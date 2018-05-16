@@ -10,6 +10,7 @@ import { toastNotifications } from 'ui/notify';
 
 import {
   EuiTitle,
+  EuiText,
   EuiSpacer,
   EuiHorizontalRule,
   EuiButton,
@@ -123,14 +124,14 @@ export class PolicyConfiguration extends Component {
         <EuiHorizontalRule className="ilmHrule" />
         <EuiTitle>
           <h4>
-            {!selectedPolicyName ? 'Edit new policy' : `Edit policy ${selectedPolicyName}`}
+            {!selectedPolicyName ? 'Create a new policy' : `Edit policy ${selectedPolicyName}`}
           </h4>
         </EuiTitle>
         <EuiSpacer size="xs" />
-        <EuiTitle size="xs">
-          <h5>Configure the phases of your data and when to transition between them.  Only the hot phase is required.</h5>
-        </EuiTitle>
-        <EuiHorizontalRule className="ilmHrule" />
+        <EuiText color="subdued">
+          <p>Configure the phases of your data and when to transition between them.  Only the hot phase is required.</p>
+        </EuiText>
+        <EuiSpacer />
         <HotPhase
           validate={this.validate}
           errors={errors[PHASE_HOT]}
@@ -255,7 +256,7 @@ export class PolicyConfiguration extends Component {
           iconType="sortRight"
           onClick={this.submit}
         >
-          Next
+          Continue
         </EuiButton>
 
         {this.state.isShowingNodeDetailsFlyout ? (

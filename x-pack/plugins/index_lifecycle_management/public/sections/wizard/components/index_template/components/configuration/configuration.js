@@ -4,21 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, Component } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
   EuiSpacer,
   EuiSelect,
   EuiFieldNumber,
-  EuiHorizontalRule,
   EuiCallOut,
   EuiButtonEmpty,
-  EuiIconTip,
   EuiLink,
+  EuiDescribedFormGroup,
 } from '@elastic/eui';
 import {
   STRUCTURE_NODE_ATTRS,
@@ -93,97 +91,95 @@ export class Configuration extends Component {
 
     return (
       <div>
-        <EuiHorizontalRule className="ilmHrule" />
-        <EuiTitle>
-          <h4>Configure options</h4>
-        </EuiTitle>
-        <EuiSpacer size="l" />
-        <ErrableFormRow
-          label={
-            <Fragment>
-              <span>Where do you want your hot indices to live</span>
-              &nbsp;
-              <EuiIconTip
-                content="Hot indices are indices in active writing mode."
-                position="right"
-              />
-            </Fragment>
-          }
-          errorKey={STRUCTURE_NODE_ATTRS}
-          isShowingErrors={isShowingErrors}
-          errors={errors}
-          helpText={selectedNodeAttrs ? (
-            <EuiButtonEmpty
-              flush="left"
-              onClick={() =>
-                this.setState({ isShowingNodeDetailsFlyout: true })
-              }
-            >
-              View node details
-            </EuiButtonEmpty>
-          ) : null}
+        <EuiDescribedFormGroup
+          title={<h4>Configuration</h4>}
+          titleSize="s"
+          description="Indices are thought of as &quot;hot&quot; when they are actively being written to."
+          fullWidth
         >
-          <EuiSelect
-            value={selectedNodeAttrs}
-            onChange={async e => {
-              await setSelectedNodeAttrs(e.target.value);
-              validate();
-            }}
-            options={nodeOptions}
+          <ErrableFormRow
+            label="Where do you want your hot indices to live?"
+            errorKey={STRUCTURE_NODE_ATTRS}
+            isShowingErrors={isShowingErrors}
+            errors={errors}
+            helpText={selectedNodeAttrs ? (
+              <EuiButtonEmpty
+                flush="left"
+                iconType="eye"
+                onClick={() =>
+                  this.setState({ isShowingNodeDetailsFlyout: true })
+                }
+              >
+                View a list of nodes attached to this configuration
+              </EuiButtonEmpty>
+            ) : null}
+          >
+            <EuiSelect
+              value={selectedNodeAttrs}
+              onChange={async e => {
+                await setSelectedNodeAttrs(e.target.value);
+                validate();
+              }}
+              options={nodeOptions}
+            />
+          </ErrableFormRow>
+          <EuiCallOut
+            color="warning"
+            size="s"
+            title={
+              <p>
+                The best way to determine how many shards you need is to benchmark
+                using realistic data and queries on your hardware.{' '}
+                <EuiLink href="https://www.elastic.co/webinars/using-rally-to-get-your-elasticsearch-cluster-size-right">
+                  Learn more in our docs
+                </EuiLink>.
+              </p>
+            }
           />
-        </ErrableFormRow>
-        <EuiCallOut title="Tip">
-          <p>
-            The best way to determine how many shards you need is to benchmark
-            using realistic data and queries on your hardware.{' '}
-            <EuiLink href="https://www.elastic.co/webinars/using-rally-to-get-your-elasticsearch-cluster-size-right">
-              Learn more.
-            </EuiLink>
-          </p>
-        </EuiCallOut>
-        <EuiSpacer />
-        <EuiFlexGroup>
-          <EuiFlexItem style={{ maxWidth: 188 }}>
-            <ErrableFormRow
-              label="Primary shards"
-              errorKey={STRUCTURE_PRIMARY_NODES}
-              isShowingErrors={isShowingErrors}
-              errors={errors}
-            >
-              <EuiFieldNumber
-                onChange={async e => {
-                  await setSelectedPrimaryShardCount(e.target.value);
-                  validate();
-                }}
-                value={selectedPrimaryShardCount}
-              />
-            </ErrableFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem style={{ maxWidth: 188 }}>
-            <ErrableFormRow
-              label="Replicas"
-              errorKey={STRUCTURE_REPLICAS}
-              isShowingErrors={isShowingErrors}
-              errors={errors}
-            >
-              <EuiFieldNumber
-                onChange={async e => {
-                  await setSelectedReplicaCount(e.target.value);
-                  validate();
-                }}
-                value={selectedReplicaCount}
-              />
-            </ErrableFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        {this.state.isShowingNodeDetailsFlyout ? (
-          <NodeAttrsDetails
-            selectedNodeAttrs={selectedNodeAttrs}
-            close={() => this.setState({ isShowingNodeDetailsFlyout: false })}
-          />
-        ) : null}
+          <EuiSpacer />
+          <EuiFlexGroup>
+            <EuiFlexItem style={{ maxWidth: 188 }}>
+              <ErrableFormRow
+                label="Primary shards"
+                errorKey={STRUCTURE_PRIMARY_NODES}
+                isShowingErrors={isShowingErrors}
+                errors={errors}
+              >
+                <EuiFieldNumber
+                  onChange={async e => {
+                    await setSelectedPrimaryShardCount(e.target.value);
+                    validate();
+                  }}
+                  value={selectedPrimaryShardCount}
+                />
+              </ErrableFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem style={{ maxWidth: 188 }}>
+              <ErrableFormRow
+                label="Replicas"
+                errorKey={STRUCTURE_REPLICAS}
+                isShowingErrors={isShowingErrors}
+                errors={errors}
+              >
+                <EuiFieldNumber
+                  onChange={async e => {
+                    await setSelectedReplicaCount(e.target.value);
+                    validate();
+                  }}
+                  value={selectedReplicaCount}
+                />
+              </ErrableFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {this.state.isShowingNodeDetailsFlyout ? (
+            <NodeAttrsDetails
+              selectedNodeAttrs={selectedNodeAttrs}
+              close={() => this.setState({ isShowingNodeDetailsFlyout: false })}
+            />
+          ) : null}
 
-        {primaryNodeErrors}
+          {primaryNodeErrors}
+        </EuiDescribedFormGroup>
       </div>
     );
   }

@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiPortal,
 } from '@elastic/eui';
 
 export class NodeAttrsDetails extends PureComponent {
@@ -36,42 +37,44 @@ export class NodeAttrsDetails extends PureComponent {
     const { selectedNodeAttrs, allocationRules, details, close } = this.props;
 
     return (
-      <EuiFlyout onClose={close}>
-        <EuiFlyoutBody>
-          <EuiTitle>
-            <h2>Nodes that contain the attribute: `{selectedNodeAttrs}`</h2>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          {allocationRules ? (
-            <Fragment>
-              <EuiCallOut
-                style={{ marginTop: '1rem' }}
-                title="Heads up"
-                color="warning"
-              >
-                Be aware that this index template has existing allocation rules
-                which will affect the list of nodes these indices can be allocated to.
-              </EuiCallOut>
-              <EuiSpacer size="s" />
-            </Fragment>
-          ) : null}
-          <EuiInMemoryTable
-            items={details}
-            columns={[
-              { field: 'nodeId', name: 'ID' },
-              { field: 'stats.name', name: 'Name' },
-              { field: 'stats.host', name: 'Host' },
-            ]}
-            pagination={true}
-            sorting={true}
-          />
-        </EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <EuiButtonEmpty iconType="cross" onClick={close} flush="left">
-            Close
-          </EuiButtonEmpty>
-        </EuiFlyoutFooter>
-      </EuiFlyout>
+      <EuiPortal>
+        <EuiFlyout ownFocus onClose={close}>
+          <EuiFlyoutBody>
+            <EuiTitle>
+              <h2>Nodes that contain the attribute: `{selectedNodeAttrs}`</h2>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            {allocationRules ? (
+              <Fragment>
+                <EuiCallOut
+                  style={{ marginTop: '1rem' }}
+                  title="Heads up"
+                  color="warning"
+                >
+                  Be aware that this index template has existing allocation rules
+                  which will affect the list of nodes these indices can be allocated to.
+                </EuiCallOut>
+                <EuiSpacer size="s" />
+              </Fragment>
+            ) : null}
+            <EuiInMemoryTable
+              items={details}
+              columns={[
+                { field: 'nodeId', name: 'ID' },
+                { field: 'stats.name', name: 'Name' },
+                { field: 'stats.host', name: 'Host' },
+              ]}
+              pagination={true}
+              sorting={true}
+            />
+          </EuiFlyoutBody>
+          <EuiFlyoutFooter>
+            <EuiButtonEmpty iconType="cross" onClick={close} flush="left">
+              Close
+            </EuiButtonEmpty>
+          </EuiFlyoutFooter>
+        </EuiFlyout>
+      </EuiPortal>
     );
   }
 }

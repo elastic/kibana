@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, Component } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { toastNotifications } from 'ui/notify';
 
@@ -12,12 +12,8 @@ import { TemplateSelection } from './components/template_selection';
 import { Configuration } from './components/configuration';
 
 import {
-  EuiSpacer,
-  EuiTitle,
   EuiHorizontalRule,
   EuiButton,
-  EuiTextColor,
-  EuiLink,
 } from '@elastic/eui';
 import { hasErrors } from '../../../../lib/find_errors';
 import {
@@ -60,25 +56,6 @@ export class IndexTemplate extends Component {
 
     return (
       <div className="euiAnimateContentLoad">
-        <EuiTitle>
-          <h4>Select a template</h4>
-        </EuiTitle>
-        <EuiTitle size="xs">
-          <Fragment>
-            <EuiSpacer size="xs"/>
-            <EuiTextColor color="subdued">
-              <h5>
-                An index template defines the settings, mappings, and aliases to apply
-                when you create an index.
-              </h5>
-            </EuiTextColor>
-            <EuiSpacer size="xs"/>
-            <EuiLink href="https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-templates.html">
-              Learn more
-            </EuiLink>
-          </Fragment>
-        </EuiTitle>
-        <EuiSpacer />
         <TemplateSelection
           validate={this.validate}
           errors={errors[STRUCTURE_TEMPLATE_SELECTION]}
@@ -89,6 +66,7 @@ export class IndexTemplate extends Component {
           errors={errors[STRUCTURE_CONFIGURATION]}
           isShowingErrors={isShowingErrors}
         />
+
         <EuiHorizontalRule className="ilmHrule" />
 
         <EuiButton
@@ -97,7 +75,7 @@ export class IndexTemplate extends Component {
           iconType="sortRight"
           onClick={this.submit}
         >
-          Next
+          Continue
         </EuiButton>
       </div>
     );
