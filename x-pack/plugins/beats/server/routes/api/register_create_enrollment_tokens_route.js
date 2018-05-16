@@ -12,7 +12,7 @@ import {
   flatten
 } from 'lodash';
 import { INDEX_NAMES } from '../../../common/constants';
-import { callWithRequestFactory } from '../../lib/call_with_request_factory';
+import { callWithRequestFactory } from '../../lib/client';
 import { wrapEsError } from '../../lib/error_wrappers';
 
 function persistTokens(callWithRequest, tokens, enrollmentTokensTtlInSeconds) {
