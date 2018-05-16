@@ -33,7 +33,7 @@ export class EmbeddedVisualizeHandler {
    */
   update(params = {}) {
     this._scope.$evalAsync(() => {
-      if (params.timeRange) {
+      if (params.hasOwnProperty('timeRange')) {
         this._scope.timeRange = params.timeRange;
       }
 
