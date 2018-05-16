@@ -132,7 +132,7 @@ export const termsBucketAgg = new BucketAggType({
           if (!orderBy && prevOrderBy === INIT) {
             let respAgg = _($scope.responseValueAggs).filter((agg) => !$scope.rejectAgg(agg)).first();
             if (!respAgg) {
-              respAgg = { id: '_term' };
+              respAgg = { id: '_key' };
             }
             params.orderBy = respAgg.id;
             return;
@@ -147,7 +147,7 @@ export const termsBucketAgg = new BucketAggType({
             // ensure that orderBy is set to a valid agg
             const respAgg = _($scope.responseValueAggs).filter((agg) => !$scope.rejectAgg(agg)).find({ id: orderBy });
             if (!respAgg) {
-              params.orderBy = '_term';
+              params.orderBy = '_key';
             }
             return;
           }

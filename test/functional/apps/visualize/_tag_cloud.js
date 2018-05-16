@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }) {
           });
         })
         .then(function () {
-          return PageObjects.visualize.selectOrderBy('_term');
+          return PageObjects.visualize.selectOrderBy('_key');
         })
         .then(function () {
           return PageObjects.visualize.clickGo();
