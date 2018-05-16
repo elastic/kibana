@@ -5,7 +5,9 @@
  */
 
 import { registerCreateEnrollmentTokensRoute } from './register_create_enrollment_tokens_route';
+import { registerEnrollBeatRoute } from './register_enroll_beat_route';
 
 export function registerApiRoutes(server) {
   registerCreateEnrollmentTokensRoute(server);
+  registerEnrollBeatRoute(server);
 }
