@@ -1,5 +1,5 @@
 // All types must be universal and be castable on the client or on the server
-import { get } from 'lodash';
+import { intersection, keys } from 'lodash';
 import { getType } from '../lib/get_type';
 
 // TODO: Currently all casting functions must be syncronous.
@@ -14,27 +14,31 @@ export function Type(config) {
   // Optional type validation, useful for checking function output
   this.validate = config.validate || function validate() {};
 
-  const getToFn = type => get(config, ['to', type]) || get(config, ['to', '*']);
-  const getFromFn = type => get(config, ['from', type]) || get(config, ['from', '*']);
+  const fns = {
+    from: config.from || {},
+    to: config.to || {},
+  };
 
-  this.castsTo = type => typeof getToFn(type) === 'function';
-  this.castsFrom = type => typeof getFromFn(type) === 'function';
+  const castableTypeNames = (types, toOrFrom) =>
+    intersection(types.concat(['*']), keys(fns[toOrFrom]));
 
-  this.to = (node, toTypeName) => {
+  this.castsTo = types => castableTypeNames(types.concat(['*']), 'to').length > 0;
+  this.castsFrom = types => castableTypeNames(types.concat(['*']), 'from').length > 0;
+  this.to = (node, types) => {
     const typeName = getType(node);
-    if (typeName !== this.name) {
-      throw new Error(`Can not cast object of type '${typeName}' using '${this.name}'`);
-    } else if (!this.castsTo(toTypeName)) {
-      throw new Error(`Can not cast '${typeName}' to '${toTypeName}'`);
-    }
-    return getToFn(toTypeName)(node);
+    if (typeName !== this.name)
+      throw new Error(
+        `Casting source type '${typeName}' does not match current type '${this.name}'`
+      );
+    if (!this.castsTo(types))
+      throw new Error(`Can not cast '${typeName}' to any of ${types.join(', ')}`);
+    return fns.to[castableTypeNames(types, 'to')[0]](node);
   };
 
   this.from = node => {
     const typeName = getType(node);
-    if (!this.castsFrom(typeName)) {
-      throw new Error(`Can not cast '${this.name}' from ${typeName}`);
-    }
-    return getFromFn(typeName)(node);
+    if (!this.castsFrom([typeName]))
+      throw new Error(`Can not cast '${typeName}' to any of ${this.name}`);
+    return fns.from[castableTypeNames([typeName], 'from')[0]](node);
   };
 }
