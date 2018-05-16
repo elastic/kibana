@@ -25,8 +25,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { PageHeader } from './page_header';
-import { IndexPrivilegeForm } from './index_privilege_form';
-import { ClusterPrivileges } from './cluster_privileges';
+import { IndexPrivilegeForm } from './privileges/index_privilege_form';
+import { ClusterPrivileges } from './privileges/cluster_privileges';
 import { getFields, saveRole, deleteRole } from '../../../../objects';
 import { isReservedRole } from '../lib/is_reserved_role';
 import { RoleValidator } from '../lib/validate_role';
@@ -34,6 +34,7 @@ import { ReservedRoleBadge } from './reserved_role_badge';
 import { ROLES_PATH } from '../../management_urls';
 import { DeleteRoleButton } from './delete_role_button';
 import { setApplicationPrivileges } from '../lib/set_application_privileges';
+import { KibanaPrivileges } from './privileges/kibana_privileges';
 
 const notifier = new Notifier();
 
@@ -48,8 +49,7 @@ export class EditRolePage extends Component {
     spacesEnabled: PropTypes.bool.isRequired,
     allowDocumentLevelSecurity: PropTypes.bool.isRequired,
     allowFieldLevelSecurity: PropTypes.bool.isRequired,
-    kibanaPrivileges: PropTypes.array.isRequired,
-    otherPrivileges: PropTypes.array.isRequired,
+    kibanaAppPrivileges: PropTypes.array.isRequired,
   };
 
   constructor(props) {
@@ -376,24 +376,36 @@ export class EditRolePage extends Component {
   }
 
   getKibanaPrivileges = () => {
-    if (!this.props.kibanaPrivilegesEnabled) {
+    if (!this.props.rbacEnabled) {
       return null;
     }
 
     return (
       <Fragment>
-        <EuiFormRow label={'Kibana'}>
-          <EuiAccordion
-            id={'kibanaPrivilegesAccordion'}
-            buttonContent={<div><EuiIcon type={'logoElastic'} size={'m'} /> Cluster Privileges</div>}
-          >
-            <EuiSpacer />
-            <ClusterPrivileges role={{}} onChange={() => { }} />
-          </EuiAccordion>
-        </EuiFormRow>
+        <EuiTitle>
+          <h3>Kibana</h3>
+        </EuiTitle>
+
+        <EuiSpacer />
+
+        <KibanaPrivileges
+          kibanaAppPrivileges={this.props.kibanaAppPrivileges}
+          rbacApplication={this.props.rbacApplication}
+          role={this.state.role}
+          onChange={this.onKibanaPrivilegesChange}
+        />
       </Fragment>
     );
   };
+
+  onKibanaPrivilegesChange = (applications) => {
+    this.setState({
+      role: {
+        ...this.state.role,
+        applications
+      }
+    });
+  }
 
   editingExistingRole = () => {
     return !!this.props.role.name;

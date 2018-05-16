@@ -6,15 +6,15 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { getClusterPrivileges } from '../../../../services/role_privileges';
-import { isReservedRole } from '../lib/is_reserved_role';
+import { getClusterPrivileges } from '../../../../../services/role_privileges';
+import { isReservedRole } from '../../lib/is_reserved_role';
 import {
   EuiCheckboxGroup,
   EuiText,
   EuiSpacer,
   EuiLink,
 } from '@elastic/eui';
-import { CLUSTER_PRIVS_DOC_LINK } from '../lib/constants';
+import { CLUSTER_PRIVS_DOC_LINK } from '../../lib/constants';
 
 export class ClusterPrivileges extends Component {
   static propTypes = {
@@ -42,7 +42,7 @@ export class ClusterPrivileges extends Component {
             <EuiLink href={CLUSTER_PRIVS_DOC_LINK} target={'_blank'}>Learn more</EuiLink>
           </p>
         </EuiText>
-        <EuiSpacer/>
+        <EuiSpacer />
         <EuiCheckboxGroup
           options={checkboxes}
           idToSelectedMap={selectionMap}

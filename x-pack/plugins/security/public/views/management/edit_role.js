@@ -26,26 +26,6 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 
-const getKibanaPrivileges = (kibanaApplicationPrivilege, role, application) => {
-  const kibanaPrivileges = kibanaApplicationPrivilege.reduce((acc, p) => {
-    acc[p.name] = false;
-    return acc;
-  }, {});
-
-  if (!role.applications || role.applications.length === 0) {
-    return kibanaPrivileges;
-  }
-
-  const applications = role.applications.filter(x => x.application === application);
-
-  const assigned = _.uniq(_.flatten(_.pluck(applications, 'privileges')));
-  assigned.forEach(a => {
-    kibanaPrivileges[a] = true;
-  });
-
-  return kibanaPrivileges;
-};
-
 const getOtherApplications = (kibanaPrivileges, role, application) => {
   if (!role.applications || role.applications.length === 0) {
     return [];
@@ -82,6 +62,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     },
     kibanaApplicationPrivilege(ApplicationPrivilege, kbnUrl, Promise, Private) {
       return ApplicationPrivilege.query().$promise
+        .then(privileges => privileges.map(p => p.toJSON()))
         .catch(checkLicenseError(kbnUrl, Promise, Private));
     },
     users(ShieldUser, kbnUrl, Promise, Private) {
@@ -109,7 +90,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     $scope.rbacEnabled = rbacEnabled;
     const kibanaApplicationPrivilege = $route.current.locals.kibanaApplicationPrivilege;
     const role = $route.current.locals.role;
-    $scope.kibanaPrivileges = getKibanaPrivileges(kibanaApplicationPrivilege, role, rbacApplication);
+    $scope.kibanaPrivileges = {};// getKibanaPrivileges(kibanaApplicationPrivilege, role, rbacApplication);
     $scope.otherApplications = getOtherApplications(kibanaApplicationPrivilege, role, rbacApplication);
 
     $scope.rolesHref = `#${ROLES_PATH}`;
@@ -144,10 +125,10 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     render(<EditRolePage
       runAsUsers={users}
       role={role.toJSON()}
-      kibanaPrivileges={getKibanaPrivileges(kibanaApplicationPrivilege, role, rbacApplication)}
-      otherApplications={getOtherApplications(kibanaApplicationPrivilege, role, rbacApplication)}
+      kibanaAppPrivileges={kibanaApplicationPrivilege}
       indexPatterns={indexPatterns}
       rbacEnabled={rbacEnabled}
+      rbacApplication={rbacApplication}
       spacesEnabled={true}
       httpClient={$http}
       breadcrumbs={routes.getBreadcrumbs()}
