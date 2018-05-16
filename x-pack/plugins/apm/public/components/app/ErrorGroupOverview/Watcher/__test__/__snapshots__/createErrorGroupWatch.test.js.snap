@@ -9,7 +9,7 @@ Object {
           "html": "Your service \\"{{ctx.metadata.serviceName}}\\" has error groups which exceeds {{ctx.metadata.threshold}} occurrences within \\"{{ctx.metadata.timeRangeHumanReadable}}\\"<br/><br/>{{#ctx.payload.aggregations.error_groups.buckets}}<br/><strong>{{sample.hits.hits.0._source.error.log.message}}{{^sample.hits.hits.0._source.error.log.message}}{{sample.hits.hits.0._source.error.exception.message}}{{/sample.hits.hits.0._source.error.log.message}}</strong><br/>{{sample.hits.hits.0._source.error.culprit}}{{^sample.hits.hits.0._source.error.culprit}}N/A{{/sample.hits.hits.0._source.error.culprit}}<br/>{{doc_count}} occurrences<br/>{{/ctx.payload.aggregations.error_groups.buckets}}",
         },
         "subject": "\\"{{ctx.metadata.serviceName}}\\" has error groups which exceeds the threshold",
-        "to": "{{ctx.metadata.emails}}",
+        "to": "{{#join}}ctx.metadata.emails{{/join}}",
       },
     },
     "log_error": Object {
