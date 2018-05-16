@@ -48,7 +48,7 @@ class NodeVersion {
   static isVersionValid(currentVersion, requiredVersion) {
     return (!!currentVersion
       && !!requiredVersion
-      && !semver.satisfies(currentVersion, requiredVersion)
+      && semver.satisfies(currentVersion, requiredVersion)
     );
   }
 
