@@ -49,8 +49,7 @@ export const createInstallRoute = () => ({
         };
         await callWithRequest(request, 'indices.create', createIndexParams);
       } catch (err) {
-        server.log(['warning'], `sample_data install errors while creating index. Error: ${err.message}`);
-        return reply(`Unable to create sample data index "${index}", see kibana logs for details`).code(500);
+        return reply(`Unable to create sample data index "${index}", error: ${err.message}`).code(err.status);
       }
 
       const now = new Date();

@@ -28,7 +28,7 @@ export const createUninstallRoute = () => ({
       try {
         await callWithRequest(request, 'indices.delete', { index: index });
       } catch (err) {
-        // ignore delete error. Happens if index does not exist.
+        return reply(`Unable to delete sample data index "${index}", error: ${err.message}`).code(err.status);
       }
 
       const deletePromises = sampleDataset.savedObjects.map((savedObjectJson) => {
@@ -37,7 +37,7 @@ export const createUninstallRoute = () => ({
       try {
         await Promise.all(deletePromises);
       } catch (err) {
-        // ignore delete error - may happen if saved objects are not loaded
+        return reply(`Unable to delete samle dataset saved objects, error: ${err.message}`).code(500);
       }
 
       reply();
