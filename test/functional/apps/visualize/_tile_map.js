@@ -136,7 +136,7 @@ export default function ({ getService, getPageObjects }) {
 
         it('when checked adds filters to aggregation', async () => {
           const tableHeaders = await PageObjects.visualize.getInspectorTableHeaders();
-          expect(tableHeaders.trim()).to.equal('filter geohash_grid Count Geo Centroid');
+          expect(tableHeaders).to.eql(['filter', 'geohash_grid', 'Count', 'Geo Centroid']);
         });
 
         it('when not checked does not add filters to aggregation', async () => {
@@ -144,7 +144,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.visualize.clickGo();
           await PageObjects.header.waitUntilLoadingHasFinished();
           const tableHeaders = await PageObjects.visualize.getInspectorTableHeaders();
-          expect(tableHeaders.trim()).to.equal('geohash_grid Count Geo Centroid');
+          expect(tableHeaders).to.eql(['geohash_grid', 'Count', 'Geo Centroid']);
         });
 
         after(async () => {

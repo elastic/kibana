@@ -103,7 +103,7 @@ export default function ({ getService, getPageObjects }) {
         ];
 
         return retry.try(function () {
-          return PageObjects.visualize.getInspectorTableData()
+          return PageObjects.visualize.getTableVisData()
             .then(function showData(data) {
               log.debug(data.split('\n'));
               expect(data.split('\n')).to.eql(expectedChartData);

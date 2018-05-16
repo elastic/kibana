@@ -38,13 +38,13 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
-    describe('spy panel tabel', function indexPatternCreation() {
+    describe('inspector table', function indexPatternCreation() {
 
       it('should update table header when columns change', async function () {
 
         await PageObjects.visualize.openInspector();
         let headers = await PageObjects.visualize.getInspectorTableHeaders();
-        expect(headers.trim()).to.equal('Count');
+        expect(headers).to.eql(['Count']);
 
         log.debug('Add Average Metric on machine.ram field');
         await PageObjects.visualize.clickAddMetric();
@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.openInspector();
 
         headers = await PageObjects.visualize.getInspectorTableHeaders();
-        expect(headers.trim()).to.equal('Count Average machine.ram');
+        expect(headers).to.eql(['Count', 'Average machine.ram']);
       });
     });
   });

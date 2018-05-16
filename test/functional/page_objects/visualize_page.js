@@ -814,7 +814,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         const inspectorPanel = await testSubjects.find('inspectorPanel');
         return await inspectorPanel.findByTagName('thead');
       });
-      return await dataTableHeader.getVisibleText();
+      const cells = await dataTableHeader.findAllByTagName('th');
+      return await Promise.all(cells.map(async (cell) => {
+        const untrimmed = await cell.getVisibleText();
+        return untrimmed.trim();
+      }));
     }
 
     async toggleIsFilteredByCollarCheckbox() {
