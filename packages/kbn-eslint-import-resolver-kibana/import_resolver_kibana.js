@@ -34,14 +34,11 @@ function initContext(file, config) {
 }
 
 function tryNodeResolver(importRequest, file, config) {
-  return nodeResolver.resolve(
-    importRequest,
-    file,
-    Object.assign({}, config, {
-      extensions: ['.js', '.json'],
-      isFile,
-    })
-  );
+  return nodeResolver.resolve(importRequest, file, {
+    ...config,
+    extensions: ['.js', '.json'],
+    isFile,
+  });
 }
 
 exports.resolve = function resolveKibanaPath(importRequest, file, config) {
