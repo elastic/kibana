@@ -49,9 +49,7 @@ export default {
     'target/',
   ],
   testMatch: [
-    '**/*.test.js',
-    '**/*.test.ts',
-    '**/*.test.tsx',
+    '**/*.test.{js,ts,tsx}'
   ],
   testPathIgnorePatterns: [
     '<rootDir>/packages/kbn-ui-framework/(dist|doc_site|generator-kui)/',
@@ -60,7 +58,7 @@ export default {
   ],
   transform: {
     '^.+\\.js$': '<rootDir>/src/dev/jest/babel_transform.js',
-    '^.+\\.tsx?$': 'ts-jest',
+    '^.+\\.tsx?$': '<rootDir>/src/dev/jest/ts_transform.js',
   },
   transformIgnorePatterns: [
     '[/\\\\]node_modules[/\\\\].+\\.js$',
