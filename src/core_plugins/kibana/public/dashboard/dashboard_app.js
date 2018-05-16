@@ -7,7 +7,7 @@ import { toastNotifications } from 'ui/notify';
 
 import 'ui/query_bar';
 
-import { panelActionsCache } from './cache/panel_actions_cache';
+import { panelActionsStore } from './store/panel_actions_store';
 
 import { getDashboardTitle } from './dashboard_strings';
 import { DashboardViewMode } from './dashboard_view_mode';
@@ -64,7 +64,7 @@ app.directive('dashboardApp', function ($injector) {
       const embeddableFactories = Private(EmbeddableFactoriesRegistryProvider);
       const panelActionsRegistry = Private(DashboardPanelActionsRegistryProvider);
 
-      panelActionsCache.initializeFromRegistry(panelActionsRegistry);
+      panelActionsStore.initialize(panelActionsRegistry);
 
       $scope.getEmbeddableFactory = panelType => embeddableFactories.byName[panelType];
 

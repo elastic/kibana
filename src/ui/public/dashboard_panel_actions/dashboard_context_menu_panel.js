@@ -6,17 +6,21 @@ export class DashboardContextMenuPanel {
    * @param {function} getContent
    */
   constructor({ actions, id, title, getContent }) {
-    this.actions = actions;
+    this.actions = actions || [];
     this.id = id;
     this.title = title;
-    this.getContent = getContent;
+
+    if (getContent) {
+      this.getContent = getContent;
+    }
   }
 
   /**
+   * Either actions or content should be specified.
    * @param {Embeddable} embeddable
-   * @param containerState
+   * @param {ContainerState} containerState
    */
   getContent(/*embeddable, containerState*/) {
-    throw new Error('Must implement getContent');
+    return null;
   }
 }

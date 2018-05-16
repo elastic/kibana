@@ -19,6 +19,7 @@ export function PanelOptionsMenu({ toggleContextMenu, isPopoverOpen, closeContex
 
   return (
     <EuiPopover
+      id="dashboardPanelContextMenu"
       className="dashboardPanelPopOver"
       button={button}
       isOpen={isPopoverOpen}

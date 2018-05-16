@@ -1,10 +1,9 @@
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
-import { ContextMenuPanel } from './panel_actions/context_menu_panel';
 import { PanelOptionsMenu } from './panel_options_menu';
 import {
-  buildKuiContextMenuPanels,
+  buildEuiContextMenuPanels,
   getEditPanelAction,
   getRemovePanelAction,
   getCustomizePanelAction,
@@ -29,6 +28,7 @@ import {
   getContainerState,
   getVisibleContextMenuPanelId,
 } from '../../selectors';
+import { DashboardContextMenuPanel } from 'ui/dashboard_panel_actions';
 
 const mapStateToProps = ({ dashboard }, { panelId }) => {
   const embeddable = getEmbeddable(dashboard, panelId);
@@ -94,7 +94,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
   // Don't build the panels if the pop over is not open, or this gets expensive - this function is called once for
   // every panel, every time any state changes.
   if (isPopoverOpen) {
-    const mainPanel = new ContextMenuPanel({
+    const mainPanel = new DashboardContextMenuPanel({
       title: 'Options',
       id: 'mainMenu',
       actions: [
@@ -109,7 +109,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
         getRemovePanelAction(onDeletePanel),
       ]
     });
-    panels = buildKuiContextMenuPanels(mainPanel, { embeddable: ownProps.embeddable, containerState });
+    panels = buildEuiContextMenuPanels(mainPanel, { embeddable: ownProps.embeddable, containerState });
   }
 
   return {
