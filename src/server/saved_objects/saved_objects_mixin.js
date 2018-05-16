@@ -62,33 +62,32 @@ export function savedObjectsMixin(kbnServer, server) {
     }
   }
 
-  const savedObjectsClientProvider = new SavedObjectsClientProvider();
-  server.decorate('server', 'getSavedObjectsClientProvider', () => savedObjectsClientProvider);
-
-  server.decorate('server', 'savedObjectsClientFactory', ({ callCluster, request }) => {
-    const createBaseClient = (options) => {
-      const {
-        server,
-        mappings,
-        callCluster,
-        onBeforeWrite,
-      } = options;
+  const savedObjectsClientProvider = new SavedObjectsClientProvider({
+    index: server.config().get('kibana.index'),
+    mappings: server.getKibanaIndexMappingsDsl(),
+    onBeforeWrite,
+    defaultClientFactory({
+      request,
+      index,
+      mappings,
+      onBeforeWrite
+    }) {
+      const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
+      const callCluster = (...args) => callWithRequest(request, ...args);
 
       return new SavedObjectsClient({
-        index: server.config().get('kibana.index'),
+        index,
         mappings,
+        onBeforeWrite,
         callCluster,
-        onBeforeWrite
       });
-    };
+    }
+  });
 
-    return savedObjectsClientProvider.createSavedObjectsClient(createBaseClient, {
-      server,
-      request,
-      mappings: server.getKibanaIndexMappingsDsl(),
-      callCluster,
-      onBeforeWrite
-    });
+  server.decorate('server', 'getSavedObjectsClientProvider', () => savedObjectsClientProvider);
+
+  server.decorate('server', 'savedObjectsClientFactory', ({ request }) => {
+    return savedObjectsClientProvider.createSavedObjectsClient(request);
   });
 
   const savedObjectsClientCache = new WeakMap();
@@ -99,10 +98,7 @@ export function savedObjectsMixin(kbnServer, server) {
       return savedObjectsClientCache.get(request);
     }
 
-    const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
-    const callCluster = (...args) => callWithRequest(request, ...args);
-
-    const savedObjectsClient = server.savedObjectsClientFactory({ callCluster, request });
+    const savedObjectsClient = server.savedObjectsClientFactory({ request });
 
     savedObjectsClientCache.set(request, savedObjectsClient);
     return savedObjectsClient;

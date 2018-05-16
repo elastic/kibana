@@ -17,12 +17,11 @@ import { authenticateFactory } from './server/lib/auth_redirect';
 import { checkLicense } from './server/lib/check_license';
 import { initAuthenticator } from './server/lib/authentication/authenticator';
 import { mirrorStatusAndInitialize } from './server/lib/mirror_status_and_initialize';
-import { secureSavedObjectsClientWrapper } from './server/lib/saved_objects_client/saved_objects_client_wrapper';
-import { secureSavedObjectsClientOptionsBuilder } from './server/lib/saved_objects_client/secure_options_builder';
 import { registerPrivilegesWithCluster } from './server/lib/privileges';
 import { createDefaultRoles } from './server/lib/authorization/create_default_roles';
 import { initPrivilegesApi } from './server/routes/api/v1/privileges';
 import { hasPrivilegesWithServer } from './server/lib/authorization/has_privileges';
+import { SecureSavedObjectsClient } from './server/lib/saved_objects_client/secure_saved_objects_client';
 
 export const security = (kibana) => new kibana.Plugin({
   id: 'security',
@@ -114,10 +113,26 @@ export const security = (kibana) => new kibana.Plugin({
     if (config.get('xpack.security.rbac.enabled')) {
       const hasPrivilegesWithRequest = hasPrivilegesWithServer(server);
       const savedObjectsClientProvider = server.getSavedObjectsClientProvider();
-      savedObjectsClientProvider.addClientOptionBuilder(options =>
-        secureSavedObjectsClientOptionsBuilder(server, hasPrivilegesWithRequest, options)
-      );
-      savedObjectsClientProvider.addClientWrapper(secureSavedObjectsClientWrapper);
+
+      savedObjectsClientProvider.registerCustomClientFactory(({
+        request,
+        index,
+        mappings,
+        onBeforeWrite
+      }) => {
+        const hasPrivileges = hasPrivilegesWithRequest(request);
+
+        const adminCluster = server.plugins.elasticsearch.getCluster('admin');
+        const { callWithInternalUser } = adminCluster;
+
+        return new SecureSavedObjectsClient({
+          index,
+          mappings,
+          onBeforeWrite,
+          hasPrivileges,
+          callCluster: callWithInternalUser
+        });
+      });
     }
 
     getUserProvider(server);

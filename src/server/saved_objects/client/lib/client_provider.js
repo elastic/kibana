@@ -1,29 +1,35 @@
-import { PrioritizedCollection } from './prioritized_collection';
-
 /**
  * Provider for the Saved Object Client.
  */
 export class SavedObjectsClientProvider {
-  constructor() {
-    this._optionBuilders = new PrioritizedCollection('optionBuilders');
-    this._wrappers = new PrioritizedCollection('savedObjectClientWrappers');
+  constructor({
+    index,
+    mappings,
+    onBeforeWrite,
+    defaultClientFactory
+  }) {
+    this._index = index;
+    this._mappings = mappings;
+    this._onBeforeWrite = onBeforeWrite;
+    this._defaultClientFactory = defaultClientFactory;
+    this._customClientFactory;
   }
 
-  addClientOptionBuilder(builder, priority) {
-    this._optionBuilders.add(builder, priority);
+  registerCustomClientFactory(customClientFactory) {
+    if (this._customClientFactory) {
+      throw new Error(`custom client factory is already registered, can't register another one`);
+    }
+
+    this._customClientFactory = customClientFactory;
   }
 
-  addClientWrapper(wrapper, priority) {
-    this._wrappers.add(wrapper, priority);
-  }
-
-  createSavedObjectsClient(baseClientFactory, options) {
-    const orderedBuilders = this._optionBuilders.toArray();
-    const clientOptions = orderedBuilders.reduce((acc, builder) => builder(acc), options);
-
-    const baseClient = baseClientFactory(clientOptions);
-
-    const orderedWrappers = this._wrappers.toArray();
-    return orderedWrappers.reduce((client, wrapper) => wrapper(client, clientOptions), baseClient);
+  createSavedObjectsClient(request) {
+    const factory = this._customClientFactory || this._defaultClientFactory;
+    return factory({
+      request,
+      index: this._index,
+      mappings: this._mappings,
+      onBeforeWrite: this._onBeforeWrite,
+    });
   }
 }
