@@ -6,28 +6,15 @@
 
 import { get, uniq } from 'lodash';
 import * as errors from '../../../../../../src/server/saved_objects/client/lib/errors';
-import { SavedObjectsRepository } from '../../../../../../src/server/saved_objects/client/saved_objects_repository';
 
 export class SecureSavedObjectsClient {
   errors = errors
 
-  constructor(options) {
-    const {
-      index,
-      mappings,
-      onBeforeWrite,
-      hasPrivileges,
-      callCluster,
-    } = options;
-
-
-    this._repository = new SavedObjectsRepository({
-      index,
-      mappings,
-      onBeforeWrite,
-      callCluster
-    });
-
+  constructor({
+    repository,
+    hasPrivileges,
+  }) {
+    this._repository = repository;
     this._hasPrivileges = hasPrivileges;
   }
 

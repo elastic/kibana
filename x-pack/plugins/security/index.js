@@ -116,6 +116,7 @@ export const security = (kibana) => new kibana.Plugin({
 
       savedObjectsClientProvider.registerCustomClientFactory(({
         request,
+        SavedObjectsRepository,
         index,
         mappings,
         onBeforeWrite
@@ -125,12 +126,16 @@ export const security = (kibana) => new kibana.Plugin({
         const adminCluster = server.plugins.elasticsearch.getCluster('admin');
         const { callWithInternalUser } = adminCluster;
 
-        return new SecureSavedObjectsClient({
+        const repository = new SavedObjectsRepository({
           index,
           mappings,
           onBeforeWrite,
-          hasPrivileges,
           callCluster: callWithInternalUser
+        });
+
+        return new SecureSavedObjectsClient({
+          repository,
+          hasPrivileges
         });
       });
     }

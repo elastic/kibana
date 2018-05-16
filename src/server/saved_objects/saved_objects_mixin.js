@@ -1,5 +1,4 @@
-import { SavedObjectsClientProvider } from './client/lib';
-import { SavedObjectsClient } from './client';
+import { SavedObjectsClient, SavedObjectsRepository, SavedObjectsClientProvider } from './client';
 import {
   createBulkGetRoute,
   createCreateRoute,
@@ -66,7 +65,9 @@ export function savedObjectsMixin(kbnServer, server) {
     index: server.config().get('kibana.index'),
     mappings: server.getKibanaIndexMappingsDsl(),
     onBeforeWrite,
+    SavedObjectsRepository,
     defaultClientFactory({
+      SavedObjectsRepository,
       request,
       index,
       mappings,
@@ -75,12 +76,14 @@ export function savedObjectsMixin(kbnServer, server) {
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
       const callCluster = (...args) => callWithRequest(request, ...args);
 
-      return new SavedObjectsClient({
+      const repository = new SavedObjectsRepository({
         index,
         mappings,
         onBeforeWrite,
-        callCluster,
+        callCluster
       });
+
+      return new SavedObjectsClient(repository);
     }
   });
 
