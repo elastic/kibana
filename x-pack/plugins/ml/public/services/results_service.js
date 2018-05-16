@@ -12,7 +12,7 @@ import _ from 'lodash';
 
 import { ML_MEDIAN_PERCENTS } from 'plugins/ml/../common/util/job_utils';
 import { escapeForElasticsearchQuery } from 'plugins/ml/util/string_utils';
-import { ML_RESULTS_INDEX_PATTERN } from 'plugins/ml/constants/index_patterns';
+import { ML_RESULTS_INDEX_PATTERN } from 'plugins/ml/../common/constants/index_patterns';
 
 import { ml } from 'plugins/ml/services/ml_api_service';
 
@@ -698,88 +698,6 @@ function getInfluencerValueMaxScoreByTime(
       });
   });
 }
-
-
-// Obtains the definition of the category with the specified ID and job ID.
-// Returned response contains four properties - categoryId, regex, examples
-// and terms (space delimited String of the common tokens matched in values of the category).
-function getCategoryDefinition(jobId, categoryId) {
-  return new Promise((resolve, reject) => {
-    const obj = { success: true, categoryId: categoryId, terms: null, regex: null, examples: [] };
-
-    ml.esSearch({
-      index: ML_RESULTS_INDEX_PATTERN,
-      size: 1,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              { term: { job_id: jobId } },
-              { term: { category_id: categoryId } }
-            ]
-          }
-        }
-      }
-    })
-      .then((resp) => {
-        if (resp.hits.total !== 0) {
-          const source = _.first(resp.hits.hits)._source;
-          obj.categoryId = source.category_id;
-          obj.regex = source.regex;
-          obj.terms = source.terms;
-          obj.examples = source.examples;
-        }
-        resolve(obj);
-      })
-      .catch((resp) => {
-        reject(resp);
-      });
-  });
-}
-
-
-// Obtains the categorization examples for the categories with the specified IDs
-// from the given index and job ID.
-// Returned response contains two properties - jobId and
-// examplesByCategoryId (list of examples against categoryId).
-function getCategoryExamples(jobId, categoryIds, maxExamples) {
-  return new Promise((resolve, reject) => {
-    const obj = { success: true, jobId: jobId, examplesByCategoryId: {} };
-
-    ml.esSearch({
-      index: ML_RESULTS_INDEX_PATTERN,
-      size: 500,  // Matches size of records in anomaly summary table.
-      body: {
-        query: {
-          bool: {
-            filter: [
-              { term: { job_id: jobId } },
-              { terms: { category_id: categoryIds } }
-            ]
-          }
-        }
-      }
-    })
-      .then((resp) => {
-        if (resp.hits.total !== 0) {
-          _.each(resp.hits.hits, (hit) => {
-            if (maxExamples) {
-              obj.examplesByCategoryId[hit._source.category_id] =
-              _.slice(hit._source.examples, 0, Math.min(hit._source.examples.length, maxExamples));
-            } else {
-              obj.examplesByCategoryId[hit._source.category_id] = hit._source.examples;
-            }
-
-          });
-        }
-        resolve(obj);
-      })
-      .catch((resp) => {
-        reject(resp);
-      });
-  });
-}
-
 
 // Queries Elasticsearch to obtain record level results containing the influencers
 // for the specified job(s), record score threshold, and time range.
@@ -1738,8 +1656,6 @@ export const mlResultsService = {
   getTopInfluencerValues,
   getOverallBucketScores,
   getInfluencerValueMaxScoreByTime,
-  getCategoryDefinition,
-  getCategoryExamples,
   getRecordInfluencers,
   getRecordsForInfluencer,
   getRecordsForDetector,
