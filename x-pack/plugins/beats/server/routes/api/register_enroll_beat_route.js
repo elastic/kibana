@@ -37,21 +37,16 @@ function deleteUsedEnrollmentToken(callWithInternalUser, enrollmentToken) {
   return callWithInternalUser('delete', params);
 }
 
-function persistBeat(callWithInternalUser, beat, beatId, accessToken, remoteAddress) {
+function persistBeat(callWithInternalUser, beat) {
   const body = {
     type: 'beat',
-    beat: {
-      ...omit(beat, 'enrollment_token'),
-      id: beatId,
-      access_token: accessToken,
-      host_ip: remoteAddress
-    }
+    beat
   };
 
   const params = {
     index: INDEX_NAMES.BEATS,
     type: '_doc',
-    id: `beat:${beatId}`,
+    id: `beat:${beat.id}`,
     body,
     refresh: 'wait_for'
   };
@@ -76,6 +71,7 @@ export function registerEnrollBeatRoute(server) {
     },
     handler: async (request, reply) => {
       const callWithInternalUser = callWithInternalUserFactory(server);
+      const beatId = request.params.beatId;
       let accessToken;
 
       try {
@@ -90,7 +86,12 @@ export function registerEnrollBeatRoute(server) {
 
         accessToken = uuid.v4().replace(/-/g, "");
         const remoteAddress = request.info.remoteAddress;
-        await persistBeat(callWithInternalUser, request.payload, request.params.beatId, accessToken, remoteAddress);
+        await persistBeat(callWithInternalUser, {
+          ...omit(request.payload, 'enrollment_token'),
+          id: beatId,
+          access_token: accessToken,
+          host_ip: remoteAddress
+        });
 
         await deleteUsedEnrollmentToken(callWithInternalUser, enrollmentToken);
       } catch (err) {
