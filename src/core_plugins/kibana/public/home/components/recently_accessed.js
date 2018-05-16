@@ -13,6 +13,7 @@ import {
   EuiIcon,
   EuiSpacer,
   EuiToolTip,
+  EuiTitle,
 } from '@elastic/eui';
 
 export const NUM_LONG_LINKS = 5;
@@ -174,13 +175,13 @@ export class RecentlyAccessed extends Component {
   render() {
     return (
       <EuiPanel paddingSize="l">
-        <EuiText>
-          <p>
+        <EuiTitle size="s">
+          <h3>
             <EuiTextColor color="subdued">
               Recently viewed
             </EuiTextColor>
-          </p>
-        </EuiText>
+          </h3>
+        </EuiTitle>
 
         <EuiSpacer size="s"/>
 
