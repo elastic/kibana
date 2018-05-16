@@ -49,46 +49,47 @@ export default function ({ getService }) {
       });
     });
 
-    it('includes stats from past 6.2 reporting indexes', async () => {
-      await esArchiver.load('reporting/bwc/6_2');
-      const stats = await statsAPI.getStats();
+    describe('includes stats from reporting indexes', () => {
+      it('generated from 6.2', async () => {
+        await esArchiver.load('reporting/bwc/6_2');
+        const stats = await statsAPI.getStats();
 
-      reportingAPI.expectRecentJobTypeTotalStats(stats, 'csv', 0);
-      reportingAPI.expectRecentJobTypeTotalStats(stats, 'printable_pdf', 0);
+        reportingAPI.expectRecentJobTypeTotalStats(stats, 'csv', 0);
+        reportingAPI.expectRecentJobTypeTotalStats(stats, 'printable_pdf', 0);
 
-      reportingAPI.expectAllTimeJobTypeTotalStats(stats, 'csv', 1);
-      reportingAPI.expectAllTimeJobTypeTotalStats(stats, 'printable_pdf', 7);
+        reportingAPI.expectAllTimeJobTypeTotalStats(stats, 'csv', 1);
+        reportingAPI.expectAllTimeJobTypeTotalStats(stats, 'printable_pdf', 7);
 
-      // These statistics weren't tracked until 6.3
-      reportingAPI.expectRecentPdfAppStats(stats, 'visualization', 0);
-      reportingAPI.expectRecentPdfAppStats(stats, 'dashboard', 0);
-      reportingAPI.expectRecentPdfLayoutStats(stats, 'preserve_layout', 0);
-      reportingAPI.expectRecentPdfLayoutStats(stats, 'print', 0);
-      reportingAPI.expectAllTimePdfAppStats(stats, 'visualization', 0);
-      reportingAPI.expectAllTimePdfAppStats(stats, 'dashboard', 0);
-      reportingAPI.expectAllTimePdfLayoutStats(stats, 'preserve_layout', 0);
-      reportingAPI.expectAllTimePdfLayoutStats(stats, 'print', 0);
-    });
+        // These statistics weren't tracked until 6.3
+        reportingAPI.expectRecentPdfAppStats(stats, 'visualization', 0);
+        reportingAPI.expectRecentPdfAppStats(stats, 'dashboard', 0);
+        reportingAPI.expectRecentPdfLayoutStats(stats, 'preserve_layout', 0);
+        reportingAPI.expectRecentPdfLayoutStats(stats, 'print', 0);
+        reportingAPI.expectAllTimePdfAppStats(stats, 'visualization', 0);
+        reportingAPI.expectAllTimePdfAppStats(stats, 'dashboard', 0);
+        reportingAPI.expectAllTimePdfLayoutStats(stats, 'preserve_layout', 0);
+        reportingAPI.expectAllTimePdfLayoutStats(stats, 'print', 0);
+      });
 
 
-    it('includes stats from past 6.3 reporting indexes', async () => {
-      await esArchiver.load('reporting/bwc/6_3');
-      const stats = await statsAPI.getStats();
+      it('generated from 6.3', async () => {
+        await esArchiver.load('reporting/bwc/6_3');
+        const stats = await statsAPI.getStats();
 
-      // TODO: uncomment once time passes and the index I just generated falls outside of the last 7 day window
-      // reportingAPI.expectRecentJobTypeTotalStats(stats, 'csv', 0);
-      // reportingAPI.expectRecentJobTypeTotalStats(stats, 'printable_pdf', 0);
-      // reportingAPI.expectRecentPdfAppStats(stats, 'visualization', 0);
-      // reportingAPI.expectRecentPdfAppStats(stats, 'dashboard', 0);
-      // reportingAPI.expectRecentPdfLayoutStats(stats, 'preserve_layout', 0);
-      // reportingAPI.expectRecentPdfLayoutStats(stats, 'print', 0);
+        reportingAPI.expectRecentJobTypeTotalStats(stats, 'csv', 0);
+        reportingAPI.expectRecentJobTypeTotalStats(stats, 'printable_pdf', 0);
+        reportingAPI.expectRecentPdfAppStats(stats, 'visualization', 0);
+        reportingAPI.expectRecentPdfAppStats(stats, 'dashboard', 0);
+        reportingAPI.expectRecentPdfLayoutStats(stats, 'preserve_layout', 0);
+        reportingAPI.expectRecentPdfLayoutStats(stats, 'print', 0);
 
-      reportingAPI.expectAllTimeJobTypeTotalStats(stats, 'csv', 3);
-      reportingAPI.expectAllTimeJobTypeTotalStats(stats, 'printable_pdf', 19);
-      reportingAPI.expectAllTimePdfAppStats(stats, 'visualization', 3);
-      reportingAPI.expectAllTimePdfAppStats(stats, 'dashboard', 3);
-      reportingAPI.expectAllTimePdfLayoutStats(stats, 'preserve_layout', 3);
-      reportingAPI.expectAllTimePdfLayoutStats(stats, 'print', 3);
+        reportingAPI.expectAllTimeJobTypeTotalStats(stats, 'csv', 3);
+        reportingAPI.expectAllTimeJobTypeTotalStats(stats, 'printable_pdf', 19);
+        reportingAPI.expectAllTimePdfAppStats(stats, 'visualization', 3);
+        reportingAPI.expectAllTimePdfAppStats(stats, 'dashboard', 3);
+        reportingAPI.expectAllTimePdfLayoutStats(stats, 'preserve_layout', 3);
+        reportingAPI.expectAllTimePdfLayoutStats(stats, 'print', 3);
+      });
     });
 
     describe('stats updated when new jobs are posted', async () => {
@@ -107,13 +108,12 @@ export default function ({ getService }) {
       it('stats updated', async () => {
         const stats = await statsAPI.getStats();
 
-        // TODO: uncomment once time passes and the index I just generated falls outside of the last 7 day window
-        // reportingAPI.expectRecentPdfAppStats(stats, 'visualization', 0);
-        // reportingAPI.expectRecentPdfAppStats(stats, 'dashboard', 0);
-        // reportingAPI.expectRecentPdfLayoutStats(stats, 'preserve_layout', 0);
-        // reportingAPI.expectRecentPdfLayoutStats(stats, 'print', 0);
-        // reportingAPI.expectRecentJobTypeTotalStats(stats, 'csv', 0);
-        // reportingAPI.expectRecentJobTypeTotalStats(stats, 'printable_pdf', 0);
+        reportingAPI.expectRecentPdfAppStats(stats, 'visualization', 0);
+        reportingAPI.expectRecentPdfAppStats(stats, 'dashboard', 0);
+        reportingAPI.expectRecentPdfLayoutStats(stats, 'preserve_layout', 0);
+        reportingAPI.expectRecentPdfLayoutStats(stats, 'print', 0);
+        reportingAPI.expectRecentJobTypeTotalStats(stats, 'csv', 0);
+        reportingAPI.expectRecentJobTypeTotalStats(stats, 'printable_pdf', 0);
 
         reportingAPI.expectAllTimePdfAppStats(stats, 'visualization', 5);
         reportingAPI.expectAllTimePdfAppStats(stats, 'dashboard', 5);
