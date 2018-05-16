@@ -2,6 +2,8 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
+  const find = getService('find');
+  const dashboardExpect = getService('dashboardExpect');
   const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard']);
 
   describe('sample data', function describeIndexTests() {
@@ -38,8 +40,46 @@ export default function ({ getService, getPageObjects }) {
       it('should launch sample data set dashboard', async ()=> {
         await PageObjects.home.launchSampleDataSet('flights');
         await PageObjects.header.waitUntilLoadingHasFinished();
+        const today = new Date();
+        const todayYearMonthDay = today.toISOString().substring(0, 10);
+        const fromTime = `${todayYearMonthDay} 00:00:00.000`;
+        const toTime = `${todayYearMonthDay} 23:59:59.999`;
+        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
         const panelCount = await PageObjects.dashboard.getPanelCount();
         expect(panelCount).to.be(19);
+      });
+
+      it('pie charts rendered', async () => {
+        await dashboardExpect.pieSliceCount(4);
+      });
+
+      it('area, bar and heatmap charts rendered', async () => {
+        await dashboardExpect.seriesElementCount(15);
+      });
+
+      it('saved searches render', async () => {
+        await dashboardExpect.savedSearchRowCount(50);
+      });
+
+      it('goal and guage render', async () => {
+        await dashboardExpect.goalAndGuageLabelsExist(['93', '40']);
+      });
+
+      it('input controls render', async () => {
+        await dashboardExpect.inputControlItemCount(3);
+      });
+
+      it('metric vis renders', async () => {
+        await dashboardExpect.metricValuesExist(['336', '$594.09']);
+      });
+
+      it('tag cloud renders', async () => {
+        await dashboardExpect.tagCloudWithValuesFound(['Sunny', 'Rain', 'Clear', 'Cloudy', 'Hail']);
+      });
+
+      it('vega chart renders', async () => {
+        const tsvb = await find.existsByCssSelector('.vega-view-container');
+        expect(tsvb).to.be(true);
       });
     });
 
