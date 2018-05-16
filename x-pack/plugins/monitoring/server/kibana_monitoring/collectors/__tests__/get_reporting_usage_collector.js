@@ -6,10 +6,10 @@
 
 import expect from 'expect.js';
 import sinon from 'sinon';
-import { getReportingCollector } from '../get_reporting_collector';
+import { getReportingUsageCollector } from '../get_reporting_usage_collector';
 import { callClusterFactory } from '../../../../../xpack_main';
 
-describe('getReportingCollector', () => {
+describe('getReportingUsageCollector', () => {
   let clusterStub;
   let serverStub;
   let callClusterStub;
@@ -36,7 +36,7 @@ describe('getReportingCollector', () => {
   });
 
   it('correctly defines reporting collector.', () => {
-    const reportingCollector = getReportingCollector(serverStub, callClusterStub);
+    const reportingCollector = getReportingUsageCollector(serverStub, callClusterStub);
 
     expect(reportingCollector.type).to.be('reporting_stats');
     expect(reportingCollector.fetch).to.be.a(Function);
