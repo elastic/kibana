@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function verticesForIds(vertices, ids) {
+export function getVerticesForIds(vertices, ids) {
   return vertices.filter(v => ids.some(id => id === v.id));
 }
