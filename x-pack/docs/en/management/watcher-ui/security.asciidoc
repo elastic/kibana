@@ -7,4 +7,4 @@ The Watcher UI requires a user with `kibana_user` and the user must have either 
 
 `watcher_user` can view all existing watches, but is not able to create or edit watches.
 
-Learn more about creating users and roles in the https://www.elastic.co/guide/en/kibana/current/xpack-security.html[Security documentation].
+Learn more about creating users and roles in <<xpack-security>>.
