@@ -168,4 +168,5 @@ NOTE: This must be a user who has been assigned the `kibana_user` role.
 --
 
 include::authentication/index.asciidoc[]
+include::rbac.asciidoc[]
 include::{xkb-repo-dir}/settings/security-settings.asciidoc[]

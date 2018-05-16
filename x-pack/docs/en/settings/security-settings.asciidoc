@@ -44,3 +44,24 @@ routing requests through a load balancer or proxy).
 `xpack.security.sessionTimeout`::
 Sets the session duration (in milliseconds). By default, sessions stay active
 until the browser is closed.
+
+[float]
+[[security-rbac-settings]]
+==== Role Based Access Control (RBAC) Settings
++
+--
+
+NOTE: RBAC is an experimental feature. Additional functionality will be added in later 
+versions of {kib}. See <<kibana-rbac,RBAC in {kib}>> for additional information.
+
+--
+
+`xpack.security.rbac.enabled`::
+Set to true to enable experimental RBAC features. The default value is `false`.
+
+`xpack.security.rbac.application`::
+Set a custom name for this instance of {kib}. The default value is `kibana`, and it usually does not beed to be changed.
+Changing this is only useful in multi-tenant setups, where multiple isolated {kib} 
+installations are running within the same {es} cluster.
+This value must be identical for all {kib} instances that share a `kibana.index`.
+The name you choose will be used to derive the default role names that {kib} creates on your behalf.

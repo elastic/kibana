@@ -1,0 +1,39 @@
+:kib: Kibana
+:kib-privs: {kib} Privileges
+
+[role="xpack"]
+[[kibana-rbac]]
+=== Role Based Access Control (RBAC) in Kibana
+
+
+--
+
+NOTE: RBAC is an experimental opt-in feature. Additional functionality will be added in later versions of {kib}.
+
+--
+
+RBAC allows you to control access to {kib} objects, including Dashboards, Visualizations, Saved Searches, and Index Patterns.
+
+See <<security-rbac-settings,Configuring RBAC in {kib}>> for setup instructions.
+
+==== Features
+
+With RBAC enabled, you no longer need to grant user roles direct access to the {kib} index (e.g., `.kibana`).
+Instead, each user role can be assigned one or more {kib-privs}, which are used to grant access to the underlying {kib} objects.
+
+The default `kibana_user` and `kibana_dashboard_only_user` roles will not have any {kib-privs} assigned.
+When RBAC is first enabled, {kib} will create two new corresponding roles which should be used instead: `kibana_rbac_user` and `kibana_rbac_dashboard_only_user`.
+
+The `kibana` prefix is determined by your `xpack.security.rbac.application` setting, which defaults to `kibana`. If your `xpack.security.rbac.application` is set to `example`, then the corresponding roles would be named `example_rbac_user` and `example_rbac_dashboard_only_user`.
+
+==== {kib-privs}
+
+{kib} supports the following Privileges:
+
+`**all**`::
+grants full read and write access to all {kib} objects. This is functionally similar to the `kibana_user` role when RBAC is not enabled. 
+`**read**`::
+grants read-only access to all {kib} objects. This is functionally similar to the `kibana_dashboard_only_user` role when RBAC is not enabled.
+
+==== Important Considerations
+Before enabling RBAC, make sure that you do not have any {kib} users who rely on direct access to {kib}'s underlying index (e.g., `.kibana`).
