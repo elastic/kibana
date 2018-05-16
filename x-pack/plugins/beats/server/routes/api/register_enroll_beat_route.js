@@ -54,7 +54,7 @@ function persistBeat(callWithInternalUser, beat) {
 }
 
 // TODO: add license check pre-hook
-// TODO: write to Kibana audit log file (include who did the verification as well)
+// TODO: write to Kibana audit log file
 export function registerEnrollBeatRoute(server) {
   server.route({
     method: 'POST',
