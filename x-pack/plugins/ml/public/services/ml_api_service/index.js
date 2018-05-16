@@ -9,7 +9,9 @@
 import { pick } from 'lodash';
 import chrome from 'ui/chrome';
 
-import { http } from './http_service';
+import { http } from 'plugins/ml/services/http_service';
+
+import { results } from './results';
 
 const basePath = chrome.addBasePath('/api/ml');
 
@@ -403,4 +405,6 @@ export const ml = {
       data: obj
     });
   },
+
+  results
 };

@@ -20,8 +20,8 @@ import 'ui/timefilter';
 
 import { ResizeChecker } from 'ui/resize_checker';
 
+import { getSeverityWithLow } from 'plugins/ml/../common/util/anomaly_utils';
 import { formatValue } from 'plugins/ml/formatters/format_value';
-import { getSeverityWithLow } from 'plugins/ml/util/anomaly_utils';
 import {
   drawLineChartDots,
   filterAxisLabels,
