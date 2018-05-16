@@ -11,7 +11,8 @@ import {
   setPanels,
   setPanelTitle,
   resetPanelTitle,
-  embeddableIsInitialized, updateTimeRange,
+  embeddableIsInitialized,
+  updateTimeRange,
 } from '../../actions';
 import { findTestSubject } from '@elastic/eui/lib/test';
 

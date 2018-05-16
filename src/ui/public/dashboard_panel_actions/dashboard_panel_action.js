@@ -5,8 +5,8 @@ export class DashboardPanelAction {
    * @param {string} displayName
    * @param {function} onClick
    * @param {DashboardContextMenuPanel} childContextMenuPanel - optional child panel to open when clicked.
-   * @param {function} disabled - optionally set a custom disabled function
-   * @param {function} visible - optionally set a custom visible function
+   * @param {function} isDisabled - optionally set a custom disabled function
+   * @param {function} isVisible - optionally set a custom isVisible function
    * @param {string} parentPanelId - set if this action belongs on a nested child panel
    * @param {Element} icon
    */
@@ -16,8 +16,8 @@ export class DashboardPanelAction {
       displayName,
       onClick,
       childContextMenuPanel,
-      disabled,
-      visible,
+      isDisabled,
+      isVisible,
       parentPanelId,
       icon,
     } = {}) {
@@ -31,25 +31,25 @@ export class DashboardPanelAction {
       this.onClick = onClick;
     }
 
-    if (disabled) {
-      this.disabled = disabled;
+    if (isDisabled) {
+      this.isDisabled = isDisabled;
     }
 
-    if (visible) {
-      this.visible = visible;
+    if (isVisible) {
+      this.isVisible = isVisible;
     }
   }
 
   /**
    * @param {Embeddable} embeddable
-   * @param containerState
+   * @param ContainerState} containerState
    */
   onClick(/*embeddable, containerState*/) {}
 
   /**
    * Defaults to always visible.
    * @param {Embeddable} embeddable
-   * @param containerState
+   * @param ContainerState} containerState
    * @return {boolean}
    */
   isVisible(/*embeddable, containerState*/) {
@@ -59,7 +59,7 @@ export class DashboardPanelAction {
   /**
    * Defaults to always enabled.
    * @param {Embeddable} embeddable
-   * @param containerState
+   * @param {ContainerState} containerState
    */
   isDisabled(/*embeddable, containerState */) {
     return false;
