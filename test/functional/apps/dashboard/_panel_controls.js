@@ -6,7 +6,6 @@ import {
 } from '../../../../src/core_plugins/kibana/public/visualize/visualize_constants';
 
 export default function ({ getService, getPageObjects }) {
-  const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const remote = getService('remote');
   const dashboardPanelActions = getService('dashboardPanelActions');
@@ -41,16 +40,17 @@ export default function ({ getService, getPageObjects }) {
 
       it('are hidden in view mode', async function () {
         await PageObjects.dashboard.saveDashboard(dashboardName);
-        const panelToggleMenu = await testSubjects.exists('dashboardPanelToggleMenuIcon');
-        expect(panelToggleMenu).to.equal(false);
+        const isContextMenuToggleVisible = await dashboardPanelActions.isContextMenuToggleVisible();
+        expect(isContextMenuToggleVisible).to.equal(false);
       });
 
       it('are shown in edit mode', async function () {
         await PageObjects.dashboard.clickEdit();
 
-        const panelToggleMenu = await testSubjects.exists('dashboardPanelToggleMenuIcon');
-        expect(panelToggleMenu).to.equal(true);
-        await testSubjects.click('dashboardPanelToggleMenuIcon');
+        const isContextMenuToggleVisible = await dashboardPanelActions.isContextMenuToggleVisible();
+        expect(isContextMenuToggleVisible).to.equal(true);
+        await dashboardPanelActions.openContextMenu();
+
         const editLinkExists = await dashboardPanelActions.editPanelActionExists();
         const removeExists = await dashboardPanelActions.removePanelActionExists();
 
