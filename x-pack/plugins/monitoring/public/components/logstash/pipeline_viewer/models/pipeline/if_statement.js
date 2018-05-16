@@ -9,10 +9,12 @@ import { makeStatement } from './make_statement';
 import { isVertexPipelineStage } from './utils';
 
 export class IfStatement extends Statement {
-  constructor(id, hasExplicitId, stats, meta, condition, trueStatements, elseStatements) {
-    super(id, hasExplicitId, stats, meta);
+  constructor(vertex, trueStatements, elseStatements) {
+    super(vertex);
 
-    this.condition = condition;
+    const { name } = vertex;
+
+    this.condition = name;
     this.trueStatements = trueStatements;
     this.elseStatements = elseStatements;
   }
@@ -38,11 +40,7 @@ export class IfStatement extends Statement {
     }
 
     return new IfStatement(
-      ifVertex.id,
-      ifVertex.hasExplicitId,
-      ifVertex.stats,
-      ifVertex.meta,
-      ifVertex.name,
+      ifVertex,
       trueStatements,
       elseStatements
     );
