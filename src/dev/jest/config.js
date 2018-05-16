@@ -42,6 +42,7 @@ export default {
     'js',
     'json',
     'ts',
+    'tsx',
   ],
   modulePathIgnorePatterns: [
     '__fixtures__/',
@@ -50,6 +51,7 @@ export default {
   testMatch: [
     '**/*.test.js',
     '**/*.test.ts',
+    '**/*.test.tsx',
   ],
   testPathIgnorePatterns: [
     '<rootDir>/packages/kbn-ui-framework/(dist|doc_site|generator-kui)/',
@@ -58,7 +60,7 @@ export default {
   ],
   transform: {
     '^.+\\.js$': '<rootDir>/src/dev/jest/babel_transform.js',
-    '^.+\\.ts$': 'ts-jest',
+    '^.+\\.tsx?$': 'ts-jest',
   },
   transformIgnorePatterns: [
     '[/\\\\]node_modules[/\\\\].+\\.js$',
