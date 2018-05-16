@@ -21,6 +21,9 @@ export function runMochaCli() {
   // ensure that mocha exits when test have completed
   process.argv.push('--exit');
 
+  // check that we aren't leaking any globals
+  process.argv.push('--check-leaks');
+
   // ensure that mocha requires the babel-register script
   process.argv.push('--require', require.resolve('../../babel-register'));
 
