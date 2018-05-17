@@ -23,7 +23,7 @@ import _ from 'lodash';
 import {
   EuiComboBox,
 } from '@elastic/eui';
-import { durationInputOptions } from './lib/durations';
+import { durationOutputOptions, durationInputOptions } from './lib/durations';
 const durationFormatTest = /[pnumshdwMY]+,[pnumshdwMY]+/;
 
 class DataFormatPicker extends Component {
@@ -116,7 +116,7 @@ class DataFormatPicker extends Component {
       const selectedFrom = durationInputOptions.find(option => {
         return from === option.value;
       });
-      const selectedTo = durationInputOptions.find(option => {
+      const selectedTo = durationOutputOptions.find(option => {
         return to === option.value;
       });
       return (
@@ -147,7 +147,7 @@ class DataFormatPicker extends Component {
           <div className="vis_editor__item">
             <EuiComboBox
               isClearable={false}
-              options={durationInputOptions}
+              options={durationOutputOptions}
               selectedOptions={selectedTo ? [selectedTo] : []}
               onChange={this.handleDurationChange('to')}
               singleSelection={true}
