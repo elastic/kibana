@@ -112,12 +112,10 @@ export const security = (kibana) => new kibana.Plugin({
 
     if (config.get('xpack.security.rbac.enabled')) {
       const hasPrivilegesWithRequest = hasPrivilegesWithServer(server);
-      const savedObjectsClientProvider = server.getSavedObjectsClientProvider();
+      const { savedObjects } = server;
 
-      savedObjectsClientProvider.registerCustomClientFactory(({
+      savedObjects.registerScopedSavedObjectsClientFactory(({
         request,
-        SavedObjectsRepository,
-        errors,
         index,
         mappings,
         onBeforeWrite
@@ -127,7 +125,7 @@ export const security = (kibana) => new kibana.Plugin({
         const adminCluster = server.plugins.elasticsearch.getCluster('admin');
         const { callWithInternalUser } = adminCluster;
 
-        const repository = new SavedObjectsRepository({
+        const repository = new savedObjects.SavedObjectsRepository({
           index,
           mappings,
           onBeforeWrite,
@@ -136,7 +134,7 @@ export const security = (kibana) => new kibana.Plugin({
 
         return new SecureSavedObjectsClient({
           repository,
-          errors,
+          errors: savedObjects.SavedObjectsClient.errors,
           hasPrivileges
         });
       });
