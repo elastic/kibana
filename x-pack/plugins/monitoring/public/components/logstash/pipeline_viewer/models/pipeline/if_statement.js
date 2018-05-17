@@ -11,8 +11,6 @@ import {
 } from './utils';
 
 function createChildStatements(outgoingVertices, statements, next, pipelineStage) {
-  if (!outgoingVertices) { return; }
-
   outgoingVertices.forEach(vertex => {
     let currentVertex = vertex;
     while(isVertexPipelineStage(currentVertex, pipelineStage) && (currentVertex !== next)) {

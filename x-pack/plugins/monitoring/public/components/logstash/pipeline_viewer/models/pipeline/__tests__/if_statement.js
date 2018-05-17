@@ -50,6 +50,7 @@ describe('IfStatement class', () => {
 
         ifVertex.trueOutgoingVertex = esVertex;
         ifVertex.trueOutgoingVertices = [ esVertex ];
+        ifVertex.falseOutgoingVertices = [];
       });
 
       it('creates a IfStatement from vertex props', () => {
@@ -131,6 +132,7 @@ describe('IfStatement class', () => {
 
         ifVertex.trueOutgoingVertex = esVertex;
         ifVertex.trueOutgoingVertices = [ esVertex ];
+        ifVertex.falseOutgoingVertices = [];
       });
 
       it('creates a IfStatement from vertex props', () => {
