@@ -1,4 +1,3 @@
-[role="xpack"]
 [[configuring-tls]]
 === Encrypting communications in {kib}
 ++++
