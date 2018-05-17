@@ -25,7 +25,7 @@ import {
 import generateByTypeFilter from '../lib/generate_by_type_filter';
 
 function FieldSelect(props) {
-  const { type, fields, indexPattern, value, onChange } = props;
+  const { type, fields, indexPattern, value, onChange, disabled } = props;
   if (type === 'count') {
     return null;
   }
@@ -43,6 +43,7 @@ function FieldSelect(props) {
   return (
     <EuiComboBox
       placeholder="Select field..."
+      isDisabled={disabled}
       options={options}
       selectedOptions={selectedOptions}
       onChange={onChange}

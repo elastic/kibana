@@ -293,6 +293,7 @@ function TimeseriesConfig(props) {
           <div className="vis_editor__row_item">
             <EuiComboBox
               isClearable={false}
+              isDisabled={disableSeperateYaxis}
               id={htmlId('axisPos')}
               options={positionOptions}
               selectedOptions={selectedAxisPosOption ? [selectedAxisPosOption] : []}
