@@ -21,6 +21,32 @@ export class EmbeddedVisualizeHandler {
   }
 
   /**
+   * Update properties of the embedded visualization. This method does not allow
+   * updating all initial parameters, but only a subset of the ones allowed
+   * in {@link VisualizeLoaderParams}.
+   *
+   * @param {Object} [params={}] The parameters that should be updated.
+   * @property {Object} [timeRange] A new time range for this visualization.
+   * @property {Object} [dataAttrs] An object of data attributes to modify. The
+   *    key will be the name of the data attribute and the value the value that
+   *    attribute will get. Use null to remove a specific data attribute from the visualization.
+   */
+  update(params = {}) {
+    this._scope.$evalAsync(() => {
+      if (params.hasOwnProperty('timeRange')) {
+        this._scope.timeRange = params.timeRange;
+      }
+
+      // Apply data- attributes to the element if specified
+      if (params.dataAttrs) {
+        Object.keys(params.dataAttrs).forEach(key => {
+          this._element.attr(`data-${key}`, params.dataAttrs[key]);
+        });
+      }
+    });
+  }
+
+  /**
    * Destroy the underlying Angular scope of the visualization. This should be
    * called whenever you remove the visualization.
    */

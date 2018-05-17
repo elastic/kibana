@@ -280,7 +280,6 @@
     "grunt-karma": "2.0.0",
     "grunt-peg": "^2.0.1",
     "grunt-run": "0.7.0",
-    "grunt-simple-mocha": "0.4.0",
     "gulp-babel": "^7.0.1",
     "gulp-sourcemaps": "1.7.3",
     "husky": "0.8.1",
