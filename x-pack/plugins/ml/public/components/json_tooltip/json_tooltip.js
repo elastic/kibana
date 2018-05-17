@@ -24,26 +24,33 @@ module.service('mlJsonTooltipService', function () {
       return '';
     }
   };
-})
+});
 
 // directive for placing an i icon with a popover tooltip anywhere on a page
-// tooltip format: <i ml-info-icon="the_id" />
+// tooltip format: <i ml-info-icon="<the_id>" />
 // the_id will match an entry in tooltips.json
-  .directive('mlInfoIcon', function () {
-    return {
-      scope: {
-        id: '@mlInfoIcon'
-      },
-      restrict: 'AE',
-      replace: true,
-      template: `
-      <i aria-hidden="true" class="fa fa-info-circle" tooltip="{{text}}">
-        <span id="ml_aria_description_{{id}}" class="ml-info-tooltip-text">{{text}}</span>
-      </i>
+// the original <i ml-info-icon="<the_id>" /> will be replaced with
+// <span ml-tooltip="<tooltip_text>">...</span> to transform the DOM structure
+// into one which is suitable for use with EuiTooltip. Because of this replacement
+// span[ml-info-icon] has to be used instead of i[ml-info-icon] when using CSS.
+module.directive('mlInfoIcon', function () {
+  return {
+    scope: {
+      id: '@mlInfoIcon',
+      position: '@'
+    },
+    restrict: 'AE',
+    replace: true,
+    template: `
+      <span ml-tooltip="{{text}}">
+        <i aria-hidden="true" class="fa fa-info-circle">
+          <span id="ml_aria_description_{{id}}" class="ml-info-tooltip-text">{{text}}</span>
+        </i>
+      </span>
     `,
-      controller: function ($scope) {
-        $scope.text = (tooltips[$scope.id]) ? tooltips[$scope.id].text : '';
-      }
-    };
+    controller: function ($scope) {
+      $scope.text = (tooltips[$scope.id]) ? tooltips[$scope.id].text : '';
+    }
+  };
 
-  });
+});
