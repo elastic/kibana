@@ -19,13 +19,25 @@ include::{asciidoc-dir}/../../shared/versions.asciidoc[]
 :blob:           {repo}blob/{branch}/
 :security-ref:   https://www.elastic.co/community/security/
 
-include::{kib-repo-dir}/index-shared1.asciidoc[]
+include::{asciidoc-dir}/../../shared/attributes.asciidoc[]
+
+include::introduction.asciidoc[]
+
+include::setup.asciidoc[]
 
 include::{xkb-repo-dir}/setup/setup-xkb.asciidoc[]
 
-include::{kib-repo-dir}/index-shared2.asciidoc[]
+include::migration.asciidoc[]
 
-include::{kib-repo-dir}/index-shared3.asciidoc[]
+include::getting-started.asciidoc[]
+
+include::discover.asciidoc[]
+
+include::visualize.asciidoc[]
+
+include::dashboard.asciidoc[]
+
+include::timelion.asciidoc[]
 
 include::{xkb-repo-dir}/ml/index.asciidoc[]
 
@@ -33,7 +45,7 @@ include::{xkb-repo-dir}/apm/index.asciidoc[]
 
 include::{xkb-repo-dir}/graph/index.asciidoc[]
 
-include::{kib-repo-dir}/index-shared4.asciidoc[]
+include::dev-tools.asciidoc[]
 
 include::{xkb-repo-dir}/searchprofiler/index.asciidoc[]
 
@@ -41,7 +53,7 @@ include::{xkb-repo-dir}/grokdebugger/index.asciidoc[]
 
 include::{xkb-repo-dir}/monitoring/index.asciidoc[]
 
-include::{kib-repo-dir}/index-shared5.asciidoc[]
+include::management.asciidoc[]
 
 include::{xkb-repo-dir}/security/index.asciidoc[]
 
@@ -53,4 +65,10 @@ include::{xkb-repo-dir}/dashboard_only_mode/index.asciidoc[]
 
 include::{xkb-repo-dir}/reporting/index.asciidoc[]
 
-include::{kib-repo-dir}/index-shared6.asciidoc[]
+include::plugins.asciidoc[]
+
+include::development.asciidoc[]
+
+include::limitations.asciidoc[]
+
+include::CHANGELOG.asciidoc[]
