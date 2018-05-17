@@ -8,6 +8,7 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiText,
+  EuiTextColor,
   EuiSpacer,
   EuiIcon,
   EuiAccordion,
@@ -49,10 +50,16 @@ export class ElasticsearchPrivileges extends Component {
       onChange,
     };
 
+    const {
+      isInvalid
+    } = validator.validateIndexPrivileges(role);
+
+    const indexTextColor = isInvalid ? 'danger' : 'default';
+
     return (
       <Fragment>
         <EuiTitle>
-          <h3>Elasticsearch</h3>
+          <h4>Elasticsearch</h4>
         </EuiTitle>
 
         <EuiSpacer />
@@ -60,8 +67,13 @@ export class ElasticsearchPrivileges extends Component {
         <EuiPanel>
           <EuiAccordion
             id={'clusterPrivilegesAccordion'}
-            buttonContent={<div><EuiIcon type={'logoElastic'} size={'m'} /> Cluster Privileges ({role.cluster.length})</div>}
+            buttonContent={
+              <div>
+                <EuiIcon color={indexTextColor} type={'logoElastic'} size={'m'} /> Cluster Privileges ({role.cluster.length})
+              </div>
+            }
           >
+            <EuiSpacer size="s" />
             <ClusterPrivileges role={this.props.role} onChange={this.onClusterPrivilegesChange} />
           </EuiAccordion>
         </EuiPanel>
@@ -72,14 +84,18 @@ export class ElasticsearchPrivileges extends Component {
             id={'indexPrivilegesAccordion'}
             buttonContent={
               <div>
-                <EuiIcon type={'indexSettings'} size={'m'} /> Index Privileges (
-                {role.indices.filter(i => i.names.length).length})
+                <EuiIcon type={'indexSettings'} size={'m'} color={indexTextColor} />
+                <EuiTextColor color={indexTextColor}> Index Privileges (
+                  {role.indices.filter(i => i.names.length).length})
+                </EuiTextColor>
               </div>
             }
           >
+            <EuiSpacer size="s" />
+
             <EuiText>
               <p>
-                Index Privileges allow you to foo the bar while baring the baz
+                Control access to the data in your cluster.
               </p>
             </EuiText>
 
@@ -96,9 +112,11 @@ export class ElasticsearchPrivileges extends Component {
             id={'runAsPrivilegesAccordion'}
             buttonContent={<div><EuiIcon type={'play'} size={'m'} /> Run As Privileges ({role.run_as.length})</div>}
           >
+            <EuiSpacer size="s" />
+
             <EuiText>
               <p>
-                Run As Privileges allow you to foo the bar while baring the baz
+                Allow requests to be submitted on behalf of other users.
               </p>
             </EuiText>
             <EuiSpacer />

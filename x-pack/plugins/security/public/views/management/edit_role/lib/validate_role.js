@@ -23,8 +23,8 @@ export class RoleValidator {
     if (!role.name) {
       return invalid(`Please provide a role name`);
     }
-    if (role.name.length > 30) {
-      return invalid(`Name must not exceed 30 characters`);
+    if (role.name.length > 1024) {
+      return invalid(`Name must not exceed 1024 characters`);
     }
     if (!role.name.match(/^[a-zA-Z_][a-zA-Z0-9_@\-\$\.]*$/)) {
       return invalid(`Name must begin with a letter or underscore and contain only letters, underscores, and numbers.`);

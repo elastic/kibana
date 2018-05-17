@@ -18,6 +18,7 @@ import {
 export class KibanaPrivileges extends Component {
   static propTypes = {
     role: PropTypes.object.isRequired,
+    spaces: PropTypes.array,
     kibanaAppPrivileges: PropTypes.array.isRequired,
     onChange: PropTypes.func.isRequired,
   };
@@ -53,7 +54,7 @@ export class KibanaPrivileges extends Component {
     return (
       <Fragment>
         <EuiTitle>
-          <h3>Kibana</h3>
+          <h4>Kibana</h4>
         </EuiTitle>
 
         <EuiSpacer />

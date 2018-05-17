@@ -28,12 +28,12 @@ describe('validateRoleName', () => {
     expect(validator.validateRoleName(role)).toEqual({ isInvalid: true, error: `Please provide a role name` });
   });
 
-  test('it cannot exceed 30 characters', () => {
+  test('it cannot exceed 1024 characters', () => {
     const role = {
-      name: 'This-is-a31-character-role-name'
+      name: new Array(1026).join('A')
     };
 
-    expect(validator.validateRoleName(role)).toEqual({ isInvalid: true, error: `Name must not exceed 30 characters` });
+    expect(validator.validateRoleName(role)).toEqual({ isInvalid: true, error: `Name must not exceed 1024 characters` });
   });
 
   const charList = `!#%^&*()+=[]{}\|';:"/,<>?`.split('');
@@ -44,7 +44,8 @@ describe('validateRoleName', () => {
       };
 
       expect(validator.validateRoleName(role)).toEqual(
-        { isInvalid: true,
+        {
+          isInvalid: true,
           error: `Name must begin with a letter or underscore and contain only letters, underscores, and numbers.`
         }
       );
