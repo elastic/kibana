@@ -10,29 +10,26 @@ import React from 'react';
 import { BucketSpanEstimator } from './bucket_span_estimator_view';
 
 describe('BucketSpanEstimator', () => {
-  const props = {
-    buttonDisabled: false,
-    estimatorRunning: false,
-    guessBucketSpan: () => {},
-    buttonText: 'Estimate bucket span'
-  };
-
-  const component = (
-    <BucketSpanEstimator {...props} />
-  );
-
-  const wrapper = shallow(component);
 
   test('renders the button', () => {
+    const props = {
+      buttonDisabled: false,
+      estimatorRunning: false,
+      guessBucketSpan: () => { },
+      buttonText: 'Estimate bucket span'
+    };
+    const wrapper = shallow(<BucketSpanEstimator {...props} />);
     expect(wrapper).toMatchSnapshot();
   });
 
-  props.buttonDisabled = true;
-  props.estimatorRunning = true;
-  props.buttonText = 'Estimating bucket span';
-  wrapper.setProps(props);
-
   test('renders the loading button', () => {
+    const props = {
+      buttonDisabled: true,
+      estimatorRunning: true,
+      guessBucketSpan: () => { },
+      buttonText: 'Estimating bucket span'
+    };
+    const wrapper = shallow(<BucketSpanEstimator {...props} />);
     expect(wrapper).toMatchSnapshot();
   });
 });
