@@ -71,4 +71,77 @@ describe('pipelineToList', () => {
     expect(outputs[3]).toBeInstanceOf(ElseElement);
     expect(outputs[4]).toBeInstanceOf(PluginElement);
   });
+
+  it('creates list for multi-nested if/else statements in filter section', () => {
+    pipeline.filterStatements = [
+      new IfStatement(
+        { id: 'filter_if_1' },
+        [
+          new IfStatement(
+            { id: 'filter_if_2' },
+            [ PluginStatement.fromPipelineGraphVertex({ id: 'plugin_1' })],
+            [ ]
+          )
+        ],
+        [
+          new IfStatement(
+            { id: 'filter_if_3' },
+            [ PluginStatement.fromPipelineGraphVertex({ id: 'plugin_2' })],
+            [ PluginStatement.fromPipelineGraphVertex({ id: 'plugin_3' })]
+          )
+        ]
+      )
+    ];
+
+    const result = pipelineToList(pipeline);
+    const {
+      inputs,
+      filters,
+      outputs
+    } = result;
+
+    expect(inputs).toHaveLength(1);
+    expect(outputs).toHaveLength(1);
+    expect(filters).toHaveLength(8);
+
+    expect(filters[0].id).toBe('filter_if_1');
+    expect(filters[0].depth).toBe(0);
+    expect(filters[0].parentId).toBe(null);
+    expect(filters[0]).toBeInstanceOf(IfElement);
+
+    expect(filters[1].id).toBe('filter_if_2');
+    expect(filters[1].depth).toBe(1);
+    expect(filters[1].parentId).toBe('filter_if_1');
+    expect(filters[1]).toBeInstanceOf(IfElement);
+
+    expect(filters[2].id).toBe('plugin_1');
+    expect(filters[2].depth).toBe(2);
+    expect(filters[2].parentId).toBe('filter_if_2');
+    expect(filters[2]).toBeInstanceOf(PluginElement);
+
+    expect(filters[3].id).toBe('filter_if_1_else');
+    expect(filters[3].depth).toBe(0);
+    expect(filters[3].parentId).toBe(null);
+    expect(filters[3]).toBeInstanceOf(ElseElement);
+
+    expect(filters[4].id).toBe('filter_if_3');
+    expect(filters[4].depth).toBe(1);
+    expect(filters[4].parentId).toBe('filter_if_1_else');
+    expect(filters[4]).toBeInstanceOf(IfElement);
+
+    expect(filters[5].id).toBe('plugin_2');
+    expect(filters[5].depth).toBe(2);
+    expect(filters[5].parentId).toBe('filter_if_3');
+    expect(filters[5]).toBeInstanceOf(PluginElement);
+
+    expect(filters[6].id).toBe('filter_if_3_else');
+    expect(filters[6].depth).toBe(1);
+    expect(filters[6].parentId).toBe('filter_if_1_else');
+    expect(filters[6]).toBeInstanceOf(ElseElement);
+
+    expect(filters[7].id).toBe('plugin_3');
+    expect(filters[7].depth).toBe(2);
+    expect(filters[7].parentId).toBe('filter_if_3_else');
+    expect(filters[7]).toBeInstanceOf(PluginElement);
+  });
 });

@@ -7,6 +7,8 @@
 import expect from 'expect.js';
 import { IfStatement } from '../if_statement';
 import { PluginVertex } from '../../graph/plugin_vertex';
+import { IfElement } from '../../list/if_element';
+import { PluginElement } from '../../list/plugin_element';
 
 describe('IfStatement class', () => {
   let ifVertex;
@@ -199,6 +201,31 @@ describe('IfStatement class', () => {
         expect(ifStatement.elseStatements).to.be.an(Array);
         expect(ifStatement.elseStatements.length).to.be(2);
         expect(ifStatement.vertex).to.eql(ifVertex);
+      });
+    });
+
+    describe('toList', () => {
+      beforeEach(() => {
+        const esVertex = new PluginVertex({ edgesByFrom: {} }, { id: 'es_output' });
+        esVertex.pipelineStage = 'output';
+
+        ifVertex.trueOutgoingVertex = esVertex;
+      });
+
+      it('creates list and sub-list for nested statements', () => {
+        const ifStatement = IfStatement.fromPipelineGraphVertex(ifVertex, pipelineStage);
+
+        const result = ifStatement.toList(0, null);
+
+        expect(result).to.be.an(Array);
+        expect(result.length).to.be(2);
+        expect(result[0]).to.be.an(IfElement);
+        expect(result[0].id).to.be('0aef421');
+        expect(result[1]).to.be.an(Array);
+        expect(result[1].length).to.be(1);
+        const plugin = result[1][0];
+        expect(plugin).to.be.an(PluginElement);
+        expect(plugin.id).to.be('es_output');
       });
     });
   });

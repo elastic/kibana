@@ -4,29 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginElement } from './plugin_element';
-import { IfElement } from './if_element';
-import { ElseElement } from './else_element';
-import { PluginStatement } from '../pipeline/plugin_statement';
-import { IfStatement } from '../pipeline/if_statement';
+import { flattenDeep } from 'lodash';
 
-export function flattenPipelineSection(tree, depth, parentId) {
-  let list = [];
+export function flattenPipelineSection(pipelineSection, depth, parentId) {
+  const list = [];
 
-  tree.forEach(node => {
-    if (node instanceof PluginStatement) {
-      list.push(new PluginElement(node, depth, parentId));
-    } else if (node instanceof IfStatement) {
-      list.push(new IfElement(node, depth, parentId));
-      list = list.concat(flattenPipelineSection(node.trueStatements, depth + 1, node.id));
-
-      if (node.elseStatements && node.elseStatements.length) {
-        const elseElement = new ElseElement(node, depth, parentId);
-        list.push(elseElement);
-        list = list.concat(flattenPipelineSection(node.elseStatements, depth + 1, elseElement.id));
-      }
-    }
+  pipelineSection.forEach(statement => {
+    list.push(statement.toList(depth, parentId));
   });
 
-  return list;
+  return flattenDeep(list);
 }

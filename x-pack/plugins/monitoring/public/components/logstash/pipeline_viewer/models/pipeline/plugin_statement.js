@@ -20,7 +20,7 @@ export class PluginStatement extends Statement {
     this.name = name; // twitter, grok, elasticsearch, etc.
   }
 
-  flatten(depth, parentId) {
+  toList(depth, parentId) {
     return [ new PluginElement(this, depth, parentId) ];
   }
 

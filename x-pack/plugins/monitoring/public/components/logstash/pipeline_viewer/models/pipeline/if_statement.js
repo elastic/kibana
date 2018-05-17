@@ -31,20 +31,20 @@ export class IfStatement extends Statement {
     this.elseStatements = elseStatements;
   }
 
-  flatten(depth, parentId) {
+  toList(depth, parentId) {
     const list = [];
 
     list.push(new IfElement(this, depth, parentId));
 
     this.trueStatements.forEach(trueStatement => {
-      list.push(trueStatement.flatten(depth + 1, this.id));
+      list.push(trueStatement.toList(depth + 1, this.id));
     });
 
     if (this.elseStatements.length) {
       const elseElement = new ElseElement(this, depth, parentId);
       list.push(elseElement);
       this.elseStatements.forEach(elseStatement => {
-        list.push(elseStatement.flatten(depth + 1, elseElement.id));
+        list.push(elseStatement.toList(depth + 1, elseElement.id));
       });
     }
 
