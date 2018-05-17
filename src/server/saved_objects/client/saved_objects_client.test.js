@@ -1,6 +1,6 @@
 import { SavedObjectsClient } from './saved_objects_client';
-import { SavedObjectsRepository } from './lib';
-jest.mock('./saved_objects_repository');
+import { SavedObjectsRepository } from './lib/repository';
+jest.mock('./lib/repository');
 
 let mockSavedObjectsRepository;
 beforeEach(() => {
