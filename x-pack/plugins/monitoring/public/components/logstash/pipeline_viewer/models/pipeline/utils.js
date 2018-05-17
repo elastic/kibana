@@ -7,13 +7,3 @@
 export function isVertexPipelineStage(vertex, pipelineStage) {
   return vertex && vertex.pipelineStage === pipelineStage;
 }
-
-export function addVertices(statements, verticesToAdd, pipelineStage, makeStatement) {
-  if (!verticesToAdd) { return; }
-
-  verticesToAdd.forEach(vertex => {
-    if (isVertexPipelineStage(vertex, pipelineStage)) {
-      statements.push(makeStatement(vertex, pipelineStage));
-    }
-  });
-}
