@@ -19,7 +19,6 @@
 
 import _ from 'lodash';
 import { uiModules } from '../modules';
-import { stateMonitorFactory } from '../state_management/state_monitor_factory';
 import visualizeTemplate from './visualize.html';
 import { VisRequestHandlersRegistryProvider } from '../registry/vis_request_handlers';
 import { VisResponseHandlersRegistryProvider } from '../registry/vis_response_handlers';
@@ -55,6 +54,8 @@ uiModules
         appState: '=?',
         uiState: '=?',
         timeRange: '=?',
+        filters: '=?',
+        query: '=?',
       },
       template: visualizeTemplate,
       link: async function ($scope, $el) {
@@ -97,16 +98,17 @@ uiModules
           // to make this working and correctly rerender, so for now we will either
           // use the one passed in to us or look into the timefilter ourselfs (which
           // will be removed in the future).
-          const timeRange = $scope.timeRange || timefilter.time;
 
-          $scope.vis.filters = { timeRange };
+          $scope.vis.filters = { timeRange: $scope.timeRange };
 
           const handlerParams = {
             appState: $scope.appState,
             uiState: $scope.uiState,
             queryFilter: queryFilter,
             searchSource: $scope.savedObj.searchSource,
-            timeRange: timeRange,
+            timeRange: $scope.timeRange,
+            filters: $scope.filters,
+            query: $scope.query,
             forceFetch,
           };
 
@@ -152,9 +154,8 @@ uiModules
           if ($scope.editorMode) {
             $scope.appState.vis = $scope.vis.getState();
             $scope.appState.save();
-          } else {
-            $scope.fetch();
           }
+          $scope.fetch();
         };
         $scope.vis.on('update', handleVisUpdate);
 
@@ -169,46 +170,19 @@ uiModules
         // dashboard will fire fetch event when it wants to refresh
         $scope.$on('fetch', reload);
 
-
-
-        const handleQueryUpdate = ()=> {
-          $scope.fetch();
-        };
-        queryFilter.on('update', handleQueryUpdate);
-
-        if ($scope.appState) {
-          const stateMonitor = stateMonitorFactory.create($scope.appState);
-          stateMonitor.onChange((status, type, keys) => {
-            if (keys[0] === 'vis') {
-              if ($scope.appState.vis) $scope.vis.setState($scope.appState.vis);
-              $scope.fetch();
-            }
-            if ($scope.vis.type.requiresSearch && ['query', 'filters'].includes(keys[0])) {
-              $scope.fetch();
-            }
-          });
-
-          $scope.$on('$destroy', () => {
-            stateMonitor.destroy();
-          });
-        }
-
         // Listen on uiState changes to start fetching new data again.
         // Some visualizations might need different data depending on their uiState,
         // thus we need to retrigger. The request handler should take care about
         // checking if anything changed, that actually require a new fetch or return
         // cached data otherwise.
         $scope.uiState.on('change', $scope.fetch);
-        resizeChecker.on('resize', $scope.fetch);
 
-        // visualize needs to know about timeFilter
-        $scope.$listen(timefilter, 'fetch', $scope.fetch);
+        resizeChecker.on('resize', $scope.fetch);
 
         $scope.$on('$destroy', () => {
           destroyed = true;
           $scope.vis.removeListener('reload', reload);
           $scope.vis.removeListener('update', handleVisUpdate);
-          queryFilter.off('update', handleQueryUpdate);
           $scope.uiState.off('change', $scope.fetch);
           resizeChecker.destroy();
         });

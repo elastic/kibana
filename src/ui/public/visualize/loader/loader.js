@@ -62,6 +62,8 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
     scope.appState = params.appState;
     scope.uiState = params.uiState;
     scope.timeRange = params.timeRange;
+    scope.filters = params.filters;
+    scope.query = params.query;
     scope.showSpyPanel = params.showSpyPanel;
 
     const container = angular.element(el);

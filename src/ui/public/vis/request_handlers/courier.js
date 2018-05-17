@@ -25,21 +25,9 @@ import { calculateObjectHash } from '../lib/calculate_object_hash';
 const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
   const SearchSource = Private(SearchSourceProvider);
 
-  /**
-   * TODO: This code can be removed as soon as we got rid of inheritance in the
-   * searchsource and pass down every filter explicitly.
-   * We are filtering out the global timefilter by the meta key set by the root
-   * search source on that filter.
-   */
-  function removeSearchSourceParentTimefilter(searchSource) {
-    searchSource.addFilterPredicate((filter) => {
-      return !_.get(filter, 'meta._globalTimefilter', false);
-    });
-  }
-
   return {
     name: 'courier',
-    handler: function (vis, { appState, queryFilter, searchSource, timeRange, forceFetch }) {
+    handler: function (vis, { searchSource, timeRange, query, filters, forceFetch }) {
 
       // Create a new search source that inherits the original search source
       // but has the propriate timeRange applied via a filter.
@@ -74,12 +62,8 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
         return timefilter.get(searchSource.get('index'), timeRange);
       });
 
-      removeSearchSourceParentTimefilter(requestSearchSource);
-
-      if (queryFilter && vis.editorMode) {
-        searchSource.set('filter', queryFilter.getFilters());
-        searchSource.set('query', appState.query);
-      }
+      searchSource.set('filter', filters);
+      searchSource.set('query', query);
 
       const shouldQuery = () => {
         if (!searchSource.lastQuery || forceFetch) return true;

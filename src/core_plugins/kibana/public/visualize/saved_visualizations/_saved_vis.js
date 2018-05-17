@@ -105,6 +105,8 @@ uiModules
       const linkedSearch = !!self.savedSearchId;
       const current = self.savedSearch;
 
+      self.searchSource.inherits(false);
+
       if (linkedSearch && current && current.id === self.savedSearchId) {
         return;
       }
@@ -120,6 +122,7 @@ uiModules
           .then(function (savedSearch) {
             self.savedSearch = savedSearch;
             self.searchSource.inherits(self.savedSearch.searchSource);
+            self.savedSearch.searchSource.inherits(false);
           });
       }
     });

@@ -239,6 +239,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
 
     const updateTimeRange = () => {
       $scope.timeRange = timefilter.time;
+      $scope.vis.forceReload();
     };
 
     timefilter.enableAutoRefreshSelector();
