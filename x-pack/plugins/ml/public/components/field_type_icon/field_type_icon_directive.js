@@ -10,7 +10,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import { FieldTypeIcon } from './field_type_icon_view.js';
-import { ML_JOB_FIELD_TYPES } from 'plugins/ml/../common/constants/field_types';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
@@ -30,7 +29,6 @@ module.directive('mlFieldTypeIcon', function () {
 
       function updateComponent() {
         const props = {
-          ML_JOB_FIELD_TYPES,
           tooltipEnabled: scope.tooltipEnabled,
           type: scope.type
         };

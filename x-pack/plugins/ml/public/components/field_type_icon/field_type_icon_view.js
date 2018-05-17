@@ -9,7 +9,11 @@ import React from 'react';
 
 import { EuiToolTip } from '@elastic/eui';
 
-export function FieldTypeIcon({ ML_JOB_FIELD_TYPES, tooltipEnabled = false, type }) {
+// don't use something like plugins/ml/../common
+// because it won't work with the jest tests
+import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
+
+export function FieldTypeIcon({ tooltipEnabled = false, type }) {
   let ariaLabel = '';
   let iconClass = '';
   let iconChar = '';
@@ -74,7 +78,6 @@ export function FieldTypeIcon({ ML_JOB_FIELD_TYPES, tooltipEnabled = false, type
   return <FieldTypeIconContainer {...containerProps} />;
 }
 FieldTypeIcon.propTypes = {
-  ML_JOB_FIELD_TYPES: PropTypes.object.isRequired,
   tooltipEnabled: PropTypes.bool,
   type: PropTypes.string
 };
