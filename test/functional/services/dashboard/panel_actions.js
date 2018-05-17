@@ -13,8 +13,8 @@ export function DashboardPanelActionsProvider({ getService }) {
   return new class DashboardPanelActions {
 
     async isContextMenuOpen(parent) {
-      // Customize panel action chosen arbitrarily.
-      return this.customizePanelActionExists(parent);
+      // Full screen toggle was chosen because it's available in both view and edit mode.
+      return this.toggleExpandActionExists(parent);
     }
 
     async findContextMenu(parent) {
