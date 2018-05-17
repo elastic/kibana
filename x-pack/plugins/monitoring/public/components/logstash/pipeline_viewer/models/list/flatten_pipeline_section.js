@@ -7,15 +7,16 @@
 import { PluginElement } from './plugin_element';
 import { IfElement } from './if_element';
 import { ElseElement } from './else_element';
+import { PluginStatement } from '../pipeline/plugin_statement';
+import { IfStatement } from '../pipeline/if_statement';
 
 export function flattenPipelineSection(tree, depth, parentId) {
   let list = [];
 
   tree.forEach(node => {
-    const type = node.constructor.name;
-    if (type === 'PluginStatement') {
+    if (node instanceof PluginStatement) {
       list.push(new PluginElement(node, depth, parentId));
-    } else if (type === 'IfStatement') {
+    } else if (node instanceof IfStatement) {
       list.push(new IfElement(node, depth, parentId));
       list = list.concat(flattenPipelineSection(node.trueStatements, depth + 1, node.id));
 
