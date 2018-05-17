@@ -79,7 +79,7 @@ export class Review extends Component {
         this.props.selectedPolicyName
       );
       this.setState({ affectedIndices, isLoadingAffectedIndices: false });
-    }, 500);
+    }, 1000);
   }
 
   async componentWillMount() {
@@ -129,9 +129,13 @@ export class Review extends Component {
       lifecycle,
       bootstrapEnabled,
       aliasName,
+      policies,
     } = this.props;
 
     const { affectedIndices, isLoadingAffectedIndices, isShowingErrors } = this.state;
+
+    const showSaveChangedMessage = (originalPolicyName && !saveAsNewPolicy)
+      || (saveAsNewPolicy && !!policies.find(policy => policy.name === selectedPolicyName));
 
     return (
       <div className="euiAnimateContentLoad">
@@ -217,18 +221,22 @@ export class Review extends Component {
         <Fragment>
           {originalPolicyName ? (
             <Fragment>
-              <EuiTitle size="s">
-                <h3>Save changes to {originalPolicyName} policy</h3>
-              </EuiTitle>
-              <EuiText>
-                <p>
-                  <strong>You are editing an existing policy</strong>. This means that any saves you make
+              { showSaveChangedMessage ? (
+                <Fragment>
+                  <EuiTitle size="s">
+                    <h3>Save changes to {selectedPolicyName} policy</h3>
+                  </EuiTitle>
+                  <EuiText>
+                    <p>
+                      <strong>You are editing an existing policy</strong>. This means that any saves you make
                   will also change any index templates this policy is attached to. You can instead save
                   these changes and make it a brand new policy that only changes the template you
                   selected.
-                </p>
-              </EuiText>
-              <EuiSpacer />
+                    </p>
+                  </EuiText>
+                  <EuiSpacer />
+                </Fragment>
+              ) : null }
               <EuiFormRow label="Policy options" style={{ maxWidth: '100%' }}>
                 <EuiSwitch
                   style={{ maxWidth: '100%' }}

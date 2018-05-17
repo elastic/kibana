@@ -20,6 +20,7 @@ import {
   getAliasName,
   getBootstrapEnabled,
   getIndexName,
+  getPolicies,
 } from '../../../../store/selectors';
 import {
   setSelectedPolicyName,
@@ -33,6 +34,7 @@ export const Review = connect(
   state => ({
     selectedIndexTemplateName: getSelectedIndexTemplateName(state),
     affectedIndexTemplates: getAffectedIndexTemplates(state),
+    policies: getPolicies(state),
     templateDiff: getTemplateDiff(state),
     lifecycle: getLifecycle(state),
     bootstrapEnabled: getBootstrapEnabled(state),
