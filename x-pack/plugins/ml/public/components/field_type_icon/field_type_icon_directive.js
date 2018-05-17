@@ -6,7 +6,10 @@
 
 
 
-import template from './field_type_icon.html';
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+import { FieldTypeIcon } from './field_type_icon_view.js';
 import { ML_JOB_FIELD_TYPES } from 'plugins/ml/../common/constants/field_types';
 
 import { uiModules } from 'ui/modules';
@@ -17,11 +20,20 @@ module.directive('mlFieldTypeIcon', function () {
     restrict: 'E',
     replace: true,
     scope: {
+      tooltipEnabled: '=',
       type: '='
     },
-    template,
-    controller: function ($scope) {
-      $scope.ML_JOB_FIELD_TYPES = ML_JOB_FIELD_TYPES;
+    link: function (scope, element) {
+      const props = {
+        ML_JOB_FIELD_TYPES,
+        tooltipEnabled: scope.tooltipEnabled,
+        type: scope.type
+      };
+
+      ReactDOM.render(
+        React.createElement(FieldTypeIcon, props),
+        element[0]
+      );
     }
   };
 });
