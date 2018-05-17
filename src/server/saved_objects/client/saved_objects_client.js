@@ -1,5 +1,5 @@
-import { SavedObjectsRepository } from './saved_objects_repository';
 import {
+  SavedObjectsRepository,
   errors,
 } from './lib';
 
