@@ -1,5 +1,6 @@
 /**
- * Provider for the Saved Object Client.
+ * Provider for the Scoped Saved Object Client.
+ *
  */
 export class ScopedSavedObjectsClientProvider {
 
@@ -18,8 +19,16 @@ export class ScopedSavedObjectsClientProvider {
     this._customClientFactory;
   }
 
+  // the client wrapper factories are put at the front of the array, so that
+  // when we use `reduce` below they're invoked in LIFO order. This is so that
+  // if multiple plugins register their client wrapper factories, that we can use
+  // the plugin dependencies/optionalDependencies to implicitly control the order
+  // in which these are used. For example, if we have a plugin a that declares a
+  // dependency on plugin b, that means that plugin b's client wrapper would want
+  // to be able to run first when the SavedObjectClient methods are invoked to
+  // provide additional context to plugin a's client wrapper.
   registerScopedSavedObjectsClientWrapperFactory(wrapperFactory) {
-    this._wrapperFactories.push(wrapperFactory);
+    this._wrapperFactories.unshift(wrapperFactory);
   }
 
   registerScopedSavedObjectsClientFactory(customClientFactory) {
