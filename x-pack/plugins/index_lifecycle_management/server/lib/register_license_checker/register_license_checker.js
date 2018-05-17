@@ -10,9 +10,9 @@ import { PLUGIN } from '../../../common/constants';
 
 export function registerLicenseChecker(server) {
   const xpackMainPlugin = server.plugins.xpack_main;
-  const watcherPlugin = server.plugins.watcher;
+  const ilmPlugin = server.plugins.index_lifecycle_management;
 
-  mirrorPluginStatus(xpackMainPlugin, watcherPlugin);
+  mirrorPluginStatus(xpackMainPlugin, ilmPlugin);
   xpackMainPlugin.status.once('green', () => {
     // Register a function that is called whenever the xpack info changes,
     // to re-compute the license check results for this plugin

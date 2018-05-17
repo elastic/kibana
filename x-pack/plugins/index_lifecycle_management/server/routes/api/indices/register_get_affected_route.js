@@ -27,7 +27,7 @@ async function getAffectedIndices(
 ) {
   const templates = await fetchTemplates(callWithRequest);
 
-  if (!templates || templates.length === 0) {
+  if (!templates || Object.keys(templates).length === 0) {
     return [];
   }
 
