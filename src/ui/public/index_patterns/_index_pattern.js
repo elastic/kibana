@@ -353,57 +353,50 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
       return body;
     }
 
-    /**
-     * Returns a promise that resolves to true if either the title is unique, or if the user confirmed they
-     * wished to save the duplicate title.  Promise is rejected if the user rejects the confirmation.
-     */
-    warnIfDuplicateTitle() {
-      return findObjectByTitle(savedObjectsClient, type, this.title)
-        .then(duplicate => {
-          if (!duplicate) return false;
-          if (duplicate.id === this.id) return false;
-
-          const confirmMessage =
-            `An index pattern with the title '${this.title}' already exists.`;
-
-          return confirmModalPromise(confirmMessage, { confirmButtonText: 'Go to existing pattern' })
-            .then(() => {
-              kbnUrl.redirect('/management/kibana/indices/{{id}}', { id: duplicate.id });
-              return true;
-            }).catch(() => {
-              return true;
-            });
-        });
-    }
-
-    create() {
-      return this.warnIfDuplicateTitle().then((isDuplicate) => {
-        if (isDuplicate) return;
+    async create(allowOverride = false, showOverridePrompt = false) {
+      const _create = async (duplicateId) => {
+        if (duplicateId) {
+          const duplicatePattern = new IndexPattern(duplicateId);
+          await duplicatePattern.destroy();
+        }
 
         const body = this.prepBody();
+        const response = await savedObjectsClient.create(type, body, { id: this.id });
+        return setId(this, response.id);
+      };
 
-        return savedObjectsClient.create(type, body, { id: this.id })
-          .then(response => setId(this, response.id))
-          .catch(err => {
-            if (err.statusCode !== 409) {
-              return Promise.resolve(false);
-            }
-            const confirmMessage = 'Are you sure you want to overwrite this?';
+      const potentialDuplicateByTitle = await findObjectByTitle(savedObjectsClient, type, this.title);
+      // If there is potentialy duplicate title, just create it
+      if (!potentialDuplicateByTitle) {
+        return await _create();
+      }
 
-            return confirmModalPromise(confirmMessage, { confirmButtonText: 'Overwrite' })
-              .then(() => Promise
-                .try(() => {
-                  const cached = patternCache.get(this.id);
-                  if (cached) {
-                    return cached.then(pattern => pattern.destroy());
-                  }
-                })
-                .then(() => savedObjectsClient.create(type, body, { id: this.id, overwrite: true }))
-                .then(response => setId(this, response.id)),
-              _.constant(false) // if the user doesn't overwrite, resolve with false
-              );
-          });
-      });
+      // We found a duplicate but we aren't allowing override, show the warn modal
+      if (!allowOverride) {
+        const confirmMessage = `An index pattern with the title '${this.title}' already exists.`;
+        try {
+          await confirmModalPromise(confirmMessage, { confirmButtonText: 'Go to existing pattern' });
+          return kbnUrl.redirect('/management/kibana/indices/{{id}}', { id: potentialDuplicateByTitle.id });
+        } catch (err) {
+          return false;
+        }
+      }
+
+      // We can override, but we do not want to see a prompt, so just do it
+      if (!showOverridePrompt) {
+        return await _create(potentialDuplicateByTitle.id);
+      }
+
+      // We can override and we want to prompt for confirmation
+      try {
+        await confirmModalPromise(`Are you sure you want to overwrite ${this.title}?`, { confirmButtonText: 'Overwrite' });
+      } catch (err) {
+        // They changed their mind
+        return false;
+      }
+
+      // Let's do it!
+      return await _create(potentialDuplicateByTitle.id);
     }
 
     save() {
