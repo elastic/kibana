@@ -61,16 +61,8 @@ export default function ({ getService, getPageObjects }) {
         await dashboardExpect.savedSearchRowCount(50);
       });
 
-      it('goal and guage render', async () => {
-        await dashboardExpect.goalAndGuageLabelsExist(['93', '40']);
-      });
-
       it('input controls render', async () => {
         await dashboardExpect.inputControlItemCount(3);
-      });
-
-      it('metric vis renders', async () => {
-        await dashboardExpect.metricValuesExist(['336', '$594.09']);
       });
 
       it('tag cloud renders', async () => {
