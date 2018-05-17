@@ -8,6 +8,7 @@
 
 
 import { connect } from 'react-redux';
+import '../../less/main.less';
 import { Wizard as PresentationComponent } from './wizard';
 import { saveLifecycle } from '../../store/actions';
 import {

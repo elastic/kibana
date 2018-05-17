@@ -13,8 +13,8 @@ import { PolicyConfiguration } from './components/policy_configuration';
 import { Review } from './components/review';
 import {
   EuiPage,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiPageBody,
+  EuiPageContent,
   EuiTitle,
   EuiSpacer,
   EuiStepsHorizontal,
@@ -163,20 +163,21 @@ export class Wizard extends Component {
 
     return (
       <EuiPage>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="l">
+        <EuiPageBody>
+          <EuiPageContent verticalPosition="center" horizontalPosition="center" className="ilmContent">
+            <EuiTitle size="m">
               <h2>Index lifecycle management</h2>
             </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <EuiStepsHorizontal steps={steps} />
-        <EuiSpacer size="m" />
-        {/* <DiffView
-          templateDiff={diff}
-        /> */}
-        {this.renderContent()}
+            <EuiSpacer />
+            <EuiStepsHorizontal steps={steps} />
+
+            <EuiSpacer />
+            {/* <DiffView
+              templateDiff={diff}
+            /> */}
+            {this.renderContent()}
+          </EuiPageContent>
+        </EuiPageBody>
       </EuiPage>
     );
   }

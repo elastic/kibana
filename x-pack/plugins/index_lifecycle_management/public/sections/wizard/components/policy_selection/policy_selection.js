@@ -8,14 +8,12 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import {
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiTitle,
-  EuiSpacer,
-  EuiPanel,
-  EuiText,
+  EuiButton,
+  EuiDescribedFormGroup,
+  EuiFormRow,
+  EuiSelect,
 } from '@elastic/eui';
 
 export class PolicySelection extends Component {
@@ -38,25 +36,48 @@ export class PolicySelection extends Component {
     // this.props.done();
   }
 
+
   render() {
     const { policies, existingPolicyName } = this.props;
 
+    let options = [];
+    options = policies.map(item => ({ value: item.name, text: item.name }));
+
+    console.log(policies);
+
     return (
-      <div className="euiAnimateContentLoad">
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
-          <EuiFlexItem grow={true}>
-            <EuiTitle>
-              <h4>Select a policy</h4>
-            </EuiTitle>
-            <EuiText>
-              <p>
-                An index lifecycle policy is a blueprint for transitioning your data over time.
-                You can create a new policy or edit an existing policy and save it with a new name.
-              </p>
-            </EuiText>
+      <EuiDescribedFormGroup
+        title={<h4>Select or create a policy</h4>}
+        titleSize="s"
+        description="An index lifecycle policy is a
+          blueprint for transitioning your data over time.
+          You can create a new policy or edit an existing
+          policy and save it with a new name."
+        fullWidth
+      >
+        <EuiFlexGroup alginItems="center">
+          <EuiFlexItem>
+            <EuiFormRow label="Existing policies">
+              <EuiSelect
+                options={options}
+                value={existingPolicyName}
+                onChange={async e => {
+                  await this.selectPolicy(e.target.value);
+                }}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFormRow hasEmptyLabelSpace>
+              <EuiButton
+                onClick={() => this.selectPolicy(null)}
+              >
+                Create new policy
+              </EuiButton>
+            </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer />
+        {/*
         <EuiFlexGrid columns={4}>
           <EuiFlexItem>
             <EuiPanel
@@ -85,6 +106,8 @@ export class PolicySelection extends Component {
             </EuiFlexItem>
           ))}
         </EuiFlexGrid>
+        */}
+
         {/* <EuiHorizontalRule className="ilmHrule" /> */}
 
         {/* <EuiButtonEmpty
@@ -94,7 +117,7 @@ export class PolicySelection extends Component {
         >
           Back
         </EuiButtonEmpty> */}
-      </div>
+      </EuiDescribedFormGroup>
     );
   }
 }
