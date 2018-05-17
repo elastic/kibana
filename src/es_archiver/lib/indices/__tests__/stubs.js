@@ -58,6 +58,7 @@ export const createStubClient = (existingIndices = []) => ({
         return { ok: true };
       }
     }),
+    existsAlias: sinon.spy(() => Promise.resolve(false)),
     delete: sinon.spy(async ({ index }) => {
       if (existingIndices.includes(index)) {
         existingIndices.splice(existingIndices.indexOf(index), 1);
