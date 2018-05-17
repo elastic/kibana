@@ -34,11 +34,17 @@ function initContext(file, config) {
 }
 
 function tryNodeResolver(importRequest, file, config) {
-  return nodeResolver.resolve(importRequest, file, {
-    ...config,
-    extensions: ['.js', '.json', '.ts', '.tsx'],
-    isFile,
-  });
+  return nodeResolver.resolve(
+    importRequest,
+    file,
+    // we use Object.assign so that this file is compatible with slightly older
+    // versions of node.js used by IDEs (eg. resolvers are run in the Electron
+    // process in Atom)
+    Object.assign({}, config, {
+      extensions: ['.js', '.json', '.ts', '.tsx'],
+      isFile,
+    })
+  );
 }
 
 exports.resolve = function resolveKibanaPath(importRequest, file, config) {

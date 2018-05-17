@@ -4,12 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Statement } from './statement';
-
-export class Queue extends Statement {
-  static fromPipelineGraphVertex(queueVertex) {
-    return new Queue(
-      queueVertex
-    );
-  }
-}
+import './tooltip_directive';
