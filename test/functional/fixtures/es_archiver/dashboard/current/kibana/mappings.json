@@ -13,6 +13,20 @@
       "doc": {
         "dynamic": "strict",
         "properties": {
+          "migration": {
+            "properties": {
+              "status": { "type": "keyword" },
+              "previousIndex": { "type": "keyword" },
+              "plugins": {
+                "properties": {
+                  "id": { "type": "keyword" },
+                  "mappings": { "type": "text" },
+                  "checksum": { "type": "keyword" },
+                  "migrationIds": { "type": "keyword" }
+                }
+              }
+            }
+          },
           "config": {
             "dynamic": "true",
             "properties": {
