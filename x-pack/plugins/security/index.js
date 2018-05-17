@@ -139,6 +139,7 @@ export const security = (kibana) => new kibana.Plugin({
         });
       });
 
+      // purely an example at this point, will be deleted
       savedObjects.registerScopedSavedObjectsClientWrapperFactory(({ client }) => {
         return {
           errors: client.errors,

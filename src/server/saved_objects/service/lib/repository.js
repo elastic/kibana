@@ -1,14 +1,11 @@
 import uuid from 'uuid';
 
-import { getRootType } from '../../mappings';
-
-import {
-  getSearchDsl,
-  trimIdPrefix,
-  includedFields,
-  decorateEsError,
-  errors,
-} from './lib';
+import { getRootType } from '../../../mappings';
+import { getSearchDsl } from './search_dsl';
+import { trimIdPrefix } from './trim_id_prefix';
+import { includedFields } from './included_fields';
+import { decorateEsError } from './decorate_es_error';
+import * as errors from './errors';
 
 export class SavedObjectsRepository {
   constructor(options) {
