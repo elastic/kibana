@@ -23,7 +23,10 @@ Instead, each user role can be assigned one or more {kib-privs}, which are used 
 The default `kibana_user` and `kibana_dashboard_only_user` roles will not have any {kib-privs} assigned.
 When RBAC is first enabled, {kib} will create two new corresponding roles which should be used instead: `kibana_rbac_user` and `kibana_rbac_dashboard_only_user`.
 
-The `kibana` prefix is determined by your `xpack.security.rbac.application` setting, which defaults to `kibana`. If your `xpack.security.rbac.application` is set to `example`, then the corresponding roles would be named `example_rbac_user` and `example_rbac_dashboard_only_user`.
+The `kibana` prefix is determined by your `xpack.security.rbac.application` setting, which defaults to `kibana`. If your `xpack.security.rbac.application` is set to `example`, then the corresponding roles would be named `example_rbac_user` and `example_rbac_dashboard_only_user`. Changing this is only useful in multi-tenant setups, where multiple isolated {kib} 
+installations are running within the same {es} cluster.
+This value must be identical for all {kib} instances that share a `kibana.index`.
+The name you choose will be used to derive the default role names that {kib} creates on your behalf.
 
 ==== {kib-privs}
 

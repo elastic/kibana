@@ -60,7 +60,7 @@ versions of {kib}. See <<kibana-rbac,RBAC in {kib}>> for additional information.
 Set to true to enable experimental RBAC features. The default value is `false`.
 
 `xpack.security.rbac.application`::
-Set a custom name for this instance of {kib}. The default value is `kibana`, and it usually does not beed to be changed.
+Set a custom name for this instance of {kib}. The default value is `kibana`, and it usually does not need to be changed.
 Changing this is only useful in multi-tenant setups, where multiple isolated {kib} 
 installations are running within the same {es} cluster.
 This value must be identical for all {kib} instances that share a `kibana.index`.
