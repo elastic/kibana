@@ -1,9 +1,8 @@
-let ace = require('ace');
-require('ace/mode-json');
-let x_json = require('./x_json_highlight_rules');
+const ace = require('ace');
+const x_json = require('./x_json_highlight_rules');
 
-var oop = ace.require("ace/lib/oop");
-var JsonHighlightRules = ace.require("ace/mode/json_highlight_rules").JsonHighlightRules;
+const oop = ace.acequire('ace/lib/oop');
+const JsonHighlightRules = ace.acequire('ace/mode/json_highlight_rules').JsonHighlightRules;
 
 export function OutputJsonHighlightRules() {
 
@@ -13,12 +12,12 @@ export function OutputJsonHighlightRules() {
 
   this.$rules.start.unshift(
     {
-      "token": "warning",
-      "regex": "#!.*$"
+      'token': 'warning',
+      'regex': '#!.*$'
     },
     {
-      "token": "comment",
-      "regex": "#.*$"
+      'token': 'comment',
+      'regex': '#.*$'
     }
   );
 

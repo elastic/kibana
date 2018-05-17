@@ -1,11 +1,11 @@
 /* eslint import/no-unresolved: 0 */
-let ace = require('ace');
+const ace = require('ace');
 
-ace.define("ace/theme/sense-dark", ['require', 'exports', 'module'],
+ace.define('ace/theme/sense-dark', ['require', 'exports', 'module'],
   function (require, exports) {
     exports.isDark = true;
-    exports.cssClass = "ace-sense-dark";
-    exports.cssText = ".ace-sense-dark .ace_gutter {\
+    exports.cssClass = 'ace-sense-dark';
+    exports.cssText = '.ace-sense-dark .ace_gutter {\
 background: #2e3236;\
 color: #bbbfc2;\
 }\
@@ -108,9 +108,9 @@ text-decoration: underline\
 }\
 .ace-sense-dark .ace_indent-guide {\
 background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAACCAYAAACZgbYnAAAAEklEQVQImWNQ11D6z7Bq1ar/ABCKBG6g04U2AAAAAElFTkSuQmCC) right repeat-y\
-}";
+}';
 
-    var dom = require("ace/lib/dom");
+    let dom = require('ace/lib/dom');
     dom.importCssString(exports.cssText, exports.cssClass);
   });
 

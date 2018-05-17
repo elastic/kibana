@@ -1,7 +1,7 @@
-const glob = require('glob');
-const { join, basename } = require('path');
-const { readFileSync } = require('fs');
-const { merge } = require('lodash');
+import glob from 'glob';
+import { join, basename } from 'path';
+import { readFileSync } from 'fs';
+import { merge } from 'lodash';
 
 const extensionSpecFilePaths = [];
 export function getSpec() {

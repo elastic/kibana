@@ -9,7 +9,7 @@ export function buildNodeParams(fieldName) {
 export function toElasticsearchQuery(node, indexPattern) {
   const { arguments: [ fieldNameArg ] } = node;
   const fieldName = literal.toElasticsearchQuery(fieldNameArg);
-  const field = indexPattern.fields.byName[fieldName];
+  const field = indexPattern.fields.find(field => field.name === fieldName);
 
   if (field && field.scripted) {
     throw new Error(`Exists query does not support scripted fields`);

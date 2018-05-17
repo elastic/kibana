@@ -1,9 +1,8 @@
 let ace = require('ace');
 let x_json = require('./x_json_highlight_rules');
 
-var oop = ace.require("ace/lib/oop");
-var TextHighlightRules = ace.require("ace/mode/text_highlight_rules").TextHighlightRules;
-
+const oop = ace.acequire('ace/lib/oop');
+const { TextHighlightRules } = ace.acequire('ace/mode/text_highlight_rules');
 export function InputHighlightRules() {
   function mergeTokens(/* ... */) {
     return [].concat.apply([], arguments);

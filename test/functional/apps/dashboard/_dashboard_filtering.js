@@ -6,6 +6,7 @@ import expect from 'expect.js';
  */
 export default function ({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
+  const queryBar = getService('queryBar');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
@@ -153,8 +154,8 @@ export default function ({ getService, getPageObjects }) {
         await dashboardExpect.pieSliceCount(5);
 
         await PageObjects.dashboard.clickEditVisualization();
-        await PageObjects.dashboard.setQuery('weightLbs:>50');
-        await PageObjects.dashboard.clickFilterButton();
+        await queryBar.setQuery('weightLbs:>50');
+        await queryBar.submitQuery();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
         await dashboardExpect.pieSliceCount(3);
@@ -186,9 +187,8 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('Pie chart linked to saved search filters shows no data with conflicting dashboard query', async () => {
-        await PageObjects.dashboard.setQuery('weightLbs:<40');
-        await PageObjects.dashboard.clickFilterButton();
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await queryBar.setQuery('weightLbs:<40');
+        await queryBar.submitQuery();
         await PageObjects.dashboard.waitForRenderComplete();
 
         await dashboardExpect.pieSliceCount(0);

@@ -9,6 +9,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'visualize', 'header', 'discover']);
   const testSubjects = getService('testSubjects');
   const remote = getService('remote');
+  const queryBar = getService('queryBar');
   const retry = getService('retry');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
@@ -33,11 +34,8 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.dashboard.clickEdit();
 
-      // Opening legend colors has been flaky.
-      await retry.try(async () => {
-        await PageObjects.visualize.clickLegendOption('Count');
-        await PageObjects.visualize.selectNewLegendColorChoice('#EA6460');
-      });
+      await PageObjects.visualize.openLegendOptionColors('Count');
+      await PageObjects.visualize.selectNewLegendColorChoice('#EA6460');
 
       await PageObjects.dashboard.saveDashboard('Overridden colors');
 
@@ -146,14 +144,14 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
 
-        const currentQuery = await PageObjects.dashboard.getQuery();
+        const currentQuery = await queryBar.getQueryString();
         expect(currentQuery).to.equal('');
         const currentUrl = await remote.getCurrentUrl();
         const newUrl = currentUrl.replace('query:%27%27', 'query:%27hi%27');
         // Don't add the timestamp to the url or it will cause a hard refresh and we want to test a
         // soft refresh.
         await remote.get(newUrl.toString(), false);
-        const newQuery = await PageObjects.dashboard.getQuery();
+        const newQuery = await queryBar.getQueryString();
         expect(newQuery).to.equal('hi');
       });
 
@@ -193,7 +191,7 @@ export default function ({ getService, getPageObjects }) {
       describe('for embeddable config color parameters on a visualization', () => {
         it('updates a pie slice color on a soft refresh', async function () {
           await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
-          await PageObjects.visualize.clickLegendOption('80,000');
+          await PageObjects.visualize.openLegendOptionColors('80,000');
           await PageObjects.visualize.selectNewLegendColorChoice('#F9D9F9');
           const currentUrl = await remote.getCurrentUrl();
           const newUrl = currentUrl.replace('F9D9F9', 'FFFFFF');
