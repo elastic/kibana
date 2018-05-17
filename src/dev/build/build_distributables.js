@@ -79,10 +79,10 @@ export async function buildDistributables(options) {
   await run(CreateEmptyDirsAndFilesTask);
   await run(CreateReadmeTask);
   await run(TranspileBabelTask);
+  await run(TranspileTypescriptTask);
   await run(BuildPackagesTask);
   await run(CreatePackageJsonTask);
   await run(InstallDependenciesTask);
-  await run(TranspileTypescriptTask);
   await run(CleanTypescriptTask);
   await run(CleanPackagesTask);
   await run(CreateNoticeFileTask);
