@@ -36,7 +36,7 @@ const createEsClientError = (errorType) => {
   return err;
 };
 
-export const createStubClient = (existingIndices = []) => ({
+export const createStubClient = (existingIndices = [], { isAlias } = {}) => ({
   indices: {
     get: sinon.spy(async ({ index }) => {
       if (!existingIndices.includes(index)) {
@@ -58,7 +58,13 @@ export const createStubClient = (existingIndices = []) => ({
         return { ok: true };
       }
     }),
-    existsAlias: sinon.spy(() => Promise.resolve(false)),
+    existsAlias: sinon.spy(() => Promise.resolve(isAlias)),
+    getAlias: sinon.spy(({ name }) => {
+      if (existingIndices.includes(name)) {
+        return Promise.resolve(existingIndices.reduce((acc, k) => ({ ...acc, [k]: true }), {}));
+      }
+      return Promise.reject(`Alias ${name} does not exist!`);
+    }),
     delete: sinon.spy(async ({ index }) => {
       if (existingIndices.includes(index)) {
         existingIndices.splice(existingIndices.indexOf(index), 1);
