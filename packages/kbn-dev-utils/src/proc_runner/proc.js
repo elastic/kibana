@@ -8,7 +8,6 @@ import treeKill from 'tree-kill';
 import { promisify } from 'util';
 const treeKillAsync = promisify(treeKill);
 
-import { log } from './log';
 import { observeLines } from './observe_lines';
 import { createCliError } from './errors';
 
@@ -33,7 +32,7 @@ async function withTimeout(attempt, ms, onTimeout) {
   }
 }
 
-export function createProc(name, { cmd, args, cwd, env, stdin }) {
+export function createProc(name, { cmd, args, cwd, env, stdin, log }) {
   log.info('[%s] > %s', name, cmd, args.join(' '));
 
   // spawn fails with ENOENT when either the
@@ -78,7 +77,7 @@ export function createProc(name, { cmd, args, cwd, env, stdin }) {
         .map(code => {
           // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat then as errors
           if (code > 0 && !(code === 143 || code === 130)) {
-            throw createCliError(`[${name}] exitted with code ${code}`);
+            throw createCliError(`[${name}] exited with code ${code}`);
           }
 
           return code;
@@ -92,10 +91,14 @@ export function createProc(name, { cmd, args, cwd, env, stdin }) {
       return Rx.Observable.race(exit$, error$);
     }).share();
 
-    outcomePromise = Rx.Observable.merge(
+    _outcomePromise = Rx.Observable.merge(
       this.lines$.ignoreElements(),
       this.outcome$
     ).toPromise();
+
+    getOutcomePromise() {
+      return this._outcomePromise;
+    }
 
     async stop(signal) {
       await withTimeout(
@@ -114,7 +117,7 @@ export function createProc(name, { cmd, args, cwd, env, stdin }) {
       await withTimeout(
         async () => {
           try {
-            await this.outcomePromise;
+            await this.getOutcomePromise();
           } catch (error) {
             // ignore
           }

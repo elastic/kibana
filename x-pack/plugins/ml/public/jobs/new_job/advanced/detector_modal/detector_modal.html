@@ -1,0 +1,118 @@
+<div class="detector-modal">
+  <ml-message-bar ></ml-message-bar>
+  <h1 class="euiTitle">{{title}}</h1>
+  <div class="euiSpacer euiSpacer--m"></div>
+
+  <div class="form-group">
+    <ml-form-label label-id="new_job_detector_description">Description</ml-form-label>
+    <input
+      aria-labelledby="ml_aria_label_new_job_detector_description"
+      aria-describedby="ml_aria_description_new_job_detector_description"
+      ng-model="detector.detector_description"
+      placeholder="{{ detectorToString(detector) }}"
+      class="form-control" />
+  </div>
+
+  <div class="editor-color detector_field_form">
+
+    <div class="field-cols">
+      <div class="form-group">
+        <ml-form-label label-id="new_job_detector_function">function</ml-form-label>
+        <field-select
+          label-id='"new_job_detector_function"'
+          on-change='setDetectorProperty'
+          value='detector.function'
+          field='"function"'
+          options='functionIds'>
+        </field-select>
+      </div>
+    </div>
+
+    <div class="field-cols">
+      <div class="form-group">
+        <ml-form-label label-id="new_job_detector_fieldname">field_name</ml-form-label>
+        <field-select
+          label-id='"new_job_detector_fieldname"'
+          on-change='setDetectorProperty'
+          value='detector.field_name'
+          field='"field_name"'
+          options='fields'>
+        </field-select>
+      </div>
+    </div>
+
+    <div class="field-cols">
+      <div class="form-group">
+        <ml-form-label label-id="new_job_detector_byfieldname">by_field_name</ml-form-label>
+        <field-select
+          label-id='"new_job_detector_byfieldname"'
+          on-change='setDetectorProperty'
+          value='detector.by_field_name'
+          field='"by_field_name"'
+          options='fields_byFieldName'>
+        </field-select>
+      </div>
+    </div>
+
+  </div>
+  <div class="editor-color detector_field_form">
+
+    <div class="field-cols">
+      <div class="form-group">
+        <ml-form-label label-id="new_job_detector_overfieldname">over_field_name</ml-form-label>
+        <field-select
+          label-id='"new_job_detector_overfieldname"'
+          on-change='setDetectorProperty'
+          value='detector.over_field_name'
+          field='"over_field_name"'
+          options='fields'>
+        </field-select>
+      </div>
+    </div>
+
+    <div class="field-cols">
+      <div class="form-group">
+        <ml-form-label label-id="new_job_detector_partitionfieldname">partition_field_name</ml-form-label>
+        <field-select
+          label-id='"new_job_detector_partitionfieldname"'
+          on-change='setDetectorProperty'
+          value='detector.partition_field_name'
+          field='"partition_field_name"'
+          options='fields'>
+        </field-select>
+      </div>
+    </div>
+
+    <div class="field-cols">
+      <div class="form-group">
+        <ml-form-label label-id="new_job_detector_excludefrequent">exclude_frequent</ml-form-label>
+        <field-select
+          label-id='"new_job_detector_excludefrequent"'
+          on-change='setDetectorProperty'
+          value='detector.exclude_frequent'
+          field='"exclude_frequent"'
+          options='{all: "", none: ""}'>
+        </field-select>
+      </div>
+    </div>
+
+  </div>
+  <small><div class='help-pane'><ml-documentation-help-link ml-uri="{{helpLink.uri}}" ml-label="{{helpLink.label}}"></ml-documentation-help-link></div></small>
+
+  <hr class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium">
+
+  <button
+    ng-click="save()"
+    ng-disabled="(saveLock === true) || (detector.function === '')"
+    class="kuiButton kuiButton--primary"
+    aria-label="Save">
+    {{ (editMode? "Update" : "Add") }}
+  </button>
+  <button
+    ng-click="cancel()"
+    ng-disabled="(saveLock === true)"
+    class="kuiButton kuiButton--primary"
+    aria-label="Cancel">
+    Cancel
+  </button>
+</div>

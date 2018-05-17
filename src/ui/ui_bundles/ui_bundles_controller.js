@@ -44,6 +44,8 @@ export class UiBundlesController {
       matchBase: true
     });
 
+    this._appExtensions = uiExports.appExtensions || {};
+
     this._webpackAliases = {
       ...getWebpackAliases(pluginSpecs),
       ...uiExports.webpackAliases
@@ -103,6 +105,10 @@ export class UiBundlesController {
     return this._webpackAliases;
   }
 
+  getAppExtensions() {
+    return this._appExtensions;
+  }
+
   isDevMode() {
     return this._env === 'development';
   }
@@ -124,7 +130,7 @@ export class UiBundlesController {
       case 0:
         return '0 bundles';
       case 1:
-        return `bundle for ${this._bundles[0].id}`;
+        return `bundle for ${this._bundles[0].getId()}`;
       default:
         const ids = this.getIds();
         const last = ids.pop();

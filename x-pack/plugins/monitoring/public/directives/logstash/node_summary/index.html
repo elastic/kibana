@@ -1,0 +1,31 @@
+<div class="monitoring-summary-status" role="status">
+  <div class="monitoring-summary-status__content">
+    <div>
+      <strong data-test-subj="httpAddress">{{ logstash.http_address }}</strong>
+    </div>
+    <div>Events Received:
+      <strong data-test-subj="eventsIn">{{ logstash.events.in|formatNumber:'0.[0]a' }}</strong>
+    </div>
+    <div>Events Emitted:
+      <strong data-test-subj="eventsOut">{{ logstash.events.out|formatNumber:'0.[0]a' }}</strong>
+    </div>
+    <div>Config Reloads:
+      <strong data-test-subj="numReloads">{{ logstash.reloads.successes }}</strong>
+    </div>
+    <div>Pipeline Workers:
+      <strong data-test-subj="pipelineWorkers">{{ logstash.pipeline.workers }}</strong>
+    </div>
+    <div>Batch Size:
+      <strong data-test-subj="pipelineBatchSize">{{ logstash.pipeline.batch_size }}</strong>
+    </div>
+    <div ng-show="logstash.queue_type">Queue Type:
+      <strong data-test-subj="queueType">{{ logstash.queue_type }}</strong>
+    </div>
+    <div>Logstash:
+      <strong data-test-subj="version">{{ logstash.version }}</strong>
+    </div>
+    <div>Uptime:
+      <strong data-test-subj="uptime">{{ logstash.uptime|formatNumber:'time_since' }}</strong>
+    </div>
+  </div>
+</div>

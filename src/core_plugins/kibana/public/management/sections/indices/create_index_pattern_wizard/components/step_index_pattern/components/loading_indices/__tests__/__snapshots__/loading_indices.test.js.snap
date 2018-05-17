@@ -4,6 +4,7 @@ exports[`LoadingIndices should render normally 1`] = `
 <EuiFlexGroup
   alignItems="center"
   component="div"
+  direction="row"
   gutterSize="l"
   justifyContent="center"
   responsive={true}
@@ -21,7 +22,9 @@ exports[`LoadingIndices should render normally 1`] = `
     component="div"
     grow={false}
   >
-    <EuiText>
+    <EuiText
+      grow={true}
+    >
       <EuiTextColor
         color="subdued"
       >
@@ -29,6 +32,7 @@ exports[`LoadingIndices should render normally 1`] = `
       </EuiTextColor>
     </EuiText>
     <EuiText
+      grow={true}
       size="s"
       style={
         Object {

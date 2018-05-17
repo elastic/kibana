@@ -1,0 +1,40 @@
+<div class="monitoring-summary-status" role="status">
+  <div
+    class="monitoring-summary-status__content"
+    data-test-subj="kibanaSummaryStatus"
+  >
+    <div>Instances:
+      <strong data-test-subj="instances">
+        {{ status.count }}
+      </strong>
+    </div>
+    <div>Memory:
+      <strong data-test-subj="memory">
+        {{ status.memory_size|formatNumber:'byte' }} / {{ status.memory_limit|formatNumber:'byte' }}
+      </strong>
+    </div>
+    <div>Requests:
+      <strong data-test-subj="requests">
+        {{ status.requests_total }}
+      </strong>
+    </div>
+    <div>Connections:
+      <strong data-test-subj="connections">
+        {{ status.concurrent_connections|formatNumber:'int_commas' }}
+      </strong>
+    </div>
+    <div>Max. Response Time:
+      <strong data-test-subj="maxResponseTime">
+        {{ status.response_time_max }} ms
+      </strong>
+    </div>
+    <div class="monitoring-summary-status__status-indicator">
+      Health:
+      <monitoring-kibana-status-icon
+        status="status.status"
+        title="Overall status of Kibana instances in the cluster: {{ status.status }}"
+      ></monitoring-kibana-status-icon>
+      {{ status.status|capitalize }}
+    </div>
+  </div>
+</div>

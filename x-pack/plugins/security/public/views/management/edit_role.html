@@ -1,0 +1,161 @@
+<kbn-management-app section="security" omit-breadcrumb-pages="['edit']">
+  <!-- This content gets injected below the localNav. -->
+  <div class="kuiViewContent kuiViewContent--constrainedWidth kuiViewContentItem">
+    <!-- Subheader -->
+    <div class="kuiBar kuiVerticalRhythm">
+      <div class="kuiBarSection">
+        <!-- Title -->
+        <h1 class="kuiTitle">
+          <span ng-if="editRole.isNewRole">
+            New Role
+          </span>
+          <span ng-if="!editRole.isNewRole">
+            &ldquo;{{ role.name }}&rdquo; Role
+          </span>
+        </h1>
+      </div>
+
+      <div class="kuiBarSection">
+        <!-- Delete button -->
+        <button
+          ng-if="!editRole.isNewRole && !role.metadata._reserved"
+          class="kuiButton kuiButton--danger kuiButton--iconText"
+          ng-click="deleteRole(role)"
+          tooltip="Delete Role"
+        >
+          <span class="kuiButton__inner">
+            <span class="kuiButton__icon kuiIcon fa-trash"></span>
+            <span>Delete role</span>
+          </span>
+        </button>
+        <div
+          ng-if="role.metadata._reserved"
+          class="kuiBadge kuiBadge--default"
+          tooltip="Reserved roles are built-in and cannot be removed or modified."
+        >
+          <span class="kuiIcon fa-lock"></span>
+          Reserved
+        </div>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <form name="form" novalidate class="kuiVerticalRhythm">
+      <!-- Name -->
+      <div class="kuiFormSection">
+        <label for="name" class="kuiFormLabel">
+          Name
+        </label>
+        <input
+          type="text"
+          class="fullWidth"
+          ng-class="::editRole.isNewRole ? 'kuiTextInput' : 'kuiStaticInput'"
+          ng-disabled="!editRole.isNewRole"
+          id="name"
+          name="name"
+          ng-model="role.name"
+          required
+          pattern="[a-zA-Z_][a-zA-Z0-9_@\-\$\.]*"
+          maxlength="30"
+          data-test-subj="roleFormNameInput"
+        />
+
+        <!-- Errors -->
+        <div
+          class="kuiInputNote kuiInputNote--danger"
+          ng-show="form.name.$error.pattern"
+        >
+          Name must begin with a letter or underscore and contain only letters, underscores, and numbers.
+        </div>
+
+        <div
+          class="kuiInputNote kuiInputNote--danger"
+          ng-show="form.name.$touched && form.name.$error.required"
+        >
+          Name is required.
+        </div>
+      </div>
+
+      <div class="kuiVerticalRhythm">
+        <!-- Cluster privileges -->
+        <div class="kuiFormSection">
+          <label class="kuiFormLabel">
+            Cluster Privileges
+          </label>
+          <div ng-repeat="privilege in privileges.cluster">
+            <label>
+              <input
+                class="kuiCheckBox"
+                type="checkbox"
+                ng-checked="includes(role.cluster, privilege)"
+                ng-click="toggle(role.cluster, privilege)"
+                ng-disabled="role.metadata._reserved || !isRoleEnabled(role)"
+              />
+              <span class="kuiOptionLabel">{{privilege}}</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Run-as privileges -->
+        <div class="kuiFormSection">
+          <label class="kuiFormLabel">
+            Run As Privileges
+          </label>
+          <ui-select
+            multiple
+            ng-model="role.run_as"
+            ng-disabled="role.metadata._reserved || !isRoleEnabled(role)"
+          >
+            <ui-select-match placeholder="Add a user...">
+              {{$item}}
+            </ui-select-match>
+            <ui-select-choices repeat="user as user in union([$select.search], users) | filter:$select.search">
+              <div ng-bind-html="user"></div>
+            </ui-select-choices>
+          </ui-select>
+        </div>
+
+        <!-- Index privileges -->
+        <div class="kuiFormSection">
+          <kbn-index-privileges-form
+            is-new-role="editRole.isNewRole"
+            indices="role.indices"
+            index-patterns="indexPatterns"
+            privileges="privileges"
+            field-options="editRole.fieldOptions"
+            is-reserved="role.metadata._reserved"
+            is-enabled="isRoleEnabled(role)"
+            allow-document-level-security="allowDocumentLevelSecurity"
+            allow-field-level-security="allowFieldLevelSecurity"
+            add-index="addIndex(indices)"
+            remove-index="toggle(indices, index)"
+          ></kbn-index-privileges-form>
+        </div>
+      </div>
+
+      <div class="kuiVerticalRhythm">
+        <!-- Form actions -->
+        <div class="kuiFormSection kuiFormFooter">
+          <button
+            class="kuiButton kuiButton--primary"
+            ng-click="saveRole(role)"
+            ng-if="!role.metadata._reserved && isRoleEnabled(role)"
+            ng-disabled="form.$invalid || !areIndicesValid(role.indices)"
+            data-test-subj="roleFormSaveButton"
+          >
+            Save
+          </button>
+
+          <a
+            class="kuiButton kuiButton--basic"
+            ng-if="!role.metadata._reserved"
+            ng-href="{{rolesHref}}"
+            data-test-subj="roleFormCancelButton"
+          >
+            Cancel
+          </a>
+        </div>
+      </div>
+    </form>
+  </div>
+</kbn-management-app>

@@ -52,6 +52,7 @@ export default function MetricsVisProvider(Private) {
         interval: 'auto',
         axis_position: 'left',
         axis_formatter: 'number',
+        axis_scale: 'normal',
         show_legend: 1,
         show_grid: 1
       },

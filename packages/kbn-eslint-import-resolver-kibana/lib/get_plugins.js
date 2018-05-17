@@ -1,7 +1,8 @@
 const { dirname, resolve } = require('path');
+
 const glob = require('glob-all');
 
-module.exports = function getPlugins(config, kibanaPath, projectRoot) {
+exports.getPlugins = function(config, kibanaPath, projectRoot) {
   const resolveToRoot = path => resolve(projectRoot, path);
 
   const pluginDirs = [

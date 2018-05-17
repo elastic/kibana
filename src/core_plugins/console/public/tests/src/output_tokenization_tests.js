@@ -4,8 +4,8 @@ let RowParser = require('../../src/sense_editor/row_parser');
 import { initializeOutput } from '../../src/output';
 let output;
 
-var token_iterator = ace.require("ace/token_iterator");
-var { module, asyncTest, deepEqual, start } = window.QUnit;
+const token_iterator = ace.acequire('ace/token_iterator');
+const { module, asyncTest, deepEqual, start } = window.QUnit;
 
 
 module("Output Tokenization", {

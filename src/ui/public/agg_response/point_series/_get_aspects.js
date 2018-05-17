@@ -42,8 +42,8 @@ export function PointSeriesGetAspectsProvider(Private) {
       .transform(columnToAspect, {})
       // unwrap groups that only have one value, and validate groups that have more
       .transform(function (aspects, group, name) {
-        if (name !== 'y' && group.length > 1) {
-          throw new TypeError('Only multiple metrics are supported in point series');
+        if ((name !== 'y' && name !== 'series') && group.length > 1) {
+          throw new TypeError('Only multiple metrics and series are supported in point series');
         }
 
         aspects[name] = group.length > 1 ? group : group[0];

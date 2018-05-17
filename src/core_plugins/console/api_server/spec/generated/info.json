@@ -1,0 +1,11 @@
+{
+  "info": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      ""
+    ],
+    "documentation": "http://www.elastic.co/guide/"
+  }
+}

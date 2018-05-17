@@ -1,7 +1,9 @@
 
 export function DashboardVisualizationProvider({ getService, getPageObjects }) {
   const log = getService('log');
+  const queryBar = getService('queryBar');
   const testSubjects = getService('testSubjects');
+  const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects(['dashboard', 'visualize', 'header', 'discover']);
 
   return new class DashboardVisualizations {
@@ -11,8 +13,8 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
       if (inViewMode) {
         await PageObjects.dashboard.clickEdit();
       }
-      await PageObjects.dashboard.clickAddVisualization();
-      await PageObjects.dashboard.clickAddNewVisualizationLink();
+      await dashboardAddPanel.ensureAddPanelIsShowing();
+      await dashboardAddPanel.clickAddNewEmbeddableLink();
       await PageObjects.visualize.clickVisualBuilder();
       await PageObjects.visualize.saveVisualization(name);
     }
@@ -24,8 +26,8 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
       await PageObjects.dashboard.setTimepickerInDataRange();
 
       if (query) {
-        await PageObjects.dashboard.setQuery(query);
-        await PageObjects.dashboard.clickFilterButton();
+        await queryBar.setQuery(query);
+        await queryBar.submitQuery();
       }
 
       if (fields) {
@@ -49,7 +51,7 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
       if (inViewMode) {
         await PageObjects.dashboard.clickEdit();
       }
-      await PageObjects.dashboard.addSavedSearch(name);
+      await dashboardAddPanel.addSavedSearch(name);
     }
 
     async createAndAddMarkdown({ name, markdown }) {
@@ -58,8 +60,8 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
       if (inViewMode) {
         await PageObjects.dashboard.clickEdit();
       }
-      await PageObjects.dashboard.clickAddVisualization();
-      await PageObjects.dashboard.clickAddNewVisualizationLink();
+      await dashboardAddPanel.ensureAddPanelIsShowing();
+      await dashboardAddPanel.clickAddNewEmbeddableLink();
       await PageObjects.visualize.clickMarkdownWidget();
       await PageObjects.visualize.setMarkdownTxt(markdown);
       await PageObjects.visualize.clickGo();

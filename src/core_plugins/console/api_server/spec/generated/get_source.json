@@ -1,5 +1,5 @@
 {
-  "{index}/{type}/{id}/_source": {
+  "get_source": {
     "url_params": {
       "parent": "",
       "preference": "random",
@@ -22,6 +22,7 @@
     ],
     "patterns": [
       "{indices}/{type}/{id}/_source"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/docs-get.html"
   }
 }

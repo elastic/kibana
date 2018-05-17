@@ -6,25 +6,28 @@ exports[`render 1`] = `
   hasShadow={false}
   paddingSize="l"
 >
-  <EuiText>
-    <p>
+  <EuiTitle
+    size="xs"
+  >
+    <h3>
       <EuiTextColor
         color="subdued"
       >
         Recently viewed
       </EuiTextColor>
-    </p>
-  </EuiText>
+    </h3>
+  </EuiTitle>
   <EuiSpacer
     size="s"
   />
   <EuiFlexGroup
     alignItems="flexEnd"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="spaceBetween"
     responsive={true}
-    wrap={false}
+    wrap={true}
   >
     <EuiFlexItem
       className="recentlyAccessedFlexItem"
@@ -34,6 +37,7 @@ exports[`render 1`] = `
       <EuiFlexGroup
         alignItems="stretch"
         component="div"
+        direction="row"
         gutterSize="l"
         justifyContent="flexStart"
         responsive={true}
@@ -52,14 +56,19 @@ exports[`render 1`] = `
               }
             }
           >
-            <EuiLink
-              className="recentlyAccessedLongLink"
-              color="primary"
-              href="link0"
-              type="button"
+            <EuiToolTip
+              content="label0"
+              position="bottom"
             >
-              label0
-            </EuiLink>
+              <EuiLink
+                className="recentlyAccessedLongLink"
+                color="primary"
+                href="link0"
+                type="button"
+              >
+                label0
+              </EuiLink>
+            </EuiToolTip>
           </EuiFlexItem>
         </React.Fragment>
         <React.Fragment
@@ -70,7 +79,9 @@ exports[`render 1`] = `
             component="div"
             grow={false}
           >
-            <EuiText>
+            <EuiText
+              grow={true}
+            >
               <EuiIcon
                 color="subdued"
                 size="m"
@@ -88,14 +99,19 @@ exports[`render 1`] = `
               }
             }
           >
-            <EuiLink
-              className="recentlyAccessedLongLink"
-              color="primary"
-              href="link1"
-              type="button"
+            <EuiToolTip
+              content="label1"
+              position="bottom"
             >
-              label1
-            </EuiLink>
+              <EuiLink
+                className="recentlyAccessedLongLink"
+                color="primary"
+                href="link1"
+                type="button"
+              >
+                label1
+              </EuiLink>
+            </EuiToolTip>
           </EuiFlexItem>
         </React.Fragment>
       </EuiFlexGroup>

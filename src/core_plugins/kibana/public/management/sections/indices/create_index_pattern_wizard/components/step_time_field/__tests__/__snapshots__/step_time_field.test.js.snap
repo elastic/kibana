@@ -25,6 +25,7 @@ exports[`StepTimeField should render a loading state when creating the index pat
   <EuiFlexGroup
     alignItems="center"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="flexStart"
     responsive={true}
@@ -40,7 +41,9 @@ exports[`StepTimeField should render a loading state when creating the index pat
       component="div"
       grow={false}
     >
-      <EuiText>
+      <EuiText
+        grow={true}
+      >
         Creating index pattern...
       </EuiText>
     </EuiFlexItem>

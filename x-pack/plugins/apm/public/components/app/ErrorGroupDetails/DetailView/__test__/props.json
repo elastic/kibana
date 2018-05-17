@@ -1,0 +1,935 @@
+{
+  "errorGroup": {
+    "args": {
+      "serviceName": "opbeans-node",
+      "errorGroupId": "c00e245c2fbebaf178fc31eeb2bb0250",
+      "start": "2018-01-09T14:24:42.561Z",
+      "end": "2018-01-09T14:39:42.561Z"
+    },
+    "data": {
+      "error": {
+        "@timestamp": "2018-01-09T14:39:00.274Z",
+        "processor": { "event": "error", "name": "error" },
+        "error": {
+          "id": "c5e55dfc-09cc-4e0d-ace3-1ba4233f66eb",
+          "culprit": "<anonymous> (server/coffee.js)",
+          "exception": {
+            "type": "TypeError",
+            "stacktrace": [
+              {
+                "line": {
+                  "number": 9,
+                  "context": "  if (req.paarms.level === 11) {"
+                },
+                "filename": "server/coffee.js",
+                "absPath": "/app/server/coffee.js",
+                "function": "<anonymous>",
+                "libraryFrame": false,
+                "context": {
+                  "pre": [
+                    "",
+                    "var express = require('express')",
+                    "var apm = require('elastic-apm-node')",
+                    "",
+                    "var app = module.exports = new express.Router()",
+                    "",
+                    "app.get('/is-it-coffee-time', function (req, res) {"
+                  ],
+                  "post": [
+                    "    res.send('Of course!')",
+                    "  } else {",
+                    "    res.send('You can\\'t have any!')",
+                    "  }",
+                    "})",
+                    "",
+                    "app.get('/log-error', function (req, res) {"
+                  ]
+                }
+              },
+              {
+                "filename": "node_modules/express/lib/router/layer.js",
+                "absPath": "/app/node_modules/express/lib/router/layer.js",
+                "function": "handle",
+                "libraryFrame": true,
+                "context": {
+                  "pre": [
+                    "",
+                    "  if (fn.length > 3) {",
+                    "    // not a standard request handler",
+                    "    return next();",
+                    "  }",
+                    "",
+                    "  try {"
+                  ],
+                  "post": [
+                    "  } catch (err) {",
+                    "    next(err);",
+                    "  }",
+                    "};",
+                    "",
+                    "/**",
+                    " * Check if this route matches `path`, if so"
+                  ]
+                },
+                "line": { "number": 95, "context": "    fn(req, res, next);" }
+              },
+              {
+                "function": "next",
+                "libraryFrame": true,
+                "context": {
+                  "pre": [
+                    "    if (layer.method && layer.method !== method) {",
+                    "      return next(err);",
+                    "    }",
+                    "",
+                    "    if (err) {",
+                    "      layer.handle_error(err, req, res, next);",
+                    "    } else {"
+                  ],
+                  "post": [
+                    "    }",
+                    "  }",
+                    "};",
+                    "",
+                    "/**",
+                    " * Add a handler for all HTTP verbs to this route.",
+                    " *"
+                  ]
+                },
+                "line": {
+                  "number": 137,
+                  "context": "      layer.handle_request(req, res, next);"
+                },
+                "filename": "node_modules/express/lib/router/route.js",
+                "absPath": "/app/node_modules/express/lib/router/route.js"
+              },
+              {
+                "filename": "node_modules/express/lib/router/route.js",
+                "absPath": "/app/node_modules/express/lib/router/route.js",
+                "function": "dispatch",
+                "libraryFrame": true,
+                "context": {
+                  "pre": [
+                    "  var method = req.method.toLowerCase();",
+                    "  if (method === 'head' && !this.methods['head']) {",
+                    "    method = 'get';",
+                    "  }",
+                    "",
+                    "  req.route = this;",
+                    ""
+                  ],
+                  "post": [
+                    "",
+                    "  function next(err) {",
+                    "    // signal to exit route",
+                    "    if (err && err === 'route') {",
+                    "      return done();",
+                    "    }",
+                    ""
+                  ]
+                },
+                "line": { "context": "  next();", "number": 112 }
+              },
+              {
+                "filename": "node_modules/express/lib/router/layer.js",
+                "absPath": "/app/node_modules/express/lib/router/layer.js",
+                "function": "handle",
+                "libraryFrame": true,
+                "context": {
+                  "pre": [
+                    "",
+                    "  if (fn.length > 3) {",
+                    "    // not a standard request handler",
+                    "    return next();",
+                    "  }",
+                    "",
+                    "  try {"
+                  ],
+                  "post": [
+                    "  } catch (err) {",
+                    "    next(err);",
+                    "  }",
+                    "};",
+                    "",
+                    "/**",
+                    " * Check if this route matches `path`, if so"
+                  ]
+                },
+                "line": { "number": 95, "context": "    fn(req, res, next);" }
+              },
+              {
+                "context": {
+                  "pre": [
+                    "    // this should be done for the layer",
+                    "    self.process_params(layer, paramcalled, req, res, function (err) {",
+                    "      if (err) {",
+                    "        return next(layerError || err);",
+                    "      }",
+                    "",
+                    "      if (route) {"
+                  ],
+                  "post": [
+                    "      }",
+                    "",
+                    "      trim_prefix(layer, layerError, layerPath, path);",
+                    "    });",
+                    "  }",
+                    "",
+                    "  function trim_prefix(layer, layerError, layerPath, path) {"
+                  ]
+                },
+                "line": {
+                  "number": 281,
+                  "context":
+                    "        return layer.handle_request(req, res, next);"
+                },
+                "filename": "node_modules/express/lib/router/index.js",
+                "absPath": "/app/node_modules/express/lib/router/index.js",
+                "function": "<anonymous>",
+                "libraryFrame": true
+              },
+              {
+                "line": { "number": 335, "context": "    return done();" },
+                "filename": "node_modules/express/lib/router/index.js",
+                "absPath": "/app/node_modules/express/lib/router/index.js",
+                "function": "process_params",
+                "libraryFrame": true,
+                "context": {
+                  "post": [
+                    "  }",
+                    "",
+                    "  var i = 0;",
+                    "  var name;",
+                    "  var paramIndex = 0;",
+                    "  var key;",
+                    "  var paramVal;"
+                  ],
+                  "pre": [
+                    "  var params = this.params;",
+                    "",
+                    "  // captured parameters from the layer, keys and values",
+                    "  var keys = layer.keys;",
+                    "",
+                    "  // fast track",
+                    "  if (!keys || keys.length === 0) {"
+                  ]
+                }
+              },
+              {
+                "filename": "node_modules/express/lib/router/index.js",
+                "absPath": "/app/node_modules/express/lib/router/index.js",
+                "function": "next",
+                "libraryFrame": true,
+                "context": {
+                  "pre": [
+                    "    // Capture one-time layer values",
+                    "    req.params = self.mergeParams",
+                    "      ? mergeParams(layer.params, parentParams)",
+                    "      : layer.params;",
+                    "    var layerPath = layer.path;",
+                    "",
+                    "    // this should be done for the layer"
+                  ],
+                  "post": [
+                    "      if (err) {",
+                    "        return next(layerError || err);",
+                    "      }",
+                    "",
+                    "      if (route) {",
+                    "        return layer.handle_request(req, res, next);",
+                    "      }"
+                  ]
+                },
+                "line": {
+                  "number": 275,
+                  "context":
+                    "    self.process_params(layer, paramcalled, req, res, function (err) {"
+                }
+              },
+              {
+                "line": { "context": "  next();", "number": 174 },
+                "filename": "node_modules/express/lib/router/index.js",
+                "absPath": "/app/node_modules/express/lib/router/index.js",
+                "function": "handle",
+                "libraryFrame": true,
+                "context": {
+                  "pre": [
+                    "    });",
+                    "  }",
+                    "",
+                    "  // setup basic req values",
+                    "  req.baseUrl = parentUrl;",
+                    "  req.originalUrl = req.originalUrl || req.url;",
+                    ""
+                  ],
+                  "post": [
+                    "",
+                    "  function next(err) {",
+                    "    var layerError = err === 'route'",
+                    "      ? null",
+                    "      : err;",
+                    "",
+                    "    // remove added slash"
+                  ]
+                }
+              },
+              {
+                "libraryFrame": true,
+                "context": {
+                  "pre": [
+                    " * @public",
+                    " */",
+                    "",
+                    "var proto = module.exports = function(options) {",
+                    "  var opts = options || {};",
+                    "",
+                    "  function router(req, res, next) {"
+                  ],
+                  "post": [
+                    "  }",
+                    "",
+                    "  // mixin Router class functions",
+                    "  setPrototypeOf(router, proto)",
+                    "",
+                    "  router.params = {};",
+                    "  router._params = [];"
+                  ]
+                },
+                "line": {
+                  "number": 47,
+                  "context": "    router.handle(req, res, next);"
+                },
+                "filename": "node_modules/express/lib/router/index.js",
+                "absPath": "/app/node_modules/express/lib/router/index.js",
+                "function": "router"
+              },
+              {
+                "filename": "node_modules/express/lib/router/layer.js",
+                "absPath": "/app/node_modules/express/lib/router/layer.js",
+                "function": "handle",
+                "libraryFrame": true,
+                "context": {
+                  "pre": [
+                    "",
+                    "  if (fn.length > 3) {",
+                    "    // not a standard request handler",
+                    "    return next();",
+                    "  }",
+                    "",
+                    "  try {"
+                  ],
+                  "post": [
+                    "  } catch (err) {",
+                    "    next(err);",
+                    "  }",
+                    "};",
+                    "",
+                    "/**",
+                    " * Check if this route matches `path`, if so"
+                  ]
+                },
+                "line": { "number": 95, "context": "    fn(req, res, next);" }
+              },
+              {
+                "absPath": "/app/node_modules/express/lib/router/index.js",
+                "function": "trim_prefix",
+                "libraryFrame": true,
+                "context": {
+                  "pre": [
+                    "    }",
+                    "",
+                    "    debug('%s %s : %s', layer.name, layerPath, req.originalUrl);",
+                    "",
+                    "    if (layerError) {",
+                    "      layer.handle_error(layerError, req, res, next);",
+                    "    } else {"
+                  ],
+                  "post": [
+                    "    }",
+                    "  }",
+                    "};",
+                    "",
+                    "/**",
+                    " * Process any parameters for the layer.",
+                    " * @private"
+                  ]
+                },
+                "line": {
+                  "number": 317,
+                  "context": "      layer.handle_request(req, res, next);"
+                },
+                "filename": "node_modules/express/lib/router/index.js"
+              },
+              {
+                "libraryFrame": true,
+                "context": {
+                  "pre": [
+                    "        return next(layerError || err);",
+                    "      }",
+                    "",
+                    "      if (route) {",
+                    "        return layer.handle_request(req, res, next);",
+                    "      }",
+                    ""
+                  ],
+                  "post": [
+                    "    });",
+                    "  }",
+                    "",
+                    "  function trim_prefix(layer, layerError, layerPath, path) {",
+                    "    if (layerPath.length !== 0) {",
+                    "      // Validate path breaks on a path separator",
+                    "      var c = path[layerPath.length]"
+                  ]
+                },
+                "line": {
+                  "number": 284,
+                  "context":
+                    "      trim_prefix(layer, layerError, layerPath, path);"
+                },
+                "filename": "node_modules/express/lib/router/index.js",
+                "absPath": "/app/node_modules/express/lib/router/index.js",
+                "function": "<anonymous>"
+              },
+              {
+                "function": "process_params",
+                "libraryFrame": true,
+                "context": {
+                  "pre": [
+                    "  var params = this.params;",
+                    "",
+                    "  // captured parameters from the layer, keys and values",
+                    "  var keys = layer.keys;",
+                    "",
+                    "  // fast track",
+                    "  if (!keys || keys.length === 0) {"
+                  ],
+                  "post": [
+                    "  }",
+                    "",
+                    "  var i = 0;",
+                    "  var name;",
+                    "  var paramIndex = 0;",
+                    "  var key;",
+                    "  var paramVal;"
+                  ]
+                },
+                "line": { "number": 335, "context": "    return done();" },
+                "filename": "node_modules/express/lib/router/index.js",
+                "absPath": "/app/node_modules/express/lib/router/index.js"
+              },
+              {
+                "line": {
+                  "number": 275,
+                  "context":
+                    "    self.process_params(layer, paramcalled, req, res, function (err) {"
+                },
+                "filename": "node_modules/express/lib/router/index.js",
+                "absPath": "/app/node_modules/express/lib/router/index.js",
+                "function": "next",
+                "libraryFrame": true,
+                "context": {
+                  "pre": [
+                    "    // Capture one-time layer values",
+                    "    req.params = self.mergeParams",
+                    "      ? mergeParams(layer.params, parentParams)",
+                    "      : layer.params;",
+                    "    var layerPath = layer.path;",
+                    "",
+                    "    // this should be done for the layer"
+                  ],
+                  "post": [
+                    "      if (err) {",
+                    "        return next(layerError || err);",
+                    "      }",
+                    "",
+                    "      if (route) {",
+                    "        return layer.handle_request(req, res, next);",
+                    "      }"
+                  ]
+                }
+              },
+              {
+                "line": { "number": 27, "context": "  next()" },
+                "filename": "server.js",
+                "absPath": "/app/server.js",
+                "function": "<anonymous>",
+                "libraryFrame": false,
+                "context": {
+                  "post": [
+                    "})",
+                    "",
+                    "app.use(require('./server/coffee'))",
+                    "app.use('/api', require('./server/routes'))",
+                    "app.get('*', function (req, res) {",
+                    "  res.sendFile(path.resolve(__dirname, 'client/build', 'index.html'))",
+                    "})"
+                  ],
+                  "pre": [
+                    "app.use(require('body-parser').json())",
+                    "app.use(express.static('client/build'))",
+                    "app.use(function (req, res, next) {",
+                    "  apm.setTag('foo', 'bar')",
+                    "  apm.setTag('lorem', 'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.')",
+                    "  apm.setTag('this-is-a-very-long-tag-name-without-any-spaces', 'test')",
+                    "  apm.setTag('multi-line', 'foo\\nbar\\nbaz')"
+                  ]
+                }
+              },
+              {
+                "function": "handle",
+                "libraryFrame": true,
+                "context": {
+                  "post": [
+                    "  } catch (err) {",
+                    "    next(err);",
+                    "  }",
+                    "};",
+                    "",
+                    "/**",
+                    " * Check if this route matches `path`, if so"
+                  ],
+                  "pre": [
+                    "",
+                    "  if (fn.length > 3) {",
+                    "    // not a standard request handler",
+                    "    return next();",
+                    "  }",
+                    "",
+                    "  try {"
+                  ]
+                },
+                "line": { "context": "    fn(req, res, next);", "number": 95 },
+                "filename": "node_modules/express/lib/router/layer.js",
+                "absPath": "/app/node_modules/express/lib/router/layer.js"
+              },
+              {
+                "libraryFrame": true,
+                "context": {
+                  "pre": [
+                    "    }",
+                    "",
+                    "    debug('%s %s : %s', layer.name, layerPath, req.originalUrl);",
+                    "",
+                    "    if (layerError) {",
+                    "      layer.handle_error(layerError, req, res, next);",
+                    "    } else {"
+                  ],
+                  "post": [
+                    "    }",
+                    "  }",
+                    "};",
+                    "",
+                    "/**",
+                    " * Process any parameters for the layer.",
+                    " * @private"
+                  ]
+                },
+                "line": {
+                  "number": 317,
+                  "context": "      layer.handle_request(req, res, next);"
+                },
+                "filename": "node_modules/express/lib/router/index.js",
+                "absPath": "/app/node_modules/express/lib/router/index.js",
+                "function": "trim_prefix"
+              },
+              {
+                "filename": "node_modules/express/lib/router/index.js",
+                "absPath": "/app/node_modules/express/lib/router/index.js",
+                "function": "<anonymous>",
+                "libraryFrame": true,
+                "context": {
+                  "pre": [
+                    "        return next(layerError || err);",
+                    "      }",
+                    "",
+                    "      if (route) {",
+                    "        return layer.handle_request(req, res, next);",
+                    "      }",
+                    ""
+                  ],
+                  "post": [
+                    "    });",
+                    "  }",
+                    "",
+                    "  function trim_prefix(layer, layerError, layerPath, path) {",
+                    "    if (layerPath.length !== 0) {",
+                    "      // Validate path breaks on a path separator",
+                    "      var c = path[layerPath.length]"
+                  ]
+                },
+                "line": {
+                  "number": 284,
+                  "context":
+                    "      trim_prefix(layer, layerError, layerPath, path);"
+                }
+              },
+              {
+                "libraryFrame": true,
+                "context": {
+                  "post": [
+                    "  }",
+                    "",
+                    "  var i = 0;",
+                    "  var name;",
+                    "  var paramIndex = 0;",
+                    "  var key;",
+                    "  var paramVal;"
+                  ],
+                  "pre": [
+                    "  var params = this.params;",
+                    "",
+                    "  // captured parameters from the layer, keys and values",
+                    "  var keys = layer.keys;",
+                    "",
+                    "  // fast track",
+                    "  if (!keys || keys.length === 0) {"
+                  ]
+                },
+                "line": { "number": 335, "context": "    return done();" },
+                "filename": "node_modules/express/lib/router/index.js",
+                "absPath": "/app/node_modules/express/lib/router/index.js",
+                "function": "process_params"
+              },
+              {
+                "libraryFrame": true,
+                "context": {
+                  "pre": [
+                    "    // Capture one-time layer values",
+                    "    req.params = self.mergeParams",
+                    "      ? mergeParams(layer.params, parentParams)",
+                    "      : layer.params;",
+                    "    var layerPath = layer.path;",
+                    "",
+                    "    // this should be done for the layer"
+                  ],
+                  "post": [
+                    "      if (err) {",
+                    "        return next(layerError || err);",
+                    "      }",
+                    "",
+                    "      if (route) {",
+                    "        return layer.handle_request(req, res, next);",
+                    "      }"
+                  ]
+                },
+                "line": {
+                  "number": 275,
+                  "context":
+                    "    self.process_params(layer, paramcalled, req, res, function (err) {"
+                },
+                "filename": "node_modules/express/lib/router/index.js",
+                "absPath": "/app/node_modules/express/lib/router/index.js",
+                "function": "next"
+              },
+              {
+                "absPath":
+                  "/app/node_modules/elastic-apm-node/lib/instrumentation/modules/express.js",
+                "function": "nextHook",
+                "libraryFrame": true,
+                "context": {
+                  "pre": [
+                    "      return function serveStatic (req, res, next) {",
+                    "        req._elastic_apm_static = true",
+                    "",
+                    "        return origServeStatic(req, res, nextHook)",
+                    "",
+                    "        function nextHook (err) {",
+                    "          if (!err) req._elastic_apm_static = false"
+                  ],
+                  "post": [
+                    "        }",
+                    "      }",
+                    "    }",
+                    "  })",
+                    "",
+                    "  return express",
+                    "}"
+                  ]
+                },
+                "line": {
+                  "number": 90,
+                  "context": "          return next.apply(this, arguments)"
+                },
+                "filename":
+                  "node_modules/elastic-apm-node/lib/instrumentation/modules/express.js"
+              },
+              {
+                "filename": "node_modules/serve-static/index.js",
+                "absPath": "/app/node_modules/serve-static/index.js",
+                "function": "error",
+                "libraryFrame": true,
+                "context": {
+                  "post": [
+                    "    })",
+                    "",
+                    "    // pipe",
+                    "    stream.pipe(res)",
+                    "  }",
+                    "}",
+                    ""
+                  ],
+                  "pre": [
+                    "    // forward errors",
+                    "    stream.on('error', function error (err) {",
+                    "      if (forwardError || !(err.statusCode < 500)) {",
+                    "        next(err)",
+                    "        return",
+                    "      }",
+                    ""
+                  ]
+                },
+                "line": { "number": 121, "context": "      next()" }
+              },
+              {
+                "filename": "events.js",
+                "absPath": "events.js",
+                "function": "emitOne",
+                "libraryFrame": true,
+                "line": { "number": 96 }
+              },
+              {
+                "filename": "events.js",
+                "absPath": "events.js",
+                "function": "emit",
+                "libraryFrame": true,
+                "line": { "number": 188 }
+              },
+              {
+                "libraryFrame": true,
+                "context": {
+                  "pre": [
+                    " * @param {Error} [err]",
+                    " * @private",
+                    " */",
+                    "",
+                    "SendStream.prototype.error = function error (status, err) {",
+                    "  // emit if listeners instead of responding",
+                    "  if (hasListeners(this, 'error')) {"
+                  ],
+                  "post": [
+                    "      expose: false",
+                    "    }))",
+                    "  }",
+                    "",
+                    "  var res = this.res",
+                    "  var msg = statuses[status] || String(status)",
+                    "  var doc = createHtmlDocument('Error', escapeHtml(msg))"
+                  ]
+                },
+                "line": {
+                  "number": 270,
+                  "context":
+                    "    return this.emit('error', createError(status, err, {"
+                },
+                "filename": "node_modules/send/index.js",
+                "absPath": "/app/node_modules/send/index.js",
+                "function": "error"
+              },
+              {
+                "function": "onStatError",
+                "libraryFrame": true,
+                "context": {
+                  "pre": [
+                    " */",
+                    "",
+                    "SendStream.prototype.onStatError = function onStatError (error) {",
+                    "  switch (error.code) {",
+                    "    case 'ENAMETOOLONG':",
+                    "    case 'ENOENT':",
+                    "    case 'ENOTDIR':"
+                  ],
+                  "post": [
+                    "      break",
+                    "    default:",
+                    "      this.error(500, error)",
+                    "      break",
+                    "  }",
+                    "}",
+                    ""
+                  ]
+                },
+                "line": {
+                  "number": 421,
+                  "context": "      this.error(404, error)"
+                },
+                "filename": "node_modules/send/index.js",
+                "absPath": "/app/node_modules/send/index.js"
+              },
+              {
+                "line": {
+                  "number": 736,
+                  "context": "        ? self.onStatError(err)"
+                },
+                "filename": "node_modules/send/index.js",
+                "absPath": "/app/node_modules/send/index.js",
+                "function": "next",
+                "libraryFrame": true,
+                "context": {
+                  "pre": [
+                    "    self.emit('file', path, stat)",
+                    "    self.send(path, stat)",
+                    "  })",
+                    "",
+                    "  function next (err) {",
+                    "    if (self._extensions.length <= i) {",
+                    "      return err"
+                  ],
+                  "post": [
+                    "        : self.error(404)",
+                    "    }",
+                    "",
+                    "    var p = path + '.' + self._extensions[i++]",
+                    "",
+                    "    debug('stat \"%s\"', p)",
+                    "    fs.stat(p, function (err, stat) {"
+                  ]
+                }
+              },
+              {
+                "filename": "node_modules/send/index.js",
+                "absPath": "/app/node_modules/send/index.js",
+                "function": "onstat",
+                "libraryFrame": true,
+                "context": {
+                  "pre": [
+                    "  var i = 0",
+                    "  var self = this",
+                    "",
+                    "  debug('stat \"%s\"', path)",
+                    "  fs.stat(path, function onstat (err, stat) {",
+                    "    if (err && err.code === 'ENOENT' && !extname(path) && path[path.length - 1] !== sep) {",
+                    "      // not found, check extensions"
+                  ],
+                  "post": [
+                    "    }",
+                    "    if (err) return self.onStatError(err)",
+                    "    if (stat.isDirectory()) return self.redirect(path)",
+                    "    self.emit('file', path, stat)",
+                    "    self.send(path, stat)",
+                    "  })",
+                    ""
+                  ]
+                },
+                "line": { "number": 725, "context": "      return next(err)" }
+              },
+              {
+                "context": {
+                  "pre": [
+                    "  var trans = this.currentTransaction",
+                    "",
+                    "  return elasticAPMCallbackWrapper",
+                    "",
+                    "  function elasticAPMCallbackWrapper () {",
+                    "    var prev = ins.currentTransaction",
+                    "    ins.currentTransaction = trans"
+                  ],
+                  "post": [
+                    "    ins.currentTransaction = prev",
+                    "    return result",
+                    "  }",
+                    "}",
+                    "",
+                    "Instrumentation.prototype._recoverTransaction = function (trans) {",
+                    "  if (this.currentTransaction === trans) return"
+                  ]
+                },
+                "line": {
+                  "number": 116,
+                  "context": "    var result = original.apply(this, arguments)"
+                },
+                "filename":
+                  "node_modules/elastic-apm-node/lib/instrumentation/index.js",
+                "absPath":
+                  "/app/node_modules/elastic-apm-node/lib/instrumentation/index.js",
+                "function": "elasticAPMCallbackWrapper",
+                "libraryFrame": true
+              },
+              {
+                "filename": "fs.js",
+                "absPath": "fs.js",
+                "function": "FSReqWrap.oncomplete",
+                "libraryFrame": true,
+                "line": { "number": 123 }
+              }
+            ],
+            "message": "Cannot read property 'level' of undefined"
+          },
+          "groupingKey": "c00e245c2fbebaf178fc31eeb2bb0250"
+        },
+        "context": {
+          "request": {
+            "http_version": "1.1",
+            "method": "GET",
+            "url": {
+              "raw": "/is-it-coffee-time",
+              "hostname": "opbeans-node",
+              "port": "3000",
+              "pathname": "/is-it-coffee-time"
+            },
+            "socket": {
+              "remote_address": "::ffff:172.19.0.7",
+              "encrypted": false
+            },
+            "headers": {
+              "user-agent": "workload/2.4.3",
+              "host": "opbeans-node:3000",
+              "connection": "close"
+            }
+          },
+          "response": {
+            "status_code": 200,
+            "headers": {},
+            "headers_sent": false,
+            "finished": false
+          },
+          "system": {
+            "architecture": "x64",
+            "platform": "linux",
+            "hostname": "b4cb1df7e088"
+          },
+          "tags": {
+            "foo": "bar",
+            "lorem":
+              "ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.",
+            "this-is-a-very-long-tag-name-without-any-spaces": "test",
+            "multi-line": "foo\nbar\nbaz"
+          },
+          "custom": {},
+          "service": {
+            "language": { "name": "javascript" },
+            "runtime": { "name": "node", "version": "v6.12.0" },
+            "framework": { "name": "express", "version": "4.16.2" },
+            "name": "opbeans-node",
+            "agent": { "name": "nodejs", "version": "0.9.0" }
+          },
+          "process": {
+            "pid": 36,
+            "title": "node /app/server.js",
+            "argv": [
+              "/usr/local/bin/node",
+              "/usr/local/lib/node_modules/pm2/lib/ProcessContainer.js"
+            ]
+          },
+          "user": {}
+        },
+        "beat": {
+          "name": "8be8857dbeda",
+          "hostname": "8be8857dbeda",
+          "version": "7.0.0-alpha1"
+        }
+      },
+      "occurrencesCount": 18,
+      "groupId": "c00e245c2fbebaf178fc31eeb2bb0250"
+    },
+    "status": "SUCCESS"
+  },
+  "urlParams": {
+    "page": 0,
+    "serviceName": "opbeans-node",
+    "transactionType": "request",
+    "errorGroupId": "c00e245c2fbebaf178fc31eeb2bb0250",
+    "start": "2018-01-09T14:24:42.561Z",
+    "end": "2018-01-09T14:39:42.561Z"
+  }
+}

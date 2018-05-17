@@ -1,0 +1,42 @@
+<div class="monitoring-summary-status" role="status">
+  <div class="monitoring-summary-status__content" data-test-subj="elasticsearchNodeSummaryStatus">
+    <div data-test-subj="transportAddress">
+      <strong>{{ node.transport_address|extractIp }}</strong>
+    </div>
+    <div data-test-subj="jvmHeap">
+      JVM Heap:
+      <strong>{{ node.usedHeap|formatMetric:'0,0.[00]':'%' }}</strong>
+    </div>
+    <div data-test-subj="freeDiskSpace">
+      Free Disk Space:
+      <strong>{{ node.freeSpace|formatMetric:'0.0 b' }}</strong>
+    </div>
+    <div data-test-subj="documentCount">
+      Documents:
+      <strong>{{ node.documents|formatMetric:'0.[0]a' }}</strong>
+    </div>
+    <div data-test-subj="dataSize">
+      Data: <strong>{{ node.dataSize|formatMetric:'0.0 b' }}</strong>
+    </div>
+    <div data-test-subj="indicesCount">
+      Indices:
+      <strong>{{ node.indexCount|formatMetric:'0,0' }}</strong>
+    </div>
+    <div data-test-subj="shardsCount">
+      Shards:
+      <strong>{{ node.totalShards|formatMetric:'0,0' }}</strong>
+    </div>
+    <div data-test-subj="nodeType">
+      Type:
+      <strong>{{ node.nodeTypeLabel }}</strong>
+    </div>
+    <div class="monitoring-summary-status__status-indicator">
+      Health:
+      <monitoring-elasticsearch-node-status-icon
+        status="node.status"
+        title="Status of this Elasticsearch node: {{ node.status }}"
+      ></monitoring-elasticsearch-node-status-icon>
+      {{ node.status|capitalize }}
+    </div>
+  </div>
+</div>

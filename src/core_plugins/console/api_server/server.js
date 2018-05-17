@@ -1,14 +1,14 @@
-let _ = require("lodash");
+import _ from 'lodash';
 
-export function resolveApi(sense_version, apis, reply) {
-  let result = {};
+export function resolveApi(senseVersion, apis, reply) {
+  const result = {};
   _.each(apis, function (name) {
     {
       // for now we ignore sense_version. might add it in the api name later
-      let api = require('./' + name);
+      const api = require('./' + name);
       result[name] = api.asJson();
     }
   });
 
-  return reply(result).type("application/json");
+  return reply(result).type('application/json');
 }

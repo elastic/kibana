@@ -1,0 +1,18 @@
+<form novalidate>
+  <div class="kuiFormSection">
+    <label class="kuiLabel kuiVerticalRhythmSmall">
+      Sample Data
+    </label>
+    <div class="grokdebugger-ace-editor">
+      <div
+        class="event-input-editor kuiVerticalRhythmSmall"
+        require-keys="true"
+        ui-ace="{
+          onLoad: aceLoaded
+        }"
+        ng-model="eventInput.rawEvent"
+        data-test-subj="aceEventInput"
+      ></div>
+    </div>
+  </div>
+</form>
