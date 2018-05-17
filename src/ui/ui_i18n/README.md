@@ -1,106 +1,33 @@
-## I18n engine
+# I18n
 
-[React-intl](https://github.com/yahoo/react-intl) is built around
-[intl-messageformat](https://github.com/yahoo/intl-messageformat),
-so both react and angular frameworks will use the same engine and
-the same message syntax. The engine uses the ICU Message syntax
-and works for all CLDR languages which have pluralization rules
-defined. `intl-messageformat` package exposes `IntlMessageFormat`
-constructor. Messages are provided into the constructor as a
-string message, or a pre-parsed AST object.
-
-```
-import IntlMessageFormat from 'intl-messageformat';
-
-const msg = new IntlMessageFormat(message, locales, [formats]);
-```
-
-The string `message` is parsed, then stored internally in a
-compiled form that is optimized for the `format()` method to
-produce the formatted string for displaying to the user.
-
-```
-const output = msg.format(values);
-```
-
-Creating instances of `IntlMessageFormat` is an expensive operation.
-[Intl-format-cache](https://github.com/yahoo/intl-format-cache)
-library is simply to make it easier to create a cache of format
-instances of a particular type to aid in their reuse. Under the
-hood, this package creates a cache key based on the arguments passed
-to the memoized constructor.
-
-```
-import memoizeIntlConstructor from 'intl-format-cache';
-
-const getMessageFormat = memoizeIntlConstructor(IntlMessageFormat);
-```
-
-`Intl-messageformat` package assumes that the
-[Intl](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl)
-global object exists in the runtime. `Intl` is present in all modern
-browsers and Node.js > 0.10. In order to load `Intl MessageFormat`
-in Node.js we should simply `require()` this package (in Node.js,
-the data for all 200+ languages is loaded along with the library):
-```
-const IntlMessageFormat = require('intl-messageformat');
-```
-
-After that we are able to use this library in the same way as for browsers.
-
-## Angular wrapper
-
-Angular wrapper will have at least 3 entities: translation `service`,
-`directive` and `filter`. Both, the directive and the filter will use
-the translation service with `intl-messageformat` library under the hood.
-
-The translation `service` will provide the following methods (names can be changed):
-- `addMessages(messages: object, [locale: string])` - provides a way to register
-translations with the library
-- `getMessages()` - returns messages for the current language
-- `locale(locale: string)` - tells the library which language to use by given
-language key
-- `locale()` - returns the current locale 
-- `defaultLocale(locale: string)` - tells the library which language to fallback
-when missing translations
-- `defaultLocale()` - returns the default locale
-- `defineFormats(formats: object)` - supply a set of options to the underlying formatter
-- `translate({id: string, values: object, defaultMessage: string})` – translate message by id
-
-The translation `filter` will look like this:
-```
-{{'translationId' | i18n[:{ values: object, defaultMessage: string }]}}
-```
-
-Where:
-- `translationId` - translation id to be translated
-- `values` - values to pass into translation
-- `defaultMessage` - will be used unless translation was successful
-
-The translation `directive` will look like this:
-```
-<ANY
-  i18n="{string}"
-  [i18n-values="{object}"]
-  [i18n-default-message="{string}"]
-></ANY>
-```
-
-Where:
-- `i18n` - translation id to be translated
-- `i18n-values` - values to pass into translation
-- `i18n-default-message` - will be used unless translation was successful
+Kibana relies on several UI frameworks (React and Angular) and
+requires localization in different environments (browser and NodeJS).
+Internationalization engine is framework agnostic and consumable in
+all parts of Kibana (React, Angular and NodeJS). In order to simplify
+internationalization in UI frameworks, the additional abstractions are
+built around the I18n engine: `react-intl` for React and custom
+components for Angular. [React-intl](https://github.com/yahoo/react-intl)
+is built around [intl-messageformat](https://github.com/yahoo/intl-messageformat),
+so both React and Angular frameworks use the same engine and the same
+message syntax.
 
 ## Localization files
 
-Localization files will have [JSON5](https://github.com/json5/json5) format,
-so single and multi-line comments are allowed. It can help to understand
-which section of application localization key is used for. Also `namespaces`
-will be used in order to simplify message location search. For example, if
+Localization files have [JSON5](https://github.com/json5/json5) format.
+
+The main benefits of using `JSON5`:
+
+- Objects may have a single trailing comma.
+- Single and multi-line comments are allowed.
+- Additional white space characters are allowed.
+
+Using comments can help to understand which section of the application
+the localization key is used for. Also `namespaces`
+are used in order to simplify message location search. For example, if
 we are going to translate the title of `/management/sections/objects/_objects.html`
 file, we should use message path like this: `'MANAGEMENT.OBJECTS.TITLE'`.
 
-Each Kibana plugin will have a separate folder with translation files located at
+Each Kibana plugin has a separate folder with translation files located at
 ```
 src/core_plugins/{plugin_name}/translations/{locale}.json
 ```
@@ -114,7 +41,7 @@ src/core_plugins/kibana/translations/en.json
 
 When a new translation file is added, you have to register this file into
 `uiExports.translations` array of plugin constructor parameters. For example:
-```
+```js
 export default function (kibana) {
   return new kibana.Plugin({
     uiExports: {
@@ -128,27 +55,256 @@ export default function (kibana) {
 }
 ```
 
-Localization files are loaded in `src/ui/public/chrome/api/angular.js` file and
-provided to angular using `i18nProvider`:
+The engine uses a locale resolution process similar to that of the built-in
+Intl APIs to determine which locale data to use based on the `accept-language`
+http header.
+
+The following are the abstract steps i18n engine goes through to resolve the locale value:
+
+- If there's data for the specified locale (localization file is registered in
+  `uiExports.translations`), then that locale will be resolved.
+- If locale data is missing for a leaf locale like `fr-FR`, but there is data
+for one of its ancestors, `fr` in this case, then its ancestor will be used.
+- If `accept-language` header is not presented or previous steps didn't resolve
+the locale, the locale will be resolved to locale defined in `i18n.defaultLocale`
+option at `config/kibana.yml` file.
+- If `i18n.defaultLocale` is not specified or if there is no data for this locale,
+`en` locale will be used.
+
+## I18n engine
+
+I18n engine is the platform agnostic abstractions which helps to supply a locale
+data to UI frameworks and provides methods for the direct translation.
+
+Here is the public API exposed by this engine:
+
+- `getMessages()` - returns messages for the current language
+- `setLocale(locale: string)` - tells the engine which language to use by given
+language key
+- `getLocale()` - returns the current locale
+- `setDefaultLocale(locale: string)` - tells the library which language to fallback
+when missing translations
+- `getDefaultLocale()` - returns the default locale
+- `defineFormats(formats: object)` - supply a set of options to the underlying formatter.
+For the detailed explanation, see the section below
+- `translate(id: string, [{values: object, defaultMessage: string}])` – translate message by id
+
+#### I18n engine internals
+
+The engine uses the ICU Message syntax and works for all CLDR languages which
+have pluralization rules defined. It's built around `intl-messageformat` package
+which exposes `IntlMessageFormat` class. Messages are provided into the constructor
+as a string message, or a pre-parsed AST object.
+
+```js
+import IntlMessageFormat from 'intl-messageformat';
+
+const msg = new IntlMessageFormat(message, locales, [formats]);
 ```
+
+The string `message` is parsed, then stored internally in a
+compiled form that is optimized for the `format()` method to
+produce the formatted string for displaying to the user.
+
+```js
+const output = msg.format(values);
+```
+
+`formats` parameter in `IntlMessageFormat` constructor allows to format numbers
+and dates/times in messages using `Intl.NumberFormat` and `Intl.DateTimeFormat`,
+respectively.
+
+```js
+const msg = new IntlMessageFormat('The price is: {price, number, USD}', 'en-US', {
+  number: {
+    USD: {
+      style   : 'currency',
+      currency: 'USD',
+    },
+  },
+});
+
+const output = msg.format({ price: 100 });
+
+console.log(output); // => "The price is: $100.00"
+```
+
+In this example, we're defining a USD number format style which is passed to
+the underlying `Intl.NumberFormat` instance as its options.
+[Here](https://github.com/yahoo/intl-messageformat/blob/master/src/core.js#L62)
+you can find default format options used as the prototype of the formats
+provided to the constructor.
+
+Creating instances of `IntlMessageFormat` is an expensive operation.
+[Intl-format-cache](https://github.com/yahoo/intl-format-cache)
+library is simply to make it easier to create a cache of format
+instances of a particular type to aid in their reuse. Under the
+hood, this package creates a cache key based on the arguments passed
+to the memoized constructor.
+
+```js
+import memoizeIntlConstructor from 'intl-format-cache';
+
+const getMessageFormat = memoizeIntlConstructor(IntlMessageFormat);
+```
+
+## React
+
+[React-intl](https://github.com/yahoo/react-intl) library is used for internalization
+React part of the application. It provides React components and an API to format
+dates, numbers, and strings, including pluralization and handling translations.
+
+React Intl uses the provider pattern to scope an i18n context to a tree of components.
+`IntlProvider` component is used to setup the i18n context for a tree. After that we
+are able to use `FormattedMessage` component in order to translate messages.
+`IntlProvider` should wrap react app's root component (inside each react render method).
+
+In order to translate messages we need to pass them into the `IntlProvider`
+from I18n engine:
+
+```js
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { IntlProvider } from 'react-intl';
+
+import i18n from 'i18n';
+
+const locale = i18n.getLocale();
+const messages = i18n.getMessages();
+
+ReactDOM.render(
+  <IntlProvider
+    locale={locale}
+    messages={messages}
+  >
+    <RootComponent>
+      ...
+    </RootComponent>
+  </IntlProvider>,
+  document.getElementById('container')
+);
+```
+
+After that we can use `FormattedMessage` components inside `RootComponent`:
+```js
+import React, { Component } from 'react';
+import { FormattedMessage } from 'react-intl';
+
+class RootComponent extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      name: 'Eric',
+      unreadCount: 1000,
+    };
+  }
+
+  render() {
+    const {
+      name,
+      unreadCount,
+    } = this.state;
+
+    return (
+      <p>
+        <FormattedMessage
+          id="welcome"
+          defaultMessage={`Hello {name}, you have {unreadCount, number} {unreadCount, plural,
+            one {message}
+            other {messages}
+          }`}
+          values={{name: <b>{name}</b>, unreadCount}}
+          />
+          ...
+      </p>
+    );
+  }
+}
+```
+
+## Angular
+
+Angular wrapper has 4 entities: translation `provider`, `service`, `directive`
+and `filter`. Both the directive and the filter use the translation `service`
+with i18n engine under the hood.
+
+The translation `provider` is used for `service` configuration and
+has the following methods:
+- `addMessages(messages: Map<string, string>, [locale: string])` - provides a way to register
+translations with the library
+- `setLocale(locale: string)` - tells the library which language to use by given
+language key
+- `getLocale()` - returns the current locale
+- `setDefaultLocale(locale: string)` - tells the library which language to fallback
+when missing translations
+- `getDefaultLocale()` - returns the default locale
+- `defineFormats(formats: object)` - supply a set of options to the underlying formatter
+
+The translation `service` provides the only one method:
+- `translate(id: string, [{values: object, defaultMessage: string}])` – translate message by id
+
+The translation `filter` has the following syntax:
+```
+{{'translationId' | i18n[:{ values: object, defaultMessage: string }]}}
+```
+
+Where:
+- `translationId` - translation id to be translated
+- `values` - values to pass into translation
+- `defaultMessage` - will be used unless translation was successful
+
+The translation `directive` has the following syntax:
+```html
+<ANY
+  i18n-id="{string}"
+  [i18n-values="{object}"]
+  [i18n-default-message="{string}"]
+></ANY>
+```
+
+Where:
+- `i18n-id` - translation id to be translated
+- `i18n-values` - values to pass into translation
+- `i18n-default-message` - will be used unless translation was successful
+
+In order to initialize the translation service, we need to pass locale and
+localization messages from I18n engine into the `i18nProvider`:
+
+```js
+import { uiModules } from 'ui/modules';
+import i18n from 'i18n';
+
 uiModules.get('kibana').config(function (i18nProvider) {
-  i18nProvider.addMessages(chrome.getTranslations());
+  i18nProvider.addMessages(i18n.getMessages());
+  i18nProvider.setLocale(i18n.getLocale());
 });
 ```
 
-After that we are able to provide translation messages to react `IntlProvider`:
+After that we can use i18n directive in Angular templates:
+```html
+<span
+  i18n-id="welcome"
+  i18n-default-message="Hello!"
+></span>
 ```
-const i18n = $injector.get('i18n');
-const locale = i18n.locale();
-const messages = i18n.getMessages();
 
-<IntlProvider
-  locale={locale}
-  messages={messages}
->
-  ...
-</IntlProvider>
+## Node.JS
+
+`Intl-messageformat` package assumes that the
+[Intl](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl)
+global object exists in the runtime. `Intl` is present in all modern
+browsers and Node.js 0.10+. In order to load i18n engine
+in Node.js we should simply `require()` this module (in Node.js, the
+[data](https://github.com/yahoo/intl-messageformat/tree/master/dist/locale-data)
+for all 200+ languages is loaded along with the library):
+
+```js
+const i18n = require('i18n');
 ```
+
+After that we are able to use all methods exposed by the i18n engine
+(see [I18n engine](#i18n-engine) section above for more details).
 
 ## Build tools
 
