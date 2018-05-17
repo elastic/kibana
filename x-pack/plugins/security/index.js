@@ -138,6 +138,40 @@ export const security = (kibana) => new kibana.Plugin({
           hasPrivileges
         });
       });
+
+      savedObjects.registerScopedSavedObjectsClientWrapperFactory(({ client }) => {
+        return {
+          errors: client.errors,
+
+          async create(type, attributes = {}, options = {}) {
+            return await client.create(type, attributes, options);
+          },
+
+          async bulkCreate(objects, options = {}) {
+            return await client.bulkCreate(objects, options);
+          },
+
+          async delete(type, id) {
+            return await client.delete(type, id);
+          },
+
+          async find(options = {}) {
+            return await client.find(options);
+          },
+
+          async bulkGet(objects = []) {
+            return await client.bulkGet(objects);
+          },
+
+          async get(type, id) {
+            return await client.get(type, id);
+          },
+
+          async update(type, id, attributes, options = {}) {
+            return await client.update(type, id, attributes, options);
+          }
+        };
+      });
     }
 
     getUserProvider(server);
