@@ -1,5 +1,5 @@
 import { SavedObjectsClient, SavedObjectsRepository } from './client';
-import { SavedObjectsClientProvider } from './saved_objects_client_provider';
+import { ScopedSavedObjectsClientProvider } from './scoped_saved_objects_client_provider';
 
 export function createSavedObjectsService(server) {
   const onBeforeWrite = async () => {
@@ -39,12 +39,11 @@ export function createSavedObjectsService(server) {
     }
   };
 
-  const clientProvider = new SavedObjectsClientProvider({
+  const scopedClientProvider = new ScopedSavedObjectsClientProvider({
     index: server.config().get('kibana.index'),
     mappings: server.getKibanaIndexMappingsDsl(),
     onBeforeWrite,
     defaultClientFactory({
-      SavedObjectsRepository,
       request,
       index,
       mappings,
@@ -67,7 +66,7 @@ export function createSavedObjectsService(server) {
   return {
     SavedObjectsClient,
     SavedObjectsRepository,
-    getScopedSavedObjectsClient: clientProvider.getScopedSavedObjectsClient.bind(clientProvider),
-    registerScopedSavedObjectsClientFactory: clientProvider.registerScopedSavedObjectsClientFactory.bind(clientProvider),
+    getScopedSavedObjectsClient: scopedClientProvider.getScopedSavedObjectsClient.bind(scopedClientProvider),
+    registerScopedSavedObjectsClientFactory: scopedClientProvider.registerScopedSavedObjectsClientFactory.bind(scopedClientProvider),
   };
 }

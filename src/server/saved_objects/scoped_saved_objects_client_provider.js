@@ -1,9 +1,7 @@
-import { SavedObjectsRepository, SavedObjectsClient } from './client';
-
 /**
  * Provider for the Saved Object Client.
  */
-export class SavedObjectsClientProvider {
+export class ScopedSavedObjectsClientProvider {
   constructor({
     index,
     mappings,
@@ -29,8 +27,6 @@ export class SavedObjectsClientProvider {
     const factory = this._customClientFactory || this._defaultClientFactory;
     return factory({
       request,
-      SavedObjectsRepository,
-      errors: SavedObjectsClient.errors,
       index: this._index,
       mappings: this._mappings,
       onBeforeWrite: this._onBeforeWrite,
