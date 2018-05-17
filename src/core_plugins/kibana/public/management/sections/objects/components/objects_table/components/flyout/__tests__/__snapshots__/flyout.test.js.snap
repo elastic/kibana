@@ -100,6 +100,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
     <EuiFlexGroup
       alignItems="stretch"
       component="div"
+      direction="row"
       gutterSize="l"
       justifyContent="spaceBetween"
       responsive={true}
@@ -171,16 +172,19 @@ exports[`Flyout should render import step 1`] = `
   <EuiFlyoutBody>
     <EuiForm>
       <EuiFormRow
+        describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
         label="Please select a JSON file to import"
       >
         <EuiFilePicker
+          compressed={false}
           initialPromptText="Import"
           onChange={[Function]}
         />
       </EuiFormRow>
       <EuiFormRow
+        describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
       >
@@ -198,6 +202,7 @@ exports[`Flyout should render import step 1`] = `
     <EuiFlexGroup
       alignItems="stretch"
       component="div"
+      direction="row"
       gutterSize="l"
       justifyContent="spaceBetween"
       responsive={true}
