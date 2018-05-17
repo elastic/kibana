@@ -41,7 +41,7 @@ export class IfVertex extends Vertex {
   }
 
   get trueEdges() {
-    return this.outgoingEdges.filter(e => e.when);
+    return this.outgoingEdges.filter(e => e.when === true);
   }
 
   get falseEdge() {

@@ -6,11 +6,9 @@
 
 import { Statement } from './statement';
 import { makeStatement } from './make_statement';
-import {
-  isVertexPipelineStage
-} from './utils';
+import { isVertexPipelineStage } from './utils';
 
-function createChildStatements(outgoingVertices, statements, next, pipelineStage) {
+function makeStatementsForOutgoingVertices(outgoingVertices, statements, next, pipelineStage) {
   outgoingVertices.forEach(vertex => {
     let currentVertex = vertex;
     while(isVertexPipelineStage(currentVertex, pipelineStage) && (currentVertex !== next)) {
@@ -41,8 +39,8 @@ export class IfStatement extends Statement {
 
     const next = ifVertex.next;
 
-    createChildStatements(trueOutgoingVertices, trueStatements, next, pipelineStage);
-    createChildStatements(falseOutgoingVertices, elseStatements, next, pipelineStage);
+    makeStatementsForOutgoingVertices(trueOutgoingVertices, trueStatements, next, pipelineStage);
+    makeStatementsForOutgoingVertices(falseOutgoingVertices, elseStatements, next, pipelineStage);
 
     return new IfStatement(
       ifVertex,

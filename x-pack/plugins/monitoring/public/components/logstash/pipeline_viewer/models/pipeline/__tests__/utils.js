@@ -5,7 +5,6 @@
  */
 
 import expect from 'expect.js';
-
 import { isVertexPipelineStage } from '../utils';
 
 describe('Utils', () => {
