@@ -43,14 +43,16 @@ export class IfStatement extends Statement {
     const ifElement = new IfElement(this, depth, parentId);
     list.push(ifElement);
 
-    const nestedElementDepth = depth + 1;
-    addStatementsToList(list, this.trueStatements, nestedElementDepth, ifElement.id);
+    this.trueStatements.forEach(trueStatement => {
+      list.push(trueStatement.toList(depth + 1, this.id));
+    });
 
     if (this.elseStatements.length) {
       const elseElement = new ElseElement(this, depth, parentId);
       list.push(elseElement);
-
-      addStatementsToList(list, this.elseStatements, nestedElementDepth, elseElement.id);
+      this.elseStatements.forEach(elseStatement => {
+        list.push(elseStatement.toList(depth + 1, elseElement.id));
+      });
     }
 
     return list;
