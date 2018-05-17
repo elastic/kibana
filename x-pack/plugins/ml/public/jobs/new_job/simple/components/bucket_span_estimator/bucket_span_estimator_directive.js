@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
+import ReactDOM from 'react-dom';
 
-
-import template from './bucket_span_estimator.html';
+import { BucketSpanEstimator } from './bucket_span_estimator_view';
 import { getQueryFromSavedSearch } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { EVENT_RATE_COUNT_FIELD } from 'plugins/ml/jobs/new_job/simple/components/constants/general';
 import { ml } from 'plugins/ml/services/ml_api_service';
@@ -26,15 +27,13 @@ module.directive('mlBucketSpanEstimator', function () {
       ui: '=ui',
       exportedFunctions: '='
     },
-    template,
-    link: function ($scope) {
+    link: function ($scope, $element) {
       const STATUS = {
         FAILED: -1,
         NOT_RUNNING: 0,
         RUNNING: 1,
         FINISHED: 2
       };
-      $scope.STATUS = STATUS;
 
       const errorHandler = (error) => {
         console.log('Bucket span could not be estimated', error);
@@ -101,6 +100,38 @@ module.directive('mlBucketSpanEstimator', function () {
         $scope.exportedFunctions.guessBucketSpan = $scope.guessBucketSpan;
       }
 
+      // watch for these changes
+      $scope.$watch('formConfig.agg.type', updateButton, true);
+      $scope.$watch('jobStateWrapper.jobState', updateButton, true);
+      $scope.$watch('[ui.showJobInput,ui.formValid,ui.bucketSpanEstimator.status]', updateButton, true);
+
+      function updateButton() {
+        const buttonDisabled = (
+          $scope.ui.showJobInput === false ||
+          $scope.ui.formValid === false ||
+          $scope.formConfig.agg.type === undefined ||
+          $scope.jobStateWrapper.jobState === $scope.JOB_STATE.RUNNING ||
+          $scope.jobStateWrapper.jobState === $scope.JOB_STATE.STOPPING ||
+          $scope.jobStateWrapper.jobState === $scope.JOB_STATE.FINISHED ||
+          $scope.ui.bucketSpanEstimator.status === STATUS.RUNNING
+        );
+        const estimatorRunning = ($scope.ui.bucketSpanEstimator.status === STATUS.RUNNING);
+        const buttonText = (estimatorRunning) ? 'Estimating bucket span' : 'Estimate bucket span';
+
+        const props = {
+          buttonDisabled,
+          estimatorRunning,
+          guessBucketSpan: $scope.guessBucketSpan,
+          buttonText
+        };
+
+        ReactDOM.render(
+          React.createElement(BucketSpanEstimator, props),
+          $element[0]
+        );
+      }
+
+      updateButton();
     }
   };
 });
