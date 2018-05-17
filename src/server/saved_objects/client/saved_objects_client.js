@@ -282,6 +282,7 @@ export class SavedObjectsClient {
       sortField,
       sortOrder,
       fields,
+      includeTypes,
     } = options;
 
     if (searchFields && !Array.isArray(searchFields)) {
@@ -304,6 +305,7 @@ export class SavedObjectsClient {
           search,
           searchFields,
           type,
+          includeTypes,
           sortField,
           sortOrder
         })

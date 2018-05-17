@@ -18,4 +18,12 @@ export function IndexPatternsPatternCacheProvider() {
   this.clear = this.delete = function (id) {
     if (validId(id)) delete vals[id];
   };
+
+  this.clearAll = function () {
+    for (const id in vals) {
+      if (vals.hasOwnProperty(id)) {
+        delete vals[id];
+      }
+    }
+  };
 }
