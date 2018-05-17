@@ -3,12 +3,12 @@
 
 [partintro]
 --
-A Kibana _dashboard_ displays a collection of visualizations.
-You can arrange, resize, and edit the visualizations and then save the dashboard
+A Kibana _dashboard_ displays a collection of visualizations and searches.
+You can arrange, resize, and edit the dashboard content and then save the dashboard
 so you can share it.
 
 [role="screenshot"]
-image:images/tutorial-dashboard.png[Example dashboard]
+image:images/Dashboard_example.png[Example dashboard]
 
 --
 
@@ -25,68 +25,72 @@ or click *Add new visualization* to create one.
 If you have a large number of visualizations, you can filter the list.
 +
 [role="screenshot"]
-image:images/Dashboard_add_visualization.png[Example dashboard]
+image:images/Dashboard_add_visualization.png[Example add visualization to dashboard]
+
+. To add a saved search, click the *Saved Search* tab, and then select a name from the list.
+
 [[saving-dashboards]]
-. When you're finished adding and arranging visualizations,
+. When you're finished adding and arranging the dashboard content,
 go to the menu bar, click *Save*, and enter
 a name. Optionally, you can store the time period specified in the time
 filter by selecting *Store time with dashboard*.
 
-NOTE: By default, Kibana dashboards use a light color theme. To use a dark color theme,
-click *Options* and select *Use dark theme*. To use the dark theme by default, go
+By default, Kibana dashboards use a light color theme. To use a dark color theme,
+click *Options* and select *Use dark theme*. To set the dark theme as the default, go
 to *Management > Advanced Settings* and set `dashboard:defaultDarkTheme`
 to `On`.
 
+[[loading-a-saved-dashboard]]
+TIP: You can import, export, and delete dashboards in *Kibana > Management >
+Saved Objects > Dashboards*.
 
 [[customizing-your-dashboard]]
 == Arranging Dashboard Elements
 
-The visualizations in your dashboard are stored in containers that you can move,
-resize, and delete.
+The visualizations and searches in a dashboard are stored in panels that you can move,
+resize, and delete.  To start editing, open the dashboard and click *Edit*
+in the menu bar.
 
 [role="screenshot"]
 image:images/Dashboard_Resize_Menu.png[Example dashboard]
 
 [[moving-containers]]
-To move a visualization, click and hold the
-header of a visualization and drag to the new location.
+To move a panel, click and hold the
+header of a panel and drag to the new location.
 
 [[resizing-containers]]
-To resize a visualization, click the resize control on the lower right and drag
+To resize a panel, click the resize control on the lower right and drag
 to the new dimensions.
 
 [[removing-containers]]
 Additional commands for managing the
-container and its contents are in the gear menu in the upper right.
+panel and its contents are in the gear menu in the upper right.
 
-NOTE: Deleting a visualization from a
-dashboard does _not_ delete the saved visualization.
-
-
+NOTE: Deleting a panel from a
+dashboard does *not* delete the saved visualization or search.
 
 [[viewing-detailed-information]]
 == Viewing Visualization Data
 
-You can display the raw data behind a visualization in a dashboard using the
+You can display the raw data behind a dashboard visualization using the
 Expand/Collapse button.
 
 . Open the dashboard.
-. Hover over the visualization to display the *Expand* button in the lower
+. Hover over the visualization and click the *Expand* button in the lower
 left.
-. Click *Expand* to display a table that contains the underlying data.
 +
-You can also view
+The underlying data is displayed in a table. You can also view
 the raw Elasticsearch request, the response in JSON, and the request statistics.
 These statistics show the query duration, request duration, total number
 of matching records, and the index that was searched.
 +
 [role="screenshot"]
-image:images/Dashboard_visualization_data.png[Example dashboard]
+image:images/Dashboard_visualization_data.png[Example of visualization data]
 
 To export the data as a comma separated values
 (CSV) file, click *Raw* or *Formatted* at the bottom of the data
-table. *Raw* exports the data as it is stored in Elasticsearch. *Formatted*
-exports the results of an applicable Kibana <<managing-fields,field
+table. *Raw* exports the response data as provided. *Formatted*
+exports the reponse data using applicable Kibana <<managing-fields,field
 formatters>>.
 
 To return to the visualization, click the *Collapse* button in the lower left
