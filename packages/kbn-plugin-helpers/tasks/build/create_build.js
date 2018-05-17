@@ -106,10 +106,7 @@ module.exports = function createBuild(
         return;
       }
 
-      if (
-        !plugin.pkg.devDependencies.typescript &&
-        !plugin.pkg.dependencies.typescript
-      ) {
+      if (!plugin.pkg.devDependencies.typescript) {
         throw new Error(
           'Found tsconfig.json file in plugin but typescript is not a devDependency.'
         );
