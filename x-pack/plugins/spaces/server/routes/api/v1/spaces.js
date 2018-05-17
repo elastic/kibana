@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from 'boom';
 import { omit } from 'lodash';
 import { routePreCheckLicense } from '../../../lib/route_pre_check_license';
 import { spaceSchema } from '../../../lib/space_schema';
 import { wrapError } from '../../../lib/errors';
+import { isReservedSpace } from '../../../../common/is_reserved_space';
 
 export function initSpacesApi(server) {
   const routePreCheckLicenseFn = routePreCheckLicense(server);
@@ -29,7 +31,7 @@ export function initSpacesApi(server) {
           ...space.attributes,
           id: space.id
         }));
-      } catch(e) {
+      } catch (e) {
         return reply(wrapError(e));
       }
 
@@ -77,13 +79,21 @@ export function initSpacesApi(server) {
         overwrite = false
       } = request.query;
 
-      const space = omit(request.payload, ['id']);
+      const space = omit(request.payload, ['id', '_reserved']);
       const id = request.params.id;
 
       let result;
       try {
+        const existingSpace = await getSpaceById(client, id);
+
+        // Reserved Spaces cannot have their _reserved or urlContext properties altered.
+        if (isReservedSpace(existingSpace)) {
+          space._reserved = true;
+          space.urlContext = existingSpace.urlContext;
+        }
+
         result = await client.create('space', { ...space }, { id, overwrite });
-      } catch(e) {
+      } catch (e) {
         return reply(wrapError(e));
       }
 
@@ -108,8 +118,13 @@ export function initSpacesApi(server) {
       let result;
 
       try {
+        const existingSpace = await getSpaceById(client, id);
+        if (isReservedSpace(existingSpace)) {
+          return reply(wrapError(Boom.badRequest('This Space cannot be deleted because it is reserved.')));
+        }
+
         result = await client.delete('space', id);
-      } catch(e) {
+      } catch (e) {
         return reply(wrapError(e));
       }
 
@@ -119,4 +134,20 @@ export function initSpacesApi(server) {
       pre: [routePreCheckLicenseFn]
     }
   });
+
+  async function getSpaceById(client, spaceId) {
+    try {
+      const existingSpace = await client.get('space', spaceId);
+      console.log(existingSpace);
+      return {
+        id: existingSpace.id,
+        ...existingSpace.attributes
+      };
+    } catch (e) {
+      if (client.errors.isNotFoundError(e)) {
+        return null;
+      }
+      throw e;
+    }
+  }
 }

@@ -61,6 +61,11 @@ test(`it creates the default space when one does not exist`, async () => {
 
   expect(client.get).toHaveBeenCalledTimes(1);
   expect(client.create).toHaveBeenCalledTimes(1);
+  expect(client.create).toHaveBeenCalledWith(
+    'space',
+    { "_reserved": true, "description": "This is your Default Space!", "name": "Default Space", "urlContext": "" },
+    { "id": "default" }
+  );
 });
 
 test(`it does not attempt to recreate the default space if it already exists`, async () => {

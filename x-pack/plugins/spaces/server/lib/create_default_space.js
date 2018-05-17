@@ -18,13 +18,16 @@ export async function createDefaultSpace(server) {
     return;
   }
 
+  const options = {
+    id: DEFAULT_SPACE_ID
+  };
+
   await savedObjectsClient.create('space', {
     name: 'Default Space',
     description: 'This is your Default Space!',
-    urlContext: ''
-  }, {
-    id: DEFAULT_SPACE_ID
-  });
+    urlContext: '',
+    _reserved: true
+  }, options);
 }
 
 async function doesDefaultSpaceExist(savedObjectsClient) {

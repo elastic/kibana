@@ -53,6 +53,28 @@ export function initSpacesRequestInterceptors(server) {
           type: 'space'
         });
 
+        if (total === 1) {
+          // If only one space is available, then send user there directly.
+          // No need for an interstitial screen where there is only one possible outcome.
+          const space = spaceObjects[0];
+          const {
+            urlContext
+          } = space.attributes;
+
+          const config = server.config();
+          const basePath = config.get('server.basePath');
+          const defaultRoute = config.get('server.defaultRoute');
+
+          let destination;
+          if (urlContext) {
+            destination = `${basePath}/s/${urlContext}${defaultRoute}`;
+          } else {
+            destination = `${basePath}${defaultRoute}`;
+          }
+
+          return reply.redirect(destination);
+        }
+
         if (total > 0) {
           // render spaces selector instead of home page
           const app = server.getHiddenUiAppById('space_selector');
@@ -61,7 +83,7 @@ export function initSpacesRequestInterceptors(server) {
           });
         }
 
-      } catch(e) {
+      } catch (e) {
         return reply(wrapError(e));
       }
     }
