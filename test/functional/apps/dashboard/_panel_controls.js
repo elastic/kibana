@@ -40,8 +40,13 @@ export default function ({ getService, getPageObjects }) {
 
       it('are hidden in view mode', async function () {
         await PageObjects.dashboard.saveDashboard(dashboardName);
-        const isContextMenuToggleVisible = await dashboardPanelActions.isContextMenuToggleVisible();
-        expect(isContextMenuToggleVisible).to.equal(false);
+
+        await dashboardPanelActions.openContextMenu();
+        const editLinkExists = await dashboardPanelActions.editPanelActionExists();
+        const removeExists = await dashboardPanelActions.removePanelActionExists();
+
+        expect(editLinkExists).to.equal(false);
+        expect(removeExists).to.equal(false);
       });
 
       it('are shown in edit mode', async function () {
