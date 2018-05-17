@@ -805,7 +805,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       // TODO: we should use datat-test-subj=inspectorTable as soon as EUI supports it
       const inspectorPanel = await testSubjects.find('inspectorPanel');
       const tableBody = await retry.try(async () => inspectorPanel.findByTagName('tbody'));
-      return await tableBody.getVisibleText();
+      // Convert the data into a nested array format:
+      // [ [cell1_in_row1, cell2_in_row1], [cell1_in_row2, cell2_in_row2] ]
+      const rows = await tableBody.findAllByTagName('tr');
+      return await Promise.all(rows.map(async row => {
+        const cells = await row.findAllByTagName('td');
+        return await Promise.all(cells.map(async cell => cell.getVisibleText()));
+      }));
     }
 
     async getInspectorTableHeaders() {
@@ -853,15 +859,19 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async getVisualizationRequest() {
       log.debug('getVisualizationRequest');
       await this.openInspector();
-      await testSubjects.click('spyModeSelect-request');
-      return await testSubjects.getVisibleText('visualizationEsRequestBody');
+      await testSubjects.click('inspectorViewChooser');
+      await testSubjects.click('inspectorViewChooserRequests');
+      await testSubjects.click('inspectorRequestDetailRequest');
+      return await testSubjects.getVisibleText('inspectorRequestBody');
     }
 
     async getVisualizationResponse() {
       log.debug('getVisualizationResponse');
       await this.openInspector();
-      await testSubjects.click('spyModeSelect-response');
-      return await testSubjects.getVisibleText('visualizationEsResponseBody');
+      await testSubjects.click('inspectorViewChooser');
+      await testSubjects.click('inspectorViewChooserRequests');
+      await testSubjects.click('inspectorRequestDetailResponse');
+      return await testSubjects.getVisibleText('inspectorResponseBody');
     }
 
     async getMapBounds() {

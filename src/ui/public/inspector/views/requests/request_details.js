@@ -56,6 +56,7 @@ class RequestDetails extends Component {
         key={detail.name}
         isSelected={detail === this.state.selectedDetail}
         onClick={() => this.selectDetailsTab(detail)}
+        data-test-subj={`inspectorRequestDetail${detail.name}`}
       >
         {detail.name}
       </EuiTab>

@@ -74,10 +74,10 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should show results after clicking play (join on states)', async function () {
-        const expectedData = 'CN,2,592,IN,2,373,US,1,194,ID,489,BR,415';
+        const expectedData = [['CN', '2,592'], ['IN', '2,373'], ['US', '1,194'], ['ID', '489'], ['BR', '415']];
         await PageObjects.visualize.openInspector();
         const data = await PageObjects.visualize.getInspectorTableData();
-        expect(data.trim().split('\n').join(',')).to.eql(expectedData);
+        expect(data).to.eql(expectedData);
       });
 
       it('should change results after changing layer to world', async function () {
@@ -97,8 +97,8 @@ export default function ({ getService, getPageObjects }) {
 
         await PageObjects.visualize.openInspector();
         const actualData = await PageObjects.visualize.getInspectorTableData();
-        const expectedData = 'CN,2,592,IN,2,373,US,1,194,ID,489,BR,415';
-        expect(actualData.trim().split('\n').join(',')).to.eql(expectedData);
+        const expectedData = [['CN', '2,592'], ['IN', '2,373'], ['US', '1,194'], ['ID', '489'], ['BR', '415']];
+        expect(actualData).to.eql(expectedData);
 
 
       });

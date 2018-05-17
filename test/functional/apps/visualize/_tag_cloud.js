@@ -152,11 +152,12 @@ export default function ({ getService, getPageObjects }) {
 
 
       it.skip('should show correct data', function () {
-        const expectedTableData =  [ '32,212,254,720', '737',
-          '21,474,836,480', '728',
-          '20,401,094,656', '687',
-          '19,327,352,832', '695',
-          '18,253,611,008', '679'
+        const expectedTableData =  [
+          ['32,212,254,720', '737'],
+          ['21,474,836,480', '728'],
+          ['20,401,094,656', '687'],
+          ['19,327,352,832', '695'],
+          ['18,253,611,008', '679'],
         ];
 
         return PageObjects.visualize.openInspector()
@@ -167,8 +168,8 @@ export default function ({ getService, getPageObjects }) {
             return PageObjects.visualize.getInspectorTableData();
           })
           .then(function showData(data) {
-            log.debug(data.split('\n'));
-            expect(data.trim().split('\n')).to.eql(expectedTableData);
+            log.debug(data);
+            expect(data).to.eql(expectedTableData);
           });
       });
 

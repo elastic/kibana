@@ -37,6 +37,7 @@ class InspectorModes extends Component {
           this.props.onModeSelected(mode);
           this.closeSelector();
         }}
+        data-test-subj={`inspectorViewChooser${mode.title}`}
       >
         {mode.title}
       </EuiContextMenuItem>
@@ -50,6 +51,7 @@ class InspectorModes extends Component {
         size="l"
         iconType="arrowDown"
         iconSide="right"
+        data-test-subj="inspectorViewChooser"
         onClick={this.toggleSelector}
       >
         { selectedMode.icon &&

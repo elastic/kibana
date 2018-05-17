@@ -104,9 +104,9 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should visualize scripted field in vertical bar chart', async function () {
-        const expectedChartValues = [ '14', '31', '10', '29', '7', '24', '11', '24', '12', '23',
-          '20', '23', '19', '21', '6', '20', '17', '20', '30', '20', '13', '19', '18', '18', '16', '17', '5', '16',
-          '8', '16', '15', '14', '3', '13', '2', '12', '9', '10', '4', '9'
+        const expectedChartValues = [ ['14', '31'], ['10', '29'], ['7', '24'], ['11', '24'], ['12', '23'],
+          ['20', '23'], ['19', '21'], ['6', '20'], ['17', '20'], ['30', '20'], ['13', '19'], ['18', '18'],
+          ['16', '17'], ['5', '16'], ['8', '16'], ['15', '14'], ['3', '13'], ['2', '12'], ['9', '10'], ['4', '9']
         ];
         await PageObjects.discover.removeAllFilters();
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName);
@@ -115,10 +115,10 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.openInspector();
         await PageObjects.visualize.setInspectorTablePageSize(50);
         const data = await PageObjects.visualize.getInspectorTableData();
-        await log.debug('getDataTableData = ' + data.split('\n'));
+        await log.debug('getDataTableData = ' + data);
         await log.debug('data=' + data);
         await log.debug('data.length=' + data.length);
-        expect(data.trim().split('\n')).to.eql(expectedChartValues);
+        expect(data).to.eql(expectedChartValues);
       });
     });
 
@@ -178,10 +178,13 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.visualize.openInspector();
         const data = await PageObjects.visualize.getInspectorTableData();
-        await log.debug('getDataTableData = ' + data.split('\n'));
+        await log.debug('getDataTableData = ' + data);
         await log.debug('data=' + data);
         await log.debug('data.length=' + data.length);
-        expect(data.trim().split('\n')).to.eql([ 'good', '359', 'bad', '27' ]);
+        expect(data).to.eql([
+          ['good', '359'],
+          ['bad', '27']
+        ]);
       });
     });
 
@@ -241,10 +244,13 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.visualize.openInspector();
         const data = await PageObjects.visualize.getInspectorTableData();
-        await log.debug('getDataTableData = ' + data.split('\n'));
+        await log.debug('getDataTableData = ' + data);
         await log.debug('data=' + data);
         await log.debug('data.length=' + data.length);
-        expect(data.trim().split('\n')).to.eql([ 'true', '359', 'false', '27' ]);
+        expect(data).to.eql([
+          ['true', '359'],
+          ['false', '27']
+        ]);
       });
     });
 
@@ -305,30 +311,30 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.openInspector();
         await PageObjects.visualize.setInspectorTablePageSize(50);
         const data = await PageObjects.visualize.getInspectorTableData();
-        await log.debug('getDataTableData = ' + data.split('\n'));
+        await log.debug('getDataTableData = ' + data);
         await log.debug('data=' + data);
         await log.debug('data.length=' + data.length);
-        expect(data.trim().split('\n')).to.eql([
-          '2015-09-17 20:00', '1',
-          '2015-09-17 21:00', '1',
-          '2015-09-17 23:00', '1',
-          '2015-09-18 00:00', '1',
-          '2015-09-18 03:00', '1',
-          '2015-09-18 04:00', '1',
-          '2015-09-18 04:00', '1',
-          '2015-09-18 04:00', '1',
-          '2015-09-18 04:00', '1',
-          '2015-09-18 05:00', '1',
-          '2015-09-18 05:00', '1',
-          '2015-09-18 05:00', '1',
-          '2015-09-18 05:00', '1',
-          '2015-09-18 06:00', '1',
-          '2015-09-18 06:00', '1',
-          '2015-09-18 06:00', '1',
-          '2015-09-18 06:00', '1',
-          '2015-09-18 07:00', '1',
-          '2015-09-18 07:00', '1',
-          '2015-09-18 07:00', '1',
+        expect(data).to.eql([
+          ['2015-09-17 20:00', '1'],
+          ['2015-09-17 21:00', '1'],
+          ['2015-09-17 23:00', '1'],
+          ['2015-09-18 00:00', '1'],
+          ['2015-09-18 03:00', '1'],
+          ['2015-09-18 04:00', '1'],
+          ['2015-09-18 04:00', '1'],
+          ['2015-09-18 04:00', '1'],
+          ['2015-09-18 04:00', '1'],
+          ['2015-09-18 05:00', '1'],
+          ['2015-09-18 05:00', '1'],
+          ['2015-09-18 05:00', '1'],
+          ['2015-09-18 05:00', '1'],
+          ['2015-09-18 06:00', '1'],
+          ['2015-09-18 06:00', '1'],
+          ['2015-09-18 06:00', '1'],
+          ['2015-09-18 06:00', '1'],
+          ['2015-09-18 07:00', '1'],
+          ['2015-09-18 07:00', '1'],
+          ['2015-09-18 07:00', '1'],
         ]);
       });
     });
