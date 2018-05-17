@@ -17,6 +17,11 @@ you can configure {kib} to access {es} via HTTPS. Thus, communications between
 
 . Configure {kib} to encrypt communications between the browser and the {kib}
 server:
++
+--
+NOTE: You do not need to enable {security} for this type of encryption. 
+
+--
 
 .. Generate a server certificate for {kib}. 
 +
