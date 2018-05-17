@@ -2,12 +2,6 @@
   "compilerOptions": {
     "baseUrl": ".",
 
-    "paths": {
-      "ui/*": [
-        "src/ui/public/*"
-      ]
-    },
-
     // Enables all strict type checking options.
     "strict": true,
 
