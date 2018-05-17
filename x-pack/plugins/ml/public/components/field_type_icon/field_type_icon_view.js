@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiToolTip } from '@elastic/eui';
 
-export function FieldTypeIcon({ ML_JOB_FIELD_TYPES, tooltipEnabled, type }) {
+export function FieldTypeIcon({ ML_JOB_FIELD_TYPES, tooltipEnabled = false, type }) {
   let ariaLabel = '';
   let iconClass = '';
   let iconChar = '';
@@ -43,6 +43,10 @@ export function FieldTypeIcon({ ML_JOB_FIELD_TYPES, tooltipEnabled, type }) {
       ariaLabel = 'IP address field';
       iconClass = 'fa-laptop';
       break;
+    default:
+      // if type doesn't match one of ML_JOB_FIELD_TYPES
+      // don't render the component at all
+      return null;
   }
 
   let className = 'field-type-icon';
@@ -56,10 +60,13 @@ export function FieldTypeIcon({ ML_JOB_FIELD_TYPES, tooltipEnabled, type }) {
     iconChar
   };
 
-  if (tooltipEnabled) {
+  if (tooltipEnabled === true) {
+    // wrap the inner component inside <span> because EuiToolTip doesn't seem
+    // to support having another component directly inside the tooltip anchor
+    // see https://github.com/elastic/eui/issues/839
     return (
-      <EuiToolTip content={type}>
-        <FieldTypeIconContainer {...containerProps} />
+      <EuiToolTip position="left" content={type}>
+        <span><FieldTypeIconContainer {...containerProps} /></span>
       </EuiToolTip>
     );
   }
@@ -68,7 +75,8 @@ export function FieldTypeIcon({ ML_JOB_FIELD_TYPES, tooltipEnabled, type }) {
 }
 FieldTypeIcon.propTypes = {
   ML_JOB_FIELD_TYPES: PropTypes.object.isRequired,
-  type: PropTypes.string.isRequired
+  tooltipEnabled: PropTypes.bool,
+  type: PropTypes.string
 };
 
 function FieldTypeIconContainer({ ariaLabel, className, iconChar }) {

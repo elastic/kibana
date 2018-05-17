@@ -18,22 +18,28 @@ const module = uiModules.get('apps/ml');
 module.directive('mlFieldTypeIcon', function () {
   return {
     restrict: 'E',
-    replace: true,
+    replace: false,
     scope: {
       tooltipEnabled: '=',
       type: '='
     },
     link: function (scope, element) {
-      const props = {
-        ML_JOB_FIELD_TYPES,
-        tooltipEnabled: scope.tooltipEnabled,
-        type: scope.type
-      };
+      scope.$watch('type', updateComponent);
 
-      ReactDOM.render(
-        React.createElement(FieldTypeIcon, props),
-        element[0]
-      );
+      updateComponent();
+
+      function updateComponent() {
+        const props = {
+          ML_JOB_FIELD_TYPES,
+          tooltipEnabled: scope.tooltipEnabled,
+          type: scope.type
+        };
+
+        ReactDOM.render(
+          React.createElement(FieldTypeIcon, props),
+          element[0]
+        );
+      }
     }
   };
 });
