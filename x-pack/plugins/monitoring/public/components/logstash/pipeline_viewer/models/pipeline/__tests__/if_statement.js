@@ -49,6 +49,7 @@ describe('IfStatement class', () => {
         esVertex.pipelineStage = 'output';
 
         ifVertex.trueOutgoingVertex = esVertex;
+        ifVertex.trueOutgoingVertices = [ esVertex ];
       });
 
       it('creates a IfStatement from vertex props', () => {
@@ -88,6 +89,9 @@ describe('IfStatement class', () => {
 
         ifVertex.trueOutgoingVertex = esVertex;
         ifVertex.falseOutgoingVertex = terminalVertex;
+
+        ifVertex.trueOutgoingVertices = [ esVertex ];
+        ifVertex.falseOutgoingVertices = [ terminalVertex ];
       });
 
       it('creates a IfStatement from vertex props', () => {
@@ -126,6 +130,7 @@ describe('IfStatement class', () => {
         esVertex.pipelineStage = 'output';
 
         ifVertex.trueOutgoingVertex = esVertex;
+        ifVertex.trueOutgoingVertices = [ esVertex ];
       });
 
       it('creates a IfStatement from vertex props', () => {
@@ -171,6 +176,9 @@ describe('IfStatement class', () => {
 
         ifVertex.trueOutgoingVertex = esVertex;
         ifVertex.falseOutgoingVertex = terminalVertex;
+
+        ifVertex.trueOutgoingVertices = [ esVertex ];
+        ifVertex.falseOutgoingVertices = [ terminalVertex ];
       });
 
       it('creates a IfStatement from vertex props', () => {

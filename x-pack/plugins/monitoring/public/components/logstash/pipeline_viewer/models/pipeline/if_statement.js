@@ -4,14 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pull } from 'lodash';
-
 import { Statement } from './statement';
 import { makeStatement } from './make_statement';
 import {
-  addVertices,
   isVertexPipelineStage
 } from './utils';
+
+function createChildStatements(outgoingVertices, statements, next, pipelineStage) {
+  if (!outgoingVertices) { return; }
+
+  outgoingVertices.forEach(vertex => {
+    let currentVertex = vertex;
+    while(isVertexPipelineStage(currentVertex, pipelineStage) && (currentVertex !== next)) {
+      statements.push(makeStatement(currentVertex, pipelineStage));
+      currentVertex = currentVertex.next;
+    }
+  });
+}
 
 export class IfStatement extends Statement {
   constructor(vertex, trueStatements, elseStatements) {
@@ -27,28 +36,15 @@ export class IfStatement extends Statement {
   static fromPipelineGraphVertex(ifVertex, pipelineStage) {
     const trueStatements = [];
     const elseStatements = [];
-    const { trueOutgoingVertices } = ifVertex;
-    const { falseOutgoingVertices } = ifVertex;
-    const trueVertex = ifVertex.trueOutgoingVertex;
-    const falseVertex = ifVertex.falseOutgoingVertex;
+    const {
+      trueOutgoingVertices,
+      falseOutgoingVertices
+    } = ifVertex;
+
     const next = ifVertex.next;
 
-    let currentVertex = trueVertex;
-    while (isVertexPipelineStage(currentVertex, pipelineStage) && (currentVertex !== next)) {
-      pull(trueOutgoingVertices, currentVertex);
-      trueStatements.push(makeStatement(currentVertex, pipelineStage));
-      currentVertex = currentVertex.next;
-    }
-
-    currentVertex = falseVertex;
-    while (currentVertex && isVertexPipelineStage(currentVertex, pipelineStage) && (currentVertex !== next)) {
-      pull(falseOutgoingVertices, currentVertex);
-      elseStatements.push(makeStatement(currentVertex, pipelineStage));
-      currentVertex = currentVertex.next;
-    }
-
-    addVertices(trueStatements, trueOutgoingVertices, pipelineStage, makeStatement);
-    addVertices(elseStatements, falseOutgoingVertices, pipelineStage, makeStatement);
+    createChildStatements(trueOutgoingVertices, trueStatements, next, pipelineStage);
+    createChildStatements(falseOutgoingVertices, elseStatements, next, pipelineStage);
 
     return new IfStatement(
       ifVertex,
