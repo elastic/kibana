@@ -102,6 +102,7 @@ export class DashboardAddPanel extends React.Component {
   render() {
     return (
       <EuiFlyout
+        ownFocus
         className="addPanelFlyout"
         onClose={this.props.onClose}
         size="s"
