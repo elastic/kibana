@@ -6,7 +6,7 @@ export function PanelMaximizeIcon({ onMaximize }) {
     <button
       className="kuiMicroButton viewModeExpandPanelToggle"
       aria-label="Maximize panel"
-      data-test-subj="dashboardPanelExpandIcon"
+      data-test-subj="dashboardPanelAction-togglePanel"
       onClick={onMaximize}
     >
       <span

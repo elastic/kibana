@@ -1,6 +1,7 @@
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-
+import { panelActionsStore } from '../../store/panel_actions_store';
+import { embeddableShape } from 'ui/embeddable';
 import { PanelOptionsMenu } from './panel_options_menu';
 import {
   buildEuiContextMenuPanels,
@@ -94,22 +95,24 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
   // Don't build the panels if the pop over is not open, or this gets expensive - this function is called once for
   // every panel, every time any state changes.
   if (isPopoverOpen) {
-    const mainPanel = new DashboardContextMenuPanel({
+    const contextMenuPanel = new DashboardContextMenuPanel({
       title: 'Options',
-      id: 'mainMenu',
-      actions: [
-        getEditPanelAction(),
-        getCustomizePanelAction({
-          onResetPanelTitle,
-          onUpdatePanelTitle,
-          title: panelTitle,
-          closeContextMenu: closeMyContextMenuPanel
-        }),
-        getToggleExpandPanelAction({ isExpanded, toggleExpandedPanel }),
-        getRemovePanelAction(onDeletePanel),
-      ]
+      id: 'mainMenu'
     });
-    panels = buildEuiContextMenuPanels(mainPanel, { embeddable: ownProps.embeddable, containerState });
+
+    const actions = [
+      getEditPanelAction(),
+      getCustomizePanelAction({
+        onResetPanelTitle,
+        onUpdatePanelTitle,
+        title: panelTitle,
+        closeContextMenu: closeMyContextMenuPanel
+      }),
+      getToggleExpandPanelAction({ isExpanded, toggleExpandedPanel }),
+      getRemovePanelAction(onDeletePanel),
+    ].concat(panelActionsStore.actions);
+
+    panels = buildEuiContextMenuPanels({ contextMenuPanel, actions, embeddable: ownProps.embeddable, containerState });
   }
 
   return {
@@ -128,4 +131,5 @@ export const PanelOptionsMenuContainer = connect(
 
 PanelOptionsMenuContainer.propTypes = {
   panelId: PropTypes.string.isRequired,
+  embeddable: embeddableShape,
 };

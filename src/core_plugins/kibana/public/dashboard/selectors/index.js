@@ -165,6 +165,7 @@ export const getDescription = dashboard => dashboard.metadata.description;
  * This state object is specifically for communicating to embeddables and it's structure is not tied to
  * the redux tree structure.
  * @typedef {Object} ContainerState
+ * @property {DashboardViewMode} viewMode - edit or view mode.
  * @property {String} timeRange.to - either an absolute time range in utc format or a relative one (e.g. now-15m)
  * @property {String} timeRange.from - either an absolute time range in utc format or a relative one (e.g. now-15m)
  * @property {Object} embeddableCustomization
@@ -187,6 +188,7 @@ export const getContainerState = (dashboard, panelId) => {
     embeddableCustomization: _.cloneDeep(getEmbeddableCustomization(dashboard, panelId) || {}),
     hidePanelTitles: getHidePanelTitles(dashboard),
     customTitle: getPanel(dashboard, panelId).title,
+    viewMode: getViewMode(dashboard),
   };
 };
 

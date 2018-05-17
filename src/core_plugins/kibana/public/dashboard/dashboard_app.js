@@ -64,7 +64,7 @@ app.directive('dashboardApp', function ($injector) {
       const embeddableFactories = Private(EmbeddableFactoriesRegistryProvider);
       const panelActionsRegistry = Private(DashboardPanelActionsRegistryProvider);
 
-      panelActionsStore.initialize(panelActionsRegistry);
+      panelActionsStore.initializeFromRegistry(panelActionsRegistry);
 
       $scope.getEmbeddableFactory = panelType => embeddableFactories.byName[panelType];
 

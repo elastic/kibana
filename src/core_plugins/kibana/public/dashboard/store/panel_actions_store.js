@@ -9,10 +9,12 @@ class PanelActionsStore {
 
   /**
    *
-   * @type {Array.<DashboardPanelAction>}
+   * @type {IndexedArray} panelActionsRegistry
    */
-  initialize(panelActions) {
-    this.actions = panelActions;
+  initializeFromRegistry(panelActionsRegistry) {
+    panelActionsRegistry.forEach(panelAction => {
+      this.actions.push(panelAction);
+    });
   }
 }
 

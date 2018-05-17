@@ -5,6 +5,7 @@ import {
 } from '@elastic/eui';
 
 import { DashboardPanelAction } from 'ui/dashboard_panel_actions';
+import { DashboardViewMode } from '../../../dashboard_view_mode';
 
 /**
  *
@@ -15,7 +16,9 @@ export function getEditPanelAction() {
     displayName: 'Edit visualization',
     id: 'editPanel',
     icon: <EuiIcon type="pencil" />,
+    parentPanelId: 'mainMenu',
     onClick: ({ embeddable }) => { window.location = embeddable.metadata.editUrl; },
-    disabled: ({ embeddable }) => (!embeddable.metadata || !embeddable.metadata.editUrl),
+    isVisible: ({ containerState }) => (containerState.viewMode === DashboardViewMode.EDIT),
+    isDisabled: ({ embeddable }) => (!embeddable.metadata || !embeddable.metadata.editUrl),
   });
 }

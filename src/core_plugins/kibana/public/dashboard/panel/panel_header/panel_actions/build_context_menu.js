@@ -1,22 +1,22 @@
-import { panelActionsStore } from '../../../store/panel_actions_store';
-
 /**
- * Loops through any registered actions and inserts any that belong on the given panel.
+ * Loops through allActions and extracts those that belong on the given contextMenuPanelId
  * @param {string} contextMenuPanelId
- * @param {Array.<DashboardPanelAction>} contextMenuActions
+ * @param {Array.<DashboardPanelAction>} allActions
  */
-function insertPluggableActionsForPanel(contextMenuPanelId, contextMenuActions) {
-  for (let i = 0; i < panelActionsStore.actions.length; i++) {
-    const pluggableAction = panelActionsStore.actions[i];
-    if (pluggableAction.parentPanelId === contextMenuPanelId) {
-      contextMenuActions.push(pluggableAction);
+function getActionsForPanel(contextMenuPanelId, allActions) {
+  const panelActions = [];
+  for (let i = 0; i < allActions.length; i++) {
+    const action = allActions[i];
+    if (action.parentPanelId === contextMenuPanelId) {
+      panelActions.push(action);
     }
   }
+  return panelActions;
 }
 
 /**
- *
- * @param {Array.<DashboardPanelAction>} contextMenuActions
+ * @param {String} contextMenuPanelId
+ * @param {Array.<DashboardPanelAction>} actions
  * @param {Embeddable} embeddable
  * @param {ContainerState} containerState
  * @return {{
@@ -26,10 +26,11 @@ function insertPluggableActionsForPanel(contextMenuPanelId, contextMenuActions) 
  *     need to be moved to the top level for EUI.
  *  }}
  */
-function buildEuiContextMenuPanelItemsAndChildPanels(contextMenuActions, { embeddable, containerState }) {
+function buildEuiContextMenuPanelItemsAndChildPanels({ contextMenuPanelId, actions, embeddable, containerState }) {
   const items = [];
   let childPanels = [];
-  contextMenuActions.forEach(action => {
+  const actionsForPanel = getActionsForPanel(contextMenuPanelId, actions);
+  actionsForPanel.forEach(action => {
     const isVisible = action.isVisible({ embeddable, containerState });
     if (!isVisible) {
       return;
@@ -38,7 +39,12 @@ function buildEuiContextMenuPanelItemsAndChildPanels(contextMenuActions, { embed
     let childPanelToOpenOnClick;
     if (action.childContextMenuPanel) {
       childPanels = childPanels.concat(
-        buildEuiContextMenuPanels(action.childContextMenuPanel, { embeddable, containerState }));
+        buildEuiContextMenuPanels({
+          contextMenuPanel: action.childContextMenuPanel,
+          actions,
+          embeddable,
+          containerState
+        }));
       childPanelToOpenOnClick = action.childContextMenuPanel.id;
     }
 
@@ -58,13 +64,15 @@ function buildEuiContextMenuPanelItemsAndChildPanels(contextMenuActions, { embed
  * Transforms a DashboardContextMenuPanel to the shape EuiContextMenuPanel expects, inserting any registered pluggable
  * panel actions.
  * @param {DashboardContextMenuPanel} contextMenuPanel
+ * @param {Array.<DashboardPanelAction>} actions to build the context menu with
  * @param {Embeddable} embeddable
  * @param {ContainerState} containerState
  * @return {Object} An object that conforms to EuiContextMenuPanelShape in elastic/eui
  */
 export function buildEuiContextMenuPanels(
-  contextMenuPanel,
   {
+    contextMenuPanel,
+    actions,
     embeddable,
     containerState
   }) {
@@ -75,12 +83,14 @@ export function buildEuiContextMenuPanels(
     content: contextMenuPanel.getContent({ embeddable, containerState }),
   };
   let contextMenuPanels = [euiContextMenuPanel];
-  const contextMenuActions = contextMenuPanel.actions || [];
-
-  insertPluggableActionsForPanel(contextMenuPanel.id, contextMenuActions);
 
   const { items, childPanels } =
-    buildEuiContextMenuPanelItemsAndChildPanels(contextMenuActions, { embeddable, containerState });
+    buildEuiContextMenuPanelItemsAndChildPanels({
+      contextMenuPanelId: contextMenuPanel.id,
+      actions,
+      embeddable,
+      containerState
+    });
 
   contextMenuPanels = contextMenuPanels.concat(childPanels);
   euiContextMenuPanel.items = items;

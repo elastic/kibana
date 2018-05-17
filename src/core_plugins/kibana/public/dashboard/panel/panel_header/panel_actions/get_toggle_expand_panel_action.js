@@ -15,6 +15,7 @@ export function getToggleExpandPanelAction({ isExpanded, toggleExpandedPanel }) 
   return new DashboardPanelAction({
     displayName: isExpanded ? 'Minimize' : 'Full screen',
     id: 'togglePanel',
+    parentPanelId: 'mainMenu',
     // TODO: Update to minimize icon when https://github.com/elastic/eui/issues/837 is complete.
     icon: <EuiIcon
       type={isExpanded ? 'expand' : 'expand'}

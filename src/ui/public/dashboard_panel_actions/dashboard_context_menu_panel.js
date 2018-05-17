@@ -1,12 +1,10 @@
 export class DashboardContextMenuPanel {
   /**
-   * @param {Array.<DashboardPanelAction>} actions
    * @param {string} id
    * @param {string} title
    * @param {function} getContent
    */
-  constructor({ actions, id, title, getContent }) {
-    this.actions = actions || [];
+  constructor({ id, title, getContent }) {
     this.id = id;
     this.title = title;
 
@@ -16,11 +14,11 @@ export class DashboardContextMenuPanel {
   }
 
   /**
-   * Either actions or content should be specified.
+   * Optional, could be composed of actions instead of content.
    * @param {Embeddable} embeddable
    * @param {ContainerState} containerState
    */
-  getContent(/*embeddable, containerState*/) {
+  getContent(/*{ embeddable, containerState }*/) {
     return null;
   }
 }

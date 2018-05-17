@@ -44,7 +44,7 @@ export class DashboardPanelAction {
    * @param {Embeddable} embeddable
    * @param ContainerState} containerState
    */
-  onClick(/*embeddable, containerState*/) {}
+  onClick(/*{ embeddable, containerState }*/) {}
 
   /**
    * Defaults to always visible.
@@ -52,7 +52,7 @@ export class DashboardPanelAction {
    * @param ContainerState} containerState
    * @return {boolean}
    */
-  isVisible(/*embeddable, containerState*/) {
+  isVisible(/*{ embeddable, containerState }*/) {
     return true;
   }
 
@@ -61,7 +61,7 @@ export class DashboardPanelAction {
    * @param {Embeddable} embeddable
    * @param {ContainerState} containerState
    */
-  isDisabled(/*embeddable, containerState */) {
+  isDisabled(/*{ embeddable, containerState }*/) {
     return false;
   }
 }
