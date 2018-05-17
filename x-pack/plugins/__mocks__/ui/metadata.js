@@ -6,4 +6,5 @@
 
 export const metadata = {
   branch: 'my-metadata-branch',
+  version: 'my-metadata-version'
 };

@@ -48,7 +48,13 @@ export class FieldSelect extends Component {
       return;
     }
 
-    const indexPattern = await this.props.getIndexPattern(indexPatternId);
+    let indexPattern;
+    try {
+      indexPattern = await this.props.getIndexPattern(indexPatternId);
+    } catch (err) {
+      // index pattern no longer exists
+      return;
+    }
 
     if (this._hasUnmounted) {
       return;

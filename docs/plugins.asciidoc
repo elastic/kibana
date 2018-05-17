@@ -52,7 +52,7 @@ $ bin/kibana-plugin install file:///some/local/path/my-plugin.zip -d path/to/dir
 
 NOTE: This command creates the specified directory if it does not already exist.
 
-WARNING: This option is deprecated and will be removed in Kibana 7. It is known to not work with some plugins, including X-Pack.
+WARNING: This option is deprecated and will be removed in Kibana 7. It is known to not work with some plugins, including {xpack}.
 
 [float]
 === Installing Plugins with Linux packages

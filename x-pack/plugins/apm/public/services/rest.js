@@ -6,68 +6,52 @@
 
 import 'isomorphic-fetch';
 import { camelizeKeys } from 'humps';
-import url from 'url';
-import _ from 'lodash';
-import chrome from 'ui/chrome';
+import { kfetch } from 'ui/kfetch';
+import { omit } from 'lodash';
 
-async function callApi(options) {
-  const { pathname, query, camelcase, compact, ...requestOptions } = {
+function removeEmpty(query) {
+  return omit(query, val => val == null);
+}
+
+async function callApi(fetchOptions, kibanaOptions) {
+  const combinedKibanaOptions = {
     compact: true, // remove empty query args
     camelcase: true,
-    credentials: 'same-origin',
-    method: 'GET',
-    headers: new Headers({
-      'Content-Type': 'application/json',
-      'kbn-xsrf': true
-    }),
-    ...options
+    ...kibanaOptions
   };
 
-  const fullUrl = url.format({
-    pathname,
-    query: compact ? _.omit(query, val => val == null) : query
-  });
+  const combinedFetchOptions = {
+    ...fetchOptions,
+    query: combinedKibanaOptions.compact
+      ? removeEmpty(fetchOptions.query)
+      : fetchOptions.query
+  };
 
-  try {
-    const response = await fetch(fullUrl, requestOptions);
-    const json = await response.json();
-    if (!response.ok) {
-      throw new Error(JSON.stringify(json, null, 4));
-    }
-    return camelcase ? camelizeKeys(json) : json;
-  } catch (err) {
-    console.error(
-      'Rest request error with options:\n',
-      JSON.stringify(options, null, 4),
-      '\n',
-      err.message,
-      err.stack
-    );
-    throw err;
-  }
+  const res = await kfetch(combinedFetchOptions, combinedKibanaOptions);
+  return combinedKibanaOptions.camelcase ? camelizeKeys(res) : res;
 }
 
 export async function loadLicense() {
   return callApi({
-    pathname: chrome.addBasePath(`/api/xpack/v1/info`)
+    pathname: `/api/xpack/v1/info`
   });
 }
 
 export async function loadServerStatus() {
   return callApi({
-    pathname: chrome.addBasePath(`/api/apm/status/server`)
+    pathname: `/api/apm/status/server`
   });
 }
 
 export async function loadAgentStatus() {
   return callApi({
-    pathname: chrome.addBasePath(`/api/apm/status/agent`)
+    pathname: `/api/apm/status/agent`
   });
 }
 
 export async function loadServiceList({ start, end }) {
   return callApi({
-    pathname: chrome.addBasePath(`/api/apm/services`),
+    pathname: `/api/apm/services`,
     query: {
       start,
       end
@@ -77,7 +61,7 @@ export async function loadServiceList({ start, end }) {
 
 export async function loadServiceDetails({ start, end, serviceName }) {
   return callApi({
-    pathname: chrome.addBasePath(`/api/apm/services/${serviceName}`),
+    pathname: `/api/apm/services/${serviceName}`,
     query: {
       start,
       end
@@ -92,9 +76,7 @@ export async function loadTransactionList({
   transactionType
 }) {
   return callApi({
-    pathname: chrome.addBasePath(
-      `/api/apm/services/${serviceName}/transactions`
-    ),
+    pathname: `/api/apm/services/${serviceName}/transactions`,
     query: {
       start,
       end,
@@ -110,9 +92,7 @@ export async function loadTransactionDistribution({
   transactionName
 }) {
   return callApi({
-    pathname: chrome.addBasePath(
-      `/api/apm/services/${serviceName}/transactions/distribution`
-    ),
+    pathname: `/api/apm/services/${serviceName}/transactions/distribution`,
     query: {
       start,
       end,
@@ -123,9 +103,7 @@ export async function loadTransactionDistribution({
 
 export async function loadSpans({ serviceName, start, end, transactionId }) {
   return callApi({
-    pathname: chrome.addBasePath(
-      `/api/apm/services/${serviceName}/transactions/${transactionId}/spans`
-    ),
+    pathname: `/api/apm/services/${serviceName}/transactions/${transactionId}/spans`,
     query: {
       start,
       end
@@ -140,9 +118,7 @@ export async function loadTransaction({
   transactionId
 }) {
   const res = await callApi({
-    pathname: chrome.addBasePath(
-      `/api/apm/services/${serviceName}/transactions/${transactionId}`
-    ),
+    pathname: `/api/apm/services/${serviceName}/transactions/${transactionId}`,
     camelcase: false,
     query: {
       start,
@@ -164,9 +140,7 @@ export async function loadCharts({
   transactionName
 }) {
   return callApi({
-    pathname: chrome.addBasePath(
-      `/api/apm/services/${serviceName}/transactions/charts`
-    ),
+    pathname: `/api/apm/services/${serviceName}/transactions/charts`,
     query: {
       start,
       end,
@@ -186,7 +160,7 @@ export async function loadErrorGroupList({
   sortOrder
 }) {
   return callApi({
-    pathname: chrome.addBasePath(`/api/apm/services/${serviceName}/errors`),
+    pathname: `/api/apm/services/${serviceName}/errors`,
     query: {
       start,
       end,
@@ -205,9 +179,7 @@ export async function loadErrorGroupDetails({
   end
 }) {
   const res = await callApi({
-    pathname: chrome.addBasePath(
-      `/api/apm/services/${serviceName}/errors/${errorGroupId}`
-    ),
+    pathname: `/api/apm/services/${serviceName}/errors/${errorGroupId}`,
     camelcase: false,
     query: {
       start,
@@ -228,9 +200,7 @@ export async function loadErrorDistribution({
   errorGroupId
 }) {
   return callApi({
-    pathname: chrome.addBasePath(
-      `/api/apm/services/${serviceName}/errors/${errorGroupId}/distribution`
-    ),
+    pathname: `/api/apm/services/${serviceName}/errors/${errorGroupId}/distribution`,
     query: {
       start,
       end
@@ -241,7 +211,7 @@ export async function loadErrorDistribution({
 export async function createWatch(id, watch) {
   return callApi({
     method: 'PUT',
-    pathname: chrome.addBasePath(`/api/watcher/watch/${id}`),
+    pathname: `/api/watcher/watch/${id}`,
     body: JSON.stringify({ type: 'json', id, watch })
   });
 }

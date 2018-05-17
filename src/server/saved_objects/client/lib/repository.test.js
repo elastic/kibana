@@ -372,7 +372,8 @@ describe('SavedObjectsRepository', () => {
         searchFields: ['foo'],
         type: 'bar',
         sortField: 'name',
-        sortOrder: 'desc'
+        sortOrder: 'desc',
+        includeTypes: ['index-pattern', 'dashboard'],
       };
 
       await savedObjectsRepository.find(relevantOpts);

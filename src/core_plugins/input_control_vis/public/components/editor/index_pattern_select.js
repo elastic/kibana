@@ -46,13 +46,15 @@ export class IndexPatternSelect extends Component {
       return;
     }
 
-    const indexPattern = await this.props.getIndexPattern(indexPatternId);
-
-    if (!this._isMounted) {
+    let indexPattern;
+    try {
+      indexPattern = await this.props.getIndexPattern(indexPatternId);
+    } catch (err) {
+      // index pattern no longer exists
       return;
     }
 
-    if (!indexPattern) {
+    if (!this._isMounted) {
       return;
     }
 

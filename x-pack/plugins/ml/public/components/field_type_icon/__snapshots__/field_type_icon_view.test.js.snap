@@ -1,0 +1,32 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FieldTypeIcon render component inside tooltip wrapper 1`] = `
+<EuiToolTip
+  content="keyword"
+  position="left"
+>
+  <span>
+    <FieldTypeIconContainer
+      ariaLabel="Aggregatable string field"
+      className="field-type-icon"
+      iconChar="t"
+    />
+  </span>
+</EuiToolTip>
+`;
+
+exports[`FieldTypeIcon render component when type matches a field type 1`] = `
+<FieldTypeIconContainer
+  ariaLabel="Aggregatable string field"
+  className="field-type-icon"
+  iconChar="t"
+/>
+`;
+
+exports[`FieldTypeIcon update component 1`] = `
+<FieldTypeIconContainer
+  ariaLabel="Aggregatable string field"
+  className="field-type-icon"
+  iconChar="t"
+/>
+`;

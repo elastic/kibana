@@ -9,7 +9,15 @@ module.exports = {
   ],
 
   settings: {
-    'import/resolver': 'eslint-import-resolver-node',
+    'import/resolver': {
+      '@kbn/eslint-import-resolver-kibana': {
+        forceNode: true,
+      },
+    },
+
+    react: {
+      version: '16.3',
+    },
   },
 
   overrides: [
@@ -70,6 +78,7 @@ module.exports = {
 
         'import/resolver': {
           '@kbn/eslint-import-resolver-kibana': {
+            forceNode: false,
             rootPackageName: 'kibana',
             kibanaPath: '.',
             pluginMap: readdirSync(resolve(__dirname, 'x-pack/plugins')).reduce(

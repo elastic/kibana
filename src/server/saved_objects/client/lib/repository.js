@@ -201,6 +201,7 @@ export class SavedObjectsRepository {
       sortField,
       sortOrder,
       fields,
+      includeTypes,
     } = options;
 
     if (searchFields && !Array.isArray(searchFields)) {
@@ -223,6 +224,7 @@ export class SavedObjectsRepository {
           search,
           searchFields,
           type,
+          includeTypes,
           sortField,
           sortOrder
         })
