@@ -61,15 +61,17 @@ Selecting an action will allow you to customize settings for the respective acti
 
 image:management/watcher-ui/images/threshold-alert/threshold-alert-action.png["Threshold Alert Logging Action",link="management/watcher-ui/images/threshold-alert/threshold-alert-action.png"]
 
-All fields for an alert support using http://mustache.github.io/mustache.5.html[mustache syntax] and expose a `{{ctx}}` variable which exposes https://www.elastic.co/guide/en/watcher/current/condition.html#accessing-watch-payload[various properties of the alert]
+All fields for an alert support using http://mustache.github.io/mustache.5.html[mustache syntax] and expose a `{{ctx}}` variable which exposes {stack-ov}/condition-script.html#accessing-watch-payload[various properties of the alert]
 
 The supported actions are:
 
-* https://www.elastic.co/guide/en/watcher/current/actions.html#actions-slack[Slack]
-* https://www.elastic.co/guide/en/watcher/current/actions.html#actions-logging[Logging]
-* https://www.elastic.co/guide/en/watcher/current/actions.html#actions-email[Email]
+* {stack-ov}/actions-slack.html[Slack]
+* {stack-ov}/actions-logging.html[Logging]
+* {stack-ov}/actions-email.html[Email]
 
-Note that certain actions require configuration within ES, such as https://www.elastic.co/guide/en/x-pack/current/actions-email.html#configuring-email[email] and https://www.elastic.co/guide/en/x-pack/current/actions-slack.html#configuring-slack[slack].
+Note that certain actions require configuration within {es}, such as 
+{stack-ov}/actions-email.html#configuring-email[email] and 
+{stack-ov}/actions-slack.html#configuring-slack[slack].
 
 include::create-advanced-watch.asciidoc[]
 
