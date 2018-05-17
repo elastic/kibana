@@ -20,16 +20,13 @@ export class SavedObjectFinder extends React.Component {
     };
   }
 
-  componentWillMount() {
-    this._isMounted = true;
-  }
-
   componentWillUnmount() {
     this._isMounted = false;
     this.debouncedFetch.cancel();
   }
 
   componentDidMount() {
+    this._isMounted = true;
     this.fetchItems();
   }
 
