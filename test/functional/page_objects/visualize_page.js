@@ -518,6 +518,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await input.type(newValue);
     }
 
+    async toggleDisabledAgg(agg) {
+      await testSubjects.click(`aggregationEditor${agg} disableAggregationBtn`);
+    }
+
     async toggleOtherBucket() {
       return await find.clickByCssSelector('input[name="showOther"]');
     }
