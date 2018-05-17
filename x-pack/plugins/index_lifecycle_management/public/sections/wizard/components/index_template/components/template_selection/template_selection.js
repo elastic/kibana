@@ -7,7 +7,15 @@
 import React, { Fragment, PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
-import { EuiSelect, EuiFormRow, EuiSwitch, EuiFieldText } from '@elastic/eui';
+import {
+  EuiSelect,
+  EuiFormRow,
+  EuiSwitch,
+  EuiFieldText,
+  EuiDescribedFormGroup,
+  EuiLink,
+} from '@elastic/eui';
+
 import { ErrableFormRow } from '../../../../form_errors';
 import {
   STRUCTURE_TEMPLATE_NAME,
@@ -50,9 +58,22 @@ export class TemplateSelection extends PureComponent {
     } = this.props;
 
     return (
-      <Fragment>
+      <EuiDescribedFormGroup
+        title={<h4>Select a template</h4>}
+        fullWidth
+        titleSize="s"
+        description={
+          <p>
+            An index template defines the settings, mappings, and aliases to apply
+            when you create an index.{' '}
+            <EuiLink href="https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-templates.html">
+              Learn more
+            </EuiLink>.
+          </p>
+        }
+      >
         <ErrableFormRow
-          label="Template name"
+          label="Your existing templates"
           errorKey={STRUCTURE_TEMPLATE_NAME}
           isShowingErrors={isShowingErrors}
           errors={errors}
@@ -110,7 +131,7 @@ export class TemplateSelection extends PureComponent {
             ) : null}
           </Fragment>
         ) : null}
-      </Fragment>
+      </EuiDescribedFormGroup>
     );
   }
 }

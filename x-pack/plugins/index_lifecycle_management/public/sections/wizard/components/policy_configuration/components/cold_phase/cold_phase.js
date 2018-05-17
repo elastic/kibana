@@ -4,23 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { PureComponent } from 'react';
+import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiTitle,
   EuiSpacer,
   EuiText,
   EuiTextColor,
-  EuiAccordion,
   EuiFormRow,
   EuiFieldNumber,
   EuiSelect,
-  EuiSwitch,
   EuiButtonEmpty,
+  EuiDescribedFormGroup,
+  EuiBetaBadge,
+  EuiButton,
 } from '@elastic/eui';
 import {
   PHASE_ENABLED,
@@ -78,153 +77,155 @@ export class ColdPhase extends PureComponent {
     } = this.props;
 
     return (
-      <EuiAccordion
-        id="cold"
-        buttonContent={
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={false}>
-              <div
-                style={{
-                  background: '#0079a5',
-                  borderRadius: 4,
-                  height: 64,
-                  width: 64,
-                  lineHeight: '64px',
-                  textAlign: 'center',
-                  color: 'white'
-                }}
-              >
-                <EuiIcon type="sortDown" size="xl" />
-              </div>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="s">
-                <h4>Cold phase</h4>
-              </EuiTitle>
-              <EuiTextColor color="subdued">
+      <EuiDescribedFormGroup
+        title={
+          <div>
+            <span className="eui-displayInlineBlock eui-alignMiddle">Cold phase</span>{' '}
+            {phaseData[PHASE_ENABLED] ? (
+              <EuiBetaBadge iconType="check" className="eui-alignMiddle" />
+            ) : null}
+          </div>
+        }
+        titleSize="s"
+        description={
+          <Fragment>
+            <p>
+              Your read-only index is queried less frequently. Use this phase
+              when the index no longer needs to be on the most performant hardware.
+            </p>
+            {isShowingErrors ? (
+              <EuiTextColor color="danger">
                 <EuiText>
-                  <p>
-                    This phase is optional. Your read-only index is queried less frequently.
-                    Use this phase when the index no longer needs to be on the most performant hardware.
-                  </p>
+                  <p>This phase contains errors that need to be fixed.</p>
                 </EuiText>
               </EuiTextColor>
-              {isShowingErrors ? (
-                <EuiTextColor color="danger">
-                  <EuiText>
-                    <p>This phase contains errors that need to be fixed.</p>
-                  </EuiText>
-                </EuiTextColor>
-              ) : null}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-        buttonClassName="ilmAccordion__button"
-        buttonContentClassName="ilmAccordion__buttonContent"
-        extraAction={
-          <EuiSwitch
-            checked={phaseData[PHASE_ENABLED]}
-            onChange={e => setPhaseData(PHASE_ENABLED, e.target.checked)}
-            label="Enable this phase"
-          />
-        }
-      >
-        <div style={{ padding: '16px 16px 16px 40px', marginLeft: '-16px' }}>
-          <EuiTitle size="s">
-            <p>Configuration</p>
-          </EuiTitle>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup>
-            <EuiFlexItem style={{ maxWidth: 188 }}>
-              <ErrableFormRow
-                label="Move to cold phase after"
-                errorKey={PHASE_ROLLOVER_AFTER}
-                isShowingErrors={isShowingErrors}
-                errors={errors}
-              >
-                <EuiFieldNumber
-                  value={phaseData[PHASE_ROLLOVER_AFTER]}
-                  onChange={async e => {
-                    setPhaseData(PHASE_ROLLOVER_AFTER, e.target.value);
-                    validate();
-                  }}
-                />
-              </ErrableFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem style={{ maxWidth: 188 }}>
-              <EuiFormRow hasEmptyLabelSpace>
-                <EuiSelect
-                  value={phaseData[PHASE_ROLLOVER_AFTER_UNITS]}
-                  onChange={e =>
-                    setPhaseData(PHASE_ROLLOVER_AFTER_UNITS, e.target.value)
-                  }
-                  options={[
-                    { value: 'd', text: 'days' },
-                    { value: 'h', text: 'hours' }
-                  ]}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-
-          <EuiSpacer />
-
-          <ErrableFormRow
-            label="Where would you like to allocate these indices?"
-            errorKey={PHASE_NODE_ATTRS}
-            isShowingErrors={isShowingErrors}
-            errors={errors}
-            helpText={phaseData[PHASE_NODE_ATTRS] ? (
-              <EuiButtonEmpty
-                flush="left"
-                onClick={() => showNodeDetailsFlyout(phaseData[PHASE_NODE_ATTRS])}
-              >
-                View node details
-              </EuiButtonEmpty>
             ) : null}
-          >
-            <EuiSelect
-              value={phaseData[PHASE_NODE_ATTRS]}
-              options={nodeOptions}
-              onChange={async e => {
-                await setPhaseData(PHASE_NODE_ATTRS, e.target.value);
-                validate();
-              }}
-            />
-          </ErrableFormRow>
+          </Fragment>
+        }
+        fullWidth
+      >
+        {phaseData[PHASE_ENABLED] ? (
+          <Fragment>
 
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false} style={{ maxWidth: 188 }}>
-              <ErrableFormRow
-                label="Number of replicas"
-                errorKey={PHASE_REPLICA_COUNT}
-                isShowingErrors={isShowingErrors}
-                errors={errors}
+            <div>
+              <EuiSpacer />
+              <EuiButton
+                color="danger"
+                onClick={async () => {
+                  await setPhaseData(PHASE_ENABLED, false);
+                  validate();
+                }}
               >
-                <EuiFieldNumber
-                  value={phaseData[PHASE_REPLICA_COUNT]}
-                  onChange={async e => {
-                    await setPhaseData(PHASE_REPLICA_COUNT, e.target.value);
-                    validate();
-                  }}
-                />
-              </ErrableFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFormRow hasEmptyLabelSpace>
+                Deactive cold phase
+              </EuiButton>
+            </div>
+
+            <EuiSpacer size="m" />
+            <EuiFlexGroup>
+              <EuiFlexItem style={{ maxWidth: 188 }}>
+                <ErrableFormRow
+                  label="Move to cold phase after"
+                  errorKey={PHASE_ROLLOVER_AFTER}
+                  isShowingErrors={isShowingErrors}
+                  errors={errors}
+                >
+                  <EuiFieldNumber
+                    value={phaseData[PHASE_ROLLOVER_AFTER]}
+                    onChange={async e => {
+                      setPhaseData(PHASE_ROLLOVER_AFTER, e.target.value);
+                      validate();
+                    }}
+                  />
+                </ErrableFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem style={{ maxWidth: 188 }}>
+                <EuiFormRow hasEmptyLabelSpace>
+                  <EuiSelect
+                    value={phaseData[PHASE_ROLLOVER_AFTER_UNITS]}
+                    onChange={e =>
+                      setPhaseData(PHASE_ROLLOVER_AFTER_UNITS, e.target.value)
+                    }
+                    options={[
+                      { value: 'd', text: 'days' },
+                      { value: 'h', text: 'hours' }
+                    ]}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiSpacer />
+
+            <ErrableFormRow
+              label="Where would you like to allocate these indices?"
+              errorKey={PHASE_NODE_ATTRS}
+              isShowingErrors={isShowingErrors}
+              errors={errors}
+              helpText={phaseData[PHASE_NODE_ATTRS] ? (
                 <EuiButtonEmpty
                   flush="left"
-                  onClick={() =>
-                    setPhaseData(PHASE_REPLICA_COUNT, warmPhaseReplicaCount)
-                  }
+                  iconType="eye"
+                  onClick={() => showNodeDetailsFlyout(phaseData[PHASE_NODE_ATTRS])}
                 >
-                  Use number in warm phase
+                  View a list of nodes attached to this configuration
                 </EuiButtonEmpty>
-              </EuiFormRow>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
-      </EuiAccordion>
+              ) : null}
+            >
+              <EuiSelect
+                value={phaseData[PHASE_NODE_ATTRS]}
+                options={nodeOptions}
+                onChange={async e => {
+                  await setPhaseData(PHASE_NODE_ATTRS, e.target.value);
+                  validate();
+                }}
+              />
+            </ErrableFormRow>
+
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false} style={{ maxWidth: 188 }}>
+                <ErrableFormRow
+                  label="Number of replicas"
+                  errorKey={PHASE_REPLICA_COUNT}
+                  isShowingErrors={isShowingErrors}
+                  errors={errors}
+                >
+                  <EuiFieldNumber
+                    value={phaseData[PHASE_REPLICA_COUNT]}
+                    onChange={async e => {
+                      await setPhaseData(PHASE_REPLICA_COUNT, e.target.value);
+                      validate();
+                    }}
+                  />
+                </ErrableFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormRow hasEmptyLabelSpace>
+                  <EuiButtonEmpty
+                    flush="left"
+                    onClick={() =>
+                      setPhaseData(PHASE_REPLICA_COUNT, warmPhaseReplicaCount)
+                    }
+                  >
+                    Set same as warm phase
+                  </EuiButtonEmpty>
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </Fragment>
+        ) : (
+          <div>
+            <EuiSpacer />
+            <EuiButton
+              onClick={async () => {
+                await setPhaseData(PHASE_ENABLED, true);
+                validate();
+              }}
+            >
+              Activate cold phase
+            </EuiButton>
+          </div>
+        )}
+      </EuiDescribedFormGroup>
     );
   }
 }

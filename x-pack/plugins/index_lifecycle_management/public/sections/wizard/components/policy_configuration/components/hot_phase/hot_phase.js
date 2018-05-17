@@ -10,16 +10,16 @@ import PropTypes from 'prop-types';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiTitle,
   EuiSpacer,
   EuiText,
   EuiTextColor,
-  EuiAccordion,
   EuiFieldNumber,
   EuiSelect,
   EuiSwitch,
-  EuiLink
+  EuiLink,
+  EuiFormRow,
+  EuiDescribedFormGroup,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import {
   PHASE_ROLLOVER_ALIAS,
@@ -66,52 +66,41 @@ export class HotPhase extends PureComponent {
     } = this.props;
 
     return (
-      <EuiAccordion
-        id="hot"
-        buttonContent={
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={false}>
-              <div
-                style={{
-                  background: '#A30000',
-                  borderRadius: 4,
-                  height: 64,
-                  width: 64,
-                  lineHeight: '64px',
-                  textAlign: 'center',
-                  color: 'white'
-                }}
-              >
-                <EuiIcon type="indexFlush" size="xl" />
-              </div>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="s">
-                <h4>Hot phase</h4>
-              </EuiTitle>
-              <EuiTextColor color="subdued">
+      <EuiDescribedFormGroup
+        title={
+          <div>
+            <span className="eui-displayInlineBlock eui-alignMiddle">Hot phase</span>{' '}
+            <EuiBetaBadge iconType="check" className="eui-alignMiddle" />
+          </div>
+        }
+        titleSize="s"
+        description={
+          <Fragment>
+            <p>
+              This phase is required. Your index is being queried and in active writing mode.
+            </p>
+            {isShowingErrors ? (
+              <EuiTextColor color="danger">
                 <EuiText>
-                  <p>This phase is required. Your index is being queried and in active writing mode.</p>
+                  <p>This phase contains errors that need to be fixed.</p>
                 </EuiText>
               </EuiTextColor>
-              {isShowingErrors ? (
-                <EuiTextColor color="danger">
-                  <EuiText>
-                    <p>This phase contains errors that need to be fixed.</p>
-                  </EuiText>
-                </EuiTextColor>
-              ) : null}
-            </EuiFlexItem>
-          </EuiFlexGroup>
+            ) : null}
+          </Fragment>
         }
-        buttonClassName="ilmAccordion__button"
-        buttonContentClassName="ilmAccordion__buttonContent"
+        fullWidth
       >
-        <div style={{ padding: '16px 16px 16px 40px', marginLeft: '-16px' }}>
-          <EuiTitle size="s">
-            <p>Rollover condition</p>
-          </EuiTitle>
-          <EuiSpacer />
+        <EuiFormRow
+          hasEmptyLabelSpace
+          helpText={
+            <p>
+              Setting this to true will rollover the index when it gets too big or too old. The alias will switch to the new index.{' '}
+              <EuiLink href="https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-rollover-index.html">
+                Learn more.
+              </EuiLink>
+            </p>
+          }
+        >
           <EuiSwitch
             checked={phaseData[PHASE_ROLLOVER_ENABLED]}
             onChange={async e => {
@@ -120,111 +109,99 @@ export class HotPhase extends PureComponent {
             }}
             label="Enable rollover"
           />
-          <EuiSpacer size="xs"/>
-          <EuiTitle size="xs">
-            <p>
-              <EuiTextColor color="subdued">
-                Rollover the index when it gets too big or too old. The alias will switch to the new index.
-              </EuiTextColor>
-              &nbsp;
-              <EuiLink href="https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-rollover-index.html">
-                Learn more.
-              </EuiLink>
-            </p>
-          </EuiTitle>
-          {phaseData[PHASE_ROLLOVER_ENABLED] ? (
-            <Fragment>
-              <EuiSpacer size="m" />
-              <EuiFlexGroup>
-                <EuiFlexItem style={{ maxWidth: 188 }}>
-                  <ErrableFormRow
-                    label="Maximum index size stored"
-                    errorKey={PHASE_ROLLOVER_MAX_SIZE_STORED}
-                    isShowingErrors={isShowingErrors}
-                    errors={errors}
-                  >
-                    <EuiFieldNumber
-                      value={phaseData[PHASE_ROLLOVER_MAX_SIZE_STORED]}
-                      onChange={async e => {
-                        await setPhaseData(
-                          PHASE_ROLLOVER_MAX_SIZE_STORED,
-                          e.target.value
-                        );
-                        validate();
-                      }}
-                    />
-                  </ErrableFormRow>
-                </EuiFlexItem>
-                <EuiFlexItem style={{ maxWidth: 188 }}>
-                  <ErrableFormRow
-                    hasEmptyLabelSpace
-                    errorKey={PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS}
-                    isShowingErrors={isShowingErrors}
-                    errors={errors}
-                  >
-                    <EuiSelect
-                      value={phaseData[PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS]}
-                      onChange={async e => {
-                        await setPhaseData(
-                          PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS,
-                          e.target.value
-                        );
-                        validate();
-                      }}
-                      options={[
-                        { value: 'gb', text: 'gigabytes' },
-                        { value: MAX_SIZE_TYPE_DOCUMENT, text: 'documents' }
-                      ]}
-                    />
-                  </ErrableFormRow>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer />
-              <EuiFlexGroup>
-                <EuiFlexItem style={{ maxWidth: 188 }}>
-                  <ErrableFormRow
-                    label="Maximum age"
-                    errorKey={PHASE_ROLLOVER_MAX_AGE}
-                    isShowingErrors={isShowingErrors}
-                    errors={errors}
-                  >
-                    <EuiFieldNumber
-                      value={phaseData[PHASE_ROLLOVER_MAX_AGE]}
-                      onChange={async e => {
-                        await setPhaseData(PHASE_ROLLOVER_MAX_AGE, e.target.value);
-                        validate();
-                      }}
-                    />
-                  </ErrableFormRow>
-                </EuiFlexItem>
-                <EuiFlexItem style={{ maxWidth: 188 }}>
-                  <ErrableFormRow
-                    hasEmptyLabelSpace
-                    errorKey={PHASE_ROLLOVER_MAX_AGE_UNITS}
-                    isShowingErrors={isShowingErrors}
-                    errors={errors}
-                  >
-                    <EuiSelect
-                      value={phaseData[PHASE_ROLLOVER_MAX_AGE_UNITS]}
-                      onChange={async e => {
-                        await setPhaseData(
-                          PHASE_ROLLOVER_MAX_AGE_UNITS,
-                          e.target.value
-                        );
-                        validate();
-                      }}
-                      options={[
-                        { value: 'd', text: 'days' },
-                        { value: 'h', text: 'hours' }
-                      ]}
-                    />
-                  </ErrableFormRow>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </Fragment>
-          ) : null}
-        </div>
-      </EuiAccordion>
+        </EuiFormRow>
+        {phaseData[PHASE_ROLLOVER_ENABLED] ? (
+          <Fragment>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup>
+              <EuiFlexItem style={{ maxWidth: 188 }}>
+                <ErrableFormRow
+                  label="Maximum index size stored"
+                  errorKey={PHASE_ROLLOVER_MAX_SIZE_STORED}
+                  isShowingErrors={isShowingErrors}
+                  errors={errors}
+                >
+                  <EuiFieldNumber
+                    value={phaseData[PHASE_ROLLOVER_MAX_SIZE_STORED]}
+                    onChange={async e => {
+                      await setPhaseData(
+                        PHASE_ROLLOVER_MAX_SIZE_STORED,
+                        e.target.value
+                      );
+                      validate();
+                    }}
+                  />
+                </ErrableFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem style={{ maxWidth: 188 }}>
+                <ErrableFormRow
+                  hasEmptyLabelSpace
+                  errorKey={PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS}
+                  isShowingErrors={isShowingErrors}
+                  errors={errors}
+                >
+                  <EuiSelect
+                    value={phaseData[PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS]}
+                    onChange={async e => {
+                      await setPhaseData(
+                        PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS,
+                        e.target.value
+                      );
+                      validate();
+                    }}
+                    options={[
+                      { value: 'gb', text: 'gigabytes' },
+                      { value: MAX_SIZE_TYPE_DOCUMENT, text: 'documents' }
+                    ]}
+                  />
+                </ErrableFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer />
+            <EuiFlexGroup>
+              <EuiFlexItem style={{ maxWidth: 188 }}>
+                <ErrableFormRow
+                  label="Maximum age"
+                  errorKey={PHASE_ROLLOVER_MAX_AGE}
+                  isShowingErrors={isShowingErrors}
+                  errors={errors}
+                >
+                  <EuiFieldNumber
+                    value={phaseData[PHASE_ROLLOVER_MAX_AGE]}
+                    onChange={async e => {
+                      await setPhaseData(PHASE_ROLLOVER_MAX_AGE, e.target.value);
+                      validate();
+                    }}
+                  />
+                </ErrableFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem style={{ maxWidth: 188 }}>
+                <ErrableFormRow
+                  hasEmptyLabelSpace
+                  errorKey={PHASE_ROLLOVER_MAX_AGE_UNITS}
+                  isShowingErrors={isShowingErrors}
+                  errors={errors}
+                >
+                  <EuiSelect
+                    value={phaseData[PHASE_ROLLOVER_MAX_AGE_UNITS]}
+                    onChange={async e => {
+                      await setPhaseData(
+                        PHASE_ROLLOVER_MAX_AGE_UNITS,
+                        e.target.value
+                      );
+                      validate();
+                    }}
+                    options={[
+                      { value: 'd', text: 'days' },
+                      { value: 'h', text: 'hours' }
+                    ]}
+                  />
+                </ErrableFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </Fragment>
+        ) : null}
+      </EuiDescribedFormGroup>
     );
   }
 }
