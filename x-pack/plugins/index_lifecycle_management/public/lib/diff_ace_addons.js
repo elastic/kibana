@@ -7,30 +7,22 @@ import ace from 'brace';
 import { ADDITION_PREFIX, REMOVAL_PREFIX } from './diff_tools';
 
 function findInObject(key, obj, debug) {
-  // debug && console.log('findInObject()', key, obj);
   const objKeys = Object.keys(obj);
   for (const objKey of objKeys) {
     if (objKey === key) {
-      // debug && console.log('findInObject() FOUND', key);
       return obj[objKey];
     }
     if (typeof obj[objKey] === 'object' && !Array.isArray(obj[objKey])) {
       const item = findInObject(key, obj[objKey], debug);
       if (item !== false) {
-        // debug && console.log('findInObject() FOUND 2', key);
         return item;
       }
     }
   }
-  // debug && console.log('findInObject() NOT FOUND', key);
   return false;
 }
 
 function getDiffClasses(key, val, jsonObject) {
-  const debug = false;//key === 'name' && val === '"t"';
-
-  debug && console.log('getDiffClasses()', key, val);
-
   let value = val;
   if (value.endsWith(',')) {
     value = value.slice(0, -1);
@@ -39,8 +31,8 @@ function getDiffClasses(key, val, jsonObject) {
     value = value.slice(1, -1);
   }
 
-  const additionValue = findInObject(`${ADDITION_PREFIX}${key}`, jsonObject, debug);
-  const removalValue = findInObject(`${REMOVAL_PREFIX}${key}`, jsonObject, debug);
+  const additionValue = findInObject(`${ADDITION_PREFIX}${key}`, jsonObject);
+  const removalValue = findInObject(`${REMOVAL_PREFIX}${key}`, jsonObject);
 
   const isAddition = Array.isArray(additionValue)
     ? !!additionValue.find(v => v === value)
@@ -57,16 +49,6 @@ function getDiffClasses(key, val, jsonObject) {
   } else {
     diffClasses = 'variable';
   }
-
-  debug && console.log(`getDiffClasses()
-    key='${key}'
-    value='${value}'
-    additionValue='${additionValue}'
-    removalValue='${removalValue}'
-    isAddition=${isAddition}
-    isRemoval=${isRemoval}
-    diffClasses='${diffClasses}'
-  `);
 
   return diffClasses;
 }

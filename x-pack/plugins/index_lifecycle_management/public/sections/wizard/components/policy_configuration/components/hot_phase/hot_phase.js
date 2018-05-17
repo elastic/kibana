@@ -70,7 +70,7 @@ export class HotPhase extends PureComponent {
         title={
           <div>
             <span className="eui-displayInlineBlock eui-alignMiddle">Hot phase</span>{' '}
-            <EuiBetaBadge iconType="check" className="eui-alignMiddle" />
+            <EuiBetaBadge label="Enabled" iconType="check" className="eui-alignMiddle" />
           </div>
         }
         titleSize="s"

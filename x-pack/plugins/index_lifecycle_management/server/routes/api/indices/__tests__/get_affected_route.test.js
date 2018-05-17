@@ -8,7 +8,6 @@ import { registerGetAffectedRoute } from '../register_get_affected_route';
 
 jest.mock('../../../../lib/call_with_request_factory', () => {
   const mock = jest.fn().mockImplementation((method, params) => {
-    // console.log('hi', method, params);
     if (params.path === '/_template') {
       return {
         'foobar': {

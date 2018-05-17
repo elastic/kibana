@@ -133,8 +133,6 @@ export class Review extends Component {
 
     const { affectedIndices, isLoadingAffectedIndices, isShowingErrors } = this.state;
 
-    // console.log('render', affectedIndices);
-
     return (
       <div className="euiAnimateContentLoad">
         {/* <EuiTitle>

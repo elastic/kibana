@@ -95,10 +95,7 @@ export const mergeAndPreserveDuplicateKeys = (
   changes = []
 ) => {
   for (const [key, value] of Object.entries(source)) {
-    // const debug = key === 'fooobar';
-    // debug && console.log('mergeAndPreserveDuplicateKeys', key, value, target);
     if (isDifferent(target, key, value)) {
-      // debug && console.log('isDifferent');
       result[`${REMOVAL_PREFIX}${key}`] = value;
       result[`${ADDITION_PREFIX}${key}`] = target[key];
       changes.push({
@@ -107,7 +104,6 @@ export const mergeAndPreserveDuplicateKeys = (
         updated: removePrefixes(target[key]),
       });
     } else if (isObject(value)) {
-      // debug && console.log('value is object', target[key]);
       if (target.hasOwnProperty(key)) {
         const recurseResult = mergeAndPreserveDuplicateKeys(value, target[key]);
         result[key] = recurseResult.result;

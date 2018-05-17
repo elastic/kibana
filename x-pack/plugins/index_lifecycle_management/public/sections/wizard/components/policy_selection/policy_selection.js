@@ -31,7 +31,8 @@ export class PolicySelection extends Component {
     this.props.fetchPolicies();
   }
 
-  selectPolicy(policy) {
+  selectPolicy(policyName) {
+    const policy = this.props.policies.find(policy => policy.name === policyName);
     this.props.setSelectedPolicy(policy);
     // this.props.done();
   }
@@ -40,10 +41,11 @@ export class PolicySelection extends Component {
   render() {
     const { policies, existingPolicyName } = this.props;
 
-    let options = [];
-    options = policies.map(item => ({ value: item.name, text: item.name }));
-
-    console.log(policies);
+    const options = policies.map(item => ({ value: item.name, text: item.name }));
+    options.unshift({
+      value: '',
+      text: '-- New Policy --'
+    });
 
     return (
       <EuiDescribedFormGroup
@@ -55,7 +57,7 @@ export class PolicySelection extends Component {
           policy and save it with a new name."
         fullWidth
       >
-        <EuiFlexGroup alginItems="center">
+        <EuiFlexGroup alignItems="center">
           <EuiFlexItem>
             <EuiFormRow label="Existing policies">
               <EuiSelect
@@ -70,7 +72,7 @@ export class PolicySelection extends Component {
           <EuiFlexItem grow={false}>
             <EuiFormRow hasEmptyLabelSpace>
               <EuiButton
-                onClick={() => this.selectPolicy(null)}
+                onClick={() => this.selectPolicy()}
               >
                 Create new policy
               </EuiButton>

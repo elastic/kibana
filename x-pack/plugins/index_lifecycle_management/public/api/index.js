@@ -11,8 +11,6 @@ export const setHttpClient = (client) => {
 };
 const apiPrefix = chrome.addBasePath('/api/index_lifecycle_management');
 
-console.log('apiPrefix', apiPrefix);
-
 export async function loadNodes() {
   const response = await httpClient.get(`${apiPrefix}/nodes/list`);
   return response.data;

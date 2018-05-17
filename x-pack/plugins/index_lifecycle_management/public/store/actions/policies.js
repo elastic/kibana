@@ -22,6 +22,7 @@ export const fetchPolicies = () => async dispatch => {
   }
 
   dispatch(fetchedPolicies(policies));
+  return policies;
 };
 
 export const setSelectedPolicy = createAction('SET_SELECTED_POLICY');

@@ -112,7 +112,7 @@ export const policies = handleActions(
       };
     },
     [setSelectedPolicy](state, { payload: selectedPolicy }) {
-      if (selectedPolicy === null) {
+      if (!selectedPolicy) {
         return {
           ...state,
           selectedPolicy: defaultPolicy,

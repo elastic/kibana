@@ -17,7 +17,7 @@ import {
   setAliasName,
   setSelectedPrimaryShardCount,
   setSelectedReplicaCount,
-  setSelectedNodeAttrs
+  setSelectedNodeAttrs,
 } from '.';
 import {
   PHASE_HOT,
@@ -43,7 +43,7 @@ export const fetchIndexTemplates = () => async dispatch => {
 };
 
 export const fetchedIndexTemplate = createAction('FETCHED_INDEX_TEMPLATE');
-export const fetchIndexTemplate = templateName => async dispatch => {
+export const fetchIndexTemplate = templateName => async (dispatch) => {
   let template;
   try {
     template = await loadIndexTemplate(templateName);

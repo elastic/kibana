@@ -116,7 +116,7 @@ export class WarmPhase extends Component {
           <div>
             <span className="eui-displayInlineBlock eui-alignMiddle">Warm phase</span>{' '}
             {phaseData[PHASE_ENABLED] ? (
-              <EuiBetaBadge iconType="check" className="eui-alignMiddle" />
+              <EuiBetaBadge label="Enabled" iconType="check" className="eui-alignMiddle" />
             ) : null}
           </div>
         }

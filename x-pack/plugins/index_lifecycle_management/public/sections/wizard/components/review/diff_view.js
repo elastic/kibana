@@ -47,21 +47,15 @@ export class DiffView extends PureComponent {
       templateDiff: { originalFullIndexTemplate, newFullIndexTemplate },
     } = this.props;
 
-    // console.log(JSON.stringify(this.props));
-
     const { result: mergedJson, changes } = mergeAndPreserveDuplicateKeys(
       originalFullIndexTemplate,
       newFullIndexTemplate
     );
 
-    console.log('mergedJson', mergedJson, changes);
-
     // Strip the ^ and $ characters
     const mergedJsonAsString = removePrefixes(
       JSON.stringify(mergedJson, null, 2)
     );
-
-    // console.log('mergedJsonAsString', mergedJsonAsString);
 
     setCurrentJsonObject(mergedJson);
     addDiffAddonsForAce();

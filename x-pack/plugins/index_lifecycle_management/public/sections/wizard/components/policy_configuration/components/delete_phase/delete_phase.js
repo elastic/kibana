@@ -65,7 +65,7 @@ export class DeletePhase extends PureComponent {
           <div>
             <span className="eui-displayInlineBlock eui-alignMiddle">Delete phase</span>{' '}
             {phaseData[PHASE_ENABLED] ? (
-              <EuiBetaBadge iconType="check" className="eui-alignMiddle" />
+              <EuiBetaBadge label="Enabled" iconType="check" className="eui-alignMiddle" />
             ) : null}
           </div>
         }

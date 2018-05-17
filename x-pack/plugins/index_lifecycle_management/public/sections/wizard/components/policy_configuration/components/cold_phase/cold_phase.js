@@ -82,7 +82,7 @@ export class ColdPhase extends PureComponent {
           <div>
             <span className="eui-displayInlineBlock eui-alignMiddle">Cold phase</span>{' '}
             {phaseData[PHASE_ENABLED] ? (
-              <EuiBetaBadge iconType="check" className="eui-alignMiddle" />
+              <EuiBetaBadge label="Enabled" iconType="check" className="eui-alignMiddle" />
             ) : null}
           </div>
         }
