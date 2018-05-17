@@ -67,7 +67,7 @@ export function createSavedObjectsService(server) {
   return {
     SavedObjectsClient,
     SavedObjectsRepository,
-    getScopedSavedObjectsClient: clientProvider.createSavedObjectsClient.bind(clientProvider),
-    registerScopedSavedObjectsClientFactory: clientProvider.registerCustomClientFactory.bind(clientProvider),
+    getScopedSavedObjectsClient: clientProvider.getScopedSavedObjectsClient.bind(clientProvider),
+    registerScopedSavedObjectsClientFactory: clientProvider.registerScopedSavedObjectsClientFactory.bind(clientProvider),
   };
 }

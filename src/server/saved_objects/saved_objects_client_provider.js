@@ -17,7 +17,7 @@ export class SavedObjectsClientProvider {
     this._customClientFactory;
   }
 
-  registerCustomClientFactory(customClientFactory) {
+  registerScopedSavedObjectsClientFactory(customClientFactory) {
     if (this._customClientFactory) {
       throw new Error(`custom client factory is already registered, can't register another one`);
     }
@@ -25,7 +25,7 @@ export class SavedObjectsClientProvider {
     this._customClientFactory = customClientFactory;
   }
 
-  createSavedObjectsClient(request) {
+  getScopedSavedObjectsClient(request) {
     const factory = this._customClientFactory || this._defaultClientFactory;
     return factory({
       request,
