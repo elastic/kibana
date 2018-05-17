@@ -67,9 +67,8 @@ image:images/tsvb-markdown.png["Markdown Visualization"]
 
 ==== Table
 
-The table visualization allows you to present data from multiple series in one
-table. You can define a grouping field to define rows in your table and add multiple
-columns via series to the table.
+A table visualization allows you to display data from multiple time series.
+You define which field group to show in the rows and what columns of data to display.
 
 image:images/tsvb-table.png["Table Visualization"]
 
