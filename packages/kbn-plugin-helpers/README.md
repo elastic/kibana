@@ -72,7 +72,6 @@ Setting | Description
 `skipInstallDependencies` | Don't install dependencies defined in package.json into build output
 `buildVersion` | Version for the build output
 `kibanaVersion` | Kibana version for the build output (added to package.json)
-`buildSourcePatterns` | Globs/patterns for files that should be copied into your distributable. Default patterns are defined [here](https://github.com/elastic/kibana/blob/master/packages/kbn-plugin-helpers/lib/plugin_config.js#L11-L16).
 
 ## TypeScript support
 
@@ -90,5 +89,3 @@ Plugin code can be written in [TypeScript](http://www.typescriptlang.org/) if de
   ]
 }
 ```
-
-> NOTE: If you define a custom `buildSourcePatterns`, make sure to include your `tsconfig.json` file so that the build task will transpile your `.ts` files into `.js` files before archiving your plugin.
