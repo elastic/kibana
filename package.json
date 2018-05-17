@@ -221,6 +221,7 @@
     "@kbn/eslint-import-resolver-kibana": "link:packages/kbn-eslint-import-resolver-kibana",
     "@kbn/eslint-plugin-license-header": "link:packages/kbn-eslint-plugin-license-header",
     "@kbn/plugin-generator": "link:packages/kbn-plugin-generator",
+    "@kbn/test": "link:packages/kbn-test",
     "angular-mocks": "1.4.7",
     "babel-eslint": "8.1.2",
     "babel-jest": "^22.4.3",
