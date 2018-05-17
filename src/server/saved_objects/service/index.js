@@ -1,4 +1,4 @@
-import { SavedObjectsClient, SavedObjectsRepository } from './client';
+import { SavedObjectsClient, SavedObjectsRepository } from '../client';
 import { ScopedSavedObjectsClientProvider } from './scoped_saved_objects_client_provider';
 
 export function createSavedObjectsService(server) {

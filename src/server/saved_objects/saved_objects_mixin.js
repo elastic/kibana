@@ -1,4 +1,4 @@
-import { createSavedObjectsService } from './saved_objects_service';
+import { createSavedObjectsService } from './service';
 
 import {
   createBulkGetRoute,
