@@ -1,3 +1,4 @@
+import className from 'classnames';
 import React from 'react';
 import PropTypes from 'prop-types';
 
@@ -5,6 +6,8 @@ import './editor_options_group.less';
 
 import {
   EuiAccordion,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
@@ -18,10 +21,12 @@ import {
  * to produce an aligned look and feel.
  */
 function EditorOptionsGroup(props) {
-  return (
+  const panelClass = className('editorOptionsGroup__panel', props.className);
+
+  const collapsibleOptionGroup = (
     <EuiPanel
       grow={false}
-      className="editorOptionsGroup__panel"
+      className={panelClass}
     >
       <EuiAccordion
         id={htmlIdGenerator('eog')()}
@@ -38,6 +43,37 @@ function EditorOptionsGroup(props) {
       </EuiAccordion>
     </EuiPanel>
   );
+
+  const simpleOptionGroup = (
+    <EuiPanel
+      grow={props.grow}
+      className={panelClass}
+    >
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiTitle size="xs">
+                <h2>{props.title}</h2>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {props.actions}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          { props.children }
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+
+  if (props.collapsible) {
+    return collapsibleOptionGroup;
+  } else {
+    return simpleOptionGroup;
+  }
 }
 
 EditorOptionsGroup.propTypes = {
@@ -50,13 +86,28 @@ EditorOptionsGroup.propTypes = {
    */
   actions: PropTypes.node,
   /**
+   * classNames to append to panel.
+   */
+  className: PropTypes.string,
+  /**
   * Whether the panel should be collapsed by default.
   */
   initialIsCollapsed: PropTypes.bool,
+  /**
+   * Whether the panel should be collapsible.
+   */
+  collapsible: PropTypes.bool,
+  /**
+   * Whether the panel should grow. Only applies when collapsible is set to false.
+   */
+  grow: PropTypes.bool,
+
   /**
    * All elements that should be within this group.
    */
   children: PropTypes.node.isRequired,
 };
+
+EditorOptionsGroup.defaultProps = { grow: false, collapsible: true };
 
 export { EditorOptionsGroup };

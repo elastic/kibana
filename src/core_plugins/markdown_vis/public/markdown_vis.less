@@ -5,26 +5,13 @@
   width: 100%;
 }
 
-.vis-editor {
+.markdown-vis-editor,
+.markdown-vis-editor-row {
+  display: flex;
+  flex: 1 1 100%;
+}
 
-  &.vis-type-markdown {
-
-    .visualization-options {
-      .flex-parent();
-      flex: 1 1 auto;
-    }
-
-    .markdown-vis-options {
-      .flex-parent();
-      flex: 1 1 auto;
-
-      textarea {
-        flex: 1 1 auto;
-        resize: none;
-      }
-
-    }
-
-  }
-
+.markdown-vis-editor-textarea {
+  flex: 1 1 auto;
+  resize: none;
 }

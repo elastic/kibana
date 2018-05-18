@@ -2,7 +2,8 @@ import './markdown_vis.less';
 import { MarkdownVisWrapper } from './markdown_vis_controller';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CATEGORY } from 'ui/vis/vis_category';
-import markdownVisParamsTemplate from './markdown_vis_params.html';
+import { MarkdownOptionsTab } from './markdown_vis_params';
+import { MarkdownEditorTab } from './markdown_vis_editor';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import image from './images/icon-markdown.svg';
 import { DefaultEditorSize } from 'ui/vis/editor_size';
@@ -33,7 +34,10 @@ function MarkdownVisProvider(Private) {
       }
     },
     editorConfig: {
-      optionsTemplate: markdownVisParamsTemplate,
+      optionTabs: [
+        { name: 'markdown', title: 'Markdown', editor: MarkdownEditorTab },
+        { name: 'options', title: 'Settings', editor: MarkdownOptionsTab },
+      ],
       enableAutoApply: true,
       defaultSize: DefaultEditorSize.LARGE,
     },
