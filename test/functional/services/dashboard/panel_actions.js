@@ -13,6 +13,7 @@ export function DashboardPanelActionsProvider({ getService }) {
   return new class DashboardPanelActions {
 
     async isContextMenuOpen(parent) {
+      log.debug('isContextMenuOpen');
       // Full screen toggle was chosen because it's available in both view and edit mode.
       return this.toggleExpandActionExists(parent);
     }
@@ -24,6 +25,7 @@ export function DashboardPanelActionsProvider({ getService }) {
     }
 
     async isContextMenuToggleVisible() {
+      log.debug('isContextMenuToggleVisible');
       return await testSubjects.exists(CONTEXT_MENU_TOGGLE_DATA_TEST_SUBJ);
     }
 
@@ -42,6 +44,7 @@ export function DashboardPanelActionsProvider({ getService }) {
     }
 
     async toggleExpandPanel(parent) {
+      log.debug('toggleExpandPanel');
       await (parent ? remote.moveMouseTo(parent) : testSubjects.moveMouseTo('dashboardPanelTitle'));
       const expandShown = await this.toggleExpandActionExists();
       if (!expandShown) {
@@ -65,11 +68,13 @@ export function DashboardPanelActionsProvider({ getService }) {
     }
 
     async toggleExpandPanel() {
+      log.debug('toggleExpandPanel');
       await this.openContextMenu();
       await testSubjects.click(TOGGLE_PANEL_DATA_TEST_SUBJ);
     }
 
     async removePanel() {
+      log.debug('removePanel');
       await this.openContextMenu();
       await testSubjects.click(REMOVE_PANEL_DATA_TEST_SUBJ);
     }
@@ -80,14 +85,17 @@ export function DashboardPanelActionsProvider({ getService }) {
     }
 
     async removePanelActionExists() {
+      log.debug('removePanelActionExists');
       return await testSubjects.exists(REMOVE_PANEL_DATA_TEST_SUBJ);
     }
 
     async editPanelActionExists() {
+      log.debug('editPanelActionExists');
       return await testSubjects.exists(EDIT_PANEL_DATA_TEST_SUBJ);
     }
 
     async toggleExpandActionExists() {
+      log.debug('toggleExpandActionExists');
       return await testSubjects.exists(TOGGLE_PANEL_DATA_TEST_SUBJ);
     }
 
