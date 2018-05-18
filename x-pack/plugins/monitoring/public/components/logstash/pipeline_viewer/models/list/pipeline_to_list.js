@@ -7,9 +7,9 @@
 import { flattenPipelineSection } from './flatten_pipeline_section';
 
 export function pipelineToList(pipeline) {
-  const inputs = flattenPipelineSection(pipeline.inputStatements, 0, null);
-  const filters = flattenPipelineSection(pipeline.filterStatements, 0, null);
-  const outputs = flattenPipelineSection(pipeline.outputStatements, 0, null);
+  const inputs = flattenPipelineSection(pipeline.inputStatements);
+  const filters = flattenPipelineSection(pipeline.filterStatements);
+  const outputs = flattenPipelineSection(pipeline.outputStatements);
   const { queue } = pipeline;
 
   return {

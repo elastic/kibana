@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function flattenPipelineSection(pipelineSection, depth, parentId) {
+export function flattenPipelineSection(pipelineSection, depth = 0, parentId = null) {
   const list = [];
 
   pipelineSection.forEach(statement => {
