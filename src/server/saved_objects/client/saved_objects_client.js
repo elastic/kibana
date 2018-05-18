@@ -251,7 +251,7 @@ export class SavedObjectsClient {
 
   /**
    * @param {object} [options={}]
-   * @property {string} [options.type]
+   * @property {(string|Array<string>)} [options.type]
    * @property {string} [options.search]
    * @property {Array<string>} [options.searchFields] - see Elasticsearch Simple Query String
    *                                        Query field argument for more information
@@ -272,7 +272,6 @@ export class SavedObjectsClient {
       sortField,
       sortOrder,
       fields,
-      includeTypes,
     } = options;
 
     if (searchFields && !Array.isArray(searchFields)) {
@@ -295,7 +294,6 @@ export class SavedObjectsClient {
           search,
           searchFields,
           type,
-          includeTypes,
           sortField,
           sortOrder
         })

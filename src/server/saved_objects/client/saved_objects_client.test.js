@@ -372,7 +372,6 @@ describe('SavedObjectsClient', () => {
         type: 'bar',
         sortField: 'name',
         sortOrder: 'desc',
-        includeTypes: ['index-pattern', 'dashboard'],
       };
 
       await savedObjectsClient.find(relevantOpts);
