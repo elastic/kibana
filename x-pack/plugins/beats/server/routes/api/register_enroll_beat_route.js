@@ -64,6 +64,7 @@ export function registerEnrollBeatRoute(server) {
         payload: Joi.object({
           enrollment_token: Joi.string().required(),
           type: Joi.string().required(),
+          version: Joi.string().required(),
           host_name: Joi.string().required()
         }).required()
       },
