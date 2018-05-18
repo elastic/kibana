@@ -2,13 +2,13 @@
   "compilerOptions": {
     "target": "es6",
     "module": "commonjs",
-    "baseUrl": "../../.",
+    "baseUrl": "../../../.",
     "paths": {
       "ui/*": [
-        "../src/ui/public/*"
+        "src/ui/public/*"
       ],
       "plugins/ml/*": [
-        "plugins/ml/public/*"
+        "x-pack/plugins/ml/public/*"
       ]
     }
   },
