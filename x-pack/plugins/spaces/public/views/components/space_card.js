@@ -36,7 +36,5 @@ function renderSpaceTitle(space) {
 }
 
 function renderSpaceDescription(space) {
-  return (
-    <EuiText className="spaceCardDescription"><p>{space.description}</p></EuiText>
-  );
+  return space.description;
 }

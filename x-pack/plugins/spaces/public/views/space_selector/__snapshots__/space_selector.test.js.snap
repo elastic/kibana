@@ -45,7 +45,7 @@ exports[`it renders without crashing 1`] = `
     className="euiPageBody"
   >
     <div
-      className="euiPanel euiPanel--paddingLarge euiPageContent"
+      className="euiPanel euiPanel--paddingLarge euiPageContent spaceSelectorPageContent"
     >
       <div
         className="euiText spaceWelcomeText"
@@ -61,16 +61,12 @@ exports[`it renders without crashing 1`] = `
           Select a space to begin.
         </p>
       </div>
-      <div
-        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceEvenly euiFlexGroup--responsive spacesGroup"
+      <hr
+        className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
       />
       <div
-        className="euiText spaceProfileText"
-      >
-        <p>
-          You can change your workspace at anytime by accessing your profile within Kibana.
-        </p>
-      </div>
+        className="euiSpacer euiSpacer--l"
+      />
     </div>
   </div>
 </div>
