@@ -8,6 +8,16 @@ import { Statement } from './statement';
 import { makeStatement } from './make_statement';
 import { isVertexPipelineStage } from './utils';
 
+function makeStatementsForOutgoingVertices(outgoingVertices, statements, next, pipelineStage) {
+  outgoingVertices.forEach(vertex => {
+    let currentVertex = vertex;
+    while(isVertexPipelineStage(currentVertex, pipelineStage) && (currentVertex !== next)) {
+      statements.push(makeStatement(currentVertex, pipelineStage));
+      currentVertex = currentVertex.next;
+    }
+  });
+}
+
 export class IfStatement extends Statement {
   constructor(vertex, trueStatements, elseStatements) {
     super(vertex);
@@ -22,22 +32,15 @@ export class IfStatement extends Statement {
   static fromPipelineGraphVertex(ifVertex, pipelineStage) {
     const trueStatements = [];
     const elseStatements = [];
+    const {
+      trueOutgoingVertices,
+      falseOutgoingVertices
+    } = ifVertex;
 
-    const trueVertex = ifVertex.trueOutgoingVertex;
-    const falseVertex = ifVertex.falseOutgoingVertex;
     const next = ifVertex.next;
 
-    let currentVertex = trueVertex;
-    while (isVertexPipelineStage(currentVertex, pipelineStage) && (currentVertex !== next)) {
-      trueStatements.push(makeStatement(currentVertex, pipelineStage));
-      currentVertex = currentVertex.next;
-    }
-
-    currentVertex = falseVertex;
-    while (currentVertex && isVertexPipelineStage(currentVertex, pipelineStage) && (currentVertex !== next)) {
-      elseStatements.push(makeStatement(currentVertex, pipelineStage));
-      currentVertex = currentVertex.next;
-    }
+    makeStatementsForOutgoingVertices(trueOutgoingVertices, trueStatements, next, pipelineStage);
+    makeStatementsForOutgoingVertices(falseOutgoingVertices, elseStatements, next, pipelineStage);
 
     return new IfStatement(
       ifVertex,
