@@ -1,8 +1,8 @@
 const REMOVE_PANEL_DATA_TEST_SUBJ = 'dashboardPanelAction-deletePanel';
 const EDIT_PANEL_DATA_TEST_SUBJ = 'dashboardPanelAction-editPanel';
-const TOGGLE_PANEL_DATA_TEST_SUBJ = 'dashboardPanelAction-togglePanel';
+const TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ = 'dashboardPanelAction-togglePanel';
 const CUSTOMIZE_PANEL_DATA_TEST_SUBJ = 'dashboardPanelAction-customizePanel';
-const CONTEXT_MENU_TOGGLE_DATA_TEST_SUBJ = 'dashboardPanelToggleMenuIcon';
+const OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ = 'dashboardPanelToggleMenuIcon';
 
 export function DashboardPanelActionsProvider({ getService }) {
   const log = getService('log');
@@ -20,13 +20,13 @@ export function DashboardPanelActionsProvider({ getService }) {
 
     async findContextMenu(parent) {
       return parent ?
-        await testSubjects.findDescendant(CONTEXT_MENU_TOGGLE_DATA_TEST_SUBJ, parent) :
-        await testSubjects.find(CONTEXT_MENU_TOGGLE_DATA_TEST_SUBJ);
+        await testSubjects.findDescendant(OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ, parent) :
+        await testSubjects.find(OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ);
     }
 
-    async isContextMenuToggleVisible() {
-      log.debug('isContextMenuToggleVisible');
-      return await testSubjects.exists(CONTEXT_MENU_TOGGLE_DATA_TEST_SUBJ);
+    async isContextMenuIconVisible() {
+      log.debug('isContextMenuIconVisible');
+      return await testSubjects.exists(OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ);
     }
 
     async openContextMenu(parent) {
@@ -70,7 +70,7 @@ export function DashboardPanelActionsProvider({ getService }) {
     async toggleExpandPanel() {
       log.debug('toggleExpandPanel');
       await this.openContextMenu();
-      await testSubjects.click(TOGGLE_PANEL_DATA_TEST_SUBJ);
+      await testSubjects.click(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
     }
 
     async removePanel() {
@@ -96,7 +96,7 @@ export function DashboardPanelActionsProvider({ getService }) {
 
     async toggleExpandActionExists() {
       log.debug('toggleExpandActionExists');
-      return await testSubjects.exists(TOGGLE_PANEL_DATA_TEST_SUBJ);
+      return await testSubjects.exists(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
     }
 
     async customizePanelActionExists(parent) {
