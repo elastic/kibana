@@ -1,4 +1,4 @@
-import { getRootProperties } from '../../../../mappings';
+import { getRootPropertiesObjects } from '../../../../mappings';
 
 /**
  * Gets the types based on the type. Uses mappings to support
@@ -8,7 +8,7 @@ import { getRootProperties } from '../../../../mappings';
  */
 function getTypes(mappings, type) {
   if (!type) {
-    return Object.keys(getRootProperties(mappings));
+    return Object.keys(getRootPropertiesObjects(mappings));
   }
 
   if (Array.isArray(type)) {
