@@ -6,11 +6,11 @@
 
 export class Collector {
   /*
-   * @param {String} type.type - property name as the key for the data
-   * @param {Function} type.init (optional) - initialization function
-   * @param {Function} type.fetch - function to query data
-   * @param {Function} type.cleanup (optional) - cleanup function
-   * @param {Boolean} type.fetchAfterInit (optional) - if collector should fetch immediately after init
+   * @param {String} type - property name as the key for the data
+   * @param {Function} init (optional) - initialization function
+   * @param {Function} fetch - function to query data
+   * @param {Function} cleanup (optional) - cleanup function
+   * @param {Boolean} fetchAfterInit (optional) - if collector should fetch immediately after init
    */
   constructor({ type, init, fetch, cleanup, fetchAfterInit }) {
     this.type = type;
