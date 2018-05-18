@@ -6,6 +6,7 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import {
+  EuiCallOut,
   EuiComboBox,
   EuiTextArea,
   EuiFormRow,
@@ -116,20 +117,39 @@ export class IndexPrivilegeForm extends Component {
       ));
     }
 
+    let grantedFieldsWarning = null;
+
     if (allowFieldLevelSecurity) {
 
       const { grant = [] } = indexPrivilege.field_security || {};
 
+      if (grant.length === 0) {
+        grantedFieldsWarning = (
+          <Fragment>
+            <EuiSpacer />
+            <EuiCallOut title={'No Granted Fields'} size="s" color="warning" iconType="help">
+              <p>
+                If no fields are granted, then users assigned to this role will not be able to
+                see any data for this index. Is this really what you want?
+              </p>
+            </EuiCallOut>
+          </Fragment>
+        );
+      }
+
       features.push((
         <EuiFlexItem key={1}>
-          <EuiFormRow label={'Granted Fields (optional)'} fullWidth={true}>
-            <EuiComboBox
-              options={availableFields ? availableFields.map(toOption) : []}
-              selectedOptions={grant.map(toOption)}
-              onCreateOption={this.onCreateGrantedField}
-              onChange={this.onGrantedFieldsChange}
-              isDisabled={this.props.isReservedRole}
-            />
+          <EuiFormRow label={'Granted Fields (optional)'} fullWidth={true} >
+            <Fragment>
+              <EuiComboBox
+                options={availableFields ? availableFields.map(toOption) : []}
+                selectedOptions={grant.map(toOption)}
+                onCreateOption={this.onCreateGrantedField}
+                onChange={this.onGrantedFieldsChange}
+                isDisabled={this.props.isReservedRole}
+              />
+              {grantedFieldsWarning}
+            </Fragment>
           </EuiFormRow>
         </EuiFlexItem>
       ));

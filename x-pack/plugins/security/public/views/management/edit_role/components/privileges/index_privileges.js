@@ -119,7 +119,7 @@ export class IndexPrivileges extends Component {
 
   onIndexPrivilegeDelete = (privilegeIndex) => {
     return () => {
-      const { role } = this.state;
+      const { role } = this.props;
 
       const newIndices = [...role.indices];
       newIndices.splice(privilegeIndex, 1);
