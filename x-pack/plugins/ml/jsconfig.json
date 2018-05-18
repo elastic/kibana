@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": "../../.",
+    "paths": {
+      "ui/*": [
+        "../src/ui/public/*"
+      ],
+      "plugins/ml/*": [
+        "plugins/ml/public/*"
+      ]
+    }
+  },
+  "exclude": [
+    "node_modules",
+    "build"
+  ]
+}
