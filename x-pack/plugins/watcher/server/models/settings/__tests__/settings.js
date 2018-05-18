@@ -29,6 +29,19 @@ describe('settings module', () => {
       describe('when upstream JSON contains a configured action type', () => {
         it('returns the correct Settings instance', () => {
           const upstreamJson = {
+            persistent: {
+              xpack: {
+                notification: {
+                  email: {
+                    account: {
+                      foo: {},
+                      bar: {}
+                    },
+                    default_account: 'bar'
+                  }
+                }
+              }
+            },
             defaults: {
               xpack: {
                 notification: {
@@ -49,6 +62,8 @@ describe('settings module', () => {
           expect(actionTypes.email.enabled).to.be(true);
           expect(actionTypes.email.accounts.scooby.default).to.be(true);
           expect(actionTypes.email.accounts.scrappy).to.be.an('object');
+          expect(actionTypes.email.accounts.foo).to.be.an('object');
+          expect(actionTypes.email.accounts.bar).to.be.an('object');
         });
       });
     });
