@@ -10,7 +10,7 @@
 // data on forecasts that have been performed.
 import _ from 'lodash';
 
-import { ML_RESULTS_INDEX_PATTERN } from 'plugins/ml/constants/index_patterns';
+import { ML_RESULTS_INDEX_PATTERN } from 'plugins/ml/../common/constants/index_patterns';
 import { ml } from 'plugins/ml/services/ml_api_service';
 
 

@@ -19,22 +19,15 @@
   .form-controls {
     .bucket-span-container {
       white-space: nowrap;
+      width: calc(~"100% - 40px");
 
       .bucket-span-input {
-        width: calc(~"100% - 40px");
-        display: inline-block;
         background-color: transparent;
         float: left;
       }
 
       .bucket-span-input:disabled {
         background-color: #D9D9D9;
-      }
-
-      .bucket-span-estimator {
-        button {
-          margin-right: 45px;
-        }
       }
 
       .validation-error  {

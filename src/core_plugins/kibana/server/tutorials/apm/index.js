@@ -1,5 +1,5 @@
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { ON_PREM_INSTRUCTIONS } from './on_prem';
+import { onPremInstructions } from './on_prem';
 import { ELASTIC_CLOUD_INSTRUCTIONS } from './elastic_cloud';
 
 const apmIntro = 'Collect in-depth performance metrics and errors from inside your applications.';
@@ -42,7 +42,7 @@ export function apmSpecProvider(server) {
       ' [Learn more]({config.docs.base_url}guide/en/apm/get-started/{config.docs.version}/index.html).',
     euiIconType: 'apmApp',
     artifacts: artifacts,
-    onPrem: ON_PREM_INSTRUCTIONS,
+    onPrem: onPremInstructions(server),
     elasticCloud: ELASTIC_CLOUD_INSTRUCTIONS,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/apm/apm.png',
   };

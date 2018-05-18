@@ -10,7 +10,7 @@
 
 // Service for carrying out Elasticsearch queries to obtain data for the
 // Ml Results dashboards.
-import { ML_NOTIFICATION_INDEX_PATTERN } from 'plugins/ml/constants/index_patterns';
+import { ML_NOTIFICATION_INDEX_PATTERN } from 'plugins/ml/../common/constants/index_patterns';
 import { ml } from 'plugins/ml/services/ml_api_service';
 
 // search for audit messages, jobId is optional.
