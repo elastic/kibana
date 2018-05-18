@@ -58,7 +58,7 @@ export function getSettingsCollector(server) {
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const config = server.config();
 
-  return new Collector({
+  return new Collector(server, {
     type: KIBANA_SETTINGS_TYPE,
     async fetch() {
       let kibanaSettingsData;

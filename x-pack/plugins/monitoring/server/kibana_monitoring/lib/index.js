@@ -4,10 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Collector } from './collector';
-
-export class UsageCollector extends Collector {
-  constructor(server, properties) {
-    super(server, properties);
-  }
-}
+export { getCollectorLogger } from './get_collector_logger';

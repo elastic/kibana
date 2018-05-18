@@ -42,7 +42,7 @@ export function getOpsStatsCollector(server) {
     }, 5 * 1000); // wait 5 seconds to avoid race condition with reloading logging configuration
   });
 
-  return new Collector({
+  return new Collector(server, {
     type: KIBANA_STATS_TYPE,
     init,
     fetch: buffer.flush,

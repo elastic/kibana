@@ -60,7 +60,7 @@ describe('CollectorSet', () => {
         onPayload: identity
       });
 
-      collectors.register(new Collector({
+      collectors.register(new Collector(server, {
         type: 'type_collector_test',
         fetchAfterInit: true,
         init,
@@ -101,7 +101,7 @@ describe('CollectorSet', () => {
       });
 
       fetch = () => ({ testFetch: true });
-      collectors.register(new Collector({
+      collectors.register(new Collector(server, {
         type: 'type_collector_test',
         fetchAfterInit: true,
         init,
@@ -143,7 +143,7 @@ describe('CollectorSet', () => {
         onPayload: identity
       });
 
-      collectors.register(new Collector({
+      collectors.register(new Collector(server, {
         type: 'type_collector_test',
         fetchAfterInit: true,
         init,

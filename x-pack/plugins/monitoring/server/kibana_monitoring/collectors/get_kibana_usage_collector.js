@@ -21,7 +21,7 @@ const TYPES = [
  * Fetches saved object client counts by querying the saved object index
  */
 export function getKibanaUsageCollector(server, callCluster) {
-  return new UsageCollector({
+  return new UsageCollector(server, {
     type: KIBANA_USAGE_TYPE,
     async fetch() {
       const index = server.config().get('kibana.index');
@@ -53,9 +53,7 @@ export function getKibanaUsageCollector(server, callCluster) {
 
       return {
         index,
-
-        // combine the bucketCounts and 0s for types that don't have documents
-        ...TYPES.reduce((acc, type) => ({
+        ...TYPES.reduce((acc, type) => ({ // combine the bucketCounts and 0s for types that don't have documents
           ...acc,
           [snakeCase(type)]: {
             total: bucketCounts[type] || 0
