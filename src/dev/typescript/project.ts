@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs';
 import { basename, dirname, relative, resolve } from 'path';
+import globby from 'globby';
 
 import { IMinimatch, Minimatch } from 'minimatch';
 import { parseConfigFileTextToJson } from 'typescript';
@@ -50,11 +51,14 @@ export class Project {
   }
 }
 
-export const TS_PROJECTS = [
-  Project.fromConfig(require.resolve('../../../tsconfig.json')),
-  Project.fromConfig(require.resolve('../../../packages/kbn-pm/tsconfig.json')),
-  Project.fromConfig(require.resolve('../../../packages/kbn-system-loader/tsconfig.json')),
-];
+export const TS_PROJECTS = globby.sync([
+  'packages/*/tsconfig.json',
+  'tsconfig.json',
+  'x-pack/tsconfig.json'
+], {
+  cwd: ROOT_DIR,
+  absolute: true,
+}).map(path => Project.fromConfig(path))
 
 export function findProjectForAbsolutePath(path: string) {
   const project = TS_PROJECTS.find(p => p.isAbsolutePathSelected(path));
