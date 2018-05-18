@@ -722,5 +722,11 @@ export default function (api) {
         //populated by a global rule
       },
     },
+    wrapper: {
+      __template: {
+        query: 'QUERY_BASE64_ENCODED',
+      },
+      query: ''
+    }
   });
 }
