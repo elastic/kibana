@@ -94,3 +94,15 @@ export const kb = (value: number) => bytes(value * 1024);
 export const mb = (value: number) => kb(value * 1024);
 export const gb = (value: number) => mb(value * 1024);
 export const tb = (value: number) => gb(value * 1024);
+
+export function ensureByteSizeValue(value?: ByteSizeValue | string | number) {
+  if (typeof value === 'string') {
+    return ByteSizeValue.parse(value);
+  }
+
+  if (typeof value === 'number') {
+    return new ByteSizeValue(value);
+  }
+
+  return value;
+}

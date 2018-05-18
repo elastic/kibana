@@ -18,18 +18,17 @@
  */
 
 import typeDetect from 'type-detect';
-import { SchemaTypeError } from '../errors';
-import { Type } from './type';
+import { internals } from '../internals';
+import { Type, TypeOptions } from './type';
 
 export class BooleanType extends Type<boolean> {
-  public process(value: any, context?: string): boolean {
-    if (typeof value !== 'boolean') {
-      throw new SchemaTypeError(
-        `expected value of type [boolean] but got [${typeDetect(value)}]`,
-        context
-      );
-    }
+  constructor(options?: TypeOptions<boolean>) {
+    super(internals.boolean(), options);
+  }
 
-    return value;
+  protected handleError(type: string, { value }: Record<string, any>) {
+    if (type === 'any.required' || type === 'boolean.base') {
+      return `expected value of type [boolean] but got [${typeDetect(value)}]`;
+    }
   }
 }

@@ -4,7 +4,7 @@ exports[`called with wrong type 1`] = `"expected a plain object value, but found
 
 exports[`called with wrong type 2`] = `"expected a plain object value, but found [number] instead."`;
 
-exports[`fails if key does not exist in schema 1`] = `"missing definitions in schema for keys [bar]"`;
+exports[`fails if key does not exist in schema 1`] = `"[bar]: definition for this key is missing"`;
 
 exports[`fails if missing required value 1`] = `"[name]: expected value of type [string] but got [undefined]"`;
 

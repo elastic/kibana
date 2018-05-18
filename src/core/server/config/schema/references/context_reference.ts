@@ -17,15 +17,10 @@
  * under the License.
  */
 
-import { Type } from './type';
+import { Reference } from './reference';
 
-export class MaybeType<V> extends Type<V | undefined> {
-  constructor(type: Type<V>) {
-    super(
-      type
-        .getSchema()
-        .optional()
-        .default()
-    );
+export class ContextReference<T> extends Reference<T> {
+  constructor(key: string) {
+    super(`$${key}`);
   }
 }

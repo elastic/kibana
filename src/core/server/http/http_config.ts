@@ -37,14 +37,21 @@ const createHttpSchema = schema.object(
         ),
       })
     ),
-    cors: schema.oneOf([
-      schema.boolean({ defaultValue: false }),
-      schema.object({
-        origin: schema.arrayOf(
-          schema.string({ defaultValue: '*://localhost:9876' })
-        ),
-      }),
-    ]),
+    cors: schema.conditional(
+      schema.context_ref('dev'),
+      true,
+      schema.object(
+        {
+          origin: schema.arrayOf(schema.string()),
+        },
+        {
+          defaultValue: {
+            origin: ['*://localhost:9876'], // karma test server
+          },
+        }
+      ),
+      schema.boolean({ defaultValue: false })
+    ),
     host: schema.string({
       defaultValue: 'localhost',
       validate: match(validHostnameRegex, 'must be a valid hostname'),

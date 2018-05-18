@@ -18,8 +18,9 @@
  */
 
 import typeDetect from 'type-detect';
-import { ByteSizeValue } from '../byte_size_value';
+import { ByteSizeValue, ensureByteSizeValue } from '../byte_size_value';
 import { SchemaTypeError } from '../errors';
+import { internals } from '../internals';
 import { Type } from './type';
 
 export interface ByteSizeOptions {
@@ -30,70 +31,45 @@ export interface ByteSizeOptions {
   max?: ByteSizeValue | string | number;
 }
 
-function ensureByteSizeValue(value?: ByteSizeValue | string | number) {
-  if (typeof value === 'string') {
-    return ByteSizeValue.parse(value);
-  }
-
-  if (typeof value === 'number') {
-    return new ByteSizeValue(value);
-  }
-
-  return value;
-}
-
 export class ByteSizeType extends Type<ByteSizeValue> {
-  private readonly min: ByteSizeValue | void;
-  private readonly max: ByteSizeValue | void;
-
   constructor(options: ByteSizeOptions = {}) {
-    const { defaultValue, min, max, ...rest } = options;
+    let schema = internals.bytes();
 
-    super({
-      ...rest,
-      defaultValue: ensureByteSizeValue(defaultValue),
+    if (options.min !== undefined) {
+      schema = schema.min(options.min);
+    }
+
+    if (options.max !== undefined) {
+      schema = schema.max(options.max);
+    }
+
+    super(schema, {
+      defaultValue: ensureByteSizeValue(options.defaultValue),
+      validate: options.validate,
     });
-
-    this.min = ensureByteSizeValue(min);
-    this.max = ensureByteSizeValue(max);
   }
 
-  public process(value: any, context?: string): ByteSizeValue {
-    if (typeof value === 'string') {
-      value = ByteSizeValue.parse(value);
-    }
-
-    if (typeof value === 'number') {
-      value = new ByteSizeValue(value);
-    }
-
-    if (!(value instanceof ByteSizeValue)) {
-      throw new SchemaTypeError(
-        `expected value of type [ByteSize] but got [${typeDetect(value)}]`,
-        context
-      );
-    }
-
-    const { min, max } = this;
-
-    if (min && value.isLessThan(min)) {
-      throw new SchemaTypeError(
-        `Value is [${value.toString()}] ([${value.toString(
+  protected handleError(
+    type: string,
+    { limit, message, value }: Record<string, any>,
+    path: string[]
+  ) {
+    switch (type) {
+      case 'any.required':
+      case 'bytes.base':
+        return `expected value of type [ByteSize] but got [${typeDetect(
+          value
+        )}]`;
+      case 'bytes.parse':
+        return new SchemaTypeError(message, path);
+      case 'bytes.min':
+        return `Value is [${value.toString()}] ([${value.toString(
           'b'
-        )}]) but it must be equal to or greater than [${min.toString()}]`,
-        context
-      );
-    }
-
-    if (max && value.isGreaterThan(max)) {
-      throw new SchemaTypeError(
-        `Value is [${value.toString()}] ([${value.toString(
+        )}]) but it must be equal to or greater than [${limit.toString()}]`;
+      case 'bytes.max':
+        return `Value is [${value.toString()}] ([${value.toString(
           'b'
-        )}]) but it must be equal to or less than [${max.toString()}]`,
-        context
-      );
+        )}]) but it must be equal to or less than [${limit.toString()}]`;
     }
-
-    return value;
   }
 }

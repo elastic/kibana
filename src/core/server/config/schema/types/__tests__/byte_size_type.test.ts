@@ -32,7 +32,7 @@ test('is required by default', () => {
 
 test('includes context in failure', () => {
   expect(() =>
-    byteSize().validate(undefined, 'foo-context')
+    byteSize().validate(undefined, {}, 'foo-context')
   ).toThrowErrorMatchingSnapshot();
 });
 

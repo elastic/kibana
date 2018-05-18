@@ -17,15 +17,6 @@
  * under the License.
  */
 
-import { Type } from './type';
-
-export class MaybeType<V> extends Type<V | undefined> {
-  constructor(type: Type<V>) {
-    super(
-      type
-        .getSchema()
-        .optional()
-        .default()
-    );
-  }
-}
+export { Reference } from './reference';
+export { ContextReference } from './context_reference';
+export { SiblingReference } from './sibling_reference';

@@ -32,7 +32,7 @@ test('is required by default', () => {
 
 test('includes context in failure', () => {
   expect(() =>
-    duration().validate(undefined, 'foo-context')
+    duration().validate(undefined, {}, 'foo-context')
   ).toThrowErrorMatchingSnapshot();
 });
 
