@@ -100,7 +100,7 @@ jest.mock('../../saved_objects', () => {
 
         return {
           id: object._id,
-          version: ++object._version,
+          _version: ++object._version,
         };
       }
     },

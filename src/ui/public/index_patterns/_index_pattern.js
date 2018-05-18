@@ -436,9 +436,9 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
       // What keys changed since they last pulled the index pattern
       const originalChangedKeys = Object.keys(body).filter(key => body[key] !== this.originalBody[key]);
       return savedObjectsClient.update(type, this.id, body, { version: this.version })
-        .then(({ id, version }) => {
+        .then(({ id, _version }) => {
           setId(this, id);
-          setVersion(this, version);
+          setVersion(this, _version);
         })
         .catch(err => {
           if (err.statusCode === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
