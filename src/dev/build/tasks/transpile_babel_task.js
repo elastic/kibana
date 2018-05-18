@@ -3,7 +3,7 @@ import vfs from 'vinyl-fs';
 
 import { createPromiseFromStreams } from '../../../utils';
 
-export const TranspileSourceTask = {
+export const TranspileBabelTask = {
   description: 'Transpiling sources with babel',
 
   async run(config, log, build) {
