@@ -7,6 +7,7 @@
 import { flatten, isEmpty } from 'lodash';
 import { LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG } from '../../../common/constants';
 import Promise from 'bluebird';
+import { Collector } from './collector';
 import { UsageCollector } from './usage_collector';
 
 const LOGGING_TAGS = [LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG];
@@ -19,20 +20,17 @@ const LOGGING_TAGS = [LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG];
 export class CollectorSet {
 
   /*
+   * @param server {Object} server object
    * @param options.interval {Number} in milliseconds
-   * @param options.logger {Function}
    * @param options.combineTypes {Function}
    * @param options.onPayload {Function}
    */
-  constructor({ interval, logger, combineTypes, onPayload }) {
+  constructor(server, { interval, combineTypes, onPayload }) {
     this._collectors = [];
     this._timer = null;
 
     if (typeof interval !== 'number') {
       throw new Error('interval number of milliseconds is required');
-    }
-    if (typeof logger !== 'function') {
-      throw new Error('Logger function is required');
     }
     if (typeof combineTypes !== 'function') {
       throw new Error('combineTypes function is required');
@@ -42,9 +40,9 @@ export class CollectorSet {
     }
 
     this._log = {
-      debug: message => logger(['debug', ...LOGGING_TAGS], message),
-      info: message => logger(['info', ...LOGGING_TAGS], message),
-      warn: message => logger(['warning', ...LOGGING_TAGS], message)
+      debug: message => server.log(['debug', ...LOGGING_TAGS], message),
+      info: message => server.log(['info', ...LOGGING_TAGS], message),
+      warn: message => server.log(['warning', ...LOGGING_TAGS], message)
     };
 
     this._interval = interval;
@@ -56,6 +54,11 @@ export class CollectorSet {
    * @param {Collector} collector object
    */
   register(collector) {
+    // check instanceof
+    if (!(collector instanceof Collector)) {
+      throw new Error('CollectorSet can only have Collector instances registered');
+    }
+    collector.setLogger(this._log);
     this._collectors.push(collector);
   }
 
@@ -73,10 +76,7 @@ export class CollectorSet {
         collector.init();
       }
 
-      if (collector.setLogger) {
-        this._log.debug(`Setting logger for ${collector.type} collector`);
-        collector.setLogger(this._log);
-      }
+      this._log.debug(`Setting logger for ${collector.type} collector`);
 
       if (collector.fetchAfterInit) {
         initialCollectors.push(collector);

@@ -27,11 +27,8 @@ export function startCollectorSet(kbnServer, server, client, _sendBulkPayload = 
   const config = server.config();
   const interval = config.get('xpack.monitoring.kibana.collection.interval');
 
-  const collectorSet = new CollectorSet({
+  const collectorSet = new CollectorSet(server, {
     interval,
-    logger(...message) {
-      server.log(...message);
-    },
     combineTypes: getCollectorTypesCombiner(kbnServer, config),
     onPayload(payload) {
       return _sendBulkPayload(client, interval, payload);
