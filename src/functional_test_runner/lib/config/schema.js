@@ -94,11 +94,7 @@ export const schema = Joi.object().keys({
     serverArgs: Joi.array(),
   }).default(),
 
-  kbnTestServer: Joi.object().keys({
-    buildArgs: Joi.array(),
-    sourceArgs: Joi.array(),
-    serverArgs: Joi.array(),
-  }).default(),
+  kibanaServerArgs: Joi.array(),
 
   // env allows generic data, but should be removed
   env: Joi.object().default(),
