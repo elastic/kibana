@@ -73,6 +73,7 @@ class DataDownloadOptions extends Component {
         closePopover={this.closePopover}
         panelPaddingSize="none"
         anchorPosition="downLeft"
+        withTitle
       >
         <EuiContextMenuPanel
           items={items}
