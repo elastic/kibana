@@ -6,12 +6,13 @@
 
 import { KIBANA_REPORTING_TYPE } from '../../../common/constants';
 import { getReportingUsage } from '../../../../reporting';
+import { UsageCollector } from '../';
 
 export function getReportingUsageCollector(server, callCluster) {
-  return {
+  return new UsageCollector(server, {
     type: KIBANA_REPORTING_TYPE,
     fetch() {
       return getReportingUsage(callCluster, server);
     }
-  };
+  });
 }

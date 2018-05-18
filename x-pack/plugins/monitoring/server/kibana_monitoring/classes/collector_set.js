@@ -5,10 +5,10 @@
  */
 
 import { flatten, isEmpty } from 'lodash';
-import { LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG } from '../../../common/constants';
 import Promise from 'bluebird';
-
-const LOGGING_TAGS = [LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG];
+import { getCollectorLogger } from '../lib';
+import { Collector } from './collector';
+import { UsageCollector } from './usage_collector';
 
 /*
  * A collector object has types registered into it with the register(type)
@@ -18,20 +18,17 @@ const LOGGING_TAGS = [LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG];
 export class CollectorSet {
 
   /*
-   * @param options.interval {Number} in milliseconds
-   * @param options.logger {Function}
-   * @param options.combineTypes {Function}
-   * @param options.onPayload {Function}
+   * @param {Object} server - server object
+   * @param {Number} options.interval - in milliseconds
+   * @param {Function} options.combineTypes
+   * @param {Function} options.onPayload
    */
-  constructor({ interval, logger, combineTypes, onPayload }) {
+  constructor(server, { interval, combineTypes, onPayload }) {
     this._collectors = [];
     this._timer = null;
 
     if (typeof interval !== 'number') {
       throw new Error('interval number of milliseconds is required');
-    }
-    if (typeof logger !== 'function') {
-      throw new Error('Logger function is required');
     }
     if (typeof combineTypes !== 'function') {
       throw new Error('combineTypes function is required');
@@ -40,11 +37,7 @@ export class CollectorSet {
       throw new Error('onPayload function is required');
     }
 
-    this._log = {
-      debug: message => logger(['debug', ...LOGGING_TAGS], message),
-      info: message => logger(['info', ...LOGGING_TAGS], message),
-      warn: message => logger(['warning', ...LOGGING_TAGS], message)
-    };
+    this._log = getCollectorLogger(server);
 
     this._interval = interval;
     this._combineTypes = combineTypes;
@@ -52,13 +45,14 @@ export class CollectorSet {
   }
 
   /*
-   * @param {String} type.type
-   * @param {Function} type.init (optional)
-   * @param {Function} type.fetch
-   * @param {Function} type.cleanup (optional)
+   * @param collector {Collector} collector object
    */
-  register(type) {
-    this._collectors.push(type);
+  register(collector) {
+    // check instanceof
+    if (!(collector instanceof Collector)) {
+      throw new Error('CollectorSet can only have Collector instances registered');
+    }
+    this._collectors.push(collector);
   }
 
   /*
@@ -75,10 +69,7 @@ export class CollectorSet {
         collector.init();
       }
 
-      if (collector.setLogger) {
-        this._log.debug(`Setting logger for ${collector.type} collector`);
-        collector.setLogger(this._log);
-      }
+      this._log.debug(`Setting logger for ${collector.type} collector`);
 
       if (collector.fetchAfterInit) {
         initialCollectors.push(collector);
@@ -137,6 +128,19 @@ export class CollectorSet {
           this._log.warn(`Unable to fetch data from ${collectorType} collector`);
         });
     });
+  }
+
+  async bulkFetchUsage() {
+    const usageCollectors = this._collectors.filter(c => c instanceof UsageCollector);
+    const bulk = await this._bulkFetch(usageCollectors);
+
+    // summarize each type of stat
+    return bulk.reduce((accumulatedStats, currentStat) => {
+      return {
+        ...accumulatedStats,
+        [currentStat.type]: currentStat.result,
+      };
+    }, {});
   }
 
   cleanup() {
