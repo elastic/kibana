@@ -81,3 +81,16 @@ body {
 html {
   font-size: @textMedium;
 }
+
+// TODO: remove if fix is provided for https://github.com/elastic/eui/issues/833
+// temp fix for SVGs not appearing in the EuiImage fullscreen view
+.euiImageFullScreen {
+  min-width: 100px;
+}
+
+// this makes the eui file picker smaller and fit better next to the image preview in imageUpload
+.euiFilePicker {
+  .euiFilePicker__promptText {
+    font-size: 0.75rem;
+  }
+}

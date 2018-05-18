@@ -1,5 +1,4 @@
 import { dropdownControl } from './dropdownControl';
-import { grid } from './grid';
 import { image } from './image';
 import { markdown } from './markdown';
 import { pie } from './pie';
@@ -12,7 +11,6 @@ import { timefilterControl } from './timefilterControl';
 
 export const viewSpecs = [
   dropdownControl,
-  grid,
   image,
   markdown,
   plot,

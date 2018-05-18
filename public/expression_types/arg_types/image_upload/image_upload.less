@@ -1,14 +1,9 @@
+@import '../../../style/variables';
+
 .canvas__argtype--image {
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-
-  .canvas__argtype--image--control {
-    flex: 1 1;
-  }
-
   .canvas__argtype--image--preview {
-    width: 60px;
-    height: 45px;
+    max-height: 100px;
+    overflow: hidden;
+    border: 1px solid @lightGrey;
   }
 }

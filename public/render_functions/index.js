@@ -2,7 +2,6 @@ import { advancedFilter } from './advanced_filter';
 import { dropdownFilter } from './dropdown_filter';
 import { debug } from './debug';
 import { error } from './error';
-import { grid } from './grid';
 import { image } from './image';
 import { repeatImage } from './repeat_image';
 import { revealImage } from './reveal_image';
@@ -18,7 +17,6 @@ export const renderFunctions = [
   dropdownFilter,
   debug,
   error,
-  grid,
   image,
   repeatImage,
   revealImage,

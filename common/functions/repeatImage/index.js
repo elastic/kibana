@@ -37,7 +37,7 @@ export const repeatImage = () => ({
       type: 'render',
       as: 'repeatImage',
       value: {
-        count,
+        count: Math.floor(count),
         ...args,
         image: resolveWithMissingImage(args.image, elasticOutline),
         emptyImage: resolveWithMissingImage(args.emptyImage),
