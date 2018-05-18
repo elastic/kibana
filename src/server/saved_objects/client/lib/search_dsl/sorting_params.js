@@ -7,21 +7,22 @@ export function getSortingParams(mappings, type, sortField, sortOrder) {
     return {};
   }
 
-  const key = type ? `${type}.${sortField}` : sortField;
-
-  const field = getProperty(mappings, key);
-  if (!field) {
-    throw Boom.badRequest(`Unknown sort field ${sortField}`);
-  }
+  const types = Array.isArray(type) ? type : [type];
 
   return {
-    sort: [
-      {
+    sort: types.map(type => {
+      const key = `${type}.${sortField}`;
+      const field = getProperty(mappings, key);
+      if (!field) {
+        throw Boom.badRequest(`Unknown sort field ${sortField}`);
+      }
+
+      return {
         [key]: {
           order: sortOrder,
           unmapped_type: field.type
         }
-      }
-    ]
+      };
+    })
   };
 }

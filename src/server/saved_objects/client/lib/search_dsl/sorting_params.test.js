@@ -7,6 +7,11 @@ const MAPPINGS = {
         properties: {
           title: {
             type: 'text',
+            fields: {
+              raw: {
+                type: 'keyword'
+              }
+            }
           }
         }
       },
@@ -55,8 +60,8 @@ describe('searchDsl/getSortParams', () => {
     });
   });
 
-  describe('search field no direction', () => {
-    describe('search field is simple property', () => {
+  describe('sortField no direction', () => {
+    describe('sortField is simple property', () => {
       it('returns correct params', () => {
         expect(getSortingParams(MAPPINGS, 'saved', 'title'))
           .toEqual({
@@ -71,7 +76,28 @@ describe('searchDsl/getSortParams', () => {
           });
       });
     });
-    describe('search field is multi-field', () => {
+    describe('sortFields are simple properties', () => {
+      it('returns correct params', () => {
+        expect(getSortingParams(MAPPINGS, ['saved', 'pending'], 'title'))
+          .toEqual({
+            sort: [
+              {
+                'saved.title': {
+                  order: undefined,
+                  unmapped_type: 'text'
+                }
+              },
+              {
+                'pending.title': {
+                  order: undefined,
+                  unmapped_type: 'text'
+                }
+              }
+            ]
+          });
+      });
+    });
+    describe('sortField is multi-field', () => {
       it('returns correct params', () => {
         expect(getSortingParams(MAPPINGS, 'saved', 'title.raw'))
           .toEqual({
@@ -86,10 +112,31 @@ describe('searchDsl/getSortParams', () => {
           });
       });
     });
+    describe('sortFields are multi-field', () => {
+      it('returns correct params', () => {
+        expect(getSortingParams(MAPPINGS, ['saved', 'pending'], 'title.raw'))
+          .toEqual({
+            sort: [
+              {
+                'saved.title.raw': {
+                  order: undefined,
+                  unmapped_type: 'keyword'
+                }
+              },
+              {
+                'pending.title.raw': {
+                  order: undefined,
+                  unmapped_type: 'keyword'
+                }
+              }
+            ]
+          });
+      });
+    });
   });
 
-  describe('search with direction', () => {
-    describe('search field is simple property', () => {
+  describe('sort with direction', () => {
+    describe('sortField is simple property', () => {
       it('returns correct params', () => {
         expect(getSortingParams(MAPPINGS, 'saved', 'title', 'desc'))
           .toEqual({
@@ -104,13 +151,55 @@ describe('searchDsl/getSortParams', () => {
           });
       });
     });
-    describe('search field is multi-field', () => {
+    describe('sortFields are simple property', () => {
+      it('returns correct params', () => {
+        expect(getSortingParams(MAPPINGS, ['saved', 'pending'], 'title', 'desc'))
+          .toEqual({
+            sort: [
+              {
+                'saved.title': {
+                  order: 'desc',
+                  unmapped_type: 'text'
+                }
+              },
+              {
+                'pending.title': {
+                  order: 'desc',
+                  unmapped_type: 'text'
+                }
+              }
+            ]
+          });
+      });
+    });
+    describe('sortField is multi-field', () => {
       it('returns correct params', () => {
         expect(getSortingParams(MAPPINGS, 'saved', 'title.raw', 'asc'))
           .toEqual({
             sort: [
               {
                 'saved.title.raw': {
+                  order: 'asc',
+                  unmapped_type: 'keyword'
+                }
+              }
+            ]
+          });
+      });
+    });
+    describe('sortField are multi-fields', () => {
+      it('returns correct params', () => {
+        expect(getSortingParams(MAPPINGS, ['saved', 'pending'], 'title.raw', 'asc'))
+          .toEqual({
+            sort: [
+              {
+                'saved.title.raw': {
+                  order: 'asc',
+                  unmapped_type: 'keyword'
+                }
+              },
+              {
+                'pending.title.raw': {
                   order: 'asc',
                   unmapped_type: 'keyword'
                 }
