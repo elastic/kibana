@@ -3,9 +3,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import {
-  EuiSearchBar,
+  EuiFieldSearch,
   EuiBasicTable,
   EuiLink,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 
 export class SavedObjectFinder extends React.Component {
@@ -15,8 +17,9 @@ export class SavedObjectFinder extends React.Component {
     this.state = {
       items: [],
       isFetchingItems: false,
-      page: 1,
-      perPage: 20,
+      page: 0,
+      perPage: 10,
+      totalItems: 0,
     };
   }
 
@@ -33,15 +36,15 @@ export class SavedObjectFinder extends React.Component {
   onTableChange = ({ page }) => {
     this.setState({
       page: page.index,
-      perPage: page.pageSize,
-    });
+      perPage: page.size,
+    }, this.fetchItems);
   }
 
   debouncedFetch = _.debounce(async (filter) => {
     const response = await this.props.find(
       this.props.savedObjectType,
       filter,
-      this.state.page,
+      this.state.page + 1, // EuiBasicTable paging is 0-index based and savedObjectCliet find is 1-index based
       this.state.perPage);
 
     if (!this._isMounted) {
@@ -72,20 +75,34 @@ export class SavedObjectFinder extends React.Component {
   }
 
   renderSearchBar() {
-    const toolsRight = [];
+    let actionBtn;
     if (this.props.addNewButton) {
-      toolsRight.push(this.props.addNewButton);
+      actionBtn = (
+        <EuiFlexItem grow={false}>
+          {this.props.addNewButton}
+        </EuiFlexItem>
+      );
     }
+
     return (
-      <EuiSearchBar
-        onChange={(query) => {
-          this.setState({
-            filter: query.text
-          }, this.fetchItems);
-        }}
-        box={{ incremental: true, ['data-test-subj']: 'savedObjectFinderSearchInput' }}
-        toolsRight={toolsRight}
-      />
+      <EuiFlexGroup>
+        <EuiFlexItem grow={true}>
+          <EuiFieldSearch
+            placeholder="Search..."
+            fullWidth
+            value={this.state.filter}
+            onChange={(e) => {
+              this.setState({
+                filter: e.target.value
+              }, this.fetchItems);
+            }}
+            data-test-subj="savedObjectFinderSearchInput"
+          />
+        </EuiFlexItem>
+
+        {actionBtn}
+
+      </EuiFlexGroup>
     );
   }
 
@@ -93,8 +110,8 @@ export class SavedObjectFinder extends React.Component {
     const pagination = {
       pageIndex: this.state.page,
       pageSize: this.state.perPage,
-      totalItemCount: this.state.items.length,
-      pageSizeOptions: [10, 20, 50],
+      totalItemCount: this.state.totalItems,
+      pageSizeOptions: [5, 10],
     };
     const tableColumns = [
       {

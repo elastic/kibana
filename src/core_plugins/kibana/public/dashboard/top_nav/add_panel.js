@@ -93,7 +93,13 @@ export class DashboardAddPanel extends React.Component {
   onAddPanel = (id, type) => {
     this.props.addNewPanel(id, type);
 
-    toastNotifications.addSuccess({
+    // To avoid the clutter of having toast messages cover flyout
+    // close previous toast message before creating a new one
+    if (this.lastToast) {
+      toastNotifications.remove(this.lastToast);
+    }
+
+    this.lastToast = toastNotifications.addSuccess({
       title: `${this.state.selectedTab.name} was added to your dashboard`,
       'data-test-subj': this.state.selectedTab.toastDataTestSubj,
     });
