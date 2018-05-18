@@ -25,7 +25,7 @@ export default function ({ getService }) {
 
       const beatsFromApi = apiResponse.beats;
 
-      expect(beatsFromApi.length).to.be(3);
+      expect(beatsFromApi.length).to.be(4);
       expect(beatsFromApi.filter(beat => beat.hasOwnProperty('verified_on')).length).to.be(1);
       expect(beatsFromApi.find(beat => beat.hasOwnProperty('verified_on')).id).to.be('foo');
     });
@@ -39,7 +39,7 @@ export default function ({ getService }) {
 
       const beatsFromApi = apiResponse.beats;
 
-      expect(beatsFromApi.length).to.be(3);
+      expect(beatsFromApi.length).to.be(4);
       expect(beatsFromApi.filter(beat => beat.hasOwnProperty('access_token')).length).to.be(0);
     });
   });
