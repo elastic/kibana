@@ -58,6 +58,7 @@
     "build": "node scripts/build",
     "start": "node scripts/kibana --dev",
     "debug": "node --nolazy --inspect scripts/kibana --dev",
+    "debug-break": "node --nolazy --inspect-brk scripts/kibana --dev",
     "precommit": "node scripts/precommit_hook",
     "karma": "karma start",
     "lint": "echo 'use `node scripts/eslint`' && false",
