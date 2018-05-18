@@ -6,10 +6,17 @@
 
 import { wrap, serverTimeout as serverUnavailable } from 'boom';
 
+const getClusterUuid = async req => {
+  const { server } = req;
+  const { callWithRequest, } = server.plugins.elasticsearch.getCluster('data');
+  const { cluster_uuid: uuid } = await callWithRequest(req, 'info', { filterPath: 'cluster_uuid', });
+  return uuid;
+};
+
 /*
  * @return {Object} data from usage stats collectors registered with Monitoring CollectorSet
  */
-const getUsage = async (req) => {
+const getUsage = async req => {
   const server = req.server;
   const { collectorSet } = server.plugins.monitoring;
   if (collectorSet === undefined) {
@@ -25,7 +32,15 @@ export function xpackUsageRoute(server) {
     method: 'GET',
     async handler(req, reply) {
       try {
-        reply(getUsage(req));
+        const [ clusterUuid, xpackUsage ] = await Promise.all([
+          getClusterUuid(req),
+          getUsage(req),
+        ]);
+
+        reply({
+          cluster_uuid: clusterUuid,
+          ...xpackUsage
+        });
       } catch(err) {
         req.log(['error'], err);
         if (err.isBoom) {
