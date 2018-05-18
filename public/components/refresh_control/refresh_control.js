@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import { OverlayTrigger, Popover } from 'react-bootstrap';
+import { EuiIcon, EuiButtonIcon, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
 import { AutoRefreshControls } from './auto_refresh_controls';
 import './refresh_control.less';
 
@@ -38,32 +38,71 @@ const getRefreshInterval = (val = '') => {
   }
 };
 
-export const RefreshControl = props => {
-  const { inFlight, doRefresh, setRefreshInterval, refreshInterval, className } = props;
-  const setRefresh = val => setRefreshInterval(getRefreshInterval(val));
+export class RefreshControl extends PureComponent {
+  state = {
+    isPopoverOpen: false,
+  };
 
-  const autoRefreshControls = (
-    <Popover id="auto-refresh-popover" title="Workpad Auto Refresh">
-      <AutoRefreshControls
-        refreshInterval={refreshInterval}
-        setRefresh={setRefresh}
-        disableInterval={() => setRefresh(0)}
+  handleClick = () => {
+    this.setState({
+      isPopoverOpen: !this.state.isPopoverOpen,
+    });
+  };
+
+  closePopover = () => {
+    this.setState({
+      isPopoverOpen: false,
+    });
+  };
+
+  render() {
+    const { inFlight, doRefresh, setRefreshInterval, refreshInterval } = this.props;
+    const setRefresh = val => setRefreshInterval(getRefreshInterval(val));
+
+    const popoverButton = (
+      <EuiButtonIcon
+        iconType="arrowDown"
+        size="m"
+        className={autoClass(refreshInterval)}
+        onClick={this.handleClick}
+        aria-label="Auto Refresh Popover"
       />
-    </Popover>
-  );
+    );
 
-  return (
-    <span className={`canvas__refresh_control ${className}`}>
-      <i className={`fa fa-refresh ${refreshClass(inFlight)}`} onClick={doRefresh} />
-      <OverlayTrigger trigger="click" rootClose placement="bottom" overlay={autoRefreshControls}>
-        <i className={`fa fa-caret-down ${autoClass(refreshInterval)}`} />
-      </OverlayTrigger>
-    </span>
-  );
-};
+    const autoRefreshControls = (
+      <EuiPopover
+        id="auto-refresh-popover"
+        ownFocus
+        button={popoverButton}
+        isOpen={this.state.isPopoverOpen}
+        closePopover={this.closePopover}
+        withTitle
+        panelClassName="canvas__refresh_control--popover"
+      >
+        <EuiPopoverTitle>Workpad Auto Refresh</EuiPopoverTitle>
+        <AutoRefreshControls
+          refreshInterval={refreshInterval}
+          setRefresh={setRefresh}
+          disableInterval={() => setRefresh(0)}
+        />
+      </EuiPopover>
+    );
+
+    return (
+      <span className={`canvas__refresh_control`}>
+        <EuiIcon
+          type="refresh"
+          size="xl"
+          className={`${refreshClass(inFlight)}`}
+          onClick={doRefresh}
+        />
+        {autoRefreshControls}
+      </span>
+    );
+  }
+}
 
 RefreshControl.propTypes = {
-  className: PropTypes.string,
   inFlight: PropTypes.bool.isRequired,
   doRefresh: PropTypes.func.isRequired,
   refreshInterval: PropTypes.number,

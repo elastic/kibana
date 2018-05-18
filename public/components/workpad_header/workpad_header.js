@@ -1,12 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Shortcuts } from 'react-shortcuts';
-import { Toggle } from '../toggle';
+import { EuiIcon, EuiSwitch, EuiTitle, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { FullscreenControl } from '../fullscreen_control';
 import { RefreshControl } from '../refresh_control';
 import './workpad_header.less';
-
-const btnClass = 'canvas__workpad_header--button';
 
 export const WorkpadHeader = ({ workpadName, editing, toggleEditing }) => {
   const keyHandler = action => {
@@ -15,24 +13,27 @@ export const WorkpadHeader = ({ workpadName, editing, toggleEditing }) => {
 
   return (
     <div className="canvas__workpad_header">
-      <h2>
-        {workpadName}
-
-        <RefreshControl className={`canvas__workpad_header--refresh ${btnClass}`} />
-
-        <FullscreenControl>
-          {({ toggleFullscreen }) => (
-            <span className={`canvas__workpad_header--fullscreenControl ${btnClass}`}>
-              <i className="fa fa-play" onClick={toggleFullscreen} />
-            </span>
-          )}
-        </FullscreenControl>
-
-        <span className={`canvas__workpad_header--editToggle ${btnClass}`}>
-          <Shortcuts name="EDITOR" handler={keyHandler} targetNodeSelector="body" global />
-          <Toggle value={editing} onChange={toggleEditing} />
-        </span>
-      </h2>
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="l">
+            <h2 className="canvas__workpad_header--title">{workpadName}</h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <RefreshControl />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <FullscreenControl className={`clickable`}>
+            {({ toggleFullscreen }) => <EuiIcon type="play" size="xl" onClick={toggleFullscreen} />}
+          </FullscreenControl>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <span>
+            <Shortcuts name="EDITOR" handler={keyHandler} targetNodeSelector="body" global />
+            <EuiSwitch checked={editing} onChange={toggleEditing} />
+          </span>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </div>
   );
 };

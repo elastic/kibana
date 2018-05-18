@@ -1,17 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { EuiFormRow } from '@elastic/eui';
 import { ColorPickerMini } from '../color_picker_mini';
-import './page_config.less';
 
 export const PageConfig = ({ setBackground, background }) => {
   return (
-    <div className="canvas__page-config">
-      <div>
-        <label>Page Background</label>
-      </div>
-
+    <EuiFormRow label="Page Background">
       <ColorPickerMini onChange={setBackground} value={background} />
-    </div>
+    </EuiFormRow>
   );
 };
 

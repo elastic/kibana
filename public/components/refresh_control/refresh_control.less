@@ -1,49 +1,68 @@
-@import (reference) "../../style/main";
+@import (reference) '../../style/main';
 
 .canvas__refresh_control {
-  i {
-    padding-right: @spacingXS;
-  }
-
-  i:last-child {
-    padding-right: 0;
+  .canvas__refresh_control--popover {
+    min-width: 250px;
   }
 
   .canvas__auto_refresh {
-    color: #93C83D;
+    color: #93c83d;
   }
 
   .canvas__in_flight {
-    -webkit-animation: refreshInFlight 3s 1s linear infinite;
-    animation: refreshInFlight 3s linear 1s infinite;
+    -webkit-animation: refreshInFlight 3s 0s linear infinite;
+    animation: refreshInFlight 3s linear 0s infinite;
   }
 
-}
+  .canvas__refresh_control--auto-refresh--submit {
+    min-width: @spacingXXXL;
+  }
 
-.canvas__refresh_control--auto-refresh--preset-intervals {
-  display: flex;
-  justify-content: space-around;
-  flex-direction: row;
-
-  .items > * {
-    display: block;
+  .canvas__refresh_control--auto-refresh--preset-intervals {
+    .items > * {
+      width: 100%;
+    }
   }
 }
 
 @-webkit-keyframes refreshInFlight {
-  0%   { color: #0779A1; }
-  20%  { color: #93C83D; }
-  40%  { color: #24BBB1; }
-  60%  { color: #17A8E0; }
-  80%  { color: #EF5098; }
-  100% { color: #0779A1; }
+  0% {
+    color: #0779a1;
+  }
+  20% {
+    color: #93c83d;
+  }
+  40% {
+    color: #24bbb1;
+  }
+  60% {
+    color: #17a8e0;
+  }
+  80% {
+    color: #ef5098;
+  }
+  100% {
+    color: #0779a1;
+  }
 }
 
 @keyframes refreshInFlight {
-  0%   { color: #0779A1; }
-  20%  { color: #93C83D; }
-  40%  { color: #24BBB1; }
-  60%  { color: #17A8E0; }
-  80%  { color: #EF5098; }
-  100% { color: #0779A1; }
+  0% {
+    color: #0779a1;
+  }
+  20% {
+    color: #93c83d;
+  }
+  40% {
+    color: #24bbb1;
+  }
+  60% {
+    color: #17a8e0;
+  }
+  80% {
+    color: #ef5098;
+  }
+  100% {
+    color: #0779a1;
+  }
 }

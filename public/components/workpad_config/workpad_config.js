@@ -1,60 +1,91 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ControlLabel, FormGroup, FormControl, Label } from 'react-bootstrap';
-
-import './workpad_config.less';
+import {
+  EuiFieldText,
+  EuiFieldNumber,
+  EuiBadge,
+  EuiButtonIcon,
+  EuiFormRow,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
 
 export const WorkpadConfig = ({ size, name, setSize, setName }) => {
   const rotate = () => setSize({ width: size.height, height: size.width });
 
+  const badges = [
+    {
+      name: '1080p',
+      size: { height: 1080, width: 1920 },
+    },
+    {
+      name: '720p',
+      size: { height: 720, width: 1280 },
+    },
+    {
+      name: 'A4',
+      size: { height: 842, width: 590 },
+    },
+    {
+      name: 'US Letter',
+      size: { height: 792, width: 612 },
+    },
+  ];
+
   return (
-    <div className="canvas__workpad_config">
-      <FormGroup>
-        <FormControl
-          type="text"
-          value={name}
-          onChange={e => setName(e.target.value)}
-          placeholder="Workpad Name"
-        />
-      </FormGroup>
-      <div className="canvas__workpad-config--size">
-        <div>
-          <FormControl
-            spellCheck={false}
-            componentClass="input"
-            type="number"
-            onChange={e => setSize({ width: Number(e.target.value), height: size.height })}
-            value={size.width}
-          />
-          <ControlLabel>Width</ControlLabel>
-        </div>
-        <div>
-          <FormControl
-            spellCheck={false}
-            componentClass="input"
-            type="number"
-            onChange={e => setSize({ height: Number(e.target.value), width: size.width })}
-            value={size.height}
-          />
-          <ControlLabel>Height</ControlLabel>
-        </div>
-        <div>
-          <i onClick={rotate} className="fa fa-rotate-right" />
-        </div>
+    <div>
+      <div>
+        <EuiFormRow label="Workpad Name">
+          <EuiFieldText value={name} onChange={e => setName(e.target.value)} />
+        </EuiFormRow>
       </div>
-      <div className="canvas__workpad_config--presets">
-        <Label bsStyle="default" onClick={() => setSize({ height: 1080, width: 1920 })}>
-          1080p
-        </Label>
-        <Label bsStyle="default" onClick={() => setSize({ height: 720, width: 1280 })}>
-          720p
-        </Label>
-        <Label bsStyle="default" onClick={() => setSize({ height: 842, width: 590 })}>
-          A4
-        </Label>
-        <Label bsStyle="default" onClick={() => setSize({ height: 792, width: 612 })}>
-          US Letter
-        </Label>
+
+      <EuiSpacer size="m" />
+
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem>
+          <EuiFormRow label="Width">
+            <EuiFieldNumber
+              onChange={e => setSize({ width: Number(e.target.value), height: size.height })}
+              value={size.width}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow hasEmptyLabelSpace>
+            <EuiButtonIcon
+              size="l"
+              className="clickable"
+              iconType="kqlOperand"
+              onClick={rotate}
+              aria-label="Swap Page Dimensions"
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow label="Height">
+            <EuiFieldNumber
+              onChange={e => setSize({ height: Number(e.target.value), width: size.width })}
+              value={size.height}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="m" />
+
+      <div>
+        {badges.map((badge, i) => (
+          <EuiBadge
+            key={`page-size-badge-${i}`}
+            color="default"
+            onClick={() => setSize(badge.size)}
+            aria-label={`Preset Page Size: ${badge.name}`}
+          >
+            {badge.name}
+          </EuiBadge>
+        ))}
       </div>
     </div>
   );
