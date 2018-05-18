@@ -1,12 +1,48 @@
 export async function parallelizeBatches<T>(
-  batches: Array<T[]>,
+  batches: T[][],
   fn: (item: T) => Promise<void>
 ) {
   for (const batch of batches) {
-    const running = batch.map(obj => fn(obj));
-
     // We need to make sure the entire batch has completed before we can move on
     // to the next batch
-    await Promise.all(running);
+    await parallelize(batch, fn);
   }
+}
+
+export async function parallelize<T>(
+  items: T[],
+  fn: (item: T) => Promise<void>,
+  concurrency = 4
+) {
+  if (items.length === 0) {
+    return;
+  }
+
+  return new Promise<void>((resolve, reject) => {
+    let activePromises = 0;
+    const values = items.slice(0);
+
+    async function scheduleItem(item: T) {
+      activePromises++;
+
+      try {
+        await fn(item);
+
+        activePromises--;
+
+        if (values.length > 0) {
+          // We have more work to do, so we schedule the next promise
+          scheduleItem(values.shift()!);
+        } else if (activePromises === 0) {
+          // We have no more values left, and all items have completed, so we've
+          // completed all the work.
+          resolve();
+        }
+      } catch (error) {
+        reject(error);
+      }
+    }
+
+    values.splice(0, concurrency).map(scheduleItem);
+  });
 }
