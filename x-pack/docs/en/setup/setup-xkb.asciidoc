@@ -19,6 +19,3 @@ other {xpack} features are mentioned in this documentation, we've added an icon
 to clearly indicate that what you're reading pertains to features available only
 in {xpack}.
 
-include::{xkb-repo-dir}/monitoring/monitoring-xkib.asciidoc[]
-include::{xkb-repo-dir}/security/securing-kibana.asciidoc[]
-include::{xkb-repo-dir}/settings/settings-xkb.asciidoc[]
