@@ -23,20 +23,25 @@ export default function () {
       ],
     },
 
-    kibanaServerArgs: [
-      '--env=development',
-      '--logging.json=false',
-      '--no-base-path',
-      `--server.port=${kbnTestConfig.getPort()}`,
-      `--optimize.watchPort=${kbnTestConfig.getPort()}`,
-      '--optimize.watchPrebuild=true',
-      '--status.allowAnonymous=true',
-      '--optimize.enabled=true',
-      `--optimize.bundleDir=${OPTIMIZE_BUNDLE_DIR}`,
-      `--elasticsearch.url=${formatUrl(servers.elasticsearch)}`,
-      `--elasticsearch.username=${servers.elasticsearch.username}`,
-      `--elasticsearch.password=${servers.elasticsearch.password}`,
-    ],
+    kbnTestServer: {
+      buildArgs: [ '--optimize.useBundleCache=true' ],
+      sourceArgs: [
+        '--no-base-path',
+        `--optimize.bundleDir=${OPTIMIZE_BUNDLE_DIR}`,
+      ],
+      serverArgs: [
+        '--env=development',
+        '--logging.json=false',
+        `--server.port=${kbnTestConfig.getPort()}`,
+        `--optimize.watchPort=${kbnTestConfig.getPort()}`,
+        '--optimize.watchPrebuild=true',
+        '--status.allowAnonymous=true',
+        '--optimize.enabled=true',
+        `--elasticsearch.url=${formatUrl(servers.elasticsearch)}`,
+        `--elasticsearch.username=${servers.elasticsearch.username}`,
+        `--elasticsearch.password=${servers.elasticsearch.password}`,
+      ],
+    },
 
     services: {
       kibanaServer: KibanaServerProvider,
