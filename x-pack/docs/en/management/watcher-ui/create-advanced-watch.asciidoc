@@ -1,7 +1,8 @@
 [[watcher-create-advanced-watch]]
 === Create Advanced Watch
 
-Advanced watches are for people who are more familiar with Elasticsearch query syntax and the watcher framework overall. The creation UI is more closely aligned with using the REST apis directly. Please reference the https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html[Elasticsearch query DSL] for more information.
+Advanced watches are for people who are more familiar with Elasticsearch query syntax and the watcher framework overall. The creation UI is more closely aligned with using the REST apis directly. For 
+more information, see {ref}/query-dsl.html[Query DSL].
 
 To create a new advanced watch:
 
@@ -16,7 +17,9 @@ This screen lets you define the core properties of an advanced watch.
 
 image:management/watcher-ui/images/advanced-watch/advanced-watch-create.png["Create Advanced Watch",link="management/watcher-ui/images/advanced-watch/advanced-watch-create.png"]
 
-The `ID` refers to the identifier used by Elasticsearch, whereas `Name` is the more user-friendly way to identify the watch. Refer to the https://www.elastic.co/guide/en/x-pack/current/how-watcher-works.html#watch-definition[Watch definition documentation] for the Watch JSON.
+The `ID` refers to the identifier used by Elasticsearch, whereas `Name` is the more user-friendly way to identify the watch. Refer to the 
+{stack-ov}/how-watcher-works.html#watch-definition[Watch definition documentation] 
+for the Watch JSON.
 
 [float]
 === Simulate
@@ -27,10 +30,10 @@ This screen allows you to override parts of the watch and then run a simulation 
 
 Some implementation details on overrides:
 
-* Trigger overrides use https://www.elastic.co/guide/en/elasticsearch/reference/current/common-options.html#date-math[date math]
+* Trigger overrides use {ref}/common-options.html#date-math[date math].
 * Input override accepts a JSON blob that overrides the `input`.
 * Condition overrides is just a checkbox to indicate if you want to force the condition to always be true.
-* Action overrides support multiple options, which are https://www.elastic.co/guide/en/elasticsearch/reference/current/watcher-api-execute-watch.html#watcher-api-execute-watch-action-mode[explained here]
+* Action overrides support multiple options, which are {ref}/watcher-api-execute-watch.html#watcher-api-execute-watch-action-mode[explained here].
 
 [float]
 === Simulated
@@ -46,5 +49,6 @@ The possible simulation statuses for watches are:
 * `Ok` - The watch is not actively firing but working properly.
 * `Disabled` - The watch will not fire under any circumstance.
 
-For more information on the various fields in the response, https://www.elastic.co/guide/en/elasticsearch/reference/current/watcher-api-execute-watch.html[please refer to the Elasticsearch docs].
+For more information on the various fields in the response, see the 
+{ref}/watcher-api-execute-watch.html[Execute Watch API].
 
