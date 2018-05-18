@@ -19,3 +19,6 @@ to continue using the Platinum features. You can install
 your purchased license from the *License Management* UI.
 
 If your trial license expires, you'll revert to the Basic license.
+
+For a comparison of the Elastic license levels, 
+see link:https://www.elastic.co/subscriptions[the subscription page].
