@@ -28,6 +28,10 @@ const options = {
           pattern: '.(less|png|svg)$',
           location: resolve(__dirname, 'tasks', 'mocks', 'noop'),
         },
+        {
+          pattern: 'plugins/canvas/apps',
+          location: resolve(__dirname, 'tasks', 'mocks', 'noop'),
+        },
       ],
     ],
   ],
