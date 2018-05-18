@@ -12,7 +12,9 @@ export function RootSearchSourceProvider(Private, $rootScope, timefilter) {
     // to remove that timefilter again because we use our explicitly passed in one.
     // This should be removed as soon as we got rid of inheritance in SearchSource
     // across the boundary or visualization.
-    filter.meta = { _globalTimefilter: true };
+    if (filter) {
+      filter.meta = { _globalTimefilter: true };
+    }
     return filter;
   });
 
