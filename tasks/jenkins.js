@@ -6,6 +6,7 @@ module.exports = function (grunt) {
   grunt.registerTask('jenkins:unit', [
     'run:eslint',
     'licenses',
+    'verifyDependencyVersions',
     'run:verifyNotice',
     'test:server',
     'test:jest',

@@ -9,9 +9,9 @@
 import moment from 'moment';
 import angular from 'angular';
 
-import { JobServiceProvider } from 'plugins/ml/services/job_service';
-import { CreateWatchServiceProvider } from 'plugins/ml/jobs/new_job/simple/components/watcher/create_watch_service';
+import { mlJobService } from 'plugins/ml/services/job_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
+import { xpackFeatureProvider } from 'plugins/ml/license/check_license';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
@@ -23,10 +23,9 @@ module.controller('MlJobTimepickerModal', function (
   params,
   Private) {
   const msgs = mlMessageBarService;
-  const mlJobService = Private(JobServiceProvider);
-  const mlCreateWatchService = Private(CreateWatchServiceProvider);
   $scope.saveLock = false;
-  $scope.watcherEnabled = mlCreateWatchService.isWatcherEnabled();
+  const xpackFeature = Private(xpackFeatureProvider);
+  $scope.watcherEnabled = xpackFeature.isAvailable('watcher');
 
   const job = angular.copy(params.job);
   $scope.jobId = job.job_id;
@@ -106,6 +105,7 @@ module.controller('MlJobTimepickerModal', function (
               msgs.error(`Could not open ${$scope.jobId}`, resp);
             }
           } else {
+            // console.log(resp);
             msgs.error(`Could not open ${$scope.jobId}`, resp);
           }
           $scope.saveLock = false;

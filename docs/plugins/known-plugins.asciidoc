@@ -10,10 +10,6 @@ The Kibana plugin interfaces are in a state of constant development.  We cannot 
 This list of plugins is not guaranteed to work on your version of Kibana. Instead, these are plugins that were known to work at some point with Kibana *5.x*. The Kibana installer will reject any plugins that haven't been published for your specific version of Kibana.
 
 [float]
-=== Packs
-* https://www.elastic.co/downloads/x-pack[X-Pack] - security, monitoring, reporting, alerts, graph
-
-[float]
 === Apps
 * https://github.com/sivasamyk/logtrail[LogTrail] - View, analyze, search and tail log events in realtime with a developer/sysadmin friendly interface
 * https://github.com/wtakase/kibana-own-home[Own Home] (wtakase) - enables multi-tenancy
@@ -44,6 +40,7 @@ This list of plugins is not guaranteed to work on your version of Kibana. Instea
 * https://github.com/clamarque/Kibana_health_metric_vis[Health Metric] (clamarque)
 * https://github.com/sbeyn/kibana-plugin-line-sg[Line] (sbeyn)
 * https://github.com/walterra/kibana-milestones-vis[Milestones] (walterra)
+* https://github.com/varundbest/navigation[Navigation] (varundbest)
 * https://github.com/dlumbrer/kbn_network[Network Plugin] (dlumbrer)
 * https://github.com/amannocci/kibana-plugin-metric-percent[Percent] (amannocci)
 * https://github.com/dlumbrer/kbn_polar[Polar] (dlumbrer)

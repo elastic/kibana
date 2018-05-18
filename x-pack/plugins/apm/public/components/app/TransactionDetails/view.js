@@ -8,15 +8,34 @@ import React from 'react';
 import { HeaderLarge } from '../../shared/UIComponents';
 import Transaction from './Transaction';
 import Distribution from './Distribution';
-import Charts from './Charts';
+import { DetailsChartsRequest } from '../../../store/reduxRequest/detailsCharts';
+import Charts from '../../shared/charts/TransactionCharts';
+import { TransactionDistributionRequest } from '../../../store/reduxRequest/transactionDistribution';
+import { TransactionDetailsRequest } from '../../../store/reduxRequest/transactionDetails';
 
 function TransactionDetails({ urlParams }) {
   return (
     <div>
       <HeaderLarge>{urlParams.transactionName}</HeaderLarge>
-      <Charts />
-      <Distribution />
-      <Transaction />
+
+      <DetailsChartsRequest
+        urlParams={urlParams}
+        render={({ data }) => <Charts charts={data} urlParams={urlParams} />}
+      />
+
+      <TransactionDistributionRequest
+        urlParams={urlParams}
+        render={({ data }) => (
+          <Distribution distribution={data} urlParams={urlParams} />
+        )}
+      />
+
+      <TransactionDetailsRequest
+        urlParams={urlParams}
+        render={({ data }) => (
+          <Transaction transaction={data} urlParams={urlParams} />
+        )}
+      />
     </div>
   );
 }

@@ -1,2 +1,2 @@
 require('../src/babel-register');
-require('../test/scripts/run_mocha');
+require('../src/dev/mocha').runMochaCli();

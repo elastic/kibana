@@ -125,4 +125,18 @@ export function systemRoutes(server, commonRouteConfig) {
       ...commonRouteConfig
     }
   });
+
+  server.route({
+    method: 'POST',
+    path: '/api/ml/es_search',
+    handler(request, reply) {
+      const callWithRequest = callWithRequestFactory(server, request);
+      return callWithRequest('search', request.payload)
+        .then(resp => reply(resp))
+        .catch(resp => reply(wrapError(resp)));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
 }

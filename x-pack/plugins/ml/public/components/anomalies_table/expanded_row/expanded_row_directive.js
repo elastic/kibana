@@ -22,8 +22,8 @@ import {
   getSeverity,
   showActualForFunction,
   showTypicalForFunction
-} from 'plugins/ml/util/anomaly_utils';
-import 'plugins/ml/filters/format_value';
+} from 'plugins/ml/../common/util/anomaly_utils';
+import 'plugins/ml/formatters/format_value';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');

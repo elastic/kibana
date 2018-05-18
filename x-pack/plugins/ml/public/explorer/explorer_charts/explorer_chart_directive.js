@@ -18,25 +18,23 @@ import d3 from 'd3';
 import angular from 'angular';
 import moment from 'moment';
 
-import { getSeverityWithLow } from 'plugins/ml/util/anomaly_utils';
+import { formatValue } from 'plugins/ml/formatters/format_value';
+import { getSeverityWithLow } from 'plugins/ml/../common/util/anomaly_utils';
 import { drawLineChartDots, numTicksForDateFormat } from 'plugins/ml/util/chart_utils';
 import { TimeBuckets } from 'ui/time_buckets';
-import 'plugins/ml/filters/format_value';
 import loadingIndicatorWrapperTemplate from 'plugins/ml/components/loading_indicator/loading_indicator_wrapper.html';
 import { mlEscape } from 'plugins/ml/util/string_utils';
-import { FieldFormatServiceProvider } from 'plugins/ml/services/field_format_service';
+import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 module.directive('mlExplorerChart', function (
-  formatValueFilter,
   mlChartTooltipService,
   Private,
   mlSelectSeverityService) {
 
   function link(scope, element) {
-    const mlFieldFormatService = Private(FieldFormatServiceProvider);
     console.log('ml-explorer-chart directive link series config:', scope.seriesConfig);
     if (typeof scope.seriesConfig === 'undefined') {
       // just return so the empty directive renders without an error later on
@@ -287,10 +285,10 @@ module.directive('mlExplorerChart', function (
         if (_.has(marker, 'actual')) {
           // Display the record actual in preference to the chart value, which may be
           // different depending on the aggregation interval of the chart.
-          contents += (`<br/>actual: ${formatValueFilter(marker.actual, config.functionDescription, fieldFormat)}`);
-          contents += (`<br/>typical: ${formatValueFilter(marker.typical, config.functionDescription, fieldFormat)}`);
+          contents += (`<br/>actual: ${formatValue(marker.actual, config.functionDescription, fieldFormat)}`);
+          contents += (`<br/>typical: ${formatValue(marker.typical, config.functionDescription, fieldFormat)}`);
         } else {
-          contents += (`<br/>value: ${formatValueFilter(marker.value, config.functionDescription, fieldFormat)}`);
+          contents += (`<br/>value: ${formatValue(marker.value, config.functionDescription, fieldFormat)}`);
           if (_.has(marker, 'byFieldName') && _.has(marker, 'numberOfCauses')) {
             const numberOfCauses = marker.numberOfCauses;
             const byFieldName = mlEscape(marker.byFieldName);
@@ -304,7 +302,7 @@ module.directive('mlExplorerChart', function (
           }
         }
       } else {
-        contents += `value: ${formatValueFilter(marker.value, config.functionDescription, fieldFormat)}`;
+        contents += `value: ${formatValue(marker.value, config.functionDescription, fieldFormat)}`;
       }
 
       if (_.has(marker, 'scheduledEvents')) {

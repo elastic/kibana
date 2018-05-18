@@ -13,7 +13,7 @@ import { fromRoot } from '../utils';
 import { PUBLIC_PATH_PLACEHOLDER } from './public_path_placeholder';
 
 const POSTCSS_CONFIG_PATH = require.resolve('./postcss.config');
-const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack');
+const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
 const BABEL_EXCLUDE_RE = [
   /[\/\\](webpackShims|node_modules|bower_components)[\/\\]/,
 ];
@@ -153,6 +153,30 @@ export default class BaseOptimizer {
         }),
 
         new webpack.NoEmitOnErrorsPlugin(),
+
+        // replace imports for `uiExports/*` modules with a synthetic module
+        // created by create_ui_exports_module.js
+        new webpack.NormalModuleReplacementPlugin(/^uiExports\//, (resource) => {
+          // the map of uiExport types to module ids
+          const extensions = this.uiBundles.getAppExtensions();
+
+          // everything following the first / in the request is
+          // treated as a type of appExtension
+          const type = resource.request.slice(resource.request.indexOf('/') + 1);
+
+          resource.request = [
+            // the "val-loader" is used to execute create_ui_exports_module
+            // and use its return value as the source for the module in the
+            // bundle. This allows us to bypass writing to the file system
+            require.resolve('val-loader'),
+            '!',
+            require.resolve('./create_ui_exports_module'),
+            '?',
+            // this JSON is parsed by create_ui_exports_module and determines
+            // what require() calls it will execute within the bundle
+            JSON.stringify({ type, modules: extensions[type] || [] })
+          ].join('');
+        }),
 
         ...this.uiBundles.getWebpackPluginProviders()
           .map(provider => provider(webpack)),

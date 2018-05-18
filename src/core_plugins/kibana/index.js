@@ -9,6 +9,7 @@ import { scrollSearchApi } from './server/routes/api/scroll_search';
 import { importApi } from './server/routes/api/import';
 import { exportApi } from './server/routes/api/export';
 import { homeApi } from './server/routes/api/home';
+import { managementApi } from './server/routes/api/management';
 import { scriptsApi } from './server/routes/api/scripts';
 import { registerSuggestionsApi } from './server/routes/api/suggestions';
 import { registerFieldFormats } from './server/field_formats/register';
@@ -48,22 +49,6 @@ export default function (kibana) {
         listed: false,
         description: 'the kibana you know and love',
         main: 'plugins/kibana/kibana',
-        uses: [
-          'home',
-          'visTypes',
-          'visResponseHandlers',
-          'visRequestHandlers',
-          'visEditorTypes',
-          'savedObjectTypes',
-          'spyModes',
-          'fieldFormats',
-          'fieldFormatEditors',
-          'navbarExtensions',
-          'managementSections',
-          'devTools',
-          'docViews',
-          'embeddableFactories',
-        ],
       },
 
       links: [
@@ -149,6 +134,7 @@ export default function (kibana) {
       importApi(server);
       exportApi(server);
       homeApi(server);
+      managementApi(server);
       registerSuggestionsApi(server);
       registerFieldFormats(server);
       registerTutorials(server);

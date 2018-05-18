@@ -102,7 +102,6 @@ export class OptInBanner extends Component {
           <EuiFlexItem grow={false}>
             <EuiButton
               size="s"
-              fill
               onClick={() => this.props.optInClick(true)}
             >
               Yes

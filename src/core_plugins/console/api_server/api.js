@@ -1,45 +1,51 @@
-const _ = require("lodash");
+import _ from 'lodash';
 
-'use strict';
-
-/**
- *
- * @param name
- */
-function Api(name) {
-  this.globalRules = {};
-  this.endpoints = {};
-  this.name = name;
-}
-
-(function (cls) {
-  cls.addGlobalAutocompleteRules = function (parentNode, rules) {
+class Api {
+  constructor(name) {
+    this.globalRules = {};
+    this.endpoints = {};
+    this.name = name;
+  }
+  addGlobalAutocompleteRules = function (parentNode, rules) {
     this.globalRules[parentNode] = rules;
-  };
-
-  cls.addEndpointDescription = function (endpoint, description) {
+  }
+  addEndpointDescription(endpoint, description = {}) {
+    let copiedDescription = {};
     if (this.endpoints[endpoint]) {
-      throw new Error("endpoint [" + endpoint + "] is already registered");
+      copiedDescription = { ...this.endpoints[endpoint] };
+    }
+    let urlParamsDef;
+    _.each(description.patterns || [], function (p) {
+      if (p.indexOf('{indices}') >= 0) {
+        urlParamsDef = urlParamsDef || {};
+        urlParamsDef.ignore_unavailable = '__flag__';
+        urlParamsDef.allow_no_indices = '__flag__';
+        urlParamsDef.expand_wildcards = ['open', 'closed'];
+      }
+    });
+
+    if (urlParamsDef) {
+      description.url_params = _.extend(description.url_params || {}, copiedDescription.url_params);
+      _.defaults(description.url_params, urlParamsDef);
     }
 
-    var copiedDescription = {};
-    _.extend(copiedDescription, description || {});
+    _.extend(copiedDescription, description);
     _.defaults(copiedDescription, {
       id: endpoint,
       patterns: [endpoint],
       methods: ['GET']
     });
     this.endpoints[endpoint] = copiedDescription;
-  };
+  }
 
-  cls.asJson = function () {
+  asJson() {
     return {
-      "name": this.name,
-      "globals": this.globalRules,
-      "endpoints": this.endpoints
-    }
-  };
+      'name': this.name,
+      'globals': this.globalRules,
+      'endpoints': this.endpoints
+    };
+  }
 
-}(Api.prototype));
+}
 
 export default Api;

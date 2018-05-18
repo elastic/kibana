@@ -38,42 +38,42 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async getAdvancedSettings(propertyName) {
       log.debug('in getAdvancedSettings');
-      return await testSubjects.getVisibleText(`advancedSetting-${propertyName}-currentValue`);
+      const setting =  await testSubjects.find(`advancedSetting-editField-${propertyName}`);
+      return await setting.getProperty('value');
+    }
+
+    async getAdvancedSettingCheckbox(propertyName) {
+      log.debug('in getAdvancedSettingCheckbox');
+      const setting =  await testSubjects.find(`advancedSetting-editField-${propertyName}`);
+      return await setting.getProperty('checked');
     }
 
     async clearAdvancedSettings(propertyName) {
-      await testSubjects.click(`advancedSetting-${propertyName}-clearButton`);
+      await testSubjects.click(`advancedSetting-resetField-${propertyName}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async setAdvancedSettingsSelect(propertyName, propertyValue) {
-      await testSubjects.click(`advancedSetting-${propertyName}-editButton`);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.common.sleep(1000);
       await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector(`option[label="${propertyValue}"]`).click();
+        .findByCssSelector(`[data-test-subj="advancedSetting-editField-${propertyName}"] option[value="${propertyValue}"]`).click();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.click(`advancedSetting-${propertyName}-saveButton`);
+      await testSubjects.click(`advancedSetting-saveEditField-${propertyName}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    async setAdvancedSettingsInput(propertyName, propertyValue, inputSelector) {
-      await testSubjects.click(`advancedSetting-${propertyName}-editButton`);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const input = await testSubjects.find(inputSelector);
+    async setAdvancedSettingsInput(propertyName, propertyValue) {
+      const input = await testSubjects.find(`advancedSetting-editField-${propertyName}`);
       await input.clearValue();
       await input.type(propertyValue);
-      await testSubjects.click(`advancedSetting-${propertyName}-saveButton`);
+      await testSubjects.click(`advancedSetting-saveEditField-${propertyName}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async toggleAdvancedSettingCheckbox(propertyName) {
-      await testSubjects.click(`advancedSetting-${propertyName}-editButton`);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const checkbox = await testSubjects.find(`advancedSetting-${propertyName}-checkbox`);
+      const checkbox = await testSubjects.find(`advancedSetting-editField-${propertyName}`);
       await checkbox.click();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.click(`advancedSetting-${propertyName}-saveButton`);
+      await testSubjects.click(`advancedSetting-saveEditField-${propertyName}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -479,31 +479,72 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('editorFieldScript', script);
     }
 
-    async importFile(path) {
+    async importFile(path, overwriteAll = true) {
       log.debug(`importFile(${path})`);
-      await remote.findById('testfile').type(path);
+
+      log.debug(`Clicking importObjects`);
+      await testSubjects.click('importObjects');
+      log.debug(`Setting the path on the file input`);
+      await find.setValue('.euiFilePicker__input', path);
+      if (!overwriteAll) {
+        log.debug(`Toggling overwriteAll`);
+        await testSubjects.click('importSavedObjectsOverwriteToggle');
+      } else {
+        log.debug(`Leaving overwriteAll alone`);
+      }
+      await testSubjects.click('importSavedObjectsImportBtn');
+      log.debug(`done importing the file`);
+    }
+
+    async clickImportDone() {
+      await testSubjects.click('importSavedObjectsDoneBtn');
+    }
+
+    async clickConfirmConflicts() {
+      await testSubjects.click('importSavedObjectsConfirmBtn');
     }
 
     async setImportIndexFieldOption(child) {
-      await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector(`select[data-test-subj="managementChangeIndexSelection"] > option:nth-child(${child})`)
-        .click();
+      await find
+        .clickByCssSelector(`select[data-test-subj="managementChangeIndexSelection"] > option:nth-child(${child})`);
     }
 
     async clickChangeIndexConfirmButton() {
-      await (await testSubjects.find('changeIndexConfirmButton')).click();
+      await testSubjects.click('changeIndexConfirmButton');
     }
 
     async clickVisualizationsTab() {
-      await (await testSubjects.find('objectsTab-visualizations')).click();
+      await testSubjects.click('objectsTab-visualizations');
     }
 
     async clickSearchesTab() {
-      await (await testSubjects.find('objectsTab-searches')).click();
+      await testSubjects.click('objectsTab-searches');
     }
 
     async getVisualizationRows() {
       return await testSubjects.findAll(`objectsTableRow`);
+    }
+
+    async waitUntilSavedObjectsTableIsNotLoading() {
+      return retry.try(async () => {
+        const exists = await find.existsByDisplayedByCssSelector('*[data-test-subj="savedObjectsTable"] .euiBasicTable-loading');
+        if (exists) {
+          throw new Error('Waiting');
+        }
+        return true;
+      });
+    }
+
+    async getSavedObjectsInTable() {
+      const table = await testSubjects.find('savedObjectsTable');
+      const cells = await table.findAll('css selector', 'td:nth-child(3)');
+
+      const objects = [];
+      for (const cell of cells) {
+        objects.push(await cell.getVisibleText());
+      }
+
+      return objects;
     }
   }
 

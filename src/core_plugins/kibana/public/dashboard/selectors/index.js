@@ -128,9 +128,10 @@ export const getHidePanelTitles = dashboard => dashboard.view.hidePanelTitles;
  * @return {string|undefined}
  */
 export const getMaximizedPanelId = dashboard => dashboard.view.maximizedPanelId;
+
 /**
  * @param dashboard {DashboardState}
- * @return {string|undefined}
+ * @return {{ from: {string}, to: {string}, mode: {string} }}
  */
 export const getTimeRange = dashboard => dashboard.view.timeRange;
 
@@ -160,7 +161,8 @@ export const getDescription = dashboard => dashboard.metadata.description;
  * This state object is specifically for communicating to embeddables and it's structure is not tied to
  * the redux tree structure.
  * @typedef {Object} ContainerState
- * @property {Object} timeRange
+ * @property {String} timeRange.to - either an absolute time range in utc format or a relative one (e.g. now-15m)
+ * @property {String} timeRange.from - either an absolute time range in utc format or a relative one (e.g. now-15m)
  * @property {Object} embeddableCustomization
  * @property {boolean} hidePanelTitles
  */
@@ -171,12 +173,18 @@ export const getDescription = dashboard => dashboard.metadata.description;
  * @param panelId {string}
  * @return {ContainerState}
  */
-export const getContainerState = (dashboard, panelId) => ({
-  timeRange: _.cloneDeep(getTimeRange(dashboard)),
-  embeddableCustomization: _.cloneDeep(getEmbeddableCustomization(dashboard, panelId) || {}),
-  hidePanelTitles: getHidePanelTitles(dashboard),
-  customTitle: getPanel(dashboard, panelId).title,
-});
+export const getContainerState = (dashboard, panelId) => {
+  const time = getTimeRange(dashboard);
+  return {
+    timeRange: {
+      to: time.to,
+      from: time.from,
+    },
+    embeddableCustomization: _.cloneDeep(getEmbeddableCustomization(dashboard, panelId) || {}),
+    hidePanelTitles: getHidePanelTitles(dashboard),
+    customTitle: getPanel(dashboard, panelId).title,
+  };
+};
 
 /**
  *

@@ -6,7 +6,7 @@ import { createGunzip } from 'zlib';
 import vfs from 'vinyl-fs';
 import { promisify } from 'bluebird';
 import mkdirpCb from 'mkdirp';
-import { createPromiseFromStreams } from '../../../utils';
+import { createPromiseFromStreams, createMapStream } from '../../../utils';
 
 import { Extract } from 'tar';
 
@@ -16,6 +16,7 @@ const chmodAsync = promisify(fs.chmod);
 const writeFileAsync = promisify(fs.writeFile);
 const readFileAsync = promisify(fs.readFile);
 const readdirAsync = promisify(fs.readdir);
+const utimesAsync = promisify(fs.utimes);
 
 function assertAbsolute(path) {
   if (!isAbsolute(path)) {
@@ -70,6 +71,7 @@ export async function copyAll(sourceDir, destination, options = {}) {
   const {
     select = ['**/*'],
     dot = false,
+    time,
   } = options;
 
   assertAbsolute(sourceDir);
@@ -82,8 +84,8 @@ export async function copyAll(sourceDir, destination, options = {}) {
       base: sourceDir,
       dot,
     }),
-
-    vfs.dest(destination)
+    vfs.dest(destination),
+    ...(Boolean(time) ? [createMapStream(file => utimesAsync(file.path, time, time))] : []),
   ]);
 }
 

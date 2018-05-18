@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import { isEmpty, capitalize } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { StatusIcon } from '../';
@@ -19,20 +19,28 @@ const wrapChild = ({ label, value, dataTestSubj }, index) => (
   </EuiFlexItem>
 );
 
-const StatusIndicator = ({ status }) => {
+const DefaultIconComponent = ({ status }) => (
+  <Fragment>
+    Status: {(
+      <StatusIcon type={status.toUpperCase()} label={`Status: ${status}`} />
+    )}
+  </Fragment>
+);
+
+const StatusIndicator = ({ status, IconComponent }) => {
   if (isEmpty(status)) {
     return null;
   }
 
   return (
     <div className="monitoring-summary-status__status-indicator">
-      Health: <StatusIcon type={status.toUpperCase()} label={`Status: ${status}`} />{' '}
+      <IconComponent status={status} />{' '}
       {capitalize(status)}
     </div>
   );
 };
 
-export function SummaryStatus({ children, status, ...props }) {
+export function SummaryStatus({ children, status, IconComponent = DefaultIconComponent, ...props }) {
   return (
     <div className="monitoring-summary-status" role="status">
       <div className="monitoring-summary-status__content" {...props}>
@@ -43,7 +51,7 @@ export function SummaryStatus({ children, status, ...props }) {
             grow={true}
             className="monitoring-summary-status__eui-content"
           >
-            <StatusIndicator status={status} />
+            <StatusIndicator status={status} IconComponent={IconComponent} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </div>

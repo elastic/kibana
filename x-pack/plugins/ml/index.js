@@ -20,6 +20,7 @@ import { dataRecognizer } from './server/routes/modules';
 import { dataVisualizerRoutes } from './server/routes/data_visualizer';
 import { calendars } from './server/routes/calendars';
 import { fieldsService } from './server/routes/fields_service';
+import { resultsServiceRoutes } from './server/routes/results_service';
 
 export const ml = (kibana) => {
   return new kibana.Plugin({
@@ -34,14 +35,9 @@ export const ml = (kibana) => {
         description: 'Machine Learning for the Elastic Stack',
         icon: 'plugins/ml/ml.svg',
         main: 'plugins/ml/app',
-        uses: [
-          'fieldFormats',
-          'savedObjectTypes',
-        ]
       },
       hacks: ['plugins/ml/hacks/toggle_app_link_in_nav'],
       home: ['plugins/ml/register_feature']
-
     },
 
 
@@ -87,6 +83,7 @@ export const ml = (kibana) => {
       dataVisualizerRoutes(server, commonRouteConfig);
       calendars(server, commonRouteConfig);
       fieldsService(server, commonRouteConfig);
+      resultsServiceRoutes(server, commonRouteConfig);
     }
 
   });

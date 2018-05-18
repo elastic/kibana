@@ -86,7 +86,7 @@ describe('Terms Agg', function () {
       expect($rootScope.agg.params.orderBy).to.be('agg5');
     });
 
-    it('defaults to the _term metric if no agg is compatible', function () {
+    it('defaults to the _key metric if no agg is compatible', function () {
       init({
         responseValueAggs: [
           {
@@ -97,15 +97,15 @@ describe('Terms Agg', function () {
           }
         ]
       });
-      expect($rootScope.agg.params.orderBy).to.be('_term');
+      expect($rootScope.agg.params.orderBy).to.be('_key');
     });
 
-    it('selects _term if there are no metric aggs', function () {
+    it('selects _key if there are no metric aggs', function () {
       init({});
-      expect($rootScope.agg.params.orderBy).to.be('_term');
+      expect($rootScope.agg.params.orderBy).to.be('_key');
     });
 
-    it('selects _term if the selected metric becomes incompatible', function () {
+    it('selects _key if the selected metric becomes incompatible', function () {
       init({
         responseValueAggs: [
           {
@@ -126,7 +126,7 @@ describe('Terms Agg', function () {
         }
       ];
       $rootScope.$digest();
-      expect($rootScope.agg.params.orderBy).to.be('_term');
+      expect($rootScope.agg.params.orderBy).to.be('_key');
     });
 
     it('selects first metric if it is avg', function () {
@@ -144,7 +144,7 @@ describe('Terms Agg', function () {
       expect($rootScope.agg.params.orderBy).to.be('agg1');
     });
 
-    it('selects _term if the first metric is avg_bucket', function () {
+    it('selects _key if the first metric is avg_bucket', function () {
       $rootScope.responseValueAggs = [
         {
           id: 'agg1',
@@ -155,10 +155,10 @@ describe('Terms Agg', function () {
         }
       ];
       $rootScope.$digest();
-      expect($rootScope.agg.params.orderBy).to.be('_term');
+      expect($rootScope.agg.params.orderBy).to.be('_key');
     });
 
-    it('selects _term if the selected metric is removed', function () {
+    it('selects _key if the selected metric is removed', function () {
       init({
         responseValueAggs: [
           {
@@ -172,7 +172,7 @@ describe('Terms Agg', function () {
       expect($rootScope.agg.params.orderBy).to.be('agg1');
       $rootScope.responseValueAggs = [];
       $rootScope.$digest();
-      expect($rootScope.agg.params.orderBy).to.be('_term');
+      expect($rootScope.agg.params.orderBy).to.be('_key');
     });
 
     it('adds "custom metric" option');

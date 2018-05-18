@@ -1,57 +1,44 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import Select from 'react-select';
 import { FormRow } from './form_row';
 
 import {
   EuiFieldText,
+  EuiComboBox,
 } from '@elastic/eui';
 
 export class ListControl extends Component {
-  constructor(props) {
-    super(props);
 
-    this.handleOnChange = this.handleOnChange.bind(this);
-    this.truncate = this.truncate.bind(this);
-  }
-
-  handleOnChange(evt) {
-    let newValue = '';
-    if (evt) {
-      newValue = evt;
-    }
-    this.props.stageFilter(this.props.controlIndex, newValue);
-  }
-
-  truncate(selected) {
-    if (selected.label.length <= 24) {
-      return selected.label;
-    }
-    return `${selected.label.substring(0, 23)}...`;
+  handleOnChange = (selectedOptions) => {
+    this.props.stageFilter(this.props.controlIndex, selectedOptions);
   }
 
   renderControl() {
-    if (!this.props.control.isEnabled()) {
-      // react-select clobbers the tooltip, so just returning a disabled input instead
+    if (this.props.disableMsg) {
       return (
         <EuiFieldText
+          placeholder="Select..."
           disabled={true}
         />
       );
     }
 
+    const options = this.props.options.map(option => {
+      return {
+        label: option.label,
+        value: option.value,
+        ['data-test-subj']: `option_${option.value.replace(' ', '_')}`
+      };
+    });
+
     return (
-      <Select
-        className="list-control-react-select"
+      <EuiComboBox
         placeholder="Select..."
-        multi={this.props.control.options.multiselect}
-        simpleValue={true}
-        delimiter={this.props.control.getMultiSelectDelimiter()}
-        value={this.props.control.value}
-        options={this.props.control.selectOptions}
+        options={options}
+        selectedOptions={this.props.selectedOptions}
         onChange={this.handleOnChange}
-        valueRenderer={this.truncate}
-        inputProps={{ id: this.props.control.id }}
+        singleSelection={!this.props.multiselect}
+        data-test-subj={`listControlSelect${this.props.controlIndex}`}
       />
     );
   }
@@ -59,10 +46,10 @@ export class ListControl extends Component {
   render() {
     return (
       <FormRow
-        id={this.props.control.id}
-        label={this.props.control.label}
+        id={this.props.id}
+        label={this.props.label}
         controlIndex={this.props.controlIndex}
-        control={this.props.control}
+        disableMsg={this.props.disableMsg}
       >
         {this.renderControl()}
       </FormRow>
@@ -70,8 +57,22 @@ export class ListControl extends Component {
   }
 }
 
+const comboBoxOptionShape = PropTypes.shape({
+  label: PropTypes.string.isRequired,
+  value: PropTypes.string.isRequired,
+});
+
 ListControl.propTypes = {
-  control: PropTypes.object.isRequired,
+  id: PropTypes.string.isRequired,
+  label: PropTypes.string.isRequired,
+  selectedOptions: PropTypes.arrayOf(comboBoxOptionShape).isRequired,
+  options: PropTypes.arrayOf(comboBoxOptionShape),
+  disableMsg: PropTypes.string,
+  multiselect: PropTypes.bool.isRequired,
   controlIndex: PropTypes.number.isRequired,
   stageFilter: PropTypes.func.isRequired
+};
+
+ListControl.defaultProps = {
+  options: [],
 };

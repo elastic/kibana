@@ -29,8 +29,22 @@ function getFieldsForTypes(searchFields, types) {
  *  @param  {Array<string>} searchFields
  *  @return {Object}
  */
-export function getQueryParams(mappings, type, search, searchFields) {
+export function getQueryParams(mappings, type, search, searchFields, includeTypes) {
   if (!type && !search) {
+    if (includeTypes) {
+      return {
+        query: {
+          bool: {
+            should: includeTypes.map(includeType => ({
+              term: {
+                type: includeType,
+              }
+            }))
+          }
+        }
+      };
+    }
+
     return {};
   }
 
@@ -42,14 +56,29 @@ export function getQueryParams(mappings, type, search, searchFields) {
     ];
   }
 
+  if (includeTypes) {
+    bool.must = [
+      {
+        bool: {
+          should: includeTypes.map(includeType => ({
+            term: {
+              type: includeType,
+            }
+          })),
+        }
+      }
+    ];
+  }
+
   if (search) {
     bool.must = [
+      ...bool.must || [],
       {
         simple_query_string: {
           query: search,
           ...getFieldsForTypes(
             searchFields,
-            type ? [type] : Object.keys(getRootProperties(mappings))
+            type ? [type] : Object.keys(getRootProperties(mappings)),
           )
         }
       }

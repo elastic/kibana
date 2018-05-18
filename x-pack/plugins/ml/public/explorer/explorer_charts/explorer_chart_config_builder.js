@@ -16,10 +16,9 @@ import _ from 'lodash';
 import { parseInterval } from 'ui/utils/parse_interval';
 import { buildConfigFromDetector } from 'plugins/ml/util/chart_config_builder';
 import { mlEscape } from 'plugins/ml/util/string_utils';
-import { JobServiceProvider } from 'plugins/ml/services/job_service';
+import { mlJobService } from 'plugins/ml/services/job_service';
 
-export function explorerChartConfigBuilder(Private) {
-  const mlJobService = Private(JobServiceProvider);
+export function explorerChartConfigBuilder() {
 
   const compiledTooltip = _.template(
     '<div class="explorer-chart-info-tooltip">job ID: <%= jobId %><br/>' +

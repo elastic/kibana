@@ -33,8 +33,33 @@ function initContext(file, config) {
   return context;
 }
 
+function tryNodeResolver(importRequest, file, config) {
+  return nodeResolver.resolve(
+    importRequest,
+    file,
+    Object.assign({}, config, {
+      extensions: ['.js', '.json'],
+      isFile,
+    })
+  );
+}
+
 exports.resolve = function resolveKibanaPath(importRequest, file, config) {
   config = config || {};
+
+  if (config.forceNode) {
+    return tryNodeResolver(importRequest, file, config);
+  }
+
+  // these modules are simulated by webpack, so there is no
+  // path to resolve to and no reason to do any more work
+  if (importRequest.startsWith('uiExports/')) {
+    return {
+      found: true,
+      path: null,
+    };
+  }
+
   const { webpackConfig, aliasEntries } = initContext(file, config);
   let isPathRequest = getIsPathRequest(importRequest);
 
@@ -69,14 +94,7 @@ exports.resolve = function resolveKibanaPath(importRequest, file, config) {
   // to the node_modules directory by the node resolver, but we want
   // them to resolve to the actual shim
   if (isPathRequest || !isProbablyWebpackShim(importRequest, file)) {
-    const nodeResult = nodeResolver.resolve(
-      importRequest,
-      file,
-      Object.assign({}, config, {
-        isFile,
-      })
-    );
-
+    const nodeResult = tryNodeResolver(importRequest, file, config);
     if (nodeResult && nodeResult.found) {
       return nodeResult;
     }

@@ -3,6 +3,7 @@
 exports[`renders OptionsTab 1`] = `
 <EuiForm>
   <EuiFormRow
+    describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
     id="updateFiltersOnChange"
@@ -15,6 +16,7 @@ exports[`renders OptionsTab 1`] = `
     />
   </EuiFormRow>
   <EuiFormRow
+    describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
     id="useTimeFilter"
@@ -27,6 +29,7 @@ exports[`renders OptionsTab 1`] = `
     />
   </EuiFormRow>
   <EuiFormRow
+    describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
     id="pinFilters"

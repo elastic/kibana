@@ -31,6 +31,13 @@ export function initAngularApi(chrome, internals) {
         a.href = chrome.addBasePath('/elasticsearch');
         return a.href;
       }()))
+      .config($locationProvider => {
+        $locationProvider.html5Mode({
+          enabled: false,
+          requireBase: false,
+          rewriteLinks: false,
+        });
+      })
       .config(chrome.$setupXsrfRequestInterceptor)
       .config(function ($compileProvider, $locationProvider) {
         if (!internals.devMode) {
@@ -39,6 +46,7 @@ export function initAngularApi(chrome, internals) {
 
         $locationProvider.hashPrefix('');
       })
+      .run(internals.capture$httpLoadingCount)
       .run(($location, $rootScope, Private, config) => {
         chrome.getFirstPathSegment = () => {
           return $location.path().split('/')[1];

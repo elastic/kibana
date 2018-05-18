@@ -36,12 +36,81 @@ export class VisualizeEmbeddable extends Embeddable  {
     };
   }
 
-  getHandlerParams() {
-    return {
+  /**
+   * Transfers all changes in the containerState.embeddableCustomization into
+   * the uiState of this visualization.
+   */
+  transferCustomizationsToUiState(containerState) {
+    // Check for changes that need to be forwarded to the uiState
+    // Since the vis has an own listener on the uiState we don't need to
+    // pass anything from here to the handler.update method
+    const customization = containerState.embeddableCustomization;
+    if (!_.isEqual(this.customization, customization)) {
+      // Turn this off or the uiStateChangeHandler will fire for every modification.
+      this.uiState.off('change', this._uiStateChangeHandler);
+      this.uiState.clearAllKeys();
+      Object.getOwnPropertyNames(customization).forEach(key => {
+        this.uiState.set(key, customization[key]);
+      });
+      this.customization = customization;
+      this.uiState.on('change', this._uiStateChangeHandler);
+    }
+  }
+
+  /**
+   * Retrieve the panel title for this panel from the container state.
+   * This will either return the overwritten panel title or the visualization title.
+   */
+  getPanelTitle(containerState) {
+    let derivedPanelTitle = '';
+    if (!containerState.hidePanelTitles) {
+      derivedPanelTitle = containerState.customTitle !== undefined ?
+        containerState.customTitle :
+        this.savedVisualization.title;
+    }
+    return derivedPanelTitle;
+  }
+
+  onContainerStateChanged(containerState) {
+    this.transferCustomizationsToUiState(containerState);
+
+    const updatedParams = {};
+
+    // Check if timerange has changed
+    if (containerState.timeRange !== this.timeRange) {
+      updatedParams.timeRange = containerState.timeRange;
+      this.timeRange = containerState.timeRange;
+    }
+
+    const derivedPanelTitle = this.getPanelTitle(containerState);
+    if (this.panelTitle !== derivedPanelTitle) {
+      updatedParams.dataAttrs = {
+        title: derivedPanelTitle,
+      };
+      this.panelTitle = derivedPanelTitle;
+    }
+
+    if (this.handler && !_.isEmpty(updatedParams)) {
+      this.handler.update(updatedParams);
+    }
+  }
+
+  /**
+   *
+   * @param {Element} domNode
+   * @param {ContainerState} containerState
+   */
+  render(domNode, containerState) {
+    this.panelTitle = this.getPanelTitle(containerState);
+    this.timeRange = containerState.timeRange;
+
+    this.transferCustomizationsToUiState(containerState);
+
+    const handlerParams = {
       uiState: this.uiState,
       // Append visualization to container instead of replacing its content
       append: true,
-      timeRange: this.timeRange,
+      timeRange: containerState.timeRange,
       cssClass: `panel-content panel-content--fullWidth`,
       // The chrome is permanently hidden in "embed mode" in which case we don't want to show the spy pane, since
       // we deem that situation to be more public facing and want to hide more detailed information.
@@ -52,53 +121,12 @@ export class VisualizeEmbeddable extends Embeddable  {
         description: this.savedVisualization.description,
       }
     };
-  }
 
-  onContainerStateChanged(containerState) {
-    const customization = containerState.embeddableCustomization;
-    let isDirty = false;
-    if (!_.isEqual(this.customization, customization)) {
-      // Turn this off or the uiStateChangeHandler will fire for every modification.
-      this.uiState.off('change', this._uiStateChangeHandler);
-      this.uiState.clearAllKeys();
-      Object.getOwnPropertyNames(customization).forEach(key => {
-        this.uiState.set(key, customization[key]);
-      });
-      this.customization = customization;
-      isDirty = true;
-      this.uiState.on('change', this._uiStateChangeHandler);
-    }
-
-    let derivedPanelTitle = '';
-    if (!containerState.hidePanelTitles) {
-      derivedPanelTitle = containerState.customTitle !== undefined ?
-        containerState.customTitle :
-        this.savedVisualization.title;
-    }
-
-    if (this.panelTitle !== derivedPanelTitle) {
-      this.panelTitle = derivedPanelTitle;
-      isDirty = true;
-    }
-
-    if (isDirty && this.handler && this.domNode) {
-      // TODO: We need something like this in the handler
-      // this.handler.update(this.getHandlerParams());
-      // For now:
-      this.destroy();
-      this.handler = this.loader.embedVisualizationWithSavedObject(
-        this.domNode,
-        this.savedVisualization,
-        this.getHandlerParams());
-    }
-  }
-
-  render(domNode) {
-    this.domNode = domNode;
     this.handler = this.loader.embedVisualizationWithSavedObject(
       domNode,
       this.savedVisualization,
-      this.getHandlerParams());
+      handlerParams,
+    );
   }
 
   destroy() {
