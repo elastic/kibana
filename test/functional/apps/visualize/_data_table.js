@@ -91,6 +91,34 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
+      it('should show correct data for a data table with date histogram', async () => {
+        await PageObjects.common.navigateToUrl('visualize', 'new');
+        await PageObjects.visualize.clickDataTable();
+        await PageObjects.visualize.clickNewSearch();
+        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.visualize.clickBucket('Split Rows');
+        await PageObjects.visualize.selectAggregation('Date Histogram');
+        await PageObjects.visualize.selectField('@timestamp');
+        await PageObjects.visualize.setInterval('Daily');
+        await PageObjects.visualize.clickGo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const data = await PageObjects.visualize.getDataTableData();
+        expect(data.trim().split('\n')).to.be.eql([
+          '2015-09-20', '4,757',
+          '2015-09-21', '4,614',
+          '2015-09-22', '4,633',
+        ]);
+      });
+
+      it('should correctly filter for applied time filter on the main timefield', async () => {
+        await PageObjects.header.addFilter('@timestamp', 'is between', ['2015-09-19', '2015-09-21']);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const data = await PageObjects.visualize.getDataTableData();
+        expect(data.trim().split('\n')).to.be.eql([
+          '2015-09-20', '4,757',
+        ]);
+      });
+
     });
   });
 }
