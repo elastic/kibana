@@ -16,18 +16,14 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       await testSubjects.click('addNewSavedObjectLink');
     }
 
-    async closeAddVizualizationPanel() {
-      log.debug('closeAddVizualizationPanel');
-      await find.clickByCssSelector('i.fa fa-chevron-up');
-    }
-
     async clickSavedSearchTab() {
       await testSubjects.click('addSavedSearchTab');
     }
 
     async addEveryEmbeddableOnCurrentPage() {
       log.debug('addEveryEmbeddableOnCurrentPage');
-      const embeddableRows = await find.allByCssSelector('.list-group-menu-item');
+      const addPanel = await testSubjects.find('dashboardAddPanel');
+      const embeddableRows = await addPanel.findAllByClassName('euiLink');
       for (let i = 0; i < embeddableRows.length; i++) {
         await embeddableRows[i].click();
       }
@@ -35,12 +31,28 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
     }
 
     async clickPagerNextButton() {
-      const pagerNextButtonExists = await testSubjects.exists('paginateNext');
-      if (pagerNextButtonExists) {
-        await testSubjects.click('paginateNext');
+      // Clear all toasts that could hide pagination controls
+      const toasts = await find.allByCssSelector('.euiToast');
+      for (const toastElement of toasts) {
+        try {
+          const closeBtn = await toastElement.findByCssSelector('euiToast__closeButton');
+          await closeBtn.click();
+        } catch (err) {
+          // ignore errors, toast clear themselves after timeout
+        }
+      }
+
+      const addPanel = await testSubjects.find('dashboardAddPanel');
+      const pagination = await addPanel.findAllByClassName('euiPagination');
+      if (pagination.length === 0) {
+        return false;
+      }
+      const pagerNextButton = await pagination[0].findByCssSelector('button[aria-label="Next page"]');
+      if (pagerNextButton) {
+        await pagerNextButton.click();
         await PageObjects.header.waitUntilLoadingHasFinished();
       }
-      return pagerNextButtonExists;
+      return pagerNextButton ? true : false;
     }
 
     async isAddPanelOpen() {
@@ -87,6 +99,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
         await this.addEveryEmbeddableOnCurrentPage();
         morePages = await this.clickPagerNextButton();
       }
+      await this.closeAddPanel();
     }
 
     async addEverySavedSearch(filter) {
@@ -101,6 +114,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
         await this.addEveryEmbeddableOnCurrentPage();
         morePages = await this.clickPagerNextButton();
       }
+      await this.closeAddPanel();
     }
 
     async addSavedSearch(searchName) {
