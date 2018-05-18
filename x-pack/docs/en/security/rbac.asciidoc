@@ -4,12 +4,7 @@
 [[kibana-rbac]]
 === Role Based Access Control (RBAC) in Kibana
 
-
---
-
-NOTE: RBAC is an experimental opt-in feature. Additional functionality will be added in later versions of {kib}.
-
---
+experimental[RBAC is an experimental opt-in feature. Additional functionality will be added in later versions of {kib}.]
 
 RBAC allows you to control access to {kib} objects, including Dashboards, Visualizations, Saved Searches, and Index Patterns.
 
@@ -32,9 +27,9 @@ The name you choose will be used to derive the default role names that {kib} cre
 
 {kib} supports the following Privileges:
 
-`**all**`::
+**`all`**::
 grants full read and write access to all {kib} objects. This is functionally similar to the `kibana_user` role when RBAC is not enabled. 
-`**read**`::
+**`read`**::
 grants read-only access to all {kib} objects. This is functionally similar to the `kibana_dashboard_only_user` role when RBAC is not enabled.
 
 ==== Important Considerations

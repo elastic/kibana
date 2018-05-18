@@ -48,13 +48,8 @@ until the browser is closed.
 [float]
 [[security-rbac-settings]]
 ==== Role Based Access Control (RBAC) Settings
-+
---
 
-NOTE: RBAC is an experimental feature. Additional functionality will be added in later 
-versions of {kib}. See <<kibana-rbac,RBAC in {kib}>> for additional information.
-
---
+experimental[RBAC is an experimental opt-in feature. Additional functionality will be added in later versions of {kib}.]
 
 `xpack.security.rbac.enabled`::
 Set to true to enable experimental RBAC features. The default value is `false`.
