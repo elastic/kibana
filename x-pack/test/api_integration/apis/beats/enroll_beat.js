@@ -31,7 +31,6 @@ export default function ({ getService }) {
         + chance.integer({ min: 1, max: 10 });
 
       beat = {
-        enrollment_token: validEnrollmentToken,
         type: 'filebeat',
         host_name: 'foo.bar.com',
         version
@@ -57,6 +56,7 @@ export default function ({ getService }) {
           `/api/beats/agent/${beatId}`
         )
         .set('kbn-xsrf', 'xxx')
+        .set('kbn-beats-enrollment-token', validEnrollmentToken)
         .send(beat)
         .expect(201);
 
@@ -76,6 +76,7 @@ export default function ({ getService }) {
           `/api/beats/agent/${beatId}`
         )
         .set('kbn-xsrf', 'xxx')
+        .set('kbn-beats-enrollment-token', validEnrollmentToken)
         .send(beat)
         .expect(201);
 
@@ -94,14 +95,12 @@ export default function ({ getService }) {
     });
 
     it('should reject an invalid enrollment token', async () => {
-      const invalidEnrollmentToken = chance.word();
-      beat.enrollment_token = invalidEnrollmentToken;
-
       const { body: apiResponse } = await supertest
         .post(
           `/api/beats/agent/${beatId}`
         )
         .set('kbn-xsrf', 'xxx')
+        .set('kbn-beats-enrollment-token', chance.word())
         .send(beat)
         .expect(400);
 
@@ -124,13 +123,12 @@ export default function ({ getService }) {
         }
       });
 
-      beat.enrollment_token = expiredEnrollmentToken;
-
       const { body: apiResponse } = await supertest
         .post(
           `/api/beats/agent/${beatId}`
         )
         .set('kbn-xsrf', 'xxx')
+        .set('kbn-beats-enrollment-token', expiredEnrollmentToken)
         .send(beat)
         .expect(400);
 
@@ -143,6 +141,7 @@ export default function ({ getService }) {
           `/api/beats/agent/${beatId}`
         )
         .set('kbn-xsrf', 'xxx')
+        .set('kbn-beats-enrollment-token', validEnrollmentToken)
         .send(beat)
         .expect(201);
 
@@ -162,6 +161,7 @@ export default function ({ getService }) {
           `/api/beats/agent/${beatId}`
         )
         .set('kbn-xsrf', 'xxx')
+        .set('kbn-beats-enrollment-token', validEnrollmentToken)
         .send(beat)
         .expect(201);
 
@@ -183,6 +183,7 @@ export default function ({ getService }) {
           `/api/beats/agent/${beatId}`
         )
         .set('kbn-xsrf', 'xxx')
+        .set('kbn-beats-enrollment-token', validEnrollmentToken)
         .send(beat)
         .expect(409);
     });
