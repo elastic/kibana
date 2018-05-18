@@ -4,232 +4,269 @@ const matchOptions = {
   cutoff_frequency: 0.001,
   query: '',
   operator: {
-    __one_of: ['and', 'or']
+    __one_of: ['and', 'or'],
   },
   zero_terms_query: {
-    __one_of: ['none', 'all']
+    __one_of: ['none', 'all'],
   },
   max_expansions: 10,
   analyzer: '',
   boost: 1.0,
   lenient: {
-    __one_of: [ 'true', 'false' ]
+    __one_of: ['true', 'false'],
   },
   fuzzy_transpositions: {
-    __one_of: [ 'true', 'false' ]
+    __one_of: ['true', 'false'],
   },
   auto_generate_synonyms_phrase_query: {
-    __one_of: [ 'true', 'false' ]
+    __one_of: ['true', 'false'],
   },
   fuzziness: 1.0,
   prefix_length: 1,
-  minimum_should_match: 1
+  minimum_should_match: 1,
 };
 const innerHits = {
-  docvalue_fields: [
-    'FIELD'
-  ],
+  docvalue_fields: ['FIELD'],
   from: {},
   size: {},
   sort: {},
   name: {},
   highlight: {},
-  '_source': {
-    __one_of: [ 'true', 'false' ]
+  _source: {
+    __one_of: ['true', 'false'],
   },
-  'explain': {
-    __one_of: [ 'true', 'false' ]
+  explain: {
+    __one_of: ['true', 'false'],
   },
   script_fields: {
     __template: {
-      'FIELD': {
-        script: {}
-      }
+      FIELD: {
+        script: {},
+      },
     },
     '{field}': {
-      script: {}
-    }
+      script: {},
+    },
   },
   version: {
-    __one_of: [ 'true', 'false' ]
-  }
+    __one_of: ['true', 'false'],
+  },
 };
 const SPAN_QUERIES = {
   // TODO add one_of for objects
   span_first: {
-    __scope_link: '.span_first'
+    __scope_link: '.span_first',
   },
   span_near: {
-    __scope_link: '.span_near'
+    __scope_link: '.span_near',
   },
   span_or: {
-    __scope_link: '.span_or'
+    __scope_link: '.span_or',
   },
   span_not: {
-    __scope_link: '.span_not'
+    __scope_link: '.span_not',
   },
   span_term: {
-    __scope_link: '.span_term'
+    __scope_link: '.span_term',
   },
   span_containing: {
-    __scope_link: '.span_containing'
+    __scope_link: '.span_containing',
   },
   span_within: {
-    __scope_link: '.span_within'
-  }
+    __scope_link: '.span_within',
+  },
 };
 
 const DECAY_FUNC_DESC = {
   __template: {
-    'FIELD': {
-      'origin': '',
-      'scale': ''
-    }
+    FIELD: {
+      origin: '',
+      scale: '',
+    },
   },
   '{field}': {
-    'origin': '',
-    'scale': '',
-    'offset': '',
-    'decay': 0.5
-  }
+    origin: '',
+    scale: '',
+    offset: '',
+    decay: 0.5,
+  },
 };
 const SCORING_FUNCS = {
-  'script_score': {
+  script_score: {
     __template: {
-      'script': '_score * doc[\'f\'].value'
+      script: '_score * doc[\'f\'].value',
     },
-    'script': {
+    script: {
       //populated by a global rule
-    }
-  },
-  'boost_factor': 2.0,
-  'random_score': {
-    'seed': 314159265359
-  },
-  'linear': DECAY_FUNC_DESC,
-  'exp': DECAY_FUNC_DESC,
-  'gauss': DECAY_FUNC_DESC,
-  'field_value_factor': {
-    __template: {
-      'field': ''
     },
-    'field': '{field}',
-    'factor': 1.2,
-    'modifier': {
-      __one_of: ['none', 'log', 'log1p', 'log2p', 'ln', 'ln1p', 'ln2p', 'square', 'sqrt', 'reciprocal']
-    }
-  }
+  },
+  boost_factor: 2.0,
+  random_score: {
+    seed: 314159265359,
+  },
+  linear: DECAY_FUNC_DESC,
+  exp: DECAY_FUNC_DESC,
+  gauss: DECAY_FUNC_DESC,
+  field_value_factor: {
+    __template: {
+      field: '',
+    },
+    field: '{field}',
+    factor: 1.2,
+    modifier: {
+      __one_of: [
+        'none',
+        'log',
+        'log1p',
+        'log2p',
+        'ln',
+        'ln1p',
+        'ln2p',
+        'square',
+        'sqrt',
+        'reciprocal',
+      ],
+    },
+  },
 };
 
 export default function (api) {
   api.addGlobalAutocompleteRules('query', {
     match: {
       __template: {
-        'FIELD': 'TEXT'
+        FIELD: 'TEXT',
       },
       '{field}': {
-        'type': {
-          __one_of: ['phrase', 'phrase_prefix', 'boolean']
+        type: {
+          __one_of: ['phrase', 'phrase_prefix', 'boolean'],
         },
-        ...matchOptions
-      }
+        ...matchOptions,
+      },
     },
     match_phrase: {
       __template: {
-        'FIELD': 'PHRASE'
+        FIELD: 'PHRASE',
       },
       '{field}': {
         query: '',
         analyzer: '',
-        slop: 1
-      }
+        slop: 1,
+      },
     },
     match_phrase_prefix: {
       __template: {
-        'FIELD': 'PREFIX'
+        FIELD: 'PREFIX',
       },
       '{field}': {
         query: '',
         analyzer: '',
         max_expansions: 10,
         prefix_length: 1,
-        fuzziness: 0.1
-      }
+        fuzziness: 0.1,
+      },
+    },
+    regexp: {
+      __template: {
+        FIELD: 'REGEXP',
+      },
+      '{field}': {
+        value: '',
+        flags: {
+          __one_of: [
+            'ALL',
+            'ANYSTRING',
+            'COMPLEMENT',
+            'EMPTY',
+            'INTERSECTION',
+            'INTERVAL',
+            'NONE',
+          ],
+        },
+        max_determinized_states: 10000,
+      },
     },
     multi_match: {
       __template: {
-        'query': '',
-        'fields': []
+        query: '',
+        fields: [],
       },
       ...matchOptions,
       fields: ['{field}'],
       use_dis_max: {
         __template: true,
-        __one_of: [true, false]
+        __one_of: [true, false],
       },
       tie_breaker: 0.0,
-      type: { __one_of: ['best_fields', 'most_fields', 'cross_fields', 'phrase', 'phrase_prefix'] }
+      type: {
+        __one_of: [
+          'best_fields',
+          'most_fields',
+          'cross_fields',
+          'phrase',
+          'phrase_prefix',
+        ],
+      },
     },
     bool: {
       must: [
         {
-          __scope_link: '.'
-        }
+          __scope_link: '.',
+        },
       ],
       must_not: [
         {
-          __scope_link: '.'
-        }
+          __scope_link: '.',
+        },
       ],
       should: [
         {
-          __scope_link: '.'
-        }
+          __scope_link: '.',
+        },
       ],
       filter: {
-        __scope_link: 'GLOBAL.filter'
+        __scope_link: 'GLOBAL.filter',
       },
       minimum_should_match: 1,
-      boost: 1.0
+      boost: 1.0,
     },
     boosting: {
       positive: {
-        __scope_link: '.'
+        __scope_link: '.',
       },
       negative: {
-        __scope_link: '.'
+        __scope_link: '.',
       },
-      negative_boost: 0.2
+      negative_boost: 0.2,
     },
     ids: {
       type: '',
-      values: []
+      values: [],
     },
     constant_score: {
       __template: {
         filter: {},
-        boost: 1.2
+        boost: 1.2,
       },
       query: {},
       filter: {},
-      boost: 1.2
+      boost: 1.2,
     },
     dis_max: {
       __template: {
         tie_breaker: 0.7,
         boost: 1.2,
-        queries: []
+        queries: [],
       },
       tie_breaker: 0.7,
       boost: 1.2,
       queries: [
         {
-          __scope_link: '.'
-        }
-      ]
+          __scope_link: '.',
+        },
+      ],
     },
     exists: {
-      field: ''
+      field: '',
     },
     field: {
       '{field}': {
@@ -237,52 +274,52 @@ export default function (api) {
         boost: 2.0,
         enable_position_increments: {
           __template: false,
-          __one_of: [true, false]
-        }
-      }
+          __one_of: [true, false],
+        },
+      },
     },
     fuzzy: {
       '{field}': {
-        'value': '',
-        'boost': 1.0,
-        'fuzziness': 0.5,
-        'prefix_length': 0
-      }
+        value: '',
+        boost: 1.0,
+        fuzziness: 0.5,
+        prefix_length: 0,
+      },
     },
     has_child: {
       __template: {
         type: 'TYPE',
-        query: {}
+        query: {},
       },
       inner_hits: { ...innerHits },
-      'type': '{type}',
-      'score_mode': {
-        __one_of: ['none', 'max', 'sum', 'avg']
+      type: '{type}',
+      score_mode: {
+        __one_of: ['none', 'max', 'sum', 'avg'],
       },
-      '_scope': '',
-      'query': {},
-      'min_children': 1,
-      'max_children': 10
+      _scope: '',
+      query: {},
+      min_children: 1,
+      max_children: 10,
     },
     has_parent: {
       __template: {
         parent_type: 'TYPE',
-        query: {}
+        query: {},
       },
-      'parent_type': '{type}',
-      'score_mode': {
-        __one_of: ['none', 'score']
+      parent_type: '{type}',
+      score_mode: {
+        __one_of: ['none', 'score'],
       },
-      '_scope': '',
-      'query': {}
+      _scope: '',
+      query: {},
     },
     match_all: {},
     more_like_this: {
       __template: {
-        'fields': ['FIELD'],
-        'like': 'text like this one',
-        'min_term_freq': 1,
-        'max_query_terms': 12
+        fields: ['FIELD'],
+        like: 'text like this one',
+        min_term_freq: 1,
+        max_query_terms: 12,
       },
       fields: ['{field}'],
       like: '',
@@ -297,50 +334,52 @@ export default function (api) {
       boost_terms: 1,
       boost: 1.0,
       analyzer: '',
-      docs: [{
-        _index: '{index}',
-        _type: '{type}',
-        _id: ''
-      }],
-      ids: ['']
+      docs: [
+        {
+          _index: '{index}',
+          _type: '{type}',
+          _id: '',
+        },
+      ],
+      ids: [''],
     },
     mlt: {
       __template: {
-        'fields': ['FIELD'],
-        'like': 'text like this one',
-        'min_term_freq': 1,
-        'max_query_terms': 12
+        fields: ['FIELD'],
+        like: 'text like this one',
+        min_term_freq: 1,
+        max_query_terms: 12,
       },
-      __scope_link: '.more_like_this'
+      __scope_link: '.more_like_this',
     },
     prefix: {
       __template: {
-        'FIELD': {
-          'value': ''
-        }
+        FIELD: {
+          value: '',
+        },
       },
       '{field}': {
         value: '',
-        boost: 1.0
-      }
+        boost: 1.0,
+      },
     },
     query_string: {
       __template: {
-        'default_field': 'FIELD',
-        'query': 'this AND that OR thus'
+        default_field: 'FIELD',
+        query: 'this AND that OR thus',
       },
       query: '',
       default_field: '{field}',
       fields: ['{field}'],
       default_operator: {
-        __one_of: ['OR', 'AND']
+        __one_of: ['OR', 'AND'],
       },
       analyzer: '',
       allow_leading_wildcard: {
-        __one_of: [true, false]
+        __one_of: [true, false],
       },
       enable_position_increments: {
-        __one_of: [true, false]
+        __one_of: [true, false],
       },
       fuzzy_max_expansions: 50,
       fuzziness: 0.5,
@@ -348,25 +387,25 @@ export default function (api) {
       phrase_slop: 0,
       boost: 1.0,
       analyze_wildcard: {
-        __one_of: [false, true]
+        __one_of: [false, true],
       },
       auto_generate_phrase_queries: {
-        __one_of: [false, true]
+        __one_of: [false, true],
       },
       minimum_should_match: '20%',
       lenient: {
-        __one_of: [false, true]
+        __one_of: [false, true],
       },
       use_dis_max: {
-        __one_of: [true, false]
+        __one_of: [true, false],
       },
       tie_breaker: 0,
-      time_zone: '+1:00'
+      time_zone: '+1:00',
     },
     simple_query_string: {
       __template: {
         query: '',
-        fields: []
+        fields: [],
       },
       query: '',
       fields: ['{field}'],
@@ -374,19 +413,19 @@ export default function (api) {
       analyzer: '',
       flags: 'OR|AND|PREFIX',
       locale: 'ROOT',
-      lenient: { __one_of: [true, false] }
+      lenient: { __one_of: [true, false] },
     },
     range: {
       __template: {
-        'FIELD': {
+        FIELD: {
           gte: 10,
-          lte: 20
-        }
+          lte: 20,
+        },
       },
       '{field}': {
         __template: {
           gte: 10,
-          lte: 20
+          lte: 20,
         },
         gte: 10,
         gt: 10,
@@ -394,226 +433,221 @@ export default function (api) {
         lt: 20,
         time_zone: '+1:00',
         boost: 1.0,
-        'format': 'dd/MM/yyyy||yyyy'
-
-      }
+        format: 'dd/MM/yyyy||yyyy',
+      },
     },
     span_first: {
       __template: {
-        'match': {
-          'span_term': {
-            'FIELD': 'VALUE'
-          }
+        match: {
+          span_term: {
+            FIELD: 'VALUE',
+          },
         },
-        'end': 3
+        end: 3,
       },
-      match: SPAN_QUERIES
+      match: SPAN_QUERIES,
     },
     span_near: {
       __template: {
-        'clauses': [
+        clauses: [
           {
             span_term: {
-              'FIELD': {
-                'value': 'VALUE'
-              }
-            }
-          }
+              FIELD: {
+                value: 'VALUE',
+              },
+            },
+          },
         ],
         slop: 12,
-        in_order: false
+        in_order: false,
       },
-      clauses: [
-        SPAN_QUERIES
-      ],
+      clauses: [SPAN_QUERIES],
       slop: 12,
       in_order: {
-        __one_of: [false, true]
+        __one_of: [false, true],
       },
       collect_payloads: {
-        __one_of: [false, true]
-      }
+        __one_of: [false, true],
+      },
     },
     span_term: {
       __template: {
-        'FIELD': {
-          'value': 'VALUE'
-        }
+        FIELD: {
+          value: 'VALUE',
+        },
       },
       '{field}': {
         value: '',
-        boost: 2.0
-      }
+        boost: 2.0,
+      },
     },
     span_not: {
       __template: {
         include: {
           span_term: {
-            'FIELD': {
-              'value': 'VALUE'
-            }
-          }
+            FIELD: {
+              value: 'VALUE',
+            },
+          },
         },
         exclude: {
           span_term: {
-            'FIELD': {
-              'value': 'VALUE'
-            }
-          }
-        }
+            FIELD: {
+              value: 'VALUE',
+            },
+          },
+        },
       },
       include: SPAN_QUERIES,
-      exclude: SPAN_QUERIES
+      exclude: SPAN_QUERIES,
     },
     span_or: {
       __template: {
         clauses: [
           {
             span_term: {
-              'FIELD': {
-                'value': 'VALUE'
-              }
-            }
-          }
-        ]
+              FIELD: {
+                value: 'VALUE',
+              },
+            },
+          },
+        ],
       },
-      clauses: [
-        SPAN_QUERIES
-      ]
+      clauses: [SPAN_QUERIES],
     },
     span_containing: {
       __template: {
         little: {
           span_term: {
-            'FIELD': {
-              'value': 'VALUE'
-            }
-          }
+            FIELD: {
+              value: 'VALUE',
+            },
+          },
         },
         big: {
           span_near: {
-            'clauses': [
+            clauses: [
               {
                 span_term: {
-                  'FIELD': {
-                    'value': 'VALUE'
-                  }
-                }
+                  FIELD: {
+                    value: 'VALUE',
+                  },
+                },
               },
               {
                 span_term: {
-                  'FIELD': {
-                    'value': 'VALUE'
-                  }
-                }
-              }
+                  FIELD: {
+                    value: 'VALUE',
+                  },
+                },
+              },
             ],
-            'slop': 5,
-            'in_order': false
-          }
-        }
+            slop: 5,
+            in_order: false,
+          },
+        },
       },
       little: SPAN_QUERIES,
-      big: SPAN_QUERIES
+      big: SPAN_QUERIES,
     },
     span_within: {
       __template: {
         little: {
           span_term: {
-            'FIELD': {
-              'value': 'VALUE'
-            }
-          }
+            FIELD: {
+              value: 'VALUE',
+            },
+          },
         },
         big: {
           span_near: {
-            'clauses': [
+            clauses: [
               {
                 span_term: {
-                  'FIELD': {
-                    'value': 'VALUE'
-                  }
-                }
+                  FIELD: {
+                    value: 'VALUE',
+                  },
+                },
               },
               {
                 span_term: {
-                  'FIELD': {
-                    'value': 'VALUE'
-                  }
-                }
-              }
+                  FIELD: {
+                    value: 'VALUE',
+                  },
+                },
+              },
             ],
-            'slop': 5,
-            'in_order': false
-          }
-        }
+            slop: 5,
+            in_order: false,
+          },
+        },
       },
       little: SPAN_QUERIES,
-      big: SPAN_QUERIES
+      big: SPAN_QUERIES,
     },
     term: {
       __template: {
-        'FIELD': {
-          value: 'VALUE'
-        }
+        FIELD: {
+          value: 'VALUE',
+        },
       },
       '{field}': {
         value: '',
-        boost: 2.0
-      }
+        boost: 2.0,
+      },
     },
     terms: {
       __template: {
-        'FIELD': ['VALUE1', 'VALUE2']
+        FIELD: ['VALUE1', 'VALUE2'],
       },
-      '{field}': ['']
+      '{field}': [''],
     },
     wildcard: {
       __template: {
-        'FIELD': {
-          value: 'VALUE'
-        }
+        FIELD: {
+          value: 'VALUE',
+        },
       },
       '{field}': {
         value: '',
-        boost: 2.0
-      }
+        boost: 2.0,
+      },
     },
     nested: {
       __template: {
         path: 'path_to_nested_doc',
-        query: {}
+        query: {},
       },
       inner_hits: { ...innerHits },
       path: '',
       query: {},
       score_mode: {
-        __one_of: ['avg', 'total', 'max', 'none']
-      }
+        __one_of: ['avg', 'total', 'max', 'none'],
+      },
     },
     common: {
       __template: {
-        'FIELD': {
-          query: {}
-        }
+        FIELD: {
+          query: {},
+        },
       },
       '{field}': {
         query: {},
         cutoff_frequency: 0.001,
         minimum_should_match: {
           low_freq: {},
-          high_freq: {}
-        }
-      }
+          high_freq: {},
+        },
+      },
     },
     custom_filters_score: {
       __template: {
         query: {},
         filters: [
           {
-            filter: {}
-          }
-        ]
+            filter: {},
+          },
+        ],
       },
       query: {},
       filters: [
@@ -622,70 +656,71 @@ export default function (api) {
           boost: 2.0,
           script: {
             //populated by a global rule
-          }
-        }
+          },
+        },
       ],
       score_mode: {
-        __one_of: ['first', 'min', 'max', 'total', 'avg', 'multiply']
+        __one_of: ['first', 'min', 'max', 'total', 'avg', 'multiply'],
       },
       max_boost: 2.0,
       params: {},
-      lang: ''
+      lang: '',
     },
     indices: {
       __template: {
         indices: ['INDEX1', 'INDEX2'],
-        query: {}
+        query: {},
       },
       indices: ['{index}'],
       query: {},
       no_match_query: {
-        __scope_link: '.'
-      }
+        __scope_link: '.',
+      },
     },
     geo_shape: {
       __template: {
         location: {},
-        relation: 'within'
+        relation: 'within',
       },
-      __scope_link: '.filter.geo_shape'
+      __scope_link: '.filter.geo_shape',
     },
     // js hint gets confused here
     /* jshint -W015 */
-    function_score: _.defaults({
-      __template: {
+    function_score: _.defaults(
+      {
+        __template: {
+          query: {},
+          functions: [{}],
+        },
         query: {},
         functions: [
-          {}
-        ]
+          _.defaults(
+            {
+              filter: {},
+              weight: 1.0,
+            },
+            SCORING_FUNCS
+          ),
+        ],
+        boost: 1.0,
+        boost_mode: {
+          __one_of: ['multiply', 'replace', 'sum', 'avg', 'max', 'min'],
+        },
+        score_mode: {
+          __one_of: ['multiply', 'sum', 'first', 'avg', 'max', 'min'],
+        },
+        max_boost: 10,
+        min_score: 1.0,
       },
-      query: {},
-      functions: [
-        _.defaults(
-          {
-            filter: {},
-            weight: 1.0
-          },
-          SCORING_FUNCS
-        )
-      ],
-      boost: 1.0,
-      boost_mode: { __one_of: ['multiply', 'replace', 'sum', 'avg', 'max', 'min'] },
-      score_mode: { __one_of: ['multiply', 'sum', 'first', 'avg', 'max', 'min'] },
-      max_boost: 10,
-      min_score: 1.0
-    },
-    SCORING_FUNCS
+      SCORING_FUNCS
     ),
     script: {
       __template: {
-        'script': '_score * doc[\'f\'].value'
+        script: '_score * doc[\'f\'].value',
       },
       script: {
         //populated by a global rule
-      }
+      },
     },
-
-
   });
 }
