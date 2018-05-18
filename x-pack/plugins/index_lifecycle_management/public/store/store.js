@@ -4,14 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createStore, applyMiddleware, compose } from 'redux';
+import {
+  createStore,
+  applyMiddleware,
+  compose
+} from 'redux';
 import thunk from 'redux-thunk';
 
-import { indexLifecycleManagement } from './reducers/';
-import { autoEnablePhase, setSelectedPolicyFromSelectedTemplate } from './middleware';
+import {
+  indexLifecycleManagement
+} from './reducers/';
+import {
+  autoEnablePhase,
+  setSelectedPolicyFromSelectedTemplate,
+  autoSetNodeAttrs
+} from './middleware';
 
 export const indexLifecycleManagementStore = (initialState = {}) => {
-  const enhancers = [ applyMiddleware(thunk, autoEnablePhase, setSelectedPolicyFromSelectedTemplate) ];
+  const enhancers = [applyMiddleware(thunk, autoEnablePhase, setSelectedPolicyFromSelectedTemplate, autoSetNodeAttrs)];
 
   window.__REDUX_DEVTOOLS_EXTENSION__ && enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());
   return createStore(

@@ -27,7 +27,9 @@ import {
   PHASE_ATTRIBUTES_THAT_ARE_NUMBERS,
   PHASE_PRIMARY_SHARD_COUNT,
   PHASE_SHRINK_ENABLED,
-  STRUCTURE_REVIEW
+  STRUCTURE_REVIEW,
+  PHASE_FORCE_MERGE_ENABLED,
+  PHASE_FORCE_MERGE_SEGMENTS
 } from '../constants';
 import {
   getPhase,
@@ -81,6 +83,24 @@ export const validatePhase = (type, phase) => {
       else if (numberedAttribute === PHASE_PRIMARY_SHARD_COUNT && phase[numberedAttribute] < 1) {
         errors[numberedAttribute] = ['Only positive numbers above 0 are allowed.'];
       }
+    }
+  }
+
+  if (phase[PHASE_SHRINK_ENABLED]) {
+    if (!isNumber(phase[PHASE_PRIMARY_SHARD_COUNT])) {
+      errors[PHASE_PRIMARY_SHARD_COUNT] = ['A number is required.'];
+    }
+    else if (phase[PHASE_PRIMARY_SHARD_COUNT] < 1) {
+      errors[PHASE_PRIMARY_SHARD_COUNT] = ['Only positive numbers above 0 are allowed.'];
+    }
+  }
+
+  if (phase[PHASE_FORCE_MERGE_ENABLED]) {
+    if (!isNumber(phase[PHASE_FORCE_MERGE_SEGMENTS])) {
+      errors[PHASE_FORCE_MERGE_SEGMENTS] = ['A number is required.'];
+    }
+    else if (phase[PHASE_FORCE_MERGE_SEGMENTS] < 1) {
+      errors[PHASE_FORCE_MERGE_SEGMENTS] = ['Only positive numbers above 0 are allowed.'];
     }
   }
 
@@ -142,22 +162,37 @@ export const validateLifecycle = state => {
   //   }
   // }
 
+  const hotPhase = getPhase(state, PHASE_HOT);
+  const warmPhase = getPhase(state, PHASE_WARM);
+  const coldPhase = getPhase(state, PHASE_COLD);
+  const deletePhase = getPhase(state, PHASE_DELETE);
+
   errors[STRUCTURE_POLICY_CONFIGURATION][PHASE_HOT] = {
     ...errors[STRUCTURE_POLICY_CONFIGURATION][PHASE_HOT],
-    ...validatePhase(PHASE_HOT, getPhase(state, PHASE_HOT))
+    ...validatePhase(PHASE_HOT, hotPhase)
   };
   errors[STRUCTURE_POLICY_CONFIGURATION][PHASE_WARM] = {
     ...errors[STRUCTURE_POLICY_CONFIGURATION][PHASE_WARM],
-    ...validatePhase(PHASE_WARM, getPhase(state, PHASE_WARM))
+    ...validatePhase(PHASE_WARM, warmPhase)
   };
   errors[STRUCTURE_POLICY_CONFIGURATION][PHASE_COLD] = {
     ...errors[STRUCTURE_POLICY_CONFIGURATION][PHASE_COLD],
-    ...validatePhase(PHASE_COLD, getPhase(state, PHASE_COLD))
+    ...validatePhase(PHASE_COLD, coldPhase)
   };
   errors[STRUCTURE_POLICY_CONFIGURATION][PHASE_DELETE] = {
     ...errors[STRUCTURE_POLICY_CONFIGURATION][PHASE_DELETE],
-    ...validatePhase(PHASE_DELETE, getPhase(state, PHASE_DELETE))
+    ...validatePhase(PHASE_DELETE, deletePhase)
   };
+
+  if (warmPhase[PHASE_SHRINK_ENABLED]) {
+    if (isNumber(warmPhase[PHASE_PRIMARY_SHARD_COUNT]) && warmPhase[PHASE_PRIMARY_SHARD_COUNT] > 0) {
+      if (getSelectedPrimaryShardCount(state) % warmPhase[PHASE_PRIMARY_SHARD_COUNT] !== 0) {
+        errors[STRUCTURE_POLICY_CONFIGURATION][PHASE_WARM][PHASE_PRIMARY_SHARD_COUNT].push(
+          'The shard count needs to be a divisor of the hot phase shard count.'
+        );
+      }
+    }
+  }
 
   return errors;
 };
