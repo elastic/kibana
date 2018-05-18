@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import React from 'react';
 
 import { FieldTypeIcon } from './field_type_icon_view';
@@ -26,9 +26,17 @@ describe('FieldTypeIcon', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
-  test(`render component inside tooltip wrapper`, () => {
-    const wrapper = shallow(<FieldTypeIcon type="keyword" tooltipEnabled={true} />);
-    expect(wrapper).toMatchSnapshot();
+  test(`render with tooltip and test hovering`, () => {
+    const wrapper = mount(<FieldTypeIcon type="keyword" tooltipEnabled={true} />);
+    const container = wrapper.find({ className: 'field-type-icon-container' });
+
+    expect(wrapper.find('EuiToolTip').children()).toHaveLength(1);
+
+    container.simulate('mouseover');
+    expect(wrapper.find('EuiToolTip').children()).toHaveLength(2);
+
+    container.simulate('mouseout');
+    expect(wrapper.find('EuiToolTip').children()).toHaveLength(1);
   });
 
   test(`update component`, () => {
