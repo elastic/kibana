@@ -72,7 +72,7 @@ export function registerEnrollBeatRoute(server) {
     },
     handler: async (request, reply) => {
       const callWithInternalUser = callWithInternalUserFactory(server);
-      const beatId = request.params.beatId;
+      const { beatId } = request.params;
       let accessToken;
 
       try {

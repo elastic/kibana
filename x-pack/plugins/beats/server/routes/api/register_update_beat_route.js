@@ -64,7 +64,7 @@ export function registerUpdateBeatRoute(server) {
     },
     handler: async (request, reply) => {
       const callWithInternalUser = callWithInternalUserFactory(server);
-      const beatId = request.params.beatId;
+      const { beatId } = request.params;
 
       try {
         const beat = await getBeat(callWithInternalUser, beatId);
