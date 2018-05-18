@@ -9,7 +9,7 @@ import { startServers } from '../../';
  * @param {string} configPath path to config
  */
 export async function startServersCli(defaultConfigPath) {
-  const { config, log, help } = processArgv(defaultConfigPath);
+  const { config, log, help, installDir } = processArgv(defaultConfigPath);
 
   if (help) return displayHelp();
 
@@ -21,7 +21,7 @@ export async function startServersCli(defaultConfigPath) {
   }
 
   try {
-    await startServers(config, { log });
+    await startServers(config, { log, installDir });
   } catch (err) {
     log.error('FATAL ERROR');
     log.error(err);
@@ -50,6 +50,7 @@ function processArgv(defaultConfigPath) {
   return {
     config,
     log,
+    installDir: options.kibanaInstallDir,
     help: options.help,
     rest: options._,
   };
@@ -63,6 +64,9 @@ function displayHelp() {
     Usage:  node scripts/functional_tests_server [options]
 
     --config      Option to pass in a config
+    --kibana-install-dir
+                  Run Kibana from an existing install directory
+                  Default: run from source
     --help        Display this menu and exit
 
     Log level options:
