@@ -275,6 +275,10 @@ export class SavedObjectsClient {
       includeTypes,
     } = options;
 
+    if (!type) {
+      throw new Error('options.type is required');
+    }
+
     if (searchFields && !Array.isArray(searchFields)) {
       throw new TypeError('options.searchFields must be an array');
     }
