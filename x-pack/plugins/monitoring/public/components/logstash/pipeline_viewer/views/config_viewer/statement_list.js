@@ -8,20 +8,71 @@
 
 import React from 'react';
 
-import { Statement } from './statement';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiTitle,
+} from '@elastic/eui';
 
-const StatementList = ({ statements, vertexSelected }) => (
-  statements.map((statement, index) => (
-    <Statement
-      statement={statement}
-      key={statement.id}
-      isTop={true}
-      isEvenChild={index + 1 % 2 === 0}
-      isLast={statements.length === index + 1}
-      vertexSelected={vertexSelected}
-    />
-  ))
-);
+function Statement() {
+  return (
+    <li>hello! I am a <b>Statement</b>!</li>
+  );
+}
+
+export function StatementSection({ iconType, headingText, statements }) {
+  return (
+    <div>
+      <EuiFlexGroup>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiIcon
+            type={iconType}
+            size="m"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiTitle size="m">
+            <h3>{headingText}</h3>
+          </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <StatementList statements={statements} />
+    </div>
+  );
+}
+
+function StatementList({ statements }) {
+  return (
+    <ul>
+      {
+        statements.map(statement => (
+          <Statement
+            key={statement.id}
+            statement={statement}
+          />
+        ))
+      }
+    </ul>
+  );
+}
+
+// const StatementList = ({ statements, vertexSelected }) => (
+//   statements.map((statement, index) => (
+//     <Statement
+//       statement={statement}
+//       key={statement.id}
+//       isTop={true}
+//       isEvenChild={index + 1 % 2 === 0}
+//       isLast={statements.length === index + 1}
+//       vertexSelected={vertexSelected}
+//     />
+//   ))
+// );
 
 const sectionFactory = (headerText, iconType, children, vertexSelected) => (
   {

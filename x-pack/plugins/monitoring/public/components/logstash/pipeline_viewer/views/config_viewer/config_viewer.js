@@ -7,11 +7,12 @@
 
 
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import { DetailDrawer } from '../detail_drawer';
 
-import { renderSection } from './statement_section';
-import { getStatementListFromPipeline } from './statement_list';
+//import { renderSection } from './statement_section';
+import { StatementSection } from './statement_list';
 
 export class ConfigViewer extends React.Component {
   constructor() {
@@ -60,16 +61,40 @@ export class ConfigViewer extends React.Component {
 
   render() {
     const {
-      pipeline
-    } = this.props;
+      inputs,
+      filters,
+      outputs,
+      queue
+    } = this.props.pipeline;
 
+    console.log(queue);
     return (
       <div>
-        {
-          getStatementListFromPipeline(pipeline, this.onShowVertexDetails).map(section => renderSection(section))
-        }
+        <StatementSection
+          iconType="logstashInput"
+          headingText="Inputs"
+          statements={inputs}
+        />
+        Queue goes here
+        <StatementSection
+          iconType="logstashFilter"
+          headingText="Filters"
+          statements={filters}
+        />
+        <StatementSection
+          iconType="logstashOutput"
+          headingText="Outputs"
+          statements={outputs}
+        />
         { this.renderDetailDrawer() }
       </div>
     );
   }
 }
+
+ConfigViewer.propTypes = {
+  inputs: PropTypes.array,
+  filters: PropTypes.array,
+  outputs: PropTypes.array,
+  queue: PropTypes.object,
+};
