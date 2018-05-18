@@ -51,7 +51,11 @@ export async function startServers(configPath, options) {
     const config = await readConfigFile(log, configPath);
 
     const es = await runElasticsearch({ config, log });
-    await runKibanaServer({ procs, config, options });
+    await runKibanaServer({
+      procs,
+      config,
+      options: { ...options, devMode: true },
+    });
 
     // wait for 5 seconds of silence before logging the
     // success message so that it doesn't get buried

@@ -6,7 +6,7 @@ export async function runKibanaServer({ procs, config, options }) {
 
   await procs.run('kibana', {
     cmd: getKibanaCmd(installDir),
-    args: getCliArgs(config, installDir),
+    args: getCliArgs(config, options),
     env: {
       FORCE_COLOR: 1,
       ...process.env,
@@ -26,10 +26,12 @@ function getKibanaCmd(installDir) {
   return KIBANA_EXEC;
 }
 
-function getCliArgs(config, installDir) {
+function getCliArgs(config, { devMode, installDir }) {
   const buildArgs = config.get('kbnTestServer.buildArgs') || [];
   const sourceArgs = config.get('kbnTestServer.sourceArgs') || [];
   const serverArgs = config.get('kbnTestServer.serverArgs') || [];
+
+  if (devMode) serverArgs.push('--dev');
 
   return installDir
     ? [...serverArgs, ...buildArgs]
