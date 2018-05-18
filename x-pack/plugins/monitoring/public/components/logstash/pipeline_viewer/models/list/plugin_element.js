@@ -8,6 +8,7 @@ import { PipelineElement } from './pipeline_element';
 
 export class PluginElement extends PipelineElement {
   constructor(statement, depth, parentId) {
-    super(statement.id, statement, depth, parentId);
+    const { id } = statement;
+    super(id, statement, depth, parentId);
   }
 }

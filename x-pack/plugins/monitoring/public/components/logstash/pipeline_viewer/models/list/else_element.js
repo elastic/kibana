@@ -8,6 +8,7 @@ import { PipelineElement } from './pipeline_element';
 
 export class ElseElement extends PipelineElement {
   constructor(statement, depth, parentId) {
-    super(`${statement.id}_else`, statement, depth, parentId);
+    const { id } = statement;
+    super(`${id}_else`, statement, depth, parentId);
   }
 }
