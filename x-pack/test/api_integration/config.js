@@ -27,7 +27,7 @@ export default async function ({ readConfigFile }) {
       reportName: 'X-Pack API Integration Tests',
     },
     env: xPackFunctionalTestsConfig.get('env'),
-    kbnTestServer: xPackFunctionalTestsConfig.get('kbnTestServer'),
+    kibanaServerArgs: xPackFunctionalTestsConfig.get('kibanaServerArgs'),
     esTestCluster: xPackFunctionalTestsConfig.get('esTestCluster'),
   };
 }
