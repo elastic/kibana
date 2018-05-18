@@ -1,0 +1,21 @@
+[[managing-licenses]]
+== License Management
+
+When you install Kibana, it generates a Basic license
+with no expiration date.  You can see the status of your
+license by opening *Management* and then clicking *License
+Management*.
+
+[role="screenshot"]
+image::images/management-license.png[]
+
+If you want to try the full set of
+link:https://www.elastic.co/subscriptions[Platinum features],
+you can start a 30-day trial.  You'll get access to security,
+machine learning, alerting, graphing capabilities, and more.
+
+At the end of the trial period, you can purchase a subscription
+to continue using the Platinum features. You can install
+your purchased license from the *License Management* UI.
+
+If your trial license expires, you'll revert to the Basic license.
