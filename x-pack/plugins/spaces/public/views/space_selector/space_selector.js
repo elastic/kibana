@@ -13,7 +13,9 @@ import {
   EuiPageContent,
   EuiPageHeaderSection,
   EuiIcon,
+  EuiSpacer,
   EuiText,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { SpaceCards } from '../components/space_cards';
 
@@ -62,17 +64,18 @@ export class SpaceSelector extends Component {
           </EuiPageHeaderSection>
         </EuiPageHeader>
         <EuiPageBody>
-          <EuiPageContent>
+          <EuiPageContent className="spaceSelectorPageContent">
             <EuiText className="spaceWelcomeText">
               <p className="welcomeLarge">Welcome to Kibana.</p>
               <p className="welcomeMedium">Select a space to begin.</p>
             </EuiText>
 
+            <EuiHorizontalRule />
+
             <SpaceCards spaces={spaces} />
 
-            <EuiText className="spaceProfileText">
-              <p>You can change your workspace at anytime by accessing your profile within Kibana.</p>
-            </EuiText>
+            <EuiSpacer />
+
           </EuiPageContent>
         </EuiPageBody>
       </EuiPage>

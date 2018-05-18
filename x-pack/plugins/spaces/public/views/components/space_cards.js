@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import chrome from 'ui/chrome';
 import { SpaceCard } from './space_card';
@@ -12,14 +12,29 @@ import { stripSpaceUrlContext } from '../../../common/spaces_url_parser';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSpacer,
 } from '@elastic/eui';
+import { chunk } from 'lodash';
 
 export class SpaceCards extends Component {
   render() {
+    const maxSpacesPerRow = 3;
+    const rows = chunk(this.props.spaces, maxSpacesPerRow);
+
     return (
-      <EuiFlexGroup gutterSize="l" justifyContent="spaceEvenly" className="spacesGroup">
-        {this.props.spaces.map(this.renderSpace)}
-      </EuiFlexGroup>
+      <Fragment>
+        {
+          rows.map((row, idx) => (
+            <Fragment key={idx}>
+              <EuiFlexGroup gutterSize="l" justifyContent="spaceEvenly">
+                {row.map(this.renderSpace)}
+              </EuiFlexGroup>
+              <EuiSpacer />
+            </Fragment>
+          ))
+        }
+      </Fragment>
+
     );
   }
 

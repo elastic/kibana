@@ -7,7 +7,6 @@
 import React from 'react';
 import {
   EuiCard,
-  EuiAvatar,
   EuiText
 } from '@elastic/eui';
 import './space_card.less';
@@ -22,7 +21,7 @@ export const SpaceCard = (props) => {
     <EuiCard
       className="spaceCard"
       title={renderSpaceTitle(space)}
-      description={space.description}
+      description={renderSpaceDescription(space)}
       onClick={onClick}
     />
   );
@@ -31,8 +30,13 @@ export const SpaceCard = (props) => {
 function renderSpaceTitle(space) {
   return (
     <div className="spaceCardTitle">
-      <EuiAvatar name={space.name} size="m" />
       <EuiText><h3>{space.name}</h3></EuiText>
     </div>
+  );
+}
+
+function renderSpaceDescription(space) {
+  return (
+    <EuiText className="spaceCardDescription"><p>{space.description}</p></EuiText>
   );
 }
