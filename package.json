@@ -284,7 +284,7 @@
     "load-grunt-config": "0.19.2",
     "makelogs": "^4.0.4",
     "marked-text-renderer": "0.1.0",
-    "mocha": "^5.0.5",
+    "mocha": "github:elastic/mocha#37dc027261b2974aa0411955a06c93fb8ed2c06e",
     "mock-fs": "^4.4.2",
     "murmurhash3js": "3.0.1",
     "ncp": "2.0.0",
