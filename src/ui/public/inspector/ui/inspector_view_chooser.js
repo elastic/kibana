@@ -7,10 +7,9 @@ import {
   EuiContextMenuPanel,
   EuiIcon,
   EuiPopover,
-  EuiPopoverTitle,
 } from '@elastic/eui';
 
-class InspectorModes extends Component {
+class InspectorViewChooser extends Component {
 
   state = {
     isSelectorOpen: false
@@ -28,68 +27,69 @@ class InspectorModes extends Component {
     });
   };
 
-  renderMode = (mode, index) => {
+  renderView = (view, index) => {
     return (
       <EuiContextMenuItem
         key={index}
-        icon={mode.icon || 'empty'}
         onClick={() => {
-          this.props.onModeSelected(mode);
+          this.props.onViewSelected(view);
           this.closeSelector();
         }}
-        data-test-subj={`inspectorViewChooser${mode.title}`}
+        toolTipContent={view.help}
+        toolTipPosition="left"
+        data-test-subj={`inspectorViewChooser${view.title}`}
       >
-        {mode.title}
+        {view.title}
       </EuiContextMenuItem>
     );
   }
 
-  render() {
-    const { selectedMode, modes } = this.props;
-    const triggerButton = (
+  renderCurrentView() {
+    return (
       <EuiButtonEmpty
         size="l"
         iconType="arrowDown"
         iconSide="right"
-        data-test-subj="inspectorViewChooser"
         onClick={this.toggleSelector}
+        data-test-subj="inspectorViewChooser"
       >
-        { selectedMode.icon &&
-          <EuiIcon
-            type={selectedMode.icon}
-            size="m"
-            className="inspector-modes__icon"
-            aria-hidden="true"
-          />
-        }
-        { this.props.selectedMode.title }
+        <EuiIcon
+          type="apps"
+          size="m"
+          aria-hidden="true"
+          className="inspector-view-chooser__icon"
+        />
+        { this.props.selectedView.title }
       </EuiButtonEmpty>
     );
+  }
+
+  render() {
+    const { views } = this.props;
+    const triggerButton = this.renderCurrentView();
 
     return (
       <EuiPopover
-        id="inspectorModeSelector"
+        id="inspectorViewChooser"
         ownFocus
         button={triggerButton}
         isOpen={this.state.isSelectorOpen}
         closePopover={this.closeSelector}
         panelPaddingSize="none"
-        anchorPosition="downCenter"
-        withTitle
+        anchorPosition="downRight"
       >
-        <EuiPopoverTitle>Select mode</EuiPopoverTitle>
         <EuiContextMenuPanel
-          items={modes.map(this.renderMode)}
+          items={views.map(this.renderView)}
         />
       </EuiPopover>
     );
   }
 }
 
-InspectorModes.propTypes = {
-  modes: PropTypes.array.isRequired,
-  onModeSelected: PropTypes.func.isRequired,
-  selectedMode: PropTypes.object.isRequired,
+InspectorViewChooser.propTypes = {
+  views: PropTypes.array.isRequired,
+  onViewSelected: PropTypes.func.isRequired,
+  selectedView: PropTypes.object.isRequired,
 };
 
-export { InspectorModes };
+export { InspectorViewChooser };

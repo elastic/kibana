@@ -12,7 +12,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { InspectorModes } from './inspector_modes2';
+import { InspectorViewChooser } from './inspector_view_chooser';
 
 import './inspector.less';
 
@@ -34,7 +34,7 @@ class InspectorPanel extends Component {
     }
   }
 
-  onModeSelected = (view) => {
+  onViewSelected = (view) => {
     if (view !== this.state.selectedView) {
       this.setState({
         selectedView: view
@@ -98,15 +98,11 @@ class InspectorPanel extends Component {
                 <h1>{ title }</h1>
               </EuiTitle>
             </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-              className="inspector-panel__action"
-            >
-              { /* TODO: rename to views */ }
-              <InspectorModes
-                modes={views}
-                onModeSelected={this.onModeSelected}
-                selectedMode={selectedView}
+            <EuiFlexItem grow={false}>
+              <InspectorViewChooser
+                views={views}
+                onViewSelected={this.onViewSelected}
+                selectedView={selectedView}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
