@@ -2,21 +2,14 @@ import { SavedObjectsClient } from './saved_objects_client';
 import { SavedObjectsRepository } from './lib/repository';
 jest.mock('./lib/repository');
 
-let mockSavedObjectsRepository;
 beforeEach(() => {
-  mockSavedObjectsRepository = {
-    create: jest.fn(),
-    bulkCreate: jest.fn(),
-    delete: jest.fn(),
-    find: jest.fn(),
-    bulkGet: jest.fn(),
-    get: jest.fn(),
-    update: jest.fn(),
-  };
-
   SavedObjectsRepository.mockClear();
-  SavedObjectsRepository.mockImplementation(() => mockSavedObjectsRepository);
 });
+
+const setupMockRepository = (mock) => {
+  SavedObjectsRepository.mockImplementation(() => mock);
+  return mock;
+};
 
 test(`#constructor`, () => {
   const options = {};
@@ -24,73 +17,108 @@ test(`#constructor`, () => {
   expect(SavedObjectsRepository).toHaveBeenCalledWith(options);
 });
 
-test(`#create`, () => {
+test(`#create`, async () => {
+  const returnValue = Symbol();
+  const mockRepository = setupMockRepository({
+    create: jest.fn().mockReturnValue(Promise.resolve(returnValue)),
+  });
   const client = new SavedObjectsClient();
 
   const type = 'foo';
   const attributes = {};
   const options = {};
-  client.create(type, attributes, options);
+  const result = await client.create(type, attributes, options);
 
-  expect(mockSavedObjectsRepository.create).toHaveBeenCalledWith(type, attributes, options);
+  expect(mockRepository.create).toHaveBeenCalledWith(type, attributes, options);
+  expect(result).toBe(returnValue);
 });
 
-test(`#bulkCreate`, () => {
+test(`#bulkCreate`, async () => {
+  const returnValue = Symbol();
+  const mockRepository = setupMockRepository({
+    bulkCreate: jest.fn().mockReturnValue(Promise.resolve(returnValue)),
+  });
   const client = new SavedObjectsClient();
 
   const objects = [];
   const options = {};
-  client.bulkCreate(objects, options);
+  const result = await client.bulkCreate(objects, options);
 
-  expect(mockSavedObjectsRepository.bulkCreate).toHaveBeenCalledWith(objects, options);
+  expect(mockRepository.bulkCreate).toHaveBeenCalledWith(objects, options);
+  expect(result).toBe(returnValue);
 });
 
-test(`#delete`, () => {
+test(`#delete`, async () => {
+  const returnValue = Symbol();
+  const mockRepository = setupMockRepository({
+    delete: jest.fn().mockReturnValue(Promise.resolve(returnValue)),
+  });
   const client = new SavedObjectsClient();
 
   const type = 'foo';
   const id = 1;
-  client.delete(type, id);
+  const result = await client.delete(type, id);
 
-  expect(mockSavedObjectsRepository.delete).toHaveBeenCalledWith(type, id);
+  expect(mockRepository.delete).toHaveBeenCalledWith(type, id);
+  expect(result).toBe(returnValue);
 });
 
-test(`#find`, () => {
+test(`#find`, async () => {
+  const returnValue = Symbol();
+  const mockRepository = setupMockRepository({
+    find: jest.fn().mockReturnValue(Promise.resolve(returnValue)),
+  });
   const client = new SavedObjectsClient();
 
   const options = {};
-  client.find(options);
+  const result = await client.find(options);
 
-  expect(mockSavedObjectsRepository.find).toHaveBeenCalledWith(options);
+  expect(mockRepository.find).toHaveBeenCalledWith(options);
+  expect(result).toBe(returnValue);
 });
 
-test(`#bulkGet`, () => {
+test(`#bulkGet`, async () => {
+  const returnValue = Symbol();
+  const mockRepository = setupMockRepository({
+    bulkGet: jest.fn().mockReturnValue(Promise.resolve(returnValue)),
+  });
   const client = new SavedObjectsClient();
 
   const objects = {};
-  client.bulkGet(objects);
+  const result = await client.bulkGet(objects);
 
-  expect(mockSavedObjectsRepository.bulkGet).toHaveBeenCalledWith(objects);
+  expect(mockRepository.bulkGet).toHaveBeenCalledWith(objects);
+  expect(result).toBe(returnValue);
 });
 
-test(`#get`, () => {
+test(`#get`, async () => {
+  const returnValue = Symbol();
+  const mockRepository = setupMockRepository({
+    get: jest.fn().mockReturnValue(Promise.resolve(returnValue)),
+  });
   const client = new SavedObjectsClient();
 
   const type = 'foo';
   const id = 1;
-  client.get(type, id);
+  const result = await client.get(type, id);
 
-  expect(mockSavedObjectsRepository.get).toHaveBeenCalledWith(type, id);
+  expect(mockRepository.get).toHaveBeenCalledWith(type, id);
+  expect(result).toBe(returnValue);
 });
 
-test(`#update`, () => {
+test(`#update`, async () => {
+  const returnValue = Symbol();
+  const mockRepository = setupMockRepository({
+    update: jest.fn().mockReturnValue(Promise.resolve(returnValue)),
+  });
   const client = new SavedObjectsClient();
 
   const type = 'foo';
   const id = 1;
   const attributes = {};
   const options = {};
-  client.update(type, id, attributes, options);
+  const result = await client.update(type, id, attributes, options);
 
-  expect(mockSavedObjectsRepository.update).toHaveBeenCalledWith(type, id, attributes, options);
+  expect(mockRepository.update).toHaveBeenCalledWith(type, id, attributes, options);
+  expect(result).toBe(returnValue);
 });
