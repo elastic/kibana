@@ -45,8 +45,9 @@ export function xpackUsageRoute(server) {
         req.log(['error'], err);
         if (err.isBoom) {
           reply(err);
+        } else {
+          reply(wrap(err, err.statusCode, err.message));
         }
-        reply(wrap(err, err.statusCode, err.message));
       }
     }
   });
