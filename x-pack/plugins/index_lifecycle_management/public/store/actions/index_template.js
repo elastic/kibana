@@ -18,6 +18,7 @@ import {
   setSelectedPrimaryShardCount,
   setSelectedReplicaCount,
   setSelectedNodeAttrs,
+  setSelectedPolicyName,
 } from '.';
 import {
   PHASE_HOT,
@@ -68,6 +69,9 @@ export const fetchIndexTemplate = templateName => async (dispatch) => {
           template.settings.index.routing.allocation.include.sattr_name
         )
       );
+    }
+    if (template.settings.index.lifecycle) {
+      dispatch(setSelectedPolicyName(template.settings.index.lifecycle.name));
     }
   }
 

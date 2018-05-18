@@ -23,7 +23,7 @@ export class PolicySelection extends Component {
     // done: PropTypes.func.isRequired,
     // back: PropTypes.func.isRequired,
 
-    existingPolicyName: PropTypes.string.isRequired,
+    selectedPolicyName: PropTypes.string.isRequired,
     policies: PropTypes.array.isRequired
   };
 
@@ -39,7 +39,7 @@ export class PolicySelection extends Component {
 
 
   render() {
-    const { policies, existingPolicyName } = this.props;
+    const { policies, selectedPolicyName } = this.props;
 
     const options = policies.map(item => ({ value: item.name, text: item.name }));
     options.unshift({
@@ -62,7 +62,7 @@ export class PolicySelection extends Component {
             <EuiFormRow label="Existing policies">
               <EuiSelect
                 options={options}
-                value={existingPolicyName}
+                value={selectedPolicyName}
                 onChange={async e => {
                   await this.selectPolicy(e.target.value);
                 }}
@@ -101,7 +101,7 @@ export class PolicySelection extends Component {
                 <EuiTitle size="s">
                   <p>
                     {item.name}
-                    {existingPolicyName === item.name ? '*' : ''}
+                    {selectedPolicyName === item.name ? '*' : ''}
                   </p>
                 </EuiTitle>
               </EuiPanel>

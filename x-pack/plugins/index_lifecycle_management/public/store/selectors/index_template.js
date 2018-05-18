@@ -57,14 +57,6 @@ export const getSelectedIndexTemplate = createSelector(
 
 export const getFullSelectedIndexTemplate = state => state.indexTemplate.fullSelectedIndexTemplate;
 
-export const getExistingPolicyName = state => {
-  const template = getFullSelectedIndexTemplate(state);
-  if (template && template.settings && template.settings.index && template.settings.index.lifecycle) {
-    return template.settings.index.lifecycle.name;
-  }
-  return '';
-};
-
 export const getAlias = state => {
   const template = getSelectedIndexTemplate(state);
   if (template && template.settings) {
