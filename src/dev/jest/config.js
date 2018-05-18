@@ -35,7 +35,6 @@ export default {
   ],
   globals: {
     'ts-jest': {
-      tsConfigFile: 'src/dev/jest/tsconfig.json',
       skipBabel: true,
     },
   },
@@ -43,14 +42,14 @@ export default {
     'js',
     'json',
     'ts',
+    'tsx',
   ],
   modulePathIgnorePatterns: [
     '__fixtures__/',
     'target/',
   ],
   testMatch: [
-    '**/*.test.js',
-    '**/*.test.ts',
+    '**/*.test.{js,ts,tsx}'
   ],
   testPathIgnorePatterns: [
     '<rootDir>/packages/kbn-ui-framework/(dist|doc_site|generator-kui)/',
@@ -59,7 +58,7 @@ export default {
   ],
   transform: {
     '^.+\\.js$': '<rootDir>/src/dev/jest/babel_transform.js',
-    '^.+\\.ts$': 'ts-jest',
+    '^.+\\.tsx?$': '<rootDir>/src/dev/jest/ts_transform.js',
   },
   transformIgnorePatterns: [
     '[/\\\\]node_modules[/\\\\].+\\.js$',

@@ -1,6 +1,6 @@
 const join = require('path').join;
 const relative = require('path').relative;
-const unlinkSync = require('fs').unlinkSync;
+const { readFileSync, writeFileSync, unlinkSync, existsSync } = require('fs');
 const execFileSync = require('child_process').execFileSync;
 const del = require('del');
 const vfs = require('vinyl-fs');
@@ -29,7 +29,29 @@ function removeSymlinkDependencies(root) {
   });
 }
 
-module.exports = function createBuild(plugin, buildTarget, buildVersion, kibanaVersion, files) {
+// parse a ts config file
+function parseTsconfig(pluginSourcePath, configPath) {
+  const ts = require(join(pluginSourcePath, 'node_modules', 'typescript'));
+
+  const { error, config } = ts.parseConfigFileTextToJson(
+    configPath,
+    readFileSync(configPath, 'utf8')
+  );
+
+  if (error) {
+    throw error;
+  }
+
+  return config;
+}
+
+module.exports = function createBuild(
+  plugin,
+  buildTarget,
+  buildVersion,
+  kibanaVersion,
+  files
+) {
   const buildSource = plugin.root;
   const buildRoot = join(buildTarget, 'kibana', plugin.id);
 
@@ -64,6 +86,45 @@ module.exports = function createBuild(plugin, buildTarget, buildVersion, kibanaV
       };
 
       execFileSync(winCmd('yarn'), ['install', '--production', '--pure-lockfile'], options);
+    })
+    .then(function () {
+      const buildConfigPath = join(buildRoot, 'tsconfig.json');
+
+      if (!existsSync(buildConfigPath)) {
+        return;
+      }
+
+      if (!plugin.pkg.devDependencies.typescript) {
+        throw new Error(
+          'Found tsconfig.json file in plugin but typescript is not a devDependency.'
+        );
+      }
+
+      // attempt to patch the extends path in the tsconfig file
+      const buildConfig = parseTsconfig(buildSource, buildConfigPath);
+
+      if (buildConfig.extends) {
+        buildConfig.extends = join(
+          relative(buildRoot, buildSource),
+          buildConfig.extends
+        );
+
+        writeFileSync(buildConfigPath, JSON.stringify(buildConfig));
+      }
+
+      execFileSync(
+        join(buildSource, 'node_modules', '.bin', 'tsc'),
+        ['--pretty', 'true'],
+        {
+          cwd: buildRoot,
+          stdio: ['ignore', 'pipe', 'pipe'],
+        }
+      );
+
+      del.sync([
+        join(buildRoot, '**', '*.{ts,tsx,d.ts}'),
+        join(buildRoot, 'tsconfig.json'),
+      ]);
     })
     .then(function () {
       const buildFiles = [relative(buildTarget, buildRoot) + '/**/*'];

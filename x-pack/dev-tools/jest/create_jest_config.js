@@ -15,7 +15,9 @@ export function createJestConfig({
     ],
     moduleFileExtensions: [
       "js",
-      "json"
+      "json",
+      "ts",
+      "tsx",
     ],
     moduleNameMapper: {
       "^ui/(.*)": `${kibanaDirectory}/src/ui/public/$1`,
@@ -28,10 +30,11 @@ export function createJestConfig({
       `<rootDir>/dev-tools/jest/setup/enzyme.js`
     ],
     testMatch: [
-      "**/*.test.js"
+      "**/*.test.{js,ts,tsx}"
     ],
     transform: {
-      "^.+\\.js$": `${kibanaDirectory}/src/dev/jest/babel_transform.js`
+      "^.+\\.js$": `${kibanaDirectory}/src/dev/jest/babel_transform.js`,
+      "^.+\\.tsx?$": `${kibanaDirectory}/src/dev/jest/ts_transform.js`,
     },
     transformIgnorePatterns: [
       "[/\\\\]node_modules[/\\\\].+\\.js$"
