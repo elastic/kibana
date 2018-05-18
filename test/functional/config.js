@@ -87,13 +87,10 @@ export default async function ({ readConfigFile }) {
 
     esTestCluster: commonConfig.get('esTestCluster'),
 
-    kbnTestServer: {
-      ...commonConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...commonConfig.get('kbnTestServer.serverArgs'),
-        '--oss',
-      ],
-    },
+    kibanaServerArgs: [
+      ...commonConfig.get('kibanaServerArgs'),
+      '--oss',
+    ],
 
     apps: {
       status_page: {

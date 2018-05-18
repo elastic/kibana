@@ -22,36 +22,29 @@ in another terminal session by running this command from this directory:
 
 /**
  * Run servers and tests for each config
- * @param {string[]} configPaths         Array of paths to configs
- * @param {object}   options             Optional
- * @param {Log}      options.log         Optional logger
- * @param {string}   options.installDir  Optional installation dir
- *                                       from which to run Kibana
- * @param {boolean}  options.bail  Whether to exit test run at the first failure
+ * @param {string[]} configPaths   Array of paths to configs
+ * @param {boolean}  bail          Whether to exit test run at the first failure
+ * @param {Log}      log           Optional logger
  */
-export async function runTests(configPaths, options) {
+export async function runTests(configPaths, { bail, log }) {
   for (const configPath of configPaths) {
-    await runSingleConfig(resolve(process.cwd(), configPath), options);
+    await runSingleConfig(resolve(process.cwd(), configPath), { bail, log });
   }
 }
 
 /**
  * Start only servers using single config
- * @param {string}  configPath          Path to a config file
- * @param {object}  options             Optional
- * @param {Log}     options.log         Optional logger
- * @param {string}  options.installDir  Optional installation dir
- *                                      from which to run Kibana
+ * @param {string}  configPath   Path to a config file
+ * @param {Log}     log          Optional logger
  */
-export async function startServers(configPath, options) {
-  const { log } = options;
+export async function startServers(configPath, { log }) {
   configPath = resolve(process.cwd(), configPath);
 
   await withProcRunner(log, async procs => {
     const config = await readConfigFile(log, configPath);
 
     const es = await runElasticsearch({ config, log });
-    await runKibanaServer({ procs, config, options });
+    await runKibanaServer({ procs, config, log });
 
     // wait for 5 seconds of silence before logging the
     // success message so that it doesn't get buried
@@ -74,14 +67,12 @@ async function silence(milliseconds, { log }) {
 /*
  * Start servers and run tests for single config
  */
-async function runSingleConfig(configPath, options) {
-  const { bail, log } = options;
-
+async function runSingleConfig(configPath, { bail, log }) {
   await withProcRunner(log, async procs => {
     const config = await readConfigFile(log, configPath);
 
     const es = await runElasticsearch({ config, log });
-    await runKibanaServer({ procs, config, options });
+    await runKibanaServer({ procs, config });
 
     // Note: When solving how to incorporate functional_test_runner
     // clean this up
