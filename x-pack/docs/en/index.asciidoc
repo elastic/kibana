@@ -3,6 +3,8 @@
 
 include::{kib-repo-dir}/index-shared1.asciidoc[]
 
+include::setup/installing.asciidoc[]
+
 include::setup/setup-xkb.asciidoc[]
 
 include::{kib-repo-dir}/index-shared2.asciidoc[]
