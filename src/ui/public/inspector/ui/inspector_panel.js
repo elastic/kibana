@@ -7,8 +7,6 @@ import {
   EuiFlyout,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiIconTip,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -51,30 +49,6 @@ class InspectorPanel extends Component {
       <this.state.selectedView.component
         adapters={this.props.adapters}
         title={this.props.title}
-      />
-    );
-  }
-
-  renderHelpButton() {
-    const helpText = (
-      <EuiText
-        color="ghost"
-        className="inspector-panel__helpPopover"
-      >
-        <p>
-          Using the Inspector you can gain insights into your visualization.
-        </p>
-        { this.state.selectedView.help &&
-          <p>{ this.state.selectedView.help }</p>
-        }
-      </EuiText>
-    );
-    return (
-      <EuiIconTip
-        type="questionInCircle"
-        color="text"
-        aria-label="Help"
-        content={helpText}
       />
     );
   }
