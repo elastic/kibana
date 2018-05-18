@@ -76,7 +76,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "dependencies": {
-    "@elastic/eui": "v0.0.46",
+    "@elastic/eui": "v0.0.47",
     "@elastic/filesaver": "1.1.2",
     "@elastic/numeral": "2.3.2",
     "@elastic/ui-ace": "0.2.3",
@@ -102,7 +102,7 @@
     "bluebird": "2.9.34",
     "body-parser": "1.12.0",
     "boom": "5.2.0",
-    "brace": "0.10.0",
+    "brace": "0.11.1",
     "bunyan": "1.7.1",
     "cache-loader": "1.0.3",
     "chalk": "2.3.0",
@@ -261,7 +261,6 @@
     "grunt-karma": "2.0.0",
     "grunt-peg": "^2.0.1",
     "grunt-run": "0.7.0",
-    "grunt-simple-mocha": "0.4.0",
     "gulp-babel": "^7.0.1",
     "gulp-sourcemaps": "1.7.3",
     "husky": "0.8.1",

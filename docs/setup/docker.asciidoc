@@ -87,7 +87,7 @@ Some example translations are shown here:
 `XPACK_MONITORING_ENABLED`:: `xpack.monitoring.enabled`
 
 In general, any setting listed in <<settings>> or
-{xpack-ref}/xpack-settings.html[X-Pack Settings] can be configured
+{xpack-ref}/xpack-settings.html[{xpack} Settings] can be configured
 with this technique.
 
 These variables can be set with +docker-compose+ like this:
@@ -115,7 +115,7 @@ images:
 `server.host`:: `"0"`
 `elasticsearch.url`:: `http://elasticsearch:9200`
 
-In the `x-pack` image, the following additional defaults are also set:
+In the {xpack} image, the following additional defaults are also set:
 
 [horizontal]
 `elasticsearch.username`:: `elastic`

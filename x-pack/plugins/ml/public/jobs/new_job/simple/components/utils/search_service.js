@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 
-import { ML_RESULTS_INDEX_PATTERN } from 'plugins/ml/constants/index_patterns';
+import { ML_RESULTS_INDEX_PATTERN } from 'plugins/ml/../common/constants/index_patterns';
 import { escapeForElasticsearchQuery } from 'plugins/ml/util/string_utils';
 import { ml } from 'plugins/ml/services/ml_api_service';
 
