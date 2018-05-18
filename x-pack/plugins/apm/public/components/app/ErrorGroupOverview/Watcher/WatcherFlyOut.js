@@ -358,7 +358,6 @@ export default class WatcherFlyout extends Component {
           />
 
           <EuiSpacer size="m" />
-
           {this.state.actions.email && (
             <EuiFormRow
               label="Receipients (seperated with comma)"
