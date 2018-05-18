@@ -17,15 +17,26 @@
  * under the License.
  */
 
-import { Type } from './type';
+import { internals, Reference as InternalReference } from '../internals';
 
-export class MaybeType<V> extends Type<V | undefined> {
-  constructor(type: Type<V>) {
-    super(
-      type
-        .getSchema()
-        .optional()
-        .default()
+export class Reference<T> {
+  public static isReference<V>(
+    value: V | Reference<V> | undefined
+  ): value is Reference<V> {
+    return (
+      value !== undefined &&
+      typeof (value as Reference<V>).getSchema === 'function' &&
+      internals.isRef((value as Reference<V>).getSchema())
     );
+  }
+
+  private readonly internalSchema: InternalReference;
+
+  constructor(key: string) {
+    this.internalSchema = internals.ref(key);
+  }
+
+  public getSchema() {
+    return this.internalSchema;
   }
 }

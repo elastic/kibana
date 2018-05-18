@@ -31,7 +31,7 @@ test('is required by default', () => {
 
 test('includes context in failure', () => {
   expect(() =>
-    schema.boolean().validate(undefined, 'foo-context')
+    schema.boolean().validate(undefined, {}, 'foo-context')
   ).toThrowErrorMatchingSnapshot();
 });
 

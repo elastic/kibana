@@ -2,7 +2,6 @@
 
 exports[`has defaults for config 1`] = `
 Object {
-  "basePath": undefined,
   "cors": false,
   "host": "localhost",
   "maxPayload": ByteSizeValue {
@@ -11,8 +10,6 @@ Object {
   "port": 5601,
   "rewriteBasePath": false,
   "ssl": Object {
-    "certificate": undefined,
-    "certificateAuthorities": undefined,
     "cipherSuites": Array [
       "ECDHE-RSA-AES128-GCM-SHA256",
       "ECDHE-ECDSA-AES128-GCM-SHA256",
@@ -37,10 +34,6 @@ Object {
       "!CAMELLIA",
     ],
     "enabled": false,
-    "key": undefined,
-    "keyPassphrase": undefined,
-    "redirectHttpFromPort": undefined,
-    "supportedProtocols": undefined,
   },
 }
 `;

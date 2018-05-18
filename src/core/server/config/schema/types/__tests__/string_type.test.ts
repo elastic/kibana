@@ -31,7 +31,7 @@ test('is required by default', () => {
 
 test('includes context in failure', () => {
   expect(() =>
-    schema.string().validate(undefined, 'foo-context')
+    schema.string().validate(undefined, {}, 'foo-context')
   ).toThrowErrorMatchingSnapshot();
 });
 
@@ -69,6 +69,16 @@ describe('#defaultValue', () => {
   test('returns value when specified', () => {
     expect(schema.string({ defaultValue: 'foo' }).validate('bar')).toBe('bar');
   });
+
+  test('returns value from context when context reference is specified', () => {
+    expect(
+      schema
+        .string({ defaultValue: schema.context_ref('some_value') })
+        .validate(undefined, {
+          some_value: 'some',
+        })
+    ).toBe('some');
+  });
 });
 
 describe('#validate', () => {
@@ -84,16 +94,12 @@ describe('#validate', () => {
     expect(calledWith).toBe('test');
   });
 
-  test('is called with default value in no input', () => {
-    let calledWith;
-
-    const validate = (val: any) => {
-      calledWith = val;
-    };
+  test('is not called with default value in no input', () => {
+    const validate = jest.fn();
 
     schema.string({ validate, defaultValue: 'foo' }).validate(undefined);
 
-    expect(calledWith).toBe('foo');
+    expect(validate).not.toHaveBeenCalled();
   });
 
   test('throws when returns string', () => {

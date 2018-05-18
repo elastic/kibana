@@ -49,7 +49,9 @@ test('fails when not receiving expected key type', () => {
 
 test('includes context in failure when wrong top-level type', () => {
   const type = schema.mapOf(schema.string(), schema.string());
-  expect(() => type.validate([], 'foo-context')).toThrowErrorMatchingSnapshot();
+  expect(() =>
+    type.validate([], {}, 'foo-context')
+  ).toThrowErrorMatchingSnapshot();
 });
 
 test('includes context in failure when wrong value type', () => {
@@ -59,7 +61,7 @@ test('includes context in failure when wrong value type', () => {
   };
 
   expect(() =>
-    type.validate(value, 'foo-context')
+    type.validate(value, {}, 'foo-context')
   ).toThrowErrorMatchingSnapshot();
 });
 
@@ -70,7 +72,7 @@ test('includes context in failure when wrong key type', () => {
   };
 
   expect(() =>
-    type.validate(value, 'foo-context')
+    type.validate(value, {}, 'foo-context')
   ).toThrowErrorMatchingSnapshot();
 });
 

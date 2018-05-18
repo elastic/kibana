@@ -54,20 +54,34 @@ test('fails if key does not exist in schema', () => {
   });
   const value = {
     bar: 'baz',
+    foo: 'bar',
   };
 
   expect(() => type.validate(value)).toThrowErrorMatchingSnapshot();
 });
 
-test('object within object', () => {
+test('defined object within object', () => {
   const type = schema.object({
     foo: schema.object({
       bar: schema.string({ defaultValue: 'hello world' }),
     }),
   });
-  const value = { foo: {} };
 
-  expect(type.validate(value)).toEqual({
+  expect(type.validate({ foo: {} })).toEqual({
+    foo: {
+      bar: 'hello world',
+    },
+  });
+});
+
+test('undefined object within object', () => {
+  const type = schema.object({
+    foo: schema.object({
+      bar: schema.string({ defaultValue: 'hello world' }),
+    }),
+  });
+
+  expect(type.validate({})).toEqual({
     foo: {
       bar: 'hello world',
     },
@@ -80,14 +94,14 @@ test('object within object with required', () => {
       bar: schema.string(),
     }),
   });
-  const value = {};
+  const value = { foo: {} };
 
   expect(() => type.validate(value)).toThrowErrorMatchingSnapshot();
 });
 
 describe('#validate', () => {
   test('is called after all content is processed', () => {
-    let calledWith;
+    const mockValidate = jest.fn();
 
     const type = schema.object(
       {
@@ -96,15 +110,13 @@ describe('#validate', () => {
         }),
       },
       {
-        validate: value => {
-          calledWith = value;
-        },
+        validate: mockValidate,
       }
     );
 
     type.validate({ foo: {} });
 
-    expect(calledWith).toEqual({
+    expect(mockValidate).toHaveBeenCalledWith({
       foo: {
         bar: 'baz',
       },
@@ -128,12 +140,57 @@ test('handles oneOf', () => {
   expect(() => type.validate({ key: 123 })).toThrowErrorMatchingSnapshot();
 });
 
+test('handles references', () => {
+  const type = schema.object({
+    context: schema.string({
+      defaultValue: schema.context_ref('context_value'),
+    }),
+    key: schema.string(),
+    value: schema.string({ defaultValue: schema.sibling_ref('key') }),
+  });
+
+  expect(
+    type.validate({ key: 'key#1' }, { context_value: 'context#1' })
+  ).toEqual({
+    context: 'context#1',
+    key: 'key#1',
+    value: 'key#1',
+  });
+  expect(type.validate({ key: 'key#1', value: 'value#1' })).toEqual({
+    key: 'key#1',
+    value: 'value#1',
+  });
+});
+
+test('handles conditionals', () => {
+  const type = schema.object({
+    key: schema.string(),
+    value: schema.conditional(
+      schema.sibling_ref('key'),
+      'some-key',
+      schema.string({ defaultValue: 'some-value' }),
+      schema.string({ defaultValue: 'unknown-value' })
+    ),
+  });
+
+  expect(type.validate({ key: 'some-key' })).toEqual({
+    key: 'some-key',
+    value: 'some-value',
+  });
+  expect(type.validate({ key: 'another-key' })).toEqual({
+    key: 'another-key',
+    value: 'unknown-value',
+  });
+});
+
 test('includes context in failure when wrong top-level type', () => {
   const type = schema.object({
     foo: schema.string(),
   });
 
-  expect(() => type.validate([], 'foo-context')).toThrowErrorMatchingSnapshot();
+  expect(() =>
+    type.validate([], {}, 'foo-context')
+  ).toThrowErrorMatchingSnapshot();
 });
 
 test('includes context in failure when wrong value type', () => {
@@ -145,6 +202,6 @@ test('includes context in failure when wrong value type', () => {
   };
 
   expect(() =>
-    type.validate(value, 'foo-context')
+    type.validate(value, {}, 'foo-context')
   ).toThrowErrorMatchingSnapshot();
 });

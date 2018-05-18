@@ -82,7 +82,7 @@ test('includes context in failure', () => {
   const type = schema.oneOf([schema.object({ age: schema.number() })]);
 
   expect(() =>
-    type.validate({ age: 'foo' }, 'foo-context')
+    type.validate({ age: 'foo' }, {}, 'foo-context')
   ).toThrowErrorMatchingSnapshot();
 });
 
@@ -103,7 +103,7 @@ test('handles multiple types', () => {
 });
 
 test('handles maybe', () => {
-  const type = schema.oneOf([schema.maybe(schema.string())]);
+  const type = schema.maybe(schema.oneOf([schema.maybe(schema.string())]));
 
   expect(type.validate(undefined)).toBe(undefined);
   expect(type.validate('test')).toBe('test');

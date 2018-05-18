@@ -47,6 +47,6 @@ test('returns error when not correct', () => {
 
 test('includes context in failure', () => {
   expect(() =>
-    literal('test').validate('foo', 'foo-context')
+    literal('test').validate('foo', {}, 'foo-context')
   ).toThrowErrorMatchingSnapshot();
 });

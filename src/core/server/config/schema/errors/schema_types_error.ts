@@ -17,30 +17,18 @@
  * under the License.
  */
 
-import { SchemaError } from '.';
+import { SchemaTypeError } from '.';
 
-export class SchemaTypesError extends SchemaError {
-  public static extractMessages(
-    error: Error[],
-    heading: string,
-    context?: string
+export class SchemaTypesError extends SchemaTypeError {
+  constructor(
+    error: Error | string,
+    path: string[],
+    public readonly errors: SchemaTypeError[]
   ) {
-    const messages = `- ${error.map(e => e.message).join('\n- ')}`;
+    super(error, path);
 
-    if (context == null) {
-      return `${heading}:\n${messages}`;
-    }
-    return `[${context}]: ${heading}:\n${messages}`;
-  }
-
-  public static extractFirstCause(error: Error[]): Error | undefined {
-    return error.length > 0 ? error[0] : undefined;
-  }
-
-  constructor(errors: Error[], message: string, key?: string) {
-    super(
-      SchemaTypesError.extractMessages(errors, message, key),
-      SchemaTypesError.extractFirstCause(errors)
-    );
+    // Set the prototype explicitly, see:
+    // https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
+    Object.setPrototypeOf(this, SchemaTypesError.prototype);
   }
 }
