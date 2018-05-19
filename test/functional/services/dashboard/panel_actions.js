@@ -4,11 +4,12 @@ const TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ = 'dashboardPanelAction-togglePanel';
 const CUSTOMIZE_PANEL_DATA_TEST_SUBJ = 'dashboardPanelAction-customizePanel';
 const OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ = 'dashboardPanelToggleMenuIcon';
 
-export function DashboardPanelActionsProvider({ getService }) {
+export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const remote = getService('remote');
   const testSubjects = getService('testSubjects');
+  const PageObjects = getPageObjects(['header', 'common']);
 
   return new class DashboardPanelActions {
 
@@ -55,14 +56,19 @@ export function DashboardPanelActionsProvider({ getService }) {
 
     async clickEdit() {
       log.debug('clickEdit');
+      await this.openContextMenu();
 
       // Edit link may sometimes be disabled if the embeddable isn't rendered yet.
       await retry.try(async () => {
-        await this.openContextMenu();
-        await testSubjects.click(EDIT_PANEL_DATA_TEST_SUBJ);
+        const editExists = await this.editPanelActionExists();
+        if (editExists) {
+          await testSubjects.click(EDIT_PANEL_DATA_TEST_SUBJ);
+        }
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.common.waitForTopNavToBeVisible();
         const current = await remote.getCurrentUrl();
-        if (current.indexOf('visualize') < 0) {
-          throw new Error('not on visualize page');
+        if (current.indexOf('dashboard') >= 0) {
+          throw new Error('Still on dashboard');
         }
       });
     }
