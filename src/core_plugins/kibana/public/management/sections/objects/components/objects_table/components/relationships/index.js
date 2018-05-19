@@ -1,1 +1,0 @@
-export { Relationships } from './relationships';

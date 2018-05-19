@@ -33,8 +33,7 @@ describe('getSearchDsl', () => {
       const opts = {
         type: 'foo',
         search: 'bar',
-        searchFields: ['baz'],
-        includeTypes: ['index-pattern', 'dashboard']
+        searchFields: ['baz']
       };
 
       getSearchDsl(mappings, opts);
@@ -45,7 +44,6 @@ describe('getSearchDsl', () => {
         opts.type,
         opts.search,
         opts.searchFields,
-        opts.includeTypes,
       );
     });
 

@@ -479,72 +479,31 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('editorFieldScript', script);
     }
 
-    async importFile(path, overwriteAll = true) {
+    async importFile(path) {
       log.debug(`importFile(${path})`);
-
-      log.debug(`Clicking importObjects`);
-      await testSubjects.click('importObjects');
-      log.debug(`Setting the path on the file input`);
-      await find.setValue('.euiFilePicker__input', path);
-      if (!overwriteAll) {
-        log.debug(`Toggling overwriteAll`);
-        await testSubjects.click('importSavedObjectsOverwriteToggle');
-      } else {
-        log.debug(`Leaving overwriteAll alone`);
-      }
-      await testSubjects.click('importSavedObjectsImportBtn');
-      log.debug(`done importing the file`);
-    }
-
-    async clickImportDone() {
-      await testSubjects.click('importSavedObjectsDoneBtn');
-    }
-
-    async clickConfirmConflicts() {
-      await testSubjects.click('importSavedObjectsConfirmBtn');
+      await remote.findById('testfile').type(path);
     }
 
     async setImportIndexFieldOption(child) {
-      await find
-        .clickByCssSelector(`select[data-test-subj="managementChangeIndexSelection"] > option:nth-child(${child})`);
+      await remote.setFindTimeout(defaultFindTimeout)
+        .findByCssSelector(`select[data-test-subj="managementChangeIndexSelection"] > option:nth-child(${child})`)
+        .click();
     }
 
     async clickChangeIndexConfirmButton() {
-      await testSubjects.click('changeIndexConfirmButton');
+      await (await testSubjects.find('changeIndexConfirmButton')).click();
     }
 
     async clickVisualizationsTab() {
-      await testSubjects.click('objectsTab-visualizations');
+      await (await testSubjects.find('objectsTab-visualizations')).click();
     }
 
     async clickSearchesTab() {
-      await testSubjects.click('objectsTab-searches');
+      await (await testSubjects.find('objectsTab-searches')).click();
     }
 
     async getVisualizationRows() {
       return await testSubjects.findAll(`objectsTableRow`);
-    }
-
-    async waitUntilSavedObjectsTableIsNotLoading() {
-      return retry.try(async () => {
-        const exists = await find.existsByDisplayedByCssSelector('*[data-test-subj="savedObjectsTable"] .euiBasicTable-loading');
-        if (exists) {
-          throw new Error('Waiting');
-        }
-        return true;
-      });
-    }
-
-    async getSavedObjectsInTable() {
-      const table = await testSubjects.find('savedObjectsTable');
-      const cells = await table.findAll('css selector', 'td:nth-child(3)');
-
-      const objects = [];
-      for (const cell of cells) {
-        objects.push(await cell.getVisibleText());
-      }
-
-      return objects;
     }
   }
 

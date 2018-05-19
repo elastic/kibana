@@ -49,7 +49,6 @@ export function IndexPatternsProvider(Notifier, Private, config) {
   self.cache = patternCache;
   self.getIds = getProvider('id');
   self.getTitles = getProvider('attributes.title');
-  self.getFields = getProvider.multiple;
   self.intervals = Private(IndexPatternsIntervalsProvider);
   self.fieldsFetcher = Private(FieldsFetcherProvider);
   self.fieldFormats = fieldFormats;
