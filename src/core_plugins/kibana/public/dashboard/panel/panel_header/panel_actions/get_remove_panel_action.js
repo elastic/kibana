@@ -19,7 +19,9 @@ export function getRemovePanelAction(onDeletePanel) {
     icon: <EuiIcon
       type="trash"
     />,
-    isVisible: ({ containerState }) => (containerState.viewMode === DashboardViewMode.EDIT),
+    isVisible: ({ containerState }) => (
+      containerState.viewMode === DashboardViewMode.EDIT && !containerState.isPanelExpanded
+    ),
     onClick: onDeletePanel,
   });
 }

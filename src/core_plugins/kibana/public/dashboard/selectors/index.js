@@ -170,6 +170,7 @@ export const getDescription = dashboard => dashboard.metadata.description;
  * @property {String} timeRange.from - either an absolute time range in utc format or a relative one (e.g. now-15m)
  * @property {Object} embeddableCustomization
  * @property {boolean} hidePanelTitles
+ * @property {boolean} isPanelExpanded
  */
 
 /**
@@ -189,6 +190,7 @@ export const getContainerState = (dashboard, panelId) => {
     hidePanelTitles: getHidePanelTitles(dashboard),
     customTitle: getPanel(dashboard, panelId).title,
     viewMode: getViewMode(dashboard),
+    isPanelExpanded: getMaximizedPanelId(dashboard) === panelId,
   };
 };
 
