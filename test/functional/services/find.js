@@ -53,20 +53,6 @@ export function FindProvider({ getService }) {
       });
     }
 
-    async setValue(selector, text) {
-      return await retry.try(async () => {
-        const element = await this.byCssSelector(selector);
-        await element.click();
-
-        // in case the input element is actually a child of the testSubject, we
-        // call clearValue() and type() on the element that is focused after
-        // clicking on the testSubject
-        const input = await remote.getActiveElement();
-        await input.clearValue();
-        await input.type(text);
-      });
-    }
-
     async allByCustom(findAllFunction, timeout = defaultFindTimeout) {
       return await this._withTimeout(timeout, async remote => {
         return await retry.try(async () => {

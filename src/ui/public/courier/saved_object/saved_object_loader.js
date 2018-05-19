@@ -94,15 +94,14 @@ export class SavedObjectLoader {
    * @param size
    * @returns {Promise}
    */
-  findAll(search = '', size = 100, fields) {
+  findAll(search = '', size = 100) {
     return this.savedObjectsClient.find(
       {
         type: this.lowercaseType,
         search: search ? `${search}*` : undefined,
         perPage: size,
         page: 1,
-        searchFields: ['title^3', 'description'],
-        fields,
+        searchFields: ['title^3', 'description']
       }).then((resp) => {
       return {
         total: resp.total,
