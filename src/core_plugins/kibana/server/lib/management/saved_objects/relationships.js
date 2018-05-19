@@ -1,4 +1,9 @@
-async function findDashboardRelationships(id, size, savedObjectsClient) {
+function formatId(id) {
+  return id.split(':')[1];
+}
+
+async function findDashboardRelationships(id, size, callCluster, savedObjectsClient) {
+  const kibanaIndex = savedObjectsClient._index;
   const dashboard = await savedObjectsClient.get('dashboard', id);
   const visualizations = [];
 
@@ -6,16 +11,22 @@ async function findDashboardRelationships(id, size, savedObjectsClient) {
   const panelsJSON = JSON.parse(dashboard.attributes.panelsJSON);
   if (panelsJSON) {
     const visualizationIds = panelsJSON.map(panel => panel.id);
-    const visualizationResponse = await savedObjectsClient.bulkGet(visualizationIds.slice(0, size).map(id => ({
-      id,
-      type: 'visualization',
-    })));
+    const visualizationResponse = await callCluster('mget', {
+      body: {
+        docs: visualizationIds.slice(0, size).map(id => ({
+          _index: kibanaIndex,
+          _type: 'doc',
+          _id: `visualization:${id}`,
+          _source: [`visualization.title`]
+        }))
+      }
+    });
 
-    visualizations.push(...visualizationResponse.saved_objects.reduce((accum, object) => {
-      if (!object.error) {
+    visualizations.push(...visualizationResponse.docs.reduce((accum, doc) => {
+      if (doc.found) {
         accum.push({
-          id: object.id,
-          title: object.attributes.title,
+          id: formatId(doc._id),
+          title: doc._source.visualization.title,
         });
       }
       return accum;
@@ -25,24 +36,31 @@ async function findDashboardRelationships(id, size, savedObjectsClient) {
   return { visualizations };
 }
 
-async function findVisualizationRelationships(id, size, savedObjectsClient) {
-  const allDashboardsResponse = await savedObjectsClient.find({
-    type: 'dashboard',
-    fields: ['title', 'panelsJSON']
+async function findVisualizationRelationships(id, size, callCluster, savedObjectsClient) {
+  const kibanaIndex = savedObjectsClient._index;
+  const allDashboardsResponse = await callCluster('search', {
+    index: kibanaIndex,
+    size: 10000,
+    ignore: [404],
+    _source: [`dashboard.title`, `dashboard.panelsJSON`],
+    body: {
+      query: {
+        term: {
+          type: 'dashboard'
+        }
+      }
+    }
   });
 
   const dashboards = [];
-  for (const dashboard of allDashboardsResponse.saved_objects) {
-    if (dashboard.error) {
-      continue;
-    }
-    const panelsJSON = JSON.parse(dashboard.attributes.panelsJSON);
+  for (const dashboard of allDashboardsResponse.hits.hits) {
+    const panelsJSON = JSON.parse(dashboard._source.dashboard.panelsJSON);
     if (panelsJSON) {
       for (const panel of panelsJSON) {
         if (panel.type === 'visualization' && panel.id === id) {
           dashboards.push({
-            id: dashboard.id,
-            title: dashboard.attributes.title,
+            id: formatId(dashboard._id),
+            title: dashboard._source.dashboard.title,
           });
         }
       }
@@ -56,7 +74,8 @@ async function findVisualizationRelationships(id, size, savedObjectsClient) {
   return { dashboards };
 }
 
-async function findSavedSearchRelationships(id, size, savedObjectsClient) {
+async function findSavedSearchRelationships(id, size, callCluster, savedObjectsClient) {
+  const kibanaIndex = savedObjectsClient._index;
   const search = await savedObjectsClient.get('search', id);
 
   const searchSourceJSON = JSON.parse(search.attributes.kibanaSavedObjectMeta.searchSourceJSON);
@@ -69,52 +88,93 @@ async function findSavedSearchRelationships(id, size, savedObjectsClient) {
     // Do nothing
   }
 
-  const allVisualizationsResponse = await savedObjectsClient.find({
-    type: 'visualization',
-    searchFields: ['savedSearchId'],
-    search: id,
-    fields: ['title']
+  const allVisualizationsResponse = await callCluster('search', {
+    index: kibanaIndex,
+    size,
+    ignore: [404],
+    _source: [`visualization.title`],
+    body: {
+      query: {
+        term: {
+          'visualization.savedSearchId': id,
+        }
+      }
+    }
   });
 
-  const visualizations = allVisualizationsResponse.saved_objects.reduce((accum, object) => {
-    if (!object.error) {
-      accum.push({
-        id: object.id,
-        title: object.attributes.title,
-      });
-    }
-    return accum;
-  }, []);
+  const visualizations = allVisualizationsResponse.hits.hits.map(response => ({
+    id: formatId(response._id),
+    title: response._source.visualization.title,
+  }));
 
   return { visualizations, indexPatterns };
 }
 
-async function findIndexPatternRelationships(id, size, savedObjectsClient) {
+async function findIndexPatternRelationships(id, size, callCluster, savedObjectsClient) {
+  const kibanaIndex = savedObjectsClient._index;
+
   const [allVisualizationsResponse, savedSearchResponse] = await Promise.all([
-    savedObjectsClient.find({
-      type: 'visualization',
-      searchFields: ['kibanaSavedObjectMeta.searchSourceJSON'],
-      search: '*',
-      fields: [`title`, `kibanaSavedObjectMeta.searchSourceJSON`],
+    callCluster('search', {
+      index: kibanaIndex,
+      size: 10000,
+      ignore: [404],
+      _source: [`visualization.title`, `visualization.kibanaSavedObjectMeta.searchSourceJSON`],
+      body: {
+        query: {
+          bool: {
+            filter: [
+              {
+                exists: {
+                  field: 'visualization.kibanaSavedObjectMeta.searchSourceJSON',
+                }
+              },
+              {
+                term: {
+                  type: {
+                    value: 'visualization'
+                  }
+                }
+              }
+            ],
+          }
+        }
+      }
     }),
-    savedObjectsClient.find({
-      type: 'search',
-      searchFields: ['kibanaSavedObjectMeta.searchSourceJSON'],
-      search: '*',
-      fields: [`title`, `kibanaSavedObjectMeta.searchSourceJSON`],
-    }),
+    callCluster('search', {
+      index: kibanaIndex,
+      size: 10000,
+      ignore: [404],
+      _source: [`search.title`, `search.kibanaSavedObjectMeta.searchSourceJSON`],
+      body: {
+        query: {
+          bool: {
+            filter: [
+              {
+                exists: {
+                  field: 'search.kibanaSavedObjectMeta.searchSourceJSON',
+                }
+              },
+              {
+                term: {
+                  type: {
+                    value: 'search'
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    })
   ]);
 
   const visualizations = [];
-  for (const visualization of allVisualizationsResponse.saved_objects) {
-    if (visualization.error) {
-      continue;
-    }
-    const searchSourceJSON = JSON.parse(visualization.attributes.kibanaSavedObjectMeta.searchSourceJSON);
+  for (const visualization of allVisualizationsResponse.hits.hits) {
+    const searchSourceJSON = JSON.parse(visualization._source.visualization.kibanaSavedObjectMeta.searchSourceJSON);
     if (searchSourceJSON && searchSourceJSON.index === id) {
       visualizations.push({
-        id: visualization.id,
-        title: visualization.attributes.title,
+        id: formatId(visualization._id),
+        title: visualization._source.visualization.title,
       });
     }
 
@@ -124,15 +184,12 @@ async function findIndexPatternRelationships(id, size, savedObjectsClient) {
   }
 
   const searches = [];
-  for (const search of savedSearchResponse.saved_objects) {
-    if (search.error) {
-      continue;
-    }
-    const searchSourceJSON = JSON.parse(search.attributes.kibanaSavedObjectMeta.searchSourceJSON);
+  for (const search of savedSearchResponse.hits.hits) {
+    const searchSourceJSON = JSON.parse(search._source.search.kibanaSavedObjectMeta.searchSourceJSON);
     if (searchSourceJSON && searchSourceJSON.index === id) {
       searches.push({
-        id: search.id,
-        title: search.attributes.title,
+        id: formatId(search._id),
+        title: search._source.search.title,
       });
     }
 
@@ -144,16 +201,16 @@ async function findIndexPatternRelationships(id, size, savedObjectsClient) {
   return { visualizations, searches };
 }
 
-export async function findRelationships(type, id, size, savedObjectsClient) {
+export async function findRelationships(type, id, size, callCluster, savedObjectsClient) {
   switch (type) {
     case 'dashboard':
-      return await findDashboardRelationships(id, size, savedObjectsClient);
+      return await findDashboardRelationships(id, size, callCluster, savedObjectsClient);
     case 'visualization':
-      return await findVisualizationRelationships(id, size, savedObjectsClient);
+      return await findVisualizationRelationships(id, size, callCluster, savedObjectsClient);
     case 'search':
-      return await findSavedSearchRelationships(id, size, savedObjectsClient);
+      return await findSavedSearchRelationships(id, size, callCluster, savedObjectsClient);
     case 'index-pattern':
-      return await findIndexPatternRelationships(id, size, savedObjectsClient);
+      return await findIndexPatternRelationships(id, size, callCluster, savedObjectsClient);
   }
   return {};
 }

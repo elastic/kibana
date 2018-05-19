@@ -6,6 +6,37 @@ describe('findRelationships', () => {
     const type = 'dashboard';
     const id = 'foo';
     const size = 10;
+    const callCluster = () => ({
+      docs: [
+        {
+          _id: 'visualization:1',
+          found: true,
+          _source: {
+            visualization: {
+              title: 'Foo',
+            },
+          },
+        },
+        {
+          _id: 'visualization:2',
+          found: true,
+          _source: {
+            visualization: {
+              title: 'Bar',
+            },
+          },
+        },
+        {
+          _id: 'visualization:3',
+          found: true,
+          _source: {
+            visualization: {
+              title: 'FooBar',
+            },
+          },
+        },
+      ],
+    });
 
     const savedObjectsClient = {
       _index: '.kibana',
@@ -14,33 +45,12 @@ describe('findRelationships', () => {
           panelsJSON: JSON.stringify([{ id: '1' }, { id: '2' }, { id: '3' }]),
         },
       }),
-      bulkGet: () => ({
-        saved_objects: [
-          {
-            id: '1',
-            attributes: {
-              title: 'Foo',
-            },
-          },
-          {
-            id: '2',
-            attributes: {
-              title: 'Bar',
-            },
-          },
-          {
-            id: '3',
-            attributes: {
-              title: 'FooBar',
-            },
-          },
-        ],
-      })
     };
     const result = await findRelationships(
       type,
       id,
       size,
+      callCluster,
       savedObjectsClient
     );
     expect(result).to.eql({
@@ -56,50 +66,60 @@ describe('findRelationships', () => {
     const type = 'visualization';
     const id = 'foo';
     const size = 10;
+    const callCluster = () => ({
+      hits: {
+        hits: [
+          {
+            _id: 'dashboard:1',
+            found: true,
+            _source: {
+              dashboard: {
+                title: 'My Dashboard',
+                panelsJSON: JSON.stringify([
+                  {
+                    type: 'visualization',
+                    id,
+                  },
+                  {
+                    type: 'visualization',
+                    id: 'foobar',
+                  },
+                ]),
+              },
+            },
+          },
+          {
+            _id: 'dashboard:2',
+            found: true,
+            _source: {
+              dashboard: {
+                title: 'Your Dashboard',
+                panelsJSON: JSON.stringify([
+                  {
+                    type: 'visualization',
+                    id,
+                  },
+                  {
+                    type: 'visualization',
+                    id: 'foobar',
+                  },
+                ]),
+              },
+            },
+          },
+        ],
+      },
+    });
 
     const savedObjectsClient = {
-      find: () => ({
-        saved_objects: [
-          {
-            id: '1',
-            attributes: {
-              title: 'My Dashboard',
-              panelsJSON: JSON.stringify([
-                {
-                  type: 'visualization',
-                  id,
-                },
-                {
-                  type: 'visualization',
-                  id: 'foobar',
-                },
-              ]),
-            },
-          },
-          {
-            id: '2',
-            attributes: {
-              title: 'Your Dashboard',
-              panelsJSON: JSON.stringify([
-                {
-                  type: 'visualization',
-                  id,
-                },
-                {
-                  type: 'visualization',
-                  id: 'foobar',
-                },
-              ]),
-            },
-          },
-        ]
-      })
+      _index: '.kibana',
     };
 
     const result = await findRelationships(
       type,
       id,
       size,
+      callCluster,
       savedObjectsClient
     );
     expect(result).to.eql({
@@ -114,12 +134,46 @@ describe('findRelationships', () => {
     const type = 'search';
     const id = 'foo';
     const size = 10;
+    const callCluster = () => ({
+      hits: {
+        hits: [
+          {
+            _id: 'visualization:1',
+            found: true,
+            _source: {
+              visualization: {
+                title: 'Foo',
+              },
+            },
+          },
+          {
+            _id: 'visualization:2',
+            found: true,
+            _source: {
+              visualization: {
+                title: 'Bar',
+              },
+            },
+          },
+          {
+            _id: 'visualization:3',
+            found: true,
+            _source: {
+              visualization: {
+                title: 'FooBar',
+              },
+            },
+          },
+        ],
+      },
+    });
 
     const savedObjectsClient = {
+      _index: '.kibana',
       get: type => {
         if (type === 'search') {
           return {
-            id: '1',
+            id: 'search:1',
             attributes: {
               kibanaSavedObjectMeta: {
                 searchSourceJSON: JSON.stringify({
@@ -137,34 +191,13 @@ describe('findRelationships', () => {
           },
         };
       },
-      find: () => ({
-        saved_objects: [
-          {
-            id: '1',
-            attributes: {
-              title: 'Foo',
-            },
-          },
-          {
-            id: '2',
-            attributes: {
-              title: 'Bar',
-            },
-          },
-          {
-            id: '3',
-            attributes: {
-              title: 'FooBar',
-            },
-          },
-        ]
-      })
     };
 
     const result = await findRelationships(
       type,
       id,
       size,
+      callCluster,
       savedObjectsClient
     );
     expect(result).to.eql({
@@ -181,16 +214,66 @@ describe('findRelationships', () => {
     const type = 'index-pattern';
     const id = 'foo';
     const size = 10;
-
-    const savedObjectsClient = {
-      find: options => {
-        if (options.type === 'visualization') {
-          return {
-            saved_objects: [
+    const callCluster = (endpoint, options) => {
+      if (options._source[0] === 'visualization.title') {
+        return {
+          hits: {
+            hits: [
               {
-                id: '1',
+                _id: 'visualization:1',
                 found: true,
-                attributes: {
+                _source: {
+                  visualization: {
+                    title: 'Foo',
+                    kibanaSavedObjectMeta: {
+                      searchSourceJSON: JSON.stringify({
+                        index: 'foo',
+                      }),
+                    },
+                  },
+                },
+              },
+              {
+                _id: 'visualization:2',
+                found: true,
+                _source: {
+                  visualization: {
+                    title: 'Bar',
+                    kibanaSavedObjectMeta: {
+                      searchSourceJSON: JSON.stringify({
+                        index: 'foo',
+                      }),
+                    },
+                  },
+                },
+              },
+              {
+                _id: 'visualization:3',
+                found: true,
+                _source: {
+                  visualization: {
+                    title: 'FooBar',
+                    kibanaSavedObjectMeta: {
+                      searchSourceJSON: JSON.stringify({
+                        index: 'foo2',
+                      }),
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        };
+      }
+
+      return {
+        hits: {
+          hits: [
+            {
+              _id: 'search:1',
+              found: true,
+              _source: {
+                search: {
                   title: 'Foo',
                   kibanaSavedObjectMeta: {
                     searchSourceJSON: JSON.stringify({
@@ -199,10 +282,12 @@ describe('findRelationships', () => {
                   },
                 },
               },
-              {
-                id: '2',
-                found: true,
-                attributes: {
+            },
+            {
+              _id: 'search:2',
+              found: true,
+              _source: {
+                search: {
                   title: 'Bar',
                   kibanaSavedObjectMeta: {
                     searchSourceJSON: JSON.stringify({
@@ -211,10 +296,12 @@ describe('findRelationships', () => {
                   },
                 },
               },
-              {
-                id: '3',
-                found: true,
-                attributes: {
+            },
+            {
+              _id: 'search:3',
+              found: true,
+              _source: {
+                search: {
                   title: 'FooBar',
                   kibanaSavedObjectMeta: {
                     searchSourceJSON: JSON.stringify({
@@ -223,54 +310,21 @@ describe('findRelationships', () => {
                   },
                 },
               },
-            ]
-          };
-        }
+            },
+          ],
+        },
+      };
+    };
 
-        return {
-          saved_objects: [
-            {
-              id: '1',
-              attributes: {
-                title: 'Foo',
-                kibanaSavedObjectMeta: {
-                  searchSourceJSON: JSON.stringify({
-                    index: 'foo',
-                  }),
-                },
-              },
-            },
-            {
-              id: '2',
-              attributes: {
-                title: 'Bar',
-                kibanaSavedObjectMeta: {
-                  searchSourceJSON: JSON.stringify({
-                    index: 'foo',
-                  }),
-                },
-              },
-            },
-            {
-              id: '3',
-              attributes: {
-                title: 'FooBar',
-                kibanaSavedObjectMeta: {
-                  searchSourceJSON: JSON.stringify({
-                    index: 'foo2',
-                  }),
-                },
-              },
-            },
-          ]
-        };
-      }
+    const savedObjectsClient = {
+      _index: '.kibana',
     };
 
     const result = await findRelationships(
       type,
       id,
       size,
+      callCluster,
       savedObjectsClient
     );
     expect(result).to.eql({

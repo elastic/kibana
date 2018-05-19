@@ -442,7 +442,7 @@ export class ObjectsTable extends Component {
     const filterOptions = INCLUDED_TYPES.map(type => ({
       value: type,
       name: type,
-      view: `${type} (${savedObjectCounts[type] || 0})`,
+      view: `${type} (${savedObjectCounts[type]})`,
     }));
 
     return (
