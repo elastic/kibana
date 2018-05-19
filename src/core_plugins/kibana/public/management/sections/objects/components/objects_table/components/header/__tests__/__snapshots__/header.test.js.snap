@@ -8,7 +8,6 @@ exports[`Header should render normally 1`] = `
   <EuiFlexGroup
     alignItems="flexEnd"
     component="div"
-    direction="row"
     gutterSize="l"
     justifyContent="spaceBetween"
     responsive={true}
@@ -35,7 +34,6 @@ exports[`Header should render normally 1`] = `
       <EuiFlexGroup
         alignItems="flexEnd"
         component="div"
-        direction="row"
         gutterSize="l"
         justifyContent="spaceBetween"
         responsive={true}
