@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionResult } from '../action_result';
+import { ActionResult } from './action_result';
 
 describe('ActionResult', () => {
 
@@ -15,35 +15,35 @@ describe('ActionResult', () => {
   const okResult = new ActionResult({ message, response });
   const notOkResult = new ActionResult({ message, response, error });
 
-  it('getError returns supplied error or undefined', () => {
+  test('getError returns supplied error or undefined', () => {
     expect(okResult.getError()).toBeUndefined();
     expect(notOkResult.getError()).toBe(error);
   });
 
-  it('getMessage returns supplied message', () => {
+  test('getMessage returns supplied message', () => {
     expect(okResult.getMessage()).toBe(message);
     expect(notOkResult.getMessage()).toBe(message);
   });
 
-  it('getResponse returns supplied response', () => {
+  test('getResponse returns supplied response', () => {
     expect(okResult.getResponse()).toBe(response);
     expect(notOkResult.getResponse()).toBe(response);
   });
 
-  it('isOk returns based on having an error', () => {
+  test('isOk returns based on having an error', () => {
     expect(okResult.isOk()).toBe(true);
-    expect(notOkResult.isOkay()).toBe(false);
+    expect(notOkResult.isOk()).toBe(false);
   });
 
-  it('toJson', () => {
-    expect(okResult.toJson()).toBe({
+  test('toJson', () => {
+    expect(okResult.toJson()).toEqual({
       ok: true,
       error: undefined,
       message,
       response,
     });
 
-    expect(notOkResult.toJson()).toBe({
+    expect(notOkResult.toJson()).toEqual({
       ok: false,
       error,
       message,

@@ -5,12 +5,12 @@
  */
 
 import { WebClient } from '@slack/client';
-import { ActionResult } from '../../';
+import { ActionResult } from '../';
 import {
   SLACK_ACTION_ID,
   SlackAction,
   webClientCreator,
-} from '../slack_action';
+} from './slack_action';
 
 describe('SlackAction', () => {
 
@@ -37,11 +37,11 @@ describe('SlackAction', () => {
     action = new SlackAction({ server, options, defaults, _webClientCreator });
   });
 
-  it('webClientCreator creates a WebClient', () => {
+  test('webClientCreator creates a WebClient', () => {
     expect(webClientCreator('faketoken') instanceof WebClient).toBe(true);
   });
 
-  it('id and name to be from constructor', () => {
+  test('id and name to be from constructor', () => {
     expect(action.id).toBe(SLACK_ACTION_ID);
     expect(action.name).toBe('Slack');
     expect(action.client).toBe(client);
@@ -52,7 +52,7 @@ describe('SlackAction', () => {
 
   describe('getMissingFields', () => {
 
-    it('returns missing fields', () => {
+    test('returns missing fields', () => {
       const channel = { field: 'channel', name: 'Channel', type: 'text' };
       const subject = { field: 'subject', name: 'Message', type: 'markdown' };
 
@@ -70,7 +70,7 @@ describe('SlackAction', () => {
       });
     });
 
-    it('returns [] when all fields exist', () => {
+    test('returns [] when all fields exist', () => {
       const exists = [
         { defaults: { }, notification: { channel: '#kibana', subject: 'subject', }, },
         { defaults: { channel: '#kibana', }, notification: { subject: 'subject', }, },
@@ -87,12 +87,12 @@ describe('SlackAction', () => {
 
   describe('doPerformHealthCheck', () => {
 
-    it('rethrows Error for failure', async () => {
+    test('rethrows Error for failure', async () => {
       const error = new Error('TEST - expected');
 
       client.api.test.mockRejectedValue(error);
 
-      await expect(async () => await action.doPerformHealthCheck())
+      await expect(action.doPerformHealthCheck())
         .rejects
         .toThrow(error);
 
@@ -100,10 +100,10 @@ describe('SlackAction', () => {
       expect(client.api.test).toHaveBeenCalledWith();
     });
 
-    it('returns ActionResult if not ok with error', async () => {
+    test('returns ActionResult if not ok with error', async () => {
       const response = { ok: false, error: { expected: true } };
 
-      client.api.test.mockResolvedReturnValue(response);
+      client.api.test.mockResolvedValue(response);
 
       const result = await action.doPerformHealthCheck();
 
@@ -117,10 +117,10 @@ describe('SlackAction', () => {
       expect(client.api.test).toHaveBeenCalledWith();
     });
 
-    it('returns ActionResult if not ok with default error', async () => {
+    test('returns ActionResult if not ok with default error', async () => {
       const response = { ok: false };
 
-      client.api.test.mockResolvedReturnValue(response);
+      client.api.test.mockResolvedValue(response);
 
       const result = await action.doPerformHealthCheck();
 
@@ -134,10 +134,10 @@ describe('SlackAction', () => {
       expect(client.api.test).toHaveBeenCalledWith();
     });
 
-    it('returns ActionResult for success', async () => {
+    test('returns ActionResult for success', async () => {
       const response = { ok: true };
 
-      client.api.test.mockResolvedReturnValue(response);
+      client.api.test.mockResolvedValue(response);
 
       const result = await action.doPerformHealthCheck();
 
@@ -154,7 +154,7 @@ describe('SlackAction', () => {
 
   describe('renderMessage', () => {
 
-    it('does not contain attachments', () => {
+    test('does not contain attachments', () => {
       const message = { subject: 'subject' };
       const response = action.renderMessage(message);
 
@@ -164,7 +164,7 @@ describe('SlackAction', () => {
       });
     });
 
-    it('contains attachments', () => {
+    test('contains attachments', () => {
       const message = { subject: 'subject', markdown: 'markdown' };
       const response = action.renderMessage(message);
 
@@ -183,12 +183,12 @@ describe('SlackAction', () => {
   describe('doPerformAction', () => {
     const message = { channel: '#kibana', subject: 'subject', markdown: 'body', };
 
-    it('rethrows Error for failure', async () => {
+    test('rethrows Error for failure', async () => {
       const error = new Error('TEST - expected');
 
       client.chat.postMessage.mockRejectedValue(error);
 
-      await expect(async () => await action.doPerformAction(message))
+      await expect(action.doPerformAction(message))
         .rejects
         .toThrow(error);
 
@@ -200,10 +200,10 @@ describe('SlackAction', () => {
       });
     });
 
-    it('returns ActionResult for failure without Error', async () => {
+    test('returns ActionResult for failure without Error', async () => {
       const response = { fake: true, error: { expected: true } };
 
-      client.chat.postMessage.mockResolvedReturnValue(response);
+      client.chat.postMessage.mockResolvedValue(response);
 
       const result = await action.doPerformAction(message);
 
@@ -222,10 +222,10 @@ describe('SlackAction', () => {
     });
 
 
-    it('returns ActionResult for success', async () => {
+    test('returns ActionResult for success', async () => {
       const response = { fake: true };
 
-      client.chat.postMessage.mockResolvedReturnValue(response);
+      client.chat.postMessage.mockResolvedValue(response);
 
       const result = await action.doPerformAction(message);
 
@@ -242,10 +242,10 @@ describe('SlackAction', () => {
       });
     });
 
-    it('returns ActionResult for success with default channel', async () => {
+    test('returns ActionResult for success with default channel', async () => {
       const response = { fake: false };
 
-      client.chat.postMessage.mockResolvedReturnValue(response);
+      client.chat.postMessage.mockResolvedValue(response);
 
       const channelDefaults = {
         ...defaults,

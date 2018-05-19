@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { checkForErrors, sendNotification } from '../notify';
+import { checkForErrors, sendNotification } from './notify';
 import { wrap } from 'boom';
 
 describe('notifications/routes/send', () => {
@@ -58,7 +58,7 @@ describe('notifications/routes/send', () => {
 
       const error = checkForErrors(action, id, notification);
 
-      expect(error.message).toEqual({
+      expect(error).toEqual({
         message: `Unable to perform '${action.name}' action due to missing required fields.`,
         fields
       });
@@ -104,8 +104,8 @@ describe('notifications/routes/send', () => {
       expect(notificationService.getActionForId).toHaveBeenCalledWith(id);
       expect(checkForErrors).toHaveBeenCalledTimes(1);
       expect(checkForErrors).toHaveBeenCalledWith(action, id, notification);
-      expect(server.logger).toHaveBeenCalledTimes(1);
-      expect(server.logger).toHaveBeenCalledWith(['actions', 'error'], error.message);
+      expect(server.log).toHaveBeenCalledTimes(1);
+      expect(server.log).toHaveBeenCalledWith(['actions', 'error'], error.message);
 
       expect(reply).toHaveBeenCalledTimes(1);
       expect(reply).toHaveBeenCalledWith({

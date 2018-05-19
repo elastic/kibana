@@ -70,6 +70,14 @@ export class XPackInfoLicense {
   }
 
   /**
+   * Returns mode of the license (basic, gold etc.). This is the "effective" type of the license.
+   * @returns {string|undefined}
+   */
+  getMode() {
+    return get(this._getRawLicense(), 'mode');
+  }
+
+  /**
    * Determine if the current license is active and the supplied {@code type}.
    *
    * @param {Function} typeChecker The license type checker.

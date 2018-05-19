@@ -4,23 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionResult } from '../../';
-import { LOGGER_ACTION_ID, LoggerAction } from '../logger_action';
+import { ActionResult } from '../';
+import { LOGGER_ACTION_ID, LoggerAction } from './logger_action';
 
 describe('LoggerAction', () => {
 
   const action = new LoggerAction({ server: { } });
 
-  it('id and name to be from constructor', () => {
+  test('id and name to be from constructor', () => {
     expect(action.id).toBe(LOGGER_ACTION_ID);
     expect(action.name).toBe('Log');
   });
 
-  it('getMissingFields to return []', () => {
+  test('getMissingFields to return []', () => {
     expect(action.getMissingFields()).toEqual([]);
   });
 
-  it('doPerformHealthCheck returns ActionResult', async () => {
+  test('doPerformHealthCheck returns ActionResult', async () => {
     const result = await action.doPerformHealthCheck();
 
     expect(result instanceof ActionResult).toBe(true);
@@ -29,7 +29,7 @@ describe('LoggerAction', () => {
     expect(result.getResponse()).toEqual({ });
   });
 
-  it('doPerformAction logs and returns ActionResult', async () => {
+  test('doPerformAction logs and returns ActionResult', async () => {
     const notification = { fake: true };
 
     const logger = jest.fn();

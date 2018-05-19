@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Action } from '../action';
-import { ActionResult } from '../action_result';
+import { Action } from './action';
+import { ActionResult } from './action_result';
 
 describe('Action', () => {
 
@@ -18,17 +18,17 @@ describe('Action', () => {
     fake: true,
   };
 
-  it('id and name to be from constructor', () => {
+  test('id and name to be from constructor', () => {
     expect(action.id).toBe(id);
     expect(action.name).toBe(unimplementedName);
   });
 
-  it('getMissingFields returns an empty array', () => {
-    expect(action.getMissingFields()).toBe([]);
-    expect(action.getMissingFields(notification)).toBe([]);
+  test('getMissingFields returns an empty array', () => {
+    expect(action.getMissingFields()).toEqual([]);
+    expect(action.getMissingFields(notification)).toEqual([]);
   });
 
-  it('doPerformHealthChecks throws error indicating that it is not implemented', async () => {
+  test('doPerformHealthChecks throws error indicating that it is not implemented', async () => {
     await expect(action.doPerformHealthCheck())
       .rejects
       .toThrow(`[doPerformHealthCheck] is not implemented for '${unimplementedName}' action.`);
@@ -57,7 +57,7 @@ describe('Action', () => {
       }
     }
 
-    it('runs against unimplemented doPerformHealthChecks', async () => {
+    test('runs against unimplemented doPerformHealthChecks', async () => {
       const result = await action.performHealthCheck();
 
       expect(result instanceof ActionResult).toBe(true);
@@ -66,7 +66,7 @@ describe('Action', () => {
         .toMatch(new RegExp(`^Unable to perform '${unimplementedName}' health check: \\[doPerformHealthCheck\\] is not.*`));
     });
 
-    it('runs against failing doPerformHealthChecks', async () => {
+    test('runs against failing doPerformHealthChecks', async () => {
       const failAction = new ThrowsErrorHealthCheckAction();
       const result = await failAction.performHealthCheck();
 
@@ -76,7 +76,7 @@ describe('Action', () => {
         .toMatch(new RegExp(`^Unable to perform '${throwsErrorName}' health check: TEST - expected`));
     });
 
-    it('runs against succeeding result', async () => {
+    test('runs against succeeding result', async () => {
       const expectedResult = new ActionResult({ message: 'Blah', response: { ok: true } });
       const succeedsAction = new PassThruHealthCheckAction(expectedResult);
       const result = await succeedsAction.performHealthCheck();
@@ -86,19 +86,19 @@ describe('Action', () => {
 
   });
 
-  it('doPerformAction throws error indicating that it is not implemented', async () => {
+  test('doPerformAction throws error indicating that it is not implemented', async () => {
     await expect(action.doPerformAction(notification))
       .rejects
-      .toThrow(`[doPerformAction] is not implemented for '${unimplementedName}' action: {"fake": true}`);
+      .toThrow(`[doPerformAction] is not implemented for '${unimplementedName}' action: {"fake":true}`);
   });
 
   describe('isLicenseValid', () => {
 
-    it('server variable is not exposed as expected', () => {
+    test('server variable is not exposed as expected', () => {
       expect(() => action.isLicenseValid()).toThrow(Error);
     });
 
-    it('returns false is license is not valid', () => {
+    test('returns false is license is not valid', () => {
       const unlicensedServer = {
         plugins: {
           xpack_main: {
@@ -115,7 +115,7 @@ describe('Action', () => {
       expect(unlicensedAction.isLicenseValid()).toBe(false);
     });
 
-    it('returns true is license is not valid', () => {
+    test('returns true is license is not valid', () => {
       const licensedServer = {
         plugins: {
           xpack_main: {
@@ -173,7 +173,7 @@ describe('Action', () => {
     describe('fails license check', () => {
 
       // handles the case when xpack_main definitions change
-      it('because of bad reference', async () => {
+      test('because of bad reference', async () => {
         // server is an empty object, so a reference fails early in the chain (mostly a way to give devs a way to find this error)
         const result = await action.performAction(notification);
 
@@ -181,7 +181,7 @@ describe('Action', () => {
         expect(result.isOk()).toBe(false);
       });
 
-      it('because license is invalid or basic', async () => {
+      test('because license is invalid or basic', async () => {
         const unlicensedServer = {
           plugins: {
             xpack_main: {
@@ -200,16 +200,14 @@ describe('Action', () => {
         expect(result.isOk()).toBe(false);
         expect(result.getMessage())
           .toMatch(
-            new RegExp(
-              `^Unable to perform '${unimplementedName}' action: '${unimplementedName}' action: ` +
-              `The current license does not allow actions.$`
-            )
+            `Unable to perform '${unimplementedName}' action: ` +
+            `The current license does not allow '${unimplementedName}' action.`
           );
       });
 
     });
 
-    it('runs against unimplemented doPerformAction', async () => {
+    test('runs against unimplemented doPerformAction', async () => {
       const licensedAction = new Action({ server, id, name: unimplementedName  });
       const result = await licensedAction.performAction(notification);
 
@@ -219,7 +217,7 @@ describe('Action', () => {
         .toMatch(new RegExp(`^Unable to perform '${unimplementedName}' action: \\[doPerformAction\\] is not.*`));
     });
 
-    it('runs against failing doPerformAction', async () => {
+    test('runs against failing doPerformAction', async () => {
       const failAction = new ThrowsErrorAction();
       const result = await failAction.performAction(notification);
 
@@ -229,7 +227,7 @@ describe('Action', () => {
         .toMatch(new RegExp(`^Unable to perform '${throwsErrorName}' action: TEST - expected`));
     });
 
-    it('runs against succeeding result', async () => {
+    test('runs against succeeding result', async () => {
       const expectedResult = new ActionResult({ message: 'Blah', response: { ok: true } });
       const succeedsAction = new PassThruAction(expectedResult);
       const result = await succeedsAction.performAction(notification);

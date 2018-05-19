@@ -4,22 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SlackAction } from '../slack_action';
+import { EmailAction } from './email_action';
 import {
-  createSlackAction,
+  createEmailAction,
   defaultsFromConfig,
   optionsFromConfig,
-} from '../create_slack_action';
+} from './create_email_action';
 
-describe('create_slack_action', () => {
+describe('create_email_action', () => {
 
-  it('optionsFromConfig uses config without modification', () => {
-    const config = key => {
+  test('optionsFromConfig uses config without modification',  () => {
+    const get = key => {
       const suffixes = [
-        'token',
+        'host',
+        'port',
+        'require_tls',
+        'pool',
+        'auth.username',
+        'auth.password',
       ];
       const value = suffixes.find(suffix => {
-        return `xpack.notifications.slack.${suffix}` === key;
+        return `xpack.notifications.email.smtp.${suffix}` === key;
       });
 
       if (value === undefined) {
@@ -29,26 +34,28 @@ describe('create_slack_action', () => {
       return value;
     };
 
-    expect(optionsFromConfig(config)).toEqual({
-      token: 'token',
+    expect(optionsFromConfig({ get })).toEqual({
+      host: 'host',
+      port: 'port',
+      requireTLS: 'require_tls',
+      pool: 'pool',
+      auth: {
+        user: 'auth.username',
+        pass: 'auth.password',
+      },
     });
   });
 
-  it('defaultsFromConfig uses config without modification', () => {
-    const config = key => {
+  test('defaultsFromConfig uses config without modification', () => {
+    const get = key => {
       const suffixes = [
-        'channel',
-        'as_user',
-        'icon_emoji',
-        'icon_url',
-        'link_names',
-        'mrkdwn',
-        'unfurl_links',
-        'unfurl_media',
-        'username',
+        'from',
+        'to',
+        'cc',
+        'bcc',
       ];
       const value = suffixes.find(suffix => {
-        return `xpack.notifications.slack.defaults.${suffix}` === key;
+        return `xpack.notifications.email.defaults.${suffix}` === key;
       });
 
       if (value === undefined) {
@@ -58,29 +65,24 @@ describe('create_slack_action', () => {
       return value;
     };
 
-    expect(defaultsFromConfig(config)).toEqual({
-      channel: 'channel',
-      as_user: 'as_user',
-      icon_emoji: 'icon_emoji',
-      icon_url: 'icon_url',
-      link_names: 'link_names',
-      mrkdwn: 'mrkdwn',
-      unfurl_links: 'unfurl_links',
-      unfurl_media: 'unfurl_media',
-      username: 'username',
+    expect(defaultsFromConfig({ get })).toEqual({
+      from: 'from',
+      to: 'to',
+      cc: 'cc',
+      bcc: 'bcc',
     });
   });
 
-  it('createSlackAction', async () => {
+  test('createEmailAction', async () => {
     const config = { };
     const server = { config: jest.fn().mockReturnValue(config) };
     const _options = jest.fn().mockReturnValue({ options: true });
     const defaults = { defaults: true };
     const _defaults = jest.fn().mockReturnValue(defaults);
 
-    const action = createSlackAction(server, { _options, _defaults });
+    const action = createEmailAction(server, { _options, _defaults });
 
-    expect(action instanceof SlackAction).toBe(true);
+    expect(action instanceof EmailAction).toBe(true);
     expect(action.defaults).toBe(defaults);
 
     expect(server.config).toHaveBeenCalledTimes(1);

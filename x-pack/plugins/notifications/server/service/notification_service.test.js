@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Action } from '../action';
-import { NotificationService } from '../notification_service';
+import { Action } from './action';
+import { NotificationService } from './notification_service';
 
 class TestAction extends Action {
   constructor({ server, id }) {
@@ -40,19 +40,19 @@ describe('NotificationService', () => {
     notificationService = new NotificationService();
   });
 
-  it('initializes with no default actions', () => {
+  test('initializes with no default actions', () => {
     expect(notificationService.actions).toEqual([]);
   });
 
   describe('setAction', () => {
 
-    it('adds the action', () => {
+    test('adds the action', () => {
       notificationService.setAction(action);
 
       expect(notificationService.actions[0]).toBe(action);
     });
 
-    it('removes any action with the same ID first, then adds the action', () => {
+    test('removes any action with the same ID first, then adds the action', () => {
       notificationService.setAction({ id: actionId });
       notificationService.setAction(action);
 
@@ -64,7 +64,7 @@ describe('NotificationService', () => {
 
   describe('removeAction', () => {
 
-    it('returns null if the action does not exist', () => {
+    test('returns null if the action does not exist', () => {
       expect(notificationService.removeAction(actionId)).toBe(null);
 
       notificationService.setAction(action);
@@ -73,7 +73,7 @@ describe('NotificationService', () => {
       expect(notificationService.actions[0]).toBe(action);
     });
 
-    it('returns the removed action', () => {
+    test('returns the removed action', () => {
       notificationService.setAction(action);
 
       expect(notificationService.removeAction(actionId)).toBe(action);
@@ -84,7 +84,7 @@ describe('NotificationService', () => {
 
   describe('getActionForId', () => {
 
-    it('returns null if the action does not exist', () => {
+    test('returns null if the action does not exist', () => {
       expect(notificationService.getActionForId(actionId)).toBe(null);
 
       notificationService.setAction(action);
@@ -93,7 +93,7 @@ describe('NotificationService', () => {
       expect(notificationService.actions[0]).toBe(action);
     });
 
-    it('returns the action', () => {
+    test('returns the action', () => {
       notificationService.setAction(action);
 
       expect(notificationService.getActionForId(actionId)).toBe(action);
@@ -104,7 +104,7 @@ describe('NotificationService', () => {
 
   describe('getActionsForData', () => {
 
-    it('returns [] if no corresponding action exists', () => {
+    test('returns [] if no corresponding action exists', () => {
       expect(notificationService.getActionsForData({})).toEqual([]);
 
       notificationService.setAction(new MissingFieldTestAction({ server, id: 'always-missing' }));
@@ -113,7 +113,7 @@ describe('NotificationService', () => {
       expect(notificationService.actions).toHaveLength(1);
     });
 
-    it('returns the actions that match', () => {
+    test('returns the actions that match', () => {
       notificationService.setAction(action);
 
       expect(notificationService.getActionsForData({})).toEqual([ action ]);
@@ -125,11 +125,8 @@ describe('NotificationService', () => {
       notificationService.setAction(new TestAction({ server, id: otherActionId }));
 
       const actions = notificationService.getActionsForData({});
-      const unmatchedActionIds = [ actionId, otherActionId ].filter(id => {
-        return actions.filter(action => action.id === id);
-      });
 
-      expect(unmatchedActionIds).toEqual([]);
+      expect(actions.map(action => action.id)).toEqual([ actionId, otherActionId ]);
     });
 
   });

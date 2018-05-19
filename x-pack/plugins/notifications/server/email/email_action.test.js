@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionResult } from '../../';
-import { EMAIL_ACTION_ID, EmailAction } from '../email_action';
+import { ActionResult } from '../';
+import { EMAIL_ACTION_ID, EmailAction } from './email_action';
 
 describe('EmailAction', () => {
 
@@ -29,7 +29,7 @@ describe('EmailAction', () => {
     action = new EmailAction({ server, options, defaults, _nodemailer });
   });
 
-  it('id and name to be from constructor', () => {
+  test('id and name to be from constructor', () => {
     expect(action.id).toBe(EMAIL_ACTION_ID);
     expect(action.name).toBe('Email');
     expect(action.transporter).toBe(transporter);
@@ -40,7 +40,7 @@ describe('EmailAction', () => {
 
   describe('getMissingFields', () => {
 
-    it('returns missing fields', () => {
+    test('returns missing fields', () => {
       const to = { field: 'to', name: 'To', type: 'email' };
       const from = { field: 'from', name: 'From', type: 'email' };
       const subject = { field: 'subject', name: 'Subject', type: 'text' };
@@ -63,7 +63,7 @@ describe('EmailAction', () => {
       });
     });
 
-    it('returns [] when all fields exist', () => {
+    test('returns [] when all fields exist', () => {
       const exists = [
         { defaults: { }, notification: { to: 'a@b.co', from: 'b@c.co', subject: 'subject', markdown: 'body', }, },
         { defaults: { to: 'a@b.co', }, notification: { from: 'b@c.co', subject: 'subject', markdown: 'body', }, },
@@ -82,12 +82,12 @@ describe('EmailAction', () => {
 
   describe('doPerformHealthCheck', () => {
 
-    it('rethrows Error for failure', async () => {
+    test('rethrows Error for failure', async () => {
       const error = new Error('TEST - expected');
 
       transporter.verify.mockRejectedValue(error);
 
-      await expect(async () => await action.doPerformHealthCheck())
+      await expect(action.doPerformHealthCheck())
         .rejects
         .toThrow(error);
 
@@ -95,8 +95,8 @@ describe('EmailAction', () => {
       expect(transporter.verify).toHaveBeenCalledWith();
     });
 
-    it('returns ActionResult for success', async () => {
-      transporter.verify.mockResolvedReturnValue(true);
+    test('returns ActionResult for success', async () => {
+      transporter.verify.mockResolvedValue(true);
 
       const result = await action.doPerformHealthCheck();
 
@@ -116,23 +116,31 @@ describe('EmailAction', () => {
   describe('doPerformAction', () => {
     const email = { subject: 'email', markdown: 'body' };
 
-    it('rethrows Error for failure', async () => {
+    test('rethrows Error for failure', async () => {
       const error = new Error('TEST - expected');
 
       transporter.sendMail.mockRejectedValue(error);
 
-      await expect(async () => await action.doPerformAction(email))
+      await expect(action.doPerformAction(email))
         .rejects
         .toThrow(error);
 
       expect(transporter.sendMail).toHaveBeenCalledTimes(1);
-      expect(transporter.sendMail).toHaveBeenCalledWith(email);
+      expect(transporter.sendMail).toHaveBeenCalledWith({
+        to: undefined,
+        from: undefined,
+        cc: undefined,
+        bcc: undefined,
+        subject: email.subject,
+        html: email.markdown,
+        text: email.markdown,
+      });
     });
 
-    it('returns ActionResult for success', async () => {
+    test('returns ActionResult for success', async () => {
       const response = { fake: true };
 
-      transporter.sendMail.mockResolvedReturnValue(response);
+      transporter.sendMail.mockResolvedValue(response);
 
       const result = await action.doPerformAction(email);
 
@@ -142,7 +150,15 @@ describe('EmailAction', () => {
       expect(result.getResponse()).toBe(response);
 
       expect(transporter.sendMail).toHaveBeenCalledTimes(1);
-      expect(transporter.sendMail).toHaveBeenCalledWith(email);
+      expect(transporter.sendMail).toHaveBeenCalledWith({
+        to: undefined,
+        from: undefined,
+        cc: undefined,
+        bcc: undefined,
+        subject: email.subject,
+        html: email.markdown,
+        text: email.markdown,
+      });
     });
 
   });
