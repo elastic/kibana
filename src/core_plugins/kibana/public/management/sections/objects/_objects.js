@@ -42,7 +42,7 @@ function updateObjectsTable($scope, $injector) {
         basePath={chrome.getBasePath()}
         newIndexPatternUrl={kbnUrl.eval('#/management/kibana/index')}
         getEditUrl={(id, type) => {
-          if (type === 'index-pattern' || type === 'indexPatterns') {
+          if (type === 'index-pattern') {
             return kbnUrl.eval(`#/management/kibana/indices/${id}`);
           }
           const serviceName = typeToServiceName(type);
