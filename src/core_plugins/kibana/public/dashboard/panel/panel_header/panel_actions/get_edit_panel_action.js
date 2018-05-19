@@ -19,6 +19,6 @@ export function getEditPanelAction() {
     parentPanelId: 'mainMenu',
     onClick: ({ embeddable }) => { window.location = embeddable.metadata.editUrl; },
     isVisible: ({ containerState }) => (containerState.viewMode === DashboardViewMode.EDIT),
-    isDisabled: ({ embeddable }) => (!embeddable.metadata || !embeddable.metadata.editUrl),
+    isDisabled: ({ embeddable }) => (!embeddable || !embeddable.metadata || !embeddable.metadata.editUrl),
   });
 }
