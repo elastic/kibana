@@ -7,9 +7,7 @@ export function getSortingParams(mappings, type, sortField, sortOrder) {
     return {};
   }
 
-  const key = type ? `${type}.${sortField}` : sortField;
-
-  const field = getProperty(mappings, key);
+  const field = getProperty(mappings, `${type}.${sortField}`);
   if (!field) {
     throw Boom.badRequest(`Unknown sort field ${sortField}`);
   }
@@ -17,7 +15,7 @@ export function getSortingParams(mappings, type, sortField, sortOrder) {
   return {
     sort: [
       {
-        [key]: {
+        [`${type}.${sortField}`]: {
           order: sortOrder,
           unmapped_type: field.type
         }
