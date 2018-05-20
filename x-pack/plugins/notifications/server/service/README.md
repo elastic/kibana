@@ -45,7 +45,7 @@ provides an abstract Javascript `class` to implement new `Action`s.
 
 ### NotificationService Interface
 
-The `notificationService` currently has four methods defined with very distinct purposes:
+The `NotificationService` currently has four methods defined with very distinct purposes:
 
 1. `setAction` is intended for plugin authors to add actions that do not exist with the basic notifications
 service.
@@ -195,14 +195,14 @@ discovery.
 ##### Syntax
 
 ```js
-const actions = notificationService.getActionForData(notification);
+const actions = notificationService.getActionsForData(notification);
 ```
 
 ###### Parameters
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `data` | Object | Payload to send to a notification. |
+| `notification` | Object | Payload to send notification. |
 
 ###### Returns
 
@@ -214,7 +214,7 @@ const actions = notificationService.getActionForData(notification);
 
 ```js
 // In this case, the ID is known from the earlier example
-const actions = notificationService.getActionForData({
+const actions = notificationService.getActionsForData({
   arbitrary: 'payload',
   can: 'have multiple',
   fields: [ 1, 2, 3 ]
