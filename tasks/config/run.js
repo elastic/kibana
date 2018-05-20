@@ -51,6 +51,13 @@ module.exports = function (grunt) {
     '--server.maxPayloadBytes=1648576', //default is 1048576
     '--elasticsearch.url=' + esTestConfig.getUrl(),
     '--server.port=' + kbnTestConfig.getPort(),
+    `--plugins.scanDirs=${JSON.stringify([
+      resolve(__dirname, '../../plugins'),
+      resolve(__dirname, '../../src/core_plugins'),
+      // Load plugins from the plugins folder in the functional test folder.
+      // These plugins will only be present during functional test runs.
+      resolve(__dirname, '../../test/functional/plugins'),
+    ])}`,
   ];
 
   const browserTestServerFlags = [
