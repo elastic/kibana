@@ -13,6 +13,16 @@ jest.mock('../../../lib/route_pre_check_license', () => {
   };
 });
 
+jest.mock('../../../../../../server/lib/get_client_shield', () => {
+  return {
+    getClient: () => {
+      return {
+        callWithInternalUser: jest.fn(() => {})
+      };
+    }
+  };
+});
+
 const spaces = [{
   id: 'space:a-space',
   attributes: {
@@ -101,7 +111,7 @@ describe('Spaces API', () => {
   });
 
   test(`'GET spaces/{id}' returns the space with that id`, async () => {
-    const response = await request('GET', '/api/spaces/v1/spaces/default');
+    const response = await request('GET', '/api/spaces/v1/space/default');
 
     const {
       statusCode,
@@ -114,7 +124,7 @@ describe('Spaces API', () => {
   });
 
   test(`'DELETE spaces/{id}' deletes the space`, async () => {
-    const response = await request('DELETE', '/api/spaces/v1/spaces/a-space');
+    const response = await request('DELETE', '/api/spaces/v1/space/a-space');
 
     const {
       statusCode
@@ -124,7 +134,7 @@ describe('Spaces API', () => {
   });
 
   test(`'DELETE spaces/{id}' cannot delete reserved spaces`, async () => {
-    const response = await request('DELETE', '/api/spaces/v1/spaces/default');
+    const response = await request('DELETE', '/api/spaces/v1/space/default');
 
     const {
       statusCode,
