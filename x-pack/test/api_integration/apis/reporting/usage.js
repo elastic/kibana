@@ -108,12 +108,12 @@ export default function ({ getService }) {
       it('stats updated', async () => {
         const stats = await statsAPI.getStats();
 
-        reportingAPI.expectRecentPdfAppStats(stats, 'visualization', 0);
-        reportingAPI.expectRecentPdfAppStats(stats, 'dashboard', 0);
-        reportingAPI.expectRecentPdfLayoutStats(stats, 'preserve_layout', 0);
-        reportingAPI.expectRecentPdfLayoutStats(stats, 'print', 0);
-        reportingAPI.expectRecentJobTypeTotalStats(stats, 'csv', 0);
-        reportingAPI.expectRecentJobTypeTotalStats(stats, 'printable_pdf', 0);
+        reportingAPI.expectRecentPdfAppStats(stats, 'visualization', 2);
+        reportingAPI.expectRecentPdfAppStats(stats, 'dashboard', 2);
+        reportingAPI.expectRecentPdfLayoutStats(stats, 'preserve_layout', 2);
+        reportingAPI.expectRecentPdfLayoutStats(stats, 'print', 2);
+        reportingAPI.expectRecentJobTypeTotalStats(stats, 'csv', 1);
+        reportingAPI.expectRecentJobTypeTotalStats(stats, 'printable_pdf', 4);
 
         reportingAPI.expectAllTimePdfAppStats(stats, 'visualization', 5);
         reportingAPI.expectAllTimePdfAppStats(stats, 'dashboard', 5);
