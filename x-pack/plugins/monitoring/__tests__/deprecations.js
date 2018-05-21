@@ -21,6 +21,7 @@ describe('monitoring plugin deprecations', function () {
   });
 
   it('verificationMode is set to full when elasticsearch.ssl.verify is true', function () {
+    expect(true).to.be(false);
     const settings = {
       elasticsearch: {
         ssl: {

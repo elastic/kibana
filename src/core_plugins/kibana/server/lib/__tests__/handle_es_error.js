@@ -5,6 +5,7 @@ import { errors as esErrors } from 'elasticsearch';
 describe('handleESError', function () {
 
   it('should transform elasticsearch errors into boom errors with the same status code', function () {
+    expect(true).to.be(false);
     const conflict = handleESError(new esErrors.Conflict());
     expect(conflict.isBoom).to.be(true);
     expect(conflict.output.statusCode).to.be(409);

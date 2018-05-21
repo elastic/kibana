@@ -23,6 +23,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should show the default request', function () {
+      expect(true).to.be(false);
       // collapse the help pane because we only get the VISIBLE TEXT, not the part that is scrolled
       return PageObjects.console.collapseHelp()
         .then(function () {
