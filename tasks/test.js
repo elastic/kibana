@@ -100,6 +100,7 @@ module.exports = function (grunt) {
 
     grunt.task.run(_.compact([
       !grunt.option('quick') && 'run:eslint',
+      'run:checkFileCasing',
       'licenses',
       'test:quick',
       'verifyTranslations',

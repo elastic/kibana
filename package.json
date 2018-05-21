@@ -257,7 +257,7 @@
     "faker": "1.1.0",
     "geckodriver": "1.11.0",
     "getopts": "2.0.0",
-    "globby": "^8.0.0",
+    "globby": "^8.0.1",
     "grunt": "1.0.1",
     "grunt-cli": "0.1.13",
     "grunt-contrib-watch": "^1.0.0",
