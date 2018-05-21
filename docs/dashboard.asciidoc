@@ -72,8 +72,8 @@ dashboard does *not* delete the saved visualization or search.
 [[viewing-detailed-information]]
 == Viewing Visualization Data
 
-You can display the raw data behind a dashboard visualization using the
-Expand/Collapse button.
+If your visualization supports it, you can display the raw data behind
+the visualization using the Expand/Collapse button.
 
 . Open the dashboard.
 . Hover over the visualization and click the *Expand* button in the lower
@@ -87,7 +87,7 @@ of matching records, and the index that was searched.
 [role="screenshot"]
 image:images/Dashboard_visualization_data.png[Example of visualization data]
 
-To export the data as a comma separated values
+To export the visualization data as a comma separated values
 (CSV) file, click *Raw* or *Formatted* at the bottom of the data
 table. *Raw* exports the response data as provided. *Formatted*
 exports the reponse data using applicable Kibana <<managing-fields,field
@@ -109,7 +109,10 @@ to view an embedded dashboard.
 . In the menu bar, click *Share*.
 . Copy the link you want to share or the iframe you want to embed. You can
 share the live dashboard or a static snapshot of the current point in time.
-+
+
+TIP: You can create a link to a dashboard by title by doing this: +
+`${domain}/${basepath?}/app/kibana#/dashboards?title=${yourdashboardtitle}`
+
 TIP: When sharing a link to a dashboard snapshot, use the *Short URL*. Snapshot
 URLs are long and can be problematic for Internet Explorer and other
-tools.
+tools.  To create a short URL, you must have write access to `.kibana`.
