@@ -21,6 +21,7 @@ import angular from 'angular';
 import { Embeddable } from 'ui/embeddable';
 import searchTemplate from './search_template.html';
 import * as columnActions from 'ui/doc_table/actions/columns';
+import { getTime } from 'ui/timefilter/get_time';
 
 export class SearchEmbeddable extends Embeddable {
   constructor({ onEmbeddableStateChanged, savedSearch, editUrl, loader, $rootScope, $compile }) {
@@ -65,6 +66,7 @@ export class SearchEmbeddable extends Embeddable {
     this.customization = containerState.embeddableCustomization || {};
     this.filters = containerState.filters;
     this.query = containerState.query;
+    this.timeRange = containerState.timeRange;
     this.panelTitle = '';
     if (!containerState.hidePanelTitles) {
       this.panelTitle = containerState.customTitle !== undefined ?
@@ -82,6 +84,19 @@ export class SearchEmbeddable extends Embeddable {
 
     this.searchScope.description = this.savedSearch.description;
     this.searchScope.searchSource = this.savedSearch.searchSource;
+
+    const timeRangeSearchSource = this.searchScope.searchSource.clone();
+    timeRangeSearchSource.inherits(false);
+    timeRangeSearchSource.filter(() => {
+      return getTime(timeRangeSearchSource.index(), this.timeRange);
+    });
+
+    const filtersSearchSource = this.searchScope.searchSource.clone();
+    filtersSearchSource.inherits(timeRangeSearchSource);
+    filtersSearchSource.filter([]);
+    filtersSearchSource.set('query', null);
+
+    this.searchScope.searchSource.inherits(filtersSearchSource);
 
     this.pushContainerStateParamsToScope();
 

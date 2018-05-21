@@ -53,7 +53,6 @@ import {
   getStagedFilters,
   getEmbeddables,
   getEmbeddableMetadata,
-  getFilters,
   getQuery,
 } from '../selectors';
 
@@ -201,7 +200,7 @@ export class DashboardStateManager {
       store.dispatch(updateDescription(this.getDescription()));
     }
 
-    if (getFilters(state) !== this.getFilterState().filterBars) {
+    if (this.getFilterBarChanged()) {
       store.dispatch(updateFilters(this.getFilterState().filterBars));
     }
 
