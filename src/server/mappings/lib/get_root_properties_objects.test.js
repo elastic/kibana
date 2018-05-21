@@ -19,6 +19,25 @@ test(`returns single object with properties`, () => {
   });
 });
 
+test(`returns single object with type === 'object'`, () => {
+  const mappings = {
+    rootType: {
+      properties: {
+        foo: {
+          type: 'object'
+        }
+      }
+    }
+  };
+
+  const result = getRootPropertiesObjects(mappings);
+  expect(result).toEqual({
+    foo: {
+      type: 'object'
+    }
+  });
+});
+
 test(`returns two objects with properties`, () => {
   const mappings = {
     rootType: {
@@ -44,7 +63,32 @@ test(`returns two objects with properties`, () => {
   });
 });
 
-test(`excludes objects without properties`, () => {
+test(`returns two objects with type === 'object'`, () => {
+  const mappings = {
+    rootType: {
+      properties: {
+        foo: {
+          type: 'object'
+        },
+        bar: {
+          type: 'object'
+        }
+      }
+    }
+  };
+
+  const result = getRootPropertiesObjects(mappings);
+  expect(result).toEqual({
+    foo: {
+      type: 'object'
+    },
+    bar: {
+      type: 'object'
+    }
+  });
+});
+
+test(`excludes objects without properties and type of keyword`, () => {
   const mappings = {
     rootType: {
       properties: {
@@ -59,7 +103,7 @@ test(`excludes objects without properties`, () => {
   expect(result).toEqual({});
 });
 
-test(`excludes two objects without properties`, () => {
+test(`excludes two objects without properties and type of keyword`, () => {
   const mappings = {
     rootType: {
       properties: {
@@ -95,6 +139,28 @@ test(`includes one object with properties and excludes one object without proper
   expect(result).toEqual({
     foo: {
       properties: {}
+    }
+  });
+});
+
+test(`includes one object with type === 'object' and excludes one object without properties`, () => {
+  const mappings = {
+    rootType: {
+      properties: {
+        foo: {
+          type: 'object'
+        },
+        bar: {
+          type: 'keyword'
+        }
+      }
+    }
+  };
+
+  const result = getRootPropertiesObjects(mappings);
+  expect(result).toEqual({
+    foo: {
+      type: 'object'
     }
   });
 });

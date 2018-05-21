@@ -18,8 +18,8 @@ export function getRootPropertiesObjects(mappings) {
   const rootProperties = getRootProperties(mappings);
   return Object.entries(rootProperties).reduce((acc, [key, value]) => {
 
-    // we consider the existence of the properties to designate that this is an object
-    if (value.properties) {
+    // we consider the existence of the properties or type of object to designate that this is an object
+    if (value.properties || value.type === 'object') {
       acc[key] = value;
     }
 
