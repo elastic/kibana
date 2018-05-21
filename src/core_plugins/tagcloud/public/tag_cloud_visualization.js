@@ -31,7 +31,7 @@ export class TagCloudVisualization {
       const filter = this._bucketAgg.createFilter(event);
       this._vis.API.queryFilter.addFilters(filter);
     });
-    this._renderComplete$ = Rx.fromEvent(this._tagCloud, 'renderComplete');
+    this._renderComplete$ = Rx.fromEvent(this._tagCloud, 'renderComplete', x => x);
 
 
     this._feedbackNode = document.createElement('div');

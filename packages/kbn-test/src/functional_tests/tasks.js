@@ -69,7 +69,7 @@ export async function startServers(configPath, options) {
 }
 
 async function silence(milliseconds, { log }) {
-  await Rx.fromEvent(log, 'data')
+  await Rx.fromEvent(log, 'data', x => x)
     .pipe(startWith(null), switchMap(() => Rx.timer(milliseconds)), take(1))
     .toPromise();
 }

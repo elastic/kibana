@@ -27,12 +27,12 @@ export async function getFileHash(cache, path, stat, fd) {
     autoClose: false
   });
 
-  const promise = Rx.fromEvent(read, 'data').pipe(
+  const promise = Rx.fromEvent(read, 'data', x => x).pipe(
     merge(
-      Rx.fromEvent(read, 'error')
+      Rx.fromEvent(read, 'error', x => x)
         .pipe(mergeMap(Rx.throwError))
     ),
-    takeUntil(Rx.fromEvent(read, 'end')),
+    takeUntil(Rx.fromEvent(read, 'end', x => x)),
   )
     .forEach(chunk => hash.update(chunk))
     .then(() => hash.digest('hex'))

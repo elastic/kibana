@@ -81,7 +81,7 @@ export function createProc(name, { cmd, args, cwd, env, stdin, log }) {
 
     outcome$ = Rx.defer(() => {
       // observe first exit event
-      const exit$ = Rx.fromEvent(childProcess, 'exit').pipe(
+      const exit$ = Rx.fromEvent(childProcess, 'exit', x => x).pipe(
         take(1),
         map(code => {
           // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat then as errors
@@ -94,7 +94,7 @@ export function createProc(name, { cmd, args, cwd, env, stdin, log }) {
       );
 
       // observe first error event until there is a close event
-      const error$ = Rx.fromEvent(childProcess, 'error').pipe(
+      const error$ = Rx.fromEvent(childProcess, 'error', x => x).pipe(
         take(1),
         mergeMap(err => Rx.throwError(err))
       );

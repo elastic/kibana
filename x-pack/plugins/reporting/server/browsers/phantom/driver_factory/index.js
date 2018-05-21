@@ -65,7 +65,7 @@ export class PhantomDriverFactory {
           return;
         }
 
-        const exit$ = Rx.fromEvent(browser.process, 'exit').pipe(
+        const exit$ = Rx.fromEvent(browser.process, 'exit', x => x).pipe(
           mergeMap(code => Rx.throwError(new Error(`Phantom exited with code: ${code}. ${exitCodeSuggestion(code)}`)))
         );
 

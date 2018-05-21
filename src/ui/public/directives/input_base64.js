@@ -45,7 +45,7 @@ module.directive('inputBaseSixtyFour', function () {
       const validators = [ maxSizeValidator ];
 
       // produce fileContent$ whenever the $element 'change' event is triggered.
-      const fileContent$ = Rx.fromEvent($elem, 'change').pipe(
+      const fileContent$ = Rx.fromEvent($elem, 'change', x => x).pipe(
         map(e => e.target.files),
         switchMap(files => {
           if (files.length === 0) {
