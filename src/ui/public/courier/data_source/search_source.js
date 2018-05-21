@@ -75,7 +75,6 @@ import angular from 'angular';
 import '../../promises';
 
 import { NormalizeSortRequestProvider } from './_normalize_sort_request';
-import { RootSearchSourceProvider } from './_root_search_source';
 import { SearchRequestProvider } from '../fetch/request';
 import { SegmentedRequestProvider } from '../fetch/request/segmented';
 
@@ -227,11 +226,11 @@ export function SearchSourceProvider(Promise, PromiseEmitter, Private, config) {
      * Get the parent of this SearchSource
      * @return {undefined|searchSource}
      */
-    getParent(onlyHardLinked) {
+    getParent() {
       const self = this;
       if (self._parent === false) return;
       if (self._parent) return self._parent;
-      return onlyHardLinked ? undefined : Private(RootSearchSourceProvider).get();
+      return undefined;
     }
 
     /**
