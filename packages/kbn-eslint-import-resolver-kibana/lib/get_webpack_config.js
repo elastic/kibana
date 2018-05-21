@@ -33,7 +33,7 @@ exports.getWebpackConfig = function(kibanaPath, projectRoot, config) {
   return {
     context: kibanaPath,
     resolve: {
-      extensions: ['.js', '.json'],
+      extensions: ['.js', '.json', '.ts', '.tsx'],
       mainFields: ['browser', 'main'],
       modules: [
         'webpackShims',

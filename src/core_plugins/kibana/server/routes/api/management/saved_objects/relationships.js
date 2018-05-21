@@ -1,6 +1,5 @@
 import Boom from 'boom';
 import Joi from 'joi';
-import _ from 'lodash';
 import { findRelationships } from '../../../../lib/management/saved_objects/relationships';
 
 export function registerRelationships(server) {
@@ -20,9 +19,6 @@ export function registerRelationships(server) {
     },
 
     handler: async (req, reply) => {
-      const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-      const boundCallWithRequest = _.partial(callWithRequest, req);
-
       const type = req.params.type;
       const id = req.params.id;
       const size = req.query.size || 10;
@@ -32,7 +28,6 @@ export function registerRelationships(server) {
           type,
           id,
           size,
-          boundCallWithRequest,
           req.getSavedObjectsClient(),
         );
 

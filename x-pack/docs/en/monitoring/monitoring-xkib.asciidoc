@@ -5,6 +5,10 @@
 <titleabbrev>Configuring Monitoring</titleabbrev>
 ++++
 
+{monitoring} gives you insight into the operation of your {stack}. For more 
+information, see <<xpack-monitoring,{monitoring}>> and 
+{stack-ov}/xpack-monitoring.html[Monitoring the {stack}]. 
+
 . To monitor {kib}:
 
 .. Verify that the `xpack.monitoring.collection.enabled` setting is `true` on

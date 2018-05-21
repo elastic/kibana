@@ -9,7 +9,8 @@ export const CopySourceTask = {
       select: [
         'yarn.lock',
         'src/**',
-        '!src/**/__tests__/**',
+        '!src/**/*.test.{js,ts,tsx}',
+        '!src/**/{__tests__,__snapshots__}/**',
         '!src/test_utils/**',
         '!src/fixtures/**',
         '!src/core_plugins/dev_mode/**',
@@ -24,6 +25,7 @@ export const CopySourceTask = {
         'bin/**',
         'webpackShims/**',
         'config/kibana.yml',
+        'tsconfig.json',
       ],
     });
   },

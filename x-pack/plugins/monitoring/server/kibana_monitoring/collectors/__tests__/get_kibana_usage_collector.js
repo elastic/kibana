@@ -22,7 +22,8 @@ describe('getKibanaUsageCollector', () => {
           getCluster: sinon.stub()
         }
       },
-      config: () => ({ get: sinon.stub() })
+      config: () => ({ get: sinon.stub() }),
+      log: sinon.stub(),
     };
     serverStub.plugins.elasticsearch.getCluster.withArgs('admin').returns(clusterStub);
     callClusterStub = callClusterFactory(serverStub).getCallClusterInternal();

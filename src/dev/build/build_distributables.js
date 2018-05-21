@@ -6,6 +6,7 @@ import {
   CleanExtraBinScriptsTask,
   CleanExtraFilesFromModulesTask,
   CleanPackagesTask,
+  CleanTypescriptTask,
   CleanTask,
   CopySourceTask,
   CreateArchivesSourcesTask,
@@ -21,7 +22,8 @@ import {
   InstallDependenciesTask,
   OptimizeBuildTask,
   RemovePackageJsonDepsTask,
-  TranspileSourceTask,
+  TranspileBabelTask,
+  TranspileTypescriptTask,
   UpdateLicenseFileTask,
   VerifyEnvTask,
   VerifyExistingNodeBuildsTask,
@@ -76,10 +78,12 @@ export async function buildDistributables(options) {
   await run(CopySourceTask);
   await run(CreateEmptyDirsAndFilesTask);
   await run(CreateReadmeTask);
-  await run(TranspileSourceTask);
+  await run(TranspileBabelTask);
+  await run(TranspileTypescriptTask);
   await run(BuildPackagesTask);
   await run(CreatePackageJsonTask);
   await run(InstallDependenciesTask);
+  await run(CleanTypescriptTask);
   await run(CleanPackagesTask);
   await run(CreateNoticeFileTask);
   await run(UpdateLicenseFileTask);
