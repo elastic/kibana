@@ -5,7 +5,7 @@
  */
 
 /**
- * User-configurable settings for xpack.actions via configuration schema
+ * User-configurable settings for xpack.notifications via configuration schema
  *
  * @param {Object} Joi - HapiJS Joi module that allows for schema validation
  * @return {Object} config schema
