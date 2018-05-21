@@ -5,7 +5,8 @@
  */
 
 export default function ({ loadTestFile }) {
-  describe('stats', () => {
-    loadTestFile(require.resolve('./stats'));
+  describe('X-Pack Usage', () => {
+    loadTestFile(require.resolve('./usage'));
   });
 }
+
