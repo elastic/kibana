@@ -49,7 +49,7 @@ export default function ({ getService }) {
       const firstConfigurationBlock = {
         type: 'output',
         tag: 'production',
-        block_yml: 'elasticsearch:\n    hosts: [\"localhost:9200\"]\n    username: "..."'
+        block_yml: 'elasticsearch:\n    hosts: ["localhost:9200"]\n    username: "..."'
       };
       await supertest
         .post(
@@ -62,7 +62,7 @@ export default function ({ getService }) {
       const secondConfigurationBlock = {
         type: 'output',
         tag: 'production',
-        block_yml: 'logstash:\n    hosts: [\"localhost:9000\"]\n'
+        block_yml: 'logstash:\n    hosts: ["localhost:9000"]\n'
       };
       await supertest
         .post(
@@ -77,7 +77,7 @@ export default function ({ getService }) {
       const firstConfigurationBlock = {
         type: 'output',
         tag: 'production',
-        block_yml: 'elasticsearch:\n    hosts: [\"localhost:9200\"]\n    username: "..."'
+        block_yml: 'elasticsearch:\n    hosts: ["localhost:9200"]\n    username: "..."'
       };
       await supertest
         .post(
@@ -90,7 +90,7 @@ export default function ({ getService }) {
       const secondConfigurationBlock = {
         type: 'output',
         tag: 'development',
-        block_yml: 'logstash:\n    hosts: [\"localhost:9000\"]\n'
+        block_yml: 'logstash:\n    hosts: ["localhost:9000"]\n'
       };
       await supertest
         .post(
@@ -105,7 +105,7 @@ export default function ({ getService }) {
       const firstConfigurationBlock = {
         type: 'output',
         tag: 'production',
-        block_yml: 'elasticsearch:\n    hosts: [\"localhost:9200\"]\n    username: "..."'
+        block_yml: 'elasticsearch:\n    hosts: ["localhost:9200"]\n    username: "..."'
       };
       await supertest
         .post(
@@ -118,7 +118,7 @@ export default function ({ getService }) {
       const secondConfigurationBlock = {
         type: 'input',
         tag: 'production',
-        block_yml: 'file:\n    path: \"/var/log/some.log\"]\n'
+        block_yml: 'file:\n    path: "/var/log/some.log"]\n'
       };
       await supertest
         .post(
