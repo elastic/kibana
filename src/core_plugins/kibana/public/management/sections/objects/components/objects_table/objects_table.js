@@ -141,7 +141,6 @@ export class ObjectsTable extends Component {
           search: queryText ? `${queryText}*` : undefined,
           perPage,
           page: page + 1,
-          sortField: 'type',
           fields: ['title', 'id'],
           searchFields: ['title'],
           type,
