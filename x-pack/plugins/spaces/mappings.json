@@ -5,13 +5,22 @@
   "space": {
     "properties": {
       "name": {
-        "type": "text"
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 2048
+          }
+        }
       },
       "urlContext": {
         "type": "keyword"
       },
       "description": {
         "type": "text"
+      },
+      "_reserved": {
+        "type": "boolean"
       }
     }
   }

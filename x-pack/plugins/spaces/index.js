@@ -9,6 +9,7 @@ import { validateConfig } from './server/lib/validate_config';
 import { checkLicense } from './server/lib/check_license';
 import { initSpacesApi } from './server/routes/api/v1/spaces';
 import { initSpacesRequestInterceptors } from './server/lib/space_request_interceptors';
+import { createDefaultSpace } from './server/lib/create_default_space';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import { getActiveSpace } from './server/lib/get_active_space';
 import { wrapError } from './server/lib/errors';
@@ -76,5 +77,7 @@ export const spaces = (kibana) => new kibana.Plugin({
     initSpacesApi(server);
 
     initSpacesRequestInterceptors(server);
+
+    await createDefaultSpace(server);
   }
 });
