@@ -54,6 +54,9 @@
             "type": {
               "type": "keyword"
             },
+            "version": {
+              "type": "keyword"
+            },
             "host_ip": {
               "type": "ip"
             },
