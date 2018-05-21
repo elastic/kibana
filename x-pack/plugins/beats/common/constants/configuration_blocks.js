@@ -6,10 +6,15 @@
 
 export const CONFIGURATION_BLOCKS = {
   TYPES: {
-    OUTPUT: 'output'
+    OUTPUTS: 'outputs',
+    PROCESSORS: 'processors',
+    FILEBEAT_INPUTS: 'filebeat.inputs',
+    FILEBEAT_MODULES: 'filebeat.modules',
+    METRICBEAT_INPUTS: 'metricbeat.inputs',
+    METRICBEAT_MODULES: 'metricbeat.modules'
   }
 };
 
 CONFIGURATION_BLOCKS.UNIQUENESS_ENFORCING_TYPES = [
-  CONFIGURATION_BLOCKS.TYPES.OUTPUT
+  CONFIGURATION_BLOCKS.TYPES.OUTPUTS
 ];

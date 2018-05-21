@@ -13,11 +13,12 @@ import {
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const es = getService('es');
+  const chance = getService('chance');
 
   describe('create_configuration_block', () => {
     it('should create the given configuration block', async () => {
       const configurationBlock = {
-        type: 'output',
+        type: 'outputs',
         tag: 'production',
         block_yml: 'elasticsearch:\n    hosts: [\"localhost:9200\"]\n    username: "..."'
       };
@@ -47,7 +48,7 @@ export default function ({ getService }) {
 
     it('should not allow two "output" type configuration blocks with the same tag', async () => {
       const firstConfigurationBlock = {
-        type: 'output',
+        type: 'outputs',
         tag: 'production',
         block_yml: 'elasticsearch:\n    hosts: ["localhost:9200"]\n    username: "..."'
       };
@@ -60,7 +61,7 @@ export default function ({ getService }) {
         .expect(201);
 
       const secondConfigurationBlock = {
-        type: 'output',
+        type: 'outputs',
         tag: 'production',
         block_yml: 'logstash:\n    hosts: ["localhost:9000"]\n'
       };
@@ -75,7 +76,7 @@ export default function ({ getService }) {
 
     it('should allow two "output" type configuration blocks with different tags', async () => {
       const firstConfigurationBlock = {
-        type: 'output',
+        type: 'outputs',
         tag: 'production',
         block_yml: 'elasticsearch:\n    hosts: ["localhost:9200"]\n    username: "..."'
       };
@@ -88,7 +89,7 @@ export default function ({ getService }) {
         .expect(201);
 
       const secondConfigurationBlock = {
-        type: 'output',
+        type: 'outputs',
         tag: 'development',
         block_yml: 'logstash:\n    hosts: ["localhost:9000"]\n'
       };
@@ -103,7 +104,7 @@ export default function ({ getService }) {
 
     it('should allow two configuration blocks of different types with the same tag', async () => {
       const firstConfigurationBlock = {
-        type: 'output',
+        type: 'outputs',
         tag: 'production',
         block_yml: 'elasticsearch:\n    hosts: ["localhost:9200"]\n    username: "..."'
       };
@@ -116,7 +117,7 @@ export default function ({ getService }) {
         .expect(201);
 
       const secondConfigurationBlock = {
-        type: 'input',
+        type: 'filebeat.inputs',
         tag: 'production',
         block_yml: 'file:\n    path: "/var/log/some.log"]\n'
       };
@@ -127,6 +128,22 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'xxx')
         .send(secondConfigurationBlock)
         .expect(201);
+    });
+
+
+    it('should reject a configuration block with an invalid type', async () => {
+      const firstConfigurationBlock = {
+        type: chance.word(),
+        tag: 'production',
+        block_yml: 'elasticsearch:\n    hosts: ["localhost:9200"]\n    username: "..."'
+      };
+      await supertest
+        .post(
+          '/api/beats/configuration_blocks'
+        )
+        .set('kbn-xsrf', 'xxx')
+        .send(firstConfigurationBlock)
+        .expect(400);
     });
   });
 }

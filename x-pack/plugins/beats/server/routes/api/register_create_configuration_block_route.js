@@ -75,7 +75,7 @@ export function registerCreateConfigurationBlockRoute(server) {
     config: {
       validate: {
         payload: Joi.object({
-          type: Joi.string().required(),
+          type: Joi.string().required().valid(Object.values(CONFIGURATION_BLOCKS.TYPES)),
           tag: Joi.string().required(),
           block_yml: Joi.string().required()
         }).required()
