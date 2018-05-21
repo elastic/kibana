@@ -4,14 +4,7 @@
  * @param {Array.<DashboardPanelAction>} allActions
  */
 function getActionsForPanel(contextMenuPanelId, allActions) {
-  const panelActions = [];
-  for (let i = 0; i < allActions.length; i++) {
-    const action = allActions[i];
-    if (action.parentPanelId === contextMenuPanelId) {
-      panelActions.push(action);
-    }
-  }
-  return panelActions;
+  return allActions.filter(action => action.parentPanelId === contextMenuPanelId);
 }
 
 /**
@@ -28,7 +21,7 @@ function getActionsForPanel(contextMenuPanelId, allActions) {
  */
 function buildEuiContextMenuPanelItemsAndChildPanels({ contextMenuPanelId, actions, embeddable, containerState }) {
   const items = [];
-  let childPanels = [];
+  const childPanels = [];
   const actionsForPanel = getActionsForPanel(contextMenuPanelId, actions);
   actionsForPanel.forEach(action => {
     const isVisible = action.isVisible({ embeddable, containerState });
@@ -38,8 +31,8 @@ function buildEuiContextMenuPanelItemsAndChildPanels({ contextMenuPanelId, actio
 
     let childPanelToOpenOnClick;
     if (action.childContextMenuPanel) {
-      childPanels = childPanels.concat(
-        buildEuiContextMenuPanels({
+      childPanels.push(
+        ...buildEuiContextMenuPanels({
           contextMenuPanel: action.childContextMenuPanel,
           actions,
           embeddable,
