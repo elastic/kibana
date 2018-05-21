@@ -24,10 +24,17 @@ export default function ({ getService }) {
     beforeEach(async () => {
       validEnrollmentToken = chance.word();
       beatId = chance.word();
+      const version = chance.integer({ min: 1, max: 10 })
+        + '.'
+        + chance.integer({ min: 1, max: 10 })
+        + '.'
+        + chance.integer({ min: 1, max: 10 });
+
       beat = {
         enrollment_token: validEnrollmentToken,
         type: 'filebeat',
         host_name: 'foo.bar.com',
+        version
       };
 
       await es.index({

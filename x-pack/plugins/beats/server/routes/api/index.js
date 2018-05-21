@@ -8,10 +8,12 @@ import { registerCreateEnrollmentTokensRoute } from './register_create_enrollmen
 import { registerEnrollBeatRoute } from './register_enroll_beat_route';
 import { registerListBeatsRoute } from './register_list_beats_route';
 import { registerVerifyBeatsRoute } from './register_verify_beats_route';
+import { registerUpdateBeatRoute } from './register_update_beat_route';
 
 export function registerApiRoutes(server) {
   registerCreateEnrollmentTokensRoute(server);
   registerEnrollBeatRoute(server);
   registerListBeatsRoute(server);
   registerVerifyBeatsRoute(server);
+  registerUpdateBeatRoute(server);
 }
