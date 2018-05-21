@@ -56,9 +56,9 @@ describe('plugin discovery/packs in directory', () => {
 
       packageJsons.forEach(pack => expect(pack).to.be.an(Object));
       // there should be one result for each item in PLUGINS_DIR
-      expect(results).to.have.length(9);
+      expect(results).to.have.length(8);
       // three of the fixtures are errors of some sort
-      expect(errors).to.have.length(3);
+      expect(errors).to.have.length(2);
       // six of them are valid
       expect(packageJsons).to.have.length(6);
     });
