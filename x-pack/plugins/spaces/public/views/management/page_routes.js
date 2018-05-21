@@ -11,6 +11,7 @@ import template from 'plugins/spaces/views/management/template.html';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { SpacesGridPage, ManageSpacePage } from './components';
+import { SpacesManager } from '../../lib/spaces_manager';
 
 import routes from 'ui/routes';
 
@@ -39,10 +40,13 @@ routes.when('/management/spaces/create', {
   controller: function ($scope,  $http, chrome) {
     const domNode = document.getElementById(reactRootNodeId);
 
+    const spacesManager = new SpacesManager($http, chrome);
+
     render(<ManageSpacePage
       httpAgent={$http}
       chrome={chrome}
       breadcrumbs={routes.getBreadcrumbs()}
+      spacesManager={spacesManager}
     />, domNode);
 
     // unmount react on controller destroy
@@ -63,11 +67,14 @@ routes.when('/management/spaces/edit/:space', {
 
     const { space } = $route.current.params;
 
+    const spacesManager = new SpacesManager($http, chrome);
+
     render(<ManageSpacePage
       httpAgent={$http}
       space={space}
       chrome={chrome}
       breadcrumbs={routes.getBreadcrumbs()}
+      spacesManager={spacesManager}
     />, domNode);
 
     // unmount react on controller destroy
