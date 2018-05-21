@@ -55,9 +55,13 @@ export const createChildDirectory$ = (path) => (
     mergeAll(),
     filter(name => !name.startsWith('.')),
     map(name => resolve(path, name)),
-    mergeMap(
-      async absolute => await isDirectory(absolute),
-      (absolute, pass) => pass ? [absolute] : []
-    )
+    mergeMap(async absolute => {
+      if (await isDirectory(absolute)) {
+        return [absolute];
+      } else {
+        return [];
+      }
+    }),
+    mergeAll()
   )
 );
