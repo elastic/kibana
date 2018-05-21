@@ -1,6 +1,7 @@
-import chalk from 'chalk';
+import { resolve } from 'path';
 
 import { createToolingLog } from '@kbn/dev-utils';
+import chalk from 'chalk';
 import execa from 'execa';
 import getopts from 'getopts';
 import Listr from 'listr';
@@ -24,10 +25,14 @@ export function runTslintCli() {
     process.argv.push('--format', 'stylish');
   }
 
-  if (opts.project) {
-    require('tslint/bin/tslint');
-  } else {
-    const tasks = PROJECTS.map(project => ({
+  const list = new Listr(
+    PROJECTS.filter(project => {
+      if (!opts.project) {
+        return true;
+      }
+
+      return resolve(opts.project) === project.getTsConfigPath();
+    }).map(project => ({
       task: () =>
         execa(
           'tslint',
@@ -41,28 +46,27 @@ export function runTslintCli() {
           throw new LintFailure(project, error);
         }),
       title: project.getName(),
-    }));
-
-    const list = new Listr(tasks as any, {
+    })),
+    {
       concurrent: true,
       exitOnError: false,
-    });
+    }
+  );
 
-    list.run().catch((error: any) => {
-      if (!error.errors) {
-        log.error('Unhandled execption!');
-        log.error(error);
-        process.exit(1);
-      }
+  list.run().catch((error: any) => {
+    if (!error.errors) {
+      log.error('Unhandled execption!');
+      log.error(error);
+      process.exit(1);
+    }
 
-      for (const e of error.errors) {
-        if (e instanceof LintFailure) {
-          log.write('');
-          log.error(`${e.project.getName()} failed\n${e.error.stdout}`);
-        } else {
-          log.error(e);
-        }
+    for (const e of error.errors) {
+      if (e instanceof LintFailure) {
+        log.write('');
+        log.error(`${e.project.getName()} failed\n${e.error.stdout}`);
+      } else {
+        log.error(e);
       }
-    });
-  }
+    }
+  });
 }

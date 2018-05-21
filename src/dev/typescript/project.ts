@@ -4,8 +4,8 @@ import { basename, dirname, relative, resolve } from 'path';
 import { IMinimatch, Minimatch } from 'minimatch';
 import { parseConfigFileTextToJson } from 'typescript';
 
+import { REPO_ROOT } from '../constants';
 import { File } from '../file';
-import { REPO_ROOT } from '../constants'
 
 function makeMatchers(directory: string, patterns: string[]) {
   return patterns.map(
