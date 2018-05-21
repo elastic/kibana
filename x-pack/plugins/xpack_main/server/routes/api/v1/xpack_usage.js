@@ -15,6 +15,7 @@ const getClusterUuid = async req => {
 
 /*
  * @return {Object} data from usage stats collectors registered with Monitoring CollectorSet
+ * @throws {Error} if the Monitoring CollectorSet is not ready
  */
 const getUsage = async req => {
   const server = req.server;
