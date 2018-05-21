@@ -3,13 +3,10 @@ import { run } from 'tslint/lib/runner';
 import { ToolingLog } from '@kbn/dev-utils';
 import { File } from '../file';
 import { createFailError } from '../run';
-import { getTsProjectForAbsolutePath } from '../typescript';
+import { getTsProjectForAbsolutePath, Project } from '../typescript';
 
 function groupFilesByProject(files: File[]) {
-  const filesByProject: Map<
-    ReturnType<typeof getTsProjectForAbsolutePath>,
-    File[]
-  > = new Map();
+  const filesByProject: Map<Project, File[]> = new Map();
 
   files.forEach(file => {
     const project = getTsProjectForAbsolutePath(file.getAbsolutePath());

@@ -1,3 +1,4 @@
+export { Project } from './project';
 export { PROJECTS } from './projects';
 export {
   getTsProjectForAbsolutePath,

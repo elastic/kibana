@@ -6,13 +6,10 @@ import execa from 'execa';
 import getopts from 'getopts';
 import Listr from 'listr';
 
-import { PROJECTS } from '../typescript';
+import { Project, PROJECTS } from '../typescript';
 
 class LintFailure {
-  constructor(
-    public project: typeof PROJECTS[0],
-    public error: execa.ExecaError
-  ) {}
+  constructor(public project: Project, public error: execa.ExecaError) {}
 }
 
 export function runTslintCli() {
