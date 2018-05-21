@@ -256,7 +256,7 @@ describe('kibana_map tests', function () {
     });
 
 
-    it('TMS', async function () {
+    it.skip('TMS', async function () {
 
       const options = {
         'url': 'https://tiles-stage.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana',
