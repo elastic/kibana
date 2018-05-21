@@ -20,6 +20,7 @@ export class SavedObjectFinder extends React.Component {
       page: 0,
       perPage: 10,
       totalItems: 0,
+      filter: '',
     };
   }
 
