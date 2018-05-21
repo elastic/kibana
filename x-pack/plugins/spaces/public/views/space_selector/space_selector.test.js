@@ -9,6 +9,8 @@ import { SpaceSelector } from './space_selector';
 import chrome from 'ui/chrome';
 import renderer from 'react-test-renderer';
 import { render, shallow } from 'enzyme';
+import { SpacesManager } from '../../lib/spaces_manager';
+
 
 function getHttpAgent(spaces = []) {
   const httpAgent = () => {};
@@ -17,17 +19,26 @@ function getHttpAgent(spaces = []) {
   return httpAgent;
 }
 
+function getSpacesManager(spaces = []) {
+  const manager = new SpacesManager(getHttpAgent(spaces), chrome);
+
+  const origGet = manager.getSpaces;
+  manager.getSpaces = jest.fn(origGet);
+
+  return manager;
+}
+
 
 test('it renders without crashing', () => {
-  const httpAgent = getHttpAgent();
+  const spacesManager = getSpacesManager();
   const component = renderer.create(
-    <SpaceSelector spaces={[]} httpAgent={httpAgent} chrome={chrome}/>
+    <SpaceSelector spaces={[]} spacesManager={spacesManager}/>
   );
   expect(component).toMatchSnapshot();
 });
 
 test('it uses the spaces on props, when provided', () => {
-  const httpAgent = getHttpAgent();
+  const spacesManager = getSpacesManager();
 
   const spaces = [{
     id: 'space-1',
@@ -37,14 +48,14 @@ test('it uses the spaces on props, when provided', () => {
   }];
 
   const component = render(
-    <SpaceSelector spaces={spaces} httpAgent={httpAgent} chrome={chrome}/>
+    <SpaceSelector spaces={spaces} spacesManager={spacesManager} />
   );
 
   return Promise
     .resolve()
     .then(() => {
       expect(component.find('.spaceCard')).toHaveLength(1);
-      expect(httpAgent.get).toHaveBeenCalledTimes(0);
+      expect(spacesManager.getSpaces).toHaveBeenCalledTimes(0);
     });
 });
 
@@ -56,16 +67,15 @@ test('it queries for spaces when not provided on props', () => {
     urlContext: 'space-1-context'
   }];
 
-  const httpAgent = getHttpAgent(spaces);
+  const spacesManager = getSpacesManager(spaces);
 
-  const component = shallow(
-    <SpaceSelector httpAgent={httpAgent} chrome={chrome}/>
+  shallow(
+    <SpaceSelector spacesManager={spacesManager}/>
   );
 
   return Promise
     .resolve()
     .then(() => {
-      expect(httpAgent.get).toHaveBeenCalledTimes(1);
-      expect(component.update().find('.spaceCard')).toHaveLength(1);
+      expect(spacesManager.getSpaces).toHaveBeenCalledTimes(1);
     });
 });

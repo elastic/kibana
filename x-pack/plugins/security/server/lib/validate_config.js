@@ -7,7 +7,6 @@
 const crypto = require('crypto');
 
 const isDefault = (config, key) => {
-  console.log(config.getDefault(key), config.get(key));
   return config.getDefault(key) === config.get(key);
 };
 

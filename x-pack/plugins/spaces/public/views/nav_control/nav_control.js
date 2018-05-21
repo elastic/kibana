@@ -7,7 +7,13 @@
 import { constant } from 'lodash';
 import { chromeNavControlsRegistry } from 'ui/registry/chrome_nav_controls';
 import { uiModules } from 'ui/modules';
+import { SpacesManager } from 'plugins/spaces/lib/spaces_manager';
 import template from 'plugins/spaces/views/nav_control/nav_control.html';
+import 'plugins/spaces/views/nav_control/nav_control.less';
+
+import React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
+import { NavControlModal } from 'plugins/spaces/views/nav_control/nav_control_modal';
 
 chromeNavControlsRegistry.register(constant({
   name: 'spaces',
@@ -17,6 +23,16 @@ chromeNavControlsRegistry.register(constant({
 
 const module = uiModules.get('spaces', ['kibana']);
 
-module.controller('spacesNavController', () => {
+module.controller('spacesNavController', ($scope, $http, chrome, activeSpace) => {
+  const domNode = document.getElementById(`spacesNavReactRoot`);
+
+  const spacesManager = new SpacesManager($http, chrome);
+
+  render(<NavControlModal spacesManager={spacesManager} activeSpace={activeSpace} />, domNode);
+
+  // unmount react on controller destroy
+  $scope.$on('$destroy', () => {
+    unmountComponentAtNode(domNode);
+  });
 
 });

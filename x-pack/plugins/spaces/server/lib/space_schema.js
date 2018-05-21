@@ -10,5 +10,6 @@ export const spaceSchema = Joi.object({
   id: Joi.string(),
   name: Joi.string().required(),
   description: Joi.string().required(),
-  urlContext: Joi.string().regex(/[a-z0-9\-]+/, `lower case, a-z, 0-9, and "-" are allowed`).required()
+  urlContext: Joi.string().regex(/[a-z0-9\-]+/, `lower case, a-z, 0-9, and "-" are allowed`).required(),
+  _reserved: Joi.boolean()
 }).default();
