@@ -12,12 +12,12 @@ import {
   EuiPageBody,
   EuiPageContent,
   EuiPageHeaderSection,
-  EuiCard,
   EuiIcon,
+  EuiSpacer,
   EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiHorizontalRule,
 } from '@elastic/eui';
+import { SpaceCards } from '../components/space_cards';
 
 export class SpaceSelector extends Component {
   state = {
@@ -40,14 +40,13 @@ export class SpaceSelector extends Component {
 
   loadSpaces() {
     this.setState({ loading: true });
-    const { httpAgent, chrome } = this.props;
+    const { spacesManager } = this.props;
 
-    httpAgent
-      .get(chrome.addBasePath(`/api/spaces/v1/spaces`))
-      .then(response => {
+    spacesManager.getSpaces()
+      .then(spaces => {
         this.setState({
           loading: false,
-          spaces: response.data
+          spaces
         });
       });
   }
@@ -65,57 +64,26 @@ export class SpaceSelector extends Component {
           </EuiPageHeaderSection>
         </EuiPageHeader>
         <EuiPageBody>
-          <EuiPageContent>
+          <EuiPageContent className="spaceSelectorPageContent">
             <EuiText className="spaceWelcomeText">
               <p className="welcomeLarge">Welcome to Kibana.</p>
               <p className="welcomeMedium">Select a space to begin.</p>
             </EuiText>
 
-            <EuiFlexGroup gutterSize="l" justifyContent="spaceEvenly" className="spacesGroup">
-              {spaces.map(this.renderSpace)}
-            </EuiFlexGroup>
+            <EuiHorizontalRule />
 
-            <EuiText className="spaceProfileText">
-              <p>You can change your workspace at anytime by accessing your profile within Kibana.</p>
-            </EuiText>
+            <SpaceCards spaces={spaces} />
+
+            <EuiSpacer />
+
           </EuiPageContent>
         </EuiPageBody>
       </EuiPage>
     );
   }
-
-  renderSpace = (space) => {
-    return (
-      <EuiFlexItem key={space.id} grow={false} className="spaceCard">
-        <EuiCard
-          icon={<EuiIcon size="xxl" type={space.logo} />}
-          title={this.renderSpaceTitle(space)}
-          description={space.description}
-          onClick={this.createSpaceClickHandler(space)}
-        />
-      </EuiFlexItem>
-    );
-  };
-
-  renderSpaceTitle = (space) => {
-    return (
-      <div className="spaceCardTitle">
-        <span>{space.name}</span>
-        {/* <EuiIcon type={'starEmpty'} size="s" /> */}
-      </div>
-    );
-  };
-
-  createSpaceClickHandler = (space) => {
-    return () => {
-      window.location = this.props.chrome.addBasePath(`/s/${space.urlContext}`);
-    };
-  }
-
 }
 
 SpaceSelector.propTypes = {
   spaces: PropTypes.array,
-  httpAgent: PropTypes.func.isRequired,
-  chrome: PropTypes.object.isRequired,
+  spacesManager: PropTypes.object.isRequired
 };
