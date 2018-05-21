@@ -3,6 +3,7 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
+  const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
   describe('visualize app', function describeIndexTests() {
@@ -111,7 +112,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should correctly filter for applied time filter on the main timefield', async () => {
-        await PageObjects.header.addFilter('@timestamp', 'is between', ['2015-09-19', '2015-09-21']);
+        await filterBar.addFilter('@timestamp', 'is between', ['2015-09-19', '2015-09-21']);
         await PageObjects.header.waitUntilLoadingHasFinished();
         const data = await PageObjects.visualize.getDataTableData();
         expect(data.trim().split('\n')).to.be.eql([

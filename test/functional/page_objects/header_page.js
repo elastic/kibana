@@ -256,29 +256,6 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     async isSharedTimefilterEnabled() {
       return await find.existsByCssSelector('[shared-timefilter=true]');
     }
-
-    async typeIntoReactSelect(testSubj, value) {
-      const select = await testSubjects.find(testSubj);
-      const input = await select.findByClassName('ui-select-search');
-      await input.type(value);
-      const activeSelection = await select.findByCssSelector('.ui-select-choices-row.active');
-      await activeSelection.click();
-    }
-
-    async addFilter(field, operator, values) {
-      if (!Array.isArray(values)) {
-        values = [values];
-      }
-      await testSubjects.click('addFilter');
-      await this.typeIntoReactSelect('filterfieldSuggestionList', field);
-      await this.typeIntoReactSelect('filterOperatorList', operator);
-      const params = await testSubjects.find('filterParams');
-      const paramFields = await params.findAllByTagName('input');
-      await Promise.all(values.map(async (value, index) => {
-        await paramFields[index].type(value);
-      }));
-      await testSubjects.click('saveFilter');
-    }
   }
 
   return new HeaderPage();
