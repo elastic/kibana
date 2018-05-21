@@ -249,9 +249,7 @@ export class DataRecognizer {
       if (startDatafeed) {
         const savedDatafeeds = moduleConfig.datafeeds.filter((df) => {
           const datafeedResult = saveResults.datafeeds.find(d => d.id === df.id);
-          if (datafeedResult !== undefined && datafeedResult.success === true) {
-            return df;
-          }
+          return (datafeedResult !== undefined && datafeedResult.success === true);
         });
 
         const startResults = await this.startDatafeeds(savedDatafeeds, start, end);
