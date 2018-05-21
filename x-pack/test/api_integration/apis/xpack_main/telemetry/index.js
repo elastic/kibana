@@ -5,7 +5,7 @@
  */
 
 export default function ({ loadTestFile }) {
-  describe('telemetry', () => {
+  describe('Telemetry', () => {
     loadTestFile(require.resolve('./telemetry'));
   });
 }
