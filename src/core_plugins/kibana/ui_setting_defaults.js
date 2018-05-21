@@ -13,6 +13,9 @@ export function getUiSettingDefaults() {
     'buildNum': {
       readonly: true
     },
+    'version': {
+      readonly: true
+    },
     'query:queryString:options': {
       name: 'Query string options',
       value: '{ "analyze_wildcard": true }',

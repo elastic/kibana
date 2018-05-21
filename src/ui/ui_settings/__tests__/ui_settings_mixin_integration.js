@@ -120,6 +120,28 @@ describe('uiSettingsMixin()', () => {
     });
   });
 
+  describe('request.setUiSettingsIdSuffix()', () => {
+    it('exposes "setUiSettingsIdSuffix" on requests', async () => {
+      const { decorations } = await setup();
+      expect(decorations.request).to.have.property('setUiSettingsIdSuffix').a('function');
+    });
+
+    it('passes idSuffix to getUiSettingsServiceForRequest', async () => {
+      const { server, decorations } = await setup();
+      const request = {};
+      decorations.request.setUiSettingsIdSuffix.call(request, 'aux-id');
+
+      sandbox.stub(getUiSettingsServiceForRequestNS, 'getUiSettingsServiceForRequest');
+      sinon.assert.notCalled(getUiSettingsServiceForRequest);
+
+      decorations.request.getUiSettingsService.call(request);
+      sinon.assert.calledWith(getUiSettingsServiceForRequest, server, request, {
+        getDefaults: sinon.match.func,
+        idSuffix: 'aux-id'
+      });
+    });
+  });
+
   describe('server.uiSettings()', () => {
     it('throws an error, links to pr', async () => {
       const { decorations } = await setup();
