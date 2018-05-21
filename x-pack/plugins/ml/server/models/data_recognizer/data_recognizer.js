@@ -191,7 +191,17 @@ export class DataRecognizer {
   // takes a module config id, an optional jobPrefix and the request object
   // creates all of the jobs, datafeeds and savedObjects  listed in the module config.
   // if any of the savedObjects already exist, they will not be overwritten.
-  async setupModuleItems(moduleId, jobPrefix, groups, indexPatternName, query, startDatafeed, start, end, request) {
+  async setupModuleItems(
+    moduleId,
+    jobPrefix,
+    groups,
+    indexPatternName,
+    query,
+    startDatafeed,
+    start,
+    end,
+    request
+  ) {
     this.savedObjectsClient = request.getSavedObjectsClient();
     this.indexPatterns = await this.loadIndexPatterns();
 

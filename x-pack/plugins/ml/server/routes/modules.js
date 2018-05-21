@@ -21,9 +21,29 @@ function getModule(callWithRequest, moduleId) {
   return dr.getModule(moduleId);
 }
 
-function saveModuleItems(callWithRequest, moduleId, prefix, groups, indexPatternName, query, startDatafeed, start, end, request) {
+function saveModuleItems(
+  callWithRequest,
+  moduleId,
+  prefix,
+  groups,
+  indexPatternName,
+  query,
+  startDatafeed,
+  start,
+  end,
+  request
+) {
   const dr = new DataRecognizer(callWithRequest);
-  return dr.setupModuleItems(moduleId, prefix, groups, indexPatternName, query, startDatafeed, start, end, request);
+  return dr.setupModuleItems(
+    moduleId,
+    prefix,
+    groups,
+    indexPatternName,
+    query,
+    startDatafeed,
+    start,
+    end,
+    request);
 }
 
 export function dataRecognizer(server, commonRouteConfig) {
@@ -75,7 +95,18 @@ export function dataRecognizer(server, commonRouteConfig) {
         end
       } = request.payload;
 
-      return saveModuleItems(callWithRequest, moduleId, prefix, groups, indexPatternName, query, startDatafeed, start, end, request)
+      return saveModuleItems(
+        callWithRequest,
+        moduleId,
+        prefix,
+        groups,
+        indexPatternName,
+        query,
+        startDatafeed,
+        start,
+        end,
+        request
+      )
         .then(resp => reply(resp))
         .catch(resp => reply(wrapError(resp)));
     },
