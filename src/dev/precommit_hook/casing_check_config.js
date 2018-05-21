@@ -8,6 +8,7 @@
  */
 export const IGNORE_FILE_GLOBS = [
   '.node-version',
+  '.github/**/*',
   'docs/**/*',
   '**/bin/**/*',
   '**/+([A-Z_]).md',
