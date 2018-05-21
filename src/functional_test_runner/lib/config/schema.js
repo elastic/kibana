@@ -88,6 +88,19 @@ export const schema = Joi.object().keys({
     elasticsearch: urlPartsSchema(),
   }).default(),
 
+  esTestCluster: Joi.object().keys({
+    license: Joi.string().default('oss'),
+    from: Joi.string().default('snapshot'),
+    serverArgs: Joi.array(),
+  }).default(),
+
+  kbnTestServer: Joi.object().keys({
+    buildArgs: Joi.array(),
+    sourceArgs: Joi.array(),
+    serverArgs: Joi.array(),
+  }).default(),
+
+  // env allows generic data, but should be removed
   env: Joi.object().default(),
 
   chromedriver: Joi.object().keys({

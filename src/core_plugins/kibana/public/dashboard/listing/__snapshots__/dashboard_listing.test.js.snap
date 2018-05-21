@@ -44,6 +44,7 @@ exports[`after fetch hideWriteControls 1`] = `
       grow={true}
     >
       <EuiFieldSearch
+        compressed={false}
         data-test-subj="searchFilter"
         fullWidth={true}
         incremental={false}
@@ -171,6 +172,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
       grow={true}
     >
       <EuiFieldSearch
+        compressed={false}
         data-test-subj="searchFilter"
         fullWidth={true}
         incremental={false}
@@ -319,6 +321,7 @@ exports[`after fetch renders table rows 1`] = `
       grow={true}
     >
       <EuiFieldSearch
+        compressed={false}
         data-test-subj="searchFilter"
         fullWidth={true}
         incremental={false}
@@ -486,6 +489,7 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
       grow={true}
     >
       <EuiFieldSearch
+        compressed={false}
         data-test-subj="searchFilter"
         fullWidth={true}
         incremental={false}
@@ -622,6 +626,7 @@ exports[`initialFilter 1`] = `
       grow={true}
     >
       <EuiFieldSearch
+        compressed={false}
         data-test-subj="searchFilter"
         fullWidth={true}
         incremental={false}
@@ -745,6 +750,7 @@ exports[`renders table in loading state 1`] = `
       grow={true}
     >
       <EuiFieldSearch
+        compressed={false}
         data-test-subj="searchFilter"
         fullWidth={true}
         incremental={false}

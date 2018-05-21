@@ -3,25 +3,23 @@ import { FilterManager } from './filter_manager.js';
 import { buildPhraseFilter } from 'ui/filter_manager/lib/phrase';
 import { buildPhrasesFilter } from 'ui/filter_manager/lib/phrases';
 
-const EMPTY_VALUE = '';
-
 export class PhraseFilterManager extends FilterManager {
-  constructor(controlId, fieldName, indexPattern, queryFilter, delimiter) {
-    super(controlId, fieldName, indexPattern, queryFilter, EMPTY_VALUE);
-
-    this.delimiter = delimiter;
+  constructor(controlId, fieldName, indexPattern, queryFilter) {
+    super(controlId, fieldName, indexPattern, queryFilter, []);
   }
 
   /**
    * Convert phrases into filter
    *
-   * @param {string} react-select value (delimiter-separated string of values)
+   * @param {array}
    * @return {object} query filter
    *   single phrase: match query
    *   multiple phrases: bool query with should containing list of match_phrase queries
    */
-  createFilter(value) {
-    const phrases = value.split(this.delimiter);
+  createFilter(selectedOptions) {
+    const phrases = selectedOptions.map(phrase => {
+      return phrase.value;
+    });
     let newFilter;
     if (phrases.length === 1) {
       newFilter = buildPhraseFilter(
@@ -43,14 +41,25 @@ export class PhraseFilterManager extends FilterManager {
     if (kbnFilters.length === 0) {
       return this.getUnsetValue();
     } else {
-      const values = kbnFilters
+      return kbnFilters
         .map((kbnFilter) => {
           return this._getValueFromFilter(kbnFilter);
+        })
+        .reduce((accumulator, currentValue) => {
+          return accumulator.concat(currentValue);
+        }, [])
+        .map(value => {
+          return { value, label: value };
         });
-      return values.join(this.delimiter);
     }
   }
 
+  /**
+   * Extract filtering value from kibana filters
+   *
+   * @param {object} kbnFilter
+   * @return {Array.<string>} array of values pulled from filter
+   */
   _getValueFromFilter(kbnFilter) {
     // bool filter - multiple phrase filters
     if (_.has(kbnFilter, 'query.bool.should')) {
@@ -63,8 +72,7 @@ export class PhraseFilterManager extends FilterManager {
             return true;
           }
           return false;
-        })
-        .join(this.delimiter);
+        });
     }
 
     // scripted field filter

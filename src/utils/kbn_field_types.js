@@ -17,7 +17,7 @@ export class KbnFieldType {
   }
 }
 
-const KBN_FIELD_TYPES = [
+export const KBN_FIELD_TYPES = [
   new KbnFieldType({
     name: 'string',
     sortable: true,

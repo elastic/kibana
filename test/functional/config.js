@@ -82,6 +82,19 @@ export default async function ({ readConfigFile }) {
       dashboardAddPanel: DashboardAddPanelProvider,
     },
     servers: commonConfig.get('servers'),
+
+    env: commonConfig.get('env'),
+
+    esTestCluster: commonConfig.get('esTestCluster'),
+
+    kbnTestServer: {
+      ...commonConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...commonConfig.get('kbnTestServer.serverArgs'),
+        '--oss',
+      ],
+    },
+
     apps: {
       status_page: {
         pathname: '/status',

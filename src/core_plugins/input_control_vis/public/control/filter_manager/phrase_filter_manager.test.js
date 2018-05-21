@@ -24,11 +24,11 @@ describe('PhraseFilterManager', function () {
     const queryFilterMock = {};
     let filterManager;
     beforeEach(() => {
-      filterManager = new PhraseFilterManager(controlId, 'field1', indexPatternMock, queryFilterMock, '|');
+      filterManager = new PhraseFilterManager(controlId, 'field1', indexPatternMock, queryFilterMock);
     });
 
     test('should create match phrase filter from single value', function () {
-      const newFilter = filterManager.createFilter('ios');
+      const newFilter = filterManager.createFilter([{ value: 'ios' }]);
       expect(newFilter).to.have.property('meta');
       expect(newFilter.meta.index).to.be(indexPatternId);
       expect(newFilter.meta.controlledBy).to.be(controlId);
@@ -37,7 +37,7 @@ describe('PhraseFilterManager', function () {
     });
 
     test('should create bool filter from multiple values', function () {
-      const newFilter = filterManager.createFilter('ios|win xp');
+      const newFilter = filterManager.createFilter([{ value: 'ios' }, { value: 'win xp' }]);
       expect(newFilter).to.have.property('meta');
       expect(newFilter.meta.index).to.be(indexPatternId);
       expect(newFilter.meta.controlledBy).to.be(controlId);
@@ -67,7 +67,7 @@ describe('PhraseFilterManager', function () {
           this.mockFilters = mockFilters;
         }
       }
-      filterManager = new MockFindFiltersPhraseFilterManager(controlId, 'field1', indexPatternMock, queryFilterMock, '|');
+      filterManager = new MockFindFiltersPhraseFilterManager(controlId, 'field1', indexPatternMock, queryFilterMock);
     });
 
     test('should extract value from match phrase filter', function () {
@@ -83,7 +83,33 @@ describe('PhraseFilterManager', function () {
           }
         }
       ]);
-      expect(filterManager.getValueFromFilterBar()).to.be('ios');
+      expect(filterManager.getValueFromFilterBar()).to.eql([{ value: 'ios', label: 'ios' }]);
+    });
+
+    test('should extract value from multiple filters', function () {
+      filterManager.setMockFilters([
+        {
+          query: {
+            match: {
+              field1: {
+                query: 'ios',
+                type: 'phrase'
+              }
+            }
+          }
+        },
+        {
+          query: {
+            match: {
+              field1: {
+                query: 'win xp',
+                type: 'phrase'
+              }
+            }
+          }
+        },
+      ]);
+      expect(filterManager.getValueFromFilterBar()).to.eql([{ value: 'ios', label: 'ios' }, { value: 'win xp', label: 'win xp' }]);
     });
 
     test('should extract value from bool filter', function () {
@@ -107,7 +133,7 @@ describe('PhraseFilterManager', function () {
           }
         }
       ]);
-      expect(filterManager.getValueFromFilterBar()).to.be('ios|win xp');
+      expect(filterManager.getValueFromFilterBar()).to.eql([{ value: 'ios', label: 'ios' }, { value: 'win xp', label: 'win xp' }]);
     });
   });
 

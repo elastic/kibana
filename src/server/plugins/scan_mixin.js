@@ -1,5 +1,5 @@
 import * as Rx from 'rxjs';
-import { map, distinct, tap } from 'rxjs/operators';
+import { map, distinct, toArray, tap } from 'rxjs/operators';
 import { findPluginSpecs } from '../../plugin_discovery';
 
 import { Plugin } from './lib';
@@ -72,17 +72,19 @@ export async function scanMixin(kbnServer, server, config) {
     )
   );
 
-  const enabledSpecs$ = spec$
-    .toArray()
-    .do(specs => {
+  const enabledSpecs$ = spec$.pipe(
+    toArray(),
+    tap(specs => {
       kbnServer.pluginSpecs = specs;
-    });
+    })
+  );
 
-  const disabledSpecs$ = disabledSpec$
-    .toArray()
-    .do(specs => {
+  const disabledSpecs$ = disabledSpec$.pipe(
+    toArray(),
+    tap(specs => {
       kbnServer.disabledPluginSpecs = specs;
-    });
+    })
+  );
 
   // await completion of enabledSpecs$, disabledSpecs$, and logging$
   await Rx.merge(logging$, enabledSpecs$, disabledSpecs$).toPromise();

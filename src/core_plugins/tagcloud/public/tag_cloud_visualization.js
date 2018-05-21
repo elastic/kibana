@@ -1,5 +1,6 @@
 import TagCloud from './tag_cloud';
 import * as Rx from 'rxjs';
+import { take } from 'rxjs/operators';
 import { render, unmountComponentAtNode } from 'react-dom';
 import React from 'react';
 
@@ -58,7 +59,7 @@ export class TagCloudVisualization {
       this._resize();
     }
 
-    await this._renderComplete$.take(1).toPromise();
+    await this._renderComplete$.pipe(take(1)).toPromise();
 
     const hasAggDefined = this._vis.aggs[0] && this._vis.aggs[1];
     if (!hasAggDefined) {

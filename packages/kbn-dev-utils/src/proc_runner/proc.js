@@ -2,7 +2,14 @@ import execa from 'execa';
 import { statSync } from 'fs';
 
 import * as Rx from 'rxjs';
-import { tap, share, take, mergeMap, map } from 'rxjs/operators';
+import {
+  tap,
+  share,
+  take,
+  mergeMap,
+  map,
+  ignoreElements,
+} from 'rxjs/operators';
 import { gray } from 'chalk';
 
 import treeKill from 'tree-kill';
@@ -79,7 +86,7 @@ export function createProc(name, { cmd, args, cwd, env, stdin, log }) {
         map(code => {
           // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat then as errors
           if (code > 0 && !(code === 143 || code === 130)) {
-            throw createCliError(`[${name}] exitted with code ${code}`);
+            throw createCliError(`[${name}] exited with code ${code}`);
           }
 
           return code;
@@ -96,7 +103,7 @@ export function createProc(name, { cmd, args, cwd, env, stdin, log }) {
     }).share();
 
     _outcomePromise = Rx.Observable.merge(
-      this.lines$.ignoreElements(),
+      this.lines$.pipe(ignoreElements()),
       this.outcome$
     ).toPromise();
 

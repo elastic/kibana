@@ -2,6 +2,7 @@ import React from 'react';
 import sinon from 'sinon';
 import { mount, shallow } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { getIndexPatternMock } from './__tests__/get_index_pattern_mock';
 import {
   ControlsTab,
 } from './controls_tab';
@@ -21,14 +22,7 @@ const savedObjectsClientMock = {
   }
 };
 const indexPatternsMock = {
-  get: () => {
-    return Promise.resolve({
-      fields: [
-        { name: 'keywordField', type: 'string', aggregatable: true },
-        { name: 'numberField', type: 'number', aggregatable: true }
-      ]
-    });
-  }
+  get: getIndexPatternMock
 };
 const scopeMock = {
   vis: {

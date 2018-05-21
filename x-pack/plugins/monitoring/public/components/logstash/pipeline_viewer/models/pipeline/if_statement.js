@@ -8,11 +8,23 @@ import { Statement } from './statement';
 import { makeStatement } from './make_statement';
 import { isVertexPipelineStage } from './utils';
 
-export class IfStatement extends Statement {
-  constructor(id, hasExplicitId, stats, meta, condition, trueStatements, elseStatements) {
-    super(id, hasExplicitId, stats, meta);
+function makeStatementsForOutgoingVertices(outgoingVertices, statements, next, pipelineStage) {
+  outgoingVertices.forEach(vertex => {
+    let currentVertex = vertex;
+    while(isVertexPipelineStage(currentVertex, pipelineStage) && (currentVertex !== next)) {
+      statements.push(makeStatement(currentVertex, pipelineStage));
+      currentVertex = currentVertex.next;
+    }
+  });
+}
 
-    this.condition = condition;
+export class IfStatement extends Statement {
+  constructor(vertex, trueStatements, elseStatements) {
+    super(vertex);
+
+    const { name } = vertex;
+
+    this.condition = name;
     this.trueStatements = trueStatements;
     this.elseStatements = elseStatements;
   }
@@ -20,29 +32,18 @@ export class IfStatement extends Statement {
   static fromPipelineGraphVertex(ifVertex, pipelineStage) {
     const trueStatements = [];
     const elseStatements = [];
+    const {
+      trueOutgoingVertices,
+      falseOutgoingVertices
+    } = ifVertex;
 
-    const trueVertex = ifVertex.trueOutgoingVertex;
-    const falseVertex = ifVertex.falseOutgoingVertex;
     const next = ifVertex.next;
 
-    let currentVertex = trueVertex;
-    while (isVertexPipelineStage(currentVertex, pipelineStage) && (currentVertex !== next)) {
-      trueStatements.push(makeStatement(currentVertex, pipelineStage));
-      currentVertex = currentVertex.next;
-    }
-
-    currentVertex = falseVertex;
-    while (currentVertex && isVertexPipelineStage(currentVertex, pipelineStage) && (currentVertex !== next)) {
-      elseStatements.push(makeStatement(currentVertex, pipelineStage));
-      currentVertex = currentVertex.next;
-    }
+    makeStatementsForOutgoingVertices(trueOutgoingVertices, trueStatements, next, pipelineStage);
+    makeStatementsForOutgoingVertices(falseOutgoingVertices, elseStatements, next, pipelineStage);
 
     return new IfStatement(
-      ifVertex.id,
-      ifVertex.hasExplicitId,
-      ifVertex.stats,
-      ifVertex.meta,
-      ifVertex.name,
+      ifVertex,
       trueStatements,
       elseStatements
     );

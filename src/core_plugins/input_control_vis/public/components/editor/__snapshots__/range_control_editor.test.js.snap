@@ -4,17 +4,18 @@ exports[`renders RangeControlEditor 1`] = `
 <div>
   <IndexPatternSelect
     controlIndex={0}
+    getIndexPattern={[Function]}
     getIndexPatterns={[Function]}
+    indexPatternId="indexPattern1"
     onChange={[Function]}
-    value="indexPattern1"
   />
   <FieldSelect
     controlIndex={0}
+    fieldName="numberField"
     filterField={[Function]}
     getIndexPattern={[Function]}
     indexPatternId="indexPattern1"
     onChange={[Function]}
-    value="numberField"
   />
   <EuiFormRow
     describedByIds={Array []}
@@ -24,6 +25,7 @@ exports[`renders RangeControlEditor 1`] = `
     label="Step Size"
   >
     <EuiFieldNumber
+      compressed={false}
       data-test-subj="rangeControlSizeInput0"
       fullWidth={false}
       isLoading={false}
@@ -39,6 +41,7 @@ exports[`renders RangeControlEditor 1`] = `
     label="Decimal Places"
   >
     <EuiFieldNumber
+      compressed={false}
       data-test-subj="rangeControlDecimalPlacesInput0"
       fullWidth={false}
       isLoading={false}

@@ -3,6 +3,7 @@ import { writeFileSync } from 'fs';
 import { relative, resolve } from 'path';
 import { safeDump } from 'js-yaml';
 import es from 'event-stream';
+import stripAnsi from 'strip-ansi';
 import { readYamlConfig } from '../read_yaml_config';
 
 const testConfigFile = follow('__fixtures__/reload_logging_config/kibana.test.yml');
@@ -29,10 +30,10 @@ const prepareJson = obj => ({
 });
 
 const prepareLogLine = str =>
-  str.replace(
+  stripAnsi(str.replace(
     /\[\d{2}:\d{2}:\d{2}.\d{3}\]/,
     '[## timestamp ##]'
-  );
+  ));
 
 describe('Server logging configuration', function () {
   let child;

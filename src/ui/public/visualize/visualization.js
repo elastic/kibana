@@ -1,5 +1,5 @@
 import * as Rx from 'rxjs';
-import { share } from 'rxjs/operators';
+import { tap, debounceTime, filter, share, switchMap } from 'rxjs/operators';
 
 import './spy';
 import './visualize.less';
@@ -76,21 +76,24 @@ uiModules
           share()
         );
 
-        const success$ = render$
-          .do(() => {
+        const success$ = render$.pipe(
+          tap(() => {
             dispatchRenderStart($el[0]);
-          })
-          .filter(({ vis, visData, container }) => vis && vis.initialized && container && (!vis.type.requiresSearch || visData))
-          .debounceTime(100)
-          .switchMap(async ({ vis, visData, container }) => {
+          }),
+          filter(({ vis, visData, container }) => vis && vis.initialized && container && (!vis.type.requiresSearch || visData)),
+          debounceTime(100),
+          switchMap(async ({ vis, visData, container }) => {
             vis.size = [container.width(), container.height()];
             const status = getUpdateStatus(vis.type.requiresUpdateStatus, $scope);
             const renderPromise = visualization.render(visData, status);
             $scope.$apply();
             return renderPromise;
-          });
+          })
+        );
 
-        const requestError$ = render$.filter(({ vis }) => vis.requestError);
+        const requestError$ = render$.pipe(
+          filter(({ vis }) => vis.requestError)
+        );
 
         const renderSubscription = Rx.merge(success$, requestError$)
           .subscribe(() => {

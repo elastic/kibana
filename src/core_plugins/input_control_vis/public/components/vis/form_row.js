@@ -8,9 +8,9 @@ import {
 
 export function FormRow(props) {
   let control = props.children;
-  if (!props.control.isEnabled()) {
+  if (props.disableMsg) {
     control = (
-      <EuiToolTip placement="top" content={props.control.disabledReason}>
+      <EuiToolTip placement="top" content={props.disableMsg}>
         {control}
       </EuiToolTip>
     );
@@ -32,5 +32,5 @@ FormRow.propTypes = {
   id: PropTypes.string.isRequired,
   children: PropTypes.node.isRequired,
   controlIndex: PropTypes.number.isRequired,
-  control: PropTypes.object.isRequired,
+  disableMsg: PropTypes.string,
 };

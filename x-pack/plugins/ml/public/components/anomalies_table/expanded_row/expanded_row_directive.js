@@ -22,7 +22,7 @@ import {
   getSeverity,
   showActualForFunction,
   showTypicalForFunction
-} from 'plugins/ml/util/anomaly_utils';
+} from 'plugins/ml/../common/util/anomaly_utils';
 import 'plugins/ml/formatters/format_value';
 
 import { uiModules } from 'ui/modules';

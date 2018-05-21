@@ -16,6 +16,21 @@ function convertHeatmapLabelColor(visState) {
 }
 
 /**
+ * Update old terms aggregation format to new terms aggregation format. This will
+ * update the following things:
+ * - Rewrite orderBy: _term to orderBy: _key (new API in Elasticsearch)
+ */
+function convertTermAggregation(visState) {
+  if (visState.aggs) {
+    visState.aggs.forEach(agg => {
+      if (agg.type === 'terms' && agg.params && agg.params.orderBy === '_term') {
+        agg.params.orderBy = '_key';
+      }
+    });
+  }
+}
+
+/**
  * This function is responsible for updating old visStates - the actual saved object
  * object - into the format, that will be required by the current Kibana version.
  * This method will be executed for each saved vis object, that will be loaded.
@@ -25,6 +40,8 @@ function convertHeatmapLabelColor(visState) {
 export const updateOldState = (visState) => {
   if (!visState) return visState;
   const newState = _.cloneDeep(visState);
+
+  convertTermAggregation(newState);
 
   if (visState.type === 'gauge' && visState.fontSize) {
     delete newState.fontSize;

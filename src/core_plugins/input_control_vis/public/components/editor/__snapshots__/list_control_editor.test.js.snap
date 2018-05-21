@@ -4,17 +4,18 @@ exports[`parentCandidates 1`] = `
 <div>
   <IndexPatternSelect
     controlIndex={0}
+    getIndexPattern={[Function]}
     getIndexPatterns={[Function]}
+    indexPatternId="indexPattern1"
     onChange={[Function]}
-    value="indexPattern1"
   />
   <FieldSelect
     controlIndex={0}
+    fieldName="keywordField"
     filterField={[Function]}
     getIndexPattern={[Function]}
     indexPatternId="indexPattern1"
     onChange={[Function]}
-    value="keywordField"
   />
   <EuiFormRow
     describedByIds={Array []}
@@ -25,6 +26,7 @@ exports[`parentCandidates 1`] = `
     label="Parent control"
   >
     <EuiSelect
+      compressed={false}
       fullWidth={false}
       hasNoInitialSelection={false}
       isLoading={false}
@@ -68,6 +70,7 @@ exports[`parentCandidates 1`] = `
     label="Size"
   >
     <EuiFieldNumber
+      compressed={false}
       data-test-subj="listControlSizeInput"
       fullWidth={false}
       isLoading={false}
@@ -83,17 +86,18 @@ exports[`renders ListControlEditor 1`] = `
 <div>
   <IndexPatternSelect
     controlIndex={0}
+    getIndexPattern={[Function]}
     getIndexPatterns={[Function]}
+    indexPatternId="indexPattern1"
     onChange={[Function]}
-    value="indexPattern1"
   />
   <FieldSelect
     controlIndex={0}
+    fieldName="keywordField"
     filterField={[Function]}
     getIndexPattern={[Function]}
     indexPatternId="indexPattern1"
     onChange={[Function]}
-    value="keywordField"
   />
   <EuiFormRow
     describedByIds={Array []}
@@ -116,6 +120,7 @@ exports[`renders ListControlEditor 1`] = `
     label="Size"
   >
     <EuiFieldNumber
+      compressed={false}
       data-test-subj="listControlSizeInput"
       fullWidth={false}
       isLoading={false}
