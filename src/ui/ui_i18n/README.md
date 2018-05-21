@@ -19,7 +19,24 @@ The main benefits of using `JSON5`:
 
 - Objects may have a single trailing comma.
 - Single and multi-line comments are allowed.
-- Additional white space characters are allowed.
+- Strings may span multiple lines by escaping new line characters.
+
+Short example:
+
+```js
+{
+  // comments
+  unquoted: 'and you can quote me on that',
+  singleQuotes: 'I can use "double quotes" here',
+  lineBreaks: "Wow! \
+No \\n's!",
+  hexadecimal: 0xdecaf,
+  leadingDecimalPoint: .8675309, andTrailing: 8675309.,
+  positiveSign: +1,
+  trailingComma: 'in objects', andIn: ['arrays',],
+  "backwardsCompatible": "with JSON",
+}
+```
 
 Using comments can help to understand which section of the application
 the localization key is used for. Also `namespaces`
@@ -29,7 +46,7 @@ file, we should use message path like this: `'MANAGEMENT.OBJECTS.TITLE'`.
 
 Each Kibana plugin has a separate folder with translation files located at
 ```
-src/core_plugins/{plugin_name}/translations/{locale}.json
+{path/to/plugin}/translations/{locale}.json
 ```
 
 where `locale` is [ISO 639 language code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes).
@@ -73,7 +90,7 @@ option at `config/kibana.yml` file.
 
 ## I18n engine
 
-I18n engine is the platform agnostic abstractions which helps to supply a locale
+I18n engine is the platform agnostic abstraction that helps to supply locale
 data to UI frameworks and provides methods for the direct translation.
 
 Here is the public API exposed by this engine:
@@ -85,7 +102,7 @@ language key
 - `setDefaultLocale(locale: string)` - tells the library which language to fallback
 when missing translations
 - `getDefaultLocale()` - returns the default locale
-- `defineFormats(formats: object)` - supply a set of options to the underlying formatter.
+- `defineFormats(formats: object)` - supplies a set of options to the underlying formatter.
 For the detailed explanation, see the section below
 - `translate(id: string, [{values: object, defaultMessage: string}])` – translate message by id
 
@@ -110,7 +127,7 @@ produce the formatted string for displaying to the user.
 const output = msg.format(values);
 ```
 
-`formats` parameter in `IntlMessageFormat` constructor allows to format numbers
+`formats` parameter in `IntlMessageFormat` constructor allows formatting numbers
 and dates/times in messages using `Intl.NumberFormat` and `Intl.DateTimeFormat`,
 respectively.
 
@@ -135,7 +152,7 @@ the underlying `Intl.NumberFormat` instance as its options.
 you can find default format options used as the prototype of the formats
 provided to the constructor.
 
-Creating instances of `IntlMessageFormat` is an expensive operation.
+Creating instances of `IntlMessageFormat` is expensive.
 [Intl-format-cache](https://github.com/yahoo/intl-format-cache)
 library is simply to make it easier to create a cache of format
 instances of a particular type to aid in their reuse. Under the
@@ -165,9 +182,9 @@ from I18n engine:
 ```js
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { IntlProvider } from 'react-intl';
 
-import i18n from 'i18n';
+import i18n from 'kbn-i18n';
+import { IntlProvider } from 'ui/i18n/react-intl';
 
 const locale = i18n.getLocale();
 const messages = i18n.getMessages();
@@ -188,7 +205,8 @@ ReactDOM.render(
 After that we can use `FormattedMessage` components inside `RootComponent`:
 ```js
 import React, { Component } from 'react';
-import { FormattedMessage } from 'react-intl';
+
+import { FormattedMessage } from 'ui/i18n/react-intl';
 
 class RootComponent extends Component {
   constructor(props) {
@@ -215,8 +233,8 @@ class RootComponent extends Component {
             other {messages}
           }`}
           values={{name: <b>{name}</b>, unreadCount}}
-          />
-          ...
+        />
+        ...
       </p>
     );
   }
@@ -239,12 +257,13 @@ language key
 - `setDefaultLocale(locale: string)` - tells the library which language to fallback
 when missing translations
 - `getDefaultLocale()` - returns the default locale
-- `defineFormats(formats: object)` - supply a set of options to the underlying formatter
+- `defineFormats(formats: object)` - supplies a set of options to the underlying formatter
 
-The translation `service` provides the only one method:
+The translation `service` provides only one method:
 - `translate(id: string, [{values: object, defaultMessage: string}])` – translate message by id
 
-The translation `filter` has the following syntax:
+The translation `filter` is used for attributes translation and has
+the following syntax:
 ```
 {{'translationId' | i18n[:{ values: object, defaultMessage: string }]}}
 ```
@@ -273,7 +292,7 @@ localization messages from I18n engine into the `i18nProvider`:
 
 ```js
 import { uiModules } from 'ui/modules';
-import i18n from 'i18n';
+import i18n from 'kbn-i18n';
 
 uiModules.get('kibana').config(function (i18nProvider) {
   i18nProvider.addMessages(i18n.getMessages());
@@ -295,12 +314,12 @@ After that we can use i18n directive in Angular templates:
 [Intl](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl)
 global object exists in the runtime. `Intl` is present in all modern
 browsers and Node.js 0.10+. In order to load i18n engine
-in Node.js we should simply `require()` this module (in Node.js, the
+in Node.js we should simply `import` this module (in Node.js, the
 [data](https://github.com/yahoo/intl-messageformat/tree/master/dist/locale-data)
 for all 200+ languages is loaded along with the library):
 
 ```js
-const i18n = require('i18n');
+import i18n from 'kbn-i18n';
 ```
 
 After that we are able to use all methods exposed by the i18n engine
