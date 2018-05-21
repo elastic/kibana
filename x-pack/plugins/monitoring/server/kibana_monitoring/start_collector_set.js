@@ -5,7 +5,7 @@
  */
 
 import { callClusterFactory } from '../../../xpack_main';
-import { CollectorSet } from './lib/collector_set';
+import { CollectorSet } from './classes/collector_set';
 import { getOpsStatsCollector } from './collectors/get_ops_stats_collector';
 import { getSettingsCollector } from './collectors/get_settings_collector';
 import { getKibanaUsageCollector } from './collectors/get_kibana_usage_collector';
@@ -27,11 +27,8 @@ export function startCollectorSet(kbnServer, server, client, _sendBulkPayload = 
   const config = server.config();
   const interval = config.get('xpack.monitoring.kibana.collection.interval');
 
-  const collectorSet = new CollectorSet({
+  const collectorSet = new CollectorSet(server, {
     interval,
-    logger(...message) {
-      server.log(...message);
-    },
     combineTypes: getCollectorTypesCombiner(kbnServer, config),
     onPayload(payload) {
       return _sendBulkPayload(client, interval, payload);

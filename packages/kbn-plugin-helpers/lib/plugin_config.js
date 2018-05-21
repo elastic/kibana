@@ -10,6 +10,7 @@ module.exports = function(root) {
 
   const buildSourcePatterns = [
     'yarn.lock',
+    'tsconfig.json',
     'package.json',
     'index.js',
     '{lib,public,server,webpackShims,translations}/**/*',
