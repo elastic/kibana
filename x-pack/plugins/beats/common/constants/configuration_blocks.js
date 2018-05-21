@@ -4,6 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { PLUGIN } from './plugin';
-export { INDEX_NAMES } from './index_names';
-export { CONFIGURATION_BLOCKS } from './configuration_blocks';
+export const CONFIGURATION_BLOCKS = {
+  TYPES: {
+    OUTPUT: 'output'
+  }
+};
+
+CONFIGURATION_BLOCKS.UNIQUENESS_ENFORCING_TYPES = [
+  CONFIGURATION_BLOCKS.TYPES.OUTPUT
+];
