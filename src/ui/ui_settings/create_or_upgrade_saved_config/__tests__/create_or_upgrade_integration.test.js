@@ -1,5 +1,4 @@
 import sinon from 'sinon';
-import expect from 'expect.js';
 
 import { createTestCluster } from '../../../../test_utils/es';
 import { createServerWithCorePlugins } from '../../../../test_utils/kbn_server';
@@ -11,7 +10,7 @@ describe('createOrUpgradeSavedConfig()', () => {
   let kbnServer;
   const cleanup = [];
 
-  before(async function () {
+  beforeAll(async function () {
     const log = createToolingLog('debug');
     log.pipe(process.stdout);
     log.indent(6);
@@ -20,7 +19,6 @@ describe('createOrUpgradeSavedConfig()', () => {
     log.indent(4);
 
     const es = createTestCluster({ log });
-    this.timeout(es.getStartTimeout());
 
     log.indent(-4);
     cleanup.push(async () => await es.cleanup());
@@ -67,29 +65,32 @@ describe('createOrUpgradeSavedConfig()', () => {
         },
       },
     ]);
-  });
+  }, 30000);
 
-  after(async () => {
+  afterAll(async () => {
     await Promise.all(cleanup.map(fn => fn()));
     cleanup.length = 0;
   });
 
   it('upgrades the previous version on each increment', async function () {
-    this.timeout(30000);
 
     // ------------------------------------
     // upgrade to 5.4.0
     await createOrUpgradeSavedConfig({
       savedObjectsClient,
       version: '5.4.0',
+      id: '5.4.0',
       buildNum: 54099,
       log: sinon.stub()
     });
 
     const config540 = await savedObjectsClient.get('config', '5.4.0');
-    expect(config540).to.have.property('attributes').eql({
+    expect(config540).toHaveProperty('attributes');
+    expect(config540.attributes).toEqual({
       // should have the new build number
       buildNum: 54099,
+
+      version: '5.4.0',
 
       // 5.4.0-SNAPSHOT and @@version were ignored so we only have the
       // attributes from 5.4.0-rc1, even though the other build nums are greater
@@ -106,14 +107,18 @@ describe('createOrUpgradeSavedConfig()', () => {
     await createOrUpgradeSavedConfig({
       savedObjectsClient,
       version: '5.4.1',
+      id: '5.4.1',
       buildNum: 54199,
       log: sinon.stub()
     });
 
     const config541 = await savedObjectsClient.get('config', '5.4.1');
-    expect(config541).to.have.property('attributes').eql({
+    expect(config541).toHaveProperty('attributes');
+    expect(config541.attributes).toEqual({
       // should have the new build number
       buildNum: 54199,
+
+      version: '5.4.1',
 
       // should also include properties from 5.4.0 and 5.4.0-rc1
       '5.4.0': true,
@@ -130,14 +135,18 @@ describe('createOrUpgradeSavedConfig()', () => {
     await createOrUpgradeSavedConfig({
       savedObjectsClient,
       version: '7.0.0-rc1',
+      id: '7.0.0-rc1',
       buildNum: 70010,
       log: sinon.stub()
     });
 
     const config700rc1 = await savedObjectsClient.get('config', '7.0.0-rc1');
-    expect(config700rc1).to.have.property('attributes').eql({
+    expect(config700rc1).toHaveProperty('attributes');
+    expect(config700rc1.attributes).toEqual({
       // should have the new build number
       buildNum: 70010,
+
+      version: '7.0.0-rc1',
 
       // should also include properties from 5.4.1, 5.4.0 and 5.4.0-rc1
       '5.4.1': true,
@@ -155,14 +164,18 @@ describe('createOrUpgradeSavedConfig()', () => {
     await createOrUpgradeSavedConfig({
       savedObjectsClient,
       version: '7.0.0',
+      id: '7.0.0',
       buildNum: 70099,
       log: sinon.stub()
     });
 
     const config700 = await savedObjectsClient.get('config', '7.0.0');
-    expect(config700).to.have.property('attributes').eql({
+    expect(config700).toHaveProperty('attributes');
+    expect(config700.attributes).toEqual({
       // should have the new build number
       buildNum: 70099,
+
+      version: '7.0.0',
 
       // should also include properties from ancestors, including 7.0.0-rc1
       '7.0.0-rc1': true,
@@ -181,19 +194,23 @@ describe('createOrUpgradeSavedConfig()', () => {
     await createOrUpgradeSavedConfig({
       savedObjectsClient,
       version: '6.2.3-rc1',
+      id: '6.2.3-rc1',
       buildNum: 62310,
       log: sinon.stub()
     });
 
     const config623rc1 = await savedObjectsClient.get('config', '6.2.3-rc1');
-    expect(config623rc1).to.have.property('attributes').eql({
+    expect(config623rc1).toHaveProperty('attributes');
+    expect(config623rc1.attributes).toEqual({
       // should have the new build number
       buildNum: 62310,
+
+      version: '6.2.3-rc1',
 
       // should also include properties from ancestors, but not 7.0.0-rc1 or 7.0.0
       '5.4.1': true,
       '5.4.0': true,
       '5.4.0-rc1': true,
     });
-  });
+  }, 30000);
 });

@@ -18,11 +18,16 @@ export function uiSettingsServiceFactory(server, options) {
   const {
     savedObjectsClient,
     getDefaults,
+    idSuffix = ''
   } = options;
+
+  const kibanaVersion = config.get('pkg.version');
+  const uiSettingsId = idSuffix ? `${kibanaVersion}:${idSuffix}` : kibanaVersion;
 
   return new UiSettingsService({
     type: 'config',
-    id: config.get('pkg.version'),
+    id: uiSettingsId,
+    version: kibanaVersion,
     buildNum: config.get('pkg.buildNum'),
     savedObjectsClient,
     getDefaults,

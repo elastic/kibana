@@ -12,6 +12,17 @@ export function uiSettingsMixin(kbnServer, server) {
     kbnServer.uiExports.uiSettingDefaults
   );
 
+  const identifierCache = new WeakMap();
+  server.decorate('request', 'setUiSettingsIdentifier', function (identifier) {
+    const request = this;
+
+    if (identifierCache.has(request)) {
+      throw new Error(`UI Settings identifier has already been set for this request`);
+    }
+
+    identifierCache.set(request, identifier);
+  });
+
   server.decorate('server', 'uiSettingsServiceFactory', (options = {}) => {
     return uiSettingsServiceFactory(server, {
       getDefaults,
@@ -22,6 +33,7 @@ export function uiSettingsMixin(kbnServer, server) {
   server.addMemoizedFactoryToRequest('getUiSettingsService', request => {
     return getUiSettingsServiceForRequest(server, request, {
       getDefaults,
+      idSuffix: identifierCache.get(request)
     });
   });
 
