@@ -8,7 +8,6 @@ import { number } from './number';
 import { palette } from './palette';
 import { select } from './select';
 import { seriesStyle } from './series_style';
-import { shape } from './shape';
 import { textarea } from './textarea';
 import { string } from './string';
 import { font } from './font';
@@ -26,6 +25,5 @@ export const argTypeSpecs = [
   select,
   string,
   seriesStyle,
-  shape,
   textarea,
 ];
