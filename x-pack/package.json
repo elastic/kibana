@@ -123,6 +123,7 @@
     "moment-timezone": "^0.5.14",
     "ngreact": "^0.5.1",
     "object-hash": "1.2.0",
+    "openlayers": "^4.2.0",
     "path-match": "1.2.4",
     "pdfmake": "0.1.33",
     "pivotal-ui": "13.0.1",

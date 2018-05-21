@@ -17,6 +17,7 @@ import { grokdebugger } from './plugins/grokdebugger';
 import { dashboardMode } from './plugins/dashboard_mode';
 import { logstash } from './plugins/logstash';
 import { apm } from './plugins/apm';
+import { gis } from './plugins/gis';
 import { licenseManagement } from './plugins/license_management';
 import { cloud } from './plugins/cloud';
 import { indexManagement } from './plugins/index_management';
@@ -37,6 +38,7 @@ module.exports = function (kibana) {
     dashboardMode(kibana),
     logstash(kibana),
     apm(kibana),
+    gis(kibana),
     licenseManagement(kibana),
     cloud(kibana),
     indexManagement(kibana),

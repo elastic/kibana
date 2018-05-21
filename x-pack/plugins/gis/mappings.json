@@ -1,0 +1,18 @@
+{
+  "gis-app": {
+    "properties": {
+      "description": {
+        "type": "text"
+      },
+      "title": {
+        "type": "text"
+      },
+      "version": {
+        "type": "integer"
+      },
+      "data": {
+        "type": "text"
+      }
+    }
+  }
+}
