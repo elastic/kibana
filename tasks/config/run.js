@@ -202,7 +202,19 @@ module.exports = function (grunt) {
         'scripts/functional_tests',
         '--config', 'test/api_integration/config.js',
         '--es-from', 'source',
-        '--debug',
+      ],
+    },
+
+    functional_tests: {
+      cmd: process.execPath,
+      args: [
+        'scripts/functional_tests',
+        '--config', 'test/functional/config.js',
+        '--es-from', 'source',
+        '--verbose',
+        '--server.maxPayloadBytes=1648576', //default is 1048576
+        '--env.name=development',
+        '--kibana-install-dir', `./build/oss/kibana-${PKG_VERSION}-${process.platform}-x86_64`,
       ],
     },
   };

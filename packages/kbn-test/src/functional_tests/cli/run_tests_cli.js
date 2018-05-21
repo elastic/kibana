@@ -31,7 +31,7 @@ import { runTests } from '../../';
  *                                       if no config option is passed
  */
 export async function runTestsCli(defaultConfigPaths) {
-  const { configs, help, bail, log, installDir, esFrom } = processArgs(
+  const { configs, help, bail, log, installDir, esFrom, rest } = processArgs(
     defaultConfigPaths
   );
 
@@ -45,7 +45,7 @@ export async function runTestsCli(defaultConfigPaths) {
   }
 
   try {
-    await runTests(configs, { bail, log, installDir, esFrom });
+    await runTests(configs, { bail, log, installDir, esFrom, rest });
   } catch (err) {
     log.error('FATAL ERROR');
     log.error(err);

@@ -25,7 +25,7 @@ export async function runKibanaServer({ procs, config, options }) {
 
   await procs.run('kibana', {
     cmd: getKibanaCmd(installDir),
-    args: getCliArgs(config, options),
+    args: collectCliArgs(config, options),
     env: {
       FORCE_COLOR: 1,
       ...process.env,
@@ -45,14 +45,29 @@ function getKibanaCmd(installDir) {
   return KIBANA_EXEC;
 }
 
-function getCliArgs(config, { devMode, installDir }) {
+function collectCliArgs(config, { devMode, installDir }) {
   const buildArgs = config.get('kbnTestServer.buildArgs') || [];
   const sourceArgs = config.get('kbnTestServer.sourceArgs') || [];
-  const serverArgs = config.get('kbnTestServer.serverArgs') || [];
+  const baseServerArgs = config.get('kbnTestServer.serverArgs') || [];
 
-  if (devMode) serverArgs.push('--dev');
+  const serverArgs = pipe(
+    baseServerArgs,
+    args => (devMode ? [...args.push('--dev')] : args),
+    args => (installDir ? args.filter(a => a !== '--oss') : args)
+  );
 
   return installDir
     ? [...serverArgs, ...buildArgs]
     : [KIBANA_EXEC_PATH, ...serverArgs, ...sourceArgs];
+}
+
+/*
+ * Apply each function in fns to the result of the
+ * previous function. The first function's input
+ * is the arr array.
+ */
+function pipe(arr, ...fns) {
+  return fns.reduce((acc, fn) => {
+    return fn(arr);
+  }, []);
 }
