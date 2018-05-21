@@ -28,21 +28,21 @@ export function runTslintCli() {
         return true;
       }
 
-      return resolve(opts.project) === project.getTsConfigPath();
+      return resolve(opts.project) === project.tsConfigPath;
     }).map(project => ({
       task: () =>
         execa(
           'tslint',
-          [...process.argv.slice(2), '--project', project.getTsConfigPath()],
+          [...process.argv.slice(2), '--project', project.tsConfigPath],
           {
-            cwd: project.getDirectory(),
+            cwd: project.directory,
             env: chalk.enabled ? { FORCE_COLOR: 'true' } : {},
             stdio: ['ignore', 'pipe', 'pipe'],
           }
         ).catch(error => {
           throw new LintFailure(project, error);
         }),
-      title: project.getName(),
+      title: project.name,
     })),
     {
       concurrent: true,
@@ -60,7 +60,7 @@ export function runTslintCli() {
     for (const e of error.errors) {
       if (e instanceof LintFailure) {
         log.write('');
-        log.error(`${e.project.getName()} failed\n${e.error.stdout}`);
+        log.error(`${e.project.name} failed\n${e.error.stdout}`);
       } else {
         log.error(e);
       }

@@ -11,4 +11,4 @@ export const PROJECTS = [
   // because it takes less than 10 ms, while the other modules
   // both took closer to 1000ms.
   ...glob.sync('packages/*/tsconfig.json', { cwd: REPO_ROOT }),
-].map(path => Project.fromConfig(resolve(REPO_ROOT, path)));
+].map(path => new Project(resolve(REPO_ROOT, path)));

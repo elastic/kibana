@@ -38,7 +38,7 @@ export async function lintFiles(log: ToolingLog, files: File[]) {
         files: filesInProject.map(f => f.getAbsolutePath()),
         fix: false,
         format: 'stylish',
-        project: project.getTsConfigPath(),
+        project: project.tsConfigPath,
       },
       {
         log(m: string) {
@@ -55,7 +55,7 @@ export async function lintFiles(log: ToolingLog, files: File[]) {
     } else {
       log.success(
         '[tslint/%s] %d files linted successfully',
-        project.getName(),
+        project.name,
         files.length
       );
     }

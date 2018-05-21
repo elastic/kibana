@@ -24,7 +24,7 @@ export function getTsProjectForAbsolutePath(path: string) {
 
   if (projects.length !== 1) {
     const configPaths = projects.map(
-      p => `"${relative(REPO_ROOT, p.getTsConfigPath())}"`
+      p => `"${relative(REPO_ROOT, p.tsConfigPath)}"`
     );
 
     const pathsMsg = `${configPaths.slice(0, -1).join(', ')} or ${
