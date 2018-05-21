@@ -10,7 +10,7 @@ import path from 'path';
 import { spawn } from 'child_process';
 import rimraf from 'rimraf';
 import * as Rx from 'rxjs';
-import { map, share, first, tap, mergeMap, filter } from 'rxjs/operators';
+import { map, share, first, tap, mergeMap, filter, partition } from 'rxjs/operators';
 import cdp from 'chrome-remote-interface';
 import { HeadlessChromiumDriver } from '../driver';
 import { args } from './args';
@@ -56,7 +56,9 @@ export class HeadlessChromiumDriverFactory {
         share()
       );
 
-      const [ consoleMessage$, message$ ] = stderr$.partition(msg => msg.match(/\[\d+\/\d+.\d+:\w+:CONSOLE\(\d+\)\]/));
+      const [ consoleMessage$, message$ ] = stderr$.pipe(
+        partition(msg => msg.match(/\[\d+\/\d+.\d+:\w+:CONSOLE\(\d+\)\]/))
+      );
 
       const driver$ = message$.pipe(
         first(line => line.indexOf(`DevTools listening on ws://127.0.0.1:${bridgePort}`) >= 0),

@@ -5,7 +5,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { take, share, mapTo, delay, tap } from 'rxjs/operators';
+import { take, share, mapTo, delay, tap, ignoreElements } from 'rxjs/operators';
 
 // Our process can get sent various signals, and when these occur we wish to
 // kill the subprocess and then kill our process as long as the observer isn't cancelled
@@ -53,7 +53,7 @@ export function safeChildProcess(childProcess, observer) {
     childProcess.kill('SIGKILL');
   });
 
-  observer.add(terminate$.ignoreElements().subscribe(observer));
+  observer.add(terminate$.pipe(ignoreElements()).subscribe(observer));
 }
 
 // If a process exits ungracefully, we can try to help the user make sense of why

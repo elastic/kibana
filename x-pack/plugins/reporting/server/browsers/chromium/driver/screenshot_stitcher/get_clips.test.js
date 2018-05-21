@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { toArray } from 'rxjs/operators';
 import { $getClips } from './get_clips';
 
 function getClipsTest(description, { dimensions, max }, { clips: expectedClips }) {
   test(description, async () => {
-    const clips =  await $getClips(dimensions, max).toArray().toPromise();
+    const clips =  await $getClips(dimensions, max).pipe(toArray()).toPromise();
     expect(clips.length).toBe(expectedClips.length);
     for (let i = 0; i < clips.length; ++i) {
       expect(clips[i]).toEqual(expectedClips[i]);

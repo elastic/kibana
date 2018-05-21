@@ -1,5 +1,6 @@
 import { resolve } from 'path';
 
+import { toArray } from 'rxjs/operators';
 import expect from 'expect.js';
 
 import { createPackageJsonsInDirectory$ } from '../package_jsons_in_directory';
@@ -13,7 +14,7 @@ describe('plugin discovery/packs in directory', () => {
   describe('createPackageJsonsInDirectory$()', () => {
     describe('errors emitted as { error } results', () => {
       async function checkError(path, check) {
-        const results = await createPackageJsonsInDirectory$(path).toArray().toPromise();
+        const results = await createPackageJsonsInDirectory$(path).pipe(toArray()).toPromise();
         expect(results).to.have.length(1);
         expect(results[0]).to.only.have.keys('error');
         const { error } = results[0];
@@ -43,7 +44,7 @@ describe('plugin discovery/packs in directory', () => {
     });
 
     it('includes child errors for invalid packageJsons within a valid directory', async () => {
-      const results = await createPackageJsonsInDirectory$(PLUGINS_DIR).toArray().toPromise();
+      const results = await createPackageJsonsInDirectory$(PLUGINS_DIR).pipe(toArray()).toPromise();
 
       const errors = results
         .map(result => result.error)

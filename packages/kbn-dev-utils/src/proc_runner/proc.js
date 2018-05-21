@@ -102,7 +102,7 @@ export function createProc(name, { cmd, args, cwd, env, stdin, log }) {
       return Rx.race(exit$, error$);
     }).share();
 
-    _outcomePromise = Rx.Observable.merge(
+    _outcomePromise = Rx.merge(
       this.lines$.pipe(ignoreElements()),
       this.outcome$
     ).toPromise();

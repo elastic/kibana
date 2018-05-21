@@ -9,7 +9,7 @@ import { mapTo } from 'rxjs/operators';
  *  @return {Rx.Observable}
  */
 export function observeSignals(process) {
-  return Rx.Observable.merge(
+  return Rx.merge(
     Rx.fromEvent(process, 'exit').pipe(mapTo('exit')),
     Rx.fromEvent(process, 'SIGINT').pipe(mapTo('SIGINT')),
     Rx.fromEvent(process, 'SIGTERM').pipe(mapTo('SIGTERM'))

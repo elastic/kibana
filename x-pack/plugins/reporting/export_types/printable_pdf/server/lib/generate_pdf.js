@@ -5,7 +5,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { mergeMap } from 'rxjs/operators';
+import { toArray, mergeMap } from 'rxjs/operators';
 import moment from 'moment';
 import { pdf } from './pdf';
 import { groupBy } from 'lodash';
@@ -71,9 +71,10 @@ function generatePdfObservableFn(server) {
     const layout = getLayout(layoutParams);
     const screenshots$ = urlScreenshotsObservable(urls, headers, layout);
 
-    return screenshots$
-      .toArray()
-      .mergeMap(urlScreenshots => createPdfWithScreenshots({ title, browserTimezone, urlScreenshots, layout, logo }));
+    return screenshots$.pipe(
+      toArray(),
+      mergeMap(urlScreenshots => createPdfWithScreenshots({ title, browserTimezone, urlScreenshots, layout, logo }))
+    );
   };
 }
 
