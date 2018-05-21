@@ -5,7 +5,7 @@ export default function ({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
   const PageObjects = getPageObjects(['dashboard', 'header', 'settings', 'common']);
 
-  xdescribe('dashboard time zones', () => {
+  describe('dashboard time zones', () => {
     before(async () => {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaSavedObjects();
