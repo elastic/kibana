@@ -42,7 +42,8 @@ module.factory('SavedSearch', function (courier) {
         hits: 0,
         sort: [],
         version: 1
-      }
+      },
+      afterESResp: this._afterEsResp
     });
 
     this.showInRecenltyAccessed = true;
@@ -66,6 +67,17 @@ module.factory('SavedSearch', function (courier) {
 
   SavedSearch.prototype.getFullPath = function () {
     return `/app/kibana#/discover/${this.id}`;
+  };
+
+  SavedSearch.prototype._afterEsResp = function () {
+    const baseSearchSource = this.searchSource.clone();
+    baseSearchSource.inherits(false);
+    baseSearchSource.set('filter', []);
+    baseSearchSource.set('query', null);
+
+    this.searchSource.inherits(baseSearchSource);
+
+    return this.searchSource;
   };
 
   return SavedSearch;
