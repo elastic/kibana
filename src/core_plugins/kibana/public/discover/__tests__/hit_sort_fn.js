@@ -5,6 +5,7 @@ import expect from 'expect.js';
 import PluginsKibanaDiscoverHitSortFnProvider from '../_hit_sort_fn';
 
 describe('hit sort function', function () {
+  expect(true).to.be(false);
   let createHitSortFn;
 
   beforeEach(ngMock.module('kibana'));
