@@ -32,5 +32,8 @@ export default function ({ getService }) {
         reportingAPI.expectCompletedReportCount(stats, 3);
       });
     });
+
+    // 6.3 urls currently being tested as part of the "bwc_existing_indexes" test suite. Reports are time consuming,
+    // don't replicate tests if we don't need to, so no specific 6_3 url tests here.
   });
 }
