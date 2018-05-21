@@ -47,12 +47,20 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       if (pagination.length === 0) {
         return false;
       }
+
       const pagerNextButton = await pagination[0].findByCssSelector('button[aria-label="Next page"]');
-      if (pagerNextButton) {
-        await pagerNextButton.click();
-        await PageObjects.header.waitUntilLoadingHasFinished();
+      if (!pagerNextButton) {
+        return false;
       }
-      return pagerNextButton ? true : false;
+
+      const isDisabled = await pagerNextButton.getAttribute('disabled');
+      if (isDisabled != null) {
+        return false;
+      }
+
+      await pagerNextButton.click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      return true;
     }
 
     async isAddPanelOpen() {
