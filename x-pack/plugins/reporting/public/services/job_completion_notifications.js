@@ -7,7 +7,7 @@
 import { uiModules } from 'ui/modules';
 import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '../../common/constants';
 
-const jobCompletionNotifications = {
+export const jobCompletionNotifications = {
   add(jobId) {
     const jobs = this.getAll();
     jobs.push(jobId);
