@@ -90,13 +90,13 @@ export class ColdPhase extends PureComponent {
         description={
           <Fragment>
             <p>
-              Your read-only index is queried less frequently. Use this phase
-              when the index no longer needs to be on the most performant hardware.
+              Your index is queried less frequently
+              and no longer needs to be on the most performant hardware.
             </p>
             {isShowingErrors ? (
               <EuiTextColor color="danger">
                 <EuiText>
-                  <p>This phase contains errors that need to be fixed.</p>
+                  <p>This phase contains errors</p>
                 </EuiText>
               </EuiTextColor>
             ) : null}
@@ -206,7 +206,7 @@ export class ColdPhase extends PureComponent {
                       setPhaseData(PHASE_REPLICA_COUNT, warmPhaseReplicaCount)
                     }
                   >
-                    Set same as warm phase
+                    Set to same as warm phase
                   </EuiButtonEmpty>
                 </EuiFormRow>
               </EuiFlexItem>

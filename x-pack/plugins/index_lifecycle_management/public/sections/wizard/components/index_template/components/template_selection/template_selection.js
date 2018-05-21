@@ -68,7 +68,7 @@ export class TemplateSelection extends PureComponent {
             when you create an index.{' '}
             <EuiLink href="https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-templates.html">
               Learn more
-            </EuiLink>.
+            </EuiLink>
           </p>
         }
       >
@@ -100,7 +100,7 @@ export class TemplateSelection extends PureComponent {
             {bootstrapEnabled ? (
               <Fragment>
                 <ErrableFormRow
-                  label="Name your index"
+                  label="Index name"
                   errorKey={STRUCTURE_INDEX_NAME}
                   isShowingErrors={isShowingErrors}
                   errors={errors}
@@ -114,7 +114,7 @@ export class TemplateSelection extends PureComponent {
                   />
                 </ErrableFormRow>
                 <ErrableFormRow
-                  label="Name your alias"
+                  label="Alias name"
                   errorKey={STRUCTURE_ALIAS_NAME}
                   isShowingErrors={isShowingErrors}
                   errors={errors}

@@ -72,7 +72,7 @@ export class PolicyConfiguration extends Component {
     if (await this.validate()) {
       this.props.done();
     } else {
-      toastNotifications.addDanger('Please fix errors on the page.');
+      toastNotifications.addDanger('Please the fix errors on the page');
     }
   };
 
@@ -124,12 +124,12 @@ export class PolicyConfiguration extends Component {
         <EuiHorizontalRule className="ilmHrule" />
         <EuiTitle>
           <h4>
-            {!selectedPolicyName ? 'Create a new policy' : `Edit policy ${selectedPolicyName}`}
+            {!selectedPolicyName ? 'Create a policy' : `Edit policy ${selectedPolicyName}`}
           </h4>
         </EuiTitle>
         <EuiSpacer size="xs" />
         <EuiText color="subdued">
-          <p>Configure the phases of your data and when to transition between them.  Only the hot phase is required.</p>
+          <p>Configure the phases of your data and when to transition between them.</p>
         </EuiText>
         <EuiSpacer />
         <HotPhase

@@ -103,7 +103,7 @@ export class Review extends Component {
     if (await this.validate()) {
       this.props.done();
     } else {
-      toastNotifications.addDanger('Please fix errors on the page.');
+      toastNotifications.addDanger('Please fix the errors on the page');
     }
   };
 
@@ -148,22 +148,22 @@ export class Review extends Component {
           <h3>Review your policy changes</h3>
         </EuiTitle>
         <EuiText>
-          <p>Be careful. Your changes will go into effect immediately once you save.</p>
+          <p>When you save a policy, your changes go into effect immediately.</p>
         </EuiText>
 
         <EuiSpacer />
 
         <EuiCallOut
-          title="This will change template configurations"
+          title="Your changes affect these template configurations"
           color="warning"
         >
-          <h4>{`${affectedIndexTemplates.length} Affected index ${affectedIndexTemplates.length === 1 ? 'template' : 'templates'}`}</h4>
+          <h4>{`${affectedIndexTemplates.length} Index ${affectedIndexTemplates.length === 1 ? 'template' : 'templates'}`}</h4>
           <ul>
             {affectedIndexTemplates.map(template => (
               <li key={template}>{template}</li>
             ))}
           </ul>
-          <h4>{`${affectedIndices.length} Affected ${affectedIndices.length === 1 ? 'Index' : 'Indices' }`}</h4>
+          <h4>{`${affectedIndices.length} ${affectedIndices.length === 1 ? 'Index' : 'Indices' }`}</h4>
           { isLoadingAffectedIndices ? (
             <EuiLoadingSpinner size="l"/>
           ) : (
@@ -177,10 +177,10 @@ export class Review extends Component {
           <Fragment>
             <EuiSpacer />
             <EuiCallOut
-              title="This will create a new index alias"
+              title="This action creates a new index alias"
               color="success"
             >
-              <p>Since you decided to bootstrap a new index you&apos;ll want to point to a new alias going forward</p>
+              <p>You decided to bootstrap a new index. Point to this new alias going forward.</p>
               <h3><span className="ilmAlias">{aliasName}</span> is your new alias</h3>
             </EuiCallOut>
           </Fragment>
@@ -224,13 +224,13 @@ export class Review extends Component {
               { showSaveChangedMessage ? (
                 <Fragment>
                   <EuiTitle size="s">
-                    <h3>Save changes to {selectedPolicyName} policy</h3>
+                    <h3>Save changes to {selectedPolicyName} policy?</h3>
                   </EuiTitle>
                   <EuiText>
                     <p>
-                      <strong>You are editing an existing policy</strong>. This means that any saves you make
-                  will also change any index templates this policy is attached to. You can instead save
-                  these changes and make it a brand new policy that only changes the template you
+                      <strong>You are editing an existing policy</strong>. Any changes you make
+                  will also change index templates that this policy is attached to. Alternately, you can save
+                  these changes in a new policy and only change the template you
                   selected.
                     </p>
                   </EuiText>

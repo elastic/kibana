@@ -144,7 +144,7 @@ export class Wizard extends Component {
       //   onClick: () => this.onSelectedStepChanged(2),
       // },
       {
-        title: 'Configure policy',
+        title: 'Configure a policy',
         isSelected: this.state.selectedStep === 2,
         isComplete: this.state.selectedStep > 2,
         disabled: this.state.selectedStep < 2,

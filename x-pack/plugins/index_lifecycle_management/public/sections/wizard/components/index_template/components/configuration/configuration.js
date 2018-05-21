@@ -92,9 +92,9 @@ export class Configuration extends Component {
     return (
       <div>
         <EuiDescribedFormGroup
-          title={<h4>Configuration</h4>}
+          title={<h4>Configure hot indices</h4>}
           titleSize="s"
-          description="Indices are thought of as &quot;hot&quot; when they are actively being written to."
+          description="A hot index is actively being written to."
           fullWidth
         >
           <ErrableFormRow
@@ -131,8 +131,8 @@ export class Configuration extends Component {
                 The best way to determine how many shards you need is to benchmark
                 using realistic data and queries on your hardware.{' '}
                 <EuiLink href="https://www.elastic.co/webinars/using-rally-to-get-your-elasticsearch-cluster-size-right">
-                  Learn more in our docs
-                </EuiLink>.
+                  Learn more
+                </EuiLink>
               </p>
             }
           />
