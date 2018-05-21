@@ -35,6 +35,8 @@ import {
   updateHidePanelTitles,
   updateTimeRange,
   clearStagedFilters,
+  updateFilters,
+  updateQuery,
 } from './actions';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import { createPanelState } from './panel';
@@ -50,7 +52,9 @@ import {
   getHidePanelTitles,
   getStagedFilters,
   getEmbeddables,
-  getEmbeddableMetadata
+  getEmbeddableMetadata,
+  getFilters,
+  getQuery,
 } from '../selectors';
 
 /**
@@ -195,6 +199,14 @@ export class DashboardStateManager {
 
     if (getDescription(state) !== this.getDescription()) {
       store.dispatch(updateDescription(this.getDescription()));
+    }
+
+    if (getFilters(state) !== this.getFilterState().filterBars) {
+      store.dispatch(updateFilters(this.getFilterState().filterBars));
+    }
+
+    if (getQuery(state) !== this.getQuery()) {
+      store.dispatch(updateQuery(this.getQuery()));
     }
   }
 
