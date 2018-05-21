@@ -51,20 +51,16 @@ export function migrationTest(callCluster) {
       await waitForDocs(index, docs.value().length);
     },
 
-    async assertValidMigrationState({ index, plugins }) {
+    async assertValidMigrationState({ index, expectedTypes }) {
       const { _source: { migration: migrationState } } = await fetchMigrationState(index);
-      const expectedPlugins = _.sortBy(plugins, 'id');
-      const actualPlugins = _.sortBy(migrationState.plugins, 'id');
 
       assert.equal(migrationState.status, 'migrated');
       assert.isOk(migrationState.previousIndex);
+
       assert.deepEqual(
-        actualPlugins.map(p => _.pick(p, ['id', 'migrationIds'])),
-        expectedPlugins.map(({ id, migrations }) => ({ id, migrationIds: migrations.map(m => m.id) })),
-      );
-      assert.deepEqual(
-        actualPlugins.map(({ mappings }) => JSON.parse(mappings)),
-        expectedPlugins.map(({ mappings }) => mappings),
+        expectedTypes,
+        migrationState.types,
+        `EXPECTED ${JSON.stringify(migrationState.types)} to equal ${JSON.stringify(expectedTypes)}`
       );
 
       return migrationState;

@@ -3,7 +3,7 @@
 exports[`kibana_migrations plugin init migrates the kibana index 1`] = `
 Object {
   "data": Object {
-    ".kibana-4.5.6-903bdb8e0a613cbe24fe86480bd7c100a25112b9": Object {
+    ".kibana-4.5.6-c992f48e": Object {
       "field1:a": Object {
         "_source": Object {
           "field1": "Dangit",
@@ -21,26 +21,24 @@ Object {
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
-            "plugins": Array [
+            "previousIndex": ".kibana-4.5.6-original",
+            "status": "migrated",
+            "types": Array [
               Object {
-                "checksum": "9772e119360552cc7bade8b311957ab1bca4a087",
-                "id": "p1",
-                "mappings": "{\\"field1\\":{\\"type\\":\\"text\\"}}",
+                "checksum": "1a201c97",
                 "migrationIds": Array [
                   "mg1",
                 ],
+                "type": "field1",
               },
               Object {
-                "checksum": "605c5acd01d06da94873e1f8312f9d3d644f2a01",
-                "id": "p2",
-                "mappings": "{\\"field2\\":{\\"type\\":\\"text\\"}}",
+                "checksum": "dcb7d955",
                 "migrationIds": Array [
                   "mg2",
                 ],
+                "type": "field2",
               },
             ],
-            "previousIndex": ".kibana-4.5.6-original",
-            "status": "migrated",
           },
           "type": "migration",
         },
@@ -51,8 +49,8 @@ Object {
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
-            "plugins": Array [],
             "status": "migrating",
+            "types": Array [],
           },
           "type": "migration",
         },
@@ -63,7 +61,7 @@ Object {
   "meta": Object {
     "aliases": Object {
       ".kibana": Object {
-        ".kibana-4.5.6-903bdb8e0a613cbe24fe86480bd7c100a25112b9": Object {
+        ".kibana-4.5.6-c992f48e": Object {
           "aliases": Object {
             ".kibana": Object {},
           },
@@ -71,7 +69,7 @@ Object {
       },
     },
     "mappings": Object {
-      ".kibana-4.5.6-903bdb8e0a613cbe24fe86480bd7c100a25112b9": Object {
+      ".kibana-4.5.6-c992f48e": Object {
         "doc": Object {
           "dynamic": "strict",
           "properties": Object {
@@ -91,28 +89,24 @@ Object {
             },
             "migration": Object {
               "properties": Object {
-                "plugins": Object {
-                  "properties": Object {
-                    "checksum": Object {
-                      "type": "keyword",
-                    },
-                    "id": Object {
-                      "type": "keyword",
-                    },
-                    "mappings": Object {
-                      "type": "text",
-                    },
-                    "migrationIds": Object {
-                      "type": "keyword",
-                    },
-                  },
-                  "type": "nested",
-                },
                 "previousIndex": Object {
                   "type": "keyword",
                 },
                 "status": Object {
                   "type": "keyword",
+                },
+                "types": Object {
+                  "properties": Object {
+                    "checksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "type": Object {
+                      "type": "keyword",
+                    },
+                  },
                 },
               },
             },
@@ -145,28 +139,24 @@ Object {
             },
             "migration": Object {
               "properties": Object {
-                "plugins": Object {
-                  "properties": Object {
-                    "checksum": Object {
-                      "type": "keyword",
-                    },
-                    "id": Object {
-                      "type": "keyword",
-                    },
-                    "mappings": Object {
-                      "type": "text",
-                    },
-                    "migrationIds": Object {
-                      "type": "keyword",
-                    },
-                  },
-                  "type": "nested",
-                },
                 "previousIndex": Object {
                   "type": "keyword",
                 },
                 "status": Object {
                   "type": "keyword",
+                },
+                "types": Object {
+                  "properties": Object {
+                    "checksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "type": Object {
+                      "type": "keyword",
+                    },
+                  },
                 },
               },
             },
@@ -181,7 +171,7 @@ Object {
       },
     },
     "settings": Object {
-      ".kibana-4.5.6-903bdb8e0a613cbe24fe86480bd7c100a25112b9": Object {
+      ".kibana-4.5.6-c992f48e": Object {
         "index": Object {
           "number_of_replicas": "1",
           "number_of_shards": "5",
@@ -202,13 +192,13 @@ Object {
 exports[`kibana_migrations plugin init respects the force option 1`] = `
 Object {
   "data": Object {
-    ".kibana-4.5.6-989db2448f309bfdd99b513f37c84b8f5794d2b5": Object {
+    ".kibana-4.5.6-989db244": Object {
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
-            "plugins": Array [],
             "previousIndex": ".kibana-4.5.6-original",
             "status": "migrated",
+            "types": Array [],
           },
           "type": "migration",
         },
@@ -231,7 +221,7 @@ Object {
   "meta": Object {
     "aliases": Object {
       ".kibana": Object {
-        ".kibana-4.5.6-989db2448f309bfdd99b513f37c84b8f5794d2b5": Object {
+        ".kibana-4.5.6-989db244": Object {
           "aliases": Object {
             ".kibana": Object {},
           },
@@ -239,7 +229,7 @@ Object {
       },
     },
     "mappings": Object {
-      ".kibana-4.5.6-989db2448f309bfdd99b513f37c84b8f5794d2b5": Object {
+      ".kibana-4.5.6-989db244": Object {
         "doc": Object {
           "dynamic": "strict",
           "properties": Object {
@@ -253,28 +243,24 @@ Object {
             },
             "migration": Object {
               "properties": Object {
-                "plugins": Object {
-                  "properties": Object {
-                    "checksum": Object {
-                      "type": "keyword",
-                    },
-                    "id": Object {
-                      "type": "keyword",
-                    },
-                    "mappings": Object {
-                      "type": "text",
-                    },
-                    "migrationIds": Object {
-                      "type": "keyword",
-                    },
-                  },
-                  "type": "nested",
-                },
                 "previousIndex": Object {
                   "type": "keyword",
                 },
                 "status": Object {
                   "type": "keyword",
+                },
+                "types": Object {
+                  "properties": Object {
+                    "checksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "type": Object {
+                      "type": "keyword",
+                    },
+                  },
                 },
               },
             },
@@ -292,28 +278,24 @@ Object {
           "properties": Object {
             "migration": Object {
               "properties": Object {
-                "plugins": Object {
-                  "properties": Object {
-                    "checksum": Object {
-                      "type": "keyword",
-                    },
-                    "id": Object {
-                      "type": "keyword",
-                    },
-                    "mappings": Object {
-                      "type": "text",
-                    },
-                    "migrationIds": Object {
-                      "type": "keyword",
-                    },
-                  },
-                  "type": "nested",
-                },
                 "previousIndex": Object {
                   "type": "keyword",
                 },
                 "status": Object {
                   "type": "keyword",
+                },
+                "types": Object {
+                  "properties": Object {
+                    "checksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "type": Object {
+                      "type": "keyword",
+                    },
+                  },
                 },
               },
             },
@@ -325,7 +307,7 @@ Object {
       },
     },
     "settings": Object {
-      ".kibana-4.5.6-989db2448f309bfdd99b513f37c84b8f5794d2b5": Object {
+      ".kibana-4.5.6-989db244": Object {
         "index": Object {
           "number_of_replicas": undefined,
           "number_of_shards": undefined,
@@ -346,7 +328,6 @@ Object {
 exports[`kibana_migrations plugin migrationOptions exposes pluginSpecs 1`] = `
 Array [
   Object {
-    "checksum": "d3e9a53a895f2eab53921489f92002aa971e1132",
     "id": "foo",
     "mappings": Object {
       "bar": Object {
@@ -357,6 +338,7 @@ Array [
       Object {
         "id": "mg1",
         "seed": [Function],
+        "type": "bar",
       },
     ],
   },

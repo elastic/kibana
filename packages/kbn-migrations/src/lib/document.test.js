@@ -4,7 +4,7 @@ const { seededDocs, buildTransformFunction, toObjectClient, toRaw } = require('.
 describe('buildTransformFunction', () => {
   test('accepts a raw document (e.g. straight from the index)', () => {
     const migrations = [{
-      filter: ({ type }) => type === 'dabo',
+      type: 'dabo',
       transform: (doc) => _.set(doc, 'attributes.name', 'swinney'),
     }];
     const fn = buildTransformFunction(migrations);
@@ -20,7 +20,7 @@ describe('buildTransformFunction', () => {
 
   test('accepts an object client document', () => {
     const migrations = [{
-      filter: ({ type }) => type === 'coach',
+      type: 'coach',
       transform: (doc) => _.set(doc, 'attributes.name', 'swinney'),
     }];
     const fn = buildTransformFunction(migrations);
@@ -37,10 +37,10 @@ describe('buildTransformFunction', () => {
 
   test('runs multiple transforms', () => {
     const migrations = [{
-      filter: ({ type }) => type === 'bar',
+      type: 'bar',
       transform: (doc) => _.set(doc, 'attributes.baz', 'Nifties'),
     }, {
-      filter: ({ type }) => type === 'bar',
+      type: 'bar',
       transform: (doc) => _.set(doc, 'attributes.bing', 'Bingiton'),
     }];
     const fn = buildTransformFunction(migrations);
@@ -66,7 +66,7 @@ describe('buildTransformFunction', () => {
       attributes: { thanks: 'and bring a towel' },
     };
     const migrations = [{
-      filter: ({ type }) => type === 'do',
+      type: 'do',
       transform: (doc) => _.set(doc, 'attributes.towel', 'massively useful'),
     }];
     const fn = buildTransformFunction(migrations);
@@ -86,12 +86,12 @@ describe('buildTransformFunction', () => {
       },
     };
     const migrations = [{
-      filter: ({ type }) => type === 'here',
+      type: 'here',
       transform: (doc) => _.set(doc, 'attributes.a', true),
     }, {
       seed: () => { throw new Error('DOH!'); }
     }, {
-      filter: () => true,
+      type: 'here',
       transform: (doc) => _.set(doc, 'attributes.b', true),
     }];
     const fn = buildTransformFunction(migrations);
@@ -115,7 +115,7 @@ describe('buildTransformFunction', () => {
       },
     };
     const migrations = [{
-      filter: () => true,
+      type: 'says',
       transform: () => { throw new Error(`Shouldn't get called, since there are no object-client docs being migrated`); },
     }];
     const fn = buildTransformFunction(migrations);
@@ -157,7 +157,7 @@ describe('seededDocs', () => {
 
   test('runs seeds through subsequent transforms', () => {
     const migrations = [{
-      filter: () => true,
+      type: 'novel',
       transform: () => { throw new Error('NOPE'); },
     }, {
       seed: () => ({
@@ -168,7 +168,7 @@ describe('seededDocs', () => {
         },
       }),
     }, {
-      filter: ({ type }) => type === 'novel',
+      type: 'novel',
       transform: (doc) => _.set(doc, 'attributes.rating', 5),
     }, {
       seed: () => ({
@@ -179,7 +179,7 @@ describe('seededDocs', () => {
         },
       }),
     }, {
-      filter: ({ type }) => type === 'novel',
+      type: 'novel',
       transform: (doc) => _.set(doc, 'attributes.author', 'N/A'),
     }];
     expect(seededDocs(_.cloneDeep(migrations)))

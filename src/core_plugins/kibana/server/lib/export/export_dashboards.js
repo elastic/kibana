@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import { collectDashboards } from './collect_dashboards';
-import { MigrationState } from '@kbn/migrations';
 
 export async function exportDashboards(req) {
   const ids = _.flatten([req.query.dashboard]);
@@ -12,7 +11,7 @@ export async function exportDashboards(req) {
 
   return {
     version: config.get('pkg.version'),
-    migrationState: MigrationState.trimForExport(migrationState.attributes),
+    migrationState: migrationState.attributes,
     objects
   };
 }

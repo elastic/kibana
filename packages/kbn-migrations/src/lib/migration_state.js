@@ -3,7 +3,7 @@
 // and mappings have already been applied? 3. mapping info for disabled plugins
 
 const _ = require('lodash');
-const Plugin = require('./plugin');
+const objectHash = require('./object_hash');
 const MigrationStatus = require('./migration_status');
 const Persistence = require('./persistence');
 const { DOC_TYPE } = require('./document');
@@ -13,7 +13,7 @@ const ID = `${TYPE}:migration-state`;
 
 const empty = {
   status: MigrationStatus.outOfDate,
-  plugins: [],
+  types: [],
 };
 
 // The mapping that allows us to store migration state in an index
@@ -36,15 +36,13 @@ const mappings = {
     properties: {
       status: { type: 'keyword' },
       previousIndex: { type: 'keyword' },
-      plugins: {
-        type: 'nested',
+      types: {
         properties: {
-          id: { type: 'keyword' },
-          mappings: { type: 'text' },
+          type: { type: 'keyword' },
           checksum: { type: 'keyword' },
           migrationIds: { type: 'keyword' },
-        },
-      },
+        }
+      }
     },
   },
 };
@@ -58,48 +56,40 @@ module.exports = {
   status,
   fetch,
   save,
-  trimForExport,
 };
 
-function trimForExport({ plugins }) {
-  return {
-    plugins: plugins.map(plugin => _.pick(plugin, ['id', 'checksum', 'migrationIds'])),
-  };
-}
-
-// Migration state includes a plugin's mappings. This is so that we can can make determinations
-// about what documents require what plugins even if those plugins are disabled.
+// We need the previous state, if any, so that we don't lose migration info
+// for plugins that are no longer active in the system but whose docs remain.
+// The checksum is a combination of mappings for a type as well as that type's
+// migration ids, so that if either changes, we can detect that we are out of date.
 function build(plugins, previousIndex, previousState = empty) {
-  const disabledIds = new Set(Plugin.disabledIds(plugins, previousState));
-  const disabledPlugins = previousState.plugins.filter(({ id }) => disabledIds.has(id));
-  const enabledPlugins = plugins.map((plugin) => {
-    const { id, mappings, migrations, checksum } = plugin;
-    return {
-      id,
-      checksum,
-      mappings: JSON.stringify(mappings),
-      migrationIds: migrations.map(({ id }) => id),
-    };
-  });
+  const previousTypes = _.indexBy(previousState.types, 'type');
+  const updatedTypes = plugins.reduce((acc, plugin) => Object.assign(acc, pluginTypes(plugin)), previousTypes);
+
   return {
     previousIndex,
+    types: _.values(updatedTypes),
     status: MigrationStatus.migrated,
-    plugins: disabledPlugins.concat(enabledPlugins),
   };
 }
 
-// We can't just compare a single checksum, as we may have some plugins that are now disabled,
-// but which were enabled at one point, and whose migrations are already in the index. So, this
-// status check ignores disabled plugins, as their data is vestigial.
-function status(plugins, migrationState) {
-  if (migrationState.status === MigrationStatus.migrating) {
+// Compares the stored migration state with the current migration state
+// to determine what the migration status is:
+// migrating - a migration is running
+// outOfDate - migrations need to run
+// migrated - everything is up to date
+function status(currentMigrationState, storedMigrationState) {
+  if (storedMigrationState.status === MigrationStatus.migrating) {
     return MigrationStatus.migrating;
   }
-
-  const pluginState = _.indexBy(migrationState.plugins, 'id');
-  const isMigrated = plugins.every(plugin => !Plugin.isOutOfDate(pluginState[plugin.id], plugin));
-
-  return isMigrated ? MigrationStatus.migrated : MigrationStatus.outOfDate;
+  const storedTypes = _.indexBy(storedMigrationState.types, 'type');
+  const isMigrated = currentMigrationState.types.every(({ type, checksum }) => _.get(storedTypes, [type, 'checksum']) === checksum);
+  if (isMigrated) {
+    return MigrationStatus.migrated;
+  }
+  // Verify that we can in fact migrate this, and throw if not.
+  currentMigrationState.types.forEach(assertValidMigrationOrder(storedTypes));
+  return MigrationStatus.outOfDate;
 }
 
 async function fetch(callCluster, index) {
@@ -141,4 +131,52 @@ async function save(callCluster, index, version, migrationState) {
       doc_as_upsert: true,
     },
   });
+}
+
+function pluginTypes(plugin) {
+  const migrationsByType = _.groupBy(plugin.migrations, 'type');
+  return _.chain(_.keys(migrationsByType))
+    .concat(_.keys(plugin.mappings))
+    .uniq()
+    .value()
+    .reduce((acc, type) => {
+      const migrations = _.get(migrationsByType, type, []);
+      const migrationIds = uniqueMigrationIds(plugin, migrations);
+      const checksum = objectHash({ migrationIds, mapping: _.get(plugin.mappings, type) });
+      return _.set(acc, type, { type, checksum, migrationIds });
+    }, {});
+}
+
+function uniqueMigrationIds(plugin, migrations) {
+  const migrationIds = _.map(migrations, 'id');
+  const dup = _.chain(migrationIds)
+    .groupBy(_.identity)
+    .values()
+    .find(v => v.length > 1)
+    .first()
+    .value();
+
+  if (dup) {
+    throw new Error(`Plugin "${plugin.id}" has migration "${dup}" defined more than once.`);
+  }
+
+  return migrationIds;
+}
+
+function assertValidMigrationOrder(storedTypes) {
+  return ({ type, migrationIds }) => {
+    const storedIds = _.get(storedTypes, [type, 'migrationIds'], []);
+    if (storedIds.length > migrationIds.length) {
+      throw new Error(
+        `Type "${type}" has had ${storedIds.length} migrations applied to it, but only ${migrationIds.length} migrations are known.`
+      );
+    }
+    for (let i = 0; i < storedIds.length; ++i) {
+      const actual = migrationIds[i];
+      const expected = storedIds[i];
+      if (actual !== expected) {
+        throw new Error(`Type "${type}" migration order has changed. Expected migration "${expected}", but found "${actual}".`);
+      }
+    }
+  };
 }

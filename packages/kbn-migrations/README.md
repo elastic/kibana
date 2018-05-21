@@ -28,13 +28,12 @@ In each index that the migration system controls, it stores a document with id `
 
 - `status` - is the index migrating or migrated
 - `previousIndex` - the name of the previous index (if any), which can be used to rollback or trace the history of migrations
-- `plugins` - an array of plugin metadata, including
-  - id of the plugin
-  - mappings the plugins have applied to the current index
-  - migration ids the plugins have applied to the current index
-  - checksums of the mappings and migration ids used to quickly determine if the mappings / migration list has changed
+- `types` - an array of types that have at least one migration written for them
+  - `type` - the id / name of the type to which migrations have been applied
+  - `migrationIds` - ids of all migrations that have been applied to documents of the specified type
+  - `checksum` - a short hash used to detect if the type is up to date
 
-To determine if an index needs to be migrated, the migration system compares the plugins in migrationState with the current plugins in the system. If any of the checksums don't match, a migration is needed. Plugins which exist in migrationState but are no longer in the live system are ignored. Their documents and mappings are retained in the index, so removing / disabling a plugin won't require a migration.
+To determine if an index needs to be migrated, the migration system compares the types in migrationState with the types defined by the current plugins in the system. If any of the checksums don't match, a migration is needed. Types which exist in migrationState but are no longer in the live system are ignored. Their documents and mappings are retained in the index, so removing / disabling a plugin won't require a migration.
 
 A migration is required if *any* one of the following statements is true:
 
@@ -44,7 +43,7 @@ A migration is required if *any* one of the following statements is true:
 - The index exists, has a migrationState, the index's migrationState.status is 'migrated', but one or more of the active plugins' mappings / migrations are missing from it
 - The `force` option is true and the index's migrationState.status is 'migrating'
 
-Note: We don't store and compare a single checksum, because the migration system supports disabling and plugins without requiring a migration. If we were to use a single checksum of all plugins, then any change-- including disable / removal of a plugin-- requires a migration.
+Note: We don't store and compare a single checksum because the migration system supports disabling and plugins without requiring a migration. If we were to use a single checksum of all plugins, then any change-- including disable / removal of a plugin-- requires a migration.
 
 
 ### Migrating an index
@@ -61,8 +60,9 @@ When a migration is attempted on an index, the first thing the migration index d
 - A destination index will be created with a name like `index-7.0.0-SHAOFMIGRATIONSTATE`
   - `7.0.0` is whatever the current version of the Elasticstack is
   - `SHAOFMIGRATIONSTATE` ia a hash computed from the array of migrations and mappings being applied to the index
-  - The destination index is created with mappings which include mappings defined by enabled *and* disabled / missing plugins
-    - Disabled / removed plugin mappings are retained so that documents managed by those plugins are not lost during the migration process
+  - The destination index is created with mappings which include
+    - Mappings from the original / source index
+    - Mappings defined by active / enabled plugins (if these conflict with mappings in the original index, the plugins win)
 - Seed migrations will be run
   - The resulting docs are passed through any subsequent transform migrations before being written to the destination index
 - All documents from the original index will be run through the relevant transform migrations, then written to the destination index
@@ -95,7 +95,7 @@ Migrations can fail for a number of reasons
 
 - One of the seeds / transforms throws an exception
 - The index migrationState document has been tampered with and is invalid
-- If any plugins in the index's migrationState are newer than the current, active plugins (e.g. if you try to run Kibana 6.4 against a Kibana 7.0 index)
+- If any types in the index's migrationState are newer than those in the current, active plugins (e.g. if you try to run Kibana 6.4 against a Kibana 7.0 index)
 - Connectivity errors between Kibana and Elasticsearch
 
 
@@ -118,6 +118,7 @@ Update the seed file to look something like this:
 ```js
 module.exports = {
   id: '20180430161212_seed_fancipants',
+  type: 'pants',
   seed() {
     return {
       id: 'fanci',
@@ -160,7 +161,7 @@ module.exports = {
   id: '20180430161610_transform_add_title_to_pants',
 
   // Only apply this migration to documents of type 'pants'
-  filter: ({ type }) => 'pants',
+  type: 'pants'
 
   // We're going to add a title field to these docs, so we'll
   // give the existing docs a default value of 'N/A' for this field...
@@ -302,9 +303,15 @@ It should now be possible to start the previous version of Kibana.
 - The index is assumed to only have documents which conform to the saved-object-client conventions
 - Does not attempt to recover from failure of an individual migration
   - If an individual migration (transform or seed) fails, the migration fails
-- Plugin ids are assumed to be stable. If a plugin's id changes, the migration system will:
-  - Will think that it has been removed and a brand new plugin has been added
-  - Will attempt to run all migrations for the "new" plugin
+- Ownership of a type can be moved from one plugin to another by:
+  - Moving the mappings and *all* migrations for that type to the new plugin
+  - Removeing the mappings and *all* migrations for that type from the old plugin
+  - It is an error for two plugins to define mappings for the same type
+- Types can be renamed (e.g. from `dash` to `dashboard`) by:
+  - Creating a transform migration whose `type` field is `dash`
+  - Whose `transform` function returns a document of type `dashboard`
+  - It is important that any future migrations for type `dashboard` are appended to the same array of migrations as `dash`
+  - Ownership of `dash` and `dashboard` docs should always be paired (e.g. always be owned by the same plugin)
 - Migration order is assumed to be stable within a plugin
   - So, the system will error in a scenario like this:
     - A plugin defines migrations 'a', 'b', and 'c'
@@ -318,7 +325,6 @@ It should now be possible to start the previous version of Kibana.
     - During migration, track what mappings are required by existing docs
     - After migration, remove any mappings that are not defined by active plugins and that are not required by existing docs
 
-
 ## Kibana-index specific notes
 
 Apart from the core migration logic in the `kbn-migrations` package, there is logic which is specific to the Kibana index itself.
@@ -326,3 +332,11 @@ Apart from the core migration logic in the `kbn-migrations` package, there is lo
 When Kibana starts, it will check to see if it needs to migrate its index. If it does, it will perform the migration prior to serving any HTTP requests. Only one instance of Kibana will perform migrations at any given time. All other Kibana instances will wait for the migration to complete. This wait is done by polling the index at a configurable interval (defaults to 2 seconds, and is configurable via the `kibanamigrations.pollInterval` setting). Once the Kibana index migration has completed, the other instances will be able to start successfully.
 
 If the Kibana instance that is performing the migration crashes or is killed prior to finishing the migration, all Kibana instances will be stuck in a polling loop, waiting for the migration to complete. There is no automatic recovery from this scenario, as such a mechanism seemed too complex and likely to introduce subtle bugs. Instead, one of the Kibana instances can be started with a `--force-migration` option which will make it run migrations even if the index has a `migrating` status.
+
+## Running tests
+
+- `node scripts/jest --testPathPattern=migrations`
+- `node scripts/mocha --grep "migrate"`
+- Integration tests:
+  - Start the test server: `yarn run test:ui:server`
+  - Run the tests: `node scripts/functional_test_runner --config test/api_integration/config.js --grep migration`

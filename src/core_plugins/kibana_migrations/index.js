@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { MigrationStatus, Migration, Plugin } from '@kbn/migrations';
+import { MigrationStatus, Migration } from '@kbn/migrations';
 
 export default function (kibana) {
   return new kibana.Plugin({
@@ -53,12 +53,12 @@ function optsFromKbnServer({ pluginSpecs, server, version }, callCluster) {
     index: server.config().get('kibana.index'),
     log: (...args) => server.log(...args),
     callCluster: callCluster || server.plugins.elasticsearch.getCluster('admin').callWithInternalUser,
-    plugins: Plugin.sanitize({
-      plugins: pluginSpecs.map((plugin) => ({
+    plugins: pluginSpecs
+      .map((plugin) => ({
         id: plugin.getId(),
         mappings: _.get(plugin.getExportSpecs(), 'mappings'),
         migrations: plugin.getMigrations(),
-      })),
-    }),
+      }))
+      .filter(p => p.migrations || p.mappings),
   };
 }

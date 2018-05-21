@@ -2,21 +2,16 @@ const Joi = require('joi');
 
 const migrationSchema = Joi.object({
   id: Joi.string().required(),
+  type: Joi.string().required(),
   seed: Joi.func(),
-  filter: Joi.func(),
   transform: Joi.func(),
-}).xor('seed', 'filter')
-  .xor('seed', 'transform');
+}).xor('seed', 'transform');
 
 const pluginSchema = Joi.object({
   id: Joi.string().required(),
   mappings: Joi.object(),
   migrations: Joi.array().items(migrationSchema),
 }).unknown();
-
-const sanitizedPluginSchema = pluginSchema.keys({
-  checksum: Joi.string().required().allow(''),
-});
 
 const documentSchema = Joi.object().unknown().keys({
   id: Joi.string(),
@@ -27,7 +22,6 @@ const documentSchema = Joi.object().unknown().keys({
 const callClusterSchema = Joi.func();
 const indexSchema = Joi.string();
 const pluginArraySchema = Joi.array().items(pluginSchema);
-const sanitizedPluginArraySchema = Joi.array().items(sanitizedPluginSchema);
 const documentArraySchema = Joi.array().items(documentSchema);
 const migrationStateSchema = Joi.object({
   status: Joi.string(),
@@ -47,5 +41,4 @@ module.exports = {
   pluginArraySchema,
   documentArraySchema,
   migrationStateSchema,
-  sanitizedPluginArraySchema,
 };

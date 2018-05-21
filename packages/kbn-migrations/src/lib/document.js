@@ -24,9 +24,9 @@ function seededDocs(migrations) {
 // Creates a function which runs a document through the transforms
 // defined in the list of migrations.
 function buildTransformFunction(migrations) {
-  const transforms = migrations.filter(m => m.filter && m.transform);
-  const transformDoc = (doc, { filter, transform }) => {
-    return filter(doc) ? transform(doc) : doc;
+  const transforms = migrations.filter(m => m.transform);
+  const transformDoc = (doc, { type, transform }) => {
+    return doc.type === type ? transform(doc) : doc;
   };
   return (doc) => {
     const objectClientDoc = toObjectClient(doc);

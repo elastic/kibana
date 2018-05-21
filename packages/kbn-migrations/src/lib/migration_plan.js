@@ -8,20 +8,20 @@ module.exports = {
 
 // Computes the mappings and migrations which need to be applied.
 // It's important to move existing mappings over so their docs remain valid.
-function build(plugins, migrationState, currentMappings) {
+function build(plugins, storedMigrationState, currentMappings) {
   return {
     mappings: updateMappings(currentMappings, buildMappings([...plugins])),
-    migrations: unappliedMigrations(plugins, migrationState),
+    migrations: unappliedMigrations(plugins, storedMigrationState),
   };
 }
 
-function unappliedMigrations(plugins, migrationState) {
-  const previousPlugins = _.indexBy(migrationState.plugins, 'id');
-  return _(plugins)
-    .map(({ id, migrations }) => {
-      const numApplied = _.get(previousPlugins, [id, 'migrationIds', 'length'], 0);
-      return _.slice(migrations, numApplied).map(m => ({ ...m, pluginId: id }));
-    })
+function unappliedMigrations(plugins, storedMigrationState) {
+  const previousTypes = _.indexBy(storedMigrationState.types, 'type');
+  const numApplied = type => _.get(previousTypes, [type, 'migrationIds', 'length'], 0);
+  return _.chain(plugins)
+    .filter('migrations')
+    .reduce((acc, { migrations }) => Object.assign(acc, _.groupBy(migrations, 'type')), {})
+    .map((migrations, type) => migrations.slice(numApplied(type)))
     .flatten()
     .compact()
     .value();

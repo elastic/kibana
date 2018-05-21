@@ -2,13 +2,12 @@
 // should demonstrate:
 // - disabled plugins are properly handled (thus, plugin p2 gets disabled in v2)
 // - seeds are transformed (thus plugin p3 does a transform after its seed)
-const { Plugin } = require('../lib');
-
 const p1v1 = {
   id: 'p1',
   mappings: { p1: { properties: { name: { type: 'text' } } } },
   migrations: [{
     id: 'p1m1',
+    type: 'p1',
     seed: () => ({
       id: 'sample',
       type: 'p1',
@@ -22,13 +21,14 @@ const p1v2 = {
   mappings: { p1: { properties: { fullName: { type: 'text' } } } },
   migrations: [ ...p1v1.migrations, {
     id: 'p1m2',
-    filter: ({ type }) => type === 'p1',
+    type: 'p1',
     transform: (doc) => ({
       ...doc,
       attributes: { fullName: doc.attributes.name },
     }),
   }, {
     id: 'p1m3',
+    type: 'p1',
     seed: () => ({
       id: 'newseedsofcontemplation',
       type: 'p1',
@@ -42,6 +42,7 @@ const p2v1 = {
   mappings: { p2: { properties: { thing: { type: 'text' } } } },
   migrations: [{
     id: 'p2m1',
+    type: 'p2',
     seed: () => ({
       id: 'p2doc',
       type: 'p2',
@@ -55,6 +56,7 @@ const p3v2 = {
   mappings: { p3: { properties: { shtuff: { type: 'text' } } } },
   migrations: [{
     id: 'p3m1',
+    type: 'p3',
     seed: () => ({
       id: 'p3doc',
       type: 'p3',
@@ -62,7 +64,7 @@ const p3v2 = {
     }),
   }, {
     id: 'p3m2',
-    filter: ({ type }) => type === 'p3',
+    type: 'p3',
     transform: (doc) => ({
       ...doc,
       attributes: {
@@ -73,15 +75,15 @@ const p3v2 = {
   }],
 };
 
-const v1 = Plugin.sanitize([
+const v1 = [
   p1v1,
   p2v1,
-]);
+];
 
-const v2 = Plugin.sanitize([
+const v2 = [
   p1v2,
   p3v2,
-]);
+];
 
 module.exports = {
   testPlugins: { v1, v2 },

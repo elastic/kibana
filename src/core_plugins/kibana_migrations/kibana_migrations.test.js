@@ -26,6 +26,7 @@ describe('kibana_migrations plugin', () => {
         },
         migrations: [{
           id: 'mg1',
+          type: 'field1',
           seed: () => ({ id: 'a', type: 'field1', attributes: 'Dangit' }),
         }],
       }, {
@@ -35,6 +36,7 @@ describe('kibana_migrations plugin', () => {
         },
         migrations: [{
           id: 'mg2',
+          type: 'field2',
           seed: () => ({ id: 'b', type: 'field2', attributes: 'Bobby' }),
         }],
       }];
@@ -131,6 +133,7 @@ describe('kibana_migrations plugin', () => {
         },
         migrations: [{
           id: 'mg1',
+          type: 'bar',
           seed: () => ({ type: 'bar', attributes: 'Dangit' }),
         }],
       }, {

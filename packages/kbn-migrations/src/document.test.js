@@ -1,6 +1,6 @@
 const _ = require('lodash');
 const Document = require('./document');
-const { MigrationState, Plugin } = require('./lib');
+const { MigrationState } = require('./lib');
 const { testPlugins, testCluster } = require('./test');
 
 describe('Document', () => {
@@ -17,10 +17,9 @@ describe('Document', () => {
     const plugins = testPlugins.v1;
     const { index, callCluster } = await testCluster({ plugins });
     const migrationState = {
-      plugins: [{
-        id: 'whatisit',
-        mappings: JSON.stringify({ dunnoes: { type: 'text' } }),
-        migrationIds: [],
+      types: [{
+        type: 'dunnoes',
+        migrationIds: ['1'],
         checksum: 'w1',
       }],
     };
@@ -29,24 +28,24 @@ describe('Document', () => {
       type: 'dunnoes',
       attributes: 'This should get rejected, methinks.',
     };
-    expect(Document.transform({ callCluster, migrationState, plugins, index, docs: [doc] }))
-      .rejects.toThrow(/unavailable plugin \"whatisit\"/);
+    await expect(Document.transform({ callCluster, migrationState, plugins, index, docs: [doc] }))
+      .rejects.toThrow(/Document "hrm" requires type "dunnoes" version 1, but our index is at version 0/);
   });
 
   test('importing a doc w/ no exported migration state runs all transforms', async () => {
-    const plugins = Plugin.sanitize([{
+    const plugins = [{
       id: 'jam',
       mappings: { space: { type: 'text' } },
       migrations: [{
         id: 'a',
-        filter: () => true,
+        type: 'space',
         transform: (doc) => ({ ...doc, attributes: `space ${doc.attributes}` }),
       }, {
         id: 'b',
-        filter: () => true,
+        type: 'space',
         transform: (doc) => ({ ...doc, attributes: `${doc.attributes.toUpperCase()}!!!` }),
       }],
-    }]);
+    }];
     const { index, callCluster } = await testCluster({ plugins });
     const docs = [{
       id: 'enterprise',
@@ -63,39 +62,37 @@ describe('Document', () => {
   });
 
   test('Transforms old docs', async () => {
-    const plugins = Plugin.sanitize([{
+    const plugins = [{
       id: 'jam',
       migrations: [{
         id: 'a',
-        filter: ({ type }) => type === 'space',
+        type: 'space',
         transform: () => { throw new Error('Should not run!'); },
       }, {
         id: 'b',
-        filter: ({ type }) => type === 'space',
+        type: 'space',
         transform: (doc) => ({ ...doc, attributes: `${doc.attributes.toUpperCase()}!!!` }),
       }],
     }, {
       id: 'maican',
       migrations: [{
         id: 'm1',
-        filter: ({ type }) => type === 'book',
+        type: 'book',
         transform: () => { throw new Error('Should not run!'); },
       }, {
         id: 'm2',
-        filter: ({ type }) => type === 'book',
+        type: 'book',
         transform: (doc) => ({ ...doc, attributes: `Title: ${doc.attributes}` }),
       }],
-    }]);
+    }];
     const { index, callCluster } = await testCluster({ plugins });
     const migrationState = {
-      plugins: [{
-        id: 'jam',
-        mappings: JSON.stringify({ space: { type: 'text' } }),
+      types: [{
+        type: 'space',
         migrationIds: ['a'],
         checksum: 'ahoy',
       }, {
-        id: 'maican',
-        mappings: JSON.stringify({ book: { type: 'text' } }),
+        type: 'book',
         migrationIds: ['m1'],
         checksum: '4',
       }],
@@ -113,41 +110,12 @@ describe('Document', () => {
       ]);
   });
 
-  test('Exported migration state does not need to specify mappings', async () => {
-    const plugins = Plugin.sanitize([{
-      id: 'jam',
-      mappings: { space: { type: 'text' } },
-      migrations: [{
-        id: 'a',
-        filter: ({ type }) => type === 'space',
-        transform: () => { throw new Error('Should not run!'); },
-      }, {
-        id: 'b',
-        filter: ({ type }) => type === 'space',
-        transform: (doc) => ({ ...doc, attributes: `${doc.attributes.toUpperCase()}!!!` }),
-      }],
-    }]);
-    const { index, callCluster } = await testCluster({ plugins });
-    const migrationState = {
-      plugins: [{
-        id: 'jam',
-        migrationIds: ['a'],
-        checksum: 'ahoy',
-      }],
-    };
-    const docs = [{ id: 'enterprise', type: 'space', attributes: 'The final frontier' }];
-    const transformed = await Document.transform({ callCluster, migrationState, plugins, index, docs });
-
-    expect(transformed)
-      .toEqual([{ id: 'enterprise', type: 'space', attributes: 'THE FINAL FRONTIER!!!' }]);
-  });
-
   test('accepts if a disabled plugin is required, but doc is up to date', async () => {
-    const plugins = Plugin.sanitize([{
+    const plugins = [{
       id: 'jam',
       mappings: { aha: { type: 'text' } },
       migrations: [],
-    }]);
+    }];
     const migrationState = MigrationState.build(plugins);
     const { index, callCluster } = await testCluster({ plugins });
     const docs = [{ id: '123', type: 'aha', attributes: 'Move along' }];
@@ -156,20 +124,20 @@ describe('Document', () => {
       .toEqual([{ id: '123', type: 'aha', attributes: 'Move along' }]);
   });
 
-  test('throws if migration requires a disabled plugin', async () => {
-    const plugins = Plugin.sanitize([{
+  test('rejects docs that require disabled plugins', async () => {
+    const plugins = [{
       id: 'jam',
       mappings: { space: { type: 'text' } },
-      migrations: [],
-    }]);
+      migrations: [{ id: 'a', type: 'space', transform() { } }],
+    }];
     const { index, callCluster } = await testCluster({ plugins });
     const docs = [{
       id: 'enterprise',
       type: 'space',
       attributes: 'The final frontier',
     }];
-    expect(Document.transform({ docs, migrationState: {}, plugins: [], callCluster, index }))
-      .rejects.toThrow(/requires unavailable plugin \"jam\"/);
+    await expect(Document.transform({ docs, migrationState: {}, plugins: [], callCluster, index }))
+      .rejects.toThrow(/Document "enterprise" requires type "space" version 1, but the required plugins are disabled or missing/);
   });
 
   test('index is required', () => {

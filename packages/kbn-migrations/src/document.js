@@ -1,6 +1,6 @@
 const _ = require('lodash');
 const Joi = require('joi');
-const { MigrationPlan, MigrationContext, Plugin, Document, Opts } = require('./lib');
+const { MigrationPlan, MigrationContext, Document, Opts } = require('./lib');
 
 module.exports = {
   transform,
@@ -9,7 +9,7 @@ module.exports = {
 const optsSchema = Joi.object().unknown().keys({
   callCluster: Opts.callClusterSchema.required(),
   index: Opts.indexSchema.required(),
-  plugins: Opts.sanitizedPluginArraySchema.required(),
+  plugins: Opts.pluginArraySchema.required(),
   docs: Opts.documentArraySchema.required(),
   migrationState: Opts.migrationStateSchema.required(),
 });
@@ -46,28 +46,38 @@ function buildImportFunction(plugins, exportedState, migrationState) {
 // may contain plugins that the current system knows nothing about. Additionally,
 // the exportedState may contain outdated versions of plugins which are now disabled
 // and therefore the doc can't be migrated up to the state of the index.
+// So, we have two failure cases:
+// - If doc.type's exported version > our current version, fail
+// - If doc.type's exported version < our current version, and there are not enough migrations available to upgrade it, throw
+// We check on a per-doc basis, as the exported migration state may include migrations for docs
+// that aren't actually being imported.
 function buildValidationFunction(plugins, exportedState, migrationState) {
-  const previousPlugins = _.indexBy(exportedState.plugins, 'id');
-  const currentPlugins = _.indexBy(migrationState.plugins, 'id');
-  const propToPlugin = mapPropsToPlugin(exportedState.plugins, migrationState.plugins);
-  const disabledIds = new Set(Plugin.disabledIds(plugins, migrationState));
+  const migrationsByType = _.chain(plugins)
+    .filter('migrations')
+    .map('migrations')
+    .flatten()
+    .groupBy('type')
+    .value();
+  const currentTypes = _.indexBy(migrationState.types, 'type');
+  const exportedTypes = _.indexBy(exportedState.types, 'type');
 
   return (doc) => {
-    const { id } = propToPlugin[doc.type];
-    const requiresDisabledPlugin = Plugin.isOutOfDate(previousPlugins[id], currentPlugins[id]) && disabledIds.has(id);
-    const requiresUnknownPlugin = !currentPlugins[id];
+    const docVersion = _.get(exportedTypes, [doc.type, 'migrationIds', 'length'], 0);
+    const newVersion = _.get(currentTypes, [doc.type, 'migrationIds', 'length'], 0);
+    const availableMigrations = _.get(migrationsByType, [doc.type, 'length'], 0);
+    const requiredVersion = Math.max(docVersion, newVersion);
 
-    if (requiresDisabledPlugin || requiresUnknownPlugin) {
-      throw new Error(`Document "${doc._id}" requires unavailable plugin "${id}"`);
+    if (requiredVersion > newVersion) {
+      throw new Error(
+        `Document "${doc.id}" requires type "${doc.type}" version ${requiredVersion}, but our index is at version ${newVersion}`
+      );
+    }
+    if (requiredVersion > availableMigrations) {
+      throw new Error(
+        `Document "${doc.id}" requires type "${doc.type}" version ${requiredVersion}, but the required plugins are disabled or missing.`
+      );
     }
 
     return doc;
   };
-}
-
-function mapPropsToPlugin(...pluginLists) {
-  const jsonKeys = json => json ? _.keys(JSON.parse(json)) : [];
-  const setAll = (obj, keys, val) => _.reduce(keys, (o, k) => _.set(o, k, val), obj);
-
-  return _(pluginLists).flatten().compact().reduce((acc, p) => setAll(acc, jsonKeys(p.mappings), p), {});
 }

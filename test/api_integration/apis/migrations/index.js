@@ -1,9 +1,8 @@
-// Smokescreen tests for core migration logic. Each test is large, so they are each
-// given their own file.
+// Smokescreen tests for core migration logic
 
 import _ from 'lodash';
 import { assert } from 'chai';
-import { Migration, Plugin } from '@kbn/migrations';
+import { Migration } from '@kbn/migrations';
 import { migrationTest, catPlugin, dogPlugin } from './test_helpers';
 
 export default function ({ getService }) {
@@ -18,17 +17,30 @@ export default function ({ getService }) {
     plugins: [],
   };
 
-  describe('migrate', () => {
+  describe('Kibana index migration', () => {
+    before(() => callCluster('indices.delete', { index: '.migrate-*' }));
+
     it('Migrates an existing index that has never been migrated before', async () => {
-      const index = '.test-existing';
+      const index = '.migrate-existing';
       await helper.createUnmigratedIndex({ index, indexDefinition: [catPlugin.V0, dogPlugin.V0] });
       const migrationResult = await Migration.migrate({
         ...opts,
         index,
-        plugins: Plugin.sanitize({ plugins: [catPlugin.V2.plugin, dogPlugin.V2.plugin] }),
+        plugins: [catPlugin.V2.plugin, dogPlugin.V2.plugin],
       });
       await helper.waitForMigration({ index, migrationResult, minDocs: 3 });
-      await helper.assertValidMigrationState({ index, plugins: [catPlugin.V2.plugin, dogPlugin.V2.plugin] });
+      await helper.assertValidMigrationState({
+        index,
+        expectedTypes: [{
+          type: 'cat',
+          checksum: '8415a3bb',
+          migrationIds: ['cat-ensure-action', 'cat-seed', 'cat-add-name', 'cat-actions'],
+        }, {
+          type: 'dog',
+          checksum: '74ac450b',
+          migrationIds: ['dog-seed', 'dog-add-eats', 'dog-does'],
+        }],
+      });
       await helper.assertDocument({ index, doc: catPlugin.V2.docs.transformedSeed  });
       await helper.assertDocument({ index, doc: catPlugin.V2.docs.transformedOriginal });
       await helper.assertDocument({ index, doc: dogPlugin.V2.docs.transformedSeed  });
@@ -36,22 +48,44 @@ export default function ({ getService }) {
     });
 
     it('Migrates a previously migrated index, if migrations change', async () => {
-      const index = '.test-previous';
+      const index = '.migrate-previous';
       const firstMigration = await Migration.migrate({
         ...opts,
         index,
-        plugins: Plugin.sanitize({ plugins: [catPlugin.V1.plugin, dogPlugin.V1.plugin] }),
+        plugins: [catPlugin.V1.plugin, dogPlugin.V1.plugin],
       });
       await helper.waitForMigration({ index, migrationResult: firstMigration });
-      await helper.assertValidMigrationState({ index, plugins: Plugin.sanitize({ plugins: [catPlugin.V1.plugin, dogPlugin.V1.plugin] }) });
+      await helper.assertValidMigrationState({
+        index,
+        expectedTypes: [{
+          type: 'cat',
+          checksum: '9308bb75',
+          migrationIds: ['cat-ensure-action', 'cat-seed', 'cat-add-name'],
+        }, {
+          type: 'dog',
+          checksum: '7d045eb4',
+          migrationIds: ['dog-seed', 'dog-add-eats'],
+        }]
+      });
 
       const secondMigration = await Migration.migrate({
         ...opts,
         index,
-        plugins: Plugin.sanitize({ plugins: [catPlugin.V2.plugin] }),
+        plugins: [catPlugin.V2.plugin],
       });
       await helper.waitForMigration({ index, migrationResult: secondMigration });
-      const migrationState = await helper.assertValidMigrationState({ index, plugins: [catPlugin.V2.plugin, dogPlugin.V1.plugin] });
+      const migrationState = await helper.assertValidMigrationState({
+        index,
+        expectedTypes: [{
+          checksum: '8415a3bb',
+          type: 'cat',
+          migrationIds: ['cat-ensure-action', 'cat-seed', 'cat-add-name', 'cat-actions'],
+        }, {
+          checksum: '7d045eb4',
+          type: 'dog',
+          migrationIds: ['dog-seed', 'dog-add-eats'],
+        }],
+      });
 
       assert.equal(firstMigration.destIndex, migrationState.previousIndex);
       assert.notEqual(firstMigration.destIndex, secondMigration.destIndex);

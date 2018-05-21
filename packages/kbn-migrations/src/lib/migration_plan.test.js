@@ -101,17 +101,17 @@ describe('MigrationPlan.build', () => {
       .toThrow(/Invalid mapping \"_hm\" in plugin \"nadachance\"\. Mappings cannot start with _/);
   });
 
-  test('is empty if no migrations are defined', () => {
+  test('handles the empty condition', () => {
     expect(MigrationPlan.build([], {}).migrations).toEqual([]);
   });
 
   test('handles new migrations', async () => {
     const plugins = [{
       id: 'bon',
-      migrations: [{ id: 'derp' }],
+      migrations: [{ id: 'derp', type: 'foo' }],
     }];
     expect(MigrationPlan.build(plugins, {}).migrations)
-      .toEqual([{ pluginId: 'bon', id: 'derp' }]);
+      .toEqual([{ type: 'foo', id: 'derp' }]);
   });
 
   test('is empty if migrations are unchanged', async () => {
@@ -120,7 +120,7 @@ describe('MigrationPlan.build', () => {
       mappings: {
         merlin: { type: 'wizard' },
       },
-      migrations: [{ id: 'bingo' }],
+      migrations: [{ id: 'bingo', type: 'merlin' }],
     }];
     const state = MigrationState.build(plugins);
     expect(MigrationPlan.build(plugins, state).migrations)
@@ -138,7 +138,7 @@ describe('MigrationPlan.build', () => {
     const state = MigrationState.build(plugins);
     plugins[0].migrations.push({ id: 'fancipants' });
     expect(MigrationPlan.build(plugins, state).migrations)
-      .toEqual([{ pluginId: 'bon', id: 'fancipants' }]);
+      .toEqual([{ id: 'fancipants' }]);
   });
 
   test('disabled plugins have no affect on the dry run', async () => {

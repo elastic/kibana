@@ -56,10 +56,11 @@ export const V1 = {
 
     migrations: [{
       id: 'cat-ensure-action',
-      filter: ({ type }) => type === 'cat',
+      type: 'cat',
       transform: (doc) => _.set(_.cloneDeep(doc), 'attributes.action', 'lie_around'),
     }, {
       id: 'cat-seed',
+      type: 'cat',
       seed: () => ({
         id: 'boots',
         type: 'cat',
@@ -69,7 +70,7 @@ export const V1 = {
       }),
     }, {
       id: 'cat-add-name',
-      filter: ({ type }) => type === 'cat',
+      type: 'cat',
       transform: (doc) => _.set(_.cloneDeep(doc), 'attributes.name', doc.attributes.name || 'Boots'),
     }],
   }
@@ -118,7 +119,7 @@ export const V2 = {
       ...V1.plugin.migrations,
       {
         id: 'cat-actions',
-        filter: ({ type }) => type === 'cat',
+        type: 'cat',
         transform: (doc) => ({
           ...doc,
           attributes: {

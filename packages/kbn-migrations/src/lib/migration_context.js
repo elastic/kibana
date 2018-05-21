@@ -2,8 +2,7 @@
 // that are necessary to analyze and run migrations.
 
 const _ = require('lodash');
-const objectHash = require('object-hash');
-const Plugin = require('./plugin');
+const objectHash = require('./object_hash');
 const MigrationPlan = require('./migration_plan');
 const MigrationState = require('./migration_state');
 const Persistence = require('./persistence');
@@ -14,19 +13,19 @@ module.exports = {
 
 async function fetch(opts) {
   const { callCluster, log, index, plugins, elasticVersion, force } = opts;
-  const initialIndex = `${index}-${elasticVersion}-original`.toLowerCase();
+  const initialIndex = sanitizeIndexName(`${index}-${elasticVersion}-original`);
   const [currentIndex, { migrationState, migrationStateVersion }, currentMappings] = await Promise.all([
     Persistence.getCurrentIndex(callCluster, index),
     MigrationState.fetch(callCluster, index),
     Persistence.getMapping(callCluster, index),
   ]);
-
-  Plugin.validate(plugins, migrationState);
-
   const migrationPlan = MigrationPlan.build(plugins, migrationState, currentMappings);
   const nextMigrationState = MigrationState.build(plugins, currentIndex || initialIndex, migrationState);
-  const sha = objectHash(_.map(nextMigrationState.plugins, 'checksum'));
+  const status = MigrationState.status(nextMigrationState, migrationState);
+  const sha = objectHash(_.map(nextMigrationState.types, 'checksum'));
+
   return {
+    status,
     index,
     callCluster,
     migrationState,
@@ -36,9 +35,13 @@ async function fetch(opts) {
     force,
     initialIndex,
     plugins,
-    destIndex: `${index}-${elasticVersion}-${sha}`.toLowerCase(),
+    destIndex: sanitizeIndexName(`${index}-${elasticVersion}-${sha}`),
     log: log ? migrationLogger(log) : _.noop,
   };
+}
+
+function sanitizeIndexName(indexName) {
+  return indexName.toLowerCase();
 }
 
 function migrationLogger(log) {

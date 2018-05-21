@@ -25,15 +25,13 @@ describe('exportDashboards(req)', () => {
             if (type === 'migration' && id === 'migration-state') {
               return {
                 attributes: {
-                  plugins: [{
-                    id: 'hello',
+                  types: [{
+                    type: 'hello',
                     checksum: 'map-check',
-                    mappings: '{"something": "grand"}',
                     migrationIds: ['hi1', 'hi2'],
                   }, {
-                    id: 'goodbye',
+                    type: 'goodbye',
                     checksum: 'bye-map-check',
-                    mappings: '{"bye": "hasta"}',
                     migrationIds: ['by1', 'by2'],
                   }],
                 },
@@ -65,12 +63,12 @@ describe('exportDashboards(req)', () => {
   it('should return a response object migration state', () => {
     return exportDashboards(req).then((resp) => {
       expect(resp.migrationState).to.deep.equal({
-        plugins: [{
-          id: 'hello',
+        types: [{
+          type: 'hello',
           checksum: 'map-check',
           migrationIds: ['hi1', 'hi2'],
         }, {
-          id: 'goodbye',
+          type: 'goodbye',
           checksum: 'bye-map-check',
           migrationIds: ['by1', 'by2'],
         }]

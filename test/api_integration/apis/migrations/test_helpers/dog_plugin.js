@@ -57,6 +57,7 @@ export const V1 = {
 
     migrations: [{
       id: 'dog-seed',
+      type: 'dog',
       seed: () => ({
         id: 'callie',
         type: 'dog',
@@ -66,7 +67,7 @@ export const V1 = {
       }),
     }, {
       id: 'dog-add-eats',
-      filter: ({ type }) => type === 'dog',
+      type: 'dog',
       transform: (doc) => _.set(_.cloneDeep(doc), 'attributes.eats', 'Anything but dog food'),
     }],
   },
@@ -115,7 +116,7 @@ export const V2 = {
       ...V1.plugin.migrations,
       {
         id: 'dog-does',
-        filter: ({ type }) => type === 'dog',
+        type: 'dog',
         transform: (doc) => _.set(_.cloneDeep(doc), 'attributes.does', 'nothing'),
       },
     ],

@@ -1,118 +1,201 @@
 const MigrationStatus = require('./migration_status');
 const MigrationState = require('./migration_state');
-const Plugin = require('./plugin');
 const _ = require('lodash');
 
 describe('MigrationState.status', () => {
-  test('is migrating if the migrationState has a status of migrating', () => {
+  test('is migrating if the stored migrationState has a status of migrating', () => {
     expect(MigrationState.status([], { status: MigrationStatus.migrating }))
       .toEqual(MigrationStatus.migrating);
   });
 
-  test('is migrated if current plugin checksums match the persisted checksums', () => {
-    const plugins = Plugin.sanitize([{
-      id: 'hello-world',
-      migrations: [{ id: 'migration1' }, { id: 'migration2' }],
-      mappings: { stuff: 'whatnot' },
-    }]);
-    const state = buildMinimalMigrationState(plugins);
-
-    expect(MigrationState.status(plugins, state))
+  test('is migrated if checksums all match', () => {
+    const currentState = { types: [{ type: 'a', checksum: 'abc111' }] };
+    const storedState = _.cloneDeep(currentState);
+    expect(MigrationState.status(currentState, storedState))
       .toEqual(MigrationStatus.migrated);
   });
 
-  test('is out of date if a new plugin is added', () => {
-    const plugins = Plugin.sanitize([{
-      id: 'hello-world',
-      migrations: [{ id: 'migration1' }, { id: 'migration2' }],
-      mappings: { stuff: 'whatnot' },
-    }, {
-      id: 'shazm',
-      migrations: [],
-      mappings: { hey: 'there' },
-    }]);
-    const state = buildMinimalMigrationState([plugins[0]]);
+  test('is out of date if a new type is added', () => {
+    const currentState = {
+      types: [
+        { type: 'a', checksum: 'ca', migrationIds: ['1'] },
+        { type: 'b', checksum: 'cb', migrationIds: ['2'] }
+      ],
+    };
+    const storedState = {
+      types: [
+        { type: 'a', checksum: 'ca', migrationIds: ['1'] }
+      ]
+    };
 
-    expect(MigrationState.status(plugins, state))
+    expect(MigrationState.status(currentState, storedState))
       .toEqual(MigrationStatus.outOfDate);
   });
 
-  test('is out of date if a mapping changes', () => {
-    const plugins = Plugin.sanitize([{
-      id: 'hello-world',
-      migrations: [{ id: 'migration1' }, { id: 'migration2' }],
-      mappings: { stuff: 'whatnot' },
-    }]);
-    const state = buildMinimalMigrationState(plugins);
+  test('is out of date if a checksum changes', () => {
+    const currentState = {
+      types: [
+        { type: 'a', checksum: 'ca', migrationIds: ['1'] },
+      ],
+    };
+    const storedState = {
+      types: [
+        { type: 'a', checksum: 'cc', migrationIds: ['1'] }
+      ]
+    };
 
-    plugins[0].mappings = { stuff: 'SHAZM' };
-
-    expect(MigrationState.status(Plugin.sanitize(plugins), state))
-      .toEqual(MigrationStatus.outOfDate);
-  });
-
-  test('is out of date if a migration is added', () => {
-    const plugins = Plugin.sanitize([{
-      id: 'hello-world',
-      migrations: [{ id: 'migration1' }, { id: 'migration2' }],
-      mappings: { stuff: 'whatnot' },
-    }]);
-    const state = buildMinimalMigrationState(plugins);
-    plugins[0].migrations.push({ id: 'dang diggity' });
-
-    expect(MigrationState.status(Plugin.sanitize(plugins), state))
+    expect(MigrationState.status(currentState, storedState))
       .toEqual(MigrationStatus.outOfDate);
   });
 
   test('is not out of date if a migration is disabled', () => {
-    const plugins = Plugin.sanitize([{
-      id: 'hello-world',
-      migrations: [{ id: 'migration1' }, { id: 'migration2' }],
-      mappings: { stuff: 'whatnot' },
-    }, {
-      id: 'shazm',
-      migrations: [],
-      mappings: { hey: 'there' },
-    }]);
-    const state = buildMinimalMigrationState(plugins);
+    const currentState = {
+      types: [
+        { type: 'a', checksum: 'aa111', migrationIds: ['1'] },
+      ],
+    };
+    const storedState = {
+      types: [
+        { type: 'a', checksum: 'aa111', migrationIds: ['1'] },
+        { type: 'b', checksum: 'bb111', migrationIds: ['2'] },
+      ],
+    };
 
-    expect(MigrationState.status([plugins[0]], state))
+    expect(MigrationState.status(currentState, storedState))
       .toEqual(MigrationStatus.migrated);
   });
 
-  function buildMinimalMigrationState(plugins) {
-    const state = MigrationState.build(plugins);
-    return {
-      plugins: state.plugins.map(plugin => _.pick(plugin, ['id', 'checksum']))
+  test('throws error if migration ids are out of order', () => {
+    const currentState = {
+      types: [
+        { type: 'a', checksum: 'aa111', migrationIds: ['1', '2'] },
+      ],
     };
-  }
+    const storedState = {
+      types: [
+        { type: 'a', checksum: 'bb111', migrationIds: ['2', '1'] },
+      ],
+    };
+
+    expect(() => MigrationState.status(currentState, storedState))
+      .toThrow(/migration order has changed/);
+  });
+
+  test('throws error if stored migration state is ahead of current migration state', () => {
+    const currentState = {
+      types: [
+        { type: 'a', checksum: 'aa111', migrationIds: ['1'] },
+      ],
+    };
+    const storedState = {
+      types: [
+        { type: 'a', checksum: 'bb111', migrationIds: ['1', '2'] },
+      ],
+    };
+
+    expect(() => MigrationState.status(currentState, storedState))
+      .toThrow(/has had 2 migrations applied to it, but only 1 migrations are known/);
+  });
 });
 
 describe('MigrationState.build', () => {
-  test('tracks id, mappings, checksums, and applied migration ids', () => {
-    const plugins = Plugin.sanitize([{
-      id: 'z',
-      mappings: { foo: 'baz' },
-      migrations: [{ id: 'gee' }],
-    }, {
-      id: 'q',
-      mappings: { and: 'there', stuff: 'here' },
-      migrations: [{ id: 'm1' }, { id: 'm2' }],
+  test('Migration state is predictable and consistent', () => {
+    const plugins = [{
+      id: 'a',
+      mappings: {
+        foo: { type: 'text' },
+        bar: { type: 'integer' },
+      },
+      migrations: [{
+        id: 'a1',
+        type: 'foo',
+      }, {
+        id: 'a2',
+        type: 'foo',
+      }, {
+        id: 'a3',
+        type: 'bar',
+      }],
+    }];
+    expect(MigrationState.build(plugins, 'index5'))
+      .toMatchSnapshot();
+  });
+
+  test('Types are kept from previous migration state', () => {
+    const previousState = {
+      types: [{
+        type: 'a',
+        checksum: 'a1',
+        migrationIds: ['m_a1', 'm_a2'],
+      }, {
+        type: 'b',
+        checksum: 'b1',
+        migrationIds: ['m_b1'],
+      }]
+    };
+    const plugins = [{
+      id: 'x',
+      mappings: {
+        b: { type: 'text' },
+      },
+      migrations: [{
+        id: 'm_b1',
+        type: 'b',
+      }, {
+        id: 'm_b2',
+        type: 'b',
+      }],
+    }];
+    expect(MigrationState.build(plugins, 'index-foo', previousState))
+      .toMatchSnapshot();
+  });
+
+  test('Allows migrations for no-longer-defined types', () => {
+    const plugins = [{
+      id: 'x',
+      mappings: {
+        b: { type: 'text' },
+      },
+      migrations: [{
+        id: 'm_b1',
+        type: 'b',
+      }, {
+        id: 'm_a1',
+        type: 'a',
+      }],
+    }];
+    expect(MigrationState.build(plugins, 'index-baz'))
+      .toMatchSnapshot();
+  });
+
+  test('checksums change if mappings change', () => {
+    const state1 = MigrationState.build([{
+      id: 'a',
+      mappings: { foo: { type: 'text' } },
+      migrations: [],
     }]);
-    expect(MigrationState.build(plugins))
-      .toEqual({
-        status: 'migrated',
-        plugins: [{
-          id: 'z',
-          mappings: JSON.stringify({ foo: 'baz' }),
-          checksum: '6e656d01cb4c13e4faeb8d75ae603a7426c3690d',
-          migrationIds: ['gee'],
-        }, {
-          id: 'q',
-          mappings: JSON.stringify({ and: 'there', stuff: 'here' }),
-          checksum: '71a16ddd5ef53fe2515efd14839a00391a151ec9',
-          migrationIds: ['m1', 'm2'],
-        }],
-      });
+    const state2 = MigrationState.build([{
+      id: 'a',
+      mappings: { foo: { type: 'keyword' } },
+      migrations: [],
+    }]);
+    expect(_.map(state1.types, 'checksum'))
+      .not.toEqual(_.map(state2.types, 'checksum'));
+  });
+
+
+  test('checksums change if migrations change', () => {
+    const state1 = MigrationState.build([{
+      id: 'a',
+      mappings: { foo: { type: 'text' } },
+      migrations: [],
+    }]);
+    const state2 = MigrationState.build([{
+      id: 'a',
+      mappings: { foo: { type: 'text' } },
+      migrations: ['a'],
+    }]);
+    expect(_.map(state1.types, 'checksum'))
+      .not.toEqual(_.map(state2.types, 'checksum'));
   });
 });

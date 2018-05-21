@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const { migrate, computeStatus } = require('./migration');
 const { testCluster, testPlugins } = require('./test');
-const { MigrationStatus, Plugin } = require('./lib');
+const { MigrationStatus } = require('./lib');
 
 const opts = {
   log: _.noop,
@@ -37,7 +37,7 @@ describe('Migration.computeStatus', () => {
     const pluginV1 = testPlugins.v1[0];
     const { index, callCluster } = await testCluster({ plugins: [pluginV1] });
     const pluginV2 = { ...pluginV1, mappings: { whatever: { type: 'keyword' } } };
-    const actual = await computeStatus({ callCluster, index, plugins: Plugin.sanitize([pluginV2]) });
+    const actual = await computeStatus({ callCluster, index, plugins: [pluginV2] });
     expect(actual).toEqual(MigrationStatus.outOfDate);
   });
 
@@ -187,7 +187,7 @@ describe('Migration.migrate', () => {
     const plugins = testPlugins.v1;
     const { index, callCluster } = await testCluster({ plugins: testPlugins.v2 });
     expect(migrate({ ...opts, index, plugins, callCluster }))
-      .rejects.toThrow(/migration order has changed/);
+      .rejects.toThrow(/had 3 migrations applied to it/);
   });
 
   test('index is required', () => {
