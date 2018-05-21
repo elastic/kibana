@@ -9,18 +9,20 @@ import { ActionResult } from './action_result';
 
 describe('Action', () => {
 
+  const server = { };
   const id = 'notifications-test';
   const unimplementedName = 'Unimplemented';
   const throwsErrorName = 'Throws Error';
   const passThruName = 'Test Action';
-  const action = new Action({ server: { }, id, name: unimplementedName  });
+  const action = new Action({ server, id, name: unimplementedName  });
   const notification = {
     fake: true,
   };
 
   test('id and name to be from constructor', () => {
-    expect(action.id).toBe(id);
-    expect(action.name).toBe(unimplementedName);
+    expect(action.server).toBe(server);
+    expect(action.getId()).toBe(id);
+    expect(action.getName()).toBe(unimplementedName);
   });
 
   test('getMissingFields returns an empty array', () => {

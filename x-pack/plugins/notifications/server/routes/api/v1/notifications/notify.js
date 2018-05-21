@@ -48,6 +48,16 @@ export function checkForErrors(action, actionId, data) {
   return null;
 }
 
+/**
+ * Attempt to send the {@code data} as a notification.
+ *
+ * @param {Object} server Kibana server object.
+ * @param {NotificationService} notificationService The notification service singleton.
+ * @param {String} actionId The specified action's ID.
+ * @param {Function} data The notification data to send via the specified action.
+ * @param {Function} reply The response function from the server route.
+ * @param {Function} _checkForErrors Exposed for testing.
+ */
 export async function sendNotification(server, notificationService, actionId, data, reply, { _checkForErrors = checkForErrors } = { }) {
   const action = notificationService.getActionForId(actionId);
   const error = _checkForErrors(action, actionId, data);
@@ -55,7 +65,7 @@ export async function sendNotification(server, notificationService, actionId, da
   if (error === null) {
     return action.performAction(data)
       .then(result => reply(result.toJson()))
-      .catch(err => reply(wrap(err))); // by API definition, this should never hapepn as performAction isn't allow to throw errrors
+      .catch(err => reply(wrap(err))); // by API definition, this should never happen as performAction isn't allow to throw errrors
   }
 
   server.log(['actions', 'error'], error.message);

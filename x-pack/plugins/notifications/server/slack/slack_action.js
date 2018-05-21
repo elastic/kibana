@@ -27,6 +27,14 @@ export function webClientCreator(options) {
  */
 export class SlackAction extends Action {
 
+  /**
+   * Create a new Action capable of sending Slack messages.
+   *
+   * @param {Object} server Kibana server object.
+   * @param {Object} options Configuration options for the Slack WebClient. Currently only expect "token" field.
+   * @param {Object} defaults Default fields used when sending messages.
+   * @param {Function} _webClientCreator Exposed for tests.
+   */
   constructor({ server, options, defaults = { }, _webClientCreator = webClientCreator }) {
     super({ server, id: SLACK_ACTION_ID, name: 'Slack' });
 

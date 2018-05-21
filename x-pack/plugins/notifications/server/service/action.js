@@ -31,6 +31,24 @@ export class Action {
   }
 
   /**
+   * Get the unique ID of the Action.
+   *
+   * @return {String}
+   */
+  getId() {
+    return this.id;
+  }
+
+  /**
+   * Get the user-friendly name of the Action.
+   *
+   * @return {String}
+   */
+  getName() {
+    return this.name;
+  }
+
+  /**
    * Determine if this action can use the {@code notification}. This is useful if you use the action service
    * generically, such as using it from a generic UI.
    *

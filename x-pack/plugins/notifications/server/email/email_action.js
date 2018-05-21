@@ -15,7 +15,15 @@ export const EMAIL_ACTION_ID = 'xpack-notifications-email';
  */
 export class EmailAction extends Action {
 
-  constructor({ server, options = { }, defaults = { }, _nodemailer = nodemailer }) {
+  /**
+   * Create a new Action capable of sending emails.
+   *
+   * @param {Object} server Kibana server object.
+   * @param {Object} options Configuration options for Nodemailer.
+   * @param {Object} defaults Default fields used when sending emails.
+   * @param {Object} _nodemailer Exposed for tests.
+   */
+  constructor({ server, options, defaults = { }, _nodemailer = nodemailer }) {
     super({ server, id: EMAIL_ACTION_ID, name: 'Email' });
 
     this.transporter = _nodemailer.createTransport(options, defaults);

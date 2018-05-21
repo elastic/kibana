@@ -9,10 +9,10 @@ import { init } from './init';
 import { config } from './config';
 
 /**
- * Invokes plugin modules to instantiate the Monitoring plugin for Kibana
+ * Invokes plugin modules to instantiate the Notification plugin for Kibana
  *
  * @param kibana {Object} Kibana plugin instance
- * @return {Object} Monitoring UI Kibana plugin object
+ * @return {Object} Notification Kibana plugin object
  */
 export const notifications = (kibana) => new kibana.Plugin({
   require: ['kibana', 'xpack_main'],

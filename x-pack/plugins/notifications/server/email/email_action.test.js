@@ -30,8 +30,8 @@ describe('EmailAction', () => {
   });
 
   test('id and name to be from constructor', () => {
-    expect(action.id).toBe(EMAIL_ACTION_ID);
-    expect(action.name).toBe('Email');
+    expect(action.getId()).toBe(EMAIL_ACTION_ID);
+    expect(action.getName()).toBe('Email');
     expect(action.transporter).toBe(transporter);
 
     expect(_nodemailer.createTransport).toHaveBeenCalledTimes(1);

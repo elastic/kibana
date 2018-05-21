@@ -42,8 +42,8 @@ describe('SlackAction', () => {
   });
 
   test('id and name to be from constructor', () => {
-    expect(action.id).toBe(SLACK_ACTION_ID);
-    expect(action.name).toBe('Slack');
+    expect(action.getId()).toBe(SLACK_ACTION_ID);
+    expect(action.getName()).toBe('Slack');
     expect(action.client).toBe(client);
 
     expect(_webClientCreator).toHaveBeenCalledTimes(1);
