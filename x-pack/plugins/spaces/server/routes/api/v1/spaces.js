@@ -29,6 +29,8 @@ export function initSpacesApi(server) {
   async function checkForDuplicateContext(space) {
     const query = createDuplicateContextQuery(config.get('kibana.index'), space);
 
+    // TODO(legrego): Once the SOC is split into a client & repository, this "callWithInternalUser" call should
+    // be replaced to use the repository instead.
     const { hits } = await callWithInternalUser('search', query);
 
     const { total, hits: conflicts } = hits;
