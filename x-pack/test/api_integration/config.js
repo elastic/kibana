@@ -6,7 +6,6 @@
 
 import {
   SupertestWithoutAuthProvider,
-  ReportingAPIProvider,
   UsageAPIProvider,
 } from './services';
 
@@ -25,7 +24,6 @@ export default async function ({ readConfigFile }) {
       supertestWithoutAuth: SupertestWithoutAuthProvider,
       es: kibanaCommonConfig.get('services.es'),
       esArchiver: kibanaCommonConfig.get('services.esArchiver'),
-      reportingAPI: ReportingAPIProvider,
       usageAPI: UsageAPIProvider,
       kibanaServer: kibanaCommonConfig.get('services.kibanaServer'),
     },
@@ -34,7 +32,13 @@ export default async function ({ readConfigFile }) {
       reportName: 'X-Pack API Integration Tests',
     },
     env: xPackFunctionalTestsConfig.get('env'),
-    kbnTestServer: xPackFunctionalTestsConfig.get('kbnTestServer'),
+    kbnTestServer: {
+      ...xPackFunctionalTestsConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...xPackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
+        '--optimize.enabled=false',
+      ],
+    },
     esTestCluster: xPackFunctionalTestsConfig.get('esTestCluster'),
   };
 }

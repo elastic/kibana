@@ -8,7 +8,7 @@ export default function ({ loadTestFile, getService }) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-  describe('reporting', () => {
+  describe('phantom', () => {
     before(async () => {
       await esArchiver.load('../../../../test/functional/fixtures/es_archiver/dashboard/current/kibana');
       await esArchiver.load('../../../../test/functional/fixtures/es_archiver/dashboard/current/data');

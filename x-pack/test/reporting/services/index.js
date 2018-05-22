@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SupertestWithoutAuthProvider } from './supertest_without_auth';
-export { UsageAPIProvider } from './usage_api';
+export { ReportingAPIProvider } from './reporting_api';
