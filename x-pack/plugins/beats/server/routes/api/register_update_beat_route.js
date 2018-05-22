@@ -51,14 +51,16 @@ export function registerUpdateBeatRoute(server) {
     config: {
       validate: {
         payload: Joi.object({
-          access_token: Joi.string().required(),
           type: Joi.string(),
           version: Joi.string(),
           host_name: Joi.string(),
           ephemeral_id: Joi.string(),
           local_configuration_yml: Joi.string(),
           metadata: Joi.object()
-        }).required()
+        }).required(),
+        headers: Joi.object({
+          'kbn-beats-access-token': Joi.string().required()
+        }).options({ allowUnknown: true })
       },
       auth: false
     },
@@ -72,7 +74,7 @@ export function registerUpdateBeatRoute(server) {
           return reply({ message: 'Beat not found' }).code(404);
         }
 
-        const isAccessTokenValid = beat.access_token === request.payload.access_token;
+        const isAccessTokenValid = beat.access_token === request.headers['kbn-beats-access-token'];
         if (!isAccessTokenValid) {
           return reply({ message: 'Invalid access token' }).code(401);
         }
