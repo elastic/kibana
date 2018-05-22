@@ -19,7 +19,6 @@ export class SavedObjectFinder extends React.Component {
       isFetchingItems: false,
       page: 0,
       perPage: 10,
-      totalItems: 0,
       filter: '',
     };
   }
@@ -41,12 +40,21 @@ export class SavedObjectFinder extends React.Component {
     }, this.fetchItems);
   }
 
+  // server-side paging not supported
+  // 1) saved object client does not support sorting by title because title is only mapped as analyzed
+  // 2) can not search on anything other than title because all other fields are stored in opaque JSON strings,
+  //    for example, visualizations need to be search by isLab but this is not possible in Elasticsearch side
+  //    with the current mappings
+  getPageOfItems = () => {
+    // If begin is greater than the length of the sequence, an empty array is returned.
+    const startIndex = this.state.page * this.state.perPage;
+    // If end is greater than the length of the sequence, slice extracts through to the end of the sequence (arr.length).
+    const lastIndex = startIndex + this.state.perPage;
+    return this.state.items.slice(startIndex, lastIndex);
+  }
+
   debouncedFetch = _.debounce(async (filter) => {
-    const response = await this.props.find(
-      this.props.savedObjectType,
-      filter,
-      this.state.page + 1, // EuiBasicTable paging is 0-index based and savedObjectCliet find is 1-index based
-      this.state.perPage);
+    const response = await this.props.find(this.props.savedObjectType, filter);
 
     if (!this._isMounted) {
       return;
@@ -64,7 +72,6 @@ export class SavedObjectFinder extends React.Component {
             type: savedObject.type,
           };
         }),
-        totalItems: response.total,
       });
     }
   }, 300);
@@ -111,7 +118,7 @@ export class SavedObjectFinder extends React.Component {
     const pagination = {
       pageIndex: this.state.page,
       pageSize: this.state.perPage,
-      totalItemCount: this.state.totalItems,
+      totalItemCount: this.state.items.length,
       pageSizeOptions: [5, 10],
     };
     const tableColumns = [
@@ -130,9 +137,10 @@ export class SavedObjectFinder extends React.Component {
         )
       }
     ];
+    const items = this.state.items.length === 0 ? [] : this.getPageOfItems();
     return (
       <EuiBasicTable
-        items={this.state.items}
+        items={items}
         loading={this.state.isFetchingItems}
         columns={tableColumns}
         pagination={pagination}

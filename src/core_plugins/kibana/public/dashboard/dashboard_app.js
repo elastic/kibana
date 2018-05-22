@@ -25,6 +25,7 @@ import * as filterActions from 'ui/doc_table/actions/filter';
 import { FilterManagerProvider } from 'ui/filter_manager';
 import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_factories_registry';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
 import { DashboardViewportProvider } from './viewport/dashboard_viewport_provider';
 
@@ -62,6 +63,7 @@ app.directive('dashboardApp', function ($injector) {
       const notify = new Notifier({ location: 'Dashboard' });
       const embeddableFactories = Private(EmbeddableFactoriesRegistryProvider);
       const savedObjectsClient = Private(SavedObjectsClientProvider);
+      const visTypes = Private(VisTypesRegistryProvider);
       $scope.getEmbeddableFactory = panelType => embeddableFactories.byName[panelType];
 
       const dash = $scope.dash = $route.current.locals.dash;
@@ -333,7 +335,10 @@ app.directive('dashboardApp', function ($injector) {
           $scope.$apply();
         };
 
-        showAddPanel(savedObjectsClient, dashboardStateManager.addNewPanel, addNewVis);
+        const isLabsEnabled = config.get('visualize:enableLabs');
+        const listingLimit = config.get('savedObjects:listingLimit');
+
+        showAddPanel(savedObjectsClient, dashboardStateManager.addNewPanel, addNewVis, listingLimit, isLabsEnabled, visTypes);
       };
       updateViewMode(dashboardStateManager.getViewMode());
 

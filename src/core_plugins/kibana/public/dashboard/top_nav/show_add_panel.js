@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom';
 
 let isOpen = false;
 
-export function showAddPanel(savedObjectsClient, addNewPanel, addNewVis) {
+export function showAddPanel(savedObjectsClient, addNewPanel, addNewVis, listingLimit, isLabsEnabled, visTypes) {
   if (isOpen) {
     return;
   }
@@ -16,16 +16,27 @@ export function showAddPanel(savedObjectsClient, addNewPanel, addNewVis) {
     document.body.removeChild(container);
     isOpen = false;
   };
-  const find = (type, search, page, perPage) => {
-    return savedObjectsClient.find({
+  const find = async (type, search) => {
+    const resp = await savedObjectsClient.find({
       type: type,
-      fields: ['title'],
+      fields: ['title', 'visState'],
       search: search ? `${search}*` : undefined,
-      perPage: perPage,
-      page: page,
+      page: 1,
+      perPage: listingLimit,
       searchFields: ['title^3', 'description']
     });
+
+    if (type === 'visualization' && !isLabsEnabled) {
+      resp.savedObjects = resp.savedObjects.filter(savedObject => {
+        const typeName = JSON.parse(savedObject.attributes.visState).type;
+        const visType = visTypes.byName[typeName];
+        return visType.stage !== 'lab';
+      });
+    }
+
+    return resp;
   };
+
   const addNewVisWithCleanup = () => {
     onClose();
     addNewVis();
