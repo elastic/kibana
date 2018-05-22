@@ -1,0 +1,15 @@
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "type": "doc",
+    "id": "config:7.0.0-alpha1",
+    "source": {
+      "type": "config",
+      "config": {
+        "buildNum": 8467,
+        "xPackMonitoring:showBanner": false
+      }
+    }
+  }
+}

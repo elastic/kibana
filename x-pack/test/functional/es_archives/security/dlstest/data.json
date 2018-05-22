@@ -1,0 +1,25 @@
+{
+  "type": "doc",
+  "value": {
+    "index": "dlstest",
+    "type": "dls",
+    "id": "doc1",
+    "source": {
+      "name": "ABC Company",
+      "region": "EAST"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "dlstest",
+    "type": "dls",
+    "id": "doc2",
+    "source": {
+      "name": "ABC Company",
+      "region": "WEST"
+    }
+  }
+}

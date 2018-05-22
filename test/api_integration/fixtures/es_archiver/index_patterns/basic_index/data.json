@@ -1,0 +1,13 @@
+{
+  "type": "doc",
+  "value": {
+    "index": "basic_index",
+    "type": "type",
+    "id": "1",
+    "source": {
+      "foo": 1,
+      "bar": false,
+      "baz": "hello"
+    }
+  }
+}
