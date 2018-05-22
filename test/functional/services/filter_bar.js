@@ -3,6 +3,14 @@ export function FilterBarProvider({ getService }) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
 
+  async function typeIntoReactSelect(testSubj, value) {
+    const select = await testSubjects.find(testSubj);
+    const input = await select.findByClassName('ui-select-search');
+    await input.type(value);
+    const activeSelection = await select.findByClassName('active');
+    await activeSelection.click();
+  }
+
   class FilterBar {
     hasFilter(key, value, enabled = true) {
       const filterActivationState = enabled ? 'enabled' : 'disabled';
@@ -23,17 +31,25 @@ export function FilterBarProvider({ getService }) {
       await testSubjects.click(`filter & filter-key-${key} disableFilter-${key}`);
     }
 
-    async addFilter(field, operator, value, inputCssClass = 'ui-select-search') {
+    async addFilter(field, operator, values) {
+      if (!Array.isArray(values)) {
+        values = [values];
+      }
       await testSubjects.click('addFilter');
-      let input = await find.byCssSelector(`filter-field-select input.ui-select-search`);
-      await input.type(field);
-      await remote.pressKeys('\uE006');
-      input = await find.byCssSelector(`filter-operator-select input.ui-select-search`);
-      await input.type(operator);
-      await remote.pressKeys('\uE006');
-      input = await find.byCssSelector(`filter-params-editor input.${inputCssClass}`);
-      await input.type(value);
-      await remote.pressKeys('\uE006');
+      await typeIntoReactSelect('filterfieldSuggestionList', field);
+      await typeIntoReactSelect('filterOperatorList', operator);
+      const params = await testSubjects.find('filterParams');
+      const paramFields = await params.findAllByTagName('input');
+      await Promise.all(values.map(async (value, index) => {
+        await paramFields[index].type(value);
+        // Checks if the actual options value has an auto complete (like 'is one of' filter)
+        // In this case we need to click the active autocompletion.
+        const hasAutocompletion = await find.exists(async () => await params.findByClassName('active'));
+        if (hasAutocompletion) {
+          const activeSelection = await params.findByClassName('active');
+          await activeSelection.click();
+        }
+      }));
       await testSubjects.click('saveFilter');
     }
 

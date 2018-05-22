@@ -217,7 +217,7 @@ uiModules.get('apps/management')
       const confirmModalOptions = {
         confirmButtonText: 'Refresh',
         onConfirm: async () => {
-          await $scope.indexPattern.refreshFields();
+          await $scope.indexPattern.init(true);
           $scope.fields = $scope.indexPattern.getNonScriptedFields();
         },
         title: 'Refresh field list?'

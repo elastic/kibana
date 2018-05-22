@@ -4,7 +4,7 @@ exports[`renders DashboardCloneModal 1`] = `
 <EuiOverlayMask>
   <EuiModal
     className="dashboardCloneModal"
-    data-tests-subj="dashboardCloneModal"
+    data-test-subj="dashboardCloneModal"
     onClose={[Function]}
   >
     <EuiModalHeader>
@@ -28,6 +28,7 @@ exports[`renders DashboardCloneModal 1`] = `
         compressed={false}
         data-test-subj="clonedDashboardTitle"
         fullWidth={false}
+        isInvalid={false}
         isLoading={false}
         onChange={[Function]}
         value="dash title"
@@ -49,6 +50,7 @@ exports[`renders DashboardCloneModal 1`] = `
         data-test-subj="cloneConfirmButton"
         fill={true}
         iconSide="left"
+        isLoading={false}
         onClick={[Function]}
         type="button"
       >

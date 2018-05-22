@@ -41,14 +41,12 @@ describe('Filter Manager', function () {
 
     // mock required queryFilter methods, used in the manager
     queryFilter = Private(FilterBarQueryFilterProvider);
-    sinon.stub(queryFilter, 'getAppFilters', function () {
-      return appState.filters;
-    });
-    sinon.stub(queryFilter, 'addFilters', function (filters) {
+    sinon.stub(queryFilter, 'getAppFilters').callsFake(() => appState.filters);
+    sinon.stub(queryFilter, 'addFilters').callsFake((filters) => {
       if (!Array.isArray(filters)) filters = [filters];
       appState.filters = appState.filters.concat(filters);
     });
-    sinon.stub(queryFilter, 'invertFilter', function (filter) {
+    sinon.stub(queryFilter, 'invertFilter').callsFake((filter) => {
       filter.meta.negate = !filter.meta.negate;
     });
   }));
