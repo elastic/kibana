@@ -145,19 +145,15 @@ export class Router {
     try {
       const kibanaResponse = await handler(kibanaRequest, responseFactory);
 
-      if (kibanaResponse instanceof KibanaResponse) {
-        let payload = null;
-        if (kibanaResponse.payload instanceof Error) {
-          // TODO Design an error format
-          payload = { error: kibanaResponse.payload.message };
-        } else if (kibanaResponse.payload !== undefined) {
-          payload = kibanaResponse.payload;
-        }
-
-        return responseToolkit.response(payload).code(kibanaResponse.status);
+      let payload = null;
+      if (kibanaResponse.payload instanceof Error) {
+        // TODO Design an error format
+        payload = { error: kibanaResponse.payload.message };
+      } else if (kibanaResponse.payload !== undefined) {
+        payload = kibanaResponse.payload;
       }
 
-      return responseToolkit.response(kibanaResponse);
+      return responseToolkit.response(payload).code(kibanaResponse.status);
     } catch (e) {
       // TODO Handle `KibanaResponseError`
 
@@ -174,4 +170,4 @@ export type RequestHandler<
 > = (
   req: KibanaRequest<schema.TypeOf<P>, schema.TypeOf<Q>, schema.TypeOf<B>>,
   createResponse: ResponseFactory
-) => Promise<KibanaResponse<any> | { [key: string]: any }>;
+) => Promise<KibanaResponse<any>>;

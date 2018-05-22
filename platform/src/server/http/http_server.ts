@@ -219,7 +219,6 @@ export class HttpServer {
       await this._redirectServer.start();
     } catch (err) {
       if (err.code === 'EADDRINUSE') {
-        console.log(err);
         throw new Error(
           'The redirect server failed to start up because port ' +
             `${

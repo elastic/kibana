@@ -374,25 +374,6 @@ test('handles deleting', async () => {
     });
 });
 
-test('returns 200 OK if returning object', async () => {
-  const router = new Router('/foo');
-
-  router.get({ path: '/', validate: false }, async (req, res) => {
-    return { key: 'value' };
-  });
-
-  server.registerRouter(router);
-
-  await server.start(config);
-
-  await supertest(getServerListener(server))
-    .get('/foo/')
-    .expect(200)
-    .then(res => {
-      expect(res.body).toEqual({ key: 'value' });
-    });
-});
-
 test('filtered headers', async () => {
   expect.assertions(1);
 
@@ -432,12 +413,14 @@ describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
     } as HttpConfig;
 
     const router = new Router('/');
-    router.get({ path: '/', validate: false }, async () => ({
-      key: 'value:/',
-    }));
-    router.get({ path: '/foo', validate: false }, async () => ({
-      key: 'value:/foo',
-    }));
+    router.get(
+      { path: '/', validate: false },
+      async (req, res) => res.ok({ key: 'value:/' })
+    );
+    router.get(
+      { path: '/foo', validate: false },
+      async (req, res) => res.ok({ key: 'value:/foo' })
+    );
 
     server.registerRouter(router);
 
@@ -492,12 +475,14 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
     } as HttpConfig;
 
     const router = new Router('/');
-    router.get({ path: '/', validate: false }, async () => ({
-      key: 'value:/',
-    }));
-    router.get({ path: '/foo', validate: false }, async () => ({
-      key: 'value:/foo',
-    }));
+    router.get(
+      { path: '/', validate: false },
+      async (req, res) => res.ok({ key: 'value:/' })
+    );
+    router.get(
+      { path: '/foo', validate: false },
+      async (req, res) => res.ok({ key: 'value:/foo' })
+    );
 
     server.registerRouter(router);
 
@@ -561,9 +546,10 @@ describe('with defined `redirectHttpFromPort`', () => {
     } as HttpConfig;
 
     const router = new Router('/');
-    router.get({ path: '/', validate: false }, async () => ({
-      key: 'value:/',
-    }));
+    router.get(
+      { path: '/', validate: false },
+      async (req, res) => res.ok({ key: 'value:/' })
+    );
 
     server.registerRouter(router);
 
