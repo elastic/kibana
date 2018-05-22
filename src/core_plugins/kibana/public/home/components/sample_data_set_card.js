@@ -6,6 +6,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import {
@@ -29,7 +30,6 @@ export class SampleDataSetCard extends React.Component {
       setConfig,
       id,
       name,
-      isInstalled,
       onRequestComplete,
       defaultIndex,
       clearIndexPatternsCache,
@@ -39,7 +39,7 @@ export class SampleDataSetCard extends React.Component {
       isProcessingRequest: true,
     });
 
-    if (isInstalled) {
+    if (this.isInstalled()) {
       await uninstallSampleDataSet(id, name, defaultIndex, getConfig, setConfig, clearIndexPatternsCache);
     } else {
       await installSampleDataSet(id, name, defaultIndex, getConfig, setConfig, clearIndexPatternsCache);
@@ -52,45 +52,75 @@ export class SampleDataSetCard extends React.Component {
     });
   }
 
-  renderBtn = () => {
-    if (this.props.isInstalled) {
-      return (
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              isLoading={this.state.isProcessingRequest}
-              onClick={this.startRequest}
-              color="danger"
-              data-test-subj={`removeSampleDataSet${this.props.id}`}
-            >
-              {this.state.isProcessingRequest ? 'Removing' : 'Remove'}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              href={this.props.launchUrl}
-              data-test-subj={`launchSampleDataSet${this.props.id}`}
-            >
-              Launch
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
+  isInstalled = () => {
+    if (this.props.status === 'installed') {
+      return true;
     }
 
-    return (
-      <EuiFlexGroup justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            isLoading={this.state.isProcessingRequest}
-            onClick={this.startRequest}
-            data-test-subj={`addSampleDataSet${this.props.id}`}
-          >
-            {this.state.isProcessingRequest ? 'Adding' : 'Add'}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+    return false;
+  }
+
+  renderBtn = () => {
+    switch (this.props.status) {
+      case 'installed':
+        return (
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                isLoading={this.state.isProcessingRequest}
+                onClick={this.startRequest}
+                color="danger"
+                data-test-subj={`removeSampleDataSet${this.props.id}`}
+              >
+                {this.state.isProcessingRequest ? 'Removing' : 'Remove'}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                href={this.props.launchUrl}
+                data-test-subj={`launchSampleDataSet${this.props.id}`}
+              >
+                Launch
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+
+      case 'not_installed':
+        return (
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                isLoading={this.state.isProcessingRequest}
+                onClick={this.startRequest}
+                data-test-subj={`addSampleDataSet${this.props.id}`}
+              >
+                {this.state.isProcessingRequest ? 'Adding' : 'Add'}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+
+      default: {
+        return (
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                position="top"
+                content={<p>{`Unable to verify dataset status, error: ${this.props.statusMsg}`}</p>}
+              >
+                <EuiButton
+                  isDisabled
+                  data-test-subj={`addSampleDataSet${this.props.id}`}
+                >
+                  {'Add'}
+                </EuiButton>
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      }
+    }
   }
 
   render() {
@@ -99,7 +129,7 @@ export class SampleDataSetCard extends React.Component {
         image={this.props.previewUrl}
         title={this.props.name}
         description={this.props.description}
-        betaBadgeLabel={this.props.isInstalled ? 'INSTALLED' : null}
+        betaBadgeLabel={this.isInstalled() ? 'INSTALLED' : null}
         footer={this.renderBtn()}
         data-test-subj={`sampleDataSetCard${this.props.id}`}
       />
@@ -112,7 +142,12 @@ SampleDataSetCard.propTypes = {
   description: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   launchUrl: PropTypes.string.isRequired,
-  isInstalled: PropTypes.bool.isRequired,
+  status: PropTypes.oneOf([
+    'installed',
+    'not_installed',
+    'unknown',
+  ]).isRequired,
+  statusMsg: PropTypes.string,
   onRequestComplete: PropTypes.func.isRequired,
   getConfig: PropTypes.func.isRequired,
   setConfig: PropTypes.func.isRequired,

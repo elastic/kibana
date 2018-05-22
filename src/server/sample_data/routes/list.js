@@ -1,5 +1,8 @@
 import { createIndexName } from './lib/create_index_name';
 
+const NOT_INSTALLED = 'not_installed';
+const INSTALLED = 'installed';
+
 export const createListRoute = () => ({
   path: '/api/sample_data',
   method: 'GET',
@@ -21,10 +24,16 @@ export const createListRoute = () => ({
       const isInstalledPromises = sampleDatasets.map(async sampleDataset => {
         const index = createIndexName(request.server, sampleDataset.id);
         try {
+          const indexExists = await callWithRequest(request, 'indices.exists', { index: index });
+          if (!indexExists) {
+            sampleDataset.status = NOT_INSTALLED;
+            return;
+          }
           const { count } = await callWithRequest(request, 'count', { index: index });
-          sampleDataset.isInstalled = count > 0;
+          sampleDataset.status = count > 0 ? INSTALLED : NOT_INSTALLED;
         } catch (err) {
-          sampleDataset.isInstalled = false;
+          sampleDataset.status = 'unknown';
+          sampleDataset.statusMsg = err.message;
         }
       });
 
