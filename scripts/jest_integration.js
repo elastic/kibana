@@ -13,5 +13,5 @@
 const { resolve } = require('path');
 process.argv.push('--config', resolve(__dirname, '../src/dev/jest/config.integration.js'));
 
-require('../src/babel-register');
+require('../src/setup_node_env');
 require('../src/dev/jest/cli');
