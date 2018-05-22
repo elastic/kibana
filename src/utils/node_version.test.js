@@ -7,11 +7,9 @@ const defineProcessVersion = (version, writable = true) => {
   Object.defineProperty(process, 'version', { value: version, writable });
 };
 
-jest.mock('./index', () => ({
-  pkg: {
-    engines: {
-      node: '8.12.0'
-    }
+jest.mock('../../package.json', () => ({
+  engines: {
+    node: '8.12.0'
   }
 }));
 
