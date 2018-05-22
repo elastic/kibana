@@ -19,7 +19,7 @@ after(async () => {
 });
 
 describe('src/dev/build/tasks/nodejs/download', () => {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
   afterEach(() => sandbox.reset());
 
   const log = createToolingLog('verbose');
@@ -177,7 +177,7 @@ describe('src/dev/build/tasks/nodejs/download', () => {
 
   describe('sha256 option not supplied', () => {
     before(() => {
-      sinon.spy(Wreck, 'request');
+      sinon.stub(Wreck, 'request');
     });
     after(() => {
       Wreck.request.restore();

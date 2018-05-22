@@ -32,7 +32,7 @@ describe('collectIndexPatterns(req, panels)', () => {
     }
   ];
 
-  const savedObjectsClient = { bulkGet: sinon.mock() };
+  const savedObjectsClient = { bulkGet: sinon.stub() };
 
   beforeEach(() => {
     savedObjectsClient.bulkGet.returns(Promise.resolve({
@@ -43,7 +43,7 @@ describe('collectIndexPatterns(req, panels)', () => {
   });
 
   afterEach(() => {
-    savedObjectsClient.bulkGet.reset();
+    savedObjectsClient.bulkGet.resetHistory();
   });
 
   it('should request all index patterns', async () => {

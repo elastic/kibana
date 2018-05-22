@@ -5,7 +5,7 @@ import sinon from 'sinon';
 import { positionTooltip } from '../position_tooltip';
 
 describe('Tooltip Positioning', function () {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
   const positions = ['north', 'south', 'east', 'west'];
   const bounds = ['top', 'left', 'bottom', 'right', 'area'];
   let $window;

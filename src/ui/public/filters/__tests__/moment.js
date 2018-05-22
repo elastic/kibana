@@ -20,7 +20,7 @@ const init = function () {
 
 
 describe('moment formatting filter', function () {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
 
   beforeEach(function () {
     sandbox.useFakeTimers(moment(anchor).valueOf());

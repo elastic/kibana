@@ -7,7 +7,7 @@ describe('shortUrlLookupProvider', () => {
   const TYPE = 'url';
   const URL = 'http://elastic.co';
   const server = { log: sinon.stub() };
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
 
   let savedObjectsClient;
   let req;

@@ -35,7 +35,7 @@ describe('debounce service', function () {
   });
 
   describe('delayed execution', function () {
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
 
     beforeEach(() => sandbox.useFakeTimers());
     afterEach(() => sandbox.restore());
@@ -49,7 +49,7 @@ describe('debounce service', function () {
       $timeout.flush();
       sinon.assert.calledOnce(spy);
 
-      spy.reset();
+      spy.resetHistory();
 
       bouncerFromProvider();
       sinon.assert.notCalled(spy);
@@ -66,7 +66,7 @@ describe('debounce service', function () {
       $timeout.flush();
       sinon.assert.calledTwice(spy);
 
-      spy.reset();
+      spy.resetHistory();
 
       bouncerFromProvider();
       sinon.assert.calledOnce(spy);
@@ -83,7 +83,7 @@ describe('debounce service', function () {
       $timeout.flush();
       sinon.assert.calledOnce(spy);
 
-      spy.reset();
+      spy.resetHistory();
 
       bouncerFromProvider();
       sinon.assert.calledOnce(spy);
@@ -105,8 +105,8 @@ describe('debounce service', function () {
       sinon.assert.calledOnce(spy);
       sinon.assert.calledOnce(cancelSpy);
 
-      spy.reset();
-      cancelSpy.reset();
+      spy.resetHistory();
+      cancelSpy.resetHistory();
 
       bouncerFromProvider();
       sandbox.clock.tick(1);
@@ -131,7 +131,7 @@ describe('debounce service', function () {
       // throws if pending timeouts
       $timeout.verifyNoPendingTasks();
 
-      cancelSpy.reset();
+      cancelSpy.resetHistory();
 
       bouncerFromProvider();
       bouncerFromProvider.cancel();

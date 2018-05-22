@@ -9,7 +9,7 @@ import { version } from '../../../../../../package.json';
 const xsrfHeader = 'kbn-version';
 
 describe('chrome xsrf apis', function () {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
 
   afterEach(function () {
     sandbox.restore();

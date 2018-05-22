@@ -6,7 +6,7 @@ import { createRunner } from '../runner';
 import { isErrorLogged, markErrorLogged } from '../errors';
 
 describe('dev/build/lib/runner', () => {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
 
   const config = {};
 

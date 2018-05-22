@@ -262,7 +262,7 @@ describe('BaseWatch', () => {
 
     let downstreamJson;
     beforeEach(() => {
-      actionFromDownstreamJSONMock.reset();
+      actionFromDownstreamJSONMock.resetHistory();
 
       downstreamJson = {
         id: 'my-watch',
@@ -316,8 +316,8 @@ describe('BaseWatch', () => {
 
     let upstreamJson;
     beforeEach(() => {
-      actionFromUpstreamJSONMock.reset();
-      watchStatusFromUpstreamJSONMock.reset();
+      actionFromUpstreamJSONMock.resetHistory();
+      watchStatusFromUpstreamJSONMock.resetHistory();
 
       upstreamJson = {
         id: 'my-watch',
