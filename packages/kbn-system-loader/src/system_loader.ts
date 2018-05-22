@@ -46,6 +46,21 @@ export class SystemLoader<C, M extends ISystemMetadata> {
       });
   }
 
+  /**
+   * Stop all systems in the reverse order of when they were started
+   */
+  public stopSystems() {
+    this.startedSystems
+      .map(systemName => this.systems.get(systemName)!)
+      .reverse()
+      .forEach(system => {
+        system.stop();
+        this.systems.delete(system.name);
+      });
+
+    this.startedSystems = [];
+  }
+
   private _ensureAllSystemDependenciesCanBeResolved() {
     for (const [systemName, system] of this.systems) {
       for (const systemDependency of system.dependencies) {
@@ -76,20 +91,5 @@ export class SystemLoader<C, M extends ISystemMetadata> {
 
     system.start(kibanaSystemApi, dependenciesValues);
     this.startedSystems.push(system.name);
-  }
-
-  /**
-   * Stop all systems in the reverse order of when they were started
-   */
-  public stopSystems() {
-    this.startedSystems
-      .map(systemName => this.systems.get(systemName)!)
-      .reverse()
-      .forEach(system => {
-        system.stop();
-        this.systems.delete(system.name);
-      });
-
-    this.startedSystems = [];
   }
 }
