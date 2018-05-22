@@ -33,7 +33,10 @@ const getKibanaPrivileges = (kibanaApplicationPrivilege, role, application) => {
     return kibanaPrivileges;
   }
 
-  const applications = role.applications.filter(x => x.application === application);
+  // we're filtering out privileges for non-default resources as well incase
+  // the roles were created in a future version
+  const applications = role.applications
+    .filter(x => x.application === application && x.application.resources.all(r => r === DEFAULT_RESOURCE));
 
   const assigned =  _.uniq(_.flatten(_.pluck(applications, 'privileges')));
   assigned.forEach(a => {
