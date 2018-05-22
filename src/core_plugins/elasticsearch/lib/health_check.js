@@ -13,7 +13,9 @@ export default function (plugin, server) {
 
   plugin.status.yellow('Waiting for Elasticsearch');
   function waitForPong(callWithInternalUser, url) {
-    return callWithInternalUser('ping').catch(function (err) {
+    return callWithInternalUser('ping', {
+      requestTimeout: config.get('elasticsearch.pingTimeout')
+    }).catch(function (err) {
       if (!(err instanceof NoConnections)) throw err;
       plugin.status.red(`Unable to connect to Elasticsearch at ${url}.`);
 
