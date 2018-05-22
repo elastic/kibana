@@ -13,21 +13,21 @@ export function renderProjectsTree(
   return treeToString(createTreeStructure(projectsTree));
 }
 
-interface Tree {
+interface ITree {
   name?: string;
-  children?: TreeChildren;
+  children?: ITreeChildren;
 }
-interface TreeChildren extends Array<Tree> {}
+interface ITreeChildren extends Array<ITree> {}
 
 type DirOrProjectName = string | typeof projectKey;
-type ProjectsTree = Map<DirOrProjectName, ProjectsTreeValue | string>;
-interface ProjectsTreeValue extends ProjectsTree {}
 
-function treeToString(tree: Tree) {
+interface IProjectsTree extends Map<DirOrProjectName, string | IProjectsTree> {}
+
+function treeToString(tree: ITree) {
   return [tree.name].concat(childrenToString(tree.children, '')).join('\n');
 }
 
-function childrenToString(tree: TreeChildren | undefined, treePrefix: string) {
+function childrenToString(tree: ITreeChildren | undefined, treePrefix: string) {
   if (tree === undefined) {
     return [];
   }
@@ -45,9 +45,9 @@ function childrenToString(tree: TreeChildren | undefined, treePrefix: string) {
   return string;
 }
 
-function createTreeStructure(tree: ProjectsTree): Tree {
+function createTreeStructure(tree: IProjectsTree): ITree {
   let name: string | undefined;
-  const children: TreeChildren = [];
+  const children: ITreeChildren = [];
 
   for (const [dir, project] of tree.entries()) {
     // This is a leaf node (aka a project)
@@ -113,7 +113,7 @@ function dirOrProjectName(dir: DirOrProjectName, projectName: string) {
 }
 
 function buildProjectsTree(rootPath: string, projects: Map<string, Project>) {
-  const tree: ProjectsTree = new Map();
+  const tree: IProjectsTree = new Map();
 
   for (const project of projects.values()) {
     if (rootPath === project.path) {
@@ -128,7 +128,7 @@ function buildProjectsTree(rootPath: string, projects: Map<string, Project>) {
 }
 
 function addProjectToTree(
-  tree: ProjectsTree,
+  tree: IProjectsTree,
   pathParts: string[],
   project: Project
 ) {
@@ -141,7 +141,7 @@ function addProjectToTree(
       tree.set(currentDir, new Map());
     }
 
-    const subtree = tree.get(currentDir) as ProjectsTree;
+    const subtree = tree.get(currentDir) as IProjectsTree;
     addProjectToTree(subtree, rest, project);
   }
 }

@@ -2,13 +2,13 @@ import chalk from 'chalk';
 import indentString from 'indent-string';
 import wrapAnsi from 'wrap-ansi';
 
-import { Command, CommandConfig } from './commands';
-import { getProjectPaths, ProjectPathOptions } from './config';
+import { ICommand, ICommandConfig } from './commands';
+import { getProjectPaths, IProjectPathOptions } from './config';
 import { CliError } from './utils/errors';
 import { buildProjectGraph, getProjects } from './utils/projects';
 import { renderProjectsTree } from './utils/projects_tree';
 
-export async function runCommand(command: Command, config: CommandConfig) {
+export async function runCommand(command: ICommand, config: ICommandConfig) {
   try {
     /* tslint:disable-next-line no-console */
     console.log(
@@ -21,7 +21,7 @@ export async function runCommand(command: Command, config: CommandConfig) {
 
     const projectPaths = getProjectPaths(
       config.rootPath,
-      config.options as ProjectPathOptions
+      config.options as IProjectPathOptions
     );
 
     const projects = await getProjects(config.rootPath, projectPaths, {

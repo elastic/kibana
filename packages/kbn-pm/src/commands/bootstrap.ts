@@ -3,9 +3,9 @@ import chalk from 'chalk';
 import { linkProjectExecutables } from '../utils/link_project_executables';
 import { parallelizeBatches } from '../utils/parallelize';
 import { topologicallyBatchProjects } from '../utils/projects';
-import { Command } from './';
+import { ICommand } from './';
 
-export const BootstrapCommand: Command = {
+export const BootstrapCommand: ICommand = {
   description: 'Install dependencies and crosslink projects',
   name: 'bootstrap',
 

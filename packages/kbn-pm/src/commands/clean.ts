@@ -4,9 +4,9 @@ import ora from 'ora';
 import { relative } from 'path';
 
 import { isDirectory } from '../utils/fs';
-import { Command } from './';
+import { ICommand } from './';
 
-export const CleanCommand: Command = {
+export const CleanCommand: ICommand = {
   description:
     'Remove the node_modules and target directories from all projects.',
   name: 'clean',

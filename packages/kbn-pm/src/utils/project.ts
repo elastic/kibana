@@ -4,10 +4,10 @@ import { inspect } from 'util';
 
 import { CliError } from './errors';
 import {
+  IPackageDependencies,
+  IPackageJson,
+  IPackageScripts,
   isLinkDependency,
-  PackageDependencies,
-  PackageJson,
-  PackageScripts,
   readPackageJson,
 } from './package_json';
 import {
@@ -16,7 +16,7 @@ import {
   runScriptInPackageStreaming,
 } from './scripts';
 
-interface BuildConfig {
+interface IBuildConfig {
   skip?: boolean;
   intermediateBuildDirectory?: string;
 }
@@ -27,17 +27,17 @@ export class Project {
     return new Project(pkgJson, path);
   }
 
-  public readonly json: PackageJson;
+  public readonly json: IPackageJson;
   public readonly packageJsonLocation: string;
   public readonly nodeModulesLocation: string;
   public readonly targetLocation: string;
   public readonly path: string;
-  public readonly allDependencies: PackageDependencies;
-  public readonly productionDependencies: PackageDependencies;
-  public readonly devDependencies: PackageDependencies;
-  public readonly scripts: PackageScripts;
+  public readonly allDependencies: IPackageDependencies;
+  public readonly productionDependencies: IPackageDependencies;
+  public readonly devDependencies: IPackageDependencies;
+  public readonly scripts: IPackageScripts;
 
-  constructor(packageJson: PackageJson, projectPath: string) {
+  constructor(packageJson: IPackageJson, projectPath: string) {
     this.json = Object.freeze(packageJson);
     this.path = projectPath;
 
@@ -95,7 +95,7 @@ export class Project {
     );
   }
 
-  public getBuildConfig(): BuildConfig {
+  public getBuildConfig(): IBuildConfig {
     return (this.json.kibana && this.json.kibana.build) || {};
   }
 

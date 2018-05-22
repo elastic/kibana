@@ -2,9 +2,9 @@ import chalk from 'chalk';
 
 import { parallelizeBatches } from '../utils/parallelize';
 import { topologicallyBatchProjects } from '../utils/projects';
-import { Command } from './';
+import { ICommand } from './';
 
-export const RunCommand: Command = {
+export const RunCommand: ICommand = {
   description:
     'Run script defined in package.json in each package that contains that script.',
   name: 'run',

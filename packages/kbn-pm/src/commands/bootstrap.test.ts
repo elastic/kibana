@@ -8,7 +8,7 @@ import {
   stripAnsiSnapshotSerializer,
 } from '../test_helpers';
 import { linkProjectExecutables } from '../utils/link_project_executables';
-import { PackageJson } from '../utils/package_json';
+import { IPackageJson } from '../utils/package_json';
 import { Project } from '../utils/project';
 import { buildProjectGraph } from '../utils/projects';
 import { installInDir, runScriptInPackageStreaming } from '../utils/scripts';
@@ -18,7 +18,7 @@ const mockInstallInDir = installInDir as jest.Mock;
 const mockRunScriptInPackageStreaming = runScriptInPackageStreaming as jest.Mock;
 const mockLinkProjectExecutables = linkProjectExecutables as jest.Mock;
 
-const createProject = (packageJson: PackageJson, path = '.') =>
+const createProject = (packageJson: IPackageJson, path = '.') =>
   new Project(
     {
       name: 'kibana',

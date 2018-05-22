@@ -1,5 +1,5 @@
 import { resolve } from 'path';
-import { Command, CommandConfig } from './commands';
+import { ICommand, ICommandConfig } from './commands';
 import { runCommand } from './run';
 import { Project } from './utils/project';
 
@@ -25,8 +25,8 @@ function getExpectedProjectsAndGraph(runMock: any) {
   return { projects, graph };
 }
 
-let command: Command;
-let config: CommandConfig;
+let command: ICommand;
+let config: ICommandConfig;
 beforeEach(() => {
   command = {
     description: 'test description',

@@ -1,6 +1,6 @@
 import { resolve } from 'path';
 
-export interface ProjectPathOptions {
+export interface IProjectPathOptions {
   'skip-kibana-extra'?: boolean;
   oss?: boolean;
 }
@@ -8,7 +8,10 @@ export interface ProjectPathOptions {
 /**
  * Returns all the paths where plugins are located
  */
-export function getProjectPaths(rootPath: string, options: ProjectPathOptions) {
+export function getProjectPaths(
+  rootPath: string,
+  options: IProjectPathOptions
+) {
   const skipKibanaExtra = Boolean(options['skip-kibana-extra']);
   const ossOnly = Boolean(options.oss);
 
