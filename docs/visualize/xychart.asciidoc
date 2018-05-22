@@ -33,11 +33,14 @@ NOTE: In Elasticsearch releases 1.4.3 and later, this functionality requires you
 
 The availability of these options varies depending on the aggregation you choose.
 
+[float]
+[[metrics-axes]]
 === Metrics & Axes
 
 Select the *Metrics & Axes* tab to change the way each individual metric is shown on the chart.
 The data series are styled in the _Metrics_ section, while the axes are styled in the X and Y axis sections.
 
+[float]
 ==== Metrics
 Modify how each metric from the Data panel is visualized on the chart.
 
@@ -46,6 +49,7 @@ Modify how each metric from the Data panel is visualized on the chart.
 *Value Axis*:: choose the axis you want to plot this data too (the properties of each are configured under Y-axes).
 *Line mode*:: should the outline of lines or bars appear *smooth*, *straight*, or *stepped*.
 
+[float]
 ==== Y-axis
 
 Style all the Y-axes of the chart.
@@ -61,6 +65,7 @@ Style all the Y-axes of the chart.
                            this box to change both upper and lower bounds to match the values returned in the data.
 *Custom Extents*:::: You can define custom minimum and maximum for each axis
 
+[float]
 ==== X-Axis
 
 *Position*:: position of the X-Axis (*left* or *right* for horizontal charts, and *top* or *bottom* for vertical charts).
@@ -70,16 +75,19 @@ Style all the Y-axes of the chart.
 *Labels - Rotate*:::: You can enter the number in degrees for how much you want to rotate labels
 *Labels - Truncate*:::: You can enter the size in pixels to which the label is truncated
 
-
+[float]
+[[panel-settings]]
 === Panel Settings
 
 These are options that apply to the entire chart and not just the individual data series.
 
+[float]
 ==== Common options
 *Legend Position*:: Move your legend to the *left*, *right*, *top* or *bottom*
 *Show Tooltip*:: Enables or disables the display of tooltip on hovering over chart objects
 *Current Time Marker*:: Show a line indicating the current time
 
+[float]
 ==== Grid options
 You can enable grid on the chart. By default grid is displayed on the category axis only.
 
