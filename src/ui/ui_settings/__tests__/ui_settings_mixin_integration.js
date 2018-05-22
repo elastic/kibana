@@ -140,6 +140,16 @@ describe('uiSettingsMixin()', () => {
         idSuffix: 'aux-id'
       });
     });
+
+    it('does not allow itself to be called more than once per request', async () => {
+      const { decorations } = await setup();
+      const request = {};
+      decorations.request.setUiSettingsIdSuffix.call(request, 'aux-id');
+
+      expect(() => {
+        decorations.request.setUiSettingsIdSuffix.call(request, 'aux-id');
+      }).to.throwException(/UI Settings ID Suffix has already been set for this request/);
+    });
   });
 
   describe('server.uiSettings()', () => {
