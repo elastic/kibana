@@ -1,6 +1,9 @@
 [role="xpack"]
 [[kibana-authentication]]
 === Authentication in Kibana
+++++
+<titleabbrev>Authentication</titleabbrev>
+++++
 
 {kib} supports the following authentication mechanisms:
 
