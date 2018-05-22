@@ -29,7 +29,6 @@ export default function ({ getService }) {
         + chance.integer({ min: 1, max: 10 });
 
       beat = {
-        access_token: '93c4a4dd08564c189a7ec4e4f046b975',
         type: `${chance.word()}beat`,
         host_name: `www.${chance.word()}.net`,
         version,
@@ -46,6 +45,7 @@ export default function ({ getService }) {
           `/api/beats/agent/${beatId}`
         )
         .set('kbn-xsrf', 'xxx')
+        .set('kbn-beats-access-token', '93c4a4dd08564c189a7ec4e4f046b975')
         .send(beat)
         .expect(204);
 
@@ -64,12 +64,12 @@ export default function ({ getService }) {
 
     it('should return an error for an invalid access token', async () => {
       const beatId = 'foo';
-      beat.access_token = chance.word();
       const { body } = await supertest
         .put(
           `/api/beats/agent/${beatId}`
         )
         .set('kbn-xsrf', 'xxx')
+        .set('kbn-beats-access-token', chance.word())
         .send(beat)
         .expect(401);
 
@@ -90,12 +90,12 @@ export default function ({ getService }) {
 
     it('should return an error for an existing but unverified beat', async () => {
       const beatId = 'bar';
-      beat.access_token = '3c4a4dd08564c189a7ec4e4f046b9759';
       const { body } = await supertest
         .put(
           `/api/beats/agent/${beatId}`
         )
         .set('kbn-xsrf', 'xxx')
+        .set('kbn-beats-access-token', '3c4a4dd08564c189a7ec4e4f046b9759')
         .send(beat)
         .expect(400);
 
@@ -121,6 +121,7 @@ export default function ({ getService }) {
           `/api/beats/agent/${beatId}`
         )
         .set('kbn-xsrf', 'xxx')
+        .set('kbn-beats-access-token', chance.word())
         .send(beat)
         .expect(404);
 
