@@ -13,6 +13,7 @@ export const RunCommand: Command = {
     const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
 
     if (extraArgs.length === 0) {
+      /* tslint:disable-next-line no-console */
       console.log(chalk.red.bold('\nNo script specified'));
       process.exit(1);
     }
@@ -20,6 +21,7 @@ export const RunCommand: Command = {
     const scriptName = extraArgs[0];
     const scriptArgs = extraArgs.slice(1);
 
+    /* tslint:disable-next-line no-console */
     console.log(
       chalk.bold(
         `\nRunning script [${chalk.green(

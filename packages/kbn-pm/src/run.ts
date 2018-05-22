@@ -10,6 +10,7 @@ import { renderProjectsTree } from './utils/projects_tree';
 
 export async function runCommand(command: Command, config: CommandConfig) {
   try {
+    /* tslint:disable-next-line no-console */
     console.log(
       chalk.bold(
         `Running [${chalk.green(command.name)}] command from [${chalk.yellow(
@@ -29,6 +30,7 @@ export async function runCommand(command: Command, config: CommandConfig) {
     });
 
     if (projects.size === 0) {
+      /* tslint:disable-next-line no-console */
       console.log(
         chalk.red(
           `There are no projects found. Double check project name(s) in '-i/--include' and '-e/--exclude' filters.\n`
@@ -39,17 +41,21 @@ export async function runCommand(command: Command, config: CommandConfig) {
 
     const projectGraph = buildProjectGraph(projects);
 
+    /* tslint:disable-next-line no-console */
     console.log(
       chalk.bold(`Found [${chalk.green(projects.size.toString())}] projects:\n`)
     );
+    /* tslint:disable-next-line no-console */
     console.log(renderProjectsTree(config.rootPath, projects));
 
     await command.run(projects, projectGraph, config);
   } catch (e) {
+    /* tslint:disable-next-line no-console */
     console.log(chalk.bold.red(`\n[${command.name}] failed:\n`));
 
     if (e instanceof CliError) {
       const msg = chalk.red(`CliError: ${e.message}\n`);
+      /* tslint:disable-next-line no-console */
       console.log(wrapAnsi(msg, 80));
 
       const keys = Object.keys(e.meta);
@@ -59,10 +65,13 @@ export async function runCommand(command: Command, config: CommandConfig) {
           return `${key}: ${value}`;
         });
 
+        /* tslint:disable-next-line no-console */
         console.log('Additional debugging info:\n');
+        /* tslint:disable-next-line no-console */
         console.log(indentString(metaOutput.join('\n'), 3));
       }
     } else {
+      /* tslint:disable-next-line no-console */
       console.log(e.stack);
     }
 

@@ -38,6 +38,7 @@ export const WatchCommand: Command = {
     }
 
     if (projectsToWatch.size === 0) {
+      /* tslint:disable-next-line no-console */
       console.log(
         chalk.red(
           `\nThere are no projects to watch found. Make sure that projects define 'kbn:watch' script in 'package.json'.\n`
@@ -47,6 +48,7 @@ export const WatchCommand: Command = {
     }
 
     const projectNames = Array.from(projectsToWatch.keys());
+    /* tslint:disable-next-line no-console */
     console.log(
       chalk.bold(
         chalk.green(
@@ -73,6 +75,7 @@ export const WatchCommand: Command = {
         pkg.runScriptStreaming(watchScriptName).stdout
       );
 
+      /* tslint:disable-next-line no-console */
       console.log(
         chalk.bold(
           `[${chalk.green(

@@ -24,8 +24,10 @@ export const CleanCommand: Command = {
     }
 
     if (directoriesToDelete.length === 0) {
+      /* tslint:disable-next-line no-console */
       console.log(chalk.bold.green('\n\nNo directories to delete'));
     } else {
+      /* tslint:disable-next-line no-console */
       console.log(chalk.bold.red('\n\nDeleting directories:\n'));
 
       for (const dir of directoriesToDelete) {

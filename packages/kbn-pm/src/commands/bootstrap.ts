@@ -15,6 +15,7 @@ export const BootstrapCommand: Command = {
     const frozenLockfile = options['frozen-lockfile'] === true;
     const extraArgs = frozenLockfile ? ['--frozen-lockfile'] : [];
 
+    /* tslint:disable-next-line no-console */
     console.log(chalk.bold('\nRunning installs in topological order:'));
 
     for (const batch of batchedProjects) {
@@ -25,6 +26,7 @@ export const BootstrapCommand: Command = {
       }
     }
 
+    /* tslint:disable-next-line no-console */
     console.log(
       chalk.bold('\nInstalls completed, linking package executables:\n')
     );
@@ -36,6 +38,7 @@ export const BootstrapCommand: Command = {
      * transpiled before they can be used. Ideally we shouldn't do this unless we
      * have to, as it will slow down the bootstrapping process.
      */
+    /* tslint:disable-next-line no-console */
     console.log(
       chalk.bold(
         '\nLinking executables completed, running `kbn:bootstrap` scripts\n'
@@ -47,6 +50,7 @@ export const BootstrapCommand: Command = {
       }
     });
 
+    /* tslint:disable-next-line no-console */
     console.log(chalk.green.bold('\nBootstrapping completed!\n'));
   },
 };

@@ -147,6 +147,7 @@ export class Project {
   }
 
   public async runScript(scriptName: string, args: string[] = []) {
+    /* tslint:disable-next-line no-console */
     console.log(
       chalk.bold(
         `\n\nRunning script [${chalk.green(scriptName)}] in [${chalk.green(
@@ -166,6 +167,7 @@ export class Project {
   }
 
   public async installDependencies({ extraArgs }: { extraArgs: string[] }) {
+    /* tslint:disable-next-line no-console */
     console.log(
       chalk.bold(
         `\n\nInstalling dependencies in [${chalk.green(this.name)}]:\n`

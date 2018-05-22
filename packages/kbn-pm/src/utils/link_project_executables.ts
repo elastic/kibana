@@ -39,6 +39,7 @@ export async function linkProjectExecutables(
           .split(sep)
           .join('/');
 
+        /* tslint:disable-next-line no-console */
         console.log(
           chalk`{dim [${project.name}]} ${name} -> {dim ${projectRelativePath}}`
         );
