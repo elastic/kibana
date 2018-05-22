@@ -85,8 +85,11 @@ for one of its ancestors, `fr` in this case, then its ancestor will be used.
 - If `accept-language` header is not presented or previous steps didn't resolve
 the locale, the locale will be resolved to locale defined in `i18n.defaultLocale`
 option at `config/kibana.yml` file.
-- If `i18n.defaultLocale` is not specified or if there is no data for this locale,
-`en` locale will be used.
+
+One of our technical requirements is to have default message in the templates
+themselves, and that message will always be english, so we don't need interact
+with `en.json` file directly. If default message has been changed in the code
+then tools will update it.
 
 ## I18n engine
 
@@ -271,7 +274,8 @@ the following syntax:
 Where:
 - `translationId` - translation id to be translated
 - `values` - values to pass into translation
-- `defaultMessage` - will be used unless translation was successful
+- `defaultMessage` - will be used unless translation was successful (the final
+  fallback in english, will be used for generating `en.json`)
 
 The translation `directive` has the following syntax:
 ```html
