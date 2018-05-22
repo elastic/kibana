@@ -69,52 +69,7 @@ xpack.security.sessionTimeout: 600000
 --------------------------------------------------------------------------------
 --
 
-[[configure-kibana-cert]]
-. Configure {kib} to encrypt communications between the browser and the {kib}
-server:
-
-.. Generate a server certificate for {kib}. You must either set the certificate's
-`subjectAltName` to the hostname, fully-qualified domain name (FQDN), or IP
-address of the {kib} server, or set the CN to the {kib} server's hostname
-or FQDN. Using the server's IP address as the CN does not work.
-
-.. Set the `server.ssl.key` and `server.ssl.certificate` properties in `kibana.yml`:
-+
---
-[source,yaml]
---------------------------------------------------------------------------------
-server.ssl.key: /path/to/your/server.key
-server.ssl.certificate: /path/to/your/server.crt
---------------------------------------------------------------------------------
-
-Once you enable SSL encryption between the browser and the {kib} server,
-access {kib} via HTTPS. For example, `https://localhost:5601`.
---
-
-[[configure-kibana-ssl]]
-. If you have enabled SSL encryption in {security}, configure {kib} to connect
-to {es} via HTTPS:
-
-.. Specify the HTTPS protocol in the `elasticsearch.url` setting in the {kib}
-configuration file, `kibana.yml`:
-+
---
-[source,yaml]
---------------------------------------------------------------------------------
-elasticsearch.url: "https://<your_elasticsearch_host>.com:9200"
---------------------------------------------------------------------------------
---
-
-.. If you are using your own CA to sign certificates for {es}, set the
-`elasticsearch.ssl.certificateAuthorities` setting in `kibana.yml` to specify
-the location of the PEM file.
-+
---
-[source,yaml]
---------------------------------------------------------------------------------
-elasticsearch.ssl.certificateAuthorities: /path/to/your/cacert.pem
---------------------------------------------------------------------------------
---
+. Optional: <<configuring-tls,Configure {kib} to encrypt communications>>. 
 
 . Restart {kib}.
 
@@ -168,4 +123,5 @@ NOTE: This must be a user who has been assigned the `kibana_user` role.
 --
 
 include::authentication/index.asciidoc[]
+include::securing-communications/index.asciidoc[]
 include::{xkb-repo-dir}/settings/security-settings.asciidoc[]
