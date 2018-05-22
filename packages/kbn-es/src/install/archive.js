@@ -109,6 +109,16 @@ async function appendToConfig(installPath, key, value) {
  * @param {ToolingLog} log
  */
 async function configureKeystore(installPath, password, log = defaultLog) {
+  const configPath =
+    process.env.ES_PATH_CONF || path.join(installPath, 'config');
+  const keystorePath = path.join(configPath, 'elasticsearch.keystore');
+
+  if (fs.existsSync(keystorePath)) {
+    log.info('keystore already exists at %s', chalk.bold(keystorePath));
+    log.warning('unable to bootstrap password');
+    return;
+  }
+
   log.info('setting bootstrap password to %s', chalk.bold(password));
 
   await execa(ES_KEYSTORE_BIN, ['create'], { cwd: installPath });
