@@ -3,7 +3,7 @@ const { resolve } = require('path');
 // this must happen before `require('babel-register')` and can't be changed
 // once the module has been loaded
 if (!process.env.BABEL_CACHE_PATH) {
-  process.env.BABEL_CACHE_PATH = resolve(__dirname, '../../optimize/.babelcache.json');
+  process.env.BABEL_CACHE_PATH = resolve(__dirname, '../../../optimize/.babelcache.json');
 }
 
 // paths that babel-register should ignore
@@ -32,7 +32,7 @@ if (global.__BUILT_WITH_BABEL__) {
   // We still need babel-register for plugins though, we've been
   // building their server code at require-time since version 4.2
   // TODO: the plugin install process could transpile plugin server code...
-  ignore.push(resolve(__dirname, '../../src'));
+  ignore.push(resolve(__dirname, '../../../src'));
 }
 
 // modifies all future calls to require() to automatically

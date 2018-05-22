@@ -1,20 +1,10 @@
 import _ from 'lodash';
-import { pkg, NodeVersion } from '../utils';
+import { pkg } from '../utils';
 import Command from './command';
 import serveCommand from './serve/serve';
 
 const argv = process.env.kbnWorkerArgv ? JSON.parse(process.env.kbnWorkerArgv) : process.argv.slice();
 const program = new Command('bin/kibana');
-
-// Validates current the NodeJS version compatibility when Kibana starts.
-NodeVersion.runValidator(() => {
-  // Action to apply when validation fails: error report + exit.
-  console.error(
-    `Kibana does not support the current Node.js version ${NodeVersion.getCurrentVersion()}. `
-    + `Please use Node.js ${NodeVersion.getRequiredVersion()}.`
-  );
-  process.exit(1);
-});
 
 program
   .version(pkg.version)
