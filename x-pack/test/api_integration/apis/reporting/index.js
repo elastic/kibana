@@ -26,6 +26,6 @@ export default function ({ loadTestFile, getService }) {
 
     loadTestFile(require.resolve('./bwc_existing_indexes'));
     loadTestFile(require.resolve('./bwc_generation_urls'));
-    loadTestFile(require.resolve('./stats'));
+    loadTestFile(require.resolve('./usage'));
   });
 }
