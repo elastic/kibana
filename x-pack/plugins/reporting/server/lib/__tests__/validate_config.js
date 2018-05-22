@@ -12,7 +12,7 @@ describe('Reporting: Validate config', function () {
   const log = sinon.spy();
 
   beforeEach(() => {
-    log.reset();
+    log.resetHistory();
   });
 
   [undefined, null].forEach(value => {

@@ -210,7 +210,7 @@ describe('State Management', () => {
 
       it('does not replace the state value on read', () => {
         const { state } = setup();
-        sinon.stub($location, 'search', (newSearch) => {
+        sinon.stub($location, 'search').callsFake((newSearch) => {
           if (newSearch) {
             return $location;
           } else {

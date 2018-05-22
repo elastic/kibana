@@ -14,7 +14,7 @@ let indexPattern;
 let buildHierarchicalData;
 
 describe('buildHierarchicalData', function () {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {

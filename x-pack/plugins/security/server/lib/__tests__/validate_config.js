@@ -10,7 +10,7 @@ import { validateConfig } from '../validate_config';
 
 describe('Validate config', function () {
   let config;
-  const log = sinon.spy();
+  const log = sinon.stub();
   const validKey = 'd624dce49dafa1401be7f3e1182b756a';
 
   beforeEach(() => {
@@ -18,7 +18,7 @@ describe('Validate config', function () {
       get: sinon.stub(),
       set: sinon.stub()
     };
-    log.reset();
+    log.resetHistory();
   });
 
   it('should log a warning and set xpack.security.encryptionKey if not set', function () {

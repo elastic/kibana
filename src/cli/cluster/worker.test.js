@@ -32,10 +32,10 @@ function setup(opts = {}) {
 }
 
 describe('CLI cluster manager', function () {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
 
   beforeEach(function () {
-    sandbox.stub(cluster, 'fork', () => new MockClusterFork());
+    sandbox.stub(cluster, 'fork').callsFake(() => new MockClusterFork());
   });
 
   afterEach(async function () {

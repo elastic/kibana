@@ -60,7 +60,7 @@ describe('Watch', () => {
 
     beforeEach(() => {
       Object.keys(watchTypeMocks).forEach(key => {
-        watchTypeMocks[key].fromDownstreamJsonMock.reset();
+        watchTypeMocks[key].fromDownstreamJsonMock.resetHistory();
       });
     });
 
@@ -95,7 +95,7 @@ describe('Watch', () => {
 
     beforeEach(() => {
       Object.keys(watchTypeMocks).forEach(key => {
-        watchTypeMocks[key].fromUpstreamJsonMock.reset();
+        watchTypeMocks[key].fromUpstreamJsonMock.resetHistory();
       });
     });
 
