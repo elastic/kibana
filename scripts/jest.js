@@ -1,3 +1,5 @@
+/* eslint-disable no-var */
+
 // # Run Jest tests
 //
 // All args will be forwarded directly to Jest, e.g. to watch tests run:
@@ -10,7 +12,7 @@
 //
 // See all cli options in https://facebook.github.io/jest/docs/cli.html
 
-const { resolve } = require('path');
+var resolve = require('path').resolve;
 process.argv.push('--config', resolve(__dirname, '../src/dev/jest/config.js'));
 
 require('../src/setup_node_env');
