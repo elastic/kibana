@@ -132,8 +132,8 @@ In the `x-pack` image, the following additional defaults are also set:
 `xpack.monitoring.ui.container.elasticsearch.enabled`:: `true`
 
 These settings are defined in the default `kibana.yml`. They can be overridden
-with a <<docker-bind-mount-config,custom `kibana.yml`>> or via
-<<docker-env-config,environment variables>>.
+with a <<bind-mount-config,custom `kibana.yml`>> or via
+<<environment-variable-config,environment variables>>.
 
 IMPORTANT: If replacing `kibana.yml` with a custom version, be sure to copy the
 above defaults to the custom file if you want to retain them. If not, they will
