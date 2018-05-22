@@ -1,7 +1,7 @@
-import expect from 'expect.js';
 
 import { isConfigVersionUpgradeable } from '../is_config_version_upgradeable';
 import { pkg } from '../../../../utils';
+import expect from 'expect.js';
 
 describe('savedObjects/health_check/isConfigVersionUpgradeable', function () {
   function isUpgradableTest(savedVersion, kibanaVersion, expected) {

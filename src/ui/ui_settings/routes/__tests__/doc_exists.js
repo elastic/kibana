@@ -61,6 +61,9 @@ export function docExistsSuite() {
           buildNum: {
             userValue: sinon.match.number
           },
+          version: {
+            userValue: sinon.match.string
+          },
           defaultIndex: {
             userValue: defaultIndex
           }
@@ -87,6 +90,9 @@ export function docExistsSuite() {
         settings: {
           buildNum: {
             userValue: sinon.match.number
+          },
+          version: {
+            userValue: sinon.match.string
           },
           defaultIndex: {
             userValue: defaultIndex
@@ -117,6 +123,9 @@ export function docExistsSuite() {
           buildNum: {
             userValue: sinon.match.number
           },
+          version: {
+            userValue: sinon.match.string
+          },
           defaultIndex: {
             userValue: defaultIndex
           }
@@ -145,6 +154,9 @@ export function docExistsSuite() {
         settings: {
           buildNum: {
             userValue: sinon.match.number
+          },
+          version: {
+            userValue: sinon.match.string
           }
         }
       });
