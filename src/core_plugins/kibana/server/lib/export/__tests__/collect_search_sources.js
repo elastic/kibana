@@ -3,7 +3,7 @@ import * as deps from '../collect_index_patterns';
 import { collectSearchSources } from '../collect_search_sources';
 import { expect } from 'chai';
 describe('collectSearchSources(req, panels)', () => {
-  const savedObjectsClient = { bulkGet: sinon.mock() };
+  const savedObjectsClient = { bulkGet: sinon.stub() };
 
   let panels;
   let collectIndexPatternsStub;
@@ -26,7 +26,7 @@ describe('collectSearchSources(req, panels)', () => {
 
   afterEach(() => {
     collectIndexPatternsStub.restore();
-    savedObjectsClient.bulkGet.reset();
+    savedObjectsClient.bulkGet.resetHistory();
   });
 
   it('should request all search sources', async () => {

@@ -21,9 +21,7 @@ describe('hide dev tools', function () {
 
   beforeEach(function () {
     navlinks = {};
-    sinon.stub(chrome, 'getNavLinkById', function () {
-      return navlinks;
-    });
+    sinon.stub(chrome, 'getNavLinkById').returns(navlinks);
   });
 
   it('should hide the app if there are no dev tools', function () {

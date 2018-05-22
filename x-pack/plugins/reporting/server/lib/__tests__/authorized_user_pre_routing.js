@@ -57,7 +57,7 @@ describe('authorized_user_pre_routing', function () {
         }
       };
 
-      callWithRequestStub.reset();
+      callWithRequestStub.resetHistory();
       callWithRequestStub.returns(Promise.resolve(user));
       return mockServer;
     };

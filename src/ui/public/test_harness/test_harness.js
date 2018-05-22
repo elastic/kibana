@@ -30,7 +30,6 @@ before(() => {
   sinon.useFakeXMLHttpRequest();
 });
 
-
 let stubUiSettings = new UiSettingsClient({
   defaults: metadata.uiSettings.defaults,
   initialSettings: {},
@@ -41,7 +40,7 @@ let stubUiSettings = new UiSettingsClient({
     }
   }
 });
-sinon.stub(chrome, 'getUiSettingsClient', () => stubUiSettings);
+sinon.stub(chrome, 'getUiSettingsClient').callsFake(() => stubUiSettings);
 
 beforeEach(function () {
   // ensure that notifications are not left in the notifiers

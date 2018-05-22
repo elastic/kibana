@@ -11,7 +11,7 @@ import esResponse from './__fixtures__/es_field_caps_response.json';
 
 describe('index_patterns/field_capabilities/field_caps_response', () => {
   let sandbox;
-  beforeEach(() => sandbox = sinon.sandbox.create());
+  beforeEach(() => sandbox = sinon.createSandbox());
   afterEach(() => sandbox.restore());
 
   describe('readFieldCapsResponse()', () => {
