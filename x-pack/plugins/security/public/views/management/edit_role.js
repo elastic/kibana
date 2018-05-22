@@ -35,6 +35,13 @@ const getKibanaPrivileges = (kibanaApplicationPrivilege, role, application) => {
 
   const applications = role.applications.filter(x => x.application === application);
 
+  const resources = _.uniq(_.flatten(applications.map(x => x.resources)));
+  if (resources.some(x => x !== DEFAULT_RESOURCE)) {
+    // this should only happen if we created roles with a newer version of Kibana
+    // and then rolled back to a previous version
+    throw new Error('Unable to edit role with non-default resource');
+  }
+
   const assigned =  _.uniq(_.flatten(_.pluck(applications, 'privileges')));
   assigned.forEach(a => {
     kibanaPrivileges[a] = true;
