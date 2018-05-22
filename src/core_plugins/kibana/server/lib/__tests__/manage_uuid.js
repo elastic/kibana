@@ -20,7 +20,6 @@ describe('core_plugins/kibana/server/lib', function () {
     // clear uuid stuff from previous test runs
     beforeEach(function () {
       kbnServer.server.log = sinon.stub();
-      kbnServer.server.log.reset();
       config = kbnServer.server.config();
     });
 

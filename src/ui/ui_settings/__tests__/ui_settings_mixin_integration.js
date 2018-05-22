@@ -13,7 +13,7 @@ import { getUiSettingsServiceForRequest } from '../ui_settings_service_for_reque
 import { uiSettingsMixin } from '../ui_settings_mixin';
 
 describe('uiSettingsMixin()', () => {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
 
   async function setup(options = {}) {
     const {

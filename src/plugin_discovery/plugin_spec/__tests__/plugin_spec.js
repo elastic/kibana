@@ -433,7 +433,7 @@ describe('plugin discovery/plugin spec', () => {
         get: sinon.stub()
       };
 
-      afterEach(() => config.get.reset());
+      afterEach(() => config.get.resetHistory());
 
       describe('key = "foo"', () => {
         it('passes key as own array item', () => {

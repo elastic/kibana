@@ -92,7 +92,7 @@ describe('dev/build/lib/build', () => {
     });
 
     describe('#getPlatformArchivePath()', () => {
-      const sandbox = sinon.sandbox.create();
+      const sandbox = sinon.createSandbox();
 
       const config = {
         resolveFromRepo: sandbox.stub(),
@@ -110,7 +110,7 @@ describe('dev/build/lib/build', () => {
       };
 
       beforeEach(() => {
-        sandbox.reset();
+        sandbox.resetHistory();
       });
 
       it('uses config.resolveFromRepo(), config.getBuildVersion, and platform.getBuildName() to create path', () => {

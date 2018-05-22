@@ -39,7 +39,7 @@ describe('filterBarClickHandler', function () {
     };
   }));
 
-  afterEach(function () {
+  beforeEach(function () {
     toastNotifications.list.splice(0);
   });
 

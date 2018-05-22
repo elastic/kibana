@@ -7,7 +7,7 @@ import { createToolingLog } from '@kbn/dev-utils';
 import { exec } from '../exec';
 
 describe('dev/build/lib/exec', () => {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
   afterEach(() => sandbox.reset());
 
   const log = createToolingLog('verbose');

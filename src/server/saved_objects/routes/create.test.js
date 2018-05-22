@@ -22,7 +22,7 @@ describe('POST /api/saved_objects/{type}', () => {
   });
 
   afterEach(() => {
-    savedObjectsClient.create.reset();
+    savedObjectsClient.create.resetHistory();
   });
 
   it('formats successful response', async () => {
