@@ -77,10 +77,10 @@ export class SavedObjectFinder extends React.Component {
 
   renderSearchBar() {
     let actionBtn;
-    if (this.props.addNewButton) {
+    if (this.props.callToActionButton) {
       actionBtn = (
         <EuiFlexItem grow={false}>
-          {this.props.addNewButton}
+          {this.props.callToActionButton}
         </EuiFlexItem>
       );
     }
@@ -153,7 +153,7 @@ export class SavedObjectFinder extends React.Component {
 }
 
 SavedObjectFinder.propTypes = {
-  addNewButton: PropTypes.node,
+  callToActionButton: PropTypes.node,
   onChoose: PropTypes.func.isRequired,
   find: PropTypes.func.isRequired,
   noItemsMessage: PropTypes.node,

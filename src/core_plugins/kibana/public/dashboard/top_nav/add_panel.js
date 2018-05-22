@@ -2,7 +2,7 @@ import './add_panel.less';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { toastNotifications } from 'ui/notify';
-import { SavedObjectFinder } from './saved_object_finder';
+import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 
 import {
   EuiFlexGroup,
@@ -41,7 +41,7 @@ export class DashboardAddPanel extends React.Component {
       savedObjectFinder: (
         <SavedObjectFinder
           key="visSavedObjectFinder"
-          addNewButton={addNewVisBtn}
+          callToActionButton={addNewVisBtn}
           onChoose={this.onAddPanel}
           find={this.props.find}
           noItemsMessage="No matching visualizations found."

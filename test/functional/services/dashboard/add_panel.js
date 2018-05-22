@@ -3,8 +3,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
-  const PageObjects = getPageObjects(['header']);
+  const PageObjects = getPageObjects(['header', 'common']);
 
   return new class DashboardAddPanel {
     async clickOpenAddPanel() {
@@ -32,15 +31,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
 
     async clickPagerNextButton() {
       // Clear all toasts that could hide pagination controls
-      const toasts = await find.allByCssSelector('.euiToast');
-      for (const toastElement of toasts) {
-        try {
-          const closeBtn = await toastElement.findByCssSelector('euiToast__closeButton');
-          await closeBtn.click();
-        } catch (err) {
-          // ignore errors, toast clear themselves after timeout
-        }
-      }
+      await PageObjects.common.clearAllToasts();
 
       const addPanel = await testSubjects.find('dashboardAddPanel');
       const pagination = await addPanel.findAllByClassName('euiPagination');

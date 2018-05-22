@@ -68,7 +68,7 @@ exports[`render 1`] = `
       size="s"
     />
     <SavedObjectFinder
-      addNewButton={
+      callToActionButton={
         <EuiButton
           color="primary"
           data-test-subj="addNewSavedObjectLink"
