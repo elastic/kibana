@@ -24,25 +24,28 @@ type DirOrProjectName = string | typeof projectKey;
 interface IProjectsTree extends Map<DirOrProjectName, string | IProjectsTree> {}
 
 function treeToString(tree: ITree) {
-  return [tree.name].concat(childrenToString(tree.children, '')).join('\n');
+  return [tree.name].concat(childrenToStrings(tree.children, '')).join('\n');
 }
 
-function childrenToString(tree: ITreeChildren | undefined, treePrefix: string) {
+function childrenToStrings(
+  tree: ITreeChildren | undefined,
+  treePrefix: string
+) {
   if (tree === undefined) {
     return [];
   }
 
-  let string: string[] = [];
+  let strings: string[] = [];
   tree.forEach((node, index) => {
     const isLastNode = tree.length - 1 === index;
     const nodePrefix = isLastNode ? '└── ' : '├── ';
     const childPrefix = isLastNode ? '    ' : '│   ';
     const childrenPrefix = treePrefix + childPrefix;
 
-    string.push(`${treePrefix}${nodePrefix}${node.name}`);
-    string = string.concat(childrenToString(node.children, childrenPrefix));
+    strings.push(`${treePrefix}${nodePrefix}${node.name}`);
+    strings = strings.concat(childrenToStrings(node.children, childrenPrefix));
   });
-  return string;
+  return strings;
 }
 
 function createTreeStructure(tree: IProjectsTree): ITree {
