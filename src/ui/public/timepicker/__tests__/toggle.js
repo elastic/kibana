@@ -5,7 +5,7 @@ import $ from 'jquery';
 import sinon from 'sinon';
 
 describe('kbnGlobalTimepicker', function () {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
 
   let compile;
   let scope;
@@ -16,7 +16,7 @@ describe('kbnGlobalTimepicker', function () {
       scope = $rootScope.$new();
       compile = (timefilterStubProperties = {}) => {
         Object.keys(timefilterStubProperties).forEach((key) => {
-          sandbox.stub(timefilter, key, timefilterStubProperties[key]);
+          sandbox.stub(timefilter, key).value(timefilterStubProperties[key]);
         });
 
         const $el = $('<kbn-global-timepicker></kbn-global-timepicker>');

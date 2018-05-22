@@ -6,7 +6,7 @@ import * as FieldFormatsServiceNS from '../field_formats_service';
 import { createServer } from '../../../test_utils/kbn_server';
 
 describe('server.registerFieldFormat(createFormat)', () => {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
 
   let server;
   beforeEach(async () => {
@@ -34,7 +34,7 @@ describe('server.registerFieldFormat(createFormat)', () => {
 
   it('passes the returned class to the FieldFormatsService', async () => {
     const { FieldFormatsService: ActualFFS } = FieldFormatsServiceNS;
-    sinon.stub(FieldFormatsServiceNS, 'FieldFormatsService', function (...args) {
+    sandbox.stub(FieldFormatsServiceNS, 'FieldFormatsService').callsFake((...args) => {
       return new ActualFFS(...args);
     });
 

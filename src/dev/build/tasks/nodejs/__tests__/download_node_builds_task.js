@@ -7,7 +7,7 @@ import * as DownloadNS from '../download';
 import { DownloadNodeBuildsTask } from '../download_node_builds_task';
 
 describe('src/dev/build/tasks/nodejs/download_node_builds_task', () => {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
   afterEach(() => {
     sandbox.restore();
   });
@@ -24,7 +24,7 @@ describe('src/dev/build/tasks/nodejs/download_node_builds_task', () => {
       getNodeVersion: () => 'nodeVersion',
     };
 
-    sandbox.stub(NodeDownloadInfoNS, 'getNodeDownloadInfo', function (config, platform) {
+    sandbox.stub(NodeDownloadInfoNS, 'getNodeDownloadInfo').callsFake((config, platform) => {
       return {
         url: `${platform.getName()}:url`,
         downloadPath: `${platform.getName()}:downloadPath`,
@@ -37,7 +37,7 @@ describe('src/dev/build/tasks/nodejs/download_node_builds_task', () => {
       'bar:downloadName': 'bar:sha256',
     });
 
-    sandbox.stub(DownloadNS, 'download', function ({ url }) {
+    sandbox.stub(DownloadNS, 'download').callsFake(({ url }) => {
       if (url === failOnUrl) {
         throw new Error('Download failed for reasons');
       }

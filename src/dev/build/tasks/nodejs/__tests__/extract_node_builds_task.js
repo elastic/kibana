@@ -6,7 +6,7 @@ import * as FsNS from '../../../lib/fs';
 import { ExtractNodeBuildsTask } from '../extract_node_builds_task';
 
 describe('src/dev/build/tasks/node_extract_node_builds_task', () => {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
   afterEach(() => {
     sandbox.restore();
   });
