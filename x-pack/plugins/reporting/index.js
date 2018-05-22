@@ -158,7 +158,6 @@ export const reporting = (kibana) => {
       });
 
       // Register a function to with Monitoring to manage the collection of usage stats
-      // TODO: take plugin stats collection out of Monitoring: https://github.com/elastic/kibana/issues/18242
       monitoringPlugin.status.once('green', () => {
         if (monitoringPlugin.collectorSet) {
           const callCluster = callClusterFactory(server).getCallClusterInternal(); // uses callWithInternal as this is for internal collection

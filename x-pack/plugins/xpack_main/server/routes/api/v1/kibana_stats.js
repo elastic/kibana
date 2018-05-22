@@ -23,7 +23,7 @@ export function kibanaStatsRoute(server) {
 
       try {
         const kibanaUsageCollector = getKibanaUsageCollector(server, callCluster);
-        const reportingUsageCollector = getReportingUsageCollector(server, callCluster); // TODO instead of hardcoding, loop through a set of usage collectors that have been registered to a server method
+        const reportingUsageCollector = getReportingUsageCollector(server, callCluster);
 
         const [ kibana, reporting ] = await Promise.all([
           kibanaUsageCollector.fetch(),

@@ -8,7 +8,7 @@ import { uniq } from 'lodash';
 import { getExportTypesHandler } from './get_export_type_handler';
 import { getReportCountsByParameter } from './get_reporting_type_counts';
 import { KIBANA_REPORTING_TYPE } from '../../common/constants';
-import { UsageCollector } from '../../../monitoring/server/kibana_monitoring'; // TODO: should come from xpack_main
+import { UsageCollector } from '../../../monitoring/server/kibana_monitoring';
 
 /**
  * @typedef {Object} ReportingUsageStats  Almost all of these stats are optional.

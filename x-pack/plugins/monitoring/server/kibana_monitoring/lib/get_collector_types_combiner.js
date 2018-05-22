@@ -10,9 +10,7 @@ import {
   KIBANA_SETTINGS_TYPE,
   KIBANA_USAGE_TYPE,
 } from '../../../common/constants';
-
 import { KIBANA_REPORTING_TYPE } from '../../../../reporting/common/constants';
-
 import { sourceKibana } from './source_kibana';
 
 /*
