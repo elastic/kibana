@@ -86,7 +86,7 @@ export const createInstallRoute = () => ({
           await request.getSavedObjectsClient().bulkCreate(sampleDataset.savedObjects, { overwrite: true });
         } catch (err) {
           server.log(['warning'], `sample_data install errors while loading saved objects. Error: ${err.message}`);
-          return reply(`Unable to load kibana saved objects, see kibana logs for details`).code(500);
+          return reply(`Unable to load kibana saved objects, see kibana logs for details`).code(403);
         }
 
         return reply({ docsLoaded: count, kibanaSavedObjectsLoaded: sampleDataset.savedObjects.length });

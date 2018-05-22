@@ -37,7 +37,7 @@ export const createUninstallRoute = () => ({
       try {
         await Promise.all(deletePromises);
       } catch (err) {
-        return reply(`Unable to delete samle dataset saved objects, error: ${err.message}`).code(500);
+        return reply(`Unable to delete samle dataset saved objects, error: ${err.message}`).code(403);
       }
 
       reply();
