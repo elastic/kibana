@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { pipelineToList } from './pipeline_to_list';
+export { List } from './list';
