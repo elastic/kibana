@@ -269,6 +269,18 @@ app.directive('dashboardApp', function ($injector) {
         );
       };
 
+      /**
+       * Saves the dashboard.
+       *
+       * @param {object} [saveOptions={}]
+       * @property {boolean} [saveOptions.confirmOverwrite=false] - If true, attempts to create the source so it
+       * can confirm an overwrite if a document with the id already exists.
+       * @property {boolean} [saveOptions.isTitleDuplicateConfirmed=false] - If true, save allowed with duplicate title
+       * @property {func} [saveOptions.onTitleDuplicate] - function called if duplicate title exists.
+       * When not provided, confirm modal will be displayed asking user to confirm or cancel save.
+       * @return {Promise}
+       * @resolved {String} - The id of the doc
+       */
       $scope.save = function (saveOptions) {
         return saveDashboard(angular.toJson, timefilter, dashboardStateManager, saveOptions)
           .then(function (id) {

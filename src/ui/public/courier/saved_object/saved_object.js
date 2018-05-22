@@ -291,10 +291,6 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
         .catch(() => Promise.reject(new Error(SAVE_DUPLICATE_REJECTED)));
     };
 
-    /**
-     * Returns a promise that resolves to true if either the title is unique, or if the user confirmed they
-     * wished to save the duplicate title.  Promise is rejected if the user rejects the confirmation.
-     */
     const checkForDuplicateTitle = (isTitleDuplicateConfirmed, onTitleDuplicate) => {
       // Don't check for duplicates if user has already confirmed save with duplicate title
       if (isTitleDuplicateConfirmed) {
@@ -335,7 +331,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
      * @return {Promise}
      * @resolved {String} - The id of the doc
      */
-    this.save = ({ confirmOverwrite, isTitleDuplicateConfirmed, onTitleDuplicate } = {}) => {
+    this.save = ({ confirmOverwrite = false, isTitleDuplicateConfirmed = false, onTitleDuplicate } = {}) => {
       // Save the original id in case the save fails.
       const originalId = this.id;
       // Read https://github.com/elastic/kibana/issues/9056 and
