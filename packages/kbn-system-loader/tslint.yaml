@@ -1,0 +1,14 @@
+extends: ../../tslint.yaml
+
+rules:
+  max-classes-per-file: false
+  interface-name: false
+  variable-name: false
+  no-empty: false
+  object-literal-sort-keys: false
+  member-ordering: false
+  member-access: false
+  ordered-imports: false
+  interface-over-type-literal: false
+  array-type: false
+  prefer-const: false
