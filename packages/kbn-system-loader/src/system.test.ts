@@ -1,3 +1,5 @@
+/* tslint:disable max-classes-per-file */
+
 import { System } from './system';
 import { KibanaSystem } from './system_types';
 
