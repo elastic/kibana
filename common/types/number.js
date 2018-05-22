@@ -7,10 +7,11 @@ export const number = () => ({
   to: {
     string: n => String(n),
     render: value => {
+      const text = `${value}`;
       return {
         type: 'render',
         as: 'text',
-        value: `${value}`,
+        value: { text },
       };
     },
     datatable: value => {

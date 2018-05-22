@@ -9,10 +9,11 @@ export const boolean = () => ({
     string: n => String(n),
     number: n => Number(n),
     render: value => {
+      const text = `${value}`;
       return {
         type: 'render',
         as: 'text',
-        value: `${value}`,
+        value: { text },
       };
     },
   },

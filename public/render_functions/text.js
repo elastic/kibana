@@ -6,8 +6,8 @@ export const text = () => ({
   displayName: 'Plain Text',
   help: 'Render output as plain text',
   reuseDomNode: true,
-  render(domNode, config, handlers) {
-    ReactDOM.render(<div>{config}</div>, domNode, () => handlers.done());
+  render(domNode, { text }, handlers) {
+    ReactDOM.render(<div>{text}</div>, domNode, () => handlers.done());
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
   },
 });

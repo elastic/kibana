@@ -6,11 +6,11 @@ export const string = () => ({
   },
   to: {
     number: n => Number(n),
-    render: value => {
+    render: text => {
       return {
         type: 'render',
         as: 'text',
-        value,
+        value: { text },
       };
     },
   },
