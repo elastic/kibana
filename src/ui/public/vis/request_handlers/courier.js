@@ -9,32 +9,13 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
   /**
    * TODO: This code can be removed as soon as we got rid of inheritance in the
    * searchsource and pass down every filter explicitly.
-   * we're only adding one range filter against the timeFieldName to ensure
-   * that our filter is the only one applied and override the global filters.
-   * this does rely on the "implementation detail" that filters are added first
-   * on the leaf SearchSource and subsequently on the parents.
+   * We are filtering out the global timefilter by the meta key set by the root
+   * search source on that filter.
    */
   function removeSearchSourceParentTimefilter(searchSource) {
-    searchSource.addFilterPredicate((filter, state) => {
-      if (!filter.range) {
-        return true;
-      }
-
-      const index = searchSource.index() || searchSource.getParent().index();
-      const timeFieldName = index && index.timeFieldName;
-      if (!index || !timeFieldName) {
-        return true;
-      }
-
-      // Only check if we need to filter out this filter if it's actual a range filter
-      // on our time field and not any other field.
-      if (!filter.range[timeFieldName]) {
-        return true;
-      }
-
-      return !(state.filters || []).find(f => f.range && f.range[timeFieldName]);
+    searchSource.addFilterPredicate((filter) => {
+      return !_.get(filter, 'meta._globalTimefilter', false);
     });
-
   }
 
   return {
@@ -61,6 +42,14 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
         }
       });
 
+      requestSearchSource.aggs(function () {
+        return vis.getAggConfig().toDsl();
+      });
+
+      requestSearchSource.onRequestStart((searchSource, searchRequest) => {
+        return vis.onSearchRequestStart(searchSource, searchRequest);
+      });
+
       // Add the explicit passed timeRange as a filter to the requestSearchSource.
       requestSearchSource.filter(() => {
         return timefilter.get(searchSource.index(), timeRange);
@@ -77,7 +66,7 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
         if (!searchSource.lastQuery || vis.reload) return true;
         if (!_.isEqual(_.cloneDeep(searchSource.get('filter')), searchSource.lastQuery.filter)) return true;
         if (!_.isEqual(_.cloneDeep(searchSource.get('query')), searchSource.lastQuery.query)) return true;
-        if (!_.isEqual(calculateObjectHash(vis.aggs.getRequestAggs()), searchSource.lastQuery.aggs)) return true;
+        if (!_.isEqual(calculateObjectHash(vis.getAggConfig()), searchSource.lastQuery.aggs)) return true;
         if (!_.isEqual(_.cloneDeep(timeRange), searchSource.lastQuery.timeRange)) return true;
 
         return false;
@@ -90,7 +79,7 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
             searchSource.lastQuery = {
               filter: _.cloneDeep(searchSource.get('filter')),
               query: _.cloneDeep(searchSource.get('query')),
-              aggs: calculateObjectHash(vis.aggs.getRequestAggs()),
+              aggs: calculateObjectHash(vis.getAggConfig()),
               timeRange: _.cloneDeep(timeRange)
             };
 
