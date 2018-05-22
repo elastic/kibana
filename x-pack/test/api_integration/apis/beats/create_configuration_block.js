@@ -18,7 +18,7 @@ export default function ({ getService }) {
   describe('create_configuration_block', () => {
     it('should create the given configuration block', async () => {
       const configurationBlock = {
-        type: 'outputs',
+        type: 'output',
         tag: 'production',
         block_yml: 'elasticsearch:\n    hosts: [\"localhost:9200\"]\n    username: "..."'
       };
@@ -48,7 +48,7 @@ export default function ({ getService }) {
 
     it('should not allow two "output" type configuration blocks with the same tag', async () => {
       const firstConfigurationBlock = {
-        type: 'outputs',
+        type: 'output',
         tag: 'production',
         block_yml: 'elasticsearch:\n    hosts: ["localhost:9200"]\n    username: "..."'
       };
@@ -61,7 +61,7 @@ export default function ({ getService }) {
         .expect(201);
 
       const secondConfigurationBlock = {
-        type: 'outputs',
+        type: 'output',
         tag: 'production',
         block_yml: 'logstash:\n    hosts: ["localhost:9000"]\n'
       };
@@ -76,7 +76,7 @@ export default function ({ getService }) {
 
     it('should allow two "output" type configuration blocks with different tags', async () => {
       const firstConfigurationBlock = {
-        type: 'outputs',
+        type: 'output',
         tag: 'production',
         block_yml: 'elasticsearch:\n    hosts: ["localhost:9200"]\n    username: "..."'
       };
@@ -89,7 +89,7 @@ export default function ({ getService }) {
         .expect(201);
 
       const secondConfigurationBlock = {
-        type: 'outputs',
+        type: 'output',
         tag: 'development',
         block_yml: 'logstash:\n    hosts: ["localhost:9000"]\n'
       };
@@ -104,7 +104,7 @@ export default function ({ getService }) {
 
     it('should allow two configuration blocks of different types with the same tag', async () => {
       const firstConfigurationBlock = {
-        type: 'outputs',
+        type: 'output',
         tag: 'production',
         block_yml: 'elasticsearch:\n    hosts: ["localhost:9200"]\n    username: "..."'
       };

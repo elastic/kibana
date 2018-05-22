@@ -6,7 +6,7 @@
 
 export const CONFIGURATION_BLOCKS = {
   TYPES: {
-    OUTPUTS: 'outputs',
+    OUTPUT: 'output',
     PROCESSORS: 'processors',
     FILEBEAT_INPUTS: 'filebeat.inputs',
     FILEBEAT_MODULES: 'filebeat.modules',
@@ -16,5 +16,5 @@ export const CONFIGURATION_BLOCKS = {
 };
 
 CONFIGURATION_BLOCKS.UNIQUENESS_ENFORCING_TYPES = [
-  CONFIGURATION_BLOCKS.TYPES.OUTPUTS
+  CONFIGURATION_BLOCKS.TYPES.OUTPUT
 ];
