@@ -17,9 +17,9 @@ export class System<C, M extends ISystemMetadata, D extends ISystemsType, E> {
   public readonly dependencies: SystemName[];
   public readonly metadata?: M;
 
-  private readonly _systemClass: IKibanaSystemClassStatic<C, D, E>;
-  private _systemInstance?: KibanaSystem<C, D, E>;
-  private _exposedValues?: E;
+  private readonly systemClass: IKibanaSystemClassStatic<C, D, E>;
+  private systemInstance?: KibanaSystem<C, D, E>;
+  private exposedValues?: E;
 
   constructor(
     name: SystemName,
@@ -32,25 +32,25 @@ export class System<C, M extends ISystemMetadata, D extends ISystemsType, E> {
     this.name = name;
     this.dependencies = config.dependencies || [];
     this.metadata = config.metadata;
-    this._systemClass = config.implementation;
+    this.systemClass = config.implementation;
   }
 
   public getExposedValues(): E {
-    if (this._systemInstance === undefined) {
+    if (this.systemInstance === undefined) {
       throw new Error(
         'trying to get the exposed value of a system that is NOT running'
       );
     }
 
-    return this._exposedValues!;
+    return this.exposedValues!;
   }
 
   public start(kibanaValues: C, dependenciesValues: D) {
-    this._systemInstance = new this._systemClass(
+    this.systemInstance = new this.systemClass(
       kibanaValues,
       dependenciesValues
     );
-    const exposedValues = this._systemInstance.start();
+    const exposedValues = this.systemInstance.start();
 
     if (isPromise(exposedValues)) {
       throw new Error(
@@ -60,15 +60,15 @@ export class System<C, M extends ISystemMetadata, D extends ISystemsType, E> {
       );
     }
 
-    this._exposedValues =
+    this.exposedValues =
       exposedValues === undefined ? ({} as E) : exposedValues;
   }
 
   public stop() {
-    const stoppedResponse = this._systemInstance && this._systemInstance.stop();
+    const stoppedResponse = this.systemInstance && this.systemInstance.stop();
 
-    this._exposedValues = undefined;
-    this._systemInstance = undefined;
+    this.exposedValues = undefined;
+    this.systemInstance = undefined;
 
     if (isPromise(stoppedResponse)) {
       throw new Error(
