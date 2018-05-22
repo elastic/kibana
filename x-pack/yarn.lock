@@ -10,9 +10,9 @@
     esutils "^2.0.2"
     js-tokens "^3.0.0"
 
-"@elastic/eui@0.0.47":
-  version "0.0.47"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-0.0.47.tgz#5bae27966bb1d68bb3106853610a407509053b44"
+"@elastic/eui@0.0.49":
+  version "0.0.49"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-0.0.49.tgz#583b3c1526df352b99a6cf13bd750d6d5adfb949"
   dependencies:
     brace "^0.10.0"
     classnames "^2.2.5"

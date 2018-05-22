@@ -25,7 +25,6 @@ describe('Table', () => {
     const props = {
       selectedSavedObjects: [1],
       selectionConfig: {
-        itemId: 'id',
         onSelectionChange: () => {},
       },
       filterOptions: [2],
@@ -37,6 +36,7 @@ describe('Table', () => {
       pageIndex: 1,
       pageSize: 2,
       items: [3],
+      itemId: 'id',
       totalItemCount: 3,
       onQueryChange: () => {},
       onTableChange: () => {},
