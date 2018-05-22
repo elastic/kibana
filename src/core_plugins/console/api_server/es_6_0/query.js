@@ -77,6 +77,24 @@ const SPAN_QUERIES = {
   },
 };
 
+const SPAN_MULTI_QUERIES = {
+  wildcard: {
+    __scope_link: '.wildcard'
+  },
+  fuzzy: {
+    __scope_link: '.fuzzy'
+  },
+  prefix: {
+    __scope_link: '.prefix'
+  },
+  range: {
+    __scope_link: '.range'
+  },
+  regexp: {
+    __scope_link: '.regexp'
+  }
+};
+
 const DECAY_FUNC_DESC = {
   __template: {
     FIELD: {
@@ -446,6 +464,14 @@ export default function (api) {
         end: 3,
       },
       match: SPAN_QUERIES,
+    },
+    span_multi: {
+      __template: {
+        match: {
+          MULTI_TERM_QUERY: {}
+        }
+      },
+      match: SPAN_MULTI_QUERIES
     },
     span_near: {
       __template: {
