@@ -6,3 +6,4 @@
 
 export { PLUGIN } from './plugin';
 export { INDEX_NAMES } from './index_names';
+export { CONFIGURATION_BLOCKS } from './configuration_blocks';
