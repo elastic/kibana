@@ -164,12 +164,12 @@ describe('#getProjects', () => {
 
 describe('#buildProjectGraph', () => {
   test('builds full project graph', async () => {
-    const projects = await getProjects(rootPath, [
+    const allProjects = await getProjects(rootPath, [
       '.',
       'packages/*',
       '../plugins/*',
     ]);
-    const graph = buildProjectGraph(projects);
+    const graph = buildProjectGraph(allProjects);
 
     const expected: { [k: string]: string[] } = {};
     for (const [projectName, projects] of graph.entries()) {

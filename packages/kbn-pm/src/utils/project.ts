@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import path from 'path';
+import { relative, resolve as resolvePath } from 'path';
 import { inspect } from 'util';
 
 import { CliError } from './errors';
@@ -41,9 +41,9 @@ export class Project {
     this.json = Object.freeze(packageJson);
     this.path = projectPath;
 
-    this.packageJsonLocation = path.resolve(this.path, 'package.json');
-    this.nodeModulesLocation = path.resolve(this.path, 'node_modules');
-    this.targetLocation = path.resolve(this.path, 'target');
+    this.packageJsonLocation = resolvePath(this.path, 'package.json');
+    this.nodeModulesLocation = resolvePath(this.path, 'node_modules');
+    this.targetLocation = resolvePath(this.path, 'target');
 
     this.productionDependencies = this.json.dependencies || {};
     this.devDependencies = this.json.devDependencies || {};
@@ -61,7 +61,7 @@ export class Project {
 
   public ensureValidProjectDependency(project: Project) {
     const relativePathToProject = normalizePath(
-      path.relative(this.path, project.path)
+      relative(this.path, project.path)
     );
 
     const versionInPackageJson = this.allDependencies[project.name];
@@ -105,7 +105,7 @@ export class Project {
    * instead of everything located in the project directory.
    */
   public getIntermediateBuildDirectory() {
-    return path.resolve(
+    return resolvePath(
       this.path,
       this.getBuildConfig().intermediateBuildDirectory || '.'
     );
@@ -124,14 +124,14 @@ export class Project {
 
     if (typeof raw === 'string') {
       return {
-        [this.name]: path.resolve(this.path, raw),
+        [this.name]: resolvePath(this.path, raw),
       };
     }
 
     if (typeof raw === 'object') {
       const binsConfig: { [k: string]: string } = {};
       for (const binName of Object.keys(raw)) {
-        binsConfig[binName] = path.resolve(this.path, raw[binName]);
+        binsConfig[binName] = resolvePath(this.path, raw[binName]);
       }
       return binsConfig;
     }
