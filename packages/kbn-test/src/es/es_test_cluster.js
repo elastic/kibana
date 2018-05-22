@@ -29,12 +29,12 @@ import elasticsearch from 'elasticsearch';
 
 export function createEsTestCluster(options = {}) {
   const {
-    port = options.port || esTestConfig.getPort(),
-    password = options.password || 'changeme',
-    license = options.license || 'oss',
-    log = options.log,
-    basePath = options.basePath || resolve(KIBANA_ROOT, '.es'),
-    esFrom = options.esFrom || esTestConfig.getBuildFrom(),
+    port = esTestConfig.getPort(),
+    password = 'changeme',
+    license = 'oss',
+    log,
+    basePath = resolve(KIBANA_ROOT, '.es'),
+    esFrom = esTestConfig.getBuildFrom(),
   } = options;
 
   const randomHash = Math.random()

@@ -17,33 +17,26 @@
  * under the License.
  */
 
-import { KIBANA_FTR_SCRIPT, PROJECT_ROOT } from './paths';
+import getopts from 'getopts';
+import { startServers } from '../../../';
+import { processOptions, displayHelp } from './args';
 
-export async function runFtr({
-  procs,
-  configPath,
-  cwd = PROJECT_ROOT,
-  options,
-}) {
-  const args = [KIBANA_FTR_SCRIPT];
+/**
+ * Start servers
+ * @param {string} configPath path to config
+ */
+export async function startServersCli(defaultConfigPath) {
+  const userOptions = getopts(process.argv.slice(2)) || {};
+  const options = processOptions(userOptions, defaultConfigPath);
+  const { config, help } = options;
 
-  if (getLogFlag(options.log)) args.push(`--${getLogFlag(options.log)}`);
-  if (options.bail) args.push('--bail');
-  if (configPath) args.push('--config', configPath);
-  if (options.grep) args.push('--grep', options.grep);
-  if (options.updateBaselines) args.push('--updateBaselines');
+  if (help) return displayHelp();
 
-  await procs.run('ftr', {
-    cmd: 'node',
-    args,
-    cwd,
-    wait: true,
-  });
-}
-
-function getLogFlag(log) {
-  const level = log.getLevel();
-
-  if (level === 'info') return null;
-  return level === 'error' ? 'quiet' : level;
+  try {
+    await startServers(config, options);
+  } catch (err) {
+    options.log.error('FATAL ERROR');
+    options.log.error(err);
+    process.exit(1);
+  }
 }

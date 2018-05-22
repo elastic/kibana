@@ -75,7 +75,7 @@ export async function startServers(configPath, options) {
     await runKibanaServer({
       procs,
       config,
-      options: { ...options, devMode: true },
+      options: { ...options, extraKbnOpts: [...options.extraKbnOpts, '--dev'] },
     });
 
     // wait for 5 seconds of silence before logging the
@@ -100,7 +100,7 @@ async function silence(milliseconds, { log }) {
  * Start servers and run tests for single config
  */
 async function runSingleConfig(configPath, options) {
-  const { bail, log } = options;
+  const { log } = options;
 
   await withProcRunner(log, async procs => {
     const config = await readConfigFile(log, configPath);
@@ -113,9 +113,8 @@ async function runSingleConfig(configPath, options) {
     await runFtr({
       procs,
       configPath,
-      bail,
-      log,
       cwd: process.cwd(),
+      options,
     });
 
     await procs.stop('kibana');

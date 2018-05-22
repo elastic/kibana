@@ -45,20 +45,21 @@ function getKibanaCmd(installDir) {
   return KIBANA_EXEC;
 }
 
-function collectCliArgs(config, { devMode, installDir }) {
+function collectCliArgs(config, { installDir, extraKbnOpts }) {
   const buildArgs = config.get('kbnTestServer.buildArgs') || [];
   const sourceArgs = config.get('kbnTestServer.sourceArgs') || [];
-  const baseServerArgs = config.get('kbnTestServer.serverArgs') || [];
+  const serverArgs = config.get('kbnTestServer.serverArgs') || [];
 
-  const serverArgs = pipe(
-    baseServerArgs,
-    args => (devMode ? [...args.push('--dev')] : args),
-    args => (installDir ? args.filter(a => a !== '--oss') : args)
+  return pipe(
+    serverArgs,
+    args => (installDir ? args.filter(a => a !== '--oss') : args),
+    args => {
+      return installDir
+        ? args.concat(buildArgs)
+        : [KIBANA_EXEC_PATH, ...args, ...sourceArgs];
+    },
+    args => args.concat(extraKbnOpts || [])
   );
-
-  return installDir
-    ? [...serverArgs, ...buildArgs]
-    : [KIBANA_EXEC_PATH, ...serverArgs, ...sourceArgs];
 }
 
 /*
@@ -68,6 +69,6 @@ function collectCliArgs(config, { devMode, installDir }) {
  */
 function pipe(arr, ...fns) {
   return fns.reduce((acc, fn) => {
-    return fn(arr);
-  }, []);
+    return fn(acc);
+  }, arr);
 }

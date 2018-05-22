@@ -202,6 +202,7 @@ module.exports = function (grunt) {
         'scripts/functional_tests',
         '--config', 'test/api_integration/config.js',
         '--es-from', 'source',
+        '--bail',
       ],
     },
 
@@ -212,9 +213,11 @@ module.exports = function (grunt) {
         '--config', 'test/functional/config.js',
         '--es-from', 'source',
         '--verbose',
-        '--server.maxPayloadBytes=1648576', //default is 1048576
-        '--env.name=development',
+        '--bail',
         '--kibana-install-dir', `./build/oss/kibana-${PKG_VERSION}-${process.platform}-x86_64`,
+        '--',
+        '--server.maxPayloadBytes=1648576',
+        '--env.name=development',
       ],
     },
   };

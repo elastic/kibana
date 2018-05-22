@@ -85,11 +85,6 @@ module.exports = function (grunt) {
   grunt.registerTask('test:uiRelease', [
     'checkPlugins',
     'run:functional_tests',
-    // 'run:testEsServer',
-    // 'run:ossDistFuncTestServer',
-    // 'functional_test_runner:functional',
-    // 'stop:testEsServer',
-    // 'stop:ossDistFuncTestServer'
   ]);
 
   grunt.registerTask('test:ui:server', [
