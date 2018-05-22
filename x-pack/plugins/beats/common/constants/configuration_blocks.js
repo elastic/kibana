@@ -10,7 +10,6 @@ export const CONFIGURATION_BLOCKS = {
     PROCESSORS: 'processors',
     FILEBEAT_INPUTS: 'filebeat.inputs',
     FILEBEAT_MODULES: 'filebeat.modules',
-    METRICBEAT_INPUTS: 'metricbeat.inputs',
     METRICBEAT_MODULES: 'metricbeat.modules'
   }
 };
