@@ -52,7 +52,8 @@ const innerHits = {
     __one_of: ['true', 'false'],
   },
 };
-const SPAN_QUERIES = {
+
+const SPAN_QUERIES_NO_FIELD_MASK = {
   // TODO add one_of for objects
   span_first: {
     __scope_link: '.span_first',
@@ -75,6 +76,18 @@ const SPAN_QUERIES = {
   span_within: {
     __scope_link: '.span_within',
   },
+};
+const SPAN_QUERIES = {
+  ...SPAN_QUERIES_NO_FIELD_MASK,
+  field_masking_span: {
+    __template: {
+      query: {
+        SPAN_QUERY: {}
+      }
+    },
+    query: SPAN_QUERIES_NO_FIELD_MASK,
+    field: ''
+  }
 };
 
 const SPAN_MULTI_QUERIES = {
