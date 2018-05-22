@@ -664,6 +664,10 @@ export default function (api) {
         __one_of: ['avg', 'total', 'max', 'none'],
       },
     },
+    percolate: {
+      field: '',
+      document: {}
+    },
     common: {
       __template: {
         FIELD: {
