@@ -62,8 +62,16 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
         return timefilter.get(searchSource.get('index'), timeRange);
       });
 
-      searchSource.set('filter', filters);
-      searchSource.set('query', query);
+      // in editor mode we want to set filter and query on searchSource so they get
+      // stored with visualization, however on dashboard we set them on requestSearchSource
+      // so we don't override the stored ones
+      if (vis.editorMode) {
+        searchSource.set('filter', filters);
+        searchSource.set('query', query);
+      } else {
+        requestSearchSource.set('filter', filters);
+        requestSearchSource.set('query', query);
+      }
 
       const shouldQuery = () => {
         if (!searchSource.lastQuery || forceFetch) return true;
