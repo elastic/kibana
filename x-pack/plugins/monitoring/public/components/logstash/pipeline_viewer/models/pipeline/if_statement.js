@@ -22,7 +22,7 @@ function makeStatementsForOutgoingVertices(outgoingVertices, statements, next, p
 
 function addStatementsToList(list, statements, depth, id) {
   statements.forEach(statement => {
-    list.push(...statement.toList(depth + 1, id));
+    list.push(...statement.toList(depth, id));
   });
 }
 
@@ -40,15 +40,17 @@ export class IfStatement extends Statement {
   toList(depth, parentId) {
     const list = [];
 
-    list.push(new IfElement(this, depth, parentId));
+    const ifElement = new IfElement(this, depth, parentId);
+    list.push(ifElement);
 
-    addStatementsToList(list, this.trueStatements, depth, this.id);
+    const nestedElementDepth = depth + 1;
+    addStatementsToList(list, this.trueStatements, nestedElementDepth, ifElement.id);
 
     if (this.elseStatements.length) {
       const elseElement = new ElseElement(this, depth, parentId);
       list.push(elseElement);
 
-      addStatementsToList(list, this.elseStatements, depth, elseElement.id);
+      addStatementsToList(list, this.elseStatements, nestedElementDepth, elseElement.id);
     }
 
     return list;

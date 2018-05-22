@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pipelineToList } from './pipeline_to_list';
+import { List } from './list';
 import { PluginStatement } from '../pipeline/plugin_statement';
 import { IfStatement } from '../pipeline/if_statement';
 import { PluginElement } from './plugin_element';
@@ -34,7 +34,7 @@ describe('pipelineToList', () => {
   });
 
   it('creates list with element for each statement', () => {
-    const result = pipelineToList(pipeline);
+    const result = List.fromPipeline(pipeline);
     const {
       inputs,
       filters,
@@ -55,7 +55,7 @@ describe('pipelineToList', () => {
       )
     );
 
-    const result = pipelineToList(pipeline);
+    const result = List.fromPipeline(pipeline);
     const {
       inputs,
       filters,
@@ -93,7 +93,7 @@ describe('pipelineToList', () => {
       )
     ];
 
-    const result = pipelineToList(pipeline);
+    const result = List.fromPipeline(pipeline);
     const {
       inputs,
       filters,

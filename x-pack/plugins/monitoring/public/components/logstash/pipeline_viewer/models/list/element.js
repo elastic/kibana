@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export class PipelineElement {
+export class Element {
   constructor(id, statement, depth, parentId) {
     this.id = id;
     this.statement = statement;

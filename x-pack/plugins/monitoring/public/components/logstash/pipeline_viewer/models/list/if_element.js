@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PipelineElement } from './pipeline_element';
+import { Element } from './element';
 
-export class IfElement extends PipelineElement {
+export class IfElement extends Element {
   constructor(statement, depth, parentId) {
     const { id } = statement;
     super(id, statement, depth, parentId);
