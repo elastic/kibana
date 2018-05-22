@@ -126,14 +126,13 @@ export class WarmPhase extends Component {
         description={
           <Fragment>
             <p>
-              Your index is frequently queried, but is read-only.
-              Use this phase to optimize for search.Your index is being queried
-              and in active writing mode.
+              Your index becomes read-only when it enters the warm phase.
+              You can optimize this phase for search.
             </p>
             {isShowingErrors ? (
               <EuiTextColor color="danger">
                 <EuiText>
-                  <p>This phase contains errors that need to be fixed.</p>
+                  <p>This phase contains errors</p>
                 </EuiText>
               </EuiTextColor>
             ) : null}
@@ -269,7 +268,7 @@ export class WarmPhase extends Component {
                         validate();
                       }}
                     >
-                      Set same as hot phase
+                      Set to same as hot phase
                     </EuiButtonEmpty>
                   </EuiFormRow>
                 </EuiFlexItem>
@@ -284,7 +283,7 @@ export class WarmPhase extends Component {
                 <EuiTextColor color="subdued">
                   Shrink the index into a new index with fewer primary shards.{' '}
                   <EuiLink href="https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-shrink-index.html#indices-shrink-index">
-                    Learn more.
+                    Learn more
                   </EuiLink>
                 </EuiTextColor>
               </EuiTitle>
@@ -297,7 +296,7 @@ export class WarmPhase extends Component {
                   await setPhaseData(PHASE_SHRINK_ENABLED, e.target.checked);
                   validate();
                 }}
-                label="Enable shrink"
+                label="Shrink index"
               />
 
               <EuiSpacer size="m" />
@@ -336,7 +335,7 @@ export class WarmPhase extends Component {
                             validate();
                           }}
                         >
-                          Set same as hot phase
+                          Set to same as hot phase
                         </EuiButtonEmpty>
                       </EuiFormRow>
                     </EuiFlexItem>
@@ -351,10 +350,10 @@ export class WarmPhase extends Component {
               </EuiTitle>
               <EuiTitle size="xs">
                 <EuiTextColor color="subdued">
-                  Reduce the number of segments in your shard by and merging smaller
+                  Reduce the number of segments in your shard by merging smaller
                   files and clearing deleted ones.{' '}
                   <EuiLink href="https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-forcemerge.html">
-                    Learn More
+                    Learn more
                   </EuiLink>
                 </EuiTextColor>
               </EuiTitle>

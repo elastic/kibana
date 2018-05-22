@@ -73,12 +73,12 @@ export class DeletePhase extends PureComponent {
         description={
           <Fragment>
             <p>
-              When your data is no longer useful. Define how long you want to retain it.
+              Use this phase to define how long to retain your data.
             </p>
             {isShowingErrors ? (
               <EuiTextColor color="danger">
                 <EuiText>
-                  <p>This phase contains errors that need to be fixed.</p>
+                  <p>This phase contains errors</p>
                 </EuiText>
               </EuiTextColor>
             ) : null}

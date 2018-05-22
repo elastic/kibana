@@ -77,12 +77,13 @@ export class HotPhase extends PureComponent {
         description={
           <Fragment>
             <p>
-              This phase is required. Your index is being queried and in active writing mode.
+              This phase is required. Your index is being queried and actively written to.
+              You can optimize this phase for write throughput.
             </p>
             {isShowingErrors ? (
               <EuiTextColor color="danger">
                 <EuiText>
-                  <p>This phase contains errors that need to be fixed.</p>
+                  <p>This phase contains errors</p>
                 </EuiText>
               </EuiTextColor>
             ) : null}
@@ -94,9 +95,9 @@ export class HotPhase extends PureComponent {
           hasEmptyLabelSpace
           helpText={
             <p>
-              Setting this to true will rollover the index when it gets too big or too old. The alias will switch to the new index.{' '}
+              If true, rollover the index when it gets too big or too old. The alias switches to the new index.{' '}
               <EuiLink href="https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-rollover-index.html">
-                Learn more.
+                Learn more
               </EuiLink>
             </p>
           }
@@ -116,7 +117,7 @@ export class HotPhase extends PureComponent {
             <EuiFlexGroup>
               <EuiFlexItem style={{ maxWidth: 188 }}>
                 <ErrableFormRow
-                  label="Maximum index size stored"
+                  label="Maximum index size"
                   errorKey={PHASE_ROLLOVER_MAX_SIZE_STORED}
                   isShowingErrors={isShowingErrors}
                   errors={errors}

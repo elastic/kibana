@@ -60,10 +60,10 @@ export const validatePhase = (type, phase) => {
       !isNumber(phase[PHASE_ROLLOVER_MAX_SIZE_STORED])
     ) {
       errors[PHASE_ROLLOVER_MAX_AGE] = [
-        'A rollover requires a max age, max docs, or max size.'
+        'A maximum age is required'
       ];
       errors[PHASE_ROLLOVER_MAX_SIZE_STORED] = [
-        'A rollover requires a max age, max docs, or max size.'
+        'A maximum index size is required'
       ];
     }
   }
@@ -75,13 +75,13 @@ export const validatePhase = (type, phase) => {
         continue;
       }
       if (!isNumber(phase[numberedAttribute])) {
-        errors[numberedAttribute] = ['A number is required.'];
+        errors[numberedAttribute] = ['A number is required'];
       }
       else if (phase[numberedAttribute] < 0) {
-        errors[numberedAttribute] = ['Only positive numbers allowed.'];
+        errors[numberedAttribute] = ['Only positive numbers are allowed'];
       }
       else if (numberedAttribute === PHASE_PRIMARY_SHARD_COUNT && phase[numberedAttribute] < 1) {
-        errors[numberedAttribute] = ['Only positive numbers above 0 are allowed.'];
+        errors[numberedAttribute] = ['Only positive numbers are allowed'];
       }
     }
   }
@@ -118,41 +118,41 @@ export const validateLifecycle = state => {
   }
 
   if (getBootstrapEnabled(state) && !getIndexName(state)) {
-    errors[STRUCTURE_INDEX_TEMPLATE][STRUCTURE_TEMPLATE_SELECTION][STRUCTURE_INDEX_NAME].push('An index name is required.');
+    errors[STRUCTURE_INDEX_TEMPLATE][STRUCTURE_TEMPLATE_SELECTION][STRUCTURE_INDEX_NAME].push('An index name is required');
   }
 
   if (getBootstrapEnabled(state) && !getAliasName(state)) {
-    errors[STRUCTURE_INDEX_TEMPLATE][STRUCTURE_TEMPLATE_SELECTION][STRUCTURE_ALIAS_NAME].push('An alias name is required.');
+    errors[STRUCTURE_INDEX_TEMPLATE][STRUCTURE_TEMPLATE_SELECTION][STRUCTURE_ALIAS_NAME].push('An alias name is required');
   }
 
   if (!isNumber(getSelectedPrimaryShardCount(state))) {
     errors[STRUCTURE_INDEX_TEMPLATE][STRUCTURE_CONFIGURATION][
       STRUCTURE_PRIMARY_NODES
-    ].push('A value is required.');
+    ].push('A value is required');
   }
   else if (getSelectedPrimaryShardCount(state) < 1) {
     errors[STRUCTURE_INDEX_TEMPLATE][STRUCTURE_CONFIGURATION][
       STRUCTURE_PRIMARY_NODES
-    ].push('Only positive numbers above 0 are allowed.');
+    ].push('Only positive numbers are allowed');
   }
 
   if (!isNumber(getSelectedReplicaCount(state))) {
     errors[STRUCTURE_INDEX_TEMPLATE][STRUCTURE_CONFIGURATION][
       STRUCTURE_REPLICAS
-    ].push('A value is required.');
+    ].push('A value is required');
   }
   else if (getSelectedReplicaCount(state) < 0) {
     errors[STRUCTURE_INDEX_TEMPLATE][STRUCTURE_CONFIGURATION][
       STRUCTURE_REPLICAS
-    ].push('Only positive numbers allowed.');
+    ].push('Only positive numbers are allowed');
   }
 
   if (!getSelectedPolicyName(state)) {
-    errors[STRUCTURE_REVIEW][STRUCTURE_POLICY_NAME].push('A policy name is required.');
+    errors[STRUCTURE_REVIEW][STRUCTURE_POLICY_NAME].push('A policy name is required');
   }
 
   if (getSaveAsNewPolicy(state) && getSelectedOriginalPolicyName(state) === getSelectedPolicyName(state)) {
-    errors[STRUCTURE_REVIEW][STRUCTURE_POLICY_NAME].push('The policy name must be different.');
+    errors[STRUCTURE_REVIEW][STRUCTURE_POLICY_NAME].push('The policy name must be different');
   }
 
   // if (getSaveAsNewPolicy(state)) {

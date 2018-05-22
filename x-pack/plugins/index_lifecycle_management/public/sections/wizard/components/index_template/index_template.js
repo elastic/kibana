@@ -46,7 +46,7 @@ export class IndexTemplate extends Component {
     if (await this.validate()) {
       this.props.done();
     } else {
-      toastNotifications.addDanger('Please fix errors on the page.');
+      toastNotifications.addDanger('Please fix the errors on the page');
     }
   };
 
