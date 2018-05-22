@@ -26,11 +26,14 @@ export default async function ({ readConfigFile }) {
     },
     env: commonConfig.get('env'),
     esTestCluster: commonConfig.get('esTestCluster'),
-    kibanaServerArgs: [
-      ...functionalConfig.get('kibanaServerArgs'),
-      '--optimize.enabled=false',
-      '--elasticsearch.healthCheck.delay=3600000',
-      '--server.xsrf.disableProtection=true',
-    ],
+    kbnTestServer: {
+      ...functionalConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...functionalConfig.get('kbnTestServer.serverArgs'),
+        '--optimize.enabled=false',
+        '--elasticsearch.healthCheck.delay=3600000',
+        '--server.xsrf.disableProtection=true',
+      ],
+    },
   };
 }
