@@ -8,27 +8,31 @@ import React from 'react';
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import { withInitialData } from './helpers';
-import { ReduxRequest } from '../../components/shared/ReduxRequest';
+import { Request } from 'react-redux-request';
 import { loadServiceDetails } from '../../services/rest';
 
 const ID = 'serviceDetails';
 const INITIAL_DATA = { types: [] };
 
 export function getServiceDetails(state) {
-  return withInitialData(state.reduxRequest[ID], INITIAL_DATA);
+  return withInitialData(state.reactReduxRequest[ID], INITIAL_DATA);
 }
 
 export function getDefaultTransactionType(state) {
-  const types = _.get(state.reduxRequest.serviceDetails, 'data.types');
+  const types = _.get(state.reactReduxRequest.serviceDetails, 'data.types');
   return _.first(types);
 }
 
 export function ServiceDetailsRequest({ urlParams, render }) {
   const { serviceName, start, end, kuery } = urlParams;
+
+  if (!(serviceName && start && end)) {
+    return null;
+  }
+
   return (
-    <ReduxRequest
+    <Request
       id={ID}
-      shouldInvoke={Boolean(serviceName && start && end)}
       fn={loadServiceDetails}
       args={[{ serviceName, start, end, kuery }]}
       selector={getServiceDetails}
