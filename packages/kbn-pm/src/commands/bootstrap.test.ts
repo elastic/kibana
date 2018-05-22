@@ -31,7 +31,9 @@ const createProject = (packageJson: PackageJson, path = '.') =>
 expect.addSnapshotSerializer(absolutePathSnapshotSerializer);
 expect.addSnapshotSerializer(stripAnsiSnapshotSerializer);
 
-const noop = () => {};
+const noop = () => {
+  // noop
+};
 
 afterEach(() => {
   jest.resetAllMocks();

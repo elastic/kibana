@@ -41,7 +41,9 @@ beforeEach(() => {
   };
 
   // Reduce the noise that comes from the run command.
-  jest.spyOn(console, 'log').mockImplementation(() => {});
+  jest.spyOn(console, 'log').mockImplementation(() => {
+    // noop
+  });
 });
 
 test('passes all found projects to the command if no filter is specified', async () => {
@@ -102,9 +104,9 @@ test('respects both `include` and `exclude` filters if specified at the same tim
 });
 
 test('does not run command if all projects are filtered out', async () => {
-  const mockProcessExit = jest
-    .spyOn(process, 'exit')
-    .mockImplementation(() => {});
+  const mockProcessExit = jest.spyOn(process, 'exit').mockImplementation(() => {
+    // noop
+  });
 
   await runCommand(command, {
     ...config,

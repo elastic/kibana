@@ -82,7 +82,9 @@ describe('bin script points to a file', () => {
     const fs = require('./fs');
     fs.isFile.mockReturnValue(true);
 
-    const logMock = jest.spyOn(console, 'log').mockImplementation(() => {});
+    const logMock = jest.spyOn(console, 'log').mockImplementation(() => {
+      // noop
+    });
     await linkProjectExecutables(projectsByName, projectGraph);
     logMock.mockRestore();
 
