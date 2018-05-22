@@ -54,6 +54,7 @@ import {
   getEmbeddables,
   getEmbeddableMetadata,
   getQuery,
+  getFilters,
 } from '../selectors';
 
 /**
@@ -200,8 +201,11 @@ export class DashboardStateManager {
       store.dispatch(updateDescription(this.getDescription()));
     }
 
-    if (this.getFilterBarChanged()) {
-      store.dispatch(updateFilters(this.getFilterState().filterBars));
+    if (!_.isEqual(
+      FilterUtils.cleanFiltersForComparison(this.appState.filters),
+      FilterUtils.cleanFiltersForComparison(getFilters(state))
+    )) {
+      store.dispatch(updateFilters(this.appState.filters));
     }
 
     if (getQuery(state) !== this.getQuery()) {
