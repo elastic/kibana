@@ -44,7 +44,7 @@ via the `context:defaultSize` setting in <<advanced-options, *Management >
 Advanced Settings*>>.
 
 [float]
-[[changing-context-size]]
+[[change-context-size]]
 === Changing the Context Size
 
 You can change the number documents displayed before and after the anchor
@@ -69,7 +69,7 @@ configured via the `context:step` setting in <<advanced-options, *Management >
 Advanced Settings*>>.
 
 [float]
-[[filtering-context]]
+[[filter-context]]
 === Filtering the Context
 
 Depending on how the documents are partitioned into index patterns, the context

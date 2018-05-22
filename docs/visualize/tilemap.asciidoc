@@ -104,7 +104,7 @@ After changing options, click the  *Apply changes* button to update your visuali
 changes* button to keep your visualization in its current state.
 
 [float]
-[[navigating-map]]
+[[navigate-map]]
 === Navigating the Map
 
 Once your tilemap visualization is ready, you can explore the map in several ways:
