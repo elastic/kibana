@@ -24,20 +24,20 @@ test('starts system with core api', () => {
   class FooSystem extends KibanaSystem<IKibanaCoreApi, {}> {
     public start() {
       expect(this.kibana).toEqual({
-        name: 'foo',
         fromCore: true,
         metadata: {
           configPath: 'config.path.foo',
         },
+        name: 'foo',
       });
     }
   }
 
   const foo = new System('foo', {
+    implementation: FooSystem,
     metadata: {
       configPath: 'config.path.foo',
     },
-    implementation: FooSystem,
   });
 
   const createSystemApi: KibanaSystemApiFactory<IKibanaCoreApi, IMetadata> = (
@@ -45,9 +45,9 @@ test('starts system with core api', () => {
     metadata
   ) => {
     return {
-      name,
-      metadata,
       fromCore: true,
+      metadata,
+      name,
     };
   };
 
