@@ -11,9 +11,9 @@ import { take, share, mapTo, delay, tap, ignoreElements } from 'rxjs/operators';
 // kill the subprocess and then kill our process as long as the observer isn't cancelled
 export function safeChildProcess(childProcess, observer) {
   const ownTerminateSignal$ = Rx.merge(
-    Rx.fromEvent(process, 'SIGTERM', x => x).pipe(mapTo('SIGTERM')),
-    Rx.fromEvent(process, 'SIGINT', x => x).pipe(mapTo('SIGINT')),
-    Rx.fromEvent(process, 'SIGBREAK', x => x).pipe(mapTo('SIGBREAK')),
+    Rx.fromEvent(process, 'SIGTERM').pipe(mapTo('SIGTERM')),
+    Rx.fromEvent(process, 'SIGINT').pipe(mapTo('SIGINT')),
+    Rx.fromEvent(process, 'SIGBREAK').pipe(mapTo('SIGBREAK')),
   )
     .pipe(
       take(1),
@@ -29,7 +29,7 @@ export function safeChildProcess(childProcess, observer) {
     ),
 
     // SIGKILL when this process forcefully exits
-    Rx.fromEvent(process, 'exit', x => x).pipe(
+    Rx.fromEvent(process, 'exit').pipe(
       take(1),
       mapTo('SIGKILL')
     ),

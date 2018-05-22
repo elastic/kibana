@@ -51,7 +51,7 @@ export class HeadlessChromiumDriverFactory {
 
       safeChildProcess(chromium, observer);
 
-      const stderr$ = Rx.fromEvent(chromium.stderr, 'data', x => x).pipe(
+      const stderr$ = Rx.fromEvent(chromium.stderr, 'data').pipe(
         map(line => line.toString()),
         share()
       );
@@ -71,12 +71,12 @@ export class HeadlessChromiumDriverFactory {
         }))
       );
 
-      const processError$ = Rx.fromEvent(chromium, 'error', x => x).pipe(
+      const processError$ = Rx.fromEvent(chromium, 'error').pipe(
         mergeMap(() => Rx.throwError(new Error(`Unable to spawn Chromium`))),
       );
 
-      const processExit$ = Rx.fromEvent(chromium, 'exit', x => x).pipe(
-        mergeMap(code => Rx.throwError(new Error(`Chromium exited with code: ${code}. ${exitCodeSuggestion(code)}`)))
+      const processExit$ = Rx.fromEvent(chromium, 'exit').pipe(
+        mergeMap(([code]) => Rx.throwError(new Error(`Chromium exited with code: ${code}. ${exitCodeSuggestion(code)}`)))
       );
 
       const nssError$ = message$.pipe(

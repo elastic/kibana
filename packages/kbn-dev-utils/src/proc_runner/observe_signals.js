@@ -1,5 +1,5 @@
 import * as Rx from 'rxjs';
-import { mapTo } from 'rxjs/operators';
+import { map, mapTo } from 'rxjs/operators';
 
 /**
  *  Creates an Observable from a Process object that:
@@ -10,8 +10,8 @@ import { mapTo } from 'rxjs/operators';
  */
 export function observeSignals(process) {
   return Rx.merge(
-    Rx.fromEvent(process, 'exit', x => x).pipe(mapTo('exit')),
-    Rx.fromEvent(process, 'SIGINT', x => x).pipe(mapTo('SIGINT')),
-    Rx.fromEvent(process, 'SIGTERM', x => x).pipe(mapTo('SIGTERM'))
+    Rx.fromEvent(process, 'exit').pipe(map(([code]) => code), mapTo('exit')),
+    Rx.fromEvent(process, 'SIGINT').pipe(mapTo('SIGINT')),
+    Rx.fromEvent(process, 'SIGTERM').pipe(mapTo('SIGTERM'))
   );
 }

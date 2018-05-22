@@ -25,7 +25,7 @@ import { observeReadable } from './observe_readable';
 export function observeLines(readable) {
   const done$ = observeReadable(readable).pipe(share());
 
-  const scan$ = Rx.fromEvent(readable, 'data', x => x).pipe(
+  const scan$ = Rx.fromEvent(readable, 'data').pipe(
     scan(
       ({ buffer }, chunk) => {
         buffer += chunk;
