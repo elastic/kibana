@@ -4,18 +4,18 @@ import { System } from './system';
 import { KibanaSystem } from './system_types';
 
 test('can get exposed values after starting', () => {
-  interface CoreType {
+  interface ICoreType {
     bar: string;
   }
-  interface DepsType {
+  interface IDepsType {
     quux: string;
   }
-  interface ExposedType {
-    core: CoreType;
-    deps: DepsType;
+  interface IExposedType {
+    core: ICoreType;
+    deps: IDepsType;
   }
 
-  class FooSystem extends KibanaSystem<CoreType, DepsType, ExposedType> {
+  class FooSystem extends KibanaSystem<ICoreType, IDepsType, IExposedType> {
     public start() {
       return {
         core: this.kibana,

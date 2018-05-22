@@ -1,9 +1,9 @@
 import {
+  IKibanaSystemClassStatic,
+  ISystemMetadata,
+  ISystemsType,
   KibanaSystem,
-  KibanaSystemClassStatic,
-  SystemMetadata,
   SystemName,
-  SystemsType,
 } from './system_types';
 
 function isPromise(obj: any) {
@@ -12,12 +12,12 @@ function isPromise(obj: any) {
   );
 }
 
-export class System<C, M extends SystemMetadata, D extends SystemsType, E> {
+export class System<C, M extends ISystemMetadata, D extends ISystemsType, E> {
   public readonly name: SystemName;
   public readonly dependencies: SystemName[];
   public readonly metadata?: M;
 
-  private readonly _systemClass: KibanaSystemClassStatic<C, D, E>;
+  private readonly _systemClass: IKibanaSystemClassStatic<C, D, E>;
   private _systemInstance?: KibanaSystem<C, D, E>;
   private _exposedValues?: E;
 
@@ -26,7 +26,7 @@ export class System<C, M extends SystemMetadata, D extends SystemsType, E> {
     config: {
       metadata?: M;
       dependencies?: SystemName[];
-      implementation: KibanaSystemClassStatic<C, D, E>;
+      implementation: IKibanaSystemClassStatic<C, D, E>;
     }
   ) {
     this.name = name;
