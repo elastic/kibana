@@ -1,5 +1,6 @@
 export const all = () => ({
   name: 'all',
+  type: 'boolean',
   help: 'Return true if all of the conditions are true',
   args: {
     _: {

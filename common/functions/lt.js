@@ -1,5 +1,6 @@
 export const lt = () => ({
   name: 'lt',
+  type: 'boolean',
   help: 'Return if the context is less than the argument',
   args: {
     _: {

@@ -1,5 +1,6 @@
 export const any = () => ({
   name: 'any',
+  type: 'boolean',
   help: 'Return true if any of the conditions are true',
   args: {
     _: {

@@ -1,5 +1,6 @@
 export const eq = () => ({
   name: 'eq',
+  type: 'boolean',
   help: 'Return if the context is equal to the argument',
   args: {
     _: {

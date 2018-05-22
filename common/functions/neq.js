@@ -1,5 +1,6 @@
 export const neq = () => ({
   name: 'neq',
+  type: 'boolean',
   help: 'Return if the context is not equal to the argument',
   args: {
     _: {

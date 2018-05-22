@@ -1,5 +1,6 @@
 export const gt = () => ({
   name: 'gt',
+  type: 'boolean',
   help: 'Return if the context is greater than the argument',
   args: {
     _: {
