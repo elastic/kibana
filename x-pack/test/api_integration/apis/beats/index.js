@@ -22,5 +22,6 @@ export default function ({ getService, loadTestFile }) {
     loadTestFile(require.resolve('./list_beats'));
     loadTestFile(require.resolve('./verify_beats'));
     loadTestFile(require.resolve('./update_beat'));
+    loadTestFile(require.resolve('./create_configuration_block'));
   });
 }
