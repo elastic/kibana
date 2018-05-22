@@ -7,6 +7,6 @@ if (!global.__BUILT_WITH_BABEL__) {
   const { resolve } = require('path');
   require('ts-node').register({
     transpileOnly: true,
-    cacheDirectory: resolve(__dirname, '../../../optimize/.cache/ts-node')
+    cacheDirectory: resolve(__dirname, '../../optimize/.cache/ts-node')
   });
 }
