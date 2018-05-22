@@ -9,6 +9,7 @@ import { registerEnrollBeatRoute } from './register_enroll_beat_route';
 import { registerListBeatsRoute } from './register_list_beats_route';
 import { registerVerifyBeatsRoute } from './register_verify_beats_route';
 import { registerUpdateBeatRoute } from './register_update_beat_route';
+import { registerCreateConfigurationBlockRoute } from './register_create_configuration_block_route';
 
 export function registerApiRoutes(server) {
   registerCreateEnrollmentTokensRoute(server);
@@ -16,4 +17,5 @@ export function registerApiRoutes(server) {
   registerListBeatsRoute(server);
   registerVerifyBeatsRoute(server);
   registerUpdateBeatRoute(server);
+  registerCreateConfigurationBlockRoute(server);
 }
