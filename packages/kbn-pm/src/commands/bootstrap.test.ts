@@ -45,19 +45,19 @@ test('handles dependencies of dependencies', async () => {
   });
   const foo = createProject(
     {
-      name: 'foo',
       dependencies: {
         bar: 'link:../bar',
       },
+      name: 'foo',
     },
     'packages/foo'
   );
   const bar = createProject(
     {
-      name: 'bar',
       dependencies: {
         baz: 'link:../baz',
       },
+      name: 'bar',
     },
     'packages/bar'
   );

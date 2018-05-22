@@ -73,9 +73,9 @@ export class Project {
 
     const updateMsg = 'Update its package.json to the expected value below.';
     const meta = {
-      package: `${this.name} (${this.packageJsonLocation})`,
-      expected: `"${project.name}": "${expectedVersionInPackageJson}"`,
       actual: `"${project.name}": "${versionInPackageJson}"`,
+      expected: `"${project.name}": "${expectedVersionInPackageJson}"`,
+      package: `${this.name} (${this.packageJsonLocation})`,
     };
 
     if (isLinkDependency(versionInPackageJson)) {
@@ -140,8 +140,8 @@ export class Project {
       `[${this.name}] has an invalid "bin" field in its package.json, ` +
         `expected an object or a string`,
       {
-        package: `${this.name} (${this.packageJsonLocation})`,
         binConfig: inspect(raw),
+        package: `${this.name} (${this.packageJsonLocation})`,
       }
     );
   }

@@ -63,8 +63,8 @@ function createTreeStructure(tree: ProjectsTree): Tree {
     if (project.size === 1 && project.has(projectKey)) {
       const projectName = project.get(projectKey)! as string;
       children.push({
-        name: dirOrProjectName(dir, projectName),
         children: [],
+        name: dirOrProjectName(dir, projectName),
       });
       continue;
     }
@@ -77,8 +77,8 @@ function createTreeStructure(tree: ProjectsTree): Tree {
       const projectName = subtree.name;
 
       children.push({
-        name: dirOrProjectName(dir, projectName),
         children: subtree.children,
+        name: dirOrProjectName(dir, projectName),
       });
       continue;
     }
@@ -91,15 +91,15 @@ function createTreeStructure(tree: ProjectsTree): Tree {
       const newName = chalk.dim(path.join(dir.toString(), child.name!));
 
       children.push({
-        name: newName,
         children: child.children,
+        name: newName,
       });
       continue;
     }
 
     children.push({
-      name: chalk.dim(dir.toString()),
       children: subtree.children,
+      name: chalk.dim(dir.toString()),
     });
   }
 

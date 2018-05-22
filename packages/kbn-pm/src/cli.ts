@@ -47,9 +47,9 @@ export async function run(argv: string[]) {
 
   const options = getopts(argv, {
     alias: {
+      e: 'exclude',
       h: 'help',
       i: 'include',
-      e: 'exclude',
     },
   });
 

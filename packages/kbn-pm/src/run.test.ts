@@ -29,8 +29,8 @@ let command: Command;
 let config: CommandConfig;
 beforeEach(() => {
   command = {
-    name: 'test name',
     description: 'test description',
+    name: 'test name',
     run: jest.fn(),
   };
 

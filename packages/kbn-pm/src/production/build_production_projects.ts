@@ -99,9 +99,9 @@ async function copyToBuild(
 
   await copy(['**/*', '!node_modules/**'], buildProjectPath, {
     cwd: project.getIntermediateBuildDirectory(),
-    parents: true,
-    nodir: true,
     dot: true,
+    nodir: true,
+    parents: true,
   });
 
   // If a project is using an intermediate build directory, we special-case our

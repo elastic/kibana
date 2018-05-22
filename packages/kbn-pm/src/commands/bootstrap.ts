@@ -6,8 +6,8 @@ import { topologicallyBatchProjects } from '../utils/projects';
 import { Command } from './';
 
 export const BootstrapCommand: Command = {
-  name: 'bootstrap',
   description: 'Install dependencies and crosslink projects',
+  name: 'bootstrap',
 
   async run(projects, projectGraph, { options }) {
     const batchedProjects = topologicallyBatchProjects(projects, projectGraph);

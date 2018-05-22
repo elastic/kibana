@@ -16,8 +16,8 @@ const normalizePaths = (value: any) => {
   });
 
   return {
-    didReplacement,
     clone,
+    didReplacement,
   };
 };
 

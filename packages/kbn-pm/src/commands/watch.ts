@@ -25,8 +25,8 @@ const kibanaProjectName = 'kibana';
  * `webpack` and `tsc` only, for the rest we rely on predefined timeouts.
  */
 export const WatchCommand: Command = {
-  name: 'watch',
   description: 'Runs `kbn:watch` script for every project.',
+  name: 'watch',
 
   async run(projects, projectGraph) {
     const projectsToWatch: ProjectMap = new Map();

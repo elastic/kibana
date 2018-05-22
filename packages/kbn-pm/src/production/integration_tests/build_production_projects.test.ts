@@ -18,9 +18,9 @@ describe('kbn-pm production', function() {
       // Copy all the test fixtures into a tmp dir, as we will be mutating them
       await copy(['**/*'], tmpDir, {
         cwd: fixturesPath,
-        parents: true,
-        nodir: true,
         dot: true,
+        nodir: true,
+        parents: true,
       });
 
       const projects = await getProjects(tmpDir, ['.', './packages/*']);

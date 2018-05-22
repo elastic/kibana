@@ -42,8 +42,8 @@ export function spawnStreaming(
   const color = nextColor();
   const prefixedStdout = logTransformer({ tag: `${color.bold(prefix)}:` });
   const prefixedStderr = logTransformer({
-    tag: `${logSymbols.error} ${color.bold(prefix)}:`,
     mergeMultiline: true,
+    tag: `${logSymbols.error} ${color.bold(prefix)}:`,
   });
 
   spawned.stdout.pipe(prefixedStdout).pipe(process.stdout);

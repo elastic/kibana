@@ -25,11 +25,11 @@ describe('fromPath', () => {
 
 test('fields', async () => {
   const kibana = createProjectWith({
-    scripts: {
-      test: 'jest',
-    },
     dependencies: {
       foo: '1.2.3',
+    },
+    scripts: {
+      test: 'jest',
     },
   });
 

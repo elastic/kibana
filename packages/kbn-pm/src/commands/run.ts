@@ -5,9 +5,9 @@ import { topologicallyBatchProjects } from '../utils/projects';
 import { Command } from './';
 
 export const RunCommand: Command = {
-  name: 'run',
   description:
     'Run script defined in package.json in each package that contains that script.',
+  name: 'run',
 
   async run(projects, projectGraph, { extraArgs }) {
     const batchedProjects = topologicallyBatchProjects(projects, projectGraph);

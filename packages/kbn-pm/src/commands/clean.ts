@@ -7,9 +7,9 @@ import { isDirectory } from '../utils/fs';
 import { Command } from './';
 
 export const CleanCommand: Command = {
-  name: 'clean',
   description:
     'Remove the node_modules and target directories from all projects.',
+  name: 'clean',
 
   async run(projects, projectGraph, { rootPath }) {
     const directoriesToDelete = [];
