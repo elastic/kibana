@@ -2,7 +2,7 @@
 
 // Note: This is written in ES5 so we can run this before anything else
 // and gives support for older NodeJS versions
-var NodeVersion = require('../utils/node_version').NodeVersion;
+var NodeVersion = require('../utils/node_version');
 
 // Validates current the NodeJS version compatibility when Kibana starts.
 NodeVersion.runValidator(function () {
