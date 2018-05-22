@@ -72,6 +72,9 @@ export function indexMissingSuite() {
           buildNum: {
             userValue: sinon.match.number
           },
+          version: {
+            userValue: sinon.match.string
+          },
           defaultIndex: {
             userValue: defaultIndex
           }
@@ -101,6 +104,9 @@ export function indexMissingSuite() {
           buildNum: {
             userValue: sinon.match.number
           },
+          version: {
+            userValue: sinon.match.string
+          },
           defaultIndex: {
             userValue: defaultIndex
           }
@@ -125,7 +131,10 @@ export function indexMissingSuite() {
         settings: {
           buildNum: {
             userValue: sinon.match.number
-          }
+          },
+          version: {
+            userValue: sinon.match.string
+          },
         }
       });
 

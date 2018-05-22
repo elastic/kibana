@@ -108,6 +108,7 @@ export class UiSettingsService {
 
       await createOrUpgradeSavedConfig({
         savedObjectsClient: this._savedObjectsClient,
+        id: this._id,
         version: this._version,
         buildNum: this._buildNum,
         log: this._log,

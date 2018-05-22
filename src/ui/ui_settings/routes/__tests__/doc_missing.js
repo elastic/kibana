@@ -61,6 +61,9 @@ export function docMissingSuite() {
           buildNum: {
             userValue: sinon.match.number
           },
+          version: {
+            userValue: sinon.match.string
+          },
           defaultIndex: {
             userValue: defaultIndex
           }
@@ -88,6 +91,9 @@ export function docMissingSuite() {
           buildNum: {
             userValue: sinon.match.number
           },
+          version: {
+            userValue: sinon.match.string
+          },
           defaultIndex: {
             userValue: defaultIndex
           }
@@ -97,7 +103,7 @@ export function docMissingSuite() {
   });
 
   describe('delete route', () => {
-    it('creates doc, returns a 200 with just buildNum', async () => {
+    it('creates doc, returns a 200 with just buildNum and version', async () => {
       const { kbnServer } = getServices();
 
       const { statusCode, result } = await kbnServer.inject({
@@ -110,7 +116,10 @@ export function docMissingSuite() {
         settings: {
           buildNum: {
             userValue: sinon.match.number
-          }
+          },
+          version: {
+            userValue: sinon.match.string
+          },
         }
       });
     });
