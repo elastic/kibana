@@ -7,6 +7,7 @@ export const asset = () => ({
   context: {
     types: ['null'],
   },
+  type: 'string',
   help: 'Use Canvas workpad asset objects to provide argument values. Usually images.',
   args: {
     _: {
@@ -18,6 +19,7 @@ export const asset = () => ({
   fn: (context, args) => {
     // TODO: handle the case where the asset id provided doesn't exist
     const assetId = args._;
-    return getAssetById(getState(), assetId);
+    const { value } = getAssetById(getState(), assetId);
+    return value;
   },
 });

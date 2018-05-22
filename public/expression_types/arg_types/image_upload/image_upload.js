@@ -58,8 +58,7 @@ class ImageUpload extends React.Component {
   render() {
     const { resolvedArgValue } = this.props;
     const isLoading = this.state.loading;
-    const isDataUrl =
-      resolvedArgValue && resolvedArgValue.type === 'dataurl' && isValid(resolvedArgValue.value);
+    const isDataUrl = resolvedArgValue && isValid(resolvedArgValue);
 
     const previewImage = isDataUrl && (
       <EuiImage
@@ -67,7 +66,7 @@ class ImageUpload extends React.Component {
         hasShadow
         allowFullScreen
         alt="Image Preview"
-        url={resolvedArgValue.value}
+        url={resolvedArgValue}
         className="canvas__checkered"
       />
     );

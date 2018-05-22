@@ -1,6 +1,5 @@
 import { boolean } from './boolean';
 import { datatable } from './datatable';
-import { dataurl } from './dataurl';
 import { error } from './error';
 import { filter } from './filter';
 import { image } from './image';
@@ -15,7 +14,6 @@ import { style } from './style';
 export const typeSpecs = [
   boolean,
   datatable,
-  dataurl,
   error,
   filter,
   image,
