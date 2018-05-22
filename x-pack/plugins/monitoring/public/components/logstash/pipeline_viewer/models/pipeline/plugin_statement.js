@@ -5,6 +5,7 @@
  */
 
 import { Statement } from './statement';
+import { PluginElement } from '../list/plugin_element';
 
 export class PluginStatement extends Statement {
   constructor(vertex) {
@@ -17,6 +18,10 @@ export class PluginStatement extends Statement {
 
     this.pluginType = pluginType; // input, filter, or output
     this.name = name; // twitter, grok, elasticsearch, etc.
+  }
+
+  toList(depth, parentId) {
+    return [ new PluginElement(this, depth, parentId) ];
   }
 
   static fromPipelineGraphVertex(pluginVertex) {
