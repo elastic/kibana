@@ -435,7 +435,6 @@ export class ObjectsTable extends Component {
     } = this.state;
 
     const selectionConfig = {
-      itemId: 'id',
       onSelectionChange: this.onSelectionChanged,
     };
 
@@ -461,6 +460,7 @@ export class ObjectsTable extends Component {
         />
         <EuiSpacer size="xs" />
         <Table
+          itemId={'id'}
           selectionConfig={selectionConfig}
           selectedSavedObjects={selectedSavedObjects}
           onQueryChange={this.onQueryChange}
