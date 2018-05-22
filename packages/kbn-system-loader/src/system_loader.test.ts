@@ -6,7 +6,9 @@ import { KibanaSystem } from './system_types';
 
 // To make types simpler in the tests
 type CoreType = void;
-const createCoreValues = () => {};
+const createCoreValues = () => {
+  // noop
+};
 
 test('starts system with core api', () => {
   expect.assertions(1);
@@ -344,7 +346,9 @@ test('can register multiple values in single system', () => {
 
 test("throws if starting a system that depends on a system that's not present", () => {
   class FooSystem extends KibanaSystem<CoreType, {}> {
-    public start() {}
+    public start() {
+      // noop
+    }
   }
 
   const foo = new System('foo', {
@@ -363,7 +367,9 @@ test("throws if starting a system that depends on a system that's not present", 
 
 test("throws if adding that has the same name as a system that's already added", () => {
   class FooSystem extends KibanaSystem<CoreType, {}> {
-    public start() {}
+    public start() {
+      // noop
+    }
   }
 
   const foo = new System('foo', {

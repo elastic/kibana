@@ -61,7 +61,9 @@ test('throws if start returns a promise', () => {
 
 test('throws if stop returns a promise', () => {
   class FooSystem extends KibanaSystem<any, any, any> {
-    public start() {}
+    public start() {
+      // noop
+    }
 
     public async stop() {
       return 'stop';
