@@ -22,7 +22,7 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
   });
 
   afterEach(() => {
-    savedObjectsClient.get.reset();
+    savedObjectsClient.get.resetHistory();
   });
 
   it('formats successful response', async () => {

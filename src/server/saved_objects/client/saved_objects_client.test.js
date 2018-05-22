@@ -6,7 +6,7 @@ import { getSearchDsl } from './lib';
 import elasticsearch from 'elasticsearch';
 
 describe('SavedObjectsClient', () => {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
 
   let callAdminCluster;
   let onBeforeWrite;
@@ -207,8 +207,8 @@ describe('SavedObjectsClient', () => {
 
       sinon.assert.calledOnce(onBeforeWrite);
 
-      callAdminCluster.reset();
-      onBeforeWrite.reset();
+      callAdminCluster.resetHistory();
+      onBeforeWrite.resetHistory();
 
       await savedObjectsClient.bulkCreate([{ type: 'foo', id: 'bar', attributes: {} }], { overwrite: true });
       sinon.assert.calledOnce(callAdminCluster);

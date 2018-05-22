@@ -17,9 +17,7 @@ describe('IndexPatterns service', function () {
       IndexPatternProvider,
       function (...args) {
         const indexPattern = new IndexPattern(...args);
-        sinon.stub(indexPattern, 'init', function () {
-          return new Promise();
-        });
+        sinon.stub(indexPattern, 'init').callsFake(() => new Promise());
         return indexPattern;
       }
     );

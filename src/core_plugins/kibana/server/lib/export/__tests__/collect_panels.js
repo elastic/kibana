@@ -9,7 +9,7 @@ describe('collectPanels(req, dashboard)', () => {
   let collectIndexPatternsStub;
   let dashboard;
 
-  const savedObjectsClient = { bulkGet: sinon.mock() };
+  const savedObjectsClient = { bulkGet: sinon.stub() };
 
   beforeEach(() => {
     dashboard = {
@@ -36,7 +36,7 @@ describe('collectPanels(req, dashboard)', () => {
   afterEach(() => {
     collectSearchSourcesStub.restore();
     collectIndexPatternsStub.restore();
-    savedObjectsClient.bulkGet.reset();
+    savedObjectsClient.bulkGet.resetHistory();
   });
 
   it('should request each panel in the panelJSON', async () => {

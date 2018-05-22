@@ -18,9 +18,7 @@ const parsedLocalEs = parseUrl('https://localhost:5601/search');
 
 describe('ProxyConfig', function () {
   beforeEach(function () {
-    sinon.stub(fs, 'readFileSync', function (path) {
-      return { path };
-    });
+    sinon.stub(fs, 'readFileSync').callsFake((path) => ({ path }));
   });
 
   afterEach(function () {

@@ -4,7 +4,7 @@ import sinon from 'sinon';
 import { ensureNotTribe } from '../ensure_not_tribe';
 
 describe('plugins/elasticsearch ensureNotTribe', () => {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
   afterEach(() => sandbox.restore());
 
   const stubcallWithInternalUser = (nodesInfoResp = { nodes: {} }) => {

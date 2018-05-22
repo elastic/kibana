@@ -18,7 +18,7 @@ describe('SegmentedRequestProvider', () => {
     SegmentedReq = Private(SegmentedRequestProvider);
 
     const SearchRequest = Private(SearchRequestProvider);
-    abstractReqStart = sinon.stub(SearchRequest.prototype, 'start', () => {
+    abstractReqStart = sinon.stub(SearchRequest.prototype, 'start').callsFake(() => {
       const promise = Promise.resolve();
       sinon.spy(promise, 'then');
       return promise;

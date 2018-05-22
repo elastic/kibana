@@ -67,7 +67,7 @@ describe('Dashboard Context', () => {
     });
 
     afterEach(() => {
-      getAppState.reset();
+      getAppState.resetHistory();
     });
 
     it('should add a valid filter to must', () => {

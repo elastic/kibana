@@ -22,7 +22,7 @@ describe('DELETE /api/saved_objects/{type}/{id}', () => {
   });
 
   afterEach(() => {
-    savedObjectsClient.delete.reset();
+    savedObjectsClient.delete.resetHistory();
   });
 
   it('formats successful response', async () => {

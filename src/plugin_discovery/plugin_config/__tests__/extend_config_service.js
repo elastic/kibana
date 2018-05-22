@@ -8,7 +8,7 @@ import * as SchemaNS from '../schema';
 import * as SettingsNS from '../settings';
 
 describe('plugin discovery/extend config service', () => {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
   afterEach(() => sandbox.restore());
 
   const pluginSpec = new PluginPack({
