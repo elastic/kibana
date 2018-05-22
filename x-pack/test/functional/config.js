@@ -168,6 +168,7 @@ export default async function ({ readConfigFile }) {
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
       ],
     },
+
     // the apps section defines the urls that
     // `PageObjects.common.navigateTo(appKey)` will use.
     // Merge urls for your plugin with the urls defined in
