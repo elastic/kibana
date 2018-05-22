@@ -62,11 +62,13 @@ export function registerEnrollBeatRoute(server) {
     config: {
       validate: {
         payload: Joi.object({
-          enrollment_token: Joi.string().required(),
           type: Joi.string().required(),
           version: Joi.string().required(),
           host_name: Joi.string().required()
-        }).required()
+        }).required(),
+        headers: Joi.object({
+          'kbn-beats-enrollment-token': Joi.string().required()
+        }).options({ allowUnknown: true })
       },
       auth: false
     },
@@ -76,7 +78,7 @@ export function registerEnrollBeatRoute(server) {
       let accessToken;
 
       try {
-        const enrollmentToken = request.payload.enrollment_token;
+        const enrollmentToken = request.headers['kbn-beats-enrollment-token'];
         const { token, expires_on: expiresOn } = await getEnrollmentToken(callWithInternalUser, enrollmentToken);
         if (!token || token !== enrollmentToken) {
           return reply({ message: 'Invalid enrollment token' }).code(400);
