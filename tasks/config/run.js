@@ -73,6 +73,15 @@ module.exports = function (grunt) {
       ]
     },
 
+    // used by the test and jenkins:unit tasks
+    //    runs the tslint script to check for Typescript linting errors
+    tslint: {
+      cmd: process.execPath,
+      args: [
+        require.resolve('../../scripts/tslint')
+      ]
+    },
+
     // used by the test:server task
     //    runs all node.js/server mocha tests
     mocha: {

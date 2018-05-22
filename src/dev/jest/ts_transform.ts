@@ -1,8 +1,7 @@
 import { getCacheKey, install, process } from 'ts-jest';
 import { JestConfig, TransformOptions } from 'ts-jest/dist/jest-types';
 
-import { transform } from 'typescript';
-import { findProjectForAbsolutePath } from '../typescript';
+import { getTsProjectForAbsolutePath } from '../typescript';
 
 function extendJestConfigJSON(jestConfigJSON: string, filePath: string) {
   const jestConfig = JSON.parse(jestConfigJSON) as JestConfig;
@@ -15,20 +14,30 @@ function extendJestConfig(jestConfig: JestConfig, filePath: string) {
     globals: {
       ...(jestConfig.globals || {}),
       'ts-jest': {
-        tsConfigFile: findProjectForAbsolutePath(filePath).getTsConfigPath(),
         skipBabel: true,
+        tsConfigFile: getTsProjectForAbsolutePath(filePath).tsConfigPath,
       },
     },
   };
 }
 
 module.exports = {
-  process(src: string, filePath: string, jestConfig: JestConfig, transformOptions: TransformOptions) {
+  process(
+    src: string,
+    filePath: string,
+    jestConfig: JestConfig,
+    transformOptions: TransformOptions
+  ) {
     const extendedConfig = extendJestConfig(jestConfig, filePath);
     return process(src, filePath, extendedConfig, transformOptions);
   },
 
-  getCacheKey(src: string, filePath: string, jestConfigJSON: string, transformOptions: TransformOptions) {
+  getCacheKey(
+    src: string,
+    filePath: string,
+    jestConfigJSON: string,
+    transformOptions: TransformOptions
+  ) {
     const extendedConfigJSON = extendJestConfigJSON(jestConfigJSON, filePath);
     return getCacheKey(src, filePath, extendedConfigJSON, transformOptions);
   },
