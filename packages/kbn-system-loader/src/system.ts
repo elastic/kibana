@@ -1,9 +1,9 @@
 import {
-  SystemsType,
-  SystemName,
-  SystemMetadata,
-  KibanaSystemClassStatic,
   KibanaSystem,
+  KibanaSystemClassStatic,
+  SystemMetadata,
+  SystemName,
+  SystemsType,
 } from './system_types';
 
 function isPromise(obj: any) {
@@ -13,9 +13,9 @@ function isPromise(obj: any) {
 }
 
 export class System<C, M extends SystemMetadata, D extends SystemsType, E> {
-  readonly name: SystemName;
-  readonly dependencies: SystemName[];
-  readonly metadata?: M;
+  public readonly name: SystemName;
+  public readonly dependencies: SystemName[];
+  public readonly metadata?: M;
 
   private readonly _systemClass: KibanaSystemClassStatic<C, D, E>;
   private _systemInstance?: KibanaSystem<C, D, E>;
@@ -35,7 +35,7 @@ export class System<C, M extends SystemMetadata, D extends SystemsType, E> {
     this._systemClass = config.implementation;
   }
 
-  getExposedValues(): E {
+  public getExposedValues(): E {
     if (this._systemInstance === undefined) {
       throw new Error(
         'trying to get the exposed value of a system that is NOT running'
@@ -45,7 +45,7 @@ export class System<C, M extends SystemMetadata, D extends SystemsType, E> {
     return this._exposedValues!;
   }
 
-  start(kibanaValues: C, dependenciesValues: D) {
+  public start(kibanaValues: C, dependenciesValues: D) {
     this._systemInstance = new this._systemClass(
       kibanaValues,
       dependenciesValues
@@ -64,7 +64,7 @@ export class System<C, M extends SystemMetadata, D extends SystemsType, E> {
       exposedValues === undefined ? ({} as E) : exposedValues;
   }
 
-  stop() {
+  public stop() {
     const stoppedResponse = this._systemInstance && this._systemInstance.stop();
 
     this._exposedValues = undefined;

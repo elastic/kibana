@@ -1,6 +1,6 @@
-import { System } from './system';
-import { SystemName, SystemMetadata, SystemsType } from './system_types';
 import { getSortedSystemNames } from './sorted_systems';
+import { System } from './system';
+import { SystemMetadata, SystemName, SystemsType } from './system_types';
 
 export type KibanaSystemApiFactory<C, M> = (
   name: SystemName,
@@ -20,13 +20,15 @@ export class SystemLoader<C, M extends SystemMetadata> {
     private readonly _kibanaSystemApiFactory: KibanaSystemApiFactory<C, M>
   ) {}
 
-  addSystems(systemSpecs: System<C, M, any, any>[]) {
+  public addSystems(systemSpecs: Array<System<C, M, any, any>>) {
     systemSpecs.forEach(systemSpec => {
       this.addSystem(systemSpec);
     });
   }
 
-  addSystem<D extends SystemsType, E = void>(system: System<C, M, D, E>) {
+  public addSystem<D extends SystemsType, E = void>(
+    system: System<C, M, D, E>
+  ) {
     if (this._systems.has(system.name)) {
       throw new Error(`a system named [${system.name}] has already been added`);
     }
@@ -34,7 +36,7 @@ export class SystemLoader<C, M extends SystemMetadata> {
     this._systems.set(system.name, system);
   }
 
-  startSystems() {
+  public startSystems() {
     this._ensureAllSystemDependenciesCanBeResolved();
 
     getSortedSystemNames(this._systems)
@@ -79,7 +81,7 @@ export class SystemLoader<C, M extends SystemMetadata> {
   /**
    * Stop all systems in the reverse order of when they were started
    */
-  stopSystems() {
+  public stopSystems() {
     this._startedSystems
       .map(systemName => this._systems.get(systemName)!)
       .reverse()

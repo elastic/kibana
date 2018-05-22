@@ -2,15 +2,19 @@ import { System } from './system';
 import { KibanaSystem } from './system_types';
 
 test('can get exposed values after starting', () => {
-  type CoreType = { bar: string };
-  type DepsType = { quux: string };
-  type ExposedType = {
+  interface CoreType {
+    bar: string;
+  }
+  interface DepsType {
+    quux: string;
+  }
+  interface ExposedType {
     core: CoreType;
     deps: DepsType;
-  };
+  }
 
   class FooSystem extends KibanaSystem<CoreType, DepsType, ExposedType> {
-    start() {
+    public start() {
       return {
         core: this.kibana,
         deps: this.deps,
@@ -39,7 +43,7 @@ test('can get exposed values after starting', () => {
 
 test('throws if start returns a promise', () => {
   class FooSystem extends KibanaSystem<any, any, any> {
-    async start() {
+    public async start() {
       return 'foo';
     }
   }
@@ -55,9 +59,9 @@ test('throws if start returns a promise', () => {
 
 test('throws if stop returns a promise', () => {
   class FooSystem extends KibanaSystem<any, any, any> {
-    start() {}
+    public start() {}
 
-    async stop() {
+    public async stop() {
       return 'stop';
     }
   }

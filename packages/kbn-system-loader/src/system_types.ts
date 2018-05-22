@@ -1,18 +1,18 @@
 export type SystemName = string;
-export type SystemMetadata = {
+export interface SystemMetadata {
   [key: string]: any;
-};
+}
 
-export type SystemsType = {
+export interface SystemsType {
   [systemName: string]: any;
-};
+}
 
 export abstract class KibanaSystem<C, D extends SystemsType, E = void> {
   constructor(readonly kibana: C, readonly deps: D) {}
 
-  abstract start(): E;
+  public abstract start(): E;
 
-  stop() {
+  public stop() {
     // default implementation of stop does nothing
   }
 }
