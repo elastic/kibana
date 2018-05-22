@@ -7,7 +7,6 @@
 import expect from 'expect.js';
 
 export default function ({ getService }) {
-  const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const usageAPI = getService('usageAPI');
 
@@ -27,7 +26,7 @@ export default function ({ getService }) {
       expect(usage.cluster_uuid).to.be.a('string');
       expect(usage.kibana.dashboard.total).to.be(26);
       expect(usage.kibana.visualization.total).to.be(47);
-      expect(usage.kibana.search.total).to.be(15;
+      expect(usage.kibana.search.total).to.be(15);
       expect(usage.kibana.index_pattern.total).to.be(3);
       expect(usage.kibana.timelion_sheet.total).to.be(0);
       expect(usage.kibana.graph_workspace.total).to.be(0);

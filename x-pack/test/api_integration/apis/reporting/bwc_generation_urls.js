@@ -8,7 +8,7 @@ import * as GenerationUrls from './generation_urls';
 
 export default function ({ getService }) {
   const reportingAPI = getService('reportingAPI');
-  const statsAPI = getService('statsAPI');
+  const usageAPI = getService('usageAPI');
 
   describe('BWC report generation urls', () => {
     describe('6_2', () => {
@@ -28,7 +28,7 @@ export default function ({ getService }) {
       }).timeout(1540000);
 
       it('jobs completed successfully', async () => {
-        const stats = await statsAPI.getStats();
+        const stats = await usageAPI.getUsageStats();
         reportingAPI.expectCompletedReportCount(stats, 3);
       });
     });

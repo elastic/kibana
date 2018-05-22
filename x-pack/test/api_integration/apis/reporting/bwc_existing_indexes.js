@@ -18,7 +18,7 @@ import * as GenerationUrls from './generation_urls';
 export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
   const reportingAPI = getService('reportingAPI');
-  const statsAPI = getService('statsAPI');
+  const usageAPI = getService('usageAPI');
 
   describe('BWC report generation into existing indexes', async () => {
     let expectedCompletedReportCount;
@@ -33,7 +33,7 @@ export default function ({ getService }) {
         const ARCHIVED_REPORTING_INDEX = '.reporting-2018.03.11';
         cleanupIndexAlias = await reportingAPI.coerceReportsIntoExistingIndex(ARCHIVED_REPORTING_INDEX);
 
-        const stats = await statsAPI.getStats();
+        const stats = await usageAPI.getUsageStats();
         expectedCompletedReportCount = await reportingAPI.getCompletedReportCount(stats);
       });
 
@@ -56,7 +56,7 @@ export default function ({ getService }) {
       }).timeout(1540000);
 
       it('jobs completed successfully', async () => {
-        const stats = await statsAPI.getStats();
+        const stats = await usageAPI.getUsageStats();
         expectedCompletedReportCount += 5;
         reportingAPI.expectCompletedReportCount(stats, expectedCompletedReportCount);
       });
