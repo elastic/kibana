@@ -7,10 +7,10 @@ import { readPackageJson } from '../../utils/package_json';
 import { getProjects } from '../../utils/projects';
 import { buildProductionProjects } from '../build_production_projects';
 
-describe('kbn-pm production', function() {
+describe('kbn-pm production', () => {
   test(
     'builds and copies projects for production',
-    async function() {
+    async () => {
       const tmpDir = tempy.directory();
       const buildRoot = tempy.directory();
       const fixturesPath = resolve(__dirname, '__fixtures__');
