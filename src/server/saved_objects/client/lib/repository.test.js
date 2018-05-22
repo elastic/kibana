@@ -10,7 +10,7 @@ import elasticsearch from 'elasticsearch';
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
 
 describe('SavedObjectsRepository', () => {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
 
   let callAdminCluster;
   let onBeforeWrite;
@@ -211,8 +211,8 @@ describe('SavedObjectsRepository', () => {
 
       sinon.assert.calledOnce(onBeforeWrite);
 
-      callAdminCluster.reset();
-      onBeforeWrite.reset();
+      callAdminCluster.resetHistory();
+      onBeforeWrite.resetHistory();
 
       await savedObjectsRepository.bulkCreate([{ type: 'foo', id: 'bar', attributes: {} }], { overwrite: true });
       sinon.assert.calledOnce(callAdminCluster);

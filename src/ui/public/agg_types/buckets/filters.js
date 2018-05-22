@@ -7,8 +7,6 @@ import { createFilterFilters } from './create_filter/filters';
 import { decorateQuery } from '../../courier/data_source/_decorate_query';
 import filtersTemplate from '../controls/filters.html';
 
-import { toastNotifications } from '../../notify';
-
 export const filtersBucketAgg = new BucketAggType({
   name: 'filters',
   title: 'Filters',
@@ -25,10 +23,17 @@ export const filtersBucketAgg = new BucketAggType({
 
         const outFilters = _.transform(inFilters, function (filters, filter) {
           const input = _.cloneDeep(filter.input);
-          if (!input) return toastNotifications.add('malformed filter agg params, missing "input" query');
+
+          if (!input) {
+            console.log('malformed filter agg params, missing "input" query'); // eslint-disable-line no-console
+            return;
+          }
 
           const query = input.query = luceneStringToDsl(input.query);
-          if (!query) return toastNotifications.add('malformed filter agg params, missing "query" on input');
+          if (!query) {
+            console.log('malformed filter agg params, missing "query" on input'); // eslint-disable-line no-console
+            return;
+          }
 
           decorateQuery(query);
 

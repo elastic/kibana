@@ -4,7 +4,7 @@ import { findObjectByTitle } from '../find_object_by_title';
 import { SavedObject } from '../saved_object';
 
 describe('findObjectByTitle', () => {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
   const savedObjectsClient = {};
 
   beforeEach(() => {

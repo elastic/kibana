@@ -7,7 +7,15 @@ export function RootSearchSourceProvider(Private, $rootScope, timefilter) {
   globalSource.inherits(false); // this is the final source, it has no parents
   globalSource.filter(function (globalSource) {
     // dynamic time filter will be called in the _flatten phase of things
-    return timefilter.get(globalSource.get('index'));
+    const filter = timefilter.get(globalSource.get('index'));
+    // Attach a meta property to it, that we check inside visualizations
+    // to remove that timefilter again because we use our explicitly passed in one.
+    // This should be removed as soon as we got rid of inheritance in SearchSource
+    // across the boundary or visualization.
+    if (filter) {
+      filter.meta = { _globalTimefilter: true };
+    }
+    return filter;
   });
 
   let appSource; // set in setAppSource()

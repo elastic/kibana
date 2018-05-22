@@ -6,10 +6,10 @@ import ClusterManager from './cluster_manager';
 import Worker from './worker';
 
 describe('CLI cluster manager', function () {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
 
   beforeEach(function () {
-    sandbox.stub(cluster, 'fork', function () {
+    sandbox.stub(cluster, 'fork').callsFake(() => {
       return {
         process: {
           kill: sinon.stub(),
