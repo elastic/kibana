@@ -6,7 +6,6 @@ import {
 } from '../../utils';
 
 import {
-  isGzip,
   createStats,
   prioritizeMappings,
   readDirectory,
@@ -25,7 +24,7 @@ export async function unloadAction({ name, client, dataDir, log }) {
 
     await createPromiseFromStreams([
       createReadStream(resolve(inputDir, filename)),
-      ...createParseArchiveStreams({ gzip: isGzip(filename) }),
+      ...createParseArchiveStreams(),
       createFilterRecordsStream('index'),
       createDeleteIndexStream(client, stats, log)
     ]);

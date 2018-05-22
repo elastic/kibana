@@ -1,5 +1,4 @@
 export {
-  isGzip,
   prioritizeMappings,
 } from './filenames';
 

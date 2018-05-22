@@ -1,6 +1,3 @@
-import { createGunzip } from 'zlib';
-import { PassThrough } from 'stream';
-
 import {
   createSplitStream,
   createJsonParseStream,
@@ -8,9 +5,8 @@ import {
 
 import { RECORD_SEPARATOR } from './constants';
 
-export function createParseArchiveStreams({ gzip = false } = {}) {
+export function createParseArchiveStreams() {
   return [
-    gzip ? createGunzip() : new PassThrough(),
     createSplitStream(RECORD_SEPARATOR),
     createJsonParseStream(),
   ];

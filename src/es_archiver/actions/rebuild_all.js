@@ -14,7 +14,6 @@ import {
 import {
   prioritizeMappings,
   readDirectory,
-  isGzip,
   createParseArchiveStreams,
   createFormatArchiveStreams,
 } from '../lib';
@@ -29,13 +28,12 @@ export async function rebuildAllAction({ dataDir, log }) {
       log.info('[%s] Rebuilding %j', name, filename);
 
       const path = resolve(inputDir, filename);
-      const gzip = isGzip(path);
-      const tempFile = path + (gzip ? '.rebuilding.gz' : '.rebuilding');
+      const tempFile = path + '.rebuilding';
 
       await createPromiseFromStreams([
         createReadStream(path),
-        ...createParseArchiveStreams({ gzip }),
-        ...createFormatArchiveStreams({ gzip }),
+        ...createParseArchiveStreams(),
+        ...createFormatArchiveStreams(),
         createWriteStream(tempFile),
       ]);
 
