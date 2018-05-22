@@ -44,6 +44,5 @@ export function errorIfXPackRemove(settings) {
     throw new Error(
       'You are using the standard distrbution of Kibana.  Please install the OSS-only distribution to remove X-Pack features.'
     );
-    process.exit(1);
   }
 }
