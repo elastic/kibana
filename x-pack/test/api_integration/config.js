@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SupertestWithoutAuthProvider } from './services';
+import {
+  SupertestWithoutAuthProvider,
+  ReportingAPIProvider,
+  UsageAPIProvider,
+} from './services';
 
 export default async function ({ readConfigFile }) {
 
@@ -21,6 +25,9 @@ export default async function ({ readConfigFile }) {
       supertestWithoutAuth: SupertestWithoutAuthProvider,
       es: kibanaCommonConfig.get('services.es'),
       esArchiver: kibanaCommonConfig.get('services.esArchiver'),
+      reportingAPI: ReportingAPIProvider,
+      usageAPI: UsageAPIProvider,
+      kibanaServer: kibanaCommonConfig.get('services.kibanaServer'),
     },
     esArchiver: xPackFunctionalTestsConfig.get('esArchiver'),
     junit: {
