@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }) {
         await dashboardAddPanel.closeAddPanel();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
-        await filterBar.addFilter('bytes', 'is', '12345678', 'kuiTextInput');
+        await filterBar.addFilter('bytes', 'is', '12345678');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
       });
