@@ -7,12 +7,12 @@ import {
   absolutePathSnapshotSerializer,
   stripAnsiSnapshotSerializer,
 } from '../test_helpers';
-import { BootstrapCommand } from './bootstrap';
+import { linkProjectExecutables } from '../utils/link_project_executables';
 import { PackageJson } from '../utils/package_json';
 import { Project } from '../utils/project';
 import { buildProjectGraph } from '../utils/projects';
 import { installInDir, runScriptInPackageStreaming } from '../utils/scripts';
-import { linkProjectExecutables } from '../utils/link_project_executables';
+import { BootstrapCommand } from './bootstrap';
 
 const mockInstallInDir = installInDir as jest.Mock;
 const mockRunScriptInPackageStreaming = runScriptInPackageStreaming as jest.Mock;

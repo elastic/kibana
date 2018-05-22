@@ -1,8 +1,8 @@
 import chalk from 'chalk';
 
-import { topologicallyBatchProjects } from '../utils/projects';
 import { linkProjectExecutables } from '../utils/link_project_executables';
 import { parallelizeBatches } from '../utils/parallelize';
+import { topologicallyBatchProjects } from '../utils/projects';
 import { Command } from './';
 
 export const BootstrapCommand: Command = {

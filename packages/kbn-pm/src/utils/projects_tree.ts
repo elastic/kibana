@@ -1,5 +1,5 @@
-import path from 'path';
 import chalk from 'chalk';
+import path from 'path';
 
 import { Project } from './project';
 
@@ -13,10 +13,10 @@ export function renderProjectsTree(
   return treeToString(createTreeStructure(projectsTree));
 }
 
-type Tree = {
+interface Tree {
   name?: string;
   children?: TreeChildren;
-};
+}
 interface TreeChildren extends Array<Tree> {}
 
 type DirOrProjectName = string | typeof projectKey;

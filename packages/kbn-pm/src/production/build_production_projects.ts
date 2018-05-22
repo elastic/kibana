@@ -1,22 +1,21 @@
-import del from 'del';
-import { relative, resolve, join } from 'path';
 import copy from 'cpy';
+import del from 'del';
+import { join, relative, resolve } from 'path';
 
 import { getProjectPaths } from '../config';
-import {
-  getProjects,
-  buildProjectGraph,
-  topologicallyBatchProjects,
-  ProjectMap,
-  includeTransitiveProjects,
-} from '../utils/projects';
+import { isDirectory, isFile } from '../utils/fs';
 import {
   createProductionPackageJson,
-  writePackageJson,
   readPackageJson,
+  writePackageJson,
 } from '../utils/package_json';
-import { isDirectory, isFile } from '../utils/fs';
 import { Project } from '../utils/project';
+import {
+  buildProjectGraph,
+  getProjects,
+  includeTransitiveProjects,
+  topologicallyBatchProjects,
+} from '../utils/projects';
 
 export async function buildProductionProjects({
   kibanaRoot,

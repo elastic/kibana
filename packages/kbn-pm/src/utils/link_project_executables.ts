@@ -1,8 +1,8 @@
-import { resolve, relative, dirname, sep } from 'path';
+import { dirname, relative, resolve, sep } from 'path';
 
 import chalk from 'chalk';
 
-import { createSymlink, isFile, chmod, mkdirp } from './fs';
+import { chmod, createSymlink, isFile, mkdirp } from './fs';
 import { ProjectGraph, ProjectMap } from './projects';
 
 /**

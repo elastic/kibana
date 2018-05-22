@@ -1,10 +1,9 @@
 import readPkg from 'read-pkg';
 import writePkg from 'write-pkg';
-import path from 'path';
 
-export type PackageJson = { [key: string]: any };
-export type PackageDependencies = { [key: string]: string };
-export type PackageScripts = { [key: string]: string };
+export interface PackageJson { [key: string]: any }
+export interface PackageDependencies { [key: string]: string }
+export interface PackageScripts { [key: string]: string }
 
 export function readPackageJson(dir: string) {
   return readPkg(dir, { normalize: false });

@@ -1,6 +1,6 @@
-import getopts from 'getopts';
-import dedent from 'dedent';
 import chalk from 'chalk';
+import dedent from 'dedent';
+import getopts from 'getopts';
 import { resolve } from 'path';
 
 import { commands } from './commands';

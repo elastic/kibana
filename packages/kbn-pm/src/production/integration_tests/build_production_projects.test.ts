@@ -1,11 +1,11 @@
-import tempy from 'tempy';
 import copy from 'cpy';
-import { resolve, relative, join } from 'path';
 import globby from 'globby';
+import { join, resolve } from 'path';
+import tempy from 'tempy';
 
-import { buildProductionProjects } from '../build_production_projects';
-import { getProjects } from '../../utils/projects';
 import { readPackageJson } from '../../utils/package_json';
+import { getProjects } from '../../utils/projects';
+import { buildProductionProjects } from '../build_production_projects';
 
 describe('kbn-pm production', function() {
   test(

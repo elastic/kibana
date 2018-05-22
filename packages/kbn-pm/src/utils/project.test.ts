@@ -1,4 +1,4 @@
-import { resolve, join } from 'path';
+import { join, resolve } from 'path';
 
 import { PackageJson } from './package_json';
 import { Project } from './project';

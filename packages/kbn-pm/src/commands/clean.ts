@@ -1,7 +1,7 @@
-import del from 'del';
 import chalk from 'chalk';
-import { relative } from 'path';
+import del from 'del';
 import ora from 'ora';
+import { relative } from 'path';
 
 import { isDirectory } from '../utils/fs';
 import { Command } from './';

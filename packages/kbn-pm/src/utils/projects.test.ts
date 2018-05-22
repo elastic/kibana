@@ -1,15 +1,15 @@
 import { resolve } from 'path';
 
-import {
-  getProjects,
-  buildProjectGraph,
-  topologicallyBatchProjects,
-  includeTransitiveProjects,
-  ProjectMap,
-  ProjectGraph,
-} from './projects';
-import { Project } from './project';
 import { getProjectPaths } from '../config';
+import { Project } from './project';
+import {
+  buildProjectGraph,
+  getProjects,
+  includeTransitiveProjects,
+  ProjectGraph,
+  ProjectMap,
+  topologicallyBatchProjects,
+} from './projects';
 
 const rootPath = resolve(`${__dirname}/__fixtures__/kibana`);
 

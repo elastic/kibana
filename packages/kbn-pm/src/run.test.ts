@@ -1,7 +1,7 @@
 import { resolve } from 'path';
+import { Command, CommandConfig } from './commands';
 import { runCommand } from './run';
 import { Project } from './utils/project';
-import { Command, CommandConfig } from './commands';
 
 const rootPath = resolve(`${__dirname}/utils/__fixtures__/kibana`);
 
@@ -102,7 +102,7 @@ test('respects both `include` and `exclude` filters if specified at the same tim
 });
 
 test('does not run command if all projects are filtered out', async () => {
-  let mockProcessExit = jest
+  const mockProcessExit = jest
     .spyOn(process, 'exit')
     .mockImplementation(() => {});
 

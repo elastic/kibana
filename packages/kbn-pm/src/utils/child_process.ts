@@ -1,7 +1,7 @@
-import execa from 'execa';
 import chalk from 'chalk';
-import logTransformer from 'strong-log-transformer';
+import execa from 'execa';
 import logSymbols from 'log-symbols';
+import logTransformer from 'strong-log-transformer';
 
 function generateColors() {
   const colorWheel = [

@@ -1,6 +1,6 @@
 import chalk from 'chalk';
-import { topologicallyBatchProjects, ProjectMap } from '../utils/projects';
 import { parallelizeBatches } from '../utils/parallelize';
+import { ProjectMap, topologicallyBatchProjects } from '../utils/projects';
 import { waitUntilWatchIsReady } from '../utils/watch';
 import { Command } from './';
 

@@ -1,8 +1,8 @@
-import fs from 'fs';
-import { relative, dirname } from 'path';
-import { promisify } from 'util';
 import cmdShimCb from 'cmd-shim';
+import fs from 'fs';
 import mkdirpCb from 'mkdirp';
+import { dirname, relative } from 'path';
+import { promisify } from 'util';
 
 const stat = promisify(fs.stat);
 const readFile = promisify(fs.readFile);

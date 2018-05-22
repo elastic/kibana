@@ -1,12 +1,12 @@
 import chalk from 'chalk';
-import wrapAnsi from 'wrap-ansi';
 import indentString from 'indent-string';
+import wrapAnsi from 'wrap-ansi';
 
-import { CliError } from './utils/errors';
-import { getProjects, buildProjectGraph } from './utils/projects';
-import { renderProjectsTree } from './utils/projects_tree';
-import { getProjectPaths, ProjectPathOptions } from './config';
 import { Command, CommandConfig } from './commands';
+import { getProjectPaths, ProjectPathOptions } from './config';
+import { CliError } from './utils/errors';
+import { buildProjectGraph, getProjects } from './utils/projects';
+import { renderProjectsTree } from './utils/projects_tree';
 
 export async function runCommand(command: Command, config: CommandConfig) {
   try {

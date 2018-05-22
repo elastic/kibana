@@ -9,7 +9,7 @@ const glob = promisify(globSync);
 
 export type ProjectMap = Map<string, Project>;
 export type ProjectGraph = Map<string, Project[]>;
-export type ProjectsOptions = { include?: string[]; exclude?: string[] };
+export interface ProjectsOptions { include?: string[]; exclude?: string[] }
 
 export async function getProjects(
   rootPath: string,

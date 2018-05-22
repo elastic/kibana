@@ -1,20 +1,20 @@
+import chalk from 'chalk';
 import path from 'path';
 import { inspect } from 'util';
-import chalk from 'chalk';
 
+import { CliError } from './errors';
+import {
+  isLinkDependency,
+  PackageDependencies,
+  PackageJson,
+  PackageScripts,
+  readPackageJson,
+} from './package_json';
 import {
   installInDir,
   runScriptInPackage,
   runScriptInPackageStreaming,
 } from './scripts';
-import {
-  PackageJson,
-  PackageDependencies,
-  PackageScripts,
-  isLinkDependency,
-  readPackageJson,
-} from './package_json';
-import { CliError } from './errors';
 
 interface BuildConfig {
   skip?: boolean;
@@ -22,7 +22,7 @@ interface BuildConfig {
 }
 
 export class Project {
-  static async fromPath(path: string) {
+  public static async fromPath(path: string) {
     const pkgJson = await readPackageJson(path);
     return new Project(pkgJson, path);
   }
@@ -59,7 +59,7 @@ export class Project {
     return this.json.name;
   }
 
-  ensureValidProjectDependency(project: Project) {
+  public ensureValidProjectDependency(project: Project) {
     const relativePathToProject = normalizePath(
       path.relative(this.path, project.path)
     );
@@ -95,7 +95,7 @@ export class Project {
     );
   }
 
-  getBuildConfig(): BuildConfig {
+  public getBuildConfig(): BuildConfig {
     return (this.json.kibana && this.json.kibana.build) || {};
   }
 
@@ -104,18 +104,18 @@ export class Project {
    * This config can be specified to only include the project's build artifacts
    * instead of everything located in the project directory.
    */
-  getIntermediateBuildDirectory() {
+  public getIntermediateBuildDirectory() {
     return path.resolve(
       this.path,
       this.getBuildConfig().intermediateBuildDirectory || '.'
     );
   }
 
-  hasScript(name: string) {
+  public hasScript(name: string) {
     return name in this.scripts;
   }
 
-  getExecutables(): { [key: string]: string } {
+  public getExecutables(): { [key: string]: string } {
     const raw = this.json.bin;
 
     if (!raw) {
@@ -146,7 +146,7 @@ export class Project {
     );
   }
 
-  async runScript(scriptName: string, args: string[] = []) {
+  public async runScript(scriptName: string, args: string[] = []) {
     console.log(
       chalk.bold(
         `\n\nRunning script [${chalk.green(scriptName)}] in [${chalk.green(
@@ -157,15 +157,15 @@ export class Project {
     return runScriptInPackage(scriptName, args, this);
   }
 
-  runScriptStreaming(scriptName: string, args: string[] = []) {
+  public runScriptStreaming(scriptName: string, args: string[] = []) {
     return runScriptInPackageStreaming(scriptName, args, this);
   }
 
-  hasDependencies() {
+  public hasDependencies() {
     return Object.keys(this.allDependencies).length > 0;
   }
 
-  async installDependencies({ extraArgs }: { extraArgs: string[] }) {
+  public async installDependencies({ extraArgs }: { extraArgs: string[] }) {
     console.log(
       chalk.bold(
         `\n\nInstalling dependencies in [${chalk.green(this.name)}]:\n`

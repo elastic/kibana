@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 
-import { topologicallyBatchProjects } from '../utils/projects';
 import { parallelizeBatches } from '../utils/parallelize';
+import { topologicallyBatchProjects } from '../utils/projects';
 import { Command } from './';
 
 export const RunCommand: Command = {

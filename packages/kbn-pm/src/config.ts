@@ -1,9 +1,9 @@
 import { resolve } from 'path';
 
-export type ProjectPathOptions = {
+export interface ProjectPathOptions {
   'skip-kibana-extra'?: boolean;
-  'oss'?: boolean;
-};
+  oss?: boolean;
+}
 
 /**
  * Returns all the paths where plugins are located
