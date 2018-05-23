@@ -4,24 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import React from 'react';
 
 import {
+  // EuiButtonEmpty,
+  // EuiButtonIcon,
+  // EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiTitle,
 } from '@elastic/eui';
+// import { PluginStatement } from '../../models/pipeline/plugin_statement';
+import { Statement } from './statement';
 
-function Statement() {
-  return (
-    <li>hello! I am a <b>Statement</b>!</li>
-  );
-}
+// function getStats() {
+//   return (
 
-export function StatementSection({ iconType, headingText, statements }) {
+//   );
+// }
+
+
+
+// function Statement({ element }) {
+//   const {
+//     statement,
+//     depth,
+//     parentId
+//   } = element;
+//   return (
+//     <li>hello! I am a <b>Statement</b>!</li>
+//   );
+// }
+
+export function StatementSection({ iconType, headingText, elements }) {
   return (
     <div>
       <EuiFlexGroup>
@@ -30,7 +46,7 @@ export function StatementSection({ iconType, headingText, statements }) {
         >
           <EuiIcon
             type={iconType}
-            size="m"
+            size="s"
           />
         </EuiFlexItem>
         <EuiFlexItem
@@ -41,24 +57,78 @@ export function StatementSection({ iconType, headingText, statements }) {
           </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <StatementList statements={statements} />
+      <StatementList elements={elements} />
     </div>
   );
 }
 
-function StatementList({ statements }) {
-  return (
-    <ul>
-      {
-        statements.map(statement => (
-          <Statement
-            key={statement.id}
-            statement={statement}
-          />
-        ))
+class StatementList extends React.PureComponent {
+  constructor(props) {
+    super(props);
+    this.state = {
+      collapsedParentIds: new Set()
+    };
+    this.collapse = this.collapse.bind(this);
+    this.expand = this.expand.bind(this);
+    this.getStatement = this.getStatement.bind(this);
+  }
+
+  elementIsCollapsed(id, parentId) {
+    return this.state.collapsedParentIds.has(id) || this.state.collapsedParentIds.has(parentId);
+  }
+
+  expand(elementId) {
+    console.log(`expand ${elementId}`);
+  }
+
+  // receive collapsed element, add to list
+  collapse(elementId) {
+    const collapsedParentIds = new Set(this.state.collapsedParentIds);
+    const { elements } = this.props;
+
+    collapsedParentIds.add(elementId);
+
+    elements.forEach(element => {
+      const { parentId, id } = element;
+      if (collapsedParentIds.has(parentId)) {
+        collapsedParentIds.add(id);
       }
-    </ul>
-  );
+    });
+
+    this.setState({
+      collapsedParentIds
+    });
+  }
+
+  getStatement(statement) {
+    const { parentId } = statement;
+
+    return this.state.collapsedParentIds.has(parentId) ?
+      null
+      :
+      (
+        <Statement
+          key={statement.id}
+          element={statement}
+          collapse={this.collapse}
+          expand={this.expand}
+        />
+      );
+  }
+
+  render() {
+    const { elements } = this.props;
+
+    console.log(this.state.collapsedParentIds);
+
+    return (
+      <ul className="cv-list-parent">
+        {
+          elements.map(this.getStatement)
+        }
+      </ul>
+    );
+  }
 }
 
 // const StatementList = ({ statements, vertexSelected }) => (

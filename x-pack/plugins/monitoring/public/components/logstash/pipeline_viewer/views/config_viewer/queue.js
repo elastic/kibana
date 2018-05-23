@@ -6,21 +6,29 @@
 
 import React from 'react';
 
-export const Queue = () => (
-  <li className="statement">
-    <div>
-      Queue stats not available
-      {/* <EuiPanel
-        className="statement__content"
-        paddingSize="s"
-        onClick={vertexSelected}
-      >
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <strong>Queue</strong>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel> */}
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiTitle
+} from '@elastic/eui';
+
+export function Queue() {
+  return (
+    <div className="statement">
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="logstashQueue" />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle>
+            <h3>Queue</h3>
+          </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <div>
+        Queue stats not available
+      </div>
     </div>
-  </li>
-);
+  );
+}

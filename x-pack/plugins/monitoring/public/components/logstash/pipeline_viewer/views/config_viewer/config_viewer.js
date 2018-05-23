@@ -11,8 +11,8 @@ import PropTypes from 'prop-types';
 
 import { DetailDrawer } from '../detail_drawer';
 
-//import { renderSection } from './statement_section';
 import { StatementSection } from './statement_list';
+import { Queue } from './queue';
 
 export class ConfigViewer extends React.Component {
   constructor() {
@@ -67,24 +67,23 @@ export class ConfigViewer extends React.Component {
       queue
     } = this.props.pipeline;
 
-    console.log(queue);
     return (
       <div>
         <StatementSection
           iconType="logstashInput"
           headingText="Inputs"
-          statements={inputs}
+          elements={inputs}
         />
-        Queue goes here
+        <Queue queue={queue} />
         <StatementSection
           iconType="logstashFilter"
           headingText="Filters"
-          statements={filters}
+          elements={filters}
         />
         <StatementSection
           iconType="logstashOutput"
           headingText="Outputs"
-          statements={outputs}
+          elements={outputs}
         />
         { this.renderDetailDrawer() }
       </div>
@@ -93,8 +92,8 @@ export class ConfigViewer extends React.Component {
 }
 
 ConfigViewer.propTypes = {
-  inputs: PropTypes.array,
-  filters: PropTypes.array,
-  outputs: PropTypes.array,
-  queue: PropTypes.object,
+  inputs: PropTypes.array.isRequired,
+  filters: PropTypes.array.isRequired,
+  outputs: PropTypes.array.isRequired,
+  queue: PropTypes.object.isRequired,
 };
