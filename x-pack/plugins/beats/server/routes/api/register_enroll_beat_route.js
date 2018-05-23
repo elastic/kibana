@@ -14,6 +14,7 @@ import {
 import { INDEX_NAMES } from '../../../common/constants';
 import { callWithInternalUserFactory } from '../../lib/client';
 import { wrapEsError } from '../../lib/error_wrappers';
+import { areTokensEqual } from '../../lib/crypto';
 
 async function getEnrollmentToken(callWithInternalUser, enrollmentToken) {
   const params = {
