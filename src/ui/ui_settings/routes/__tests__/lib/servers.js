@@ -32,7 +32,7 @@ export function getServices() {
 
   const callCluster = es.getCallCluster();
 
-  const savedObjectsClient = kbnServer.server.savedObjectsClientFactory();
+  const savedObjectsClient = kbnServer.server.savedObjectsClientFactory({ request: {} });
 
   const uiSettings = kbnServer.server.uiSettingsServiceFactory({
     savedObjectsClient,

@@ -37,7 +37,7 @@ describe('createOrUpgradeSavedConfig()', () => {
 
     await kbnServer.server.plugins.elasticsearch.waitUntilReady();
 
-    savedObjectsClient = kbnServer.server.savedObjectsClientFactory();
+    savedObjectsClient = kbnServer.server.savedObjectsClientFactory({ request: {} });
 
     await savedObjectsClient.bulkCreate([
       {
