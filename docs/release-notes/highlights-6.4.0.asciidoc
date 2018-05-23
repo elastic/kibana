@@ -1,0 +1,9 @@
+[[release-highlights-6.4.0]]
+== 6.4.0 release highlights
+++++
+<titleabbrev>6.4.0</titleabbrev>
+++++
+
+coming[6.4.0]
+
+See also <<breaking-changes>> and <<release-notes>>.
