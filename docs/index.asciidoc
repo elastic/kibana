@@ -68,6 +68,8 @@ include::reporting/index.asciidoc[]
 
 include::api.asciidoc[]
 
+include::api.asciidoc[]
+
 include::plugins.asciidoc[]
 
 include::development.asciidoc[]
