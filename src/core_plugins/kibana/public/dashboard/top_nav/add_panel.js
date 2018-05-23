@@ -33,7 +33,7 @@ export class DashboardAddPanel extends React.Component {
       </EuiButton>
     );
 
-    this.tabs = [{
+    const tabs = [{
       id: VIS_TAB_ID,
       name: 'Visualization',
       dataTestSubj: 'addVisualizationTab',
@@ -65,7 +65,8 @@ export class DashboardAddPanel extends React.Component {
     }];
 
     this.state = {
-      selectedTab: this.tabs[0],
+      tabs: tabs,
+      selectedTab: tabs[0],
     };
   }
 
@@ -76,7 +77,7 @@ export class DashboardAddPanel extends React.Component {
   }
 
   renderTabs() {
-    return this.tabs.map((tab) => {
+    return this.state.tabs.map((tab) => {
       return (
         <EuiTab
           onClick={() => this.onSelectedTabChanged(tab)}
