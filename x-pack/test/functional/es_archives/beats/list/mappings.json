@@ -27,16 +27,21 @@
               }
             }
           },
-          "configuration_block": {
+          "tag": {
             "properties": {
-              "tag": {
+              "id": {
                 "type": "keyword"
               },
-              "type": {
-                "type": "keyword"
-              },
-              "block_yml": {
-                "type": "text"
+              "configuration_blocks": {
+                "type": "nested",
+                "properties": {
+                  "type": {
+                    "type": "keyword"
+                  },
+                  "block_yml": {
+                    "type": "text"
+                  }
+                }
               }
             }
           },
@@ -68,6 +73,9 @@
               },
               "local_configuration_yml": {
                 "type": "text"
+              },
+              "tags": {
+                "type": "keyword"
               },
               "central_configuration_yml": {
                 "type": "text"
