@@ -50,7 +50,7 @@ export default function ({ getService }) {
       });
     });
 
-    it('should enroll beat in an unverified state', async () => {
+    it('should enroll beat in a verified state by default', async () => {
       await supertest
         .post(
           `/api/beats/agent/${beatId}`
@@ -66,7 +66,7 @@ export default function ({ getService }) {
         id: `beat:${beatId}`
       });
 
-      expect(esResponse._source.beat).to.not.have.property('verified_on');
+      expect(esResponse._source.beat).to.have.property('verified_on');
       expect(esResponse._source.beat).to.have.property('host_ip');
     });
 
