@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import $ from 'jquery';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
@@ -109,13 +108,14 @@ describe('visualize directive', function () {
 
   describe('request handler', () => {
 
-    const requestHandler = sinon.stub().returns(new Promise(_.noop));
-    // Create utility property `lastParams` to quickly access last passed params
-    Object.defineProperty(requestHandler, 'lastParams', {
-      get() {
-        return requestHandler.lastCall.args[1];
-      }
-    });
+    const requestHandler = sinon.stub().resolves();
+
+    /**
+     * Asserts that a specific parameter had a specific value in the last call to the requestHandler.
+     */
+    function assertParam(obj) {
+      sinon.assert.calledWith(requestHandler, sinon.match.any, sinon.match(obj));
+    }
 
     /**
      * Wait for the next $scope.fetch call.
@@ -130,44 +130,44 @@ describe('visualize directive', function () {
     });
 
     afterEach(() => {
-      requestHandler.reset();
+      requestHandler.resetHistory();
     });
 
     describe('forceFetch param', () => {
       it('should be true if triggered via vis.forceReload', async () => {
         $scope.vis.forceReload();
         await waitForFetch();
-        expect(requestHandler.calledOnce).to.be(true);
-        expect(requestHandler.lastParams.forceFetch).to.be(true);
+        sinon.assert.calledOnce(requestHandler);
+        assertParam({ forceFetch: true });
       });
 
       it('should be true if triggered via courier:searchRefresh event', async () => {
         $scope.$emit('courier:searchRefresh');
         await waitForFetch();
-        expect(requestHandler.calledOnce).to.be(true);
-        expect(requestHandler.lastParams.forceFetch).to.be(true);
+        sinon.assert.calledOnce(requestHandler);
+        assertParam({ forceFetch: true });
       });
 
       it('should be true if triggered via fetch event', async () => {
         $scope.$emit('fetch');
         await waitForFetch();
-        expect(requestHandler.calledOnce).to.be(true);
-        expect(requestHandler.lastParams.forceFetch).to.be(true);
+        sinon.assert.calledOnce(requestHandler);
+        assertParam({ forceFetch: true });
       });
 
       it('should be false if triggered via resize event', async () => {
         $el.width(400);
         $el.height(500);
         await waitForFetch();
-        expect(requestHandler.calledOnce).to.be(true);
-        expect(requestHandler.lastParams.forceFetch).to.be(false);
+        sinon.assert.calledOnce(requestHandler);
+        assertParam({ forceFetch: false });
       });
 
       it('should be false if triggered via uiState change', async () => {
         uiState.set('foo', 'bar');
         await waitForFetch();
-        expect(requestHandler.calledOnce).to.be(true);
-        expect(requestHandler.lastParams.forceFetch).to.be(false);
+        sinon.assert.calledOnce(requestHandler);
+        assertParam({ forceFetch: false });
       });
 
       it('should be true if at least one trigger required it to be true', async () => {
@@ -175,8 +175,8 @@ describe('visualize directive', function () {
         $scope.vis.forceReload(); // This requires forceFetch to be true
         uiState.set('foo', 'bar');
         await waitForFetch();
-        expect(requestHandler.calledOnce).to.be(true);
-        expect(requestHandler.lastParams.forceFetch).to.be(true);
+        sinon.assert.calledOnce(requestHandler);
+        assertParam({ forceFetch: true });
       });
     });
   });
