@@ -1,5 +1,3 @@
-/* eslint-disable no-var */
-
 // # Run Jest integration tests
 //
 // All args will be forwarded directly to Jest, e.g. to watch tests run:
