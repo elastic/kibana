@@ -7,18 +7,18 @@ import {
   absolutePathSnapshotSerializer,
   stripAnsiSnapshotSerializer,
 } from '../test_helpers';
-import { BootstrapCommand } from './bootstrap';
-import { PackageJson } from '../utils/package_json';
+import { linkProjectExecutables } from '../utils/link_project_executables';
+import { IPackageJson } from '../utils/package_json';
 import { Project } from '../utils/project';
 import { buildProjectGraph } from '../utils/projects';
 import { installInDir, runScriptInPackageStreaming } from '../utils/scripts';
-import { linkProjectExecutables } from '../utils/link_project_executables';
+import { BootstrapCommand } from './bootstrap';
 
 const mockInstallInDir = installInDir as jest.Mock;
 const mockRunScriptInPackageStreaming = runScriptInPackageStreaming as jest.Mock;
 const mockLinkProjectExecutables = linkProjectExecutables as jest.Mock;
 
-const createProject = (packageJson: PackageJson, path = '.') =>
+const createProject = (packageJson: IPackageJson, path = '.') =>
   new Project(
     {
       name: 'kibana',
@@ -31,7 +31,9 @@ const createProject = (packageJson: PackageJson, path = '.') =>
 expect.addSnapshotSerializer(absolutePathSnapshotSerializer);
 expect.addSnapshotSerializer(stripAnsiSnapshotSerializer);
 
-const noop = () => {};
+const noop = () => {
+  // noop
+};
 
 afterEach(() => {
   jest.resetAllMocks();
@@ -45,19 +47,19 @@ test('handles dependencies of dependencies', async () => {
   });
   const foo = createProject(
     {
-      name: 'foo',
       dependencies: {
         bar: 'link:../bar',
       },
+      name: 'foo',
     },
     'packages/foo'
   );
   const bar = createProject(
     {
-      name: 'bar',
       dependencies: {
         baz: 'link:../baz',
       },
+      name: 'bar',
     },
     'packages/bar'
   );

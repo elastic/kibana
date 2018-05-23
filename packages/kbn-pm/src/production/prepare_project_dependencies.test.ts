@@ -1,4 +1,4 @@
-import { resolve, join } from 'path';
+import { join, resolve } from 'path';
 
 import { prepareExternalProjectDependencies } from './prepare_project_dependencies';
 

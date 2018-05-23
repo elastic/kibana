@@ -1,9 +1,9 @@
 import { resolve } from 'path';
 
-import { stripAnsiSnapshotSerializer } from '../test_helpers';
-import { renderProjectsTree } from './projects_tree';
-import { getProjects } from './projects';
 import { getProjectPaths } from '../config';
+import { stripAnsiSnapshotSerializer } from '../test_helpers';
+import { getProjects } from './projects';
+import { renderProjectsTree } from './projects_tree';
 
 const rootPath = resolve(`${__dirname}/__fixtures__/kibana`);
 
