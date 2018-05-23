@@ -34,19 +34,19 @@ cmd
   .option('--raw', `don't gzip the archive`)
   .command('save <name> <indices...>')
   .description('archive the <indices ...> into the --dir with <name>')
-  .action((name, indices) => execute('save', name, indices));
+  .action((name, indices) => execute((archiver, { raw }) => archiver.save(name, indices, { raw })));
 
 cmd.command('load <name>')
   .description('load the archive in --dir with <name>')
-  .action(name => execute('load', name));
+  .action(name => execute(archiver => archiver.load(name)));
 
 cmd.command('unload <name>')
   .description('remove indices created by the archive in --dir with <name>')
-  .action(name => execute('unload', name));
+  .action(name => execute(archiver => archiver.unload(name)));
 
 cmd.command('rebuild-all')
   .description('[internal] read and write all archives in --dir to remove any inconsistencies')
-  .action(() => execute('rebuildAll'));
+  .action(() => execute(archiver => archiver.rebuildAll()));
 
 cmd.parse(process.argv);
 
@@ -55,7 +55,7 @@ if (missingCommand) {
   execute();
 }
 
-async function execute(operation, ...args) {
+async function execute(fn) {
   try {
     const log = createToolingLog(cmd.verbose ? 'debug' : 'info');
     log.pipe(process.stdout);
@@ -74,7 +74,6 @@ async function execute(operation, ...args) {
       log.error(msg);
     };
 
-    if (!operation) error('Missing or invalid command');
     if (!cmd.esUrl) {
       error('You must specify either --es-url or --config flags');
     }
@@ -89,7 +88,6 @@ async function execute(operation, ...args) {
     }
 
     // run!
-
     const client = new elasticsearch.Client({
       host: cmd.esUrl,
       log: cmd.verbose ? 'trace' : []
@@ -101,7 +99,7 @@ async function execute(operation, ...args) {
         client,
         dataDir: resolve(cmd.dir),
       });
-      await esArchiver[operation](...args, cmd);
+      await fn(esArchiver, cmd);
     } finally {
       await client.close();
     }
