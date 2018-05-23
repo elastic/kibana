@@ -8,7 +8,6 @@ export const args = ({ userDataDir, bridgePort, viewport, disableSandbox, proxyC
   const flags = [
     '--enable-logging',
     '--v=1',
-    '--no-sandbox',
     // Disable built-in Google Translate service
     '--disable-translate',
     // Disable all chrome extensions entirely
