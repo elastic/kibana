@@ -53,7 +53,7 @@ where `locale` is [ISO 639 language code](https://en.wikipedia.org/wiki/List_of_
 
 For example:
 ```
-src/core_plugins/kibana/translations/en.json
+src/core_plugins/kibana/translations/fr.json
 ```
 
 When a new translation file is added, you have to register this file into
@@ -63,7 +63,7 @@ export default function (kibana) {
   return new kibana.Plugin({
     uiExports: {
       translations: [
-        resolve(__dirname, './translations/en.json'),
+        resolve(__dirname, './translations/fr.json'),
       ],
       ...
     },
@@ -88,8 +88,8 @@ option at `config/kibana.yml` file.
 
 One of our technical requirements is to have default message in the templates
 themselves, and that message will always be english, so we don't need interact
-with `en.json` file directly. If default message has been changed in the code
-then tools will update it.
+with `en.json` file directly. We can generate that file from `defaultMessage`s
+defined inline.
 
 ## I18n engine
 
