@@ -33,11 +33,27 @@ export class SavedObjectFinder extends React.Component {
     this.fetchItems();
   }
 
-  onTableChange = ({ page }) => {
+  onTableChange = ({ page, sort = {} }) => {
+    let {
+      field: sortField,
+      direction: sortDirection,
+    } = sort;
+
+    // 3rd sorting state that is not captured by sort - native order (no sort)
+    // when switching from desc to asc for the same field - use native order
+    if (this.state.sortField === sortField
+      && this.state.sortDirection === 'desc'
+      && sortDirection === 'asc') {
+      sortField = null;
+      sortDirection = null;
+    }
+
     this.setState({
       page: page.index,
       perPage: page.size,
-    }, this.fetchItems);
+      sortField,
+      sortDirection,
+    });
   }
 
   // server-side paging not supported
@@ -46,11 +62,26 @@ export class SavedObjectFinder extends React.Component {
   //    for example, visualizations need to be search by isLab but this is not possible in Elasticsearch side
   //    with the current mappings
   getPageOfItems = () => {
+    // do not sort original list to preserve elasticsearch ranking order
+    const items = this.state.items.slice();
+
+    if (this.state.sortField) {
+      items.sort((a, b) => {
+        const fieldA = _.get(a, this.state.sortField, '');
+        const fieldB = _.get(b, this.state.sortField, '');
+        let order = 1;
+        if (this.state.sortDirection === 'desc') {
+          order = -1;
+        }
+        return order * fieldA.toLowerCase().localeCompare(fieldB.toLowerCase());
+      });
+    }
+
     // If begin is greater than the length of the sequence, an empty array is returned.
     const startIndex = this.state.page * this.state.perPage;
     // If end is greater than the length of the sequence, slice extracts through to the end of the sequence (arr.length).
     const lastIndex = startIndex + this.state.perPage;
-    return this.state.items.slice(startIndex, lastIndex);
+    return items.slice(startIndex, lastIndex);
   }
 
   debouncedFetch = _.debounce(async (filter) => {
@@ -121,10 +152,18 @@ export class SavedObjectFinder extends React.Component {
       totalItemCount: this.state.items.length,
       pageSizeOptions: [5, 10],
     };
+    const sorting = {};
+    if (this.state.sortField) {
+      sorting.sort = {
+        field: this.state.sortField,
+        direction: this.state.sortDirection,
+      };
+    }
     const tableColumns = [
       {
         field: 'title',
         name: 'Title',
+        sortable: true,
         render: (field, record) => (
           <EuiLink
             onClick={() => {
@@ -144,6 +183,7 @@ export class SavedObjectFinder extends React.Component {
         loading={this.state.isFetchingItems}
         columns={tableColumns}
         pagination={pagination}
+        sorting={sorting}
         onChange={this.onTableChange}
         noItemsMessage={this.props.noItemsMessage}
       />
