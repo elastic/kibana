@@ -162,6 +162,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('clonedDashboardTitle', title);
     }
 
+    async isCloneDuplicateTitleWarningDisplayed() {
+      return await testSubjects.exists('cloneModalTitleDupicateWarnMsg');
+    }
+
     async clickEdit() {
       log.debug('Clicking edit');
       return await testSubjects.click('dashboardEditMode');

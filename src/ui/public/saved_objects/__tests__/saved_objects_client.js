@@ -5,7 +5,7 @@ import { SavedObject } from '../saved_object';
 
 describe('SavedObjectsClient', () => {
   const basePath = Math.random().toString(36).substring(7);
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
   const doc = {
     id: 'AVwSwFxtcMV38qjDZoQg',
     type: 'config',

@@ -72,7 +72,7 @@ uiModules
           }
 
           if (!self.selectedFormatId) {
-            delete indexPattern.fieldFormatMap[field.name];
+            indexPattern.fieldFormatMap[field.name] = {};
           } else {
             indexPattern.fieldFormatMap[field.name] = self.field.format;
           }
@@ -116,12 +116,20 @@ uiModules
           const changedFormat = cur !== prev;
           const missingFormat = cur && (!format || format.type.id !== cur);
 
-          if (!changedFormat || !missingFormat) return;
+          if (!changedFormat || !missingFormat) {
+            return;
+          }
 
           // reset to the defaults, but make sure it's an object
           const FieldFormat = getFieldFormatType();
           const paramDefaults = new FieldFormat({}, getConfig).getParamDefaults();
+          const currentFormatParams = self.formatParams;
           self.formatParams = _.assign({}, _.cloneDeep(paramDefaults));
+          // If there are no current or new params, the watch will not trigger
+          // so manually update the format here
+          if (_.size(currentFormatParams) === 0 && _.size(self.formatParams) === 0) {
+            self.field.format = new FieldFormat(self.formatParams, getConfig);
+          }
         });
 
         $scope.$watch('editor.formatParams', function () {

@@ -40,6 +40,7 @@ uiModules
       template: visualizeTemplate,
       link: async function ($scope, $el) {
         let destroyed = false;
+        let forceFetch = false;
         if (!$scope.savedObj) throw(`saved object was not provided to <visualize> directive`);
         if (!$scope.appState) $scope.appState = getAppState();
 
@@ -87,7 +88,12 @@ uiModules
             queryFilter: queryFilter,
             searchSource: $scope.savedObj.searchSource,
             timeRange: timeRange,
+            forceFetch,
           };
+
+          // Reset forceFetch flag, since we are now executing our forceFetch in case it was true
+          forceFetch = false;
+
           // searchSource is only there for courier request handler
           requestHandler($scope.vis, handlerParams)
             .then(requestHandlerResponse => {
@@ -135,7 +141,7 @@ uiModules
 
 
         const reload = () => {
-          $scope.vis.reload = true;
+          forceFetch = true;
           $scope.fetch();
         };
         $scope.vis.on('reload', reload);

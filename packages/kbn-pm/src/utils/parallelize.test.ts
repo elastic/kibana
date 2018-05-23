@@ -106,9 +106,9 @@ test('rejects if any promise rejects', async () => {
 function createPromiseWithResolve() {
   let resolve: (val?: any) => void;
   let reject: (err?: any) => void;
-  const promise = new Promise((_resolve, _reject) => {
-    resolve = _resolve;
-    reject = _reject;
+  const promise = new Promise((res, rej) => {
+    resolve = res;
+    reject = rej;
   });
   return { promise, resolve: resolve!, reject: reject!, called: false };
 }

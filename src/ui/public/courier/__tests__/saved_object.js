@@ -169,7 +169,7 @@ describe('Saved Object', function () {
         const mockDocResponse = getMockedDocResponse('myId');
         stubESResponse(mockDocResponse);
         return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(savedObject => {
-          sinon.stub(savedObjectsClientStub, 'create', function () {
+          sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
             return BluebirdPromise.resolve({ type: 'dashboard', id: 'newUniqueId' });
           });
 
@@ -185,7 +185,7 @@ describe('Saved Object', function () {
         const mockDocResponse = getMockedDocResponse(originalId);
         stubESResponse(mockDocResponse);
         return createInitializedSavedObject({ type: 'dashboard', id: originalId }).then(savedObject => {
-          sinon.stub(savedObjectsClientStub, 'create', function () {
+          sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
             return BluebirdPromise.reject('simulated error');
           });
           savedObject.copyOnSave = true;
@@ -203,7 +203,7 @@ describe('Saved Object', function () {
         stubESResponse(mockDocResponse);
 
         return createInitializedSavedObject({ type: 'dashboard', id: id }).then(savedObject => {
-          sinon.stub(savedObjectsClientStub, 'create', function () {
+          sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
             expect(savedObject.id).to.be(id);
             return BluebirdPromise.resolve(id);
           });
@@ -218,7 +218,7 @@ describe('Saved Object', function () {
     it('returns id from server on success', function () {
       return createInitializedSavedObject({ type: 'dashboard' }).then(savedObject => {
         const mockDocResponse = getMockedDocResponse('myId');
-        sinon.stub(savedObjectsClientStub, 'create', function () {
+        sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
           return BluebirdPromise.resolve({ type: 'dashboard', id: 'myId', _version: 2 });
         });
 
@@ -235,7 +235,7 @@ describe('Saved Object', function () {
         stubESResponse(getMockedDocResponse(id));
 
         return createInitializedSavedObject({ type: 'dashboard', id: id }).then(savedObject => {
-          sinon.stub(savedObjectsClientStub, 'create', () => {
+          sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
             expect(savedObject.isSaving).to.be(true);
             return BluebirdPromise.resolve({
               type: 'dashboard', id, version: 2
@@ -251,7 +251,7 @@ describe('Saved Object', function () {
       it('on failure', function () {
         stubESResponse(getMockedDocResponse('id'));
         return createInitializedSavedObject({ type: 'dashboard' }).then(savedObject => {
-          sinon.stub(savedObjectsClientStub, 'create', () => {
+          sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
             expect(savedObject.isSaving).to.be(true);
             return BluebirdPromise.reject();
           });

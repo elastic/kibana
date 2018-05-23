@@ -323,7 +323,6 @@ export class DashboardListing extends React.Component {
       pageSizeOptions: [10, 20, 50],
     };
     const selection = {
-      itemId: 'id',
       onSelectionChange: (selection) => {
         this.setState({
           selectedIds: selection.map(item => { return item.id; })
@@ -340,6 +339,7 @@ export class DashboardListing extends React.Component {
     const items = this.state.dashboards.length === 0 ? [] : this.getPageOfItems();
     return (
       <EuiBasicTable
+        itemId={'id'}
         items={items}
         loading={this.state.isFetchingItems}
         columns={tableColumns}
