@@ -10,6 +10,7 @@ aggregations and pipeline aggregations to display complex data in a meaningful w
 
 image:images/tsvb-screenshot.png["Time Series Visual Builder Interface"]
 
+[[time-series-visualizations]]
 === Featured Visualizations
 
 Time Series Visual Build comes with 6 different visualization types. You can
@@ -73,6 +74,7 @@ You define which field group to show in the rows and what columns of data to dis
 image:images/tsvb-table.png["Table Visualization"]
 
 
+[[time-series-interface]]
 === Interface Overview
 
 The user interface for each visualization is compose of a "Data" tab and "Panel

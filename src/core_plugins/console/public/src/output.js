@@ -10,6 +10,7 @@ export function initializeOutput($el) {
 
   const outputMode = new OutputMode.Mode();
 
+  output.$blockScrolling = Infinity;
   output.resize = smartResize(output);
   output.update = function (val, mode, cb) {
     if (typeof mode === 'function') {
