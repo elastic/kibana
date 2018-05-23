@@ -20,12 +20,12 @@ function createHiddenTextElement(text) {
 export function copyToClipboard(text) {
   let isCopied = true;
   const range = document.createRange();
-  const selection = document.getSelection();
+  const selection = window.getSelection();
   const elementToBeCopied = createHiddenTextElement(text);
 
   document.body.appendChild(elementToBeCopied);
   range.selectNode(elementToBeCopied);
-  selection.empty();
+  selection.removeAllRanges();
   selection.addRange(range);
 
   if (!document.execCommand('copy')) {
