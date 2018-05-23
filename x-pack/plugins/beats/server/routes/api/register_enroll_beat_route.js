@@ -14,6 +14,7 @@ import {
 import { INDEX_NAMES } from '../../../common/constants';
 import { callWithInternalUserFactory } from '../../lib/client';
 import { wrapEsError } from '../../lib/error_wrappers';
+import { areTokensEqual } from '../../lib/crypto';
 
 async function getEnrollmentToken(callWithInternalUser, enrollmentToken) {
   const params = {
@@ -80,7 +81,7 @@ export function registerEnrollBeatRoute(server) {
       try {
         const enrollmentToken = request.headers['kbn-beats-enrollment-token'];
         const { token, expires_on: expiresOn } = await getEnrollmentToken(callWithInternalUser, enrollmentToken);
-        if (!token || token !== enrollmentToken) {
+        if (!token || !areTokensEqual(token, enrollmentToken)) {
           return reply({ message: 'Invalid enrollment token' }).code(400);
         }
         if (moment(expiresOn).isBefore(moment())) {

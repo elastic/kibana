@@ -9,6 +9,7 @@ import {  get } from 'lodash';
 import { INDEX_NAMES } from '../../../common/constants';
 import { callWithInternalUserFactory } from '../../lib/client';
 import { wrapEsError } from '../../lib/error_wrappers';
+import { areTokensEqual } from '../../lib/crypto';
 
 async function getBeat(callWithInternalUser, beatId) {
   const params = {
@@ -74,7 +75,7 @@ export function registerUpdateBeatRoute(server) {
           return reply({ message: 'Beat not found' }).code(404);
         }
 
-        const isAccessTokenValid = beat.access_token === request.headers['kbn-beats-access-token'];
+        const isAccessTokenValid = areTokensEqual(beat.access_token, request.headers['kbn-beats-access-token']);
         if (!isAccessTokenValid) {
           return reply({ message: 'Invalid access token' }).code(401);
         }
