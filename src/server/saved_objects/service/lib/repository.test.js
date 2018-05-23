@@ -1,16 +1,17 @@
 import sinon from 'sinon';
 import { delay } from 'bluebird';
-import { SavedObjectsClient } from './saved_objects_client';
-import * as getSearchDslNS from './lib/search_dsl/search_dsl';
-import { getSearchDsl } from './lib';
+import { SavedObjectsRepository } from './repository';
+import * as getSearchDslNS from './search_dsl/search_dsl';
+import { getSearchDsl } from './search_dsl';
+import * as errors from './errors';
 import elasticsearch from 'elasticsearch';
 
-describe('SavedObjectsClient', () => {
+describe('SavedObjectsRepository', () => {
   const sandbox = sinon.sandbox.create();
 
   let callAdminCluster;
   let onBeforeWrite;
-  let savedObjectsClient;
+  let savedObjectsRepository;
   const mockTimestamp = '2017-08-14T15:49:14.886Z';
   const mockTimestampFields = { updated_at: mockTimestamp };
   const searchResults = {
@@ -79,14 +80,14 @@ describe('SavedObjectsClient', () => {
     callAdminCluster = sandbox.stub();
     onBeforeWrite = sandbox.stub();
 
-    savedObjectsClient = new SavedObjectsClient({
+    savedObjectsRepository = new SavedObjectsRepository({
       index: '.kibana-test',
       mappings,
       callCluster: callAdminCluster,
       onBeforeWrite
     });
 
-    sandbox.stub(savedObjectsClient, '_getCurrentTime').returns(mockTimestamp);
+    sandbox.stub(savedObjectsRepository, '_getCurrentTime').returns(mockTimestamp);
     sandbox.stub(getSearchDslNS, 'getSearchDsl').returns({});
   });
 
@@ -105,7 +106,7 @@ describe('SavedObjectsClient', () => {
     });
 
     it('formats Elasticsearch response', async () => {
-      const response = await savedObjectsClient.create('index-pattern', {
+      const response = await savedObjectsRepository.create('index-pattern', {
         title: 'Logstash'
       });
 
@@ -121,7 +122,7 @@ describe('SavedObjectsClient', () => {
     });
 
     it('should use ES index action', async () => {
-      await savedObjectsClient.create('index-pattern', {
+      await savedObjectsRepository.create('index-pattern', {
         id: 'logstash-*',
         title: 'Logstash'
       });
@@ -132,7 +133,7 @@ describe('SavedObjectsClient', () => {
     });
 
     it('should use create action if ID defined and overwrite=false', async () => {
-      await savedObjectsClient.create('index-pattern', {
+      await savedObjectsRepository.create('index-pattern', {
         title: 'Logstash'
       }, {
         id: 'logstash-*',
@@ -144,7 +145,7 @@ describe('SavedObjectsClient', () => {
     });
 
     it('allows for id to be provided', async () => {
-      await savedObjectsClient.create('index-pattern', {
+      await savedObjectsRepository.create('index-pattern', {
         title: 'Logstash'
       }, { id: 'logstash-*' });
 
@@ -157,7 +158,7 @@ describe('SavedObjectsClient', () => {
     });
 
     it('self-generates an ID', async () => {
-      await savedObjectsClient.create('index-pattern', {
+      await savedObjectsRepository.create('index-pattern', {
         title: 'Logstash'
       });
 
@@ -174,7 +175,7 @@ describe('SavedObjectsClient', () => {
     it('formats Elasticsearch request', async () => {
       callAdminCluster.returns({ items: [] });
 
-      await savedObjectsClient.bulkCreate([
+      await savedObjectsRepository.bulkCreate([
         { type: 'config', id: 'one', attributes: { title: 'Test One' } },
         { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
       ]);
@@ -195,7 +196,7 @@ describe('SavedObjectsClient', () => {
     it('should overwrite objects if overwrite is truthy', async () => {
       callAdminCluster.returns({ items: [] });
 
-      await savedObjectsClient.bulkCreate([{ type: 'foo', id: 'bar', attributes: {} }], { overwrite: false });
+      await savedObjectsRepository.bulkCreate([{ type: 'foo', id: 'bar', attributes: {} }], { overwrite: false });
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, 'bulk', sinon.match({
         body: [
@@ -210,7 +211,7 @@ describe('SavedObjectsClient', () => {
       callAdminCluster.reset();
       onBeforeWrite.reset();
 
-      await savedObjectsClient.bulkCreate([{ type: 'foo', id: 'bar', attributes: {} }], { overwrite: true });
+      await savedObjectsRepository.bulkCreate([{ type: 'foo', id: 'bar', attributes: {} }], { overwrite: true });
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, 'bulk', sinon.match({
         body: [
@@ -243,7 +244,7 @@ describe('SavedObjectsClient', () => {
         }]
       }));
 
-      const response = await savedObjectsClient.bulkCreate([
+      const response = await savedObjectsRepository.bulkCreate([
         { type: 'config', id: 'one', attributes: { title: 'Test One' } },
         { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
       ]);
@@ -281,7 +282,7 @@ describe('SavedObjectsClient', () => {
         }]
       }));
 
-      const response = await savedObjectsClient.bulkCreate([
+      const response = await savedObjectsRepository.bulkCreate([
         { type: 'config', id: 'one', attributes: { title: 'Test One' } },
         { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
       ]);
@@ -313,7 +314,7 @@ describe('SavedObjectsClient', () => {
       }));
 
       try {
-        await savedObjectsClient.delete('index-pattern', 'logstash-*');
+        await savedObjectsRepository.delete('index-pattern', 'logstash-*');
       } catch(e) {
         expect(e.output.statusCode).toEqual(404);
       }
@@ -323,7 +324,7 @@ describe('SavedObjectsClient', () => {
       callAdminCluster.returns({
         result: 'deleted'
       });
-      await savedObjectsClient.delete('index-pattern', 'logstash-*');
+      await savedObjectsRepository.delete('index-pattern', 'logstash-*');
 
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, 'delete', {
@@ -345,7 +346,7 @@ describe('SavedObjectsClient', () => {
 
     it('requires searchFields be an array if defined', async () => {
       try {
-        await savedObjectsClient.find({ searchFields: 'string' });
+        await savedObjectsRepository.find({ searchFields: 'string' });
         throw new Error('expected find() to reject');
       } catch (error) {
         sinon.assert.notCalled(callAdminCluster);
@@ -356,7 +357,7 @@ describe('SavedObjectsClient', () => {
 
     it('requires fields be an array if defined', async () => {
       try {
-        await savedObjectsClient.find({ fields: 'string' });
+        await savedObjectsRepository.find({ fields: 'string' });
         throw new Error('expected find() to reject');
       } catch (error) {
         sinon.assert.notCalled(callAdminCluster);
@@ -374,14 +375,14 @@ describe('SavedObjectsClient', () => {
         sortOrder: 'desc'
       };
 
-      await savedObjectsClient.find(relevantOpts);
+      await savedObjectsRepository.find(relevantOpts);
       sinon.assert.calledOnce(getSearchDsl);
       sinon.assert.calledWithExactly(getSearchDsl, mappings, relevantOpts);
     });
 
     it('merges output of getSearchDsl into es request body', async () => {
       getSearchDsl.returns({ query: 1, aggregations: 2 });
-      await savedObjectsClient.find();
+      await savedObjectsRepository.find();
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.notCalled(onBeforeWrite);
       sinon.assert.calledWithExactly(callAdminCluster, 'search', sinon.match({
@@ -395,7 +396,7 @@ describe('SavedObjectsClient', () => {
     it('formats Elasticsearch response', async () => {
       const count = searchResults.hits.hits.length;
 
-      const response = await savedObjectsClient.find();
+      const response = await savedObjectsRepository.find();
 
       expect(response.total).toBe(count);
       expect(response.saved_objects).toHaveLength(count);
@@ -412,7 +413,7 @@ describe('SavedObjectsClient', () => {
     });
 
     it('accepts per_page/page', async () => {
-      await savedObjectsClient.find({ perPage: 10, page: 6 });
+      await savedObjectsRepository.find({ perPage: 10, page: 6 });
 
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
@@ -424,7 +425,7 @@ describe('SavedObjectsClient', () => {
     });
 
     it('can filter by fields', async () => {
-      await savedObjectsClient.find({ fields: ['title'] });
+      await savedObjectsRepository.find({ fields: ['title'] });
 
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
@@ -454,7 +455,7 @@ describe('SavedObjectsClient', () => {
     });
 
     it('formats Elasticsearch response', async () => {
-      const response = await savedObjectsClient.get('index-pattern', 'logstash-*');
+      const response = await savedObjectsRepository.get('index-pattern', 'logstash-*');
       sinon.assert.notCalled(onBeforeWrite);
       expect(response).toEqual({
         id: 'logstash-*',
@@ -468,7 +469,7 @@ describe('SavedObjectsClient', () => {
     });
 
     it('prepends type to the id', async () => {
-      await savedObjectsClient.get('index-pattern', 'logstash-*');
+      await savedObjectsRepository.get('index-pattern', 'logstash-*');
 
       sinon.assert.notCalled(onBeforeWrite);
       sinon.assert.calledOnce(callAdminCluster);
@@ -483,7 +484,7 @@ describe('SavedObjectsClient', () => {
     it('accepts a array of mixed type and ids', async () => {
       callAdminCluster.returns({ docs: [] });
 
-      await savedObjectsClient.bulkGet([
+      await savedObjectsRepository.bulkGet([
         { id: 'one', type: 'config' },
         { id: 'two', type: 'index-pattern' }
       ]);
@@ -504,7 +505,7 @@ describe('SavedObjectsClient', () => {
     it('returns early for empty objects argument', async () => {
       callAdminCluster.returns({ docs: [] });
 
-      const response = await savedObjectsClient.bulkGet([]);
+      const response = await savedObjectsRepository.bulkGet([]);
 
       expect(response.saved_objects).toHaveLength(0);
       sinon.assert.notCalled(callAdminCluster);
@@ -526,7 +527,7 @@ describe('SavedObjectsClient', () => {
         }]
       }));
 
-      const { saved_objects: savedObjects } = await savedObjectsClient.bulkGet(
+      const { saved_objects: savedObjects } = await savedObjectsRepository.bulkGet(
         [{ id: 'good', type: 'config' }, { id: 'bad', type: 'config' }]
       );
 
@@ -565,7 +566,7 @@ describe('SavedObjectsClient', () => {
     });
 
     it('returns current ES document version', async () => {
-      const response = await savedObjectsClient.update('index-pattern', 'logstash-*', attributes);
+      const response = await savedObjectsRepository.update('index-pattern', 'logstash-*', attributes);
       expect(response).toEqual({
         id,
         type,
@@ -576,7 +577,7 @@ describe('SavedObjectsClient', () => {
     });
 
     it('accepts version', async () => {
-      await savedObjectsClient.update(
+      await savedObjectsRepository.update(
         type,
         id,
         { title: 'Testing' },
@@ -590,7 +591,7 @@ describe('SavedObjectsClient', () => {
     });
 
     it('passes the parameters to callAdminCluster', async () => {
-      await savedObjectsClient.update('index-pattern', 'logstash-*', { title: 'Testing' });
+      await savedObjectsRepository.update('index-pattern', 'logstash-*', { title: 'Testing' });
 
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, 'update', {
@@ -614,7 +615,7 @@ describe('SavedObjectsClient', () => {
       onBeforeWrite.returns(delay(500));
       callAdminCluster.returns({ result: 'deleted', found: true });
 
-      const deletePromise = savedObjectsClient.delete('type', 'id');
+      const deletePromise = savedObjectsRepository.delete('type', 'id');
       await delay(100);
       sinon.assert.calledOnce(onBeforeWrite);
       sinon.assert.notCalled(callAdminCluster);
@@ -627,15 +628,15 @@ describe('SavedObjectsClient', () => {
       expect.assertions(3);
 
       const es401 = new elasticsearch.errors[401];
-      expect(SavedObjectsClient.errors.isNotAuthorizedError(es401)).toBe(false);
+      expect(errors.isNotAuthorizedError(es401)).toBe(false);
       onBeforeWrite.throws(es401);
 
       try {
-        await savedObjectsClient.delete('type', 'id');
+        await savedObjectsRepository.delete('type', 'id');
       } catch (error) {
         sinon.assert.calledOnce(onBeforeWrite);
         expect(error).toBe(es401);
-        expect(SavedObjectsClient.errors.isNotAuthorizedError(error)).toBe(true);
+        expect(errors.isNotAuthorizedError(error)).toBe(true);
       }
     });
   });

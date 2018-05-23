@@ -17,12 +17,11 @@ import { authenticateFactory } from './server/lib/auth_redirect';
 import { checkLicense } from './server/lib/check_license';
 import { initAuthenticator } from './server/lib/authentication/authenticator';
 import { mirrorStatusAndInitialize } from './server/lib/mirror_status_and_initialize';
-import { secureSavedObjectsClientWrapper } from './server/lib/saved_objects_client/saved_objects_client_wrapper';
-import { secureSavedObjectsClientOptionsBuilder } from './server/lib/saved_objects_client/secure_options_builder';
 import { registerPrivilegesWithCluster } from './server/lib/privileges';
 import { createDefaultRoles } from './server/lib/authorization/create_default_roles';
 import { initPrivilegesApi } from './server/routes/api/v1/privileges';
 import { hasPrivilegesWithServer } from './server/lib/authorization/has_privileges';
+import { SecureSavedObjectsClient } from './server/lib/saved_objects_client/secure_saved_objects_client';
 
 export const security = (kibana) => new kibana.Plugin({
   id: 'security',
@@ -113,11 +112,67 @@ export const security = (kibana) => new kibana.Plugin({
 
     if (config.get('xpack.security.rbac.enabled')) {
       const hasPrivilegesWithRequest = hasPrivilegesWithServer(server);
-      const savedObjectsClientProvider = server.getSavedObjectsClientProvider();
-      savedObjectsClientProvider.addClientOptionBuilder(options =>
-        secureSavedObjectsClientOptionsBuilder(server, hasPrivilegesWithRequest, options)
-      );
-      savedObjectsClientProvider.addClientWrapper(secureSavedObjectsClientWrapper);
+      const { savedObjects } = server;
+
+      savedObjects.registerScopedSavedObjectsClientFactory(({
+        request,
+        index,
+        mappings,
+        onBeforeWrite
+      }) => {
+        const hasPrivileges = hasPrivilegesWithRequest(request);
+
+        const adminCluster = server.plugins.elasticsearch.getCluster('admin');
+        const { callWithInternalUser } = adminCluster;
+
+        const repository = new savedObjects.SavedObjectsRepository({
+          index,
+          mappings,
+          onBeforeWrite,
+          callCluster: callWithInternalUser
+        });
+
+        return new SecureSavedObjectsClient({
+          repository,
+          errors: savedObjects.SavedObjectsClient.errors,
+          hasPrivileges
+        });
+      });
+
+      // purely an example at this point, will be deleted
+      savedObjects.registerScopedSavedObjectsClientWrapperFactory(({ client }) => {
+        return {
+          errors: client.errors,
+
+          async create(type, attributes = {}, options = {}) {
+            return await client.create(type, attributes, options);
+          },
+
+          async bulkCreate(objects, options = {}) {
+            return await client.bulkCreate(objects, options);
+          },
+
+          async delete(type, id) {
+            return await client.delete(type, id);
+          },
+
+          async find(options = {}) {
+            return await client.find(options);
+          },
+
+          async bulkGet(objects = []) {
+            return await client.bulkGet(objects);
+          },
+
+          async get(type, id) {
+            return await client.get(type, id);
+          },
+
+          async update(type, id, attributes, options = {}) {
+            return await client.update(type, id, attributes, options);
+          }
+        };
+      });
     }
 
     getUserProvider(server);
