@@ -6,15 +6,8 @@
 
 import React from 'react';
 
-import {
-  // EuiButtonEmpty,
-  // EuiButtonIcon,
-  // EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiTitle,
-} from '@elastic/eui';
+import { StatementListHeading } from './statement_list_heading';
+
 // import { PluginStatement } from '../../models/pipeline/plugin_statement';
 import { Statement } from './statement';
 
@@ -39,24 +32,11 @@ import { Statement } from './statement';
 
 export function StatementSection({ iconType, headingText, elements }) {
   return (
-    <div>
-      <EuiFlexGroup>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiIcon
-            type={iconType}
-            size="s"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiTitle size="m">
-            <h3>{headingText}</h3>
-          </EuiTitle>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    <div className="cv-statementList">
+      <StatementListHeading
+        iconType={iconType}
+        title={headingText}
+      />
       <StatementList elements={elements} />
     </div>
   );

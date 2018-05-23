@@ -6,26 +6,15 @@
 
 import React from 'react';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiTitle
-} from '@elastic/eui';
+import { StatementListHeading } from './statement_list_heading';
 
 export function Queue() {
   return (
-    <div className="statement">
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="logstashQueue" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiTitle>
-            <h3>Queue</h3>
-          </EuiTitle>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    <div className="cv-statementList">
+      <StatementListHeading
+        iconType="logstashQueue"
+        title="Queue"
+      />
       <div>
         Queue stats not available
       </div>
