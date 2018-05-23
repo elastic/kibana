@@ -52,10 +52,6 @@ export class CollapsibleStatement extends React.PureComponent {
   constructor(props) {
     super(props);
 
-    this.state = {
-      isCollapsed: false
-    };
-
     this.toggleClicked = this.toggleClicked.bind(this);
     this.getToggleIconType = this.getToggleIconType.bind(this);
   }
@@ -68,11 +64,7 @@ export class CollapsibleStatement extends React.PureComponent {
       expand
     } = this.props;
 
-    this.setState({
-      isCollapsed: !this.state.isCollapsed
-    });
-
-    if (this.state.isCollapsed) {
+    if (this.props.isCollapsed) {
       expand(id);
     } else {
       collapse(id);
@@ -80,7 +72,7 @@ export class CollapsibleStatement extends React.PureComponent {
   }
 
   getToggleIconType() {
-    return this.state.isCollapsed ? 'arrowRight' : 'arrowDown';
+    return this.props.isCollapsed ? 'arrowRight' : 'arrowDown';
   }
 
   getStatementBody() {

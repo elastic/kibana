@@ -137,14 +137,26 @@ export class Statement extends React.PureComponent
     const {
       collapse,
       element,
-      expand } = this.props;
+      expand,
+      isCollapsed
+    } = this.props;
     const { id } = element;
 
     const isIf = element instanceof IfElement;
 
     return statement instanceof PluginStatement
       ? pluginStatement(statement)
-      : <CollapsibleStatement expand={expand} collapse={collapse} statement={statement} isIf={isIf} id={id} />;
+      :
+      (
+        <CollapsibleStatement
+          expand={expand}
+          collapse={collapse}
+          statement={statement}
+          isIf={isIf}
+          isCollapsed={isCollapsed}
+          id={id}
+        />
+      );
   }
 
   render() {

@@ -11,7 +11,7 @@ import { uiModules } from 'ui/modules';
 import { ConfigViewer } from 'plugins/monitoring/components/logstash/pipeline_viewer/views/config_viewer';
 // import { PipelineViewer } from 'plugins/monitoring/components/logstash/pipeline_viewer';
 import { Pipeline } from 'plugins/monitoring/components/logstash/pipeline_viewer/models/pipeline';
-import { pipelineToList } from 'plugins/monitoring/components/logstash/pipeline_viewer/models/list';
+import { List } from 'plugins/monitoring/components/logstash/pipeline_viewer/models/list';
 import { PipelineState } from 'plugins/monitoring/components/logstash/pipeline_viewer/models/pipeline_state';
 
 const uiModule = uiModules.get('monitoring/directives', []);
@@ -34,12 +34,9 @@ uiModule.directive('monitoringLogstashPipelineViewer', ($injector) => {
 
         const configModel = Pipeline.fromPipelineGraph(pipelineState.config.graph);
 
-        console.log(configModel);
-        console.log(pipelineToList(configModel));
-
         const configViewer = (
           <ConfigViewer
-            pipeline={pipelineToList(configModel)}
+            pipeline={List.fromPipeline(configModel)}
             timeseriesTooltipXValueFormatter={timeseriesTooltipXValueFormatter}
           />
         );

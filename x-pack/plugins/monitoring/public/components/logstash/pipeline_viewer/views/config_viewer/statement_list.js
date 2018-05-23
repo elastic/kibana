@@ -66,55 +66,100 @@ class StatementList extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      collapsedParentIds: new Set()
+      collapsedIds: new Set(),
+      collapsedChildIds: new Set()
     };
     this.collapse = this.collapse.bind(this);
     this.expand = this.expand.bind(this);
     this.getStatement = this.getStatement.bind(this);
-  }
-
-  elementIsCollapsed(id, parentId) {
-    return this.state.collapsedParentIds.has(id) || this.state.collapsedParentIds.has(parentId);
+    this.elementIsCollapsed = this.elementIsCollapsed.bind(this);
   }
 
   expand(elementId) {
-    const collapsedParentIds = new Set(this.state.collapsedParentIds);
-    const expandParentIds = [elementId];
-    const { elements } = this.props;
+    const collapsedIds = new Set(this.state.collapsedIds);
+    const collapsedChildIds = new Set();
 
-    elements.forEach(element => {
+    collapsedIds.delete(elementId);
+
+    this.props.elements.forEach(element => {
       const { id, parentId } = element;
-      if (expandParentIds.some(expandId => expandId === parentId || expandId === id)) {
-        expandParentIds.push(id);
-        collapsedParentIds.delete(id);
+
+      if (collapsedIds.has(parentId) || collapsedChildIds.has(parentId)) {
+        collapsedChildIds.add(id);
       }
     });
-    console.log(collapsedParentIds);
 
-    this.setState({ collapsedParentIds });
+    this.setState({
+      collapsedIds,
+      collapsedChildIds
+    });
+    console.log(collapsedIds);
+    console.log(collapsedChildIds);
   }
 
   collapse(elementId) {
-    const collapsedParentIds = new Set(this.state.collapsedParentIds);
-    const { elements } = this.props;
+    const collapsedIds = new Set(this.state.collapsedIds);
+    const collapsedChildIds = new Set(this.state.collapsedChildIds);
+    collapsedIds.add(elementId);
 
-    collapsedParentIds.add(elementId);
+    this.props.elements.forEach(element => {
+      const { id, parentId } = element;
 
-    elements.forEach(element => {
-      const { parentId, id } = element;
-      if (collapsedParentIds.has(parentId)) {
-        collapsedParentIds.add(id);
+      if (collapsedIds.has(parentId) || collapsedChildIds.has(parentId)) {
+        collapsedChildIds.add(id);
       }
     });
 
-    console.log(collapsedParentIds.entries());
-    this.setState({ collapsedParentIds });
+    this.setState({
+      collapsedIds,
+      collapsedChildIds
+    });
+    console.log(collapsedIds);
+    console.log(collapsedChildIds);
+  }
+
+  // expand(elementId) {
+  //   const collapsedParentIds = new Set(this.state.collapsedParentIds);
+  //   const expandParentIds = [elementId];
+  //   const { elements } = this.props;
+
+  //   elements.forEach(element => {
+  //     const { id, parentId } = element;
+  //     if (expandParentIds.some(expandId => expandId === parentId || expandId === id)) {
+  //       expandParentIds.push(id);
+  //       collapsedParentIds.delete(id);
+  //     }
+  //   });
+  //   console.log(collapsedParentIds);
+
+  //   this.setState({ collapsedParentIds });
+  // }
+
+  // collapse(elementId) {
+  //   const collapsedParentIds = new Set(this.state.collapsedParentIds);
+  //   const { elements } = this.props;
+
+  //   collapsedParentIds.add(elementId);
+
+  //   elements.forEach(element => {
+  //     const { parentId, id } = element;
+  //     if (collapsedParentIds.has(parentId)) {
+  //       collapsedParentIds.add(id);
+  //     }
+  //   });
+
+  //   console.log(collapsedParentIds.entries());
+  //   this.setState({ collapsedParentIds });
+  // }
+
+  elementIsCollapsed(elementId) {
+    return this.state.collapsedIds.has(elementId);
   }
 
   getStatement(element) {
-    const { parentId } = element;
+    const { id, parentId } = element;
 
-    return this.state.collapsedParentIds.has(parentId) ?
+    return this.state.collapsedIds.has(parentId) || this.state.collapsedChildIds.has(parentId) ?
       null
       :
       (
@@ -123,6 +168,7 @@ class StatementList extends React.PureComponent {
           element={element}
           collapse={this.collapse}
           expand={this.expand}
+          isCollapsed={this.elementIsCollapsed(id)}
         />
       );
   }
