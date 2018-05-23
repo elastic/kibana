@@ -106,8 +106,6 @@ export default async function ({ readConfigFile }) {
     },
     servers: commonConfig.get('servers'),
 
-    env: commonConfig.get('env'),
-
     esTestCluster: commonConfig.get('esTestCluster'),
 
     kbnTestServer: {

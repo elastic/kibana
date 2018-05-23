@@ -11,9 +11,6 @@ export default async function ({ readConfigFile }) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
   return {
-    testFiles: [
-      require.resolve('./apis'),
-    ],
     services: {
       es: commonConfig.get('services.es'),
       esArchiver: commonConfig.get('services.esArchiver'),
@@ -26,7 +23,6 @@ export default async function ({ readConfigFile }) {
     junit: {
       reportName: 'Integration Tests'
     },
-    env: commonConfig.get('env'),
     esTestCluster: commonConfig.get('esTestCluster'),
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
