@@ -9,7 +9,6 @@ import { isEmpty, capitalize } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { StatusIcon } from '../';
 
-// TODO: make data-test-subj wrap the entire EuiFlexItem so the visual text includes the label
 const wrapChild = ({ label, value, dataTestSubj }, index) => (
   <EuiFlexItem
     key={`summary-status-item-${index}`}
