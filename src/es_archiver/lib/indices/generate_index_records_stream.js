@@ -23,7 +23,7 @@ export function createGenerateIndexRecordsStream(client, stats) {
         const { settings, mappings } = resp[index];
 
         stats.archivedIndex(index, { settings, mappings });
-        this.push({
+        callback(null, {
           type: 'index',
           value: {
             index,
@@ -32,8 +32,6 @@ export function createGenerateIndexRecordsStream(client, stats) {
             aliases,
           }
         });
-
-        callback(null);
       } catch (err) {
         callback(err);
       }
