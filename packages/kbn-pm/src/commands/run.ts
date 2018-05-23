@@ -1,5 +1,6 @@
 import chalk from 'chalk';
 
+import { log } from '../utils/log';
 import { parallelizeBatches } from '../utils/parallelize';
 import { topologicallyBatchProjects } from '../utils/projects';
 import { ICommand } from './';
@@ -13,16 +14,14 @@ export const RunCommand: ICommand = {
     const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
 
     if (extraArgs.length === 0) {
-      /* tslint:disable-next-line no-console */
-      console.log(chalk.red.bold('\nNo script specified'));
+      log.write(chalk.red.bold('\nNo script specified'));
       process.exit(1);
     }
 
     const scriptName = extraArgs[0];
     const scriptArgs = extraArgs.slice(1);
 
-    /* tslint:disable-next-line no-console */
-    console.log(
+    log.write(
       chalk.bold(
         `\nRunning script [${chalk.green(
           scriptName

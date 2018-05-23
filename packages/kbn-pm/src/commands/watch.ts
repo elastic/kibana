@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import { log } from '../utils/log';
 import { parallelizeBatches } from '../utils/parallelize';
 import { ProjectMap, topologicallyBatchProjects } from '../utils/projects';
 import { waitUntilWatchIsReady } from '../utils/watch';
@@ -38,8 +39,7 @@ export const WatchCommand: ICommand = {
     }
 
     if (projectsToWatch.size === 0) {
-      /* tslint:disable-next-line no-console */
-      console.log(
+      log.write(
         chalk.red(
           `\nThere are no projects to watch found. Make sure that projects define 'kbn:watch' script in 'package.json'.\n`
         )
@@ -48,8 +48,7 @@ export const WatchCommand: ICommand = {
     }
 
     const projectNames = Array.from(projectsToWatch.keys());
-    /* tslint:disable-next-line no-console */
-    console.log(
+    log.write(
       chalk.bold(
         chalk.green(
           `Running ${watchScriptName} scripts for [${projectNames.join(', ')}].`
@@ -75,8 +74,7 @@ export const WatchCommand: ICommand = {
         pkg.runScriptStreaming(watchScriptName).stdout
       );
 
-      /* tslint:disable-next-line no-console */
-      console.log(
+      log.write(
         chalk.bold(
           `[${chalk.green(
             pkg.name

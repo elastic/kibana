@@ -4,6 +4,7 @@ import { join, relative, resolve } from 'path';
 
 import { getProjectPaths } from '../config';
 import { isDirectory, isFile } from '../utils/fs';
+import { log } from '../utils/log';
 import {
   createProductionPackageJson,
   readPackageJson,
@@ -29,8 +30,7 @@ export async function buildProductionProjects({
   const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
 
   const projectNames = [...projects.values()].map(project => project.name);
-  /* tslint:disable-next-line no-console */
-  console.log(`Preparing production build for [${projectNames.join(', ')}]`);
+  log.write(`Preparing production build for [${projectNames.join(', ')}]`);
 
   for (const batch of batchedProjects) {
     for (const project of batch) {

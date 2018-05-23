@@ -3,6 +3,7 @@ import { dirname, relative, resolve, sep } from 'path';
 import chalk from 'chalk';
 
 import { chmod, createSymlink, isFile, mkdirp } from './fs';
+import { log } from './log';
 import { ProjectGraph, ProjectMap } from './projects';
 
 /**
@@ -39,8 +40,7 @@ export async function linkProjectExecutables(
           .split(sep)
           .join('/');
 
-        /* tslint:disable-next-line no-console */
-        console.log(
+        log.write(
           chalk`{dim [${project.name}]} ${name} -> {dim ${projectRelativePath}}`
         );
 

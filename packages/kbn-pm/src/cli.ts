@@ -5,14 +5,14 @@ import { resolve } from 'path';
 
 import { commands } from './commands';
 import { runCommand } from './run';
+import { log } from './utils/log';
 
 function help() {
   const availableCommands = Object.keys(commands)
     .map(commandName => commands[commandName])
     .map(command => `${command.name} - ${command.description}`);
 
-  /* tslint:disable-next-line no-console */
-  console.log(dedent`
+  log.write(dedent`
     usage: kbn <command> [<args>]
 
     By default commands are run for Kibana itself, all packages in the 'packages/'
@@ -36,8 +36,7 @@ export async function run(argv: string[]) {
   // starts forwarding the `--` directly to this script, see
   // https://github.com/yarnpkg/yarn/blob/b2d3e1a8fe45ef376b716d597cc79b38702a9320/src/cli/index.js#L174-L182
   if (argv.includes('--')) {
-    /* tslint:disable-next-line no-console */
-    console.log(
+    log.write(
       chalk.red(
         `Using "--" is not allowed, as it doesn't work with 'yarn kbn'.`
       )
@@ -71,8 +70,7 @@ export async function run(argv: string[]) {
 
   const command = commands[commandName];
   if (command === undefined) {
-    /* tslint:disable-next-line no-console */
-    console.log(
+    log.write(
       chalk.red(`[${commandName}] is not a valid command, see 'kbn --help'`)
     );
     process.exit(1);

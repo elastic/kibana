@@ -4,6 +4,7 @@ import ora from 'ora';
 import { relative } from 'path';
 
 import { isDirectory } from '../utils/fs';
+import { log } from '../utils/log';
 import { ICommand } from './';
 
 export const CleanCommand: ICommand = {
@@ -24,11 +25,9 @@ export const CleanCommand: ICommand = {
     }
 
     if (directoriesToDelete.length === 0) {
-      /* tslint:disable-next-line no-console */
-      console.log(chalk.bold.green('\n\nNo directories to delete'));
+      log.write(chalk.bold.green('\n\nNo directories to delete'));
     } else {
-      /* tslint:disable-next-line no-console */
-      console.log(chalk.bold.red('\n\nDeleting directories:\n'));
+      log.write(chalk.bold.red('\n\nDeleting directories:\n'));
 
       for (const dir of directoriesToDelete) {
         const deleting = del(dir, { force: true });

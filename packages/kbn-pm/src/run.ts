@@ -5,13 +5,13 @@ import wrapAnsi from 'wrap-ansi';
 import { ICommand, ICommandConfig } from './commands';
 import { getProjectPaths, IProjectPathOptions } from './config';
 import { CliError } from './utils/errors';
+import { log } from './utils/log';
 import { buildProjectGraph, getProjects } from './utils/projects';
 import { renderProjectsTree } from './utils/projects_tree';
 
 export async function runCommand(command: ICommand, config: ICommandConfig) {
   try {
-    /* tslint:disable-next-line no-console */
-    console.log(
+    log.write(
       chalk.bold(
         `Running [${chalk.green(command.name)}] command from [${chalk.yellow(
           config.rootPath
@@ -30,8 +30,7 @@ export async function runCommand(command: ICommand, config: ICommandConfig) {
     });
 
     if (projects.size === 0) {
-      /* tslint:disable-next-line no-console */
-      console.log(
+      log.write(
         chalk.red(
           `There are no projects found. Double check project name(s) in '-i/--include' and '-e/--exclude' filters.\n`
         )
@@ -41,22 +40,18 @@ export async function runCommand(command: ICommand, config: ICommandConfig) {
 
     const projectGraph = buildProjectGraph(projects);
 
-    /* tslint:disable-next-line no-console */
-    console.log(
+    log.write(
       chalk.bold(`Found [${chalk.green(projects.size.toString())}] projects:\n`)
     );
-    /* tslint:disable-next-line no-console */
-    console.log(renderProjectsTree(config.rootPath, projects));
+    log.write(renderProjectsTree(config.rootPath, projects));
 
     await command.run(projects, projectGraph, config);
   } catch (e) {
-    /* tslint:disable-next-line no-console */
-    console.log(chalk.bold.red(`\n[${command.name}] failed:\n`));
+    log.write(chalk.bold.red(`\n[${command.name}] failed:\n`));
 
     if (e instanceof CliError) {
       const msg = chalk.red(`CliError: ${e.message}\n`);
-      /* tslint:disable-next-line no-console */
-      console.log(wrapAnsi(msg, 80));
+      log.write(wrapAnsi(msg, 80));
 
       const keys = Object.keys(e.meta);
       if (keys.length > 0) {
@@ -65,14 +60,11 @@ export async function runCommand(command: ICommand, config: ICommandConfig) {
           return `${key}: ${value}`;
         });
 
-        /* tslint:disable-next-line no-console */
-        console.log('Additional debugging info:\n');
-        /* tslint:disable-next-line no-console */
-        console.log(indentString(metaOutput.join('\n'), 3));
+        log.write('Additional debugging info:\n');
+        log.write(indentString(metaOutput.join('\n'), 3));
       }
     } else {
-      /* tslint:disable-next-line no-console */
-      console.log(e.stack);
+      log.write(e.stack);
     }
 
     process.exit(1);

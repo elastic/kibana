@@ -3,6 +3,7 @@ import { relative, resolve as resolvePath } from 'path';
 import { inspect } from 'util';
 
 import { CliError } from './errors';
+import { log } from './log';
 import {
   IPackageDependencies,
   IPackageJson,
@@ -147,8 +148,7 @@ export class Project {
   }
 
   public async runScript(scriptName: string, args: string[] = []) {
-    /* tslint:disable-next-line no-console */
-    console.log(
+    log.write(
       chalk.bold(
         `\n\nRunning script [${chalk.green(scriptName)}] in [${chalk.green(
           this.name
@@ -167,8 +167,7 @@ export class Project {
   }
 
   public async installDependencies({ extraArgs }: { extraArgs: string[] }) {
-    /* tslint:disable-next-line no-console */
-    console.log(
+    log.write(
       chalk.bold(
         `\n\nInstalling dependencies in [${chalk.green(this.name)}]:\n`
       )
