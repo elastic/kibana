@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/*
+ * TODO: deprecate this API in 7.0
+ */
 import { wrap } from 'boom';
 import { callClusterFactory } from '../../../lib/call_cluster_factory';
 import { getKibanaUsageCollector, getReportingUsageCollector } from '../../../../../monitoring/server/kibana_monitoring';

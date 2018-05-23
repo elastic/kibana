@@ -12,7 +12,9 @@ import { runTests } from '../../';
  *                                       if no config option is passed
  */
 export async function runTestsCli(defaultConfigPaths) {
-  const { configs, help, bail, log } = processArgs(defaultConfigPaths);
+  const { configs, help, bail, log, installDir } = processArgs(
+    defaultConfigPaths
+  );
 
   if (help) return displayHelp();
 
@@ -24,7 +26,7 @@ export async function runTestsCli(defaultConfigPaths) {
   }
 
   try {
-    await runTests(configs, { bail, log });
+    await runTests(configs, { bail, log, installDir });
   } catch (err) {
     log.error('FATAL ERROR');
     log.error(err);
@@ -50,6 +52,7 @@ function processArgs(defaultConfigPaths) {
     log,
     help: options.help,
     bail: options.bail,
+    installDir: options['kibana-install-dir'],
     rest: options._,
   };
 }
@@ -64,6 +67,9 @@ function displayHelp() {
     --config      Option to pass in a config
                   Can pass in multiple configs with
                   --config file1 --config file2 --config file3
+    --kibana-install-dir
+                  Run Kibana from an existing install directory
+                  Default: run from source
     --bail        Stop the test run at the first failure
     --help        Display this menu and exit
 

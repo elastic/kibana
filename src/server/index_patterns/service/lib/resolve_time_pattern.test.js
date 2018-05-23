@@ -13,7 +13,7 @@ const TIME_PATTERN = '[logs-]dddd-YYYY.w';
 
 describe('server/index_patterns/service/lib/resolve_time_pattern', () => {
   let sandbox;
-  beforeEach(() => sandbox = sinon.sandbox.create());
+  beforeEach(() => sandbox = sinon.createSandbox());
   afterEach(() => sandbox.restore());
 
   describe('resolveTimePattern()', () => {

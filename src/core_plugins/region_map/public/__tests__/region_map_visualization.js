@@ -125,7 +125,7 @@ describe('RegionMapsVisualizationTests', function () {
     };
 
     const serviceSettings = $injector.get('serviceSettings');
-    sinon.stub(serviceSettings, '_getManifest', function (url) {
+    sinon.stub(serviceSettings, '_getManifest').callsFake((url) => {
       let contents = null;
       if (url.startsWith(tmsManifestUrl)) {
         contents = tmsManifest;

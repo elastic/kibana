@@ -16,6 +16,9 @@ import vegaImage512 from './vega_image_512.png';
 
 import vegaTooltipGraph from '!!raw-loader!./vega_tooltip_test.hjson';
 
+import vegaMapGraph from '!!raw-loader!./vega_map_test.hjson';
+import vegaMapImage256 from './vega_map_image_256.png';
+
 import { VegaParser } from '../data_model/vega_parser';
 import { SearchCache } from '../data_model/search_cache';
 
@@ -137,6 +140,28 @@ describe('VegaVisualizations', () => {
 
         tooltip = document.getElementById('vega-kibana-tooltip');
         expect(tooltip).to.not.be.ok();
+
+      } finally {
+        vegaVis.destroy();
+      }
+
+    });
+
+    it('should show vega blank rectangle on top of a map (vegamap)', async () => {
+
+      let vegaVis;
+      try {
+
+        vegaVis = new VegaVisualization(domNode, vis);
+        const vegaParser = new VegaParser(vegaMapGraph, new SearchCache());
+        await vegaParser.parseAsync();
+
+        domNode.style.width = '256px';
+        domNode.style.height = '256px';
+
+        await vegaVis.render(vegaParser, { data: true });
+        const mismatchedPixels = await compareImage(vegaMapImage256);
+        expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
 
       } finally {
         vegaVis.destroy();

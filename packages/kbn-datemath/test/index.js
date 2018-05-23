@@ -355,8 +355,8 @@ describe('dateMath', function() {
       dateMath.parse('now', { momentInstance: m1 });
       expect(m1Spy.called).to.be(true);
       expect(m2Spy.called).to.be(false);
-      m1Spy.reset();
-      m2Spy.reset();
+      m1Spy.resetHistory();
+      m2Spy.resetHistory();
       dateMath.parse('now', { momentInstance: m2 });
       expect(m1Spy.called).to.be(false);
       expect(m2Spy.called).to.be(true);
@@ -371,8 +371,8 @@ describe('dateMath', function() {
       dateMath.parse('now', { momentInstance: m });
       expect(momentSpy.called).to.be(false);
       expect(cloneSpy.called).to.be(true);
-      momentSpy.reset();
-      cloneSpy.reset();
+      momentSpy.resetHistory();
+      cloneSpy.resetHistory();
       dateMath.parse('now');
       expect(momentSpy.called).to.be(true);
       expect(cloneSpy.called).to.be(false);

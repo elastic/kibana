@@ -91,7 +91,7 @@ exports[`Table should render normally 1`] = `
           },
         ]
       }
-      itemIdToExpandedRowMap={Object {}}
+      itemId="id"
       items={
         Array [
           3,
@@ -116,7 +116,6 @@ exports[`Table should render normally 1`] = `
       responsive={true}
       selection={
         Object {
-          "itemId": "id",
           "onSelectionChange": [Function],
         }
       }

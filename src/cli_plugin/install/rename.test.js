@@ -15,7 +15,7 @@ describe('plugin folder rename', function () {
   });
 
   it('should rethrow any exceptions', function () {
-    renameStub = sinon.stub(fs, 'rename', function (from, to, cb) {
+    renameStub = sinon.stub(fs, 'rename').callsFake((from, to, cb) => {
       cb({
         code: 'error'
       });
@@ -29,7 +29,7 @@ describe('plugin folder rename', function () {
   });
 
   it('should resolve if there are no errors', function () {
-    renameStub = sinon.stub(fs, 'rename', function (from, to, cb) {
+    renameStub = sinon.stub(fs, 'rename').callsFake((from, to, cb) => {
       cb();
     });
 
@@ -55,7 +55,7 @@ describe('plugin folder rename', function () {
     });
 
     it('should retry on Windows EPERM errors for up to 3 seconds', function () {
-      renameStub = sinon.stub(fs, 'rename', function (from, to, cb) {
+      renameStub = sinon.stub(fs, 'rename').callsFake((from, to, cb) => {
         cb({
           code: 'EPERM'
         });

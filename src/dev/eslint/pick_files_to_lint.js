@@ -18,11 +18,11 @@ export function pickFilesToLint(log, files) {
     const path = file.getRelativePath();
 
     if (cli.isPathIgnored(path)) {
-      log.warning(`%j ignored by .eslintignore`, file);
+      log.warning(`[eslint] %j ignored by .eslintignore`, file);
       return false;
     }
 
-    log.debug('linting %j', file);
+    log.debug('[eslint] linting %j', file);
     return true;
   });
 }

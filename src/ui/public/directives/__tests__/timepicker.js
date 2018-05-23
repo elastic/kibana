@@ -70,7 +70,7 @@ const init = function () {
 
 
 describe('timepicker directive', function () {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
 
   beforeEach(function () {
     // Stub out the clock so 'now' doesn't move

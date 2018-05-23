@@ -52,10 +52,10 @@ describe('plugins/elasticsearch', function () {
   });
 
   describe('server stop', () => {
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
 
     beforeEach(() => {
-      sandbox.stub(ClusterNS, 'Cluster', function () {
+      sandbox.stub(ClusterNS, 'Cluster').callsFake(function () {
         this.stub = true;
         this.close = sinon.stub();
       });

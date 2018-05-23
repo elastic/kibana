@@ -8,6 +8,7 @@
  */
 export const IGNORE_FILE_GLOBS = [
   '.node-version',
+  '.github/**/*',
   'docs/**/*',
   '**/bin/**/*',
   '**/+([A-Z_]).md',
@@ -19,6 +20,7 @@ export const IGNORE_FILE_GLOBS = [
   '**/.*',
   '**/{webpackShims,__mocks__}/**/*',
   'x-pack/docs/**/*',
+  'src/dev/tslint/rules/*',
 ];
 
 

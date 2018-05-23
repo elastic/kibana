@@ -111,7 +111,7 @@ describe('ThresholdWatch', () => {
 
     let props;
     beforeEach(() => {
-      constructorMock.reset();
+      constructorMock.resetHistory();
 
       props = {
         index: 'index',
@@ -195,12 +195,12 @@ describe('ThresholdWatch', () => {
   describe('watchJson getter method', () => {
 
     beforeEach(() => {
-      buildActionsMock.reset();
-      buildConditionMock.reset();
-      buildInputMock.reset();
-      buildMetadataMock.reset();
-      buildTransformMock.reset();
-      buildTriggerMock.reset();
+      buildActionsMock.resetHistory();
+      buildConditionMock.resetHistory();
+      buildInputMock.resetHistory();
+      buildMetadataMock.resetHistory();
+      buildTransformMock.resetHistory();
+      buildTriggerMock.resetHistory();
     });
 
     it('should return the correct result', () => {
@@ -229,7 +229,7 @@ describe('ThresholdWatch', () => {
   describe('getVisualizeQuery method', () => {
 
     beforeEach(() => {
-      buildVisualizeQueryMock.reset();
+      buildVisualizeQueryMock.resetHistory();
     });
 
     it('should call the external buildVisualizeQuery method', () => {
@@ -245,7 +245,7 @@ describe('ThresholdWatch', () => {
   describe('formatVisualizeData method', () => {
 
     beforeEach(() => {
-      formatVisualizeDataMock.reset();
+      formatVisualizeDataMock.resetHistory();
     });
 
     it('should call the external formatVisualizeData method', () => {
@@ -262,7 +262,7 @@ describe('ThresholdWatch', () => {
 
     let props;
     beforeEach(() => {
-      upstreamJsonMock.reset();
+      upstreamJsonMock.resetHistory();
 
       props = {
         index: 'index',
@@ -295,7 +295,7 @@ describe('ThresholdWatch', () => {
 
     let props;
     beforeEach(() => {
-      downstreamJsonMock.reset();
+      downstreamJsonMock.resetHistory();
 
       props = {
         index: 'index',
@@ -342,7 +342,7 @@ describe('ThresholdWatch', () => {
 
     let upstreamJson;
     beforeEach(() => {
-      getPropsFromUpstreamJsonMock.reset();
+      getPropsFromUpstreamJsonMock.resetHistory();
 
       upstreamJson = {
         watchJson: {
@@ -399,7 +399,7 @@ describe('ThresholdWatch', () => {
 
     let downstreamJson;
     beforeEach(() => {
-      getPropsFromDownstreamJsonMock.reset();
+      getPropsFromDownstreamJsonMock.resetHistory();
 
       downstreamJson = {
         index: 'index',
