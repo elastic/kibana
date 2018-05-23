@@ -112,24 +112,6 @@ describe('esArchiver: Stats', () => {
     });
   });
 
-  describe('#createdAliases(index, aliases)', () => {
-    it('marks the aliases as created', () => {
-      const stats = createStats('name', createToolingLog());
-      stats.createdAliases('myindex', { foo: {}, bar: {} });
-      const indexStats = stats.toJSON().myindex;
-      expect(indexStats.aliases).to.eql({
-        foo: {},
-        bar: {},
-      });
-    });
-    it('logs that the aliases were created', async () => {
-      const log = createToolingLog('debug');
-      const stats = createStats('name', log);
-      stats.createdAliases('myindex', { dangdiggity: {} });
-      expect(await drain(log)).to.contain('Created aliases for index "myindex"');
-    });
-  });
-
   describe('#archivedIndex(index, [metadata])', () => {
     it('marks the index as archived', () => {
       const stats = createStats('name', createToolingLog());

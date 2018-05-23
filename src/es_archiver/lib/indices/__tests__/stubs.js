@@ -17,13 +17,8 @@ export const createStubStats = () => ({
   },
 });
 
-export const createStubIndexRecord = (index) => ({
+export const createStubIndexRecord = (index, aliases = {}) => ({
   type: 'index',
-  value: { index }
-});
-
-export const createStubAliasRecord = (index, aliases) => ({
-  type: 'alias',
   value: { index, aliases }
 });
 
@@ -42,7 +37,7 @@ const createEsClientError = (errorType) => {
   return err;
 };
 
-export const createStubClient = (existingIndices = []) => ({
+export const createStubClient = (existingIndices = [], aliases = {}) => ({
   indices: {
     get: sinon.spy(async ({ index }) => {
       if (!existingIndices.includes(index)) {
@@ -55,6 +50,9 @@ export const createStubClient = (existingIndices = []) => ({
           settings: {},
         }
       };
+    }),
+    getAlias: sinon.spy(({ index }) => {
+      return Promise.resolve({ [index]: { aliases: aliases[index] || {} } });
     }),
     updateAliases: sinon.spy(async ({ body }) => {
       body.actions.forEach(({ add: { index, alias } }) => {

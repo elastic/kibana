@@ -16,14 +16,14 @@ export function createCreateIndexStream({ client, stats, skipExisting, log }) {
   }
 
   async function handleIndex(stream, record) {
-    const { index, settings, mappings } = record.value;
+    const { index, settings, mappings, aliases } = record.value;
 
     async function attemptToCreate(attemptNumber = 1) {
       try {
         await client.indices.create({
           method: 'PUT',
           index,
-          body: { settings, mappings },
+          body: { settings, mappings, aliases },
         });
         stats.createdIndex(index, { settings });
       } catch (err) {
@@ -46,23 +46,6 @@ export function createCreateIndexStream({ client, stats, skipExisting, log }) {
     await attemptToCreate();
   }
 
-  async function handleAlias(stream, record) {
-    const { index, aliases } = record.value;
-
-    await client.indices.updateAliases({
-      body: {
-        actions: Object.entries(aliases).map(([alias, definition]) => ({
-          add: {
-            ...definition,
-            index,
-            alias,
-          },
-        })),
-      }
-    });
-    stats.createdAliases(index, aliases);
-  }
-
   return new Transform({
     readableObjectMode: true,
     writableObjectMode: true,
@@ -71,10 +54,6 @@ export function createCreateIndexStream({ client, stats, skipExisting, log }) {
         switch (record && record.type) {
           case 'index':
             await handleIndex(this, record);
-            break;
-
-          case 'alias':
-            await handleAlias(this, record);
             break;
 
           case 'doc':

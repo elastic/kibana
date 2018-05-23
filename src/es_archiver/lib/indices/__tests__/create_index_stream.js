@@ -15,7 +15,6 @@ import {
 import {
   createStubStats,
   createStubIndexRecord,
-  createStubAliasRecord,
   createStubDocRecord,
   createStubClient
 } from './stubs';
@@ -67,22 +66,20 @@ describe('esArchiver: createCreateIndexStream()', () => {
       const stats = createStubStats();
       await createPromiseFromStreams([
         createListStream([
-          createStubIndexRecord('index'),
-          createStubAliasRecord('index', { myalias: {}, youralias: {} }),
+          createStubIndexRecord('index', { foo: { } }),
           createStubDocRecord('index', 1),
         ]),
         createCreateIndexStream({ client, stats }),
         createConcatStream([])
       ]);
 
-
-      sinon.assert.calledOnce(client.indices.updateAliases);
-      sinon.assert.calledWith(client.indices.updateAliases, {
+      sinon.assert.calledWith(client.indices.create, {
+        method: 'PUT',
+        index: 'index',
         body: {
-          actions: [
-            { add: { index: 'index', alias: 'myalias' } },
-            { add: { index: 'index', alias: 'youralias' } },
-          ],
+          settings: undefined,
+          mappings: undefined,
+          aliases: { foo: {} },
         },
       });
     });

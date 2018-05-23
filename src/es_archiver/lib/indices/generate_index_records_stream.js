@@ -19,16 +19,21 @@ export function createGenerateIndexRecordsStream(client, stats) {
           ]
         });
 
+        const { [index]: { aliases } } = await client.indices.getAlias({ index });
         const { settings, mappings } = resp[index];
+
         stats.archivedIndex(index, { settings, mappings });
-        callback(null, {
+        this.push({
           type: 'index',
           value: {
             index,
             settings,
             mappings,
+            aliases,
           }
         });
+
+        callback(null);
       } catch (err) {
         callback(err);
       }
