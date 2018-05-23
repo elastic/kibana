@@ -79,4 +79,6 @@ include::development.asciidoc[]
 
 include::limitations.asciidoc[]
 
+include::release-notes/highlights.asciidoc[]
+
 include::CHANGELOG.asciidoc[]
