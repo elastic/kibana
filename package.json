@@ -285,7 +285,7 @@
     "karma-junit-reporter": "1.2.0",
     "karma-mocha": "1.3.0",
     "karma-safari-launcher": "1.0.0",
-    "leadfoot": "1.7.5",
+    "leadfoot": "silne30/leadfoot#Fix_execute_implemenatation",
     "license-checker": "^16.0.0",
     "listr": "^0.14.1",
     "load-grunt-config": "0.19.2",

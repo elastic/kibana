@@ -7780,9 +7780,9 @@ lead@^1.0.0:
   dependencies:
     flush-write-stream "^1.0.2"
 
-leadfoot@1.7.5:
-  version "1.7.5"
-  resolved "https://registry.yarnpkg.com/leadfoot/-/leadfoot-1.7.5.tgz#2188019ba95f524f2fec4dd9fbb06f1e6e832d3e"
+leadfoot@silne30/leadfoot#Fix_execute_implemenatation:
+  version "1.7.6-pre"
+  resolved "https://codeload.github.com/silne30/leadfoot/tar.gz/d4f5e152f52c06935d1e24efa7618a5fc4a01169"
   dependencies:
     dojo "2.0.0-alpha.7"
     jszip "2.5.0"

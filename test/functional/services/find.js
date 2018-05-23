@@ -91,18 +91,18 @@ export function FindProvider({ getService }) {
 
     async descendantExistsByCssSelector(selector, parentElement, timeout = 1000) {
       log.debug('Find.descendantExistsByCssSelector: ' + selector);
-      return await this.exists(async () => await parentElement.findDisplayedByCssSelector(selector), timeout);
+      return await this.exists(async () => await parentElement.findByCssSelector(selector), timeout);
     }
 
     async descendantDisplayedByCssSelector(selector, parentElement) {
       log.debug('Find.descendantDisplayedByCssSelector: ' + selector);
-      return await this._ensureElement(async () => await parentElement.findDisplayedByCssSelector(selector));
+      return await this._ensureElement(async () => await parentElement.findByCssSelector(selector));
     }
 
     async displayedByCssSelector(selector, timeout = defaultFindTimeout, parentElement) {
       log.debug('in displayedByCssSelector: ' + selector);
       return await this._ensureElementWithTimeout(timeout, async remote => {
-        return await remote.findDisplayedByCssSelector(selector);
+        return await remote.findByCssSelector(selector);
       }, parentElement);
     }
 
@@ -133,12 +133,12 @@ export function FindProvider({ getService }) {
 
     async existsByLinkText(linkText, timeout = 1000) {
       log.debug(`existsByLinkText ${linkText}`);
-      return await this.exists(async remote => await remote.findDisplayedByLinkText(linkText), timeout);
+      return await this.exists(async remote => await remote.findByLinkText(linkText), timeout);
     }
 
     async existsByDisplayedByCssSelector(selector, timeout = 1000) {
       log.debug(`existsByDisplayedByCssSelector ${selector}`);
-      return await this.exists(async remote => await remote.findDisplayedByCssSelector(selector), timeout);
+      return await this.exists(async remote => await remote.findByCssSelector(selector), timeout);
     }
 
     async existsByCssSelector(selector, timeout = 1000) {
