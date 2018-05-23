@@ -7,7 +7,7 @@ jest.mock('../http_server', () => ({
 import { noop } from 'lodash';
 import { BehaviorSubject } from '@kbn/observable';
 
-import { Env } from '../../../config/env';
+import { Env } from '../../../config';
 import { HttpService } from '../http_service';
 import { HttpConfig } from '../http_config';
 import { Router } from '../router';

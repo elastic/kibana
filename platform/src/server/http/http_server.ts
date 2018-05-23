@@ -10,14 +10,14 @@ import { Router } from './router';
 import { modifyUrl } from '../../lib/utils/url';
 
 export class HttpServer {
-  private _server?: Server;
-  private _redirectServer?: Server;
-  private _registeredRouters: Set<Router> = new Set();
+  private server?: Server;
+  private redirectServer?: Server;
+  private registeredRouters: Set<Router> = new Set();
 
-  constructor(private readonly _log: Logger, private readonly _env: Env) {}
+  constructor(private readonly log: Logger, private readonly env: Env) {}
 
   isListening() {
-    return this._server !== undefined && this._server.listener.listening;
+    return this.server !== undefined && this.server.listener.listening;
   }
 
   registerRouter(router: Router) {
@@ -27,38 +27,38 @@ export class HttpServer {
       );
     }
 
-    this._registeredRouters.add(router);
+    this.registeredRouters.add(router);
   }
 
   async start(config: HttpConfig) {
-    this._server = this.initializeServer(config);
+    this.server = this.initializeServer(config);
 
     // If a redirect port is specified, we start an http server at this port and
     // redirect all requests to the ssl port.
     if (config.ssl.enabled && config.ssl.redirectHttpFromPort !== undefined) {
-      await this._setupRedirectServer(config);
+      await this.setupRedirectServer(config);
     }
 
-    this._setupBasePathRewrite(this._server, config);
+    this.setupBasePathRewrite(this.server, config);
 
-    for (const router of this._registeredRouters) {
+    for (const router of this.registeredRouters) {
       for (const route of router.getRoutes()) {
-        this._server.route({
+        this.server.route({
           method: route.method,
-          path: this._getRouteFullPath(router.path, route.path),
+          path: this.getRouteFullPath(router.path, route.path),
           handler: route.handler,
         });
       }
     }
 
-    const legacyKbnServer = this._env.getLegacyKbnServer();
+    const legacyKbnServer = this.env.getLegacyKbnServer();
     if (legacyKbnServer !== undefined) {
-      legacyKbnServer.newPlatformProxyListener.bind(this._server.listener);
+      legacyKbnServer.newPlatformProxyListener.bind(this.server.listener);
 
       // We register Kibana proxy middleware right before we start server to allow
       // all new platform plugins register their routes, so that `legacyKbnServer`
       // handles only requests that aren't handled by the new platform.
-      this._server.route({
+      this.server.route({
         method: '*',
         path: '/{p*}',
         options: {
@@ -75,7 +75,7 @@ export class HttpServer {
       });
     }
 
-    this._server.listener.on('clientError', (err, socket) => {
+    this.server.listener.on('clientError', (err, socket) => {
       if (socket.writable) {
         socket.end(new Buffer('HTTP/1.1 400 Bad Request\r\n\r\n', 'ascii'));
       } else {
@@ -83,22 +83,22 @@ export class HttpServer {
       }
     });
 
-    this._log.info(`starting http server [${config.host}:${config.port}]`);
+    this.log.info(`starting http server [${config.host}:${config.port}]`);
 
-    await this._server.start();
+    await this.server.start();
   }
 
   async stop() {
-    this._log.info('stopping http server');
+    this.log.info('stopping http server');
 
-    if (this._server !== undefined) {
-      await this._server.stop();
-      this._server = undefined;
+    if (this.server !== undefined) {
+      await this.server.stop();
+      this.server = undefined;
     }
 
-    if (this._redirectServer !== undefined) {
-      await this._redirectServer.stop();
-      this._redirectServer = undefined;
+    if (this.redirectServer !== undefined) {
+      await this.redirectServer.stop();
+      this.redirectServer = undefined;
     }
   }
 
@@ -149,7 +149,7 @@ export class HttpServer {
     return new Server(options);
   }
 
-  private _setupBasePathRewrite(server: Server, config: HttpConfig) {
+  private setupBasePathRewrite(server: Server, config: HttpConfig) {
     if (config.basePath === undefined || !config.rewriteBasePath) {
       return;
     }
@@ -186,19 +186,19 @@ export class HttpServer {
     );
   }
 
-  private async _setupRedirectServer(config: HttpConfig) {
-    this._log.info(
+  private async setupRedirectServer(config: HttpConfig) {
+    this.log.info(
       `starting HTTP --> HTTPS redirect server [${config.host}:${
         config.ssl.redirectHttpFromPort
       }]`
     );
 
-    this._redirectServer = new Server({
+    this.redirectServer = new Server({
       host: config.host,
       port: config.ssl.redirectHttpFromPort,
     });
 
-    this._redirectServer.ext(
+    this.redirectServer.ext(
       'onRequest',
       (request: Request, responseToolkit: ResponseToolkit) => {
         return responseToolkit
@@ -216,7 +216,7 @@ export class HttpServer {
     );
 
     try {
-      await this._redirectServer.start();
+      await this.redirectServer.start();
     } catch (err) {
       if (err.code === 'EADDRINUSE') {
         throw new Error(
@@ -232,7 +232,7 @@ export class HttpServer {
     }
   }
 
-  private _getRouteFullPath(routerPath: string, routePath: string) {
+  private getRouteFullPath(routerPath: string, routePath: string) {
     // If router's path ends with slash and route's path starts with slash,
     // we should omit one of them to have a valid concatenated path.
     const routePathStartIndex =

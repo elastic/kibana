@@ -19,11 +19,11 @@ let server: HttpServer;
 let config: HttpConfig;
 
 function getServerListener(server: HttpServer) {
-  return (server as any)._server.listener;
+  return (server as any).server.listener;
 }
 
 function getRedirectServerListener(server: HttpServer) {
-  return (server as any)._redirectServer.listener;
+  return (server as any).redirectServer.listener;
 }
 
 beforeEach(() => {
