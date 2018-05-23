@@ -14,7 +14,6 @@ import {
 import { INDEX_NAMES } from '../../../common/constants';
 import { callWithInternalUserFactory } from '../../lib/client';
 import { wrapEsError } from '../../lib/error_wrappers';
-import { areTokensEqual } from '../../lib/crypto';
 
 async function getEnrollmentToken(callWithInternalUser, enrollmentToken) {
   const params = {
@@ -25,7 +24,14 @@ async function getEnrollmentToken(callWithInternalUser, enrollmentToken) {
   };
 
   const response = await callWithInternalUser('get', params);
-  return get(response, '_source.enrollment_token', {});
+  const token = get(response, '_source.enrollment_token', {});
+
+  // Elasticsearch might return fast if the token is not found. OR it might return fast
+  // if the token *is* found. Either way, an attacker could using a timing attack to figure
+  // out whether a token is valid or not. So we introduce a random delay in returning from
+  // this function to obscure the actual time it took for Elasticsearch to find the token.
+  const randomDelayInMs = 25 + Math.round(Math.random() * 200); // between 25 and 225 ms
+  return new Promise(resolve => setTimeout(() => resolve(token), randomDelayInMs));
 }
 
 function deleteUsedEnrollmentToken(callWithInternalUser, enrollmentToken) {
