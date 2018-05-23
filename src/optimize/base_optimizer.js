@@ -281,7 +281,6 @@ export default class BaseOptimizer {
                     experimentalWatchApi: true,
                     onlyCompileBundledFiles: true,
                     compilerOptions: {
-                      jsx: 'react',
                       sourceMap: Boolean(this.sourceMaps),
                       target: 'es5',
                       module: 'esnext',
