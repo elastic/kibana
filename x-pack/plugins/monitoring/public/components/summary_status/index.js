@@ -14,8 +14,9 @@ const wrapChild = ({ label, value, dataTestSubj }, index) => (
     key={`summary-status-item-${index}`}
     grow={false}
     className="monitoring-summary-status__eui-content"
+    data-test-subj={dataTestSubj}
   >
-    {label}: <strong data-test-subj={dataTestSubj}>{value}</strong>
+    {label}: <strong>{value}</strong>
   </EuiFlexItem>
 );
 
