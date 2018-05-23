@@ -43,4 +43,13 @@ describe('props', () => {
     />);
     expect(component).toMatchSnapshot(); // eslint-disable-line
   });
+
+  test('should update links target when changing the openLinksInNewTab prop', () => {
+    const component = shallow(<Markdown
+      markdown={markdown}
+      openLinksInNewTab={false}
+    />);
+    component.setProps({ openLinksInNewTab: true });
+    expect(component.render().find('a').prop('target')).toBe('_blank');
+  });
 });

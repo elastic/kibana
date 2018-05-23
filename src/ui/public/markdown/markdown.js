@@ -23,15 +23,21 @@ export function markdownFactory(whiteListedRules, openLinksInNewTab = false) {
     markdownIt = new MarkdownIt({ html: false, linkify: true });
   }
 
-  // saving the original link renderer
-  // https://github.com/markdown-it/markdown-it/blob/master/docs/architecture.md#renderer
-  markdownIt.renderer.rules.original_link_open =
-    markdownIt.renderer.rules.link_open ||
-    function (tokens, idx, options, env, self) {
+  if (openLinksInNewTab) {
+    // All links should open in new browser tab.
+    // Define custom renderer to add 'target' attribute
+    // https://github.com/markdown-it/markdown-it/blob/master/docs/architecture.md#renderer
+    const originalLinkRender = markdownIt.renderer.rules.link_open || function (tokens, idx, options, env, self) {
       return self.renderToken(tokens, idx, options);
     };
+    markdownIt.renderer.rules.link_open = function (tokens, idx, options, env, self) {
+      tokens[idx].attrPush(['target', '_blank']);
+      // https://www.jitbit.com/alexblog/256-targetblank---the-most-underestimated-vulnerability-ever/
+      tokens[idx].attrPush(['rel', 'noopener noreferrer']);
+      return originalLinkRender(tokens, idx, options, env, self);
+    };
+  }
 
-  setMarkdownOpenLinksinNewTab(markdownIt, openLinksInNewTab);
   return markdownIt;
 }
 
@@ -60,8 +66,11 @@ export class Markdown extends Component {
   }
 
   componentWillReceiveProps(props) {
-    if (props.markdown !== this.props.markdown || props.openLinksInNewTab !== this.props.openLinksInNewTab) {
-      setMarkdownOpenLinksinNewTab(this.markdownIt, props.openLinksInNewTab);
+    const openLinksInNewTabChanged = props.openLinksInNewTab !== this.props.openLinksInNewTab;
+    if (openLinksInNewTabChanged) {
+      this.markdownIt = markdownFactory(props.whiteListedRules, props.openLinksInNewTab);
+    }
+    if (props.markdown !== this.props.markdown || openLinksInNewTabChanged) {
       this.setState({
         renderedMarkdown: this.transformMarkdown(props),
       });
@@ -100,20 +109,3 @@ Markdown.propTypes = {
   openLinksInNewTab: PropTypes.bool,
   whiteListedRules: PropTypes.arrayOf(PropTypes.string),
 };
-
-function openLinksInNewTabRenderer(originalLinkRenderer) {
-  return (tokens, idx, options, env, self) => {
-    tokens[idx].attrPush(['target', '_blank']);
-    // https://www.jitbit.com/alexblog/256-targetblank---the-most-underestimated-vulnerability-ever/
-    tokens[idx].attrPush(['rel', 'noopener noreferrer']);
-    return originalLinkRenderer(tokens, idx, options, env, self);
-  };
-}
-
-function setMarkdownOpenLinksinNewTab(markdownIt, openLinksInNewTab = false) {
-  const originalLinkRenderer = markdownIt.renderer.rules.original_link_open;
-  markdownIt.renderer.rules.link_open = openLinksInNewTab
-    ? openLinksInNewTabRenderer(originalLinkRenderer)
-    : originalLinkRenderer;
-  return markdownIt;
-}
