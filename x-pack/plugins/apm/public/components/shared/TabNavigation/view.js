@@ -87,7 +87,7 @@ function TabNavigation({ urlParams, location }) {
                 key={type}
               >
                 <NavLink
-                  path={`${serviceName}/transactions/${encodeURIComponent(
+                  path={`/${serviceName}/transactions/${encodeURIComponent(
                     type
                   )}`}
                   selected={transactionType === type && !errorsSelected}
@@ -101,7 +101,7 @@ function TabNavigation({ urlParams, location }) {
       />
 
       <Divider />
-      <TabLink path={`${serviceName}/errors`} selected={errorsSelected}>
+      <TabLink path={`/${serviceName}/errors`} selected={errorsSelected}>
         Errors
       </TabLink>
     </Container>
