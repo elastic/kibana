@@ -1,5 +1,3 @@
-/* eslint-disable no-var */
-
 var _ = require('lodash');
 var semver = require('semver');
 var pkg = require('../../package.json');
