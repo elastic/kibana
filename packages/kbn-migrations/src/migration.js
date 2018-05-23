@@ -85,9 +85,9 @@ async function runMigrationIfOutOfDate(opts) {
       return resetIndex(context);
     }
 
-    return runMigration(context);
+    return await runMigration(context);
   } catch (err) {
-    context.log.error(err);
+    context.log.error(`Migrations failed with error: ${JSON.stringify(err, null, 2)}`);
     throw err;
   }
 }
