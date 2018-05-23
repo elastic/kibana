@@ -30,7 +30,9 @@ cmd
     console.log(readFileSync(resolve(__dirname, './cli_help.txt'), 'utf8'));
   });
 
-cmd.command('save <name> <indices...>')
+cmd
+  .option('--raw', `don't gzip the archive`)
+  .command('save <name> <indices...>')
   .description('archive the <indices ...> into the --dir with <name>')
   .action((name, indices) => execute('save', name, indices));
 
@@ -99,7 +101,7 @@ async function execute(operation, ...args) {
         client,
         dataDir: resolve(cmd.dir),
       });
-      await esArchiver[operation](...args);
+      await esArchiver[operation](...args, cmd);
     } finally {
       await client.close();
     }
