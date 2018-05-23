@@ -73,17 +73,23 @@ export class ConfigViewer extends React.Component {
           iconType="logstashInput"
           headingText="Inputs"
           elements={inputs}
+          onShowVertexDetails={this.onShowVertexDetails}
+          detailVertex={this.state.detailDrawer.vertex}
         />
         <Queue queue={queue} />
         <StatementSection
           iconType="logstashFilter"
           headingText="Filters"
           elements={filters}
+          onShowVertexDetails={this.onShowVertexDetails}
+          detailVertex={this.state.detailDrawer.vertex}
         />
         <StatementSection
           iconType="logstashOutput"
           headingText="Outputs"
           elements={outputs}
+          onShowVertexDetails={this.onShowVertexDetails}
+          detailVertex={this.state.detailDrawer.vertex}
         />
         { this.renderDetailDrawer() }
       </div>

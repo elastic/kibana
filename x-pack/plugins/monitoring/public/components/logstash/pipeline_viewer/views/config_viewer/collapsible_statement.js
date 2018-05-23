@@ -14,7 +14,7 @@ import {
   EuiFlexGroup
 } from '@elastic/eui';
 
-function clickableStatementName(name) {
+function clickableStatementName(name, onVertexSelected) {
   return (
     <EuiFlexItem
       grow={false}
@@ -22,6 +22,7 @@ function clickableStatementName(name) {
       <EuiButtonEmpty
         color="text"
         size="xs"
+        onClick={onVertexSelected}
       >
         <span className="cv-ifStatement__title">{name}</span>
       </EuiButtonEmpty>
@@ -29,10 +30,10 @@ function clickableStatementName(name) {
   );
 }
 
-function ifStatement(statement) {
+function ifStatement(statement, onVertexSelected) {
   const { condition } = statement;
   return [
-    clickableStatementName('if'),
+    clickableStatementName('if', onVertexSelected),
     (
       <EuiFlexItem grow={false}>
         <EuiCodeBlock
@@ -78,12 +79,17 @@ export class CollapsibleStatement extends React.PureComponent {
   getStatementBody() {
     const {
       isIf,
-      statement
+      statement,
+      onShowVertexDetails
     } = this.props;
 
+    const { vertex } = statement;
+
+    const showVertexDetailsClicked = () => { onShowVertexDetails(vertex); };
+
     return isIf ?
-      ifStatement(statement)
-      : clickableStatementName('else');
+      ifStatement(statement, showVertexDetailsClicked)
+      : clickableStatementName('else', showVertexDetailsClicked);
   }
 
   render() {

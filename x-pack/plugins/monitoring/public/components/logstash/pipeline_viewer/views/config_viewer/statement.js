@@ -90,11 +90,12 @@ import {
 //   }
 // };
 
-function pluginStatement(statement) {
+function pluginStatement(statement, onShowVertexDetails) {
   const {
     hasExplicitId,
     id,
     name,
+    vertex,
   } = statement;
   return (
     <div className="cv-statement">
@@ -116,6 +117,7 @@ function pluginStatement(statement) {
             flush="left"
             size="xs"
             className="cv-statement__name"
+            onClick={() => { onShowVertexDetails(vertex); }}
           >
             <span>{name}</span>
           </EuiButtonEmpty>
@@ -148,14 +150,16 @@ export class Statement extends React.PureComponent
       collapse,
       element,
       expand,
-      isCollapsed
+      isCollapsed,
+      onShowVertexDetails
     } = this.props;
     const { id } = element;
 
     const isIf = element instanceof IfElement;
 
+    console.log(onShowVertexDetails);
     return statement instanceof PluginStatement
-      ? pluginStatement(statement)
+      ? pluginStatement(statement, onShowVertexDetails)
       :
       (
         <CollapsibleStatement
@@ -165,6 +169,7 @@ export class Statement extends React.PureComponent
           isIf={isIf}
           isCollapsed={isCollapsed}
           id={id}
+          onShowVertexDetails={onShowVertexDetails}
         />
       );
   }
@@ -176,6 +181,7 @@ export class Statement extends React.PureComponent
       statement
     } = this.props.element;
 
+    console.log(this.props);
     const spacers = this.getNestingSpacers(depth);
 
     const statementComponent = this.getStatement(statement);

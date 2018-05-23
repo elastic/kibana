@@ -30,14 +30,17 @@ import { Statement } from './statement';
 //   );
 // }
 
-export function StatementSection({ iconType, headingText, elements }) {
+export function StatementSection({ iconType, headingText, elements, onShowVertexDetails }) {
   return (
     <div className="cv-statementList">
       <StatementListHeading
         iconType={iconType}
         title={headingText}
       />
-      <StatementList elements={elements} />
+      <StatementList
+        elements={elements}
+        onShowVertexDetails={onShowVertexDetails}
+      />
     </div>
   );
 }
@@ -138,6 +141,7 @@ class StatementList extends React.PureComponent {
 
   getStatement(element) {
     const { id, parentId } = element;
+    const { onShowVertexDetails } = this.props;
 
     return this.state.collapsedIds.has(parentId) || this.state.collapsedChildIds.has(parentId) ?
       null
@@ -149,6 +153,7 @@ class StatementList extends React.PureComponent {
           collapse={this.collapse}
           expand={this.expand}
           isCollapsed={this.elementIsCollapsed(id)}
+          onShowVertexDetails={onShowVertexDetails}
         />
       );
   }
