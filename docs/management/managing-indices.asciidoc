@@ -1,0 +1,22 @@
+[[managing-indices]]
+== Managing Indices
+
+include::{asciidoc-dir}/../../shared/attributes.asciidoc[]
+
+The index management UI enables you to update your Elasticsearch indices
+either individually or in bulk. To open the UI, go to *Management* and click
+*Index Management*.
+
+[role="screenshot"]
+image::images/management-index-management.png[Index Management UI]
+
+Clicking an index name opens a panel with access to the index settings, mapping, and
+statistics. Operations for managing the index are in a context menu on the lower
+right.
+
+To perform operations on multiple indices, in the main window, select the
+checkbox for each index, or *Name* to select all indices.  The context
+menu for managing the indices appears next to the query bar.
+
+For information on the items in the context menu, see {ref}/indices.html[Indices APIs]
+in the Elasticsearch Reference.
