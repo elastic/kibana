@@ -19,10 +19,42 @@
 
 import 'ui/field_editor';
 import { IndexPatternsFieldProvider } from 'ui/index_patterns/_field';
+import { GetEnabledScriptingLanguagesProvider } from 'ui/scripting_languages';
 import { KbnUrlProvider } from 'ui/url';
 import uiRoutes from 'ui/routes';
 import { toastNotifications } from 'ui/notify';
 import template from './scripted_field_editor.html';
+
+import React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
+import { FieldEditor } from '../../field_editor';
+
+const REACT_FIELD_EDITOR_ID = 'reactFieldEditor';
+const renderFieldEditor = ($scope, indexPattern, field, Field, getEnabledScriptingLanguages) => {
+  $scope.$$postDigest(() => {
+    const node = document.getElementById(REACT_FIELD_EDITOR_ID);
+    if (!node) {
+      return;
+    }
+
+    render(
+      <FieldEditor
+        indexPattern={indexPattern}
+        field={field}
+        helpers={{
+          Field,
+          getEnabledScriptingLanguages,
+        }}
+      />,
+      node,
+    );
+  });
+}
+
+const destroyFieldEditor = () => {
+  const node = document.getElementById(REACT_FIELD_EDITOR_ID);
+  node && unmountComponentAtNode(node);
+}
 
 uiRoutes
   .when('/management/kibana/indices/:indexPatternId/field/:fieldName*', { mode: 'edit' })
@@ -49,8 +81,9 @@ uiRoutes
       }
     },
     controllerAs: 'fieldSettings',
-    controller: function FieldEditorPageController($route, Private, docTitle) {
+    controller: function FieldEditorPageController($scope, $route, Private, docTitle) {
       const Field = Private(IndexPatternsFieldProvider);
+      const getEnabledScriptingLanguages = Private(GetEnabledScriptingLanguagesProvider);
       const kbnUrl = Private(KbnUrlProvider);
 
       this.mode = $route.current.mode;
@@ -83,5 +116,11 @@ uiRoutes
       this.goBack = function () {
         kbnUrl.changeToRoute(this.indexPattern, 'edit');
       };
+
+      renderFieldEditor($scope, this.indexPattern, this.field, Field, getEnabledScriptingLanguages);
+
+      $scope.$on('$destroy', () => {
+        destroyFieldEditor();
+      });
     }
   });
