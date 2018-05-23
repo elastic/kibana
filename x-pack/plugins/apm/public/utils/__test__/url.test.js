@@ -5,8 +5,9 @@
  */
 
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { Router } from 'react-router-dom';
 import { mount } from 'enzyme';
+import createHistory from 'history/createMemoryHistory';
 
 import {
   toQuery,
@@ -48,34 +49,57 @@ describe('fromQuery', () => {
 });
 
 describe('RelativeLinkComponent', () => {
+  let history;
   let wrapper;
 
   beforeEach(() => {
+    history = createHistory();
+    history.location = {
+      ...history.location,
+      pathname: '/opbeans-node/transactions',
+      search: '?foo=bar'
+    };
+
     wrapper = mount(
-      <MemoryRouter>
+      <Router history={history}>
         <RelativeLinkComponent
-          location={{
-            pathname: '/opbeans-backend/transactions',
-            search:
-              '?_g=(refreshInterval:(display:Off,pause:!f,value:0),time:(from:now-2y,mode:quick,to:now))'
-          }}
-          path={'/opbeans-backend/errors'}
-          query={{}}
+          location={history.location}
+          query={{ foo2: 'bar2' }}
+          path={'/opbeans-node/errors'}
         >
-          Errors
+          Go to Discover
         </RelativeLinkComponent>
-      </MemoryRouter>
+      </Router>
     );
   });
 
   it('should have correct url', () => {
     expect(wrapper.find('a').prop('href')).toBe(
-      '/opbeans-backend/errors?_g=(refreshInterval:(display:Off,pause:!f,value:0),time:(from:now-2y,mode:quick,to:now))'
+      '/opbeans-node/errors?foo=bar&foo2=bar2'
     );
   });
 
   it('should render correct markup', () => {
     expect(toJson(wrapper)).toMatchSnapshot();
+  });
+
+  it('should have initial location', () => {
+    expect(history.location).toEqual(
+      expect.objectContaining({
+        pathname: '/opbeans-node/transactions',
+        search: '?foo=bar'
+      })
+    );
+  });
+
+  it('should update location on click', () => {
+    wrapper.simulate('click', { button: 0 });
+    expect(history.location).toEqual(
+      expect.objectContaining({
+        pathname: '/opbeans-node/errors',
+        search: '?foo=bar&foo2=bar2'
+      })
+    );
   });
 });
 
