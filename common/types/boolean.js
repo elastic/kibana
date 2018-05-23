@@ -6,8 +6,6 @@ export const boolean = () => ({
     string: s => Boolean(s),
   },
   to: {
-    string: n => String(n),
-    number: n => Number(n),
     render: value => {
       const text = `${value}`;
       return {
@@ -16,5 +14,10 @@ export const boolean = () => ({
         value: { text },
       };
     },
+    datatable: value => ({
+      type: 'datatable',
+      columns: [{ name: 'value', type: 'boolean' }],
+      rows: [{ value }],
+    }),
   },
 });

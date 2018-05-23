@@ -2,10 +2,10 @@ export const number = () => ({
   name: 'number',
   from: {
     null: () => 0,
+    boolean: b => Number(b),
     string: n => Number(n),
   },
   to: {
-    string: n => String(n),
     render: value => {
       const text = `${value}`;
       return {
@@ -14,17 +14,10 @@ export const number = () => ({
         value: { text },
       };
     },
-    datatable: value => {
-      return {
-        type: 'datatable',
-        columns: [
-          {
-            name: 'value',
-            type: 'number',
-          },
-        ],
-        rows: [{ value }],
-      };
-    },
+    datatable: value => ({
+      type: 'datatable',
+      columns: [{ name: 'value', type: 'number' }],
+      rows: [{ value }],
+    }),
   },
 });

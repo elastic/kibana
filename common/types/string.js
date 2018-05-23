@@ -2,10 +2,10 @@ export const string = () => ({
   name: 'string',
   from: {
     null: () => '',
+    boolean: b => String(b),
     number: n => String(n),
   },
   to: {
-    number: n => Number(n),
     render: text => {
       return {
         type: 'render',
@@ -13,5 +13,10 @@ export const string = () => ({
         value: { text },
       };
     },
+    datatable: value => ({
+      type: 'datatable',
+      columns: [{ name: 'value', type: 'string' }],
+      rows: [{ value }],
+    }),
   },
 });
