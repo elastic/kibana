@@ -1,22 +1,22 @@
-import del from 'del';
-import { relative, resolve, join } from 'path';
 import copy from 'cpy';
+import del from 'del';
+import { join, relative, resolve } from 'path';
 
 import { getProjectPaths } from '../config';
-import {
-  getProjects,
-  buildProjectGraph,
-  topologicallyBatchProjects,
-  ProjectMap,
-  includeTransitiveProjects,
-} from '../utils/projects';
+import { isDirectory, isFile } from '../utils/fs';
+import { log } from '../utils/log';
 import {
   createProductionPackageJson,
-  writePackageJson,
   readPackageJson,
+  writePackageJson,
 } from '../utils/package_json';
-import { isDirectory, isFile } from '../utils/fs';
 import { Project } from '../utils/project';
+import {
+  buildProjectGraph,
+  getProjects,
+  includeTransitiveProjects,
+  topologicallyBatchProjects,
+} from '../utils/projects';
 
 export async function buildProductionProjects({
   kibanaRoot,
@@ -30,7 +30,7 @@ export async function buildProductionProjects({
   const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
 
   const projectNames = [...projects.values()].map(project => project.name);
-  console.log(`Preparing production build for [${projectNames.join(', ')}]`);
+  log.write(`Preparing production build for [${projectNames.join(', ')}]`);
 
   for (const batch of batchedProjects) {
     for (const project of batch) {
@@ -99,9 +99,9 @@ async function copyToBuild(
 
   await copy(['**/*', '!node_modules/**'], buildProjectPath, {
     cwd: project.getIntermediateBuildDirectory(),
-    parents: true,
-    nodir: true,
     dot: true,
+    nodir: true,
+    parents: true,
   });
 
   // If a project is using an intermediate build directory, we special-case our
