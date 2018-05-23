@@ -5,7 +5,6 @@
  */
 
 
-
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
@@ -21,23 +20,8 @@ export class InfluencersCell extends Component {
   constructor(props) {
     super(props);
 
-    this.limit = props.limit;
-    const recordInfluencers = props.influencers || [];
-    this.influencers = [];
-    _.each(recordInfluencers, (influencer) => {
-      _.each(influencer, (influencerFieldValue, influencerFieldName) => {
-        this.influencers.push({
-          influencerFieldName,
-          influencerFieldValue
-        });
-      });
-    });
-
-    // Allow one more influencer than the supplied limit as displaying
-    // 'and 1 more' would take up an extra line.
-    const showAll = this.influencers.length <= (this.limit + 1);
     this.state = {
-      showAll
+      showAll: false
     };
   }
 
@@ -45,36 +29,42 @@ export class InfluencersCell extends Component {
     this.setState({ showAll: !this.state.showAll });
   }
 
-  renderInfluencers() {
-    const numberToDisplay = this.state.showAll === false ? this.limit : this.influencers.length;
-    const displayInfluencers = this.influencers.slice(0, numberToDisplay);
+  renderInfluencers(influencers) {
+    const numberToDisplay = (this.state.showAll === false) ? this.props.limit : influencers.length;
+    const displayInfluencers = influencers.slice(0, numberToDisplay);
 
-    this.othersCount = Math.max(this.influencers.length - numberToDisplay, 0);
-    if (this.othersCount === 1) {
+    let othersCount = Math.max(influencers.length - numberToDisplay, 0);
+    if (othersCount === 1) {
       // Display the additional influencer.
-      displayInfluencers.push(this.influencers[this.limit]);
-      this.othersCount = 0;
+      displayInfluencers.push(influencers[this.props.limit]);
+      othersCount = 0;
     }
 
-    return displayInfluencers.map((influencer, index) => {
-      return (
-        <div key={index}>{influencer.influencerFieldName}: {influencer.influencerFieldValue}</div>
-      );
-    });
+    const displayRows = displayInfluencers.map((influencer, index) => (
+      <div key={index}>{influencer.influencerFieldName}: {influencer.influencerFieldValue}</div>
+    ));
+
+
+    return (
+      <React.Fragment>
+        {displayRows}
+        {this.renderOthers(influencers.length, othersCount)}
+      </React.Fragment>
+    );
   }
 
-  renderOthers() {
-    if (this.othersCount > 0) {
+  renderOthers(totalCount, othersCount) {
+    if (othersCount > 0) {
       return (
         <div>
           <EuiLink
             onClick={() => this.toggleAllInfluencers()}
           >
-          and {this.othersCount} more
+          and {othersCount} more
           </EuiLink>
         </div>
       );
-    } else if (this.influencers.length > this.limit + 1) {
+    } else if (totalCount > this.props.limit + 1) {
       return (
         <div>
           <EuiLink
@@ -88,10 +78,22 @@ export class InfluencersCell extends Component {
   }
 
   render() {
+    const recordInfluencers = this.props.influencers || [];
+
+    const influencers = [];
+    _.each(recordInfluencers, (influencer) => {
+      _.each(influencer, (influencerFieldValue, influencerFieldName) => {
+        influencers.push({
+          influencerFieldName,
+          influencerFieldValue
+        });
+      });
+    });
+
     return (
       <div>
-        {this.renderInfluencers()}
-        {this.renderOthers()}
+        {this.renderInfluencers(influencers)}
+        {this.renderOthers(influencers)}
       </div>
     );
   }
