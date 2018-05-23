@@ -18,6 +18,7 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
   it('scolls 1000 documents at a time', async () => {
     const stats = createStubStats();
     const client = createStubClient([
+      stubGetAlias('logstash-*'),
       (name, params) => {
         expect(name).to.be('search');
         expect(params).to.have.property('index', 'logstash-*');
@@ -40,6 +41,7 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
   it('uses a 1 minute scroll timeout', async () => {
     const stats = createStubStats();
     const client = createStubClient([
+      stubGetAlias('logstash-*'),
       (name, params) => {
         expect(name).to.be('search');
         expect(params).to.have.property('index', 'logstash-*');
@@ -63,6 +65,7 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
     const stats = createStubStats();
     let checkpoint = Date.now();
     const client = createStubClient([
+      stubGetAlias('index1'),
       async (name, params) => {
         expect(name).to.be('search');
         expect(params).to.have.property('index', 'index1');
@@ -80,6 +83,7 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
         await delay(200);
         return { hits: { total: 2, hits: [ { _id: 2 } ] } };
       },
+      stubGetAlias('index2'),
       async (name, params) => {
         expect(name).to.be('search');
         expect(params).to.have.property('index', 'index2');
@@ -121,4 +125,89 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
     ]);
     sinon.assert.calledTwice(stats.archivedDoc);
   });
+
+  it('records aliases for each index if they exist', async () => {
+    const stats = createStubStats();
+    const stubGetDocs = (index, docs) => (name, params) => {
+      expect(name).to.be('search');
+      expect(params).to.have.property('index', index);
+      return Promise.resolve({
+        _scroll_id: `${index}ScrollId`,
+        hits: { total: docs.length, hits: docs }
+      });
+    };
+    const client = createStubClient([
+      stubGetAlias('aaa', { aliasa: {}, aliasb: {} }),
+      stubGetDocs('aaa', [{ _id: 1 }]),
+      stubGetAlias('bbb', { aliasc: {} }),
+      stubGetDocs('bbb', [{ _id: 2 }, { _id: 3 }]),
+    ]);
+
+    const docRecords = await createPromiseFromStreams([
+      createListStream([ 'aaa', 'bbb' ]),
+      createGenerateDocRecordsStream(client, stats),
+      createConcatStream([])
+    ]);
+
+    expect(docRecords).to.eql([
+      {
+        type: 'alias',
+        value: {
+          index: 'aaa',
+          aliases: {
+            aliasa: {},
+            aliasb: {},
+          },
+        },
+      },
+
+      {
+        type: 'doc',
+        value: {
+          id: 1,
+          index: undefined,
+          source: undefined,
+          type: undefined,
+        }
+      },
+
+      {
+        type: 'alias',
+        value: {
+          index: 'bbb',
+          aliases: {
+            aliasc: {},
+          },
+        },
+      },
+
+      {
+        type: 'doc',
+        value: {
+          id: 2,
+          index: undefined,
+          source: undefined,
+          type: undefined,
+        }
+      },
+
+      {
+        type: 'doc',
+        value: {
+          id: 3,
+          index: undefined,
+          source: undefined,
+          type: undefined,
+        }
+      },
+    ]);
+  });
 });
+
+function stubGetAlias(index, aliases = {}) {
+  return (name, params) => {
+    expect(name).to.be('getAlias');
+    expect(params).to.eql({ index });
+    return Promise.resolve({ [index]: { aliases } });
+  };
+}

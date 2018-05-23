@@ -12,6 +12,18 @@ export function createGenerateDocRecordsStream(client, stats) {
         let remainingHits = null;
         let resp = null;
 
+        const alias = await client.indices.getAlias({ index });
+
+        if (!isEmpty(alias[index].aliases)) {
+          this.push({
+            type: 'alias',
+            value: {
+              index,
+              aliases: alias[index].aliases,
+            },
+          });
+        }
+
         while (!resp || remainingHits > 0) {
           if (!resp) {
             resp = await client.search({
@@ -49,4 +61,8 @@ export function createGenerateDocRecordsStream(client, stats) {
       }
     }
   });
+}
+
+function isEmpty(obj) {
+  return !obj || Object.keys(obj).length === 0;
 }

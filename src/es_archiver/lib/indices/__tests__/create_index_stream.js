@@ -15,6 +15,7 @@ import {
 import {
   createStubStats,
   createStubIndexRecord,
+  createStubAliasRecord,
   createStubDocRecord,
   createStubClient
 } from './stubs';
@@ -59,6 +60,31 @@ describe('esArchiver: createCreateIndexStream()', () => {
         createStubDocRecord('index', 1),
         createStubDocRecord('index', 2),
       ]);
+    });
+
+    it('creates aliases', async () => {
+      const client = createStubClient();
+      const stats = createStubStats();
+      await createPromiseFromStreams([
+        createListStream([
+          createStubIndexRecord('index'),
+          createStubAliasRecord('index', { myalias: {}, youralias: {} }),
+          createStubDocRecord('index', 1),
+        ]),
+        createCreateIndexStream({ client, stats }),
+        createConcatStream([])
+      ]);
+
+
+      sinon.assert.calledOnce(client.indices.updateAliases);
+      sinon.assert.calledWith(client.indices.updateAliases, {
+        body: {
+          actions: [
+            { add: { index: 'index', alias: 'myalias' } },
+            { add: { index: 'index', alias: 'youralias' } },
+          ],
+        },
+      });
     });
 
     it('passes through records with unknown types', async () => {

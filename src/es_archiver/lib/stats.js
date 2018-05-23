@@ -13,6 +13,7 @@ export function createStats(name, log) {
         created: false,
         archived: false,
         waitForSnapshot: 0,
+        aliases: {},
         configDocs: {
           upgraded: 0,
           tagged: 0,
@@ -49,6 +50,11 @@ export function createStats(name, log) {
       Object.keys(metadata || {}).forEach(name => {
         debug('%j %s %j', index, name, metadata[name]);
       });
+    }
+
+    createdAliases(index, aliases) {
+      getOrCreate(index).aliases = aliases;
+      info('Created aliases for index %j: %j', index, aliases);
     }
 
     archivedIndex(index, metadata) {

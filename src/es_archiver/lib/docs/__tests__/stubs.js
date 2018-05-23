@@ -36,6 +36,9 @@ export const createStubClient = (responses = []) => {
     search: createStubClientMethod('search'),
     scroll: createStubClientMethod('scroll'),
     bulk: createStubClientMethod('bulk'),
+    indices: {
+      getAlias: createStubClientMethod('getAlias'),
+    },
 
     assertNoPendingResponses() {
       if (responses.length) {

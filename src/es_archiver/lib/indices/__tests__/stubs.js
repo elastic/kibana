@@ -2,6 +2,7 @@ import sinon from 'sinon';
 
 export const createStubStats = () => ({
   createdIndex: sinon.stub(),
+  createdAliases: sinon.stub(),
   deletedIndex: sinon.stub(),
   skippedIndex: sinon.stub(),
   archivedIndex: sinon.stub(),
@@ -19,6 +20,11 @@ export const createStubStats = () => ({
 export const createStubIndexRecord = (index) => ({
   type: 'index',
   value: { index }
+});
+
+export const createStubAliasRecord = (index, aliases) => ({
+  type: 'alias',
+  value: { index, aliases }
 });
 
 export const createStubDocRecord = (index, id) => ({
@@ -49,6 +55,16 @@ export const createStubClient = (existingIndices = []) => ({
           settings: {},
         }
       };
+    }),
+    updateAliases: sinon.spy(async ({ body }) => {
+      body.actions.forEach(({ add: { index, alias } }) => {
+        if (!existingIndices.includes(index)) {
+          throw createEsClientError('index_not_found_exception');
+        }
+        existingIndices.push({ index, alias });
+      });
+
+      return { ok: true };
     }),
     create: sinon.spy(async ({ index }) => {
       if (existingIndices.includes(index)) {
