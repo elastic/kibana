@@ -20,7 +20,7 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
 
   return {
     name: 'courier',
-    handler: function (vis, { appState, queryFilter, searchSource, timeRange }) {
+    handler: function (vis, { appState, queryFilter, searchSource, timeRange, forceFetch }) {
 
       // Create a new search source that inherits the original search source
       // but has the propriate timeRange applied via a filter.
@@ -63,7 +63,7 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
       }
 
       const shouldQuery = () => {
-        if (!searchSource.lastQuery || vis.reload) return true;
+        if (!searchSource.lastQuery || forceFetch) return true;
         if (!_.isEqual(_.cloneDeep(searchSource.get('filter')), searchSource.lastQuery.filter)) return true;
         if (!_.isEqual(_.cloneDeep(searchSource.get('query')), searchSource.lastQuery.query)) return true;
         if (!_.isEqual(calculateObjectHash(vis.getAggConfig()), searchSource.lastQuery.aggs)) return true;
@@ -74,7 +74,6 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
 
       return new Promise((resolve, reject) => {
         if (shouldQuery()) {
-          delete vis.reload;
           requestSearchSource.onResults().then(resp => {
             searchSource.lastQuery = {
               filter: _.cloneDeep(searchSource.get('filter')),
