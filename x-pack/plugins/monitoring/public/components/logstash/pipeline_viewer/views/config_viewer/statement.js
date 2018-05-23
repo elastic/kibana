@@ -19,7 +19,7 @@ import { IfElement } from '../../models/list/if_element';
 // import { Queue } from './queue';
 
 import {
-  // EuiButtonEmpty,
+  EuiButtonEmpty,
   // EuiButtonIcon,
   // EuiCodeBlock,
   EuiFlexGroup,
@@ -101,14 +101,24 @@ function pluginStatement(statement) {
       <EuiFlexGroup
         gutterSize="s"
       >
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem
+          grow={false}
+          className="cv-pluginStatement__icon"
+        >
           <EuiIcon
             type="dot"
             color="#50b0a4"
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <span className="cv-statement__name">{name}</span>
+          <EuiButtonEmpty
+            color="#50b0a4"
+            flush="left"
+            size="xs"
+            className="cv-statement__name"
+          >
+            <span>{name}</span>
+          </EuiButtonEmpty>
         </EuiFlexItem>
         {
           hasExplicitId &&

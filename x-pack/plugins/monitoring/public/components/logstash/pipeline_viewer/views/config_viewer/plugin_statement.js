@@ -67,15 +67,18 @@ export const PluginStatement = ({ statement, stats, vertexSelected, isEvenChild 
                 >
                   <EuiIcon className="statement__dot" type="dot" />
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
+                <EuiFlexItem
+                  grow={false}
+                  className="cv-pluginStatement__name"
+                >
                   <EuiButtonEmpty
                     color="text"
                     flush="left"
                     onClick={vertexSelected}
                     size="xs"
-                    className="statement__name"
+                    className="cv-statement__name"
                   >
-                    <span className="statement__name">
+                    <span>
                       {statement.name}
                     </span>
                   </EuiButtonEmpty>

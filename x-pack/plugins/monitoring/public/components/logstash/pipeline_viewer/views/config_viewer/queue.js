@@ -15,7 +15,7 @@ export function Queue() {
         iconType="logstashQueue"
         title="Queue"
       />
-      <div>
+      <div className="cv-queue__messageText">
         Queue stats not available
       </div>
     </div>
