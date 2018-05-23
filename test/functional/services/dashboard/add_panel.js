@@ -153,5 +153,12 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('savedObjectFinderSearchInput', name);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
+
+    async panelAddLinkExists(name) {
+      log.debug(`DashboardAddPanel.panelAddLinkExists(${name})`);
+      await this.ensureAddPanelIsShowing();
+      await this.filterEmbeddableNames(`"${name}"`);
+      return await testSubjects.exists(`addPanel${name.split(' ').join('-')}`);
+    }
   };
 }
