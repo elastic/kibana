@@ -1,4 +1,3 @@
-import { createGzip, Z_BEST_COMPRESSION } from 'zlib';
 import { PassThrough } from 'stream';
 
 import {
@@ -8,10 +7,10 @@ import {
 
 import { RECORD_SEPARATOR } from './constants';
 
-export function createFormatArchiveStreams({ gzip = false } = {}) {
+export function createFormatArchiveStreams() {
   return [
     createJsonStringifyStream({ pretty: true }),
     createIntersperseStream(RECORD_SEPARATOR),
-    gzip ? createGzip({ level: Z_BEST_COMPRESSION }) : new PassThrough(),
+    new PassThrough(),
   ];
 }

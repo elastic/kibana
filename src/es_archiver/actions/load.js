@@ -7,7 +7,6 @@ import {
 } from '../../utils';
 
 import {
-  isGzip,
   createStats,
   prioritizeMappings,
   readDirectory,
@@ -40,7 +39,7 @@ export async function loadAction({ name, skipExisting, client, dataDir, log }) {
 
       return pipeline(
         createReadStream(resolve(inputDir, filename)),
-        ...createParseArchiveStreams({ gzip: isGzip(filename) })
+        ...createParseArchiveStreams()
       );
     }),
     { objectMode: true }

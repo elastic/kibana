@@ -37,12 +37,12 @@ export async function saveAction({ name, indices, client, dataDir, log }) {
       createWriteStream(resolve(outputDir, 'mappings.json')),
     ]),
 
-    // export all documents from matching indexes into data.json.gz
+    // export all documents from matching indexes into data.json
     createPromiseFromStreams([
       createListStream(resolvedIndexes),
       createGenerateDocRecordsStream(client, stats),
-      ...createFormatArchiveStreams({ gzip: true }),
-      createWriteStream(resolve(outputDir, 'data.json.gz'))
+      ...createFormatArchiveStreams(),
+      createWriteStream(resolve(outputDir, 'data.json'))
     ])
   ]);
 

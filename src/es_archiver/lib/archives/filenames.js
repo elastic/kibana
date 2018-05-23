@@ -1,16 +1,12 @@
-import { basename, extname } from 'path';
-
-export function isGzip(path) {
-  return extname(path) === '.gz';
-}
+import { basename } from 'path';
 
 /**
- *  Check if a path is for a, potentially gzipped, mapping file
+ *  Check if a path is a mapping file
  *  @param  {String} path
  *  @return {Boolean}
  */
 export function isMappingFile(path) {
-  return basename(path, '.gz') === 'mappings.json';
+  return basename(path) === 'mappings.json';
 }
 
 /**

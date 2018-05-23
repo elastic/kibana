@@ -18,7 +18,6 @@ export {
 } from './stats';
 
 export {
-  isGzip,
   prioritizeMappings,
   createParseArchiveStreams,
   createFormatArchiveStreams,
