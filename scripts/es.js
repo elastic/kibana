@@ -2,6 +2,8 @@ var resolve = require('path').resolve;
 var pkg = require('../package.json');
 var kbnEs = require('@kbn/es');
 
+require('../src/setup_node_env');
+
 kbnEs
   .run({
     license: 'basic',
