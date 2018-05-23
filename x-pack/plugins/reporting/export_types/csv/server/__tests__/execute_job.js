@@ -10,7 +10,7 @@ import sinon from 'sinon';
 import nodeCrypto from '@elastic/node-crypto';
 
 import { CancellationToken } from '../../../../server/lib/esqueue/helpers/cancellation_token';
-import { SavedObjectsClient } from  '../../../../../../../src/server/saved_objects/client/saved_objects_client.js';
+import { SavedObjectsClient } from  '../../../../../../../src/server/saved_objects';
 import { FieldFormat } from  '../../../../../../../src/ui/field_formats/field_format.js';
 import { FieldFormatsService } from  '../../../../../../../src/ui/field_formats/field_formats_service.js';
 import { createStringFormat } from  '../../../../../../../src/core_plugins/kibana/common/field_formats/types/string.js';
