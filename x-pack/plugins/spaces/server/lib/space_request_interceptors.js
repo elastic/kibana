@@ -48,10 +48,17 @@ export function initSpacesRequestInterceptors(server) {
     // which is not available at the time of "onRequest".
     if (isRequestingKibanaRoot && !urlContext) {
       try {
+
+        const { selectedSpace } = request.state;
+
         const client = request.getSavedObjectsClient();
         const { total, saved_objects: spaceObjects } = await client.find({
           type: 'space'
         });
+
+        const config = server.config();
+        const basePath = config.get('server.basePath');
+        const defaultRoute = config.get('server.defaultRoute');
 
         if (total === 1) {
           // If only one space is available, then send user there directly.
@@ -60,10 +67,6 @@ export function initSpacesRequestInterceptors(server) {
           const {
             urlContext
           } = space.attributes;
-
-          const config = server.config();
-          const basePath = config.get('server.basePath');
-          const defaultRoute = config.get('server.defaultRoute');
 
           let destination;
           if (urlContext) {
@@ -76,6 +79,19 @@ export function initSpacesRequestInterceptors(server) {
         }
 
         if (total > 0) {
+
+          const preferredSpace = spaceObjects.find(so => so.attributes.urlContext === selectedSpace);
+          if (preferredSpace) {
+            let destination;
+            if (preferredSpace.attributes.urlContext) {
+              destination = `${basePath}/s/${preferredSpace.attributes.urlContext}${defaultRoute}`;
+            } else {
+              destination = `${basePath}${defaultRoute}`;
+            }
+
+            return reply.redirect(destination);
+          }
+
           // render spaces selector instead of home page
           const app = server.getHiddenUiAppById('space_selector');
           return reply.renderApp(app, {
@@ -88,6 +104,10 @@ export function initSpacesRequestInterceptors(server) {
       }
     }
 
+    if (typeof urlContext === 'string' && request.state.selectedSpace !== urlContext) {
+      console.log('setting selectedSpace', urlContext);
+      reply.state('selectedSpace', urlContext);
+    }
     return reply.continue();
   });
 

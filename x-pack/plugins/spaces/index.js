@@ -76,6 +76,11 @@ export const spaces = (kibana) => new kibana.Plugin({
 
     initSpacesApi(server);
 
+    server.state('selectedSpace', {
+      isHttpOnly: true,
+      path: config.get('server.basePath')
+    });
+
     initSpacesRequestInterceptors(server);
 
     await createDefaultSpace(server);
