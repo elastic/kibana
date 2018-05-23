@@ -23,12 +23,11 @@ export default function ({ getService }) {
     it('Migrates an existing index that has never been migrated before', async () => {
       const index = '.migrate-existing';
       await helper.createUnmigratedIndex({ index, indexDefinition: [catPlugin.V0, dogPlugin.V0] });
-      const migrationResult = await Migration.migrate({
+      await Migration.migrate({
         ...opts,
         index,
         plugins: [catPlugin.V2.plugin, dogPlugin.V2.plugin],
       });
-      await helper.waitForMigration({ index, migrationResult, minDocs: 3 });
       await helper.assertValidMigrationState({
         index,
         expectedTypes: [{
@@ -54,7 +53,6 @@ export default function ({ getService }) {
         index,
         plugins: [catPlugin.V1.plugin, dogPlugin.V1.plugin],
       });
-      await helper.waitForMigration({ index, migrationResult: firstMigration });
       await helper.assertValidMigrationState({
         index,
         expectedTypes: [{
@@ -73,7 +71,6 @@ export default function ({ getService }) {
         index,
         plugins: [catPlugin.V2.plugin],
       });
-      await helper.waitForMigration({ index, migrationResult: secondMigration });
       const migrationState = await helper.assertValidMigrationState({
         index,
         expectedTypes: [{

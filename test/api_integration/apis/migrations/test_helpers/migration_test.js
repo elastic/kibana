@@ -10,17 +10,7 @@ export function migrationTest(callCluster) {
     return callCluster('indices.getAlias', { name });
   }
 
-  function waitForDocs(index, minDocs) {
-    return waitUntilExists(() => callCluster('count', { index }).then(({ count }) => parseInt(count) >= minDocs));
-  }
-
   return {
-    async waitForMigration({ index, migrationResult: { destIndex }, minDocs = 3 }) {
-      await waitUntilExists(() => fetchAlias(index).then((alias) => alias[destIndex]));
-      await waitForDocs(destIndex, minDocs);
-      await waitUntilExists(() => fetchMigrationState(destIndex));
-    },
-
     async createUnmigratedIndex({ index, indexDefinition }) {
       await callCluster('indices.create', {
         index,
@@ -48,7 +38,7 @@ export function migrationTest(callCluster) {
           .value(),
       });
 
-      await waitForDocs(index, docs.value().length);
+      await callCluster('indices.refresh', { index });
     },
 
     async assertValidMigrationState({ index, expectedTypes }) {

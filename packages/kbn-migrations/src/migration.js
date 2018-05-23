@@ -130,6 +130,9 @@ async function runMigration(context) {
   log.info(() => `Pointing alias ${index} to ${destIndex}`);
   await Persistence.setAlias(callCluster, index, destIndex);
 
+  log.info(() => `Refreshing index ${destIndex}`);
+  await callCluster('indices.refresh', { index: destIndex });
+
   return migrationResult(context);
 }
 
