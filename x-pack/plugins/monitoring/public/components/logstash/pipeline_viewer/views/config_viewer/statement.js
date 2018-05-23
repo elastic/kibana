@@ -13,7 +13,9 @@ import React from 'react';
 import { PluginStatement } from '../../models/pipeline/plugin_statement';
 // import { Stat } from './stat';
 
-import { IfStatement } from './if_statement';
+import { CollapsibleStatement } from './collapsible_statement';
+
+import { IfElement } from '../../models/list/if_element';
 // import { Queue } from './queue';
 
 import {
@@ -134,11 +136,15 @@ export class Statement extends React.PureComponent
   getStatement(statement) {
     const {
       collapse,
+      element,
       expand } = this.props;
+    const { id } = element;
+
+    const isIf = element instanceof IfElement;
 
     return statement instanceof PluginStatement
       ? pluginStatement(statement)
-      : <IfStatement expand={expand} collapse={collapse} statement={statement} />;
+      : <CollapsibleStatement expand={expand} collapse={collapse} statement={statement} isIf={isIf} id={id} />;
   }
 
   render() {

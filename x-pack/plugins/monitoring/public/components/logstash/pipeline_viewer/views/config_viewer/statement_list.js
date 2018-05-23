@@ -78,10 +78,22 @@ class StatementList extends React.PureComponent {
   }
 
   expand(elementId) {
-    console.log(`expand ${elementId}`);
+    const collapsedParentIds = new Set(this.state.collapsedParentIds);
+    const expandParentIds = [elementId];
+    const { elements } = this.props;
+
+    elements.forEach(element => {
+      const { id, parentId } = element;
+      if (expandParentIds.some(expandId => expandId === parentId || expandId === id)) {
+        expandParentIds.push(id);
+        collapsedParentIds.delete(id);
+      }
+    });
+    console.log(collapsedParentIds);
+
+    this.setState({ collapsedParentIds });
   }
 
-  // receive collapsed element, add to list
   collapse(elementId) {
     const collapsedParentIds = new Set(this.state.collapsedParentIds);
     const { elements } = this.props;
@@ -95,21 +107,20 @@ class StatementList extends React.PureComponent {
       }
     });
 
-    this.setState({
-      collapsedParentIds
-    });
+    console.log(collapsedParentIds.entries());
+    this.setState({ collapsedParentIds });
   }
 
-  getStatement(statement) {
-    const { parentId } = statement;
+  getStatement(element) {
+    const { parentId } = element;
 
     return this.state.collapsedParentIds.has(parentId) ?
       null
       :
       (
         <Statement
-          key={statement.id}
-          element={statement}
+          key={element.id}
+          element={element}
           collapse={this.collapse}
           expand={this.expand}
         />
@@ -119,7 +130,7 @@ class StatementList extends React.PureComponent {
   render() {
     const { elements } = this.props;
 
-    console.log(this.state.collapsedParentIds);
+    console.log(elements);
 
     return (
       <ul className="cv-list-parent">

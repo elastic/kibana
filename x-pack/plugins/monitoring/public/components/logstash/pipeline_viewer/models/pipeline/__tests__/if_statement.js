@@ -209,12 +209,7 @@ describe('IfStatement class', () => {
         const esVertex = new PluginVertex({ edgesByFrom: {} }, { id: 'es_output' });
         esVertex.pipelineStage = 'output';
 
-<<<<<<< HEAD
-        ifVertex.trueOutgoingVertices = [esVertex];
-        ifVertex.falseOutgoingVertices = [];
-=======
         ifVertex.trueOutgoingVertex = esVertex;
->>>>>>> Finish moving flatten logic into classes, add tests.
       });
 
       it('creates list and sub-list for nested statements', () => {
