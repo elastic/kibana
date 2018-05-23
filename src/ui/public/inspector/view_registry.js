@@ -11,7 +11,7 @@ import EventEmitter from 'events';
  * An object describing an inspector view.
  * @typedef {object} InspectorViewDescription
  * @property {string} title - The title that will be used to present that view.
- * @proeprty {string} icon - An icon name to present this view. Must match an EUI icon.
+ * @property {string} icon - An icon name to present this view. Must match an EUI icon.
  * @property {ReactComponent} component - The actual React component to render that
  *    that view. It should always return an `InspectorView` element at the toplevel.
  * @property {number} [order=9000] - An order for this view. Views are ordered from lower

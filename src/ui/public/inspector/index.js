@@ -9,4 +9,4 @@ export {
 
 export {
   viewRegistry
-} from './views';
+} from './view_registry';

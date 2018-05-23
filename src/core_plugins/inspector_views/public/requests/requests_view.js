@@ -5,7 +5,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { InspectorView } from '../..';
+import { InspectorView } from 'ui/inspector';
 
 import { RequestDetails } from './request_details';
 import { RequestListEntry } from './request_list_entry';

@@ -7,7 +7,7 @@ import {
   EuiLoadingChart,
 } from '@elastic/eui';
 
-import { InspectorView } from '../..';
+import { InspectorView } from 'ui/inspector';
 
 import {
   DataTableFormat,

@@ -1,4 +1,4 @@
-import { InspectorViewRegistry } from './registry';
+import { InspectorViewRegistry } from './view_registry';
 
 
 function createMockView(params = {}) {

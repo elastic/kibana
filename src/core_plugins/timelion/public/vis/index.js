@@ -66,6 +66,9 @@ export default function TimelionVisProvider(Private) {
       showIndexSelection: false,
       showQueryBar: false,
       showFilterBar: false,
-    }
+    },
+    inspectorAdapters: {
+      data: true,
+    },
   });
 }

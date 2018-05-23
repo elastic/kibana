@@ -9,7 +9,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 
-import { RequestStatus } from '../../adapters';
+import { RequestStatus } from 'ui/inspector/adapters';
 
 
 function RequestListEntry({ request, onClick, isSelected }) {

@@ -3,7 +3,7 @@ import React from 'react';
 import EventEmitter from 'events';
 
 import { InspectorPanel } from './ui/inspector_panel';
-import { viewRegistry } from './views';
+import { viewRegistry } from './view_registry';
 
 let activeSession = null;
 

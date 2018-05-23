@@ -1,5 +1,5 @@
 import { openInspector, hasInspector } from './inspector';
-jest.mock('./views', () => ({
+jest.mock('./view_registry', () => ({
   viewRegistry: {
     getVisible: jest.fn()
   }
@@ -7,7 +7,7 @@ jest.mock('./views', () => ({
 jest.mock('./ui/inspector_panel', () => ({
   InspectorPanel: () => 'InspectorPanel'
 }));
-import { viewRegistry } from './views';
+import { viewRegistry } from './view_registry';
 
 function setViews(views) {
   viewRegistry.getVisible.mockImplementation(() => views);
