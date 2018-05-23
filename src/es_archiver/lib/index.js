@@ -27,3 +27,7 @@ export {
 export {
   readDirectory
 } from './directory';
+
+export {
+  migrateKibanaIndex
+} from './migrate_kibana_index';

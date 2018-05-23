@@ -24,6 +24,16 @@ export default function (kibana) {
   });
 }
 
+export function pluginSpecsToMigrations(pluginSpecs) {
+  return pluginSpecs
+    .map((spec) => ({
+      id: spec.getId(),
+      mappings: _.get(spec.getExportSpecs(), 'mappings'),
+      migrations: spec.getMigrations(),
+    }))
+    .filter(p => p.migrations || p.mappings);
+}
+
 async function migrateKibanaIndex(kbnServer) {
   const opts = optsFromKbnServer(kbnServer);
   const force = _.get(kbnServer, 'settings.migration.force');
@@ -53,12 +63,6 @@ function optsFromKbnServer({ pluginSpecs, server, version }, callCluster) {
     index: server.config().get('kibana.index'),
     log: (...args) => server.log(...args),
     callCluster: callCluster || server.plugins.elasticsearch.getCluster('admin').callWithInternalUser,
-    plugins: pluginSpecs
-      .map((plugin) => ({
-        id: plugin.getId(),
-        mappings: _.get(plugin.getExportSpecs(), 'mappings'),
-        migrations: plugin.getMigrations(),
-      }))
-      .filter(p => p.migrations || p.mappings),
+    plugins: pluginSpecsToMigrations(pluginSpecs),
   };
 }

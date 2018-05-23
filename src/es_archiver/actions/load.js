@@ -14,6 +14,7 @@ import {
   createParseArchiveStreams,
   createCreateIndexStream,
   createIndexDocRecordsStream,
+  migrateKibanaIndex,
 } from '../lib';
 
 // pipe a series of streams into each other so that data and errors
@@ -52,15 +53,24 @@ export async function loadAction({ name, skipExisting, client, dataDir, log }) {
     createIndexDocRecordsStream(client, stats),
   ]);
 
-  const indicesToRefresh = [];
-  stats.forEachIndex((index, { docs }) => {
-    log.info('[%s] Indexed %d docs into %j', name, docs.indexed, index);
-    indicesToRefresh.push(index);
-  });
+  const result = stats.toJSON();
+
+  // If we affected the Kibana index, we need to ensure it's migrated...
+  if (Object.keys(result).some(k => k.startsWith('.kibana'))) {
+    await migrateKibanaIndex({ client, log });
+  }
+
+  const indicesToRefresh = Object
+    .entries(result)
+    .filter(([, stats]) => !stats.deleted)
+    .map(([index, { docs }]) => {
+      log.info('[%s] Indexed %d docs into %j', name, docs.indexed, index);
+      return index;
+    });
 
   await client.indices.refresh({
     index: indicesToRefresh
   });
 
-  return stats.toJSON();
+  return result;
 }
