@@ -28,7 +28,7 @@ export const InstallDependenciesTask = {
     // build. This means the lockfile won't be consistent, so instead of
     // verifying it, we just skip writing a new lockfile. However, this does
     // still use the existing lockfile for dependency resolution.
-    const args = ['--production', '--ignore-optional', '--pure-lockfile'];
+    const args = ['--production', '--ignore-optional', '--pure-lockfile', '--no-bin-links'];
 
     await exec(log, 'yarn', args, {
       cwd: build.resolvePath(),
