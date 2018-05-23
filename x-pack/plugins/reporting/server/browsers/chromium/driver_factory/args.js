@@ -6,7 +6,8 @@
 
 export const args = ({ userDataDir, bridgePort, viewport, disableSandbox, proxyConfig }) => {
   const flags = [
-    '--debug',
+    '--enable-logging',
+    '--v=1',
     '--no-sandbox',
     // Disable built-in Google Translate service
     '--disable-translate',
