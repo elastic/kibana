@@ -7,7 +7,7 @@
 export function MonitoringElasticsearchSummaryStatusProvider({ getService }) {
   const testSubjects = getService('testSubjects');
 
-  const SUBJ_SUMMARY = 'elasticsearchSummaryStatus';
+  const SUBJ_SUMMARY = 'elasticsearchClusterStatus';
   const SUBJ_SUMMARY_NODES_COUNT = `${SUBJ_SUMMARY} nodesCount`;
   const SUBJ_SUMMARY_INDICES_COUNT = `${SUBJ_SUMMARY} indicesCount`;
   const SUBJ_SUMMARY_MEMORY = `${SUBJ_SUMMARY} memory`;
