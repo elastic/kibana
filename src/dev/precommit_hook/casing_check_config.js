@@ -20,6 +20,7 @@ export const IGNORE_FILE_GLOBS = [
   '**/.*',
   '**/{webpackShims,__mocks__}/**/*',
   'x-pack/docs/**/*',
+  'src/dev/tslint/rules/*',
 ];
 
 

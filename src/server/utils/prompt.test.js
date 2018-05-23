@@ -4,7 +4,7 @@ import { PassThrough } from 'stream';
 import { confirm, question } from './prompt';
 
 describe('prompt', () => {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
 
   let input;
   let output;

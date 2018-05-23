@@ -72,7 +72,7 @@ exports[`after fetch hideWriteControls 1`] = `
         },
       ]
     }
-    itemIdToExpandedRowMap={Object {}}
+    itemId="id"
     items={Array []}
     loading={false}
     noItemsMessage={
@@ -104,7 +104,6 @@ exports[`after fetch hideWriteControls 1`] = `
     responsive={true}
     selection={
       Object {
-        "itemId": "id",
         "onSelectionChange": [Function],
       }
     }
@@ -208,7 +207,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
         },
       ]
     }
-    itemIdToExpandedRowMap={Object {}}
+    itemId="id"
     items={Array []}
     loading={false}
     noItemsMessage={
@@ -253,7 +252,6 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
     responsive={true}
     selection={
       Object {
-        "itemId": "id",
         "onSelectionChange": [Function],
       }
     }
@@ -357,7 +355,7 @@ exports[`after fetch renders table rows 1`] = `
         },
       ]
     }
-    itemIdToExpandedRowMap={Object {}}
+    itemId="id"
     items={
       Array [
         Object {
@@ -390,7 +388,6 @@ exports[`after fetch renders table rows 1`] = `
     responsive={true}
     selection={
       Object {
-        "itemId": "id",
         "onSelectionChange": [Function],
       }
     }
@@ -525,7 +522,7 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
         },
       ]
     }
-    itemIdToExpandedRowMap={Object {}}
+    itemId="id"
     items={
       Array [
         Object {
@@ -558,7 +555,6 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
     responsive={true}
     selection={
       Object {
-        "itemId": "id",
         "onSelectionChange": [Function],
       }
     }
@@ -662,7 +658,7 @@ exports[`initialFilter 1`] = `
         },
       ]
     }
-    itemIdToExpandedRowMap={Object {}}
+    itemId="id"
     items={Array []}
     loading={true}
     noItemsMessage=""
@@ -682,7 +678,6 @@ exports[`initialFilter 1`] = `
     responsive={true}
     selection={
       Object {
-        "itemId": "id",
         "onSelectionChange": [Function],
       }
     }
@@ -786,7 +781,7 @@ exports[`renders table in loading state 1`] = `
         },
       ]
     }
-    itemIdToExpandedRowMap={Object {}}
+    itemId="id"
     items={Array []}
     loading={true}
     noItemsMessage=""
@@ -806,7 +801,6 @@ exports[`renders table in loading state 1`] = `
     responsive={true}
     selection={
       Object {
-        "itemId": "id",
         "onSelectionChange": [Function],
       }
     }

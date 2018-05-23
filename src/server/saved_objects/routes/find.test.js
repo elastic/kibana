@@ -22,7 +22,7 @@ describe('GET /api/saved_objects/_find', () => {
   });
 
   afterEach(() => {
-    savedObjectsClient.find.reset();
+    savedObjectsClient.find.resetHistory();
   });
 
   it('formats successful response', async () => {

@@ -57,7 +57,8 @@ ul.navbar-inline li {
   }
 
 .content {
-  .real-flex-parent(@flow: row nowrap);
+  display: flex;
+  flex-flow: row nowrap;
   width: 100%;
   height: 100%;
   overflow: hidden;
@@ -72,10 +73,18 @@ ul.navbar-inline li {
 }
 
 .application {
-  .flex-parent(@shrink: 0);
   position: relative;
   z-index: 0;
   background-color: @white;
+  display: flex;
+  flex-grow: 1;
+  flex-shrink: 0;
+  flex-basis: auto;
+  flex-direction: column;
+
+  > * {
+    flex-shrink: 0;
+  }
 }
 
 .top-fixed {

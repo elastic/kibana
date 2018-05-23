@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.monitoring.clickBreadcrumb('breadcrumbEsNodes'); // return back for next test
       });
 
-      it('master node with 20 indices and 38 shards', async () => {
+      it('should show node summary of master node with 20 indices and 38 shards', async () => {
         await nodesList.clickRowByResolver('jUT5KdxfRbORSCWkb5zjmA');
 
         expect(await nodeDetail.getSummary()).to.eql({
@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      it('data node with 4 indices and 4 shards', async () => {
+      it('should show node summary of data node with 4 indices and 4 shards', async () => {
         await nodesList.clickRowByResolver('bwQWH-7IQY-mFPpfoaoFXQ');
 
         expect(await nodeDetail.getSummary()).to.eql({
@@ -87,7 +87,7 @@ export default function ({ getService, getPageObjects }) {
         await tearDown();
       });
 
-      it('shows NA', async () => {
+      it('should show node summary of NA for offline node', async () => {
         await nodesList.clickRowByResolver('1jxg5T33TWub-jJL4qP0Wg');
 
         expect(await nodeDetail.getSummary()).to.eql({

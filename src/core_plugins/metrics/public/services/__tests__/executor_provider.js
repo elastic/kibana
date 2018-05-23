@@ -17,8 +17,8 @@ describe('$executor service', () => {
     $timeout.cancel = (id) => clearTimeout(id);
 
     timefilter = new EventEmitter();
-    onSpy = sinon.spy((...args) => timefilter.addListener(...args));
-    offSpy = sinon.spy((...args) => timefilter.removeListener(...args));
+    onSpy = sinon.stub().callsFake((...args) => timefilter.addListener(...args));
+    offSpy = sinon.stub().callsFake((...args) => timefilter.removeListener(...args));
 
     timefilter.on = onSpy;
     timefilter.off = offSpy;
@@ -59,13 +59,17 @@ describe('$executor service', () => {
 
   it('should execute function if ingorePause is passed (interval set to 1000ms)', (done) => {
     timefilter.refreshInterval.value = 1000;
-    executor.register({ execute: () => done() });
+    executor.register({
+      execute: () => Promise.resolve().then(done)
+    });
     executor.start({ ignorePaused: true });
   });
 
   it('should execute function if timefilter is not paused and interval set to 1000ms', (done) => {
     timefilter.refreshInterval.value = 1000;
-    executor.register({ execute: () => done() });
+    executor.register({
+      execute: () => Promise.resolve().then(done)
+    });
     executor.start();
   });
 

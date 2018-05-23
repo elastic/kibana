@@ -19,7 +19,7 @@ function replaceAll(source, replace, replaceWith) {
 }
 
 describe('optimizer/bundle route', () => {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
 
   function createServer(options = {}) {
     const {
@@ -262,7 +262,7 @@ describe('optimizer/bundle route', () => {
       });
 
       sinon.assert.calledOnce(createHash);
-      createHash.reset();
+      createHash.resetHistory();
       expect(resp1.statusCode).to.be(200);
 
       const resp2 = await server.inject({

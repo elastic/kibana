@@ -89,7 +89,7 @@ describe('service_settings (FKA tilemaptest)', function () {
     manifestServiceUrlOriginal = mapConfig.manifestServiceUrl;
     tilemapsConfigDeprecatedOriginal = tilemapsConfig.deprecated;
 
-    sinon.stub(serviceSettings, '_getManifest', function (url) {
+    sinon.stub(serviceSettings, '_getManifest').callsFake((url) => {
       let contents = null;
       if (url.startsWith(tmsManifestUrl)) {
         contents = tmsManifest;

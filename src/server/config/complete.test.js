@@ -7,7 +7,7 @@ import { transformDeprecations } from './transform_deprecations';
 /* eslint-enable import/no-duplicates */
 
 describe('server/config completeMixin()', function () {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
   afterEach(() => sandbox.restore());
 
   const setup = (options = {}) => {
@@ -183,7 +183,7 @@ describe('server/config completeMixin()', function () {
     });
 
     it('should use transformed settings when considering what is used', function () {
-      sandbox.stub(transformDeprecationsNS, 'transformDeprecations', (settings) => {
+      sandbox.stub(transformDeprecationsNS, 'transformDeprecations').callsFake((settings) => {
         settings.bar = settings.foo;
         delete settings.foo;
         return settings;

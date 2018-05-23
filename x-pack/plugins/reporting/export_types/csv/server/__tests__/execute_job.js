@@ -7,7 +7,6 @@
 import expect from 'expect.js';
 import Puid from 'puid';
 import sinon from 'sinon';
-import 'sinon-as-promised';
 import nodeCrypto from '@elastic/node-crypto';
 
 import { CancellationToken } from '../../../../server/lib/esqueue/helpers/cancellation_token';
@@ -370,7 +369,7 @@ describe('CSV Execute Job', function () {
       // that delays the Promise resolution so we have a chance to call cancellationToken.cancel().
       // Otherwise, we get into an endless loop, and don't have a chance to call cancel
       callWithRequestStub.restore();
-      callWithRequestStub = sinon.stub(clusterStub, 'callWithRequest', async function () {
+      callWithRequestStub = sinon.stub(clusterStub, 'callWithRequest').callsFake(async function () {
         await delay(1);
         return {
           hits: {

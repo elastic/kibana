@@ -52,7 +52,7 @@ describe('Scanner', function () {
 
       search = sinon.stub().returns(Promise.resolve({ data: mockSearch }));
       scroll = sinon.stub().returns(Promise.resolve({ data: mockScroll }));
-      httpPost = sinon.stub(scanner.$http, 'post', (path, ...args) => {
+      httpPost = sinon.stub(scanner.$http, 'post').callsFake((path, ...args) => {
         if (path.includes('legacy_scroll_start')) {
           return search(...args);
         }

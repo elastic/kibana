@@ -239,9 +239,7 @@ describe('AggConfigs', function () {
       const aggInfos = vis.aggs.map(function (aggConfig) {
         const football = {};
 
-        sinon.stub(aggConfig, 'toDsl', function () {
-          return football;
-        });
+        sinon.stub(aggConfig, 'toDsl').returns(football);
 
         return {
           id: aggConfig.id,
