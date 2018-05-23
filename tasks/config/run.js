@@ -196,7 +196,7 @@ module.exports = function (grunt) {
       ]
     },
 
-    api_integration_tests: {
+    apiIntegrationTests: {
       cmd: process.execPath,
       args: [
         'scripts/functional_tests',
@@ -206,18 +206,39 @@ module.exports = function (grunt) {
       ],
     },
 
-    functional_tests: {
+    functionalTests: {
       cmd: process.execPath,
       args: [
         'scripts/functional_tests',
         '--config', 'test/functional/config.js',
         '--es-from', 'source',
-        '--verbose',
+        '--bail',
+        '--',
+        '--server.maxPayloadBytes=1648576',
+      ],
+    },
+
+    functionalTestsRelease: {
+      cmd: process.execPath,
+      args: [
+        'scripts/functional_tests',
+        '--config', 'test/functional/config.js',
+        '--es-from', 'source',
         '--bail',
         '--kibana-install-dir', `./build/oss/kibana-${PKG_VERSION}-${process.platform}-x86_64`,
         '--',
         '--server.maxPayloadBytes=1648576',
-        '--env.name=development',
+      ],
+    },
+
+    functionalTestsDevServer: {
+      cmd: process.execPath,
+      args: [
+        'scripts/functional_tests_server',
+        '--config', 'test/functional/config.js',
+        '--es-from', 'source',
+        '--',
+        '--server.maxPayloadBytes=1648576',
       ],
     },
   };

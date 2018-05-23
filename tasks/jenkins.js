@@ -34,7 +34,7 @@ module.exports = function (grunt) {
     'test:jest_integration',
     'test:projects',
     'test:browser-ci',
-    'run:api_integration_tests',
+    'run:apiIntegrationTests',
     'verifyTranslations',
   ]);
 

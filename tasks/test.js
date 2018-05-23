@@ -64,7 +64,7 @@ module.exports = function (grunt) {
     'test:jest_integration',
     'test:projects',
     'test:browser',
-    'run:api_integration_tests'
+    'run:apiIntegrationTests'
   ]);
 
   grunt.registerTask('test:dev', [
@@ -75,22 +75,17 @@ module.exports = function (grunt) {
 
   grunt.registerTask('test:ui', [
     'checkPlugins',
-    'run:testEsServer',
-    'run:funcTestServer',
-    'functional_test_runner:functional',
-    'stop:testEsServer',
-    'stop:funcTestServer'
+    'run:functionalTests',
   ]);
 
   grunt.registerTask('test:uiRelease', [
     'checkPlugins',
-    'run:functional_tests',
+    'run:functionalTestsRelease',
   ]);
 
   grunt.registerTask('test:ui:server', [
     'checkPlugins',
-    'run:testEsServer',
-    'run:devFuncTestServer:keepalive'
+    'run:functionalTestsDevServer',
   ]);
 
   grunt.registerTask('test', subTask => {

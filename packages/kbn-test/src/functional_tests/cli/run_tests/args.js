@@ -140,12 +140,3 @@ function validateOptions(userOptions) {
     }
   });
 }
-
-// test cases:
-// node scripts/functional_tests --config test/functional/config.js --es-from snapshot --debug --grep management --bail=peanut -- --server.maxPayloadBytes=1648576
-// node scripts/functional_tests --config test/functional/config.js --es-from butter --debug --grep management --bail=peanut -- --server.maxPayloadBytes=1648576
-// node scripts/functional_tests --config --es-from source --debug --grep management --bail=peanut -- --server.maxPayloadBytes=1648576
-// node scripts/functional_tests --config test/functional/config.js --es-from source --debug --grep management --bail=peanut -- --server.maxPayloadBytes=1648576
-// node scripts/functional_tests --config test/functional/config.js --es-from source --debug --server.maxPayloadBytes=1648576 --grep management --bail=peanut -- --server.maxPayloadBytes=1648576
-// node scripts/functional_tests --config test/functional/config.js --config test/api_integration/config.js --es-from snapshot --debug --grep management --bail -- --server.maxPayloadBytes=1648576
-// node scripts/functional_tests --es-from snapshot --debug --grep management --bail -- --server.maxPayloadBytes=1648576
