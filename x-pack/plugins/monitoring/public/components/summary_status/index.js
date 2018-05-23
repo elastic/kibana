@@ -53,7 +53,7 @@ export function SummaryStatus({ children, status, isOnline, IconComponent = Defa
             grow={true}
             className="monitoring-summary-status__eui-content"
           >
-            <StatusIndicator IconComponent={IconComponent} status={status} isOnline={isOnline} />
+            <StatusIndicator status={status} IconComponent={IconComponent} isOnline={isOnline} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </div>
