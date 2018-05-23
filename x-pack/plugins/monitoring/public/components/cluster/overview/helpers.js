@@ -64,7 +64,7 @@ export function ClusterItemContainer(props) {
             <EuiFlexItem grow={false}>
               <EuiIcon type={icon} size="l" />
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiTitle>
                 <h2>
                   { props.title }
