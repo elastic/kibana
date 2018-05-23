@@ -1,4 +1,4 @@
-const { resolve } = require('path');
+var resolve = require('path').resolve;
 
 // this must happen before `require('babel-register')` and can't be changed
 // once the module has been loaded
@@ -7,7 +7,7 @@ if (!process.env.BABEL_CACHE_PATH) {
 }
 
 // paths that babel-register should ignore
-const ignore = [
+var ignore = [
   /\/bower_components\//,
   /\/kbn-pm\/dist\//,
 
