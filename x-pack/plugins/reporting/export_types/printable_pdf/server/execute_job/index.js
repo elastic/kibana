@@ -21,7 +21,6 @@ const KBN_SCREENSHOT_HEADER_BLACKLIST = [
 ];
 
 function executeJobFn(server) {
-  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
   const generatePdfObservable = generatePdfObservableFactory(server);
   const crypto = cryptoFactory(server);
   const compatibilityShim = compatibilityShimFactory(server);
@@ -41,11 +40,8 @@ function executeJobFn(server) {
       headers: filteredHeaders,
     };
 
-    const callEndpoint = (endpoint, clientParams = {}, options = {}) => {
-      return callWithRequest(fakeRequest, endpoint, clientParams, options);
-    };
     const savedObjectsClient = server.savedObjectsClientFactory({
-      callCluster: callEndpoint
+      request: fakeRequest
     });
     const uiSettings = server.uiSettingsServiceFactory({
       savedObjectsClient
