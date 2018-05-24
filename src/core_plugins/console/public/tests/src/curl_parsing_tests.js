@@ -1,12 +1,12 @@
-let _ = require('lodash');
-let curl = require('../../src/curl');
-let curlTests = require('raw-loader!./curl_parsing_tests.txt');
+const _ = require('lodash');
+const curl = require('../../src/curl');
+const curlTests = require('raw-loader!./curl_parsing_tests.txt');
 
-var { test, module, ok, equal } = window.QUnit;
+const { test, module, ok, equal } = window.QUnit;
 
-module("CURL");
+module('CURL');
 
-var notCURLS = [
+const notCURLS = [
   'sldhfsljfhs',
   's;kdjfsldkfj curl -XDELETE ""',
   '{ "hello": 1 }'
@@ -14,23 +14,23 @@ var notCURLS = [
 
 
 _.each(notCURLS, function (notCURL, i) {
-  test("cURL Detection - broken strings " + i, function () {
-    ok(!curl.detectCURL(notCURL), "marked as curl while it wasn't:" + notCURL);
+  test('cURL Detection - broken strings ' + i, function () {
+    ok(!curl.detectCURL(notCURL), 'marked as curl while it wasn\'t:' + notCURL);
   });
 });
 
 _.each(curlTests.split(/^=+$/m), function (fixture) {
-  if (fixture.trim() == "") {
+  if (fixture.trim() === '') {
     return;
   }
   fixture = fixture.split(/^-+$/m);
-  var name = fixture[0].trim(),
-    curlText = fixture[1],
-    response = fixture[2].trim();
+  const name = fixture[0].trim();
+  const  curlText = fixture[1];
+  const  response = fixture[2].trim();
 
-  test("cURL Detection - " + name, function () {
-    ok(curl.detectCURL(curlText), "marked as not curl while it was:" + curlText);
-    var r = curl.parseCURL(curlText);
+  test('cURL Detection - ' + name, function () {
+    ok(curl.detectCURL(curlText), 'marked as not curl while it was:' + curlText);
+    const r = curl.parseCURL(curlText);
     equal(r, response);
   });
 });
