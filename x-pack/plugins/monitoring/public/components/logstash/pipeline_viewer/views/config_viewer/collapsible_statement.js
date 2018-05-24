@@ -95,12 +95,8 @@ export class CollapsibleStatement extends React.PureComponent {
 
   render() {
     return (
-      <EuiFlexGroup
-        gutterSize="xs"
-      >
-        <EuiFlexItem
-          grow={false}
-        >
+      <EuiFlexGroup gutterSize="xs">
+        <EuiFlexItem grow={false}>
           <EuiButtonIcon
             color="text"
             size="s"

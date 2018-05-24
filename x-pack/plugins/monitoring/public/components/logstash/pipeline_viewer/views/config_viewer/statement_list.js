@@ -5,30 +5,8 @@
  */
 
 import React from 'react';
-
 import { StatementListHeading } from './statement_list_heading';
-
-// import { PluginStatement } from '../../models/pipeline/plugin_statement';
 import { Statement } from './statement';
-
-// function getStats() {
-//   return (
-
-//   );
-// }
-
-
-
-// function Statement({ element }) {
-//   const {
-//     statement,
-//     depth,
-//     parentId
-//   } = element;
-//   return (
-//     <li>hello! I am a <b>Statement</b>!</li>
-//   );
-// }
 
 export function StatementSection({ iconType, headingText, elements, onShowVertexDetails }) {
   return (
@@ -76,8 +54,6 @@ class StatementList extends React.PureComponent {
       collapsedIds,
       collapsedChildIds
     });
-    console.log(collapsedIds);
-    console.log(collapsedChildIds);
   }
 
   collapse(elementId) {
@@ -97,43 +73,7 @@ class StatementList extends React.PureComponent {
       collapsedIds,
       collapsedChildIds
     });
-    console.log(collapsedIds);
-    console.log(collapsedChildIds);
   }
-
-  // expand(elementId) {
-  //   const collapsedParentIds = new Set(this.state.collapsedParentIds);
-  //   const expandParentIds = [elementId];
-  //   const { elements } = this.props;
-
-  //   elements.forEach(element => {
-  //     const { id, parentId } = element;
-  //     if (expandParentIds.some(expandId => expandId === parentId || expandId === id)) {
-  //       expandParentIds.push(id);
-  //       collapsedParentIds.delete(id);
-  //     }
-  //   });
-  //   console.log(collapsedParentIds);
-
-  //   this.setState({ collapsedParentIds });
-  // }
-
-  // collapse(elementId) {
-  //   const collapsedParentIds = new Set(this.state.collapsedParentIds);
-  //   const { elements } = this.props;
-
-  //   collapsedParentIds.add(elementId);
-
-  //   elements.forEach(element => {
-  //     const { parentId, id } = element;
-  //     if (collapsedParentIds.has(parentId)) {
-  //       collapsedParentIds.add(id);
-  //     }
-  //   });
-
-  //   console.log(collapsedParentIds.entries());
-  //   this.setState({ collapsedParentIds });
-  // }
 
   elementIsCollapsed(elementId) {
     return this.state.collapsedIds.has(elementId);
@@ -143,10 +83,9 @@ class StatementList extends React.PureComponent {
     const { id, parentId } = element;
     const { onShowVertexDetails } = this.props;
 
-    return this.state.collapsedIds.has(parentId) || this.state.collapsedChildIds.has(parentId) ?
-      null
-      :
-      (
+    return this.state.collapsedIds.has(parentId) || this.state.collapsedChildIds.has(parentId)
+      ? null
+      : (
         <Statement
           key={element.id}
           element={element}
@@ -161,8 +100,6 @@ class StatementList extends React.PureComponent {
   render() {
     const { elements } = this.props;
 
-    console.log(elements);
-
     return (
       <ul className="cv-list-parent">
         {
@@ -172,38 +109,3 @@ class StatementList extends React.PureComponent {
     );
   }
 }
-
-// const StatementList = ({ statements, vertexSelected }) => (
-//   statements.map((statement, index) => (
-//     <Statement
-//       statement={statement}
-//       key={statement.id}
-//       isTop={true}
-//       isEvenChild={index + 1 % 2 === 0}
-//       isLast={statements.length === index + 1}
-//       vertexSelected={vertexSelected}
-//     />
-//   ))
-// );
-
-const sectionFactory = (headerText, iconType, children, vertexSelected) => (
-  {
-    headerText,
-    iconType,
-    children: (
-      <StatementList
-        statements={children}
-        vertexSelected={vertexSelected}
-      />
-    )
-  }
-);
-
-export const getStatementListFromPipeline = ({ inputStatements, queue, filterStatements, outputStatements }, vertexSelected) => (
-  [
-    sectionFactory('Input Statements', 'logstashInput', inputStatements, vertexSelected),
-    sectionFactory('Queue', 'logstashQueue', [queue], vertexSelected),
-    sectionFactory('Filter Statements', 'logstashFilter', filterStatements, vertexSelected),
-    sectionFactory('Output Statements', 'logstashOutput', outputStatements, vertexSelected)
-  ]
-);

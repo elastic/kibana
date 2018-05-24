@@ -7,90 +7,16 @@
 
 
 import React from 'react';
-
-// import { formatMetric } from '../../../../../lib/format_number';
-
-import { PluginStatement } from '../../models/pipeline/plugin_statement';
-// import { Stat } from './stat';
-
-import { CollapsibleStatement } from './collapsible_statement';
-
-import { IfElement } from '../../models/list/if_element';
-// import { Queue } from './queue';
-
-import { formatMetric } from '../../../../../lib/format_number';
-
 import {
   EuiButtonEmpty,
-  // EuiButtonIcon,
-  // EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  // EuiTitle,
 } from '@elastic/eui';
-
-// const getDefaultStats = ({ pluginType, vertex }) => {
-//   switch (pluginType) {
-//     case 'input':
-//       return [
-//         new Stat(
-//           formatMetric(vertex.latestEventsPerSecond, '0.[00]a', 'e/s emitted'),
-//           vertex.isSlow()
-//         )
-//       ];
-//     case 'filter':
-//     case 'output':
-//       return [
-//         new Stat(
-//           formatMetric(Math.round(vertex.percentOfTotalProcessorTime || 0), '0', '%', { prependSpace: false }),
-//           vertex.isTimeConsuming()
-//         ),
-//         new Stat(
-//           formatMetric(vertex.latestMillisPerEvent, '0.[00]a', 'ms/e'),
-//           vertex.isSlow()
-//         ),
-//         new Stat(formatMetric(vertex.latestEventsPerSecond, '0.[00]a', 'e/s received'))
-//       ];
-//   }
-//   return [];
-// };
-
-// export const Statement = ({ isLast, statement, vertexSelected, isEvenChild }) => {
-//   const klass = statement.constructor.name;
-//   const { vertex } = statement;
-
-//   const handler = () => vertexSelected(vertex);
-//   switch (klass) {
-//     case 'IfStatement':
-//       return (
-//         <ul>
-//           <IfStatement
-//             isLast={isLast}
-//             statement={statement}
-//             vertexSelected={vertexSelected}
-//           />
-//         </ul>
-//       );
-//     case 'PluginStatement':
-//       return (
-//         <PluginStatement
-//           statement={statement}
-//           stats={getDefaultStats(statement)}
-//           vertexSelected={handler}
-//           isLast={isLast}
-//           isEvenChild={isEvenChild}
-//         />
-//       );
-//     case 'Queue':
-//       return (
-//         <Queue
-//           statement={statement}
-//           vertexSelected={handler}
-//         />
-//       );
-//   }
-// };
+import { PluginStatement } from '../../models/pipeline/plugin_statement';
+import { CollapsibleStatement } from './collapsible_statement';
+import { IfElement } from '../../models/list/if_element';
+import { formatMetric } from '../../../../../lib/format_number';
 
 function getInputStatementStats(inputVertex) {
   const { latestEventsPerSecond } = inputVertex;
