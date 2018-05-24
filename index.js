@@ -12,15 +12,6 @@ export default function(kibana) {
         description: 'Data driven workpads',
         icon: 'plugins/canvas/icon.svg',
         main: 'plugins/canvas/app',
-        uses: [
-          'visTypes',
-          'visResponseHandlers',
-          'visRequestHandlers',
-          'visEditorTypes',
-          'savedObjectTypes',
-          'spyModes',
-          'fieldFormats',
-        ],
         injectVars: server => {
           const config = server.config();
           const basePath = config.get('server.basePath');
