@@ -8,7 +8,7 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import chrome from 'ui/chrome';
 import { SpaceCard } from './space_card';
-import { stripSpaceUrlContext } from '../../../common/spaces_url_parser';
+import { stripSpaceUrlContext, addSpaceUrlContext } from '../../../common/spaces_url_parser';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -48,7 +48,7 @@ export class SpaceCards extends Component {
     return () => {
       const baseUrlWithoutSpace = stripSpaceUrlContext(chrome.getBasePath());
 
-      window.location = `${baseUrlWithoutSpace}/s/${space.urlContext}`;
+      window.location = addSpaceUrlContext(baseUrlWithoutSpace, space.urlContext);
     };
   };
 }

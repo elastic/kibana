@@ -4,11 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const DEFAULT_SPACE_ID = `default`;
+export {
+  addSpaceUrlContext,
+  stripSpaceUrlContext,
+  getSpaceUrlContext,
+} from './spaces_url_parser';
 
-export const SELECTED_SPACE_COOKIE = 'selectedSpace';
-
-/**
- * Cookie expiration for the user's selected Space. (90 days)
- */
-export const SELECTED_SPACE_COOKIE_TTL_MILLIS = 1000 * 60 * 60 * 24 * 90;
+export {
+  DEFAULT_SPACE_ID,
+  SELECTED_SPACE_COOKIE,
+  SELECTED_SPACE_COOKIE_TTL_MILLIS,
+} from './constants';

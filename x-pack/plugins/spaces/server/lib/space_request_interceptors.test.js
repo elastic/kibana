@@ -6,6 +6,13 @@
 import sinon from 'sinon';
 import { Server } from 'hapi';
 import { initSpacesRequestInterceptors } from './space_request_interceptors';
+import { initSelectedSpaceState } from './selected_space_state';
+
+const config = {
+  'server.ssl.enabled': true,
+  'server.basePath': '/',
+  'xpack.spaces.rememberSelectedSpace': true,
+};
 
 describe('interceptors', () => {
   const sandbox = sinon.sandbox.create();
@@ -19,6 +26,12 @@ describe('interceptors', () => {
       const server = new Server();
 
       server.connection({ port: 0 });
+
+      initSelectedSpaceState(server, {
+        get: (key) => {
+          return config[key];
+        }
+      });
 
       initSpacesRequestInterceptors(server);
 

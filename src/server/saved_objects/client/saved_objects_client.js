@@ -16,7 +16,7 @@ export class SavedObjectsClient {
       index,
       mappings,
       callCluster,
-      onBeforeWrite = () => {},
+      onBeforeWrite = () => { },
     } = options;
 
     this._index = index;

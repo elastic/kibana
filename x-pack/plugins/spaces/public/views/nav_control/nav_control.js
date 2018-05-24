@@ -13,7 +13,7 @@ import 'plugins/spaces/views/nav_control/nav_control.less';
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { NavControlModal } from 'plugins/spaces/views/nav_control/nav_control_modal';
+import { NavControlPopover } from 'plugins/spaces/views/nav_control/nav_control_popover';
 
 chromeNavControlsRegistry.register(constant({
   name: 'spaces',
@@ -23,12 +23,12 @@ chromeNavControlsRegistry.register(constant({
 
 const module = uiModules.get('spaces', ['kibana']);
 
-module.controller('spacesNavController', ($scope, $http, chrome, activeSpace) => {
+module.controller('spacesNavController', ($scope, $http, chrome, globalNavState, activeSpace) => {
   const domNode = document.getElementById(`spacesNavReactRoot`);
 
   const spacesManager = new SpacesManager($http, chrome);
 
-  render(<NavControlModal spacesManager={spacesManager} activeSpace={activeSpace} />, domNode);
+  render(<NavControlPopover spacesManager={spacesManager} activeSpace={activeSpace} globalNavState={globalNavState} />, domNode);
 
   // unmount react on controller destroy
   $scope.$on('$destroy', () => {

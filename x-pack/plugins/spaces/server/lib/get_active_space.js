@@ -7,26 +7,19 @@
 import Boom from 'boom';
 import { wrapError } from './errors';
 import { getSpaceUrlContext } from '../../common/spaces_url_parser';
+import { DEFAULT_SPACE_ID } from '../../common/constants';
 
 export async function getActiveSpace(savedObjectsClient, basePath) {
   const spaceContext = getSpaceUrlContext(basePath);
 
-  if (!spaceContext) {
+  if (typeof spaceContext !== 'string') {
     return null;
   }
 
   let spaces;
   try {
-    const {
-      saved_objects: savedObjects
-    } = await savedObjectsClient.find({
-      type: 'space',
-      search: `"${spaceContext}"`,
-      search_fields: ['urlContext'],
-    });
-
-    spaces = savedObjects || [];
-  } catch(e) {
+    spaces = await getSpacesFromContext(savedObjectsClient, spaceContext);
+  } catch (e) {
     throw wrapError(e);
   }
 
@@ -48,4 +41,21 @@ export async function getActiveSpace(savedObjectsClient, basePath) {
     id: spaces[0].id,
     ...spaces[0].attributes
   };
+}
+
+async function getSpacesFromContext(client, context) {
+  // Workaround for SOC's find operation, which can't "find" on an empty string.
+  if (!context) {
+    return [await client.get('space', DEFAULT_SPACE_ID)];
+  }
+
+  const {
+    saved_objects: savedObjects
+  } = await client.find({
+    type: 'space',
+    search: `"${context}"`,
+    searchFields: ['urlContext'],
+  });
+
+  return savedObjects;
 }

@@ -1,8 +1,23 @@
+@import (reference) "~ui/styles/variables";
+
 .global-nav-link__icon .spaceNavGraphic {
     margin-top: 0.5em;
 }
 
-.selectSpaceModal {
-  min-width: 450px;
-  max-width: 1200px;
+.spaceSelectorMenu:last-child {
+  margin-bottom: 5px;
+}
+
+.spaceSelectorMenu__manageSpacesButton {
+  margin: 0 5px;
+}
+
+.spaceSelectorMenu__panel {
+  width: calc(@global-nav-open-width - 10px);
+}
+
+.euiFlexItem.spaceSelectorMenu__title {
+  background-color: #fff;
+  padding: 10px;
+  margin-bottom: 0;
 }

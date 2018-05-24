@@ -6,6 +6,7 @@
 
 import { Server } from 'hapi';
 import { initSpacesApi } from './spaces';
+import { initSelectedSpaceState } from '../../../lib/selected_space_state';
 
 jest.mock('../../../lib/route_pre_check_license', () => {
   return {
@@ -17,7 +18,7 @@ jest.mock('../../../../../../server/lib/get_client_shield', () => {
   return {
     getClient: () => {
       return {
-        callWithInternalUser: jest.fn(() => {})
+        callWithInternalUser: jest.fn(() => { })
       };
     }
   };
@@ -48,6 +49,12 @@ describe('Spaces API', () => {
   const teardowns = [];
   let request;
 
+  const config = {
+    'server.ssl.enabled': true,
+    'server.basePath': '',
+    'xpack.spaces.rememberSelectedSpace': true
+  };
+
   beforeEach(() => {
     request = async (method, path, setupFn = () => { }) => {
 
@@ -59,10 +66,11 @@ describe('Spaces API', () => {
 
       server.decorate('server', 'config', jest.fn(() => {
         return {
-          get: () => ''
+          get: (key) => config[key]
         };
       }));
 
+      initSelectedSpaceState(server, server.config());
       initSpacesApi(server);
 
       server.decorate('request', 'getBasePath', jest.fn());
@@ -147,5 +155,25 @@ describe('Spaces API', () => {
       error: "Bad Request",
       message: "This Space cannot be deleted because it is reserved."
     });
+  });
+
+  test('PUT space/{id}/select should set a cookie with the new Space, and respond with a new location', async () => {
+    const response = await request('PUT', '/api/spaces/v1/space/a-space/select');
+
+    const {
+      statusCode,
+      headers,
+      payload
+    } = response;
+
+    expect(statusCode).toEqual(200);
+
+    expect(headers).toHaveProperty('set-cookie');
+    expect(headers['set-cookie']).toHaveLength(1);
+    const [nameValuePair] = headers['set-cookie'][0].split(';').map(a => a.trim());
+    expect(nameValuePair).toEqual('selectedSpace=a-space');
+
+    const result = JSON.parse(payload);
+    expect(result.location).toEqual('/s/a-space');
   });
 });

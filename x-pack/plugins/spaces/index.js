@@ -14,6 +14,7 @@ import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import { getActiveSpace } from './server/lib/get_active_space';
 import { wrapError } from './server/lib/errors';
 import mappings from './mappings.json';
+import { initSelectedSpaceState } from './server/lib/selected_space_state';
 
 export const spaces = (kibana) => new kibana.Plugin({
   id: 'spaces',
@@ -24,6 +25,7 @@ export const spaces = (kibana) => new kibana.Plugin({
   config(Joi) {
     return Joi.object({
       enabled: Joi.boolean().default(true),
+      rememberSelectedSpace: Joi.boolean().default(true),
     }).default();
   },
 
@@ -47,12 +49,19 @@ export const spaces = (kibana) => new kibana.Plugin({
       };
     },
     replaceInjectedVars: async function (vars, request) {
+      // A rather obtuse way of preventing the Kibana login/logout resources from trying to make these requests.
+      // This seems safer than excluding a couple of hard-coded paths.
+      const canReplace = request.path.startsWith('/app/');
+      if (!canReplace) {
+        return vars;
+      }
+
       try {
         vars.activeSpace = {
           valid: true,
           space: await getActiveSpace(request.getSavedObjectsClient(), request.getBasePath())
         };
-      } catch(e) {
+      } catch (e) {
         vars.activeSpace = {
           valid: false,
           error: wrapError(e).output.payload
@@ -75,6 +84,8 @@ export const spaces = (kibana) => new kibana.Plugin({
     validateConfig(config, message => server.log(['spaces', 'warning'], message));
 
     initSpacesApi(server);
+
+    initSelectedSpaceState(server, config);
 
     initSpacesRequestInterceptors(server);
 
