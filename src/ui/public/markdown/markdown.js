@@ -66,11 +66,14 @@ export class Markdown extends Component {
   }
 
   componentWillReceiveProps(props) {
-    const openLinksInNewTabChanged = props.openLinksInNewTab !== this.props.openLinksInNewTab;
-    if (openLinksInNewTabChanged) {
+    const hasOpenLinksInNewTabChanged = props.openLinksInNewTab !== this.props.openLinksInNewTab;
+    const hasMarkdownChanged = props.markdown !== this.props.markdown;
+    const hasWhiteListerRulesChanged = props.whiteListedRules !== this.props.whiteListedRules;
+
+    if (hasOpenLinksInNewTabChanged || hasWhiteListerRulesChanged) {
       this.markdownIt = markdownFactory(props.whiteListedRules, props.openLinksInNewTab);
     }
-    if (props.markdown !== this.props.markdown || openLinksInNewTabChanged) {
+    if (hasMarkdownChanged || hasOpenLinksInNewTabChanged || hasWhiteListerRulesChanged) {
       this.setState({
         renderedMarkdown: this.transformMarkdown(props),
       });
