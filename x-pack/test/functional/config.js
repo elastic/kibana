@@ -16,6 +16,7 @@ import {
   GraphPageProvider,
   GrokDebuggerPageProvider,
   WatcherPageProvider,
+  ReportingPageProvider,
 } from './page_objects';
 
 import {
@@ -139,6 +140,7 @@ export default async function ({ readConfigFile }) {
       graph: GraphPageProvider,
       grokDebugger: GrokDebuggerPageProvider,
       watcher: WatcherPageProvider,
+      reporting: ReportingPageProvider,
     },
 
     servers,

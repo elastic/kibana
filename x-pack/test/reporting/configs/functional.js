@@ -5,17 +5,12 @@
  */
 const path = require('path');
 
-import { ReportingPageProvider } from '../page_objects/reporting_page';
-
 export async function getFunctionalConfig({ readConfigFile }) {
   const xPackFunctionalTestsConfig = await readConfigFile(require.resolve('../../functional/config.js'));
 
   return {
     services: xPackFunctionalTestsConfig.get('services'),
-    pageObjects: {
-      ...xPackFunctionalTestsConfig.get('pageObjects'),
-      reporting: ReportingPageProvider,
-    },
+    pageObjects: xPackFunctionalTestsConfig.get('pageObjects'),
     servers: xPackFunctionalTestsConfig.get('servers'),
     env: xPackFunctionalTestsConfig.get('env'),
     esTestCluster: xPackFunctionalTestsConfig.get('esTestCluster'),
