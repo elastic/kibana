@@ -7,11 +7,17 @@ import {
   updateHidePanelTitles,
   updateIsFullScreenMode,
   updateTimeRange,
+  setVisibleContextMenuPanelId,
 } from '../actions';
 
 import { DashboardViewMode } from '../dashboard_view_mode';
 
 export const view = handleActions({
+  [setVisibleContextMenuPanelId]: (state, { payload }) => ({
+    ...state,
+    visibleContextMenuPanelId: payload
+  }),
+
   [updateViewMode]: (state, { payload }) => ({
     ...state,
     viewMode: payload
