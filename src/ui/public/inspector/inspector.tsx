@@ -1,11 +1,12 @@
-import ReactDOM from 'react-dom';
+import { EventEmitter } from 'events';
 import React from 'react';
-import EventEmitter from 'events';
+import ReactDOM from 'react-dom';
 
+import { IAdapters } from './types';
 import { InspectorPanel } from './ui/inspector_panel';
 import { viewRegistry } from './view_registry';
 
-let activeSession = null;
+let activeSession: InspectorSession | null = null;
 
 const CONTAINER_ID = 'inspector-container';
 
@@ -30,13 +31,12 @@ function getOrCreateContainerElement() {
  * @extends EventEmitter
  */
 class InspectorSession extends EventEmitter {
-
   /**
    * Binds the current inspector session to an Angular scope, meaning this inspector
    * session will be closed as soon as the Angular scope gets destroyed.
    * @param {object} scope - And angular scope object to bind to.
    */
-  bindToAngularScope(scope) {
+  public bindToAngularScope(scope: ng.IScope): void {
     const removeWatch = scope.$on('$destroy', () => this.close());
     this.on('closed', () => removeWatch());
   }
@@ -47,7 +47,7 @@ class InspectorSession extends EventEmitter {
    * If this session was still active and an inspector was closed, the 'closed'
    * event will be emitted on this InspectorSession instance.
    */
-  close() {
+  public close(): void {
     if (activeSession === this) {
       const container = document.getElementById(CONTAINER_ID);
       if (container) {
@@ -56,7 +56,6 @@ class InspectorSession extends EventEmitter {
       }
     }
   }
-
 }
 
 /**
@@ -67,15 +66,18 @@ class InspectorSession extends EventEmitter {
  * @returns {boolean} True, if a call to `openInspector` with the same adapters
  *    would have shown the inspector panel, false otherwise.
  */
-function hasInspector(adapters) {
+function hasInspector(adapters: IAdapters): boolean {
   return viewRegistry.getVisible(adapters).length > 0;
 }
 
 /**
- * @typedef {object} InspectorOptions
+ * Options that can be specified when opening the inspector.
  * @property {string} title - An optional title, that will be shown in the header
  *    of the inspector. Can be used to give more context about what is being inspected.
  */
+interface InspectorOptions {
+  title?: string;
+}
 
 /**
  * Opens the inspector panel for the given adapters and close any previously opened
@@ -88,7 +90,10 @@ function hasInspector(adapters) {
  * @param {InspectorOptions} options - Options that configure the inspector. See InspectorOptions type.
  * @return {InspectorSession} The session instance for the opened inspector.
  */
-function openInspector(adapters, options = {}) {
+function openInspector(
+  adapters: IAdapters,
+  options: InspectorOptions = {}
+): InspectorSession {
   // If there is an active inspector session close it before opening a new one.
   if (activeSession) {
     activeSession.close();
@@ -104,7 +109,7 @@ function openInspector(adapters, options = {}) {
   }
 
   const container = getOrCreateContainerElement();
-  const session = activeSession = new InspectorSession();
+  const session = (activeSession = new InspectorSession());
 
   ReactDOM.render(
     <InspectorPanel
@@ -119,7 +124,4 @@ function openInspector(adapters, options = {}) {
   return session;
 }
 
-export {
-  hasInspector,
-  openInspector,
-};
+export { hasInspector, openInspector };

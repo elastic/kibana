@@ -1,20 +1,30 @@
-import { InspectorViewRegistry } from './view_registry';
+import {
+  InspectorViewDescription,
+  InspectorViewRegistry,
+} from './view_registry';
 
+import { IAdapters } from './types';
 
-function createMockView(params = {}) {
+function createMockView(
+  params: {
+    component?: string;
+    help?: string;
+    order?: number;
+    shouldShow?: (view?: IAdapters) => boolean;
+    title?: string;
+  } = {}
+): InspectorViewDescription {
   return {
-    name: params.name || 'view',
-    icon: params.icon || 'icon',
+    component: params.component || (() => () => null),
     help: params.help || 'help text',
-    component: params.component || (() => {}),
     order: params.order,
     shouldShow: params.shouldShow,
+    title: params.title || 'view',
   };
 }
 
 describe('InspectorViewRegistry', () => {
-
-  let registry;
+  let registry: InspectorViewRegistry;
 
   beforeEach(() => {
     registry = new InspectorViewRegistry();
@@ -28,47 +38,47 @@ describe('InspectorViewRegistry', () => {
   });
 
   it('should return views ordered by their order property', () => {
-    const view1 = createMockView({ name: 'view1', order: 2000 });
-    const view2 = createMockView({ name: 'view2', order: 1000 });
+    const view1 = createMockView({ title: 'view1', order: 2000 });
+    const view2 = createMockView({ title: 'view2', order: 1000 });
     registry.register(view1);
     registry.register(view2);
     const views = registry.getAll();
-    expect(views.map(v => v.name)).toEqual(['view2', 'view1']);
+    expect(views.map(v => v.title)).toEqual(['view2', 'view1']);
   });
 
   describe('getVisible()', () => {
-    it('should return empty array on passing null to the registry', () => {
-      const view1 = createMockView({ name: 'view1', shouldShow: () => true });
-      const view2 = createMockView({ name: 'view2', shouldShow: () => false });
+    it('should return empty array on passing undefined to the registry', () => {
+      const view1 = createMockView({ title: 'view1', shouldShow: () => true });
+      const view2 = createMockView({ title: 'view2', shouldShow: () => false });
       registry.register(view1);
       registry.register(view2);
-      const views = registry.getVisible(null);
+      const views = registry.getVisible();
       expect(views).toEqual([]);
     });
 
     it('should only return matching views', () => {
-      const view1 = createMockView({ name: 'view1', shouldShow: () => true });
-      const view2 = createMockView({ name: 'view2', shouldShow: () => false });
+      const view1 = createMockView({ title: 'view1', shouldShow: () => true });
+      const view2 = createMockView({ title: 'view2', shouldShow: () => false });
       registry.register(view1);
       registry.register(view2);
       const views = registry.getVisible({});
-      expect(views.map(v => v.name)).toEqual(['view1']);
+      expect(views.map(v => v.title)).toEqual(['view1']);
     });
 
     it('views without shouldShow should be included', () => {
-      const view1 = createMockView({ name: 'view1', shouldShow: () => true });
-      const view2 = createMockView({ name: 'view2' });
+      const view1 = createMockView({ title: 'view1', shouldShow: () => true });
+      const view2 = createMockView({ title: 'view2' });
       registry.register(view1);
       registry.register(view2);
       const views = registry.getVisible({});
-      expect(views.map(v => v.name)).toEqual(['view1', 'view2']);
+      expect(views.map(v => v.title)).toEqual(['view1', 'view2']);
     });
 
     it('should pass the adapters to the callbacks', () => {
       const shouldShow = jest.fn();
       const view1 = createMockView({ shouldShow });
       registry.register(view1);
-      const adapter = { foo: () => {} };
+      const adapter = { foo: () => null };
       registry.getVisible(adapter);
       expect(shouldShow).toHaveBeenCalledWith(adapter);
     });

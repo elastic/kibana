@@ -1,4 +1,5 @@
-import EventEmitter from 'events';
+import { EventEmitter } from 'events';
+import { IAdapters } from './types';
 
 /**
  * @callback viewShouldShowFunc
@@ -22,12 +23,19 @@ import EventEmitter from 'events';
  *    this view should be visible for a given collection of adapters. If not specified
  *    the view will always be visible.
  */
+interface InspectorViewDescription {
+  title: string;
+  order?: number;
+  shouldShow?: (adapters: IAdapters) => boolean;
+  component: any; // TODO: Use React.Component
+  help?: string;
+}
 
 /**
  * A registry that will hold inspector views.
  */
 class InspectorViewRegistry extends EventEmitter {
-  _views = [];
+  private views: InspectorViewDescription[] = [];
 
   /**
    * Register a new inspector view to the registry. Check the README.md in the
@@ -36,11 +44,13 @@ class InspectorViewRegistry extends EventEmitter {
    *
    * @param {InspectorViewDescription} view - The view description to add to the registry.
    */
-  register(view) {
-    if (!view) return;
-    this._views.push(view);
+  public register(view: InspectorViewDescription): void {
+    if (!view) {
+      return;
+    }
+    this.views.push(view);
     // Keep registry sorted by the order property
-    this._views.sort((a, b) => (a.order || 9000) - (b.order || 9000));
+    this.views.sort((a, b) => (a.order || 9000) - (b.order || 9000));
     this.emit('change');
   }
 
@@ -49,8 +59,8 @@ class InspectorViewRegistry extends EventEmitter {
    * @returns {InspectorViewDescription[]} A by `order` sorted list of all registered
    *    inspector views.
    */
-  getAll() {
-    return this._views;
+  public getAll(): InspectorViewDescription[] {
+    return this.views;
   }
 
   /**
@@ -59,12 +69,12 @@ class InspectorViewRegistry extends EventEmitter {
    * @returns {InspectorViewDescription[]} All inespector view descriptions visible
    *    for the specific adapters.
    */
-  getVisible(adapters) {
+  public getVisible(adapters?: IAdapters): InspectorViewDescription[] {
     if (!adapters) {
       return [];
     }
-    return this._views.filter(view =>
-      !view.shouldShow || view.shouldShow(adapters)
+    return this.views.filter(
+      view => !view.shouldShow || view.shouldShow(adapters)
     );
   }
 }
@@ -75,4 +85,4 @@ class InspectorViewRegistry extends EventEmitter {
  */
 const viewRegistry = new InspectorViewRegistry();
 
-export { viewRegistry, InspectorViewRegistry };
+export { viewRegistry, InspectorViewRegistry, InspectorViewDescription };
