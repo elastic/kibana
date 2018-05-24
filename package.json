@@ -130,6 +130,7 @@
     "glob-all": "3.0.1",
     "good-squeeze": "2.1.0",
     "h2o2": "5.1.1",
+    "h2o2-latest": "npm:h2o2@8.1.2",
     "handlebars": "4.0.5",
     "hapi": "14.2.0",
     "hapi-latest": "npm:hapi@17.5.0",

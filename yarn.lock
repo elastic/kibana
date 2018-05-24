@@ -5947,6 +5947,15 @@ gulp-sourcemaps@1.7.3:
     through2 "2.X"
     vinyl "1.X"
 
+"h2o2-latest@npm:h2o2@8.1.2":
+  version "8.1.2"
+  resolved "https://registry.yarnpkg.com/h2o2/-/h2o2-8.1.2.tgz#25e6f69f453175c9ca1e3618741c5ebe1b5000c1"
+  dependencies:
+    boom "7.x.x"
+    hoek "5.x.x"
+    joi "13.x.x"
+    wreck "14.x.x"
+
 h2o2@5.1.1:
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/h2o2/-/h2o2-5.1.1.tgz#dc09d59e8771d0ffc9f3bdba2e6b72ef6151c1e3"

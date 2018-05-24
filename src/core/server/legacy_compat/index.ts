@@ -36,15 +36,22 @@ import {
 import { BehaviorSubject, k$, map } from '../../lib/kbn_observable';
 import { Env } from '../config';
 import { Root } from '../root';
+import { BasePathProxyRoot } from '../root/base_path_proxy_root';
+
+function getConfigs(rawKbnServer: any) {
+  const legacyConfig$ = new BehaviorSubject(rawKbnServer.config);
+  const config$ = k$(legacyConfig$)(
+    map(legacyConfig => new LegacyConfigToRawConfigAdapter(legacyConfig))
+  );
+
+  return { legacyConfig$, config$ };
+}
 
 /**
  * @internal
  */
 export const injectIntoKbnServer = (rawKbnServer: any) => {
-  const legacyConfig$ = new BehaviorSubject(rawKbnServer.config);
-  const config$ = k$(legacyConfig$)(
-    map(legacyConfig => new LegacyConfigToRawConfigAdapter(legacyConfig))
-  );
+  const { legacyConfig$, config$ } = getConfigs(rawKbnServer);
 
   rawKbnServer.newPlatform = {
     // Custom HTTP Listener that will be used within legacy platform by HapiJS server.
@@ -60,4 +67,13 @@ export const injectIntoKbnServer = (rawKbnServer: any) => {
       legacyConfig$.next(legacyConfig);
     },
   };
+};
+
+export const createBasePathProxy = (rawKbnServer: any) => {
+  const { config$ } = getConfigs(rawKbnServer);
+
+  return new BasePathProxyRoot(
+    config$,
+    Env.createDefault({ kbnServer: new LegacyKbnServer(rawKbnServer) })
+  );
 };

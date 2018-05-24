@@ -22,9 +22,9 @@ import { debounce, invoke, bindAll, once, uniq } from 'lodash';
 
 import Log from '../log';
 import Worker from './worker';
-import BasePathProxy from './base_path_proxy';
 import { Config } from '../../server/config/config';
 import { transformDeprecations } from '../../server/config/transform_deprecations';
+import { configureBasePathProxy } from './base_path_proxy';
 
 process.env.kbnWorkerType = 'managr';
 
@@ -33,10 +33,14 @@ export default class ClusterManager {
     const transformedSettings = transformDeprecations(settings);
     const config = await Config.withDefaultSchema(transformedSettings);
 
-    return new ClusterManager(opts, config);
+    const basePathProxy = opts.basePath
+      ? await configureBasePathProxy(config)
+      : undefined;
+
+    return new ClusterManager(opts, config, basePathProxy);
   }
 
-  constructor(opts, config) {
+  constructor(opts, config, basePathProxy) {
     this.log = new Log(opts.quiet, opts.silent);
     this.addedCount = 0;
     this.inReplMode = !!opts.repl;
@@ -47,8 +51,8 @@ export default class ClusterManager {
       '--server.autoListen=false',
     ];
 
-    if (opts.basePath) {
-      this.basePathProxy = new BasePathProxy(this, config);
+    if (basePathProxy) {
+      this.basePathProxy = basePathProxy;
 
       optimizerArgv.push(
         `--server.basePath=${this.basePathProxy.basePath}`,
@@ -77,6 +81,10 @@ export default class ClusterManager {
         argv: serverArgv
       })
     ];
+
+    // Pass server worker to the basepath proxy so that it can hold off the
+    // proxying until server worker is ready.
+    this.basePathProxy.serverWorker = this.server;
 
     // broker messages between workers
     this.workers.forEach((worker) => {
@@ -120,7 +128,7 @@ export default class ClusterManager {
     this.setupManualRestart();
     invoke(this.workers, 'start');
     if (this.basePathProxy) {
-      this.basePathProxy.listen();
+      this.basePathProxy.start();
     }
   }
 

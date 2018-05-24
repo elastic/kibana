@@ -34,14 +34,14 @@ export type OnShutdown = (reason?: Error) => void;
  */
 export class Root {
   public configService: ConfigService;
-  public server?: Server;
   public readonly log: Logger;
   public readonly logger: LoggerFactory;
+  private server?: Server;
   private readonly loggingService: LoggingService;
 
   constructor(
     rawConfig$: Observable<RawConfig>,
-    private readonly env: Env,
+    protected readonly env: Env,
     private readonly onShutdown: OnShutdown = () => {
       // noop
     }
@@ -71,12 +71,8 @@ export class Root {
       throw e;
     }
 
-    this.log.info('starting the server');
-
-    this.server = new Server(this.configService, this.logger, this.env);
-
     try {
-      await this.server.start();
+      await this.startServer();
     } catch (e) {
       this.log.error(e);
 
@@ -86,13 +82,24 @@ export class Root {
   }
 
   public async shutdown(reason?: Error) {
-    this.log.info('stopping Kibana');
-    if (this.server !== undefined) {
-      await this.server.stop();
-    }
+    await this.stopServer();
 
     await this.loggingService.stop();
 
     this.onShutdown(reason);
+  }
+
+  protected async startServer() {
+    this.server = new Server(this.configService, this.logger, this.env);
+    return this.server.start();
+  }
+
+  protected async stopServer() {
+    if (this.server === undefined) {
+      return;
+    }
+
+    await this.server.stop();
+    this.server = undefined;
   }
 }

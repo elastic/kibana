@@ -17,7 +17,28 @@
  * under the License.
  */
 
-export {
-  injectIntoKbnServer,
-  createBasePathProxy,
-} from './server/legacy_compat';
+import { schema, TypeOf } from '../config/schema';
+
+const createDevSchema = schema.object({
+  basePathProxyTarget: schema.number({
+    defaultValue: 5603,
+  }),
+});
+
+type DevConfigType = TypeOf<typeof createDevSchema>;
+
+export class DevConfig {
+  /**
+   * @internal
+   */
+  public static schema = createDevSchema;
+
+  public basePathProxyTargetPort: number;
+
+  /**
+   * @internal
+   */
+  constructor(config: DevConfigType) {
+    this.basePathProxyTargetPort = config.basePathProxyTarget;
+  }
+}
