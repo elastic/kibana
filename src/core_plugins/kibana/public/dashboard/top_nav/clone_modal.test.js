@@ -7,7 +7,7 @@ import {
 
 import {
   DashboardCloneModal,
-} from '../top_nav/clone_modal';
+} from './clone_modal';
 
 let onClone;
 let onClose;
