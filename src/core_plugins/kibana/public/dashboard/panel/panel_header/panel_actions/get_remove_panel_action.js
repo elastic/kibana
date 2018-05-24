@@ -16,9 +16,7 @@ export function getRemovePanelAction(onDeletePanel) {
     displayName: 'Delete from dashboard',
     id: 'deletePanel',
     parentPanelId: 'mainMenu',
-    icon: <EuiIcon
-      type="trash"
-    />,
+    icon: <EuiIcon type="trash" />,
     isVisible: ({ containerState }) => (
       containerState.viewMode === DashboardViewMode.EDIT && !containerState.isPanelExpanded
     ),

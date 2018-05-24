@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 /**
  * Loops through allActions and extracts those that belong on the given contextMenuPanelId
  * @param {string} contextMenuPanelId
@@ -44,7 +46,6 @@ function buildEuiContextMenuPanelItemsAndChildPanels({ contextMenuPanelId, actio
     items.push(convertPanelActionToContextMenuItem(
       {
         action,
-        contextMenuPanelId: childPanelToOpenOnClick,
         containerState,
         embeddable
       }));
@@ -75,7 +76,7 @@ export function buildEuiContextMenuPanels(
     items: [],
     content: contextMenuPanel.getContent({ embeddable, containerState }),
   };
-  let contextMenuPanels = [euiContextMenuPanel];
+  const contextMenuPanels = [euiContextMenuPanel];
 
   const { items, childPanels } =
     buildEuiContextMenuPanelItemsAndChildPanels({
@@ -85,25 +86,23 @@ export function buildEuiContextMenuPanels(
       containerState
     });
 
-  contextMenuPanels = contextMenuPanels.concat(childPanels);
   euiContextMenuPanel.items = items;
-  return contextMenuPanels;
+  return contextMenuPanels.concat(childPanels);
 }
 
 /**
  *
  * @param {DashboardPanelAction} action
- * @param {String|undefined} contextMenuPanelId - an optional nested panel id to show when clicked.
  * @param {ContainerState} containerState
  * @param {Embeddable} embeddable
  * @return {Object} See EuiContextMenuPanelItemShape in @elastic/eui
  */
-function convertPanelActionToContextMenuItem({ action, contextMenuPanelId, containerState, embeddable }) {
+function convertPanelActionToContextMenuItem({ action, containerState, embeddable }) {
   return {
     id: action.id || action.displayName.replace(/\s/g, ''),
     name: action.displayName,
     icon: action.icon,
-    panel: contextMenuPanelId,
+    panel: _.get(action, 'childContextMenuPanel.id'),
     onClick: () => action.onClick({ containerState, embeddable }),
     disabled: action.isDisabled({ containerState, embeddable }),
     'data-test-subj': `dashboardPanelAction-${action.id}`,

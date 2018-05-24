@@ -15,7 +15,7 @@ import { DashboardViewMode } from '../../../dashboard_view_mode';
  * @return {DashboardPanelAction}
  */
 export function getCustomizePanelAction({ onResetPanelTitle, onUpdatePanelTitle, title, closeContextMenu }) {
-  return  new DashboardPanelAction({
+  return new DashboardPanelAction({
     displayName: 'Customize panel',
     id: 'customizePanel',
     parentPanelId: 'mainMenu',
