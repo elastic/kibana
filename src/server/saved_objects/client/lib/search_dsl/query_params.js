@@ -1,12 +1,31 @@
-import { getRootProperties } from '../../../../mappings';
+import { getRootPropertiesObjects } from '../../../../mappings';
+
+/**
+ * Gets the types based on the type. Uses mappings to support
+ * null type (all types), a single type string or an array
+ * @param {EsMapping} mappings
+ * @param {(string|Array<string>)} type
+ */
+function getTypes(mappings, type) {
+  if (!type) {
+    return Object.keys(getRootPropertiesObjects(mappings));
+  }
+
+  if (Array.isArray(type)) {
+    return type;
+  }
+
+  return [type];
+}
 
 /**
  *  Get the field params based on the types and searchFields
  *  @param  {Array<string>} searchFields
- *  @param  {Array<string>} types
+ *  @param  {string|Array<string>} types
  *  @return {Object}
  */
 function getFieldsForTypes(searchFields, types) {
+
   if (!searchFields || !searchFields.length) {
     return {
       all_fields: true
@@ -24,27 +43,13 @@ function getFieldsForTypes(searchFields, types) {
 /**
  *  Get the "query" related keys for the search body
  *  @param  {EsMapping} mapping mappings from Ui
- *  @param  {Object} type
+ *  @param  {(string|Array<string>)} type
  *  @param  {String} search
  *  @param  {Array<string>} searchFields
  *  @return {Object}
  */
-export function getQueryParams(mappings, type, search, searchFields, includeTypes) {
+export function getQueryParams(mappings, type, search, searchFields) {
   if (!type && !search) {
-    if (includeTypes) {
-      return {
-        query: {
-          bool: {
-            should: includeTypes.map(includeType => ({
-              term: {
-                type: includeType,
-              }
-            }))
-          }
-        }
-      };
-    }
-
     return {};
   }
 
@@ -52,21 +57,7 @@ export function getQueryParams(mappings, type, search, searchFields, includeType
 
   if (type) {
     bool.filter = [
-      { term: { type } }
-    ];
-  }
-
-  if (includeTypes) {
-    bool.must = [
-      {
-        bool: {
-          should: includeTypes.map(includeType => ({
-            term: {
-              type: includeType,
-            }
-          })),
-        }
-      }
+      { [Array.isArray(type) ? 'terms' : 'term']: { type } }
     ];
   }
 
@@ -78,7 +69,7 @@ export function getQueryParams(mappings, type, search, searchFields, includeType
           query: search,
           ...getFieldsForTypes(
             searchFields,
-            type ? [type] : Object.keys(getRootProperties(mappings)),
+            getTypes(mappings, type)
           )
         }
       }

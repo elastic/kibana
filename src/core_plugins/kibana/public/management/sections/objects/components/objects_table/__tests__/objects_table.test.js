@@ -96,8 +96,8 @@ $http.post = jest.fn().mockImplementation(() => ([]));
 const defaultProps = {
   savedObjectsClient: {
     find: jest.fn().mockImplementation(({ type }) => {
-      // We pass in type when fetching counts
-      if (type) {
+      // We pass in a single type when fetching counts
+      if (type && !Array.isArray(type)) {
         return {
           total: 1,
           savedObjects: [
