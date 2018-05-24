@@ -271,32 +271,18 @@ describe('lib/config/config', function () {
         expect(fooDefault).toEqual(['bar']);
       });
 
-      it('should not return same instance of Array', function () {
-        const noDefaultSchema = Joi.object().keys({
+      it('should return clone of the default', function () {
+        const schemaWithArrayDefault = Joi.object().keys({
           foo: Joi.array().items(Joi.string().min(1)).default(['bar'])
-        }).required();
+        }).default();
 
-        const config = new Config(noDefaultSchema);
+        const config = new Config(schemaWithArrayDefault);
         config.set({
           foo: ['baz']
         });
 
         expect(config.getDefault('foo')).not.toBe(config.getDefault('foo'));
-      });
-
-      it(`shouldn't let you mutate the default`, function () {
-        const noDefaultSchema = Joi.object().keys({
-          foo: Joi.array().items(Joi.string().min(1)).default(['bar'])
-        }).required();
-
-        const config = new Config(noDefaultSchema);
-        config.set({
-          foo: ['baz']
-        });
-
-        config.getDefault('foo').push('quz');
-
-        expect(config.getDefault('foo')).toEqual(['bar']);
+        expect(config.getDefault('foo')).toEqual(config.getDefault('foo'));
       });
     });
 
