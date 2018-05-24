@@ -45,9 +45,14 @@ export function handleResponse(clusterState, shardStats, resolver) {
         freeSpace: get(sourceStats, 'fs.total.available_in_bytes'),
         usedHeap: get(sourceStats, 'jvm.mem.heap_used_percent'),
         status: 'Online',
+        isOnline: true,
       };
     } else {
-      nodeSummary = { nodeTypeLabel: 'Offline Node', status: 'Offline', };
+      nodeSummary = {
+        nodeTypeLabel: 'Offline Node',
+        status: 'Offline',
+        isOnline: false,
+      };
     }
 
     return {
