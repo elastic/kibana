@@ -43,4 +43,27 @@ describe('props', () => {
     />);
     expect(component).toMatchSnapshot(); // eslint-disable-line
   });
+
+  test('should update markdown when openLinksInNewTab prop change', () => {
+    const component = shallow(<Markdown
+      markdown={markdown}
+      openLinksInNewTab={false}
+    />);
+    expect(component.render().find('a').prop('target')).not.toBe('_blank');
+    component.setProps({ openLinksInNewTab: true });
+    expect(component.render().find('a').prop('target')).toBe('_blank');
+  });
+
+  test('should update markdown when whiteListedRules prop change', () => {
+    const markdown = '*emphasis* `backticks`';
+    const component = shallow(<Markdown
+      markdown={markdown}
+      whiteListedRules={['emphasis', 'backticks']}
+    />);
+    expect(component.render().find('em')).toHaveLength(1);
+    expect(component.render().find('code')).toHaveLength(1);
+    component.setProps({ whiteListedRules: ['backticks'] });
+    expect(component.render().find('code')).toHaveLength(1);
+    expect(component.render().find('em')).toHaveLength(0);
+  });
 });

@@ -27,8 +27,8 @@ import {
   ERROR_EXC_MESSAGE,
   ERROR_EXC_HANDLED
 } from '../../../../common/constants';
-import { ErrorDistributionRequest } from '../../../store/reduxRequest/errorDistribution';
-import { ErrorGroupDetailsRequest } from '../../../store/reduxRequest/errorGroup';
+import { ErrorDistributionRequest } from '../../../store/reactReduxRequest/errorDistribution';
+import { ErrorGroupDetailsRequest } from '../../../store/reactReduxRequest/errorGroup';
 
 const Titles = styled.div`
   margin-bottom: ${px(units.plus)};

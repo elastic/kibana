@@ -13,7 +13,7 @@ import { EuiButton } from '@elastic/eui';
 import List from './List';
 import { HeaderContainer } from '../../shared/UIComponents';
 
-import { ServiceListRequest } from '../../../store/reduxRequest/serviceList';
+import { ServiceListRequest } from '../../../store/reactReduxRequest/serviceList';
 
 class ServiceOverview extends Component {
   state = {

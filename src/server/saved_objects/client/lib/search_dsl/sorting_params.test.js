@@ -3,10 +3,23 @@ import { getSortingParams } from './sorting_params';
 const MAPPINGS = {
   rootType: {
     properties: {
+      type: {
+        type: 'text',
+        fields: {
+          raw: {
+            type: 'keyword'
+          }
+        }
+      },
       pending: {
         properties: {
           title: {
             type: 'text',
+            fields: {
+              raw: {
+                type: 'keyword'
+              }
+            }
           }
         }
       },
@@ -55,8 +68,8 @@ describe('searchDsl/getSortParams', () => {
     });
   });
 
-  describe('search field no direction', () => {
-    describe('search field is simple property', () => {
+  describe('sortField no direction', () => {
+    describe('sortField is simple property with single type', () => {
       it('returns correct params', () => {
         expect(getSortingParams(MAPPINGS, 'saved', 'title'))
           .toEqual({
@@ -71,7 +84,27 @@ describe('searchDsl/getSortParams', () => {
           });
       });
     });
-    describe('search field is multi-field', () => {
+    describe('sortField is simple root property with multiple types', () => {
+      it('returns correct params', () => {
+        expect(getSortingParams(MAPPINGS, ['saved', 'pending'], 'type'))
+          .toEqual({
+            sort: [
+              {
+                'type': {
+                  order: undefined,
+                  unmapped_type: 'text'
+                }
+              }
+            ]
+          });
+      });
+    });
+    describe('sortField is simple non-root property with multiple types', () => {
+      it('returns correct params', () => {
+        expect(() => getSortingParams(MAPPINGS, ['saved', 'pending'], 'title')).toThrowErrorMatchingSnapshot();
+      });
+    });
+    describe('sortField is multi-field with single type', () => {
       it('returns correct params', () => {
         expect(getSortingParams(MAPPINGS, 'saved', 'title.raw'))
           .toEqual({
@@ -86,10 +119,30 @@ describe('searchDsl/getSortParams', () => {
           });
       });
     });
+    describe('sortField is root multi-field with multiple types', () => {
+      it('returns correct params', () => {
+        expect(getSortingParams(MAPPINGS, ['saved', 'pending'], 'type.raw'))
+          .toEqual({
+            sort: [
+              {
+                'type.raw': {
+                  order: undefined,
+                  unmapped_type: 'keyword'
+                }
+              }
+            ]
+          });
+      });
+    });
+    describe('sortField is not-root multi-field with multiple types', () => {
+      it('returns correct params', () => {
+        expect(() => getSortingParams(MAPPINGS, ['saved', 'pending'], 'title.raw')).toThrowErrorMatchingSnapshot();
+      });
+    });
   });
 
-  describe('search with direction', () => {
-    describe('search field is simple property', () => {
+  describe('sort with direction', () => {
+    describe('sortField is simple property with single type', () => {
       it('returns correct params', () => {
         expect(getSortingParams(MAPPINGS, 'saved', 'title', 'desc'))
           .toEqual({
@@ -104,7 +157,27 @@ describe('searchDsl/getSortParams', () => {
           });
       });
     });
-    describe('search field is multi-field', () => {
+    describe('sortField is root simple property with multiple type', () => {
+      it('returns correct params', () => {
+        expect(getSortingParams(MAPPINGS, ['saved', 'pending'], 'type', 'desc'))
+          .toEqual({
+            sort: [
+              {
+                'type': {
+                  order: 'desc',
+                  unmapped_type: 'text'
+                }
+              }
+            ]
+          });
+      });
+    });
+    describe('sortFields is non-root simple property with multiple types', () => {
+      it('returns correct params', () => {
+        expect(() => getSortingParams(MAPPINGS, ['saved', 'pending'], 'title', 'desc')).toThrowErrorMatchingSnapshot();
+      });
+    });
+    describe('sortField is multi-field with single type', () => {
       it('returns correct params', () => {
         expect(getSortingParams(MAPPINGS, 'saved', 'title.raw', 'asc'))
           .toEqual({
@@ -117,6 +190,26 @@ describe('searchDsl/getSortParams', () => {
               }
             ]
           });
+      });
+    });
+    describe('sortField is root multi-field with multiple types', () => {
+      it('returns correct params', () => {
+        expect(getSortingParams(MAPPINGS, ['saved', 'pending'], 'type.raw', 'asc'))
+          .toEqual({
+            sort: [
+              {
+                'type.raw': {
+                  order: 'asc',
+                  unmapped_type: 'keyword'
+                }
+              }
+            ]
+          });
+      });
+    });
+    describe('sortField is non-root multi-field with multiple types', () => {
+      it('returns correct params', () => {
+        expect(() => getSortingParams(MAPPINGS, ['saved', 'pending'], 'title.raw', 'asc')).toThrowErrorMatchingSnapshot();
       });
     });
   });

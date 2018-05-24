@@ -56,7 +56,7 @@ export async function lintFiles(log: ToolingLog, files: File[]) {
       log.success(
         '[tslint/%s] %d files linted successfully',
         project.name,
-        files.length
+        filesInProject.length
       );
     }
   }

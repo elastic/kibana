@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 import ServiceOverview from './view';
-import { getServiceList } from '../../../store/reduxRequest/serviceList';
+import { getServiceList } from '../../../store/reactReduxRequest/serviceList';
 import { getUrlParams } from '../../../store/urlParams';
 import sorting, { changeServiceSorting } from '../../../store/sorting';
 
