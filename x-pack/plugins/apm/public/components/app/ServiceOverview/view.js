@@ -12,7 +12,6 @@ import { KibanaLink } from '../../../utils/url';
 import { EuiButton } from '@elastic/eui';
 import List from './List';
 import { HeaderContainer } from '../../shared/UIComponents';
-import { KueryBar } from '../../shared/KueryBar';
 
 import { ServiceListRequest } from '../../../store/reactReduxRequest/serviceList';
 
@@ -56,8 +55,6 @@ class ServiceOverview extends Component {
           <h1>Services</h1>
           <SetupInstructionsLink />
         </HeaderContainer>
-
-        <KueryBar />
 
         <ServiceListRequest
           urlParams={urlParams}

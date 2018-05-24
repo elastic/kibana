@@ -12,7 +12,6 @@ import List from './List';
 import WatcherFlyout from './Watcher/WatcherFlyOut';
 import OpenWatcherDialogButton from './Watcher/OpenWatcherDialogButton';
 import { ErrorGroupDetailsRequest } from '../../../store/reactReduxRequest/errorGroupList';
-import { KueryBar } from '../../shared/KueryBar';
 
 class ErrorGroupOverview extends Component {
   state = {
@@ -39,8 +38,6 @@ class ErrorGroupOverview extends Component {
             <OpenWatcherDialogButton onOpenFlyout={this.onOpenFlyout} />
           )}
         </HeaderContainer>
-
-        <KueryBar />
 
         <TabNavigation />
 
