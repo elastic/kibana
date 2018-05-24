@@ -1,31 +1,30 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { EuiSpacer } from '@elastic/eui';
 import { BorderForm } from './border_form';
 import { AppearanceForm } from './appearance_form';
 
-import './container_style.less';
-
 export const ExtendedTemplate = ({ getArgValue, setArgValue, workpad }) => (
-  <div className="canvas__argtype--containerStyle">
-    <div>
-      <label>Appearance</label>
-      <AppearanceForm
-        className="canvas__argtype--containerStyle--appearance"
-        padding={getArgValue('padding')}
-        backgroundColor={getArgValue('backgroundColor')}
-        opacity={getArgValue('opacity')}
-        onChange={setArgValue}
-      />
+  <div>
+    <label>Appearance</label>
+    <EuiSpacer size="xs" />
+    <AppearanceForm
+      padding={getArgValue('padding')}
+      backgroundColor={getArgValue('backgroundColor')}
+      opacity={getArgValue('opacity')}
+      onChange={setArgValue}
+    />
 
-      <label>Border</label>
-      <BorderForm
-        className="canvas__argtype--containerStyle--border"
-        value={getArgValue('border', '')}
-        radius={getArgValue('borderRadius')}
-        onChange={setArgValue}
-        colors={workpad.colors}
-      />
-    </div>
+    <EuiSpacer size="m" />
+
+    <label>Border</label>
+    <EuiSpacer size="xs" />
+    <BorderForm
+      value={getArgValue('border', '')}
+      radius={getArgValue('borderRadius')}
+      onChange={setArgValue}
+      colors={workpad.colors}
+    />
   </div>
 );
 

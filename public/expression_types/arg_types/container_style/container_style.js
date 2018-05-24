@@ -5,8 +5,6 @@ import { templateFromReactComponent } from '../../../lib/template_from_react_com
 import { SimpleTemplate } from './simple_template';
 import { ExtendedTemplate } from './extended_template';
 
-import './container_style.less';
-
 const wrap = Component =>
   // TODO: this should be in a helper
   withHandlers({
@@ -22,8 +20,8 @@ const wrap = Component =>
 
 export const containerStyle = () => ({
   name: 'containerStyle',
-  displayName: 'Image Upload',
-  help: 'Select or upload an image',
+  displayName: 'Container Style',
+  help: 'Tweak the appearance of the element container',
   simpleTemplate: templateFromReactComponent(wrap(SimpleTemplate)),
   template: templateFromReactComponent(wrap(ExtendedTemplate)),
 });

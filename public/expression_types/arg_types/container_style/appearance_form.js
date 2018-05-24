@@ -1,17 +1,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { LabeledInput } from '../../../components/labeled_input';
+import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 
 const opacities = [
-  [1, '100%'],
-  [0.9, '90%'],
-  [0.7, '70%'],
-  [0.5, '50%'],
-  [0.3, '30%'],
-  [0.1, '10%'],
+  { value: 1, text: '100%' },
+  { value: 0.9, text: '90%' },
+  { value: 0.7, text: '70%' },
+  { value: 0.5, text: '50%' },
+  { value: 0.3, text: '30%' },
+  { value: 0.1, text: '10%' },
 ];
 
-export const AppearanceForm = ({ className, padding, opacity, onChange }) => {
+export const AppearanceForm = ({ padding, opacity, onChange }) => {
   const paddingVal = padding ? padding.replace('px', '') : '';
 
   const namedChange = name => ev => {
@@ -21,24 +21,18 @@ export const AppearanceForm = ({ className, padding, opacity, onChange }) => {
   };
 
   return (
-    <div className={className}>
-      <LabeledInput
-        type="number"
-        className="padding"
-        label="Padding"
-        value={paddingVal}
-        onChange={namedChange('padding')}
-      />
-
-      <LabeledInput
-        type="select"
-        className="opacity"
-        label="Opacity"
-        value={opacity}
-        values={opacities}
-        onChange={namedChange('opacity')}
-      />
-    </div>
+    <EuiFlexGroup gutterSize="s">
+      <EuiFlexItem>
+        <EuiFormRow label="Padding">
+          <EuiFieldNumber value={Number(paddingVal)} onChange={namedChange('padding')} />
+        </EuiFormRow>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFormRow label="Opacity">
+          <EuiSelect defaultValue={opacity} options={opacities} onChange={namedChange('opacity')} />
+        </EuiFormRow>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
@@ -46,5 +40,4 @@ AppearanceForm.propTypes = {
   padding: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   opacity: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   onChange: PropTypes.func.isRequired,
-  className: PropTypes.string,
 };

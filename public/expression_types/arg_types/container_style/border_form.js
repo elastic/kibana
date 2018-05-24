@@ -1,12 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ControlLabel } from 'react-bootstrap';
+import { EuiFlexGroup, EuiFormRow, EuiFlexItem, EuiFieldNumber, EuiSelect } from '@elastic/eui';
 import { ColorPickerMini } from '../../../components/color_picker_mini';
-import { LabeledInput } from '../../../components/labeled_input';
 
 const styles = ['solid', 'dotted', 'dashed', 'double', 'groove', 'ridge', 'inset', 'outset'];
 
-export const BorderForm = ({ className, value, radius, onChange, colors }) => {
+const options = [{ value: '', text: '--' }];
+styles.forEach(val => options.push({ value: val, text: val }));
+
+export const BorderForm = ({ value, radius, onChange, colors }) => {
   const border = value || '';
   const [borderWidth = '', borderStyle = '', borderColor = ''] = border.split(' ');
   const borderWidthVal = borderWidth ? borderWidth.replace('px', '') : '';
@@ -28,38 +30,35 @@ export const BorderForm = ({ className, value, radius, onChange, colors }) => {
   const borderColorChange = color => onChange('border', `${borderWidth} ${borderStyle} ${color}`);
 
   return (
-    <div className={className}>
-      <LabeledInput
-        type="number"
-        className="border-width"
-        label="Width"
-        value={borderWidthVal}
-        onChange={namedChange('borderWidth')}
-      />
+    <EuiFlexGroup gutterSize="s">
+      <EuiFlexItem grow={2}>
+        <EuiFormRow label="Width">
+          <EuiFieldNumber value={Number(borderWidthVal)} onChange={namedChange('borderWidth')} />
+        </EuiFormRow>
+      </EuiFlexItem>
 
-      <LabeledInput
-        type="select"
-        includeEmpty
-        className="border-style"
-        label="Style"
-        value={borderStyle}
-        values={styles}
-        onChange={namedChange('borderStyle')}
-      />
+      <EuiFlexItem grow={3}>
+        <EuiFormRow label="Style">
+          <EuiSelect
+            defaultValue={borderStyle}
+            options={options}
+            onChange={namedChange('borderStyle')}
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
 
-      <LabeledInput
-        type="number"
-        className="border-radius"
-        label="Radius"
-        value={radiusVal}
-        onChange={namedChange('borderRadius')}
-      />
+      <EuiFlexItem grow={2}>
+        <EuiFormRow label="Radius">
+          <EuiFieldNumber value={Number(radiusVal)} onChange={namedChange('borderRadius')} />
+        </EuiFormRow>
+      </EuiFlexItem>
 
-      <div className="border-color">
-        <ColorPickerMini value={borderColor} onChange={borderColorChange} colors={colors} />
-        <ControlLabel>Color</ControlLabel>
-      </div>
-    </div>
+      <EuiFlexItem grow={1}>
+        <EuiFormRow label="Color">
+          <ColorPickerMini value={borderColor} onChange={borderColorChange} colors={colors} />
+        </EuiFormRow>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
@@ -67,6 +66,5 @@ BorderForm.propTypes = {
   value: PropTypes.string,
   radius: PropTypes.string,
   onChange: PropTypes.func.isRequired,
-  className: PropTypes.string,
   colors: PropTypes.array.isRequired,
 };
