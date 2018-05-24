@@ -120,6 +120,7 @@ module.exports = function (grunt) {
     grunt.task.run(_.compact([
       !grunt.option('quick') && 'run:eslint',
       !grunt.option('quick') && 'run:tslint',
+      'run:checkFileCasing',
       'licenses',
       'test:quick',
       'verifyTranslations',
