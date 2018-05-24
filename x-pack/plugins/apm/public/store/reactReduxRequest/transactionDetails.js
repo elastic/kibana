@@ -6,22 +6,26 @@
 
 import React from 'react';
 import { withInitialData } from './helpers';
-import { ReduxRequest } from '../../components/shared/ReduxRequest';
+import { Request } from 'react-redux-request';
 import { loadTransaction } from '../../services/rest';
 
 const ID = 'transactionDetails';
 const INITIAL_DATA = {};
 
 export function getTransactionDetails(state) {
-  return withInitialData(state.reduxRequest[ID], INITIAL_DATA);
+  return withInitialData(state.reactReduxRequest[ID], INITIAL_DATA);
 }
 
 export function TransactionDetailsRequest({ urlParams, render }) {
   const { serviceName, start, end, transactionId, kuery } = urlParams;
+
+  if (!(serviceName && start && end && transactionId)) {
+    return null;
+  }
+
   return (
-    <ReduxRequest
+    <Request
       id={ID}
-      shouldInvoke={Boolean(serviceName && start && end && transactionId)}
       fn={loadTransaction}
       selector={getTransactionDetails}
       args={[{ serviceName, start, end, transactionId, kuery }]}

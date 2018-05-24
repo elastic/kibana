@@ -7,7 +7,7 @@
 export function MonitoringElasticsearchIndexDetailProvider({ getService }) {
   const testSubjects = getService('testSubjects');
 
-  const SUBJ_SUMMARY = 'elasticsearchIndexSummaryStatus';
+  const SUBJ_SUMMARY = 'elasticsearchIndexDetailStatus';
   const SUBJ_SUMMARY_DATA_SIZE           = `${SUBJ_SUMMARY} dataSize`;
   const SUBJ_SUMMARY_DATA_SIZE_PRIMARIES = `${SUBJ_SUMMARY} dataSizePrimaries`;
   const SUBJ_SUMMARY_DOCUMENT_COUNT      = `${SUBJ_SUMMARY} documentCount`;

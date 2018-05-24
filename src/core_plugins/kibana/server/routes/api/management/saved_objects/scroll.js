@@ -65,7 +65,7 @@ export function registerScrollForCountRoute(server) {
     handler: async (req, reply) => {
       const savedObjectsClient = req.getSavedObjectsClient();
       const findOptions = {
-        includeTypes: req.payload.typesToInclude,
+        type: req.payload.typesToInclude,
         perPage: 1000,
       };
 

@@ -1,16 +1,22 @@
+/* tslint:disable max-classes-per-file */
+
 import { System } from './system';
 import { KibanaSystem } from './system_types';
 
 test('can get exposed values after starting', () => {
-  type CoreType = { bar: string };
-  type DepsType = { quux: string };
-  type ExposedType = {
-    core: CoreType;
-    deps: DepsType;
-  };
+  interface ICoreType {
+    bar: string;
+  }
+  interface IDepsType {
+    quux: string;
+  }
+  interface IExposedType {
+    core: ICoreType;
+    deps: IDepsType;
+  }
 
-  class FooSystem extends KibanaSystem<CoreType, DepsType, ExposedType> {
-    start() {
+  class FooSystem extends KibanaSystem<ICoreType, IDepsType, IExposedType> {
+    public start() {
       return {
         core: this.kibana,
         deps: this.deps,
@@ -39,7 +45,7 @@ test('can get exposed values after starting', () => {
 
 test('throws if start returns a promise', () => {
   class FooSystem extends KibanaSystem<any, any, any> {
-    async start() {
+    public async start() {
       return 'foo';
     }
   }
@@ -55,9 +61,11 @@ test('throws if start returns a promise', () => {
 
 test('throws if stop returns a promise', () => {
   class FooSystem extends KibanaSystem<any, any, any> {
-    start() {}
+    public start() {
+      // noop
+    }
 
-    async stop() {
+    public async stop() {
       return 'stop';
     }
   }

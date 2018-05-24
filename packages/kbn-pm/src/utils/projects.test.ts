@@ -1,15 +1,15 @@
 import { resolve } from 'path';
 
-import {
-  getProjects,
-  buildProjectGraph,
-  topologicallyBatchProjects,
-  includeTransitiveProjects,
-  ProjectMap,
-  ProjectGraph,
-} from './projects';
-import { Project } from './project';
 import { getProjectPaths } from '../config';
+import { Project } from './project';
+import {
+  buildProjectGraph,
+  getProjects,
+  includeTransitiveProjects,
+  ProjectGraph,
+  ProjectMap,
+  topologicallyBatchProjects,
+} from './projects';
 
 const rootPath = resolve(`${__dirname}/__fixtures__/kibana`);
 
@@ -164,12 +164,12 @@ describe('#getProjects', () => {
 
 describe('#buildProjectGraph', () => {
   test('builds full project graph', async () => {
-    const projects = await getProjects(rootPath, [
+    const allProjects = await getProjects(rootPath, [
       '.',
       'packages/*',
       '../plugins/*',
     ]);
-    const graph = buildProjectGraph(projects);
+    const graph = buildProjectGraph(allProjects);
 
     const expected: { [k: string]: string[] } = {};
     for (const [projectName, projects] of graph.entries()) {

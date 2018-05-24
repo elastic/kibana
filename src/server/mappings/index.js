@@ -7,4 +7,5 @@ export {
   getRootType,
   getProperty,
   getRootProperties,
+  getRootPropertiesObjects,
 } from './lib';
