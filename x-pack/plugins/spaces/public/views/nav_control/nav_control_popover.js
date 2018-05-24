@@ -13,9 +13,7 @@ import {
 import { Notifier } from 'ui/notify';
 import { SpacesContextMenu } from './components/spaces_context_menu';
 
-export class NavControlModal extends Component {
-  buttonRef;
-
+export class NavControlPopover extends Component {
   state = {
     isOpen: false,
     loading: false,
@@ -95,7 +93,7 @@ export class NavControlModal extends Component {
 
   getButton = (linkIcon, linkTitle) => {
     return (
-      <div className="global-nav-link" ref={(me) => { this.buttonRef = me; }} onClick={this.expandGlobalNav}>
+      <div className="global-nav-link" onClick={this.expandGlobalNav}>
         <a className="global-nav-link__anchor" onClick={this.togglePortal}>
           <div className="global-nav-link__icon">{linkIcon}</div>
           <div className="global-nav-link__title">{linkTitle}</div>
@@ -133,7 +131,7 @@ export class NavControlModal extends Component {
   }
 }
 
-NavControlModal.propTypes = {
+NavControlPopover.propTypes = {
   activeSpace: PropTypes.object,
   spacesManager: PropTypes.object.isRequired,
   globalNavState: PropTypes.object.isRequired,
