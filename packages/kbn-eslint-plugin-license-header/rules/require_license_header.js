@@ -2,6 +2,10 @@ const babelEslint = require('babel-eslint');
 
 const { assert, normalizeWhitespace, init } = require('../lib');
 
+function isHashbang(text) {
+  return text.trim().startsWith('#!') && !text.trim().includes('\n');
+}
+
 module.exports = {
   meta: {
     fixable: 'code',
@@ -52,6 +56,10 @@ module.exports = {
               end: { line: 1, column: sourceCode.lines[0].length - 1 }
             },
             fix(fixer) {
+              if (isHashbang(sourceCode.lines[0])) {
+                return undefined;
+              }
+
               return fixer.replaceTextRange([0, 0], license.source + '\n\n');
             }
           });
@@ -60,7 +68,7 @@ module.exports = {
 
         // ensure there is nothing before the comment
         const sourceBeforeNode = sourceCode.getText().slice(0, sourceCode.getIndexFromLoc(comment.loc.start));
-        if (sourceBeforeNode.length) {
+        if (sourceBeforeNode.length && !isHashbang(sourceBeforeNode)) {
           context.report({
             node: comment,
             message: 'License header must be at the very beginning of the file',
