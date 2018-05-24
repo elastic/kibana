@@ -119,6 +119,7 @@
     "elasticsearch-browser": "^14.2.1",
     "encode-uri-query": "1.0.0",
     "even-better": "7.0.2",
+    "execa": "^0.10.0",
     "expiry-js": "0.1.7",
     "extract-text-webpack-plugin": "3.0.1",
     "file-loader": "1.1.4",
