@@ -7,7 +7,7 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { spawn } from 'child_process';
+import { spawn, spawnSync } from 'child_process';
 import rimraf from 'rimraf';
 import Rx from 'rxjs/Rx';
 import cdp from 'chrome-remote-interface';
@@ -35,6 +35,7 @@ export class HeadlessChromiumDriverFactory {
         userDataDir,
         bridgePort,
         viewport,
+        verboseLogging: this.logger.isVerbose,
         disableSandbox: this.browserConfig.disableSandbox,
         proxyConfig: this.browserConfig.proxy,
       });
@@ -56,7 +57,11 @@ export class HeadlessChromiumDriverFactory {
 
       const driver$ = message$
         .first(line => line.indexOf(`DevTools listening on ws://127.0.0.1:${bridgePort}`) >= 0)
-        .do(() => this.logger.debug('Connecting chrome remote inspector'))
+        .do(() => {
+          // See https://github.com/elastic/kibana/issues/19351 for why this is necessary.
+          this.logger.debug('Ensure chromium is running and listening');
+          spawnSync(`curl`,  [`http://127.0.0.1:${bridgePort}/json`], { stdio: 'inherit' });
+        })
         .mergeMap(() => cdp({ port: bridgePort, local: true }))
         .do(() => this.logger.debug('Initializing chromium driver'))
         .map(client => new HeadlessChromiumDriver(client, {

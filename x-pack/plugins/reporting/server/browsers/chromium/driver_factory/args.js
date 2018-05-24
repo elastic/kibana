@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const args = ({ userDataDir, bridgePort, viewport, disableSandbox, proxyConfig }) => {
+export const args = ({ userDataDir, bridgePort, viewport, disableSandbox, proxyConfig, verboseLogging }) => {
   const flags = [
-    '--enable-logging',
-    '--v=1',
     // Disable built-in Google Translate service
     '--disable-translate',
     // Disable all chrome extensions entirely
@@ -44,6 +42,11 @@ export const args = ({ userDataDir, bridgePort, viewport, disableSandbox, proxyC
 
   if (disableSandbox) {
     flags.push('--no-sandbox');
+  }
+
+  if (verboseLogging) {
+    flags.push('--enable-logging');
+    flags.push('--v=1');
   }
 
   if (process.platform === 'linux') {

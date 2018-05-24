@@ -40,6 +40,6 @@ module.exports = function (grunt) {
 
   grunt.config.set('functional_test_runner.functional.options.configOverrides.mochaOpts.bail', true);
   grunt.registerTask('jenkins:selenium', [
-    //'test:uiRelease'
+    'test:uiRelease'
   ]);
 };
