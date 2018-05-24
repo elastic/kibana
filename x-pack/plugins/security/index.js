@@ -17,6 +17,7 @@ import { authenticateFactory } from './server/lib/auth_redirect';
 import { checkLicense } from './server/lib/check_license';
 import { initAuthenticator } from './server/lib/authentication/authenticator';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
+import { createAuditLogger } from './server/lib/audit_logger';
 
 export const security = (kibana) => new kibana.Plugin({
   id: 'security',
@@ -73,6 +74,8 @@ export const security = (kibana) => new kibana.Plugin({
     const thisPlugin = this;
     const xpackMainPlugin = server.plugins.xpack_main;
     mirrorPluginStatus(xpackMainPlugin, thisPlugin);
+
+    server.expose('auditLogger', createAuditLogger(server));
 
     // Register a function that is called whenever the xpack info changes,
     // to re-compute the license check results for this plugin
