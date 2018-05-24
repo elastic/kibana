@@ -6,24 +6,27 @@
 
 import React from 'react';
 import { withInitialData } from './helpers';
-import { ReduxRequest } from '../../components/shared/ReduxRequest';
+import { Request } from 'react-redux-request';
 import { loadErrorGroupDetails } from '../../services/rest';
 
 const ID = 'errorGroupDetails';
 const INITIAL_DATA = {};
 
 export function getErrorGroupDetails(state) {
-  return withInitialData(state.reduxRequest[ID], INITIAL_DATA);
+  return withInitialData(state.reactReduxRequest[ID], INITIAL_DATA);
 }
 
 export function ErrorGroupDetailsRequest({ urlParams, render }) {
   const { serviceName, errorGroupId, start, end, kuery } = urlParams;
 
+  if (!(serviceName && start && end && errorGroupId)) {
+    return null;
+  }
+
   return (
-    <ReduxRequest
+    <Request
       id={ID}
       fn={loadErrorGroupDetails}
-      shouldInvoke={Boolean(serviceName && start && end && errorGroupId)}
       args={[{ serviceName, start, end, errorGroupId, kuery }]}
       selector={getErrorGroupDetails}
       render={render}

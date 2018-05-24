@@ -9,10 +9,10 @@ import { createSelector } from 'reselect';
 import { getCharts } from '../selectors/chartSelectors';
 import { getUrlParams } from '../urlParams';
 import { withInitialData } from './helpers';
-import { ReduxRequest } from '../../components/shared/ReduxRequest';
+import { Request } from 'react-redux-request';
 import { loadCharts } from '../../services/rest';
 
-const ID = 'overviewCharts';
+const ID = 'detailsCharts';
 const INITIAL_DATA = {
   totalHits: 0,
   dates: [],
@@ -21,21 +21,34 @@ const INITIAL_DATA = {
   weightedAverage: null
 };
 
-export const getOverviewCharts = createSelector(
+export const getDetailsCharts = createSelector(
   getUrlParams,
-  state => withInitialData(state.reduxRequest[ID], INITIAL_DATA),
+  state => withInitialData(state.reactReduxRequest[ID], INITIAL_DATA),
   getCharts
 );
 
-export function OverviewChartsRequest({ urlParams, render }) {
-  const { serviceName, start, end, transactionType, kuery } = urlParams;
+export function DetailsChartsRequest({ urlParams, render }) {
+  const {
+    serviceName,
+    start,
+    end,
+    transactionType,
+    transactionName,
+    kuery
+  } = urlParams;
+
+  if (!(serviceName && start && end && transactionType && transactionName)) {
+    return null;
+  }
+
   return (
-    <ReduxRequest
+    <Request
       id={ID}
-      shouldInvoke={Boolean(serviceName && start && end && transactionType)}
       fn={loadCharts}
-      args={[{ serviceName, start, end, transactionType, kuery }]}
-      selector={getOverviewCharts}
+      args={[
+        { serviceName, start, end, transactionType, transactionName, kuery }
+      ]}
+      selector={getDetailsCharts}
       render={render}
     />
   );

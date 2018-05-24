@@ -6,14 +6,14 @@
 
 import React from 'react';
 import { withInitialData } from './helpers';
-import { ReduxRequest } from '../../components/shared/ReduxRequest';
+import { Request } from 'react-redux-request';
 import { loadTransactionDistribution } from '../../services/rest';
 
 const INITIAL_DATA = { buckets: [], totalHits: 0 };
 
 export function getTransactionDistribution(state) {
   return withInitialData(
-    state.reduxRequest.transactionDistribution,
+    state.reactReduxRequest.transactionDistribution,
     INITIAL_DATA
   );
 }
@@ -25,10 +25,14 @@ export function getDefaultTransactionId(state) {
 
 export function TransactionDistributionRequest({ urlParams, render }) {
   const { serviceName, start, end, transactionName, kuery } = urlParams;
+
+  if (!(serviceName && start && end && transactionName)) {
+    return null;
+  }
+
   return (
-    <ReduxRequest
+    <Request
       id="transactionDistribution"
-      shouldInvoke={Boolean(serviceName && start && end && transactionName)}
       fn={loadTransactionDistribution}
       args={[{ serviceName, start, end, transactionName, kuery }]}
       selector={getTransactionDistribution}

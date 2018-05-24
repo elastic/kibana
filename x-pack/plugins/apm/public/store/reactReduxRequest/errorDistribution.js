@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { ReduxRequest } from '../../components/shared/ReduxRequest';
+import { Request } from 'react-redux-request';
 import { loadErrorDistribution } from '../../services/rest';
 import { withInitialData } from './helpers';
 
@@ -13,17 +13,20 @@ const ID = 'errorDistribution';
 const INITIAL_DATA = { buckets: [], totalHits: 0 };
 
 export function getErrorDistribution(state) {
-  return withInitialData(state.reduxRequest[ID], INITIAL_DATA);
+  return withInitialData(state.reactReduxRequest[ID], INITIAL_DATA);
 }
 
 export function ErrorDistributionRequest({ urlParams, render }) {
   const { serviceName, start, end, errorGroupId, kuery } = urlParams;
 
+  if (!(serviceName, start, end, errorGroupId)) {
+    return null;
+  }
+
   return (
-    <ReduxRequest
+    <Request
       id={ID}
       fn={loadErrorDistribution}
-      shouldInvoke={Boolean(serviceName, start, end, errorGroupId)}
       args={[{ serviceName, start, end, errorGroupId, kuery }]}
       selector={getErrorDistribution}
       render={render}
