@@ -168,7 +168,9 @@ uiModules
         // auto reload will trigger this event
         $scope.$on('courier:searchRefresh', reload);
 
-        $scope.$watchGroup(['filters', 'query', 'timeRange'], fetch);
+        $scope.$watch('filters', $scope.fetch, true);
+        $scope.$watch('query', $scope.fetch, true);
+        $scope.$watch('timeRange', $scope.fetch, true);
 
         // Listen on uiState changes to start fetching new data again.
         // Some visualizations might need different data depending on their uiState,
