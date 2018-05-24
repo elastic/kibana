@@ -6,14 +6,13 @@ import { getSortingParams } from './sorting_params';
 export function getSearchDsl(mappings, options = {}) {
   const {
     type,
-    includeTypes,
     search,
     searchFields,
     sortField,
     sortOrder
   } = options;
 
-  if (!type && !includeTypes && sortField) {
+  if (!type && sortField) {
     throw Boom.notAcceptable('Cannot sort without filtering by type');
   }
 
@@ -22,7 +21,7 @@ export function getSearchDsl(mappings, options = {}) {
   }
 
   return {
-    ...getQueryParams(mappings, type, search, searchFields, includeTypes),
+    ...getQueryParams(mappings, type, search, searchFields),
     ...getSortingParams(mappings, type, sortField, sortOrder),
   };
 }

@@ -7,45 +7,29 @@
 import expect from 'expect.js';
 
 export default function ({ getService }) {
-  const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const usageAPI = getService('usageAPI');
 
   describe('/api/_xpack/usage', () => {
     before('load archives', async () => {
-      // Using this archive because it includes reports as well as a range of visualization types.
-      await esArchiver.load('reporting/6_2');
-      // Not really neccessary to have data indexes, but it feels incomplete to leave out, and it is possible that
-      // having data available could potentially interefere with the stats api (unlikely... but possible).
-      await esArchiver.load('logstash_functional');
+      await esArchiver.load('../../../../test/functional/fixtures/es_archiver/dashboard/current/kibana');
     });
 
     after(async () => {
-      await esArchiver.unload('reporting/6_2');
-      await esArchiver.unload('logstash_functional');
+      await esArchiver.unload('../../../../test/functional/fixtures/es_archiver/dashboard/current/kibana');
     });
 
 
     it('should return xpack usage data', async () => {
-      const { body } = await supertest
-        .get(`/api/_xpack/usage`)
-        .set('kbn-xsrf', 'xxx')
-        .expect(200);
+      const usage = await usageAPI.getUsageStats();
 
-      expect(body.cluster_uuid).to.be.a('string');
-      expect(body.kibana.dashboard.total).to.be(3);
-      expect(body.kibana.visualization.total).to.be(18);
-      expect(body.kibana.search.total).to.be(1);
-      expect(body.kibana.index_pattern.total).to.be(1);
-      expect(body.kibana.timelion_sheet.total).to.be(0);
-      expect(body.kibana.graph_workspace.total).to.be(0);
-      expect(body.reporting.available).to.be(true);
-      expect(body.reporting.enabled).to.be(true);
-      expect(body.reporting.browser_type).to.be('phantom');
-      expect(body.reporting._all).to.be(8);
-      expect(body.reporting.csv.available).to.be(true);
-      expect(body.reporting.csv.total).to.be(1);
-      expect(body.reporting.printable_pdf.available).to.be(true);
-      expect(body.reporting.printable_pdf.total).to.be(7);
+      expect(usage.cluster_uuid).to.be.a('string');
+      expect(usage.kibana.dashboard.total).to.be(26);
+      expect(usage.kibana.visualization.total).to.be(47);
+      expect(usage.kibana.search.total).to.be(5);
+      expect(usage.kibana.index_pattern.total).to.be(3);
+      expect(usage.kibana.timelion_sheet.total).to.be(0);
+      expect(usage.kibana.graph_workspace.total).to.be(0);
     });
   });
 }

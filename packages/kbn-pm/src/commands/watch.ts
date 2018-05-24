@@ -1,8 +1,9 @@
 import chalk from 'chalk';
-import { topologicallyBatchProjects, ProjectMap } from '../utils/projects';
+import { log } from '../utils/log';
 import { parallelizeBatches } from '../utils/parallelize';
+import { ProjectMap, topologicallyBatchProjects } from '../utils/projects';
 import { waitUntilWatchIsReady } from '../utils/watch';
-import { Command } from './';
+import { ICommand } from './';
 
 /**
  * Name of the script in the package/project package.json file to run during `kbn watch`.
@@ -24,9 +25,9 @@ const kibanaProjectName = 'kibana';
  * the `kbn:watch` script and eventually for the entire batch. Currently we support completion "markers" for
  * `webpack` and `tsc` only, for the rest we rely on predefined timeouts.
  */
-export const WatchCommand: Command = {
-  name: 'watch',
+export const WatchCommand: ICommand = {
   description: 'Runs `kbn:watch` script for every project.',
+  name: 'watch',
 
   async run(projects, projectGraph) {
     const projectsToWatch: ProjectMap = new Map();
@@ -38,7 +39,7 @@ export const WatchCommand: Command = {
     }
 
     if (projectsToWatch.size === 0) {
-      console.log(
+      log.write(
         chalk.red(
           `\nThere are no projects to watch found. Make sure that projects define 'kbn:watch' script in 'package.json'.\n`
         )
@@ -47,7 +48,7 @@ export const WatchCommand: Command = {
     }
 
     const projectNames = Array.from(projectsToWatch.keys());
-    console.log(
+    log.write(
       chalk.bold(
         chalk.green(
           `Running ${watchScriptName} scripts for [${projectNames.join(', ')}].`
@@ -73,7 +74,7 @@ export const WatchCommand: Command = {
         pkg.runScriptStreaming(watchScriptName).stdout
       );
 
-      console.log(
+      log.write(
         chalk.bold(
           `[${chalk.green(
             pkg.name

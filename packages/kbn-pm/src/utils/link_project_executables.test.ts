@@ -15,10 +15,10 @@ const projectsByName = new Map([
     'foo',
     new Project(
       {
-        name: 'foo',
         dependencies: {
           bar: 'link:../bar',
         },
+        name: 'foo',
       },
       resolve(__dirname, 'foo')
     ),
@@ -27,8 +27,8 @@ const projectsByName = new Map([
     'bar',
     new Project(
       {
-        name: 'bar',
         bin: 'bin/bar.js',
+        name: 'bar',
       },
       resolve(__dirname, 'bar')
     ),
@@ -37,10 +37,10 @@ const projectsByName = new Map([
     'baz',
     new Project(
       {
-        name: 'baz',
         devDependencies: {
           bar: 'link:../bar',
         },
+        name: 'baz',
       },
       resolve(__dirname, 'baz')
     ),
@@ -82,7 +82,9 @@ describe('bin script points to a file', () => {
     const fs = require('./fs');
     fs.isFile.mockReturnValue(true);
 
-    const logMock = jest.spyOn(console, 'log').mockImplementation(() => {});
+    const logMock = jest.spyOn(console, 'log').mockImplementation(() => {
+      // noop
+    });
     await linkProjectExecutables(projectsByName, projectGraph);
     logMock.mockRestore();
 

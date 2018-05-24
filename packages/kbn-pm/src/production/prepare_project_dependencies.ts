@@ -1,5 +1,5 @@
-import { Project } from '../utils/project';
 import { isLinkDependency } from '../utils/package_json';
+import { Project } from '../utils/project';
 
 /**
  * All external projects are located within `../kibana-extra/{plugin}` relative

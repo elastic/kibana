@@ -1,15 +1,16 @@
-import del from 'del';
 import chalk from 'chalk';
-import { relative } from 'path';
+import del from 'del';
 import ora from 'ora';
+import { relative } from 'path';
 
 import { isDirectory } from '../utils/fs';
-import { Command } from './';
+import { log } from '../utils/log';
+import { ICommand } from './';
 
-export const CleanCommand: Command = {
-  name: 'clean',
+export const CleanCommand: ICommand = {
   description:
     'Remove the node_modules and target directories from all projects.',
+  name: 'clean',
 
   async run(projects, projectGraph, { rootPath }) {
     const directoriesToDelete = [];
@@ -24,9 +25,9 @@ export const CleanCommand: Command = {
     }
 
     if (directoriesToDelete.length === 0) {
-      console.log(chalk.bold.green('\n\nNo directories to delete'));
+      log.write(chalk.bold.green('\n\nNo directories to delete'));
     } else {
-      console.log(chalk.bold.red('\n\nDeleting directories:\n'));
+      log.write(chalk.bold.red('\n\nDeleting directories:\n'));
 
       for (const dir of directoriesToDelete) {
         const deleting = del(dir, { force: true });
