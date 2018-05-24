@@ -25,51 +25,38 @@ import {
 } from '@elastic/eui/lib/test';
 
 import {
-  DashboardCloneModal,
-} from './clone_modal';
+  DashboardAddPanel,
+} from './add_panel';
 
-let onClone;
+jest.mock('ui/notify',
+  () => ({
+    toastNotifications: {
+      addDanger: () => {},
+    }
+  }), { virtual: true });
+
 let onClose;
-let component;
-
 beforeEach(() => {
-  onClone = sinon.spy();
   onClose = sinon.spy();
 });
 
-function createComponent(creationMethod = mount) {
-  component = creationMethod(
-    <DashboardCloneModal
-      title="dash title"
-      onClose={onClose}
-      onClone={onClone}
-    />
-  );
-}
-
-test('renders DashboardCloneModal', () => {
-  createComponent(shallow);
-  expect(component).toMatchSnapshot(); // eslint-disable-line
-});
-
-test('onClone', () => {
-  createComponent();
-  findTestSubject(component, 'cloneConfirmButton', false).simulate('click');
-  sinon.assert.calledWith(onClone, 'dash title');
-  sinon.assert.notCalled(onClose);
+test('render', () => {
+  const component = shallow(<DashboardAddPanel
+    onClose={onClose}
+    find={() => {}}
+    addNewPanel={() => {}}
+    addNewVis={() => {}}
+  />);
+  expect(component).toMatchSnapshot();
 });
 
 test('onClose', () => {
-  createComponent();
-  findTestSubject(component, 'cloneCancelButton', false).simulate('click');
+  const component = mount(<DashboardAddPanel
+    onClose={onClose}
+    find={() => {}}
+    addNewPanel={() => {}}
+    addNewVis={() => {}}
+  />);
+  findTestSubject(component, 'closeAddPanelBtn', false).simulate('click');
   sinon.assert.calledOnce(onClose);
-  sinon.assert.notCalled(onClone);
-});
-
-test('title', () => {
-  createComponent();
-  const event = { target: { value: 'a' } };
-  component.find('input').simulate('change', event);
-  findTestSubject(component, 'cloneConfirmButton', false).simulate('click');
-  sinon.assert.calledWith(onClone, 'a');
 });

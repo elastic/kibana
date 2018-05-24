@@ -47,7 +47,7 @@ export function getTopNavConfig(dashboardMode, actions, hideWriteControls) {
       return [
         getSaveConfig(),
         getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE]),
-        getAddConfig(),
+        getAddConfig(actions[TopNavIds.ADD]),
         getOptionsConfig(),
         getShareConfig()];
     default:
@@ -115,12 +115,12 @@ function getCloneConfig(action) {
 /**
  * @returns {kbnTopNavConfig}
  */
-function getAddConfig() {
+function getAddConfig(action) {
   return {
     key: TopNavIds.ADD,
     description: 'Add a panel to the dashboard',
     testId: 'dashboardAddPanelButton',
-    template: require('plugins/kibana/dashboard/top_nav/add_panel.html')
+    run: action
   };
 }
 

@@ -22,8 +22,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
-  const PageObjects = getPageObjects(['header']);
+  const PageObjects = getPageObjects(['header', 'common']);
 
   return new class DashboardAddPanel {
     async clickOpenAddPanel() {
@@ -35,18 +34,14 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       await testSubjects.click('addNewSavedObjectLink');
     }
 
-    async closeAddVizualizationPanel() {
-      log.debug('closeAddVizualizationPanel');
-      await find.clickByCssSelector('i.fa fa-chevron-up');
-    }
-
     async clickSavedSearchTab() {
       await testSubjects.click('addSavedSearchTab');
     }
 
     async addEveryEmbeddableOnCurrentPage() {
       log.debug('addEveryEmbeddableOnCurrentPage');
-      const embeddableRows = await find.allByCssSelector('.list-group-menu-item');
+      const addPanel = await testSubjects.find('dashboardAddPanel');
+      const embeddableRows = await addPanel.findAllByClassName('euiLink');
       for (let i = 0; i < embeddableRows.length; i++) {
         await embeddableRows[i].click();
       }
@@ -54,12 +49,28 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
     }
 
     async clickPagerNextButton() {
-      const pagerNextButtonExists = await testSubjects.exists('paginateNext');
-      if (pagerNextButtonExists) {
-        await testSubjects.click('paginateNext');
-        await PageObjects.header.waitUntilLoadingHasFinished();
+      // Clear all toasts that could hide pagination controls
+      await PageObjects.common.clearAllToasts();
+
+      const addPanel = await testSubjects.find('dashboardAddPanel');
+      const pagination = await addPanel.findAllByClassName('euiPagination');
+      if (pagination.length === 0) {
+        return false;
       }
-      return pagerNextButtonExists;
+
+      const pagerNextButton = await pagination[0].findByCssSelector('button[aria-label="Next page"]');
+      if (!pagerNextButton) {
+        return false;
+      }
+
+      const isDisabled = await pagerNextButton.getAttribute('disabled');
+      if (isDisabled != null) {
+        return false;
+      }
+
+      await pagerNextButton.click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      return true;
     }
 
     async isAddPanelOpen() {
@@ -86,7 +97,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       const isOpen = await this.isAddPanelOpen();
       if (isOpen) {
         await retry.try(async () => {
-          await this.clickOpenAddPanel();
+          await testSubjects.click('closeAddPanelBtn');
           const isOpen = await this.isAddPanelOpen();
           if (isOpen) {
             throw new Error('Add panel still open, trying again.');
@@ -106,6 +117,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
         await this.addEveryEmbeddableOnCurrentPage();
         morePages = await this.clickPagerNextButton();
       }
+      await this.closeAddPanel();
     }
 
     async addEverySavedSearch(filter) {
@@ -120,6 +132,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
         await this.addEveryEmbeddableOnCurrentPage();
         morePages = await this.clickPagerNextButton();
       }
+      await this.closeAddPanel();
     }
 
     async addSavedSearch(searchName) {
@@ -129,7 +142,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       await this.clickSavedSearchTab();
       await this.filterEmbeddableNames(searchName);
 
-      await find.clickByPartialLinkText(searchName);
+      await testSubjects.click(`addPanel${searchName.split(' ').join('-')}`);
       await testSubjects.exists('addSavedSearchToDashboardSuccess');
       await this.closeAddPanel();
     }
@@ -151,13 +164,20 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       log.debug(`DashboardAddPanel.addVisualization(${vizName})`);
       await this.ensureAddPanelIsShowing();
       await this.filterEmbeddableNames(`"${vizName.replace('-', ' ')}"`);
-      await find.clickByPartialLinkText(vizName);
+      await testSubjects.click(`addPanel${vizName.split(' ').join('-')}`);
       await this.closeAddPanel();
     }
 
     async filterEmbeddableNames(name) {
       await testSubjects.setValue('savedObjectFinderSearchInput', name);
       await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async panelAddLinkExists(name) {
+      log.debug(`DashboardAddPanel.panelAddLinkExists(${name})`);
+      await this.ensureAddPanelIsShowing();
+      await this.filterEmbeddableNames(`"${name}"`);
+      return await testSubjects.exists(`addPanel${name.split(' ').join('-')}`);
     }
   };
 }

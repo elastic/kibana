@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import sinon from 'sinon';
-import { getReportingUsage } from './get_usage';
+import { getReportingUsageCollector } from './get_reporting_usage_collector';
 
 function getServerMock(customization) {
   const getLicenseCheckResults = sinon.stub().returns({});
@@ -52,7 +52,8 @@ test('sets enabled to false when reporting is turned off', async () => {
   });
   const serverMock = getServerMock({ config: () => ({ get: mockConfigGet }) });
   const callClusterMock = jest.fn();
-  const usageStats = await getReportingUsage(callClusterMock, serverMock);
+  const { fetch: getReportingUsage } = getReportingUsageCollector(serverMock, callClusterMock);
+  const usageStats = await getReportingUsage();
   expect(usageStats.enabled).toBe(false);
 });
 
@@ -62,7 +63,8 @@ describe('with a basic license', async () => {
     const serverWithBasicLicenseMock = getServerMock();
     serverWithBasicLicenseMock.plugins.xpack_main.info.license.getType = sinon.stub().returns('basic');
     const callClusterMock = jest.fn(() => Promise.resolve({}));
-    usageStats = await getReportingUsage(callClusterMock, serverWithBasicLicenseMock);
+    const { fetch: getReportingUsage } = getReportingUsageCollector(serverWithBasicLicenseMock, callClusterMock);
+    usageStats = await getReportingUsage();
   });
 
   test('sets enables to true', async () => {
@@ -84,7 +86,8 @@ describe('with no license', async () => {
     const serverWithNoLicenseMock = getServerMock();
     serverWithNoLicenseMock.plugins.xpack_main.info.license.getType = sinon.stub().returns('none');
     const callClusterMock = jest.fn(() => Promise.resolve({}));
-    usageStats = await getReportingUsage(callClusterMock, serverWithNoLicenseMock);
+    const { fetch: getReportingUsage } = getReportingUsageCollector(serverWithNoLicenseMock, callClusterMock);
+    usageStats = await getReportingUsage();
   });
 
   test('sets enables to true', async () => {
@@ -106,7 +109,8 @@ describe('with platinum license', async () => {
     const serverWithPlatinumLicenseMock = getServerMock();
     serverWithPlatinumLicenseMock.plugins.xpack_main.info.license.getType = sinon.stub().returns('platinum');
     const callClusterMock = jest.fn(() => Promise.resolve({}));
-    usageStats = await getReportingUsage(callClusterMock, serverWithPlatinumLicenseMock);
+    const { fetch: getReportingUsage } = getReportingUsageCollector(serverWithPlatinumLicenseMock, callClusterMock);
+    usageStats = await getReportingUsage();
   });
 
   test('sets enables to true', async () => {

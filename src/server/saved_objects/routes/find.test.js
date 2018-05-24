@@ -150,7 +150,7 @@ describe('GET /api/saved_objects/_find', () => {
     });
   });
 
-  it('accepts the type as a query parameter', async () => {
+  it('accepts the query parameter type as a string', async () => {
     const request = {
       method: 'GET',
       url: '/api/saved_objects/_find?type=index-pattern'
@@ -161,6 +161,20 @@ describe('GET /api/saved_objects/_find', () => {
     expect(savedObjectsClient.find.calledOnce).toBe(true);
 
     const options = savedObjectsClient.find.getCall(0).args[0];
-    expect(options).toEqual({ perPage: 20, page: 1, type: 'index-pattern' });
+    expect(options).toEqual({ perPage: 20, page: 1, type: [ 'index-pattern' ] });
+  });
+
+  it('accepts the query parameter type as an array', async () => {
+    const request = {
+      method: 'GET',
+      url: '/api/saved_objects/_find?type=index-pattern&type=visualization'
+    };
+
+    await server.inject(request);
+
+    expect(savedObjectsClient.find.calledOnce).toBe(true);
+
+    const options = savedObjectsClient.find.getCall(0).args[0];
+    expect(options).toEqual({ perPage: 20, page: 1, type: ['index-pattern', 'visualization'] });
   });
 });

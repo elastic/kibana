@@ -64,7 +64,7 @@ describe('searchDsl/queryParams', () => {
   });
 
   describe('{type}', () => {
-    it('includes just a terms filter', () => {
+    it('adds a term filter when a string', () => {
       expect(getQueryParams(MAPPINGS, 'saved'))
         .toEqual({
           query: {
@@ -72,6 +72,21 @@ describe('searchDsl/queryParams', () => {
               filter: [
                 {
                   term: { type: 'saved' }
+                }
+              ]
+            }
+          }
+        });
+    });
+
+    it('adds a terms filter when an array', () => {
+      expect(getQueryParams(MAPPINGS, ['saved', 'vis']))
+        .toEqual({
+          query: {
+            bool: {
+              filter: [
+                {
+                  terms: { type: ['saved', 'vis'] }
                 }
               ]
             }
@@ -121,6 +136,26 @@ describe('searchDsl/queryParams', () => {
           }
         });
     });
+    it('includes bool with sqs query and terms filter for type', () => {
+      expect(getQueryParams(MAPPINGS, ['saved', 'vis'], 'y*'))
+        .toEqual({
+          query: {
+            bool: {
+              filter: [
+                { terms: { type: ['saved', 'vis'] } }
+              ],
+              must: [
+                {
+                  simple_query_string: {
+                    query: 'y*',
+                    all_fields: true
+                  }
+                }
+              ]
+            }
+          }
+        });
+    });
   });
 
   describe('{search,searchFields}', () => {
@@ -134,7 +169,6 @@ describe('searchDsl/queryParams', () => {
                   simple_query_string: {
                     query: 'y*',
                     fields: [
-                      'type.title',
                       'pending.title',
                       'saved.title'
                     ]
@@ -155,7 +189,6 @@ describe('searchDsl/queryParams', () => {
                   simple_query_string: {
                     query: 'y*',
                     fields: [
-                      'type.title^3',
                       'pending.title^3',
                       'saved.title^3'
                     ]
@@ -176,10 +209,8 @@ describe('searchDsl/queryParams', () => {
                   simple_query_string: {
                     query: 'y*',
                     fields: [
-                      'type.title',
                       'pending.title',
                       'saved.title',
-                      'type.title.raw',
                       'pending.title.raw',
                       'saved.title.raw',
                     ]
@@ -193,7 +224,7 @@ describe('searchDsl/queryParams', () => {
   });
 
   describe('{type,search,searchFields}', () => {
-    it('includes bool, and sqs with field list', () => {
+    it('includes bool, with term filter and sqs with field list', () => {
       expect(getQueryParams(MAPPINGS, 'saved', 'y*', ['title']))
         .toEqual({
           query: {
@@ -207,6 +238,29 @@ describe('searchDsl/queryParams', () => {
                     query: 'y*',
                     fields: [
                       'saved.title'
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        });
+    });
+    it('includes bool, with terms filter and sqs with field list', () => {
+      expect(getQueryParams(MAPPINGS, ['saved', 'vis'], 'y*', ['title']))
+        .toEqual({
+          query: {
+            bool: {
+              filter: [
+                { terms: { type: ['saved', 'vis'] } }
+              ],
+              must: [
+                {
+                  simple_query_string: {
+                    query: 'y*',
+                    fields: [
+                      'saved.title',
+                      'vis.title'
                     ]
                   }
                 }

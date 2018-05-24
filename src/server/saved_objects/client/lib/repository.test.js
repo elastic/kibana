@@ -395,7 +395,6 @@ describe('SavedObjectsRepository', () => {
         type: 'bar',
         sortField: 'name',
         sortOrder: 'desc',
-        includeTypes: ['index-pattern', 'dashboard'],
       };
 
       await savedObjectsRepository.find(relevantOpts);

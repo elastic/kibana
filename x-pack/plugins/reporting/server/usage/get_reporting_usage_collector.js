@@ -6,9 +6,9 @@
 
 import { uniq } from 'lodash';
 import { getExportTypesHandler } from './get_export_type_handler';
-import {
-  getReportCountsByParameter,
-} from './get_reporting_type_counts';
+import { getReportCountsByParameter } from './get_reporting_type_counts';
+import { KIBANA_REPORTING_TYPE } from '../../common/constants';
+import { UsageCollector } from '../../../monitoring/server/kibana_monitoring';
 
 /**
  * @typedef {Object} ReportingUsageStats  Almost all of these stats are optional.
@@ -110,34 +110,44 @@ async function getReportingUsageWithinRange(callCluster, server, reportingAvaila
   };
 }
 
-export async function getReportingUsage(callCluster, server) {
-  const xpackInfo = server.plugins.xpack_main.info;
-  const config = server.config();
-  const available = xpackInfo && xpackInfo.isAvailable(); // some form of reporting (csv at least) is available for all valid licenses
-  const enabled = config.get('xpack.reporting.enabled'); // follow ES behavior: if its not available then its not enabled
-  const reportingAvailable = available && enabled;
+/*
+ * @param {Object} server
+ * @param {Function} callCluster - function that uses either callWithRequest or callWithInternal to fetch data from ES
+ * @return {Object} kibana usage stats type collection object
+ */
+export function getReportingUsageCollector(server, callCluster) {
+  return new UsageCollector(server, {
+    type: KIBANA_REPORTING_TYPE,
+    fetch: async () => {
+      const xpackInfo = server.plugins.xpack_main.info;
+      const config = server.config();
+      const available = xpackInfo && xpackInfo.isAvailable(); // some form of reporting (csv at least) is available for all valid licenses
+      const enabled = config.get('xpack.reporting.enabled'); // follow ES behavior: if its not available then its not enabled
+      const reportingAvailable = available && enabled;
 
-  const statsOverAllTime = await getReportingUsageWithinRange(callCluster, server, reportingAvailable);
-  const statsOverLast1Day = await getReportingUsageWithinRange(callCluster, server, reportingAvailable, 1);
-  const statsOverLast7Days = await getReportingUsageWithinRange(callCluster, server, reportingAvailable, 7);
+      const statsOverAllTime = await getReportingUsageWithinRange(callCluster, server, reportingAvailable);
+      const statsOverLast1Day = await getReportingUsageWithinRange(callCluster, server, reportingAvailable, 1);
+      const statsOverLast7Days = await getReportingUsageWithinRange(callCluster, server, reportingAvailable, 7);
 
-  let browserType;
-  if (enabled) {
-    // Allow this to explictly throw an exception if/when this config is deprecated,
-    // because we shouldn't collect browserType in that case!
-    browserType = config.get('xpack.reporting.capture.browser.type');
-  }
+      let browserType;
+      if (enabled) {
+        // Allow this to explictly throw an exception if/when this config is deprecated,
+        // because we shouldn't collect browserType in that case!
+        browserType = config.get('xpack.reporting.capture.browser.type');
+      }
 
-  return {
-    available,
-    enabled: available && enabled, // similar behavior as _xpack API in ES
-    browser_type: browserType,
-    ...statsOverAllTime,
-    lastDay: {
-      ...statsOverLast1Day
-    },
-    last7Days: {
-      ...statsOverLast7Days
+      return {
+        available,
+        enabled: available && enabled, // similar behavior as _xpack API in ES
+        browser_type: browserType,
+        ...statsOverAllTime,
+        lastDay: {
+          ...statsOverLast1Day
+        },
+        last7Days: {
+          ...statsOverLast7Days
+        }
+      };
     }
-  };
+  });
 }
