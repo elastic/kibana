@@ -61,7 +61,7 @@ export class HeadlessChromiumDriverFactory {
           // See https://github.com/elastic/kibana/issues/19351 for why this is necessary. Long story short, on certain
           // linux platforms (fwiw, we have only experienced this on jenkins agents) the first bootup of chromium takes
           // a long time doing something with fontconfig packages loading up a cache. The cdp command will timeout
-          // if we don't want for this manually. Note that this may still timeout based on the value of
+          // if we don't wait for this manually. Note that this may still timeout based on the value of
           // xpack.reporting.queue.timeout. Subsequent runs should be fast because the cache will already be
           // initialized.
           this.logger.debug('Ensure chromium is running and listening');
