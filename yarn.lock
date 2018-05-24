@@ -77,9 +77,9 @@
   version "0.0.0"
   uid ""
 
-"@elastic/eui@0.0.38", "@elastic/eui@v0.0.38":
-  version "0.0.38"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-0.0.38.tgz#83d55b7ad111c0a917dee2747247bac9f0be7fb5"
+"@elastic/eui@v0.0.38-bugfix.1":
+  version "0.0.38-bugfix.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-0.0.38-bugfix.1.tgz#31e9f2b222d76d1a20c152e80cb76b58e29afa81"
   dependencies:
     brace "^0.10.0"
     classnames "^2.2.5"
