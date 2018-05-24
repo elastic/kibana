@@ -36,7 +36,8 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
       // Using callParentStartHandlers: true we make sure, that the parent searchSource
       // onSearchRequestStart will be called properly even though we use an inherited
       // search source.
-      const requestSearchSource = new SearchSource().inherits(searchSource, { callParentStartHandlers: true });
+      const timeFilterSearchSource = new SearchSource().inherits(searchSource, { callParentStartHandlers: true });
+      const requestSearchSource = new SearchSource().inherits(timeFilterSearchSource, { callParentStartHandlers: true });
 
       // For now we need to mirror the history of the passed search source, since
       // the spy panel wouldn't work otherwise.
@@ -58,7 +59,7 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
       });
 
       // Add the explicit passed timeRange as a filter to the requestSearchSource.
-      requestSearchSource.filter(() => {
+      requestSearchSource.set('filter', () => {
         return timefilter.get(searchSource.get('index'), timeRange);
       });
 
