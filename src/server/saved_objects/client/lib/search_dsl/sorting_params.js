@@ -10,7 +10,7 @@ export function getSortingParams(mappings, type, sortField, sortOrder) {
   if (Array.isArray(type)) {
     const rootField = getProperty(mappings, sortField);
     if (!rootField) {
-      throw Boom.badRequest(`Unable to sort multiple types by field ${sortField}, not a root field`);
+      throw Boom.badRequest(`Unable to sort multiple types by field ${sortField}, not a root property`);
     }
 
     return {
