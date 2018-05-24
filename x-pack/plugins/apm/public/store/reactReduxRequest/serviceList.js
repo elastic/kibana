@@ -8,14 +8,14 @@ import React from 'react';
 import orderBy from 'lodash.orderby';
 import { createSelector } from 'reselect';
 import { loadServiceList } from '../../services/rest';
-import { ReduxRequest } from '../../components/shared/ReduxRequest';
+import { Request } from 'react-redux-request';
 import { withInitialData } from './helpers';
 
 const ID = 'serviceList';
 const INITIAL_DATA = [];
 
 export const getServiceList = createSelector(
-  state => withInitialData(state.reduxRequest[ID], INITIAL_DATA),
+  state => withInitialData(state.reactReduxRequest[ID], INITIAL_DATA),
   state => state.sorting.service,
   (serviceList, serviceSorting) => {
     const { key: sortKey, descending } = serviceSorting;
@@ -30,7 +30,7 @@ export const getServiceList = createSelector(
 export function ServiceListRequest({ urlParams, render }) {
   const { start, end, kuery } = urlParams;
   return (
-    <ReduxRequest
+    <Request
       id={ID}
       fn={loadServiceList}
       args={[{ start, end, kuery }]}
