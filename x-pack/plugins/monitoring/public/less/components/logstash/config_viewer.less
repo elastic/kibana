@@ -16,6 +16,10 @@
   border-left: 1px gray dashed;
 }
 
+.cv-spacer:last-child {
+  width: 0px;
+}
+
 .cv-pluginStatement__icon {
   padding-top: 4px;
 }
@@ -23,6 +27,7 @@
 .cv-statement__content {
   display: inline-block;
   min-height: 28px;
+  padding-left: 9px;
 }
 
 .cv-spaceContainer {
@@ -64,73 +69,18 @@
   margin-top: -2px;
 }
 
-.cv-ifStatement__title {
-  font-weight: bold;
-}
-
-.cv-ifStatement__condition {
-  margin-top: 5px;
-}
-
-.ifPill__condition {
-  margin-top: 5px;
-}
-
-.statement__body {
-  border: none;
-  box-shadow: none;
-  background: transparent;
-  //min-width: 190px;
-  //max-width: 400px;
-  //max-height: 320px;
-}
-
-// .statement__content {
-//   background-color: none;
-// }
-
-.statement__dot {
-  color: green;
-  margin-top: 5px;
-}
-
-.statement__name {
-  color: green;
-  font-weight: bold;
-  margin-top: 0px;
-}
-
-.statement__explicitId {
-  font-weight: bold;
-  background-color: #d0d0d0;
-  padding: 4px;
-  border-radius: 2px;
+.cv-ifElseStatement__title {
   margin-top: 2px;
 }
 
-.statement__stat {
-  text-align: right;
-  margin-left: 15px;
-  min-width: 150px;
+.cv-ifElseStatement__name {
+  font-weight: bold;
 }
 
-.ifChildren {
-  border-left: 1px dashed #D0D0D0;
-  padding-left: 8px;
-  margin-left: 12px;
+.cv-ifElseStatement__toggle {
+  margin-top: 3px;
 }
 
-.statement {
-  border: none;
-  margin-bottom: 8px;
-  // margin-top: 10px;
-}
-
-.evenStatement {
-  background-color: #D5D5D5;
-}
-
-.statementSection {
-  border: none;
-  box-shadow: none;
+.cv-ifStatement__condition {
+  margin-top: 7px;
 }

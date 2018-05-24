@@ -23,8 +23,9 @@ function clickableStatementName(name, onVertexSelected) {
         color="text"
         size="xs"
         onClick={onVertexSelected}
+        className="cv-ifElseStatement__title"
       >
-        <span className="cv-ifStatement__title">{name}</span>
+        <span className="cv-ifElseStatement__name">{name}</span>
       </EuiButtonEmpty>
     </EuiFlexItem>
   );
@@ -106,6 +107,7 @@ export class CollapsibleStatement extends React.PureComponent {
             aria-label
             iconType={this.getToggleIconType()}
             onClick={this.toggleClicked}
+            className="cv-ifElseStatement__toggle"
           />
         </EuiFlexItem>
         {this.getStatementBody()}

@@ -157,7 +157,6 @@ export class Statement extends React.PureComponent
 
     const isIf = element instanceof IfElement;
 
-    console.log(onShowVertexDetails);
     return statement instanceof PluginStatement
       ? pluginStatement(statement, onShowVertexDetails)
       :
@@ -181,7 +180,7 @@ export class Statement extends React.PureComponent
       statement
     } = this.props.element;
 
-    console.log(this.props);
+    const topLevelStyle = depth === 0 ? { paddingLeft: '0px' } : null;
     const spacers = this.getNestingSpacers(depth);
 
     const statementComponent = this.getStatement(statement);
@@ -191,7 +190,10 @@ export class Statement extends React.PureComponent
         <div className="cv-spaceContainer">
           {spacers}
         </div>
-        <div className="cv-statement__content">
+        <div
+          className="cv-statement__content"
+          style={topLevelStyle}
+        >
           {statementComponent}
         </div>
       </li>
