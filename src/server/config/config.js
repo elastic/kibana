@@ -124,6 +124,18 @@ export class Config {
     return clone(value);
   }
 
+  getDefault(key) {
+    const schemaDescription = Joi.describe(this.getSchema());
+    const parts = key.split('.');
+    const path = `children.${parts.join('.children.')}`;
+    const description = _.get(schemaDescription, path);
+    if (!description) {
+      throw new Error('Unknown config key: ' + key);
+    }
+
+    return _.get(description, 'flags.default');
+  }
+
   has(key) {
     function has(key, schema, path) {
       path = path || [];
