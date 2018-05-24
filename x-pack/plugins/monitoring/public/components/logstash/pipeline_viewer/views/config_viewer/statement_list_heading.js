@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-
 import {
   EuiFlexGroup,
   EuiFlexItem,

@@ -8,11 +8,9 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-
 import { DetailDrawer } from '../detail_drawer';
-
-import { StatementSection } from './statement_list';
 import { Queue } from './queue';
+import { StatementSection } from './statement_list';
 
 export class ConfigViewer extends React.Component {
   constructor() {
@@ -98,8 +96,10 @@ export class ConfigViewer extends React.Component {
 }
 
 ConfigViewer.propTypes = {
-  inputs: PropTypes.array.isRequired,
-  filters: PropTypes.array.isRequired,
-  outputs: PropTypes.array.isRequired,
-  queue: PropTypes.object.isRequired,
+  pipeline: PropTypes.shape({
+    inputs: PropTypes.array.isRequired,
+    filters: PropTypes.array.isRequired,
+    outputs: PropTypes.array.isRequired,
+    queue: PropTypes.object.isRequired,
+  })
 };

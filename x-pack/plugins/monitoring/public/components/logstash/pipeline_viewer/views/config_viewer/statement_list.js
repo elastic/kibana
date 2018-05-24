@@ -23,6 +23,18 @@ export function StatementSection({ iconType, headingText, elements, onShowVertex
   );
 }
 
+function getCollapsedChildElements(elements, collapsedIds) {
+  const collapsedChildIds = new Set();
+  elements.forEach(element => {
+    const { id, parentId } = element;
+
+    if (collapsedIds.has(parentId) || collapsedChildIds.has(parentId)) {
+      collapsedChildIds.add(id);
+    }
+  });
+  return collapsedChildIds;
+}
+
 class StatementList extends React.PureComponent {
   constructor(props) {
     super(props);
@@ -38,36 +50,18 @@ class StatementList extends React.PureComponent {
 
   expand(elementId) {
     const collapsedIds = new Set(this.state.collapsedIds);
-    const collapsedChildIds = new Set();
-
     collapsedIds.delete(elementId);
-
-    this.props.elements.forEach(element => {
-      const { id, parentId } = element;
-
-      if (collapsedIds.has(parentId) || collapsedChildIds.has(parentId)) {
-        collapsedChildIds.add(id);
-      }
-    });
-
-    this.setState({
-      collapsedIds,
-      collapsedChildIds
-    });
+    this.updateCollapsedElements(collapsedIds);
   }
 
   collapse(elementId) {
     const collapsedIds = new Set(this.state.collapsedIds);
-    const collapsedChildIds = new Set(this.state.collapsedChildIds);
     collapsedIds.add(elementId);
+    this.updateCollapsedElements(collapsedIds);
+  }
 
-    this.props.elements.forEach(element => {
-      const { id, parentId } = element;
-
-      if (collapsedIds.has(parentId) || collapsedChildIds.has(parentId)) {
-        collapsedChildIds.add(id);
-      }
-    });
+  updateCollapsedElements(collapsedIds) {
+    const collapsedChildIds = getCollapsedChildElements(this.props.elements, collapsedIds);
 
     this.setState({
       collapsedIds,

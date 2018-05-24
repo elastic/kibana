@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-
 import { StatementListHeading } from './statement_list_heading';
 
 export function Queue() {

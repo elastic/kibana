@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import React from 'react';
 import {
   EuiButtonEmpty,
@@ -152,23 +150,20 @@ export class Statement extends React.PureComponent
     const {
       collapse,
       element,
+      element: { id },
       expand,
       isCollapsed,
       onShowVertexDetails
     } = this.props;
-    const { id } = element;
-
-    const isIf = element instanceof IfElement;
 
     return statement instanceof PluginStatement
       ? pluginStatement(statement, onShowVertexDetails)
-      :
-      (
+      : (
         <CollapsibleStatement
           expand={expand}
           collapse={collapse}
           statement={statement}
-          isIf={isIf}
+          isIf={element instanceof IfElement}
           isCollapsed={isCollapsed}
           id={id}
           onShowVertexDetails={onShowVertexDetails}
@@ -179,13 +174,11 @@ export class Statement extends React.PureComponent
   render() {
     const {
       depth,
-      // parentId,
       statement
     } = this.props.element;
 
     const topLevelStyle = depth === 0 ? { paddingLeft: '0px' } : null;
     const spacers = this.getNestingSpacers(depth);
-
     const statementComponent = this.getStatement(statement);
 
     return (

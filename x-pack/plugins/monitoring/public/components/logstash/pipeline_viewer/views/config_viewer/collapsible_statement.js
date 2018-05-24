@@ -59,14 +59,14 @@ export class CollapsibleStatement extends React.PureComponent {
   }
 
   toggleClicked() {
-    const { id } = this.props;
-
     const {
       collapse,
-      expand
+      expand,
+      id,
+      isCollapsed
     } = this.props;
 
-    if (this.props.isCollapsed) {
+    if (isCollapsed) {
       expand(id);
     } else {
       collapse(id);
@@ -74,7 +74,8 @@ export class CollapsibleStatement extends React.PureComponent {
   }
 
   getToggleIconType() {
-    return this.props.isCollapsed ? 'arrowRight' : 'arrowDown';
+    const { isCollapsed } = this.props;
+    return isCollapsed ? 'arrowRight' : 'arrowDown';
   }
 
   getStatementBody() {
@@ -85,7 +86,6 @@ export class CollapsibleStatement extends React.PureComponent {
     } = this.props;
 
     const { vertex } = statement;
-
     const showVertexDetailsClicked = () => { onShowVertexDetails(vertex); };
 
     return isIf ?
