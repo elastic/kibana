@@ -10,7 +10,7 @@ describe('root reducer', () => {
   it('should return the initial state', () => {
     expect(reducer(undefined, {})).toEqual({
       location: { hash: '', pathname: '', search: '' },
-      reduxRequest: {},
+      reactReduxRequest: {},
       sorting: {
         service: { descending: false, key: 'serviceName' },
         transaction: { descending: true, key: 'impact' }

@@ -48,10 +48,8 @@ export class Markdown extends Component {
     this.markdownIt = markdownFactory(this.props.whiteListedRules, this.props.openLinksInNewTab);
 
     this.state = {
-      renderedMarkdown: this.transformMarkdown(this.props)
+      renderedMarkdown: this.transformMarkdown(this.props),
     };
-
-
   }
 
   /**
@@ -68,9 +66,16 @@ export class Markdown extends Component {
   }
 
   componentWillReceiveProps(props) {
-    if (props.markdown !== this.props.markdown) {
+    const hasOpenLinksInNewTabChanged = props.openLinksInNewTab !== this.props.openLinksInNewTab;
+    const hasMarkdownChanged = props.markdown !== this.props.markdown;
+    const hasWhiteListerRulesChanged = props.whiteListedRules !== this.props.whiteListedRules;
+
+    if (hasOpenLinksInNewTabChanged || hasWhiteListerRulesChanged) {
+      this.markdownIt = markdownFactory(props.whiteListedRules, props.openLinksInNewTab);
+    }
+    if (hasMarkdownChanged || hasOpenLinksInNewTabChanged || hasWhiteListerRulesChanged) {
       this.setState({
-        renderedMarkdown: this.transformMarkdown(props)
+        renderedMarkdown: this.transformMarkdown(props),
       });
     }
   }
@@ -84,10 +89,7 @@ export class Markdown extends Component {
       ...rest
     } = this.props;
 
-    const classes = classNames(
-      'markdown-body',
-      className
-    );
+    const classes = classNames('markdown-body', className);
 
     return (
       <div
