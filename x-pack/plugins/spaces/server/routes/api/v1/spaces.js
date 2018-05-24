@@ -12,6 +12,8 @@ import { spaceSchema } from '../../../lib/space_schema';
 import { wrapError } from '../../../lib/errors';
 import { isReservedSpace } from '../../../../common/is_reserved_space';
 import { createDuplicateContextQuery } from '../../../lib/check_duplicate_context';
+import { setSelectedSpace } from '../../../lib/selected_space_state';
+import { addSpaceUrlContext } from '../../../../common';
 
 export function initSpacesApi(server) {
   const routePreCheckLicenseFn = routePreCheckLicense(server);
@@ -63,7 +65,7 @@ export function initSpacesApi(server) {
         });
 
         spaces = result.saved_objects.map(convertSavedObjectToSpace);
-      } catch(e) {
+      } catch (e) {
         return reply(wrapError(e));
       }
 
@@ -156,7 +158,7 @@ export function initSpacesApi(server) {
       let result;
       try {
         result = await client.create('space', { ...space }, { id, overwrite });
-      } catch(e) {
+      } catch (e) {
         return reply(wrapError(e));
       }
 
@@ -195,6 +197,30 @@ export function initSpacesApi(server) {
     },
     config: {
       pre: [routePreCheckLicenseFn]
+    }
+  });
+
+  server.route({
+    method: 'PUT',
+    path: '/api/spaces/v1/space/{id}/select',
+    async handler(request, reply) {
+      const client = request.getSavedObjectsClient();
+
+      const id = request.params.id;
+
+      try {
+        const existingSpace = await getSpaceById(client, id);
+
+        setSelectedSpace(request, reply, existingSpace.urlContext);
+        const config = server.config();
+
+        return reply({
+          location: addSpaceUrlContext(config.get('server.basePath'), existingSpace.urlContext)
+        });
+
+      } catch (e) {
+        return reply(wrapError(e));
+      }
     }
   });
 

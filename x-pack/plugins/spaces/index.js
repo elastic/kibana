@@ -14,6 +14,7 @@ import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import { getActiveSpace } from './server/lib/get_active_space';
 import { wrapError } from './server/lib/errors';
 import mappings from './mappings.json';
+import { initSelectedSpaceState } from './server/lib/selected_space_state';
 
 export const spaces = (kibana) => new kibana.Plugin({
   id: 'spaces',
@@ -24,6 +25,7 @@ export const spaces = (kibana) => new kibana.Plugin({
   config(Joi) {
     return Joi.object({
       enabled: Joi.boolean().default(true),
+      rememberSelectedSpace: Joi.boolean().default(true),
     }).default();
   },
 
@@ -52,7 +54,7 @@ export const spaces = (kibana) => new kibana.Plugin({
           valid: true,
           space: await getActiveSpace(request.getSavedObjectsClient(), request.getBasePath())
         };
-      } catch(e) {
+      } catch (e) {
         vars.activeSpace = {
           valid: false,
           error: wrapError(e).output.payload
@@ -76,10 +78,7 @@ export const spaces = (kibana) => new kibana.Plugin({
 
     initSpacesApi(server);
 
-    server.state('selectedSpace', {
-      isHttpOnly: true,
-      path: config.get('server.basePath')
-    });
+    initSelectedSpaceState(server, config);
 
     initSpacesRequestInterceptors(server);
 

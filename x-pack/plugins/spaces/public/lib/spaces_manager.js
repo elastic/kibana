@@ -35,4 +35,14 @@ export class SpacesManager {
     return await this._httpAgent
       .delete(`${this._baseUrl}/space/${space.id}`);
   }
+
+  async changeSelectedSpace(space) {
+    return await this._httpAgent
+      .put(`${this._baseUrl}/space/${space.id}/select`)
+      .then(response => {
+        if (response.data && response.data.location) {
+          window.location = response.data.location;
+        }
+      });
+  }
 }

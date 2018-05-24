@@ -5,6 +5,8 @@
  */
 
 import { wrapError } from './errors';
+import { addSpaceUrlContext, SELECTED_SPACE_COOKIE } from '../../common';
+import { setSelectedSpace } from './selected_space_state';
 
 export function initSpacesRequestInterceptors(server) {
   const contextCache = new WeakMap();
@@ -42,14 +44,13 @@ export function initSpacesRequestInterceptors(server) {
 
     const isRequestingKibanaRoot = path === '/';
     const urlContext = contextCache.get(request);
+    const { [SELECTED_SPACE_COOKIE]: selectedSpace } = request.state;
 
     // if requesting the application root, then show the Space Selector UI to allow the user to choose which space
     // they wish to visit. This is done "onPostAuth" to allow the Saved Objects Client to use the request's auth scope,
     // which is not available at the time of "onRequest".
     if (isRequestingKibanaRoot && !urlContext) {
       try {
-
-        const { selectedSpace } = request.state;
 
         const client = request.getSavedObjectsClient();
         const { total, saved_objects: spaceObjects } = await client.find({
@@ -68,31 +69,20 @@ export function initSpacesRequestInterceptors(server) {
             urlContext
           } = space.attributes;
 
-          let destination;
-          if (urlContext) {
-            destination = `${basePath}/s/${urlContext}${defaultRoute}`;
-          } else {
-            destination = `${basePath}${defaultRoute}`;
-          }
-
+          const destination = addSpaceUrlContext(basePath, urlContext, defaultRoute);
+          setSelectedSpace(request, reply, urlContext);
           return reply.redirect(destination);
         }
 
         if (total > 0) {
-
           const preferredSpace = spaceObjects.find(so => so.attributes.urlContext === selectedSpace);
+          // If the user's previously selected space is still available, then send them there automatically
           if (preferredSpace) {
-            let destination;
-            if (preferredSpace.attributes.urlContext) {
-              destination = `${basePath}/s/${preferredSpace.attributes.urlContext}${defaultRoute}`;
-            } else {
-              destination = `${basePath}${defaultRoute}`;
-            }
-
+            const destination = addSpaceUrlContext(basePath, preferredSpace.attributes.urlContext, defaultRoute);
             return reply.redirect(destination);
           }
 
-          // render spaces selector instead of home page
+          // otherwise, render spaces selector instead of home page
           const app = server.getHiddenUiAppById('space_selector');
           return reply.renderApp(app, {
             spaces: spaceObjects.map(so => ({ ...so.attributes, id: so.id }))
@@ -104,12 +94,8 @@ export function initSpacesRequestInterceptors(server) {
       }
     }
 
-    if (typeof urlContext === 'string' && request.state.selectedSpace !== urlContext) {
-      console.log('setting selectedSpace', urlContext);
-      reply.state('selectedSpace', urlContext);
-    }
+    setSelectedSpace(request, reply, urlContext);
+
     return reply.continue();
   });
-
-
 }
