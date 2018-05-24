@@ -27,17 +27,17 @@ export function initializeOutput($el) {
     }
   };
 
-  output.append = function (val, fold_previous, cb) {
-    if (typeof fold_previous === 'function') {
-      cb = fold_previous;
-      fold_previous = true;
+  output.append = function (val, foldPrevious, cb) {
+    if (typeof foldPrevious === 'function') {
+      cb = foldPrevious;
+      foldPrevious = true;
     }
-    if (_.isUndefined(fold_previous)) {
-      fold_previous = true;
+    if (_.isUndefined(foldPrevious)) {
+      foldPrevious = true;
     }
     const session = output.getSession();
     const lastLine = session.getLength();
-    if (fold_previous) {
+    if (foldPrevious) {
       output.moveCursorTo(Math.max(0, lastLine - 1), 0);
       session.toggleFold(false);
 
