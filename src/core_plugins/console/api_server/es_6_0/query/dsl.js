@@ -1,5 +1,18 @@
 import _ from 'lodash';
-
+import {
+  spanFirstTemplate,
+  spanNearTemplate,
+  spanOrTemplate,
+  spanNotTemplate,
+  spanTermTemplate,
+  spanContainingTemplate,
+  spanWithinTemplate,
+  wildcardTemplate,
+  fuzzyTemplate,
+  prefixTemplate,
+  rangeTemplate,
+  regexpTemplate
+} from './templates';
 const matchOptions = {
   cutoff_frequency: 0.001,
   query: '',
@@ -52,29 +65,71 @@ const innerHits = {
     __one_of: ['true', 'false'],
   },
 };
-const SPAN_QUERIES = {
+const SPAN_QUERIES_NO_FIELD_MASK = {
   // TODO add one_of for objects
   span_first: {
+    __template: spanFirstTemplate,
     __scope_link: '.span_first',
   },
   span_near: {
+    __template: spanNearTemplate,
     __scope_link: '.span_near',
   },
   span_or: {
+    __template: spanOrTemplate,
     __scope_link: '.span_or',
   },
   span_not: {
+    __template: spanNotTemplate,
     __scope_link: '.span_not',
   },
   span_term: {
+    __template: spanTermTemplate,
     __scope_link: '.span_term',
   },
   span_containing: {
+    __template: spanContainingTemplate,
     __scope_link: '.span_containing',
   },
   span_within: {
+    __template: spanWithinTemplate,
     __scope_link: '.span_within',
   },
+};
+const SPAN_QUERIES = {
+  ...SPAN_QUERIES_NO_FIELD_MASK,
+  field_masking_span: {
+    __template: {
+      query: {
+        SPAN_QUERY: {}
+      }
+    },
+    query: SPAN_QUERIES_NO_FIELD_MASK,
+    field: ''
+  }
+};
+
+const SPAN_MULTI_QUERIES = {
+  wildcard: {
+    __template: wildcardTemplate,
+    __scope_link: '.wildcard'
+  },
+  fuzzy: {
+    __template: fuzzyTemplate,
+    __scope_link: '.fuzzy'
+  },
+  prefix: {
+    __template: prefixTemplate,
+    __scope_link: '.prefix'
+  },
+  range: {
+    __template: rangeTemplate,
+    __scope_link: '.range'
+  },
+  regexp: {
+    __template: regexpTemplate,
+    __scope_link: '.regexp'
+  }
 };
 
 const DECAY_FUNC_DESC = {
@@ -130,7 +185,7 @@ const SCORING_FUNCS = {
   },
 };
 
-export default function (api) {
+export function queryDsl(api) {
   api.addGlobalAutocompleteRules('query', {
     match: {
       __template: {
@@ -166,9 +221,7 @@ export default function (api) {
       },
     },
     regexp: {
-      __template: {
-        FIELD: 'REGEXP',
-      },
+      __template: regexpTemplate,
       '{field}': {
         value: '',
         flags: {
@@ -279,6 +332,7 @@ export default function (api) {
       },
     },
     fuzzy: {
+      __template: fuzzyTemplate,
       '{field}': {
         value: '',
         boost: 1.0,
@@ -353,11 +407,7 @@ export default function (api) {
       __scope_link: '.more_like_this',
     },
     prefix: {
-      __template: {
-        FIELD: {
-          value: '',
-        },
-      },
+      __template: prefixTemplate,
       '{field}': {
         value: '',
         boost: 1.0,
@@ -416,12 +466,7 @@ export default function (api) {
       lenient: { __one_of: [true, false] },
     },
     range: {
-      __template: {
-        FIELD: {
-          gte: 10,
-          lte: 20,
-        },
-      },
+      __template: rangeTemplate,
       '{field}': {
         __template: {
           gte: 10,
@@ -437,30 +482,19 @@ export default function (api) {
       },
     },
     span_first: {
-      __template: {
-        match: {
-          span_term: {
-            FIELD: 'VALUE',
-          },
-        },
-        end: 3,
-      },
+      __template: spanFirstTemplate,
       match: SPAN_QUERIES,
     },
-    span_near: {
+    span_multi: {
       __template: {
-        clauses: [
-          {
-            span_term: {
-              FIELD: {
-                value: 'VALUE',
-              },
-            },
-          },
-        ],
-        slop: 12,
-        in_order: false,
+        match: {
+          MULTI_TERM_QUERY: {}
+        }
       },
+      match: SPAN_MULTI_QUERIES
+    },
+    span_near: {
+      __template: spanNearTemplate,
       clauses: [SPAN_QUERIES],
       slop: 12,
       in_order: {
@@ -471,117 +505,28 @@ export default function (api) {
       },
     },
     span_term: {
-      __template: {
-        FIELD: {
-          value: 'VALUE',
-        },
-      },
+      __template: spanTermTemplate,
       '{field}': {
         value: '',
         boost: 2.0,
       },
     },
     span_not: {
-      __template: {
-        include: {
-          span_term: {
-            FIELD: {
-              value: 'VALUE',
-            },
-          },
-        },
-        exclude: {
-          span_term: {
-            FIELD: {
-              value: 'VALUE',
-            },
-          },
-        },
-      },
+      __template: spanNotTemplate,
       include: SPAN_QUERIES,
       exclude: SPAN_QUERIES,
     },
     span_or: {
-      __template: {
-        clauses: [
-          {
-            span_term: {
-              FIELD: {
-                value: 'VALUE',
-              },
-            },
-          },
-        ],
-      },
+      __template: spanOrTemplate,
       clauses: [SPAN_QUERIES],
     },
     span_containing: {
-      __template: {
-        little: {
-          span_term: {
-            FIELD: {
-              value: 'VALUE',
-            },
-          },
-        },
-        big: {
-          span_near: {
-            clauses: [
-              {
-                span_term: {
-                  FIELD: {
-                    value: 'VALUE',
-                  },
-                },
-              },
-              {
-                span_term: {
-                  FIELD: {
-                    value: 'VALUE',
-                  },
-                },
-              },
-            ],
-            slop: 5,
-            in_order: false,
-          },
-        },
-      },
+      __template: spanContainingTemplate,
       little: SPAN_QUERIES,
       big: SPAN_QUERIES,
     },
     span_within: {
-      __template: {
-        little: {
-          span_term: {
-            FIELD: {
-              value: 'VALUE',
-            },
-          },
-        },
-        big: {
-          span_near: {
-            clauses: [
-              {
-                span_term: {
-                  FIELD: {
-                    value: 'VALUE',
-                  },
-                },
-              },
-              {
-                span_term: {
-                  FIELD: {
-                    value: 'VALUE',
-                  },
-                },
-              },
-            ],
-            slop: 5,
-            in_order: false,
-          },
-        },
-      },
+      __template: spanWithinTemplate,
       little: SPAN_QUERIES,
       big: SPAN_QUERIES,
     },
@@ -603,11 +548,7 @@ export default function (api) {
       '{field}': [''],
     },
     wildcard: {
-      __template: {
-        FIELD: {
-          value: 'VALUE',
-        },
-      },
+      __template: wildcardTemplate,
       '{field}': {
         value: '',
         boost: 2.0,
@@ -624,6 +565,22 @@ export default function (api) {
       score_mode: {
         __one_of: ['avg', 'total', 'max', 'none'],
       },
+    },
+    percolate: {
+      __template: {
+        field: '',
+        document: {}
+      },
+      field: '',
+      document: {},
+      name: '',
+      documents: [{}],
+      document_type: '',
+      index: '',
+      type: '',
+      id: '',
+      routing: '',
+      preference: ''
     },
     common: {
       __template: {
@@ -722,5 +679,11 @@ export default function (api) {
         //populated by a global rule
       },
     },
+    wrapper: {
+      __template: {
+        query: 'QUERY_BASE64_ENCODED',
+      },
+      query: ''
+    }
   });
 }
