@@ -611,11 +611,14 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
           return await sharedItem.getAttribute('data-render-complete');
         }));
         if (renderComplete.length !== sharedItems.length) {
-          throw new Error('Some shared items dont have data-render-complete attribute');
+          const expecting = `expecting: ${sharedItems.length}, received: ${renderComplete.length}`;
+          throw new Error(
+            `Some shared items dont have data-render-complete attribute, ${expecting}`);
         }
         const totalCount = renderComplete.filter(value => value === 'true' || value === 'disabled').length;
         if (totalCount < sharedItems.length) {
-          throw new Error('Still waiting on more visualizations to finish rendering');
+          const expecting = `${sharedItems.length}, received: ${totalCount}`;
+          throw new Error(`Still waiting on more visualizations to finish rendering, expecting: ${expecting}`);
         }
       });
     }
