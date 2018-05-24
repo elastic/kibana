@@ -81,7 +81,7 @@ export class InfluencersCell extends Component {
     const recordInfluencers = this.props.influencers || [];
 
     const influencers = [];
-    _.each(recordInfluencers, (influencer) => {
+    recordInfluencers.forEach((influencer) => {
       _.each(influencer, (influencerFieldValue, influencerFieldName) => {
         influencers.push({
           influencerFieldName,

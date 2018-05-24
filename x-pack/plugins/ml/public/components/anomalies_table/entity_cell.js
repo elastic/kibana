@@ -19,7 +19,7 @@ import {
  * a filter on this entity.
  */
 export function EntityCell({ entityName, entityValue, filter }) {
-  const valueText = entityName !== 'mlcategory' ? entityValue : `mlcategory ${entityValue}`;
+  const valueText = (entityName !== 'mlcategory') ? entityValue : `mlcategory ${entityValue}`;
   return (
     <React.Fragment>
       {valueText}

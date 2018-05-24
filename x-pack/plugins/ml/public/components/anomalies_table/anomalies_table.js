@@ -91,13 +91,11 @@ function getColumns(
     {
       field: 'severity',
       name: `${(isAggregatedData === true) ? 'max ' : ''}severity`,
-      render: (score) => {
-        return (
-          <EuiHealth color={getSeverityColor(score)} compressed="true">
-            {score >= 1 ? Math.floor(score) : '< 1'}
-          </EuiHealth>
-        );
-      },
+      render: (score) => (
+        <EuiHealth color={getSeverityColor(score)} compressed="true">
+          {score >= 1 ? Math.floor(score) : '< 1'}
+        </EuiHealth>
+      ),
       sortable: true
     },
     {
@@ -111,15 +109,13 @@ function getColumns(
     columns.push({
       field: 'entityValue',
       name: 'found for',
-      render: (entityValue, item) => {
-        return (
-          <EntityCell
-            entityName={item.entityName}
-            entityValue={entityValue}
-            filter={filter}
-          />
-        );
-      },
+      render: (entityValue, item) => (
+        <EntityCell
+          entityName={item.entityName}
+          entityValue={entityValue}
+          filter={filter}
+        />
+      ),
       sortable: true
     });
   }
@@ -128,14 +124,12 @@ function getColumns(
     columns.push({
       field: 'influencers',
       name: 'influenced by',
-      render: (influencers) => {
-        return (
-          <InfluencersCell
-            limit={INFLUENCERS_LIMIT}
-            influencers={influencers}
-          />
-        );
-      },
+      render: (influencers) => (
+        <InfluencersCell
+          limit={INFLUENCERS_LIMIT}
+          influencers={influencers}
+        />
+      ),
       sortable: true
     });
   }
@@ -176,14 +170,12 @@ function getColumns(
       columns.push({
         field: 'metricDescriptionSort',
         name: 'description',
-        render: (metricDescriptionSort, item) => {
-          return (
-            <DescriptionCell
-              actual={item.actual}
-              typical={item.typical}
-            />
-          );
-        },
+        render: (metricDescriptionSort, item) => (
+          <DescriptionCell
+            actual={item.actual}
+            typical={item.typical}
+          />
+        ),
         sortable: true
       });
     }
@@ -196,7 +188,7 @@ function getColumns(
   });
 
   const showExamples = items.some(item => item.entityName === 'mlcategory');
-  const showLinks = showViewSeriesLink === true && items.some((item) => showLinksMenuForItem(item));
+  const showLinks = (showViewSeriesLink === true) || items.some(item => showLinksMenuForItem(item));
 
   if (showLinks === true) {
     columns.push({
@@ -264,7 +256,7 @@ class AnomaliesTable extends Component {
         return anomaly.rowId === rowId;
       });
 
-      return matching === undefined;
+      return (matching === undefined);
     });
 
     if (prevExpandedNotInData !== undefined) {
@@ -283,7 +275,7 @@ class AnomaliesTable extends Component {
     if (itemIdToExpandedRowMap[item.rowId]) {
       delete itemIdToExpandedRowMap[item.rowId];
     } else {
-      const examples = item.entityName === 'mlcategory' ?
+      const examples = (item.entityName === 'mlcategory') ?
         _.get(this.props.tableData, ['examplesByJobId', item.jobId, item.entityValue]) : undefined;
       itemIdToExpandedRowMap[item.rowId] = (
         <AnomalyDetails
@@ -291,6 +283,7 @@ class AnomaliesTable extends Component {
           examples={examples}
           isAggregatedData={this.isShowingAggregatedData()}
           filter={this.props.filter}
+          influencersLimit={INFLUENCERS_LIMIT}
         />
       );
     }
@@ -310,7 +303,7 @@ class AnomaliesTable extends Component {
       if (expandButton.length > 0) {
         const rowId = expandButton.attr('data-row-id');
         mouseOverRecord = this.props.tableData.anomalies.find((anomaly) => {
-          return anomaly.rowId === rowId;
+          return (anomaly.rowId === rowId);
         });
       }
     }
@@ -325,11 +318,9 @@ class AnomaliesTable extends Component {
           mlAnomaliesTableService.anomalyRecordMouseenter.changed(mouseOverRecord);
         }
       }
-    } else {
-      if (mouseOverRecord !== undefined) {
-        // Mouse is now over a row, fire mouseenter on the record.
-        mlAnomaliesTableService.anomalyRecordMouseenter.changed(mouseOverRecord);
-      }
+    } else if (mouseOverRecord !== undefined) {
+      // Mouse is now over a row, fire mouseenter on the record.
+      mlAnomaliesTableService.anomalyRecordMouseenter.changed(mouseOverRecord);
     }
 
     this.mouseOverRecord = mouseOverRecord;
@@ -342,9 +333,10 @@ class AnomaliesTable extends Component {
   };
 
   render() {
-    if (this.props.tableData === undefined ||
-      this.props.tableData.anomalies === undefined ||
-      this.props.tableData.anomalies.length === 0) {
+    const { timefilter, tableData, filter } = this.props;
+
+    if (tableData === undefined ||
+      tableData.anomalies === undefined || tableData.anomalies.length === 0) {
       return (
         <EuiFlexGroup justifyContent="spaceAround">
           <EuiFlexItem grow={false}>
@@ -357,15 +349,15 @@ class AnomaliesTable extends Component {
     }
 
     const columns = getColumns(
-      this.props.tableData.anomalies,
-      this.props.tableData.examplesByJobId,
+      tableData.anomalies,
+      tableData.examplesByJobId,
       this.isShowingAggregatedData(),
-      this.props.tableData.interval,
-      this.props.timefilter,
-      this.props.tableData.showViewSeriesLink,
+      tableData.interval,
+      timefilter,
+      tableData.showViewSeriesLink,
       this.state.itemIdToExpandedRowMap,
       this.toggleRow,
-      this.props.filter);
+      filter);
 
     const sorting = {
       sort: {
@@ -377,7 +369,7 @@ class AnomaliesTable extends Component {
     return (
       <EuiInMemoryTable
         className="ml-anomalies-table"
-        items={this.props.tableData.anomalies}
+        items={tableData.anomalies}
         columns={columns}
         pagination={{
           pageSizeOptions: [10, 25, 100],

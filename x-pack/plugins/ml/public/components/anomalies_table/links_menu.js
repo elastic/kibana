@@ -46,13 +46,14 @@ export class LinksMenu extends Component {
   }
 
   openCustomUrl = (customUrl) => {
-    console.log('Anomalies Table - open customUrl for record:', this.props.anomaly);
+    const { anomaly, interval, isAggregatedData } = this.props;
+
+    console.log('Anomalies Table - open customUrl for record:', anomaly);
 
     // If url_value contains $earliest$ and $latest$ tokens, add in times to the source record.
     // Create a copy of the record as we are adding properties into it.
-    const record = _.cloneDeep(this.props.anomaly.source);
+    const record = _.cloneDeep(anomaly.source);
     const timestamp = record.timestamp;
-    const interval = this.props.interval;
     const configuredUrlValue = customUrl.url_value;
     const timeRangeInterval = parseInterval(customUrl.time_range);
     if (configuredUrlValue.includes('$earliest$')) {
@@ -74,7 +75,7 @@ export class LinksMenu extends Component {
       if (timeRangeInterval !== null) {
         latestMoment.add(timeRangeInterval);
       } else {
-        if (this.props.isAggregatedData === true) {
+        if (isAggregatedData === true) {
           latestMoment = moment(timestamp).endOf(interval);
           if (interval === 'hour') {
             // Show to the end of the next hour.
@@ -97,9 +98,9 @@ export class LinksMenu extends Component {
 
       ml.results.getCategoryDefinition(jobId, categoryId)
         .then((resp) => {
-        // Prefix each of the terms with '+' so that the Elasticsearch Query String query
-        // run in a drilldown Kibana dashboard has to match on all terms.
-          const termsArray = _.map(resp.terms.split(' '), (term) => { return '+' + term; });
+          // Prefix each of the terms with '+' so that the Elasticsearch Query String query
+          // run in a drilldown Kibana dashboard has to match on all terms.
+          const termsArray = resp.terms.split(' ').map(term => `+${term}`);
           record.mlcategoryterms = termsArray.join(' ');
           record.mlcategoryregex = resp.regex;
 
@@ -188,10 +189,8 @@ export class LinksMenu extends Component {
     });
 
     // Need to encode the _a parameter in case any entities contain unsafe characters such as '+'.
-    let path = chrome.getBasePath();
-    path += '/app/ml#/timeseriesexplorer';
-    path += '?_g=' + _g;
-    path += '&_a=' + encodeURIComponent(_a);
+    let path = `${chrome.getBasePath()}/app/ml#/timeseriesexplorer`;
+    path += `?_g=${_g}&_a=${encodeURIComponent(_a)}`;
     window.open(path, '_blank');
   }
 
@@ -201,6 +200,12 @@ export class LinksMenu extends Component {
     const indexPatterns = getIndexPatterns();
 
     const job = mlJobService.getJob(this.props.anomaly.jobId);
+    if (job === undefined) {
+      console.log(`viewExamples(): no job found with ID: ${this.props.anomaly.jobId}`);
+      toastNotifications.addDanger(
+        `Unable to view examples as no details could be found for job ID ${this.props.anomaly.jobId}`);
+      return;
+    }
     const categorizationFieldName = job.analysis_config.categorization_field_name;
     const datafeedIndices = job.datafeed_config.indices;
     // Find the type of the categorization field i.e. text (preferred) or keyword.
@@ -330,6 +335,8 @@ export class LinksMenu extends Component {
   };
 
   render() {
+    const { anomaly, showViewSeriesLink } = this.props;
+
     const button = (
       <EuiButtonEmpty
         size="s"
@@ -343,8 +350,8 @@ export class LinksMenu extends Component {
     );
 
     const items = [];
-    if (this.props.anomaly.customUrls !== undefined) {
-      this.props.anomaly.customUrls.forEach((customUrl, index) => {
+    if (anomaly.customUrls !== undefined) {
+      anomaly.customUrls.forEach((customUrl, index) => {
         items.push(
           <EuiContextMenuItem
             key={`custom_url_${index}`}
@@ -357,7 +364,7 @@ export class LinksMenu extends Component {
       });
     }
 
-    if (this.props.showViewSeriesLink === true && this.props.anomaly.isTimeSeriesViewDetector === true) {
+    if (showViewSeriesLink === true && anomaly.isTimeSeriesViewDetector === true) {
       items.push(
         <EuiContextMenuItem
           key="view_series"
@@ -369,7 +376,7 @@ export class LinksMenu extends Component {
       );
     }
 
-    if (this.props.anomaly.entityName === 'mlcategory') {
+    if (anomaly.entityName === 'mlcategory') {
       items.push(
         <EuiContextMenuItem
           key="view_examples"

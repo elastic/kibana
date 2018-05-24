@@ -708,14 +708,14 @@ module.controller('MlTimeSeriesExplorerController', function (
         }
       });
 
-      $timeout(() => {
+      $scope.$evalAsync(() => {
         $scope.tableData = {
           anomalies,
           interval: resp.interval,
           examplesByJobId: resp.examplesByJobId,
           showViewSeriesLink: false
         };
-      }, 0);
+      });
 
     }).catch((resp) => {
       console.log('Time series explorer - error loading data for anomalies table:', resp);

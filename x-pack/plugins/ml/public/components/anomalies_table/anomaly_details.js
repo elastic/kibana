@@ -32,7 +32,6 @@ import {
 import { formatValue } from 'plugins/ml/formatters/format_value';
 
 const TIME_FIELD_NAME = 'timestamp';
-const INFLUENCERS_LIMIT = 5;
 
 
 function getFilterEntity(entityName, entityValue, filter) {
@@ -116,14 +115,14 @@ function getDetailsItems(anomaly, examples, filter) {
 
   if (examples !== undefined && examples.length > 0) {
     examples.forEach((example, index) => {
-      const title = index === 0 ? 'category examples' : '';
+      const title = (index === 0) ? 'category examples' : '';
       items.push({ title, description: example });
     });
   }
 
   items.push({
     title: 'function',
-    description: source.function !== 'metric' ? source.function : source.function_description
+    description: (source.function !== 'metric') ? source.function : source.function_description
   });
 
   if (source.field_name !== undefined) {
@@ -162,7 +161,7 @@ function getDetailsItems(anomaly, examples, filter) {
   // will already have been added for display.
   if (causes.length > 1) {
     causes.forEach((cause, index) => {
-      const title = index === 0 ? `${cause.entityName} values` : '';
+      const title = (index === 0) ? `${cause.entityName} values` : '';
       let description = `${cause.entityValue} (actual ${formatValue(cause.actual, source.function)}, `;
       description += `typical ${formatValue(cause.typical, source.function)}, probability ${cause.probability})`;
       items.push({ title, description });
@@ -213,7 +212,7 @@ export class AnomalyDetails extends Component {
           <h5>Description</h5>
           {anomalyDescription}
         </EuiText>
-        {mvDescription !== undefined &&
+        {(mvDescription !== undefined) &&
           <EuiText size="xs">
             {mvDescription}
           </EuiText>
@@ -254,8 +253,8 @@ export class AnomalyDetails extends Component {
     let othersCount = 0;
     let numToDisplay = 0;
     if (anomalyInfluencers !== undefined) {
-      numToDisplay = this.state.showAllInfluencers === true ?
-        anomalyInfluencers.length : Math.min(INFLUENCERS_LIMIT, anomalyInfluencers.length);
+      numToDisplay = (this.state.showAllInfluencers === true) ?
+        anomalyInfluencers.length : Math.min(this.props.influencersLimit, anomalyInfluencers.length);
       othersCount = Math.max(anomalyInfluencers.length - numToDisplay, 0);
 
       if (othersCount === 1) {
@@ -293,7 +292,7 @@ export class AnomalyDetails extends Component {
             and {othersCount} more
             </EuiLink>
           }
-          {numToDisplay > (INFLUENCERS_LIMIT + 1) &&
+          {numToDisplay > (this.props.influencersLimit + 1) &&
             <EuiLink
               onClick={() => this.toggleAllInfluencers()}
             >
@@ -322,5 +321,6 @@ AnomalyDetails.propTypes = {
   anomaly: PropTypes.object.isRequired,
   examples: PropTypes.array,
   isAggregatedData: PropTypes.bool,
-  filter: PropTypes.func
+  filter: PropTypes.func,
+  influencersLimit: PropTypes.number
 };

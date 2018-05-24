@@ -812,14 +812,14 @@ module.controller('MlExplorerController', function (
         }
       });
 
-      $timeout(() => {
+      $scope.$evalAsync(() => {
         $scope.tableData = {
           anomalies,
           interval: resp.interval,
           examplesByJobId: resp.examplesByJobId,
           showViewSeriesLink: true
         };
-      }, 0);
+      });
 
     }).catch((resp) => {
       console.log('Explorer - error loading data for anomalies table:', resp);
