@@ -150,6 +150,7 @@ export function FindProvider({ getService }) {
       log.debug(`clickByPartialLinkText(${linkText})`);
       await retry.try(async () => {
         const element = await this.byPartialLinkText(linkText, timeout);
+        await remote.moveMouseTo(element);
         await element.click();
       });
     }
@@ -158,6 +159,7 @@ export function FindProvider({ getService }) {
       log.debug(`clickByLinkText(${linkText})`);
       await retry.try(async () => {
         const element = await this.byLinkText(linkText, timeout);
+        await remote.moveMouseTo(element);
         await element.click();
       });
     }
@@ -166,6 +168,7 @@ export function FindProvider({ getService }) {
       log.debug(`clickByCssSelector(${selector})`);
       await retry.try(async () => {
         const element = await this.byCssSelector(selector, timeout);
+        await remote.moveMouseTo(element);
         await element.click();
       });
     }
