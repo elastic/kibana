@@ -2,6 +2,7 @@ import { createIndexName } from './lib/create_index_name';
 
 const NOT_INSTALLED = 'not_installed';
 const INSTALLED = 'installed';
+const UNKNOWN = 'unknown';
 
 export const createListRoute = () => ({
   path: '/api/sample_data',
@@ -29,12 +30,33 @@ export const createListRoute = () => ({
             sampleDataset.status = NOT_INSTALLED;
             return;
           }
+
           const { count } = await callWithRequest(request, 'count', { index: index });
-          sampleDataset.status = count > 0 ? INSTALLED : NOT_INSTALLED;
+          if (count === 0) {
+            sampleDataset.status = NOT_INSTALLED;
+            return;
+          }
         } catch (err) {
-          sampleDataset.status = 'unknown';
+          sampleDataset.status = UNKNOWN;
           sampleDataset.statusMsg = err.message;
+          return;
         }
+
+        try {
+          await request.getSavedObjectsClient().get('dashboard', sampleDataset.overviewDashboard);
+        } catch (err) {
+          // savedObjectClient.get() throws an boom error when object is not found.
+          if (err.output.payload.statusCode === 404) {
+            sampleDataset.status = NOT_INSTALLED;
+            return;
+          }
+
+          sampleDataset.status = UNKNOWN;
+          sampleDataset.statusMsg = err.message;
+          return;
+        }
+
+        sampleDataset.status = INSTALLED;
       });
 
       await Promise.all(isInstalledPromises);

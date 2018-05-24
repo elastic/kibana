@@ -82,10 +82,12 @@ export const createInstallRoute = () => ({
           return reply(err.message).code(500);
         }
 
-        try {
-          await request.getSavedObjectsClient().bulkCreate(sampleDataset.savedObjects, { overwrite: true });
-        } catch (err) {
-          server.log(['warning'], `sample_data install errors while loading saved objects. Error: ${err.message}`);
+        const createResults = await request.getSavedObjectsClient().bulkCreate(sampleDataset.savedObjects, { overwrite: true });
+        const errors = createResults.filter(savedObjectCreateResult => {
+          return savedObjectCreateResult.hasOwnProperty('error');
+        });
+        if (errors.length > 0) {
+          server.log(['warning'], `sample_data install errors while loading saved objects. Errors: ${errors.join(',')}`);
           return reply(`Unable to load kibana saved objects, see kibana logs for details`).code(403);
         }
 
