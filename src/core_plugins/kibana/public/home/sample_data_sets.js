@@ -15,6 +15,7 @@ export async function listSampleDataSets() {
       credentials: 'include',
       headers: headers,
     });
+
     if (response.status >= 300) {
       throw new Error(`Request failed with status code: ${response.status}`);
     }
@@ -36,8 +37,10 @@ export async function installSampleDataSet(id, name, defaultIndex, getConfig, se
       credentials: 'include',
       headers: headers,
     });
+
     if (response.status >= 300) {
-      throw new Error(`Request failed with status code: ${response.status}`);
+      const body = await response.text();
+      throw new Error(`Request failed with status code: ${response.status}, message: ${body}`);
     }
   } catch (err) {
     toastNotifications.addDanger({
@@ -68,7 +71,8 @@ export async function uninstallSampleDataSet(id, name, defaultIndex, getConfig, 
       headers: headers,
     });
     if (response.status >= 300) {
-      throw new Error(`Request failed with status code: ${response.status}`);
+      const body = await response.text();
+      throw new Error(`Request failed with status code: ${response.status}, message: ${body}`);
     }
   } catch (err) {
     toastNotifications.addDanger({

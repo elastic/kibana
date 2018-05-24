@@ -30,6 +30,13 @@ export const createInstallRoute = () => ({
         }
       };
 
+      // clean up any old installation of dataset
+      try {
+        await callWithRequest(request, 'indices.delete', { index: index });
+      } catch (err) {
+        // ignore delete errors
+      }
+
       try {
         const createIndexParams = {
           index: index,
@@ -49,7 +56,9 @@ export const createInstallRoute = () => ({
         };
         await callWithRequest(request, 'indices.create', createIndexParams);
       } catch (err) {
-        return reply(`Unable to create sample data index "${index}", error: ${err.message}`).code(err.status);
+        const errMsg = `Unable to create sample data index "${index}", error: ${err.message}`;
+        server.log(['warning'], errMsg);
+        return reply(errMsg).code(err.status);
       }
 
       const now = new Date();
