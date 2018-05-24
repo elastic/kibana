@@ -141,11 +141,7 @@ module.exports = {
      * Files that run BEFORE node version check
      */
     {
-      files: [
-        'scripts/**/*',
-        'src/setup_node_env/**/*',
-        'src/utils/node_version.js',
-      ],
+      files: ['scripts/**/*', 'src/setup_node_env/**/*'],
       rules: {
         'import/no-commonjs': 'off',
         'prefer-object-spread/prefer-object-spread': 'off',
