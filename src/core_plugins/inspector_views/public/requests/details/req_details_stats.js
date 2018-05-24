@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
+  EuiIcon,
   EuiIconTip,
   EuiTable,
   EuiTableBody,
@@ -12,27 +13,30 @@ class RequestDetailsStats extends Component {
 
   static shouldShow = (request) => !!request.stats && Object.keys(request.stats).length;
 
-  state = { };
-
   renderStatRow = (stat) => {
     return [
       <EuiTableRow
         key={stat.name}
       >
         <EuiTableRowCell>
+          <span className="requests-stats__icon">
+            { stat.description &&
+              <EuiIconTip
+                aria-label="Description"
+                type="questionInCircle"
+                color="subdued"
+                content={stat.description}
+              />
+            }
+            { !stat.description &&
+              <EuiIcon
+                type="empty"
+              />
+            }
+          </span>
           {stat.name}
         </EuiTableRowCell>
         <EuiTableRowCell>{stat.value}</EuiTableRowCell>
-        <EuiTableRowCell>
-          { stat.description &&
-            <EuiIconTip
-              aria-label="Description"
-              type="questionInCircle"
-              color="text"
-              content={stat.description}
-            />
-          }
-        </EuiTableRowCell>
       </EuiTableRow>
     ];
   };

@@ -20,42 +20,47 @@ class DataTableFormat extends Component {
   static renderCell(col, value) {
     return (
       <EuiFlexGroup
-        gutterSize="none"
+        gutterSize="s"
         alignItems="center"
       >
-        <EuiFlexItem grow={true}>
+        <EuiFlexItem grow={false}>
           { value }
         </EuiFlexItem>
-        { col.filter &&
-          <EuiFlexItem grow={false} className="inspector-table__filter">
-            <EuiToolTip
-              position="bottom"
-              content="Filter for value"
-            >
-              <EuiButtonIcon
-                iconType="plusInCircle"
-                color="text"
-                aria-label="Filter for value"
-                onClick={() => col.filter(value)}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        }
-        { col.filterOut &&
-          <EuiFlexItem grow={false} className="inspector-table__filter">
-            <EuiToolTip
-              position="bottom"
-              content="Filter out value"
-            >
-              <EuiButtonIcon
-                iconType="minusInCircle"
-                color="text"
-                aria-label="Filter out value"
-                onClick={() => col.filterOut(value)}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        }
+        <EuiFlexItem grow={false} className="inspector-table__filter">
+          <EuiFlexGroup
+            gutterSize="none"
+            alignItems="center"
+          >
+            { col.filter &&
+              <EuiToolTip
+                position="bottom"
+                content="Filter for value"
+              >
+                <EuiButtonIcon
+                  iconType="plusInCircle"
+                  color="text"
+                  aria-label="Filter for value"
+                  onClick={() => col.filter(value)}
+                />
+              </EuiToolTip>
+            }
+            { col.filterOut &&
+              <EuiFlexItem grow={false} className="inspector-table__filter">
+                <EuiToolTip
+                  position="bottom"
+                  content="Filter out value"
+                >
+                  <EuiButtonIcon
+                    iconType="minusInCircle"
+                    color="text"
+                    aria-label="Filter out value"
+                    onClick={() => col.filterOut(value)}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            }
+          </EuiFlexGroup>
+        </EuiFlexItem>
       </EuiFlexGroup>
     );
   }

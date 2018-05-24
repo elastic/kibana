@@ -7,6 +7,7 @@ import {
   EuiFlyout,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiHorizontalRule,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -80,6 +81,7 @@ class InspectorPanel extends Component {
               />
             </EuiFlexItem>
           </EuiFlexGroup>
+          <EuiHorizontalRule margin="s"/>
         </EuiFlyoutHeader>
         { this.renderSelectedPanel() }
         <EuiFlyoutFooter>
