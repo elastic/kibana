@@ -2,6 +2,7 @@ import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Synopsis } from './synopsis';
+import { SampleDataSetCard } from './sample_data_set_card';
 
 import {
   EuiPage,
@@ -15,8 +16,10 @@ import {
 
 
 import { getTutorials } from '../load_tutorials';
+import { listSampleDataSets } from '../sample_data_sets';
 
-const ALL = 'all';
+const ALL_TAB_ID = 'all';
+const SAMPLE_DATA_TAB_ID = 'sampleData';
 
 export class TutorialDirectory extends React.Component {
 
@@ -24,7 +27,7 @@ export class TutorialDirectory extends React.Component {
     super(props);
 
     this.tabs = [{
-      id: ALL,
+      id: ALL_TAB_ID,
       name: 'All',
     }, {
       id: 'logging',
@@ -35,30 +38,83 @@ export class TutorialDirectory extends React.Component {
     }, {
       id: 'security',
       name: 'Security Analytics',
+    }, {
+      id: SAMPLE_DATA_TAB_ID,
+      name: 'Sample Data',
     }];
 
-    let openTab = ALL;
+    let openTab = ALL_TAB_ID;
     if (props.openTab && this.tabs.some(tab => { return tab.id === props.openTab; })) {
       openTab = props.openTab;
     }
     this.state = {
       selectedTabId: openTab,
-      tutorials: []
+      tutorialCards: [],
+      sampleDataSets: [],
     };
   }
 
-  async componentWillMount() {
-    let tutorials = await getTutorials();
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  async componentDidMount() {
+    this._isMounted = true;
+
+    this.loadSampleDataSets();
+
+    const tutorialConfigs = await getTutorials();
+
+    if (!this._isMounted) {
+      return;
+    }
+
+    let tutorialCards = tutorialConfigs.map(tutorialConfig => {
+      return {
+        category: tutorialConfig.category,
+        icon: tutorialConfig.euiIconType,
+        name: tutorialConfig.name,
+        description: tutorialConfig.shortDescription,
+        url: this.props.addBasePath(`#/home/tutorial/${tutorialConfig.id}`),
+        elasticCloud: tutorialConfig.elasticCloud,
+      };
+    });
+
+    // Add card for sample data that only gets show in "all" tab
+    tutorialCards.push({
+      name: 'Sample Data',
+      description: 'Get started exploring Kibana with these "one click" data sets.',
+      url: this.props.addBasePath('#/home/tutorial_directory/sampleData'),
+      elasticCloud: true,
+      onClick: this.onSelectedTabChanged.bind(null, SAMPLE_DATA_TAB_ID),
+    });
+
     if (this.props.isCloudEnabled) {
-      tutorials = tutorials.filter(tutorial => {
+      tutorialCards = tutorialCards.filter(tutorial => {
         return _.has(tutorial, 'elasticCloud');
       });
     }
-    tutorials.sort((a, b) => {
+
+    tutorialCards.sort((a, b) => {
       return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
     });
+
+    this.setState({ // eslint-disable-line react/no-did-mount-set-state
+      tutorialCards: tutorialCards,
+    });
+  }
+
+  loadSampleDataSets = async () => {
+    const sampleDataSets = await listSampleDataSets();
+
+    if (!this._isMounted) {
+      return;
+    }
+
     this.setState({
-      tutorials: tutorials,
+      sampleDataSets: sampleDataSets.sort((a, b) => {
+        return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+      }),
     });
   }
 
@@ -81,28 +137,57 @@ export class TutorialDirectory extends React.Component {
     ));
   }
 
-  renderTutorials = () => {
-    return this.state.tutorials
+  renderTab = () => {
+    if (this.state.selectedTabId === SAMPLE_DATA_TAB_ID) {
+      return this.renderSampleDataSetsTab();
+    }
+
+    return this.renderTutorialsTab();
+  }
+
+  renderTutorialsTab = () => {
+    return this.state.tutorialCards
       .filter((tutorial) => {
-        if (this.state.selectedTabId === ALL) {
-          return true;
-        }
-        return this.state.selectedTabId === tutorial.category;
+        return this.state.selectedTabId === ALL_TAB_ID || this.state.selectedTabId === tutorial.category;
       })
       .map((tutorial) => {
         return (
           <EuiFlexItem key={tutorial.name}>
             <Synopsis
-              iconType={tutorial.euiIconType}
-              description={tutorial.shortDescription}
+              iconType={tutorial.icon}
+              description={tutorial.description}
               title={tutorial.name}
               wrapInPanel
-              url={this.props.addBasePath(`#/home/tutorial/${tutorial.id}`)}
+              url={tutorial.url}
+              onClick={tutorial.onClick}
             />
           </EuiFlexItem>
         );
       });
   };
+
+  renderSampleDataSetsTab = () => {
+    return this.state.sampleDataSets.map(sampleDataSet => {
+      return (
+        <EuiFlexItem key={sampleDataSet.id}>
+          <SampleDataSetCard
+            id={sampleDataSet.id}
+            description={sampleDataSet.description}
+            name={sampleDataSet.name}
+            launchUrl={this.props.addBasePath(`/app/kibana#/dashboard/${sampleDataSet.overviewDashboard}`)}
+            status={sampleDataSet.status}
+            statusMsg={sampleDataSet.statusMsg}
+            onRequestComplete={this.loadSampleDataSets}
+            getConfig={this.props.getConfig}
+            setConfig={this.props.setConfig}
+            clearIndexPatternsCache={this.props.clearIndexPatternsCache}
+            defaultIndex={sampleDataSet.defaultIndex}
+            previewUrl={this.props.addBasePath(sampleDataSet.previewImagePath)}
+          />
+        </EuiFlexItem>
+      );
+    });
+  }
 
   render() {
     return (
@@ -123,7 +208,7 @@ export class TutorialDirectory extends React.Component {
         </EuiTabs>
         <EuiSpacer />
         <EuiFlexGrid columns={4}>
-          { this.renderTutorials() }
+          { this.renderTab() }
         </EuiFlexGrid>
 
       </EuiPage>
@@ -135,4 +220,7 @@ TutorialDirectory.propTypes = {
   addBasePath: PropTypes.func.isRequired,
   openTab: PropTypes.string,
   isCloudEnabled: PropTypes.bool.isRequired,
+  getConfig: PropTypes.func.isRequired,
+  setConfig: PropTypes.func.isRequired,
+  clearIndexPatternsCache: PropTypes.func.isRequired,
 };
