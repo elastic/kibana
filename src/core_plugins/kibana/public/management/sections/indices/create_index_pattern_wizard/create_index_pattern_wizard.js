@@ -13,7 +13,6 @@ import { getIndices } from './lib/get_indices';
 
 export class CreateIndexPatternWizard extends Component {
   static propTypes = {
-    loadingDataDocUrl: PropTypes.string.isRequired,
     initialQuery: PropTypes.string,
     services: PropTypes.shape({
       es: PropTypes.object.isRequired,
@@ -106,9 +105,9 @@ export class CreateIndexPatternWizard extends Component {
       return <LoadingState />;
     }
 
-    if (allIndices.length === 0) {
-      const { loadingDataDocUrl } = this.props;
-      return <EmptyState loadingDataDocUrl={loadingDataDocUrl} onRefresh={this.fetchIndices} />;
+    const hasDataIndices = allIndices.some(({ name }) => !name.startsWith('.'));
+    if (!hasDataIndices) {
+      return <EmptyState onRefresh={this.fetchIndices} />;
     }
 
     if (step === 1) {

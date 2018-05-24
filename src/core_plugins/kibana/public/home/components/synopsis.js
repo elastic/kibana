@@ -11,7 +11,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
-export function Synopsis({ description, iconUrl, iconType, title, url, wrapInPanel }) {
+export function Synopsis({ description, iconUrl, iconType, title, url, wrapInPanel, onClick }) {
   let optionalImg;
   if (iconUrl) {
     optionalImg = (
@@ -63,6 +63,18 @@ export function Synopsis({ description, iconUrl, iconType, title, url, wrapInPan
     );
   }
 
+  if (onClick) {
+    return (
+      <span
+        onClick={onClick}
+        className="euiLink synopsis"
+        data-test-subj={`homeSynopsisLink${title.toLowerCase()}`}
+      >
+        {synopsisDisplay}
+      </span>
+    );
+  }
+
   return (
     <a
       href={url}
@@ -79,5 +91,6 @@ Synopsis.propTypes = {
   iconUrl: PropTypes.string,
   iconType: PropTypes.string,
   title: PropTypes.string.isRequired,
-  url: PropTypes.string.isRequired
+  url: PropTypes.string,
+  onClick: PropTypes.func,
 };

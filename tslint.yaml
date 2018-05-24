@@ -8,3 +8,4 @@ rulesDirectory:
 rules:
   prettier: true
   no-unused-variable: true
+  interface-name: false
