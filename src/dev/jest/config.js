@@ -9,6 +9,7 @@ export default {
     '<rootDir>/src/cli_plugin',
     '<rootDir>/src/dev',
     '<rootDir>/src/utils',
+    '<rootDir>/src/setup_node_env',
     '<rootDir>/packages',
   ],
   collectCoverageFrom: [
