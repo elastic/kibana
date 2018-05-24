@@ -5,6 +5,7 @@ import * as getSearchDslNS from './search_dsl/search_dsl';
 import { getSearchDsl } from './search_dsl';
 import * as errors from './errors';
 import elasticsearch from 'elasticsearch';
+import _ from 'lodash';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -15,6 +16,7 @@ describe('SavedObjectsRepository', () => {
   let callAdminCluster;
   let onBeforeWrite;
   let savedObjectsRepository;
+  let transformDocuments;
   const mockTimestamp = '2017-08-14T15:49:14.886Z';
   const mockTimestampFields = { updated_at: mockTimestamp };
   const searchResults = {
@@ -82,12 +84,13 @@ describe('SavedObjectsRepository', () => {
   beforeEach(() => {
     callAdminCluster = sandbox.stub();
     onBeforeWrite = sandbox.stub();
-
+    transformDocuments = sandbox.stub();
     savedObjectsRepository = new SavedObjectsRepository({
       index: '.kibana-test',
       mappings,
       callCluster: callAdminCluster,
-      onBeforeWrite
+      onBeforeWrite,
+      transformDocuments,
     });
 
     sandbox.stub(savedObjectsRepository, '_getCurrentTime').returns(mockTimestamp);
@@ -97,7 +100,6 @@ describe('SavedObjectsRepository', () => {
   afterEach(() => {
     sandbox.restore();
   });
-
 
   describe('#create', () => {
     beforeEach(() => {
@@ -171,6 +173,56 @@ describe('SavedObjectsRepository', () => {
       }));
 
       sinon.assert.calledOnce(onBeforeWrite);
+    });
+
+    it('should not transform docs if no migrationState is passed', async () => {
+      await savedObjectsRepository.create('index-pattern', {
+        id: 'logstash-*',
+        title: 'Logstash'
+      });
+
+      sinon.assert.notCalled(transformDocuments);
+    });
+
+    it('should transform docs if migrationState is passed', async () => {
+      const migrationState = { notReal: 'just a test' };
+      const doc = {
+        id: 'logstash-*',
+        type: 'index-pattern',
+        attributes: {
+          title: 'The orig.',
+        },
+      };
+      const transformedDoc = {
+        id: 'shazm',
+        type: 'index-pattern',
+        attributes: {
+          title: 'LOGSTASHHHHH!!!',
+        },
+      };
+
+      transformDocuments.returns(_.cloneDeep([transformedDoc]));
+
+      await savedObjectsRepository.create(doc.type, doc.attributes, { migrationState, id: doc.id });
+
+      const opts = transformDocuments.getCall(0).args[0];
+
+      sinon.assert.calledOnce(transformDocuments);
+      expect(opts.migrationState)
+        .toEqual(migrationState);
+      expect(opts.docs.length)
+        .toEqual(1);
+      expect(opts.docs[0])
+        .toEqual(doc);
+
+      sinon.assert.calledWithExactly(callAdminCluster, 'create', sinon.match({
+        id: `index-pattern:shazm`,
+        body: {
+          [transformedDoc.type]: {
+            title: 'LOGSTASHHHHH!!!',
+          },
+        },
+      }));
     });
   });
 
@@ -305,6 +357,69 @@ describe('SavedObjectsRepository', () => {
           attributes: { title: 'Test Two' },
         }
       ]);
+    });
+
+    it('should not transform docs if no migrationState is passed', async () => {
+      callAdminCluster.returns({ items: [] });
+      await savedObjectsRepository.bulkCreate([
+        { type: 'index-pattern', id: 'logstash-*', attributes: { title: 'Logs' } },
+      ]);
+
+      sinon.assert.notCalled(transformDocuments);
+    });
+
+    it('should transform docs if migrationState is passed', async () => {
+      callAdminCluster.returns(Promise.resolve({
+        errors: false,
+        items: [{
+          create: {
+            _type: 'doc',
+            _id: 'foo:1',
+            _version: 2
+          }
+        }, {
+          create: {
+            _type: 'doc',
+            _id: 'goo:2',
+            _version: 2
+          }
+        }]
+      }));
+
+      const migrationState = { notReal: 'just a test' };
+      const docs = [
+        { type: 'foo', id: '1', attributes: { title: 'Logs' } },
+        { type: 'goo', id: '2', attributes: { title: 'Pea' } },
+      ];
+
+      transformDocuments.returns(docs.map(doc => ({
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          title: doc.attributes.title.toUpperCase(),
+        }
+      })));
+
+      await savedObjectsRepository.bulkCreate(docs, { migrationState });
+
+      const opts = transformDocuments.getCall(0).args[0];
+
+      sinon.assert.calledOnce(transformDocuments);
+      expect(opts.migrationState)
+        .toEqual(migrationState);
+      expect(opts.docs.length)
+        .toEqual(2);
+      expect(opts.docs)
+        .toEqual(docs);
+
+      sinon.assert.calledWithExactly(callAdminCluster, 'bulk', sinon.match({
+        body: [
+          { create: { _id: 'foo:1', _type: 'doc' } },
+          { foo: { title: 'LOGS' }, type: 'foo', updated_at: '2017-08-14T15:49:14.886Z' },
+          { create: { _id: 'goo:2', _type: 'doc' } },
+          { goo: { title: 'PEA' }, type: 'goo', updated_at: '2017-08-14T15:49:14.886Z' },
+        ],
+      }));
     });
   });
 
