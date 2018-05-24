@@ -18,6 +18,7 @@ function clickableStatementName(name, onVertexSelected) {
   return (
     <EuiFlexItem
       grow={false}
+      key="nameSection"
     >
       <EuiButtonEmpty
         color="text"
@@ -36,7 +37,10 @@ function ifStatement(statement, onVertexSelected) {
   return [
     clickableStatementName('if', onVertexSelected),
     (
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem
+        key="ifSection"
+        grow={false}
+      >
         <EuiCodeBlock
           fontSize="s"
           paddingSize="none"
@@ -94,9 +98,13 @@ export class CollapsibleStatement extends React.PureComponent {
   }
 
   render() {
+    const { id } = this.props;
     return (
       <EuiFlexGroup gutterSize="xs">
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem
+          key={`${id}_collapseSection`}
+          grow={false}
+        >
           <EuiButtonIcon
             color="text"
             size="s"

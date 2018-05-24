@@ -99,12 +99,11 @@ function pluginStatement(statement, onShowVertexDetails) {
             >
               <EuiIcon
                 type="dot"
-                color="#50b0a4"
+                className="cv-statement__icon"
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                color="#50b0a4"
                 flush="left"
                 size="xs"
                 className="cv-statement__name"
@@ -141,7 +140,7 @@ export class Statement extends React.PureComponent
   getNestingSpacers(depth) {
     const spacers = [];
     for (let i = 0; i < depth; i += 1) {
-      spacers.push(<div className="cv-spacer" />);
+      spacers.push(<div key={`spacer_${i}`} className="cv-spacer" />);
     }
     return spacers;
   }
