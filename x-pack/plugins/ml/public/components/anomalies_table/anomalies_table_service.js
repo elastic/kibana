@@ -11,16 +11,14 @@
  * anomalies table component.
  */
 
-import { uiModules } from 'ui/modules';
-const module = uiModules.get('apps/ml');
-
 import { listenerFactoryProvider } from 'plugins/ml/factories/listener_factory';
 
-module.service('mlAnomaliesTableService', function () {
+class AnomaliesTableService {
+  constructor() {
+    const listenerFactory = listenerFactoryProvider();
+    this.anomalyRecordMouseenter = listenerFactory();
+    this.anomalyRecordMouseleave = listenerFactory();
+  }
+}
 
-  const listenerFactory = listenerFactoryProvider();
-  this.anomalyRecordMouseenter = listenerFactory();
-  this.anomalyRecordMouseleave = listenerFactory();
-  this.filterChange = listenerFactory();
-
-});
+export const mlAnomaliesTableService = new AnomaliesTableService();
