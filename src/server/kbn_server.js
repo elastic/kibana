@@ -16,6 +16,7 @@ import optimizeMixin from '../optimize';
 import * as Plugins from './plugins';
 import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects';
+import { sampleDataMixin } from './sample_data';
 import { kibanaIndexMappingsMixin } from './mappings';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
@@ -62,6 +63,9 @@ export default class KbnServer {
 
       // setup saved object routes
       savedObjectsMixin,
+
+      // setup routes for installing/uninstalling sample data sets
+      sampleDataMixin,
 
       // ensure that all bundles are built, or that the
       // watch bundle server is running

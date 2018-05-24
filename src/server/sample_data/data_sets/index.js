@@ -1,0 +1,1 @@
+export { flightsSpecProvider } from './flights';
