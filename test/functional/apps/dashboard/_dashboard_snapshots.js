@@ -8,6 +8,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'common']);
   const screenshot = getService('screenshots');
   const remote = getService('remote');
+  const dashboardPanelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
 
   describe('dashboard snapshots', function describeIndexTests() {
@@ -38,7 +39,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await testSubjects.click('saveDashboardSuccess toastCloseButton');
 
       await PageObjects.dashboard.clickFullScreenMode();
-      await PageObjects.dashboard.toggleExpandPanel();
+      await dashboardPanelActions.toggleExpandPanel();
 
       await PageObjects.dashboard.waitForRenderComplete();
       const percentSimilar = await screenshot.compareAgainstBaseline('tsvb_dashboard', updateBaselines);
@@ -59,7 +60,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await testSubjects.click('saveDashboardSuccess toastCloseButton');
 
       await PageObjects.dashboard.clickFullScreenMode();
-      await PageObjects.dashboard.toggleExpandPanel();
+      await dashboardPanelActions.toggleExpandPanel();
 
       await PageObjects.dashboard.waitForRenderComplete();
       // The need for this should have been removed with https://github.com/elastic/kibana/pull/15574 but the
