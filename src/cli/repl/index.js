@@ -51,16 +51,17 @@ function promiseFriendlyWriter({ displayPrompt, getPrintDepth }) {
 }
 
 function promisePrint(result, displayPrompt, getPrintDepth) {
+  const depth = getPrintDepth();
   if (result && typeof result.then === 'function') {
     // Bit of a hack to encourage the user to wait for the result of a promise
     // by printing text out beside the current prompt.
     Promise.resolve()
       .then(() => console.log('Waiting for promise...'))
       .then(() => result)
-      .then((o) => prettyPrint('Promise Resolved: \n', o, getPrintDepth()))
-      .catch((err) => prettyPrint('Promise Rejected: \n', err, getPrintDepth()))
+      .then((o) => prettyPrint('Promise Resolved: \n', o, depth))
+      .catch((err) => prettyPrint('Promise Rejected: \n', err, depth))
       .then(displayPrompt);
     return '';
   }
-  return colorize(result, getPrintDepth());
+  return colorize(result, depth);
 }
