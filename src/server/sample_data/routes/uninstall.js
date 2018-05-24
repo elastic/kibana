@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import Joi from 'joi';
 
 import { createIndexName } from './lib/create_index_name';
@@ -37,7 +38,10 @@ export const createUninstallRoute = () => ({
       try {
         await Promise.all(deletePromises);
       } catch (err) {
-        return reply(`Unable to delete samle dataset saved objects, error: ${err.message}`).code(403);
+        // ignore 404s since users could have deleted some of the saved objects via the UI
+        if (_.get(err, 'output.statusCode') !== 404) {
+          return reply(`Unable to delete samle dataset saved objects, error: ${err.message}`).code(403);
+        }
       }
 
       reply();

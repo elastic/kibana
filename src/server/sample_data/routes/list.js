@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { createIndexName } from './lib/create_index_name';
 
 const NOT_INSTALLED = 'not_installed';
@@ -46,7 +47,7 @@ export const createListRoute = () => ({
           await request.getSavedObjectsClient().get('dashboard', sampleDataset.overviewDashboard);
         } catch (err) {
           // savedObjectClient.get() throws an boom error when object is not found.
-          if (err.output.payload.statusCode === 404) {
+          if (_.get(err, 'output.statusCode') === 404) {
             sampleDataset.status = NOT_INSTALLED;
             return;
           }
