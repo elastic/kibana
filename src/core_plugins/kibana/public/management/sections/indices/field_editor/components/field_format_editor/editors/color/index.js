@@ -1,0 +1,1 @@
+export { ColorEditor } from './color';

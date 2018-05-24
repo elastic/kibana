@@ -1,0 +1,20 @@
+import { RegistryFieldFormatEditorsProvider } from 'ui/registry/field_format_editors';
+import { BytesEditor } from './editors/bytes';
+import { ColorEditor } from './editors/color';
+import { DateEditor } from './editors/date';
+import { DurationEditor } from './editors/duration';
+import { NumberEditor } from './editors/number';
+import { PercentEditor } from './editors/percent';
+import { StringEditor } from './editors/string';
+import { TruncateEditor } from './editors/truncate';
+import { UrlEditor } from './editors/url';
+
+RegistryFieldFormatEditorsProvider.register(BytesEditor);
+RegistryFieldFormatEditorsProvider.register(ColorEditor);
+RegistryFieldFormatEditorsProvider.register(DateEditor);
+RegistryFieldFormatEditorsProvider.register(DurationEditor);
+RegistryFieldFormatEditorsProvider.register(NumberEditor);
+RegistryFieldFormatEditorsProvider.register(PercentEditor);
+RegistryFieldFormatEditorsProvider.register(StringEditor);
+RegistryFieldFormatEditorsProvider.register(TruncateEditor);
+RegistryFieldFormatEditorsProvider.register(UrlEditor);

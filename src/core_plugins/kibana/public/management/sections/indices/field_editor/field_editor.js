@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react';
+import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { intersection, union, get } from 'lodash';
 
@@ -6,6 +6,10 @@ import {
   getDeprecatedScriptingLanguages,
   getSupportedScriptingLanguages,
 } from 'ui/scripting_languages';
+
+import {
+  fieldFormats
+} from 'ui/registry/field_formats';
 
 import {
   getDocLink
@@ -33,8 +37,12 @@ import {
   ScriptingHelpCallOut,
 } from './components/scripting_call_outs';
 
+import {
+  FieldFormatEditor
+} from './components/field_format_editor';
+
 import { FIELD_TYPES_BY_LANG, DEFAULT_FIELD_TYPES } from './constants';
-import { copyField } from './lib';
+import { copyField, getDefaultFormat } from './lib';
 
 export class FieldEditor extends PureComponent {
   static propTypes = {
@@ -42,7 +50,9 @@ export class FieldEditor extends PureComponent {
     field: PropTypes.object.isRequired,
     helpers: PropTypes.shape({
       Field: PropTypes.func.isRequired,
+      getConfig: PropTypes.func.isRequired,
       getEnabledScriptingLanguages: PropTypes.func.isRequired,
+      fieldFormatEditors: PropTypes.object.isRequired,
     }),
   };
 
@@ -54,8 +64,11 @@ export class FieldEditor extends PureComponent {
       isDeprecatedLang: false,
       scriptingLangs: [],
       fieldTypes: [],
+      fieldTypeFormats: [],
       existingFieldNames: props.indexPattern.fields.map(field => field.name),
       field: copyField(props.field, props.indexPattern, props.helpers.Field),
+      fieldFormatId: undefined,
+      fieldFormatParams: {},
     };
     this.supportedLangs = getSupportedScriptingLanguages();
     this.deprecatedLangs = getDeprecatedScriptingLanguages();
@@ -65,40 +78,51 @@ export class FieldEditor extends PureComponent {
   async init() {
     const { getEnabledScriptingLanguages } = this.props.helpers;
     const { field } = this.state;
+    const { indexPattern } = this.props;
 
     const enabledLangs = await getEnabledScriptingLanguages();
     const scriptingLangs = intersection(enabledLangs, union(this.supportedLangs, this.deprecatedLangs));
-    const fieldLang = scriptingLangs.includes(field.lang) ? field.lang : undefined;
+    field.lang = scriptingLangs.includes(field.lang) ? field.lang : undefined;
 
     this.setState({
       isReady: true,
-      isCreating: !this.props.indexPattern.fields.byName[field.name],
+      isCreating: !indexPattern.fields.byName[field.name],
       errors: [],
       scriptingLangs,
-      field: {
-        ...field,
-        lang: fieldLang,
-      },
+      fieldFormatId: get(indexPattern, ['fieldFormatMap', field.name, 'type', 'id']),
+      fieldFormatParams: field.format.params(),
     });
 
     this.setFieldTypes();
+    this.setFieldTypeFormats();
   }
 
   setFieldTypes() {
     const { field } = this.state;
     const fieldTypes = get(FIELD_TYPES_BY_LANG, field.lang, DEFAULT_FIELD_TYPES);
-    const fieldType = fieldTypes.includes(field.type) ? field.type : fieldTypes[0];
+    field.type = fieldTypes.includes(field.type) ? field.type : fieldTypes[0];
+
     this.setState({
       isDeprecatedLang: this.deprecatedLangs.includes(field.lang),
       fieldTypes,
-      field: {
-        ...field,
-        type: fieldType,
-      },
     });
   }
 
-  onFieldChange = (fieldName, value) => {
+  setFieldTypeFormats() {
+    const { field } = this.state;
+    const DefaultFieldFormat = fieldFormats.getDefaultType(field.type);
+
+    const fieldTypeFormats = [
+      getDefaultFormat(DefaultFieldFormat),
+      ...fieldFormats.byFieldType[field.type],
+    ];
+
+    this.setState({
+      fieldTypeFormats,
+    });
+  }
+
+  onFieldChange = (fieldName, value, callback) => {
     const changes = {};
     changes[fieldName] = value;
     this.setState({
@@ -106,7 +130,24 @@ export class FieldEditor extends PureComponent {
         ...this.state.field,
         ...changes,
       },
+    }, typeof callback === 'function' ? callback : () => {});
+  }
+
+  onFormatChange = (formatId, params) => {
+    const { getConfig } = this.props.helpers
+    const { field, fieldTypeFormats } = this.state;
+    const FieldFormat = formatId ? fieldTypeFormats.find((format) => format.id === formatId) : fieldTypeFormats[0];
+    field.format = new FieldFormat(params, getConfig);
+
+    this.setState({
+      fieldFormatId: formatId,
+      fieldFormatParams: field.format.params(),
     });
+  }
+
+  onFormatParamsChange = (newParams, hasError) => {
+    const { fieldFormatId } = this.state;
+    this.onFormatChange(fieldFormatId, newParams);
   }
 
   isDuplicateName() {
@@ -160,7 +201,7 @@ export class FieldEditor extends PureComponent {
           value={field.lang}
           options={scriptingLangs.map(lang => { return { value: lang, text: lang }; })}
           data-test-subj="editorFieldLang"
-          onChange={(e) => { this.onFieldChange('lang', e.target.value); this.setFieldTypes(); }}
+          onChange={(e) => { this.onFieldChange('lang', e.target.value, this.setFieldTypes); }}
         />
       </EuiFormRow>
     ) : null;
@@ -176,9 +217,45 @@ export class FieldEditor extends PureComponent {
           disabled={!field.scripted}
           options={fieldTypes.map(type => { return { value: type, text: type }; })}
           data-test-subj="editorFieldType"
-          onChange={(e) => { this.onFieldChange('type', e.target.value);}}
+          onChange={(e) => { this.onFieldChange('type', e.target.value, this.setFieldTypeFormats); }}
         />
       </EuiFormRow>
+    );
+  }
+
+  renderFormat() {
+    const { field, fieldTypeFormats, fieldFormatId, fieldFormatParams } = this.state;
+    const { fieldFormatEditors } = this.props.helpers;
+    const defaultFormat = fieldTypeFormats[0] && fieldTypeFormats[0].resolvedTitle;
+
+    return (
+      <Fragment>
+        <EuiFormRow
+          label={<span>Format {defaultFormat ? <span>(Default: <EuiCode>{defaultFormat}</EuiCode>)</span> : null}</span>}
+          helpText={
+            <span>
+              Formatting allows you to control the way that specific values are displayed.
+              It can also cause values to be completely changed and prevent highlighting in Discover from working.
+            </span>
+          }
+        >
+          <EuiSelect
+            value={fieldFormatId}
+            options={fieldTypeFormats.map(format => { return { value: format.id || '', text: format.title }; })}
+            data-test-subj="editorSelectedFormatId"
+            onChange={(e) => { this.onFormatChange(e.target.value); }}
+          />
+        </EuiFormRow>
+        { fieldFormatId ? (
+          <FieldFormatEditor
+            fieldFormat={field.format}
+            fieldFormatId={fieldFormatId}
+            fieldFormatParams={fieldFormatParams}
+            fieldFormatEditors={fieldFormatEditors}
+            onChange={this.onFormatParamsChange}
+          />
+        ) : null }
+      </Fragment>
     );
   }
 
@@ -234,6 +311,7 @@ export class FieldEditor extends PureComponent {
           {this.renderName()}
           {this.renderLanguage()}
           {this.renderType()}
+          {this.renderFormat()}
           {this.renderPopularity()}
           {this.renderScript()}
           <ScriptingHelpCallOut isVisible={field.scripted} />

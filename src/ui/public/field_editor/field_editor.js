@@ -37,7 +37,7 @@ import { getKbnTypeNames } from '../../../utils';
 uiModules
   .get('kibana')
   .directive('fieldEditor', function (Private, $sce, confirmModal, config) {
-    const getConfig = (...args) => config.get(...args);
+    const getConfig = (...args) => config.get(...args); // do this too
 
     const Field = Private(IndexPatternsFieldProvider);
     const getEnabledScriptingLanguages = Private(GetEnabledScriptingLanguagesProvider);
@@ -151,6 +151,7 @@ uiModules
           }
         });
 
+        // need to implement
         $scope.$watch('editor.formatParams', function () {
           const FieldFormat = getFieldFormatType();
           self.field.format = new FieldFormat(self.formatParams, getConfig);

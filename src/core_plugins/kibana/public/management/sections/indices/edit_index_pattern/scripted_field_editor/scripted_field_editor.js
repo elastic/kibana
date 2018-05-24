@@ -20,6 +20,7 @@
 import 'ui/field_editor';
 import { IndexPatternsFieldProvider } from 'ui/index_patterns/_field';
 import { GetEnabledScriptingLanguagesProvider } from 'ui/scripting_languages';
+import { RegistryFieldFormatEditorsProvider } from 'ui/registry/field_format_editors';
 import { KbnUrlProvider } from 'ui/url';
 import uiRoutes from 'ui/routes';
 import { toastNotifications } from 'ui/notify';
@@ -30,7 +31,12 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { FieldEditor } from '../../field_editor';
 
 const REACT_FIELD_EDITOR_ID = 'reactFieldEditor';
-const renderFieldEditor = ($scope, indexPattern, field, Field, getEnabledScriptingLanguages) => {
+const renderFieldEditor = ($scope, indexPattern, field, {
+  Field,
+  getConfig,
+  getEnabledScriptingLanguages,
+  fieldFormatEditors,
+}) => {
   $scope.$$postDigest(() => {
     const node = document.getElementById(REACT_FIELD_EDITOR_ID);
     if (!node) {
@@ -43,7 +49,9 @@ const renderFieldEditor = ($scope, indexPattern, field, Field, getEnabledScripti
         field={field}
         helpers={{
           Field,
+          getConfig,
           getEnabledScriptingLanguages,
+          fieldFormatEditors,
         }}
       />,
       node,
@@ -81,9 +89,11 @@ uiRoutes
       }
     },
     controllerAs: 'fieldSettings',
-    controller: function FieldEditorPageController($scope, $route, Private, docTitle) {
+    controller: function FieldEditorPageController($scope, $route, Private, docTitle, config) {
       const Field = Private(IndexPatternsFieldProvider);
+      const getConfig = (...args) => config.get(...args);
       const getEnabledScriptingLanguages = Private(GetEnabledScriptingLanguagesProvider);
+      const fieldFormatEditors = Private(RegistryFieldFormatEditorsProvider);
       const kbnUrl = Private(KbnUrlProvider);
 
       this.mode = $route.current.mode;
@@ -117,7 +127,12 @@ uiRoutes
         kbnUrl.changeToRoute(this.indexPattern, 'edit');
       };
 
-      renderFieldEditor($scope, this.indexPattern, this.field, Field, getEnabledScriptingLanguages);
+      renderFieldEditor($scope, this.indexPattern, this.field, {
+        Field,
+        getConfig,
+        getEnabledScriptingLanguages,
+        fieldFormatEditors,
+      });
 
       $scope.$on('$destroy', () => {
         destroyFieldEditor();

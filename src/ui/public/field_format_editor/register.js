@@ -17,25 +17,25 @@
  * under the License.
  */
 
-import { RegistryFieldFormatEditorsProvider } from '../registry/field_format_editors';
-import { bytesEditor } from './editors/numeral/bytes';
-import { colorEditor } from './editors/color/color';
-import { dateEditor } from './editors/date/date';
-import { durationEditor } from './editors/duration/duration';
-import { numberEditor } from './editors/numeral/number';
-import { percentEditor } from './editors/numeral/percent';
-import { stringEditor } from './editors/string/string';
-import { truncateEditor } from './editors/truncate/truncate';
-import { urlEditor } from './editors/url/url';
-import { staticLookupEditor } from './editors/static_lookup/static_lookup';
-
-RegistryFieldFormatEditorsProvider.register(bytesEditor);
-RegistryFieldFormatEditorsProvider.register(colorEditor);
-RegistryFieldFormatEditorsProvider.register(dateEditor);
-RegistryFieldFormatEditorsProvider.register(durationEditor);
-RegistryFieldFormatEditorsProvider.register(numberEditor);
-RegistryFieldFormatEditorsProvider.register(percentEditor);
-RegistryFieldFormatEditorsProvider.register(stringEditor);
-RegistryFieldFormatEditorsProvider.register(truncateEditor);
-RegistryFieldFormatEditorsProvider.register(urlEditor);
-RegistryFieldFormatEditorsProvider.register(staticLookupEditor);
+// import { RegistryFieldFormatEditorsProvider } from '../registry/field_format_editors';
+// import { bytesEditor } from './editors/numeral/bytes';
+// import { colorEditor } from './editors/color/color';
+// import { dateEditor } from './editors/date/date';
+// import { durationEditor } from './editors/duration/duration';
+// import { numberEditor } from './editors/numeral/number';
+// import { percentEditor } from './editors/numeral/percent';
+// import { stringEditor } from './editors/string/string';
+// import { truncateEditor } from './editors/truncate/truncate';
+// import { urlEditor } from './editors/url/url';
+// import { staticLookupEditor } from './editors/static_lookup/static_lookup';
+//
+// RegistryFieldFormatEditorsProvider.register(bytesEditor);
+// RegistryFieldFormatEditorsProvider.register(colorEditor);
+// RegistryFieldFormatEditorsProvider.register(dateEditor);
+// RegistryFieldFormatEditorsProvider.register(durationEditor);
+// RegistryFieldFormatEditorsProvider.register(numberEditor);
+// RegistryFieldFormatEditorsProvider.register(percentEditor);
+// RegistryFieldFormatEditorsProvider.register(stringEditor);
+// RegistryFieldFormatEditorsProvider.register(truncateEditor);
+// RegistryFieldFormatEditorsProvider.register(urlEditor);
+// RegistryFieldFormatEditorsProvider.register(staticLookupEditor);
