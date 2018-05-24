@@ -2,6 +2,7 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const remote = getService('remote');
+  const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['dashboard']);
 
   describe('dashboard grid', () => {
@@ -15,7 +16,7 @@ export default function ({ getService, getPageObjects }) {
       // Specific test after https://github.com/elastic/kibana/issues/14764 fix
       it('Can move panel from bottom to top row', async () => {
         const lastVisTitle = 'Rendering Test: datatable';
-        const panelTitleBeforeMove = await PageObjects.dashboard.getPanelHeading(lastVisTitle);
+        const panelTitleBeforeMove = await dashboardPanelActions.getPanelHeading(lastVisTitle);
         const position1 = await panelTitleBeforeMove.getPosition();
 
         remote
@@ -24,7 +25,7 @@ export default function ({ getService, getPageObjects }) {
           .moveMouseTo(null, -20, -450)
           .releaseMouseButton();
 
-        const panelTitleAfterMove = await PageObjects.dashboard.getPanelHeading(lastVisTitle);
+        const panelTitleAfterMove = await dashboardPanelActions.getPanelHeading(lastVisTitle);
         const position2 = await panelTitleAfterMove.getPosition();
 
         expect(position1.y).to.be.greaterThan(position2.y);
