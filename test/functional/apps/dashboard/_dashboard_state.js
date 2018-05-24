@@ -168,7 +168,10 @@ export default function ({ getService, getPageObjects }) {
           }
 
           await PageObjects.dashboard.waitForRenderComplete();
-          expect(newPanelDimensions[0].width).to.be(currentPanelDimensions[0].width * 2);
+          // Add a "margin" of error  - because of page margins, it won't be a straight doubling of width.
+          const marginOfError = 10;
+          expect(newPanelDimensions[0].width).to.be.lessThan(currentPanelDimensions[0].width * 2 + marginOfError);
+          expect(newPanelDimensions[0].width).to.be.greaterThan(currentPanelDimensions[0].width * 2 - marginOfError);
         });
       });
 
