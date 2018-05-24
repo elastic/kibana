@@ -38,7 +38,7 @@ describe('getSpaceUrlContext', () => {
 
   test('it handles base url without a space url context', () => {
     const basePath = `/this/is/a/crazy/path/s`;
-    expect(getSpaceUrlContext(basePath)).toEqual(null);
+    expect(getSpaceUrlContext(basePath)).toEqual('');
   });
 });
 

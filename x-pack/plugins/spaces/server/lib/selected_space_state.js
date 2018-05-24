@@ -18,7 +18,7 @@ export function initSelectedSpaceState(server, config) {
     ttl: SELECTED_SPACE_COOKIE_TTL_MILLIS,
     isHttpOnly: true,
     isSecure: config.get('server.ssl.enabled'),
-    path: config.get('server.basePath'),
+    path: config.get('server.basePath') || null,
   });
 }
 

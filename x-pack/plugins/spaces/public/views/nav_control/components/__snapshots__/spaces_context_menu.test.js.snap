@@ -1,0 +1,198 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`it renders the provided spaces 1`] = `
+<SpacesContextMenu
+  onSelectSpace={[MockFunction]}
+  spaces={
+    Array [
+      Object {
+        "id": "a-space",
+        "name": "a space",
+        "urlContext": "a-space",
+      },
+      Object {
+        "id": "b-space",
+        "name": "b space",
+        "urlContext": "b-space",
+      },
+      Object {
+        "_reserved": true,
+        "id": "default",
+        "name": "Default Space",
+        "urlContext": "",
+      },
+    ]
+  }
+>
+  <EuiFlexGroup
+    alignItems="stretch"
+    className="spaceSelectorMenu"
+    component="div"
+    direction="column"
+    gutterSize="l"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={false}
+  >
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive spaceSelectorMenu"
+    >
+      <EuiFlexItem
+        className="spaceSelectorMenu__title"
+        component="div"
+        grow={false}
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero spaceSelectorMenu__title"
+        >
+          <EuiText
+            grow={true}
+          >
+            <div
+              className="euiText"
+            >
+              <h4>
+                Select a Space
+              </h4>
+            </div>
+          </EuiText>
+        </div>
+      </EuiFlexItem>
+      <EuiFlexItem
+        component="div"
+        grow={true}
+      >
+        <div
+          className="euiFlexItem"
+        >
+          <EuiContextMenuPanel
+            className="spaceSelectorMenu__panel"
+            hasFocus={true}
+            items={
+              Array [
+                <EuiContextMenuItem
+                  data-id="a-space"
+                  onClick={[Function]}
+                  toolTipContent={undefined}
+                  toolTipPosition="right"
+                  toolTipTitle="Switch to a space"
+                >
+                  a space
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  data-id="b-space"
+                  onClick={[Function]}
+                  toolTipContent={undefined}
+                  toolTipPosition="right"
+                  toolTipTitle="Switch to b space"
+                >
+                  b space
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  data-id="default"
+                  onClick={[Function]}
+                  toolTipContent={undefined}
+                  toolTipPosition="right"
+                  toolTipTitle="Switch to Default Space"
+                >
+                  Default Space
+                </EuiContextMenuItem>,
+              ]
+            }
+            watchedItemProps={
+              Array [
+                "data-id",
+              ]
+            }
+          >
+            <div
+              className="euiContextMenuPanel spaceSelectorMenu__panel"
+              onAnimationEnd={[Function]}
+              onKeyDown={[Function]}
+              tabIndex="0"
+            >
+              <div>
+                <EuiContextMenuItem
+                  buttonRef={[Function]}
+                  data-id="a-space"
+                  key="a-space"
+                  onClick={[Function]}
+                  toolTipPosition="right"
+                  toolTipTitle="Switch to a space"
+                >
+                  <button
+                    className="euiContextMenuItem"
+                    data-id="a-space"
+                    onClick={[Function]}
+                    type="button"
+                  >
+                    <span
+                      className="euiContextMenu__itemLayout"
+                    >
+                      <span
+                        className="euiContextMenuItem__text"
+                      >
+                        a space
+                      </span>
+                    </span>
+                  </button>
+                </EuiContextMenuItem>
+                <EuiContextMenuItem
+                  buttonRef={[Function]}
+                  data-id="b-space"
+                  key="b-space"
+                  onClick={[Function]}
+                  toolTipPosition="right"
+                  toolTipTitle="Switch to b space"
+                >
+                  <button
+                    className="euiContextMenuItem"
+                    data-id="b-space"
+                    onClick={[Function]}
+                    type="button"
+                  >
+                    <span
+                      className="euiContextMenu__itemLayout"
+                    >
+                      <span
+                        className="euiContextMenuItem__text"
+                      >
+                        b space
+                      </span>
+                    </span>
+                  </button>
+                </EuiContextMenuItem>
+                <EuiContextMenuItem
+                  buttonRef={[Function]}
+                  data-id="default"
+                  key="default"
+                  onClick={[Function]}
+                  toolTipPosition="right"
+                  toolTipTitle="Switch to Default Space"
+                >
+                  <button
+                    className="euiContextMenuItem"
+                    data-id="default"
+                    onClick={[Function]}
+                    type="button"
+                  >
+                    <span
+                      className="euiContextMenu__itemLayout"
+                    >
+                      <span
+                        className="euiContextMenuItem__text"
+                      >
+                        Default Space
+                      </span>
+                    </span>
+                  </button>
+                </EuiContextMenuItem>
+              </div>
+            </div>
+          </EuiContextMenuPanel>
+        </div>
+      </EuiFlexItem>
+    </div>
+  </EuiFlexGroup>
+</SpacesContextMenu>
+`;
