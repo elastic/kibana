@@ -14,6 +14,7 @@ const PING_INTERVAL = 500;
 
 export function createLocalBrowserDriverApi(log, url, browser) {
   let runningDriver = null;
+  if (!browser) browser = 'firefox';
   const driverName = browser + 'driver';
   switch (browser) {
     case 'chrome':
