@@ -1,8 +1,8 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
+import { getServices } from '../../../../test_utils/servers';
 
 import {
-  getServices,
   chance,
   assertSinonMatch,
 } from './lib';

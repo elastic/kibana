@@ -1,9 +1,9 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
 import { KbnIndex } from '@kbn/dev-utils';
+import { getServices } from '../../../../test_utils/servers';
 
 import {
-  getServices,
   chance,
   assertSinonMatch,
 } from './lib';

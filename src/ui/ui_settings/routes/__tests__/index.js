@@ -1,7 +1,7 @@
 import {
   startServers,
   stopServers,
-} from './lib';
+} from '../../../../test_utils/servers';
 
 import { docExistsSuite } from './doc_exists';
 import { docMissingSuite } from './doc_missing';
