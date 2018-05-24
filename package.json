@@ -271,6 +271,7 @@
     "gulp-babel": "^7.0.1",
     "gulp-sourcemaps": "1.7.3",
     "husky": "0.8.1",
+    "iedriver": "^3.9.2",
     "image-diff": "1.6.0",
     "istanbul-instrumenter-loader": "3.0.0",
     "jest": "^22.4.3",
