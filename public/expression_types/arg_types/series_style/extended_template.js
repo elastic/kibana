@@ -1,9 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Form, FormGroup, FormControl, ControlLabel } from 'react-bootstrap';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { get } from 'lodash';
 import { set, del } from 'object-path-immutable';
-import { LabeledInput } from '../../../components/labeled_input';
 
 export const ExtendedTemplate = props => {
   const { typeInstance, onValueChange, labels, argValue } = props;
@@ -23,67 +22,67 @@ export const ExtendedTemplate = props => {
 
   // TODO: add fill and stack options
   // TODO: add label name auto-complete
-  const values = [[0, 'None'], 1, 2, 3, 4, 5];
+  const values = [
+    { value: 0, text: 'None' },
+    { value: 1, text: '1' },
+    { value: 2, text: '2' },
+    { value: 3, text: '3' },
+    { value: 4, text: '4' },
+    { value: 5, text: '5' },
+  ];
+
+  const labelOptions = [{ value: '', text: 'Select Series' }];
+  labels.sort().forEach(val => labelOptions.push({ value: val, text: val }));
 
   return (
-    <Form onSubmit={() => false}>
-      <div className="canvas__argtype--seriesStyle">
-        {name !== 'defaultStyle' && (
-          <FormGroup>
-            <FormControl
-              componentClass="select"
-              placeholder="Select Series"
-              value={selectedSeries}
-              onChange={ev => handleChange('label', ev)}
-            >
-              <option value={null}>Select a Series Label</option>
-              {labels.sort().map(val => (
-                <option key={val} value={val}>
-                  {val}
-                </option>
-              ))}
-            </FormControl>
-            <ControlLabel>Series Identifier</ControlLabel>
-          </FormGroup>
-        )}
-        {hasPropFields && (
-          <FormGroup>
-            <div className="canvas__argtype--seriesStyle--properties">
-              {fields.includes('lines') && (
-                <LabeledInput
-                  type="select"
-                  className="canvas__argtype--seriesStyle--lines"
-                  label="Line"
-                  value={get(chainArgs, 'lines.0', 0)}
-                  values={[...values]}
+    <div>
+      {name !== 'defaultStyle' && (
+        <EuiFormRow label="Series Identifier">
+          <EuiSelect
+            defaultValue={selectedSeries}
+            options={labelOptions}
+            onChange={ev => handleChange('label', ev)}
+          />
+        </EuiFormRow>
+      )}
+      {hasPropFields && (
+        <EuiFlexGroup gutterSize="s">
+          {fields.includes('lines') && (
+            <EuiFlexItem>
+              <EuiFormRow label="Line">
+                <EuiSelect
+                  defaultValue={get(chainArgs, 'lines.0', 0)}
+                  options={values}
                   onChange={ev => handleChange('lines', ev)}
                 />
-              )}
-              {fields.includes('bars') && (
-                <LabeledInput
-                  type="select"
-                  className="canvas__argtype--seriesStyle--bars"
-                  label="Bar"
-                  value={get(chainArgs, 'bars.0', 0)}
-                  values={[...values]}
+              </EuiFormRow>
+            </EuiFlexItem>
+          )}
+          {fields.includes('bars') && (
+            <EuiFlexItem>
+              <EuiFormRow label="Bar">
+                <EuiSelect
+                  defaultValue={get(chainArgs, 'bars.0', 0)}
+                  options={values}
                   onChange={ev => handleChange('bars', ev)}
                 />
-              )}
-              {fields.includes('points') && (
-                <LabeledInput
-                  type="select"
-                  className="canvas__argtype--seriesStyle--points"
-                  label="Point"
-                  value={get(chainArgs, 'points.0', 0)}
-                  values={[...values]}
+              </EuiFormRow>
+            </EuiFlexItem>
+          )}
+          {fields.includes('points') && (
+            <EuiFlexItem>
+              <EuiFormRow label="Point">
+                <EuiSelect
+                  defaultValue={get(chainArgs, 'points.0', 0)}
+                  options={values}
                   onChange={ev => handleChange('points', ev)}
                 />
-              )}
-            </div>
-          </FormGroup>
-        )}
-      </div>
-    </Form>
+              </EuiFormRow>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      )}
+    </div>
   );
 };
 
