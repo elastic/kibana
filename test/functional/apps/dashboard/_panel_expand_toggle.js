@@ -22,6 +22,7 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const remote = getService('remote');
+  const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['dashboard', 'visualize', 'header']);
 
   describe('expanding a panel', () => {
@@ -30,7 +31,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('hides other panels', async () => {
-      await PageObjects.dashboard.toggleExpandPanel();
+      await dashboardPanelActions.toggleExpandPanel();
       await retry.try(async () => {
         const panelCount = await PageObjects.dashboard.getPanelCount();
         expect(panelCount).to.eql(1);
@@ -71,8 +72,9 @@ export default function ({ getService, getPageObjects }) {
     it('shows other panels after being minimized', async () => {
       const panelCount = await PageObjects.dashboard.getPanelCount();
       // Panels are all minimized on a fresh open of a dashboard, so we need to re-expand in order to then minimize.
-      await PageObjects.dashboard.toggleExpandPanel();
-      await PageObjects.dashboard.toggleExpandPanel();
+      await dashboardPanelActions.toggleExpandPanel();
+      await dashboardPanelActions.toggleExpandPanel();
+
 
       // Add a retry to fix https://github.com/elastic/kibana/issues/14574.  Perhaps the recent changes to this
       // being a CSS update is causing the UI to change slower than grabbing the panels?

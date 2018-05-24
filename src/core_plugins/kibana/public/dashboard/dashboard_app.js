@@ -26,6 +26,8 @@ import { toastNotifications } from 'ui/notify';
 
 import 'ui/query_bar';
 
+import { panelActionsStore } from './store/panel_actions_store';
+
 import { getDashboardTitle } from './dashboard_strings';
 import { DashboardViewMode } from './dashboard_view_mode';
 import { TopNavIds } from './top_nav/top_nav_ids';
@@ -43,6 +45,7 @@ import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import * as filterActions from 'ui/doc_table/actions/filter';
 import { FilterManagerProvider } from 'ui/filter_manager';
 import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_factories_registry';
+import { DashboardPanelActionsRegistryProvider } from 'ui/dashboard_panel_actions/dashboard_panel_actions_registry';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
@@ -81,6 +84,10 @@ app.directive('dashboardApp', function ($injector) {
       const docTitle = Private(DocTitleProvider);
       const notify = new Notifier({ location: 'Dashboard' });
       const embeddableFactories = Private(EmbeddableFactoriesRegistryProvider);
+      const panelActionsRegistry = Private(DashboardPanelActionsRegistryProvider);
+
+      panelActionsStore.initializeFromRegistry(panelActionsRegistry);
+
       const savedObjectsClient = Private(SavedObjectsClientProvider);
       const visTypes = Private(VisTypesRegistryProvider);
       $scope.getEmbeddableFactory = panelType => embeddableFactories.byName[panelType];

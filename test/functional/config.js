@@ -47,6 +47,7 @@ import {
   FailureDebuggingProvider,
   VisualizeListingTableProvider,
   DashboardAddPanelProvider,
+  DashboardPanelActionsProvider,
 } from './services';
 
 export default async function ({ readConfigFile }) {
@@ -99,6 +100,7 @@ export default async function ({ readConfigFile }) {
       failureDebugging: FailureDebuggingProvider,
       visualizeListingTable: VisualizeListingTableProvider,
       dashboardAddPanel: DashboardAddPanelProvider,
+      dashboardPanelActions: DashboardPanelActionsProvider,
     },
     servers: commonConfig.get('servers'),
 

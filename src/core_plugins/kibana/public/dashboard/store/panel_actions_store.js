@@ -17,6 +17,24 @@
  * under the License.
  */
 
-export { EmbeddableFactory } from './embeddable_factory';
-export * from './embeddable';
-export { EmbeddableFactoriesRegistryProvider } from './embeddable_factories_registry';
+class PanelActionsStore {
+  constructor() {
+    /**
+     *
+     * @type {Array.<DashboardPanelAction>}
+     */
+    this.actions = [];
+  }
+
+  /**
+   *
+   * @type {IndexedArray} panelActionsRegistry
+   */
+  initializeFromRegistry(panelActionsRegistry) {
+    panelActionsRegistry.forEach(panelAction => {
+      this.actions.push(panelAction);
+    });
+  }
+}
+
+export const panelActionsStore = new PanelActionsStore();

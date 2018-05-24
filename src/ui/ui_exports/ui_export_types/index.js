@@ -43,6 +43,7 @@ export {
   spyModes,
   chromeNavControls,
   navbarExtensions,
+  dashboardPanelActions,
   managementSections,
   devTools,
   docViews,

@@ -17,6 +17,6 @@
  * under the License.
  */
 
-export { EmbeddableFactory } from './embeddable_factory';
-export * from './embeddable';
-export { EmbeddableFactoriesRegistryProvider } from './embeddable_factories_registry';
+export { DashboardPanelAction } from './dashboard_panel_action';
+export { DashboardPanelActionsRegistryProvider } from './dashboard_panel_actions_registry';
+export { DashboardContextMenuPanel } from './dashboard_context_menu_panel';

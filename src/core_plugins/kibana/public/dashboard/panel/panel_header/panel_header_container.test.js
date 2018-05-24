@@ -31,6 +31,7 @@ import {
   setPanelTitle,
   resetPanelTitle,
   embeddableIsInitialized,
+  updateTimeRange,
 } from '../../actions';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
@@ -44,6 +45,7 @@ function getProps(props = {}) {
 let component;
 
 beforeAll(() => {
+  store.dispatch(updateTimeRange({ to: 'now', from: 'now-15m' }));
   store.dispatch(updateViewMode(DashboardViewMode.EDIT));
   store.dispatch(setPanels({ 'foo1': { panelIndex: 'foo1' } }));
   const metadata = { title: 'my embeddable title', editUrl: 'editme' };

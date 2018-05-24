@@ -140,6 +140,7 @@ export class DashboardPanel extends React.Component {
         >
           <PanelHeader
             panelId={panel.panelIndex}
+            embeddable={this.embeddable}
           />
 
           {this.renderContent()}

@@ -21,6 +21,7 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
+  const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['dashboard']);
 
   describe('dashboard data-shared attributes', function describeIndexTests() {
@@ -56,7 +57,7 @@ export default function ({ getService, getPageObjects }) {
     it('data-shared-item title should update a viz when using a custom panel title', async () => {
       await PageObjects.dashboard.clickEdit();
       const CUSTOM_VIS_TITLE = 'ima custom title for a vis!';
-      await PageObjects.dashboard.setCustomPanelTitle(CUSTOM_VIS_TITLE);
+      await dashboardPanelActions.setCustomPanelTitle(CUSTOM_VIS_TITLE);
       await retry.try(async () => {
         const sharedData = await PageObjects.dashboard.getPanelSharedItemData();
         const foundSharedItemTitle = !!sharedData.find(item => {
@@ -67,7 +68,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('data-shared-item title is cleared with an empty panel title string', async () => {
-      await PageObjects.dashboard.setCustomPanelTitle('h\b');
+      await dashboardPanelActions.setCustomPanelTitle('h\b');
       await retry.try(async () => {
         const sharedData = await PageObjects.dashboard.getPanelSharedItemData();
         const foundSharedItemTitle = !!sharedData.find(item => {
@@ -78,7 +79,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('data-shared-item title can be reset', async () => {
-      await PageObjects.dashboard.resetCustomPanelTitle();
+      await dashboardPanelActions.resetCustomPanelTitle();
       await retry.try(async () => {
         const sharedData = await PageObjects.dashboard.getPanelSharedItemData();
         const foundOriginalSharedItemTitle = !!sharedData.find(item => {
@@ -90,7 +91,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('data-shared-item title should update a saved search when using a custom panel title', async () => {
       const CUSTOM_SEARCH_TITLE = 'ima custom title for a search!';
-      await PageObjects.dashboard.setCustomPanelTitle(CUSTOM_SEARCH_TITLE, 'Rendering Test: saved search');
+      await dashboardPanelActions.setCustomPanelTitle(CUSTOM_SEARCH_TITLE, 'Rendering Test: saved search');
       await retry.try(async () => {
         const sharedData = await PageObjects.dashboard.getPanelSharedItemData();
         const foundSharedItemTitle = !!sharedData.find(item => {

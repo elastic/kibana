@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { PropTypes } from 'prop-types';
+
 /**
  * @typedef {Object} EmbeddableMetadata - data that does not change over the course of the embeddables life span.
  * @property {string} title
@@ -24,6 +26,12 @@
  * @property {IndexPattern} indexPattern
  */
 
+export const embeddableShape = PropTypes.shape({
+  metadata: PropTypes.object.isRequired,
+  onContainerStateChanged: PropTypes.func.isRequired,
+  render: PropTypes.func.isRequired,
+  destroy: PropTypes.func.isRequired,
+});
 
 export class Embeddable {
   /**

@@ -17,25 +17,27 @@
  * under the License.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
+export class DashboardContextMenuPanel {
+  /**
+   * @param {string} id
+   * @param {string} title
+   * @param {function} getContent
+   */
+  constructor({ id, title, getContent }) {
+    this.id = id;
+    this.title = title;
 
-export function PanelMaximizeIcon({ onMaximize }) {
-  return (
-    <button
-      className="kuiMicroButton viewModeExpandPanelToggle"
-      aria-label="Maximize panel"
-      data-test-subj="dashboardPanelExpandIcon"
-      onClick={onMaximize}
-    >
-      <span
-        aria-hidden="true"
-        className="kuiIcon fa-expand"
-      />
-    </button>
-  );
+    if (getContent) {
+      this.getContent = getContent;
+    }
+  }
+
+  /**
+   * Optional, could be composed of actions instead of content.
+   * @param {Embeddable} embeddable
+   * @param {ContainerState} containerState
+   */
+  getContent(/*{ embeddable, containerState }*/) {
+    return null;
+  }
 }
-
-PanelMaximizeIcon.propTypes = {
-  onMaximize: PropTypes.func.isRequired
-};

@@ -17,6 +17,9 @@
  * under the License.
  */
 
-export { EmbeddableFactory } from './embeddable_factory';
-export * from './embeddable';
-export { EmbeddableFactoriesRegistryProvider } from './embeddable_factories_registry';
+import { uiRegistry } from 'ui/registry/_registry';
+
+export const DashboardPanelActionsRegistryProvider = uiRegistry({
+  name: 'dashboardPanelActions',
+  index: ['name'],
+});

@@ -19,13 +19,15 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { embeddableShape } from 'ui/embeddable';
+import { PanelOptionsMenuContainer } from './panel_options_menu_container';
 
-export function PanelHeader({ title, actions, isViewOnlyMode, hidePanelTitles }) {
+export function PanelHeader({ title, panelId, embeddable, isViewOnlyMode, hidePanelTitles }) {
   if (isViewOnlyMode && (!title || hidePanelTitles)) {
     return (
       <div className="panel-heading-floater">
         <div className="kuiMicroButtonGroup">
-          {actions}
+          <PanelOptionsMenuContainer panelId={panelId} embeddable={embeddable} />
         </div>
       </div>
     );
@@ -43,7 +45,7 @@ export function PanelHeader({ title, actions, isViewOnlyMode, hidePanelTitles })
       </span>
 
       <div className="kuiMicroButtonGroup">
-        {actions}
+        <PanelOptionsMenuContainer panelId={panelId} embeddable={embeddable} />
       </div>
     </div>
   );
@@ -52,6 +54,7 @@ export function PanelHeader({ title, actions, isViewOnlyMode, hidePanelTitles })
 PanelHeader.propTypes = {
   isViewOnlyMode: PropTypes.bool,
   title: PropTypes.string,
-  actions: PropTypes.node,
   hidePanelTitles: PropTypes.bool.isRequired,
+  embeddable: embeddableShape,
+  panelId: PropTypes.string.isRequired,
 };
