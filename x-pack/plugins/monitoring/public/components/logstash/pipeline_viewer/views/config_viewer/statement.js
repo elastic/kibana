@@ -18,6 +18,8 @@ import { CollapsibleStatement } from './collapsible_statement';
 import { IfElement } from '../../models/list/if_element';
 // import { Queue } from './queue';
 
+import { formatMetric } from '../../../../../lib/format_number';
+
 import {
   EuiButtonEmpty,
   // EuiButtonIcon,
@@ -90,6 +92,65 @@ import {
 //   }
 // };
 
+function getInputStatementStats(inputVertex) {
+  const { latestEventsPerSecond } = inputVertex;
+
+  return [
+    {
+      className: 'cv-inputStat__eventsEmitted',
+      value: formatMetric(latestEventsPerSecond, '0.[00]a', 'e/s emitted')
+    }
+  ];
+}
+
+function getProcessorStatementStats(processorVertex) {
+  const {
+    latestMillisPerEvent,
+    latestEventsPerSecond,
+    percentOfTotalProcessorTime,
+  } = processorVertex;
+
+  const cpuHighlight = processorVertex.isTimeConsuming() ? 'cv-processorStat__cpuTimeHighlight' : '';
+  const eventMillisHighlight = processorVertex.isSlow() ? 'cv-processorStat__eventMillis' : '';
+
+  return [
+    {
+      className: `cv-processorStat__cpuTime ${cpuHighlight}`,
+      value: formatMetric(Math.round(percentOfTotalProcessorTime || 0), '0', '%', { prependSpace: false })
+    },
+    {
+      className: `cv-processorStat__eventMillis ${eventMillisHighlight}`,
+      value: formatMetric(latestMillisPerEvent, '0.[00]a', 'ms/e')
+    },
+    {
+      className: 'cv-processorStat__events',
+      value: formatMetric(latestEventsPerSecond, '0.[00]a', 'e/s emitted')
+    }
+  ];
+}
+
+function getPluginStatementStatList(statement) {
+  const {
+    pluginType,
+    vertex
+  } = statement;
+
+  const stats = pluginType === 'input'
+    ? getInputStatementStats(vertex)
+    : getProcessorStatementStats(vertex);
+
+  return stats.map(({ className, value }) => (
+    <EuiFlexItem
+      grow={false}
+      className={"cv-pluginStatement__statContainer"}
+    >
+      <div className={className}>
+        {value}
+      </div>
+    </EuiFlexItem>
+  ));
+}
+
 function pluginStatement(statement, onShowVertexDetails) {
   const {
     hasExplicitId,
@@ -97,37 +158,53 @@ function pluginStatement(statement, onShowVertexDetails) {
     name,
     vertex,
   } = statement;
+
+  const statementStats = getPluginStatementStatList(statement);
+
   return (
     <div className="cv-statement">
       <EuiFlexGroup
-        gutterSize="s"
+        gutterSize="none"
+        justifyContent="spaceBetween"
       >
-        <EuiFlexItem
-          grow={false}
-          className="cv-pluginStatement__icon"
-        >
-          <EuiIcon
-            type="dot"
-            color="#50b0a4"
-          />
-        </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            color="#50b0a4"
-            flush="left"
-            size="xs"
-            className="cv-statement__name"
-            onClick={() => { onShowVertexDetails(vertex); }}
-          >
-            <span>{name}</span>
-          </EuiButtonEmpty>
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem
+              grow={false}
+              className="cv-pluginStatement__icon"
+            >
+              <EuiIcon
+                type="dot"
+                color="#50b0a4"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                color="#50b0a4"
+                flush="left"
+                size="xs"
+                className="cv-statement__name"
+                onClick={() => { onShowVertexDetails(vertex); }}
+              >
+                <span>{name}</span>
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            {
+              hasExplicitId &&
+              <EuiFlexItem grow={false}>
+                <div className="cv-statement__id">
+                  {id}
+                </div>
+              </EuiFlexItem>
+            }
+          </EuiFlexGroup>
         </EuiFlexItem>
         {
-          hasExplicitId &&
+          statementStats &&
           <EuiFlexItem grow={false}>
-            <div className="cv-statement__id">
-              {id}
-            </div>
+            <EuiFlexGroup style={{ marginRight: '0px' }}>
+              {statementStats}
+            </EuiFlexGroup>
           </EuiFlexItem>
         }
       </EuiFlexGroup>
@@ -190,12 +267,14 @@ export class Statement extends React.PureComponent
         <div className="cv-spaceContainer">
           {spacers}
         </div>
-        <div
-          className="cv-statement__content"
-          style={topLevelStyle}
-        >
-          {statementComponent}
-        </div>
+        <EuiFlexGroup gutterSize="none">
+          <div
+            className="cv-statement__content"
+            style={topLevelStyle}
+          >
+            {statementComponent}
+          </div>
+        </EuiFlexGroup>
       </li>
     );
   }
