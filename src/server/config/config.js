@@ -133,7 +133,7 @@ export class Config {
       throw new Error('Unknown config key: ' + key);
     }
 
-    return _.get(description, 'flags.default');
+    return clone(_.get(description, 'flags.default'));
   }
 
   has(key) {

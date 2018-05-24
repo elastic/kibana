@@ -257,6 +257,47 @@ describe('lib/config/config', function () {
         });
       });
 
+      it('object schema with no default should return default value for property', function () {
+        const noDefaultSchema = Joi.object().keys({
+          foo: Joi.array().items(Joi.string().min(1)).default(['bar'])
+        }).required();
+
+        const config = new Config(noDefaultSchema);
+        config.set({
+          foo: ['baz']
+        });
+
+        const fooDefault = config.getDefault('foo');
+        expect(fooDefault).toEqual(['bar']);
+      });
+
+      it('should not return same instance of Array', function () {
+        const noDefaultSchema = Joi.object().keys({
+          foo: Joi.array().items(Joi.string().min(1)).default(['bar'])
+        }).required();
+
+        const config = new Config(noDefaultSchema);
+        config.set({
+          foo: ['baz']
+        });
+
+        expect(config.getDefault('foo')).not.toBe(config.getDefault('foo'));
+      });
+
+      it(`shouldn't let you mutate the default`, function () {
+        const noDefaultSchema = Joi.object().keys({
+          foo: Joi.array().items(Joi.string().min(1)).default(['bar'])
+        }).required();
+
+        const config = new Config(noDefaultSchema);
+        config.set({
+          foo: ['baz']
+        });
+
+        config.getDefault('foo').push('quz');
+
+        expect(config.getDefault('foo')).toEqual(['bar']);
+      });
     });
 
     describe('#extendSchema(key, schema)', function () {
