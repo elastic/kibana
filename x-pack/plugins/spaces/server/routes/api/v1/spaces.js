@@ -227,7 +227,6 @@ export function initSpacesApi(server) {
   async function getSpaceById(client, spaceId) {
     try {
       const existingSpace = await client.get('space', spaceId);
-      console.log(existingSpace);
       return {
         id: existingSpace.id,
         ...existingSpace.attributes

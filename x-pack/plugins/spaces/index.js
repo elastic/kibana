@@ -49,6 +49,13 @@ export const spaces = (kibana) => new kibana.Plugin({
       };
     },
     replaceInjectedVars: async function (vars, request) {
+      // A rather obtuse way of preventing the Kibana login/logout resources from trying to make these requests.
+      // This seems safer than excluding a couple of hard-coded paths.
+      const canReplace = request.path.startsWith('/app/');
+      if (!canReplace) {
+        return vars;
+      }
+
       try {
         vars.activeSpace = {
           valid: true,
