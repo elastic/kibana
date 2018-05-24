@@ -7,14 +7,14 @@
 import React from 'react';
 import orderBy from 'lodash.orderby';
 import { createSelector } from 'reselect';
-import { ReduxRequest } from '../../components/shared/ReduxRequest';
+import { Request } from 'react-redux-request';
 import { loadTransactionList } from '../../services/rest';
 
 const ID = 'transactionList';
 const INITIAL_DATA = [];
 
 export const getTransactionList = createSelector(
-  state => state.reduxRequest[ID],
+  state => state.reactReduxRequest[ID],
   state => state.sorting.transaction,
   (transactionList = {}, transactionSorting) => {
     const { key: sortKey, descending } = transactionSorting;
@@ -32,10 +32,14 @@ export const getTransactionList = createSelector(
 
 export function TransactionListRequest({ urlParams, render }) {
   const { serviceName, start, end, transactionType, kuery } = urlParams;
+
+  if (!(serviceName && start && end && transactionType)) {
+    return null;
+  }
+
   return (
-    <ReduxRequest
+    <Request
       id={ID}
-      shouldInvoke={Boolean(serviceName && start && end && transactionType)}
       fn={loadTransactionList}
       args={[
         {

@@ -12,13 +12,13 @@ import { mountWithStore } from '../../../utils/testHelpers';
 describe('serviceList', () => {
   describe('getServiceList', () => {
     it('should return default value when empty', () => {
-      const state = { reduxRequest: {}, sorting: { service: {} } };
+      const state = { reactReduxRequest: {}, sorting: { service: {} } };
       expect(getServiceList(state)).toEqual({ data: [] });
     });
 
     it('should return serviceList when not empty', () => {
       const state = {
-        reduxRequest: { serviceList: { data: [{ foo: 'bar' }] } },
+        reactReduxRequest: { serviceList: { data: [{ foo: 'bar' }] } },
         sorting: { service: {} }
       };
       expect(getServiceList(state)).toEqual({ data: [{ foo: 'bar' }] });
@@ -32,7 +32,7 @@ describe('serviceList', () => {
 
     beforeEach(() => {
       const state = {
-        reduxRequest: {
+        reactReduxRequest: {
           serviceList: { status: 'my-status', data: [{ foo: 'bar' }] }
         },
         sorting: { service: {} }
