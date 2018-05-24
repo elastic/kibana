@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { withInitialData } from './helpers';
-import { ReduxRequest } from '../../components/shared/ReduxRequest';
+import { Request } from 'react-redux-request';
 import { loadLicense } from '../../services/rest';
 
 const ID = 'license';
@@ -15,16 +15,11 @@ const INITIAL_DATA = {
 };
 
 export function getLicense(state) {
-  return withInitialData(state.reduxRequest[ID], INITIAL_DATA);
+  return withInitialData(state.reactReduxRequest[ID], INITIAL_DATA);
 }
 
 export function LicenceRequest({ render }) {
   return (
-    <ReduxRequest
-      id={ID}
-      fn={loadLicense}
-      selector={getLicense}
-      render={render}
-    />
+    <Request id={ID} fn={loadLicense} selector={getLicense} render={render} />
   );
 }

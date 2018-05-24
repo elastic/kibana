@@ -17,7 +17,7 @@ import Timeline from '../../../../shared/charts/Timeline';
 import EmptyMessage from '../../../../shared/EmptyMessage';
 import { getFeatureDocs } from '../../../../../utils/documentation';
 import { ExternalLink } from '../../../../../utils/url';
-import { SpansRequest } from '../../../../../store/reduxRequest/spans';
+import { SpansRequest } from '../../../../../store/reactReduxRequest/spans';
 
 const Container = styled.div`
   transition: 0.1s padding ease;

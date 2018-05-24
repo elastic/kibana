@@ -8,13 +8,13 @@ import { combineReducers } from 'redux';
 import location from './location';
 import sorting from './sorting';
 import urlParams from './urlParams';
-import { reduxRequestReducer } from '../components/shared/ReduxRequest';
+import { reducer } from 'react-redux-request';
 
 const rootReducer = combineReducers({
   location,
   sorting,
   urlParams,
-  reduxRequest: reduxRequestReducer
+  reactReduxRequest: reducer
 });
 
 export default rootReducer;
