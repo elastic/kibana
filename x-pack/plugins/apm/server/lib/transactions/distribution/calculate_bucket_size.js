@@ -24,6 +24,8 @@ export async function calculateBucketSize({
       query: {
         bool: {
           filter: [
+            { term: { [SERVICE_NAME]: serviceName } },
+            { term: { [`${TRANSACTION_NAME}.keyword`]: transactionName } },
             {
               range: {
                 '@timestamp': {
@@ -32,9 +34,7 @@ export async function calculateBucketSize({
                   format: 'epoch_millis'
                 }
               }
-            },
-            { term: { [`${TRANSACTION_NAME}.keyword`]: transactionName } },
-            { term: { [SERVICE_NAME]: serviceName } }
+            }
           ]
         }
       },

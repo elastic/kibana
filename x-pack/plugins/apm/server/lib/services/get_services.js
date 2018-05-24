@@ -15,47 +15,33 @@ import { get } from 'lodash';
 export async function getServices({ setup }) {
   const { start, end, esFilterQuery, client, config } = setup;
 
-  const query = {
-    bool: {
-      filter: [
-        {
-          bool: {
-            should: [
-              {
-                term: {
-                  [PROCESSOR_EVENT]: 'transaction'
-                }
-              },
-              {
-                term: {
-                  [PROCESSOR_EVENT]: 'error'
-                }
-              }
-            ]
-          }
-        },
-        {
-          range: {
-            '@timestamp': {
-              gte: start,
-              lte: end,
-              format: 'epoch_millis'
-            }
-          }
-        }
-      ]
-    }
-  };
-
-  if (esFilterQuery) {
-    query.bool.filter.push(esFilterQuery);
-  }
-
   const params = {
     index: config.get('xpack.apm.indexPattern'),
     body: {
       size: 0,
-      query,
+      query: {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [
+                  { term: { [PROCESSOR_EVENT]: 'transaction' } },
+                  { term: { [PROCESSOR_EVENT]: 'error' } }
+                ]
+              }
+            },
+            {
+              range: {
+                '@timestamp': {
+                  gte: start,
+                  lte: end,
+                  format: 'epoch_millis'
+                }
+              }
+            }
+          ]
+        }
+      },
       aggs: {
         services: {
           terms: {

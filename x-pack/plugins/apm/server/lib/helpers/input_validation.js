@@ -8,3 +8,12 @@ import Joi from 'joi';
 export const dateValidation = Joi.alternatives()
   .try(Joi.date().iso(), Joi.number())
   .required();
+
+export const withDefaultValidators = (validators = {}) => {
+  return Joi.object().keys({
+    start: dateValidation,
+    end: dateValidation,
+    esFilterQuery: Joi.string().allow(''),
+    ...validators
+  });
+};

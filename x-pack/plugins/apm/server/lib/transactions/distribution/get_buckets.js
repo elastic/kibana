@@ -30,6 +30,8 @@ export async function getBuckets({
       query: {
         bool: {
           filter: [
+            { term: { [SERVICE_NAME]: serviceName } },
+            { term: { [`${TRANSACTION_NAME}.keyword`]: transactionName } },
             {
               range: {
                 '@timestamp': {
@@ -38,9 +40,7 @@ export async function getBuckets({
                   format: 'epoch_millis'
                 }
               }
-            },
-            { term: { [SERVICE_NAME]: serviceName } },
-            { term: { [`${TRANSACTION_NAME}.keyword`]: transactionName } }
+            }
           ],
           should: [{ term: { [TRANSACTION_SAMPLED]: true } }]
         }

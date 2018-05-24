@@ -16,6 +16,8 @@ export async function getBuckets({ serviceName, groupId, bucketSize, setup }) {
       query: {
         bool: {
           filter: [
+            { term: { [SERVICE_NAME]: serviceName } },
+            { term: { [ERROR_GROUP_ID]: groupId } },
             {
               range: {
                 '@timestamp': {
@@ -24,9 +26,7 @@ export async function getBuckets({ serviceName, groupId, bucketSize, setup }) {
                   format: 'epoch_millis'
                 }
               }
-            },
-            { term: { [ERROR_GROUP_ID]: groupId } },
-            { term: { [SERVICE_NAME]: serviceName } }
+            }
           ]
         }
       },
