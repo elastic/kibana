@@ -10,7 +10,7 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
         await PageObjects.dashboard.initTests({
           kibanaIndex: 'dashboard/current/kibana',
           dataIndex: 'dashboard/current/data',
-          defaultIndex: 'logstash-*'
+          defaultIndex: 'logstash-*',
         });
         await PageObjects.dashboard.preserveCrossAppState();
       });

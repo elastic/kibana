@@ -430,13 +430,13 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await dashboardAddPanel.addVisualizations(visualizations);
     }
 
-    async setTimepickerInDataRange() {
+    async setTimepickerInHistoricalDataRange() {
       const fromTime = '2015-09-19 06:31:44.000';
       const toTime = '2015-09-23 18:31:44.000';
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
     }
 
-    async setTimepickerIn63DataRange() {
+    async setTimepickerInDataRange() {
       const fromTime = '2018-01-01 00:00:00.000';
       const toTime = '2018-04-13 00:00:00.000';
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
