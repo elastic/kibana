@@ -1,126 +1,114 @@
-ml-anomalies-table {
-
-  .anomalies-table {
-
-    padding: 10px;
-
-    .no-results-item {
-      text-align: center;
-      padding-top: 10px;
-    }
-
-    .table {
-      margin-bottom: 35px;
-
-      td, th {
-        color: #2d2d2d;
-        font-size: 12px;
-        white-space: nowrap;
-
-        .kuiButton.dropdown-toggle {
-          font-size: 12px;
-        }
-
-        .fa.fa-arrow-up, .fa.fa-arrow-down {
-          font-size: 11px;
-          color: #686868;
-        }
-
-        button {
-          border: none;
-        }
-        button:focus {
-          outline: none;
-        }
-      }
-
-      td {
-        button {
-          font-family: inherit;
-          background-color: transparent;
-        }
-      }
-
-      th {
-        button {
-          background-color: #FFFFFF;
-          padding: 0px 2px;
-        }
-      }
-    }
-
-    .agg-table-paginated {
-      overflow-x: auto;
-      .dropdown-menu {
-        left: -60px;
-      }
-    }
-
-    .ml-anomaly-interim-result {
-      font-style:italic;
-      padding-bottom: 3px;
-    }
-
-    .ml-tablerow-expanded {
-      width: 100%;
-      padding: 5px 20px;
-      overflow: hidden;
-      font-size: 12px;
-
-      table {
-        td {
-          padding: 0px 0px 2px 0px;
-          button {
-            padding: 0px 0px;
-          }
-        }
-
-        tr>td:first-child {
-          padding-left: 2px;
-          vertical-align: top;
-        }
-
-        td:first-child {
-          width: 140px;
-        }
-
-        td:nth-child(2) {
-          padding-left: 5px;
-        }
-      }
-
-    }
-
-    .ml-tablerow-expanded-heading {
-      font-weight: bold;
-      display: block;
-      padding-top: 5px;
-    }
-
-    .ml-tablerow-expanded-heading:first-child {
-      padding-top: 0px;
-    }
-
-    .ml-tablerow-expanded-mv-description {
-      display: block;
-    }
-
+.ml-anomalies-table {
+  .ml-icon-severity-critical,
+  .ml-icon-severity-major,
+  .ml-icon-severity-minor,
+  .ml-icon-severity-warning,
+  .ml-icon-severity-unknown {
+    color: inherit;
+    text-shadow: none;
   }
+
+
+  .ml-icon-severity-critical {
+    .euiIcon {
+      fill: #fe5050;
+    }
+  }
+
+  .ml-icon-severity-major {
+    .euiIcon {
+      fill: #fba740;
+    }
+  }
+
+  .ml-icon-severity-minor {
+    .euiIcon {
+      fill: #fdec25;
+    }
+  }
+
+  .ml-icon-severity-warning {
+    .euiIcon {
+      fill: #8bc8fb;
+    }
+  }
+
+  .ml-icon-severity-unknown {
+    .euiIcon {
+      fill: #c0c0c0;
+    }
+  }
+
+  tr th:first-child,
+  tr td:first-child {
+    width: 32px;
+  }
+
+  .euiTableCellContent {
+    .euiHealth {
+      font-size: inherit;
+    }
+
+    .filter-button {
+      opacity: 0.3;
+      width: 20px;
+      padding-top: 2px;
+
+      .euiIcon {
+        width: 14px;
+        height: 14px;
+      }
+    }
+
+    .filter-button:hover {
+      opacity: 1;
+    }
+  }
+
+  .euiContextMenuItem {
+    min-width: 150px
+  }
+
+  .category-example {
+    display: block;
+    white-space: nowrap;
+  }
+
+  .interim-result {
+    font-style: italic;
+  }
+
+  .ml-anomalies-table-details {
+    padding: 4px 32px;
+    max-height: 1000px;
+    overflow-y: auto;
+
+    .anomaly-description-list {
+
+      .euiDescriptionList__title {
+        margin-top: 0px;
+        flex-basis: 15%;
+        font-size: inherit;
+      }
+
+      .euiDescriptionList__description {
+        margin-top: 0px;
+        flex-basis: 85%;
+        font-size: inherit;
+      }
+
+      .filter-button {
+        height: 20px;
+        padding-top: 2px;
+
+        .euiButtonIcon__icon {
+          -webkit-transform: translateY(-7px);
+          transform: translateY(-7px);
+        }
+      }
+
+    }
+  }
+
 }
 
-.ml-anomalies-table.dropdown-menu {
-  min-width: 120px;
-  font-size: 12px;
-}
-
-.ml-anomalies-table.dropdown-menu > li > a {
-  color: #444444;
-  text-decoration: none;
-}
-
-.ml-anomalies-table.dropdown-menu > li > a:hover,
-.ml-anomalies-table.dropdown-menu > li > a:active,
-.ml-anomalies-table.dropdown-menu > li > a:focus {
-  color: #ffffff;
-  box-shadow: none;
-}
