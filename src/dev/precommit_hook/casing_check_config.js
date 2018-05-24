@@ -21,6 +21,9 @@ export const IGNORE_FILE_GLOBS = [
   '**/{webpackShims,__mocks__}/**/*',
   'x-pack/docs/**/*',
   'src/dev/tslint/rules/*',
+
+  // filename must match language code which requires capital letters
+  'src/ui/ui_i18n/__tests__/fixtures/translations/test_plugin_1/es-ES.json',
 ];
 
 

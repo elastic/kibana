@@ -13,6 +13,7 @@ import {
   EuiText,
   EuiCard,
   EuiIcon,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 
 export function AddData({ apmUiEnabled }) {
@@ -115,12 +116,27 @@ export function AddData({ apmUiEnabled }) {
 
       {renderCards()}
 
-      <EuiFlexGroup justifyContent="center">
+      <EuiHorizontalRule />
+
+      <EuiFlexGroup justifyContent="spaceAround">
         <EuiFlexItem grow={false}>
           <EuiText>
-            <span style={{ height: 38 }}>
+            <strong style={{ height: 38 }}>
+              Fresh Elastic stack installation?
+            </strong>
+            <EuiLink
+              style={{ marginLeft: 8 }}
+              href="#/home/tutorial_directory/sampleData"
+            >
+              Try some sample data sets
+            </EuiLink>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText>
+            <strong style={{ height: 38 }}>
               Data already in Elasticsearch?
-            </span>
+            </strong>
             <EuiLink
               style={{ marginLeft: 8 }}
               href="#/management/kibana/index"
@@ -129,6 +145,8 @@ export function AddData({ apmUiEnabled }) {
             </EuiLink>
           </EuiText>
         </EuiFlexItem>
+
+
       </EuiFlexGroup>
 
     </EuiPanel>

@@ -51,11 +51,18 @@ exports[`EmptyState should render normally 1`] = `
            
           <EuiLink
             color="primary"
-            href="http://www.elastic.co"
-            target="_blank"
+            href="#/home/tutorial_directory"
             type="button"
           >
-            Learn how.
+            Learn how
+          </EuiLink>
+           or 
+          <EuiLink
+            color="primary"
+            href="#/home/tutorial_directory/sampleData"
+            type="button"
+          >
+            get started with some sample data sets.
           </EuiLink>
         </p>
       </EuiText>
