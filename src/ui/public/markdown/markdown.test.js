@@ -49,6 +49,7 @@ describe('props', () => {
       markdown={markdown}
       openLinksInNewTab={false}
     />);
+    expect(component.render().find('a').prop('target')).not.toBe('_blank');
     component.setProps({ openLinksInNewTab: true });
     expect(component.render().find('a').prop('target')).toBe('_blank');
   });
@@ -59,6 +60,8 @@ describe('props', () => {
       markdown={markdown}
       whiteListedRules={['emphasis', 'backticks']}
     />);
+    expect(component.render().find('em')).toHaveLength(1);
+    expect(component.render().find('code')).toHaveLength(1);
     component.setProps({ whiteListedRules: ['backticks'] });
     expect(component.render().find('code')).toHaveLength(1);
     expect(component.render().find('em')).toHaveLength(0);
