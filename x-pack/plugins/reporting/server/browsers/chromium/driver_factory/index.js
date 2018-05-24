@@ -58,9 +58,17 @@ export class HeadlessChromiumDriverFactory {
       const driver$ = message$
         .first(line => line.indexOf(`DevTools listening on ws://127.0.0.1:${bridgePort}`) >= 0)
         .do(() => {
-          // See https://github.com/elastic/kibana/issues/19351 for why this is necessary.
+          // See https://github.com/elastic/kibana/issues/19351 for why this is necessary. Long story short, on certain
+          // linux platforms (fwiw, we have only experienced this on jenkins agents) the first bootup of chromium takes
+          // a long time doing something with fontconfig packages loading up a cache. The cdp command will timeout
+          // if we don't want for this manually. Note that this may still timeout based on the value of
+          // xpack.reporting.queue.timeout. Subsequent runs should be fast because the cache will already be
+          // initialized.
           this.logger.debug('Ensure chromium is running and listening');
-          spawnSync(`curl`,  [`http://127.0.0.1:${bridgePort}/json`], { stdio: 'inherit' });
+          spawnSync(
+            `curl`,
+            [`http://127.0.0.1:${bridgePort}/json`],
+            this.logger.isVerbose ? { stdio: 'inherit' } : {});
         })
         .mergeMap(() => cdp({ port: bridgePort, local: true }))
         .do(() => this.logger.debug('Initializing chromium driver'))
