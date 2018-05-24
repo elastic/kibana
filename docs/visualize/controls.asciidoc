@@ -6,6 +6,8 @@ Controls can be used to create two types of inputs; dropdowns and range sliders.
 
 image::images/controls/controls_in_dashboard.png[]
 
+Gail's version
+
 === Configuration
 Create Controls visualizations by following the <<createvis,Creating a Visualization>> instructions.
 Select *Controls* as the visualization type.
