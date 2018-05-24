@@ -200,7 +200,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe.skip('and preserves edits on cancel', function () {
+    describe('and preserves edits on cancel', function () {
       it('when time changed is stored with dashboard', async function () {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
         const newFromTime = '2015-09-19 06:31:44.000';
