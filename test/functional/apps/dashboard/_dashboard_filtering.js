@@ -149,7 +149,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.dashboard.setTimepickerIn63DataRange();
 
-        await dashboardAddPanel.addVisualization('animal sounds pie');
+        await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
         await dashboardExpect.pieSliceCount(5);
@@ -162,7 +162,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.waitForRenderComplete();
         await dashboardExpect.pieSliceCount(3);
 
-        await PageObjects.visualize.saveVisualization('animal sounds pie');
+        await PageObjects.visualize.saveVisualization('Rendering-Test:-animal-sounds-pie');
         await PageObjects.header.clickDashboard();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
