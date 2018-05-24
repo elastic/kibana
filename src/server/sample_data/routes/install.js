@@ -26,7 +26,8 @@ export const createInstallRoute = () => ({
       const index = createIndexName(server, sampleDataset.id);
       const insertCmd = {
         index: {
-          _index: index
+          _index: index,
+          _type: '_doc',
         }
       };
 
