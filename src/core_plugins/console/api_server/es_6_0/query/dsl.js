@@ -572,7 +572,15 @@ export function queryDsl(api) {
         document: {}
       },
       field: '',
-      document: {}
+      document: {},
+      name: '',
+      documents: [{}],
+      document_type: '',
+      index: '',
+      type: '',
+      id: '',
+      routing: '',
+      preference: ''
     },
     common: {
       __template: {
