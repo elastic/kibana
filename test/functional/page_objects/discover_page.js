@@ -54,7 +54,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async openSavedSearch() {
-      await this.clickLoadSavedSearchButton();
+      await testSubjects.click('discoverOpenButton');
       await retry.try(async () => {
         const isLoadFormVisible = await testSubjects.exists('loadSearchForm');
         if (!isLoadFormVisible) {
@@ -69,7 +69,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async loadSavedSearch(searchName) {
-      await this.clickLoadSavedSearchButton();
+      await this.openSavedSearch();
       const searchLink = await find.byPartialLinkText(searchName);
       await searchLink.click();
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -81,10 +81,6 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     async clickSaveSearchButton() {
       await testSubjects.click('discoverSaveButton');
-    }
-
-    async clickLoadSavedSearchButton() {
-      await testSubjects.click('discoverOpenButton');
     }
 
     async getCurrentQueryName() {
