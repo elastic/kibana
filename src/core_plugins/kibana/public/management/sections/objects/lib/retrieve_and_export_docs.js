@@ -6,7 +6,7 @@ export async function retrieveAndExportDocs(objs, savedObjectsClient) {
   const response = await savedObjectsClient.bulkGet([...objs, migrationStateQuery]);
   const [[migrationState], docs] = _.partition(response.savedObjects, migrationStateQuery);
   const objects = {
-    migrationState: minimizedMigrationState(migrationState),
+    migrationState: { types: _.get(migrationState, 'attributes.types') },
     docs: docs.map(obj => {
       return {
         _id: obj.id,
@@ -17,10 +17,4 @@ export async function retrieveAndExportDocs(objs, savedObjectsClient) {
   };
 
   saveToFile(JSON.stringify(objects, null, 2));
-}
-
-function minimizedMigrationState({ plugins }) {
-  return {
-    plugins: plugins.map(plugin => _.omit(plugin, 'mappings')),
-  };
 }

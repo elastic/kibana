@@ -48,7 +48,7 @@ export class SavedObjectsRepository {
     } = options;
 
     try {
-      const [doc] = this._upgradeDocuments({
+      const [doc] = await this._upgradeDocuments({
         migrationState,
         docs: [{ id, type, attributes }],
       });
@@ -96,7 +96,7 @@ export class SavedObjectsRepository {
       return acc;
     };
 
-    const docs = this._upgradeDocuments({
+    const docs = await this._upgradeDocuments({
       time,
       migrationState,
       docs: objects,

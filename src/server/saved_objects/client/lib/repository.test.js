@@ -201,7 +201,7 @@ describe('SavedObjectsRepository', () => {
         },
       };
 
-      transformDocuments.returns(_.cloneDeep([transformedDoc]));
+      transformDocuments.returns(Promise.resolve(_.cloneDeep([transformedDoc])));
 
       await savedObjectsRepository.create(doc.type, doc.attributes, { migrationState, id: doc.id });
 
@@ -392,13 +392,13 @@ describe('SavedObjectsRepository', () => {
         { type: 'goo', id: '2', attributes: { title: 'Pea' } },
       ];
 
-      transformDocuments.returns(docs.map(doc => ({
+      transformDocuments.returns(Promise.resolve(docs.map(doc => ({
         ...doc,
         attributes: {
           ...doc.attributes,
           title: doc.attributes.title.toUpperCase(),
         }
-      })));
+      }))));
 
       await savedObjectsRepository.bulkCreate(docs, { migrationState });
 

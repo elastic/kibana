@@ -57,6 +57,7 @@ export class Flyout extends Component {
       isLoading: false,
       loadingMessage: undefined,
       wasImportSuccessful: false,
+      migrationState: {},
     };
   }
 
@@ -100,7 +101,9 @@ export class Flyout extends Component {
       return;
     }
 
-    if (!Array.isArray(contents)) {
+    const { migrationState = {}, docs = contents } = contents;
+
+    if (!Array.isArray(docs)) {
       this.setState({
         isLoading: false,
         error: 'Saved objects file format is invalid and cannot be imported.',
@@ -108,20 +111,19 @@ export class Flyout extends Component {
       return;
     }
 
-    contents = contents.filter(content =>
-      INCLUDED_TYPES.includes(content._type)
-    );
-
     const {
       conflictedIndexPatterns,
       conflictedSavedObjectsLinkedToSavedSearches,
       conflictedSearchDocs,
       importedObjectCount,
     } = await resolveSavedObjects(
-      contents,
+      docs.filter(content =>
+        INCLUDED_TYPES.includes(content._type)
+      ),
       isOverwriteAllChecked,
       services,
-      indexPatterns
+      indexPatterns,
+      migrationState,
     );
 
     const byId = groupBy(conflictedIndexPatterns, ({ obj }) =>
@@ -151,6 +153,7 @@ export class Flyout extends Component {
       importCount: importedObjectCount,
       isLoading: false,
       wasImportSuccessful: conflicts.length === 0,
+      migrationState,
     });
   };
 
@@ -179,6 +182,7 @@ export class Flyout extends Component {
       isOverwriteAllChecked,
       conflictedSavedObjectsLinkedToSavedSearches,
       conflictedSearchDocs,
+      migrationState,
     } = this.state;
 
     const { services, indexPatterns } = this.props;
@@ -201,13 +205,15 @@ export class Flyout extends Component {
           importCount += await resolveIndexPatternConflicts(
             resolutions,
             conflictedIndexPatterns,
-            isOverwriteAllChecked
+            isOverwriteAllChecked,
+            migrationState,
           );
         }
         this.setState({ loadingMessage: 'Saving conflicts...' });
         importCount += await saveObjects(
           conflictedSavedObjectsLinkedToSavedSearches,
-          isOverwriteAllChecked
+          isOverwriteAllChecked,
+          migrationState,
         );
         this.setState({
           loadingMessage: 'Ensure saved searches are linked properly...',
@@ -216,7 +222,8 @@ export class Flyout extends Component {
           conflictedSearchDocs,
           services,
           indexPatterns,
-          isOverwriteAllChecked
+          isOverwriteAllChecked,
+          migrationState,
         );
       } catch (e) {
         this.setState({

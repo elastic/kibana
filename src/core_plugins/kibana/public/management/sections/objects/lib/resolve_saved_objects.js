@@ -24,9 +24,9 @@ async function importIndexPattern(doc, indexPatterns, overwriteAll) {
   return newId;
 }
 
-async function importDocument(obj, doc, overwriteAll) {
+async function importDocument(obj, doc, overwriteAll, migrationState) {
   await obj.applyESResp(doc);
-  return await obj.save({ confirmOverwrite: !overwriteAll });
+  return await obj.save({ confirmOverwrite: !overwriteAll, migrationState });
 }
 
 function groupByType(docs) {
@@ -58,7 +58,8 @@ async function awaitEachItemInParallel(list, op) {
 export async function resolveIndexPatternConflicts(
   resolutions,
   conflictedIndexPatterns,
-  overwriteAll
+  overwriteAll,
+  migrationState,
 ) {
   let importCount = 0;
   await awaitEachItemInParallel(conflictedIndexPatterns, async ({ obj }) => {
@@ -74,19 +75,19 @@ export async function resolveIndexPatternConflicts(
     }
     const newIndexId = resolution.newId;
     await obj.hydrateIndexPattern(newIndexId);
-    if (await saveObject(obj, overwriteAll)) {
+    if (await saveObject(obj, overwriteAll, migrationState)) {
       importCount++;
     }
   });
   return importCount;
 }
 
-export async function saveObjects(objs, overwriteAll) {
+export async function saveObjects(objs, overwriteAll, migrationState) {
   let importCount = 0;
   await awaitEachItemInParallel(
     objs,
     async obj => {
-      if (await saveObject(obj, overwriteAll)) {
+      if (await saveObject(obj, overwriteAll, migrationState)) {
         importCount++;
       }
     }
@@ -94,15 +95,16 @@ export async function saveObjects(objs, overwriteAll) {
   return importCount;
 }
 
-export async function saveObject(obj, overwriteAll) {
-  return await obj.save({ confirmOverwrite: !overwriteAll });
+export async function saveObject(obj, overwriteAll, migrationState) {
+  return await obj.save({ confirmOverwrite: !overwriteAll, migrationState });
 }
 
 export async function resolveSavedSearches(
   savedSearches,
   services,
   indexPatterns,
-  overwriteAll
+  overwriteAll,
+  migrationState,
 ) {
   let importCount = 0;
   await awaitEachItemInParallel(savedSearches, async searchDoc => {
@@ -111,7 +113,7 @@ export async function resolveSavedSearches(
       // Just ignore?
       return;
     }
-    if (await importDocument(obj, searchDoc, overwriteAll)) {
+    if (await importDocument(obj, searchDoc, overwriteAll, migrationState)) {
       importCount++;
     }
   });
@@ -122,7 +124,8 @@ export async function resolveSavedObjects(
   savedObjects,
   overwriteAll,
   services,
-  indexPatterns
+  indexPatterns,
+  migrationState,
 ) {
   const docTypes = groupByType(savedObjects);
 
@@ -134,7 +137,7 @@ export async function resolveSavedObjects(
   await awaitEachItemInParallel(
     docTypes.indexPatterns,
     async indexPatternDoc => {
-      if (await importIndexPattern(indexPatternDoc, indexPatterns, overwriteAll)) {
+      if (await importIndexPattern(indexPatternDoc, indexPatterns, overwriteAll, migrationState)) {
         importedObjectCount++;
       }
     }
@@ -157,7 +160,7 @@ export async function resolveSavedObjects(
     const obj = await getSavedObject(searchDoc, services);
 
     try {
-      if (await importDocument(obj, searchDoc, overwriteAll)) {
+      if (await importDocument(obj, searchDoc, overwriteAll, migrationState)) {
         importedObjectCount++;
       }
     } catch (err) {
@@ -175,7 +178,7 @@ export async function resolveSavedObjects(
     const obj = await getSavedObject(otherDoc, services);
 
     try {
-      if (await importDocument(obj, otherDoc, overwriteAll)) {
+      if (await importDocument(obj, otherDoc, overwriteAll, migrationState)) {
         importedObjectCount++;
       }
     } catch (err) {
