@@ -23,7 +23,6 @@ export class NavControlPopover extends Component {
   notifier = new Notifier(`Spaces`);
 
   async loadSpaces() {
-    console.log('loading spaces');
     const {
       spacesManager
     } = this.props;
@@ -62,7 +61,7 @@ export class NavControlPopover extends Component {
         button={this.getActiveSpaceButton()}
         closePopover={this.closePortal}
       >
-        <SpacesContextMenu spaces={this.state.spaces} showManageButton={true} onSelectSpace={this.onSelectSpace} />
+        <SpacesContextMenu spaces={this.state.spaces} showManageButton={false} onSelectSpace={this.onSelectSpace} />
       </EuiPopover>
     );
   }
