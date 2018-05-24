@@ -209,21 +209,21 @@ describe('IfStatement class', () => {
         const esVertex = new PluginVertex({ edgesByFrom: {} }, { id: 'es_output' });
         esVertex.pipelineStage = 'output';
 
-        ifVertex.trueOutgoingVertex = esVertex;
+        ifVertex.trueOutgoingVertices = [esVertex];
+        ifVertex.falseOutgoingVertices = [];
       });
 
       it('creates list and sub-list for nested statements', () => {
         const ifStatement = IfStatement.fromPipelineGraphVertex(ifVertex, pipelineStage);
 
-        const result = ifStatement.toList(0, null);
+        const result = ifStatement.toList(0, 'output');
 
         expect(result).to.be.an(Array);
         expect(result.length).to.be(2);
         expect(result[0]).to.be.an(IfElement);
         expect(result[0].id).to.be('0aef421');
-        expect(result[1]).to.be.an(Array);
-        expect(result[1].length).to.be(1);
-        const plugin = result[1][0];
+        expect(result[1]).to.be.an(PluginElement);
+        const plugin = result[1];
         expect(plugin).to.be.an(PluginElement);
         expect(plugin.id).to.be('es_output');
       });
