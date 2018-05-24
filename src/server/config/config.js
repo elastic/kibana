@@ -126,7 +126,7 @@ export class Config {
 
   getDefault(key) {
     const schemaDescription = Joi.describe(this.getSchema());
-    const parts = key.split('.');
+    const parts = Array.isArray(key) ? key : key.split('.');
     const path = `children.${parts.join('.children.')}`;
     const description = _.get(schemaDescription, path);
     if (!description) {
