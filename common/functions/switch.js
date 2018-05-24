@@ -5,19 +5,23 @@ export const switchFn = () => ({
     _: {
       types: ['case'],
       aliases: ['cases'],
+      resolve: false,
       multi: true,
       help: 'The list of conditions to check',
     },
     default: {
       aliases: ['finally'],
+      resolve: false,
       help: 'The default case if no cases match',
     },
   },
-  fn: (context, args) => {
+  fn: async (context, args) => {
     const cases = args._ || [];
-    const matchingCase = cases.find(c => c.matches);
-    if (matchingCase) return matchingCase.result;
-    if (args.default) return args.default;
+    for (let i = 0; i < cases.length; i++) {
+      const { matches, result } = await cases[i]();
+      if (matches) return result;
+    }
+    if (typeof args.default !== 'undefined') return await args.default();
     return context;
   },
 });

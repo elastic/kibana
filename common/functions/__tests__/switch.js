@@ -4,6 +4,7 @@ import { functionWrapper } from '../../../__tests__/helpers/function_wrapper';
 
 describe('switch', () => {
   const fn = functionWrapper(switchFn);
+  const getter = value => () => value;
   const mockCases = [
     {
       type: 'case',
@@ -41,41 +42,41 @@ describe('switch', () => {
 
   describe('function', () => {
     describe('with no cases', () => {
-      it('should return the context if no default is provided', () => {
+      it('should return the context if no default is provided', async () => {
         const context = 'foo';
-        expect(fn(context, {})).to.be(context);
+        expect(await fn(context, {})).to.be(context);
       });
 
-      it('should return the default if provided', () => {
+      it('should return the default if provided', async () => {
         const context = 'foo';
-        const args = { default: 'bar' };
-        expect(fn(context, args)).to.be(args.default);
+        const args = { default: () => 'bar' };
+        expect(await fn(context, args)).to.be(args.default());
       });
     });
 
     describe('with no matching cases', () => {
-      it('should return the context if no default is provided', () => {
+      it('should return the context if no default is provided', async () => {
         const context = 'foo';
-        const args = { _: nonMatchingCases };
-        expect(fn(context, args)).to.be(context);
+        const args = { _: nonMatchingCases.map(getter) };
+        expect(await fn(context, args)).to.be(context);
       });
 
-      it('should return the default if provided', () => {
+      it('should return the default if provided', async () => {
         const context = 'foo';
         const args = {
-          _: nonMatchingCases,
-          default: 'bar',
+          _: nonMatchingCases.map(getter),
+          default: () => 'bar',
         };
-        expect(fn(context, args)).to.be(args.default);
+        expect(await fn(context, args)).to.be(args.default());
       });
     });
 
     describe('with matching cases', () => {
-      it('should return the first match', () => {
+      it('should return the first match', async () => {
         const context = 'foo';
-        const args = { _: mockCases };
+        const args = { _: mockCases.map(getter) };
         const firstMatch = mockCases.find(c => c.matches);
-        expect(fn(context, args)).to.be(firstMatch.result);
+        expect(await fn(context, args)).to.be(firstMatch.result);
       });
     });
   });

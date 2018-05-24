@@ -42,13 +42,7 @@ argument_assignment
   }
 
 argument
-  = '{' space? expression:expression space? '}' { return expression; }
-  / '${' space? expression:expression space? '}' {
-    return {
-      type: 'partial',
-      chain: expression.chain
-    };
-  }
+  = '$'? '{' space? expression:expression space? '}' { return expression; }
   / literal
 
 arg_list

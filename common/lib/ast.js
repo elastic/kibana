@@ -15,7 +15,6 @@ function getArgumentString(arg, argKey) {
   if (type === 'string') return maybeArgKey(`"${escapeSpecialCharacters(arg)}"`);
   if (type === 'boolean' || type === 'null' || type === 'number') return maybeArgKey(`${arg}`);
   if (type === 'expression') return maybeArgKey(`{${getExpression(arg.chain)}}`);
-  if (type === 'partial') return maybeArgKey('${' + getExpression(arg.chain) + '}');
 
   throw new Error(`Invalid argument type in AST: ${type}`);
 }
@@ -43,16 +42,15 @@ function fnWithArgs(fnName, args) {
 }
 
 function getExpression(chain) {
-  if (!chain) throw new Error('expression and partial arguments must contain a chain');
+  if (!chain) throw new Error('Expressions must contain a chain');
 
   return chain
     .map(chainObj => {
       const type = getType(chainObj);
 
-      if (type === 'function' || type === 'partial') {
+      if (type === 'function') {
         const fn = chainObj.function;
-        if (!fn || fn.length === 0)
-          throw new Error('Functions and partials must have a function name');
+        if (!fn || fn.length === 0) throw new Error('Functions must have a function name');
 
         const expArgs = getExpressionArgs(chainObj);
 
@@ -91,14 +89,14 @@ Thanks for understanding,
 export function toExpression(astObj, type = 'expression') {
   if (type === 'argument') return getArgumentString(astObj);
 
-  const validType = ['partial', 'expression', 'function'].includes(getType(astObj));
+  const validType = ['expression', 'function'].includes(getType(astObj));
   if (!validType) {
-    throw new Error('Expression must be a partial, expression, or argument function');
+    throw new Error('Expression must be an expression or argument function');
   }
 
-  if (['partial', 'expression'].includes(getType(astObj))) {
+  if (getType(astObj) === 'expression') {
     if (!Array.isArray(astObj.chain)) {
-      throw new Error('Partials or expressions must contain a chain');
+      throw new Error('Expressions must contain a chain');
     }
     return getExpression(astObj.chain);
   }

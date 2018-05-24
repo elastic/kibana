@@ -121,15 +121,15 @@ describe('ast fromExpression', () => {
         block = astObject.chain[0];
       });
 
-      it('is partial type', () => {
+      it('is expression type', () => {
         expect(block.arguments).to.have.property('examplePartial');
-        expect(block.arguments.examplePartial[0]).to.have.property('type', 'partial');
+        expect(block.arguments.examplePartial[0]).to.have.property('type', 'expression');
       });
 
       it('has expected shape', () => {
         expect(block.arguments.examplePartial).to.eql([
           {
-            type: 'partial',
+            type: 'expression',
             chain: [
               {
                 type: 'function',

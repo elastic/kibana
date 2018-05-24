@@ -15,7 +15,8 @@ export const mapColumn = () => ({
       help: 'The name of the resulting column',
     },
     expression: {
-      types: ['function'],
+      types: ['boolean', 'number', 'string', 'null'],
+      resolve: false,
       aliases: ['exp', 'fn'],
       help: 'A canvas expression which will be passed each row as a single row datatable',
     },
@@ -33,16 +34,10 @@ export const mapColumn = () => ({
           columns,
           rows: [row],
         })
-        .then(val => {
-          if (typeof val === 'object' && val !== null) {
-            throw new Error('Expression must return a literal, eg a string, number, boolean, null');
-          }
-
-          return {
-            ...row,
-            [args._]: val,
-          };
-        });
+        .then(val => ({
+          ...row,
+          [args._]: val,
+        }));
     });
 
     return Promise.all(rowPromises).then(rows => {

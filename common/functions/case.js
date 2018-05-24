@@ -1,36 +1,37 @@
 export const caseFn = () => ({
   name: 'case',
   type: 'case',
-  help: 'Build a condition to pass to the switch function',
+  help: 'Build a case (including a condition/result) to pass to the switch function.',
   args: {
     _: {
+      resolve: false,
       help:
-        'When the `if` argument is not provided, the context is compared with this value to see if the condition is met',
+        'This value is compared to the context to see if the condition is met. It is overridden by the "if" argument if both are provided.',
     },
     if: {
       types: ['boolean'],
-      help: 'When provided, this value is used as whether or not the condition is met',
+      help:
+        'This value is used as whether or not the condition is met. It overrides the unnamed argument if both are provided.',
     },
     then: {
+      resolve: false,
       help: 'The value to return if the condition is met',
     },
   },
-  fn: (context, args) => {
-    return {
-      type: 'case',
-      matches: doesMatch(context, args),
-      result: getResult(context, args),
-    };
+  fn: async (context, args) => {
+    const matches = await doesMatch(context, args);
+    const result = matches ? await getResult(context, args) : null;
+    return { type: 'case', matches, result };
   },
 });
 
-function doesMatch(context, args) {
+async function doesMatch(context, args) {
   if (typeof args.if !== 'undefined') return args.if;
-  if (typeof args._ !== 'undefined') return args._ === context;
+  if (typeof args._ !== 'undefined') return (await args._()) === context;
   return true;
 }
 
-function getResult(context, args) {
-  if (typeof args.then !== 'undefined') return args.then;
+async function getResult(context, args) {
+  if (typeof args.then !== 'undefined') return await args.then();
   return context;
 }

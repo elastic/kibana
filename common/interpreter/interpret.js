@@ -1,6 +1,5 @@
-import { each, keys, last, mapValues, values } from 'lodash';
+import { keys, last, mapValues, reduce, zipObject } from 'lodash';
 import clone from 'lodash.clone';
-import omitBy from 'lodash.omitby';
 import { getType } from '../lib/get_type';
 import { fromExpression } from '../lib/ast';
 import { typesRegistry } from '../lib/types_registry';
@@ -27,12 +26,8 @@ export function interpretProvider(config) {
 
   function interpret(node, context = null) {
     switch (getType(node)) {
-      case 'partial':
-        return partialContext => invokeChain(node.chain, partialContext);
       case 'expression':
         return invokeChain(node.chain, context);
-      case 'function':
-        return node;
       case 'string':
       case 'number':
       case 'null':
@@ -60,7 +55,9 @@ export function interpretProvider(config) {
 
     try {
       // Resolve arguments before passing to function
-      const resolvedArgs = await resolveArgs(fnName, context, fnArgs);
+      // resolveArgs returns an object because the arguments themselves might
+      // actually have a 'then' function which would be treated as a promise
+      const { resolvedArgs } = await resolveArgs(fnDef, context, fnArgs);
       const newContext = await invokeFunction(fnName, context, resolvedArgs);
 
       // if something failed, just return the failure
@@ -107,63 +104,68 @@ export function interpretProvider(config) {
   }
 
   // Processes the multi-valued AST argument values into arguments that can be passed to the function
-  async function resolveArgs(fnName, context, astArgs) {
-    const fnDef = functions[fnName];
+  async function resolveArgs(fnDef, context, argAsts) {
     const argDefs = fnDef.args;
-    const nonAliasArgDefs = omitBy(argDefs, { isAlias: true });
 
-    // Break argument definitions into keys and values, then recombine later
-    const multiValuedArgValues = values(astArgs);
-    const nonAliasArgNames = keys(astArgs).map(argName => {
-      if (!argDefs[argName]) {
-        throw new Error(`Unknown argument '${argName}' passed to function '${fnDef.name}'`);
-      }
-
-      // This is where the alias gets turned into the actual name
-      return argDefs[argName].name;
-    });
+    // Use the non-alias name from the argument definition
+    const dealiasedArgAsts = reduce(
+      argAsts,
+      (argAsts, argAst, argName) => {
+        // TODO: Implement a system to allow for undeclared arguments
+        if (!argDefs[argName]) {
+          throw new Error(`Unknown argument '${argName}' passed to function '${fnDef.name}'`);
+        }
+        const { name } = argDefs[argName];
+        argAsts[name] = (argAsts[name] || []).concat(argAst);
+        return argAsts;
+      },
+      {}
+    );
 
     // Fill in default values from argument definition
-    each(nonAliasArgDefs, (argDef, argName) => {
-      if (nonAliasArgNames.includes(argName)) return;
+    const argAstsWithDefaults = reduce(
+      argDefs,
+      (argAsts, argDef, argName) => {
+        if (typeof argAsts[argName] === 'undefined' && typeof argDef.default !== 'undefined') {
+          argAsts[argName] = [fromExpression(argDef.default, 'argument')];
+        }
+        return argAsts;
+      },
+      dealiasedArgAsts
+    );
 
-      if (typeof argDef.default !== 'undefined') {
-        nonAliasArgNames.push(argName);
-        multiValuedArgValues.push([fromExpression(argDef.default, 'argument')]);
-      }
+    // Create the functions to resolve the argument ASTs into values
+    // These are what are passed to the actual functions if you opt out of resolving
+    const resolveArgFns = mapValues(argAstsWithDefaults, (argAsts, argName) => {
+      return argAsts.map(argAst => {
+        return async (ctx = context) => {
+          const newContext = await interpret(argAst, ctx);
+          return cast(newContext, argDefs[argName].types);
+        };
+      });
     });
 
-    // Create an array of promises, each representing 1 argument name
-    const argListPromises = multiValuedArgValues.map(multiValueArg => {
-      // Since each argument in the AST is multivalued, each argument value is an array
-      // We use Promise.all to turn the values into a single promise
-      // Note that we're resolving the argument values before even looking up their definition
-      const argPromises = multiValueArg.map(argValue => interpret(argValue, context));
-      return Promise.all(argPromises);
+    const argNames = keys(resolveArgFns);
+
+    // Actually resolve unless the argument definition says not to
+    const resolvedArgValues = await Promise.all(
+      argNames.map(argName => {
+        const interpretFns = resolveArgFns[argName];
+        if (!argDefs[argName].resolve) return interpretFns;
+        return Promise.all(interpretFns.map(fn => fn()));
+      })
+    );
+
+    const resolvedMultiArgs = zipObject(argNames, resolvedArgValues);
+
+    // Just return the last unless the argument definition allows multiple
+    const resolvedArgs = mapValues(resolvedMultiArgs, (argValues, argName) => {
+      if (argDefs[argName].multi) return argValues;
+      return last(argValues);
     });
 
-    const argValues = await Promise.all(argListPromises);
-    const resolvedArgs = nonAliasArgNames.reduce((args, argName, i) => {
-      return {
-        ...args,
-        [argName]: (args[argName] || []).concat(argValues[i]),
-      };
-    }, {});
-
-    return mapValues(resolvedArgs, (val, name) => {
-      // TODO: Implement a system to allow for undeclared arguments
-      const argDef = argDefs[name];
-      if (!argDef) {
-        throw new Error(`Unknown argument '${name}' passed to function '${fnName}'`);
-      }
-
-      // Return an array for multi-valued arguments
-      if (argDef.multi) {
-        return val.map(argValue => cast(argValue, argDef.types));
-      }
-
-      // Otherwise return the final instance
-      return cast(last(val), argDef.types);
-    });
+    // Return an object here because the arguments themselves might actually have a 'then'
+    // function which would be treated as a promise
+    return { resolvedArgs };
   }
 }

@@ -1,14 +1,4 @@
 import { groupBy, flatten, pick, map } from 'lodash';
-import { getType } from '../lib/get_type';
-
-function checkDatatableType(datatable) {
-  if (getType(datatable) !== 'datatable') {
-    throw new Error(
-      'All ply expressions must return a datatable. Use `as` to turn a literal (eg string, number) into a datatable'
-    );
-  }
-  return datatable;
-}
 
 function combineColumns(arrayOfColumnsArrays) {
   return arrayOfColumnsArrays.reduce((resultingColumns, columns) => {
@@ -25,12 +15,11 @@ function combineColumns(arrayOfColumnsArrays) {
 // This handles merging the tables produced by multiple expressions run on a single member of the `by` split.
 // Thus all tables must be the same length, although their columns do not need to be the same, we will handle combining the columns
 function combineAcross(datatableArray) {
-  const referenceTable = checkDatatableType(datatableArray[0]);
+  const [referenceTable] = datatableArray;
   const targetRowLength = referenceTable.rows.length;
 
   // Sanity check
   datatableArray.forEach(datatable => {
-    checkDatatableType(datatable);
     if (datatable.rows.length !== targetRowLength)
       throw new Error('All expressions must return the same number of rows');
   });
@@ -70,7 +59,8 @@ export const ply = () => ({
       multi: true,
     },
     expression: {
-      types: ['function'],
+      types: ['datatable'],
+      resolve: false,
       multi: true,
       aliases: ['fn', 'function'],
       help:

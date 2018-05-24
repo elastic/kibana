@@ -8,8 +8,9 @@ export const filterrows = () => ({
   help: 'Filter rows in a datatable based on the return value of a subexpression.',
   args: {
     _: {
+      resolve: false,
       aliases: ['fn'],
-      types: ['function'],
+      types: ['boolean'],
       help:
         'An expression to pass each rows in the datatable into. The expression should return a boolean. ' +
         'A true value will preserve the row, and a false value will remove it.',

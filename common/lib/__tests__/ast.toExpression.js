@@ -4,13 +4,13 @@ import { toExpression } from '../ast';
 describe('ast toExpression', () => {
   describe('single expression', () => {
     it('throws if not correct type', () => {
-      const errMsg = 'Expression must be a partial, expression, or argument function';
+      const errMsg = 'Expression must be an expression or argument function';
       const astObject = { hello: 'world' };
       expect(() => toExpression(astObject)).to.throwException(errMsg);
     });
 
     it('throws if expression without chain', () => {
-      const errMsg = 'Partials or expressions must contain a chain';
+      const errMsg = 'Expressions must contain a chain';
       const astObject = {
         type: 'expression',
         hello: 'world',
@@ -77,58 +77,44 @@ describe('ast toExpression', () => {
       expect(() => toExpression(astObject)).to.throwException(errMsg);
     });
 
-    it('throws on partials and expressions without chains', () => {
-      const errMsg = 'expression and partial arguments must contain a chain';
-      const chainTypes = ['expression', 'partial'];
+    it('throws on expressions without chains', () => {
+      const errMsg = 'Expressions must contain a chain';
 
-      function validate(obj) {
-        expect(() => toExpression(obj)).to.throwException(errMsg);
-      }
-
-      for (let i = 0; i < chainTypes.length; i++) {
-        const astObject = {
-          type: 'expression',
-          chain: [
-            {
-              type: 'function',
-              function: 'test',
-              arguments: {
-                test: [
-                  {
-                    type: chainTypes[i],
-                    invalid: 'no chain here',
-                  },
-                ],
-              },
+      const astObject = {
+        type: 'expression',
+        chain: [
+          {
+            type: 'function',
+            function: 'test',
+            arguments: {
+              test: [
+                {
+                  type: 'expression',
+                  invalid: 'no chain here',
+                },
+              ],
             },
-          ],
-        };
+          },
+        ],
+      };
 
-        validate(astObject);
-      }
+      expect(() => toExpression(astObject)).to.throwException(errMsg);
     });
 
     it('throws on nameless functions and partials', () => {
-      const errMsg = 'Functions and partials must have a function name';
-      const chainTypes = ['function', 'partial'];
+      const errMsg = 'Functions must have a function name';
 
-      function validate(obj) {
-        expect(() => toExpression(obj)).to.throwException(errMsg);
-      }
+      const astObject = {
+        type: 'expression',
+        chain: [
+          {
+            type: 'function',
+            function: '',
+          },
+        ],
+      };
 
-      for (let i = 0; i < chainTypes.length; i++) {
-        const astObject = {
-          type: 'expression',
-          chain: [
-            {
-              type: chainTypes[i],
-              function: '',
-            },
-          ],
-        };
-
-        validate(astObject);
-      }
+      expect(() => toExpression(astObject)).to.throwException(errMsg);
     });
 
     it('single expression', () => {
@@ -325,7 +311,7 @@ describe('ast toExpression', () => {
       expect(expression).to.equal('csv calc={getcalc} input="stuff\nthings"');
     });
 
-    it('single expression with partial argument', () => {
+    it('single expression with expression argument', () => {
       const astObj = {
         type: 'expression',
         chain: [
@@ -335,7 +321,7 @@ describe('ast toExpression', () => {
             arguments: {
               calc: [
                 {
-                  type: 'partial',
+                  type: 'expression',
                   chain: [
                     {
                       type: 'function',
@@ -352,10 +338,10 @@ describe('ast toExpression', () => {
       };
 
       const expression = toExpression(astObj);
-      expect(expression).to.equal('csv calc=${partcalc} input="stuff\nthings"');
+      expect(expression).to.equal('csv calc={partcalc} input="stuff\nthings"');
     });
 
-    it('single expression with partial and expression arguments, with arguments', () => {
+    it('single expression with expression arguments, with arguments', () => {
       const astObj = {
         type: 'expression',
         chain: [
@@ -365,7 +351,7 @@ describe('ast toExpression', () => {
             arguments: {
               sep: [
                 {
-                  type: 'partial',
+                  type: 'expression',
                   chain: [
                     {
                       type: 'function',
@@ -399,7 +385,7 @@ describe('ast toExpression', () => {
 
       const expression = toExpression(astObj);
       expect(expression).to.equal(
-        'csv sep=${partcalc type="comma"} input="stuff\nthings" break={setBreak type="newline"}'
+        'csv sep={partcalc type="comma"} input="stuff\nthings" break={setBreak type="newline"}'
       );
     });
   });
@@ -424,7 +410,7 @@ describe('ast toExpression', () => {
             arguments: {
               x: [
                 {
-                  type: 'partial',
+                  type: 'expression',
                   chain: [
                     {
                       type: 'function',
@@ -438,7 +424,7 @@ describe('ast toExpression', () => {
               ],
               y: [
                 {
-                  type: 'partial',
+                  type: 'expression',
                   chain: [
                     {
                       type: 'function',
@@ -452,7 +438,7 @@ describe('ast toExpression', () => {
               ],
               colors: [
                 {
-                  type: 'partial',
+                  type: 'expression',
                   chain: [
                     {
                       type: 'function',
@@ -474,7 +460,7 @@ describe('ast toExpression', () => {
         'csv input="year,make,model,price',
         '2016,honda,cr-v,23845',
         '2016,honda,fit,15890,',
-        '2016,honda,civic,18640" | line x=${distinct f="year"} y=${sum f="price"} colors=${distinct f="model"}',
+        '2016,honda,civic,18640" | line x={distinct f="year"} y={sum f="price"} colors={distinct f="model"}',
       ];
       expect(expression).to.equal(expected.join('\n'));
     });
@@ -498,7 +484,7 @@ describe('ast toExpression', () => {
             arguments: {
               x: [
                 {
-                  type: 'partial',
+                  type: 'expression',
                   chain: [
                     {
                       type: 'function',
@@ -512,7 +498,7 @@ describe('ast toExpression', () => {
               ],
               y: [
                 {
-                  type: 'partial',
+                  type: 'expression',
                   chain: [
                     {
                       type: 'function',
@@ -526,7 +512,7 @@ describe('ast toExpression', () => {
               ],
               colors: [
                 {
-                  type: 'partial',
+                  type: 'expression',
                   chain: [
                     {
                       type: 'function',
@@ -568,37 +554,10 @@ describe('ast toExpression', () => {
         'csv input="year,make,model,price',
         '2016,honda,cr-v,23845',
         '2016,honda,fit,15890,',
-        '2016,honda,civic,18640" | pointseries x=${distinct f="year"} y=${sum f="price"} ' +
-          'colors=${distinct f="model"} | line pallette={getColorPallette name="elastic"}',
+        '2016,honda,civic,18640" | pointseries x={distinct f="year"} y={sum f="price"} ' +
+          'colors={distinct f="model"} | line pallette={getColorPallette name="elastic"}',
       ];
       expect(expression).to.equal(expected.join('\n'));
-    });
-  });
-
-  describe('partial expressions', () => {
-    it('resolve partial expression', () => {
-      const astObj = {
-        type: 'function',
-        function: 'pointseries',
-        arguments: {
-          x: ['time'],
-          y: [
-            {
-              type: 'partial',
-              chain: [
-                {
-                  type: 'partial',
-                  function: 'math',
-                  arguments: {
-                    _: ['sum(price)'],
-                  },
-                },
-              ],
-            },
-          ],
-        },
-      };
-      expect(toExpression(astObj)).to.equal('pointseries x="time" y=${math "sum(price)"}');
     });
   });
 
