@@ -254,7 +254,7 @@
     "eslint-plugin-import": "2.8.0",
     "eslint-plugin-jest": "^21.6.2",
     "eslint-plugin-mocha": "4.11.0",
-    "eslint-plugin-no-unsanitized": "^2.0.2",
+    "eslint-plugin-no-unsanitized": "^3.0.2",
     "eslint-plugin-prefer-object-spread": "1.2.1",
     "eslint-plugin-prettier": "^2.6.0",
     "eslint-plugin-react": "7.5.1",
