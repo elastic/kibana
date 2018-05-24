@@ -23,5 +23,6 @@ export default function ({ getService, loadTestFile }) {
     loadTestFile(require.resolve('./verify_beats'));
     loadTestFile(require.resolve('./update_beat'));
     loadTestFile(require.resolve('./set_tag'));
+    loadTestFile(require.resolve('./add_tags_to_beats'));
   });
 }
