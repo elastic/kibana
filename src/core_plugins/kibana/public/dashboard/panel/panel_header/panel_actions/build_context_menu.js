@@ -31,7 +31,6 @@ function buildEuiContextMenuPanelItemsAndChildPanels({ contextMenuPanelId, actio
       return;
     }
 
-    let childPanelToOpenOnClick;
     if (action.childContextMenuPanel) {
       childPanels.push(
         ...buildEuiContextMenuPanels({
@@ -40,7 +39,6 @@ function buildEuiContextMenuPanelItemsAndChildPanels({ contextMenuPanelId, actio
           embeddable,
           containerState
         }));
-      childPanelToOpenOnClick = action.childContextMenuPanel.id;
     }
 
     items.push(convertPanelActionToContextMenuItem(
