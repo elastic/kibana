@@ -4,27 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function createAuditLogger(server) {
-  const log = (msg, data) => {
-    server.log(['security', 'audit'], {
-      tmpl: msg,
-      ...data
-    });
-  };
+export class SecurityAuditLogger {
+  constructor(auditLogger) {
+    this._auditLogger = auditLogger;
+  }
 
-  return {
-    authenticationFailure: (request, username) => {
-      log(`Authentication failed for ${username}`, {
-        eventType: 'authentication_failure',
+  authenticationFailure(request, username) {
+    this._auditLogger.log(
+      'authentication_failure',
+      `Authentication failed for ${username}`, {
         username
       });
-    },
+  }
 
-    authenticationSuccess: (request, username) => {
-      log(`Authentication successful for ${username}`, {
-        eventType: 'authentication_success',
+  authenticationSuccess(request, username) {
+    this._auditLogger.log(
+      'authentication_success',
+      `Authentication successful for ${username}`, {
         username
       });
-    }
-  };
+  }
 }
