@@ -119,7 +119,6 @@ RequestsViewComponent.propTypes = {
 
 const RequestsView = {
   title: 'Requests',
-  icon: 'apmApp',
   order: 20,
   help: `The requests inspector allows you to inspect the requests the visualization
     did to collect its data.`,

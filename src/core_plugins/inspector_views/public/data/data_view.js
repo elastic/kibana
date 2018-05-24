@@ -119,7 +119,6 @@ class DataViewComponent extends Component {
 
 const DataView = {
   title: 'Data',
-  icon: 'addDataApp',
   order: 10,
   help: `The data inspector shows the data that is used to draw the visualization
     in different formats (if available).`,
