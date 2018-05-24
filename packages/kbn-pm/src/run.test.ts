@@ -1,7 +1,7 @@
 import { resolve } from 'path';
+import { ICommand, ICommandConfig } from './commands';
 import { runCommand } from './run';
 import { Project } from './utils/project';
-import { Command, CommandConfig } from './commands';
 
 const rootPath = resolve(`${__dirname}/utils/__fixtures__/kibana`);
 
@@ -25,12 +25,12 @@ function getExpectedProjectsAndGraph(runMock: any) {
   return { projects, graph };
 }
 
-let command: Command;
-let config: CommandConfig;
+let command: ICommand;
+let config: ICommandConfig;
 beforeEach(() => {
   command = {
-    name: 'test name',
     description: 'test description',
+    name: 'test name',
     run: jest.fn(),
   };
 
@@ -41,7 +41,9 @@ beforeEach(() => {
   };
 
   // Reduce the noise that comes from the run command.
-  jest.spyOn(console, 'log').mockImplementation(() => {});
+  jest.spyOn(console, 'log').mockImplementation(() => {
+    // noop
+  });
 });
 
 test('passes all found projects to the command if no filter is specified', async () => {
@@ -102,9 +104,9 @@ test('respects both `include` and `exclude` filters if specified at the same tim
 });
 
 test('does not run command if all projects are filtered out', async () => {
-  let mockProcessExit = jest
-    .spyOn(process, 'exit')
-    .mockImplementation(() => {});
+  const mockProcessExit = jest.spyOn(process, 'exit').mockImplementation(() => {
+    // noop
+  });
 
   await runCommand(command, {
     ...config,

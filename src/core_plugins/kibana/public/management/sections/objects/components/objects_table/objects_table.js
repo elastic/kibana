@@ -92,13 +92,13 @@ export class ObjectsTable extends Component {
 
   fetchCounts = async () => {
     const { queryText, visibleTypes } = parseQuery(this.state.activeQuery);
-    const includeTypes = INCLUDED_TYPES.filter(
+    const type = INCLUDED_TYPES.filter(
       type => !visibleTypes || visibleTypes.includes(type)
     );
 
     const savedObjectCounts = await getSavedObjectCounts(
       this.props.$http,
-      includeTypes,
+      type,
       queryText
     );
 
@@ -130,7 +130,7 @@ export class ObjectsTable extends Component {
     let savedObjects = [];
     let totalItemCount = 0;
 
-    const includeTypes = INCLUDED_TYPES.filter(
+    const type = INCLUDED_TYPES.filter(
       type => !visibleTypes || visibleTypes.includes(type)
     );
 
@@ -144,7 +144,7 @@ export class ObjectsTable extends Component {
           sortField: 'type',
           fields: ['title', 'id'],
           searchFields: ['title'],
-          includeTypes,
+          type,
         });
 
         savedObjects = data.savedObjects.map(savedObject => ({
@@ -435,7 +435,6 @@ export class ObjectsTable extends Component {
     } = this.state;
 
     const selectionConfig = {
-      itemId: 'id',
       onSelectionChange: this.onSelectionChanged,
     };
 
@@ -461,6 +460,7 @@ export class ObjectsTable extends Component {
         />
         <EuiSpacer size="xs" />
         <Table
+          itemId={'id'}
           selectionConfig={selectionConfig}
           selectedSavedObjects={selectedSavedObjects}
           onQueryChange={this.onQueryChange}

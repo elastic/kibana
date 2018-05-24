@@ -37,8 +37,8 @@ describe('Metrics Collector', () => {
     let sandbox;
     let clock;
     beforeAll(() => {
-      sandbox = sinon.sandbox.create();
-      clock = sinon.useFakeTimers(1524174654366);
+      sandbox = sinon.createSandbox();
+      clock = sandbox.useFakeTimers(1524174654366);
     });
 
     afterAll(() => {

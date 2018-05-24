@@ -6,7 +6,7 @@ import $ from 'jquery';
 import sinon from 'sinon';
 
 describe('FixedScroll directive', function () {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
 
   let compile;
   let flushPendingTasks;
@@ -156,7 +156,7 @@ describe('FixedScroll directive', function () {
           $from.scroll();
           expect(spy.callCount).to.be(2);
 
-          spy.reset();
+          spy.resetHistory();
           $to.scroll();
           expect(spy.callCount).to.be(0);
         });

@@ -42,23 +42,11 @@ export default function ({ getService, getPageObjects }) {
 
     it('and warns on duplicate name', async function () {
       await PageObjects.dashboard.confirmClone();
-      const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
-      expect(isConfirmOpen).to.equal(true);
-    });
-
-    it('preserves the original title on cancel', async function () {
-      await PageObjects.common.clickCancelOnModal();
-      await PageObjects.dashboard.confirmClone();
-
-      await retry.try(async () => {
-        // Should see the same confirmation if the title is the same.
-        const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
-        expect(isConfirmOpen).to.equal(true);
-      });
+      const isWarningDisplayed = await PageObjects.dashboard.isCloneDuplicateTitleWarningDisplayed();
+      expect(isWarningDisplayed).to.equal(true);
     });
 
     it('and doesn\'t save', async () => {
-      await PageObjects.common.clickCancelOnModal();
       await PageObjects.dashboard.cancelClone();
 
       const countOfDashboards = await PageObjects.dashboard.getDashboardCountWithName(dashboardName);
@@ -70,7 +58,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.clickClone();
 
       await PageObjects.dashboard.confirmClone();
-      await PageObjects.common.clickConfirmOnModal();
+      await PageObjects.dashboard.confirmClone();
 
       // This is important since saving a new dashboard will cause a refresh of the page.  We have to
       // wait till it finishes reloading or it might reload the url after simulating the

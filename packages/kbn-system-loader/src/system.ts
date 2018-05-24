@@ -1,9 +1,9 @@
 import {
-  SystemsType,
-  SystemName,
-  SystemMetadata,
-  KibanaSystemClassStatic,
+  IKibanaSystemClassStatic,
+  ISystemMetadata,
+  ISystemsType,
   KibanaSystem,
+  SystemName,
 } from './system_types';
 
 function isPromise(obj: any) {
@@ -12,45 +12,45 @@ function isPromise(obj: any) {
   );
 }
 
-export class System<C, M extends SystemMetadata, D extends SystemsType, E> {
-  readonly name: SystemName;
-  readonly dependencies: SystemName[];
-  readonly metadata?: M;
+export class System<C, M extends ISystemMetadata, D extends ISystemsType, E> {
+  public readonly name: SystemName;
+  public readonly dependencies: SystemName[];
+  public readonly metadata?: M;
 
-  private readonly _systemClass: KibanaSystemClassStatic<C, D, E>;
-  private _systemInstance?: KibanaSystem<C, D, E>;
-  private _exposedValues?: E;
+  private readonly systemClass: IKibanaSystemClassStatic<C, D, E>;
+  private systemInstance?: KibanaSystem<C, D, E>;
+  private exposedValues?: E;
 
   constructor(
     name: SystemName,
     config: {
       metadata?: M;
       dependencies?: SystemName[];
-      implementation: KibanaSystemClassStatic<C, D, E>;
+      implementation: IKibanaSystemClassStatic<C, D, E>;
     }
   ) {
     this.name = name;
     this.dependencies = config.dependencies || [];
     this.metadata = config.metadata;
-    this._systemClass = config.implementation;
+    this.systemClass = config.implementation;
   }
 
-  getExposedValues(): E {
-    if (this._systemInstance === undefined) {
+  public getExposedValues(): E {
+    if (this.systemInstance === undefined) {
       throw new Error(
         'trying to get the exposed value of a system that is NOT running'
       );
     }
 
-    return this._exposedValues!;
+    return this.exposedValues!;
   }
 
-  start(kibanaValues: C, dependenciesValues: D) {
-    this._systemInstance = new this._systemClass(
+  public start(kibanaValues: C, dependenciesValues: D) {
+    this.systemInstance = new this.systemClass(
       kibanaValues,
       dependenciesValues
     );
-    const exposedValues = this._systemInstance.start();
+    const exposedValues = this.systemInstance.start();
 
     if (isPromise(exposedValues)) {
       throw new Error(
@@ -60,15 +60,15 @@ export class System<C, M extends SystemMetadata, D extends SystemsType, E> {
       );
     }
 
-    this._exposedValues =
+    this.exposedValues =
       exposedValues === undefined ? ({} as E) : exposedValues;
   }
 
-  stop() {
-    const stoppedResponse = this._systemInstance && this._systemInstance.stop();
+  public stop() {
+    const stoppedResponse = this.systemInstance && this.systemInstance.stop();
 
-    this._exposedValues = undefined;
-    this._systemInstance = undefined;
+    this.exposedValues = undefined;
+    this.systemInstance = undefined;
 
     if (isPromise(stoppedResponse)) {
       throw new Error(

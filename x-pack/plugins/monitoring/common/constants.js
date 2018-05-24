@@ -33,11 +33,6 @@ export const KIBANA_SETTINGS_TYPE = 'kibana_settings';
  * @type {string}
  */
 export const KIBANA_USAGE_TYPE = 'kibana';
-/**
- * The type name used within the Monitoring index to publish reporting stats.
- * @type {string}
- */
-export const KIBANA_REPORTING_TYPE = 'reporting_stats';
 
 /*
  * Key for the localStorage service

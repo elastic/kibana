@@ -6,7 +6,7 @@ import {
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['dashboard', 'header', 'visualize']);
+  const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'settings', 'common']);
   const remote = getService('remote');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
@@ -39,6 +39,42 @@ export default function ({ getService, getPageObjects }) {
 
       after(async () => {
         await PageObjects.header.clickDashboard();
+      });
+    });
+
+    describe('visualize:enableLabs advanced setting', () => {
+      const LAB_VIS_NAME = 'Rendering Test: input control';
+
+      it('should display lab visualizations in add panel', async () => {
+        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.clickNewDashboard();
+        const exists = await dashboardAddPanel.panelAddLinkExists(LAB_VIS_NAME);
+        await dashboardAddPanel.closeAddPanel();
+        expect(exists).to.be(true);
+      });
+
+      describe('is false', () => {
+        before(async () => {
+          await PageObjects.header.clickManagement();
+          await PageObjects.settings.clickKibanaSettings();
+          await PageObjects.settings.toggleAdvancedSettingCheckbox('visualize:enableLabs');
+        });
+
+        it('should not display lab visualizations in add panel', async () => {
+          await PageObjects.common.navigateToApp('dashboard');
+          await PageObjects.dashboard.clickNewDashboard();
+
+          const exists = await dashboardAddPanel.panelAddLinkExists(LAB_VIS_NAME);
+          await dashboardAddPanel.closeAddPanel();
+          expect(exists).to.be(false);
+        });
+
+        after(async () => {
+          await PageObjects.header.clickManagement();
+          await PageObjects.settings.clickKibanaSettings();
+          await PageObjects.settings.clearAdvancedSettings('visualize:enableLabs');
+          await PageObjects.header.clickDashboard();
+        });
       });
     });
   });

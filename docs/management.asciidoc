@@ -13,9 +13,13 @@ This section is pluginable, so in addition to the out of the box capabitilies,
 packs such as {xpack} can add additional management capabilities to Kibana.
 --
 
+include::management/managing-licenses.asciidoc[]
+
 include::management/index-patterns.asciidoc[]
 
 include::management/managing-fields.asciidoc[]
+
+include::management/managing-indices.asciidoc[]
 
 include::management/advanced-options.asciidoc[]
 

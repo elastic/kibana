@@ -1,6 +1,7 @@
 import { run, combineErrors } from './run';
 
-import { lintFiles, pickFilesToLint } from './eslint';
+import * as Eslint from './eslint';
+import * as Tslint from './tslint';
 import { getFilesForCommit, checkFileCasing } from './precommit_hook';
 
 run(async ({ log }) => {
@@ -13,10 +14,15 @@ run(async ({ log }) => {
     errors.push(error);
   }
 
-  try {
-    await lintFiles(log, pickFilesToLint(log, files));
-  } catch (error) {
-    errors.push(error);
+  for (const Linter of [Eslint, Tslint]) {
+    const filesToLint = Linter.pickFilesToLint(log, files);
+    if (filesToLint.length > 0) {
+      try {
+        await Linter.lintFiles(log, filesToLint);
+      } catch (error) {
+        errors.push(error);
+      }
+    }
   }
 
   if (errors.length) {

@@ -8,8 +8,8 @@ import _ from 'lodash';
 import { createSelector } from 'reselect';
 import { LOCATION_UPDATE } from './location';
 import { toQuery, legacyDecodeURIComponent } from '../utils/url';
-import { getDefaultTransactionId } from './reduxRequest/transactionDistribution';
-import { getDefaultTransactionType } from './reduxRequest/serviceDetails';
+import { getDefaultTransactionId } from './reactReduxRequest/transactionDistribution';
+import { getDefaultTransactionType } from './reactReduxRequest/serviceDetails';
 
 // ACTION TYPES
 export const TIMEPICKER_UPDATE = 'TIMEPICKER_UPDATE';

@@ -14,7 +14,7 @@ const defaultHandlerReadinessTimeout = 2000;
 /**
  * Describes configurable watch options.
  */
-interface WatchOptions {
+interface IWatchOptions {
   /**
    * Number of milliseconds to wait before we fall back to default watch handler.
    */
@@ -33,7 +33,7 @@ function getWatchHandlers(
   {
     handlerDelay = defaultHandlerDelay,
     handlerReadinessTimeout = defaultHandlerReadinessTimeout,
-  }: WatchOptions
+  }: IWatchOptions
 ) {
   const typescriptHandler = buildOutput$
     .first(data => data.includes('$ tsc'))
@@ -60,7 +60,7 @@ function getWatchHandlers(
 
 export function waitUntilWatchIsReady(
   stream: NodeJS.EventEmitter,
-  opts: WatchOptions = {}
+  opts: IWatchOptions = {}
 ) {
   const buildOutput$ = new Subject<string>();
   const onDataListener = (data: Buffer) =>

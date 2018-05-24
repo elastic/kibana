@@ -1,5 +1,5 @@
-import { resolve, sep as pathSep } from 'path';
 import cloneDeepWith from 'lodash.clonedeepwith';
+import { resolve, sep as pathSep } from 'path';
 
 const repoRoot = resolve(__dirname, '../../../../');
 
@@ -16,8 +16,8 @@ const normalizePaths = (value: any) => {
   });
 
   return {
-    didReplacement,
     clone,
+    didReplacement,
   };
 };
 

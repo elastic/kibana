@@ -1,16 +1,17 @@
 import chalk from 'chalk';
-import wrapAnsi from 'wrap-ansi';
 import indentString from 'indent-string';
+import wrapAnsi from 'wrap-ansi';
 
+import { ICommand, ICommandConfig } from './commands';
+import { getProjectPaths, IProjectPathOptions } from './config';
 import { CliError } from './utils/errors';
-import { getProjects, buildProjectGraph } from './utils/projects';
+import { log } from './utils/log';
+import { buildProjectGraph, getProjects } from './utils/projects';
 import { renderProjectsTree } from './utils/projects_tree';
-import { getProjectPaths, ProjectPathOptions } from './config';
-import { Command, CommandConfig } from './commands';
 
-export async function runCommand(command: Command, config: CommandConfig) {
+export async function runCommand(command: ICommand, config: ICommandConfig) {
   try {
-    console.log(
+    log.write(
       chalk.bold(
         `Running [${chalk.green(command.name)}] command from [${chalk.yellow(
           config.rootPath
@@ -20,7 +21,7 @@ export async function runCommand(command: Command, config: CommandConfig) {
 
     const projectPaths = getProjectPaths(
       config.rootPath,
-      config.options as ProjectPathOptions
+      config.options as IProjectPathOptions
     );
 
     const projects = await getProjects(config.rootPath, projectPaths, {
@@ -29,7 +30,7 @@ export async function runCommand(command: Command, config: CommandConfig) {
     });
 
     if (projects.size === 0) {
-      console.log(
+      log.write(
         chalk.red(
           `There are no projects found. Double check project name(s) in '-i/--include' and '-e/--exclude' filters.\n`
         )
@@ -39,18 +40,18 @@ export async function runCommand(command: Command, config: CommandConfig) {
 
     const projectGraph = buildProjectGraph(projects);
 
-    console.log(
+    log.write(
       chalk.bold(`Found [${chalk.green(projects.size.toString())}] projects:\n`)
     );
-    console.log(renderProjectsTree(config.rootPath, projects));
+    log.write(renderProjectsTree(config.rootPath, projects));
 
     await command.run(projects, projectGraph, config);
   } catch (e) {
-    console.log(chalk.bold.red(`\n[${command.name}] failed:\n`));
+    log.write(chalk.bold.red(`\n[${command.name}] failed:\n`));
 
     if (e instanceof CliError) {
       const msg = chalk.red(`CliError: ${e.message}\n`);
-      console.log(wrapAnsi(msg, 80));
+      log.write(wrapAnsi(msg, 80));
 
       const keys = Object.keys(e.meta);
       if (keys.length > 0) {
@@ -59,11 +60,11 @@ export async function runCommand(command: Command, config: CommandConfig) {
           return `${key}: ${value}`;
         });
 
-        console.log('Additional debugging info:\n');
-        console.log(indentString(metaOutput.join('\n'), 3));
+        log.write('Additional debugging info:\n');
+        log.write(indentString(metaOutput.join('\n'), 3));
       }
     } else {
-      console.log(e.stack);
+      log.write(e.stack);
     }
 
     process.exit(1);

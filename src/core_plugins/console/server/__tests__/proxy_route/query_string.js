@@ -8,14 +8,12 @@ import { createProxyRoute } from '../../';
 import { createWreckResponseStub } from './stubs';
 
 describe('Console Proxy Route', () => {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
   const teardowns = [];
   let request;
 
   beforeEach(() => {
-    teardowns.push(() => sandbox.restore());
-
-    sandbox.stub(Wreck, 'request', createWreckResponseStub());
+    sandbox.stub(Wreck, 'request').callsFake(createWreckResponseStub());
 
     request = async (method, path) => {
       const server = new Server();
@@ -38,6 +36,7 @@ describe('Console Proxy Route', () => {
   });
 
   afterEach(async () => {
+    sandbox.restore();
     await Promise.all(teardowns.splice(0).map(fn => fn()));
   });
 

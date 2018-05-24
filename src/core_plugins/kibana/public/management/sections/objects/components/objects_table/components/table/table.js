@@ -16,7 +16,6 @@ export class Table extends PureComponent {
   static propTypes = {
     selectedSavedObjects: PropTypes.array.isRequired,
     selectionConfig: PropTypes.shape({
-      itemId: PropTypes.string.isRequired,
       selectable: PropTypes.func,
       selectableMessage: PropTypes.func,
       onSelectionChange: PropTypes.func.isRequired,
@@ -30,6 +29,10 @@ export class Table extends PureComponent {
     pageIndex: PropTypes.number.isRequired,
     pageSize: PropTypes.number.isRequired,
     items: PropTypes.array.isRequired,
+    itemId: PropTypes.oneOfType([
+      PropTypes.string, // the name of the item id property
+      PropTypes.func    // (item) => string
+    ]),
     totalItemCount: PropTypes.number.isRequired,
     onQueryChange: PropTypes.func.isRequired,
     onTableChange: PropTypes.func.isRequired,
@@ -42,6 +45,7 @@ export class Table extends PureComponent {
     const {
       pageIndex,
       pageSize,
+      itemId,
       items,
       totalItemCount,
       isSearching,
@@ -168,6 +172,7 @@ export class Table extends PureComponent {
         <div data-test-subj="savedObjectsTable">
           <EuiBasicTable
             loading={isSearching}
+            itemId={itemId}
             items={items}
             columns={columns}
             pagination={pagination}

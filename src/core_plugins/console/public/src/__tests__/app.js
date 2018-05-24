@@ -6,7 +6,7 @@ import mappings from '../mappings';
 import init from '../app';
 
 describe('app initialization', () => {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
 
   let inputMock, outputMock;
   let ajaxDoneStub;

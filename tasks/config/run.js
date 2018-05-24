@@ -70,6 +70,25 @@ module.exports = function (grunt) {
       ]
     },
 
+    // used by the test tasks
+    //    runs the check_file_casing script to ensure filenames use correct casing
+    checkFileCasing: {
+      cmd: process.execPath,
+      args: [
+        require.resolve('../../scripts/check_file_casing'),
+        '--quiet' // only log errors, not warnings
+      ]
+    },
+
+    // used by the test and jenkins:unit tasks
+    //    runs the tslint script to check for Typescript linting errors
+    tslint: {
+      cmd: process.execPath,
+      args: [
+        require.resolve('../../scripts/tslint')
+      ]
+    },
+
     // used by the test:server task
     //    runs all node.js/server mocha tests
     mocha: {

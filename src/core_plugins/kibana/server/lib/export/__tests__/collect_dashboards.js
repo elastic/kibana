@@ -6,7 +6,7 @@ import { expect } from 'chai';
 describe('collectDashboards(req, ids)', () => {
 
   let collectPanelsStub;
-  const savedObjectsClient = { bulkGet: sinon.mock() };
+  const savedObjectsClient = { bulkGet: sinon.stub() };
 
   const ids = ['dashboard-01', 'dashboard-02'];
 
@@ -32,7 +32,7 @@ describe('collectDashboards(req, ids)', () => {
 
   afterEach(() => {
     collectPanelsStub.restore();
-    savedObjectsClient.bulkGet.reset();
+    savedObjectsClient.bulkGet.resetHistory();
   });
 
   it('should request all dashboards', async () => {

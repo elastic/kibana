@@ -136,9 +136,14 @@ export class CollectorSet {
 
     // summarize each type of stat
     return bulk.reduce((accumulatedStats, currentStat) => {
+      /* Suffix removal is a temporary hack: some types have `_stats` suffix
+       * because of how monitoring bulk upload needed to combine types. It can
+       * be removed when bulk upload goes away
+       */
+      const statType = currentStat.type.replace('_stats', '');
       return {
         ...accumulatedStats,
-        [currentStat.type]: currentStat.result,
+        [statType]: currentStat.result,
       };
     }, {});
   }
