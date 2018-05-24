@@ -15,6 +15,7 @@ const basePath = chrome.addBasePath('/api/ml');
 export const results = {
   getAnomaliesTableData(
     jobIds,
+    criteriaFields,
     influencers,
     aggregationInterval,
     threshold,
@@ -28,6 +29,7 @@ export const results = {
       method: 'POST',
       data: {
         jobIds,
+        criteriaFields,
         influencers,
         aggregationInterval,
         threshold,
