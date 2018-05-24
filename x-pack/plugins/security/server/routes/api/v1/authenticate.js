@@ -40,7 +40,7 @@ export function initAuthenticateApi(server) {
         auditLogger.authenticationSuccess(request, username);
         return reply.continue({ credentials: authenticationResult.user });
       } catch(err) {
-        server.plugins.security.auditLogger.authenticationFailed(request, username);
+        auditLogger.authenticationFailed(request, username);
         return reply(wrapError(err));
       }
     }
