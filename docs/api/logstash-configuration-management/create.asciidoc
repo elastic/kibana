@@ -1,3 +1,4 @@
+[role="xpack"]
 [[logstash-configuration-management-api-create]]
 === Create Pipeline
 
