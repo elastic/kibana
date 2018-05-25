@@ -369,9 +369,7 @@ module.controller('MlExplorerController', function (
         const influencers = getSelectionInfluencers(cellData);
 
         loadAnomaliesTableData();
-
-        const args = [jobIds, influencers, timerange.earliestMs, timerange.latestMs];
-        loadDataForCharts(...args);
+        loadDataForCharts(jobIds, influencers, timerange.earliestMs, timerange.latestMs);
       } else {
         // Multiple cells are selected, all with a score of 0 - clear all anomalies.
         $scope.$evalAsync(() => {
