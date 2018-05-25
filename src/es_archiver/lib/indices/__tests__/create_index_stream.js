@@ -43,7 +43,7 @@ describe('esArchiver: createCreateIndexStream()', () => {
     });
 
     it('deletes existing aliases, creates all', async () => {
-      const client = createStubClient(['existing-index'], { isAlias: true });
+      const client = createStubClient(['actual-index'], { 'existing-index': 'actual-index' });
       const stats = createStubStats();
       await createPromiseFromStreams([
         createListStream([
@@ -56,7 +56,7 @@ describe('esArchiver: createCreateIndexStream()', () => {
       expect(client.indices.getAlias.calledOnce).to.be.ok();
       expect(client.indices.getAlias.args[0][0]).to.eql({ name: 'existing-index' });
       expect(client.indices.delete.calledOnce).to.be.ok();
-      expect(client.indices.delete.args[0][0]).to.eql({ index: 'existing-index' });
+      expect(client.indices.delete.args[0][0]).to.eql({ index: ['actual-index'] });
       sinon.assert.callCount(client.indices.create, 3); // one failed create because of existing
     });
 

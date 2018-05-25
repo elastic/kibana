@@ -63,7 +63,7 @@ export function createCreateIndexStream({ client, stats, skipExisting, log }) {
         if (await client.indices.existsAlias({ name: index })) {
           log.debug(`Deleting alias ${index} and associated indices.`);
           const alias = await client.indices.getAlias({ name: index });
-          await Promise.all(Object.keys(alias).map(index => client.indices.delete({ index })));
+          await client.indices.delete({ index: Object.keys(alias) });
         } else {
           await deleteIndex({ client, stats, index, log });
         }
