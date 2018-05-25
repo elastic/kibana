@@ -3,14 +3,14 @@ import sinon from 'sinon';
 
 import { FieldFormat } from '../field_format';
 import * as FieldFormatsServiceNS from '../field_formats_service';
-import { createServerWithCorePlugins } from '../../../test_utils/kbn_server';
+import { createServer } from '../../../test_utils/kbn_server';
 
 describe('server.registerFieldFormat(createFormat)', () => {
   const sandbox = sinon.createSandbox();
 
   let server;
   beforeEach(async () => {
-    const kbnServer = createServerWithCorePlugins();
+    const kbnServer = createServer();
     await kbnServer.ready();
     server = kbnServer.server;
   });
