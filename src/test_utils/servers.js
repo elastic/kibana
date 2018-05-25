@@ -57,19 +57,13 @@ export function getServices() {
 export async function stopServers() {
   services = null;
 
-  try {
-    if (kbnServer) {
-      await kbnServer.close();
-      kbnServer = null;
-    }
-
-    if (es) {
-      await es.cleanup();
-      es = null;
-    }
-  } catch (err) {
-    console.error('OH NOES!!!!!!!!>>>>>>>>>>>>>>>>> ', err);
-    throw err;
+  if (kbnServer) {
+    await kbnServer.close();
+    kbnServer = null;
   }
 
+  if (es) {
+    await es.cleanup();
+    es = null;
+  }
 }
