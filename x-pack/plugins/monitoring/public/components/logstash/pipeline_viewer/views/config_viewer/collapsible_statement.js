@@ -11,11 +11,11 @@ import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiCodeBlock,
-  EuiFlexItem,
-  EuiFlexGroup
+  EuiFlexGroup,
+  EuiFlexItem
 } from '@elastic/eui';
 
-function clickableStatementName(name, onVertexSelected) {
+function renderStatementName(name, onVertexSelected) {
   return (
     <EuiFlexItem
       grow={false}
@@ -33,10 +33,9 @@ function clickableStatementName(name, onVertexSelected) {
   );
 }
 
-function ifStatement(statement, onVertexSelected) {
-  const { condition } = statement;
+function renderIfStatement({ condition }, onVertexSelected) {
   return [
-    clickableStatementName('if', onVertexSelected),
+    renderStatementName('if', onVertexSelected),
     (
       <EuiFlexItem
         key="ifContent"
@@ -87,15 +86,15 @@ export class CollapsibleStatement extends React.PureComponent {
     const {
       isIf,
       statement,
+      statement: vertex,
       onShowVertexDetails
     } = this.props;
 
-    const { vertex } = statement;
     const showVertexDetailsClicked = () => { onShowVertexDetails(vertex); };
 
     return isIf ?
-      ifStatement(statement, showVertexDetailsClicked)
-      : clickableStatementName('else', showVertexDetailsClicked);
+      renderIfStatement(statement, showVertexDetailsClicked)
+      : renderStatementName('else', showVertexDetailsClicked);
   }
 
   render() {
@@ -107,12 +106,12 @@ export class CollapsibleStatement extends React.PureComponent {
           grow={false}
         >
           <EuiButtonIcon
-            color="text"
-            size="s"
             aria-label
+            className="cv-ifElseStatement__toggle"
+            color="text"
             iconType={this.getToggleIconType()}
             onClick={this.toggleClicked}
-            className="cv-ifElseStatement__toggle"
+            size="s"
           />
         </EuiFlexItem>
         {this.getStatementBody()}
