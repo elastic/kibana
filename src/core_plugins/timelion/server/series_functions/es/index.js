@@ -48,7 +48,6 @@ export default new Datasource('es', {
     {
       name: 'debug',
       types: ['boolean', 'null'],
-      default: false,
       help: 'Set to true to log Elasticsearch body to kibana server log.'
     }
   ],
