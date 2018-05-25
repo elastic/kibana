@@ -3,19 +3,18 @@ import {
   InspectorViewRegistry,
 } from './view_registry';
 
-import { IAdapters } from './types';
+import { Adapters } from './types';
 
 function createMockView(
   params: {
-    component?: string;
     help?: string;
     order?: number;
-    shouldShow?: (view?: IAdapters) => boolean;
+    shouldShow?: (view?: Adapters) => boolean;
     title?: string;
   } = {}
 ): InspectorViewDescription {
   return {
-    component: params.component || (() => () => null),
+    component: () => null,
     help: params.help || 'help text',
     order: params.order,
     shouldShow: params.shouldShow,

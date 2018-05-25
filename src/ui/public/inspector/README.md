@@ -114,7 +114,7 @@ class MyCustomInspectorAdapter {
   // ...
   inspectorAdapters: {
     custom: {
-      someAdaoter: MyCustomInspectorAdapter
+      someAdapter: MyCustomInspectorAdapter
     }
   }
 }

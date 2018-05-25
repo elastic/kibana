@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { IAdapters } from './types';
+import { Adapters } from './types';
 import { InspectorPanel } from './ui/inspector_panel';
 import { viewRegistry } from './view_registry';
 
@@ -66,7 +66,7 @@ class InspectorSession extends EventEmitter {
  * @returns {boolean} True, if a call to `openInspector` with the same adapters
  *    would have shown the inspector panel, false otherwise.
  */
-function hasInspector(adapters: IAdapters): boolean {
+function hasInspector(adapters: Adapters): boolean {
   return viewRegistry.getVisible(adapters).length > 0;
 }
 
@@ -91,7 +91,7 @@ interface InspectorOptions {
  * @return {InspectorSession} The session instance for the opened inspector.
  */
 function openInspector(
-  adapters: IAdapters,
+  adapters: Adapters,
   options: InspectorOptions = {}
 ): InspectorSession {
   // If there is an active inspector session close it before opening a new one.

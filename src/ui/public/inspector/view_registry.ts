@@ -1,5 +1,6 @@
 import { EventEmitter } from 'events';
-import { IAdapters } from './types';
+import React from 'react';
+import { Adapters, InspectorViewProps } from './types';
 
 /**
  * @callback viewShouldShowFunc
@@ -24,11 +25,13 @@ import { IAdapters } from './types';
  *    the view will always be visible.
  */
 interface InspectorViewDescription {
-  title: string;
-  order?: number;
-  shouldShow?: (adapters: IAdapters) => boolean;
-  component: any; // TODO: Use React.Component
+  component:
+    | React.Component<InspectorViewProps, any>
+    | React.SFC<InspectorViewProps>;
   help?: string;
+  order?: number;
+  shouldShow?: (adapters: Adapters) => boolean;
+  title: string;
 }
 
 /**
@@ -69,7 +72,7 @@ class InspectorViewRegistry extends EventEmitter {
    * @returns {InspectorViewDescription[]} All inespector view descriptions visible
    *    for the specific adapters.
    */
-  public getVisible(adapters?: IAdapters): InspectorViewDescription[] {
+  public getVisible(adapters?: Adapters): InspectorViewDescription[] {
     if (!adapters) {
       return [];
     }
