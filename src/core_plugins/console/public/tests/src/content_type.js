@@ -14,7 +14,7 @@ test('body', () => {
     JSON.stringify({
       foo: 'bar'
     })
-  ].join('\n'))
+  ].join('\n'));
 
   equal(contentType, APPLICATION_JSON);
 });
