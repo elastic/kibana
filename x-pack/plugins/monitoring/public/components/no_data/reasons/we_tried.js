@@ -31,8 +31,7 @@ export function WeTried() {
         </p>
         <p>
           There may be data available for a different time period than we have
-          selected. Try adjusting the time filter controls to a time range where
-          the Monitoring data is expected.
+          selected. Make sure the time filter is set to &quot;Last 1 hour.&quot;
         </p>
         <p>
           We are refreshing the search for data in the background. If cluster data
