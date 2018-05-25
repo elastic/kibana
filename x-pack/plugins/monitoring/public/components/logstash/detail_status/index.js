@@ -19,7 +19,7 @@ export function DetailStatus({ stats }) {
     uptime
   } = stats;
 
-  const firstChildren = [
+  const firstMetrics = [
     {
       value: httpAddress,
       dataTestSubj: 'httpAddress'
@@ -51,7 +51,7 @@ export function DetailStatus({ stats }) {
     }
   ];
 
-  const lastChildren = [
+  const lastMetrics = [
     {
       label: 'Version',
       value: version,
@@ -65,17 +65,15 @@ export function DetailStatus({ stats }) {
   ];
 
   // make queueType conditional
-  let metrics;
+  const metrics = [...firstMetrics];
   if (queueType) {
-    const queueTypeChild = {
+    metrics.push({
       label: 'Queue Type',
       value: queueType,
       dataTestSubj: 'queueType'
-    };
-    metrics = [].concat(firstChildren, queueTypeChild, lastChildren);
-  } else {
-    metrics = [].concat(firstChildren, lastChildren);
+    });
   }
+  metrics.push(...lastMetrics);
 
   return (
     <SummaryStatus
