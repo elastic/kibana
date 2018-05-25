@@ -5,16 +5,19 @@ experimental[This functionality is experimental and may be changed or removed co
 
 The Delete Pipeline API enables you to delete a centrally-managed Logstash pipeline.
 
+[float]
 ==== Request
 
 `DELETE /api/logstash/pipeline/<id>`
 
+[float]
 ==== Path Parameters
 
 `id` (required)::
   (string) ID for pipeline.
 
 
+[float]
 ==== Examples
 
 [source,js]

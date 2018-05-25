@@ -5,10 +5,12 @@ experimental[This functionality is experimental and may be changed or removed co
 
 The List Pipelines API enables you to list all centrally-managed Logstash pipelines.
 
+[float]
 ==== Request
 
 `GET /api/logstash/pipelines`
 
+[float]
 ==== Examples
 
 [source,js]
