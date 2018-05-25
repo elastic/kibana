@@ -65,21 +65,21 @@ export function DetailStatus({ stats }) {
   ];
 
   // make queueType conditional
-  let children;
+  let metrics;
   if (queueType) {
     const queueTypeChild = {
       label: 'Queue Type',
       value: queueType,
       dataTestSubj: 'queueType'
     };
-    children = [].concat(firstChildren, queueTypeChild, lastChildren);
+    metrics = [].concat(firstChildren, queueTypeChild, lastChildren);
   } else {
-    children = [].concat(firstChildren, lastChildren);
+    metrics = [].concat(firstChildren, lastChildren);
   }
 
   return (
     <SummaryStatus
-      children={children}
+      metrics={metrics}
       data-test-subj="logstashDetailStatus"
     />
   );

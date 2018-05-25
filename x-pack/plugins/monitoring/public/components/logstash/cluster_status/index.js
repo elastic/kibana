@@ -17,7 +17,7 @@ export function ClusterStatus({ stats }) {
     events_out_total: eventsOutTotal
   } = stats;
 
-  const children = [
+  const metrics = [
     {
       label: 'Nodes',
       value: nodeCount,
@@ -42,7 +42,7 @@ export function ClusterStatus({ stats }) {
 
   return (
     <SummaryStatus
-      children={children}
+      metrics={metrics}
       data-test-subj="logstashClusterStatus"
     />
   );
