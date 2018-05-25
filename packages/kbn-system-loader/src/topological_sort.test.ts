@@ -8,7 +8,7 @@ test('returns a topologically ordered sequence', () => {
     ['d', ['a']],
   ]);
 
-  let sorted = topologicalSort(nodes);
+  const sorted = topologicalSort(nodes);
 
   expect(sorted).toBeDefined();
 
@@ -23,7 +23,7 @@ test('handles multiple "roots" with no deps', () => {
     ['d', ['a']],
   ]);
 
-  let sorted = topologicalSort(nodes);
+  const sorted = topologicalSort(nodes);
 
   expect(sorted).toBeDefined();
 

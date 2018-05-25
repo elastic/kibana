@@ -18,6 +18,7 @@ import DragSelect from 'dragselect';
 import moment from 'moment';
 
 import 'plugins/ml/components/anomalies_table';
+import 'plugins/ml/components/controls';
 import 'plugins/ml/components/influencers_list';
 import 'plugins/ml/components/job_select_list';
 
@@ -32,10 +33,12 @@ import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import { loadIndexPatterns, getIndexPatterns } from 'plugins/ml/util/index_utils';
 import { refreshIntervalWatcher } from 'plugins/ml/util/refresh_interval_watcher';
 import { IntervalHelperProvider, getBoundsRoundedToInterval } from 'plugins/ml/util/ml_time_buckets';
+import { ml } from 'plugins/ml/services/ml_api_service';
 import { mlResultsService } from 'plugins/ml/services/results_service';
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { JobSelectServiceProvider } from 'plugins/ml/components/job_select_list/job_select_service';
+import { isTimeSeriesViewDetector } from 'plugins/ml/../common/util/job_utils';
 
 uiRoutes
   .when('/explorer/?', {
@@ -60,6 +63,7 @@ module.controller('MlExplorerController', function (
   mlCheckboxShowChartsService,
   mlExplorerDashboardService,
   mlSelectLimitService,
+  mlSelectIntervalService,
   mlSelectSeverityService) {
 
   $scope.timeFieldName = 'timestamp';
@@ -75,12 +79,12 @@ module.controller('MlExplorerController', function (
 
   const $mlExplorer = $('.ml-explorer');
   const MAX_INFLUENCER_FIELD_VALUES = 10;
+  const MAX_CATEGORY_EXAMPLES = 10;
   const VIEW_BY_JOB_LABEL = 'job ID';
 
   const ALLOW_CELL_RANGE_SELECTION = mlExplorerDashboardService.allowCellRangeSelection;
   let disableDragSelectOnMouseLeave = true;
   $scope.queryFilters = [];
-  $scope.anomalyRecords = [];
 
   const dragSelect = new DragSelect({
     selectables: document.querySelectorAll('.sl-cell'),
@@ -116,7 +120,6 @@ module.controller('MlExplorerController', function (
   });
 
   $scope.selectedJobs = null;
-  $scope.influencersData = {};
 
   $scope.getSelectedJobIds = function () {
     const selectedJobs = _.filter($scope.jobs, job => job.selected);
@@ -309,16 +312,34 @@ module.controller('MlExplorerController', function (
     // Returns the time range of the cell(s) currently selected in the swimlane.
     // If no cell(s) are currently selected, returns the dashboard time range.
     const bounds = timefilter.getActiveBounds();
-
-    // time property of the cell data is an array, with the elements being
-    // the start times of the first and last cell selected.
-    const earliestMs = cellData.time[0] !== undefined ? ((cellData.time[0]) * 1000) : bounds.min.valueOf();
+    let earliestMs = bounds.min.valueOf();
     let latestMs = bounds.max.valueOf();
-    if (cellData.time[1] !== undefined) {
-      // Subtract 1 ms so search does not include start of next bucket.
-      latestMs = ((cellData.time[1] + cellData.interval) * 1000) - 1;
+
+    if (cellData !== undefined && cellData.time !== undefined) {
+      // time property of the cell data is an array, with the elements being
+      // the start times of the first and last cell selected.
+      earliestMs = (cellData.time[0] !== undefined) ? cellData.time[0] * 1000 : bounds.min.valueOf();
+      latestMs = bounds.max.valueOf();
+      if (cellData.time[1] !== undefined) {
+        // Subtract 1 ms so search does not include start of next bucket.
+        latestMs = ((cellData.time[1] + cellData.interval) * 1000) - 1;
+      }
     }
+
     return { earliestMs, latestMs };
+  }
+
+  function getSelectionInfluencers(cellData) {
+    const influencers = [];
+
+    if (cellData !== undefined && cellData.fieldName !== undefined &&
+        cellData.fieldName !== VIEW_BY_JOB_LABEL) {
+      cellData.laneLabels.forEach((laneLabel) =>{
+        influencers.push({ fieldName: $scope.swimlaneViewByFieldName, fieldValue: laneLabel });
+      });
+    }
+
+    return influencers;
   }
 
   // Listener for click events in the swimlane and load corresponding anomaly data.
@@ -332,33 +353,43 @@ module.controller('MlExplorerController', function (
       }
       clearSelectedAnomalies();
     } else {
-      let jobIds = [];
-      const influencers = [];
       const timerange = getSelectionTimeRange(cellData);
-
-      if (cellData.fieldName === undefined) {
-        // Click is in one of the cells in the Overall swimlane - reload the 'view by' swimlane
-        // to show the top 'view by' values for the selected time.
-        loadViewBySwimlaneForSelectedTime(timerange.earliestMs, timerange.latestMs);
-        $scope.viewByLoadedForTimeFormatted = moment(timerange.earliestMs).format('MMMM Do YYYY, HH:mm');
-      }
-
-      if (cellData.fieldName === VIEW_BY_JOB_LABEL) {
-        jobIds = cellData.laneLabels;
-      } else {
-        jobIds = $scope.getSelectedJobIds();
-
-        if (cellData.fieldName !== undefined) {
-          cellData.laneLabels.forEach((laneLabel) =>{
-            influencers.push({ fieldName: $scope.swimlaneViewByFieldName, fieldValue: laneLabel });
-          });
-        }
-      }
-
       $scope.cellData = cellData;
-      const args = [jobIds, influencers, timerange.earliestMs, timerange.latestMs];
-      loadAnomalies(...args);
-      $scope.loadAnomaliesForCharts(...args);
+
+      if (cellData.score > 0) {
+        if (cellData.fieldName === undefined) {
+          // Click is in one of the cells in the Overall swimlane - reload the 'view by' swimlane
+          // to show the top 'view by' values for the selected time.
+          loadViewBySwimlaneForSelectedTime(timerange.earliestMs, timerange.latestMs);
+          $scope.viewByLoadedForTimeFormatted = moment(timerange.earliestMs).format('MMMM Do YYYY, HH:mm');
+        }
+
+        const jobIds = (cellData.fieldName === VIEW_BY_JOB_LABEL) ?
+          cellData.laneLabels : $scope.getSelectedJobIds();
+        const influencers = getSelectionInfluencers(cellData);
+
+        loadAnomaliesTableData();
+        loadDataForCharts(jobIds, influencers, timerange.earliestMs, timerange.latestMs);
+      } else {
+        // Multiple cells are selected, all with a score of 0 - clear all anomalies.
+        $scope.$evalAsync(() => {
+          $scope.influencers = {};
+          $scope.anomalyChartRecords = [];
+
+          $scope.tableData = {
+            anomalies: [],
+            interval: mlSelectIntervalService.state.get('interval').val,
+            examplesByJobId: {},
+            showViewSeriesLink: true
+          };
+        });
+
+        mlExplorerDashboardService.anomalyDataChange.changed(
+          [],
+          timerange.earliestMs,
+          timerange.latestMs
+        );
+      }
     }
   };
   mlExplorerDashboardService.swimlaneCellClick.watch(swimlaneCellClickListener);
@@ -387,6 +418,12 @@ module.controller('MlExplorerController', function (
   };
   mlSelectSeverityService.state.watch(anomalyChartsSeverityListener);
 
+  const tableControlsListener = function () {
+    loadAnomaliesTableData();
+  };
+  mlSelectIntervalService.state.watch(tableControlsListener);
+  mlSelectSeverityService.state.watch(tableControlsListener);
+
   const swimlaneLimitListener = function () {
     loadViewBySwimlane([]);
     clearSelectedAnomalies();
@@ -405,46 +442,53 @@ module.controller('MlExplorerController', function (
     mlExplorerDashboardService.swimlaneCellClick.unwatch(swimlaneCellClickListener);
     mlExplorerDashboardService.swimlaneRenderDone.unwatch(swimlaneRenderDoneListener);
     mlSelectSeverityService.state.unwatch(anomalyChartsSeverityListener);
+    mlSelectIntervalService.state.unwatch(tableControlsListener);
+    mlSelectSeverityService.state.unwatch(tableControlsListener);
     mlSelectLimitService.state.unwatch(swimlaneLimitListener);
-    $scope.cellData = undefined;
+    delete $scope.cellData;
     refreshWatcher.cancel();
     // Cancel listening for updates to the global nav state.
     navListener();
   });
 
-  $scope.loadAnomaliesForCharts = function (jobIds, influencers, earliestMs, latestMs) {
-    // Load the top anomalies (by record_score) which will be displayed in the charts.
-    // TODO - combine this with loadAnomalies().
-    mlResultsService.getRecordsForInfluencer(
-      jobIds, influencers, 0, earliestMs, latestMs, 500
-    ).then((resp) => {
-      $scope.anomalyChartRecords = resp.records;
-      console.log('Explorer anomaly charts data set:', $scope.anomalyChartRecords);
-
-      if (mlCheckboxShowChartsService.state.get('showCharts')) {
-        mlExplorerDashboardService.anomalyDataChange.changed(
-          $scope.anomalyChartRecords, earliestMs, latestMs
-        );
-      }
-    });
-  };
-
-  function loadAnomalies(jobIds, influencers, earliestMs, latestMs) {
-    // Loads the anomalies for the table, plus the scores for
-    // the Top Influencers List for the influencers in the anomaly records.
-
+  function loadDataForCharts(jobIds, influencers, earliestMs, latestMs) {
+    // Loads the data used to populate the anomaly charts and the Top Influencers List.
     if (influencers.length === 0) {
       getTopInfluencers(jobIds, earliestMs, latestMs);
     }
 
+    // Load the top anomalies (by record_score) which will be displayed in the charts.
     mlResultsService.getRecordsForInfluencer(
       jobIds, influencers, 0, earliestMs, latestMs, 500
     )
       .then((resp) => {
+        if ($scope.cellData !== undefined && _.keys($scope.cellData).length > 0) {
+          $scope.anomalyChartRecords = resp.records;
+          console.log('Explorer anomaly charts data set:', $scope.anomalyChartRecords);
+
+          if (mlCheckboxShowChartsService.state.get('showCharts')) {
+            mlExplorerDashboardService.anomalyDataChange.changed(
+              $scope.anomalyChartRecords, earliestMs, latestMs
+            );
+          }
+        }
+
         if (influencers.length > 0) {
           // Filter the Top Influencers list to show just the influencers from
           // the records in the selected time range.
           const recordInfluencersByName = {};
+
+          // Add the specified influencer(s) to ensure they are used in the filter
+          // even if their influencer score for the selected time range is zero.
+          influencers.forEach((influencer) => {
+            const fieldName = influencer.fieldName;
+            if (recordInfluencersByName[influencer.fieldName] === undefined) {
+              recordInfluencersByName[influencer.fieldName] = [];
+            }
+            recordInfluencersByName[fieldName].push(influencer.fieldValue);
+          });
+
+          // Add the influencers from the top scoring anomalies.
           resp.records.forEach((record) => {
             const influencersByName = record.influencers || [];
             influencersByName.forEach((influencer) => {
@@ -483,13 +527,6 @@ module.controller('MlExplorerController', function (
 
           getTopInfluencers(jobIds, earliestMs, latestMs, filterInfluencers);
         }
-
-        // Use $evalAsync to ensure the update happens after the child scope is updated with the new data.
-        $scope.$evalAsync(() => {
-          // Sort in descending time order before storing in scope.
-          $scope.anomalyRecords = _.chain(resp.records).sortBy(record => record[$scope.timeFieldName]).reverse().value();
-          console.log('Explorer anomalies table data set:', $scope.anomalyRecords);
-        });
       });
   }
 
@@ -767,10 +804,62 @@ module.controller('MlExplorerController', function (
     }
   }
 
+  function loadAnomaliesTableData() {
+    const cellData = $scope.cellData;
+    const jobIds = ($scope.cellData !== undefined && cellData.fieldName === VIEW_BY_JOB_LABEL) ?
+      cellData.laneLabels : $scope.getSelectedJobIds();
+    const influencers = getSelectionInfluencers(cellData);
+    const timeRange = getSelectionTimeRange(cellData);
+
+    ml.results.getAnomaliesTableData(
+      jobIds,
+      [],
+      influencers,
+      mlSelectIntervalService.state.get('interval').val,
+      mlSelectSeverityService.state.get('threshold').val,
+      timeRange.earliestMs,
+      timeRange.latestMs,
+      500,
+      MAX_CATEGORY_EXAMPLES
+    ).then((resp) => {
+      const anomalies = resp.anomalies;
+      const detectorsByJob = mlJobService.detectorsByJob;
+      anomalies.forEach((anomaly) => {
+        // Add a detector property to each anomaly.
+        // Default to functionDescription if no description available.
+        // TODO - when job_service is moved server_side, move this to server endpoint.
+        const jobId = anomaly.jobId;
+        anomaly.detector = _.get(detectorsByJob,
+          [jobId, anomaly.detectorIndex, 'detector_description'],
+          anomaly.source.function_description);
+
+        // Add properties used for building the links menu.
+        // TODO - when job_service is moved server_side, move this to server endpoint.
+        anomaly.isTimeSeriesViewDetector = isTimeSeriesViewDetector(
+          mlJobService.getJob(jobId), anomaly.detectorIndex);
+        if (_.has(mlJobService.customUrlsByJob, jobId)) {
+          anomaly.customUrls = mlJobService.customUrlsByJob[jobId];
+        }
+      });
+
+      $scope.$evalAsync(() => {
+        $scope.tableData = {
+          anomalies,
+          interval: resp.interval,
+          examplesByJobId: resp.examplesByJobId,
+          showViewSeriesLink: true
+        };
+      });
+
+    }).catch((resp) => {
+      console.log('Explorer - error loading data for anomalies table:', resp);
+    });
+  }
+
   function clearSelectedAnomalies() {
     $scope.anomalyChartRecords = [];
-    $scope.anomalyRecords = [];
     $scope.viewByLoadedForTimeFormatted = null;
+    delete $scope.cellData;
 
     // With no swimlane selection, display anomalies over all time in the table.
     const jobIds = $scope.getSelectedJobIds();
@@ -778,7 +867,8 @@ module.controller('MlExplorerController', function (
     const earliestMs = bounds.min.valueOf();
     const latestMs = bounds.max.valueOf();
     mlExplorerDashboardService.anomalyDataChange.changed($scope.anomalyChartRecords, earliestMs, latestMs);
-    loadAnomalies(jobIds, [], earliestMs, latestMs);
+    loadDataForCharts(jobIds, [], earliestMs, latestMs);
+    loadAnomaliesTableData();
   }
 
   function calculateSwimlaneBucketInterval() {

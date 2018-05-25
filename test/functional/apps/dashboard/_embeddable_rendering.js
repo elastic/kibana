@@ -36,8 +36,6 @@ export default function ({ getService, getPageObjects }) {
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.be(27);
 
-      await PageObjects.dashboard.waitForRenderComplete();
-
       // Not neccessary but helpful for local debugging.
       await PageObjects.dashboard.saveDashboard('embeddable rendering test');
     });

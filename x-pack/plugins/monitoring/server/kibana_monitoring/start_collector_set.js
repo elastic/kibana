@@ -9,7 +9,6 @@ import { CollectorSet } from './classes/collector_set';
 import { getOpsStatsCollector } from './collectors/get_ops_stats_collector';
 import { getSettingsCollector } from './collectors/get_settings_collector';
 import { getKibanaUsageCollector } from './collectors/get_kibana_usage_collector';
-import { getReportingUsageCollector } from './collectors/get_reporting_usage_collector';
 import { sendBulkPayload } from './lib/send_bulk_payload';
 import { getCollectorTypesCombiner } from './lib/get_collector_types_combiner';
 
@@ -39,7 +38,6 @@ export function startCollectorSet(kbnServer, server, client, _sendBulkPayload = 
   collectorSet.register(getKibanaUsageCollector(server, callCluster));
   collectorSet.register(getOpsStatsCollector(server));
   collectorSet.register(getSettingsCollector(server));
-  collectorSet.register(getReportingUsageCollector(server, callCluster)); // TODO: move this to Reporting init
 
   // Startup Kibana cleanly or reconnect to Elasticsearch
   server.plugins.elasticsearch.status.on('green', () => {

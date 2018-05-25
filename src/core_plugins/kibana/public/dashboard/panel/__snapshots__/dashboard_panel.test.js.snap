@@ -25,7 +25,7 @@ exports[`DashboardPanel matches snapshot 1`] = `
       >
         <div
           class="euiPopover euiPopover--anchorDownRight dashboardPanelPopOver euiPopover--withTitle"
-          id="panelContextMenu"
+          id="dashboardPanelContextMenu"
         >
           <button
             aria-label="Panel options"

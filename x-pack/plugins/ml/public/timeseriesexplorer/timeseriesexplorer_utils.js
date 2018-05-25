@@ -107,9 +107,9 @@ export function processDataForFocusAnomalies(
     const recordTime = record[timeFieldName];
     let chartPoint = findNearestChartPointToTime(chartData, recordTime);
 
-    // TODO - handle case where there is an anomaly due to the absense of data
+    // TODO - handle case where there is an anomaly due to the absence of data
     // and there is no model plot.
-    if (chartPoint === undefined && chartData.length) {
+    if (chartPoint === undefined && chartData !== undefined && chartData.length) {
       // In case there is a record with a time after that of the last chart point, set the score
       // for the last chart point to that of the last record, if that record has a higher score.
       const lastChartPoint = chartData[chartData.length - 1];
@@ -167,6 +167,10 @@ export function processScheduledEventsForChart(chartData, scheduledEvents) {
 
 export function findNearestChartPointToTime(chartData, time) {
   let chartPoint;
+  if(chartData === undefined) {
+    return chartPoint;
+  }
+
   for (let i = 0; i < chartData.length; i++) {
     if (chartData[i].date.getTime() === time) {
       chartPoint = chartData[i];

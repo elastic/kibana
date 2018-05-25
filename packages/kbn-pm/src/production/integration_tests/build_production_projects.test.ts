@@ -1,16 +1,16 @@
-import tempy from 'tempy';
 import copy from 'cpy';
-import { resolve, relative, join } from 'path';
 import globby from 'globby';
+import { join, resolve } from 'path';
+import tempy from 'tempy';
 
-import { buildProductionProjects } from '../build_production_projects';
-import { getProjects } from '../../utils/projects';
 import { readPackageJson } from '../../utils/package_json';
+import { getProjects } from '../../utils/projects';
+import { buildProductionProjects } from '../build_production_projects';
 
-describe('kbn-pm production', function() {
+describe('kbn-pm production', () => {
   test(
     'builds and copies projects for production',
-    async function() {
+    async () => {
       const tmpDir = tempy.directory();
       const buildRoot = tempy.directory();
       const fixturesPath = resolve(__dirname, '__fixtures__');
@@ -18,9 +18,9 @@ describe('kbn-pm production', function() {
       // Copy all the test fixtures into a tmp dir, as we will be mutating them
       await copy(['**/*'], tmpDir, {
         cwd: fixturesPath,
-        parents: true,
-        nodir: true,
         dot: true,
+        nodir: true,
+        parents: true,
       });
 
       const projects = await getProjects(tmpDir, ['.', './packages/*']);
