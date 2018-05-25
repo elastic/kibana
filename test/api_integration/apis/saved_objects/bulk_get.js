@@ -2,7 +2,6 @@ import expect from 'expect.js';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('es');
   const esArchiver = getService('esArchiver');
 
   const BULK_REQUESTS = [
@@ -25,7 +24,7 @@ export default function ({ getService }) {
       before(() => esArchiver.load('saved_objects/basic'));
       after(() => esArchiver.unload('saved_objects/basic'));
 
-      it('should return 200 with individual responses', async () => (
+      it('should return 200 with individual responses', async () => {
         await supertest
           .post(`/api/saved_objects/_bulk_get`)
           .send(BULK_REQUESTS)
@@ -68,55 +67,8 @@ export default function ({ getService }) {
                 }
               ]
             });
-          })
-      ));
-    });
-
-    describe('without kibana index', () => {
-      before(async () => (
-        // just in case the kibana server has recreated it
-        await es.indices.delete({
-          index: '.kibana',
-          ignore: [404],
-        })
-      ));
-
-      it('should return 200 with individual responses', async () => (
-        await supertest
-          .post('/api/saved_objects/_bulk_get')
-          .send(BULK_REQUESTS)
-          .expect(200)
-          .then(resp => {
-            expect(resp.body).to.eql({
-              saved_objects: [
-                {
-                  id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                  type: 'visualization',
-                  error: {
-                    statusCode: 404,
-                    message: 'Not found'
-                  }
-                },
-                {
-                  id: 'does not exist',
-                  type: 'dashboard',
-                  error: {
-                    statusCode: 404,
-                    message: 'Not found'
-                  }
-                },
-                {
-                  id: '7.0.0-alpha1',
-                  type: 'config',
-                  error: {
-                    statusCode: 404,
-                    message: 'Not found'
-                  }
-                }
-              ]
-            });
-          })
-      ));
+          });
+      });
     });
   });
 }
