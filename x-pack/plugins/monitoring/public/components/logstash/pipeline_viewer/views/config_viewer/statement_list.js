@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { StatementListHeading } from './statement_list_heading';
 import { Statement } from './statement';
 
@@ -81,7 +82,7 @@ class StatementList extends React.PureComponent {
       ? null
       : (
         <Statement
-          key={element.id}
+          key={id}
           element={element}
           collapse={this.collapse}
           expand={this.expand}
@@ -93,13 +94,25 @@ class StatementList extends React.PureComponent {
 
   render() {
     const { elements } = this.props;
+    const statements = elements.map(this.getStatement);
 
     return (
       <ul className="cv-list-parent">
         {
-          elements.map(this.getStatement)
+          statements.filter(statement => statement !== null)
         }
       </ul>
     );
   }
 }
+
+StatementList.propTypes = {
+  elements: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      // top-level elements have null parentId
+      parentId: PropTypes.string
+    })
+  ).isRequired,
+  onShowVertexDetails: PropTypes.func.isRequired,
+};

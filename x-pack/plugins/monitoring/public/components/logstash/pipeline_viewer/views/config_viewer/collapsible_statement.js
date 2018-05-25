@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import {
   EuiButtonEmpty,
@@ -18,7 +19,7 @@ function clickableStatementName(name, onVertexSelected) {
   return (
     <EuiFlexItem
       grow={false}
-      key="nameSection"
+      key="statementName"
     >
       <EuiButtonEmpty
         color="text"
@@ -38,7 +39,7 @@ function ifStatement(statement, onVertexSelected) {
     clickableStatementName('if', onVertexSelected),
     (
       <EuiFlexItem
-        key="ifSection"
+        key="ifContent"
         grow={false}
       >
         <EuiCodeBlock
@@ -102,7 +103,7 @@ export class CollapsibleStatement extends React.PureComponent {
     return (
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem
-          key={`${id}_collapseSection`}
+          key={id}
           grow={false}
         >
           <EuiButtonIcon
@@ -119,3 +120,13 @@ export class CollapsibleStatement extends React.PureComponent {
     );
   }
 }
+
+CollapsibleStatement.propTypes = {
+  collapse: PropTypes.func.isRequired,
+  expand: PropTypes.func.isRequired,
+  id: PropTypes.string.isRequired,
+  isIf: PropTypes.bool.isRequired,
+  isCollapsed: PropTypes.bool.isRequired,
+  onShowVertexDetails: PropTypes.func.isRequired,
+  statement: PropTypes.object.isRequired,
+};
