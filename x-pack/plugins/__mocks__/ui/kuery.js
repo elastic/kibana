@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
-export const dateValidation = Joi.alternatives()
-  .try(Joi.date().iso(), Joi.number())
-  .required();
+export function fromKueryExpression() {}
+export function toElasticsearchQuery() {}
+export function getSuggestionsProvider() {}
