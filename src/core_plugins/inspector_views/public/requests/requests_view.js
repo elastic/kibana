@@ -7,8 +7,8 @@ import {
 
 import { InspectorView } from 'ui/inspector';
 
+import { RequestSelector } from './request_selector';
 import { RequestDetails } from './request_details';
-import { RequestListEntry } from './request_list_entry';
 
 import './requests_inspector.less';
 
@@ -36,22 +36,11 @@ class RequestsViewComponent extends Component {
     }
   }
 
-  selectRequest(request) {
+  selectRequest = (request) => {
     if (request !== this.state.request) {
       this.setState({ request });
     }
   }
-
-  _renderRequest = (req, index) => {
-    return (
-      <RequestListEntry
-        key={index}
-        request={req}
-        isSelected={this.state.request === req}
-        onClick={() => this.selectRequest(req)}
-      />
-    );
-  };
 
   componentWillReceiveProps(props) {
     if (props.vis !== this.props.vis) {
@@ -99,9 +88,11 @@ class RequestsViewComponent extends Component {
 
     return (
       <InspectorView>
-        <ul>
-          { this.state.requests.map(this._renderRequest) }
-        </ul>
+        <RequestSelector
+          requests={this.state.requests}
+          selectedRequest={this.state.request}
+          onRequestChanged={this.selectRequest}
+        />
         <EuiSpacer size="m" />
         { this.state.request &&
           <RequestDetails

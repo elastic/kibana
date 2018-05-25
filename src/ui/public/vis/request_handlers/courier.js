@@ -70,8 +70,9 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
       rowsRaw.push(raw);
     });
 
+    // TODO: Remove delay before merging
     return await new Promise(resolve => {
-      setTimeout(() => resolve({ columns, rows, rowsRaw }), 3000);
+      setTimeout(() => resolve({ columns, rows, rowsRaw }), 1000);
     });
 
     return { columns, rows, rowsRaw };

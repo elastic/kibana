@@ -5,8 +5,8 @@ import {
   EuiButtonEmpty,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  EuiIcon,
   EuiPopover,
+  EuiToolTip,
 } from '@elastic/eui';
 
 class InspectorViewChooser extends Component {
@@ -44,29 +44,39 @@ class InspectorViewChooser extends Component {
     );
   }
 
-  renderCurrentView() {
+  renderViewButton() {
     return (
       <EuiButtonEmpty
-        size="l"
+        size="s"
         iconType="arrowDown"
         iconSide="right"
         onClick={this.toggleSelector}
         data-test-subj="inspectorViewChooser"
       >
-        <EuiIcon
-          type="apps"
-          size="m"
-          aria-hidden="true"
-          className="inspector-view-chooser__icon"
-        />
-        { this.props.selectedView.title }
+        View: { this.props.selectedView.title }
       </EuiButtonEmpty>
+    );
+  }
+
+  renderSingleView() {
+    return (
+      <EuiToolTip
+        position="bottom"
+        content={this.props.selectedView.help}
+      >
+        <span>View: { this.props.selectedView.title }</span>
+      </EuiToolTip>
     );
   }
 
   render() {
     const { views } = this.props;
-    const triggerButton = this.renderCurrentView();
+
+    if (views.length < 2) {
+      return this.renderSingleView();
+    }
+
+    const triggerButton = this.renderViewButton();
 
     return (
       <EuiPopover

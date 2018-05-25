@@ -50,6 +50,8 @@ class DataDownloadOptions extends Component {
         <EuiContextMenuItem
           key="csv"
           onClick={this.exportAsCsv}
+          toolTipContent="Downloads the data as shown in the table."
+          toolTipPosition="left"
         >
           Formatted CSV
         </EuiContextMenuItem>
@@ -60,6 +62,9 @@ class DataDownloadOptions extends Component {
         <EuiContextMenuItem
           key="rawCsv"
           onClick={this.exportAsRawCsv}
+          toolTipContent={`Downloads the raw data i.e. dates as timestamps,
+            numeric values without thousand separators, etc.`}
+          toolTipPosition="left"
         >
           Raw CSV
         </EuiContextMenuItem>
@@ -73,11 +78,9 @@ class DataDownloadOptions extends Component {
         closePopover={this.closePopover}
         panelPaddingSize="none"
         anchorPosition="downLeft"
-        withTitle
       >
         <EuiContextMenuPanel
           items={items}
-          title="Download data as"
         />
       </EuiPopover>
     );

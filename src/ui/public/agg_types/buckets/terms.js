@@ -91,9 +91,12 @@ export const termsBucketAgg = new BucketAggType({
       request.stats(getRequestInspectorStats(nestedSearchSource));
 
       const response = await nestedSearchSource.fetchAsRejectablePromise();
-      request
-        .stats(getResponseInspectorStats(nestedSearchSource, response))
-        .ok({ json: response });
+      // TODO: Remove delay and error before merging
+      setTimeout(() => {
+        request
+          .stats(getResponseInspectorStats(nestedSearchSource, response))
+          .error({ json: response });
+      }, 8000);
       resp = mergeOtherBucketAggResponse(aggConfigs, resp, response, aggConfig, filterAgg());
     }
     if (aggConfig.params.missingBucket) {
