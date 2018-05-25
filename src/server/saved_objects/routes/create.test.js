@@ -92,7 +92,7 @@ describe('POST /api/saved_objects/{type}', () => {
       method: 'POST',
       url: '/api/saved_objects/index-pattern',
       payload: {
-        migrationState: { plugins: [] },
+        migrationState: { types: [] },
         attributes: {
           title: 'Testing'
         }
@@ -103,7 +103,7 @@ describe('POST /api/saved_objects/{type}', () => {
     expect(savedObjectsClient.create.calledOnce).toBe(true);
 
     const args = savedObjectsClient.create.getCall(0).args;
-    const options = { migrationState: request.migrationState, overwrite: false, id: undefined };
+    const options = { migrationState: { types: [] }, overwrite: false, id: undefined };
     const attributes = { title: 'Testing' };
 
     expect(args).toEqual(['index-pattern', attributes, options]);
