@@ -19,7 +19,7 @@ export const Header = ({
   <Fragment>
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="baseline" gutterSize="m">
+        <EuiFlexGroup alignItems="baseline" gutterSize="m" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiTitle>
               <h1>Saved Objects</h1>
@@ -33,7 +33,7 @@ export const Header = ({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="baseline" gutterSize="m">
+        <EuiFlexGroup alignItems="baseline" gutterSize="m" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="s"
