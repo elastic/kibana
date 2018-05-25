@@ -7,4 +7,4 @@
 //
 // This is why we have this single statement in it's own file and require
 // it from ./index.js
-import 'babel-polyfill';
+require('babel-polyfill');
