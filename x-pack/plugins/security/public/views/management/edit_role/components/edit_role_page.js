@@ -8,6 +8,7 @@ import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { Notifier, toastNotifications } from 'ui/notify';
 import {
+  EuiPanel,
   EuiText,
   EuiSpacer,
   EuiPage,
@@ -56,29 +57,32 @@ export class EditRolePage extends Component {
 
   render() {
     return (
-      <EuiPage>
+      <div>
         <PageHeader breadcrumbs={this.props.breadcrumbs} />
-        <EuiPageContent>
-          <EuiForm {...this.state.formError}>
+        <EuiPage className="editRolePage">
+          <EuiPageContent className="editRolePage__content">
+            <EuiForm {...this.state.formError}>
+              {this.getFormTitle()}
 
-            <EuiSpacer />
+              <EuiSpacer />
 
-            {this.getRoleName()}
+              {this.getRoleName()}
 
-            <EuiSpacer />
+              <EuiSpacer />
 
-            {this.getElasticsearchPrivileges()}
+              {this.getElasticsearchPrivileges()}
 
-            <EuiSpacer />
+              <EuiSpacer />
 
-            {this.getKibanaPrivileges()}
+              {this.getKibanaPrivileges()}
 
-            <EuiSpacer size={'xl'} />
+              <EuiSpacer size={'xl'} />
 
-            {this.getFormButtons()}
-          </EuiForm>
-        </EuiPageContent>
-      </EuiPage>
+              {this.getFormButtons()}
+            </EuiForm>
+          </EuiPageContent>
+        </EuiPage>
+      </div>
     );
   }
 
@@ -111,19 +115,21 @@ export class EditRolePage extends Component {
 
   getRoleName = () => {
     return (
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiFormRow label={'Name'} {...this.validator.validateRoleName(this.state.role)}>
-            <EuiFieldText
-              name={'name'}
-              value={this.state.role.name || ''}
-              onChange={this.onNameChange}
-              readOnly={isReservedRole(this.props.role) || this.editingExistingRole()}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <ReservedRoleBadge role={this.props.role} />
-      </EuiFlexGroup>
+      <EuiPanel>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFormRow label={'Role name'} {...this.validator.validateRoleName(this.state.role)}>
+              <EuiFieldText
+                name={'name'}
+                value={this.state.role.name || ''}
+                onChange={this.onNameChange}
+                readOnly={isReservedRole(this.props.role) || this.editingExistingRole()}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <ReservedRoleBadge role={this.props.role} />
+        </EuiFlexGroup>
+      </EuiPanel>
     );
   }
 

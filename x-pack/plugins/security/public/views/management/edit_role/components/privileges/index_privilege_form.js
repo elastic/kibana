@@ -12,9 +12,11 @@ import {
   EuiFormRow,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
+  EuiSwitch,
   EuiSpacer,
   EuiHorizontalRule,
+  EuiLink,
+  EuiIcon,
 } from '@elastic/eui';
 import { getIndexPrivileges } from '../../../../../services/role_privileges';
 
@@ -34,21 +36,24 @@ export class IndexPrivilegeForm extends Component {
     validator: PropTypes.object.isRequired,
   };
 
+  constructor(props) {
+    super(props);
+    this.state = {
+      queryExanded: !!props.indexPrivilege.query,
+      documentQuery: props.indexPrivilege.query
+    };
+  }
+
   render() {
     return (
       <div>
-        <EuiFlexGroup className="index-privilege-form">
+        <EuiFlexGroup className="index-privilege-form" alignItems={'center'}>
           <EuiFlexItem>
             {this.getPrivilegeForm()}
           </EuiFlexItem>
           {this.props.allowDelete && (
             <EuiFlexItem grow={false}>
-              <EuiButton
-                size={'s'}
-                color={'danger'}
-                iconType={'trash'}
-                onClick={this.props.onDelete}
-              />
+              <EuiLink color={'danger'} onClick={this.props.onDelete}><EuiIcon type={'trash'} size={'m'} /></EuiLink>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
@@ -82,11 +87,106 @@ export class IndexPrivilegeForm extends Component {
               />
             </EuiFormRow>
           </EuiFlexItem>
+          {this.getGrantedFieldsControl()}
         </EuiFlexGroup>
 
-        {this.getConditionalFeatures()}
+        {this.getGrantedDocumentsControl()}
       </Fragment>
     );
+  };
+
+  getGrantedFieldsControl = () => {
+    const {
+      allowFieldLevelSecurity,
+      availableFields,
+      indexPrivilege,
+    } = this.props;
+
+    if (!allowFieldLevelSecurity) {
+      return null;
+    }
+
+    const { grant = [] } = indexPrivilege.field_security || {};
+
+    return (
+      <EuiFlexItem>
+        <EuiFormRow label={'Granted Fields (optional)'} fullWidth={true} >
+          <Fragment>
+            <EuiComboBox
+              options={availableFields ? availableFields.map(toOption) : []}
+              selectedOptions={grant.map(toOption)}
+              onCreateOption={this.onCreateGrantedField}
+              onChange={this.onGrantedFieldsChange}
+              isDisabled={this.props.isReservedRole}
+            />
+          </Fragment>
+        </EuiFormRow>
+      </EuiFlexItem>
+    );
+  };
+
+  getGrantedDocumentsControl = () => {
+    const {
+      allowDocumentLevelSecurity,
+      indexPrivilege,
+    } = this.props;
+
+    if (!allowDocumentLevelSecurity) {
+      return null;
+    }
+
+    return (
+      <EuiFlexGroup>
+        <EuiFlexItem grow={3}>
+          <EuiSwitch
+            label={'Restrict documents query'}
+            compressed={true}
+            value={this.state.queryExanded}
+            onChange={this.toggleDocumentQuery}
+          />
+        </EuiFlexItem>
+        {this.state.queryExpanded &&
+          <EuiFlexItem grow={5}>
+            <EuiFormRow label={'Granted Documents Query (optional)'} fullWidth={true}>
+              <EuiTextArea
+                rows={1}
+                fullWidth={true}
+                value={indexPrivilege.query}
+                onChange={this.onQueryChange}
+                readOnly={this.props.isReservedRole}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        }
+      </EuiFlexGroup>
+    );
+  };
+
+  toggleDocumentQuery = () => {
+    const willToggleOff = this.state.queryExanded;
+    const willToggleOn = !willToggleOff;
+
+    // If turning off, then save the current query in state so that we can restore it if the user changes their mind.
+    this.setState({
+      queryExpanded: !this.state.queryExpanded,
+      documentQuery: willToggleOff ? this.props.indexPrivilege.query : this.state.documentQuery
+    });
+
+    // If turning off, then remove the query from the Index Privilege
+    if (willToggleOff) {
+      this.props.onChange({
+        ...this.props.indexPrivilege,
+        query: '',
+      });
+    }
+
+    // If turning on, then restore the saved query if available
+    if (willToggleOn && !this.props.indexPrivilege.query && this.state.documentQuery) {
+      this.props.onChange({
+        ...this.props.indexPrivilege,
+        query: this.state.documentQuery,
+      });
+    }
   };
 
   getConditionalFeatures = () => {

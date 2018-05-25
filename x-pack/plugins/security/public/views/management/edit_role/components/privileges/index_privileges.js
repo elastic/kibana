@@ -3,17 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 import { isReservedRole } from '../../../../../lib/role';
 import { IndexPrivilegeForm } from './index_privilege_form';
 import { getFields } from '../../../../../objects';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton
-} from '@elastic/eui';
 
 export class IndexPrivileges extends Component {
   static propTypes = {
@@ -63,24 +58,7 @@ export class IndexPrivileges extends Component {
       />
     ));
 
-    const button = isReservedRole(this.props.role)
-      ? null
-      : (
-        <EuiFlexGroup justifyContent={'flexEnd'}>
-          <EuiFlexItem grow={false}>
-            <EuiButton size={'s'} onClick={this.addIndexPrivilege} iconType={'plusInCircle'}>
-              New Index Privilege
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-
-    return (
-      <Fragment>
-        {forms}
-        {button}
-      </Fragment>
-    );
+    return forms;
   }
 
   addIndexPrivilege = () => {

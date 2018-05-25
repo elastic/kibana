@@ -8,17 +8,23 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiText,
-  EuiTextColor,
   EuiSpacer,
   EuiIcon,
-  EuiAccordion,
   EuiComboBox,
   EuiPanel,
+  EuiFormRow,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiDescribedFormGroup,
   EuiTitle,
+  EuiHorizontalRule,
+  EuiLink,
 } from '@elastic/eui';
 import { ClusterPrivileges } from './cluster_privileges';
 import { IndexPrivileges } from './index_privileges';
 import { isReservedRole } from '../../../../../lib/role';
+import './elasticsearch_privileges.less';
 
 export class ElasticsearchPrivileges extends Component {
   static propTypes = {
@@ -29,7 +35,43 @@ export class ElasticsearchPrivileges extends Component {
     validator: PropTypes.object.isRequired,
   };
 
+  state = {
+    collapsed: false
+  };
+
   render() {
+
+
+    return (
+      <EuiPanel>
+        {this.getTitle()}
+        {this.getForm()}
+      </EuiPanel>
+    );
+  }
+
+  getTitle = () => {
+    return (
+      <EuiFlexGroup alignItems={'baseline'}>
+        <EuiFlexItem grow={false}>
+          <EuiTitle>
+            <div>
+              <EuiIcon type={'logoElasticsearch'} size={'l'} className={'manageRoles__esLogo'} /> Elasticsearch&nbsp;
+            </div>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiLink size={'s'} onClick={this.toggleCollapsed}>{this.state.collapsed ? 'show' : 'hide'}</EuiLink>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
+
+  getForm = () => {
+    if (this.state.collapsed) {
+      return null;
+    }
+
     const {
       role,
       httpClient,
@@ -50,76 +92,33 @@ export class ElasticsearchPrivileges extends Component {
       onChange,
     };
 
-    const {
-      isInvalid
-    } = validator.validateIndexPrivileges(role);
-
-    const indexTextColor = isInvalid ? 'danger' : 'default';
-
     return (
       <Fragment>
-        <EuiTitle>
-          <h4>Elasticsearch</h4>
-        </EuiTitle>
-
         <EuiSpacer />
-
-        <EuiPanel>
-          <EuiAccordion
-            id={'clusterPrivilegesAccordion'}
-            buttonContent={
-              <div>
-                <EuiIcon color={indexTextColor} type={'logoElastic'} size={'m'} /> Cluster Privileges ({role.cluster.length})
-              </div>
-            }
-          >
-            <EuiSpacer size="s" />
+        <EuiDescribedFormGroup
+          title={<p>Cluster privileges</p>}
+          description={
+            <p>
+              Manage the actions this role can perform against your cluster.
+            </p>
+          }
+        >
+          <EuiFormRow fullWidth={true}>
             <ClusterPrivileges role={this.props.role} onChange={this.onClusterPrivilegesChange} />
-          </EuiAccordion>
-        </EuiPanel>
+          </EuiFormRow>
+        </EuiDescribedFormGroup>
+
         <EuiSpacer />
 
-        <EuiPanel>
-          <EuiAccordion
-            id={'indexPrivilegesAccordion'}
-            buttonContent={
-              <div>
-                <EuiIcon type={'indexSettings'} size={'m'} color={indexTextColor} />
-                <EuiTextColor color={indexTextColor}> Index Privileges (
-                  {role.indices.filter(i => i.names.length).length})
-                </EuiTextColor>
-              </div>
-            }
-          >
-            <EuiSpacer size="s" />
-
-            <EuiText>
-              <p>
-                Control access to the data in your cluster.
-              </p>
-            </EuiText>
-
-            <EuiSpacer />
-
-            <IndexPrivileges {...indexProps} />
-
-          </EuiAccordion>
-        </EuiPanel>
-        <EuiSpacer />
-
-        <EuiPanel>
-          <EuiAccordion
-            id={'runAsPrivilegesAccordion'}
-            buttonContent={<div><EuiIcon type={'play'} size={'m'} /> Run As Privileges ({role.run_as.length})</div>}
-          >
-            <EuiSpacer size="s" />
-
-            <EuiText>
-              <p>
-                Allow requests to be submitted on behalf of other users.
-              </p>
-            </EuiText>
-            <EuiSpacer />
+        <EuiDescribedFormGroup
+          title={<p>Run As privileges</p>}
+          description={
+            <p>
+              Allow requests to be submitted on behalf of other users.
+            </p>
+          }
+        >
+          <EuiFormRow>
             <EuiComboBox
               placeholder={'Add a user...'}
               options={this.props.runAsUsers.map(username => ({ id: username, label: username }))}
@@ -127,11 +126,54 @@ export class ElasticsearchPrivileges extends Component {
               onChange={this.onRunAsUserChange}
               isDisabled={isReservedRole(this.props.role)}
             />
-          </EuiAccordion>
-        </EuiPanel>
+          </EuiFormRow>
+        </EuiDescribedFormGroup>
+
+        <EuiSpacer />
+
+        <EuiFormRow fullWidth={true}>
+          <div>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiTitle size={'xs'}><p>Index privileges</p></EuiTitle>
+                <EuiText size={'s'} color={'subdued'}><p>Control access to the data in your cluster.</p></EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton size={'s'} iconType={'plusInCircle'} onClick={this.addIndexPrivilege}>Add Index Privilege</EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiHorizontalRule margin={'xs'} />
+          </div>
+        </EuiFormRow>
+        <EuiFormRow fullWidth={true}>
+          <IndexPrivileges {...indexProps} />
+        </EuiFormRow>
       </Fragment>
     );
   }
+
+  toggleCollapsed = () => {
+    this.setState({
+      collapsed: !this.state.collapsed
+    });
+  }
+
+  addIndexPrivilege = () => {
+    const { role } = this.props;
+
+    const newIndices = [...role.indices, {
+      names: [],
+      privileges: [],
+      field_security: {
+        grant: ['*']
+      }
+    }];
+
+    this.props.onChange({
+      ...this.props.role,
+      indices: newIndices
+    });
+  };
 
   onClusterPrivilegesChange = (cluster) => {
     const role = {
