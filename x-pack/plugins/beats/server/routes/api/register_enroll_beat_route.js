@@ -56,6 +56,7 @@ function persistBeat(callWithInternalUser, beat) {
 // TODO: add license check pre-hook
 // TODO: write to Kibana audit log file
 export function registerEnrollBeatRoute(server) {
+  const config = server.config();
   server.route({
     method: 'POST',
     path: '/api/beats/agent/{beatId}',
@@ -89,12 +90,17 @@ export function registerEnrollBeatRoute(server) {
 
         accessToken = uuid.v4().replace(/-/g, "");
         const remoteAddress = request.info.remoteAddress;
-        await persistBeat(callWithInternalUser, {
+
+        const beat = {
           ...omit(request.payload, 'enrollment_token'),
           id: beatId,
           access_token: accessToken,
-          host_ip: remoteAddress
-        });
+          host_ip: remoteAddress,
+        };
+        if (!config.get('xpack.beats.requireVerification')) {
+          beat.verified_on = moment().toJSON();
+        }
+        await persistBeat(callWithInternalUser, beat);
 
         await deleteUsedEnrollmentToken(callWithInternalUser, enrollmentToken);
       } catch (err) {

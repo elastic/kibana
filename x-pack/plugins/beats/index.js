@@ -17,7 +17,8 @@ export function beats(kibana)  {
     configPrefix: 'xpack.beats',
     config: Joi => Joi.object({
       enabled: Joi.boolean().default(true),
-      enrollmentTokensTtlInSeconds: Joi.number().integer().min(1).default(DEFAULT_ENROLLMENT_TOKENS_TTL_S)
+      enrollmentTokensTtlInSeconds: Joi.number().integer().min(1).default(DEFAULT_ENROLLMENT_TOKENS_TTL_S),
+      requireVerification: Joi.boolean().default(false)
     }).default(),
     init: async function (server) {
       await installIndexTemplate(server);
