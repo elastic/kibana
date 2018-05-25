@@ -15,7 +15,7 @@ describe('get_pipeline', () => {
     let vertex;
     let vertexStatsBucket;
     let totalProcessorsDurationInMillis;
-    let timeboundsInSeconds;
+    let timeseriesIntervalInSeconds;
 
     beforeEach(() => {
       vertex = {
@@ -31,11 +31,11 @@ describe('get_pipeline', () => {
       };
 
       totalProcessorsDurationInMillis = 24000;
-      timeboundsInSeconds = 15 * 60;
+      timeseriesIntervalInSeconds = 15 * 60;
     });
 
     it('returns correct stats', () => {
-      const result = _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationInMillis, timeboundsInSeconds);
+      const result = _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationInMillis, timeseriesIntervalInSeconds);
       expect(result).to.eql({
         events_in: 10000,
         events_out: 9000,
@@ -55,7 +55,7 @@ describe('get_pipeline', () => {
       });
 
       it('returns correct stats', () => {
-        const result = _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationInMillis, timeboundsInSeconds);
+        const result = _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationInMillis, timeseriesIntervalInSeconds);
         expect(result).to.eql({
           events_in: 10000,
           events_out: 9000,
@@ -76,7 +76,7 @@ describe('get_pipeline', () => {
       });
 
       it('returns correct stats', () => {
-        const result = _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationInMillis, timeboundsInSeconds);
+        const result = _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationInMillis, timeseriesIntervalInSeconds);
         expect(result).to.eql({
           events_in: 10000,
           events_out: 9000,
