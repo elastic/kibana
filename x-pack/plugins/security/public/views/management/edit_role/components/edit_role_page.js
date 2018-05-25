@@ -87,9 +87,14 @@ export class EditRolePage extends Component {
   }
 
   getFormTitle = () => {
-    const titleText = this.editingExistingRole()
-      ? 'Edit Role'
-      : 'New Role';
+    let titleText;
+    if (isReservedRole(this.props.role)) {
+      titleText = 'Reserved role';
+    } else if (this.editingExistingRole()) {
+      titleText = 'Edit role';
+    } else {
+      titleText = 'New role';
+    }
 
     return (
       <EuiFlexGroup justifyContent={'spaceBetween'}>
@@ -182,10 +187,24 @@ export class EditRolePage extends Component {
   };
 
   getFormButtons = () => {
+    if (isReservedRole(this.props.role)) {
+      return (
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiButton onClick={this.backToRoleList}>
+              Return to role list
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
+    const saveText = this.editingExistingRole() ? 'Update role' : 'Create role';
+
     return (
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <EuiButton fill onClick={this.saveRole} disabled={isReservedRole(this.props.role)}>Save</EuiButton>
+          <EuiButton fill onClick={this.saveRole} disabled={isReservedRole(this.props.role)}>{saveText}</EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton onClick={this.backToRoleList}>
