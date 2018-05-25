@@ -217,7 +217,12 @@ export class FieldEditor extends PureComponent {
           disabled={!field.scripted}
           options={fieldTypes.map(type => { return { value: type, text: type }; })}
           data-test-subj="editorFieldType"
-          onChange={(e) => { this.onFieldChange('type', e.target.value, this.setFieldTypeFormats); }}
+          onChange={(e) => {
+            this.onFieldChange('type', e.target.value, () => {
+              this.setFieldTypeFormats();
+              this.onFormatChange();
+            });
+          }}
         />
       </EuiFormRow>
     );
