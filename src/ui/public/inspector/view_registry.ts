@@ -14,7 +14,7 @@ import { Adapters, InspectorViewProps } from './types';
  * @typedef {object} InspectorViewDescription
  * @property {string} title - The title that will be used to present that view.
  * @property {string} icon - An icon name to present this view. Must match an EUI icon.
- * @property {ReactComponent} component - The actual React component to render that
+ * @property {React.ComponentType<InspectorViewProps>} component - The actual React component to render that
  *    that view. It should always return an `InspectorView` element at the toplevel.
  * @property {number} [order=9000] - An order for this view. Views are ordered from lower
  *    order values to higher order values in the UI.
@@ -25,9 +25,7 @@ import { Adapters, InspectorViewProps } from './types';
  *    the view will always be visible.
  */
 interface InspectorViewDescription {
-  component:
-    | React.Component<InspectorViewProps, any>
-    | React.SFC<InspectorViewProps>;
+  component: React.ComponentType<InspectorViewProps>;
   help?: string;
   order?: number;
   shouldShow?: (adapters: Adapters) => boolean;
