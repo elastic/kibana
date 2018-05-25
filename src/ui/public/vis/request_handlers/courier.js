@@ -74,25 +74,20 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
         requestSearchSource.set('query', query);
       }
 
-      const shouldQuery = () => {
+      const shouldQuery = async () => {
+        const currentRequest = await requestSearchSource.getSearchRequestBody();
         if (!searchSource.lastQuery || forceFetch) return true;
-        if (!_.isEqual(_.cloneDeep(searchSource.get('filter')), searchSource.lastQuery.filter)) return true;
-        if (!_.isEqual(_.cloneDeep(searchSource.get('query')), searchSource.lastQuery.query)) return true;
-        if (!_.isEqual(calculateObjectHash(vis.getAggConfig()), searchSource.lastQuery.aggs)) return true;
-        if (!_.isEqual(_.cloneDeep(timeRange), searchSource.lastQuery.timeRange)) return true;
+        if (searchSource.lastQuery !== calculateObjectHash(currentRequest)) return true;
 
         return false;
       };
 
-      return new Promise((resolve, reject) => {
-        if (shouldQuery()) {
+
+
+      return new Promise(async (resolve, reject) => {
+        if (await shouldQuery()) {
           requestSearchSource.onResults().then(resp => {
-            searchSource.lastQuery = {
-              filter: _.cloneDeep(searchSource.get('filter')),
-              query: _.cloneDeep(searchSource.get('query')),
-              aggs: calculateObjectHash(vis.getAggConfig()),
-              timeRange: _.cloneDeep(timeRange)
-            };
+            requestSearchSource.getSearchRequestBody().then(q => searchSource.lastQuery = calculateObjectHash(q));
 
             searchSource.rawResponse = resp;
 
