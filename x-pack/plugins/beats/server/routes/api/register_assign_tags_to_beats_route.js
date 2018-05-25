@@ -54,9 +54,9 @@ function findNonExistentTags(callWithRequest, tags) {
   return findNonExistentItems(callWithRequest, tags, getTags);
 }
 
-async function persistAdditions(callWithRequest, additions) {
-  const body = flatten(additions.map(addition => {
-    const { beatId, tag } = addition;
+async function persistAssignments(callWithRequest, assignments) {
+  const body = flatten(assignments.map(assignment => {
+    const { beatId, tag } = assignment;
     const script = 'def beat = ctx._source.beat; '
       + 'if (beat.tags == null) { '
       + '  beat.tags = []; '
@@ -83,46 +83,46 @@ async function persistAdditions(callWithRequest, additions) {
     .map((item, resultIdx) => ({
       status: item.update.status,
       result: item.update.result,
-      idxInRequest: additions[resultIdx].idxInRequest
+      idxInRequest: assignments[resultIdx].idxInRequest
     }));
 }
 
-function addNonExistentAdditionsToResponse(response, additions, nonExistentBeatIds, nonExistentTags) {
-  additions.forEach((addition, idx) => {
-    const isBeatNonExistent = nonExistentBeatIds.includes(addition.beat_id);
-    const isTagNonExistent = nonExistentTags.includes(addition.tag);
+function addNonExistentItemAssignmentsToResponse(response, assignments, nonExistentBeatIds, nonExistentTags) {
+  assignments.forEach((assignment, idx) => {
+    const isBeatNonExistent = nonExistentBeatIds.includes(assignment.beat_id);
+    const isTagNonExistent = nonExistentTags.includes(assignment.tag);
 
     if (isBeatNonExistent && isTagNonExistent) {
-      response.additions[idx].status = 404;
-      response.additions[idx].result = `Beat ${addition.beat_id} and tag ${addition.tag} not found`;
+      response.assignments[idx].status = 404;
+      response.assignments[idx].result = `Beat ${assignment.beat_id} and tag ${assignment.tag} not found`;
     } else if (isBeatNonExistent) {
-      response.additions[idx].status = 404;
-      response.additions[idx].result = `Beat ${addition.beat_id} not found`;
+      response.assignments[idx].status = 404;
+      response.assignments[idx].result = `Beat ${assignment.beat_id} not found`;
     } else if (isTagNonExistent) {
-      response.additions[idx].status = 404;
-      response.additions[idx].result = `Tag ${addition.tag} not found`;
+      response.assignments[idx].status = 404;
+      response.assignments[idx].result = `Tag ${assignment.tag} not found`;
     }
   });
 }
 
-function addAdditionResultsToResponse(response, additionResults) {
-  additionResults.forEach(additionResult => {
-    const { idxInRequest, status, result } = additionResult;
-    response.additions[idxInRequest].status = status;
-    response.additions[idxInRequest].result = result;
+function addAssignmentResultsToResponse(response, assignmentResults) {
+  assignmentResults.forEach(assignmentResult => {
+    const { idxInRequest, status, result } = assignmentResult;
+    response.assignments[idxInRequest].status = status;
+    response.assignments[idxInRequest].result = result;
   });
 }
 
 // TODO: add license check pre-hook
 // TODO: write to Kibana audit log file
-export function registerAddTagsToBeatsRoute(server) {
+export function registerAssignTagsToBeatsRoute(server) {
   server.route({
     method: 'POST',
-    path: '/api/beats/agents_tags',
+    path: '/api/beats/agents_tags/assignments',
     config: {
       validate: {
         payload: Joi.object({
-          additions: Joi.array().items(Joi.object({
+          assignments: Joi.array().items(Joi.object({
             beat_id: Joi.string().required(),
             tag: Joi.string().required()
           }))
@@ -132,32 +132,32 @@ export function registerAddTagsToBeatsRoute(server) {
     handler: async (request, reply) => {
       const callWithRequest = callWithRequestFactory(server, request);
 
-      const { additions } = request.payload;
-      const beatIds = uniq(additions.map(addition => addition.beat_id));
-      const tags = uniq(additions.map(addition => addition.tag));
+      const { assignments } = request.payload;
+      const beatIds = uniq(assignments.map(assignment => assignment.beat_id));
+      const tags = uniq(assignments.map(assignment => assignment.tag));
 
       const response = {
-        additions: additions.map(() => ({ status: null }))
+        assignments: assignments.map(() => ({ status: null }))
       };
 
       try {
-        // Handle additions containing non-existing beat IDs or tags
+        // Handle assignments containing non-existing beat IDs or tags
         const nonExistentBeatIds = await findNonExistentBeatIds(callWithRequest, beatIds);
         const nonExistentTags = await findNonExistentTags(callWithRequest, tags);
 
-        addNonExistentAdditionsToResponse(response, additions, nonExistentBeatIds, nonExistentTags);
+        addNonExistentItemAssignmentsToResponse(response, assignments, nonExistentBeatIds, nonExistentTags);
 
-        const validAdditions = additions
-          .map((addition, idxInRequest) => ({
-            beatId: addition.beat_id,
-            tag: addition.tag,
-            idxInRequest // so we can add the result of this addition to the correct place in the response
+        const validAssignments = assignments
+          .map((assignment, idxInRequest) => ({
+            beatId: assignment.beat_id,
+            tag: assignment.tag,
+            idxInRequest // so we can add the result of this assignment to the correct place in the response
           }))
-          .filter((addition, idx) => response.additions[idx].status === null);
+          .filter((assignment, idx) => response.assignments[idx].status === null);
 
-        if (validAdditions.length > 0) {
-          const additionResults = await persistAdditions(callWithRequest, validAdditions);
-          addAdditionResultsToResponse(response, additionResults);
+        if (validAssignments.length > 0) {
+          const assignmentResults = await persistAssignments(callWithRequest, validAssignments);
+          addAssignmentResultsToResponse(response, assignmentResults);
         }
       } catch (err) {
         return reply(wrapEsError(err));

@@ -10,7 +10,7 @@ import { registerListBeatsRoute } from './register_list_beats_route';
 import { registerVerifyBeatsRoute } from './register_verify_beats_route';
 import { registerUpdateBeatRoute } from './register_update_beat_route';
 import { registerSetTagRoute } from './register_set_tag_route';
-import { registerAddTagsToBeatsRoute } from './register_add_tags_to_beats_route';
+import { registerAssignTagsToBeatsRoute } from './register_assign_tags_to_beats_route';
 
 export function registerApiRoutes(server) {
   registerCreateEnrollmentTokensRoute(server);
@@ -19,5 +19,5 @@ export function registerApiRoutes(server) {
   registerVerifyBeatsRoute(server);
   registerUpdateBeatRoute(server);
   registerSetTagRoute(server);
-  registerAddTagsToBeatsRoute(server);
+  registerAssignTagsToBeatsRoute(server);
 }
