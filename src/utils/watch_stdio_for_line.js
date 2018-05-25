@@ -28,9 +28,9 @@ function skipLastEmptyLineStream() {
   });
 }
 
-export async function watchStdioForLine(proc, log, level, exitAfter) {
+export async function watchStdioForLine(proc, logFn, exitAfter) {
   function onLogLine(line) {
-    log[level](line);
+    logFn(line);
 
     if (exitAfter && exitAfter.test(line)) {
       proc.kill('SIGINT');

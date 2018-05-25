@@ -5,20 +5,18 @@ import stripAnsi from 'strip-ansi';
 import sinon from 'sinon';
 
 import { watchStdioForLine } from '../watch_stdio_for_line';
-import { createToolingLog } from '../../dev/tooling_log';
 
 describe('src/utils/watch_stdio_for_line', function () {
   const sandbox = sinon.sandbox.create();
   afterEach(() => sandbox.reset());
 
-  const log = createToolingLog('verbose');
   const onLogLine = sandbox.stub();
-  log.on('data', line => onLogLine(stripAnsi(line)));
+  const logFn = line => onLogLine(stripAnsi(line));
 
-  it('logs using level: option', async () => {
+  it('calls logFn with log lines', async () => {
     const proc = execa(process.execPath, ['-e', 'console.log("hi")']);
 
-    await watchStdioForLine(proc, log, 'info');
+    await watchStdioForLine(proc, logFn);
 
     // log output of the process
     sinon.assert.calledWithExactly(onLogLine, sinon.match(/info\s+hi/));
@@ -32,7 +30,7 @@ describe('src/utils/watch_stdio_for_line', function () {
 
     const proc = execa(process.execPath, [require.resolve('./fixtures/log_on_sigint')]);
 
-    await watchStdioForLine(proc, log, 'info', /listening for SIGINT/);
+    await watchStdioForLine(proc, logFn, /listening for SIGINT/);
 
     sinon.assert.calledWithExactly(onLogLine, sinon.match(/listening for SIGINT/));
     sinon.assert.neverCalledWith(onLogLine, sinon.match(/SIGINT not received/));
@@ -45,7 +43,7 @@ describe('src/utils/watch_stdio_for_line', function () {
       cwd: parentDir,
     });
 
-    await watchStdioForLine(proc, log, 'info');
+    await watchStdioForLine(proc, logFn);
 
     // log output of the process, checking for \n to ensure cwd() doesn't log
     // the subdir that this process is executing in

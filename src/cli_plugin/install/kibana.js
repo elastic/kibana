@@ -18,27 +18,21 @@ export function existingInstall(settings, logger) {
 export async function rebuildCache(settings, logger) {
   logger.log('Optimizing and caching browser bundles...');
 
-  const kibanaScript = /^win/.test(process.platform)
-    ? '.\\bin\\kibana.bat'
-    : './bin/kibana';
-
   const kibanaArgs = [
+    fromRoot('./src/cli'),
     '--env.name=production',
-    `--logging.silent=${settings.silent}`,
-    `--logging.quiet=${!settings.silent}`,
-    `--logging.verbose=false`,
     '--optimize.useBundleCache=false',
     '--server.autoListen=false',
     '--plugins.initialize=false',
     '--uiSettings.enabled=false'
   ];
 
-  const proc = execa(kibanaScript, kibanaArgs, {
+  const proc = execa(process.execPath, kibanaArgs, {
     stdio: ['ignore', 'pipe', 'pipe'],
     cwd: fromRoot('.'),
   });
 
-  await watchStdioForLine(proc, logger, 'log', /Optimization .+ complete/);
+  await watchStdioForLine(proc, () => {}, /Optimization .+ complete/);
 }
 
 export function assertVersion(settings) {

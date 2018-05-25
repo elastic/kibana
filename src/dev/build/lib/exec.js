@@ -17,5 +17,5 @@ export async function exec(log, cmd, args, options = {}) {
     cwd,
   });
 
-  await watchStdioForLine(proc, log, level, exitAfter);
+  await watchStdioForLine(proc, line => log[level](line), exitAfter);
 }
