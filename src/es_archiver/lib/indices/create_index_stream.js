@@ -34,7 +34,7 @@ export function createCreateIndexStream({ client, stats, skipExisting, log }) {
   }
 
   async function handleIndex(stream, record) {
-    const { index, settings, mappings } = record.value;
+    const { index, settings, mappings, aliases } = record.value;
 
     async function attemptToCreate(attemptNumber = 1) {
       try {
@@ -44,7 +44,7 @@ export function createCreateIndexStream({ client, stats, skipExisting, log }) {
         await client.indices.create({
           method: 'PUT',
           index,
-          body: { settings, mappings },
+          body: { settings, mappings, aliases },
         });
         stats.createdIndex(index, { settings });
       } catch (err) {
