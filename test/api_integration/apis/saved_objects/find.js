@@ -2,7 +2,6 @@ import expect from 'expect.js';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('es');
   const esArchiver = getService('esArchiver');
 
   describe('find', () => {
