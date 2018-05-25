@@ -11,7 +11,6 @@ import { BasicCredentials } from '../../../../server/lib/authentication/provider
 import { canRedirectRequest } from '../../../lib/can_redirect_request';
 
 export function initAuthenticateApi(server) {
-  const auditLogger = server.plugins.security.auditLogger;
   server.route({
     method: 'POST',
     path: '/api/security/v1/login',
@@ -33,14 +32,11 @@ export function initAuthenticateApi(server) {
         );
 
         if (!authenticationResult.succeeded()) {
-          auditLogger.authenticationFailure(request, username);
           return reply(Boom.unauthorized(authenticationResult.error));
         }
 
-        auditLogger.authenticationSuccess(request, username);
         return reply.continue({ credentials: authenticationResult.user });
       } catch(err) {
-        auditLogger.authenticationFailure(request, username);
         return reply(wrapError(err));
       }
     }
