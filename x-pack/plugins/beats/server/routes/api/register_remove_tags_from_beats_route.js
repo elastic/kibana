@@ -86,19 +86,19 @@ async function persistRemovals(callWithRequest, removals) {
 }
 
 function addNonExistentItemRemovalsToResponse(response, removals, nonExistentBeatIds, nonExistentTags) {
-  removals.forEach((removal, idx) => {
-    const isBeatNonExistent = nonExistentBeatIds.includes(removal.beat_id);
-    const isTagNonExistent = nonExistentTags.includes(removal.tag);
+  removals.forEach(({ beat_id: beatId, tag }, idx) => {
+    const isBeatNonExistent = nonExistentBeatIds.includes(beatId);
+    const isTagNonExistent = nonExistentTags.includes(tag);
 
     if (isBeatNonExistent && isTagNonExistent) {
       response.removals[idx].status = 404;
-      response.removals[idx].result = `Beat ${removal.beat_id} and tag ${removal.tag} not found`;
+      response.removals[idx].result = `Beat ${beatId} and tag ${tag} not found`;
     } else if (isBeatNonExistent) {
       response.removals[idx].status = 404;
-      response.removals[idx].result = `Beat ${removal.beat_id} not found`;
+      response.removals[idx].result = `Beat ${beatId} not found`;
     } else if (isTagNonExistent) {
       response.removals[idx].status = 404;
-      response.removals[idx].result = `Tag ${removal.tag} not found`;
+      response.removals[idx].result = `Tag ${tag} not found`;
     }
   });
 }
