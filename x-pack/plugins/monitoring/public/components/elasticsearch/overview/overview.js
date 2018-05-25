@@ -7,7 +7,7 @@
 import React, { Fragment } from 'react';
 import { ClusterStatus } from '../cluster_status';
 import { ShardActivity } from '../shard_activity';
-import { MonitoringTimeseriesContainer } from 'plugins/monitoring/components';
+import { MonitoringTimeseriesContainer } from '../../chart';
 
 export function ElasticsearchOverview({
   clusterStatus,
