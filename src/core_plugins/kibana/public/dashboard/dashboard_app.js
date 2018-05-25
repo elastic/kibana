@@ -329,6 +329,9 @@ app.directive('dashboardApp', function ($injector) {
         dashboardStateManager.setFullScreenMode(true);
       navActions[TopNavIds.EXIT_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.VIEW);
       navActions[TopNavIds.ENTER_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.EDIT);
+      navActions[TopNavIds.SAVE] = () => {
+        console.log('jesus saves');
+      };
       navActions[TopNavIds.CLONE] = () => {
         const currentTitle = $scope.model.title;
         const onClone = (newTitle, isTitleDuplicateConfirmed, onTitleDuplicate) => {
