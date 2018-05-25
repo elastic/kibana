@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import React from 'react';
 import PropTypes from 'prop-types';
 import { DetailDrawer } from '../detail_drawer';
@@ -101,5 +99,5 @@ ConfigViewer.propTypes = {
     filters: PropTypes.array.isRequired,
     outputs: PropTypes.array.isRequired,
     queue: PropTypes.object.isRequired,
-  })
+  }).isRequired
 };

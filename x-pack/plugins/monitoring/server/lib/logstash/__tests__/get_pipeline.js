@@ -36,7 +36,6 @@ describe('get_pipeline', () => {
 
     it('returns correct stats', () => {
       const result = _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationInMillis, timeseriesIntervalInSeconds);
-
       expect(result).to.eql({
         events_in: 10000,
         events_out: 9000,

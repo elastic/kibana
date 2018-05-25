@@ -9,7 +9,12 @@ import PropTypes from 'prop-types';
 import { StatementListHeading } from './statement_list_heading';
 import { Statement } from './statement';
 
-export function StatementSection({ iconType, headingText, elements, onShowVertexDetails }) {
+export function StatementSection({
+  iconType,
+  headingText,
+  elements,
+  onShowVertexDetails
+}) {
   return (
     <div className="cv-statementList">
       <StatementListHeading
@@ -26,9 +31,7 @@ export function StatementSection({ iconType, headingText, elements, onShowVertex
 
 function getCollapsedChildElements(elements, collapsedIds) {
   const collapsedChildIds = new Set();
-  elements.forEach(element => {
-    const { id, parentId } = element;
-
+  elements.forEach(({ id, parentId }) => {
     if (collapsedIds.has(parentId) || collapsedChildIds.has(parentId)) {
       collapsedChildIds.add(id);
     }
@@ -39,13 +42,15 @@ function getCollapsedChildElements(elements, collapsedIds) {
 class StatementList extends React.PureComponent {
   constructor(props) {
     super(props);
+
     this.state = {
       collapsedIds: new Set(),
       collapsedChildIds: new Set()
     };
+
     this.collapse = this.collapse.bind(this);
     this.expand = this.expand.bind(this);
-    this.getStatement = this.getStatement.bind(this);
+    this.renderStatement = this.renderStatement.bind(this);
     this.elementIsCollapsed = this.elementIsCollapsed.bind(this);
   }
 
@@ -74,7 +79,7 @@ class StatementList extends React.PureComponent {
     return this.state.collapsedIds.has(elementId);
   }
 
-  getStatement(element) {
+  renderStatement(element) {
     const { id, parentId } = element;
     const { onShowVertexDetails } = this.props;
 
@@ -94,12 +99,11 @@ class StatementList extends React.PureComponent {
 
   render() {
     const { elements } = this.props;
-    const statements = elements.map(this.getStatement);
 
     return (
-      <ul className="cv-list-parent">
+      <ul className="cv-listParent">
         {
-          statements.filter(statement => statement !== null)
+          elements.map(this.renderStatement)
         }
       </ul>
     );

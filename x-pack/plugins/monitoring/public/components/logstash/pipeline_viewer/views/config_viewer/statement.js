@@ -10,11 +10,11 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { PluginStatement } from '../../models/pipeline/plugin_statement';
 import { CollapsibleStatement } from './collapsible_statement';
 import { IfElement } from '../../models/list/if_element';
-import { pluginStatement } from './plugin_statement';
+import { renderPluginStatement } from './plugin_statement';
 
 export class Statement extends React.PureComponent
 {
-  getNestingSpacers(depth) {
+  renderNestingSpacers(depth) {
     const spacers = [];
     for (let i = 0; i < depth; i += 1) {
       spacers.push(<div key={`spacer_${i}`} className="cv-spacer" />);
@@ -22,7 +22,7 @@ export class Statement extends React.PureComponent
     return spacers;
   }
 
-  getStatement(statement) {
+  renderStatement(statement) {
     const {
       collapse,
       element,
@@ -33,7 +33,7 @@ export class Statement extends React.PureComponent
     } = this.props;
 
     return statement instanceof PluginStatement
-      ? pluginStatement(statement, onShowVertexDetails)
+      ? renderPluginStatement(statement, onShowVertexDetails)
       : (
         <CollapsibleStatement
           expand={expand}
@@ -53,9 +53,11 @@ export class Statement extends React.PureComponent
       statement
     } = this.props.element;
 
-    const topLevelStyle = depth === 0 ? { paddingLeft: '0px' } : null;
-    const spacers = this.getNestingSpacers(depth);
-    const statementComponent = this.getStatement(statement);
+    const topLevelStatementPadding = depth === 0
+      ? { paddingLeft: '0px' }
+      : null;
+    const spacers = this.renderNestingSpacers(depth);
+    const statementComponent = this.renderStatement(statement);
 
     return (
       <li className="cv-list">
@@ -65,7 +67,7 @@ export class Statement extends React.PureComponent
         <EuiFlexGroup gutterSize="none">
           <div
             className="cv-statement__content"
-            style={topLevelStyle}
+            style={topLevelStatementPadding}
           >
             {statementComponent}
           </div>

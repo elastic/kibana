@@ -12,16 +12,15 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import { formatMetric } from '../../../../../lib/format_number';
+import { Stat } from './stat';
 
-function getInputStatementStats(inputVertex) {
-  const { latestEventsPerSecond } = inputVertex;
-
+function getInputStatementStats({ latestEventsPerSecond }) {
   return [
-    {
-      name: 'eventsEmitted',
-      className: 'cv-inputStat__eventsEmitted',
-      value: formatMetric(latestEventsPerSecond, '0.[00]a', 'e/s emitted')
-    }
+    new Stat(
+      'eventsEmitted',
+      'cv-inputStat__eventsEmitted',
+      formatMetric(latestEventsPerSecond, '0.[00]a', 'e/s emitted')
+    )
   ];
 }
 
@@ -36,30 +35,25 @@ function getProcessorStatementStats(processorVertex) {
   const eventMillisHighlight = processorVertex.isSlow() ? 'cv-processorStat__eventMillis' : '';
 
   return [
-    {
-      name: 'cpuStat',
-      className: `cv-processorStat__cpuTime ${cpuHighlight}`,
-      value: formatMetric(Math.round(percentOfTotalProcessorTime || 0), '0', '%', { prependSpace: false })
-    },
-    {
-      name: 'eventMillis',
-      className: `cv-processorStat__eventMillis ${eventMillisHighlight}`,
-      value: formatMetric(latestMillisPerEvent, '0.[00]a', 'ms/e')
-    },
-    {
-      name: 'eventsReceived',
-      className: 'cv-processorStat__events',
-      value: formatMetric(latestEventsPerSecond, '0.[00]a', 'e/s received')
-    }
+    new Stat(
+      'cpuStat',
+      `cv-processorStat__cpuTime ${cpuHighlight}`,
+      formatMetric(Math.round(percentOfTotalProcessorTime || 0), '0', '%', { prependSpace: false })
+    ),
+    new Stat(
+      'eventMillis',
+      `cv-processorStat__eventMillis ${eventMillisHighlight}`,
+      formatMetric(latestMillisPerEvent, '0.[00]a', 'ms/e')
+    ),
+    new Stat(
+      'eventsReceived',
+      'cv-processorStat__events',
+      formatMetric(latestEventsPerSecond, '0.[00]a', 'e/s received')
+    )
   ];
 }
 
-function getPluginStatementStatList(statement) {
-  const {
-    pluginType,
-    vertex
-  } = statement;
-
+function renderPluginStatementStats(pluginType, vertex) {
   const stats = pluginType === 'input'
     ? getInputStatementStats(vertex)
     : getProcessorStatementStats(vertex);
@@ -77,15 +71,16 @@ function getPluginStatementStatList(statement) {
   ));
 }
 
-export function pluginStatement(statement, onShowVertexDetails) {
-  const {
-    hasExplicitId,
-    id,
-    name,
-    vertex,
-  } = statement;
+export function renderPluginStatement({
+  hasExplicitId,
+  id,
+  name,
+  pluginType,
+  vertex,
+}, onShowVertexDetails) {
 
-  const statementStats = getPluginStatementStatList(statement);
+  const statementStats = renderPluginStatementStats(pluginType, vertex);
+  const onNameButtonClick = () => { onShowVertexDetails(vertex); };
 
   return (
     <div className="cv-statement">
@@ -109,7 +104,7 @@ export function pluginStatement(statement, onShowVertexDetails) {
                 flush="left"
                 size="xs"
                 className="cv-statement__name"
-                onClick={() => { onShowVertexDetails(vertex); }}
+                onClick={onNameButtonClick}
               >
                 <span>{name}</span>
               </EuiButtonEmpty>

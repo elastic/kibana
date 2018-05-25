@@ -86,14 +86,14 @@ export class CollapsibleStatement extends React.PureComponent {
     const {
       isIf,
       statement,
-      statement: vertex,
+      statement: { vertex },
       onShowVertexDetails
     } = this.props;
 
     const showVertexDetailsClicked = () => { onShowVertexDetails(vertex); };
 
-    return isIf ?
-      renderIfStatement(statement, showVertexDetailsClicked)
+    return isIf
+      ? renderIfStatement(statement, showVertexDetailsClicked)
       : renderStatementName('else', showVertexDetailsClicked);
   }
 
