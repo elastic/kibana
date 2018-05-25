@@ -30,13 +30,13 @@ export default function ({ getService, getPageObjects }) {
       await tearDown();
     });
 
-    it('Kibana Cluster Summary Status shows correct info', async () => {
+    it('should have Kibana Cluster Summary Status showing correct info', async () => {
       expect(await kibanaClusterSummaryStatus.getContent()).to.eql({
-        instances: '1',
-        memory: '219.6 MB / 1.4 GB',
-        requests: '174',
-        connections: '174',
-        maxResponseTime: '2203 ms',
+        instances: 'Instances: 1',
+        memory: 'Memory: 219.6 MB / 1.4 GB',
+        requests: 'Requests: 174',
+        connections: 'Connections: 174',
+        maxResponseTime: 'Max. Response Time: 2203 ms',
         health: 'Health: green',
       });
     });
