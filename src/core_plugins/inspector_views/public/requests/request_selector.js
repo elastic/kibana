@@ -33,7 +33,7 @@ class RequestSelector extends Component {
   }
 
   renderRequestDropdownItem = (request, index) => {
-    const hasFailed = request.response && request.response.status === RequestStatus.ERROR;
+    const hasFailed = request.status === RequestStatus.ERROR;
     const itemClass = className({
       'inspector-request-chooser__menu-item--failed': hasFailed,
     });
@@ -57,7 +57,7 @@ class RequestSelector extends Component {
 
   renderRequestDropdown() {
     const failedCount = this.props.requests.filter(
-      req => req.response && req.response.status === RequestStatus.ERROR
+      req => req.status === RequestStatus.ERROR
     ).length;
     const button = (
       <EuiButtonEmpty
@@ -91,7 +91,6 @@ class RequestSelector extends Component {
 
   render() {
     const { selectedRequest, requests } = this.props;
-    const status = selectedRequest.response ? selectedRequest.response.status : null;
     return (
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
@@ -100,15 +99,17 @@ class RequestSelector extends Component {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          { status &&
+          { selectedRequest.status !== RequestStatus.PENDING &&
             <EuiBadge
-              color={status === RequestStatus.OK ? 'secondary' : 'danger'}
-              iconType={status === RequestStatus.OK ? 'check' : 'cross'}
+              color={selectedRequest.status === RequestStatus.OK ? 'secondary' : 'danger'}
+              iconType={selectedRequest.status === RequestStatus.OK ? 'check' : 'cross'}
             >
               {selectedRequest.time}ms
             </EuiBadge>
           }
-          { !status && <EuiLoadingSpinner size="m" /> }
+          { selectedRequest.status === RequestStatus.PENDING &&
+            <EuiLoadingSpinner size="m" />
+          }
         </EuiFlexItem>
         <EuiFlexItem grow={true} />
         { requests.length > 1 &&
