@@ -24,6 +24,19 @@ import PropTypes from 'prop-types';
 import MarkdownIt from 'markdown-it';
 
 /**
+ * This method is used to actually render markdown from the passed parameter
+ * into HTML. It will just return an empty string when the markdown is empty.
+ * Since we want to use this with dangerouslySetInnerHTML, this method returns
+ * the required object format with an __html key in it.
+ */
+function transformMarkdown(markdownIt, markdown) {
+  if (!markdown) {
+    return { __html: '' };
+  }
+  return { __html: markdownIt.render(markdown) };
+}
+
+/**
  * @param {Array of Strings} whiteListedRules - white list of markdown rules
  * list of rules can be found at https://github.com/markdown-it/markdown-it/issues/361
  * @param {Boolean} openLinksInNewTab
@@ -63,40 +76,41 @@ export function markdownFactory(whiteListedRules, openLinksInNewTab = false) {
 export class Markdown extends Component {
   constructor(props) {
     super(props);
+    const { whiteListedRules, openLinksInNewTab, markdown } = props;
 
-    this.markdownIt = markdownFactory(this.props.whiteListedRules, this.props.openLinksInNewTab);
-
+    const markdownIt = markdownFactory(whiteListedRules, openLinksInNewTab);
+    const renderedMarkdown = transformMarkdown(markdownIt, markdown);
     this.state = {
-      renderedMarkdown: this.transformMarkdown(this.props),
+      whiteListedRules,
+      openLinksInNewTab,
+      markdown,
+      markdownIt,
+      renderedMarkdown,
     };
   }
 
-  /**
-   * This method is used to actually render markdown from the passed parameter
-   * into HTML. It will just return an empty string when the markdown is empty.
-   * Since we want to use this with dangerouslySetInnerHTML, this method returns
-   * the required object format with an __html key in it.
-   */
-  transformMarkdown(params) {
-    if (!params.markdown) {
-      return { __html: '' };
-    }
-    return { __html: this.markdownIt.render(params.markdown) };
-  }
+  static getDerivedStateFromProps(nextProps, prevState) {
+    const { whiteListedRules, openLinksInNewTab, markdown } = nextProps;
 
-  componentWillReceiveProps(props) {
-    const hasOpenLinksInNewTabChanged = props.openLinksInNewTab !== this.props.openLinksInNewTab;
-    const hasMarkdownChanged = props.markdown !== this.props.markdown;
-    const hasWhiteListerRulesChanged = props.whiteListedRules !== this.props.whiteListedRules;
+    const hasOpenLinksInNewTabChanged = openLinksInNewTab !== prevState.openLinksInNewTab;
+    const hasWhiteListerRulesChanged = whiteListedRules !== prevState.whiteListedRules;
+    const hasMarkdownChanged = markdown !== prevState.markdown;
 
-    if (hasOpenLinksInNewTabChanged || hasWhiteListerRulesChanged) {
-      this.markdownIt = markdownFactory(props.whiteListedRules, props.openLinksInNewTab);
-    }
+    const markdownIt = hasOpenLinksInNewTabChanged || hasWhiteListerRulesChanged
+      ? markdownFactory(whiteListedRules, openLinksInNewTab)
+      : prevState.markdownIt;
+
     if (hasMarkdownChanged || hasOpenLinksInNewTabChanged || hasWhiteListerRulesChanged) {
-      this.setState({
-        renderedMarkdown: this.transformMarkdown(props),
-      });
+      const renderedMarkdown = transformMarkdown(markdownIt, markdown);
+      return {
+        whiteListedRules,
+        openLinksInNewTab,
+        markdown,
+        markdownIt,
+        renderedMarkdown,
+      };
     }
+    return null;
   }
 
   render() {
