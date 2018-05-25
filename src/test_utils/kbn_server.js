@@ -31,9 +31,6 @@ const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {
     username: kibanaServerTestUser.username,
     password: kibanaServerTestUser.password
   },
-  kibana: {
-    index: '.kibana'
-  }
 };
 
 /**
