@@ -33,14 +33,14 @@ export function initAuthenticateApi(server) {
         );
 
         if (!authenticationResult.succeeded()) {
-          auditLogger.authenticationFailed(request, username);
+          auditLogger.authenticationFailure(request, username);
           return reply(Boom.unauthorized(authenticationResult.error));
         }
 
         auditLogger.authenticationSuccess(request, username);
         return reply.continue({ credentials: authenticationResult.user });
       } catch(err) {
-        auditLogger.authenticationFailed(request, username);
+        auditLogger.authenticationFailure(request, username);
         return reply(wrapError(err));
       }
     }
