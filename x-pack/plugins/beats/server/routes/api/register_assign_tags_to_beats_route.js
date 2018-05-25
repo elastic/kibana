@@ -88,19 +88,19 @@ async function persistAssignments(callWithRequest, assignments) {
 }
 
 function addNonExistentItemAssignmentsToResponse(response, assignments, nonExistentBeatIds, nonExistentTags) {
-  assignments.forEach((assignment, idx) => {
-    const isBeatNonExistent = nonExistentBeatIds.includes(assignment.beat_id);
-    const isTagNonExistent = nonExistentTags.includes(assignment.tag);
+  assignments.forEach(({ beat_id: beatId, tag }, idx) => {
+    const isBeatNonExistent = nonExistentBeatIds.includes(beatId);
+    const isTagNonExistent = nonExistentTags.includes(tag);
 
     if (isBeatNonExistent && isTagNonExistent) {
       response.assignments[idx].status = 404;
-      response.assignments[idx].result = `Beat ${assignment.beat_id} and tag ${assignment.tag} not found`;
+      response.assignments[idx].result = `Beat ${beatId} and tag ${tag} not found`;
     } else if (isBeatNonExistent) {
       response.assignments[idx].status = 404;
-      response.assignments[idx].result = `Beat ${assignment.beat_id} not found`;
+      response.assignments[idx].result = `Beat ${beatId} not found`;
     } else if (isTagNonExistent) {
       response.assignments[idx].status = 404;
-      response.assignments[idx].result = `Tag ${assignment.tag} not found`;
+      response.assignments[idx].result = `Tag ${tag} not found`;
     }
   });
 }
