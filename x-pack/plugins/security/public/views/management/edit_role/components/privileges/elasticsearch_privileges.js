@@ -9,9 +9,7 @@ import PropTypes from 'prop-types';
 import {
   EuiText,
   EuiSpacer,
-  EuiIcon,
   EuiComboBox,
-  EuiPanel,
   EuiFormRow,
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,12 +17,11 @@ import {
   EuiDescribedFormGroup,
   EuiTitle,
   EuiHorizontalRule,
-  EuiLink,
 } from '@elastic/eui';
 import { ClusterPrivileges } from './cluster_privileges';
 import { IndexPrivileges } from './index_privileges';
 import { isReservedRole } from '../../../../../lib/role';
-import './elasticsearch_privileges.less';
+import { CollapsiblePanel } from '../collapsible_panel';
 
 export class ElasticsearchPrivileges extends Component {
   static propTypes = {
@@ -35,43 +32,15 @@ export class ElasticsearchPrivileges extends Component {
     validator: PropTypes.object.isRequired,
   };
 
-  state = {
-    collapsed: false
-  };
-
   render() {
-
-
     return (
-      <EuiPanel>
-        {this.getTitle()}
+      <CollapsiblePanel iconType={'logoElasticsearch'} title={'Elasticsearch'}>
         {this.getForm()}
-      </EuiPanel>
+      </CollapsiblePanel>
     );
   }
 
-  getTitle = () => {
-    return (
-      <EuiFlexGroup alignItems={'baseline'}>
-        <EuiFlexItem grow={false}>
-          <EuiTitle>
-            <div>
-              <EuiIcon type={'logoElasticsearch'} size={'l'} className={'manageRoles__esLogo'} /> Elasticsearch&nbsp;
-            </div>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiLink size={'s'} onClick={this.toggleCollapsed}>{this.state.collapsed ? 'show' : 'hide'}</EuiLink>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  };
-
   getForm = () => {
-    if (this.state.collapsed) {
-      return null;
-    }
-
     const {
       role,
       httpClient,
@@ -94,7 +63,6 @@ export class ElasticsearchPrivileges extends Component {
 
     return (
       <Fragment>
-        <EuiSpacer />
         <EuiDescribedFormGroup
           title={<p>Cluster privileges</p>}
           description={
@@ -150,12 +118,6 @@ export class ElasticsearchPrivileges extends Component {
         </EuiFormRow>
       </Fragment>
     );
-  }
-
-  toggleCollapsed = () => {
-    this.setState({
-      collapsed: !this.state.collapsed
-    });
   }
 
   addIndexPrivilege = () => {

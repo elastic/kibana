@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { isReservedRole } from '../../../../../lib/role';
 import { getKibanaPrivileges } from '../../lib/get_application_privileges';
 import { togglePrivilege } from '../../lib/set_application_privileges';
+
+import { CollapsiblePanel } from '../collapsible_panel';
 import {
   EuiCheckboxGroup,
-  EuiText,
-  EuiSpacer,
-  EuiTitle,
+  EuiDescribedFormGroup,
 } from '@elastic/eui';
 export class KibanaPrivileges extends Component {
   static propTypes = {
@@ -30,7 +30,14 @@ export class KibanaPrivileges extends Component {
   idToPrivilege = (id) => id.split(this.idPrefix())[1];
 
   render() {
+    return (
+      <CollapsiblePanel iconType={'logoKibana'} title={'Kibana'}>
+        {this.getForm()}
+      </CollapsiblePanel>
+    );
+  }
 
+  getForm = () => {
     const {
       kibanaAppPrivileges,
       role,
@@ -52,26 +59,17 @@ export class KibanaPrivileges extends Component {
     }, {});
 
     return (
-      <Fragment>
-        <EuiTitle>
-          <h4>Kibana</h4>
-        </EuiTitle>
-
-        <EuiSpacer />
-
-        <EuiText>
-          <p>
-            Manage the actions this role can perform against Kibana.&nbsp;
-          </p>
-        </EuiText>
-        <EuiSpacer />
+      <EuiDescribedFormGroup
+        title={<p>Application privileges</p>}
+        description={<p>Manage the actions this role can perform within Kibana.</p>}
+      >
         <EuiCheckboxGroup
           options={checkboxes}
           idToSelectedMap={selectionMap}
           onChange={this.onKibanaPrivilegesChange}
           disabled={isReservedRole(role)}
         />
-      </Fragment>
+      </EuiDescribedFormGroup>
     );
   }
 
