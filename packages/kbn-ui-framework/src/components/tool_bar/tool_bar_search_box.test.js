@@ -7,7 +7,7 @@ import {
   KuiToolBarSearchBox,
 } from './tool_bar_search_box';
 
-const onFilter = sinon.spy();
+const onFilter = sinon.stub();
 
 test('renders KuiToolBarSearchBox', () => {
   const component = <KuiToolBarSearchBox onFilter={onFilter} {...requiredProps} />;
@@ -17,7 +17,7 @@ test('renders KuiToolBarSearchBox', () => {
 describe('onFilter', () => {
   test('is called on change event, with the value entered', () => {
     const searchBox = mount(<KuiToolBarSearchBox onFilter={onFilter} {...requiredProps} />);
-    onFilter.reset();
+    onFilter.resetHistory();
     const event = { target: { value: 'a' } };
     searchBox.find('input').simulate('change', event);
     sinon.assert.calledWith(onFilter, 'a');

@@ -102,8 +102,8 @@ export default class BaseOptimizer {
      * files in optimize/.cache that are not necessary for distributable versions
      * of Kibana and just make compressing and extracting it more difficult.
      */
-    function maybeAddCacheLoader(uiBundles, cacheName, loaders) {
-      if (!uiBundles.isDevMode()) {
+    const maybeAddCacheLoader = (cacheName, loaders) => {
+      if (!this.uiBundles.isDevMode()) {
         return loaders;
       }
 
@@ -111,12 +111,30 @@ export default class BaseOptimizer {
         {
           loader: 'cache-loader',
           options: {
-            cacheDirectory: uiBundles.getCacheDirectory(cacheName)
+            cacheDirectory: this.uiBundles.getCacheDirectory(cacheName)
           }
         },
         ...loaders
       ];
-    }
+    };
+
+    /**
+     * Creates the selection rules for a loader that will only pass for
+     * source files that are eligible for automatic transpilation.
+     */
+    const createSourceFileResourceSelector = (test) => {
+      return [
+        {
+          test,
+          exclude: BABEL_EXCLUDE_RE.concat(this.uiBundles.getWebpackNoParseRules()),
+        },
+        {
+          test,
+          include: /[\/\\]node_modules[\/\\]x-pack[\/\\]/,
+          exclude: /[\/\\]node_modules[\/\\]x-pack[\/\\]node_modules[\/\\]/,
+        }
+      ];
+    };
 
     const commonConfig = {
       node: { fs: 'empty' },
@@ -188,7 +206,7 @@ export default class BaseOptimizer {
             test: /\.less$/,
             use: getStyleLoaders(
               ['less-loader'],
-              maybeAddCacheLoader(this.uiBundles, 'less', [])
+              maybeAddCacheLoader('less', [])
             ),
           },
           {
@@ -213,18 +231,8 @@ export default class BaseOptimizer {
             loader: 'file-loader'
           },
           {
-            resource: [
-              {
-                test: /\.js$/,
-                exclude: BABEL_EXCLUDE_RE.concat(this.uiBundles.getWebpackNoParseRules()),
-              },
-              {
-                test: /\.js$/,
-                include: /[\/\\]node_modules[\/\\]x-pack[\/\\]/,
-                exclude: /[\/\\]node_modules[\/\\]x-pack[\/\\]node_modules[\/\\]/,
-              }
-            ],
-            use: maybeAddCacheLoader(this.uiBundles, 'babel', [
+            resource: createSourceFileResourceSelector(/\.js$/),
+            use: maybeAddCacheLoader('babel', [
               {
                 loader: 'babel-loader',
                 options: {
@@ -261,6 +269,43 @@ export default class BaseOptimizer {
 
     if (this.uiBundles.isDevMode()) {
       return webpackMerge(commonConfig, {
+        module: {
+          rules: [
+            {
+              resource: createSourceFileResourceSelector(/\.tsx?$/),
+              use: maybeAddCacheLoader('typescript', [
+                {
+                  loader: 'ts-loader',
+                  options: {
+                    transpileOnly: true,
+                    experimentalWatchApi: true,
+                    onlyCompileBundledFiles: true,
+                    compilerOptions: {
+                      sourceMap: Boolean(this.sourceMaps),
+                      target: 'es5',
+                      module: 'esnext',
+                    }
+                  }
+                }
+              ]),
+            }
+          ]
+        },
+
+        stats: {
+          // when typescript doesn't do a full type check, as we have the ts-loader
+          // configured here, it does not have enough information to determine
+          // whether an imported name is a type or not, so when the name is then
+          // exported, typescript has no choice but to emit the export. Fortunately,
+          // the extraneous export should not be harmful, so we just suppress these warnings
+          // https://github.com/TypeStrong/ts-loader#transpileonly-boolean-defaultfalse
+          warningsFilter: /export .* was not found in/
+        },
+
+        resolve: {
+          extensions: ['.ts', '.tsx'],
+        },
+
         // In the test env we need to add react-addons (and a few other bits) for the
         // enzyme tests to work.
         // https://github.com/airbnb/enzyme/blob/master/docs/guides/webpack.md

@@ -22,6 +22,7 @@ import { cloud } from './plugins/cloud';
 import { indexManagement } from './plugins/index_management';
 import { indexLifecycleManagement } from './plugins/index_lifecycle_management';
 import { consoleExtensions } from './plugins/console_extensions';
+import { notifications } from './plugins/notifications';
 
 module.exports = function (kibana) {
   return [
@@ -41,7 +42,8 @@ module.exports = function (kibana) {
     licenseManagement(kibana),
     cloud(kibana),
     indexManagement(kibana),
+    consoleExtensions(kibana),
+    notifications(kibana),
     indexLifecycleManagement(kibana),
-    consoleExtensions(kibana)
   ];
 };

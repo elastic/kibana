@@ -17,7 +17,7 @@ const BUILD_NUM = 1234;
 const chance = new Chance();
 
 describe('ui settings', () => {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
 
   function setup(options = {}) {
     const {

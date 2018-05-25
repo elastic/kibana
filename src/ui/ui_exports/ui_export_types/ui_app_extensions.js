@@ -20,6 +20,7 @@ export const visRequestHandlers = appExtension;
 export const visEditorTypes = appExtension;
 export const savedObjectTypes = appExtension;
 export const embeddableFactories = appExtension;
+export const dashboardPanelActions = appExtension;
 export const fieldFormats = appExtension;
 export const fieldFormatEditors = appExtension;
 export const spyModes = appExtension;

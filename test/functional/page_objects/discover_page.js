@@ -55,7 +55,12 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     async openSavedSearch() {
       await this.clickLoadSavedSearchButton();
-      await testSubjects.exists('loadSearchForm');
+      await retry.try(async () => {
+        const isLoadFormVisible = await testSubjects.exists('loadSearchForm');
+        if (!isLoadFormVisible) {
+          throw new Error('Load search form not visible yet.');
+        }
+      });
     }
 
     async hasSavedSearch(searchName) {

@@ -1,7 +1,7 @@
-import execa from 'execa';
 import chalk from 'chalk';
-import logTransformer from 'strong-log-transformer';
+import execa from 'execa';
 import logSymbols from 'log-symbols';
+import logTransformer from 'strong-log-transformer';
 
 function generateColors() {
   const colorWheel = [
@@ -42,8 +42,8 @@ export function spawnStreaming(
   const color = nextColor();
   const prefixedStdout = logTransformer({ tag: `${color.bold(prefix)}:` });
   const prefixedStderr = logTransformer({
-    tag: `${logSymbols.error} ${color.bold(prefix)}:`,
     mergeMultiline: true,
+    tag: `${logSymbols.error} ${color.bold(prefix)}:`,
   });
 
   spawned.stdout.pipe(prefixedStdout).pipe(process.stdout);

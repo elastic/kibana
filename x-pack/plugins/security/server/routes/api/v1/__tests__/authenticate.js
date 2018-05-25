@@ -93,7 +93,15 @@ describe('Authentication routes', () => {
 
       sinon.assert.notCalled(replyStub.continue);
       sinon.assert.calledOnce(replyStub);
-      sinon.assert.calledWithExactly(replyStub, Boom.unauthorized(failureReason));
+
+      sinon.assert.calledWithExactly(
+        replyStub,
+        sinon.match({
+          isBoom: true,
+          message: failureReason.toString(),
+          output: { statusCode: 401 },
+        })
+      );
     });
 
     it('returns 401 if authentication is not handled.', async () => {
@@ -105,7 +113,15 @@ describe('Authentication routes', () => {
 
       sinon.assert.notCalled(replyStub.continue);
       sinon.assert.calledOnce(replyStub);
-      sinon.assert.calledWithExactly(replyStub, Boom.unauthorized());
+
+      sinon.assert.calledWithExactly(
+        replyStub,
+        sinon.match({
+          isBoom: true,
+          message: 'Unauthorized',
+          output: { statusCode: 401 },
+        })
+      );
     });
 
     it('returns user data if authentication succeed.', async () => {
@@ -183,7 +199,11 @@ describe('Authentication routes', () => {
       sinon.assert.calledOnce(replyStub);
       sinon.assert.calledWithExactly(
         replyStub,
-        Boom.badRequest('Client should be able to process redirect response.')
+        sinon.match({
+          isBoom: true,
+          message: 'Client should be able to process redirect response.',
+          output: { statusCode: 400 }
+        })
       );
       sinon.assert.notCalled(replyStub.continue);
       sinon.assert.notCalled(replyStub.redirect);
@@ -323,7 +343,14 @@ describe('Authentication routes', () => {
       sinon.assert.notCalled(replyStub.continue);
       sinon.assert.notCalled(replyStub.redirect);
       sinon.assert.calledOnce(replyStub);
-      sinon.assert.calledWithExactly(replyStub, Boom.unauthorized(failureReason));
+      sinon.assert.calledWithExactly(
+        replyStub,
+        sinon.match({
+          isBoom: true,
+          message: failureReason.toString(),
+          output: { statusCode: 401 }
+        })
+      );
     });
 
     it('returns 401 if authentication is not handled.', async () => {
@@ -336,7 +363,14 @@ describe('Authentication routes', () => {
       sinon.assert.notCalled(replyStub.continue);
       sinon.assert.notCalled(replyStub.redirect);
       sinon.assert.calledOnce(replyStub);
-      sinon.assert.calledWithExactly(replyStub, Boom.unauthorized());
+      sinon.assert.calledWithExactly(
+        replyStub,
+        sinon.match({
+          isBoom: true,
+          message: 'Unauthorized',
+          output: { statusCode: 401 }
+        })
+      );
     });
 
     it('returns 403 if there an active session exists.', async () => {
@@ -351,10 +385,12 @@ describe('Authentication routes', () => {
       sinon.assert.calledOnce(replyStub);
       sinon.assert.calledWithExactly(
         replyStub,
-        Boom.forbidden(
-          'Sorry, you already have an active Kibana session. ' +
-          'If you want to start a new one, please logout from the existing session first.'
-        )
+        sinon.match({
+          isBoom: true,
+          message: 'Sorry, you already have an active Kibana session. ' +
+            'If you want to start a new one, please logout from the existing session first.',
+          output: { statusCode: 403 }
+        })
       );
     });
 

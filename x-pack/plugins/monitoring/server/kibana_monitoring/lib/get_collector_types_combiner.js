@@ -9,8 +9,8 @@ import {
   KIBANA_STATS_TYPE,
   KIBANA_SETTINGS_TYPE,
   KIBANA_USAGE_TYPE,
-  KIBANA_REPORTING_TYPE,
 } from '../../../common/constants';
+import { KIBANA_REPORTING_TYPE } from '../../../../reporting/common/constants';
 import { sourceKibana } from './source_kibana';
 
 /*

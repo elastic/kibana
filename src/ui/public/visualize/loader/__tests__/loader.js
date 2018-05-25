@@ -78,7 +78,7 @@ describe('visualize loader', () => {
     // Setup savedObject
     mockedSavedObject = createSavedObject();
     // Mock savedVisualizations.get to return 'mockedSavedObject' when id is 'exists'
-    sinon.stub(savedVisualizations, 'get', (id) =>
+    sinon.stub(savedVisualizations, 'get').callsFake((id) =>
       id === 'exists' ? Promise.resolve(mockedSavedObject) : Promise.reject()
     );
   }));
@@ -251,7 +251,7 @@ describe('visualize loader', () => {
         expect(spy.notCalled).to.be(true);
         container.find('visualize').trigger('renderComplete');
         expect(spy.calledOnce).to.be(true);
-        spy.reset();
+        spy.resetHistory();
         handler.removeRenderCompleteListener(spy);
         container.find('visualize').trigger('renderComplete');
         expect(spy.notCalled).to.be(true);

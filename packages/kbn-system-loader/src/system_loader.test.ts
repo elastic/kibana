@@ -1,44 +1,53 @@
+/* tslint:disable max-classes-per-file */
+
 import { System } from './system';
+import { KibanaSystemApiFactory, SystemLoader } from './system_loader';
 import { KibanaSystem } from './system_types';
-import { SystemLoader, KibanaSystemApiFactory } from './system_loader';
 
 // To make types simpler in the tests
 type CoreType = void;
-const createCoreValues = () => {};
+const createCoreValues = () => {
+  // noop
+};
 
 test('starts system with core api', () => {
   expect.assertions(1);
 
-  type KibanaCoreApi = { fromCore: boolean; name: string };
-  type Metadata = { configPath?: string };
+  interface IKibanaCoreApi {
+    fromCore: boolean;
+    name: string;
+  }
+  interface IMetadata {
+    configPath?: string;
+  }
 
-  class FooSystem extends KibanaSystem<KibanaCoreApi, {}> {
-    start() {
+  class FooSystem extends KibanaSystem<IKibanaCoreApi, {}> {
+    public start() {
       expect(this.kibana).toEqual({
-        name: 'foo',
         fromCore: true,
         metadata: {
           configPath: 'config.path.foo',
         },
+        name: 'foo',
       });
     }
   }
 
   const foo = new System('foo', {
+    implementation: FooSystem,
     metadata: {
       configPath: 'config.path.foo',
     },
-    implementation: FooSystem,
   });
 
-  const createSystemApi: KibanaSystemApiFactory<KibanaCoreApi, Metadata> = (
+  const createSystemApi: KibanaSystemApiFactory<IKibanaCoreApi, IMetadata> = (
     name,
     metadata
   ) => {
     return {
-      name,
-      metadata,
       fromCore: true,
+      metadata,
+      name,
     };
   };
 
@@ -51,22 +60,22 @@ test('starts system with core api', () => {
 test('system can expose a value', () => {
   expect.assertions(1);
 
-  type Foo = {
+  interface IFoo {
     foo: {
       value: string;
     };
-  };
+  }
 
-  class FooSystem extends KibanaSystem<CoreType, {}, Foo['foo']> {
-    start() {
+  class FooSystem extends KibanaSystem<CoreType, {}, IFoo['foo']> {
+    public start() {
       return {
         value: 'my-value',
       };
     }
   }
 
-  class BarSystem extends KibanaSystem<CoreType, Foo> {
-    start() {
+  class BarSystem extends KibanaSystem<CoreType, IFoo> {
+    public start() {
       expect(this.deps.foo).toEqual({ value: 'my-value' });
     }
   }
@@ -89,22 +98,22 @@ test('system can expose a value', () => {
 test('system can expose a function', () => {
   expect.assertions(2);
 
-  type Foo = {
+  interface IFoo {
     foo: {
       fn: (val: string) => string;
     };
-  };
+  }
 
-  class FooSystem extends KibanaSystem<CoreType, {}, Foo['foo']> {
-    start(): Foo['foo'] {
+  class FooSystem extends KibanaSystem<CoreType, {}, IFoo['foo']> {
+    public start(): IFoo['foo'] {
       return {
         fn: val => `test-${val}`,
       };
     }
   }
 
-  class BarSystem extends KibanaSystem<CoreType, Foo> {
-    start() {
+  class BarSystem extends KibanaSystem<CoreType, IFoo> {
+    public start() {
       expect(this.deps.foo).toBeDefined();
       expect(this.deps.foo.fn('some-value')).toBe('test-some-value');
     }
@@ -128,36 +137,36 @@ test('system can expose a function', () => {
 test('can expose value with same name across multiple systems', () => {
   expect.assertions(2);
 
-  type Foo = {
+  interface IFoo {
     foo: {
       value: string;
     };
-  };
+  }
 
-  type Bar = {
+  interface IBar {
     bar: {
       value: string;
     };
-  };
+  }
 
-  class FooSystem extends KibanaSystem<CoreType, {}, Foo['foo']> {
-    start(): Foo['foo'] {
+  class FooSystem extends KibanaSystem<CoreType, {}, IFoo['foo']> {
+    public start(): IFoo['foo'] {
       return {
         value: 'value-foo',
       };
     }
   }
 
-  class BarSystem extends KibanaSystem<CoreType, {}, Bar['bar']> {
-    start(): Bar['bar'] {
+  class BarSystem extends KibanaSystem<CoreType, {}, IBar['bar']> {
+    public start(): IBar['bar'] {
       return {
         value: 'value-bar',
       };
     }
   }
 
-  class QuuxSystem extends KibanaSystem<CoreType, Foo & Bar> {
-    start() {
+  class QuuxSystem extends KibanaSystem<CoreType, IFoo & IBar> {
+    public start() {
       expect(this.deps.foo).toEqual({ value: 'value-foo' });
       expect(this.deps.bar).toEqual({ value: 'value-bar' });
     }
@@ -186,32 +195,36 @@ test('can expose value with same name across multiple systems', () => {
 test('receives values from dependencies but not transitive dependencies', () => {
   expect.assertions(3);
 
-  type Grandchild = {
+  interface IGrandchild {
     grandchild: {
       value: string;
     };
-  };
+  }
 
-  type Child = {
+  interface IChild {
     child: {
       value: string;
     };
-  };
+  }
 
   class GrandchildSystem extends KibanaSystem<
     CoreType,
     {},
-    Grandchild['grandchild']
+    IGrandchild['grandchild']
   > {
-    start() {
+    public start() {
       return {
         value: 'grandchild',
       };
     }
   }
 
-  class ChildSystem extends KibanaSystem<CoreType, Grandchild, Child['child']> {
-    start() {
+  class ChildSystem extends KibanaSystem<
+    CoreType,
+    IGrandchild,
+    IChild['child']
+  > {
+    public start() {
       expect(this.deps.grandchild).toEqual({ value: 'grandchild' });
 
       return {
@@ -220,8 +233,8 @@ test('receives values from dependencies but not transitive dependencies', () => 
     }
   }
 
-  class ParentSystem extends KibanaSystem<CoreType, Grandchild & Child> {
-    start() {
+  class ParentSystem extends KibanaSystem<CoreType, IGrandchild & IChild> {
+    public start() {
       expect(this.deps.child).toEqual({ value: 'child' });
       expect(this.deps.grandchild).toBeUndefined();
     }
@@ -251,24 +264,24 @@ test('receives values from dependencies but not transitive dependencies', () => 
 test('keeps reference on registered value', () => {
   expect.assertions(1);
 
-  type Child = {
+  interface IChild {
     child: {
       value: {};
     };
-  };
+  }
 
   const myRef = {};
 
-  class ChildSystem extends KibanaSystem<CoreType, {}, Child['child']> {
-    start() {
+  class ChildSystem extends KibanaSystem<CoreType, {}, IChild['child']> {
+    public start() {
       return {
         value: myRef,
       };
     }
   }
 
-  class ParentSystem extends KibanaSystem<CoreType, Child> {
-    start() {
+  class ParentSystem extends KibanaSystem<CoreType, IChild> {
+    public start() {
       expect(this.deps.child.value).toBe(myRef);
     }
   }
@@ -291,15 +304,15 @@ test('keeps reference on registered value', () => {
 test('can register multiple values in single system', () => {
   expect.assertions(1);
 
-  type Child = {
+  interface IChild {
     child: {
       value1: number;
       value2: number;
     };
-  };
+  }
 
-  class ChildSystem extends KibanaSystem<CoreType, {}, Child['child']> {
-    start() {
+  class ChildSystem extends KibanaSystem<CoreType, {}, IChild['child']> {
+    public start() {
       return {
         value1: 1,
         value2: 2,
@@ -307,8 +320,8 @@ test('can register multiple values in single system', () => {
     }
   }
 
-  class ParentSystem extends KibanaSystem<CoreType, Child> {
-    start() {
+  class ParentSystem extends KibanaSystem<CoreType, IChild> {
+    public start() {
       expect(this.deps.child).toEqual({
         value1: 1,
         value2: 2,
@@ -333,7 +346,9 @@ test('can register multiple values in single system', () => {
 
 test("throws if starting a system that depends on a system that's not present", () => {
   class FooSystem extends KibanaSystem<CoreType, {}> {
-    start() {}
+    public start() {
+      // noop
+    }
   }
 
   const foo = new System('foo', {
@@ -352,7 +367,9 @@ test("throws if starting a system that depends on a system that's not present", 
 
 test("throws if adding that has the same name as a system that's already added", () => {
   class FooSystem extends KibanaSystem<CoreType, {}> {
-    start() {}
+    public start() {
+      // noop
+    }
   }
 
   const foo = new System('foo', {
@@ -371,19 +388,19 @@ test('stops systems in reverse order of their starting order', () => {
   const events: string[] = [];
 
   class FooSystem extends KibanaSystem<CoreType, {}> {
-    start() {
+    public start() {
       events.push('start foo');
     }
-    stop() {
+    public stop() {
       events.push('stop foo');
     }
   }
 
   class BarSystem extends KibanaSystem<CoreType, {}> {
-    start() {
+    public start() {
       events.push('start bar');
     }
-    stop() {
+    public stop() {
       events.push('stop bar');
     }
   }
@@ -409,18 +426,18 @@ test('stops systems in reverse order of their starting order', () => {
 test('can add systems before adding its dependencies', () => {
   expect.assertions(1);
 
-  type Foo = {
+  interface IFoo {
     foo: string;
-  };
+  }
 
-  class FooSystem extends KibanaSystem<CoreType, {}, Foo['foo']> {
-    start() {
+  class FooSystem extends KibanaSystem<CoreType, {}, IFoo['foo']> {
+    public start() {
       return 'value';
     }
   }
 
-  class BarSystem extends KibanaSystem<CoreType, Foo> {
-    start() {
+  class BarSystem extends KibanaSystem<CoreType, IFoo> {
+    public start() {
       expect(this.deps.foo).toBe('value');
     }
   }
@@ -447,13 +464,13 @@ test('can add multiple system specs at the same time', () => {
   const spy = jest.fn();
 
   class FooSystem extends KibanaSystem<CoreType, {}> {
-    start() {
+    public start() {
       spy();
     }
   }
 
   class BarSystem extends KibanaSystem<CoreType, {}> {
-    start() {
+    public start() {
       spy();
     }
   }

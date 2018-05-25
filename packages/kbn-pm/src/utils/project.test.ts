@@ -1,11 +1,11 @@
-import { resolve, join } from 'path';
+import { join, resolve } from 'path';
 
-import { PackageJson } from './package_json';
+import { IPackageJson } from './package_json';
 import { Project } from './project';
 
 const rootPath = resolve(`${__dirname}/__fixtures__/kibana`);
 
-const createProjectWith = (packageJson: PackageJson, path = '') =>
+const createProjectWith = (packageJson: IPackageJson, path = '') =>
   new Project(
     {
       name: 'kibana',
@@ -25,11 +25,11 @@ describe('fromPath', () => {
 
 test('fields', async () => {
   const kibana = createProjectWith({
-    scripts: {
-      test: 'jest',
-    },
     dependencies: {
       foo: '1.2.3',
+    },
+    scripts: {
+      test: 'jest',
     },
   });
 

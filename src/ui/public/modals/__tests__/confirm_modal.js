@@ -93,8 +93,8 @@ describe('ui/modals/confirm_modal', function () {
     };
 
     beforeEach(() => {
-      confirmCallback.reset();
-      cancelCallback.reset();
+      confirmCallback.resetHistory();
+      cancelCallback.resetHistory();
     });
 
     it('onCancel', function () {

@@ -7,7 +7,7 @@ import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
 const chance = new Chance();
 
 describe('uiSettings/createOrUpgradeSavedConfig', function () {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
   afterEach(() => sandbox.restore());
 
   const version = '4.0.1';

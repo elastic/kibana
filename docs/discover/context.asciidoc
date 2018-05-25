@@ -32,7 +32,7 @@ pattern the context is based on.
 
 While not required, it is recommended to only
 use fields which have {ref}/doc-values.html[doc values] enabled to achieve
-good performance and avoid unnecessary {ref}/modules-fielddata.html[field 
+good performance and avoid unnecessary {ref}/modules-fielddata.html[field
 data] usage. Common examples for suitable fields include log line numbers,
 monotonically increasing counters and high-precision timestamps.
 --
@@ -43,6 +43,8 @@ NOTE: The number of documents displayed by default can be configured
 via the `context:defaultSize` setting in <<advanced-options, *Management >
 Advanced Settings*>>.
 
+[float]
+[[change-context-size]]
 === Changing the Context Size
 
 You can change the number documents displayed before and after the anchor
@@ -66,6 +68,8 @@ NOTE: The default number of documents loaded with each button click can be
 configured via the `context:step` setting in <<advanced-options, *Management >
 Advanced Settings*>>.
 
+[float]
+[[filter-context]]
 === Filtering the Context
 
 Depending on how the documents are partitioned into index patterns, the context

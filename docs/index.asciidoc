@@ -1,9 +1,82 @@
 [[kibana-guide]]
 = Kibana User Guide
 
-include::index-shared1.asciidoc[]
-include::index-shared2.asciidoc[]
-include::index-shared3.asciidoc[]
-include::index-shared4.asciidoc[]
-include::index-shared5.asciidoc[]
-include::index-shared6.asciidoc[]
+:include-xpack:  true
+:lang:           en
+:kib-repo-dir:   {docdir}
+:xkb-repo-dir:   {docdir}/../x-pack/docs/{lang}
+:blog-ref:       https://www.elastic.co/blog/
+:wikipedia:      https://en.wikipedia.org/wiki
+
+include::{asciidoc-dir}/../../shared/versions.asciidoc[]
+
+:docker-repo:    docker.elastic.co/kibana/kibana
+:docker-image:   docker.elastic.co/kibana/kibana:{version}
+:repo:           https://github.com/elastic/kibana/
+:issue:          {repo}issues/
+:pull:           {repo}pull/
+:commit:         {repo}commit/
+:blob:           {repo}blob/{branch}/
+:security-ref:   https://www.elastic.co/community/security/
+
+include::{asciidoc-dir}/../../shared/attributes.asciidoc[]
+
+include::introduction.asciidoc[]
+
+include::setup.asciidoc[]
+
+include::{xkb-repo-dir}/setup/setup-xkb.asciidoc[]
+
+include::{xkb-repo-dir}/monitoring/monitoring-xkib.asciidoc[]
+
+include::{xkb-repo-dir}/security/securing-kibana.asciidoc[]
+
+include::{xkb-repo-dir}/settings/settings-xkb.asciidoc[]
+
+include::migration.asciidoc[]
+
+include::getting-started.asciidoc[]
+
+include::discover.asciidoc[]
+
+include::visualize.asciidoc[]
+
+include::dashboard.asciidoc[]
+
+include::timelion.asciidoc[]
+
+include::{xkb-repo-dir}/ml/index.asciidoc[]
+
+include::{xkb-repo-dir}/apm/index.asciidoc[]
+
+include::{xkb-repo-dir}/graph/index.asciidoc[]
+
+include::dev-tools.asciidoc[]
+
+include::{xkb-repo-dir}/searchprofiler/index.asciidoc[]
+
+include::{xkb-repo-dir}/grokdebugger/index.asciidoc[]
+
+include::{xkb-repo-dir}/monitoring/index.asciidoc[]
+
+include::management.asciidoc[]
+
+include::{xkb-repo-dir}/security/index.asciidoc[]
+
+include::{xkb-repo-dir}/management/watcher-ui/index.asciidoc[]
+
+include::{xkb-repo-dir}/upgrade-assistant/index.asciidoc[]
+
+include::{xkb-repo-dir}/dashboard_only_mode/index.asciidoc[]
+
+include::{xkb-repo-dir}/reporting/index.asciidoc[]
+
+include::plugins.asciidoc[]
+
+include::development.asciidoc[]
+
+include::limitations.asciidoc[]
+
+include::release-notes/highlights.asciidoc[]
+
+include::CHANGELOG.asciidoc[]
