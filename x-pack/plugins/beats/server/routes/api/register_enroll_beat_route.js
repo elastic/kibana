@@ -80,7 +80,7 @@ export function registerEnrollBeatRoute(server) {
       try {
         const enrollmentToken = request.headers['kbn-beats-enrollment-token'];
         const { token, expires_on: expiresOn } = await getEnrollmentToken(callWithInternalUser, enrollmentToken);
-        if (!token || token !== enrollmentToken) {
+        if (!token) {
           return reply({ message: 'Invalid enrollment token' }).code(400);
         }
         if (moment(expiresOn).isBefore(moment())) {
