@@ -16,9 +16,19 @@ export async function deleteIndex(options) {
     retryIfSnapshottingCount = 3
   } = options;
 
+  const getIndicesToDelete = async () => {
+    const isAlias = await client.indices.existsAlias({ name: index });
+    if (!isAlias) {
+      return index;
+    }
+    const alias = await client.indices.getAlias({ name: index });
+    return Object.keys(alias);
+  };
+
   try {
-    await client.indices.delete({ index });
-    stats.deletedIndex(index);
+    const indicesToDelete = await getIndicesToDelete();
+    await client.indices.delete({ index: indicesToDelete });
+    stats.deletedIndex(indicesToDelete);
   } catch (error) {
 
     if (retryIfSnapshottingCount > 0 && isDeleteWhileSnapshotInProgressError(error)) {
