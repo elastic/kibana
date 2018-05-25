@@ -12,11 +12,4 @@ commander
   .description('Generates a new transform migration in the dir/migrations directory.')
   .action(newTransform);
 
-commander
-  .command('*')
-  .action((cmd) => {
-    console.log(`Unknown command ${cmd}`);
-    commander.outputHelp();
-  });
-
 commander.parse(process.argv);
