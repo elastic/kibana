@@ -8,35 +8,66 @@ import Joi from 'joi';
 import {
   get,
   flatten,
-  difference,
   uniq
 } from 'lodash';
 import { INDEX_NAMES } from '../../../common/constants';
 import { callWithRequestFactory } from '../../lib/client';
 import { wrapEsError } from '../../lib/error_wrappers';
 
-async function getBeats(callWithRequest, beatIds) {
-  const ids = beatIds.map(beatId => `beat:${beatId}`);
+async function getDocs(callWithRequest, ids) {
   const params = {
     index: INDEX_NAMES.BEATS,
     type: '_doc',
     body: { ids },
-    _sourceInclude: [ 'beat.id', 'beat.tags' ]
+    _source: false
   };
 
   const response = await callWithRequest('mget', params);
   return get(response, 'docs', []);
 }
 
-async function persistTagAdditions(callWithRequest, existingBeatTagMap, tagAdditions) {
-  const body = flatten(tagAdditions.map(addition => {
-    const { beatId, tags } = addition;
-    const existingTags = existingBeatTagMap[beatId];
-    const newTags = uniq([ ...existingTags, ...tags ]);
+function getBeats(callWithRequest, beatIds) {
+  const ids = beatIds.map(beatId => `beat:${beatId}`);
+  return getDocs(callWithRequest, ids);
+}
+
+function getTags(callWithRequest, tags) {
+  const ids = tags.map(tag => `tag:${tag}`);
+  return getDocs(callWithRequest, ids);
+}
+
+async function findNonExistentItems(callWithRequest, items, getFn) {
+  const itemsFromEs = await getFn.call(null, callWithRequest, items);
+  return itemsFromEs.reduce((nonExistentItems, itemFromEs, idx) => {
+    if (!itemFromEs.found) {
+      nonExistentItems.push(items[idx]);
+    }
+    return nonExistentItems;
+  }, []);
+}
+
+function findNonExistentBeatIds(callWithRequest, beatIds) {
+  return findNonExistentItems(callWithRequest, beatIds, getBeats);
+}
+
+function findNonExistentTags(callWithRequest, tags) {
+  return findNonExistentItems(callWithRequest, tags, getTags);
+}
+
+async function persistAdditions(callWithRequest, additions) {
+  const body = flatten(additions.map(addition => {
+    const { beatId, tag } = addition;
+    const script = 'def beat = ctx._source.beat; '
+      + 'if (beat.tags == null) { '
+      + '  beat.tags = []; '
+      + '} '
+      + 'if (!beat.tags.contains(params.tag)) { '
+      + '  beat.tags.add(params.tag); '
+      + '}';
 
     return [
       { update: { _id: `beat:${beatId}` } },
-      { doc: { beat: { tags: newTags } } }
+      { script: { source: script, params: { tag } } }
     ];
   }));
 
@@ -48,23 +79,38 @@ async function persistTagAdditions(callWithRequest, existingBeatTagMap, tagAddit
   };
 
   const response = await callWithRequest('bulk', params);
-  return get(response, 'items', []);
+  return get(response, 'items', [])
+    .map((item, resultIdx) => ({
+      status: item.update.status,
+      result: item.update.result,
+      idxInRequest: additions[resultIdx].idxInRequest
+    }));
 }
 
-function findNonExistentBeatIds(beatsFromEs, beatIdsFromRequest) {
-  return beatsFromEs.reduce((nonExistentBeatIds, beatFromEs, idx) => {
-    if (!beatFromEs.found) {
-      nonExistentBeatIds.push(beatIdsFromRequest[idx]);
+function addNonExistentAdditionsToResponse(response, additions, nonExistentBeatIds, nonExistentTags) {
+  additions.forEach((addition, idx) => {
+    const isBeatNonExistent = nonExistentBeatIds.includes(addition.beat_id);
+    const isTagNonExistent = nonExistentTags.includes(addition.tag);
+
+    if (isBeatNonExistent && isTagNonExistent) {
+      response.additions[idx].status = 404;
+      response.additions[idx].result = `Beat ${addition.beat_id} and tag ${addition.tag} not found`;
+    } else if (isBeatNonExistent) {
+      response.additions[idx].status = 404;
+      response.additions[idx].result = `Beat ${addition.beat_id} not found`;
+    } else if (isTagNonExistent) {
+      response.additions[idx].status = 404;
+      response.additions[idx].result = `Tag ${addition.tag} not found`;
     }
-    return nonExistentBeatIds;
-  }, []);
+  });
 }
 
-function makeBeatTagMap(beatsFromEs) {
-  return beatsFromEs.reduce((beatTagMap, beat) => {
-    beatTagMap[beat.id] = beat.tags || [];
-    return beatTagMap;
-  }, {});
+function addAdditionResultsToResponse(response, additionResults) {
+  additionResults.forEach(additionResult => {
+    const { idxInRequest, status, result } = additionResult;
+    response.additions[idxInRequest].status = status;
+    response.additions[idxInRequest].result = result;
+  });
 }
 
 // TODO: add license check pre-hook
@@ -72,68 +118,50 @@ function makeBeatTagMap(beatsFromEs) {
 export function registerAddTagsToBeatsRoute(server) {
   server.route({
     method: 'POST',
-    path: '/api/beats/beats_tags',
+    path: '/api/beats/agents_tags',
     config: {
       validate: {
         payload: Joi.object({
-          beat_ids: Joi.object().pattern(/\w/, Joi.object({
-            tags: Joi.array().items(Joi.string())
-          })).required()
+          additions: Joi.array().items(Joi.object({
+            beat_id: Joi.string().required(),
+            tag: Joi.string().required()
+          }))
         }).required()
       }
     },
     handler: async (request, reply) => {
       const callWithRequest = callWithRequestFactory(server, request);
 
-      const beatIds = Object.keys(request.payload.beat_ids);
+      const { additions } = request.payload;
+      const beatIds = uniq(additions.map(addition => addition.beat_id));
+      const tags = uniq(additions.map(addition => addition.tag));
+
       const response = {
-        beat_ids: {}
+        additions: additions.map(() => ({ status: null }))
       };
 
-      if (beatIds.length === 0) {
-        return reply(response);
-      }
-
-      let nonExistentBeatIds;
-      let existingBeatIds;
-      let tagAdditionResults;
       try {
-        const beatsFromEs = await getBeats(callWithRequest, beatIds);
+        // Handle additions containing non-existing beat IDs or tags
+        const nonExistentBeatIds = await findNonExistentBeatIds(callWithRequest, beatIds);
+        const nonExistentTags = await findNonExistentTags(callWithRequest, tags);
 
-        nonExistentBeatIds = findNonExistentBeatIds(beatsFromEs, beatIds);
-        existingBeatIds = difference(beatIds, nonExistentBeatIds);
+        addNonExistentAdditionsToResponse(response, additions, nonExistentBeatIds, nonExistentTags);
 
-        if (existingBeatIds.length === 0) {
-          return reply(response);
+        const validAdditions = additions
+          .map((addition, idxInRequest) => ({
+            beatId: addition.beat_id,
+            tag: addition.tag,
+            idxInRequest // so we can add the result of this addition to the correct place in the response
+          }))
+          .filter((addition, idx) => response.additions[idx].status === null);
+
+        if (validAdditions.length > 0) {
+          const additionResults = await persistAdditions(callWithRequest, validAdditions);
+          addAdditionResultsToResponse(response, additionResults);
         }
-
-        const existingBeatsFromEs = beatsFromEs
-          .map(doc => doc._source.beat)
-          .filter(beat => existingBeatIds.includes(beat.id));
-
-        const existingBeatTagMap = makeBeatTagMap(existingBeatsFromEs);
-
-        tagAdditionResults = await persistTagAdditions(callWithRequest, existingBeatTagMap, existingBeatIds.map(beatId => ({
-          beatId,
-          tags: request.payload.beat_ids[beatId].tags
-        })));
       } catch (err) {
         return reply(wrapEsError(err));
       }
-
-      nonExistentBeatIds.forEach(beatId => {
-        response.beat_ids[beatId] = {
-          status: 404,
-          result: 'not found'
-        };
-      });
-
-      existingBeatIds.forEach((beatId, idx) => {
-        response.beat_ids[beatId] = {
-          status: tagAdditionResults[idx].update.status,
-          result: 'added'
-        };
-      });
 
       reply(response);
     }
