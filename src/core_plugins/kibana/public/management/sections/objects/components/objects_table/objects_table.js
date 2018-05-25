@@ -58,7 +58,7 @@ export class ObjectsTable extends Component {
     this.state = {
       totalCount: 0,
       page: 0,
-      perPage: props.perPageConfig || 10,
+      perPage: props.perPageConfig || 50,
       savedObjects: [],
       savedObjectCounts: INCLUDED_TYPES.reduce((accum, type) => {
         accum[type] = 0;
