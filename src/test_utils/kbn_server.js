@@ -30,19 +30,11 @@ const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {
     url: esTestConfig.getUrl(),
     username: kibanaServerTestUser.username,
     password: kibanaServerTestUser.password
+  },
+  kibana: {
+    index: '.kibana'
   }
 };
-
-/**
- * Creates an instance of KbnServer with default configuration
- * tailored for unit tests
- *
- * @param {Object} [settings={}] Any config overrides for this instance
- * @return {KbnServer}
- */
-export function createServer(settings = {}) {
-  return new KbnServer(defaultsDeep({}, settings, DEFAULTS_SETTINGS));
-}
 
 /**
  *  Creates an instance of KbnServer, including all of the core plugins,

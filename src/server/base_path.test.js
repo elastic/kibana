@@ -4,7 +4,7 @@ const basePath = '/kibana';
 describe('Server basePath config', function () {
   let kbnServer;
   beforeAll(async function () {
-    kbnServer = kbnTestServer.createServer({
+    kbnServer = kbnTestServer.createServerWithCorePlugins({
       server: { basePath }
     });
     await kbnServer.ready();
