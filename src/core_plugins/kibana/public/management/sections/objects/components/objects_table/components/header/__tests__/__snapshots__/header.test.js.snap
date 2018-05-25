@@ -21,7 +21,7 @@ exports[`Header should render normally 1`] = `
         direction="row"
         gutterSize="m"
         justifyContent="flexStart"
-        responsive={true}
+        responsive={false}
         wrap={false}
       >
         <EuiFlexItem
@@ -61,7 +61,7 @@ exports[`Header should render normally 1`] = `
         direction="row"
         gutterSize="m"
         justifyContent="flexStart"
-        responsive={true}
+        responsive={false}
         wrap={false}
       >
         <EuiFlexItem
