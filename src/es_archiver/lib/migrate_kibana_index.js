@@ -4,7 +4,6 @@ import path from 'path';
 import { promisify } from 'util';
 import { Migration } from '@kbn/migrations';
 import { findPluginSpecs } from '../../plugin_discovery';
-import { pluginSpecsToMigrations } from '../../core_plugins/kibana_migrations';
 
 // This is an expensive operation, so we'll ensure it only happens once
 const buildPlugins = _.once(async () => {
@@ -27,6 +26,16 @@ export async function migrateKibanaIndex({ client, log }) {
   };
 
   return await Migration.migrate(opts);
+}
+
+function pluginSpecsToMigrations(pluginSpecs) {
+  return pluginSpecs
+    .map((spec) => ({
+      id: spec.getId(),
+      mappings: _.get(spec.getExportSpecs(), 'mappings'),
+      migrations: spec.getMigrations(),
+    }))
+    .filter(p => p.migrations || p.mappings);
 }
 
 async function loadElasticVersion() {

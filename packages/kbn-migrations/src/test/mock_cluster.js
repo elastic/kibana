@@ -66,6 +66,7 @@ function mockElasticSearchCommands(data, meta) {
     'indices.updateAliases': updateAliases,
     'indices.putMapping': putMapping,
     'indices.getSettings': getSettings,
+    'indices.refresh': refreshIndex,
     'reindex': reindex,
     'indices.delete': deleteIndex,
     'indices.putAlias': putAlias,
@@ -102,7 +103,7 @@ function mockElasticSearchCommands(data, meta) {
 
   function tryUnAlias(index) {
     if (!indexExists({ index })) {
-      throw new Error(`Index ${index} does not exist.`);
+      throw reject(`Index ${index} does not exist.`);
     }
     return unAlias(index);
   }
@@ -125,6 +126,10 @@ function mockElasticSearchCommands(data, meta) {
       shards_acknowledged: true,
       index,
     });
+  }
+
+  function refreshIndex({ index }) {
+    return tryUnAlias(index);
   }
 
   function isReadOnly(index) {

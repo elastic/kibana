@@ -24,7 +24,7 @@ export default function (kibana) {
   });
 }
 
-export function pluginSpecsToMigrations(pluginSpecs) {
+function pluginSpecsToMigrations(pluginSpecs) {
   return pluginSpecs
     .map((spec) => ({
       id: spec.getId(),

@@ -335,7 +335,7 @@ If the Kibana instance that is performing the migration crashes or is killed pri
 
 ## Running tests
 
-- `node scripts/jest --testPathPattern=migrations`
+- `node scripts/jest --testPathPattern=migration`
 - `node scripts/mocha --grep "migrate"`
 - Integration tests:
   - Start the test server: `yarn run test:ui:server`
