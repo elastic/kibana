@@ -1,63 +1,93 @@
 [[controls]]
 == Controls Visualization
 
-Controls provide the ability to add interactive inputs to Kibana Dashboards.
-Controls can be used to create two types of inputs; dropdowns and range sliders.
+The Controls visualization enables you to add interactive inputs
+to Kibana dashboards.  You can create two types of inputs:
+a dropdown menu and a radio slider.
 
+To start a *Controls* visualization, open the Visualization application
+and click the *+* button. Scroll to the *Others* section and
+select *Controls*.
+
+[role="screenshot"]
 image::images/controls/controls_in_dashboard.png[]
 
-Gail's version
+[[add-input-controls]]
+=== Adding Input Controls
 
-=== Configuration
-Create Controls visualizations by following the <<createvis,Creating a Visualization>> instructions.
-Select *Controls* as the visualization type.
+From the *Controls* tab, you can add a dropdown menu
+and range slider to your visualization.
 
-==== Dropdown
+==== Dropdown menu
 
-Dropdown inputs allow users to easily filter content by selecting options from a list.
-The dropdown options list is dynamically populated with the results of a terms aggregation.
+A dropdown menu allows users to filter content by selecting
+one or more options from a list. The dropdown menu is dynamically populated
+with the results of a terms aggregation.
 
-Add dropdown inputs to your Controls Visualization by selecting *Options list* and clicking *Add*.
-
+[role="screenshot"]
 image::images/controls/dropdown_control_editor.png[]
 
-*Control Label*:: By default, the control label will be the *Field*. Set this configuration to customize the control's label.
-*Index Pattern*:: Specify the data set by selecting an <<index-patterns,Index Pattern>>.
-*Field*:: Select the Field that will be used to populate the options list
-and will be filtered on when users interact with the input.
-The list of available fields is derived from the selected *Index Pattern* configuration.
-*Parent control*:: Set parent control to chain dropdown inputs so that the selection of the first input
-will filter the terms of the second input. Configuration is only available when multiple dropdowns have been created.
-*Multiselect*:: When enabled, the dropdown will allow users to select multiple options.
-*Size*:: Use the size parameter to define the number of options.
+*Control Label*:: The label for the dropdown menu. By default, the
+label is the field name.
+
+*Index Pattern*:: The <<index-patterns,index pattern>> that contains
+the data set to visualize.
+
+*Field*:: The field to use to populate the options list
+and to filter on when users interact with the input.
+The list of available fields is derived from the specified
+index pattern.
+
+*Parent control*:: The control for chaining dropdown menus so that the
+selection in the first menu
+filters the terms in the second menu. Only available when
+creating multiple dropdown menus.
+
+*Multiselect*:: When enabled, the dropdown menu allows users to select multiple options.
+
+*Size*:: The number of options to include in the list.
 
 ==== Range slider
 
-Range sliders allow users to easily filter content by selecting a numerical range.
-The range slider minimum and maximum values are dynamically populated with the results of a min and max aggregation.
+A range sliders allow users to filter content within a range of numbers.
+The range slider minimum and maximum values are dynamically populated with
+the results of a min and max aggregation.
 
-Add range sliders to your Controls Visualization by selecting *Range slider* and clicking *Add*.
-
+[role="screenshot"]
 image::images/controls/range_slider_editor.png[]
 
-*Control Label*:: By default, the control label will be the *Field*. Set this configuration to customize the control's label.
-*Index Pattern*:: Specify the data set by selecting an <<index-patterns,Index Pattern>>.
-*Field*:: Select the Field that will be used to populate the slider range
-and will be filtered on when users interact with the input.
-The list of available fields is derived from the selected *Index Pattern* configuration.
-*Step Size*:: Use this configuration to change the slider increment/decrement size.
-*Decimal Places*:: Number of decimal places.
+*Control Label*:: The label for the range slider. By default, the
+label is the field name.
 
-==== Options
+*Index Pattern*:: The <<index-patterns,index pattern>> that contains
+the data set to visualize.
 
-Open the *Options* tab to configure settings that apply to all inputs in a Controls Visualization.
+*Field*:: The field to use to populate the range slider
+and to filter on when users interact with the input.
+The list of available fields is derived from the
+specified index pattern.
 
+*Step Size*:: The increment/decrement size of the slider.
+
+*Decimal Places*:: The number of decimal places.
+
+[[configure-input-control-options]]
+=== Configuring Settings for all Inputs
+
+Use the *Options* tab to configure settings that apply to all input
+controls in a Controls visualization.
+
+[role="screenshot"]
 image::images/controls/controls_options.png[]
 
-*Update Kibana filters on each change*:: When enabled, all input interactions will immediately
-create filters that will cause the dashboard to refresh. When disabled, Kibana filters will only be created
-once *Apply changes* is clicked.
-*Use time filter*:: When enabled, the aggregations used to generate the dropdown options list and
-range minimum and maximum will be bound to <<set-time-filter,Kibana's global time range>>.
-*Pin filters to global state*:: When enabled, all filters created by interacting with the inputs
-will be automatically pinned.
+*Update Kibana filters on each change*:: When enabled, all input interactions
+immediately create filters that cause the dashboard to refresh. When disabled,
+Kibana filters are only created
+when the user clicks *Apply changes* image:images/apply-changes-button.png[].
+
+*Use time filter*:: When enabled, the aggregations used to generate
+the dropdown options list and range minimum and maximum are bound
+to <<set-time-filter,Kibana's global time range>>.
+
+*Pin filters to global state*:: When enabled, all filters created by
+interacting with the inputs are automatically pinned.
