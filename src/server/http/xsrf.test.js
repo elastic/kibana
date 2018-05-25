@@ -21,7 +21,7 @@ describe('xsrf request filter', function () {
   }
 
   const makeServer = async function () {
-    const kbnServer = kbnTestServer.createServerWithCorePlugins({
+    const kbnServer = kbnTestServer.createServer({
       server: {
         xsrf: {
           disableProtection: false,

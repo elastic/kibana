@@ -17,7 +17,7 @@ describe('version_check request filter', function () {
   }
 
   async function makeServer() {
-    const kbnServer = kbnTestServer.createServerWithCorePlugins();
+    const kbnServer = kbnTestServer.createServer();
 
     await kbnServer.ready();
 

@@ -10,6 +10,12 @@ import {
 } from './routes';
 
 export function savedObjectsMixin(kbnServer, server) {
+  // we use kibana.index which is technically defined in the kibana plugin, so if
+  // we don't have the plugin (mainly tests) we can't initialize the saved objects
+  if (!kbnServer.pluginSpecs.find(p => p.getId() === 'kibana')) {
+    return;
+  }
+
   const prereqs = {
     getSavedObjectsClient: {
       assign: 'savedObjectsClient',
