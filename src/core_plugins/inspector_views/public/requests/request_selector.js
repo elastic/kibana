@@ -34,6 +34,7 @@ class RequestSelector extends Component {
 
   renderRequestDropdownItem = (request, index) => {
     const hasFailed = request.status === RequestStatus.ERROR;
+    const inProgress = request.status === RequestStatus.PENDING;
     const itemClass = className({
       'inspector-request-chooser__menu-item--failed': hasFailed,
     });
@@ -51,6 +52,13 @@ class RequestSelector extends Component {
       >
         {request.name}
         { hasFailed && ' (failed)' }
+        { inProgress &&
+          <EuiLoadingSpinner
+            size="s"
+            aria-label="Request in progress"
+            className="inspector-request-chooser__menu-spinner"
+          />
+        }
       </EuiContextMenuItem>
     );
   }
@@ -108,7 +116,10 @@ class RequestSelector extends Component {
             </EuiBadge>
           }
           { selectedRequest.status === RequestStatus.PENDING &&
-            <EuiLoadingSpinner size="m" />
+            <EuiLoadingSpinner
+              size="m"
+              aria-label="Request in progress"
+            />
           }
         </EuiFlexItem>
         <EuiFlexItem grow={true} />
