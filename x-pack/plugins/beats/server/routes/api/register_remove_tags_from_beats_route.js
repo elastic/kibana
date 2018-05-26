@@ -55,8 +55,7 @@ function findNonExistentTags(callWithRequest, tags) {
 }
 
 async function persistRemovals(callWithRequest, removals) {
-  const body = flatten(removals.map(removal => {
-    const { beatId, tag } = removal;
+  const body = flatten(removals.map(({ beatId, tag }) => {
     const script = ''
       + 'def beat = ctx._source.beat; '
       + 'if (beat.tags != null) { '
