@@ -89,7 +89,7 @@ export default function ({ getService }) {
       });
 
       beat = esResponse._source.beat;
-      expect(beat.tags).to.eql([]);
+      expect(beat).to.not.have.property('tags');
     });
 
     it('should remove multiple tags from a single beat', async () => {
@@ -161,7 +161,7 @@ export default function ({ getService }) {
       });
 
       beat = esResponse._source.beat;
-      expect(beat.tags).to.eql([]);
+      expect(beat).to.not.have.property('tags');
     });
 
     it('should return errors for non-existent beats', async () => {
