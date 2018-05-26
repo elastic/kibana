@@ -57,7 +57,8 @@ function findNonExistentTags(callWithRequest, tags) {
 async function persistAssignments(callWithRequest, assignments) {
   const body = flatten(assignments.map(assignment => {
     const { beatId, tag } = assignment;
-    const script = 'def beat = ctx._source.beat; '
+    const script = ''
+      + 'def beat = ctx._source.beat; '
       + 'if (beat.tags == null) { '
       + '  beat.tags = []; '
       + '} '
