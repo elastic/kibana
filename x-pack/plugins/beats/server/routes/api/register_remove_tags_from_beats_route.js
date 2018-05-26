@@ -59,10 +59,9 @@ async function persistRemovals(callWithRequest, removals) {
     const { beatId, tag } = removal;
     const script = ''
       + 'def beat = ctx._source.beat; '
-      + 'if (beat.tags == null) { '
-      + '  beat.tags = []; '
-      + '} '
-      + 'beat.tags.removeAll([params.tag]);';
+      + 'if (beat.tags != null) { '
+      + '  beat.tags.removeAll([params.tag]); '
+      + '}';
 
     return [
       { update: { _id: `beat:${beatId}` } },
