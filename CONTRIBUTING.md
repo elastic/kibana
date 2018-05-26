@@ -265,6 +265,8 @@ Once that's done, just run:
 yarn test && yarn build --skip-os-packages
 ```
 
+You can see all build options [here](./packages/kbn-plugin-helpers/cli.js#L23).
+
 ### Debugging Server Code
 `yarn debug` will start the server with Node's inspect flag.  Kibana's development mode will start three processes.  Chrome's developer tools can be configured to connect to all three under the connection tab.
 
