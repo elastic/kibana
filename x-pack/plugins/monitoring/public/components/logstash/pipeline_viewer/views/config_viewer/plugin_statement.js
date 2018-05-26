@@ -71,14 +71,16 @@ function renderPluginStatementStats(pluginType, vertex) {
   ));
 }
 
-export function renderPluginStatement({
-  hasExplicitId,
-  id,
-  name,
-  pluginType,
-  vertex,
-}, onShowVertexDetails) {
-
+export function PluginStatement({
+  statement: {
+    hasExplicitId,
+    id,
+    name,
+    pluginType,
+    vertex
+  },
+  onShowVertexDetails
+}) {
   const statementStats = renderPluginStatementStats(pluginType, vertex);
   const onNameButtonClick = () => { onShowVertexDetails(vertex); };
 

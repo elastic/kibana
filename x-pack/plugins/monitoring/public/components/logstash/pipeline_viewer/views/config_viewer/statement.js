@@ -7,10 +7,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup } from '@elastic/eui';
-import { PluginStatement } from '../../models/pipeline/plugin_statement';
+import { PluginStatement as PluginStatementModel } from '../../models/pipeline/plugin_statement';
 import { CollapsibleStatement } from './collapsible_statement';
 import { IfElement } from '../../models/list/if_element';
-import { renderPluginStatement } from './plugin_statement';
+import { PluginStatement } from './plugin_statement';
 
 export class Statement extends React.PureComponent
 {
@@ -32,19 +32,31 @@ export class Statement extends React.PureComponent
       onShowVertexDetails
     } = this.props;
 
-    return statement instanceof PluginStatement
-      ? renderPluginStatement(statement, onShowVertexDetails)
-      : (
-        <CollapsibleStatement
-          expand={expand}
-          collapse={collapse}
+    if (statement instanceof PluginStatementModel) {
+      return (
+        <PluginStatement
           statement={statement}
-          isIf={element instanceof IfElement}
-          isCollapsed={isCollapsed}
-          id={id}
           onShowVertexDetails={onShowVertexDetails}
         />
       );
+    }
+    return (
+      <CollapsibleStatement
+        expand={expand}
+        collapse={collapse}
+        statement={statement}
+        isIf={element instanceof IfElement}
+        isCollapsed={isCollapsed}
+        id={id}
+        onShowVertexDetails={onShowVertexDetails}
+      />
+    );
+  }
+
+  getTopLevelStatementPadding(depth) {
+    return depth === 0
+      ? { paddingLeft: '0px' }
+      : null;
   }
 
   render() {
@@ -53,9 +65,7 @@ export class Statement extends React.PureComponent
       statement
     } = this.props.element;
 
-    const topLevelStatementPadding = depth === 0
-      ? { paddingLeft: '0px' }
-      : null;
+    const topLevelStatementPadding = this.getTopLevelStatementPadding(depth);
     const spacers = this.renderNestingSpacers(depth);
     const statementComponent = this.renderStatement(statement);
 
