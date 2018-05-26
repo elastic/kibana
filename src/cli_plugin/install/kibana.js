@@ -1,8 +1,6 @@
-import _ from 'lodash';
 import path from 'path';
-import { fromRoot } from '../../utils';
-import KbnServer from '../../server/kbn_server';
-import { readYamlConfig } from '../../cli/serve/read_yaml_config';
+import execa from 'execa';
+import { fromRoot, watchStdioForLine } from '../../utils';
 import { versionSatisfies, cleanVersion } from '../../utils/version';
 import { statSync } from 'fs';
 
@@ -19,34 +17,22 @@ export function existingInstall(settings, logger) {
 
 export async function rebuildCache(settings, logger) {
   logger.log('Optimizing and caching browser bundles...');
-  const serverConfig = _.merge(
-    readYamlConfig(settings.config),
-    {
-      env: 'production',
-      logging: {
-        silent: settings.silent,
-        quiet: !settings.silent,
-        verbose: false
-      },
-      optimize: {
-        useBundleCache: false
-      },
-      server: {
-        autoListen: false
-      },
-      plugins: {
-        initialize: false,
-        scanDirs: [settings.pluginDir, fromRoot('src/core_plugins')]
-      },
-      uiSettings: {
-        enabled: false
-      }
-    }
-  );
 
-  const kbnServer = new KbnServer(serverConfig);
-  await kbnServer.ready();
-  await kbnServer.close();
+  const kibanaArgs = [
+    fromRoot('./src/cli'),
+    '--env.name=production',
+    '--optimize.useBundleCache=false',
+    '--server.autoListen=false',
+    '--plugins.initialize=false',
+    '--uiSettings.enabled=false'
+  ];
+
+  const proc = execa(process.execPath, kibanaArgs, {
+    stdio: ['ignore', 'pipe', 'pipe'],
+    cwd: fromRoot('.'),
+  });
+
+  await watchStdioForLine(proc, () => {}, /Optimization .+ complete/);
 }
 
 export function assertVersion(settings) {
