@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
     it('compare TSVB snapshot', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.setTimepickerInDataRange();
+      await PageObjects.dashboard.setTimepickerInLogstashDataRange();
       await dashboardAddPanel.addVisualization('Rendering Test: tsvb-ts');
       await PageObjects.common.closeToast();
 
@@ -31,6 +31,8 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await dashboardPanelActions.toggleExpandPanel();
 
       await PageObjects.dashboard.waitForRenderComplete();
+      // Render complete flag doesn't handle resizes from expanding.
+      await PageObjects.common.sleep(2000);
       const percentSimilar = await screenshot.compareAgainstBaseline('tsvb_dashboard', updateBaselines);
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
@@ -41,7 +43,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
     it('compare area chart snapshot', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.setTimepickerInDataRange();
+      await PageObjects.dashboard.setTimepickerInLogstashDataRange();
       await dashboardAddPanel.addVisualization('Rendering Test: area with not filter');
       await PageObjects.common.closeToast();
       await PageObjects.dashboard.saveDashboard('area');
@@ -51,6 +53,8 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await dashboardPanelActions.toggleExpandPanel();
 
       await PageObjects.dashboard.waitForRenderComplete();
+      // Render complete flag doesn't handle resizes from expanding.
+      await PageObjects.common.sleep(2000);
       const percentSimilar = await screenshot.compareAgainstBaseline('area_chart', updateBaselines);
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();

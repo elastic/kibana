@@ -442,6 +442,12 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
     }
 
+    async setTimepickerInLogstashDataRange() {
+      const fromTime = '2018-04-09 00:00:00.000';
+      const toTime = '2018-04-13 00:00:00.000';
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+    }
+
     async setSaveAsNewCheckBox(checked) {
       log.debug('saveAsNewCheckbox: ' + checked);
       const saveAsNewCheckbox = await testSubjects.find('saveAsNewCheckbox');
