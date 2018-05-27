@@ -437,6 +437,10 @@ add-event-listener@0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/add-event-listener/-/add-event-listener-0.0.1.tgz#a76229ebc64c8aefae204a16273a2f255abea2d0"
 
+adm-zip@0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/adm-zip/-/adm-zip-0.2.1.tgz#e801cedeb5bd9a4e98d699c5c0f4239e2731dcbf"
+
 adm-zip@0.4.7:
   version "0.4.7"
   resolved "https://registry.yarnpkg.com/adm-zip/-/adm-zip-0.4.7.tgz#8606c2cbf1c426ce8c8ec00174447fd49b6eafc1"
@@ -2834,7 +2838,7 @@ conf@^1.1.2:
     pkg-up "^2.0.0"
     write-file-atomic "^2.3.0"
 
-config-chain@^1.1.11:
+config-chain@^1.1.11, config-chain@~1.1.1:
   version "1.1.11"
   resolved "https://registry.yarnpkg.com/config-chain/-/config-chain-1.1.11.tgz#aba09747dfbe4c3e70e766a6e41586e1859fc6f2"
   dependencies:
@@ -4728,7 +4732,7 @@ extract-zip@1.5.0:
     mkdirp "0.5.0"
     yauzl "2.4.1"
 
-extract-zip@^1.6.5:
+extract-zip@1.6.6, extract-zip@^1.6.5:
   version "1.6.6"
   resolved "https://registry.yarnpkg.com/extract-zip/-/extract-zip-1.6.6.tgz#1290ede8d20d0872b429fd3f351ca128ec5ef85c"
   dependencies:
@@ -5591,6 +5595,10 @@ graceful-fs@4.X, graceful-fs@^4.0.0, graceful-fs@^4.1.10, graceful-fs@^4.1.11, g
   version "4.1.11"
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.1.11.tgz#0e8bdfe4d1ddb8854d64e04ea7c00e2a026e5658"
 
+graceful-fs@~1.1:
+  version "1.1.14"
+  resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-1.1.14.tgz#07078db5f6377f6321fceaaedf497de124dc9465"
+
 "graceful-readlink@>= 1.0.0":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/graceful-readlink/-/graceful-readlink-1.0.1.tgz#4cafad76bc62f02fa039b2f94e9a3dd3a391a725"
@@ -6169,6 +6177,19 @@ icss-utils@^2.1.0:
   dependencies:
     postcss "^6.0.1"
 
+iedriver@^3.9.2:
+  version "3.9.2"
+  resolved "https://registry.yarnpkg.com/iedriver/-/iedriver-3.9.2.tgz#3781322371da20493415e79e96c57e71de5f059c"
+  dependencies:
+    adm-zip "0.2.1"
+    extract-zip "1.6.6"
+    kew "~0.1.7"
+    md5-file "^1.1.4"
+    mkdirp "0.3.5"
+    npmconf "0.0.24"
+    request "^2.81.0"
+    rimraf "~2.0.2"
+
 ieee754@^1.1.4:
   version "1.1.10"
   resolved "https://registry.yarnpkg.com/ieee754/-/ieee754-1.1.10.tgz#719a6f7b026831e64bdb838b0de1bb0029bbf716"
@@ -6265,9 +6286,17 @@ inherits@2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/inherits/-/inherits-2.0.1.tgz#b17d08d326b4423e568eff719f91b0b1cbdf69f1"
 
+inherits@~1.0.0:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/inherits/-/inherits-1.0.2.tgz#ca4309dadee6b54cc0b8d247e8d7c7a0975bdc9b"
+
 ini@^1.3.4, ini@~1.3.0:
   version "1.3.5"
   resolved "https://registry.yarnpkg.com/ini/-/ini-1.3.5.tgz#eee25f56db1c9ec6085e0c22778083f596abf927"
+
+ini@~1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/ini/-/ini-1.1.0.tgz#4e808c2ce144c6c1788918e034d6797bc6cf6281"
 
 inquirer@^0.11.1:
   version "0.11.4"
@@ -7614,6 +7643,10 @@ kew@^0.7.0:
   version "0.7.0"
   resolved "https://registry.yarnpkg.com/kew/-/kew-0.7.0.tgz#79d93d2d33363d6fdd2970b335d9141ad591d79b"
 
+kew@~0.1.7:
+  version "0.1.7"
+  resolved "https://registry.yarnpkg.com/kew/-/kew-0.1.7.tgz#0a32a817ff1a9b3b12b8c9bacf4bc4d679af8e72"
+
 keymirror@^0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/keymirror/-/keymirror-0.1.1.tgz#918889ea13f8d0a42e7c557250eee713adc95c35"
@@ -7701,9 +7734,9 @@ lead@^1.0.0:
   dependencies:
     flush-write-stream "^1.0.2"
 
-leadfoot@1.7.5:
-  version "1.7.5"
-  resolved "https://registry.yarnpkg.com/leadfoot/-/leadfoot-1.7.5.tgz#2188019ba95f524f2fec4dd9fbb06f1e6e832d3e"
+leadfoot@silne30/leadfoot#Fix_execute_implemenatation:
+  version "1.7.6-pre"
+  resolved "https://codeload.github.com/silne30/leadfoot/tar.gz/d4f5e152f52c06935d1e24efa7618a5fc4a01169"
   dependencies:
     dojo "2.0.0-alpha.7"
     jszip "2.5.0"
@@ -8389,6 +8422,10 @@ math-expression-evaluator@^1.2.14:
   version "1.2.17"
   resolved "https://registry.yarnpkg.com/math-expression-evaluator/-/math-expression-evaluator-1.2.17.tgz#de819fdbcd84dccd8fae59c6aeb79615b9d266ac"
 
+md5-file@^1.1.4:
+  version "1.1.10"
+  resolved "https://registry.yarnpkg.com/md5-file/-/md5-file-1.1.10.tgz#d8f4fce76c92cb20b7d143a59f58ca49b4cf3174"
+
 md5.js@^1.3.4:
   version "1.3.4"
   resolved "https://registry.yarnpkg.com/md5.js/-/md5.js-1.3.4.tgz#e9bdbde94a20a5ac18b04340fc5764d5b09d901d"
@@ -8615,6 +8652,10 @@ mixin-deep@^1.2.0:
     for-in "^1.0.2"
     is-extendable "^1.0.1"
 
+mkdirp@0.3.5, mkdirp@^0.3.5, mkdirp@~0.3.3, mkdirp@~0.3.5:
+  version "0.3.5"
+  resolved "https://registry.yarnpkg.com/mkdirp/-/mkdirp-0.3.5.tgz#de3e5f8961c88c787ee1368df849ac4413eca8d7"
+
 mkdirp@0.5.0:
   version "0.5.0"
   resolved "https://registry.yarnpkg.com/mkdirp/-/mkdirp-0.5.0.tgz#1d73076a6df986cd9344e15e71fcc05a4c9abf12"
@@ -8626,10 +8667,6 @@ mkdirp@0.5.1, mkdirp@0.5.x, "mkdirp@>=0.5 0", mkdirp@^0.5.0, mkdirp@^0.5.1, mkdi
   resolved "https://registry.yarnpkg.com/mkdirp/-/mkdirp-0.5.1.tgz#30057438eac6cf7f8c4767f38648d6697d75c903"
   dependencies:
     minimist "0.0.8"
-
-mkdirp@^0.3.5, mkdirp@~0.3.5:
-  version "0.3.5"
-  resolved "https://registry.yarnpkg.com/mkdirp/-/mkdirp-0.3.5.tgz#de3e5f8961c88c787ee1368df849ac4413eca8d7"
 
 mocha@3.3.0:
   version "3.3.0"
@@ -8909,15 +8946,15 @@ nomnom@~1.6.2:
     colors "0.5.x"
     underscore "~1.4.4"
 
-nopt@3.x, nopt@~3.0.6:
-  version "3.0.6"
-  resolved "https://registry.yarnpkg.com/nopt/-/nopt-3.0.6.tgz#c6465dbf08abcd4db359317f79ac68a646b28ff9"
+nopt@2, nopt@^2.2.0:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/nopt/-/nopt-2.2.1.tgz#2aa09b7d1768487b3b89a9c5aa52335bff0baea7"
   dependencies:
     abbrev "1"
 
-nopt@^2.2.0:
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/nopt/-/nopt-2.2.1.tgz#2aa09b7d1768487b3b89a9c5aa52335bff0baea7"
+nopt@3.x, nopt@~3.0.6:
+  version "3.0.6"
+  resolved "https://registry.yarnpkg.com/nopt/-/nopt-3.0.6.tgz#c6465dbf08abcd4db359317f79ac68a646b28ff9"
   dependencies:
     abbrev "1"
 
@@ -8988,6 +9025,19 @@ npm-run-path@^2.0.0:
   resolved "https://registry.yarnpkg.com/npm-run-path/-/npm-run-path-2.0.2.tgz#35a9232dfa35d7067b4cb2ddf2357b1871536c5f"
   dependencies:
     path-key "^2.0.0"
+
+npmconf@0.0.24:
+  version "0.0.24"
+  resolved "https://registry.yarnpkg.com/npmconf/-/npmconf-0.0.24.tgz#b78875b088ccc3c0afa3eceb3ce3244b1b52390c"
+  dependencies:
+    config-chain "~1.1.1"
+    inherits "~1.0.0"
+    ini "~1.1.0"
+    mkdirp "~0.3.3"
+    nopt "2"
+    once "~1.1.1"
+    osenv "0.0.3"
+    semver "~1.1.0"
 
 npmlog@^4.0.2:
   version "4.1.2"
@@ -9139,6 +9189,10 @@ once@1.x, once@^1.3.0, once@^1.3.1, once@^1.3.2, once@^1.3.3, once@^1.4.0:
   dependencies:
     wrappy "1"
 
+once@~1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/once/-/once-1.1.1.tgz#9db574933ccb08c3a7614d154032c09ea6f339e7"
+
 onetime@^1.0.0:
   version "1.1.0"
   resolved "http://registry.npmjs.org/onetime/-/onetime-1.1.0.tgz#a1f7838f8314c516f05ecefcbc4ccfe04b4ed789"
@@ -9220,6 +9274,10 @@ os-locale@^2.0.0:
 os-tmpdir@^1.0.0, os-tmpdir@^1.0.1, os-tmpdir@~1.0.1, os-tmpdir@~1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/os-tmpdir/-/os-tmpdir-1.0.2.tgz#bbe67406c79aa85c5cfec766fe5734555dfa1274"
+
+osenv@0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/osenv/-/osenv-0.0.3.tgz#cd6ad8ddb290915ad9e22765576025d411f29cb6"
 
 osenv@^0.1.0, osenv@^0.1.4:
   version "0.1.5"
@@ -10975,6 +11033,31 @@ request@^2.55.0, request@^2.65.0, request@^2.83.0, request@^2.85.0:
     tunnel-agent "^0.6.0"
     uuid "^3.1.0"
 
+request@^2.81.0:
+  version "2.87.0"
+  resolved "https://registry.yarnpkg.com/request/-/request-2.87.0.tgz#32f00235cd08d482b4d0d68db93a829c0ed5756e"
+  dependencies:
+    aws-sign2 "~0.7.0"
+    aws4 "^1.6.0"
+    caseless "~0.12.0"
+    combined-stream "~1.0.5"
+    extend "~3.0.1"
+    forever-agent "~0.6.1"
+    form-data "~2.3.1"
+    har-validator "~5.0.3"
+    http-signature "~1.2.0"
+    is-typedarray "~1.0.0"
+    isstream "~0.1.2"
+    json-stringify-safe "~5.0.1"
+    mime-types "~2.1.17"
+    oauth-sign "~0.8.2"
+    performance-now "^2.1.0"
+    qs "~6.5.1"
+    safe-buffer "^5.1.1"
+    tough-cookie "~2.3.3"
+    tunnel-agent "^0.6.0"
+    uuid "^3.1.0"
+
 require-directory@^2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/require-directory/-/require-directory-2.1.1.tgz#8c64ad5fd30dab1c976e2344ffe7f792a6a6df42"
@@ -11111,6 +11194,12 @@ rimraf@2.4.3:
   resolved "https://registry.yarnpkg.com/rimraf/-/rimraf-2.4.3.tgz#e5b51c9437a4c582adb955e9f28cf8d945e272af"
   dependencies:
     glob "^5.0.14"
+
+rimraf@~2.0.2:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/rimraf/-/rimraf-2.0.3.tgz#f50a2965e7144e9afd998982f15df706730f56a9"
+  optionalDependencies:
+    graceful-fs "~1.1"
 
 rimraf@~2.2.8:
   version "2.2.8"
@@ -11306,6 +11395,10 @@ semver-diff@^2.0.0:
 semver@5.1.0:
   version "5.1.0"
   resolved "https://registry.yarnpkg.com/semver/-/semver-5.1.0.tgz#85f2cf8550465c4df000cf7d86f6b054106ab9e5"
+
+semver@~1.1.0:
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/semver/-/semver-1.1.4.tgz#2e5a4e72bab03472cc97f72753b4508912ef5540"
 
 semver@~4.3.3:
   version "4.3.6"

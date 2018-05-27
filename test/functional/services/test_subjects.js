@@ -15,7 +15,7 @@ export function TestSubjectsProvider({ getService }) {
   class TestSubjects {
     async exists(selector, timeout = 1000) {
       log.debug(`TestSubjects.exists(${selector})`);
-      return await find.existsByDisplayedByCssSelector(testSubjSelector(selector), timeout);
+      return await find.existsByCssSelector(testSubjSelector(selector), timeout);
     }
 
     async append(selector, text) {
@@ -40,7 +40,7 @@ export function TestSubjectsProvider({ getService }) {
     }
 
     async findDescendant(selector, parentElement) {
-      return await find.descendantDisplayedByCssSelector(testSubjSelector(selector), parentElement);
+      return await find.descendantByCssSelector(testSubjSelector(selector), parentElement);
     }
 
     async find(selector, timeout = 1000) {

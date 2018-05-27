@@ -5,6 +5,7 @@ import treeKill from 'tree-kill';
 import { delay, fromNode as fcb } from 'bluebird';
 import { path as CHROMEDRIVER_EXEC } from 'chromedriver';
 import { path as FIREFOXDRIVER_EXEC } from 'geckodriver';
+import { path as IEDRIVER_EXEC } from 'iedriver';
 
 import { ping } from './ping';
 import { BrowserDriverApi } from './browser_driver_api';
@@ -13,13 +14,20 @@ const PING_INTERVAL = 500;
 
 export function createLocalBrowserDriverApi(log, url, browser) {
   let runningDriver = null;
+  if (!browser) browser = 'firefox';
   const driverName = browser + 'driver';
   switch (browser) {
+    case 'chrome':
+      runningDriver = CHROMEDRIVER_EXEC;
+      break;
     case 'firefox':
       runningDriver = FIREFOXDRIVER_EXEC;
       break;
+    case 'ie':
+      runningDriver = IEDRIVER_EXEC;
+      break;
     default:
-      runningDriver = CHROMEDRIVER_EXEC;
+      throw Error(`${browser} is not a valid driver`);
   }
   let proc = null;
 

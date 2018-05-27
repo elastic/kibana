@@ -5,7 +5,7 @@ function seletorToTerms(selector) {
 }
 
 function termToCssSelector(term) {
-  return term ? '[data-test-subj~="' + term + '"]' : '';
+  return term ? '[data-test-subj="' + term + '"]' : '';
 }
 
 module.exports = function testSubjSelector(selector) {

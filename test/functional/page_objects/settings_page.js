@@ -527,7 +527,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async waitUntilSavedObjectsTableIsNotLoading() {
       return retry.try(async () => {
-        const exists = await find.existsByDisplayedByCssSelector('*[data-test-subj="savedObjectsTable"] .euiBasicTable-loading');
+        const exists = await find.existsByCssSelector('*[data-test-subj="savedObjectsTable"] .euiBasicTable-loading');
         if (exists) {
           throw new Error('Waiting');
         }
