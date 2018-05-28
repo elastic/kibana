@@ -27,49 +27,37 @@ export function getBoolFilter(urlParams) {
 
   if (urlParams.serviceName) {
     boolFilter.push({
-      term: {
-        [SERVICE_NAME]: urlParams.serviceName
-      }
+      term: { [SERVICE_NAME]: urlParams.serviceName }
     });
   }
 
   switch (urlParams.processorEvent) {
     case 'transaction':
       boolFilter.push({
-        term: {
-          [PROCESSOR_EVENT]: 'transaction'
-        }
+        term: { [PROCESSOR_EVENT]: 'transaction' }
       });
 
       if (urlParams.transactionName) {
         boolFilter.push({
-          term: {
-            [`${TRANSACTION_NAME}.keyword`]: urlParams.transactionName
-          }
+          term: { [`${TRANSACTION_NAME}.keyword`]: urlParams.transactionName }
         });
       }
 
       if (urlParams.transactionType) {
         boolFilter.push({
-          term: {
-            [TRANSACTION_TYPE]: urlParams.transactionType
-          }
+          term: { [TRANSACTION_TYPE]: urlParams.transactionType }
         });
       }
       break;
 
     case 'error':
       boolFilter.push({
-        term: {
-          'processor.event': 'error'
-        }
+        term: { [PROCESSOR_EVENT]: 'error' }
       });
 
       if (urlParams.errorGroupId) {
         boolFilter.push({
-          term: {
-            [ERROR_GROUP_ID]: urlParams.errorGroupId
-          }
+          term: { [ERROR_GROUP_ID]: urlParams.errorGroupId }
         });
       }
       break;
@@ -78,16 +66,8 @@ export function getBoolFilter(urlParams) {
       boolFilter.push({
         bool: {
           should: [
-            {
-              term: {
-                'processor.event': 'error'
-              }
-            },
-            {
-              term: {
-                'processor.event': 'transaction'
-              }
-            }
+            { term: { [PROCESSOR_EVENT]: 'error' } },
+            { term: { [PROCESSOR_EVENT]: 'transaction' } }
           ]
         }
       });
