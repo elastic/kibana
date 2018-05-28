@@ -119,6 +119,8 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('when a new vis is added', async function () {
+          const originalPanelCount = await PageObjects.dashboard.getPanelCount();
+
           await dashboardAddPanel.ensureAddPanelIsShowing();
           await dashboardAddPanel.clickAddNewEmbeddableLink();
           await PageObjects.visualize.clickAreaChart();
@@ -130,21 +132,21 @@ export default function ({ getService, getPageObjects }) {
           // confirm lose changes
           await PageObjects.common.clickConfirmOnModal();
 
-          const visualizations = PageObjects.dashboard.getTestVisualizations();
           const panelCount = await PageObjects.dashboard.getPanelCount();
-          expect(panelCount).to.eql(visualizations.length);
+          expect(panelCount).to.eql(originalPanelCount);
         });
 
         it('when an existing vis is added', async function () {
+          const originalPanelCount = await PageObjects.dashboard.getPanelCount();
+
           await dashboardAddPanel.addVisualization('new viz panel');
           await PageObjects.dashboard.clickCancelOutOfEditMode();
 
           // confirm lose changes
           await PageObjects.common.clickConfirmOnModal();
 
-          const visualizations = PageObjects.dashboard.getTestVisualizations();
           const panelCount = await PageObjects.dashboard.getPanelCount();
-          expect(panelCount).to.eql(visualizations.length);
+          expect(panelCount).to.eql(originalPanelCount);
         });
       });
 
