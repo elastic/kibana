@@ -17,7 +17,8 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await remote.setWindowSize(1300, 900);
     });
 
-    it('compare TSVB snapshot', async () => {
+    // Skip until https://github.com/elastic/kibana/issues/19471 is fixed
+    it.skip('compare TSVB snapshot', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.setTimepickerInLogstashDataRange();
