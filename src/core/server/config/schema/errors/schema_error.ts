@@ -1,5 +1,5 @@
 export class SchemaError extends Error {
-  cause?: Error;
+  public cause?: Error;
 
   constructor(message: string, cause?: Error) {
     super(message);

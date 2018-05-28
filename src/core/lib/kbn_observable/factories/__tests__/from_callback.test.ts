@@ -1,7 +1,7 @@
 import { $from } from '../';
-import { $fromCallback } from '../from_callback';
-import { Subject } from '../../subject';
 import { collect } from '../../lib/collect';
+import { Subject } from '../../subject';
+import { $fromCallback } from '../from_callback';
 
 test('returns raw value', async () => {
   const observable = $fromCallback(() => 'foo');

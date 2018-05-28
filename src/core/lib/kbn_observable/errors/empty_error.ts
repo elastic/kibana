@@ -1,5 +1,5 @@
 export class EmptyError extends Error {
-  code = 'K$_EMPTY_ERROR';
+  public code = 'K$_EMPTY_ERROR';
 
   constructor(producer: string) {
     super(

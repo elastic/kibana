@@ -1,9 +1,9 @@
-import { Server } from 'net';
-import { IncomingMessage, ServerResponse } from 'http';
 import { EventEmitter } from 'events';
+import { IncomingMessage, ServerResponse } from 'http';
+import { Server } from 'net';
 
-import { Root } from '../root';
 import { Logger } from '../logging';
+import { Root } from '../root';
 
 /**
  * List of the server events to be forwarded to the legacy platform.
@@ -47,14 +47,18 @@ export class LegacyPlatformProxifier extends EventEmitter {
   /**
    * Neither new nor legacy platform should use this method directly.
    */
-  address() {
+  public address() {
     return this.server && this.server.address();
   }
 
   /**
    * Neither new nor legacy platform should use this method directly.
    */
-  async listen(port: number, host: string, callback?: (error?: Error) => void) {
+  public async listen(
+    port: number,
+    host: string,
+    callback?: (error?: Error) => void
+  ) {
     this.log.debug(`"listen" has been called (${host}:${port}).`);
 
     let error: Error | undefined;
@@ -73,7 +77,7 @@ export class LegacyPlatformProxifier extends EventEmitter {
   /**
    * Neither new nor legacy platform should use this method directly.
    */
-  async close(callback?: (error?: Error) => void) {
+  public async close(callback?: (error?: Error) => void) {
     this.log.debug('"close" has been called.');
 
     let error: Error | undefined;
@@ -92,7 +96,9 @@ export class LegacyPlatformProxifier extends EventEmitter {
   /**
    * Neither new nor legacy platform should use this method directly.
    */
-  getConnections(callback: (error: Error | null, count?: number) => void) {
+  public getConnections(
+    callback: (error: Error | null, count?: number) => void
+  ) {
     // This method is used by `even-better` (before we start platform).
     // It seems that the latest version of parent `good` doesn't use this anymore.
     if (this.server) {
@@ -106,7 +112,7 @@ export class LegacyPlatformProxifier extends EventEmitter {
    * Binds Http/Https server to the LegacyPlatformProxifier.
    * @param server Server to bind to.
    */
-  bind(server: Server) {
+  public bind(server: Server) {
     const oldServer = this.server;
     this.server = server;
 
@@ -122,7 +128,7 @@ export class LegacyPlatformProxifier extends EventEmitter {
    * @param request Native Node request object instance.
    * @param response Native Node response object instance.
    */
-  proxy(request: IncomingMessage, response: ServerResponse) {
+  public proxy(request: IncomingMessage, response: ServerResponse) {
     this.log.debug(
       `Request will be handled by proxy ${request.method}:${request.url}.`
     );

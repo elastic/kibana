@@ -1,5 +1,5 @@
-import { Observable } from '../observable';
 import { MonoTypeOperatorFunction } from '../interfaces';
+import { Observable } from '../observable';
 
 const isStrictlyEqual = (a: any, b: any) => a === b;
 

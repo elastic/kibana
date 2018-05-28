@@ -1,9 +1,9 @@
 import { Request, ResponseObject, ResponseToolkit } from 'hapi-latest';
 import { ObjectType, schema, TypeOf } from '../../config/schema';
 
-import { RouteMethod, RouteSchemas, RouteConfig } from './route';
 import { KibanaRequest } from './request';
 import { KibanaResponse, ResponseFactory, responseFactory } from './response';
+import { RouteConfig, RouteMethod, RouteSchemas } from './route';
 
 export interface RouterRoute {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE';
@@ -15,7 +15,7 @@ export interface RouterRoute {
 }
 
 export class Router {
-  routes: Readonly<RouterRoute>[] = [];
+  public routes: Array<Readonly<RouterRoute>> = [];
 
   constructor(readonly path: string) {}
 
@@ -46,11 +46,10 @@ export class Router {
   /**
    * Register a `GET` request with the router
    */
-  get<
-    P extends ObjectType,
-    Q extends ObjectType,
-    B extends ObjectType
-  >(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) {
+  public get<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
+    route: RouteConfig<P, Q, B>,
+    handler: RequestHandler<P, Q, B>
+  ) {
     const routeSchemas = this.routeSchemasFromRouteConfig(route, 'GET');
     this.routes.push({
       method: 'GET',
@@ -63,11 +62,10 @@ export class Router {
   /**
    * Register a `POST` request with the router
    */
-  post<
-    P extends ObjectType,
-    Q extends ObjectType,
-    B extends ObjectType
-  >(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) {
+  public post<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
+    route: RouteConfig<P, Q, B>,
+    handler: RequestHandler<P, Q, B>
+  ) {
     const routeSchemas = this.routeSchemasFromRouteConfig(route, 'POST');
     this.routes.push({
       method: 'POST',
@@ -80,11 +78,10 @@ export class Router {
   /**
    * Register a `PUT` request with the router
    */
-  put<
-    P extends ObjectType,
-    Q extends ObjectType,
-    B extends ObjectType
-  >(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) {
+  public put<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
+    route: RouteConfig<P, Q, B>,
+    handler: RequestHandler<P, Q, B>
+  ) {
     const routeSchemas = this.routeSchemasFromRouteConfig(route, 'POST');
     this.routes.push({
       method: 'PUT',
@@ -97,7 +94,7 @@ export class Router {
   /**
    * Register a `DELETE` request with the router
    */
-  delete<
+  public delete<
     P extends ObjectType,
     Q extends ObjectType,
     B extends ObjectType
@@ -115,7 +112,7 @@ export class Router {
    * Returns all routes registered with the this router.
    * @returns List of registered routes.
    */
-  getRoutes() {
+  public getRoutes() {
     return [...this.routes];
   }
 
@@ -129,11 +126,7 @@ export class Router {
     responseToolkit: ResponseToolkit,
     handler: RequestHandler<P, Q, B>
   ) {
-    let kibanaRequest: KibanaRequest<
-      TypeOf<P>,
-      TypeOf<Q>,
-      TypeOf<B>
-    >;
+    let kibanaRequest: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>;
 
     try {
       kibanaRequest = KibanaRequest.from(request, routeSchemas);

@@ -1,7 +1,7 @@
-import { k$ } from '../../k';
 import { first } from '../';
-import { Subject } from '../../subject';
+import { k$ } from '../../k';
 import { collect } from '../../lib/collect';
+import { Subject } from '../../subject';
 
 test('returns the first value, then completes', async () => {
   const values$ = new Subject();

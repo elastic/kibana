@@ -1,5 +1,5 @@
 import { ConfigService, Env } from './config';
-import { HttpModule, HttpConfig, Router } from './http';
+import { HttpConfig, HttpModule, Router } from './http';
 import { Logger, LoggerFactory } from './logging';
 
 export class Server {
@@ -17,11 +17,13 @@ export class Server {
     this.http = new HttpModule(httpConfig$, logger, env);
   }
 
-  async start() {
+  public async start() {
     this.log.info('starting server :tada:');
 
     const router = new Router('/core');
-    router.get({ path: '/', validate: false },async (req, res) => res.ok({ version: '0.0.1' }));
+    router.get({ path: '/', validate: false }, async (req, res) =>
+      res.ok({ version: '0.0.1' })
+    );
     this.http.service.registerRouter(router);
 
     await this.http.service.start();
@@ -36,7 +38,7 @@ export class Server {
     }
   }
 
-  async stop() {
+  public async stop() {
     this.log.debug('stopping server');
 
     await this.http.service.stop();

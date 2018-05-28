@@ -1,6 +1,6 @@
-import { SslConfig } from './ssl_config';
 import { Env } from '../config';
 import { ByteSizeValue, schema, TypeOf } from '../config/schema';
+import { SslConfig } from './ssl_config';
 
 const validHostnameRegex = /^(([A-Z0-9]|[A-Z0-9][A-Z0-9\-]*[A-Z0-9])\.)*([A-Z0-9]|[A-Z0-9][A-Z0-9\-]*[A-Z0-9])$/i;
 const validBasePathRegex = /(^$|^\/.*[^\/]$)/;
@@ -75,16 +75,16 @@ export class HttpConfig {
   /**
    * @internal
    */
-  static schema = createHttpSchema;
+  public static schema = createHttpSchema;
 
-  host: string;
-  port: number;
-  cors: boolean | { origin: string[] };
-  maxPayload: ByteSizeValue;
-  basePath?: string;
-  rewriteBasePath: boolean;
-  publicDir: string;
-  ssl: SslConfig;
+  public host: string;
+  public port: number;
+  public cors: boolean | { origin: string[] };
+  public maxPayload: ByteSizeValue;
+  public basePath?: string;
+  public rewriteBasePath: boolean;
+  public publicDir: string;
+  public ssl: SslConfig;
 
   /**
    * @internal

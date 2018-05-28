@@ -20,14 +20,14 @@ export type LogLevelId =
  * @internal
  */
 export class LogLevel {
-  static readonly Off = new LogLevel('off', 1);
-  static readonly Fatal = new LogLevel('fatal', 2);
-  static readonly Error = new LogLevel('error', 3);
-  static readonly Warn = new LogLevel('warn', 4);
-  static readonly Info = new LogLevel('info', 5);
-  static readonly Debug = new LogLevel('debug', 6);
-  static readonly Trace = new LogLevel('trace', 7);
-  static readonly All = new LogLevel('all', 8);
+  public static readonly Off = new LogLevel('off', 1);
+  public static readonly Fatal = new LogLevel('fatal', 2);
+  public static readonly Error = new LogLevel('error', 3);
+  public static readonly Warn = new LogLevel('warn', 4);
+  public static readonly Info = new LogLevel('info', 5);
+  public static readonly Debug = new LogLevel('debug', 6);
+  public static readonly Trace = new LogLevel('trace', 7);
+  public static readonly All = new LogLevel('all', 8);
 
   private constructor(readonly id: LogLevelId, readonly value: number) {}
 
@@ -36,7 +36,7 @@ export class LogLevel {
    * @param level Instance of `LogLevel` to compare to.
    * @returns True if specified `level` is covered by this log level.
    */
-  supports(level: LogLevel) {
+  public supports(level: LogLevel) {
     return this.value >= level.value;
   }
 
@@ -45,7 +45,7 @@ export class LogLevel {
    * @param level String representation of log level.
    * @returns Instance of `LogLevel` class.
    */
-  static fromId(level: LogLevelId): LogLevel {
+  public static fromId(level: LogLevelId): LogLevel {
     switch (level) {
       case 'all':
         return LogLevel.All;

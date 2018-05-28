@@ -1,7 +1,7 @@
-import { Observable } from '../observable';
-import { Subject } from '../subject';
 import { BehaviorSubject } from '../behavior_subject';
 import { collect } from '../lib/collect';
+import { Observable } from '../observable';
+import { Subject } from '../subject';
 
 test('should extend Subject', () => {
   const subject = new BehaviorSubject(null);

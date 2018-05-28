@@ -8,7 +8,7 @@ import { Observable, Subscription } from '../observable';
  * @param {Observable...}
  * @return {Observable}
  */
-export function $concat<T>(...observables: Observable<T>[]) {
+export function $concat<T>(...observables: Array<Observable<T>>) {
   return new Observable(observer => {
     let subscription: Subscription | undefined;
 

@@ -1,6 +1,6 @@
 import { JsonLayout } from '../json_layout';
-import { PatternLayout } from '../pattern_layout';
 import { Layouts } from '../layouts';
+import { PatternLayout } from '../pattern_layout';
 
 test('`configSchema` creates correct schema for `pattern` layout.', () => {
   const layoutsSchema = Layouts.configSchema;

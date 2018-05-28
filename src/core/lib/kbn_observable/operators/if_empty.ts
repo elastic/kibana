@@ -1,6 +1,6 @@
-import { Observable } from '../observable';
-import { MonoTypeOperatorFunction } from '../interfaces';
 import { $fromCallback } from '../factories';
+import { MonoTypeOperatorFunction } from '../interfaces';
+import { Observable } from '../observable';
 
 /**
  * Modifies a stream so that when the source completes without emitting any

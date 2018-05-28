@@ -17,7 +17,7 @@ test('handles array', () => {
 
 test('handles iterable', () => {
   const fooIterable: Iterable<number> = {
-    [Symbol.iterator]: function*() {
+    *[Symbol.iterator]() {
       yield 1;
       yield 2;
       yield 3;

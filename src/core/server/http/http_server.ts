@@ -1,13 +1,13 @@
+import { readFileSync } from 'fs';
 import { Request, ResponseToolkit, Server, ServerOptions } from 'hapi-latest';
 import { ServerOptions as TLSOptions } from 'https';
-import { readFileSync } from 'fs';
 import { format as formatUrl } from 'url';
 
-import { HttpConfig } from './http_config';
+import { modifyUrl } from '../../utils';
 import { Env } from '../config';
 import { Logger } from '../logging';
+import { HttpConfig } from './http_config';
 import { Router } from './router';
-import { modifyUrl } from '../../utils';
 
 export class HttpServer {
   private server?: Server;
@@ -16,11 +16,11 @@ export class HttpServer {
 
   constructor(private readonly log: Logger, private readonly env: Env) {}
 
-  isListening() {
+  public isListening() {
     return this.server !== undefined && this.server.listener.listening;
   }
 
-  registerRouter(router: Router) {
+  public registerRouter(router: Router) {
     if (this.isListening()) {
       throw new Error(
         'Routers can be registered only when HTTP server is stopped.'
@@ -30,7 +30,7 @@ export class HttpServer {
     this.registeredRouters.add(router);
   }
 
-  async start(config: HttpConfig) {
+  public async start(config: HttpConfig) {
     this.server = this.initializeServer(config);
 
     // If a redirect port is specified, we start an http server at this port and
@@ -88,7 +88,7 @@ export class HttpServer {
     await this.server.start();
   }
 
-  async stop() {
+  public async stop() {
     this.log.info('stopping http server');
 
     if (this.server !== undefined) {

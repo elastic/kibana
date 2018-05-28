@@ -1,4 +1,4 @@
-import { $of, $combineLatest } from '../../factories';
+import { $combineLatest, $of } from '../../factories';
 import { collect } from '../../lib/collect';
 import { Subject } from '../../subject';
 

@@ -1,7 +1,7 @@
-import { Observable } from '../observable';
-import { Subject } from '../subject';
 import { k$ } from '../k';
+import { Observable } from '../observable';
 import { first } from '../operators';
+import { Subject } from '../subject';
 
 const noop = () => {};
 
@@ -395,7 +395,7 @@ describe('asObservable', () => {
   test('should handle subject completes without emits', () => {
     const subject = new Subject();
 
-    let complete = jest.fn();
+    const complete = jest.fn();
 
     subject.asObservable().subscribe({
       complete,
@@ -409,7 +409,7 @@ describe('asObservable', () => {
   test('should handle subject throws', () => {
     const subject = new Subject();
 
-    let error = jest.fn();
+    const error = jest.fn();
 
     subject.asObservable().subscribe({
       error,
@@ -425,7 +425,7 @@ describe('asObservable', () => {
   test('should handle subject emits', () => {
     const subject = new Subject<number>();
 
-    let actual: number[] = [];
+    const actual: number[] = [];
 
     subject.asObservable().subscribe({
       next(x) {
@@ -443,7 +443,7 @@ describe('asObservable', () => {
   test('can unsubscribe', () => {
     const subject = new Subject<number>();
 
-    let actual: number[] = [];
+    const actual: number[] = [];
 
     const sub = subject.asObservable().subscribe({
       next(x) {
@@ -464,7 +464,7 @@ describe('asObservable', () => {
   test('should handle multiple observables', () => {
     const subject = new Subject<string>();
 
-    let actual: string[] = [];
+    const actual: string[] = [];
 
     subject.asObservable().subscribe({
       next(x) {

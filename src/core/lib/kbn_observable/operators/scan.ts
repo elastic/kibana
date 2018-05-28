@@ -1,5 +1,5 @@
-import { Observable } from '../observable';
 import { OperatorFunction } from '../interfaces';
+import { Observable } from '../observable';
 
 /**
  * Applies the accumulator function to every value in the source stream and

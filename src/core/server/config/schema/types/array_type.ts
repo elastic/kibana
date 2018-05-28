@@ -1,14 +1,14 @@
 import typeDetect from 'type-detect';
-import { Type, TypeOptions } from './type';
-import { toContext } from './index';
 import { SchemaTypeError } from '../errors';
+import { toContext } from './index';
+import { Type, TypeOptions } from './type';
 
-export type ArrayOptions<T> = TypeOptions<Array<T>> & {
+export type ArrayOptions<T> = TypeOptions<T[]> & {
   minSize?: number;
   maxSize?: number;
 };
 
-export class ArrayType<T> extends Type<Array<T>> {
+export class ArrayType<T> extends Type<T[]> {
   private readonly itemType: Type<T>;
   private readonly minSize?: number;
   private readonly maxSize?: number;
@@ -20,7 +20,7 @@ export class ArrayType<T> extends Type<Array<T>> {
     this.maxSize = options.maxSize;
   }
 
-  process(value: any, context?: string): Array<T> {
+  public process(value: any, context?: string): T[] {
     if (!Array.isArray(value)) {
       throw new SchemaTypeError(
         `expected value of type [array] but got [${typeDetect(value)}]`,
@@ -32,7 +32,7 @@ export class ArrayType<T> extends Type<Array<T>> {
       throw new SchemaTypeError(
         `array size is [${value.length}], but cannot be smaller than [${
           this.minSize
-          }]`,
+        }]`,
         context
       );
     }
@@ -41,7 +41,7 @@ export class ArrayType<T> extends Type<Array<T>> {
       throw new SchemaTypeError(
         `array size is [${value.length}], but cannot be greater than [${
           this.maxSize
-          }]`,
+        }]`,
         context
       );
     }

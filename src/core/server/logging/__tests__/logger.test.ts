@@ -1,7 +1,7 @@
 import { Appender } from '../appenders/appenders';
-import { LoggingConfig } from '../logging_config';
 import { LogLevel } from '../log_level';
 import { BaseLogger } from '../logger';
+import { LoggingConfig } from '../logging_config';
 
 const context = LoggingConfig.getLoggerContext(['context', 'parent', 'child']);
 let appenderMocks: Appender[];
@@ -122,7 +122,7 @@ test('`warn()` correctly forms `LogRecord` and passes it to all appenders.', () 
       timestamp,
       level: LogLevel.Warn,
       message: 'message-2',
-      error: error,
+      error,
       meta: undefined,
     });
   }
@@ -164,7 +164,7 @@ test('`error()` correctly forms `LogRecord` and passes it to all appenders.', ()
       timestamp,
       level: LogLevel.Error,
       message: 'message-2',
-      error: error,
+      error,
       meta: undefined,
     });
   }
@@ -206,7 +206,7 @@ test('`fatal()` correctly forms `LogRecord` and passes it to all appenders.', ()
       timestamp,
       level: LogLevel.Fatal,
       message: 'message-2',
-      error: error,
+      error,
       meta: undefined,
     });
   }

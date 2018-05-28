@@ -11,10 +11,10 @@ jest.mock('../../layouts/layouts', () => {
   };
 });
 
-import { ConsoleAppender } from '../console/console_appender';
-import { FileAppender } from '../file/file_appender';
 import { LegacyAppender } from '../../../legacy_compat/logging/appenders/legacy_appender';
 import { Appenders } from '../appenders';
+import { ConsoleAppender } from '../console/console_appender';
+import { FileAppender } from '../file/file_appender';
 
 beforeEach(() => {
   mockCreateLayout.mockReset();

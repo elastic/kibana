@@ -1,5 +1,5 @@
-import { Observable } from '../observable';
 import { MonoTypeOperatorFunction } from '../interfaces';
+import { Observable } from '../observable';
 
 /**
  * Filter items emitted by the source Observable by only emitting those that

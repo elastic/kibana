@@ -3,18 +3,30 @@ import { Duration } from 'moment';
 import { ByteSizeValue } from './byte_size_value';
 import {
   AnyType,
-  ArrayOptions, ArrayType,
+  ArrayOptions,
+  ArrayType,
   BooleanType,
-  ByteSizeOptions, ByteSizeType, DurationOptions, DurationType, LiteralType, MapOfOptions, MapOfType, MaybeType,
+  ByteSizeOptions,
+  ByteSizeType,
+  DurationOptions,
+  DurationType,
+  LiteralType,
+  MapOfOptions,
+  MapOfType,
+  MaybeType,
   NumberOptions,
-  NumberType, ObjectType, Props,
+  NumberType,
+  ObjectType,
+  Props,
   StringOptions,
   StringType,
-  Type, TypeOf,
-  TypeOptions, UnionType
+  Type,
+  TypeOf,
+  TypeOptions,
+  UnionType,
 } from './types';
 
-export { AnyType, ObjectType, TypeOf }
+export { AnyType, ObjectType, TypeOf };
 export { ByteSizeValue } from './byte_size_value';
 
 function boolean(options?: TypeOptions<boolean>): Type<boolean> {
@@ -25,9 +37,7 @@ function string(options?: StringOptions): Type<string> {
   return new StringType(options);
 }
 
-function literal<T extends string | number | boolean>(
-  value: T
-): Type<T> {
+function literal<T extends string | number | boolean>(value: T): Type<T> {
   return new LiteralType(value);
 }
 
@@ -57,10 +67,7 @@ function object<P extends Props>(
   return new ObjectType(schema, options);
 }
 
-function arrayOf<T>(
-  itemType: Type<T>,
-  options?: ArrayOptions<T>
-): Type<Array<T>> {
+function arrayOf<T>(itemType: Type<T>, options?: ArrayOptions<T>): Type<T[]> {
   return new ArrayType(itemType, options);
 }
 
@@ -84,7 +91,7 @@ function oneOf<A, B, C, D, E, F, G, H, I, J>(
     Type<H>,
     Type<I>,
     Type<J>
-    ],
+  ],
   options?: TypeOptions<A | B | C | D | E | F | G | H | I | J>
 ): Type<A | B | C | D | E | F | G | H | I | J>;
 function oneOf<A, B, C, D, E, F, G, H, I>(
@@ -98,7 +105,7 @@ function oneOf<A, B, C, D, E, F, G, H, I>(
     Type<G>,
     Type<H>,
     Type<I>
-    ],
+  ],
   options?: TypeOptions<A | B | C | D | E | F | G | H | I>
 ): Type<A | B | C | D | E | F | G | H | I>;
 function oneOf<A, B, C, D, E, F, G, H>(
@@ -111,7 +118,7 @@ function oneOf<A, B, C, D, E, F, G, H>(
     Type<F>,
     Type<G>,
     Type<H>
-    ],
+  ],
   options?: TypeOptions<A | B | C | D | E | F | G | H>
 ): Type<A | B | C | D | E | F | G | H>;
 function oneOf<A, B, C, D, E, F, G>(
@@ -139,7 +146,7 @@ function oneOf<A, B>(
   options?: TypeOptions<A | B>
 ): Type<A | B>;
 function oneOf<A>(types: [Type<A>], options?: TypeOptions<A>): Type<A>;
-function oneOf<RTS extends Array<AnyType>>(
+function oneOf<RTS extends AnyType[]>(
   types: RTS,
   options?: TypeOptions<any>
 ): Type<any> {

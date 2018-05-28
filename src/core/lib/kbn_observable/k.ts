@@ -1,7 +1,7 @@
-import { Observable, ObservableInput } from './observable';
-import { pipeFromArray } from './lib';
-import { UnaryFunction } from './interfaces';
 import { $from } from './factories';
+import { UnaryFunction } from './interfaces';
+import { pipeFromArray } from './lib';
+import { Observable, ObservableInput } from './observable';
 
 export function k$<T, R>(source: ObservableInput<T>) {
   function kOperations<A>(op1: UnaryFunction<Observable<T>, A>): A;
@@ -66,7 +66,7 @@ export function k$<T, R>(source: ObservableInput<T>) {
     op9: UnaryFunction<H, I>
   ): I;
 
-  function kOperations(...operations: UnaryFunction<Observable<T>, R>[]) {
+  function kOperations(...operations: Array<UnaryFunction<Observable<T>, R>>) {
     return pipeFromArray(operations)($from(source));
   }
 

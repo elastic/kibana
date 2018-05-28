@@ -2,11 +2,13 @@ import { EventEmitter } from 'events';
 import { IncomingMessage, ServerResponse } from 'http';
 
 class mockNetServer extends EventEmitter {
-  address() {
+  public address() {
     return { port: 1234, family: 'test-family', address: 'test-address' };
   }
 
-  getConnections(callback: (error: Error | null, count: number) => void) {
+  public getConnections(
+    callback: (error: Error | null, count: number) => void
+  ) {
     callback(null, 100500);
   }
 }
@@ -14,8 +16,8 @@ jest.mock('net', () => ({
   createServer: jest.fn(() => new mockNetServer()),
 }));
 
-import { LegacyPlatformProxifier } from '..';
 import { createServer } from 'net';
+import { LegacyPlatformProxifier } from '..';
 
 let root: any;
 let proxifier: LegacyPlatformProxifier;

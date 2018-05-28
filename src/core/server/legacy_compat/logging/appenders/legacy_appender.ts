@@ -1,7 +1,7 @@
 import { schema } from '../../../config/schema';
 
-import { LogRecord } from '../../../logging/log_record';
 import { DisposableAppender } from '../../../logging/appenders/appenders';
+import { LogRecord } from '../../../logging/log_record';
 import { LegacyKbnServer } from '../../legacy_kbn_server';
 
 const { literal, object } = schema;
@@ -11,7 +11,7 @@ const { literal, object } = schema;
  * @internal
  */
 export class LegacyAppender implements DisposableAppender {
-  static configSchema = object({
+  public static configSchema = object({
     kind: literal('legacy-appender'),
   });
 
@@ -22,7 +22,7 @@ export class LegacyAppender implements DisposableAppender {
    * write record to the configured destination.
    * @param record `LogRecord` instance to forward to.
    */
-  append(record: LogRecord) {
+  public append(record: LogRecord) {
     this.kbnServer.log(
       [record.level.id.toLowerCase(), ...record.context.split('.')],
       record.error || record.message,
@@ -30,5 +30,5 @@ export class LegacyAppender implements DisposableAppender {
     );
   }
 
-  async dispose() {}
+  public async dispose() {}
 }

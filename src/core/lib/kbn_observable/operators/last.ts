@@ -1,6 +1,6 @@
-import { Observable } from '../observable';
 import { EmptyError } from '../errors';
 import { MonoTypeOperatorFunction } from '../interfaces';
+import { Observable } from '../observable';
 
 /**
  * Emits the last value emitted by the source Observable, then immediately

@@ -52,7 +52,7 @@ export class Subject<T> extends Observable<T> {
    * @param value The value that will be forwarded to every observer subscribed
    * to this subject.
    */
-  next(value: T) {
+  public next(value: T) {
     for (const observer of this.observers) {
       observer.next(value);
     }
@@ -62,7 +62,7 @@ export class Subject<T> extends Observable<T> {
    * @param error The error that will be forwarded to every observer subscribed
    * to this subject.
    */
-  error(error: Error) {
+  public error(error: Error) {
     this.thrownError = error;
     this.isStopped = true;
 
@@ -76,7 +76,7 @@ export class Subject<T> extends Observable<T> {
   /**
    * Completes all the subscribed observers, then clears the list of observers.
    */
-  complete() {
+  public complete() {
     this.isStopped = true;
 
     for (const observer of this.observers) {
@@ -89,7 +89,7 @@ export class Subject<T> extends Observable<T> {
   /**
    * Returns an observable, so the observer methods are hidden.
    */
-  asObservable(): Observable<T> {
+  public asObservable(): Observable<T> {
     return new Observable(observer => this.subscribe(observer));
   }
 }

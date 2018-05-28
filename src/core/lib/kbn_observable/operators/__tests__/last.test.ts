@@ -1,6 +1,6 @@
+import { last } from '../';
 import { k$ } from '../../k';
 import { Subject } from '../../subject';
-import { last } from '../';
 
 test('returns the last value', async () => {
   const values$ = new Subject();

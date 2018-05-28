@@ -1,9 +1,14 @@
-import { BehaviorSubject, k$, first, toPromise } from '../../../lib/kbn_observable';
-import { schema, AnyType, TypeOf } from '../schema';
+import {
+  BehaviorSubject,
+  first,
+  k$,
+  toPromise,
+} from '../../../lib/kbn_observable';
+import { AnyType, schema, TypeOf } from '../schema';
 
 import { ConfigService, ObjectToRawConfigAdapter } from '..';
-import { Env } from '../env';
 import { logger } from '../../logging/__mocks__';
+import { Env } from '../env';
 
 const emptyArgv = {};
 const defaultEnv = new Env('/kibana', emptyArgv);
@@ -241,14 +246,14 @@ test('treats config as enabled if config path is not present in config', async (
 
 function createClassWithSchema(s: AnyType) {
   return class ExampleClassWithSchema {
-    static schema = s;
+    public static schema = s;
 
     constructor(readonly value: TypeOf<typeof s>) {}
   };
 }
 
 class ExampleClassWithStringSchema {
-  static schema = schema.string();
+  public static schema = schema.string();
 
   constructor(readonly value: string) {}
 }

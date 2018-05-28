@@ -1,6 +1,6 @@
 // TODO inline all of these
-import { AnyType, TypeOf } from './schema';
 import { Env } from './env';
+import { AnyType, TypeOf } from './schema';
 
 /**
  * Interface that defines the static side of a config class.

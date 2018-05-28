@@ -1,6 +1,6 @@
-import { Observable, ObservableInput } from '../observable';
-import { OperatorFunction } from '../interfaces';
 import { $from } from '../factories';
+import { OperatorFunction } from '../interfaces';
+import { Observable, ObservableInput } from '../observable';
 
 /**
  * Projects each source value to an Observable which is merged in the output

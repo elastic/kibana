@@ -2,16 +2,16 @@ jest.mock('fs', () => ({
   readFileSync: jest.fn(),
 }));
 
+import Chance from 'chance';
 import http from 'http';
 import supertest from 'supertest';
-import Chance from 'chance';
 
-import { ByteSizeValue } from '../../config/schema';
 import { Env } from '../../config';
-import { Router } from '../router';
-import { HttpServer } from '../http_server';
-import { HttpConfig } from '../http_config';
+import { ByteSizeValue } from '../../config/schema';
 import { logger } from '../../logging/__mocks__';
+import { HttpConfig } from '../http_config';
+import { HttpServer } from '../http_server';
+import { Router } from '../router';
 
 const chance = new Chance();
 
@@ -413,13 +413,11 @@ describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
     } as HttpConfig;
 
     const router = new Router('/');
-    router.get(
-      { path: '/', validate: false },
-      async (req, res) => res.ok({ key: 'value:/' })
+    router.get({ path: '/', validate: false }, async (req, res) =>
+      res.ok({ key: 'value:/' })
     );
-    router.get(
-      { path: '/foo', validate: false },
-      async (req, res) => res.ok({ key: 'value:/foo' })
+    router.get({ path: '/foo', validate: false }, async (req, res) =>
+      res.ok({ key: 'value:/foo' })
     );
 
     server.registerRouter(router);
@@ -475,13 +473,11 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
     } as HttpConfig;
 
     const router = new Router('/');
-    router.get(
-      { path: '/', validate: false },
-      async (req, res) => res.ok({ key: 'value:/' })
+    router.get({ path: '/', validate: false }, async (req, res) =>
+      res.ok({ key: 'value:/' })
     );
-    router.get(
-      { path: '/foo', validate: false },
-      async (req, res) => res.ok({ key: 'value:/foo' })
+    router.get({ path: '/foo', validate: false }, async (req, res) =>
+      res.ok({ key: 'value:/foo' })
     );
 
     server.registerRouter(router);
@@ -546,9 +542,8 @@ describe('with defined `redirectHttpFromPort`', () => {
     } as HttpConfig;
 
     const router = new Router('/');
-    router.get(
-      { path: '/', validate: false },
-      async (req, res) => res.ok({ key: 'value:/' })
+    router.get({ path: '/', validate: false }, async (req, res) =>
+      res.ok({ key: 'value:/' })
     );
 
     server.registerRouter(router);

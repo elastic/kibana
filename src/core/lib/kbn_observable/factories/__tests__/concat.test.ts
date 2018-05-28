@@ -1,6 +1,6 @@
 import { $concat } from '../';
-import { Subject } from '../../subject';
 import { collect } from '../../lib/collect';
+import { Subject } from '../../subject';
 
 test('continous on next observable when previous completes', async () => {
   const a = new Subject();

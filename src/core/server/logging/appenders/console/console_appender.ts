@@ -1,7 +1,7 @@
 import { schema } from '../../../config/schema';
 
-import { LogRecord } from '../../log_record';
 import { Layout, Layouts } from '../../layouts/layouts';
+import { LogRecord } from '../../log_record';
 import { DisposableAppender } from '../appenders';
 
 const { literal, object } = schema;
@@ -11,7 +11,7 @@ const { literal, object } = schema;
  * @internal
  */
 export class ConsoleAppender implements DisposableAppender {
-  static configSchema = object({
+  public static configSchema = object({
     kind: literal('console'),
     layout: Layouts.configSchema,
   });
@@ -26,12 +26,12 @@ export class ConsoleAppender implements DisposableAppender {
    * Formats specified `record` and logs it via built-in `console`.
    * @param record `LogRecord` instance to be logged.
    */
-  append(record: LogRecord) {
+  public append(record: LogRecord) {
     console.log(this.layout.format(record));
   }
 
   /**
    * Disposes `ConsoleAppender`.
    */
-  dispose() {}
+  public dispose() {}
 }

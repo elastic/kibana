@@ -1,15 +1,15 @@
 import { SchemaError } from '.';
 
 export class SchemaTypesError extends SchemaError {
-  constructor(errors: Array<Error>, message: string, key?: string) {
+  constructor(errors: Error[], message: string, key?: string) {
     super(
       SchemaTypesError.extractMessages(errors, message, key),
       SchemaTypesError.extractFirstCause(errors)
     );
   }
 
-  static extractMessages(
-    error: Array<Error>,
+  public static extractMessages(
+    error: Error[],
     heading: string,
     context?: string
   ) {
@@ -21,7 +21,7 @@ export class SchemaTypesError extends SchemaError {
     return `[${context}]: ${heading}:\n${messages}`;
   }
 
-  static extractFirstCause(error: Array<Error>): Error | undefined {
+  public static extractFirstCause(error: Error[]): Error | undefined {
     return error.length > 0 ? error[0] : undefined;
   }
 }

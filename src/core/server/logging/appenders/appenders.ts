@@ -2,11 +2,11 @@ import { schema, TypeOf } from '../../config/schema';
 
 import { assertNever } from '../../../utils';
 import { Env } from '../../config';
+import { LegacyAppender } from '../../legacy_compat/logging/appenders/legacy_appender';
+import { Layouts } from '../layouts/layouts';
+import { LogRecord } from '../log_record';
 import { ConsoleAppender } from './console/console_appender';
 import { FileAppender } from './file/file_appender';
-import { LegacyAppender } from '../../legacy_compat/logging/appenders/legacy_appender';
-import { LogRecord } from '../log_record';
-import { Layouts } from '../layouts/layouts';
 
 const appendersSchema = schema.oneOf([
   ConsoleAppender.configSchema,
@@ -38,7 +38,7 @@ export interface DisposableAppender extends Appender {
 
 /** @internal */
 export class Appenders {
-  static configSchema = appendersSchema;
+  public static configSchema = appendersSchema;
 
   /**
    * Factory method that creates specific `Appender` instances based on the passed `config` parameter.
@@ -46,7 +46,10 @@ export class Appenders {
    * @param env Current environment that is required by some appenders.
    * @returns Fully constructed `Appender` instance.
    */
-  static create(config: AppenderConfigType, env: Env): DisposableAppender {
+  public static create(
+    config: AppenderConfigType,
+    env: Env
+  ): DisposableAppender {
     switch (config.kind) {
       case 'console':
         return new ConsoleAppender(Layouts.create(config.layout));

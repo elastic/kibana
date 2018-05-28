@@ -1,5 +1,5 @@
-import { Observable } from '../observable';
 import { OperatorFunction } from '../interfaces';
+import { Observable } from '../observable';
 
 /**
  * Modifies each value from the source by passing it to `fn(item, i)` and

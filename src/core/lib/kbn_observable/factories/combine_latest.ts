@@ -1,5 +1,5 @@
-import { Observable, ObservableInput } from '../observable';
 import { $from } from '../factories';
+import { Observable, ObservableInput } from '../observable';
 
 const pending = Symbol('awaiting first value');
 
@@ -34,7 +34,7 @@ export function $combineLatest<T, T2, T3, T4, T5, T6>(
   v6: ObservableInput<T6>
 ): Observable<[T, T2, T3, T4, T5, T6]>;
 export function $combineLatest<T>(
-  ...observables: ObservableInput<T>[]
+  ...observables: Array<ObservableInput<T>>
 ): Observable<T[]>;
 
 /**
@@ -47,13 +47,13 @@ export function $combineLatest<T>(
  * @return {Observable}
  */
 export function $combineLatest<T>(
-  ...observables: ObservableInput<T>[]
+  ...observables: Array<ObservableInput<T>>
 ): Observable<T[]> {
   return new Observable(observer => {
     // create an array that will receive values as observables
     // update and initialize it with `pending` symbols so that
     // we know when observables emit for the first time
-    const values: (symbol | T)[] = observables.map(() => pending);
+    const values: Array<symbol | T> = observables.map(() => pending);
 
     let needFirstCount = values.length;
     let activeCount = values.length;

@@ -1,17 +1,17 @@
-import {
-  k$,
-  BehaviorSubject,
-  Observable,
-  map,
-  filter,
-  skipRepeats,
-} from '../../lib/kbn_observable';
 import { isEqual, isPlainObject } from 'lodash';
 import typeDetect from 'type-detect';
+import {
+  BehaviorSubject,
+  filter,
+  k$,
+  map,
+  Observable,
+  skipRepeats,
+} from '../../lib/kbn_observable';
 
-import { getConfigFromFile } from './read_config';
-import { RawConfig } from './raw_config';
 import { ObjectToRawConfigAdapter } from './object_to_raw_config_adapter';
+import { RawConfig } from './raw_config';
+import { getConfigFromFile } from './read_config';
 
 // Used to indicate that no config has been received yet
 const notRead = Symbol('config not yet read');
@@ -60,23 +60,23 @@ export class RawConfigService {
   /**
    * Read the initial Kibana config.
    */
-  loadConfig() {
+  public loadConfig() {
     const config = getConfigFromFile(this.configFile);
     this.rawConfigFromFile$.next(config);
   }
 
-  stop() {
+  public stop() {
     this.rawConfigFromFile$.complete();
   }
 
   /**
    * Re-read the Kibana config.
    */
-  reloadConfig() {
+  public reloadConfig() {
     this.loadConfig();
   }
 
-  getConfig$() {
+  public getConfig$() {
     return this.config$;
   }
 }

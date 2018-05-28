@@ -7,7 +7,7 @@ test('receives values when subscribed', async () => {
     observer = _observer;
   });
 
-  let res: any[] = [];
+  const res: any[] = [];
 
   source.subscribe({
     next(x) {
@@ -101,7 +101,7 @@ describe('Observable.from', () => {
 
   test('handles iterable', () => {
     const fooIterable: Iterable<number> = {
-      [Symbol.iterator]: function*() {
+      *[Symbol.iterator]() {
         yield 1;
         yield 2;
         yield 3;

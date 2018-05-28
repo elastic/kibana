@@ -1,9 +1,9 @@
 import { schema } from '../../config/schema';
 
 import { assertNever } from '../../../utils';
+import { LogRecord } from '../log_record';
 import { JsonLayout, JsonLayoutConfigType } from './json_layout';
 import { PatternLayout, PatternLayoutConfigType } from './pattern_layout';
-import { LogRecord } from '../log_record';
 
 const { oneOf } = schema;
 
@@ -19,7 +19,7 @@ export interface Layout {
 
 /** @internal */
 export class Layouts {
-  static configSchema = oneOf([
+  public static configSchema = oneOf([
     JsonLayout.configSchema,
     PatternLayout.configSchema,
   ]);
@@ -29,7 +29,7 @@ export class Layouts {
    * @param config Configuration specific to a particular `Layout` implementation.
    * @returns Fully constructed `Layout` instance.
    */
-  static create(config: LayoutConfigType): Layout {
+  public static create(config: LayoutConfigType): Layout {
     switch (config.kind) {
       case 'json':
         return new JsonLayout();

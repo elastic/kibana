@@ -2,7 +2,9 @@ import { Appender } from './appenders/appenders';
 import { LogLevel } from './log_level';
 import { LogRecord } from './log_record';
 
-export type LogMeta = { [key: string]: any };
+export interface LogMeta {
+  [key: string]: any;
+}
 
 /**
  * Logger exposes all the necessary methods to log any type of information and
@@ -32,31 +34,31 @@ export class BaseLogger implements Logger {
     private readonly appenders: Appender[]
   ) {}
 
-  trace(message: string, meta?: LogMeta): void {
+  public trace(message: string, meta?: LogMeta): void {
     this.log(this.createLogRecord(LogLevel.Trace, message, meta));
   }
 
-  debug(message: string, meta?: LogMeta): void {
+  public debug(message: string, meta?: LogMeta): void {
     this.log(this.createLogRecord(LogLevel.Debug, message, meta));
   }
 
-  info(message: string, meta?: LogMeta): void {
+  public info(message: string, meta?: LogMeta): void {
     this.log(this.createLogRecord(LogLevel.Info, message, meta));
   }
 
-  warn(errorOrMessage: string | Error, meta?: LogMeta): void {
+  public warn(errorOrMessage: string | Error, meta?: LogMeta): void {
     this.log(this.createLogRecord(LogLevel.Warn, errorOrMessage, meta));
   }
 
-  error(errorOrMessage: string | Error, meta?: LogMeta): void {
+  public error(errorOrMessage: string | Error, meta?: LogMeta): void {
     this.log(this.createLogRecord(LogLevel.Error, errorOrMessage, meta));
   }
 
-  fatal(errorOrMessage: string | Error, meta?: LogMeta): void {
+  public fatal(errorOrMessage: string | Error, meta?: LogMeta): void {
     this.log(this.createLogRecord(LogLevel.Fatal, errorOrMessage, meta));
   }
 
-  log(record: LogRecord) {
+  public log(record: LogRecord) {
     if (!this.level.supports(record.level)) {
       return;
     }

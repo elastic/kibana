@@ -1,6 +1,6 @@
 import typeDetect from 'type-detect';
-import { Type, TypeOptions } from './type';
 import { SchemaTypeError } from '../errors';
+import { Type, TypeOptions } from './type';
 
 export type NumberOptions = TypeOptions<number> & {
   min?: number;
@@ -17,7 +17,7 @@ export class NumberType extends Type<number> {
     this.max = options.max;
   }
 
-  process(value: any, context?: string): number {
+  public process(value: any, context?: string): number {
     const type = typeDetect(value);
 
     // Do we want to allow strings that can be converted, e.g. "2"? (Joi does)
@@ -41,7 +41,7 @@ export class NumberType extends Type<number> {
       throw new SchemaTypeError(
         `Value is [${value}] but it must be equal to or greater than [${
           this.min
-          }].`,
+        }].`,
         context
       );
     }
@@ -50,7 +50,7 @@ export class NumberType extends Type<number> {
       throw new SchemaTypeError(
         `Value is [${value}] but it must be equal to or lower than [${
           this.max
-          }].`,
+        }].`,
         context
       );
     }

@@ -1,5 +1,5 @@
 import { schema, TypeOf } from '../config/schema';
-import { Appenders, AppenderConfigType } from './appenders/appenders';
+import { AppenderConfigType, Appenders } from './appenders/appenders';
 
 const { literal, oneOf, object, string, arrayOf, mapOf } = schema;
 
@@ -70,12 +70,12 @@ type LoggingConfigType = TypeOf<typeof loggingSchema>;
  * @internal
  */
 export class LoggingConfig {
-  static schema = loggingSchema;
+  public static schema = loggingSchema;
 
   /**
    * Map of the appender unique arbitrary key and its corresponding config.
    */
-  readonly appenders: Map<string, AppenderConfigType> = new Map([
+  public readonly appenders: Map<string, AppenderConfigType> = new Map([
     [
       DEFAULT_APPENDER_NAME,
       {
@@ -88,7 +88,7 @@ export class LoggingConfig {
   /**
    * Map of the logger unique arbitrary key (context) and its corresponding config.
    */
-  readonly loggers: Map<string, LoggerConfigType> = new Map();
+  public readonly loggers: Map<string, LoggerConfigType> = new Map();
 
   constructor(schema: LoggingConfigType) {
     this.fillAppendersConfig(schema);
@@ -101,7 +101,7 @@ export class LoggingConfig {
    * @param contextParts List of the context parts (e.g. ['parent', 'child'].
    * @returns {string} Joined context string (e.g. 'parent.child').
    */
-  static getLoggerContext(contextParts: string[]) {
+  public static getLoggerContext(contextParts: string[]) {
     return contextParts.join(CONTEXT_SEPARATOR) || ROOT_CONTEXT_NAME;
   }
 
@@ -110,7 +110,7 @@ export class LoggingConfig {
    * @param context Context to find parent for.
    * @returns Name of the parent context or `root` if the context is the top level one.
    */
-  static getParentLoggerContext(context: string) {
+  public static getParentLoggerContext(context: string) {
     const lastIndexOfSeparator = context.lastIndexOf(CONTEXT_SEPARATOR);
     if (lastIndexOfSeparator === -1) {
       return ROOT_CONTEXT_NAME;

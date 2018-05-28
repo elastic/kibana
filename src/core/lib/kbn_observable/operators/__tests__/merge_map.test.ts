@@ -1,9 +1,9 @@
-import { Observable } from '../../observable';
+import { map, mergeMap } from '../';
+import { $error, $of } from '../../factories';
 import { k$ } from '../../k';
-import { Subject } from '../../subject';
-import { mergeMap, map } from '../';
-import { $of, $error } from '../../factories';
 import { collect } from '../../lib/collect';
+import { Observable } from '../../observable';
+import { Subject } from '../../subject';
 
 const tickMs = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 

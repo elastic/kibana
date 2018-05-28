@@ -61,7 +61,7 @@ export type PatternLayoutConfigType = TypeOf<typeof patternLayoutSchema>;
  * @internal
  */
 export class PatternLayout implements Layout {
-  static configSchema = patternLayoutSchema;
+  public static configSchema = patternLayoutSchema;
 
   constructor(
     private readonly pattern = DEFAULT_PATTERN,
@@ -72,7 +72,7 @@ export class PatternLayout implements Layout {
    * Formats `LogRecord` into a string based on the specified `pattern` and `highlighting` options.
    * @param record Instance of `LogRecord` to format into string.
    */
-  format(record: LogRecord): string {
+  public format(record: LogRecord): string {
     // Error stack is much more useful than just the message.
     const message = (record.error && record.error.stack) || record.message;
     const formattedRecord = new Map([

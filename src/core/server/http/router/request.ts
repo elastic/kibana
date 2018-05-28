@@ -1,17 +1,17 @@
 import { Request } from 'hapi-latest';
 import { ObjectType, TypeOf } from '../../config/schema';
 
-import { Headers, filterHeaders } from './headers';
+import { filterHeaders, Headers } from './headers';
 import { RouteSchemas } from './route';
 
 export class KibanaRequest<Params, Query, Body> {
-  readonly headers: Headers;
+  public readonly headers: Headers;
 
   /**
    * Factory for creating requests. Validates the request before creating an
    * instance of a KibanaRequest.
    */
-  static from<
+  public static from<
     P extends ObjectType,
     Q extends ObjectType,
     B extends ObjectType
@@ -77,7 +77,7 @@ export class KibanaRequest<Params, Query, Body> {
     this.headers = req.headers;
   }
 
-  getFilteredHeaders(headersToKeep: string[]) {
+  public getFilteredHeaders(headersToKeep: string[]) {
     return filterHeaders(this.headers, headersToKeep);
   }
 }

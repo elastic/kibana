@@ -17,9 +17,9 @@ export type JsonLayoutConfigType = TypeOf<typeof jsonLayoutSchema>;
  * @internal
  */
 export class JsonLayout implements Layout {
-  static configSchema = jsonLayoutSchema;
+  public static configSchema = jsonLayoutSchema;
 
-  format(record: LogRecord): string {
+  public format(record: LogRecord): string {
     return JSON.stringify({
       '@timestamp': record.timestamp.toISOString(),
       level: record.level.id.toUpperCase(),

@@ -1,5 +1,5 @@
-import { Observable, Subscription } from '../observable';
 import { OperatorFunction } from '../interfaces';
+import { Observable, Subscription } from '../observable';
 
 /**
  * Projects each source value to an Observable which is merged in the output
@@ -55,7 +55,7 @@ export function switchMap<T, R>(
   return function switchMapOperation(source) {
     return new Observable(observer => {
       let i = 0;
-      let innerSubscription: Subscription | undefined = undefined;
+      let innerSubscription: Subscription | undefined;
 
       return source.subscribe({
         next(value) {

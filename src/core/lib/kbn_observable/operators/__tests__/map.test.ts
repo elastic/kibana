@@ -1,7 +1,7 @@
-import { Observable } from '../../observable';
-import { k$ } from '../../k';
-import { $from } from '../../factories';
 import { map, toArray, toPromise } from '../';
+import { $from } from '../../factories';
+import { k$ } from '../../k';
+import { Observable } from '../../observable';
 
 const number$ = $from([1, 2, 3]);
 const collect = <T>(source: Observable<T>) =>

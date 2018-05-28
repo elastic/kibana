@@ -12,7 +12,7 @@ const { literal, object, string } = schema;
  * @internal
  */
 export class FileAppender implements DisposableAppender {
-  static configSchema = object({
+  public static configSchema = object({
     kind: literal('file'),
     path: string(),
     layout: Layouts.configSchema,
@@ -34,7 +34,7 @@ export class FileAppender implements DisposableAppender {
    * Formats specified `record` and writes them to the specified file.
    * @param record `LogRecord` instance to be logged.
    */
-  append(record: LogRecord) {
+  public append(record: LogRecord) {
     if (this.outputStream === undefined) {
       this.outputStream = createWriteStream(this.path, {
         flags: 'a',
@@ -48,7 +48,7 @@ export class FileAppender implements DisposableAppender {
   /**
    * Disposes `FileAppender`. Waits for the underlying file stream to be completely flushed and closed.
    */
-  async dispose() {
+  public async dispose() {
     await new Promise(resolve => {
       if (this.outputStream === undefined) {
         return resolve();

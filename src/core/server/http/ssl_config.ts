@@ -54,17 +54,17 @@ export class SslConfig {
   /**
    * @internal
    */
-  static schema = sslSchema;
+  public static schema = sslSchema;
 
-  enabled: boolean;
-  redirectHttpFromPort: number | undefined;
-  key: string | undefined;
-  certificate: string | undefined;
-  certificateAuthorities: string[] | undefined;
-  keyPassphrase: string | undefined;
+  public enabled: boolean;
+  public redirectHttpFromPort: number | undefined;
+  public key: string | undefined;
+  public certificate: string | undefined;
+  public certificateAuthorities: string[] | undefined;
+  public keyPassphrase: string | undefined;
 
-  cipherSuites: string[];
-  supportedProtocols: string[] | undefined;
+  public cipherSuites: string[];
+  public supportedProtocols: string[] | undefined;
 
   /**
    * @internal
@@ -85,7 +85,7 @@ export class SslConfig {
   /**
    * Options that affect the OpenSSL protocol behavior via numeric bitmask of the SSL_OP_* options from OpenSSL Options.
    */
-  getSecureOptions() {
+  public getSecureOptions() {
     if (
       this.supportedProtocols === undefined ||
       this.supportedProtocols.length === 0

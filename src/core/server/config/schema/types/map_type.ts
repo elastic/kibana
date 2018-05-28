@@ -1,8 +1,8 @@
 import { isPlainObject } from 'lodash';
 import typeDetect from 'type-detect';
-import { Type, TypeOptions } from './type';
 import { SchemaTypeError } from '../errors';
 import { toContext } from './index';
+import { Type, TypeOptions } from './type';
 
 function isMap<K, V>(o: any): o is Map<K, V> {
   return o instanceof Map;
@@ -19,7 +19,7 @@ export class MapOfType<K, V> extends Type<Map<K, V>> {
     super(options);
   }
 
-  process(obj: any, context?: string): Map<K, V> {
+  public process(obj: any, context?: string): Map<K, V> {
     if (isPlainObject(obj)) {
       const entries = Object.keys(obj).map(key => [key, obj[key]]);
       return this.processEntries(entries, context);
@@ -35,7 +35,7 @@ export class MapOfType<K, V> extends Type<Map<K, V>> {
     );
   }
 
-  processEntries(entries: any[][], context?: string) {
+  public processEntries(entries: any[][], context?: string) {
     const res = entries.map(([key, value]) => {
       const validatedKey = this.keyType.validate(
         key,

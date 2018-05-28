@@ -1,11 +1,11 @@
-let mockCreateWriteStream: any = {};
+const mockCreateWriteStream: any = {};
 
 jest.mock('fs', () => ({
   createWriteStream: () => mockCreateWriteStream,
 }));
 
-import { LoggingConfig } from '../logging_config';
 import { MutableLoggerFactory } from '../logger_factory';
+import { LoggingConfig } from '../logging_config';
 
 const tickMs = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 

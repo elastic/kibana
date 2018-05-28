@@ -1,15 +1,15 @@
 import typeDetect from 'type-detect';
-import { Type } from './type';
 import { ByteSizeValue } from '../byte_size_value';
 import { SchemaTypeError } from '../errors';
+import { Type } from './type';
 
-export type ByteSizeOptions = {
+export interface ByteSizeOptions {
   // we need to special-case defaultValue as we want to handle string inputs too
   validate?: (value: ByteSizeValue) => string | void;
   defaultValue?: ByteSizeValue | string | number;
   min?: ByteSizeValue | string | number;
   max?: ByteSizeValue | string | number;
-};
+}
 
 function ensureByteSizeValue(value?: ByteSizeValue | string | number) {
   if (typeof value === 'string') {
@@ -39,7 +39,7 @@ export class ByteSizeType extends Type<ByteSizeValue> {
     this.max = ensureByteSizeValue(max);
   }
 
-  process(value: any, context?: string): ByteSizeValue {
+  public process(value: any, context?: string): ByteSizeValue {
     if (typeof value === 'string') {
       value = ByteSizeValue.parse(value);
     }

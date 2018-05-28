@@ -1,5 +1,5 @@
-import { Logger, LogMeta } from './logger';
 import { LogRecord } from './log_record';
+import { Logger, LogMeta } from './logger';
 
 /** @internal */
 export class LoggerAdapter implements Logger {
@@ -13,35 +13,35 @@ export class LoggerAdapter implements Logger {
    *
    * @internal
    */
-  updateLogger(logger: Logger) {
+  public updateLogger(logger: Logger) {
     this._logger = logger;
   }
 
-  trace(message: string, meta?: LogMeta): void {
+  public trace(message: string, meta?: LogMeta): void {
     this._logger.trace(message, meta);
   }
 
-  debug(message: string, meta?: LogMeta): void {
+  public debug(message: string, meta?: LogMeta): void {
     this._logger.debug(message, meta);
   }
 
-  info(message: string, meta?: LogMeta): void {
+  public info(message: string, meta?: LogMeta): void {
     this._logger.info(message, meta);
   }
 
-  warn(errorOrMessage: string | Error, meta?: LogMeta): void {
+  public warn(errorOrMessage: string | Error, meta?: LogMeta): void {
     this._logger.warn(errorOrMessage, meta);
   }
 
-  error(errorOrMessage: string | Error, meta?: LogMeta): void {
+  public error(errorOrMessage: string | Error, meta?: LogMeta): void {
     this._logger.error(errorOrMessage, meta);
   }
 
-  fatal(errorOrMessage: string | Error, meta?: LogMeta): void {
+  public fatal(errorOrMessage: string | Error, meta?: LogMeta): void {
     this._logger.fatal(errorOrMessage, meta);
   }
 
-  log(record: LogRecord) {
+  public log(record: LogRecord) {
     this._logger.log(record);
   }
 }

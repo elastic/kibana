@@ -1,13 +1,13 @@
-import { duration as momentDuration, Duration, isDuration } from 'moment';
+import { Duration, duration as momentDuration, isDuration } from 'moment';
 import typeDetect from 'type-detect';
-import { Type } from './type';
 import { SchemaTypeError } from '../errors';
+import { Type } from './type';
 
-export type DurationOptions = {
+export interface DurationOptions {
   // we need to special-case defaultValue as we want to handle string inputs too
   validate?: (value: Duration) => string | void;
   defaultValue?: Duration | string | number;
-};
+}
 
 function ensureDuration(value?: Duration | string | number) {
   if (typeof value === 'string') {
@@ -28,7 +28,7 @@ function stringToDuration(text: string) {
   if (!result) {
     throw new Error(
       `Failed to parse [${text}] as time value. ` +
-      `Format must be <count>[ms|s|m|h|d|w|M|Y] (e.g. '70ms', '5s', '3d', '1Y')`
+        `Format must be <count>[ms|s|m|h|d|w|M|Y] (e.g. '70ms', '5s', '3d', '1Y')`
     );
   }
 
@@ -42,7 +42,7 @@ function numberToDuration(numberMs: number) {
   if (!Number.isSafeInteger(numberMs) || numberMs < 0) {
     throw new Error(
       `Failed to parse [${numberMs}] as time value. ` +
-      `Value should be a safe positive integer number.`
+        `Value should be a safe positive integer number.`
     );
   }
 
@@ -59,7 +59,7 @@ export class DurationType extends Type<Duration> {
     });
   }
 
-  process(value: any, context?: string): Duration {
+  public process(value: any, context?: string): Duration {
     if (typeof value === 'string') {
       value = stringToDuration(value);
     }

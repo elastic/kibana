@@ -40,7 +40,7 @@ export class LegacyConfigToRawConfigAdapter implements RawConfig {
     });
   }
 
-  has(configPath: ConfigPath) {
+  public has(configPath: ConfigPath) {
     if (LegacyConfigToRawConfigAdapter.isNewPlatformConfig(configPath)) {
       return this.newPlatformConfig.has(configPath);
     }
@@ -50,7 +50,7 @@ export class LegacyConfigToRawConfigAdapter implements RawConfig {
     );
   }
 
-  get(configPath: ConfigPath) {
+  public get(configPath: ConfigPath) {
     if (LegacyConfigToRawConfigAdapter.isNewPlatformConfig(configPath)) {
       return this.newPlatformConfig.get(configPath);
     }
@@ -69,7 +69,7 @@ export class LegacyConfigToRawConfigAdapter implements RawConfig {
     }
   }
 
-  set(configPath: ConfigPath, value: any) {
+  public set(configPath: ConfigPath, value: any) {
     if (LegacyConfigToRawConfigAdapter.isNewPlatformConfig(configPath)) {
       return this.newPlatformConfig.set(configPath, value);
     }
@@ -80,7 +80,7 @@ export class LegacyConfigToRawConfigAdapter implements RawConfig {
     );
   }
 
-  getFlattenedPaths() {
+  public getFlattenedPaths() {
     // This method is only used to detect unused config paths, but when we run
     // new platform within the legacy one then the new platform is in charge of
     // only `__newPlatform` config node and the legacy platform will check the rest.

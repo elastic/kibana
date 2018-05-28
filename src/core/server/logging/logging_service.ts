@@ -17,7 +17,7 @@ export class LoggingService {
    * internal logger factory.
    * @param config$ Observable that tracks all updates in the logging config.
    */
-  upgrade(config$: Observable<LoggingConfig>) {
+  public upgrade(config$: Observable<LoggingConfig>) {
     this.subscription = config$.subscribe({
       next: config => this.loggingFactory.updateConfig(config),
     });
@@ -27,7 +27,7 @@ export class LoggingService {
    * Asynchronous method that causes service to unsubscribe from logging config updates
    * and close internal logger factory.
    */
-  async stop() {
+  public async stop() {
     if (this.subscription !== undefined) {
       this.subscription.unsubscribe();
     }

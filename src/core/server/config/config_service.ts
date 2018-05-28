@@ -1,18 +1,18 @@
+import { isEqual } from 'lodash';
 import {
-  Observable,
+  first,
   k$,
   map,
-  first,
+  Observable,
   skipRepeats,
   toPromise,
 } from '../../lib/kbn_observable';
-import { isEqual } from 'lodash';
 
-import { Env } from './env';
 import { Logger, LoggerFactory } from '../logging';
-import { schema, AnyType } from './schema';
 import { ConfigWithSchema } from './config_with_schema';
+import { Env } from './env';
 import { RawConfig } from './raw_config';
+import { AnyType } from './schema';
 
 export type ConfigPath = string | string[];
 
@@ -37,7 +37,7 @@ export class ConfigService {
    * Returns the full config object observable. This is not intended for
    * "normal use", but for features that _need_ access to the full object.
    */
-  getConfig$() {
+  public getConfig$() {
     return this.config$;
   }
 
@@ -49,7 +49,7 @@ export class ConfigService {
    * @param ConfigClass A class (not an instance of a class) that contains a
    * static `schema` that we validate the config at the given `path` against.
    */
-  atPath<Schema extends AnyType, Config>(
+  public atPath<Schema extends AnyType, Config>(
     path: ConfigPath,
     ConfigClass: ConfigWithSchema<Schema, Config>
   ) {
@@ -64,7 +64,7 @@ export class ConfigService {
    *
    * @see atPath
    */
-  optionalAtPath<Schema extends AnyType, Config>(
+  public optionalAtPath<Schema extends AnyType, Config>(
     path: ConfigPath,
     ConfigClass: ConfigWithSchema<Schema, Config>
   ) {
@@ -78,7 +78,7 @@ export class ConfigService {
     );
   }
 
-  async isEnabledAtPath(path: ConfigPath) {
+  public async isEnabledAtPath(path: ConfigPath) {
     const enabledPath = createPluginEnabledPath(path);
 
     const config = await k$(this.config$)(first(), toPromise());
@@ -141,7 +141,7 @@ export class ConfigService {
     this.handledPaths.push(path);
   }
 
-  async getUnusedPaths(): Promise<string[]> {
+  public async getUnusedPaths(): Promise<string[]> {
     const config = await k$(this.config$)(first(), toPromise());
     const handledPaths = this.handledPaths.map(pathToString);
 

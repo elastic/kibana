@@ -1,5 +1,5 @@
-import { Observable } from '../observable';
 import { UnaryFunction } from '../interfaces';
+import { Observable } from '../observable';
 
 export function toPromise<T>(): UnaryFunction<Observable<T>, Promise<T>> {
   return function toPromiseOperation(source) {

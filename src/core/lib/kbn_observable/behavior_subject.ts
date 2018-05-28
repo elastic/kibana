@@ -27,7 +27,7 @@ export class BehaviorSubject<T> extends Subject<T> {
    * handy. Usually a BehaviorSubject is used so you immediately receive the
    * latest/current value when subscribing.
    */
-  getValue() {
+  public getValue() {
     if (this.thrownError !== undefined) {
       throw this.thrownError;
     }
@@ -35,7 +35,7 @@ export class BehaviorSubject<T> extends Subject<T> {
     return this.value;
   }
 
-  next(value: T) {
+  public next(value: T) {
     if (!this.isStopped) {
       this.value = value;
     }

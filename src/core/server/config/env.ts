@@ -1,5 +1,5 @@
-import process from 'process';
 import { resolve } from 'path';
+import process from 'process';
 
 import { LegacyKbnServer } from '../legacy_compat';
 
@@ -10,16 +10,16 @@ interface EnvOptions {
 }
 
 export class Env {
-  readonly configDir: string;
-  readonly corePluginsDir: string;
-  readonly binDir: string;
-  readonly logDir: string;
-  readonly staticFilesDir: string;
+  public readonly configDir: string;
+  public readonly corePluginsDir: string;
+  public readonly binDir: string;
+  public readonly logDir: string;
+  public readonly staticFilesDir: string;
 
   /**
    * @internal
    */
-  static createDefault(options: EnvOptions): Env {
+  public static createDefault(options: EnvOptions): Env {
     return new Env(process.cwd(), options);
   }
 
@@ -34,7 +34,7 @@ export class Env {
     this.staticFilesDir = resolve(this.homeDir, 'ui');
   }
 
-  getConfigFile() {
+  public getConfigFile() {
     const defaultConfigFile = this.getDefaultConfigFile();
     return this.options.config === undefined
       ? defaultConfigFile
@@ -44,7 +44,7 @@ export class Env {
   /**
    * @internal
    */
-  getLegacyKbnServer(): LegacyKbnServer | undefined {
+  public getLegacyKbnServer(): LegacyKbnServer | undefined {
     return this.options.kbnServer;
   }
 

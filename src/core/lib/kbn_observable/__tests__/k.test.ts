@@ -1,10 +1,10 @@
-import { Observable } from '../observable';
-import { k$ } from '../k';
 import {
+  MonoTypeOperatorFunction,
   OperatorFunction,
   UnaryFunction,
-  MonoTypeOperatorFunction,
 } from '../interfaces';
+import { k$ } from '../k';
+import { Observable } from '../observable';
 
 const plus1: MonoTypeOperatorFunction<number> = source =>
   new Observable(observer => {

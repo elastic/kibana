@@ -1,9 +1,9 @@
 import { difference, isPlainObject } from 'lodash';
 import typeDetect from 'type-detect';
-import { toContext } from './index';
-import { Type, TypeOptions } from './type';
 import { SchemaTypeError } from '../errors';
 import { AnyType } from './any_type';
+import { toContext } from './index';
+import { Type, TypeOptions } from './type';
 
 export type Props = Record<string, AnyType>;
 
@@ -14,11 +14,11 @@ export type TypeOf<RT extends AnyType> = RT['_type'];
 
 export type ObjectResultType<P extends Props> = Readonly<
   { [K in keyof P]: TypeOf<P[K]> }
-  >;
+>;
 
 export class ObjectType<P extends Props = any> extends Type<
   ObjectResultType<P>
-  > {
+> {
   constructor(
     private readonly schema: P,
     options: TypeOptions<{ [K in keyof P]: TypeOf<P[K]> }> = {}
@@ -29,7 +29,7 @@ export class ObjectType<P extends Props = any> extends Type<
     });
   }
 
-  process(value: any = {}, context?: string): ObjectResultType<P> {
+  public process(value: any = {}, context?: string): ObjectResultType<P> {
     if (!isPlainObject(value)) {
       throw new SchemaTypeError(
         `expected a plain object value, but found [${typeDetect(

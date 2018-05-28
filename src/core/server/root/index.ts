@@ -4,9 +4,9 @@ import { Server } from '..';
 import { ConfigService, Env, RawConfig } from '../config';
 
 import { Logger } from '../logging';
-import { LoggingService } from '../logging/logging_service';
 import { LoggerFactory, MutableLoggerFactory } from '../logging/logger_factory';
 import { LoggingConfig } from '../logging/logging_config';
+import { LoggingService } from '../logging/logging_service';
 
 export type OnShutdown = (reason?: Error) => void;
 
@@ -14,10 +14,10 @@ export type OnShutdown = (reason?: Error) => void;
  * Top-level entry point to kick off the app and start the Kibana server.
  */
 export class Root {
-  configService: ConfigService;
-  server?: Server;
-  readonly log: Logger;
-  readonly logger: LoggerFactory;
+  public configService: ConfigService;
+  public server?: Server;
+  public readonly log: Logger;
+  public readonly logger: LoggerFactory;
   private readonly loggingService: LoggingService;
 
   constructor(
@@ -33,7 +33,7 @@ export class Root {
     this.configService = new ConfigService(rawConfig$, env, this.logger);
   }
 
-  async start() {
+  public async start() {
     try {
       const loggingConfig$ = this.configService.atPath(
         'logging',
@@ -63,7 +63,7 @@ export class Root {
     }
   }
 
-  async shutdown(reason?: Error) {
+  public async shutdown(reason?: Error) {
     this.log.info('stopping Kibana');
     if (this.server !== undefined) {
       await this.server.stop();

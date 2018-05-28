@@ -1,7 +1,7 @@
-import { k$ } from '../../k';
 import { reduce } from '../';
-import { Subject } from '../../subject';
+import { k$ } from '../../k';
 import { collect } from '../../lib/collect';
+import { Subject } from '../../subject';
 
 test('completes when source completes', async () => {
   const subject = new Subject<string>();

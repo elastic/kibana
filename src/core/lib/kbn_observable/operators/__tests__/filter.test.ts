@@ -1,6 +1,6 @@
-import { k$ } from '../../k';
-import { $from } from '../../factories';
 import { filter } from '../';
+import { $from } from '../../factories';
+import { k$ } from '../../k';
 import { collect } from '../../lib/collect';
 
 const number$ = $from([1, 2, 3]);

@@ -1,5 +1,5 @@
-import { Type } from './type';
 import { SchemaTypeError } from '../errors';
+import { Type } from './type';
 
 export class MaybeType<V> extends Type<V | undefined> {
   private readonly type: Type<V>;
@@ -9,7 +9,7 @@ export class MaybeType<V> extends Type<V | undefined> {
     this.type = type;
   }
 
-  process(value: any, context?: string): V | undefined {
+  public process(value: any, context?: string): V | undefined {
     if (value === undefined) {
       return value;
     }

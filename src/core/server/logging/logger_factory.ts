@@ -1,10 +1,10 @@
 import { Env } from '../config/env';
-import { LoggingConfig, LoggerConfigType } from './logging_config';
-import { LogLevel } from './log_level';
-import { Logger, BaseLogger } from './logger';
-import { LoggerAdapter } from './logger_adapter';
 import { Appenders, DisposableAppender } from './appenders/appenders';
 import { BufferAppender } from './appenders/buffer/buffer_appender';
+import { LogLevel } from './log_level';
+import { BaseLogger, Logger } from './logger';
+import { LoggerAdapter } from './logger_adapter';
+import { LoggerConfigType, LoggingConfig } from './logging_config';
 
 /**
  * The single purpose of `LoggerFactory` interface is to define a way to
@@ -28,7 +28,7 @@ export class MutableLoggerFactory implements LoggerFactory {
 
   constructor(private readonly env: Env) {}
 
-  get(...contextParts: string[]): Logger {
+  public get(...contextParts: string[]): Logger {
     const context = LoggingConfig.getLoggerContext(contextParts);
     if (this.loggers.has(context)) {
       return this.loggers.get(context)!;
@@ -46,7 +46,7 @@ export class MutableLoggerFactory implements LoggerFactory {
    * Updates all current active loggers with the new config values.
    * @param config New config instance.
    */
-  updateConfig(config: LoggingConfig) {
+  public updateConfig(config: LoggingConfig) {
     // Config update is asynchronous and may require some time to complete, so we should invalidate
     // config so that new loggers will be using BufferAppender until newly configured appenders are ready.
     this.config = undefined;
@@ -83,7 +83,7 @@ export class MutableLoggerFactory implements LoggerFactory {
    * calling of this method.
    * @returns Promise that is resolved once all loggers are successfully disposed.
    */
-  async close() {
+  public async close() {
     for (const appender of this.appenders.values()) {
       await appender.dispose();
     }

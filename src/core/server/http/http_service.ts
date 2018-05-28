@@ -1,17 +1,17 @@
 import {
+  first,
+  k$,
   Observable,
   Subscription,
-  k$,
-  first,
   toPromise,
 } from '../../lib/kbn_observable';
 
-import { Env } from '../config';
-import { HttpServer } from './http_server';
-import { HttpConfig } from './http_config';
-import { Logger, LoggerFactory } from '../logging';
-import { Router } from './router';
 import { CoreService } from '../../types/core_service';
+import { Env } from '../config';
+import { Logger, LoggerFactory } from '../logging';
+import { HttpConfig } from './http_config';
+import { HttpServer } from './http_server';
+import { Router } from './router';
 
 export class HttpService implements CoreService {
   private readonly httpServer: HttpServer;
@@ -28,7 +28,7 @@ export class HttpService implements CoreService {
     this.httpServer = new HttpServer(logger.get('http', 'server'), env);
   }
 
-  async start() {
+  public async start() {
     this.configSubscription = this.config$.subscribe(() => {
       if (this.httpServer.isListening()) {
         // If the server is already running we can't make any config changes
@@ -44,7 +44,7 @@ export class HttpService implements CoreService {
     await this.httpServer.start(config);
   }
 
-  async stop() {
+  public async stop() {
     if (this.configSubscription === undefined) {
       return;
     }
@@ -55,7 +55,7 @@ export class HttpService implements CoreService {
     await this.httpServer.stop();
   }
 
-  registerRouter(router: Router): void {
+  public registerRouter(router: Router): void {
     if (this.httpServer.isListening()) {
       // If the server is already running we can't make any config changes
       // to it, so we warn and don't allow the config to pass through.

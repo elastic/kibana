@@ -1,9 +1,9 @@
+import { skipRepeats } from '../';
+import { $of } from '../../factories';
+import { k$ } from '../../k';
+import { collect } from '../../lib/collect';
 import { Observable } from '../../observable';
 import { Subject } from '../../subject';
-import { k$ } from '../../k';
-import { $of } from '../../factories';
-import { skipRepeats } from '../';
-import { collect } from '../../lib/collect';
 
 test('should distinguish between values', async () => {
   const values$ = new Subject<string>();

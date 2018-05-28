@@ -1,5 +1,5 @@
-import { parse as parseUrl, format as formatUrl, UrlObject } from 'url';
-import { ParsedUrlQuery } from 'querystring'
+import { ParsedUrlQuery } from 'querystring';
+import { format as formatUrl, parse as parseUrl, UrlObject } from 'url';
 
 export interface URLMeaningfulParts {
   auth: string | null;
@@ -41,7 +41,12 @@ export interface URLMeaningfulParts {
  *  @param urlModifier A function that will modify the parsed url, or return a new one.
  *  @returns The modified and reformatted url
  */
-export function modifyUrl(url: string, urlModifier: (urlParts: URLMeaningfulParts) => Partial<URLMeaningfulParts> | undefined) {
+export function modifyUrl(
+  url: string,
+  urlModifier: (
+    urlParts: URLMeaningfulParts
+  ) => Partial<URLMeaningfulParts> | undefined
+) {
   const parsed = parseUrl(url, true) as URLMeaningfulParts;
 
   // Copy over the most specific version of each property. By default, the parsed url includes several

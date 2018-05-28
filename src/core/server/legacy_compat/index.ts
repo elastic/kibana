@@ -8,15 +8,15 @@ export {
 /**@internal**/
 export { LegacyKbnServer } from './legacy_kbn_server';
 
-import { k$, map, BehaviorSubject } from '../../lib/kbn_observable';
-import { Root } from '../root';
-import { Env } from '../config';
 import {
   LegacyConfig,
+  LegacyConfigToRawConfigAdapter,
   LegacyKbnServer,
   LegacyPlatformProxifier,
-  LegacyConfigToRawConfigAdapter,
 } from '.';
+import { BehaviorSubject, k$, map } from '../../lib/kbn_observable';
+import { Env } from '../config';
+import { Root } from '../root';
 
 /**
  * @internal

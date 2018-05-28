@@ -8,10 +8,10 @@ import { noop } from 'lodash';
 import { BehaviorSubject } from '../../../lib/kbn_observable';
 
 import { Env } from '../../config';
-import { HttpService } from '../http_service';
-import { HttpConfig } from '../http_config';
-import { Router } from '../router';
 import { logger } from '../../logging/__mocks__';
+import { HttpConfig } from '../http_config';
+import { HttpService } from '../http_service';
+import { Router } from '../router';
 
 beforeEach(() => {
   logger._clear();

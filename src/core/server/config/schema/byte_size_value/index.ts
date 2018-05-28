@@ -22,23 +22,23 @@ export class ByteSizeValue {
     }
   }
 
-  isGreaterThan(other: ByteSizeValue): boolean {
+  public isGreaterThan(other: ByteSizeValue): boolean {
     return this.valueInBytes > other.valueInBytes;
   }
 
-  isLessThan(other: ByteSizeValue): boolean {
+  public isLessThan(other: ByteSizeValue): boolean {
     return this.valueInBytes < other.valueInBytes;
   }
 
-  isEqualTo(other: ByteSizeValue): boolean {
+  public isEqualTo(other: ByteSizeValue): boolean {
     return this.valueInBytes === other.valueInBytes;
   }
 
-  getValueInBytes(): number {
+  public getValueInBytes(): number {
     return this.valueInBytes;
   }
 
-  toString(returnUnit?: ByteSizeValueUnit) {
+  public toString(returnUnit?: ByteSizeValueUnit) {
     let value = this.valueInBytes;
     let unit = `b`;
 
@@ -54,7 +54,7 @@ export class ByteSizeValue {
     return renderUnit(value, unit);
   }
 
-  static parse(text: string): ByteSizeValue {
+  public static parse(text: string): ByteSizeValue {
     const match = /([1-9][0-9]*)(b|kb|mb|gb)/.exec(text);
     if (!match) {
       throw new Error(

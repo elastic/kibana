@@ -1,6 +1,6 @@
+import { OperatorFunction } from '../interfaces';
 import { Observable } from '../observable';
 import { reduce } from './reduce';
-import { OperatorFunction } from '../interfaces';
 
 function concat<T>(source: Observable<T>) {
   return reduce<T, T[]>((acc, item) => acc.concat([item]), [] as T[])(source);

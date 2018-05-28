@@ -1,6 +1,6 @@
 import typeDetect from 'type-detect';
-import { Type, TypeOptions } from './type';
 import { SchemaTypeError } from '../errors';
+import { Type, TypeOptions } from './type';
 
 export type StringOptions = TypeOptions<string> & {
   minLength?: number;
@@ -17,7 +17,7 @@ export class StringType extends Type<string> {
     this.maxLength = options.maxLength;
   }
 
-  process(value: any, context?: string): string {
+  public process(value: any, context?: string): string {
     if (typeof value !== 'string') {
       throw new SchemaTypeError(
         `expected value of type [string] but got [${typeDetect(value)}]`,
@@ -29,7 +29,7 @@ export class StringType extends Type<string> {
       throw new SchemaTypeError(
         `value is [${value}] but it must have a minimum length of [${
           this.minLength
-          }].`,
+        }].`,
         context
       );
     }
@@ -38,7 +38,7 @@ export class StringType extends Type<string> {
       throw new SchemaTypeError(
         `value is [${value}] but it must have a maximum length of [${
           this.maxLength
-          }].`,
+        }].`,
         context
       );
     }

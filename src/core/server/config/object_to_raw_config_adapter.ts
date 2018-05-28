@@ -1,7 +1,7 @@
-import { has, get, set } from 'lodash';
+import { get, has, set } from 'lodash';
 
-import { RawConfig } from './raw_config';
 import { ConfigPath } from './config_service';
+import { RawConfig } from './raw_config';
 
 /**
  * Allows plain javascript object to behave like `RawConfig` instance.
@@ -10,19 +10,19 @@ import { ConfigPath } from './config_service';
 export class ObjectToRawConfigAdapter implements RawConfig {
   constructor(private readonly rawValue: { [key: string]: any }) {}
 
-  has(configPath: ConfigPath) {
+  public has(configPath: ConfigPath) {
     return has(this.rawValue, configPath);
   }
 
-  get(configPath: ConfigPath) {
+  public get(configPath: ConfigPath) {
     return get(this.rawValue, configPath);
   }
 
-  set(configPath: ConfigPath, value: any) {
+  public set(configPath: ConfigPath, value: any) {
     set(this.rawValue, configPath, value);
   }
 
-  getFlattenedPaths() {
+  public getFlattenedPaths() {
     return [...flattenObjectKeys(this.rawValue)];
   }
 }

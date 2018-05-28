@@ -19,7 +19,7 @@ export class LegacyKbnServer {
    * @param [data] Optional string or object to log with the event.
    * @param [timestamp] Timestamp value associated with the log record.
    */
-  log(tags: string | string[], data?: string | Error, timestamp?: Date) {
+  public log(tags: string | string[], data?: string | Error, timestamp?: Date) {
     this.rawKbnServer.server.log(tags, data, timestamp);
   }
 }

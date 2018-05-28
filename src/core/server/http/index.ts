@@ -1,9 +1,9 @@
 import { Observable } from '../../lib/kbn_observable';
 
 import { Env } from '../config';
-import { HttpService } from './http_service';
-import { HttpConfig } from './http_config';
 import { LoggerFactory } from '../logging';
+import { HttpConfig } from './http_config';
+import { HttpService } from './http_service';
 
 export { Router, KibanaRequest } from './router';
 export { HttpService };
@@ -11,7 +11,7 @@ export { HttpService };
 export { HttpConfig };
 
 export class HttpModule {
-  readonly service: HttpService;
+  public readonly service: HttpService;
 
   constructor(
     readonly config$: Observable<HttpConfig>,

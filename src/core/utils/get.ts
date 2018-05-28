@@ -40,7 +40,7 @@ export function get<CFG extends { [k: string]: any }, A extends keyof CFG>(
 ): CFG[A];
 export function get<CFG extends { [k: string]: any }>(
   obj: CFG,
-  path: Array<string> | string
+  path: string[] | string
 ): any {
   if (typeof path === 'string') {
     if (path.includes('.')) {
@@ -52,7 +52,7 @@ export function get<CFG extends { [k: string]: any }>(
     return obj[path];
   }
 
-  for (let key of path) {
+  for (const key of path) {
     obj = obj[key];
   }
 

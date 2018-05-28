@@ -1,8 +1,8 @@
+import { OperatorFunction } from '../interfaces';
+import { pipe } from '../lib';
+import { ifEmpty } from './if_empty';
 import { last } from './last';
 import { scan } from './scan';
-import { ifEmpty } from './if_empty';
-import { pipe } from '../lib';
-import { OperatorFunction } from '../interfaces';
 
 /**
  * Applies the accumulator function to every value in the source observable and

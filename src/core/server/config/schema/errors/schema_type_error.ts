@@ -2,10 +2,13 @@ import { SchemaError } from '.';
 
 export class SchemaTypeError extends SchemaError {
   constructor(error: Error | string, key?: string) {
-    super(SchemaTypeError.extractMessage(error, key), SchemaTypeError.extractCause(error));
+    super(
+      SchemaTypeError.extractMessage(error, key),
+      SchemaTypeError.extractCause(error)
+    );
   }
 
-  static extractMessage(error: Error | string, context?: string) {
+  public static extractMessage(error: Error | string, context?: string) {
     const message = typeof error === 'string' ? error : error.message;
     if (context == null) {
       return message;
@@ -13,7 +16,7 @@ export class SchemaTypeError extends SchemaError {
     return `[${context}]: ${message}`;
   }
 
-  static extractCause(error: Error | string): Error | undefined {
+  public static extractCause(error: Error | string): Error | undefined {
     return typeof error !== 'string' ? error : undefined;
   }
 }
