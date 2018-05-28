@@ -44,6 +44,11 @@ export default new Datasource('es', {
       name: 'interval', // You really shouldn't use this, use the interval picker instead
       types: ['string', 'null'],
       help: '**DO NOT USE THIS**. Its fun for debugging fit functions, but you really should use the interval picker'
+    },
+    {
+      name: 'debug',
+      types: ['boolean', 'null'],
+      help: 'Set to true to log Elasticsearch body to kibana server log.'
     }
   ],
   help: 'Pull data from an elasticsearch instance',
@@ -76,8 +81,11 @@ export default new Datasource('es', {
         return field.scripted;
       });
     }
-
     const body = buildRequest(config, tlConfig, scriptedFields);
+
+    if (args.byName.debug) {
+      tlConfig.server.log(['info'], `timelion elasticsearch request body: ${JSON.stringify(body, null, ' ')}`);
+    }
 
     const { callWithRequest } = tlConfig.server.plugins.elasticsearch.getCluster('data');
     const resp = await callWithRequest(tlConfig.request, 'search', body);
