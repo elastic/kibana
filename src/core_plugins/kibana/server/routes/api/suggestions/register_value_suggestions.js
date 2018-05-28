@@ -7,9 +7,9 @@ export function registerValueSuggestions(server) {
     method: ['POST'],
     handler: async function (req, reply) {
       const { index } = req.params;
-      const { field, query } = req.payload;
+      const { field, query, boolFilter } = req.payload;
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-      const body = getBody({ field, query });
+      const body = getBody({ field, query, boolFilter });
       try {
         const response = await callWithRequest(req, 'search', { index, body });
         const buckets = get(response, 'aggregations.suggestions.buckets') || [];
@@ -22,7 +22,7 @@ export function registerValueSuggestions(server) {
   });
 }
 
-function getBody({ field, query }) {
+function getBody({ field, query, boolFilter }) {
   // Helps ensure that the regex is not evaluated eagerly against the terms dictionary
   const executionHint = 'map';
 
@@ -38,6 +38,11 @@ function getBody({ field, query }) {
     size: 0,
     timeout: '1s',
     terminate_after: terminateAfter,
+    query: {
+      bool: {
+        filter: boolFilter,
+      }
+    },
     aggs: {
       suggestions: {
         terms: {
