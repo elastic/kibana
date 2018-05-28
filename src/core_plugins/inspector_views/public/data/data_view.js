@@ -120,8 +120,7 @@ class DataViewComponent extends Component {
 const DataView = {
   title: 'Data',
   order: 10,
-  help: `The data inspector shows the data that is used to draw the visualization
-    in different formats (if available).`,
+  help: `The data inspector shows the data that is used to draw the visualization.`,
   shouldShow(adapters) {
     return adapters.data;
   },
