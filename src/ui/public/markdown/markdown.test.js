@@ -17,6 +17,15 @@ test('should never render html tags', () => {
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
 
+test('should render links with parentheses correctly', () => {
+  const component = shallow(
+    <Markdown
+      markdown="[link](https://example.com/foo/bar?group=(()filters:!t))"
+    />
+  );
+  expect(component.render().find('a').prop('href')).toBe('https://example.com/foo/bar?group=(()filters:!t)');
+});
+
 describe('props', () => {
 
   const markdown = 'I am *some* [content](https://en.wikipedia.org/wiki/Content) with `markdown`';
