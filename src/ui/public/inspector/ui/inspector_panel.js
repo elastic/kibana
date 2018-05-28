@@ -15,6 +15,11 @@ import { InspectorViewChooser } from './inspector_view_chooser';
 
 import './inspector.less';
 
+function hasAdaptersChanged(oldAdapters, newAdapters) {
+  return Object.keys(oldAdapters).length !== Object.keys(newAdapters).length
+    || Object.keys(oldAdapters).some(key => oldAdapters[key] !== newAdapters[key]);
+}
+
 class InspectorPanel extends Component {
 
   constructor(props) {
@@ -22,15 +27,22 @@ class InspectorPanel extends Component {
     this.state = {
       isHelpPopoverOpen: false,
       selectedView: props.views[0],
+      views: props.views,
+      // Clone adapters array so we can validate that this prop never change
+      adapters: { ...props.adapters },
     };
   }
 
-  componentWillReceiveProps(props) {
-    if (props.views !== this.props.views && !props.views.includes(this.state.selectedView)) {
-      this.setState({
-        selectedView: props.views[0],
-      });
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (hasAdaptersChanged(prevState.adapters, nextProps.adapters)) {
+      throw new Error('Adapters are not allowed to be changed on an open InspectorPanel.');
     }
+    const selectedViewMustChange = nextProps.views !== prevState.views
+        && !nextProps.views.includes(prevState.selectedView);
+    return {
+      views: nextProps.views,
+      selectedView: selectedViewMustChange ? nextProps.views[0] : prevState.selectedView,
+    };
   }
 
   onViewSelected = (view) => {
@@ -42,10 +54,6 @@ class InspectorPanel extends Component {
   };
 
   renderSelectedPanel() {
-    if (!this.state.selectedView) {
-      return null;
-    }
-
     return (
       <this.state.selectedView.component
         adapters={this.props.adapters}
@@ -104,7 +112,13 @@ InspectorPanel.defaultProps = {
 
 InspectorPanel.propTypes = {
   adapters: PropTypes.object.isRequired,
-  views: PropTypes.array.isRequired,
+  views: (props, propName, componentName) => {
+    if (!Array.isArray(props[propName]) || props[propName].length < 1) {
+      throw new Error(
+        `${propName} prop must be an array of at least one element in ${componentName}.`
+      );
+    }
+  },
   onClose: PropTypes.func.isRequired,
   title: PropTypes.string,
 };

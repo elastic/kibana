@@ -16,10 +16,9 @@ class RequestsViewComponent extends Component {
 
   constructor(props) {
     super(props);
-    this.requests = props.adapters.requests;
-    this.requests.on('change', this._onRequestsChange);
+    props.adapters.requests.on('change', this._onRequestsChange);
 
-    const requests = this.requests.getRequests();
+    const requests = props.adapters.requests.getRequests();
     this.state = {
       requests: requests,
       request: requests.length ? requests[0] : null
@@ -27,7 +26,7 @@ class RequestsViewComponent extends Component {
   }
 
   _onRequestsChange = () => {
-    const requests = this.requests.getRequests();
+    const requests = this.props.adapters.requests.getRequests();
     this.setState({ requests });
     if (!requests.includes(this.state.request)) {
       this.setState({
@@ -42,24 +41,8 @@ class RequestsViewComponent extends Component {
     }
   }
 
-  componentWillReceiveProps(props) {
-    if (props.vis !== this.props.vis) {
-      // Vis is about to change. Remove listener from the previous vis requests
-      // logger and attach it to the new requests logger.
-      this.requests.removeListener('change', this._onRequestsChange);
-      this.requests = props.vis.API.inspectorAdapters.requests;
-      this.requests.on('change', this._onRequestsChange);
-      const requests = this.requests.getRequests();
-      // Also write the new vis requests to the state.
-      this.setState({
-        requests: requests,
-        request: requests.length ? requests[0] : null
-      });
-    }
-  }
-
   componentWillUnmount() {
-    this.requests.removeListener('change', this._onRequestsChange);
+    this.props.adapters.requests.removeListener('change', this._onRequestsChange);
   }
 
   renderEmptyRequests() {

@@ -21,9 +21,26 @@ const DETAILS = [
 
 class RequestDetails extends Component {
 
-  constructor(props) {
-    super(props);
-    this.state = this.getAvailableDetails(props.request);
+  state = {
+    availableDetails: [],
+    selectedDetail: null,
+  };
+
+  static getDerivedStateFromProps(nextProps, prevState) {
+    const selectedDetail = prevState && prevState.selectedDetail;
+    const availableDetails = DETAILS.filter(detail =>
+      !detail.component.shouldShow || detail.component.shouldShow(nextProps.request)
+    );
+    // If the previously selected detail is still available we want to stay
+    // on this tab and not set another selectedDetail.
+    if (selectedDetail && availableDetails.includes(selectedDetail)) {
+      return { availableDetails };
+    }
+
+    return {
+      availableDetails: availableDetails,
+      selectedDetail: availableDetails[0]
+    };
   }
 
   selectDetailsTab = (detail) => {
@@ -33,22 +50,6 @@ class RequestDetails extends Component {
       });
     }
   };
-
-  getAvailableDetails(request, prevSelectedDetail) {
-    const availableDetails = DETAILS.filter(detail =>
-      !detail.component.shouldShow || detail.component.shouldShow(request)
-    );
-    // If the previously selected detail is still available we want to stay
-    // on this tab and not set another selectedDetail.
-    if (prevSelectedDetail && availableDetails.includes(prevSelectedDetail)) {
-      return { availableDetails };
-    }
-
-    return {
-      availableDetails: availableDetails,
-      selectedDetail: availableDetails[0]
-    };
-  }
 
   renderDetailTab = (detail) => {
     return (
@@ -61,10 +62,6 @@ class RequestDetails extends Component {
         {detail.name}
       </EuiTab>
     );
-  }
-
-  componentWillReceiveProps(props) {
-    this.setState(this.getAvailableDetails(props.request, this.state.selectedDetail));
   }
 
   render() {
