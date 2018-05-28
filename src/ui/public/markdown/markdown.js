@@ -84,6 +84,7 @@ export class Markdown extends PureComponent {
       markdown,
       openLinksInNewTab,
       whiteListedRules,
+      ...rest
     } = this.props;
 
     const classes = classNames('markdown-body', className);
@@ -91,6 +92,7 @@ export class Markdown extends PureComponent {
     const renderedMarkdown = markdownRenderer(markdown);
     return (
       <div
+        {...rest}
         className={classes}
         /*
          * Justification for dangerouslySetInnerHTML:
