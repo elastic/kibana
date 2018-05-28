@@ -21,6 +21,7 @@ import { ServiceDetailsRequest } from '../../../store/reactReduxRequest/serviceD
 
 import DynamicBaselineButton from './DynamicBaseline/Button';
 import DynamicBaselineFlyout from './DynamicBaseline/Flyout';
+import { KueryBar } from '../../shared/KueryBar';
 
 function ServiceDetailsAndTransactionList({ urlParams, render }) {
   return (
@@ -62,14 +63,7 @@ class TransactionOverview extends Component {
   onCloseFlyout = () => this.setState({ isFlyoutOpen: false });
 
   render() {
-    const {
-      changeTransactionSorting,
-      hasDynamicBaseline,
-      license,
-      location,
-      transactionSorting,
-      urlParams
-    } = this.props;
+    const { hasDynamicBaseline, license, location, urlParams } = this.props;
 
     const { serviceName, transactionType } = urlParams;
     const mlEnabled = chrome.getInjected('mlEnabled');
@@ -102,6 +96,8 @@ class TransactionOverview extends Component {
               <DynamicBaselineButton onOpenFlyout={this.onOpenFlyout} />
             )}
         </HeaderContainer>
+
+        <KueryBar />
 
         <DynamicBaselineFlyout
           hasDynamicBaseline={hasDynamicBaseline}
@@ -137,8 +133,6 @@ class TransactionOverview extends Component {
                 serviceName={serviceName}
                 type={transactionType}
                 items={transactionList}
-                changeTransactionSorting={changeTransactionSorting}
-                transactionSorting={transactionSorting}
               />
             );
           }}
@@ -149,11 +143,9 @@ class TransactionOverview extends Component {
 }
 
 TransactionOverview.propTypes = {
-  changeTransactionSorting: PropTypes.func.isRequired,
   hasDynamicBaseline: PropTypes.bool.isRequired,
   license: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
-  transactionSorting: PropTypes.object.isRequired,
   urlParams: PropTypes.object.isRequired
 };
 

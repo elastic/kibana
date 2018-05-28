@@ -26,6 +26,7 @@ function urlParams(state = {}, action) {
   switch (action.type) {
     case LOCATION_UPDATE: {
       const {
+        processorEvent,
         serviceName,
         transactionType,
         transactionName,
@@ -57,6 +58,7 @@ function urlParams(state = {}, action) {
         kuery: legacyDecodeURIComponent(kuery),
 
         // path params
+        processorEvent,
         serviceName,
         transactionType: legacyDecodeURIComponent(transactionType),
         transactionName: legacyDecodeURIComponent(transactionName),
@@ -89,12 +91,14 @@ function getPathParams(pathname) {
   switch (pageName) {
     case 'transactions':
       return {
+        processorEvent: 'transaction',
         serviceName: paths[0],
         transactionType: paths[2],
         transactionName: paths[3]
       };
     case 'errors':
       return {
+        processorEvent: 'error',
         serviceName: paths[0],
         errorGroupId: paths[2]
       };
