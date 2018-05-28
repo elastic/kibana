@@ -116,9 +116,7 @@ export default function ({ getService, getPageObjects }) {
       expect(headers[1]).to.be('agent');
     });
 
-    // TODO: Maps currently overlay the temporary inspector icon sometimes. Enable
-    // this test again once we have proper dashboard triggers
-    it.skip('Tile map with no changes will update with visualization changes', async () => {
+    it('Tile map with no changes will update with visualization changes', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
       await PageObjects.dashboard.clickNewDashboard();

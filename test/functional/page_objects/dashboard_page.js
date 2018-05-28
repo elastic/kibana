@@ -238,8 +238,9 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async openInspectorForPanel(index) {
       const panels = await testSubjects.findAll('dashboardPanel');
       const panel = panels[index];
-      // TODO: Replace this by the proper code when we have proper dashboard panel triggers
-      const openInspectorButton = await panel.findByClassName('visualize-show-spy-tab');
+      const contextMenu = await testSubjects.findDescendant('dashboardPanelToggleMenuIcon', panel);
+      await contextMenu.click();
+      const openInspectorButton = await testSubjects.findDescendant('dashboardPanelAction-openInspector', panel);
       return await openInspectorButton.click();
     }
 
