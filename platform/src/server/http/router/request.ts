@@ -1,4 +1,4 @@
-import express from 'express';
+import { Request } from 'hapi';
 import { schema } from '@kbn/utils';
 
 import { Headers, filterHeaders } from './headers';
@@ -15,7 +15,7 @@ export class KibanaRequest<Params, Query, Body> {
     P extends schema.ObjectType,
     Q extends schema.ObjectType,
     B extends schema.ObjectType
-  >(req: express.Request, routeSchemas: RouteSchemas<P, Q, B> | undefined) {
+  >(req: Request, routeSchemas: RouteSchemas<P, Q, B> | undefined) {
     const requestParts = KibanaRequest.validate(req, routeSchemas);
     return new KibanaRequest(
       req,
@@ -35,7 +35,7 @@ export class KibanaRequest<Params, Query, Body> {
     Q extends schema.ObjectType,
     B extends schema.ObjectType
   >(
-    req: express.Request,
+    req: Request,
     routeSchemas: RouteSchemas<P, Q, B> | undefined
   ): {
     params: schema.TypeOf<P>;
@@ -63,13 +63,13 @@ export class KibanaRequest<Params, Query, Body> {
     const body =
       routeSchemas.body === undefined
         ? {}
-        : routeSchemas.body.validate(req.body);
+        : routeSchemas.body.validate(req.payload);
 
     return { query, params, body };
   }
 
   constructor(
-    req: express.Request,
+    req: Request,
     readonly params: Params,
     readonly query: Query,
     readonly body: Body

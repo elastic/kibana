@@ -17,7 +17,7 @@ import { AdminClient } from './admin_client';
 import { ScopedDataClient } from './scoped_data_client';
 import { LoggerFactory } from '../../logging';
 import { CoreService } from '../../types/core_service';
-import { Headers } from '../http/Router/headers';
+import { Headers } from '../http/router/headers';
 
 type Clients = { data: Client; admin: Client };
 

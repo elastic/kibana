@@ -7,20 +7,21 @@ import { setupVersionCheck } from './version_check';
 import { handleShortUrlError } from './short_url_error';
 import { shortUrlAssertValid } from './short_url_assert_valid';
 import { shortUrlLookupProvider } from './short_url_lookup';
-import { setupConnection } from './setup_connection';
-import { setupRedirectServer } from './setup_redirect_server';
 import { registerHapiPlugins } from './register_hapi_plugins';
-import { setupBasePathRewrite } from './setup_base_path_rewrite';
 import { setupXsrf } from './xsrf';
 
 export default async function (kbnServer, server, config) {
-  server = kbnServer.server = new Hapi.Server();
+  kbnServer.server = new Hapi.Server();
+  server = kbnServer.server;
 
   const shortUrlLookup = shortUrlLookupProvider(server);
 
-  setupConnection(server, config, kbnServer.newPlatform);
-  setupBasePathRewrite(server, config);
-  await setupRedirectServer(config);
+  server.connection({
+    host: config.get('server.host'),
+    port: config.get('server.port'),
+    listener: kbnServer.newPlatform.proxyListener
+  });
+
   registerHapiPlugins(server);
 
   // provide a simple way to expose static directories

@@ -1,9 +1,7 @@
 import { readFileSync } from 'fs';
 import secureOptions from './secure_options';
 
-export function setupConnection(server, config, newPlatform) {
-  const newPlatformProxyListener = newPlatform && newPlatform.proxyListener;
-
+export function setupConnection(server, config) {
   const host = config.get('server.host');
   const port = config.get('server.port');
 
@@ -23,8 +21,7 @@ export function setupConnection(server, config, newPlatform) {
           abortEarly: false
         }
       }
-    },
-    listener: newPlatformProxyListener
+    }
   };
 
   const useSsl = config.get('server.ssl.enabled');

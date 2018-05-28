@@ -3,7 +3,7 @@ import { Observable } from '@kbn/observable';
 import { Server } from '../server';
 import { ConfigService, Env, RawConfig } from '../config';
 
-import { Logger } from '../logging/logger';
+import { Logger } from '../logging';
 import { LoggingService } from '../logging/logging_service';
 import { LoggerFactory, MutableLoggerFactory } from '../logging/logger_factory';
 import { LoggingConfig } from '../logging/logging_config';

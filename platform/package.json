@@ -7,19 +7,22 @@
   "types": "./target/tsc-types/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "kbn:bootstrap": "yarn build"
+    "kbn:bootstrap": "yarn build",
+    "kbn:watch": "yarn build --watch"
   },
   "dependencies": {
     "@kbn/observable": "link:../packages/kbn-observable",
     "@kbn/utils": "link:../packages/kbn-utils",
-    "rxjs": "5.4.3",
+    "hapi": "^17.4.0",
+    "rxjs": "^6.1.0",
     "type-detect": "^4.0.8"
   },
   "devDependencies": {
+    "@types/hapi": "^17.0.12",
     "@types/has-ansi": "^3.0.0",
     "@types/strip-ansi": "^3.0.0",
     "has-ansi": "^3.0.0",
     "strip-ansi": "^4.0.0",
-    "typescript": "^2.7.1"
+    "typescript": "^2.8.3"
   }
 }

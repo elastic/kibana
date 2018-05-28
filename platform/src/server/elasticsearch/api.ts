@@ -39,11 +39,11 @@ export function registerElasticsearchRoutes(
       let response: any = cluster;
       response = { hits: { total: 0 } };
 
-      return {
+      return res.ok({
         params: req.params,
         query: req.query,
         total_count: response.hits.total,
-      };
+      });
     }
   );
 

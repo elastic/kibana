@@ -118,8 +118,10 @@ export class LegacyConfigToRawConfigAdapter implements RawConfig {
     return {
       host: configValue.host,
       port: configValue.port,
+      cors: configValue.cors,
       maxPayload: configValue.maxPayloadBytes,
       basePath: configValue.basePath,
+      rewriteBasePath: configValue.rewriteBasePath,
       ssl: configValue.ssl,
     };
   }
