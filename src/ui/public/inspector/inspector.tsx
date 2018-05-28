@@ -66,7 +66,7 @@ class InspectorSession extends EventEmitter {
  * @returns {boolean} True, if a call to `openInspector` with the same adapters
  *    would have shown the inspector panel, false otherwise.
  */
-function hasInspector(adapters: Adapters): boolean {
+function hasInspector(adapters?: Adapters): boolean {
   return viewRegistry.getVisible(adapters).length > 0;
 }
 
