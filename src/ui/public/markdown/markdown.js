@@ -19,30 +19,21 @@
 
 import './github_markdown.less';
 import classNames from 'classnames';
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import MarkdownIt from 'markdown-it';
+import { memoize } from 'lodash';
 
 /**
- * This method is used to actually render markdown from the passed parameter
- * into HTML. It will just return an empty string when the markdown is empty.
- * Since we want to use this with dangerouslySetInnerHTML, this method returns
- * the required object format with an __html key in it.
- */
-function transformMarkdown(markdownIt, markdown) {
-  if (!markdown) {
-    return { __html: '' };
-  }
-  return { __html: markdownIt.render(markdown) };
-}
-
-/**
+ * Return a memoized markdown rendering function that use the specified
+ * whiteListedRules and openLinksInNewTab configurations.
  * @param {Array of Strings} whiteListedRules - white list of markdown rules
  * list of rules can be found at https://github.com/markdown-it/markdown-it/issues/361
  * @param {Boolean} openLinksInNewTab
- * @return {MarkdownIt}
+ * @return {Function} Returns an Object to use with dangerouslySetInnerHTML
+ * with the rendered markdown HTML
  */
-export function markdownFactory(whiteListedRules, openLinksInNewTab = false) {
+export const markdownFactory = memoize((whiteListedRules = [], openLinksInNewTab = false) => {
   let markdownIt;
 
   // It is imperitive that the html config property be set to false, to mitigate XSS: the output of markdown-it is
@@ -69,71 +60,44 @@ export function markdownFactory(whiteListedRules, openLinksInNewTab = false) {
       return originalLinkRender(tokens, idx, options, env, self);
     };
   }
-
-  return markdownIt;
-}
-
-export class Markdown extends Component {
-  constructor(props) {
-    super(props);
-    const { whiteListedRules, openLinksInNewTab, markdown } = props;
-
-    const markdownIt = markdownFactory(whiteListedRules, openLinksInNewTab);
-    const renderedMarkdown = transformMarkdown(markdownIt, markdown);
-    this.state = {
-      whiteListedRules,
-      openLinksInNewTab,
-      markdown,
-      markdownIt,
-      renderedMarkdown,
-    };
-  }
-
-  static getDerivedStateFromProps(nextProps, prevState) {
-    const { whiteListedRules, openLinksInNewTab, markdown } = nextProps;
-
-    const hasOpenLinksInNewTabChanged = openLinksInNewTab !== prevState.openLinksInNewTab;
-    const hasWhiteListerRulesChanged = whiteListedRules !== prevState.whiteListedRules;
-    const hasMarkdownChanged = markdown !== prevState.markdown;
-
-    const markdownIt = hasOpenLinksInNewTabChanged || hasWhiteListerRulesChanged
-      ? markdownFactory(whiteListedRules, openLinksInNewTab)
-      : prevState.markdownIt;
-
-    if (hasMarkdownChanged || hasOpenLinksInNewTabChanged || hasWhiteListerRulesChanged) {
-      const renderedMarkdown = transformMarkdown(markdownIt, markdown);
-      return {
-        whiteListedRules,
-        openLinksInNewTab,
-        markdown,
-        markdownIt,
-        renderedMarkdown,
-      };
+  /**
+   * This method is used to render markdown from the passed parameter
+   * into HTML. It will just return an empty string when the markdown is empty.
+   * @param {String} markdown - Rhe markdown String
+   * @return {Object} - Returns the dangerouslySetInnerHTML required object
+   * with the rendered HTML stored in the __html key.
+   */
+  return (markdown) => {
+    if (!markdown) {
+      return { __html: '' };
     }
-    return null;
-  }
+    return { __html: markdownIt.render(markdown) };
+  };
+}, (whiteListedRules = [], openLinksInNewTab = false) => {
+  return whiteListedRules.join('_').concat(openLinksInNewTab);
+});
 
+export class Markdown extends PureComponent {
   render() {
     const {
       className,
-      markdown, //eslint-disable-line no-unused-vars
-      openLinksInNewTab, //eslint-disable-line no-unused-vars
-      whiteListedRules, //eslint-disable-line no-unused-vars
-      ...rest
+      markdown,
+      openLinksInNewTab,
+      whiteListedRules,
     } = this.props;
 
     const classes = classNames('markdown-body', className);
-
+    const markdownRenderer = markdownFactory(whiteListedRules, openLinksInNewTab);
+    const renderedMarkdown = markdownRenderer(markdown);
     return (
       <div
         className={classes}
-        {...rest}
         /*
          * Justification for dangerouslySetInnerHTML:
          * The Markdown Visulization is, believe it or not, responsible for rendering Markdown.
          * This relies on `markdown-it` to produce safe and correct HTML.
          */
-        dangerouslySetInnerHTML={this.state.renderedMarkdown} //eslint-disable-line react/no-danger
+        dangerouslySetInnerHTML={renderedMarkdown} //eslint-disable-line react/no-danger
       />
     );
   }

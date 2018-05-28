@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 
 import {
   Markdown,
@@ -73,7 +73,7 @@ describe('props', () => {
   });
 
   test('should update markdown when openLinksInNewTab prop change', () => {
-    const component = mount(<Markdown
+    const component = shallow(<Markdown
       markdown={markdown}
       openLinksInNewTab={false}
     />);
@@ -84,7 +84,7 @@ describe('props', () => {
 
   test('should update markdown when whiteListedRules prop change', () => {
     const markdown = '*emphasis* `backticks`';
-    const component = mount(<Markdown
+    const component = shallow(<Markdown
       markdown={markdown}
       whiteListedRules={['emphasis', 'backticks']}
     />);
