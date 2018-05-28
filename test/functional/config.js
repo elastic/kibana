@@ -28,6 +28,7 @@ import {
   FailureDebuggingProvider,
   VisualizeListingTableProvider,
   DashboardAddPanelProvider,
+  DashboardPanelActionsProvider,
 } from './services';
 
 export default async function ({ readConfigFile }) {
@@ -80,6 +81,7 @@ export default async function ({ readConfigFile }) {
       failureDebugging: FailureDebuggingProvider,
       visualizeListingTable: VisualizeListingTableProvider,
       dashboardAddPanel: DashboardAddPanelProvider,
+      dashboardPanelActions: DashboardPanelActionsProvider,
     },
     servers: commonConfig.get('servers'),
 
@@ -87,10 +89,13 @@ export default async function ({ readConfigFile }) {
 
     esTestCluster: commonConfig.get('esTestCluster'),
 
-    kibanaServerArgs: [
-      ...commonConfig.get('kibanaServerArgs'),
-      '--oss',
-    ],
+    kbnTestServer: {
+      ...commonConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...commonConfig.get('kbnTestServer.serverArgs'),
+        '--oss',
+      ],
+    },
 
     apps: {
       status_page: {

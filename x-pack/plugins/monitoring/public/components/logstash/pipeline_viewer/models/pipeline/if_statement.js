@@ -7,6 +7,24 @@
 import { Statement } from './statement';
 import { makeStatement } from './make_statement';
 import { isVertexPipelineStage } from './utils';
+import { IfElement } from '../list/if_element';
+import { ElseElement } from '../list/else_element';
+
+function makeStatementsForOutgoingVertices(outgoingVertices, statements, next, pipelineStage) {
+  outgoingVertices.forEach(vertex => {
+    let currentVertex = vertex;
+    while(isVertexPipelineStage(currentVertex, pipelineStage) && (currentVertex !== next)) {
+      statements.push(makeStatement(currentVertex, pipelineStage));
+      currentVertex = currentVertex.next;
+    }
+  });
+}
+
+function addStatementsToList(list, statements, depth, id) {
+  statements.forEach(statement => {
+    list.push(...statement.toList(depth, id));
+  });
+}
 
 export class IfStatement extends Statement {
   constructor(vertex, trueStatements, elseStatements) {
@@ -19,25 +37,37 @@ export class IfStatement extends Statement {
     this.elseStatements = elseStatements;
   }
 
+  toList(depth, parentId) {
+    const list = [];
+
+    const ifElement = new IfElement(this, depth, parentId);
+    list.push(ifElement);
+
+    const nestedElementDepth = depth + 1;
+    addStatementsToList(list, this.trueStatements, nestedElementDepth, ifElement.id);
+
+    if (this.elseStatements.length) {
+      const elseElement = new ElseElement(this, depth, parentId);
+      list.push(elseElement);
+
+      addStatementsToList(list, this.elseStatements, nestedElementDepth, elseElement.id);
+    }
+
+    return list;
+  }
+
   static fromPipelineGraphVertex(ifVertex, pipelineStage) {
     const trueStatements = [];
     const elseStatements = [];
+    const {
+      trueOutgoingVertices,
+      falseOutgoingVertices
+    } = ifVertex;
 
-    const trueVertex = ifVertex.trueOutgoingVertex;
-    const falseVertex = ifVertex.falseOutgoingVertex;
     const next = ifVertex.next;
 
-    let currentVertex = trueVertex;
-    while (isVertexPipelineStage(currentVertex, pipelineStage) && (currentVertex !== next)) {
-      trueStatements.push(makeStatement(currentVertex, pipelineStage));
-      currentVertex = currentVertex.next;
-    }
-
-    currentVertex = falseVertex;
-    while (currentVertex && isVertexPipelineStage(currentVertex, pipelineStage) && (currentVertex !== next)) {
-      elseStatements.push(makeStatement(currentVertex, pipelineStage));
-      currentVertex = currentVertex.next;
-    }
+    makeStatementsForOutgoingVertices(trueOutgoingVertices, trueStatements, next, pipelineStage);
+    makeStatementsForOutgoingVertices(falseOutgoingVertices, elseStatements, next, pipelineStage);
 
     return new IfStatement(
       ifVertex,

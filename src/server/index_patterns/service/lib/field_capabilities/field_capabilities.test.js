@@ -15,7 +15,7 @@ import * as mergeOverridesNS from './overrides';
 
 describe('index_patterns/field_capabilities/field_capabilities', () => {
   let sandbox;
-  beforeEach(() => sandbox = sinon.sandbox.create());
+  beforeEach(() => sandbox = sinon.createSandbox());
   afterEach(() => sandbox.restore());
 
   const footballs = [
@@ -35,9 +35,9 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
       mergeOverrides = identity
     } = options;
 
-    sandbox.stub(callFieldCapsApiNS, 'callFieldCapsApi', async () => esResponse);
-    sandbox.stub(readFieldCapsResponseNS, 'readFieldCapsResponse', () => fieldsFromFieldCaps);
-    sandbox.stub(mergeOverridesNS, 'mergeOverrides', mergeOverrides);
+    sandbox.stub(callFieldCapsApiNS, 'callFieldCapsApi').callsFake(async () => esResponse);
+    sandbox.stub(readFieldCapsResponseNS, 'readFieldCapsResponse').returns(fieldsFromFieldCaps);
+    sandbox.stub(mergeOverridesNS, 'mergeOverrides').callsFake(mergeOverrides);
   };
 
   describe('calls `callFieldCapsApi()`', () => {

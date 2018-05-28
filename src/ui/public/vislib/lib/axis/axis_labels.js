@@ -77,12 +77,17 @@ export function VislibAxisLabelsProvider() {
 
       return function (selection) {
         if (!config.get('labels.filter')) return;
+
+        const el = $(config.get('rootEl')).find(config.get('elSelector'));
+        const maxSize = config.isHorizontal() ? el.width() : el.height();
+        const scaleRange = self.axisScale.scale.range();
+        const scaleWidth = scaleRange[scaleRange.length - 1] - scaleRange[0];
+        const scaleStartPad = .5 * (maxSize - scaleWidth);
+
         selection.selectAll('.tick text')
           .text(function (d) {
             const par = d3.select(this.parentNode).node();
-            const el = $(config.get('rootEl')).find(config.get('elSelector'));
-            const maxSize = config.isHorizontal() ? el.width() : el.height();
-            const myPos = config.isHorizontal() ? self.axisScale.scale(d) : maxSize - self.axisScale.scale(d);
+            const myPos = scaleStartPad + (config.isHorizontal() ? self.axisScale.scale(d) : maxSize - self.axisScale.scale(d));
             const mySize = (config.isHorizontal() ? par.getBBox().width : par.getBBox().height) * padding;
             const halfSize = mySize / 2;
 

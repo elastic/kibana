@@ -71,7 +71,7 @@ export function ClusterStatus({ stats }) {
       children={children}
       status={status}
       IconComponent={IconComponent}
-      data-test-subj="elasticsearchSummaryStatus"
+      data-test-subj="elasticsearchClusterStatus"
     />
   );
 }

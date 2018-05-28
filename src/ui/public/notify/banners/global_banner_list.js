@@ -1,10 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-} from '@elastic/eui';
+
+import './global_banner_list.less';
 
 /**
  * GlobalBannerList is a list of "banners". A banner something that is displayed at the top of Kibana that may or may not disappear.
@@ -40,13 +37,6 @@ export class GlobalBannerList extends Component {
       return null;
     }
 
-    const panelStyle = {
-      border: 'none'
-    };
-    const flexStyle = {
-      flexDirection: 'column'
-    };
-
     const flexBanners = this.props.banners.map(banner => {
       const {
         id,
@@ -56,28 +46,21 @@ export class GlobalBannerList extends Component {
       } = banner;
 
       return (
-        <EuiFlexItem
-          grow={true}
+        <div
           key={id}
           data-test-priority={priority}
+          className="globalBanner__item"
           {...rest}
         >
           { component }
-        </EuiFlexItem>
+        </div>
       );
     });
 
     return (
-      <EuiPanel
-        style={panelStyle}
-      >
-        <EuiFlexGroup
-          style={flexStyle}
-          gutterSize="s"
-        >
-          {flexBanners}
-        </EuiFlexGroup>
-      </EuiPanel>
+      <div className="globalBanner__list">
+        {flexBanners}
+      </div>
     );
   }
 }

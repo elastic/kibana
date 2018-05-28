@@ -27,7 +27,7 @@ describe('intersperseStream', () => {
     str.write('a');
     sinon.assert.calledOnce(stub);
     expect(stub.firstCall.args).to.eql(['a']);
-    stub.reset();
+    stub.resetHistory();
 
     str.write('b');
     sinon.assert.calledTwice(stub);

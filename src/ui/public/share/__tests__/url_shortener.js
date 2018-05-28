@@ -46,7 +46,7 @@ describe('Url shortener', () => {
 
     let getBasePath;
     beforeEach(ngMock.inject((Private) => {
-      getBasePath = sinon.stub(chrome, 'getBasePath', () => basePath);
+      getBasePath = sinon.stub(chrome, 'getBasePath').returns(basePath);
       urlShortener = Private(UrlShortenerProvider);
     }));
 

@@ -22,7 +22,7 @@ export async function getErrorGroups({
   sortOrder = 'desc',
   setup
 }) {
-  const { start, end, client, config } = setup;
+  const { start, end, esFilterQuery, client, config } = setup;
 
   const params = {
     index: config.get('xpack.apm.indexPattern'),
@@ -72,6 +72,10 @@ export async function getErrorGroups({
       }
     }
   };
+
+  if (esFilterQuery) {
+    params.body.query.bool.filter.push(esFilterQuery);
+  }
 
   // sort buckets by last occurence of error
   if (sortBy === 'latestOccurrenceAt') {

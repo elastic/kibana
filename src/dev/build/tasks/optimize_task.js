@@ -1,6 +1,4 @@
-import del from 'del';
-
-import { copyAll, exec } from '../lib';
+import { deleteAll, copyAll, exec } from '../lib';
 import { getNodeDownloadInfo } from './nodejs';
 
 export const OptimizeBuildTask = {
@@ -34,6 +32,6 @@ export const OptimizeBuildTask = {
     });
 
     // clean up temporary node install
-    await del(tempNodeInstallDir);
+    await deleteAll(log, [tempNodeInstallDir]);
   },
 };

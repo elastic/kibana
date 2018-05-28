@@ -96,7 +96,7 @@ module.exports = {
     },
 
     /**
-     * files that ARE NOT allowed to use devDepenedncies
+     * Files that ARE NOT allowed to use devDependencies
      */
     {
       files: ['packages/kbn-ui-framework/**/*', 'x-pack/**/*'],
@@ -112,7 +112,7 @@ module.exports = {
     },
 
     /**
-     * files that ARE allowed to use devDepenedncies
+     * Files that ARE allowed to use devDependencies
      */
     {
       files: [
@@ -138,7 +138,39 @@ module.exports = {
     },
 
     /**
-     * Files that are not transpiled with babel
+     * Files that run BEFORE node version check
+     */
+    {
+      files: ['scripts/**/*', 'src/setup_node_env/**/*'],
+      rules: {
+        'import/no-commonjs': 'off',
+        'prefer-object-spread/prefer-object-spread': 'off',
+        'no-var': 'off',
+        'prefer-const': 'off',
+        'prefer-destructuring': 'off',
+        'no-restricted-syntax': [
+          'error',
+          'ImportDeclaration',
+          'ExportNamedDeclaration',
+          'ExportDefaultDeclaration',
+          'ExportAllDeclaration',
+          'ArrowFunctionExpression',
+          'AwaitExpression',
+          'ClassDeclaration',
+          'RestElement',
+          'SpreadElement',
+          'YieldExpression',
+          'VariableDeclaration[kind="const"]',
+          'VariableDeclaration[kind="let"]',
+          'VariableDeclarator[id.type="ArrayPattern"]',
+          'VariableDeclarator[id.type="ObjectPattern"]',
+        ],
+      },
+    },
+
+    /**
+     * Files that run AFTER node version check
+     * and are not also transpiled with babel
      */
     {
       files: [

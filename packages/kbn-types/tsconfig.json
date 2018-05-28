@@ -6,7 +6,7 @@
     "stripInternal": true,
     "outDir": "./dist"
   },
-  "files": [
+  "include": [
     "./index.ts",
     "../../types/index.d.ts"
   ]

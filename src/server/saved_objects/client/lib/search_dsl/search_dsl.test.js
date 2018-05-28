@@ -4,7 +4,7 @@ import * as queryParamsNS from './query_params';
 import * as sortParamsNS from './sorting_params';
 
 describe('getSearchDsl', () => {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
   afterEach(() => sandbox.restore());
 
   describe('validation', () => {
@@ -33,7 +33,7 @@ describe('getSearchDsl', () => {
       const opts = {
         type: 'foo',
         search: 'bar',
-        searchFields: ['baz']
+        searchFields: ['baz'],
       };
 
       getSearchDsl(mappings, opts);

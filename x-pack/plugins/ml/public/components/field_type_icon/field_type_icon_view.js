@@ -70,7 +70,7 @@ export function FieldTypeIcon({ tooltipEnabled = false, type }) {
     // see https://github.com/elastic/eui/issues/839
     return (
       <EuiToolTip position="left" content={type}>
-        <span><FieldTypeIconContainer {...containerProps} /></span>
+        <FieldTypeIconContainer {...containerProps} />
       </EuiToolTip>
     );
   }
@@ -82,9 +82,11 @@ FieldTypeIcon.propTypes = {
   type: PropTypes.string
 };
 
-function FieldTypeIconContainer({ ariaLabel, className, iconChar }) {
+// If the tooltip is used, it will apply its events to its first inner child.
+// To pass on its properties we apply `rest` to the outer `span` element.
+function FieldTypeIconContainer({ ariaLabel, className, iconChar, ...rest }) {
   return (
-    <span className="field-type-icon-container">
+    <span className="field-type-icon-container" {...rest} >
       {(iconChar === '') ? (
         <span aria-label={ariaLabel} className={className} />
       ) : (

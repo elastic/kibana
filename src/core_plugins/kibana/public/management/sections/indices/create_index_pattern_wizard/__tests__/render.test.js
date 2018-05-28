@@ -15,7 +15,6 @@ describe('CreateIndexPatternWizardRender', () => {
   it('should call render', () => {
     renderCreateIndexPatternWizard(
       '',
-      '',
       {
         es: {},
         indexPatterns: {},

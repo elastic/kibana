@@ -9,8 +9,8 @@ export function showCloneModal(onClone, title) {
     document.body.removeChild(container);
   };
 
-  const onCloneConfirmed = (newTitle) => {
-    onClone(newTitle).then(id => {
+  const onCloneConfirmed = (newTitle, isTitleDuplicateConfirmed, onTitleDuplicate) => {
+    onClone(newTitle, isTitleDuplicateConfirmed, onTitleDuplicate).then(id => {
       if (id) {
         closeModal();
       }

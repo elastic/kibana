@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it ('should continue to show for visualizations with no search source', async () => {
-        await dashboardAddPanel.addVisualization('input control');
+        await dashboardAddPanel.addVisualization('Rendering-Test:-input-control');
         const hasAddFilter = await testSubjects.exists('addFilter');
         expect(hasAddFilter).to.be(true);
       });
@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('shows index pattern of vis when one is added', async () => {
-        await dashboardAddPanel.addVisualization('animal sounds pie');
+        await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await filterBar.ensureFieldEditorModalIsClosed();
         await testSubjects.click('addFilter');
@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('works when a vis with no index pattern is added', async () => {
-        await dashboardAddPanel.addVisualization('markdown');
+        await dashboardAddPanel.addVisualization('Rendering-Test:-markdown');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await filterBar.ensureFieldEditorModalIsClosed();
         await testSubjects.click('addFilter');

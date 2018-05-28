@@ -4,7 +4,12 @@
     "declaration": true,
     "declarationDir": "./target/tsc-types",
     "stripInternal": true,
-    "outDir": "./target/tsc"
+    "outDir": "./target/tsc",
+    // Skip type checking of all declaration files (*.d.ts).
+    // TODO The is only enabled because of a bug in RxJS, and _should_ be
+    // removed once https://github.com/ReactiveX/rxjs/issues/3031 is resolved
+    // and released.
+    "skipLibCheck": true
   },
   "include": [
     "./src/**/*.ts"
