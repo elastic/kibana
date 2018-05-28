@@ -16,10 +16,11 @@ const canUseFirstScreenshot = (screenshots, outputDimensions) => {
   }
 
   const firstScreenshot = screenshots[0];
-  return firstScreenshot.dimensions.width === outputDimensions.width && firstScreenshot.dimensions.height === outputDimensions.height;
+  return firstScreenshot.dimensions.width === outputDimensions.width &&
+    firstScreenshot.dimensions.height === outputDimensions.height;
 };
 
-export function $combine(screenshots, outputDimensions) {
+export function $combine(screenshots, outputDimensions, logger) {
   if (screenshots.length === 0) {
     return Observable.throw('Unable to combine 0 screenshots');
   }
@@ -42,6 +43,7 @@ export function $combine(screenshots, outputDimensions) {
   const output$ = pngs$
     .reduce(
       (output, { dimensions, png }) => {
+        logger.debug(`Creating output png with ${JSON.stringify(dimensions)}`);
         png.bitblt(output, 0, 0, dimensions.width, dimensions.height, dimensions.x, dimensions.y);
         return output;
       },

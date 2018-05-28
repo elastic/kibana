@@ -100,7 +100,8 @@ export class HeadlessChromiumDriver {
           ...screenshotClip,
           scale: 1
         }
-      });
+      }, this._logger);
+      this._logger.debug(`captured screenshot clip ${JSON.stringify(screenshotClip)}`);
       return data;
     });
   }
