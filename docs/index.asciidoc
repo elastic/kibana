@@ -49,7 +49,7 @@ include::timelion.asciidoc[]
 
 include::{xkb-repo-dir}/ml/index.asciidoc[]
 
-include::{xkb-repo-dir}/apm/index.asciidoc[]
+include::apm/index.asciidoc[]
 
 include::{xkb-repo-dir}/graph/index.asciidoc[]
 
