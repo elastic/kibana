@@ -63,7 +63,6 @@ export function createStringFormat(FieldFormat) {
 
     static id = 'string';
     static title = 'String';
-    static transformOptions = TRANSFORM_OPTIONS;
     static fieldType = [
       'number',
       'boolean',
@@ -77,5 +76,6 @@ export function createStringFormat(FieldFormat) {
       'unknown',
       'conflict'
     ];
+    static transformOptions = TRANSFORM_OPTIONS;
   };
 }

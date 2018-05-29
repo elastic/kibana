@@ -19,11 +19,14 @@ export class DefaultFormatEditor extends PureComponent {
 
   static getDerivedStateFromProps(nextProps, state) {
     const converter = nextProps.format.getConverterFor('text');
+    const type = typeof state.sampleInputsByType === 'object' && nextProps.formatParams.type;
+    const inputs = type ? state.sampleInputsByType[nextProps.formatParams.type] || [] : state.sampleInputs;
+
     let error = null;
     let samples = [];
 
     try {
-      samples = state.sampleInputs.map(input => {
+      samples = inputs.map(input => {
         return {
           input,
           output: converter(input),
