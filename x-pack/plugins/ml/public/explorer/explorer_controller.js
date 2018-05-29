@@ -75,10 +75,13 @@ module.controller('MlExplorerController', function (
   mlSelectSeverityService) {
 
   const state = store.getState().anomalyExplorer;
+  $scope.checkboxShowChartsVisibility = state.checkboxShowChartsVisibility;
+  $scope.loading = state.loading;
 
   const unsubscribeStore = store.subscribe(() => {
     const newState = store.getState().anomalyExplorer;
     $scope.loading = newState.loading;
+    $scope.checkboxShowChartsVisibility = newState.checkboxShowChartsVisibility;
     $scope.$applyAsync();
   });
 
@@ -90,21 +93,12 @@ module.controller('MlExplorerController', function (
       }
     )
   );
-  $scope.checkboxShowChartsVisibility = false;
-  const unsubscribeCheckboxShowChartsVisibility = store.subscribe(
-    watch(store.getState, 'anomalyExplorer.anomalyChartRecords')(
-      (anomalyChartRecords) => {
-        $scope.checkboxShowChartsVisibility = (anomalyChartRecords.length > 0);
-        $scope.$applyAsync();
-      }
-    )
-  );
 
-  $scope.loading = state.loading;
   const dLoadingStart = dispatchDecorator(aLoadingStart);
   const dLoadingStop = dispatchDecorator(aLoadingStop);
   const dAnomalyDataChange = dispatchDecorator(aAnomalyDataChange);
   const dTimeRangeChange = dispatchDecorator(aTimeRangeChange);
+
   timefilter.enableTimeRangeSelector();
   timefilter.enableAutoRefreshSelector();
 
@@ -468,7 +462,6 @@ module.controller('MlExplorerController', function (
     dragSelect.stop();
     unsubscribeStore();
     unsubscribeShowCharts();
-    unsubscribeCheckboxShowChartsVisibility();
     mlExplorerDashboardService.swimlaneCellClick.unwatch(swimlaneCellClickListener);
     mlExplorerDashboardService.swimlaneRenderDone.unwatch(swimlaneRenderDoneListener);
     mlSelectSeverityService.state.unwatch(anomalyChartsSeverityListener);

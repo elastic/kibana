@@ -23,6 +23,7 @@ export const aLoadingStop = () => ({ type: LOADING_STOP });
 
 const defaultState = {
   anomalyChartRecords: [],
+  checkboxShowChartsVisibility: false,
   earliestMs: null,
   latestMs: null,
   loading: true,
@@ -36,6 +37,7 @@ export const anomalyExplorerReducer = (state = defaultState, action) => {
       return {
         ...state,
         anomalyChartRecords,
+        checkboxShowChartsVisibility: (anomalyChartRecords.length > 0),
         earliestMs,
         latestMs
       };
