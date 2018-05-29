@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }) {
     describe('adding a filter that excludes all data', async () => {
       before(async () => {
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.setTimepickerIn63DataRange();
+        await PageObjects.dashboard.setTimepickerInDataRange();
         await dashboardAddPanel.addEveryVisualization('"Filter Bytes Test"');
         await dashboardAddPanel.addEverySavedSearch('"Filter Bytes Test"');
         await dashboardAddPanel.closeAddPanel();
@@ -166,7 +166,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('visualization saved with a query filters data', async () => {
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.setTimepickerIn63DataRange();
+        await PageObjects.dashboard.setTimepickerInDataRange();
 
         await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
         await PageObjects.header.waitUntilLoadingHasFinished();
