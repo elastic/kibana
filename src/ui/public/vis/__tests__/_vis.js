@@ -120,7 +120,7 @@ describe('Vis Class', function () {
     });
 
     describe('hasInspector()', () => {
-      it('should forward to inspectors hasInspector', () => {
+      it.skip('should forward to inspectors hasInspector', () => {
         const vis = new Vis(indexPattern, state({
           inspectorAdapters: {
             data: true,
@@ -149,7 +149,7 @@ describe('Vis Class', function () {
       });
     });
 
-    describe('openInspector()', () => {
+    describe.skip('openInspector()', () => {
 
       beforeEach(() => {
         sinon.stub(Inspector, 'openInspector');
