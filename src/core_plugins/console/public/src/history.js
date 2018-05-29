@@ -58,19 +58,41 @@ const history = {
     });
   },
 
-  updateCurrentState(content) {
-    var timestamp = new Date().getTime();
-    storage.set("editor_state", {
+  updateCurrentState(content, workspaceId) {
+    const k = "editor_state" + (workspaceId || "");
+    const timestamp = new Date().getTime();
+    storage.set(k, {
       time: timestamp,
       content: content
     });
   },
 
-  getSavedEditorState() {
-    const saved = storage.get('editor_state');
+  getSavedEditorState(workspaceId) {
+    const k = "editor_state" + (workspaceId || "");
+    const saved = storage.get(k);
     if (!saved) return;
     const { time, content } = saved;
     return { time, content };
+  },
+
+  getWorkspaceKeys() {
+    return storage.keys()
+      .filter(key => key.indexOf("editor_state") === 0)
+      .sort();
+  },
+
+  getWorkspaceIds() {
+    return history.getWorkspaceKeys()
+      .map(key => key.replace("editor_state", ""));
+  },
+
+  getWorkspaces() {
+    return history.getWorkspaceKeys()
+      .map(key => storage.get(key));
+  },
+
+  deleteWorkspace(workspaceId) {
+    storage.delete("editor_state" + (workspaceId || ""));
   },
 
   clearHistory() {

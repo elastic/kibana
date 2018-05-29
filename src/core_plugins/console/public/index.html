@@ -1,4 +1,25 @@
 <kbn-dev-tools-app data-test-subj="console" top-nav-config="topNavController">
+<div id="workspace_container">
+  <select class="kuiSelect" ng-model="activeWorkspace" ng-change="onWorkspaceChange()">
+    <option value="-1">New workspace...</option>
+    <option 
+      value="{{ws}}" 
+      ng-selected="ws == activeWorkspace"
+      ng-repeat="ws in workspaces">
+      {{ws || 'Default'}}
+    </option>
+  </select>
+  <button class="workspace_action" ng-show="!!activeWorkspace && activeWorkspace != '-1'" ng-click="removeWorkspace()" id="delete_workspace">
+    <i class="fa fa-trash"></i>
+  </button>
+
+  <div id="new_workspace_container" ng-show="activeWorkspace == '-1'">
+    <input type="text" placeholder="New workspace..." aria-placeholder="New workspace..." ng-model="newWorkspaceName" class="kuiTextInput ng-pristine ng-valid ng-scope ng-not-empty ng-touched" />
+    <button class="kuiButton kuiButton--danger" ng-click="onCancelNewWorkspace()">Cancel</button>
+    <button class="kuiButton kuiButton--primary" ng-click="onCreateNewWorkspace()">Save</button>
+  </div>
+</div>
+
   <div id="editor_output_container">
     <div id="editor_container">
       <ul id="autocomplete"></ul>

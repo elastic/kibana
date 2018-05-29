@@ -22,7 +22,11 @@ var $ = require('jquery');
 let history = require('./history');
 let mappings = require('./mappings');
 
-export default function init(input, output, sourceLocation = 'stored') {
+export default function init(input, output, sourceLocation = 'stored', workspaceId) {
+  var workspace = workspaceId;
+  var saveDelay = 500;
+  var timer;
+
   $(document.body).removeClass('fouc');
 
   // set the value of the input and clear the output
@@ -34,7 +38,7 @@ export default function init(input, output, sourceLocation = 'stored') {
   }
 
   function loadSavedState() {
-    var previousSaveState = history.getSavedEditorState();
+    var previousSaveState = history.getSavedEditorState(workspace);
 
     if (sourceLocation == "stored") {
       if (previousSaveState) {
@@ -72,25 +76,30 @@ export default function init(input, output, sourceLocation = 'stored') {
   }
 
   function setupAutosave() {
-    var timer;
-    var saveDelay = 500;
+    input.getSession().on("change", onChange);
+  }
 
-    input.getSession().on("change", function onChange() {
-      if (timer) {
-        timer = clearTimeout(timer);
-      }
-      timer = setTimeout(saveCurrentState, saveDelay);
-    });
+  function onChange() {
+    if (timer) {
+      timer = clearTimeout(timer);
+    }
+    timer = setTimeout(saveCurrentState, saveDelay);
   }
 
   function saveCurrentState() {
     try {
       var content = input.getValue();
-      history.updateCurrentState(content);
+      history.updateCurrentState(content, workspace);
     }
     catch (e) {
       console.log("Ignoring saving error: " + e);
     }
+  }
+
+  function teardownAutosave() {
+    // flush everything and unbind
+    saveCurrentState();
+    input.getSession().off("change", onChange);
   }
 
   // stupid simple restore function, called when the user
@@ -134,4 +143,18 @@ export default function init(input, output, sourceLocation = 'stored') {
   loadSavedState();
   setupAutosave();
   mappings.startRetrievingAutoCompleteInfo();
+
+  return {
+    changeWorkspace(workspaceId) {
+      // flush and unbind
+      teardownAutosave();
+
+      // swap workspace
+      workspace = workspaceId;
+
+      // load new workspace and configure autosave
+      loadSavedState();
+      setupAutosave();
+    }
+  }
 }
