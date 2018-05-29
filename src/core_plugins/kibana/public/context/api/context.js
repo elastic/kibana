@@ -43,8 +43,8 @@ import { reverseSortDirection } from './utils/sorting';
 
 const DAY_MILLIS = 24 * 60 * 60 * 1000;
 
-// look from 1 day up to 1000 days into the past
-const LOOKUP_OFFSETS = subdivideDownTo(DAY_MILLIS, 0, 10000 * DAY_MILLIS, 4);
+// look from 1 day up to 10000 days into the past and future
+const LOOKUP_OFFSETS = [0, 1, 7, 30, 365, 10000].map((days) => days * DAY_MILLIS);
 
 function fetchContextProvider(courier, Private) {
   /**
@@ -147,7 +147,7 @@ function fetchContextProvider(courier, Private) {
         remainingSize
       );
 
-      predecessors = [...hits.reverse(), ...predecessors];
+      predecessors = [...hits.slice().reverse(), ...predecessors];
     }
 
     return predecessors;
@@ -238,28 +238,6 @@ function fetchContextProvider(courier, Private) {
 
     return response.hits ? response.hits.hits : [];
   }
-}
-
-/**
- * Divide the interval from `start` to `end` into a monotinically increasing
- * sequence `[start, start + n, start + base * n, start + base^2 * n, ..., end]` with
- * `n <= limit`.
- *
- * @param {number} limit the lower limit on the step size
- * @param {number} start the start number
- * @param {number} end the end number
- * @param {number} [ratio=2] the ratio of the subdivision
- * @returns {number[]}
- */
-function subdivideDownTo(limit, start, end, ratio = 2) {
-  if (end - start <= limit) {
-    return [start, end];
-  }
-
-  return [
-    ...subdivideDownTo(limit, start, Math.ceil(start + end) / ratio),
-    end
-  ];
 }
 
 /**

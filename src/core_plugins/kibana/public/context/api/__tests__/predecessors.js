@@ -94,11 +94,9 @@ describe('context app', function () {
     it('should perform multiple queries until the expected hit count is returned', function () {
       const searchSourceStub = getSearchSourceStub();
       searchSourceStub._stubHits = [
-        searchSourceStub._createStubHit(MS_PER_DAY * 4000),
-        searchSourceStub._createStubHit(MS_PER_DAY * 3000),
         searchSourceStub._createStubHit(MS_PER_DAY * 1700),
-        searchSourceStub._createStubHit(MS_PER_DAY * 1500),
         searchSourceStub._createStubHit(MS_PER_DAY * 1200),
+        searchSourceStub._createStubHit(MS_PER_DAY * 1100),
         searchSourceStub._createStubHit(MS_PER_DAY * 1000),
       ];
 

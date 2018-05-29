@@ -97,7 +97,7 @@ describe('context app', function () {
         searchSourceStub._createStubHit(MS_PER_DAY * 3000),
         searchSourceStub._createStubHit(MS_PER_DAY * 3000 - 1),
         searchSourceStub._createStubHit(MS_PER_DAY * 3000 - 2),
-        searchSourceStub._createStubHit(MS_PER_DAY * 2500),
+        searchSourceStub._createStubHit(MS_PER_DAY * 2800),
         searchSourceStub._createStubHit(MS_PER_DAY * 2200),
         searchSourceStub._createStubHit(MS_PER_DAY * 1000),
       ];
