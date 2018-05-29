@@ -34,6 +34,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiTextArea,
+  EuiSwitch,
 } from '@elastic/eui';
 
 export class DashboardSaveModal extends React.Component {
@@ -43,7 +44,7 @@ export class DashboardSaveModal extends React.Component {
     this.state = {
       title: props.title,
       description: props.description,
-      saveAsNewDashboard: false,
+      copyOnSave: props.copyOnSave,
       timeRestore: props.timeRestore,
       isTitleDuplicateConfirmed: false,
       hasTitleDuplicate: false,
@@ -70,8 +71,13 @@ export class DashboardSaveModal extends React.Component {
       isLoading: true,
     });
 
-    await this.props.onSave(this.state.title, this.state.description, this.state.timeRestore,
-      this.state.isTitleDuplicateConfirmed, this.onTitleDuplicate);
+    await this.props.onSave(
+      this.state.title,
+      this.state.description,
+      this.state.copyOnSave,
+      this.state.timeRestore,
+      this.state.isTitleDuplicateConfirmed,
+      this.onTitleDuplicate);
 
     if (this._isMounted) {
       this.setState({
@@ -94,6 +100,18 @@ export class DashboardSaveModal extends React.Component {
     });
   };
 
+  onCopyOnSaveChange = (event) => {
+    this.setState({
+      copyOnSave: event.target.checked,
+    });
+  }
+
+  onTimeRestoreChange = (event) => {
+    this.setState({
+      timeRestore: event.target.checked,
+    });
+  }
+
   renderDuplicateTitleCallout = () => {
     if (!this.state.hasTitleDuplicate) {
       return;
@@ -102,7 +120,7 @@ export class DashboardSaveModal extends React.Component {
     return (
       <Fragment>
         <EuiCallOut
-          title={`A Dashboard with the title '${this.state.newDashboardName}' already exists.`}
+          title={`A Dashboard with the title '${this.state.title}' already exists.`}
           color="warning"
           data-test-subj="saveModalTitleDupicateWarnMsg"
         >
@@ -112,6 +130,24 @@ export class DashboardSaveModal extends React.Component {
         </EuiCallOut>
         <EuiSpacer />
       </Fragment>
+    );
+  }
+
+  renderCopyOnSave = () => {
+    if (!this.props.showCopyOnSave) {
+      return;
+    }
+
+    return (
+      <EuiFormRow
+        label="Save as a new dashboard"
+      >
+        <EuiSwitch
+          data-test-subj="saveAsNewCheckbox"
+          checked={this.state.copyOnSave}
+          onChange={this.onCopyOnSaveChange}
+        />
+      </EuiFormRow>
     );
   }
 
@@ -135,6 +171,8 @@ export class DashboardSaveModal extends React.Component {
 
             <EuiForm>
 
+              {this.renderCopyOnSave()}
+
               <EuiFormRow
                 label="Title"
               >
@@ -154,8 +192,21 @@ export class DashboardSaveModal extends React.Component {
                   data-test-subj="dashboardDescription"
                   value={this.state.description}
                   onChange={this.onDescriptionChange}
+                  compressed
                 />
               </EuiFormRow>
+
+              <EuiFormRow
+                label="Store time with dashboard"
+                helpText="This changes the time filter to the currently selected time each time this dashboard is loaded."
+              >
+                <EuiSwitch
+                  data-test-subj="storeTimeWithDashboard"
+                  checked={this.state.timeRestore}
+                  onChange={this.onTimeRestoreChange}
+                />
+              </EuiFormRow>
+
             </EuiForm>
 
           </EuiModalBody>
@@ -188,5 +239,7 @@ DashboardSaveModal.propTypes = {
   onClose: PropTypes.func.isRequired,
   title: PropTypes.string.isRequired,
   description: PropTypes.string.isRequired,
+  copyOnSave: PropTypes.bool.isRequired,
   timeRestore: PropTypes.bool.isRequired,
+  showCopyOnSave: PropTypes.bool.isRequired,
 };

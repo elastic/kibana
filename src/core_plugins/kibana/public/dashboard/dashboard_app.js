@@ -328,9 +328,11 @@ app.directive('dashboardApp', function ($injector) {
       navActions[TopNavIds.EXIT_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.VIEW);
       navActions[TopNavIds.ENTER_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.EDIT);
       navActions[TopNavIds.SAVE] = () => {
-        const onSave = (newTitle, newDescription, newTimeRestore, isTitleDuplicateConfirmed, onTitleDuplicate) => {
+        const currentCopyOnSave = dashboardStateManager.savedDashboard.copyOnSave;
+        const onSave = (newTitle, newDescription, newCopyOnSave, newTimeRestore, isTitleDuplicateConfirmed, onTitleDuplicate) => {
           dashboardStateManager.setTitle(newTitle);
           dashboardStateManager.setDescription(newDescription);
+          dashboardStateManager.savedDashboard.copyOnSave = newCopyOnSave;
           dashboardStateManager.setTimeRestore(newTimeRestore);
           const saveOptions = {
             confirmOverwrite: false,
@@ -342,13 +344,21 @@ app.directive('dashboardApp', function ($injector) {
             if (!id) {
               dashboardStateManager.setTitle($scope.model.title);
               dashboardStateManager.setDescription($scope.model.description);
+              dashboardStateManager.savedDashboard.copyOnSave = currentCopyOnSave;
               dashboardStateManager.setTimeRestore($scope.model.timeRestore);
             }
             return id;
           });
         };
 
-        showSaveModal(onSave, $scope.model.title, $scope.model.description, $scope.model.timeRestore);
+        const showCopyOnSave = !dash.id ? false : true;
+        showSaveModal(
+          onSave,
+          $scope.model.title,
+          $scope.model.description,
+          $scope.model.copyOnSave,
+          $scope.model.timeRestore,
+          showCopyOnSave);
       };
       navActions[TopNavIds.CLONE] = () => {
         const currentTitle = $scope.model.title;
