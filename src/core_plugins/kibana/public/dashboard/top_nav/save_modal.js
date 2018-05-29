@@ -30,16 +30,21 @@ import {
   EuiModalHeaderTitle,
   EuiOverlayMask,
   EuiSpacer,
-  EuiText,
   EuiCallOut,
+  EuiForm,
+  EuiFormRow,
+  EuiTextArea,
 } from '@elastic/eui';
 
-export class DashboardCloneModal extends React.Component {
+export class DashboardSaveModal extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      newDashboardName: props.title,
+      title: props.title,
+      description: props.description,
+      saveAsNewDashboard: false,
+      timeRestore: props.timeRestore,
       isTitleDuplicateConfirmed: false,
       hasTitleDuplicate: false,
       isLoading: false,
@@ -60,12 +65,13 @@ export class DashboardCloneModal extends React.Component {
     });
   }
 
-  cloneDashboard = async () => {
+  saveDashboard = async () => {
     this.setState({
       isLoading: true,
     });
 
-    await this.props.onClone(this.state.newDashboardName, this.state.isTitleDuplicateConfirmed, this.onTitleDuplicate);
+    await this.props.onSave(this.state.title, this.state.description, this.state.timeRestore,
+      this.state.isTitleDuplicateConfirmed, this.onTitleDuplicate);
 
     if (this._isMounted) {
       this.setState({
@@ -74,11 +80,17 @@ export class DashboardCloneModal extends React.Component {
     }
   };
 
-  onInputChange = (event) => {
+  onTitleChange = (event) => {
     this.setState({
-      newDashboardName: event.target.value,
+      title: event.target.value,
       isTitleDuplicateConfirmed: false,
       hasTitleDuplicate: false,
+    });
+  };
+
+  onDescriptionChange = (event) => {
+    this.setState({
+      description: event.target.value,
     });
   };
 
@@ -92,10 +104,10 @@ export class DashboardCloneModal extends React.Component {
         <EuiCallOut
           title={`A Dashboard with the title '${this.state.newDashboardName}' already exists.`}
           color="warning"
-          data-test-subj="cloneModalTitleDupicateWarnMsg"
+          data-test-subj="saveModalTitleDupicateWarnMsg"
         >
           <p>
-            Click <strong>Confirm Clone</strong> to clone the dashboard with the duplicate title.
+            Click <strong>Confirm Save</strong> to save the dashboard with the duplicate title.
           </p>
         </EuiCallOut>
         <EuiSpacer />
@@ -107,40 +119,50 @@ export class DashboardCloneModal extends React.Component {
     return (
       <EuiOverlayMask>
         <EuiModal
-          data-test-subj="dashboardCloneModal"
+          data-test-subj="dashboardSaveModal"
           className="dashboardModal"
           onClose={this.props.onClose}
         >
           <EuiModalHeader>
             <EuiModalHeaderTitle>
-              Clone Dashboard
+              Save Dashboard
             </EuiModalHeaderTitle>
           </EuiModalHeader>
 
           <EuiModalBody>
-            <EuiText>
-              <p>
-                Please enter a new name for your dashboard.
-              </p>
-            </EuiText>
-
-            <EuiSpacer />
 
             {this.renderDuplicateTitleCallout()}
 
-            <EuiFieldText
-              autoFocus
-              data-test-subj="clonedDashboardTitle"
-              value={this.state.newDashboardName}
-              onChange={this.onInputChange}
-              isInvalid={this.state.hasTitleDuplicate}
-            />
+            <EuiForm>
+
+              <EuiFormRow
+                label="Title"
+              >
+                <EuiFieldText
+                  autoFocus
+                  data-test-subj="dashboardTitle"
+                  value={this.state.title}
+                  onChange={this.onTitleChange}
+                  isInvalid={this.state.hasTitleDuplicate}
+                />
+              </EuiFormRow>
+
+              <EuiFormRow
+                label="Description"
+              >
+                <EuiTextArea
+                  data-test-subj="dashboardDescription"
+                  value={this.state.description}
+                  onChange={this.onDescriptionChange}
+                />
+              </EuiFormRow>
+            </EuiForm>
 
           </EuiModalBody>
 
           <EuiModalFooter>
             <EuiButton
-              data-test-subj="cloneCancelButton"
+              data-test-subj="saveCancelButton"
               onClick={this.props.onClose}
             >
               Cancel
@@ -148,11 +170,11 @@ export class DashboardCloneModal extends React.Component {
 
             <EuiButton
               fill
-              data-test-subj="cloneConfirmButton"
-              onClick={this.cloneDashboard}
+              data-test-subj="confirmSaveDashboardButton"
+              onClick={this.saveDashboard}
               isLoading={this.state.isLoading}
             >
-              Confirm Clone
+              Confirm Save
             </EuiButton>
           </EuiModalFooter>
         </EuiModal>
@@ -161,8 +183,10 @@ export class DashboardCloneModal extends React.Component {
   }
 }
 
-DashboardCloneModal.propTypes = {
-  onClone: PropTypes.func,
-  onClose: PropTypes.func,
-  title: PropTypes.string
+DashboardSaveModal.propTypes = {
+  onSave: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired,
+  title: PropTypes.string.isRequired,
+  description: PropTypes.string.isRequired,
+  timeRestore: PropTypes.bool.isRequired,
 };

@@ -40,6 +40,7 @@ import { VisualizeConstants } from '../visualize/visualize_constants';
 import { DashboardStateManager } from './dashboard_state_manager';
 import { saveDashboard } from './lib';
 import { showCloneModal } from './top_nav/show_clone_modal';
+import { showSaveModal } from './top_nav/show_save_modal';
 import { showAddPanel } from './top_nav/show_add_panel';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import * as filterActions from 'ui/doc_table/actions/filter';
@@ -219,9 +220,6 @@ app.directive('dashboardApp', function ($injector) {
         dashboardStateManager.setDarkTheme($scope.model.darkTheme);
         updateTheme();
       });
-      $scope.$watch('model.description', () => dashboardStateManager.setDescription($scope.model.description));
-      $scope.$watch('model.title', () => dashboardStateManager.setTitle($scope.model.title));
-      $scope.$watch('model.timeRestore', () => dashboardStateManager.setTimeRestore($scope.model.timeRestore));
       $scope.indexPatterns = [];
 
       $scope.onPanelRemoved = (panelIndex) => {
@@ -330,7 +328,27 @@ app.directive('dashboardApp', function ($injector) {
       navActions[TopNavIds.EXIT_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.VIEW);
       navActions[TopNavIds.ENTER_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.EDIT);
       navActions[TopNavIds.SAVE] = () => {
-        console.log('jesus saves');
+        const onSave = (newTitle, newDescription, newTimeRestore, isTitleDuplicateConfirmed, onTitleDuplicate) => {
+          dashboardStateManager.setTitle(newTitle);
+          dashboardStateManager.setDescription(newDescription);
+          dashboardStateManager.setTimeRestore(newTimeRestore);
+          const saveOptions = {
+            confirmOverwrite: false,
+            isTitleDuplicateConfirmed,
+            onTitleDuplicate,
+          };
+          return $scope.save(saveOptions).then(id => {
+            // If the save wasn't successful, put the original values back.
+            if (!id) {
+              dashboardStateManager.setTitle($scope.model.title);
+              dashboardStateManager.setDescription($scope.model.description);
+              dashboardStateManager.setTimeRestore($scope.model.timeRestore);
+            }
+            return id;
+          });
+        };
+
+        showSaveModal(onSave, $scope.model.title, $scope.model.description, $scope.model.timeRestore);
       };
       navActions[TopNavIds.CLONE] = () => {
         const currentTitle = $scope.model.title;
@@ -345,9 +363,6 @@ app.directive('dashboardApp', function ($injector) {
           return $scope.save(saveOptions).then(id => {
             // If the save wasn't successful, put the original title back.
             if (!id) {
-              $scope.model.title = currentTitle;
-              // There is a watch on $scope.model.title that *should* call this automatically but
-              // angular is failing to trigger it, so do so manually here.
               dashboardStateManager.setTitle(currentTitle);
             }
             return id;
@@ -409,11 +424,9 @@ app.directive('dashboardApp', function ($injector) {
         kbnUrl.removeParam(DashboardConstants.NEW_VISUALIZATION_ID_PARAM);
       }
 
+      // TODO remove opts once share has been converted to react
       $scope.opts = {
-        displayName: dash.getDisplayName(),
-        dashboard: dash,
-        save: $scope.save,
-        timefilter: $scope.timefilter
+        dashboard: dash, // used in share.html
       };
     }
   };
