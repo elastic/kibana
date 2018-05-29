@@ -26,7 +26,7 @@ locally, go to `http://localhost:5601/`.
 . Click **DevTools** in the side navigation and then click **Grok Debugger**
 on the top navigation bar.
 +
-image::grokdebugger/images/grok-debugger.png["Grok Debugger UI"]
+image::dev-tools/grokdebugger/images/grok-debugger.png["Grok Debugger UI"]
 
 . Under Sample Data, enter a sample message that is representative of the data you
 want to parse. For example:
@@ -50,13 +50,13 @@ For example, to parse the log line in the example, you use:
 Under Structured Data, you'll see the simulated event that results from applying the grok
 pattern:
 +
-image::grokdebugger/images/grok-debugger-output.png["Viewing Grok Debugger Output"]
+image::dev-tools/grokdebugger/images/grok-debugger-output.png["Viewing Grok Debugger Output"]
 +
 Any errors in the pattern will appear at the top of the page. For example,
 here you see a parse exception because the pattern name is misspelled as `WORDD`
 and therefore can't be found in the pattern dictionary:
 +
-image::grokdebugger/images/grok-debugger-error.png["Viewing Grok Debugger Errors"]
+image::dev-tools/grokdebugger/images/grok-debugger-error.png["Viewing Grok Debugger Errors"]
 +
 You can click the **More** link to see more detail about the message.
 +
@@ -114,7 +114,7 @@ MSG message-id=<%{GREEDYDATA}>
 Under Output, you'll see the simulated output event that results from applying
 the grok pattern that contains the custom pattern:
 +
-image::grokdebugger/images/grok-debugger-custom-pattern.png["Debugging a custom pattern"]
+image::dev-tools/grokdebugger/images/grok-debugger-custom-pattern.png["Debugging a custom pattern"]
 +
 If an error occurs, you can view the error message and continue iterating over
 the custom pattern until there are no errors and the output matches the event

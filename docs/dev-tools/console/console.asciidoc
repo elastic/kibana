@@ -5,7 +5,7 @@ The Console plugin provides a UI to interact with the REST API of Elasticsearch.
 where you compose requests to Elasticsearch, and the *response* pane, which displays the responses to the request.
 
 .The Console UI
-image::images/introduction_screen.png[Screenshot]
+image::dev-tools/console/images/introduction_screen.png[Screenshot]
 
 Console understands commands in a cURL-like syntax. For example the following Console command
 
@@ -39,7 +39,7 @@ names.
 
 [[suggestions]]
 .API suggestions
-image::images/introduction_suggestion.png["Suggestions",width=400,align="center"]
+image::dev-tools/console/images/introduction_suggestion.png["Suggestions",width=400,align="center"]
 
 Once you have typed a command in to the left pane, you can submit it to Elasticsearch by clicking the little green
 triangle that appears next to the URL line of the request. Notice that as you move the cursor around, the little
@@ -48,12 +48,12 @@ triangle that appears next to the URL line of the request. Notice that as you mo
 
 [[action_menu]]
 .The Action Menu
-image::images/introduction_action_menu.png["The Action Menu",width=400,align="center"]
+image::dev-tools/console/images/introduction_action_menu.png["The Action Menu",width=400,align="center"]
 
 When the response come back, you should see it in the left hand panel:
 
 .The Output Pane
-image::images/introduction_output.png[Screenshot]
+image::dev-tools/console/images/introduction_output.png[Screenshot]
 
 [float]
 [[console-ui]]
@@ -63,14 +63,14 @@ In this section you will find a more detailed description of UI of Console. The 
 in the <<console-kibana>> section.
 
 
-include::console/multi-requests.asciidoc[]
+include::multi-requests.asciidoc[]
 
-include::console/auto-formatting.asciidoc[]
+include::auto-formatting.asciidoc[]
 
-include::console/keyboard-shortcuts.asciidoc[]
+include::keyboard-shortcuts.asciidoc[]
 
-include::console/history.asciidoc[]
+include::history.asciidoc[]
 
-include::console/settings.asciidoc[]
+include::settings.asciidoc[]
 
-include::console/configuring-console.asciidoc[]
+include::configuring-console.asciidoc[]
