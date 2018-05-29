@@ -184,6 +184,7 @@
     "reactcss": "1.2.3",
     "redux": "3.7.2",
     "redux-actions": "2.2.1",
+    "redux-observable": "^0.18.0",
     "redux-thunk": "2.2.0",
     "regression": "2.0.0",
     "request": "^2.85.0",

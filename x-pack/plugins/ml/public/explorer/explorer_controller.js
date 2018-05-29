@@ -54,6 +54,12 @@ uiRoutes
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
+import { store, dispatchDecorator } from '../redux/store';
+import {
+  aLoadingStart,
+  aLoadingStop
+} from '../redux/modules/anomaly_explorer';
+
 module.controller('MlExplorerController', function (
   $scope,
   $timeout,
@@ -66,8 +72,18 @@ module.controller('MlExplorerController', function (
   mlSelectIntervalService,
   mlSelectSeverityService) {
 
-  $scope.timeFieldName = 'timestamp';
-  $scope.loading = true;
+  // redux
+  const state = store.getState().anomalyExplorer;
+
+  store.subscribe(() => {
+    const newState = store.getState().anomalyExplorer;
+    $scope.loading = newState.loading;
+    $scope.$applyAsync();
+  });
+
+  $scope.loading = state.loading;
+  const dLoadingStart = dispatchDecorator(aLoadingStart);
+  const dLoadingStop = dispatchDecorator(aLoadingStop);
   timefilter.enableTimeRangeSelector();
   timefilter.enableAutoRefreshSelector();
 
@@ -149,7 +165,7 @@ module.controller('MlExplorerController', function (
         const selectedJobIds = mlJobSelectService.getSelectedJobIds(true);
         $scope.setSelectedJobs(selectedJobIds);
       } else {
-        $scope.loading = false;
+        dLoadingStop();
       }
 
     }).catch((resp) => {
@@ -639,7 +655,7 @@ module.controller('MlExplorerController', function (
       return;
     }
 
-    $scope.loading = true;
+    dLoadingStart();
     $scope.hasResults = false;
 
     $scope.swimlaneBucketInterval = calculateSwimlaneBucketInterval();
@@ -679,7 +695,7 @@ module.controller('MlExplorerController', function (
       } else {
         $scope.hasResults = false;
       }
-      $scope.loading = false;
+      dLoadingStop();
 
       // Tell the result components directives to render.
       // Need to use $timeout to ensure the broadcast happens after the child scope is updated with the new data.

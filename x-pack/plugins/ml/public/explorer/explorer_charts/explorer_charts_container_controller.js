@@ -24,10 +24,14 @@ import { isTimeSeriesViewDetector } from 'plugins/ml/../common/util/job_utils';
 import { mlResultsService } from 'plugins/ml/services/results_service';
 import { mlJobService } from 'plugins/ml/services/job_service';
 
+import { store } from '../../redux/store';
+
 module.controller('MlExplorerChartsContainerController', function ($scope, $injector) {
   const Private = $injector.get('Private');
   const mlExplorerDashboardService = $injector.get('mlExplorerDashboardService');
   const mlSelectSeverityService = $injector.get('mlSelectSeverityService');
+
+  const state = store.getState().anomalyExplorer;
 
   $scope.seriesToPlot = [];
 
@@ -434,13 +438,13 @@ module.controller('MlExplorerChartsContainerController', function ($scope, $inje
       $scope.tooManyBuckets = true;
       // For each series being plotted, display the record with the highest score if possible.
       const maxTimeSpan = maxBucketSpanMs * CHART_MAX_POINTS;
-      let minMs = recordsToPlot[0][$scope.timeFieldName];
-      let maxMs = recordsToPlot[0][$scope.timeFieldName];
+      let minMs = recordsToPlot[0][state.timeFieldName];
+      let maxMs = recordsToPlot[0][state.timeFieldName];
 
       _.each(recordsToPlot, (record) => {
         const diffMs = maxMs - minMs;
         if (diffMs < maxTimeSpan) {
-          const recordTime = record[$scope.timeFieldName];
+          const recordTime = record[state.timeFieldName];
           if (recordTime < minMs) {
             if (maxMs - recordTime <= maxTimeSpan) {
               minMs = recordTime;

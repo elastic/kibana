@@ -5289,6 +5289,10 @@ git-config-path@^1.0.1:
     fs-exists-sync "^0.1.0"
     homedir-polyfill "^1.0.0"
 
+gitbook-plugin-github@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/gitbook-plugin-github/-/gitbook-plugin-github-2.0.0.tgz#5166e763cfcc402d432880b7a6c85c1c54b56a8d"
+
 glob-all@3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/glob-all/-/glob-all-3.0.1.tgz#6347edfb5e026cbe35d0eeabd5385ce9c28312ff"
@@ -10739,6 +10743,12 @@ redux-actions@2.2.1:
     lodash "^4.13.1"
     lodash-es "^4.17.4"
     reduce-reducers "^0.1.0"
+
+redux-observable@^0.18.0:
+  version "0.18.0"
+  resolved "https://registry.yarnpkg.com/redux-observable/-/redux-observable-0.18.0.tgz#48de1f35554b7ba23a88b18379ca1c93f5124197"
+  dependencies:
+    gitbook-plugin-github "^2.0.0"
 
 redux-thunk@2.2.0:
   version "2.2.0"
