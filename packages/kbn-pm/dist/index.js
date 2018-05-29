@@ -26865,18 +26865,18 @@ function mkdirP (p, opts, f, made) {
     else if (!opts || typeof opts !== 'object') {
         opts = { mode: opts };
     }
-
+    
     var mode = opts.mode;
     var xfs = opts.fs || fs;
-
+    
     if (mode === undefined) {
         mode = _0777 & (~process.umask());
     }
     if (!made) made = null;
-
+    
     var cb = f || function () {};
     p = path.resolve(p);
-
+    
     xfs.mkdir(p, mode, function (er) {
         if (!er) {
             made = made || p;
@@ -26909,10 +26909,10 @@ mkdirP.sync = function sync (p, opts, made) {
     if (!opts || typeof opts !== 'object') {
         opts = { mode: opts };
     }
-
+    
     var mode = opts.mode;
     var xfs = opts.fs || fs;
-
+    
     if (mode === undefined) {
         mode = _0777 & (~process.umask());
     }
@@ -36149,7 +36149,7 @@ var _path = __webpack_require__(3);
 function getProjectPaths(rootPath, options) {
     const skipKibanaExtra = Boolean(options['skip-kibana-extra']);
     const ossOnly = Boolean(options.oss);
-    const projectPaths = [rootPath, (0, _path.resolve)(rootPath, 'packages/*'), (0, _path.resolve)(rootPath, 'platform')];
+    const projectPaths = [rootPath, (0, _path.resolve)(rootPath, 'packages/*')];
     if (!ossOnly) {
         projectPaths.push((0, _path.resolve)(rootPath, 'x-pack'));
         projectPaths.push((0, _path.resolve)(rootPath, 'x-pack/plugins/*'));
@@ -40835,10 +40835,10 @@ module.exports.cli = __webpack_require__(381);
 // rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
 // sell copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-//
+// 
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-//
+// 
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -40916,7 +40916,7 @@ util.inherits(LineStream, stream.Transform);
 LineStream.prototype._transform = function(chunk, encoding, done) {
   // decode binary chunks as UTF-8
   encoding = encoding || 'utf8';
-
+  
   if (Buffer.isBuffer(chunk)) {
     if (encoding == 'buffer') {
       chunk = chunk.toString(); // utf8
@@ -40927,15 +40927,15 @@ LineStream.prototype._transform = function(chunk, encoding, done) {
     }
   }
   this._chunkEncoding = encoding;
-
+  
   // see: http://www.unicode.org/reports/tr18/#Line_Boundaries
   var lines = chunk.split(/\r\n|[\n\v\f\r\x85\u2028\u2029]/g);
-
+  
   // don't split CRLF which spans chunks
   if (this._lastChunkEndedWithCR && chunk[0] == '\n') {
     lines.shift();
   }
-
+  
   if (this._lineBuffer.length > 0) {
     this._lineBuffer[this._lineBuffer.length - 1] += lines[0];
     lines.shift();
@@ -41531,13 +41531,13 @@ function usage($0, p) {
 
 module.exports = function (args, opts) {
     if (!opts) opts = {};
-
+    
     var flags = { bools : {}, strings : {} };
-
+    
     [].concat(opts['boolean']).filter(Boolean).forEach(function (key) {
         flags.bools[key] = true;
     });
-
+    
     var aliases = {};
     Object.keys(opts.alias || {}).forEach(function (key) {
         aliases[key] = [].concat(opts.alias[key]);
@@ -41556,12 +41556,12 @@ module.exports = function (args, opts) {
      });
 
     var defaults = opts['default'] || {};
-
+    
     var argv = { _ : [] };
     Object.keys(flags.bools).forEach(function (key) {
         setArg(key, defaults[key] === undefined ? false : defaults[key]);
     });
-
+    
     var notFlags = [];
 
     if (args.indexOf('--') !== -1) {
@@ -41574,15 +41574,15 @@ module.exports = function (args, opts) {
             ? Number(val) : val
         ;
         setKey(argv, key.split('.'), value);
-
+        
         (aliases[key] || []).forEach(function (x) {
             setKey(argv, x.split('.'), value);
         });
     }
-
+    
     for (var i = 0; i < args.length; i++) {
         var arg = args[i];
-
+        
         if (/^--.+=/.test(arg)) {
             // Using [\s\S] instead of . because js doesn't support the
             // 'dotall' regex modifier. See:
@@ -41613,23 +41613,23 @@ module.exports = function (args, opts) {
         }
         else if (/^-[^-]+/.test(arg)) {
             var letters = arg.slice(1,-1).split('');
-
+            
             var broken = false;
             for (var j = 0; j < letters.length; j++) {
                 var next = arg.slice(j+2);
-
+                
                 if (next === '-') {
                     setArg(letters[j], next)
                     continue;
                 }
-
+                
                 if (/[A-Za-z]/.test(letters[j])
                 && /-?\d+(\.\d*)?(e-?\d+)?$/.test(next)) {
                     setArg(letters[j], next);
                     broken = true;
                     break;
                 }
-
+                
                 if (letters[j+1] && letters[j+1].match(/\W/)) {
                     setArg(letters[j], arg.slice(j+2));
                     broken = true;
@@ -41639,7 +41639,7 @@ module.exports = function (args, opts) {
                     setArg(letters[j], flags.strings[letters[j]] ? '' : true);
                 }
             }
-
+            
             var key = arg.slice(-1)[0];
             if (!broken && key !== '-') {
                 if (args[i+1] && !/^(-|--)[^-]/.test(args[i+1])
@@ -41663,17 +41663,17 @@ module.exports = function (args, opts) {
             );
         }
     }
-
+    
     Object.keys(defaults).forEach(function (key) {
         if (!hasKey(argv, key.split('.'))) {
             setKey(argv, key.split('.'), defaults[key]);
-
+            
             (aliases[key] || []).forEach(function (x) {
                 setKey(argv, x.split('.'), defaults[key]);
             });
         }
     });
-
+    
     if (opts['--']) {
         argv['--'] = new Array();
         notFlags.forEach(function(key) {
@@ -41705,7 +41705,7 @@ function setKey (obj, keys, value) {
         if (o[key] === undefined) o[key] = {};
         o = o[key];
     });
-
+    
     var key = keys[keys.length - 1];
     if (o[key] === undefined || typeof o[key] === 'boolean') {
         o[key] = value;
@@ -44325,7 +44325,7 @@ function coerce(version) {
   if (match == null)
     return null;
 
-  return parse((match[1] || '0') + '.' + (match[2] || '0') + '.' + (match[3] || '0'));
+  return parse((match[1] || '0') + '.' + (match[2] || '0') + '.' + (match[3] || '0')); 
 }
 
 
@@ -46834,7 +46834,7 @@ function writeFileSync (filename, data, options) {
     // @return {number} The 32-bit hash
     MurmurHash3.prototype.result = function() {
         var k1, h1;
-
+        
         k1 = this.k1;
         h1 = this.h1;
 
