@@ -5,6 +5,8 @@
  */
 
 const ANOMALY_DATA_CHANGE = 'ANOMALY_DATA_CHANGE';
+const TIMERANGE_CHANGE = 'TIMERANGE_CHANGE';
+
 const LOADING_START = 'LOADING_START';
 const LOADING_STOP = 'LOADING_STOP';
 
@@ -14,10 +16,11 @@ export const aAnomalyDataChange = (anomalyChartRecords, earliestMs, latestMs) =>
   earliestMs,
   latestMs
 });
+export const aTimeRangeChange = (timerange) => ({ type: TIMERANGE_CHANGE, timerange });
+
 export const aLoadingStart = () => ({ type: LOADING_START });
 export const aLoadingStop = () => ({ type: LOADING_STOP });
 
-// anomalyRecords, earliestMs, latestMs
 const defaultState = {
   anomalyChartRecords: [],
   earliestMs: null,
@@ -35,6 +38,13 @@ export const anomalyExplorerReducer = (state = defaultState, action) => {
         anomalyChartRecords,
         earliestMs,
         latestMs
+      };
+
+    case TIMERANGE_CHANGE:
+      return {
+        ...state,
+        earliestMs: action.timerange.earliestMs,
+        latestMs: action.timerange.latestMs
       };
 
     case LOADING_START:

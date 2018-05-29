@@ -58,6 +58,7 @@ const module = uiModules.get('apps/ml');
 import { store, dispatchDecorator } from '../redux/store';
 import {
   aAnomalyDataChange,
+  aTimeRangeChange,
   aLoadingStart,
   aLoadingStop
 } from '../redux/modules/anomaly_explorer';
@@ -78,7 +79,6 @@ module.controller('MlExplorerController', function (
   const unsubscribeStore = store.subscribe(() => {
     const newState = store.getState().anomalyExplorer;
     $scope.loading = newState.loading;
-    $scope.anomalyChartRecords = newState.anomalyChartRecords;
     $scope.$applyAsync();
   });
 
@@ -90,11 +90,21 @@ module.controller('MlExplorerController', function (
       }
     )
   );
+  $scope.checkboxShowChartsVisibility = false;
+  const unsubscribeCheckboxShowChartsVisibility = store.subscribe(
+    watch(store.getState, 'anomalyExplorer.anomalyChartRecords')(
+      (anomalyChartRecords) => {
+        $scope.checkboxShowChartsVisibility = (anomalyChartRecords.length > 0);
+        $scope.$applyAsync();
+      }
+    )
+  );
 
   $scope.loading = state.loading;
   const dLoadingStart = dispatchDecorator(aLoadingStart);
   const dLoadingStop = dispatchDecorator(aLoadingStop);
   const dAnomalyDataChange = dispatchDecorator(aAnomalyDataChange);
+  const dTimeRangeChange = dispatchDecorator(aTimeRangeChange);
   timefilter.enableTimeRangeSelector();
   timefilter.enableAutoRefreshSelector();
 
@@ -425,18 +435,14 @@ module.controller('MlExplorerController', function (
       swimlaneCellClickListener($scope.cellData);
     } else {
       const timerange = getSelectionTimeRange($scope.cellData);
-      dAnomalyDataChange(
-        $scope.anomalyChartRecords, timerange.earliestMs, timerange.latestMs
-      );
+      dTimeRangeChange(timerange);
     }
   }
 
   function anomalyChartsSeverityListener() {
     if (store.getState().showCharts && $scope.cellData !== undefined) {
       const timerange = getSelectionTimeRange($scope.cellData);
-      dAnomalyDataChange(
-        $scope.anomalyChartRecords, timerange.earliestMs, timerange.latestMs
-      );
+      dTimeRangeChange(timerange);
     }
   }
 
@@ -462,6 +468,7 @@ module.controller('MlExplorerController', function (
     dragSelect.stop();
     unsubscribeStore();
     unsubscribeShowCharts();
+    unsubscribeCheckboxShowChartsVisibility();
     mlExplorerDashboardService.swimlaneCellClick.unwatch(swimlaneCellClickListener);
     mlExplorerDashboardService.swimlaneRenderDone.unwatch(swimlaneRenderDoneListener);
     mlSelectSeverityService.state.unwatch(anomalyChartsSeverityListener);
@@ -486,12 +493,11 @@ module.controller('MlExplorerController', function (
     )
       .then((resp) => {
         if ($scope.cellData !== undefined && _.keys($scope.cellData).length > 0) {
-          $scope.anomalyChartRecords = resp.records;
-          console.log('Explorer anomaly charts data set:', $scope.anomalyChartRecords);
+          console.log('Explorer anomaly charts data set:', resp.records);
 
           if (store.getState().showCharts) {
             dAnomalyDataChange(
-              $scope.anomalyChartRecords, earliestMs, latestMs
+              resp.records, earliestMs, latestMs
             );
           }
         }
@@ -880,7 +886,6 @@ module.controller('MlExplorerController', function (
   }
 
   function clearSelectedAnomalies() {
-    $scope.anomalyChartRecords = [];
     $scope.viewByLoadedForTimeFormatted = null;
     delete $scope.cellData;
 
@@ -889,7 +894,7 @@ module.controller('MlExplorerController', function (
     const bounds = timefilter.getActiveBounds();
     const earliestMs = bounds.min.valueOf();
     const latestMs = bounds.max.valueOf();
-    dAnomalyDataChange($scope.anomalyChartRecords, earliestMs, latestMs);
+    dAnomalyDataChange([], earliestMs, latestMs);
     loadDataForCharts(jobIds, [], earliestMs, latestMs);
     loadAnomaliesTableData();
   }
