@@ -26,7 +26,6 @@ exports[`Table should render normally 1`] = `
           iconType="trash"
           isDisabled={false}
           onClick={[Function]}
-          size="s"
           type="button"
         >
           Delete
@@ -38,7 +37,6 @@ exports[`Table should render normally 1`] = `
           iconType="exportAction"
           isDisabled={false}
           onClick={[Function]}
-          size="s"
           type="button"
         >
           Export
