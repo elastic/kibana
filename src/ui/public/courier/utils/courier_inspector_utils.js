@@ -64,6 +64,9 @@ function getResponseInspectorStats(searchSource, resp) {
   if (lastRequest && (lastRequest.ms === 0 || lastRequest.ms)) {
     stats['Request time'] = {
       value: `${lastRequest.ms}ms`,
+      description: `The time this request took from the browser to Elasticsearch
+        and back again. This does not include the time the request waited in the queue
+        to be executed.`
     };
   }
 
