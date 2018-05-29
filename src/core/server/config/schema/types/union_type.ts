@@ -11,7 +11,7 @@ export class UnionType<RTS extends AnyType[], T> extends Type<T> {
   public process(value: any, context?: string): T {
     const errors = [];
 
-    for (const i in this.types) {
+    for (let i = 0; i < this.types.length; i++) {
       try {
         return this.types[i].validate(value, toContext(context, i));
       } catch (e) {
