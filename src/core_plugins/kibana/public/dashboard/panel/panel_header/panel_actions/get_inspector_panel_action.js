@@ -42,7 +42,20 @@ export function getInspectorPanelAction({ closeContextMenu }) {
     parentPanelId: 'mainMenu',
     onClick: ({ embeddable }) => {
       closeContextMenu();
-      openInspector(embeddable.getInspectorAdapters());
+      const session = openInspector(embeddable.getInspectorAdapters());
+      // Overwrite the embeddables.destroy() function to close the inspector
+      // before calling the original destroy method
+      const originalDestroy = embeddable.destroy;
+      embeddable.destroy = () => {
+        session.close();
+        if (originalDestroy) {
+          originalDestroy.call(embeddable);
+        }
+      };
+      // In case the inspector gets closed (otherwise), restore the original destroy function
+      session.on('closed', () => {
+        embeddable.destroy = originalDestroy;
+      });
     },
     isVisible: ({ embeddable }) => (
       embeddable && embeddable.getInspectorAdapters && hasInspector(embeddable.getInspectorAdapters())
