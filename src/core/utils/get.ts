@@ -32,11 +32,7 @@ export function get<
 >(obj: CFG, path: [A, B]): CFG[A][B];
 export function get<CFG extends { [k: string]: any }, A extends keyof CFG>(
   obj: CFG,
-  path: [A]
-): CFG[A];
-export function get<CFG extends { [k: string]: any }, A extends keyof CFG>(
-  obj: CFG,
-  path: A
+  path: [A] | A
 ): CFG[A];
 export function get<CFG extends { [k: string]: any }>(
   obj: CFG,
