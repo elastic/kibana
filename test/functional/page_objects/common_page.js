@@ -298,7 +298,6 @@ export function CommonPageProvider({ getService, getPageObjects }) {
           const closeBtn = await toastElement.findByCssSelector('.euiToast__closeButton');
           await closeBtn.click();
         } catch (err) {
-          log.debug('err');
           // ignore errors, toast clear themselves after timeout
         }
       }
