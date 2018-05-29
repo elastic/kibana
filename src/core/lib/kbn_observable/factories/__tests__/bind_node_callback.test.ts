@@ -55,7 +55,7 @@ test('function throws instead of calling callback', async () => {
 });
 
 test('errors if callback is called with more than two args', async () => {
-  const read = (cb: Function) => cb(undefined, 'arg1', 'arg2');
+  const read = (cb: (...args: any[]) => any) => cb(undefined, 'arg1', 'arg2');
 
   const read$ = $bindNodeCallback(read);
   const res = collect(read$());

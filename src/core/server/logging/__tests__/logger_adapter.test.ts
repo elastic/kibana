@@ -68,7 +68,7 @@ test('forwards all method calls to new internal logger if it is updated.', () =>
     'trace-message',
     undefined
   );
-  (oldInternalLogger.trace as jest.Mock<Function>).mockReset();
+  (oldInternalLogger.trace as jest.Mock<() => void>).mockReset();
 
   adapter.updateLogger(newInternalLogger);
   adapter.trace('trace-message');

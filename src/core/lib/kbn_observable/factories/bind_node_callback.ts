@@ -66,7 +66,7 @@ export function $bindNodeCallback<T, T2, T3, T4, T5, T6, R>(
  *       e => console.error(e)
  *     );
  */
-export function $bindNodeCallback<T>(callbackFunc: Function) {
+export function $bindNodeCallback<T>(callbackFunc: (...args: any[]) => any) {
   return function(this: any, ...args: any[]): Observable<T> {
     const context = this;
 

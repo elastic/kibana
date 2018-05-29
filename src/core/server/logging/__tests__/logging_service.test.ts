@@ -14,14 +14,16 @@ const createConfig = () => {
   });
 };
 
-const getLastMockCallArgs = (mockFunction: jest.Mock<Function>) => {
+const getLastMockCallArgs = (
+  mockFunction: jest.Mock<(config: LoggingConfig) => void>
+) => {
   expect(mockFunction).toHaveBeenCalled();
   return mockFunction.mock.calls[mockFunction.mock.calls.length - 1];
 };
 
 let factory: MutableLoggerFactory;
 let service: LoggingService;
-let updateConfigMock: jest.Mock<Function>;
+let updateConfigMock: jest.Mock<(config: LoggingConfig) => void>;
 
 beforeEach(() => {
   factory = new MutableLoggerFactory({} as any);
