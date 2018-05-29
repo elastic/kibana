@@ -5,17 +5,15 @@ import { Layout, Layouts } from '../../layouts/layouts';
 import { LogRecord } from '../../log_record';
 import { DisposableAppender } from '../appenders';
 
-const { literal, object, string } = schema;
-
 /**
  * Appender that formats all the `LogRecord` instances it receives and writes them to the specified file.
  * @internal
  */
 export class FileAppender implements DisposableAppender {
-  public static configSchema = object({
-    kind: literal('file'),
+  public static configSchema = schema.object({
+    kind: schema.literal('file'),
     layout: Layouts.configSchema,
-    path: string(),
+    path: schema.string(),
   });
 
   /**

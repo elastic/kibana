@@ -39,7 +39,7 @@ beforeEach(() => {
 
 afterEach(async () => {
   await server.stop();
-  logger._clear();
+  logger.mockClear();
 });
 
 test('listening after started', async () => {

@@ -2,11 +2,11 @@ import { SchemaTypeError } from '../errors';
 import { Type } from './type';
 
 export class MaybeType<V> extends Type<V | undefined> {
-  private readonly type: Type<V>;
+  private readonly innerType: Type<V>;
 
-  constructor(type: Type<V>) {
+  constructor(innerType: Type<V>) {
     super();
-    this.type = type;
+    this.innerType = innerType;
   }
 
   public process(value: any, context?: string): V | undefined {
@@ -21,6 +21,6 @@ export class MaybeType<V> extends Type<V | undefined> {
       );
     }
 
-    return this.type.validate(value, context);
+    return this.innerType.validate(value, context);
   }
 }

@@ -1,6 +1,6 @@
 // Test helpers to simplify mocking logs and collecting all their outputs
 
-const _log = {
+const mockLog = {
   debug: jest.fn(),
   error: jest.fn(),
   fatal: jest.fn(),
@@ -10,30 +10,30 @@ const _log = {
   warn: jest.fn(),
 };
 
-const _clear = () => {
+const mockClear = () => {
   logger.get.mockClear();
-  _log.debug.mockClear();
-  _log.info.mockClear();
-  _log.warn.mockClear();
-  _log.error.mockClear();
-  _log.trace.mockClear();
-  _log.fatal.mockClear();
-  _log.log.mockClear();
+  mockLog.debug.mockClear();
+  mockLog.info.mockClear();
+  mockLog.warn.mockClear();
+  mockLog.error.mockClear();
+  mockLog.trace.mockClear();
+  mockLog.fatal.mockClear();
+  mockLog.log.mockClear();
 };
 
-const _collect = () => ({
-  debug: _log.debug.mock.calls,
-  error: _log.error.mock.calls,
-  fatal: _log.fatal.mock.calls,
-  info: _log.info.mock.calls,
-  log: _log.log.mock.calls,
-  trace: _log.trace.mock.calls,
-  warn: _log.warn.mock.calls,
+const mockCollect = () => ({
+  debug: mockLog.debug.mock.calls,
+  error: mockLog.error.mock.calls,
+  fatal: mockLog.fatal.mock.calls,
+  info: mockLog.info.mock.calls,
+  log: mockLog.log.mock.calls,
+  trace: mockLog.trace.mock.calls,
+  warn: mockLog.warn.mock.calls,
 });
 
 export const logger = {
-  _clear,
-  _collect,
-  _log,
-  get: jest.fn(() => _log),
+  get: jest.fn(() => mockLog),
+  mockClear,
+  mockCollect,
+  mockLog,
 };

@@ -42,7 +42,7 @@ describe('#get', () => {
   });
 
   test('correctly handles paths that do not need to be transformed.', () => {
-    legacyConfigMock.__rawData = new Map<string, any>([
+    legacyConfigMock.rawData = new Map<string, any>([
       ['one', 'value-one'],
       ['one.sub', 'value-one-sub'],
       ['container', { value: 'some' }],
@@ -55,7 +55,7 @@ describe('#get', () => {
   });
 
   test('correctly handles silent logging config.', () => {
-    legacyConfigMock.__rawData = new Map([['logging', { silent: true }]]);
+    legacyConfigMock.rawData = new Map([['logging', { silent: true }]]);
 
     expect(configAdapter.get('logging')).toEqual({
       appenders: {
@@ -66,7 +66,7 @@ describe('#get', () => {
   });
 
   test('correctly handles verbose file logging config with json format.', () => {
-    legacyConfigMock.__rawData = new Map([
+    legacyConfigMock.rawData = new Map([
       ['logging', { verbose: true, json: true, dest: '/some/path.log' }],
     ]);
 
@@ -95,7 +95,7 @@ describe('#set', () => {
   });
 
   test('correctly sets values for existing paths.', () => {
-    legacyConfigMock.__rawData = new Map([
+    legacyConfigMock.rawData = new Map([
       ['known', ''],
       ['known.sub1', ''],
       ['known.sub2', ''],
@@ -105,23 +105,23 @@ describe('#set', () => {
     configAdapter.set(['known', 'sub1'], 'sub-value-1');
     configAdapter.set('known.sub2', 'sub-value-2');
 
-    expect(legacyConfigMock.__rawData.get('known')).toEqual('value');
-    expect(legacyConfigMock.__rawData.get('known.sub1')).toEqual('sub-value-1');
-    expect(legacyConfigMock.__rawData.get('known.sub2')).toEqual('sub-value-2');
+    expect(legacyConfigMock.rawData.get('known')).toEqual('value');
+    expect(legacyConfigMock.rawData.get('known.sub1')).toEqual('sub-value-1');
+    expect(legacyConfigMock.rawData.get('known.sub2')).toEqual('sub-value-2');
   });
 
   test('correctly sets values for new platform config.', () => {
-    legacyConfigMock.__rawData = new Map<string, any>([
+    legacyConfigMock.rawData = new Map<string, any>([
       ['__newPlatform', { plugins: { scanDirs: ['foo'] } }],
     ]);
 
     configAdapter = new LegacyConfigToRawConfigAdapter(legacyConfigMock);
 
     configAdapter.set(['__newPlatform', 'plugins', 'scanDirs'], ['bar']);
-    expect(legacyConfigMock.__rawData.get('__newPlatform')).toMatchSnapshot();
+    expect(legacyConfigMock.rawData.get('__newPlatform')).toMatchSnapshot();
 
     configAdapter.set('__newPlatform.plugins.scanDirs', ['baz']);
-    expect(legacyConfigMock.__rawData.get('__newPlatform')).toMatchSnapshot();
+    expect(legacyConfigMock.rawData.get('__newPlatform')).toMatchSnapshot();
   });
 });
 
@@ -138,7 +138,7 @@ describe('#has', () => {
   });
 
   test('returns true if config is set.', () => {
-    legacyConfigMock.__rawData = new Map([
+    legacyConfigMock.rawData = new Map([
       ['known', 'foo'],
       ['known.sub1', 'bar'],
       ['known.sub2', 'baz'],
@@ -150,7 +150,7 @@ describe('#has', () => {
   });
 
   test('returns true if new platform config is set.', () => {
-    legacyConfigMock.__rawData = new Map<string, any>([
+    legacyConfigMock.rawData = new Map<string, any>([
       ['__newPlatform', { known: 'foo', known2: { sub: 'bar' } }],
     ]);
 
@@ -166,7 +166,7 @@ describe('#has', () => {
 });
 
 test('`getFlattenedPaths` returns paths from new platform config only.', () => {
-  legacyConfigMock.__rawData = new Map<string, any>([
+  legacyConfigMock.rawData = new Map<string, any>([
     ['__newPlatform', { known: 'foo', known2: { sub: 'bar' } }],
     ['legacy', { known: 'baz' }],
   ]);

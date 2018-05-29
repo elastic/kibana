@@ -1,13 +1,11 @@
 import { schema } from '../..';
 
-const { oneOf, string, number, literal, object, maybe } = schema;
-
 test('handles string', () => {
-  expect(oneOf([string()]).validate('test')).toBe('test');
+  expect(schema.oneOf([schema.string()]).validate('test')).toBe('test');
 });
 
 test('handles string with default', () => {
-  const type = oneOf([string()], {
+  const type = schema.oneOf([schema.string()], {
     defaultValue: 'test',
   });
 
@@ -15,11 +13,11 @@ test('handles string with default', () => {
 });
 
 test('handles number', () => {
-  expect(oneOf([number()]).validate(123)).toBe(123);
+  expect(schema.oneOf([schema.number()]).validate(123)).toBe(123);
 });
 
 test('handles number with default', () => {
-  const type = oneOf([number()], {
+  const type = schema.oneOf([schema.number()], {
     defaultValue: 123,
   });
 
@@ -27,13 +25,13 @@ test('handles number with default', () => {
 });
 
 test('handles literal', () => {
-  const type = oneOf([literal('foo')]);
+  const type = schema.oneOf([schema.literal('foo')]);
 
   expect(type.validate('foo')).toBe('foo');
 });
 
 test('handles literal with default', () => {
-  const type = oneOf([literal('foo')], {
+  const type = schema.oneOf([schema.literal('foo')], {
     defaultValue: 'foo',
   });
 
@@ -41,7 +39,7 @@ test('handles literal with default', () => {
 });
 
 test('handles multiple literals with default', () => {
-  const type = oneOf([literal('foo'), literal('bar')], {
+  const type = schema.oneOf([schema.literal('foo'), schema.literal('bar')], {
     defaultValue: 'bar',
   });
 
@@ -50,19 +48,19 @@ test('handles multiple literals with default', () => {
 });
 
 test('handles object', () => {
-  const type = oneOf([object({ name: string() })]);
+  const type = schema.oneOf([schema.object({ name: schema.string() })]);
 
   expect(type.validate({ name: 'foo' })).toEqual({ name: 'foo' });
 });
 
 test('handles object with wrong type', () => {
-  const type = oneOf([object({ age: number() })]);
+  const type = schema.oneOf([schema.object({ age: schema.number() })]);
 
   expect(() => type.validate({ age: 'foo' })).toThrowErrorMatchingSnapshot();
 });
 
 test('includes context in failure', () => {
-  const type = oneOf([object({ age: number() })]);
+  const type = schema.oneOf([schema.object({ age: schema.number() })]);
 
   expect(() =>
     type.validate({ age: 'foo' }, 'foo-context')
@@ -70,40 +68,43 @@ test('includes context in failure', () => {
 });
 
 test('handles multiple objects with same key', () => {
-  const type = oneOf([object({ age: string() }), object({ age: number() })]);
+  const type = schema.oneOf([
+    schema.object({ age: schema.string() }),
+    schema.object({ age: schema.number() }),
+  ]);
 
   expect(type.validate({ age: 'foo' })).toEqual({ age: 'foo' });
 });
 
 test('handles multiple types', () => {
-  const type = oneOf([string(), number()]);
+  const type = schema.oneOf([schema.string(), schema.number()]);
 
   expect(type.validate('test')).toBe('test');
   expect(type.validate(123)).toBe(123);
 });
 
 test('handles maybe', () => {
-  const type = oneOf([maybe(string())]);
+  const type = schema.oneOf([schema.maybe(schema.string())]);
 
   expect(type.validate(undefined)).toBe(undefined);
   expect(type.validate('test')).toBe('test');
 });
 
 test('fails if not matching type', () => {
-  const type = oneOf([string()]);
+  const type = schema.oneOf([schema.string()]);
 
   expect(() => type.validate(false)).toThrowErrorMatchingSnapshot();
   expect(() => type.validate(123)).toThrowErrorMatchingSnapshot();
 });
 
 test('fails if not matching multiple types', () => {
-  const type = oneOf([string(), number()]);
+  const type = schema.oneOf([schema.string(), schema.number()]);
 
   expect(() => type.validate(false)).toThrowErrorMatchingSnapshot();
 });
 
 test('fails if not matching literal', () => {
-  const type = oneOf([literal('foo')]);
+  const type = schema.oneOf([schema.literal('foo')]);
 
   expect(() => type.validate('bar')).toThrowErrorMatchingSnapshot();
 });

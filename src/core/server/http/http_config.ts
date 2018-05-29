@@ -5,47 +5,38 @@ import { SslConfig } from './ssl_config';
 const validHostnameRegex = /^(([A-Z0-9]|[A-Z0-9][A-Z0-9\-]*[A-Z0-9])\.)*([A-Z0-9]|[A-Z0-9][A-Z0-9\-]*[A-Z0-9])$/i;
 const validBasePathRegex = /(^$|^\/.*[^\/]$)/;
 
-const {
-  arrayOf,
-  boolean,
-  object,
-  string,
-  number,
-  byteSize,
-  maybe,
-  oneOf,
-} = schema;
-
 const match = (regex: RegExp, errorMsg: string) => (str: string) =>
   regex.test(str) ? undefined : errorMsg;
 
-const createHttpSchema = object(
+const createHttpSchema = schema.object(
   {
-    basePath: maybe(
-      string({
+    basePath: schema.maybe(
+      schema.string({
         validate: match(
           validBasePathRegex,
           "must start with a slash, don't end with one"
         ),
       })
     ),
-    cors: oneOf([
-      boolean({ defaultValue: false }),
-      object({
-        origin: arrayOf(string({ defaultValue: '*://localhost:9876' })),
+    cors: schema.oneOf([
+      schema.boolean({ defaultValue: false }),
+      schema.object({
+        origin: schema.arrayOf(
+          schema.string({ defaultValue: '*://localhost:9876' })
+        ),
       }),
     ]),
-    host: string({
+    host: schema.string({
       defaultValue: 'localhost',
       validate: match(validHostnameRegex, 'must be a valid hostname'),
     }),
-    maxPayload: byteSize({
+    maxPayload: schema.byteSize({
       defaultValue: '1048576b',
     }),
-    port: number({
+    port: schema.number({
       defaultValue: 5601,
     }),
-    rewriteBasePath: boolean({ defaultValue: false }),
+    rewriteBasePath: schema.boolean({ defaultValue: false }),
     ssl: SslConfig.schema,
   },
   {

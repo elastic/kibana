@@ -1,9 +1,7 @@
 import { schema } from '../..';
 
-const { mapOf, object, string, number } = schema;
-
 test('handles object as input', () => {
-  const type = mapOf(string(), string());
+  const type = schema.mapOf(schema.string(), schema.string());
   const value = {
     name: 'foo',
   };
@@ -13,7 +11,7 @@ test('handles object as input', () => {
 });
 
 test('fails when not receiving expected value type', () => {
-  const type = mapOf(string(), string());
+  const type = schema.mapOf(schema.string(), schema.string());
   const value = {
     name: 123,
   };
@@ -22,7 +20,7 @@ test('fails when not receiving expected value type', () => {
 });
 
 test('fails when not receiving expected key type', () => {
-  const type = mapOf(number(), string());
+  const type = schema.mapOf(schema.number(), schema.string());
   const value = {
     name: 'foo',
   };
@@ -31,12 +29,12 @@ test('fails when not receiving expected key type', () => {
 });
 
 test('includes context in failure when wrong top-level type', () => {
-  const type = mapOf(string(), string());
+  const type = schema.mapOf(schema.string(), schema.string());
   expect(() => type.validate([], 'foo-context')).toThrowErrorMatchingSnapshot();
 });
 
 test('includes context in failure when wrong value type', () => {
-  const type = mapOf(string(), string());
+  const type = schema.mapOf(schema.string(), schema.string());
   const value = {
     name: 123,
   };
@@ -47,7 +45,7 @@ test('includes context in failure when wrong value type', () => {
 });
 
 test('includes context in failure when wrong key type', () => {
-  const type = mapOf(number(), string());
+  const type = schema.mapOf(schema.number(), schema.string());
   const value = {
     name: 'foo',
   };
@@ -60,7 +58,7 @@ test('includes context in failure when wrong key type', () => {
 test('returns default value if undefined', () => {
   const obj = new Map([['foo', 'bar']]);
 
-  const type = mapOf(string(), string(), {
+  const type = schema.mapOf(schema.string(), schema.string(), {
     defaultValue: obj,
   });
 
@@ -68,7 +66,10 @@ test('returns default value if undefined', () => {
 });
 
 test('mapOf within mapOf', () => {
-  const type = mapOf(string(), mapOf(string(), number()));
+  const type = schema.mapOf(
+    schema.string(),
+    schema.mapOf(schema.string(), schema.number())
+  );
   const value = {
     foo: {
       bar: 123,
@@ -80,10 +81,10 @@ test('mapOf within mapOf', () => {
 });
 
 test('object within mapOf', () => {
-  const type = mapOf(
-    string(),
-    object({
-      bar: number(),
+  const type = schema.mapOf(
+    schema.string(),
+    schema.object({
+      bar: schema.number(),
     })
   );
   const value = {

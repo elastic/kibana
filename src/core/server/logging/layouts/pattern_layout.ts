@@ -5,7 +5,6 @@ import { LogLevel } from '../log_level';
 import { LogRecord } from '../log_record';
 import { Layout } from './layouts';
 
-const { boolean, literal, maybe, object, string } = schema;
 /**
  * A set of static constants describing supported parameters in the log message pattern.
  */
@@ -46,10 +45,10 @@ const DEFAULT_PATTERN = `[${Parameters.Timestamp}][${Parameters.Level}][${
   Parameters.Context
 }] ${Parameters.Message}`;
 
-const patternLayoutSchema = object({
-  highlight: maybe(boolean()),
-  kind: literal('pattern'),
-  pattern: maybe(string()),
+const patternLayoutSchema = schema.object({
+  highlight: schema.maybe(schema.boolean()),
+  kind: schema.literal('pattern'),
+  pattern: schema.maybe(schema.string()),
 });
 
 /** @internal */

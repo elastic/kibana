@@ -3,8 +3,8 @@ import { Observable, SubscriptionObserver } from '../observable';
 test('receives values when subscribed', async () => {
   let observer: SubscriptionObserver<any>;
 
-  const source = new Observable(_observer => {
-    observer = _observer;
+  const source = new Observable(innerObservable => {
+    observer = innerObservable;
   });
 
   const res: any[] = [];
@@ -25,8 +25,8 @@ test('receives values when subscribed', async () => {
 test('triggers complete when observer is completed', async () => {
   let observer: SubscriptionObserver<any>;
 
-  const source = new Observable(_observer => {
-    observer = _observer;
+  const source = new Observable(innerObservable => {
+    observer = innerObservable;
   });
 
   const complete = jest.fn();

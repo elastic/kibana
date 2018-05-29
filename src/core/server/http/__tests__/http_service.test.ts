@@ -14,7 +14,7 @@ import { HttpService } from '../http_service';
 import { Router } from '../router';
 
 beforeEach(() => {
-  logger._clear();
+  logger.mockClear();
   mockHttpServer.mockClear();
 });
 
@@ -67,7 +67,7 @@ test('logs error is already started', async () => {
 
   await service.start();
 
-  expect(logger._collect()).toMatchSnapshot();
+  expect(logger.mockCollect()).toMatchSnapshot();
 });
 
 test('stops http server', async () => {
@@ -121,7 +121,7 @@ test('register route handler', () => {
 
   expect(httpServer.registerRouter).toHaveBeenCalledTimes(1);
   expect(httpServer.registerRouter).toHaveBeenLastCalledWith(router);
-  expect(logger._collect()).toMatchSnapshot();
+  expect(logger.mockCollect()).toMatchSnapshot();
 });
 
 test('throws if registering route handler after http server is started', () => {
@@ -147,5 +147,5 @@ test('throws if registering route handler after http server is started', () => {
   service.registerRouter(router);
 
   expect(httpServer.registerRouter).toHaveBeenCalledTimes(0);
-  expect(logger._collect()).toMatchSnapshot();
+  expect(logger.mockCollect()).toMatchSnapshot();
 });

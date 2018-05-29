@@ -1,17 +1,6 @@
 import crypto from 'crypto';
 import { schema, TypeOf } from '../config/schema';
 
-const {
-  object,
-  boolean,
-  string,
-  arrayOf,
-  oneOf,
-  literal,
-  maybe,
-  number,
-} = schema;
-
 // `crypto` type definitions doesn't currently include `crypto.constants`, see
 // https://github.com/DefinitelyTyped/DefinitelyTyped/blob/fa5baf1733f49cf26228a4e509914572c1b74adf/types/node/v6/index.d.ts#L3412
 const cryptoConstants = (crypto as any).constants;
@@ -22,21 +11,29 @@ const protocolMap = new Map<string, number>([
   ['TLSv1.2', cryptoConstants.SSL_OP_NO_TLSv1_2],
 ]);
 
-const sslSchema = object(
+const sslSchema = schema.object(
   {
-    certificate: maybe(string()),
-    certificateAuthorities: maybe(oneOf([arrayOf(string()), string()])),
-    cipherSuites: arrayOf(string(), {
+    certificate: schema.maybe(schema.string()),
+    certificateAuthorities: schema.maybe(
+      schema.oneOf([schema.arrayOf(schema.string()), schema.string()])
+    ),
+    cipherSuites: schema.arrayOf(schema.string(), {
       defaultValue: cryptoConstants.defaultCoreCipherList.split(':'),
     }),
-    enabled: boolean({
+    enabled: schema.boolean({
       defaultValue: false,
     }),
-    key: maybe(string()),
-    keyPassphrase: maybe(string()),
-    redirectHttpFromPort: maybe(number()),
-    supportedProtocols: maybe(
-      arrayOf(oneOf([literal('TLSv1'), literal('TLSv1.1'), literal('TLSv1.2')]))
+    key: schema.maybe(schema.string()),
+    keyPassphrase: schema.maybe(schema.string()),
+    redirectHttpFromPort: schema.maybe(schema.number()),
+    supportedProtocols: schema.maybe(
+      schema.arrayOf(
+        schema.oneOf([
+          schema.literal('TLSv1'),
+          schema.literal('TLSv1.1'),
+          schema.literal('TLSv1.2'),
+        ])
+      )
     ),
   },
   {

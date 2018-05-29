@@ -7,7 +7,7 @@ import { Type, TypeOptions } from './type';
 
 export type Props = Record<string, AnyType>;
 
-export type TypeOf<RT extends AnyType> = RT['_type'];
+export type TypeOf<RT extends AnyType> = RT['type'];
 
 // Because of https://github.com/Microsoft/TypeScript/issues/14041
 // this might not have perfect _rendering_ output, but it will be typed.

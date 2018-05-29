@@ -1,8 +1,6 @@
 import { schema, TypeOf } from '../config/schema';
 import { AppenderConfigType, Appenders } from './appenders/appenders';
 
-const { literal, oneOf, object, string, arrayOf, mapOf } = schema;
-
 // We need this helper for the types to be correct
 // (otherwise it assumes an array of A|B instead of a tuple [A,B])
 const toTuple = <A, B>(a: A, b: B): [A, B] => [a, b];
@@ -22,37 +20,37 @@ const ROOT_CONTEXT_NAME = 'root';
  */
 const DEFAULT_APPENDER_NAME = 'default';
 
-const createLevelSchema = oneOf(
+const createLevelSchema = schema.oneOf(
   [
-    literal('all'),
-    literal('fatal'),
-    literal('error'),
-    literal('warn'),
-    literal('info'),
-    literal('debug'),
-    literal('trace'),
-    literal('off'),
+    schema.literal('all'),
+    schema.literal('fatal'),
+    schema.literal('error'),
+    schema.literal('warn'),
+    schema.literal('info'),
+    schema.literal('debug'),
+    schema.literal('trace'),
+    schema.literal('off'),
   ],
   {
     defaultValue: 'info',
   }
 );
 
-const createLoggerSchema = object({
-  appenders: arrayOf(string(), { defaultValue: [] }),
-  context: string(),
+const createLoggerSchema = schema.object({
+  appenders: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  context: schema.string(),
   level: createLevelSchema,
 });
 
-const loggingSchema = object({
-  appenders: mapOf(string(), Appenders.configSchema, {
+const loggingSchema = schema.object({
+  appenders: schema.mapOf(schema.string(), Appenders.configSchema, {
     defaultValue: new Map<string, AppenderConfigType>(),
   }),
-  loggers: arrayOf(createLoggerSchema, {
+  loggers: schema.arrayOf(createLoggerSchema, {
     defaultValue: [],
   }),
-  root: object({
-    appenders: arrayOf(string(), {
+  root: schema.object({
+    appenders: schema.arrayOf(schema.string(), {
       defaultValue: [DEFAULT_APPENDER_NAME],
       minSize: 1,
     }),

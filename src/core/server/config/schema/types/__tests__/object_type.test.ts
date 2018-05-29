@@ -1,10 +1,8 @@
 import { schema } from '../..';
 
-const { object, oneOf, string } = schema;
-
 test('returns value by default', () => {
-  const type = object({
-    name: string(),
+  const type = schema.object({
+    name: schema.string(),
   });
   const value = {
     name: 'test',
@@ -14,8 +12,8 @@ test('returns value by default', () => {
 });
 
 test('fails if missing required value', () => {
-  const type = object({
-    name: string(),
+  const type = schema.object({
+    name: schema.string(),
   });
   const value = {};
 
@@ -23,8 +21,8 @@ test('fails if missing required value', () => {
 });
 
 test('returns value if undefined string with default', () => {
-  const type = object({
-    name: string({ defaultValue: 'test' }),
+  const type = schema.object({
+    name: schema.string({ defaultValue: 'test' }),
   });
   const value = {};
 
@@ -32,8 +30,8 @@ test('returns value if undefined string with default', () => {
 });
 
 test('fails if key does not exist in schema', () => {
-  const type = object({
-    foo: string(),
+  const type = schema.object({
+    foo: schema.string(),
   });
   const value = {
     bar: 'baz',
@@ -43,9 +41,9 @@ test('fails if key does not exist in schema', () => {
 });
 
 test('object within object', () => {
-  const type = object({
-    foo: object({
-      bar: string({ defaultValue: 'hello world' }),
+  const type = schema.object({
+    foo: schema.object({
+      bar: schema.string({ defaultValue: 'hello world' }),
     }),
   });
   const value = { foo: {} };
@@ -58,9 +56,9 @@ test('object within object', () => {
 });
 
 test('object within object with required', () => {
-  const type = object({
-    foo: object({
-      bar: string(),
+  const type = schema.object({
+    foo: schema.object({
+      bar: schema.string(),
     }),
   });
   const value = {};
@@ -72,10 +70,10 @@ describe('#validate', () => {
   test('is called after all content is processed', () => {
     let calledWith;
 
-    const type = object(
+    const type = schema.object(
       {
-        foo: object({
-          bar: string({ defaultValue: 'baz' }),
+        foo: schema.object({
+          bar: schema.string({ defaultValue: 'baz' }),
         }),
       },
       {
@@ -96,15 +94,15 @@ describe('#validate', () => {
 });
 
 test('called with wrong type', () => {
-  const type = object({});
+  const type = schema.object({});
 
   expect(() => type.validate('foo')).toThrowErrorMatchingSnapshot();
   expect(() => type.validate(123)).toThrowErrorMatchingSnapshot();
 });
 
 test('handles oneOf', () => {
-  const type = object({
-    key: oneOf([string()]),
+  const type = schema.object({
+    key: schema.oneOf([schema.string()]),
   });
 
   expect(type.validate({ key: 'foo' })).toEqual({ key: 'foo' });
@@ -112,16 +110,16 @@ test('handles oneOf', () => {
 });
 
 test('includes context in failure when wrong top-level type', () => {
-  const type = object({
-    foo: string(),
+  const type = schema.object({
+    foo: schema.string(),
   });
 
   expect(() => type.validate([], 'foo-context')).toThrowErrorMatchingSnapshot();
 });
 
 test('includes context in failure when wrong value type', () => {
-  const type = object({
-    foo: string(),
+  const type = schema.object({
+    foo: schema.string(),
   });
   const value = {
     foo: 123,
