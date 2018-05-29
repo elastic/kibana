@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export class Stat {
+export class Metric {
   constructor(name, className, value) {
     this.name = name;
     this.className = className;
