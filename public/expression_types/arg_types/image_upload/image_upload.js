@@ -12,10 +12,7 @@ class ImageUpload extends React.Component {
     onAssetAdd: PropTypes.func.isRequired,
     onValueChange: PropTypes.func.isRequired,
     typeInstance: PropTypes.object.isRequired,
-    resolvedArgValue: PropTypes.shape({
-      type: PropTypes.string,
-      value: PropTypes.string,
-    }),
+    resolvedArgValue: PropTypes.string,
   };
 
   state = {

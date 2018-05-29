@@ -12,7 +12,7 @@ export class PendingArgValue extends React.PureComponent {
     setResolvedArgValue: PropTypes.func.isRequired,
     templateProps: PropTypes.shape({
       argResolver: PropTypes.func.isRequired,
-      argValue: PropTypes.object,
+      argValue: PropTypes.any,
     }),
   };
 
@@ -20,7 +20,7 @@ export class PendingArgValue extends React.PureComponent {
     // on mount, resolve the arg value using the argResolver
     const { setResolvedArgValue, templateProps } = this.props;
     const { argResolver, argValue } = templateProps;
-    if (!argValue) {
+    if (argValue == null) {
       setResolvedArgValue(null);
     } else {
       argResolver(argValue)
