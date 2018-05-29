@@ -1,13 +1,11 @@
 [[controls]]
 == Controls Visualization
+experimental[]
+
 
 The Controls visualization enables you to add interactive inputs
 to Kibana dashboards.  You can create two types of inputs:
 a dropdown menu and a radio slider.
-
-To start a *Controls* visualization, open the Visualization application
-and click the *+* button. Scroll to the *Others* section and
-select *Controls*.
 
 [role="screenshot"]
 image::images/controls/controls_in_dashboard.png[]
@@ -15,8 +13,12 @@ image::images/controls/controls_in_dashboard.png[]
 [[add-input-controls]]
 === Adding Input Controls
 
-From the *Controls* tab, you can add a dropdown menu
-and range slider to your visualization.
+To start a *Controls* visualization, open the Visualization application
+and click the *+* button. Scroll to the *Others* section and
+select *Controls*.
+
+In the visualization builder, choose the type of control to add to
+your visualization.
 
 ==== Dropdown menu
 
@@ -33,8 +35,8 @@ label is the field name.
 *Index Pattern*:: The <<index-patterns,index pattern>> that contains
 the data set to visualize.
 
-*Field*:: The field to use to populate the options list
-and to filter on when users interact with the input.
+*Field*:: The field used to populate the list of options
+and filter on when users interact with the input.
 The list of available fields is derived from the specified
 index pattern.
 
@@ -62,8 +64,8 @@ label is the field name.
 *Index Pattern*:: The <<index-patterns,index pattern>> that contains
 the data set to visualize.
 
-*Field*:: The field to use to populate the range slider
-and to filter on when users interact with the input.
+*Field*:: The field used to populate the range slider
+and filter on when users interact with the input.
 The list of available fields is derived from the
 specified index pattern.
 
@@ -71,10 +73,10 @@ specified index pattern.
 
 *Decimal Places*:: The number of decimal places.
 
-[[configure-input-control-options]]
-=== Configuring Settings for all Inputs
+[[global-options]]
+=== Global Options
 
-Use the *Options* tab to configure settings that apply to all input
+Open the *Options* tab to configure settings that apply to all input
 controls in a Controls visualization.
 
 [role="screenshot"]
