@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component }  from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import {
@@ -35,8 +35,6 @@ export class PageHeader extends Component {
     );
   }
 }
-
-
 
 PageHeader.propTypes = {
   breadcrumbs: PropTypes.array.isRequired

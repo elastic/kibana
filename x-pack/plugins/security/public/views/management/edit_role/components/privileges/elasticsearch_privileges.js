@@ -30,6 +30,9 @@ export class ElasticsearchPrivileges extends Component {
     onChange: PropTypes.func.isRequired,
     runAsUsers: PropTypes.array.isRequired,
     validator: PropTypes.object.isRequired,
+    indexPatterns: PropTypes.array.isRequired,
+    allowDocumentLevelSecurity: PropTypes.bool.isRequired,
+    allowFieldLevelSecurity: PropTypes.bool.isRequired,
   };
 
   render() {

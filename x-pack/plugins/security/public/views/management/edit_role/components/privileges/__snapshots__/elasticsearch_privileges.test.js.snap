@@ -1,0 +1,164 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`it renders without crashing 1`] = `
+<CollapsiblePanel
+  iconType="logoElasticsearch"
+  title="Elasticsearch"
+>
+  <React.Fragment>
+    <EuiDescribedFormGroup
+      description={
+        <p>
+          Manage the actions this role can perform against your cluster.
+        </p>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      title={
+        <p>
+          Cluster privileges
+        </p>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        describedByIds={Array []}
+        fullWidth={true}
+        hasEmptyLabelSpace={false}
+      >
+        <ClusterPrivileges
+          onChange={[Function]}
+          role={
+            Object {
+              "cluster": Array [],
+              "indices": Array [],
+              "run_as": Array [],
+            }
+          }
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+    <EuiSpacer
+      size="l"
+    />
+    <EuiDescribedFormGroup
+      description={
+        <p>
+          Allow requests to be submitted on behalf of other users.
+        </p>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      title={
+        <p>
+          Run As privileges
+        </p>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        describedByIds={Array []}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+      >
+        <EuiComboBox
+          isClearable={true}
+          isDisabled={false}
+          onChange={[Function]}
+          options={Array []}
+          placeholder="Add a user..."
+          selectedOptions={Array []}
+          singleSelection={false}
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+    <EuiSpacer
+      size="l"
+    />
+    <EuiFormRow
+      describedByIds={Array []}
+      fullWidth={true}
+      hasEmptyLabelSpace={false}
+    >
+      <div>
+        <EuiFlexGroup
+          alignItems="stretch"
+          component="div"
+          direction="row"
+          gutterSize="l"
+          justifyContent="flexStart"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            component="div"
+            grow={true}
+          >
+            <EuiTitle
+              size="xs"
+            >
+              <p>
+                Index privileges
+              </p>
+            </EuiTitle>
+            <EuiText
+              color="subdued"
+              grow={true}
+              size="s"
+            >
+              <p>
+                Control access to the data in your cluster.
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem
+            component="div"
+            grow={false}
+          >
+            <EuiButton
+              color="primary"
+              fill={false}
+              iconSide="left"
+              iconType="plusInCircle"
+              onClick={[Function]}
+              size="s"
+              type="button"
+            >
+              Add Index Privilege
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiHorizontalRule
+          margin="xs"
+          size="full"
+        />
+      </div>
+    </EuiFormRow>
+    <EuiFormRow
+      describedByIds={Array []}
+      fullWidth={true}
+      hasEmptyLabelSpace={false}
+    >
+      <IndexPrivileges
+        allowDocumentLevelSecurity={true}
+        allowFieldLevelSecurity={true}
+        httpClient={[MockFunction]}
+        indexPatterns={Array []}
+        onChange={[MockFunction]}
+        role={
+          Object {
+            "cluster": Array [],
+            "indices": Array [],
+            "run_as": Array [],
+          }
+        }
+        validator={
+          RoleValidator {
+            "_shouldValidate": undefined,
+          }
+        }
+      />
+    </EuiFormRow>
+  </React.Fragment>
+</CollapsiblePanel>
+`;
