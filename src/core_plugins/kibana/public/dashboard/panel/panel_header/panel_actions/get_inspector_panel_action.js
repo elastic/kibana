@@ -33,7 +33,7 @@ import { DashboardPanelAction } from 'ui/dashboard_panel_actions';
  * could be shown for those adapters - the inspector icon will be visible.
  * @return {DashboardPanelAction}
  */
-export function getInspectorPanelAction({ closeContextMenu }) {
+export function getInspectorPanelAction({ closeContextMenu, panelTitle }) {
   return new DashboardPanelAction({
     displayName: 'Inspector',
     id: 'openInspector',
@@ -42,7 +42,9 @@ export function getInspectorPanelAction({ closeContextMenu }) {
     parentPanelId: 'mainMenu',
     onClick: ({ embeddable }) => {
       closeContextMenu();
-      const session = openInspector(embeddable.getInspectorAdapters());
+      const session = openInspector(embeddable.getInspectorAdapters(), {
+        title: panelTitle,
+      });
       // Overwrite the embeddables.destroy() function to close the inspector
       // before calling the original destroy method
       const originalDestroy = embeddable.destroy;

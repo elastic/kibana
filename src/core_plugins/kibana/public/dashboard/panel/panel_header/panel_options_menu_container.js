@@ -125,7 +125,10 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
     });
 
     const actions = [
-      getInspectorPanelAction({ closeContextMenu: closeMyContextMenuPanel }),
+      getInspectorPanelAction({
+        closeContextMenu: closeMyContextMenuPanel,
+        panelTitle,
+      }),
       getEditPanelAction(),
       getCustomizePanelAction({
         onResetPanelTitle,
