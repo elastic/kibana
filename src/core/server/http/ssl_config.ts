@@ -98,6 +98,7 @@ export class SslConfig {
       (secureOptions, [protocolAlias, secureOption]) => {
         // `secureOption` is the option that turns *off* support for a particular protocol,
         // so if protocol is supported, we should not enable this option.
+        // tslint:disable no-bitwise
         return supportedProtocols.includes(protocolAlias)
           ? secureOptions
           : secureOptions | secureOption;
