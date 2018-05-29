@@ -48,7 +48,8 @@ export function hasPrivilegesWithServer(server) {
 
       return {
         success,
-        missing: missingPrivileges
+        missing: missingPrivileges,
+        user: request.user,
       };
     };
   };

@@ -151,6 +151,21 @@ test(`returns success when has_all_requested`, async () => {
   expect(result.success).toBe(true);
 });
 
+test(`returns user from request when has_all_requested`, async () => {
+  const mockServer = createMockServer();
+  mockResponse(true, {
+    [getVersionPrivilege(defaultVersion)]: true,
+    [getLoginPrivilege()]: true,
+    foo: true,
+  });
+  const user = Symbol();
+
+  const hasPrivilegesWithRequest = hasPrivilegesWithServer(mockServer);
+  const hasPrivileges = hasPrivilegesWithRequest({ user });
+  const result = await hasPrivileges(['foo']);
+  expect(result.user).toBe(user);
+});
+
 test(`returns false success when has_all_requested is false`, async () => {
   const mockServer = createMockServer();
   mockResponse(false, {
@@ -173,6 +188,31 @@ test(`returns false success when has_all_requested is false`, async () => {
   const hasPrivileges = hasPrivilegesWithRequest({});
   const result = await hasPrivileges(['foo']);
   expect(result.success).toBe(false);
+});
+
+test(`returns user from request when has_all_requested is false`, async () => {
+  const mockServer = createMockServer();
+  mockResponse(false, {
+    [getVersionPrivilege(defaultVersion)]: true,
+    [getLoginPrivilege()]: true,
+    foo: false,
+  });
+  mockCallWithRequest.mockImplementationOnce(async () => ({
+    has_all_requested: false,
+    application: {
+      [defaultApplication]: {
+        [DEFAULT_RESOURCE]: {
+          foo: false
+        }
+      }
+    }
+  }));
+  const user = Symbol();
+
+  const hasPrivilegesWithRequest = hasPrivilegesWithServer(mockServer);
+  const hasPrivileges = hasPrivilegesWithRequest({ user });
+  const result = await hasPrivileges(['foo']);
+  expect(result.user).toBe(user);
 });
 
 test(`returns missing privileges`, async () => {
