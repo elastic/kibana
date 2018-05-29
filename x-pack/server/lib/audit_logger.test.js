@@ -29,9 +29,9 @@ test(`calls server.log with message as tmpl`, () => {
   const message = 'summary of what happened';
   auditLogger.log('bar', message);
   expect(mockServer.log).toHaveBeenCalledTimes(1);
-  const call = mockServer.log.mock.calls[0];
-  const logMessage = call[1];
-  expect(logMessage.tmpl).toBe(message);
+  expect(mockServer.log).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+    tmpl: message
+  }));
 });
 
 test(`calls server.log with data appended to log message`, () => {
@@ -48,8 +48,8 @@ test(`calls server.log with data appended to log message`, () => {
 
   auditLogger.log('bar', 'summary of what happened', data);
   expect(mockServer.log).toHaveBeenCalledTimes(1);
-  const call = mockServer.log.mock.calls[0];
-  const logMessage = call[1];
-  expect(logMessage.foo).toBe(data.foo);
-  expect(logMessage.bar).toBe(data.bar);
+  expect(mockServer.log).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+    foo: data.foo,
+    bar: data.bar,
+  }));
 });
