@@ -69,7 +69,7 @@ include::{xkb-repo-dir}/upgrade-assistant/index.asciidoc[]
 
 include::{xkb-repo-dir}/dashboard_only_mode/index.asciidoc[]
 
-include::{xkb-repo-dir}/reporting/index.asciidoc[]
+include::reporting/index.asciidoc[]
 
 include::plugins.asciidoc[]
 
