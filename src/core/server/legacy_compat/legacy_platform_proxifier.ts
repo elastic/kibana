@@ -117,7 +117,10 @@ export class LegacyPlatformProxifier extends EventEmitter {
     this.server = server;
 
     for (const [eventName, eventHandler] of this.eventHandlers) {
-      oldServer && oldServer.removeListener(eventName, eventHandler);
+      if (oldServer !== undefined) {
+        oldServer.removeListener(eventName, eventHandler);
+      }
+
       this.server.addListener(eventName, eventHandler);
     }
   }

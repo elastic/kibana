@@ -18,17 +18,7 @@ beforeEach(() => {
   mockHttpServer.mockClear();
 });
 
-test('creates an http server', () => {
-  const config = {} as HttpConfig;
-
-  const config$ = new BehaviorSubject(config);
-
-  new HttpService(config$.asObservable(), logger, new Env('/kibana', {}));
-
-  expect(mockHttpServer.mock.instances.length).toBe(1);
-});
-
-test('starts http server', async () => {
+test('creates and starts http server', async () => {
   const config = {
     port: 1234,
     host: 'example.org',
@@ -48,6 +38,9 @@ test('starts http server', async () => {
     logger,
     new Env('/kibana', {})
   );
+
+  expect(mockHttpServer.mock.instances.length).toBe(1);
+  expect(httpServer.start).not.toHaveBeenCalled();
 
   await service.start();
 
