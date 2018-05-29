@@ -27,6 +27,7 @@ export class ConsoleAppender implements DisposableAppender {
    * @param record `LogRecord` instance to be logged.
    */
   public append(record: LogRecord) {
+    // tslint:disable no-console
     console.log(this.layout.format(record));
   }
 

@@ -43,6 +43,7 @@ export class Root {
     } catch (e) {
       // This specifically console.logs because we were not able to configure
       // the logger.
+      // tslint:disable no-console
       console.error('Configuring logger failed:', e.message);
 
       await this.shutdown(e);
