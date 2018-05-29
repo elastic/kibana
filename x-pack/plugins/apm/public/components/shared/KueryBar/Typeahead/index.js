@@ -10,7 +10,6 @@ import styled from 'styled-components';
 import Suggestions from './Suggestions';
 import ClickOutside from './ClickOutside';
 import { fontSizes, units, px, colors } from '../../../../style/variables';
-import { EuiLoadingSpinner } from '@elastic/eui';
 
 const KEY_CODES = {
   LEFT: 37,
@@ -153,7 +152,7 @@ export class Typeahead extends Component {
     this.inputRef.focus();
   };
 
-  onMouseOverSuggestion = index => {
+  onMouseEnterSuggestion = index => {
     this.setState({ index });
   };
 
@@ -163,13 +162,8 @@ export class Typeahead extends Component {
         onClickOutside={this.onClickOutside}
         style={{ position: 'relative' }}
       >
-        {this.props.isLoading && (
-          <EuiLoadingSpinner
-            size="m"
-            style={{ position: 'absolute', top: '13px', right: '12px' }}
-          />
-        )}
         <Input
+          placeholder="Search..."
           innerRef={node => (this.inputRef = node)}
           type="text"
           value={this.state.value}
@@ -185,7 +179,7 @@ export class Typeahead extends Component {
           suggestions={this.props.suggestions}
           index={this.state.index}
           onClick={this.onClickSuggestion}
-          onMouseOver={this.onMouseOverSuggestion}
+          onMouseEnter={this.onMouseEnterSuggestion}
         />
       </ClickOutside>
     );

@@ -103,7 +103,7 @@ function Suggestion(props) {
       innerRef={props.innerRef}
       selected={props.selected}
       onClick={() => props.onClick(props.suggestion)}
-      onMouseOver={props.onMouseOver}
+      onMouseEnter={props.onMouseEnter}
     >
       <Icon type={props.suggestion.type}>
         <EuiIcon type={getEuiIconType(props.suggestion.type)} />
@@ -118,7 +118,7 @@ function Suggestion(props) {
 
 Suggestion.propTypes = {
   onClick: PropTypes.func.isRequired,
-  onMouseOver: PropTypes.func.isRequired,
+  onMouseEnter: PropTypes.func.isRequired,
   selected: PropTypes.bool,
   suggestion: PropTypes.object.isRequired,
   innerRef: PropTypes.func.isRequired

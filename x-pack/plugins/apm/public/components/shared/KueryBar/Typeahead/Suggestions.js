@@ -63,19 +63,14 @@ class Suggestions extends Component {
           selected={index === this.props.index}
           suggestion={suggestion}
           onClick={this.props.onClick}
-          onMouseOver={() => this.props.onMouseOver(index)}
+          onMouseEnter={() => this.props.onMouseEnter(index)}
           key={key}
         />
       );
     });
 
     return (
-      <List
-        innerRef={node => (this.parentNode = node)}
-        onMouseLeave={this.props.onMouseLeave}
-      >
-        {suggestions}
-      </List>
+      <List innerRef={node => (this.parentNode = node)}>{suggestions}</List>
     );
   }
 }
@@ -83,8 +78,7 @@ class Suggestions extends Component {
 Suggestions.propTypes = {
   index: PropTypes.number,
   onClick: PropTypes.func.isRequired,
-  onMouseLeave: PropTypes.func.isRequired,
-  onMouseOver: PropTypes.func.isRequired,
+  onMouseEnter: PropTypes.func.isRequired,
   show: PropTypes.bool,
   suggestions: PropTypes.array.isRequired
 };

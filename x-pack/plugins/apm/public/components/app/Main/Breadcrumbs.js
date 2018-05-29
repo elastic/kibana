@@ -15,7 +15,7 @@ class Breadcrumbs extends React.Component {
 
   render() {
     const { breadcrumbs, location } = this.props;
-    const _g = toQuery(location.search)._g;
+    const { _g, kuery } = toQuery(location.search);
 
     return (
       <div className="kuiLocalBreadcrumbs">
@@ -38,7 +38,9 @@ class Breadcrumbs extends React.Component {
                   {breadcrumb}
                 </span>
               ) : (
-                <a href={`#${match.url}?_g=${_g}`}>{breadcrumb}</a>
+                <a href={`#${match.url}?_g=${_g}&kuery=${kuery}`}>
+                  {breadcrumb}
+                </a>
               )}
             </div>
           );

@@ -86,7 +86,6 @@ class KueryBarView extends Component {
           onChange={this.onChange}
           onSubmit={this.onSubmit}
           suggestions={this.state.suggestions}
-          isLoading={this.state.isLoading}
         />
       </Container>
     );
