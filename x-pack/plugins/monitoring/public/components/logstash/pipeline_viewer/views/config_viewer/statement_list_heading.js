@@ -23,13 +23,13 @@ export function StatementListHeading({
     >
       <EuiFlexItem grow={false}>
         <EuiIcon
-          size="m"
+          size="s"
           type={iconType}
           className="cv-statementList__icon"
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiTitle size="s">
+        <EuiTitle size="xs">
           <h4>{title}</h4>
         </EuiTitle>
       </EuiFlexItem>
