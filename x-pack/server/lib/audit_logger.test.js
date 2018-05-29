@@ -5,7 +5,7 @@
  */
 import { AuditLogger } from './audit_logger';
 
-test(`calls server.log with 'audit', pluginId and eventType as tags`, () => {
+test(`calls server.log with 'info', audit', pluginId and eventType as tags`, () => {
   const mockServer = {
     log: jest.fn()
   };
@@ -15,7 +15,7 @@ test(`calls server.log with 'audit', pluginId and eventType as tags`, () => {
   const eventType = 'bar';
   auditLogger.log(eventType, '');
   expect(mockServer.log).toHaveBeenCalledTimes(1);
-  expect(mockServer.log).toHaveBeenCalledWith(['audit', pluginId, eventType], expect.anything());
+  expect(mockServer.log).toHaveBeenCalledWith(['info', 'audit', pluginId, eventType], expect.anything());
 });
 
 
