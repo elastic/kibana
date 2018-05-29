@@ -1,11 +1,11 @@
-/**@internal**/
+/** @internal */
 export { LegacyPlatformProxifier } from './legacy_platform_proxifier';
-/**@internal**/
+/** @internal */
 export {
   LegacyConfigToRawConfigAdapter,
   LegacyConfig,
 } from './legacy_platform_config';
-/**@internal**/
+/** @internal */
 export { LegacyKbnServer } from './legacy_kbn_server';
 
 import {
