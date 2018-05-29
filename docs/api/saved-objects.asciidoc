@@ -9,8 +9,10 @@ documents directly to the `.kibana` index. *Do not do this!* Writing directly
 to the `.kibana` index is not safe and it _will_ result in corrupted data that
 permanently breaks Kibana in a future version.
 
+* <<saved-objects-api-get>>
 * <<saved-objects-api-create>>
 * <<saved-objects-api-delete>>
 
+include::saved-objects/get.asciidoc[]
 include::saved-objects/create.asciidoc[]
 include::saved-objects/delete.asciidoc[]
