@@ -138,9 +138,16 @@ export class DashboardSaveModal extends React.Component {
       return;
     }
 
+    let helpText;
+    if (this.props.title !== this.state.title) {
+      helpText = `In previous versions of Kibana, changing the name of a dashboard would make a copy with the new name.
+      Use the 'Save as a new dashboard' checkbox to do this now.`;
+    }
+
     return (
       <EuiFormRow
         label="Save as a new dashboard"
+        helpText={helpText}
       >
         <EuiSwitch
           data-test-subj="saveAsNewCheckbox"

@@ -351,7 +351,7 @@ app.directive('dashboardApp', function ($injector) {
           });
         };
 
-        const showCopyOnSave = !dash.id ? false : true;
+        const showCopyOnSave = dash.id ? true : false;
         showSaveModal(
           onSave,
           $scope.model.title,
