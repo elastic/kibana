@@ -60,7 +60,7 @@ containing a JSON structure similar to the following example:
   "attributes": {
     "title": "my-pattern"
   }
-}⏎
+}
 --------------------------------------------------
 
 <1> If `my-pattern` was not specified in the path, a unique ID would have been
