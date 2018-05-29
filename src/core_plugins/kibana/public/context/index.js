@@ -23,7 +23,6 @@ import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import uiRoutes from 'ui/routes';
 
 import './app';
-import { getDocumentUid } from './api/utils/ids';
 import contextAppRouteTemplate from './index.html';
 
 
@@ -64,7 +63,8 @@ function ContextAppRouteController(
     this.filters = _.cloneDeep(queryFilter.getFilters());
   });
 
-  this.anchorUid = getDocumentUid($routeParams.type, $routeParams.id);
+  this.anchorType = $routeParams.type;
+  this.anchorId = $routeParams.id;
   this.indexPattern = indexPattern;
   this.discoverUrl = chrome.getNavLinkById('kibana:discover').lastSubUrl;
   this.filters = _.cloneDeep(queryFilter.getFilters());

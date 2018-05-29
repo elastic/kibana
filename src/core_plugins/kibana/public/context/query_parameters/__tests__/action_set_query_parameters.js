@@ -46,7 +46,8 @@ describe('context app', function () {
       });
 
       setQueryParameters(state)({
-        anchorUid: 'ANCHOR_UID',
+        anchorType: 'ANCHOR_TYPE',
+        anchorId: 'ANCHOR_ID',
         columns: ['column'],
         defaultStepSize: 3,
         filters: ['filter'],
@@ -58,7 +59,8 @@ describe('context app', function () {
 
       expect(state.queryParameters).to.eql({
         additionalParameter: 'ADDITIONAL_PARAMETER',
-        anchorUid: 'ANCHOR_UID',
+        anchorType: 'ANCHOR_TYPE',
+        anchorId: 'ANCHOR_ID',
         columns: ['column'],
         defaultStepSize: 3,
         filters: ['filter'],

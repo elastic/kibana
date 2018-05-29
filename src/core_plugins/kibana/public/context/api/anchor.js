@@ -21,11 +21,15 @@ import _ from 'lodash';
 
 import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
 
-
 function fetchAnchorProvider(courier, Private) {
   const SearchSource = Private(SearchSourceProvider);
 
-  return async function fetchAnchor(indexPatternId, uid, sort) {
+  return async function fetchAnchor(
+    indexPatternId,
+    anchorType,
+    anchorId,
+    sort
+  ) {
     const indexPattern = await courier.indexPatterns.get(indexPatternId);
 
     const searchSource = new SearchSource()
@@ -37,13 +41,14 @@ function fetchAnchorProvider(courier, Private) {
         query: {
           constant_score: {
             filter: {
-              terms: {
-                _uid: [uid],
+              ids: {
+                type: anchorType,
+                values: [anchorId],
               },
             },
           },
         },
-        language: 'lucene'
+        language: 'lucene',
       })
       .set('sort', sort);
 
@@ -60,7 +65,4 @@ function fetchAnchorProvider(courier, Private) {
   };
 }
 
-
-export {
-  fetchAnchorProvider,
-};
+export { fetchAnchorProvider };
