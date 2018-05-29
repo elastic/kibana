@@ -137,7 +137,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('can filter on a visualization', async () => {
-        await PageObjects.dashboard.setTimepickerInDataRange();
+        await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
         await PageObjects.dashboard.filterOnPieSlice();
         const filters = await PageObjects.dashboard.getFilters();
         expect(filters.length).to.equal(1);
