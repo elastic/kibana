@@ -36,6 +36,7 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
       canSplit: false,
       asAggConfigResults: false,
       partialRows: true,
+      isHierarchical: vis.isHierarchical(),
     });
     const columns = table.columns.map((col, index) => {
       const field = col.aggConfig.getField();
