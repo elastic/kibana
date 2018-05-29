@@ -24,7 +24,6 @@ import { CreateIndexPatternWizard } from './create_index_pattern_wizard';
 const CREATE_INDEX_PATTERN_DOM_ELEMENT_ID = 'createIndexPatternReact';
 
 export function renderCreateIndexPatternWizard(
-  loadingDataDocUrl,
   initialQuery,
   services,
 ) {
@@ -35,7 +34,6 @@ export function renderCreateIndexPatternWizard(
 
   render(
     <CreateIndexPatternWizard
-      loadingDataDocUrl={loadingDataDocUrl}
       initialQuery={initialQuery}
       services={services}
     />,

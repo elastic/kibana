@@ -33,7 +33,6 @@ import {
 } from '@elastic/eui';
 
 export const EmptyState = ({
-  loadingDataDocUrl,
   onRefresh,
 }) => (
   <EuiPanel paddingSize="l">
@@ -52,10 +51,15 @@ export const EmptyState = ({
             </EuiTextColor>
             &nbsp;
             <EuiLink
-              href={loadingDataDocUrl}
-              target="_blank"
+              href="#/home/tutorial_directory"
             >
-              Learn how.
+              Learn how
+            </EuiLink>
+            {' or '}
+            <EuiLink
+              href="#/home/tutorial_directory/sampleData"
+            >
+              get started with some sample data sets.
             </EuiLink>
           </p>
         </EuiText>
@@ -79,6 +83,5 @@ export const EmptyState = ({
 );
 
 EmptyState.propTypes = {
-  loadingDataDocUrl: PropTypes.string.isRequired,
   onRefresh: PropTypes.func.isRequired,
 };

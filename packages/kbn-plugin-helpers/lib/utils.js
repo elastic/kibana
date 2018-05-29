@@ -26,7 +26,7 @@ function babelRegister() {
 
   try {
     // add support for moved babel-register source: https://github.com/elastic/kibana/pull/13973
-    require(resolve(plugin.kibanaRoot, 'src/babel-register'));
+    require(resolve(plugin.kibanaRoot, 'src/setup_node_env/babel_register'));
   } catch (error) {
     if (error.code === 'MODULE_NOT_FOUND') {
       require(resolve(plugin.kibanaRoot, 'src/optimize/babel/register'));

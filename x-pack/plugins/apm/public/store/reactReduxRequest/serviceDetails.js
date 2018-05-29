@@ -19,7 +19,7 @@ export function getServiceDetails(state) {
 }
 
 export function getDefaultTransactionType(state) {
-  const types = _.get(state.reactReduxRequest.serviceDetails, 'data.types');
+  const types = _.get(state.reactReduxRequest[ID], 'data.types');
   return _.first(types);
 }
 

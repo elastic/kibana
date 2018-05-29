@@ -11,7 +11,7 @@ import { getDistribution } from '../lib/errors/distribution/get_distribution';
 import { getErrorGroups } from '../lib/errors/get_error_groups';
 import { getErrorGroup } from '../lib/errors/get_error_group';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { dateValidation } from '../lib/helpers/date_validation';
+import { withDefaultValidators } from '../lib/helpers/input_validation';
 
 const pre = [{ method: setupRequest, assign: 'setup' }];
 const ROOT = '/api/apm/services/{serviceName}/errors';
@@ -27,9 +27,7 @@ export function initErrorsApi(server) {
     config: {
       pre,
       validate: {
-        query: Joi.object().keys({
-          start: dateValidation,
-          end: dateValidation,
+        query: withDefaultValidators({
           q: Joi.string().allow(''),
           sortBy: Joi.string(),
           sortOrder: Joi.string()
@@ -59,10 +57,7 @@ export function initErrorsApi(server) {
     config: {
       pre,
       validate: {
-        query: Joi.object().keys({
-          start: dateValidation,
-          end: dateValidation
-        })
+        query: withDefaultValidators()
       }
     },
     handler: (req, reply) => {
@@ -80,10 +75,7 @@ export function initErrorsApi(server) {
     config: {
       pre,
       validate: {
-        query: Joi.object().keys({
-          start: dateValidation,
-          end: dateValidation
-        })
+        query: withDefaultValidators()
       }
     },
     handler: (req, reply) => {

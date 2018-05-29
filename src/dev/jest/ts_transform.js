@@ -17,5 +17,5 @@
  * under the License.
  */
 
-require('../../babel-register');
+require('../../setup_node_env');
 module.exports = require('./ts_transform.ts');

@@ -88,7 +88,7 @@ describe('CreateIndexPatternWizard', () => {
 
     component.setState({
       isInitiallyLoadingIndices: false,
-      allIndices: [{}],
+      allIndices: [{ name: 'myIndexPattern' }],
     });
 
     await component.update();
@@ -106,7 +106,7 @@ describe('CreateIndexPatternWizard', () => {
 
     component.setState({
       isInitiallyLoadingIndices: false,
-      allIndices: [{}],
+      allIndices: [{ name: 'myIndexPattern' }],
       step: 2,
     });
 

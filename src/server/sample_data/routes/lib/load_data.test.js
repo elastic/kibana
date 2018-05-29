@@ -17,18 +17,16 @@
  * under the License.
  */
 
-// unless we are running a prebuilt/distributable version of
-// kibana, automatically transpile typescript to js before babel
-if (!global.__BUILT_WITH_BABEL__) {
-  const { resolve } = require('path');
-  require('ts-node').register({
-    transpileOnly: true,
-    cacheDirectory: resolve(__dirname, '../../optimize/.cache/ts-node')
-  });
-}
+import { loadData } from './load_data';
 
-// register and polyfill need to happen in this
-// order and in separate files. Checkout each file
-// for a much more detailed explaination
-require('./register');
-require('./polyfill');
+test('load data', done => {
+  let myDocsCount = 0;
+  const bulkInsertMock = (docs) => {
+    myDocsCount += docs.length;
+  };
+  loadData('./src/server/sample_data/data_sets/flights/flights.json.gz', bulkInsertMock, async (err, count) => {
+    expect(myDocsCount).toBe(13059);
+    expect(count).toBe(13059);
+    done();
+  });
+});
