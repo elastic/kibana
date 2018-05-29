@@ -20,12 +20,12 @@ import {
 } from '@elastic/eui';
 import { ClusterPrivileges } from './cluster_privileges';
 import { IndexPrivileges } from './index_privileges';
-import { isReservedRole } from '../../../../../lib/role';
 import { CollapsiblePanel } from '../collapsible_panel';
 
 export class ElasticsearchPrivileges extends Component {
   static propTypes = {
     role: PropTypes.object.isRequired,
+    editable: PropTypes.bool.isRequired,
     httpClient: PropTypes.func.isRequired,
     onChange: PropTypes.func.isRequired,
     runAsUsers: PropTypes.array.isRequired,
@@ -88,11 +88,11 @@ export class ElasticsearchPrivileges extends Component {
         >
           <EuiFormRow>
             <EuiComboBox
-              placeholder={'Add a user...'}
+              placeholder={this.props.editable ? 'Add a user...' : null}
               options={this.props.runAsUsers.map(username => ({ id: username, label: username }))}
               selectedOptions={this.props.role.run_as.map(u => ({ label: u }))}
               onChange={this.onRunAsUserChange}
-              isDisabled={isReservedRole(this.props.role)}
+              isDisabled={!this.props.editable}
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
@@ -106,9 +106,11 @@ export class ElasticsearchPrivileges extends Component {
                 <EuiTitle size={'xs'}><p>Index privileges</p></EuiTitle>
                 <EuiText size={'s'} color={'subdued'}><p>Control access to the data in your cluster.</p></EuiText>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton size={'s'} iconType={'plusInCircle'} onClick={this.addIndexPrivilege}>Add Index Privilege</EuiButton>
-              </EuiFlexItem>
+              {this.props.editable && (
+                <EuiFlexItem grow={false}>
+                  <EuiButton size={'s'} iconType={'plusInCircle'} onClick={this.addIndexPrivilege}>Add Index Privilege</EuiButton>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
             <EuiHorizontalRule margin={'xs'} />
           </div>

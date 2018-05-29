@@ -52,7 +52,7 @@ export const spaces = (kibana) => new kibana.Plugin({
           valid: true,
           space: await getActiveSpace(request.getSavedObjectsClient(), request.getBasePath())
         };
-      } catch(e) {
+      } catch (e) {
         vars.activeSpace = {
           valid: false,
           error: wrapError(e).output.payload

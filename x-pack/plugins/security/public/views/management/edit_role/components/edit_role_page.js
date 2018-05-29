@@ -154,6 +154,7 @@ export class EditRolePage extends Component {
     return (
       <ElasticsearchPrivileges
         role={this.state.role}
+        editable={!isReservedRole(this.state.role)}
         httpClient={this.props.httpClient}
         onChange={this.onRoleChange}
         runAsUsers={this.props.runAsUsers}

@@ -137,14 +137,16 @@ export class IndexPrivilegeForm extends Component {
 
     return (
       <EuiFlexGroup>
-        <EuiFlexItem grow={3}>
-          <EuiSwitch
-            label={'Restrict documents query'}
-            compressed={true}
-            value={this.state.queryExanded}
-            onChange={this.toggleDocumentQuery}
-          />
-        </EuiFlexItem>
+        {!this.props.isReservedRole &&
+          <EuiFlexItem grow={3}>
+            <EuiSwitch
+              label={'Restrict documents query'}
+              compressed={true}
+              value={this.state.queryExanded}
+              onChange={this.toggleDocumentQuery}
+            />
+          </EuiFlexItem>
+        }
         {this.state.queryExpanded &&
           <EuiFlexItem grow={5}>
             <EuiFormRow label={'Granted Documents Query (optional)'} fullWidth={true}>
