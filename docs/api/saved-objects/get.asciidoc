@@ -40,7 +40,7 @@ containing a JSON structure similar to the following example:
   "type": "index-pattern",
   "version": 1,
   "attributes": {
-    "title": "my-pattern"
+    "title": "my-pattern-*"
   }
 }
 --------------------------------------------------
