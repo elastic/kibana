@@ -47,7 +47,7 @@ include::dashboard.asciidoc[]
 
 include::timelion.asciidoc[]
 
-include::{xkb-repo-dir}/ml/index.asciidoc[]
+include::ml/index.asciidoc[]
 
 include::apm/index.asciidoc[]
 
