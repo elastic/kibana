@@ -3,10 +3,10 @@ jest.mock('../../layouts/layouts', () => {
   const { schema } = require('../../../config/schema');
   return {
     Layouts: {
-      create: mockCreateLayout,
       configSchema: schema.object({
         kind: schema.literal('mock'),
       }),
+      create: mockCreateLayout,
     },
   };
 });
@@ -60,9 +60,9 @@ test('`create()` creates correct appender.', () => {
     {
       kind: 'console',
       layout: {
+        highlight: true,
         kind: 'pattern',
         pattern: '',
-        highlight: true,
       },
     },
     {} as any
@@ -72,12 +72,12 @@ test('`create()` creates correct appender.', () => {
   const fileAppender = Appenders.create(
     {
       kind: 'file',
-      path: 'path',
       layout: {
+        highlight: true,
         kind: 'pattern',
         pattern: '',
-        highlight: true,
       },
+      path: 'path',
     },
     {} as any
   );

@@ -44,9 +44,9 @@ export class KibanaRequest<Params, Query, Body> {
   } {
     if (routeSchemas === undefined) {
       return {
+        body: {},
         params: {},
         query: {},
-        body: {},
       };
     }
 

@@ -1,4 +1,4 @@
-import { Env } from '../config/env';
+import { Env } from '../config';
 import { Appenders, DisposableAppender } from './appenders/appenders';
 import { BufferAppender } from './appenders/buffer/buffer_appender';
 import { LogLevel } from './log_level';

@@ -57,14 +57,14 @@ test('`get()` returns Logger that appends records to buffer if config is not rea
         },
         file: {
           kind: 'file',
-          path: 'path',
           layout: { kind: 'pattern' },
+          path: 'path',
         },
       },
       loggers: [
         {
-          context: 'tests',
           appenders: ['file'],
+          context: 'tests',
           level: 'warn',
         },
         {
@@ -124,8 +124,8 @@ test('`close()` disposes all resources used by appenders.', async () => {
       appenders: {
         default: {
           kind: 'file',
-          path: 'path',
           layout: { kind: 'pattern' },
+          path: 'path',
         },
       },
     })

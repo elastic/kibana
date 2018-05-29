@@ -1,11 +1,11 @@
 import { get } from '../get';
 
 const obj = {
-  foo: 'value',
   bar: {
     quux: 123,
   },
   'dotted.value': 'dots',
+  foo: 'value',
 };
 
 test('get with string', () => {

@@ -59,24 +59,24 @@ test('file stream is created only once and only after first `append()` is called
   expect(mockCreateWriteStream).not.toHaveBeenCalled();
 
   appender.append({
-    timestamp: new Date(),
-    message: 'message-1',
     context: 'context-1',
     level: LogLevel.All,
+    message: 'message-1',
+    timestamp: new Date(),
   });
 
   expect(mockCreateWriteStream).toHaveBeenCalledTimes(1);
   expect(mockCreateWriteStream).toHaveBeenCalledWith(mockPath, {
-    flags: 'a',
     encoding: 'utf8',
+    flags: 'a',
   });
 
   mockCreateWriteStream.mockClear();
   appender.append({
-    timestamp: new Date(),
-    message: 'message-2',
     context: 'context-2',
     level: LogLevel.All,
+    message: 'message-2',
+    timestamp: new Date(),
   });
 
   expect(mockCreateWriteStream).not.toHaveBeenCalled();
@@ -88,23 +88,23 @@ test('`append()` correctly formats records and pushes them to the file.', () => 
 
   const records: LogRecord[] = [
     {
-      timestamp: new Date(),
-      message: 'message-1',
       context: 'context-1',
       level: LogLevel.All,
+      message: 'message-1',
+      timestamp: new Date(),
     },
     {
-      timestamp: new Date(),
-      message: 'message-2',
       context: 'context-2',
       level: LogLevel.Trace,
+      message: 'message-2',
+      timestamp: new Date(),
     },
     {
-      timestamp: new Date(),
-      message: 'message-3',
       context: 'context-3',
       error: new Error('Error'),
       level: LogLevel.Fatal,
+      message: 'message-3',
+      timestamp: new Date(),
     },
   ];
 
@@ -146,10 +146,10 @@ test('`dispose()` closes stream.', async () => {
   });
 
   mockCreateWriteStream.mockReturnValue({
+    end: mockStreamEnd,
     write: () => {
       // noop
     },
-    end: mockStreamEnd,
   });
 
   const appender = new FileAppender(
@@ -157,10 +157,10 @@ test('`dispose()` closes stream.', async () => {
     'mock://path/file.log'
   );
   appender.append({
-    timestamp: new Date(),
-    message: 'message-1',
     context: 'context-1',
     level: LogLevel.All,
+    message: 'message-1',
+    timestamp: new Date(),
   });
 
   await appender.dispose();

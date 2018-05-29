@@ -20,8 +20,8 @@ beforeEach(() => {
 
 test('creates and starts http server', async () => {
   const config = {
-    port: 1234,
     host: 'example.org',
+    port: 1234,
   } as HttpConfig;
 
   const config$ = new BehaviorSubject(config);
@@ -104,9 +104,9 @@ test('register route handler', () => {
 
   const httpServer = {
     isListening: () => false,
+    registerRouter: jest.fn(),
     start: noop,
     stop: noop,
-    registerRouter: jest.fn(),
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
@@ -131,9 +131,9 @@ test('throws if registering route handler after http server is started', () => {
 
   const httpServer = {
     isListening: () => true,
+    registerRouter: jest.fn(),
     start: noop,
     stop: noop,
-    registerRouter: jest.fn(),
   };
   mockHttpServer.mockImplementation(() => httpServer);
 

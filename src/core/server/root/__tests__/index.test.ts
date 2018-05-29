@@ -13,14 +13,14 @@ const server = {
 const mockServer = jest.fn(() => server);
 
 const loggingService = {
-  upgrade: jest.fn(),
   stop: jest.fn(),
+  upgrade: jest.fn(),
 };
 
 const logger = {
   get: jest.fn(() => ({
-    info: jest.fn(),
     error: jest.fn(),
+    info: jest.fn(),
   })),
 };
 

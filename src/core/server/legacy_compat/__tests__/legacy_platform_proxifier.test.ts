@@ -28,14 +28,14 @@ let root: any;
 let proxifier: LegacyPlatformProxifier;
 beforeEach(() => {
   root = {
-    start: jest.fn(),
-    shutdown: jest.fn(),
     logger: {
       get: jest.fn(() => ({
-        info: jest.fn(),
         debug: jest.fn(),
+        info: jest.fn(),
       })),
     },
+    shutdown: jest.fn(),
+    start: jest.fn(),
   } as any;
 
   proxifier = new LegacyPlatformProxifier(root);
@@ -129,9 +129,9 @@ test('returns `address` from the underlying server.', () => {
   proxifier.bind(createServer());
 
   expect(proxifier.address()).toEqual({
-    port: 1234,
-    family: 'test-family',
     address: 'test-address',
+    family: 'test-family',
+    port: 1234,
   });
 });
 

@@ -52,10 +52,10 @@ export class Router {
   ) {
     const routeSchemas = this.routeSchemasFromRouteConfig(route, 'GET');
     this.routes.push({
-      method: 'GET',
-      path: route.path,
       handler: async (req, responseToolkit) =>
         await this.handle(routeSchemas, req, responseToolkit, handler),
+      method: 'GET',
+      path: route.path,
     });
   }
 
@@ -68,10 +68,10 @@ export class Router {
   ) {
     const routeSchemas = this.routeSchemasFromRouteConfig(route, 'POST');
     this.routes.push({
-      method: 'POST',
-      path: route.path,
       handler: async (req, responseToolkit) =>
         await this.handle(routeSchemas, req, responseToolkit, handler),
+      method: 'POST',
+      path: route.path,
     });
   }
 
@@ -84,10 +84,10 @@ export class Router {
   ) {
     const routeSchemas = this.routeSchemasFromRouteConfig(route, 'POST');
     this.routes.push({
-      method: 'PUT',
-      path: route.path,
       handler: async (req, responseToolkit) =>
         await this.handle(routeSchemas, req, responseToolkit, handler),
+      method: 'PUT',
+      path: route.path,
     });
   }
 
@@ -101,10 +101,10 @@ export class Router {
   >(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) {
     const routeSchemas = this.routeSchemasFromRouteConfig(route, 'DELETE');
     this.routes.push({
-      method: 'DELETE',
-      path: route.path,
       handler: async (req, responseToolkit) =>
         await this.handle(routeSchemas, req, responseToolkit, handler),
+      method: 'DELETE',
+      path: route.path,
     });
   }
 

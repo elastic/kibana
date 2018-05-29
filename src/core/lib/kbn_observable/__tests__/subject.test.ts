@@ -343,9 +343,9 @@ test('can use subject in $k', async () => {
   const error = jest.fn();
 
   k$(values$)(first()).subscribe({
-    next,
-    error,
     complete,
+    error,
+    next,
   });
 
   values$.next('test');

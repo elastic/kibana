@@ -52,8 +52,8 @@ describe('with TLS', () => {
     const httpSchema = HttpConfig.schema;
     const obj = {
       ssl: {
-        enabled: true,
         certificate: '/path/to/certificate',
+        enabled: true,
       },
     };
     expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
@@ -75,8 +75,8 @@ describe('with TLS', () => {
     const obj = {
       port: 1234,
       ssl: {
-        enabled: true,
         certificate: '/path/to/certificate',
+        enabled: true,
         key: '/path/to/key',
         redirectHttpFromPort: 1234,
       },
@@ -88,10 +88,10 @@ describe('with TLS', () => {
     const httpSchema = HttpConfig.schema;
     const obj = {
       ssl: {
-        enabled: true,
         certificate: '/path/to/certificate',
-        key: '/path/to/key',
         certificateAuthorities: '/authority/',
+        enabled: true,
+        key: '/path/to/key',
       },
     };
 
@@ -103,10 +103,10 @@ describe('with TLS', () => {
     const httpSchema = HttpConfig.schema;
     const obj = {
       ssl: {
-        enabled: true,
         certificate: '/path/to/certificate',
-        key: '/path/to/key',
         certificateAuthorities: ['/authority/1', '/authority/2'],
+        enabled: true,
+        key: '/path/to/key',
       },
     };
 
@@ -121,8 +121,8 @@ describe('with TLS', () => {
     const httpSchema = HttpConfig.schema;
     const singleKnownProtocol = {
       ssl: {
-        enabled: true,
         certificate: '/path/to/certificate',
+        enabled: true,
         key: '/path/to/key',
         supportedProtocols: ['TLSv1'],
       },
@@ -130,8 +130,8 @@ describe('with TLS', () => {
 
     const allKnownProtocols = {
       ssl: {
-        enabled: true,
         certificate: '/path/to/certificate',
+        enabled: true,
         key: '/path/to/key',
         supportedProtocols: ['TLSv1', 'TLSv1.1', 'TLSv1.2'],
       },
@@ -153,8 +153,8 @@ describe('with TLS', () => {
 
     const singleUnknownProtocol = {
       ssl: {
-        enabled: true,
         certificate: '/path/to/certificate',
+        enabled: true,
         key: '/path/to/key',
         supportedProtocols: ['SOMEv100500'],
       },
@@ -162,8 +162,8 @@ describe('with TLS', () => {
 
     const allKnownWithOneUnknownProtocols = {
       ssl: {
-        enabled: true,
         certificate: '/path/to/certificate',
+        enabled: true,
         key: '/path/to/key',
         supportedProtocols: ['TLSv1', 'TLSv1.1', 'TLSv1.2', 'SOMEv100500'],
       },

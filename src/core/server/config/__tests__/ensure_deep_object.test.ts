@@ -33,17 +33,17 @@ test('deep object', () => {
 test('flat within deep object', () => {
   const obj = {
     foo: {
-      'bar.a': 1,
       b: 2,
+      'bar.a': 1,
     },
   };
 
   expect(ensureDeepObject(obj)).toEqual({
     foo: {
+      b: 2,
       bar: {
         a: 1,
       },
-      b: 2,
     },
   });
 });
@@ -51,18 +51,18 @@ test('flat within deep object', () => {
 test('flat then flat object', () => {
   const obj = {
     'foo.bar': {
-      'quux.a': 1,
       b: 2,
+      'quux.a': 1,
     },
   };
 
   expect(ensureDeepObject(obj)).toEqual({
     foo: {
       bar: {
+        b: 2,
         quux: {
           a: 1,
         },
-        b: 2,
       },
     },
   });

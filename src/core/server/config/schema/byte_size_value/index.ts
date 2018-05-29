@@ -2,9 +2,9 @@ export type ByteSizeValueUnit = 'b' | 'kb' | 'mb' | 'gb';
 
 const unitMultiplier: { [unit: string]: number } = {
   b: Math.pow(1024, 0),
+  gb: Math.pow(1024, 3),
   kb: Math.pow(1024, 1),
   mb: Math.pow(1024, 2),
-  gb: Math.pow(1024, 3),
 };
 
 function renderUnit(value: number, unit: string) {

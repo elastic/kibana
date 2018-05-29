@@ -3,13 +3,13 @@ import { LoggerAdapter } from '../logger_adapter';
 
 test('proxies all method calls to the internal logger.', () => {
   const internalLogger: Logger = {
-    trace: jest.fn(),
     debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
     error: jest.fn(),
     fatal: jest.fn(),
+    info: jest.fn(),
     log: jest.fn(),
+    trace: jest.fn(),
+    warn: jest.fn(),
   };
 
   const adapter = new LoggerAdapter(internalLogger);
@@ -41,23 +41,23 @@ test('proxies all method calls to the internal logger.', () => {
 
 test('forwards all method calls to new internal logger if it is updated.', () => {
   const oldInternalLogger: Logger = {
-    trace: jest.fn(),
     debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
     error: jest.fn(),
     fatal: jest.fn(),
+    info: jest.fn(),
     log: jest.fn(),
+    trace: jest.fn(),
+    warn: jest.fn(),
   };
 
   const newInternalLogger: Logger = {
-    trace: jest.fn(),
     debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
     error: jest.fn(),
     fatal: jest.fn(),
+    info: jest.fn(),
     log: jest.fn(),
+    trace: jest.fn(),
+    warn: jest.fn(),
   };
 
   const adapter = new LoggerAdapter(oldInternalLogger);

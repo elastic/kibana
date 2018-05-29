@@ -10,10 +10,10 @@ const { boolean, literal, maybe, object, string } = schema;
  * A set of static constants describing supported parameters in the log message pattern.
  */
 const Parameters = Object.freeze({
-  Timestamp: '{timestamp}',
-  Level: '{level}',
   Context: '{context}',
+  Level: '{level}',
   Message: '{message}',
+  Timestamp: '{timestamp}',
 });
 
 /**
@@ -47,9 +47,9 @@ const DEFAULT_PATTERN = `[${Parameters.Timestamp}][${Parameters.Level}][${
 }] ${Parameters.Message}`;
 
 const patternLayoutSchema = object({
+  highlight: maybe(boolean()),
   kind: literal('pattern'),
   pattern: maybe(string()),
-  highlight: maybe(boolean()),
 });
 
 /** @internal */

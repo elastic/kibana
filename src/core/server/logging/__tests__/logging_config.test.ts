@@ -53,8 +53,8 @@ test('correctly fills in custom `appenders` config.', () => {
         },
         file: {
           kind: 'file',
-          path: 'path',
           layout: { kind: 'pattern' },
+          path: 'path',
         },
       },
     })
@@ -74,8 +74,8 @@ test('correctly fills in custom `appenders` config.', () => {
 
   expect(config.appenders.get('file')).toEqual({
     kind: 'file',
-    path: 'path',
     layout: { kind: 'pattern' },
+    path: 'path',
   });
 });
 
@@ -85,8 +85,8 @@ test('correctly fills in default `loggers` config.', () => {
 
   expect(config.loggers.size).toBe(1);
   expect(config.loggers.get('root')).toEqual({
-    context: 'root',
     appenders: ['default'],
+    context: 'root',
     level: 'info',
   });
 });
@@ -98,14 +98,14 @@ test('correctly fills in custom `loggers` config.', () => {
       appenders: {
         file: {
           kind: 'file',
-          path: 'path',
           layout: { kind: 'pattern' },
+          path: 'path',
         },
       },
       loggers: [
         {
-          context: 'plugins',
           appenders: ['file'],
+          context: 'plugins',
           level: 'warn',
         },
         {
@@ -113,9 +113,9 @@ test('correctly fills in custom `loggers` config.', () => {
           level: 'trace',
         },
         {
+          appenders: ['default'],
           context: 'http',
           level: 'error',
-          appenders: ['default'],
         },
       ],
     })
@@ -123,23 +123,23 @@ test('correctly fills in custom `loggers` config.', () => {
 
   expect(config.loggers.size).toBe(4);
   expect(config.loggers.get('root')).toEqual({
-    context: 'root',
     appenders: ['default'],
+    context: 'root',
     level: 'info',
   });
   expect(config.loggers.get('plugins')).toEqual({
-    context: 'plugins',
     appenders: ['file'],
+    context: 'plugins',
     level: 'warn',
   });
   expect(config.loggers.get('plugins.pid')).toEqual({
-    context: 'plugins.pid',
     appenders: ['file'],
+    context: 'plugins.pid',
     level: 'trace',
   });
   expect(config.loggers.get('http')).toEqual({
-    context: 'http',
     appenders: ['default'],
+    context: 'http',
     level: 'error',
   });
 });
@@ -149,8 +149,8 @@ test('fails if loggers use unknown appenders.', () => {
   const validateConfig = loggingConfigSchema.validate({
     loggers: [
       {
-        context: 'some.nested.context',
         appenders: ['unknown'],
+        context: 'some.nested.context',
       },
     ],
   });

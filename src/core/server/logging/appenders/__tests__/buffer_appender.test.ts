@@ -11,16 +11,16 @@ test('`flush()` does not return any record buffered at the beginning.', () => {
 test('`flush()` returns all appended records and cleans internal buffer.', () => {
   const records: LogRecord[] = [
     {
-      timestamp: new Date(),
-      message: 'message-1',
       context: 'context-1',
       level: LogLevel.All,
+      message: 'message-1',
+      timestamp: new Date(),
     },
     {
-      timestamp: new Date(),
-      message: 'message-2',
       context: 'context-2',
       level: LogLevel.Trace,
+      message: 'message-2',
+      timestamp: new Date(),
     },
   ];
 
@@ -41,10 +41,10 @@ test('`flush()` returns all appended records and cleans internal buffer.', () =>
 test('`dispose()` flushes internal buffer.', async () => {
   const appender = new BufferAppender();
   appender.append({
-    timestamp: new Date(),
-    message: 'message-1',
     context: 'context-1',
     level: LogLevel.All,
+    message: 'message-1',
+    timestamp: new Date(),
   });
 
   await appender.dispose();

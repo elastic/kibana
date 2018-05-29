@@ -24,20 +24,20 @@ const protocolMap = new Map<string, number>([
 
 const sslSchema = object(
   {
-    enabled: boolean({
-      defaultValue: false,
-    }),
-    redirectHttpFromPort: maybe(number()),
     certificate: maybe(string()),
-    key: maybe(string()),
-    keyPassphrase: maybe(string()),
     certificateAuthorities: maybe(oneOf([arrayOf(string()), string()])),
-    supportedProtocols: maybe(
-      arrayOf(oneOf([literal('TLSv1'), literal('TLSv1.1'), literal('TLSv1.2')]))
-    ),
     cipherSuites: arrayOf(string(), {
       defaultValue: cryptoConstants.defaultCoreCipherList.split(':'),
     }),
+    enabled: boolean({
+      defaultValue: false,
+    }),
+    key: maybe(string()),
+    keyPassphrase: maybe(string()),
+    redirectHttpFromPort: maybe(number()),
+    supportedProtocols: maybe(
+      arrayOf(oneOf([literal('TLSv1'), literal('TLSv1.1'), literal('TLSv1.2')]))
+    ),
   },
   {
     validate: ssl => {

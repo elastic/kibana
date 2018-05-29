@@ -39,24 +39,24 @@ const createLevelSchema = oneOf(
 );
 
 const createLoggerSchema = object({
+  appenders: arrayOf(string(), { defaultValue: [] }),
   context: string(),
   level: createLevelSchema,
-  appenders: arrayOf(string(), { defaultValue: [] }),
 });
 
 const loggingSchema = object({
   appenders: mapOf(string(), Appenders.configSchema, {
     defaultValue: new Map<string, AppenderConfigType>(),
   }),
+  loggers: arrayOf(createLoggerSchema, {
+    defaultValue: [],
+  }),
   root: object({
-    level: createLevelSchema,
     appenders: arrayOf(string(), {
       defaultValue: [DEFAULT_APPENDER_NAME],
       minSize: 1,
     }),
-  }),
-  loggers: arrayOf(createLoggerSchema, {
-    defaultValue: [],
+    level: createLevelSchema,
   }),
 });
 

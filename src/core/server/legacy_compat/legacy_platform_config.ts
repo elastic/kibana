@@ -97,8 +97,8 @@ export class LegacyConfigToRawConfigAdapter implements RawConfig {
 
   private static transformLogging(configValue: LegacyLoggingConfig) {
     const loggingConfig = {
-      root: { level: 'info' },
       appenders: { default: { kind: 'legacy-appender' } },
+      root: { level: 'info' },
     };
 
     if (configValue.silent) {
@@ -116,11 +116,11 @@ export class LegacyConfigToRawConfigAdapter implements RawConfig {
     // TODO: New platform uses just a subset of `server` config from the legacy platform,
     // new values will be exposed once we need them (eg. customResponseHeaders, cors or xsrf).
     return {
-      host: configValue.host,
-      port: configValue.port,
-      cors: configValue.cors,
-      maxPayload: configValue.maxPayloadBytes,
       basePath: configValue.basePath,
+      cors: configValue.cors,
+      host: configValue.host,
+      maxPayload: configValue.maxPayloadBytes,
+      port: configValue.port,
       rewriteBasePath: configValue.rewriteBasePath,
       ssl: configValue.ssl,
     };

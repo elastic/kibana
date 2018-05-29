@@ -58,10 +58,10 @@ describe('#get', () => {
     legacyConfigMock.__rawData = new Map([['logging', { silent: true }]]);
 
     expect(configAdapter.get('logging')).toEqual({
-      root: { level: 'off' },
       appenders: {
         default: { kind: 'legacy-appender' },
       },
+      root: { level: 'off' },
     });
   });
 
@@ -71,10 +71,10 @@ describe('#get', () => {
     ]);
 
     expect(configAdapter.get('logging')).toEqual({
-      root: { level: 'all' },
       appenders: {
         default: { kind: 'legacy-appender' },
       },
+      root: { level: 'all' },
     });
   });
 });

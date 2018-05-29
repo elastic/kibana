@@ -53,14 +53,14 @@ export function modifyUrl(
   // conflicting properties (like path and pathname + search, or search and query) and keeping track
   // of which property is actually used when they are formatted is harder than necessary.
   const meaningfulParts: URLMeaningfulParts = {
-    protocol: parsed.protocol,
-    slashes: parsed.slashes,
     auth: parsed.auth,
-    hostname: parsed.hostname,
-    port: parsed.port,
-    pathname: parsed.pathname,
-    query: parsed.query || {},
     hash: parsed.hash,
+    hostname: parsed.hostname,
+    pathname: parsed.pathname,
+    port: parsed.port,
+    protocol: parsed.protocol,
+    query: parsed.query || {},
+    slashes: parsed.slashes,
   };
 
   // The urlModifier modifies the meaningfulParts object, or returns a new one.
@@ -68,13 +68,13 @@ export function modifyUrl(
 
   // Format the modified/replaced meaningfulParts back into a url.
   return formatUrl({
-    protocol: modifiedParts.protocol,
-    slashes: modifiedParts.slashes,
     auth: modifiedParts.auth,
-    hostname: modifiedParts.hostname,
-    port: modifiedParts.port,
-    pathname: modifiedParts.pathname,
-    query: modifiedParts.query,
     hash: modifiedParts.hash,
+    hostname: modifiedParts.hostname,
+    pathname: modifiedParts.pathname,
+    port: modifiedParts.port,
+    protocol: modifiedParts.protocol,
+    query: modifiedParts.query,
+    slashes: modifiedParts.slashes,
   } as UrlObject);
 }

@@ -28,9 +28,9 @@ function getRedirectServerListener(httpServer: HttpServer) {
 
 beforeEach(() => {
   config = {
-    port: chance.integer({ min: 10000, max: 15000 }),
     host: '127.0.0.1',
     maxPayload: new ByteSizeValue(1024),
+    port: chance.integer({ min: 10000, max: 15000 }),
     ssl: {},
   } as HttpConfig;
 
@@ -397,8 +397,8 @@ test('filtered headers', async () => {
     .set('x-kibana-bar', 'quux');
 
   expect(filteredHeaders).toEqual({
-    'x-kibana-foo': 'bar',
     host: `127.0.0.1:${config.port}`,
+    'x-kibana-foo': 'bar',
   });
 });
 
@@ -532,12 +532,12 @@ describe('with defined `redirectHttpFromPort`', () => {
     configWithSSL = {
       ...config,
       ssl: {
-        enabled: true,
-        key: '/key',
         certificate: '/certificate',
         cipherSuites: ['cipherSuite'],
-        redirectHttpFromPort: config.port + 1,
+        enabled: true,
         getSecureOptions: () => 0,
+        key: '/key',
+        redirectHttpFromPort: config.port + 1,
       },
     } as HttpConfig;
 

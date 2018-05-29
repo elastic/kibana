@@ -21,11 +21,11 @@ test('`trace()` correctly forms `LogRecord` and passes it to all appenders.', ()
     expect(appenderMock.append).toHaveBeenCalledTimes(1);
     expect(appenderMock.append).toHaveBeenCalledWith({
       context,
-      timestamp,
+      error: undefined,
       level: LogLevel.Trace,
       message: 'message-1',
-      error: undefined,
       meta: undefined,
+      timestamp,
     });
   }
 
@@ -34,11 +34,11 @@ test('`trace()` correctly forms `LogRecord` and passes it to all appenders.', ()
     expect(appenderMock.append).toHaveBeenCalledTimes(2);
     expect(appenderMock.append).toHaveBeenCalledWith({
       context,
-      timestamp,
+      error: undefined,
       level: LogLevel.Trace,
       message: 'message-2',
-      error: undefined,
       meta: { trace: true },
+      timestamp,
     });
   }
 });
@@ -49,11 +49,11 @@ test('`debug()` correctly forms `LogRecord` and passes it to all appenders.', ()
     expect(appenderMock.append).toHaveBeenCalledTimes(1);
     expect(appenderMock.append).toHaveBeenCalledWith({
       context,
-      timestamp,
+      error: undefined,
       level: LogLevel.Debug,
       message: 'message-1',
-      error: undefined,
       meta: undefined,
+      timestamp,
     });
   }
 
@@ -62,11 +62,11 @@ test('`debug()` correctly forms `LogRecord` and passes it to all appenders.', ()
     expect(appenderMock.append).toHaveBeenCalledTimes(2);
     expect(appenderMock.append).toHaveBeenCalledWith({
       context,
-      timestamp,
+      error: undefined,
       level: LogLevel.Debug,
       message: 'message-2',
-      error: undefined,
       meta: { debug: true },
+      timestamp,
     });
   }
 });
@@ -77,11 +77,11 @@ test('`info()` correctly forms `LogRecord` and passes it to all appenders.', () 
     expect(appenderMock.append).toHaveBeenCalledTimes(1);
     expect(appenderMock.append).toHaveBeenCalledWith({
       context,
-      timestamp,
+      error: undefined,
       level: LogLevel.Info,
       message: 'message-1',
-      error: undefined,
       meta: undefined,
+      timestamp,
     });
   }
 
@@ -90,11 +90,11 @@ test('`info()` correctly forms `LogRecord` and passes it to all appenders.', () 
     expect(appenderMock.append).toHaveBeenCalledTimes(2);
     expect(appenderMock.append).toHaveBeenCalledWith({
       context,
-      timestamp,
+      error: undefined,
       level: LogLevel.Info,
       message: 'message-2',
-      error: undefined,
       meta: { info: true },
+      timestamp,
     });
   }
 });
@@ -105,11 +105,11 @@ test('`warn()` correctly forms `LogRecord` and passes it to all appenders.', () 
     expect(appenderMock.append).toHaveBeenCalledTimes(1);
     expect(appenderMock.append).toHaveBeenCalledWith({
       context,
-      timestamp,
+      error: undefined,
       level: LogLevel.Warn,
       message: 'message-1',
-      error: undefined,
       meta: undefined,
+      timestamp,
     });
   }
 
@@ -119,11 +119,11 @@ test('`warn()` correctly forms `LogRecord` and passes it to all appenders.', () 
     expect(appenderMock.append).toHaveBeenCalledTimes(2);
     expect(appenderMock.append).toHaveBeenCalledWith({
       context,
-      timestamp,
+      error,
       level: LogLevel.Warn,
       message: 'message-2',
-      error,
       meta: undefined,
+      timestamp,
     });
   }
 
@@ -132,11 +132,11 @@ test('`warn()` correctly forms `LogRecord` and passes it to all appenders.', () 
     expect(appenderMock.append).toHaveBeenCalledTimes(3);
     expect(appenderMock.append).toHaveBeenCalledWith({
       context,
-      timestamp,
+      error: undefined,
       level: LogLevel.Warn,
       message: 'message-3',
-      error: undefined,
       meta: { warn: true },
+      timestamp,
     });
   }
 });
@@ -147,11 +147,11 @@ test('`error()` correctly forms `LogRecord` and passes it to all appenders.', ()
     expect(appenderMock.append).toHaveBeenCalledTimes(1);
     expect(appenderMock.append).toHaveBeenCalledWith({
       context,
-      timestamp,
+      error: undefined,
       level: LogLevel.Error,
       message: 'message-1',
-      error: undefined,
       meta: undefined,
+      timestamp,
     });
   }
 
@@ -161,11 +161,11 @@ test('`error()` correctly forms `LogRecord` and passes it to all appenders.', ()
     expect(appenderMock.append).toHaveBeenCalledTimes(2);
     expect(appenderMock.append).toHaveBeenCalledWith({
       context,
-      timestamp,
+      error,
       level: LogLevel.Error,
       message: 'message-2',
-      error,
       meta: undefined,
+      timestamp,
     });
   }
 
@@ -174,11 +174,11 @@ test('`error()` correctly forms `LogRecord` and passes it to all appenders.', ()
     expect(appenderMock.append).toHaveBeenCalledTimes(3);
     expect(appenderMock.append).toHaveBeenCalledWith({
       context,
-      timestamp,
+      error: undefined,
       level: LogLevel.Error,
       message: 'message-3',
-      error: undefined,
       meta: { error: true },
+      timestamp,
     });
   }
 });
@@ -189,11 +189,11 @@ test('`fatal()` correctly forms `LogRecord` and passes it to all appenders.', ()
     expect(appenderMock.append).toHaveBeenCalledTimes(1);
     expect(appenderMock.append).toHaveBeenCalledWith({
       context,
-      timestamp,
+      error: undefined,
       level: LogLevel.Fatal,
       message: 'message-1',
-      error: undefined,
       meta: undefined,
+      timestamp,
     });
   }
 
@@ -203,11 +203,11 @@ test('`fatal()` correctly forms `LogRecord` and passes it to all appenders.', ()
     expect(appenderMock.append).toHaveBeenCalledTimes(2);
     expect(appenderMock.append).toHaveBeenCalledWith({
       context,
-      timestamp,
+      error,
       level: LogLevel.Fatal,
       message: 'message-2',
-      error,
       meta: undefined,
+      timestamp,
     });
   }
 
@@ -216,11 +216,11 @@ test('`fatal()` correctly forms `LogRecord` and passes it to all appenders.', ()
     expect(appenderMock.append).toHaveBeenCalledTimes(3);
     expect(appenderMock.append).toHaveBeenCalledWith({
       context,
-      timestamp,
+      error: undefined,
       level: LogLevel.Fatal,
       message: 'message-3',
-      error: undefined,
       meta: { fatal: true },
+      timestamp,
     });
   }
 });
@@ -228,9 +228,9 @@ test('`fatal()` correctly forms `LogRecord` and passes it to all appenders.', ()
 test('`log()` just passes the record to all appenders.', () => {
   const record = {
     context,
-    timestamp,
     level: LogLevel.Info,
     message: 'message-1',
+    timestamp,
   };
 
   logger.log(record);
@@ -263,9 +263,9 @@ test('logger with `All` level passes all records to appenders.', () => {
     expect(appenderMock.append).toHaveBeenCalledTimes(1);
     expect(appenderMock.append).toHaveBeenCalledWith({
       context,
-      timestamp,
       level: LogLevel.Trace,
       message: 'trace-message',
+      timestamp,
     });
   }
 
@@ -274,9 +274,9 @@ test('logger with `All` level passes all records to appenders.', () => {
     expect(appenderMock.append).toHaveBeenCalledTimes(2);
     expect(appenderMock.append).toHaveBeenCalledWith({
       context,
-      timestamp,
       level: LogLevel.Debug,
       message: 'debug-message',
+      timestamp,
     });
   }
 
@@ -285,9 +285,9 @@ test('logger with `All` level passes all records to appenders.', () => {
     expect(appenderMock.append).toHaveBeenCalledTimes(3);
     expect(appenderMock.append).toHaveBeenCalledWith({
       context,
-      timestamp,
       level: LogLevel.Info,
       message: 'info-message',
+      timestamp,
     });
   }
 
@@ -296,9 +296,9 @@ test('logger with `All` level passes all records to appenders.', () => {
     expect(appenderMock.append).toHaveBeenCalledTimes(4);
     expect(appenderMock.append).toHaveBeenCalledWith({
       context,
-      timestamp,
       level: LogLevel.Warn,
       message: 'warn-message',
+      timestamp,
     });
   }
 
@@ -307,9 +307,9 @@ test('logger with `All` level passes all records to appenders.', () => {
     expect(appenderMock.append).toHaveBeenCalledTimes(5);
     expect(appenderMock.append).toHaveBeenCalledWith({
       context,
-      timestamp,
       level: LogLevel.Error,
       message: 'error-message',
+      timestamp,
     });
   }
 
@@ -318,9 +318,9 @@ test('logger with `All` level passes all records to appenders.', () => {
     expect(appenderMock.append).toHaveBeenCalledTimes(6);
     expect(appenderMock.append).toHaveBeenCalledWith({
       context,
-      timestamp,
       level: LogLevel.Fatal,
       message: 'fatal-message',
+      timestamp,
     });
   }
 });
@@ -341,9 +341,9 @@ test('passes log record to appenders only if log level is supported.', () => {
     expect(appenderMock.append).toHaveBeenCalledTimes(1);
     expect(appenderMock.append).toHaveBeenCalledWith({
       context,
-      timestamp,
       level: LogLevel.Warn,
       message: 'warn-message',
+      timestamp,
     });
   }
 
@@ -352,9 +352,9 @@ test('passes log record to appenders only if log level is supported.', () => {
     expect(appenderMock.append).toHaveBeenCalledTimes(2);
     expect(appenderMock.append).toHaveBeenCalledWith({
       context,
-      timestamp,
       level: LogLevel.Error,
       message: 'error-message',
+      timestamp,
     });
   }
 
@@ -363,9 +363,9 @@ test('passes log record to appenders only if log level is supported.', () => {
     expect(appenderMock.append).toHaveBeenCalledTimes(3);
     expect(appenderMock.append).toHaveBeenCalledWith({
       context,
-      timestamp,
       level: LogLevel.Fatal,
       message: 'fatal-message',
+      timestamp,
     });
   }
 });

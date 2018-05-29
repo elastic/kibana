@@ -61,8 +61,8 @@ test('handles default values for undefined values', () => {
 test('array within array', () => {
   const type = arrayOf(
     arrayOf(string(), {
-      minSize: 2,
       maxSize: 2,
+      minSize: 2,
     }),
     { minSize: 1, maxSize: 1 }
   );

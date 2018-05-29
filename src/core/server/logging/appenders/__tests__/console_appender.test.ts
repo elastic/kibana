@@ -35,23 +35,23 @@ test('`append()` correctly formats records and pushes them to console.', () => {
 
   const records: LogRecord[] = [
     {
-      timestamp: new Date(),
-      message: 'message-1',
       context: 'context-1',
       level: LogLevel.All,
+      message: 'message-1',
+      timestamp: new Date(),
     },
     {
-      timestamp: new Date(),
-      message: 'message-2',
       context: 'context-2',
       level: LogLevel.Trace,
+      message: 'message-2',
+      timestamp: new Date(),
     },
     {
-      timestamp: new Date(),
-      message: 'message-3',
       context: 'context-3',
       error: new Error('Error'),
       level: LogLevel.Fatal,
+      message: 'message-3',
+      timestamp: new Date(),
     },
   ];
 

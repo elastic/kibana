@@ -44,9 +44,9 @@ export class HttpServer {
     for (const router of this.registeredRouters) {
       for (const route of router.getRoutes()) {
         this.server.route({
+          handler: route.handler,
           method: route.method,
           path: this.getRouteFullPath(router.path, route.path),
-          handler: route.handler,
         });
       }
     }
@@ -59,8 +59,11 @@ export class HttpServer {
       // all new platform plugins register their routes, so that `legacyKbnServer`
       // handles only requests that aren't handled by the new platform.
       this.server.route({
+        handler: ({ raw: { req, res } }, responseToolkit) => {
+          legacyKbnServer.newPlatformProxyListener.proxy(req, res);
+          return responseToolkit.abandon;
+        },
         method: '*',
-        path: '/{p*}',
         options: {
           payload: {
             output: 'stream',
@@ -68,10 +71,7 @@ export class HttpServer {
             timeout: false,
           },
         },
-        handler: ({ raw: { req, res } }, responseToolkit) => {
-          legacyKbnServer.newPlatformProxyListener.proxy(req, res);
-          return responseToolkit.abandon;
-        },
+        path: '/{p*}',
       });
     }
 
@@ -131,13 +131,13 @@ export class HttpServer {
             readFileSync(caFilePath)
           ),
 
-        key: readFileSync(ssl.key!),
         cert: readFileSync(ssl.certificate!),
-        passphrase: ssl.keyPassphrase,
-
         ciphers: config.ssl.cipherSuites.join(':'),
         // We use the server's cipher order rather than the client's to prevent the BEAST attack.
         honorCipherOrder: true,
+
+        key: readFileSync(ssl.key!),
+        passphrase: ssl.keyPassphrase,
         secureOptions: ssl.getSecureOptions(),
       };
 
@@ -204,10 +204,10 @@ export class HttpServer {
         return responseToolkit
           .redirect(
             formatUrl({
-              protocol: 'https',
               hostname: config.host,
-              port: config.port,
               pathname: request.url.pathname,
+              port: config.port,
+              protocol: 'https',
               search: request.url.search,
             })
           )

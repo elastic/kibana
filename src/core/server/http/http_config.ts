@@ -21,22 +21,6 @@ const match = (regex: RegExp, errorMsg: string) => (str: string) =>
 
 const createHttpSchema = object(
   {
-    host: string({
-      defaultValue: 'localhost',
-      validate: match(validHostnameRegex, 'must be a valid hostname'),
-    }),
-    port: number({
-      defaultValue: 5601,
-    }),
-    cors: oneOf([
-      boolean({ defaultValue: false }),
-      object({
-        origin: arrayOf(string({ defaultValue: '*://localhost:9876' })),
-      }),
-    ]),
-    maxPayload: byteSize({
-      defaultValue: '1048576b',
-    }),
     basePath: maybe(
       string({
         validate: match(
@@ -45,6 +29,22 @@ const createHttpSchema = object(
         ),
       })
     ),
+    cors: oneOf([
+      boolean({ defaultValue: false }),
+      object({
+        origin: arrayOf(string({ defaultValue: '*://localhost:9876' })),
+      }),
+    ]),
+    host: string({
+      defaultValue: 'localhost',
+      validate: match(validHostnameRegex, 'must be a valid hostname'),
+    }),
+    maxPayload: byteSize({
+      defaultValue: '1048576b',
+    }),
+    port: number({
+      defaultValue: 5601,
+    }),
     rewriteBasePath: boolean({ defaultValue: false }),
     ssl: SslConfig.schema,
   },

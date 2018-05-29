@@ -14,8 +14,8 @@ const { literal, object, string } = schema;
 export class FileAppender implements DisposableAppender {
   public static configSchema = object({
     kind: literal('file'),
-    path: string(),
     layout: Layouts.configSchema,
+    path: string(),
   });
 
   /**
@@ -37,8 +37,8 @@ export class FileAppender implements DisposableAppender {
   public append(record: LogRecord) {
     if (this.outputStream === undefined) {
       this.outputStream = createWriteStream(this.path, {
-        flags: 'a',
         encoding: 'utf8',
+        flags: 'a',
       });
     }
 

@@ -131,7 +131,6 @@ test("throws error if config class does not implement 'schema'", async () => {
 
 test('tracks unhandled paths', async () => {
   const initialConfig = {
-    foo: 'value',
     bar: {
       deep1: {
         key: '123',
@@ -140,6 +139,7 @@ test('tracks unhandled paths', async () => {
         key: '321',
       },
     },
+    foo: 'value',
     quux: {
       deep1: {
         key: 'hello',
