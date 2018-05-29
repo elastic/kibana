@@ -57,7 +57,9 @@ export class PluginVertex extends Vertex {
   }
 
   get eventsPerSecond() {
-    const eventsPerMillisecond = this.stats.events_per_millisecond;
+    const eventsPerMillisecond = this.isInput
+      ? this.stats.events_out_per_millisecond
+      : this.stats.events_in_per_millisecond;
     return {
       ...omit(eventsPerMillisecond, 'data'),
       data: get(eventsPerMillisecond, 'data', []).map(([x, y]) => [x, y * 1000])
