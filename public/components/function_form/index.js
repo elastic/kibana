@@ -14,12 +14,14 @@ import {
   getSelectedPage,
   getContextForIndex,
 } from '../../state/selectors/workpad';
+import { getAssets } from '../../state/selectors/assets';
 import { FunctionForm as Component } from './function_form';
 
 const mapStateToProps = (state, { expressionIndex }) => ({
   context: getContextForIndex(state, expressionIndex),
   element: getSelectedElement(state),
   pageId: getSelectedPage(state),
+  assets: getAssets(state),
 });
 
 const mapDispatchToProps = (dispatch, { expressionIndex }) => ({
@@ -57,15 +59,22 @@ const mapDispatchToProps = (dispatch, { expressionIndex }) => ({
     const assetId = getId('asset');
     dispatch(createAsset(type, content, assetId));
 
-    // then the id, so the caller knows the id that will be created
+    // then return the id, so the caller knows the id that will be created
     return assetId;
   },
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
-  const { element, pageId } = stateProps;
+  const { element, pageId, assets } = stateProps;
   const { argType, nextArgType } = ownProps;
-  const { updateContext, setArgument, addArgument, deleteArgument, ...dispatchers } = dispatchProps;
+  const {
+    updateContext,
+    setArgument,
+    addArgument,
+    deleteArgument,
+    onAssetAdd,
+    ...dispatchers
+  } = dispatchProps;
 
   return {
     ...stateProps,
@@ -77,6 +86,13 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
     onValueChange: setArgument(element, pageId),
     onValueAdd: addArgument(element, pageId),
     onValueRemove: deleteArgument(element, pageId),
+    onAssetAdd: (type, content) => {
+      const existingId = Object.keys(assets).find(
+        assetId => assets[assetId].type === type && assets[assetId].value === content
+      );
+      if (existingId) return existingId;
+      return onAssetAdd(type, content);
+    },
   };
 };
 
