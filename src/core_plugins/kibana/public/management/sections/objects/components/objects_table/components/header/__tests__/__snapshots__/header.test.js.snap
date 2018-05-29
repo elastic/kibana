@@ -2,11 +2,8 @@
 
 exports[`Header should render normally 1`] = `
 <React.Fragment>
-  <EuiSpacer
-    size="m"
-  />
   <EuiFlexGroup
-    alignItems="flexEnd"
+    alignItems="baseline"
     component="div"
     direction="row"
     gutterSize="l"
@@ -18,37 +15,62 @@ exports[`Header should render normally 1`] = `
       component="div"
       grow={false}
     >
-      <EuiTitle
-        size="m"
-      >
-        <h1>
-          Edit Saved Objects (Found 
-          4
-          )
-        </h1>
-      </EuiTitle>
-    </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={false}
-    >
       <EuiFlexGroup
-        alignItems="flexEnd"
+        alignItems="baseline"
         component="div"
         direction="row"
-        gutterSize="l"
-        justifyContent="spaceBetween"
-        responsive={true}
+        gutterSize="m"
+        justifyContent="flexStart"
+        responsive={false}
         wrap={false}
       >
         <EuiFlexItem
           component="div"
           grow={false}
         >
-          <EuiButton
+          <EuiTitle
+            size="m"
+          >
+            <h1>
+              Saved Objects
+            </h1>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem
+          component="div"
+          grow={true}
+        >
+          <EuiTextColor
+            color="subdued"
+          >
+            <p>
+              4
+               in total
+            </p>
+          </EuiTextColor>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiFlexGroup
+        alignItems="baseline"
+        component="div"
+        direction="row"
+        gutterSize="m"
+        justifyContent="flexStart"
+        responsive={false}
+        wrap={false}
+      >
+        <EuiFlexItem
+          component="div"
+          grow={false}
+        >
+          <EuiButtonEmpty
             color="primary"
             data-test-subj="exportAllObjects"
-            fill={false}
             iconSide="left"
             iconType="exportAction"
             onClick={[Function]}
@@ -56,16 +78,15 @@ exports[`Header should render normally 1`] = `
             type="button"
           >
             Export Everything
-          </EuiButton>
+          </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem
           component="div"
           grow={false}
         >
-          <EuiButton
+          <EuiButtonEmpty
             color="primary"
             data-test-subj="importObjects"
-            fill={false}
             iconSide="left"
             iconType="importAction"
             onClick={[Function]}
@@ -73,15 +94,14 @@ exports[`Header should render normally 1`] = `
             type="button"
           >
             Import
-          </EuiButton>
+          </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem
           component="div"
           grow={false}
         >
-          <EuiButton
+          <EuiButtonEmpty
             color="primary"
-            fill={false}
             iconSide="left"
             iconType="refresh"
             onClick={[Function]}
@@ -89,13 +109,13 @@ exports[`Header should render normally 1`] = `
             type="button"
           >
             Refresh
-          </EuiButton>
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>
   </EuiFlexGroup>
   <EuiSpacer
-    size="s"
+    size="m"
   />
   <EuiText
     grow={true}
