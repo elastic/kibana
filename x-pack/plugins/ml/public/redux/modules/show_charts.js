@@ -6,14 +6,14 @@
 
 const SHOW_CHARTS = 'SHOW_CHARTS';
 
-export const aShowCharts = (showCharts) => ({ type: SHOW_CHARTS, showCharts });
+export const showCharts = (visible) => ({ type: SHOW_CHARTS, visible });
 
 const defaultState = true;
 
 export const showChartsReducer = (state = defaultState, action) => {
   switch (action.type) {
     case SHOW_CHARTS:
-      return action.showCharts;
+      return action.visible;
 
     default:
       return state;

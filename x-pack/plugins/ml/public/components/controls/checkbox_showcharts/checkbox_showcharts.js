@@ -11,7 +11,7 @@
  */
 
 import { store, dispatchDecorator } from '../../../redux/store';
-import { aShowCharts } from '../../../redux/modules/show_charts';
+import { showCharts } from '../../../redux/modules/show_charts';
 
 import template from './checkbox_showcharts.html';
 import 'plugins/ml/components/controls/controls_select';
@@ -28,9 +28,9 @@ module
         visible: '='
       },
       link: function (scope) {
-        const dShowCharts = dispatchDecorator(aShowCharts);
+        const dispatchShowCharts = dispatchDecorator(showCharts);
         scope.showCharts = store.getState().showCharts;
-        scope.toggleChartsVisibility = () => dShowCharts(scope.showCharts);
+        scope.toggleChartsVisibility = () => dispatchShowCharts(scope.showCharts);
       }
     };
   });

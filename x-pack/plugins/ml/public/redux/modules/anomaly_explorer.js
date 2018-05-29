@@ -10,16 +10,16 @@ const TIMERANGE_CHANGE = 'TIMERANGE_CHANGE';
 const LOADING_START = 'LOADING_START';
 const LOADING_STOP = 'LOADING_STOP';
 
-export const aAnomalyDataChange = (anomalyChartRecords, earliestMs, latestMs) => ({
+export const anomalyDataChange = (anomalyChartRecords, earliestMs, latestMs) => ({
   type: ANOMALY_DATA_CHANGE,
   anomalyChartRecords,
   earliestMs,
   latestMs
 });
-export const aTimeRangeChange = (timerange) => ({ type: TIMERANGE_CHANGE, timerange });
+export const timeRangeChange = (timerange) => ({ type: TIMERANGE_CHANGE, timerange });
 
-export const aLoadingStart = () => ({ type: LOADING_START });
-export const aLoadingStop = () => ({ type: LOADING_STOP });
+export const loadingStart = () => ({ type: LOADING_START });
+export const loadingStop = () => ({ type: LOADING_STOP });
 
 const defaultState = {
   anomalyChartRecords: [],
