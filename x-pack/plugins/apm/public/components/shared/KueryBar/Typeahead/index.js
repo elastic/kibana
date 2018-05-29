@@ -10,6 +10,7 @@ import styled from 'styled-components';
 import Suggestions from './Suggestions';
 import ClickOutside from './ClickOutside';
 import { fontSizes, units, px, colors } from '../../../../style/variables';
+import { EuiButton } from '@elastic/eui';
 
 const KEY_CODES = {
   LEFT: 37,
@@ -156,24 +157,40 @@ export class Typeahead extends Component {
     this.setState({ index });
   };
 
+  onSubmit = () => {
+    this.props.onSubmit(this.state.value);
+    this.setState({ isSuggestionsVisible: false });
+  };
+
   render() {
     return (
       <ClickOutside
         onClickOutside={this.onClickOutside}
         style={{ position: 'relative' }}
       >
-        <Input
-          placeholder="Search..."
-          innerRef={node => (this.inputRef = node)}
-          type="text"
-          value={this.state.value}
-          onKeyDown={this.onKeyDown}
-          onKeyUp={this.onKeyUp}
-          onChange={this.onChangeInputValue}
-          onClick={this.onClickInput}
-          autoComplete="off"
-          spellCheck={false}
-        />
+        <div style={{ display: 'flex' }}>
+          <Input
+            placeholder="Search..."
+            innerRef={node => (this.inputRef = node)}
+            type="text"
+            value={this.state.value}
+            onKeyDown={this.onKeyDown}
+            onKeyUp={this.onKeyUp}
+            onChange={this.onChangeInputValue}
+            onClick={this.onClickInput}
+            autoComplete="off"
+            spellCheck={false}
+          />
+
+          <EuiButton
+            onClick={this.onSubmit}
+            iconType="search"
+            fill
+            style={{ minWidth: '60px' }}
+            aria-label="Search"
+          />
+        </div>
+
         <Suggestions
           show={this.state.isSuggestionsVisible}
           suggestions={this.props.suggestions}
