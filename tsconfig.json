@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "allowJs": true,
     "baseUrl": ".",
     "paths": {
       "ui/*": ["src/ui/public/*"]

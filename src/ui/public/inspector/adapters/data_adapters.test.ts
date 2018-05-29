@@ -1,7 +1,7 @@
 import { DataAdapter } from './data_adapter';
 
 describe('DataAdapter', () => {
-  let adapter: DataAdapter = null;
+  let adapter: DataAdapter;
 
   beforeEach(() => {
     adapter = new DataAdapter();

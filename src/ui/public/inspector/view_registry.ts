@@ -1,6 +1,5 @@
 import { EventEmitter } from 'events';
-import React from 'react';
-import { Adapters, InspectorViewProps } from './types';
+import { Adapters, InspectorViewDescription } from './types';
 
 /**
  * @callback viewShouldShowFunc
@@ -8,29 +7,6 @@ import { Adapters, InspectorViewProps } from './types';
  *    should be shown for.
  * @returns {boolean} true - if this view should be shown for the given adapters.
  */
-
-/**
- * An object describing an inspector view.
- * @typedef {object} InspectorViewDescription
- * @property {string} title - The title that will be used to present that view.
- * @property {string} icon - An icon name to present this view. Must match an EUI icon.
- * @property {React.ComponentType<InspectorViewProps>} component - The actual React component to render that
- *    that view. It should always return an `InspectorView` element at the toplevel.
- * @property {number} [order=9000] - An order for this view. Views are ordered from lower
- *    order values to higher order values in the UI.
- * @property {string} [help=''] - An help text for this view, that gives a brief description
- *    of this view.
- * @property {viewShouldShowFunc} [shouldShow] - A function, that determines whether
- *    this view should be visible for a given collection of adapters. If not specified
- *    the view will always be visible.
- */
-interface InspectorViewDescription {
-  component: React.ComponentType<InspectorViewProps>;
-  help?: string;
-  order?: number;
-  shouldShow?: (adapters: Adapters) => boolean;
-  title: string;
-}
 
 /**
  * A registry that will hold inspector views.
