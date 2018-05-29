@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 import { IncomingMessage, ServerResponse } from 'http';
 
-class mockNetServer extends EventEmitter {
+class MockNetServer extends EventEmitter {
   public address() {
     return { port: 1234, family: 'test-family', address: 'test-address' };
   }
@@ -12,8 +12,13 @@ class mockNetServer extends EventEmitter {
     callback(null, 100500);
   }
 }
+
+function mockNetServer() {
+  return new MockNetServer();
+}
+
 jest.mock('net', () => ({
-  createServer: jest.fn(() => new mockNetServer()),
+  createServer: jest.fn(() => mockNetServer()),
 }));
 
 import { createServer } from 'net';
