@@ -28,7 +28,6 @@ import { store } from '../../redux/store';
 
 module.controller('MlExplorerChartsContainerController', function ($scope, $injector) {
   const Private = $injector.get('Private');
-  const mlExplorerDashboardService = $injector.get('mlExplorerDashboardService');
   const mlSelectSeverityService = $injector.get('mlSelectSeverityService');
 
   const state = store.getState().anomalyExplorer;
@@ -270,10 +269,9 @@ module.controller('MlExplorerChartsContainerController', function ($scope, $inje
       });
   };
 
-  mlExplorerDashboardService.anomalyDataChange.watch(anomalyDataChangeListener);
-
-  $scope.$on('$destroy', () => {
-    mlExplorerDashboardService.anomalyDataChange.unwatch(anomalyDataChangeListener);
+  store.subscribe(() => {
+    const { anomalyChartRecords, earliestMs, latestMs } = store.getState().anomalyExplorer;
+    anomalyDataChangeListener(anomalyChartRecords, earliestMs, latestMs);
   });
 
   function processRecordsForDisplay(anomalyRecords) {

@@ -56,6 +56,7 @@ const module = uiModules.get('apps/ml');
 
 import { store, dispatchDecorator } from '../redux/store';
 import {
+  aAnomalyDataChange,
   aLoadingStart,
   aLoadingStop
 } from '../redux/modules/anomaly_explorer';
@@ -78,12 +79,14 @@ module.controller('MlExplorerController', function (
   store.subscribe(() => {
     const newState = store.getState().anomalyExplorer;
     $scope.loading = newState.loading;
+    $scope.anomalyChartRecords = newState.anomalyChartRecords;
     $scope.$applyAsync();
   });
 
   $scope.loading = state.loading;
   const dLoadingStart = dispatchDecorator(aLoadingStart);
   const dLoadingStop = dispatchDecorator(aLoadingStop);
+  const dAnomalyDataChange = dispatchDecorator(aAnomalyDataChange);
   timefilter.enableTimeRangeSelector();
   timefilter.enableAutoRefreshSelector();
 
@@ -390,7 +393,6 @@ module.controller('MlExplorerController', function (
         // Multiple cells are selected, all with a score of 0 - clear all anomalies.
         $scope.$evalAsync(() => {
           $scope.influencers = {};
-          $scope.anomalyChartRecords = [];
 
           $scope.tableData = {
             anomalies: [],
@@ -400,7 +402,7 @@ module.controller('MlExplorerController', function (
           };
         });
 
-        mlExplorerDashboardService.anomalyDataChange.changed(
+        dAnomalyDataChange(
           [],
           timerange.earliestMs,
           timerange.latestMs
@@ -416,7 +418,7 @@ module.controller('MlExplorerController', function (
       swimlaneCellClickListener($scope.cellData);
     } else {
       const timerange = getSelectionTimeRange($scope.cellData);
-      mlExplorerDashboardService.anomalyDataChange.changed(
+      dAnomalyDataChange(
         [], timerange.earliestMs, timerange.latestMs
       );
     }
@@ -427,7 +429,7 @@ module.controller('MlExplorerController', function (
     const showCharts = mlCheckboxShowChartsService.state.get('showCharts');
     if (showCharts && $scope.cellData !== undefined) {
       const timerange = getSelectionTimeRange($scope.cellData);
-      mlExplorerDashboardService.anomalyDataChange.changed(
+      dAnomalyDataChange(
         $scope.anomalyChartRecords, timerange.earliestMs, timerange.latestMs
       );
     }
@@ -483,7 +485,7 @@ module.controller('MlExplorerController', function (
           console.log('Explorer anomaly charts data set:', $scope.anomalyChartRecords);
 
           if (mlCheckboxShowChartsService.state.get('showCharts')) {
-            mlExplorerDashboardService.anomalyDataChange.changed(
+            dAnomalyDataChange(
               $scope.anomalyChartRecords, earliestMs, latestMs
             );
           }
@@ -882,7 +884,7 @@ module.controller('MlExplorerController', function (
     const bounds = timefilter.getActiveBounds();
     const earliestMs = bounds.min.valueOf();
     const latestMs = bounds.max.valueOf();
-    mlExplorerDashboardService.anomalyDataChange.changed($scope.anomalyChartRecords, earliestMs, latestMs);
+    dAnomalyDataChange($scope.anomalyChartRecords, earliestMs, latestMs);
     loadDataForCharts(jobIds, [], earliestMs, latestMs);
     loadAnomaliesTableData();
   }

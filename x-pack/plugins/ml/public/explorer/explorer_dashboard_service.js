@@ -24,7 +24,6 @@ module.service('mlExplorerDashboardService', function () {
   const swimlaneCellClick = this.swimlaneCellClick = listenerFactory();
   const swimlaneDataChange = this.swimlaneDataChange = listenerFactory();
   const swimlaneRenderDone = this.swimlaneRenderDone = listenerFactory();
-  this.anomalyDataChange = listenerFactory();
 
   this.init = function () {
     // Clear out any old listeners.
