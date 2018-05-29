@@ -27,7 +27,6 @@ import { RoleValidator } from '../lib/validate_role';
 import { ReservedRoleBadge } from './reserved_role_badge';
 import { ROLES_PATH } from '../../management_urls';
 import { DeleteRoleButton } from './delete_role_button';
-import { setApplicationPrivileges } from '../lib/set_application_privileges';
 import { ElasticsearchPrivileges, KibanaPrivileges } from './privileges';
 
 const notifier = new Notifier();
@@ -247,8 +246,6 @@ export class EditRolePage extends Component {
 
       role.indices = role.indices.filter(i => !this.isPlaceholderPrivilege(i));
       role.indices.forEach((index) => index.query || delete index.query);
-
-      setApplicationPrivileges(this.props.kibanaPrivileges, role, this.props.rbacApplication);
 
       saveRole(httpClient, role)
         .then(() => {
