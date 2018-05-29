@@ -12,7 +12,6 @@ import {
   toQuery,
   legacyEncodeURIComponent
 } from '../../../utils/url';
-import { debounce } from 'lodash';
 import { Typeahead } from './Typeahead';
 import { getAPMIndexPattern } from '../../../services/rest/savedObjects';
 import { convertKueryToEsQuery, getSuggestions } from '../../../services/kuery';
@@ -35,7 +34,7 @@ class KueryBarView extends Component {
     this.setState({ indexPattern });
   }
 
-  onChange = debounce(async (inputValue, selectionStart) => {
+  onChange = async (inputValue, selectionStart) => {
     const { indexPattern } = this.state;
     const { urlParams } = this.props;
     if (!indexPattern) {
@@ -51,7 +50,7 @@ class KueryBarView extends Component {
       boolFilter
     );
     this.setState({ suggestions, isLoading: false });
-  }, 200);
+  };
 
   onSubmit = inputValue => {
     const { indexPattern } = this.state;
