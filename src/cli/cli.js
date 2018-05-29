@@ -29,7 +29,7 @@ program
   .version(pkg.version)
   .description(
     'Kibana is an open source (Apache Licensed), browser ' +
-  'based analytics and search dashboard for Elasticsearch.'
+    'based analytics and search dashboard for Elasticsearch.'
   );
 
 // attach commands

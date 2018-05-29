@@ -17,7 +17,7 @@
  * under the License.
  */
 
-require('./src/babel-register');
+require('./src/setup_node_env');
 
 module.exports = function (grunt) {
   // set the config once before calling load-grunt-config

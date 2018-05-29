@@ -17,19 +17,21 @@
  * under the License.
  */
 
-const path = require('path');
-const pkg = require('../package.json');
-const kbnEs = require('@kbn/es');
+var resolve = require('path').resolve;
+var pkg = require('../package.json');
+var kbnEs = require('@kbn/es');
+
+require('../src/setup_node_env');
 
 kbnEs
   .run({
     license: 'basic',
     password: 'changeme',
     version: pkg.version,
-    'source-path': path.resolve(__dirname, '../../elasticsearch'),
-    'base-path': path.resolve(__dirname, '../.es'),
+    'source-path': resolve(__dirname, '../../elasticsearch'),
+    'base-path': resolve(__dirname, '../.es'),
   })
-  .catch(e => {
+  .catch(function (e) {
     console.error(e);
     process.exitCode = 1;
   });

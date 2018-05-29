@@ -17,5 +17,5 @@
  * under the License.
  */
 
-require('../babel-register');
+require('../setup_node_env');
 require('./cli_keystore');

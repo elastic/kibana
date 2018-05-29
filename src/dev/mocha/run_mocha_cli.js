@@ -43,8 +43,8 @@ export function runMochaCli() {
   // check that we aren't leaking any globals
   process.argv.push('--check-leaks');
 
-  // ensure that mocha requires the babel-register script
-  process.argv.push('--require', require.resolve('../../babel-register'));
+  // ensure that mocha requires the setup_node_env script
+  process.argv.push('--require', require.resolve('../../setup_node_env'));
 
   // set default test timeout
   if (opts.timeout == null && !opts['no-timeouts']) {

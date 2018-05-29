@@ -17,13 +17,18 @@
  * under the License.
  */
 
-// `babel-preset-env` looks for and rewrites the following import
-// statement into a list of import statements based on the polyfills
-// necessary for our target environment (the current version of node)
-// but since it does that during compilation, `import 'babel-polyfill'`
-// must be in a file that is loaded with `require()` AFTER `babel-register`
-// is configured.
-//
-// This is why we have this single statement in it's own file and require
-// it from ./index.js
-import 'babel-polyfill';
+// unless we are running a prebuilt/distributable version of
+// kibana, automatically transpile typescript to js before babel
+if (!global.__BUILT_WITH_BABEL__) {
+  var resolve = require('path').resolve;
+  require('ts-node').register({
+    transpileOnly: true,
+    cacheDirectory: resolve(__dirname, '../../../optimize/.cache/ts-node')
+  });
+}
+
+// register and polyfill need to happen in this
+// order and in separate files. Checkout each file
+// for a much more detailed explanation
+require('./register');
+require('./polyfill');
