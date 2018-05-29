@@ -32,7 +32,7 @@ function stringToDuration(text: string) {
     );
   }
 
-  const count = parseInt(result[1]);
+  const count = parseInt(result[1], 0);
   const unit = result[2] as any;
 
   return momentDuration(count, unit);

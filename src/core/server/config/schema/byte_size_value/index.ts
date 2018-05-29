@@ -63,7 +63,7 @@ export class ByteSizeValue {
       );
     }
 
-    const value = parseInt(match[1]);
+    const value = parseInt(match[1], 0);
     const unit = match[2];
 
     return new ByteSizeValue(value * unitMultiplier[unit]);
