@@ -17,14 +17,14 @@ export const table = () => ({
       argType: 'select',
       default: 10,
       options: {
-        choices: ['', 5, 10, 25, 50, 100].map(v => ({ name: v, value: v })),
+        choices: ['', 5, 10, 25, 50, 100].map(v => ({ name: String(v), value: v })),
       },
     },
     {
       name: 'paginate',
       displayName: 'Pagination',
       help: 'Show or hide pagination controls. If disabled only the first page will be shown.',
-      argType: 'checkbox',
+      argType: 'toggle',
       default: true,
     },
   ],

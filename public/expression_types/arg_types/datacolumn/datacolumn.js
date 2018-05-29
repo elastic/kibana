@@ -1,14 +1,13 @@
 import React from 'react';
 import { compose, withPropsOnChange, withHandlers } from 'recompose';
 import PropTypes from 'prop-types';
-import { FormControl } from 'react-bootstrap';
+import { EuiSelect, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { sortBy } from 'lodash';
 import { createStatefulPropHoc } from '../../../components/enhance/stateful_prop';
 import { getType } from '../../../../common/lib/get_type';
 import { templateFromReactComponent } from '../../../lib/template_from_react_component';
 import { SimpleMathFunction } from './simple_math_function';
 import { getFormObject } from './get_form_object';
-import './datacolumn.less';
 
 const maybeQuoteValue = val => (val.match(/\s/) ? `'${val}'` : val);
 
@@ -19,6 +18,7 @@ const DatacolumnArgInput = ({
   mathValue,
   setMathFunction,
   renderError,
+  argId,
 }) => {
   if (mathValue.error) {
     renderError();
@@ -48,30 +48,32 @@ const DatacolumnArgInput = ({
   };
 
   const column = columns.map(col => col.name).find(colName => colName === mathValue.column) || '';
+
+  const options = [{ value: '', text: 'select column', disabled: true }];
+
+  sortBy(columns, 'name').forEach(column => {
+    options.push({ value: column.name, text: column.name });
+  });
+
   return (
-    <div className="canvas__argtype--datacolumn">
-      <SimpleMathFunction
-        value={mathValue.fn}
-        inputRef={ref => (inputRefs.fn = ref)}
-        onChange={updateFunctionValue}
-      />
-      <FormControl
-        componentClass="select"
-        placeholder="select"
-        value={column}
-        inputRef={ref => (inputRefs.column = ref)}
-        onChange={updateFunctionValue}
-      >
-        <option value="" disabled>
-          select column
-        </option>
-        {sortBy(columns, 'name').map(column => (
-          <option key={column.name} value={column.name}>
-            {column.name}
-          </option>
-        ))}
-      </FormControl>
-    </div>
+    <EuiFlexGroup gutterSize="s" className="canvas__argtype--datacolumn" id={argId}>
+      <EuiFlexItem grow={false}>
+        <SimpleMathFunction
+          id={argId}
+          value={mathValue.fn}
+          inputRef={ref => (inputRefs.fn = ref)}
+          onChange={updateFunctionValue}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiSelect
+          options={options}
+          defaultValue={column}
+          inputRef={ref => (inputRefs.column = ref)}
+          onChange={updateFunctionValue}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
@@ -82,6 +84,7 @@ DatacolumnArgInput.propTypes = {
   setMathFunction: PropTypes.func.isRequired,
   typeInstance: PropTypes.object.isRequired,
   renderError: PropTypes.func.isRequired,
+  argId: PropTypes.string.isRequired,
 };
 
 const EnhancedDatacolumnArgInput = compose(

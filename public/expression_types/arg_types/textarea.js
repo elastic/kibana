@@ -1,34 +1,28 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { compose, withProps } from 'recompose';
-import { FormGroup, FormControl, Button } from 'react-bootstrap';
 import { get } from 'lodash';
+import { EuiForm, EuiTextArea, EuiButton } from '@elastic/eui';
 import { createStatefulPropHoc } from '../../components/enhance/stateful_prop';
 import { templateFromReactComponent } from '../../lib/template_from_react_component';
 
-const TextAreaArgInput = ({ updateValue, value, confirm, commit, renderError }) => {
+const TextAreaArgInput = ({ updateValue, value, confirm, commit, renderError, argId }) => {
   if (typeof value !== 'string') {
     renderError();
     return null;
   }
   return (
-    <div>
-      <FormGroup>
-        <FormControl
-          spellCheck={false}
-          componentClass="textarea"
-          style={{ height: 200 }}
-          value={value}
-          onChange={confirm ? updateValue : ev => commit(ev.target.value)}
-        />
-      </FormGroup>
-
-      {confirm && (
-        <Button bsStyle="primary" bsSize="xsmall" onClick={() => commit(value)}>
-          {confirm}
-        </Button>
-      )}
-    </div>
+    <EuiForm>
+      <EuiTextArea
+        id={argId}
+        rows={5}
+        value={value}
+        onChange={confirm ? updateValue : ev => commit(ev.target.value)}
+      />
+      <EuiButton size="s" onClick={() => commit(value)}>
+        {confirm}
+      </EuiButton>
+    </EuiForm>
   );
 };
 
@@ -38,6 +32,7 @@ TextAreaArgInput.propTypes = {
   confirm: PropTypes.string,
   commit: PropTypes.func.isRequired,
   renderError: PropTypes.func,
+  argId: PropTypes.string.isRequired,
 };
 
 const EnhancedTextAreaArgInput = compose(

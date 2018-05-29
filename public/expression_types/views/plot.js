@@ -17,7 +17,7 @@ export const plot = () => ({
       name: 'legend',
       displayName: 'Legend Visibility',
       help: 'Enable or disable the legend',
-      argType: 'checkbox',
+      argType: 'toggle',
       default: 'true',
     },
     {

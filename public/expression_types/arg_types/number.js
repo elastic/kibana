@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { compose, withProps } from 'recompose';
-import { Form, FormGroup, FormControl, Button } from 'react-bootstrap';
+import { EuiFieldNumber, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { get } from 'lodash';
 import { createStatefulPropHoc } from '../../components/enhance/stateful_prop';
 import { templateFromReactComponent } from '../../lib/template_from_react_component';
@@ -11,26 +11,27 @@ import { templateFromReactComponent } from '../../lib/template_from_react_compon
 // most understandable way to do this. There, I said it.
 
 // TODO: Support max/min as options
-const NumberArgInput = ({ updateValue, value, confirm, commit }) => (
-  <Form inline>
-    <FormGroup>
-      <FormControl
-        spellCheck={false}
-        value={value}
+const NumberArgInput = ({ updateValue, value, confirm, commit, argId }) => (
+  <EuiFlexGroup gutterSize="s">
+    <EuiFlexItem>
+      <EuiFieldNumber
+        id={argId}
+        value={Number(value)}
         onChange={confirm ? updateValue : ev => commit(Number(ev.target.value))}
       />
-    </FormGroup>
+    </EuiFlexItem>
     {confirm && (
-      <Button bsStyle="primary" bsSize="xsmall" onClick={() => commit(Number(value))}>
-        {confirm}
-      </Button>
+      <EuiFlexItem grow={false}>
+        <EuiButton onClick={() => commit(Number(value))}>{confirm}</EuiButton>
+      </EuiFlexItem>
     )}
-  </Form>
+  </EuiFlexGroup>
 );
 
 NumberArgInput.propTypes = {
+  argId: PropTypes.string.isRequired,
   updateValue: PropTypes.func.isRequired,
-  value: PropTypes.number.isRequired,
+  value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
   confirm: PropTypes.string,
   commit: PropTypes.func.isRequired,
 };

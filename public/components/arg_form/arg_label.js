@@ -11,10 +11,11 @@ export const ArgLabel = props => {
     <div className={`canvas__arg--header${className && ` ${className}`}`}>
       {expandable ? (
         <EuiAccordion
-          id={`accordian-${argId}`}
+          id={`accordion-${argId}`}
+          className="canvas__arg--label"
           buttonContent={
             <Tooltip text={help} placement="left">
-              <EuiFormLabel className="canvas__arg--label">{label}</EuiFormLabel>
+              <EuiFormLabel htmlFor={`accordion-${argId}`}>{label}</EuiFormLabel>
             </Tooltip>
           }
           extraAction={simpleArg}
@@ -30,6 +31,7 @@ export const ArgLabel = props => {
                 <span className="canvas__arg--label">{label}</span>
               </Tooltip>
             }
+            id={argId}
           >
             {simpleArg}
           </EuiFormRow>

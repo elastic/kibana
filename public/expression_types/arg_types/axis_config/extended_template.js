@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { set } from 'object-path-immutable';
-import { LabeledInput } from '../../../components/labeled_input';
+import { EuiSelect, EuiFormRow, EuiText } from '@elastic/eui';
 
 const defaultExpression = {
   type: 'expression',
@@ -25,6 +25,7 @@ export class ExtendedTemplate extends React.PureComponent {
       }).isRequired,
     ]),
     typeInstance: PropTypes.object.isRequired,
+    argId: PropTypes.string.isRequired,
   };
 
   // TODO: this should be in a helper, it's the same code from container_style
@@ -45,7 +46,9 @@ export class ExtendedTemplate extends React.PureComponent {
     const isDisabled = typeof this.props.argValue === 'boolean' && this.props.argValue === false;
 
     if (isDisabled)
-      return <div className="canvas__argtype--axis_config--disabled">The axis is disabled</div>;
+      return (
+        <EuiText className="canvas__argtype--axis_config--disabled">The axis is disabled</EuiText>
+      );
 
     const positions = {
       xaxis: ['bottom', 'top'],
@@ -54,16 +57,17 @@ export class ExtendedTemplate extends React.PureComponent {
     const argName = this.props.typeInstance.name;
     const position = this.getArgValue('position', positions[argName][0]);
 
+    const options = positions[argName].map(val => ({ value: val, text: val }));
+
     return (
-      <div className="canvas__argtype--axis_config--configure">
-        <LabeledInput
-          type="select"
-          className="position"
-          label="Position"
-          value={position}
-          values={positions[argName]}
-          onChange={this.setArgValue('position')}
-        />
+      <div>
+        <EuiFormRow label="Position">
+          <EuiSelect
+            defaultValue={position}
+            options={options}
+            onChange={this.setArgValue('position')}
+          />
+        </EuiFormRow>
       </div>
     );
   }

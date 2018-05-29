@@ -69,6 +69,7 @@ const ArgFormComponent = props => {
           },
           label,
           workpad,
+          argId,
         };
 
         const expandableLabel = Boolean(hasError || template);

@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { compose, withProps, withPropsOnChange } from 'recompose';
-import { Button, FormGroup, FormControl } from 'react-bootstrap';
+import { EuiForm, EuiTextArea, EuiButton, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
 import { createStatefulPropHoc } from '../../components/enhance/stateful_prop';
 import { fromExpression, toExpression } from '../../../common/lib/ast';
 
@@ -13,6 +13,7 @@ export const AdvancedFailureComponent = props => {
     updateArgExpression,
     resetErrorState,
     valid,
+    argId,
   } = props;
 
   const valueChange = ev => {
@@ -32,30 +33,28 @@ export const AdvancedFailureComponent = props => {
   };
 
   return (
-    <div className="canvas__arg--error canvas__arg--error-simple">
-      <form onSubmit={e => valueChange(e)}>
-        <FormGroup className={!valid && 'has-error'}>
-          <FormControl
-            spellCheck={false}
-            componentClass="textarea"
-            value={argExpression}
-            onChange={updateArgExpression}
-            rows="3"
-          />
-        </FormGroup>
-        <div className="canvas__arg--controls--submit">
-          {defaultValue &&
-            defaultValue.length && (
-              <Button bsSize="xsmall" bsStyle="link" onClick={confirmReset}>
-                Reset
-              </Button>
-            )}
-          <Button disabled={!valid} type="submit" bsSize="xsmall" bsStyle="primary">
-            Apply
-          </Button>
-        </div>
-      </form>
-    </div>
+    <EuiForm>
+      <EuiFormRow id={argId} isInvalid={!valid} error="Invalid Expression">
+        <EuiTextArea
+          id={argId}
+          isInvalid={!valid}
+          value={argExpression}
+          onChange={updateArgExpression}
+          rows={3}
+        />
+      </EuiFormRow>
+      <div>
+        <EuiButton disabled={!valid} onClick={e => valueChange(e)} size="s" type="submit">
+          Apply
+        </EuiButton>
+        {defaultValue &&
+          defaultValue.length && (
+            <EuiButtonEmpty size="s" color="danger" onClick={confirmReset}>
+              Reset
+            </EuiButtonEmpty>
+          )}
+      </div>
+    </EuiForm>
   );
 };
 
@@ -66,6 +65,7 @@ AdvancedFailureComponent.propTypes = {
   updateArgExpression: PropTypes.func.isRequired,
   resetErrorState: PropTypes.func.isRequired,
   valid: PropTypes.bool.isRequired,
+  argId: PropTypes.string.isRequired,
 };
 
 export const AdvancedFailure = compose(
