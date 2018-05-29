@@ -34,7 +34,7 @@ export function ifEmpty<T>(factory: () => T): MonoTypeOperatorFunction<T> {
         }),
       ];
 
-      return function() {
+      return () => {
         subs.forEach(sub => sub.unsubscribe());
         subs.length = 0;
       };

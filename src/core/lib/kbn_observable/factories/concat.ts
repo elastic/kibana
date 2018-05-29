@@ -36,7 +36,7 @@ export function $concat<T>(...observables: Array<Observable<T>>) {
 
     subscribe(0);
 
-    return function() {
+    return () => {
       if (subscription !== undefined) {
         subscription.unsubscribe();
       }

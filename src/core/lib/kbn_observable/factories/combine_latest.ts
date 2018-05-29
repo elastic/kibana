@@ -1,5 +1,5 @@
-import { $from } from '../factories';
 import { Observable, ObservableInput } from '../observable';
+import { $from } from './from';
 
 const pending = Symbol('awaiting first value');
 
@@ -88,7 +88,7 @@ export function $combineLatest<T>(
       })
     );
 
-    return function() {
+    return () => {
       subs.forEach(sub => {
         sub.unsubscribe();
       });

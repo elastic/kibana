@@ -47,7 +47,7 @@ test('throws if basepath is not specified, but rewriteBasePath is set', () => {
   expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
 });
 
-describe('with TLS', function() {
+describe('with TLS', () => {
   test('throws if TLS is enabled but `key` is not specified', () => {
     const httpSchema = HttpConfig.schema;
     const obj = {
