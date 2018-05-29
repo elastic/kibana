@@ -61,10 +61,10 @@ function maybe<V>(type: Type<V>): Type<V | undefined> {
 }
 
 function object<P extends Props>(
-  schema: P,
+  props: P,
   options?: TypeOptions<{ [K in keyof P]: TypeOf<P[K]> }>
 ): ObjectType<P> {
-  return new ObjectType(schema, options);
+  return new ObjectType(props, options);
 }
 
 function arrayOf<T>(itemType: Type<T>, options?: ArrayOptions<T>): Type<T[]> {

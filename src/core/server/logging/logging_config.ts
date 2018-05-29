@@ -90,9 +90,9 @@ export class LoggingConfig {
    */
   public readonly loggers: Map<string, LoggerConfigType> = new Map();
 
-  constructor(schema: LoggingConfigType) {
-    this.fillAppendersConfig(schema);
-    this.fillLoggersConfig(schema);
+  constructor(configType: LoggingConfigType) {
+    this.fillAppendersConfig(configType);
+    this.fillLoggersConfig(configType);
   }
 
   /**

@@ -18,12 +18,12 @@ const chance = new Chance();
 let server: HttpServer;
 let config: HttpConfig;
 
-function getServerListener(server: HttpServer) {
-  return (server as any).server.listener;
+function getServerListener(httpServer: HttpServer) {
+  return (httpServer as any).server.listener;
 }
 
-function getRedirectServerListener(server: HttpServer) {
-  return (server as any).redirectServer.listener;
+function getRedirectServerListener(httpServer: HttpServer) {
+  return (httpServer as any).redirectServer.listener;
 }
 
 beforeEach(() => {

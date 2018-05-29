@@ -111,11 +111,10 @@ describe('#set', () => {
   });
 
   test('correctly sets values for new platform config.', () => {
-    const legacyConfigMock = new LegacyConfigMock(
-      new Map<string, any>([
-        ['__newPlatform', { plugins: { scanDirs: ['foo'] } }],
-      ])
-    );
+    legacyConfigMock.__rawData = new Map<string, any>([
+      ['__newPlatform', { plugins: { scanDirs: ['foo'] } }],
+    ]);
+
     configAdapter = new LegacyConfigToRawConfigAdapter(legacyConfigMock);
 
     configAdapter.set(['__newPlatform', 'plugins', 'scanDirs'], ['bar']);
@@ -151,11 +150,10 @@ describe('#has', () => {
   });
 
   test('returns true if new platform config is set.', () => {
-    const legacyConfigMock = new LegacyConfigMock(
-      new Map<string, any>([
-        ['__newPlatform', { known: 'foo', known2: { sub: 'bar' } }],
-      ])
-    );
+    legacyConfigMock.__rawData = new Map<string, any>([
+      ['__newPlatform', { known: 'foo', known2: { sub: 'bar' } }],
+    ]);
+
     configAdapter = new LegacyConfigToRawConfigAdapter(legacyConfigMock);
 
     expect(configAdapter.has('__newPlatform.known')).toBe(true);
@@ -168,12 +166,11 @@ describe('#has', () => {
 });
 
 test('`getFlattenedPaths` returns paths from new platform config only.', () => {
-  const legacyConfigMock = new LegacyConfigMock(
-    new Map<string, any>([
-      ['__newPlatform', { known: 'foo', known2: { sub: 'bar' } }],
-      ['legacy', { known: 'baz' }],
-    ])
-  );
+  legacyConfigMock.__rawData = new Map<string, any>([
+    ['__newPlatform', { known: 'foo', known2: { sub: 'bar' } }],
+    ['legacy', { known: 'baz' }],
+  ]);
+
   configAdapter = new LegacyConfigToRawConfigAdapter(legacyConfigMock);
 
   expect(configAdapter.getFlattenedPaths()).toMatchSnapshot();
