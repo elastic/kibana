@@ -18,6 +18,7 @@
  */
 import _ from 'lodash';
 import { MigrationStatus, Migration } from '@kbn/migrations';
+import { KbnIndex } from '@kbn/dev-utils';
 
 export default function (kibana) {
   return new kibana.Plugin({
@@ -40,16 +41,6 @@ export default function (kibana) {
         .then(() => this.status.green('Ready'));
     }
   });
-}
-
-function pluginSpecsToMigrations(pluginSpecs) {
-  return pluginSpecs
-    .map((spec) => ({
-      id: spec.getId(),
-      mappings: _.get(spec.getExportSpecs(), 'mappings'),
-      migrations: spec.getMigrations(),
-    }))
-    .filter(p => p.migrations || p.mappings);
 }
 
 async function migrateKibanaIndex(kbnServer) {
@@ -81,6 +72,6 @@ function optsFromKbnServer({ pluginSpecs, server, version }, callCluster) {
     index: server.config().get('kibana.index'),
     log: (...args) => server.log(...args),
     callCluster: callCluster || server.plugins.elasticsearch.getCluster('admin').callWithInternalUser,
-    plugins: pluginSpecsToMigrations(pluginSpecs),
+    plugins: KbnIndex.pluginSpecsToMigrations(pluginSpecs),
   };
 }

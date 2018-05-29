@@ -18,6 +18,7 @@
  */
 export const KbnIndex = {
   clear,
+  pluginSpecsToMigrations,
 };
 
 // Clear the index w/out wiping migration state.
@@ -39,4 +40,15 @@ function clear(kbnServer) {
       },
     },
   });
+}
+
+// Turns plugin specs into a list of migrations for the Kibana index.
+function pluginSpecsToMigrations(pluginSpecs) {
+  return pluginSpecs
+    .map(spec => ({
+      id: spec.getId(),
+      mappings: (spec.getExportSpecs() || {}).mappings,
+      migrations: spec.getMigrations(),
+    }))
+    .filter(p => p.migrations || p.mappings);
 }
