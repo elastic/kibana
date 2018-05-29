@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickNewSearch('shakes*');
       await PageObjects.visualize.waitForVisualization();
 
-      const expectedChartValues = [111396];
+      const expectedChartValues = [111390];
       await retry.try(async () => {
         const data = await PageObjects.visualize.getBarChartData('Count');
         log.debug('data=' + data);

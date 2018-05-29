@@ -1,3 +1,4 @@
+import { delay } from 'bluebird';
 export function FindProvider({ getService }) {
   const log = getService('log');
   const config = getService('config');
@@ -63,7 +64,11 @@ export function FindProvider({ getService }) {
         // clicking on the testSubject
         const input = await remote.getActiveElement();
         await input.clearValue();
-        await input.type(text);
+        const textArray = text.split('');
+        for (let i = 0; i < textArray.length; i++) {
+          await input.type(textArray[i]);
+          await delay(25);
+        }
       });
     }
 

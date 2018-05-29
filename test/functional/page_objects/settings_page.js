@@ -19,7 +19,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async clickLinkText(text) {
       await retry.try(async () => {
-        await remote.findDisplayedByLinkText(text).click();
+        await remote.findByLinkText(text).click();
       });
     }
 
@@ -313,7 +313,11 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       log.debug(`setIndexPatternField(${indexPatternName})`);
       const field = await this.getIndexPatternField();
       await field.clearValue();
-      await field.type(indexPatternName);
+      const textArray = indexPatternName.split('');
+      for (let i = 0; i < textArray.length; i++) {
+        await field.type(textArray[i]);
+        await PageObjects.common.sleep(25);
+      }
     }
 
     async getCreateIndexPatternGoToStep2Button() {

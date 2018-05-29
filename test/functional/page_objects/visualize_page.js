@@ -710,7 +710,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
       async function getChartType(chart) {
         const barHeight = await chart.getAttribute('height');
-        return Math.round(barHeight * yAxisRatio);
+        return Math.round(barHeight * yAxisRatio).toPrecision(5);
       }
       const getChartTypesPromises = chartTypes.map(getChartType);
       return await Promise.all(getChartTypesPromises);
