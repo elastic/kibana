@@ -49,7 +49,7 @@ include::{xkb-repo-dir}/ml/index.asciidoc[]
 
 include::apm/index.asciidoc[]
 
-include::{xkb-repo-dir}/graph/index.asciidoc[]
+include::graph/index.asciidoc[]
 
 include::dev-tools.asciidoc[]
 
