@@ -50,7 +50,7 @@ describe('context app', function () {
       )
         .then((hits) => {
           expect(searchSourceStub.fetchAsRejectablePromise.calledOnce).to.be(true);
-          expect(hits).to.eql(searchSourceStub._stubHits.slice(0, 3).reverse());
+          expect(hits).to.eql(searchSourceStub._stubHits.slice(0, 3));
         });
     });
 
