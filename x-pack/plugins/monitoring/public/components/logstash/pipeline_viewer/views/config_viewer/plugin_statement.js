@@ -127,7 +127,10 @@ export function PluginStatement({
         {
           statementStats &&
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup style={{ marginRight: '0px' }}>
+            <EuiFlexGroup
+              gutterSize="none"
+              style={{ marginRight: '0px' }}
+            >
               {statementStats}
             </EuiFlexGroup>
           </EuiFlexItem>
