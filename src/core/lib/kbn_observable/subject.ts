@@ -35,19 +35,6 @@ export class Subject<T> extends Observable<T> {
     super(observer => this.registerObserver(observer));
   }
 
-  protected registerObserver(observer: SubscriptionObserver<T>) {
-    if (this.isStopped) {
-      if (this.thrownError !== undefined) {
-        observer.error(this.thrownError);
-      } else {
-        observer.complete();
-      }
-    } else {
-      this.observers.add(observer);
-      return () => this.observers.delete(observer);
-    }
-  }
-
   /**
    * @param value The value that will be forwarded to every observer subscribed
    * to this subject.
@@ -91,5 +78,18 @@ export class Subject<T> extends Observable<T> {
    */
   public asObservable(): Observable<T> {
     return new Observable(observer => this.subscribe(observer));
+  }
+
+  protected registerObserver(observer: SubscriptionObserver<T>) {
+    if (this.isStopped) {
+      if (this.thrownError !== undefined) {
+        observer.error(this.thrownError);
+      } else {
+        observer.complete();
+      }
+    } else {
+      this.observers.add(observer);
+      return () => this.observers.delete(observer);
+    }
   }
 }

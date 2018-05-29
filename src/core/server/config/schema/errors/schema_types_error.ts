@@ -1,13 +1,6 @@
 import { SchemaError } from '.';
 
 export class SchemaTypesError extends SchemaError {
-  constructor(errors: Error[], message: string, key?: string) {
-    super(
-      SchemaTypesError.extractMessages(errors, message, key),
-      SchemaTypesError.extractFirstCause(errors)
-    );
-  }
-
   public static extractMessages(
     error: Error[],
     heading: string,
@@ -23,5 +16,12 @@ export class SchemaTypesError extends SchemaError {
 
   public static extractFirstCause(error: Error[]): Error | undefined {
     return error.length > 0 ? error[0] : undefined;
+  }
+
+  constructor(errors: Error[], message: string, key?: string) {
+    super(
+      SchemaTypesError.extractMessages(errors, message, key),
+      SchemaTypesError.extractFirstCause(errors)
+    );
   }
 }

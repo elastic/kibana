@@ -103,6 +103,15 @@ export class ConfigService {
     return true;
   }
 
+  public async getUnusedPaths(): Promise<string[]> {
+    const config = await k$(this.config$)(first(), toPromise());
+    const handledPaths = this.handledPaths.map(pathToString);
+
+    return config
+      .getFlattenedPaths()
+      .filter(path => !isPathHandled(path, handledPaths));
+  }
+
   private createConfig<Schema extends AnyType, Config>(
     path: ConfigPath,
     rawConfig: {},
@@ -139,15 +148,6 @@ export class ConfigService {
   private markAsHandled(path: ConfigPath) {
     this.log.debug(`Marking config path as handled: ${path}`);
     this.handledPaths.push(path);
-  }
-
-  public async getUnusedPaths(): Promise<string[]> {
-    const config = await k$(this.config$)(first(), toPromise());
-    const handledPaths = this.handledPaths.map(pathToString);
-
-    return config
-      .getFlattenedPaths()
-      .filter(path => !isPathHandled(path, handledPaths));
   }
 }
 

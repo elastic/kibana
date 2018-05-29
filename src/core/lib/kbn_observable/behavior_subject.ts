@@ -14,13 +14,6 @@ export class BehaviorSubject<T> extends Subject<T> {
     super();
   }
 
-  protected registerObserver(observer: SubscriptionObserver<T>) {
-    if (!this.isStopped) {
-      observer.next(this.value);
-    }
-    return super.registerObserver(observer);
-  }
-
   /**
    * @returns The current value of the BehaviorSubject. Most of the time this
    * shouldn't be used directly, but there are situations were it can come in
@@ -40,5 +33,12 @@ export class BehaviorSubject<T> extends Subject<T> {
       this.value = value;
     }
     return super.next(value);
+  }
+
+  protected registerObserver(observer: SubscriptionObserver<T>) {
+    if (!this.isStopped) {
+      observer.next(this.value);
+    }
+    return super.registerObserver(observer);
   }
 }

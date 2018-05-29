@@ -73,29 +73,6 @@ export class LoggingConfig {
   public static schema = loggingSchema;
 
   /**
-   * Map of the appender unique arbitrary key and its corresponding config.
-   */
-  public readonly appenders: Map<string, AppenderConfigType> = new Map([
-    [
-      DEFAULT_APPENDER_NAME,
-      {
-        kind: 'console',
-        layout: { kind: 'pattern', highlight: true },
-      } as AppenderConfigType,
-    ],
-  ]);
-
-  /**
-   * Map of the logger unique arbitrary key (context) and its corresponding config.
-   */
-  public readonly loggers: Map<string, LoggerConfigType> = new Map();
-
-  constructor(configType: LoggingConfigType) {
-    this.fillAppendersConfig(configType);
-    this.fillLoggersConfig(configType);
-  }
-
-  /**
    * Helper method that joins separate string context parts into single context string.
    * In case joined context is an empty string, `root` context name is returned.
    * @param contextParts List of the context parts (e.g. ['parent', 'child'].
@@ -117,6 +94,29 @@ export class LoggingConfig {
     }
 
     return context.slice(0, lastIndexOfSeparator);
+  }
+
+  /**
+   * Map of the appender unique arbitrary key and its corresponding config.
+   */
+  public readonly appenders: Map<string, AppenderConfigType> = new Map([
+    [
+      DEFAULT_APPENDER_NAME,
+      {
+        kind: 'console',
+        layout: { kind: 'pattern', highlight: true },
+      } as AppenderConfigType,
+    ],
+  ]);
+
+  /**
+   * Map of the logger unique arbitrary key (context) and its corresponding config.
+   */
+  public readonly loggers: Map<string, LoggerConfigType> = new Map();
+
+  constructor(configType: LoggingConfigType) {
+    this.fillAppendersConfig(configType);
+    this.fillLoggersConfig(configType);
   }
 
   private fillAppendersConfig(loggingConfig: LoggingConfigType) {

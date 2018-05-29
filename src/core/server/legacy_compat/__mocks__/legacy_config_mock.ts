@@ -2,8 +2,6 @@
  * This is a partial mock of src/server/config/config.js.
  */
 export class LegacyConfigMock {
-  constructor(public __rawData: Map<string, any> = new Map()) {}
-
   public readonly set = jest.fn((key, value) => {
     // Real legacy config throws error if key is not presented in the schema.
     if (!this.__rawData.has(key)) {
@@ -23,4 +21,6 @@ export class LegacyConfigMock {
   });
 
   public readonly has = jest.fn(key => this.__rawData.has(key));
+
+  constructor(public __rawData: Map<string, any> = new Map()) {}
 }

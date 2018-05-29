@@ -19,17 +19,6 @@ export type JsonLayoutConfigType = TypeOf<typeof jsonLayoutSchema>;
 export class JsonLayout implements Layout {
   public static configSchema = jsonLayoutSchema;
 
-  public format(record: LogRecord): string {
-    return JSON.stringify({
-      '@timestamp': record.timestamp.toISOString(),
-      context: record.context,
-      error: JsonLayout.errorToSerializableObject(record.error),
-      level: record.level.id.toUpperCase(),
-      message: record.message,
-      meta: record.meta,
-    });
-  }
-
   private static errorToSerializableObject(error: Error | undefined) {
     if (error === undefined) {
       return error;
@@ -40,5 +29,16 @@ export class JsonLayout implements Layout {
       name: error.name,
       stack: error.stack,
     };
+  }
+
+  public format(record: LogRecord): string {
+    return JSON.stringify({
+      '@timestamp': record.timestamp.toISOString(),
+      context: record.context,
+      error: JsonLayout.errorToSerializableObject(record.error),
+      level: record.level.id.toUpperCase(),
+      message: record.message,
+      meta: record.meta,
+    });
   }
 }

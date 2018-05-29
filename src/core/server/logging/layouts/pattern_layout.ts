@@ -63,6 +63,24 @@ export type PatternLayoutConfigType = TypeOf<typeof patternLayoutSchema>;
 export class PatternLayout implements Layout {
   public static configSchema = patternLayoutSchema;
 
+  private static highlightRecord(
+    record: LogRecord,
+    formattedRecord: Map<string, string>
+  ) {
+    if (LEVEL_COLORS.has(record.level)) {
+      const color = LEVEL_COLORS.get(record.level)!;
+      formattedRecord.set(
+        Parameters.Level,
+        color(formattedRecord.get(Parameters.Level)!)
+      );
+    }
+
+    formattedRecord.set(
+      Parameters.Context,
+      chalk.magenta(formattedRecord.get(Parameters.Context)!)
+    );
+  }
+
   constructor(
     private readonly pattern = DEFAULT_PATTERN,
     private readonly highlight = false
@@ -89,24 +107,6 @@ export class PatternLayout implements Layout {
     return this.pattern.replace(
       PATTERN_REGEX,
       match => formattedRecord.get(match)!
-    );
-  }
-
-  private static highlightRecord(
-    record: LogRecord,
-    formattedRecord: Map<string, string>
-  ) {
-    if (LEVEL_COLORS.has(record.level)) {
-      const color = LEVEL_COLORS.get(record.level)!;
-      formattedRecord.set(
-        Parameters.Level,
-        color(formattedRecord.get(Parameters.Level)!)
-      );
-    }
-
-    formattedRecord.set(
-      Parameters.Context,
-      chalk.magenta(formattedRecord.get(Parameters.Context)!)
     );
   }
 }

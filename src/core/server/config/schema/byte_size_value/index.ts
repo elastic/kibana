@@ -13,6 +13,21 @@ function renderUnit(value: number, unit: string) {
 }
 
 export class ByteSizeValue {
+  public static parse(text: string): ByteSizeValue {
+    const match = /([1-9][0-9]*)(b|kb|mb|gb)/.exec(text);
+    if (!match) {
+      throw new Error(
+        `could not parse byte size value [${text}]. value must start with a ` +
+          `number and end with bytes size unit, e.g. 10kb, 23mb, 3gb, 239493b`
+      );
+    }
+
+    const value = parseInt(match[1], 0);
+    const unit = match[2];
+
+    return new ByteSizeValue(value * unitMultiplier[unit]);
+  }
+
   constructor(private readonly valueInBytes: number) {
     if (!Number.isSafeInteger(valueInBytes) || valueInBytes < 0) {
       throw new Error(
@@ -52,21 +67,6 @@ export class ByteSizeValue {
     }
 
     return renderUnit(value, unit);
-  }
-
-  public static parse(text: string): ByteSizeValue {
-    const match = /([1-9][0-9]*)(b|kb|mb|gb)/.exec(text);
-    if (!match) {
-      throw new Error(
-        `could not parse byte size value [${text}]. value must start with a ` +
-          `number and end with bytes size unit, e.g. 10kb, 23mb, 3gb, 239493b`
-      );
-    }
-
-    const value = parseInt(match[1], 0);
-    const unit = match[2];
-
-    return new ByteSizeValue(value * unitMultiplier[unit]);
   }
 }
 

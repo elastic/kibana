@@ -29,17 +29,6 @@ export class LogLevel {
   public static readonly Trace = new LogLevel('trace', 7);
   public static readonly All = new LogLevel('all', 8);
 
-  private constructor(readonly id: LogLevelId, readonly value: number) {}
-
-  /**
-   * Indicates whether current log level covers the one that is passed as an argument.
-   * @param level Instance of `LogLevel` to compare to.
-   * @returns True if specified `level` is covered by this log level.
-   */
-  public supports(level: LogLevel) {
-    return this.value >= level.value;
-  }
-
   /**
    * Converts string representation of log level into `LogLevel` instance.
    * @param level String representation of log level.
@@ -66,5 +55,16 @@ export class LogLevel {
       default:
         return assertNever(level);
     }
+  }
+
+  private constructor(readonly id: LogLevelId, readonly value: number) {}
+
+  /**
+   * Indicates whether current log level covers the one that is passed as an argument.
+   * @param level Instance of `LogLevel` to compare to.
+   * @returns True if specified `level` is covered by this log level.
+   */
+  public supports(level: LogLevel) {
+    return this.value >= level.value;
   }
 }

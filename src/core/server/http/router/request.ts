@@ -5,8 +5,6 @@ import { filterHeaders, Headers } from './headers';
 import { RouteSchemas } from './route';
 
 export class KibanaRequest<Params, Query, Body> {
-  public readonly headers: Headers;
-
   /**
    * Factory for creating requests. Validates the request before creating an
    * instance of a KibanaRequest.
@@ -67,6 +65,8 @@ export class KibanaRequest<Params, Query, Body> {
 
     return { query, params, body };
   }
+
+  public readonly headers: Headers;
 
   constructor(
     req: Request,

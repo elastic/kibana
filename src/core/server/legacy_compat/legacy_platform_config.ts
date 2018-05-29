@@ -31,6 +31,53 @@ interface LegacyLoggingConfig {
  * supported by the current platform.
  */
 export class LegacyConfigToRawConfigAdapter implements RawConfig {
+  private static flattenConfigPath(configPath: ConfigPath) {
+    if (!Array.isArray(configPath)) {
+      return configPath;
+    }
+
+    return configPath.join('.');
+  }
+
+  private static transformLogging(configValue: LegacyLoggingConfig) {
+    const loggingConfig = {
+      appenders: { default: { kind: 'legacy-appender' } },
+      root: { level: 'info' },
+    };
+
+    if (configValue.silent) {
+      loggingConfig.root.level = 'off';
+    } else if (configValue.quiet) {
+      loggingConfig.root.level = 'error';
+    } else if (configValue.verbose) {
+      loggingConfig.root.level = 'all';
+    }
+
+    return loggingConfig;
+  }
+
+  private static transformServer(configValue: any) {
+    // TODO: New platform uses just a subset of `server` config from the legacy platform,
+    // new values will be exposed once we need them (eg. customResponseHeaders, cors or xsrf).
+    return {
+      basePath: configValue.basePath,
+      cors: configValue.cors,
+      host: configValue.host,
+      maxPayload: configValue.maxPayloadBytes,
+      port: configValue.port,
+      rewriteBasePath: configValue.rewriteBasePath,
+      ssl: configValue.ssl,
+    };
+  }
+
+  private static isNewPlatformConfig(configPath: ConfigPath) {
+    if (Array.isArray(configPath)) {
+      return configPath[0] === NEW_PLATFORM_CONFIG_ROOT;
+    }
+
+    return configPath.startsWith(NEW_PLATFORM_CONFIG_ROOT);
+  }
+
   private newPlatformConfig: ObjectToRawConfigAdapter;
 
   constructor(private readonly legacyConfig: LegacyConfig) {
@@ -85,52 +132,5 @@ export class LegacyConfigToRawConfigAdapter implements RawConfig {
     // new platform within the legacy one then the new platform is in charge of
     // only `__newPlatform` config node and the legacy platform will check the rest.
     return this.newPlatformConfig.getFlattenedPaths();
-  }
-
-  private static flattenConfigPath(configPath: ConfigPath) {
-    if (!Array.isArray(configPath)) {
-      return configPath;
-    }
-
-    return configPath.join('.');
-  }
-
-  private static transformLogging(configValue: LegacyLoggingConfig) {
-    const loggingConfig = {
-      appenders: { default: { kind: 'legacy-appender' } },
-      root: { level: 'info' },
-    };
-
-    if (configValue.silent) {
-      loggingConfig.root.level = 'off';
-    } else if (configValue.quiet) {
-      loggingConfig.root.level = 'error';
-    } else if (configValue.verbose) {
-      loggingConfig.root.level = 'all';
-    }
-
-    return loggingConfig;
-  }
-
-  private static transformServer(configValue: any) {
-    // TODO: New platform uses just a subset of `server` config from the legacy platform,
-    // new values will be exposed once we need them (eg. customResponseHeaders, cors or xsrf).
-    return {
-      basePath: configValue.basePath,
-      cors: configValue.cors,
-      host: configValue.host,
-      maxPayload: configValue.maxPayloadBytes,
-      port: configValue.port,
-      rewriteBasePath: configValue.rewriteBasePath,
-      ssl: configValue.ssl,
-    };
-  }
-
-  private static isNewPlatformConfig(configPath: ConfigPath) {
-    if (Array.isArray(configPath)) {
-      return configPath[0] === NEW_PLATFORM_CONFIG_ROOT;
-    }
-
-    return configPath.startsWith(NEW_PLATFORM_CONFIG_ROOT);
   }
 }

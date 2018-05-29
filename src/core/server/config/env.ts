@@ -10,18 +10,18 @@ interface EnvOptions {
 }
 
 export class Env {
-  public readonly configDir: string;
-  public readonly corePluginsDir: string;
-  public readonly binDir: string;
-  public readonly logDir: string;
-  public readonly staticFilesDir: string;
-
   /**
    * @internal
    */
   public static createDefault(options: EnvOptions): Env {
     return new Env(process.cwd(), options);
   }
+
+  public readonly configDir: string;
+  public readonly corePluginsDir: string;
+  public readonly binDir: string;
+  public readonly logDir: string;
+  public readonly staticFilesDir: string;
 
   /**
    * @internal

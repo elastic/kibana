@@ -20,30 +20,6 @@ export class Router {
   constructor(readonly path: string) {}
 
   /**
-   * Create the schemas for a route
-   *
-   * @returns Route schemas if `validate` is specified on the route, otherwise
-   * undefined.
-   */
-  private routeSchemasFromRouteConfig<
-    P extends ObjectType,
-    Q extends ObjectType,
-    B extends ObjectType
-  >(route: RouteConfig<P, Q, B>, routeMethod: RouteMethod) {
-    // The type doesn't allow `validate` to be undefined, but it can still
-    // happen when it's used from JavaScript.
-    if (route.validate === undefined) {
-      throw new Error(
-        `The [${routeMethod}] at [${
-          route.path
-        }] does not have a 'validate' specified. Use 'false' as the value if you want to bypass validation.`
-      );
-    }
-
-    return route.validate ? route.validate(schema) : undefined;
-  }
-
-  /**
    * Register a `GET` request with the router
    */
   public get<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
@@ -114,6 +90,30 @@ export class Router {
    */
   public getRoutes() {
     return [...this.routes];
+  }
+
+  /**
+   * Create the schemas for a route
+   *
+   * @returns Route schemas if `validate` is specified on the route, otherwise
+   * undefined.
+   */
+  private routeSchemasFromRouteConfig<
+    P extends ObjectType,
+    Q extends ObjectType,
+    B extends ObjectType
+  >(route: RouteConfig<P, Q, B>, routeMethod: RouteMethod) {
+    // The type doesn't allow `validate` to be undefined, but it can still
+    // happen when it's used from JavaScript.
+    if (route.validate === undefined) {
+      throw new Error(
+        `The [${routeMethod}] at [${
+          route.path
+        }] does not have a 'validate' specified. Use 'false' as the value if you want to bypass validation.`
+      );
+    }
+
+    return route.validate ? route.validate(schema) : undefined;
   }
 
   private async handle<
