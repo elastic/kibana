@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.addVisualizations([PIE_CHART_VIS_NAME]);
       await dashboardExpect.pieSliceCount(0);
 
-      await PageObjects.dashboard.setTimepickerInDataRange();
+      await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
       await dashboardExpect.pieSliceCount(10);
     });
 

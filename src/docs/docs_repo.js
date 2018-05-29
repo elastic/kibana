@@ -27,7 +27,14 @@ export function buildDocsScript(cmd) {
 
 export function buildDocsArgs(cmd) {
   const docsIndexFile = resolve(kibanaDir, 'docs', 'index.asciidoc');
-  let args = ['--doc', docsIndexFile, '--chunk=1'];
+  const xpackDocsPath = resolve(kibanaDir, 'x-pack', 'docs');
+  let args = [
+    '--doc',
+    docsIndexFile,
+    '--resource',
+    xpackDocsPath,
+    '--chunk=1',
+  ];
   if (cmd.open) {
     args = [...args, '--open'];
   }
