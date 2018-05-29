@@ -125,15 +125,14 @@ export class Config {
   }
 
   getDefault(key) {
-    const schemaDescription = Joi.describe(this.getSchema());
-    const parts = Array.isArray(key) ? key : key.split('.');
-    const path = `children.${parts.join('.children.')}`;
-    const description = _.get(schemaDescription, path);
-    if (!description) {
-      throw new Error('Unknown config key: ' + key);
+    const schemaKey = Array.isArray(key) ? key.join('.') : key;
+
+    const subSchema = Joi.reach(this.getSchema(), schemaKey);
+    if (!subSchema) {
+      throw new Error(`Unknown config key: ${key}.`);
     }
 
-    return clone(_.get(description, 'flags.default'));
+    return clone(_.get(Joi.describe(subSchema), 'flags.default'));
   }
 
   has(key) {

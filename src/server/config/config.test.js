@@ -235,7 +235,7 @@ describe('lib/config/config', function () {
         it('should throw exception for unknown key', function () {
           expect(() => {
             config.getDefault('foo.bar');
-          }).toThrow();
+          }).toThrowErrorMatchingSnapshot();
         });
       });
 
@@ -253,7 +253,7 @@ describe('lib/config/config', function () {
         it('should throw exception for unknown key', function () {
           expect(() => {
             config.getDefault(['foo', 'bar']);
-          }).toThrow();
+          }).toThrowErrorMatchingSnapshot();
         });
       });
 
