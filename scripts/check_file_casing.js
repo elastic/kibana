@@ -17,5 +17,5 @@
  * under the License.
  */
 
-require('../src/setup_node_env/babel_register');
+require('../src/setup_node_env');
 require('../src/dev/run_check_file_casing');
