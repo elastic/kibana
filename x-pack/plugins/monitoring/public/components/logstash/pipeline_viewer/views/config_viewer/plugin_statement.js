@@ -91,7 +91,10 @@ export function PluginStatement({
         justifyContent="spaceBetween"
       >
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s">
+          <EuiFlexGroup
+            gutterSize="s"
+            responsive={false}
+          >
             <EuiFlexItem
               grow={false}
               className="cv-pluginStatement__icon"

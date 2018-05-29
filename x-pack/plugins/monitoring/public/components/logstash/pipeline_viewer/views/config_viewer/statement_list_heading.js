@@ -17,7 +17,10 @@ export function StatementListHeading({
   title
 }) {
   return (
-    <EuiFlexGroup gutterSize="s">
+    <EuiFlexGroup
+      gutterSize="s"
+      responsive={false}
+    >
       <EuiFlexItem grow={false}>
         <EuiIcon
           size="m"

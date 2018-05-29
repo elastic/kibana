@@ -100,7 +100,7 @@ export class CollapsibleStatement extends React.PureComponent {
   render() {
     const { id } = this.props;
     return (
-      <EuiFlexGroup gutterSize="xs">
+      <EuiFlexGroup responsive={false} gutterSize="xs">
         <EuiFlexItem
           key={id}
           grow={false}

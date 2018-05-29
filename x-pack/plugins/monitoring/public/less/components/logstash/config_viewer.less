@@ -16,6 +16,12 @@
   border-left: 1px #b2b2b2 dashed;
 }
 
+@media (max-width: 768px) {
+  .cv-spacer {
+    border: 0px;
+  }
+}
+
 .cv-spacer:last-child {
   width: 0px;
 }
@@ -106,7 +112,7 @@
 
 .cv-list {
   display: flex;
-  height: 32px;
+  min-height: 32px;
 }
 
 .cv-listParent li:nth-child(2n+1) {
