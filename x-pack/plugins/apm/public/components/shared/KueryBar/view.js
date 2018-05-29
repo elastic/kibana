@@ -26,7 +26,8 @@ const Container = styled.div`
 class KueryBarView extends Component {
   state = {
     indexPattern: null,
-    suggestions: []
+    suggestions: [],
+    isLoading: false
   };
 
   async componentDidMount() {
@@ -40,16 +41,16 @@ class KueryBarView extends Component {
     if (!indexPattern) {
       return;
     }
+    this.setState({ suggestions: [], isLoading: true });
 
     const boolFilter = getBoolFilter(urlParams);
-    this.setState({ suggestions: [] });
     const suggestions = await getSuggestions(
       inputValue,
       selectionStart,
       indexPattern,
       boolFilter
     );
-    this.setState({ suggestions });
+    this.setState({ suggestions, isLoading: false });
   }, 200);
 
   onSubmit = inputValue => {
@@ -85,6 +86,7 @@ class KueryBarView extends Component {
           onChange={this.onChange}
           onSubmit={this.onSubmit}
           suggestions={this.state.suggestions}
+          isLoading={this.state.isLoading}
         />
       </Container>
     );
