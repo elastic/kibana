@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import Suggestions from './Suggestions';
 import ClickOutside from './ClickOutside';
+import { fontSizes, units, px } from '../../../../style/variables';
 
 const KEY_CODES = {
   LEFT: 37,
@@ -22,12 +23,13 @@ const KEY_CODES = {
 
 const Input = styled.input`
   width: 100%;
-  padding: 8px;
-  font-size: 16px;
+  padding: ${px(units.half)};
+  font-size: ${fontSizes.large};
   outline: none;
+  border-radius: ${px(units.quarter)};
 `;
 
-export class Typeahead extends React.Component {
+export class Typeahead extends Component {
   state = {
     isSuggestionsVisible: false,
     index: null,
@@ -171,6 +173,8 @@ export class Typeahead extends React.Component {
           onKeyUp={this.onKeyUp}
           onChange={this.onChangeInputValue}
           onClick={this.onClickInput}
+          autoComplete="off"
+          spellCheck={false}
         />
         <Suggestions
           show={this.state.isSuggestionsVisible}

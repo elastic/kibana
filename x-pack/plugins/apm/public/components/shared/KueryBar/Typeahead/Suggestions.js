@@ -9,18 +9,19 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 import Suggestion from './Suggestion';
+import { units, colors, px, unit } from '../../../../style/variables';
 
 const List = styled.ul`
   width: 100%;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid ${colors.gray4};
+  border-radius: ${px(units.quarter)};
+  box-shadow: 0px ${px(units.quarter)} ${px(units.double)} rgba(0, 0, 0, 0.1);
   position: absolute;
   background: #fff;
   z-index: 10;
-  top: 50px;
+  top: 42px;
   left: 0;
-  max-height: 300px;
+  max-height: ${px(unit * 20)};
   overflow: scroll;
 `;
 

@@ -42,6 +42,7 @@ class KueryBarView extends Component {
     }
 
     const boolFilter = getBoolFilter(urlParams);
+    this.setState({ suggestions: [] });
     const suggestions = await getSuggestions(
       inputValue,
       selectionStart,
