@@ -1,8 +1,5 @@
 extends: ../tslint.yaml
 
-rulesDirectory:
-  - ../src/dev/tslint/rules
-
 rules:
   require-license-header:
     - true
