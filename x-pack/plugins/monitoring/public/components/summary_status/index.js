@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
+import PropTypes from 'prop-types';
 import { isEmpty, capitalize } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { StatusIcon } from '../';
@@ -42,12 +43,12 @@ const StatusIndicator = ({ status, isOnline, IconComponent }) => {
   );
 };
 
-export function SummaryStatus({ children, status, isOnline, IconComponent = DefaultIconComponent, ...props }) {
+export function SummaryStatus({ metrics, status, isOnline, IconComponent = DefaultIconComponent, ...props }) {
   return (
     <div className="monitoring-summary-status" role="status">
       <div className="monitoring-summary-status__content" {...props}>
         <EuiFlexGroup gutterSize="xs" alignItems="center">
-          {children.map(wrapChild)}
+          {metrics.map(wrapChild)}
 
           <EuiFlexItem
             grow={true}
@@ -60,3 +61,7 @@ export function SummaryStatus({ children, status, isOnline, IconComponent = Defa
     </div>
   );
 }
+
+SummaryStatus.propTypes = {
+  metrics: PropTypes.array.isRequired
+};
