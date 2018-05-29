@@ -21,7 +21,7 @@ export const getNodeOptions = createSelector(
 
     options.sort((a, b) => a.value.localeCompare(b.value));
     options.unshift({
-      text: '',
+      text: '-- Do not reallocate my indices --',
       value: undefined,
     });
 
