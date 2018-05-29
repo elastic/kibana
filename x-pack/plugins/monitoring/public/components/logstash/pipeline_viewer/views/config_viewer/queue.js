@@ -15,7 +15,7 @@ export function Queue() {
         title="Queue"
       />
       <div className="cv-queue__messageText">
-        Queue stats not available
+        Queue metrics not available
       </div>
     </div>
   );
