@@ -6,7 +6,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
-import { isReservedRole } from '../../../../../lib/role';
+import { isReservedRole, isRoleEnabled } from '../../../../../lib/role';
 import { IndexPrivilegeForm } from './index_privilege_form';
 import { getFields } from '../../../../../objects';
 
@@ -40,8 +40,11 @@ export class IndexPrivileges extends Component {
 
     const props = {
       indexPatterns,
-      allowDocumentLevelSecurity,
-      allowFieldLevelSecurity,
+      // If editing an existing role while that has been disabled, always show the FLS/DLS fields because currently
+      // a role is only marked as disabled if it has FLS/DLS setup (usually before the user changed to a license that
+      // doesn't permit FLS/DLS).
+      allowDocumentLevelSecurity: allowDocumentLevelSecurity || !isRoleEnabled(this.props.role),
+      allowFieldLevelSecurity: allowFieldLevelSecurity || !isRoleEnabled(this.props.role),
       isReservedRole: isReservedRole(this.props.role)
     };
 
