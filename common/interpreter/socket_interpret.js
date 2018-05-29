@@ -1,5 +1,6 @@
 import { has } from 'lodash';
 import uuid from 'uuid/v4';
+import { serializeProvider } from '../lib/serialize';
 import { interpretProvider } from './interpret';
 
 /*
@@ -41,6 +42,8 @@ export function socketInterpreterProvider({
         const id = uuid();
 
         return new Promise((resolve, reject) => {
+          const { serialize, deserialize } = serializeProvider(types);
+
           const listener = resp => {
             if (resp.error) {
               // cast error strings back into error instances
@@ -48,7 +51,7 @@ export function socketInterpreterProvider({
               if (resp.stack) err.stack = resp.stack;
               reject(err);
             } else {
-              resolve(resp.value);
+              resolve(deserialize(resp.value));
             }
           };
 
@@ -56,7 +59,7 @@ export function socketInterpreterProvider({
 
           // Go run the remaining AST and context somewhere else, meaning either the browser or the server, depending on
           // where this file was loaded
-          socket.emit('run', { ast, context, id });
+          socket.emit('run', { ast, context: serialize(context), id });
         });
       });
     },

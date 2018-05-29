@@ -1,6 +1,7 @@
 import socket from 'socket.io';
 import { createHandlers } from '../lib/create_handlers';
 import { socketInterpreterProvider } from '../../common/interpreter/socket_interpret';
+import { serializeProvider } from '../../common/lib/serialize';
 import { functionsRegistry } from '../../common/lib/functions_registry';
 import { typesRegistry } from '../../common/lib/types_registry';
 import { getAuthHeader } from './get_auth/get_auth_header';
@@ -34,17 +35,19 @@ export function socketApi(server) {
       Promise.all([getClientFunctions, authHeader]).then(([clientFunctions, authHeader]) => {
         if (server.plugins.security) request.headers.authorization = authHeader;
 
+        const types = typesRegistry.toJS();
         const interpret = socketInterpreterProvider({
-          types: typesRegistry.toJS(),
+          types,
           functions: functionsRegistry.toJS(),
           handlers: createHandlers(request, server),
           referableFunctions: clientFunctions,
           socket: socket,
         });
 
-        return interpret(ast, context)
+        const { serialize, deserialize } = serializeProvider(types);
+        return interpret(ast, deserialize(context))
           .then(value => {
-            socket.emit(`resp:${id}`, { value });
+            socket.emit(`resp:${id}`, { value: serialize(value) });
           })
           .catch(e => {
             socket.emit(`resp:${id}`, {

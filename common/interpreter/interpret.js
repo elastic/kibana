@@ -19,8 +19,9 @@ const createError = (err, { name, context, args }) => ({
 });
 
 export function interpretProvider(config) {
-  const cast = castProvider(config.types);
-  const { functions, onFunctionNotFound, handlers } = config;
+  const { functions, onFunctionNotFound, types } = config;
+  const handlers = { ...config.handlers, types };
+  const cast = castProvider(types);
 
   return interpret;
 

@@ -45,6 +45,7 @@ import { table } from './table';
 import { tail } from './tail';
 import { timefilter } from './timefilter';
 import { timefilterControl } from './timefilterControl';
+import { to } from './to';
 import { switchFn } from './switch';
 import { caseFn } from './case';
 
@@ -96,6 +97,7 @@ export const commonFunctions = [
   tail,
   timefilter,
   timefilterControl,
+  to,
   switchFn,
   caseFn,
 ];

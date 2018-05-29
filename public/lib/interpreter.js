@@ -1,4 +1,5 @@
 import { socketInterpreterProvider } from '../../common/interpreter/socket_interpret';
+import { serializeProvider } from '../../common/lib/serialize';
 import { socket } from '../socket';
 import { typesRegistry } from '../../common/lib/types_registry';
 import { createHandlers } from './create_handlers';
@@ -24,7 +25,9 @@ export function interpretAst(ast, context) {
 }
 
 socket.on('run', ({ ast, context, id }) => {
-  interpretAst(ast, context).then(value => {
-    socket.emit(`resp:${id}`, { value });
+  const types = typesRegistry.toJS();
+  const { serialize, deserialize } = serializeProvider(types);
+  interpretAst(ast, deserialize(context)).then(value => {
+    socket.emit(`resp:${id}`, { value: serialize(value) });
   });
 });

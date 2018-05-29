@@ -1,5 +1,3 @@
-import { datatable } from './datatable';
-
 export const pointseries = () => ({
   name: 'pointseries',
   from: {
@@ -12,13 +10,12 @@ export const pointseries = () => ({
     },
   },
   to: {
-    render: pointseries => {
+    render: (pointseries, types) => {
+      const datatable = types.datatable.from(pointseries, types);
       return {
         type: 'render',
         as: 'table',
-        value: {
-          datatable: datatable().from.pointseries(pointseries),
-        },
+        value: { datatable },
       };
     },
   },

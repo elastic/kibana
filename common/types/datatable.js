@@ -1,4 +1,4 @@
-import { map } from 'lodash';
+import { map, zipObject } from 'lodash';
 
 export const datatable = () => ({
   name: 'datatable',
@@ -11,6 +11,24 @@ export const datatable = () => ({
     if (!datatable.rows) {
       throw new Error('datatable must have a rows array, even if it is empty');
     }
+  },
+  serialize: datatable => {
+    const { columns, rows } = datatable;
+    return {
+      ...datatable,
+      rows: rows.map(row => {
+        return columns.map(column => row[column.name]);
+      }),
+    };
+  },
+  deserialize: datatable => {
+    const { columns, rows } = datatable;
+    return {
+      ...datatable,
+      rows: rows.map(row => {
+        return zipObject(map(columns, 'name'), row);
+      }),
+    };
   },
   from: {
     null: () => {
