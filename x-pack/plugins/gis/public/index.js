@@ -11,18 +11,19 @@ import ReactDOM from 'react-dom';
 import 'ui/autoload/styles';
 import 'ui/autoload/all';
 import 'react-vis/dist/style.css';
+import { initTimepicker } from './timepicker';
 
 import './style/main.css';
-
+import '../../../node_modules/openlayers/dist/ol.css';
 
 import template from './templates/index.html';
 import { GISApp } from './components/gis_app';
 
-
 chrome.setRootTemplate(template);
-init();
+initTimepicker(init);
 
 async function init() {
+  console.log('time picker is ready');
   await whenDOMIsReady();
   const root = document.getElementById('react-gis-root');
   ReactDOM.render(<GISApp/>, root);

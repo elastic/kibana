@@ -9,7 +9,6 @@ const ROOT = '/api/gis';
 
 export function initRoutes(server) {
 
-
   server.route({
     method: 'GET',
     path: `${ROOT}/foobar`,
@@ -21,16 +20,12 @@ export function initRoutes(server) {
           "title": "also foobar",
           "version": 1
         }, {});
-        console.log(ret);
         reply(ret);
       } catch (e) {
-        console.error(e);
         throw e;
       }
     }
   });
-
-
   server.route({
     method: 'GET',
     path: `${ROOT}/app`,

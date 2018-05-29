@@ -9,11 +9,6 @@ import * as ol from 'openlayers';
 
 
 import {
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiFlyoutFooter,
-  EuiTitle,
 } from '@elastic/eui';
 
 export class GISApp extends React.Component {
@@ -43,25 +38,10 @@ export class GISApp extends React.Component {
     this._olMap.addLayer(olTileLayer);
   }
 
-
   render() {
     return (
       <div>
         <div id="mapContainer" ref="mapContainer" />
-
-        <EuiFlyout onClose={()=> {}}>
-          <EuiFlyoutHeader>
-            <EuiTitle size="s">
-              <h2><strong>Add Layer</strong></h2>
-            </EuiTitle>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            From source
-          </EuiFlyoutBody>
-          <EuiFlyoutFooter>
-            Submit
-          </EuiFlyoutFooter>
-        </EuiFlyout>
       </div>
     );
   }
