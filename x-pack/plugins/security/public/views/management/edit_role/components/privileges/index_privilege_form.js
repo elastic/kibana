@@ -108,22 +108,44 @@ export class IndexPrivilegeForm extends Component {
 
     const { grant = [] } = indexPrivilege.field_security || {};
 
-    return (
-      <EuiFlexItem>
-        <EuiFormRow label={'Granted Fields (optional)'} fullWidth={true} >
+    let grantedFieldsWarning = null;
+
+    if (allowFieldLevelSecurity) {
+
+      if (grant.length === 0) {
+        grantedFieldsWarning = (
           <Fragment>
-            <EuiComboBox
-              options={availableFields ? availableFields.map(toOption) : []}
-              selectedOptions={grant.map(toOption)}
-              onCreateOption={this.onCreateGrantedField}
-              onChange={this.onGrantedFieldsChange}
-              isDisabled={this.props.isReservedRole}
-            />
+            <EuiSpacer />
+            <EuiCallOut title={'No Granted Fields'} size="s" color="warning" iconType="help">
+              <p>
+                If no fields are granted, then users assigned to this role will not be able to
+                see any data for this index. Is this really what you want?
+              </p>
+            </EuiCallOut>
           </Fragment>
-        </EuiFormRow>
-      </EuiFlexItem>
-    );
-  };
+        );
+      }
+
+      return (
+        <EuiFlexItem>
+          <EuiFormRow label={'Granted Fields (optional)'} fullWidth={true} >
+            <Fragment>
+              <EuiComboBox
+                options={availableFields ? availableFields.map(toOption) : []}
+                selectedOptions={grant.map(toOption)}
+                onCreateOption={this.onCreateGrantedField}
+                onChange={this.onGrantedFieldsChange}
+                isDisabled={this.props.isReservedRole}
+              />
+              {grantedFieldsWarning}
+            </Fragment>
+          </EuiFormRow>
+        </EuiFlexItem>
+      );
+    }
+
+    return null;
+  }
 
   getGrantedDocumentsControl = () => {
     const {
@@ -189,82 +211,6 @@ export class IndexPrivilegeForm extends Component {
         query: this.state.documentQuery,
       });
     }
-  };
-
-  getConditionalFeatures = () => {
-    const {
-      allowDocumentLevelSecurity,
-      allowFieldLevelSecurity,
-      indexPrivilege,
-      availableFields,
-    } = this.props;
-
-    if (!allowFieldLevelSecurity && !allowDocumentLevelSecurity) {
-      return null;
-    }
-
-    const features = [];
-    if (allowDocumentLevelSecurity) {
-      features.push((
-        <EuiFlexItem key={0}>
-          <EuiFormRow label={'Granted Documents Query (optional)'} fullWidth={true}>
-            <EuiTextArea
-              rows={1}
-              value={indexPrivilege.query}
-              onChange={this.onQueryChange}
-              readOnly={this.props.isReservedRole}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      ));
-    }
-
-    let grantedFieldsWarning = null;
-
-    if (allowFieldLevelSecurity) {
-
-      const { grant = [] } = indexPrivilege.field_security || {};
-
-      if (grant.length === 0) {
-        grantedFieldsWarning = (
-          <Fragment>
-            <EuiSpacer />
-            <EuiCallOut title={'No Granted Fields'} size="s" color="warning" iconType="help">
-              <p>
-                If no fields are granted, then users assigned to this role will not be able to
-                see any data for this index. Is this really what you want?
-              </p>
-            </EuiCallOut>
-          </Fragment>
-        );
-      }
-
-      features.push((
-        <EuiFlexItem key={1}>
-          <EuiFormRow label={'Granted Fields (optional)'} fullWidth={true} >
-            <Fragment>
-              <EuiComboBox
-                options={availableFields ? availableFields.map(toOption) : []}
-                selectedOptions={grant.map(toOption)}
-                onCreateOption={this.onCreateGrantedField}
-                onChange={this.onGrantedFieldsChange}
-                isDisabled={this.props.isReservedRole}
-              />
-              {grantedFieldsWarning}
-            </Fragment>
-          </EuiFormRow>
-        </EuiFlexItem>
-      ));
-    }
-
-    return (
-      <Fragment>
-        <EuiSpacer />
-        <EuiFlexGroup>
-          {features}
-        </EuiFlexGroup>
-      </Fragment>
-    );
   };
 
   onCreateIndexPatternOption = (option) => {
