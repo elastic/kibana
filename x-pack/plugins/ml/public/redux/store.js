@@ -26,13 +26,3 @@ export const store = createStore(
   mainReducer,
   composeEnhancers(applyMiddleware())
 );
-
-// a helper function to wrap an action creator around the store's dispatch()
-export const dispatchDecorator = (actionCreator) => {
-  return function () {
-    const action = actionCreator.apply(this, arguments);
-    store.dispatch(action);
-  };
-};
-
-export const dd = dispatchDecorator;

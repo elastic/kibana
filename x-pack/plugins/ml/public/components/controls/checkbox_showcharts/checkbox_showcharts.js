@@ -10,8 +10,8 @@
  * AngularJS directive for a checkbox element to toggle charts display.
  */
 
-import { store, dispatchDecorator } from '../../../redux/store';
-import { showCharts } from '../../../redux/modules/show_charts';
+import { store } from '../../../redux/store';
+import { showCharts } from '../../../redux/bound_actions';
 
 import template from './checkbox_showcharts.html';
 import 'plugins/ml/components/controls/controls_select';
@@ -28,9 +28,8 @@ module
         visible: '='
       },
       link: function (scope) {
-        const dispatchShowCharts = dispatchDecorator(showCharts);
         scope.showCharts = store.getState().showCharts;
-        scope.toggleChartsVisibility = () => dispatchShowCharts(scope.showCharts);
+        scope.toggleChartsVisibility = () => showCharts(scope.showCharts);
       }
     };
   });

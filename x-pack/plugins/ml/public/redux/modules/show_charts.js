@@ -6,7 +6,9 @@
 
 const SHOW_CHARTS = 'SHOW_CHARTS';
 
-export const showCharts = (visible) => ({ type: SHOW_CHARTS, visible });
+export const showChartsActions = {
+  showCharts: (visible) => ({ type: SHOW_CHARTS, visible })
+};
 
 const defaultState = true;
 

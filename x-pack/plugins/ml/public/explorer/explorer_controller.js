@@ -16,7 +16,6 @@ import _ from 'lodash';
 import $ from 'jquery';
 import DragSelect from 'dragselect';
 import moment from 'moment';
-import watch from 'redux-watch';
 
 import 'plugins/ml/components/anomalies_table';
 import 'plugins/ml/components/controls';
@@ -55,13 +54,14 @@ uiRoutes
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-import { store, dispatchDecorator } from '../redux/store';
+import watch from 'redux-watch';
+import { store } from '../redux/store';
 import {
   anomalyDataChange,
   timeRangeChange,
   loadingStart,
   loadingStop
-} from '../redux/modules/anomaly_explorer';
+} from '../redux/bound_actions';
 
 module.controller('MlExplorerController', function (
   $scope,
@@ -100,11 +100,6 @@ module.controller('MlExplorerController', function (
       }
     )
   );
-
-  const dispatchLoadingStart = dispatchDecorator(loadingStart);
-  const dispatchLoadingStop = dispatchDecorator(loadingStop);
-  const dispatchAnomalyDataChange = dispatchDecorator(anomalyDataChange);
-  const dispatchTimeRangeChange = dispatchDecorator(timeRangeChange);
 
   timefilter.enableTimeRangeSelector();
   timefilter.enableAutoRefreshSelector();
@@ -187,7 +182,7 @@ module.controller('MlExplorerController', function (
         const selectedJobIds = mlJobSelectService.getSelectedJobIds(true);
         $scope.setSelectedJobs(selectedJobIds);
       } else {
-        dispatchLoadingStop();
+        loadingStop();
       }
 
     }).catch((resp) => {
@@ -421,7 +416,7 @@ module.controller('MlExplorerController', function (
           };
         });
 
-        dispatchAnomalyDataChange(
+        anomalyDataChange(
           [],
           timerange.earliestMs,
           timerange.latestMs
@@ -436,14 +431,14 @@ module.controller('MlExplorerController', function (
       swimlaneCellClickListener($scope.cellData);
     } else {
       const timerange = getSelectionTimeRange($scope.cellData);
-      dispatchTimeRangeChange(timerange);
+      timeRangeChange(timerange);
     }
   }
 
   function anomalyChartsSeverityListener() {
     if (store.getState().showCharts && $scope.cellData !== undefined) {
       const timerange = getSelectionTimeRange($scope.cellData);
-      dispatchTimeRangeChange(timerange);
+      timeRangeChange(timerange);
     }
   }
 
@@ -496,7 +491,7 @@ module.controller('MlExplorerController', function (
           console.log('Explorer anomaly charts data set:', resp.records);
 
           if (store.getState().showCharts) {
-            dispatchAnomalyDataChange(
+            anomalyDataChange(
               resp.records, earliestMs, latestMs
             );
           }
@@ -668,7 +663,7 @@ module.controller('MlExplorerController', function (
       return;
     }
 
-    dispatchLoadingStart();
+    loadingStart();
     $scope.hasResults = false;
 
     $scope.swimlaneBucketInterval = calculateSwimlaneBucketInterval();
@@ -708,7 +703,7 @@ module.controller('MlExplorerController', function (
       } else {
         $scope.hasResults = false;
       }
-      dispatchLoadingStop();
+      loadingStop();
 
       // Tell the result components directives to render.
       // Need to use $timeout to ensure the broadcast happens after the child scope is updated with the new data.
@@ -894,7 +889,7 @@ module.controller('MlExplorerController', function (
     const bounds = timefilter.getActiveBounds();
     const earliestMs = bounds.min.valueOf();
     const latestMs = bounds.max.valueOf();
-    dispatchAnomalyDataChange([], earliestMs, latestMs);
+    anomalyDataChange([], earliestMs, latestMs);
     loadDataForCharts(jobIds, [], earliestMs, latestMs);
     loadAnomaliesTableData();
   }
