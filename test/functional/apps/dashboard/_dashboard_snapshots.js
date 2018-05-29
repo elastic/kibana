@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import expect from 'expect.js';
 
 import { AREA_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
@@ -8,6 +27,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'common']);
   const screenshot = getService('screenshots');
   const remote = getService('remote');
+  const dashboardPanelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
 
   describe('dashboard snapshots', function describeIndexTests() {
@@ -38,7 +58,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await testSubjects.click('saveDashboardSuccess toastCloseButton');
 
       await PageObjects.dashboard.clickFullScreenMode();
-      await PageObjects.dashboard.toggleExpandPanel();
+      await dashboardPanelActions.toggleExpandPanel();
 
       await PageObjects.dashboard.waitForRenderComplete();
       const percentSimilar = await screenshot.compareAgainstBaseline('tsvb_dashboard', updateBaselines);
@@ -59,7 +79,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await testSubjects.click('saveDashboardSuccess toastCloseButton');
 
       await PageObjects.dashboard.clickFullScreenMode();
-      await PageObjects.dashboard.toggleExpandPanel();
+      await dashboardPanelActions.toggleExpandPanel();
 
       await PageObjects.dashboard.waitForRenderComplete();
       // The need for this should have been removed with https://github.com/elastic/kibana/pull/15574 but the
