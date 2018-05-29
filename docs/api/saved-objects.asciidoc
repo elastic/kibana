@@ -1,11 +1,16 @@
 [[saved-objects-api]]
-== Saved Objects APIs
+== Saved Objects API
+
+The saved objects API allows people to manage Kibana saved objects, including
+but not limited to dashboards, visualizations, and index patterns.
+
+Traditionally, developers would perform this level of integration by writing
+documents directly to the `.kibana` index. *Do not do this!* Writing directly
+to the `.kibana` index is not safe and it _will_ result in corrupted data that
+permanently breaks Kibana in a future version.
 
 * <<saved-objects-api-create>>
 * <<saved-objects-api-delete>>
-//* <<saved-objects-get,Get an object>>, <<api-saved-objects-bulk-get,Get multiple objects>>
-//* <<saved-objects-find,Find an object>>
-//* <<saved-objects-update,Update an object>>
 
 include::saved-objects/create.asciidoc[]
 include::saved-objects/delete.asciidoc[]
