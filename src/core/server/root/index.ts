@@ -23,7 +23,9 @@ export class Root {
   constructor(
     rawConfig$: Observable<RawConfig>,
     private readonly env: Env,
-    private readonly onShutdown: OnShutdown = () => {}
+    private readonly onShutdown: OnShutdown = () => {
+      // noop
+    }
   ) {
     const loggerFactory = new MutableLoggerFactory(env);
     this.loggingService = new LoggingService(loggerFactory);

@@ -87,7 +87,9 @@ test('`create()` creates correct appender.', () => {
 test('`create()` fails to create legacy appender if kbnServer is not provided.', () => {
   expect(() => {
     Appenders.create({ kind: 'legacy-appender' }, {
-      getLegacyKbnServer() {},
+      getLegacyKbnServer() {
+        // noop
+      },
     } as any);
   }).toThrowErrorMatchingSnapshot();
 });

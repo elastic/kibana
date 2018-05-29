@@ -3,7 +3,9 @@ import { Observable } from '../observable';
 import { first } from '../operators';
 import { Subject } from '../subject';
 
-const noop = () => {};
+const noop = () => {
+  // noop
+};
 
 test('should pump values right on through itself', () => {
   const subject = new Subject<string>();

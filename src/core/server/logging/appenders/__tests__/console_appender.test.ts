@@ -29,7 +29,9 @@ test('`configSchema` creates correct schema.', () => {
 });
 
 test('`append()` correctly formats records and pushes them to console.', () => {
-  jest.spyOn(global.console, 'log').mockImplementation(() => {});
+  jest.spyOn(global.console, 'log').mockImplementation(() => {
+    // noop
+  });
 
   const records: LogRecord[] = [
     {

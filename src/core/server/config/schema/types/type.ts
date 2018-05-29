@@ -5,7 +5,9 @@ export interface TypeOptions<T> {
   validate?: (value: T) => string | void;
 }
 
-const noop = () => {};
+const noop = () => {
+  // noop
+};
 
 export abstract class Type<V> {
   // This is just to enable the `TypeOf` helper, and because TypeScript would

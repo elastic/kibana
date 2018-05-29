@@ -48,7 +48,9 @@ const config$ = new BehaviorSubject({} as RawConfig);
 
 const mockProcessExit = jest
   .spyOn(global.process, 'exit')
-  .mockImplementation(() => {});
+  .mockImplementation(() => {
+    // noop
+  });
 afterEach(() => {
   mockProcessExit.mockReset();
 });
@@ -101,7 +103,9 @@ describe('when configuring logger fails', () => {
   const logged = jest.spyOn(console, 'error');
 
   beforeEach(() => {
-    logged.mockImplementation(() => {});
+    logged.mockImplementation(() => {
+      // noop
+    });
   });
 
   afterEach(() => {

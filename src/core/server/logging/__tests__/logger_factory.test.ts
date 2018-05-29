@@ -21,7 +21,9 @@ mockCreateWriteStream.end = jest.fn(async (chunk, encoding, callback) => {
 const timestamp = new Date(Date.UTC(2012, 1, 1));
 const mockConsoleLog = jest
   .spyOn(global.console, 'log')
-  .mockImplementation(() => {});
+  .mockImplementation(() => {
+    // noop
+  });
 jest.spyOn(global, 'Date').mockImplementation(() => timestamp);
 
 beforeEach(() => {

@@ -34,5 +34,7 @@ export class ConsoleAppender implements DisposableAppender {
   /**
    * Disposes `ConsoleAppender`.
    */
-  public dispose() {}
+  public dispose() {
+    // noop
+  }
 }

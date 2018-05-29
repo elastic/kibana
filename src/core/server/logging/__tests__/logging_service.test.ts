@@ -29,8 +29,12 @@ beforeEach(() => {
   factory = new MutableLoggerFactory({} as any);
   updateConfigMock = jest
     .spyOn(factory, 'updateConfig')
-    .mockImplementation(() => {});
-  jest.spyOn(factory, 'close').mockImplementation(() => {});
+    .mockImplementation(() => {
+      // noop
+    });
+  jest.spyOn(factory, 'close').mockImplementation(() => {
+    // noop
+  });
 
   service = new LoggingService(factory);
 });

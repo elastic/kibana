@@ -47,7 +47,11 @@ test('`createConfigSchema()` creates correct schema.', () => {
 });
 
 test('file stream is created only once and only after first `append()` is called.', () => {
-  mockCreateWriteStream.mockReturnValue({ write() {} });
+  mockCreateWriteStream.mockReturnValue({
+    write() {
+      // noop
+    },
+  });
 
   const mockPath = 'mock://path/file.log';
   const appender = new FileAppender({ format: () => '' }, mockPath);
@@ -142,7 +146,9 @@ test('`dispose()` closes stream.', async () => {
   });
 
   mockCreateWriteStream.mockReturnValue({
-    write: () => {},
+    write: () => {
+      // noop
+    },
     end: mockStreamEnd,
   });
 

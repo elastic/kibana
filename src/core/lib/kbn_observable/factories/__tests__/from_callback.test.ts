@@ -57,7 +57,9 @@ test('returns observable that completes later', () => {
 test('handles early unsubscribe', () => {
   const subject = new Subject();
 
-  const next = () => {};
+  const next = () => {
+    // noop
+  };
   const sub = $fromCallback(() => subject).subscribe(next);
 
   subject.next('foo');

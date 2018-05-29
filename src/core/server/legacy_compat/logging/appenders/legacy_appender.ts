@@ -30,5 +30,7 @@ export class LegacyAppender implements DisposableAppender {
     );
   }
 
-  public async dispose() {}
+  public async dispose() {
+    // noop
+  }
 }

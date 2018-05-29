@@ -69,7 +69,9 @@ export function pipe<T, R>(
   return pipeFromArray(fns);
 }
 
-const noop: () => any = () => {};
+const noop: () => any = () => {
+  // noop
+};
 
 /* @internal */
 export function pipeFromArray<T, R>(
