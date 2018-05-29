@@ -19,7 +19,7 @@
 
 import expect from 'expect.js';
 import sinon from 'sinon';
-import { KbnIndex } from '@kbn/dev-utils';
+import { KbnIndex } from '../../../../utils';
 import { getServices } from '../../../../test_utils/servers';
 
 import {

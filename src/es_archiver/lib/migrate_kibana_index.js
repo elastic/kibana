@@ -21,7 +21,7 @@ import fs from 'fs';
 import path from 'path';
 import { promisify } from 'util';
 import { Migration } from '@kbn/migrations';
-import { KbnIndex } from '@kbn/dev-utils';
+import { KbnIndex } from '../../utils';
 import { findPluginSpecs } from '../../plugin_discovery';
 
 // This is an expensive operation, so we'll ensure it only happens once

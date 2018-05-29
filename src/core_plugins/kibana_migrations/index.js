@@ -18,7 +18,7 @@
  */
 import _ from 'lodash';
 import { MigrationStatus, Migration } from '@kbn/migrations';
-import { KbnIndex } from '@kbn/dev-utils';
+import { KbnIndex } from '../../utils';
 
 export default function (kibana) {
   return new kibana.Plugin({
