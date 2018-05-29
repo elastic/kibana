@@ -125,8 +125,7 @@ export default function ({ getService, getPageObjects }) {
       await dashboardAddPanel.addVisualization('Visualization TileMap');
       await PageObjects.dashboard.saveDashboard('No local edits');
 
-      await testSubjects.moveMouseTo('dashboardPanel');
-      await PageObjects.dashboard.openInspectorForPanel(0);
+      await dashboardPanelActions.openInspector();
       const tileMapData = await PageObjects.visualize.getInspectorTableData();
       await PageObjects.visualize.closeInspector();
 
@@ -142,8 +141,7 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.header.clickDashboard();
 
-      await testSubjects.moveMouseTo('dashboardPanel');
-      await PageObjects.dashboard.openInspectorForPanel(0);
+      await dashboardPanelActions.openInspector();
       const changedTileMapData = await PageObjects.visualize.getInspectorTableData();
       await PageObjects.visualize.closeInspector();
       expect(changedTileMapData.length).to.not.equal(tileMapData.length);

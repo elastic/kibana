@@ -235,15 +235,6 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       }
     }
 
-    async openInspectorForPanel(index) {
-      const panels = await testSubjects.findAll('dashboardPanel');
-      const panel = panels[index];
-      const contextMenu = await testSubjects.findDescendant('dashboardPanelToggleMenuIcon', panel);
-      await contextMenu.click();
-      const openInspectorButton = await testSubjects.findDescendant('dashboardPanelAction-openInspector', panel);
-      return await openInspectorButton.click();
-    }
-
     // avoids any 'Object with id x not found' errors when switching tests.
     async clearSavedObjectsFromAppLinks() {
       await PageObjects.header.clickVisualize();
