@@ -148,6 +148,7 @@
     "redux": "3.7.2",
     "redux-actions": "2.2.1",
     "redux-thunk": "2.2.0",
+    "redux-watch": "^1.1.1",
     "request": "^2.85.0",
     "reselect": "3.0.1",
     "rimraf": "^2.6.2",

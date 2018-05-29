@@ -43,6 +43,10 @@ module.controller('MlExplorerChartsContainerController', function ($scope, $inje
   const USE_OVERALL_CHART_LIMITS = false;
 
   const anomalyDataChangeListener = function (anomalyRecords, earliestMs, latestMs) {
+    if (store.getState().showCharts === false) {
+      anomalyRecords = [];
+    }
+
     const threshold = mlSelectSeverityService.state.get('threshold');
     const filteredRecords = _.filter(anomalyRecords, (record) => {
       return Number(record.record_score) >= threshold.val;

@@ -13,9 +13,11 @@ import {
 } from 'redux';
 
 import { anomalyExplorerReducer } from './modules/anomaly_explorer';
+import { showChartsReducer } from './modules/show_charts';
 
 const mainReducer = combineReducers({
-  anomalyExplorer: anomalyExplorerReducer
+  anomalyExplorer: anomalyExplorerReducer,
+  showCharts: showChartsReducer
 });
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;

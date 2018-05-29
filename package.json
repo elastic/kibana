@@ -186,6 +186,7 @@
     "redux-actions": "2.2.1",
     "redux-observable": "^0.18.0",
     "redux-thunk": "2.2.0",
+    "redux-watch": "^1.1.1",
     "regression": "2.0.0",
     "request": "^2.85.0",
     "reselect": "^3.0.1",

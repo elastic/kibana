@@ -16,6 +16,7 @@ import _ from 'lodash';
 import $ from 'jquery';
 import DragSelect from 'dragselect';
 import moment from 'moment';
+import watch from 'redux-watch';
 
 import 'plugins/ml/components/anomalies_table';
 import 'plugins/ml/components/controls';
@@ -67,21 +68,28 @@ module.controller('MlExplorerController', function (
   AppState,
   Private,
   timefilter,
-  mlCheckboxShowChartsService,
   mlExplorerDashboardService,
   mlSelectLimitService,
   mlSelectIntervalService,
   mlSelectSeverityService) {
 
-  // redux
   const state = store.getState().anomalyExplorer;
 
-  store.subscribe(() => {
+  const unsubscribeStore = store.subscribe(() => {
     const newState = store.getState().anomalyExplorer;
     $scope.loading = newState.loading;
     $scope.anomalyChartRecords = newState.anomalyChartRecords;
     $scope.$applyAsync();
   });
+
+  const unsubscribeShowCharts = store.subscribe(
+    watch(store.getState, 'showCharts')(
+      () => {
+        checkboxShowChartsListener();
+        anomalyChartsSeverityListener();
+      }
+    )
+  );
 
   $scope.loading = state.loading;
   const dLoadingStart = dispatchDecorator(aLoadingStart);
@@ -412,29 +420,25 @@ module.controller('MlExplorerController', function (
   };
   mlExplorerDashboardService.swimlaneCellClick.watch(swimlaneCellClickListener);
 
-  const checkboxShowChartsListener = function () {
-    const showCharts = mlCheckboxShowChartsService.state.get('showCharts');
-    if (showCharts && $scope.cellData !== undefined) {
+  function checkboxShowChartsListener() {
+    if (store.getState().showCharts && $scope.cellData !== undefined) {
       swimlaneCellClickListener($scope.cellData);
     } else {
-      const timerange = getSelectionTimeRange($scope.cellData);
-      dAnomalyDataChange(
-        [], timerange.earliestMs, timerange.latestMs
-      );
-    }
-  };
-  mlCheckboxShowChartsService.state.watch(checkboxShowChartsListener);
-
-  const anomalyChartsSeverityListener = function () {
-    const showCharts = mlCheckboxShowChartsService.state.get('showCharts');
-    if (showCharts && $scope.cellData !== undefined) {
       const timerange = getSelectionTimeRange($scope.cellData);
       dAnomalyDataChange(
         $scope.anomalyChartRecords, timerange.earliestMs, timerange.latestMs
       );
     }
-  };
-  mlSelectSeverityService.state.watch(anomalyChartsSeverityListener);
+  }
+
+  function anomalyChartsSeverityListener() {
+    if (store.getState().showCharts && $scope.cellData !== undefined) {
+      const timerange = getSelectionTimeRange($scope.cellData);
+      dAnomalyDataChange(
+        $scope.anomalyChartRecords, timerange.earliestMs, timerange.latestMs
+      );
+    }
+  }
 
   const tableControlsListener = function () {
     loadAnomaliesTableData();
@@ -456,7 +460,8 @@ module.controller('MlExplorerController', function (
 
   $scope.$on('$destroy', () => {
     dragSelect.stop();
-    mlCheckboxShowChartsService.state.unwatch(checkboxShowChartsListener);
+    unsubscribeStore();
+    unsubscribeShowCharts();
     mlExplorerDashboardService.swimlaneCellClick.unwatch(swimlaneCellClickListener);
     mlExplorerDashboardService.swimlaneRenderDone.unwatch(swimlaneRenderDoneListener);
     mlSelectSeverityService.state.unwatch(anomalyChartsSeverityListener);
@@ -484,7 +489,7 @@ module.controller('MlExplorerController', function (
           $scope.anomalyChartRecords = resp.records;
           console.log('Explorer anomaly charts data set:', $scope.anomalyChartRecords);
 
-          if (mlCheckboxShowChartsService.state.get('showCharts')) {
+          if (store.getState().showCharts) {
             dAnomalyDataChange(
               $scope.anomalyChartRecords, earliestMs, latestMs
             );
