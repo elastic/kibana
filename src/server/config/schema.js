@@ -246,8 +246,8 @@ export default async () => Joi.object({
       tms: Joi.boolean(),
       reuseTiles: Joi.boolean(),
       bounds: Joi.array().items(Joi.array().items(Joi.number()).min(2).required()).min(2)
-    }).default()
-  }).default(),
+    })
+  }).notes('Deprecated'),
   regionmap: Joi.object({
     includeElasticMapsService: Joi.boolean().default(true),
     layers: Joi.array().items(Joi.object({
@@ -269,7 +269,7 @@ export default async () => Joi.object({
         description: Joi.string()
       }))
     }))
-  }).default(),
+  }).notes('Deprecated'),
 
   i18n: Joi.object({
     defaultLocale: Joi.string().default('en'),
