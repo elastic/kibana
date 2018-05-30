@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('when time changed is stored with dashboard', async function () {
-          await PageObjects.dashboard.setTimepickerIn63DataRange();
+          await PageObjects.dashboard.setTimepickerInDataRange();
 
           const originalFromTime = await PageObjects.header.getFromTime();
           const originalToTime = await PageObjects.header.getToTime();
