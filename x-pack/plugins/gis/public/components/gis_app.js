@@ -5,11 +5,7 @@
  */
 
 import React from 'react';
-import * as ol from 'openlayers';
-
-
-import {
-} from '@elastic/eui';
+import { KibanaMap } from './kibana_map';
 
 export class GISApp extends React.Component {
 
@@ -17,33 +13,8 @@ export class GISApp extends React.Component {
     super();
   }
 
-
-  componentDidMount() {
-
-    const olView = new ol.View({
-      center: ol.proj.fromLonLat([37.41, 8.82]),
-      zoom: 4
-    });
-    this._olMap = new ol.Map({
-      target: this.refs.mapContainer,
-      layers: [],
-      view: olView
-    });
-
-    const olTileLayer = new ol.layer.Tile({
-      source: new ol.source.XYZ({
-        url: `https://tiles.maps.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana"`
-      })
-    });
-    this._olMap.addLayer(olTileLayer);
-  }
-
   render() {
-    return (
-      <div>
-        <div id="mapContainer" ref="mapContainer" />
-      </div>
-    );
+    return (<KibanaMap/>);
   }
 
 }
