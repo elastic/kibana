@@ -43,6 +43,8 @@ export function $combine(screenshots, outputDimensions, logger) {
   const output$ = pngs$
     .reduce(
       (output, { dimensions, png }) => {
+        // Spitting out a lot of output to help debug https://github.com/elastic/kibana/issues/19563. Once that is
+        // fixed, this should probably get pared down.
         logger.debug(`Output dimensions is ${JSON.stringify(outputDimensions)}`);
         logger.debug(`Input png w: ${png.width} and h: ${png.height}`);
         logger.debug(`Creating output png with ${JSON.stringify(dimensions)}`);
