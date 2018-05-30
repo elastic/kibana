@@ -3,17 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { spawn, spawnSync } from 'child_process';
+import { spawn } from 'child_process';
 import rimraf from 'rimraf';
 import Rx from 'rxjs/Rx';
 import cdp from 'chrome-remote-interface';
 import { HeadlessChromiumDriver } from '../driver';
 import { args } from './args';
 import { safeChildProcess, exitCodeSuggestion } from '../../safe_child_process';
+import { ensureChromiumIsListening } from './ensure_chromium_is_listening';
 
 const compactWhitespace = (str) => {
   return str.replace(/\s+/, ' ');
@@ -57,19 +57,8 @@ export class HeadlessChromiumDriverFactory {
 
       const driver$ = message$
         .first(line => line.indexOf(`DevTools listening on ws://127.0.0.1:${bridgePort}`) >= 0)
-        .do(() => {
-          // See https://github.com/elastic/kibana/issues/19351 for why this is necessary. Long story short, on certain
-          // linux platforms (fwiw, we have only experienced this on jenkins agents) the first bootup of chromium takes
-          // a long time doing something with fontconfig packages loading up a cache. The cdp command will timeout
-          // if we don't wait for this manually. Note that this may still timeout based on the value of
-          // xpack.reporting.queue.timeout. Subsequent runs should be fast because the cache will already be
-          // initialized.
-          this.logger.debug('Ensure chromium is running and listening');
-          spawnSync(
-            `curl`,
-            [`http://127.0.0.1:${bridgePort}/json`],
-            this.logger.isVerbose ? { stdio: 'inherit' } : {});
-        })
+        .do(() => this.logger.debug('Ensure chromium is running and listening'))
+        .mergeMap(() => ensureChromiumIsListening(bridgePort))
         .mergeMap(() => cdp({ port: bridgePort, local: true }))
         .do(() => this.logger.debug('Initializing chromium driver'))
         .map(client => new HeadlessChromiumDriver(client, {
