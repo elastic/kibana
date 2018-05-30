@@ -21,7 +21,7 @@ const $ = require('jquery');
 const _ = require('lodash');
 const mappings = require('./mappings');
 const Api = require('./kb/api');
-const autocomplete_engine = require('./autocomplete/engine');
+const autocompleteEngine = require('./autocomplete/engine');
 
 let ACTIVE_API = new Api();
 
@@ -29,17 +29,17 @@ function nonValidIndexType(token) {
   return !(token === '_all' || token[0] !== '_');
 }
 
-function IndexAutocompleteComponent(name, parent, multi_valued) {
-  autocomplete_engine.ListComponent.call(this, name, mappings.getIndices, parent, multi_valued);
+function IndexAutocompleteComponent(name, parent, multiValued) {
+  autocompleteEngine.ListComponent.call(this, name, mappings.getIndices, parent, multiValued);
 }
 
 IndexAutocompleteComponent.prototype = _.create(
-  autocomplete_engine.ListComponent.prototype,
+  autocompleteEngine.ListComponent.prototype,
   { 'constructor': IndexAutocompleteComponent });
 
 (function (cls) {
   cls.validateTokens = function (tokens) {
-    if (!this.multi_valued && tokens.length > 1) {
+    if (!this.multiValued && tokens.length > 1) {
       return false;
     }
     return !_.find(tokens, nonValidIndexType);
@@ -59,17 +59,17 @@ function TypeGenerator(context) {
   return mappings.getTypes(context.indices);
 }
 
-function TypeAutocompleteComponent(name, parent, multi_valued) {
-  autocomplete_engine.ListComponent.call(this, name, TypeGenerator, parent, multi_valued);
+function TypeAutocompleteComponent(name, parent, multiValued) {
+  autocompleteEngine.ListComponent.call(this, name, TypeGenerator, parent, multiValued);
 }
 
 TypeAutocompleteComponent.prototype = _.create(
-  autocomplete_engine.ListComponent.prototype,
+  autocompleteEngine.ListComponent.prototype,
   { 'constructor': TypeAutocompleteComponent });
 
 (function (cls) {
   cls.validateTokens = function (tokens) {
-    if (!this.multi_valued && tokens.length > 1) {
+    if (!this.multiValued && tokens.length > 1) {
       return false;
     }
 
@@ -91,17 +91,17 @@ function FieldGenerator(context) {
   });
 }
 
-function FieldAutocompleteComponent(name, parent, multi_valued) {
-  autocomplete_engine.ListComponent.call(this, name, FieldGenerator, parent, multi_valued);
+function FieldAutocompleteComponent(name, parent, multiValued) {
+  autocompleteEngine.ListComponent.call(this, name, FieldGenerator, parent, multiValued);
 }
 
 FieldAutocompleteComponent.prototype = _.create(
-  autocomplete_engine.ListComponent.prototype,
+  autocompleteEngine.ListComponent.prototype,
   { 'constructor': FieldAutocompleteComponent });
 
 (function (cls) {
   cls.validateTokens = function (tokens) {
-    if (!this.multi_valued && tokens.length > 1) {
+    if (!this.multiValued && tokens.length > 1) {
       return false;
     }
 
@@ -121,12 +121,12 @@ FieldAutocompleteComponent.prototype = _.create(
 
 
 function IdAutocompleteComponent(name, parent, multi) {
-  autocomplete_engine.SharedComponent.call(this, name, parent);
+  autocompleteEngine.SharedComponent.call(this, name, parent);
   this.multi_match = multi;
 }
 
 IdAutocompleteComponent.prototype = _.create(
-  autocomplete_engine.SharedComponent.prototype,
+  autocompleteEngine.SharedComponent.prototype,
   { 'constructor': IdAutocompleteComponent });
 
 (function (cls) {
@@ -143,14 +143,14 @@ IdAutocompleteComponent.prototype = _.create(
     })) {
       return null;
     }
-    let r = Object.getPrototypeOf(cls).match.call(this, token, context, editor);
+    const r = Object.getPrototypeOf(cls).match.call(this, token, context, editor);
     r.context_values = r.context_values || {};
     r.context_values.id = token;
     return r;
   };
 }(IdAutocompleteComponent.prototype));
 
-let parametrizedComponentFactories = {
+const parametrizedComponentFactories = {
 
   'index': function (name, parent) {
     return new IndexAutocompleteComponent(name, parent, false);
@@ -177,11 +177,11 @@ let parametrizedComponentFactories = {
     return new FieldAutocompleteComponent(name, parent, false);
   },
   'nodes': function (name, parent) {
-    return new autocomplete_engine.ListComponent(name, ['_local', '_master', 'data:true', 'data:false',
+    return new autocompleteEngine.ListComponent(name, ['_local', '_master', 'data:true', 'data:false',
       'master:true', 'master:false'], parent);
   },
   'node': function (name, parent) {
-    return new autocomplete_engine.ListComponent(name, [], parent, false);
+    return new autocompleteEngine.ListComponent(name, [], parent, false);
   }
 };
 
@@ -194,7 +194,7 @@ export function getEndpointDescriptionByEndpoint(endpoint) {
 }
 
 export function getEndpointBodyCompleteComponents(endpoint) {
-  let desc = getEndpointDescriptionByEndpoint(endpoint);
+  const desc = getEndpointDescriptionByEndpoint(endpoint);
   if (!desc) {
     throw new Error('failed to resolve endpoint [\'' + endpoint + '\']');
   }

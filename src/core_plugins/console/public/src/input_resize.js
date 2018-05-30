@@ -37,17 +37,17 @@ export default function (input, output) {
     $left.width(editorWidth);
   }
 
-  var $resizer = $('#editor_resizer');
+  const $resizer = $('#editor_resizer');
   $resizer
     .on('mousedown', function (event) {
       $resizer.addClass('active');
-      var startWidth = $left.width();
-      var startX = event.pageX;
+      const startWidth = $left.width();
+      const startX = event.pageX;
       input.resize.topRow = input.renderer.layerConfig.firstRow;
       output.resize.topRow = output.renderer.layerConfig.firstRow;
 
       function onMove(event) {
-        setEditorWidth(startWidth + event.pageX - startX)
+        setEditorWidth(startWidth + event.pageX - startX);
       }
 
       $(document.body)

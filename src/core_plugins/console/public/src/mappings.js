@@ -17,16 +17,17 @@
  * under the License.
  */
 
-let $ = require('jquery');
-let _ = require('lodash');
-let es = require('./es');
-let settings = require('./settings');
+const $ = require('jquery');
+const _ = require('lodash');
+const es = require('./es');
+const settings = require('./settings');
 
 
-var per_index_types = {};
-var per_alias_indexes = [];
 
-var mappingObj = {};
+let perIndexTypes = {};
+let perAliasIndexes = [];
+
+const mappingObj = {};
 
 function expandAliases(indicesOrAliases) {
   // takes a list of indices or aliases or a string which may be either and returns a list of indices
@@ -36,20 +37,20 @@ function expandAliases(indicesOrAliases) {
     return indicesOrAliases;
   }
 
-  if (typeof indicesOrAliases === "string") {
+  if (typeof indicesOrAliases === 'string') {
     indicesOrAliases = [indicesOrAliases];
   }
   indicesOrAliases = $.map(indicesOrAliases, function (iOrA) {
-    if (per_alias_indexes[iOrA]) {
-      return per_alias_indexes[iOrA];
+    if (perAliasIndexes[iOrA]) {
+      return perAliasIndexes[iOrA];
     }
     return [iOrA];
   });
-  var ret = [].concat.apply([], indicesOrAliases);
+  let ret = [].concat.apply([], indicesOrAliases);
   ret.sort();
-  var last;
+  let last;
   ret = $.map(ret, function (v) {
-    var r = last == v ? null : v;
+    const r = last === v ? null : v;
     last = v;
     return r;
   });
@@ -58,23 +59,23 @@ function expandAliases(indicesOrAliases) {
 
 function getFields(indices, types) {
   // get fields for indices and types. Both can be a list, a string or null (meaning all).
-  var ret = [];
+  let ret = [];
   indices = expandAliases(indices);
-  if (typeof indices == "string") {
+  if (typeof indices === 'string') {
 
-    var type_dict = per_index_types[indices];
-    if (!type_dict) {
+    const typeDict = perIndexTypes[indices];
+    if (!typeDict) {
       return [];
     }
 
-    if (typeof types == "string") {
-      var f = type_dict[types];
+    if (typeof types === 'string') {
+      const f = typeDict[types];
       ret = f ? f : [];
     }
     else {
       // filter what we need
-      $.each(type_dict, function (type, fields) {
-        if (!types || types.length == 0 || $.inArray(type, types) != -1) {
+      $.each(typeDict, function (type, fields) {
+        if (!types || types.length === 0 || $.inArray(type, types) !== -1) {
           ret.push(fields);
         }
       });
@@ -84,8 +85,8 @@ function getFields(indices, types) {
   }
   else {
     // multi index mode.
-    $.each(per_index_types, function (index) {
-      if (!indices || indices.length == 0 || $.inArray(index, indices) != -1) {
+    $.each(perIndexTypes, function (index) {
+      if (!indices || indices.length === 0 || $.inArray(index, indices) !== -1) {
         ret.push(getFields(index, types));
       }
     });
@@ -93,29 +94,29 @@ function getFields(indices, types) {
   }
 
   return _.uniq(ret, function (f) {
-    return f.name + ":" + f.type
+    return f.name + ':' + f.type;
   });
 }
 
 function getTypes(indices) {
-  var ret = [];
+  let ret = [];
   indices = expandAliases(indices);
-  if (typeof indices == "string") {
-    var type_dict = per_index_types[indices];
-    if (!type_dict) {
+  if (typeof indices === 'string') {
+    const typeDict = perIndexTypes[indices];
+    if (!typeDict) {
       return [];
     }
 
     // filter what we need
-    $.each(type_dict, function (type) {
+    $.each(typeDict, function (type) {
       ret.push(type);
     });
 
   }
   else {
     // multi index mode.
-    $.each(per_index_types, function (index) {
-      if (!indices || $.inArray(index, indices) != -1) {
+    $.each(perIndexTypes, function (index) {
+      if (!indices || $.inArray(index, indices) !== -1) {
         ret.push(getTypes(index));
       }
     });
@@ -127,137 +128,138 @@ function getTypes(indices) {
 }
 
 
-function getIndices(include_aliases) {
-  var ret = [];
-  $.each(per_index_types, function (index) {
+function getIndices(includeAliases) {
+  const ret = [];
+  $.each(perIndexTypes, function (index) {
     ret.push(index);
   });
-  if (typeof include_aliases === "undefined" ? true : include_aliases) {
-    $.each(per_alias_indexes, function (alias) {
+  if (typeof includeAliases === 'undefined' ? true : includeAliases) {
+    $.each(perAliasIndexes, function (alias) {
       ret.push(alias);
     });
   }
   return ret;
 }
 
-function getFieldNamesFromFieldMapping(field_name, field_mapping) {
-  if (field_mapping['enabled'] == false) {
+function getFieldNamesFromFieldMapping(fieldName, fieldMapping) {
+  if (fieldMapping.enabled === false) {
     return [];
   }
-  var nested_fields;
+  let nestedFields;
 
-  function applyPathSettings(nested_field_names) {
-    var path_type = field_mapping['path'] || "full";
-    if (path_type == "full") {
-      return $.map(nested_field_names, function (f) {
-        f.name = field_name + "." + f.name;
+  function applyPathSettings(nestedFieldNames) {
+    const pathType = fieldMapping.path || 'full';
+    if (pathType === 'full') {
+      return $.map(nestedFieldNames, function (f) {
+        f.name = fieldName + '.' + f.name;
         return f;
       });
     }
-    return nested_field_names;
+    return nestedFieldNames;
   }
 
-  if (field_mapping["properties"]) {
+  if (fieldMapping.properties) {
     // derived object type
-    nested_fields = getFieldNamesFromTypeMapping(field_mapping);
-    return applyPathSettings(nested_fields);
+    nestedFields = getFieldNamesFromTypeMapping(fieldMapping);
+    return applyPathSettings(nestedFields);
   }
 
-  var field_type = field_mapping['type'];
+  const fieldType = fieldMapping.type;
 
-  if (field_type === 'multi_field') {
-    nested_fields = $.map(field_mapping['fields'], function (field_mapping, field_name) {
-      return getFieldNamesFromFieldMapping(field_name, field_mapping);
+  if (fieldType === 'multi_field') {
+    nestedFields = $.map(fieldMapping.fields, function (fieldMapping, fieldName) {
+      return getFieldNamesFromFieldMapping(fieldName, fieldMapping);
     });
 
-    return applyPathSettings(nested_fields);
+    return applyPathSettings(nestedFields);
   }
 
-  var ret = { name: field_name, type: field_type };
+  const ret = { name: fieldName, type: fieldType };
 
-  if (field_mapping["index_name"]) {
-    ret.name = field_mapping["index_name"];
+  if (fieldMapping.index_name) {
+    ret.name = fieldMapping.index_name;
   }
 
-  if (field_mapping["fields"]) {
-    nested_fields = $.map(field_mapping['fields'], function (field_mapping, field_name) {
-      return getFieldNamesFromFieldMapping(field_name, field_mapping);
+  if (fieldMapping.fields) {
+    nestedFields = $.map(fieldMapping.fields, function (fieldMapping, fieldName) {
+      return getFieldNamesFromFieldMapping(fieldName, fieldMapping);
     });
-    nested_fields = applyPathSettings(nested_fields);
-    nested_fields.unshift(ret);
-    return nested_fields;
+    nestedFields = applyPathSettings(nestedFields);
+    nestedFields.unshift(ret);
+    return nestedFields;
   }
 
   return [ret];
 }
 
-function getFieldNamesFromTypeMapping(type_mapping) {
-  var field_list =
-    $.map(type_mapping['properties'] || {}, function (field_mapping, field_name) {
-      return getFieldNamesFromFieldMapping(field_name, field_mapping);
+function getFieldNamesFromTypeMapping(typeMapping) {
+  const fieldList =
+    $.map(typeMapping.properties || {}, function (fieldMapping, fieldName) {
+      return getFieldNamesFromFieldMapping(fieldName, fieldMapping);
     });
 
   // deduping
-  return _.uniq(field_list, function (f) {
-    return f.name + ":" + f.type
+  return _.uniq(fieldList, function (f) {
+    return f.name + ':' + f.type;
   });
 }
 
 function loadMappings(mappings) {
-  per_index_types = {};
-  $.each(mappings, function (index, index_mapping) {
-    var normalized_index_mappings = {};
+  perIndexTypes = {};
+  $.each(mappings, function (index, indexMapping) {
+    const normalizedIndexMappings = {};
     // 1.0.0 mapping format has changed, extract underlying mapping
-    if (index_mapping.mappings && _.keys(index_mapping).length === 1) {
-      index_mapping = index_mapping.mappings;
+    if (indexMapping.mappings && _.keys(indexMapping).length === 1) {
+      indexMapping = indexMapping.mappings;
     }
-    $.each(index_mapping, function (type_name, type_mapping) {
-      var field_list = getFieldNamesFromTypeMapping(type_mapping);
-      normalized_index_mappings[type_name] = field_list;
+    $.each(indexMapping, function (typeName, typeMapping) {
+      const fieldList = getFieldNamesFromTypeMapping(typeMapping);
+      normalizedIndexMappings[typeName] = fieldList;
     });
-    per_index_types[index] = normalized_index_mappings;
+    perIndexTypes[index] = normalizedIndexMappings;
   });
 }
 
 function loadAliases(aliases) {
-  per_alias_indexes = {};
-  $.each(aliases || {}, function (index, index_aliases) {
+  perAliasIndexes = {};
+  $.each(aliases || {}, function (index, omdexAliases) {
     // verify we have an index defined. usefull when mapping loading is disabled
-    per_index_types[index] = per_index_types[index] || {};
+    perIndexTypes[index] = perIndexTypes[index] || {};
 
-    $.each(index_aliases.aliases || {}, function (alias) {
+    $.each(omdexAliases.aliases || {}, function (alias) {
       if (alias === index) {
         return;
       } // alias which is identical to index means no index.
-      var cur_aliases = per_alias_indexes[alias];
-      if (!cur_aliases) {
-        cur_aliases = [];
-        per_alias_indexes[alias] = cur_aliases;
+      let curAliases = perAliasIndexes[alias];
+      if (!curAliases) {
+        curAliases = [];
+        perAliasIndexes[alias] = curAliases;
       }
-      cur_aliases.push(index);
+      curAliases.push(index);
     });
   });
 
-  per_alias_indexes['_all'] = getIndices(false);
+  perAliasIndexes._all = getIndices(false);
 }
 
 function clear() {
-  per_index_types = {};
-  per_alias_indexes = {};
+  perIndexTypes = {};
+  perAliasIndexes = {};
 }
 
 function retrieveAutocompleteInfoFromServer() {
-  var autocompleteSettings = settings.getAutocomplete(),
-    mappingPromise, aliasesPromise;
+  const autocompleteSettings = settings.getAutocomplete();
+  let mappingPromise;
+  let aliasesPromise;
   if (autocompleteSettings.fields) {
-    mappingPromise = es.send("GET", "_mapping", null, null, true);
+    mappingPromise = es.send('GET', '_mapping', null, null, true);
   }
   else {
     mappingPromise = new $.Deferred();
     mappingPromise.resolve();
   }
   if (autocompleteSettings.indices) {
-    aliasesPromise = es.send("GET", "_aliases", null, null, true);
+    aliasesPromise = es.send('GET', '_aliases', null, null, true);
   }
   else {
     aliasesPromise = new $.Deferred();
@@ -267,13 +269,13 @@ function retrieveAutocompleteInfoFromServer() {
   $.when(mappingPromise, aliasesPromise)
     .done(function (mappings, aliases) {
       if (!mappings) {
-        mappings = {}
+        mappings = {};
       }
       else if (mappings[0].length < 10 * 1024 * 1024) {
         mappings = JSON.parse(mappings[0]);
       }
       else {
-        console.warn("mapping size is larger than 10MB (" + mappings[0].length / 1024 / 1024 + " MB). ignoring..");
+        console.warn('mapping size is larger than 10MB (' + mappings[0].length / 1024 / 1024 + ' MB). ignoring..');
         mappings = {};
       }
       loadMappings(mappings);
@@ -286,14 +288,14 @@ function retrieveAutocompleteInfoFromServer() {
       // Trigger an update event with the mappings and aliases
       $(mappingObj).trigger('update', [mappings[0], aliases[0]]);
     }
-  )
+    )
   ;
 }
 
-function autocomplete_retriever() {
+function autocompleteRetriever() {
   retrieveAutocompleteInfoFromServer();
   setTimeout(function () {
-    autocomplete_retriever();
+    autocompleteRetriever();
   }, 60000);
 }
 
@@ -305,5 +307,5 @@ export default _.assign(mappingObj, {
   loadAliases: loadAliases,
   expandAliases: expandAliases,
   clear: clear,
-  startRetrievingAutoCompleteInfo: autocomplete_retriever
+  startRetrievingAutoCompleteInfo: autocompleteRetriever
 });
