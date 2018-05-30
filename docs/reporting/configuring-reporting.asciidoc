@@ -28,4 +28,4 @@ communicates with the Kibana server, manages background jobs, and captures
 screenshots. See <<reporting-settings-kb, Reporting Settings>> for the complete
 list of settings.
 
-include::{xkb-repo-dir}/security/reporting.asciidoc[]
+include::{kib-repo-dir}/security/reporting.asciidoc[]
