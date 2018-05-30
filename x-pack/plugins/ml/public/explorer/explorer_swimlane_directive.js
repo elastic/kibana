@@ -23,52 +23,74 @@ import { mlEscape } from 'plugins/ml/util/string_utils';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
+import { createSelector } from 'reselect';
+import watch from 'redux-watch';
+import { store } from '../redux/store';
+
 module.directive('mlExplorerSwimlane', function ($compile, Private, mlExplorerDashboardService, mlChartTooltipService) {
 
   function link(scope, element) {
+    const state = store.getState().anomalyExplorer;
 
     // Consider the setting to support to select a range of cells
-    if (!mlExplorerDashboardService.allowCellRangeSelection) {
+    if (!state.allowCellRangeSelection) {
       element.addClass('ml-hide-range-selection');
     }
 
-    let cellMouseoverActive = true;
+    let cellMouseoverActive = state.cellMouseoverActive;
+
+    const getCellMouseoverActive = createSelector(
+      s => s.anomalyExplorer.cellMouseoverActive,
+      d => d
+    );
+    const unsubCellMouseoverActive = store.subscribe(
+      watch(() => getCellMouseoverActive(store.getState()))(
+        (update) => {
+          cellMouseoverActive = update;
+        }
+      )
+    );
 
     // Listen for dragSelect events
-    function dragSelectListener({ action, elements = [] }) {
-      if (action === 'newSelection' && elements.length > 0) {
-        const firstCellData = $(elements[0]).data('click');
-        if (typeof firstCellData !== 'undefined' && scope.swimlaneType === firstCellData.swimlaneType) {
-          const selectedData = elements.reduce((d, e) => {
-            const cellData = $(e).data('click');
-            d.bucketScore = Math.max(d.bucketScore, cellData.bucketScore);
-            d.laneLabels.push(cellData.laneLabel);
-            d.times.push(cellData.time);
-            return d;
-          }, {
-            bucketScore: 0,
-            laneLabels: [],
-            times: []
-          });
+    const getDragging = createSelector(
+      s => s.anomalyExplorer.dragging,
+      d => d
+    );
+    const unsubDragging = store.subscribe(
+      watch(() => getDragging(store.getState()))(
+        (dragging) => {
+          if (dragging === true) {
+            element.addClass('ml-dragselect-dragging');
+          } else {
+            element.removeClass('ml-dragselect-dragging');
 
-          selectedData.laneLabels = _.uniq(selectedData.laneLabels);
-          selectedData.times = _.uniq(selectedData.times);
-          cellClick(elements, selectedData);
+            const elements = store.getState().anomalyExplorer.selectedElements;
+
+            if (elements.length > 0) {
+              const firstCellData = $(elements[0]).data('click');
+              if (typeof firstCellData !== 'undefined' && scope.swimlaneType === firstCellData.swimlaneType) {
+                const selectedData = elements.reduce((d, e) => {
+                  const cellData = $(e).data('click');
+                  d.bucketScore = Math.max(d.bucketScore, cellData.bucketScore);
+                  d.laneLabels.push(cellData.laneLabel);
+                  d.times.push(cellData.time);
+                  return d;
+                }, {
+                  bucketScore: 0,
+                  laneLabels: [],
+                  times: []
+                });
+
+                selectedData.laneLabels = _.uniq(selectedData.laneLabels);
+                selectedData.times = _.uniq(selectedData.times);
+                cellClick(elements, selectedData);
+              }
+            }
+            elements.map(e => $(e).removeClass('ds-selected'));
+          }
         }
-        cellMouseoverActive = true;
-      } else if (action === 'elementSelect') {
-        element.addClass('ml-dragselect-dragging');
-        return;
-      } else if (action === 'dragStart') {
-        cellMouseoverActive = false;
-        return;
-      }
-
-      element.removeClass('ml-dragselect-dragging');
-      elements.map(e => $(e).removeClass('ds-selected'));
-    }
-
-    mlExplorerDashboardService.dragSelect.watch(dragSelectListener);
+      )
+    );
 
     // Re-render the swimlane whenever the underlying data changes.
     function swimlaneDataChangeListener(swimlaneType) {
@@ -81,7 +103,8 @@ module.directive('mlExplorerSwimlane', function ($compile, Private, mlExplorerDa
     mlExplorerDashboardService.swimlaneDataChange.watch(swimlaneDataChangeListener);
 
     element.on('$destroy', () => {
-      mlExplorerDashboardService.dragSelect.unwatch(dragSelectListener);
+      unsubCellMouseoverActive();
+      unsubDragging();
       mlExplorerDashboardService.swimlaneDataChange.unwatch(swimlaneDataChangeListener);
       scope.$destroy();
     });

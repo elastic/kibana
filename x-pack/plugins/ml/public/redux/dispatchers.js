@@ -11,6 +11,8 @@ import { anomalyExplorerActions } from './modules/anomaly_explorer';
 import { showChartsActions } from './modules/show_charts';
 
 export const {
+  dragSelectUpdate,
+  dragSelectFinish,
   loadingStart,
   loadingStop,
   anomalyDataChange,

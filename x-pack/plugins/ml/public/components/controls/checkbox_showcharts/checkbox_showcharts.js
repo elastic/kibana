@@ -11,7 +11,7 @@
  */
 
 import { store } from '../../../redux/store';
-import { showCharts } from '../../../redux/bound_actions';
+import { showCharts } from '../../../redux/dispatchers';
 
 import template from './checkbox_showcharts.html';
 import 'plugins/ml/components/controls/controls_select';

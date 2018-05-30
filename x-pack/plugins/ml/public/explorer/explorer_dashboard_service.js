@@ -17,8 +17,6 @@ const module = uiModules.get('apps/ml');
 import { listenerFactoryProvider } from 'plugins/ml/factories/listener_factory';
 
 module.service('mlExplorerDashboardService', function () {
-  this.allowCellRangeSelection = true;
-
   const listenerFactory = listenerFactoryProvider();
   const dragSelect = this.dragSelect = listenerFactory();
   const swimlaneCellClick = this.swimlaneCellClick = listenerFactory();

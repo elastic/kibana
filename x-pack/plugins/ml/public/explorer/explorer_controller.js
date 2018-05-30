@@ -54,14 +54,17 @@ uiRoutes
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
+import { createSelector } from 'reselect';
 import watch from 'redux-watch';
 import { store } from '../redux/store';
 import {
+  dragSelectUpdate,
+  dragSelectFinish,
   anomalyDataChange,
   timeRangeChange,
   loadingStart,
   loadingStop
-} from '../redux/bound_actions';
+} from '../redux/dispatchers';
 
 module.controller('MlExplorerController', function (
   $scope,
@@ -74,17 +77,17 @@ module.controller('MlExplorerController', function (
   mlSelectIntervalService,
   mlSelectSeverityService) {
 
-  const state = store.getState().anomalyExplorer;
-  $scope.checkboxShowChartsVisibility = state.checkboxShowChartsVisibility;
-  $scope.loading = state.loading;
-
-  function mapStateToScope() {
-    const { loading, checkboxShowChartsVisibility } = store.getState().anomalyExplorer;
-    return { loading, checkboxShowChartsVisibility };
-  }
+  const mapStateToScope = createSelector(
+    s => s.anomalyExplorer.loading,
+    s => s.anomalyExplorer.checkboxShowChartsVisibility,
+    (loading, checkboxShowChartsVisibility) => ({
+      loading, checkboxShowChartsVisibility
+    })
+  );
+  Object.assign($scope, mapStateToScope(store.getState()));
 
   const unsubscribeScopeUpdate = store.subscribe(
-    watch(mapStateToScope)(
+    watch(() => mapStateToScope(store.getState()))(
       (newScope) => {
         Object.assign($scope, newScope);
         $scope.$applyAsync();
@@ -92,8 +95,12 @@ module.controller('MlExplorerController', function (
     )
   );
 
+  const getShowCharts = createSelector(
+    s => s.showCharts,
+    d => d
+  );
   const unsubscribeShowCharts = store.subscribe(
-    watch(store.getState, 'showCharts')(
+    watch(() => getShowCharts(store.getState()))(
       () => {
         checkboxShowChartsListener();
         anomalyChartsSeverityListener();
@@ -115,41 +122,12 @@ module.controller('MlExplorerController', function (
   const MAX_CATEGORY_EXAMPLES = 10;
   const VIEW_BY_JOB_LABEL = 'job ID';
 
-  const ALLOW_CELL_RANGE_SELECTION = mlExplorerDashboardService.allowCellRangeSelection;
-  let disableDragSelectOnMouseLeave = true;
   $scope.queryFilters = [];
 
   const dragSelect = new DragSelect({
     selectables: document.querySelectorAll('.sl-cell'),
-    callback(elements) {
-      if (elements.length > 1 && !ALLOW_CELL_RANGE_SELECTION) {
-        elements = [elements[0]];
-      }
-
-      if (elements.length > 0) {
-        mlExplorerDashboardService.dragSelect.changed({
-          action: 'newSelection',
-          elements
-        });
-      }
-
-      disableDragSelectOnMouseLeave = true;
-    },
-    onDragStart() {
-      if (ALLOW_CELL_RANGE_SELECTION) {
-        mlExplorerDashboardService.dragSelect.changed({
-          action: 'dragStart'
-        });
-        disableDragSelectOnMouseLeave = false;
-      }
-    },
-    onElementSelect() {
-      if (ALLOW_CELL_RANGE_SELECTION) {
-        mlExplorerDashboardService.dragSelect.changed({
-          action: 'elementSelect'
-        });
-      }
-    }
+    callback: dragSelectFinish,
+    onElementSelect: dragSelectUpdate
   });
 
   $scope.selectedJobs = null;
@@ -258,7 +236,7 @@ module.controller('MlExplorerController', function (
   };
 
   $scope.setSwimlaneSelectActive = function (active) {
-    if (!active && disableDragSelectOnMouseLeave) {
+    if (!active && store.getState().anomalyExplorer.disableDragSelectOnMouseLeave) {
       dragSelect.clearSelection();
       dragSelect.stop();
       return;
@@ -456,7 +434,10 @@ module.controller('MlExplorerController', function (
 
   // Listens to render updates of the swimlanes to update dragSelect
   const swimlaneRenderDoneListener = function () {
+    dragSelect.clearSelection();
+    dragSelect.stop();
     dragSelect.addSelectables(document.querySelectorAll('.sl-cell'));
+    dragSelect.start();
   };
   mlExplorerDashboardService.swimlaneRenderDone.watch(swimlaneRenderDoneListener);
 
@@ -487,15 +468,14 @@ module.controller('MlExplorerController', function (
       jobIds, influencers, 0, earliestMs, latestMs, 500
     )
       .then((resp) => {
+        let anomalyChartsData = [];
         if ($scope.cellData !== undefined && _.keys($scope.cellData).length > 0) {
           console.log('Explorer anomaly charts data set:', resp.records);
-
-          if (store.getState().showCharts) {
-            anomalyDataChange(
-              resp.records, earliestMs, latestMs
-            );
-          }
+          anomalyChartsData = resp.records;
         }
+        anomalyDataChange(
+          anomalyChartsData, earliestMs, latestMs
+        );
 
         if (influencers.length > 0) {
           // Filter the Top Influencers list to show just the influencers from
