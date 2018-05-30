@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }) {
     describe('panel edit controls', function () {
       before(async () => {
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.setTimepickerInDataRange();
+        await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
         await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
       });
 
