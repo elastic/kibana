@@ -21,11 +21,13 @@ import React from 'react';
 import AggRow from './agg_row';
 import AggSelect from './agg_select';
 import FieldSelect from './field_select';
-import Select from 'react-select';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
-import { htmlIdGenerator } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiComboBox,
+} from '@elastic/eui';
 
 export const TopHitAgg = props => {
   const { fields, series, panel } = props;
@@ -56,6 +58,12 @@ export const TopHitAgg = props => {
   ];
 
   const htmlId = htmlIdGenerator();
+  const selectedAggWithOption = aggWithOptions.find(option => {
+    return model.agg_with === option.value;
+  });
+  const selectedOrderOption = orderOptions.find(option => {
+    return model.order === option.value;
+  });
   return (
     <AggRow
       disableDelete={props.disableDelete}
@@ -106,13 +114,14 @@ export const TopHitAgg = props => {
             <label className="vis_editor__label" htmlFor={htmlId('agg_with')}>
               Aggregate with
             </label>
-            <Select
-              inputProps={{ id: htmlId('agg_with') }}
-              clearable={false}
+            <EuiComboBox
+              isClearable={false}
+              id={htmlId('agg_with')}
               placeholder="Select..."
-              onChange={handleSelectChange('agg_with')}
-              value={model.agg_with}
               options={aggWithOptions}
+              selectedOptions={selectedAggWithOption ? [selectedAggWithOption] : []}
+              onChange={handleSelectChange('agg_with')}
+              singleSelection={true}
             />
           </div>
           <div className="vis_editor__row_item">
@@ -132,13 +141,14 @@ export const TopHitAgg = props => {
             <label className="vis_editor__label" htmlFor={htmlId('order')}>
               Order
             </label>
-            <Select
-              inputProps={{ id: htmlId('order') }}
-              clearable={false}
+            <EuiComboBox
+              isClearable={false}
+              id={htmlId('order')}
               placeholder="Select..."
-              onChange={handleSelectChange('order')}
-              value={model.order}
               options={orderOptions}
+              selectedOptions={selectedOrderOption ? [selectedOrderOption] : []}
+              onChange={handleSelectChange('order')}
+              singleSelection={true}
             />
           </div>
         </div>

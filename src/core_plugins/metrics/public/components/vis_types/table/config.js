@@ -24,10 +24,12 @@ import DataFormatPicker from '../../data_format_picker';
 import createSelectHandler from '../../lib/create_select_handler';
 import createTextHandler from '../../lib/create_text_handler';
 import FieldSelect from '../../aggs/field_select';
-import Select from 'react-select';
 import YesNo from '../../yes_no';
 import ColorRules from '../../color_rules';
-import { htmlIdGenerator } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiComboBox,
+} from '@elastic/eui';
 
 class TableSeriesConfig extends Component {
 
@@ -58,6 +60,9 @@ class TableSeriesConfig extends Component {
       { label: 'Overall Avg', value: 'overall_avg' },
       { label: 'Cumlative Sum', value: 'cumlative_sum' },
     ];
+    const selectedAggFuncOption = functionOptions.find(option => {
+      return model.aggregate_function === option.value;
+    });
 
     return (
       <div>
@@ -101,11 +106,12 @@ class TableSeriesConfig extends Component {
             </div>
             <label className="vis_editor__label" htmlFor={htmlId('aggregateFunctionInput')}>Aggregate Function</label>
             <div className="vis_editor__row_item">
-              <Select
-                inputProps={{ id: htmlId('aggregateFunctionInput') }}
-                value={model.aggregate_function}
+              <EuiComboBox
+                id={htmlId('aggregateFunctionInput')}
                 options={functionOptions}
+                selectedOptions={selectedAggFuncOption ? [selectedAggFuncOption] : []}
                 onChange={handleSelectChange('aggregate_function')}
+                singleSelection={true}
               />
             </div>
           </div>
