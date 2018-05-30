@@ -157,4 +157,4 @@ query editor and click *Profile*:
 --------------------------------------------------
 // NOTCONSOLE
 
-image::searchprofiler/images/pasting.png["Visualizing pre-collected responses"]
+image::dev-tools/searchprofiler/images/pasting.png["Visualizing pre-collected responses"]
