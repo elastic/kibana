@@ -11,12 +11,14 @@ permanently breaks Kibana in a future version.
 
 * <<saved-objects-api-get>>
 * <<saved-objects-api-bulk-get>>
+* <<saved-objects-api-find>>
 * <<saved-objects-api-create>>
 * <<saved-objects-api-update>>
 * <<saved-objects-api-delete>>
 
 include::saved-objects/get.asciidoc[]
 include::saved-objects/bulk_get.asciidoc[]
+include::saved-objects/find.asciidoc[]
 include::saved-objects/create.asciidoc[]
 include::saved-objects/update.asciidoc[]
 include::saved-objects/delete.asciidoc[]
