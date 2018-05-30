@@ -27,9 +27,19 @@ export function injectVars(server) {
   const isOverridden = typeof configuredUrl === 'string' && configuredUrl !== '';
   const mapConfig = serverConfig.get('map');
 
-  // Fall back to top-level legacy map config settings if needed
+  // Fall back to top-level legacy map config settings if needed. Warn on usage
   const tilemapsConfig = serverConfig.get('map.tilemap') || serverConfig.get('tilemap');
   const regionmapsConfig = serverConfig.get('map.regionmap') || serverConfig.get('regionmap');
+
+  ['tilemap', 'regionmap'].forEach(legacyMap => {
+    const hasLegacyMap = serverConfig.has(legacyMap);
+    const legacyMapDef = serverConfig.get(legacyMap);
+    if (hasLegacyMap && typeof legacyMapDef !== 'undefined') {
+      server.log(['warning', 'deprecated'],
+        `Use of "${legacyMap}" in the kibana configuration is deprecated. ` +
+        `Use "map.${legacyMap}" instead`);
+    }
+  });
 
   regionmapsConfig.layers = (regionmapsConfig.layers) ? regionmapsConfig.layers : [];
 
