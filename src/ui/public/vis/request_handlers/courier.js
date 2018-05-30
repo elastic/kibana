@@ -160,7 +160,7 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
               resolve(resp);
             }).catch(e => reject(e));
 
-            searchSource.getSearchRequestBody().then(req => {
+            requestSearchSource.getSearchRequestBody().then(req => {
               request.json(req);
             });
 
