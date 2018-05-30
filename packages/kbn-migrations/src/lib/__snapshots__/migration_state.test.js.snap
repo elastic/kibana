@@ -6,18 +6,18 @@ Object {
   "status": "migrated",
   "types": Array [
     Object {
-      "checksum": "0a512223",
-      "migrationIds": Array [
-        "m_b1",
-      ],
-      "type": "b",
-    },
-    Object {
       "checksum": "cd8412f2",
       "migrationIds": Array [
         "m_a1",
       ],
       "type": "a",
+    },
+    Object {
+      "checksum": "0a512223",
+      "migrationIds": Array [
+        "m_b1",
+      ],
+      "type": "b",
     },
   ],
 }
@@ -29,19 +29,19 @@ Object {
   "status": "migrated",
   "types": Array [
     Object {
+      "checksum": "ca93d730",
+      "migrationIds": Array [
+        "a3",
+      ],
+      "type": "bar",
+    },
+    Object {
       "checksum": "97602af3",
       "migrationIds": Array [
         "a1",
         "a2",
       ],
       "type": "foo",
-    },
-    Object {
-      "checksum": "ca93d730",
-      "migrationIds": Array [
-        "a3",
-      ],
-      "type": "bar",
     },
   ],
 }

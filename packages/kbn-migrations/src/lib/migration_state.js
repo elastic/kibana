@@ -16,7 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// Migration state contains all of the data we need to persist in an index
+
+// The migration state contains all of the data we need to persist in an index
 // in order to know: 1. do we need to migrate? 2. what migrations
 // and mappings have already been applied? 3. mapping info for disabled plugins
 
@@ -81,13 +82,17 @@ module.exports = {
 // The checksum is a combination of mappings for a type as well as that type's
 // migration ids, so that if either changes, we can detect that we are out of date.
 function build(plugins, previousIndex, previousState = empty) {
-  const previousTypes = _.indexBy(previousState.types, 'type');
-  const updatedTypes = plugins.reduce((acc, plugin) => Object.assign(acc, pluginTypes(plugin)), previousTypes);
+  const types = _(plugins).map(pluginTypes).flatten();
 
   return {
     previousIndex,
-    types: _.values(updatedTypes),
     status: MigrationStatus.migrated,
+    types: _(types)
+      .concat(previousState.types)
+      .compact()
+      .unique(({ type }) => type)
+      .sortBy('type')
+      .value(),
   };
 }
 
@@ -157,16 +162,18 @@ function pluginTypes(plugin) {
     .concat(_.keys(plugin.mappings))
     .uniq()
     .value()
-    .reduce((acc, type) => {
-      const migrations = _.get(migrationsByType, type, []);
-      const migrationIds = uniqueMigrationIds(plugin, migrations);
-      const checksum = objectHash({ migrationIds, mapping: _.get(plugin.mappings, type) });
-      return _.set(acc, type, { type, checksum, migrationIds });
-    }, {});
+    .map((type) => {
+      const migrationIds = _.map(_.get(migrationsByType, type, []), 'id');
+      const mapping = _.get(plugin.mappings, type);
+      const checksum = objectHash({ migrationIds, mapping });
+
+      assertUniqueMigrationIds(plugin, migrationIds);
+
+      return { type, checksum, migrationIds };
+    });
 }
 
-function uniqueMigrationIds(plugin, migrations) {
-  const migrationIds = _.map(migrations, 'id');
+function assertUniqueMigrationIds(plugin, migrationIds) {
   const dup = _.chain(migrationIds)
     .groupBy(_.identity)
     .values()
@@ -177,9 +184,8 @@ function uniqueMigrationIds(plugin, migrations) {
   if (dup) {
     throw new Error(`Plugin "${plugin.id}" has migration "${dup}" defined more than once.`);
   }
-
-  return migrationIds;
 }
+
 
 function assertValidMigrationOrder(storedTypes) {
   return ({ type, migrationIds }) => {
