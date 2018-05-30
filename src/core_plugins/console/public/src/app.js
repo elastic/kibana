@@ -17,10 +17,10 @@
  * under the License.
  */
 
-var $ = require('jquery');
+const $ = require('jquery');
 
-let history = require('./history');
-let mappings = require('./mappings');
+const history = require('./history');
+const mappings = require('./mappings');
 
 export default function init(input, output, sourceLocation = 'stored') {
   $(document.body).removeClass('fouc');
@@ -30,13 +30,13 @@ export default function init(input, output, sourceLocation = 'stored') {
     if (content != null) {
       input.update(content);
     }
-    output.update("");
+    output.update('');
   }
 
   function loadSavedState() {
-    var previousSaveState = history.getSavedEditorState();
+    const previousSaveState = history.getSavedEditorState();
 
-    if (sourceLocation == "stored") {
+    if (sourceLocation === 'stored') {
       if (previousSaveState) {
         resetToValues(previousSaveState.content);
       }
@@ -46,9 +46,9 @@ export default function init(input, output, sourceLocation = 'stored') {
       }
     }
     else if (/^https?:\/\//.test(sourceLocation)) {
-      var loadFrom = { url: sourceLocation, dataType: "text", kbnXsrfToken: false };
+      const loadFrom = { url: sourceLocation, dataType: 'text', kbnXsrfToken: false };
       if (/https?:\/\/api.github.com/.test(sourceLocation)) {
-        loadFrom.headers = { Accept: "application/vnd.github.v3.raw" };
+        loadFrom.headers = { Accept: 'application/vnd.github.v3.raw' };
       }
       $.ajax(loadFrom).done(function (data) {
         resetToValues(data);
@@ -64,10 +64,10 @@ export default function init(input, output, sourceLocation = 'stored') {
   }
 
   function setupAutosave() {
-    var timer;
-    var saveDelay = 500;
+    let timer;
+    const saveDelay = 500;
 
-    input.getSession().on("change", function onChange() {
+    input.getSession().on('change', function onChange() {
       if (timer) {
         timer = clearTimeout(timer);
       }
@@ -77,11 +77,11 @@ export default function init(input, output, sourceLocation = 'stored') {
 
   function saveCurrentState() {
     try {
-      var content = input.getValue();
+      const content = input.getValue();
       history.updateCurrentState(content);
     }
     catch (e) {
-      console.log("Ignoring saving error: " + e);
+      console.log('Ignoring saving error: ' + e);
     }
   }
 
@@ -89,30 +89,30 @@ export default function init(input, output, sourceLocation = 'stored') {
   // chooses to restore a request from the history
   // PREVENTS history from needing to know about the input
   history.restoreFromHistory = function applyHistoryElem(req) {
-    var session = input.getSession();
-    var pos = input.getCursorPosition();
-    var prefix = "";
-    var suffix = "\n";
+    const session = input.getSession();
+    let pos = input.getCursorPosition();
+    let prefix = '';
+    let suffix = '\n';
     if (input.parser.isStartRequestRow(pos.row)) {
       pos.column = 0;
-      suffix += "\n";
+      suffix += '\n';
     }
     else if (input.parser.isEndRequestRow(pos.row)) {
-      var line = session.getLine(pos.row);
+      const line = session.getLine(pos.row);
       pos.column = line.length;
-      prefix = "\n\n";
+      prefix = '\n\n';
     }
     else if (input.parser.isInBetweenRequestsRow(pos.row)) {
       pos.column = 0;
     }
     else {
       pos = input.nextRequestEnd(pos);
-      prefix = "\n\n";
+      prefix = '\n\n';
     }
 
-    var s = prefix + req.method + " " + req.endpoint;
+    let s = prefix + req.method + ' ' + req.endpoint;
     if (req.data) {
-      s += "\n" + req.data;
+      s += '\n' + req.data;
     }
 
     s += suffix;
