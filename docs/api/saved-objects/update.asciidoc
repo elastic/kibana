@@ -13,7 +13,7 @@ existing Kibana saved object.
 ==== Path Parameters
 
 `type` (required)::
-  (string) Valid options, include: `visualization`, `dashboard`, `search`, `config`, and `timelion-sheet`
+  (string) Valid options, include: `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`
 
 `id` (required)::
   (string) ID of object to update

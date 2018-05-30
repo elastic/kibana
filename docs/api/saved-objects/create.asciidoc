@@ -14,7 +14,7 @@ The create saved object API enables you to persist a Kibana saved object.
 ==== Path Parameters
 
 `type` (required)::
-  (string) Valid options, include: `visualization`, `dashboard`, `search`, `config`, and `timelion-sheet`
+  (string) Valid options, include: `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`
 
 `id` (optional)::
   (string) Enables specifying an ID to use, as opposed to one being randomly generated
