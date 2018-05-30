@@ -26,10 +26,11 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 
-export function PanelOptionsMenu({ toggleContextMenu, isPopoverOpen, closeContextMenu, panels }) {
+export function PanelOptionsMenu({ toggleContextMenu, isPopoverOpen, closeContextMenu, panels, isViewMode }) {
   const button = (
     <EuiButtonIcon
-      iconType="gear"
+      iconType={isViewMode ? 'arrowDown' : 'gear'}
+      className={isViewMode && !isPopoverOpen ? 'viewModeOpenContextMenuIcon' : ''}
       aria-label="Panel options"
       data-test-subj="dashboardPanelToggleMenuIcon"
       onClick={toggleContextMenu}
@@ -60,4 +61,5 @@ PanelOptionsMenu.propTypes = {
   toggleContextMenu: PropTypes.func,
   closeContextMenu: PropTypes.func,
   isPopoverOpen: PropTypes.bool,
+  isViewMode: PropTypes.bool.isRequired,
 };
