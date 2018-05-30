@@ -63,7 +63,7 @@ include::{xkb-repo-dir}/security/index.asciidoc[]
 
 include::management/watcher-ui/index.asciidoc[]
 
-include::{xkb-repo-dir}/upgrade-assistant/index.asciidoc[]
+include::management/upgrade-assistant/index.asciidoc[]
 
 include::management/dashboard_only_mode/index.asciidoc[]
 
