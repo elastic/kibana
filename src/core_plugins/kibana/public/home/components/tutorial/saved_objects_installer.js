@@ -17,15 +17,21 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 
 import {
+  EuiSteps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
   EuiButton,
+  EuiSpacer,
+  EuiCallOut,
 } from '@elastic/eui';
+
+const INCOMPLETE = 'incomplete';
+const COMPLETE = 'complete';
 
 export class SavedObjectsInstaller extends React.Component {
   constructor(props) {
@@ -33,12 +39,88 @@ export class SavedObjectsInstaller extends React.Component {
 
     this.state = {
       isInstalling: false,
+      installStatus: INCOMPLETE,
+    };
+  }
+
+  installSavedObjects = async () => {
+    this.setState({
+      isInstalling: true,
+    });
+
+    const resp = await this.props.bulkCreate(this.props.savedObjects, { overwrite: true });
+    const errors = resp.filter(savedObjectCreateResult => {
+      return savedObjectCreateResult.hasOwnProperty('error');
+    });
+
+    let statusMsg = `${this.props.savedObjects.length} saved objects successfully added`;
+    if (errors.length > 0) {
+      statusMsg = `Unable to load kibana saved objects, Error: ${errors[0]}`;
+    }
+
+    this.setState({
+      isInstalling: false,
+      installStatusMsg: statusMsg,
+      installStatus: errors.length === 0 ? COMPLETE : INCOMPLETE,
+    });
+  }
+
+  renderInstallMessage() {
+    if (!this.state.installStatusMsg) {
+      return;
+    }
+
+    return (
+      <EuiCallOut
+        title={this.state.installStatusMsg}
+        color={this.state.installStatus === COMPLETE ? 'success' : 'warning'}
+      />
+    );
+  }
+
+  renderInstallStep() {
+    const installStep = (
+      <Fragment>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexItem>
+            <EuiText>
+              <p>
+                Click button to add Kibana objects for module
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+
+          <EuiFlexItem
+            grow={false}
+          >
+            <EuiButton
+              onClick={this.installSavedObjects}
+              isLoading={this.state.isInstalling}
+            >
+              Add
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer size="s" />
+
+        {this.renderInstallMessage()}
+      </Fragment>
+    );
+
+    return {
+      title: 'Load Kibana objects',
+      status: this.state.installStatus,
+      children: installStep,
+      key: 'installStep'
     };
   }
 
   render() {
     return (
-      <div>hello</div>
+      <EuiSteps
+        steps={[this.renderInstallStep()]}
+      />
     );
   }
 }
@@ -46,7 +128,7 @@ export class SavedObjectsInstaller extends React.Component {
 const savedObjectShape = PropTypes.shape({
   id: PropTypes.string.isRequired,
   type: PropTypes.string.isRequired,
-  attributes: PropTypes.arrayOf(PropTypes.object).isRequired,
+  attributes: PropTypes.object.isRequired,
 });
 
 SavedObjectsInstaller.propTypes = {
