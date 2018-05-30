@@ -98,7 +98,7 @@ class RequestsViewComponent extends Component {
     return (
       <InspectorView>
         <EuiText size="xs">
-          <p>
+          <p role="status" aria-live="polite" aria-atomic="true">
             {this.state.requests.length}
             {this.state.requests.length !== 1 ? ' requests were' : ' request was'} made
             {failedCount > 0 &&
