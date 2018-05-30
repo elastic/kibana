@@ -131,4 +131,4 @@ and the monitoring cluster.
 
 See also <<monitoring-data>>.
 
-include::{xkb-repo-dir}/settings/monitoring-settings.asciidoc[]
+include::{kib-repo-dir}/settings/monitoring-settings.asciidoc[]
