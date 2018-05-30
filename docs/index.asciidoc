@@ -29,7 +29,7 @@ include::setup/installing.asciidoc[]
 
 include::setup/setup-xkb.asciidoc[]
 
-include::{xkb-repo-dir}/monitoring/monitoring-xkib.asciidoc[]
+include::monitoring/monitoring-xkib.asciidoc[]
 
 include::security/securing-kibana.asciidoc[]
 
@@ -55,7 +55,7 @@ include::graph/index.asciidoc[]
 
 include::dev-tools.asciidoc[]
 
-include::{xkb-repo-dir}/monitoring/index.asciidoc[]
+include::monitoring/index.asciidoc[]
 
 include::management.asciidoc[]
 
