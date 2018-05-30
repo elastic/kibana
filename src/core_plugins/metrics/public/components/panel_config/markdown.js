@@ -22,7 +22,6 @@ import React, { Component } from 'react';
 import SeriesEditor from '../series_editor';
 import { IndexPattern } from '../index_pattern';
 import 'brace/mode/less';
-import Select from 'react-select';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import ColorPicker from '../color_picker';
@@ -30,7 +29,10 @@ import YesNo from '../yes_no';
 import MarkdownEditor from '../markdown_editor';
 import less from 'less/lib/less-browser';
 import { KuiCodeEditor } from '@kbn/ui-framework/components';
-import { htmlIdGenerator } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiComboBox,
+} from '@elastic/eui';
 const lessC = less(window, { env: 'production' });
 
 class MarkdownPanelConfig extends Component {
@@ -73,6 +75,9 @@ class MarkdownPanelConfig extends Component {
       { label: 'Middle', value: 'middle' },
       { label: 'Bottom', value: 'bottom' }
     ];
+    const selectedAlignOption = alignOptions.find(option => {
+      return model.markdown_vertical_align === option.value;
+    });
     let view;
     if (selectedTab === 'markdown') {
       view = (<MarkdownEditor {...this.props}/>);
@@ -129,13 +134,13 @@ class MarkdownPanelConfig extends Component {
               Vertical Alignment
             </label>
             <div className="vis_editor__row_item">
-              <Select
-                inputProps={{ id: htmlId('valign') }}
-                autosize={true}
-                clearable={false}
+              <EuiComboBox
+                isClearable={false}
+                id={htmlId('valign')}
                 options={alignOptions}
-                value={model.markdown_vertical_align}
+                selectedOptions={selectedAlignOption ? [selectedAlignOption] : []}
                 onChange={handleSelectChange('markdown_vertical_align')}
+                singleSelection={true}
               />
             </div>
           </div>

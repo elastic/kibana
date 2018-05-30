@@ -20,11 +20,13 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import AggSelect from './agg_select';
-import Select from 'react-select';
 import AggRow from './agg_row';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
-import { htmlIdGenerator } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiComboBox,
+} from '@elastic/eui';
 
 function SeriesAgg(props) {
   const { panel, model } = props;
@@ -45,6 +47,9 @@ function SeriesAgg(props) {
     { label: 'Overall Avg', value: 'overall_avg' },
     { label: 'Cumlative Sum', value: 'cumlative_sum' },
   ];
+  const selectedFunctionOption = functionOptions.find(option => {
+    return model.function === option.value;
+  });
 
   if (panel.type === 'table') {
     return (
@@ -83,11 +88,12 @@ function SeriesAgg(props) {
       </div>
       <div className="vis_editor__item">
         <label className="vis_editor__label" htmlFor={htmlId('function')}>Function</label>
-        <Select
-          inputProps={{ id: htmlId('function') }}
-          value={model.function}
+        <EuiComboBox
+          id={htmlId('function')}
           options={functionOptions}
+          selectedOptions={selectedFunctionOption ? [selectedFunctionOption] : []}
           onChange={handleSelectChange('function')}
+          singleSelection={true}
         />
       </div>
     </AggRow>
