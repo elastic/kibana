@@ -29,7 +29,7 @@ POST test/test/_bulk
   grayed-out `_all`).  This restricts profiled queries to the `test` index.
 +
 --
-image::searchprofiler/images/gs7.png["Using the index filter"]
+image::dev-tools/searchprofiler/images/gs7.png["Using the index filter"]
 --
 
 . Replace the default `match_all` query with a query that has two sub-query
@@ -74,7 +74,7 @@ the following query into the query editor.
 . Click *Profile* to profile the query and visualize the results.
 +
 --
-image::searchprofiler/images/gs8.png["Profiling the more complicated query"]
+image::dev-tools/searchprofiler/images/gs8.png["Profiling the more complicated query"]
 
 As before, you'll see a list of shards appear in the center panel.  You'll notice
 that the query was slightly slower (15ms vs 0.13ms) because it actually had to do
@@ -84,7 +84,7 @@ a bit of work this time, unlike the `match_all` query.
 . Click the first shard's Expand button to view the query details.
 +
 --
-image::searchprofiler/images/gs9.png["Drilling into the first shard's details"]
+image::dev-tools/searchprofiler/images/gs9.png["Drilling into the first shard's details"]
 
 --
 
@@ -113,7 +113,7 @@ This particular query also includes a aggregation (a `stats` agg on the `"age"` 
 To view Aggregation profiling statistics, click the *Aggregation Profile* tab. This tab
 is only enabled if the query being profiled contains an aggregation.
 
-image::searchprofiler/images/gs10.png["Drilling into the first shard's details"]
+image::dev-tools/searchprofiler/images/gs10.png["Drilling into the first shard's details"]
 
 Click a shard's Expand button to view the aggregation details. Hover over an
 aggregation row to view the timing breakdown.
