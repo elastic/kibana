@@ -41,10 +41,17 @@ export class Collector {
     this.log = getCollectorLogger(server);
   }
 
-  fetchInternal(callCluster) {
-    if (typeof callCluster !== 'function') {
-      throw new Error('A `callCluster` function must be passed to the fetch methods of collectors');
+  /*
+   * @param {Object} fetchMechanisms - an object with a callCluster function and a savedObjectsClient object
+   */
+  fetchInternal(fetchMechanisms) {
+    const { callCluster, savedObjectsClient } = fetchMechanisms;
+    if (typeof callCluster !== 'function' || typeof savedObjectsClient !== 'object') {
+      throw new Error(
+        'An object must be passed to the fetch methods of collectors having ' +
+        'properties of a callCluster function and savedObjectsClient object'
+      );
     }
-    return this.fetch(callCluster);
+    return this.fetch(fetchMechanisms);
   }
 }

@@ -39,6 +39,10 @@ describe('BulkUploader', () => {
             }),
           },
         },
+        config: () => ({
+          get: sinon.spy()
+        }),
+        getKibanaIndexMappingsDsl: sinon.stub().returns({ properties: {} }),
         usage: {},
       };
     });

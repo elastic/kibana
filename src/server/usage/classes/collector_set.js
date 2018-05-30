@@ -71,9 +71,10 @@ export class CollectorSet {
 
   /*
    * Call a bunch of fetch methods and then do them in bulk
+   * @param {Object} fetchMechanisms - an object with a callCluster function and a savedObjectsClient object
    * @param {Array} collectors - an array of collectors, default to all registered collectors
    */
-  bulkFetch(callCluster, collectors = this._collectors) {
+  bulkFetch(fetchMechanisms, collectors = this._collectors) {
     if (!Array.isArray(collectors)) {
       throw new Error(`bulkFetch method given bad collectors parameter: ` + typeof collectors);
     }
@@ -83,7 +84,7 @@ export class CollectorSet {
       this._log.debug(`Fetching data from ${collectorType} collector`);
       return Promise.props({
         type: collectorType,
-        result: collector.fetchInternal(callCluster) // use the wrapper for fetch, kicks in error checking
+        result: collector.fetchInternal(fetchMechanisms) // use the wrapper for fetch, kicks in error checking
       })
         .catch(err => {
           this._log.warn(err);
@@ -92,9 +93,9 @@ export class CollectorSet {
     });
   }
 
-  async bulkFetchUsage(callCluster) {
+  async bulkFetchUsage(fetchMechanisms) {
     const usageCollectors = this._collectors.filter(c => c instanceof UsageCollector);
-    return this.bulkFetch(callCluster, usageCollectors);
+    return this.bulkFetch(fetchMechanisms, usageCollectors);
   }
 
   // convert an array of fetched stats results into key/object
