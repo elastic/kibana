@@ -11,17 +11,6 @@ export async function saveRole($http, role) {
   return await $http.post(`${apiBase}/${role.name}`, role);
 }
 
-export async function getRole($http, name) {
-  try {
-    return await $http.get(`${apiBase}/${name}`);
-  } catch (response) {
-    if (response.status === 404) {
-      return null;
-    }
-    throw response;
-  }
-}
-
 export async function deleteRole($http, name) {
   return await $http.delete(`${apiBase}/${name}`);
 }

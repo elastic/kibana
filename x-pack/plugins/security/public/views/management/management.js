@@ -5,7 +5,6 @@
  */
 
 import 'plugins/security/views/management/change_password_form/change_password_form';
-import 'plugins/security/views/management/index_privileges_form/index_privileges_form';
 import 'plugins/security/views/management/password_form/password_form';
 import 'plugins/security/views/management/users';
 import 'plugins/security/views/management/roles';

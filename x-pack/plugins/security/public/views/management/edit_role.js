@@ -78,9 +78,6 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     const kibanaApplicationPrivilege = $route.current.locals.kibanaApplicationPrivilege;
     const role = $route.current.locals.role;
 
-    this.isNewRole = $route.current.params.name == null;
-    this.fieldOptions = {};
-
     const xpackInfo = Private(XPackInfoProvider);
     const allowDocumentLevelSecurity = xpackInfo.get('features.security.allowRoleDocumentLevelSecurity');
     const allowFieldLevelSecurity = xpackInfo.get('features.security.allowRoleFieldLevelSecurity');
@@ -91,8 +88,6 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
       users,
       indexPatterns,
     } = $route.current.locals;
-
-    this.fieldOptions = {};
 
     const roleToEdit = role.toJSON();
     if (roleToEdit.indices.length === 0) {
@@ -107,12 +102,11 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
 
     render(<EditRolePage
       runAsUsers={users}
-      role={role.toJSON()}
+      role={roleToEdit}
       kibanaAppPrivileges={kibanaApplicationPrivilege}
       indexPatterns={indexPatterns}
       rbacEnabled={rbacEnabled}
       rbacApplication={rbacApplication}
-      spacesEnabled={true}
       httpClient={$http}
       breadcrumbs={routes.getBreadcrumbs()}
       allowDocumentLevelSecurity={allowDocumentLevelSecurity}

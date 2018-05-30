@@ -6,7 +6,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
-import { Notifier, toastNotifications } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 import {
   EuiPanel,
   EuiText,
@@ -29,8 +29,6 @@ import { ROLES_PATH } from '../../management_urls';
 import { DeleteRoleButton } from './delete_role_button';
 import { ElasticsearchPrivileges, KibanaPrivileges } from './privileges';
 
-const notifier = new Notifier();
-
 export class EditRolePage extends Component {
   static propTypes = {
     role: PropTypes.object.isRequired,
@@ -39,10 +37,10 @@ export class EditRolePage extends Component {
     httpClient: PropTypes.func.isRequired,
     rbacEnabled: PropTypes.bool.isRequired,
     rbacApplication: PropTypes.string,
-    spacesEnabled: PropTypes.bool.isRequired,
     allowDocumentLevelSecurity: PropTypes.bool.isRequired,
     allowFieldLevelSecurity: PropTypes.bool.isRequired,
     kibanaAppPrivileges: PropTypes.array.isRequired,
+    notifier: PropTypes.func.isRequired,
   };
 
   constructor(props) {
@@ -238,6 +236,7 @@ export class EditRolePage extends Component {
 
       const {
         httpClient,
+        notifier,
       } = this.props;
 
       const role = {
@@ -262,6 +261,7 @@ export class EditRolePage extends Component {
     const {
       httpClient,
       role,
+      notifier,
     } = this.props;
 
     deleteRole(httpClient, role.name)
