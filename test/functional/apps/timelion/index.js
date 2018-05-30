@@ -27,6 +27,7 @@ export default function ({ getService, loadTestFile }) {
     before(async function () {
       log.debug('Starting timelion before method');
       remote.setWindowSize(1280, 800);
+      await esArchiver.emptyKibanaIndex();
       await esArchiver.loadIfNeeded('logstash_functional');
       await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC', 'defaultIndex': 'logstash-*' });
     });
