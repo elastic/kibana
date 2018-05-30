@@ -1,5 +1,24 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import classNames from 'classnames';
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import {
   KuiBar,
@@ -13,7 +32,13 @@ import {
   EuiTab,
   EuiSpacer,
   EuiSteps,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiButton,
+  EuiCallOut,
 } from '@elastic/eui';
+import * as StatusCheckStates from './status_check_states';
 
 export class InstructionSet extends React.Component {
 
@@ -58,6 +83,72 @@ export class InstructionSet extends React.Component {
         {tab.name}
       </EuiTab>
     ));
+  };
+
+  renderStatusCheckMessage() {
+    let message;
+    let color;
+    switch (this.props.statusCheckState) {
+      case StatusCheckStates.NOT_CHECKED:
+      case StatusCheckStates.FETCHING:
+        return null; // Don't show any message while fetching or if you haven't yet checked.
+      case StatusCheckStates.HAS_DATA:
+        message = this.props.statusCheckConfig.success ? this.props.statusCheckConfig.success : 'Success';
+        color = 'success';
+        break;
+      case StatusCheckStates.ERROR:
+      case StatusCheckStates.NO_DATA:
+        message = this.props.statusCheckConfig.error ? this.props.statusCheckConfig.error : 'No data found';
+        color = 'warning';
+        break;
+    }
+    return (
+      <EuiCallOut
+        title={message}
+        color={color}
+      />
+    );
+  }
+
+  renderStatusCheck() {
+    const { statusCheckState, statusCheckConfig, onStatusCheck } = this.props;
+    const checkStatusStep = (
+      <Fragment>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexItem>
+            <EuiText>
+              <p>
+                {statusCheckConfig.text}
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+
+          <EuiFlexItem
+            grow={false}
+          >
+            <EuiButton
+              onClick={onStatusCheck}
+              isLoading={statusCheckState === StatusCheckStates.FETCHING}
+            >
+              {statusCheckConfig.btnLabel || 'Check status'}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer size="s" />
+
+        {this.renderStatusCheckMessage()}
+      </Fragment>
+    );
+
+    const stepStatus = statusCheckState === StatusCheckStates.NOT_CHECKED ||
+      statusCheckState === StatusCheckStates.FETCHING ? 'incomplete' : 'complete';
+    return {
+      title: statusCheckConfig.title || 'Status Check',
+      status: stepStatus,
+      children: checkStatusStep,
+      key: 'checkStatusStep'
+    };
   }
 
   renderInstructions = () => {
@@ -85,13 +176,17 @@ export class InstructionSet extends React.Component {
       };
     });
 
+    if (this.props.statusCheckConfig) {
+      steps.push(this.renderStatusCheck());
+    }
+
     return (
       <EuiSteps
         steps={steps}
         firstStepNumber={this.props.offset}
       />
     );
-  }
+  };
 
   renderHeader = () => {
     let paramsVisibilityToggle;
@@ -129,7 +224,7 @@ export class InstructionSet extends React.Component {
         </KuiBarSection>
       </KuiBar>
     );
-  }
+  };
 
   render() {
     let paramsForm;
@@ -175,9 +270,26 @@ const instructionVariantShape = PropTypes.shape({
   instructions: PropTypes.arrayOf(instructionShape).isRequired,
 });
 
+const statusCheckConfigShape = PropTypes.shape({
+  success: PropTypes.string,
+  error: PropTypes.string,
+  title: PropTypes.string,
+  text: PropTypes.string,
+  btnLabel: PropTypes.string,
+});
+
 InstructionSet.propTypes = {
   title: PropTypes.string.isRequired,
   instructionVariants: PropTypes.arrayOf(instructionVariantShape).isRequired,
+  statusCheckConfig: statusCheckConfigShape,
+  statusCheckState: PropTypes.oneOf([
+    StatusCheckStates.FETCHING,
+    StatusCheckStates.NOT_CHECKED,
+    StatusCheckStates.HAS_DATA,
+    StatusCheckStates.NO_DATA,
+    StatusCheckStates.ERROR,
+  ]),
+  onStatusCheck: PropTypes.func.isRequired,
   offset: PropTypes.number.isRequired,
   params: PropTypes.array,
   paramValues: PropTypes.object.isRequired,

@@ -1,7 +1,28 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 
 export function DashboardVisualizationProvider({ getService, getPageObjects }) {
   const log = getService('log');
+  const queryBar = getService('queryBar');
   const testSubjects = getService('testSubjects');
+  const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects(['dashboard', 'visualize', 'header', 'discover']);
 
   return new class DashboardVisualizations {
@@ -11,8 +32,8 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
       if (inViewMode) {
         await PageObjects.dashboard.clickEdit();
       }
-      await PageObjects.dashboard.clickAddVisualization();
-      await PageObjects.dashboard.clickAddNewVisualizationLink();
+      await dashboardAddPanel.ensureAddPanelIsShowing();
+      await dashboardAddPanel.clickAddNewEmbeddableLink();
       await PageObjects.visualize.clickVisualBuilder();
       await PageObjects.visualize.saveVisualization(name);
     }
@@ -21,11 +42,11 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
       log.debug(`createSavedSearch(${name})`);
       await PageObjects.header.clickDiscover();
 
-      await PageObjects.dashboard.setTimepickerInDataRange();
+      await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
 
       if (query) {
-        await PageObjects.dashboard.setQuery(query);
-        await PageObjects.dashboard.clickFilterButton();
+        await queryBar.setQuery(query);
+        await queryBar.submitQuery();
       }
 
       if (fields) {
@@ -49,7 +70,7 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
       if (inViewMode) {
         await PageObjects.dashboard.clickEdit();
       }
-      await PageObjects.dashboard.addSavedSearch(name);
+      await dashboardAddPanel.addSavedSearch(name);
     }
 
     async createAndAddMarkdown({ name, markdown }) {
@@ -58,8 +79,8 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
       if (inViewMode) {
         await PageObjects.dashboard.clickEdit();
       }
-      await PageObjects.dashboard.clickAddVisualization();
-      await PageObjects.dashboard.clickAddNewVisualizationLink();
+      await dashboardAddPanel.ensureAddPanelIsShowing();
+      await dashboardAddPanel.clickAddNewEmbeddableLink();
       await PageObjects.visualize.clickMarkdownWidget();
       await PageObjects.visualize.setMarkdownTxt(markdown);
       await PageObjects.visualize.clickGo();

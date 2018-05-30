@@ -30,16 +30,16 @@ export default function ({ getService, getPageObjects }) {
       await tearDown();
     });
 
-    it('Logstash Cluster Summary Status shows correct info', async () => {
+    it('should have Logstash Cluster Summary Status showing correct info', async () => {
       expect(await lsClusterSummaryStatus.getContent()).to.eql({
-        nodeCount: '2',
-        memoryUsed: '528.4 MB / 1.9 GB',
-        eventsInTotal: '117.9k',
-        eventsOutTotal: '111.9k'
+        nodeCount: 'Nodes: 2',
+        memoryUsed: 'Memory: 528.4 MB / 1.9 GB',
+        eventsInTotal: 'Events Received: 117.9k',
+        eventsOutTotal: 'Events Emitted: 111.9k'
       });
     });
 
-    it('Pipelines table shows correct rows with default sorting', async () => {
+    it('should have Pipelines table showing correct rows with default sorting', async () => {
       const rows = await pipelinesList.getRows();
       expect(rows.length).to.be(4);
 
@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('Pipelines Table shows correct rows after sorting by Events Emitted Rate Asc', async () => {
+    it('should have Pipelines Table showing correct rows after sorting by Events Emitted Rate Asc', async () => {
       await pipelinesList.clickEventsEmittedRateCol();
 
       const rows = await pipelinesList.getRows();
@@ -83,14 +83,14 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('filters for specific pipelines', async () => {
+    it('should filter for specific pipelines', async () => {
       await pipelinesList.setFilter('la');
       const rows = await pipelinesList.getRows();
       expect(rows.length).to.be(2);
       await pipelinesList.clearFilter();
     });
 
-    it('filters for non-existent pipeline', async () => {
+    it('should filter for non-existent pipeline', async () => {
       await pipelinesList.setFilter('foobar');
       await pipelinesList.assertNoData();
       await pipelinesList.clearFilter();

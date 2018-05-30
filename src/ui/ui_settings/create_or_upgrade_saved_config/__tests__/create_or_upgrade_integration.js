@@ -1,7 +1,26 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import sinon from 'sinon';
 import expect from 'expect.js';
 
-import { createTestCluster } from '../../../../test_utils/es';
+import { createEsTestCluster } from '@kbn/test';
 import { createServerWithCorePlugins } from '../../../../test_utils/kbn_server';
 import { createToolingLog } from '@kbn/dev-utils';
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
@@ -19,7 +38,7 @@ describe('createOrUpgradeSavedConfig()', () => {
     log.info('starting elasticsearch');
     log.indent(4);
 
-    const es = createTestCluster({ log });
+    const es = createEsTestCluster({ log });
     this.timeout(es.getStartTimeout());
 
     log.indent(-4);
@@ -47,7 +66,7 @@ describe('createOrUpgradeSavedConfig()', () => {
         type: 'config',
         attributes: {
           buildNum: 54090,
-          '5.4.0-SNAPSHOT': true
+          '5.4.0-SNAPSHOT': true,
         },
       },
       {
@@ -55,7 +74,7 @@ describe('createOrUpgradeSavedConfig()', () => {
         type: 'config',
         attributes: {
           buildNum: 54010,
-          '5.4.0-rc1': true
+          '5.4.0-rc1': true,
         },
       },
       {
@@ -63,7 +82,7 @@ describe('createOrUpgradeSavedConfig()', () => {
         type: 'config',
         attributes: {
           buildNum: 99999,
-          '@@version': true
+          '@@version': true,
         },
       },
     ]);
@@ -83,18 +102,20 @@ describe('createOrUpgradeSavedConfig()', () => {
       savedObjectsClient,
       version: '5.4.0',
       buildNum: 54099,
-      log: sinon.stub()
+      log: sinon.stub(),
     });
 
     const config540 = await savedObjectsClient.get('config', '5.4.0');
-    expect(config540).to.have.property('attributes').eql({
-      // should have the new build number
-      buildNum: 54099,
+    expect(config540)
+      .to.have.property('attributes')
+      .eql({
+        // should have the new build number
+        buildNum: 54099,
 
-      // 5.4.0-SNAPSHOT and @@version were ignored so we only have the
-      // attributes from 5.4.0-rc1, even though the other build nums are greater
-      '5.4.0-rc1': true,
-    });
+        // 5.4.0-SNAPSHOT and @@version were ignored so we only have the
+        // attributes from 5.4.0-rc1, even though the other build nums are greater
+        '5.4.0-rc1': true,
+      });
 
     // add the 5.4.0 flag to the 5.4.0 savedConfig
     await savedObjectsClient.update('config', '5.4.0', {
@@ -107,18 +128,20 @@ describe('createOrUpgradeSavedConfig()', () => {
       savedObjectsClient,
       version: '5.4.1',
       buildNum: 54199,
-      log: sinon.stub()
+      log: sinon.stub(),
     });
 
     const config541 = await savedObjectsClient.get('config', '5.4.1');
-    expect(config541).to.have.property('attributes').eql({
-      // should have the new build number
-      buildNum: 54199,
+    expect(config541)
+      .to.have.property('attributes')
+      .eql({
+        // should have the new build number
+        buildNum: 54199,
 
-      // should also include properties from 5.4.0 and 5.4.0-rc1
-      '5.4.0': true,
-      '5.4.0-rc1': true,
-    });
+        // should also include properties from 5.4.0 and 5.4.0-rc1
+        '5.4.0': true,
+        '5.4.0-rc1': true,
+      });
 
     // add the 5.4.1 flag to the 5.4.1 savedConfig
     await savedObjectsClient.update('config', '5.4.1', {
@@ -131,19 +154,21 @@ describe('createOrUpgradeSavedConfig()', () => {
       savedObjectsClient,
       version: '7.0.0-rc1',
       buildNum: 70010,
-      log: sinon.stub()
+      log: sinon.stub(),
     });
 
     const config700rc1 = await savedObjectsClient.get('config', '7.0.0-rc1');
-    expect(config700rc1).to.have.property('attributes').eql({
-      // should have the new build number
-      buildNum: 70010,
+    expect(config700rc1)
+      .to.have.property('attributes')
+      .eql({
+        // should have the new build number
+        buildNum: 70010,
 
-      // should also include properties from 5.4.1, 5.4.0 and 5.4.0-rc1
-      '5.4.1': true,
-      '5.4.0': true,
-      '5.4.0-rc1': true,
-    });
+        // should also include properties from 5.4.1, 5.4.0 and 5.4.0-rc1
+        '5.4.1': true,
+        '5.4.0': true,
+        '5.4.0-rc1': true,
+      });
 
     // tag the 7.0.0-rc1 doc
     await savedObjectsClient.update('config', '7.0.0-rc1', {
@@ -156,20 +181,22 @@ describe('createOrUpgradeSavedConfig()', () => {
       savedObjectsClient,
       version: '7.0.0',
       buildNum: 70099,
-      log: sinon.stub()
+      log: sinon.stub(),
     });
 
     const config700 = await savedObjectsClient.get('config', '7.0.0');
-    expect(config700).to.have.property('attributes').eql({
-      // should have the new build number
-      buildNum: 70099,
+    expect(config700)
+      .to.have.property('attributes')
+      .eql({
+        // should have the new build number
+        buildNum: 70099,
 
-      // should also include properties from ancestors, including 7.0.0-rc1
-      '7.0.0-rc1': true,
-      '5.4.1': true,
-      '5.4.0': true,
-      '5.4.0-rc1': true,
-    });
+        // should also include properties from ancestors, including 7.0.0-rc1
+        '7.0.0-rc1': true,
+        '5.4.1': true,
+        '5.4.0': true,
+        '5.4.0-rc1': true,
+      });
 
     // tag the 7.0.0 doc
     await savedObjectsClient.update('config', '7.0.0', {
@@ -182,18 +209,20 @@ describe('createOrUpgradeSavedConfig()', () => {
       savedObjectsClient,
       version: '6.2.3-rc1',
       buildNum: 62310,
-      log: sinon.stub()
+      log: sinon.stub(),
     });
 
     const config623rc1 = await savedObjectsClient.get('config', '6.2.3-rc1');
-    expect(config623rc1).to.have.property('attributes').eql({
-      // should have the new build number
-      buildNum: 62310,
+    expect(config623rc1)
+      .to.have.property('attributes')
+      .eql({
+        // should have the new build number
+        buildNum: 62310,
 
-      // should also include properties from ancestors, but not 7.0.0-rc1 or 7.0.0
-      '5.4.1': true,
-      '5.4.0': true,
-      '5.4.0-rc1': true,
-    });
+        // should also include properties from ancestors, but not 7.0.0-rc1 or 7.0.0
+        '5.4.1': true,
+        '5.4.0': true,
+        '5.4.0-rc1': true,
+      });
   });
 });

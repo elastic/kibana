@@ -28,7 +28,7 @@ import { populateAppStateSettings } from 'plugins/ml/jobs/new_job/simple/compone
 import { getIndexedFields } from 'plugins/ml/jobs/new_job/simple/components/utils/create_fields';
 import { changeJobIDCase } from 'plugins/ml/jobs/new_job/simple/components/general_job_details/change_job_id_case';
 import { CHART_STATE, JOB_STATE } from 'plugins/ml/jobs/new_job/simple/components/constants/states';
-import { getIndexPatternWithRoute, getSavedSearchWithRoute, timeBasedIndexCheck } from 'plugins/ml/util/index_utils';
+import { loadCurrentIndexPattern, loadCurrentSavedSearch, timeBasedIndexCheck } from 'plugins/ml/util/index_utils';
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { loadNewJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
 import {
@@ -36,10 +36,11 @@ import {
   createResultsUrl,
   addNewJobToRecentlyAccessed,
   moveToAdvancedJobCreationProvider } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
-import { JobServiceProvider } from 'plugins/ml/services/job_service';
+import { mlJobService } from 'plugins/ml/services/job_service';
 import { SingleMetricJobServiceProvider } from './create_job_service';
 import { FullTimeRangeSelectorServiceProvider } from 'plugins/ml/components/full_time_range_selector/full_time_range_selector_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
+import { initPromise } from 'plugins/ml/util/promise';
 
 import template from './create_job.html';
 
@@ -49,10 +50,11 @@ uiRoutes
     resolve: {
       CheckLicense: checkLicenseExpired,
       privileges: checkCreateJobsPrivilege,
-      indexPattern: getIndexPatternWithRoute,
-      savedSearch: getSavedSearchWithRoute,
+      indexPattern: loadCurrentIndexPattern,
+      savedSearch: loadCurrentSavedSearch,
       checkMlNodesAvailable,
-      loadNewJobDefaults
+      loadNewJobDefaults,
+      initPromise: initPromise(true)
     }
   });
 
@@ -64,7 +66,6 @@ module
     $scope,
     $route,
     $filter,
-    $q,
     timefilter,
     Private,
     AppState) {
@@ -74,7 +75,6 @@ module
     const msgs = mlMessageBarService;
     const MlTimeBuckets = Private(IntervalHelperProvider);
     const moveToAdvancedJobCreation = Private(moveToAdvancedJobCreationProvider);
-    const mlJobService = Private(JobServiceProvider);
     const mlSingleMetricJobService = Private(SingleMetricJobServiceProvider);
     const mlFullTimeRangeSelectorService = Private(FullTimeRangeSelectorServiceProvider);
 
@@ -201,8 +201,8 @@ module
       query,
       filters,
       combinedQuery,
-      jobId: undefined,
-      description: undefined,
+      jobId: '',
+      description: '',
       jobGroups: [],
       useDedicatedIndex: false,
       isSparseData: false,

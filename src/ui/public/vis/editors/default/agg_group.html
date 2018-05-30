@@ -5,7 +5,7 @@
 
   <div ng-class="groupName" draggable-container="group" class="vis-editor-agg-group">
     <!-- wrapper needed for nesting-indicator -->
-    <div ng-repeat="agg in group track by agg.id" draggable-item="agg" class="vis-editor-agg-wrapper">
+    <div ng-repeat="agg in group track by agg.id" data-test-subj="aggregationEditor{{agg.id}}" draggable-item="agg" class="vis-editor-agg-wrapper">
       <!-- agg.html - controls for aggregation -->
       <ng-form vis-editor-agg name="aggForm" class="vis-editor-agg"></ng-form>
     </div>

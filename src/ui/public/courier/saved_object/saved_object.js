@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 /**
  * @name SavedObject
  *
@@ -283,12 +302,21 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
         });
     };
 
-    /**
-     * Returns a promise that resolves to true if either the title is unique, or if the user confirmed they
-     * wished to save the duplicate title.  Promise is rejected if the user rejects the confirmation.
-     */
-    const warnIfDuplicateTitle = () => {
-      // Don't warn if the user isn't updating the title, otherwise that would become very annoying to have
+    const displayDuplicateTitleConfirmModal = () => {
+      const confirmMessage =
+        `A ${this.getDisplayName()} with the title '${this.title}' already exists. Would you like to save anyway?`;
+
+      return confirmModalPromise(confirmMessage, { confirmButtonText: `Save ${this.getDisplayName()}` })
+        .catch(() => Promise.reject(new Error(SAVE_DUPLICATE_REJECTED)));
+    };
+
+    const checkForDuplicateTitle = (isTitleDuplicateConfirmed, onTitleDuplicate) => {
+      // Don't check for duplicates if user has already confirmed save with duplicate title
+      if (isTitleDuplicateConfirmed) {
+        return Promise.resolve();
+      }
+
+      // Don't check if the user isn't updating the title, otherwise that would become very annoying to have
       // to confirm the save every time, except when copyOnSave is true, then we do want to check.
       if (this.title === this.lastSavedTitle && !this.copyOnSave) {
         return Promise.resolve();
@@ -299,11 +327,14 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
           if (!duplicate) return true;
           if (duplicate.id === this.id) return true;
 
-          const confirmMessage =
-            `A ${this.getDisplayName()} with the title '${this.title}' already exists. Would you like to save anyway?`;
+          if (onTitleDuplicate) {
+            onTitleDuplicate();
+            return Promise.reject(new Error(SAVE_DUPLICATE_REJECTED));
+          }
 
-          return confirmModalPromise(confirmMessage, { confirmButtonText: `Save ${this.getDisplayName()}` })
-            .catch(() => Promise.reject(new Error(SAVE_DUPLICATE_REJECTED)));
+          // TODO: make onTitleDuplicate a required prop and remove UI components from this class
+          // Need to leave here until all users pass onTitleDuplicate.
+          return displayDuplicateTitleConfirmModal();
         });
     };
 
@@ -313,10 +344,13 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
      * @param {object} [options={}]
      * @property {boolean} [options.confirmOverwrite=false] - If true, attempts to create the source so it
      * can confirm an overwrite if a document with the id already exists.
+     * @property {boolean} [options.isTitleDuplicateConfirmed=false] - If true, save allowed with duplicate title
+     * @property {func} [options.onTitleDuplicate] - function called if duplicate title exists.
+     * When not provided, confirm modal will be displayed asking user to confirm or cancel save.
      * @return {Promise}
      * @resolved {String} - The id of the doc
      */
-    this.save = ({ confirmOverwrite } = {}) => {
+    this.save = ({ confirmOverwrite = false, isTitleDuplicateConfirmed = false, onTitleDuplicate } = {}) => {
       // Save the original id in case the save fails.
       const originalId = this.id;
       // Read https://github.com/elastic/kibana/issues/9056 and
@@ -333,7 +367,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
 
       this.isSaving = true;
 
-      return warnIfDuplicateTitle()
+      return checkForDuplicateTitle(isTitleDuplicateConfirmed, onTitleDuplicate)
         .then(() => {
           if (confirmOverwrite) {
             return createSource(source);

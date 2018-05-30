@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { VisualizeConstants } from '../../../src/core_plugins/kibana/public/visualize/visualize_constants';
 import Keys from 'leadfoot/keys';
 import Bluebird from 'bluebird';
@@ -40,6 +59,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clickAddMetric() {
       await find.clickByCssSelector('[group-name="metrics"] [data-test-subj="visualizeEditorAddAggregationButton"]');
+    }
+
+    async clickAddBucket() {
+      await find.clickByCssSelector('[group-name="buckets"] [data-test-subj="visualizeEditorAddAggregationButton"]');
     }
 
     async clickMetric() {
@@ -194,41 +217,60 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await input.type(timeString);
     }
 
-    async setReactSelect(className, value) {
-      const input = await find.byCssSelector(className + ' * input', 0);
+    async setComboBox(comboBoxSelector, value) {
+      const comboBox = await testSubjects.find(comboBoxSelector);
+      await this.setComboBoxElement(comboBox, value);
+    }
+
+    async setComboBoxElement(element, value) {
+      const input = await element.findByTagName('input');
       await input.clearValue();
       await input.type(value);
-      await find.clickByCssSelector('.Select-option');
-      const stillOpen = await find.existsByCssSelector('.Select-menu-outer', 0);
-      if (stillOpen) {
-        await find.clickByCssSelector(className + ' * .Select-arrow-zone');
-      }
+      await find.clickByCssSelector('.euiComboBoxOption');
+      await this.closeComboBoxOptionsList(element);
     }
 
-    async clearReactSelect(className) {
-      await find.clickByCssSelector(className + ' * .Select-clear-zone');
-    }
-
-    async getReactSelectOptions(containerSelector) {
-      await testSubjects.click(containerSelector);
+    async getComboBoxOptions(comboBoxSelector) {
+      await testSubjects.click(comboBoxSelector);
       const menu = await retry.try(
-        async () => find.byCssSelector('.Select-menu-outer'));
-      return await menu.getVisibleText();
+        async () => await testSubjects.find('comboBoxOptionsList'));
+      const optionsText = await menu.getVisibleText();
+      const comboBox = await testSubjects.find(comboBoxSelector);
+      await this.closeComboBoxOptionsList(comboBox);
+      return optionsText;
     }
 
-    async doesReactSelectHaveValue(className) {
-      return await find.existsByCssSelector(className + ' * .Select-value-label', 0);
+    async doesComboBoxHaveSelectedOptions(comboBoxSelector) {
+      const comboBox = await testSubjects.find(comboBoxSelector);
+      const selectedOptions = await comboBox.findAllByClassName('euiComboBoxPill');
+      return selectedOptions > 0;
     }
 
-    async getReactSelectValue(className) {
-      const hasValue = await this.doesReactSelectHaveValue(className);
-      if (!hasValue) {
-        return '';
+    async getComboBoxSelectedOptions(comboBoxSelector) {
+      const comboBox = await testSubjects.find(comboBoxSelector);
+      const selectedOptions = await comboBox.findAllByClassName('euiComboBoxPill');
+      if (selectedOptions.length === 0) {
+        return [];
       }
 
-      const valueElement = await retry.try(
-        async () => find.byCssSelector(className + ' * .Select-value-label'));
-      return await valueElement.getVisibleText();
+      const getOptionValuePromises = selectedOptions.map(async (optionElement) => {
+        return await optionElement.getVisibleText();
+      });
+      return await Promise.all(getOptionValuePromises);
+    }
+
+    async clearComboBox(comboBoxSelector) {
+      const comboBox = await testSubjects.find(comboBoxSelector);
+      const clearBtn = await comboBox.findByCssSelector('button.euiFormControlLayout__clear');
+      await clearBtn.click();
+    }
+
+    async closeComboBoxOptionsList(comboBoxElement) {
+      const isOptionsListOpen = await testSubjects.exists('comboBoxOptionsList');
+      if (isOptionsListOpen) {
+        const closeBtn = await comboBoxElement.findByCssSelector('button.euiFormControlLayout__icon');
+        await closeBtn.click();
+      }
     }
 
     async addInputControl() {
@@ -375,12 +417,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async toggleOpenEditor(index) {
+    async toggleOpenEditor(index, toState = 'true') {
       // index, see selectYAxisAggregation
       const toggle = await find.byCssSelector(`button[aria-controls="visAggEditorParams${index}"]`);
       const toggleOpen = await toggle.getAttribute('aria-expanded');
       log.debug(`toggle ${index} expand = ${toggleOpen}`);
-      if (toggleOpen === 'false') {
+      if (toggleOpen !== toState) {
         log.debug(`toggle ${index} click()`);
         await toggle.click();
       }
@@ -500,6 +542,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await input.type(newValue);
     }
 
+    async toggleDisabledAgg(agg) {
+      await testSubjects.click(`aggregationEditor${agg} disableAggregationBtn`);
+    }
+
     async toggleOtherBucket() {
       return await find.clickByCssSelector('input[name="showOther"]');
     }
@@ -558,11 +604,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async saveVisualization(vizName) {
+    async saveVisualization(vizName, { saveAsNew = false } = {}) {
       await this.ensureSavePanelOpen();
       await testSubjects.setValue('visTitleInput', vizName);
       log.debug('click submit button');
       await testSubjects.click('saveVisualizationButton');
+      if (saveAsNew) {
+        await testSubjects.click('saveAsNewCheckbox');
+      }
       await PageObjects.header.waitUntilLoadingHasFinished();
       return await testSubjects.exists('saveVisualizationSuccess');
     }
@@ -753,9 +802,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await dataTable.getVisibleText();
     }
 
-    async getDataTableHeaders() {
+    async getDataTableHeaders(parent) {
       const dataTableHeader = await retry.try(
-        async () => testSubjects.find('paginated-table-header'));
+        async () => (
+          parent ?
+            testSubjects.findDescendant('paginated-table-header', parent) :
+            testSubjects.find('paginated-table-header')
+        ));
       return await dataTableHeader.getVisibleText();
     }
 
@@ -873,8 +926,26 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       }
     }
 
-    async clickLegendOption(name) {
-      await testSubjects.click(`legend-${name}`);
+    async getLegendEntries() {
+      const legendEntries = await find.allByCssSelector('.legend-value-title', defaultFindTimeout * 2);
+      return await Promise.all(legendEntries.map(async chart => await chart.getAttribute('data-label')));
+    }
+
+    async openLegendOptionColors(name) {
+      await retry.try(async () => {
+        // This click has been flaky in opening the legend, hence the retry.  See
+        // https://github.com/elastic/kibana/issues/17468
+        await testSubjects.click(`legend-${name}`);
+        // arbitrary color chosen, any available would do
+        const isOpen = await this.doesLegendColorChoiceExist('#EF843C');
+        if (!isOpen) {
+          throw new Error('legend color selector not open');
+        }
+      });
+    }
+
+    async doesLegendColorChoiceExist(color) {
+      return await testSubjects.exists(`legendSelectColor-${color}`);
     }
 
     async selectNewLegendColorChoice(color) {

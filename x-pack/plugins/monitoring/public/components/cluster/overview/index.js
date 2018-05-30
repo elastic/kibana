@@ -20,6 +20,7 @@ export function Overview(props) {
 
       <ElasticsearchPanel
         {...props.cluster.elasticsearch}
+        version={props.cluster.version}
         ml={props.cluster.ml}
         changeUrl={props.changeUrl}
         license={props.cluster.license}

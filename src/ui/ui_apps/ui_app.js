@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { UiNavLink } from '../ui_nav_links';
 
 export class UiApp {
@@ -14,7 +33,6 @@ export class UiApp {
       linkToLastSubUrl,
       listed,
       url = `/app/${id}`,
-      uses = []
     } = spec;
 
     if (!id) {
@@ -37,18 +55,6 @@ export class UiApp {
     if (this._pluginId && !this._getPlugin()) {
       throw new Error(`Unknown plugin id "${this._pluginId}"`);
     }
-
-    const { appExtensions = [] } = kbnServer.uiExports;
-    this._modules = [].concat(
-      this._main || [],
-      uses
-        // flatten appExtensions for used types
-        .reduce((acc, type) => acc.concat(appExtensions[type] || []), [])
-        // de-dupe app extension module ids
-        .reduce((acc, item) => !item || acc.includes(item) ? acc : acc.concat(item), [])
-        // sort app extension module ids alphabetically
-        .sort((a, b) => a.localeCompare(b))
-    );
 
     if (!this.isHidden()) {
       // unless an app is hidden it gets a navlink, but we only respond to `getNavLink()`
@@ -93,7 +99,7 @@ export class UiApp {
   }
 
   getModules() {
-    return this._modules;
+    return this._main ? [this._main] : [];
   }
 
   _getPlugin() {

@@ -1,11 +1,32 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
 import AddDeleteButtons from './add_delete_buttons';
-import Select from 'react-select';
 import * as collectionActions from './lib/collection_actions';
 import ColorPicker from './color_picker';
-import { htmlIdGenerator } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiComboBox,
+} from '@elastic/eui';
 
 class ColorRules extends Component {
 
@@ -18,7 +39,7 @@ class ColorRules extends Component {
     return (e) => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
       const part = {};
-      part[name] = cast(_.get(e, 'value', _.get(e, 'target.value')));
+      part[name] = cast(_.get(e, '[0].value', _.get(e, 'target.value')));
       if (part[name] === 'undefined') part[name] = undefined;
       if (part[name] === NaN) part[name] = undefined;
       handleChange(_.assign({}, item, part));
@@ -41,6 +62,10 @@ class ColorRules extends Component {
       handleChange(_.assign({}, model, part));
     };
     const htmlId = htmlIdGenerator(model.id);
+    const selectedOperatorOption = operatorOptions.find(option => {
+      return model.opperator === option.value;
+    });
+
     let secondary;
     if (!this.props.hideSecondary) {
       secondary = (
@@ -67,11 +92,12 @@ class ColorRules extends Component {
           if metric is
         </label>
         <div className="color_rules__item">
-          <Select
-            inputProps={{ id: htmlId('ifMetricIs') }}
-            onChange={this.handleChange(model, 'opperator')}
-            value={model.opperator}
+          <EuiComboBox
+            id={htmlId('ifMetricIs')}
             options={operatorOptions}
+            selectedOptions={selectedOperatorOption ? [selectedOperatorOption] : []}
+            onChange={this.handleChange(model, 'opperator')}
+            singleSelection={true}
           />
         </div>
         <input

@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { resolve } from 'path';
 import { chmodSync, statSync } from 'fs';
 
@@ -249,6 +268,22 @@ describe('dev/build/lib/fs', () => {
 
       expect(await read(resolve(destination, 'foo_dir/bar.txt'))).to.be('bar\n');
       expect(await read(resolve(destination, 'foo_dir/.bar'))).to.be('dotfile\n');
+    });
+
+    it('supports atime and mtime', async () => {
+      const destination = resolve(TMP, 'a/b/c/d/e');
+      const time = new Date(1425298511000);
+      await copyAll(FIXTURES, destination, {
+        time
+      });
+      const barTxt = statSync(resolve(destination, 'foo_dir/bar.txt'));
+      const fooDir = statSync(resolve(destination, 'foo_dir'));
+
+      // precision is platform specific
+      const oneDay = 86400000;
+      expect(Math.abs(barTxt.atimeMs - time.getTime())).to.be.below(oneDay);
+      expect(Math.abs(fooDir.atimeMs - time.getTime())).to.be.below(oneDay);
+      expect(Math.abs(barTxt.mtimeMs - time.getTime())).to.be.below(oneDay);
     });
   });
 

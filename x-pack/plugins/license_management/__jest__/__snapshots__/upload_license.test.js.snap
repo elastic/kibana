@@ -39,13 +39,14 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
         <EuiFlexGroup
           alignItems="stretch"
           component="div"
+          direction="row"
           gutterSize="l"
           justifyContent="spaceAround"
           responsive={true}
           wrap={false}
         >
           <div
-            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceAround euiFlexGroup--responsive"
+            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
           >
             <EuiFlexItem
               component="div"
@@ -193,13 +194,16 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                           >
                             <EuiText
                               data-test-subj="confirmModalBodyText"
+                              grow={true}
                             >
                               <div
                                 className="euiText"
                                 data-test-subj="confirmModalBodyText"
                               >
                                 <div>
-                                  <EuiText>
+                                  <EuiText
+                                    grow={true}
+                                  >
                                     <div
                                       className="euiText"
                                     >
@@ -208,7 +212,9 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
         BASIC license.  Review the list of features below.
                                     </div>
                                   </EuiText>
-                                  <EuiText>
+                                  <EuiText
+                                    grow={true}
+                                  >
                                     <div
                                       className="euiText"
                                     >
@@ -287,14 +293,18 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                 </EuiModal>
               </EuiConfirmModal>
             </EuiOverlayMask>
-            <EuiText>
+            <EuiText
+              grow={true}
+            >
               <div
                 className="euiText"
               >
                 Your license key is a JSON file with a signature attached.
               </div>
             </EuiText>
-            <EuiText>
+            <EuiText
+              grow={true}
+            >
               <div
                 className="euiText"
               >
@@ -318,11 +328,14 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
               <div
                 className="euiForm"
               >
-                <EuiText>
+                <EuiText
+                  grow={true}
+                >
                   <div
                     className="euiText"
                   >
                     <EuiFilePicker
+                      compressed={false}
                       id="licenseFile"
                       initialPromptText="Select or drag your license file"
                       onChange={[Function]}
@@ -404,13 +417,14 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                 <EuiFlexGroup
                   alignItems="stretch"
                   component="div"
+                  direction="row"
                   gutterSize="l"
                   justifyContent="spaceBetween"
                   responsive={true}
                   wrap={false}
                 >
                   <div
-                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--responsive"
+                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <EuiFlexItem
                       component="div"
@@ -514,13 +528,14 @@ exports[`UploadLicense should display an error when ES says license is expired 1
         <EuiFlexGroup
           alignItems="stretch"
           component="div"
+          direction="row"
           gutterSize="l"
           justifyContent="spaceAround"
           responsive={true}
           wrap={false}
         >
           <div
-            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceAround euiFlexGroup--responsive"
+            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
           >
             <EuiFlexItem
               component="div"
@@ -557,14 +572,18 @@ exports[`UploadLicense should display an error when ES says license is expired 1
           <div
             className="euiPanel euiPanel--paddingMedium"
           >
-            <EuiText>
+            <EuiText
+              grow={true}
+            >
               <div
                 className="euiText"
               >
                 Your license key is a JSON file with a signature attached.
               </div>
             </EuiText>
-            <EuiText>
+            <EuiText
+              grow={true}
+            >
               <div
                 className="euiText"
               >
@@ -611,6 +630,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                       </span>
                     </div>
                     <EuiText
+                      grow={true}
                       size="s"
                     >
                       <div
@@ -628,11 +648,14 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                     </EuiText>
                   </div>
                 </EuiCallOut>
-                <EuiText>
+                <EuiText
+                  grow={true}
+                >
                   <div
                     className="euiText"
                   >
                     <EuiFilePicker
+                      compressed={false}
                       id="licenseFile"
                       initialPromptText="Select or drag your license file"
                       onChange={[Function]}
@@ -714,13 +737,14 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                 <EuiFlexGroup
                   alignItems="stretch"
                   component="div"
+                  direction="row"
                   gutterSize="l"
                   justifyContent="spaceBetween"
                   responsive={true}
                   wrap={false}
                 >
                   <div
-                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--responsive"
+                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <EuiFlexItem
                       component="div"
@@ -824,13 +848,14 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
         <EuiFlexGroup
           alignItems="stretch"
           component="div"
+          direction="row"
           gutterSize="l"
           justifyContent="spaceAround"
           responsive={true}
           wrap={false}
         >
           <div
-            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceAround euiFlexGroup--responsive"
+            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
           >
             <EuiFlexItem
               component="div"
@@ -867,14 +892,18 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
           <div
             className="euiPanel euiPanel--paddingMedium"
           >
-            <EuiText>
+            <EuiText
+              grow={true}
+            >
               <div
                 className="euiText"
               >
                 Your license key is a JSON file with a signature attached.
               </div>
             </EuiText>
-            <EuiText>
+            <EuiText
+              grow={true}
+            >
               <div
                 className="euiText"
               >
@@ -921,6 +950,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                       </span>
                     </div>
                     <EuiText
+                      grow={true}
                       size="s"
                     >
                       <div
@@ -938,11 +968,14 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                     </EuiText>
                   </div>
                 </EuiCallOut>
-                <EuiText>
+                <EuiText
+                  grow={true}
+                >
                   <div
                     className="euiText"
                   >
                     <EuiFilePicker
+                      compressed={false}
                       id="licenseFile"
                       initialPromptText="Select or drag your license file"
                       onChange={[Function]}
@@ -1024,13 +1057,14 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                 <EuiFlexGroup
                   alignItems="stretch"
                   component="div"
+                  direction="row"
                   gutterSize="l"
                   justifyContent="spaceBetween"
                   responsive={true}
                   wrap={false}
                 >
                   <div
-                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--responsive"
+                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <EuiFlexItem
                       component="div"
@@ -1134,13 +1168,14 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
         <EuiFlexGroup
           alignItems="stretch"
           component="div"
+          direction="row"
           gutterSize="l"
           justifyContent="spaceAround"
           responsive={true}
           wrap={false}
         >
           <div
-            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceAround euiFlexGroup--responsive"
+            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
           >
             <EuiFlexItem
               component="div"
@@ -1177,14 +1212,18 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
           <div
             className="euiPanel euiPanel--paddingMedium"
           >
-            <EuiText>
+            <EuiText
+              grow={true}
+            >
               <div
                 className="euiText"
               >
                 Your license key is a JSON file with a signature attached.
               </div>
             </EuiText>
-            <EuiText>
+            <EuiText
+              grow={true}
+            >
               <div
                 className="euiText"
               >
@@ -1231,6 +1270,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                       </span>
                     </div>
                     <EuiText
+                      grow={true}
                       size="s"
                     >
                       <div
@@ -1248,11 +1288,14 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                     </EuiText>
                   </div>
                 </EuiCallOut>
-                <EuiText>
+                <EuiText
+                  grow={true}
+                >
                   <div
                     className="euiText"
                   >
                     <EuiFilePicker
+                      compressed={false}
                       id="licenseFile"
                       initialPromptText="Select or drag your license file"
                       onChange={[Function]}
@@ -1334,13 +1377,14 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                 <EuiFlexGroup
                   alignItems="stretch"
                   component="div"
+                  direction="row"
                   gutterSize="l"
                   justifyContent="spaceBetween"
                   responsive={true}
                   wrap={false}
                 >
                   <div
-                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--responsive"
+                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <EuiFlexItem
                       component="div"
@@ -1444,13 +1488,14 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
         <EuiFlexGroup
           alignItems="stretch"
           component="div"
+          direction="row"
           gutterSize="l"
           justifyContent="spaceAround"
           responsive={true}
           wrap={false}
         >
           <div
-            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceAround euiFlexGroup--responsive"
+            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
           >
             <EuiFlexItem
               component="div"
@@ -1487,14 +1532,18 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
           <div
             className="euiPanel euiPanel--paddingMedium"
           >
-            <EuiText>
+            <EuiText
+              grow={true}
+            >
               <div
                 className="euiText"
               >
                 Your license key is a JSON file with a signature attached.
               </div>
             </EuiText>
-            <EuiText>
+            <EuiText
+              grow={true}
+            >
               <div
                 className="euiText"
               >
@@ -1541,6 +1590,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                       </span>
                     </div>
                     <EuiText
+                      grow={true}
                       size="s"
                     >
                       <div
@@ -1558,11 +1608,14 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                     </EuiText>
                   </div>
                 </EuiCallOut>
-                <EuiText>
+                <EuiText
+                  grow={true}
+                >
                   <div
                     className="euiText"
                   >
                     <EuiFilePicker
+                      compressed={false}
                       id="licenseFile"
                       initialPromptText="Select or drag your license file"
                       onChange={[Function]}
@@ -1644,13 +1697,14 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                 <EuiFlexGroup
                   alignItems="stretch"
                   component="div"
+                  direction="row"
                   gutterSize="l"
                   justifyContent="spaceBetween"
                   responsive={true}
                   wrap={false}
                 >
                   <div
-                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--responsive"
+                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <EuiFlexItem
                       component="div"

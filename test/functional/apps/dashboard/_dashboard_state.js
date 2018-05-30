@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import expect from 'expect.js';
 
 import { PIE_CHART_VIS_NAME, AREA_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
@@ -9,7 +28,10 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'visualize', 'header', 'discover']);
   const testSubjects = getService('testSubjects');
   const remote = getService('remote');
+  const queryBar = getService('queryBar');
   const retry = getService('retry');
+  const dashboardPanelActions = getService('dashboardPanelActions');
+  const dashboardAddPanel = getService('dashboardAddPanel');
 
   describe('dashboard state', function describeIndexTests() {
     before(async function () {
@@ -25,18 +47,15 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
       await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.setTimepickerInDataRange();
+      await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
 
-      await PageObjects.dashboard.addVisualizations([AREA_CHART_VIS_NAME]);
+      await dashboardAddPanel.addVisualization(AREA_CHART_VIS_NAME);
       await PageObjects.dashboard.saveDashboard('Overridden colors');
 
       await PageObjects.dashboard.clickEdit();
 
-      // Opening legend colors has been flaky.
-      retry.try(async () => {
-        await PageObjects.visualize.clickLegendOption('Count');
-        await PageObjects.visualize.selectNewLegendColorChoice('#EA6460');
-      });
+      await PageObjects.visualize.openLegendOptionColors('Count');
+      await PageObjects.visualize.selectNewLegendColorChoice('#EA6460');
 
       await PageObjects.dashboard.saveDashboard('Overridden colors');
 
@@ -51,7 +70,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
       await PageObjects.header.clickDiscover();
-      await PageObjects.dashboard.setTimepickerInDataRange();
+      await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
       await PageObjects.discover.clickFieldListItemAdd('bytes');
       await PageObjects.discover.saveSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -59,7 +78,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.clickDashboard();
       await PageObjects.dashboard.clickNewDashboard();
 
-      await PageObjects.dashboard.addSavedSearch('my search');
+      await dashboardAddPanel.addSavedSearch('my search');
       await PageObjects.dashboard.saveDashboard('No local edits');
 
       const inViewMode = await testSubjects.exists('dashboardEditMode');
@@ -101,9 +120,9 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
       await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.setTimepickerInDataRange();
+      await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
 
-      await PageObjects.dashboard.addVisualizations(['Visualization TileMap']);
+      await dashboardAddPanel.addVisualization('Visualization TileMap');
       await PageObjects.dashboard.saveDashboard('No local edits');
 
       await testSubjects.moveMouseTo('dashboardPanel');
@@ -113,7 +132,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.closeSpyPanel();
 
       await PageObjects.dashboard.clickEdit();
-      await PageObjects.dashboard.clickEditVisualization();
+      await dashboardPanelActions.clickEdit();
 
       await PageObjects.visualize.clickMapZoomIn();
       await PageObjects.visualize.clickMapZoomIn();
@@ -129,8 +148,15 @@ export default function ({ getService, getPageObjects }) {
       const changedTileMapData = await PageObjects.visualize.getDataTableData();
       await testSubjects.moveMouseTo('dashboardPanel');
       await PageObjects.visualize.closeSpyPanel();
-
       expect(changedTileMapData.length).to.not.equal(tileMapData.length);
+    });
+
+    it('retains dark theme', async function () {
+      await PageObjects.dashboard.useDarkTheme(true);
+      await PageObjects.header.clickVisualize();
+      await PageObjects.header.clickDashboard();
+      const isDarkThemeOn = await PageObjects.dashboard.isDarkThemeOn();
+      expect(isDarkThemeOn).to.equal(true);
     });
 
     describe('Directly modifying url updates dashboard state', () => {
@@ -138,19 +164,19 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
 
-        const currentQuery = await PageObjects.dashboard.getQuery();
+        const currentQuery = await queryBar.getQueryString();
         expect(currentQuery).to.equal('');
         const currentUrl = await remote.getCurrentUrl();
         const newUrl = currentUrl.replace('query:%27%27', 'query:%27hi%27');
         // Don't add the timestamp to the url or it will cause a hard refresh and we want to test a
         // soft refresh.
         await remote.get(newUrl.toString(), false);
-        const newQuery = await PageObjects.dashboard.getQuery();
+        const newQuery = await queryBar.getQueryString();
         expect(newQuery).to.equal('hi');
       });
 
       it('for panel size parameters', async function () {
-        await PageObjects.dashboard.addVisualization(PIE_CHART_VIS_NAME);
+        await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
         const currentUrl = await remote.getCurrentUrl();
         const currentPanelDimensions = await PageObjects.dashboard.getPanelDimensions();
         const newUrl = currentUrl.replace(`w:${DEFAULT_PANEL_WIDTH}`, `w:${DEFAULT_PANEL_WIDTH * 2}`);
@@ -160,12 +186,10 @@ export default function ({ getService, getPageObjects }) {
           if (newPanelDimensions.length < 0) {
             throw new Error('No panel dimensions...');
           }
-          // Some margin of error is allowed (I've noticed it being off by one pixel which probably something to do
-          // with an odd width and dividing by two), but due to https://github.com/elastic/kibana/issues/14542 I'm
-          // adding more margin of error than should be necessary.  That issue looks legit, but because I can't
-          // repro locally, I don't have a quick solution aside from increasing this margin error, for getting the
-          // build to pass consistently again.
-          const marginOfError = 20;
+
+          await PageObjects.dashboard.waitForRenderComplete();
+          // Add a "margin" of error  - because of page margins, it won't be a straight doubling of width.
+          const marginOfError = 10;
           expect(newPanelDimensions[0].width).to.be.lessThan(currentPanelDimensions[0].width * 2 + marginOfError);
           expect(newPanelDimensions[0].width).to.be.greaterThan(currentPanelDimensions[0].width * 2 - marginOfError);
         });
@@ -184,8 +208,8 @@ export default function ({ getService, getPageObjects }) {
 
       describe('for embeddable config color parameters on a visualization', () => {
         it('updates a pie slice color on a soft refresh', async function () {
-          await PageObjects.dashboard.addVisualization(PIE_CHART_VIS_NAME);
-          await PageObjects.visualize.clickLegendOption('80,000');
+          await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
+          await PageObjects.visualize.openLegendOptionColors('80,000');
           await PageObjects.visualize.selectNewLegendColorChoice('#F9D9F9');
           const currentUrl = await remote.getCurrentUrl();
           const newUrl = currentUrl.replace('F9D9F9', 'FFFFFF');

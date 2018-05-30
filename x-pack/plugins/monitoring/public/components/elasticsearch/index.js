@@ -5,3 +5,5 @@
  */
 
 export { ElasticsearchOverview } from './overview';
+export { ElasticsearchNodes } from './nodes';
+export { ElasticsearchIndices } from './indices';

@@ -1,0 +1,24 @@
+[[managing-indices]]
+== Managing Indices
+
+The *Index management* UI enables you to view index settings,
+mappings, and statistics and perform management operations.
+These include refreshing, flushing, clearing the cache, merging segments,
+and closing or deleting indices. The UI provides a convenient way to
+perform bulk operations on multiple indices.
+
+[role="screenshot"]
+image::images/management-index-management.png[Index Management UI]
+
+Click the name of an index to display the index summary and access
+the index settings, mapping, and statistics. The *Manage* menu in the
+lower right of the index pane enables you to manage
+the selected index.
+
+To perform bulk operations, select the checkboxes of the indices you want to
+modify and choose an operation from the *Manage indices* menu
+next to the query bar. To select all
+indices, select the checkbox in the *Name* header.
+
+For information about the available management operations,
+see {ref}/indices.html[Indices APIs] in the Elasticsearch Reference.

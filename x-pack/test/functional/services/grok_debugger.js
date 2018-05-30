@@ -61,5 +61,23 @@ export function GrokDebuggerProvider({ getService }) {
         expect(value).to.eql(expectedValue);
       });
     }
+
+    async assertPatternInputSyntaxHighlighting(expectedHighlights) {
+      const patternInputElement = await testSubjects.find(SUBJ_UI_ACE_PATTERN_INPUT);
+      const highlightedElements = await patternInputElement.findAllByXpath('.//div[@class="ace_line"]/*');
+
+      expect(highlightedElements.length).to.be(expectedHighlights.length);
+      await Promise.all(highlightedElements.map(async (element, index) => {
+        const highlightClass = await element.getAttribute('class');
+        const highlightedContent = await element.getVisibleText();
+
+        const expectedHighlight = expectedHighlights[index];
+        const expectedHighlightClass = `ace_${expectedHighlight.token}`;
+        const expectedHighlightedContent = expectedHighlight.content;
+
+        expect(highlightClass).to.be(expectedHighlightClass);
+        expect(highlightedContent).to.be(expectedHighlightedContent);
+      }));
+    }
   };
 }

@@ -41,7 +41,15 @@
         <button ng-click="copyToClipboard(job)" class="kuiButton kuiButton--primary" aria-label="Copy JSON to clipboard">
           Copy JSON to clipboard
         </button>
-        <div class="ml-pre">{{jobJson}}</div>
+        <div
+          ng-if="jobJson!==''"
+          class="json-textarea"
+          ui-ace="{
+            mode: 'json',
+            onLoad: aceLoaded
+          }"
+          ng-model="jobJson"
+        ></div>
       </div>
     </ml-job-tab-4>
 
@@ -115,7 +123,14 @@
           is-loading="(datafeedPreview.json === '')"
         />
         <div ng-hide="(datafeedPreview.json === '')">
-          <div class="ml-pre">{{datafeedPreview.json}}</div>
+          <div
+            class="json-textarea"
+            ui-ace="{
+              mode: 'json',
+              onLoad: aceLoaded
+            }"
+            ng-model="datafeedPreview.json"
+            ></div>
         </div>
       </div>
       <div class="tab_contents" ng-if="permissions.canPreviewDatafeed===false">

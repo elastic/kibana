@@ -40,10 +40,16 @@ describe('PluginVertex', () => {
             [ 1516667386000, 0.3 ]
           ]
         },
-        events_per_millisecond: {
+        events_in_per_millisecond: {
           data: [
             [ 1516667383000, 0.01 ],
             [ 1516667386000, 0.02 ]
+          ]
+        },
+        events_out_per_millisecond: {
+          data: [
+            [ 1516667383000, 0.01 ],
+            [ 1516667386000, 0.03 ]
           ]
         }
       }

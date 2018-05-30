@@ -1,14 +1,33 @@
-let _ = require('lodash');
-let engine = require('./engine');
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
-export const URL_PATH_END_MARKER = "__url_path_end__";
+const _ = require('lodash');
+const engine = require('./engine');
+
+export const URL_PATH_END_MARKER = '__url_path_end__';
 
 function AcceptEndpointComponent(endpoint, parent) {
   engine.SharedComponent.call(this, endpoint.id, parent);
-  this.endpoint = endpoint
+  this.endpoint = endpoint;
 }
 
-AcceptEndpointComponent.prototype = _.create(engine.SharedComponent.prototype, { "constructor": AcceptEndpointComponent });
+AcceptEndpointComponent.prototype = _.create(engine.SharedComponent.prototype, { 'constructor': AcceptEndpointComponent });
 
 (function (cls) {
 
@@ -19,15 +38,15 @@ AcceptEndpointComponent.prototype = _.create(engine.SharedComponent.prototype, {
     if (this.endpoint.methods && -1 === _.indexOf(this.endpoint.methods, context.method)) {
       return null;
     }
-    var r = Object.getPrototypeOf(cls).match.call(this, token, context, editor);
+    const r = Object.getPrototypeOf(cls).match.call(this, token, context, editor);
     r.context_values = r.context_values || {};
-    r.context_values['endpoint'] = this.endpoint;
+    r.context_values.endpoint = this.endpoint;
     if (_.isNumber(this.endpoint.priority)) {
       r.priority = this.endpoint.priority;
     }
     return r;
-  }
-})(AcceptEndpointComponent.prototype);
+  };
+}(AcceptEndpointComponent.prototype));
 
 
 /**
@@ -42,22 +61,22 @@ AcceptEndpointComponent.prototype = _.create(engine.SharedComponent.prototype, {
  */
 export function UrlPatternMatcher(parametrizedComponentFactories) {
   // This is not really a component, just a handy container to make iteration logic simpler
-  this.rootComponent = new engine.SharedComponent("ROOT");
+  this.rootComponent = new engine.SharedComponent('ROOT');
   this.parametrizedComponentFactories = parametrizedComponentFactories || {};
 }
 
 (function (cls) {
   cls.addEndpoint = function (pattern, endpoint) {
-    var c,
-      active_component = this.rootComponent,
-      endpointComponents = endpoint.url_components || {};
-    var partList = pattern.split("/");
+    let c;
+    let activeComponent = this.rootComponent;
+    const endpointComponents = endpoint.url_components || {};
+    const partList = pattern.split('/');
     _.each(partList, function (part, partIndex) {
       if (part.search(/^{.+}$/) >= 0) {
         part = part.substr(1, part.length - 2);
-        if (active_component.getComponent(part)) {
+        if (activeComponent.getComponent(part)) {
           // we already have something for this, reuse
-          active_component = active_component.getComponent(part);
+          activeComponent = activeComponent.getComponent(part);
           return;
         }
         // a new path, resolve.
@@ -65,57 +84,58 @@ export function UrlPatternMatcher(parametrizedComponentFactories) {
         if ((c = endpointComponents[part])) {
           // endpoint specific. Support list
           if (Array.isArray(c)) {
-            c = new engine.ListComponent(part, c, active_component);
+            c = new engine.ListComponent(part, c, activeComponent);
           }
-          else if (_.isObject(c) && c.type === "list") {
-            c = new engine.ListComponent(part, c.list, active_component, c.multi_valued, c.allow_non_valid);
+          else if (_.isObject(c) && c.type === 'list') {
+            c = new engine.ListComponent(part, c.list, activeComponent, c.multiValued, c.allow_non_valid);
           }
           else {
-            console.warn("incorrectly configured url component ", part, " in endpoint", endpoint);
+            console.warn('incorrectly configured url component ', part, ' in endpoint', endpoint);
             c = new engine.SharedComponent(part);
           }
         }
         else if ((c = this.parametrizedComponentFactories[part])) {
           // c is a f
-          c = c(part, active_component);
+          c = c(part, activeComponent);
         }
         else {
           // just accept whatever with not suggestions
-          c = new engine.SimpleParamComponent(part, active_component);
+          c = new engine.SimpleParamComponent(part, activeComponent);
         }
 
-        active_component = c;
+        activeComponent = c;
       }
       else {
         // not pattern
-        var lookAhead = part, s;
+        let lookAhead = part;
+        let s;
 
         for (partIndex++; partIndex < partList.length; partIndex++) {
           s = partList[partIndex];
-          if (s.indexOf("{") >= 0) {
+          if (s.indexOf('{') >= 0) {
             break;
           }
-          lookAhead += "/" + s;
+          lookAhead += '/' + s;
 
         }
 
-        if (active_component.getComponent(part)) {
+        if (activeComponent.getComponent(part)) {
           // we already have something for this, reuse
-          active_component = active_component.getComponent(part);
-          active_component.addOption(lookAhead);
+          activeComponent = activeComponent.getComponent(part);
+          activeComponent.addOption(lookAhead);
         }
         else {
-          c = new engine.ConstantComponent(part, active_component, lookAhead);
-          active_component = c;
+          c = new engine.ConstantComponent(part, activeComponent, lookAhead);
+          activeComponent = c;
         }
       }
     }, this);
     // mark end of endpoint path
-    new AcceptEndpointComponent(endpoint, active_component);
+    new AcceptEndpointComponent(endpoint, activeComponent);
   };
 
   cls.getTopLevelComponents = function () {
     return this.rootComponent.next;
-  }
+  };
 
-})(UrlPatternMatcher.prototype);
+}(UrlPatternMatcher.prototype));

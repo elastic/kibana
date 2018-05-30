@@ -7,7 +7,7 @@
 /* eslint-disable kibana-custom/no-default-export */
 
 import { resolve } from 'path';
-import { resolveKibanaPath } from '@kbn/plugin-helpers';
+import { format as formatUrl } from 'url';
 
 import {
   SecurityPageProvider,
@@ -53,10 +53,36 @@ import {
 // that returns an object with the projects config values
 export default async function ({ readConfigFile }) {
 
-  // read the Kibana config file so that we can utilize some of
-  // its services and PageObjects
-  const kibanaConfig = await readConfigFile(resolveKibanaPath('test/functional/config.js'));
-  const kibanaAPITestsConfig = await readConfigFile(resolveKibanaPath('test/api_integration/config.js'));
+  const kibanaCommonConfig = await readConfigFile(require.resolve('../../../test/common/config.js'));
+  const kibanaFunctionalConfig = await readConfigFile(require.resolve('../../../test/functional/config.js'));
+  const kibanaAPITestsConfig = await readConfigFile(require.resolve('../../../test/api_integration/config.js'));
+
+  const servers = {
+    elasticsearch: {
+      protocol: process.env.TEST_ES_PROTOCOL || 'http',
+      hostname: process.env.TEST_ES_HOSTNAME || 'localhost',
+      port: parseInt(process.env.TEST_ES_PORT, 10) || 9240,
+      auth: 'elastic:changeme',
+      username: 'elastic',
+      password: 'changeme',
+    },
+    kibana: {
+      protocol: process.env.TEST_KIBANA_PROTOCOL || 'http',
+      hostname: process.env.TEST_KIBANA_HOSTNAME || 'localhost',
+      port: parseInt(process.env.TEST_KIBANA_PORT, 10) || 5640,
+      auth: 'elastic:changeme',
+      username: 'elastic',
+      password: 'changeme',
+    },
+  };
+
+  const env = {
+    kibana: {
+      server: {
+        uuid: '5b2de169-2785-441b-ae8c-186a1936b17d', // Kibana UUID for "primary" cluster in monitoring data
+      }
+    }
+  };
 
   return {
     // list paths to the files that contain your plugins tests
@@ -75,7 +101,7 @@ export default async function ({ readConfigFile }) {
     // available to your tests. If you don't specify anything here
     // only the built-in services will be avaliable
     services: {
-      ...kibanaConfig.get('services'),
+      ...kibanaFunctionalConfig.get('services'),
       esSupertest: kibanaAPITestsConfig.get('services.esSupertest'),
       monitoringNoData: MonitoringNoDataProvider,
       monitoringClusterList: MonitoringClusterListProvider,
@@ -108,7 +134,7 @@ export default async function ({ readConfigFile }) {
     // just like services, PageObjects are defined as a map of
     // names to Providers. Merge in Kibana's or pick specific ones
     pageObjects: {
-      ...kibanaConfig.get('pageObjects'),
+      ...kibanaFunctionalConfig.get('pageObjects'),
       security: SecurityPageProvider,
       reporting: ReportingPageProvider,
       monitoring: MonitoringPageProvider,
@@ -118,26 +144,29 @@ export default async function ({ readConfigFile }) {
       watcher: WatcherPageProvider,
     },
 
-    servers: {
-      elasticsearch: {
-        port: 9240,
-        auth: 'elastic:changeme',
-        username: 'elastic',
-        password: 'changeme',
-      },
-      kibana: {
-        port: 5640,
-        auth: 'elastic:changeme',
-        username: 'elastic',
-        password: 'changeme',
-      },
+    servers,
+
+    env,
+
+    esTestCluster: {
+      license: 'trial',
+      from: 'source',
+      serverArgs: [
+        'xpack.license.self_generated.type=trial',
+        'xpack.security.enabled=true',
+      ],
     },
-    env: {
-      kibana: {
-        server: {
-          uuid: '5b2de169-2785-441b-ae8c-186a1936b17d', // Kibana UUID for "primary" cluster in monitoring data
-        }
-      }
+
+    kbnTestServer: {
+      ...kibanaCommonConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...kibanaCommonConfig.get('kbnTestServer.serverArgs'),
+        `--server.uuid=${env.kibana.server.uuid}`,
+        `--server.port=${servers.kibana.port}`,
+        `--elasticsearch.url=${formatUrl(servers.elasticsearch)}`,
+        '--xpack.xpack_main.telemetry.enabled=false',
+        '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
+      ],
     },
 
     // the apps section defines the urls that
@@ -145,7 +174,7 @@ export default async function ({ readConfigFile }) {
     // Merge urls for your plugin with the urls defined in
     // Kibana's config in order to use this helper
     apps: {
-      ...kibanaConfig.get('apps'),
+      ...kibanaFunctionalConfig.get('apps'),
       login: {
         pathname: '/login'
       },

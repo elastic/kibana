@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import expect from 'expect.js';
 import { parseConfig } from '../parse_config';
 
@@ -69,7 +88,7 @@ describe('plugins/elasticsearch', function () {
         expect(config.ssl.ca).to.contain('test ca certificate\n');
       });
 
-      it(`sets cert and key when certificate and key paths are specified`, function () {
+      it(`by default sets cert and key when certificate and key paths are specified`, function () {
         serverConfig.ssl.certificate = __dirname + '/fixtures/cert.crt';
         serverConfig.ssl.key = __dirname + '/fixtures/cert.key';
 
@@ -78,13 +97,31 @@ describe('plugins/elasticsearch', function () {
         expect(config.ssl.key).to.be('test key\n');
       });
 
-      it(`sets passphrase when certificate, key and keyPassphrase are specified`, function () {
+      it(`by default sets passphrase when certificate, key and keyPassphrase are specified`, function () {
         serverConfig.ssl.certificate = __dirname + '/fixtures/cert.crt';
         serverConfig.ssl.key = __dirname + '/fixtures/cert.key';
         serverConfig.ssl.keyPassphrase = 'secret';
 
         const config = parseConfig(serverConfig);
         expect(config.ssl.passphrase).to.be('secret');
+      });
+
+      it(`doesn't set cert and key when ignoreCertAndKey is true`, function () {
+        serverConfig.ssl.certificate = __dirname + '/fixtures/cert.crt';
+        serverConfig.ssl.key = __dirname + '/fixtures/cert.key';
+
+        const config = parseConfig(serverConfig, { ignoreCertAndKey: true });
+        expect(config.ssl.cert).to.be(undefined);
+        expect(config.ssl.key).to.be(undefined);
+      });
+
+      it(`by default sets passphrase when ignoreCertAndKey is true`, function () {
+        serverConfig.ssl.certificate = __dirname + '/fixtures/cert.crt';
+        serverConfig.ssl.key = __dirname + '/fixtures/cert.key';
+        serverConfig.ssl.keyPassphrase = 'secret';
+
+        const config = parseConfig(serverConfig, { ignoreCertAndKey: true });
+        expect(config.ssl.passphrase).to.be(undefined);
       });
     });
   });

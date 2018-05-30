@@ -8,7 +8,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { TabLink } from '../UIComponents';
 import styled from 'styled-components';
-import withService from '../withService';
 import {
   unit,
   units,
@@ -20,6 +19,7 @@ import {
 import { isEmpty } from 'lodash';
 
 import TooltipOverlay from '../../shared/TooltipOverlay';
+import { ServiceDetailsRequest } from '../../../store/reactReduxRequest/serviceDetails';
 
 const Container = styled.div`
   display: flex;
@@ -59,39 +59,49 @@ function transactionTypeLabel(type) {
   }
 }
 
-function TabNavigation({ urlParams, location, service }) {
+function TabNavigation({ urlParams, location }) {
   const { serviceName, transactionType } = urlParams;
   const errorsSelected = location.pathname.includes('/errors');
-  const { types } = service.data;
 
   return (
     <Container>
-      {types.map(type => {
-        const label = transactionTypeLabel(type);
-        return (
-          <TooltipOverlay
-            content={
-              <span>
-                Transaction type:<br />
-                {label}
-              </span>
-            }
-            key={type}
-          >
-            <NavLink
-              path={`${serviceName}/transactions/${encodeURIComponent(type)}`}
-              selected={transactionType === type && !errorsSelected}
-            >
-              {label}
-            </NavLink>
-          </TooltipOverlay>
-        );
-      })}
-      {isEmpty(types) && (
-        <EmptyMessage>No transactions available.</EmptyMessage>
-      )}
+      <ServiceDetailsRequest
+        urlParams={urlParams}
+        render={serviceDetails => {
+          const { types } = serviceDetails.data;
+
+          if (isEmpty(types)) {
+            return <EmptyMessage>No transactions available.</EmptyMessage>;
+          }
+
+          return types.map(type => {
+            const label = transactionTypeLabel(type);
+            return (
+              <TooltipOverlay
+                content={
+                  <span>
+                    Transaction type:<br />
+                    {label}
+                  </span>
+                }
+                key={type}
+              >
+                <NavLink
+                  path={`/${serviceName}/transactions/${encodeURIComponent(
+                    type
+                  )}`}
+                  selected={transactionType === type && !errorsSelected}
+                >
+                  {label}
+                </NavLink>
+              </TooltipOverlay>
+            );
+          });
+        }}
+      />
+
       <Divider />
-      <TabLink path={`${serviceName}/errors`} selected={errorsSelected}>
+      <TabLink path={`/${serviceName}/errors`} selected={errorsSelected}>
         Errors
       </TabLink>
     </Container>
@@ -102,4 +112,4 @@ TabNavigation.propTypes = {
   location: PropTypes.object.isRequired
 };
 
-export default withService(TabNavigation);
+export default TabNavigation;

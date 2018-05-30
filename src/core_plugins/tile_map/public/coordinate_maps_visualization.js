@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import { GeohashLayer } from './geohash_layer';
 import { BaseMapsVisualizationProvider } from './base_maps_visualization';
@@ -23,7 +42,7 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
 
       await super._makeKibanaMap();
 
-      this.vis.sessionState.mapBounds = this._kibanaMap.getUntrimmedBounds();
+      this.vis.sessionState.mapBounds = this._kibanaMap.getBounds();
 
       let previousPrecision = this._kibanaMap.getGeohashPrecision();
       let precisionChange = false;
@@ -31,14 +50,20 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
         precisionChange = (previousPrecision !== this._kibanaMap.getGeohashPrecision());
         previousPrecision = this._kibanaMap.getGeohashPrecision();
         const geohashAgg = this._getGeoHashAgg();
+        if (!geohashAgg) {
+          return;
+        }
         const isAutoPrecision = typeof geohashAgg.params.autoPrecision === 'boolean' ? geohashAgg.params.autoPrecision : true;
-        if (geohashAgg && isAutoPrecision) {
+        if (isAutoPrecision) {
           geohashAgg.params.precision = previousPrecision;
         }
       });
       this._kibanaMap.on('zoomend', () => {
-        const agg = this._getGeoHashAgg();
-        const isAutoPrecision = typeof agg.params.autoPrecision === 'boolean' ? agg.params.autoPrecision : true;
+        const geohashAgg = this._getGeoHashAgg();
+        if (!geohashAgg) {
+          return;
+        }
+        const isAutoPrecision = typeof geohashAgg.params.autoPrecision === 'boolean' ? geohashAgg.params.autoPrecision : true;
         if (!isAutoPrecision) {
           return;
         }
@@ -133,6 +158,7 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
         mapType: newParams.mapType,
         isFilteredByCollar: this._isFilteredByCollar(),
         fetchBounds: this.getGeohashBounds.bind(this),
+        colorRamp: newParams.colorSchema,
         heatmap: {
           heatClusterSize: newParams.heatClusterSize
         }

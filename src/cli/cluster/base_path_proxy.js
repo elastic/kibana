@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { Server } from 'hapi';
 import { notFound } from 'boom';
 import { map, sample } from 'lodash';
@@ -5,21 +24,16 @@ import { map as promiseMap, fromNode } from 'bluebird';
 import { Agent as HttpsAgent } from 'https';
 import { readFileSync } from 'fs';
 
-import { Config } from '../../server/config/config';
 import { setupConnection } from '../../server/http/setup_connection';
 import { registerHapiPlugins } from '../../server/http/register_hapi_plugins';
 import { setupLogging } from '../../server/logging';
-import { transformDeprecations } from '../../server/config/transform_deprecations';
 
 const alphabet = 'abcdefghijklmnopqrztuvwxyz'.split('');
 
 export default class BasePathProxy {
-  constructor(clusterManager, userSettings) {
+  constructor(clusterManager, config) {
     this.clusterManager = clusterManager;
     this.server = new Server();
-
-    const settings = transformDeprecations(userSettings);
-    const config = Config.withDefaultSchema(settings);
 
     this.targetPort = config.get('dev.basePathProxyTarget');
     this.basePath = config.get('server.basePath');
