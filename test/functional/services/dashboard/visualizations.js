@@ -42,7 +42,7 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
       log.debug(`createSavedSearch(${name})`);
       await PageObjects.header.clickDiscover();
 
-      await PageObjects.dashboard.setTimepickerInDataRange();
+      await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
 
       if (query) {
         await queryBar.setQuery(query);
