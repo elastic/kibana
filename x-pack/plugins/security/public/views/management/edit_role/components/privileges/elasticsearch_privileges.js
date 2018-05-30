@@ -17,10 +17,14 @@ import {
   EuiDescribedFormGroup,
   EuiTitle,
   EuiHorizontalRule,
+  EuiLink,
+  EuiIcon,
 } from '@elastic/eui';
+import './elasticsearch_privileges.less';
 import { ClusterPrivileges } from './cluster_privileges';
 import { IndexPrivileges } from './index_privileges';
 import { CollapsiblePanel } from '../collapsible_panel';
+import { documentationLinks } from '../../../../../documentation_links';
 
 export class ElasticsearchPrivileges extends Component {
   static propTypes = {
@@ -67,7 +71,7 @@ export class ElasticsearchPrivileges extends Component {
     return (
       <Fragment>
         <EuiDescribedFormGroup
-          title={<p>Cluster privileges</p>}
+          title={<p>Cluster privileges {this.learnMore(documentationLinks.esClusterPrivileges)}</p>}
           description={
             <p>
               Manage the actions this role can perform against your cluster.
@@ -82,7 +86,7 @@ export class ElasticsearchPrivileges extends Component {
         <EuiSpacer />
 
         <EuiDescribedFormGroup
-          title={<p>Run As privileges</p>}
+          title={<p>Run As privileges {this.learnMore(documentationLinks.esRunAsPrivileges)}</p>}
           description={
             <p>
               Allow requests to be submitted on behalf of other users.
@@ -106,7 +110,7 @@ export class ElasticsearchPrivileges extends Component {
           <div>
             <EuiFlexGroup>
               <EuiFlexItem>
-                <EuiTitle size={'xs'}><p>Index privileges</p></EuiTitle>
+                <EuiTitle size={'xs'}><p>Index privileges {this.learnMore(documentationLinks.esIndicesPrivileges)}</p></EuiTitle>
                 <EuiText size={'s'} color={'subdued'}><p>Control access to the data in your cluster.</p></EuiText>
               </EuiFlexItem>
               {this.props.editable && (
@@ -124,6 +128,12 @@ export class ElasticsearchPrivileges extends Component {
       </Fragment>
     );
   }
+
+  learnMore = (href) => (
+    <EuiLink className="editRole__learnMore" href={href} target={'_blank'}>
+      <EuiIcon size={"s"} type="questionInCircle" />
+    </EuiLink>
+  );
 
   addIndexPrivilege = () => {
     const { role } = this.props;

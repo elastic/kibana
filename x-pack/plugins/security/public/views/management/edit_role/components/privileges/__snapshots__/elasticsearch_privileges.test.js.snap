@@ -16,7 +16,19 @@ exports[`it renders without crashing 1`] = `
       gutterSize="l"
       title={
         <p>
-          Cluster privileges
+          Cluster privileges 
+          <EuiLink
+            className="editRole__learnMore"
+            color="primary"
+            href="undefinedguide/en/x-pack/current/security-privileges.html#security-privileges"
+            target="_blank"
+            type="button"
+          >
+            <EuiIcon
+              size="s"
+              type="questionInCircle"
+            />
+          </EuiLink>
         </p>
       }
       titleSize="xs"
@@ -51,7 +63,19 @@ exports[`it renders without crashing 1`] = `
       gutterSize="l"
       title={
         <p>
-          Run As privileges
+          Run As privileges 
+          <EuiLink
+            className="editRole__learnMore"
+            color="primary"
+            href="undefinedguide/en/x-pack/current/security-privileges.html#_run_as_privilege"
+            target="_blank"
+            type="button"
+          >
+            <EuiIcon
+              size="s"
+              type="questionInCircle"
+            />
+          </EuiLink>
         </p>
       }
       titleSize="xs"
@@ -98,7 +122,19 @@ exports[`it renders without crashing 1`] = `
               size="xs"
             >
               <p>
-                Index privileges
+                Index privileges 
+                <EuiLink
+                  className="editRole__learnMore"
+                  color="primary"
+                  href="undefinedguide/en/x-pack/current/security-privileges.html#privileges-list-indices"
+                  target="_blank"
+                  type="button"
+                >
+                  <EuiIcon
+                    size="s"
+                    type="questionInCircle"
+                  />
+                </EuiLink>
               </p>
             </EuiTitle>
             <EuiText
