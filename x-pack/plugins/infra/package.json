@@ -1,0 +1,14 @@
+{
+  "author": "Elastic",
+  "name": "infra",
+  "version": "7.0.0-alpha1",
+  "scripts": {
+    "build-graphql-types": "node scripts/generate_types_from_graphql.js"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.110"
+  },
+  "dependencies": {
+    "lodash": "^4.17.10"
+  }
+}
