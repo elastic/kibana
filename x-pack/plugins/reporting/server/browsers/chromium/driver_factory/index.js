@@ -58,7 +58,8 @@ export class HeadlessChromiumDriverFactory {
       const driver$ = message$
         .first(line => line.indexOf(`DevTools listening on ws://127.0.0.1:${bridgePort}`) >= 0)
         .do(() => this.logger.debug('Ensure chromium is running and listening'))
-        .mergeMap(() => ensureChromiumIsListening(bridgePort))
+        .mergeMap(() => ensureChromiumIsListening(bridgePort, this.logger))
+        .do(() => this.logger.debug('Connecting chrome remote interface'))
         .mergeMap(() => cdp({ port: bridgePort, local: true }))
         .do(() => this.logger.debug('Initializing chromium driver'))
         .map(client => new HeadlessChromiumDriver(client, {

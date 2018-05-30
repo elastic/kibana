@@ -15,18 +15,22 @@ import http from 'http';
 /**
  *
  * @param {string} port
+ * @param {Object} logger
  * @return {Promise}
  */
-export async function ensureChromiumIsListening(port) {
+export async function ensureChromiumIsListening(port, logger) {
   const options = {
     port,
     hostname: '127.0.0.1',
-    method: 'CONNECT',
     timeout: 120000,
+    path: '/json',
   };
 
   return new Promise((resolve, reject) => {
     http.get(options, () => resolve())
-      .on('error', e => reject(e));
+      .on('error', e => {
+        logger.error(`Ensure chromium is listening failed with error ${e.message}`);
+        reject(e);
+      });
   });
 }
