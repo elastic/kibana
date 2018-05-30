@@ -17,7 +17,7 @@ export function MonitoringTableToolBar(props) {
   const searchBox = props.showSearchBox
     ? (
       <KuiToolBarSearchBox
-        filter={props.filterText}
+        defaultValue={props.filterText}
         onFilter={props.onFilterChange}
         placeholder={props.placeholder}
         data-test-subj="monitoringTableToolBar"

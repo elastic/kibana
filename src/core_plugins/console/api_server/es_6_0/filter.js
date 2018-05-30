@@ -17,7 +17,7 @@
  * under the License.
  */
 
-var filters = {};
+const filters = {};
 
 filters.and = {
   __template: {
@@ -272,14 +272,14 @@ filters.range = {
       lte: 20
     }
   },
-  "{field}": {
+  '{field}': {
     gte: 1,
     gt: 1,
     lte: 20,
     lt: 20,
-    time_zone: "+1:00",
-    "format": "dd/MM/yyyy||yyyy",
-    execution: { __one_of: ["index", "fielddata"] }
+    time_zone: '+1:00',
+    'format': 'dd/MM/yyyy||yyyy',
+    execution: { __one_of: ['index', 'fielddata'] }
   }
 };
 
