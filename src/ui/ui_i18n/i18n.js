@@ -159,6 +159,6 @@ export class I18n {
     });
 
     return Promise.all(translations)
-      .then(translations => _.assign({}, ...translations));
+      .then(translations => _.assign({ locale }, ...translations));
   }
 }

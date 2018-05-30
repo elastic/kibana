@@ -1,0 +1,14 @@
+{
+  "name": "@kbn/i18n",
+  "main": "./src/index.js",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "dependencies": {
+    "intl-format-cache": "2.1.0",
+    "intl-messageformat": "2.2.0",
+    "prop-types": "15.5.8",
+    "react": "^16.3.0",
+    "react-intl": "2.4.0"
+  }
+}

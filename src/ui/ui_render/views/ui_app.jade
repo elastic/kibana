@@ -108,6 +108,6 @@ block content
       .kibanaWelcomeLogoCircle
         .kibanaWelcomeLogo
     .kibanaWelcomeText
-      | #{i18n('UI-WELCOME_MESSAGE')}
+      | #{i18n('UI-WELCOME_MESSAGE', { defaultMessage: 'Loading Kibana' })}
 
   script(src='#{bundlePath}/app/#{app.getId()}/bootstrap.js')

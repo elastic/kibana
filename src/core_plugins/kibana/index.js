@@ -123,9 +123,7 @@ export default function (kibana) {
         };
       },
 
-      translations: [
-        resolve(__dirname, './translations/en.json')
-      ],
+      translations: [],
 
       mappings,
       uiSettingDefaults: getUiSettingDefaults(),

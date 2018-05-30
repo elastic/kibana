@@ -83,6 +83,7 @@
     "@elastic/ui-ace": "0.2.3",
     "@kbn/babel-preset": "link:packages/kbn-babel-preset",
     "@kbn/datemath": "link:packages/kbn-datemath",
+    "@kbn/i18n": "link:packages/kbn-i18n",
     "@kbn/pm": "link:packages/kbn-pm",
     "@kbn/test-subj-selector": "link:packages/kbn-test-subj-selector",
     "@kbn/ui-framework": "link:packages/kbn-ui-framework",

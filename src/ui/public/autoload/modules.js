@@ -18,6 +18,7 @@
  */
 
 import 'angular';
+import '@kbn/i18n';
 import '../chrome';
 import '../bind';
 import '../kbn_top_nav';

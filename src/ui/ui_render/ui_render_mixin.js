@@ -21,6 +21,7 @@ import { defaults, get } from 'lodash';
 import { props, reduce as reduceAsync } from 'bluebird';
 import Boom from 'boom';
 import { resolve } from 'path';
+import I18n from '@kbn/i18n/src/core';
 import { AppBootstrap } from './bootstrap';
 
 export function uiRenderMixin(kbnServer, server, config) {
@@ -138,6 +139,7 @@ export function uiRenderMixin(kbnServer, server, config) {
     try {
       const request = reply.request;
       const translations = await request.getUiTranslations();
+      const i18n = new I18n(translations);
 
       return reply.view('ui_app', {
         app,
@@ -148,7 +150,7 @@ export function uiRenderMixin(kbnServer, server, config) {
           injectedVarsOverrides
         }),
         bundlePath: `${config.get('server.basePath')}/bundles`,
-        i18n: key => get(translations, key, ''),
+        i18n: i18n.translate.bind(i18n),
       });
     } catch (err) {
       reply(err);

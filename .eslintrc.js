@@ -31,6 +31,7 @@ module.exports = {
         'packages/kbn-pm/**/*',
         'packages/kbn-es/**/*',
         'packages/kbn-datemath/**/*',
+        'packages/kbn-i18n/**/*',
         'packages/kbn-dev-utils/**/*',
         'packages/kbn-plugin-helpers/**/*',
         'packages/kbn-plugin-generator/**/*',

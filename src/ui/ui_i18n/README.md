@@ -98,6 +98,8 @@ data to UI frameworks and provides methods for the direct translation.
 
 Here is the public API exposed by this engine:
 
+- `addMessages(messages: Map<string, string>, [locale: string])` - provides a way to register
+translations with the engine
 - `getMessages()` - returns messages for the current language
 - `setLocale(locale: string)` - tells the engine which language to use by given
 language key
@@ -107,6 +109,7 @@ when missing translations
 - `getDefaultLocale()` - returns the default locale
 - `defineFormats(formats: object)` - supplies a set of options to the underlying formatter.
 For the detailed explanation, see the section below
+- `getFormats()` - returns current formats
 - `translate(id: string, [{values: object, defaultMessage: string}])` – translate message by id
 
 #### I18n engine internals
@@ -179,24 +182,17 @@ React Intl uses the provider pattern to scope an i18n context to a tree of compo
 are able to use `FormattedMessage` component in order to translate messages.
 `IntlProvider` should wrap react app's root component (inside each react render method).
 
-In order to translate messages we need to pass them into the `IntlProvider`
-from I18n engine:
+In order to translate messages we need to use custom `I18nProvider` component
+that uses I18n engine under the hood:
 
 ```js
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import i18n from 'kbn-i18n';
-import { IntlProvider } from 'ui/i18n/react-intl';
-
-const locale = i18n.getLocale();
-const messages = i18n.getMessages();
+import { I18nProvider } from '@kbn/i18n';
 
 ReactDOM.render(
-  <IntlProvider
-    locale={locale}
-    messages={messages}
-  >
+  <I18nProvider>
     <RootComponent>
       ...
     </RootComponent>
@@ -209,7 +205,7 @@ After that we can use `FormattedMessage` components inside `RootComponent`:
 ```js
 import React, { Component } from 'react';
 
-import { FormattedMessage } from 'ui/i18n/react-intl';
+import { FormattedMessage } from '@kbn/i18n';
 
 class RootComponent extends Component {
   constructor(props) {
@@ -261,6 +257,7 @@ language key
 when missing translations
 - `getDefaultLocale()` - returns the default locale
 - `defineFormats(formats: object)` - supplies a set of options to the underlying formatter
+- `getFormats()` - returns current formats
 
 The translation `service` provides only one method:
 - `translate(id: string, [{values: object, defaultMessage: string}])` – translate message by id
@@ -291,20 +288,8 @@ Where:
 - `i18n-values` - values to pass into translation
 - `i18n-default-message` - will be used unless translation was successful
 
-In order to initialize the translation service, we need to pass locale and
-localization messages from I18n engine into the `i18nProvider`:
-
-```js
-import { uiModules } from 'ui/modules';
-import i18n from 'kbn-i18n';
-
-uiModules.get('kibana').config(function (i18nProvider) {
-  i18nProvider.addMessages(i18n.getMessages());
-  i18nProvider.setLocale(i18n.getLocale());
-});
-```
-
-After that we can use i18n directive in Angular templates:
+Angular `I18n` module is placed into `autoload` module, so it will be
+loaded automatically. After that we can use i18n directive in Angular templates:
 ```html
 <span
   i18n-id="welcome"
@@ -320,10 +305,13 @@ global object exists in the runtime. `Intl` is present in all modern
 browsers and Node.js 0.10+. In order to load i18n engine
 in Node.js we should simply `import` this module (in Node.js, the
 [data](https://github.com/yahoo/intl-messageformat/tree/master/dist/locale-data)
-for all 200+ languages is loaded along with the library):
+for all 200+ languages is loaded along with the library) and pass the translation
+messages into the constructor:
 
 ```js
-import i18n from 'kbn-i18n';
+import I18n from '@kbn/i18n/src/core';
+
+const i18n = new I18n(messages);
 ```
 
 After that we are able to use all methods exposed by the i18n engine
