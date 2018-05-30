@@ -55,10 +55,6 @@ include::graph/index.asciidoc[]
 
 include::dev-tools.asciidoc[]
 
-include::{xkb-repo-dir}/searchprofiler/index.asciidoc[]
-
-include::{xkb-repo-dir}/grokdebugger/index.asciidoc[]
-
 include::{xkb-repo-dir}/monitoring/index.asciidoc[]
 
 include::management.asciidoc[]
