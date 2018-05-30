@@ -80,11 +80,11 @@ export class SavedObjectsClient {
    * @property {boolean} [options.overwrite=false]
    * @returns {promise} - [{ id, type, version, attributes, error: { message } }]
    */
-  bulkCreate(objects = [], options = {}) {
+  bulkCreate = (objects = [], options = {}) => {
     const url = this._getUrl(['_bulk_create'], _.pick(options, ['overwrite']));
 
     return this._request('POST', url, objects).then(resp => {
-      resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
+      resp.saved_objects = resp.map(d => this.createSavedObject(d));
       return keysToCamelCaseShallow(resp);
     });
   }

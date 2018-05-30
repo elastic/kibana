@@ -49,7 +49,7 @@ export class SavedObjectsInstaller extends React.Component {
     });
 
     const resp = await this.props.bulkCreate(this.props.savedObjects, { overwrite: true });
-    const errors = resp.filter(savedObjectCreateResult => {
+    const errors = resp.savedObjects.filter(savedObjectCreateResult => {
       return savedObjectCreateResult.hasOwnProperty('error');
     });
 
@@ -85,7 +85,7 @@ export class SavedObjectsInstaller extends React.Component {
           <EuiFlexItem>
             <EuiText>
               <p>
-                Click button to add Kibana objects for module
+                Click button to add Saved Searches, Visualizations, and Dashboards for module
               </p>
             </EuiText>
           </EuiFlexItem>
