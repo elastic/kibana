@@ -7,7 +7,7 @@
 
 By default, the Monitoring application is enabled, but data collection
 is disabled.  When you first start {kib} monitoring, you will be prompted to
-to enable data collection.
+enable data collection.
 
 You can adjust how monitoring data is
 collected from {kib} and displayed in {kib} by configuring settings in the
