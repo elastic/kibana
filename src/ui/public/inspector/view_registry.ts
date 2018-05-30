@@ -46,7 +46,9 @@ class InspectorViewRegistry extends EventEmitter {
     }
     this.views.push(view);
     // Keep registry sorted by the order property
-    this.views.sort((a, b) => (a.order || 9000) - (b.order || 9000));
+    this.views.sort(
+      (a, b) => (a.order || Number.MAX_VALUE) - (b.order || Number.MAX_VALUE)
+    );
     this.emit('change');
   }
 
