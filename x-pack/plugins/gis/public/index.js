@@ -23,20 +23,6 @@ chrome.setRootTemplate(template);
 initTimepicker(init);
 
 async function init() {
-  console.log('time picker is ready');
-  await whenDOMIsReady();
   const root = document.getElementById('react-gis-root');
   ReactDOM.render(<GISApp/>, root);
-}
-
-async function whenDOMIsReady() {
-  return new Promise(resolve => {
-    const checkInterval = setInterval(() => {
-      const hasElm = !!document.getElementById('react-gis-root');
-      if (hasElm) {
-        clearInterval(checkInterval);
-        resolve();
-      }
-    }, 10);
-  });
 }
