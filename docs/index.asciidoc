@@ -25,7 +25,7 @@ include::introduction.asciidoc[]
 
 include::setup.asciidoc[]
 
-include::{xkb-repo-dir}/setup/setup-xkb.asciidoc[]
+include::setup/setup-xkb.asciidoc[]
 
 include::{xkb-repo-dir}/monitoring/monitoring-xkib.asciidoc[]
 
