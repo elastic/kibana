@@ -152,7 +152,7 @@ test(`returns success when has_all_requested`, async () => {
   expect(result.success).toBe(true);
 });
 
-test(`returns user from response when has_all_requested`, async () => {
+test(`returns username from has_privileges response when has_all_requested`, async () => {
   const mockServer = createMockServer();
   const username = 'foo-username';
   mockResponse(true, {
@@ -181,7 +181,7 @@ test(`returns false success when has_all_requested is false`, async () => {
   expect(result.success).toBe(false);
 });
 
-test(`returns user from request when has_all_requested is false`, async () => {
+test(`returns username from has_privileges when has_all_requested is false`, async () => {
   const username = 'foo-username';
   const mockServer = createMockServer();
   mockResponse(false, {
