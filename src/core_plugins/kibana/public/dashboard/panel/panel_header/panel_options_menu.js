@@ -30,6 +30,7 @@ export function PanelOptionsMenu({ toggleContextMenu, isPopoverOpen, closeContex
   const button = (
     <EuiButtonIcon
       iconType={isViewMode ? 'boxesHorizontal' : 'gear'}
+      color="text"
       className={isViewMode && !isPopoverOpen ? 'viewModeOpenContextMenuIcon' : ''}
       aria-label="Panel options"
       data-test-subj="dashboardPanelToggleMenuIcon"
