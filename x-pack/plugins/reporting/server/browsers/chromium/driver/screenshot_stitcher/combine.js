@@ -44,7 +44,7 @@ export function $combine(screenshots, outputDimensions, logger) {
     .reduce(
       (output, { dimensions, png }) => {
         logger.debug(`Output dimensions is ${JSON.stringify(outputDimensions)}`);
-        logger.debug(`Input png is ${JSON.stringify(png)}`);
+        logger.debug(`Input png w: ${png.width} and h: ${png.height}`);
         logger.debug(`Creating output png with ${JSON.stringify(dimensions)}`);
         png.bitblt(output, 0, 0, dimensions.width, dimensions.height, dimensions.x, dimensions.y);
         return output;
