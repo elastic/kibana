@@ -17,9 +17,9 @@ import { getCollectorTypesCombiner } from './lib';
  * @param {Object} server HapiJS server instance
  */
 export function initBulkUploader(kbnServer, server) {
-
   const config = server.config();
   const interval = config.get('xpack.monitoring.kibana.collection.interval');
+
   return new BulkUploader(server, {
     interval,
     combineTypes: getCollectorTypesCombiner(kbnServer, config)

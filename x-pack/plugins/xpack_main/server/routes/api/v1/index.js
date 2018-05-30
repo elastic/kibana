@@ -6,5 +6,4 @@
 
 export { xpackInfoRoute } from './xpack_info';
 export { kibanaStatsRoute } from './kibana_stats';
-export { xpackUsageRoute } from './xpack_usage';
 export { telemetryRoute } from './telemetry';

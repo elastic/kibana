@@ -1,7 +1,20 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 import { wrap as wrapError } from 'boom';
@@ -12,17 +25,16 @@ const getClusterUuid = async callCluster => {
 };
 
 /*
- * @return {Object} data from usage stats collectors registered with Monitoring CollectorSet
- * @throws {Error} if the Monitoring CollectorSet is not ready
+ * @return {Object} data from usage stats collectors registered with CollectorSet
  */
 const getUsage = (callCluster, server) => {
-  const { collectorSet } = server.plugins.monitoring;
+  const { collectorSet } = server.usage;
   return collectorSet.bulkFetchUsage(callCluster);
 };
 
-export function xpackUsageRoute(server) {
+export function registerUsageApi(server) {
   server.route({
-    path: '/api/_xpack/usage',
+    path: '/api/usage',
     method: 'GET',
     async handler(req, reply) {
       const { server } = req;
@@ -30,14 +42,14 @@ export function xpackUsageRoute(server) {
       const callCluster = (...args) => callWithRequest(req, ...args); // All queries from HTTP API must use authentication headers from the request
 
       try {
-        const [ clusterUuid, xpackUsage ] = await Promise.all([
+        const [ clusterUuid, usage ] = await Promise.all([
           getClusterUuid(callCluster),
           getUsage(callCluster, server),
         ]);
 
         reply({
           cluster_uuid: clusterUuid,
-          ...xpackUsage
+          ...usage
         });
       } catch(err) {
         req.log(['error'], err); // FIXME doesn't seem to log anything useful if ES times out
