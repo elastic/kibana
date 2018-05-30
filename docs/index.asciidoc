@@ -33,7 +33,7 @@ include::{xkb-repo-dir}/monitoring/monitoring-xkib.asciidoc[]
 
 include::{xkb-repo-dir}/security/securing-kibana.asciidoc[]
 
-include::{xkb-repo-dir}/settings/settings-xkb.asciidoc[]
+include::settings/settings-xkb.asciidoc[]
 
 include::migration.asciidoc[]
 

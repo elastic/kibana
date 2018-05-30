@@ -127,4 +127,4 @@ For more information about the settings in these steps, see
 
 include::authentication/index.asciidoc[]
 include::securing-communications/index.asciidoc[]
-include::{xkb-repo-dir}/settings/security-settings.asciidoc[]
+include::{kib-repo-dir}/settings/security-settings.asciidoc[]
