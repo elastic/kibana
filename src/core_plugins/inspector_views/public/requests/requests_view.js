@@ -49,12 +49,11 @@ class RequestsViewComponent extends Component {
 
   _onRequestsChange = () => {
     const requests = this.props.adapters.requests.getRequests();
-    this.setState({ requests });
+    const newState = { requests };
     if (!requests.includes(this.state.request)) {
-      this.setState({
-        request: requests.length ? requests[0] : null
-      });
+      newState.request = requests.length ? requests[0] : null;
     }
+    this.setState(newState);
   }
 
   selectRequest = (request) => {

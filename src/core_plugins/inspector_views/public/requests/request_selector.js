@@ -18,6 +18,7 @@
  */
 
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
 import {
   EuiBadge,
@@ -151,5 +152,10 @@ class RequestSelector extends Component {
     );
   }
 }
+
+RequestSelector.propTypes = {
+  requests: PropTypes.array.isRequired,
+  selectedRequest: PropTypes.object.isRequired,
+};
 
 export { RequestSelector };
