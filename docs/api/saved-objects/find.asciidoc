@@ -17,15 +17,15 @@ saved objects by various conditions.
 `page` (optional)::
   (number) The page of objects to return
 `type` (optional)::
-  (array|string) The saved object type or types that the response should be limited to
+  (array|string) The saved object type(s) that the response should be limited to
 `search` (optional)::
   (string) A {ref}/query-dsl-simple-query-string-query.html[simple_query_string] Elasticsearch query to filter the objects in the response
 `search_fields` (optional)::
-  (string) The fields to perform the `simple_query_string` parsed query against
+  (array|string) The fields to perform the `simple_query_string` parsed query against
+`fields` (optional)::
+  (array|string) The fields to return in the response
 `sort_field` (optional)::
   (string) The field on which the response will be sorted
-`fields` (optional)::
-  (string) The fields to return in the response
 
 
 ==== Examples
@@ -58,3 +58,18 @@ containing a JSON structure similar to the following example:
   ]
 }
 --------------------------------------------------
+
+[NOTE]
+.Multiple values for a parameter
+==============================================
+
+For parameters that can accept multiple values (e.g. `fields`), repeat the
+query parameter for each value:
+
+[source,js]
+--------------------------------------------------
+GET api/saved_objects/_find?fields=id&fields=title
+--------------------------------------------------
+// KIBANA
+
+==============================================
