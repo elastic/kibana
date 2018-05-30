@@ -22,9 +22,12 @@ import PropTypes from 'prop-types';
 import {
   EuiEmptyPrompt,
   EuiSpacer,
+  EuiText,
+  EuiTextColor,
 } from '@elastic/eui';
 
 import { InspectorView } from 'ui/inspector';
+import { RequestStatus } from 'ui/inspector/adapters';
 
 import { RequestSelector } from './request_selector';
 import { RequestDetails } from './request_details';
@@ -88,8 +91,29 @@ class RequestsViewComponent extends Component {
       return this.renderEmptyRequests();
     }
 
+    const failedCount = this.state.requests.filter(
+      req => req.status === RequestStatus.ERROR
+    ).length;
+
     return (
       <InspectorView>
+        <EuiText size="xs">
+          <p>
+            {this.state.requests.length}
+            {this.state.requests.length !== 1 ? ' requests were' : ' request was'} made
+            {failedCount > 0 &&
+              <React.Fragment>
+                , {' '}
+                <EuiTextColor
+                  color="danger"
+                >
+                  {failedCount} had a failure
+                </EuiTextColor>
+              </React.Fragment>
+            }
+          </p>
+        </EuiText>
+        <EuiSpacer size="m"/>
         <RequestSelector
           requests={this.state.requests}
           selectedRequest={this.state.request}

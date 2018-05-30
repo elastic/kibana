@@ -37,7 +37,7 @@ const InspectorView: React.SFC<{ useFlex?: boolean }> = ({
   useFlex,
   children,
 }) => {
-  const classes = classNames({
+  const classes = classNames('inspector-view__body', {
     'inspector-view__flex': Boolean(useFlex),
   });
   return <EuiFlyoutBody className={classes}>{children}</EuiFlyoutBody>;

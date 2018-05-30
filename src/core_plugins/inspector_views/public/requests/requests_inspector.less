@@ -10,8 +10,16 @@
   min-width: 300px;
 }
 
-.inspector-request-chooser__menu-item--failed {
-  color: #A30000; // $euiColorDanger
+.inspector-request-chooser__request-title {
+  font-size: 1.2em;
+}
+
+.inspector-request-chooser__single-request {
+  .inspector-request-chooser__request-title();
+  height: 30px; // height of EuiEmptyButton small
+  padding: 0 8px;
+  display: flex;
+  align-items: center;
 }
 
 .inspector-request-chooser__menu-spinner {

@@ -18,7 +18,6 @@
  */
 
 import React, { Component } from 'react';
-import className from 'classnames';
 
 import {
   EuiBadge,
@@ -29,7 +28,7 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPopover,
-  EuiTitle,
+  EuiTextColor,
 } from '@elastic/eui';
 
 import { RequestStatus } from 'ui/inspector/adapters';
@@ -54,9 +53,7 @@ class RequestSelector extends Component {
   renderRequestDropdownItem = (request, index) => {
     const hasFailed = request.status === RequestStatus.ERROR;
     const inProgress = request.status === RequestStatus.PENDING;
-    const itemClass = className({
-      'inspector-request-chooser__menu-item--failed': hasFailed,
-    });
+
     return (
       <EuiContextMenuItem
         key={index}
@@ -67,35 +64,32 @@ class RequestSelector extends Component {
         }}
         toolTipContent={request.description}
         toolTipPosition="left"
-        className={itemClass}
       >
-        {request.name}
-        { hasFailed && ' (failed)' }
-        { inProgress &&
-          <EuiLoadingSpinner
-            size="s"
-            aria-label="Request in progress"
-            className="inspector-request-chooser__menu-spinner"
-          />
-        }
+        <EuiTextColor color={hasFailed ? 'danger' : 'default'}>
+          {request.name}
+          { hasFailed && ' (failed)' }
+          { inProgress &&
+            <EuiLoadingSpinner
+              size="s"
+              aria-label="Request in progress"
+              className="inspector-request-chooser__menu-spinner"
+            />
+          }
+        </EuiTextColor>
       </EuiContextMenuItem>
     );
   }
 
   renderRequestDropdown() {
-    const failedCount = this.props.requests.filter(
-      req => req.status === RequestStatus.ERROR
-    ).length;
     const button = (
       <EuiButtonEmpty
         iconType="arrowDown"
         iconSide="right"
         size="s"
+        className="inspector-request-chooser__request-title"
         onClick={this.togglePopover}
       >
-        ({this.props.requests.length - 1} more requests
-        { failedCount > 0 && ` / ${failedCount} failed`}
-        )
+        {this.props.selectedRequest.name}
       </EuiButtonEmpty>
     );
 
@@ -106,7 +100,7 @@ class RequestSelector extends Component {
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover}
         panelPaddingSize="none"
-        anchorPosition="downRight"
+        anchorPosition="downLeft"
       >
         <EuiContextMenuPanel
           className="inspector-request-chooser__menu-panel"
@@ -119,11 +113,23 @@ class RequestSelector extends Component {
   render() {
     const { selectedRequest, requests } = this.props;
     return (
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h2>{selectedRequest.name}</h2>
-          </EuiTitle>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="xs"
+      >
+        <EuiFlexItem
+          grow={false}
+          className="inspector-request-chooser__request-title"
+        >
+          Request:
+        </EuiFlexItem>
+        <EuiFlexItem grow={true}>
+          {requests.length <= 1 &&
+            <div className="inspector-request-chooser__single-request">
+              {selectedRequest.name}
+            </div>
+          }
+          {requests.length > 1 && this.renderRequestDropdown()}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           { selectedRequest.status !== RequestStatus.PENDING &&
@@ -141,12 +147,6 @@ class RequestSelector extends Component {
             />
           }
         </EuiFlexItem>
-        <EuiFlexItem grow={true} />
-        { requests.length > 1 &&
-          <EuiFlexItem grow={false}>
-            { this.renderRequestDropdown() }
-          </EuiFlexItem>
-        }
       </EuiFlexGroup>
     );
   }
