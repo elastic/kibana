@@ -5,7 +5,7 @@
 <titleabbrev>Monitoring Settings</titleabbrev>
 ++++
 
-By default, monitoring is enabled, but data collection
+By default, the Monitoring application is enabled, but data collection
 is disabled.  When you first start {kib} monitoring, you will be prompted to
 to enable data collection.
 
