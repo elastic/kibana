@@ -19,7 +19,6 @@
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import _ from 'lodash';
 
 import {
   EuiButton,
@@ -45,7 +44,7 @@ export class DashboardSaveModal extends React.Component {
     this.state = {
       title: props.title,
       description: props.description,
-      copyOnSave: props.copyOnSave,
+      copyOnSave: false,
       timeRestore: props.timeRestore,
       isTitleDuplicateConfirmed: false,
       hasTitleDuplicate: false,
@@ -62,12 +61,18 @@ export class DashboardSaveModal extends React.Component {
 
   onTitleDuplicate = () => {
     this.setState({
+      isLoading: false,
       isTitleDuplicateConfirmed: true,
       hasTitleDuplicate: true,
     });
   }
 
-  saveDashboard = _.debounce(async () => {
+  saveDashboard = async () => {
+    if (this.state.isLoading) {
+      // ignore extra clicks
+      return;
+    }
+
     this.setState({
       isLoading: true,
     });
@@ -80,13 +85,7 @@ export class DashboardSaveModal extends React.Component {
       isTitleDuplicateConfirmed: this.state.isTitleDuplicateConfirmed,
       onTitleDuplicate: this.onTitleDuplicate,
     });
-
-    if (this._isMounted) {
-      this.setState({
-        isLoading: false,
-      });
-    }
-  }, 300);
+  };
 
   onTitleChange = (event) => {
     this.setState({
@@ -241,7 +240,6 @@ DashboardSaveModal.propTypes = {
   onClose: PropTypes.func.isRequired,
   title: PropTypes.string.isRequired,
   description: PropTypes.string.isRequired,
-  copyOnSave: PropTypes.bool.isRequired,
   timeRestore: PropTypes.bool.isRequired,
   showCopyOnSave: PropTypes.bool.isRequired,
 };

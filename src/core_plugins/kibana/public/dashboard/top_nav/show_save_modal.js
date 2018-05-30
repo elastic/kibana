@@ -21,7 +21,7 @@ import { DashboardSaveModal } from './save_modal';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-export function showSaveModal({ onSave, title, description, copyOnSave, timeRestore, showCopyOnSave }) {
+export function showSaveModal({ onSave, title, description, timeRestore, showCopyOnSave }) {
   const container = document.createElement('div');
   const closeModal = () => {
     ReactDOM.unmountComponentAtNode(container);
@@ -42,7 +42,6 @@ export function showSaveModal({ onSave, title, description, copyOnSave, timeRest
       onClose={closeModal}
       title={title}
       description={description}
-      copyOnSave={copyOnSave}
       timeRestore={timeRestore}
       showCopyOnSave={showCopyOnSave}
     />
