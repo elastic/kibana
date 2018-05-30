@@ -20,7 +20,8 @@
 import { ScopedSavedObjectsClientProvider } from './scoped_client_provider';
 
 test(`uses default client factory when one isn't registered`, () => {
-  const defaultClientFactoryMock = jest.fn();
+  const returnValue = Symbol();
+  const defaultClientFactoryMock = jest.fn().mockReturnValue(returnValue);
   const index = Symbol();
   const mappings = Symbol();
   const onBeforeWrite = () => {};
@@ -32,8 +33,9 @@ test(`uses default client factory when one isn't registered`, () => {
     onBeforeWrite,
     defaultClientFactory: defaultClientFactoryMock
   });
-  clientProvider.getScopedSavedObjectsClient(request);
+  const result = clientProvider.getScopedSavedObjectsClient(request);
 
+  expect(result).toBe(returnValue);
   expect(defaultClientFactoryMock).toHaveBeenCalledTimes(1);
   expect(defaultClientFactoryMock).toHaveBeenCalledWith({
     request,
@@ -49,7 +51,8 @@ test(`uses custom client factory when one is registered`, () => {
   const mappings = Symbol();
   const onBeforeWrite = () => {};
   const request = Symbol();
-  const customClientFactoryMock = jest.fn();
+  const returnValue = Symbol();
+  const customClientFactoryMock = jest.fn().mockReturnValue(returnValue);
 
   const clientProvider = new ScopedSavedObjectsClientProvider({
     index,
@@ -58,8 +61,10 @@ test(`uses custom client factory when one is registered`, () => {
     defaultClientFactory: defaultClientFactoryMock
   });
   clientProvider.registerScopedSavedObjectsClientFactory(customClientFactoryMock);
-  clientProvider.getScopedSavedObjectsClient(request);
+  const result = clientProvider.getScopedSavedObjectsClient(request);
 
+  expect(result).toBe(returnValue);
+  expect(defaultClientFactoryMock).toHaveBeenCalledTimes(0);
   expect(customClientFactoryMock).toHaveBeenCalledTimes(1);
   expect(customClientFactoryMock).toHaveBeenCalledWith({
     request,
