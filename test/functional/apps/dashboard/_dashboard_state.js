@@ -148,7 +148,6 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('retains dark theme', async function () {
-      await PageObjects.dashboard.clickEdit();
       await PageObjects.dashboard.useDarkTheme(true);
       await PageObjects.header.clickVisualize();
       await PageObjects.header.clickDashboard();

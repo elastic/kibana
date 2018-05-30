@@ -137,6 +137,7 @@ exports[`InspectorPanel should render as expected 1`] = `
                               <EuiButtonEmpty
                                 color="primary"
                                 data-test-subj="inspectorViewChooser"
+                                flush="right"
                                 iconSide="right"
                                 iconType="arrowDown"
                                 onClick={[Function]}
@@ -164,6 +165,7 @@ exports[`InspectorPanel should render as expected 1`] = `
                                 <EuiButtonEmpty
                                   color="primary"
                                   data-test-subj="inspectorViewChooser"
+                                  flush="right"
                                   iconSide="right"
                                   iconType="arrowDown"
                                   onClick={[Function]}
@@ -171,7 +173,7 @@ exports[`InspectorPanel should render as expected 1`] = `
                                   type="button"
                                 >
                                   <button
-                                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--iconRight"
+                                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--iconRight euiButtonEmpty--flushRight"
                                     data-test-subj="inspectorViewChooser"
                                     onClick={[Function]}
                                     type="button"
