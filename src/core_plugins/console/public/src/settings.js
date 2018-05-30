@@ -19,8 +19,8 @@
 
 const storage = require('./storage');
 
-import getInput from './input'
-import getOutput from './output'
+import getInput from './input';
+import getOutput from './output';
 
 function getFontSize() {
   return storage.get('font_size', 14);
