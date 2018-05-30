@@ -122,7 +122,7 @@ export class DashboardSaveModal extends React.Component {
         <EuiCallOut
           title={`A Dashboard with the title '${this.state.title}' already exists.`}
           color="warning"
-          data-test-subj="saveModalTitleDupicateWarnMsg"
+          data-test-subj="titleDupicateWarnMsg"
         >
           <p>
             Click <strong>Confirm Save</strong> to save the dashboard with the duplicate title.
