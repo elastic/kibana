@@ -23,51 +23,72 @@ export class SecureSavedObjectsClient {
   }
 
   async create(type, attributes = {}, options = {}) {
-    await this._performAuthorizationCheck(type, 'create');
+    await this._performAuthorizationCheck(type, 'create', {
+      type,
+      attributes,
+      options,
+    });
 
     return await this._client.create(type, attributes, options);
   }
 
   async bulkCreate(objects, options = {}) {
     const types = uniq(objects.map(o => o.type));
-    await this._performAuthorizationCheck(types, 'create');
+    await this._performAuthorizationCheck(types, 'create', {
+      objects,
+      options,
+    });
 
     return await this._client.bulkCreate(objects, options);
   }
 
   async delete(type, id) {
-    await this._performAuthorizationCheck(type, 'delete');
+    await this._performAuthorizationCheck(type, 'delete', {
+      type,
+      id,
+    });
 
     return await this._client.delete(type, id);
   }
 
   async find(options = {}) {
-    await this._performAuthorizationCheck(options.type, 'search');
+    await this._performAuthorizationCheck(options.type, 'search', {
+      options,
+    });
 
     return await this._client.find(options);
   }
 
   async bulkGet(objects = []) {
-    for (const object of objects) {
-      await this._performAuthorizationCheck(object.type, 'mget');
-    }
+    const types = uniq(objects.map(o => o.type));
+    await this._performAuthorizationCheck(types, 'mget', {
+      objects,
+    });
 
     return await this._client.bulkGet(objects);
   }
 
   async get(type, id) {
-    await this._performAuthorizationCheck(type, 'get');
+    await this._performAuthorizationCheck(type, 'get', {
+      type,
+      id,
+    });
 
     return await this._client.get(type, id);
   }
 
   async update(type, id, attributes, options = {}) {
-    await this._performAuthorizationCheck(type, 'update');
+    await this._performAuthorizationCheck(type, 'update', {
+      type,
+      id,
+      attributes,
+      options,
+    });
 
     return await this._client.update(type, id, attributes, options);
   }
 
-  async _performAuthorizationCheck(typeOrTypes, action) {
+  async _performAuthorizationCheck(typeOrTypes, action, args) {
     const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
     const actions = types.map(type => `action:saved-objects/${type}/${action}`);
 
@@ -80,7 +101,7 @@ export class SecureSavedObjectsClient {
     }
 
     if (result.success) {
-      this._auditLogger.savedObjectsAuthorizationSuccess(result.username, action, types);
+      this._auditLogger.savedObjectsAuthorizationSuccess(result.username, action, types, args);
     } else {
       this._auditLogger.savedObjectsAuthorizationFailure(result.username, action, types, result.missing);
       const msg = `Unable to ${action} ${types.join(',')}, missing ${result.missing.join(',')}`;

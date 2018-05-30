@@ -27,7 +27,7 @@ export class SecurityAuditLogger {
     );
   }
 
-  savedObjectsAuthorizationSuccess(username, action, types) {
+  savedObjectsAuthorizationSuccess(username, action, types, args) {
     if (!this._enabled) {
       return;
     }
@@ -39,6 +39,7 @@ export class SecurityAuditLogger {
         username,
         action,
         types,
+        args,
       }
     );
   }

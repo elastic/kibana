@@ -87,8 +87,13 @@ describe(`#savedObjectsAuthorizationSuccess`, () => {
     const username = 'foo-user';
     const action = 'foo-action';
     const types = [ 'foo-type-1', 'foo-type-2' ];
+    const args = {
+      'foo': 'bar',
+      'dude': 'yup',
+      'women': 'yay!',
+    };
 
-    securityAuditLogger.savedObjectsAuthorizationSuccess(username, action, types);
+    securityAuditLogger.savedObjectsAuthorizationSuccess(username, action, types, args);
 
     expect(auditLogger.log).toHaveBeenCalledWith(
       'saved_objects_authorization_success',
@@ -97,6 +102,7 @@ describe(`#savedObjectsAuthorizationSuccess`, () => {
         username,
         action,
         types,
+        args,
       }
     );
   });
