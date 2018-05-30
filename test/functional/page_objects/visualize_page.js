@@ -219,12 +219,15 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async setComboBox(comboBoxSelector, value) {
       const comboBox = await testSubjects.find(comboBoxSelector);
-      const input = await comboBox.findByTagName('input');
+      await this.setComboBoxElement(comboBox, value);
+    }
+
+    async setComboBoxElement(element, value) {
+      const input = await element.findByTagName('input');
       await input.clearValue();
       await input.type(value);
       await find.clickByCssSelector('.euiComboBoxOption');
-      await this.closeComboBoxOptionsList(comboBox);
-      await remote.pressKeys('\uE004');
+      await this.closeComboBoxOptionsList(element);
     }
 
     async getComboBoxOptions(comboBoxSelector) {

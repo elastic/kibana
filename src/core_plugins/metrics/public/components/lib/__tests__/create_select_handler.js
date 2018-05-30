@@ -29,7 +29,7 @@ describe('createSelectHandler()', () => {
     handleChange = sinon.spy();
     changeHandler = createSelectHandler(handleChange);
     const fn = changeHandler('test');
-    fn({ value: 'foo' });
+    fn([{ value: 'foo' }]);
   });
 
   it('calls handleChange() funciton with partial', () => {

@@ -11,7 +11,7 @@ into a visualization that is easy to navigate, allowing you to diagnose and debu
 poorly performing queries much faster.
 
 
-image::searchprofiler/images/overview.png["Search Profiler Visualization"]
+image::dev-tools/searchprofiler/images/overview.png["Search Profiler Visualization"]
 
 include::getting-started.asciidoc[]
 

@@ -19,10 +19,10 @@
 
 import _ from 'lodash';
 export default (handleChange) => {
-  return (name) => (value) => {
+  return (name) => (selectedOptions) => {
     if (_.isFunction(handleChange)) {
       return handleChange({
-        [name]: value && value.value || null
+        [name]: _.get(selectedOptions, '[0].value', null)
       });
     }
   };

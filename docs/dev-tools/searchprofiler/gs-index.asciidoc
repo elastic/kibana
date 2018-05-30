@@ -12,7 +12,7 @@ into a visualization that is easy to navigate, allowing you to diagnose and debu
 poorly performing queries much faster.
 
 
-image::images/overview.png["Search Profiler Visualization"]
+image::dev-tools/searchprofile/images/overview.png["Search Profiler Visualization"]
 
 --
 
