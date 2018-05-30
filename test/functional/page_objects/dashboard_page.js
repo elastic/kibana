@@ -286,7 +286,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await this.enterDashboardTitleAndClickSave(dashName, saveOptions);
 
       if (saveOptions.needsConfirm) {
-        await PageObjects.common.clickConfirmOnModal();
+        await this.clickSave();
       }
 
       await PageObjects.header.waitUntilLoadingHasFinished();
