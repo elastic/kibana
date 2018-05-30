@@ -37,8 +37,7 @@ export function getInspectorPanelAction({ closeContextMenu, panelTitle }) {
   return new DashboardPanelAction({
     displayName: 'Inspector',
     id: 'openInspector',
-    // TODO: Use proper inspector icon once available
-    icon: <EuiIcon type="eye" />,
+    icon: <EuiIcon type="inspect" />,
     parentPanelId: 'mainMenu',
     onClick: ({ embeddable }) => {
       closeContextMenu();
