@@ -45,16 +45,14 @@ const optsSchema = Joi.object().unknown().keys({
  */
 async function transform(opts) {
   Joi.assert(opts, optsSchema);
-  const context = await MigrationContext.fetch(opts);
+  const { plugins, migrationState } = await MigrationContext.fetch(opts);
   const { migrationState: exportedState, docs } = opts;
-  const { plugins, migrationState } = context;
-  const transformDoc = buildImportFunction(plugins, exportedState, migrationState);
-  return docs.map(transformDoc);
+  return docs.map(buildTransformFunction(plugins, exportedState, migrationState));
 }
 
-function buildImportFunction(plugins, exportedState, migrationState) {
+function buildTransformFunction(plugins, exportedState, migrationState) {
   const { migrations } = MigrationPlan.build(plugins, exportedState);
-  const validateDoc = buildValidationFunction(plugins, exportedState, migrationState);
+  const validateDoc = buildValidateDocFunction(plugins, exportedState, migrationState);
   const transformDoc = Document.buildTransformFunction(migrations);
 
   return (doc) => transformDoc(validateDoc(doc));
@@ -69,33 +67,49 @@ function buildImportFunction(plugins, exportedState, migrationState) {
 // - If doc.type's exported version < our current version, and there are not enough migrations available to upgrade it, throw
 // We check on a per-doc basis, as the exported migration state may include migrations for docs
 // that aren't actually being imported.
-function buildValidationFunction(plugins, exportedState, migrationState) {
-  const migrationsByType = _.chain(plugins)
-    .filter('migrations')
+function buildValidateDocFunction(plugins, exportedState, migrationState) {
+  const getDocVersion = stateToVersionFn(exportedState);
+  const getIndexVersion = stateToVersionFn(migrationState);
+  const getPluginVersion = pluginsToVersionFn(plugins);
+  return _.partial(assertValidateDoc, getDocVersion, getIndexVersion, getPluginVersion);
+}
+
+function assertValidateDoc(getDocVersion, getIndexVersion, getPluginVersion, doc) {
+  const docVersion = getDocVersion(doc);
+  const indexVersion = getIndexVersion(doc);
+  if (docVersion !== indexVersion) {
+    assertIndexNotOlder(docVersion, indexVersion, doc);
+    assertMigrationsAvailable(indexVersion, getPluginVersion(doc), doc);
+  }
+  return doc;
+}
+
+function stateToVersionFn({ types }) {
+  const versions = _.indexBy(types, 'type');
+  return ({ type }) => _.get(versions, [type, 'migrationIds', 'length'], 0);
+}
+
+function pluginsToVersionFn(plugins) {
+  const migrationsForType = _.chain(plugins)
     .map('migrations')
     .flatten()
     .groupBy('type')
     .value();
-  const currentTypes = _.indexBy(migrationState.types, 'type');
-  const exportedTypes = _.indexBy(exportedState.types, 'type');
+  return ({ type }) => _.get(migrationsForType, [type, 'length'], 0);
+}
 
-  return (doc) => {
-    const docVersion = _.get(exportedTypes, [doc.type, 'migrationIds', 'length'], 0);
-    const newVersion = _.get(currentTypes, [doc.type, 'migrationIds', 'length'], 0);
-    const availableMigrations = _.get(migrationsByType, [doc.type, 'length'], 0);
-    const requiredVersion = Math.max(docVersion, newVersion);
+function assertIndexNotOlder(docVersion, indexVersion, doc) {
+  if (docVersion > indexVersion) {
+    throw new Error(
+      `Document "${doc.id}" requires type "${doc.type}" version ${docVersion}, but our index is at version ${indexVersion}`
+    );
+  }
+}
 
-    if (requiredVersion > newVersion) {
-      throw new Error(
-        `Document "${doc.id}" requires type "${doc.type}" version ${requiredVersion}, but our index is at version ${newVersion}`
-      );
-    }
-    if (requiredVersion > availableMigrations) {
-      throw new Error(
-        `Document "${doc.id}" requires type "${doc.type}" version ${requiredVersion}, but the required plugins are disabled or missing.`
-      );
-    }
-
-    return doc;
-  };
+function assertMigrationsAvailable(indexVersion, pluginVersion, doc) {
+  if (indexVersion > pluginVersion) {
+    throw new Error(
+      `Document "${doc.id}" requires type "${doc.type}" version ${indexVersion}, but the required plugins are disabled or missing.`
+    );
+  }
 }
