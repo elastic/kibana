@@ -35,16 +35,18 @@ export class RoleValidator {
   validateIndexPrivileges(role) {
     if (!this._shouldValidate) return valid();
 
-    if (Array.isArray(role.indices)) {
-      const areIndicesValid = role.indices
-        .map(this.validateIndexPrivilege.bind(this))
-        .find((result) => result.isInvalid) == null;
-
-      if (areIndicesValid) {
-        return valid();
-      }
-      return invalid();
+    if (!Array.isArray(role.indices)) {
+      throw new TypeError(`Expected role.indices to be an array`);
     }
+
+    const areIndicesValid = role.indices
+      .map(this.validateIndexPrivilege.bind(this))
+      .find((result) => result.isInvalid) == null;
+
+    if (areIndicesValid) {
+      return valid();
+    }
+    return invalid();
   }
 
   validateIndexPrivilege(indexPrivilege) {

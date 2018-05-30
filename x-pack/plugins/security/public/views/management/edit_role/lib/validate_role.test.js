@@ -83,4 +83,12 @@ describe('validateIndexPrivileges', () => {
       isInvalid: true
     });
   });
+
+  test('it throws when indices is not an array', () => {
+    const role = {
+      indices: null
+    };
+
+    expect(() => validator.validateIndexPrivileges(role)).toThrowErrorMatchingSnapshot();
+  });
 });
