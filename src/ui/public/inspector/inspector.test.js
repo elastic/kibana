@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { hasInspector, openInspector } from './inspector';
+import { Inspector } from './inspector';
 jest.mock('./view_registry', () => ({
   viewRegistry: {
     getVisible: jest.fn(),
@@ -33,22 +33,22 @@ function setViews(views) {
 }
 
 describe('Inspector', () => {
-  describe('hasInspector()', () => {
+  describe('isAvailable()', () => {
     it('should return false if no view would be available', () => {
       setViews([]);
-      expect(hasInspector({})).toBe(false);
+      expect(Inspector.isAvailable({})).toBe(false);
     });
 
     it('should return true if views would be available', () => {
       setViews([{}]);
-      expect(hasInspector({})).toBe(true);
+      expect(Inspector.isAvailable({})).toBe(true);
     });
   });
 
-  describe('openInspector()', () => {
+  describe('open()', () => {
     it('should throw an error if no views available', () => {
       setViews([]);
-      expect(() => openInspector({})).toThrow();
+      expect(() => Inspector.open({})).toThrow();
     });
 
     describe('return value', () => {
@@ -57,20 +57,20 @@ describe('Inspector', () => {
       });
 
       it('should be an object with a close function', () => {
-        const session = openInspector({});
+        const session = Inspector.open({});
         expect(typeof session.close).toBe('function');
       });
 
       it('should emit the "closed" event if another inspector opens', () => {
-        const session = openInspector({});
+        const session = Inspector.open({});
         const spy = jest.fn();
         session.on('closed', spy);
-        openInspector({});
+        Inspector.open({});
         expect(spy).toHaveBeenCalled();
       });
 
       it('should emit the "closed" event if you call close', () => {
-        const session = openInspector({});
+        const session = Inspector.open({});
         const spy = jest.fn();
         session.on('closed', spy);
         session.close();
@@ -78,7 +78,7 @@ describe('Inspector', () => {
       });
 
       it('can be bound to an angular scope', () => {
-        const session = openInspector({});
+        const session = Inspector.open({});
         const spy = jest.fn();
         session.on('closed', spy);
         const scope = {
@@ -95,7 +95,7 @@ describe('Inspector', () => {
       });
 
       it('will remove from angular scope when closed', () => {
-        const session = openInspector({});
+        const session = Inspector.open({});
         const unwatchSpy = jest.fn();
         const scope = {
           $on: jest.fn(() => unwatchSpy)

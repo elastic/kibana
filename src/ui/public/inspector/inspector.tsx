@@ -81,11 +81,11 @@ class InspectorSession extends EventEmitter {
  * Checks if a inspector panel could be shown based on the passed adapters.
  *
  * @param {object} adapters - An object of adapters. This should be the same
- *    you would pass into `openInspector`.
- * @returns {boolean} True, if a call to `openInspector` with the same adapters
+ *    you would pass into `open`.
+ * @returns {boolean} True, if a call to `open` with the same adapters
  *    would have shown the inspector panel, false otherwise.
  */
-function hasInspector(adapters?: Adapters): boolean {
+function isAvailable(adapters?: Adapters): boolean {
   return viewRegistry.getVisible(adapters).length > 0;
 }
 
@@ -109,7 +109,7 @@ interface InspectorOptions {
  * @param {InspectorOptions} options - Options that configure the inspector. See InspectorOptions type.
  * @return {InspectorSession} The session instance for the opened inspector.
  */
-function openInspector(
+function open(
   adapters: Adapters,
   options: InspectorOptions = {}
 ): InspectorSession {
@@ -123,7 +123,7 @@ function openInspector(
   // Don't open inspector if there are no views available for the passed adapters
   if (!views || views.length === 0) {
     throw new Error(`Tried to open an inspector without views being available.
-      Make sure to call hasInspector() with the same adapters before to check
+      Make sure to call Inspector.isAvailable() with the same adapters before to check
       if an inspector can be shown.`);
   }
 
@@ -143,4 +143,9 @@ function openInspector(
   return session;
 }
 
-export { hasInspector, openInspector };
+const Inspector = {
+  isAvailable,
+  open,
+};
+
+export { Inspector };

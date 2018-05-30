@@ -40,7 +40,7 @@ import { queryManagerFactory } from '../query_manager';
 import { SearchSourceProvider } from '../courier/data_source/search_source';
 import { SavedObjectsClientProvider } from '../saved_objects';
 
-import { openInspector, hasInspector } from '../inspector';
+import { Inspector } from '../inspector';
 import { RequestAdapter, DataAdapter } from '../inspector/adapters';
 
 export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppState) {
@@ -101,13 +101,13 @@ export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppS
      * @return {InspectorSession} the handler for the session of this inspector.
      */
     openInspector() {
-      return openInspector(this.API.inspectorAdapters, {
+      return Inspector.open(this.API.inspectorAdapters, {
         title: this.title
       });
     }
 
     hasInspector() {
-      return hasInspector(this.API.inspectorAdapters);
+      return Inspector.isAvailable(this.API.inspectorAdapters);
     }
 
     /**

@@ -30,7 +30,7 @@ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logsta
 import { VisProvider } from '../../../vis';
 import { getVisualizeLoader } from '../loader';
 import { EmbeddedVisualizeHandler } from '../embedded_visualize_handler';
-import * as Inspector from '../../../inspector/inspector';
+import { Inspector } from '../../../inspector/inspector';
 
 describe('visualize loader', () => {
 
@@ -229,12 +229,11 @@ describe('visualize loader', () => {
         expect(handler.getElement().jquery).to.be.ok();
       });
 
-      it.skip('should allow opening the inspector of the visualization and return its session', () => {
+      it('should allow opening the inspector of the visualization and return its session', () => {
         const handler = loader.embedVisualizationWithSavedObject(newContainer(), createSavedObject(), {});
-        // TODO: Figure out a way to spy on this typescript function
-        sinon.spy(Inspector, 'openInspector', ['get']);
+        sinon.spy(Inspector, 'open');
         const inspectorSession = handler.openInspector();
-        expect(Inspector.openInspector.calledOnce).to.be(true);
+        expect(Inspector.open.calledOnce).to.be(true);
         expect(inspectorSession.close).to.be.a('function');
         inspectorSession.close();
       });

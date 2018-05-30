@@ -23,7 +23,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
-import { hasInspector, openInspector } from 'ui/inspector';
+import { Inspector } from 'ui/inspector';
 import { DashboardPanelAction } from 'ui/dashboard_panel_actions';
 
 /**
@@ -41,7 +41,7 @@ export function getInspectorPanelAction({ closeContextMenu, panelTitle }) {
     parentPanelId: 'mainMenu',
     onClick: ({ embeddable }) => {
       closeContextMenu();
-      const session = openInspector(embeddable.getInspectorAdapters(), {
+      const session = Inspector.open(embeddable.getInspectorAdapters(), {
         title: panelTitle,
       });
       // Overwrite the embeddables.destroy() function to close the inspector
@@ -59,7 +59,7 @@ export function getInspectorPanelAction({ closeContextMenu, panelTitle }) {
       });
     },
     isVisible: ({ embeddable }) => (
-      embeddable && embeddable.getInspectorAdapters && hasInspector(embeddable.getInspectorAdapters())
+      embeddable && embeddable.getInspectorAdapters && Inspector.isAvailable(embeddable.getInspectorAdapters())
     ),
   });
 }

@@ -25,7 +25,7 @@ import { VisProvider } from '..';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { VisTypesRegistryProvider } from '../../registry/vis_types';
 import { DataAdapter, RequestAdapter } from '../../inspector/adapters';
-import * as Inspector from '../../inspector/inspector';
+import { Inspector } from '../../inspector/inspector';
 
 describe('Vis Class', function () {
   let indexPattern;
@@ -120,24 +120,24 @@ describe('Vis Class', function () {
     });
 
     describe('hasInspector()', () => {
-      it.skip('should forward to inspectors hasInspector', () => {
+      it('should forward to inspectors hasInspector', () => {
         const vis = new Vis(indexPattern, state({
           inspectorAdapters: {
             data: true,
             requests: true,
           }
         }));
-        sinon.spy(Inspector, 'hasInspector');
+        sinon.spy(Inspector, 'isAvailable');
         vis.hasInspector();
-        expect(Inspector.hasInspector.calledOnce).to.be(true);
-        const adapters = Inspector.hasInspector.lastCall.args[0];
+        expect(Inspector.isAvailable.calledOnce).to.be(true);
+        const adapters = Inspector.isAvailable.lastCall.args[0];
         expect(adapters.data).to.be.a(DataAdapter);
         expect(adapters.requests).to.be.a(RequestAdapter);
       });
 
       it('should return hasInspectors result', () => {
         const vis = new Vis(indexPattern, state({}));
-        const stub = sinon.stub(Inspector, 'hasInspector');
+        const stub = sinon.stub(Inspector, 'isAvailable');
         stub.returns(true);
         expect(vis.hasInspector()).to.be(true);
         stub.returns(false);
@@ -145,14 +145,14 @@ describe('Vis Class', function () {
       });
 
       afterEach(() => {
-        Inspector.hasInspector.restore();
+        Inspector.isAvailable.restore();
       });
     });
 
-    describe.skip('openInspector()', () => {
+    describe('openInspector()', () => {
 
       beforeEach(() => {
-        sinon.stub(Inspector, 'openInspector');
+        sinon.stub(Inspector, 'open');
       });
 
       it('should call openInspector with all attached inspectors', () => {
@@ -166,21 +166,21 @@ describe('Vis Class', function () {
           }
         }));
         vis.openInspector();
-        expect(Inspector.openInspector.calledOnce).to.be(true);
-        const adapters = Inspector.openInspector.lastCall.args[0];
+        expect(Inspector.open.calledOnce).to.be(true);
+        const adapters = Inspector.open.lastCall.args[0];
         expect(adapters).to.be(vis.API.inspectorAdapters);
       });
 
       it('should pass the vis title to the openInspector call', () => {
         const vis = new Vis(indexPattern, { ...state(), title: 'beautifulVis' });
         vis.openInspector();
-        expect(Inspector.openInspector.calledOnce).to.be(true);
-        const params = Inspector.openInspector.lastCall.args[1];
+        expect(Inspector.open.calledOnce).to.be(true);
+        const params = Inspector.open.lastCall.args[1];
         expect(params.title).to.be('beautifulVis');
       });
 
       afterEach(() => {
-        Inspector.openInspector.restore();
+        Inspector.open.restore();
       });
     });
 
