@@ -1,0 +1,192 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`it renders without crashing 1`] = `
+<div>
+  <EuiFlexGroup
+    alignItems="center"
+    className="index-privilege-form"
+    component="div"
+    direction="row"
+    gutterSize="l"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={true}
+    >
+      <React.Fragment>
+        <EuiFlexGroup
+          alignItems="stretch"
+          component="div"
+          direction="row"
+          gutterSize="l"
+          justifyContent="flexStart"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            component="div"
+            grow={true}
+          >
+            <EuiFormRow
+              describedByIds={Array []}
+              fullWidth={true}
+              hasEmptyLabelSpace={false}
+              isInvalid={false}
+              label="Indices"
+            >
+              <EuiComboBox
+                isClearable={true}
+                isDisabled={false}
+                onChange={[Function]}
+                onCreateOption={[Function]}
+                options={Array []}
+                selectedOptions={Array []}
+                singleSelection={false}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem
+            component="div"
+            grow={true}
+          >
+            <EuiFormRow
+              describedByIds={Array []}
+              fullWidth={true}
+              hasEmptyLabelSpace={false}
+              label="Privileges"
+            >
+              <EuiComboBox
+                isClearable={true}
+                isDisabled={false}
+                onChange={[Function]}
+                options={
+                  Array [
+                    Object {
+                      "label": "all",
+                    },
+                    Object {
+                      "label": "manage",
+                    },
+                    Object {
+                      "label": "monitor",
+                    },
+                    Object {
+                      "label": "read",
+                    },
+                    Object {
+                      "label": "index",
+                    },
+                    Object {
+                      "label": "create",
+                    },
+                    Object {
+                      "label": "delete",
+                    },
+                    Object {
+                      "label": "write",
+                    },
+                    Object {
+                      "label": "delete_index",
+                    },
+                    Object {
+                      "label": "create_index",
+                    },
+                    Object {
+                      "label": "view_index_metadata",
+                    },
+                    Object {
+                      "label": "read_cross_cluster",
+                    },
+                  ]
+                }
+                selectedOptions={Array []}
+                singleSelection={false}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem
+            component="div"
+            grow={true}
+          >
+            <EuiFormRow
+              className="indexPrivilegeForm__grantedFieldsRow"
+              describedByIds={Array []}
+              fullWidth={true}
+              hasEmptyLabelSpace={false}
+              label="Granted Fields (optional)"
+            >
+              <React.Fragment>
+                <EuiComboBox
+                  isClearable={true}
+                  isDisabled={false}
+                  onChange={[Function]}
+                  onCreateOption={[Function]}
+                  options={Array []}
+                  selectedOptions={Array []}
+                  singleSelection={false}
+                />
+                <React.Fragment>
+                  <EuiSpacer
+                    size="l"
+                  />
+                  <EuiCallOut
+                    color="warning"
+                    iconType="help"
+                    size="s"
+                    title="No Granted Fields"
+                  >
+                    <p>
+                      If no fields are granted, then users assigned to this role will not be able to see any data for this index. Is this really what you want?
+                    </p>
+                  </EuiCallOut>
+                </React.Fragment>
+              </React.Fragment>
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFlexGroup
+          alignItems="stretch"
+          component="div"
+          direction="row"
+          gutterSize="l"
+          justifyContent="flexStart"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            component="div"
+            grow={3}
+          >
+            <EuiSwitch
+              compressed={true}
+              label="Restrict documents query"
+              onChange={[Function]}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </React.Fragment>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiLink
+        color="danger"
+        type="button"
+      >
+        <EuiIcon
+          size="m"
+          type="trash"
+        />
+      </EuiLink>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiHorizontalRule
+    margin="l"
+    size="full"
+  />
+</div>
+`;

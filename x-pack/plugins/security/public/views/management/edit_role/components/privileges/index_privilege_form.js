@@ -39,7 +39,7 @@ export class IndexPrivilegeForm extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      queryExanded: !!props.indexPrivilege.query,
+      queryExpanded: !!props.indexPrivilege.query,
       documentQuery: props.indexPrivilege.query
     };
   }
@@ -128,7 +128,7 @@ export class IndexPrivilegeForm extends Component {
 
       return (
         <EuiFlexItem>
-          <EuiFormRow label={'Granted Fields (optional)'} fullWidth={true} >
+          <EuiFormRow label={'Granted Fields (optional)'} fullWidth={true} className="indexPrivilegeForm__grantedFieldsRow">
             <Fragment>
               <EuiComboBox
                 options={availableFields ? availableFields.map(toOption) : []}
