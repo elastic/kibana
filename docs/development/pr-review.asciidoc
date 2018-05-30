@@ -123,6 +123,7 @@ Establishing a comprehensive checklist for all of the things that should happen 
 * Has thorough unit test coverage
 * Automated tests provide high confidence the change continues to work without manual verification
 * Appropriate product documentation is included (asciidocs)
+* If there's any doubts on the usability, performance, cross-browser compatibility of the change, pull the PR and test it
 * Any new UI changes are accessible to differently abled persons, including but not limited to sufficient contrasts in colors, keyboard navigation, and aria tags
 * Sufficient security protections are in place where appropriate, particularly when rendering API responses, parsing expressions, compiling URLs, loading external content, or redirecting
 * PR title summarizes the change (no "fixes bug number 123")
@@ -131,3 +132,9 @@ Establishing a comprehensive checklist for all of the things that should happen 
 ** The motivation for the change
 ** Screenshot(s) if the UI is changing
 ** A link to each issue that is closed by the PR (e.g. Closes #123)
+
+[float]
+=== Approving a PR
+
+* Use the github "Review changes" changes button to "Approve"
+* Add a comment more than "LGTM" (Looks good to me) to say if you did a "code review" and/or if you pulled the PR and tested it.  Include any details which might be relevant for the change such as what browser you tested on, etc.
