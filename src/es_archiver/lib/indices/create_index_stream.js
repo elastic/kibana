@@ -18,9 +18,8 @@
  */
 
 import { Transform } from 'stream';
-
 import { get, once } from 'lodash';
-
+import { deleteKibanaIndices } from './kibana_index';
 import { deleteIndex } from './delete_index';
 
 export function createCreateIndexStream({ client, stats, skipExisting, log }) {
@@ -30,19 +29,7 @@ export function createCreateIndexStream({ client, stats, skipExisting, log }) {
   // previous indices are removed so we're starting w/ a clean slate for
   // migrations. This only needs to be done once per archive load operation.
   // For the '.kibana' index, we will ignore 'skipExisting' and always load.
-  const clearKibanaIndices = once(async () => {
-    const kibanaIndices = await client.cat.indices({ index: '.kibana*', format: 'json' });
-    const indexNames = kibanaIndices.map(x => x.index);
-    if (!indexNames.length) {
-      return;
-    }
-    await client.indices.putSettings({
-      index: indexNames,
-      body: { index: { blocks: { read_only: false } } },
-    });
-    await client.indices.delete({ index: indexNames });
-    indexNames.forEach(stats.deletedIndex);
-  });
+  const clearKibanaIndices = once(async () => await deleteKibanaIndices({ client, stats }));
 
   async function handleDoc(stream, record) {
     if (skipDocsFromIndices.has(record.value.index)) {
