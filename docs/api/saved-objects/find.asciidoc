@@ -27,6 +27,15 @@ saved objects by various conditions.
 `sort_field` (optional)::
   (string) The field on which the response will be sorted
 
+[NOTE]
+==============================================
+
+As objects change in Kibana, the results on each page of this response can
+change. This makes the `find` API suitable for traditional paginated results
+but not a reliable way to safely export large amounts of data.
+
+==============================================
+
 
 ==== Examples
 
