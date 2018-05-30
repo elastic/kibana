@@ -24,8 +24,10 @@ const _ = require('lodash');
 import {
   URL_PATH_END_MARKER,
   UrlPatternMatcher,
-} from '../../src/autocomplete/url_pattern_matcher';
-import { populateContext, ListComponent } from '../../src/autocomplete/engine';
+  ListComponent
+} from '../../src/autocomplete/components';
+
+import { populateContext } from '../../src/autocomplete/engine';
 
 describe('Url autocomplete', () => {
   function patternsTest(

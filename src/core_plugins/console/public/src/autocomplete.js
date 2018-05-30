@@ -25,7 +25,7 @@ import {
 } from './kb';
 import utils from './utils';
 import { populateContext } from './autocomplete/engine';
-import { URL_PATH_END_MARKER } from './autocomplete/url_pattern_matcher';
+import { URL_PATH_END_MARKER } from './autocomplete/components';
 import _ from 'lodash';
 import ace from 'brace';
 import 'brace/ext/language_tools';
