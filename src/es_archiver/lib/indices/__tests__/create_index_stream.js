@@ -80,6 +80,29 @@ describe('esArchiver: createCreateIndexStream()', () => {
       ]);
     });
 
+    it('creates aliases', async () => {
+      const client = createStubClient();
+      const stats = createStubStats();
+      await createPromiseFromStreams([
+        createListStream([
+          createStubIndexRecord('index', { foo: { } }),
+          createStubDocRecord('index', 1),
+        ]),
+        createCreateIndexStream({ client, stats }),
+        createConcatStream([])
+      ]);
+
+      sinon.assert.calledWith(client.indices.create, {
+        method: 'PUT',
+        index: 'index',
+        body: {
+          settings: undefined,
+          mappings: undefined,
+          aliases: { foo: {} },
+        },
+      });
+    });
+
     it('passes through records with unknown types', async () => {
       const client = createStubClient();
       const stats = createStubStats();

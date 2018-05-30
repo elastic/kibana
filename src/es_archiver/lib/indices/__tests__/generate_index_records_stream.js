@@ -98,4 +98,25 @@ describe('esArchiver: createGenerateIndexRecordsStream()', () => {
     expect(indexRecords[2]).to.have.property('value');
     expect(indexRecords[2].value).to.have.property('index', 'index3');
   });
+
+  it('understands aliases', async () => {
+    const stats = createStubStats();
+    const client = createStubClient(['index1'], { index1: { foo: {} } });
+
+    const indexRecords = await createPromiseFromStreams([
+      createListStream(['index1']),
+      createGenerateIndexRecordsStream(client, stats),
+      createConcatStream([]),
+    ]);
+
+    expect(indexRecords).to.eql([{
+      type: 'index',
+      value: {
+        index: 'index1',
+        settings: {},
+        mappings: {},
+        aliases: { foo: {} },
+      }
+    }]);
+  });
 });

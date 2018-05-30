@@ -21,6 +21,7 @@ import sinon from 'sinon';
 
 export const createStubStats = () => ({
   createdIndex: sinon.stub(),
+  createdAliases: sinon.stub(),
   deletedIndex: sinon.stub(),
   skippedIndex: sinon.stub(),
   archivedIndex: sinon.stub(),
@@ -35,9 +36,9 @@ export const createStubStats = () => ({
   },
 });
 
-export const createStubIndexRecord = (index) => ({
+export const createStubIndexRecord = (index, aliases = {}) => ({
   type: 'index',
-  value: { index }
+  value: { index, aliases }
 });
 
 export const createStubDocRecord = (index, id) => ({
@@ -55,7 +56,7 @@ const createEsClientError = (errorType) => {
   return err;
 };
 
-export const createStubClient = (existingIndices = []) => ({
+export const createStubClient = (existingIndices = [], aliases = {}) => ({
   indices: {
     get: sinon.spy(async ({ index }) => {
       if (!existingIndices.includes(index)) {
@@ -68,6 +69,19 @@ export const createStubClient = (existingIndices = []) => ({
           settings: {},
         }
       };
+    }),
+    getAlias: sinon.spy(({ index }) => {
+      return Promise.resolve({ [index]: { aliases: aliases[index] || {} } });
+    }),
+    updateAliases: sinon.spy(async ({ body }) => {
+      body.actions.forEach(({ add: { index, alias } }) => {
+        if (!existingIndices.includes(index)) {
+          throw createEsClientError('index_not_found_exception');
+        }
+        existingIndices.push({ index, alias });
+      });
+
+      return { ok: true };
     }),
     create: sinon.spy(async ({ index }) => {
       if (existingIndices.includes(index)) {
