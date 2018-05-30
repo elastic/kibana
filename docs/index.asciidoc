@@ -65,7 +65,7 @@ include::management.asciidoc[]
 
 include::{xkb-repo-dir}/security/index.asciidoc[]
 
-include::{xkb-repo-dir}/management/watcher-ui/index.asciidoc[]
+include::management/watcher-ui/index.asciidoc[]
 
 include::{xkb-repo-dir}/upgrade-assistant/index.asciidoc[]
 
