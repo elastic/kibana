@@ -19,6 +19,7 @@
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
+import _ from 'lodash';
 
 import {
   EuiButton,
@@ -66,25 +67,26 @@ export class DashboardSaveModal extends React.Component {
     });
   }
 
-  saveDashboard = async () => {
+  saveDashboard = _.debounce(async () => {
     this.setState({
       isLoading: true,
     });
 
-    await this.props.onSave(
-      this.state.title,
-      this.state.description,
-      this.state.copyOnSave,
-      this.state.timeRestore,
-      this.state.isTitleDuplicateConfirmed,
-      this.onTitleDuplicate);
+    await this.props.onSave({
+      newTitle: this.state.title,
+      newDescription: this.state.description,
+      newCopyOnSave: this.state.copyOnSave,
+      newTimeRestore: this.state.timeRestore,
+      isTitleDuplicateConfirmed: this.state.isTitleDuplicateConfirmed,
+      onTitleDuplicate: this.onTitleDuplicate,
+    });
 
     if (this._isMounted) {
       this.setState({
         isLoading: false,
       });
     }
-  };
+  }, 300);
 
   onTitleChange = (event) => {
     this.setState({
@@ -138,16 +140,9 @@ export class DashboardSaveModal extends React.Component {
       return;
     }
 
-    let helpText;
-    if (this.props.title !== this.state.title) {
-      helpText = `In previous versions of Kibana, changing the name of a dashboard would make a copy with the new name.
-      Use the 'Save as a new dashboard' checkbox to do this now.`;
-    }
-
     return (
       <EuiFormRow
         label="Save as a new dashboard"
-        helpText={helpText}
       >
         <EuiSwitch
           data-test-subj="saveAsNewCheckbox"

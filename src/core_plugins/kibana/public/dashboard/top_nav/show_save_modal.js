@@ -21,15 +21,15 @@ import { DashboardSaveModal } from './save_modal';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-export function showSaveModal(onSave, title, description, copyOnSave, timeRestore, showCopyOnSave) {
+export function showSaveModal({ onSave, title, description, copyOnSave, timeRestore, showCopyOnSave }) {
   const container = document.createElement('div');
   const closeModal = () => {
     ReactDOM.unmountComponentAtNode(container);
     document.body.removeChild(container);
   };
 
-  const onSaveConfirmed = (newTitle, newDescription, newCopyOnSave, newTimeRestore, isTitleDuplicateConfirmed, onTitleDuplicate) => {
-    onSave(newTitle, newDescription, newCopyOnSave, newTimeRestore, isTitleDuplicateConfirmed, onTitleDuplicate).then(id => {
+  const onSaveConfirmed = (...args) => {
+    onSave(...args).then(id => {
       if (id) {
         closeModal();
       }
