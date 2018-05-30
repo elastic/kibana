@@ -18,7 +18,7 @@
  */
 
 const $ = require('jquery');
-require('ace');
+require('brace');
 require('brace/ext/searchbox');
 const Autocomplete = require('./autocomplete');
 const SenseEditor = require('./sense_editor/editor');
@@ -33,8 +33,12 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output) {
   input = new SenseEditor($el);
 
   // this may not exist if running from tests
-  const appSense = uiModules.get('app/sense');
-  appSense.setupResizeCheckerForRootEditors($el, input, output);
+  if (uiModules) {
+    const appSense = uiModules.get('app/sense');
+    if (appSense && appSense.setupResizeCheckerForRootEditors) {
+      appSense.setupResizeCheckerForRootEditors($el, input, output);
+    }
+  }
 
   input.autocomplete = new Autocomplete(input);
 

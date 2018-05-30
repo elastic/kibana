@@ -18,7 +18,7 @@
  */
 
 
-const ace = require('ace');
+const ace = require('brace');
 const oop = ace.acequire('ace/lib/oop');
 const { TextHighlightRules } = ace.acequire('ace/mode/text_highlight_rules');
 const painlessKeywords = (

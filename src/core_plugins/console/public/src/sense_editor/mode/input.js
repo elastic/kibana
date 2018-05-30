@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import ace from 'ace';
+import ace from 'brace';
 
 const oop = ace.acequire('ace/lib/oop');
 const TextMode = ace.acequire('ace/mode/text').Mode;

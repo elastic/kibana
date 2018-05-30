@@ -20,7 +20,7 @@
 /* eslint import/no-unresolved: 0 */
 /* eslint  no-multi-str: 0 */
 /* eslint  max-len: 0 */
-const ace = require('ace');
+const ace = require('brace');
 
 ace.define('ace/theme/sense-dark', ['require', 'exports', 'module'],
   function (require, exports) {

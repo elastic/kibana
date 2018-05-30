@@ -74,6 +74,6 @@ class Storage {
   }
 }
 
-const instance = new Storage(localStorage, 'sense:');
+const instance = new Storage(window.localStorage, 'sense:');
 
 export default instance;

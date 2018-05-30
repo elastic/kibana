@@ -16,26 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import uiRoutes from 'ui/routes';
-import template from './index.html';
-
-require('brace');
-require('ui-bootstrap-custom');
-
-require('ui/modules').get('kibana', ['sense.ui.bootstrap']);
-require('ui/tooltip');
-require('ui/autoload/styles');
-
-require('./css/sense.less');
-require('./src/controllers/sense_controller');
-require('./src/directives/sense_history');
-require('./src/directives/sense_settings');
-require('./src/directives/sense_help');
-require('./src/directives/sense_welcome');
-
-
-uiRoutes.when('/dev_tools/console', {
-  controller: 'SenseController',
-  template
-});
+/* eslint no-undef: 0 */
+jest.mock('../../src/sense_editor/mode/worker', () => { return { workerModule: { id: 'sense_editor/mode/worker', src: '' } }; });
+window.Worker = function () { this.postMessage = () => {}; this.terminate = () => {}; };
+window.URL = {
+  createObjectURL: () => { return ''; }
+};
+jest.mock('../../src/storage');
+document.queryCommandSupported = () => true;

@@ -18,7 +18,7 @@
  */
 
 const _ = require('lodash');
-const ace = require('ace');
+const ace = require('brace');
 const $ = require('jquery');
 const curl = require('../curl');
 const RowParser = require('./row_parser');

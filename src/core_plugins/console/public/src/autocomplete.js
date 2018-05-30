@@ -27,7 +27,7 @@ import utils from './utils';
 import { populateContext } from './autocomplete/engine';
 import { URL_PATH_END_MARKER } from './autocomplete/url_pattern_matcher';
 import _ from 'lodash';
-import ace from 'ace';
+import ace from 'brace';
 import 'brace/ext/language_tools';
 
 const AceRange = ace.acequire('ace/range').Range;
@@ -250,7 +250,7 @@ export default function (editor) {
   function getAutoCompleteType(pos) {
     // return "method", "path" or "body" to determine auto complete type.
 
-    let rowMode = editor.parser.getRowParseMode(pos.row);
+    let rowMode = editor.parser.getRowParseMode();
 
     //noinspection JSBitwiseOperatorUsage
     if (rowMode & editor.parser.MODE.IN_REQUEST) {
