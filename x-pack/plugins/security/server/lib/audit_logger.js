@@ -17,12 +17,28 @@ export class SecurityAuditLogger {
 
     this._auditLogger.log(
       'saved_objects_authorization_failure',
-      `${username} unable to ${action} ${types.join(',')}, missing ${missing.join(',')}`,
+      `${username} unauthorized to ${action} ${types.join(',')}, missing ${missing.join(',')}`,
       {
         username,
         action,
         types,
         missing
+      }
+    );
+  }
+
+  savedObjectsAuthorizationSuccess(username, action, types) {
+    if (!this._enabled) {
+      return;
+    }
+
+    this._auditLogger.log(
+      'saved_objects_authorization_success',
+      `${username} authorized to ${action} ${types.join(',')}`,
+      {
+        username,
+        action,
+        types,
       }
     );
   }

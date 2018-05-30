@@ -79,7 +79,9 @@ export class SecureSavedObjectsClient {
       throw this._client.errors.decorateGeneralError(error, reason);
     }
 
-    if (!result.success) {
+    if (result.success) {
+      this._auditLogger.savedObjectsAuthorizationSuccess(result.username, action, types);
+    } else {
       this._auditLogger.savedObjectsAuthorizationFailure(result.username, action, types, result.missing);
       const msg = `Unable to ${action} ${types.join(',')}, missing ${result.missing.join(',')}`;
       throw this._client.errors.decorateForbiddenError(new Error(msg));

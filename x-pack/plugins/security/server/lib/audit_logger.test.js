@@ -54,7 +54,7 @@ describe(`#savedObjectsAuthorizationFailure`, () => {
 
     expect(auditLogger.log).toHaveBeenCalledWith(
       'saved_objects_authorization_failure',
-      expect.stringContaining(`unable to ${action}`),
+      expect.stringContaining(`${username} unauthorized to ${action}`),
       {
         username,
         action,
@@ -65,3 +65,39 @@ describe(`#savedObjectsAuthorizationFailure`, () => {
   });
 });
 
+describe(`#savedObjectsAuthorizationSuccess`, () => {
+  test(`doesn't log anything when xpack.security.audit.enabled is false`, () => {
+    const config = createMockConfig({
+      'xpack.security.audit.enabled': false
+    });
+    const auditLogger = createMockAuditLogger();
+
+    const securityAuditLogger = new SecurityAuditLogger(config, auditLogger);
+    securityAuditLogger.savedObjectsAuthorizationSuccess();
+
+    expect(auditLogger.log).toHaveBeenCalledTimes(0);
+  });
+
+  test('logs via auditLogger when xpack.security.audit.enabled is true', () => {
+    const config = createMockConfig({
+      'xpack.security.audit.enabled': true
+    });
+    const auditLogger = createMockAuditLogger();
+    const securityAuditLogger = new SecurityAuditLogger(config, auditLogger);
+    const username = 'foo-user';
+    const action = 'foo-action';
+    const types = [ 'foo-type-1', 'foo-type-2' ];
+
+    securityAuditLogger.savedObjectsAuthorizationSuccess(username, action, types);
+
+    expect(auditLogger.log).toHaveBeenCalledWith(
+      'saved_objects_authorization_success',
+      expect.stringContaining(`${username} authorized to ${action}`),
+      {
+        username,
+        action,
+        types,
+      }
+    );
+  });
+});
