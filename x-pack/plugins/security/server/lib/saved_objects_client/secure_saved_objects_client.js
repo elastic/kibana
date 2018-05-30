@@ -12,12 +12,14 @@ export class SecureSavedObjectsClient {
       request,
       hasPrivilegesWithRequest,
       baseClient,
+      auditLogger,
     } = options;
 
     this.errors = baseClient.errors;
 
     this._client = baseClient;
     this._hasPrivileges = hasPrivilegesWithRequest(request);
+    this._auditLogger = auditLogger;
   }
 
   async create(type, attributes = {}, options = {}) {
@@ -78,6 +80,7 @@ export class SecureSavedObjectsClient {
     }
 
     if (!result.success) {
+      this._auditLogger.savedObjectsAuthorizationFailure(result.username, action, types, result.missing);
       const msg = `Unable to ${action} ${types.join(',')}, missing ${result.missing.join(',')}`;
       throw this._client.errors.decorateForbiddenError(new Error(msg));
     }
