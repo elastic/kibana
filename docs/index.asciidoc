@@ -4,7 +4,6 @@
 :include-xpack:  true
 :lang:           en
 :kib-repo-dir:   {docdir}
-:xkb-repo-dir:   {docdir}/../x-pack/docs/{lang}
 :blog-ref:       https://www.elastic.co/blog/
 :wikipedia:      https://en.wikipedia.org/wiki
 
