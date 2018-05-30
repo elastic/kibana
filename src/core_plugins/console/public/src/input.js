@@ -101,15 +101,15 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output) {
 
   function sendCurrentRequestToES() {
 
-    const req_id = ++CURRENT_REQ_ID;
+    const reqId = ++CURRENT_REQ_ID;
 
     input.getRequestsInRange(function (requests) {
-      if (req_id != CURRENT_REQ_ID) {
+      if (reqId !== CURRENT_REQ_ID) {
         return;
       }
       output.update('');
 
-      if (requests.length == 0) {
+      if (requests.length === 0) {
         return;
       }
 
@@ -118,24 +118,24 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output) {
 
       let isFirstRequest = true;
 
-      var sendNextRequest = function () {
-        if (req_id != CURRENT_REQ_ID) {
+      const sendNextRequest = function () {
+        if (reqId !== CURRENT_REQ_ID) {
           return;
         }
-        if (requests.length == 0) {
+        if (requests.length === 0) {
           finishChain();
           return;
         }
         const req = requests.shift();
-        const es_path = req.url;
-        const es_method = req.method;
-        let es_data = utils.collapseLiteralStrings(req.data.join('\n'));
-        if (es_data) {
-          es_data += '\n';
+        const esPath = req.url;
+        const esMethod = req.method;
+        let esData = utils.collapseLiteralStrings(req.data.join('\n'));
+        if (esData) {
+          esData += '\n';
         } //append a new line for bulk requests.
 
-        es.send(es_method, es_path, es_data).always(function (dataOrjqXHR, textStatus, jqXhrORerrorThrown) {
-          if (req_id != CURRENT_REQ_ID) {
+        es.send(esMethod, esPath, esData).always(function (dataOrjqXHR, textStatus, jqXhrORerrorThrown) {
+          if (reqId !== CURRENT_REQ_ID) {
             return;
           }
           let xhr;
@@ -157,10 +157,10 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output) {
 
           if (typeof xhr.status === 'number' &&
           // things like DELETE index where the index is not there are OK.
-            ((xhr.status >= 200 && xhr.status < 300) || xhr.status == 404)
+            ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 404)
           ) {
             // we have someone on the other side. Add to history
-            history.addToHistory(es_path, es_method, es_data);
+            history.addToHistory(esPath, esMethod, esData);
 
 
             let value = xhr.responseText;
@@ -172,7 +172,7 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output) {
                 value = utils.expandLiteralStrings(JSON.stringify(JSON.parse(value), null, 2));
               }
               catch (e) {
-
+                // nothing to do here
               }
             }
 
@@ -196,15 +196,17 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output) {
             sendNextRequest();
           }
           else {
-            let value, mode;
+            let value;
+            let mode;
             if (xhr.responseText) {
               value = xhr.responseText; // ES error should be shown
               mode = modeForContentType(xhr.getAllResponseHeaders('Content-Type') || '');
-              if (value[0] == '{') {
+              if (value[0] === '{') {
                 try {
                   value = JSON.stringify(JSON.parse(value), null, 2);
                 }
                 catch (e) {
+                  // nothing to do here
                 }
               }
             } else {

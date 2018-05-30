@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import { stringify as formatQueryString } from 'querystring'
+import { stringify as formatQueryString } from 'querystring';
+
 import $ from 'jquery';
 
-let esVersion = [];
+const esVersion = [];
 
 export function getVersion() {
   return esVersion;
@@ -32,14 +33,14 @@ export function getContentType(body) {
 }
 
 export function send(method, path, data) {
-  var wrappedDfd = $.Deferred();
+  const wrappedDfd = $.Deferred();  // eslint-disable-line new-cap
 
-  var isGetRequest = /^get$/i.test(method)
+  const isGetRequest = /^get$/i.test(method);
   if (data && isGetRequest) {
-    method = "POST";
+    method = 'POST';
   }
 
-  var options = {
+  const options = {
     url: '../api/console/proxy?' + formatQueryString({ path, method }),
     data,
     contentType: getContentType(data),
@@ -55,8 +56,8 @@ export function send(method, path, data) {
       wrappedDfd.resolveWith(this, [data, textStatus, jqXHR]);
     },
     function (jqXHR, textStatus, errorThrown) {
-      if (jqXHR.status == 0) {
-        jqXHR.responseText = "\n\nFailed to connect to Console's backend.\nPlease check the Kibana server is up and running";
+      if (jqXHR.status === 0) {
+        jqXHR.responseText = '\n\nFailed to connect to Console\'s backend.\nPlease check the Kibana server is up and running';
       }
       wrappedDfd.rejectWith(this, [jqXHR, textStatus, errorThrown]);
     });
