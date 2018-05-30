@@ -1,0 +1,64 @@
+{
+  "nodes.stats": {
+    "url_params": {
+      "completion_fields": [],
+      "fielddata_fields": [],
+      "fields": [],
+      "groups": "__flag__",
+      "level": [
+        "indices",
+        "node",
+        "shards"
+      ],
+      "types": [],
+      "timeout": "",
+      "include_segment_file_sizes": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_nodes/stats",
+      "_nodes/{nodes}/stats",
+      "_nodes/stats/{metrics}",
+      "_nodes/{nodes}/stats/{metrics}",
+      "_nodes/stats/{metrics}/{index_metric}",
+      "_nodes/{nodes}/stats/{metrics}/{index_metric}"
+    ],
+    "url_components": {
+      "metrics": [
+        "_all",
+        "breaker",
+        "discovery",
+        "fs",
+        "http",
+        "indices",
+        "jvm",
+        "os",
+        "process",
+        "thread_pool",
+        "transport"
+      ],
+      "index_metric": [
+        "_all",
+        "completion",
+        "docs",
+        "fielddata",
+        "flush",
+        "get",
+        "indexing",
+        "merge",
+        "query_cache",
+        "refresh",
+        "request_cache",
+        "search",
+        "segments",
+        "store",
+        "suggest",
+        "warmer"
+      ],
+      "nodes": null
+    },
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-nodes-stats.html"
+  }
+}

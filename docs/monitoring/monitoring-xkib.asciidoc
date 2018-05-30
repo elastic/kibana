@@ -1,0 +1,134 @@
+[role="xpack"]
+[[monitoring-xpack-kibana]]
+== Configuring Monitoring in {kib}
+++++
+<titleabbrev>Configuring Monitoring</titleabbrev>
+++++
+
+{monitoring} gives you insight into the operation of your {stack}. For more 
+information, see <<xpack-monitoring,{monitoring}>> and 
+{stack-ov}/xpack-monitoring.html[Monitoring the {stack}]. 
+
+. To monitor {kib}:
+
+.. Verify that the `xpack.monitoring.collection.enabled` setting is `true` on
+the production cluster. If that setting is `false`, which is the default value,
+the collection of monitoring data is disabled in {es} and data is ignored from
+all other sources. For more information, see
+{ref}/monitoring-settings.html[Monitoring Settings in {es}].
+
+.. Verify that `xpack.monitoring.enabled` and
+`xpack.monitoring.kibana.collection.enabled` are set to `true`, which are the
+default values. For more information, see <<monitoring-settings-kb>>.
+
+.. Identify where to send monitoring data. {kib} automatically
+sends metrics to the {es} cluster specified in the `elasticsearch.url` setting
+in the `kibana.yml` file. This property has a default value of
+`http://localhost:9200`. This cluster is often referred to as the
+_production cluster_.
++
+--
+TIP: If {security} is enabled on the production cluster, use an HTTPS URL such
+as `https://<your_production_cluster>:9200` in this setting.
+
+--
+
+. To visualize monitoring data:
+
+.. Verify that `xpack.monitoring.ui.enabled` is set to `true`, which is the
+default value. For more information, see <<monitoring-settings-kb>>.
+
+.. Identify where to retrieve monitoring data from. If you want to use a
+separate _monitoring cluster_, set `xpack.monitoring.elasticsearch.url` in the
+`kibana.yml` file. Otherwise, the monitoring data is stored in the production
+cluster.
++
+--
+TIP: If {security} is enabled on the monitoring cluster, use an HTTPS URL such
+as `https://<your_monitoring_cluster>:9200` in this setting.
+
+To learn more about typical monitoring architectures with separate
+production and monitoring clusters, see
+{xpack-ref}/how-monitoring-works.html[How Monitoring Works].
+--
+
+. If {security} is enabled on the production cluster:
+
+.. Verify that there is a
+valid user ID and password in the `elasticsearch.username` and
+`elasticsearch.password` settings in the `kibana.yml` file. These values are
+used when {kib} sends monitoring data to the production cluster.
+
+.. Configure {kib} to encrypt communications between the {kib} server and the
+production cluster. This set up involves generating a server certificate and
+setting `server.ssl.*` and `elasticsearch.ssl.certitifcateAuthorities` settings
+in the `kibana.yml` file on the {kib} server. For example:
++
+--
+[source,yaml]
+--------------------------------------------------------------------------------
+server.ssl.key: /path/to/your/server.key
+server.ssl.certificate: /path/to/your/server.crt
+--------------------------------------------------------------------------------
+
+If you are using your own certificate authority to sign certificates, specify
+the location of the PEM file in the `kibana.yml` file:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+elasticsearch.ssl.certificateAuthorities: /path/to/your/cacert.pem
+--------------------------------------------------------------------------------
+
+For more information, see <<using-kibana-with-security>>.
+--
+
+. If {security} is enabled on the monitoring cluster:
+
+.. Identify a user ID and password that {kib} can use to retrieve monitoring
+data. Specify these values in the `xpack.monitoring.elasticsearch.username` and
+`xpack.monitoring.elasticsearch.password` settings in the `kibana.yml` file.
+If these settings are omitted, {kib} uses the `elasticsearch.username` and
+`elasticsearch.password` setting values.
+
+.. Configure {kib} to encrypt communications between the {kib} server and the
+monitoring cluster. Specify the `xpack.monitoring.elasticsearch.ssl.*` settings
+in the `kibana.yml` file on the {kib} server.
++
+--
+For example, if you are using your own certificate authority to sign
+certificates, specify the location of the PEM file in the `kibana.yml` file:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.monitoring.elasticsearch.ssl.certificateAuthorities: /path/to/your/cacert.pem
+--------------------------------------------------------------------------------
+
+--
+
+. Restart {kib}.
+
+. If {security} is enabled on your {kib} server:
+
+.. Log in to {kib} as a user who has both the `kibana_user` and
+`monitoring_user` roles. These roles have the necessary privileges to view the
+monitoring dashboards. For example:
++
+--
+[source,js]
+--------------------------------------------------
+POST /_xpack/security/user/stack-monitor
+{
+  "password" : "changeme",
+  "roles" : [ "kibana_user", "monitoring_user" ]
+}
+--------------------------------------------------
+// CONSOLE
+--
+
+.. If you are accessing a remote monitoring cluster, you must log in to {kib}
+with username and password credentials that are valid on both the {kib} server
+and the monitoring cluster.
+
+See also <<monitoring-data>>.
+
+include::{kib-repo-dir}/settings/monitoring-settings.asciidoc[]

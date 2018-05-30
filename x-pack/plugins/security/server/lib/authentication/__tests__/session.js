@@ -11,7 +11,7 @@ import { serverFixture } from '../../__tests__/__fixtures__/server';
 import { Session } from '../session';
 
 describe('Session', () => {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
 
   let server;
   let config;
@@ -110,14 +110,14 @@ describe('Session', () => {
       sinon.assert.calledOnce(callback);
       sinon.assert.calledWithExactly(callback, null, true, sessionWithoutExpires);
 
-      callback.reset();
+      callback.resetHistory();
       const notExpiredSession = { token: 'token', expires: currentTime + 1 };
       validateFunc({}, notExpiredSession, callback);
 
       sinon.assert.calledOnce(callback);
       sinon.assert.calledWithExactly(callback, null, true, notExpiredSession);
 
-      callback.reset();
+      callback.resetHistory();
       const expiredSession = { token: 'token', expires: currentTime - 1 };
       validateFunc({}, expiredSession, callback);
 

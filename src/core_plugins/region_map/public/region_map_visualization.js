@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
 import _ from 'lodash';
 import { BaseMapsVisualizationProvider } from '../../tile_map/public/base_maps_visualization';
@@ -126,6 +145,14 @@ export function RegionMapsVisualizationProvider(Private, Notifier, config) {
       }
 
       this._choroplethLayer.on('select', (event) => {
+
+
+        if (!this._isAggReady()) {
+          //even though we have maps data available and have added the choropleth layer to the map
+          //the aggregation may not be available yet
+          return;
+        }
+
         const agg = this._vis.aggs.bySchemaName.segment[0];
         const filter = agg.createFilter(event);
         this._vis.API.queryFilter.addFilters(filter);
@@ -145,10 +172,14 @@ export function RegionMapsVisualizationProvider(Private, Notifier, config) {
 
     }
 
+    _isAggReady() {
+      return this._vis.getAggConfig().bySchemaName.segment && this._vis.getAggConfig().bySchemaName.segment[0];
+    }
+
 
     _setTooltipFormatter() {
       const metricsAgg = _.first(this._vis.getAggConfig().bySchemaName.metric);
-      if (this._vis.getAggConfig().bySchemaName.segment && this._vis.getAggConfig().bySchemaName.segment[0]) {
+      if (this._isAggReady()) {
         const fieldName = this._vis.getAggConfig().bySchemaName.segment[0].makeLabel();
         this._choroplethLayer.setTooltipFormatter(tooltipFormatter, metricsAgg, fieldName);
       } else {

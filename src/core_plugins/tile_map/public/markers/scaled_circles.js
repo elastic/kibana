@@ -1,8 +1,29 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import L from 'leaflet';
 import _ from 'lodash';
 import d3 from 'd3';
 import $ from 'jquery';
 import { EventEmitter } from 'events';
+import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
+import * as colorUtil from 'ui/vis/map/color_util';
 
 export class ScaledCirclesMarkers extends EventEmitter {
 
@@ -17,6 +38,7 @@ export class ScaledCirclesMarkers extends EventEmitter {
     this._valueFormatter = options.valueFormatter || ((x) => {x;});
     this._tooltipFormatter = options.tooltipFormatter || ((x) => {x;});
     this._label = options.label;
+    this._colorRamp = options.colorRamp;
 
     this._legendColors = null;
     this._legendQuantizer = null;
@@ -38,7 +60,6 @@ export class ScaledCirclesMarkers extends EventEmitter {
       };
     }
     this._leafletLayer = L.geoJson(null, layerOptions);
-
     this._leafletLayer.addData(this._featureCollection);
   }
 
@@ -53,10 +74,11 @@ export class ScaledCirclesMarkers extends EventEmitter {
     const max = _.get(this._featureCollectionMetaData, 'max', 1);
 
     const quantizeDomain = (min !== max) ? [min, max] : d3.scale.quantize().domain();
-    this._legendColors = makeCircleMarkerLegendColors(min, max);
+
+    this._legendColors = makeLegendColors(this._colorRamp);
     this._legendQuantizer = d3.scale.quantize().domain(quantizeDomain).range(this._legendColors);
 
-    return makeStyleFunction(min, max, this._legendColors, quantizeDomain);
+    return makeStyleFunction(this._legendColors, quantizeDomain);
   }
 
 
@@ -191,27 +213,9 @@ export class ScaledCirclesMarkers extends EventEmitter {
 }
 
 
-/**
- * d3 quantize scale returns a hex color, used for marker fill color
- *
- * @method quantizeLegendColors
- * return {undefined}
- */
-function makeCircleMarkerLegendColors(min, max) {
-  const reds1 = ['#ff6128'];
-  const reds3 = ['#fecc5c', '#fd8d3c', '#e31a1c'];
-  const reds5 = ['#fed976', '#feb24c', '#fd8d3c', '#f03b20', '#bd0026'];
-  const bottomCutoff = 2;
-  const middleCutoff = 24;
-  let legendColors;
-  if (max - min <= bottomCutoff) {
-    legendColors = reds1;
-  } else if (max - min <= middleCutoff) {
-    legendColors = reds3;
-  } else {
-    legendColors = reds5;
-  }
-  return legendColors;
+function makeLegendColors(colorRampKey) {
+  const colorRamp = truncatedColorMaps[colorRampKey];
+  return colorUtil.getLegendColors(colorRamp);
 }
 
 function makeColorDarker(color) {
@@ -219,7 +223,7 @@ function makeColorDarker(color) {
   return d3.hcl(color).darker(amount).toString();
 }
 
-function makeStyleFunction(min, max, legendColors, quantizeDomain) {
+function makeStyleFunction(legendColors, quantizeDomain) {
   const legendQuantizer = d3.scale.quantize().domain(quantizeDomain).range(legendColors);
   return (feature) => {
     const value = _.get(feature, 'properties.value');

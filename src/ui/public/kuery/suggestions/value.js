@@ -1,37 +1,78 @@
-import { flatten, memoize } from 'lodash';
-import chrome from '../../chrome';
-import { escapeQuotes } from './escape_kuery';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
-const baseUrl = chrome.addBasePath('/api/kibana/suggestions/values');
+import 'isomorphic-fetch';
+import { flatten, memoize } from 'lodash';
+import { escapeQuotes } from './escape_kuery';
+import { kfetch } from '../../kfetch';
+
 const type = 'value';
 
-export function getSuggestionsProvider({ $http, config, indexPatterns }) {
-  const allFields = flatten(indexPatterns.map(indexPattern => indexPattern.fields.raw));
-  const requestSuggestions = memoize((query, field) => {
-    const queryParams = { query, field: field.name };
-    return $http.post(`${baseUrl}/${field.indexPattern.title}`, queryParams);
-  }, resolver);
+const requestSuggestions = memoize((query, field) => {
+  return kfetch({
+    pathname: `/api/kibana/suggestions/values/${field.indexPatternTitle}`,
+    method: 'POST',
+    body: JSON.stringify({ query, field: field.name }),
+  });
+}, resolver);
+
+export function getSuggestionsProvider({ config, indexPatterns }) {
+  const allFields = flatten(
+    indexPatterns.map(indexPattern => {
+      return indexPattern.fields.map(field => ({
+        ...field,
+        indexPatternTitle: indexPattern.title,
+      }));
+    })
+  );
   const shouldSuggestValues = config.get('filterEditor:suggestValues');
 
-  return function getValueSuggestions({ start, end, prefix, suffix, fieldName }) {
+  return function getValueSuggestions({
+    start,
+    end,
+    prefix,
+    suffix,
+    fieldName,
+  }) {
     const fields = allFields.filter(field => field.name === fieldName);
     const query = `${prefix}${suffix}`;
 
     const suggestionsByField = fields.map(field => {
       if (field.type === 'boolean') {
         return wrapAsSuggestions(start, end, query, ['true', 'false']);
-      } else if (!shouldSuggestValues || !field.aggregatable || field.type !== 'string') {
+      } else if (
+        !shouldSuggestValues ||
+        !field.aggregatable ||
+        field.type !== 'string'
+      ) {
         return [];
       }
 
-      return requestSuggestions(query, field).then(({ data }) => {
+      return requestSuggestions(query, field).then(data => {
         const quotedValues = data.map(value => `"${escapeQuotes(value)}"`);
         return wrapAsSuggestions(start, end, query, quotedValues);
       });
     });
 
-    return Promise.all(suggestionsByField)
-      .then(suggestions => flatten(suggestions));
+    return Promise.all(suggestionsByField).then(suggestions =>
+      flatten(suggestions)
+    );
   };
 }
 
@@ -47,5 +88,5 @@ function wrapAsSuggestions(start, end, query, values) {
 function resolver(query, field) {
   // Only cache results for a minute
   const ttl = Math.floor(Date.now() / 1000 / 60);
-  return [ttl, query, field.indexPattern.title, field.name].join('|');
+  return [ttl, query, field.indexPatternTitle, field.name].join('|');
 }

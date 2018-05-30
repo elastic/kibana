@@ -1,12 +1,33 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import PropTypes from 'prop-types';
 import React from 'react';
-import Select from 'react-select';
 import DataFormatPicker from '../../data_format_picker';
 import createSelectHandler from '../../lib/create_select_handler';
 import YesNo from '../../yes_no';
 import createTextHandler from '../../lib/create_text_handler';
 import { IndexPattern } from '../../index_pattern';
-import { htmlIdGenerator } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiComboBox,
+} from '@elastic/eui';
 
 function TimeseriesConfig(props) {
   const handleSelectChange = createSelectHandler(props.onChange);
@@ -32,21 +53,33 @@ function TimeseriesConfig(props) {
     { label: 'Stacked', value: 'stacked' },
     { label: 'Percent', value: 'percent' }
   ];
+  const selectedStackedOption = stackedOptions.find(option => {
+    return model.stacked === option.value;
+  });
 
   const positionOptions = [
     { label: 'Right', value: 'right' },
     { label: 'Left', value: 'left' }
   ];
+  const selectedAxisPosOption = positionOptions.find(option => {
+    return model.axis_position === option.value;
+  });
 
   const chartTypeOptions = [
     { label: 'Bar', value: 'bar' },
     { label: 'Line', value: 'line' }
   ];
+  const selectedChartTypeOption = chartTypeOptions.find(option => {
+    return model.chart_type === option.value;
+  });
 
   const splitColorOptions = [
     { label: 'Gradient', value: 'gradient' },
     { label: 'Rainbow', value: 'rainbow' }
   ];
+  const selectedSplitColorOption = splitColorOptions.find(option => {
+    return model.split_color_mode === option.value;
+  });
 
   let type;
   if (model.chart_type === 'line') {
@@ -56,24 +89,26 @@ function TimeseriesConfig(props) {
           Chart Type
         </label>
         <div className="vis_editor__item">
-          <Select
-            inputProps={{ id: htmlId('chartType') }}
-            clearable={false}
+          <EuiComboBox
+            isClearable={false}
+            id={htmlId('chartType')}
             options={chartTypeOptions}
-            value={model.chart_type}
+            selectedOptions={selectedChartTypeOption ? [selectedChartTypeOption] : []}
             onChange={handleSelectChange('chart_type')}
+            singleSelection={true}
           />
         </div>
         <label className="vis_editor__label" htmlFor={htmlId('stacked')}>
           Stacked
         </label>
         <div className="vis_editor__item">
-          <Select
-            inputProps={{ id: htmlId('stacked') }}
-            clearable={false}
+          <EuiComboBox
+            isClearable={false}
+            id={htmlId('stacked')}
             options={stackedOptions}
-            value={model.stacked}
+            selectedOptions={selectedStackedOption ? [selectedStackedOption] : []}
             onChange={handleSelectChange('stacked')}
+            singleSelection={true}
           />
         </div>
         <label className="vis_editor__label" htmlFor={htmlId('fill')}>
@@ -123,24 +158,26 @@ function TimeseriesConfig(props) {
           Chart Type
         </label>
         <div className="vis_editor__item">
-          <Select
-            inputProps={{ id: htmlId('chartType') }}
-            clearable={false}
+          <EuiComboBox
+            isClearable={false}
+            id={htmlId('chartType')}
             options={chartTypeOptions}
-            value={model.chart_type}
+            selectedOptions={selectedChartTypeOption ? [selectedChartTypeOption] : []}
             onChange={handleSelectChange('chart_type')}
+            singleSelection={true}
           />
         </div>
         <label className="vis_editor__label" htmlFor={htmlId('stacked')}>
           Stacked
         </label>
         <div className="vis_editor__item">
-          <Select
-            inputProps={{ id: htmlId('stacked') }}
-            clearable={false}
+          <EuiComboBox
+            isClearable={false}
+            id={htmlId('stacked')}
             options={stackedOptions}
-            value={model.stacked}
+            selectedOptions={selectedStackedOption ? [selectedStackedOption] : []}
             onChange={handleSelectChange('stacked')}
+            singleSelection={true}
           />
         </div>
         <label className="vis_editor__label" htmlFor={htmlId('fill')}>
@@ -211,12 +248,13 @@ function TimeseriesConfig(props) {
             Split Color Theme
           </label>
           <div className="vis_editor__row_item">
-            <Select
-              inputProps={{ id: htmlId('splitColor') }}
-              clearable={false}
+            <EuiComboBox
+              isClearable={false}
+              id={htmlId('splitColor')}
               options={splitColorOptions}
-              value={model.split_color_mode}
+              selectedOptions={selectedSplitColorOption ? [selectedSplitColorOption] : []}
               onChange={handleSelectChange('split_color_mode')}
+              singleSelection={true}
             />
           </div>
         </div>
@@ -253,13 +291,14 @@ function TimeseriesConfig(props) {
             Axis Position
           </label>
           <div className="vis_editor__row_item">
-            <Select
-              inputProps={{ id: htmlId('axisPos') }}
-              clearable={false}
-              disabled={disableSeperateYaxis}
+            <EuiComboBox
+              isClearable={false}
+              isDisabled={disableSeperateYaxis}
+              id={htmlId('axisPos')}
               options={positionOptions}
-              value={model.axis_position}
+              selectedOptions={selectedAxisPosOption ? [selectedAxisPosOption] : []}
               onChange={handleSelectChange('axis_position')}
+              singleSelection={true}
             />
           </div>
         </div>

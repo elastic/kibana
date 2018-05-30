@@ -18,7 +18,8 @@ import { exportTypesRegistryFactory } from './server/lib/export_types_registry';
 import { createBrowserDriverFactory, getDefaultBrowser, getDefaultChromiumSandboxDisabled } from './server/browsers';
 import { logConfiguration } from './log_configuration';
 
-export { getReportingUsage } from './server/usage';
+import { callClusterFactory } from '../xpack_main';
+import { getReportingUsageCollector } from './server/usage';
 
 const kbToBase64Length = (kb) => {
   return Math.floor((kb * 1024 * 8) / 6);
@@ -47,15 +48,17 @@ export const reporting = (kibana) => {
       },
       uiSettingDefaults: {
         [UI_SETTINGS_CUSTOM_PDF_LOGO]: {
-          description: `Custom image to use in the PDF's footer`,
+          name: 'PDF footer image',
           value: null,
+          description: `Custom image to use in the PDF's footer`,
           type: 'image',
           options: {
             maxSize: {
               length: kbToBase64Length(200),
               description: '200 kB',
             }
-          }
+          },
+          category: ['reporting'],
         }
       }
     },
@@ -144,13 +147,22 @@ export const reporting = (kibana) => {
       validateConfig(config, message => server.log(['reporting', 'warning'], message));
       logConfiguration(config, message => server.log(['reporting', 'debug'], message));
 
-      const xpackMainPlugin = server.plugins.xpack_main;
+      const { xpack_main: xpackMainPlugin, monitoring: monitoringPlugin } = server.plugins;
+
       mirrorPluginStatus(xpackMainPlugin, this);
       const checkLicense = checkLicenseFactory(exportTypesRegistry);
       xpackMainPlugin.status.once('green', () => {
         // Register a function that is called whenever the xpack info changes,
         // to re-compute the license check results for this plugin
         xpackMainPlugin.info.feature(this.id).registerLicenseCheckResultsGenerator(checkLicense);
+      });
+
+      // Register a function to with Monitoring to manage the collection of usage stats
+      monitoringPlugin.status.once('green', () => {
+        if (monitoringPlugin.collectorSet) {
+          const callCluster = callClusterFactory(server).getCallClusterInternal(); // uses callWithInternal as this is for internal collection
+          monitoringPlugin.collectorSet.register(getReportingUsageCollector(server, callCluster));
+        }
       });
 
       server.expose('browserDriverFactory', await createBrowserDriverFactory(server));

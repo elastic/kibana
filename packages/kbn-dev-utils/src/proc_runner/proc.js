@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import execa from 'execa';
 import { statSync } from 'fs';
 
@@ -8,7 +27,6 @@ import treeKill from 'tree-kill';
 import { promisify } from 'util';
 const treeKillAsync = promisify(treeKill);
 
-import { log } from './log';
 import { observeLines } from './observe_lines';
 import { createCliError } from './errors';
 
@@ -33,7 +51,7 @@ async function withTimeout(attempt, ms, onTimeout) {
   }
 }
 
-export function createProc(name, { cmd, args, cwd, env, stdin }) {
+export function createProc(name, { cmd, args, cwd, env, stdin, log }) {
   log.info('[%s] > %s', name, cmd, args.join(' '));
 
   // spawn fails with ENOENT when either the
@@ -78,7 +96,7 @@ export function createProc(name, { cmd, args, cwd, env, stdin }) {
         .map(code => {
           // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat then as errors
           if (code > 0 && !(code === 143 || code === 130)) {
-            throw createCliError(`[${name}] exitted with code ${code}`);
+            throw createCliError(`[${name}] exited with code ${code}`);
           }
 
           return code;
@@ -92,10 +110,14 @@ export function createProc(name, { cmd, args, cwd, env, stdin }) {
       return Rx.Observable.race(exit$, error$);
     }).share();
 
-    outcomePromise = Rx.Observable.merge(
+    _outcomePromise = Rx.Observable.merge(
       this.lines$.ignoreElements(),
       this.outcome$
     ).toPromise();
+
+    getOutcomePromise() {
+      return this._outcomePromise;
+    }
 
     async stop(signal) {
       await withTimeout(
@@ -114,7 +136,7 @@ export function createProc(name, { cmd, args, cwd, env, stdin }) {
       await withTimeout(
         async () => {
           try {
-            await this.outcomePromise;
+            await this.getOutcomePromise();
           } catch (error) {
             // ignore
           }

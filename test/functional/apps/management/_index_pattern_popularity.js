@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
@@ -25,17 +44,8 @@ export default function ({ getService, getPageObjects }) {
     describe('change popularity', function indexPatternCreation() {
       const fieldName = 'geo.coordinates';
 
-      // set the page size to All again, https://github.com/elastic/kibana/issues/5030
-      // TODO: remove this after issue #5030 is closed
-      async function fix5030() {
-        await PageObjects.settings.setPageSize(50);
-        await PageObjects.common.sleep(1000);
-      }
-
       beforeEach(async function () {
         // increase Popularity of geo.coordinates
-        await PageObjects.settings.setPageSize(50);
-        await PageObjects.common.sleep(1000);
         log.debug('Starting openControlsByName (' + fieldName + ')');
         await PageObjects.settings.openControlsByName(fieldName);
         log.debug('increasePopularity');
@@ -56,7 +66,6 @@ export default function ({ getService, getPageObjects }) {
       it('should be reset on cancel', async function () {
         // Cancel saving the popularity change
         await PageObjects.settings.controlChangeCancel();
-        await fix5030();
         await PageObjects.settings.openControlsByName(fieldName);
         // check that it is 0 (previous increase was cancelled
         const popularity = await PageObjects.settings.getPopularity();
@@ -67,7 +76,6 @@ export default function ({ getService, getPageObjects }) {
       it('can be saved', async function () {
         // Saving the popularity change
         await PageObjects.settings.controlChangeSave();
-        await fix5030();
         await PageObjects.settings.openControlsByName(fieldName);
         const popularity = await PageObjects.settings.getPopularity();
         log.debug('popularity = ' + popularity);

@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import expect from 'expect.js';
 import { KibanaMap } from '../../map/kibana_map';
 import { KibanaMapLayer } from '../../map/kibana_map_layer';
@@ -73,7 +92,7 @@ describe('kibana_map tests', function () {
   });
 
 
-  describe('getUntrimmedBounds', function () {
+  describe('getBounds', function () {
 
     afterEach(function () {
       kibanaMap.destroy();
@@ -92,7 +111,7 @@ describe('kibana_map tests', function () {
       });
 
       it('should get untrimmed map bounds', function () {
-        const bounds = kibanaMap.getUntrimmedBounds();
+        const bounds = kibanaMap.getBounds();
         expect(bounds.bottom_right.lon.toFixed(2)).to.equal('281.25');
         expect(bounds.top_left.lon.toFixed(2)).to.equal('-281.25');
       });
@@ -112,7 +131,7 @@ describe('kibana_map tests', function () {
       });
 
       it('should calculate map dimensions based on enforcement of single pixel min-width CSS-rule', function () {
-        const bounds = kibanaMap.getUntrimmedBounds();
+        const bounds = kibanaMap.getBounds();
         expect(bounds).to.have.property('bottom_right');
         expect(round(bounds.bottom_right.lon, 2)).to.equal(0.27);
         expect(round(bounds.bottom_right.lat, 2)).to.equal(0);
@@ -142,7 +161,7 @@ describe('kibana_map tests', function () {
       });
 
       it('should calculate map dimensions based on enforcement of single pixel min-width CSS-rule', function () {
-        const bounds = kibanaMap.getUntrimmedBounds();
+        const bounds = kibanaMap.getBounds();
         expect(bounds).to.have.property('bottom_right');
         expect(Math.round(bounds.bottom_right.lon)).to.equal(0);
         expect(bounds.bottom_right.lat.toFixed(2)).to.equal('-0.18');
@@ -151,7 +170,47 @@ describe('kibana_map tests', function () {
         expect(bounds.top_left.lat.toFixed(2)).to.equal('0.18');
       });
     });
+
+
+    describe('wrapping', function () {
+      beforeEach(async function () {
+        setupDOM('1600px', '1024px');
+        kibanaMap = new KibanaMap(domNode, {
+          minZoom: 1,
+          maxZoom: 10,
+          center: [0, -800], //swing the map over two earth-rotations west
+          zoom: 2
+        });
+      });
+
+      it('coordinates should be corrected to  center the -180,180 range', function () {
+        const bounds = kibanaMap.getBounds();
+        expect(bounds.bottom_right.lon.toFixed(2)).to.equal('201.09');
+        expect(bounds.top_left.lon.toFixed(2)).to.equal('-361.41');
+      });
+    });
+
+    describe('wrapping - zoomed in', function () {
+      beforeEach(async function () {
+        setupDOM('1600px', '1024px');
+        kibanaMap = new KibanaMap(domNode, {
+          minZoom: 1,
+          maxZoom: 10,
+          center: [0, -800], //swing the map over two earth-rotations west
+          zoom: 8
+        });
+      });
+
+      it('coordinates should be corrected to fall within the -180,180 range', function () {
+        const bounds = kibanaMap.getBounds();
+        expect(bounds.bottom_right.lon.toFixed(2)).to.equal('-75.61');
+        expect(bounds.top_left.lon.toFixed(2)).to.equal('-84.40');
+      });
+    });
+
   });
+
+
 
 
   describe('KibanaMap - attributions', function () {

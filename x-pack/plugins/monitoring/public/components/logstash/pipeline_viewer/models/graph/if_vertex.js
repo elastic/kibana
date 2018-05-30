@@ -40,16 +40,32 @@ export class IfVertex extends Vertex {
     return this.outgoingEdges.find(e => e.when === true);
   }
 
+  get trueEdges() {
+    return this.outgoingEdges.filter(e => e.when === true);
+  }
+
   get falseEdge() {
     return this.outgoingEdges.find(e => e.when === false);
+  }
+
+  get falseEdges() {
+    return this.outgoingEdges.filter(e => e.when === false);
   }
 
   get trueOutgoingVertex() {
     return this.trueEdge ? this.trueEdge.to : null;
   }
 
+  get trueOutgoingVertices() {
+    return this.trueEdges.map(e => e.to);
+  }
+
   get falseOutgoingVertex() {
     return this.falseEdge ? this.falseEdge.to : null;
+  }
+
+  get falseOutgoingVertices() {
+    return this.falseEdges.map(e => e.to);
   }
 
   get next() {

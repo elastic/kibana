@@ -1,11 +1,32 @@
-/* eslint import/no-unresolved: 0 */
-let ace = require('ace');
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
-ace.define("ace/theme/sense-dark", ['require', 'exports', 'module'],
+/* eslint import/no-unresolved: 0 */
+/* eslint  no-multi-str: 0 */
+/* eslint  max-len: 0 */
+const ace = require('ace');
+
+ace.define('ace/theme/sense-dark', ['require', 'exports', 'module'],
   function (require, exports) {
     exports.isDark = true;
-    exports.cssClass = "ace-sense-dark";
-    exports.cssText = ".ace-sense-dark .ace_gutter {\
+    exports.cssClass = 'ace-sense-dark';
+    exports.cssText = '.ace-sense-dark .ace_gutter {\
 background: #2e3236;\
 color: #bbbfc2;\
 }\
@@ -108,9 +129,9 @@ text-decoration: underline\
 }\
 .ace-sense-dark .ace_indent-guide {\
 background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAACCAYAAACZgbYnAAAAEklEQVQImWNQ11D6z7Bq1ar/ABCKBG6g04U2AAAAAElFTkSuQmCC) right repeat-y\
-}";
+}';
 
-    var dom = require("ace/lib/dom");
+    const dom = require('ace/lib/dom');
     dom.importCssString(exports.cssText, exports.cssClass);
   });
 

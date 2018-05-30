@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
@@ -70,10 +89,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('field list pagination', function () {
-      const EXPECTED_DEFAULT_PAGE_SIZE = 10;
       const EXPECTED_FIELD_COUNT = 86;
-      const EXPECTED_LAST_PAGE_COUNT = EXPECTED_FIELD_COUNT % EXPECTED_DEFAULT_PAGE_SIZE;
-      const LAST_PAGE_NUMBER = Math.ceil(EXPECTED_FIELD_COUNT / EXPECTED_DEFAULT_PAGE_SIZE);
 
       before(function () {
         return PageObjects.settings.navigateTo()
@@ -93,30 +109,6 @@ export default function ({ getService, getPageObjects }) {
               expect(tabCount).to.be('' + EXPECTED_FIELD_COUNT);
             });
         });
-      });
-
-      it('should have correct default page size selected', function () {
-        return PageObjects.settings.getPageSize()
-          .then(function (pageSize) {
-            expect(pageSize).to.be('Rows per page: ' + EXPECTED_DEFAULT_PAGE_SIZE);
-          });
-      });
-
-      it('should have the correct number of rows per page', async function () {
-        for (let pageNum = 1; pageNum <= LAST_PAGE_NUMBER; pageNum += 1) {
-          if (pageNum > 1) {
-            // We are by default on page 1 so don't navigate there
-            await PageObjects.settings.goToPage(pageNum);
-          }
-
-          const pageFieldNames = await retry.tryMethod(PageObjects.settings, 'getFieldNames');
-
-          if (pageNum === LAST_PAGE_NUMBER) {
-            expect(pageFieldNames).to.have.length(EXPECTED_LAST_PAGE_COUNT);
-          } else {
-            expect(pageFieldNames).to.have.length(EXPECTED_DEFAULT_PAGE_SIZE);
-          }
-        }
       });
     }); // end describe pagination
   }); // end index result field sort

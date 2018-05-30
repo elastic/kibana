@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
@@ -114,5 +133,96 @@ describe('Filter Bar Directive', function () {
         expect($scope.addFilters.called).to.be(true);
       });
     });
+
+    describe('show and hide filters', function () {
+      let scope;
+
+      beforeEach(() => {
+        scope = $rootScope.$new();
+      });
+
+      function create(attrs) {
+        const template = `
+        <div
+        class="filter-bar filter-panel"
+        ng-class="filterNavToggle.isOpen == true ? '' : 'filter-panel-close'">
+          <div
+            class="filter-link pull-right"
+            ng-class="filterNavToggle.isOpen == true ? '' : 'action-show'"
+            ng-show="filters.length">
+          </div>
+          <div
+            class="filter-nav-link__icon"
+            tooltip="{{ filterNavToggle.tooltipContent }}"
+            tooltip-placement="left"
+            tooltip-popup-delay="0"
+            tooltip-append-to-body="1"
+            ng-show="filters.length"
+            ng-class="filterNavToggle.isOpen == true ? '' : 'filter-nav-link--close'"
+            aria-hidden="!filters.length"
+          >
+          </div>
+        </div>`;
+
+        const element = $compile(template)(scope);
+
+        scope.$apply(() => {
+          Object.assign(scope, attrs);
+        });
+
+        return element;
+      }
+
+
+      describe('collapse filters', function () {
+        let element;
+
+        beforeEach(function () {
+          element = create({
+            filterNavToggle: {
+              isOpen: false
+            }
+          });
+        });
+
+        it('should be able to collapse filters', function () {
+          expect(element.hasClass('filter-panel-close')).to.be(true);
+        });
+
+        it('should be able to see `actions`', function () {
+          expect(element.find('.filter-link.pull-right').hasClass('action-show')).to.be(true);
+        });
+
+        it('should be able to view the same button for `expand`', function () {
+          expect(element.find('.filter-nav-link__icon').hasClass('filter-nav-link--close')).to.be(true);
+        });
+      });
+
+      describe('expand filters', function () {
+        let element;
+
+        beforeEach(function () {
+          element = create({
+            filterNavToggle: {
+              isOpen: true
+            }
+          });
+        });
+
+        it('should be able to expand filters', function () {
+          expect(element.hasClass('filter-panel-close')).to.be(false);
+        });
+
+        it('should be able to view the `actions` at the bottom of the filter-bar', function () {
+          expect(element.find('.filter-link.pull-right').hasClass('action-show')).to.be(false);
+        });
+
+        it('should be able to view the same button for `collapse`', function () {
+          expect(element.find('.filter-nav-link__icon').hasClass('filter-nav-link--close')).to.be(false);
+        });
+      });
+
+    });
+
   });
 });

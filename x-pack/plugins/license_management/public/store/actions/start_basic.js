@@ -12,6 +12,10 @@ export const startBasicLicenseStatus = createAction(
   'LICENSE_MANAGEMENT_START_BASIC_LICENSE_STATUS'
 );
 
+export const cancelStartBasicLicense = createAction(
+  'LICENSE_MANAGEMENT_CANCEL_START_BASIC_LICENSE'
+);
+
 export const startBasicLicense = (currentLicenseType, ack) => async (
   dispatch,
   getState,

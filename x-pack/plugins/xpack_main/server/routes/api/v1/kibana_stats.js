@@ -4,9 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/*
+ * TODO: deprecate this API in 7.0
+ */
 import { wrap } from 'boom';
 import { callClusterFactory } from '../../../lib/call_cluster_factory';
-import { getUsageCollector, getReportingCollector } from '../../../../../monitoring/server/kibana_monitoring';
+import { getKibanaUsageCollector } from '../../../../../monitoring/server/kibana_monitoring';
+import { getReportingUsageCollector } from '../../../../../reporting/server/usage';
 
 export function kibanaStatsRoute(server) {
   server.route({
@@ -18,12 +22,12 @@ export function kibanaStatsRoute(server) {
       const callCluster = callClusterFactory(server).getCallClusterWithReq(req);
 
       try {
-        const kibanaUsageCollector = getUsageCollector(server, callCluster);
-        const reportingCollector = getReportingCollector(server, callCluster);
+        const kibanaUsageCollector = getKibanaUsageCollector(server, callCluster);
+        const reportingUsageCollector = getReportingUsageCollector(server, callCluster);
 
         const [ kibana, reporting ] = await Promise.all([
           kibanaUsageCollector.fetch(),
-          reportingCollector.fetch(),
+          reportingUsageCollector.fetch(),
         ]);
 
         reply({

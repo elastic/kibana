@@ -5,9 +5,15 @@
  */
 
 export { MonitoringTimeseriesContainer } from './chart';
+export { MonitoringTable } from './table';
+export { Tooltip } from './tooltip';
 export { NoData } from './no_data';
 export { License } from './license';
 export { StatusIcon } from './status_icon';
-export { SummaryStatus } from './summary_status';
+export { SummaryStatus } from './summary_status'; // TODO this line can be removed, component is only used by other components
 export { PageLoading } from './page_loading';
-export { ElasticsearchOverview } from './elasticsearch';
+export {
+  ElasticsearchOverview,
+  ElasticsearchNodes,
+  ElasticsearchIndices
+} from './elasticsearch';

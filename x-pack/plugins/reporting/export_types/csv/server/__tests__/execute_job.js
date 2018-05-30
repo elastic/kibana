@@ -7,15 +7,15 @@
 import expect from 'expect.js';
 import Puid from 'puid';
 import sinon from 'sinon';
-import 'sinon-as-promised';
 import nodeCrypto from '@elastic/node-crypto';
-import { resolveKibanaPath } from '@kbn/plugin-helpers';
-import { executeJobFactory } from '../execute_job';
+
 import { CancellationToken } from '../../../../server/lib/esqueue/helpers/cancellation_token';
-const { SavedObjectsClient } = require(resolveKibanaPath('src/server/saved_objects/client/saved_objects_client.js'));
-const { FieldFormat } = require(resolveKibanaPath('src/ui/field_formats/field_format.js'));
-const { FieldFormatsService } = require(resolveKibanaPath('src/ui/field_formats/field_formats_service.js'));
-const { createStringFormat } = require(resolveKibanaPath('src/core_plugins/kibana/common/field_formats/types/string.js'));
+import { SavedObjectsClient } from  '../../../../../../../src/server/saved_objects/client/saved_objects_client.js';
+import { FieldFormat } from  '../../../../../../../src/ui/field_formats/field_format.js';
+import { FieldFormatsService } from  '../../../../../../../src/ui/field_formats/field_formats_service.js';
+import { createStringFormat } from  '../../../../../../../src/core_plugins/kibana/common/field_formats/types/string.js';
+
+import { executeJobFactory } from '../execute_job';
 
 const delay = (ms) => new Promise(resolve => setTimeout(() => resolve(), ms));
 
@@ -369,7 +369,7 @@ describe('CSV Execute Job', function () {
       // that delays the Promise resolution so we have a chance to call cancellationToken.cancel().
       // Otherwise, we get into an endless loop, and don't have a chance to call cancel
       callWithRequestStub.restore();
-      callWithRequestStub = sinon.stub(clusterStub, 'callWithRequest', async function () {
+      callWithRequestStub = sinon.stub(clusterStub, 'callWithRequest').callsFake(async function () {
         await delay(1);
         return {
           hits: {

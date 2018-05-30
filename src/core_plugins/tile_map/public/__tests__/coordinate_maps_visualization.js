@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { CoordinateMapsVisualizationProvider } from '../coordinate_maps_visualization';
@@ -7,6 +26,8 @@ import { ImageComparator } from 'test_utils/image_comparator';
 import sinon from 'sinon';
 import dummyESResponse from './dummy_es_response.json';
 import initial from './initial.png';
+import blues from './blues.png';
+import shadedGeohashGrid from './shadedGeohashGrid.png';
 import heatmapRaw from './heatmap_raw.png';
 
 function mockRawData() {
@@ -75,7 +96,7 @@ describe('CoordinateMapsVisualizationTest', function () {
 
 
     const serviceSettings = $injector.get('serviceSettings');
-    sinon.stub(serviceSettings, '_getManifest', function (url) {
+    sinon.stub(serviceSettings, '_getManifest').callsFake((url) => {
       let contents = null;
       if (url.startsWith(tmsManifestUrl)) {
         contents = tmsManifest;
@@ -180,7 +201,6 @@ describe('CoordinateMapsVisualizationTest', function () {
       coordinateMapVisualization.destroy();
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
 
-
     });
 
     it('should toggle back&forth OK between mapTypes', async function () {
@@ -213,6 +233,61 @@ describe('CoordinateMapsVisualizationTest', function () {
       });
 
       const mismatchedPixels = await compareImage(initial, 0);
+      coordinateMapVisualization.destroy();
+      expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
+
+    });
+
+    it('should toggle to different color schema ok', async function () {
+
+      const coordinateMapVisualization = new CoordinateMapsVisualization(domNode, vis);
+      await coordinateMapVisualization.render(dummyESResponse, {
+        resize: false,
+        params: true,
+        aggs: true,
+        data: true,
+        uiState: false
+      });
+
+
+      vis.params.colorSchema = 'Blues';
+      await coordinateMapVisualization.render(dummyESResponse, {
+        resize: false,
+        params: true,
+        aggs: false,
+        data: false,
+        uiState: false
+      });
+
+      const mismatchedPixels = await compareImage(blues, 0);
+      coordinateMapVisualization.destroy();
+      expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
+
+    });
+
+    it('should toggle to different color schema and maptypes ok', async function () {
+
+      const coordinateMapVisualization = new CoordinateMapsVisualization(domNode, vis);
+      await coordinateMapVisualization.render(dummyESResponse, {
+        resize: false,
+        params: true,
+        aggs: true,
+        data: true,
+        uiState: false
+      });
+
+
+      vis.params.colorSchema = 'Greens';
+      vis.params.mapType = 'Shaded Geohash Grid';
+      await coordinateMapVisualization.render(dummyESResponse, {
+        resize: false,
+        params: true,
+        aggs: false,
+        data: false,
+        uiState: false
+      });
+
+      const mismatchedPixels = await compareImage(shadedGeohashGrid, 0);
       coordinateMapVisualization.destroy();
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
 

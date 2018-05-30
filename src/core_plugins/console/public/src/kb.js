@@ -1,56 +1,75 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 const $ = require('jquery');
 const _ = require('lodash');
 const mappings = require('./mappings');
 const Api = require('./kb/api');
-const autocomplete_engine = require('./autocomplete/engine');
+const autocompleteEngine = require('./autocomplete/engine');
 
 let ACTIVE_API = new Api();
 
 function nonValidIndexType(token) {
-  return !(token === "_all" || token[0] !== "_");
+  return !(token === '_all' || token[0] !== '_');
 }
 
-function IndexAutocompleteComponent(name, parent, multi_valued) {
-  autocomplete_engine.ListComponent.call(this, name, mappings.getIndices, parent, multi_valued);
+function IndexAutocompleteComponent(name, parent, multiValued) {
+  autocompleteEngine.ListComponent.call(this, name, mappings.getIndices, parent, multiValued);
 }
 
 IndexAutocompleteComponent.prototype = _.create(
-  autocomplete_engine.ListComponent.prototype,
+  autocompleteEngine.ListComponent.prototype,
   { 'constructor': IndexAutocompleteComponent });
 
 (function (cls) {
   cls.validateTokens = function (tokens) {
-    if (!this.multi_valued && tokens.length > 1) {
+    if (!this.multiValued && tokens.length > 1) {
       return false;
     }
     return !_.find(tokens, nonValidIndexType);
   };
 
   cls.getDefaultTermMeta = function () {
-    return "index"
+    return 'index';
   };
 
   cls.getContextKey = function () {
-    return "indices";
+    return 'indices';
   };
-})(IndexAutocompleteComponent.prototype);
+}(IndexAutocompleteComponent.prototype));
 
 
 function TypeGenerator(context) {
   return mappings.getTypes(context.indices);
 }
 
-function TypeAutocompleteComponent(name, parent, multi_valued) {
-  autocomplete_engine.ListComponent.call(this, name, TypeGenerator, parent, multi_valued);
+function TypeAutocompleteComponent(name, parent, multiValued) {
+  autocompleteEngine.ListComponent.call(this, name, TypeGenerator, parent, multiValued);
 }
 
 TypeAutocompleteComponent.prototype = _.create(
-  autocomplete_engine.ListComponent.prototype,
+  autocompleteEngine.ListComponent.prototype,
   { 'constructor': TypeAutocompleteComponent });
 
 (function (cls) {
   cls.validateTokens = function (tokens) {
-    if (!this.multi_valued && tokens.length > 1) {
+    if (!this.multiValued && tokens.length > 1) {
       return false;
     }
 
@@ -58,13 +77,13 @@ TypeAutocompleteComponent.prototype = _.create(
   };
 
   cls.getDefaultTermMeta = function () {
-    return "type"
+    return 'type';
   };
 
   cls.getContextKey = function () {
-    return "types";
+    return 'types';
   };
-})(TypeAutocompleteComponent.prototype);
+}(TypeAutocompleteComponent.prototype));
 
 function FieldGenerator(context) {
   return _.map(mappings.getFields(context.indices, context.types), function (field) {
@@ -72,17 +91,17 @@ function FieldGenerator(context) {
   });
 }
 
-function FieldAutocompleteComponent(name, parent, multi_valued) {
-  autocomplete_engine.ListComponent.call(this, name, FieldGenerator, parent, multi_valued);
+function FieldAutocompleteComponent(name, parent, multiValued) {
+  autocompleteEngine.ListComponent.call(this, name, FieldGenerator, parent, multiValued);
 }
 
 FieldAutocompleteComponent.prototype = _.create(
-  autocomplete_engine.ListComponent.prototype,
+  autocompleteEngine.ListComponent.prototype,
   { 'constructor': FieldAutocompleteComponent });
 
 (function (cls) {
   cls.validateTokens = function (tokens) {
-    if (!this.multi_valued && tokens.length > 1) {
+    if (!this.multiValued && tokens.length > 1) {
       return false;
     }
 
@@ -92,22 +111,22 @@ FieldAutocompleteComponent.prototype = _.create(
   };
 
   cls.getDefaultTermMeta = function () {
-    return "field"
+    return 'field';
   };
 
   cls.getContextKey = function () {
-    return "fields";
+    return 'fields';
   };
-})(FieldAutocompleteComponent.prototype);
+}(FieldAutocompleteComponent.prototype));
 
 
 function IdAutocompleteComponent(name, parent, multi) {
-  autocomplete_engine.SharedComponent.call(this, name, parent);
-  this.multi_match = multi
+  autocompleteEngine.SharedComponent.call(this, name, parent);
+  this.multi_match = multi;
 }
 
 IdAutocompleteComponent.prototype = _.create(
-  autocomplete_engine.SharedComponent.prototype,
+  autocompleteEngine.SharedComponent.prototype,
   { 'constructor': IdAutocompleteComponent });
 
 (function (cls) {
@@ -120,18 +139,18 @@ IdAutocompleteComponent.prototype = _.create(
     }
     token = Array.isArray(token) ? token : [token];
     if (_.find(token, function (t) {
-        return t.match(/[\/,]/);
-      })) {
+      return t.match(/[\/,]/);
+    })) {
       return null;
     }
-    var r = Object.getPrototypeOf(cls).match.call(this, token, context, editor);
+    const r = Object.getPrototypeOf(cls).match.call(this, token, context, editor);
     r.context_values = r.context_values || {};
-    r.context_values['id'] = token;
+    r.context_values.id = token;
     return r;
   };
-})(IdAutocompleteComponent.prototype);
+}(IdAutocompleteComponent.prototype));
 
-var parametrizedComponentFactories = {
+const parametrizedComponentFactories = {
 
   'index': function (name, parent) {
     return new IndexAutocompleteComponent(name, parent, false);
@@ -158,11 +177,11 @@ var parametrizedComponentFactories = {
     return new FieldAutocompleteComponent(name, parent, false);
   },
   'nodes': function (name, parent) {
-    return new autocomplete_engine.ListComponent(name, ["_local", "_master", "data:true", "data:false",
-      "master:true", "master:false"], parent)
+    return new autocompleteEngine.ListComponent(name, ['_local', '_master', 'data:true', 'data:false',
+      'master:true', 'master:false'], parent);
   },
   'node': function (name, parent) {
-    return new autocomplete_engine.ListComponent(name, [], parent, false)
+    return new autocompleteEngine.ListComponent(name, [], parent, false);
   }
 };
 
@@ -171,13 +190,13 @@ export function getUnmatchedEndpointComponents() {
 }
 
 export function getEndpointDescriptionByEndpoint(endpoint) {
-  return ACTIVE_API.getEndpointDescriptionByEndpoint(endpoint)
+  return ACTIVE_API.getEndpointDescriptionByEndpoint(endpoint);
 }
 
 export function getEndpointBodyCompleteComponents(endpoint) {
-  var desc = getEndpointDescriptionByEndpoint(endpoint);
+  const desc = getEndpointDescriptionByEndpoint(endpoint);
   if (!desc) {
-    throw new Error("failed to resolve endpoint ['" + endpoint + "']");
+    throw new Error('failed to resolve endpoint [\'' + endpoint + '\']');
   }
   return desc.bodyAutocompleteRootComponents;
 }
@@ -193,8 +212,8 @@ export function getGlobalAutocompleteComponents(term, throwOnMissing) {
 function loadApisFromJson(json, urlParametrizedComponentFactories, bodyParametrizedComponentFactories) {
   urlParametrizedComponentFactories = urlParametrizedComponentFactories || parametrizedComponentFactories;
   bodyParametrizedComponentFactories = bodyParametrizedComponentFactories || urlParametrizedComponentFactories;
-  let api = new Api(urlParametrizedComponentFactories, bodyParametrizedComponentFactories);
-  let names = [];
+  const api = new Api(urlParametrizedComponentFactories, bodyParametrizedComponentFactories);
+  const names = [];
   _.each(json, function (apiJson, name) {
     names.unshift(name);
     _.each(apiJson.globals || {}, function (globalJson, globalName) {
@@ -204,32 +223,32 @@ function loadApisFromJson(json, urlParametrizedComponentFactories, bodyParametri
       api.addEndpointDescription(endpointName, endpointJson);
     });
   });
-  api.name = names.join(",");
+  api.name = names.join(',');
   return api;
 }
 
 export function setActiveApi(api) {
   if (_.isString(api)) {
     $.ajax({
-        url: '../api/console/api_server?sense_version=' + encodeURIComponent('@@SENSE_VERSION') + "&apis=" + encodeURIComponent(api),
-        dataType: "json", // disable automatic guessing
-      }
+      url: '../api/console/api_server?sense_version=' + encodeURIComponent('@@SENSE_VERSION') + '&apis=' + encodeURIComponent(api),
+      dataType: 'json', // disable automatic guessing
+    }
     ).then(
       function (data) {
         setActiveApi(loadApisFromJson(data));
       },
       function (jqXHR) {
-        console.log("failed to load API '" + api + "': " + jqXHR.responseText);
+        console.log('failed to load API \'' + api + '\': ' + jqXHR.responseText);
       });
     return;
 
   }
-  console.log("setting active api to [" + api.name + "]");
+  console.log('setting active api to [' + api.name + ']');
 
   ACTIVE_API = api;
 }
 
-setActiveApi('es_5_0');
+setActiveApi('es_6_0');
 
 export const _test = {
   loadApisFromJson: loadApisFromJson

@@ -149,8 +149,14 @@ export default class WatcherFlyout extends Component {
 
     const timeRange =
       this.state.schedule === 'interval'
-        ? `now-${this.state.interval.value}${this.state.interval.unit}`
-        : 'now-24h';
+        ? {
+            value: this.state.interval.value,
+            unit: this.state.interval.unit
+          }
+        : {
+            value: 24,
+            unit: 'h'
+          };
 
     return createErrorGroupWatch({
       emails,
@@ -255,6 +261,7 @@ export default class WatcherFlyout extends Component {
           <EuiFormRow
             label="Occurrences threshold per error group"
             helpText="Threshold to be met for error group to be included in report."
+            compressed
           >
             <EuiFieldNumber
               icon="number"
@@ -282,6 +289,7 @@ export default class WatcherFlyout extends Component {
 
           <EuiFormRow
             helpText={`The daily report will be sent at ${dailyTimeFormatted} / ${dailyTime12HourFormatted}.`}
+            compressed
           >
             <EuiSelect
               value={dailyTime}
@@ -303,7 +311,10 @@ export default class WatcherFlyout extends Component {
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <SmallInput>
-                <EuiFormRow helpText="Time interval between reports.">
+                <EuiFormRow
+                  helpText="Time interval between reports."
+                  compressed
+                >
                   <EuiFieldNumber
                     icon="clock"
                     min={1}
@@ -315,21 +326,23 @@ export default class WatcherFlyout extends Component {
               </SmallInput>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiSelect
-                value={this.state.interval.unit}
-                onChange={this.onChangeIntervalUnit}
-                options={[
-                  {
-                    value: 'm',
-                    text: 'mins'
-                  },
-                  {
-                    value: 'h',
-                    text: 'hrs'
-                  }
-                ]}
-                disabled={this.state.schedule !== 'interval'}
-              />
+              <EuiFormRow compressed>
+                <EuiSelect
+                  value={this.state.interval.unit}
+                  onChange={this.onChangeIntervalUnit}
+                  options={[
+                    {
+                      value: 'm',
+                      text: 'mins'
+                    },
+                    {
+                      value: 'h',
+                      text: 'hrs'
+                    }
+                  ]}
+                  disabled={this.state.schedule !== 'interval'}
+                />
+              </EuiFormRow>
             </EuiFlexItem>
           </EuiFlexGroup>
 
@@ -348,6 +361,7 @@ export default class WatcherFlyout extends Component {
           {this.state.actions.email && (
             <EuiFormRow
               label="Receipients (seperated with comma)"
+              compressed
               helpText={
                 <span>
                   If you have not configured email, please see the{' '}
@@ -378,6 +392,7 @@ export default class WatcherFlyout extends Component {
           {this.state.actions.slack && (
             <EuiFormRow
               label="Slack Webhook URL"
+              compressed
               helpText={
                 <span>
                   To get a Slack webhook, please see the{' '}
@@ -438,7 +453,7 @@ export default class WatcherFlyout extends Component {
 
     return (
       <React.Fragment>
-        {this.props.isFlyoutOpen && flyout}
+        {this.props.isOpen && flyout}
         <EuiGlobalToastList
           toasts={this.state.toasts}
           dismissToast={this.removeToasts}
@@ -450,7 +465,7 @@ export default class WatcherFlyout extends Component {
 }
 
 WatcherFlyout.propTypes = {
-  isFlyoutOpen: PropTypes.bool.isRequired,
+  isOpen: PropTypes.bool.isRequired,
   serviceName: PropTypes.string,
   onClose: PropTypes.func.isRequired
 };

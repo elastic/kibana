@@ -27,8 +27,10 @@ export function dashboardMode(kibana) {
     uiExports: {
       uiSettingDefaults: {
         [CONFIG_DASHBOARD_ONLY_MODE_ROLES]: {
-          description: 'Roles that belong to View Dashboards Only mode',
-          value: ['kibana_dashboard_only_user'],
+          name: 'Dashboards only roles',
+          description: `Roles that belong to View Dashboards Only mode`,
+          value: ['kibana_dashboard_only_user', 'kibana_rbac_dashboard_only_user'],
+          category: ['dashboard'],
         }
       },
       app: {
@@ -38,18 +40,6 @@ export function dashboardMode(kibana) {
         hidden: true,
         description: 'view dashboards',
         main: 'plugins/dashboard_mode/dashboard_viewer',
-        uses: [
-          'visTypes',
-          'visResponseHandlers',
-          'visRequestHandlers',
-          'visEditorTypes',
-          'savedObjectTypes',
-          'embeddableFactories',
-          'spyModes',
-          'navbarExtensions',
-          'docViews',
-          'fieldFormats'
-        ],
         links: [
           {
             id: 'kibana:dashboard',

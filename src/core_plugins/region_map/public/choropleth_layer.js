@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import $ from 'jquery';
 import L from 'leaflet';
 import _ from 'lodash';
@@ -6,6 +25,7 @@ import { KibanaMapLayer } from 'ui/vis/map/kibana_map_layer';
 import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
 import * as topojson from 'topojson-client';
 import { toastNotifications } from 'ui/notify';
+import * as colorUtil from 'ui/vis/map/color_util';
 
 const EMPTY_STYLE = {
   weight: 1,
@@ -179,7 +199,7 @@ CORS configuration of the server permits requests from the Kibana application on
 
     if (this._metrics && this._metrics.length > 0) {
       const { min, max } = getMinMax(this._metrics);
-      this._legendColors = getLegendColors(this._colorRamp);
+      this._legendColors = colorUtil.getLegendColors(this._colorRamp);
       const quantizeDomain = (min !== max) ? [min, max] : d3.scale.quantize().domain();
       this._legendQuantizer = d3.scale.quantize().domain(quantizeDomain).range(this._legendColors);
     }
@@ -420,39 +440,15 @@ function getMinMax(data) {
   return { min, max };
 }
 
-function getLegendColors(colorRamp) {
-  const colors = [];
-  colors[0] = getColor(colorRamp, 0);
-  colors[1] = getColor(colorRamp, Math.floor(colorRamp.length * 1 / 4));
-  colors[2] = getColor(colorRamp, Math.floor(colorRamp.length * 2 / 4));
-  colors[3] = getColor(colorRamp, Math.floor(colorRamp.length * 3 / 4));
-  colors[4] = getColor(colorRamp, colorRamp.length - 1);
-  return colors;
-}
-
-function getColor(colorRamp, i) {
-
-  if (!colorRamp[i]) {
-    return getColor();
-  }
-
-  const color = colorRamp[i][1];
-  const red = Math.floor(color[0] * 255);
-  const green = Math.floor(color[1] * 255);
-  const blue = Math.floor(color[2] * 255);
-  return `rgb(${red},${green},${blue})`;
-}
-
-
 function getChoroplethColor(value, min, max, colorRamp) {
   if (min === max) {
-    return getColor(colorRamp, colorRamp.length - 1);
+    return colorUtil.getColor(colorRamp, colorRamp.length - 1);
   }
   const fraction = (value - min) / (max - min);
   const index = Math.round(colorRamp.length * fraction) - 1;
   const i = Math.max(Math.min(colorRamp.length - 1, index), 0);
 
-  return getColor(colorRamp, i);
+  return colorUtil.getColor(colorRamp, i);
 }
 
 

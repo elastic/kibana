@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 export function HeaderPageProvider({ getService, getPageObjects }) {
   const config = getService('config');
   const remote = getService('remote');
@@ -13,34 +32,45 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
 
     async clickSelector(selector) {
       log.debug(`clickSelector(${selector})`);
-      await retry.try(async () => await remote.findByCssSelector(selector).click());
+      await find.clickByCssSelector(selector);
+    }
+
+    async confirmTopNavTextContains(text) {
+      await retry.try(async () => {
+        const topNavText = await PageObjects.common.getTopNavText();
+        if (topNavText.toLowerCase().indexOf(text.toLowerCase()) < 0) {
+          throw new Error(`Top nav text ${topNavText} does not contain ${text} (case insensitive)`);
+        }
+      });
     }
 
     async clickDiscover() {
       log.debug('click Discover tab');
       await this.clickSelector('a[href*=\'discover\']');
       await PageObjects.common.waitForTopNavToBeVisible();
-      await this.isGlobalLoadingIndicatorHidden();
+      await this.awaitGlobalLoadingIndicatorHidden();
     }
 
     async clickVisualize() {
       log.debug('click Visualize tab');
       await this.clickSelector('a[href*=\'visualize\']');
       await PageObjects.common.waitForTopNavToBeVisible();
-      await this.isGlobalLoadingIndicatorHidden();
+      await this.confirmTopNavTextContains('visualize');
+      await this.awaitGlobalLoadingIndicatorHidden();
     }
 
     async clickDashboard() {
       log.debug('click Dashboard tab');
       await this.clickSelector('a[href*=\'dashboard\']');
       await PageObjects.common.waitForTopNavToBeVisible();
-      await this.isGlobalLoadingIndicatorHidden();
+      await this.confirmTopNavTextContains('dashboard');
+      await this.awaitGlobalLoadingIndicatorHidden();
     }
 
     async clickManagement() {
       log.debug('click Management tab');
       await this.clickSelector('a[href*=\'management\']');
-      await this.isGlobalLoadingIndicatorHidden();
+      await this.awaitGlobalLoadingIndicatorHidden();
     }
 
     async clickSettings() {
@@ -158,7 +188,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       log.debug('--Setting To Time : ' + toTime);
       await this.setToTime(toTime);
       await this.clickGoButton();
-      await this.isGlobalLoadingIndicatorHidden();
+      await this.awaitGlobalLoadingIndicatorHidden();
     }
 
     async setQuickTime(quickTime) {
@@ -225,7 +255,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
           throw exception;
         }
       }
-      await this.isGlobalLoadingIndicatorHidden();
+      await this.awaitGlobalLoadingIndicatorHidden();
     }
 
     async isGlobalLoadingIndicatorVisible() {
@@ -233,9 +263,9 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       return await testSubjects.exists('globalLoadingIndicator');
     }
 
-    async isGlobalLoadingIndicatorHidden() {
-      log.debug('isGlobalLoadingIndicatorHidden');
-      return await find.byCssSelector('[data-test-subj="globalLoadingIndicator"].ng-hide', defaultFindTimeout * 10);
+    async awaitGlobalLoadingIndicatorHidden() {
+      log.debug('awaitGlobalLoadingIndicatorHidden');
+      await testSubjects.find('globalLoadingIndicator-hidden', defaultFindTimeout * 10);
     }
 
     async getPrettyDuration() {

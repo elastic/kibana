@@ -2,7 +2,9 @@
 
 exports[`IndicesList should change pages 1`] = `
 <div>
-  <EuiTable>
+  <EuiTable
+    responsive={true}
+  >
     <EuiTableBody>
       <EuiTableRow
         key="0"
@@ -32,6 +34,7 @@ exports[`IndicesList should change pages 1`] = `
   <EuiFlexGroup
     alignItems="center"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="spaceBetween"
     responsive={true}
@@ -70,24 +73,28 @@ exports[`IndicesList should change pages 1`] = `
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 5
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 10
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 20
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 50
               </EuiContextMenuItem>,
@@ -102,7 +109,9 @@ exports[`IndicesList should change pages 1`] = `
 
 exports[`IndicesList should change per page 1`] = `
 <div>
-  <EuiTable>
+  <EuiTable
+    responsive={true}
+  >
     <EuiTableBody>
       <EuiTableRow
         key="0"
@@ -122,6 +131,7 @@ exports[`IndicesList should change per page 1`] = `
   <EuiFlexGroup
     alignItems="center"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="spaceBetween"
     responsive={true}
@@ -160,24 +170,28 @@ exports[`IndicesList should change per page 1`] = `
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 5
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 10
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 20
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 50
               </EuiContextMenuItem>,
@@ -202,7 +216,9 @@ exports[`IndicesList should change per page 1`] = `
 
 exports[`IndicesList should highlight the query in the matches 1`] = `
 <div>
-  <EuiTable>
+  <EuiTable
+    responsive={true}
+  >
     <EuiTableBody>
       <EuiTableRow
         key="0"
@@ -237,6 +253,7 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
   <EuiFlexGroup
     alignItems="center"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="spaceBetween"
     responsive={true}
@@ -275,24 +292,28 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 5
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 10
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 20
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 50
               </EuiContextMenuItem>,
@@ -307,7 +328,9 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
 
 exports[`IndicesList should render normally 1`] = `
 <div>
-  <EuiTable>
+  <EuiTable
+    responsive={true}
+  >
     <EuiTableBody>
       <EuiTableRow
         key="0"
@@ -337,6 +360,7 @@ exports[`IndicesList should render normally 1`] = `
   <EuiFlexGroup
     alignItems="center"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="spaceBetween"
     responsive={true}
@@ -375,24 +399,28 @@ exports[`IndicesList should render normally 1`] = `
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 5
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 10
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 20
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 50
               </EuiContextMenuItem>,
@@ -407,7 +435,9 @@ exports[`IndicesList should render normally 1`] = `
 
 exports[`IndicesList updating props should render all new indices 1`] = `
 <div>
-  <EuiTable>
+  <EuiTable
+    responsive={true}
+  >
     <EuiTableBody>
       <EuiTableRow
         key="0"
@@ -517,6 +547,7 @@ exports[`IndicesList updating props should render all new indices 1`] = `
   <EuiFlexGroup
     alignItems="center"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="spaceBetween"
     responsive={true}
@@ -555,24 +586,28 @@ exports[`IndicesList updating props should render all new indices 1`] = `
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 5
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 10
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 20
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 50
               </EuiContextMenuItem>,

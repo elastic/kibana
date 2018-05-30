@@ -10,7 +10,7 @@ export function MonitoringKibanaInstanceProvider({ getService }) {
 
   const SUBJ_INSTANCE_PAGE = 'kibanaInstancePage';
 
-  const SUBJ_SUMMARY = 'kibanaInstanceStatus';
+  const SUBJ_SUMMARY = 'kibanaDetailStatus';
   const SUBJ_SUMMARY_TRANSPORT_ADDRESS = `${SUBJ_SUMMARY} transportAddress`;
   const SUBJ_SUMMARY_OS_FREE_MEMORY = `${SUBJ_SUMMARY} osFreeMemory`;
   const SUBJ_SUMMARY_VERSION = `${SUBJ_SUMMARY} version`;

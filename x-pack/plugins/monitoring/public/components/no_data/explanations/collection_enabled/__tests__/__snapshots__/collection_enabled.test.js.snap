@@ -27,7 +27,9 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
       <span
         className="euiTextColor euiTextColor--subdued"
       >
-        <EuiText>
+        <EuiText
+          grow={true}
+        >
           <div
             className="euiText"
           >
@@ -47,7 +49,9 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
       className="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
     />
   </EuiHorizontalRule>
-  <EuiText>
+  <EuiText
+    grow={true}
+  >
     <div
       className="euiText"
     >
@@ -111,13 +115,14 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
   <EuiFlexGroup
     alignItems="center"
     component="div"
+    direction="row"
     gutterSize="s"
     justifyContent="spaceAround"
     responsive={true}
     wrap={false}
   >
     <div
-      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--responsive"
+      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
       <EuiFlexItem
         component="div"

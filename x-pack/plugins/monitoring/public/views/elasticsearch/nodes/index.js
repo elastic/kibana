@@ -4,39 +4,56 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { find } from 'lodash';
 import uiRoutes from 'ui/routes';
+import template from './index.html';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { MonitoringViewBaseTableController } from '../../';
-import { getPageData } from './get_page_data';
-import template from './index.html';
+import { ElasticsearchNodes } from '../../../components';
 
 uiRoutes.when('/elasticsearch/nodes', {
   template,
   resolve: {
-    clusters: function (Private) {
+    clusters(Private) {
       const routeInit = Private(routeInitProvider);
       return routeInit();
-    },
-    pageData: getPageData
+    }
   },
-  controllerAs: 'esNodes',
-  controller: class EsNodesList extends MonitoringViewBaseTableController {
-
+  controllerAs: 'elasticsearchNodes',
+  controller: class ElasticsearchNodesController extends MonitoringViewBaseTableController {
     constructor($injector, $scope) {
+      const $route = $injector.get('$route');
+      const globalState = $injector.get('globalState');
+      const showCgroupMetricsElasticsearch = $injector.get('showCgroupMetricsElasticsearch');
+
+      $scope.cluster = find($route.current.locals.clusters, {
+        cluster_uuid: globalState.cluster_uuid
+      });
+
       super({
         title: 'Elasticsearch - Nodes',
         storageKey: 'elasticsearch.nodes',
-        getPageData,
+        api: `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/elasticsearch/nodes`,
+        reactNodeId: 'elasticsearchNodesReact',
+        defaultData: {},
         $scope,
         $injector
       });
 
-      const $route = $injector.get('$route');
-      this.data = $route.current.locals.pageData;
-      const globalState = $injector.get('globalState');
-      $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
-    }
+      $scope.$watch(() => this.data, data => {
+        this.renderReact(data);
+      });
 
+      this.renderReact = ({ clusterStatus, nodes }) => {
+        super.renderReact(
+          <ElasticsearchNodes
+            clusterStatus={clusterStatus}
+            nodes={nodes}
+            showCgroupMetricsElasticsearch={showCgroupMetricsElasticsearch}
+          />
+        );
+      };
+    }
   }
 });

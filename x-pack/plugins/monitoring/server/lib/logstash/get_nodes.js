@@ -9,7 +9,7 @@ import moment from 'moment';
 import { checkParam } from '../error_missing_required';
 import { createQuery } from '../create_query';
 import { calculateAvailability } from '../calculate_availability';
-import { ElasticsearchMetric } from '../metrics';
+import { LogstashMetric } from '../metrics';
 
 /*
  * Get detailed info for Logstash's in the cluster
@@ -38,7 +38,7 @@ export function getNodes(req, lsIndexPattern, { clusterUuid }) {
         start,
         end,
         clusterUuid,
-        metric: ElasticsearchMetric.getMetricFields(),
+        metric: LogstashMetric.getMetricFields(),
         type: 'logstash_stats'
       }),
       collapse: {

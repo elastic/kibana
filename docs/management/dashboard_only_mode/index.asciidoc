@@ -1,0 +1,26 @@
+[role="xpack"]
+[[xpack-dashboard-only-mode]]
+== Kibana Dashboard Only Mode
+
+{xpack} gives the ability for admins to limit what certain users see when they log in to Kibana with a
+reserved `kibana_dashboard_only_user` role.
+
+When you assign a user this role, the next time they sign in to Kibana they will only be able to see the Dashboard app,
+and no editing tools will be available.
+
+image:management/dashboard_only_mode/images/view_only_listing_page.png["View Only Dashboard Listing Page"]
+
+image:management/dashboard_only_mode/images/view_only_dashboard.png["View Only Dashboard"]
+
+IMPORTANT: If a user is also assigned the reserved `superuser` role, they will be able to see all of Kibana and have
+full access.
+
+The `kibana_dashboard_only_user` role comes preconfigured with read only permissions on the `.kibana` index.
+
+IMPORTANT: If you assign a user the `kibana_dashboard_only_user` role, along with a role with write permissions on
+the .kibana index, they *will* have write access, even though the controls will remain hidden in the kibana
+UI.
+
+For advanced set ups that use a custom Kibana index,
+<<advanced-dashboard-mode-configuration, advanced configurations>> are possible.
+include::advanced_configuration.asciidoc[]

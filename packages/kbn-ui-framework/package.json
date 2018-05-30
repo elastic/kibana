@@ -65,7 +65,7 @@
     "redux": "3.7.2",
     "redux-thunk": "2.2.0",
     "sass-loader": "6.0.6",
-    "sinon": "1.17.2",
+    "sinon": "^5.0.7",
     "style-loader": "0.19.0",
     "webpack": "3.6.0",
     "webpack-dev-server": "2.9.1",

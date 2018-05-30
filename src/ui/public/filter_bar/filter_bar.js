@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import template from './filter_bar.html';
 import '../directives/json_input';
@@ -30,9 +49,10 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
     template,
     restrict: 'E',
     scope: {
-      indexPatterns: '='
+      indexPatterns: '=',
+      tooltipContent: '=',
     },
-    link: function ($scope) {
+    link: function ($scope, $elem) {
       // bind query filter actions to the scope
       [
         'addFilters',
@@ -49,6 +69,32 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
       });
 
       $scope.state = getAppState();
+
+      $scope.showCollapseLink = () => {
+        const pill = $elem.find('filter-pill');
+        return pill[pill.length - 1].offsetTop > 10;
+      };
+
+      $scope.filterNavToggle = {
+        isOpen: true,
+        tooltipContent: 'Collapse to hide filters'
+      };
+
+      $scope.toggleFilterShown = () => {
+        const collapser = $elem.find('.filter-nav-link__collapser');
+        const filterPanelPill = $elem.find('.filter-panel__pill');
+        if ($scope.filterNavToggle.isOpen) {
+          $scope.filterNavToggle.tooltipContent = 'Expand to show filters';
+          collapser.attr('aria-expanded', 'false');
+          filterPanelPill.attr('style', 'width: calc(100% - 80px)');
+        } else {
+          $scope.filterNavToggle.tooltipContent = 'Collapse to hide filters';
+          collapser.attr('aria-expanded', 'true');
+          filterPanelPill.attr('style', 'width: auto');
+        }
+
+        $scope.filterNavToggle.isOpen = !$scope.filterNavToggle.isOpen;
+      };
 
       $scope.applyFilters = function (filters) {
         addAndInvertFilters(filterAppliedAndUnwrap(filters));

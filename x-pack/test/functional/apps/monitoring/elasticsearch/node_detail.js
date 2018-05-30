@@ -36,35 +36,35 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.monitoring.clickBreadcrumb('breadcrumbEsNodes'); // return back for next test
       });
 
-      it('master node with 20 indices and 38 shards', async () => {
+      it('should show node summary of master node with 20 indices and 38 shards', async () => {
         await nodesList.clickRowByResolver('jUT5KdxfRbORSCWkb5zjmA');
 
         expect(await nodeDetail.getSummary()).to.eql({
           transportAddress: '127.0.0.1:9300',
-          jvmHeap: 'JVM Heap: 29 %',
+          jvmHeap: 'JVM Heap: 29%',
           freeDiskSpace: 'Free Disk Space: 173.9 GB',
           documentCount: 'Documents: 24.8k',
           dataSize: 'Data: 50.4 MB',
           indicesCount: 'Indices: 20',
           shardsCount: 'Shards: 38',
           nodeType: 'Type: Master Node',
-          status: 'Health: Online',
+          status: 'Status: Online',
         });
       });
 
-      it('data node with 4 indices and 4 shards', async () => {
+      it('should show node summary of data node with 4 indices and 4 shards', async () => {
         await nodesList.clickRowByResolver('bwQWH-7IQY-mFPpfoaoFXQ');
 
         expect(await nodeDetail.getSummary()).to.eql({
           transportAddress: '127.0.0.1:9302',
-          jvmHeap: 'JVM Heap: 17 %',
+          jvmHeap: 'JVM Heap: 17%',
           freeDiskSpace: 'Free Disk Space: 173.9 GB',
           documentCount: 'Documents: 240',
           dataSize: 'Data: 1.4 MB',
           indicesCount: 'Indices: 4',
           shardsCount: 'Shards: 4',
           nodeType: 'Type: Node',
-          status: 'Health: Online',
+          status: 'Status: Online',
         });
       });
     });
@@ -87,7 +87,7 @@ export default function ({ getService, getPageObjects }) {
         await tearDown();
       });
 
-      it('shows NA', async () => {
+      it('should show node summary of NA for offline node', async () => {
         await nodesList.clickRowByResolver('1jxg5T33TWub-jJL4qP0Wg');
 
         expect(await nodeDetail.getSummary()).to.eql({
@@ -99,7 +99,7 @@ export default function ({ getService, getPageObjects }) {
           indicesCount: 'Indices: N/A',
           shardsCount: 'Shards: N/A',
           nodeType: 'Type: Offline Node',
-          status: 'Health: Offline',
+          status: 'Status: Offline',
         });
       });
     });
