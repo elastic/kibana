@@ -30,6 +30,7 @@ import {
   EuiLoadingSpinner,
   EuiPopover,
   EuiTextColor,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { RequestStatus } from 'ui/inspector/adapters';
@@ -134,12 +135,18 @@ class RequestSelector extends Component {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           { selectedRequest.status !== RequestStatus.PENDING &&
-            <EuiBadge
-              color={selectedRequest.status === RequestStatus.OK ? 'secondary' : 'danger'}
-              iconType={selectedRequest.status === RequestStatus.OK ? 'check' : 'cross'}
+            <EuiToolTip
+              position="left"
+              title={selectedRequest.status === RequestStatus.OK ? 'Request succeeded' : 'Request failed'}
+              content="The total time the request took."
             >
-              {selectedRequest.time}ms
-            </EuiBadge>
+              <EuiBadge
+                color={selectedRequest.status === RequestStatus.OK ? 'secondary' : 'danger'}
+                iconType={selectedRequest.status === RequestStatus.OK ? 'check' : 'cross'}
+              >
+                {selectedRequest.time}ms
+              </EuiBadge>
+            </EuiToolTip>
           }
           { selectedRequest.status === RequestStatus.PENDING &&
             <EuiLoadingSpinner
