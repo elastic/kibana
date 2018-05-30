@@ -174,15 +174,12 @@ function pluginTypes(plugin) {
 }
 
 function assertUniqueMigrationIds(plugin, migrationIds) {
-  const dup = _.chain(migrationIds)
-    .groupBy(_.identity)
-    .values()
-    .find(v => v.length > 1)
-    .first()
-    .value();
-
-  if (dup) {
-    throw new Error(`Plugin "${plugin.id}" has migration "${dup}" defined more than once.`);
+  const set = new Set();
+  for (const id of migrationIds) {
+    if (set.has(id)) {
+      throw new Error(`Plugin "${plugin.id}" has migration "${id}" defined more than once.`);
+    }
+    set.add(id);
   }
 }
 
