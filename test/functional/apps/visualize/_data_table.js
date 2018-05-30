@@ -122,7 +122,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.setInterval('Daily');
         await PageObjects.visualize.clickGo();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        const data = await PageObjects.visualize.getDataTableData();
+        const data = await PageObjects.visualize.getTableVisData();
         expect(data.trim().split('\n')).to.be.eql([
           '2015-09-20', '4,757',
           '2015-09-21', '4,614',
@@ -133,7 +133,7 @@ export default function ({ getService, getPageObjects }) {
       it('should correctly filter for applied time filter on the main timefield', async () => {
         await filterBar.addFilter('@timestamp', 'is between', ['2015-09-19', '2015-09-21']);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        const data = await PageObjects.visualize.getDataTableData();
+        const data = await PageObjects.visualize.getTableVisData();
         expect(data.trim().split('\n')).to.be.eql([
           '2015-09-20', '4,757',
         ]);
