@@ -49,7 +49,7 @@ export function hasPrivilegesWithServer(server) {
       return {
         success,
         missing: missingPrivileges,
-        user: request.user,
+        username: privilegeCheck.username,
       };
     };
   };
