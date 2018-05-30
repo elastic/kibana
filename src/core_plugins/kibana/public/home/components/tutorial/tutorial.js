@@ -25,6 +25,7 @@ import { Footer } from './footer';
 import { Introduction } from './introduction';
 import { InstructionSet } from './instruction_set';
 import { RadioButtonGroup } from './radio_button_group';
+import { SavedObjectsInstaller } from './saved_objects_installer';
 import { EuiSpacer, EuiPage, EuiPanel, EuiLink, EuiText } from '@elastic/eui';
 import * as StatusCheckStates from './status_check_states';
 
@@ -235,6 +236,20 @@ export class Tutorial extends React.Component {
     });
   };
 
+  renderSavedObjectsInstaller = () => {
+    if (!this.state.tutorial.savedObjects) {
+      return;
+    }
+
+    return (
+      <SavedObjectsInstaller
+        bulkCreate={this.props.bulkCreate}
+        savedObjects={this.state.tutorial.savedObjects}
+      />
+    );
+
+  }
+
   renderFooter = () => {
     let label;
     let url;
@@ -305,6 +320,7 @@ export class Tutorial extends React.Component {
           <EuiSpacer />
           <EuiPanel paddingSize="l">
             {this.renderInstructionSets(instructions)}
+            {this.renderSavedObjectsInstaller()}
             {this.renderFooter()}
           </EuiPanel>
         </div>
@@ -327,4 +343,5 @@ Tutorial.propTypes = {
   getTutorial: PropTypes.func.isRequired,
   replaceTemplateStrings: PropTypes.func.isRequired,
   tutorialId: PropTypes.string.isRequired,
+  bulkCreate: PropTypes.func.isRequired,
 };

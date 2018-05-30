@@ -108,4 +108,7 @@ export const tutorialSchema = {
 
   // Elastic stack artifacts produced by product when it is setup and run.
   artifacts: artifactsSchema,
+
+  // saved objects used by data module.
+  savedObjects: Joi.array().items(),
 };

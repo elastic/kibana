@@ -22,6 +22,7 @@ import chrome from 'ui/chrome';
 import routes from 'ui/routes';
 import template from './home_ng_wrapper.html';
 import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { uiModules } from 'ui/modules';
 import {
   HomeApp
@@ -37,6 +38,7 @@ function getRoute() {
   return {
     template,
     controller($scope, config, indexPatterns, Private) {
+      const savedObjectsClient = Private(SavedObjectsClientProvider);
       $scope.addBasePath = chrome.addBasePath;
       $scope.directories = Private(FeatureCatalogueRegistryProvider).inTitleOrder;
       $scope.recentlyAccessed = recentlyAccessed.get().map(item => {
@@ -49,6 +51,7 @@ function getRoute() {
         const getter = indexPatterns.getIds;
         getter.clearCache();
       };
+      $scope.bulkCreate = savedObjectsClient.bulkCreate;
     }
   };
 }

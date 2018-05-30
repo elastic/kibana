@@ -20,6 +20,7 @@
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions } from './on_prem';
 import { ELASTIC_CLOUD_INSTRUCTIONS } from './elastic_cloud';
+import { getSavedObjects } from './saved_objects';
 
 const apmIntro = 'Collect in-depth performance metrics and errors from inside your applications.';
 
@@ -64,5 +65,6 @@ export function apmSpecProvider(server) {
     onPrem: onPremInstructions(server),
     elasticCloud: ELASTIC_CLOUD_INSTRUCTIONS,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/apm/apm.png',
+    savedObjects: getSavedObjects(server),
   };
 }

@@ -17,10 +17,27 @@
  * under the License.
  */
 
-export { createBulkCreateRoute } from './bulk_create';
-export { createBulkGetRoute } from './bulk_get';
-export { createCreateRoute } from './create';
-export { createDeleteRoute } from './delete';
-export { createFindRoute } from './find';
-export { createGetRoute } from './get';
-export { createUpdateRoute } from './update';
+import Joi from 'joi';
+
+export const createBulkCreateRoute = (prereqs) => ({
+  path: '/api/saved_objects/_bulk_create',
+  method: 'POST',
+  config: {
+    pre: [prereqs.getSavedObjectsClient],
+    validate: {
+      query: Joi.object().keys({
+        overwrite: Joi.boolean().default(false)
+      }).default(),
+      payload: Joi.array().items(Joi.object({
+        type: Joi.string().required(),
+        id: Joi.string().required(),
+      }).required())
+    },
+    handler(request, reply) {
+      const { overwrite } = request.query;
+      const { savedObjectsClient } = request.pre;
+
+      reply(savedObjectsClient.bulkCreate(request.payload, { overwrite }));
+    }
+  }
+});

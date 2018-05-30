@@ -17,10 +17,39 @@
  * under the License.
  */
 
-export { createBulkCreateRoute } from './bulk_create';
-export { createBulkGetRoute } from './bulk_get';
-export { createCreateRoute } from './create';
-export { createDeleteRoute } from './delete';
-export { createFindRoute } from './find';
-export { createGetRoute } from './get';
-export { createUpdateRoute } from './update';
+import React from 'react';
+import PropTypes from 'prop-types';
+
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiButton,
+} from '@elastic/eui';
+
+export class SavedObjectsInstaller extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      isInstalling: false,
+    };
+  }
+
+  render() {
+    return (
+      <div>hello</div>
+    );
+  }
+}
+
+const savedObjectShape = PropTypes.shape({
+  id: PropTypes.string.isRequired,
+  type: PropTypes.string.isRequired,
+  attributes: PropTypes.arrayOf(PropTypes.object).isRequired,
+});
+
+SavedObjectsInstaller.propTypes = {
+  bulkCreate: PropTypes.func.isRequired,
+  savedObjects: PropTypes.arrayOf(savedObjectShape).isRequired,
+};
