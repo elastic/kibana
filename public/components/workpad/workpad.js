@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Shortcuts } from 'react-shortcuts';
-import { PageStack } from '../page_stack';
+import { WorkpadPage } from '../workpad_page';
 import { Fullscreen } from '../fullscreen';
 import './workpad.less';
 
@@ -9,7 +9,7 @@ export const Workpad = props => {
   const {
     selectedPageId,
     pages,
-    style,
+    totalElementCount,
     workpad,
     fetchAllRenderables,
     undoHistory,
@@ -22,9 +22,6 @@ export const Workpad = props => {
   } = props;
 
   const { height, width } = workpad;
-
-  // TODO: I think this is mixing in background color, that should be pushed down to a page component, otherwise reporting wont work right
-  const itsTheNewStyle = { ...style, height, width };
 
   const keyHandler = action => {
     // handle keypress events for editor and presentation events
@@ -57,12 +54,16 @@ export const Workpad = props => {
                 transform,
                 WebkitTransform: transform,
                 msTransform: transform,
+                height,
+                width,
               };
 
+          // NOTE: the data-shared-* attributes here are used for reporting
           return (
             <div
               className={`canvas__workpad ${isFullscreen ? 'fullscreen' : ''}`}
-              style={{ ...itsTheNewStyle, ...fsStyle }}
+              style={fsStyle}
+              data-shared-items-count={totalElementCount}
             >
               {isFullscreen && (
                 <Shortcuts
@@ -72,12 +73,15 @@ export const Workpad = props => {
                   global
                 />
               )}
-              <PageStack
-                pages={pages}
-                selectedPageId={selectedPageId}
-                height={height}
-                width={width}
-              />
+              {pages.map(page => (
+                <WorkpadPage
+                  key={page.id}
+                  page={page}
+                  isSelected={selectedPageId === page.id}
+                  height={height}
+                  width={width}
+                />
+              ))}
               <div
                 className="canvas__grid"
                 style={{ height, width, display: grid ? 'block' : 'none' }}
@@ -94,6 +98,7 @@ Workpad.propTypes = {
   grid: PropTypes.bool.isRequired,
   setGrid: PropTypes.func.isRequired,
   pages: PropTypes.array.isRequired,
+  totalElementCount: PropTypes.number.isRequired,
   selectedPageId: PropTypes.string.isRequired,
   isFullscreen: PropTypes.bool.isRequired,
   workpad: PropTypes.object.isRequired,

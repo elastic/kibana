@@ -1,14 +1,13 @@
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { compose, withState, getContext, withHandlers } from 'recompose';
-import { get } from 'lodash';
 import { undoHistory, redoHistory } from '../../state/actions/history';
 import { fetchAllRenderables } from '../../state/actions/elements';
 import { getFullscreen, getEditing } from '../../state/selectors/app';
 import {
-  getPageById,
   getSelectedPage,
   getSelectedPageIndex,
+  getAllElements,
   getWorkpad,
   getPages,
 } from '../../state/selectors/workpad';
@@ -18,7 +17,7 @@ const mapStateToProps = state => ({
   pages: getPages(state),
   selectedPageId: getSelectedPage(state),
   selectedPageNumber: getSelectedPageIndex(state) + 1,
-  style: get(getPageById(state, getSelectedPage(state)), 'style'),
+  totalElementCount: getAllElements(state).length,
   workpad: getWorkpad(state),
   isFullscreen: getFullscreen(state),
   isEditing: getEditing(state),

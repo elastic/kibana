@@ -39,12 +39,13 @@ const branches = [
   })),
 ];
 
+// NOTE: the data-shared-* attributes here are used for reporting
 export const ElementContent = compose(pure, ...branches)(
   ({ renderable, renderFunction, size, handlers }) => {
     return Style.it(
       renderable.css,
       <div style={{ ...renderable.containerStyle, ...size }}>
-        <div className="canvas__element--content">
+        <div className="canvas__element--content" data-shared-item>
           <RenderWithFn
             name={renderFunction.name}
             renderFn={renderFunction.render}
