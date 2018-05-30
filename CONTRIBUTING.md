@@ -265,7 +265,7 @@ Once that's done, just run:
 yarn test && yarn build --skip-os-packages
 ```
 
-You can get all build options using the following command :  
+You can get all build options using the following command:
 
 ```bash
 yarn build --help
