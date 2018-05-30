@@ -21,14 +21,29 @@ jest.mock('repl', () => ({ start: (opts) => ({ opts, context: {} }) }), { virtua
 
 describe('repl', () => {
   const originalConsoleLog = console.log;
+  let mockRepl;
 
   beforeEach(() => {
     global.console.log = jest.fn();
     require('repl').start = (opts) => {
-      return {
+      let resetHandler;
+      const replServer = {
         opts,
         context: { },
+        on: jest.fn((eventName, handler) => {
+          expect(eventName).toBe('reset');
+          resetHandler = handler;
+        }),
       };
+
+      mockRepl = {
+        replServer,
+        clear() {
+          replServer.context = {};
+          resetHandler(replServer.context);
+        },
+      };
+      return replServer;
     };
   });
 
@@ -77,6 +92,37 @@ describe('repl', () => {
     splosion.whoops = splosion;
     expect(replServer.opts.writer(splosion))
       .toMatchSnapshot();
+  });
+
+  test('it allows print depth to be specified', () => {
+    const { startRepl } = require('.');
+    const replServer = startRepl({});
+    const splosion = {};
+    let child = splosion;
+    for (let i = 0; i < 2000; ++i) {
+      child[i] = {};
+      child = child[i];
+    }
+    splosion.whoops = splosion;
+    replServer.context.repl.printDepth = 2;
+    expect(replServer.opts.writer(splosion))
+      .toMatchSnapshot();
+  });
+
+  test('resets context to original when reset', () => {
+    const { startRepl } = require('.');
+    const testServer = {
+      server: { },
+    };
+    const replServer = startRepl(testServer);
+    replServer.context.foo = 'bar';
+    expect(replServer.context.server).toBe(testServer.server);
+    expect(replServer.context.kbnServer).toBe(testServer);
+    expect(replServer.context.foo).toBe('bar');
+    mockRepl.clear();
+    expect(replServer.context.server).toBe(testServer.server);
+    expect(replServer.context.kbnServer).toBe(testServer);
+    expect(replServer.context.foo).toBeUndefined();
   });
 
   test('it prints promise resolves', async () => {
