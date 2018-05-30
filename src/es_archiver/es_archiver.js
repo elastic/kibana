@@ -37,12 +37,15 @@ export class EsArchiver {
    *
    *  @param {String} name - the name of this archive, used to determine filename
    *  @param {String|Array<String>} indices - the indices to archive
+   *  @param {Object} options
+   *  @property {Boolean} options.raw - should the archive be raw (unzipped) or not
    *  @return Promise<Stats>
    */
-  async save(name, indices) {
+  async save(name, indices, { raw = false } = {}) {
     return await saveAction({
       name,
       indices,
+      raw,
       client: this.client,
       dataDir: this.dataDir,
       log: this.log,
