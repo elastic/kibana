@@ -1,0 +1,33 @@
+[[api]]
+= REST API
+
+[partintro]
+--
+Some of the features of Kibana are provided via a REST API, which is ideal for
+people that want to create an integration with Kibana or that want to automate
+certain aspects of configuring and deploying Kibana.
+
+Each API in this documentation should be clearly marked as either `stable`,
+`beta`, or `experimental`. If an API is not marked, it should be considered
+`experimental`.
+
+What do these labels mean?
+
+* *Stable* APIs should be safe to use extensively in production. Any breaking
+changes to these APIs should only occur in major versions and will be
+clearly documented in the breaking changes documentation for that release.
+* *Beta* APIs are on track to become stable, permanent features of Kibana.
+Caution should be exercised in their use since it is possible we'd have to make
+a breaking change to these APIs in a minor version, but we'll avoid this
+wherever possible.
+* *Experimental* APIs are just that - an experiment. An experimental API might
+have breaking changes in any version of Kibana, or it might even be removed
+entirely.
+
+[float]
+== APIs
+
+* <<saved-objects-api>>
+--
+
+include::api/saved-objects.asciidoc[]

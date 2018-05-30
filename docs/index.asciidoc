@@ -69,6 +69,8 @@ include::management/dashboard_only_mode/index.asciidoc[]
 
 include::reporting/index.asciidoc[]
 
+include::api.asciidoc[]
+
 include::plugins.asciidoc[]
 
 include::development.asciidoc[]
