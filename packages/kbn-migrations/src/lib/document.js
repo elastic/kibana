@@ -16,7 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// Helper functions for transforming and seeding documents during a migration
+
+// This module contains functions for transforming and seeding documents during a migration
+
 const uuid = require('uuid');
 
 const DOC_TYPE = 'doc';

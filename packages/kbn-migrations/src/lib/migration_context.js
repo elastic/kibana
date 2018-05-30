@@ -16,8 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// The migration context object contains all of the data and functions
-// that are necessary to analyze and run migrations.
 
 const _ = require('lodash');
 const objectHash = require('./object_hash');
@@ -29,33 +27,43 @@ module.exports = {
   fetch,
 };
 
+// Converts migration options to a more comprehensive object which contains
+// all of the data and functions that are necessary to analyze and run migrations.
 async function fetch(opts) {
   const { callCluster, log, index, plugins, elasticVersion, force } = opts;
+  const { currentIndex, migrationState, migrationStateVersion, currentMappings } = await fetchIndexInfo(callCluster, index);
   const initialIndex = sanitizeIndexName(`${index}-${elasticVersion}-original`);
-  const [currentIndex, { migrationState, migrationStateVersion }, currentMappings] = await Promise.all([
-    Persistence.getCurrentIndex(callCluster, index),
-    MigrationState.fetch(callCluster, index),
-    Persistence.getMapping(callCluster, index),
-  ]);
-  const migrationPlan = MigrationPlan.build(plugins, migrationState, currentMappings);
   const nextMigrationState = MigrationState.build(plugins, currentIndex || initialIndex, migrationState);
-  const status = MigrationState.status(nextMigrationState, migrationState);
-  const sha = objectHash(_.map(nextMigrationState.types, 'checksum'));
 
   return {
-    status,
     index,
     callCluster,
     migrationState,
     migrationStateVersion,
     nextMigrationState,
-    migrationPlan,
     force,
     initialIndex,
     plugins,
-    destIndex: sanitizeIndexName(`${index}-${elasticVersion}-${sha}`),
+    status: MigrationState.status(nextMigrationState, migrationState),
+    migrationPlan: MigrationPlan.build(plugins, migrationState, currentMappings),
+    destIndex: destIndex(index, elasticVersion, nextMigrationState.types),
     log: log ? migrationLogger(log) : _.noop,
   };
+}
+
+async function fetchIndexInfo(callCluster, index) {
+  const [currentIndex, { migrationState, migrationStateVersion }, currentMappings] = await Promise.all([
+    Persistence.getCurrentIndex(callCluster, index),
+    MigrationState.fetch(callCluster, index),
+    Persistence.getMapping(callCluster, index),
+  ]);
+
+  return { currentIndex, migrationState, migrationStateVersion, currentMappings };
+}
+
+function destIndex(index, elasticVersion, types) {
+  const sha = objectHash(_.map(types, 'checksum'));
+  return sanitizeIndexName(`${index}-${elasticVersion}-${sha}`);
 }
 
 function sanitizeIndexName(indexName) {

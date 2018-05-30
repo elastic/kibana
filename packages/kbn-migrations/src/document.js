@@ -71,10 +71,10 @@ function buildValidateDocFunction(plugins, exportedState, migrationState) {
   const getDocVersion = stateToVersionFn(exportedState);
   const getIndexVersion = stateToVersionFn(migrationState);
   const getPluginVersion = pluginsToVersionFn(plugins);
-  return _.partial(assertValidateDoc, getDocVersion, getIndexVersion, getPluginVersion);
+  return _.partial(assertValidDoc, getDocVersion, getIndexVersion, getPluginVersion);
 }
 
-function assertValidateDoc(getDocVersion, getIndexVersion, getPluginVersion, doc) {
+function assertValidDoc(getDocVersion, getIndexVersion, getPluginVersion, doc) {
   const docVersion = getDocVersion(doc);
   const indexVersion = getIndexVersion(doc);
   if (docVersion !== indexVersion) {

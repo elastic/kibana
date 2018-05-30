@@ -37,8 +37,9 @@ function unappliedMigrations(plugins, storedMigrationState) {
   const previousTypes = _.indexBy(storedMigrationState.types, 'type');
   const numApplied = type => _.get(previousTypes, [type, 'migrationIds', 'length'], 0);
   return _.chain(plugins)
-    .filter('migrations')
-    .reduce((acc, { migrations }) => Object.assign(acc, _.groupBy(migrations, 'type')), {})
+    .map('migrations')
+    .flatten()
+    .groupBy('type')
     .map((migrations, type) => migrations.slice(numApplied(type)))
     .flatten()
     .compact()
@@ -62,7 +63,8 @@ function buildMappings(plugins) {
 }
 
 function updateMappings(currentMappings, newMappings) {
-  const currentProperties = _.get(currentMappings, [_(currentMappings).keys().first(), 'mappings', 'doc', 'properties'], {});
+  const currentIndex = _(currentMappings).keys().first();
+  const currentProperties = _.get(currentMappings, [currentIndex, 'mappings', 'doc', 'properties'], {});
   return {
     doc: {
       ...newMappings.doc,
@@ -76,17 +78,28 @@ function updateMappings(currentMappings, newMappings) {
 
 // Shallow merge of the specified objects into one object, if any property
 // conflicts occur, this will bail with an error.
-function mergeMappings(mappings) {
-  return mappings
-    .filter(({ mappings }) => !!mappings)
-    .reduce((acc, { id, mappings }) => {
-      const invalidKey = Object.keys(mappings).find(k => k.startsWith('_') || acc.hasOwnProperty(k));
-      if (_.startsWith(invalidKey, '_')) {
-        throw new Error(`Invalid mapping "${invalidKey}" in plugin "${id}". Mappings cannot start with _.`);
-      }
-      if (invalidKey) {
-        throw new Error(`Plugin "${id}" is attempting to redefine mapping "${invalidKey}".`);
-      }
-      return Object.assign(acc, mappings);
-    }, {});
+function mergeMappings(plugins) {
+  return _(plugins)
+    .filter('mappings')
+    .reduce(validateAndMergePlugin, {});
+}
+
+function validateAndMergePlugin(acc, { id, mappings }) {
+  Object.keys(mappings).forEach(mappingName => {
+    assertUnique(id, acc, mappingName);
+    assertValidMappingNames(id, mappingName);
+  });
+  return Object.assign(acc, mappings);
+}
+
+function assertUnique(pluginId, mappings, mappingName) {
+  if (mappings.hasOwnProperty(mappingName)) {
+    throw new Error(`Plugin "${pluginId}" is attempting to redefine mapping "${mappingName}".`);
+  }
+}
+
+function assertValidMappingNames(pluginId, mappingName) {
+  if (mappingName.startsWith('_')) {
+    throw new Error(`Invalid mapping "${mappingName}" in plugin "${pluginId}". Mappings cannot start with _.`);
+  }
 }
