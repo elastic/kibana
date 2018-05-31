@@ -84,3 +84,35 @@ export const CleanExtraBinScriptsTask = {
     }
   }
 };
+
+export const CleanExtraBrowsersTask = {
+  description: 'Cleaning extra browsers from platform-specific builds',
+
+  async run(config, log, build) {
+    for (const platform of config.getPlatforms()) {
+      console.log(platform);
+      if (platform.isWindows()) {
+        await deleteAll(log, [
+          build.resolvePathForPlatform(platform,
+            'node_modules/x-pack/plugins/reporting/{.chromium,.phantom}/*{darwin,macosx,linux}.zip'
+          ),
+        ]);
+      }
+      else if (platform.isMac()) {
+        await deleteAll(log, [
+          build.resolvePathForPlatform(
+            platform,
+            'node_modules/x-pack/plugins/reporting/{.chromium,.phantom}/*{win32,windows,macosx,linux}.zip'
+          ),
+        ]);
+      } else if (platform.isLinux()) {
+        await deleteAll(log, [
+          build.resolvePathForPlatform(
+            platform,
+            'node_modules/x-pack/plugins/reporting/{.chromium,.phantom}/*{darwin,macosx,win32,windows}.zip'
+          ),
+        ]);
+      }
+    }
+  }
+};
