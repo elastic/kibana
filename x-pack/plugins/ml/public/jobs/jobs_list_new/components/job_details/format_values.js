@@ -66,3 +66,17 @@ export function formatValues([key, value]) {
   }
   return [key, value];
 }
+
+export function filterObjects(obj, allowArrays, allowObjects) {
+  return Object.keys(obj)
+    .filter(k => (allowObjects || typeof obj[k] !== 'object' || (allowArrays && Array.isArray(obj[k]))))
+    .map((k) => {
+      let item = obj[k];
+      if (Array.isArray(item)) {
+        item = item.join(', ');
+      } else if (typeof obj[k] === 'object') {
+        item = JSON.stringify(item);
+      }
+      return ([k, item]);
+    });
+}
