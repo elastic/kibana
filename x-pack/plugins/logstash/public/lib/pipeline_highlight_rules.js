@@ -29,11 +29,11 @@ export class PipelineHighlightRules extends TextHighlightRules {
         }
       ],
     };
-    this.embedRules(JsonHighlightRules, 'json-', [{
-      token: 'end',
-      regex: '^```$',
-      next: 'start',
-    }]);
+    // this.embedRules(JsonHighlightRules, 'json-', [{
+    //   token: 'end',
+    //   regex: '^```$',
+    //   next: 'start',
+    // }]);
   }
 }
 
