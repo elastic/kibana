@@ -262,9 +262,9 @@ angular-resource@1.4.9:
   version "1.4.9"
   resolved "https://registry.yarnpkg.com/angular-resource/-/angular-resource-1.4.9.tgz#67f09382b623fd7e61540b0d127dba99fda99d45"
 
-angular-sanitize@1.5.7:
-  version "1.5.7"
-  resolved "https://registry.yarnpkg.com/angular-sanitize/-/angular-sanitize-1.5.7.tgz#36e78b7bba6e90233a9b908e597a05770356f290"
+angular-sanitize@^1.5.7:
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/angular-sanitize/-/angular-sanitize-1.7.0.tgz#8ff2870fa3f6d4d0e0647900dbc01258ebeee1c1"
 
 angular-ui-ace@0.2.3:
   version "0.2.3"
@@ -1069,7 +1069,7 @@ boom@4.x.x:
   dependencies:
     hoek "4.x.x"
 
-boom@5.2.0, boom@5.x.x:
+boom@5.x.x, boom@^5.2.0:
   version "5.2.0"
   resolved "https://registry.yarnpkg.com/boom/-/boom-5.2.0.tgz#5dd9da6ee3a5f302077436290cb717d3f4a54e02"
   dependencies:
@@ -4206,16 +4206,7 @@ jest@^22.4.3:
     import-local "^1.0.0"
     jest-cli "^22.4.3"
 
-joi@10.4.1:
-  version "10.4.1"
-  resolved "https://registry.yarnpkg.com/joi/-/joi-10.4.1.tgz#a2fca1f0d603d1b843f2c1e086b52461f6be1f36"
-  dependencies:
-    hoek "4.x.x"
-    isemail "2.x.x"
-    items "2.x.x"
-    topo "2.x.x"
-
-joi@10.x.x:
+joi@10.x.x, joi@^10.4.1:
   version "10.6.0"
   resolved "https://registry.yarnpkg.com/joi/-/joi-10.6.0.tgz#52587f02d52b8b75cdb0c74f0b164a191a0e1fc2"
   dependencies:
@@ -6615,7 +6606,7 @@ rimraf@~2.2.6:
   version "2.2.8"
   resolved "https://registry.yarnpkg.com/rimraf/-/rimraf-2.2.8.tgz#e439be2aaee327321952730f99a8929e4fc50582"
 
-rison-node@2.0.0:
+rison-node@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/rison-node/-/rison-node-2.0.0.tgz#a637ec8caca337458b37a5b03d413b07840231db"
 
