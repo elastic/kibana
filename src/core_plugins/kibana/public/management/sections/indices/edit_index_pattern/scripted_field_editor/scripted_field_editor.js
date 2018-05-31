@@ -57,12 +57,12 @@ const renderFieldEditor = ($scope, indexPattern, field, {
       node,
     );
   });
-}
+};
 
 const destroyFieldEditor = () => {
   const node = document.getElementById(REACT_FIELD_EDITOR_ID);
   node && unmountComponentAtNode(node);
-}
+};
 
 uiRoutes
   .when('/management/kibana/indices/:indexPatternId/field/:fieldName*', { mode: 'edit' })

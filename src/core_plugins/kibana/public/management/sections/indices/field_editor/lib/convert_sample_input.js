@@ -17,5 +17,23 @@
  * under the License.
  */
 
-export { ScriptingDisabledCallOut } from './disabled_call_out';
-export { ScriptingHelpCallOut } from './help_call_out';
+export const convertSampleInput = (converter, inputs) => {
+  let error = null;
+  let samples = [];
+
+  try {
+    samples = inputs.map(input => {
+      return {
+        input,
+        output: converter(input),
+      };
+    });
+  } catch(e) {
+    error = `An error occured while trying to use this format configuration: ${e.message}`;
+  }
+
+  return {
+    error,
+    samples,
+  };
+};
