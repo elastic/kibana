@@ -55,20 +55,6 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
       loadTestFile(require.resolve('./_dashboard_grid'));
       loadTestFile(require.resolve('./_dashboard_snapshots'));
       loadTestFile(require.resolve('./_view_edit'));
-      loadTestFile(require.resolve('./_view_edit'));
-      loadTestFile(require.resolve('./_view_edit'));
-      loadTestFile(require.resolve('./_view_edit'));
-      loadTestFile(require.resolve('./_view_edit'));
-      loadTestFile(require.resolve('./_view_edit'));
-      loadTestFile(require.resolve('./_view_edit'));
-      loadTestFile(require.resolve('./_view_edit'));
-      loadTestFile(require.resolve('./_view_edit'));
-      loadTestFile(require.resolve('./_view_edit'));
-      loadTestFile(require.resolve('./_view_edit'));
-      loadTestFile(require.resolve('./_view_edit'));
-      loadTestFile(require.resolve('./_view_edit'));
-      loadTestFile(require.resolve('./_view_edit'));
-      loadTestFile(require.resolve('./_view_edit'));
     });
 
     // Each of these tests call initTests themselves, the way it was originally written.  The above tests only load
