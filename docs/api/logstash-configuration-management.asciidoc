@@ -1,6 +1,13 @@
 [role="xpack"]
 [[logstash-configuration-management-api]]
-== Logstash Configuration Management APIs
+== Logstash Configuration Management API
+
+The Logstash configuration management API allows users to programatically integrate with the
+Logstash configuration management feature.
+
+Traditionally users would perform this integration by accessing the the `.logstash` index
+directly. *Do not do this!* The structure of this index is subject to change, which could
+cause your integration to break. Instead, use the following API.
 
 * <<logstash-configuration-management-api-create>>
 * <<logstash-configuration-management-api-retrieve>>
