@@ -9,8 +9,6 @@ import { ColaGraph } from './views/cola_graph';
 import { DetailDrawer } from './views/detail_drawer';
 import { PropTypes } from 'prop-types';
 
-export { ConfigViewer } from './views/config_viewer';
-
 export class PipelineViewer extends React.Component {
   constructor() {
     super();
@@ -57,7 +55,7 @@ export class PipelineViewer extends React.Component {
   }
 
   render() {
-    const { graph } = this.props.pipelineState.config;
+    const graph = this.props.pipelineState.config.graph;
 
     return (
       <div className="lspvContainer">
