@@ -6,6 +6,7 @@
 
 import path from 'path';
 import { resolveKibanaPath } from '@kbn/plugin-helpers';
+import { EsProvider } from './services/es';
 
 export default async function ({ readConfigFile }) {
 
@@ -23,7 +24,7 @@ export default async function ({ readConfigFile }) {
     testFiles: [require.resolve('./apis')],
     servers: config.xpack.api.get('servers'),
     services: {
-      es: config.kibana.functional.get('services.es'),
+      es: EsProvider,
       supertest: config.kibana.api.get('services.supertest'),
       esArchiver: config.kibana.functional.get('services.esArchiver'),
     },
