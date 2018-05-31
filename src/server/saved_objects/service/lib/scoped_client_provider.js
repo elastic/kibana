@@ -19,11 +19,11 @@
 
 /**
  * Provider for the Scoped Saved Object Client.
- *
  */
 export class ScopedSavedObjectsClientProvider {
 
   _wrapperFactories = [];
+  _customClientFactory = null;
 
   constructor({
     index,
@@ -35,7 +35,6 @@ export class ScopedSavedObjectsClientProvider {
     this._mappings = mappings;
     this._onBeforeWrite = onBeforeWrite;
     this._defaultClientFactory = defaultClientFactory;
-    this._customClientFactory;
   }
 
   // the client wrapper factories are put at the front of the array, so that
@@ -46,11 +45,11 @@ export class ScopedSavedObjectsClientProvider {
   // dependency on plugin b, that means that plugin b's client wrapper would want
   // to be able to run first when the SavedObjectClient methods are invoked to
   // provide additional context to plugin a's client wrapper.
-  registerScopedSavedObjectsClientWrapperFactory(wrapperFactory) {
+  registerClientWrapperFactory(wrapperFactory) {
     this._wrapperFactories.unshift(wrapperFactory);
   }
 
-  registerScopedSavedObjectsClientFactory(customClientFactory) {
+  registerClientFactory(customClientFactory) {
     if (this._customClientFactory) {
       throw new Error(`custom client factory is already registered, can't register another one`);
     }
@@ -58,7 +57,7 @@ export class ScopedSavedObjectsClientProvider {
     this._customClientFactory = customClientFactory;
   }
 
-  getScopedSavedObjectsClient(request) {
+  getClient(request) {
     const factory = this._customClientFactory || this._defaultClientFactory;
     const client = factory({
       request,
