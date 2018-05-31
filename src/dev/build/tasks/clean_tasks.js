@@ -89,27 +89,21 @@ export const CleanExtraBrowsersTask = {
   description: 'Cleaning extra browsers from platform-specific builds',
 
   async run(config, log, build) {
+    const reporting = 'node_modules/x-pack/plugins/reporting';
+    const browsers = '{.chromium,.phantom}';
     for (const platform of config.getPlatforms()) {
       if (platform.isWindows()) {
         await deleteAll(log, [
-          build.resolvePathForPlatform(platform,
-            'node_modules/x-pack/plugins/reporting/{.chromium,.phantom}/*{darwin,macosx,linux}.zip'
-          ),
+          build.resolvePathForPlatform(platform, reporting, browsers, '*{darwin,macosx,linux}.zip'),
         ]);
       }
       else if (platform.isMac()) {
         await deleteAll(log, [
-          build.resolvePathForPlatform(
-            platform,
-            'node_modules/x-pack/plugins/reporting/{.chromium,.phantom}/*{win32,windows,macosx,linux}.zip'
-          ),
+          build.resolvePathForPlatform(platform, reporting, browsers, '*{win32,windows,linux}.zip'),
         ]);
       } else if (platform.isLinux()) {
         await deleteAll(log, [
-          build.resolvePathForPlatform(
-            platform,
-            'node_modules/x-pack/plugins/reporting/{.chromium,.phantom}/*{darwin,macosx,win32,windows}.zip'
-          ),
+          build.resolvePathForPlatform(platform, reporting, browsers, '*{win32,windows,darwin,macosx}.zip'),
         ]);
       }
     }
