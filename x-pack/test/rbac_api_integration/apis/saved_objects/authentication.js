@@ -7,7 +7,7 @@
 export const AUTHENTICATION = {
   SUPERUSER: {
     USERNAME: 'elastic',
-    PASSWORD: 'changeme,'
+    PASSWORD: 'changeme'
   },
   KIBANA_RBAC_USER: {
     USERNAME: 'a_kibana_rbac_user',

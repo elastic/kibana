@@ -8,7 +8,7 @@ import expect from 'expect.js';
 import { AUTHENTICATION } from './authentication';
 
 export default function ({ getService }) {
-  const supertest = getService('supertest');
+  const supertest = getService('supertestWithoutAuth');
   const es = getService('es');
   const esArchiver = getService('esArchiver');
 
@@ -106,7 +106,7 @@ export default function ({ getService }) {
           before(() => esArchiver.load('saved_objects/basic'));
           after(() => esArchiver.unload('saved_objects/basic'));
 
-          it('should return 200 with individual responses', async () => {
+          it(`should return ${assert.withIndex.statusCode}`, async () => {
             await supertest
               .post(`/api/saved_objects/_bulk_get`)
               .auth(auth.username, auth.password)
@@ -126,7 +126,7 @@ export default function ({ getService }) {
               })
           );
 
-          it('should return 200 with individual responses', async () => {
+          it(`should return ${assert.withoutIndex.statusCode}`, async () => {
             await supertest
               .post('/api/saved_objects/_bulk_get')
               .auth(auth.username, auth.password)
