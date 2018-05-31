@@ -27,6 +27,7 @@ import {
 
 import {
   keyCodes,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 
 export class ExitFullScreenButton extends PureComponent {
@@ -52,6 +53,12 @@ export class ExitFullScreenButton extends PureComponent {
       <div
         className="exitFullScreenButton"
       >
+        <EuiScreenReaderOnly>
+          <p aria-live="polite">
+            In full screen mode, press ESC to exit.
+          </p>
+        </EuiScreenReaderOnly>
+
         <KuiButton
           type="hollow"
           aria-label="Exit full screen mode"
