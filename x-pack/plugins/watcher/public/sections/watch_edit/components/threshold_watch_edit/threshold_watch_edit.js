@@ -39,7 +39,7 @@ app.directive('thresholdWatchEdit', function ($injector) {
   const actionDefaultsService = $injector.get('xpackWatcherActionDefaultsService');
   const kbnUrl = $injector.get('kbnUrl');
   const confirmModal = $injector.get('confirmModal');
-  const dirtyPrompt = $injector.get('dirtyPrompt');
+  // const dirtyPrompt = $injector.get('dirtyPrompt');
   const $interval = $injector.get('$interval');
 
   return {
@@ -64,9 +64,9 @@ app.directive('thresholdWatchEdit', function ($injector) {
         ];
         this.breadcrumb = this.watch.displayName;
 
-        dirtyPrompt.register(() => !this.watch.isEqualTo(this.originalWatch));
+        // dirtyPrompt.register(() => !this.watch.isEqualTo(this.originalWatch));
         $scope.$on('$destroy', () => {
-          dirtyPrompt.deregister();
+          // dirtyPrompt.deregister();
           this.stopRefreshWatchVisualizationTimer();
         });
 
@@ -152,7 +152,7 @@ app.directive('thresholdWatchEdit', function ($injector) {
       }
 
       onClose = () => {
-        dirtyPrompt.deregister();
+        // dirtyPrompt.deregister();
         kbnUrl.change('/management/elasticsearch/watcher/watches', {});
       }
 

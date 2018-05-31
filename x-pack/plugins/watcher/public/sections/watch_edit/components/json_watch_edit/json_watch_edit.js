@@ -26,7 +26,7 @@ app.directive('jsonWatchEdit', function ($injector) {
   const licenseService = $injector.get('xpackWatcherLicenseService');
   const kbnUrl = $injector.get('kbnUrl');
   const confirmModal = $injector.get('confirmModal');
-  const dirtyPrompt = $injector.get('dirtyPrompt');
+  // const dirtyPrompt = $injector.get('dirtyPrompt');
 
   return {
     restrict: 'E',
@@ -37,7 +37,7 @@ app.directive('jsonWatchEdit', function ($injector) {
     bindToController: true,
     controllerAs: 'jsonWatchEdit',
     controller: class JsonWatchEditController extends InitAfterBindingsWorkaround {
-      initAfterBindings($scope) {
+      initAfterBindings() {
         this.notifier = new Notifier({ location: 'Watcher' });
         this.selectedTabId = 'edit-watch';
         this.simulateResults = null;
@@ -51,8 +51,8 @@ app.directive('jsonWatchEdit', function ($injector) {
         ];
         this.breadcrumb = this.watch.displayName;
 
-        dirtyPrompt.register(() => !this.watch.isEqualTo(this.originalWatch));
-        $scope.$on('$destroy', dirtyPrompt.deregister);
+        // dirtyPrompt.register(() => !this.watch.isEqualTo(this.originalWatch));
+        // $scope.$on('$destroy', dirtyPrompt.deregister);
 
         this.onExecuteDetailsValid();
       }
@@ -174,7 +174,7 @@ app.directive('jsonWatchEdit', function ($injector) {
       }
 
       onClose = () => {
-        dirtyPrompt.deregister();
+        // dirtyPrompt.deregister();
         kbnUrl.change('/management/elasticsearch/watcher/watches', {});
       }
     }
