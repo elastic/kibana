@@ -19,7 +19,7 @@
 
 import { ScopedSavedObjectsClientProvider } from './scoped_client_provider';
 
-test(`uses default client factory when one isn't registered`, () => {
+test(`uses default client factory when one isn't set`, () => {
   const returnValue = Symbol();
   const defaultClientFactoryMock = jest.fn().mockReturnValue(returnValue);
   const index = Symbol();
@@ -45,7 +45,7 @@ test(`uses default client factory when one isn't registered`, () => {
   });
 });
 
-test(`uses custom client factory when one is registered`, () => {
+test(`uses custom client factory when one is set`, () => {
   const defaultClientFactoryMock = jest.fn();
   const index = Symbol();
   const mappings = Symbol();
@@ -60,11 +60,11 @@ test(`uses custom client factory when one is registered`, () => {
     onBeforeWrite,
     defaultClientFactory: defaultClientFactoryMock
   });
-  clientProvider.registerClientFactory(customClientFactoryMock);
+  clientProvider.setClientFactory(customClientFactoryMock);
   const result = clientProvider.getClient(request);
 
   expect(result).toBe(returnValue);
-  expect(defaultClientFactoryMock).toHaveBeenCalledTimes(0);
+  expect(defaultClientFactoryMock).not.toHaveBeenCalled();
   expect(customClientFactoryMock).toHaveBeenCalledTimes(1);
   expect(customClientFactoryMock).toHaveBeenCalledWith({
     request,
@@ -74,15 +74,15 @@ test(`uses custom client factory when one is registered`, () => {
   });
 });
 
-test(`throws error when more than one scoped saved objects client factory is registered`, () => {
+test(`throws error when more than one scoped saved objects client factory is set`, () => {
   const clientProvider = new ScopedSavedObjectsClientProvider({});
-  clientProvider.registerClientFactory(() => {});
+  clientProvider.setClientFactory(() => {});
   expect(() => {
-    clientProvider.registerClientFactory(() => {});
+    clientProvider.setClientFactory(() => {});
   }).toThrowErrorMatchingSnapshot();
 });
 
-test(`invokes and uses instance from single registered wrapper factory`, () => {
+test(`invokes and uses instance from single added wrapper factory`, () => {
   const defaultClient = Symbol();
   const defaultClientFactoryMock = jest.fn().mockReturnValue(defaultClient);
   const clientProvider = new ScopedSavedObjectsClientProvider({
@@ -92,7 +92,7 @@ test(`invokes and uses instance from single registered wrapper factory`, () => {
   const clientWrapperFactoryMock = jest.fn().mockReturnValue(wrappedClient);
   const request = Symbol();
 
-  clientProvider.registerClientWrapperFactory(clientWrapperFactoryMock);
+  clientProvider.addClientWrapperFactory(clientWrapperFactoryMock);
   const actualClient = clientProvider.getClient(request);
 
   expect(actualClient).toBe(wrappedClient);
@@ -114,8 +114,8 @@ test(`invokes and uses wrappers in LIFO order`, () => {
   const secondClientWrapperFactoryMock = jest.fn().mockReturnValue(secondWrapperClient);
   const request = Symbol();
 
-  clientProvider.registerClientWrapperFactory(firstClientWrapperFactoryMock);
-  clientProvider.registerClientWrapperFactory(secondClientWrapperFactoryMock);
+  clientProvider.addClientWrapperFactory(firstClientWrapperFactoryMock);
+  clientProvider.addClientWrapperFactory(secondClientWrapperFactoryMock);
   const actualClient = clientProvider.getClient(request);
 
   expect(actualClient).toBe(firstWrappedClient);

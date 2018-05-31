@@ -87,9 +87,9 @@ export function createSavedObjectsService(server) {
     SavedObjectsRepository,
     getScopedSavedObjectsClient: (...args) =>
       scopedClientProvider.getClient(...args),
-    registerScopedSavedObjectsClientFactory: (...args) =>
-      scopedClientProvider.registerClientFactory(...args),
-    registerScopedSavedObjectsClientWrapperFactory: (...args) =>
-      scopedClientProvider.registerClientWrapperFactory(...args),
+    setScopedSavedObjectsClientFactory: (...args) =>
+      scopedClientProvider.setClientFactory(...args),
+    addScopedSavedObjectsClientWrapperFactory: (...args) =>
+      scopedClientProvider.addClientWrapperFactory(...args),
   };
 }

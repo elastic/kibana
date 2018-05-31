@@ -45,13 +45,13 @@ export class ScopedSavedObjectsClientProvider {
   // dependency on plugin b, that means that plugin b's client wrapper would want
   // to be able to run first when the SavedObjectClient methods are invoked to
   // provide additional context to plugin a's client wrapper.
-  registerClientWrapperFactory(wrapperFactory) {
+  addClientWrapperFactory(wrapperFactory) {
     this._wrapperFactories.unshift(wrapperFactory);
   }
 
-  registerClientFactory(customClientFactory) {
+  setClientFactory(customClientFactory) {
     if (this._customClientFactory) {
-      throw new Error(`custom client factory is already registered, can't register another one`);
+      throw new Error(`custom client factory is already set, unable to replace the current one`);
     }
 
     this._customClientFactory = customClientFactory;
