@@ -36,12 +36,32 @@ locally, go to `http://localhost:5601/`. To access {kib} and view the
 monitoring dashboards, you must log in as a user who has the `kibana_user`
 and `monitoring_user` roles.
 
-. Click **Monitoring** in the side navigation. This displays any cluster alerts
+. In the side navigation, click *Monitoring*. The first time you open {kib}
+monitoring, data collection is
+disabled. You will be prompted to turn on data collection.
++
+If you have permission to turn on data collection and there is data in the cluster,
+{kib} displays the monitoring dashboards.  You'll see cluster alerts
 that require your attention and a summary of the available monitoring metrics
 for {es}, Logstash, {kib}, and Beats. To view additional information, click the
 Overview, Nodes, Indices, or Instances links.
++
+[role="screenshot"]
+image::images/monitoring-dashboard.png[Monitoring dashboard]
++
+If {kib} can't activate monitoring, here are some things to do:
++
+* If you don't have permission to activate monitoring,
+contact your system administrator.
++
+* If {kib} can't find monitoring data, set the time filter to
+“Last 1 hour”.  When monitoring data appears in your cluster, the page
+automatically refreshes with the monitoring summary.
++
+* Check your `xpack.monitoring.elasticsearch.url` setting.
+See <<monitoring-settings-kb, Monitoring Settings in Kibana>>.
 
-image::monitoring/images/monitoring.jpg["Monitoring Dashboards",link="images/monitoring.jpg"]
+
 
 include::cluster-alerts-license.asciidoc[]
 include::beats-details.asciidoc[]
