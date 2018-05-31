@@ -92,7 +92,7 @@ export class DashboardCloneModal extends React.Component {
         <EuiCallOut
           title={`A Dashboard with the title '${this.state.newDashboardName}' already exists.`}
           color="warning"
-          data-test-subj="cloneModalTitleDupicateWarnMsg"
+          data-test-subj="titleDupicateWarnMsg"
         >
           <p>
             Click <strong>Confirm Clone</strong> to clone the dashboard with the duplicate title.
@@ -108,7 +108,7 @@ export class DashboardCloneModal extends React.Component {
       <EuiOverlayMask>
         <EuiModal
           data-test-subj="dashboardCloneModal"
-          className="dashboardCloneModal"
+          className="dashboardModal"
           onClose={this.props.onClose}
         >
           <EuiModalHeader>

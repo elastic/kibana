@@ -1,0 +1,100 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders DashboardSaveModal 1`] = `
+<EuiOverlayMask>
+  <EuiModal
+    className="dashboardModal"
+    data-test-subj="dashboardSaveModal"
+    onClose={[Function]}
+  >
+    <EuiModalHeader>
+      <EuiModalHeaderTitle>
+        Save Dashboard
+      </EuiModalHeaderTitle>
+    </EuiModalHeader>
+    <EuiModalBody>
+      <EuiForm>
+        <EuiFormRow
+          describedByIds={Array []}
+          fullWidth={false}
+          hasEmptyLabelSpace={false}
+          label="Save as a new dashboard"
+        >
+          <EuiSwitch
+            checked={false}
+            data-test-subj="saveAsNewCheckbox"
+            onChange={[Function]}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          describedByIds={Array []}
+          fullWidth={false}
+          hasEmptyLabelSpace={false}
+          label="Title"
+        >
+          <EuiFieldText
+            autoFocus={true}
+            compressed={false}
+            data-test-subj="dashboardTitle"
+            fullWidth={false}
+            isInvalid={false}
+            isLoading={false}
+            onChange={[Function]}
+            value="dash title"
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          describedByIds={Array []}
+          fullWidth={false}
+          hasEmptyLabelSpace={false}
+          label="Description"
+        >
+          <EuiTextArea
+            compressed={true}
+            data-test-subj="dashboardDescription"
+            fullWidth={false}
+            onChange={[Function]}
+            value="dash description"
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          describedByIds={Array []}
+          fullWidth={false}
+          hasEmptyLabelSpace={false}
+          helpText="This changes the time filter to the currently selected time each time this dashboard is loaded."
+          label="Store time with dashboard"
+        >
+          <EuiSwitch
+            checked={true}
+            data-test-subj="storeTimeWithDashboard"
+            onChange={[Function]}
+          />
+        </EuiFormRow>
+      </EuiForm>
+    </EuiModalBody>
+    <EuiModalFooter>
+      <EuiButton
+        color="primary"
+        data-test-subj="saveCancelButton"
+        fill={false}
+        iconSide="left"
+        onClick={[Function]}
+        type="button"
+      >
+        Cancel
+      </EuiButton>
+      <EuiButton
+        color="primary"
+        data-test-subj="confirmSaveDashboardButton"
+        fill={true}
+        iconSide="left"
+        isLoading={false}
+        onClick={[Function]}
+        type="button"
+      >
+        Confirm Save
+      </EuiButton>
+    </EuiModalFooter>
+  </EuiModal>
+</EuiOverlayMask>
+`;
