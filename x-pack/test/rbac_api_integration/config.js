@@ -47,7 +47,8 @@ export default async function ({ readConfigFile }) {
       serverArgs: [
         ...config.xpack.api.get('kbnTestServer.serverArgs'),
         '--optimize.enabled=false',
-        // '--xpack.security.rbac.enabled=true'
+        '--xpack.security.rbac.enabled=true',
+        '--server.xsrf.disableProtection=true',
       ],
     },
   };
