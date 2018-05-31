@@ -4,12 +4,6 @@ exports[`is rendered 1`] = `
 <div
   class="exitFullScreenButton"
 >
-  <p
-    aria-live="polite"
-    class="euiScreenReaderOnly"
-  >
-    In full screen mode, press ESC to exit.
-  </p>
   <button
     aria-label="Exit full screen mode"
     class="kuiButton exitFullScreenMode"
