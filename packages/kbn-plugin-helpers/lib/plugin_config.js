@@ -19,7 +19,7 @@ module.exports = function (root) {
     root: root,
     kibanaRoot: pkg.name === 'x-pack'
       ? resolve(root, '..')
-      : resolve(root, '../kibana'),
+      : resolve(root, '../../kibana'),
     serverTestPatterns: ['server/**/__tests__/**/*.js'],
     buildSourcePatterns: buildSourcePatterns,
     skipInstallDependencies: false,
