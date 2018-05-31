@@ -11,6 +11,7 @@ export const dateValidation = Joi.alternatives()
 
 export const withDefaultValidators = (validators = {}) => {
   return Joi.object().keys({
+    _debug: Joi.bool(),
     start: dateValidation,
     end: dateValidation,
     esFilterQuery: Joi.string().allow(''),
