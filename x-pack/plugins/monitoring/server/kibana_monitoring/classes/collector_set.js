@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { callClusterFactory } from '../../../../xpack_main';
 import { flatten, isEmpty } from 'lodash';
 import Promise from 'bluebird';
 import { getCollectorLogger } from '../lib';
@@ -14,6 +15,9 @@ import { UsageCollector } from './usage_collector';
  * A collector object has types registered into it with the register(type)
  * function. Each type that gets registered defines how to fetch its own data
  * and combine it into a unified payload for bulk upload.
+ *
+ * TODO: Only keep the fetch and upload functionality in x-pack. Everything
+ * else move to OSS Kibana: https://github.com/elastic/kibana/issues/19534
  */
 export class CollectorSet {
 
@@ -42,6 +46,8 @@ export class CollectorSet {
     this._interval = interval;
     this._combineTypes = combineTypes;
     this._onPayload = onPayload;
+
+    this._callClusterInternal = callClusterFactory(server).getCallClusterInternal();
   }
 
   /*
@@ -78,16 +84,16 @@ export class CollectorSet {
 
     // do some fetches and bulk collect
     if (initialCollectors.length > 0) {
-      this._fetchAndUpload(initialCollectors);
+      this._fetchAndUpload(this._callClusterInternal, initialCollectors);
     }
 
     this._timer = setInterval(() => {
-      this._fetchAndUpload(this._collectors);
+      this._fetchAndUpload(this._callClusterInternal, this._collectors);
     }, this._interval);
   }
 
-  async _fetchAndUpload(collectors) {
-    const data = await this._bulkFetch(collectors);
+  async _fetchAndUpload(callCluster, collectors) {
+    const data = await this._bulkFetch(callCluster, collectors);
     const usableData = data.filter(d => Boolean(d) && !isEmpty(d.result));
     const payload = usableData.map(({ result, type }) => {
       if (!isEmpty(result)) {
@@ -115,13 +121,13 @@ export class CollectorSet {
   /*
    * Call a bunch of fetch methods and then do them in bulk
    */
-  _bulkFetch(collectors) {
+  _bulkFetch(callCluster, collectors) {
     return Promise.map(collectors, collector => {
       const collectorType = collector.type;
       this._log.debug(`Fetching data from ${collectorType} collector`);
       return Promise.props({
         type: collectorType,
-        result: collector.fetch()
+        result: collector.fetchInternal(callCluster) // use the wrapper for fetch, kicks in error checking
       })
         .catch(err => {
           this._log.warn(err);
@@ -130,9 +136,9 @@ export class CollectorSet {
     });
   }
 
-  async bulkFetchUsage() {
+  async bulkFetchUsage(callCluster) {
     const usageCollectors = this._collectors.filter(c => c instanceof UsageCollector);
-    const bulk = await this._bulkFetch(usageCollectors);
+    const bulk = await this._bulkFetch(callCluster, usageCollectors);
 
     // summarize each type of stat
     return bulk.reduce((accumulatedStats, currentStat) => {
