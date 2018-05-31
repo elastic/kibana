@@ -45,7 +45,7 @@ export function getTopNavConfig(dashboardMode, actions, hideWriteControls) {
       );
     case DashboardViewMode.EDIT:
       return [
-        getSaveConfig(),
+        getSaveConfig(actions[TopNavIds.SAVE]),
         getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE]),
         getAddConfig(actions[TopNavIds.ADD]),
         getOptionsConfig(),
@@ -79,12 +79,12 @@ function getEditConfig(action) {
 /**
  * @returns {kbnTopNavConfig}
  */
-function getSaveConfig() {
+function getSaveConfig(action) {
   return {
-    key: 'save',
+    key: TopNavIds.SAVE,
     description: 'Save your dashboard',
     testId: 'dashboardSaveMenuItem',
-    template: require('plugins/kibana/dashboard/top_nav/save.html')
+    run: action
   };
 }
 
@@ -105,7 +105,7 @@ function getViewConfig(action) {
  */
 function getCloneConfig(action) {
   return {
-    key: 'clone',
+    key: TopNavIds.CLONE,
     description: 'Create a copy of your dashboard',
     testId: 'dashboardClone',
     run: action
