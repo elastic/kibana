@@ -54,70 +54,57 @@ function renderIfStatement({ condition }, onVertexSelected) {
   ];
 }
 
-export class CollapsibleStatement extends React.PureComponent {
-  constructor(props) {
-    super(props);
+function getStatementBody({
+  isIf,
+  statement,
+  statement: { vertex },
+  onShowVertexDetails
+}) {
+  const showVertexDetailsClicked = () => { onShowVertexDetails(vertex); };
 
-    this.toggleClicked = this.toggleClicked.bind(this);
-    this.getToggleIconType = this.getToggleIconType.bind(this);
-  }
+  return isIf
+    ? renderIfStatement(statement, showVertexDetailsClicked)
+    : renderStatementName('else', showVertexDetailsClicked);
+}
 
-  toggleClicked() {
-    const {
-      collapse,
-      expand,
-      id,
-      isCollapsed
-    } = this.props;
+function getToggleIconType(isCollapsed) {
+  return isCollapsed ? 'arrowRight' : 'arrowDown';
+}
 
+export function CollapsibleStatement(props) {
+  const {
+    collapse,
+    expand,
+    id,
+    isCollapsed
+  } = props;
+
+  const toggleClicked = () => {
     if (isCollapsed) {
       expand(id);
     } else {
       collapse(id);
     }
-  }
+  };
 
-  getToggleIconType() {
-    const { isCollapsed } = this.props;
-    return isCollapsed ? 'arrowRight' : 'arrowDown';
-  }
-
-  getStatementBody() {
-    const {
-      isIf,
-      statement,
-      statement: { vertex },
-      onShowVertexDetails
-    } = this.props;
-
-    const showVertexDetailsClicked = () => { onShowVertexDetails(vertex); };
-
-    return isIf
-      ? renderIfStatement(statement, showVertexDetailsClicked)
-      : renderStatementName('else', showVertexDetailsClicked);
-  }
-
-  render() {
-    const { id } = this.props;
-    return (
-      <EuiFlexGroup responsive={false} gutterSize="xs">
-        <EuiFlexItem
-          key={id}
-          grow={false}
-        >
-          <EuiButtonIcon
-            aria-label
-            className="cv-ifElseStatement__toggle"
-            color="text"
-            iconType={this.getToggleIconType()}
-            onClick={this.toggleClicked}
-            size="s"
-          />
-        </EuiFlexItem>
-        {this.getStatementBody()}
-      </EuiFlexGroup>
-    );
-  }
+  return (
+    <EuiFlexGroup responsive={false} gutterSize="xs">
+      <EuiFlexItem
+        key={id}
+        grow={false}
+      >
+        <EuiButtonIcon
+          aria-label
+          className="cv-ifElseStatement__toggle"
+          color="text"
+          iconType={getToggleIconType(isCollapsed)}
+          onClick={toggleClicked}
+          size="s"
+        />
+      </EuiFlexItem>
+      {getStatementBody(props)}
+    </EuiFlexGroup>
+  );
 }
 
 CollapsibleStatement.propTypes = {

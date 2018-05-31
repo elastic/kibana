@@ -12,79 +12,71 @@ import { CollapsibleStatement } from './collapsible_statement';
 import { IfElement } from '../../models/list/if_element';
 import { PluginStatement } from './plugin_statement';
 
-export class Statement extends React.PureComponent
-{
-  renderNestingSpacers(depth) {
-    const spacers = [];
-    for (let i = 0; i < depth; i += 1) {
-      spacers.push(<div key={`spacer_${i}`} className="cv-spacer" />);
-    }
-    return spacers;
+function renderNestingSpacers(depth) {
+  const spacers = [];
+  for (let i = 0; i < depth; i += 1) {
+    spacers.push(<div key={`spacer_${i}`} className="cv-spacer" />);
   }
+  return spacers;
+}
 
-  renderStatement(statement) {
-    const {
-      collapse,
-      element,
-      element: { id },
-      expand,
-      isCollapsed,
-      onShowVertexDetails
-    } = this.props;
-
-    if (statement instanceof PluginStatementModel) {
-      return (
-        <PluginStatement
-          statement={statement}
-          onShowVertexDetails={onShowVertexDetails}
-        />
-      );
-    }
+function renderStatement({
+  collapse,
+  element,
+  element: {
+    id,
+    statement,
+  },
+  expand,
+  isCollapsed,
+  onShowVertexDetails
+}) {
+  if (statement instanceof PluginStatementModel) {
     return (
-      <CollapsibleStatement
-        expand={expand}
-        collapse={collapse}
+      <PluginStatement
         statement={statement}
-        isIf={element instanceof IfElement}
-        isCollapsed={isCollapsed}
-        id={id}
         onShowVertexDetails={onShowVertexDetails}
       />
     );
   }
 
-  getTopLevelStatementPadding(depth) {
-    return depth === 0
-      ? { paddingLeft: '0px' }
-      : null;
-  }
+  return (
+    <CollapsibleStatement
+      expand={expand}
+      collapse={collapse}
+      statement={statement}
+      isIf={element instanceof IfElement}
+      isCollapsed={isCollapsed}
+      id={id}
+      onShowVertexDetails={onShowVertexDetails}
+    />
+  );
+}
 
-  render() {
-    const {
-      depth,
-      statement
-    } = this.props.element;
+function getTopLevelStatementPadding(depth) {
+  return depth === 0
+    ? { paddingLeft: '0px' }
+    : null;
+}
 
-    const topLevelStatementPadding = this.getTopLevelStatementPadding(depth);
-    const spacers = this.renderNestingSpacers(depth);
-    const statementComponent = this.renderStatement(statement);
+export function Statement(props) {
+  const { depth } = props.element;
 
-    return (
-      <li className="cv-list">
-        <div className="cv-spaceContainer">
-          {spacers}
+  return (
+    <li className="cv-list">
+      <div className="cv-spaceContainer">
+        {renderNestingSpacers(depth)}
+      </div>
+      <EuiFlexGroup gutterSize="none">
+        <div
+          className="cv-statement__content"
+          style={getTopLevelStatementPadding(depth)}
+        >
+          {renderStatement(props)}
         </div>
-        <EuiFlexGroup gutterSize="none">
-          <div
-            className="cv-statement__content"
-            style={topLevelStatementPadding}
-          >
-            {statementComponent}
-          </div>
-        </EuiFlexGroup>
-      </li>
-    );
-  }
+      </EuiFlexGroup>
+    </li>
+  );
 }
 
 Statement.propTypes = {
