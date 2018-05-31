@@ -47,26 +47,21 @@ class StatementList extends React.PureComponent {
       collapsedIds: new Set(),
       collapsedChildIds: new Set()
     };
-
-    this.collapse = this.collapse.bind(this);
-    this.expand = this.expand.bind(this);
-    this.renderStatement = this.renderStatement.bind(this);
-    this.elementIsCollapsed = this.elementIsCollapsed.bind(this);
   }
 
-  expand(elementId) {
+  expand = elementId => {
     const collapsedIds = new Set(this.state.collapsedIds);
     collapsedIds.delete(elementId);
     this.updateCollapsedElements(collapsedIds);
   }
 
-  collapse(elementId) {
+  collapse = elementId => {
     const collapsedIds = new Set(this.state.collapsedIds);
     collapsedIds.add(elementId);
     this.updateCollapsedElements(collapsedIds);
   }
 
-  updateCollapsedElements(collapsedIds) {
+  updateCollapsedElements = collapsedIds => {
     const collapsedChildIds = getCollapsedChildIds(this.props.elements, collapsedIds);
 
     this.setState({
@@ -75,11 +70,9 @@ class StatementList extends React.PureComponent {
     });
   }
 
-  elementIsCollapsed(elementId) {
-    return this.state.collapsedIds.has(elementId);
-  }
+  elementIsCollapsed = elementId => this.state.collapsedIds.has(elementId);
 
-  renderStatement(element) {
+  renderStatement = element => {
     const { id, parentId } = element;
     const { onShowVertexDetails } = this.props;
 
