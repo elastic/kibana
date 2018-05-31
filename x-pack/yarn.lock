@@ -213,10 +213,6 @@ add-event-listener@0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/add-event-listener/-/add-event-listener-0.0.1.tgz#a76229ebc64c8aefae204a16273a2f255abea2d0"
 
-agentkeepalive@^2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/agentkeepalive/-/agentkeepalive-2.2.0.tgz#c5d1bd4b129008f1163f236f86e5faea2026e2ef"
-
 agentkeepalive@^3.4.1:
   version "3.4.1"
   resolved "https://registry.yarnpkg.com/agentkeepalive/-/agentkeepalive-3.4.1.tgz#aa95aebc3a749bca5ed53e3880a09f5235b48f0c"
@@ -266,17 +262,13 @@ angular-resource@1.4.9:
   version "1.4.9"
   resolved "https://registry.yarnpkg.com/angular-resource/-/angular-resource-1.4.9.tgz#67f09382b623fd7e61540b0d127dba99fda99d45"
 
-angular-sanitize@1.4.9:
-  version "1.4.9"
-  resolved "https://registry.yarnpkg.com/angular-sanitize/-/angular-sanitize-1.4.9.tgz#29e2f07dcf16b3c50a266a729ca754f58813ffc5"
+angular-sanitize@^1.5.7:
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/angular-sanitize/-/angular-sanitize-1.7.0.tgz#8ff2870fa3f6d4d0e0647900dbc01258ebeee1c1"
 
 angular-ui-ace@0.2.3:
   version "0.2.3"
   resolved "https://registry.yarnpkg.com/angular-ui-ace/-/angular-ui-ace-0.2.3.tgz#3cb903428100621a367fc7f641440e97a42a26d0"
-
-angular-ui-bootstrap@1.2.5:
-  version "1.2.5"
-  resolved "https://registry.yarnpkg.com/angular-ui-bootstrap/-/angular-ui-bootstrap-1.2.5.tgz#b0c1eff0bf3b7a65668984a1b81820a90dc60995"
 
 ansi-cyan@^0.1.1:
   version "0.1.1"
@@ -1065,12 +1057,6 @@ boom@2.x.x:
   dependencies:
     hoek "2.x.x"
 
-boom@3.1.1:
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/boom/-/boom-3.1.1.tgz#b6424f01ed8d492b2b12ae86047c24e8b6a7c937"
-  dependencies:
-    hoek "3.x.x"
-
 boom@3.x.x:
   version "3.2.2"
   resolved "https://registry.yarnpkg.com/boom/-/boom-3.2.2.tgz#0f0cc5d04adc5003b8c7d71f42cca7271fef0e78"
@@ -1083,7 +1069,7 @@ boom@4.x.x:
   dependencies:
     hoek "4.x.x"
 
-boom@5.x.x:
+boom@5.x.x, boom@^5.2.0:
   version "5.2.0"
   resolved "https://registry.yarnpkg.com/boom/-/boom-5.2.0.tgz#5dd9da6ee3a5f302077436290cb717d3f4a54e02"
   dependencies:
@@ -2111,18 +2097,7 @@ ecc-jsbn@~0.1.1:
   dependencies:
     jsbn "~0.1.0"
 
-elasticsearch@13.0.1:
-  version "13.0.1"
-  resolved "https://registry.yarnpkg.com/elasticsearch/-/elasticsearch-13.0.1.tgz#fa58204233052c4cd221e8721e48f3906b385b32"
-  dependencies:
-    agentkeepalive "^2.2.0"
-    chalk "^1.0.0"
-    lodash "2.4.2"
-    lodash.get "^4.4.2"
-    lodash.isempty "^4.4.0"
-    lodash.trimend "^4.5.1"
-
-elasticsearch@^14.1.0:
+elasticsearch@^14.1.0, elasticsearch@^14.1.2:
   version "14.2.2"
   resolved "https://registry.yarnpkg.com/elasticsearch/-/elasticsearch-14.2.2.tgz#6bbb63b19b17fa97211b22eeacb0f91197f4d6b6"
   dependencies:
@@ -2895,16 +2870,6 @@ glob@3.2.11:
     inherits "2"
     minimatch "0.3"
 
-glob@6.0.4, glob@^6.0.1:
-  version "6.0.4"
-  resolved "https://registry.yarnpkg.com/glob/-/glob-6.0.4.tgz#0f08860f6a155127b2fadd4f9ce24b1aab6e4d22"
-  dependencies:
-    inflight "^1.0.4"
-    inherits "2"
-    minimatch "2 || 3"
-    once "^1.3.0"
-    path-is-absolute "^1.0.0"
-
 glob@7.1.1:
   version "7.1.1"
   resolved "https://registry.yarnpkg.com/glob/-/glob-7.1.1.tgz#805211df04faaf1c63a3600306cdf5ade50b2ec8"
@@ -2924,6 +2889,16 @@ glob@^4.3.1:
     inherits "2"
     minimatch "^2.0.1"
     once "^1.3.0"
+
+glob@^6.0.1:
+  version "6.0.4"
+  resolved "https://registry.yarnpkg.com/glob/-/glob-6.0.4.tgz#0f08860f6a155127b2fadd4f9ce24b1aab6e4d22"
+  dependencies:
+    inflight "^1.0.4"
+    inherits "2"
+    minimatch "2 || 3"
+    once "^1.3.0"
+    path-is-absolute "^1.0.0"
 
 glob@^7.0.3, glob@^7.0.5, glob@^7.1.1, glob@^7.1.2:
   version "7.1.2"
@@ -3400,9 +3375,13 @@ hoist-non-react-statics@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/hoist-non-react-statics/-/hoist-non-react-statics-1.2.0.tgz#aa448cf0986d55cc40773b17174b7dd066cb7cfb"
 
-hoist-non-react-statics@^2.2.1, hoist-non-react-statics@^2.3.0:
+hoist-non-react-statics@^2.3.0:
   version "2.3.1"
   resolved "https://registry.yarnpkg.com/hoist-non-react-statics/-/hoist-non-react-statics-2.3.1.tgz#343db84c6018c650778898240135a1420ee22ce0"
+
+hoist-non-react-statics@^2.5.0:
+  version "2.5.0"
+  resolved "https://registry.yarnpkg.com/hoist-non-react-statics/-/hoist-non-react-statics-2.5.0.tgz#d2ca2dfc19c5a91c5a6615ce8e564ef0347e2a40"
 
 home-or-tmp@^2.0.0:
   version "2.0.0"
@@ -3848,10 +3827,6 @@ isarray@1.0.0, isarray@^1.0.0, isarray@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/isarray/-/isarray-1.0.0.tgz#bb935d48582cba168c06834957a54a3e07124f11"
 
-isemail@1.x.x:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/isemail/-/isemail-1.2.0.tgz#be03df8cc3e29de4d2c5df6501263f1fa4595e9a"
-
 isemail@2.x.x:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/isemail/-/isemail-2.2.1.tgz#0353d3d9a62951080c262c2aa0a42b8ea8e9e2a6"
@@ -4231,7 +4206,7 @@ jest@^22.4.3:
     import-local "^1.0.0"
     jest-cli "^22.4.3"
 
-joi@10.x.x:
+joi@10.x.x, joi@^10.4.1:
   version "10.6.0"
   resolved "https://registry.yarnpkg.com/joi/-/joi-10.6.0.tgz#52587f02d52b8b75cdb0c74f0b164a191a0e1fc2"
   dependencies:
@@ -4239,15 +4214,6 @@ joi@10.x.x:
     isemail "2.x.x"
     items "2.x.x"
     topo "2.x.x"
-
-joi@6.10.1:
-  version "6.10.1"
-  resolved "https://registry.yarnpkg.com/joi/-/joi-6.10.1.tgz#4d50c318079122000fe5f16af1ff8e1917b77e06"
-  dependencies:
-    hoek "2.x.x"
-    isemail "1.x.x"
-    moment "2.x.x"
-    topo "1.x.x"
 
 joi@7.x.x:
   version "7.3.0"
@@ -4500,9 +4466,13 @@ locate-path@^2.0.0:
     p-locate "^2.0.0"
     path-exists "^3.0.0"
 
-lodash-es@^4.17.4, lodash-es@^4.2.0, lodash-es@^4.2.1:
+lodash-es@^4.17.4, lodash-es@^4.2.1:
   version "4.17.4"
   resolved "https://registry.yarnpkg.com/lodash-es/-/lodash-es-4.17.4.tgz#dcc1d7552e150a0640073ba9cb31d70f032950e7"
+
+lodash-es@^4.17.5:
+  version "4.17.10"
+  resolved "https://registry.yarnpkg.com/lodash-es/-/lodash-es-4.17.10.tgz#62cd7104cdf5dd87f235a837f0ede0e8e5117e05"
 
 lodash._baseassign@^3.0.0:
   version "3.2.0"
@@ -4733,9 +4703,13 @@ lodash@3.10.1, lodash@^3.10.0, lodash@^3.10.1:
   version "3.10.1"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-3.10.1.tgz#5bf45e8e49ba4189e17d482789dfd15bd140b7b6"
 
-lodash@^4.0.1, lodash@^4.13.1, lodash@^4.14.0, lodash@^4.15.0, lodash@^4.17.4, lodash@^4.2.0, lodash@^4.2.1:
+lodash@^4.0.1, lodash@^4.13.1, lodash@^4.14.0, lodash@^4.15.0, lodash@^4.17.4, lodash@^4.2.1:
   version "4.17.4"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.4.tgz#78203a4d1c328ae1d86dca6460e369b57f4055ae"
+
+lodash@^4.17.5:
+  version "4.17.10"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.10.tgz#1b7793cf7259ea38fb3661d4d38b3260af8ae4e7"
 
 lodash@^4.3.0:
   version "4.17.5"
@@ -6102,16 +6076,16 @@ react-redux-request@^1.5.5:
     lodash.isequal "^4.5.0"
     prop-types "^15.6.1"
 
-react-redux@^5.0.5:
-  version "5.0.6"
-  resolved "https://registry.yarnpkg.com/react-redux/-/react-redux-5.0.6.tgz#23ed3a4f986359d68b5212eaaa681e60d6574946"
+react-redux@^5.0.7:
+  version "5.0.7"
+  resolved "https://registry.yarnpkg.com/react-redux/-/react-redux-5.0.7.tgz#0dc1076d9afb4670f993ffaef44b8f8c1155a4c8"
   dependencies:
-    hoist-non-react-statics "^2.2.1"
+    hoist-non-react-statics "^2.5.0"
     invariant "^2.0.0"
-    lodash "^4.2.0"
-    lodash-es "^4.2.0"
+    lodash "^4.17.5"
+    lodash-es "^4.17.5"
     loose-envify "^1.1.0"
-    prop-types "^15.5.10"
+    prop-types "^15.6.0"
 
 react-router-breadcrumbs-hoc@1.1.2:
   version "1.1.2"
@@ -6632,9 +6606,9 @@ rimraf@~2.2.6:
   version "2.2.8"
   resolved "https://registry.yarnpkg.com/rimraf/-/rimraf-2.2.8.tgz#e439be2aaee327321952730f99a8929e4fc50582"
 
-rison-node@0.3.1:
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/rison-node/-/rison-node-0.3.1.tgz#fc540015500fc146f3b27d8d25dd5742122552a6"
+rison-node@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/rison-node/-/rison-node-2.0.0.tgz#a637ec8caca337458b37a5b03d413b07840231db"
 
 rst-selector-parser@^2.2.3:
   version "2.2.3"
@@ -6664,12 +6638,6 @@ run-sequence@^2.2.1:
 rx@^4.1.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/rx/-/rx-4.1.0.tgz#a5f13ff79ef3b740fe30aa803fb09f98805d4782"
-
-rxjs@5.3.0:
-  version "5.3.0"
-  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-5.3.0.tgz#d88ccbdd46af290cbdb97d5d8055e52453fabe2d"
-  dependencies:
-    symbol-observable "^1.0.1"
 
 rxjs@^5.4.3:
   version "5.5.10"
@@ -7234,7 +7202,7 @@ symbol-observable@1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/symbol-observable/-/symbol-observable-1.0.1.tgz#8340fc4702c3122df5d22288f88283f513d3fdd4"
 
-symbol-observable@^1.0.1, symbol-observable@^1.0.3:
+symbol-observable@^1.0.3:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/symbol-observable/-/symbol-observable-1.1.0.tgz#5c68fd8d54115d9dfb72a84720549222e8db9b32"
 
@@ -7472,12 +7440,6 @@ to-through@^2.0.0:
   dependencies:
     through2 "^2.0.3"
 
-topo@1.x.x:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/topo/-/topo-1.1.0.tgz#e9d751615d1bb87dc865db182fa1ca0a5ef536d5"
-  dependencies:
-    hoek "2.x.x"
-
 topo@2.x.x:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/topo/-/topo-2.0.2.tgz#cd5615752539057c0dc0491a621c3bc6fbe1d182"
@@ -7563,9 +7525,9 @@ uglify-to-browserify@~1.0.0:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/uglify-to-browserify/-/uglify-to-browserify-1.0.2.tgz#6e0924d6bda6b5afe349e39a6d632850a0f882b7"
 
-ui-select@0.19.4:
-  version "0.19.4"
-  resolved "https://registry.yarnpkg.com/ui-select/-/ui-select-0.19.4.tgz#f5702c90cd91eca094202188a7fdbc9483e58797"
+ui-select@^0.19.8:
+  version "0.19.8"
+  resolved "https://registry.yarnpkg.com/ui-select/-/ui-select-0.19.8.tgz#74860848a7fd8bc494d9856d2f62776ea98637c1"
 
 uid-number@^0.0.6:
   version "0.0.6"
