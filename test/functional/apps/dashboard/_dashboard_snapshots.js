@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
   describe('dashboard snapshots', function describeIndexTests() {
     before(async function () {
       // We use a really small window to minimize differences across os's and browsers.
-      await remote.setWindowSize(1000, 500);
+      await remote.setWindowSize(1000, 550);
     });
 
     after(async function () {
