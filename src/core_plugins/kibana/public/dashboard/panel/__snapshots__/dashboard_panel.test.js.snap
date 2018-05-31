@@ -29,7 +29,7 @@ exports[`DashboardPanel matches snapshot 1`] = `
         >
           <button
             aria-label="Panel options"
-            class="euiButtonIcon euiButtonIcon--primary"
+            class="euiButtonIcon euiButtonIcon--text"
             data-test-subj="dashboardPanelToggleMenuIcon"
             type="button"
           >
