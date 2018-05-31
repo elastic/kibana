@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import http from 'http';
+// import http from 'http';
+import { spawnSync } from 'child_process';
+
 
 // See https://github.com/elastic/kibana/issues/19351 for why this is necessary. Long story short, on certain
 // linux platforms (fwiw, we have only experienced this on jenkins agents) the first bootup of chromium takes
@@ -19,18 +21,23 @@ import http from 'http';
  * @return {Promise}
  */
 export async function ensureChromiumIsListening(port, logger) {
-  const options = {
-    port,
-    hostname: '127.0.0.1',
-    timeout: 120000,
-    path: '/json',
-  };
+  // const options = {
+  //   port,
+  //   hostname: '127.0.0.1',
+  //   timeout: 120000,
+  //   path: '/json',
+  // };
 
-  return new Promise((resolve, reject) => {
-    http.get(options, () => resolve())
-      .on('error', e => {
-        logger.error(`Ensure chromium is listening failed with error ${e.message}`);
-        reject(e);
-      });
+  return new Promise((resolve) => {
+    spawnSync(
+      `curl`,
+      [`http://127.0.0.1:${port}/json`],
+      logger.isVerbose ? { stdio: 'inherit' } : {});
+    resolve();
+    // http.get(options, () => resolve())
+    //   .on('error', e => {
+    //     logger.error(`Ensure chromium is listening failed with error ${e.message}`);
+    //     reject(e);
+    //   });
   });
 }
