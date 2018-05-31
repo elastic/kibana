@@ -11,14 +11,11 @@ import {
   EuiSpacer,
   EuiComboBox,
   EuiFormRow,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiButton,
   EuiDescribedFormGroup,
   EuiTitle,
   EuiHorizontalRule,
   EuiLink,
-  EuiIcon,
 } from '@elastic/eui';
 import './elasticsearch_privileges.less';
 import { ClusterPrivileges } from './cluster_privileges';
@@ -71,14 +68,14 @@ export class ElasticsearchPrivileges extends Component {
     return (
       <Fragment>
         <EuiDescribedFormGroup
-          title={<p>Cluster privileges {this.learnMore(documentationLinks.esClusterPrivileges)}</p>}
+          title={<h3>Cluster privileges</h3>}
           description={
             <p>
-              Manage the actions this role can perform against your cluster.
+              Manage the actions this role can perform against your cluster. {this.learnMore(documentationLinks.esClusterPrivileges)}
             </p>
           }
         >
-          <EuiFormRow fullWidth={true}>
+          <EuiFormRow fullWidth={true} hasEmptyLabelSpace>
             <ClusterPrivileges role={this.props.role} onChange={this.onClusterPrivilegesChange} />
           </EuiFormRow>
         </EuiDescribedFormGroup>
@@ -86,14 +83,14 @@ export class ElasticsearchPrivileges extends Component {
         <EuiSpacer />
 
         <EuiDescribedFormGroup
-          title={<p>Run As privileges {this.learnMore(documentationLinks.esRunAsPrivileges)}</p>}
+          title={<h3>Run As privileges</h3>}
           description={
             <p>
-              Allow requests to be submitted on behalf of other users.
+              Allow requests to be submitted on the behalf of other users. {this.learnMore(documentationLinks.esRunAsPrivileges)}
             </p>
           }
         >
-          <EuiFormRow>
+          <EuiFormRow hasEmptyLabelSpace>
             <EuiComboBox
               placeholder={this.props.editable ? 'Add a user...' : null}
               options={this.props.runAsUsers.map(username => ({ id: username, label: username }))}
@@ -106,32 +103,26 @@ export class ElasticsearchPrivileges extends Component {
 
         <EuiSpacer />
 
-        <EuiFormRow fullWidth={true}>
-          <div>
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiTitle size={'xs'}><p>Index privileges {this.learnMore(documentationLinks.esIndicesPrivileges)}</p></EuiTitle>
-                <EuiText size={'s'} color={'subdued'}><p>Control access to the data in your cluster.</p></EuiText>
-              </EuiFlexItem>
-              {this.props.editable && (
-                <EuiFlexItem grow={false}>
-                  <EuiButton size={'s'} iconType={'plusInCircle'} onClick={this.addIndexPrivilege}>Add Index Privilege</EuiButton>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-            <EuiHorizontalRule margin={'xs'} />
-          </div>
-        </EuiFormRow>
-        <EuiFormRow fullWidth={true}>
-          <IndexPrivileges {...indexProps} />
-        </EuiFormRow>
+        <EuiTitle size={'xs'}><h3>Index privileges</h3></EuiTitle>
+        <EuiSpacer size={'s'} />
+        <EuiText size={'s'} color={'subdued'}>
+          <p>Control access to the data in your cluster. {this.learnMore(documentationLinks.esIndicesPrivileges)}</p>
+        </EuiText>
+
+        <IndexPrivileges {...indexProps} />
+
+        <EuiHorizontalRule />
+
+        {this.props.editable && (
+          <EuiButton size={'s'} iconType={'plusInCircle'} onClick={this.addIndexPrivilege}>Add index privilege</EuiButton>
+        )}
       </Fragment>
     );
   }
 
   learnMore = (href) => (
     <EuiLink className="editRole__learnMore" href={href} target={'_blank'}>
-      <EuiIcon size={"s"} type="questionInCircle" />
+      Learn more
     </EuiLink>
   );
 

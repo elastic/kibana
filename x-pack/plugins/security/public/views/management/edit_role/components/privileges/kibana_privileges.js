@@ -14,6 +14,7 @@ import { CollapsiblePanel } from '../collapsible_panel';
 import {
   EuiCheckboxGroup,
   EuiDescribedFormGroup,
+  EuiFormRow,
 } from '@elastic/eui';
 export class KibanaPrivileges extends Component {
   static propTypes = {
@@ -63,12 +64,14 @@ export class KibanaPrivileges extends Component {
         title={<p>Application privileges</p>}
         description={<p>Manage the actions this role can perform within Kibana.</p>}
       >
-        <EuiCheckboxGroup
-          options={checkboxes}
-          idToSelectedMap={selectionMap}
-          onChange={this.onKibanaPrivilegesChange}
-          disabled={isReservedRole(role)}
-        />
+        <EuiFormRow hasEmptyLabelSpace>
+          <EuiCheckboxGroup
+            options={checkboxes}
+            idToSelectedMap={selectionMap}
+            onChange={this.onKibanaPrivilegesChange}
+            disabled={isReservedRole(role)}
+          />
+        </EuiFormRow>
       </EuiDescribedFormGroup>
     );
   }

@@ -9,10 +9,10 @@ import { get } from 'lodash';
 import { toastNotifications } from 'ui/notify';
 import {
   EuiPanel,
-  EuiText,
+  EuiTitle,
   EuiSpacer,
   EuiPage,
-  EuiPageContent,
+  EuiButtonEmpty,
   EuiForm,
   EuiFormRow,
   EuiFieldText,
@@ -57,27 +57,21 @@ export class EditRolePage extends Component {
       <div>
         <PageHeader breadcrumbs={this.props.breadcrumbs} />
         <EuiPage className="editRolePage">
-          <EuiPageContent className="editRolePage__content">
-            <EuiForm {...this.state.formError}>
-              {this.getFormTitle()}
+          <EuiForm {...this.state.formError}>
+            {this.getFormTitle()}
 
-              <EuiSpacer />
+            <EuiSpacer />
 
-              {this.getRoleName()}
+            {this.getRoleName()}
 
-              <EuiSpacer />
+            {this.getElasticsearchPrivileges()}
 
-              {this.getElasticsearchPrivileges()}
+            {this.getKibanaPrivileges()}
 
-              <EuiSpacer />
+            <EuiSpacer />
 
-              {this.getKibanaPrivileges()}
-
-              <EuiSpacer size={'xl'} />
-
-              {this.getFormButtons()}
-            </EuiForm>
-          </EuiPageContent>
+            {this.getFormButtons()}
+          </EuiForm>
         </EuiPage>
       </div>
     );
@@ -94,12 +88,7 @@ export class EditRolePage extends Component {
     }
 
     return (
-      <EuiFlexGroup justifyContent={'spaceBetween'}>
-        <EuiFlexItem grow={false}>
-          <EuiText><h1>{titleText}</h1></EuiText>
-        </EuiFlexItem>
-        {this.getActionButton()}
-      </EuiFlexGroup>
+      <EuiTitle size="l"><h1>{titleText} <ReservedRoleBadge role={this.props.role} /></h1></EuiTitle>
     );
   };
 
@@ -118,19 +107,22 @@ export class EditRolePage extends Component {
   getRoleName = () => {
     return (
       <EuiPanel>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiFormRow label={'Role name'} {...this.validator.validateRoleName(this.state.role)}>
-              <EuiFieldText
-                name={'name'}
-                value={this.state.role.name || ''}
-                onChange={this.onNameChange}
-                readOnly={isReservedRole(this.props.role) || this.editingExistingRole()}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <ReservedRoleBadge role={this.props.role} />
-        </EuiFlexGroup>
+        <EuiFormRow
+          label={'Role name'}
+          helpText={
+            !isReservedRole(this.props.role) && this.editingExistingRole() ?
+              "A role's name cannot be changed once it has been created." : undefined
+          }
+          {...this.validator.validateRoleName(this.state.role)}
+        >
+
+          <EuiFieldText
+            name={'name'}
+            value={this.state.role.name || ''}
+            onChange={this.onNameChange}
+            readOnly={isReservedRole(this.props.role) || this.editingExistingRole()}
+          />
+        </EuiFormRow>
       </EuiPanel>
     );
   }
@@ -149,17 +141,20 @@ export class EditRolePage extends Component {
 
   getElasticsearchPrivileges() {
     return (
-      <ElasticsearchPrivileges
-        role={this.state.role}
-        editable={!isReservedRole(this.state.role)}
-        httpClient={this.props.httpClient}
-        onChange={this.onRoleChange}
-        runAsUsers={this.props.runAsUsers}
-        validator={this.validator}
-        indexPatterns={this.props.indexPatterns}
-        allowDocumentLevelSecurity={this.props.allowDocumentLevelSecurity}
-        allowFieldLevelSecurity={this.props.allowFieldLevelSecurity}
-      />
+      <div>
+        <EuiSpacer />
+        <ElasticsearchPrivileges
+          role={this.state.role}
+          editable={!isReservedRole(this.state.role)}
+          httpClient={this.props.httpClient}
+          onChange={this.onRoleChange}
+          runAsUsers={this.props.runAsUsers}
+          validator={this.validator}
+          indexPatterns={this.props.indexPatterns}
+          allowDocumentLevelSecurity={this.props.allowDocumentLevelSecurity}
+          allowFieldLevelSecurity={this.props.allowFieldLevelSecurity}
+        />
+      </div>
     );
   }
 
@@ -175,40 +170,41 @@ export class EditRolePage extends Component {
     }
 
     return (
-      <KibanaPrivileges
-        kibanaAppPrivileges={this.props.kibanaAppPrivileges}
-        rbacApplication={this.props.rbacApplication}
-        role={this.state.role}
-        onChange={this.onRoleChange}
-      />
+      <div>
+        <EuiSpacer />
+        <KibanaPrivileges
+          kibanaAppPrivileges={this.props.kibanaAppPrivileges}
+          rbacApplication={this.props.rbacApplication}
+          role={this.state.role}
+          onChange={this.onRoleChange}
+        />
+      </div>
     );
   };
 
   getFormButtons = () => {
     if (isReservedRole(this.props.role)) {
       return (
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiButton onClick={this.backToRoleList}>
-              Return to role list
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiButton onClick={this.backToRoleList}>
+          Return to role list
+        </EuiButton>
       );
     }
 
     const saveText = this.editingExistingRole() ? 'Update role' : 'Create role';
 
     return (
-      <EuiFlexGroup>
+      <EuiFlexGroup responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiButton fill onClick={this.saveRole} disabled={isReservedRole(this.props.role)}>{saveText}</EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={this.backToRoleList}>
+          <EuiButtonEmpty onClick={this.backToRoleList}>
             Cancel
-          </EuiButton>
+          </EuiButtonEmpty>
         </EuiFlexItem>
+        <EuiFlexItem grow={true} />
+        {this.getActionButton()}
       </EuiFlexGroup>
     );
   };

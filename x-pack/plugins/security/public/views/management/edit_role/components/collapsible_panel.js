@@ -38,12 +38,12 @@ export class CollapsiblePanel extends Component {
 
   getTitle = () => {
     return (
-      <EuiFlexGroup alignItems={'baseline'}>
+      <EuiFlexGroup alignItems={'baseline'} gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle>
-            <div>
-              <EuiIcon type={this.props.iconType} size={'l'} className={'collapsiblePanel__logo'} /> {this.props.title}
-            </div>
+            <h2>
+              <EuiIcon type={this.props.iconType} size={'xl'} className={'collapsiblePanel__logo'} /> {this.props.title}
+            </h2>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

@@ -9,9 +9,8 @@ import PropTypes from 'prop-types';
 
 import { isReservedRole } from '../../../../lib/role';
 import {
-  EuiBadge,
+  EuiIcon,
   EuiToolTip,
-  EuiFlexItem,
 } from '@elastic/eui';
 
 
@@ -22,11 +21,9 @@ export const ReservedRoleBadge = (props) => {
 
   if (isReservedRole(role)) {
     return (
-      <EuiFlexItem grow={false}>
-        <EuiToolTip content={'Reserved roles are built-in and cannot be removed or modified.'}>
-          <EuiBadge iconType={'lock'}>Reserved Role</EuiBadge>
-        </EuiToolTip>
-      </EuiFlexItem>
+      <EuiToolTip content={'Reserved roles are built-in and cannot be removed or modified.'}>
+        <EuiIcon style={{ verticalAlign: "super" }} type={'lock'} />
+      </EuiToolTip>
     );
   }
   return null;
