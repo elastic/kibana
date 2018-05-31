@@ -14,6 +14,7 @@ export class KibanaMap extends React.Component {
 
   constructor() {
     super();
+    this._layers = [];
   }
 
   componentDidMount() {
@@ -29,9 +30,14 @@ export class KibanaMap extends React.Component {
   }
 
   async addLayer(layer) {
+    this._layers.push(layer);
     const olLayer = await layer.getOLLayer();
     this._olMap.addLayer(olLayer);
     this.emit("layer:added");
+  }
+
+  getLayers() {
+    return this._layers.slice();
   }
 
   render() {
