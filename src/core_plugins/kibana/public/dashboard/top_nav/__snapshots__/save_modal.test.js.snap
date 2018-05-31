@@ -21,7 +21,7 @@ exports[`renders DashboardSaveModal 1`] = `
           label="Save as a new dashboard"
         >
           <EuiSwitch
-            checked={true}
+            checked={false}
             data-test-subj="saveAsNewCheckbox"
             onChange={[Function]}
           />

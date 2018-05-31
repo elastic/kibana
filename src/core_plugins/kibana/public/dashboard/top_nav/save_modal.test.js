@@ -30,7 +30,6 @@ test('renders DashboardSaveModal', () => {
     onClose={() => {}}
     title="dash title"
     description="dash description"
-    copyOnSave={true}
     timeRestore={true}
     showCopyOnSave={true}
   />);
