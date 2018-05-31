@@ -29,7 +29,7 @@ export function StatementSection({
   );
 }
 
-function getCollapsedChildElements(elements, collapsedIds) {
+function getCollapsedChildIds(elements, collapsedIds) {
   const collapsedChildIds = new Set();
   elements.forEach(({ id, parentId }) => {
     if (collapsedIds.has(parentId) || collapsedChildIds.has(parentId)) {
@@ -67,7 +67,7 @@ class StatementList extends React.PureComponent {
   }
 
   updateCollapsedElements(collapsedIds) {
-    const collapsedChildIds = getCollapsedChildElements(this.props.elements, collapsedIds);
+    const collapsedChildIds = getCollapsedChildIds(this.props.elements, collapsedIds);
 
     this.setState({
       collapsedIds,

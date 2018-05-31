@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -17,7 +18,7 @@ import { Metric } from './metric';
 function getInputStatementMetrics({ latestEventsPerSecond }) {
   return [(
     <Metric
-      name="eventsEmitted"
+      key="eventsEmitted"
       className="cv-inputMetric__eventsEmitted"
       value={formatMetric(latestEventsPerSecond, '0.[00]a', 'e/s emitted')}
     />
@@ -37,21 +38,21 @@ function getProcessorStatementMetrics(processorVertex) {
   return [
     (
       <Metric
-        name="cpuMetric"
+        key="cpuMetric"
         className={`cv-processorMetric__cpuTime ${cpuHighlight}`}
         value={formatMetric(Math.round(percentOfTotalProcessorTime || 0), '0', '%', { prependSpace: false })}
       />
     ),
     (
       <Metric
-        name="eventMillis"
+        key="eventMillis"
         className={`cv-processorMetric__eventMillis ${eventMillisHighlight}`}
         value={formatMetric(latestMillisPerEvent, '0.[00]a', 'ms/e')}
       />
     ),
     (
       <Metric
-        name="eventsReceived"
+        key="eventsReceived"
         className="cv-processorMetric__events"
         value={formatMetric(latestEventsPerSecond, '0.[00]a', 'e/s received')}
       />
@@ -133,3 +134,14 @@ export function PluginStatement({
     </div>
   );
 }
+
+PluginStatement.propTypes = {
+  statement: PropTypes.shape({
+    hasExplicitId: PropTypes.bool.isRequired,
+    id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    pluginType: PropTypes.string.isRequired,
+    vertex: PropTypes.object.isRequired,
+  }).isRequired,
+  onShowVertexDetails: PropTypes.func.isRequired,
+};

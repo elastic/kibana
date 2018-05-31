@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -36,3 +37,8 @@ export function StatementListHeading({
     </EuiFlexGroup>
   );
 }
+
+StatementListHeading.propTypes = {
+  iconType: PropTypes.string.isRequired,
+  title: PropTypes.string.isRequired,
+};

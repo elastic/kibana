@@ -5,14 +5,14 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { EuiFlexItem } from '@elastic/eui';
 
-export function Metric({ name, className, value }) {
+export function Metric({ className, value }) {
   return (
     <EuiFlexItem
       grow={false}
       className={"cv-pluginStatement__metricContainer"}
-      key={name}
     >
       <div className={className}>
         {value}
@@ -20,3 +20,8 @@ export function Metric({ name, className, value }) {
     </EuiFlexItem>
   );
 }
+
+Metric.propTypes = {
+  className: PropTypes.string.isRequired,
+  value: PropTypes.string.isRequired,
+};
