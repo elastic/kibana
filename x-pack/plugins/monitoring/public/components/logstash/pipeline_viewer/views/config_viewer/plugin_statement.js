@@ -15,13 +15,13 @@ import { formatMetric } from '../../../../../lib/format_number';
 import { Metric } from './metric';
 
 function getInputStatementMetrics({ latestEventsPerSecond }) {
-  return [
-    new Metric(
-      'eventsEmitted',
-      'cv-inputMetric__eventsEmitted',
-      formatMetric(latestEventsPerSecond, '0.[00]a', 'e/s emitted')
-    )
-  ];
+  return [(
+    <Metric
+      name="eventsEmitted"
+      className="cv-inputMetric__eventsEmitted"
+      value={formatMetric(latestEventsPerSecond, '0.[00]a', 'e/s emitted')}
+    />
+  )];
 }
 
 function getProcessorStatementMetrics(processorVertex) {
@@ -35,40 +35,34 @@ function getProcessorStatementMetrics(processorVertex) {
   const eventMillisHighlight = processorVertex.isSlow() ? 'cv-processorMetric__eventMillis' : '';
 
   return [
-    new Metric(
-      'cpuMetric',
-      `cv-processorMetric__cpuTime ${cpuHighlight}`,
-      formatMetric(Math.round(percentOfTotalProcessorTime || 0), '0', '%', { prependSpace: false })
+    (
+      <Metric
+        name="cpuMetric"
+        className={`cv-processorMetric__cpuTime ${cpuHighlight}`}
+        value={formatMetric(Math.round(percentOfTotalProcessorTime || 0), '0', '%', { prependSpace: false })}
+      />
     ),
-    new Metric(
-      'eventMillis',
-      `cv-processorMetric__eventMillis ${eventMillisHighlight}`,
-      formatMetric(latestMillisPerEvent, '0.[00]a', 'ms/e')
+    (
+      <Metric
+        name="eventMillis"
+        className={`cv-processorMetric__eventMillis ${eventMillisHighlight}`}
+        value={formatMetric(latestMillisPerEvent, '0.[00]a', 'ms/e')}
+      />
     ),
-    new Metric(
-      'eventsReceived',
-      'cv-processorMetric__events',
-      formatMetric(latestEventsPerSecond, '0.[00]a', 'e/s received')
+    (
+      <Metric
+        name="eventsReceived"
+        className="cv-processorMetric__events"
+        value={formatMetric(latestEventsPerSecond, '0.[00]a', 'e/s received')}
+      />
     )
   ];
 }
 
 function renderPluginStatementMetrics(pluginType, vertex) {
-  const metrics = pluginType === 'input'
+  return pluginType === 'input'
     ? getInputStatementMetrics(vertex)
     : getProcessorStatementMetrics(vertex);
-
-  return metrics.map(({ name, className, value }) => (
-    <EuiFlexItem
-      grow={false}
-      className={"cv-pluginStatement__metricContainer"}
-      key={name}
-    >
-      <div className={className}>
-        {value}
-      </div>
-    </EuiFlexItem>
-  ));
 }
 
 export function PluginStatement({

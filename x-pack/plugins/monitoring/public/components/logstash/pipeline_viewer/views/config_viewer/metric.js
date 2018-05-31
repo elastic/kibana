@@ -4,10 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export class Metric {
-  constructor(name, className, value) {
-    this.name = name;
-    this.className = className;
-    this.value = value;
-  }
+import React from 'react';
+import { EuiFlexItem } from '@elastic/eui';
+
+export function Metric({ name, className, value }) {
+  return (
+    <EuiFlexItem
+      grow={false}
+      className={"cv-pluginStatement__metricContainer"}
+      key={name}
+    >
+      <div className={className}>
+        {value}
+      </div>
+    </EuiFlexItem>
+  );
 }
