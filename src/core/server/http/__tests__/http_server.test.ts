@@ -41,10 +41,6 @@ function getServerListener(httpServer: HttpServer) {
   return (httpServer as any).server.listener;
 }
 
-function getRedirectServerListener(httpServer: HttpServer) {
-  return (httpServer as any).redirectServer.listener;
-}
-
 beforeEach(() => {
   config = {
     host: '127.0.0.1',
@@ -568,17 +564,6 @@ describe('with defined `redirectHttpFromPort`', () => {
     server.registerRouter(router);
 
     await server.start(configWithSSL);
-  });
-
-  test('http requests are forwarded to https', async () => {
-    await supertest(getRedirectServerListener(server))
-      .get('/')
-      .expect(302)
-      .then(res => {
-        expect(res.header.location).toEqual(
-          `https://${configWithSSL.host}:${configWithSSL.port}/`
-        );
-      });
   });
 });
 

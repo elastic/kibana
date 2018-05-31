@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`throws if [redirectHttpFromPort] is in use 1`] = `[Error: Redirect server cannot be started when [ssl.enabled] is set to \`false\` or [ssl.redirectHttpFromPort] is not specified.]`;
+
+exports[`throws if [redirectHttpFromPort] is not specified 1`] = `[Error: Redirect server cannot be started when [ssl.enabled] is set to \`false\` or [ssl.redirectHttpFromPort] is not specified.]`;
+
+exports[`throws if SSL is not enabled 1`] = `[Error: Redirect server cannot be started when [ssl.enabled] is set to \`false\` or [ssl.redirectHttpFromPort] is not specified.]`;
