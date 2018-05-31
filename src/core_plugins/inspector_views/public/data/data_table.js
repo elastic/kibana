@@ -45,7 +45,7 @@ class DataTableFormat extends Component {
         <EuiFlexItem grow={false}>
           { value }
         </EuiFlexItem>
-        <EuiFlexItem grow={false} className="inspector-table__filter">
+        <EuiFlexItem grow={false}>
           <EuiFlexGroup
             gutterSize="none"
             alignItems="center"
@@ -59,12 +59,13 @@ class DataTableFormat extends Component {
                   iconType="plusInCircle"
                   color="text"
                   aria-label="Filter for value"
+                  className="inspector-table__filter"
                   onClick={() => col.filter(value)}
                 />
               </EuiToolTip>
             }
             { col.filterOut &&
-              <EuiFlexItem grow={false} className="inspector-table__filter">
+              <EuiFlexItem grow={false}>
                 <EuiToolTip
                   position="bottom"
                   content="Filter out value"
@@ -73,6 +74,7 @@ class DataTableFormat extends Component {
                     iconType="minusInCircle"
                     color="text"
                     aria-label="Filter out value"
+                    className="inspector-table__filter"
                     onClick={() => col.filterOut(value)}
                   />
                 </EuiToolTip>
