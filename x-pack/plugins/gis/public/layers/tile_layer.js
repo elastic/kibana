@@ -16,6 +16,14 @@ export class TileLayer extends React.Component {
     this._tmsSource = tmsSource;
   }
 
+  renderTOCLayerEntry() {
+    return (
+      <div>
+        layer: {JSON.stringify(this._tmsSource)}
+      </div>
+    );
+  }
+
   async getOLLayer() {
     const urlTemplate = await this._tmsSource.getUrlTemplate();
     return new ol.layer.Tile({
