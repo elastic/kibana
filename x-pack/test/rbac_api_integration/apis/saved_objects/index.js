@@ -4,15 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AUTHENTICATION } from "./authentication";
+
 export default function ({ loadTestFile, getService }) {
   const es = getService('es');
 
   describe('saved_objects', () => {
     before(async () => {
       await es.shield.putUser({
-        username: 'a_kibana_user',
+        username: AUTHENTICATION.KIBANA_RBAC_USER.USERNAME,
         body: {
-          password: 'password',
+          password: AUTHENTICATION.KIBANA_RBAC_USER.PASSWORD,
           roles: ['kibana_rbac_user'],
           full_name: 'a kibana user',
           email: 'a_kibana_user@elastic.co',
@@ -20,9 +22,9 @@ export default function ({ loadTestFile, getService }) {
       });
 
       await es.shield.putUser({
-        username: 'a_kibana_dashboard_only_user',
+        username: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.USERNAME,
         body: {
-          password: 'password',
+          password: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.PASSWORD,
           roles: ["kibana_rbac_dashboard_only_user"],
           full_name: 'a kibana dashboard only user',
           email: 'a_kibana_dashboard_only_user@elastic.co',
