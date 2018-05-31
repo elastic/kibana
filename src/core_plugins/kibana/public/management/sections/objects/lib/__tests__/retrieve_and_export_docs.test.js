@@ -58,13 +58,20 @@ describe('retrieveAndExportDocs', () => {
     const objs = [1, 2, 3];
     await retrieveAndExportDocs(objs, savedObjectsClient);
     expect(savedObjectsClient.bulkGet.mock.calls.length).toBe(1);
-    expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith(objs);
+    expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith([...objs, { id: 'migration-state', type: 'migration' }]);
   });
 
   it('should use the saveToFile utility', async () => {
     const savedObjectsClient = {
       bulkGet: jest.fn().mockImplementation(() => ({
         savedObjects: [
+          {
+            id: 'migration-state',
+            type: 'migration',
+            attributes: {
+              types: [{ type: 'foo' }],
+            },
+          },
           {
             id: 1,
             type: 'index-pattern',
@@ -84,25 +91,23 @@ describe('retrieveAndExportDocs', () => {
     };
 
     const objs = [1, 2, 3];
+    const expectedArgs = {
+      migrationState: { types: [{ type: 'foo' }] },
+      docs: [
+        {
+          _id: 1,
+          _type: 'index-pattern',
+          _source: { title: 'foobar' },
+        },
+        {
+          _id: 2,
+          _type: 'search',
+          _source: { title: 'just the foo' },
+        },
+      ],
+    };
     await retrieveAndExportDocs(objs, savedObjectsClient);
     expect(saveToFile.mock.calls.length).toBe(1);
-    expect(saveToFile).toHaveBeenCalledWith(
-      JSON.stringify(
-        [
-          {
-            _id: 1,
-            _type: 'index-pattern',
-            _source: { title: 'foobar' },
-          },
-          {
-            _id: 2,
-            _type: 'search',
-            _source: { title: 'just the foo' },
-          },
-        ],
-        null,
-        2
-      )
-    );
+    expect(saveToFile).toHaveBeenCalledWith(JSON.stringify(expectedArgs, null, 2));
   });
 });

@@ -20,11 +20,10 @@
 import {
   startServers,
   stopServers,
-} from './lib';
+} from '../../../../test_utils/servers';
 
 import { docExistsSuite } from './doc_exists';
 import { docMissingSuite } from './doc_missing';
-import { indexMissingSuite } from './index_missing';
 
 describe('uiSettings/routes', function () {
 
@@ -48,7 +47,6 @@ describe('uiSettings/routes', function () {
   this.timeout(10000);
 
   before(startServers);
-  describe('index missing', indexMissingSuite);
   describe('doc missing', docMissingSuite);
   describe('doc exists', docExistsSuite);
   after(stopServers);

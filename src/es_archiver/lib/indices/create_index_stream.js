@@ -18,13 +18,18 @@
  */
 
 import { Transform } from 'stream';
-
-import { get } from 'lodash';
-
+import { get, once } from 'lodash';
+import { deleteKibanaIndices } from './kibana_index';
 import { deleteIndex } from './delete_index';
 
 export function createCreateIndexStream({ client, stats, skipExisting, log }) {
   const skipDocsFromIndices = new Set();
+
+  // If we're trying to import Kibana index docs, we need to ensure that
+  // previous indices are removed so we're starting w/ a clean slate for
+  // migrations. This only needs to be done once per archive load operation.
+  // For the '.kibana' index, we will ignore 'skipExisting' and always load.
+  const clearKibanaIndices = once(async () => await deleteKibanaIndices({ client, stats }));
 
   async function handleDoc(stream, record) {
     if (skipDocsFromIndices.has(record.value.index)) {
@@ -39,6 +44,9 @@ export function createCreateIndexStream({ client, stats, skipExisting, log }) {
 
     async function attemptToCreate(attemptNumber = 1) {
       try {
+        if (index.startsWith('.kibana')) {
+          await clearKibanaIndices();
+        }
         await client.indices.create({
           method: 'PUT',
           index,
@@ -46,7 +54,9 @@ export function createCreateIndexStream({ client, stats, skipExisting, log }) {
         });
         stats.createdIndex(index, { settings });
       } catch (err) {
-        if (get(err, 'body.error.type') !== 'resource_already_exists_exception' || attemptNumber >= 3) {
+        const errorType = get(err, 'body.error.type');
+        const isExistingIndexOrAlias = (errorType === 'resource_already_exists_exception' || errorType === 'invalid_index_name_exception');
+        if (!isExistingIndexOrAlias || attemptNumber >= 3) {
           throw err;
         }
 
@@ -56,7 +66,13 @@ export function createCreateIndexStream({ client, stats, skipExisting, log }) {
           return;
         }
 
-        await deleteIndex({ client, stats, index, log });
+        if (await client.indices.existsAlias({ name: index })) {
+          log.debug(`Deleting alias ${index} and associated indices.`);
+          const alias = await client.indices.getAlias({ name: index });
+          await client.indices.delete({ index: Object.keys(alias) });
+        } else {
+          await deleteIndex({ client, stats, index, log });
+        }
         await attemptToCreate(attemptNumber + 1);
         return;
       }

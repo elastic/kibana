@@ -16,17 +16,4 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-export default {
-  '_default_': {
-    'dynamic': 'strict'
-  },
-  config: {
-    dynamic: true,
-    properties: {
-      buildNum: {
-        type: 'keyword'
-      }
-    }
-  }
-};
+require('../src/cli/migrations');

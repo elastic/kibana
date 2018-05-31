@@ -36,7 +36,6 @@ import * as Plugins from './plugins';
 import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects';
 import { sampleDataMixin } from './sample_data';
-import { kibanaIndexMappingsMixin } from './mappings';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
 
@@ -55,8 +54,10 @@ export default class KbnServer {
 
       // sets this.config, reads this.settings
       configSetupMixin,
+
       // sets this.server
       httpMixin,
+
       // adds methods for extending this.server
       serverExtensionsMixin,
       loggingMixin,
@@ -76,9 +77,6 @@ export default class KbnServer {
       // setup this.uiExports and this.uiBundles
       uiMixin,
       indexPatternsMixin,
-
-      // setup server.getKibanaIndexMappingsDsl()
-      kibanaIndexMappingsMixin,
 
       // setup saved object routes
       savedObjectsMixin,

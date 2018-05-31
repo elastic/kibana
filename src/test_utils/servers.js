@@ -19,7 +19,7 @@
 
 import { createEsTestCluster } from '@kbn/test';
 import { createToolingLog } from '@kbn/dev-utils';
-import * as kbnTestServer from '../../../../../test_utils/kbn_server';
+import * as kbnTestServer from './kbn_server';
 
 let kbnServer;
 let services;
@@ -34,6 +34,8 @@ export async function startServers() {
   log.indent(4);
 
   es = createEsTestCluster({ log });
+  // Sometimes starting servers takes longer than we anticipate
+  // If we're called w/ this as the test context, we'll change the timeout.
   this.timeout(es.getStartTimeout());
 
   log.indent(-4);
@@ -42,6 +44,8 @@ export async function startServers() {
   kbnServer = kbnTestServer.createServerWithCorePlugins();
   await kbnServer.ready();
   await kbnServer.server.plugins.elasticsearch.waitUntilReady();
+
+  return getServices();
 }
 
 export function getServices() {

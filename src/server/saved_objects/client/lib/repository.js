@@ -37,6 +37,7 @@ export class SavedObjectsRepository {
       mappings,
       callCluster,
       onBeforeWrite = () => {},
+      transformDocuments = (doc) => doc,
     } = options;
 
     this._index = index;
@@ -44,6 +45,7 @@ export class SavedObjectsRepository {
     this._type = getRootType(this._mappings);
     this._onBeforeWrite = onBeforeWrite;
     this._unwrappedCallCluster = callCluster;
+    this._transformDocuments = transformDocuments;
   }
 
   /**
@@ -54,37 +56,23 @@ export class SavedObjectsRepository {
    * @param {object} [options={}]
    * @property {string} [options.id] - force id on creation, not recommended
    * @property {boolean} [options.overwrite=false]
+   * @property {object} [options.migrationState=undefined] - if non-nil, will transform the doc up to the latest version
    * @returns {promise} - { id, type, version, attributes }
   */
   async create(type, attributes = {}, options = {}) {
     const {
       id,
-      overwrite = false
+      migrationState,
+      overwrite = false,
     } = options;
 
-    const method = id && !overwrite ? 'create' : 'index';
-    const time = this._getCurrentTime();
-
     try {
-      const response = await this._writeToCluster(method, {
-        id: this._generateEsId(type, id),
-        type: this._type,
-        index: this._index,
-        refresh: 'wait_for',
-        body: {
-          type,
-          updated_at: time,
-          [type]: attributes
-        },
+      const [doc] = await this._upgradeDocuments({
+        migrationState,
+        docs: [{ id, type, attributes }],
       });
 
-      return {
-        id: trimIdPrefix(response._id, type),
-        type,
-        updated_at: time,
-        version: response._version,
-        attributes
-      };
+      return await this._upsertDocument(doc, overwrite);
     } catch (error) {
       if (errors.isNotFoundError(error)) {
         // See "503s from missing index" above
@@ -101,38 +89,42 @@ export class SavedObjectsRepository {
    * @param {array} objects - [{ type, id, attributes }]
    * @param {object} [options={}]
    * @property {boolean} [options.overwrite=false] - overwrites existing documents
+   * @property {object} [options.migrationState=undefined] - if non-nil, will transform all docs up to the latest version
    * @returns {promise} - [{ id, type, version, attributes, error: { message } }]
    */
   async bulkCreate(objects, options = {}) {
     const {
-      overwrite = false
+      migrationState,
+      overwrite = false,
     } = options;
     const time = this._getCurrentTime();
-    const objectToBulkRequest = (object) => {
+    const objectToBulkRequest = (acc, object) => {
       const method = object.id && !overwrite ? 'create' : 'index';
-
-      return [
-        {
-          [method]: {
-            _id: this._generateEsId(object.type, object.id),
-            _type: this._type,
-          }
-        },
-        {
-          type: object.type,
-          updated_at: time,
-          [object.type]: object.attributes
+      acc.push({
+        [method]: {
+          _id: this._generateEsId(object.type, object.id),
+          _type: this._type,
         }
-      ];
+      });
+      acc.push({
+        type: object.type,
+        updated_at: time,
+        [object.type]: object.attributes
+      });
+
+      return acc;
     };
+
+    const docs = await this._upgradeDocuments({
+      time,
+      migrationState,
+      docs: objects,
+    });
 
     const { items } = await this._writeToCluster('bulk', {
       index: this._index,
       refresh: 'wait_for',
-      body: objects.reduce((acc, object) => ([
-        ...acc,
-        ...objectToBulkRequest(object)
-      ]), []),
+      body: docs.reduce(objectToBulkRequest, []),
     });
 
     return items.map((response, i) => {
@@ -421,6 +413,44 @@ export class SavedObjectsRepository {
     } catch (err) {
       throw decorateEsError(err);
     }
+  }
+
+  async _upsertDocument({ id, type, attributes }, overwrite) {
+    const method = id && !overwrite ? 'create' : 'index';
+    const time = this._getCurrentTime();
+    const response = await this._writeToCluster(method, {
+      id: this._generateEsId(type, id),
+      type: this._type,
+      index: this._index,
+      refresh: 'wait_for',
+      body: {
+        type,
+        updated_at: time,
+        [type]: attributes
+      },
+    });
+
+    return {
+      id: trimIdPrefix(response._id, type),
+      type,
+      updated_at: time,
+      version: response._version,
+      attributes
+    };
+  }
+
+  // Upgrades documents to the same version as the index, using
+  // the Migrations transformDocuments function that was passed into
+  // the constructor.
+  _upgradeDocuments({ migrationState, docs }) {
+    if (!migrationState) {
+      return docs;
+    }
+
+    return this._transformDocuments({
+      migrationState,
+      docs,
+    });
   }
 
   _generateEsId(type, id) {

@@ -1,0 +1,1003 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Migration.migrate creates the index and alias if it does not exist 1`] = `
+Object {
+  "data": Object {
+    ".sample-index-3.2.1-112fe662": Object {
+      "migration:migration-state": Object {
+        "_source": Object {
+          "migration": Object {
+            "previousIndex": ".sample-index-3.2.1-original",
+            "status": "migrated",
+            "types": Array [
+              Object {
+                "checksum": "733682e2",
+                "migrationIds": Array [
+                  "p1m1",
+                ],
+                "type": "p1",
+              },
+              Object {
+                "checksum": "221bb3b9",
+                "migrationIds": Array [
+                  "p2m1",
+                ],
+                "type": "p2",
+              },
+            ],
+          },
+          "type": "migration",
+        },
+        "_version": 1,
+      },
+      "p1:sample": Object {
+        "_source": Object {
+          "p1": Object {
+            "name": "P1 Name!",
+          },
+          "type": "p1",
+          "updated_at": undefined,
+        },
+      },
+      "p2:p2doc": Object {
+        "_source": Object {
+          "p2": Object {
+            "thing": "P2 Thingamabob",
+          },
+          "type": "p2",
+          "updated_at": undefined,
+        },
+      },
+    },
+    ".sample-index-3.2.1-original": Object {
+      "migration:migration-state": Object {
+        "_source": Object {
+          "migration": Object {
+            "status": "migrating",
+            "types": Array [],
+          },
+          "type": "migration",
+        },
+        "_version": 1,
+      },
+    },
+  },
+  "meta": Object {
+    "aliases": Object {
+      ".sample-index": Object {
+        ".sample-index-3.2.1-112fe662": Object {
+          "aliases": Object {
+            ".sample-index": Object {},
+          },
+        },
+      },
+    },
+    "mappings": Object {
+      ".sample-index-3.2.1-112fe662": Object {
+        "doc": Object {
+          "dynamic": "strict",
+          "properties": Object {
+            "config": Object {
+              "dynamic": true,
+              "properties": Object {
+                "buildNum": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "migration": Object {
+              "properties": Object {
+                "previousIndex": Object {
+                  "type": "keyword",
+                },
+                "status": Object {
+                  "type": "keyword",
+                },
+                "types": Object {
+                  "properties": Object {
+                    "checksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "type": Object {
+                      "type": "keyword",
+                    },
+                  },
+                },
+              },
+            },
+            "p1": Object {
+              "properties": Object {
+                "name": Object {
+                  "type": "text",
+                },
+              },
+            },
+            "p2": Object {
+              "properties": Object {
+                "thing": Object {
+                  "type": "text",
+                },
+              },
+            },
+            "type": Object {
+              "type": "keyword",
+            },
+            "updated_at": Object {
+              "type": "date",
+            },
+          },
+        },
+      },
+      ".sample-index-3.2.1-original": Object {
+        "doc": Object {
+          "dynamic": "strict",
+          "properties": Object {
+            "config": Object {
+              "dynamic": true,
+              "properties": Object {
+                "buildNum": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "migration": Object {
+              "properties": Object {
+                "previousIndex": Object {
+                  "type": "keyword",
+                },
+                "status": Object {
+                  "type": "keyword",
+                },
+                "types": Object {
+                  "properties": Object {
+                    "checksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "type": Object {
+                      "type": "keyword",
+                    },
+                  },
+                },
+              },
+            },
+            "p1": Object {
+              "properties": Object {
+                "name": Object {
+                  "type": "text",
+                },
+              },
+            },
+            "p2": Object {
+              "properties": Object {
+                "thing": Object {
+                  "type": "text",
+                },
+              },
+            },
+            "type": Object {
+              "type": "keyword",
+            },
+            "updated_at": Object {
+              "type": "date",
+            },
+          },
+        },
+      },
+    },
+    "settings": Object {
+      ".sample-index-3.2.1-112fe662": Object {
+        "index": Object {
+          "number_of_replicas": "1",
+          "number_of_shards": "5",
+        },
+      },
+      ".sample-index-3.2.1-original": Object {
+        "index": Object {
+          "blocks.read_only": false,
+          "number_of_replicas": "1",
+          "number_of_shards": "5",
+        },
+      },
+    },
+  },
+}
+`;
+
+exports[`Migration.migrate does nothing if there are no migrations defined 1`] = `
+Object {
+  "data": Object {},
+  "meta": Object {
+    "aliases": Object {},
+    "mappings": Object {},
+    "settings": Object {},
+  },
+}
+`;
+
+exports[`Migration.migrate existing indices are converted to aliases and migrated 1`] = `
+Object {
+  "data": Object {
+    ".sample-index-3.2.1-185a3a7e": Object {
+      "migration:migration-state": Object {
+        "_source": Object {
+          "migration": Object {
+            "previousIndex": ".sample-index-3.2.1-original",
+            "status": "migrated",
+            "types": Array [
+              Object {
+                "checksum": "c8987679",
+                "migrationIds": Array [
+                  "p1m1",
+                  "p1m2",
+                  "p1m3",
+                ],
+                "type": "p1",
+              },
+              Object {
+                "checksum": "23d6018d",
+                "migrationIds": Array [
+                  "p3m1",
+                  "p3m2",
+                ],
+                "type": "p3",
+              },
+            ],
+          },
+          "type": "migration",
+        },
+        "_version": 1,
+      },
+      "p1:newseedsofcontemplation": Object {
+        "_source": Object {
+          "p1": Object {
+            "fullName": "Thomas Merton",
+          },
+          "type": "p1",
+          "updated_at": undefined,
+        },
+      },
+      "p1:sample": Object {
+        "_source": Object {
+          "p1": Object {
+            "fullName": "P1 Name!",
+          },
+          "type": "p1",
+          "updated_at": undefined,
+        },
+      },
+      "p3:for-old-plugin-1": Object {
+        "_source": Object {
+          "p3": Object {
+            "shtuff": "OLD SHTUFF",
+          },
+          "type": "p3",
+          "updated_at": undefined,
+        },
+      },
+      "p3:p3doc": Object {
+        "_source": Object {
+          "p3": Object {
+            "shtuff": "SHTUFF HAPPENS",
+          },
+          "type": "p3",
+          "updated_at": undefined,
+        },
+      },
+      "shut_the_front_door:2": Object {
+        "_source": Object {
+          "shut_the_front_door": Object {
+            "meaning": 42,
+          },
+          "type": "shut_the_front_door",
+          "updated_at": undefined,
+        },
+      },
+    },
+    ".sample-index-3.2.1-original": Object {
+      "migration:migration-state": Object {
+        "_source": Object {
+          "migration": Object {
+            "status": "migrating",
+            "types": Array [],
+          },
+          "type": "migration",
+        },
+        "_version": 1,
+      },
+      "p3:for-old-plugin-1": Object {
+        "_source": Object {
+          "p3": Object {
+            "shtuff": "Old Shtuff",
+          },
+          "type": "p3",
+        },
+      },
+      "shut_the_front_door:2": Object {
+        "_source": Object {
+          "shut_the_front_door": Object {
+            "meaning": 42,
+          },
+          "type": "shut_the_front_door",
+        },
+      },
+    },
+  },
+  "meta": Object {
+    "aliases": Object {
+      ".sample-index": Object {
+        ".sample-index-3.2.1-185a3a7e": Object {
+          "aliases": Object {
+            ".sample-index": Object {},
+          },
+        },
+      },
+    },
+    "mappings": Object {
+      ".sample-index-3.2.1-185a3a7e": Object {
+        "doc": Object {
+          "dynamic": "strict",
+          "properties": Object {
+            "config": Object {
+              "dynamic": true,
+              "properties": Object {
+                "buildNum": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "migration": Object {
+              "properties": Object {
+                "previousIndex": Object {
+                  "type": "keyword",
+                },
+                "status": Object {
+                  "type": "keyword",
+                },
+                "types": Object {
+                  "properties": Object {
+                    "checksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "type": Object {
+                      "type": "keyword",
+                    },
+                  },
+                },
+              },
+            },
+            "p1": Object {
+              "properties": Object {
+                "fullName": Object {
+                  "type": "text",
+                },
+              },
+            },
+            "p3": Object {
+              "properties": Object {
+                "shtuff": Object {
+                  "type": "text",
+                },
+              },
+            },
+            "shut_the_front_door": Object {
+              "properties": Object {
+                "meaning": "integer",
+              },
+            },
+            "type": Object {
+              "type": "keyword",
+            },
+            "updated_at": Object {
+              "type": "date",
+            },
+          },
+        },
+      },
+      ".sample-index-3.2.1-original": Object {
+        "doc": Object {
+          "properties": Object {
+            "migration": Object {
+              "properties": Object {
+                "previousIndex": Object {
+                  "type": "keyword",
+                },
+                "status": Object {
+                  "type": "keyword",
+                },
+                "types": Object {
+                  "properties": Object {
+                    "checksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "type": Object {
+                      "type": "keyword",
+                    },
+                  },
+                },
+              },
+            },
+            "p3": Object {
+              "properties": Object {
+                "shtuff": "text",
+              },
+            },
+            "shut_the_front_door": Object {
+              "properties": Object {
+                "meaning": "integer",
+              },
+            },
+            "type": Object {
+              "type": "keyword",
+            },
+          },
+        },
+      },
+    },
+    "settings": Object {
+      ".sample-index-3.2.1-185a3a7e": Object {
+        "index": Object {
+          "number_of_replicas": undefined,
+          "number_of_shards": undefined,
+        },
+      },
+      ".sample-index-3.2.1-original": Object {
+        "index": Object {
+          "blocks.read_only": false,
+          "number_of_replicas": undefined,
+          "number_of_shards": undefined,
+        },
+      },
+    },
+  },
+}
+`;
+
+exports[`Migration.migrate existing previously migrated index only runs new migrations 1`] = `
+Object {
+  "data": Object {
+    ".sample-index-3.2.1-112fe662": Object {
+      "migration:migration-state": Object {
+        "_source": Object {
+          "migration": Object {
+            "previousIndex": ".sample-index-3.2.1-original",
+            "status": "migrating",
+            "types": Array [
+              Object {
+                "checksum": "733682e2",
+                "migrationIds": Array [
+                  "p1m1",
+                ],
+                "type": "p1",
+              },
+              Object {
+                "checksum": "221bb3b9",
+                "migrationIds": Array [
+                  "p2m1",
+                ],
+                "type": "p2",
+              },
+            ],
+          },
+          "type": "migration",
+        },
+        "_version": 2,
+      },
+      "p1:sample": Object {
+        "_source": Object {
+          "p1": Object {
+            "name": "This Was Updated",
+          },
+          "type": "p1",
+        },
+        "_version": 1,
+      },
+      "p2:p2doc": Object {
+        "_source": Object {
+          "p2": Object {
+            "thing": "P2 Thingamabob",
+          },
+          "type": "p2",
+          "updated_at": undefined,
+        },
+      },
+    },
+    ".sample-index-3.2.1-e43e46f9": Object {
+      "migration:migration-state": Object {
+        "_source": Object {
+          "migration": Object {
+            "previousIndex": ".sample-index-3.2.1-112fe662",
+            "status": "migrated",
+            "types": Array [
+              Object {
+                "checksum": "c8987679",
+                "migrationIds": Array [
+                  "p1m1",
+                  "p1m2",
+                  "p1m3",
+                ],
+                "type": "p1",
+              },
+              Object {
+                "checksum": "221bb3b9",
+                "migrationIds": Array [
+                  "p2m1",
+                ],
+                "type": "p2",
+              },
+              Object {
+                "checksum": "23d6018d",
+                "migrationIds": Array [
+                  "p3m1",
+                  "p3m2",
+                ],
+                "type": "p3",
+              },
+            ],
+          },
+          "type": "migration",
+        },
+        "_version": 1,
+      },
+      "p1:newseedsofcontemplation": Object {
+        "_source": Object {
+          "p1": Object {
+            "fullName": "Thomas Merton",
+          },
+          "type": "p1",
+          "updated_at": undefined,
+        },
+      },
+      "p1:sample": Object {
+        "_source": Object {
+          "p1": Object {
+            "fullName": "This Was Updated",
+          },
+          "type": "p1",
+          "updated_at": undefined,
+        },
+      },
+      "p2:p2doc": Object {
+        "_source": Object {
+          "p2": Object {
+            "thing": "P2 Thingamabob",
+          },
+          "type": "p2",
+          "updated_at": undefined,
+        },
+      },
+      "p3:p3doc": Object {
+        "_source": Object {
+          "p3": Object {
+            "shtuff": "SHTUFF HAPPENS",
+          },
+          "type": "p3",
+          "updated_at": undefined,
+        },
+      },
+    },
+    ".sample-index-3.2.1-original": Object {
+      "migration:migration-state": Object {
+        "_source": Object {
+          "migration": Object {
+            "status": "migrating",
+            "types": Array [],
+          },
+          "type": "migration",
+        },
+        "_version": 1,
+      },
+    },
+  },
+  "meta": Object {
+    "aliases": Object {
+      ".sample-index": Object {
+        ".sample-index-3.2.1-e43e46f9": Object {
+          "aliases": Object {
+            ".sample-index": Object {},
+          },
+        },
+      },
+    },
+    "mappings": Object {
+      ".sample-index-3.2.1-112fe662": Object {
+        "doc": Object {
+          "dynamic": "strict",
+          "properties": Object {
+            "config": Object {
+              "dynamic": true,
+              "properties": Object {
+                "buildNum": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "migration": Object {
+              "properties": Object {
+                "previousIndex": Object {
+                  "type": "keyword",
+                },
+                "status": Object {
+                  "type": "keyword",
+                },
+                "types": Object {
+                  "properties": Object {
+                    "checksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "type": Object {
+                      "type": "keyword",
+                    },
+                  },
+                },
+              },
+            },
+            "p1": Object {
+              "properties": Object {
+                "name": Object {
+                  "type": "text",
+                },
+              },
+            },
+            "p2": Object {
+              "properties": Object {
+                "thing": Object {
+                  "type": "text",
+                },
+              },
+            },
+            "type": Object {
+              "type": "keyword",
+            },
+            "updated_at": Object {
+              "type": "date",
+            },
+          },
+        },
+      },
+      ".sample-index-3.2.1-e43e46f9": Object {
+        "doc": Object {
+          "dynamic": "strict",
+          "properties": Object {
+            "config": Object {
+              "dynamic": true,
+              "properties": Object {
+                "buildNum": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "migration": Object {
+              "properties": Object {
+                "previousIndex": Object {
+                  "type": "keyword",
+                },
+                "status": Object {
+                  "type": "keyword",
+                },
+                "types": Object {
+                  "properties": Object {
+                    "checksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "type": Object {
+                      "type": "keyword",
+                    },
+                  },
+                },
+              },
+            },
+            "p1": Object {
+              "properties": Object {
+                "fullName": Object {
+                  "type": "text",
+                },
+              },
+            },
+            "p2": Object {
+              "properties": Object {
+                "thing": Object {
+                  "type": "text",
+                },
+              },
+            },
+            "p3": Object {
+              "properties": Object {
+                "shtuff": Object {
+                  "type": "text",
+                },
+              },
+            },
+            "type": Object {
+              "type": "keyword",
+            },
+            "updated_at": Object {
+              "type": "date",
+            },
+          },
+        },
+      },
+      ".sample-index-3.2.1-original": Object {
+        "doc": Object {
+          "dynamic": "strict",
+          "properties": Object {
+            "config": Object {
+              "dynamic": true,
+              "properties": Object {
+                "buildNum": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "migration": Object {
+              "properties": Object {
+                "previousIndex": Object {
+                  "type": "keyword",
+                },
+                "status": Object {
+                  "type": "keyword",
+                },
+                "types": Object {
+                  "properties": Object {
+                    "checksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "type": Object {
+                      "type": "keyword",
+                    },
+                  },
+                },
+              },
+            },
+            "p1": Object {
+              "properties": Object {
+                "name": Object {
+                  "type": "text",
+                },
+              },
+            },
+            "p2": Object {
+              "properties": Object {
+                "thing": Object {
+                  "type": "text",
+                },
+              },
+            },
+            "type": Object {
+              "type": "keyword",
+            },
+            "updated_at": Object {
+              "type": "date",
+            },
+          },
+        },
+      },
+    },
+    "settings": Object {
+      ".sample-index-3.2.1-112fe662": Object {
+        "index": Object {
+          "blocks.read_only": false,
+          "number_of_replicas": "1",
+          "number_of_shards": "5",
+        },
+      },
+      ".sample-index-3.2.1-e43e46f9": Object {
+        "index": Object {
+          "number_of_replicas": "1",
+          "number_of_shards": "5",
+        },
+      },
+      ".sample-index-3.2.1-original": Object {
+        "index": Object {
+          "blocks.read_only": false,
+          "number_of_replicas": "1",
+          "number_of_shards": "5",
+        },
+      },
+    },
+  },
+}
+`;
+
+exports[`Migration.migrate migrations will run, if forced even if index is in migrating state 1`] = `
+Object {
+  "data": Object {
+    ".sample-index-3.2.1-112fe662": Object {
+      "migration:migration-state": Object {
+        "_source": Object {
+          "migration": Object {
+            "previousIndex": ".sample-index-3.2.1-original",
+            "status": "migrated",
+            "types": Array [
+              Object {
+                "checksum": "733682e2",
+                "migrationIds": Array [
+                  "p1m1",
+                ],
+                "type": "p1",
+              },
+              Object {
+                "checksum": "221bb3b9",
+                "migrationIds": Array [
+                  "p2m1",
+                ],
+                "type": "p2",
+              },
+            ],
+          },
+          "type": "migration",
+        },
+        "_version": 1,
+      },
+      "p1:sample": Object {
+        "_source": Object {
+          "p1": Object {
+            "name": "P1 Name!",
+          },
+          "type": "p1",
+          "updated_at": undefined,
+        },
+      },
+      "p2:p2doc": Object {
+        "_source": Object {
+          "p2": Object {
+            "thing": "P2 Thingamabob",
+          },
+          "type": "p2",
+          "updated_at": undefined,
+        },
+      },
+    },
+    ".sample-index-3.2.1-original": Object {
+      "migration:migration-state": Object {
+        "_source": Object {
+          "migration": Object {
+            "plugins": Array [],
+            "status": "migrating",
+          },
+          "type": "migration",
+        },
+        "_version": 1,
+      },
+    },
+  },
+  "meta": Object {
+    "aliases": Object {
+      ".sample-index": Object {
+        ".sample-index-3.2.1-112fe662": Object {
+          "aliases": Object {
+            ".sample-index": Object {},
+          },
+        },
+      },
+    },
+    "mappings": Object {
+      ".sample-index-3.2.1-112fe662": Object {
+        "doc": Object {
+          "dynamic": "strict",
+          "properties": Object {
+            "config": Object {
+              "dynamic": true,
+              "properties": Object {
+                "buildNum": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "migration": Object {
+              "properties": Object {
+                "previousIndex": Object {
+                  "type": "keyword",
+                },
+                "status": Object {
+                  "type": "keyword",
+                },
+                "types": Object {
+                  "properties": Object {
+                    "checksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "type": Object {
+                      "type": "keyword",
+                    },
+                  },
+                },
+              },
+            },
+            "p1": Object {
+              "properties": Object {
+                "name": Object {
+                  "type": "text",
+                },
+              },
+            },
+            "p2": Object {
+              "properties": Object {
+                "thing": Object {
+                  "type": "text",
+                },
+              },
+            },
+            "type": Object {
+              "type": "keyword",
+            },
+            "updated_at": Object {
+              "type": "date",
+            },
+          },
+        },
+      },
+      ".sample-index-3.2.1-original": Object {
+        "doc": Object {
+          "properties": Object {
+            "migration": Object {
+              "properties": Object {
+                "previousIndex": Object {
+                  "type": "keyword",
+                },
+                "status": Object {
+                  "type": "keyword",
+                },
+                "types": Object {
+                  "properties": Object {
+                    "checksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "type": Object {
+                      "type": "keyword",
+                    },
+                  },
+                },
+              },
+            },
+            "type": Object {
+              "type": "keyword",
+            },
+          },
+        },
+      },
+    },
+    "settings": Object {
+      ".sample-index-3.2.1-112fe662": Object {
+        "index": Object {
+          "number_of_replicas": undefined,
+          "number_of_shards": undefined,
+        },
+      },
+      ".sample-index-3.2.1-original": Object {
+        "index": Object {
+          "blocks.read_only": false,
+          "number_of_replicas": undefined,
+          "number_of_shards": undefined,
+        },
+      },
+    },
+  },
+}
+`;

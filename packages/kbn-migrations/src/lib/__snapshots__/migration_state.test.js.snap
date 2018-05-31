@@ -1,0 +1,73 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MigrationState.build Allows migrations for no-longer-defined types 1`] = `
+Object {
+  "previousIndex": "index-baz",
+  "status": "migrated",
+  "types": Array [
+    Object {
+      "checksum": "cd8412f2",
+      "migrationIds": Array [
+        "m_a1",
+      ],
+      "type": "a",
+    },
+    Object {
+      "checksum": "0a512223",
+      "migrationIds": Array [
+        "m_b1",
+      ],
+      "type": "b",
+    },
+  ],
+}
+`;
+
+exports[`MigrationState.build Migration state is predictable and consistent 1`] = `
+Object {
+  "previousIndex": "index5",
+  "status": "migrated",
+  "types": Array [
+    Object {
+      "checksum": "ca93d730",
+      "migrationIds": Array [
+        "a3",
+      ],
+      "type": "bar",
+    },
+    Object {
+      "checksum": "97602af3",
+      "migrationIds": Array [
+        "a1",
+        "a2",
+      ],
+      "type": "foo",
+    },
+  ],
+}
+`;
+
+exports[`MigrationState.build Types are kept from previous migration state 1`] = `
+Object {
+  "previousIndex": "index-foo",
+  "status": "migrated",
+  "types": Array [
+    Object {
+      "checksum": "a1",
+      "migrationIds": Array [
+        "m_a1",
+        "m_a2",
+      ],
+      "type": "a",
+    },
+    Object {
+      "checksum": "9d3f789f",
+      "migrationIds": Array [
+        "m_b1",
+        "m_b2",
+      ],
+      "type": "b",
+    },
+  ],
+}
+`;

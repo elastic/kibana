@@ -23,11 +23,9 @@ import expect from 'expect.js';
 
 const NoConnections = require('elasticsearch').errors.NoConnections;
 
-import mappings from './fixtures/mappings';
 import healthCheck from '../health_check';
 import kibanaVersion from '../kibana_version';
 import { esTestConfig } from '@kbn/test';
-import * as patchKibanaIndexNS from '../patch_kibana_index';
 
 const esPort = esTestConfig.getPort();
 const esUrl = esTestConfig.getUrl();
@@ -50,7 +48,6 @@ describe('plugins/elasticsearch', () => {
 
       // Stub the Kibana version instead of drawing from package.json.
       sandbox.stub(kibanaVersion, 'get').returns(COMPATIBLE_VERSION_NUMBER);
-      sandbox.stub(patchKibanaIndexNS, 'patchKibanaIndex');
 
       // setup the plugin stub
       plugin = {
@@ -95,9 +92,6 @@ describe('plugins/elasticsearch', () => {
           elasticsearch: {
             getCluster: sinon.stub().returns(cluster)
           }
-        },
-        getKibanaIndexMappingsDsl() {
-          return mappings;
         },
         ext: sinon.stub()
       };

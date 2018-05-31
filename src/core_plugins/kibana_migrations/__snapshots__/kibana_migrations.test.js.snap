@@ -1,0 +1,346 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`kibana_migrations plugin init migrates the kibana index 1`] = `
+Object {
+  "data": Object {
+    ".kibana-4.5.6-c992f48e": Object {
+      "field1:a": Object {
+        "_source": Object {
+          "field1": "Dangit",
+          "type": "field1",
+          "updated_at": undefined,
+        },
+      },
+      "field2:b": Object {
+        "_source": Object {
+          "field2": "Bobby",
+          "type": "field2",
+          "updated_at": undefined,
+        },
+      },
+      "migration:migration-state": Object {
+        "_source": Object {
+          "migration": Object {
+            "previousIndex": ".kibana-4.5.6-original",
+            "status": "migrated",
+            "types": Array [
+              Object {
+                "checksum": "1a201c97",
+                "migrationIds": Array [
+                  "mg1",
+                ],
+                "type": "field1",
+              },
+              Object {
+                "checksum": "dcb7d955",
+                "migrationIds": Array [
+                  "mg2",
+                ],
+                "type": "field2",
+              },
+            ],
+          },
+          "type": "migration",
+        },
+        "_version": 1,
+      },
+    },
+    ".kibana-4.5.6-original": Object {
+      "migration:migration-state": Object {
+        "_source": Object {
+          "migration": Object {
+            "status": "migrating",
+            "types": Array [],
+          },
+          "type": "migration",
+        },
+        "_version": 1,
+      },
+    },
+  },
+  "meta": Object {
+    "aliases": Object {
+      ".kibana": Object {
+        ".kibana-4.5.6-c992f48e": Object {
+          "aliases": Object {
+            ".kibana": Object {},
+          },
+        },
+      },
+    },
+    "mappings": Object {
+      ".kibana-4.5.6-c992f48e": Object {
+        "doc": Object {
+          "dynamic": "strict",
+          "properties": Object {
+            "config": Object {
+              "dynamic": true,
+              "properties": Object {
+                "buildNum": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "field1": Object {
+              "type": "text",
+            },
+            "field2": Object {
+              "type": "text",
+            },
+            "migration": Object {
+              "properties": Object {
+                "previousIndex": Object {
+                  "type": "keyword",
+                },
+                "status": Object {
+                  "type": "keyword",
+                },
+                "types": Object {
+                  "properties": Object {
+                    "checksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "type": Object {
+                      "type": "keyword",
+                    },
+                  },
+                },
+              },
+            },
+            "type": Object {
+              "type": "keyword",
+            },
+            "updated_at": Object {
+              "type": "date",
+            },
+          },
+        },
+      },
+      ".kibana-4.5.6-original": Object {
+        "doc": Object {
+          "dynamic": "strict",
+          "properties": Object {
+            "config": Object {
+              "dynamic": true,
+              "properties": Object {
+                "buildNum": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "field1": Object {
+              "type": "text",
+            },
+            "field2": Object {
+              "type": "text",
+            },
+            "migration": Object {
+              "properties": Object {
+                "previousIndex": Object {
+                  "type": "keyword",
+                },
+                "status": Object {
+                  "type": "keyword",
+                },
+                "types": Object {
+                  "properties": Object {
+                    "checksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "type": Object {
+                      "type": "keyword",
+                    },
+                  },
+                },
+              },
+            },
+            "type": Object {
+              "type": "keyword",
+            },
+            "updated_at": Object {
+              "type": "date",
+            },
+          },
+        },
+      },
+    },
+    "settings": Object {
+      ".kibana-4.5.6-c992f48e": Object {
+        "index": Object {
+          "number_of_replicas": "1",
+          "number_of_shards": "5",
+        },
+      },
+      ".kibana-4.5.6-original": Object {
+        "index": Object {
+          "blocks.read_only": false,
+          "number_of_replicas": "1",
+          "number_of_shards": "5",
+        },
+      },
+    },
+  },
+}
+`;
+
+exports[`kibana_migrations plugin init respects the force option 1`] = `
+Object {
+  "data": Object {
+    ".kibana-4.5.6-989db244": Object {
+      "migration:migration-state": Object {
+        "_source": Object {
+          "migration": Object {
+            "previousIndex": ".kibana-4.5.6-original",
+            "status": "migrated",
+            "types": Array [],
+          },
+          "type": "migration",
+        },
+        "_version": 1,
+      },
+    },
+    ".kibana-4.5.6-original": Object {
+      "migration:migration-state": Object {
+        "_source": Object {
+          "migration": Object {
+            "plugins": Array [],
+            "status": "migrating",
+          },
+          "type": "migration",
+        },
+        "_version": 1,
+      },
+    },
+  },
+  "meta": Object {
+    "aliases": Object {
+      ".kibana": Object {
+        ".kibana-4.5.6-989db244": Object {
+          "aliases": Object {
+            ".kibana": Object {},
+          },
+        },
+      },
+    },
+    "mappings": Object {
+      ".kibana-4.5.6-989db244": Object {
+        "doc": Object {
+          "dynamic": "strict",
+          "properties": Object {
+            "config": Object {
+              "dynamic": true,
+              "properties": Object {
+                "buildNum": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "migration": Object {
+              "properties": Object {
+                "previousIndex": Object {
+                  "type": "keyword",
+                },
+                "status": Object {
+                  "type": "keyword",
+                },
+                "types": Object {
+                  "properties": Object {
+                    "checksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "type": Object {
+                      "type": "keyword",
+                    },
+                  },
+                },
+              },
+            },
+            "type": Object {
+              "type": "keyword",
+            },
+            "updated_at": Object {
+              "type": "date",
+            },
+          },
+        },
+      },
+      ".kibana-4.5.6-original": Object {
+        "doc": Object {
+          "properties": Object {
+            "migration": Object {
+              "properties": Object {
+                "previousIndex": Object {
+                  "type": "keyword",
+                },
+                "status": Object {
+                  "type": "keyword",
+                },
+                "types": Object {
+                  "properties": Object {
+                    "checksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "type": Object {
+                      "type": "keyword",
+                    },
+                  },
+                },
+              },
+            },
+            "type": Object {
+              "type": "keyword",
+            },
+          },
+        },
+      },
+    },
+    "settings": Object {
+      ".kibana-4.5.6-989db244": Object {
+        "index": Object {
+          "number_of_replicas": undefined,
+          "number_of_shards": undefined,
+        },
+      },
+      ".kibana-4.5.6-original": Object {
+        "index": Object {
+          "blocks.read_only": false,
+          "number_of_replicas": undefined,
+          "number_of_shards": undefined,
+        },
+      },
+    },
+  },
+}
+`;
+
+exports[`kibana_migrations plugin migrationOptions exposes pluginSpecs 1`] = `
+Array [
+  Object {
+    "id": "foo",
+    "mappings": Object {
+      "bar": Object {
+        "type": "text",
+      },
+    },
+    "migrations": Array [
+      Object {
+        "id": "mg1",
+        "seed": [Function],
+        "type": "bar",
+      },
+    ],
+  },
+]
+`;

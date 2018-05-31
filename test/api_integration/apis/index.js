@@ -29,6 +29,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./shorten'));
     loadTestFile(require.resolve('./suggestions'));
     loadTestFile(require.resolve('./status'));
+    loadTestFile(require.resolve('./migrations'));
     loadTestFile(require.resolve('./stats'));
   });
 }

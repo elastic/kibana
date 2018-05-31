@@ -106,6 +106,28 @@ describe('POST /api/saved_objects/{type}', () => {
     expect(args).toEqual(['index-pattern', attributes, options]);
   });
 
+  it('passes migrationState through', async () => {
+    const request = {
+      method: 'POST',
+      url: '/api/saved_objects/index-pattern',
+      payload: {
+        migrationState: { types: [] },
+        attributes: {
+          title: 'Testing'
+        }
+      }
+    };
+
+    await server.inject(request);
+    expect(savedObjectsClient.create.calledOnce).toBe(true);
+
+    const args = savedObjectsClient.create.getCall(0).args;
+    const options = { migrationState: { types: [] }, overwrite: false, id: undefined };
+    const attributes = { title: 'Testing' };
+
+    expect(args).toEqual(['index-pattern', attributes, options]);
+  });
+
   it('can specify an id', async () => {
     const request = {
       method: 'POST',

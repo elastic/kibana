@@ -19,9 +19,9 @@
 
 import expect from 'expect.js';
 import sinon from 'sinon';
+import { getServices } from '../../../../test_utils/servers';
 
 import {
-  getServices,
   chance,
   assertSinonMatch,
 } from './lib';
@@ -32,25 +32,12 @@ export function docExistsSuite() {
       initialSettings
     } = options;
 
-    const { kbnServer, uiSettings, callCluster } = getServices();
-
-    // delete the kibana index to ensure we start fresh
-    await callCluster('indices.delete', {
-      index: kbnServer.config.get('kibana.index'),
-      ignore: [404]
-    });
-
-    // write a setting to create kibana index and savedConfig
-    await kbnServer.inject({
-      method: 'POST',
-      url: '/api/kibana/settings/defaultIndex',
-      payload: { value: 'abc' }
-    });
+    const { kbnServer, uiSettings } = getServices();
 
     // delete our defaultIndex setting to make doc empty
     await kbnServer.inject({
       method: 'DELETE',
-      url: '/api/kibana/settings/defaultIndex',
+      url: '/api/kibana/settings',
     });
 
     if (initialSettings) {

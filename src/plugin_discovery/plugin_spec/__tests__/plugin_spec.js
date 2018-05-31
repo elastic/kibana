@@ -385,6 +385,16 @@ describe('plugin discovery/plugin spec', () => {
       });
     });
 
+    describe('#getMigrations()', () => {
+      it('returns spec.migrations', () => {
+        const spec = new PluginSpec(fooPack, {
+          migrations: [{ id: 'hoithere' }],
+        });
+
+        expect(spec.getMigrations()).to.eql([{ id: 'hoithere' }]);
+      });
+    });
+
     describe('#getPreInitHandler()', () => {
       it('returns spec.preInit', () => {
         const spec = new PluginSpec(fooPack, {

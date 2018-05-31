@@ -21,16 +21,13 @@ import expect from 'expect.js';
 import path from 'path';
 
 export default function ({ getService, getPageObjects }) {
-  const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'settings', 'header']);
 
   describe('import objects', function describeIndexTests() {
     beforeEach(async function () {
-      // delete .kibana index and then wait for Kibana to re-create it
-      await kibanaServer.uiSettings.replace({});
+      await esArchiver.load('management', { skipExisting: false });
       await PageObjects.settings.navigateTo();
-      await esArchiver.load('management');
     });
 
     afterEach(async function () {

@@ -65,9 +65,10 @@ export class SavedObjectsClient {
       return this._PromiseCtor.reject(new Error('requires type and attributes'));
     }
 
-    const url = this._getUrl([type, options.id], _.pick(options, ['overwrite']));
+    const { id, migrationState } = options;
+    const url = this._getUrl([type, id], _.pick(options, ['overwrite']));
 
-    return this._request('POST', url, { attributes })
+    return this._request('POST', url, { attributes, migrationState })
       .catch(this._onCreateFailure)
       .then(resp => this.createSavedObject(resp));
   }

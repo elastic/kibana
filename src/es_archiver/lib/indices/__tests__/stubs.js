@@ -70,8 +70,15 @@ export const createStubClient = (existingIndices = [], aliases = {}) => ({
         }
       };
     }),
-    getAlias: sinon.spy(({ index }) => {
-      return Promise.resolve({ [index]: { aliases: aliases[index] || {} } });
+    existsAlias: sinon.spy(({ name }) => {
+      return Promise.resolve(aliases.hasOwnProperty(name));
+    }),
+
+    // This craziness allows us to simulate getAlias by index or by name
+    getAlias: sinon.spy(({ name, index }) => {
+      name = name || Object.keys(aliases).find(k => aliases[k] === index);
+      index = index || aliases[name];
+      return Promise.resolve({ [index]: { aliases: (name ? { [name]: {} } : {}) } });
     }),
     updateAliases: sinon.spy(async ({ body }) => {
       body.actions.forEach(({ add: { index, alias } }) => {
@@ -84,7 +91,7 @@ export const createStubClient = (existingIndices = [], aliases = {}) => ({
       return { ok: true };
     }),
     create: sinon.spy(async ({ index }) => {
-      if (existingIndices.includes(index)) {
+      if (existingIndices.includes(index) || aliases.hasOwnProperty(index)) {
         throw createEsClientError('resource_already_exists_exception');
       } else {
         existingIndices.push(index);
@@ -92,8 +99,16 @@ export const createStubClient = (existingIndices = [], aliases = {}) => ({
       }
     }),
     delete: sinon.spy(async ({ index }) => {
-      if (existingIndices.includes(index)) {
-        existingIndices.splice(existingIndices.indexOf(index), 1);
+      const indices = Array.isArray(index) ? index : [index];
+      if (indices.every(ix => existingIndices.includes(ix))) {
+        // Delete aliases associated with our indices
+        indices.forEach(ix => {
+          const alias = Object.keys(aliases).find(k => aliases[k] === ix);
+          if (alias) {
+            delete aliases[alias];
+          }
+        });
+        indices.forEach(ix => existingIndices.splice(existingIndices.indexOf(ix), 1));
         return { ok: true };
       } else {
         throw createEsClientError('index_not_found_exception');

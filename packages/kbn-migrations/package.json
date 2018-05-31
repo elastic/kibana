@@ -1,0 +1,13 @@
+{
+  "name": "@kbn/migrations",
+  "main": "./src/index.js",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "dependencies": {
+    "joi": "^10.4.1",
+    "lodash": "^3.10.1",
+    "object-hash": "^1.2.0",
+    "uuid": "^3.0.1"
+  }
+}

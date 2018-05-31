@@ -26,6 +26,7 @@ export default function ({ getService, getPageObjects }) {
   describe('test large number of fields', function () {
     const EXPECTED_FIELD_COUNT = '10006';
     before(async function () {
+      await esArchiver.emptyKibanaIndex();
       await esArchiver.loadIfNeeded('large_fields');
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndices();

@@ -19,9 +19,10 @@
 
 import expect from 'expect.js';
 import sinon from 'sinon';
+import { KbnIndex } from '../../../../utils';
+import { getServices } from '../../../../test_utils/servers';
 
 import {
-  getServices,
   chance,
   assertSinonMatch,
 } from './lib';
@@ -29,7 +30,7 @@ import {
 export function docMissingSuite() {
   // ensure the kibana index has no documents
   beforeEach(async () => {
-    const { kbnServer, callCluster } = getServices();
+    const { kbnServer } = getServices();
 
     // write a setting to ensure kibana index is created
     await kbnServer.inject({
@@ -38,13 +39,7 @@ export function docMissingSuite() {
       payload: { value: 'abc' }
     });
 
-    // delete all docs from kibana index to ensure savedConfig is not found
-    await callCluster('deleteByQuery', {
-      index: kbnServer.config.get('kibana.index'),
-      body: {
-        query: { match_all: {} }
-      }
-    });
+    await KbnIndex.clear(kbnServer);
   });
 
   describe('get route', () => {

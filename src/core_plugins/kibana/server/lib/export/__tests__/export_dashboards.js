@@ -39,7 +39,25 @@ describe('exportDashboards(req)', () => {
         },
       },
       getSavedObjectsClient() {
-        return null;
+        return {
+          get(type, id) {
+            if (type === 'migration' && id === 'migration-state') {
+              return {
+                attributes: {
+                  types: [{
+                    type: 'hello',
+                    checksum: 'map-check',
+                    migrationIds: ['hi1', 'hi2'],
+                  }, {
+                    type: 'goodbye',
+                    checksum: 'bye-map-check',
+                    migrationIds: ['by1', 'by2'],
+                  }],
+                },
+              };
+            }
+          },
+        };
       }
     };
 
@@ -58,6 +76,22 @@ describe('exportDashboards(req)', () => {
   it('should return a response object with version', () => {
     return exportDashboards(req).then((resp) => {
       expect(resp).to.have.property('version', '6.0.0');
+    });
+  });
+
+  it('should return a response object migration state', () => {
+    return exportDashboards(req).then((resp) => {
+      expect(resp.migrationState).to.deep.equal({
+        types: [{
+          type: 'hello',
+          checksum: 'map-check',
+          migrationIds: ['hi1', 'hi2'],
+        }, {
+          type: 'goodbye',
+          checksum: 'bye-map-check',
+          migrationIds: ['by1', 'by2'],
+        }]
+      });
     });
   });
 

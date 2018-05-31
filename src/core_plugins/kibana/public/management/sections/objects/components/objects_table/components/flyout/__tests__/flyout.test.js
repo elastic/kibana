@@ -199,7 +199,8 @@ describe('Flyout', () => {
         mockData.slice(0, 2),
         true,
         defaultProps.services,
-        defaultProps.indexPatterns
+        defaultProps.indexPatterns,
+        {},
       );
 
       expect(component.state()).toMatchObject({
@@ -255,17 +256,71 @@ describe('Flyout', () => {
       expect(resolveIndexPatternConflicts).toHaveBeenCalledWith(
         component.instance().resolutions,
         mockConflictedIndexPatterns,
-        true
+        true,
+        {},
       );
       expect(saveObjects).toHaveBeenCalledWith(
         mockConflictedSavedObjectsLinkedToSavedSearches,
-        true
+        true,
+        {},
       );
       expect(resolveSavedSearches).toHaveBeenCalledWith(
         mockConflictedSearchDocs,
         defaultProps.services,
         defaultProps.indexPatterns,
-        true
+        true,
+        {},
+      );
+    });
+
+    it('should support imports that specify migration state', async () => {
+      importFile.mockImplementation(() => ({
+        migrationState: { types: [{ type: 'foo' }] },
+        docs: mockData,
+      }));
+
+      const component = shallow(<Flyout {...defaultProps} />);
+
+      // Ensure all promises resolve
+      await new Promise(resolve => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      component.setState({ file: mockFile });
+      await component.instance().import();
+
+      // Ensure it looks right
+      component.update();
+
+      // Ensure we can change the resolution
+      component
+        .instance()
+        .onIndexChanged('MyIndexPattern*', { target: { value: '2' } });
+
+      // Let's resolve now
+      await component
+        .find('EuiButton[data-test-subj="importSavedObjectsConfirmBtn"]')
+        .simulate('click');
+
+      // Ensure all promises resolve
+      await new Promise(resolve => process.nextTick(resolve));
+      expect(resolveIndexPatternConflicts).toHaveBeenCalledWith(
+        component.instance().resolutions,
+        mockConflictedIndexPatterns,
+        true,
+        { types: [{ type: 'foo' }] },
+      );
+      expect(saveObjects).toHaveBeenCalledWith(
+        mockConflictedSavedObjectsLinkedToSavedSearches,
+        true,
+        { types: [{ type: 'foo' }] },
+      );
+      expect(resolveSavedSearches).toHaveBeenCalledWith(
+        mockConflictedSearchDocs,
+        defaultProps.services,
+        defaultProps.indexPatterns,
+        true,
+        { types: [{ type: 'foo' }] },
       );
     });
 

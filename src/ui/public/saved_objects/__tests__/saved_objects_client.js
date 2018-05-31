@@ -308,6 +308,21 @@ describe('SavedObjectsClient', () => {
         }
       }));
     });
+
+    it('passes migrationState along', () => {
+      const attributes = { foo: 'Foo', bar: 'Bar' };
+      const migrationState = { plugins: 'somestuff' };
+      savedObjectsClient.create('index-pattern', attributes, { migrationState });
+
+      sinon.assert.calledOnce($http);
+      sinon.assert.calledWithExactly($http, sinon.match({
+        url: sinon.match.string,
+        data: {
+          migrationState,
+          attributes
+        }
+      }));
+    });
   });
 
   describe('#find', () => {

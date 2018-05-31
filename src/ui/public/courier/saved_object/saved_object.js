@@ -287,8 +287,8 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
      * a create or index error.
      * @resolved {SavedObject}
      */
-    const createSource = (source) => {
-      return savedObjectsClient.create(esType, source, { id: this.id })
+    const createSource = (source, migrationState) => {
+      return savedObjectsClient.create(esType, source, { migrationState, id: this.id })
         .catch(err => {
           // record exists, confirm overwriting
           if (_.get(err, 'statusCode') === 409) {
@@ -350,7 +350,8 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
      * @return {Promise}
      * @resolved {String} - The id of the doc
      */
-    this.save = ({ confirmOverwrite = false, isTitleDuplicateConfirmed = false, onTitleDuplicate } = {}) => {
+
+    this.save = ({ migrationState, confirmOverwrite = false, isTitleDuplicateConfirmed = false, onTitleDuplicate } = {}) => {
       // Save the original id in case the save fails.
       const originalId = this.id;
       // Read https://github.com/elastic/kibana/issues/9056 and
@@ -370,9 +371,9 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
       return checkForDuplicateTitle(isTitleDuplicateConfirmed, onTitleDuplicate)
         .then(() => {
           if (confirmOverwrite) {
-            return createSource(source);
+            return createSource(source, migrationState);
           } else {
-            return savedObjectsClient.create(esType, source, { id: this.id, overwrite: true });
+            return savedObjectsClient.create(esType, source, { migrationState, id: this.id, overwrite: true });
           }
         })
         .then((resp) => {
