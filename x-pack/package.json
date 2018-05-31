@@ -101,6 +101,7 @@
     "dedent": "^0.7.0",
     "dragselect": "1.7.17",
     "elasticsearch": "13.0.1",
+    "event-emitter": "^0.3.5",
     "extract-zip": "1.5.0",
     "font-awesome": "4.4.0",
     "get-port": "2.1.0",

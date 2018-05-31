@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import eventEmitter from 'event-emitter';
 import React from 'react';
 import * as ol from 'openlayers';
 
@@ -30,6 +31,7 @@ export class KibanaMap extends React.Component {
   async addLayer(layer) {
     const olLayer = await layer.getOLLayer();
     this._olMap.addLayer(olLayer);
+    this.emit("layer:added");
   }
 
   render() {
@@ -39,5 +41,6 @@ export class KibanaMap extends React.Component {
       </div>
     );
   }
-
 }
+
+eventEmitter(KibanaMap.prototype);
