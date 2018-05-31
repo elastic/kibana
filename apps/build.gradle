@@ -1,0 +1,10 @@
+plugins {
+  id "com.moowork.node" version "1.2.0"
+}
+
+node {
+  version = rootProject.nodeVersion
+  yarnVersion = rootProject.yarnVersion
+  download = true
+  workDir = file("${rootProject.buildDir}/nodejs")
+}

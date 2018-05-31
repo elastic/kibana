@@ -1,0 +1,24 @@
+plugins {
+  id "com.google.protobuf" version "0.8.5"
+}
+
+repositories {
+	mavenCentral()
+}
+
+apply plugin: 'java'
+
+
+dependencies {
+  compile 'com.google.protobuf:protobuf-java:3.5.1'
+}
+
+protobuf {
+  generateProtoTasks {
+    all().each { task ->
+      task.builtins {
+	 	js { }
+      }
+    }
+  }
+}
