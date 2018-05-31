@@ -24,6 +24,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingChart,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 
 import { InspectorView } from 'ui/inspector';
@@ -108,10 +111,13 @@ class DataViewComponent extends Component {
           alignItems="center"
         >
           <EuiFlexItem grow={false}>
-            <EuiLoadingChart />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            Gathering data &hellip;
+            <EuiPanel className="eui-textCenter">
+              <EuiLoadingChart size="m" />
+              <EuiSpacer size="s" />
+              <EuiText>
+                <p>Gathering data</p>
+              </EuiText>
+            </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
       </InspectorView>

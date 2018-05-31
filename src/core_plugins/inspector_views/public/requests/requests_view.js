@@ -112,7 +112,7 @@ class RequestsViewComponent extends Component {
             }
           </p>
         </EuiText>
-        <EuiSpacer size="m"/>
+        <EuiSpacer size="xs"/>
         <RequestSelector
           requests={this.state.requests}
           selectedRequest={this.state.request}
