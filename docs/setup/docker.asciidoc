@@ -94,9 +94,8 @@ Some example translations are shown here:
 `KIBANA_DEFAULTAPPID`:: `kibana.defaultAppId`
 `XPACK_MONITORING_ENABLED`:: `xpack.monitoring.enabled`
 
-In general, any setting listed in <<settings>> or
-{xpack-ref}/xpack-settings.html[{xpack} Settings] can be configured
-with this technique.
+In general, any setting listed in <<settings>> or <<settings-xpack-kb>> can be 
+configured with this technique.
 
 These variables can be set with +docker-compose+ like this:
 
