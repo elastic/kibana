@@ -1,0 +1,71 @@
+.expanded-job {
+  margin: -8px;
+  padding: 8px;
+  background-color: #FFFFFF;
+
+  .col-md-6:nth-child(1) {
+    padding-right: 7px;
+  }
+  .col-md-6:nth-child(2) {
+    padding-left: 7px;
+  }
+}
+.ml-job-section-container {
+
+  overflow: auto;
+  padding: 5px 15px;
+  background-color: #FBFBFB;
+  border: 1px solid #ecf0f1;
+  border-radius: 3px;
+  margin: 4px 0px;
+
+  & > div {
+    margin-left:15px;
+    margin-right:15px;
+  }
+
+  // .button-wrapper {
+  //   margin-left: -30px;
+  //   padding-left: 30px;
+  // }
+
+  table.euiTable {
+    background-color: transparent;
+
+    .euiTableRow:first-child {
+      .euiTableRowCell {
+        border-top: 0px;
+      }
+    }
+
+    .euiTableRow:last-child {
+      .euiTableRowCell {
+        border-bottom: 0px;
+      }
+    }
+
+    .euiTableRow {
+      .euiTableRowCell {
+        background-color: transparent;
+        vertical-align: top;
+        border-bottom: 1px solid #EEEEEE;
+
+        .euiTableCellContent__text {
+          word-wrap: break-word;
+        }
+      }
+    }
+
+    .euiTableRow:hover {
+      background-color: inherit;
+    }
+  }
+
+  .job-config-item {
+    font-size: 12px;
+  }
+
+  .job-config-item.item-header {
+    font-weight: bold;
+  }
+}
