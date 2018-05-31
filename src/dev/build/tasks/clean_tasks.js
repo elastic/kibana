@@ -90,7 +90,6 @@ export const CleanExtraBrowsersTask = {
 
   async run(config, log, build) {
     for (const platform of config.getPlatforms()) {
-      console.log(platform);
       if (platform.isWindows()) {
         await deleteAll(log, [
           build.resolvePathForPlatform(platform,
