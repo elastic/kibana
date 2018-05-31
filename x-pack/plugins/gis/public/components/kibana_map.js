@@ -15,9 +15,7 @@ export class KibanaMap extends React.Component {
     super();
   }
 
-
   componentDidMount() {
-
     const olView = new ol.View({
       center: ol.proj.fromLonLat([37.41, 8.82]),
       zoom: 4
@@ -27,13 +25,11 @@ export class KibanaMap extends React.Component {
       layers: [],
       view: olView
     });
+  }
 
-    const olTileLayer = new ol.layer.Tile({
-      source: new ol.source.XYZ({
-        url: `https://tiles.maps.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana"`
-      })
-    });
-    this._olMap.addLayer(olTileLayer);
+  async addLayer(layer) {
+    const olLayer = await layer.getOLLayer();
+    this._olMap.addLayer(olLayer);
   }
 
   render() {
