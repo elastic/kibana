@@ -110,6 +110,9 @@ export const schema = Joi.object().keys({
   firefoxdriver: Joi.object().keys({
     url: Joi.string().uri({ scheme: /https?/ }).default('http://localhost:2828')
   }).default(),
+  iedriver: Joi.object().keys({
+    url: Joi.string().uri({ scheme: /https?/ }).default('http://localhost:5555')
+  }).default(),
 
 
   // definition of apps that work with `common.navigateToApp()`

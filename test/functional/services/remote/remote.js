@@ -6,7 +6,7 @@ export async function RemoteProvider({ getService }) {
   const lifecycle = getService('lifecycle');
   const config = getService('config');
   const log = getService('log');
-  const possibleBrowsers = ['chrome', 'firefox'];
+  const possibleBrowsers = ['chrome', 'firefox', 'ie'];
   const browserType = process.env.TEST_BROWSER_TYPE || 'chrome';
 
   if (!possibleBrowsers.includes(browserType)) {
