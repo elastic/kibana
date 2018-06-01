@@ -4,24 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import { ALayer } from './layer';
 import * as ol from 'openlayers';
 
 import {} from '@elastic/eui';
 
-export class TileLayer extends React.Component {
+export class TileLayer extends ALayer {
 
   constructor(tmsSource) {
     super();
     this._tmsSource = tmsSource;
   }
 
-  renderTOCLayerEntry() {
-    return (
-      <div>
-        layer: {JSON.stringify(this._tmsSource)}
-      </div>
-    );
+  getLayerName() {
+    return JSON.stringify(this._tmsSource);
   }
 
   async getOLLayer() {
