@@ -15,9 +15,6 @@ import { UsageCollector } from './usage_collector';
  * A collector object has types registered into it with the register(type)
  * function. Each type that gets registered defines how to fetch its own data
  * and combine it into a unified payload for bulk upload.
- *
- * TODO: Only keep the fetch and upload functionality in x-pack. Everything
- * else move to OSS Kibana: https://github.com/elastic/kibana/issues/19534
  */
 export class CollectorSet {
 
