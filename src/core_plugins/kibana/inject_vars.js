@@ -23,14 +23,25 @@ export function injectVars(server) {
   //DEPRECATED SETTINGS
   //if the url is set, the old settings must be used.
   //keeping this logic for backward compatibilty.
-  const configuredUrl = server.config().get('tilemap.url');
+  const configuredUrl = serverConfig.get('tilemap.url');
   const isOverridden = typeof configuredUrl === 'string' && configuredUrl !== '';
-  const tilemapConfig = serverConfig.get('tilemap');
-  const regionmapsConfig = serverConfig.get('regionmap');
   const mapConfig = serverConfig.get('map');
 
+  // Fall back to top-level legacy map config settings if needed. Warn on usage
+  const tilemapsConfig = serverConfig.get('map.tilemap') || serverConfig.get('tilemap');
+  const regionmapsConfig = serverConfig.get('map.regionmap') || serverConfig.get('regionmap');
 
-  regionmapsConfig.layers =  (regionmapsConfig.layers) ? regionmapsConfig.layers : [];
+  ['tilemap', 'regionmap'].forEach(legacyMap => {
+    const hasLegacyMap = serverConfig.has(legacyMap);
+    const legacyMapDef = serverConfig.get(legacyMap);
+    if (hasLegacyMap && typeof legacyMapDef !== 'undefined') {
+      server.log(['warning', 'deprecated'],
+        `Use of "${legacyMap}" in the kibana configuration is deprecated. ` +
+        `Use "map.${legacyMap}" instead`);
+    }
+  });
+
+  regionmapsConfig.layers = (regionmapsConfig.layers) ? regionmapsConfig.layers : [];
 
   return {
     kbnDefaultAppId: serverConfig.get('kibana.defaultAppId'),
@@ -39,7 +50,7 @@ export function injectVars(server) {
     tilemapsConfig: {
       deprecated: {
         isOverridden: isOverridden,
-        config: tilemapConfig,
+        config: tilemapsConfig,
       }
     }
   };
