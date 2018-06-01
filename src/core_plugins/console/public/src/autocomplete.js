@@ -529,7 +529,10 @@ export default function (editor) {
     context.token = ret.token;
     context.otherTokenValues = ret.otherTokenValues;
     context.urlTokenPath = ret.urlTokenPath;
-    populateContext(ret.urlTokenPath, context, editor, true, getTopLevelUrlCompleteComponents());
+    const components = getTopLevelUrlCompleteComponents(context.method);
+    populateContext(ret.urlTokenPath, context, editor, true, components);
+
+
     context.autoCompleteSet = addMetaToTermsList(context.autoCompleteSet, 'endpoint');
   }
 
@@ -544,7 +547,7 @@ export default function (editor) {
       return context;
     }
 
-    populateContext(ret.urlTokenPath, context, editor, false, getTopLevelUrlCompleteComponents());
+    populateContext(ret.urlTokenPath, context, editor, false, getTopLevelUrlCompleteComponents(context.method));
 
     if (!context.endpoint) {
       console.log('couldn\'t resolve an endpoint.');
@@ -563,7 +566,7 @@ export default function (editor) {
     }
 
     populateContext(tokenPath, context, editor, true,
-      context.endpoint.paramsAutocomplete.getTopLevelComponents());
+      context.endpoint.paramsAutocomplete.getTopLevelComponents(context.method));
     return context;
   }
 
@@ -579,7 +582,7 @@ export default function (editor) {
       return context;
     }
 
-    populateContext(ret.urlTokenPath, context, editor, false, getTopLevelUrlCompleteComponents());
+    populateContext(ret.urlTokenPath, context, editor, false, getTopLevelUrlCompleteComponents(context.method));
 
     context.bodyTokenPath = ret.bodyTokenPath;
     if (!ret.bodyTokenPath) { // zero length tokenPath is true
@@ -741,6 +744,10 @@ export default function (editor) {
       if (t.type === 'url.part' || t.type === 'url.param' || t.type === 'url.value') {
         // we are on the same line as cursor and dealing with a url. Current token is not part of the context
         t = tokenIter.stepBackward();
+        // This will force method parsing
+        while (t.type === 'whitespace') {
+          t = tokenIter.stepBackward();
+        }
       }
       bodyTokenPath = null; // no not on a body line.
     }

@@ -91,8 +91,8 @@ export function getEndpointBodyCompleteComponents(endpoint) {
   return desc.bodyAutocompleteRootComponents;
 }
 
-export function getTopLevelUrlCompleteComponents() {
-  return ACTIVE_API.getTopLevelUrlCompleteComponents();
+export function getTopLevelUrlCompleteComponents(method) {
+  return ACTIVE_API.getTopLevelUrlCompleteComponents(method);
 }
 
 export function getGlobalAutocompleteComponents(term, throwOnMissing) {

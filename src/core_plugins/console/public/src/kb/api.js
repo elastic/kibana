@@ -78,8 +78,9 @@ function Api(urlParametrizedComponentFactories, bodyParametrizedComponentFactori
   };
 
 
-  cls.getTopLevelUrlCompleteComponents = function () {
-    return this.urlPatternMatcher.getTopLevelComponents();
+  cls.getTopLevelUrlCompleteComponents = function (method) {
+    console.log('SDF', method);
+    return this.urlPatternMatcher.getTopLevelComponents(method);
   };
 
   cls.getUnmatchedEndpointComponents = function () {

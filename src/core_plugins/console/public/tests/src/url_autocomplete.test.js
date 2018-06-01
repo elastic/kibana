@@ -86,7 +86,7 @@ describe('Url autocomplete', () => {
         context,
         null,
         expectedContext.autoCompleteSet,
-        patternMatcher.getTopLevelComponents()
+        patternMatcher.getTopLevelComponents(context.method)
       );
 
       // override context to just check on id
@@ -113,17 +113,19 @@ describe('Url autocomplete', () => {
     const endpoints = {
       '1': {
         patterns: ['a/b'],
+        methods: ['GET']
       },
     };
     patternsTest('simple single path - completion', endpoints, 'a/b$', {
       endpoint: '1',
+      method: 'GET'
     });
 
     patternsTest(
       'simple single path - completion, with auto complete',
       endpoints,
       'a/b',
-      { autoCompleteSet: [] }
+      { method: 'GET', autoCompleteSet: [] }
     );
 
     patternsTest(
@@ -137,14 +139,14 @@ describe('Url autocomplete', () => {
       'simple single path - partial, with auto complete',
       endpoints,
       'a',
-      { autoCompleteSet: ['b'] }
+      { method: 'GET', autoCompleteSet: ['b'] }
     );
 
     patternsTest(
       'simple single path - partial, with auto complete',
       endpoints,
       [],
-      { autoCompleteSet: ['a/b'] }
+      { method: 'GET', autoCompleteSet: ['a/b'] }
     );
 
     patternsTest('simple single path - different path', endpoints, 'a/c', {});
@@ -154,56 +156,61 @@ describe('Url autocomplete', () => {
     const endpoints = {
       '1': {
         patterns: ['a/b', 'a/b/{p}'],
+        methods: ['GET']
       },
       '2': {
         patterns: ['a/c'],
+        methods: ['GET']
       },
     };
     patternsTest('shared path  - completion 1', endpoints, 'a/b$', {
       endpoint: '1',
+      method: 'GET'
     });
 
     patternsTest('shared path  - completion 2', endpoints, 'a/c$', {
       endpoint: '2',
+      method: 'GET'
     });
 
     patternsTest(
       'shared path  - completion 1 with param',
       endpoints,
       'a/b/v$',
-      { endpoint: '1', p: 'v' }
+      { method: 'GET', endpoint: '1', p: 'v' }
     );
 
     patternsTest('shared path - partial, with auto complete', endpoints, 'a', {
       autoCompleteSet: ['b', 'c'],
+      method: 'GET',
     });
 
     patternsTest(
       'shared path - partial, with auto complete of param, no options',
       endpoints,
       'a/b',
-      { autoCompleteSet: [] }
+      { method: 'GET', autoCompleteSet: [] }
     );
 
     patternsTest(
       'shared path - partial, without auto complete',
       endpoints,
       'a',
-      {}
+      { method: 'GET', }
     );
 
     patternsTest(
       'shared path - different path - with auto complete',
       endpoints,
       'a/e',
-      { autoCompleteSet: [] }
+      { method: 'GET', autoCompleteSet: [] }
     );
 
     patternsTest(
       'shared path - different path - without auto complete',
       endpoints,
       'a/e',
-      {}
+      { method: 'GET',  }
     );
   }());
 
@@ -214,51 +221,57 @@ describe('Url autocomplete', () => {
         url_components: {
           p: ['a', 'b'],
         },
+        methods: [ 'GET' ]
       },
       '2': {
         patterns: ['a/c'],
+        methods: [ 'GET' ]
       },
     };
     patternsTest('option testing - completion 1', endpoints, 'a/a$', {
+      method: 'GET',
       endpoint: '1',
       p: ['a'],
     });
 
     patternsTest('option testing - completion 2', endpoints, 'a/b$', {
+      method: 'GET',
       endpoint: '1',
       p: ['b'],
     });
 
     patternsTest('option testing - completion 3', endpoints, 'a/b,a$', {
+      method: 'GET',
       endpoint: '1',
       p: ['b', 'a'],
     });
 
     patternsTest('option testing - completion 4', endpoints, 'a/c$', {
+      method: 'GET',
       endpoint: '2',
     });
 
-    patternsTest('option testing  - completion 5', endpoints, 'a/d$', {});
+    patternsTest('option testing  - completion 5', endpoints, 'a/d$', { method: 'GET', });
 
     patternsTest(
       'option testing - partial, with auto complete',
       endpoints,
       'a',
-      { autoCompleteSet: [t('a', 'p'), t('b', 'p'), 'c'] }
+      { method: 'GET', autoCompleteSet: [t('a', 'p'), t('b', 'p'), 'c'] }
     );
 
     patternsTest(
       'option testing - partial, without auto complete',
       endpoints,
       'a',
-      {}
+      { method: 'GET', }
     );
 
     patternsTest(
       'option testing - different path - with auto complete',
       endpoints,
       'a/e',
-      { autoCompleteSet: [] }
+      { method: 'GET', autoCompleteSet: [] }
     );
   }());
 
@@ -269,12 +282,15 @@ describe('Url autocomplete', () => {
         url_components: {
           p: ['a', 'b'],
         },
+        methods: [ 'GET' ]
       },
       '2': {
         patterns: ['b/{p}'],
+        methods: [ 'GET' ]
       },
       '3': {
         patterns: ['b/{l}/c'],
+        methods: [ 'GET' ],
         url_components: {
           l: {
             type: 'list',
@@ -294,7 +310,7 @@ describe('Url autocomplete', () => {
       'global parameters testing - completion 1',
       endpoints,
       'a/a$',
-      { endpoint: '1', p: ['a'] },
+      { method: 'GET', endpoint: '1', p: ['a'] },
       globalFactories
     );
 
@@ -302,7 +318,7 @@ describe('Url autocomplete', () => {
       'global parameters testing - completion 2',
       endpoints,
       'b/g1$',
-      { endpoint: '2', p: ['g1'] },
+      { method: 'GET', endpoint: '2', p: ['g1'] },
       globalFactories
     );
 
@@ -310,7 +326,7 @@ describe('Url autocomplete', () => {
       'global parameters testing - partial, with auto complete',
       endpoints,
       'a',
-      { autoCompleteSet: [t('a', 'p'), t('b', 'p')] },
+      { method: 'GET', autoCompleteSet: [t('a', 'p'), t('b', 'p')] },
       globalFactories
     );
 
@@ -319,6 +335,7 @@ describe('Url autocomplete', () => {
       endpoints,
       'b',
       {
+        method: 'GET',
         autoCompleteSet: [
           t('g1', 'p'),
           t('g2', 'p'),
@@ -333,14 +350,14 @@ describe('Url autocomplete', () => {
       'Non valid token acceptance - partial, with auto complete 1',
       endpoints,
       'b/la',
-      { autoCompleteSet: ['c'], l: ['la'] },
+      { method: 'GET', autoCompleteSet: ['c'], l: ['la'] },
       globalFactories
     );
     patternsTest(
       'Non valid token acceptance - partial, with auto complete 2',
       endpoints,
       'b/non_valid',
-      { autoCompleteSet: ['c'], l: ['non_valid'] },
+      { method: 'GET', autoCompleteSet: ['c'], l: ['non_valid'] },
       globalFactories
     );
   }());
@@ -349,13 +366,16 @@ describe('Url autocomplete', () => {
     const endpoints = {
       '1': {
         patterns: ['a/b/{p}/c/e'],
+        methods: [ 'GET' ]
       },
     };
     patternsTest('look ahead - autocomplete before param 1', endpoints, 'a', {
+      method: 'GET',
       autoCompleteSet: ['b'],
     });
 
     patternsTest('look ahead - autocomplete before param 2', endpoints, [], {
+      method: 'GET',
       autoCompleteSet: ['a/b'],
     });
 
@@ -363,14 +383,14 @@ describe('Url autocomplete', () => {
       'look ahead - autocomplete after param 1',
       endpoints,
       'a/b/v',
-      { autoCompleteSet: ['c/e'], p: 'v' }
+      { method: 'GET', autoCompleteSet: ['c/e'], p: 'v' }
     );
 
     patternsTest(
       'look ahead - autocomplete after param 2',
       endpoints,
       'a/b/v/c',
-      { autoCompleteSet: ['e'], p: 'v' }
+      { method: 'GET', autoCompleteSet: ['e'], p: 'v' }
     );
   }());
 
