@@ -157,7 +157,7 @@ export const reporting = (kibana) => {
       });
 
       // Register a function to with Monitoring to manage the collection of usage stats
-      monitoringPlugin.status.once('green', () => {
+      monitoringPlugin && monitoringPlugin.status.once('green', () => {
         if (monitoringPlugin.collectorSet) {
           monitoringPlugin.collectorSet.register(getReportingUsageCollector(server));
         }

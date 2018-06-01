@@ -5,7 +5,11 @@
 <titleabbrev>Monitoring Settings</titleabbrev>
 ++++
 
-By default, monitoring is enabled. You can adjust how monitoring data is
+By default, the Monitoring application is enabled, but data collection
+is disabled.  When you first start {kib} monitoring, you will be prompted to
+enable data collection.
+
+You can adjust how monitoring data is
 collected from {kib} and displayed in {kib} by configuring settings in the
 `kibana.yml` file. There are also `xpack.monitoring.elasticsearch.*` settings,
 which support the same values as <<settings,{kib} configuration settings>>.
@@ -122,4 +126,5 @@ statistics. It also adds the calculated Cgroup CPU utilization to the
 *Node Overview* page instead of the overall operating system's CPU
 utilization. Defaults to `false`.
 +
-image::settings/images/monitoring-es-cgroup-true.png["Elasticsearch Inside a Container",link="images/monitoring-es-cgroup-true.png"]
+[role="screenshot"]
+image::images/monitoring-containers.png[Elasticsearch Inside a Container]

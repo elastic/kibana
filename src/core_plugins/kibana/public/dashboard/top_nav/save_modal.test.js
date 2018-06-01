@@ -17,23 +17,21 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+import React from 'react';
+import { shallow } from 'enzyme';
 
-const kibanaDir = resolve(__dirname, '..', '..');
+import {
+  DashboardSaveModal,
+} from './save_modal';
 
-export function buildDocsScript(cmd) {
-  return resolve(process.cwd(), cmd.docrepo, 'build_docs.pl');
-}
-
-export function buildDocsArgs(cmd) {
-  const docsIndexFile = resolve(kibanaDir, 'docs', 'index.asciidoc');
-  let args = ['--doc', docsIndexFile, '--chunk=1'];
-  if (cmd.open) {
-    args = [...args, '--open'];
-  }
-  return args;
-}
-
-export function defaultDocsRepoPath() {
-  return resolve(kibanaDir, '..', 'docs');
-}
+test('renders DashboardSaveModal', () => {
+  const component = shallow(<DashboardSaveModal
+    onSave={() => {}}
+    onClose={() => {}}
+    title="dash title"
+    description="dash description"
+    timeRestore={true}
+    showCopyOnSave={true}
+  />);
+  expect(component).toMatchSnapshot(); // eslint-disable-line
+});

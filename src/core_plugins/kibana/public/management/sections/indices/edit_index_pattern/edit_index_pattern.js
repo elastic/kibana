@@ -295,15 +295,14 @@ uiModules.get('apps/management')
           updateIndexedFieldsTable($scope, $state);
         case 'scriptedFields':
           updateScriptedFieldsTable($scope, $state);
+        case 'sourceFilters':
+          updateSourceFiltersTable($scope, $state);
       }
     });
 
     $scope.$watch('indexedFieldTypeFilter', () => {
       if ($scope.indexedFieldTypeFilter !== undefined && $state.tab === 'indexedFields') {
         updateIndexedFieldsTable($scope, $state);
-      }
-      if ($scope.fieldFilter !== undefined && $state.tab === 'sourceFilters') {
-        updateSourceFiltersTable($scope, $state);
       }
     });
 

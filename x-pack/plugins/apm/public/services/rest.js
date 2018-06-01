@@ -20,7 +20,10 @@ async function callApi(fetchOptions, kibanaOptions) {
 
   const combinedFetchOptions = {
     ...fetchOptions,
-    query: fetchOptions.query
+    query: {
+      ...fetchOptions.query,
+      _debug: sessionStorage.getItem('apm_debug') || false
+    }
   };
 
   const res = await kfetch(combinedFetchOptions, combinedKibanaOptions);
