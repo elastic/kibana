@@ -78,12 +78,12 @@ export const CleanExtraBrowsersTask = {
     for (const platform of config.getPlatforms()) {
       const getBrowserPaths = getBrowserPathsForPlatform(platform);
       if (platform.isWindows()) {
-        await deleteAll(log, getBrowserPaths({ linux: true, darwin: true }));
+        await del(getBrowserPaths({ linux: true, darwin: true }));
       }
       else if (platform.isMac()) {
-        await deleteAll(log, getBrowserPaths({ linux: true, windows: true }));
+        await del(getBrowserPaths({ linux: true, windows: true }));
       } else if (platform.isLinux()) {
-        await deleteAll(log, getBrowserPaths({ windows: true, darwin: true }));
+        await del(getBrowserPaths({ windows: true, darwin: true }));
       }
     }
   }
