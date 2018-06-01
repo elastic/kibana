@@ -23,6 +23,8 @@ import './styles/main.less';
 
 import { extractJobDetails } from './extract_job_details';
 import { JsonPane } from './json_tab';
+import { DatafeedPreviewPane } from './datafeed_preview_tab';
+import { ForecastsTable } from './forecasts_table';
 
 function SectionItem({ item }) {
   return (
@@ -138,6 +140,18 @@ export class JobDetails extends Component {
         id: 'json',
         name: 'JSON',
         content: <JsonPane job={job} />,
+      }, {
+        id: 'job-message',
+        name: 'Job messages',
+        content: <div />,
+      }, {
+        id: 'datafeed-preview',
+        name: 'Datafeed preview',
+        content: <DatafeedPreviewPane job={job} />,
+      }, {
+        id: 'forecasts',
+        name: 'Forecasts',
+        content: <ForecastsTable job={job} />,
       }
       ];
 

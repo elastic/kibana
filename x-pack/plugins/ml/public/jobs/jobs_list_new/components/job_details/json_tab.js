@@ -8,28 +8,17 @@
 import React from 'react';
 
 import {
-  EuiSpacer,
-  EuiCodeEditor
+  EuiSpacer
 } from '@elastic/eui';
 
-
-const WIDTH = '100%';
-const HEIGHT = '500px';
-const MODE = 'json';
+import { MLJobEditor } from './ml_job_editor';
 
 export function JsonPane({ job }) {
   const json = JSON.stringify(job, null, 2);
   return (
     <React.Fragment>
       <EuiSpacer size="s" />
-      <EuiCodeEditor
-        value={json}
-        width={WIDTH}
-        height={HEIGHT}
-        mode={MODE}
-        readOnly={true}
-        wrapEnabled={true}
-      />
+      <MLJobEditor value={json} />
     </React.Fragment>
   );
 }
