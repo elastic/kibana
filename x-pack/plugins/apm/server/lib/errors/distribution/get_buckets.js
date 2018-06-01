@@ -7,7 +7,7 @@
 import { SERVICE_NAME, ERROR_GROUP_ID } from '../../../../common/constants';
 
 export async function getBuckets({ serviceName, groupId, bucketSize, setup }) {
-  const { start, end, client, config } = setup;
+  const { start, end, esFilterQuery, client, config } = setup;
 
   const params = {
     index: config.get('xpack.apm.indexPattern'),
@@ -16,6 +16,8 @@ export async function getBuckets({ serviceName, groupId, bucketSize, setup }) {
       query: {
         bool: {
           filter: [
+            { term: { [SERVICE_NAME]: serviceName } },
+            { term: { [ERROR_GROUP_ID]: groupId } },
             {
               range: {
                 '@timestamp': {
@@ -24,9 +26,7 @@ export async function getBuckets({ serviceName, groupId, bucketSize, setup }) {
                   format: 'epoch_millis'
                 }
               }
-            },
-            { term: { [ERROR_GROUP_ID]: groupId } },
-            { term: { [SERVICE_NAME]: serviceName } }
+            }
           ]
         }
       },
@@ -45,6 +45,10 @@ export async function getBuckets({ serviceName, groupId, bucketSize, setup }) {
       }
     }
   };
+
+  if (esFilterQuery) {
+    params.body.query.bool.filter.push(esFilterQuery);
+  }
 
   const resp = await client('search', params);
 

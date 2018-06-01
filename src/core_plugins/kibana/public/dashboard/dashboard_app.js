@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import angular from 'angular';
 import { uiModules } from 'ui/modules';
@@ -21,6 +40,7 @@ import { VisualizeConstants } from '../visualize/visualize_constants';
 import { DashboardStateManager } from './dashboard_state_manager';
 import { saveDashboard } from './lib';
 import { showCloneModal } from './top_nav/show_clone_modal';
+import { showSaveModal } from './top_nav/show_save_modal';
 import { showAddPanel } from './top_nav/show_add_panel';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import * as filterActions from 'ui/doc_table/actions/filter';
@@ -200,9 +220,6 @@ app.directive('dashboardApp', function ($injector) {
         dashboardStateManager.setDarkTheme($scope.model.darkTheme);
         updateTheme();
       });
-      $scope.$watch('model.description', () => dashboardStateManager.setDescription($scope.model.description));
-      $scope.$watch('model.title', () => dashboardStateManager.setTitle($scope.model.title));
-      $scope.$watch('model.timeRestore', () => dashboardStateManager.setTimeRestore($scope.model.timeRestore));
       $scope.indexPatterns = [];
 
       $scope.onPanelRemoved = (panelIndex) => {
@@ -310,8 +327,41 @@ app.directive('dashboardApp', function ($injector) {
         dashboardStateManager.setFullScreenMode(true);
       navActions[TopNavIds.EXIT_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.VIEW);
       navActions[TopNavIds.ENTER_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.EDIT);
+      navActions[TopNavIds.SAVE] = () => {
+        const currentTitle = dashboardStateManager.getTitle();
+        const currentDescription = dashboardStateManager.getDescription();
+        const currentTimeRestore = dashboardStateManager.getTimeRestore();
+        const onSave = ({ newTitle, newDescription, newCopyOnSave, newTimeRestore, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
+          dashboardStateManager.setTitle(newTitle);
+          dashboardStateManager.setDescription(newDescription);
+          dashboardStateManager.savedDashboard.copyOnSave = newCopyOnSave;
+          dashboardStateManager.setTimeRestore(newTimeRestore);
+          const saveOptions = {
+            confirmOverwrite: false,
+            isTitleDuplicateConfirmed,
+            onTitleDuplicate,
+          };
+          return $scope.save(saveOptions).then(id => {
+            // If the save wasn't successful, put the original values back.
+            if (!id) {
+              dashboardStateManager.setTitle(currentTitle);
+              dashboardStateManager.setDescription(currentDescription);
+              dashboardStateManager.setTimeRestore(currentTimeRestore);
+            }
+            return id;
+          });
+        };
+
+        showSaveModal({
+          onSave,
+          title: currentTitle,
+          description: currentDescription,
+          timeRestore: currentTimeRestore,
+          showCopyOnSave: dash.id ? true : false,
+        });
+      };
       navActions[TopNavIds.CLONE] = () => {
-        const currentTitle = $scope.model.title;
+        const currentTitle = dashboardStateManager.getTitle();
         const onClone = (newTitle, isTitleDuplicateConfirmed, onTitleDuplicate) => {
           dashboardStateManager.savedDashboard.copyOnSave = true;
           dashboardStateManager.setTitle(newTitle);
@@ -323,9 +373,6 @@ app.directive('dashboardApp', function ($injector) {
           return $scope.save(saveOptions).then(id => {
             // If the save wasn't successful, put the original title back.
             if (!id) {
-              $scope.model.title = currentTitle;
-              // There is a watch on $scope.model.title that *should* call this automatically but
-              // angular is failing to trigger it, so do so manually here.
               dashboardStateManager.setTitle(currentTitle);
             }
             return id;
@@ -387,11 +434,9 @@ app.directive('dashboardApp', function ($injector) {
         kbnUrl.removeParam(DashboardConstants.NEW_VISUALIZATION_ID_PARAM);
       }
 
+      // TODO remove opts once share has been converted to react
       $scope.opts = {
-        displayName: dash.getDisplayName(),
-        dashboard: dash,
-        save: $scope.save,
-        timefilter: $scope.timefilter
+        dashboard: dash, // used in share.html
       };
     }
   };

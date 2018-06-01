@@ -7,29 +7,50 @@
 import 'isomorphic-fetch';
 import { camelizeKeys } from 'humps';
 import { kfetch } from 'ui/kfetch';
-import { omit } from 'lodash';
-
-function removeEmpty(query) {
-  return omit(query, val => val == null);
-}
+import { memoize, isEmpty, first } from 'lodash';
+import chrome from 'ui/chrome';
+import { convertKueryToEsQuery } from './kuery';
+import { getFromSavedObject } from 'ui/index_patterns/static_utils';
 
 async function callApi(fetchOptions, kibanaOptions) {
   const combinedKibanaOptions = {
-    compact: true, // remove empty query args
     camelcase: true,
     ...kibanaOptions
   };
 
   const combinedFetchOptions = {
     ...fetchOptions,
-    query: combinedKibanaOptions.compact
-      ? removeEmpty(fetchOptions.query)
-      : fetchOptions.query
+    query: {
+      ...fetchOptions.query,
+      _debug: sessionStorage.getItem('apm_debug') || false
+    }
   };
 
   const res = await kfetch(combinedFetchOptions, combinedKibanaOptions);
   return combinedKibanaOptions.camelcase ? camelizeKeys(res) : res;
 }
+
+export const getAPMIndexPattern = memoize(async () => {
+  const res = await callApi({
+    pathname: chrome.addBasePath(`/api/saved_objects/_find`),
+    query: {
+      type: 'index-pattern'
+    }
+  });
+
+  if (isEmpty(res.savedObjects)) {
+    return {};
+  }
+
+  const apmIndexPattern = chrome.getInjected('apmIndexPattern');
+  const apmSavedObject = first(
+    res.savedObjects.filter(
+      savedObject => savedObject.attributes.title === apmIndexPattern
+    )
+  );
+
+  return getFromSavedObject(apmSavedObject);
+});
 
 export async function loadLicense() {
   return callApi({
@@ -49,22 +70,34 @@ export async function loadAgentStatus() {
   });
 }
 
-export async function loadServiceList({ start, end }) {
+export async function getEncodedEsQuery(kuery) {
+  if (!kuery) {
+    return;
+  }
+
+  const indexPattern = await getAPMIndexPattern();
+  const esFilterQuery = convertKueryToEsQuery(kuery, indexPattern);
+  return encodeURIComponent(JSON.stringify(esFilterQuery));
+}
+
+export async function loadServiceList({ start, end, kuery }) {
   return callApi({
     pathname: `/api/apm/services`,
     query: {
       start,
-      end
+      end,
+      esFilterQuery: await getEncodedEsQuery(kuery)
     }
   });
 }
 
-export async function loadServiceDetails({ start, end, serviceName }) {
+export async function loadServiceDetails({ serviceName, start, end, kuery }) {
   return callApi({
     pathname: `/api/apm/services/${serviceName}`,
     query: {
       start,
-      end
+      end,
+      esFilterQuery: await getEncodedEsQuery(kuery)
     }
   });
 }
@@ -73,6 +106,7 @@ export async function loadTransactionList({
   serviceName,
   start,
   end,
+  kuery,
   transactionType
 }) {
   return callApi({
@@ -80,6 +114,7 @@ export async function loadTransactionList({
     query: {
       start,
       end,
+      esFilterQuery: await getEncodedEsQuery(kuery),
       transaction_type: transactionType
     }
   });
@@ -89,24 +124,33 @@ export async function loadTransactionDistribution({
   serviceName,
   start,
   end,
-  transactionName
+  transactionName,
+  kuery
 }) {
   return callApi({
     pathname: `/api/apm/services/${serviceName}/transactions/distribution`,
     query: {
       start,
       end,
-      transaction_name: transactionName
+      transaction_name: transactionName,
+      esFilterQuery: await getEncodedEsQuery(kuery)
     }
   });
 }
 
-export async function loadSpans({ serviceName, start, end, transactionId }) {
+export async function loadSpans({
+  serviceName,
+  start,
+  end,
+  transactionId,
+  kuery
+}) {
   return callApi({
     pathname: `/api/apm/services/${serviceName}/transactions/${transactionId}/spans`,
     query: {
       start,
-      end
+      end,
+      esFilterQuery: await getEncodedEsQuery(kuery)
     }
   });
 }
@@ -115,16 +159,22 @@ export async function loadTransaction({
   serviceName,
   start,
   end,
-  transactionId
+  transactionId,
+  kuery
 }) {
-  const res = await callApi({
-    pathname: `/api/apm/services/${serviceName}/transactions/${transactionId}`,
-    camelcase: false,
-    query: {
-      start,
-      end
+  const res = await callApi(
+    {
+      pathname: `/api/apm/services/${serviceName}/transactions/${transactionId}`,
+      query: {
+        start,
+        end,
+        esFilterQuery: await getEncodedEsQuery(kuery)
+      }
+    },
+    {
+      camelcase: false
     }
-  });
+  );
   const camelizedRes = camelizeKeys(res);
   if (res.context) {
     camelizedRes.context = res.context;
@@ -136,6 +186,7 @@ export async function loadCharts({
   serviceName,
   start,
   end,
+  kuery,
   transactionType,
   transactionName
 }) {
@@ -144,6 +195,7 @@ export async function loadCharts({
     query: {
       start,
       end,
+      esFilterQuery: await getEncodedEsQuery(kuery),
       transaction_type: transactionType,
       transaction_name: transactionName
     }
@@ -154,6 +206,7 @@ export async function loadErrorGroupList({
   serviceName,
   start,
   end,
+  kuery,
   size,
   q,
   sortBy,
@@ -167,25 +220,32 @@ export async function loadErrorGroupList({
       size,
       q,
       sortBy,
-      sortOrder
+      sortOrder,
+      esFilterQuery: await getEncodedEsQuery(kuery)
     }
   });
 }
 
 export async function loadErrorGroupDetails({
   serviceName,
-  errorGroupId,
   start,
-  end
+  end,
+  kuery,
+  errorGroupId
 }) {
-  const res = await callApi({
-    pathname: `/api/apm/services/${serviceName}/errors/${errorGroupId}`,
-    camelcase: false,
-    query: {
-      start,
-      end
+  const res = await callApi(
+    {
+      pathname: `/api/apm/services/${serviceName}/errors/${errorGroupId}`,
+      query: {
+        start,
+        end,
+        esFilterQuery: await getEncodedEsQuery(kuery)
+      }
+    },
+    {
+      camelcase: false
     }
-  });
+  );
   const camelizedRes = camelizeKeys(res);
   if (res.error.context) {
     camelizedRes.error.context = res.error.context;
@@ -197,13 +257,15 @@ export async function loadErrorDistribution({
   serviceName,
   start,
   end,
+  kuery,
   errorGroupId
 }) {
   return callApi({
     pathname: `/api/apm/services/${serviceName}/errors/${errorGroupId}/distribution`,
     query: {
       start,
-      end
+      end,
+      esFilterQuery: await getEncodedEsQuery(kuery)
     }
   });
 }

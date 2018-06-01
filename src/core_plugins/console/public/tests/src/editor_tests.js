@@ -1,8 +1,27 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import $ from 'jquery';
 import _ from 'lodash';
 const ace = require('ace');
 import { initializeInput } from '../../src/input';
-const editor_input1 = require('raw-loader!./editor_input1.txt');
+const editorInput1 = require('raw-loader!./editor_input1.txt');
 const utils = require('../../src/utils');
 
 const aceRange = ace.acequire('ace/range');
@@ -24,7 +43,7 @@ module('Editor', {
 
 let testCount = 0;
 
-function utils_test(name, prefix, data, test) {
+function utilsTest(name, prefix, data, test) {
   const id = testCount++;
   if (typeof data === 'function') {
     test = data;
@@ -61,7 +80,7 @@ function compareRequest(requests, expected) {
   deepEqual(requests, expected);
 }
 
-const simple_request = {
+const  simpleRequest = {
   prefix: 'POST _search',
   data: [
     '{',
@@ -70,26 +89,26 @@ const simple_request = {
   ].join('\n')
 };
 
-const single_line_request =
+const singleLineRequest =
 {
   prefix: 'POST _search',
   data: '{ "query": { "match_all": {} } }'
 };
 
-const get_request_no_data = {
+const getRequestNoData = {
   prefix: 'GET _stats'
 };
 
-const multi_doc_request = {
+const multiDocRequest = {
   prefix: 'POST _bulk',
   data_as_array: [
     '{ "index": { "_index": "index", "_type":"type" } }',
     '{ "field": 1 }'
   ]
 };
-multi_doc_request.data = multi_doc_request.data_as_array.join('\n');
+multiDocRequest.data = multiDocRequest.data_as_array.join('\n');
 
-utils_test('simple request range', simple_request.prefix, simple_request.data, function () {
+utilsTest('simple request range',  simpleRequest.prefix,  simpleRequest.data, function () {
   input.getRequestRange(function (range) {
     const expected = new aceRange.Range(
       0, 0,
@@ -100,12 +119,12 @@ utils_test('simple request range', simple_request.prefix, simple_request.data, f
   });
 });
 
-utils_test('simple request data', simple_request.prefix, simple_request.data, function () {
+utilsTest('simple request data',  simpleRequest.prefix,  simpleRequest.data, function () {
   input.getRequest(function (request) {
     const expected = {
       method: 'POST',
       url: '_search',
-      data: [simple_request.data]
+      data: [ simpleRequest.data]
     };
 
     compareRequest(request, expected);
@@ -113,7 +132,7 @@ utils_test('simple request data', simple_request.prefix, simple_request.data, fu
   });
 });
 
-utils_test('simple request range, prefixed with spaces', '   ' + simple_request.prefix, simple_request.data, function () {
+utilsTest('simple request range, prefixed with spaces', '   ' +  simpleRequest.prefix,  simpleRequest.data, function () {
   input.getRequestRange(function (range) {
     const expected = new aceRange.Range(
       0, 0,
@@ -124,12 +143,12 @@ utils_test('simple request range, prefixed with spaces', '   ' + simple_request.
   });
 });
 
-utils_test('simple request data, prefixed with spaces', '    ' + simple_request.prefix, simple_request.data, function () {
+utilsTest('simple request data, prefixed with spaces', '    ' +  simpleRequest.prefix,  simpleRequest.data, function () {
   input.getRequest(function (request) {
     const expected = {
       method: 'POST',
       url: '_search',
-      data: [simple_request.data]
+      data: [ simpleRequest.data]
     };
 
     compareRequest(request, expected);
@@ -137,7 +156,7 @@ utils_test('simple request data, prefixed with spaces', '    ' + simple_request.
   });
 });
 
-utils_test('simple request range, suffixed with spaces', simple_request.prefix + '   ', simple_request.data + '  ', function () {
+utilsTest('simple request range, suffixed with spaces',  simpleRequest.prefix + '   ',  simpleRequest.data + '  ', function () {
   input.getRequestRange(function (range) {
     const expected = new aceRange.Range(
       0, 0,
@@ -148,12 +167,12 @@ utils_test('simple request range, suffixed with spaces', simple_request.prefix +
   });
 });
 
-utils_test('simple request data, suffixed with spaces', simple_request.prefix + '    ', simple_request.data + ' ', function () {
+utilsTest('simple request data, suffixed with spaces',  simpleRequest.prefix + '    ',  simpleRequest.data + ' ', function () {
   input.getRequest(function (request) {
     const expected = {
       method: 'POST',
       url: '_search',
-      data: [simple_request.data]
+      data: [ simpleRequest.data]
     };
 
     compareRequest(request, expected);
@@ -162,7 +181,7 @@ utils_test('simple request data, suffixed with spaces', simple_request.prefix + 
 });
 
 
-utils_test('single line request range', single_line_request.prefix, single_line_request.data, function () {
+utilsTest('single line request range', singleLineRequest.prefix, singleLineRequest.data, function () {
   input.getRequestRange(function (range) {
     const expected = new aceRange.Range(
       0, 0,
@@ -173,12 +192,12 @@ utils_test('single line request range', single_line_request.prefix, single_line_
   });
 });
 
-utils_test('full url: single line request data', 'POST https://somehoset/_search', single_line_request.data, function () {
+utilsTest('full url: single line request data', 'POST https://somehoset/_search', singleLineRequest.data, function () {
   input.getRequest(function (request) {
     const expected = {
       method: 'POST',
       url: 'https://somehoset/_search',
-      data: [single_line_request.data]
+      data: [singleLineRequest.data]
     };
 
     compareRequest(request, expected);
@@ -186,7 +205,7 @@ utils_test('full url: single line request data', 'POST https://somehoset/_search
   });
 });
 
-utils_test('request with no data followed by a new line', get_request_no_data.prefix, '\n', function () {
+utilsTest('request with no data followed by a new line', getRequestNoData.prefix, '\n', function () {
   input.getRequestRange(function (range) {
     const expected = new aceRange.Range(
       0, 0,
@@ -197,7 +216,7 @@ utils_test('request with no data followed by a new line', get_request_no_data.pr
   });
 });
 
-utils_test('request with no data followed by a new line (data)', get_request_no_data.prefix, '\n', function () {
+utilsTest('request with no data followed by a new line (data)', getRequestNoData.prefix, '\n', function () {
   input.getRequest(function (request) {
     const expected = {
       method: 'GET',
@@ -211,7 +230,7 @@ utils_test('request with no data followed by a new line (data)', get_request_no_
 });
 
 
-utils_test('request with no data', get_request_no_data.prefix, get_request_no_data.data, function () {
+utilsTest('request with no data', getRequestNoData.prefix, getRequestNoData.data, function () {
   input.getRequestRange(function (range) {
     const expected = new aceRange.Range(
       0, 0,
@@ -222,7 +241,7 @@ utils_test('request with no data', get_request_no_data.prefix, get_request_no_da
   });
 });
 
-utils_test('request with no data (data)', get_request_no_data.prefix, get_request_no_data.data, function () {
+utilsTest('request with no data (data)', getRequestNoData.prefix, getRequestNoData.data, function () {
   input.getRequest(function (request) {
     const expected = {
       method: 'GET',
@@ -235,7 +254,7 @@ utils_test('request with no data (data)', get_request_no_data.prefix, get_reques
   });
 });
 
-utils_test('multi doc request range', multi_doc_request.prefix, multi_doc_request.data, function () {
+utilsTest('multi doc request range', multiDocRequest.prefix, multiDocRequest.data, function () {
   input.getRequestRange(function (range) {
     const expected = new aceRange.Range(
       0, 0,
@@ -246,12 +265,12 @@ utils_test('multi doc request range', multi_doc_request.prefix, multi_doc_reques
   });
 });
 
-utils_test('multi doc request data', multi_doc_request.prefix, multi_doc_request.data, function () {
+utilsTest('multi doc request data', multiDocRequest.prefix, multiDocRequest.data, function () {
   input.getRequest(function (request) {
     const expected = {
       method: 'POST',
       url: '_bulk',
-      data: multi_doc_request.data_as_array
+      data: multiDocRequest.data_as_array
     };
 
     compareRequest(request, expected);
@@ -259,7 +278,7 @@ utils_test('multi doc request data', multi_doc_request.prefix, multi_doc_request
   });
 });
 
-const script_request = {
+const scriptRequest = {
   prefix: 'POST _search',
   data: [
     '{',
@@ -270,7 +289,7 @@ const script_request = {
   ].join('\n')
 };
 
-utils_test('script request range', script_request.prefix, script_request.data, function () {
+utilsTest('script request range', scriptRequest.prefix, scriptRequest.data, function () {
   input.getRequestRange(function (range) {
     const expected = new aceRange.Range(
       0, 0,
@@ -281,12 +300,12 @@ utils_test('script request range', script_request.prefix, script_request.data, f
   });
 });
 
-utils_test('simple request data', simple_request.prefix, simple_request.data, function () {
+utilsTest('simple request data',  simpleRequest.prefix,  simpleRequest.data, function () {
   input.getRequest(function (request) {
     const expected = {
       method: 'POST',
       url: '_search',
-      data: [utils.collapseLiteralStrings(simple_request.data)]
+      data: [ utils.collapseLiteralStrings(simpleRequest.data) ]
     };
 
     compareRequest(request, expected);
@@ -295,8 +314,8 @@ utils_test('simple request data', simple_request.prefix, simple_request.data, fu
 });
 
 
-function multi_req_test(name, editor_input, range, expected) {
-  utils_test('multi request select - ' + name, editor_input, function () {
+function multiReqTest(name, editorInput, range, expected) {
+  utilsTest('multi request select - ' + name, editorInput, function () {
     input.getRequestsInRange(range, function (requests) {
       // convert to format returned by request.
       _.each(expected, function (req) {
@@ -309,7 +328,7 @@ function multi_req_test(name, editor_input, range, expected) {
   });
 }
 
-multi_req_test('mid body to mid body', editor_input1,
+multiReqTest('mid body to mid body', editorInput1,
   { start: { row: 12 }, end: { row: 17 } }, [{
     method: 'PUT',
     url: 'index_1/type1/1',
@@ -324,7 +343,7 @@ multi_req_test('mid body to mid body', editor_input1,
     }
   }]);
 
-multi_req_test('single request start to end', editor_input1,
+multiReqTest('single request start to end', editorInput1,
   { start: { row: 10 }, end: { row: 13 } }, [{
     method: 'PUT',
     url: 'index_1/type1/1',
@@ -333,7 +352,7 @@ multi_req_test('single request start to end', editor_input1,
     }
   }]);
 
-multi_req_test('start to end, with comment', editor_input1,
+multiReqTest('start to end, with comment', editorInput1,
   { start: { row: 6 }, end: { row: 13 } }, [{
     method: 'GET',
     url: '_stats?level=shards',
@@ -347,7 +366,7 @@ multi_req_test('start to end, with comment', editor_input1,
     }
   }]);
 
-multi_req_test('before start to after end, with comments', editor_input1,
+multiReqTest('before start to after end, with comments', editorInput1,
   { start: { row: 4 }, end: { row: 14 } }, [{
     method: 'GET',
     url: '_stats?level=shards',
@@ -361,18 +380,18 @@ multi_req_test('before start to after end, with comments', editor_input1,
     }
   }]);
 
-multi_req_test('between requests', editor_input1,
+multiReqTest('between requests', editorInput1,
   { start: { row: 21 }, end: { row: 22 } }, []);
 
-multi_req_test('between requests - with comment', editor_input1,
+multiReqTest('between requests - with comment', editorInput1,
   { start: { row: 20 }, end: { row: 22 } }, []);
 
-multi_req_test('between requests - before comment', editor_input1,
+multiReqTest('between requests - before comment', editorInput1,
   { start: { row: 19 }, end: { row: 22 } }, []);
 
 
-function multi_req_copy_as_curl_test(name, editor_input, range, expected) {
-  utils_test('multi request copy as curl - ' + name, editor_input, function () {
+function multiReqCopyAsCurlTest(name, editorInput, range, expected) {
+  utilsTest('multi request copy as curl - ' + name, editorInput, function () {
     input.getRequestsAsCURL(range, function (curl) {
       equal(curl, expected);
       start();
@@ -381,7 +400,7 @@ function multi_req_copy_as_curl_test(name, editor_input, range, expected) {
 }
 
 
-multi_req_copy_as_curl_test('start to end, with comment', editor_input1,
+multiReqCopyAsCurlTest('start to end, with comment', editorInput1,
   { start: { row: 6 }, end: { row: 13 } }, `
 curl -XGET "http://localhost:9200/_stats?level=shards"
 

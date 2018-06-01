@@ -9,18 +9,16 @@ import { withInitialData } from './helpers';
 import { Request } from 'react-redux-request';
 import { loadTransactionDistribution } from '../../services/rest';
 
+const ID = 'transactionDistribution';
 const INITIAL_DATA = { buckets: [], totalHits: 0 };
 
 export function getTransactionDistribution(state) {
-  return withInitialData(
-    state.reactReduxRequest.transactionDistribution,
-    INITIAL_DATA
-  );
+  return withInitialData(state.reactReduxRequest[ID], INITIAL_DATA);
 }
 
 export function getDefaultTransactionId(state) {
-  const _distribution = getTransactionDistribution(state);
-  return _distribution.data.defaultTransactionId;
+  const distribution = getTransactionDistribution(state);
+  return distribution.data.defaultTransactionId;
 }
 
 export function TransactionDistributionRequest({ urlParams, render }) {
@@ -32,7 +30,7 @@ export function TransactionDistributionRequest({ urlParams, render }) {
 
   return (
     <Request
-      id="transactionDistribution"
+      id={ID}
       fn={loadTransactionDistribution}
       args={[{ serviceName, start, end, transactionName, kuery }]}
       selector={getTransactionDistribution}
