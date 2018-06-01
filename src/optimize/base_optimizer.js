@@ -41,6 +41,7 @@ export default class BaseOptimizer {
   constructor(opts) {
     this.uiBundles = opts.uiBundles;
     this.profile = opts.profile || false;
+    this.resolveSymlinks = opts.resolveSymlinks;
 
     switch (opts.sourceMaps) {
       case true:
@@ -283,6 +284,7 @@ export default class BaseOptimizer {
         ],
         alias: this.uiBundles.getAliases(),
         unsafeCache: this.unsafeCache,
+        symlinks: this.resolveSymlinks
       },
     };
 
