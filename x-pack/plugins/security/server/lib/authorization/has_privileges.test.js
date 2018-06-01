@@ -43,8 +43,9 @@ const createMockServer = ({ settings = {} } = {}) => {
   return mockServer;
 };
 
-const mockResponse = (hasAllRequested, privileges, application = defaultApplication) => {
+const mockResponse = (hasAllRequested, privileges, application = defaultApplication, username = '') => {
   mockCallWithRequest.mockImplementationOnce(async () => ({
+    username: username,
     has_all_requested: hasAllRequested,
     application: {
       [application]: {
@@ -151,6 +152,21 @@ test(`returns success when has_all_requested`, async () => {
   expect(result.success).toBe(true);
 });
 
+test(`returns username from has_privileges response when has_all_requested`, async () => {
+  const mockServer = createMockServer();
+  const username = 'foo-username';
+  mockResponse(true, {
+    [getVersionPrivilege(defaultVersion)]: true,
+    [getLoginPrivilege()]: true,
+    foo: true,
+  }, defaultApplication, username);
+
+  const hasPrivilegesWithRequest = hasPrivilegesWithServer(mockServer);
+  const hasPrivileges = hasPrivilegesWithRequest({});
+  const result = await hasPrivileges(['foo']);
+  expect(result.username).toBe(username);
+});
+
 test(`returns false success when has_all_requested is false`, async () => {
   const mockServer = createMockServer();
   mockResponse(false, {
@@ -158,21 +174,26 @@ test(`returns false success when has_all_requested is false`, async () => {
     [getLoginPrivilege()]: true,
     foo: false,
   });
-  mockCallWithRequest.mockImplementationOnce(async () => ({
-    has_all_requested: false,
-    application: {
-      [defaultApplication]: {
-        [DEFAULT_RESOURCE]: {
-          foo: false
-        }
-      }
-    }
-  }));
 
   const hasPrivilegesWithRequest = hasPrivilegesWithServer(mockServer);
   const hasPrivileges = hasPrivilegesWithRequest({});
   const result = await hasPrivileges(['foo']);
   expect(result.success).toBe(false);
+});
+
+test(`returns username from has_privileges when has_all_requested is false`, async () => {
+  const username = 'foo-username';
+  const mockServer = createMockServer();
+  mockResponse(false, {
+    [getVersionPrivilege(defaultVersion)]: true,
+    [getLoginPrivilege()]: true,
+    foo: false,
+  }, defaultApplication, username);
+
+  const hasPrivilegesWithRequest = hasPrivilegesWithServer(mockServer);
+  const hasPrivileges = hasPrivilegesWithRequest({ });
+  const result = await hasPrivileges(['foo']);
+  expect(result.username).toBe(username);
 });
 
 test(`returns missing privileges`, async () => {

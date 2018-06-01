@@ -10,10 +10,12 @@
 export function secureSavedObjectsClientOptionsBuilder(server, hasPrivilegesWithRequest, options) {
   const adminCluster = server.plugins.elasticsearch.getCluster('admin');
   const { callWithInternalUser } = adminCluster;
+  const auditLogger = server.plugins.security.auditLogger;
 
   return {
     ...options,
     callCluster: callWithInternalUser,
-    hasPrivilegesWithRequest
+    hasPrivilegesWithRequest,
+    auditLogger
   };
 }
