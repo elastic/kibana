@@ -10,7 +10,7 @@ export class SecurityAuditLogger {
     this._auditLogger = auditLogger;
   }
 
-  savedObjectsAuthorizationFailure(username, action, types, missing) {
+  savedObjectsAuthorizationFailure(username, action, types, missing, args) {
     if (!this._enabled) {
       return;
     }
@@ -22,7 +22,8 @@ export class SecurityAuditLogger {
         username,
         action,
         types,
-        missing
+        missing,
+        args
       }
     );
   }

@@ -49,8 +49,12 @@ describe(`#savedObjectsAuthorizationFailure`, () => {
     const action = 'foo-action';
     const types = [ 'foo-type-1', 'foo-type-2' ];
     const missing = [`action:saved-objects/${types[0]}/foo-action`, `action:saved-objects/${types[1]}/foo-action`];
+    const args = {
+      'foo': 'bar',
+      'baz': 'quz',
+    };
 
-    securityAuditLogger.savedObjectsAuthorizationFailure(username, action, types, missing);
+    securityAuditLogger.savedObjectsAuthorizationFailure(username, action, types, missing, args);
 
     expect(auditLogger.log).toHaveBeenCalledWith(
       'saved_objects_authorization_failure',
@@ -60,6 +64,7 @@ describe(`#savedObjectsAuthorizationFailure`, () => {
         action,
         types,
         missing,
+        args,
       }
     );
   });
@@ -89,8 +94,7 @@ describe(`#savedObjectsAuthorizationSuccess`, () => {
     const types = [ 'foo-type-1', 'foo-type-2' ];
     const args = {
       'foo': 'bar',
-      'dude': 'yup',
-      'women': 'yay!',
+      'baz': 'quz',
     };
 
     securityAuditLogger.savedObjectsAuthorizationSuccess(username, action, types, args);
