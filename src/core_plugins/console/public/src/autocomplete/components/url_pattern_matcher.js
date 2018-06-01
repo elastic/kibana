@@ -124,7 +124,6 @@ export class UrlPatternMatcher {
   }
 
   getTopLevelComponents = function (method) {
-    console.log('GETTING', method, this);
     const methodRoot = this[method];
     if (!methodRoot) {
       return [];
