@@ -18,14 +18,29 @@ export class LayerTOC extends React.Component {
   componentDidMount() {
     $(this._domContainer).sortable({
       update: () => {
-        //todo update sorting
+        this._syncLayerOrderFromUIToMap();
       }
     });
   }
 
+  _syncLayerOrderFromUIToMap() {
+
+    const domnodes = [...this._domContainer.children];
+    const layers = domnodes.map((node) => {
+      const layerId = node.getAttribute("data-layerid");
+      return this.props.layers.find(layer => {
+        return layer.getId() === layerId;
+      });
+    });
+    layers.reverse();
+    this.props.layerOrderChange(layers);
+  }
+
   _renderLayers() {
-    return this.props.layers.map((layer) => {
-      return (<div key={layer.getId()}>{layer.renderTOCEntry()}</div>);
+    const topToBottomOrder = this.props.layers.slice();
+    topToBottomOrder.reverse();
+    return topToBottomOrder.map((layer) => {
+      return (<div key={layer.getId()} data-layerid={layer.getId()}>{layer.renderTOCEntry()}</div>);
     });
   }
 

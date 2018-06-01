@@ -17,7 +17,7 @@ let idCounter = 0;
 export class ALayer {
 
   constructor() {
-    this._id = idCounter++;
+    this._id = (idCounter++).toString();
   }
 
   getId() {
