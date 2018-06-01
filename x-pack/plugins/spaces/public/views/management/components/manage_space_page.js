@@ -17,6 +17,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
+  EuiAvatar,
+  EuiPanel,
 } from '@elastic/eui';
 
 import { PageHeader } from './page_header';
@@ -25,6 +27,7 @@ import { DeleteSpacesButton } from './delete_spaces_button';
 import { Notifier, toastNotifications } from 'ui/notify';
 import { UrlContext } from './url_context';
 import { toUrlContext, isValidUrlContext } from '../lib/url_context_utils';
+import { CustomizeSpaceAvatar } from './customize_space_avatar';
 
 export class ManageSpacePage extends React.Component {
   state = {
@@ -67,9 +70,9 @@ export class ManageSpacePage extends React.Component {
     } = this.state.space;
 
     return (
-      <EuiPage>
-        <PageHeader breadcrumbs={this.props.breadcrumbs}/>
-        <EuiPageContent>
+      <EuiPage className="editSpacePage">
+        <PageHeader breadcrumbs={this.props.breadcrumbs} />
+        <EuiPageContent className="editSpacePage__content">
           <EuiForm>
             <EuiFlexGroup justifyContent={'spaceBetween'}>
               <EuiFlexItem grow={false}>
@@ -80,48 +83,70 @@ export class ManageSpacePage extends React.Component {
 
             <EuiSpacer />
 
-            <EuiFormRow
-              label="Name"
-              helpText="Name your space"
-              {...this.validateName()}
-            >
-              <EuiFieldText
-                name="name"
-                placeholder={'Awesome space'}
-                value={name}
-                onChange={this.onNameChange}
-              />
-            </EuiFormRow>
-            <EuiFormRow
-              label="Description"
-              helpText="Describe your space"
-              {...this.validateDescription()}
-            >
-              <EuiFieldText
-                name="description"
-                placeholder={'This is where the magic happens'}
-                value={description}
-                onChange={this.onDescriptionChange}
-              />
-            </EuiFormRow>
+            <EuiPanel>
+              <EuiFlexGroup>
+                <EuiFlexItem style={{ maxWidth: '400px' }}>
+                  <EuiFormRow
+                    label="Name"
+                    helpText="Name your space"
+                    {...this.validateName()}
+                  >
+                    <EuiFieldText
+                      name="name"
+                      placeholder={'Awesome space'}
+                      value={name}
+                      onChange={this.onNameChange}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiFormRow hasEmptyLabelSpace={true}>
+                        <EuiAvatar name={this.state.space.name || ''} />
+                      </EuiFormRow>
+                    </EuiFlexItem>
+                    <CustomizeSpaceAvatar space={this.state.space} onChange={() => { }} />
+                  </EuiFlexGroup>
+                </EuiFlexItem>
 
-            <UrlContext
-              space={this.state.space}
-              editingExistingSpace={this.editingExistingSpace()}
-              editable={true}
-              onChange={this.onUrlContextChange}
-            />
+              </EuiFlexGroup>
 
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <EuiButton fill onClick={this.saveSpace}>Save</EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton onClick={this.backToSpacesList}>
-                  Cancel
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+              <UrlContext
+                space={this.state.space}
+                editingExistingSpace={this.editingExistingSpace()}
+                editable={true}
+                onChange={this.onUrlContextChange}
+              />
+
+              <EuiFormRow
+                label="Description"
+                helpText="Describe your space"
+                {...this.validateDescription()}
+              >
+                <EuiFieldText
+                  name="description"
+                  placeholder={'This is where the magic happens'}
+                  value={description}
+                  onChange={this.onDescriptionChange}
+                />
+              </EuiFormRow>
+
+
+
+              <EuiFlexGroup>
+                <EuiFlexItem grow={false}>
+                  <EuiButton fill onClick={this.saveSpace}>
+                    {this.editingExistingSpace() ? 'Update space' : 'Create space'}
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton onClick={this.backToSpacesList}>
+                    Cancel
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
           </EuiForm>
         </EuiPageContent>
       </EuiPage>
@@ -132,7 +157,7 @@ export class ManageSpacePage extends React.Component {
     if (this.editingExistingSpace()) {
       return `Edit space`;
     }
-    return `Create a space`;
+    return `New space`;
   };
 
   getActionButton = () => {
