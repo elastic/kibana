@@ -1,3 +1,2 @@
 include 'backend'
-include 'apps'
-include 'webserver'
+include 'kibana-plugin'
