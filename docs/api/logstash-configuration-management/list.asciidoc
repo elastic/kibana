@@ -2,7 +2,7 @@
 [[logstash-configuration-management-api-list]]
 === List Pipelines
 
-experimental[This functionality is experimental and may be changed or removed completely in a future release.]
+experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
 
 The List Pipelines API enables you to list all centrally-managed Logstash pipelines.
 

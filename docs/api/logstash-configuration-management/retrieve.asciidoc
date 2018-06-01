@@ -2,7 +2,7 @@
 [[logstash-configuration-management-api-retrieve]]
 === Retrieve Pipeline
 
-experimental[This functionality is experimental and may be changed or removed completely in a future release.]
+experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
 
 The Retrieve Pipeline API enables you to retrieve a centrally-managed Logstash pipeline.
 

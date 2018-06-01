@@ -2,7 +2,7 @@
 [[logstash-configuration-management-api-delete]]
 === Delete Pipeline
 
-experimental[This functionality is experimental and may be changed or removed completely in a future release.]
+experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
 
 The Delete Pipeline API enables you to delete a centrally-managed Logstash pipeline.
 
