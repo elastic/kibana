@@ -26,8 +26,8 @@ export const copyField = (field, indexPattern, Field) => {
       // bring the shadow copy out of the shadows
       value: () => {
         return new Field(indexPattern, {
+          ...field.$$spec,
           ...changes,
-          ...field.$$spec
         });
       }
     }

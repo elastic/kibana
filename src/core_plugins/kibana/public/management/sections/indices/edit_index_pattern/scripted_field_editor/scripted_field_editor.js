@@ -36,6 +36,7 @@ const renderFieldEditor = ($scope, indexPattern, field, {
   getConfig,
   getEnabledScriptingLanguages,
   fieldFormatEditors,
+  redirectAway,
 }) => {
   $scope.$$postDigest(() => {
     const node = document.getElementById(REACT_FIELD_EDITOR_ID);
@@ -52,6 +53,7 @@ const renderFieldEditor = ($scope, indexPattern, field, {
           getConfig,
           getEnabledScriptingLanguages,
           fieldFormatEditors,
+          redirectAway,
         }}
       />,
       node,
@@ -89,7 +91,7 @@ uiRoutes
       }
     },
     controllerAs: 'fieldSettings',
-    controller: function FieldEditorPageController($scope, $route, Private, docTitle, config) {
+    controller: function FieldEditorPageController($scope, $route, $timeout, Private, docTitle, config) {
       const Field = Private(IndexPatternsFieldProvider);
       const getConfig = (...args) => config.get(...args);
       const getEnabledScriptingLanguages = Private(GetEnabledScriptingLanguagesProvider);
@@ -123,15 +125,17 @@ uiRoutes
       }
 
       docTitle.change([this.field.name || 'New Scripted Field', this.indexPattern.title]);
-      this.goBack = function () {
-        kbnUrl.changeToRoute(this.indexPattern, 'edit');
-      };
 
       renderFieldEditor($scope, this.indexPattern, this.field, {
         Field,
         getConfig,
         getEnabledScriptingLanguages,
         fieldFormatEditors,
+        redirectAway: () => {
+          $timeout(() => {
+            kbnUrl.changeToRoute(this.indexPattern, this.field.scripted ? 'scriptedFields' : 'indexedFields');
+          });
+        }
       });
 
       $scope.$on('$destroy', () => {

@@ -42,6 +42,14 @@ import {
   FormatEditorSamples
 } from '../../samples';
 
+import {
+  LabelTemplateFlyout
+} from './label_template_flyout';
+
+import {
+  UrlTemplateFlyout
+} from './url_template_flyout';
+
 import chrome from 'ui/chrome';
 
 export class UrlFormatEditor extends DefaultFormatEditor {
@@ -82,77 +90,6 @@ export class UrlFormatEditor extends DefaultFormatEditor {
     }
   }
 
-  renderUrlTemplateFlyout() {
-    return this.state.showUrlTemplateHelp ? (
-      <EuiFlyout
-        onClose={this.hideUrlTemplateHelp}
-        size="l"
-      >
-        <EuiFlyoutBody>
-          <EuiText>
-            <h3>Url Template</h3>
-            <p>
-              If a field only contains part of a URL then a <strong>Url Template</strong> can be used to format the value
-              as a complete URL. The format is a string which uses double curly brace notation <EuiCode>{('{{ }}')}</EuiCode>
-              to inject values. The following values can be accessed:
-            </p>
-            <ul>
-              <li>
-                <EuiCode>value</EuiCode> &mdash; The URI-escaped value
-              </li>
-              <li>
-                <EuiCode>rawValue</EuiCode> &mdash; The unescaped value
-              </li>
-            </ul>
-            <h4>Examples</h4>
-            <EuiBasicTable
-              items={[
-                {
-                  input: 1234,
-                  template: 'http://company.net/profiles?user_id={{value}}',
-                  output: 'http://company.net/profiles?user_id=1234',
-                },
-                {
-                  input: 'users/admin',
-                  template: 'http://company.net/groups?id={{value}',
-                  output: 'http://company.net/groups?id=users%2Fadmin',
-                },
-                {
-                  input: '/images/favicon.ico',
-                  template: 'http://www.site.com{{rawValue}}',
-                  output: 'http://www.site.com/images/favicon.ico',
-                },
-              ]}
-              columns={[
-                {
-                  field: 'input',
-                  name: 'Input',
-                  width: '160px',
-                },
-                {
-                  field: 'template',
-                  name: 'Template',
-                },
-                {
-                  field: 'output',
-                  name: 'Output',
-                },
-              ]}
-            />
-          </EuiText>
-        </EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <EuiButtonEmpty
-            iconType="cross"
-            onClick={this.hideUrlTemplateHelp}
-          >
-            Close
-          </EuiButtonEmpty>
-        </EuiFlyoutFooter>
-      </EuiFlyout>
-    ) : null;
-  }
-
   showUrlTemplateHelp = () => {
     this.setState({
       showLabelTemplateHelp: false,
@@ -164,90 +101,6 @@ export class UrlFormatEditor extends DefaultFormatEditor {
     this.setState({
       showUrlTemplateHelp: false,
     });
-  }
-
-  renderLabelTemplateFlyout() {
-    return this.state.showLabelTemplateHelp ? (
-      <EuiFlyout
-        onClose={this.hideLabelTemplateHelp}
-        size="l"
-      >
-        <EuiFlyoutBody>
-          <EuiText>
-            <h3>Label Template</h3>
-            <p>
-              If the URL in this field is large, it might be useful to provide an alternate template for the text
-              version of the URL. This will be displayed instead of the url, but will still link to the URL. The
-              format is a string which uses double curly brace notation <EuiCode>{('{{ }}')}</EuiCode>
-              to inject values. The following values can be accessed:
-            </p>
-            <ul>
-              <li>
-                <EuiCode>value</EuiCode> &mdash; The fields value
-              </li>
-              <li>
-                <EuiCode>url</EuiCode> &mdash; The formatted URL
-              </li>
-            </ul>
-            <h4>Examples</h4>
-            <EuiBasicTable
-              items={[
-                {
-                  input: 1234,
-                  urlTemplate: 'http://company.net/profiles?user_id={{value}}',
-                  labelTemplate: 'User #{{value}}',
-                  output: '<a href="http://company.net/profiles?user_id=1234">User #1234</a>',
-                },
-                {
-                  input: '/assets/main.css',
-                  urlTemplate: 'http://site.com{{rawValue}}',
-                  labelTemplate: 'View Asset',
-                  output: '<a href="http://site.com/assets/main.css">View Asset</a>',
-                },
-              ]}
-              columns={[
-                {
-                  field: 'input',
-                  name: 'Input',
-                  width: '160px',
-                },
-                {
-                  field: 'urlTemplate',
-                  name: 'URL Template',
-                },
-                {
-                  field: 'labelTemplate',
-                  name: 'Label Template',
-                },
-                {
-                  field: 'output',
-                  name: 'Output',
-                  render: (value) => {
-                    return (
-                      <span
-                        /*
-                         * Justification for dangerouslySetInnerHTML:
-                         * Example output produces anchor link.
-                         */
-                        dangerouslySetInnerHTML={{ __html: value }} //eslint-disable-line react/no-danger
-                      />
-                    );
-                  }
-                },
-              ]}
-            />
-          </EuiText>
-        </EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <EuiButtonEmpty
-            iconType="cross"
-            onClick={this.hideLabelTemplateHelp}
-          >
-            Close
-          </EuiButtonEmpty>
-        </EuiFlyoutFooter>
-      </EuiFlyout>
-    ) : null;
   }
 
   showLabelTemplateHelp = () => {
@@ -269,15 +122,21 @@ export class UrlFormatEditor extends DefaultFormatEditor {
 
     return (
       <Fragment>
-        {this.renderUrlTemplateFlyout()}
-        {this.renderLabelTemplateFlyout()}
+        <LabelTemplateFlyout
+          isVisible={this.state.showLabelTemplateHelp}
+          onClose={this.hideLabelTemplateHelp}
+        />
+        <UrlTemplateFlyout
+          isVisible={this.state.showUrlTemplateHelp}
+          onClose={this.hideUrlTemplateHelp}
+        />
         <EuiFormRow
           label="Type"
           // isInvalid={!!error}
           // error={error}
         >
           <EuiSelect
-            defaultValue={formatParams.type}
+            value={formatParams.type}
             options={format.type.urlTypes.map(type => {
               return {
                 value: type.kind,

@@ -58,7 +58,7 @@ export class TruncateFormatEditor extends DefaultFormatEditor {
           <EuiFieldNumber
             defaultValue={formatParams.fieldLength}
             onChange={(e) => {
-              this.onChange({ fieldLength: Number(e.target.value) });
+              this.onChange({ fieldLength: e.target.value ? Number(e.target.value) : null });
             }}
             isInvalid={!!error}
           />

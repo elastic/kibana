@@ -35,9 +35,14 @@ import {
 } from 'ui/documentation_links';
 
 import {
+  toastNotifications
+} from 'ui/notify';
+
+import {
   EuiButton,
   EuiButtonEmpty,
   EuiCode,
+  EuiConfirmModal,
   EuiFieldNumber,
   EuiFieldText,
   EuiFlexGroup,
@@ -46,14 +51,18 @@ import {
   EuiFormRow,
   EuiIcon,
   EuiLink,
+  EuiOverlayMask,
   EuiSelect,
   EuiSpacer,
+  EuiText,
   EuiTextArea,
+  EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
 import {
   ScriptingDisabledCallOut,
-  ScriptingHelpCallOut,
+  ScriptingWarningCallOut,
+  ScriptingHelpFlyout,
 } from './components/scripting_call_outs';
 
 import {
@@ -72,6 +81,7 @@ export class FieldEditor extends PureComponent {
       getConfig: PropTypes.func.isRequired,
       getEnabledScriptingLanguages: PropTypes.func.isRequired,
       fieldFormatEditors: PropTypes.object.isRequired,
+      redirectAway: PropTypes.func.isRequired,
     }),
   };
 
@@ -88,6 +98,8 @@ export class FieldEditor extends PureComponent {
       field: copyField(props.field, props.indexPattern, props.helpers.Field),
       fieldFormatId: undefined,
       fieldFormatParams: {},
+      showScriptingHelp: false,
+      showDeleteModal: false,
     };
     this.supportedLangs = getSupportedScriptingLanguages();
     this.deprecatedLangs = getDeprecatedScriptingLanguages();
@@ -103,63 +115,74 @@ export class FieldEditor extends PureComponent {
     const scriptingLangs = intersection(enabledLangs, union(this.supportedLangs, this.deprecatedLangs));
     field.lang = scriptingLangs.includes(field.lang) ? field.lang : undefined;
 
-    this.setState({
-      isReady: true,
-      isCreating: !indexPattern.fields.byName[field.name],
-      errors: [],
-      scriptingLangs,
-      fieldFormatId: get(indexPattern, ['fieldFormatMap', field.name, 'type', 'id']),
-      fieldFormatParams: field.format.params(),
-    });
-
-    this.setFieldTypes();
-    this.setFieldTypeFormats();
-  }
-
-  setFieldTypes() {
-    const { field } = this.state;
     const fieldTypes = get(FIELD_TYPES_BY_LANG, field.lang, DEFAULT_FIELD_TYPES);
     field.type = fieldTypes.includes(field.type) ? field.type : fieldTypes[0];
 
-    this.setState({
-      isDeprecatedLang: this.deprecatedLangs.includes(field.lang),
-      fieldTypes,
-    });
-  }
-
-  setFieldTypeFormats() {
-    const { field } = this.state;
     const DefaultFieldFormat = fieldFormats.getDefaultType(field.type);
-
     const fieldTypeFormats = [
       getDefaultFormat(DefaultFieldFormat),
       ...fieldFormats.byFieldType[field.type],
     ];
 
     this.setState({
+      isReady: true,
+      isCreating: !indexPattern.fields.byName[field.name],
+      isDeprecatedLang: this.deprecatedLangs.includes(field.lang),
+      errors: [],
+      scriptingLangs,
+      fieldTypes,
       fieldTypeFormats,
+      fieldFormatId: get(indexPattern, ['fieldFormatMap', field.name, 'type', 'id']),
+      fieldFormatParams: field.format.params(),
     });
   }
 
-  onFieldChange = (fieldName, value, callback) => {
-    const changes = {};
-    changes[fieldName] = value;
+  onFieldChange = (fieldName, value) => {
+    const field = this.state.field;
+    field[fieldName] = value;
+    this.forceUpdate();
+  }
+
+  onTypeChange = (type) => {
+    const { getConfig } = this.props.helpers;
+    const { field } = this.state;
+    const DefaultFieldFormat = fieldFormats.getDefaultType(type);
+    field.type = type;
+
+    const fieldTypeFormats = [
+      getDefaultFormat(DefaultFieldFormat),
+      ...fieldFormats.byFieldType[field.type],
+    ];
+
+    const FieldFormat = fieldTypeFormats[0];
+    field.format = new FieldFormat(null, getConfig);
+
     this.setState({
-      field: {
-        ...this.state.field,
-        ...changes,
-      },
-    }, typeof callback === 'function' ? callback : () => {});
+      fieldTypeFormats,
+      fieldFormatId: FieldFormat.id,
+      fieldFormatParams: field.format.params(),
+    });
+  }
+
+  onLangChange = (lang) => {
+    const { field } = this.state;
+    const fieldTypes = get(FIELD_TYPES_BY_LANG, lang, DEFAULT_FIELD_TYPES);
+    field.lang = lang;
+    field.type = fieldTypes.includes(field.type) ? field.type : fieldTypes[0];
+
+    this.setState({
+      fieldTypes,
+    });
   }
 
   onFormatChange = (formatId, params) => {
     const { getConfig } = this.props.helpers;
     const { field, fieldTypeFormats } = this.state;
-    const FieldFormat = formatId ? fieldTypeFormats.find((format) => format.id === formatId) : fieldTypeFormats[0];
+    const FieldFormat = fieldTypeFormats.find((format) => format.id === formatId) || fieldTypeFormats[0];
     field.format = new FieldFormat(params, getConfig);
 
     this.setState({
-      fieldFormatId: formatId,
+      fieldFormatId: FieldFormat.id,
       fieldFormatParams: field.format.params(),
     });
   }
@@ -190,7 +213,7 @@ export class FieldEditor extends PureComponent {
         ) : null}
       >
         <EuiFieldText
-          value={field.name}
+          value={field.name || ''}
           placeholder="New scripted field"
           data-test-subj="editorFieldName"
           onChange={(e) => { this.onFieldChange('name', e.target.value);}}
@@ -220,7 +243,7 @@ export class FieldEditor extends PureComponent {
           value={field.lang}
           options={scriptingLangs.map(lang => { return { value: lang, text: lang }; })}
           data-test-subj="editorFieldLang"
-          onChange={(e) => { this.onFieldChange('lang', e.target.value, this.setFieldTypes); }}
+          onChange={(e) => { this.onLangChange(e.target.value); }}
         />
       </EuiFormRow>
     ) : null;
@@ -237,10 +260,7 @@ export class FieldEditor extends PureComponent {
           options={fieldTypes.map(type => { return { value: type, text: type }; })}
           data-test-subj="editorFieldType"
           onChange={(e) => {
-            this.onFieldChange('type', e.target.value, () => {
-              this.setFieldTypeFormats();
-              this.onFormatChange();
-            });
+            this.onTypeChange(e.target.value);
           }}
         />
       </EuiFormRow>
@@ -292,7 +312,7 @@ export class FieldEditor extends PureComponent {
         <EuiFieldNumber
           value={field.count}
           data-test-subj="editorFieldCount"
-          onChange={(e) => { this.onFieldChange('count', Number(e.target.value));}}
+          onChange={(e) => { this.onFieldChange('count', e.target.value ? Number(e.target.value) : '');}}
         />
       </EuiFormRow>
     );
@@ -302,7 +322,10 @@ export class FieldEditor extends PureComponent {
     const { field } = this.state;
 
     return field.scripted ? (
-      <EuiFormRow label="Script">
+      <EuiFormRow
+        label="Script"
+        helpText={(<EuiLink onClick={this.showScriptingHelp}>Scripting help</EuiLink>)}
+      >
         <EuiTextArea
           value={field.script}
           data-test-subj="editorFieldScript"
@@ -312,37 +335,151 @@ export class FieldEditor extends PureComponent {
     ) : null;
   }
 
+  showScriptingHelp = () => {
+    this.setState({
+      showScriptingHelp: true
+    });
+  }
+
+  hideScriptingHelp = () => {
+    this.setState({
+      showScriptingHelp: false
+    });
+  }
+
+  renderDeleteModal = () => {
+    const { field } = this.state;
+
+    return this.state.showDeleteModal ? (
+      <EuiOverlayMask>
+        <EuiConfirmModal
+          title={`Delete field '${field.name}'`}
+          onCancel={this.hideDeleteModal}
+          onConfirm={() => {
+            this.hideDeleteModal();
+            this.deleteField();
+          }}
+          cancelButtonText="Cancel"
+          confirmButtonText="Delete"
+          buttonColor="danger"
+          defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+        >
+          <p>You can&apos;t recover a deleted field.</p>
+          <p>Are you sure you want to do this?</p>
+        </EuiConfirmModal>
+      </EuiOverlayMask>
+    ) : null;
+  }
+
+  showDeleteModal = () => {
+    this.setState({
+      showDeleteModal: true
+    });
+  }
+
+  hideDeleteModal = () => {
+    this.setState({
+      showDeleteModal: false
+    });
+  }
+
   renderActions() {
-    const { isCreating } = this.state;
+    const { isCreating, field } = this.state;
+    const { redirectAway } = this.props.helpers;
 
     return (
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <EuiButton fill>{isCreating ? 'Create field' : 'Edit field'}</EuiButton>
+          <EuiButton fill onClick={this.saveField}>{isCreating ? 'Create field' : 'Edit field'}</EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty>Cancel</EuiButtonEmpty>
+          <EuiButtonEmpty onClick={redirectAway}>Cancel</EuiButtonEmpty>
         </EuiFlexItem>
+        {
+          !isCreating && field.scripted ? (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                color="danger"
+                onClick={this.showDeleteModal}
+              >
+                Delete
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          ) : null
+        }
       </EuiFlexGroup>
     );
   }
 
+  deleteField = () => {
+    const { redirectAway } = this.props.helpers;
+    const { indexPattern } = this.props;
+    const { field } = this.state;
+    const remove = indexPattern.removeScriptedField(field.name);
+
+    if(remove) {
+      remove.then(() => {
+        toastNotifications.addSuccess(`Deleted '${field.name}'`);
+        redirectAway();
+      });
+    } else {
+      redirectAway();
+    }
+  }
+
+  saveField = () => {
+    const { redirectAway } = this.props.helpers;
+    const { indexPattern } = this.props;
+    const { fieldFormatId } = this.state;
+
+    const field = this.state.field.toActualField();
+    const index = indexPattern.fields.findIndex(f => f.name === field.name);
+
+    if (index > -1) {
+      indexPattern.fields.splice(index, 1, field);
+    } else {
+      indexPattern.fields.push(field);
+    }
+
+    if (!fieldFormatId) {
+      indexPattern.fieldFormatMap[field.name] = {};
+    } else {
+      indexPattern.fieldFormatMap[field.name] = field.format;
+    }
+
+    return indexPattern.save()
+      .then(function () {
+        toastNotifications.addSuccess(`Saved '${field.name}'`);
+        redirectAway();
+      });
+  }
+
   render() {
-    const { isReady, scriptingLangs, field } = this.state;
+    const { isReady, isCreating, scriptingLangs, field, showScriptingHelp } = this.state;
+
     return isReady ? (
       <div>
+        <EuiText>
+          <h3>{isCreating ? 'Create scripted field' : `Edit ${field.name}`}</h3>
+        </EuiText>
+        <EuiSpacer size="m" />
         <EuiForm>
           <ScriptingDisabledCallOut isVisible={field.scripted && !scriptingLangs.length} />
+          <ScriptingWarningCallOut isVisible={field.scripted} />
+          <ScriptingHelpFlyout
+            isVisible={field.scripted && showScriptingHelp}
+            onClose={this.hideScriptingHelp}
+          />
           {this.renderName()}
           {this.renderLanguage()}
           {this.renderType()}
           {this.renderFormat()}
           {this.renderPopularity()}
           {this.renderScript()}
-          <ScriptingHelpCallOut isVisible={field.scripted} />
           {this.renderActions()}
+          {this.renderDeleteModal()}
         </EuiForm>
-        <EuiSpacer size="m" />
+        <EuiSpacer size="l" />
       </div>
     ) : null;
   }
