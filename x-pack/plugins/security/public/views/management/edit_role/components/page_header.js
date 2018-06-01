@@ -10,7 +10,6 @@ import PropTypes from 'prop-types';
 import {
   EuiHeader,
   EuiHeaderSection,
-  EuiHeaderBreadcrumb,
   EuiHeaderBreadcrumbs
 } from '@elastic/eui';
 
@@ -19,20 +18,17 @@ export class PageHeader extends Component {
     return (
       <EuiHeader>
         <EuiHeaderSection>
-          <EuiHeaderBreadcrumbs>
-            {this.props.breadcrumbs.map(this.buildBreadcrumb)}
-          </EuiHeaderBreadcrumbs>
+          <EuiHeaderBreadcrumbs breadcrumbs={this.props.breadcrumbs.map(this.buildBreadcrumb)} />
         </EuiHeaderSection>
       </EuiHeader>
     );
   }
 
   buildBreadcrumb = (breadcrumb) => {
-    return (
-      <EuiHeaderBreadcrumb key={breadcrumb.id} href={breadcrumb.href} isActive={breadcrumb.current}>
-        {breadcrumb.display}
-      </EuiHeaderBreadcrumb>
-    );
+    return {
+      text: breadcrumb.display,
+      href: breadcrumb.href,
+    };
   }
 }
 
