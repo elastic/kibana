@@ -117,6 +117,11 @@ export class IndexPrivileges extends Component {
   };
 
   loadAvailableFields(indices) {
+    // Reserved roles cannot be edited, and therefore do not need to fetch available fields.
+    if (isReservedRole(this.props.role)) {
+      return;
+    }
+
     const patterns = indices.map(index => index.names.join(','));
 
     const cachedPatterns = Object.keys(this.state.availableFields);

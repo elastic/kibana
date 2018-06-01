@@ -57,19 +57,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
         }));
       }
 
-      return role.then(roleToEdit => {
-        if (roleToEdit.indices.length === 0) {
-          roleToEdit.indices.push({
-            names: [],
-            privileges: [],
-            field_security: {
-              grant: ['*']
-            }
-          });
-        }
-        return roleToEdit;
-      });
-
+      return role.then(res => res.toJSON());
     },
     kibanaApplicationPrivilege(ApplicationPrivilege, kbnUrl, Promise, Private) {
       return ApplicationPrivilege.query().$promise
