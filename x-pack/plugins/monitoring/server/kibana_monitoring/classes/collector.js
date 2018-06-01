@@ -29,8 +29,6 @@ export class Collector {
     if (typeof callCluster !== 'function') {
       throw new Error('A `callCluster` function must be passed to the fetch methods of collectors');
     }
-
     return this.fetch(callCluster);
-
   }
 }

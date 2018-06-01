@@ -117,7 +117,7 @@ async function getReportingUsageWithinRange(callCluster, server, reportingAvaila
 export function getReportingUsageCollector(server) {
   return new UsageCollector(server, {
     type: KIBANA_REPORTING_TYPE,
-    fetch: async (callCluster) => {
+    fetch: async callCluster => {
       const xpackInfo = server.plugins.xpack_main.info;
       const config = server.config();
       const available = xpackInfo && xpackInfo.isAvailable(); // some form of reporting (csv at least) is available for all valid licenses

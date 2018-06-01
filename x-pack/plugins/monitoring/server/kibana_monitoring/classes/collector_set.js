@@ -46,7 +46,6 @@ export class CollectorSet {
     this._interval = interval;
     this._combineTypes = combineTypes;
     this._onPayload = onPayload;
-
     this._callClusterInternal = callClusterFactory(server).getCallClusterInternal();
   }
 
