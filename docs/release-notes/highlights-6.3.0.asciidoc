@@ -10,7 +10,7 @@ Each release of {kib} brings new features and product improvements.
 Here are the highlights of the features that were added in 6.3 and
 how the user experience improved.
 
-Refer to them <<release-notes-6.3.0,6.3.0 Release Notes>> for a list bug
+Refer to the <<release-notes-6.3.0,6.3.0 Release Notes>> for a list bug
 fixes and other changes.
 
 [float]
