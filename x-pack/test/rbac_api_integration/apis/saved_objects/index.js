@@ -12,6 +12,16 @@ export default function ({ loadTestFile, getService }) {
   describe('saved_objects', () => {
     before(async () => {
       await es.shield.putUser({
+        username: AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME,
+        body: {
+          password: AUTHENTICATION.NOT_A_KIBANA_USER.PASSWORD,
+          roles: [],
+          full_name: 'not a kibana user',
+          email: 'not_a_kibana_user@elastic.co',
+        }
+      });
+
+      await es.shield.putUser({
         username: AUTHENTICATION.KIBANA_RBAC_USER.USERNAME,
         body: {
           password: AUTHENTICATION.KIBANA_RBAC_USER.PASSWORD,

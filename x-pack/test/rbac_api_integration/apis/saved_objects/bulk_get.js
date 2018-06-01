@@ -100,6 +100,16 @@ export default function ({ getService }) {
       });
     };
 
+    const expectForbidden = resp => {
+      //eslint-disable-next-line max-len
+      const missingActions = `saved-objects/config/mget,action:saved-objects/dashboard/mget,version:7.0.0-alpha1,action:login,action:saved-objects/visualization/mget`;
+      expect(resp.body).to.eql({
+        statusCode: 403,
+        error: 'Forbidden',
+        message: `Unable to mget visualization,dashboard,config, missing action:${missingActions}`
+      });
+    };
+
     const bulkGetTest = (description, { auth, assert }) => {
       describe(description, () => {
         describe('with kibana index', () => {
@@ -137,6 +147,23 @@ export default function ({ getService }) {
         });
       });
     };
+
+    bulkGetTest(`not a kibana user`, {
+      auth: {
+        username: AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME,
+        password: AUTHENTICATION.NOT_A_KIBANA_USER.PASSWORD,
+      },
+      assert: {
+        withIndex: {
+          statusCode: 403,
+          response: expectForbidden,
+        },
+        withoutIndex: {
+          statusCode: 403,
+          response: expectForbidden
+        }
+      }
+    });
 
     bulkGetTest(`superuser`, {
       auth: {

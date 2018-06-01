@@ -5,6 +5,10 @@
  */
 
 export const AUTHENTICATION = {
+  NOT_A_KIBANA_USER: {
+    USERNAME: 'not_a_kibana_user',
+    PASSWORD: 'password'
+  },
   SUPERUSER: {
     USERNAME: 'elastic',
     PASSWORD: 'changeme'
