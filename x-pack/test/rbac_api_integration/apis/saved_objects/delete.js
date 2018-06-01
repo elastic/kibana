@@ -26,11 +26,11 @@ export default function ({ getService }) {
       });
     };
 
-    const expectForbidden = (resp) => {
+    const createExpectForbidden = canLogin => resp => {
       expect(resp.body).to.eql({
         statusCode: 403,
         error: 'Forbidden',
-        message: 'Unable to delete dashboard, missing action:saved-objects/dashboard/delete'
+        message: `Unable to delete dashboard, missing ${canLogin ? '' : 'action:login,'}action:saved-objects/dashboard/delete`
       });
     };
 
@@ -76,6 +76,29 @@ export default function ({ getService }) {
         });
       });
     };
+
+    deleteTest(`not a kibana user`, {
+      auth: {
+        username: AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME,
+        password: AUTHENTICATION.NOT_A_KIBANA_USER.PASSWORD,
+      },
+      assert: {
+        withIndex: {
+          deletingDoc: {
+            statusCode: 403,
+            response: createExpectForbidden(false),
+          },
+          deletingUnknownDoc: {
+            statusCode: 403,
+            resposne: createExpectForbidden(false),
+          }
+        },
+        withoutIndex: {
+          statusCode: 403,
+          response: createExpectForbidden(false),
+        }
+      }
+    });
 
     deleteTest(`superuser`, {
       auth: {
@@ -132,16 +155,16 @@ export default function ({ getService }) {
         withIndex: {
           deletingDoc: {
             statusCode: 403,
-            response: expectForbidden,
+            response: createExpectForbidden(true),
           },
           deletingUnknownDoc: {
             statusCode: 403,
-            response: expectForbidden,
+            response: createExpectForbidden(true),
           }
         },
         withoutIndex: {
           statusCode: 403,
-          response: expectForbidden,
+          response: createExpectForbidden(true),
         }
       }
     });

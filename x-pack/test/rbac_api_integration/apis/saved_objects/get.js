@@ -8,7 +8,7 @@ import expect from 'expect.js';
 import { AUTHENTICATION } from './authentication';
 
 export default function ({ getService }) {
-  const supertest = getService('supertest');
+  const supertest = getService('supertestWithoutAuth');
   const es = getService('es');
   const esArchiver = getService('esArchiver');
 
@@ -40,48 +40,81 @@ export default function ({ getService }) {
       });
     };
 
+    const expectForbidden = resp => {
+      expect(resp.body).to.eql({
+        statusCode: 403,
+        error: 'Forbidden',
+        message: `Unable to get visualization, missing action:login,action:saved-objects/visualization/get`
+      });
+    };
+
     const getTest = (description, { auth, assert }) => {
-      describe('with kibana index', () => {
-        before(() => esArchiver.load('saved_objects/basic'));
-        after(() => esArchiver.unload('saved_objects/basic'));
+      describe(description, () => {
+        describe('with kibana index', () => {
+          before(() => esArchiver.load('saved_objects/basic'));
+          after(() => esArchiver.unload('saved_objects/basic'));
 
-        it('should return 200', async () => (
-          await supertest
-            .get(`/api/saved_objects/visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab`)
-            .auth(auth.username, auth.password)
-            .expect(assert.withIndex.exists.statusCode)
-            .then(assert.withIndex.exists.response)
-        ));
-
-        describe('doc does not exist', () => {
-          it('should return same generic error as when index does not exist', async () => (
+          it('should return 200', async () => (
             await supertest
-              .get(`/api/saved_objects/visualization/foobar`)
+              .get(`/api/saved_objects/visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab`)
               .auth(auth.username, auth.password)
-              .expect(assert.withIndex.doesntExist.statusCode)
-              .then(assert.withIndex.doesntExist.response)
+              .expect(assert.withIndex.exists.statusCode)
+              .then(assert.withIndex.exists.response)
+          ));
+
+          describe('doc does not exist', () => {
+            it('should return same generic error as when index does not exist', async () => (
+              await supertest
+                .get(`/api/saved_objects/visualization/foobar`)
+                .auth(auth.username, auth.password)
+                .expect(assert.withIndex.doesntExist.statusCode)
+                .then(assert.withIndex.doesntExist.response)
+            ));
+          });
+        });
+
+        describe('without kibana index', () => {
+          before(async () => (
+            // just in case the kibana server has recreated it
+            await es.indices.delete({
+              index: '.kibana',
+              ignore: [404],
+            })
+          ));
+
+          it('should return basic 404 without mentioning index', async () => (
+            await supertest
+              .get('/api/saved_objects/visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab')
+              .auth(auth.username, auth.password)
+              .expect(assert.withoutIndex.statusCode)
+              .then(assert.withoutIndex.response)
           ));
         });
       });
-
-      describe('without kibana index', () => {
-        before(async () => (
-          // just in case the kibana server has recreated it
-          await es.indices.delete({
-            index: '.kibana',
-            ignore: [404],
-          })
-        ));
-
-        it('should return basic 404 without mentioning index', async () => (
-          await supertest
-            .get('/api/saved_objects/visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab')
-            .auth(auth.username, auth.password)
-            .expect(assert.withoutIndex.statusCode)
-            .then(assert.withoutIndex.response)
-        ));
-      });
     };
+
+    getTest(`not a kibana user`, {
+      auth: {
+        username: AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME,
+        password: AUTHENTICATION.NOT_A_KIBANA_USER.PASSWORD,
+      },
+      assert: {
+        withIndex: {
+          exists: {
+            statusCode: 403,
+            response: expectForbidden,
+          },
+          doesntExist: {
+            statusCode: 403,
+            response: expectForbidden,
+          },
+        },
+        withoutIndex: {
+          statusCode: 403,
+          response: expectForbidden,
+        }
+      }
+    });
 
     getTest(`superuser`, {
       auth: {

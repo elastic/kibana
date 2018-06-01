@@ -241,12 +241,26 @@ test(`throws error if missing version privilege and has login privilege`, async 
 test(`doesn't throw error if missing version privilege and missing login privilege`, async () => {
   const mockServer = createMockServer();
   mockResponse(false, {
-    [getVersionPrivilege(defaultVersion)]: true,
-    [getLoginPrivilege()]: true,
+    [getVersionPrivilege(defaultVersion)]: false,
+    [getLoginPrivilege()]: false,
     foo: true,
   });
 
   const hasPrivilegesWithRequest = hasPrivilegesWithServer(mockServer);
   const hasPrivileges = hasPrivilegesWithRequest({});
   await hasPrivileges(['foo']);
+});
+
+test(`excludes version privilege when missing version privilege and missing login privilege`, async () => {
+  const mockServer = createMockServer();
+  mockResponse(false, {
+    [getVersionPrivilege(defaultVersion)]: false,
+    [getLoginPrivilege()]: false,
+    foo: true,
+  });
+
+  const hasPrivilegesWithRequest = hasPrivilegesWithServer(mockServer);
+  const hasPrivileges = hasPrivilegesWithRequest({});
+  const result = await hasPrivileges(['foo']);
+  expect(result.missing).toEqual([getLoginPrivilege()]);
 });

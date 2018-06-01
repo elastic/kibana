@@ -30,11 +30,11 @@ export default function ({ getService }) {
       });
     };
 
-    const expectForbidden = (resp) => {
+    const createExpectForbidden = canLogin => resp => {
       expect(resp.body).to.eql({
         statusCode: 403,
         error: 'Forbidden',
-        message: 'Unable to create visualization, missing action:saved-objects/visualization/create'
+        message: `Unable to create visualization, missing ${canLogin ? '' : 'action:login,'}action:saved-objects/visualization/create`
       });
     };
 
@@ -91,6 +91,24 @@ export default function ({ getService }) {
       });
     };
 
+    createTest(`not a kibana user`, {
+      auth: {
+        username: AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME,
+        password: AUTHENTICATION.NOT_A_KIBANA_USER.PASSWORD,
+      },
+      assert: {
+        withIndex: {
+          statusCode: 403,
+          response: createExpectForbidden(false),
+        },
+        withoutIndex: {
+          statusCode: 403,
+          response: createExpectForbidden(false),
+          indexCreated: false
+        }
+      }
+    });
+
     createTest(`superuser`, {
       auth: {
         username: AUTHENTICATION.SUPERUSER.USERNAME,
@@ -135,11 +153,11 @@ export default function ({ getService }) {
       assert: {
         withIndex: {
           statusCode: 403,
-          response: expectForbidden,
+          response: createExpectForbidden(true),
         },
         withoutIndex: {
           statusCode: 403,
-          response: expectForbidden,
+          response: createExpectForbidden(true),
           indexCreated: false
         }
       }

@@ -104,7 +104,7 @@ export class SecureSavedObjectsClient {
       this._auditLogger.savedObjectsAuthorizationSuccess(result.username, action, types, args);
     } else {
       this._auditLogger.savedObjectsAuthorizationFailure(result.username, action, types, result.missing, args);
-      const msg = `Unable to ${action} ${types.join(',')}, missing ${result.missing.join(',')}`;
+      const msg = `Unable to ${action} ${types.sort().join(',')}, missing ${result.missing.sort().join(',')}`;
       throw this._client.errors.decorateForbiddenError(new Error(msg));
     }
   }
