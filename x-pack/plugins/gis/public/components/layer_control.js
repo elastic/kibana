@@ -15,6 +15,11 @@ import {
 
 import { LayerTOC } from './layer_toc';
 
+import $ from 'jquery';
+
+console.log($);
+console.log($.sortable);
+
 export class LayerControl extends React.Component {
 
   constructor(props) {

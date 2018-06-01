@@ -5,6 +5,10 @@
  */
 
 import { uiModules } from 'ui/modules'; // eslint-disable-line no-unused-vars
+
+import './vendor/jquery_ui_sortable.js';
+import './vendor/jquery_ui_sortable.css';
+
 import chrome from 'ui/chrome';
 import React  from 'react';
 import ReactDOM from 'react-dom';
