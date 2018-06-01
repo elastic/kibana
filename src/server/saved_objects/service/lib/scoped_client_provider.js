@@ -23,7 +23,6 @@
 export class ScopedSavedObjectsClientProvider {
 
   _wrapperFactories = [];
-  _customClientFactory = null;
 
   constructor({
     index,
@@ -34,7 +33,7 @@ export class ScopedSavedObjectsClientProvider {
     this._index = index;
     this._mappings = mappings;
     this._onBeforeWrite = onBeforeWrite;
-    this._defaultClientFactory = defaultClientFactory;
+    this._originalClientFactory = this._clientFactory = defaultClientFactory;
   }
 
   // the client wrapper factories are put at the front of the array, so that
@@ -50,16 +49,15 @@ export class ScopedSavedObjectsClientProvider {
   }
 
   setClientFactory(customClientFactory) {
-    if (this._customClientFactory) {
+    if (this._clientFactory !== this._originalClientFactory) {
       throw new Error(`custom client factory is already set, unable to replace the current one`);
     }
 
-    this._customClientFactory = customClientFactory;
+    this._clientFactory = customClientFactory;
   }
 
   getClient(request) {
-    const factory = this._customClientFactory || this._defaultClientFactory;
-    const client = factory({
+    const client = this._clientFactory({
       request,
       index: this._index,
       mappings: this._mappings,
