@@ -89,7 +89,7 @@ export const CleanExtraBrowsersTask = {
   description: 'Cleaning extra browsers from platform-specific builds',
 
   async run(config, log, build) {
-    const getPathsForPlatform = (platform) => {
+    const getBrowserPathsForPlatform = (platform) => {
       const reportingDir = 'node_modules/x-pack/plugins/reporting';
       const phantomDir = '.phantom';
       const chromiumDir = '.chromium';
@@ -115,14 +115,14 @@ export const CleanExtraBrowsersTask = {
       };
     };
     for (const platform of config.getPlatforms()) {
-      const getPaths = getPathsForPlatform(platform);
+      const getBrowserPaths = getBrowserPathsForPlatform(platform);
       if (platform.isWindows()) {
-        await deleteAll(log, getPaths({ linux: true, darwin: true }));
+        await deleteAll(log, getBrowserPaths({ linux: true, darwin: true }));
       }
       else if (platform.isMac()) {
-        await deleteAll(log, getPaths({ linux: true, windows: true }));
+        await deleteAll(log, getBrowserPaths({ linux: true, windows: true }));
       } else if (platform.isLinux()) {
-        await deleteAll(log, getPaths({ windows: true, darwin: true }));
+        await deleteAll(log, getBrowserPaths({ windows: true, darwin: true }));
       }
     }
   }
