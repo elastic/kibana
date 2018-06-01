@@ -53,7 +53,7 @@ export class IndexPrivileges extends Component {
         key={idx}
         {...props}
         validator={this.props.validator}
-        allowDelete={!props.isReservedRole && !(this.isPlaceholderPrivilege(indexPrivilege) && indices.length === 1)}
+        allowDelete={!props.isReservedRole}
         indexPrivilege={indexPrivilege}
         availableFields={this.state.availableFields[indexPrivilege.names.join(',')]}
         onChange={this.onIndexPrivilegeChange(idx)}
