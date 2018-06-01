@@ -52,18 +52,6 @@ export class KibanaMap extends React.Component {
     this.emit('layers:reordered');
   }
 
-  removeLayer(layer) {
-
-    if (!layer) {
-      return;
-    }
-    // layer.removeFromOpenLayersMap(this._olMap);
-    // this._kbnOLLayers.splice(this._kbnOLLayers.indexOf(layer), 1);
-
-
-    this.emit('layer:removed', layer);
-  }
-
   async addLayer(layer) {
     const olLayer = await layer.getOLLayer();
     this._kbnOLLayers.push({
