@@ -44,7 +44,7 @@ export default function ({ getService }) {
       expect(resp.body).to.eql({
         statusCode: 403,
         error: 'Forbidden',
-        message: `Unable to get visualization, missing action:login,action:saved-objects/visualization/get`
+        message: `Unable to get visualization, missing action:login,action:saved_objects/visualization/get`
       });
     };
 

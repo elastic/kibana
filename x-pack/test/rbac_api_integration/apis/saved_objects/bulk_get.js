@@ -102,11 +102,11 @@ export default function ({ getService }) {
 
     const expectForbidden = resp => {
       //eslint-disable-next-line max-len
-      const missingActions = `action:login,action:saved-objects/config/mget,action:saved-objects/dashboard/mget,action:saved-objects/visualization/mget`;
+      const missingActions = `action:login,action:saved_objects/config/bulk_get,action:saved_objects/dashboard/bulk_get,action:saved_objects/visualization/bulk_get`;
       expect(resp.body).to.eql({
         statusCode: 403,
         error: 'Forbidden',
-        message: `Unable to mget config,dashboard,visualization, missing ${missingActions}`
+        message: `Unable to bulk_get config,dashboard,visualization, missing ${missingActions}`
       });
     };
 

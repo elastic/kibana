@@ -34,7 +34,7 @@ export class SecureSavedObjectsClient {
 
   async bulkCreate(objects, options = {}) {
     const types = uniq(objects.map(o => o.type));
-    await this._performAuthorizationCheck(types, 'create', {
+    await this._performAuthorizationCheck(types, 'bulk_create', {
       objects,
       options,
     });
@@ -52,7 +52,7 @@ export class SecureSavedObjectsClient {
   }
 
   async find(options = {}) {
-    await this._performAuthorizationCheck(options.type, 'search', {
+    await this._performAuthorizationCheck(options.type, 'find', {
       options,
     });
 
@@ -61,7 +61,7 @@ export class SecureSavedObjectsClient {
 
   async bulkGet(objects = []) {
     const types = uniq(objects.map(o => o.type));
-    await this._performAuthorizationCheck(types, 'mget', {
+    await this._performAuthorizationCheck(types, 'bulk_get', {
       objects,
     });
 
@@ -90,7 +90,7 @@ export class SecureSavedObjectsClient {
 
   async _performAuthorizationCheck(typeOrTypes, action, args) {
     const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
-    const actions = types.map(type => `action:saved-objects/${type}/${action}`);
+    const actions = types.map(type => `action:saved_objects/${type}/${action}`);
 
     let result;
     try {

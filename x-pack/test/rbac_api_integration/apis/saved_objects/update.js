@@ -43,7 +43,7 @@ export default function ({ getService }) {
       expect(resp.body).to.eql({
         statusCode: 403,
         error: 'Forbidden',
-        message: `Unable to update visualization, missing ${canLogin ? '' : 'action:login,'}action:saved-objects/visualization/update`
+        message: `Unable to update visualization, missing ${canLogin ? '' : 'action:login,'}action:saved_objects/visualization/update`
       });
     };
 

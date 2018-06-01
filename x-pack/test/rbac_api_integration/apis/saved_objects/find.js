@@ -45,7 +45,7 @@ export default function ({ getService }) {
       expect(resp.body).to.eql({
         statusCode: 403,
         error: 'Forbidden',
-        message: `Unable to search ${type}, missing ${canLogin ? '' : 'action:login,'}action:saved-objects/${type}/search`
+        message: `Unable to find ${type}, missing ${canLogin ? '' : 'action:login,'}action:saved_objects/${type}/find`
       });
     };
 
