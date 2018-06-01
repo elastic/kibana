@@ -14,7 +14,7 @@ export class KibanaMap extends React.Component {
 
   constructor() {
     super();
-    this._layers = [];
+    this._kbnOLLayers = [];
   }
 
   componentDidMount() {
@@ -29,15 +29,53 @@ export class KibanaMap extends React.Component {
     });
   }
 
+  getLayerById(id) {
+    const index = this._kbnOLLayers.findIndex(layerTuple => layerTuple.kbnLayer.getId() === id);
+    return (index >= 0) ? this._kbnOLLayers[index].kbnLayer : null;
+  }
+
+  reorderLayers(orderedLayers) {
+    const newLayerOrder = [];
+    for (let i = 0; i < orderedLayers.length; i++) {
+      const tuple = this._kbnOLLayers.find(tuple => {
+        return tuple.kbnLayer === orderedLayers[i];
+      });
+      if (tuple) {
+        newLayerOrder.push(tuple);
+        this._olMap.removeLayer(tuple.olLayer);
+      }
+    }
+    this._kbnOLLayers = newLayerOrder;
+    this._kbnOLLayers.forEach((tuple) => {
+      this._olMap.addLayer(tuple.olLayer);
+    });
+    this.emit('layers:reordered');
+  }
+
+  removeLayer(layer) {
+
+    if (!layer) {
+      return;
+    }
+    // layer.removeFromOpenLayersMap(this._olMap);
+    // this._kbnOLLayers.splice(this._kbnOLLayers.indexOf(layer), 1);
+
+
+    this.emit('layer:removed', layer);
+  }
+
   async addLayer(layer) {
-    this._layers.push(layer);
     const olLayer = await layer.getOLLayer();
+    this._kbnOLLayers.push({
+      kbnLayer: layer,
+      olLayer: olLayer
+    });
     this._olMap.addLayer(olLayer);
     this.emit("layer:added");
   }
 
   getLayers() {
-    return this._layers.slice();
+    return this._kbnOLLayers.map(layerTuple => layerTuple.kbnLayer);
   }
 
   render() {
