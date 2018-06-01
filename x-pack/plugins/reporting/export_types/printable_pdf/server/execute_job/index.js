@@ -40,7 +40,8 @@ function executeJobFn(server) {
       headers: filteredHeaders,
     };
 
-    const savedObjectsClient = server.savedObjectsClientFactory({
+    const savedObjects = server.savedObjects;
+    const savedObjectsClient = savedObjects.getScopedSavedObjectsClient({
       request: fakeRequest
     });
     const uiSettings = server.uiSettingsServiceFactory({

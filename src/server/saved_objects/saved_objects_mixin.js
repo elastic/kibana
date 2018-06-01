@@ -54,10 +54,6 @@ export function savedObjectsMixin(kbnServer, server) {
 
   server.decorate('server', 'savedObjects', createSavedObjectsService(server));
 
-  server.decorate('server', 'savedObjectsClientFactory', ({ request }) => {
-    return server.savedObjects.getScopedSavedObjectsClient(request);
-  });
-
   const savedObjectsClientCache = new WeakMap();
   server.decorate('request', 'getSavedObjectsClient', function () {
     const request = this;
@@ -66,7 +62,7 @@ export function savedObjectsMixin(kbnServer, server) {
       return savedObjectsClientCache.get(request);
     }
 
-    const savedObjectsClient = server.savedObjectsClientFactory({ request });
+    const savedObjectsClient = server.savedObjects.getScopedSavedObjectsClient({ request });
 
     savedObjectsClientCache.set(request, savedObjectsClient);
     return savedObjectsClient;

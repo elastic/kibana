@@ -36,7 +36,8 @@ function executeJobFn(server) {
     const callEndpoint = (endpoint, clientParams = {}, options = {}) => {
       return callWithRequest(fakeRequest, endpoint, clientParams, options);
     };
-    const savedObjectsClient = server.savedObjectsClientFactory({
+    const savedObjects = server.savedObjects;
+    const savedObjectsClient = savedObjects.getScopedSavedObjectsClient({
       request: fakeRequest
     });
     const uiSettings = server.uiSettingsServiceFactory({
