@@ -21,13 +21,63 @@ export class PipelineHighlightRules extends TextHighlightRules {
         },
         {
           token: ['bracket'],
-          regex: /(\{|\})/
+          regex: /(\{)/,
+          next: 'segment'
+        },
+      ],
+      segment: [
+        {
+          token: ['bracket'],
+          regex: /(\})/,
+          next: 'start'
         },
         {
           token: ['pluginName'],
-          regex: /(mutate|date)/
+          regex: /(mutate)/,
+          next: 'pluginHeading'
+        },
+      ],
+      pluginHeading: [
+        {
+          token: ['bracket'],
+          regex: /(\{)/,
+          next: 'pluginBody'
         }
       ],
+      pluginBody: [
+        {
+          token: ['attribute'],
+          regex: /[A-Za-z0-9_-]+/,
+          next: 'attribute'
+        },
+        {
+          token: ['bracket'],
+          regex: /(\})/,
+          next: 'segment'
+        }
+      ],
+      attribute: [
+        {
+          token: ['operator'],
+          regex: /=>/,
+        },
+        {
+          token: ['boolean'],
+          regex: /(true|false)/,
+          next: 'pluginBody'
+        }
+      ],
+      // test: [
+      //   {
+      //     token: ['pluginName'],
+      //     regex: /(mutate)/
+      //   },
+      //   {
+      //     token: ['bracket'],
+      //     regex: /(\})/,
+      //     next: 'start'
+      //   }
+      // ]
     };
     // this.embedRules(JsonHighlightRules, 'json-', [{
     //   token: 'end',
