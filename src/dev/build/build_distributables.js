@@ -4,6 +4,7 @@ import {
   BootstrapTask,
   BuildPackagesTask,
   CleanExtraBinScriptsTask,
+  CleanExtraBrowsersTask,
   CleanExtraFilesFromModulesTask,
   CleanPackagesTask,
   CleanTask,
@@ -93,6 +94,7 @@ export async function buildDistributables(options) {
    */
   await run(CreateArchivesSourcesTask);
   await run(CleanExtraBinScriptsTask);
+  await run(CleanExtraBrowsersTask);
 
   /**
    * package platform-specific builds into archives
