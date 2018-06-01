@@ -89,22 +89,40 @@ export const CleanExtraBrowsersTask = {
   description: 'Cleaning extra browsers from platform-specific builds',
 
   async run(config, log, build) {
-    const reporting = 'node_modules/x-pack/plugins/reporting';
-    const browsers = '{.chromium,.phantom}';
+    const getPathsForPlatform = (platform) => {
+      const reportingDir = 'node_modules/x-pack/plugins/reporting';
+      const phantomDir = '.phantom';
+      const chromiumDir = '.chromium';
+      const phantomPath = p => build.resolvePathForPlatform(platform, reportingDir, phantomDir, p);
+      const chromiumPath = p => build.resolvePathForPlatform(platform, reportingDir, chromiumDir, p);
+      return platforms => {
+        const paths = [];
+        if (platforms.windows) {
+          paths.push(phantomPath('phantomjs-*-windows.zip'));
+          paths.push(chromiumPath('chromium-*-win32.zip'));
+        }
+
+        if (platforms.darwin) {
+          paths.push(phantomPath('phantomjs-*-macosx.zip'));
+          paths.push(chromiumPath('chromium-*-darwin.zip'));
+        }
+
+        if (platforms.linux) {
+          paths.push(phantomPath('phantomjs-*-linux-x86_64.tar.bz2'));
+          paths.push(chromiumPath('chromium-*-linux.zip'));
+        }
+        return paths;
+      };
+    };
     for (const platform of config.getPlatforms()) {
+      const getPaths = getPathsForPlatform(platform);
       if (platform.isWindows()) {
-        await deleteAll(log, [
-          build.resolvePathForPlatform(platform, reporting, browsers, '*{darwin,macosx,linux}.zip'),
-        ]);
+        await deleteAll(log, getPaths({ linux: true, darwin: true }));
       }
       else if (platform.isMac()) {
-        await deleteAll(log, [
-          build.resolvePathForPlatform(platform, reporting, browsers, '*{win32,windows,linux}.zip'),
-        ]);
+        await deleteAll(log, getPaths({ linux: true, windows: true }));
       } else if (platform.isLinux()) {
-        await deleteAll(log, [
-          build.resolvePathForPlatform(platform, reporting, browsers, '*{win32,windows,darwin,macosx}.zip'),
-        ]);
+        await deleteAll(log, getPaths({ windows: true, darwin: true }));
       }
     }
   }
