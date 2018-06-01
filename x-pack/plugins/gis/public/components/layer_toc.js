@@ -6,8 +6,6 @@
 
 import React from 'react';
 
-import {} from '@elastic/eui';
-
 export class LayerTOC extends React.Component {
 
   constructor(props) {
@@ -15,8 +13,8 @@ export class LayerTOC extends React.Component {
   }
 
   _renderLayers() {
-    return this.props.layers.map((layer, index) => {
-      return (<div key={index}>{layer.renderTOCLayerEntry()}</div>);
+    return this.props.layers.map((layer) => {
+      return (<div key={layer.getId()}>{layer.renderTOCEntry()}</div>);
     });
   }
 
