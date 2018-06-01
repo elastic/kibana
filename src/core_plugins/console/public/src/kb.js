@@ -33,9 +33,11 @@ let ACTIVE_API = new Api();
 
 const parametrizedComponentFactories = {
   index: function (name, parent) {
+    if (name[0] === '_') return;
     return new IndexAutocompleteComponent(name, parent, false);
   },
   indices: function (name, parent) {
+    if (name[0] === '_') return;
     return new IndexAutocompleteComponent(name, parent, true);
   },
   type: function (name, parent) {
