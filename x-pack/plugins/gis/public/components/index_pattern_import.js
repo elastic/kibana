@@ -10,6 +10,10 @@ import {
   EuiSpacer,
   EuiRadio
 } from '@elastic/eui';
+import * as util from './util';
+
+const GEO_LAYERS_URL = `http://layers.url.tbd`;
+
 export default class IndexPatternImport extends React.Component {
 
   constructor(props) {
@@ -26,7 +30,7 @@ export default class IndexPatternImport extends React.Component {
     };
 
     this._onRadioChange = (e) => {
-      this.setState({radioIdSelected: e.target.id});
+      this.setState({ radioIdSelected: e.target.id });
 
       if (e.target.id === 'geoPointRadio') {
         this.onGeoPointSelect(this._geoPointSelect);
@@ -37,7 +41,7 @@ export default class IndexPatternImport extends React.Component {
 
     this.onGeoShapeSelect = (e) => {
       const select = e.target || e;
-      let index = select.selectedIndex - 1;
+      const index = select.selectedIndex - 1;
 
       if (index < 0) {
         this._onPreviewLayer(undefined);
@@ -57,12 +61,12 @@ export default class IndexPatternImport extends React.Component {
           index_type: selection.type,
           geometry_path: "geometry"
         }
-      })
+      });
     };
 
     this.onGeoPointSelect = (e) => {
       const select = e.target || e;
-      let index = select.selectedIndex - 1;
+      const index = select.selectedIndex - 1;
 
       if (index < 0) {
         this._onPreviewLayer(undefined);
@@ -95,25 +99,25 @@ export default class IndexPatternImport extends React.Component {
   }
 
   async _fetchGeoPointState() {
-    let optionsWithFields = await util.getAvailableLayerForField('geo_point');
+    const optionsWithFields = await util.getAvailableLayerForField('geo_point');
     const options = optionsWithFields.map(option => {
-      return {
+      return ({
         value: option.id,
         text: option.display,
         _option: option
-      }
+      });
     });
     return options;
   }
 
   async _fetchGeoShapeState() {
-    let optionsWithFields = await util.getAvailableLayerForField('geo_shape');
+    const optionsWithFields = await util.getAvailableLayerForField('geo_shape');
     const options = optionsWithFields.map(option => {
-      return {
+      return ({
         value: option.id,
         text: option.display,
         _option: option
-      }
+      });
     });
     return options;
   }
