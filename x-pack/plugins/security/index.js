@@ -23,6 +23,8 @@ import { registerPrivilegesWithCluster } from './server/lib/privileges';
 import { createDefaultRoles } from './server/lib/authorization/create_default_roles';
 import { initPrivilegesApi } from './server/routes/api/v1/privileges';
 import { hasPrivilegesWithServer } from './server/lib/authorization/has_privileges';
+import { SecurityAuditLogger } from './server/lib/audit_logger';
+import { AuditLogger } from '../../server/lib/audit_logger';
 
 export const security = (kibana) => new kibana.Plugin({
   id: 'security',
@@ -50,6 +52,9 @@ export const security = (kibana) => new kibana.Plugin({
           /[a-zA-Z0-9-_]+/,
           `may contain alphanumeric characters (a-z, A-Z, 0-9), underscores and hyphens`
         ),
+      }).default(),
+      audit: Joi.object({
+        enabled: Joi.boolean().default(false)
       }).default(),
     }).default();
   },
@@ -97,6 +102,8 @@ export const security = (kibana) => new kibana.Plugin({
       await registerPrivilegesWithCluster(server);
       await createDefaultRoles(server);
     });
+
+    server.expose('auditLogger', new SecurityAuditLogger(server.config(), new AuditLogger(server, 'security')));
 
     // Register a function that is called whenever the xpack info changes,
     // to re-compute the license check results for this plugin
