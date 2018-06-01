@@ -11,15 +11,19 @@ export function UsageAPIProvider({ getService }) {
 
   return {
     async getUsageStatsNoAuth() {
-      return supertestNoAuth
+      const { body } = await supertestNoAuth
         .get('/api/_xpack/usage')
-        .set('kbn-xsrf', 'xxx');
+        .set('kbn-xsrf', 'xxx')
+        .expect(401);
+      return body;
     },
 
     async getUsageStats() {
-      return supertest
+      const { body } = await supertest
         .get('/api/_xpack/usage')
-        .set('kbn-xsrf', 'xxx');
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+      return body;
     },
 
     async getUsageStatsFromDeprecatedPre64Endpoint() {

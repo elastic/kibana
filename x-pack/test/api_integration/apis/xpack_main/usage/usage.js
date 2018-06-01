@@ -20,22 +20,20 @@ export default function ({ getService }) {
     });
 
     it('should reject without authentication headers passed', async () => {
-      const { body, statusCode } = await usageAPI.getUsageStatsNoAuth();
-      expect(body).to.eql({ statusCode: 401, error: 'Unauthorized' });
-      expect(statusCode).to.be(401);
+      const rejected = await usageAPI.getUsageStatsNoAuth();
+      expect(rejected).to.eql({ statusCode: 401, error: 'Unauthorized' });
     });
 
     it('should return xpack usage data', async () => {
-      const { body, statusCode } = await usageAPI.getUsageStats();
+      const usage = await usageAPI.getUsageStats();
 
-      expect(body.cluster_uuid).to.be.a('string');
-      expect(body.kibana.dashboard.total).to.be(26);
-      expect(body.kibana.visualization.total).to.be(47);
-      expect(body.kibana.search.total).to.be(5);
-      expect(body.kibana.index_pattern.total).to.be(3);
-      expect(body.kibana.timelion_sheet.total).to.be(0);
-      expect(body.kibana.graph_workspace.total).to.be(0);
-      expect(statusCode).to.be(200);
+      expect(usage.cluster_uuid).to.be.a('string');
+      expect(usage.kibana.dashboard.total).to.be(26);
+      expect(usage.kibana.visualization.total).to.be(47);
+      expect(usage.kibana.search.total).to.be(5);
+      expect(usage.kibana.index_pattern.total).to.be(3);
+      expect(usage.kibana.timelion_sheet.total).to.be(0);
+      expect(usage.kibana.graph_workspace.total).to.be(0);
     });
   });
 }
