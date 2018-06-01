@@ -157,15 +157,17 @@ export default async function ({ readConfigFile }) {
       ],
     },
 
-    kibanaServerArgs: [
-      ...kibanaCommonConfig.get('kibanaServerArgs'),
-      `--server.uuid=${env.kibana.server.uuid}`,
-      `--server.port=${servers.kibana.port}`,
-      `--elasticsearch.url=${formatUrl(servers.elasticsearch)}`,
-      '--xpack.monitoring.kibana.collection.enabled=false',
-      '--xpack.xpack_main.telemetry.enabled=false',
-      '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
-    ],
+    kbnTestServer: {
+      ...kibanaCommonConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...kibanaCommonConfig.get('kbnTestServer.serverArgs'),
+        `--server.uuid=${env.kibana.server.uuid}`,
+        `--server.port=${servers.kibana.port}`,
+        `--elasticsearch.url=${formatUrl(servers.elasticsearch)}`,
+        '--xpack.xpack_main.telemetry.enabled=false',
+        '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
+      ],
+    },
 
     // the apps section defines the urls that
     // `PageObjects.common.navigateTo(appKey)` will use.

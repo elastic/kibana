@@ -14,7 +14,7 @@ import { getTransactionDuration } from '../lib/transactions/get_transaction_dura
 import { getTopTransactions } from '../lib/transactions/get_top_transactions';
 import getTransaction from '../lib/transactions/get_transaction';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { dateValidation } from '../lib/helpers/date_validation';
+import { withDefaultValidators } from '../lib/helpers/input_validation';
 
 const pre = [{ method: setupRequest, assign: 'setup' }];
 const ROOT = '/api/apm/services/{serviceName}/transactions';
@@ -30,9 +30,7 @@ export function initTransactionsApi(server) {
     config: {
       pre,
       validate: {
-        query: Joi.object().keys({
-          start: dateValidation,
-          end: dateValidation,
+        query: withDefaultValidators({
           transaction_type: Joi.string().default('request'),
           query: Joi.string()
         })
@@ -59,10 +57,7 @@ export function initTransactionsApi(server) {
     config: {
       pre,
       validate: {
-        query: Joi.object().keys({
-          start: dateValidation,
-          end: dateValidation
-        })
+        query: withDefaultValidators()
       }
     },
     handler: (req, reply) => {
@@ -80,10 +75,7 @@ export function initTransactionsApi(server) {
     config: {
       pre,
       validate: {
-        query: Joi.object().keys({
-          start: dateValidation,
-          end: dateValidation
-        })
+        query: withDefaultValidators()
       }
     },
     handler: (req, reply) => {
@@ -104,9 +96,7 @@ export function initTransactionsApi(server) {
     config: {
       pre,
       validate: {
-        query: Joi.object().keys({
-          start: dateValidation,
-          end: dateValidation,
+        query: withDefaultValidators({
           transaction_type: Joi.string().default('request'),
           transaction_name: Joi.string(),
           query: Joi.string()
@@ -136,9 +126,7 @@ export function initTransactionsApi(server) {
     config: {
       pre,
       validate: {
-        query: Joi.object().keys({
-          start: dateValidation,
-          end: dateValidation,
+        query: withDefaultValidators({
           transaction_name: Joi.string().required()
         })
       }

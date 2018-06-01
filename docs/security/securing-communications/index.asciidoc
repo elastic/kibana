@@ -1,0 +1,91 @@
+[[configuring-tls]]
+=== Encrypting communications in {kib}
+++++
+<titleabbrev>Encrypting communications</titleabbrev>
+++++
+
+{kib} supports Transport Layer Security (TLS/SSL) encryption for client 
+requests. 
+//TBD: It is unclear what "client requests" are in this context. Is it just 
+// communication between the browser and the Kibana server or are we talking 
+// about other types of clients connecting to the Kibana server?
+
+If you are using {security} or a proxy that provides an HTTPS endpoint for {es}, 
+you can configure {kib} to access {es} via HTTPS. Thus, communications between 
+{kib} and {es} are also encrypted. 
+
+. Configure {kib} to encrypt communications between the browser and the {kib}
+server:
++
+--
+NOTE: You do not need to enable {security} for this type of encryption. 
+
+--
+
+.. Generate a server certificate for {kib}. 
++
+--
+//TBD: Can we provide more information about how they generate the certificate? 
+//Would they be able to use something like the elasticsearch-certutil command?
+You must either set the certificate's
+`subjectAltName` to the hostname, fully-qualified domain name (FQDN), or IP
+address of the {kib} server, or set the CN to the {kib} server's hostname
+or FQDN. Using the server's IP address as the CN does not work.
+--
+
+.. Set the `server.ssl.enabled`, `server.ssl.key`, and `server.ssl.certificate` 
+properties in `kibana.yml`:
++
+--
+[source,yaml]
+--------------------------------------------------------------------------------
+server.ssl.enabled: true
+server.ssl.key: /path/to/your/server.key
+server.ssl.certificate: /path/to/your/server.crt
+--------------------------------------------------------------------------------
+
+After making these changes, you must always access {kib} via HTTPS. For example, 
+https://localhost:5601.
+
+// TBD: The reference information for server.ssl.enabled says it "enables SSL for 
+// outgoing requests from the Kibana server to the browser". Do we need to 
+// reiterate here that only one side of the communications is encrypted?
+
+For more information, see <<settings,{kib} configuration settings>>.
+--
+
+. Configure {kib} to connect to {es} via HTTPS:
++
+--
+NOTE: To perform this step, you must 
+{ref}/configuring-security.html[enable the {security} feature in {es}] or you 
+must have a proxy that provides an HTTPS endpoint for {es}. 
+
+--
+
+.. Specify the HTTPS protocol in the `elasticsearch.url` setting in the {kib}
+configuration file, `kibana.yml`:
++
+--
+[source,yaml]
+--------------------------------------------------------------------------------
+elasticsearch.url: "https://<your_elasticsearch_host>.com:9200"
+--------------------------------------------------------------------------------
+--
+
+.. If you are using your own CA to sign certificates for {es}, set the
+`elasticsearch.ssl.certificateAuthorities` setting in `kibana.yml` to specify
+the location of the PEM file.
++
+--
+[source,yaml]
+--------------------------------------------------------------------------------
+elasticsearch.ssl.certificateAuthorities: /path/to/your/cacert.pem
+--------------------------------------------------------------------------------
+
+Setting the `certificateAuthorities` property lets you use the default 
+`verificationMode` option of `full`. 
+//TBD: Is this still true? It isn't mentioned in https://www.elastic.co/guide/en/kibana/master/settings.html
+
+For more information, see <<settings,{kib} configuration settings>>. 
+--

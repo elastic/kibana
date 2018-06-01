@@ -1,13 +1,32 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { initializeInput } from '../../src/input';
 import _ from 'lodash';
 let input;
-let kb = require('../../src/kb');
-let mappings = require('../../src/mappings');
-let $ = require('jquery');
+const kb = require('../../src/kb');
+const mappings = require('../../src/mappings');
+const $ = require('jquery');
 
-var { module, ok, asyncTest, deepEqual, equal, start } = window.QUnit;
+const { module, ok, asyncTest, deepEqual, equal, start } = window.QUnit;
 
-module("Integration", {
+module('Integration', {
   setup: function () {
     input = initializeInput($('#editor'), $('#editor_actions'), $('#copy_as_curl'), null);
     input.$el.show();
@@ -19,20 +38,20 @@ module("Integration", {
   }
 });
 
-function process_context_test(data, mapping, kb_schemes, request_line, test) {
+function processContextTest(data, mapping, kbSchemes, requestLine, test) {
   asyncTest(test.name, function () {
 
-    console.debug("starting test " + test.name);
+    console.debug('starting test ' + test.name);
 
-    var rowOffset = 0; // add one for the extra method line
-    var editorValue = data;
-    if (request_line != null) {
+    let rowOffset = 0; // add one for the extra method line
+    let editorValue = data;
+    if (requestLine != null) {
       if (data != null) {
-        editorValue = request_line + "\n" + data;
+        editorValue = requestLine + '\n' + data;
         rowOffset = 1;
       }
       else {
-        editorValue = request_line;
+        editorValue = requestLine;
       }
     }
 
@@ -40,23 +59,23 @@ function process_context_test(data, mapping, kb_schemes, request_line, test) {
 
     mappings.clear();
     mappings.loadMappings(mapping);
-    let json = {};
-    json[test.name] = kb_schemes || {};
-    var test_api = kb._test.loadApisFromJson(json);
-    //if (kb_schemes) {
-    //  if (kb_schemes.globals) {
-    //    $.each(kb_schemes.globals, function (parent, rules) {
-    //      test_api.addGlobalAutocompleteRules(parent, rules);
+    const json = {};
+    json[test.name] = kbSchemes || {};
+    const testApi = kb._test.loadApisFromJson(json);
+    //if (kbSchemes) {
+    //  if (kbSchemes.globals) {
+    //    $.each(kbSchemes.globals, function (parent, rules) {
+    //      testApi.addGlobalAutocompleteRules(parent, rules);
     //    });
     //  }
-    //  if (kb_schemes.endpoints) {
-    //    $.each(kb_schemes.endpoints, function (endpoint, scheme) {
+    //  if (kbSchemes.endpoints) {
+    //    $.each(kbSchemes.endpoints, function (endpoint, scheme) {
     //      _.defaults(scheme, {methods: null}); // disable method testing unless specified in test
-    //      test_api.addEndpointDescription(endpoint, scheme);
+    //      testApi.addEndpointDescription(endpoint, scheme);
     //    });
     //  }
     //}
-    kb.setActiveApi(test_api);
+    kb.setActiveApi(testApi);
 
     input.update(editorValue, function () {
       input.moveCursorTo(test.cursor.row, test.cursor.column);
@@ -69,11 +88,11 @@ function process_context_test(data, mapping, kb_schemes, request_line, test) {
           }
         }; // mimic auto complete
 
-        input.autocomplete._test.getCompletions(input, input.getSession(), test.cursor, "",
+        input.autocomplete._test.getCompletions(input, input.getSession(), test.cursor, '',
           function (err, terms) {
 
             if (test.assertThrows) {
-              ok(test.assertThrows.test("" + err), "failed to throw expected exception");
+              ok(test.assertThrows.test('' + err), 'failed to throw expected exception');
               start();
               return;
             }
@@ -84,10 +103,10 @@ function process_context_test(data, mapping, kb_schemes, request_line, test) {
 
 
             if (test.no_context) {
-              ok(!terms || terms.length === 0, "Expected no context bug got terms.");
+              ok(!terms || terms.length === 0, 'Expected no context bug got terms.');
             }
             else {
-              ok(terms && terms.length > 0, "failed to extract terms ...");
+              ok(terms && terms.length > 0, 'failed to extract terms ...');
             }
 
             if (!terms || terms.length === 0) {
@@ -96,36 +115,36 @@ function process_context_test(data, mapping, kb_schemes, request_line, test) {
             }
 
 
-            if (test["autoCompleteSet"]) {
-              var expected_terms = _.map(test["autoCompleteSet"], function (t) {
-                if (typeof t !== "object") {
-                  t = { "name": t };
+            if (test.autoCompleteSet) {
+              const expectedTerms = _.map(test.autoCompleteSet, function (t) {
+                if (typeof t !== 'object') {
+                  t = { 'name': t };
                 }
                 return t;
               });
-              if (terms.length != expected_terms.length) {
-                equal(_.pluck(terms, 'name'), _.pluck(expected_terms, 'name'), "list of completion terms is not of equal size");
+              if (terms.length !== expectedTerms.length) {
+                equal(_.pluck(terms, 'name'), _.pluck(expectedTerms, 'name'), 'list of completion terms is not of equal size');
               }
               else {
-                var filtered_actual_terms = _.map(terms, function (actual_term, i) {
-                  var expected_term = expected_terms[i];
-                  var filtered_term = {};
-                  _.each(expected_term, function (v, p) {
-                    filtered_term[p] = actual_term[p];
+                const filteredActualTerms = _.map(terms, function (actualTerm, i) {
+                  const expectedTerm = expectedTerms[i];
+                  const filteredTerm = {};
+                  _.each(expectedTerm, function (v, p) {
+                    filteredTerm[p] = actualTerm[p];
                   });
-                  return filtered_term;
+                  return filteredTerm;
                 });
-                deepEqual(filtered_actual_terms, expected_terms);
+                deepEqual(filteredActualTerms, expectedTerms);
               }
             }
 
-            var context = terms[0].context;
+            const context = terms[0].context;
             input.autocomplete._test.addReplacementInfoToContext(context, test.cursor, terms[0].value);
 
-            function ac(prop, prop_test) {
-              if (typeof test[prop] != "undefined") {
-                if (prop_test) {
-                  prop_test(context[prop], test[prop], prop);
+            function ac(prop, propTest) {
+              if (typeof test[prop] !== 'undefined') {
+                if (propTest) {
+                  propTest(context[prop], test[prop], prop);
                 }
                 else {
                   deepEqual(context[prop], test[prop], 'context.' + prop + ' should equal ' + JSON.stringify(test[prop]));
@@ -133,118 +152,118 @@ function process_context_test(data, mapping, kb_schemes, request_line, test) {
               }
             }
 
-            function pos_compare(actual, expected, name) {
-              equal(actual.row, expected.row + rowOffset, "row of " + name + " position is not as expected");
-              equal(actual.column, expected.column, "column of " + name + " position is not as expected");
+            function posCompare(actual, expected, name) {
+              equal(actual.row, expected.row + rowOffset, 'row of ' + name + ' position is not as expected');
+              equal(actual.column, expected.column, 'column of ' + name + ' position is not as expected');
             }
 
-            function range_compare(actual, expected, name) {
-              pos_compare(actual.start, expected.start, name + ".start");
-              pos_compare(actual.end, expected.end, name + ".end");
+            function rangeCompare(actual, expected, name) {
+              posCompare(actual.start, expected.start, name + '.start');
+              posCompare(actual.end, expected.end, name + '.end');
             }
 
-            ac("prefixToAdd");
-            ac("suffixToAdd");
-            ac("addTemplate");
-            ac("textBoxPosition", pos_compare);
-            ac("rangeToReplace", range_compare);
+            ac('prefixToAdd');
+            ac('suffixToAdd');
+            ac('addTemplate');
+            ac('textBoxPosition', posCompare);
+            ac('rangeToReplace', rangeCompare);
 
             start();
           });
       });
     });
 
-  })
+  });
 }
 
-function context_tests(data, mapping, kb_schemes, request_line, tests) {
-  if (data != null && typeof data != "string") {
+function contextTests(data, mapping, kbSchemes, requestLine, tests) {
+  if (data != null && typeof data !== 'string') {
     data = JSON.stringify(data, null, 3);
   }
-  for (var t = 0; t < tests.length; t++) {
-    process_context_test(data, mapping, kb_schemes, request_line, tests[t]);
+  for (let t = 0; t < tests.length; t++) {
+    processContextTest(data, mapping, kbSchemes, requestLine, tests[t]);
   }
 }
 
-var SEARCH_KB = {
+const SEARCH_KB = {
   endpoints: {
     _search: {
-      methods: ["GET", "POST"],
+      methods: ['GET', 'POST'],
       patterns: [
-        "{indices}/{types}/_search",
-        "{indices}/_search",
-        "_search"
+        '{indices}/{types}/_search',
+        '{indices}/_search',
+        '_search'
       ],
       data_autocomplete_rules: {
-        query: { match_all: {}, term: { "{field}": { __template: { "f": 1 } } } },
+        query: { match_all: {}, term: { '{field}': { __template: { 'f': 1 } } } },
         size: {},
         facets: {
           __template: {
-            "FIELD": {}
+            'FIELD': {}
           },
-          "*": { terms: { field: "{field}" } }
+          '*': { terms: { field: '{field}' } }
         }
       }
     }
   }
 };
 
-var MAPPING = {
-  "index1": {
-    "type1.1": {
-      "properties": {
-        "field1.1.1": { "type": "string" },
-        "field1.1.2": { "type": "string" }
+const MAPPING = {
+  'index1': {
+    'type1.1': {
+      'properties': {
+        'field1.1.1': { 'type': 'string' },
+        'field1.1.2': { 'type': 'string' }
       }
     }
   },
-  "index2": {
-    "type2.1": {
-      "properties": {
-        "field2.1.1": { "type": "string" },
-        "field2.1.2": { "type": "string" }
+  'index2': {
+    'type2.1': {
+      'properties': {
+        'field2.1.1': { 'type': 'string' },
+        'field2.1.2': { 'type': 'string' }
       }
     }
   }
 };
 
-context_tests(
+contextTests(
   {},
   MAPPING,
   SEARCH_KB,
-  "POST _search",
+  'POST _search',
   [
     {
-      name: "Empty doc",
+      name: 'Empty doc',
       cursor: { row: 0, column: 1 },
-      initialValue: "",
+      initialValue: '',
       addTemplate: true,
-      prefixToAdd: "",
-      suffixToAdd: "",
+      prefixToAdd: '',
+      suffixToAdd: '',
       rangeToReplace: { start: { row: 0, column: 1 }, end: { row: 0, column: 1 } },
-      autoCompleteSet: ["facets", "query", "size"]
+      autoCompleteSet: ['facets', 'query', 'size']
     }
   ]
 );
 
-context_tests(
+contextTests(
   {},
   MAPPING,
   SEARCH_KB,
-  "POST _no_context",
+  'POST _no_context',
   [
     {
-      name: "Missing KB",
+      name: 'Missing KB',
       cursor: { row: 0, column: 1 },
       no_context: true
     }
   ]
 );
 
-context_tests(
+contextTests(
   {
-    "query": {
-      "f": 1
+    'query': {
+      'f': 1
     }
   },
   MAPPING,
@@ -256,67 +275,67 @@ context_tests(
     },
     endpoints: {}
   },
-  "POST _no_context",
+  'POST _no_context',
   [
     {
-      name: "Missing KB - global auto complete",
+      name: 'Missing KB - global auto complete',
       cursor: { row: 2, column: 5 },
-      autoCompleteSet: ["t1"]
+      autoCompleteSet: ['t1']
     }
   ]
 );
 
-context_tests(
+contextTests(
   {
-    "query": {
-      "field": "something"
+    'query': {
+      'field': 'something'
     },
-    "facets": {},
-    "size": 20
+    'facets': {},
+    'size': 20
   },
   MAPPING,
   SEARCH_KB,
-  "POST _search",
+  'POST _search',
   [
     {
-      name: "existing dictionary key, no template",
+      name: 'existing dictionary key, no template',
       cursor: { row: 1, column: 6 },
-      initialValue: "query",
+      initialValue: 'query',
       addTemplate: false,
-      prefixToAdd: "",
-      suffixToAdd: "",
+      prefixToAdd: '',
+      suffixToAdd: '',
       rangeToReplace: { start: { row: 1, column: 3 }, end: { row: 1, column: 10 } },
-      autoCompleteSet: ["facets", "query", "size"]
+      autoCompleteSet: ['facets', 'query', 'size']
     },
     {
-      name: "existing inner dictionary key",
+      name: 'existing inner dictionary key',
       cursor: { row: 2, column: 7 },
-      initialValue: "field",
+      initialValue: 'field',
       addTemplate: false,
-      prefixToAdd: "",
-      suffixToAdd: "",
+      prefixToAdd: '',
+      suffixToAdd: '',
       rangeToReplace: { start: { row: 2, column: 6 }, end: { row: 2, column: 13 } },
-      autoCompleteSet: ["match_all", "term"]
+      autoCompleteSet: ['match_all', 'term']
     },
     {
-      name: "existing dictionary key, yes template",
+      name: 'existing dictionary key, yes template',
       cursor: { row: 4, column: 7 },
-      initialValue: "facets",
+      initialValue: 'facets',
       addTemplate: true,
-      prefixToAdd: "",
-      suffixToAdd: "",
+      prefixToAdd: '',
+      suffixToAdd: '',
       rangeToReplace: { start: { row: 4, column: 3 }, end: { row: 4, column: 15 } },
-      autoCompleteSet: ["facets", "query", "size"]
+      autoCompleteSet: ['facets', 'query', 'size']
     },
     {
-      name: "ignoring meta keys",
+      name: 'ignoring meta keys',
       cursor: { row: 4, column: 14 },
       no_context: true
     }
   ]
 );
 
-context_tests(
+contextTests(
   '{\n' +
   '   "query": {\n' +
   '    "field": "something"\n' +
@@ -326,166 +345,166 @@ context_tests(
   '}',
   MAPPING,
   SEARCH_KB,
-  "POST _search",
+  'POST _search',
   [
     {
-      name: "trailing comma, end of line",
+      name: 'trailing comma, end of line',
       cursor: { row: 4, column: 16 },
-      initialValue: "",
+      initialValue: '',
       addTemplate: true,
-      prefixToAdd: "",
-      suffixToAdd: ", ",
+      prefixToAdd: '',
+      suffixToAdd: ', ',
       rangeToReplace: { start: { row: 4, column: 16 }, end: { row: 4, column: 16 } },
-      autoCompleteSet: ["facets", "query", "size"]
+      autoCompleteSet: ['facets', 'query', 'size']
     },
     {
-      name: "trailing comma, beginning of line",
+      name: 'trailing comma, beginning of line',
       cursor: { row: 5, column: 1 },
-      initialValue: "",
+      initialValue: '',
       addTemplate: true,
-      prefixToAdd: "",
-      suffixToAdd: ", ",
+      prefixToAdd: '',
+      suffixToAdd: ', ',
       rangeToReplace: { start: { row: 5, column: 1 }, end: { row: 5, column: 1 } },
-      autoCompleteSet: ["facets", "query", "size"]
+      autoCompleteSet: ['facets', 'query', 'size']
     },
     {
-      name: "prefix comma, beginning of line",
+      name: 'prefix comma, beginning of line',
       cursor: { row: 6, column: 0 },
-      initialValue: "",
+      initialValue: '',
       addTemplate: true,
-      prefixToAdd: ", ",
-      suffixToAdd: "",
+      prefixToAdd: ', ',
+      suffixToAdd: '',
       rangeToReplace: { start: { row: 6, column: 0 }, end: { row: 6, column: 0 } },
-      autoCompleteSet: ["facets", "query", "size"]
+      autoCompleteSet: ['facets', 'query', 'size']
     },
     {
-      name: "prefix comma, end of line",
+      name: 'prefix comma, end of line',
       cursor: { row: 5, column: 14 },
-      initialValue: "",
+      initialValue: '',
       addTemplate: true,
-      prefixToAdd: ", ",
-      suffixToAdd: "",
+      prefixToAdd: ', ',
+      suffixToAdd: '',
       rangeToReplace: { start: { row: 5, column: 14 }, end: { row: 5, column: 14 } },
-      autoCompleteSet: ["facets", "query", "size"]
+      autoCompleteSet: ['facets', 'query', 'size']
     }
 
   ]
 );
 
-context_tests(
+contextTests(
   {
-    "object": 1,
-    "array": 1,
-    "value_one_of": 1,
-    "value": 2,
-    "something_else": 5
+    'object': 1,
+    'array': 1,
+    'value_one_of': 1,
+    'value': 2,
+    'something_else': 5
   },
   MAPPING,
   {
     endpoints: {
       _test: {
         patterns: [
-          "_test"
+          '_test'
         ],
         data_autocomplete_rules: {
           object: { bla: 1 },
           array: [1],
           value_one_of: { __one_of: [1, 2] },
           value: 3,
-          "*": { __one_of: [4, 5] }
+          '*': { __one_of: [4, 5] }
         }
       }
     }
   },
-  "GET _test",
+  'GET _test',
   [
     {
-      name: "not matching object when { is not opened",
+      name: 'not matching object when { is not opened',
       cursor: { row: 1, column: 12 },
-      initialValue: "",
-      autoCompleteSet: ["{"]
+      initialValue: '',
+      autoCompleteSet: ['{']
     },
     {
-      name: "not matching array when [ is not opened",
+      name: 'not matching array when [ is not opened',
       cursor: { row: 2, column: 12 },
-      initialValue: "",
-      autoCompleteSet: ["["]
+      initialValue: '',
+      autoCompleteSet: ['[']
     },
     {
-      name: "matching value with one_of",
+      name: 'matching value with one_of',
       cursor: { row: 3, column: 19 },
-      initialValue: "",
+      initialValue: '',
       autoCompleteSet: [1, 2]
     },
     {
-      name: "matching value",
+      name: 'matching value',
       cursor: { row: 4, column: 12 },
-      initialValue: "",
+      initialValue: '',
       autoCompleteSet: [3]
     },
     {
-      name: "matching any value with one_of",
+      name: 'matching any value with one_of',
       cursor: { row: 5, column: 21 },
-      initialValue: "",
+      initialValue: '',
       autoCompleteSet: [4, 5]
     }
   ]
 );
 
-context_tests(
+contextTests(
   {
-    "query": {
-      "field": "something"
+    'query': {
+      'field': 'something'
     },
-    "facets": {
-      "name": {}
+    'facets': {
+      'name': {}
     },
-    "size": 20
+    'size': 20
   },
   MAPPING,
   SEARCH_KB,
-  "GET _search",
+  'GET _search',
   [
     {
-      name: "* matching everything",
+      name: '* matching everything',
       cursor: { row: 5, column: 15 },
-      initialValue: "",
+      initialValue: '',
       addTemplate: true,
-      prefixToAdd: "",
-      suffixToAdd: "",
+      prefixToAdd: '',
+      suffixToAdd: '',
       rangeToReplace: { start: { row: 5, column: 15 }, end: { row: 5, column: 15 } },
       autoCompleteSet: [
-        { name: "terms", meta: "API" }
+        { name: 'terms', meta: 'API' }
       ]
     }
   ]
 );
 
-context_tests(
+contextTests(
   {
-    "index": "123"
+    'index': '123'
   },
   MAPPING,
   {
     endpoints: {
       _test: {
         patterns: [
-          "_test"
+          '_test'
         ],
         data_autocomplete_rules: {
-          index: "{index}"
+          index: '{index}'
         }
       }
     }
   },
-  "GET _test",
+  'GET _test',
   [
     {
-      name: "{index} matching",
+      name: '{index} matching',
       cursor: { row: 1, column: 15 },
       autoCompleteSet: [
-        { name: "index1", meta: "index" },
-        { name: "index2", meta: "index" }
+        { name: 'index1', meta: 'index' },
+        { name: 'index2', meta: 'index' }
       ]
     }
   ]
@@ -496,106 +515,106 @@ function tt(term, template, meta) {
   if (meta) {
     term.meta = meta;
   }
-  return term
+  return term;
 }
 
-context_tests(
+contextTests(
   {
-    "array": [
-      "a"
+    'array': [
+      'a'
     ],
-    "oneof": "1"
+    'oneof': '1'
   },
   MAPPING,
   {
     endpoints: {
       _endpoint: {
         patterns: [
-          "_endpoint"
+          '_endpoint'
         ],
         data_autocomplete_rules: {
-          array: ["a", "b"],
+          array: ['a', 'b'],
           number: 1,
           object: {},
-          fixed: { __template: { "a": 1 } },
-          oneof: { __one_of: ["o1", "o2"] }
+          fixed: { __template: { 'a': 1 } },
+          oneof: { __one_of: ['o1', 'o2'] }
         }
       }
     }
   },
-  "GET _endpoint",
+  'GET _endpoint',
   [
     {
-      name: "Templates 1",
+      name: 'Templates 1',
       cursor: { row: 1, column: 0 },
       autoCompleteSet: [
-        tt("array", []), tt("fixed", { a: 1 }), tt("number", 1), tt("object", {}), tt("oneof", "o1")
+        tt('array', []), tt('fixed', { a: 1 }), tt('number', 1), tt('object', {}), tt('oneof', 'o1')
       ]
     },
     {
-      name: "Templates - one off",
+      name: 'Templates - one off',
       cursor: { row: 4, column: 12 },
-      autoCompleteSet: [tt("o1"), tt("o2")]
+      autoCompleteSet: [tt('o1'), tt('o2')]
     }
   ]
 );
 
-context_tests(
+contextTests(
   {
-    "string": "value",
-    "context": {}
+    'string': 'value',
+    'context': {}
   },
   MAPPING,
   {
     endpoints: {
       _endpoint: {
         patterns: [
-          "_endpoint"
+          '_endpoint'
         ],
         data_autocomplete_rules: {
           context: {
             __one_of: [{
               __condition: {
-                lines_regex: "value"
+                lines_regex: 'value'
               },
-              "match": {}
+              'match': {}
             }, {
               __condition: {
-                lines_regex: "other"
+                lines_regex: 'other'
               },
-              "no_match": {}
-            }, { "always": {} }]
+              'no_match': {}
+            }, { 'always': {} }]
           }
         }
       }
     }
   },
-  "GET _endpoint",
+  'GET _endpoint',
   [
     {
-      name: "Conditionals",
+      name: 'Conditionals',
       cursor: { row: 2, column: 15 },
       autoCompleteSet: [
-        tt("always", {}), tt("match", {})
+        tt('always', {}), tt('match', {})
       ]
     }
   ]
 );
 
 
-context_tests(
+contextTests(
   {
-    "any_of_numbers": [
+    'any_of_numbers': [
       1
     ],
-    "any_of_obj": [
+    'any_of_obj': [
       {
-        "a": 1
+        'a': 1
       }
     ],
-    "any_of_mixed": [
+    'any_of_mixed': [
       {
-        "a": 1
+        'a': 1
       },
       2
     ]
@@ -605,7 +624,7 @@ context_tests(
     endpoints: {
       _endpoint: {
         patterns: [
-          "_endpoint"
+          '_endpoint'
         ],
         data_autocomplete_rules: {
           any_of_numbers: { __template: [1, 2], __any_of: [1, 2, 3] },
@@ -627,85 +646,85 @@ context_tests(
       }
     }
   },
-  "GET _endpoint",
+  'GET _endpoint',
   [
     {
-      name: "Any of - templates",
+      name: 'Any of - templates',
       cursor: { row: 1, column: 0 },
       autoCompleteSet: [
-        tt("any_of_mixed", []),
-        tt("any_of_numbers", [1, 2]),
-        tt("any_of_obj", [
+        tt('any_of_mixed', []),
+        tt('any_of_numbers', [1, 2]),
+        tt('any_of_obj', [
           { c: 1 }
         ])
       ]
     },
     {
-      name: "Any of - numbers",
+      name: 'Any of - numbers',
       cursor: { row: 2, column: 2 },
       autoCompleteSet: [1, 2, 3]
     },
     {
-      name: "Any of - object",
+      name: 'Any of - object',
       cursor: { row: 6, column: 2 },
       autoCompleteSet: [
-        tt("a", 1), tt("b", 2), tt("c", 1)
+        tt('a', 1), tt('b', 2), tt('c', 1)
       ]
     },
     {
-      name: "Any of - mixed - obj",
+      name: 'Any of - mixed - obj',
       cursor: { row: 11, column: 2 },
       autoCompleteSet: [
-        tt("a", 1)
+        tt('a', 1)
       ]
     },
     {
-      name: "Any of - mixed - both",
+      name: 'Any of - mixed - both',
       cursor: { row: 13, column: 2 },
       autoCompleteSet: [
-        tt("{"), tt(3)
+        tt('{'), tt(3)
       ]
     }
   ]
 );
 
-context_tests(
+contextTests(
   {},
   MAPPING,
   {
     endpoints: {
       _endpoint: {
-        patterns: ["_endpoint"],
+        patterns: ['_endpoint'],
         data_autocomplete_rules: {
-          "query": ""
+          'query': ''
         }
       }
     }
   },
-  "GET _endpoint",
+  'GET _endpoint',
   [
     {
-      name: "Empty string as default",
+      name: 'Empty string as default',
       cursor: { row: 0, column: 1 },
-      autoCompleteSet: [tt("query", "")]
+      autoCompleteSet: [tt('query', '')]
     }
   ]
 );
 
-context_tests(
+contextTests(
   {
-    "a": {
-      "b": {},
-      "c": {},
-      "d": {
+    'a': {
+      'b': {},
+      'c': {},
+      'd': {
         t1a: {}
       },
-      "e": {},
-      "f": [
+      'e': {},
+      'f': [
         {}
       ],
-      "g": {},
-      "h": {}
+      'g': {},
+      'h': {}
     }
   },
   MAPPING,
@@ -714,48 +733,48 @@ context_tests(
       gtarget: {
         t1: 2,
         t1a: {
-          __scope_link: "."
+          __scope_link: '.'
         }
       }
     },
     endpoints: {
       _current: {
-        patterns: ["_current"],
+        patterns: ['_current'],
         data_autocomplete_rules: {
-          "a": {
-            "b": {
-              __scope_link: ".a"
+          'a': {
+            'b': {
+              __scope_link: '.a'
             },
-            "c": {
-              __scope_link: "ext.target"
+            'c': {
+              __scope_link: 'ext.target'
             },
-            "d": {
-              __scope_link: "GLOBAL.gtarget"
+            'd': {
+              __scope_link: 'GLOBAL.gtarget'
             },
-            "e": {
-              __scope_link: "ext"
+            'e': {
+              __scope_link: 'ext'
             },
-            "f": [
+            'f': [
               {
-                __scope_link: "ext.target"
+                __scope_link: 'ext.target'
               }
             ],
-            "g": {
+            'g': {
               __scope_link: function () {
                 return {
-                  "a": 1,
-                  "b": 2
-                }
+                  'a': 1,
+                  'b': 2
+                };
               }
             },
-            "h": {
-              __scope_link: "GLOBAL.broken"
+            'h': {
+              __scope_link: 'GLOBAL.broken'
             }
           }
         }
       },
       ext: {
-        patterns: ["ext"],
+        patterns: ['ext'],
         data_autocomplete_rules: {
           target: {
             t2: 1
@@ -764,49 +783,49 @@ context_tests(
       }
     }
   },
-  "GET _current",
+  'GET _current',
   [
     {
-      name: "Relative scope link test",
+      name: 'Relative scope link test',
       cursor: { row: 2, column: 12 },
       autoCompleteSet: [
-        tt("b", {}), tt("c", {}), tt("d", {}), tt("e", {}), tt("f", [
+        tt('b', {}), tt('c', {}), tt('d', {}), tt('e', {}), tt('f', [
           {}
-        ]), tt("g", {}), tt("h", {})
+        ]), tt('g', {}), tt('h', {})
       ]
     },
     {
-      name: "External scope link test",
+      name: 'External scope link test',
       cursor: { row: 3, column: 12 },
-      autoCompleteSet: [tt("t2", 1)]
+      autoCompleteSet: [tt('t2', 1)]
     },
     {
-      name: "Global scope link test",
+      name: 'Global scope link test',
       cursor: { row: 4, column: 12 },
-      autoCompleteSet: [tt("t1", 2), tt("t1a", {})]
+      autoCompleteSet: [tt('t1', 2), tt('t1a', {})]
     },
     {
-      name: "Global scope link with an internal scope link",
+      name: 'Global scope link with an internal scope link',
       cursor: { row: 5, column: 17 },
-      autoCompleteSet: [tt("t1", 2), tt("t1a", {})]
+      autoCompleteSet: [tt('t1', 2), tt('t1a', {})]
     },
     {
-      name: "Entire endpoint scope link test",
+      name: 'Entire endpoint scope link test',
       cursor: { row: 7, column: 12 },
-      autoCompleteSet: [tt("target", {})]
+      autoCompleteSet: [tt('target', {})]
     },
     {
-      name: "A scope link within an array",
+      name: 'A scope link within an array',
       cursor: { row: 9, column: 10 },
-      autoCompleteSet: [tt("t2", 1)]
+      autoCompleteSet: [tt('t2', 1)]
     },
     {
-      name: "A function based scope link",
+      name: 'A function based scope link',
       cursor: { row: 11, column: 12 },
-      autoCompleteSet: [tt("a", 1), tt("b", 2)]
+      autoCompleteSet: [tt('a', 1), tt('b', 2)]
     },
     {
-      name: "A global scope link with wrong link",
+      name: 'A global scope link with wrong link',
       cursor: { row: 12, column: 12 },
       assertThrows: /broken/
 
@@ -814,7 +833,7 @@ context_tests(
   ]
 );
 
-context_tests(
+contextTests(
   {},
   MAPPING,
   {
@@ -825,73 +844,73 @@ context_tests(
     },
     endpoints: {
       _current: {
-        patterns: ["_current"],
-        id: "GET _current",
+        patterns: ['_current'],
+        id: 'GET _current',
         data_autocomplete_rules: {
-          __scope_link: "GLOBAL.gtarget"
+          __scope_link: 'GLOBAL.gtarget'
         }
       }
     }
   },
-  "GET _current",
+  'GET _current',
   [
     {
-      name: "Top level scope link",
+      name: 'Top level scope link',
       cursor: { row: 0, column: 1 },
       autoCompleteSet: [
-        tt("t1", 2)
+        tt('t1', 2)
       ]
     }
   ]
 );
 
-context_tests(
+contextTests(
   {
-    "a": {}
+    'a': {}
   },
   MAPPING,
   {
     endpoints: {
       _endpoint: {
-        patterns: ["_endpoint"],
+        patterns: ['_endpoint'],
         data_autocomplete_rules: {
-          "a": {},
-          "b": {}
+          'a': {},
+          'b': {}
         }
       }
     }
   },
-  "GET _endpoint",
+  'GET _endpoint',
   [
     {
-      name: "Path after empty object",
+      name: 'Path after empty object',
       cursor: { row: 1, column: 10 },
-      autoCompleteSet: ["a", "b"]
+      autoCompleteSet: ['a', 'b']
     }
   ]
 );
 
-context_tests(
+contextTests(
   {
-    "": {}
+    '': {}
   },
   MAPPING,
   SEARCH_KB,
-  "POST _search",
+  'POST _search',
   [
     {
-      name: "Replace an empty string",
+      name: 'Replace an empty string',
       cursor: { row: 1, column: 4 },
       rangeToReplace: { start: { row: 1, column: 3 }, end: { row: 1, column: 9 } }
     }
   ]
 );
 
-context_tests(
+contextTests(
   {
-    "a": [
+    'a': [
       {
-        "c": {}
+        'c': {}
       }
     ]
   },
@@ -899,87 +918,87 @@ context_tests(
   {
     endpoints: {
       _endpoint: {
-        patterns: ["_endpoint"],
+        patterns: ['_endpoint'],
         data_autocomplete_rules: {
-          "a": [
+          'a': [
             { b: 1 }
           ]
         }
       }
     }
   },
-  "GET _endpoint",
+  'GET _endpoint',
   [
     {
-      name: "List of objects - internal autocomplete",
+      name: 'List of objects - internal autocomplete',
       cursor: { row: 3, column: 10 },
-      autoCompleteSet: ["b"]
+      autoCompleteSet: ['b']
     },
     {
-      name: "List of objects - external template",
+      name: 'List of objects - external template',
       cursor: { row: 0, column: 1 },
-      autoCompleteSet: [tt("a", [
+      autoCompleteSet: [tt('a', [
         {}
       ])]
     }
   ]
 );
 
-context_tests(
+contextTests(
   {
-    "query": {
-      "term": {
-        "field": "something"
+    'query': {
+      'term': {
+        'field': 'something'
       }
     },
-    "facets": {
-      "test": {
-        "terms": {
-          "field": "test"
+    'facets': {
+      'test': {
+        'terms': {
+          'field': 'test'
         }
       }
     },
-    "size": 20
+    'size': 20
   },
   MAPPING,
   SEARCH_KB,
-  "POST index1/_search",
+  'POST index1/_search',
   [
     {
-      name: "Field completion as scope",
+      name: 'Field completion as scope',
       cursor: { row: 3, column: 10 },
-      autoCompleteSet: [tt("field1.1.1", { "f": 1 }, "string"), tt("field1.1.2", { "f": 1 }, "string")]
+      autoCompleteSet: [tt('field1.1.1', { 'f': 1 }, 'string'), tt('field1.1.2', { 'f': 1 }, 'string')]
     },
     {
-      name: "Field completion as value",
+      name: 'Field completion as value',
       cursor: { row: 9, column: 23 },
       autoCompleteSet: [
-        { name: "field1.1.1", meta: "string" },
-        { name: "field1.1.2", meta: "string" }
+        { name: 'field1.1.1', meta: 'string' },
+        { name: 'field1.1.2', meta: 'string' }
       ]
     }
   ]
 );
 
 
-context_tests(
-  "POST _search",
+contextTests(
+  'POST _search',
   MAPPING,
   SEARCH_KB,
   null,
   [
     {
-      name: "initial doc start",
+      name: 'initial doc start',
       cursor: { row: 1, column: 0 },
-      autoCompleteSet: ["{"],
-      prefixToAdd: "",
-      suffixToAdd: ""
+      autoCompleteSet: ['{'],
+      prefixToAdd: '',
+      suffixToAdd: ''
     }
   ]
 );
 
 
-context_tests(
+contextTests(
   '{\n' +
   '   "query": {} \n' +
   '}\n' +
@@ -987,17 +1006,17 @@ context_tests(
   '\n',
   MAPPING,
   SEARCH_KB,
-  "POST _search",
+  'POST _search',
   [
     {
-      name: "Cursor rows after request end",
+      name: 'Cursor rows after request end',
       cursor: { row: 4, column: 0 },
-      autoCompleteSet: ["GET", "PUT", "POST", "DELETE", "HEAD"],
-      prefixToAdd: "",
-      suffixToAdd: " "
+      autoCompleteSet: ['GET', 'PUT', 'POST', 'DELETE', 'HEAD'],
+      prefixToAdd: '',
+      suffixToAdd: ' '
     },
     {
-      name: "Cursor just after request end",
+      name: 'Cursor just after request end',
       cursor: { row: 2, column: 1 },
       no_context: true
     }
@@ -1006,357 +1025,357 @@ context_tests(
 );
 
 
-var CLUSTER_KB = {
+const CLUSTER_KB = {
   endpoints: {
-    "_search": {
-      patterns: ["_search", "{indices}/{types}/_search", "{indices}/_search"],
+    '_search': {
+      patterns: ['_search', '{indices}/{types}/_search', '{indices}/_search'],
       url_params: {
-        "search_type": ["count", "query_then_fetch"],
-        "scroll": "10m"
+        'search_type': ['count', 'query_then_fetch'],
+        'scroll': '10m'
       },
       data_autocomplete_rules: {}
     },
-    "_cluster/stats": {
-      patterns: ["_cluster/stats"],
-      indices_mode: "none",
+    '_cluster/stats': {
+      patterns: ['_cluster/stats'],
+      indices_mode: 'none',
       data_autocomplete_rules: {}
     },
-    "_cluster/nodes/stats": {
-      patterns: ["_cluster/nodes/stats"],
+    '_cluster/nodes/stats': {
+      patterns: ['_cluster/nodes/stats'],
       data_autocomplete_rules: {}
     }
   }
 };
 
-context_tests(
+contextTests(
   null,
   MAPPING,
   CLUSTER_KB,
-  "GET _cluster",
+  'GET _cluster',
   [
     {
-      name: "Endpoints with slashes - no slash",
+      name: 'Endpoints with slashes - no slash',
       cursor: { row: 0, column: 8 },
-      autoCompleteSet: ["_cluster/nodes/stats", "_cluster/stats", "_search", "index1", "index2"],
-      prefixToAdd: "",
-      suffixToAdd: ""
+      autoCompleteSet: ['_cluster/nodes/stats', '_cluster/stats', '_search', 'index1', 'index2'],
+      prefixToAdd: '',
+      suffixToAdd: ''
     }
   ]
 );
 
-context_tests(
+contextTests(
   null,
   MAPPING,
   CLUSTER_KB,
-  "GET _cluster/",
+  'GET _cluster/',
   [
     {
-      name: "Endpoints with slashes - before slash",
+      name: 'Endpoints with slashes - before slash',
       cursor: { row: 0, column: 7 },
-      autoCompleteSet: ["_cluster/nodes/stats", "_cluster/stats", "_search", "index1", "index2"],
-      prefixToAdd: "",
-      suffixToAdd: ""
+      autoCompleteSet: ['_cluster/nodes/stats', '_cluster/stats', '_search', 'index1', 'index2'],
+      prefixToAdd: '',
+      suffixToAdd: ''
     },
     {
-      name: "Endpoints with slashes - on slash",
+      name: 'Endpoints with slashes - on slash',
       cursor: { row: 0, column: 12 },
-      autoCompleteSet: ["_cluster/nodes/stats", "_cluster/stats", "_search", "index1", "index2"],
-      prefixToAdd: "",
-      suffixToAdd: ""
+      autoCompleteSet: ['_cluster/nodes/stats', '_cluster/stats', '_search', 'index1', 'index2'],
+      prefixToAdd: '',
+      suffixToAdd: ''
     },
     {
-      name: "Endpoints with slashes - after slash",
+      name: 'Endpoints with slashes - after slash',
       cursor: { row: 0, column: 13 },
-      autoCompleteSet: ["nodes/stats", "stats"],
-      prefixToAdd: "",
-      suffixToAdd: ""
+      autoCompleteSet: ['nodes/stats', 'stats'],
+      prefixToAdd: '',
+      suffixToAdd: ''
     }
   ]
 );
 
-context_tests(
+contextTests(
   null,
   MAPPING,
   CLUSTER_KB,
-  "GET _cluster/no",
+  'GET _cluster/no',
   [
     {
-      name: "Endpoints with slashes - after slash",
+      name: 'Endpoints with slashes - after slash',
       cursor: { row: 0, column: 14 },
       autoCompleteSet: [
-        { name: "nodes/stats", meta: "endpoint" },
-        { name: "stats", meta: "endpoint" }
+        { name: 'nodes/stats', meta: 'endpoint' },
+        { name: 'stats', meta: 'endpoint' }
       ],
-      prefixToAdd: "",
-      suffixToAdd: "",
-      initialValue: "no"
+      prefixToAdd: '',
+      suffixToAdd: '',
+      initialValue: 'no'
     }
   ]
 );
 
-context_tests(
+contextTests(
   null,
   MAPPING,
   CLUSTER_KB,
-  "GET _cluster/nodes/st",
+  'GET _cluster/nodes/st',
   [
     {
-      name: "Endpoints with two slashes",
+      name: 'Endpoints with two slashes',
       cursor: { row: 0, column: 20 },
-      autoCompleteSet: ["stats"],
-      prefixToAdd: "",
-      suffixToAdd: "",
-      initialValue: "st"
+      autoCompleteSet: ['stats'],
+      prefixToAdd: '',
+      suffixToAdd: '',
+      initialValue: 'st'
     }
   ]
 );
 
-context_tests(
+contextTests(
   null,
   MAPPING,
   CLUSTER_KB,
-  "GET ",
+  'GET ',
   [
     {
-      name: "Immediately after space + method",
+      name: 'Immediately after space + method',
       cursor: { row: 0, column: 4 },
       autoCompleteSet: [
-        { name: "_cluster/nodes/stats", meta: "endpoint" },
-        { name: "_cluster/stats", meta: "endpoint" },
-        { name: "_search", meta: "endpoint" },
-        { name: "index1", meta: "index" },
-        { name: "index2", meta: "index" }
+        { name: '_cluster/nodes/stats', meta: 'endpoint' },
+        { name: '_cluster/stats', meta: 'endpoint' },
+        { name: '_search', meta: 'endpoint' },
+        { name: 'index1', meta: 'index' },
+        { name: 'index2', meta: 'index' }
       ],
-      prefixToAdd: "",
-      suffixToAdd: "",
-      initialValue: ""
+      prefixToAdd: '',
+      suffixToAdd: '',
+      initialValue: ''
     }
   ]
 );
 
-context_tests(
+contextTests(
   null,
   MAPPING,
   CLUSTER_KB,
-  "GET cl",
+  'GET cl',
   [
     {
-      name: "Endpoints by subpart",
+      name: 'Endpoints by subpart',
       cursor: { row: 0, column: 6 },
       autoCompleteSet: [
-        { name: "_cluster/nodes/stats", meta: "endpoint" },
-        { name: "_cluster/stats", meta: "endpoint" },
-        { name: "_search", meta: "endpoint" },
-        { name: "index1", meta: "index" },
-        { name: "index2", meta: "index" }
+        { name: '_cluster/nodes/stats', meta: 'endpoint' },
+        { name: '_cluster/stats', meta: 'endpoint' },
+        { name: '_search', meta: 'endpoint' },
+        { name: 'index1', meta: 'index' },
+        { name: 'index2', meta: 'index' }
       ],
-      prefixToAdd: "",
-      suffixToAdd: "",
-      initialValue: "cl"
+      prefixToAdd: '',
+      suffixToAdd: '',
+      initialValue: 'cl'
     }
   ]
 );
 
-context_tests(
+contextTests(
   null,
   MAPPING,
   CLUSTER_KB,
-  "POST cl",
+  'POST cl',
   [
     {
-      name: "Endpoints by subpart",
+      name: 'Endpoints by subpart',
       cursor: { row: 0, column: 7 },
       autoCompleteSet: [
-        { name: "_cluster/nodes/stats", meta: "endpoint" },
-        { name: "_cluster/stats", meta: "endpoint" },
-        { name: "_search", meta: "endpoint" },
-        { name: "index1", meta: "index" },
-        { name: "index2", meta: "index" }
+        { name: '_cluster/nodes/stats', meta: 'endpoint' },
+        { name: '_cluster/stats', meta: 'endpoint' },
+        { name: '_search', meta: 'endpoint' },
+        { name: 'index1', meta: 'index' },
+        { name: 'index2', meta: 'index' }
       ],
-      prefixToAdd: "",
-      suffixToAdd: "",
-      initialValue: "cl"
+      prefixToAdd: '',
+      suffixToAdd: '',
+      initialValue: 'cl'
     }
   ]
 );
 
 
-context_tests(
+contextTests(
   null,
   MAPPING,
   CLUSTER_KB,
-  "GET _search?",
+  'GET _search?',
   [
     {
-      name: "Params just after ?",
+      name: 'Params just after ?',
       cursor: { row: 0, column: 12 },
       autoCompleteSet: [
-        { name: "filter_path", meta: "param", "insert_value": "filter_path=" },
-        { name: "format", meta: "param", "insert_value": "format=" },
-        { name: "pretty", meta: "flag" },
-        { name: "scroll", meta: "param", "insert_value": "scroll=" },
-        { name: "search_type", meta: "param", "insert_value": "search_type=" },
+        { name: 'filter_path', meta: 'param', 'insertValue': 'filter_path=' },
+        { name: 'format', meta: 'param', 'insertValue': 'format=' },
+        { name: 'pretty', meta: 'flag' },
+        { name: 'scroll', meta: 'param', 'insertValue': 'scroll=' },
+        { name: 'search_type', meta: 'param', 'insertValue': 'search_type=' },
       ],
-      prefixToAdd: "",
-      suffixToAdd: ""
+      prefixToAdd: '',
+      suffixToAdd: ''
     }
   ]
 );
 
-context_tests(
+contextTests(
   null,
   MAPPING,
   CLUSTER_KB,
-  "GET _search?format=",
+  'GET _search?format=',
   [
     {
-      name: "Params values",
+      name: 'Params values',
       cursor: { row: 0, column: 19 },
       autoCompleteSet: [
-        { name: "json", meta: "format" },
-        { name: "yaml", meta: "format" }
+        { name: 'json', meta: 'format' },
+        { name: 'yaml', meta: 'format' }
       ],
-      prefixToAdd: "",
-      suffixToAdd: ""
+      prefixToAdd: '',
+      suffixToAdd: ''
     }
   ]
 );
 
-context_tests(
+contextTests(
   null,
   MAPPING,
   CLUSTER_KB,
-  "GET _search?format=yaml&",
+  'GET _search?format=yaml&',
   [
     {
-      name: "Params after amp",
+      name: 'Params after amp',
       cursor: { row: 0, column: 24 },
       autoCompleteSet: [
-        { name: "filter_path", meta: "param", "insert_value": "filter_path=" },
-        { name: "format", meta: "param", "insert_value": "format=" },
-        { name: "pretty", meta: "flag" },
-        { name: "scroll", meta: "param", "insert_value": "scroll=" },
-        { name: "search_type", meta: "param", "insert_value": "search_type=" },
+        { name: 'filter_path', meta: 'param', 'insertValue': 'filter_path=' },
+        { name: 'format', meta: 'param', 'insertValue': 'format=' },
+        { name: 'pretty', meta: 'flag' },
+        { name: 'scroll', meta: 'param', 'insertValue': 'scroll=' },
+        { name: 'search_type', meta: 'param', 'insertValue': 'search_type=' },
       ],
-      prefixToAdd: "",
-      suffixToAdd: ""
+      prefixToAdd: '',
+      suffixToAdd: ''
     }
   ]
 );
 
-context_tests(
+contextTests(
   null,
   MAPPING,
   CLUSTER_KB,
-  "GET _search?format=yaml&search",
+  'GET _search?format=yaml&search',
   [
     {
-      name: "Params on existing param",
+      name: 'Params on existing param',
       cursor: { row: 0, column: 26 },
       rangeToReplace: {
         start: { row: 0, column: 24 },
         end: { row: 0, column: 30 }
       },
       autoCompleteSet: [
-        { name: "filter_path", meta: "param", "insert_value": "filter_path=" },
-        { name: "format", meta: "param", "insert_value": "format=" },
-        { name: "pretty", meta: "flag" },
-        { name: "scroll", meta: "param", "insert_value": "scroll=" },
-        { name: "search_type", meta: "param", "insert_value": "search_type=" },
+        { name: 'filter_path', meta: 'param', 'insertValue': 'filter_path=' },
+        { name: 'format', meta: 'param', 'insertValue': 'format=' },
+        { name: 'pretty', meta: 'flag' },
+        { name: 'scroll', meta: 'param', 'insertValue': 'scroll=' },
+        { name: 'search_type', meta: 'param', 'insertValue': 'search_type=' },
       ],
-      prefixToAdd: "",
-      suffixToAdd: ""
+      prefixToAdd: '',
+      suffixToAdd: ''
     }
   ]
 );
 
-context_tests(
+contextTests(
   null,
   MAPPING,
   CLUSTER_KB,
-  "GET _search?format=yaml&search_type=cou",
+  'GET _search?format=yaml&search_type=cou',
   [
     {
-      name: "Params on existing value",
+      name: 'Params on existing value',
       cursor: { row: 0, column: 37 },
       rangeToReplace: {
         start: { row: 0, column: 36 },
         end: { row: 0, column: 39 }
       },
       autoCompleteSet: [
-        { name: "count", meta: "search_type" },
-        { name: "query_then_fetch", meta: "search_type" },
+        { name: 'count', meta: 'search_type' },
+        { name: 'query_then_fetch', meta: 'search_type' },
       ],
-      prefixToAdd: "",
-      suffixToAdd: ""
+      prefixToAdd: '',
+      suffixToAdd: ''
     }
   ]
 );
-context_tests(
+contextTests(
   null,
   MAPPING,
   CLUSTER_KB,
-  "GET _search?format=yaml&search_type=cou",
+  'GET _search?format=yaml&search_type=cou',
   [
     {
-      name: "Params on just after = with existing value",
+      name: 'Params on just after = with existing value',
       cursor: { row: 0, column: 36 },
       rangeToReplace: {
         start: { row: 0, column: 36 },
         end: { row: 0, column: 36 }
       },
       autoCompleteSet: [
-        { name: "count", meta: "search_type" },
-        { name: "query_then_fetch", meta: "search_type" },
+        { name: 'count', meta: 'search_type' },
+        { name: 'query_then_fetch', meta: 'search_type' },
       ],
-      prefixToAdd: "",
-      suffixToAdd: ""
+      prefixToAdd: '',
+      suffixToAdd: ''
     }
   ]
 );
 
 
-context_tests(
+contextTests(
   {
-    "query": {
-      "field": "something"
+    'query': {
+      'field': 'something'
     },
-    "facets": {},
-    "size": 20
+    'facets': {},
+    'size': 20
   },
   MAPPING,
   SEARCH_KB,
-  "POST http://somehost/_search",
+  'POST http://somehost/_search',
   [
     {
-      name: "fullurl - existing dictionary key, no template",
+      name: 'fullurl - existing dictionary key, no template',
       cursor: { row: 1, column: 6 },
-      initialValue: "query",
+      initialValue: 'query',
       addTemplate: false,
-      prefixToAdd: "",
-      suffixToAdd: "",
+      prefixToAdd: '',
+      suffixToAdd: '',
       rangeToReplace: { start: { row: 1, column: 3 }, end: { row: 1, column: 10 } },
-      autoCompleteSet: ["facets", "query", "size"]
+      autoCompleteSet: ['facets', 'query', 'size']
     },
     {
-      name: "fullurl - existing inner dictionary key",
+      name: 'fullurl - existing inner dictionary key',
       cursor: { row: 2, column: 7 },
-      initialValue: "field",
+      initialValue: 'field',
       addTemplate: false,
-      prefixToAdd: "",
-      suffixToAdd: "",
+      prefixToAdd: '',
+      suffixToAdd: '',
       rangeToReplace: { start: { row: 2, column: 6 }, end: { row: 2, column: 13 } },
-      autoCompleteSet: ["match_all", "term"]
+      autoCompleteSet: ['match_all', 'term']
     },
     {
-      name: "fullurl - existing dictionary key, yes template",
+      name: 'fullurl - existing dictionary key, yes template',
       cursor: { row: 4, column: 7 },
-      initialValue: "facets",
+      initialValue: 'facets',
       addTemplate: true,
-      prefixToAdd: "",
-      suffixToAdd: "",
+      prefixToAdd: '',
+      suffixToAdd: '',
       rangeToReplace: { start: { row: 4, column: 3 }, end: { row: 4, column: 15 } },
-      autoCompleteSet: ["facets", "query", "size"]
+      autoCompleteSet: ['facets', 'query', 'size']
     }
   ]
 );

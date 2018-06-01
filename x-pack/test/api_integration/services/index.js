@@ -5,3 +5,5 @@
  */
 
 export { SupertestWithoutAuthProvider } from './supertest_without_auth';
+export { ReportingAPIProvider } from './reporting_api';
+export { UsageAPIProvider } from './usage_api';

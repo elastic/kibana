@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import expect from 'expect.js';
 
 /**
@@ -10,6 +29,7 @@ export default function ({ getService, getPageObjects }) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
+  const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize']);
 
   describe('dashboard filtering', async () => {
@@ -20,13 +40,13 @@ export default function ({ getService, getPageObjects }) {
     describe('adding a filter that excludes all data', async () => {
       before(async () => {
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.setTimepickerIn63DataRange();
+        await PageObjects.dashboard.setTimepickerInDataRange();
         await dashboardAddPanel.addEveryVisualization('"Filter Bytes Test"');
         await dashboardAddPanel.addEverySavedSearch('"Filter Bytes Test"');
         await dashboardAddPanel.closeAddPanel();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
-        await filterBar.addFilter('bytes', 'is', '12345678', 'kuiTextInput');
+        await filterBar.addFilter('bytes', 'is', '12345678');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
       });
@@ -146,21 +166,22 @@ export default function ({ getService, getPageObjects }) {
 
       it('visualization saved with a query filters data', async () => {
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.setTimepickerIn63DataRange();
+        await PageObjects.dashboard.setTimepickerInDataRange();
 
-        await dashboardAddPanel.addVisualization('animal sounds pie');
+        await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
         await dashboardExpect.pieSliceCount(5);
 
-        await PageObjects.dashboard.clickEditVisualization();
+        await dashboardPanelActions.clickEdit();
         await queryBar.setQuery('weightLbs:>50');
         await queryBar.submitQuery();
+
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
         await dashboardExpect.pieSliceCount(3);
 
-        await PageObjects.visualize.saveVisualization('animal sounds pie');
+        await PageObjects.visualize.saveVisualization('Rendering-Test:-animal-sounds-pie');
         await PageObjects.header.clickDashboard();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
@@ -168,7 +189,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('Nested visualization filter pills filters data as expected', async () => {
-        await PageObjects.dashboard.clickEditVisualization();
+        await dashboardPanelActions.clickEdit();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
         await PageObjects.dashboard.filterOnPieSlice('grr');

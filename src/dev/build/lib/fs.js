@@ -1,11 +1,32 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import fs from 'fs';
 import { createHash } from 'crypto';
 import { resolve, dirname, isAbsolute } from 'path';
 import { createGunzip } from 'zlib';
+import { inspect } from 'util';
 
 import vfs from 'vinyl-fs';
 import { promisify } from 'bluebird';
 import mkdirpCb from 'mkdirp';
+import del from 'del';
 import { createPromiseFromStreams, createMapStream } from '../../../utils';
 
 import { Extract } from 'tar';
@@ -24,6 +45,12 @@ function assertAbsolute(path) {
       'Please use absolute paths to keep things explicit. You probably want to use `build.resolvePath()` or `config.resolveFromRepo()`.'
     );
   }
+}
+
+function longInspect(value) {
+  return inspect(value, {
+    maxArrayLength: Infinity
+  });
 }
 
 export async function mkdirp(path) {
@@ -65,6 +92,22 @@ export async function copy(source, destination) {
   ]);
 
   await chmodAsync(destination, stat.mode);
+}
+
+export async function deleteAll(log, patterns) {
+  if (!Array.isArray(patterns)) {
+    throw new TypeError('Expected patterns to be an array');
+  }
+
+  log.debug('Deleting patterns:', longInspect(patterns));
+
+  for (const pattern of patterns) {
+    assertAbsolute(pattern.startsWith('!') ? pattern.slice(1) : pattern);
+  }
+
+  const files = await del(patterns);
+  log.debug('Deleted %d files/directories', files.length);
+  log.verbose('Deleted:', longInspect(files));
 }
 
 export async function copyAll(sourceDir, destination, options = {}) {

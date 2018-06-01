@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import dedent from 'dedent';
 import getopts from 'getopts';
 import { createToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
@@ -12,7 +31,9 @@ import { runTests } from '../../';
  *                                       if no config option is passed
  */
 export async function runTestsCli(defaultConfigPaths) {
-  const { configs, help, bail, log } = processArgs(defaultConfigPaths);
+  const { configs, help, bail, log, installDir } = processArgs(
+    defaultConfigPaths
+  );
 
   if (help) return displayHelp();
 
@@ -24,7 +45,7 @@ export async function runTestsCli(defaultConfigPaths) {
   }
 
   try {
-    await runTests(configs, { bail, log });
+    await runTests(configs, { bail, log, installDir });
   } catch (err) {
     log.error('FATAL ERROR');
     log.error(err);
@@ -50,6 +71,7 @@ function processArgs(defaultConfigPaths) {
     log,
     help: options.help,
     bail: options.bail,
+    installDir: options['kibana-install-dir'],
     rest: options._,
   };
 }
@@ -64,6 +86,9 @@ function displayHelp() {
     --config      Option to pass in a config
                   Can pass in multiple configs with
                   --config file1 --config file2 --config file3
+    --kibana-install-dir
+                  Run Kibana from an existing install directory
+                  Default: run from source
     --bail        Stop the test run at the first failure
     --help        Display this menu and exit
 

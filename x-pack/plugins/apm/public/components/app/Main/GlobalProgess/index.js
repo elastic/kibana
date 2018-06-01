@@ -11,7 +11,7 @@ import { STATUS } from '../../../../constants/index';
 
 function getIsLoading(state) {
   return some(
-    state.reduxRequest,
+    state.reactReduxRequest,
     subState => get(subState, 'status') === STATUS.LOADING
   );
 }

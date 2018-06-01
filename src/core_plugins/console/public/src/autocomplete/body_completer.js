@@ -1,9 +1,28 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 const _ = require('lodash');
 const engine = require('./engine');
 
-function CompilingContext(endpoint_id, parametrizedComponentFactories) {
+function CompilingContext(endpointId, parametrizedComponentFactories) {
   this.parametrizedComponentFactories = parametrizedComponentFactories;
-  this.endpoint_id = endpoint_id;
+  this.endpointId = endpointId;
 }
 
 function getTemplate(description) {
@@ -21,10 +40,10 @@ function getTemplate(description) {
     return {};
   }
   else if (Array.isArray(description)) {
-    if (description.length == 1) {
+    if (description.length === 1) {
       if (_.isObject(description[0])) {
         // shortcut to save typing
-        var innerTemplate = getTemplate(description[0]);
+        const innerTemplate = getTemplate(description[0]);
 
         return innerTemplate != null ? [innerTemplate] : [];
       }
@@ -43,8 +62,8 @@ function getTemplate(description) {
 }
 
 function getOptions(description) {
-  var options = {};
-  var template = getTemplate(description);
+  const options = {};
+  const template = getTemplate(description);
 
   if (!_.isUndefined(template)) {
     options.template = template;
@@ -63,7 +82,7 @@ function compileDescription(description, compilingContext) {
   else if (_.isObject(description)) {
     // test for objects list as arrays are also objects
     if (description.__scope_link) {
-      return [new ScopeResolver(description.__scope_link, compilingContext)]
+      return [new ScopeResolver(description.__scope_link, compilingContext)];
     }
     if (description.__any_of) {
       return [compileList(description.__any_of, compilingContext)];
@@ -73,7 +92,7 @@ function compileDescription(description, compilingContext) {
         return compileDescription(d, compilingContext);
       }));
     }
-    let obj = compileObject(description, compilingContext);
+    const obj = compileObject(description, compilingContext);
     if (description.__condition) {
       return [compileCondition(description.__condition, obj, compilingContext)];
     } else {
@@ -91,9 +110,9 @@ function compileDescription(description, compilingContext) {
 
 function compileParametrizedValue(value, compilingContext, template) {
   value = value.substr(1, value.length - 2).toLowerCase();
-  var component = compilingContext.parametrizedComponentFactories[value];
+  let component = compilingContext.parametrizedComponentFactories[value];
   if (!component) {
-    throw new Error("no factory found for '" + value + "'");
+    throw new Error('no factory found for \'' + value + '\'');
   }
   component = component(value, null, template);
   if (!_.isUndefined(template)) {
@@ -104,20 +123,22 @@ function compileParametrizedValue(value, compilingContext, template) {
 }
 
 function compileObject(objDescription, compilingContext) {
-  var objectC = new engine.ConstantComponent("{");
-  var constants = [], patterns = [];
+  const objectC = new engine.ConstantComponent('{');
+  const constants = [];
+  const patterns = [];
   _.each(objDescription, function (desc, key) {
-    if (key.indexOf("__") == 0) {
+    if (key.indexOf('__') === 0) {
       // meta key
       return;
     }
 
-    var options = getOptions(desc), component;
+    const options = getOptions(desc);
+    let component;
     if (/^\{.*\}$/.test(key)) {
       component = compileParametrizedValue(key, compilingContext, options.template);
       patterns.push(component);
     }
-    else if (key === "*") {
+    else if (key === '*') {
       component = new engine.SharedComponent(key);
       patterns.push(component);
     }
@@ -130,12 +151,12 @@ function compileObject(objDescription, compilingContext) {
       component.addComponent(subComponent);
     });
   });
-  objectC.addComponent(new ObjectComponent("inner", constants, patterns));
+  objectC.addComponent(new ObjectComponent('inner', constants, patterns));
   return objectC;
 }
 
 function compileList(listRule, compilingContext) {
-  var listC = new engine.ConstantComponent("[");
+  const listC = new engine.ConstantComponent('[');
   _.each(listRule, function (desc) {
     _.each(compileDescription(desc, compilingContext), function (component) {
       listC.addComponent(component);
@@ -148,11 +169,11 @@ function compileList(listRule, compilingContext) {
 function compileCondition(description, compiledObject) {
   if (description.lines_regex) {
     return new ConditionalProxy(function (context, editor) {
-      let lines = editor.getSession().getLines(context.requestStartRow, editor.getCursorPosition().row).join("\n");
-      return new RegExp(description.lines_regex, "m").test(lines);
+      const lines = editor.getSession().getLines(context.requestStartRow, editor.getCursorPosition().row).join('\n');
+      return new RegExp(description.lines_regex, 'm').test(lines);
     }, compiledObject);
   } else {
-    throw "unknown condition type - got: " + JSON.stringify(description);
+    throw 'unknown condition type - got: ' + JSON.stringify(description);
   }
 }
 
@@ -174,7 +195,7 @@ ObjectComponent.prototype = _.create(
 
 (function (cls) {
   cls.getTerms = function (context, editor) {
-    var options = [];
+    const options = [];
     _.each(this.constants, function (component) {
       options.push.apply(options, component.getTerms(context, editor));
     });
@@ -185,18 +206,18 @@ ObjectComponent.prototype = _.create(
   };
 
   cls.match = function (token, context, editor) {
-    var result = {
+    const result = {
       next: []
     };
     _.each(this.constants, function (component) {
-      var componentResult = component.match(token, context, editor);
+      const componentResult = component.match(token, context, editor);
       if (componentResult && componentResult.next) {
         result.next.push.apply(result.next, componentResult.next);
       }
     });
 
     // try to link to GLOBAL rules
-    var globalRules = context.globalComponentResolver(token, false);
+    const globalRules = context.globalComponentResolver(token, false);
     if (globalRules) {
       result.next.push.apply(result.next, globalRules);
     }
@@ -205,7 +226,7 @@ ObjectComponent.prototype = _.create(
       return result;
     }
     _.each(this.patternsAndWildCards, function (component) {
-      var componentResult = component.match(token, context, editor);
+      const componentResult = component.match(token, context, editor);
       if (componentResult && componentResult.next) {
         result.next.push.apply(result.next, componentResult.next);
       }
@@ -214,7 +235,7 @@ ObjectComponent.prototype = _.create(
     return result;
 
   };
-})(ObjectComponent.prototype);
+}(ObjectComponent.prototype));
 
 /**
  * An object to resolve scope links (syntax endpoint.path1.path2)
@@ -228,14 +249,14 @@ ObjectComponent.prototype = _.create(
  * which should return the top level components for the given endpoint
  */
 function ScopeResolver(link, compilingContext) {
-  engine.SharedComponent.call(this, "__scope_link", null);
-  if (_.isString(link) && link[0] === ".") {
+  engine.SharedComponent.call(this, '__scope_link', null);
+  if (_.isString(link) && link[0] === '.') {
     // relative link, inject current endpoint
-    if (link === ".") {
-      link = compilingContext.endpoint_id;
+    if (link === '.') {
+      link = compilingContext.endpointId;
     }
     else {
-      link = compilingContext.endpoint_id + link;
+      link = compilingContext.endpointId + link;
     }
   }
   this.link = link;
@@ -251,23 +272,23 @@ ScopeResolver.prototype = _.create(
 
   cls.resolveLinkToComponents = function (context, editor) {
     if (_.isFunction(this.link)) {
-      var desc = this.link(context, editor);
+      const desc = this.link(context, editor);
       return compileDescription(desc, this.compilingContext);
     }
     if (!_.isString(this.link)) {
-      throw new Error("unsupported link format", this.link);
+      throw new Error('unsupported link format', this.link);
     }
 
-    var path = this.link.replace(/\./g, "{").split(/(\{)/);
-    var endpoint = path[0];
-    var components;
+    let path = this.link.replace(/\./g, '{').split(/(\{)/);
+    const endpoint = path[0];
+    let components;
     try {
-      if (endpoint === "GLOBAL") {
+      if (endpoint === 'GLOBAL') {
         // global rules need an extra indirection
         if (path.length < 3) {
-          throw new Error("missing term in global link: " + this.link);
+          throw new Error('missing term in global link: ' + this.link);
         }
-        var term = path[2];
+        const term = path[2];
         components = context.globalComponentResolver(term);
         path = path.slice(3);
       }
@@ -277,13 +298,14 @@ ScopeResolver.prototype = _.create(
       }
     }
     catch (e) {
-      throw new Error("failed to resolve link [" + this.link + "]: " + e);
+      throw new Error('failed to resolve link [' + this.link + ']: ' + e);
     }
     return engine.resolvePathToComponents(path, context, editor, components);
   };
 
   cls.getTerms = function (context, editor) {
-    var options = [], components = this.resolveLinkToComponents(context, editor);
+    const options = [];
+    const components = this.resolveLinkToComponents(context, editor);
     _.each(components, function (component) {
       options.push.apply(options, component.getTerms(context, editor));
     });
@@ -291,13 +313,13 @@ ScopeResolver.prototype = _.create(
   };
 
   cls.match = function (token, context, editor) {
-    var result = {
-        next: []
-      },
-      components = this.resolveLinkToComponents(context, editor);
+    const result = {
+      next: []
+    };
+    const components = this.resolveLinkToComponents(context, editor);
 
     _.each(components, function (component) {
-      var componentResult = component.match(token, context, editor);
+      const componentResult = component.match(token, context, editor);
       if (componentResult && componentResult.next) {
         result.next.push.apply(result.next, componentResult.next);
       }
@@ -305,11 +327,11 @@ ScopeResolver.prototype = _.create(
 
     return result;
   };
-})(ScopeResolver.prototype);
+}(ScopeResolver.prototype));
 
 
 function ConditionalProxy(predicate, delegate) {
-  engine.SharedComponent.call(this, "__condition", null);
+  engine.SharedComponent.call(this, '__condition', null);
   this.predicate = predicate;
   this.delegate = delegate;
 }
@@ -336,7 +358,7 @@ ConditionalProxy.prototype = _.create(
       return false;
     }
   };
-})(ConditionalProxy.prototype);
+}(ConditionalProxy.prototype));
 
 
 function GlobalOnlyComponent(name) {
@@ -355,12 +377,12 @@ GlobalOnlyComponent.prototype = _.create(
   };
 
   cls.match = function (token, context) {
-    var result = {
+    const result = {
       next: []
     };
 
     // try to link to GLOBAL rules
-    var globalRules = context.globalComponentResolver(token, false);
+    const globalRules = context.globalComponentResolver(token, false);
     if (globalRules) {
       result.next.push.apply(result.next, globalRules);
     }
@@ -374,16 +396,16 @@ GlobalOnlyComponent.prototype = _.create(
     return result;
 
   };
-})(GlobalOnlyComponent.prototype);
+}(GlobalOnlyComponent.prototype));
 
 
 // a list of component that match anything but give auto complete suggestions based on global API entries.
 export function globalsOnlyAutocompleteComponents() {
-  return [new GlobalOnlyComponent("__global__")];
+  return [new GlobalOnlyComponent('__global__')];
 }
 
 /**
- * @param endpoint_id id of the endpoint being compiled.
+ * @param endpointId id of the endpoint being compiled.
  * @param description a json dict describing the endpoint
  * @param endpointComponentResolver a function (endpoint,context,editor) which should resolve an endpoint
  *        to it's list of compiled components.
@@ -395,6 +417,6 @@ export function globalsOnlyAutocompleteComponents() {
    *   }
    * }
  */
-export function compileBodyDescription(endpoint_id, description, parametrizedComponentFactories) {
-  return compileDescription(description, new CompilingContext(endpoint_id, parametrizedComponentFactories));
+export function compileBodyDescription(endpointId, description, parametrizedComponentFactories) {
+  return compileDescription(description, new CompilingContext(endpointId, parametrizedComponentFactories));
 }

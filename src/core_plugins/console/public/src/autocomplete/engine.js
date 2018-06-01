@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 const _ = require('lodash');
 
 export function AutocompleteComponent(name) {
@@ -48,44 +67,44 @@ SharedComponent.prototype = _.create(
   };
 
   cls.addComponent = function (component) {
-    var current = this._nextDict[component.name] || [];
+    const current = this._nextDict[component.name] || [];
     current.push(component);
     this._nextDict[component.name] = current;
     this.next = [].concat.apply([], _.values(this._nextDict));
   };
 
-})(SharedComponent.prototype);
+}(SharedComponent.prototype));
 
 /** A component that suggests one of the give options, but accepts anything */
-function ListComponent(name, list, parent, multi_valued, allow_non_valid_values) {
+function ListComponent(name, list, parent, multiValued, allowNonValidValues) {
   SharedComponent.call(this, name, parent);
   this.listGenerator = Array.isArray(list) ? function () {
-    return list
+    return list;
   } : list;
-  this.multi_valued = _.isUndefined(multi_valued) ? true : multi_valued;
-  this.allow_non_valid_values = _.isUndefined(allow_non_valid_values) ? false : allow_non_valid_values;
+  this.multiValued = _.isUndefined(multiValued) ? true : multiValued;
+  this.allowNonValidValues = _.isUndefined(allowNonValidValues) ? false : allowNonValidValues;
 }
 
-ListComponent.prototype = _.create(SharedComponent.prototype, { "constructor": ListComponent });
+ListComponent.prototype = _.create(SharedComponent.prototype, { 'constructor': ListComponent });
 
 
 (function (cls) {
   cls.getTerms = function (context, editor) {
-    if (!this.multi_valued && context.otherTokenValues) {
+    if (!this.multiValued && context.otherTokenValues) {
       // already have a value -> no suggestions
-      return []
+      return [];
     }
-    var already_set = context.otherTokenValues || [];
-    if (_.isString(already_set)) {
-      already_set = [already_set];
+    let alreadySet = context.otherTokenValues || [];
+    if (_.isString(alreadySet)) {
+      alreadySet = [alreadySet];
     }
-    var ret = _.difference(this.listGenerator(context, editor), already_set);
+    let ret = _.difference(this.listGenerator(context, editor), alreadySet);
 
     if (this.getDefaultTermMeta()) {
-      var meta = this.getDefaultTermMeta();
+      const meta = this.getDefaultTermMeta();
       ret = _.map(ret, function (term) {
         if (_.isString(term)) {
-          term = { "name": term };
+          term = { 'name': term };
         }
         return _.defaults(term, { meta: meta });
       });
@@ -95,17 +114,17 @@ ListComponent.prototype = _.create(SharedComponent.prototype, { "constructor": L
   };
 
   cls.validateTokens = function (tokens) {
-    if (!this.multi_valued && tokens.length > 1) {
+    if (!this.multiValued && tokens.length > 1) {
       return false;
     }
 
     // verify we have all tokens
-    var list = this.listGenerator();
-    var not_found = _.any(tokens, function (token) {
-      return list.indexOf(token) == -1;
+    const list = this.listGenerator();
+    const notFound = _.any(tokens, function (token) {
+      return list.indexOf(token) === -1;
     });
 
-    if (not_found) {
+    if (notFound) {
       return false;
     }
     return true;
@@ -121,34 +140,34 @@ ListComponent.prototype = _.create(SharedComponent.prototype, { "constructor": L
 
   cls.match = function (token, context, editor) {
     if (!Array.isArray(token)) {
-      token = [token]
+      token = [token];
     }
-    if (!this.allow_non_valid_values && !this.validateTokens(token, context, editor)) {
-      return null
+    if (!this.allowNonValidValues && !this.validateTokens(token, context, editor)) {
+      return null;
     }
 
-    var result = Object.getPrototypeOf(cls).match.call(this, token, context, editor);
+    const result = Object.getPrototypeOf(cls).match.call(this, token, context, editor);
     result.context_values = result.context_values || {};
     result.context_values[this.getContextKey()] = token;
     return result;
-  }
-})(ListComponent.prototype);
+  };
+}(ListComponent.prototype));
 
 function SimpleParamComponent(name, parent) {
   SharedComponent.call(this, name, parent);
 }
 
-SimpleParamComponent.prototype = _.create(SharedComponent.prototype, { "constructor": SimpleParamComponent });
+SimpleParamComponent.prototype = _.create(SharedComponent.prototype, { 'constructor': SimpleParamComponent });
 
 (function (cls) {
   cls.match = function (token, context, editor) {
-    var result = Object.getPrototypeOf(cls).match.call(this, token, context, editor);
+    const result = Object.getPrototypeOf(cls).match.call(this, token, context, editor);
     result.context_values = result.context_values || {};
     result.context_values[this.name] = token;
     return result;
-  }
+  };
 
-})(SimpleParamComponent.prototype);
+}(SimpleParamComponent.prototype));
 
 function ConstantComponent(name, parent, options) {
   SharedComponent.call(this, name, parent);
@@ -158,7 +177,7 @@ function ConstantComponent(name, parent, options) {
   this.options = options || [name];
 }
 
-ConstantComponent.prototype = _.create(SharedComponent.prototype, { "constructor": ConstantComponent });
+ConstantComponent.prototype = _.create(SharedComponent.prototype, { 'constructor': ConstantComponent });
 
 export { SharedComponent, ListComponent, SimpleParamComponent, ConstantComponent };
 
@@ -182,8 +201,8 @@ export { SharedComponent, ListComponent, SimpleParamComponent, ConstantComponent
 
     return Object.getPrototypeOf(cls).match.call(this, token, context, editor);
 
-  }
-})(ConstantComponent.prototype);
+  };
+}(ConstantComponent.prototype));
 
 export function wrapComponentWithDefaults(component, defaults) {
   function Wrapper() {
@@ -191,14 +210,14 @@ export function wrapComponentWithDefaults(component, defaults) {
   }
 
   Wrapper.prototype = {};
-  for (var key in component) {
+  for (const key in component) {
     if (_.isFunction(component[key])) {
       Wrapper.prototype[key] = _.bindKey(component, key);
     }
   }
 
   Wrapper.prototype.getTerms = function (context, editor) {
-    var result = component.getTerms(context, editor);
+    let result = component.getTerms(context, editor);
     if (!result) {
       return result;
     }
@@ -213,7 +232,7 @@ export function wrapComponentWithDefaults(component, defaults) {
   return new Wrapper();
 }
 
-let tracer = function () {
+const tracer = function () {
   if (window.engine_trace) {
     console.log.call(console, arguments);
   }
@@ -226,7 +245,7 @@ function passThroughContext(context, extensionList) {
   }
 
   PTC.prototype = context;
-  var result = new PTC();
+  const result = new PTC();
   if (extensionList) {
     extensionList.unshift(result);
     _.assign.apply(_, extensionList);
@@ -235,8 +254,8 @@ function passThroughContext(context, extensionList) {
   return result;
 }
 
-function WalkingState(parent_name, components, contextExtensionList, depth, priority) {
-  this.parent_name = parent_name;
+function WalkingState(parentName, components, contextExtensionList, depth, priority) {
+  this.parentName = parentName;
   this.components = components;
   this.contextExtensionList = contextExtensionList;
   this.depth = depth || 0;
@@ -246,21 +265,22 @@ function WalkingState(parent_name, components, contextExtensionList, depth, prio
 
 function walkTokenPath(tokenPath, walkingStates, context, editor) {
   if (!tokenPath || tokenPath.length === 0) {
-    return walkingStates
+    return walkingStates;
   }
-  var token = tokenPath[0],
-    nextWalkingStates = [];
+  const token = tokenPath[0];
+  const  nextWalkingStates = [];
 
-  tracer("starting token evaluation [" + token + "]");
+  tracer('starting token evaluation [' + token + ']');
 
   _.each(walkingStates, function (ws) {
-    var contextForState = passThroughContext(context, ws.contextExtensionList);
+    const contextForState = passThroughContext(context, ws.contextExtensionList);
     _.each(ws.components, function (component) {
-      tracer("evaluating [" + token + "] with [" + component.name + "]", component);
-      var result = component.match(token, contextForState, editor);
+      tracer('evaluating [' + token + '] with [' + component.name + ']', component);
+      const result = component.match(token, contextForState, editor);
       if (result && !_.isEmpty(result)) {
-        tracer("matched [" + token + "] with:", result);
-        var next, extensionList;
+        tracer('matched [' + token + '] with:', result);
+        let next;
+        let extensionList;
         if (result.next && !Array.isArray(result.next)) {
           next = [result.next];
         }
@@ -276,7 +296,7 @@ function walkTokenPath(tokenPath, walkingStates, context, editor) {
           extensionList = ws.contextExtensionList;
         }
 
-        var priority = ws.priority;
+        let priority = ws.priority;
         if (_.isNumber(result.priority)) {
           if (_.isNumber(priority)) {
             priority = Math.min(priority, result.priority);
@@ -291,29 +311,29 @@ function walkTokenPath(tokenPath, walkingStates, context, editor) {
     });
   });
 
-  if (nextWalkingStates.length == 0) {
+  if (nextWalkingStates.length === 0) {
     // no where to go, still return context variables returned so far..
     return _.map(walkingStates, function (ws) {
       return new WalkingState(ws.name, [], ws.contextExtensionList);
-    })
+    });
   }
 
   return walkTokenPath(tokenPath.slice(1), nextWalkingStates, context, editor);
 }
 
 export function resolvePathToComponents(tokenPath, context, editor, components) {
-  var walkStates = walkTokenPath(tokenPath, [new WalkingState("ROOT", components, [])], context, editor);
-  var result = [].concat.apply([], _.pluck(walkStates, 'components'));
+  const walkStates = walkTokenPath(tokenPath, [new WalkingState('ROOT', components, [])], context, editor);
+  const result = [].concat.apply([], _.pluck(walkStates, 'components'));
   return result;
 }
 
 export function populateContext(tokenPath, context, editor, includeAutoComplete, components) {
 
-  var walkStates = walkTokenPath(tokenPath, [new WalkingState("ROOT", components, [])], context, editor);
+  let walkStates = walkTokenPath(tokenPath, [new WalkingState('ROOT', components, [])], context, editor);
   if (includeAutoComplete) {
-    var autoCompleteSet = [];
+    let autoCompleteSet = [];
     _.each(walkStates, function (ws) {
-      var contextForState = passThroughContext(context, ws.contextExtensionList);
+      const contextForState = passThroughContext(context, ws.contextExtensionList);
       _.each(ws.components, function (component) {
         _.each(component.getTerms(contextForState, editor), function (term) {
           if (!_.isObject(term)) {
@@ -321,7 +341,7 @@ export function populateContext(tokenPath, context, editor, includeAutoComplete,
           }
           autoCompleteSet.push(term);
         });
-      })
+      });
     });
     autoCompleteSet = _.uniq(autoCompleteSet, false);
     context.autoCompleteSet = autoCompleteSet;
@@ -329,16 +349,16 @@ export function populateContext(tokenPath, context, editor, includeAutoComplete,
 
   // apply what values were set so far to context, selecting the deepest on which sets the context
   if (walkStates.length !== 0) {
-    var wsToUse;
+    let wsToUse;
     walkStates = _.sortBy(walkStates, function (ws) {
       return _.isNumber(ws.priority) ? ws.priority : Number.MAX_VALUE;
     });
     wsToUse = _.find(walkStates, function (ws) {
-      return _.isEmpty(ws.components)
+      return _.isEmpty(ws.components);
     });
 
     if (!wsToUse && walkStates.length > 1 && !includeAutoComplete) {
-      console.info("more then one context active for current path, but autocomplete isn't requested", walkStates);
+      console.info('more then one context active for current path, but autocomplete isn\'t requested', walkStates);
     }
 
     if (!wsToUse) {

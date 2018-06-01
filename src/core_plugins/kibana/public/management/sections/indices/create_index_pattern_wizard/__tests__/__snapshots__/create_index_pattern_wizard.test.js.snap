@@ -19,7 +19,9 @@ exports[`CreateIndexPatternWizard renders index pattern step when there are indi
   <StepIndexPattern
     allIndices={
       Array [
-        Object {},
+        Object {
+          "name": "myIndexPattern",
+        },
       ]
     }
     esService={Object {}}
@@ -38,7 +40,6 @@ exports[`CreateIndexPatternWizard renders the empty state when there are no indi
     onChangeIncludingSystemIndices={[Function]}
   />
   <EmptyState
-    loadingDataDocUrl=""
     onRefresh={[Function]}
   />
 </div>

@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 const { join, dirname, extname } = require('path');
 
 const webpackResolver = require('eslint-import-resolver-webpack');
@@ -33,8 +52,26 @@ function initContext(file, config) {
   return context;
 }
 
+function tryNodeResolver(importRequest, file, config) {
+  return nodeResolver.resolve(
+    importRequest,
+    file,
+    // we use Object.assign so that this file is compatible with slightly older
+    // versions of node.js used by IDEs (eg. resolvers are run in the Electron
+    // process in Atom)
+    Object.assign({}, config, {
+      extensions: ['.js', '.json', '.ts', '.tsx'],
+      isFile,
+    })
+  );
+}
+
 exports.resolve = function resolveKibanaPath(importRequest, file, config) {
   config = config || {};
+
+  if (config.forceNode) {
+    return tryNodeResolver(importRequest, file, config);
+  }
 
   // these modules are simulated by webpack, so there is no
   // path to resolve to and no reason to do any more work
@@ -79,14 +116,7 @@ exports.resolve = function resolveKibanaPath(importRequest, file, config) {
   // to the node_modules directory by the node resolver, but we want
   // them to resolve to the actual shim
   if (isPathRequest || !isProbablyWebpackShim(importRequest, file)) {
-    const nodeResult = nodeResolver.resolve(
-      importRequest,
-      file,
-      Object.assign({}, config, {
-        isFile,
-      })
-    );
-
+    const nodeResult = tryNodeResolver(importRequest, file, config);
     if (nodeResult && nodeResult.found) {
       return nodeResult;
     }

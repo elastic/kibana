@@ -6,17 +6,17 @@ exports[`render 1`] = `
   hasShadow={false}
   paddingSize="l"
 >
-  <EuiText
-    grow={true}
+  <EuiTitle
+    size="xs"
   >
-    <p>
+    <h3>
       <EuiTextColor
         color="subdued"
       >
         Recently viewed
       </EuiTextColor>
-    </p>
-  </EuiText>
+    </h3>
+  </EuiTitle>
   <EuiSpacer
     size="s"
   />

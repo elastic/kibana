@@ -1,9 +1,28 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import { SavedObjectNotFound, DuplicateField, IndexPatternMissingIndices } from '../errors';
 import angular from 'angular';
 import { fieldFormats } from '../registry/field_formats';
 import UtilsMappingSetupProvider from '../utils/mapping_setup';
-import { Notifier } from '../notify';
+import { Notifier, toastNotifications } from '../notify';
 
 import { getComputedFields } from './_get_computed_fields';
 import { formatHit } from './_format_hit';
@@ -25,6 +44,8 @@ export function getRoutes() {
     sourceFilters: '/management/kibana/indices/{{id}}?_a=(tab:sourceFilters)'
   };
 }
+
+const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 
 export function IndexPatternProvider(Private, config, Promise, confirmModalPromise, kbnUrl) {
   const getConfig = (...args) => config.get(...args);
@@ -72,7 +93,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
     return FieldFormat && new FieldFormat(mapping.params, getConfig);
   }
 
-  function updateFromElasticSearch(indexPattern, response) {
+  function updateFromElasticSearch(indexPattern, response, forceFieldRefresh = false) {
     if (!response.found) {
       const markdownSaveId = indexPattern.id.replace('*', '%2A');
 
@@ -109,7 +130,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
       }
     }
 
-    return indexFields(indexPattern);
+    return indexFields(indexPattern, forceFieldRefresh);
   }
 
   function isFieldRefreshRequired(indexPattern) {
@@ -128,14 +149,14 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
     });
   }
 
-  function indexFields(indexPattern) {
+  function indexFields(indexPattern, forceFieldRefresh = false) {
     let promise = Promise.resolve();
 
     if (!indexPattern.id) {
       return promise;
     }
 
-    if (isFieldRefreshRequired(indexPattern)) {
+    if (forceFieldRefresh || isFieldRefreshRequired(indexPattern)) {
       promise = indexPattern.refreshFields();
     }
 
@@ -147,6 +168,11 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
   function setId(indexPattern, id) {
     indexPattern.id = id;
     return id;
+  }
+
+  function setVersion(indexPattern, version) {
+    indexPattern.version = version;
+    return version;
   }
 
   function watch(indexPattern) {
@@ -200,7 +226,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
       return getRoutes();
     }
 
-    init() {
+    init(forceFieldRefresh = false) {
       watch(this);
 
       if (!this.id) {
@@ -211,6 +237,8 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
         .then(resp => {
           // temporary compatability for savedObjectsClient
 
+          setVersion(this, resp._version);
+
           return {
             _id: resp.id,
             _type: resp.type,
@@ -218,7 +246,17 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
             found: resp._version ? true : false
           };
         })
-        .then(response => updateFromElasticSearch(this, response))
+        // Do this before we attempt to update from ES
+        // since that call can potentially perform a save
+        .then(response => {
+          this.originalBody = this.prepBody();
+          return response;
+        })
+        .then(response => updateFromElasticSearch(this, response, forceFieldRefresh))
+        // Do it after to ensure we have the most up to date information
+        .then(() => {
+          this.originalBody = this.prepBody();
+        })
         .then(() => this);
     }
 
@@ -353,62 +391,108 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
       return body;
     }
 
-    /**
-     * Returns a promise that resolves to true if either the title is unique, or if the user confirmed they
-     * wished to save the duplicate title.  Promise is rejected if the user rejects the confirmation.
-     */
-    warnIfDuplicateTitle() {
-      return findObjectByTitle(savedObjectsClient, type, this.title)
-        .then(duplicate => {
-          if (!duplicate) return false;
-          if (duplicate.id === this.id) return false;
-
-          const confirmMessage =
-            `An index pattern with the title '${this.title}' already exists.`;
-
-          return confirmModalPromise(confirmMessage, { confirmButtonText: 'Go to existing pattern' })
-            .then(() => {
-              kbnUrl.redirect('/management/kibana/indices/{{id}}', { id: duplicate.id });
-              return true;
-            }).catch(() => {
-              return true;
-            });
-        });
-    }
-
-    create() {
-      return this.warnIfDuplicateTitle().then((isDuplicate) => {
-        if (isDuplicate) return;
+    async create(allowOverride = false, showOverridePrompt = false) {
+      const _create = async (duplicateId) => {
+        if (duplicateId) {
+          const duplicatePattern = new IndexPattern(duplicateId);
+          await duplicatePattern.destroy();
+        }
 
         const body = this.prepBody();
+        const response = await savedObjectsClient.create(type, body, { id: this.id });
+        return setId(this, response.id);
+      };
 
-        return savedObjectsClient.create(type, body, { id: this.id })
-          .then(response => setId(this, response.id))
-          .catch(err => {
-            if (err.statusCode !== 409) {
-              return Promise.resolve(false);
-            }
-            const confirmMessage = 'Are you sure you want to overwrite this?';
+      const potentialDuplicateByTitle = await findObjectByTitle(savedObjectsClient, type, this.title);
+      // If there is potentialy duplicate title, just create it
+      if (!potentialDuplicateByTitle) {
+        return await _create();
+      }
 
-            return confirmModalPromise(confirmMessage, { confirmButtonText: 'Overwrite' })
-              .then(() => Promise
-                .try(() => {
-                  const cached = patternCache.get(this.id);
-                  if (cached) {
-                    return cached.then(pattern => pattern.destroy());
-                  }
-                })
-                .then(() => savedObjectsClient.create(type, body, { id: this.id, overwrite: true }))
-                .then(response => setId(this, response.id)),
-              _.constant(false) // if the user doesn't overwrite, resolve with false
-              );
-          });
-      });
+      // We found a duplicate but we aren't allowing override, show the warn modal
+      if (!allowOverride) {
+        const confirmMessage = `An index pattern with the title '${this.title}' already exists.`;
+        try {
+          await confirmModalPromise(confirmMessage, { confirmButtonText: 'Go to existing pattern' });
+          return kbnUrl.redirect('/management/kibana/indices/{{id}}', { id: potentialDuplicateByTitle.id });
+        } catch (err) {
+          return false;
+        }
+      }
+
+      // We can override, but we do not want to see a prompt, so just do it
+      if (!showOverridePrompt) {
+        return await _create(potentialDuplicateByTitle.id);
+      }
+
+      // We can override and we want to prompt for confirmation
+      try {
+        await confirmModalPromise(`Are you sure you want to overwrite ${this.title}?`, { confirmButtonText: 'Overwrite' });
+      } catch (err) {
+        // They changed their mind
+        return false;
+      }
+
+      // Let's do it!
+      return await _create(potentialDuplicateByTitle.id);
     }
 
-    save() {
-      return savedObjectsClient.update(type, this.id, this.prepBody())
-        .then(({ id }) => setId(this, id));
+    save(saveAttempts = 0) {
+      const body = this.prepBody();
+      // What keys changed since they last pulled the index pattern
+      const originalChangedKeys = Object.keys(body).filter(key => body[key] !== this.originalBody[key]);
+      return savedObjectsClient.update(type, this.id, body, { version: this.version })
+        .then(({ id, _version }) => {
+          setId(this, id);
+          setVersion(this, _version);
+        })
+        .catch(err => {
+          if (err.statusCode === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
+            const samePattern = new IndexPattern(this.id);
+            return samePattern.init()
+              .then(() => {
+                // What keys changed from now and what the server returned
+                const updatedBody = samePattern.prepBody();
+
+                // Build a list of changed keys from the server response
+                // and ensure we ignore the key if the server response
+                // is the same as the original response (since that is expected
+                // if we made a change in that key)
+                const serverChangedKeys = Object.keys(updatedBody).filter(key => {
+                  return updatedBody[key] !== body[key] && this.originalBody[key] !== updatedBody[key];
+                });
+
+                let unresolvedCollision = false;
+                for (const originalKey of originalChangedKeys) {
+                  for (const serverKey of serverChangedKeys) {
+                    if (originalKey === serverKey) {
+                      unresolvedCollision = true;
+                      break;
+                    }
+                  }
+                }
+
+                if (unresolvedCollision) {
+                  toastNotifications.addDanger('Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.'); // eslint-disable-line max-len
+                  throw err;
+                }
+
+                // Set the updated response on this object
+                serverChangedKeys.forEach(key => {
+                  this[key] = samePattern[key];
+                });
+
+                setVersion(this, samePattern.version);
+
+                // Clear cache
+                patternCache.clear(this.id);
+
+                // Try the save again
+                return this.save(saveAttempts);
+              });
+          }
+          throw err;
+        });
     }
 
     refreshFields() {

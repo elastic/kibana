@@ -19,7 +19,7 @@ import {
 import { isEmpty } from 'lodash';
 
 import TooltipOverlay from '../../shared/TooltipOverlay';
-import { ServiceDetailsRequest } from '../../../store/reduxRequest/serviceDetails';
+import { ServiceDetailsRequest } from '../../../store/reactReduxRequest/serviceDetails';
 
 const Container = styled.div`
   display: flex;
@@ -87,7 +87,7 @@ function TabNavigation({ urlParams, location }) {
                 key={type}
               >
                 <NavLink
-                  path={`${serviceName}/transactions/${encodeURIComponent(
+                  path={`/${serviceName}/transactions/${encodeURIComponent(
                     type
                   )}`}
                   selected={transactionType === type && !errorsSelected}
@@ -101,7 +101,7 @@ function TabNavigation({ urlParams, location }) {
       />
 
       <Divider />
-      <TabLink path={`${serviceName}/errors`} selected={errorsSelected}>
+      <TabLink path={`/${serviceName}/errors`} selected={errorsSelected}>
         Errors
       </TabLink>
     </Container>

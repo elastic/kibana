@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { getQueryParams } from './query_params';
 
 const MAPPINGS = {
@@ -45,7 +64,7 @@ describe('searchDsl/queryParams', () => {
   });
 
   describe('{type}', () => {
-    it('includes just a terms filter', () => {
+    it('adds a term filter when a string', () => {
       expect(getQueryParams(MAPPINGS, 'saved'))
         .toEqual({
           query: {
@@ -53,6 +72,21 @@ describe('searchDsl/queryParams', () => {
               filter: [
                 {
                   term: { type: 'saved' }
+                }
+              ]
+            }
+          }
+        });
+    });
+
+    it('adds a terms filter when an array', () => {
+      expect(getQueryParams(MAPPINGS, ['saved', 'vis']))
+        .toEqual({
+          query: {
+            bool: {
+              filter: [
+                {
+                  terms: { type: ['saved', 'vis'] }
                 }
               ]
             }
@@ -102,6 +136,26 @@ describe('searchDsl/queryParams', () => {
           }
         });
     });
+    it('includes bool with sqs query and terms filter for type', () => {
+      expect(getQueryParams(MAPPINGS, ['saved', 'vis'], 'y*'))
+        .toEqual({
+          query: {
+            bool: {
+              filter: [
+                { terms: { type: ['saved', 'vis'] } }
+              ],
+              must: [
+                {
+                  simple_query_string: {
+                    query: 'y*',
+                    all_fields: true
+                  }
+                }
+              ]
+            }
+          }
+        });
+    });
   });
 
   describe('{search,searchFields}', () => {
@@ -115,7 +169,6 @@ describe('searchDsl/queryParams', () => {
                   simple_query_string: {
                     query: 'y*',
                     fields: [
-                      'type.title',
                       'pending.title',
                       'saved.title'
                     ]
@@ -136,7 +189,6 @@ describe('searchDsl/queryParams', () => {
                   simple_query_string: {
                     query: 'y*',
                     fields: [
-                      'type.title^3',
                       'pending.title^3',
                       'saved.title^3'
                     ]
@@ -157,10 +209,8 @@ describe('searchDsl/queryParams', () => {
                   simple_query_string: {
                     query: 'y*',
                     fields: [
-                      'type.title',
                       'pending.title',
                       'saved.title',
-                      'type.title.raw',
                       'pending.title.raw',
                       'saved.title.raw',
                     ]
@@ -174,7 +224,7 @@ describe('searchDsl/queryParams', () => {
   });
 
   describe('{type,search,searchFields}', () => {
-    it('includes bool, and sqs with field list', () => {
+    it('includes bool, with term filter and sqs with field list', () => {
       expect(getQueryParams(MAPPINGS, 'saved', 'y*', ['title']))
         .toEqual({
           query: {
@@ -188,6 +238,29 @@ describe('searchDsl/queryParams', () => {
                     query: 'y*',
                     fields: [
                       'saved.title'
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        });
+    });
+    it('includes bool, with terms filter and sqs with field list', () => {
+      expect(getQueryParams(MAPPINGS, ['saved', 'vis'], 'y*', ['title']))
+        .toEqual({
+          query: {
+            bool: {
+              filter: [
+                { terms: { type: ['saved', 'vis'] } }
+              ],
+              must: [
+                {
+                  simple_query_string: {
+                    query: 'y*',
+                    fields: [
+                      'saved.title',
+                      'vis.title'
                     ]
                   }
                 }

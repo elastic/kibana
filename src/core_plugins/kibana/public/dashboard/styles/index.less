@@ -109,7 +109,7 @@
 }
 
 
-.dashboardCloneModal {
+.dashboardModal {
   width: 450px;
 }
 
@@ -247,7 +247,6 @@ dashboard-viewport-provider {
 /**
  * 1. Fix Firefox bug where a value of overflow: hidden will prevent scrolling in a panel where the spy panel does
  * not have enough room.
- * 2. react-select used in input control vis needs `visible` overflow to avoid clipping selection list
  */
 .dashboard-panel {
   z-index: auto;
@@ -259,7 +258,7 @@ dashboard-viewport-provider {
   background: @dashboard-panel-bg;
   color: @dashboard-panel-color;
   padding: 0;
-  overflow: visible; /* 1, 2 */
+  overflow: visible; /* 1 */
 
   position: relative;
 
@@ -341,7 +340,7 @@ dashboard-viewport-provider {
      * 1. Use opacity to make this element accessible to screen readers and keyboard.
      * 2. Show on focus to enable keyboard accessibility.
      */
-    .viewModeExpandPanelToggle {
+    .viewModeOpenContextMenuIcon {
       opacity: 0; /* 1 */
       &:focus {
         opacity: 1; /* 2 */
@@ -355,7 +354,7 @@ dashboard-viewport-provider {
       .visualize-show-spy {
         visibility: visible;
       }
-      .viewModeExpandPanelToggle {
+      .viewModeOpenContextMenuIcon {
         opacity: 1;
       }
     }

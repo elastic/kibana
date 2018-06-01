@@ -25,6 +25,7 @@ exports[`renders RangeControlEditor 1`] = `
     label="Step Size"
   >
     <EuiFieldNumber
+      compressed={false}
       data-test-subj="rangeControlSizeInput0"
       fullWidth={false}
       isLoading={false}
@@ -40,6 +41,7 @@ exports[`renders RangeControlEditor 1`] = `
     label="Decimal Places"
   >
     <EuiFieldNumber
+      compressed={false}
       data-test-subj="rangeControlDecimalPlacesInput0"
       fullWidth={false}
       isLoading={false}

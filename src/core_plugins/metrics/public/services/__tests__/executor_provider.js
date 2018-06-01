@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { expect } from 'chai';
 import sinon from 'sinon';
 import executorProvider from '../executor_provider';
@@ -17,8 +36,8 @@ describe('$executor service', () => {
     $timeout.cancel = (id) => clearTimeout(id);
 
     timefilter = new EventEmitter();
-    onSpy = sinon.spy((...args) => timefilter.addListener(...args));
-    offSpy = sinon.spy((...args) => timefilter.removeListener(...args));
+    onSpy = sinon.stub().callsFake((...args) => timefilter.addListener(...args));
+    offSpy = sinon.stub().callsFake((...args) => timefilter.removeListener(...args));
 
     timefilter.on = onSpy;
     timefilter.off = offSpy;
@@ -59,13 +78,17 @@ describe('$executor service', () => {
 
   it('should execute function if ingorePause is passed (interval set to 1000ms)', (done) => {
     timefilter.refreshInterval.value = 1000;
-    executor.register({ execute: () => done() });
+    executor.register({
+      execute: () => Promise.resolve().then(done)
+    });
     executor.start({ ignorePaused: true });
   });
 
   it('should execute function if timefilter is not paused and interval set to 1000ms', (done) => {
     timefilter.refreshInterval.value = 1000;
-    executor.register({ execute: () => done() });
+    executor.register({
+      execute: () => Promise.resolve().then(done)
+    });
     executor.start();
   });
 

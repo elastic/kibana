@@ -64,6 +64,7 @@ exports[`Field for array setting should render custom setting icon if it is cust
         }
       >
         <EuiFieldText
+          compressed={false}
           data-test-subj="advancedSetting-editField-array:test:setting"
           disabled={false}
           fullWidth={false}
@@ -141,6 +142,7 @@ exports[`Field for array setting should render default value if there is no user
         }
       >
         <EuiFieldText
+          compressed={false}
           data-test-subj="advancedSetting-editField-array:test:setting"
           disabled={false}
           fullWidth={false}
@@ -247,6 +249,7 @@ exports[`Field for array setting should render user value if there is user value
         }
       >
         <EuiFieldText
+          compressed={false}
           data-test-subj="advancedSetting-editField-array:test:setting"
           disabled={false}
           fullWidth={false}
@@ -592,6 +595,7 @@ exports[`Field for image setting should render custom setting icon if it is cust
       >
         <EuiFilePicker
           accept=".jpg,.jpeg,.png"
+          compressed={false}
           data-test-subj="advancedSetting-editField-image:test:setting"
           disabled={false}
           initialPromptText="Select or drag and drop a file"
@@ -668,6 +672,7 @@ exports[`Field for image setting should render default value if there is no user
       >
         <EuiFilePicker
           accept=".jpg,.jpeg,.png"
+          compressed={false}
           data-test-subj="advancedSetting-editField-image:test:setting"
           disabled={false}
           initialPromptText="Select or drag and drop a file"
@@ -1518,6 +1523,7 @@ exports[`Field for number setting should render custom setting icon if it is cus
         }
       >
         <EuiFieldNumber
+          compressed={false}
           data-test-subj="advancedSetting-editField-number:test:setting"
           disabled={false}
           fullWidth={false}
@@ -1595,6 +1601,7 @@ exports[`Field for number setting should render default value if there is no use
         }
       >
         <EuiFieldNumber
+          compressed={false}
           data-test-subj="advancedSetting-editField-number:test:setting"
           disabled={false}
           fullWidth={false}
@@ -1701,6 +1708,7 @@ exports[`Field for number setting should render user value if there is user valu
         }
       >
         <EuiFieldNumber
+          compressed={false}
           data-test-subj="advancedSetting-editField-number:test:setting"
           disabled={false}
           fullWidth={false}
@@ -1783,6 +1791,7 @@ exports[`Field for select setting should render custom setting icon if it is cus
         }
       >
         <EuiSelect
+          compressed={false}
           data-test-subj="advancedSetting-editField-select:test:setting"
           disabled={false}
           fullWidth={false}
@@ -1877,6 +1886,7 @@ exports[`Field for select setting should render default value if there is no use
         }
       >
         <EuiSelect
+          compressed={false}
           data-test-subj="advancedSetting-editField-select:test:setting"
           disabled={false}
           fullWidth={false}
@@ -2000,6 +2010,7 @@ exports[`Field for select setting should render user value if there is user valu
         }
       >
         <EuiSelect
+          compressed={false}
           data-test-subj="advancedSetting-editField-select:test:setting"
           disabled={false}
           fullWidth={false}
@@ -2099,6 +2110,7 @@ exports[`Field for string setting should render custom setting icon if it is cus
         }
       >
         <EuiFieldText
+          compressed={false}
           data-test-subj="advancedSetting-editField-string:test:setting"
           disabled={false}
           fullWidth={false}
@@ -2176,6 +2188,7 @@ exports[`Field for string setting should render default value if there is no use
         }
       >
         <EuiFieldText
+          compressed={false}
           data-test-subj="advancedSetting-editField-string:test:setting"
           disabled={false}
           fullWidth={false}
@@ -2282,6 +2295,7 @@ exports[`Field for string setting should render user value if there is user valu
         }
       >
         <EuiFieldText
+          compressed={false}
           data-test-subj="advancedSetting-editField-string:test:setting"
           disabled={false}
           fullWidth={false}

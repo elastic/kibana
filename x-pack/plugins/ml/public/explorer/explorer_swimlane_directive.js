@@ -15,7 +15,7 @@ import $ from 'jquery';
 import moment from 'moment';
 import d3 from 'd3';
 
-import { getSeverityColor } from 'plugins/ml/util/anomaly_utils';
+import { getSeverityColor } from 'plugins/ml/../common/util/anomaly_utils';
 import { numTicksForDateFormat } from 'plugins/ml/util/chart_utils';
 import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
 import { mlEscape } from 'plugins/ml/util/string_utils';

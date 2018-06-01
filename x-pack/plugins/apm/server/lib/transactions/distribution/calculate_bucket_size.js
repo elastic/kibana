@@ -15,7 +15,7 @@ export async function calculateBucketSize({
   transactionName,
   setup
 }) {
-  const { start, end, client, config } = setup;
+  const { start, end, esFilterQuery, client, config } = setup;
 
   const params = {
     index: config.get('xpack.apm.indexPattern'),
@@ -24,6 +24,8 @@ export async function calculateBucketSize({
       query: {
         bool: {
           filter: [
+            { term: { [SERVICE_NAME]: serviceName } },
+            { term: { [`${TRANSACTION_NAME}.keyword`]: transactionName } },
             {
               range: {
                 '@timestamp': {
@@ -32,9 +34,7 @@ export async function calculateBucketSize({
                   format: 'epoch_millis'
                 }
               }
-            },
-            { term: { [`${TRANSACTION_NAME}.keyword`]: transactionName } },
-            { term: { [SERVICE_NAME]: serviceName } }
+            }
           ]
         }
       },
@@ -47,6 +47,10 @@ export async function calculateBucketSize({
       }
     }
   };
+
+  if (esFilterQuery) {
+    params.body.query.bool.filter.push(esFilterQuery);
+  }
 
   const resp = await client('search', params);
   const minBucketSize = config.get('xpack.apm.minimumBucketSize');

@@ -7,7 +7,7 @@
 export function MonitoringKibanaSummaryStatusProvider({ getService }) {
   const testSubjects = getService('testSubjects');
 
-  const SUBJ_SUMMARY = 'kibanaSummaryStatus';
+  const SUBJ_SUMMARY = 'kibanaClusterStatus';
   const SUBJ_SUMMARY_INSTANCES = `${SUBJ_SUMMARY} instances`;
   const SUBJ_SUMMARY_MEMORY = `${SUBJ_SUMMARY} memory`;
   const SUBJ_SUMMARY_REQUESTS = `${SUBJ_SUMMARY} requests`;

@@ -59,6 +59,7 @@ exports[`Header should mark the input as invalid 1`] = `
           label="Index pattern"
         >
           <EuiFieldText
+            compressed={false}
             data-test-subj="createIndexPatternNameInput"
             fullWidth={false}
             isInvalid={true}
@@ -147,6 +148,7 @@ exports[`Header should render normally 1`] = `
           label="Index pattern"
         >
           <EuiFieldText
+            compressed={false}
             data-test-subj="createIndexPatternNameInput"
             fullWidth={false}
             isInvalid={false}

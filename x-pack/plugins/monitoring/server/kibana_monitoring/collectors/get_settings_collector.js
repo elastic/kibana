@@ -5,9 +5,9 @@
  */
 
 import { get } from 'lodash';
-
 import { XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING } from '../../../../../server/lib/constants';
 import { KIBANA_SETTINGS_TYPE } from '../../../common/constants';
+import { Collector } from '../classes/collector';
 
 /*
  * Check if Cluster Alert email notifications is enabled in config
@@ -58,36 +58,28 @@ export function getSettingsCollector(server) {
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const config = server.config();
 
-  let _log;
-  const setLogger = logger => {
-    _log = logger;
-  };
-
-  const fetch = async () => {
-    let kibanaSettingsData;
-    const defaultAdminEmail = await checkForEmailValue(config, callWithInternalUser);
-
-    // skip everything if defaultAdminEmail === undefined
-    if (defaultAdminEmail || (defaultAdminEmail === null && shouldUseNull)) {
-      kibanaSettingsData = {
-        xpack: {
-          default_admin_email: defaultAdminEmail
-        }
-      };
-      _log.debug(`[${defaultAdminEmail}] default admin email setting found, sending [${KIBANA_SETTINGS_TYPE}] monitoring document.`);
-    } else {
-      _log.debug(`not sending [${KIBANA_SETTINGS_TYPE}] monitoring document because [${defaultAdminEmail}] is null or invalid.`);
-    }
-
-    // remember the current email so that we can mark it as successful if the bulk does not error out
-    shouldUseNull = !!defaultAdminEmail;
-
-    return kibanaSettingsData;
-  };
-
-  return {
+  return new Collector(server, {
     type: KIBANA_SETTINGS_TYPE,
-    setLogger,
-    fetch
-  };
+    async fetch() {
+      let kibanaSettingsData;
+      const defaultAdminEmail = await checkForEmailValue(config, callWithInternalUser);
+
+      // skip everything if defaultAdminEmail === undefined
+      if (defaultAdminEmail || (defaultAdminEmail === null && shouldUseNull)) {
+        kibanaSettingsData = {
+          xpack: {
+            default_admin_email: defaultAdminEmail
+          }
+        };
+        this.log.debug(`[${defaultAdminEmail}] default admin email setting found, sending [${KIBANA_SETTINGS_TYPE}] monitoring document.`);
+      } else {
+        this.log.debug(`not sending [${KIBANA_SETTINGS_TYPE}] monitoring document because [${defaultAdminEmail}] is null or invalid.`);
+      }
+
+      // remember the current email so that we can mark it as successful if the bulk does not error out
+      shouldUseNull = !!defaultAdminEmail;
+
+      return kibanaSettingsData;
+    }
+  });
 }

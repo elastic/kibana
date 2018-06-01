@@ -1,0 +1,19 @@
+[[xpack-profiler]]
+= Profiling your Queries and Aggregations
+
+[partintro]
+--
+Elasticsearch has a powerful profiler API which can be used to inspect and analyze
+your search queries.  The response, however, is a very large JSON blob which is
+difficult to analyze by hand.
+
+{xpack} includes the Search Profiler tool which can transform this JSON output
+into a visualization that is easy to navigate, allowing you to diagnose and debug
+poorly performing queries much faster.
+
+
+image::dev-tools/searchprofile/images/overview.png["Search Profiler Visualization"]
+
+--
+
+include::getting-started.asciidoc[]

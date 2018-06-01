@@ -1,10 +1,26 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-} from '@elastic/eui';
+
+import './global_banner_list.less';
 
 /**
  * GlobalBannerList is a list of "banners". A banner something that is displayed at the top of Kibana that may or may not disappear.
@@ -40,13 +56,6 @@ export class GlobalBannerList extends Component {
       return null;
     }
 
-    const panelStyle = {
-      border: 'none'
-    };
-    const flexStyle = {
-      flexDirection: 'column'
-    };
-
     const flexBanners = this.props.banners.map(banner => {
       const {
         id,
@@ -56,28 +65,21 @@ export class GlobalBannerList extends Component {
       } = banner;
 
       return (
-        <EuiFlexItem
-          grow={true}
+        <div
           key={id}
           data-test-priority={priority}
+          className="globalBanner__item"
           {...rest}
         >
           { component }
-        </EuiFlexItem>
+        </div>
       );
     });
 
     return (
-      <EuiPanel
-        style={panelStyle}
-      >
-        <EuiFlexGroup
-          style={flexStyle}
-          gutterSize="s"
-        >
-          {flexBanners}
-        </EuiFlexGroup>
-      </EuiPanel>
+      <div className="globalBanner__list">
+        {flexBanners}
+      </div>
     );
   }
 }

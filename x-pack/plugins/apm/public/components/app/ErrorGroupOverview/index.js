@@ -7,7 +7,7 @@
 import { connect } from 'react-redux';
 import ErrorGroupOverview from './view';
 import { getUrlParams } from '../../../store/urlParams';
-import { getLicense } from '../../../store/reduxRequest/license';
+import { getLicense } from '../../../store/reactReduxRequest/license';
 
 function mapStateToProps(state = {}) {
   return {
