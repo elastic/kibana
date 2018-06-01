@@ -15,11 +15,6 @@ import {
 
 import { LayerTOC } from './layer_toc';
 
-import $ from 'jquery';
-
-console.log($);
-console.log($.sortable);
-
 export class LayerControl extends React.Component {
 
   constructor(props) {
@@ -27,20 +22,22 @@ export class LayerControl extends React.Component {
     this.state = {
       layers: []
     };
+
+    this._onLayerOrderChange = (newOrder) => {
+      this._kbnMap.reorderLayers(newOrder);
+    };
   }
 
   setKbnMap(kbnMap) {
     this._kbnMap = kbnMap;
-    this._kbnMap.on('layer:added', () => {
+    const syncLayers = () => {
       this.setState({
         layers: this._kbnMap.getLayers()
       });
-    });
-    this._kbnMap.on('layer:removed', () => {
-      this.setState({
-        layers: this._kbnMap.getLayers()
-      });
-    });
+    };
+    this._kbnMap.on('layer:added', syncLayers);
+    this._kbnMap.on('layer:removed', syncLayers);
+    this._kbnMap.on('layers:reordered', syncLayers);
   }
 
   render() {
@@ -59,7 +56,7 @@ export class LayerControl extends React.Component {
           </EuiFlexGroup>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <LayerTOC layers={this.state.layers} />
+              <LayerTOC layers={this.state.layers} layerOrderChange={this._onLayerOrderChange}/>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>

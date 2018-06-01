@@ -8,7 +8,7 @@ import React from 'react';
 import { KibanaMap } from './kibana_map';
 import { LayerControl } from './layer_control';
 import { TMSSource } from '../sources/tms_source';
-import { TileLayer  } from '../layers/tile_layer';
+import { TileLayer } from '../layers/tile_layer';
 
 export class GISApp extends React.Component {
 
@@ -22,12 +22,17 @@ export class GISApp extends React.Component {
 
     this._layerControl.setKbnMap(this._kbnMap);
 
-    const tmsSource = new TMSSource({
+    //todo: some hardcoded example layers
+    const defaultEmsSource = new TMSSource({
       urlTemplate: "https://tiles.maps.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana"
     });
-
-    const tmsLayer = new TileLayer(tmsSource);
+    const tmsLayer = new TileLayer(defaultEmsSource);
     this._kbnMap.addLayer(tmsLayer);
+    const osmSource = new TMSSource({
+      urlTemplate: "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    });
+    const tmsLayer2 = new TileLayer(osmSource);
+    this._kbnMap.addLayer(tmsLayer2);
 
   }
 
