@@ -2,7 +2,7 @@
 [[logstash-configuration-management-api]]
 == Logstash Configuration Management API
 
-The Logstash configuration management API allows users to programatically integrate with the
+The Logstash configuration management API allows users to programmatically integrate with the
 Logstash configuration management feature.
 
 Traditionally users would perform this integration by accessing the the `.logstash` index
