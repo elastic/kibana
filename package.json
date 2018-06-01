@@ -219,6 +219,9 @@
     "yauzl": "2.7.0"
   },
   "devDependencies": {
+    "@babel/parser": "^7.0.0-beta.49",
+    "@babel/traverse": "^7.0.0-beta.49",
+    "@babel/types": "^7.0.0-beta.49",
     "@elastic/eslint-config-kibana": "link:packages/eslint-config-kibana",
     "@elastic/eslint-plugin-kibana-custom": "link:packages/eslint-plugin-kibana-custom",
     "@kbn/es": "link:packages/kbn-es",
