@@ -28,6 +28,7 @@ export class FieldFormatEditor extends PureComponent {
     fieldFormatParams: PropTypes.object.isRequired,
     fieldFormatEditors: PropTypes.object.isRequired,
     onChange: PropTypes.func.isRequired,
+    onError: PropTypes.func.isRequired,
   };
 
   constructor(props) {
@@ -43,14 +44,9 @@ export class FieldFormatEditor extends PureComponent {
     };
   }
 
-  onFormatParamsChange = (newParams, hasError) => {
-    const { onChange } = this.props;
-    onChange(newParams, hasError);
-  }
-
   render() {
     const { EditorComponent } = this.state;
-    const { fieldType, fieldFormat, fieldFormatParams } = this.props;
+    const { fieldType, fieldFormat, fieldFormatParams, onChange, onError } = this.props;
 
     return (
       <Fragment>
@@ -59,7 +55,8 @@ export class FieldFormatEditor extends PureComponent {
             fieldType={fieldType}
             format={fieldFormat}
             formatParams={fieldFormatParams}
-            onChange={this.onFormatParamsChange}
+            onChange={onChange}
+            onError={onError}
           />
         ) : null}
       </Fragment>

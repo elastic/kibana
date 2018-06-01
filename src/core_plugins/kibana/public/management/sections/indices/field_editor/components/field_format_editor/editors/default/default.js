@@ -30,6 +30,7 @@ export class DefaultFormatEditor extends PureComponent {
     format: PropTypes.object.isRequired,
     formatParams: PropTypes.object.isRequired,
     onChange: PropTypes.func.isRequired,
+    onError: PropTypes.func.isRequired,
   };
 
   constructor(props) {
@@ -46,7 +47,9 @@ export class DefaultFormatEditor extends PureComponent {
     const converter = nextProps.format.getConverterFor(state.sampleConverterType);
     const type = typeof state.sampleInputsByType === 'object' && nextProps.formatParams.type;
     const inputs = type ? state.sampleInputsByType[nextProps.formatParams.type] || [] : state.sampleInputs;
-    return convertSampleInput(converter, inputs);
+    const output = convertSampleInput(converter, inputs);
+    nextProps.onError(output.error);
+    return output;
   }
 
   onChange = (newParams = {}) => {

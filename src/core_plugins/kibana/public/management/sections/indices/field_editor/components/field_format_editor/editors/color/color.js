@@ -73,8 +73,7 @@ export class ColorFormatEditor extends DefaultFormatEditor {
   }
 
   render() {
-    const { format, formatParams, fieldType } = this.props;
-    // console.log(format, formatParams, fieldType);
+    const { formatParams, fieldType } = this.props;
 
     const items = formatParams.colors && formatParams.colors.map((color, index) => {
       return {
@@ -91,9 +90,9 @@ export class ColorFormatEditor extends DefaultFormatEditor {
           return (
             <EuiFieldText
               value={value}
-              onChange={(newValue) => {
+              onChange={(e) => {
                 this.onColorChange({
-                  regex: newValue,
+                  regex: e.target.value,
                 }, item.index);
               }}
             />
@@ -106,9 +105,9 @@ export class ColorFormatEditor extends DefaultFormatEditor {
           return (
             <EuiFieldText
               value={value}
-              onChange={(newValue) => {
+              onChange={(e) => {
                 this.onColorChange({
-                  range: newValue,
+                  range: e.target.value,
                 }, item.index);
               }}
             />

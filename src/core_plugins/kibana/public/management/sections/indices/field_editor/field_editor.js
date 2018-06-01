@@ -100,6 +100,7 @@ export class FieldEditor extends PureComponent {
       fieldFormatParams: {},
       showScriptingHelp: false,
       showDeleteModal: false,
+      hasFormatError: false,
     };
     this.supportedLangs = getSupportedScriptingLanguages();
     this.deprecatedLangs = getDeprecatedScriptingLanguages();
@@ -187,9 +188,15 @@ export class FieldEditor extends PureComponent {
     });
   }
 
-  onFormatParamsChange = (newParams, hasError) => {
+  onFormatParamsChange = (newParams) => {
     const { fieldFormatId } = this.state;
     this.onFormatChange(fieldFormatId, newParams);
+  }
+
+  onFormatParamsError = (error) => {
+    this.setState({
+      hasFormatError: !!error,
+    });
   }
 
   isDuplicateName() {
@@ -199,6 +206,7 @@ export class FieldEditor extends PureComponent {
 
   renderName() {
     const { isCreating, field } = this.state;
+    const isInvalid = !field.name || !field.name.trim();
 
     return isCreating ? (
       <EuiFormRow
@@ -211,12 +219,15 @@ export class FieldEditor extends PureComponent {
             field with the same name means you won&apos;t be able to query both fields at the same time.
           </span>
         ) : null}
+        isInvalid={isInvalid}
+        error={isInvalid ? 'Name is required' : null}
       >
         <EuiFieldText
           value={field.name || ''}
           placeholder="New scripted field"
           data-test-subj="editorFieldName"
-          onChange={(e) => { this.onFieldChange('name', e.target.value);}}
+          onChange={(e) => { this.onFieldChange('name', e.target.value); }}
+          isInvalid={isInvalid}
         />
       </EuiFormRow>
     ) : null;
@@ -298,6 +309,7 @@ export class FieldEditor extends PureComponent {
             fieldFormatParams={fieldFormatParams}
             fieldFormatEditors={fieldFormatEditors}
             onChange={this.onFormatParamsChange}
+            onError={this.onFormatParamsError}
           />
         ) : null }
       </Fragment>
@@ -320,16 +332,20 @@ export class FieldEditor extends PureComponent {
 
   renderScript() {
     const { field } = this.state;
+    const isInvalid = !field.script || !field.script.trim();
 
     return field.scripted ? (
       <EuiFormRow
         label="Script"
         helpText={(<EuiLink onClick={this.showScriptingHelp}>Scripting help</EuiLink>)}
+        isInvalid={isInvalid}
+        error={isInvalid ? 'Script is required' : null}
       >
         <EuiTextArea
           value={field.script}
           data-test-subj="editorFieldScript"
           onChange={(e) => { this.onFieldChange('script', e.target.value); }}
+          isInvalid={isInvalid}
         />
       </EuiFormRow>
     ) : null;
@@ -390,7 +406,13 @@ export class FieldEditor extends PureComponent {
     return (
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <EuiButton fill onClick={this.saveField}>{isCreating ? 'Create field' : 'Edit field'}</EuiButton>
+          <EuiButton
+            fill
+            onClick={this.saveField}
+            isDisabled={this.isSavingDisabled()}
+          >
+            {isCreating ? 'Create field' : 'Edit field'}
+          </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty onClick={redirectAway}>Cancel</EuiButtonEmpty>
@@ -454,8 +476,23 @@ export class FieldEditor extends PureComponent {
       });
   }
 
+  isSavingDisabled() {
+    const { field, hasFormatError } = this.state;
+
+    if(
+      hasFormatError
+      || !field.name
+      || !field.name.trim()
+      || (field.scripted && (!field.script || !field.script.trim()))
+    ) {
+      return true;
+    }
+
+    return false;
+  }
+
   render() {
-    const { isReady, isCreating, scriptingLangs, field, showScriptingHelp } = this.state;
+    const { isReady, isCreating, scriptingLangs, field, showScriptingHelp, errors } = this.state;
 
     return isReady ? (
       <div>

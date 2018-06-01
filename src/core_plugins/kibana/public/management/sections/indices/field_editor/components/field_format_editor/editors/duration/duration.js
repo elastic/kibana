@@ -20,6 +20,7 @@
 import React, { Fragment } from 'react';
 
 import {
+  EuiFieldNumber,
   EuiFormRow,
   EuiSelect,
 } from '@elastic/eui';
@@ -38,18 +39,39 @@ export class DurationFormatEditor extends DefaultFormatEditor {
   constructor(props) {
     super(props);
     this.state.sampleInputs = [-123, 1, 12, 123, 658, 1988, 3857, 123292, 923528271];
+    this.state.hasDecimalError = false;
+  }
+
+  static getDerivedStateFromProps(nextProps, state) {
+    const output = super.getDerivedStateFromProps(nextProps, state);
+    let error = null;
+
+    if(!nextProps.format.isHuman() && nextProps.formatParams.outputPrecision > 20) {
+      error = 'Decimal places must be between 0 and 20';
+      nextProps.onError(error);
+      return {
+        ...output,
+        error,
+        hasDecimalError: true,
+      };
+    }
+
+    return {
+      ...output,
+      hasDecimalError: false,
+    };
   }
 
   render() {
     const { format, formatParams } = this.props;
-    const { error, samples } = this.state;
+    const { error, samples, hasDecimalError } = this.state;
 
     return (
       <Fragment>
         <EuiFormRow
           label="Input format"
           isInvalid={!!error}
-          error={error}
+          error={hasDecimalError ? null : error}
         >
           <EuiSelect
             value={formatParams.inputFormat}
@@ -68,22 +90,40 @@ export class DurationFormatEditor extends DefaultFormatEditor {
         <EuiFormRow
           label="Output format"
           isInvalid={!!error}
-          error={error}
         >
           <EuiSelect
             value={formatParams.outputFormat}
             options={format.type.outputFormats.map(format => {
               return {
-                value: format.kind,
+                value: format.method,
                 text: format.text,
               };
             })}
             onChange={(e) => {
-              this.onChange({ inputFormat: e.target.value });
+              this.onChange({ outputFormat: e.target.value });
             }}
             isInvalid={!!error}
           />
         </EuiFormRow>
+        {
+          !format.isHuman() ? (
+            <EuiFormRow
+              label="Decimal places"
+              isInvalid={!!error}
+              error={hasDecimalError ? error : null}
+            >
+              <EuiFieldNumber
+                value={formatParams.outputPrecision}
+                min={0}
+                max={20}
+                onChange={(e) => {
+                  this.onChange({ outputPrecision: e.target.value ? Number(e.target.value) : null });
+                }}
+                isInvalid={!!error}
+              />
+            </EuiFormRow>
+          ) : null
+        }
         <FormatEditorSamples
           samples={samples}
         />

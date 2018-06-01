@@ -20,18 +20,11 @@
 import React, { Fragment } from 'react';
 
 import {
-  EuiBasicTable,
-  EuiButtonEmpty,
-  EuiCode,
   EuiFieldText,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFormRow,
   EuiLink,
   EuiSelect,
   EuiSwitch,
-  EuiText,
 } from '@elastic/eui';
 
 import {
@@ -130,11 +123,7 @@ export class UrlFormatEditor extends DefaultFormatEditor {
           isVisible={this.state.showUrlTemplateHelp}
           onClose={this.hideUrlTemplateHelp}
         />
-        <EuiFormRow
-          label="Type"
-          // isInvalid={!!error}
-          // error={error}
-        >
+        <EuiFormRow label="Type">
           <EuiSelect
             value={formatParams.type}
             options={format.type.urlTypes.map(type => {
@@ -164,6 +153,8 @@ export class UrlFormatEditor extends DefaultFormatEditor {
         <EuiFormRow
           label="Url template"
           helpText={(<EuiLink onClick={this.showUrlTemplateHelp}>Url template help</EuiLink>)}
+          isInvalid={!!error}
+          error={error}
         >
           <EuiFieldText
             value={formatParams.urlTemplate || ''}
@@ -176,6 +167,8 @@ export class UrlFormatEditor extends DefaultFormatEditor {
         <EuiFormRow
           label="Label template"
           helpText={(<EuiLink onClick={this.showLabelTemplateHelp}>Label template help</EuiLink>)}
+          isInvalid={!!error}
+          error={error}
         >
           <EuiFieldText
             value={formatParams.labelTemplate || ''}
