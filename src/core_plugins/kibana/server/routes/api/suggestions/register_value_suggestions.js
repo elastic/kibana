@@ -22,7 +22,7 @@ export function registerValueSuggestions(server) {
   });
 }
 
-function getBody({ field, query, boolFilter }) {
+function getBody({ field, query, boolFilter = [] }) {
   // Helps ensure that the regex is not evaluated eagerly against the terms dictionary
   const executionHint = 'map';
 
