@@ -2,7 +2,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "ui/*": ["src/ui/public/*"]
+      "ui/*": ["src/ui/public/*", "src/ui/*"]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",

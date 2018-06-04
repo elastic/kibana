@@ -88,7 +88,10 @@ export abstract class Embeddable {
   /**
    * Embeddable should render itself at the given domNode.
    */
-  public abstract render(domNode: object, containerState: ContainerState): void;
+  public abstract render(
+    domNode: HTMLElement,
+    containerState: ContainerState
+  ): void;
 
   public destroy(): void {
     return;

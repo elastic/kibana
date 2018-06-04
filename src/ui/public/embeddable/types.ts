@@ -30,6 +30,12 @@ export interface ContainerState {
   // The shape will be up to the embeddable type.
   embeddableCustomization?: object;
 
+  /**
+   * Whether or not panel titles are hidden. It is not the embeddable's responsibility to hide the title (the container
+   * handles that). This information is currently only used to determine the title for reporting (data-sharing-title
+   * attribute). If we move that out of the embeddables and push it to the container (as we probably should), then
+   * we shouldn't need to expose this information.
+   */
   hidePanelTitles: boolean;
 
   /**

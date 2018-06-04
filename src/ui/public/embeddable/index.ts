@@ -22,4 +22,3 @@ export * from './embeddable';
 export {
   EmbeddableFactoriesRegistryProvider,
 } from './embeddable_factories_registry';
-export * from './types';
