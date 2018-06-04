@@ -58,7 +58,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
           body={
             <UNDEFINED>
               <p>
-                Kibana dashboards allow you to combine different data views from other Kibana apps so that you can see them all in one place
+                Dashboards allow you to combine different data views from other Kibana apps so that you can see them all in one place
               </p>
               <p>
                 New to Kibana? 
@@ -69,7 +69,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
                 >
                   Install sample data
                 </EuiLink>
-                 to dashboards in action.
+                 to load a sample dashboard.
               </p>
             </UNDEFINED>
           }
