@@ -16,23 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { buildMappings, migrationPlugins } from '@kbn/migrations';
 
-export function kibanaIndexMappingsMixin(kbnServer, server) {
-  const mappings = buildMappings(migrationPlugins(kbnServer.pluginSpecs));
+// Functions for extracting / manipulating plugin definitions.
+import { KibanaPlugin, MigrationPlugin } from './types';
 
-  /**
-   *  Get the mappings dsl that we expect to see in the
-   *  Kibana index. Used by the elasticsearch plugin to create
-   *  and update the kibana index. Also used by the SavedObjectsClient
-   *  to determine the properties defined in the mapping as well as
-   *  things like the "rootType".
-   *
-   *  See `src/server/mappings/lib/index.js` for helpers useful for reading
-   *  the EsMappingDsl object.
-   *
-   *  @method server.getKibanaIndexMappingsDsl
-   *  @returns {EsMappingDsl}
-   */
-  server.decorate('server', 'getKibanaIndexMappingsDsl', () => mappings);
+// Converts KibanaPlugin definitions to a simple data structure
+export function migrationPlugins(plugins: KibanaPlugin[]): MigrationPlugin[] {
+  const emptySpec = { mappings: undefined };
+  return plugins.map(p => ({
+    id: p.getId(),
+    mappings: (p.getExportSpecs() || emptySpec).mappings,
+  }));
 }
