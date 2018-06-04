@@ -40,13 +40,13 @@ export function buildPrivilegeMap(application, kibanaVersion) {
 }
 
 function buildSavedObjectsReadPrivileges() {
-  const readActions = ['get', 'mget', 'search'];
+  const readActions = ['get', 'bulk_get', 'find'];
   return buildSavedObjectsPrivileges(readActions);
 }
 
 function buildSavedObjectsPrivileges(actions) {
   const objectTypes = ['config', 'dashboard', 'graph-workspace', 'index-pattern', 'search', 'timelion-sheet', 'url', 'visualization'];
   return objectTypes
-    .map(type => actions.map(action => `action:saved-objects/${type}/${action}`))
+    .map(type => actions.map(action => `action:saved_objects/${type}/${action}`))
     .reduce((acc, types) => [...acc, ...types], []);
 }
