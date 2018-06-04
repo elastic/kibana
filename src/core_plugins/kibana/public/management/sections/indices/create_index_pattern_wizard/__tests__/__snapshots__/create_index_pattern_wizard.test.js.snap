@@ -59,3 +59,26 @@ exports[`CreateIndexPatternWizard renders time field step when step is set to 2 
   />
 </div>
 `;
+
+exports[`CreateIndexPatternWizard shows system indices even if there are no other indices if the include system indices is toggled 1`] = `
+<div>
+  <Header
+    isIncludingSystemIndices={true}
+    onChangeIncludingSystemIndices={[Function]}
+  />
+  <StepIndexPattern
+    allIndices={
+      Array [
+        Object {
+          "name": ".kibana ",
+        },
+      ]
+    }
+    esService={Object {}}
+    goToNextStep={[Function]}
+    initialQuery=""
+    isIncludingSystemIndices={true}
+    savedObjectsClient={Object {}}
+  />
+</div>
+`;
