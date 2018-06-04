@@ -13,9 +13,10 @@ These were times we made an effort to create one set of abstractions for saved o
 
 Why now?
 ---------
- - new things need a standard set of abstractions for saved objects
+ - New things need a standard set of abstractions for saved objects
    - Global extensions to SOS (Saved Objects Service):
-     - OLS (object level security)
+     - [OLS](https://github.com/elastic/kibana/issues/18473): when Security is enabled all requests to saved objects need to be scoped to a user
+     - Spaces: when Spaces are enabled all requests to saved objects need to be scoped by space
      - migrations
      - tags
    - Users of SOS that should be able to consume those global extensions:
