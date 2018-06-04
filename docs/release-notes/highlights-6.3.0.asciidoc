@@ -99,7 +99,7 @@ flushing, clearing the cache, merging segments, and closing or deleting indices.
 The UI provides a convenient way to perform bulk operations on multiple indices.
 
 [role="screenshot"]
-image::images/management-index-management.png[Index Management UI]
+image::images/management_index_bulk.png[Index Management UI]
 
 [float]
 === Interactive map support in Vega
