@@ -75,8 +75,9 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
       }
 
       const shouldQuery = async () => {
-        const currentRequest = await requestSearchSource.getSearchRequestBody();
         if (!searchSource.lastQuery || forceFetch) return true;
+
+        const currentRequest = await requestSearchSource.getSearchRequestBody();
         if (searchSource.lastQuery !== calculateObjectHash(currentRequest)) return true;
 
         return false;
