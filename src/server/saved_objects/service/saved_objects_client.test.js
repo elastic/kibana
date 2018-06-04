@@ -18,30 +18,13 @@
  */
 
 import { SavedObjectsClient } from './saved_objects_client';
-import { SavedObjectsRepository } from './lib/repository';
-jest.mock('./lib/repository');
-
-beforeEach(() => {
-  SavedObjectsRepository.mockClear();
-});
-
-const setupMockRepository = (mock) => {
-  SavedObjectsRepository.mockImplementation(() => mock);
-  return mock;
-};
-
-test(`#constructor`, () => {
-  const options = {};
-  new SavedObjectsClient(options);
-  expect(SavedObjectsRepository).toHaveBeenCalledWith(options);
-});
 
 test(`#create`, async () => {
   const returnValue = Symbol();
-  const mockRepository = setupMockRepository({
+  const mockRepository = {
     create: jest.fn().mockReturnValue(Promise.resolve(returnValue)),
-  });
-  const client = new SavedObjectsClient();
+  };
+  const client = new SavedObjectsClient(mockRepository);
 
   const type = 'foo';
   const attributes = {};
@@ -54,10 +37,10 @@ test(`#create`, async () => {
 
 test(`#bulkCreate`, async () => {
   const returnValue = Symbol();
-  const mockRepository = setupMockRepository({
+  const mockRepository = {
     bulkCreate: jest.fn().mockReturnValue(Promise.resolve(returnValue)),
-  });
-  const client = new SavedObjectsClient();
+  };
+  const client = new SavedObjectsClient(mockRepository);
 
   const objects = [];
   const options = {};
@@ -69,10 +52,10 @@ test(`#bulkCreate`, async () => {
 
 test(`#delete`, async () => {
   const returnValue = Symbol();
-  const mockRepository = setupMockRepository({
+  const mockRepository = {
     delete: jest.fn().mockReturnValue(Promise.resolve(returnValue)),
-  });
-  const client = new SavedObjectsClient();
+  };
+  const client = new SavedObjectsClient(mockRepository);
 
   const type = 'foo';
   const id = 1;
@@ -84,10 +67,10 @@ test(`#delete`, async () => {
 
 test(`#find`, async () => {
   const returnValue = Symbol();
-  const mockRepository = setupMockRepository({
+  const mockRepository = {
     find: jest.fn().mockReturnValue(Promise.resolve(returnValue)),
-  });
-  const client = new SavedObjectsClient();
+  };
+  const client = new SavedObjectsClient(mockRepository);
 
   const options = {};
   const result = await client.find(options);
@@ -98,10 +81,10 @@ test(`#find`, async () => {
 
 test(`#bulkGet`, async () => {
   const returnValue = Symbol();
-  const mockRepository = setupMockRepository({
+  const mockRepository = {
     bulkGet: jest.fn().mockReturnValue(Promise.resolve(returnValue)),
-  });
-  const client = new SavedObjectsClient();
+  };
+  const client = new SavedObjectsClient(mockRepository);
 
   const objects = {};
   const result = await client.bulkGet(objects);
@@ -112,10 +95,10 @@ test(`#bulkGet`, async () => {
 
 test(`#get`, async () => {
   const returnValue = Symbol();
-  const mockRepository = setupMockRepository({
+  const mockRepository = {
     get: jest.fn().mockReturnValue(Promise.resolve(returnValue)),
-  });
-  const client = new SavedObjectsClient();
+  };
+  const client = new SavedObjectsClient(mockRepository);
 
   const type = 'foo';
   const id = 1;
@@ -127,10 +110,10 @@ test(`#get`, async () => {
 
 test(`#update`, async () => {
   const returnValue = Symbol();
-  const mockRepository = setupMockRepository({
+  const mockRepository = {
     update: jest.fn().mockReturnValue(Promise.resolve(returnValue)),
-  });
-  const client = new SavedObjectsClient();
+  };
+  const client = new SavedObjectsClient(mockRepository);
 
   const type = 'foo';
   const id = 1;

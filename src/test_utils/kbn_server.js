@@ -49,7 +49,7 @@ const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {
     url: esTestConfig.getUrl(),
     username: kibanaServerTestUser.username,
     password: kibanaServerTestUser.password
-  }
+  },
 };
 
 /**
