@@ -62,6 +62,7 @@ export const CleanExtraFilesFromModulesTask = {
       build.resolvePath('node_modules/**/tests/**/*'),
       build.resolvePath('node_modules/**/example/**/*'),
       build.resolvePath('node_modules/**/examples/**/*'),
+      build.resolvePath('node_modules/**/.bin/**/*'),
     ]);
   },
 };
