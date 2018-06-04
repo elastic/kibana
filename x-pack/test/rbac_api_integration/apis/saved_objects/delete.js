@@ -68,7 +68,7 @@ export default function ({ getService }) {
         },
         invalidId: {
           statusCode: 403,
-          resposne: createExpectForbidden(false),
+          response: createExpectForbidden(false),
         }
       }
     });
@@ -85,7 +85,7 @@ export default function ({ getService }) {
         },
         invalidId: {
           statusCode: 404,
-          resposne: expectNotFound,
+          response: expectNotFound,
         }
       }
     });
@@ -102,7 +102,7 @@ export default function ({ getService }) {
         },
         invalidId: {
           statusCode: 404,
-          resposne: expectNotFound,
+          response: expectNotFound,
         }
       }
     });
