@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 import { toastNotifications } from 'ui/notify';
@@ -26,6 +26,8 @@ import {
   EuiFieldSearch,
   EuiBasicTable,
   EuiPage,
+  EuiPageBody,
+  EuiPageContent,
   EuiLink,
   EuiFlexGroup,
   EuiFlexItem,
@@ -36,6 +38,7 @@ import {
   EuiCallOut,
   EuiText,
   EuiTextColor,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import { DashboardConstants, createDashboardEditUrl } from '../dashboard_constants';
 
@@ -177,6 +180,14 @@ export class DashboardListing extends React.Component {
     return dashboardsCopy.slice(startIndex, lastIndex);
   }
 
+  hasNoDashboards() {
+    if (!this.state.isFetchingItems && this.state.dashboards.length === 0 && !this.state.filter) {
+      return true;
+    }
+
+    return false;
+  }
+
   renderConfirmDeleteModal() {
     return (
       <EuiOverlayMask>
@@ -215,46 +226,59 @@ export class DashboardListing extends React.Component {
     }
   }
 
-  renderNoItemsMessage() {
+  renderNoResultsMessage() {
     if (this.state.isFetchingItems) {
       return '';
     }
 
-    if (!this.state.isFetchingItems && this.state.dashboards.length === 0 && !this.state.filter) {
-      if (this.props.hideWriteControls) {
-        return (
-          <EuiText>
-            <h2>
-              <EuiTextColor color="subdued">
-                {`Looks like you don't have any dashboards.`}
-              </EuiTextColor>
-            </h2>
-          </EuiText>
-        );
-      }
+    return 'No dashboards matched your search.';
+  }
 
+  renderNoItemsMessage() {
+
+    if (this.props.hideWriteControls) {
       return (
-        <React.Fragment>
-          <EuiText>
-            <h2>
-              <EuiTextColor color="subdued">
-                {`Looks like you don't have any dashboards. Let's create some!`}
-              </EuiTextColor>
-            </h2>
-          </EuiText>
-          <EuiButton
-            href={`#${DashboardConstants.CREATE_NEW_DASHBOARD_URL}`}
-            fill
-            iconType="plusInCircle"
-            data-test-subj="createDashboardPromptButton"
-          >
-            Create new dashboard
-          </EuiButton>
-        </React.Fragment>
+        <EuiText>
+          <h2>
+            <EuiTextColor color="subdued">
+              {`Looks like you don't have any dashboards.`}
+            </EuiTextColor>
+          </h2>
+        </EuiText>
       );
     }
 
-    return 'No dashboards matched your search.';
+    return (
+      <div>
+        <EuiEmptyPrompt
+          iconType="dashboardApp"
+          title={<h2>Set up your first dashboard</h2>}
+          body={
+            <Fragment>
+              <p>
+                Kibana dashboards allow you to combine different data views from
+                other Kibana apps so that you can see them all in one place
+              </p>
+              <p>
+                New to Kibana? <EuiLink href="#/home/tutorial_directory/sampleData">Install sample data</EuiLink> to
+                dashboards in action.
+              </p>
+            </Fragment>
+          }
+          actions={
+            <EuiButton
+              href={`#${DashboardConstants.CREATE_NEW_DASHBOARD_URL}`}
+              fill
+              iconType="plusInCircle"
+              data-test-subj="createDashboardPromptButton"
+            >
+              Create new dashboard
+            </EuiButton>
+          }
+        />
+      </div>
+    );
+
   }
 
   renderSearchBar() {
@@ -356,6 +380,7 @@ export class DashboardListing extends React.Component {
       };
     }
     const items = this.state.dashboards.length === 0 ? [] : this.getPageOfItems();
+
     return (
       <EuiBasicTable
         itemId={'id'}
@@ -363,7 +388,7 @@ export class DashboardListing extends React.Component {
         loading={this.state.isFetchingItems}
         columns={tableColumns}
         selection={selection}
-        noItemsMessage={this.renderNoItemsMessage()}
+        noItemsMessage={this.renderNoResultsMessage()}
         pagination={pagination}
         sorting={sorting}
         onChange={this.onTableChange}
@@ -371,7 +396,15 @@ export class DashboardListing extends React.Component {
     );
   }
 
-  render() {
+  renderListingOrEmptyState() {
+    if (this.hasNoDashboards()) {
+      return this.renderNoItemsMessage();
+    } else {
+      return this.renderListing();
+    }
+  }
+
+  renderListing() {
     let createButton;
     if (!this.props.hideWriteControls) {
       createButton = (
@@ -386,15 +419,14 @@ export class DashboardListing extends React.Component {
       );
     }
     return (
-      <EuiPage data-test-subj="dashboardLandingPage">
-
+      <div>
         {this.state.showDeleteModal && this.renderConfirmDeleteModal()}
 
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd" data-test-subj="top-nav">
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
               <h1>
-                Dashboard
+                Dashboards
               </h1>
             </EuiTitle>
           </EuiFlexItem>
@@ -409,8 +441,21 @@ export class DashboardListing extends React.Component {
 
         {this.renderSearchBar()}
 
-        {this.renderTable()}
+        <EuiSpacer size="m" />
 
+        {this.renderTable()}
+      </div>
+    );
+  }
+
+  render() {
+    return (
+      <EuiPage data-test-subj="dashboardLandingPage" className="dashboardLandingPage">
+        <EuiPageBody>
+          <EuiPageContent verticalPosition="center" horizontalPosition="center" className="dashboardLandingPage__content">
+            {this.renderListingOrEmptyState()}
+          </EuiPageContent>
+        </EuiPageBody>
       </EuiPage>
     );
   }
