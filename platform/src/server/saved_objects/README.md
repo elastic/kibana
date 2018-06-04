@@ -23,18 +23,35 @@ Why now?
      - logstash pipelines
      - canvas workpads
      - reporting jobs
- - Close the gaping holes that leak abstractions into the rest of Kibana
-     - When we create taga/ols/etc, let's do it through the new abstractions
-     - We solve the problem of new features without clobbering each other
+ - Stop the abstractions leaking into the rest of Kibana
+     - When we create tags/ols/etc, let's do it through the new abstractions
+     - We solve the problem of new features not clobbering one another
 
 Security
 ---------
-When the Security Plugin needs to access or make changes to saved objects, it needs to always use the Saved Object Service or its clients. People (users, developers) can elect to bypass the service, but if they do, they are no longer involving Security in their access or changes to saved objects. This means they could have access in unintended ways unless they have their own method of resolving that.
+When the Security Plugin needs to access or make changes to saved objects, it should always use the Saved Object Service or its clients. People (users, developers) can elect to bypass the service, but if they do, they are no longer involving Security in their access or changes to saved objects. This means they could have access in unintended ways unless they have their own method of resolving permissions.
 
-When Security uses the `find` method in current saved objects client, it decorates the request to Elasticsearch with authorization information, such that only the subset of objects return that the user has access to. (Rather than retrieve all the possible results from Elasticsearch, load them into memory, and then filter on that result set.)
+When Security uses the `find` method in the current saved objects client, it filters the objects returned from Elasticsearch by what objects the user can access. Security can also access Elasticsearch data directly, authenticating as the end user, but for things unrelated to Kibana Saved Objects.
 
-Security can also access Elasticsearch data directly, authenticating as the end user, but for things unrelated to Kibana Saved Objects.
+Spaces
+---------
+[Spaces issue](https://github.com/elastic/x-pack-kibana/issues/774)
 
+When Spaces are enabled, all requests have the new current space context. Saved objects are claimed in some space, whether explicitly or via the default space. Thus, the saved object client needs to somehow be aware that this new context is a factor in every request to saved objects.
+
+Spaces need to interact with saved objects in the same way that OLS does, the main difference being that Spaces use `space_id`.
+
+From a saved object standpoint, Spaces will be represented as individual saved objects of type `space` and other saved objects, like dashboards, index_patterns, visualizations, and saved_searches, will have a `space_id` stored on them.
+
+Saved Objects that don't have `space_id` are available in the default space, which is a virtual concept rather than a literal one, since there is no space that represents the default space.
+
+Spaces + Security
+---------
+Spaces is going to be available in X-Pack Basic, and therefore there needs to be an OSS version of the saved objects client that doesn't have anything to do with spaces or security; and when X-Pack is used, the saved objects client needs to be able to change.
+
+With just Spaces enabled but Security disabled, the saved objects client needs to accept a new `space_id` context. This can be as simple as an optional parameter. It doesn't seem like a whole new saved object client needs to be created just to scope its requests to a Space.
+
+With both Spaces and Security enabled, we'll need a saved object client that performs the extra authentication (`has privileges`) checks for all read/write access, but it cannot clobber the existing context that Spaces has required. Here, it does seem like a whole new saved object client _might_ be needed, or else some flexible way to extend some or all methods of the saved object client to perform the extra checks.
 
 Migrations
 ---------
@@ -44,9 +61,9 @@ Security + Migrations
 ---------
 Security needs to apply its own metadata and global mappings for many (and maybe all) saved objects. The implementation of this is in flux.
 
-When the security plugin starts up, it needs to apply these mapping changes. We don't know in advance of the plugin starting up whether we need to write this metadata, so tt makes sense that it happens on startup. Security should own these mappings.
+When Security starts up, it needs to apply these mapping changes. We don't know in advance of the plugin starting up whether we need to write this metadata, so it makes sense that it happens on startup. Security should own these mappings.
 
-However, tthe security plugin doesn't have to update all the saved objects when it starts up. It should handle a lack of metadata, the lack of a Space id, and data pertaining to OLS. Saved Objects can go through an ownership claiming phase, where they start out where anyone can access them; then an app can claim ownership of some objects, and OLS metadata gets applied to them. Additionally, if an object has no `space_id`, it and all its child objects are globally available. (Implementation here may change.)
+However, the security plugin doesn't have to update all the saved objects when it starts up. It should handle a lack of metadata, the lack of a Space id, and data pertaining to OLS. Saved Objects can go through an ownership claiming phase, where they start out where anyone can access them; then an app can claim ownership of some objects, and OLS metadata gets applied to them. Additionally, if an object has no `space_id`, it and all its child objects are globally available. (Implementation here may change.)
 
 In the current world, Security deals directly with Elasticsearch mappings, applying those mappings directly into the `.kibana` index. Essentially we're allowing the type details to leak into the security plugin from the current saved objects client. Our saved object details leak outside of their abstractions because that's the only way to make real changes to them, in Elasticsearch.
 
@@ -307,18 +324,6 @@ export class BazService {
 ```
 
 To see an implementation of ElasticsearchService and the different ways we can provide Elasticsearch via an Admin or Data Client, peruse [this directory](https://github.com/elastic/kibana/tree/new-platform/platform/src/server/elasticsearch).
-
-Spaces
----------
-[Spaces issue](https://github.com/elastic/x-pack-kibana/issues/774)
-
-Spaces need to interact with saved objects in the same way that OLS does, the main difference being that Spaces use `space_id`.
-
-From a saved object standpoint, Spaces will be represented as individual saved objects of type `space` and other saved objects, like dashboards, index_patterns, visualizations, and saved_searches, will have a `space_id` stored on them.
-
-Saved Objects that don't have `space_id` are available in the global space, which is a virtual concept rather than a literal one, since there is no space that represents the global space.
-
-X-Pack Security will extend the saved object client to take into account `space_id` in all relevant places.
 
 Court's draft
 ---------
