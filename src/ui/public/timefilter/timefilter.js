@@ -21,13 +21,13 @@ import _ from 'lodash';
 import moment from 'moment';
 import { calculateBounds, getTime } from './get_time';
 import '../state_management/global_state';
-import '../config';
 import { EventsProvider } from '../events';
 import { diffTimeFactory } from './lib/diff_time';
 import { diffIntervalFactory } from './lib/diff_interval';
 import uiRoutes from '../routes';
 import { uiModules } from '../modules';
 import { createLegacyClass } from '../utils/legacy_class';
+import chrome from '../chrome';
 
 uiRoutes
   .addSetupWork(function (timefilter) {
@@ -36,7 +36,7 @@ uiRoutes
 
 uiModules
   .get('kibana')
-  .service('timefilter', function (Private, globalState, $rootScope, config, $location) {
+  .service('timefilter', function (Private, globalState, $rootScope, $location) {
     const Events = Private(EventsProvider);
 
     function convertISO8601(stringTime) {
@@ -56,8 +56,9 @@ uiModules
       self.isAutoRefreshSelectorEnabled = false;
 
       self.init = _.once(function () {
-        const timeDefaults = config.get('timepicker:timeDefaults');
-        const refreshIntervalDefaults = config.get('timepicker:refreshIntervalDefaults');
+        const uiSettings = chrome.getUiSettingsClient();
+        const timeDefaults = uiSettings.get('timepicker:timeDefaults');
+        const refreshIntervalDefaults = uiSettings.get('timepicker:refreshIntervalDefaults');
 
         // These can be date math strings or moments.
         self.time = _.defaults(globalState.time || {}, timeDefaults);
