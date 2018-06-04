@@ -48,7 +48,7 @@ describe(`#savedObjectsAuthorizationFailure`, () => {
     const username = 'foo-user';
     const action = 'foo-action';
     const types = [ 'foo-type-1', 'foo-type-2' ];
-    const missing = [`action:saved-objects/${types[0]}/foo-action`, `action:saved-objects/${types[1]}/foo-action`];
+    const missing = [`action:saved_objects/${types[0]}/foo-action`, `action:saved_objects/${types[1]}/foo-action`];
     const args = {
       'foo': 'bar',
       'baz': 'quz',

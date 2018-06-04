@@ -48,7 +48,8 @@ export function hasPrivilegesWithServer(server) {
 
       return {
         success,
-        missing: missingPrivileges,
+        // We don't want to expose the version privilege to consumers, as it's an implementation detail only to detect version mismatch
+        missing: missingPrivileges.filter(p => p !== versionPrivilege),
         username: privilegeCheck.username,
       };
     };
