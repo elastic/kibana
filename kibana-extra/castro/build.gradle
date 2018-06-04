@@ -1,0 +1,7 @@
+task bootstrap(type: Exec) {
+  commandLine "yarn", "kbn", "bootstrap"
+}
+
+task start(type: Exec, dependsOn: [bootstrap]) {
+  commandLine "yarn", "start"
+}

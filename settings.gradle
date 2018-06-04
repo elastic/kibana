@@ -1,2 +1,2 @@
 include 'backend'
-include 'kibana-plugin'
+include 'kibana-extra/castro'

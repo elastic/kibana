@@ -1,25 +1,25 @@
 {
-  "name": "<%= this.kebabCase(name) %>",
-  "version": "0.0.0",
-  "description": "<%= description %>",
+  "name": "castro",
+  "version": "0.0.1",
+  "description": "castro",
   "main": "index.js",
   "kibana": {
-    "version": "<%= (kbnVersion === 'master') ? 'kibana' : kbnVersion %>",
-    "templateVersion": "<%= this.templateVersion %>"
+    "version": "kibana",
+    "templateVersion": "1.0.0"
   },
   "scripts": {
+    "preinstall": "node ../../kibana/preinstall_check",
+    "kbn": "node ../../kibana/scripts/kbn",
     "lint": "eslint **/*.js",
     "start": "plugin-helpers start",
     "test:server": "plugin-helpers test:server",
     "test:browser": "plugin-helpers test:browser",
-    "build": "plugin-helpers build",
-    "postinstall": "plugin-helpers postinstall",
-    "gather-info": "node gather-info.js"
+    "build": "plugin-helpers build"
   },
   "devDependencies": {
-    "@elastic/eslint-config-kibana": "^0.14.0",
+    "@elastic/eslint-config-kibana": "link:../../kibana/packages/eslint-config-kibana",
     "@elastic/eslint-import-resolver-kibana": "^0.9.0",
-    "@elastic/plugin-helpers": "^8.0.1",
+    "@kbn/plugin-helpers": "link:../../kibana/packages/kbn-plugin-helpers",
     "babel-eslint": "^8.0.2",
     "eslint": "^4.11.0",
     "eslint-plugin-babel": "^4.1.1",
@@ -29,5 +29,8 @@
     "eslint-plugin-prefer-object-spread": "^1.2.1",
     "eslint-plugin-react": "^7.0.1",
     "expect.js": "^0.3.1"
+  },
+  "dependencies": {
+    "nodegit": "^0.22.1"
   }
 }
