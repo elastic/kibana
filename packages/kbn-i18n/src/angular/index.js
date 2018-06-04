@@ -17,6 +17,6 @@
  * under the License.
  */
 
-import './i18n.servise';
-import './i18n.directive';
-import './i18n.filter';
+import './provider';
+import './directive';
+import './filter';

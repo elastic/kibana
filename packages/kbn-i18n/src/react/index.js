@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { I18n } from './i18n';
-export { uiI18nMixin } from './ui_i18n_mixin';
+export * from 'react-intl';
+export { I18nProvider } from './provider';

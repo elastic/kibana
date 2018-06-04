@@ -150,7 +150,7 @@ export function uiRenderMixin(kbnServer, server, config) {
           injectedVarsOverrides
         }),
         bundlePath: `${config.get('server.basePath')}/bundles`,
-        i18n: i18n.translate.bind(i18n),
+        i18n: (id, options) => i18n.translate(id, options),
       });
     } catch (err) {
       reply(err);

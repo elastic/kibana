@@ -107,9 +107,10 @@ language key
 - `setDefaultLocale(locale: string)` - tells the library which language to fallback
 when missing translations
 - `getDefaultLocale()` - returns the default locale
-- `defineFormats(formats: object)` - supplies a set of options to the underlying formatter.
+- `setFormats(formats: object)` - supplies a set of options to the underlying formatter.
 For the detailed explanation, see the section below
 - `getFormats()` - returns current formats
+- `getRegisteredLocales()` - returns array of locales having translations
 - `translate(id: string, [{values: object, defaultMessage: string}])` – translate message by id
 
 #### I18n engine internals
@@ -256,8 +257,9 @@ language key
 - `setDefaultLocale(locale: string)` - tells the library which language to fallback
 when missing translations
 - `getDefaultLocale()` - returns the default locale
-- `defineFormats(formats: object)` - supplies a set of options to the underlying formatter
+- `setFormats(formats: object)` - supplies a set of options to the underlying formatter
 - `getFormats()` - returns current formats
+- `getRegisteredLocales()` - returns array of locales having translations
 
 The translation `service` provides only one method:
 - `translate(id: string, [{values: object, defaultMessage: string}])` – translate message by id

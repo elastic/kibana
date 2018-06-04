@@ -17,10 +17,15 @@
  * under the License.
  */
 
+/**
+ @typedef Messages
+ @type {object<string, object>}
+ @property {string} [locale] - locale of the messages
+ @property {object} [localeData] - localization rules for IntlMessageFormat
+ */
+
 import IntlMessageFormat from 'intl-messageformat';
 import memoizeIntlConstructor from 'intl-format-cache';
-
-const EN_LOCALE = 'en';
 
 const getMessageById = (messages, id) =>
   id.split('.').reduce((val, key) => (val ? val[key] : null), messages);
@@ -33,8 +38,6 @@ const addLocaleData = localeData => {
   }
 };
 
-const normalizeLocale = (locale = '') => locale.toLowerCase().replace('_', '-');
-
 const showError = error => {
   if (process.env.NODE_ENV !== 'production') {
     console.error(error);
@@ -44,10 +47,23 @@ const showError = error => {
 const getMessageFormat = memoizeIntlConstructor(IntlMessageFormat);
 
 export default class I18n {
-  constructor(messages = {}, locale = messages.locale || EN_LOCALE) {
-    this.currentLocale = normalizeLocale(locale);
+  static EN_LOCALE = 'en';
+  static LOCALE_DELIMITER = '-';
+
+  static normalizeLocale(locale = '') {
+    return locale.toLowerCase().replace('_', I18n.LOCALE_DELIMITER);
+  }
+
+  /**
+   * Platform agnostic abstraction that helps to supply locale data to
+   * UI frameworks and provides methods for the direct translation.
+   * @param {Messages} messages
+   * @param {string} [locale = messages.locale||'en']
+   */
+  constructor(messages = {}, locale = messages.locale || I18n.EN_LOCALE) {
+    this.currentLocale = I18n.normalizeLocale(locale);
     this.messages = { [this.currentLocale]: messages };
-    this.defaultLocale = EN_LOCALE;
+    this.defaultLocale = I18n.EN_LOCALE;
     this.formats = {};
 
     if (messages.localeData) {
@@ -55,8 +71,13 @@ export default class I18n {
     }
   }
 
-  addMessages(messages = {}, locale = messages.locale || EN_LOCALE) {
-    const normalizedLocale = normalizeLocale(locale);
+  /**
+   * Provides a way to register translations with the engine
+   * @param {Messages} messages
+   * @param {string} [locale = messages.locale||'en']
+   */
+  addMessages(messages = {}, locale = messages.locale || I18n.EN_LOCALE) {
+    const normalizedLocale = I18n.normalizeLocale(locale);
 
     this.messages[normalizedLocale] = {
       ...this.messages[normalizedLocale],
@@ -68,34 +89,78 @@ export default class I18n {
     }
   }
 
+  /**
+   * Returns messages for the current language
+   * @returns {Messages} messages
+   */
   getMessages() {
     return this.messages[this.currentLocale];
   }
 
+  /**
+   * Tells the engine which language to use by given language key
+   * @param {string} locale
+   */
   setLocale(locale) {
-    this.currentLocale = normalizeLocale(locale);
+    this.currentLocale = I18n.normalizeLocale(locale);
   }
 
+  /**
+   * Returns the current locale
+   * @returns {string} locale
+   */
   getLocale() {
     return this.currentLocale;
   }
 
+  /**
+   * Tells the library which language to fallback when missing translations
+   * @param {string} locale
+   */
   setDefaultLocale(locale) {
-    this.defaultLocale = normalizeLocale(locale);
+    this.defaultLocale = I18n.normalizeLocale(locale);
   }
 
+  /**
+   * Returns the default locale
+   * @returns {string} defaultLocale
+   */
   getDefaultLocale() {
     return this.defaultLocale;
   }
 
-  defineFormats(formats) {
+  /**
+   * Supplies a set of options to the underlying formatter
+   * @param {object} formats
+   */
+  setFormats(formats) {
     this.formats = formats;
   }
 
+  /**
+   * Returns current formats
+   * @returns {object} formats
+   */
   getFormats() {
     return this.formats;
   }
 
+  /**
+   * Returns array of locales having translations
+   * @returns {string[]} locales
+   */
+  getRegisteredLocales() {
+    return Object.keys(this.messages);
+  }
+
+  /**
+   * Translate message by id
+   * @param {string} id - translation id to be translated
+   * @param {object} [options]
+   * @param {object} [options.values] - values to pass into translation
+   * @param {string} [options.defaultMessage] - will be used unless translation was successful
+   * @returns {string}
+   */
   translate(id, { values = {}, defaultMessage = '' } = {}) {
     if (!id) {
       showError('[I18n] An `id` must be provided to translate a message.');

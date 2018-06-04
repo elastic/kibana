@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import './angular_i18n';
+import './angular';
 
-export * from './react_i18n';
+export * from './react';
 
 export { default as I18n } from './core';
 export { default as i18n } from './i18n';

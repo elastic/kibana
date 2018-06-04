@@ -17,11 +17,12 @@
  * under the License.
  */
 
+import { uiI18nMixin } from '@kbn/i18n/src/server';
+
 import { uiExportsMixin } from './ui_exports';
 import { fieldFormatsMixin } from './field_formats';
 import { tutorialsMixin } from './tutorials_mixin';
 import { uiAppsMixin } from './ui_apps';
-import { uiI18nMixin } from './ui_i18n';
 import { uiBundlesMixin } from './ui_bundles';
 import { uiNavLinksMixin } from './ui_nav_links';
 import { uiRenderMixin } from './ui_render';

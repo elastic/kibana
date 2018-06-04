@@ -21,30 +21,27 @@ import expect from 'expect.js';
 import _ from 'lodash';
 import { join } from 'path';
 
-import { I18n } from '../';
+import { I18nLoader } from '../i18n_loader';
 
 const FIXTURES = join(__dirname, 'fixtures');
 
-describe('ui/i18n module', function () {
+describe('ui/i18n module', function() {
 
-  describe('one plugin', function () {
+  describe('one plugin', function() {
 
-    const i18nObj = new I18n();
+    const i18nObj = new I18nLoader();
 
-    before('registerTranslations - one plugin', function () {
+    before('registerTranslations - one plugin', function() {
       const pluginName = 'test_plugin_1';
       const pluginTranslationPath = join(FIXTURES, 'translations', pluginName);
       const translationFiles = [
         join(pluginTranslationPath, 'de.json'),
-        join(pluginTranslationPath, 'en.json')
+        join(pluginTranslationPath, 'en.json'),
       ];
-      const filesLen = translationFiles.length;
-      for (let indx = 0; indx < filesLen; indx++) {
-        i18nObj.registerTranslations(translationFiles[indx]);
-      }
+      i18nObj.registerTranslationFiles(translationFiles);
     });
 
-    describe('getTranslations', function () {
+    describe('getTranslations', function() {
 
       it('should return the translations for en locale as registered', function () {
         const languageTag = ['en'];
