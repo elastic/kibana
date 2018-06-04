@@ -114,7 +114,7 @@ describe('CSV Execute Job', function () {
       const executeJob = executeJobFactory(mockServer);
       await executeJob({ headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } }, cancellationToken);
       expect(mockServer.savedObjects.getScopedSavedObjectsClient.calledOnce).to.be(true);
-      expect(mockServer.savedObjects.getScopedSavedObjectsClient.firstCall.args[0].request.headers).to.be.eql(headers);
+      expect(mockServer.savedObjects.getScopedSavedObjectsClient.firstCall.args[0].headers).to.be.eql(headers);
     });
   });
 
