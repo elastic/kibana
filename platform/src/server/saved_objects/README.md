@@ -81,35 +81,19 @@ We need a mapping abstraction for Kibana saved objects. Maybe the initial defini
 
 A proper _order in which plugins make changes_ could solve the problem of clobbering mappings, before they get applied on the Elasticsearch side.
 
+This order may or may not be related to the dependency tree we build up internally during the plugin startup phase of the new platform. During this phase all plugin dependencies are analyzed so that plugins can be loaded in dependency order.
+
 Tags
 ---------
 Tagging is a new feature that enables applying some tags across objects, unrelated to a specific type. Maybe other plugins opt into this feature, or maybe the plugin only lives in X-Pack. Maybe tags have to be applied to all saved objects and the tagging features chooses how to expose them. Either way, modifications to underlying objects are applied broadly. The tagging features _can tag any type_, but it cannot know about _all the types that need to be tagged_.
 
 The same kind of clobbering of mappings could happen if Security and Migrations made changes to mappings along with Tagging. You could still ultimately lose data unless all are brought together into the same system.
 
-Saved Objects System
----------
-We envision a new system that exposes a saved objects service that runs, has life-cycle methods, and manages all the operations, extension points, and config options associated with saved objects.
-
-One idea is that it exposes three clients for use by plugins. These three interfaces encompass _all_ saved object access.
-
-1. Saved object client given to an HTTP request handler. Allows you to find, create, update saved objects.
-2. Migrations client. Bulk transformation of saved objects and mappings. Not just one-off updates, but  permanent modifications into the future to the way saved objects behave.
-
-Each of the above clients have extension points for plugins to inject functionality into the internals of the Saved Object System itself, specifically by wiring into the saved objects client and migrations client.
-
-3. API that plugins use. Allows a plugin to register its information about saved objects that it owns.
-
-
-Another model could be a two client system:
-
-1. Access client. Analogous to the saved object client above. It is not exposed directly: it is only exposed via the http service and through the background task service, provided by Kibana Core.
-2. Storage client. Accepts arguments to register a plugin's saved objects, its migrations, mappings, etc. The migrations client is contained here. This Storage Client makes its changes through the Access Client only.
-
-
 Kibana, Plugins, Saved Objects System startup
 ---------
 We believe the system should start up similarly to a daemon, around when Kibana starts up. This way, we can identify problems sooner, at setup time rather than when we write saved objects. We can also startup the various clients (which would be the daemons) that listen for and handle reads and writes properly. The consumers of the Saved Objects Service also then don't have to care about storage location for saved objects. Their startup functions can handle that.
+
+If the system starts up like a daemon, then there could be an initial saved object client that's created as an Observable. In OSS Kibana this client probably doesn't need to change for each request or when some plugins are enabled/disabled. However when certain X-Pack plugins are enabled, we do need to allow changes to be made to the client, via Spaces and Security. So that means the saved object system needs to allow plugins to instruct the system to create a saved object client for each request that specifically cares about the context of that request.
 
 Storage - Logstash, Reporting, Beats
 ---------
