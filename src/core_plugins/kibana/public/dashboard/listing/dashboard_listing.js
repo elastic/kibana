@@ -252,16 +252,14 @@ export class DashboardListing extends React.Component {
       <div>
         <EuiEmptyPrompt
           iconType="dashboardApp"
-          title={<h2>Set up your first dashboard</h2>}
+          title={<h2>Create your first dashboard</h2>}
           body={
             <Fragment>
               <p>
-                Dashboards allow you to combine different data views from
-                other Kibana apps so that you can see them all in one place
+                You can combine data views from any Kibana app into one dashboard and see everything in one place.
               </p>
               <p>
-                New to Kibana? <EuiLink href="#/home/tutorial_directory/sampleData">Install sample data</EuiLink> to
-                load a sample dashboard.
+                New to Kibana? <EuiLink href="#/home/tutorial_directory/sampleData">Install some sample data</EuiLink> to take a test drive.
               </p>
             </Fragment>
           }
