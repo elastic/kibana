@@ -75,66 +75,73 @@ export class KibanaMap extends React.Component {
     return this._kbnOLLayers.map(layerTuple => layerTuple.kbnLayer);
   }
 
+  _renderFlyout() {
+    const handlePreviewLayer = () => console.log("Handle preview layer placeholder");
+    return (
+      <EuiFlyout onClose={this.props.onClose} style={{ maxWidth: 768 }}>
+        <EuiFlyoutHeader>
+          <EuiTitle size="l">
+            <h2>Add layer</h2>
+          </EuiTitle>
+          <EuiSpacer size="m"/>
+          <EuiTextColor color="subdued">
+            <EuiText size="s">
+              <p>Choose a source from one of the following options, then click Add to map to continue.</p>
+            </EuiText>
+          </EuiTextColor>
+          <EuiSpacer />
+          <EuiHorizontalRule margin="none"/>
+        </EuiFlyoutHeader>
+
+        <EuiFlyoutBody style={{ paddingTop: 0 }}>
+          <EuiAccordion
+            id="addIndexPattern"
+            className="euiAccordionForm"
+            buttonClassName="euiAccordionForm__button"
+            buttonContent="From Elasticsearch index"
+            initialIsOpen={true}
+            ref={(ref)=>this._ipAccordion = ref}
+            onClick={this._onIPClick}
+          >
+            <div className="euiAccordionForm__children">
+              <IndexPatternImport kibanaMap={this._kibanaMap} onPreviewLayer={handlePreviewLayer}/>
+            </div>
+          </EuiAccordion>
+
+          <EuiAccordion
+            id="addEMS"
+            className="euiAccordionForm"
+            buttonClassName="euiAccordionForm__button"
+            buttonContent="Import from Elastic Maps Service"
+            initialIsOpen={false}
+            ref={(ref)=>this._emsAccordion = ref}
+            onClick={this._onEMSClick}
+          >
+            <div className="euiAccordionForm__children"/>
+          </EuiAccordion>
+
+          <EuiAccordion
+            id="addFile"
+            className="euiAccordionForm"
+            buttonClassName="euiAccordionForm__button"
+            buttonContent="Import from local file"
+            initialIsOpen={false}
+            ref={(ref)=>this._fileAccordion = ref}
+            onClick={this._onFileClick}
+          >
+            <div className="euiAccordionForm__children"/>
+          </EuiAccordion>
+        </EuiFlyoutBody>
+      </EuiFlyout>
+    );
+  }
+
   render() {
-    const handlePreviewLayer = ()=> console.log("Handle preview layer placeholder");
+    // const flyout = this._renderFlyout();
     return (
       <div>
         <div className="mapContainer" ref="mapContainer"/>
-        <EuiFlyout onClose={this.props.onClose} style={{ maxWidth: 768 }}>
-          <EuiFlyoutHeader>
-            <EuiTitle size="l">
-              <h2>Add layer</h2>
-            </EuiTitle>
-            <EuiSpacer size="m"/>
-            <EuiTextColor color="subdued">
-              <EuiText size="s">
-                <p>Choose a source from one of the following options, then click Add to map to continue.</p>
-              </EuiText>
-            </EuiTextColor>
-            <EuiSpacer />
-            <EuiHorizontalRule margin="none"/>
-          </EuiFlyoutHeader>
-
-          <EuiFlyoutBody style={{ paddingTop: 0 }}>
-            <EuiAccordion
-              id="addIndexPattern"
-              className="euiAccordionForm"
-              buttonClassName="euiAccordionForm__button"
-              buttonContent="From Elasticsearch index"
-              initialIsOpen={true}
-              ref={(ref)=>this._ipAccordion = ref}
-              onClick={this._onIPClick}
-            >
-              <div className="euiAccordionForm__children">
-                <IndexPatternImport kibanaMap={this._kibanaMap} onPreviewLayer={handlePreviewLayer}/>
-              </div>
-            </EuiAccordion>
-
-            <EuiAccordion
-              id="addEMS"
-              className="euiAccordionForm"
-              buttonClassName="euiAccordionForm__button"
-              buttonContent="Import from Elastic Maps Service"
-              initialIsOpen={false}
-              ref={(ref)=>this._emsAccordion = ref}
-              onClick={this._onEMSClick}
-            >
-              <div className="euiAccordionForm__children"/>
-            </EuiAccordion>
-
-            <EuiAccordion
-              id="addFile"
-              className="euiAccordionForm"
-              buttonClassName="euiAccordionForm__button"
-              buttonContent="Import from local file"
-              initialIsOpen={false}
-              ref={(ref)=>this._fileAccordion = ref}
-              onClick={this._onFileClick}
-            >
-              <div className="euiAccordionForm__children"/>
-            </EuiAccordion>
-          </EuiFlyoutBody>
-        </EuiFlyout>
+        {/*{flyout}*/}
       </div>
     );
   }
