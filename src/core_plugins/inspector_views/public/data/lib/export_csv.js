@@ -26,7 +26,6 @@ function buildCsv(columns, rows) {
   const csvSeparator = settings.get('csv:separator', ',');
   const quoteValues = settings.get('csv:quoteValues', true);
 
-  // const columns = formatted ? $scope.formattedColumns : $scope.table.columns;
   const nonAlphaNumRE = /[^a-zA-Z0-9]/;
   const allDoubleQuoteRE = /"/g;
 
