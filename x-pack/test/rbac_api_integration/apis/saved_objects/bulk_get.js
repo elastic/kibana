@@ -5,11 +5,10 @@
  */
 
 import expect from 'expect.js';
-import { AUTHENTICATION } from './authentication';
+import { AUTHENTICATION } from './lib/authentication';
 
 export default function ({ getService }) {
   const supertest = getService('supertestWithoutAuth');
-  const es = getService('es');
   const esArchiver = getService('esArchiver');
 
   const BULK_REQUESTS = [
@@ -69,37 +68,6 @@ export default function ({ getService }) {
       });
     };
 
-    const expect404s = resp => {
-      expect(resp.body).to.eql({
-        saved_objects: [
-          {
-            id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-            type: 'visualization',
-            error: {
-              statusCode: 404,
-              message: 'Not found',
-            },
-          },
-          {
-            id: 'does not exist',
-            type: 'dashboard',
-            error: {
-              statusCode: 404,
-              message: 'Not found',
-            },
-          },
-          {
-            id: '7.0.0-alpha1',
-            type: 'config',
-            error: {
-              statusCode: 404,
-              message: 'Not found',
-            },
-          },
-        ],
-      });
-    };
-
     const expectForbidden = resp => {
       //eslint-disable-next-line max-len
       const missingActions = `action:login,action:saved_objects/config/bulk_get,action:saved_objects/dashboard/bulk_get,action:saved_objects/visualization/bulk_get`;
@@ -110,40 +78,18 @@ export default function ({ getService }) {
       });
     };
 
-    const bulkGetTest = (description, { auth, assert }) => {
+    const bulkGetTest = (description, { auth, tests }) => {
       describe(description, () => {
-        describe('with kibana index', () => {
-          before(() => esArchiver.load('saved_objects/basic'));
-          after(() => esArchiver.unload('saved_objects/basic'));
+        before(() => esArchiver.load('saved_objects/basic'));
+        after(() => esArchiver.unload('saved_objects/basic'));
 
-          it(`should return ${assert.withIndex.statusCode}`, async () => {
-            await supertest
-              .post(`/api/saved_objects/_bulk_get`)
-              .auth(auth.username, auth.password)
-              .send(BULK_REQUESTS)
-              .expect(assert.withIndex.statusCode)
-              .then(assert.withIndex.response);
-          });
-        });
-
-        describe('without kibana index', () => {
-          before(
-            async () =>
-              // just in case the kibana server has recreated it
-              await es.indices.delete({
-                index: '.kibana',
-                ignore: [404],
-              })
-          );
-
-          it(`should return ${assert.withoutIndex.statusCode}`, async () => {
-            await supertest
-              .post('/api/saved_objects/_bulk_get')
-              .auth(auth.username, auth.password)
-              .send(BULK_REQUESTS)
-              .expect(assert.withoutIndex.statusCode)
-              .then(assert.withoutIndex.response);
-          });
+        it(`should return ${tests.default.statusCode}`, async () => {
+          await supertest
+            .post(`/api/saved_objects/_bulk_get`)
+            .auth(auth.username, auth.password)
+            .send(BULK_REQUESTS)
+            .expect(tests.default.statusCode)
+            .then(tests.default.response);
         });
       });
     };
@@ -153,14 +99,10 @@ export default function ({ getService }) {
         username: AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME,
         password: AUTHENTICATION.NOT_A_KIBANA_USER.PASSWORD,
       },
-      assert: {
-        withIndex: {
+      tests: {
+        default: {
           statusCode: 403,
           response: expectForbidden,
-        },
-        withoutIndex: {
-          statusCode: 403,
-          response: expectForbidden
         }
       }
     });
@@ -170,15 +112,11 @@ export default function ({ getService }) {
         username: AUTHENTICATION.SUPERUSER.USERNAME,
         password: AUTHENTICATION.SUPERUSER.PASSWORD,
       },
-      assert: {
-        withIndex: {
+      tests: {
+        default: {
           statusCode: 200,
           response: expectResults,
         },
-        withoutIndex: {
-          statusCode: 200,
-          response: expect404s
-        }
       }
     });
 
@@ -187,15 +125,11 @@ export default function ({ getService }) {
         username: AUTHENTICATION.KIBANA_RBAC_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_RBAC_USER.PASSWORD,
       },
-      assert: {
-        withIndex: {
+      tests: {
+        default: {
           statusCode: 200,
           response: expectResults,
         },
-        withoutIndex: {
-          statusCode: 200,
-          response: expect404s
-        }
       }
     });
 
@@ -204,15 +138,11 @@ export default function ({ getService }) {
         username: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.PASSWORD,
       },
-      assert: {
-        withIndex: {
+      tests: {
+        default: {
           statusCode: 200,
           response: expectResults,
         },
-        withoutIndex: {
-          statusCode: 200,
-          response: expect404s
-        }
       }
     });
   });

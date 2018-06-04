@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AUTHENTICATION } from "./authentication";
+import { AUTHENTICATION } from "./lib/authentication";
 
 export default function ({ loadTestFile, getService }) {
   const es = getService('es');

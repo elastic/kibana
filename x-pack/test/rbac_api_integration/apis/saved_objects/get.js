@@ -5,11 +5,10 @@
  */
 
 import expect from 'expect.js';
-import { AUTHENTICATION } from './authentication';
+import { AUTHENTICATION } from './lib/authentication';
 
 export default function ({ getService }) {
   const supertest = getService('supertestWithoutAuth');
-  const es = getService('es');
   const esArchiver = getService('esArchiver');
 
   describe('get', () => {
@@ -48,46 +47,26 @@ export default function ({ getService }) {
       });
     };
 
-    const getTest = (description, { auth, assert }) => {
+    const getTest = (description, { auth, tests }) => {
       describe(description, () => {
-        describe('with kibana index', () => {
-          before(() => esArchiver.load('saved_objects/basic'));
-          after(() => esArchiver.unload('saved_objects/basic'));
+        before(() => esArchiver.load('saved_objects/basic'));
+        after(() => esArchiver.unload('saved_objects/basic'));
 
-          it('should return 200', async () => (
+        it(`should return ${tests.exists.statusCode}`, async () => (
+          await supertest
+            .get(`/api/saved_objects/visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab`)
+            .auth(auth.username, auth.password)
+            .expect(tests.exists.statusCode)
+            .then(tests.exists.response)
+        ));
+
+        describe('document does not exist', () => {
+          it(`should return ${tests.doesntExist.statusCode}`, async () => (
             await supertest
-              .get(`/api/saved_objects/visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab`)
+              .get(`/api/saved_objects/visualization/foobar`)
               .auth(auth.username, auth.password)
-              .expect(assert.withIndex.exists.statusCode)
-              .then(assert.withIndex.exists.response)
-          ));
-
-          describe('doc does not exist', () => {
-            it('should return same generic error as when index does not exist', async () => (
-              await supertest
-                .get(`/api/saved_objects/visualization/foobar`)
-                .auth(auth.username, auth.password)
-                .expect(assert.withIndex.doesntExist.statusCode)
-                .then(assert.withIndex.doesntExist.response)
-            ));
-          });
-        });
-
-        describe('without kibana index', () => {
-          before(async () => (
-            // just in case the kibana server has recreated it
-            await es.indices.delete({
-              index: '.kibana',
-              ignore: [404],
-            })
-          ));
-
-          it('should return basic 404 without mentioning index', async () => (
-            await supertest
-              .get('/api/saved_objects/visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab')
-              .auth(auth.username, auth.password)
-              .expect(assert.withoutIndex.statusCode)
-              .then(assert.withoutIndex.response)
+              .expect(tests.doesntExist.statusCode)
+              .then(tests.doesntExist.response)
           ));
         });
       });
@@ -98,21 +77,15 @@ export default function ({ getService }) {
         username: AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME,
         password: AUTHENTICATION.NOT_A_KIBANA_USER.PASSWORD,
       },
-      assert: {
-        withIndex: {
-          exists: {
-            statusCode: 403,
-            response: expectForbidden,
-          },
-          doesntExist: {
-            statusCode: 403,
-            response: expectForbidden,
-          },
-        },
-        withoutIndex: {
+      tests: {
+        exists: {
           statusCode: 403,
           response: expectForbidden,
-        }
+        },
+        doesntExist: {
+          statusCode: 403,
+          response: expectForbidden,
+        },
       }
     });
 
@@ -121,21 +94,15 @@ export default function ({ getService }) {
         username: AUTHENTICATION.SUPERUSER.USERNAME,
         password: AUTHENTICATION.SUPERUSER.PASSWORD,
       },
-      assert: {
-        withIndex: {
-          exists: {
-            statusCode: 200,
-            response: expectResults,
-          },
-          doesntExist: {
-            statusCode: 404,
-            response: expectNotFound,
-          },
+      tests: {
+        exists: {
+          statusCode: 200,
+          response: expectResults,
         },
-        withoutIndex: {
+        doesntExist: {
           statusCode: 404,
           response: expectNotFound,
-        }
+        },
       }
     });
 
@@ -144,21 +111,15 @@ export default function ({ getService }) {
         username: AUTHENTICATION.KIBANA_RBAC_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_RBAC_USER.PASSWORD,
       },
-      assert: {
-        withIndex: {
-          exists: {
-            statusCode: 200,
-            response: expectResults,
-          },
-          doesntExist: {
-            statusCode: 404,
-            response: expectNotFound,
-          },
+      tests: {
+        exists: {
+          statusCode: 200,
+          response: expectResults,
         },
-        withoutIndex: {
+        doesntExist: {
           statusCode: 404,
           response: expectNotFound,
-        }
+        },
       }
     });
 
@@ -167,21 +128,15 @@ export default function ({ getService }) {
         username: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.PASSWORD,
       },
-      assert: {
-        withIndex: {
-          exists: {
-            statusCode: 200,
-            response: expectResults,
-          },
-          doesntExist: {
-            statusCode: 404,
-            response: expectNotFound,
-          },
+      tests: {
+        exists: {
+          statusCode: 200,
+          response: expectResults,
         },
-        withoutIndex: {
+        doesntExist: {
           statusCode: 404,
           response: expectNotFound,
-        }
+        },
       }
     });
   });

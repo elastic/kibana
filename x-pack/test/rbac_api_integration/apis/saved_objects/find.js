@@ -5,11 +5,10 @@
  */
 
 import expect from 'expect.js';
-import { AUTHENTICATION } from './authentication';
+import { AUTHENTICATION } from './lib/authentication';
 
 export default function ({ getService }) {
   const supertest = getService('supertestWithoutAuth');
-  const es = getService('es');
   const esArchiver = getService('esArchiver');
 
   describe('find', () => {
@@ -49,100 +48,49 @@ export default function ({ getService }) {
       });
     };
 
-    const findTest = (description, { auth, assert }) => {
+    const findTest = (description, { auth, tests }) => {
       describe(description, () => {
-        describe('with kibana index', () => {
-          before(() => esArchiver.load('saved_objects/basic'));
-          after(() => esArchiver.unload('saved_objects/basic'));
+        before(() => esArchiver.load('saved_objects/basic'));
+        after(() => esArchiver.unload('saved_objects/basic'));
 
-          it(`should return ${assert.withIndex.normal.statusCode} with individual responses`, async () => (
+        it(`should return ${tests.normal.statusCode} with ${tests.normal.description}`, async () => (
+          await supertest
+            .get('/api/saved_objects/_find?type=visualization&fields=title')
+            .auth(auth.username, auth.password)
+            .expect(tests.normal.statusCode)
+            .then(tests.normal.response)
+        ));
+
+        describe('unknown type', () => {
+          it(`should return ${tests.unknownType.statusCode} with ${tests.unknownType.description}`, async () => (
             await supertest
-              .get('/api/saved_objects/_find?type=visualization&fields=title')
+              .get('/api/saved_objects/_find?type=wigwags')
               .auth(auth.username, auth.password)
-              .expect(assert.withIndex.normal.statusCode)
-              .then(assert.withIndex.normal.response)
+              .expect(tests.unknownType.statusCode)
+              .then(tests.unknownType.response)
           ));
-
-          describe('unknown type', () => {
-            it(`should return ${assert.withIndex.unknownType.statusCode} with empty response`, async () => (
-              await supertest
-                .get('/api/saved_objects/_find?type=wigwags')
-                .auth(auth.username, auth.password)
-                .expect(assert.withIndex.unknownType.statusCode)
-                .then(assert.withIndex.unknownType.response)
-            ));
-          });
-
-          describe('page beyond total', () => {
-            it(`should return ${assert.withIndex.pageBeyondTotal.statusCode} with empty response`, async () => (
-              await supertest
-                .get('/api/saved_objects/_find?type=visualization&page=100&per_page=100')
-                .auth(auth.username, auth.password)
-                .expect(assert.withIndex.pageBeyondTotal.statusCode)
-                .then(assert.withIndex.pageBeyondTotal.response)
-            ));
-          });
-
-          describe('unknown search field', () => {
-            it(`should return ${assert.withIndex.unknownSearchField.statusCode} with empty response`, async () => (
-              await supertest
-                .get('/api/saved_objects/_find?type=wigwags&search_fields=a')
-                .auth(auth.username, auth.password)
-                .expect(assert.withIndex.unknownSearchField.statusCode)
-                .then(assert.withIndex.unknownSearchField.response)
-            ));
-          });
         });
 
-        describe('without kibana index', () => {
-          before(async () => (
-            // just in case the kibana server has recreated it
-            await es.indices.delete({
-              index: '.kibana',
-              ignore: [404],
-            })
-          ));
-
-          it(`should return ${assert.withoutIndex.normal.statusCode} with empty response`, async () => (
+        describe('page beyond total', () => {
+          it(`should return ${tests.pageBeyondTotal.statusCode} with ${tests.pageBeyondTotal.description}`, async () => (
             await supertest
-              .get('/api/saved_objects/_find?type=visualization')
+              .get('/api/saved_objects/_find?type=visualization&page=100&per_page=100')
               .auth(auth.username, auth.password)
-              .expect(assert.withoutIndex.normal.statusCode)
-              .then(assert.withoutIndex.normal.response)
+              .expect(tests.pageBeyondTotal.statusCode)
+              .then(tests.pageBeyondTotal.response)
           ));
+        });
 
-          describe('unknown type', () => {
-            it(`should return ${assert.withoutIndex.unknownType.statusCode} with empty response`, async () => (
-              await supertest
-                .get('/api/saved_objects/_find?type=wigwags')
-                .auth(auth.username, auth.password)
-                .expect(assert.withoutIndex.unknownType.statusCode)
-                .then(assert.withoutIndex.unknownType.response)
-            ));
-          });
-
-          describe('page beyond total', () => {
-            it(`should return ${assert.withoutIndex.pageBeyondTotal.statusCode} with empty response`, async () => (
-              await supertest
-                .get('/api/saved_objects/_find?type=visualization&page=100&per_page=100')
-                .auth(auth.username, auth.password)
-                .expect(assert.withoutIndex.pageBeyondTotal.statusCode)
-                .then(assert.withoutIndex.pageBeyondTotal.response)
-            ));
-          });
-
-          describe('unknown search field', () => {
-            it(`should return ${assert.withoutIndex.unknownSearchField.statusCode} with empty response`, async () => (
-              await supertest
-                .get('/api/saved_objects/_find?type=wigwags&search_fields=a')
-                .auth(auth.username, auth.password)
-                .expect(assert.withoutIndex.unknownSearchField.statusCode)
-                .then(assert.withoutIndex.unknownSearchField.response)
-            ));
-          });
+        describe('unknown search field', () => {
+          it(`should return ${tests.unknownSearchField.statusCode} with ${tests.unknownSearchField.description}`, async () => (
+            await supertest
+              .get('/api/saved_objects/_find?type=wigwags&search_fields=a')
+              .auth(auth.username, auth.password)
+              .expect(tests.unknownSearchField.statusCode)
+              .then(tests.unknownSearchField.response)
+          ));
         });
       });
-
     };
 
     findTest(`not a kibana user`, {
@@ -150,42 +98,26 @@ export default function ({ getService }) {
         username: AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME,
         password: AUTHENTICATION.NOT_A_KIBANA_USER.PASSWORD,
       },
-      assert: {
-        withIndex: {
-          normal: {
-            statusCode: 403,
-            response: createExpectForbidden(false, 'visualization'),
-          },
-          unknownType: {
-            statusCode: 403,
-            response: createExpectForbidden(false, 'wigwags'),
-          },
-          pageBeyondTotal: {
-            statusCode: 403,
-            response: createExpectForbidden(false, 'visualization'),
-          },
-          unknownSearchField: {
-            statusCode: 403,
-            response: createExpectForbidden(false, 'wigwags'),
-          },
+      tests: {
+        normal: {
+          description: 'forbidden login and find visualization message',
+          statusCode: 403,
+          response: createExpectForbidden(false, 'visualization'),
         },
-        withoutIndex: {
-          normal: {
-            statusCode: 403,
-            response: createExpectForbidden(false, 'visualization'),
-          },
-          unknownType: {
-            statusCode: 403,
-            response: createExpectForbidden(false, 'wigwags'),
-          },
-          pageBeyondTotal: {
-            statusCode: 403,
-            response: createExpectForbidden(false, 'visualization'),
-          },
-          unknownSearchField: {
-            statusCode: 403,
-            response: createExpectForbidden(false, 'wigwags'),
-          },
+        unknownType: {
+          description: 'forbidden login and find wigwags message',
+          statusCode: 403,
+          response: createExpectForbidden(false, 'wigwags'),
+        },
+        pageBeyondTotal: {
+          description: 'forbidden login and find visualization message',
+          statusCode: 403,
+          response: createExpectForbidden(false, 'visualization'),
+        },
+        unknownSearchField: {
+          description: 'forbidden login and find wigwags message',
+          statusCode: 403,
+          response: createExpectForbidden(false, 'wigwags'),
         },
       }
     });
@@ -195,44 +127,28 @@ export default function ({ getService }) {
         username: AUTHENTICATION.SUPERUSER.USERNAME,
         password: AUTHENTICATION.SUPERUSER.PASSWORD,
       },
-      assert: {
-        withIndex: {
-          normal: {
-            statusCode: 200,
-            response: expectResults,
-          },
-          unknownType: {
-            statusCode: 200,
-            response: createExpectEmpty(1, 20, 0),
-          },
-          pageBeyondTotal: {
-            statusCode: 200,
-            response: createExpectEmpty(100, 100, 1),
-          },
-          unknownSearchField: {
-            statusCode: 200,
-            response: createExpectEmpty(1, 20, 0),
-          },
+      tests: {
+        normal: {
+          description: 'individual responses',
+          statusCode: 200,
+          response: expectResults,
         },
-        withoutIndex: {
-          normal: {
-            statusCode: 200,
-            response: createExpectEmpty(1, 20, 0),
-          },
-          unknownType: {
-            statusCode: 200,
-            response: createExpectEmpty(1, 20, 0),
-          },
-          pageBeyondTotal: {
-            statusCode: 200,
-            response: createExpectEmpty(100, 100, 0),
-          },
-          unknownSearchField: {
-            statusCode: 200,
-            response: createExpectEmpty(1, 20, 0),
-          },
+        unknownType: {
+          description: 'empty result',
+          statusCode: 200,
+          response: createExpectEmpty(1, 20, 0),
         },
-      }
+        pageBeyondTotal: {
+          description: 'empty result',
+          statusCode: 200,
+          response: createExpectEmpty(100, 100, 1),
+        },
+        unknownSearchField: {
+          description: 'empty result',
+          statusCode: 200,
+          response: createExpectEmpty(1, 20, 0),
+        },
+      },
     });
 
     findTest(`kibana rbac user`, {
@@ -240,44 +156,28 @@ export default function ({ getService }) {
         username: AUTHENTICATION.KIBANA_RBAC_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_RBAC_USER.PASSWORD,
       },
-      assert: {
-        withIndex: {
-          normal: {
-            statusCode: 200,
-            response: expectResults,
-          },
-          unknownType: {
-            statusCode: 200,
-            response: createExpectEmpty(1, 20, 0),
-          },
-          pageBeyondTotal: {
-            statusCode: 200,
-            response: createExpectEmpty(100, 100, 1),
-          },
-          unknownSearchField: {
-            statusCode: 200,
-            response: createExpectEmpty(1, 20, 0),
-          },
+      tests: {
+        normal: {
+          description: 'individual responses',
+          statusCode: 200,
+          response: expectResults,
         },
-        withoutIndex: {
-          normal: {
-            statusCode: 200,
-            response: createExpectEmpty(1, 20, 0),
-          },
-          unknownType: {
-            statusCode: 200,
-            response: createExpectEmpty(1, 20, 0),
-          },
-          pageBeyondTotal: {
-            statusCode: 200,
-            response: createExpectEmpty(100, 100, 0),
-          },
-          unknownSearchField: {
-            statusCode: 200,
-            response: createExpectEmpty(1, 20, 0),
-          },
+        unknownType: {
+          description: 'empty result',
+          statusCode: 200,
+          response: createExpectEmpty(1, 20, 0),
         },
-      }
+        pageBeyondTotal: {
+          description: 'empty result',
+          statusCode: 200,
+          response: createExpectEmpty(100, 100, 1),
+        },
+        unknownSearchField: {
+          description: 'empty result',
+          statusCode: 200,
+          response: createExpectEmpty(1, 20, 0),
+        },
+      },
     });
 
     findTest(`kibana rbac dashboard only user`, {
@@ -285,42 +185,26 @@ export default function ({ getService }) {
         username: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.PASSWORD,
       },
-      assert: {
-        withIndex: {
-          normal: {
-            statusCode: 200,
-            response: expectResults,
-          },
-          unknownType: {
-            statusCode: 403,
-            response: createExpectForbidden(true, 'wigwags'),
-          },
-          pageBeyondTotal: {
-            statusCode: 200,
-            response: createExpectEmpty(100, 100, 1),
-          },
-          unknownSearchField: {
-            statusCode: 403,
-            response: createExpectForbidden(true, 'wigwags'),
-          },
+      tests: {
+        normal: {
+          description: 'individual responses',
+          statusCode: 200,
+          response: expectResults,
         },
-        withoutIndex: {
-          normal: {
-            statusCode: 200,
-            response: createExpectEmpty(1, 20, 0),
-          },
-          unknownType: {
-            statusCode: 403,
-            response: createExpectForbidden(true, 'wigwags'),
-          },
-          pageBeyondTotal: {
-            statusCode: 200,
-            response: createExpectEmpty(100, 100, 0),
-          },
-          unknownSearchField: {
-            statusCode: 403,
-            response: createExpectForbidden(true, 'wigwags'),
-          },
+        unknownType: {
+          description: 'forbidden find wigwags message',
+          statusCode: 403,
+          response: createExpectForbidden(true, 'wigwags'),
+        },
+        pageBeyondTotal: {
+          description: 'empty result',
+          statusCode: 200,
+          response: createExpectEmpty(100, 100, 1),
+        },
+        unknownSearchField: {
+          description: 'forbidden find wigwags message',
+          statusCode: 403,
+          response: createExpectForbidden(true, 'wigwags'),
         },
       }
     });

@@ -5,11 +5,10 @@
  */
 
 import expect from 'expect.js';
-import { AUTHENTICATION } from './authentication';
+import { AUTHENTICATION } from './lib/authentication';
 
 export default function ({ getService }) {
   const supertest = getService('supertestWithoutAuth');
-  const es = getService('es');
   const esArchiver = getService('esArchiver');
 
   describe('delete', () => {
@@ -34,46 +33,26 @@ export default function ({ getService }) {
       });
     };
 
-    const deleteTest = (description, { auth, assert }) => {
+    const deleteTest = (description, { auth, tests }) => {
       describe(description, () => {
-        describe('with kibana index', () => {
-          before(() => esArchiver.load('saved_objects/basic'));
-          after(() => esArchiver.unload('saved_objects/basic'));
+        before(() => esArchiver.load('saved_objects/basic'));
+        after(() => esArchiver.unload('saved_objects/basic'));
 
-          it(`should return ${assert.withIndex.deletingDoc.statusCode} when deleting a doc`, async () => (
-            await supertest
-              .delete(`/api/saved_objects/dashboard/be3733a0-9efe-11e7-acb3-3dab96693fab`)
-              .auth(auth.username, auth.password)
-              .expect(assert.withIndex.deletingDoc.statusCode)
-              .then(assert.withIndex.deletingDoc.response)
-          ));
+        it(`should return ${tests.actualId.statusCode} when deleting a doc`, async () => (
+          await supertest
+            .delete(`/api/saved_objects/dashboard/be3733a0-9efe-11e7-acb3-3dab96693fab`)
+            .auth(auth.username, auth.password)
+            .expect(tests.actualId.statusCode)
+            .then(tests.actualId.response)
+        ));
 
-          it(`should return generic ${assert.withIndex.deletingUnknownDoc.statusCode} when deleting an unknown doc`, async () => (
-            await supertest
-              .delete(`/api/saved_objects/dashboard/not-a-real-id`)
-              .auth(auth.username, auth.password)
-              .expect(assert.withIndex.deletingUnknownDoc.statusCode)
-              .then(assert.withIndex.deletingUnknownDoc.response)
-          ));
-        });
-
-        describe('without kibana index', () => {
-          before(async () => (
-            // just in case the kibana server has recreated it
-            await es.indices.delete({
-              index: '.kibana',
-              ignore: [404],
-            })
-          ));
-
-          it(`returns generic ${assert.withoutIndex.statusCode} when kibana index is missing`, async () => (
-            await supertest
-              .delete(`/api/saved_objects/dashboard/be3733a0-9efe-11e7-acb3-3dab96693fab`)
-              .auth(auth.username, auth.password)
-              .expect(assert.withoutIndex.statusCode)
-              .then(assert.withoutIndex.response)
-          ));
-        });
+        it(`should return ${tests.invalidId.statusCode} when deleting an unknown doc`, async () => (
+          await supertest
+            .delete(`/api/saved_objects/dashboard/not-a-real-id`)
+            .auth(auth.username, auth.password)
+            .expect(tests.invalidId.statusCode)
+            .then(tests.invalidId.response)
+        ));
       });
     };
 
@@ -82,20 +61,14 @@ export default function ({ getService }) {
         username: AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME,
         password: AUTHENTICATION.NOT_A_KIBANA_USER.PASSWORD,
       },
-      assert: {
-        withIndex: {
-          deletingDoc: {
-            statusCode: 403,
-            response: createExpectForbidden(false),
-          },
-          deletingUnknownDoc: {
-            statusCode: 403,
-            resposne: createExpectForbidden(false),
-          }
-        },
-        withoutIndex: {
+      tests: {
+        actualId: {
           statusCode: 403,
           response: createExpectForbidden(false),
+        },
+        invalidId: {
+          statusCode: 403,
+          resposne: createExpectForbidden(false),
         }
       }
     });
@@ -105,20 +78,14 @@ export default function ({ getService }) {
         username: AUTHENTICATION.SUPERUSER.USERNAME,
         password: AUTHENTICATION.SUPERUSER.PASSWORD,
       },
-      assert: {
-        withIndex: {
-          deletingDoc: {
-            statusCode: 200,
-            response: expectEmpty,
-          },
-          deletingUnknownDoc: {
-            statusCode: 404,
-            resposne: expectNotFound,
-          }
+      tests: {
+        actualId: {
+          statusCode: 200,
+          response: expectEmpty,
         },
-        withoutIndex: {
+        invalidId: {
           statusCode: 404,
-          response: expectNotFound,
+          resposne: expectNotFound,
         }
       }
     });
@@ -128,20 +95,14 @@ export default function ({ getService }) {
         username: AUTHENTICATION.KIBANA_RBAC_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_RBAC_USER.PASSWORD,
       },
-      assert: {
-        withIndex: {
-          deletingDoc: {
-            statusCode: 200,
-            response: expectEmpty,
-          },
-          deletingUnknownDoc: {
-            statusCode: 404,
-            resposne: expectNotFound,
-          }
+      tests: {
+        actualId: {
+          statusCode: 200,
+          response: expectEmpty,
         },
-        withoutIndex: {
+        invalidId: {
           statusCode: 404,
-          response: expectNotFound,
+          resposne: expectNotFound,
         }
       }
     });
@@ -151,18 +112,12 @@ export default function ({ getService }) {
         username: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.PASSWORD,
       },
-      assert: {
-        withIndex: {
-          deletingDoc: {
-            statusCode: 403,
-            response: createExpectForbidden(true),
-          },
-          deletingUnknownDoc: {
-            statusCode: 403,
-            response: createExpectForbidden(true),
-          }
+      tests: {
+        actualId: {
+          statusCode: 403,
+          response: createExpectForbidden(true),
         },
-        withoutIndex: {
+        invalidId: {
           statusCode: 403,
           response: createExpectForbidden(true),
         }
