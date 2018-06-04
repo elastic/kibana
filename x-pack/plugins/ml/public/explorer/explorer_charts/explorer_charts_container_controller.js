@@ -24,9 +24,7 @@ import { isTimeSeriesViewDetector } from 'plugins/ml/../common/util/job_utils';
 import { mlResultsService } from 'plugins/ml/services/results_service';
 import { mlJobService } from 'plugins/ml/services/job_service';
 
-import { createSelector } from 'reselect';
-import watch from 'redux-watch';
-import { store } from '../../redux/store';
+import { store, state$ } from '../../redux/store';
 
 module.controller('MlExplorerChartsContainerController', function ($scope, $injector) {
   const Private = $injector.get('Private');
@@ -44,8 +42,8 @@ module.controller('MlExplorerChartsContainerController', function ($scope, $inje
   const ML_TIME_FIELD_NAME = 'timestamp';
   const USE_OVERALL_CHART_LIMITS = false;
 
-  const anomalyDataChangeListener = function (anomalyRecords, earliestMs, latestMs) {
-    if (store.getState().showCharts === false) {
+  const anomalyDataChangeListener = function (anomalyRecords, earliestMs, latestMs, showCharts) {
+    if (showCharts === false) {
       anomalyRecords = [];
     }
 
@@ -275,20 +273,17 @@ module.controller('MlExplorerChartsContainerController', function ($scope, $inje
       });
   };
 
-  const getAnomalyChartRecordsData = createSelector(
-    s => s.anomalyExplorer.anomalyChartRecords,
-    s => s.anomalyExplorer.earliestMs,
-    s => s.anomalyExplorer.latestMs,
-    s => s.showCharts,
-    function () { return arguments; }
-  );
-  store.subscribe(
-    watch(() => getAnomalyChartRecordsData(store.getState()))(
-      (d) => {
-        anomalyDataChangeListener.apply(null, d);
-      }
-    )
-  );
+  state$
+    .map((s) => ([
+      s.anomalyExplorer.anomalyChartRecords,
+      s.anomalyExplorer.earliestMs,
+      s.anomalyExplorer.latestMs,
+      s.showCharts,
+    ]))
+    .distinctUntilChanged(_.isEqual)
+    .subscribe((d) => {
+      anomalyDataChangeListener.apply(null, d);
+    });
 
   function processRecordsForDisplay(anomalyRecords) {
     // Aggregate the anomaly data by detector, and entity (by/over/partition).

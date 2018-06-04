@@ -71,7 +71,6 @@ const defaultState = {
 };
 
 export const anomalyExplorerReducer = (state = defaultState, action) => {
-  console.warn('action.type', action.type);
   switch (action.type) {
     case actionType.ANOMALY_DATA_CHANGE:
       const { anomalyChartRecords, earliestMs, latestMs } = action;

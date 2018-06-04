@@ -12,6 +12,11 @@ import {
   applyMiddleware
 } from 'redux';
 
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/operator/distinctUntilChanged';
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/takeUntil';
+
 import { anomalyExplorerReducer } from './modules/anomaly_explorer';
 import { showChartsReducer } from './modules/show_charts';
 
@@ -26,3 +31,13 @@ export const store = createStore(
   mainReducer,
   composeEnhancers(applyMiddleware())
 );
+
+function getState$() {
+  return new Observable(function (observer) {
+    //observer.next(store.getState());
+
+    return store.subscribe(() => observer.next(store.getState()));
+  });
+}
+
+export const state$ = getState$(store);

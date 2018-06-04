@@ -23,9 +23,8 @@ import { mlEscape } from 'plugins/ml/util/string_utils';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-import { createSelector } from 'reselect';
-import watch from 'redux-watch';
-import { store } from '../redux/store';
+import { Observable } from 'rxjs/Observable';
+import { store, state$ } from '../redux/store';
 
 module.directive('mlExplorerSwimlane', function ($compile, Private, mlExplorerDashboardService, mlChartTooltipService) {
 
@@ -37,27 +36,28 @@ module.directive('mlExplorerSwimlane', function ($compile, Private, mlExplorerDa
       element.addClass('ml-hide-range-selection');
     }
 
+    const destroy$ = new Observable((observer) => {
+      scope.$on('$destroy', observer.next);
+    });
+
     let cellMouseoverActive = state.cellMouseoverActive;
 
-    const getCellMouseoverActive = createSelector(
-      s => s.anomalyExplorer.cellMouseoverActive,
-      d => d
-    );
-    const unsubCellMouseoverActive = store.subscribe(
-      watch(() => getCellMouseoverActive(store.getState()))(
+    state$
+      .map(s => s.anomalyExplorer.cellMouseoverActive)
+      .distinctUntilChanged()
+      .takeUntil(destroy$)
+      .subscribe(
         (update) => {
           cellMouseoverActive = update;
         }
-      )
-    );
+      );
 
     // Listen for dragSelect events
-    const getDragging = createSelector(
-      s => s.anomalyExplorer.dragging,
-      d => d
-    );
-    const unsubDragging = store.subscribe(
-      watch(() => getDragging(store.getState()))(
+    state$
+      .map(s => s.anomalyExplorer.dragging)
+      .distinctUntilChanged()
+      .takeUntil(destroy$)
+      .subscribe(
         (dragging) => {
           if (dragging === true) {
             element.addClass('ml-dragselect-dragging');
@@ -89,8 +89,7 @@ module.directive('mlExplorerSwimlane', function ($compile, Private, mlExplorerDa
             elements.map(e => $(e).removeClass('ds-selected'));
           }
         }
-      )
-    );
+      );
 
     // Re-render the swimlane whenever the underlying data changes.
     function swimlaneDataChangeListener(swimlaneType) {
@@ -103,8 +102,6 @@ module.directive('mlExplorerSwimlane', function ($compile, Private, mlExplorerDa
     mlExplorerDashboardService.swimlaneDataChange.watch(swimlaneDataChangeListener);
 
     element.on('$destroy', () => {
-      unsubCellMouseoverActive();
-      unsubDragging();
       mlExplorerDashboardService.swimlaneDataChange.unwatch(swimlaneDataChangeListener);
       scope.$destroy();
     });

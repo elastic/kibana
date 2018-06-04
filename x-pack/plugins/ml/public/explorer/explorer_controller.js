@@ -54,9 +54,8 @@ uiRoutes
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-import { createSelector } from 'reselect';
-import watch from 'redux-watch';
-import { store } from '../redux/store';
+import { Observable } from 'rxjs/Observable';
+import { store, state$ } from '../redux/store';
 import {
   dragSelectUpdate,
   dragSelectFinish,
@@ -77,36 +76,30 @@ module.controller('MlExplorerController', function (
   mlSelectIntervalService,
   mlSelectSeverityService) {
 
-  const mapStateToScope = createSelector(
-    s => s.anomalyExplorer.loading,
-    s => s.anomalyExplorer.checkboxShowChartsVisibility,
-    (loading, checkboxShowChartsVisibility) => ({
-      loading, checkboxShowChartsVisibility
-    })
-  );
-  Object.assign($scope, mapStateToScope(store.getState()));
+  const destroy$ = new Observable((observer) => {
+    $scope.$on('$destroy', observer.next);
+  });
 
-  const unsubscribeScopeUpdate = store.subscribe(
-    watch(() => mapStateToScope(store.getState()))(
-      (newScope) => {
-        Object.assign($scope, newScope);
-        $scope.$applyAsync();
-      }
-    )
-  );
+  state$
+    .map(s => ({
+      loading: s.anomalyExplorer.loading,
+      checkboxShowChartsVisibility: s.anomalyExplorer.checkboxShowChartsVisibility
+    }))
+    .distinctUntilChanged(_.isEqual)
+    .takeUntil(destroy$)
+    .subscribe((newScope) => {
+      Object.assign($scope, newScope);
+      $scope.$applyAsync();
+    });
 
-  const getShowCharts = createSelector(
-    s => s.showCharts,
-    d => d
-  );
-  const unsubscribeShowCharts = store.subscribe(
-    watch(() => getShowCharts(store.getState()))(
-      () => {
-        checkboxShowChartsListener();
-        anomalyChartsSeverityListener();
-      }
-    )
-  );
+  state$
+    .map(s => s.showCharts)
+    .distinctUntilChanged()
+    .takeUntil(destroy$)
+    .subscribe(() => {
+      checkboxShowChartsListener();
+      anomalyChartsSeverityListener();
+    });
 
   timefilter.enableTimeRangeSelector();
   timefilter.enableAutoRefreshSelector();
@@ -443,8 +436,6 @@ module.controller('MlExplorerController', function (
 
   $scope.$on('$destroy', () => {
     dragSelect.stop();
-    unsubscribeScopeUpdate();
-    unsubscribeShowCharts();
     mlExplorerDashboardService.swimlaneCellClick.unwatch(swimlaneCellClickListener);
     mlExplorerDashboardService.swimlaneRenderDone.unwatch(swimlaneRenderDoneListener);
     mlSelectSeverityService.state.unwatch(anomalyChartsSeverityListener);
