@@ -54,6 +54,7 @@ export function PanelOptionsMenuForm({ title, onReset, onUpdatePanelTitle, onClo
         value={title}
         onChange={onInputChange}
         onKeyDown={onKeyDown}
+        aria-label="Changes to this input are applied immediately. Press enter to exit."
       />
       <KuiButton
         buttonType="hollow"

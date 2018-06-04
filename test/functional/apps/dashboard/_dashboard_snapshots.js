@@ -19,78 +19,67 @@
 
 import expect from 'expect.js';
 
-import { AREA_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
-
-
 export default function ({ getService, getPageObjects, updateBaselines }) {
-  const dashboardVisualizations = getService('dashboardVisualizations');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'common']);
   const screenshot = getService('screenshots');
   const remote = getService('remote');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const testSubjects = getService('testSubjects');
+  const dashboardAddPanel = getService('dashboardAddPanel');
 
   describe('dashboard snapshots', function describeIndexTests() {
     before(async function () {
-      await PageObjects.dashboard.initTests();
-      await PageObjects.dashboard.preserveCrossAppState();
+      // We use a really small window to minimize differences across os's and browsers.
       await remote.setWindowSize(1000, 500);
     });
 
     after(async function () {
-      // avoids any 'Object with id x not found' errors when switching tests.
-      await PageObjects.header.clickVisualize();
-      await PageObjects.visualize.gotoLandingPage();
-      await PageObjects.header.clickDashboard();
-      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await remote.setWindowSize(1300, 900);
     });
 
-    // This one won't work because of https://github.com/elastic/kibana/issues/15501.  See if we can get it to work
-    // once TSVB has timezone support.
+    // Skip until https://github.com/elastic/kibana/issues/19471 is fixed
     it.skip('compare TSVB snapshot', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.setTimepickerInDataRange();
-      await dashboardVisualizations.createAndAddTSVBVisualization('TSVB');
-      await testSubjects.click('toastCloseButton');
+      await PageObjects.dashboard.setTimepickerInLogstashDataRange();
+      await dashboardAddPanel.addVisualization('Rendering Test: tsvb-ts');
+      await PageObjects.common.closeToast();
 
       await PageObjects.dashboard.saveDashboard('tsvb');
-      await testSubjects.click('saveDashboardSuccess toastCloseButton');
+      await PageObjects.common.closeToast();
 
       await PageObjects.dashboard.clickFullScreenMode();
       await dashboardPanelActions.toggleExpandPanel();
 
       await PageObjects.dashboard.waitForRenderComplete();
+      // Render complete flag doesn't handle resizes from expanding.
+      await PageObjects.common.sleep(2000);
       const percentSimilar = await screenshot.compareAgainstBaseline('tsvb_dashboard', updateBaselines);
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
 
-      expect(percentSimilar).to.be(0);
+      expect(percentSimilar).to.be.lessThan(0.05);
     });
 
     it('compare area chart snapshot', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.setTimepickerInDataRange();
-      await PageObjects.dashboard.addVisualizations([AREA_CHART_VIS_NAME]);
-      await testSubjects.click('addVisualizationToDashboardSuccess toastCloseButton');
-
+      await PageObjects.dashboard.setTimepickerInLogstashDataRange();
+      await dashboardAddPanel.addVisualization('Rendering Test: area with not filter');
+      await PageObjects.common.closeToast();
       await PageObjects.dashboard.saveDashboard('area');
-      await testSubjects.click('saveDashboardSuccess toastCloseButton');
+      await PageObjects.common.closeToast();
 
       await PageObjects.dashboard.clickFullScreenMode();
       await dashboardPanelActions.toggleExpandPanel();
 
       await PageObjects.dashboard.waitForRenderComplete();
-      // The need for this should have been removed with https://github.com/elastic/kibana/pull/15574 but the
-      // test failed when removed because the visualization hadn't settled.
-      await PageObjects.common.sleep(1000);
-
+      // Render complete flag doesn't handle resizes from expanding.
+      await PageObjects.common.sleep(2000);
       const percentSimilar = await screenshot.compareAgainstBaseline('area_chart', updateBaselines);
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
 
-      // Testing some OS/browser differnces were shown to cause .009 percent difference.
+      // Testing some OS/browser differences were shown to cause .009 percent difference.
       expect(percentSimilar).to.be.lessThan(0.05);
     });
   });

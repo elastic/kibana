@@ -20,7 +20,9 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
-import Select from 'react-select';
+import {
+  EuiComboBox,
+} from '@elastic/eui';
 import { durationOutputOptions, durationInputOptions } from './lib/durations';
 const durationFormatTest = /[pnumshdwMY]+,[pnumshdwMY]+/;
 
@@ -44,34 +46,46 @@ class DataFormatPicker extends Component {
   }
 
   handleCustomChange() {
-    this.props.onChange({ value: this.custom && this.custom.value || '' });
+    this.props.onChange([{ value: this.custom && this.custom.value || '' }]);
   }
 
-  handleChange(value) {
-    if (value.value === 'custom') {
+  handleChange(selectedOptions) {
+    if (selectedOptions.length < 1) {
+      return;
+    }
+
+    if (selectedOptions[0].value === 'custom') {
       this.handleCustomChange();
-    } else if (value.value === 'duration') {
+    } else if (selectedOptions[0].value === 'duration') {
       const { from, to, decimals } = this.state;
-      this.props.onChange({
+      this.props.onChange([{
         value: `${from},${to},${decimals}`
-      });
+      }]);
     } else {
-      this.props.onChange(value);
+      this.props.onChange(selectedOptions);
     }
   }
 
   handleDurationChange(name) {
-    return (value) => {
-      if (name === 'decimals') {
-        value = this.decimals;
+    return (selectedOptions) => {
+      if (selectedOptions.length < 1) {
+        return;
       }
+
+      let newValue;
+      if (name === 'decimals') {
+        newValue = this.decimals.value;
+      } else {
+        newValue = selectedOptions[0].value;
+      }
+
       this.setState({
-        [name]: value.value
+        [name]: newValue
       }, () => {
         const { from, to, decimals } = this.state;
-        this.props.onChange({
+        this.props.onChange([{
           value: `${from},${to},${decimals}`
-        });
+        }]);
       });
     };
   }
@@ -92,39 +106,51 @@ class DataFormatPicker extends Component {
       { label: 'Duration', value: 'duration' },
       { label: 'Custom', value: 'custom' }
     ];
+    const selectedOption = options.find(option => {
+      return defaultValue === option.value;
+    });
 
     let custom;
     if (defaultValue === 'duration') {
       const [from, to, decimals] = value.split(',');
+      const selectedFrom = durationInputOptions.find(option => {
+        return from === option.value;
+      });
+      const selectedTo = durationOutputOptions.find(option => {
+        return to === option.value;
+      });
       return (
         <div className="vis_editor__data_format_picker-container">
           <div className="vis_editor__label">
             {this.props.label}
           </div>
           <div className="vis_editor__item">
-            <Select
-              clearable={false}
-              value={defaultValue}
+            <EuiComboBox
+              isClearable={false}
               options={options}
+              selectedOptions={selectedOption ? [selectedOption] : []}
               onChange={this.handleChange}
+              singleSelection={true}
             />
           </div>
           <div className="vis_editor__label">From</div>
           <div className="vis_editor__item">
-            <Select
-              clearable={false}
-              value={from}
+            <EuiComboBox
+              isClearable={false}
               options={durationInputOptions}
+              selectedOptions={selectedFrom ? [selectedFrom] : []}
               onChange={this.handleDurationChange('from')}
+              singleSelection={true}
             />
           </div>
           <div className="vis_editor__label">To</div>
           <div className="vis_editor__item">
-            <Select
-              clearable={false}
-              value={to}
+            <EuiComboBox
+              isClearable={false}
               options={durationOutputOptions}
+              selectedOptions={selectedTo ? [selectedTo] : []}
               onChange={this.handleDurationChange('to')}
+              singleSelection={true}
             />
           </div>
           <div className="vis_editor__label">Decimal Places</div>
@@ -162,11 +188,12 @@ class DataFormatPicker extends Component {
           {this.props.label}
         </div>
         <div className="vis_editor__item">
-          <Select
-            clearable={false}
-            value={defaultValue}
+          <EuiComboBox
+            isClearable={false}
             options={options}
+            selectedOptions={selectedOption ? [selectedOption] : []}
             onChange={this.handleChange}
+            singleSelection={true}
           />
         </div>
         {custom}

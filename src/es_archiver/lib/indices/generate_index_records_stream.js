@@ -38,7 +38,9 @@ export function createGenerateIndexRecordsStream(client, stats) {
           ]
         });
 
+        const { [index]: { aliases } } = await client.indices.getAlias({ index });
         const { settings, mappings } = resp[index];
+
         stats.archivedIndex(index, { settings, mappings });
         callback(null, {
           type: 'index',
@@ -46,6 +48,7 @@ export function createGenerateIndexRecordsStream(client, stats) {
             index,
             settings,
             mappings,
+            aliases,
           }
         });
       } catch (err) {

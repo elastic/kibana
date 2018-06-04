@@ -40,7 +40,8 @@ module.controller('SenseController', function SenseController(Private, $scope, $
 
   // We need to wait for these elements to be rendered before we can select them with jQuery
   // and then initialize this app
-  let input, output;
+  let input;
+  let output;
   $timeout(() => {
     output = initializeOutput($('#output'));
     input = initializeInput($('#editor'), $('#editor_actions'), $('#copy_as_curl'), output);

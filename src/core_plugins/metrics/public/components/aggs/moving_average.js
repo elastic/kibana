@@ -22,12 +22,14 @@ import React from 'react';
 import AggRow from './agg_row';
 import AggSelect from './agg_select';
 import MetricSelect from './metric_select';
-import Select from 'react-select';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import createNumberHandler from '../lib/create_number_handler';
-import { htmlIdGenerator } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiComboBox,
+} from '@elastic/eui';
 
 export const MovingAverageAgg = props => {
   const { siblings } = props;
@@ -54,6 +56,13 @@ export const MovingAverageAgg = props => {
     { label: 'False', value: 0 }
   ];
   const htmlId = htmlIdGenerator();
+  const selectedModelOption = modelOptions.find(option => {
+    return model.model === option.value;
+  });
+  const selectedMinimizeOption = minimizeOptions.find(option => {
+    return model.minimize === option.value;
+  });
+
   return (
     <AggRow
       disableDelete={props.disableDelete}
@@ -86,13 +95,14 @@ export const MovingAverageAgg = props => {
         <div className="vis_editor__agg_row-item">
           <div className="vis_editor__row_item">
             <label className="vis_editor__label" htmlFor={htmlId('model')}>Model</label>
-            <Select
-              inputProps={{ id: htmlId('model') }}
-              clearable={false}
+            <EuiComboBox
+              isClearable={false}
+              id={htmlId('model')}
               placeholder="Select..."
-              onChange={handleSelectChange('model')}
-              value={props.model.model}
               options={modelOptions}
+              selectedOptions={selectedModelOption ? [selectedModelOption] : []}
+              onChange={handleSelectChange('model')}
+              singleSelection={true}
             />
           </div>
           <div className="vis_editor__row_item">
@@ -109,12 +119,13 @@ export const MovingAverageAgg = props => {
           </div>
           <div className="vis_editor__row_item">
             <label className="vis_editor__label" htmlFor={htmlId('minimize')}>Minimize</label>
-            <Select
-              inputProps={{ id: htmlId('minimize') }}
+            <EuiComboBox
+              id={htmlId('minimize')}
               placeholder="Select..."
-              onChange={handleSelectChange('minimize')}
-              value={model.minimize}
               options={minimizeOptions}
+              selectedOptions={selectedMinimizeOption ? [selectedMinimizeOption] : []}
+              onChange={handleSelectChange('minimize')}
+              singleSelection={true}
             />
           </div>
           <div className="vis_editor__row_item">

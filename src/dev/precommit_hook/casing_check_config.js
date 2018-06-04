@@ -202,7 +202,6 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'src/ui/public/styles/fonts/glyphicons-halflings-regular.woff2',
   'src/ui/public/styles/list-group-menu.less',
   'src/ui/public/styles/react-input-range.less',
-  'src/ui/public/styles/react-select.less',
   'src/ui/public/styles/theme/font-awesome.less',
   'src/ui/public/styles/variables/bootstrap-mods.less',
   'src/ui/public/styles/variables/for-theme.less',

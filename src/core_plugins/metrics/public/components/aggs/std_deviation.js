@@ -22,11 +22,13 @@ import React from 'react';
 import AggSelect from './agg_select';
 import FieldSelect from './field_select';
 import AggRow from './agg_row';
-import Select from 'react-select';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
-import { htmlIdGenerator } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiComboBox,
+} from '@elastic/eui';
 
 export const StandardDeviationAgg = props => {
   const { series, panel, fields } = props;
@@ -49,6 +51,9 @@ export const StandardDeviationAgg = props => {
 
   const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
   const htmlId = htmlIdGenerator();
+  const selectedModeOption = modeOptions.find(option => {
+    return model.mode === option.value;
+  });
 
   return (
     <AggRow
@@ -90,11 +95,12 @@ export const StandardDeviationAgg = props => {
       </div>
       <div className="vis_editor__row_item">
         <label className="vis_editor__label" htmlFor={htmlId('mode')}>Mode</label>
-        <Select
-          inputProps={{ id: htmlId('mode') }}
+        <EuiComboBox
+          id={htmlId('mode')}
           options={modeOptions}
+          selectedOptions={selectedModeOption ? [selectedModeOption] : []}
           onChange={handleSelectChange('mode')}
-          value={model.mode}
+          singleSelection={true}
         />
       </div>
     </AggRow>

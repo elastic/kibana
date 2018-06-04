@@ -1,0 +1,25 @@
+[role="xpack"]
+[[xpack-grokdebugger]]
+== Debugging Grok Expressions
+
+Grok is a pattern matching syntax that you can use to parse arbitrary text and
+structure it. Grok is perfect for parsing syslog logs, apache and other
+webserver logs, mysql logs, and in general, any log format that is generally
+written for humans and not computer consumption.
+
+Grok patterns are supported in the ingest node
+{ref}/grok-processor.html[grok processor] and the Logstash
+{logstash-ref}/plugins-filters-grok.html[grok filter]. The Elastic Stack ships
+with over 120 reusable grok patterns. See
+https://github.com/elastic/elasticsearch/tree/master/modules/ingest-common/src/main/resources/patterns[Ingest node grok patterns] and https://github.com/logstash-plugins/logstash-patterns-core/tree/master/patterns[Logstash grok patterns]
+for the full list of patterns.
+
+{xpack} includes a Grok Debugger tool that you can use to build and debug
+grok patterns before you use them in your data processing pipelines. Because
+ingest node and Logstash share the same grok implementation and pattern
+libraries, any grok pattern that you create in the Grok Debugger will work
+in ingest node and Logstash.
+
+image::dev-tools/grokdebugger/images/grok-debugger-overview.png["Grok Debugger"]
+
+include::getting-started.asciidoc[]
