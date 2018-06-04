@@ -18,13 +18,12 @@
  */
 
 import {
-  SavedObjectsRepository,
   errors,
 } from './lib';
 
 export class SavedObjectsClient {
-  constructor(options) {
-    this._repository = new SavedObjectsRepository(options);
+  constructor(repository) {
+    this._repository = repository;
   }
 
   /**
