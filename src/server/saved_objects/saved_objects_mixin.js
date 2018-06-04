@@ -62,7 +62,7 @@ export function savedObjectsMixin(kbnServer, server) {
       return savedObjectsClientCache.get(request);
     }
 
-    const savedObjectsClient = server.savedObjects.getScopedSavedObjectsClient({ request });
+    const savedObjectsClient = server.savedObjects.getScopedSavedObjectsClient(request);
 
     savedObjectsClientCache.set(request, savedObjectsClient);
     return savedObjectsClient;
