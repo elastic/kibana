@@ -137,21 +137,22 @@ The Security Plugin could get information from any incoming request, i.e. the `s
 
 Kibana core still needs to provide the http service containing the saved object client, but it needs to have a way to register a function that's invoked every time a request comes in. The Security Plugin can be the thing that hooks into the http service's saved object client, and add stuff like request headers (from which we get the current user) and space information.
 
-The three client model
+Implementation Ideas
 ---------
-The migrations client and saved object client probably share important internal details.
-
-The plugin contract exposes some extension points that give you the migration client or give you the saved object client.
-
-Each plugin can configure that it depends on these two clients, and they are made available from the saved object service, which is exposed on probably Kibana core.
+Do the Migrations client and Saved Object client share important internal details? Can they be exposed by separate services?
 
 The different things we want plugins to configure for saved objects:
 
-**Migrations.** The plugin provides a function which takes in a migration client, and that client exposes a `registerMigration` function that takes in a name and an action to run, for example.
+**Migrations.** A plugin can specify Migrations as a dependency. It can call a method `migrationsClient.registerMigration()` or something, that takes in a name and an action to run, for example.
 
-**Http service.** The plugin system could wire itself into the Http service, so every single handler gets pre-seeded with the relevant information from the request to map to a Kibana user so we can do auth for OLS.
+**Http service.** The Http Service could provide certain clients to every handler function, such as the Saved Object Service and Elasticsearch Service, and possibly also the Migration Client/Service. This has the benefit of making it hard for people (users, developers) to call the Saved Object and Elasticsearch services outside of the context of a request. It doesn't make sense to allow that.
 
-Hmmmm. This is the thing I think we should do more cleanly. There's a way to provide the relevant information without passing in the huge request object to middleware, and without exposing the `getSavedObjectsClient` on the server object or the request object. Register an endpoint along with the handler for that endpoint. Define the handler to explicitly pass headers from the request to the saved object client factory, which then provides a client bound to those headers.
+### Context
+It's clear to me that we need some kind of object that stores only the details from the current request that are relevant to accessing the Saved Objects System. In OSS Kibana, this is likely an empty object. When X-Pack is enabled, it will consist of at most (that I can think of right now) these items:
+* request headers that contain the current user (for Security)
+* request Url that contains the current space id (for Spaces)
+
+We can use this context like so. Register an endpoint along with the handler for that endpoint. Define the handler to explicitly pass the context to the saved object client factory (contained within the saved object service). The handler then provides the saved object client scoped to the right context.
 
 For example, define a plugin that has only dependencies on Kibana core, and no other plugin dependencies.
 
