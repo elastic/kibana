@@ -256,12 +256,12 @@ export class DashboardListing extends React.Component {
           body={
             <Fragment>
               <p>
-                Kibana dashboards allow you to combine different data views from
+                Dashboards allow you to combine different data views from
                 other Kibana apps so that you can see them all in one place
               </p>
               <p>
                 New to Kibana? <EuiLink href="#/home/tutorial_directory/sampleData">Install sample data</EuiLink> to
-                dashboards in action.
+                load a sample dashboard.
               </p>
             </Fragment>
           }
