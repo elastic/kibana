@@ -18,23 +18,19 @@
  */
 
 import _ from 'lodash';
-import { UtilsDiffTimePickerValsProvider } from '../../utils/diff_time_picker_vals';
+import { areTimePickerValsDifferent } from './diff_time_picker_vals';
 
-export function TimefilterLibDiffIntervalProvider(Private) {
-  const diff = Private(UtilsDiffTimePickerValsProvider);
+export function diffIntervalFactory(self) {
+  let oldRefreshInterval = _.clone(self.refreshInterval);
 
-  return function (self) {
-    let oldRefreshInterval = _.clone(self.refreshInterval);
-
-    return function () {
-      if (diff(self.refreshInterval, oldRefreshInterval)) {
-        self.emit('update');
-        if (!self.refreshInterval.pause && self.refreshInterval.value !== 0) {
-          self.emit('fetch');
-        }
+  return function () {
+    if (areTimePickerValsDifferent(self.refreshInterval, oldRefreshInterval)) {
+      self.emit('update');
+      if (!self.refreshInterval.pause && self.refreshInterval.value !== 0) {
+        self.emit('fetch');
       }
+    }
 
-      oldRefreshInterval = _.clone(self.refreshInterval);
-    };
+    oldRefreshInterval = _.clone(self.refreshInterval);
   };
 }
