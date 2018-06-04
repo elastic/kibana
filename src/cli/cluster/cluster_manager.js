@@ -82,9 +82,11 @@ export default class ClusterManager {
       })
     ];
 
-    // Pass server worker to the basepath proxy so that it can hold off the
-    // proxying until server worker is ready.
-    this.basePathProxy.serverWorker = this.server;
+    if (basePathProxy) {
+      // Pass server worker to the basepath proxy so that it can hold off the
+      // proxying until server worker is ready.
+      this.basePathProxy.serverWorker = this.server;
+    }
 
     // broker messages between workers
     this.workers.forEach((worker) => {
