@@ -17,9 +17,10 @@ import {
 import { Tooltip } from 'pivotal-ui/react/tooltip';
 import { OverlayTrigger } from 'pivotal-ui/react/overlay-trigger';
 import { KuiInfoButton } from '@kbn/ui-framework/components';
+import { timefilter } from 'ui/timefilter';
 
 const uiModule = uiModules.get('plugins/monitoring/directives', []);
-uiModule.directive('monitoringChart', (timefilter) => {
+uiModule.directive('monitoringChart', () => {
   return {
     restrict: 'E',
     scope: {
@@ -32,9 +33,10 @@ uiModule.directive('monitoringChart', (timefilter) => {
 
       function onBrush({ xaxis }) {
         scope.$evalAsync(() => {
-          timefilter.time.from = moment(xaxis.from);
-          timefilter.time.to = moment(xaxis.to);
-          timefilter.time.mode = 'absolute';
+          timefilter.setTime({
+            from: moment(xaxis.from),
+            to: moment(xaxis.to),
+            mode: 'absolute'
         });
       }
 

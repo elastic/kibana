@@ -49,6 +49,7 @@ import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_fa
 import { DashboardPanelActionsRegistryProvider } from 'ui/dashboard_panel_actions/dashboard_panel_actions_registry';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import { timefilter } from 'ui/timefilter';
 
 import { DashboardViewportProvider } from './viewport/dashboard_viewport_provider';
 
@@ -70,7 +71,6 @@ app.directive('dashboardApp', function ($injector) {
   const Notifier = $injector.get('Notifier');
   const courier = $injector.get('courier');
   const AppState = $injector.get('AppState');
-  const timefilter = $injector.get('timefilter');
   const kbnUrl = $injector.get('kbnUrl');
   const confirmModal = $injector.get('confirmModal');
   const config = $injector.get('config');
@@ -167,8 +167,7 @@ app.directive('dashboardApp', function ($injector) {
         $rootScope.$broadcast('fetch');
         courier.fetch(...args);
       };
-      $scope.timefilter = timefilter;
-      dashboardStateManager.handleTimeChange($scope.timefilter.time);
+      dashboardStateManager.handleTimeChange(timefilter.time);
 
       $scope.expandedPanel = null;
       $scope.dashboardViewMode = dashboardStateManager.getViewMode();
@@ -226,8 +225,8 @@ app.directive('dashboardApp', function ($injector) {
 
       $scope.$watch('model.query', $scope.updateQueryAndFetch);
 
-      $scope.$listen(timefilter, 'fetch', () => {
-        dashboardStateManager.handleTimeChange($scope.timefilter.time);
+      timefilter.on('fetch', () => {
+        dashboardStateManager.handleTimeChange(timefilter.time);
         // Currently discover relies on this logic to re-fetch. We need to refactor it to rely instead on the
         // directly passed down time filter. Then we can get rid of this reliance on scope broadcasts.
         $scope.refresh();

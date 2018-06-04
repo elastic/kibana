@@ -31,7 +31,7 @@ import 'ui/filters/moment';
 import 'ui/courier';
 import 'ui/index_patterns';
 import 'ui/state_management/app_state';
-import 'ui/timefilter';
+import { timefilter } from 'ui/timefilter';
 import 'ui/share';
 import 'ui/query_bar';
 import { toastNotifications, getPainlessError } from 'ui/notify';
@@ -142,7 +142,6 @@ function discoverController(
   config,
   courier,
   kbnUrl,
-  timefilter,
   localStorage,
 ) {
 
@@ -186,8 +185,6 @@ function discoverController(
     template: require('plugins/kibana/discover/partials/share_search.html'),
     testId: 'discoverShareButton',
   }];
-  $scope.timefilter = timefilter;
-
 
   // the saved savedSearch
   const savedSearch = $route.current.locals.savedSearch;
@@ -326,7 +323,6 @@ function discoverController(
     timefield: $scope.indexPattern.timeFieldName,
     savedSearch: savedSearch,
     indexPatternList: $route.current.locals.ip.list,
-    timefilter: $scope.timefilter
   };
 
   const init = _.once(function () {
@@ -338,7 +334,7 @@ function discoverController(
 
     $scope.updateDataSource()
       .then(function () {
-        $scope.$listen(timefilter, 'fetch', function () {
+        timefilter.on('fetch', function () {
           $scope.fetch();
         });
 
@@ -633,8 +629,8 @@ function discoverController(
 
   $scope.updateTime = function () {
     $scope.timeRange = {
-      from: dateMath.parse(timefilter.time.from),
-      to: dateMath.parse(timefilter.time.to, { roundUp: true })
+      from: dateMath.parse(timefilter.getTime().from),
+      to: dateMath.parse(timefilter.getTime().to, { roundUp: true })
     };
   };
 
@@ -739,7 +735,7 @@ function discoverController(
     }
 
     $scope.vis.filters = {
-      timeRange: timefilter.time
+      timeRange: timefilter.getTime()
     };
   }
 

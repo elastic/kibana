@@ -26,7 +26,7 @@ export function diffTimeFactory(self) {
   return function () {
     if (areTimePickerValsDifferent(self.time, oldTime)) {
       timeHistory.add(self.time);
-      self.emit('update');
+      self.emit('timeUpdate');
       self.emit('fetch');
     }
     oldTime = _.clone(self.time);

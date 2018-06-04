@@ -41,6 +41,7 @@ import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import { recentlyAccessed } from 'ui/persisted_log';
+import { timefilter } from 'ui/timefilter';
 
 uiRoutes
   .when(VisualizeConstants.CREATE_PATH, {
@@ -97,7 +98,7 @@ uiModules
     };
   });
 
-function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise, config, kbnBaseUrl, localStorage) {
+function VisEditor($scope, $route, AppState, $window, kbnUrl, courier, Private, Promise, config, kbnBaseUrl, localStorage) {
   const docTitle = Private(DocTitleProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
 
@@ -207,9 +208,8 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
 
     $scope.isAddToDashMode = () => addToDashMode;
 
-    $scope.timefilter = timefilter;
-    $scope.timeRange = timefilter.time;
-    $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'timefilter', 'isAddToDashMode');
+    $scope.timeRange = timefilter.getTime();
+    $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'isAddToDashMode');
 
     stateMonitor = stateMonitorFactory.create($state, stateDefaults);
     stateMonitor.ignoreProps([ 'vis.listeners' ]).onChange((status) => {
@@ -238,7 +238,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     });
 
     const updateTimeRange = () => {
-      $scope.timeRange = timefilter.time;
+      $scope.timeRange = timefilter.getTime();
     };
 
     timefilter.enableAutoRefreshSelector();

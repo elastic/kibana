@@ -20,8 +20,9 @@
 import _ from 'lodash';
 import moment from 'moment';
 import { buildRangeFilter } from '../filter_manager/lib/range';
+import { timefilter } from 'ui/timefilter';
 
-export function UtilsBrushEventProvider(timefilter) {
+export function UtilsBrushEventProvider() {
   return $state => {
     return event => {
       if (!event.data.xAxisField) {
@@ -44,9 +45,11 @@ export function UtilsBrushEventProvider(timefilter) {
 
         if (to - from === 0) return;
 
-        timefilter.time.from = from;
-        timefilter.time.to = to;
-        timefilter.time.mode = 'absolute';
+        timefilter.setTime({
+          from,
+          to,
+          mode: 'absolute'
+        });
       }
 
       function setRange() {

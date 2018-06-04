@@ -9,6 +9,7 @@ import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
 import 'ui/autoload/all';
 import { updateTimePicker } from '../../store/urlParams';
+import { timefilter } from 'ui/timefilter';
 
 let globalTimefilter;
 let currentInterval;
@@ -37,7 +38,7 @@ export function initTimepicker(history, dispatch, callback) {
 
   uiModules
     .get('app/apm', [])
-    .controller('TimePickerController', ($scope, timefilter, globalState) => {
+    .controller('TimePickerController', ($scope, globalState) => {
       // Add APM feedback menu
       // TODO: move this somewhere else
       $scope.topNavMenu = [];
@@ -52,14 +53,8 @@ export function initTimepicker(history, dispatch, callback) {
         updateRefreshRate(dispatch, timefilter);
         globalState.fetch();
       });
-      timefilter.setTime = (from, to) => {
-        timefilter.time.from = moment(from).toISOString();
-        timefilter.time.to = moment(to).toISOString();
-        $scope.$apply();
-      };
       timefilter.enableTimeRangeSelector();
       timefilter.enableAutoRefreshSelector();
-      timefilter.init();
 
       updateRefreshRate(dispatch, timefilter);
 
@@ -80,12 +75,12 @@ function getAction(timefilter) {
 }
 
 function updateRefreshRate(dispatch, timefilter) {
-  const refreshInterval = timefilter.refreshInterval.value;
+  const refreshInterval = timefilter.getRefreshInterval().value;
   if (currentInterval) {
     clearInterval(currentInterval);
   }
 
-  if (refreshInterval > 0 && !timefilter.refreshInterval.pause) {
+  if (refreshInterval > 0 && !timefilter.getRefreshInterval().pause) {
     currentInterval = setInterval(
       () => dispatch(getAction(timefilter)),
       refreshInterval

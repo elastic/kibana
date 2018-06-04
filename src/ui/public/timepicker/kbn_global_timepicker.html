@@ -26,15 +26,15 @@
     ng-show="timefilter.isAutoRefreshSelectorEnabled"
     ng-click="kbnTopNav.toggle('interval')"
   >
-    <span ng-show="timefilter.refreshInterval.value === 0">
+    <span ng-show="timefilter.getRefreshInterval().value === 0">
       <span aria-hidden="true" class="kuiIcon fa-repeat"></span> Auto-refresh
     </span>
 
     <span
-      ng-show="timefilter.refreshInterval.value > 0"
-      aria-label="{{ 'Data will refresh every ' + timefilter.refreshInterval.display }}"
+      ng-show="timefilter.getRefreshInterval().value > 0"
+      aria-label="{{ 'Data will refresh every ' + timefilter.getRefreshInterval().display }}"
     >
-      {{ timefilter.refreshInterval.display }}
+      {{ timefilter.getRefreshInterval().display }}
     </span>
   </button>
 

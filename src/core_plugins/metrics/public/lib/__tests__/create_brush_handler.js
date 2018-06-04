@@ -27,16 +27,19 @@ describe('createBrushHandler', () => {
   let range;
 
   beforeEach(() => {
-    timefilter = { time: {}, update: () => {} };
-    fn = createBrushHandler(timefilter);
+    mockTimefilter = {
+      time: {},
+      setTime: (time) => { this.time = time; }
+    };
+    fn = createBrushHandler(mockTimefilter);
     range = { xaxis: { from: '2017-01-01T00:00:00Z', to: '2017-01-01T00:10:00Z' } };
     fn(range);
   });
 
   it('returns brushHandler() that updates timefilter', () => {
-    expect(timefilter.time.from).to.equal(moment(range.xaxis.from).toISOString());
-    expect(timefilter.time.to).to.equal(moment(range.xaxis.to).toISOString());
-    expect(timefilter.time.mode).to.equal('absolute');
+    expect(mockTimefilter.time.from).to.equal(moment(range.xaxis.from).toISOString());
+    expect(mockTimefilter.time.to).to.equal(moment(range.xaxis.to).toISOString());
+    expect(mockTimefilter.time.mode).to.equal('absolute');
   });
 
 });

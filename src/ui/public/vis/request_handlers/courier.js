@@ -21,8 +21,9 @@ import _ from 'lodash';
 import { SearchSourceProvider } from '../../courier/data_source/search_source';
 import { VisRequestHandlersRegistryProvider } from '../../registry/vis_request_handlers';
 import { calculateObjectHash } from '../lib/calculate_object_hash';
+import { timefilter } from 'ui/timefilter';
 
-const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
+const CourierRequestHandlerProvider = function (Private, courier) {
   const SearchSource = Private(SearchSourceProvider);
 
   return {
@@ -59,7 +60,7 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
       });
 
       timeFilterSearchSource.set('filter', () => {
-        return timefilter.get(searchSource.get('index'), timeRange);
+        return timefilter.createFilter(searchSource.get('index'), timeRange);
       });
 
       requestSearchSource.set('filter', filters);

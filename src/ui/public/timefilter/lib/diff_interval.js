@@ -25,7 +25,7 @@ export function diffIntervalFactory(self) {
 
   return function () {
     if (areTimePickerValsDifferent(self.refreshInterval, oldRefreshInterval)) {
-      self.emit('update');
+      self.emit('refreshIntervalUpdate');
       if (!self.refreshInterval.pause && self.refreshInterval.value !== 0) {
         self.emit('fetch');
       }

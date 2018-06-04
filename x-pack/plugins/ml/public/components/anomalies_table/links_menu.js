@@ -18,7 +18,6 @@ import {
   EuiPopover
 } from '@elastic/eui';
 
-import 'ui/timefilter';
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 

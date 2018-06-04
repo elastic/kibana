@@ -27,6 +27,7 @@ import './visualization';
 import './visualization_editor';
 import { FilterBarQueryFilterProvider } from '../filter_bar/query_filter';
 import { ResizeChecker } from '../resize_checker';
+import { timefilter } from 'ui/timefilter';
 
 import {
   isTermSizeZeroError,
@@ -34,7 +35,7 @@ import {
 
 uiModules
   .get('kibana/directive', ['ngSanitize'])
-  .directive('visualize', function ($timeout, Notifier, Private, timefilter, getAppState, Promise) {
+  .directive('visualize', function ($timeout, Notifier, Private, getAppState, Promise) {
     const notify = new Notifier({ location: 'Visualize' });
     const requestHandlers = Private(VisRequestHandlersRegistryProvider);
     const responseHandlers = Private(VisResponseHandlersRegistryProvider);
@@ -172,12 +173,22 @@ uiModules
         // cached data otherwise.
         $scope.uiState.on('change', $scope.fetch);
 
+<<<<<<< HEAD
         resizeChecker.on('resize', $scope.fetch);
+=======
+        // visualize needs to know about timeFilter
+        timefilter.on('fetch', $scope.fetch);
+>>>>>>> 58f956deef... replace timefilter service with singleton
 
         $scope.$on('$destroy', () => {
           destroyed = true;
           $scope.vis.removeListener('reload', reload);
           $scope.vis.removeListener('update', handleVisUpdate);
+<<<<<<< HEAD
+=======
+          queryFilter.off('update', handleQueryUpdate);
+          timefilter.off('fetch', $scope.fetch);
+>>>>>>> 58f956deef... replace timefilter service with singleton
           $scope.uiState.off('change', $scope.fetch);
           resizeChecker.destroy();
         });

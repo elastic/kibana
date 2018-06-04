@@ -4,20 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
+import { timefilter } from 'ui/timefilter';
 
 /*
  * Watches for changes to the refresh interval of the page time filter,
  * so that listeners can be notified when the auto-refresh interval has elapsed.
  */
 
-export function refreshIntervalWatcher($rootScope, $timeout) {
+export function refreshIntervalWatcher($timeout) {
 
   let refresher;
 
   function init(listener) {
 
-    $rootScope.$watchCollection('timefilter.refreshInterval', (interval) => {
+    timefilter.on('refreshIntervalUpdate', (interval) => {
       if (refresher) {
         $timeout.cancel(refresher);
       }

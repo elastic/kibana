@@ -36,7 +36,7 @@ describe('time diff watcher', () => {
         to: 1
       },
       emit: function (eventType) {
-        if (eventType === 'update') update();
+        if (eventType === 'timeUpdate') update();
         if (eventType === 'fetch') fetch();
       }
     };

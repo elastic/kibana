@@ -22,8 +22,9 @@ import { Notifier } from '../../../notify';
 import { SearchRequestProvider } from './search_request';
 import { SegmentedHandleProvider } from './segmented_handle';
 import { pushAll } from '../../../utils/collection';
+import { timefilter } from 'ui/timefilter';
 
-export function SegmentedRequestProvider(Private, timefilter, config) {
+export function SegmentedRequestProvider(Private, config) {
   const SearchRequest = Private(SearchRequestProvider);
   const SegmentedHandle = Private(SegmentedHandleProvider);
 

@@ -22,6 +22,8 @@ import { initPromise } from 'plugins/ml/util/promise';
 
 import template from './calendars_list.html';
 
+import { timefilter } from 'ui/timefilter';
+
 uiRoutes
   .when('/settings/calendars_list', {
     template,
@@ -43,7 +45,6 @@ module.controller('MlCalendarsList',
     $route,
     $location,
     pagerFactory,
-    timefilter,
     mlConfirmModalService) {
 
     $scope.permissions = {

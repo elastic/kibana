@@ -5,7 +5,8 @@
  */
 
 import { defaults } from 'lodash';
-export function executorProvider(Promise, $timeout, timefilter) {
+import { timefilter } from 'ui/timefilter';
+export function executorProvider(Promise, $timeout) {
 
   const queue = [];
   let executionTimer;
@@ -73,7 +74,7 @@ export function executorProvider(Promise, $timeout, timefilter) {
   }
 
   function killIfPaused() {
-    if (timefilter.refreshInterval.pause) {
+    if (timefilter.getRefreshInterval().pause) {
       killTimer();
     }
   }
@@ -85,8 +86,8 @@ export function executorProvider(Promise, $timeout, timefilter) {
   function start() {
     timefilter.on('fetch', reFetch);
     timefilter.on('update', killIfPaused);
-    if ((ignorePaused || timefilter.refreshInterval.pause === false) && timefilter.refreshInterval.value > 0) {
-      executionTimer = $timeout(run, timefilter.refreshInterval.value);
+    if ((ignorePaused || timefilter.getRefreshInterval().pause === false) && timefilter.getRefreshInterval().value > 0) {
+      executionTimer = $timeout(run, timefilter.getRefreshInterval().value);
     }
   }
 

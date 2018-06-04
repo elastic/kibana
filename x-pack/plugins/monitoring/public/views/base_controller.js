@@ -9,6 +9,7 @@ import moment from 'moment';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { getPageData } from '../lib/get_page_data';
 import { PageLoading } from 'plugins/monitoring/components';
+import { timefilter } from 'ui/timefilter';
 
 /**
  * Class to manage common instantiation behaviors in a view controller
@@ -69,7 +70,6 @@ export class MonitoringViewBaseController {
     options = {}
   }) {
     const titleService = $injector.get('title');
-    const timefilter = $injector.get('timefilter');
     const $executor = $injector.get('$executor');
 
     titleService($scope.cluster, title);
@@ -120,9 +120,10 @@ export class MonitoringViewBaseController {
     this.onBrush = ({ xaxis }) => {
       const { to, from } = xaxis;
       $scope.$evalAsync(() => {
-        timefilter.time.from = moment(from);
-        timefilter.time.to = moment(to);
-        timefilter.time.mode = 'absolute';
+        timefilter.setTime({
+          from: moment(from),
+          to: moment(to),
+          mode: 'absolute'
       });
     };
   }

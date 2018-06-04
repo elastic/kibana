@@ -23,17 +23,16 @@ import moment from 'moment';
 import ngMock from 'ng_mock';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { UtilsBrushEventProvider } from '../brush_event';
+import { timefilter } from 'ui/timefilter'
 
 describe('brushEvent', function () {
   const DAY_IN_MS = 24 * 60 * 60 * 1000;
   const JAN_01_2014 = 1388559600000;
   let brushEventFn;
-  let timefilter;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private, $injector, _timefilter_) {
+  beforeEach(ngMock.inject(function (Private, $injector) {
     brushEventFn = Private(UtilsBrushEventProvider);
-    timefilter = _timefilter_;
   }));
 
   it('is a function that returns a function', function () {

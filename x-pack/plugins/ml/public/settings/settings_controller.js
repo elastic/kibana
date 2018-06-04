@@ -14,6 +14,8 @@ import { initPromise } from 'plugins/ml/util/promise';
 
 import template from './settings.html';
 
+import { timefilter } from 'ui/timefilter';
+
 uiRoutes
   .when('/settings', {
     template,
@@ -30,8 +32,7 @@ const module = uiModules.get('apps/ml');
 
 module.controller('MlSettings',
   function (
-    $scope,
-    timefilter) {
+    $scope) {
 
     timefilter.disableTimeRangeSelector(); // remove time picker from top of page
     timefilter.disableAutoRefreshSelector(); // remove time picker from top of page

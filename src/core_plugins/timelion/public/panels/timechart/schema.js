@@ -24,10 +24,11 @@ import $ from 'jquery';
 import moment from 'moment-timezone';
 import observeResize from '../../lib/observe_resize';
 import { calculateInterval, DEFAULT_TIME_FORMAT } from '../../../common/lib';
+import { timefilter } from 'ui/timefilter';
 
 const DEBOUNCE_DELAY = 50;
 
-export default function timechartFn(Private, config, $rootScope, timefilter, $compile) {
+export default function timechartFn(Private, config, $rootScope, $compile) {
   return function () {
     return {
       help: 'Draw a timeseries chart',
@@ -173,10 +174,11 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
         });
 
         $elem.on('plotselected', function (event, ranges) {
-          timefilter.time.from = moment(ranges.xaxis.from);
-          timefilter.time.to = moment(ranges.xaxis.to);
-          timefilter.time.mode = 'absolute';
-          $scope.$apply();
+          timefilter.setTime({
+            from: moment(ranges.xaxis.from),
+            to: moment(ranges.xaxis.to),
+            mode: 'absolute',
+          });
         });
 
         $elem.on('mouseleave', function () {

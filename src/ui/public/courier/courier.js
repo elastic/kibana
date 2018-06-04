@@ -31,6 +31,7 @@ import { FetchSoonProvider } from './fetch';
 import { SearchLooperProvider } from './looper/search';
 import { SavedObjectProvider } from './saved_object';
 import { RedirectWhenMissingProvider } from './_redirect_when_missing';
+import { timefilter } from 'ui/timefilter';
 
 
 uiModules.get('kibana/courier')
@@ -114,10 +115,9 @@ uiModules.get('kibana/courier')
         }
       };
 
-      // Listen for refreshInterval changes
-      $rootScope.$watchCollection('timefilter.refreshInterval', function () {
-        const refreshValue = _.get($rootScope, 'timefilter.refreshInterval.value');
-        const refreshPause = _.get($rootScope, 'timefilter.refreshInterval.pause');
+      timefilter.on('refreshIntervalUpdate', function () {
+        const refreshValue = _.get(timefilter.getRefreshInterval, 'value');
+        const refreshPause = _.get(timefilter.getRefreshInterval, 'pause');
         if (_.isNumber(refreshValue) && !refreshPause) {
           self.fetchInterval(refreshValue);
         } else {

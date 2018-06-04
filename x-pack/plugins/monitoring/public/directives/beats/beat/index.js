@@ -9,9 +9,10 @@ import moment from 'moment';
 import { render } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { Beat } from 'plugins/monitoring/components/beats/beat';
+import { timefilter } from 'ui/timefilter';
 
 const uiModule = uiModules.get('monitoring/directives', []);
-uiModule.directive('monitoringBeatsBeat', (timefilter) => {
+uiModule.directive('monitoringBeatsBeat', () => {
   return {
     restrict: 'E',
     scope: {
@@ -21,9 +22,11 @@ uiModule.directive('monitoringBeatsBeat', (timefilter) => {
 
       function onBrush({ xaxis }) {
         scope.$evalAsync(() => {
-          timefilter.time.from = moment(xaxis.from);
-          timefilter.time.to = moment(xaxis.to);
-          timefilter.time.mode = 'absolute';
+
+        timefilter.setTime({
+          from: moment(xaxis.from),
+          to: moment(xaxis.to),
+          mode: 'absolute',
         });
       }
 

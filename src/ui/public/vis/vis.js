@@ -39,8 +39,9 @@ import { updateVisualizationConfig } from './vis_update';
 import { queryManagerFactory } from '../query_manager';
 import { SearchSourceProvider } from '../courier/data_source/search_source';
 import { SavedObjectsClientProvider } from '../saved_objects';
+import { timefilter } from 'ui/timefilter';
 
-export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppState) {
+export function VisProvider(Private, Promise, indexPatterns, getAppState) {
   const visTypes = Private(VisTypesRegistryProvider);
   const brushEvent = Private(UtilsBrushEventProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);

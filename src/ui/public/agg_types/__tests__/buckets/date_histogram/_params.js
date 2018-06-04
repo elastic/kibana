@@ -25,6 +25,7 @@ import AggParamWriterProvider from '../../agg_param_writer';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { aggTypes } from '../../..';
 import { AggConfig } from '../../../../vis/agg_config';
+import { timefilter } from 'ui/timefilter';
 
 describe('params', function () {
 
@@ -38,7 +39,6 @@ describe('params', function () {
   beforeEach(ngMock.inject(function (Private, $injector) {
     const AggParamWriter = Private(AggParamWriterProvider);
     const indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-    const timefilter = $injector.get('timefilter');
 
     timeField = indexPattern.timeFieldName;
 

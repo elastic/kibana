@@ -14,6 +14,7 @@ import {
 import { ModelUpdater } from './model_updater';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { NoData } from 'plugins/monitoring/components';
+import { timefilter } from 'ui/timefilter';
 
 const REACT_NODE_ID_NO_DATA = 'noDataReact';
 
@@ -97,8 +98,7 @@ export class NoDataController {
     $executor.start(); // start the executor to keep refreshing the search for data
   }
 
-  enableTimefilter($injector, $executor) {
-    const timefilter = $injector.get('timefilter');
+  enableTimefilter() {
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
     timefilter.on('update', () => $executor.run()); // re-fetch if they change the time filter

@@ -17,146 +17,116 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import moment from 'moment';
 import { calculateBounds, getTime } from './get_time';
-import '../state_management/global_state';
-import { EventsProvider } from '../events';
 import { diffTimeFactory } from './lib/diff_time';
 import { diffIntervalFactory } from './lib/diff_interval';
-import uiRoutes from '../routes';
-import { uiModules } from '../modules';
-import { createLegacyClass } from '../utils/legacy_class';
-import chrome from '../chrome';
+import { SimpleEmitter } from 'ui/utils/simple_emitter';
 
-uiRoutes
-  .addSetupWork(function (timefilter) {
-    return timefilter.init();
-  });
+class Timefilter extends SimpleEmitter {
+  constructor() {
+    super();
+    this.diffTime = diffTimeFactory(self);
+    this.diffInterval = diffIntervalFactory(self);
+    this.isTimeRangeSelectorEnabled = false;
+    this.isAutoRefreshSelectorEnabled = false;
+    this._time = uiSettings.get('timepicker:timeDefaults');
+    this._refreshInterval = uiSettings.get('timepicker:refreshIntervalDefaults');
+  }
 
-uiModules
-  .get('kibana')
-  .service('timefilter', function (Private, globalState, $rootScope, $location) {
-    const Events = Private(EventsProvider);
+  getTime = () => {
+    return this._time;
+  }
 
-    function convertISO8601(stringTime) {
-      const obj = moment(stringTime, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true);
-      return obj.isValid() ? obj : stringTime;
+  /**
+   * Updates timeFilter time.
+   * @param {Object} time
+   * @param {string|moment} from
+   * @param {string|moment} to
+   * @param {string} mode
+   */
+  setTime = (time) => {
+    this._time = Objects.assign(this._time, time);
+    diffTime();
+  }
+
+  getRefreshInterval = () => {
+    return this._time;
+  }
+
+  /**
+   * Set timefilter refresh interval.
+   * @param {Object} refreshInterval
+   * @param {number} value
+   * @param {boolean} pause
+   */
+  setRefreshInterval = (refreshInterval) => {
+    this._refreshInterval = Objects.assign(this._refreshInterval, refreshInterval);
+    diffInterval();
+  }
+
+  toggleRefresh = () => {
+    this.setRefreshInterval({ pause: !this._refreshInterval.pause });
+  }
+
+  createFilter = (indexPattern, timeRange) => {
+    return getTime(indexPattern, timeRange ? timeRange : this.time, this.getForceNow());
+  }
+
+  getBounds = () {
+    return this.calculateBounds(this._time);
+  }
+
+  getForceNow = () => {
+    const query = $location.search().forceNow;
+    if (!query) {
+      return;
     }
 
-    createLegacyClass(Timefilter).inherits(Events);
-    function Timefilter() {
-      Timefilter.Super.call(this);
-
-      const self = this;
-      const diffTime = diffTimeFactory(self);
-      const diffInterval = diffIntervalFactory(self);
-
-      self.isTimeRangeSelectorEnabled = false;
-      self.isAutoRefreshSelectorEnabled = false;
-
-      self.init = _.once(function () {
-        const uiSettings = chrome.getUiSettingsClient();
-        const timeDefaults = uiSettings.get('timepicker:timeDefaults');
-        const refreshIntervalDefaults = uiSettings.get('timepicker:refreshIntervalDefaults');
-
-        // These can be date math strings or moments.
-        self.time = _.defaults(globalState.time || {}, timeDefaults);
-        self.refreshInterval = _.defaults(globalState.refreshInterval || {}, refreshIntervalDefaults);
-
-        globalState.on('fetch_with_changes', function () {
-        // clone and default to {} in one
-          const newTime = _.defaults({}, globalState.time, timeDefaults);
-          const newRefreshInterval = _.defaults({}, globalState.refreshInterval, refreshIntervalDefaults);
-
-          if (newTime) {
-            if (newTime.to) newTime.to = convertISO8601(newTime.to);
-            if (newTime.from) newTime.from = convertISO8601(newTime.from);
-          }
-
-          self.time = newTime;
-          self.refreshInterval = newRefreshInterval;
-        });
-      });
-
-      $rootScope.$$timefilter = self;
-
-      $rootScope.$watchMulti([
-        '$$timefilter.time',
-        '$$timefilter.time.from',
-        '$$timefilter.time.to',
-        '$$timefilter.time.mode'
-      ], diffTime);
-
-      $rootScope.$watchMulti([
-        '$$timefilter.refreshInterval',
-        '$$timefilter.refreshInterval.pause',
-        '$$timefilter.refreshInterval.value'
-      ], diffInterval);
+    const ticks = Date.parse(query);
+    if (isNaN(ticks)) {
+      throw new Error(`forceNow query parameter can't be parsed`);
     }
+    return new Date(ticks);
+  }
 
-    Timefilter.prototype.update = function () {
-      $rootScope.$apply();
-    };
+  calculateBounds = (timeRange) => {
+    return calculateBounds(timeRange, { forceNow: this.getForceNow() });
+  }
 
-    Timefilter.prototype.getForceNow = function () {
-      const query = $location.search().forceNow;
-      if (!query) {
-        return;
-      }
+  getActiveBounds = () => {
+    if (this.isTimeRangeSelectorEnabled) {
+      return this.getBounds();
+    }
+  }
 
-      const ticks = Date.parse(query);
-      if (isNaN(ticks)) {
-        throw new Error(`forceNow query parameter can't be parsed`);
-      }
-      return new Date(ticks);
-    };
+  /**
+   * Show the time bounds selector part of the time filter
+   */
+  enableTimeRangeSelector = () => {
+    this.isTimeRangeSelectorEnabled = true;
+  }
 
-    Timefilter.prototype.get = function (indexPattern, timeRange) {
-      return getTime(indexPattern, timeRange ? timeRange : this.time, this.getForceNow());
-    };
+  /**
+   * Hide the time bounds selector part of the time filter
+   */
+  disableTimeRangeSelector = () => {
+    this.isTimeRangeSelectorEnabled = false;
+  }
 
-    Timefilter.prototype.calculateBounds = function (timeRange) {
-      return calculateBounds(timeRange, { forceNow: this.getForceNow() });
-    };
+  /**
+   * Show the auto refresh part of the time filter
+   */
+  enableAutoRefreshSelector = () => {
+    this.isAutoRefreshSelectorEnabled = true;
+  }
 
-    Timefilter.prototype.getBounds = function () {
-      return this.calculateBounds(this.time);
-    };
+  /**
+   * Hide the auto refresh part of the time filter
+   */
+  disableAutoRefreshSelector = () => {
+    this.isAutoRefreshSelectorEnabled = false;
+  }
 
-    Timefilter.prototype.getActiveBounds = function () {
-      if (this.isTimeRangeSelectorEnabled) {
-        return this.getBounds();
-      }
-    };
+}
 
-    /**
-     * Show the time bounds selector part of the time filter
-     */
-    Timefilter.prototype.enableTimeRangeSelector = function () {
-      this.isTimeRangeSelectorEnabled = true;
-    };
-
-    /**
-     * Hide the time bounds selector part of the time filter
-     */
-    Timefilter.prototype.disableTimeRangeSelector = function () {
-      this.isTimeRangeSelectorEnabled = false;
-    };
-
-    /**
-     * Show the auto refresh part of the time filter
-     */
-    Timefilter.prototype.enableAutoRefreshSelector = function () {
-      this.isAutoRefreshSelectorEnabled = true;
-    };
-
-    /**
-     * Hide the auto refresh part of the time filter
-     */
-    Timefilter.prototype.disableAutoRefreshSelector = function () {
-      this.isAutoRefreshSelectorEnabled = false;
-    };
-
-    return new Timefilter();
-  });
+export const timefilter = new Timefilter();
