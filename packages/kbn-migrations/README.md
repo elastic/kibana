@@ -1,114 +1,74 @@
 # Migrations
 
-## Minor Version Transform
+A concern was raised with the previous approach to migrations: they would allow us to make breaking changes to our data between minor version changes. This might break customers who are consuming data from our Kibana index.
 
-Several PRs:
-
-- Track Kibana version in index metadata
-- Move mapping building logic out into a standalone feature that can be consumed variously by migrations and saved object client, etc
-- Put in logic to diff the current mappings w/ the mappings defined in the index
-  - If the mapping changes are additive, transform
-  - If the mapping changes are destructive, and this isn't a major version upgrade, reject
-  - If a mapping is plain missing, it's ok, as it probably means a plugin is disabled
-- Saved Object: transform prior to create / update
-- Startup: upgrade docs in the index if additive mappings are detected
+A new approach is outlined below, addressing this concern as well as a few others:
 
 
-Architecture
+## General Overview
 
-- Kibana version is stored in index metadata
-  - If Kibana starts and finds that the Kibana index is newer than the Kibana version
-    - It will fail to start
-    - Users can force it to start, in which case, it will mark the Kibana index as being its own version (provided it is the same major version as the index)
-    - The assumption here is that since changes between minor versions are non-breaking, it's probably safe to downgrade, but the user should opt in explicitly
-- Plugins define a list of types that they own
-  - This is in addition to defining mappings, as ultimately, plugins may remove a mapping, but still need to be able to upgrade old docs
+- Store Kibana version
+  - Either as index metadata or on a per-document basis or both
+  - The per-document approach would allow us to more easily detect edge-cases
+    - If someone was writing docs from an old Kibana version while a new Kibana version was migrating the index
+    - If someone somehow injects old docs into the index w/out going through the saved objects API
+- Plugins can define migrations for types that they own
   - There is no co-ownership; a plugin owns its types and no one else does
-- Plugins can define transforms for types that they own
-  - If mappings change *or* Kibana version changes the docs in the index are transformed and re-saved
+  - Plugins can define one migration per type / version
+  - If mappings change *or* Kibana version changes the docs in the index are migrated and re-saved
+  - Indices are migrated in-place for minor version upgrades and are migrated to new indices for major version upgrades
   - Docs will be diffed and only written if they have actually changed
-  - A plugin will have only one transform function per type / major Kibana version
-- A transform function must accept documents of any shape supported by the major version it pertains to (e.g. 6.0, 6.1, 6.2, etc)
-- Transforms between minor versions are not allowed to be breaking
-  - Fields can be added, but not removed, nor mappings changed
-  - If you need to (e.g. move data out of a JSON blob and into a field, the transform needs to write to the JSON blob *and* the field)
+- When Kibana starts
+  - If the index is newer than the current Kibana index
+    - Log an error
+    - Fail the boot process
+    - Overridable via a `--downgrade` flag which allows downgrading within the same major version
+    - The assumption here is that since changes between minor versions should be non-breaking, it's probably safe to downgrade, but the user should opt in explicitly
+- Migrations between minor versions are not allowed to be breaking
+  - Mapping properties / fields can be added, but not removed, and their types cannot change
+  - Examples
+    - If you need to move data out of a JSON blob and into a field, the migration needs to write to the JSON blob *and* the field
+    - If you need to change a field from text to keyword, you need to create a new field, and keep the two in sync
 - Ownership of a type can get moved from plugin to plugin by
-  - Moving that type's transform function and mapping, and moving the type from one "ownership" list to the other
-- Transforms are run on all docs prior to any saved object client save / update operations
+  - Moving that type's migration function and mapping, and moving the type from one "ownership" list to the other
+- The saved object client save / update operations will migrate docs as needed, based on the doc's version (or if not versioning per doc, based on an optional header in which the version is specified)
 - In a clustered Kibana configuration, all Kibana instances can run migrations simultaneously, as there is no real downside other than unecessary writes
 
 
-Pseudo
-
-Plugins might define their migrations in a shape that looks something like this:
-
 ```js
-
 {
-  id: 'myplugin',
-  migration: {
-    v6: {
-      mytype: {
-        transform: (doc) => doc,
-      },
-    },
-    v5: {
-      mytype: {
-        transform: (doc) => doc,
-      },
+  migrations: {
+    dashboard: {
+      'v6.5.0': (doc) => extractSomethingFromJsonToANewField(doc),
+      'v7.0.0': (doc) => dropDeprecatedFields(doc),
     },
   },
 }
 ```
 
 
-## Major Version Upgrade
+## Minor Versions
 
-WIP. Some (rough) notes:
+If Kibana detects that it needs to do a minor-version migration:
+
+- It will diff the current mappings w/ the mappings defined in the index
+  - If the mapping changes are additive, transform
+  - If the mapping changes are destructive, reject
+  - If a mapping is plain missing, it's ok, as it probably means a plugin is disabled
+
+
+## Major Versions
+
+If Kibana detects that it needs to do a major-version migration:
 
 - We don't support disabling plugins, doing the migration, then slowly enabling plugins in a staged rollout
   - We will drop data for any disabled plugins during major upgrades
   - For this reason, we'll show an upgrade assistant (show screen before migrating detailing potential data losses)
-- Plugins can make breaking changes to mappings / docs when a major version is released
-- To do this, they just need to define the new mappings and provide an upgrade function for the affected types
-  - The upgrade function takes a doc which is guaranteed to be of the shape(V-1), transforms it into shape(V)
-- When Kibana boots:
-  - Checks to see if `.kibana` is an alias and that it points to `.kibana-{MAJOR_VERSION}`
-  - If this is true, it's already upgraded, only minor version transform logic is applied
-  - If this is false, it needs to be upgraded
-    - Ensures `.kibana` is an alias
-    - Scans all docs from the old index
-    - Runs them through the previous version's transform functions
-    - Runs them through the appropriate upgrade functions
-    - Runs them through the current version's transform functions
-    - Persists them to the new index
-    - Points the `.kibana` alias to the new index
-  - Again, this process can be done by any number of Kibana instances, as it is predictive
-
-
-When we do major version upgrades, plugins can add an upgrade function to their migrations:
-
-```js
-{
-  id: 'myplugin',
-  migration: {
-    v6: {
-      mytype: {
-        transform: (doc) => doc,
-        // Upgrade doc from 5.x -> 6.0
-        upgrade: (doc) => doc,
-      }
-    },
-    v5: {
-      mytype: {
-        transform: (doc) => doc,
-        // Upgrade doc from 4.x -> 5.0
-        upgrade: (doc) => doc,
-      }
-    },
-  },
-}
-```
-
-
+- It will create a new index w/ up-to-date mappings
+- Migrate all docs from the old index to the new
+  - Drop any docs whose plugins are missing / disabled (after prompting the user in some way)
+- Point the alias to the new index
+- Plugins that are making breaking changes simply need to:
+  - Update their mappings to look however they want
+  - Write a `7.0.0` (or whatever major version) migration to reshape the pre-7.0.0 doc to conform to the new mappings
   
