@@ -10,9 +10,9 @@ exports[`it renders without blowing up 1`] = `
     alignItems="baseline"
     component="div"
     direction="row"
-    gutterSize="l"
+    gutterSize="s"
     justifyContent="flexStart"
-    responsive={true}
+    responsive={false}
     wrap={false}
   >
     <EuiFlexItem
@@ -22,15 +22,15 @@ exports[`it renders without blowing up 1`] = `
       <EuiTitle
         size="m"
       >
-        <div>
+        <h2>
           <EuiIcon
             className="collapsiblePanel__logo"
-            size="l"
+            size="xl"
             type="logoElasticsearch"
           />
            
           Elasticsearch
-        </div>
+        </h2>
       </EuiTitle>
     </EuiFlexItem>
     <EuiFlexItem

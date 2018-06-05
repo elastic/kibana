@@ -6,7 +6,7 @@
 
 import React from 'react';
 import {
-  EuiBadge
+  EuiIcon
 } from '@elastic/eui';
 import { ReservedRoleBadge } from './reserved_role_badge';
 import {
@@ -23,7 +23,7 @@ const unreservedRole = {};
 
 test('it renders without crashing', () => {
   const wrapper = shallow(<ReservedRoleBadge role={reservedRole} />);
-  expect(wrapper.find(EuiBadge)).toHaveLength(1);
+  expect(wrapper.find(EuiIcon)).toHaveLength(1);
 });
 
 test('it renders nothing for an unreserved role', () => {

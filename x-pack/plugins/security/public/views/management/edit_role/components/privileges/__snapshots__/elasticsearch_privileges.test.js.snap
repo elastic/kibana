@@ -9,34 +9,31 @@ exports[`it renders without crashing 1`] = `
     <EuiDescribedFormGroup
       description={
         <p>
-          Manage the actions this role can perform against your cluster.
+          Manage the actions this role can perform against your cluster. 
+          <EuiLink
+            className="editRole__learnMore"
+            color="primary"
+            href="undefinedguide/en/x-pack/undefined/security-privileges.html#security-privileges"
+            target="_blank"
+            type="button"
+          >
+            Learn more
+          </EuiLink>
         </p>
       }
       fullWidth={false}
       gutterSize="l"
       title={
-        <p>
-          Cluster privileges 
-          <EuiLink
-            className="editRole__learnMore"
-            color="primary"
-            href="undefinedguide/en/x-pack/current/security-privileges.html#security-privileges"
-            target="_blank"
-            type="button"
-          >
-            <EuiIcon
-              size="s"
-              type="questionInCircle"
-            />
-          </EuiLink>
-        </p>
+        <h3>
+          Cluster privileges
+        </h3>
       }
       titleSize="xs"
     >
       <EuiFormRow
         describedByIds={Array []}
         fullWidth={true}
-        hasEmptyLabelSpace={false}
+        hasEmptyLabelSpace={true}
       >
         <ClusterPrivileges
           onChange={[Function]}
@@ -56,34 +53,31 @@ exports[`it renders without crashing 1`] = `
     <EuiDescribedFormGroup
       description={
         <p>
-          Allow requests to be submitted on behalf of other users.
+          Allow requests to be submitted on the behalf of other users. 
+          <EuiLink
+            className="editRole__learnMore"
+            color="primary"
+            href="undefinedguide/en/x-pack/undefined/security-privileges.html#_run_as_privilege"
+            target="_blank"
+            type="button"
+          >
+            Learn more
+          </EuiLink>
         </p>
       }
       fullWidth={false}
       gutterSize="l"
       title={
-        <p>
-          Run As privileges 
-          <EuiLink
-            className="editRole__learnMore"
-            color="primary"
-            href="undefinedguide/en/x-pack/current/security-privileges.html#_run_as_privilege"
-            target="_blank"
-            type="button"
-          >
-            <EuiIcon
-              size="s"
-              type="questionInCircle"
-            />
-          </EuiLink>
-        </p>
+        <h3>
+          Run As privileges
+        </h3>
       }
       titleSize="xs"
     >
       <EuiFormRow
         describedByIds={Array []}
         fullWidth={false}
-        hasEmptyLabelSpace={false}
+        hasEmptyLabelSpace={true}
       >
         <EuiComboBox
           isClearable={true}
@@ -99,102 +93,68 @@ exports[`it renders without crashing 1`] = `
     <EuiSpacer
       size="l"
     />
-    <EuiFormRow
-      describedByIds={Array []}
-      fullWidth={true}
-      hasEmptyLabelSpace={false}
+    <EuiTitle
+      size="xs"
     >
-      <div>
-        <EuiFlexGroup
-          alignItems="stretch"
-          component="div"
-          direction="row"
-          gutterSize="l"
-          justifyContent="flexStart"
-          responsive={true}
-          wrap={false}
+      <h3>
+        Index privileges
+      </h3>
+    </EuiTitle>
+    <EuiSpacer
+      size="s"
+    />
+    <EuiText
+      color="subdued"
+      grow={true}
+      size="s"
+    >
+      <p>
+        Control access to the data in your cluster. 
+        <EuiLink
+          className="editRole__learnMore"
+          color="primary"
+          href="undefinedguide/en/x-pack/undefined/security-privileges.html#privileges-list-indices"
+          target="_blank"
+          type="button"
         >
-          <EuiFlexItem
-            component="div"
-            grow={true}
-          >
-            <EuiTitle
-              size="xs"
-            >
-              <p>
-                Index privileges 
-                <EuiLink
-                  className="editRole__learnMore"
-                  color="primary"
-                  href="undefinedguide/en/x-pack/current/security-privileges.html#privileges-list-indices"
-                  target="_blank"
-                  type="button"
-                >
-                  <EuiIcon
-                    size="s"
-                    type="questionInCircle"
-                  />
-                </EuiLink>
-              </p>
-            </EuiTitle>
-            <EuiText
-              color="subdued"
-              grow={true}
-              size="s"
-            >
-              <p>
-                Control access to the data in your cluster.
-              </p>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem
-            component="div"
-            grow={false}
-          >
-            <EuiButton
-              color="primary"
-              fill={false}
-              iconSide="left"
-              iconType="plusInCircle"
-              onClick={[Function]}
-              size="s"
-              type="button"
-            >
-              Add Index Privilege
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiHorizontalRule
-          margin="xs"
-          size="full"
-        />
-      </div>
-    </EuiFormRow>
-    <EuiFormRow
-      describedByIds={Array []}
-      fullWidth={true}
-      hasEmptyLabelSpace={false}
+          Learn more
+        </EuiLink>
+      </p>
+    </EuiText>
+    <IndexPrivileges
+      allowDocumentLevelSecurity={true}
+      allowFieldLevelSecurity={true}
+      httpClient={[MockFunction]}
+      indexPatterns={Array []}
+      onChange={[MockFunction]}
+      role={
+        Object {
+          "cluster": Array [],
+          "indices": Array [],
+          "run_as": Array [],
+        }
+      }
+      validator={
+        RoleValidator {
+          "_shouldValidate": undefined,
+        }
+      }
+    />
+    <EuiHorizontalRule
+      margin="l"
+      size="full"
+    />
+    <EuiButton
+      color="primary"
+      fill={false}
+      iconSide="left"
+      iconType="plusInCircle"
+      onClick={[Function]}
+      size="s"
+      type="button"
     >
-      <IndexPrivileges
-        allowDocumentLevelSecurity={true}
-        allowFieldLevelSecurity={true}
-        httpClient={[MockFunction]}
-        indexPatterns={Array []}
-        onChange={[MockFunction]}
-        role={
-          Object {
-            "cluster": Array [],
-            "indices": Array [],
-            "run_as": Array [],
-          }
-        }
-        validator={
-          RoleValidator {
-            "_shouldValidate": undefined,
-          }
-        }
-      />
-    </EuiFormRow>
+      Add index privilege
+    </EuiButton>
   </React.Fragment>
 </CollapsiblePanel>
 `;

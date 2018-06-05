@@ -7,7 +7,7 @@ import React from 'react';
 import { shallow, mount } from 'enzyme';
 import { IndexPrivilegeForm } from './index_privilege_form';
 import { RoleValidator } from '../../lib/validate_role';
-import { EuiSwitch, EuiTextArea, EuiLink, EuiCallOut } from '@elastic/eui';
+import { EuiSwitch, EuiTextArea, EuiButtonIcon } from '@elastic/eui';
 
 test('it renders without crashing', () => {
   const props = {
@@ -60,7 +60,7 @@ describe('delete button', () => {
       allowDelete: false
     };
     const wrapper = mount(<IndexPrivilegeForm {...testProps} />);
-    expect(wrapper.find(EuiLink)).toHaveLength(0);
+    expect(wrapper.find(EuiButtonIcon)).toHaveLength(0);
   });
 
   test('it is shown when allowDelete is true', () => {
@@ -69,7 +69,7 @@ describe('delete button', () => {
       allowDelete: true
     };
     const wrapper = mount(<IndexPrivilegeForm {...testProps} />);
-    expect(wrapper.find(EuiLink)).toHaveLength(1);
+    expect(wrapper.find(EuiButtonIcon)).toHaveLength(1);
   });
 
   test('it invokes onDelete when clicked', () => {
@@ -78,7 +78,7 @@ describe('delete button', () => {
       allowDelete: true
     };
     const wrapper = mount(<IndexPrivilegeForm {...testProps} />);
-    wrapper.find(EuiLink).simulate('click');
+    wrapper.find(EuiButtonIcon).simulate('click');
     expect(testProps.onDelete).toHaveBeenCalledTimes(1);
   });
 });
@@ -191,7 +191,7 @@ describe('field level security', () => {
 
     const wrapper = mount(<IndexPrivilegeForm {...testProps} />);
     expect(wrapper.find("div.indexPrivilegeForm__grantedFieldsRow")).toHaveLength(1);
-    expect(wrapper.find(EuiCallOut)).toHaveLength(1);
+    expect(wrapper.find(".euiFormHelpText")).toHaveLength(1);
   });
 
   test('it does not display a warning when fields are granted', () => {
@@ -201,6 +201,6 @@ describe('field level security', () => {
 
     const wrapper = mount(<IndexPrivilegeForm {...testProps} />);
     expect(wrapper.find("div.indexPrivilegeForm__grantedFieldsRow")).toHaveLength(1);
-    expect(wrapper.find(EuiCallOut)).toHaveLength(0);
+    expect(wrapper.find(".euiFormHelpText")).toHaveLength(0);
   });
 });

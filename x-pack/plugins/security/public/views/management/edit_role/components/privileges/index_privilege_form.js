@@ -110,25 +110,7 @@ export class IndexPrivilegeForm extends Component {
 
     const { grant = [] } = indexPrivilege.field_security || {};
 
-    // TODO: Remove this completely, if ok with just putting the text in the helptext
-    // let grantedFieldsWarning = null;
-
     if (allowFieldLevelSecurity) {
-
-      // if (grant.length === 0) {
-      //   grantedFieldsWarning = (
-      //     <Fragment>
-      //       <EuiSpacer />
-      //       <EuiCallOut title={'No Granted Fields'} size="s" color="warning" iconType="help">
-      //         <p>
-      //           If no fields are granted, then users assigned to this role will not be able to
-      //           see any data for this index. Is this really what you want?
-      //         </p>
-      //       </EuiCallOut>
-      //     </Fragment>
-      //   );
-      // }
-
       return (
         <EuiFlexItem>
           <EuiFormRow
