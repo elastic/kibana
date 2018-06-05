@@ -4,14 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { OSS_KIBANA_ARCHIVE_PATH, OSS_DATA_ARCHIVE_PATH } from './constants';
+
 export default function ({ loadTestFile, getService }) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-  describe('reporting', () => {
+  describe('phantom', () => {
     before(async () => {
-      await esArchiver.load('../../../../test/functional/fixtures/es_archiver/dashboard/current/kibana');
-      await esArchiver.load('../../../../test/functional/fixtures/es_archiver/dashboard/current/data');
+      await esArchiver.load(OSS_KIBANA_ARCHIVE_PATH);
+      await esArchiver.load(OSS_DATA_ARCHIVE_PATH);
 
       await kibanaServer.uiSettings.update({
         'dateFormat:tz': 'UTC',
@@ -20,8 +22,8 @@ export default function ({ loadTestFile, getService }) {
     });
 
     after(async () => {
-      await esArchiver.unload('../../../../test/functional/fixtures/es_archiver/dashboard/current/kibana');
-      await esArchiver.unload('../../../../test/functional/fixtures/es_archiver/dashboard/current/data');
+      await esArchiver.unload(OSS_KIBANA_ARCHIVE_PATH);
+      await esArchiver.unload(OSS_DATA_ARCHIVE_PATH);
     });
 
     loadTestFile(require.resolve('./bwc_existing_indexes'));
