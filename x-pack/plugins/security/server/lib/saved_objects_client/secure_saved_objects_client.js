@@ -9,16 +9,15 @@ import { get, uniq } from 'lodash';
 export class SecureSavedObjectsClient {
   constructor(options) {
     const {
-      request,
-      hasPrivilegesWithRequest,
-      baseClient,
+      errors,
+      repository,
+      hasPrivileges,
       auditLogger,
     } = options;
 
-    this.errors = baseClient.errors;
-
-    this._client = baseClient;
-    this._hasPrivileges = hasPrivilegesWithRequest(request);
+    this.errors = errors;
+    this._repository = repository;
+    this._hasPrivileges = hasPrivileges;
     this._auditLogger = auditLogger;
   }
 
@@ -29,7 +28,7 @@ export class SecureSavedObjectsClient {
       options,
     });
 
-    return await this._client.create(type, attributes, options);
+    return await this._repository.create(type, attributes, options);
   }
 
   async bulkCreate(objects, options = {}) {
@@ -39,7 +38,7 @@ export class SecureSavedObjectsClient {
       options,
     });
 
-    return await this._client.bulkCreate(objects, options);
+    return await this._repository.bulkCreate(objects, options);
   }
 
   async delete(type, id) {
@@ -48,7 +47,7 @@ export class SecureSavedObjectsClient {
       id,
     });
 
-    return await this._client.delete(type, id);
+    return await this._repository.delete(type, id);
   }
 
   async find(options = {}) {
@@ -56,7 +55,7 @@ export class SecureSavedObjectsClient {
       options,
     });
 
-    return await this._client.find(options);
+    return await this._repository.find(options);
   }
 
   async bulkGet(objects = []) {
@@ -65,7 +64,7 @@ export class SecureSavedObjectsClient {
       objects,
     });
 
-    return await this._client.bulkGet(objects);
+    return await this._repository.bulkGet(objects);
   }
 
   async get(type, id) {
@@ -74,7 +73,7 @@ export class SecureSavedObjectsClient {
       id,
     });
 
-    return await this._client.get(type, id);
+    return await this._repository.get(type, id);
   }
 
   async update(type, id, attributes, options = {}) {
@@ -85,7 +84,7 @@ export class SecureSavedObjectsClient {
       options,
     });
 
-    return await this._client.update(type, id, attributes, options);
+    return await this._repository.update(type, id, attributes, options);
   }
 
   async _performAuthorizationCheck(typeOrTypes, action, args) {
@@ -97,7 +96,7 @@ export class SecureSavedObjectsClient {
       result = await this._hasPrivileges(actions);
     } catch(error) {
       const { reason } = get(error, 'body.error', {});
-      throw this._client.errors.decorateGeneralError(error, reason);
+      throw this.errors.decorateGeneralError(error, reason);
     }
 
     if (result.success) {
@@ -105,7 +104,7 @@ export class SecureSavedObjectsClient {
     } else {
       this._auditLogger.savedObjectsAuthorizationFailure(result.username, action, types, result.missing, args);
       const msg = `Unable to ${action} ${types.sort().join(',')}, missing ${result.missing.sort().join(',')}`;
-      throw this._client.errors.decorateForbiddenError(new Error(msg));
+      throw this.errors.decorateForbiddenError(new Error(msg));
     }
   }
 }
