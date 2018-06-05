@@ -73,7 +73,6 @@ exports[`apmUiEnabled 1`] = `
             type="apmApp"
           />
         }
-        layout="vertical"
         textAlign="center"
         title="APM"
       />
@@ -104,7 +103,6 @@ exports[`apmUiEnabled 1`] = `
             type="loggingApp"
           />
         }
-        layout="vertical"
         textAlign="center"
         title="Logging"
       />
@@ -135,7 +133,6 @@ exports[`apmUiEnabled 1`] = `
             type="monitoringApp"
           />
         }
-        layout="vertical"
         textAlign="center"
         title="Metrics"
       />
@@ -166,7 +163,6 @@ exports[`apmUiEnabled 1`] = `
             type="securityApp"
           />
         }
-        layout="vertical"
         textAlign="center"
         title="Security Analytics"
       />
@@ -322,7 +318,6 @@ exports[`render 1`] = `
             type="loggingApp"
           />
         }
-        layout="vertical"
         textAlign="center"
         title="Logging"
       />
@@ -353,7 +348,6 @@ exports[`render 1`] = `
             type="monitoringApp"
           />
         }
-        layout="vertical"
         textAlign="center"
         title="Metrics"
       />
@@ -384,7 +378,6 @@ exports[`render 1`] = `
             type="securityApp"
           />
         }
-        layout="vertical"
         textAlign="center"
         title="Security Analytics"
       />
