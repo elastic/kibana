@@ -17,4 +17,21 @@
  * under the License.
  */
 
-export { SavedObjectsClient } from './saved_objects_client';
+import React from 'react';
+import { shallow } from 'enzyme';
+
+import {
+  DashboardSaveModal,
+} from './save_modal';
+
+test('renders DashboardSaveModal', () => {
+  const component = shallow(<DashboardSaveModal
+    onSave={() => {}}
+    onClose={() => {}}
+    title="dash title"
+    description="dash description"
+    timeRestore={true}
+    showCopyOnSave={true}
+  />);
+  expect(component).toMatchSnapshot(); // eslint-disable-line
+});
