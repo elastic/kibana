@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import { uiModules } from 'ui/modules';
+import { i18n } from '../i18n';
 
-import i18n from '../i18n';
-
-uiModules.get('kbn-i18n').provider('i18n', function() {
+export function i18nProvider() {
   this.addMessages = function(messages, locale) {
     i18n.addMessages(messages, locale);
   };
@@ -61,4 +59,4 @@ uiModules.get('kbn-i18n').provider('i18n', function() {
   this.$get = function() {
     return i18n.translate.bind(i18n);
   };
-});
+}

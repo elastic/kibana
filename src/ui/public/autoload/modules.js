@@ -18,7 +18,6 @@
  */
 
 import 'angular';
-import '@kbn/i18n';
 import '../chrome';
 import '../bind';
 import '../kbn_top_nav';
@@ -54,3 +53,4 @@ import '../validate_date_interval';
 import '../watch_multi';
 import '../courier/saved_object/ui/saved_object_save_as_checkbox';
 import '../react_components';
+import '../i18n';

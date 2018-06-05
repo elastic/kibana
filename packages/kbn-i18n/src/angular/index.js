@@ -17,6 +17,7 @@
  * under the License.
  */
 
-import './provider';
-import './directive';
-import './filter';
+export { i18nProvider } from './provider';
+export { i18nFilter } from './filter';
+export { i18nDirective } from './directive';
+export { i18nModule } from './module';

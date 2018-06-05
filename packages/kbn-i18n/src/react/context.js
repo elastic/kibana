@@ -17,35 +17,29 @@
  * under the License.
  */
 
-import React, { PureComponent } from 'react';
+import { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import { IntlProvider } from 'react-intl';
-
-import { i18n } from '../i18n';
 
 /**
- * The library uses the provider pattern to scope an i18n context to a tree
- * of components. This component is used to setup the i18n context for a tree.
- * IntlProvider should wrap react app's root component (inside each react render method).
+ * Provides intl context to a child component using React render callback pattern
+ * @example
+ * <I18nContext>
+ *   {intl => (
+ *     <input
+ *       placeholder={intl.formatMessage({
+           id: 'my-id',
+           defaultMessage: 'my default message',
+         })}
+ *     />
+ *   )}
+ * </I18nContext>
  */
-export class I18nProvider extends PureComponent {
+export class I18nContext extends PureComponent {
   static propTypes = {
-    children: PropTypes.object,
+    children: PropTypes.func.isRequired,
   };
 
   render() {
-    const { children } = this.props;
-
-    return (
-      <IntlProvider
-        locale={i18n.getLocale()}
-        messages={i18n.getMessages()}
-        defaultLocale={i18n.getDefaultLocale()}
-        formats={i18n.getFormats()}
-        defaultFormats={i18n.getFormats()}
-      >
-        {children}
-      </IntlProvider>
-    );
+    return this.props.children(this.context.intl);
   }
 }

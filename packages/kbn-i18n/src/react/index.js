@@ -17,5 +17,16 @@
  * under the License.
  */
 
-export * from 'react-intl';
+export {
+  intlShape,
+  FormattedDate,
+  FormattedTime,
+  FormattedRelative,
+  FormattedNumber,
+  FormattedPlural,
+  FormattedMessage,
+  FormattedHTMLMessage,
+} from 'react-intl';
+
 export { I18nProvider } from './provider';
+export { I18nContext } from './context';

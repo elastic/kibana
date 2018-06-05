@@ -17,10 +17,14 @@
  * under the License.
  */
 
-import * as angular from './angular';
-import * as react from './react';
+import angular from 'angular';
 
-export const AngularI18n = angular;
-export const ReactI18n = react;
+import { i18nProvider } from './provider';
+import { i18nFilter } from './filter';
+import { i18nDirective } from './directive';
 
-export { I18n, i18n } from './i18n';
+export const i18nModule = angular
+  .module('kbn-i18n', [])
+  .provider('i18n', i18nProvider)
+  .filter('i18n', i18nFilter)
+  .directive('i18nId', i18nDirective);

@@ -17,13 +17,11 @@
  * under the License.
  */
 
-import { uiModules } from 'ui/modules';
-
-uiModules.get('i18n').filter('i18n', function(i18n) {
+export function i18nFilter(i18n) {
   return function(id, { defaultMessage = '', values = {} } = {}) {
     return i18n(id, {
       values,
       defaultMessage,
     });
   };
-});
+}

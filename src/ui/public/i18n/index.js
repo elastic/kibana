@@ -17,10 +17,17 @@
  * under the License.
  */
 
-import * as angular from './angular';
-import * as react from './react';
+import { AngularI18n, i18n } from '@kbn/i18n';
 
-export const AngularI18n = angular;
-export const ReactI18n = react;
+import { uiModules } from 'ui/modules';
+import { metadata } from 'ui/metadata';
 
-export { I18n, i18n } from './i18n';
+if (metadata.translations) {
+  i18n.addMessages(metadata.translations);
+
+  if (metadata.translations.locale) {
+    i18n.setLocale(metadata.translations.locale);
+  }
+}
+
+uiModules.get('i18n', [AngularI18n.i18nModule.name]);

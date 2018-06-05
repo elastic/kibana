@@ -197,7 +197,7 @@ ReactDOM.render(
     <RootComponent>
       ...
     </RootComponent>
-  </IntlProvider>,
+  </I18nProvider>,
   document.getElementById('container')
 );
 ```

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { I18nLoader } from '@kbn/i18n/src/server';
+import { I18nLoader } from './i18n_loader';
 
 export function uiI18nMixin(kbnServer, server, config) {
   const defaultLocale = config.get('i18n.defaultLocale');
@@ -31,15 +31,12 @@ export function uiI18nMixin(kbnServer, server, config) {
    *  @name request.getUiTranslations
    *  @returns {Promise<Object<id:string,value:string>>} translations
    */
-  server.decorate('request', 'getUiTranslations', async function () {
+  server.decorate('request', 'getUiTranslations', async function() {
     const header = this.headers['accept-language'];
 
-    const [
-      defaultTranslations,
-      requestedTranslations,
-    ] = await Promise.all([
+    const [defaultTranslations, requestedTranslations] = await Promise.all([
       i18nLoader.getTranslationsByLocale(defaultLocale),
-      i18nLoader.getTranslationsByLanguageHeader(header)
+      i18nLoader.getTranslationsByLanguageHeader(header),
     ]);
 
     return {

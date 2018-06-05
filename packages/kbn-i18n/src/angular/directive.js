@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { uiModules } from 'ui/modules';
-
-uiModules.get('i18n').directive('i18nId', function(i18n) {
+export function i18nDirective(i18n) {
   return {
     restrict: 'A',
     scope: {
@@ -42,4 +40,4 @@ uiModules.get('i18n').directive('i18nId', function(i18n) {
       });
     },
   };
-});
+}
