@@ -281,6 +281,14 @@ export function SearchSourceProvider(Promise, PromiseEmitter, Private, config) {
       return clone;
     }
 
+    makeChild() {
+      return new SearchSource().inherits(this, { callParentStartHandlers: true });
+    }
+
+    new() {
+      return new SearchSource();
+    }
+
     async getSearchRequestBody() {
       const searchRequest = await this._flatten();
       return searchRequest.body;

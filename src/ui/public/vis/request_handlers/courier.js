@@ -36,8 +36,8 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
       // Using callParentStartHandlers: true we make sure, that the parent searchSource
       // onSearchRequestStart will be called properly even though we use an inherited
       // search source.
-      const timeFilterSearchSource = new SearchSource().inherits(searchSource, { callParentStartHandlers: true });
-      const requestSearchSource = new SearchSource().inherits(timeFilterSearchSource, { callParentStartHandlers: true });
+      const timeFilterSearchSource = searchSource.makeChild();
+      const requestSearchSource = timeFilterSearchSource.makeChild();
 
       // For now we need to mirror the history of the passed search source, since
       // the spy panel wouldn't work otherwise.
@@ -74,41 +74,37 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
         requestSearchSource.set('query', query);
       }
 
-      const shouldQuery = async () => {
+      const shouldQuery = (requestBodyHash) => {
         if (!searchSource.lastQuery || forceFetch) return true;
-
-        const currentRequest = await requestSearchSource.getSearchRequestBody();
-        if (searchSource.lastQuery !== calculateObjectHash(currentRequest)) return true;
-
+        if (searchSource.lastQuery !== requestBodyHash) return true;
         return false;
       };
 
-
-
       return new Promise(async (resolve, reject) => {
-        if (await shouldQuery()) {
-          requestSearchSource.onResults().then(resp => {
-            requestSearchSource.getSearchRequestBody().then(q => searchSource.lastQuery = calculateObjectHash(q));
-
-            searchSource.rawResponse = resp;
-
-            return _.cloneDeep(resp);
-          }).then(async resp => {
-            for (const agg of vis.getAggConfig()) {
-              if (_.has(agg, 'type.postFlightRequest')) {
-                const nestedSearchSource = new SearchSource().inherits(requestSearchSource);
-                resp = await agg.type.postFlightRequest(resp, vis.aggs, agg, nestedSearchSource);
+        return requestSearchSource.getSearchRequestBody().then(q => {
+          const queryHash = calculateObjectHash(q);
+          if (shouldQuery(queryHash)) {
+            requestSearchSource.onResults().then(resp => {
+              searchSource.lastQuery = queryHash;
+              searchSource.rawResponse = resp;
+              return _.cloneDeep(resp);
+            }).then(async resp => {
+              for (const agg of vis.getAggConfig()) {
+                if (_.has(agg, 'type.postFlightRequest')) {
+                  const nestedSearchSource = new SearchSource().inherits(requestSearchSource);
+                  resp = await agg.type.postFlightRequest(resp, vis.aggs, agg, nestedSearchSource);
+                }
               }
-            }
 
-            searchSource.finalResponse = resp;
-            resolve(resp);
-          }).catch(e => reject(e));
+              searchSource.finalResponse = resp;
+              resolve(resp);
+            }).catch(e => reject(e));
 
-          courier.fetch();
-        } else {
-          resolve(searchSource.finalResponse);
-        }
+            courier.fetch();
+          } else {
+            resolve(searchSource.finalResponse);
+          }
+        });
       });
     }
   };

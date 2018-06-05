@@ -85,13 +85,12 @@ export class SearchEmbeddable extends Embeddable {
     this.searchScope.description = this.savedSearch.description;
     this.searchScope.searchSource = this.savedSearch.searchSource;
 
-    const timeRangeSearchSource = this.searchScope.searchSource.clone();
-    timeRangeSearchSource.inherits(false);
+    const timeRangeSearchSource = this.searchScope.searchSource.new();
     timeRangeSearchSource.filter(() => {
       return getTime(timeRangeSearchSource.index(), this.timeRange);
     });
 
-    const filtersSearchSource = this.searchScope.searchSource.clone();
+    const filtersSearchSource = this.searchScope.searchSource.new();
     filtersSearchSource.inherits(timeRangeSearchSource);
     filtersSearchSource.filter([]);
     filtersSearchSource.set('query', null);

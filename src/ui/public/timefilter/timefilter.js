@@ -116,7 +116,7 @@ uiModules
     };
 
     Timefilter.prototype.calculateBounds = function (timeRange) {
-      return calculateBounds(timeRange, this.getForceNow());
+      return calculateBounds(timeRange, { forceNow: this.getForceNow() });
     };
 
     Timefilter.prototype.getBounds = function () {

@@ -202,11 +202,10 @@ function discoverController(
     .version(true);
 
   // searchSource which applies time range
-  const timeRangeSearchSource = savedSearch.searchSource.clone();
-  timeRangeSearchSource.inherits(false);
+  const timeRangeSearchSource = savedSearch.searchSource.new();
   timeRangeSearchSource.set('query', null);
   timeRangeSearchSource.set('filter', function () {
-    return timefilter.get(timeRangeSearchSource.get('index'));
+    return timefilter.get($scope.indexPattern);
   });
 
   $scope.searchSource.inherits(timeRangeSearchSource);
