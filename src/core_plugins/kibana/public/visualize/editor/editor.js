@@ -246,12 +246,16 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
 
     // update the searchSource when filters update
     $scope.$listen(queryFilter, 'update', function () {
+      savedVis.searchSource.set('filter', $scope.state.filters);
       $state.save();
+      $scope.vis.forceReload();
     });
 
     // update the searchSource when query updates
     $scope.fetch = function () {
+      savedVis.searchSource.set('query', $scope.state.query);
       $state.save();
+      $scope.vis.forceReload();
     };
 
     $scope.$on('$destroy', function () {

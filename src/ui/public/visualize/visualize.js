@@ -151,7 +151,7 @@ uiModules
 
         //todo: clean this one up as well
         const handleVisUpdate = () => {
-          if ($scope.editorMode) {
+          if ($scope.appState.vis) {
             $scope.appState.vis = $scope.vis.getState();
             $scope.appState.save();
           }
