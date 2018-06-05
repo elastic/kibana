@@ -7,10 +7,28 @@
 import 'isomorphic-fetch';
 import { camelizeKeys } from 'humps';
 import { kfetch } from 'ui/kfetch';
-import { memoize, isEmpty, first } from 'lodash';
+import { memoize, isEmpty, first, startsWith } from 'lodash';
 import chrome from 'ui/chrome';
 import { convertKueryToEsQuery } from './kuery';
 import { getFromSavedObject } from 'ui/index_patterns/static_utils';
+
+function fetchOptionsWithDebug(fetchOptions) {
+  const debugEnabled =
+    sessionStorage.getItem('apm_debug') === 'true' &&
+    startsWith(fetchOptions.pathname, '/api/apm');
+
+  if (!debugEnabled) {
+    return fetchOptions;
+  }
+
+  return {
+    ...fetchOptions,
+    query: {
+      ...fetchOptions.query,
+      _debug: true
+    }
+  };
+}
 
 async function callApi(fetchOptions, kibanaOptions) {
   const combinedKibanaOptions = {
@@ -18,14 +36,7 @@ async function callApi(fetchOptions, kibanaOptions) {
     ...kibanaOptions
   };
 
-  const combinedFetchOptions = {
-    ...fetchOptions,
-    query: {
-      ...fetchOptions.query,
-      _debug: sessionStorage.getItem('apm_debug') || false
-    }
-  };
-
+  const combinedFetchOptions = fetchOptionsWithDebug(fetchOptions);
   const res = await kfetch(combinedFetchOptions, combinedKibanaOptions);
   return combinedKibanaOptions.camelcase ? camelizeKeys(res) : res;
 }
