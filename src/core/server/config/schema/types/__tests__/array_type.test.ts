@@ -29,17 +29,17 @@ test('fails if wrong input type', () => {
   expect(() => type.validate('test')).toThrowErrorMatchingSnapshot();
 });
 
-test('includes context in failure when wrong top-level type', () => {
+test('includes namespace in failure when wrong top-level type', () => {
   const type = schema.arrayOf(schema.string());
   expect(() =>
-    type.validate('test', {}, 'foo-context')
+    type.validate('test', {}, 'foo-namespace')
   ).toThrowErrorMatchingSnapshot();
 });
 
-test('includes context in failure when wrong item type', () => {
+test('includes namespace in failure when wrong item type', () => {
   const type = schema.arrayOf(schema.string());
   expect(() =>
-    type.validate([123], {}, 'foo-context')
+    type.validate([123], {}, 'foo-namespace')
   ).toThrowErrorMatchingSnapshot();
 });
 

@@ -45,8 +45,8 @@ test('returns error when not correct', () => {
   expect(() => literal(123).validate('abc')).toThrowErrorMatchingSnapshot();
 });
 
-test('includes context in failure', () => {
+test('includes namespace in failure', () => {
   expect(() =>
-    literal('test').validate('foo', {}, 'foo-context')
+    literal('test').validate('foo', {}, 'foo-namespace')
   ).toThrowErrorMatchingSnapshot();
 });
