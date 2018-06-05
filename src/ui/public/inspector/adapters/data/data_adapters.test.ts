@@ -17,7 +17,6 @@
  * under the License.
  */
 
-// TODO: fix tests
 import { DataAdapter } from './data_adapter';
 
 describe('DataAdapter', () => {
@@ -29,16 +28,33 @@ describe('DataAdapter', () => {
 
   describe('getTabular()', () => {
     it('should return a null promise when called before initialized', () => {
-      expect(adapter.getTabular()).resolves.toBe(null);
+      expect(adapter.getTabular()).resolves.toEqual({
+        data: null,
+        options: {},
+      });
     });
 
-    it('should call the provided callback and resolve with its value', () => {
+    it('should call the provided callback and resolve with its value', async () => {
       const spy = jest.fn(() => 'foo');
       adapter.setTabularLoader(spy);
       expect(spy).not.toBeCalled();
-      const result = adapter.getTabular();
+      const result = await adapter.getTabular();
       expect(spy).toBeCalled();
-      expect(result).resolves.toBe('foo');
+      expect(result.data).toBe('foo');
+    });
+
+    it('should pass through options specified via setTabularLoader', async () => {
+      adapter.setTabularLoader(() => 'foo', { returnsFormattedValues: true });
+      const result = await adapter.getTabular();
+      expect(result.options).toEqual({ returnsFormattedValues: true });
+    });
+
+    it('should return options set when starting loading data', async () => {
+      adapter.setTabularLoader(() => 'foo', { returnsFormattedValues: true });
+      const waitForResult = adapter.getTabular();
+      adapter.setTabularLoader(() => 'bar', { returnsFormattedValues: false });
+      const result = await waitForResult;
+      expect(result.options).toEqual({ returnsFormattedValues: true });
     });
   });
 
