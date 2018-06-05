@@ -43,10 +43,10 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
       // the spy panel wouldn't work otherwise.
       Object.defineProperty(requestSearchSource, 'history', {
         get() {
-          return requestSearchSource._parent.history;
+          return searchSource.history;
         },
         set(history) {
-          return requestSearchSource._parent.history = history;
+          return searchSource.history = history;
         }
       });
 
