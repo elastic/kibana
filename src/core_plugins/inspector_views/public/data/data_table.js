@@ -36,14 +36,14 @@ class DataTableFormat extends Component {
 
   state = { };
 
-  static renderCell(col, value) {
+  static renderCell(col, value, isFormatted) {
     return (
       <EuiFlexGroup
         gutterSize="s"
         alignItems="center"
       >
         <EuiFlexItem grow={false}>
-          { value }
+          { isFormatted ? value.formatted : value }
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup
@@ -86,11 +86,10 @@ class DataTableFormat extends Component {
     );
   }
 
-  static getDerivedStateFromProps({ data }) {
+  static getDerivedStateFromProps({ data, isFormatted }) {
     if (!data) {
       return {
         columns: null,
-        rowsRaw: null,
         rows: null,
       };
     }
@@ -99,10 +98,10 @@ class DataTableFormat extends Component {
       name: col.name,
       field: col.field,
       sortable: true,
-      render: (value) => DataTableFormat.renderCell(col, value),
+      render: (value) => DataTableFormat.renderCell(col, value, isFormatted),
     }));
 
-    return { columns, rowsRaw: data.rowsRaw, rows: data.rows };
+    return { columns, rows: data.rows };
   }
 
   render() {
@@ -112,7 +111,6 @@ class DataTableFormat extends Component {
         <DataDownloadOptions
           columns={this.state.columns}
           rows={this.state.rows}
-          rawData={this.state.rowsRaw}
           title={this.props.exportTitle}
         />
       ]
@@ -134,6 +132,7 @@ class DataTableFormat extends Component {
 DataTableFormat.propTypes = {
   data: PropTypes.object.isRequired,
   exportTitle: PropTypes.string.isRequired,
+  isFormatted: PropTypes.bool,
 };
 
 export { DataTableFormat };

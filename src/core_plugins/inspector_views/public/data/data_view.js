@@ -54,6 +54,7 @@ class DataViewComponent extends Component {
     if (type === 'tabular') {
       this.setState({
         tabularData: null,
+        tabularOptions: {},
         tabularPromise: this.props.adapters.data.getTabular(),
       });
     }
@@ -61,11 +62,12 @@ class DataViewComponent extends Component {
 
   finishLoadingData() {
     if (this.state.tabularPromise) {
-      this.state.tabularPromise.then((data) => {
+      this.state.tabularPromise.then(({ data, options }) => {
         // Only update the data if the promise resolved before unmounting the component
         if (this._isMounted) {
           this.setState({
             tabularData: data,
+            tabularOptions: options,
             tabularPromise: null,
           });
         }
@@ -135,6 +137,7 @@ class DataViewComponent extends Component {
       <InspectorView>
         <DataTableFormat
           data={this.state.tabularData}
+          isFormatted={this.state.tabularOptions.returnsFormattedValues}
           exportTitle={this.props.title}
         />
       </InspectorView>

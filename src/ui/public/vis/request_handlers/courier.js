@@ -24,6 +24,8 @@ import { calculateObjectHash } from '../lib/calculate_object_hash';
 import { getRequestInspectorStats, getResponseInspectorStats } from '../../courier/utils/courier_inspector_utils';
 import { tabifyAggResponse } from '../../agg_response/tabify/tabify';
 
+import { FormattedData } from '../../inspector/adapters';
+
 const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
   const SearchSource = Private(SearchSourceProvider);
 
@@ -47,36 +49,31 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
         name: col.title,
         field: `col${index}`,
         filter: isCellContentFilterable && ((value) => {
-          const filter = col.aggConfig.createFilter(value);
+          const filter = col.aggConfig.createFilter(value.raw);
           vis.API.queryFilter.addFilters(filter);
         }),
         filterOut: isCellContentFilterable && ((value) => {
-          const filter = col.aggConfig.createFilter(value);
+          const filter = col.aggConfig.createFilter(value.raw);
           filter.meta = filter.meta || {};
           filter.meta.negate = true;
           vis.API.queryFilter.addFilters(filter);
         }),
       });
     });
-    const rows = [];
-    const rowsRaw = [];
-    table.rows.forEach(row => {
-      const { formatted, raw } = row.reduce((prev, cur, index) => {
-        prev.raw[`col${index}`] = cur;
+    const rows = table.rows.map(row => {
+      return row.reduce((prev, cur, index) => {
         const fieldFormatter = table.columns[index].aggConfig.fieldFormatter('text');
-        prev.formatted[`col${index}`] = fieldFormatter(cur);
+        prev[`col${index}`] = new FormattedData(cur, fieldFormatter(cur));
         return prev;
-      }, { formatted: {}, raw: {} });
-      rows.push(formatted);
-      rowsRaw.push(raw);
+      }, {});
     });
 
     // TODO: Remove delay before merging
     return await new Promise(resolve => {
-      setTimeout(() => resolve({ columns, rows, rowsRaw }), 1000);
+      setTimeout(() => resolve({ columns, rows }), 1000);
     });
 
-    return { columns, rows, rowsRaw };
+    return { columns, rows };
   }
 
   return {
@@ -155,7 +152,10 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
 
               searchSource.finalResponse = resp;
 
-              vis.API.inspectorAdapters.data.setTabularLoader(() => buildTabularInspectorData(vis, searchSource));
+              vis.API.inspectorAdapters.data.setTabularLoader(
+                () => buildTabularInspectorData(vis, searchSource),
+                { returnsFormattedData: true }
+              );
 
               resolve(resp);
             }).catch(e => reject(e));

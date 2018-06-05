@@ -23,16 +23,32 @@ import { EventEmitter } from 'events';
 type TabularData = any;
 type TabularCallback = () => TabularData | Promise<TabularData>;
 
+interface TabularHolder {
+  data: TabularData | null;
+  options: TabularLoaderOptions;
+}
+
+interface TabularLoaderOptions {
+  returnsFormattedValues?: boolean;
+}
+
 class DataAdapter extends EventEmitter {
   private tabular?: TabularCallback;
+  private tabularOptions?: TabularLoaderOptions;
 
-  public setTabularLoader(callback: TabularCallback): void {
+  public setTabularLoader(callback: TabularCallback, options?: TabularLoaderOptions = {}): void {
     this.tabular = callback;
+    this.tabularOptions = options;
     this.emit('change', 'tabular');
   }
 
-  public getTabular(): Promise<TabularData> {
-    return Promise.resolve(this.tabular ? this.tabular() : null);
+  public getTabular(): Promise<TabularHolder> {
+    if (!this.tabular) {
+      return Promise.resolve({ data: null, options: {} });
+    }
+    const options = this.tabularOptions;
+    return Promise.resolve(this.tabular())
+      .then(data => ({ data, options }));
   }
 }
 

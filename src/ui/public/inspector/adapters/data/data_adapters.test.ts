@@ -17,6 +17,7 @@
  * under the License.
  */
 
+// TODO: fix tests
 import { DataAdapter } from './data_adapter';
 
 describe('DataAdapter', () => {

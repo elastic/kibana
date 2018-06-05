@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { DataAdapter, FormattedData } from './data';
-export { RequestAdapter, RequestStatus } from './request';
+export { FormattedData } from './formatted_data';
+export { DataAdapter } from './data_adapter';
