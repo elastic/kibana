@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { callClusterFactory } from '../../../xpack_main';
 import { CollectorSet } from './classes/collector_set';
 import { getOpsStatsCollector } from './collectors/get_ops_stats_collector';
 import { getSettingsCollector } from './collectors/get_settings_collector';
@@ -33,9 +32,8 @@ export function startCollectorSet(kbnServer, server, client, _sendBulkPayload = 
       return _sendBulkPayload(client, interval, payload);
     }
   });
-  const callCluster = callClusterFactory(server).getCallClusterInternal();
 
-  collectorSet.register(getKibanaUsageCollector(server, callCluster));
+  collectorSet.register(getKibanaUsageCollector(server));
   collectorSet.register(getOpsStatsCollector(server));
   collectorSet.register(getSettingsCollector(server));
 
