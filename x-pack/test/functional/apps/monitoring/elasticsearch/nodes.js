@@ -12,7 +12,7 @@ export default function ({ getService, getPageObjects }) {
   const nodesList = getService('monitoringElasticsearchNodes');
   const esClusterSummaryStatus = getService('monitoringElasticsearchSummaryStatus');
 
-  describe('Elasticsearch nodes listing', () => {
+  describe.skip('Elasticsearch nodes listing', () => { // Skip this because page takes too long to load. Fixed in 6.4.0+
     const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
     before(async () => {
