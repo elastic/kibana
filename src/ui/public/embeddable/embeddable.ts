@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import * as _ from 'lodash';
 import * as PropTypes from 'prop-types';
 import { ContainerState } from './types';
 
@@ -65,9 +64,7 @@ export abstract class Embeddable {
 
   // TODO: Make title and editUrl required and move out of options parameter.
   constructor(options: EmbeddableOptions = {}) {
-    this.metadata.title = _.get(options, 'metadata.title');
-    this.metadata.editUrl = _.get(options, 'metadata.editUrl');
-    this.metadata.indexPattern = _.get(options, 'metadata.indexPattern');
+    this.metadata = options.metadata || {};
 
     if (options.render) {
       this.render = options.render;
