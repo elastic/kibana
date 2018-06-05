@@ -17,7 +17,8 @@
  * under the License.
  */
 
-const ace = require('ace');
+const ace = require('brace');
+import 'brace/mode/json';
 import { addToRules } from './x_json_highlight_rules';
 
 const oop = ace.acequire('ace/lib/oop');

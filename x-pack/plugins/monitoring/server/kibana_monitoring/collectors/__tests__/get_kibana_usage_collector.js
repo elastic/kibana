@@ -30,7 +30,7 @@ describe('getKibanaUsageCollector', () => {
   });
 
   it('correctly defines usage collector.', () => {
-    const usageCollector = getKibanaUsageCollector(serverStub, callClusterStub);
+    const usageCollector = getKibanaUsageCollector(serverStub);
 
     expect(usageCollector.type).to.be('kibana');
     expect(usageCollector.fetch).to.be.a(Function);
@@ -45,8 +45,8 @@ describe('getKibanaUsageCollector', () => {
       }
     });
 
-    const usageCollector = getKibanaUsageCollector(serverStub, callClusterStub);
-    await usageCollector.fetch();
+    const usageCollector = getKibanaUsageCollector(serverStub);
+    await usageCollector.fetch(callClusterStub);
 
     sinon.assert.calledOnce(clusterStub.callWithInternalUser);
     sinon.assert.calledWithExactly(clusterStub.callWithInternalUser, 'search', sinon.match({

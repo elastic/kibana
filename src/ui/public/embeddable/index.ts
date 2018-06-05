@@ -17,7 +17,8 @@
  * under the License.
  */
 
-export { SavedObjectsRepository } from './repository';
-
-import * as errors from './errors';
-export { errors };
+export { EmbeddableFactory } from './embeddable_factory';
+export * from './embeddable';
+export {
+  EmbeddableFactoriesRegistryProvider,
+} from './embeddable_factories_registry';
