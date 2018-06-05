@@ -87,7 +87,7 @@ export class SearchEmbeddable extends Embeddable {
 
     const timeRangeSearchSource = this.searchScope.searchSource.new();
     timeRangeSearchSource.filter(() => {
-      return getTime(timeRangeSearchSource.index(), this.timeRange);
+      return getTime(this.searchScope.searchSource.index(), this.timeRange);
     });
 
     const filtersSearchSource = this.searchScope.searchSource.new();
