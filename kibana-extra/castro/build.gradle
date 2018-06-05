@@ -1,7 +1,43 @@
-task bootstrap(type: Exec) {
-  commandLine "yarn", "kbn", "bootstrap"
+plugins {
+  id "com.moowork.node" version "1.2.0"
+  id "de.undercouch.download" version "3.4.3"
 }
 
-task start(type: Exec, dependsOn: [bootstrap]) {
-  commandLine "yarn", "start"
+node {
+  version = '8.11.0'
+  yarnVersion = '1.6.0' // kibna only support 1.6.0 for now
+  download = true
 }
+
+task bootstrap(type: YarnTask) {
+  args = ['kbn', 'bootstrap']
+}
+
+task start(type: YarnTask) {
+  args = ['start']
+}
+
+task downloadKibana(type: Download) {
+  src "https://github.com/elastic/kibana/archive/${kibanaVersion}.zip" // change the commit id to advance revision
+  dest buildDir
+  overwrite false
+}
+
+// TODO: wait https://github.com/gradle/gradle/issues/1108 to simplify the code
+task setupKibana(type: Sync, dependsOn: downloadKibana) {
+  from zipTree("$buildDir/${kibanaVersion}.zip")
+  into "../../kibana"
+
+  eachFile { FileCopyDetails fcp ->
+    if (fcp.relativePath.pathString.startsWith("kibana-${kibanaVersion}/")) {
+      def segments = fcp.relativePath.segments
+      def pathsegments =segments[1..-1] as String[]
+      fcp.relativePath = new RelativePath(!fcp.file.isDirectory(), pathsegments)
+    } else {
+      fcp.exclude()
+    }
+  }
+  includeEmptyDirs = false
+}
+
+tasks.bootstrap.dependsOn(setupKibana)

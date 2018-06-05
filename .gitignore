@@ -9,3 +9,4 @@ build
 *.iws
 *.iml
 *.ipr
+kibana/
