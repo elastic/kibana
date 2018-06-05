@@ -23,14 +23,15 @@ import { processOptions, displayHelp } from './args';
 
 /**
  * Start servers
- * @param {string} configPath path to config
+ * @param {string} defaultConfigPath Path to config to use
+ *                                   if no config option is passed
  */
 export async function startServersCli(defaultConfigPath) {
   const userOptions = getopts(process.argv.slice(2)) || {};
-  const options = processOptions(userOptions, defaultConfigPath);
-  const { config, help } = options;
+  if (userOptions.help) return displayHelp();
 
-  if (help) return displayHelp();
+  const options = processOptions(userOptions, defaultConfigPath);
+  const { config } = options;
 
   try {
     await startServers(config, options);

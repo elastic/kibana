@@ -31,10 +31,10 @@ import { processOptions, displayHelp } from './args';
  */
 export async function runTestsCli(defaultConfigPaths) {
   const userOptions = getopts(process.argv.slice(2)) || {};
-  const options = processOptions(userOptions, defaultConfigPaths);
-  const { help, configs } = options;
+  if (userOptions.help) return displayHelp();
 
-  if (help) return displayHelp();
+  const options = processOptions(userOptions, defaultConfigPaths);
+  const { configs } = options;
 
   try {
     await runTests(configs, options);

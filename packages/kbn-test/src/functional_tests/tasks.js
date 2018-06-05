@@ -41,13 +41,12 @@ in another terminal session by running this command from this directory:
 
 /**
  * Run servers and tests for each config
- * @param {string[]} configPaths         Array of paths to configs
- * @param {object}   options             Optional
- * @param {Log}      options.log         Optional logger
- * @property {string}   options.installDir  Optional installation dir
- *                                          from which to run Kibana
- * @property {boolean}  options.bail        Whether to exit test run at the first failure
- * @property {string} options.esFrom        Optionally run from source instead of snapshot
+ * @param {string[]} configPaths          Array of paths to configs
+ * @param {object} options                Optional
+ * @property {Log} options.log            Optional logger
+ * @property {string} options.installDir  Optional installation dir from which to run Kibana
+ * @property {boolean} options.bail       Whether to exit test run at the first failure
+ * @property {string} options.esFrom      Optionally run from source instead of snapshot
  */
 export async function runTests(configPaths, options) {
   for (const configPath of configPaths) {
@@ -57,11 +56,10 @@ export async function runTests(configPaths, options) {
 
 /**
  * Start only servers using single config
- * @param {string}  configPath          Path to a config file
- * @param {object}  options             Optional
- * @property {Log}    options.log        Optional logger
- * @property {string} options.installDir Optional installation dir
- *                                       from which to run Kibana
+ * @param {string} configPath            Path to a config file
+ * @param {object} options               Optional
+ * @property {Log} options.log           Optional logger
+ * @property {string} options.installDir Optional installation dir from which to run Kibana
  * @property {string} options.esFrom     Optionally run from source instead of snapshot
  */
 export async function startServers(configPath, options) {

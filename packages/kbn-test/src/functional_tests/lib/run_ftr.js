@@ -23,15 +23,15 @@ export async function runFtr({
   procs,
   configPath,
   cwd = PROJECT_ROOT,
-  options,
+  options: { log, bail, grep, updateBaselines },
 }) {
   const args = [KIBANA_FTR_SCRIPT];
 
-  if (getLogFlag(options.log)) args.push(`--${getLogFlag(options.log)}`);
-  if (options.bail) args.push('--bail');
+  if (getLogFlag(log)) args.push(`--${getLogFlag(log)}`);
+  if (bail) args.push('--bail');
   if (configPath) args.push('--config', configPath);
-  if (options.grep) args.push('--grep', options.grep);
-  if (options.updateBaselines) args.push('--updateBaselines');
+  if (grep) args.push('--grep', grep);
+  if (updateBaselines) args.push('--updateBaselines');
 
   await procs.run('ftr', {
     cmd: 'node',
