@@ -10,7 +10,6 @@ import { Collector } from '../classes';
 
 /*
  * Initialize a collector for Kibana Ops Stats
- * FIXME: https://github.com/elastic/x-pack-kibana/issues/1301
  */
 export function getOpsStatsCollector(server) {
   let monitor;
@@ -27,14 +26,13 @@ export function getOpsStatsCollector(server) {
     }
   };
 
-  // This needs to be removed once the FIXME for 1301 is fixed
+  // If connection to elasticsearch is lost
+  // NOTE it is possible for the plugin status to go from red to red and trigger cleanup twice
+  server.plugins.elasticsearch.status.on('red', cleanup);
+
   // `process` is a NodeJS global, and is always available without using require/import
   process.on('SIGHUP', () => {
     this.log.info('Re-initializing Kibana Monitoring due to SIGHUP');
-    /* This timeout is a temporary stop-gap until collecting stats is not bound to even-better
-     * and collecting stats is not interfered by logging configuration reloading
-     * Related to https://github.com/elastic/x-pack-kibana/issues/1301
-     */
     setTimeout(() => {
       cleanup();
       init();
@@ -45,8 +43,6 @@ export function getOpsStatsCollector(server) {
   return new Collector(server, {
     type: KIBANA_STATS_TYPE,
     init,
-    fetch: buffer.flush,
-    fetchAfterInit: true,
-    cleanup
+    fetch: buffer.flush
   });
 }

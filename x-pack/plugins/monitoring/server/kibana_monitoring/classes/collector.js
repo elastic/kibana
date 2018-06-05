@@ -12,15 +12,11 @@ export class Collector {
    * @param {String} properties.type - property name as the key for the data
    * @param {Function} properties.init (optional) - initialization function
    * @param {Function} properties.fetch - function to query data
-   * @param {Function} properties.cleanup (optional) - cleanup function -- TODO remove this, handle it in the collector itself
-   * @param {Boolean} properties.fetchAfterInit (optional) - if collector should fetch immediately after init -- TODO remove this, not useful
    */
-  constructor(server, { type, init, fetch, cleanup, fetchAfterInit }) {
+  constructor(server, { type, init, fetch }) {
     this.type = type;
     this.init = init;
     this.fetch = fetch;
-    this.cleanup = cleanup;
-    this.fetchAfterInit = fetchAfterInit;
 
     this.log = getCollectorLogger(server);
   }

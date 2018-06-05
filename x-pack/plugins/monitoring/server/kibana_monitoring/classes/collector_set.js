@@ -84,18 +84,4 @@ export class CollectorSet {
       };
     }, {});
   }
-
-  cleanup() {
-    this._log.info(`Stopping all stats collectors`);
-
-    // stop fetching
-    clearInterval(this._timer);
-
-    this._collectors.forEach(collector => {
-      if (collector.cleanup) {
-        this._log.debug(`Running ${collector.type} cleanup`);
-        collector.cleanup();
-      }
-    });
-  }
 }
