@@ -32,7 +32,7 @@ import _ from 'lodash';
 import { VisTypesRegistryProvider } from '../registry/vis_types';
 import { AggConfigs } from './agg_configs';
 import { PersistedState } from '../persisted_state';
-import { UtilsBrushEventProvider } from '../utils/brush_event';
+import { onBrushEvent } from '../utils/brush_event';
 import { FilterBarQueryFilterProvider } from '../filter_bar/query_filter';
 import { FilterBarClickHandlerProvider } from '../filter_bar/filter_bar_click_handler';
 import { updateVisualizationConfig } from './vis_update';
@@ -43,7 +43,6 @@ import { timefilter } from 'ui/timefilter';
 
 export function VisProvider(Private, Promise, indexPatterns, getAppState) {
   const visTypes = Private(VisTypesRegistryProvider);
-  const brushEvent = Private(UtilsBrushEventProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
   const SearchSource = Private(SearchSourceProvider);
@@ -80,8 +79,7 @@ export function VisProvider(Private, Promise, indexPatterns, getAppState) {
             const appState = getAppState();
             filterBarClickHandler(appState)(event);
           }, brush: (event) => {
-            const appState = getAppState();
-            brushEvent(appState)(event);
+            onBrushEvent(event, getAppState());
           }
         },
         createInheritedSearchSource: (parentSearchSource) => {
