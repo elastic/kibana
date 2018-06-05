@@ -45,6 +45,11 @@ function getKibanaCmd(installDir) {
   return KIBANA_EXEC;
 }
 
+/* When installDir is passed, we run from a built version of Kibana,
+ * which uses different command line arguments. If installDir is not
+ * passed, we run from source code. We also allow passing in extra
+ * Kibana server options, so we tack those on here.
+ */
 function collectCliArgs(config, { installDir, extraKbnOpts }) {
   const buildArgs = config.get('kbnTestServer.buildArgs') || [];
   const sourceArgs = config.get('kbnTestServer.sourceArgs') || [];
@@ -55,7 +60,7 @@ function collectCliArgs(config, { installDir, extraKbnOpts }) {
     args => (installDir ? args.filter(a => a !== '--oss') : args),
     args => {
       return installDir
-        ? args.concat(buildArgs)
+        ? [...args, ...buildArgs]
         : [KIBANA_EXEC_PATH, ...args, ...sourceArgs];
     },
     args => args.concat(extraKbnOpts || [])
