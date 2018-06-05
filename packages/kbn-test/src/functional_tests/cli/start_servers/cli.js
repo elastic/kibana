@@ -27,17 +27,16 @@ import { processOptions, displayHelp } from './args';
  *                                   if no config option is passed
  */
 export async function startServersCli(defaultConfigPath) {
-  const userOptions = getopts(process.argv.slice(2)) || {};
-  if (userOptions.help) return displayHelp();
-
-  const options = processOptions(userOptions, defaultConfigPath);
-  const { config } = options;
-
   try {
+    const userOptions = getopts(process.argv.slice(2)) || {};
+    if (userOptions.help) return displayHelp();
+
+    const options = processOptions(userOptions, defaultConfigPath);
+    const { config } = options;
     await startServers(config, options);
   } catch (err) {
-    options.log.error('FATAL ERROR');
-    options.log.error(err);
+    console.error('FATAL ERROR');
+    console.error(err);
     process.exit(1);
   }
 }

@@ -76,16 +76,13 @@ export function displayHelp() {
 }
 
 export function processOptions(userOptions, defaultConfigPath) {
-  // Don't validate if help passed
-  if (userOptions.help) return userOptions;
-
   validateOptions(userOptions);
 
   const config = userOptions.config || defaultConfigPath;
 
   if (!config) {
     console.log(chalk.red(`functional_tests_server: config is required`));
-    process.exit(9);
+    throw new Error();
   }
 
   const log = createToolingLog(pickLevelFromFlags(userOptions));
@@ -108,7 +105,7 @@ function validateOptions(userOptions) {
       console.log(
         chalk.red(`functional_tests_server: invalid option [${key}]`)
       );
-      process.exit(9);
+      throw new Error();
     }
 
     if (
@@ -124,7 +121,7 @@ function validateOptions(userOptions) {
           `functional_tests_server: invalid argument [${val}] to option [${key}]`
         )
       );
-      process.exit(9);
+      throw new Error();
     }
   });
 }

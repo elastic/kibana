@@ -85,9 +85,6 @@ export function displayHelp() {
 }
 
 export function processOptions(userOptions, defaultConfigPaths) {
-  // Don't validate if help passed
-  if (userOptions.help) return userOptions;
-
   validateOptions(userOptions);
 
   let configs;
@@ -96,7 +93,7 @@ export function processOptions(userOptions, defaultConfigPaths) {
   } else {
     if (!defaultConfigPaths || defaultConfigPaths.length === 0) {
       console.log(chalk.red(`functional_tests: config is required`));
-      process.exit(9);
+      throw new Error();
     } else {
       configs = defaultConfigPaths;
     }
@@ -120,7 +117,7 @@ function validateOptions(userOptions) {
     // Validate flags passed
     if (options[key] === undefined) {
       console.log(chalk.red(`functional_tests: invalid option [${key}]`));
-      process.exit(9);
+      throw new Error();
     }
 
     if (
@@ -136,7 +133,7 @@ function validateOptions(userOptions) {
           `functional_tests: invalid argument [${val}] to option [${key}]`
         )
       );
-      process.exit(9);
+      throw new Error();
     }
   });
 }

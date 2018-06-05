@@ -30,17 +30,16 @@ import { processOptions, displayHelp } from './args';
  *                                       if no config option is passed
  */
 export async function runTestsCli(defaultConfigPaths) {
-  const userOptions = getopts(process.argv.slice(2)) || {};
-  if (userOptions.help) return displayHelp();
-
-  const options = processOptions(userOptions, defaultConfigPaths);
-  const { configs } = options;
-
   try {
+    const userOptions = getopts(process.argv.slice(2)) || {};
+    if (userOptions.help) return displayHelp();
+
+    const options = processOptions(userOptions, defaultConfigPaths);
+    const { configs } = options;
     await runTests(configs, options);
   } catch (err) {
-    options.log.error('FATAL ERROR');
-    options.log.error(err);
+    console.error('FATAL ERROR');
+    console.error(err);
     process.exit(1);
   }
 }
