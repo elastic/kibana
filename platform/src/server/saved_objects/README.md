@@ -154,7 +154,7 @@ It's clear to me that we need some kind of object that stores only the details f
 
 We can use this context like so. Register an endpoint along with the handler for that endpoint. Define the handler to explicitly pass the context to the saved object client factory (contained within the saved object service). The handler then provides the saved object client scoped to the right context.
 
-For example, define a plugin that has only dependencies on Kibana core, and no other plugin dependencies.
+For example, define a plugin that has only dependencies on Kibana core, and no other plugin dependencies. (Very simplified code example)
 
 ```js
 // baz/index.js
@@ -164,20 +164,13 @@ import { registerEndpoints } from './register_endpoints';
 export const plugin: KibanaPluginConfig<{}> = {
   plugin: kibana => {
     // Grab components you need from Kibana core
-    const { elasticsearch, logger, http } = kibana;
-    const config$ = kibana.kibana.config$;
-
-    const log = logger.get();
-
-    log.info('create Baz plugin');
+    const { http } = kibana;
 
     // Register a router upon which to attach handlers
     const router = http.createAndRegisterRouter('/api/baz');
 
-    log.info('register Baz endpoints');
-
     // Start defining handlers
-    registerEndpoints(router, logger, elasticsearch.service, config$);
+    registerEndpoints(router);
   },
 };
 
@@ -186,129 +179,97 @@ export const plugin: KibanaPluginConfig<{}> = {
 Registering an endpoint lets you define what to expect from the request, validating those parts of the request, and how to handle the request. The handler can define a Saved Object Client
 
 ```js
-// baz/register_endpoints.js
+// baz/api.js
 export function registerEndpoints(
-  router:        Router,
-  logger:        LoggerFactory,
-  elasticsearch: ElasticsearchService,
-  config$:       Observable<KibanaConfig>
+  router: Router
 ) {
-  const log = logger.get('routes');
-
-  // Example of what happens when an endpoint fails on validation
-  router.get(
-    {
-      path: '/fail',
-      validate: false,
-    },
-    async (req, res) => {
-      log.info(`GET should fail`);
-
-      return res.badRequest(new Error('nope'));
-    }
-  );
-
-  // Example of an endpoint that validates
   router.get(
     {
       path: '/:type',
-      // schema lib can be injected
       validate: schema => ({
-        params: schema.object({
-          type: schema.string(),
-        }),
-        query: schema.object({
-          page: schema.maybe(
-            schema.number({
-              min: 1,
-            })
-          ),
-          per_page: schema.maybe(
-            schema.number({
-              min: 1,
-            })
-          ),
-        }),
+        ...
       }),
     },
-    // handler is just like normal middleware
-    async (req, res) => {
-      log.info('handle Baz route');
+    async (req, res, coreServices) => {
+      // Only what's validated is offered on request object
+      const { ... } = req;
 
-      // the only things available on request because only what's validated is offered
-      const { params, query } = req;
+      // Use some services provided
+      const {
+        esService: elasticsearch,
+        soService: savedObjects,
+      } = coreServices;
 
-      log.info('create Baz Service instance');
+      // Use a Data Client scoped to a request, given its headers
+      const esClient = await esService.getScopedDataClient(req.headers);
 
-      // Example of using a Data Client scoped to a request, given its headers
-      const client = await elasticsearch.getScopedDataClient(req.headers);
-
-      // Initialize a service that this plugin needs
-      // using the Elasticsearch client that access the right cluster,
-      // and that is scoped correctly (to the user)
-      const bazService = new BazService(client, config$);
-
-      log.info('use Baz Service instance to hit elasticsearch with the right cluster');
-
-      // bazService defines find() method that calls client.call(`endpoint`, params)
-      // Behind the scenes, the saved object client executes the call with OLS
-      const items = await bazService.find({
-        type: params.type,
-        page: query.page,
-        perPage: query.per_page,
+      // Use a Saved Object Client scoped to a context
+      const soClient = await soService.getScopedClient({
+        user:  getUser(req.headers),
+        space: getSpace(req.url),
       });
 
-      return res.ok(items);
-    }
+      // Initialize a service that uses some clients
+      const bazService = new BazService(esClient, soClient);
+
+      ...
+
   );
-}
-```
-
-BazService is just a backend service that the plugin defines. It can use the saved objects client to do stuff.
-
-```js
-// baz/BazService.js
-export class BazService {
-  // BazService has private members ScopedDataClient and config
-  constructor(
-    private readonly client: ScopedDataClient,
-    private readonly kibanaConfig$: Observable<KibanaConfig>
-  ) {}
-
-  // Define a simple find method
-  async find(options: { type: string; page?: number; perPage?: number }) {
-    const { page = 1, perPage = 20, type } = options;
-
-    const [kibanaIndex] = await latestValues(
-      k$(this.kibanaConfig$)(map(config => config.index))
-    );
-
-    // Use the ScopedDataClient to make the request
-    const response = await this.client.call('endpoint', {
-      index: kibanaIndex,
-      type,
-      size: perPage,
-      from: perPage * (page - 1),
-    });
-
-    const data = response.hits.hits.map((hit: any) => ({
-      id: hit._id,
-      type: hit._type,
-      version: hit._version,
-      attributes: hit._source,
-    }));
-
-    return {
-      data,
-      total: response.hits.total,
-      per_page: perPage,
-      page: page,
-    };
-  }
 }
 ```
 
 To see an implementation of ElasticsearchService and the different ways we can provide Elasticsearch via an Admin or Data Client, peruse [this directory](https://github.com/elastic/kibana/tree/new-platform/platform/src/server/elasticsearch).
+
+One way the Http Service can know what to provide in its `coreServices` collection in every handler, is by allowing entities (plugins, services) to register their services with the Http Service.
+
+```js
+// saved_objects/index.js
+import { KibanaPluginConfig } from '@kbn/types';
+
+export const plugin: KibanaPluginConfig<{}> = {
+  plugin: kibana => {
+    const { http } = kibana;
+
+    http.registerService('savedObjects', {
+      getClient: () => {
+        // for OSS Kibana, without Security or Spaces
+      },
+      getScopedClient: (context) => {
+        const { user, space } = context;
+        ...
+      }
+    });
+  },
+};
+```
+
+```js
+// elasticsearch/index.js
+...
+    http.registerService('elasticsearch', {
+      getUnscopedClient: () => {
+        // what is this for?
+      },
+      getScopedDataClient()
+        // for most calls
+        // uses request.headers.authorization
+    });
+```
+
+Inside of the Security plugin we can replace the core services by registering new ones.
+
+```js
+// security/index.js
+...
+  // Elasticsearch already has a way to get a scoped data client,
+  // so Security can just return that.
+  http.registerService('elasticsearch', (request) => {
+    return {
+      getDataClient: elasticsearch.getScopedDataClient,
+      //getAdminClient unchanged
+    };
+  });
+```
 
 Court's draft
 ---------
@@ -331,7 +292,9 @@ How would a tag plugin work? It could give me saved objects and invoke a functio
 A lot of features depend on how saved objects service is implemented, but OLS cannot be blocked on this.
 Is there a way I could write a shell of Saved Objects Service that lets migrations be exposed before the core of saved objects system is written? I don't know. It will have dependencies on the internals.
 
+
 Develop the core internal service and how it gets plugged. The migrations client just fits into that. What the migration client exposes is probably totally separate from what the core service needs to care about. But again, what it uses internally will matter in the design of both the core service and the migrations client.
+
 
 OSS vs X-Pack
 ---------
