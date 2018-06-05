@@ -11,12 +11,12 @@ import { format as formatUrl } from 'url';
 
 import {
   SecurityPageProvider,
-  ReportingPageProvider,
   MonitoringPageProvider,
   LogstashPageProvider,
   GraphPageProvider,
   GrokDebuggerPageProvider,
   WatcherPageProvider,
+  ReportingPageProvider,
 } from './page_objects';
 
 import {
@@ -92,7 +92,6 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/watcher'),
       resolve(__dirname, './apps/dashboard_mode'),
       resolve(__dirname, './apps/security'),
-      resolve(__dirname, './apps/reporting'),
       resolve(__dirname, './apps/logstash'),
       resolve(__dirname, './apps/grok_debugger'),
     ],
@@ -136,12 +135,12 @@ export default async function ({ readConfigFile }) {
     pageObjects: {
       ...kibanaFunctionalConfig.get('pageObjects'),
       security: SecurityPageProvider,
-      reporting: ReportingPageProvider,
       monitoring: MonitoringPageProvider,
       logstash: LogstashPageProvider,
       graph: GraphPageProvider,
       grokDebugger: GrokDebuggerPageProvider,
       watcher: WatcherPageProvider,
+      reporting: ReportingPageProvider,
     },
 
     servers,
