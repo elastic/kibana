@@ -17,13 +17,13 @@
  * under the License.
  */
 
+// @ts-ignore: implicit any for JS file
 import { uiRegistry } from '../registry/_registry';
 
 /**
  * Registry of functions (EmbeddableFactoryProviders) which return an EmbeddableFactory.
  */
 export const EmbeddableFactoriesRegistryProvider = uiRegistry({
+  index: ['name'],
   name: 'embeddableFactories',
-  index: ['name']
 });
-

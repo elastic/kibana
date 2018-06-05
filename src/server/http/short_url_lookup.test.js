@@ -19,7 +19,7 @@
 
 import sinon from 'sinon';
 import { shortUrlLookupProvider } from './short_url_lookup';
-import { SavedObjectsClient } from '../saved_objects/client';
+import { SavedObjectsClient } from '../saved_objects';
 
 describe('shortUrlLookupProvider', () => {
   const ID = 'bf00ad16941fc51420f91a93428b27a0';
