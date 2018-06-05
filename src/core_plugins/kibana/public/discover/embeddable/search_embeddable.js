@@ -24,22 +24,19 @@ import * as columnActions from 'ui/doc_table/actions/columns';
 
 export class SearchEmbeddable extends Embeddable {
   constructor({ onEmbeddableStateChanged, savedSearch, editUrl, loader, $rootScope, $compile }) {
-    super();
+    super({
+      metadata: {
+        title: savedSearch.title,
+        editUrl,
+        indexPattern: savedSearch.searchSource.get('index')
+      }
+    });
     this.onEmbeddableStateChanged = onEmbeddableStateChanged;
     this.savedSearch = savedSearch;
     this.loader = loader;
     this.$rootScope = $rootScope;
     this.$compile = $compile;
     this.customization = {};
-
-    /**
-     * @type {EmbeddableMetadata}
-     */
-    this.metadata = {
-      title: savedSearch.title,
-      editUrl,
-      indexPattern: this.savedSearch.searchSource.get('index'),
-    };
   }
 
   emitEmbeddableStateChange(embeddableState) {

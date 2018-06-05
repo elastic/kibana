@@ -17,10 +17,9 @@
  * under the License.
  */
 
+import * as _ from 'lodash';
+import * as PropTypes from 'prop-types';
 import { ContainerState } from './types';
-
-// @ts-ignore: implicit any for JS file
-import { PropTypes } from 'prop-types';
 
 // TODO: we'll be able to get rid of this shape once all of dashboard is typescriptified too.
 export const embeddableShape = PropTypes.shape({
@@ -30,45 +29,45 @@ export const embeddableShape = PropTypes.shape({
   render: PropTypes.func.isRequired,
 });
 
+interface EmbeddableMetadata {
+  // TODO: change to an array, embeddables should be able to specify multiple index patterns they use. Also
+  // see https://github.com/elastic/kibana/issues/19408 - this needs to be generalized to support embeddables that
+  // use dynamic index patterns (vega, TSVB) instead of saved object index patterns (most other visualizations).
+  /**
+   * Should specify any index pattern the embeddable uses. This will be used by the container to list out
+   * available fields to filter on.
+   */
+  indexPattern?: object;
+
+  /**
+   * The title, or name, of the embeddable.
+   */
+  title?: string;
+
+  /**
+   * A url to direct the user for managing the embeddable instance. We may want to eventually make this optional
+   * for non-instanced panels that can only be created and deleted but not edited. We also wish to eventually support
+   * in-place editing on the dashboard itself, so another option could be to supply an element, or fly out panel, to
+   * offer for editing directly on the dashboard.
+   */
+  editUrl?: string;
+}
+
+interface EmbeddableOptions {
+  metadata?: EmbeddableMetadata;
+  render?: (domNode: HTMLElement, containerState: ContainerState) => void;
+  destroy?: () => void;
+  onContainerStateChanged?: (containerState: ContainerState) => void;
+}
+
 export abstract class Embeddable {
-  public readonly metadata: {
-    // TODO: change to an array, embeddables should be able to specify multiple index patterns they use. Also
-    // see https://github.com/elastic/kibana/issues/19408 - this needs to be generalized to support embeddables that
-    // use dynamic index patterns (vega, TSVB) instead of saved object index patterns (most other visualizations).
-    /**
-     * Should specify any index pattern the embeddable uses. This will be used by the container to list out
-     * available fields to filter on.
-     */
-    indexPattern?: object;
-
-    /**
-     * The title, or name, of the embeddable.
-     */
-    title?: string;
-
-    /**
-     * A url to direct the user for managing the embeddable instance. We may want to eventually make this optional
-     * for non-instanced panels that can only be created and deleted but not edited. We also wish to eventually support
-     * in-place editing on the dashboard itself, so another option could be to supply an element, or fly out panel, to
-     * offer for editing directly on the dashboard.
-     */
-    editUrl?: string;
-  } = {};
+  public readonly metadata: EmbeddableMetadata = {};
 
   // TODO: Make title and editUrl required and move out of options parameter.
-  constructor(
-    options: {
-      title?: string;
-      editUrl?: string;
-      indexPattern?: object;
-      render?: (domNode: object, containerState: ContainerState) => void;
-      destroy?: () => void;
-      onContainerStateChanged?: (containerState: ContainerState) => void;
-    } = {}
-  ) {
-    this.metadata.title = options.title;
-    this.metadata.editUrl = options.editUrl;
-    this.metadata.indexPattern = options.indexPattern;
+  constructor(options: EmbeddableOptions = {}) {
+    this.metadata.title = _.get(options, 'metadata.title');
+    this.metadata.editUrl = _.get(options, 'metadata.editUrl');
+    this.metadata.indexPattern = _.get(options, 'metadata.indexPattern');
 
     if (options.render) {
       this.render = options.render;

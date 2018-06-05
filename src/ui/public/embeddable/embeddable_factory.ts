@@ -26,7 +26,7 @@ import { EmbeddableState } from './types';
 export abstract class EmbeddableFactory {
   /**
    *
-   * @param {Object} containerMetadata. Currently just passing in panelState but it's more than we need, so we should
+   * @param {{ id: string }} containerMetadata. Currently just passing in panelState but it's more than we need, so we should
    * decouple this to only include data given to us from the embeddable when it's added to the dashboard. Generally
    * will be just the object id, but could be anything depending on the plugin.
    * @param {onEmbeddableStateChanged} onEmbeddableStateChanged - embeddable should call this function with updated
@@ -34,7 +34,7 @@ export abstract class EmbeddableFactory {
    * @return {Promise.<Embeddable>}
    */
   public abstract create(
-    containerMetadata: object,
+    containerMetadata: { id: string },
     onEmbeddableStateChanged: (embeddableStateChanges: EmbeddableState) => void
   ): Promise<Embeddable>;
 }
