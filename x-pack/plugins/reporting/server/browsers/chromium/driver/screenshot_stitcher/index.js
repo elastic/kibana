@@ -16,7 +16,7 @@ const scaleRect = (rect, scale) => {
   };
 };
 
-export async function screenshotStitcher(outputClip, zoom, max, captureScreenshotFn) {
+export async function screenshotStitcher(outputClip, zoom, max, captureScreenshotFn, logger) {
   // We have to divide the max by the zoom because we want to be limiting the resolution
   // of the output screenshots, which is implicitly multiplied by the zoom, but we don't
   // want the zoom to affect the clipping rects that we use
@@ -44,6 +44,6 @@ export async function screenshotStitcher(outputClip, zoom, max, captureScreensho
 
   return screenshotPngDimensions$
     .toArray()
-    .switchMap(screenshots => $combine(screenshots, scaleRect(outputClip, zoom)))
+    .switchMap(screenshots => $combine(screenshots, scaleRect(outputClip, zoom), logger))
     .toPromise();
 }
