@@ -10,3 +10,4 @@ build
 *.iml
 *.ipr
 kibana/
+data/

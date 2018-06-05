@@ -40,4 +40,4 @@ task setupKibana(type: Sync, dependsOn: downloadKibana) {
   includeEmptyDirs = false
 }
 
-tasks.bootstrap.dependsOn(setupKibana)
+// tasks.bootstrap.dependsOn(setupKibana)
