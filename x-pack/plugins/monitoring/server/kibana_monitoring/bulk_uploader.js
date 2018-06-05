@@ -46,7 +46,7 @@ export class BulkUploader {
   }
 
   async _fetchAndUpload(collectorSet) {
-    const data = await collectorSet.bulkFetch(this._callClusterWithInternalUser); // TODO FIXME
+    const data = await collectorSet.bulkFetch(this._callClusterWithInternalUser);
     const usableData = data.filter(d => Boolean(d) && !isEmpty(d.result));
     const payload = usableData.map(({ result, type }) => {
       if (!isEmpty(result)) {
@@ -60,7 +60,7 @@ export class BulkUploader {
         this._log.debug(`Uploading bulk stats payload to the local cluster`);
         this._onPayload(flatten(combinedData));
       } catch (err) {
-        this._log.warn(err);
+        this._log.warn(err.stack);
         this._log.warn(
           `Unable to bulk upload the stats payload to the local cluster`
         );

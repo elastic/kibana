@@ -9,11 +9,18 @@ import { getCollectorLogger } from '../lib';
 export class Collector {
   /*
    * @param {Object} server - server object
-   * @param {String} properties.type - property name as the key for the data
-   * @param {Function} properties.init (optional) - initialization function
-   * @param {Function} properties.fetch - function to query data
+   * @param {String} options.type - property name as the key for the data
+   * @param {Function} options.init (optional) - initialization function
+   * @param {Function} options.fetch - function to query data
    */
-  constructor(server, { type, init, fetch }) {
+  constructor(server, { type, init, fetch } = {}) {
+    if (type === undefined) {
+      throw new Error('Collector must be instantiated with a options.type string property');
+    }
+    if (typeof fetch !== 'function') {
+      throw new Error('Collector must be instantiated with a options.fetch function property');
+    }
+
     this.type = type;
     this.init = init;
     this.fetch = fetch;
