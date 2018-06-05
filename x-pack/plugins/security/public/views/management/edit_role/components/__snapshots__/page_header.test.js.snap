@@ -5,7 +5,9 @@ exports[`it renders without crashing 1`] = `
   <EuiHeaderSection
     side="left"
   >
-    <EuiHeaderBreadcrumbs />
+    <EuiHeaderBreadcrumbs
+      breadcrumbs={Array []}
+    />
   </EuiHeaderSection>
 </EuiHeader>
 `;

@@ -53,7 +53,7 @@ export class IndexPrivileges extends Component {
         key={idx}
         {...props}
         validator={this.props.validator}
-        allowDelete={!props.isReservedRole && !(this.isPlaceholderPrivilege(indexPrivilege) && indices.length === 1)}
+        allowDelete={!props.isReservedRole}
         indexPrivilege={indexPrivilege}
         availableFields={this.state.availableFields[indexPrivilege.names.join(',')]}
         onChange={this.onIndexPrivilegeChange(idx)}
@@ -117,6 +117,11 @@ export class IndexPrivileges extends Component {
   };
 
   loadAvailableFields(indices) {
+    // Reserved roles cannot be edited, and therefore do not need to fetch available fields.
+    if (isReservedRole(this.props.role)) {
+      return;
+    }
+
     const patterns = indices.map(index => index.names.join(','));
 
     const cachedPatterns = Object.keys(this.state.availableFields);

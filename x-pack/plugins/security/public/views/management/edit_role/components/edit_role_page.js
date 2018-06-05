@@ -80,11 +80,11 @@ export class EditRolePage extends Component {
   getFormTitle = () => {
     let titleText;
     if (isReservedRole(this.props.role)) {
-      titleText = 'Reserved role';
+      titleText = 'Viewing role';
     } else if (this.editingExistingRole()) {
       titleText = 'Edit role';
     } else {
-      titleText = 'New role';
+      titleText = 'Create role';
     }
 
     return (

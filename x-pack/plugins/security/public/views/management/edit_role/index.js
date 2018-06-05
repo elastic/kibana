@@ -57,19 +57,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
         }));
       }
 
-      return role.then(roleToEdit => {
-        if (roleToEdit.indices.length === 0) {
-          roleToEdit.indices.push({
-            names: [],
-            privileges: [],
-            field_security: {
-              grant: ['*']
-            }
-          });
-        }
-        return roleToEdit;
-      });
-
+      return role.then(res => res.toJSON());
     },
     kibanaApplicationPrivilege(ApplicationPrivilege, kbnUrl, Promise, Private) {
       return ApplicationPrivilege.query().$promise
@@ -108,6 +96,8 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
       indexPatterns,
     } = $route.current.locals;
 
+    const routeBreadcrumbs = routes.getBreadcrumbs();
+
     render(<EditRolePage
       runAsUsers={users}
       role={role}
@@ -116,7 +106,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
       rbacEnabled={rbacEnabled}
       rbacApplication={rbacApplication}
       httpClient={$http}
-      breadcrumbs={routes.getBreadcrumbs()}
+      breadcrumbs={transformBreadcrumbs(routeBreadcrumbs)}
       allowDocumentLevelSecurity={allowDocumentLevelSecurity}
       allowFieldLevelSecurity={allowFieldLevelSecurity}
       notifier={Notifier}
@@ -128,3 +118,17 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     });
   }
 });
+
+function transformBreadcrumbs(routeBreadcrumbs) {
+  const indexOfEdit = routeBreadcrumbs.findIndex(b => b.id === 'edit');
+
+  const hasEntryAfterEdit = indexOfEdit >= 0 && indexOfEdit < (routeBreadcrumbs.length - 1);
+
+  if (hasEntryAfterEdit) {
+    // The entry after 'edit' is the name of the role being edited (if any). We don't want to use the "humanized" version of the role name here
+    const roleName = routeBreadcrumbs[indexOfEdit + 1];
+    roleName.display = roleName.id;
+  }
+
+  return routeBreadcrumbs.filter(b => b.id !== 'edit');
+}

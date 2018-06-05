@@ -8,14 +8,17 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { isReservedRole } from '../../../../../lib/role';
 import { getKibanaPrivileges } from '../../lib/get_application_privileges';
-import { togglePrivilege } from '../../lib/set_application_privileges';
+import { setApplicationPrivileges } from '../../lib/set_application_privileges';
 
 import { CollapsiblePanel } from '../collapsible_panel';
 import {
-  EuiCheckboxGroup,
+  EuiSelect,
   EuiDescribedFormGroup,
   EuiFormRow,
 } from '@elastic/eui';
+
+const noPrivilegeValue = '-none-';
+
 export class KibanaPrivileges extends Component {
   static propTypes = {
     role: PropTypes.object.isRequired,
@@ -47,17 +50,15 @@ export class KibanaPrivileges extends Component {
 
     const kibanaPrivileges = getKibanaPrivileges(kibanaAppPrivileges, role, rbacApplication);
 
-    const checkboxes = Object.keys(kibanaPrivileges).map(p => ({
-      id: this.privilegeToId(p),
-      label: p
-    }));
+    const options = [
+      { value: noPrivilegeValue, text: 'none' },
+      ...Object.keys(kibanaPrivileges).map(p => ({
+        value: p,
+        text: p
+      }))
+    ];
 
-    const selectionMap = Object.keys(kibanaPrivileges).reduce((acc, p) => {
-      return {
-        ...acc,
-        [this.privilegeToId(p)]: kibanaPrivileges[p]
-      };
-    }, {});
+    const value = Object.keys(kibanaPrivileges).find(p => kibanaPrivileges[p]) || noPrivilegeValue;
 
     return (
       <EuiDescribedFormGroup
@@ -65,9 +66,9 @@ export class KibanaPrivileges extends Component {
         description={<p>Manage the actions this role can perform within Kibana.</p>}
       >
         <EuiFormRow hasEmptyLabelSpace>
-          <EuiCheckboxGroup
-            options={checkboxes}
-            idToSelectedMap={selectionMap}
+          <EuiSelect
+            options={options}
+            value={value}
             onChange={this.onKibanaPrivilegesChange}
             disabled={isReservedRole(role)}
           />
@@ -76,13 +77,24 @@ export class KibanaPrivileges extends Component {
     );
   }
 
-  onKibanaPrivilegesChange = (privilege) => {
+  onKibanaPrivilegesChange = (e) => {
     const role = {
       ...this.props.role,
       applications: [...this.props.role.applications]
     };
 
-    togglePrivilege(role, this.props.rbacApplication, this.idToPrivilege(privilege));
+    const privilege = e.target.value;
+
+    if (privilege === noPrivilegeValue) {
+      // unsetting all privileges -- only necessary until RBAC Phase 3
+      const noPrivileges = {};
+      setApplicationPrivileges(noPrivileges, role, this.props.rbacApplication);
+    } else {
+      const newPrivileges = {
+        [privilege]: true
+      };
+      setApplicationPrivileges(newPrivileges, role, this.props.rbacApplication);
+    }
 
     this.props.onChange(role);
   }
