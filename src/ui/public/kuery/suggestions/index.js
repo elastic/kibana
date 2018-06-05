@@ -26,9 +26,9 @@ import { getSuggestionsProvider as conjunction } from './conjunction';
 
 const cursorSymbol = '@kuery-cursor@';
 
-export function getSuggestionsProvider({ config, indexPatterns }) {
+export function getSuggestionsProvider({ config, indexPatterns, boolFilter }) {
   const getSuggestionsByType = mapValues({ field, value, operator, conjunction }, provider => {
-    return provider({ config, indexPatterns });
+    return provider({ config, indexPatterns, boolFilter });
   });
 
   return function getSuggestions({ query, selectionStart, selectionEnd }) {
