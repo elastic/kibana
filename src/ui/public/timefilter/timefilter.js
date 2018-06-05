@@ -17,20 +17,23 @@
  * under the License.
  */
 
+import qs from 'querystring';
 import { calculateBounds, getTime } from './get_time';
 import { diffTimeFactory } from './lib/diff_time';
 import { diffIntervalFactory } from './lib/diff_interval';
 import { SimpleEmitter } from 'ui/utils/simple_emitter';
+import chrome from 'ui/chrome';
 
 class Timefilter extends SimpleEmitter {
   constructor() {
     super();
+    const self = this;
     this.diffTime = diffTimeFactory(self);
     this.diffInterval = diffIntervalFactory(self);
     this.isTimeRangeSelectorEnabled = false;
     this.isAutoRefreshSelectorEnabled = false;
-    this._time = uiSettings.get('timepicker:timeDefaults');
-    this._refreshInterval = uiSettings.get('timepicker:refreshIntervalDefaults');
+    this._time = chrome.getUiSettingsClient().get('timepicker:timeDefaults');
+    this._refreshInterval = chrome.getUiSettingsClient().get('timepicker:refreshIntervalDefaults');
   }
 
   getTime = () => {
@@ -38,19 +41,19 @@ class Timefilter extends SimpleEmitter {
   }
 
   /**
-   * Updates timeFilter time.
+   * Updates timefilter time.
    * @param {Object} time
    * @param {string|moment} from
    * @param {string|moment} to
    * @param {string} mode
    */
   setTime = (time) => {
-    this._time = Objects.assign(this._time, time);
-    diffTime();
+    this._time = Object.assign(this._time, time);
+    this.diffTime();
   }
 
   getRefreshInterval = () => {
-    return this._time;
+    return this._refreshInterval;
   }
 
   /**
@@ -60,8 +63,8 @@ class Timefilter extends SimpleEmitter {
    * @param {boolean} pause
    */
   setRefreshInterval = (refreshInterval) => {
-    this._refreshInterval = Objects.assign(this._refreshInterval, refreshInterval);
-    diffInterval();
+    this._refreshInterval = Object.assign(this._refreshInterval, refreshInterval);
+    this.diffInterval();
   }
 
   toggleRefresh = () => {
@@ -72,12 +75,12 @@ class Timefilter extends SimpleEmitter {
     return getTime(indexPattern, timeRange ? timeRange : this.time, this.getForceNow());
   }
 
-  getBounds = () {
+  getBounds = () => {
     return this.calculateBounds(this._time);
   }
 
   getForceNow = () => {
-    const query = $location.search().forceNow;
+    const query = qs.parse(window.location.search).forceNow;
     if (!query) {
       return;
     }

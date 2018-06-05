@@ -36,6 +36,9 @@ describe('Refresh interval diff watcher', () => {
         pause: false,
         value: 0
       },
+      getRefreshInterval: function () {
+        return this.refreshInterval;
+      },
       emit: (eventType) => {
         if (eventType === 'refreshIntervalUpdate') update();
         if (eventType === 'fetch') fetch();

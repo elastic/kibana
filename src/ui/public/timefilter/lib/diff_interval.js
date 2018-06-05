@@ -21,16 +21,16 @@ import _ from 'lodash';
 import { areTimePickerValsDifferent } from './diff_time_picker_vals';
 
 export function diffIntervalFactory(self) {
-  let oldRefreshInterval = _.clone(self.refreshInterval);
+  let oldRefreshInterval = _.clone(self.getRefreshInterval());
 
   return function () {
-    if (areTimePickerValsDifferent(self.refreshInterval, oldRefreshInterval)) {
+    if (areTimePickerValsDifferent(self.getRefreshInterval(), oldRefreshInterval)) {
       self.emit('refreshIntervalUpdate');
-      if (!self.refreshInterval.pause && self.refreshInterval.value !== 0) {
+      if (!self.getRefreshInterval().pause && self.getRefreshInterval().value !== 0) {
         self.emit('fetch');
       }
     }
 
-    oldRefreshInterval = _.clone(self.refreshInterval);
+    oldRefreshInterval = _.clone(self.getRefreshInterval());
   };
 }

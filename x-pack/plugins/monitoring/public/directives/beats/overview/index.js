@@ -26,6 +26,7 @@ uiModule.directive('monitoringBeatsOverview', () => {
             from: moment(xaxis.from),
             to: moment(xaxis.to),
             mode: 'absolute'
+          });
         });
       }
 

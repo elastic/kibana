@@ -22,11 +22,11 @@ uiModule.directive('monitoringBeatsBeat', () => {
 
       function onBrush({ xaxis }) {
         scope.$evalAsync(() => {
-
-        timefilter.setTime({
-          from: moment(xaxis.from),
-          to: moment(xaxis.to),
-          mode: 'absolute',
+          timefilter.setTime({
+            from: moment(xaxis.from),
+            to: moment(xaxis.to),
+            mode: 'absolute',
+          });
         });
       }
 

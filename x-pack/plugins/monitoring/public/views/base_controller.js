@@ -124,6 +124,7 @@ export class MonitoringViewBaseController {
           from: moment(from),
           to: moment(to),
           mode: 'absolute'
+        });
       });
     };
   }

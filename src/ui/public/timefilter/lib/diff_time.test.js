@@ -35,6 +35,9 @@ describe('time diff watcher', () => {
         from: 0,
         to: 1
       },
+      getTime: function () {
+        return this.time;
+      },
       emit: function (eventType) {
         if (eventType === 'timeUpdate') update();
         if (eventType === 'fetch') fetch();

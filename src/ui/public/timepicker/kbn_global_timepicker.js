@@ -45,6 +45,7 @@ uiModules
       link: ($scope, element, attributes, kbnTopNav) => {
         listenForUpdates();
 
+        $scope.timefilter = timefilter;
         $rootScope.toggleRefresh = () => {
           timefilter.toggleRefresh();
         };

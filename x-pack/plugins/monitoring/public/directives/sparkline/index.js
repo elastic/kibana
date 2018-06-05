@@ -32,6 +32,7 @@ uiModule.directive('sparkline', ($injector) => {
             from: moment(xaxis.from),
             to: moment(xaxis.to),
             mode: 'absolute'
+          });
         });
       }
 

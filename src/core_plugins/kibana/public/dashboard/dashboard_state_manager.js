@@ -142,12 +142,11 @@ export class DashboardStateManager {
    * @param {String} newTimeFilter.mode
    */
   handleTimeChange(newTimeFilter) {
-    const timeFilter = {
+    store.dispatch(updateTimeRange({
       from: FilterUtils.convertTimeToUTCString(newTimeFilter.from),
       to: FilterUtils.convertTimeToUTCString(newTimeFilter.to),
       mode: newTimeFilter.mode,
-    };
-    store.dispatch(updateTimeRange(timeFilter));
+    }));
   }
 
   /**

@@ -24,7 +24,6 @@ import { metadata } from '../metadata';
 import 'babel-polyfill';
 import 'whatwg-fetch';
 import 'custom-event-polyfill';
-import '../timefilter';
 import '../notify';
 import '../private';
 import '../promises';

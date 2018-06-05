@@ -22,13 +22,13 @@ import { areTimePickerValsDifferent } from './diff_time_picker_vals';
 import { timeHistory } from '../time_history';
 
 export function diffTimeFactory(self) {
-  let oldTime = _.clone(self.time);
+  let oldTime = _.clone(self.getTime());
   return function () {
-    if (areTimePickerValsDifferent(self.time, oldTime)) {
-      timeHistory.add(self.time);
+    if (areTimePickerValsDifferent(self.getTime(), oldTime)) {
+      timeHistory.add(self.getTime());
       self.emit('timeUpdate');
       self.emit('fetch');
     }
-    oldTime = _.clone(self.time);
+    oldTime = _.clone(self.getTime());
   };
 }

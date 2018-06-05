@@ -37,6 +37,7 @@ uiModule.directive('monitoringChart', () => {
             from: moment(xaxis.from),
             to: moment(xaxis.to),
             mode: 'absolute'
+          });
         });
       }
 
