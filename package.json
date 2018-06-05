@@ -84,6 +84,7 @@
     "@kbn/pm": "link:packages/kbn-pm",
     "@kbn/test-subj-selector": "link:packages/kbn-test-subj-selector",
     "@kbn/ui-framework": "link:packages/kbn-ui-framework",
+    "@types/prop-types": "^15.5.3",
     "JSONStream": "1.1.1",
     "accept-language-parser": "1.2.0",
     "angular": "1.6.9",
