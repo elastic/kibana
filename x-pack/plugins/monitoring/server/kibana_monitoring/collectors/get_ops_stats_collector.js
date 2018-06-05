@@ -6,7 +6,7 @@
 
 import { KIBANA_STATS_TYPE } from '../../../common/constants';
 import { opsBuffer } from './ops_buffer';
-import { Collector } from '../classes/collector';
+import { Collector } from '../classes';
 
 /*
  * Initialize a collector for Kibana Ops Stats
