@@ -17,11 +17,14 @@
  * under the License.
  */
 
-import qs from 'querystring';
+import _ from 'lodash';
+import moment from 'moment';
 import { calculateBounds, getTime } from './get_time';
+import { parseQueryString } from './lib/parse_querystring';
 import { diffTimeFactory } from './lib/diff_time';
 import { diffIntervalFactory } from './lib/diff_interval';
 import { SimpleEmitter } from 'ui/utils/simple_emitter';
+import uiRoutes from '../routes';
 import chrome from 'ui/chrome';
 
 class Timefilter extends SimpleEmitter {
@@ -80,14 +83,14 @@ class Timefilter extends SimpleEmitter {
   }
 
   getForceNow = () => {
-    const query = qs.parse(window.location.search).forceNow;
-    if (!query) {
+    const forceNow = parseQueryString().forceNow;
+    if (!forceNow) {
       return;
     }
 
-    const ticks = Date.parse(query);
+    const ticks = Date.parse(forceNow);
     if (isNaN(ticks)) {
-      throw new Error(`forceNow query parameter can't be parsed`);
+      throw new Error(`forceNow query parameter, ${forceNow}, can't be parsed by Date.parse`);
     }
     return new Date(ticks);
   }
@@ -133,3 +136,39 @@ class Timefilter extends SimpleEmitter {
 }
 
 export const timefilter = new Timefilter();
+
+// TODO
+// remove everything underneath once globalState is no longer an angular service
+// and listener can be registered without angular.
+function convertISO8601(stringTime) {
+  const obj = moment(stringTime, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true);
+  return obj.isValid() ? obj : stringTime;
+}
+
+const registerWithGlobalState = _.once((globalState) => {
+  const uiSettings = chrome.getUiSettingsClient();
+  const timeDefaults = uiSettings.get('timepicker:timeDefaults');
+  const refreshIntervalDefaults = uiSettings.get('timepicker:refreshIntervalDefaults');
+
+  timefilter.setTime(_.defaults(globalState.time || {}, timeDefaults));
+  timefilter.setRefreshInterval(_.defaults(globalState.refreshInterval || {}, refreshIntervalDefaults));
+
+  globalState.on('fetch_with_changes', () => {
+  // clone and default to {} in one
+    const newTime = _.defaults({}, globalState.time, timeDefaults);
+    const newRefreshInterval = _.defaults({}, globalState.refreshInterval, refreshIntervalDefaults);
+
+    if (newTime) {
+      if (newTime.to) newTime.to = convertISO8601(newTime.to);
+      if (newTime.from) newTime.from = convertISO8601(newTime.from);
+    }
+
+    timefilter.setTime(newTime);
+    timefilter.setRefreshInterval(newRefreshInterval);
+  });
+});
+
+uiRoutes
+  .addSetupWork((globalState) => {
+    return registerWithGlobalState(globalState);
+  });

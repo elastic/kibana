@@ -35,6 +35,15 @@ jest.mock('ui/chrome',
     },
   }), { virtual: true });
 
+jest.mock('./lib/parse_querystring',
+  () => ({
+    parseQueryString: () => {
+      return {
+        forceNow: '1999-01-01T00:00:00.000Z'
+      };
+    },
+  }), { virtual: true });
+
 import sinon from 'sinon';
 import expect from 'expect.js';
 import { timefilter } from './timefilter';
@@ -72,10 +81,6 @@ describe('calculateBounds', () => {
     };
 
     const forceNowString = '1999-01-01T00:00:00.000Z';
-    Object.defineProperty(window.location, 'source', {
-      writable: true,
-      value: `forceNow=${forceNowString}`,
-    });
     const result = timefilter.calculateBounds(timeRange);
 
     const forceNowTicks = Date.parse(forceNowString);
@@ -89,10 +94,10 @@ describe('calculateBounds', () => {
       to: 'now'
     };
 
-    Object.defineProperty(window.location, 'source', {
+    /*Object.defineProperty(window.location, 'href', {
       writable: true,
-      value: `forceNow=malformed%20string`,
-    });
+      value: `?forceNow=malformed%20string`,
+    });*/
     expect(() => timefilter.calculateBounds(timeRange)).to.throwError();
   });
 });
