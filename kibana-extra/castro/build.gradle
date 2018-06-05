@@ -13,8 +13,8 @@ task bootstrap(type: YarnTask) {
   args = ['kbn', 'bootstrap']
 }
 
-task start(type: YarnTask) {
-  args = ['start']
+task startKibana(type: YarnTask) {
+  args = ['start', '--elasticsearch.url', 'http://localhost:9201']
 }
 
 task downloadKibana(type: Download) {

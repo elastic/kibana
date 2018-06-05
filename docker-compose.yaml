@@ -1,0 +1,12 @@
+version: '2.1'
+services:
+  elasticsearch:
+    image: 'lambdalab/elasticsearch:7.0.0-alpha1-20180604'
+    volumes:
+      - ./data:/usr/share/elasticsearch/data
+    ports:
+      - 9201:9200
+      # - 9300:9300  // when using tcp port
+    environment:
+      ES_JAVA_OPTS: "-Xms768m -Xmx768m"
+    restart: on-failure
