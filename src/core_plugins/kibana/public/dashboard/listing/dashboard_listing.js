@@ -55,6 +55,7 @@ export class DashboardListing extends React.Component {
     super(props);
 
     this.state = {
+      hasInitialFetchReturned: false,
       isFetchingItems: false,
       showDeleteModal: false,
       showLimitError: false,
@@ -90,6 +91,7 @@ export class DashboardListing extends React.Component {
     // order than they were sent out. Only load results for the most recent search.
     if (filter === this.state.filter) {
       this.setState({
+        hasInitialFetchReturned: true,
         isFetchingItems: false,
         dashboards: response.hits,
         totalDashboards: response.total,
@@ -397,9 +399,9 @@ export class DashboardListing extends React.Component {
   renderListingOrEmptyState() {
     if (this.hasNoDashboards()) {
       return this.renderNoItemsMessage();
-    } else {
-      return this.renderListing();
     }
+
+    return this.renderListing();
   }
 
   renderListing() {
@@ -446,13 +448,23 @@ export class DashboardListing extends React.Component {
     );
   }
 
+  renderPageContent() {
+    if (!this.state.hasInitialFetchReturned) {
+      return;
+    }
+
+    return (
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" className="dashboardLandingPage__content">
+        {this.renderListingOrEmptyState()}
+      </EuiPageContent>
+    );
+  }
+
   render() {
     return (
       <EuiPage data-test-subj="dashboardLandingPage" className="dashboardLandingPage">
         <EuiPageBody>
-          <EuiPageContent verticalPosition="center" horizontalPosition="center" className="dashboardLandingPage__content">
-            {this.renderListingOrEmptyState()}
-          </EuiPageContent>
+          {this.renderPageContent()}
         </EuiPageBody>
       </EuiPage>
     );
