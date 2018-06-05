@@ -78,11 +78,11 @@ test('handles object with wrong type', () => {
   expect(() => type.validate({ age: 'foo' })).toThrowErrorMatchingSnapshot();
 });
 
-test('includes context in failure', () => {
+test('includes namespace in failure', () => {
   const type = schema.oneOf([schema.object({ age: schema.number() })]);
 
   expect(() =>
-    type.validate({ age: 'foo' }, {}, 'foo-context')
+    type.validate({ age: 'foo' }, {}, 'foo-namespace')
   ).toThrowErrorMatchingSnapshot();
 });
 

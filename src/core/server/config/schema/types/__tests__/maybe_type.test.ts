@@ -50,9 +50,9 @@ test('fails if null', () => {
   expect(() => type.validate(null)).toThrowErrorMatchingSnapshot();
 });
 
-test('includes context in failure', () => {
+test('includes namespace in failure', () => {
   const type = schema.maybe(schema.string());
   expect(() =>
-    type.validate(null, {}, 'foo-context')
+    type.validate(null, {}, 'foo-namespace')
   ).toThrowErrorMatchingSnapshot();
 });

@@ -47,32 +47,32 @@ test('fails when not receiving expected key type', () => {
   expect(() => type.validate(value)).toThrowErrorMatchingSnapshot();
 });
 
-test('includes context in failure when wrong top-level type', () => {
+test('includes namespace in failure when wrong top-level type', () => {
   const type = schema.mapOf(schema.string(), schema.string());
   expect(() =>
-    type.validate([], {}, 'foo-context')
+    type.validate([], {}, 'foo-namespace')
   ).toThrowErrorMatchingSnapshot();
 });
 
-test('includes context in failure when wrong value type', () => {
+test('includes namespace in failure when wrong value type', () => {
   const type = schema.mapOf(schema.string(), schema.string());
   const value = {
     name: 123,
   };
 
   expect(() =>
-    type.validate(value, {}, 'foo-context')
+    type.validate(value, {}, 'foo-namespace')
   ).toThrowErrorMatchingSnapshot();
 });
 
-test('includes context in failure when wrong key type', () => {
+test('includes namespace in failure when wrong key type', () => {
   const type = schema.mapOf(schema.number(), schema.string());
   const value = {
     name: 'foo',
   };
 
   expect(() =>
-    type.validate(value, {}, 'foo-context')
+    type.validate(value, {}, 'foo-namespace')
   ).toThrowErrorMatchingSnapshot();
 });
 

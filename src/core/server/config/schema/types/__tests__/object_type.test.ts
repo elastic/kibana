@@ -183,17 +183,17 @@ test('handles conditionals', () => {
   });
 });
 
-test('includes context in failure when wrong top-level type', () => {
+test('includes namespace in failure when wrong top-level type', () => {
   const type = schema.object({
     foo: schema.string(),
   });
 
   expect(() =>
-    type.validate([], {}, 'foo-context')
+    type.validate([], {}, 'foo-namespace')
   ).toThrowErrorMatchingSnapshot();
 });
 
-test('includes context in failure when wrong value type', () => {
+test('includes namespace in failure when wrong value type', () => {
   const type = schema.object({
     foo: schema.string(),
   });
@@ -202,6 +202,6 @@ test('includes context in failure when wrong value type', () => {
   };
 
   expect(() =>
-    type.validate(value, {}, 'foo-context')
+    type.validate(value, {}, 'foo-namespace')
   ).toThrowErrorMatchingSnapshot();
 });
