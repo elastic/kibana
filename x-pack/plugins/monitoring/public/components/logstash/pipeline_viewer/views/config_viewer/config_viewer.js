@@ -8,7 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { DetailDrawer } from '../detail_drawer';
 import { Queue } from './queue';
-import { StatementSection } from './statement_list';
+import { StatementSection } from './statement_section';
 
 export class ConfigViewer extends React.Component {
   constructor() {

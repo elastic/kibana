@@ -15,6 +15,8 @@ export function StatementSection({
   elements,
   onShowVertexDetails
 }) {
+  if (!elements.length) { return null; }
+
   return (
     <div className="cv-statementList">
       <StatementListHeading
