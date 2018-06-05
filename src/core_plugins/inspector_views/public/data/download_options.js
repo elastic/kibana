@@ -46,49 +46,58 @@ class DataDownloadOptions extends Component {
     });
   };
 
-  exportAsCsv = () => {
+  exportCsv = () => {
     exportAsCsv(`${this.props.title}.csv`, this.props.columns, this.props.rows);
+  }
+
+  exportFormattedCsv = () => {
+    exportAsCsv(`${this.props.title}.csv`, this.props.columns, this.props.rows, item => item.formatted);
   };
 
-  exportAsRawCsv = () => {
-    exportAsCsv(`${this.props.title}.csv`, this.props.columns, this.props.rawData);
+  exportFormattedAsRawCsv = () => {
+    exportAsCsv(`${this.props.title}.csv`, this.props.columns, this.props.rows, item => item.raw);
   };
 
-  render() {
+  renderUnformattedDownload() {
+    return (
+      <EuiButton
+        onClick={this.exportCsv}
+      >
+        Download CSV
+      </EuiButton>
+    );
+  }
+
+  renderFormattedDownloads() {
     const button = (
       <EuiButton
         iconType="arrowDown"
         iconSide="right"
         onClick={this.onTogglePopover}
       >
-        Download data
+        Download CSV
       </EuiButton>
     );
     const items = [
-      (
-        <EuiContextMenuItem
-          key="csv"
-          onClick={this.exportAsCsv}
-          toolTipContent="Downloads the data as shown in the table."
-          toolTipPosition="left"
-        >
-          Formatted CSV
-        </EuiContextMenuItem>
-      )
+      <EuiContextMenuItem
+        key="csv"
+        onClick={this.exportFormattedCsv}
+        toolTipContent="Downloads the data as shown in the table."
+        toolTipPosition="left"
+      >
+        Formatted CSV
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        key="rawCsv"
+        onClick={this.exportFormattedAsRawCsv}
+        toolTipContent={`Downloads the raw data i.e. dates as timestamps,
+          numeric values without thousand separators, etc.`}
+        toolTipPosition="left"
+      >
+        Raw CSV
+      </EuiContextMenuItem>
     ];
-    if (this.props.rawData) {
-      items.push(
-        <EuiContextMenuItem
-          key="rawCsv"
-          onClick={this.exportAsRawCsv}
-          toolTipContent={`Downloads the raw data i.e. dates as timestamps,
-            numeric values without thousand separators, etc.`}
-          toolTipPosition="left"
-        >
-          Raw CSV
-        </EuiContextMenuItem>
-      );
-    }
+
     return (
       <EuiPopover
         id="inspectorDownloadData"
@@ -103,6 +112,14 @@ class DataDownloadOptions extends Component {
         />
       </EuiPopover>
     );
+  }
+
+  render() {
+    if (!this.props.isFormatted) {
+      return this.renderUnformattedDownload();
+    }
+
+    return this.renderFormattedDownloads();
   }
 }
 

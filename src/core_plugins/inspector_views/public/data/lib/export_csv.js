@@ -21,7 +21,7 @@ import _ from 'lodash';
 import { saveAs } from '@elastic/filesaver';
 import chrome from 'ui/chrome';
 
-function buildCsv(columns, rows) {
+function buildCsv(columns, rows, valueFormatter) {
   const settings = chrome.getUiSettingsClient();
   const csvSeparator = settings.get('csv:separator', ',');
   const quoteValues = settings.get('csv:quoteValues', true);
@@ -44,7 +44,9 @@ function buildCsv(columns, rows) {
   // Convert the array of row objects to an array of row arrays
   const orderedFieldNames = columns.map(col => col.field);
   const csvRows = rows.map(row => {
-    return orderedFieldNames.map(field => escape(row[field]));
+    return orderedFieldNames.map(field =>
+      escape(valueFormatter ? valueFormatter(row[field]) : row[field])
+    );
   });
 
   return [header, ...csvRows]
@@ -53,8 +55,8 @@ function buildCsv(columns, rows) {
     + '\r\n'; // Add \r\n after last line
 }
 
-function exportAsCsv(filename, columns, rows) {
-  const csv = new Blob([buildCsv(columns, rows)], { type: 'text/plain;charset=utf-8' });
+function exportAsCsv(filename, columns, rows, valueFormatter) {
+  const csv = new Blob([buildCsv(columns, rows, valueFormatter)], { type: 'text/plain;charset=utf-8' });
   saveAs(csv, filename);
 }
 

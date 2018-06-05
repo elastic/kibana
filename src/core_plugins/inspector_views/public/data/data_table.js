@@ -111,6 +111,7 @@ class DataTableFormat extends Component {
         <DataDownloadOptions
           columns={this.state.columns}
           rows={this.state.rows}
+          isFormatted={this.props.isFormatted}
           title={this.props.exportTitle}
         />
       ]

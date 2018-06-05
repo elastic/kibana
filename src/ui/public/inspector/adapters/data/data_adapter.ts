@@ -36,19 +36,21 @@ class DataAdapter extends EventEmitter {
   private tabular?: TabularCallback;
   private tabularOptions?: TabularLoaderOptions;
 
-  public setTabularLoader(callback: TabularCallback, options?: TabularLoaderOptions = {}): void {
+  public setTabularLoader(
+    callback: TabularCallback,
+    options: TabularLoaderOptions = {}
+  ): void {
     this.tabular = callback;
     this.tabularOptions = options;
     this.emit('change', 'tabular');
   }
 
   public getTabular(): Promise<TabularHolder> {
-    if (!this.tabular) {
+    if (!this.tabular || !this.tabularOptions) {
       return Promise.resolve({ data: null, options: {} });
     }
     const options = this.tabularOptions;
-    return Promise.resolve(this.tabular())
-      .then(data => ({ data, options }));
+    return Promise.resolve(this.tabular()).then(data => ({ data, options }));
   }
 }
 

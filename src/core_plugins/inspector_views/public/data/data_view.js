@@ -40,12 +40,14 @@ class DataViewComponent extends Component {
   _isMounted = false;
   state = {
     tabularData: null,
+    tabularOptions: {},
     tabularLoader: null,
   }
 
   static getDerivedStateFromProps(nextProps) {
     return {
       tabularData: null,
+      tabularOptions: {},
       tabularPromise: nextProps.adapters.data.getTabular(),
     };
   }
