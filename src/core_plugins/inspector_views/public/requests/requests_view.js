@@ -139,7 +139,7 @@ const RequestsView = {
   help: `The requests inspector allows you to inspect the requests the visualization
     did to collect its data.`,
   shouldShow(adapters) {
-    return adapters.requests;
+    return Boolean(adapters.requests);
   },
   component: RequestsViewComponent
 };

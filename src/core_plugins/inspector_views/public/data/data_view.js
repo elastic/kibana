@@ -152,7 +152,7 @@ const DataView = {
   order: 10,
   help: `The data inspector shows the data that is used to draw the visualization.`,
   shouldShow(adapters) {
-    return adapters.data;
+    return Boolean(adapters.data);
   },
   component: DataViewComponent
 };
