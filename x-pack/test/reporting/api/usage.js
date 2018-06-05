@@ -51,7 +51,7 @@ export default function ({ getService }) {
 
     describe('includes usage from reporting indexes', () => {
       it('generated from 6.2', async () => {
-        await esArchiver.load('reporting/bwc/6_2');
+        await esArchiver.load('bwc/6_2');
         const usage = await usageAPI.getUsageStats();
 
         reportingAPI.expectRecentJobTypeTotalStats(usage, 'csv', 0);
@@ -73,7 +73,7 @@ export default function ({ getService }) {
 
 
       it('generated from 6.3', async () => {
-        await esArchiver.load('reporting/bwc/6_3');
+        await esArchiver.load('bwc/6_3');
         const usage = await usageAPI.getUsageStats();
 
         reportingAPI.expectRecentJobTypeTotalStats(usage, 'csv', 0);
