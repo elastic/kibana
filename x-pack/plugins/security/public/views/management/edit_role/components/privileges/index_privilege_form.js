@@ -6,7 +6,6 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import {
-  EuiCallOut,
   EuiComboBox,
   EuiTextArea,
   EuiFormRow,
@@ -15,8 +14,7 @@ import {
   EuiSwitch,
   EuiSpacer,
   EuiHorizontalRule,
-  EuiLink,
-  EuiIcon,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { getIndexPrivileges } from '../../../../../services/role_privileges';
 
@@ -46,19 +44,21 @@ export class IndexPrivilegeForm extends Component {
 
   render() {
     return (
-      <div>
-        <EuiFlexGroup className="index-privilege-form" alignItems={'center'}>
+      <Fragment>
+        <EuiHorizontalRule />
+        <EuiFlexGroup className="index-privilege-form">
           <EuiFlexItem>
             {this.getPrivilegeForm()}
           </EuiFlexItem>
           {this.props.allowDelete && (
             <EuiFlexItem grow={false}>
-              <EuiLink color={'danger'} onClick={this.props.onDelete}><EuiIcon type={'trash'} size={'m'} /></EuiLink>
+              <EuiFormRow hasEmptyLabelSpace>
+                <EuiButtonIcon aria-label={'Delete index privilege'} color={'danger'} onClick={this.props.onDelete} iconType={'trash'} />
+              </EuiFormRow>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
-        <EuiHorizontalRule />
-      </div>
+      </Fragment>
     );
   }
 
@@ -90,6 +90,8 @@ export class IndexPrivilegeForm extends Component {
           {this.getGrantedFieldsControl()}
         </EuiFlexGroup>
 
+        <EuiSpacer />
+
         {this.getGrantedDocumentsControl()}
       </Fragment>
     );
@@ -108,27 +110,36 @@ export class IndexPrivilegeForm extends Component {
 
     const { grant = [] } = indexPrivilege.field_security || {};
 
-    let grantedFieldsWarning = null;
+    // TODO: Remove this completely, if ok with just putting the text in the helptext
+    // let grantedFieldsWarning = null;
 
     if (allowFieldLevelSecurity) {
 
-      if (grant.length === 0) {
-        grantedFieldsWarning = (
-          <Fragment>
-            <EuiSpacer />
-            <EuiCallOut title={'No Granted Fields'} size="s" color="warning" iconType="help">
-              <p>
-                If no fields are granted, then users assigned to this role will not be able to
-                see any data for this index. Is this really what you want?
-              </p>
-            </EuiCallOut>
-          </Fragment>
-        );
-      }
+      // if (grant.length === 0) {
+      //   grantedFieldsWarning = (
+      //     <Fragment>
+      //       <EuiSpacer />
+      //       <EuiCallOut title={'No Granted Fields'} size="s" color="warning" iconType="help">
+      //         <p>
+      //           If no fields are granted, then users assigned to this role will not be able to
+      //           see any data for this index. Is this really what you want?
+      //         </p>
+      //       </EuiCallOut>
+      //     </Fragment>
+      //   );
+      // }
 
       return (
         <EuiFlexItem>
-          <EuiFormRow label={'Granted Fields (optional)'} fullWidth={true} className="indexPrivilegeForm__grantedFieldsRow">
+          <EuiFormRow
+            label={'Granted fields (optional)'}
+            fullWidth={true}
+            className="indexPrivilegeForm__grantedFieldsRow"
+            helpText={
+              grant.length === 0 ?
+                'If no fields are granted, then users assigned to this role will not be able to see any data for this index.' : undefined
+            }
+          >
             <Fragment>
               <EuiComboBox
                 options={availableFields ? availableFields.map(toOption) : []}
@@ -137,7 +148,6 @@ export class IndexPrivilegeForm extends Component {
                 onChange={this.onGrantedFieldsChange}
                 isDisabled={this.props.isReservedRole}
               />
-              {grantedFieldsWarning}
             </Fragment>
           </EuiFormRow>
         </EuiFlexItem>
@@ -158,9 +168,9 @@ export class IndexPrivilegeForm extends Component {
     }
 
     return (
-      <EuiFlexGroup>
+      <EuiFlexGroup direction="column">
         {!this.props.isReservedRole &&
-          <EuiFlexItem grow={3}>
+          <EuiFlexItem>
             <EuiSwitch
               label={'Restrict documents query'}
               compressed={true}
@@ -170,10 +180,10 @@ export class IndexPrivilegeForm extends Component {
           </EuiFlexItem>
         }
         {this.state.queryExpanded &&
-          <EuiFlexItem grow={5}>
-            <EuiFormRow label={'Granted Documents Query (optional)'} fullWidth={true}>
+          <EuiFlexItem>
+            <EuiFormRow label={'Granted documents query'} fullWidth={true}>
               <EuiTextArea
-                rows={1}
+                style={{ resize: "none" }}
                 fullWidth={true}
                 value={indexPrivilege.query}
                 onChange={this.onQueryChange}

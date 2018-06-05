@@ -14,6 +14,7 @@ import { CollapsiblePanel } from '../collapsible_panel';
 import {
   EuiSelect,
   EuiDescribedFormGroup,
+  EuiFormRow,
 } from '@elastic/eui';
 
 const noPrivilegeValue = '-none-';
@@ -64,12 +65,14 @@ export class KibanaPrivileges extends Component {
         title={<p>Application privileges</p>}
         description={<p>Manage the actions this role can perform within Kibana.</p>}
       >
-        <EuiSelect
-          options={options}
-          value={value}
-          onChange={this.onKibanaPrivilegesChange}
-          disabled={isReservedRole(role)}
-        />
+        <EuiFormRow hasEmptyLabelSpace>
+          <EuiSelect
+            options={options}
+            value={value}
+            onChange={this.onKibanaPrivilegesChange}
+            disabled={isReservedRole(role)}
+          />
+        </EuiFormRow>
       </EuiDescribedFormGroup>
     );
   }
