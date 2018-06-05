@@ -24,7 +24,13 @@ import _ from 'lodash';
 
 export class VisualizeEmbeddable extends Embeddable  {
   constructor({ onEmbeddableStateChanged, savedVisualization, editUrl, loader }) {
-    super();
+    super({
+      metadata: {
+        title: savedVisualization.title,
+        editUrl,
+        indexPattern: savedVisualization.vis.indexPattern
+      }
+    });
     this._onEmbeddableStateChanged = onEmbeddableStateChanged;
     this.savedVisualization = savedVisualization;
     this.loader = loader;
@@ -33,15 +39,6 @@ export class VisualizeEmbeddable extends Embeddable  {
     this.uiState = new PersistedState(parsedUiState);
 
     this.uiState.on('change', this._uiStateChangeHandler);
-
-    /**
-     * @type {EmbeddableMetadata}
-     */
-    this.metadata = {
-      title: savedVisualization.title,
-      editUrl,
-      indexPattern: this.savedVisualization.vis.indexPattern
-    };
   }
 
   _uiStateChangeHandler = () => {

@@ -22,12 +22,12 @@ export function kibanaStatsRoute(server) {
       const callCluster = callClusterFactory(server).getCallClusterWithReq(req);
 
       try {
-        const kibanaUsageCollector = getKibanaUsageCollector(server, callCluster);
-        const reportingUsageCollector = getReportingUsageCollector(server, callCluster);
+        const kibanaUsageCollector = getKibanaUsageCollector(server);
+        const reportingUsageCollector = getReportingUsageCollector(server);
 
         const [ kibana, reporting ] = await Promise.all([
-          kibanaUsageCollector.fetch(),
-          reportingUsageCollector.fetch(),
+          kibanaUsageCollector.fetch(callCluster),
+          reportingUsageCollector.fetch(callCluster),
         ]);
 
         reply({
