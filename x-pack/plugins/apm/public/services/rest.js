@@ -30,7 +30,7 @@ function fetchOptionsWithDebug(fetchOptions) {
   };
 }
 
-async function callApi(fetchOptions, kibanaOptions) {
+export async function callApi(fetchOptions, kibanaOptions) {
   const combinedKibanaOptions = {
     camelcase: true,
     ...kibanaOptions
