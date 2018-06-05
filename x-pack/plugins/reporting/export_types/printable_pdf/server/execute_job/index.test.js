@@ -35,7 +35,9 @@ beforeEach(() => {
         })
       }
     },
-    savedObjectsClientFactory: jest.fn(),
+    savedObjects: {
+      getScopedSavedObjectsClient: jest.fn(),
+    },
     uiSettingsServiceFactory: jest.fn().mockReturnValue({ get: jest.fn() }),
   };
 

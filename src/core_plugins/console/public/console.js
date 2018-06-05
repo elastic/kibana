@@ -20,7 +20,7 @@
 import uiRoutes from 'ui/routes';
 import template from './index.html';
 
-require('ace');
+require('brace');
 require('ui-bootstrap-custom');
 
 require('ui/modules').get('kibana', ['sense.ui.bootstrap']);

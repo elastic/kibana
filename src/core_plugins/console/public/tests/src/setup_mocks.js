@@ -16,30 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { getContentType } from '../../src/es';
-
-const { test, module, equal } = window.QUnit;
-
-const APPLICATION_JSON = 'application/json';
-
-module('Content type');
-
-test('body', () => {
-  const contentType = getContentType([
-    JSON.stringify({
-      foo: 'baz'
-    }),
-    JSON.stringify({
-      foo: 'bar'
-    })
-  ].join('\n'));
-
-  equal(contentType, APPLICATION_JSON);
-});
-
-test('no body', () => {
-  const contentType = getContentType('');
-
-  equal(contentType, undefined);
-});
+/* eslint no-undef: 0 */
+jest.mock('../../src/sense_editor/mode/worker', () => { return { workerModule: { id: 'sense_editor/mode/worker', src: '' } }; });
+window.Worker = function () { this.postMessage = () => {}; this.terminate = () => {}; };
+window.URL = {
+  createObjectURL: () => { return ''; }
+};
+jest.mock('../../src/storage');
+document.queryCommandSupported = () => true;
