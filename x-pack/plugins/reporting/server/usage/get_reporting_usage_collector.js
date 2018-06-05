@@ -112,13 +112,12 @@ async function getReportingUsageWithinRange(callCluster, server, reportingAvaila
 
 /*
  * @param {Object} server
- * @param {Function} callCluster - function that uses either callWithRequest or callWithInternal to fetch data from ES
  * @return {Object} kibana usage stats type collection object
  */
-export function getReportingUsageCollector(server, callCluster) {
+export function getReportingUsageCollector(server) {
   return new UsageCollector(server, {
     type: KIBANA_REPORTING_TYPE,
-    fetch: async () => {
+    fetch: async callCluster => {
       const xpackInfo = server.plugins.xpack_main.info;
       const config = server.config();
       const available = xpackInfo && xpackInfo.isAvailable(); // some form of reporting (csv at least) is available for all valid licenses

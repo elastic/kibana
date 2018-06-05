@@ -19,6 +19,10 @@ export default function ({ getService }) {
       await esArchiver.unload('../../../../test/functional/fixtures/es_archiver/dashboard/current/kibana');
     });
 
+    it('should reject without authentication headers passed', async () => {
+      const rejected = await usageAPI.getUsageStatsNoAuth();
+      expect(rejected).to.eql({ statusCode: 401, error: 'Unauthorized' });
+    });
 
     it('should return xpack usage data', async () => {
       const usage = await usageAPI.getUsageStats();
