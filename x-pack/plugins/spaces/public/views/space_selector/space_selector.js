@@ -15,13 +15,19 @@ import {
   EuiIcon,
   EuiSpacer,
   EuiText,
-  EuiHorizontalRule,
+  EuiTextColor,
+  EuiTitle,
+  EuiFieldSearch,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { SpaceCards } from '../components/space_cards';
+import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common/constants';
 
 export class SpaceSelector extends Component {
   state = {
     loading: false,
+    searchTerm: '',
     spaces: []
   };
 
@@ -53,33 +59,72 @@ export class SpaceSelector extends Component {
 
   render() {
     const {
-      spaces
+      spaces,
+      searchTerm,
     } = this.state;
 
+    let filteredSpaces = spaces;
+    if (searchTerm) {
+      filteredSpaces = spaces
+        .filter(s => s.name.toLowerCase().indexOf(searchTerm) >= 0 || s.description.toLowerCase().indexOf(searchTerm) >= 0);
+    }
+
     return (
-      <EuiPage>
-        <EuiPageHeader>
+      <EuiPage className="spaceSelector__page">
+        <EuiPageHeader className="spaceSelector__heading">
           <EuiPageHeaderSection className="logoHeader">
-            <EuiIcon size="xxl" type={`logoKibana`} />
+            <div className="logoCircle">
+              <EuiIcon size="xxl" type={`logoKibana`} />
+            </div>
+
+            <EuiSpacer />
+
+            <EuiTitle color="ghost">
+              <EuiTextColor color="ghost"><p>Select your space</p></EuiTextColor>
+            </EuiTitle>
           </EuiPageHeaderSection>
         </EuiPageHeader>
         <EuiPageBody>
           <EuiPageContent className="spaceSelectorPageContent">
-            <EuiText className="spaceWelcomeText">
-              <p className="welcomeLarge">Welcome to Kibana.</p>
-              <p className="welcomeMedium">Select a space to begin.</p>
-            </EuiText>
 
-            <EuiHorizontalRule />
+            <EuiFlexGroup direction="column" alignItems="center">
+              {this.getSearchField()}
 
-            <SpaceCards spaces={spaces} />
+              <EuiFlexItem>
+                <EuiText><p>You can change your space at anytime from within Kibana.</p></EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
 
             <EuiSpacer />
+
+            <SpaceCards spaces={filteredSpaces} />
 
           </EuiPageContent>
         </EuiPageBody>
       </EuiPage>
     );
+  }
+
+  getSearchField = () => {
+    if (!this.props.spaces || this.props.spaces.length < SPACE_SEARCH_COUNT_THRESHOLD) {
+      return null;
+    }
+    return (
+      <EuiFlexItem>
+        <EuiFieldSearch
+          className="spaceSelector__searchField"
+          placeholder="Find a space"
+          incremental={true}
+          onSearch={this.onSearch}
+        />
+      </EuiFlexItem>
+    );
+  }
+
+  onSearch = (searchTerm = '') => {
+    this.setState({
+      searchTerm: searchTerm.trim().toLowerCase()
+    });
   }
 }
 

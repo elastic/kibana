@@ -5,3 +5,8 @@
  */
 
 export const DEFAULT_SPACE_ID = `default`;
+
+/**
+ * The minimum number of spaces required to show a search control.
+ */
+export const SPACE_SEARCH_COUNT_THRESHOLD = 8;
