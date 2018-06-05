@@ -71,7 +71,7 @@ module.directive('exportConfig', ($rootScope, reportingDocumentControl, reportin
           return;
         }
 
-        this.updateUrl();
+        $scope.updateUrl();
       });
 
       const onResize = debounce(() => {
