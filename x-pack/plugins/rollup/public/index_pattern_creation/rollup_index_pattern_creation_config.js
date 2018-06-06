@@ -8,7 +8,7 @@ import React from 'react';
 import isEqual from 'lodash/lang/isEqual';
 import { IndexPatternCreationConfig } from 'ui/management/index_pattern_creation';
 
-import { CallOut } from './components/call_out';
+import { RollupPrompt } from './components/rollup_prompt';
 import { setHttpClient, getRollupIndices } from '../services/api';
 
 export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig {
@@ -115,7 +115,7 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
 
   renderPrompt = () => {
     return (
-      <CallOut />
+      <RollupPrompt />
     );
   }
 }

@@ -10,10 +10,9 @@ import {
   EuiCallOut
 } from '@elastic/eui';
 
-export const CallOut = () => (
+export const RollupPrompt = () => (
   <EuiCallOut
     size="s"
-    color="warning"
     title={
       `Rollup index patterns can only match against indices created from rollup jobs.
       They may have limited metrics, fields, intervals and aggregations available.

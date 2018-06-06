@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { CallOut } from './call_out';
+export { RollupPrompt } from './rollup_prompt';
