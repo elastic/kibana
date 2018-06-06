@@ -10,7 +10,7 @@ import './vendor/jquery_ui_sortable.js';
 import './vendor/jquery_ui_sortable.css';
 
 import chrome from 'ui/chrome';
-import React  from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import 'ui/autoload/styles';
 import 'ui/autoload/all';
@@ -23,8 +23,24 @@ import '../../../node_modules/openlayers/dist/ol.css';
 import template from './templates/index.html';
 import { GISApp } from './components/gis_app';
 
+import 'ui/vis/map/service_settings';
+
 chrome.setRootTemplate(template);
 initTimepicker(init);
+
+
+/*
+  Uncomment the below lines. The serviceSettings module does not get loaded due to missing dependencies.
+  Those dependencies are defined in src/core_plugins/kibana/inject_vars.js
+*/
+
+// uiModules
+//   .get('kibana')
+//   .run((Private, $injector) => {
+//     const serviceSettings = $injector.get('serviceSettings');
+//     console.log('serviceSettings loaded', serviceSettings);
+//   });
+
 
 async function init() {
   const root = document.getElementById('react-gis-root');
