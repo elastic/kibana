@@ -189,8 +189,9 @@ that uses I18n engine under the hood:
 ```js
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { ReactI18n } from '@kbn/i18n';
 
-import { I18nProvider } from '@kbn/i18n';
+const { I18nProvider } = ReactI18n;
 
 ReactDOM.render(
   <I18nProvider>
@@ -205,8 +206,9 @@ ReactDOM.render(
 After that we can use `FormattedMessage` components inside `RootComponent`:
 ```js
 import React, { Component } from 'react';
+import { ReactI18n } from '@kbn/i18n';
 
-import { FormattedMessage } from '@kbn/i18n';
+const { FormattedMessage } = ReactI18n;
 
 class RootComponent extends Component {
   constructor(props) {
@@ -311,7 +313,7 @@ for all 200+ languages is loaded along with the library) and pass the translatio
 messages into the constructor:
 
 ```js
-import I18n from '@kbn/i18n/src/core';
+import { I18n } from '@kbn/i18n/src/i18n';
 
 const i18n = new I18n(messages);
 ```

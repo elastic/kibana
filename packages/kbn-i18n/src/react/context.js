@@ -19,6 +19,7 @@
 
 import { PureComponent } from 'react';
 import PropTypes from 'prop-types';
+import { intlShape } from 'react-intl';
 
 /**
  * Provides intl context to a child component using React render callback pattern
@@ -37,6 +38,10 @@ import PropTypes from 'prop-types';
 export class I18nContext extends PureComponent {
   static propTypes = {
     children: PropTypes.func.isRequired,
+  };
+
+  static contextTypes = {
+    intl: intlShape,
   };
 
   render() {
