@@ -29,7 +29,7 @@ import { DashboardPanelAction } from 'ui/dashboard_panel_actions';
 /**
  * Returns the dashboard panel action for opening an inspector for a specific panel.
  * This will check if the embeddable inside the panel actually exposes inspector adapters
- * via its embeddable.getInspectorAdapters() metod. If so - and if an inspector
+ * via its embeddable.getInspectorAdapters() method. If so - and if an inspector
  * could be shown for those adapters - the inspector icon will be visible.
  * @return {DashboardPanelAction}
  */
