@@ -13,19 +13,16 @@ export const mapCapabilities = (capabilities, index) => {
           return;
         }
 
-        const jobInfo = {
-          job_id: job.job_id,
-          fields: job.fields,
-        };
-
-        if(capabilitiesByIndex[job.rollup_index]) {
-          capabilitiesByIndex[job.rollup_index].capabilities.push(jobInfo);
-        } else {
+        if(!capabilitiesByIndex[job.rollup_index]) {
           capabilitiesByIndex[job.rollup_index] = {
             rollup_index: job.rollup_index,
-            capabilities: [jobInfo]
+            capabilities: {},
           };
         }
+
+        capabilitiesByIndex[job.rollup_index].capabilities[job.job_id] = {
+          fields: job.fields,
+        };
       });
     });
   }

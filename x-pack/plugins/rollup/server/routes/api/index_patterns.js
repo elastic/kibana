@@ -34,7 +34,8 @@ export function registerFieldsForWildcardRoute(server) {
 
           const rollupFields = [];
           const capabilitiesByIndex = mapCapabilities(capabilities, index)[index];
-          const fieldsFromFieldCapsByName = capabilitiesByIndex.capabilities && capabilitiesByIndex.capabilities[0].fields;
+          const jobs = capabilitiesByIndex.capabilities && Object.keys(capabilitiesByIndex.capabilities);
+          const fieldsFromFieldCapsByName = jobs && capabilitiesByIndex.capabilities[jobs[0]].fields;
 
           // Keep meta fields
           JSON.parse(metaFields).forEach(field => fieldsFromIndex[field] && rollupFields.push(fieldsFromIndex[field]));
@@ -47,7 +48,6 @@ export function registerFieldsForWildcardRoute(server) {
               searchable: true,
               aggregatable: true,
               readFromDocValues: true,
-              capabilities: fieldsFromFieldCapsByName[capField],
             };
 
             if(capabilities.includes('date_histogram')) {

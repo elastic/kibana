@@ -28,7 +28,8 @@ IndexPatternListRegistry.register(() => {
     }
 
     getFieldInfo = (indexPattern, field) => {
-      const capabilities = indexPattern.typeMeta && indexPattern.typeMeta.capabilities && indexPattern.typeMeta.capabilities[field];
+      const jobs = indexPattern.typeMeta && indexPattern.typeMeta.jobs;
+      const capabilities = jobs && indexPattern.typeMeta.capabilities && indexPattern.typeMeta.capabilities[jobs[0]].fields[field];
 
       if(!capabilities) {
         return [];

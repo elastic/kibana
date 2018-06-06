@@ -82,14 +82,15 @@ IndexPatternCreationRegistry.register(() => {
       let i = 0;
       let sameCapabilities = true;
       const capabilities = this.rollupIndicesCapabilities[indices[0].name].capabilities;
+      const jobs = Object.keys(capabilities);
 
-      if(!capabilities.length) {
+      if(!jobs.length) {
         return ['This rollup index has no capabilities'];
       }
 
-      if(capabilities.length > 1) {
-        while(i < capabilities.length - 1 && sameCapabilities) {
-          sameCapabilities = isEqual(capabilities[i].fields, capabilities[i + 1].fields);
+      if(jobs.length > 1) {
+        while(i < jobs.length - 1 && sameCapabilities) {
+          sameCapabilities = isEqual(capabilities[jobs[i]].fields, capabilities[jobs[i + 1]].fields);
           i++;
         }
 
@@ -99,7 +100,7 @@ IndexPatternCreationRegistry.register(() => {
       }
 
       this.rollupIndex = indices[0].name;
-      this.rollupJobs = capabilities.reduce((jobs, job) => jobs.push(job.job_id) && jobs, []);
+      this.rollupJobs = [...jobs];
     }
 
     getIndexPatternMappings = () => {
@@ -107,7 +108,7 @@ IndexPatternCreationRegistry.register(() => {
         type: 'rollup',
         typeMeta: {
           jobs: this.rollupJobs,
-          capabilities: this.rollupIndicesCapabilities[this.rollupIndex].capabilities[0].fields,
+          capabilities: this.rollupIndicesCapabilities[this.rollupIndex].capabilities,
         },
       } : {};
     }
