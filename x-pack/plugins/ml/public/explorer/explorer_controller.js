@@ -56,14 +56,7 @@ const module = uiModules.get('apps/ml');
 
 import { Observable } from 'rxjs/Observable';
 import { store, state$ } from '../redux/store';
-import {
-  dragSelectUpdate,
-  dragSelectFinish,
-  anomalyDataChange,
-  timeRangeChange,
-  loadingStart,
-  loadingStop
-} from '../redux/dispatchers';
+import { dispatch } from '../redux/dispatchers';
 
 module.controller('MlExplorerController', function (
   $scope,
@@ -119,8 +112,8 @@ module.controller('MlExplorerController', function (
 
   const dragSelect = new DragSelect({
     selectables: document.querySelectorAll('.sl-cell'),
-    callback: dragSelectFinish,
-    onElementSelect: dragSelectUpdate
+    callback: dispatch.dragSelectFinish,
+    onElementSelect: dispatch.dragSelectUpdate
   });
 
   $scope.selectedJobs = null;
@@ -153,7 +146,7 @@ module.controller('MlExplorerController', function (
         const selectedJobIds = mlJobSelectService.getSelectedJobIds(true);
         $scope.setSelectedJobs(selectedJobIds);
       } else {
-        loadingStop();
+        dispatch.loadingStop();
       }
 
     }).catch((resp) => {
@@ -387,7 +380,7 @@ module.controller('MlExplorerController', function (
           };
         });
 
-        anomalyDataChange({
+        dispatch.anomalyDataChange({
           anomalyChartRecords: [],
           earliestMs: timerange.earliestMs,
           earliestMs: timerange.latestMs
@@ -402,14 +395,14 @@ module.controller('MlExplorerController', function (
       swimlaneCellClickListener($scope.cellData);
     } else {
       const timerange = getSelectionTimeRange($scope.cellData);
-      timeRangeChange(timerange);
+      dispatch.timeRangeChange(timerange);
     }
   }
 
   function anomalyChartsSeverityListener() {
     if (store.getState().showCharts && $scope.cellData !== undefined) {
       const timerange = getSelectionTimeRange($scope.cellData);
-      timeRangeChange(timerange);
+      dispatch.timeRangeChange(timerange);
     }
   }
 
@@ -464,7 +457,7 @@ module.controller('MlExplorerController', function (
           console.log('Explorer anomaly charts data set:', resp.records);
           anomalyChartsData = resp.records;
         }
-        anomalyDataChange({
+        dispatch.anomalyDataChange({
           anomalyChartRecords: anomalyChartsData, earliestMs, latestMs
         });
 
@@ -634,7 +627,7 @@ module.controller('MlExplorerController', function (
       return;
     }
 
-    loadingStart();
+    dispatch.loadingStart();
     $scope.hasResults = false;
 
     $scope.swimlaneBucketInterval = calculateSwimlaneBucketInterval();
@@ -674,7 +667,7 @@ module.controller('MlExplorerController', function (
       } else {
         $scope.hasResults = false;
       }
-      loadingStop();
+      dispatch.loadingStop();
 
       // Tell the result components directives to render.
       // Need to use $timeout to ensure the broadcast happens after the child scope is updated with the new data.
@@ -860,7 +853,7 @@ module.controller('MlExplorerController', function (
     const bounds = timefilter.getActiveBounds();
     const earliestMs = bounds.min.valueOf();
     const latestMs = bounds.max.valueOf();
-    anomalyDataChange({ anomalyChartRecords: [], earliestMs, latestMs });
+    dispatch.anomalyDataChange({ anomalyChartRecords: [], earliestMs, latestMs });
     loadDataForCharts(jobIds, [], earliestMs, latestMs);
     loadAnomaliesTableData();
   }

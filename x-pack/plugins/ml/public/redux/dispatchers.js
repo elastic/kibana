@@ -11,18 +11,8 @@ import { anomalyExplorerActions } from './modules/anomaly_explorer';
 import { dragSelectActions } from './modules/drag_select';
 import { showChartsActions } from './modules/show_charts';
 
-export const {
-  loadingStart,
-  loadingStop,
-  anomalyDataChange,
-  timeRangeChange
-} = bindActionCreators(anomalyExplorerActions, store.dispatch);
-
-export const {
-  dragSelectUpdate,
-  dragSelectFinish
-} = bindActionCreators(dragSelectActions, store.dispatch);
-
-export const {
-  showCharts
-} = bindActionCreators(showChartsActions, store.dispatch);
+export const dispatch = bindActionCreators({
+  ...anomalyExplorerActions,
+  ...dragSelectActions,
+  ...showChartsActions
+}, store.dispatch);
