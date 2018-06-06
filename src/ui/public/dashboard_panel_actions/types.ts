@@ -17,27 +17,19 @@
  * under the License.
  */
 
-export class DashboardContextMenuPanel {
-  /**
-   * @param {string} id
-   * @param {string} title
-   * @param {function} getContent
-   */
-  constructor({ id, title, getContent }) {
-    this.id = id;
-    this.title = title;
+import { ContainerState, Embeddable } from 'ui/embeddable';
 
-    if (getContent) {
-      this.getContent = getContent;
-    }
-  }
+/**
+ * Exposes information about the current state of the panel and the embeddable rendered internally.
+ */
+export interface PanelActionAPI {
+  /**
+   * The embeddable that resides inside this action.
+   */
+  embeddable: Embeddable;
 
   /**
-   * Optional, could be composed of actions instead of content.
-   * @param {Embeddable} embeddable
-   * @param {ContainerState} containerState
+   * Information about the current state of the panel and dashboard.
    */
-  getContent(/*{ embeddable, containerState }*/) {
-    return null;
-  }
+  containerState: ContainerState;
 }
