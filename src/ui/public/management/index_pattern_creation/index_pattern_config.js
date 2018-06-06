@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export class IndexPatternCreationType {
+export class IndexPatternConfig {
   static key = 'default';
 
   constructor() {
