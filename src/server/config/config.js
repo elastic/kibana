@@ -159,7 +159,6 @@ export class Config {
       path = path || [];
       // Catch the partial paths
       if (path.join('.') === key) return true;
-
       // Only go deep on inner objects with children
       if (_.size(schema._inner.children)) {
         for (let i = 0; i < schema._inner.children.length; i++) {
@@ -206,6 +205,4 @@ export class Config {
 
     return this[schema];
   }
-
-
 }
