@@ -13,6 +13,7 @@ import {
   EuiFieldText,
   EuiLink,
 } from '@elastic/eui';
+import { getSpaceInitials, getSpaceColor } from '../../../../common/space_attributes';
 
 export class CustomizeSpaceAvatar extends Component {
   static propTypes = {
@@ -29,16 +30,20 @@ export class CustomizeSpaceAvatar extends Component {
   }
 
   getCustomizeFields = () => {
+    const {
+      space
+    } = this.props;
+
     return (
       <Fragment>
         <EuiFlexItem grow={false}>
           <EuiFormRow label={'Initials (2 max)'}>
-            <EuiFieldText name="spaceInitials" value={''} onChange={() => { }} />
+            <EuiFieldText name="spaceInitials" value={getSpaceInitials(space)} onChange={() => { }} />
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormRow label={'Color'}>
-            <EuiColorPicker color="#ffffff" onChange={() => { }} />
+            <EuiColorPicker color={getSpaceColor(space)} onChange={() => { }} />
           </EuiFormRow>
         </EuiFlexItem>
       </Fragment>

@@ -63,7 +63,7 @@ export function initSpacesApi(server) {
         });
 
         spaces = result.saved_objects.map(convertSavedObjectToSpace);
-      } catch(e) {
+      } catch (e) {
         return reply(wrapError(e));
       }
 
@@ -131,6 +131,12 @@ export function initSpacesApi(server) {
       }
 
       return reply(convertSavedObjectToSpace(result));
+    },
+    config: {
+      validate: {
+        payload: spaceSchema
+      },
+      pre: [routePreCheckLicenseFn]
     }
   });
 
@@ -156,7 +162,7 @@ export function initSpacesApi(server) {
       let result;
       try {
         result = await client.create('space', { ...space }, { id, overwrite });
-      } catch(e) {
+      } catch (e) {
         return reply(wrapError(e));
       }
 

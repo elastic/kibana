@@ -66,7 +66,7 @@ export class ManageSpacePage extends React.Component {
   render() {
     const {
       name = '',
-      description = ''
+      description = '',
     } = this.state.space;
 
     return (
