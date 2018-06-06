@@ -70,19 +70,11 @@ export function createSavedObjectsService(server) {
     onBeforeWrite,
     defaultClientFactory({
       request,
-      index,
-      mappings,
-      onBeforeWrite
     }) {
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
       const callCluster = (...args) => callWithRequest(request, ...args);
 
-      const repository = repositoryProvider.getRepository({
-        index,
-        mappings,
-        onBeforeWrite,
-        callCluster
-      });
+      const repository = repositoryProvider.getRepository(callCluster);
 
       return new SavedObjectsClient(repository);
     }

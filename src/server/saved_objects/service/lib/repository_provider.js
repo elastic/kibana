@@ -34,23 +34,16 @@ export class SavedObjectsRepositoryProvider {
     this._onBeforeWrite = onBeforeWrite;
   }
 
-  getRepository(settings = {}) {
-
-    const {
-      index = this._index,
-      mappings = this._mappings,
-      onBeforeWrite = this._onBeforeWrite,
-      callCluster
-    } = settings;
+  getRepository(callCluster) {
 
     if (typeof callCluster !== 'function') {
       throw new TypeError('Repository requires a "callCluster" function to be provided.');
     }
 
     return new SavedObjectsRepository({
-      index,
-      mappings,
-      onBeforeWrite,
+      index: this._index,
+      mappings: this._mappings,
+      onBeforeWrite: this._onBeforeWrite,
       callCluster
     });
   }

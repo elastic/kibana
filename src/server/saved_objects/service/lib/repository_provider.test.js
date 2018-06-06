@@ -31,8 +31,8 @@ test('requires "callCluster" to be provided', () => {
   expect(() => provider.getRepository({})).toThrowErrorMatchingSnapshot();
 });
 
-test('uses defaults provided at provider construction time', async () => {
-  const defaultProperties = {
+test('creates a valid Repository', async () => {
+  const properties = {
     index: 'default-index',
     mappings: {
       foo: {
@@ -44,62 +44,19 @@ test('uses defaults provided at provider construction time', async () => {
     onBeforeWrite: jest.fn()
   };
 
-  const provider = new SavedObjectsRepositoryProvider(defaultProperties);
+  const provider = new SavedObjectsRepositoryProvider(properties);
 
   const callCluster = jest.fn().mockReturnValue({
     _id: 'new'
   });
 
-  const repository = provider.getRepository({
-    callCluster
-  });
+  const repository = provider.getRepository(callCluster);
 
   await repository.create('foo', {});
 
   expect(callCluster).toHaveBeenCalledTimes(1);
-  expect(defaultProperties.onBeforeWrite).toHaveBeenCalledTimes(1);
+  expect(properties.onBeforeWrite).toHaveBeenCalledTimes(1);
   expect(callCluster).toHaveBeenCalledWith('index', expect.objectContaining({
-    index: defaultProperties.index
-  }));
-});
-
-test('overrides provider defaults with per-repository settings when given', async () => {
-  const defaultProperties = {
-    index: 'default-index',
-    mappings: {
-      foo: {
-        properties: {
-          field: { type: 'string' }
-        }
-      }
-    },
-    onBeforeWrite: jest.fn()
-  };
-
-  const provider = new SavedObjectsRepositoryProvider(defaultProperties);
-
-  const overrideProperties = {
-    index: 'other-index',
-    onBeforeWrite: jest.fn()
-  };
-
-  const callCluster = jest.fn().mockReturnValue({
-    _id: 'new'
-  });
-
-  const repository = provider.getRepository({
-    ...overrideProperties,
-    callCluster
-  });
-
-  await repository.create('foo', {});
-
-  expect(callCluster).toHaveBeenCalledTimes(1);
-
-  expect(defaultProperties.onBeforeWrite).toHaveBeenCalledTimes(0);
-  expect(overrideProperties.onBeforeWrite).toHaveBeenCalledTimes(1);
-
-  expect(callCluster).toHaveBeenCalledWith('index', expect.objectContaining({
-    index: overrideProperties.index
+    index: properties.index
   }));
 });
