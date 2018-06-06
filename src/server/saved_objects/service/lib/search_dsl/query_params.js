@@ -67,43 +67,33 @@ function getFieldsForTypes(searchFields, types) {
  *  @param  {Array<string>} searchFields
  *  @return {Object}
  */
-export function getQueryParams(mappings, type, search, searchFields, filters = []) {
-  const filter = [...filters];
-  const must = [];
-
-  if (type) {
-    filter.push({ [Array.isArray(type) ? 'terms' : 'term']: { type } });
-  }
-
-  if (search) {
-    must.push({
-      simple_query_string: {
-        query: search,
-        ...getFieldsForTypes(
-          searchFields,
-          getTypes(mappings, type)
-        )
-      }
-    });
-  }
-
-  if (filter.length === 0 && must.length === 0) {
+export function getQueryParams(mappings, type, search, searchFields) {
+  if (!type && !search) {
     return {};
   }
 
-  const result = {
-    query: {
-      bool: {}
-    }
-  };
+  const bool = {};
 
-  if (filter.length > 0) {
-    result.query.bool.filter = filter;
+  if (type) {
+    bool.filter = [
+      { [Array.isArray(type) ? 'terms' : 'term']: { type } }
+    ];
   }
 
-  if (must.length > 0) {
-    result.query.bool.must = must;
+  if (search) {
+    bool.must = [
+      ...bool.must || [],
+      {
+        simple_query_string: {
+          query: search,
+          ...getFieldsForTypes(
+            searchFields,
+            getTypes(mappings, type)
+          )
+        }
+      }
+    ];
   }
 
-  return result;
+  return { query: { bool } };
 }

@@ -388,18 +388,13 @@ describe('SavedObjectsRepository', () => {
       }
     });
 
-    it('passes mappings, search, searchFields, type, sortField, sortOrder, and filters to getSearchDsl', async () => {
+    it('passes mappings, search, searchFields, type, sortField, and sortOrder to getSearchDsl', async () => {
       const relevantOpts = {
         search: 'foo*',
         searchFields: ['foo'],
         type: 'bar',
         sortField: 'name',
         sortOrder: 'desc',
-        filters: [{
-          terms: {
-            type: ['foo', 'bar']
-          }
-        }],
       };
 
       await savedObjectsRepository.find(relevantOpts);
