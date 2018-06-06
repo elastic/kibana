@@ -40,9 +40,6 @@ export class GISApp extends React.Component {
       layerName: "World Countries"
     });
 
-    const features = await vectorSource.getGeoJsonFeatureCollection();
-    console.log(features);
-
     const vectorLayer = new VectorLayer(vectorSource);
     this._kbnMap.addLayer(vectorLayer);
 
