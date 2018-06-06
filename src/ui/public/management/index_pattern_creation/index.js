@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import './register_default';
+import './register';
 export { IndexPatternCreationRegistry } from './index_pattern_creation';
 export { IndexPatternCreationFactory } from './index_pattern_creation';
 export { IndexPatternConfig } from './index_pattern_config';
