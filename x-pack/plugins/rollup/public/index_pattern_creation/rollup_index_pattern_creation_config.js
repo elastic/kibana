@@ -15,11 +15,12 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
   static key = 'rollup';
 
   constructor(httpClient) {
-    super(httpClient);
-    this.type = 'rollup';
-    this.name = 'rollup index pattern';
-    this.showSystemIndices = false;
-    this.allowWildcards = false;
+    super({
+      type: 'rollup',
+      name: 'rollup index pattern',
+      showSystemIndices: false,
+      allowWildcards: false,
+    });
 
     setHttpClient(httpClient);
     this.rollupIndex = null;

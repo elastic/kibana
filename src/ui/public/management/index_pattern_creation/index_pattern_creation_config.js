@@ -20,11 +20,16 @@
 export class IndexPatternCreationConfig {
   static key = 'default';
 
-  constructor() {
-    this.type = '';
-    this.name = 'index pattern';
-    this.showSystemIndices = true;
-    this.allowWildcards = true;
+  constructor({
+    type = '',
+    name = 'index pattern',
+    showSystemIndices = true,
+    allowWildcards = true,
+  }) {
+    this.type = type;
+    this.name = name;
+    this.showSystemIndices = showSystemIndices;
+    this.allowWildcards = allowWildcards;
   }
 
   async getIndexPatternCreationOption(urlHandler) {
