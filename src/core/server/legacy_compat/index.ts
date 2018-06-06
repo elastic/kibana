@@ -36,28 +36,49 @@ import {
 import { BehaviorSubject, k$, map } from '../../lib/kbn_observable';
 import { Env } from '../config';
 import { Root } from '../root';
+import { BasePathProxyRoot } from '../root/base_path_proxy_root';
 
-/**
- * @internal
- */
-export const injectIntoKbnServer = (rawKbnServer: any) => {
-  const legacyConfig$ = new BehaviorSubject(rawKbnServer.config);
+function initEnvironment(rawKbnServer: any) {
+  const config: LegacyConfig = rawKbnServer.config;
+
+  const legacyConfig$ = new BehaviorSubject(config);
   const config$ = k$(legacyConfig$)(
     map(legacyConfig => new LegacyConfigToRawConfigAdapter(legacyConfig))
   );
 
-  rawKbnServer.newPlatform = {
-    // Custom HTTP Listener that will be used within legacy platform by HapiJS server.
-    proxyListener: new LegacyPlatformProxifier(
-      new Root(
-        config$,
-        Env.createDefault({ kbnServer: new LegacyKbnServer(rawKbnServer) })
-      )
-    ),
+  const env = Env.createDefault({
+    kbnServer: new LegacyKbnServer(rawKbnServer),
+    // The defaults for the following parameters are retrieved by the legacy
+    // platform from the command line or from `package.json` and stored in the
+    // config, so we can borrow these parameters and avoid double parsing.
+    mode: config.get('env'),
+    packageInfo: config.get('pkg'),
+  });
 
+  return {
+    config$,
+    env,
     // Propagates legacy config updates to the new platform.
     updateConfig(legacyConfig: LegacyConfig) {
       legacyConfig$.next(legacyConfig);
     },
   };
+}
+
+/**
+ * @internal
+ */
+export const injectIntoKbnServer = (rawKbnServer: any) => {
+  const { env, config$, updateConfig } = initEnvironment(rawKbnServer);
+
+  rawKbnServer.newPlatform = {
+    // Custom HTTP Listener that will be used within legacy platform by HapiJS server.
+    proxyListener: new LegacyPlatformProxifier(new Root(config$, env)),
+    updateConfig,
+  };
+};
+
+export const createBasePathProxy = (rawKbnServer: any) => {
+  const { env, config$ } = initEnvironment(rawKbnServer);
+  return new BasePathProxyRoot(config$, env);
 };

@@ -20,22 +20,11 @@
 import { SchemaError } from '.';
 
 export class SchemaTypeError extends SchemaError {
-  public static extractMessage(error: Error | string, context?: string) {
-    const message = typeof error === 'string' ? error : error.message;
-    if (context == null) {
-      return message;
-    }
-    return `[${context}]: ${message}`;
-  }
+  constructor(error: Error | string, public readonly path: string[]) {
+    super(typeof error === 'string' ? error : error.message);
 
-  public static extractCause(error: Error | string): Error | undefined {
-    return typeof error !== 'string' ? error : undefined;
-  }
-
-  constructor(error: Error | string, key?: string) {
-    super(
-      SchemaTypeError.extractMessage(error, key),
-      SchemaTypeError.extractCause(error)
-    );
+    // Set the prototype explicitly, see:
+    // https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
+    Object.setPrototypeOf(this, SchemaTypeError.prototype);
   }
 }

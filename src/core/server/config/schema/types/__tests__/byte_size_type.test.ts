@@ -30,9 +30,9 @@ test('is required by default', () => {
   expect(() => byteSize().validate(undefined)).toThrowErrorMatchingSnapshot();
 });
 
-test('includes context in failure', () => {
+test('includes namespace in failure', () => {
   expect(() =>
-    byteSize().validate(undefined, 'foo-context')
+    byteSize().validate(undefined, {}, 'foo-namespace')
   ).toThrowErrorMatchingSnapshot();
 });
 

@@ -38,7 +38,21 @@ export default async function (kbnServer, server, config) {
   server.connection({
     host: config.get('server.host'),
     port: config.get('server.port'),
-    listener: kbnServer.newPlatform.proxyListener
+    listener: kbnServer.newPlatform.proxyListener,
+    state: {
+      strictHeader: false,
+    },
+    routes: {
+      cors: config.get('server.cors'),
+      payload: {
+        maxBytes: config.get('server.maxPayloadBytes'),
+      },
+      validate: {
+        options: {
+          abortEarly: false,
+        },
+      },
+    },
   });
 
   registerHapiPlugins(server);

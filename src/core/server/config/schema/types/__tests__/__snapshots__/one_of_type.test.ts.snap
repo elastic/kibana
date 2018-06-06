@@ -26,7 +26,7 @@ exports[`handles object with wrong type 1`] = `
 - [0.age]: expected value of type [number] but got [string]"
 `;
 
-exports[`includes context in failure 1`] = `
-"[foo-context]: types that failed validation:
-- [foo-context.0.age]: expected value of type [number] but got [string]"
+exports[`includes namespace in failure 1`] = `
+"[foo-namespace]: types that failed validation:
+- [foo-namespace.0.age]: expected value of type [number] but got [string]"
 `;

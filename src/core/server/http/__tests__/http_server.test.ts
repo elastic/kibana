@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { getEnvOptions } from '../../config/__tests__/__mocks__/env';
+
 jest.mock('fs', () => ({
   readFileSync: jest.fn(),
 }));
@@ -41,10 +43,6 @@ function getServerListener(httpServer: HttpServer) {
   return (httpServer as any).server.listener;
 }
 
-function getRedirectServerListener(httpServer: HttpServer) {
-  return (httpServer as any).redirectServer.listener;
-}
-
 beforeEach(() => {
   config = {
     host: '127.0.0.1',
@@ -53,7 +51,7 @@ beforeEach(() => {
     ssl: {},
   } as HttpConfig;
 
-  server = new HttpServer(logger.get(), new Env('/kibana', {}));
+  server = new HttpServer(logger.get(), new Env('/kibana', getEnvOptions()));
 });
 
 afterEach(async () => {
@@ -569,17 +567,6 @@ describe('with defined `redirectHttpFromPort`', () => {
 
     await server.start(configWithSSL);
   });
-
-  test('http requests are forwarded to https', async () => {
-    await supertest(getRedirectServerListener(server))
-      .get('/')
-      .expect(302)
-      .then(res => {
-        expect(res.header.location).toEqual(
-          `https://${configWithSSL.host}:${configWithSSL.port}/`
-        );
-      });
-  });
 });
 
 describe('when run within legacy platform', () => {
@@ -596,7 +583,7 @@ describe('when run within legacy platform', () => {
 
     server = new HttpServer(
       logger.get(),
-      new Env('/kibana', { kbnServer: kbnServerMock })
+      new Env('/kibana', getEnvOptions({ kbnServer: kbnServerMock }))
     );
 
     const router = new Router('/new');

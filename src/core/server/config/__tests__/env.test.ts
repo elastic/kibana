@@ -30,9 +30,11 @@ jest.mock('path', () => ({
 }));
 
 import { Env } from '../env';
+import { getEnvOptions } from './__mocks__/env';
 
 test('correctly creates default environment with empty options.', () => {
-  const defaultEnv = Env.createDefault({});
+  const envOptions = getEnvOptions();
+  const defaultEnv = Env.createDefault(envOptions);
 
   expect(defaultEnv.homeDir).toEqual('/test/cwd');
   expect(defaultEnv.configDir).toEqual('/test/cwd/config');
@@ -43,14 +45,25 @@ test('correctly creates default environment with empty options.', () => {
 
   expect(defaultEnv.getConfigFile()).toEqual('/test/cwd/config/kibana.yml');
   expect(defaultEnv.getLegacyKbnServer()).toBeUndefined();
+  expect(defaultEnv.getMode()).toEqual(envOptions.mode);
+  expect(defaultEnv.getPackageInfo()).toEqual(envOptions.packageInfo);
 });
 
 test('correctly creates default environment with options overrides.', () => {
   const kbnServerMock = {};
-  const defaultEnv = Env.createDefault({
-    config: '/some/other/path/some-kibana.yml',
-    kbnServer: kbnServerMock,
-  });
+  const defaultEnv = Env.createDefault(
+    getEnvOptions({
+      config: '/some/other/path/some-kibana.yml',
+      kbnServer: kbnServerMock,
+      mode: 'production',
+      packageInfo: {
+        branch: 'feature-v1',
+        buildNum: 100,
+        buildSha: 'feature-v1-build-sha',
+        version: 'v1',
+      },
+    })
+  );
 
   expect(defaultEnv.homeDir).toEqual('/test/cwd');
   expect(defaultEnv.configDir).toEqual('/test/cwd/config');
@@ -63,12 +76,33 @@ test('correctly creates default environment with options overrides.', () => {
     '/some/other/path/some-kibana.yml'
   );
   expect(defaultEnv.getLegacyKbnServer()).toBe(kbnServerMock);
+  expect(defaultEnv.getMode()).toEqual({
+    dev: false,
+    name: 'production',
+    prod: true,
+  });
+  expect(defaultEnv.getPackageInfo()).toEqual({
+    branch: 'feature-v1',
+    buildNum: 100,
+    buildSha: 'feature-v1-build-sha',
+    version: 'v1',
+  });
 });
 
 test('correctly creates environment with constructor.', () => {
-  const defaultEnv = new Env('/some/home/dir', {
-    config: '/some/other/path/some-kibana.yml',
-  });
+  const defaultEnv = new Env(
+    '/some/home/dir',
+    getEnvOptions({
+      config: '/some/other/path/some-kibana.yml',
+      mode: 'production',
+      packageInfo: {
+        branch: 'feature-v1',
+        buildNum: 100,
+        buildSha: 'feature-v1-build-sha',
+        version: 'v1',
+      },
+    })
+  );
 
   expect(defaultEnv.homeDir).toEqual('/some/home/dir');
   expect(defaultEnv.configDir).toEqual('/some/home/dir/config');
@@ -81,4 +115,15 @@ test('correctly creates environment with constructor.', () => {
     '/some/other/path/some-kibana.yml'
   );
   expect(defaultEnv.getLegacyKbnServer()).toBeUndefined();
+  expect(defaultEnv.getMode()).toEqual({
+    dev: false,
+    name: 'production',
+    prod: true,
+  });
+  expect(defaultEnv.getPackageInfo()).toEqual({
+    branch: 'feature-v1',
+    buildNum: 100,
+    buildSha: 'feature-v1-build-sha',
+    version: 'v1',
+  });
 });

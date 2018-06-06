@@ -29,8 +29,9 @@ import { AnyType, schema, TypeOf } from '../schema';
 import { ConfigService, ObjectToRawConfigAdapter } from '..';
 import { logger } from '../../logging/__mocks__';
 import { Env } from '../env';
+import { getEnvOptions } from './__mocks__/env';
 
-const emptyArgv = {};
+const emptyArgv = getEnvOptions();
 const defaultEnv = new Env('/kibana', emptyArgv);
 
 test('returns config at path as observable', async () => {
@@ -187,6 +188,50 @@ test('tracks unhandled paths', async () => {
   const unused = await configService.getUnusedPaths();
 
   expect(unused).toEqual(['bar.deep1.key', 'quux.deep1.key', 'quux.deep2.key']);
+});
+
+test('correctly passes context', async () => {
+  const config$ = new BehaviorSubject(
+    new ObjectToRawConfigAdapter({ foo: {} })
+  );
+
+  const env = new Env(
+    '/kibana',
+    getEnvOptions({
+      mode: 'development',
+      packageInfo: {
+        branch: 'feature-v1',
+        buildNum: 100,
+        buildSha: 'feature-v1-build-sha',
+        version: 'v1',
+      },
+    })
+  );
+
+  const configService = new ConfigService(config$, env, logger);
+  const configs = configService.atPath(
+    'foo',
+    createClassWithSchema(
+      schema.object({
+        branchRef: schema.string({
+          defaultValue: schema.context_ref('branch'),
+        }),
+        buildNumRef: schema.number({
+          defaultValue: schema.context_ref('buildNum'),
+        }),
+        buildShaRef: schema.string({
+          defaultValue: schema.context_ref('buildSha'),
+        }),
+        devRef: schema.boolean({ defaultValue: schema.context_ref('dev') }),
+        prodRef: schema.boolean({ defaultValue: schema.context_ref('prod') }),
+        versionRef: schema.string({
+          defaultValue: schema.context_ref('version'),
+        }),
+      })
+    )
+  );
+
+  expect(await k$(configs)(first(), toPromise())).toMatchSnapshot();
 });
 
 test('handles enabled path, but only marks the enabled path as used', async () => {

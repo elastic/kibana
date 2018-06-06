@@ -17,22 +17,21 @@
  * under the License.
  */
 
-import { SchemaTypeError } from '../errors';
+import { internals } from '../internals';
 import { Type } from './type';
 
 export class LiteralType<T> extends Type<T> {
-  constructor(private readonly value: T) {
-    super();
-  }
-
-  public process(value: any, context?: string): T {
-    if (value !== this.value) {
-      throw new SchemaTypeError(
-        `expected value to equal [${this.value}] but got [${value}]`,
-        context
-      );
-    }
-
-    return value;
+  constructor(value: T) {
+    super(internals.any(), {
+      // Before v13.3.0 Joi.any().value() didn't provide raw value if validation
+      // fails, so to display this value in error message we should provide
+      // custom validation function. Once we upgrade Joi, we'll be able to use
+      // `value()` with custom `any.allowOnly` error handler instead.
+      validate(valueToValidate) {
+        if (valueToValidate !== value) {
+          return `expected value to equal [${value}] but got [${valueToValidate}]`;
+        }
+      },
+    });
   }
 }

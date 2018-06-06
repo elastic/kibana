@@ -18,7 +18,7 @@
  */
 
 import typeDetect from 'type-detect';
-import { SchemaTypeError } from '../errors';
+import { internals } from '../internals';
 import { Type, TypeOptions } from './type';
 
 export type StringOptions = TypeOptions<string> & {
@@ -27,41 +27,29 @@ export type StringOptions = TypeOptions<string> & {
 };
 
 export class StringType extends Type<string> {
-  private readonly minLength: number | void;
-  private readonly maxLength: number | void;
-
   constructor(options: StringOptions = {}) {
-    super(options);
-    this.minLength = options.minLength;
-    this.maxLength = options.maxLength;
+    let schema = internals.string().allow('');
+
+    if (options.minLength !== undefined) {
+      schema = schema.min(options.minLength);
+    }
+
+    if (options.maxLength !== undefined) {
+      schema = schema.max(options.maxLength);
+    }
+
+    super(schema, options);
   }
 
-  public process(value: any, context?: string): string {
-    if (typeof value !== 'string') {
-      throw new SchemaTypeError(
-        `expected value of type [string] but got [${typeDetect(value)}]`,
-        context
-      );
+  protected handleError(type: string, { limit, value }: Record<string, any>) {
+    switch (type) {
+      case 'any.required':
+      case 'string.base':
+        return `expected value of type [string] but got [${typeDetect(value)}]`;
+      case 'string.min':
+        return `value is [${value}] but it must have a minimum length of [${limit}].`;
+      case 'string.max':
+        return `value is [${value}] but it must have a maximum length of [${limit}].`;
     }
-
-    if (this.minLength && value.length < this.minLength) {
-      throw new SchemaTypeError(
-        `value is [${value}] but it must have a minimum length of [${
-          this.minLength
-        }].`,
-        context
-      );
-    }
-
-    if (this.maxLength && value.length > this.maxLength) {
-      throw new SchemaTypeError(
-        `value is [${value}] but it must have a maximum length of [${
-          this.maxLength
-        }].`,
-        context
-      );
-    }
-
-    return value;
   }
 }

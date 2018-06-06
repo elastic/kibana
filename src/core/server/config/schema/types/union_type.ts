@@ -17,27 +17,40 @@
  * under the License.
  */
 
-import { SchemaTypesError } from '../errors';
+import typeDetect from 'type-detect';
+import { SchemaTypeError, SchemaTypesError } from '../errors';
+import { internals } from '../internals';
 import { AnyType } from './any_type';
-import { toContext } from './index';
 import { Type, TypeOptions } from './type';
 
 export class UnionType<RTS extends AnyType[], T> extends Type<T> {
-  constructor(public readonly types: RTS, options?: TypeOptions<T>) {
-    super(options);
+  constructor(types: RTS, options?: TypeOptions<T>) {
+    const schema = internals.alternatives(types.map(type => type.getSchema()));
+
+    super(schema, options);
   }
 
-  public process(value: any, context?: string): T {
-    const errors = [];
+  protected handleError(
+    type: string,
+    { reason, value }: Record<string, any>,
+    path: string[]
+  ) {
+    switch (type) {
+      case 'any.required':
+        return `expected at least one defined value but got [${typeDetect(
+          value
+        )}]`;
+      case 'alternatives.child':
+        return new SchemaTypesError(
+          'types that failed validation:',
+          path,
+          reason.map((e: SchemaTypeError, index: number) => {
+            const childPathWithIndex = e.path.slice();
+            childPathWithIndex.splice(path.length, 0, index.toString());
 
-    for (let i = 0; i < this.types.length; i++) {
-      try {
-        return this.types[i].validate(value, toContext(context, i));
-      } catch (e) {
-        errors.push(e);
-      }
+            return new SchemaTypeError(e.message, childPathWithIndex);
+          })
+        );
     }
-
-    throw new SchemaTypesError(errors, 'types that failed validation', context);
   }
 }

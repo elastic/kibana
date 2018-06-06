@@ -18,9 +18,8 @@
  */
 
 import { readFileSync } from 'fs';
-import { Request, ResponseToolkit, Server, ServerOptions } from 'hapi-latest';
+import { Server, ServerOptions } from 'hapi-latest';
 import { ServerOptions as TLSOptions } from 'https';
-import { format as formatUrl } from 'url';
 
 import { modifyUrl } from '../../utils';
 import { Env } from '../config';
@@ -28,9 +27,62 @@ import { Logger } from '../logging';
 import { HttpConfig } from './http_config';
 import { Router } from './router';
 
+export function configureHttpServer(config: HttpConfig) {
+  const options: ServerOptions = {
+    host: config.host,
+    port: config.port,
+    routes: {
+      cors: config.cors,
+      payload: {
+        maxBytes: config.maxPayload.getValueInBytes(),
+      },
+      validate: {
+        options: {
+          abortEarly: false,
+        },
+      },
+    },
+    state: {
+      strictHeader: false,
+    },
+  };
+
+  const ssl = config.ssl;
+  if (ssl.enabled) {
+    const tlsOptions: TLSOptions = {
+      ca:
+        config.ssl.certificateAuthorities &&
+        config.ssl.certificateAuthorities.map(caFilePath =>
+          readFileSync(caFilePath)
+        ),
+      cert: readFileSync(ssl.certificate!),
+      ciphers: config.ssl.cipherSuites.join(':'),
+      // We use the server's cipher order rather than the client's to prevent the BEAST attack.
+      honorCipherOrder: true,
+      key: readFileSync(ssl.key!),
+      passphrase: ssl.keyPassphrase,
+      secureOptions: ssl.getSecureOptions(),
+    };
+
+    // TODO: Hapi types have a typo in `tls` property type definition: `https.RequestOptions` is used instead of
+    // `https.ServerOptions`, and `honorCipherOrder` isn't presented in `https.RequestOptions`.
+    options.tls = tlsOptions as any;
+  }
+
+  const server = new Server(options);
+  server.listener.on('clientError', (err, socket) => {
+    if (socket.writable) {
+      socket.end(new Buffer('HTTP/1.1 400 Bad Request\r\n\r\n', 'ascii'));
+    } else {
+      socket.destroy(err);
+    }
+  });
+
+  return { server, options };
+}
+
 export class HttpServer {
   private server?: Server;
-  private redirectServer?: Server;
   private registeredRouters: Set<Router> = new Set();
 
   constructor(private readonly log: Logger, private readonly env: Env) {}
@@ -50,13 +102,7 @@ export class HttpServer {
   }
 
   public async start(config: HttpConfig) {
-    this.server = this.initializeServer(config);
-
-    // If a redirect port is specified, we start an http server at this port and
-    // redirect all requests to the ssl port.
-    if (config.ssl.enabled && config.ssl.redirectHttpFromPort !== undefined) {
-      await this.setupRedirectServer(config);
-    }
+    this.server = configureHttpServer(config).server;
 
     this.setupBasePathRewrite(this.server, config);
 
@@ -94,14 +140,6 @@ export class HttpServer {
       });
     }
 
-    this.server.listener.on('clientError', (err, socket) => {
-      if (socket.writable) {
-        socket.end(new Buffer('HTTP/1.1 400 Bad Request\r\n\r\n', 'ascii'));
-      } else {
-        socket.destroy(err);
-      }
-    });
-
     this.log.info(`starting http server [${config.host}:${config.port}]`);
 
     await this.server.start();
@@ -114,58 +152,6 @@ export class HttpServer {
       await this.server.stop();
       this.server = undefined;
     }
-
-    if (this.redirectServer !== undefined) {
-      await this.redirectServer.stop();
-      this.redirectServer = undefined;
-    }
-  }
-
-  private initializeServer(config: HttpConfig) {
-    const options: ServerOptions = {
-      host: config.host,
-      port: config.port,
-      routes: {
-        cors: config.cors,
-        payload: {
-          maxBytes: config.maxPayload.getValueInBytes(),
-        },
-        validate: {
-          options: {
-            abortEarly: false,
-          },
-        },
-      },
-      state: {
-        strictHeader: false,
-      },
-    };
-
-    const ssl = config.ssl;
-    if (ssl.enabled) {
-      const tlsOptions: TLSOptions = {
-        ca:
-          config.ssl.certificateAuthorities &&
-          config.ssl.certificateAuthorities.map(caFilePath =>
-            readFileSync(caFilePath)
-          ),
-
-        cert: readFileSync(ssl.certificate!),
-        ciphers: config.ssl.cipherSuites.join(':'),
-        // We use the server's cipher order rather than the client's to prevent the BEAST attack.
-        honorCipherOrder: true,
-
-        key: readFileSync(ssl.key!),
-        passphrase: ssl.keyPassphrase,
-        secureOptions: ssl.getSecureOptions(),
-      };
-
-      // TODO: Hapi types have a typo in `tls` property type definition: `https.RequestOptions` is used instead of
-      // `https.ServerOptions`, and `honorCipherOrder` isn't presented in `https.RequestOptions`.
-      options.tls = tlsOptions as any;
-    }
-
-    return new Server(options);
   }
 
   private setupBasePathRewrite(server: Server, config: HttpConfig) {
@@ -174,81 +160,32 @@ export class HttpServer {
     }
 
     const basePath = config.basePath;
-    server.ext(
-      'onRequest',
-      (request: Request, responseToolkit: ResponseToolkit) => {
-        const newURL = modifyUrl(request.url.href!, urlParts => {
-          if (
-            urlParts.pathname != null &&
-            urlParts.pathname.startsWith(basePath)
-          ) {
-            urlParts.pathname = urlParts.pathname.replace(basePath, '') || '/';
-          } else {
-            return {};
-          }
-        });
-
-        if (!newURL) {
-          return responseToolkit
-            .response('Not Found')
-            .code(404)
-            .takeover();
+    server.ext('onRequest', (request, responseToolkit) => {
+      const newURL = modifyUrl(request.url.href!, urlParts => {
+        if (
+          urlParts.pathname != null &&
+          urlParts.pathname.startsWith(basePath)
+        ) {
+          urlParts.pathname = urlParts.pathname.replace(basePath, '') || '/';
+        } else {
+          return {};
         }
+      });
 
-        request.setUrl(newURL);
-        // We should update raw request as well since it can be proxied to the old platform
-        // where base path isn't expected.
-        request.raw.req.url = request.url.href;
-
-        return responseToolkit.continue;
-      }
-    );
-  }
-
-  private async setupRedirectServer(config: HttpConfig) {
-    this.log.info(
-      `starting HTTP --> HTTPS redirect server [${config.host}:${
-        config.ssl.redirectHttpFromPort
-      }]`
-    );
-
-    this.redirectServer = new Server({
-      host: config.host,
-      port: config.ssl.redirectHttpFromPort,
-    });
-
-    this.redirectServer.ext(
-      'onRequest',
-      (request: Request, responseToolkit: ResponseToolkit) => {
+      if (!newURL) {
         return responseToolkit
-          .redirect(
-            formatUrl({
-              hostname: config.host,
-              pathname: request.url.pathname,
-              port: config.port,
-              protocol: 'https',
-              search: request.url.search,
-            })
-          )
+          .response('Not Found')
+          .code(404)
           .takeover();
       }
-    );
 
-    try {
-      await this.redirectServer.start();
-    } catch (err) {
-      if (err.code === 'EADDRINUSE') {
-        throw new Error(
-          'The redirect server failed to start up because port ' +
-            `${
-              config.ssl.redirectHttpFromPort
-            } is already in use. Ensure the port specified ` +
-            'in `server.ssl.redirectHttpFromPort` is available.'
-        );
-      } else {
-        throw err;
-      }
-    }
+      request.setUrl(newURL);
+      // We should update raw request as well since it can be proxied to the old platform
+      // where base path isn't expected.
+      request.raw.req.url = request.url.href;
+
+      return responseToolkit.continue;
+    });
   }
 
   private getRouteFullPath(routerPath: string, routePath: string) {
