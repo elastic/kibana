@@ -78,6 +78,10 @@ class KueryBarView extends Component {
   };
 
   render() {
+    if (!this.state.indexPattern) {
+      return null;
+    }
+
     return (
       <Container>
         <Typeahead
