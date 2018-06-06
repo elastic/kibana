@@ -33,7 +33,4 @@ const actionDefs = {
   LOADING_STOP: () => ({ loading: false })
 };
 
-const { actions, reducer } = reduxBootstrap({ defaultState, actionDefs });
-
-export const anomalyExplorerActions = actions;
-export const anomalyExplorerReducer = reducer;
+export const anomalyExplorerModule = reduxBootstrap({ defaultState, actionDefs });

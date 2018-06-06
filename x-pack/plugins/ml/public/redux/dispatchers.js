@@ -7,12 +7,12 @@
 import { bindActionCreators } from 'redux';
 import { store } from './store';
 
-import { anomalyExplorerActions } from './modules/anomaly_explorer';
-import { dragSelectActions } from './modules/drag_select';
-import { showChartsActions } from './modules/show_charts';
+import { anomalyExplorerModule } from './modules/anomaly_explorer';
+import { dragSelectModule } from './modules/drag_select';
+import { showChartsModule } from './modules/show_charts';
 
 export const dispatch = bindActionCreators({
-  ...anomalyExplorerActions,
-  ...dragSelectActions,
-  ...showChartsActions
+  ...anomalyExplorerModule.actions,
+  ...dragSelectModule.actions,
+  ...showChartsModule.actions
 }, store.dispatch);

@@ -6,9 +6,7 @@
 
 import { reduxBootstrap } from '../util';
 
-const actionDefs = { SHOW_CHARTS: (d) => d };
-
-const { actions, reducer } = reduxBootstrap({ defaultState: true, actionDefs });
-
-export const showChartsActions = actions;
-export const showChartsReducer = reducer;
+export const showChartsModule = reduxBootstrap({
+  defaultState: true,
+  actionDefs: { SHOW_CHARTS: (d) => d }
+});

@@ -17,14 +17,14 @@ import 'rxjs/add/operator/distinctUntilChanged';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/takeUntil';
 
-import { anomalyExplorerReducer } from './modules/anomaly_explorer';
-import { dragSelectReducer } from './modules/drag_select';
-import { showChartsReducer } from './modules/show_charts';
+import { anomalyExplorerModule } from './modules/anomaly_explorer';
+import { dragSelectModule } from './modules/drag_select';
+import { showChartsModule } from './modules/show_charts';
 
 const mainReducer = combineReducers({
-  anomalyExplorer: anomalyExplorerReducer,
-  dragSelect: dragSelectReducer,
-  showCharts: showChartsReducer
+  anomalyExplorer: anomalyExplorerModule.reducer,
+  dragSelect: dragSelectModule.reducer,
+  showCharts: showChartsModule.reducer
 });
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;

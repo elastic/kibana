@@ -20,7 +20,8 @@ const actionDefs = {
   DRAG_SELECT_UPDATE: () => ({
     cellMouseoverActive: false,
     disableDragSelectOnMouseLeave: false,
-    dragging: true
+    dragging: true,
+    selectedElements: []
   }),
   DRAG_SELECT_FINISH: (elements) => {
     if (elements.length > 1 && !ALLOW_CELL_RANGE_SELECTION) {
@@ -40,7 +41,4 @@ const actionDefs = {
   }
 };
 
-const { actions, reducer } = reduxBootstrap({ defaultState, actionDefs });
-
-export const dragSelectActions = actions;
-export const dragSelectReducer = reducer;
+export const dragSelectModule = reduxBootstrap({ defaultState, actionDefs });
