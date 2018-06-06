@@ -2,6 +2,8 @@ plugins {
   id "com.google.protobuf" version "0.8.5"
 }
 
+apply plugin: 'java'
+
 repositories {
 	mavenCentral()
 }
@@ -10,7 +12,15 @@ apply plugin: 'java'
 
 
 dependencies {
-  compile 'com.google.protobuf:protobuf-java:3.5.1'
+  compile "com.google.protobuf:protobuf-java:${rootProject.protobufJavaVersion}"
+}
+
+task startBackend(type: JavaExec) {
+  main = 'castro.Main'
+  classpath = sourceSets.main.runtimeClasspath
+  // For future args and system property
+  // args 'args'
+  // systemProperty 'key' 'value'
 }
 
 protobuf {

@@ -1,4 +1,16 @@
+apply plugin: 'war'
+apply plugin: 'idea'
+
 task startDeps(type: Exec) {
-  commandLine "/bin/bash", "-c",
-      'docker run -d  -p 9200:9200 -p 9300:9300 --name elasticsearch-castro -e discovery.type=single-node -v $PWD/data/elasticsearch:/usr/share/elasticsearch/data lambdalab/elasticsearch:7.0.0-alpha1-20180604'
+  commandLine "docker-compose", "up", "-d"
+}
+
+task stopDeps(type: Exec) {
+  commandLine "docker-compose", "down"
+}
+
+idea {
+  module {
+    excludeDirs += [file("kibana")]
+  }
 }
