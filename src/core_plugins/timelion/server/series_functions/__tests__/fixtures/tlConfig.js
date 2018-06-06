@@ -40,6 +40,13 @@ export default function () {
           }
         })
       }
+    },
+    config: function () {
+      return {
+        get: function () {
+          return 30000;
+        }
+      };
     }
   };
 

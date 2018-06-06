@@ -68,7 +68,7 @@ export default function buildRequest(config, tlConfig, scriptedFields) {
 
   return {
     index: config.index,
-    timeout: tlConfig.request.server.config().get('elasticsearch.shardTimeout') + 'ms',
+    timeout: tlConfig.server.config().get('elasticsearch.shardTimeout') + 'ms',
     body: {
       query: {
         bool: bool
