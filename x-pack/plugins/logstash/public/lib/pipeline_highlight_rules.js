@@ -9,26 +9,87 @@ import ace from 'ace';
 const { TextHighlightRules } = ace.acequire('ace/mode/text_highlight_rules');
 const { JsonHighlightRules } = ace.acequire('ace/mode/json_highlight_rules');
 
+// function rword(parentRule) {
+//   const items = [
+//     bareword,
+//     number
+//   ];
+//   return items.map(item => Object.assign(item, { next: parentRule }));
+// }
+
 export class PipelineHighlightRules extends TextHighlightRules {
   constructor() {
     super();
     console.log(JsonHighlightRules);
     this.$rules = {
       start: [
+        // {
+        //   token: 'quote',
+        //   regex: /\"/,
+        //   push: 'doubleQuotedString'
+        // },
+        // {
+        //   token: 'quote',
+        //   regex: /\'/,
+        //   push: 'singleQuotedString'
+        // }
+        {
+          token: ['pipelineSection'],
+          regex: /^(input|filter|output)/
+        },
+        {
+          token: ['brace'],
+          regex: /(\{|\})/
+        },
+        {
+          token: 'whitespace',
+          regex: /\s+/
+        },
+        {
+          defaultToken: 'error'
+        }
+      ],
+      doubleQuotedString: [
+        {
+          token: 'escapeQuote',
+          regex: /\\\"/
+        },
+        {
+          token: 'quote',
+          regex: /\"/,
+          next: 'pop'
+        },
+        {
+          defaultToken: 'quote'
+        }
+      ],
+      singleQuotedString: [
+        {
+          token: 'escapeQuote',
+          regex: /\\\'/
+        },
+        {
+          token: 'quote',
+          regex: /\'/,
+          next: 'pop'
+        },
+        {
+          defaultToken: 'quote'
+        }
+      ],
+      bareword: [
         {
           token: ['bareword'],
-          regex: /[A-Za-z_] [A-Za-z0-9_]+/
+          regex: /[A-Za-z0-9_]+/
         }
-        // {
-        //   token: ['pipelineSection'],
-        //   regex: /^(input|filter|output)/
-        // },
-        // {
-        //   token: ['brace'],
-        //   regex: /(\{)/,
-        //   next: 'branchOrPlugin'
-        // },
       ],
+      number: [
+        {
+          token: ['number'],
+          regex: /[0-9]+(.[0-9]+)?/
+        }
+      ],
+
       // branchOrPlugin: [
       //   {
       //     token: ['brace'],
@@ -109,6 +170,7 @@ export class PipelineHighlightRules extends TextHighlightRules {
     //   regex: '^```$',
     //   next: 'start',
     // }]);
+    this.normalizeRules();
   }
 }
 //   rule config
