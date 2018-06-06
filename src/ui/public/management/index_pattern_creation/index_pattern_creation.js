@@ -17,13 +17,7 @@
  * under the License.
  */
 
-import { uiRegistry } from 'ui/registry/_registry';
-
-export const IndexPatternCreationRegistry = uiRegistry({
-  name: 'indexPatternCreation',
-  index: ['name'],
-  order: ['order'],
-});
+import { IndexPatternCreationConfigRegistry } from './index_pattern_creation_config_registry';
 
 class IndexPatternCreation {
   constructor(registry, httpClient, type) {
@@ -55,7 +49,7 @@ class IndexPatternCreation {
 
 export const IndexPatternCreationFactory = (Private, $http) => {
   return (type = 'default') => {
-    const indexPatternCreationRegistry = Private(IndexPatternCreationRegistry);
+    const indexPatternCreationRegistry = Private(IndexPatternCreationConfigRegistry);
     const indexPatternCreationProvider = new IndexPatternCreation(indexPatternCreationRegistry, $http, type);
     return indexPatternCreationProvider;
   };

@@ -17,7 +17,10 @@
  * under the License.
  */
 
-import './register';
-export { IndexPatternCreationFactory } from './index_pattern_creation';
-export { IndexPatternCreationConfig } from './index_pattern_creation_config';
-export { IndexPatternCreationConfigRegistry } from './index_pattern_creation_config_registry';
+import { uiRegistry } from 'ui/registry/_registry';
+
+export const IndexPatternCreationConfigRegistry = uiRegistry({
+  name: 'indexPatternCreation',
+  index: ['name'],
+  order: ['order'],
+});
