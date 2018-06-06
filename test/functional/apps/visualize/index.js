@@ -53,6 +53,5 @@ export default function ({ getService, loadTestFile }) {
     loadTestFile(require.resolve('./_histogram_request_start'));
     loadTestFile(require.resolve('./_vega_chart'));
     loadTestFile(require.resolve('./_lab_mode'));
-    loadTestFile(require.resolve('./_visualize_screenshots'));
   });
 }
