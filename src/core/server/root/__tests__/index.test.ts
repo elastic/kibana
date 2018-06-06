@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { getEnvOptions } from '../../config/__tests__/__mocks__/env';
+
 const loggerConfig = {};
 
 const configService = {
@@ -62,7 +64,7 @@ import { Root } from '../';
 import { Env } from '../../config/env';
 import { RawConfig } from '../../config/raw_config';
 
-const env = new Env('.', {});
+const env = new Env('.', getEnvOptions());
 const config$ = new BehaviorSubject({} as RawConfig);
 
 const mockProcessExit = jest
