@@ -5,10 +5,10 @@
     ],
     "patterns": [
       "_xpack/migration/assistance",
-      "_xpack/migration/assistance/{index_name}"
+      "_xpack/migration/assistance/{index}"
     ]
   },
-  "_xpack/migration/upgrade/{index_name}": {
+  "_xpack/migration/upgrade/{index}": {
     "url_params": {
       "wait_for_completion": ["true", "false"]
     },
@@ -16,7 +16,7 @@
       "POST"
     ],
     "patterns": [
-      "_xpack/migration/upgrade/{index_name}"
+      "_xpack/migration/upgrade/{index}"
     ]
   },
   "_xpack/migration/deprecations": {
@@ -25,7 +25,7 @@
     ],
     "patterns": [
       "_xpack/migration/deprecations",
-      "{index_name}/_xpack/migration/deprecations"
+      "{index}/_xpack/migration/deprecations"
     ]
   }
 }

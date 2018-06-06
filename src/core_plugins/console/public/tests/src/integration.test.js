@@ -50,7 +50,6 @@ describe('Integration', () => {
   });
 
   function processContextTest(data, mapping, kbSchemes, requestLine, testToRun) {
-
     test(testToRun.name, async function (done) {
       let rowOffset = 0; // add one for the extra method line
       let editorValue = data;
@@ -70,19 +69,18 @@ describe('Integration', () => {
       const json = {};
       json[test.name] = kbSchemes || {};
       const testApi = kb._test.loadApisFromJson(json);
-      //if (kbSchemes) {
+      if (kbSchemes) {
       //  if (kbSchemes.globals) {
       //    $.each(kbSchemes.globals, function (parent, rules) {
       //      testApi.addGlobalAutocompleteRules(parent, rules);
       //    });
       //  }
-      //  if (kbSchemes.endpoints) {
-      //    $.each(kbSchemes.endpoints, function (endpoint, scheme) {
-      //      _.defaults(scheme, {methods: null}); // disable method testing unless specified in test
-      //      testApi.addEndpointDescription(endpoint, scheme);
-      //    });
-      //  }
-      //}
+        if (kbSchemes.endpoints) {
+          $.each(kbSchemes.endpoints, function (endpoint, scheme) {
+            testApi.addEndpointDescription(endpoint, scheme);
+          });
+        }
+      }
       kb.setActiveApi(testApi);
       const { cursor } = testToRun;
       const { row, column } =   cursor;
@@ -1021,16 +1019,19 @@ describe('Integration', () => {
           search_type: ['count', 'query_then_fetch'],
           scroll: '10m',
         },
+        methods: ['GET'],
         data_autocomplete_rules: {},
       },
       '_cluster/stats': {
         patterns: ['_cluster/stats'],
         indices_mode: 'none',
         data_autocomplete_rules: {},
+        methods: ['GET'],
       },
       '_cluster/nodes/stats': {
         patterns: ['_cluster/nodes/stats'],
         data_autocomplete_rules: {},
+        methods: ['GET'],
       },
     },
   };
@@ -1131,7 +1132,7 @@ describe('Integration', () => {
 
   contextTests(null, MAPPING, CLUSTER_KB, 'GET cl', [
     {
-      name: 'Endpoints by subpart',
+      name: 'Endpoints by subpart GET',
       cursor: { row: 0, column: 6 },
       autoCompleteSet: [
         { name: '_cluster/nodes/stats', meta: 'endpoint' },
@@ -1143,20 +1144,15 @@ describe('Integration', () => {
       prefixToAdd: '',
       suffixToAdd: '',
       initialValue: 'cl',
+      method: 'GET'
     },
   ]);
 
   contextTests(null, MAPPING, CLUSTER_KB, 'POST cl', [
     {
-      name: 'Endpoints by subpart',
+      name: 'Endpoints by subpart POST',
       cursor: { row: 0, column: 7 },
-      autoCompleteSet: [
-        { name: '_cluster/nodes/stats', meta: 'endpoint' },
-        { name: '_cluster/stats', meta: 'endpoint' },
-        { name: '_search', meta: 'endpoint' },
-        { name: 'index1', meta: 'index' },
-        { name: 'index2', meta: 'index' },
-      ],
+      no_context: true,
       prefixToAdd: '',
       suffixToAdd: '',
       initialValue: 'cl',
