@@ -12,6 +12,7 @@ export const staticColumn = () => ({
       types: ['string'],
       aliases: ['column'],
       help: 'The name of the new column column',
+      required: true,
     },
     value: {
       types: ['string', 'number', 'boolean', 'null'],
@@ -21,8 +22,6 @@ export const staticColumn = () => ({
     },
   },
   fn: (context, args) => {
-    if (!args._) throw new Error('Must provide a column name');
-
     const rows = context.rows.map(row => ({ ...row, [args._]: args.value }));
     const type = getType(rows[0][args._]);
     const columns = [...context.columns];

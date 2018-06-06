@@ -36,30 +36,16 @@ describe('mapColumn', () => {
     });
   });
 
-  describe('missing args', () => {
-    describe('_', () => {
-      it('throws when no column name is provided', () => {
-        expect(() => fn(testTable, { expression: pricePlusTwo })).to.throwException(e => {
-          expect(e.message).to.be('Must provide a column name');
-        });
+  describe('expression', () => {
+    it('maps null values to the new column', () => {
+      return fn(testTable, { _: 'empty' }).then(result => {
+        const emptyColumnIndex = result.columns.findIndex(({ name }) => name === 'empty');
+        const arbitraryRowIndex = 8;
 
-        expect(() => fn(testTable, { _: '', expression: pricePlusTwo })).to.throwException(e => {
-          expect(e.message).to.be('Must provide a column name');
-        });
-      });
-    });
-
-    describe('expression', () => {
-      it('maps null values to the new column', () => {
-        return fn(testTable, { _: 'empty' }).then(result => {
-          const emptyColumnIndex = result.columns.findIndex(({ name }) => name === 'empty');
-          const arbitraryRowIndex = 8;
-
-          expect(result.columns[emptyColumnIndex])
-            .to.have.property('name', 'empty')
-            .and.to.have.property('type', 'null');
-          expect(result.rows[arbitraryRowIndex]).to.have.property('empty', null);
-        });
+        expect(result.columns[emptyColumnIndex])
+          .to.have.property('name', 'empty')
+          .and.to.have.property('type', 'null');
+        expect(result.rows[arbitraryRowIndex]).to.have.property('empty', null);
       });
     });
   });

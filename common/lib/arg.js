@@ -2,6 +2,7 @@ import { includes } from 'lodash';
 
 export function Arg(config) {
   this.name = config.name;
+  this.required = config.required || false;
   this.help = config.help;
   this.types = config.types || [];
   this.default = config.default;

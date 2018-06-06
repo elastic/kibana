@@ -1,4 +1,4 @@
-import { keys, last, mapValues, reduce, zipObject } from 'lodash';
+import { each, keys, last, mapValues, reduce, zipObject } from 'lodash';
 import clone from 'lodash.clone';
 import { getType } from '../lib/get_type';
 import { fromExpression } from '../lib/ast';
@@ -122,6 +122,23 @@ export function interpretProvider(config) {
       },
       {}
     );
+
+    // Check for missing required arguments
+    each(argDefs, argDef => {
+      const { aliases, default: argDefault, name: argName, required } = argDef;
+      if (
+        typeof argDefault === 'undefined' &&
+        required &&
+        typeof dealiasedArgAsts[argName] === 'undefined'
+      ) {
+        if (aliases.length === 0) {
+          throw new Error(`${fnDef.name} requires an argument`);
+        } else {
+          const errorArg = argName === '_' ? aliases[0] : argName; // use an alias if _ is the missing arg
+          throw new Error(`${fnDef.name} requires an "${errorArg}" argument`);
+        }
+      }
+    });
 
     // Fill in default values from argument definition
     const argAstsWithDefaults = reduce(

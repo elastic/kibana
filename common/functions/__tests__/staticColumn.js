@@ -24,29 +24,11 @@ describe('staticColumn', () => {
     expect(result.rows.every(row => row.name === 'John')).to.be(true);
   });
 
-  describe('missing args:', () => {
-    describe('_', () => {
-      it('throws when no column name or invalid column name is provided', () => {
-        expect(() => fn(testTable)).to.throwException(e => {
-          expect(e.message).to.be('Must provide a column name');
-        });
-        expect(() => fn(testTable, { value: 'foo' })).to.throwException(e => {
-          expect(e.message).to.be('Must provide a column name');
-        });
-        expect(() => fn(testTable, { _: '', value: 'foo' })).to.throwException(e => {
-          expect(e.message).to.be('Must provide a column name');
-        });
-      });
-    });
+  it('adds a column with null values', () => {
+    const result = fn(testTable, { _: 'empty' });
 
-    describe('value', () => {
-      it('adds a column with null values', () => {
-        const result = fn(testTable, { _: 'empty' });
-
-        expect(result.type).to.be('datatable');
-        expect(result.columns).to.eql([...testTable.columns, { name: 'empty', type: 'null' }]);
-        expect(result.rows.every(row => row.empty === null)).to.be(true);
-      });
-    });
+    expect(result.type).to.be('datatable');
+    expect(result.columns).to.eql([...testTable.columns, { name: 'empty', type: 'null' }]);
+    expect(result.rows.every(row => row.empty === null)).to.be(true);
   });
 });

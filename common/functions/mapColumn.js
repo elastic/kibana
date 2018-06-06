@@ -13,6 +13,7 @@ export const mapColumn = () => ({
       types: ['string'],
       aliases: ['column'],
       help: 'The name of the resulting column',
+      required: true,
     },
     expression: {
       types: ['boolean', 'number', 'string', 'null'],
@@ -22,8 +23,6 @@ export const mapColumn = () => ({
     },
   },
   fn: (context, args) => {
-    if (!args._) throw new Error('Must provide a column name');
-
     args.expression = args.expression || (() => Promise.resolve(null));
 
     const columns = [...context.columns];
