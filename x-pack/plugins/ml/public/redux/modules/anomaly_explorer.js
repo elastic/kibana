@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { reduxBootstrap } from '../util';
+import { createModule } from '../util';
 
 // default state and reducer
 const defaultState = {
@@ -33,4 +33,4 @@ const actionDefs = {
   LOADING_STOP: () => ({ loading: false })
 };
 
-export const anomalyExplorerModule = reduxBootstrap({ defaultState, actionDefs });
+export const anomalyExplorerModule = createModule({ defaultState, actionDefs });

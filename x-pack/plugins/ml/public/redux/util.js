@@ -21,15 +21,15 @@ export function createActionCreators(actionNames) {
   }, {});
 }
 
-export function createActions(actionNames) {
+export function createActionDefinitions(actionNames) {
   return {
     actionTypes: createEnum(actionNames),
     actions: createActionCreators(actionNames)
   };
 }
 
-export const reduxBootstrap = ({ defaultState, actionDefs }) => {
-  const { actionTypes, actions } = createActions(Object.keys(actionDefs));
+export const createModule = ({ defaultState, actionDefs }) => {
+  const { actionTypes, actions } = createActionDefinitions(Object.keys(actionDefs));
 
   const reducer = (state = defaultState, action) => {
     if (

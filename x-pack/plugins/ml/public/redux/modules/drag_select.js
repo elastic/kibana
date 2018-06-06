@@ -5,7 +5,7 @@
  */
 
 // default state and reducer
-import { reduxBootstrap } from '../util';
+import { createModule } from '../util';
 
 const ALLOW_CELL_RANGE_SELECTION = true;
 
@@ -41,4 +41,4 @@ const actionDefs = {
   }
 };
 
-export const dragSelectModule = reduxBootstrap({ defaultState, actionDefs });
+export const dragSelectModule = createModule({ defaultState, actionDefs });

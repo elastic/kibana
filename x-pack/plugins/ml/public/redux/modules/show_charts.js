@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { reduxBootstrap } from '../util';
+import { createModule } from '../util';
 
-export const showChartsModule = reduxBootstrap({
+export const showChartsModule = createModule({
   defaultState: true,
   actionDefs: { SHOW_CHARTS: (d) => d }
 });
