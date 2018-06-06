@@ -27,3 +27,33 @@ export function createActions(actionNames) {
     actions: createActionCreators(actionNames)
   };
 }
+
+export const reduxBootstrap = ({ defaultState, actionDefs }) => {
+  const { actionTypes, actions } = createActions(Object.keys(actionDefs));
+
+  const reducer = (state = defaultState, action) => {
+    if (
+      actionDefs[action.type] !== undefined &&
+      typeof state === 'object' &&
+      state !== null
+    ) {
+      if (action.payload === null) {
+        return state;
+      }
+      return { ...state, ...actionDefs[action.type](action.payload) };
+    } else if (
+      actionDefs[action.type] !== undefined &&
+      (typeof state !== 'object' || state === null)
+    ) {
+      return action.payload;
+    } else {
+      return state;
+    }
+  };
+
+  return {
+    actionTypes,
+    actions,
+    reducer
+  };
+};

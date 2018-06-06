@@ -4,18 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createActions } from '../util';
+import { reduxBootstrap } from '../util';
 
-const { actionTypes, actions } = createActions(['SHOW_CHARTS']);
+const actionDefs = { SHOW_CHARTS: (d) => d };
+
+const { actions, reducer } = reduxBootstrap({ defaultState: true, actionDefs });
 
 export const showChartsActions = actions;
-
-export const showChartsReducer = (state = true, action) => {
-  switch (action.type) {
-    case actionTypes.SHOW_CHARTS:
-      return action.payload;
-
-    default:
-      return state;
-  }
-};
+export const showChartsReducer = reducer;
