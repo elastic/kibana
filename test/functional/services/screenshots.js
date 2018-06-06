@@ -22,7 +22,7 @@ import { writeFile, readFileSync } from 'fs';
 import { fromNode as fcb, promisify } from 'bluebird';
 import mkdirp from 'mkdirp';
 import del from 'del';
-import { comparePngs, getSize } from './lib/compare_pngs';
+import { comparePngs } from './lib/compare_pngs';
 
 const mkdirAsync = promisify(mkdirp);
 const writeFileAsync = promisify(writeFile);
@@ -61,14 +61,6 @@ export async function ScreenshotsProvider({ getService }) {
         await mkdirAsync(FAILURE_DIRECTORY);
         return await comparePngs(sessionPath, baselinePath, failurePath, SESSION_DIRECTORY, log);
       }
-    }
-
-
-    async getScreenshotSize() {
-      log.debug('getScreenshotSize');
-      const sessionPath = resolve(SESSION_DIRECTORY, 'temp.png');
-      await this._take(sessionPath);
-      return await getSize(sessionPath, SESSION_DIRECTORY);
     }
 
     async take(name) {
