@@ -106,26 +106,29 @@ class DataTableFormat extends Component {
 
   render() {
     const { columns, rows } = this.state;
-    const search = {
-      toolsRight: [
-        <DataDownloadOptions
-          columns={this.state.columns}
-          rows={this.state.rows}
-          isFormatted={this.props.isFormatted}
-          title={this.props.exportTitle}
-        />
-      ]
-    };
+
     return (
-      <EuiInMemoryTable
-        data-test-subj="inspectorTable"
-        columns={columns}
-        items={rows}
-        sorting={true}
-        pagination={true}
-        search={search}
-        compressed={true}
-      />
+      <React.Fragment>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={true} />
+          <EuiFlexItem grow={false}>
+            <DataDownloadOptions
+              columns={this.state.columns}
+              rows={this.state.rows}
+              isFormatted={this.props.isFormatted}
+              title={this.props.exportTitle}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiInMemoryTable
+          data-test-subj="inspectorTable"
+          columns={columns}
+          items={rows}
+          sorting={true}
+          pagination={true}
+          compressed={true}
+        />
+      </React.Fragment>
     );
   }
 }
