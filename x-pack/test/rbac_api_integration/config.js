@@ -37,7 +37,7 @@ export default async function ({ readConfigFile }) {
     // with the exception of a bogus "not-a-visualization" type that I added to make sure
     // the find filtering without a type specified worked correctly. Once we have the ability
     // to specify more granular access to the objects via the Kibana privileges, this should
-    // no longer be necessarly, and it's only required as long as we do read/all privileges.
+    // no longer be necessary, and it's only required as long as we do read/all privileges.
     esArchiver: {
       directory: path.join(__dirname, 'fixtures', 'es_archiver')
     },
