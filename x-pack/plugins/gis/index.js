@@ -23,11 +23,7 @@ export function gis(kibana) {
       },
       home: ['plugins/gis/register_feature'],
       mappings: require('./mappings.json'),
-      injectDefaultVars() {
-        return { foo: "bar" };
-      }
     },
-
     config(Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
