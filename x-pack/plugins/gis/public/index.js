@@ -29,20 +29,24 @@ chrome.setRootTemplate(template);
 initTimepicker(init);
 
 
-/*
-  Uncomment the below lines. The serviceSettings module does not get loaded due to missing dependencies.
-  Those dependencies are defined in src/core_plugins/kibana/inject_vars.js
-*/
+let kbnCoreAPI = null;
 
-// uiModules
-//   .get('kibana')
-//   .run((Private, $injector) => {
-//     const serviceSettings = $injector.get('serviceSettings');
-//     console.log('serviceSettings loaded', serviceSettings);
-//   });
+uiModules
+  .get('kibana')
+  .run((Private, $injector) => {
+    const serviceSettings = $injector.get('serviceSettings');
+    kbnCoreAPI = {
+      serviceSettings: serviceSettings
+    };
+  });
 
 
 async function init() {
-  const root = document.getElementById('react-gis-root');
-  ReactDOM.render(<GISApp/>, root);
+  const handle = setInterval(() => {
+    if (kbnCoreAPI !== null) {
+      clearInterval(handle);
+      const root = document.getElementById('react-gis-root');
+      ReactDOM.render(<GISApp kbnCoreAPI={kbnCoreAPI}/>, root);
+    }
+  }, 10);
 }
