@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { getEnvOptions } from '../../config/__tests__/__mocks__/env';
+
 jest.mock('fs', () => ({
   readFileSync: jest.fn(),
 }));
@@ -49,7 +51,7 @@ beforeEach(() => {
     ssl: {},
   } as HttpConfig;
 
-  server = new HttpServer(logger.get(), new Env('/kibana', {}));
+  server = new HttpServer(logger.get(), new Env('/kibana', getEnvOptions()));
 });
 
 afterEach(async () => {
@@ -581,7 +583,7 @@ describe('when run within legacy platform', () => {
 
     server = new HttpServer(
       logger.get(),
-      new Env('/kibana', { kbnServer: kbnServerMock })
+      new Env('/kibana', getEnvOptions({ kbnServer: kbnServerMock }))
     );
 
     const router = new Router('/new');

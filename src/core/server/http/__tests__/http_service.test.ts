@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { getEnvOptions } from '../../config/__tests__/__mocks__/env';
+
 const mockHttpServer = jest.fn();
 
 jest.mock('../http_server', () => ({
@@ -56,7 +58,7 @@ test('creates and starts http server', async () => {
   const service = new HttpService(
     config$.asObservable(),
     logger,
-    new Env('/kibana', {})
+    new Env('/kibana', getEnvOptions())
   );
 
   expect(mockHttpServer.mock.instances.length).toBe(1);
@@ -82,7 +84,7 @@ test('logs error if already started', async () => {
   const service = new HttpService(
     config$.asObservable(),
     logger,
-    new Env('/kibana', {})
+    new Env('/kibana', getEnvOptions())
   );
 
   await service.start();
@@ -105,7 +107,7 @@ test('stops http server', async () => {
   const service = new HttpService(
     config$.asObservable(),
     logger,
-    new Env('/kibana', {})
+    new Env('/kibana', getEnvOptions())
   );
 
   await service.start();
@@ -133,7 +135,7 @@ test('register route handler', () => {
   const service = new HttpService(
     config$.asObservable(),
     logger,
-    new Env('/kibana', {})
+    new Env('/kibana', getEnvOptions())
   );
 
   const router = new Router('/foo');
@@ -160,7 +162,7 @@ test('throws if registering route handler after http server is started', () => {
   const service = new HttpService(
     config$.asObservable(),
     logger,
-    new Env('/kibana', {})
+    new Env('/kibana', getEnvOptions())
   );
 
   const router = new Router('/foo');

@@ -22,9 +22,24 @@ import process from 'process';
 
 import { LegacyKbnServer } from '../legacy_compat';
 
-interface EnvOptions {
+interface PackageInfo {
+  version: string;
+  branch: string;
+  buildNum: number;
+  buildSha: string;
+}
+
+interface EnvironmentMode {
+  name: 'development' | 'production';
+  dev: boolean;
+  prod: boolean;
+}
+
+export interface EnvOptions {
   config?: string;
   kbnServer?: any;
+  packageInfo: PackageInfo;
+  mode: EnvironmentMode;
   [key: string]: any;
 }
 
@@ -65,6 +80,20 @@ export class Env {
    */
   public getLegacyKbnServer(): LegacyKbnServer | undefined {
     return this.options.kbnServer;
+  }
+
+  /**
+   * Gets information about Kibana package (version, build number etc.).
+   */
+  public getPackageInfo() {
+    return this.options.packageInfo;
+  }
+
+  /**
+   * Gets mode Kibana currently run in (development or production).
+   */
+  public getMode() {
+    return this.options.mode;
   }
 
   private getDefaultConfigFile() {

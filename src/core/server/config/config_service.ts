@@ -151,7 +151,16 @@ export class ConfigService {
       );
     }
 
-    const config = ConfigClass.schema.validate(rawConfig, {}, namespace);
+    const environmentMode = this.env.getMode();
+    const config = ConfigClass.schema.validate(
+      rawConfig,
+      {
+        dev: environmentMode.dev,
+        prod: environmentMode.prod,
+        ...this.env.getPackageInfo(),
+      },
+      namespace
+    );
     return new ConfigClass(config, this.env);
   }
 
