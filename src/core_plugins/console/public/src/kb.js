@@ -30,7 +30,7 @@ import _ from 'lodash';
 import Api from './kb/api';
 
 let ACTIVE_API = new Api();
-const isNotAnIndexName = name => name[0] === '_';
+const isNotAnIndexName = name => name[0] === '_' && name !== '_all';
 
 const parametrizedComponentFactories = {
   index: function (name, parent) {
