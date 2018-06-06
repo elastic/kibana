@@ -18,30 +18,32 @@
  */
 
 import React from 'react';
+import { shallow } from 'enzyme';
 
-import {
-  EuiCallOut,
-  EuiSpacer,
-} from '@elastic/eui';
+import { FormatEditorSamples } from './samples';
 
-export const ScriptingDisabledCallOut = ({
-  isVisible = false,
-}) => {
-  return isVisible ? (
-    <div>
-      <EuiCallOut
-        title="Scripting disabled"
-        color="danger"
-        iconType="alert"
-      >
-        <p>
-          All inline scripting has been disabled in Elasticsearch. You must enable inline
-          scripting for at least one language in order to use scripted fields in Kibana.
-        </p>
-      </EuiCallOut>
-      <EuiSpacer size="m" />
-    </div>
-  ) : null;
-};
+describe('FormatEditorSamples', () => {
+  it('should render normally', async () => {
+    const component = shallow(
+      <FormatEditorSamples
+        samples={[
+          { input: 'test', output: 'TEST' },
+          { input: 123, output: 456 },
+          { input: ['foo', 'bar'], output: '<span>foo</span>, <span>bar</span>' },
+        ]}
+      />
+    );
 
-ScriptingDisabledCallOut.displayName = 'ScriptingDisabledCallOut';
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should render nothing if there are no samples', async () => {
+    const component = shallow(
+      <FormatEditorSamples
+        samples={[]}
+      />
+    );
+
+    expect(component).toMatchSnapshot();
+  });
+});

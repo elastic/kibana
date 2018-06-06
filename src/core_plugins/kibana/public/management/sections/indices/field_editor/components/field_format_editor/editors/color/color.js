@@ -75,7 +75,7 @@ export class ColorFormatEditor extends DefaultFormatEditor {
   render() {
     const { formatParams, fieldType } = this.props;
 
-    const items = formatParams.colors && formatParams.colors.map((color, index) => {
+    const items = formatParams.colors && formatParams.colors.length && formatParams.colors.map((color, index) => {
       return {
         ...color,
         index,

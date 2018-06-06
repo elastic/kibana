@@ -19,12 +19,11 @@
 
 import 'ui/field_editor';
 import { IndexPatternsFieldProvider } from 'ui/index_patterns/_field';
-import { GetEnabledScriptingLanguagesProvider } from 'ui/scripting_languages';
 import { RegistryFieldFormatEditorsProvider } from 'ui/registry/field_format_editors';
 import { KbnUrlProvider } from 'ui/url';
 import uiRoutes from 'ui/routes';
 import { toastNotifications } from 'ui/notify';
-import template from './scripted_field_editor.html';
+import template from './create_edit_field.html';
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -34,7 +33,7 @@ const REACT_FIELD_EDITOR_ID = 'reactFieldEditor';
 const renderFieldEditor = ($scope, indexPattern, field, {
   Field,
   getConfig,
-  getEnabledScriptingLanguages,
+  $http,
   fieldFormatEditors,
   redirectAway,
 }) => {
@@ -51,7 +50,7 @@ const renderFieldEditor = ($scope, indexPattern, field, {
         helpers={{
           Field,
           getConfig,
-          getEnabledScriptingLanguages,
+          $http,
           fieldFormatEditors,
           redirectAway,
         }}
@@ -91,10 +90,9 @@ uiRoutes
       }
     },
     controllerAs: 'fieldSettings',
-    controller: function FieldEditorPageController($scope, $route, $timeout, Private, docTitle, config) {
+    controller: function FieldEditorPageController($scope, $route, $timeout, $http, Private, docTitle, config) {
       const Field = Private(IndexPatternsFieldProvider);
       const getConfig = (...args) => config.get(...args);
-      const getEnabledScriptingLanguages = Private(GetEnabledScriptingLanguagesProvider);
       const fieldFormatEditors = Private(RegistryFieldFormatEditorsProvider);
       const kbnUrl = Private(KbnUrlProvider);
 
@@ -129,7 +127,7 @@ uiRoutes
       renderFieldEditor($scope, this.indexPattern, this.field, {
         Field,
         getConfig,
-        getEnabledScriptingLanguages,
+        $http,
         fieldFormatEditors,
         redirectAway: () => {
           $timeout(() => {

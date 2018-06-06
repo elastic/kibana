@@ -36,7 +36,7 @@ import {
   FormatEditorSamples
 } from '../../samples';
 
-class DateFormatEditor extends DefaultFormatEditor {
+export class DateFormatEditor extends DefaultFormatEditor {
   static formatId = 'date';
 
   constructor(props) {
@@ -72,7 +72,8 @@ class DateFormatEditor extends DefaultFormatEditor {
           }
         >
           <EuiFieldText
-            value={formatParams.pattern || ''}
+            value={formatParams.pattern}
+            placeholder={defaultPattern}
             onChange={(e) => {
               this.onChange({ pattern: e.target.value });
             }}

@@ -29,7 +29,7 @@ export const convertSampleInput = (converter, inputs) => {
       };
     });
   } catch(e) {
-    error = `An error occured while trying to use this format configuration: ${e.message}`;
+    error = `An error occurred while trying to use this format configuration: ${e.message}`;
   }
 
   return {

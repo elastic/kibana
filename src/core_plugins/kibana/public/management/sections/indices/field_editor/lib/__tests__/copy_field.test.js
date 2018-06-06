@@ -17,31 +17,22 @@
  * under the License.
  */
 
-import React from 'react';
+import { copyField } from '../copy_field';
 
-import {
-  EuiCallOut,
-  EuiSpacer,
-} from '@elastic/eui';
-
-export const ScriptingDisabledCallOut = ({
-  isVisible = false,
-}) => {
-  return isVisible ? (
-    <div>
-      <EuiCallOut
-        title="Scripting disabled"
-        color="danger"
-        iconType="alert"
-      >
-        <p>
-          All inline scripting has been disabled in Elasticsearch. You must enable inline
-          scripting for at least one language in order to use scripted fields in Kibana.
-        </p>
-      </EuiCallOut>
-      <EuiSpacer size="m" />
-    </div>
-  ) : null;
+const field = {
+  name: 'test_field',
+  scripted: true,
+  type: 'number',
+  lang: 'painless',
 };
 
-ScriptingDisabledCallOut.displayName = 'ScriptingDisabledCallOut';
+describe('copyField', () => {
+  it('should copy a field', () => {
+    const copiedField = copyField(field, {}, {});
+    copiedField.name = 'test_name_change';
+
+    expect(field.toActualField).toEqual(undefined);
+    expect(copiedField).not.toEqual(field);
+    expect(typeof copiedField.toActualField).toEqual('function');
+  });
+});

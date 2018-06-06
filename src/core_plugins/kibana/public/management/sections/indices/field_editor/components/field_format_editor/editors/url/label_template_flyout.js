@@ -21,11 +21,9 @@ import React from 'react';
 
 import {
   EuiBasicTable,
-  EuiButtonEmpty,
   EuiCode,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiText,
 } from '@elastic/eui';
 
@@ -103,14 +101,8 @@ export const LabelTemplateFlyout = ({
           />
         </EuiText>
       </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiButtonEmpty
-          iconType="cross"
-          onClick={onClose}
-        >
-          Close
-        </EuiButtonEmpty>
-      </EuiFlyoutFooter>
     </EuiFlyout>
   ) : null;
 };
+
+LabelTemplateFlyout.displayName = 'LabelTemplateFlyout';

@@ -17,4 +17,33 @@
  * under the License.
  */
 
-import './scripted_field_editor';
+import React from 'react';
+import { shallow } from 'enzyme';
+
+import { BytesFormatEditor } from './bytes';
+
+const fieldType = 'number';
+const format = {
+  getConverterFor: jest.fn().mockImplementation(() => (input) => input * 2),
+  getParamDefaults: jest.fn().mockImplementation(() => {
+    return { pattern: '0,0.[000]b' };
+  }),
+};
+const formatParams = {};
+const onChange = jest.fn();
+const onError = jest.fn();
+
+describe('BytesFormatEditor', () => {
+  it('should render normally', async () => {
+    const component = shallow(
+      <BytesFormatEditor
+        fieldType={fieldType}
+        format={format}
+        formatParams={formatParams}
+        onChange={onChange}
+        onError={onError}
+      />
+    );
+    expect(component).toMatchSnapshot();
+  });
+});

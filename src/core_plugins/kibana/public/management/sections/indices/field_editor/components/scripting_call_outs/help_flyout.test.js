@@ -18,30 +18,30 @@
  */
 
 import React from 'react';
+import { shallow } from 'enzyme';
 
-import {
-  EuiCallOut,
-  EuiSpacer,
-} from '@elastic/eui';
+import { ScriptingHelpFlyout } from './help_flyout';
 
-export const ScriptingDisabledCallOut = ({
-  isVisible = false,
-}) => {
-  return isVisible ? (
-    <div>
-      <EuiCallOut
-        title="Scripting disabled"
-        color="danger"
-        iconType="alert"
-      >
-        <p>
-          All inline scripting has been disabled in Elasticsearch. You must enable inline
-          scripting for at least one language in order to use scripted fields in Kibana.
-        </p>
-      </EuiCallOut>
-      <EuiSpacer size="m" />
-    </div>
-  ) : null;
-};
+jest.mock('ui/documentation_links', () => ({
+  getDocLink: (doc) => `(docLink for ${doc})`,
+}));
 
-ScriptingDisabledCallOut.displayName = 'ScriptingDisabledCallOut';
+describe('ScriptingHelpFlyout', () => {
+  it('should render normally', async () => {
+    const component = shallow(
+      <ScriptingHelpFlyout
+        isVisible={true}
+      />
+    );
+
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should render nothing if not visible', async () => {
+    const component = shallow(
+      <ScriptingHelpFlyout />
+    );
+
+    expect(component).toMatchSnapshot();
+  });
+});

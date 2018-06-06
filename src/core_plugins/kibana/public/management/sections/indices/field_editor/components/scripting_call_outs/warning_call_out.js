@@ -22,7 +22,6 @@ import { getDocLink } from 'ui/documentation_links';
 
 import {
   EuiCallOut,
-  EuiCode,
   EuiIcon,
   EuiLink,
   EuiSpacer,
@@ -66,3 +65,5 @@ export const ScriptingWarningCallOut = ({
     </div>
   ) : null;
 };
+
+ScriptingWarningCallOut.displayName = 'ScriptingWarningCallOut';

@@ -21,11 +21,9 @@ import React from 'react';
 
 import {
   EuiBasicTable,
-  EuiButtonEmpty,
   EuiCode,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiText,
 } from '@elastic/eui';
 
@@ -90,14 +88,8 @@ export const UrlTemplateFlyout = ({
           />
         </EuiText>
       </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiButtonEmpty
-          iconType="cross"
-          onClick={onClose}
-        >
-          Close
-        </EuiButtonEmpty>
-      </EuiFlyoutFooter>
     </EuiFlyout>
   ) : null;
 };
+
+UrlTemplateFlyout.displayName = 'UrlTemplateFlyout';

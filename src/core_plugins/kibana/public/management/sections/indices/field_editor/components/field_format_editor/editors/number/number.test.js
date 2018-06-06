@@ -18,30 +18,32 @@
  */
 
 import React from 'react';
+import { shallow } from 'enzyme';
 
-import {
-  EuiCallOut,
-  EuiSpacer,
-} from '@elastic/eui';
+import { NumberFormatEditor } from './number';
 
-export const ScriptingDisabledCallOut = ({
-  isVisible = false,
-}) => {
-  return isVisible ? (
-    <div>
-      <EuiCallOut
-        title="Scripting disabled"
-        color="danger"
-        iconType="alert"
-      >
-        <p>
-          All inline scripting has been disabled in Elasticsearch. You must enable inline
-          scripting for at least one language in order to use scripted fields in Kibana.
-        </p>
-      </EuiCallOut>
-      <EuiSpacer size="m" />
-    </div>
-  ) : null;
+const fieldType = 'number';
+const format = {
+  getConverterFor: jest.fn().mockImplementation(() => (input) => input * 2),
+  getParamDefaults: jest.fn().mockImplementation(() => {
+    return { pattern: '0,0.[000]' };
+  }),
 };
+const formatParams = {};
+const onChange = jest.fn();
+const onError = jest.fn();
 
-ScriptingDisabledCallOut.displayName = 'ScriptingDisabledCallOut';
+describe('NumberFormatEditor', () => {
+  it('should render normally', async () => {
+    const component = shallow(
+      <NumberFormatEditor
+        fieldType={fieldType}
+        format={format}
+        formatParams={formatParams}
+        onChange={onChange}
+        onError={onError}
+      />
+    );
+    expect(component).toMatchSnapshot();
+  });
+});

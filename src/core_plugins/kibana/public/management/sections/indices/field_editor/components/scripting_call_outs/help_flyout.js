@@ -119,3 +119,5 @@ export const ScriptingHelpFlyout = ({
     </EuiFlyout>
   ) : null;
 };
+
+ScriptingHelpFlyout.displayName = 'ScriptingHelpFlyout';

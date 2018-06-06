@@ -17,10 +17,12 @@
  * under the License.
  */
 
-export const getDefaultFormat = (format) => {
-  const defaultFormat = Object.assign(Object.getPrototypeOf(format), format);
-  defaultFormat.id = '';
-  defaultFormat.resolvedTitle = defaultFormat.title;
-  defaultFormat.title = '- Default -';
-  return defaultFormat;
+export const getDefaultFormat = (Format) => {
+  class DefaultFormat extends Format {
+    static id = '';
+    static resolvedTitle = Format.title;
+    static title = '- Default -';
+  }
+
+  return DefaultFormat;
 };

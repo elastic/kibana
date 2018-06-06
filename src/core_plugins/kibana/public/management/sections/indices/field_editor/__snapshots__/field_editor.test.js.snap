@@ -1,0 +1,350 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FieldEditor should render create new scripted field correctly 1`] = `
+<div>
+  <eui-text>
+    <h3>
+      Create scripted field
+    </h3>
+  </eui-text>
+  <eui-spacer
+    size="m"
+  />
+  <eui-form>
+    <scripting-disabled-callOut
+      isVisible={false}
+    />
+    <scripting-warning-callOut
+      isVisible={true}
+    />
+    <scripting-help-flyout
+      isVisible={false}
+      onClose={[Function]}
+    />
+    <eui-form-row
+      error="Name is required"
+      helpText={null}
+      isInvalid={true}
+      label="Name"
+    >
+      <eui-field-text
+        data-test-subj="editorFieldName"
+        isInvalid={true}
+        onChange={[Function]}
+        placeholder="New scripted field"
+        value=""
+      />
+    </eui-form-row>
+    <eui-form-row
+      helpText={null}
+      label="Language"
+    >
+      <eui-select
+        data-test-subj="editorFieldLang"
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "text": "painless",
+              "value": "painless",
+            },
+          ]
+        }
+        value="painless"
+      />
+    </eui-form-row>
+    <eui-form-row
+      label="Type"
+    >
+      <eui-select
+        data-test-subj="editorFieldType"
+        disabled={false}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "text": "number",
+              "value": "number",
+            },
+            Object {
+              "text": "string",
+              "value": "string",
+            },
+            Object {
+              "text": "date",
+              "value": "date",
+            },
+            Object {
+              "text": "boolean",
+              "value": "boolean",
+            },
+          ]
+        }
+        value="number"
+      />
+    </eui-form-row>
+    <React.Fragment>
+      <eui-form-row
+        helpText={
+          <span>
+            Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working.
+          </span>
+        }
+        label={
+          <span>
+            Format 
+            <span>
+              (Default: 
+              <eui-code>
+                Test format
+              </eui-code>
+              )
+            </span>
+          </span>
+        }
+      >
+        <eui-select
+          data-test-subj="editorSelectedFormatId"
+          onChange={[Function]}
+          options={
+            Array [
+              Object {
+                "text": "- Default -",
+                "value": "",
+              },
+              Object {
+                "text": "Test format",
+                "value": "test_format",
+              },
+            ]
+          }
+        />
+      </eui-form-row>
+    </React.Fragment>
+    <eui-form-row
+      label="Popularity"
+    >
+      <eui-field-number
+        data-test-subj="editorFieldCount"
+        onChange={[Function]}
+      />
+    </eui-form-row>
+    <eui-form-row
+      error="Script is required"
+      helpText={
+        <eui-link
+          onClick={[Function]}
+        >
+          Scripting help
+        </eui-link>
+      }
+      isInvalid={true}
+      label="Script"
+    >
+      <eui-textArea
+        data-test-subj="editorFieldScript"
+        isInvalid={true}
+        onChange={[Function]}
+      />
+    </eui-form-row>
+    <eui-flex-group>
+      <eui-flex-item
+        grow={false}
+      >
+        <eui-button
+          fill={true}
+          isDisabled={true}
+          onClick={[Function]}
+        >
+          Create field
+        </eui-button>
+      </eui-flex-item>
+      <eui-flex-item
+        grow={false}
+      >
+        <eui-button-empty
+          onClick={[Function]}
+        >
+          Cancel
+        </eui-button-empty>
+      </eui-flex-item>
+    </eui-flex-group>
+  </eui-form>
+  <eui-spacer
+    size="l"
+  />
+</div>
+`;
+
+exports[`FieldEditor should render edit scripted field correctly 1`] = `
+<div>
+  <eui-text>
+    <h3>
+      Edit test
+    </h3>
+  </eui-text>
+  <eui-spacer
+    size="m"
+  />
+  <eui-form>
+    <scripting-disabled-callOut
+      isVisible={false}
+    />
+    <scripting-warning-callOut
+      isVisible={true}
+    />
+    <scripting-help-flyout
+      isVisible={false}
+      onClose={[Function]}
+    />
+    <eui-form-row
+      helpText={null}
+      label="Language"
+    >
+      <eui-select
+        data-test-subj="editorFieldLang"
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "text": "painless",
+              "value": "painless",
+            },
+          ]
+        }
+        value="painless"
+      />
+    </eui-form-row>
+    <eui-form-row
+      label="Type"
+    >
+      <eui-select
+        data-test-subj="editorFieldType"
+        disabled={false}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "text": "number",
+              "value": "number",
+            },
+            Object {
+              "text": "string",
+              "value": "string",
+            },
+            Object {
+              "text": "date",
+              "value": "date",
+            },
+            Object {
+              "text": "boolean",
+              "value": "boolean",
+            },
+          ]
+        }
+        value="number"
+      />
+    </eui-form-row>
+    <React.Fragment>
+      <eui-form-row
+        helpText={
+          <span>
+            Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working.
+          </span>
+        }
+        label={
+          <span>
+            Format 
+            <span>
+              (Default: 
+              <eui-code>
+                Test format
+              </eui-code>
+              )
+            </span>
+          </span>
+        }
+      >
+        <eui-select
+          data-test-subj="editorSelectedFormatId"
+          onChange={[Function]}
+          options={
+            Array [
+              Object {
+                "text": "- Default -",
+                "value": "",
+              },
+              Object {
+                "text": "Test format",
+                "value": "test_format",
+              },
+            ]
+          }
+        />
+      </eui-form-row>
+    </React.Fragment>
+    <eui-form-row
+      label="Popularity"
+    >
+      <eui-field-number
+        data-test-subj="editorFieldCount"
+        onChange={[Function]}
+      />
+    </eui-form-row>
+    <eui-form-row
+      error={null}
+      helpText={
+        <eui-link
+          onClick={[Function]}
+        >
+          Scripting help
+        </eui-link>
+      }
+      isInvalid={false}
+      label="Script"
+    >
+      <eui-textArea
+        data-test-subj="editorFieldScript"
+        isInvalid={false}
+        onChange={[Function]}
+        value="doc.test.value"
+      />
+    </eui-form-row>
+    <eui-flex-group>
+      <eui-flex-item
+        grow={false}
+      >
+        <eui-button
+          fill={true}
+          isDisabled={false}
+          onClick={[Function]}
+        >
+          Edit field
+        </eui-button>
+      </eui-flex-item>
+      <eui-flex-item
+        grow={false}
+      >
+        <eui-button-empty
+          onClick={[Function]}
+        >
+          Cancel
+        </eui-button-empty>
+      </eui-flex-item>
+      <eui-flex-item
+        grow={false}
+      >
+        <eui-button-empty
+          color="danger"
+          onClick={[Function]}
+        >
+          Delete
+        </eui-button-empty>
+      </eui-flex-item>
+    </eui-flex-group>
+  </eui-form>
+  <eui-spacer
+    size="l"
+  />
+</div>
+`;

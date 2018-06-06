@@ -59,4 +59,8 @@ export class DefaultFormatEditor extends PureComponent {
       ...newParams
     });
   };
+
+  render() {
+    return null;
+  }
 }

@@ -22,6 +22,7 @@ import PropTypes from 'prop-types';
 import { intersection, union, get } from 'lodash';
 
 import {
+  GetEnabledScriptingLanguagesProvider,
   getDeprecatedScriptingLanguages,
   getSupportedScriptingLanguages,
 } from 'ui/scripting_languages';
@@ -79,10 +80,10 @@ export class FieldEditor extends PureComponent {
     helpers: PropTypes.shape({
       Field: PropTypes.func.isRequired,
       getConfig: PropTypes.func.isRequired,
-      getEnabledScriptingLanguages: PropTypes.func.isRequired,
+      $http: PropTypes.func.isRequired,
       fieldFormatEditors: PropTypes.object.isRequired,
       redirectAway: PropTypes.func.isRequired,
-    }),
+    })
   };
 
   constructor(props) {
@@ -108,10 +109,11 @@ export class FieldEditor extends PureComponent {
   }
 
   async init() {
-    const { getEnabledScriptingLanguages } = this.props.helpers;
+    const { $http } = this.props.helpers;
     const { field } = this.state;
     const { indexPattern } = this.props;
 
+    const getEnabledScriptingLanguages = new GetEnabledScriptingLanguagesProvider($http);
     const enabledLangs = await getEnabledScriptingLanguages();
     const scriptingLangs = intersection(enabledLangs, union(this.supportedLangs, this.deprecatedLangs));
     field.lang = scriptingLangs.includes(field.lang) ? field.lang : undefined;
@@ -492,7 +494,7 @@ export class FieldEditor extends PureComponent {
   }
 
   render() {
-    const { isReady, isCreating, scriptingLangs, field, showScriptingHelp, errors } = this.state;
+    const { isReady, isCreating, scriptingLangs, field, showScriptingHelp } = this.state;
 
     return isReady ? (
       <div>
