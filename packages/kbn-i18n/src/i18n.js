@@ -27,16 +27,13 @@
 import IntlMessageFormat from 'intl-messageformat';
 import memoizeIntlConstructor from 'intl-format-cache';
 
-const getMessageById = (messages, id) =>
-  id.split('.').reduce((val, key) => (val ? val[key] : null), messages);
+// Add all locale data to `IntlMessageFormat`.
+// TODO: Use dynamic import for asynchronous loading of specific locale data
+import 'intl-messageformat/lib/locales';
 
+const isString = value => typeof value === 'string';
+const isObject = value => typeof value === 'object';
 const hasValues = values => Object.keys(values).length > 0;
-
-const addLocaleData = localeData => {
-  if (localeData && localeData.locale) {
-    IntlMessageFormat.__addLocaleData(localeData);
-  }
-};
 
 const showError = error => {
   if (process.env.NODE_ENV !== 'production') {
@@ -44,50 +41,53 @@ const showError = error => {
   }
 };
 
-const getMessageFormat = memoizeIntlConstructor(IntlMessageFormat);
-
 export class I18n {
   static EN_LOCALE = 'en';
   static LOCALE_DELIMITER = '-';
+  static getMessageFormat = memoizeIntlConstructor(IntlMessageFormat);
 
-  static normalizeLocale(locale = '') {
+  static getMessageById(messages, id) {
+    return id
+      .split('.')
+      .reduce((val, key) => (val ? val[key] : null), messages);
+  }
+
+  static normalizeLocale(locale) {
     return locale.toLowerCase().replace('_', I18n.LOCALE_DELIMITER);
   }
+
+  _defaultLocale = I18n.EN_LOCALE;
+  _formats = {};
+  _messages = {};
 
   /**
    * Platform agnostic abstraction that helps to supply locale data to
    * UI frameworks and provides methods for the direct translation.
    * @param {Messages} messages
-   * @param {string} [locale = messages.locale||'en']
+   * @param {string} [locale = messages.locale]
    */
-  constructor(messages = {}, locale = messages.locale || I18n.EN_LOCALE) {
-    this.currentLocale = I18n.normalizeLocale(locale);
-    this.messages = { [this.currentLocale]: messages };
-    this.defaultLocale = I18n.EN_LOCALE;
-    this.formats = {};
-    IntlMessageFormat.defaultLocale = this.defaultLocale;
-
-    if (messages.localeData) {
-      addLocaleData(messages.localeData);
-    }
+  constructor(messages = {}, locale = messages.locale) {
+    this.setLocale(locale || this._defaultLocale);
+    this.addMessages(messages, this._currentLocale);
+    IntlMessageFormat.defaultLocale = this._defaultLocale;
   }
 
   /**
    * Provides a way to register translations with the engine
    * @param {Messages} messages
-   * @param {string} [locale = messages.locale||'en']
+   * @param {string} [locale = messages.locale]
    */
-  addMessages(messages = {}, locale = messages.locale || I18n.EN_LOCALE) {
+  addMessages(messages = {}, locale = messages.locale) {
+    if (!locale) {
+      showError('[I18n] A `locale` must be provided to add messages.');
+    }
+
     const normalizedLocale = I18n.normalizeLocale(locale);
 
-    this.messages[normalizedLocale] = {
-      ...this.messages[normalizedLocale],
+    this._messages[normalizedLocale] = {
+      ...this._messages[normalizedLocale],
       ...messages,
     };
-
-    if (messages.localeData) {
-      addLocaleData(messages.localeData);
-    }
   }
 
   /**
@@ -95,7 +95,7 @@ export class I18n {
    * @returns {Messages} messages
    */
   getMessages() {
-    return this.messages[this.currentLocale];
+    return this._messages[this._currentLocale];
   }
 
   /**
@@ -103,7 +103,11 @@ export class I18n {
    * @param {string} locale
    */
   setLocale(locale) {
-    this.currentLocale = I18n.normalizeLocale(locale);
+    if (!locale || !isString(locale)) {
+      showError('[I18n] A `locale` must be not non-empty string.');
+    } else {
+      this._currentLocale = I18n.normalizeLocale(locale);
+    }
   }
 
   /**
@@ -111,7 +115,7 @@ export class I18n {
    * @returns {string} locale
    */
   getLocale() {
-    return this.currentLocale;
+    return this._currentLocale;
   }
 
   /**
@@ -119,8 +123,12 @@ export class I18n {
    * @param {string} locale
    */
   setDefaultLocale(locale) {
-    this.defaultLocale = I18n.normalizeLocale(locale);
-    IntlMessageFormat.defaultLocale = this.defaultLocale;
+    if (!locale || !isString(locale)) {
+      showError('[I18n] A `locale` must be not non-empty string.');
+    } else {
+      this._defaultLocale = I18n.normalizeLocale(locale);
+      IntlMessageFormat.defaultLocale = this._defaultLocale;
+    }
   }
 
   /**
@@ -128,7 +136,7 @@ export class I18n {
    * @returns {string} defaultLocale
    */
   getDefaultLocale() {
-    return this.defaultLocale;
+    return this._defaultLocale;
   }
 
   /**
@@ -136,7 +144,11 @@ export class I18n {
    * @param {object} formats
    */
   setFormats(formats) {
-    this.formats = formats;
+    if (!isObject(formats) || !hasValues(formats)) {
+      showError('[I18n] A `formats` must be not non-empty object.');
+    } else {
+      this._formats = formats;
+    }
   }
 
   /**
@@ -144,7 +156,7 @@ export class I18n {
    * @returns {object} formats
    */
   getFormats() {
-    return this.formats;
+    return this._formats;
   }
 
   /**
@@ -152,7 +164,7 @@ export class I18n {
    * @returns {string[]} locales
    */
   getRegisteredLocales() {
-    return Object.keys(this.messages);
+    return Object.keys(this._messages);
   }
 
   /**
@@ -168,23 +180,21 @@ export class I18n {
       showError('[I18n] An `id` must be provided to translate a message.');
     }
 
-    const message = getMessageById(this.getMessages(), id);
+    const message = I18n.getMessageById(this.getMessages(), id);
 
     if (!hasValues(values) && process.env.NODE_ENV === 'production') {
       return message || defaultMessage || id;
     }
 
-    let formattedMessage;
-
     if (message) {
       try {
-        const msg = getMessageFormat(
+        const msg = I18n.getMessageFormat(
           message,
           this.getLocale(),
           this.getFormats()
         );
 
-        formattedMessage = msg.format(values);
+        return msg.format(values);
       } catch (e) {
         showError(
           `[I18n] Error formatting message: "${id}" for locale: "${this.getLocale()}"` +
@@ -192,24 +202,25 @@ export class I18n {
             `\n${e}`
         );
       }
-    } else {
-      if (!defaultMessage || this.getLocale() !== this.getDefaultLocale()) {
-        showError(
-          `[I18n] Missing message: "${id}" for locale: "${this.getLocale()}"` +
-            (defaultMessage ? ', using default message as fallback.' : '')
-        );
-      }
+    } else if (
+      !defaultMessage ||
+      this.getLocale() !== this.getDefaultLocale()
+    ) {
+      showError(
+        `[I18n] Missing message: "${id}" for locale: "${this.getLocale()}"` +
+          (defaultMessage ? ', using default message as fallback.' : '')
+      );
     }
 
-    if (!formattedMessage && defaultMessage) {
+    if (defaultMessage) {
       try {
-        const msg = getMessageFormat(
+        const msg = I18n.getMessageFormat(
           defaultMessage,
           this.getDefaultLocale(),
           this.getFormats()
         );
 
-        formattedMessage = msg.format(values);
+        return msg.format(values);
       } catch (e) {
         showError(
           `[I18n] Error formatting the default message for: "${id}"\n${e}`
@@ -217,16 +228,14 @@ export class I18n {
       }
     }
 
-    if (!formattedMessage) {
-      showError(
-        `[I18n] Cannot format message: "${id}", ` +
-          `using message ${
-            message || defaultMessage ? 'source' : 'id'
-          } as fallback.`
-      );
-    }
+    showError(
+      `[I18n] Cannot format message: "${id}", ` +
+        `using message ${
+          message || defaultMessage ? 'source' : 'id'
+        } as fallback.`
+    );
 
-    return formattedMessage || message || defaultMessage || id;
+    return message || defaultMessage || id;
   }
 }
 

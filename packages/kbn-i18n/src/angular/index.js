@@ -20,4 +20,3 @@
 export { i18nProvider } from './provider';
 export { i18nFilter } from './filter';
 export { i18nDirective } from './directive';
-export { i18nModule } from './module';
