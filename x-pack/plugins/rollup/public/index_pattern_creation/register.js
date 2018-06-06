@@ -5,6 +5,6 @@
  */
 
 import { IndexPatternCreationRegistry } from 'ui/management/index_pattern_creation';
-import { RollupIndexPatternConfig } from './rollup_index_pattern_config';
+import { RollupIndexPatternCreationConfig } from './rollup_index_pattern_creation_config';
 
-IndexPatternCreationRegistry.register(() => RollupIndexPatternConfig);
+IndexPatternCreationRegistry.register(() => RollupIndexPatternCreationConfig);

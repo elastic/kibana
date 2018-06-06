@@ -6,12 +6,12 @@
 
 import React from 'react';
 import isEqual from 'lodash/lang/isEqual';
-import { IndexPatternConfig } from 'ui/management/index_pattern_creation';
+import { IndexPatternCreationConfig } from 'ui/management/index_pattern_creation';
 
 import { CallOut } from './components/call_out';
 import { setHttpClient, getRollupIndices } from '../services/api';
 
-export class RollupIndexPatternConfig extends IndexPatternConfig {
+export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig {
   static key = 'rollup';
 
   constructor(httpClient) {
