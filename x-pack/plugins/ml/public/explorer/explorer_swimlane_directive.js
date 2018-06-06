@@ -43,7 +43,7 @@ module.directive('mlExplorerSwimlane', function ($compile, Private, mlExplorerDa
     let cellMouseoverActive = state.cellMouseoverActive;
 
     state$
-      .map(s => s.anomalyExplorer.cellMouseoverActive)
+      .map(s => s.dragSelect.cellMouseoverActive)
       .distinctUntilChanged()
       .takeUntil(destroy$)
       .subscribe(
@@ -54,7 +54,7 @@ module.directive('mlExplorerSwimlane', function ($compile, Private, mlExplorerDa
 
     // Listen for dragSelect events
     state$
-      .map(s => s.anomalyExplorer.dragging)
+      .map(s => s.dragSelect.dragging)
       .distinctUntilChanged()
       .takeUntil(destroy$)
       .subscribe(
@@ -64,7 +64,7 @@ module.directive('mlExplorerSwimlane', function ($compile, Private, mlExplorerDa
           } else {
             element.removeClass('ml-dragselect-dragging');
 
-            const elements = store.getState().anomalyExplorer.selectedElements;
+            const elements = store.getState().dragSelect.selectedElements;
 
             if (elements.length > 0) {
               const firstCellData = $(elements[0]).data('click');

@@ -4,18 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const SHOW_CHARTS = 'SHOW_CHARTS';
+import { createActions } from '../util';
 
-export const showChartsActions = {
-  showCharts: (visible) => ({ type: SHOW_CHARTS, visible })
-};
+const { actionTypes, actions } = createActions(['SHOW_CHARTS']);
 
-const defaultState = true;
+export const showChartsActions = actions;
 
-export const showChartsReducer = (state = defaultState, action) => {
+export const showChartsReducer = (state = true, action) => {
   switch (action.type) {
-    case SHOW_CHARTS:
-      return action.visible;
+    case actionTypes.SHOW_CHARTS:
+      return action.payload;
 
     default:
       return state;

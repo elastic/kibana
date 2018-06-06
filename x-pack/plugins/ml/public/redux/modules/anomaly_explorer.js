@@ -4,54 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createEnum } from '../util';
+import { createActions } from '../util';
 
-// action names
-export const actionType = createEnum([
+const { actionTypes, actions } = createActions([
   'ANOMALY_DATA_CHANGE',
-  'DRAG_SELECT_START',
-  'DRAG_SELECT_UPDATE',
-  'DRAG_SELECT_FINISH',
-  'TIMERANGE_CHANGE',
+  'TIME_RANGE_CHANGE',
   'LOADING_START',
   'LOADING_STOP'
 ]);
 
-// action creators
-const anomalyDataChange = (anomalyChartRecords, earliestMs, latestMs) => ({
-  type: actionType.ANOMALY_DATA_CHANGE,
-  anomalyChartRecords,
-  earliestMs,
-  latestMs
-});
-
-const dragSelectStart = () => ({ type: actionType.DRAG_SELECT_START });
-const dragSelectUpdate = () => ({ type: actionType.DRAG_SELECT_UPDATE });
-const dragSelectFinish = (elements) => ({
-  type: actionType.DRAG_SELECT_FINISH,
-  elements
-});
-
-const timeRangeChange = (timerange) => ({
-  type: actionType.TIMERANGE_CHANGE,
-  timerange
-});
-
-const loadingStart = () => ({ type: actionType.LOADING_START });
-const loadingStop = () => ({ type: actionType.LOADING_STOP });
-
-export const anomalyExplorerActions = {
-  anomalyDataChange,
-  dragSelectStart,
-  dragSelectUpdate,
-  dragSelectFinish,
-  timeRangeChange,
-  loadingStart,
-  loadingStop
-};
+export const anomalyExplorerActions = actions;
 
 // default state and reducer
-const ALLOW_CELL_RANGE_SELECTION = true;
 const defaultState = {
   // general
   checkboxShowChartsVisibility: false,
@@ -61,19 +25,13 @@ const defaultState = {
   // anomaly charts
   anomalyChartRecords: [],
   earliestMs: null,
-  latestMs: null,
-
-  // dragSelect
-  cellMouseoverActive: true,
-  disableDragSelectOnMouseLeave: true,
-  dragging: false,
-  selectedElements: []
+  latestMs: null
 };
 
 export const anomalyExplorerReducer = (state = defaultState, action) => {
   switch (action.type) {
-    case actionType.ANOMALY_DATA_CHANGE:
-      const { anomalyChartRecords, earliestMs, latestMs } = action;
+    case actionTypes.ANOMALY_DATA_CHANGE:
+      const { anomalyChartRecords, earliestMs, latestMs } = action.payload;
       return {
         ...state,
         anomalyChartRecords,
@@ -82,45 +40,17 @@ export const anomalyExplorerReducer = (state = defaultState, action) => {
         latestMs
       };
 
-    case actionType.DRAG_SELECT_UPDATE:
-      if (!ALLOW_CELL_RANGE_SELECTION) {
-        return state;
-      }
+    case actionTypes.TIME_RANGE_CHANGE:
       return {
         ...state,
-        cellMouseoverActive: false,
-        disableDragSelectOnMouseLeave: false,
-        dragging: true
+        earliestMs: action.payload.earliestMs,
+        latestMs: action.payload.latestMs
       };
 
-    case actionType.DRAG_SELECT_FINISH:
-      let elements = action.elements;
-      if (elements.length > 1 && !ALLOW_CELL_RANGE_SELECTION) {
-        elements = [elements[0]];
-      }
-
-      if (elements.length === 0) {
-        return state;
-      }
-      return {
-        ...state,
-        cellMouseoverActive: true,
-        disableDragSelectOnMouseLeave: true,
-        dragging: false,
-        selectedElements: action.elements
-      };
-
-    case actionType.TIMERANGE_CHANGE:
-      return {
-        ...state,
-        earliestMs: action.timerange.earliestMs,
-        latestMs: action.timerange.latestMs
-      };
-
-    case actionType.LOADING_START:
+    case actionTypes.LOADING_START:
       return { ...state, loading: true };
 
-    case actionType.LOADING_STOP:
+    case actionTypes.LOADING_STOP:
       return { ...state, loading: false };
 
     default:

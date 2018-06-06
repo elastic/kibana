@@ -18,10 +18,12 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/takeUntil';
 
 import { anomalyExplorerReducer } from './modules/anomaly_explorer';
+import { dragSelectReducer } from './modules/drag_select';
 import { showChartsReducer } from './modules/show_charts';
 
 const mainReducer = combineReducers({
   anomalyExplorer: anomalyExplorerReducer,
+  dragSelect: dragSelectReducer,
   showCharts: showChartsReducer
 });
 

@@ -229,7 +229,7 @@ module.controller('MlExplorerController', function (
   };
 
   $scope.setSwimlaneSelectActive = function (active) {
-    if (!active && store.getState().anomalyExplorer.disableDragSelectOnMouseLeave) {
+    if (!active && store.getState().dragSelect.disableDragSelectOnMouseLeave) {
       dragSelect.clearSelection();
       dragSelect.stop();
       return;
@@ -387,11 +387,11 @@ module.controller('MlExplorerController', function (
           };
         });
 
-        anomalyDataChange(
-          [],
-          timerange.earliestMs,
-          timerange.latestMs
-        );
+        anomalyDataChange({
+          anomalyChartRecords: [],
+          earliestMs: timerange.earliestMs,
+          earliestMs: timerange.latestMs
+        });
       }
     }
   };
@@ -464,9 +464,9 @@ module.controller('MlExplorerController', function (
           console.log('Explorer anomaly charts data set:', resp.records);
           anomalyChartsData = resp.records;
         }
-        anomalyDataChange(
-          anomalyChartsData, earliestMs, latestMs
-        );
+        anomalyDataChange({
+          anomalyChartRecords: anomalyChartsData, earliestMs, latestMs
+        });
 
         if (influencers.length > 0) {
           // Filter the Top Influencers list to show just the influencers from
@@ -860,7 +860,7 @@ module.controller('MlExplorerController', function (
     const bounds = timefilter.getActiveBounds();
     const earliestMs = bounds.min.valueOf();
     const latestMs = bounds.max.valueOf();
-    anomalyDataChange([], earliestMs, latestMs);
+    anomalyDataChange({ anomalyChartRecords: [], earliestMs, latestMs });
     loadDataForCharts(jobIds, [], earliestMs, latestMs);
     loadAnomaliesTableData();
   }
