@@ -38,6 +38,9 @@ import {
 export class UrlPatternMatcher {
   // This is not really a component, just a handy container to make iteration logic simpler
   constructor(parametrizedComponentFactories) {
+    // We'll group endpoints by the methods which are attached to them,
+    //to avoid suggesting endpoints that are incompatible with the
+    //method that the user has entered.
     ['HEAD', 'GET', 'PUT', 'POST', 'DELETE'].forEach((method) => {
       this[method] = {
         rootComponent: new SharedComponent('ROOT'),

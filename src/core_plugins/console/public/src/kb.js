@@ -30,14 +30,15 @@ import _ from 'lodash';
 import Api from './kb/api';
 
 let ACTIVE_API = new Api();
+const isNotAnIndexName = name => name[0] === '_';
 
 const parametrizedComponentFactories = {
   index: function (name, parent) {
-    if (name[0] === '_') return;
+    if (isNotAnIndexName(name)) return;
     return new IndexAutocompleteComponent(name, parent, false);
   },
   indices: function (name, parent) {
-    if (name[0] === '_') return;
+    if (isNotAnIndexName(name)) return;
     return new IndexAutocompleteComponent(name, parent, true);
   },
   type: function (name, parent) {
