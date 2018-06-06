@@ -55,17 +55,17 @@
       "POST"
     ]
   },
-  "_xpack/rollup/data/{index_name}": {
+  "_xpack/rollup/data/{index}": {
     "patterns": [
-      "_xpack/rollup/data/{index_name}"
+      "_xpack/rollup/data/{index}"
     ],
     "methods": [
       "GET"
     ]
   },
-  "{index_name}/_rollup_search": {
+  "{index}/_rollup_search": {
     "patterns": [
-      "{index_name}/_rollup_search"
+      "{index}/_rollup_search"
     ],
     "methods": [
       "GET"
