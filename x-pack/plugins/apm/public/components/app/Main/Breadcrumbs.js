@@ -15,7 +15,7 @@ class Breadcrumbs extends React.Component {
 
   render() {
     const { breadcrumbs, location } = this.props;
-    const { _g, kuery } = toQuery(location.search);
+    const { _g = '', kuery = '' } = toQuery(location.search);
 
     return (
       <div className="kuiLocalBreadcrumbs">
