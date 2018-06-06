@@ -194,7 +194,7 @@ export class ObjectsTable extends Component {
     this.setState({ selectedSavedObjects });
   };
 
-  onQueryChange = query => {
+  onQueryChange = ({ query }) => {
     // TODO: investigate why this happens at EUI level
     if (isSameQuery(query, this.state.activeQuery)) {
       return;
