@@ -10,7 +10,7 @@ import styled from 'styled-components';
 import Suggestions from './Suggestions';
 import ClickOutside from './ClickOutside';
 import { fontSizes, units, px, colors } from '../../../../style/variables';
-import { EuiButton } from '@elastic/eui';
+import { EuiProgress, EuiButton } from '@elastic/eui';
 
 const KEY_CODES = {
   LEFT: 37,
@@ -29,6 +29,7 @@ const Input = styled.input`
   outline: none;
   border-radius: ${px(units.quarter)};
   border: 1px solid ${colors.gray4};
+  box-shadow: none !important;
 `;
 
 export class Typeahead extends Component {
@@ -36,17 +37,11 @@ export class Typeahead extends Component {
     isSuggestionsVisible: false,
     index: null,
     value: '',
-    inputValueChanged: false
+    inputIsPristine: true
   };
 
-  componentDidUpdate(prevProps) {
-    if (prevProps.suggestions !== this.props.suggestions) {
-      this.setState({ isSuggestionsVisible: true, index: null });
-    }
-  }
-
   static getDerivedStateFromProps(props, state) {
-    if (!state.inputValueChanged && props.initialValue) {
+    if (state.inputIsPristine && props.initialValue) {
       return {
         value: props.initialValue
       };
@@ -123,13 +118,13 @@ export class Typeahead extends Component {
   };
 
   selectSuggestion = suggestion => {
-    const nextInput =
+    const nextInputValue =
       this.state.value.substr(0, suggestion.start) +
       suggestion.text +
       this.state.value.substr(suggestion.end);
 
-    this.setState({ value: nextInput, isSuggestionsVisible: false });
-    this.props.onChange(nextInput, nextInput.length);
+    this.setState({ value: nextInputValue, index: null });
+    this.props.onChange(nextInputValue, nextInputValue.length);
   };
 
   onClickOutside = () => {
@@ -138,7 +133,12 @@ export class Typeahead extends Component {
 
   onChangeInputValue = event => {
     const { value, selectionStart } = event.target;
-    this.setState({ value, inputValueChanged: true });
+    this.setState({
+      value,
+      inputIsPristine: false,
+      isSuggestionsVisible: true,
+      index: null
+    });
     this.props.onChange(value, selectionStart);
   };
 
@@ -169,26 +169,40 @@ export class Typeahead extends Component {
         style={{ position: 'relative' }}
       >
         <div style={{ display: 'flex' }}>
-          <Input
-            placeholder="Search..."
-            innerRef={node => (this.inputRef = node)}
-            type="text"
-            value={this.state.value}
-            onKeyDown={this.onKeyDown}
-            onKeyUp={this.onKeyUp}
-            onChange={this.onChangeInputValue}
-            onClick={this.onClickInput}
-            autoComplete="off"
-            spellCheck={false}
-          />
+          <div
+            style={{
+              position: 'relative',
+              flexGrow: 1,
+              marginRight: px(units.half)
+            }}
+          >
+            <Input
+              placeholder="Search..."
+              innerRef={node => (this.inputRef = node)}
+              type="text"
+              value={this.state.value}
+              onKeyDown={this.onKeyDown}
+              onKeyUp={this.onKeyUp}
+              onChange={this.onChangeInputValue}
+              onClick={this.onClickInput}
+              autoComplete="off"
+              spellCheck={false}
+            />
 
-          <EuiButton
-            onClick={this.onSubmit}
-            iconType="search"
-            fill
-            style={{ minWidth: '60px' }}
-            aria-label="Search"
-          />
+            {this.props.isLoading && (
+              <EuiProgress
+                size="xs"
+                color="accent"
+                position="absolute"
+                style={{
+                  bottom: 0,
+                  top: 'initial'
+                }}
+              />
+            )}
+          </div>
+
+          <EuiButton onClick={this.onSubmit}>Search</EuiButton>
         </div>
 
         <Suggestions
@@ -204,12 +218,14 @@ export class Typeahead extends Component {
 }
 
 Typeahead.propTypes = {
-  onSubmit: PropTypes.func.isRequired,
+  initialValue: PropTypes.string,
+  isLoading: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
-  suggestions: PropTypes.array.isRequired,
-  initialValue: PropTypes.string
+  onSubmit: PropTypes.func.isRequired,
+  suggestions: PropTypes.array.isRequired
 };
 
 Typeahead.defaultProps = {
+  isLoading: false,
   suggestions: []
 };

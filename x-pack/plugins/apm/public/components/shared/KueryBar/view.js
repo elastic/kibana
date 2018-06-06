@@ -6,6 +6,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { uniqueId } from 'lodash';
 import {
   history,
   fromQuery,
@@ -37,19 +38,28 @@ class KueryBarView extends Component {
   onChange = async (inputValue, selectionStart) => {
     const { indexPattern } = this.state;
     const { urlParams } = this.props;
-    if (!indexPattern) {
-      return;
-    }
     this.setState({ suggestions: [], isLoading: true });
 
+    const currentRequest = uniqueId();
+    this.currentRequest = currentRequest;
+
     const boolFilter = getBoolFilter(urlParams);
-    const suggestions = await getSuggestions(
-      inputValue,
-      selectionStart,
-      indexPattern,
-      boolFilter
-    );
-    this.setState({ suggestions, isLoading: false });
+    try {
+      const suggestions = await getSuggestions(
+        inputValue,
+        selectionStart,
+        indexPattern,
+        boolFilter
+      );
+
+      if (currentRequest !== this.currentRequest) {
+        return;
+      }
+
+      this.setState({ suggestions, isLoading: false });
+    } catch (e) {
+      console.error('Error while fetching suggestions', e);
+    }
   };
 
   onSubmit = inputValue => {
@@ -85,6 +95,7 @@ class KueryBarView extends Component {
     return (
       <Container>
         <Typeahead
+          isLoading={this.state.isLoading}
           initialValue={this.props.urlParams.kuery}
           onChange={this.onChange}
           onSubmit={this.onSubmit}
