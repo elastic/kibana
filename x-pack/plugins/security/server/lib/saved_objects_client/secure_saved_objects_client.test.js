@@ -97,12 +97,14 @@ describe('#create', () => {
 
   test(`calls and returns result of repository.create`, async () => {
     const type = 'foo';
+    const username = Symbol();
     const returnValue = Symbol();
     const mockRepository = {
       create: jest.fn().mockReturnValue(returnValue)
     };
     const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-      success: true
+      success: true,
+      username,
     }));
     const mockAuditLogger = createMockAuditLogger();
     const client = new SecureSavedObjectsClient({
@@ -117,6 +119,12 @@ describe('#create', () => {
 
     expect(result).toBe(returnValue);
     expect(mockRepository.create).toHaveBeenCalledWith(type, attributes, options);
+    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'create', [type], {
+      type,
+      attributes,
+      options,
+    });
   });
 });
 
@@ -187,12 +195,16 @@ describe('#bulkCreate', () => {
   });
 
   test(`calls and returns result of repository.bulkCreate`, async () => {
+    const username = Symbol();
+    const type1 = 'foo';
+    const type2 = 'bar';
     const returnValue = Symbol();
     const mockRepository = {
       bulkCreate: jest.fn().mockReturnValue(returnValue)
     };
     const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-      success: true
+      success: true,
+      username,
     }));
     const mockAuditLogger = createMockAuditLogger();
     const client = new SecureSavedObjectsClient({
@@ -201,8 +213,8 @@ describe('#bulkCreate', () => {
       auditLogger: mockAuditLogger,
     });
     const objects = [
-      { type: 'foo', otherThing: 'sup' },
-      { type: 'bar', otherThing: 'everyone' },
+      { type: type1, otherThing: 'sup' },
+      { type: type2, otherThing: 'everyone' },
     ];
     const options = Symbol();
 
@@ -210,6 +222,11 @@ describe('#bulkCreate', () => {
 
     expect(result).toBe(returnValue);
     expect(mockRepository.bulkCreate).toHaveBeenCalledWith(objects, options);
+    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'bulk_create', [type1, type2], {
+      objects,
+      options,
+    });
   });
 });
 
@@ -273,12 +290,14 @@ describe('#delete', () => {
 
   test(`calls and returns result of repository.delete`, async () => {
     const type = 'foo';
+    const username = Symbol();
     const returnValue = Symbol();
     const mockRepository = {
       delete: jest.fn().mockReturnValue(returnValue)
     };
     const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-      success: true
+      success: true,
+      username,
     }));
     const mockAuditLogger = createMockAuditLogger();
     const client = new SecureSavedObjectsClient({
@@ -292,6 +311,11 @@ describe('#delete', () => {
 
     expect(result).toBe(returnValue);
     expect(mockRepository.delete).toHaveBeenCalledWith(type, id);
+    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'delete', [type], {
+      type,
+      id,
+    });
   });
 });
 
@@ -434,12 +458,14 @@ describe('#find', () => {
 
     test(`calls and returns result of repository.find`, async () => {
       const type = 'foo';
+      const username = Symbol();
       const returnValue = Symbol();
       const mockRepository = {
         find: jest.fn().mockReturnValue(returnValue)
       };
       const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-        success: true
+        success: true,
+        username,
       }));
       const mockAuditLogger = createMockAuditLogger();
       const client = new SecureSavedObjectsClient({
@@ -447,11 +473,16 @@ describe('#find', () => {
         hasPrivileges: mockHasPrivileges,
         auditLogger: mockAuditLogger,
       });
+      const options = { type };
 
-      const result = await client.find({ type });
+      const result = await client.find(options);
 
       expect(result).toBe(returnValue);
       expect(mockRepository.find).toHaveBeenCalledWith({ type });
+      expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'find', [type], {
+        options,
+      });
     });
   });
 
@@ -553,6 +584,7 @@ describe('#find', () => {
 
     test(`calls and returns result of repository.find`, async () => {
       const type = 'foo';
+      const username = Symbol();
       const returnValue = Symbol();
       const mockRepository = {
         getTypes: jest.fn().mockReturnValue([type]),
@@ -560,7 +592,8 @@ describe('#find', () => {
       };
       const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
         success: true,
-        missing: []
+        missing: [],
+        username,
       }));
       const mockAuditLogger = createMockAuditLogger();
       const client = new SecureSavedObjectsClient({
@@ -568,11 +601,16 @@ describe('#find', () => {
         hasPrivileges: mockHasPrivileges,
         auditLogger: mockAuditLogger,
       });
+      const options = Symbol();
 
-      const result = await client.find();
+      const result = await client.find(options);
 
       expect(result).toBe(returnValue);
       expect(mockRepository.find).toHaveBeenCalledWith({ type: [type] });
+      expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'find', [type], {
+        options,
+      });
     });
   });
 });
@@ -642,12 +680,14 @@ describe('#bulkGet', () => {
   test(`calls and returns result of repository.bulkGet`, async () => {
     const type1 = 'foo';
     const type2 = 'bar';
+    const username = Symbol();
     const returnValue = Symbol();
     const mockRepository = {
       bulkGet: jest.fn().mockReturnValue(returnValue)
     };
     const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-      success: true
+      success: true,
+      username,
     }));
     const mockAuditLogger = createMockAuditLogger();
     const client = new SecureSavedObjectsClient({
@@ -664,6 +704,10 @@ describe('#bulkGet', () => {
 
     expect(result).toBe(returnValue);
     expect(mockRepository.bulkGet).toHaveBeenCalledWith(objects);
+    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'bulk_get', [type1, type2], {
+      objects,
+    });
   });
 });
 
@@ -727,12 +771,14 @@ describe('#get', () => {
 
   test(`calls and returns result of repository.get`, async () => {
     const type = 'foo';
+    const username = Symbol();
     const returnValue = Symbol();
     const mockRepository = {
       get: jest.fn().mockReturnValue(returnValue)
     };
     const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-      success: true
+      success: true,
+      username,
     }));
     const mockAuditLogger = createMockAuditLogger();
     const client = new SecureSavedObjectsClient({
@@ -746,6 +792,11 @@ describe('#get', () => {
 
     expect(result).toBe(returnValue);
     expect(mockRepository.get).toHaveBeenCalledWith(type, id);
+    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'get', [type], {
+      type,
+      id,
+    });
   });
 });
 
@@ -813,6 +864,7 @@ describe('#update', () => {
 
   test(`calls and returns result of repository.update`, async () => {
     const type = 'foo';
+    const username = Symbol();
     const returnValue = Symbol();
     const mockRepository = {
       update: jest.fn().mockReturnValue(returnValue)
@@ -834,5 +886,12 @@ describe('#update', () => {
 
     expect(result).toBe(returnValue);
     expect(mockRepository.update).toHaveBeenCalledWith(type, id, attributes, options);
+    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'update', [type], {
+      type,
+      id,
+      attributes,
+      options,
+    });
   });
 });
