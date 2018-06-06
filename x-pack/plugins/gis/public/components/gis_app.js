@@ -8,7 +8,9 @@ import React from 'react';
 import { KibanaMap } from './kibana_map';
 import { LayerControl } from './layer_control';
 import { TMSSource } from '../sources/tms_source';
+import { EMSVectorSource } from '../sources/ems_vector_source';
 import { TileLayer } from '../layers/tile_layer';
+import { VectorLayer } from '../layers/vector_layer';
 
 export class GISApp extends React.Component {
 
@@ -18,9 +20,8 @@ export class GISApp extends React.Component {
     this._layerControl = null;
   }
 
-  componentDidMount() {
 
-    this._layerControl.setKbnMap(this._kbnMap);
+  async _createPlaceholders() {
 
     //todo: some hardcoded example layers
     const defaultEmsSource = new TMSSource({
@@ -34,6 +35,23 @@ export class GISApp extends React.Component {
     const tmsLayer2 = new TileLayer(osmSource);
     this._kbnMap.addLayer(tmsLayer2);
 
+    const vectorSource = new EMSVectorSource({
+      kbnCoreAPI: this.props.kbnCoreAPI,
+      layerName: "World Countries"
+    });
+
+    const features = await vectorSource.getGeoJsonFeatureCollection();
+    console.log(features);
+
+    const vectorLayer = new VectorLayer(vectorSource);
+    this._kbnMap.addLayer(vectorLayer);
+
+  }
+
+
+  componentDidMount() {
+    this._layerControl.setKbnMap(this._kbnMap);
+    this._createPlaceholders();
   }
 
 
