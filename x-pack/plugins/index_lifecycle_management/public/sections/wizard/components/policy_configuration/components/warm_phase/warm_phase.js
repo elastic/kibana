@@ -110,8 +110,6 @@ export class WarmPhase extends Component {
       hotPhaseRolloverEnabled,
     } = this.props;
 
-    console.log('warm', phaseData, phaseData[PHASE_NODE_ATTRS]);
-
     return (
       <EuiDescribedFormGroup
         title={
