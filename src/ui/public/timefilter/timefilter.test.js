@@ -39,7 +39,8 @@ jest.mock('./lib/parse_querystring',
   () => ({
     parseQueryString: () => {
       return {
-        forceNow: '1999-01-01T00:00:00.000Z'
+        // Can not access local variable from within a mock
+        forceNow: global.nowTime
       };
     },
   }), { virtual: true });
@@ -47,6 +48,14 @@ jest.mock('./lib/parse_querystring',
 import sinon from 'sinon';
 import expect from 'expect.js';
 import { timefilter } from './timefilter';
+
+function stubNowTime(nowTime) {
+  global.nowTime = nowTime;
+}
+
+function clearNowTimeStub() {
+  delete global.nowTime;
+}
 
 describe('calculateBounds', () => {
 
@@ -61,6 +70,7 @@ describe('calculateBounds', () => {
 
   afterEach(() => {
     clock.restore();
+    clearNowTimeStub();
   });
 
   test('uses clock time by default', () => {
@@ -69,6 +79,7 @@ describe('calculateBounds', () => {
       to: 'now'
     };
 
+    stubNowTime(undefined);
     const result = timefilter.calculateBounds(timeRange);
     expect(result.min.valueOf()).to.eql(clockNowTicks - fifteenMinutesInMilliseconds);
     expect(result.max.valueOf()).to.eql(clockNowTicks);
@@ -81,6 +92,7 @@ describe('calculateBounds', () => {
     };
 
     const forceNowString = '1999-01-01T00:00:00.000Z';
+    stubNowTime(forceNowString);
     const result = timefilter.calculateBounds(timeRange);
 
     const forceNowTicks = Date.parse(forceNowString);
@@ -94,10 +106,7 @@ describe('calculateBounds', () => {
       to: 'now'
     };
 
-    /*Object.defineProperty(window.location, 'href', {
-      writable: true,
-      value: `?forceNow=malformed%20string`,
-    });*/
+    stubNowTime('not_a_parsable_date');
     expect(() => timefilter.calculateBounds(timeRange)).to.throwError();
   });
 });
