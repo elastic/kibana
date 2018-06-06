@@ -33,8 +33,13 @@ export default async function ({ readConfigFile }) {
       reportName: 'X-Pack RBAC API Integration Tests',
     },
 
+    // The saved_objects/basic archives are almost an exact replica of the ones in OSS
+    // with the exception of a bogus "not-a-visualization" type that I added to make sure
+    // the find filtering without a type specified worked correctly. Once we have the ability
+    // to specify more granular access to the objects via the Kibana privileges, this should
+    // no longer be necessarly, and it's only required as long as we do read/all privileges.
     esArchiver: {
-      directory: resolveKibanaPath(path.join('test', 'api_integration', 'fixtures', 'es_archiver'))
+      directory: path.join(__dirname, 'fixtures', 'es_archiver')
     },
 
     esTestCluster: {

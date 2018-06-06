@@ -73,7 +73,7 @@ export class SecureSavedObjectsClient {
 
     if (authorizedTypes.length === 0) {
       this._auditLogger.savedObjectsAuthorizationFailure(result.username, action, types, result.missing, { options });
-      throw this.errors.decorateForbiddenError(new Error(`Not authorized to search any types`));
+      throw this.errors.decorateForbiddenError(new Error(`Not authorized to find any types`));
     }
     this._auditLogger.savedObjectsAuthorizationSuccess(result.username, action, authorizedTypes, { options });
 
