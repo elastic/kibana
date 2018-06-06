@@ -59,7 +59,7 @@ export function getInspectorPanelAction({ closeContextMenu, panelTitle }) {
       });
     },
     isVisible: ({ embeddable }) => (
-      embeddable && embeddable.getInspectorAdapters && Inspector.isAvailable(embeddable.getInspectorAdapters())
+      embeddable && Inspector.isAvailable(embeddable.getInspectorAdapters())
     ),
   });
 }
