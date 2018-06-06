@@ -32,6 +32,11 @@ export function gis(kibana) {
 
     init(server) {
       initRoutes(server);
+
+      server.injectUiAppVars('gis', async () => {
+        return await server.getInjectedUiAppVars('kibana');
+      });
+
     }
   });
 }
