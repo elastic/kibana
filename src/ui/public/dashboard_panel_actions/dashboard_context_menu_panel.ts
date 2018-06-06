@@ -17,9 +17,37 @@
  * under the License.
  */
 
-export { EmbeddableFactory } from './embeddable_factory';
-export * from './embeddable';
-export {
-  EmbeddableFactoriesRegistryProvider,
-} from './embeddable_factories_registry';
-export { ContainerState } from './types';
+import { PanelActionAPI } from './types';
+
+interface DashboardContextMenuPanelOptions {
+  getContent?: (panelActionAPI: PanelActionAPI) => HTMLElement | undefined;
+}
+
+interface DashboardContextMenuPanelConfig {
+  id: string;
+  title: string;
+}
+
+export abstract class DashboardContextMenuPanel {
+  public readonly id: string;
+  public readonly title: string;
+
+  constructor(
+    config: DashboardContextMenuPanelConfig,
+    options: DashboardContextMenuPanelOptions = {}
+  ) {
+    this.id = config.id;
+    this.title = config.title;
+
+    if (options.getContent) {
+      this.getContent = options.getContent;
+    }
+  }
+
+  /**
+   * Optional, could be composed of actions instead of content.
+   */
+  public getContent(panelActionAPI: PanelActionAPI): HTMLElement | undefined {
+    return;
+  }
+}

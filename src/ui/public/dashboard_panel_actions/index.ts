@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import { uiRegistry } from 'ui/registry/_registry';
-
-export const DashboardPanelActionsRegistryProvider = uiRegistry({
-  name: 'dashboardPanelActions',
-  index: ['name'],
-});
+export { DashboardContextMenuPanel } from './dashboard_context_menu_panel';
+export { DashboardPanelAction } from './dashboard_panel_action';
+export {
+  DashboardPanelActionsRegistryProvider,
+} from './dashboard_panel_actions_registry';
