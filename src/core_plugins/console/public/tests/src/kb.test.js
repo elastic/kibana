@@ -78,7 +78,7 @@ describe('Knowledge base', () => {
       context,
       null,
       expectedContext.autoCompleteSet,
-      kb.getTopLevelUrlCompleteComponents()
+      kb.getTopLevelUrlCompleteComponents('GET')
     );
 
     // override context to just check on id
