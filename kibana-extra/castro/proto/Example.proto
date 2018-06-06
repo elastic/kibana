@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option java_package = "castro";
+option java_multiple_files = true;
+
+message Commit {
+    string commit = 1;
+    string committer = 2;
+    string date = 3;
+    string message= 4;
+    repeated Entry entries = 5;
+}
+
+message Entry {
+    string path = 1;
+    string blob = 2;
+    bool isBinary = 3;
+}

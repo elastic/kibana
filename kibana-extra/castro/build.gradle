@@ -9,11 +9,21 @@ node {
   download = true
 }
 
+task generateProtoJs(type: NodeTask) {
+  script = file('node_modules/.bin/pbjs')
+  args = ['-t', 'static-module', '-w', 'commonjs', '--no-delimited', '--no-encode', '--no-decode', '--es6', '-o', 'common/proto.js', 'proto/*.proto']
+}
+
+task generateProto(type: NodeTask, dependsOn: [generateProtoJs]) {
+  script = file('node_modules/.bin/pbts')
+  args = ['-o', 'common/proto.d.ts', 'common/proto.js']
+}
+
 task bootstrap(type: YarnTask) {
   args = ['kbn', 'bootstrap']
 }
 
-task startKibana(type: YarnTask) {
+task startKibana(type: YarnTask, dependsOn: [generateProto]) {
   args = ['start', '--elasticsearch.url', 'http://localhost:9201']
 }
 
@@ -31,7 +41,7 @@ task setupKibana(type: Sync, dependsOn: downloadKibana) {
   eachFile { FileCopyDetails fcp ->
     if (fcp.relativePath.pathString.startsWith("kibana-${kibanaVersion}/")) {
       def segments = fcp.relativePath.segments
-      def pathsegments =segments[1..-1] as String[]
+      def pathsegments = segments[1..-1] as String[]
       fcp.relativePath = new RelativePath(!fcp.file.isDirectory(), pathsegments)
     } else {
       fcp.exclude()

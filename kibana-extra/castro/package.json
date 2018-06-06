@@ -19,7 +19,11 @@
   "devDependencies": {
     "@elastic/eslint-config-kibana": "link:../../kibana/packages/eslint-config-kibana",
     "@elastic/eslint-import-resolver-kibana": "^0.9.0",
+    "@elastic/eui": "^0.0.51",
     "@kbn/plugin-helpers": "link:../../kibana/packages/kbn-plugin-helpers",
+    "@types/hapi": "^17.0.12",
+    "@types/nodegit": "^0.18.8",
+    "@types/react": "^16.3.16",
     "babel-eslint": "^8.0.2",
     "eslint": "^4.11.0",
     "eslint-plugin-babel": "^4.1.1",
@@ -29,8 +33,10 @@
     "eslint-plugin-prefer-object-spread": "^1.2.1",
     "eslint-plugin-react": "^7.0.1",
     "expect.js": "^0.3.1"
+
   },
   "dependencies": {
-    "nodegit": "^0.22.1"
+    "nodegit": "^0.22.1",
+    "protobufjs": "^6.8.6"
   }
 }
