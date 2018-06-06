@@ -71,6 +71,7 @@ describe('#create', () => {
         options,
       }
     );
+    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
 
   test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
@@ -90,6 +91,8 @@ describe('#create', () => {
 
     expect(mockHasPrivileges).toHaveBeenCalledWith([`action:saved_objects/${type}/create`]);
     expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
+    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
 
   test(`calls and returns result of repository.create`, async () => {
@@ -179,6 +182,8 @@ describe('#bulkCreate', () => {
 
     expect(mockHasPrivileges).toHaveBeenCalledWith([`action:saved_objects/${type}/bulk_create`]);
     expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
+    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
 
   test(`calls and returns result of repository.bulkCreate`, async () => {
@@ -242,6 +247,7 @@ describe('#delete', () => {
         id,
       }
     );
+    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
 
   test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
@@ -261,6 +267,8 @@ describe('#delete', () => {
 
     expect(mockHasPrivileges).toHaveBeenCalledWith([`action:saved_objects/${type}/delete`]);
     expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
+    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
 
   test(`calls and returns result of repository.delete`, async () => {
@@ -323,6 +331,7 @@ describe('#find', () => {
           options
         }
       );
+      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
     });
 
     test(`throws decorated ForbiddenError when type is an array and user isn't authorized for one type`, async () => {
@@ -360,6 +369,7 @@ describe('#find', () => {
           options
         }
       );
+      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
     });
 
     test(`throws decorated ForbiddenError when type is an array and user isn't authorized for either type`, async () => {
@@ -398,6 +408,7 @@ describe('#find', () => {
           options
         }
       );
+      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
     });
 
     test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
@@ -417,6 +428,8 @@ describe('#find', () => {
 
       expect(mockHasPrivileges).toHaveBeenCalledWith([`action:saved_objects/${type}/find`]);
       expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
+      expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
     });
 
     test(`calls and returns result of repository.find`, async () => {
@@ -479,6 +492,7 @@ describe('#find', () => {
           options
         }
       );
+      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
     });
 
     test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
@@ -503,6 +517,8 @@ describe('#find', () => {
 
       expect(mockHasPrivileges).toHaveBeenCalledWith([`action:saved_objects/${type1}/find`, `action:saved_objects/${type2}/find`]);
       expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
+      expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
     });
 
     test(`specifies authorized types when calling repository.find()`, async () => {
@@ -599,6 +615,7 @@ describe('#bulkGet', () => {
         objects
       }
     );
+    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
 
   test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
@@ -618,6 +635,8 @@ describe('#bulkGet', () => {
 
     expect(mockHasPrivileges).toHaveBeenCalledWith(['action:saved_objects/foo/bulk_get']);
     expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
+    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
 
   test(`calls and returns result of repository.bulkGet`, async () => {
@@ -682,6 +701,7 @@ describe('#get', () => {
         id,
       }
     );
+    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
 
   test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
@@ -701,6 +721,8 @@ describe('#get', () => {
 
     expect(mockHasPrivileges).toHaveBeenCalledWith([`action:saved_objects/${type}/get`]);
     expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
+    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
 
   test(`calls and returns result of repository.get`, async () => {
@@ -765,6 +787,7 @@ describe('#update', () => {
         options,
       }
     );
+    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
 
   test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
@@ -784,6 +807,8 @@ describe('#update', () => {
 
     expect(mockHasPrivileges).toHaveBeenCalledWith([`action:saved_objects/${type}/update`]);
     expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
+    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
 
   test(`calls and returns result of repository.update`, async () => {
