@@ -63,6 +63,10 @@ export class KibanaMap extends React.Component {
 
   async addLayer(layer) {
     const olLayer = await layer.getOLLayer();
+    if (!olLayer) {
+      console.error('No OLLayer');
+      return;
+    }
     this._kbnOLLayers.push({
       kbnLayer: layer,
       olLayer: olLayer
