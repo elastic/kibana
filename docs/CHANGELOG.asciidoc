@@ -90,32 +90,6 @@ This section summarizes the changes in each release.
 
 There are no changes for Kibana in this version.
 
-//[float]
-//[[breaking-5.6.8]]
-//=== Breaking Changes
-
-//[float]
-//=== Breaking Java Changes
-
-//[float]
-//=== Deprecations
-
-//[float]
-//=== New Features
-
-//[float]
-//=== Enhancements
-
-//[float]
-//=== Bug Fixes
-
-//[float]
-//=== Regressions
-
-//[float]
-//=== Known Issues
-
-
 [[release-notes-5.6.9]]
 == {kib} 5.6.9
 
