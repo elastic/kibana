@@ -33,6 +33,27 @@ export default function init(input, output, sourceLocation = 'stored') {
     output.update('');
   }
 
+  function setupAutosave() {
+    let timer;
+    const saveDelay = 500;
+
+    input.getSession().on('change', function onChange() {
+      if (timer) {
+        timer = clearTimeout(timer);
+      }
+      timer = setTimeout(saveCurrentState, saveDelay);
+    });
+  }
+
+  function saveCurrentState() {
+    try {
+      const content = input.getValue();
+      history.updateCurrentState(content);
+    }
+    catch (e) {
+      console.log('Ignoring saving error: ' + e);
+    }
+  }
   function loadSavedState() {
     const previousSaveState = history.getSavedEditorState();
 
@@ -108,7 +129,7 @@ export default function init(input, output, sourceLocation = 'stored') {
     input.moveCursorTo(pos.row + prefix.length, 0);
     input.focus();
   };
-
+  setupAutosave();
   loadSavedState();
   mappings.startRetrievingAutoCompleteInfo();
 }

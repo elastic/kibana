@@ -59,18 +59,16 @@ module.controller('SenseController', function SenseController(Private, $scope, $
     input = initializeInput($('#editor'), $('#editor_actions'), $('#copy_as_curl'), output);
     init(input, output, $location.search().load_from);
     kbnUiAceKeyboardModeService.initialize($scope, $('#editor'));
-    $scope.getDocumentation();
     let timer;
     const saveDelay = 500;
     input.getSession().on('change', () => {
-      $scope.getDocumentation();
       if (timer) {
         timer = clearTimeout(timer);
       }
       timer = setTimeout(saveCurrentState, saveDelay);
     });
   });
-  $scope.getDocumentation =  () => {
+  $scope.getDocumentation = () => {
     input.getRequestsInRange(function (requests) {
       if (!requests || requests.length === 0) {
         $scope.documentation = null;
@@ -84,9 +82,7 @@ module.controller('SenseController', function SenseController(Private, $scope, $
       } else {
         $scope.documentation = null;
       }
-
     });
-
   };
   $scope.openDocumentation = () => {
     if (!$scope.documentation) {
