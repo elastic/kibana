@@ -14,19 +14,23 @@
       "renormalization_window_days": 1,
       "results_index_name": "",
       "results_retention_days": 1
-    }
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-put-job.html"
   },
   "DELETE _xpack/ml/anomaly_detectors/{job_id}": {
     "methods": ["DELETE"],
-    "patterns": ["_xpack/ml/anomaly_detectors/{job_id}"]
+    "patterns": ["_xpack/ml/anomaly_detectors/{job_id}"],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-delete-job.html"
   },
   "_xpack/ml/anomaly_detectors/{job_id}/_open": {
     "methods": ["POST"],
-    "patterns": ["_xpack/ml/anomaly_detectors/{job_id}/_open"]
+    "patterns": ["_xpack/ml/anomaly_detectors/{job_id}/_open"],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-open-job.html"
   },
   "_xpack/ml/anomaly_detectors/{job_id}/_close": {
     "methods": ["POST"],
-    "patterns": ["_xpack/ml/anomaly_detectors/{job_id}/_close"]
+    "patterns": ["_xpack/ml/anomaly_detectors/{job_id}/_close"],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-close-job.html"
   },
   "_xpack/ml/anomaly_detectors/{job_id}": {
     "methods": ["GET"],
@@ -34,7 +38,8 @@
       "_xpack/ml/anomaly_detectors/",
       "_xpack/ml/anomaly_detectors/{job_id}",
       "_xpack/ml/anomaly_detectors/_all"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-get-job.html"
   },
   "_xpack/ml/anomaly_detectors/{job_id}/stats": {
     "methods": ["GET"],
@@ -42,7 +47,8 @@
       "_xpack/ml/anomaly_detectors/stats",
       "_xpack/ml/anomaly_detectors/{job_id}/stats",
       "_xpack/ml/anomaly_detectors/_all/stats"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-get-job-stats.html"
   },
   "_xpack/ml/anomaly_detectors/{job_id}/_flush": {
     "methods": ["POST"],
@@ -52,11 +58,13 @@
       "calc_interim": ["true", "false"],
       "end": "",
       "start": ""
-    }
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-flush-job.html"
   },
   "_xpack/ml/anomaly_detectors/{job_id}/_data": {
     "methods": ["POST"],
-    "patterns": ["_xpack/ml/anomaly_detectors/{job_id}/_data"]
+    "patterns": ["_xpack/ml/anomaly_detectors/{job_id}/_data"],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-post-data.html"
   },
   "_xpack/ml/anomaly_detectors/{job_id}/_update": {
     "methods": ["POST"],
@@ -72,10 +80,12 @@
       "renormalization_window_days": 1,
       "results_index_name": "",
       "results_retention_days": 1
-    }
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-update-job.html"
   },
   "_xpack/ml/anomaly_detectors/{job_id}/_forecast": {
     "methods": ["POST"],
-    "patterns": ["_xpack/ml/anomaly_detectors/{job_id}/_forecast"]
+    "patterns": ["_xpack/ml/anomaly_detectors/{job_id}/_forecast"],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-forecast.html"
   }
 }

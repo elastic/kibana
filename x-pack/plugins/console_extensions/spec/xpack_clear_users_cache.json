@@ -8,6 +8,7 @@
     },
     "patterns": [
       "_xpack/security/realm/{realms}/_clear_cache"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-clear-cache.html"
   }
 }

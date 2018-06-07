@@ -5,7 +5,8 @@
     ],
     "methods": [
       "GET"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/rollup-get-job.html"
   },
   "PUT _xpack/rollup/job/{job_id}": {
     "methods": [
@@ -21,7 +22,8 @@
       "page_size": 100,
       "groups": {},
       "metrics": {}
-    }
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/rollup-job-config.html"
   },
   "DELETE _xpack/rollup/job/{job_id}": {
     "patterns": [
@@ -37,7 +39,8 @@
       "page_size": 100,
       "groups": {},
       "metrics": {}
-    }
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/rollup-delete-job.html"
   },
   "_xpack/rollup/job/{job_id}/_start": {
     "patterns": [
@@ -45,7 +48,8 @@
     ],
     "methods": [
       "POST"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/rollup-start-job.html"
   },
   "_xpack/rollup/job/{job_id}/_stop": {
     "patterns": [
@@ -53,7 +57,8 @@
     ],
     "methods": [
       "POST"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/rollup-stop-job.html"
   },
   "_xpack/rollup/data/{index}": {
     "patterns": [
@@ -61,7 +66,8 @@
     ],
     "methods": [
       "GET"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/rollup-get-rollup-caps.html"
   },
   "{index}/_rollup_search": {
     "patterns": [
@@ -73,6 +79,7 @@
     "data_autocomplete_rules": {
       "query": {},
       "aggregations": {}
-    }
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/rollup-search.html"
   }
 }

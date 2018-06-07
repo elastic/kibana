@@ -12,7 +12,8 @@
       "password": "",
       "fullname": "",
       "roles": []
-    }
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-users.html"
   },
   "_xpack/security/user/{name}/_enable": {
     "methods": [
@@ -20,7 +21,8 @@
     ],
     "patterns": [
       "_xpack/security/user/{name}/_enable"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-users.html"
   },
   "_xpack/security/user/{name}/_disable": {
     "methods": [
@@ -28,7 +30,8 @@
     ],
     "patterns": [
       "_xpack/security/user/{name}/_disable"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-users.html"
   },
   "_xpack/security/user/{name}/_password": {
     "methods": [
@@ -39,7 +42,8 @@
     ],
     "data_autocomplete_rules": {
       "password": ""
-    }
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-users.html"
   },
   "DELETE _xpack/security/user/{name}": {
     "methods": [
@@ -47,7 +51,8 @@
     ],
     "patterns": [
       "_xpack/security/user/{name}"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-users.html"
   },
   "_xpack/security/user": {
     "methods": [
@@ -56,7 +61,8 @@
     "patterns": [
       "_xpack/security/user",
       "_xpack/security/user/{name}"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-users.html"
   },
   "_xpack/security/user/_password": {
     "methods": [
@@ -68,7 +74,8 @@
     ],
     "data_autocomplete_rules": {
       "password": ""
-    }
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-users.html"
   },
   "_xpack/security/user/_has_privileges": {
     "methods": [
@@ -76,6 +83,7 @@
     ],
     "patterns": [
       "_xpack/security/user/_has_privileges"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-users.html"
   }
 }

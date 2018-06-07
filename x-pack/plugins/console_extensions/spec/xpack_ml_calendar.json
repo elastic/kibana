@@ -10,7 +10,8 @@
     "data_autocomplete_rules": {
       "from": 0,
       "size": 100
-    }
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-get-calendar.html"
   },
   "PUT _xpack/ml/calendars/{calendar_id}": {
     "methods": [
@@ -21,7 +22,8 @@
     ],
     "data_autocomplete_rules": {
       "description": ""
-    }
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-put-calendar.html"
   },
   "DELETE _xpack/ml/calendars/{calendar_id}": {
     "methods": [
@@ -29,7 +31,8 @@
     ],
     "patterns": [
       "_xpack/ml/calendars/{calendar_id}"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-delete-calendar.html"
   },
   "_xpack/ml/calendars/{calendar_id}/jobs/{job_id}": {
     "methods": [
@@ -37,7 +40,8 @@
     ],
     "patterns": [
       "_xpack/ml/calendars/{calendar_id}/jobs/{job_id}"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-put-calendar-job.html"
   },
   "DELETE _xpack/ml/calendars/{calendar_id}/jobs/{job_id}": {
     "methods": [
@@ -45,7 +49,8 @@
     ],
     "patterns": [
       "_xpack/ml/calendars/{calendar_id}/jobs/{job_id}"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-delete-calendar-job.html"
   },
   "_xpack/ml/calendars/{calendar_id}/events": {
     "methods": [
@@ -58,7 +63,8 @@
     "patterns": [
       "_xpack/ml/calendars/{calendar_id}/events",
       "_xpack/ml/calendars/_all/events"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-get-calendar-event.html"
   },
   "POST _xpack/ml/calendars/{calendar_id}/events": {
     "methods": [
@@ -69,7 +75,8 @@
     ],
     "data_autocomplete_rules": {
       "events": [{}]
-    }
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-post-calendar-event.html"
   },
   "_xpack/ml/calendars/{calendar_id}/events/{event_id}": {
     "methods": [
@@ -77,6 +84,7 @@
     ],
     "patterns": [
       "_xpack/ml/calendars/{calendar_id}/events/{event_id}"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-delete-calendar-event.html"
   }
 }

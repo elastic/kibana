@@ -4,7 +4,8 @@
     "patterns": [
       "_xpack/security/role_mapping",
       "_xpack/security/role_mapping/{name}"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-role-mapping.html"
   },
   "_xpack/security/role_mapping/{name}": {
     "methods": ["PUT", "POST"],
@@ -15,9 +16,11 @@
       "roles": [],
       "rules": {}
     },
-    "DELETE _xpack/security/role_mapping/{name}": {
-      "methods": ["DELETE"],
-      "patterns": ["_xpack/security/role_mapping/{name}"]
-    }
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-role-mapping.html"
+  },  
+  "DELETE _xpack/security/role_mapping/{name}": {
+    "methods": ["DELETE"],
+    "patterns": ["_xpack/security/role_mapping/{name}"],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-role-mapping.html"
   }
 }
