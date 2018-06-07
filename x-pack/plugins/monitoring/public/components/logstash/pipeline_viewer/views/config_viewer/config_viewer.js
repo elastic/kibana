@@ -9,6 +9,11 @@ import PropTypes from 'prop-types';
 import { DetailDrawer } from '../detail_drawer';
 import { Queue } from './queue';
 import { StatementSection } from './statement_section';
+import {
+  EuiSpacer,
+  EuiPage,
+  EuiPageContent,
+} from '@elastic/eui';
 
 export class ConfigViewer extends React.Component {
   constructor() {
@@ -64,31 +69,36 @@ export class ConfigViewer extends React.Component {
     } = this.props.pipeline;
 
     return (
-      <div>
-        <StatementSection
-          iconType="logstashInput"
-          headingText="Inputs"
-          elements={inputs}
-          onShowVertexDetails={this.onShowVertexDetails}
-          detailVertex={this.state.detailDrawer.vertex}
-        />
-        <Queue queue={queue} />
-        <StatementSection
-          iconType="logstashFilter"
-          headingText="Filters"
-          elements={filters}
-          onShowVertexDetails={this.onShowVertexDetails}
-          detailVertex={this.state.detailDrawer.vertex}
-        />
-        <StatementSection
-          iconType="logstashOutput"
-          headingText="Outputs"
-          elements={outputs}
-          onShowVertexDetails={this.onShowVertexDetails}
-          detailVertex={this.state.detailDrawer.vertex}
-        />
-        { this.renderDetailDrawer() }
-      </div>
+      <EuiPage>
+        <EuiPageContent verticalPosition="center" horizontalPosition="center" className="configViewer">
+          <StatementSection
+            iconType="logstashInput"
+            headingText="Inputs"
+            elements={inputs}
+            onShowVertexDetails={this.onShowVertexDetails}
+            detailVertex={this.state.detailDrawer.vertex}
+          />
+          <EuiSpacer />
+          <Queue queue={queue} />
+          <EuiSpacer />
+          <StatementSection
+            iconType="logstashFilter"
+            headingText="Filters"
+            elements={filters}
+            onShowVertexDetails={this.onShowVertexDetails}
+            detailVertex={this.state.detailDrawer.vertex}
+          />
+          <EuiSpacer />
+          <StatementSection
+            iconType="logstashOutput"
+            headingText="Outputs"
+            elements={outputs}
+            onShowVertexDetails={this.onShowVertexDetails}
+            detailVertex={this.state.detailDrawer.vertex}
+          />
+          { this.renderDetailDrawer() }
+        </EuiPageContent>
+      </EuiPage>
     );
   }
 }

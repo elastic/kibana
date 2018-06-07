@@ -25,9 +25,9 @@ function renderStatementName(name, onVertexSelected) {
         color="text"
         size="xs"
         onClick={onVertexSelected}
-        className="cv-ifElseStatement__title"
+        flush="left"
       >
-        <span className="cv-ifElseStatement__name">{name}</span>
+        <span className="configViewer__conditional">{name}</span>
       </EuiButtonEmpty>
     </EuiFlexItem>
   );
@@ -45,7 +45,6 @@ function renderIfStatement({ condition }, onVertexSelected) {
           fontSize="s"
           paddingSize="none"
           transparentBackground={true}
-          className="cv-ifStatement__condition"
         >
           {condition}
         </EuiCodeBlock>
@@ -88,14 +87,18 @@ export function CollapsibleStatement(props) {
   };
 
   return (
-    <EuiFlexGroup responsive={false} gutterSize="xs">
+    <EuiFlexGroup
+      responsive={false}
+      gutterSize="none"
+      alignItems="center"
+      className="configViewer__statement"
+    >
       <EuiFlexItem
         key={id}
         grow={false}
       >
         <EuiButtonIcon
           aria-label
-          className="cv-ifElseStatement__toggle"
           color="text"
           iconType={getToggleIconType(isCollapsed)}
           onClick={toggleClicked}

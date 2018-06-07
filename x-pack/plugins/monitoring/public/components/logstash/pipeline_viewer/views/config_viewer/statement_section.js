@@ -8,6 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { StatementListHeading } from './statement_list_heading';
 import { Statement } from './statement';
+import { EuiSpacer } from '@elastic/eui';
 
 export function StatementSection({
   iconType,
@@ -18,11 +19,12 @@ export function StatementSection({
   if (!elements.length) { return null; }
 
   return (
-    <div className="cv-statementList">
+    <div className="configStatementList">
       <StatementListHeading
         iconType={iconType}
         title={headingText}
       />
+      <EuiSpacer size="s" />
       <StatementList
         elements={elements}
         onShowVertexDetails={onShowVertexDetails}
@@ -96,7 +98,7 @@ class StatementList extends React.PureComponent {
     const { elements } = this.props;
 
     return (
-      <ul className="cv-listParent">
+      <ul className="configViewer__list">
         {
           elements.map(this.renderStatement)
         }

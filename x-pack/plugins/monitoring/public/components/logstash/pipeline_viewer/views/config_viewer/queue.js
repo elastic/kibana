@@ -6,17 +6,19 @@
 
 import React from 'react';
 import { StatementListHeading } from './statement_list_heading';
+import { EuiSpacer, EuiText } from '@elastic/eui';
 
 export function Queue() {
   return (
-    <div className="cv-statementList">
+    <div className="configStatementList">
       <StatementListHeading
         iconType="logstashQueue"
         title="Queue"
       />
-      <div className="cv-queue__messageText">
+      <EuiSpacer size="s" />
+      <EuiText className="configViewer__queueMessage">
         Queue metrics not available
-      </div>
+      </EuiText>
     </div>
   );
 }

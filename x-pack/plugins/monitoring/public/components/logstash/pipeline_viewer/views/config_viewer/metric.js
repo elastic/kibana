@@ -6,17 +6,42 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiFlexItem } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiBadge,
+  EuiText,
+} from '@elastic/eui';
+import classNames from 'classnames';
 
-export function Metric({ className, value }) {
+export function Metric({ className, value, warning }) {
+
+  const classes = classNames(
+    'configViewer__metric',
+    className,
+  );
+
+  let stylizedValue;
+  if (warning) {
+    stylizedValue = (
+      <EuiBadge color="warning" classname={className}>
+        {value}
+      </EuiBadge>
+    );
+  } else {
+    stylizedValue = (
+      <EuiText size="s" color="subdued" className={classes}>
+        <span>
+          {value}
+        </span>
+      </EuiText>
+    );
+  }
   return (
     <EuiFlexItem
+      className="configViewer__metricFlexItem"
       grow={false}
-      className={"cv-pluginStatement__metricContainer"}
     >
-      <div className={className}>
-        {value}
-      </div>
+      {stylizedValue}
     </EuiFlexItem>
   );
 }

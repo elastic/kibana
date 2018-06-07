@@ -21,16 +21,15 @@ export function StatementListHeading({
     <EuiFlexGroup
       gutterSize="s"
       responsive={false}
+      alignItems="baseline"
     >
       <EuiFlexItem grow={false}>
         <EuiIcon
-          size="s"
           type={iconType}
-          className="cv-statementList__icon"
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiTitle size="xs">
+        <EuiTitle size="s">
           <h4>{title}</h4>
         </EuiTitle>
       </EuiFlexItem>

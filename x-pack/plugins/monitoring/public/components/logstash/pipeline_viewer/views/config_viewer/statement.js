@@ -6,7 +6,6 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiFlexGroup } from '@elastic/eui';
 import { PluginStatement as PluginStatementModel } from '../../models/pipeline/plugin_statement';
 import { CollapsibleStatement } from './collapsible_statement';
 import { IfElement } from '../../models/list/if_element';
@@ -15,7 +14,7 @@ import { PluginStatement } from './plugin_statement';
 function renderNestingSpacers(depth) {
   const spacers = [];
   for (let i = 0; i < depth; i += 1) {
-    spacers.push(<div key={`spacer_${i}`} className="cv-spacer" />);
+    spacers.push(<div key={`spacer_${i}`} className="configViewer__spacer" />);
   }
   return spacers;
 }
@@ -53,28 +52,15 @@ function renderStatement({
   );
 }
 
-function getTopLevelStatementPadding(depth) {
-  return depth === 0
-    ? { paddingLeft: '0px' }
-    : null;
-}
-
 export function Statement(props) {
   const { depth } = props.element;
 
   return (
-    <li className="cv-list">
-      <div className="cv-spaceContainer">
+    <li className={`configViewer__listItem`}>
+      <div className="configViewer__spaceContainer">
         {renderNestingSpacers(depth)}
       </div>
-      <EuiFlexGroup gutterSize="none">
-        <div
-          className="cv-statement__content"
-          style={getTopLevelStatementPadding(depth)}
-        >
-          {renderStatement(props)}
-        </div>
-      </EuiFlexGroup>
+      {renderStatement(props)}
     </li>
   );
 }

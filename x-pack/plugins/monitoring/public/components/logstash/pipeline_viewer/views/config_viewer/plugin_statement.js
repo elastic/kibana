@@ -10,7 +10,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiBadge,
 } from '@elastic/eui';
 import { formatMetric } from '../../../../../lib/format_number';
 import { Metric } from './metric';
@@ -19,7 +19,7 @@ function getInputStatementMetrics({ latestEventsPerSecond }) {
   return [(
     <Metric
       key="eventsEmitted"
-      className="cv-inputMetric__eventsEmitted"
+      className="configViewer__metric--eventsEmitted"
       value={formatMetric(latestEventsPerSecond, '0.[00]a', 'e/s emitted')}
     />
   )];
@@ -32,28 +32,27 @@ function getProcessorStatementMetrics(processorVertex) {
     percentOfTotalProcessorTime,
   } = processorVertex;
 
-  const cpuHighlight = processorVertex.isTimeConsuming() ? 'cv-processorMetric__cpuTimeHighlight' : '';
-  const eventMillisHighlight = processorVertex.isSlow() ? 'cv-processorMetric__eventMillis' : '';
-
   return [
     (
       <Metric
         key="cpuMetric"
-        className={`cv-processorMetric__cpuTime ${cpuHighlight}`}
+        className="configViewer__metric--cpuTime"
+        warning={processorVertex.isTimeConsuming()}
         value={formatMetric(Math.round(percentOfTotalProcessorTime || 0), '0', '%', { prependSpace: false })}
       />
     ),
     (
       <Metric
         key="eventMillis"
-        className={`cv-processorMetric__eventMillis ${eventMillisHighlight}`}
+        className="configViewer__metric--eventMillis"
+        warning={processorVertex.isSlow()}
         value={formatMetric(latestMillisPerEvent, '0.[00]a', 'ms/e')}
       />
     ),
     (
       <Metric
         key="eventsReceived"
-        className="cv-processorMetric__events"
+        className="configViewer__metric--events"
         value={formatMetric(latestEventsPerSecond, '0.[00]a', 'e/s received')}
       />
     )
@@ -80,58 +79,54 @@ export function PluginStatement({
   const onNameButtonClick = () => { onShowVertexDetails(vertex); };
 
   return (
-    <div className="cv-statement">
-      <EuiFlexGroup
-        gutterSize="none"
-        justifyContent="spaceBetween"
-      >
+    <EuiFlexGroup
+      gutterSize="none"
+      justifyContent="spaceBetween"
+      alignItems="center"
+      className="configViewer__statement"
+    >
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup
+          gutterSize="xs"
+          responsive={false}
+          alignItems="center"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="xs"
+              color="primary"
+              iconType="dot"
+              flush="left"
+              className="configViewer__plugin"
+              onClick={onNameButtonClick}
+            >
+              <span>{name}</span>
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          {
+            hasExplicitId &&
+            <EuiFlexItem grow={false}>
+              <EuiBadge
+                onClick={onNameButtonClick}
+                onClickAriaLabel="View details"
+              >
+                {id}
+              </EuiBadge>
+            </EuiFlexItem>
+          }
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      {
+        statementMetrics &&
         <EuiFlexItem grow={false}>
           <EuiFlexGroup
             gutterSize="s"
-            responsive={false}
           >
-            <EuiFlexItem
-              grow={false}
-              className="cv-pluginStatement__icon"
-            >
-              <EuiIcon
-                type="dot"
-                className="cv-statement__icon"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                flush="left"
-                size="xs"
-                className="cv-statement__name"
-                onClick={onNameButtonClick}
-              >
-                <span>{name}</span>
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            {
-              hasExplicitId &&
-              <EuiFlexItem grow={false}>
-                <div className="cv-statement__id">
-                  {id}
-                </div>
-              </EuiFlexItem>
-            }
+            {statementMetrics}
           </EuiFlexGroup>
         </EuiFlexItem>
-        {
-          statementMetrics &&
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup
-              gutterSize="none"
-              style={{ marginRight: '0px' }}
-            >
-              {statementMetrics}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        }
-      </EuiFlexGroup>
-    </div>
+      }
+    </EuiFlexGroup>
   );
 }
 

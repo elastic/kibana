@@ -1,133 +1,100 @@
-.cv-statementList
-{
-  margin: 16px;
+@import (reference) '~ui/styles/variables/colors';
+
+monitoring-main[page="pipeline"] {
+  background: @globalColorLightestGray;
 }
 
-.cv-statementList__icon
-{
-  margin-top: 5px;
+.configViewer {
+  max-width: 1000px;
 }
 
-.cv-spacer {
-  height: 94%;
-  width: 10px;
-  display: inline-block;
-  margin-left: 11px;
-  border-left: 1px #b2b2b2 dashed;
+.configViewer__statement {
+  padding-left: 12px;
 }
 
-@media (max-width: 768px) {
-  .cv-spacer {
-    border: 0px;
+.configViewer__plugin {
+  margin-left: 4px;
+}
+
+
+.configViewer__spaceContainer {
+  background-color: white;
+  align-self: stretch;
+  display: flex;
+  // Separates the left border spaces properly
+  border-bottom: solid 2px white;
+}
+
+.configViewer__spacer {
+  width: 12px;
+  align-self: stretch;
+  margin-left: 12px;
+  border-left: 1px @globalColorMediumGray dashed;
+
+  // This allows the border to be flush
+  &:last-child {
+    width: 0px;
+  }
+
+  &:first-child {
+    // Odd number is because of the single pixel border.
+    margin-left: 23px;
   }
 }
 
-.cv-spacer:last-child {
-  width: 0px;
+
+.configViewer__metric {
+  text-align: right;
+
+  &--cputTime {
+    width: 40px;
+  }
+
+  &--events, &--eventsEmitted {
+    width: 160px;
+  }
+
+  &--eventMillis {
+    width: 80px;
+  }
 }
 
-.cv-inputMetric__eventsEmitted {
-  width: 150px;
+.configViewer__queueMessage {
+  margin-left: 24px;
+  color: @globalColorDarkGray;
 }
 
-.cv-statement__content {
-  display: inline-block;
-  min-height: 28px;
-  padding-left: 9px;
-  width: 100%;
+.configViewer__list {
+  .configViewer__listItem {
+    display: flex;
+    min-height: 32px;
+    align-items: center;
+    padding-right: 12px;
+
+    &:nth-child(2n+1) {
+      background: #fafafa;
+    }
+  }
 }
 
-.cv-statement {
-  display: inline-block;
-  margin-top: 5px;
-  margin-left: 3px;
-  width: 100%;
-}
-
-.cv-statement__id {
-  background: #d9d9d9;
-  padding: 4px 6px 4px 6px;
-  font-size: 12px;
+.configViewer__conditional {
   font-weight: bold;
-  border-radius: 2px;
-  margin-top: 1px;
+  text-transform: uppercase;
 }
 
-.cv-statement__icon {
-  color: #50b0a4;
-}
+@media (max-width: 768px) {
+  .configViewer {
+    .configViewer__spacer {
+      border: none;
+    }
 
-.cv-statement__name {
-  color: #50b0a4;
-  font-weight: bold;
-  font-size: small;
-  margin-top: -2px;
-}
+    .configViewer__metricFlexItem {
+      margin-bottom: 4px !important;
+    }
 
-.cv-ifStatement__condition {
-  margin-top: 7px;
-}
-
-.cv-pluginStatement__icon {
-  padding-top: 4px;
-}
-
-.cv-pluginStatement__metricContainer {
-  padding: 4px 8px 4px 8px;
-  border-radius: 2px;
-}
-
-.cv-processorMetric__cpuTime {
-  width: 35px;
-  padding: 2px 4px 2px 8px;
-  border-radius: 2px;
-  margin-top: -2px;
-}
-
-.cv-processorMetric__cpuTimeHighlight {
-  background: #d6b283;
-}
-
-.cv-processorMetric__events {
-  width: 150px;
-  border-radius: 2px;
-  padding: 2px 4px 2px 4px;
-  margin-top: -2px;
-}
-
-.cv-processorMetric__eventMillis {
-  width: 80px;
-  padding: 2px 4px 2px 4px;
-  margin-top: -2px;
-}
-
-.cv-spaceContainer {
-  background-color: white;
-}
-
-.cv-queue__messageText {
-  margin-left: 25px;
-  color: #838383;
-}
-
-.cv-list {
-  display: flex;
-  min-height: 32px;
-}
-
-.cv-listParent li:nth-child(2n+1) {
-  background: #f7f7f7;
-}
-
-.cv-ifElseStatement__title {
-  margin-top: 2px;
-}
-
-.cv-ifElseStatement__name {
-  font-weight: bold;
-}
-
-.cv-ifElseStatement__toggle {
-  margin-top: 3px;
-  color: #898989;
+    .configViewer__metric {
+      text-align: left;
+      padding-left: 32px;
+    }
+  }
 }
