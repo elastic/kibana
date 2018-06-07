@@ -21,19 +21,22 @@ import _ from 'lodash';
 import { buildAggBody } from './agg_body';
 
 export default function createDateAgg(config, tlConfig, scriptedFields) {
+
   const dateAgg = {
     time_buckets: {
       meta: { type: 'time_buckets' },
-      date_histogram: {
-        field: config.timefield,
-        interval: config.interval,
-        time_zone: tlConfig.time.timezone,
-        extended_bounds: {
-          min: tlConfig.time.from,
-          max: tlConfig.time.to
+      date_histogram: Object.assign(
+        {
+          interval: config.interval,
+          time_zone: tlConfig.time.timezone,
+          extended_bounds: {
+            min: tlConfig.time.from,
+            max: tlConfig.time.to
+          },
+          min_doc_count: 0
         },
-        min_doc_count: 0
-      }
+        buildAggBody(config.timefield, scriptedFields)
+      )
     }
   };
 
