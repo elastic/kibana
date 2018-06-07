@@ -18,7 +18,6 @@
  */
 
 import 'ui/doc_title';
-import  history from '../history';
 import { useResizeChecker } from '../sense_editor_resize';
 import $ from 'jquery';
 import { initializeInput } from '../input';
@@ -45,28 +44,11 @@ module.controller('SenseController', function SenseController(Private, $scope, $
   // and then initialize this app
   let input;
   let output;
-  function saveCurrentState() {
-    try {
-      const content = input.getValue();
-      history.updateCurrentState(content);
-    }
-    catch (e) {
-      console.log('Ignoring saving error: ' + e);
-    }
-  }
   $timeout(async () => {
     output = initializeOutput($('#output'));
     input = initializeInput($('#editor'), $('#editor_actions'), $('#copy_as_curl'), output);
     init(input, output, $location.search().load_from);
     kbnUiAceKeyboardModeService.initialize($scope, $('#editor'));
-    let timer;
-    const saveDelay = 500;
-    input.getSession().on('change', () => {
-      if (timer) {
-        timer = clearTimeout(timer);
-      }
-      timer = setTimeout(saveCurrentState, saveDelay);
-    });
   });
   $scope.getDocumentation = () => {
     input.getRequestsInRange(function (requests) {
