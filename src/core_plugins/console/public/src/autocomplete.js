@@ -792,7 +792,7 @@ export default function (editor) {
   }
 
   function addUrlParamsAutoCompleteSetToContext(context, pos) {
-    const ret = getCurrentMethodAndTokenPaths(pos);
+    const ret = getCurrentMethodAndTokenPaths(editor, pos);
     context.method = ret.method;
     context.otherTokenValues = ret.otherTokenValues;
     context.urlTokenPath = ret.urlTokenPath;
