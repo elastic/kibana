@@ -68,11 +68,6 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
       }, {});
     });
 
-    // TODO: Remove delay before merging
-    return await new Promise(resolve => {
-      setTimeout(() => resolve({ columns, rows }), 1000);
-    });
-
     return { columns, rows };
   }
 
