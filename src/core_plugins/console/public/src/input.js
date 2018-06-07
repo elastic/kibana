@@ -20,7 +20,7 @@
 const $ = require('jquery');
 require('brace');
 require('brace/ext/searchbox');
-const Autocomplete = require('./autocomplete');
+import  Autocomplete from './autocomplete';
 const SenseEditor = require('./sense_editor/editor');
 const settings = require('./settings');
 const utils = require('./utils');

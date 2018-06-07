@@ -71,28 +71,6 @@ export default function init(input, output, sourceLocation = 'stored') {
     input.moveToNextRequestEdge(true);
   }
 
-  function setupAutosave() {
-    let timer;
-    const saveDelay = 500;
-
-    input.getSession().on('change', function onChange() {
-      if (timer) {
-        timer = clearTimeout(timer);
-      }
-      timer = setTimeout(saveCurrentState, saveDelay);
-    });
-  }
-
-  function saveCurrentState() {
-    try {
-      const content = input.getValue();
-      history.updateCurrentState(content);
-    }
-    catch (e) {
-      console.log('Ignoring saving error: ' + e);
-    }
-  }
-
   // stupid simple restore function, called when the user
   // chooses to restore a request from the history
   // PREVENTS history from needing to know about the input
@@ -132,6 +110,5 @@ export default function init(input, output, sourceLocation = 'stored') {
   };
 
   loadSavedState();
-  setupAutosave();
   mappings.startRetrievingAutoCompleteInfo();
 }

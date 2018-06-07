@@ -18,12 +18,14 @@
  */
 
 import 'ui/doc_title';
+import  history from '../history';
 import { useResizeChecker } from '../sense_editor_resize';
 import $ from 'jquery';
 import { initializeInput } from '../input';
 import { initializeOutput } from '../output';
 import init from '../app';
 import { SenseTopNavController } from './sense_top_nav_controller';
+import { getEndpointFromPosition } from '../autocomplete';
 
 const module = require('ui/modules').get('app/sense');
 
@@ -42,12 +44,55 @@ module.controller('SenseController', function SenseController(Private, $scope, $
   // and then initialize this app
   let input;
   let output;
-  $timeout(() => {
+  function saveCurrentState() {
+    try {
+      const content = input.getValue();
+      history.updateCurrentState(content);
+    }
+    catch (e) {
+      console.log('Ignoring saving error: ' + e);
+    }
+  }
+  $timeout(async () => {
     output = initializeOutput($('#output'));
     input = initializeInput($('#editor'), $('#editor_actions'), $('#copy_as_curl'), output);
     init(input, output, $location.search().load_from);
     kbnUiAceKeyboardModeService.initialize($scope, $('#editor'));
+    $scope.getDocumentation();
+    let timer;
+    const saveDelay = 500;
+    input.getSession().on('change', () => {
+      $scope.getDocumentation();
+      if (timer) {
+        timer = clearTimeout(timer);
+      }
+      timer = setTimeout(saveCurrentState, saveDelay);
+    });
   });
+  $scope.getDocumentation =  () => {
+
+    input.getRequestsInRange(function (requests) {
+      if (!requests || requests.length === 0) {
+        return;
+      }
+      const position = requests[0].range.end;
+      position.column = position.column - 1;
+      const endpoint = getEndpointFromPosition(input, position);
+      if (endpoint && endpoint.documentation) {
+        $scope.documentation = endpoint.documentation;
+      } else {
+        $scope.documentation = null;
+      }
+
+    });
+
+  };
+  $scope.openDocumentation = () => {
+    if (!$scope.documentation) {
+      return;
+    }
+    window.open($scope.documentation, '_blank');
+  };
 
   $scope.sendSelected = () => {
     input.focus();
