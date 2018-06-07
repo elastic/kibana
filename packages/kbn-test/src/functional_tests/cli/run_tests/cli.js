@@ -38,8 +38,8 @@ export async function runTestsCli(defaultConfigPaths) {
     const { configs } = options;
     await runTests(configs, options);
   } catch (err) {
-    console.error('FATAL ERROR');
-    console.error(err);
+    console.log('FATAL ERROR');
+    console.log(err);
     process.exit(1);
   }
 }

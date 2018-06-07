@@ -35,8 +35,8 @@ export async function startServersCli(defaultConfigPath) {
     const { config } = options;
     await startServers(config, options);
   } catch (err) {
-    console.error('FATAL ERROR');
-    console.error(err);
+    console.log('FATAL ERROR');
+    console.log(err);
     process.exit(1);
   }
 }
