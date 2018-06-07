@@ -8,7 +8,8 @@
  * Licensed under the Elastic License; you may not use this file except in compliance with the Elastic License. */
 
 export function getVersionPrivilege(kibanaVersion) {
-  return `version:${kibanaVersion}`;
+  // TODO: Remove the .toLowerCase() once the capitalization with app privileges is fixed
+  return `version:${kibanaVersion.toLowerCase()}`;
 }
 
 export function getLoginPrivilege() {
