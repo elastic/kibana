@@ -313,7 +313,7 @@ for all 200+ languages is loaded along with the library) and pass the translatio
 messages into the constructor:
 
 ```js
-import { I18n } from '@kbn/i18n/src/i18n';
+import { I18n } from '@kbn/i18n';
 
 const i18n = new I18n(messages);
 ```
