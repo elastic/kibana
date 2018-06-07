@@ -12,6 +12,7 @@ import { TMSSource } from '../sources/tms_source';
 import { EMSVectorSource } from '../sources/ems_vector_source';
 import { EMSTMSSource } from '../sources/ems_tms_source';
 import { KbnYmlTMSSource } from '../sources/kbnyml_tms_source';
+import { KbnYmlVectorSource } from '../sources/kbnyml_vector_source';
 
 import { TileLayer } from '../layers/tile_layer';
 import { VectorLayer } from '../layers/vector_layer';
@@ -46,7 +47,8 @@ export class GISApp extends React.Component {
       const tmsLayer = new TileLayer(kbnymlTmsSource);
       await this._kbnMap.addLayer(tmsLayer);
     } catch(e) {
-      console.warn('no valid tms configuration in yml');
+      console.error(e);
+      console.warn('Missing map.tilemap configuration in yml');
     }
 
     const vectorSource = new EMSVectorSource({
@@ -57,6 +59,19 @@ export class GISApp extends React.Component {
     const vectorLayer = new VectorLayer(vectorSource);
     await this._kbnMap.addLayer(vectorLayer);
 
+
+    try {
+      const vectorSource = new KbnYmlVectorSource({
+        layerName: "foobar (self hosted)",
+        kbnCoreAPI: this.props.kbnCoreAPI
+      });
+
+      const vectorLayer = new VectorLayer(vectorSource);
+      await this._kbnMap.addLayer(vectorLayer);
+    } catch(e) {
+      console.error(e);
+      console.warn('Missing regionmap configuration in yml');
+    }
 
   }
 
