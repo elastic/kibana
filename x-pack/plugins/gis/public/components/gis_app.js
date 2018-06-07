@@ -9,6 +9,7 @@ import { KibanaMap } from './kibana_map';
 import { LayerControl } from './layer_control';
 import { TMSSource } from '../sources/tms_source';
 import { EMSVectorSource } from '../sources/ems_vector_source';
+import { EMSTMSSource } from '../sources/ems_tms_source';
 import { TileLayer } from '../layers/tile_layer';
 import { VectorLayer } from '../layers/vector_layer';
 
@@ -24,16 +25,17 @@ export class GISApp extends React.Component {
   async _createPlaceholders() {
 
     //todo: some hardcoded example layers
-    const defaultEmsSource = new TMSSource({
-      urlTemplate: "https://tiles.maps.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana"
+    const defaultEmsTMSSource = new EMSTMSSource({
+      kbnCoreAPI: this.props.kbnCoreAPI,
+      serviceId: "road_map"
     });
-    const tmsLayer = new TileLayer(defaultEmsSource);
-    this._kbnMap.addLayer(tmsLayer);
+    const tmsLayer = new TileLayer(defaultEmsTMSSource);
+    await this._kbnMap.addLayer(tmsLayer);
     const osmSource = new TMSSource({
       urlTemplate: "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"
     });
     const tmsLayer2 = new TileLayer(osmSource);
-    this._kbnMap.addLayer(tmsLayer2);
+    await this._kbnMap.addLayer(tmsLayer2);
 
     const vectorSource = new EMSVectorSource({
       kbnCoreAPI: this.props.kbnCoreAPI,
@@ -41,7 +43,8 @@ export class GISApp extends React.Component {
     });
 
     const vectorLayer = new VectorLayer(vectorSource);
-    this._kbnMap.addLayer(vectorLayer);
+    await this._kbnMap.addLayer(vectorLayer);
+
 
   }
 

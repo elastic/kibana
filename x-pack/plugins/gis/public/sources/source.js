@@ -11,5 +11,4 @@ export class ASource {
     return "foobar";
   }
 
-
 }
