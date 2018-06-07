@@ -22,7 +22,7 @@ import { IndexPatternCreationConfigRegistry } from './index_pattern_creation_con
 class IndexPatternCreation {
   constructor(registry, httpClient, type) {
     this._registry = registry;
-    this._allTypes = this._registry.inOrder.map(Plugin => new Plugin(httpClient));
+    this._allTypes = this._registry.inOrder.map(Plugin => new Plugin({ httpClient }));
     this._setCurrentType(type);
   }
 

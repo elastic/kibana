@@ -14,15 +14,16 @@ import { setHttpClient, getRollupIndices } from '../services/api';
 export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig {
   static key = 'rollup';
 
-  constructor(httpClient) {
+  constructor(options) {
     super({
       type: 'rollup',
       name: 'rollup index pattern',
       showSystemIndices: false,
       allowWildcards: false,
+      ...options,
     });
 
-    setHttpClient(httpClient);
+    setHttpClient(this.httpClient);
     this.rollupIndex = null;
     this.rollupJobs = [];
     this.rollupIndicesCapabilities = {};

@@ -25,11 +25,13 @@ export class IndexPatternCreationConfig {
     name = 'index pattern',
     showSystemIndices = true,
     allowWildcards = true,
+    httpClient = null,
   }) {
     this.type = type;
     this.name = name;
     this.showSystemIndices = showSystemIndices;
     this.allowWildcards = allowWildcards;
+    this.httpClient = httpClient;
   }
 
   async getIndexPatternCreationOption(urlHandler) {
