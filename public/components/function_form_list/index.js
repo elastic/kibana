@@ -1,6 +1,6 @@
 import { compose, withProps } from 'recompose';
 import { get } from 'lodash';
-import { modelRegistry, viewRegistry } from '../../expression_types';
+import { modelRegistry, viewRegistry, transformRegistry } from '../../expression_types';
 import { interpretAst } from '../../lib/interpreter';
 import { toExpression } from '../../../common/lib/ast';
 import { FunctionFormList as Component } from './function_form_list';
@@ -17,10 +17,13 @@ function getExpression(ast) {
   return ast != null && ast.type === 'expression' ? toExpression(ast) : ast;
 }
 
+function getArgTypeDef(fn) {
+  return modelRegistry.get(fn) || viewRegistry.get(fn) || transformRegistry.get(fn);
+}
+
 const functionFormItems = withProps(props => {
   const selectedElement = props.element;
   const FunctionFormChain = get(selectedElement, 'ast.chain', []);
-  const getArgTypeDef = fn => modelRegistry.get(fn) || viewRegistry.get(fn);
 
   // map argTypes from AST, attaching nextArgType if one exists
   const FunctionFormListItems = FunctionFormChain.reduce(
