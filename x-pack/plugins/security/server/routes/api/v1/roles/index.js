@@ -6,10 +6,10 @@
 
 import _ from 'lodash';
 import Boom from 'boom';
-import { getClient } from '../../../../../../server/lib/get_client_shield';
-import { roleSchema } from '../../../lib/role_schema';
-import { wrapError } from '../../../lib/errors';
-import { routePreCheckLicense } from '../../../lib/route_pre_check_license';
+import { getClient } from '../../../../../../../server/lib/get_client_shield';
+import { roleSchema } from '../../../../lib/role_schema';
+import { wrapError } from '../../../../lib/errors';
+import { routePreCheckLicense } from '../../../../lib/route_pre_check_license';
 
 export function initRolesApi(server) {
   const callWithRequest = getClient(server).callWithRequest;
@@ -21,7 +21,10 @@ export function initRolesApi(server) {
     handler(request, reply) {
       return callWithRequest(request, 'shield.getRole').then(
         (response) => {
-          const roles = _.map(response, (role, name) => _.assign(role, { name }));
+          const roles = _.map(response, (role, name) => {
+            return _.assign(role, { name });
+          });
+
           return reply(roles);
         },
         _.flow(wrapError, reply)
@@ -55,6 +58,7 @@ export function initRolesApi(server) {
     handler(request, reply) {
       const name = request.params.name;
       const body = _.omit(request.payload, 'name');
+
       return callWithRequest(request, 'shield.putRole', { name, body }).then(
         () => reply(request.payload),
         _.flow(wrapError, reply));

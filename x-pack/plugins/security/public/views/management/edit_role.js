@@ -11,6 +11,7 @@ import { toggle } from 'plugins/security/lib/util';
 import { isRoleEnabled } from 'plugins/security/lib/role';
 import template from 'plugins/security/views/management/edit_role.html';
 import 'angular-ui-select';
+import 'plugins/security/services/application_privilege';
 import 'plugins/security/services/shield_user';
 import 'plugins/security/services/shield_role';
 import 'plugins/security/services/shield_privileges';
@@ -20,6 +21,60 @@ import { IndexPatternsProvider } from 'ui/index_patterns/index_patterns';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import { checkLicenseError } from 'plugins/security/lib/check_license_error';
 import { EDIT_ROLES_PATH, ROLES_PATH } from './management_urls';
+import { DEFAULT_RESOURCE } from '../../../common/constants';
+
+const getKibanaPrivileges = (kibanaApplicationPrivilege, role, application) => {
+  const kibanaPrivileges = kibanaApplicationPrivilege.reduce((acc, p) => {
+    acc[p.name] = false;
+    return acc;
+  }, {});
+
+  if (!role.applications || role.applications.length === 0) {
+    return kibanaPrivileges;
+  }
+
+  // we're filtering out privileges for non-default resources as well incase
+  // the roles were created in a future version
+  const applications = role.applications
+    .filter(x => x.application === application && x.application.resources.all(r => r === DEFAULT_RESOURCE));
+
+  const assigned =  _.uniq(_.flatten(_.pluck(applications, 'privileges')));
+  assigned.forEach(a => {
+    kibanaPrivileges[a] = true;
+  });
+
+  return kibanaPrivileges;
+};
+
+const setApplicationPrivileges = (kibanaPrivileges, role, application) => {
+  if (!role.applications) {
+    role.applications = [];
+  }
+
+  // we first remove the matching application entries
+  role.applications = role.applications.filter(x => {
+    return x.application !== application;
+  });
+
+  const privileges = Object.keys(kibanaPrivileges).filter(key => kibanaPrivileges[key]);
+
+  // if we still have them, put the application entry back
+  if (privileges.length > 0) {
+    role.applications = [...role.applications, {
+      application,
+      privileges,
+      resources: [ DEFAULT_RESOURCE ]
+    }];
+  }
+};
+
+const getOtherApplications = (kibanaPrivileges, role, application) => {
+  if (!role.applications || role.applications.length === 0) {
+    return [];
+  }
+
+  return role.applications.map(x => x.application).filter(x => x !== application);
+};
 
 routes.when(`${EDIT_ROLES_PATH}/:name?`, {
   template,
@@ -43,8 +98,13 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
       return new ShieldRole({
         cluster: [],
         indices: [],
-        run_as: []
+        run_as: [],
+        applications: []
       });
+    },
+    kibanaApplicationPrivilege(ApplicationPrivilege, kbnUrl, Promise, Private) {
+      return ApplicationPrivilege.query().$promise
+        .catch(checkLicenseError(kbnUrl, Promise, Private));
     },
     users(ShieldUser, kbnUrl, Promise, Private) {
       // $promise is used here because the result is an ngResource, not a promise itself
@@ -58,7 +118,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     }
   },
   controllerAs: 'editRole',
-  controller($injector, $scope) {
+  controller($injector, $scope, rbacEnabled, rbacApplication) {
     const $route = $injector.get('$route');
     const kbnUrl = $injector.get('kbnUrl');
     const shieldPrivileges = $injector.get('shieldPrivileges');
@@ -71,6 +131,13 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     $scope.users = $route.current.locals.users;
     $scope.indexPatterns = $route.current.locals.indexPatterns;
     $scope.privileges = shieldPrivileges;
+
+    $scope.rbacEnabled = rbacEnabled;
+    const kibanaApplicationPrivilege = $route.current.locals.kibanaApplicationPrivilege;
+    const role = $route.current.locals.role;
+    $scope.kibanaPrivileges = getKibanaPrivileges(kibanaApplicationPrivilege, role, rbacApplication);
+    $scope.otherApplications = getOtherApplications(kibanaApplicationPrivilege, role, rbacApplication);
+
     $scope.rolesHref = `#${ROLES_PATH}`;
 
     this.isNewRole = $route.current.params.name == null;
@@ -95,6 +162,9 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     $scope.saveRole = (role) => {
       role.indices = role.indices.filter((index) => index.names.length);
       role.indices.forEach((index) => index.query || delete index.query);
+
+      setApplicationPrivileges($scope.kibanaPrivileges, role, rbacApplication);
+
       return role.$save()
         .then(() => toastNotifications.addSuccess('Updated role'))
         .then($scope.goToRoleList)
@@ -138,6 +208,16 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
 
     $scope.toggle = toggle;
     $scope.includes = _.includes;
+    $scope.togglePermission = (role, permission) => {
+      const shouldRemove = $scope.hasPermission(role, permission);
+      const rolePermissions = role.applications || [];
+      if (shouldRemove) {
+        role.applications = rolePermissions.filter(rolePermission => rolePermission.name === permission.name);
+      } else {
+        role.applications = rolePermissions.concat([permission]);
+      }
+    };
+
     $scope.union = _.flow(_.union, _.compact);
   }
 });
