@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+
 const GEO_META_URL = `http://meta.url.tbd/`;
 
 import {
-  EuiIcon
 } from '@elastic/eui';
 
 
@@ -111,32 +110,4 @@ export function zipIndexAndTypesAndFilter(meta, fieldType) {
     });
   });
   return types.filter(type=>type.fields.length > 0);
-}
-
-export function getLayerTypeIcon(type) {
-  let iconNode;
-
-  if (type === undefined) {
-    console.warn('getLayerTypeIcon requires a type');
-  } else {
-    type = type.toLowerCase();
-  }
-
-  if (type.includes('vector')) {
-    iconNode = (
-      <EuiIcon type="vector" />
-    );
-  } else if (type.includes('tile')) {
-    iconNode = (
-      <EuiIcon type="grid" />
-    );
-  } else if (type.includes('heatmap') || type.includes('geohash')) {
-    iconNode = (
-      <EuiIcon type="heatmap" />
-    );
-  } else {
-    console.warn('getLayerTypeIcon couldn\'t find a match for ' + type);
-  }
-
-  return iconNode;
 }

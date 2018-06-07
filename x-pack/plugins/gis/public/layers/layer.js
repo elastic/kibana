@@ -67,6 +67,9 @@ export class ALayer {
         data-layerid={this.getId()}
       >
         <EuiFlexGroup gutterSize="s" responsive={false} className={this.getVisibility() ? 'visible' : 'notvisible'}>
+          <EuiFlexItem grow={false}>
+            {this.renderSmallLegend()}
+          </EuiFlexItem>
           <EuiFlexItem grow={false} className="layerEntry--visibility">
             <VisibilityToggle
               checked={this.getVisibility()}

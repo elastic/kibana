@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { ALayer } from './layer';
 import * as ol from 'openlayers';
 
-import {} from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 
 
 export class VectorLayer extends ALayer {
@@ -19,6 +20,10 @@ export class VectorLayer extends ALayer {
 
   getLayerName() {
     return this._vectorSource.getDisplayName();
+  }
+
+  renderSmallLegend() {
+    return (<EuiIcon type="vector" />);
   }
 
   async getOLLayer() {
