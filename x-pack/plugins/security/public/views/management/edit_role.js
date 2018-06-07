@@ -208,15 +208,6 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
 
     $scope.toggle = toggle;
     $scope.includes = _.includes;
-    $scope.togglePermission = (role, permission) => {
-      const shouldRemove = $scope.hasPermission(role, permission);
-      const rolePermissions = role.applications || [];
-      if (shouldRemove) {
-        role.applications = rolePermissions.filter(rolePermission => rolePermission.name === permission.name);
-      } else {
-        role.applications = rolePermissions.concat([permission]);
-      }
-    };
 
     $scope.union = _.flow(_.union, _.compact);
   }
