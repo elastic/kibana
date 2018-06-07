@@ -198,7 +198,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     getDocHeader() {
       return getRemote()
-        .findByCssSelector('thead.ng-isolate-scope > tr:nth-child(1)')
+        .findByCssSelector('thead > tr:nth-child(1)')
         .getVisibleText();
     }
 
