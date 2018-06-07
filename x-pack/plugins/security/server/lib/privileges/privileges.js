@@ -24,7 +24,7 @@ export function buildPrivilegeMap(application, kibanaVersion) {
   privilegeActions.all = {
     application,
     name: 'all',
-    actions: [getVersionPrivilege(kibanaVersion), getLoginPrivilege(), 'action:*'],
+    actions: [getVersionPrivilege(kibanaVersion), 'action:*'],
     metadata: {}
   };
 
