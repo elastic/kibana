@@ -375,6 +375,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
+    async clickSavedSearch(savedSearchName) {
+      await find.clickByPartialLinkText(savedSearchName);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
     async setValue(newValue) {
       await find.clickByCssSelector('button[ng-click="numberListCntr.add()"]', defaultFindTimeout * 2);
       const input = await find.byCssSelector('input[ng-model="numberListCntr.getList()[$index]"]');
