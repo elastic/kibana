@@ -238,7 +238,7 @@
     "angular-mocks": "1.4.7",
     "babel-eslint": "8.1.2",
     "babel-jest": "^22.4.3",
-    "backport": "2.2.0",
+    "backport": "3.0.2",
     "chai": "3.5.0",
     "chance": "1.0.10",
     "cheerio": "0.22.0",
