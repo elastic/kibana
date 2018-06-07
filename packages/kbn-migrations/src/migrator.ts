@@ -65,7 +65,7 @@ export async function createMigrator(opts: MigratorOpts) {
     /**
      * Patches the index template and mappings, if the index is out of date.
      */
-    migrateIndex: () => migrateIndex(context),
+    patchIndex: () => patchIndex(context),
 
     /**
      * Updates the index to have the expected mappings.
@@ -85,7 +85,7 @@ async function migrationContext(opts: MigratorOpts): Promise<MigrationContext> {
     fetchMapping(callCluster, index),
     null
   );
-  const activeMappings = buildMappings(opts.kibanaVersion, opts.plugins);
+  const activeMappings = buildMappings(opts);
   const fullMappings = mergeMappings(
     _.get(indexMappings, 'doc.properties', {}),
     activeMappings
@@ -100,7 +100,7 @@ async function migrationContext(opts: MigratorOpts): Promise<MigrationContext> {
   };
 }
 
-async function migrateIndex(context: MigrationContext) {
+async function patchIndex(context: MigrationContext) {
   const { indexMappings, activeMappings, index, kibanaVersion } = context;
   if (!indexMappings) {
     return;

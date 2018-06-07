@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export { migrationPlugins } from './plugin';
 export { buildMappings } from './mapping';
 export { createMigrator } from './migrator';
 export * from './types';

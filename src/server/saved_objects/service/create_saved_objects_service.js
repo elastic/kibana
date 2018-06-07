@@ -19,11 +19,20 @@
 
 import { SavedObjectsRepository, ScopedSavedObjectsClientProvider } from './lib';
 import { SavedObjectsClient } from './saved_objects_client';
+import { getKibanaIndexMigrator } from '../../utils';
 
-export function createSavedObjectsService(server) {
+export function createSavedObjectsService(kbnServer, server) {
+  // getKibanaIndexMigrator could fail (e.g. if elasticsearch is unavailable)
+  // but we don't want to create a new migrator with every call, as it's relatively
+  // expensive, so we'll cache the first successful instance.
+  const getMigrator = (() => {
+    let migrator;
+    return async () => migrator || await getKibanaIndexMigrator();
+  });
   const onBeforeWrite = async () => {
     try {
-      await server.plugins.elasticsearch.getMigrator().putTemplate();
+      const migrator = await getMigrator();
+      await migrator.putTemplate();
     } catch (error) {
       server.log(['debug', 'savedObjects'], {
         tmpl:

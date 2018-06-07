@@ -39,6 +39,7 @@ import { sampleDataMixin } from './sample_data';
 import { kibanaIndexMappingsMixin } from './mappings';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
+import { initializeKibanaIndex } from './utils';
 
 const rootDir = fromRoot('.');
 
@@ -136,6 +137,7 @@ export default class KbnServer {
     } = this;
 
     await this.ready();
+    await initializeKibanaIndex(this);
     await fromNode(cb => server.start(cb));
 
     if (isWorker) {

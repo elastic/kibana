@@ -18,7 +18,7 @@
  */
 import { buildMappings } from './mapping';
 
-describe('migrations buildMappings', () => {
+describe('buildMappings', () => {
   test('combines all mappings and includes core mappings', () => {
     const plugins = [
       {
@@ -35,7 +35,9 @@ describe('migrations buildMappings', () => {
       },
     ];
 
-    expect(buildMappings('7.0.0', plugins)).toMatchSnapshot();
+    expect(
+      buildMappings({ kibanaVersion: '7.0.0', plugins })
+    ).toMatchSnapshot();
   });
 
   test('disallows duplicate mappings', () => {
@@ -53,7 +55,7 @@ describe('migrations buildMappings', () => {
       },
     ];
 
-    expect(() => buildMappings('7.1.2', plugins)).toThrow(
+    expect(() => buildMappings({ kibanaVersion: '7.1.2', plugins })).toThrow(
       /Plugin \"(hello|cartoons)\" is attempting to redefine mapping \"stuff\"/
     );
   });
@@ -66,7 +68,7 @@ describe('migrations buildMappings', () => {
       },
     ];
 
-    expect(() => buildMappings('7.2.3', plugins)).toThrow(
+    expect(() => buildMappings({ kibanaVersion: '7.2.3', plugins })).toThrow(
       /Invalid mapping \"_hm\" in plugin \"nadachance\"\. Mappings cannot start with _/
     );
   });

@@ -16,10 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { buildMappings, migrationPlugins } from '@kbn/migrations';
+import { buildKibanaMappings } from '../utils';
 
 export function kibanaIndexMappingsMixin(kbnServer, server) {
-  const mappings = buildMappings(migrationPlugins(kbnServer.pluginSpecs));
+  const mappings = buildKibanaMappings(kbnServer);
 
   /**
    *  Get the mappings dsl that we expect to see in the

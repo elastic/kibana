@@ -20,7 +20,7 @@ import _ from 'lodash';
 import { migrationType } from './migration_type';
 import { IndexMapping } from './types';
 
-describe('migrations migrationType', () => {
+describe('migrationType', () => {
   const version = '7.0.0';
   const mappings = {
     doc: {

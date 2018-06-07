@@ -18,3 +18,4 @@
  */
 
 export { confirm, question } from './prompt';
+export { getKibanaIndexMigrator, buildKibanaMappings, initializeKibanaIndex } from './kibana_index_migrator';

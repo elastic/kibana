@@ -120,9 +120,8 @@ export default function (kibana) {
       createProxy(server, 'POST', '/_msearch');
 
       // Set up the health check service and start it.
-      const { start, waitUntilReady, getMigrator } = healthCheck(this, server);
+      const { start, waitUntilReady } = healthCheck(this, server);
       server.expose('waitUntilReady', waitUntilReady);
-      server.expose('getMigrator', getMigrator);
       start();
     }
   });

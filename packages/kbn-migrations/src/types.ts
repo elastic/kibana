@@ -71,8 +71,3 @@ export interface MigrationPlugin {
 }
 
 export type LogFunction = ((metadata: string[], message: string) => any);
-
-export interface KibanaPlugin {
-  getId: () => string;
-  getExportSpecs: () => { mappings: MappingDefinition } | undefined;
-}

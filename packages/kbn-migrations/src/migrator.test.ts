@@ -22,12 +22,12 @@ import { buildMappings } from './mapping';
 import { createMigrator } from './migrator';
 import { IndexMapping } from './types';
 
-describe('migrations migrator', async () => {
+describe('migrator', async () => {
   const log = sinon.spy();
 
   test('reads the mapping for index', async () => {
     const index = randomName();
-    const mappings = buildMappings('7.0.0', []);
+    const mappings = buildMappings({ kibanaVersion: '7.0.0', plugins: [] });
     const callCluster = createCallCluster(createIndex(index, mappings));
     await createMigrator({
       callCluster,
@@ -45,7 +45,7 @@ describe('migrations migrator', async () => {
     );
   });
 
-  describe('migrate', async () => {
+  describe('patchIndex', async () => {
     test('does nothing if the index does not exist', async () => {
       const index = randomName();
       const callCluster = createCallCluster();
@@ -62,7 +62,7 @@ describe('migrations migrator', async () => {
         log,
         plugins,
       });
-      await migrator.migrateIndex();
+      await migrator.patchIndex();
 
       sinon.assert.calledOnce(callCluster);
       sinon.assert.calledWithExactly(
@@ -81,7 +81,7 @@ describe('migrations migrator', async () => {
         },
       ];
       const callCluster = createCallCluster(
-        createIndex(index, buildMappings('7.0.0', plugins))
+        createIndex(index, buildMappings({ kibanaVersion: '7.0.0', plugins }))
       );
       const migrator = await createMigrator({
         callCluster,
@@ -90,7 +90,7 @@ describe('migrations migrator', async () => {
         log,
         plugins,
       });
-      await migrator.migrateIndex();
+      await migrator.patchIndex();
 
       sinon.assert.calledOnce(callCluster);
       sinon.assert.calledWithExactly(
@@ -104,7 +104,10 @@ describe('migrations migrator', async () => {
       const index = randomName();
       const originalPlugins = [{ id: 'sample', mappings: randomMappings() }];
       const callCluster = createCallCluster(
-        createIndex(index, buildMappings('7.0.0', originalPlugins))
+        createIndex(
+          index,
+          buildMappings({ kibanaVersion: '7.0.0', plugins: originalPlugins })
+        )
       );
       const activePlugins = [
         ...originalPlugins,
@@ -120,8 +123,11 @@ describe('migrations migrator', async () => {
         log,
         plugins: activePlugins,
       });
-      await migrator.migrateIndex();
-      const expectedMappings = buildMappings('7.0.0', activePlugins);
+      await migrator.patchIndex();
+      const expectedMappings = buildMappings({
+        kibanaVersion: '7.0.0',
+        plugins: activePlugins,
+      });
 
       sinon.assert.calledThrice(callCluster);
       sinon.assert.calledWithExactly(
@@ -164,7 +170,7 @@ describe('migrations migrator', async () => {
         },
       ];
       const callCluster = createCallCluster(
-        createIndex(index, buildMappings('7.0.1', plugins))
+        createIndex(index, buildMappings({ kibanaVersion: '7.0.1', plugins }))
       );
       const migrator = await createMigrator({
         callCluster,
@@ -174,7 +180,7 @@ describe('migrations migrator', async () => {
         plugins,
       });
 
-      await expect(migrator.migrateIndex()).rejects.toThrow(
+      await expect(migrator.patchIndex()).rejects.toThrow(
         /Cannot automatically downgrade from "7.0.1" to "7.0.0"/
       );
     });
@@ -189,7 +195,10 @@ describe('migrations migrator', async () => {
         },
       ];
       const callCluster = createCallCluster(
-        createIndex(index, buildMappings('7.0.0', originalPlugins))
+        createIndex(
+          index,
+          buildMappings({ kibanaVersion: '7.0.0', plugins: originalPlugins })
+        )
       );
       const activePlugins = [originalPlugins[0]];
       const migrator = await createMigrator({
@@ -199,7 +208,7 @@ describe('migrations migrator', async () => {
         log,
         plugins: activePlugins,
       });
-      await migrator.migrateIndex();
+      await migrator.patchIndex();
 
       sinon.assert.calledOnce(callCluster);
       sinon.assert.calledWithExactly(

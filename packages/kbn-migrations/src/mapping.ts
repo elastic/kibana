@@ -27,17 +27,23 @@ import {
   MigrationPlugin,
 } from './types';
 
+interface BuildMappingsOpts {
+  kibanaVersion: string;
+  plugins: MigrationPlugin[];
+}
+
 /**
  * Builds a single index mapping from a list of plugins.
  *
- * @param {string} kibanaVersion - The current version of Kibana
- * @param {MigrationPlugin[]} plugins - The plugins whose mappings will be applied to the index
+ * @param opts
+ * @prop {string} kibanaVersion - The current version of Kibana
+ * @prop {MigrationPlugin[]} plugins - The plugins whose mappings will be applied to the index
  * @returns {IndexMapping}
  */
-export function buildMappings(
-  kibanaVersion: string,
-  plugins: MigrationPlugin[]
-): IndexMapping {
+export function buildMappings({
+  kibanaVersion,
+  plugins,
+}: BuildMappingsOpts): IndexMapping {
   const mapping = defaultMapping();
   return {
     doc: {
