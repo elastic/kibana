@@ -148,7 +148,6 @@ export function setActiveApi(api) {
     );
     return;
   }
-  console.log('setting active api to [' + api.name + ']');
 
   ACTIVE_API = api;
 }
