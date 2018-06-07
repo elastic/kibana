@@ -128,7 +128,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getChartTypeCount() {
-      const tags = await find.allByCssSelector('a.wizard-vis-type.ng-scope');
+      const tags = await find.allByCssSelector('a.wizard-vis-type');
       return tags.length;
     }
 
@@ -399,7 +399,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     // clickBucket(bucketType) 'X-Axis', 'Split Area', 'Split Chart'
     async clickBucket(bucketName) {
       const chartTypes = await retry.try(
-        async () => await find.allByCssSelector('li.list-group-item.list-group-menu-item.ng-binding.ng-scope'));
+        async () => await find.allByCssSelector('li.list-group-item.list-group-menu-item'));
       log.debug('found bucket types ' + chartTypes.length);
 
       async function getChartType(chart) {
@@ -447,7 +447,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const aggItem = await find.byCssSelector(`[data-test-subj="${agg}"]`);
       await aggItem.click();
       const fieldSelect = await find
-        .byCssSelector(`#visAggEditorParams${index} > [agg-param="agg.type.params[0]"] > div > div > div.ui-select-match.ng-scope > span`);
+        .byCssSelector(`#visAggEditorParams${index} > [agg-param="agg.type.params[0]"] > div > div > div.ui-select-match > span`);
       // open field selection list
       await fieldSelect.click();
       // select our field
@@ -515,7 +515,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async orderBy(fieldValue) {
       await find.clickByCssSelector(
         'select.form-control.ng-pristine.ng-valid.ng-untouched.ng-valid-required[ng-model="agg.params.orderBy"]'
-        + `option.ng-binding.ng-scope:contains("${fieldValue}")`);
+        + `option:contains("${fieldValue}")`);
     }
 
     async selectOrderBy(fieldValue) {
@@ -822,12 +822,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getMarkdownData() {
-      const markdown = await retry.try(async () => find.byCssSelector('visualize.ng-isolate-scope'));
+      const markdown = await retry.try(async () => find.byCssSelector('visualize'));
       return await markdown.getVisibleText();
     }
 
     async clickColumns() {
-      await find.clickByCssSelector('div.schemaEditors.ng-scope > div > div > button:nth-child(2)');
+      await find.clickByCssSelector('div.schemaEditors > div > div > button:nth-child(2)');
     }
 
     async waitForVisualization() {
