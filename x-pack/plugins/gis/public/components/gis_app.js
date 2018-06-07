@@ -7,9 +7,12 @@
 import React from 'react';
 import { KibanaMap } from './kibana_map';
 import { LayerControl } from './layer_control';
+
 import { TMSSource } from '../sources/tms_source';
 import { EMSVectorSource } from '../sources/ems_vector_source';
 import { EMSTMSSource } from '../sources/ems_tms_source';
+import { KbnYmlTMSSource } from '../sources/kbnyml_tms_source';
+
 import { TileLayer } from '../layers/tile_layer';
 import { VectorLayer } from '../layers/vector_layer';
 
@@ -25,17 +28,26 @@ export class GISApp extends React.Component {
   async _createPlaceholders() {
 
     //todo: some hardcoded example layers
-    const defaultEmsTMSSource = new EMSTMSSource({
+    const emsTMSSource = new EMSTMSSource({
       kbnCoreAPI: this.props.kbnCoreAPI,
       serviceId: "road_map"
     });
-    const tmsLayer = new TileLayer(defaultEmsTMSSource);
+    const tmsLayer = new TileLayer(emsTMSSource);
     await this._kbnMap.addLayer(tmsLayer);
     const osmSource = new TMSSource({
       urlTemplate: "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"
     });
-    const tmsLayer2 = new TileLayer(osmSource);
-    await this._kbnMap.addLayer(tmsLayer2);
+
+    const omsLayer = new TileLayer(osmSource);
+    await this._kbnMap.addLayer(omsLayer);
+
+    try {
+      const kbnymlTmsSource = new KbnYmlTMSSource({ kbnCoreAPI: this.props.kbnCoreAPI });
+      const tmsLayer = new TileLayer(kbnymlTmsSource);
+      await this._kbnMap.addLayer(tmsLayer);
+    } catch(e) {
+      console.warn('no valid tms configuration in yml');
+    }
 
     const vectorSource = new EMSVectorSource({
       kbnCoreAPI: this.props.kbnCoreAPI,

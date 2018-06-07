@@ -35,8 +35,10 @@ uiModules
   .get('kibana')
   .run((Private, $injector) => {
     const serviceSettings = $injector.get('serviceSettings');
+    const mapConfig = $injector.get('mapConfig');
     kbnCoreAPI = {
-      serviceSettings: serviceSettings
+      serviceSettings: serviceSettings,
+      mapConfig: mapConfig
     };
   });
 
