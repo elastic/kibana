@@ -42,6 +42,21 @@ export class I18nLoader {
   static TRANSLATION_FILE_EXTENSION = '.json';
 
   /**
+   * Registers passed translations files, loads them and returns promise with
+   * all translation messages
+   * @param {string[]} paths - Array of absolute paths to the translation files
+   * @returns {Promise<Map<string, Messages>>} translations - A Promise object
+   * where keys are the locale and values are objects of translation messages
+   */
+  static async getAllTranslationsFromPaths(paths) {
+    const i18nLoader = new I18nLoader();
+
+    i18nLoader.registerTranslationFiles(paths);
+
+    return await i18nLoader.getAllTranslations();
+  }
+
+  /**
    * Returns locale by the given translation file name
    * @param {string} fullFileName
    * @returns {string} locale

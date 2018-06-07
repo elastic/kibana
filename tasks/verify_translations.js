@@ -17,10 +17,12 @@
  * under the License.
  */
 
+// TODO: Integrate a new tool for translations checking
+import { I18nLoader } from '@kbn/i18n/src/server';
+
 import { fromRoot, formatListAsProse } from '../src/utils';
 import { findPluginSpecs } from '../src/plugin_discovery';
 import { collectUiExports } from '../src/ui';
-import { I18n } from '../src/ui/ui_i18n/i18n';
 
 import * as i18nVerify from './utils/i18n_verify_keys';
 
@@ -64,7 +66,7 @@ async function verifyTranslations(uiExports) {
   }
 
   // get all of the translations from uiExports
-  const translations = await I18n.getAllTranslationsFromPaths(uiExports.translationPaths);
+  const translations = await I18nLoader.getAllTranslationsFromPaths(uiExports.translationPaths);
   const keysWithoutTranslations = Object.entries(
     i18nVerify.getNonTranslatedKeys(keysUsedInViews, translations)
   );
