@@ -158,6 +158,7 @@ export function interpretProvider(config) {
       return argAsts.map(argAst => {
         return async (ctx = context) => {
           const newContext = await interpret(argAst, ctx);
+          if (getType(newContext) === 'error') throw newContext.error;
           return cast(newContext, argDefs[argName].types);
         };
       });
