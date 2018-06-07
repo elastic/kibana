@@ -9,10 +9,8 @@ import { store } from './store';
 
 import { anomalyExplorerModule } from './modules/anomaly_explorer';
 import { dragSelectModule } from './modules/drag_select';
-import { showChartsModule } from './modules/show_charts';
 
 export const dispatch = bindActionCreators({
   ...anomalyExplorerModule.actions,
   ...dragSelectModule.actions,
-  ...showChartsModule.actions
 }, store.dispatch);

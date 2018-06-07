@@ -28,7 +28,7 @@ module
         visible: '='
       },
       link: function (scope) {
-        scope.showCharts = store.getState().showCharts;
+        scope.showCharts = store.getState().anomalyExplorer.showCharts;
         scope.toggleChartsVisibility = () => dispatch.showCharts(scope.showCharts);
       }
     };

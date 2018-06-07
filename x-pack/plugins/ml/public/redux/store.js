@@ -19,12 +19,10 @@ import 'rxjs/add/operator/takeUntil';
 
 import { anomalyExplorerModule } from './modules/anomaly_explorer';
 import { dragSelectModule } from './modules/drag_select';
-import { showChartsModule } from './modules/show_charts';
 
 const mainReducer = combineReducers({
   anomalyExplorer: anomalyExplorerModule.reducer,
-  dragSelect: dragSelectModule.reducer,
-  showCharts: showChartsModule.reducer
+  dragSelect: dragSelectModule.reducer
 });
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;

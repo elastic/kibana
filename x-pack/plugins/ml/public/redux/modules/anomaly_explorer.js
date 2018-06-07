@@ -11,6 +11,7 @@ const defaultState = {
   // general
   checkboxShowChartsVisibility: false,
   loading: true,
+  showCharts: true,
   timeFieldName: 'timestamp',
 
   // anomaly charts
@@ -28,9 +29,10 @@ const actionDefs = {
       latestMs
     };
   },
-  TIME_RANGE_CHANGE: (d) => d,
+  TIME_RANGE_CHANGE: d => d,
   LOADING_START: () => ({ loading: true }),
-  LOADING_STOP: () => ({ loading: false })
+  LOADING_STOP: () => ({ loading: false }),
+  SHOW_CHARTS: d => ({ showCharts: d })
 };
 
 export const anomalyExplorerModule = createModule({ defaultState, actionDefs });

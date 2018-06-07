@@ -74,10 +74,7 @@ module.controller('MlExplorerController', function (
   });
 
   state$
-    .map(s => ({
-      loading: s.anomalyExplorer.loading,
-      checkboxShowChartsVisibility: s.anomalyExplorer.checkboxShowChartsVisibility
-    }))
+    .map(s => _.pick(s.anomalyExplorer, ['loading', 'checkboxShowChartsVisibility']))
     .distinctUntilChanged(_.isEqual)
     .takeUntil(destroy$)
     .subscribe((newScope) => {
@@ -86,7 +83,7 @@ module.controller('MlExplorerController', function (
     });
 
   state$
-    .map(s => s.showCharts)
+    .map(s => s.anomalyExplorer.showCharts)
     .distinctUntilChanged()
     .takeUntil(destroy$)
     .subscribe(() => {
@@ -390,8 +387,8 @@ module.controller('MlExplorerController', function (
   };
   mlExplorerDashboardService.swimlaneCellClick.watch(swimlaneCellClickListener);
 
-  function checkboxShowChartsListener() {
-    if (store.getState().showCharts && $scope.cellData !== undefined) {
+  function checkboxShowChartsListener(showCharts) {
+    if (showCharts && $scope.cellData !== undefined) {
       swimlaneCellClickListener($scope.cellData);
     } else {
       const timerange = getSelectionTimeRange($scope.cellData);
@@ -399,12 +396,13 @@ module.controller('MlExplorerController', function (
     }
   }
 
-  function anomalyChartsSeverityListener() {
-    if (store.getState().showCharts && $scope.cellData !== undefined) {
+  function anomalyChartsSeverityListener(showCharts) {
+    if (showCharts && $scope.cellData !== undefined) {
       const timerange = getSelectionTimeRange($scope.cellData);
       dispatch.timeRangeChange(timerange);
     }
   }
+  mlSelectSeverityService.state.watch(anomalyChartsSeverityListener);
 
   const tableControlsListener = function () {
     loadAnomaliesTableData();
@@ -452,14 +450,12 @@ module.controller('MlExplorerController', function (
       jobIds, influencers, 0, earliestMs, latestMs, 500
     )
       .then((resp) => {
-        let anomalyChartsData = [];
+        let anomalyChartRecords = [];
         if ($scope.cellData !== undefined && _.keys($scope.cellData).length > 0) {
           console.log('Explorer anomaly charts data set:', resp.records);
-          anomalyChartsData = resp.records;
+          anomalyChartRecords = resp.records;
         }
-        dispatch.anomalyDataChange({
-          anomalyChartRecords: anomalyChartsData, earliestMs, latestMs
-        });
+        dispatch.anomalyDataChange({ anomalyChartRecords, earliestMs, latestMs });
 
         if (influencers.length > 0) {
           // Filter the Top Influencers list to show just the influencers from

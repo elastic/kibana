@@ -10,6 +10,7 @@ import { createModule } from '../util';
 const ALLOW_CELL_RANGE_SELECTION = true;
 
 const defaultState = {
+  allowCellRangeSelection: ALLOW_CELL_RANGE_SELECTION,
   cellMouseoverActive: true,
   disableDragSelectOnMouseLeave: true,
   dragging: false,

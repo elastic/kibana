@@ -278,7 +278,7 @@ module.controller('MlExplorerChartsContainerController', function ($scope, $inje
       s.anomalyExplorer.anomalyChartRecords,
       s.anomalyExplorer.earliestMs,
       s.anomalyExplorer.latestMs,
-      s.showCharts,
+      s.anomalyExplorer.showCharts,
     ]))
     .distinctUntilChanged(_.isEqual)
     .subscribe((d) => {

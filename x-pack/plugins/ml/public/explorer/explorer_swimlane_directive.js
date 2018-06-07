@@ -29,7 +29,7 @@ import { store, state$ } from '../redux/store';
 module.directive('mlExplorerSwimlane', function ($compile, Private, mlExplorerDashboardService, mlChartTooltipService) {
 
   function link(scope, element) {
-    const state = store.getState().anomalyExplorer;
+    const state = store.getState().dragSelect;
 
     // Consider the setting to support to select a range of cells
     if (!state.allowCellRangeSelection) {
