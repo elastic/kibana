@@ -19,34 +19,77 @@
 
 // Functions for building, comparing, and processing mapping definitions
 // in saved object indices.
-import { IndexMapping, MappingDefinition, MigrationPlugin } from './types';
+import _ from 'lodash';
+import {
+  CallCluster,
+  IndexMapping,
+  MappingDefinition,
+  MigrationPlugin,
+} from './types';
 
-const coreMappings = {
-  config: {
-    dynamic: true,
-    properties: {
-      buildNum: {
-        type: 'keyword',
-      },
-    },
-  },
-  type: {
-    type: 'keyword',
-  },
-  updated_at: {
-    type: 'date',
-  },
-};
-
-// Builds the mappigns for an index from a list of plugins, ensuring that a given
-// property is defined only once.
-export function buildMappings(plugins: MigrationPlugin[]): IndexMapping {
+/**
+ * Builds a single index mapping from a list of plugins.
+ *
+ * @param {string} kibanaVersion - The current version of Kibana
+ * @param {MigrationPlugin[]} plugins - The plugins whose mappings will be applied to the index
+ * @returns {IndexMapping}
+ */
+export function buildMappings(
+  kibanaVersion: string,
+  plugins: MigrationPlugin[]
+): IndexMapping {
+  const mapping = defaultMapping();
   return {
     doc: {
-      dynamic: 'strict',
-      properties: plugins.reduce(validateAndMerge, { ...coreMappings }),
+      ...mapping.doc,
+      _meta: { kibanaVersion },
+      properties: plugins.reduce(validateAndMerge, mapping.doc.properties),
     },
   };
+}
+
+export async function putMapping(
+  callCluster: CallCluster,
+  index: string,
+  mapping: IndexMapping
+) {
+  return callCluster('indices.putMapping', {
+    body: mapping.doc,
+    index,
+    type: 'doc',
+  });
+}
+
+export async function fetchMapping(
+  callCluster: CallCluster,
+  index: string
+): Promise<IndexMapping> {
+  const result = await callCluster('indices.getMapping', { index });
+  return Object.values(result)[0].mappings || defaultMapping();
+}
+
+function defaultMapping(): IndexMapping {
+  return _.cloneDeep({
+    doc: {
+      dynamic: 'strict',
+      properties: {
+        config: {
+          dynamic: true,
+          properties: {
+            buildNum: {
+              type: 'keyword',
+            },
+          },
+        },
+        type: {
+          type: 'keyword',
+        },
+        updated_at: {
+          type: 'date',
+        },
+      },
+    },
+  });
 }
 
 function validateAndMerge(

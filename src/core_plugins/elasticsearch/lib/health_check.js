@@ -19,9 +19,9 @@
 
 import Promise from 'bluebird';
 import elasticsearch from 'elasticsearch';
+import { createMigrator, migrationPlugins } from '@kbn/migrations';
 import kibanaVersion from './kibana_version';
 import { ensureEsVersion } from './ensure_es_version';
-import { patchKibanaIndex } from './patch_kibana_index';
 
 const NoConnections = elasticsearch.errors.NoConnections;
 
@@ -29,6 +29,7 @@ export default function (plugin, server) {
   const config = server.config();
   const callAdminAsKibanaUser = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
   const REQUEST_DELAY = config.get('elasticsearch.healthCheck.delay');
+  let migrator;
 
   plugin.status.yellow('Waiting for Elasticsearch');
   function waitForPong(callWithInternalUser, url) {
@@ -38,6 +39,13 @@ export default function (plugin, server) {
 
       return Promise.delay(REQUEST_DELAY).then(waitForPong.bind(null, callWithInternalUser, url));
     });
+  }
+
+  function getMigrator() {
+    if (!migrator) {
+      throw new Error(`Migrations cannot be accessed until Elasticsearch is available`);
+    }
+    return migrator;
   }
 
   function waitUntilReady() {
@@ -57,16 +65,23 @@ export default function (plugin, server) {
     return plugin.status.green('Ready');
   }
 
+  async function setUpKibanaIndexMigrator() {
+    migrator = await createMigrator({
+      callCluster: callAdminAsKibanaUser,
+      index: config.get('kibana.index'),
+      kibanaVersion: kibanaVersion.get(),
+      log: (...args) => server.log(...args),
+      plugins: migrationPlugins(plugin.kbnServer.pluginSpecs),
+    });
+    return migrator;
+  }
+
   function check() {
     const healthCheck =
       waitForPong(callAdminAsKibanaUser, config.get('elasticsearch.url'))
         .then(waitForEsVersion)
-        .then(() => patchKibanaIndex({
-          callCluster: callAdminAsKibanaUser,
-          log: (...args) => server.log(...args),
-          indexName: config.get('kibana.index'),
-          kibanaIndexMappingsDsl: server.getKibanaIndexMappingsDsl()
-        }));
+        .then(setUpKibanaIndexMigrator)
+        .then(() => migrator.migrateIndex());
 
     return healthCheck
       .then(setGreenStatus)
@@ -105,6 +120,7 @@ export default function (plugin, server) {
   });
 
   return {
+    getMigrator,
     waitUntilReady: waitUntilReady,
     run: check,
     start: startorRestartChecking,

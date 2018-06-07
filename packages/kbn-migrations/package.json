@@ -10,11 +10,15 @@
     "kbn:bootstrap": "yarn build"
   },
   "dependencies": {
-    "lodash": "^3.10.1"
+    "lodash": "^3.10.1",
+    "semver": "^5.5.0"
   },
   "devDependencies": {
     "@types/jest": "^22.1.3",
     "@types/lodash": "^3.10.1",
+    "@types/semver": "^5.5.0",
+    "@types/sinon": "^5.0.1",
+    "sinon": "^5.0.7",
     "typescript": "^2.8.1"
   }
 }

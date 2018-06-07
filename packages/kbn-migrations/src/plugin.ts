@@ -20,7 +20,13 @@
 // Functions for extracting / manipulating plugin definitions.
 import { KibanaPlugin, MigrationPlugin } from './types';
 
-// Converts KibanaPlugin definitions to a simple data structure
+/**
+ * Converts a list of Kibana plugins into a simpler data structure expected
+ * by the migration system.
+ *
+ * @param {KibanaPlugin[]} plugins - The list of active plugins in the Kibana system
+ * @returns {MigrationPlugin[]}
+ */
 export function migrationPlugins(plugins: KibanaPlugin[]): MigrationPlugin[] {
   const emptySpec = { mappings: undefined };
   return plugins.map(p => ({

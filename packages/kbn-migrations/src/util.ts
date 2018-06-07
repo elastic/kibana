@@ -16,7 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export { migrationPlugins } from './plugin';
-export { buildMappings } from './mapping';
-export { createMigrator } from './migrator';
-export * from './types';
+
+export function fetchOrDefault<T>(
+  promise: Promise<T>,
+  defaultValue: T
+): Promise<T> {
+  return promise.catch(error => {
+    if (error.status === 404) {
+      return defaultValue;
+    }
+    throw error;
+  });
+}

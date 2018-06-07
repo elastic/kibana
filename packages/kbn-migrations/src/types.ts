@@ -17,21 +17,60 @@
  * under the License.
  */
 
+export interface PutMappingOpts {
+  index: string;
+  type: 'doc';
+  body: DocMapping;
+}
+
+export interface GetMappingOpts {
+  index: string;
+}
+
+export interface PutTemplateOpts {
+  name: string;
+  body: {
+    template: string;
+    settings: {
+      number_of_shards: number;
+      auto_expand_replicas: string;
+    };
+    mappings: IndexMapping;
+  };
+}
+
+export interface MappingResult {
+  [index: string]: {
+    mappings: IndexMapping;
+  };
+}
+
+export interface CallCluster {
+  (path: 'indices.putMapping', opts: PutMappingOpts): Promise<any>;
+  (path: 'indices.getMapping', opts: GetMappingOpts): Promise<MappingResult>;
+  (path: 'indices.putTemplate', opts: PutTemplateOpts): Promise<any>;
+}
+
 export interface MappingDefinition {
   [type: string]: any;
 }
 
+export interface DocMapping {
+  dynamic: string;
+  _meta?: { kibanaVersion: string };
+  properties: MappingDefinition;
+}
+
 export interface IndexMapping {
-  doc: {
-    dynamic: 'strict';
-    properties: MappingDefinition;
-  };
+  doc: DocMapping;
 }
 
 export interface MigrationPlugin {
   id: string;
   mappings?: MappingDefinition;
 }
+
+export type LogFunction = ((metadata: string[], message: string) => any);
 
 export interface KibanaPlugin {
   getId: () => string;

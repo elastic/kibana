@@ -27,7 +27,6 @@ import mappings from './fixtures/mappings';
 import healthCheck from '../health_check';
 import kibanaVersion from '../kibana_version';
 import { esTestConfig } from '@kbn/test';
-import * as patchKibanaIndexNS from '../patch_kibana_index';
 
 const esPort = esTestConfig.getPort();
 const esUrl = esTestConfig.getUrl();
@@ -50,11 +49,11 @@ describe('plugins/elasticsearch', () => {
 
       // Stub the Kibana version instead of drawing from package.json.
       sandbox.stub(kibanaVersion, 'get').returns(COMPATIBLE_VERSION_NUMBER);
-      sandbox.stub(patchKibanaIndexNS, 'patchKibanaIndex');
 
       // setup the plugin stub
       plugin = {
         name: 'elasticsearch',
+        kbnServer: { pluginSpecs: [] },
         status: {
           red: sinon.stub(),
           green: sinon.stub(),
@@ -77,6 +76,7 @@ describe('plugins/elasticsearch', () => {
           }
         }
       }));
+      cluster.callWithInternalUser.withArgs('indices.getMapping', sinon.match.any).returns(Promise.resolve({ '.my-kibana': { } }));
 
       // setup the config().get()/.set() stubs
       const get = sinon.stub();
@@ -125,6 +125,64 @@ describe('plugins/elasticsearch', () => {
       // ensure that the handler called reply and unregistered the time
       sinon.assert.calledOnce(reply);
       expect(getTimerCount()).to.be(0);
+    });
+
+    it('should patch the Kibana index (mappings and index template)', async () => {
+      cluster.callWithInternalUser.withArgs('ping').returns(Promise.resolve());
+      cluster.callWithInternalUser.withArgs('indices.getMapping', sinon.match.any)
+        .returns(Promise.resolve({
+          '.my-kibana': {
+            mappings: {
+              doc: {
+                dynamic: 'strict',
+                properties: {
+                  shazm: { type: 'text' },
+                },
+              },
+            },
+          },
+        }));
+
+      const healthRunPromise = health.run();
+      sandbox.clock.runAll();
+      await healthRunPromise;
+
+      const expectedMappings = {
+        doc: {
+          dynamic: 'strict',
+          _meta: { kibanaVersion: '5.0.0' },
+          properties: {
+            shazm: { type: 'text' },
+
+            // A non-through sanity check that default mappings also get applied
+            type: { type: 'keyword' },
+          },
+        },
+      };
+
+      sinon.assert.calledWithExactly(
+        cluster.callWithInternalUser,
+        'indices.putMapping',
+        sinon.match({
+          body: expectedMappings.doc,
+          index: '.my-kibana',
+          type: 'doc',
+        })
+      );
+      sinon.assert.calledWithExactly(
+        cluster.callWithInternalUser,
+        'indices.putTemplate',
+        sinon.match({
+          body: {
+            mappings: expectedMappings,
+            settings: {
+              auto_expand_replicas: '0-1',
+              number_of_shards: 1,
+            },
+            template: '.my-kibana',
+          },
+          name: `kibana_index_template:.my-kibana`,
+        }));
     });
 
     it('should set the cluster green if everything is ready', function () {

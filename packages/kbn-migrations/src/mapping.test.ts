@@ -35,7 +35,7 @@ describe('migrations buildMappings', () => {
       },
     ];
 
-    expect(buildMappings(plugins)).toMatchSnapshot();
+    expect(buildMappings('7.0.0', plugins)).toMatchSnapshot();
   });
 
   test('disallows duplicate mappings', () => {
@@ -53,7 +53,7 @@ describe('migrations buildMappings', () => {
       },
     ];
 
-    expect(() => buildMappings(plugins)).toThrow(
+    expect(() => buildMappings('7.1.2', plugins)).toThrow(
       /Plugin \"(hello|cartoons)\" is attempting to redefine mapping \"stuff\"/
     );
   });
@@ -66,7 +66,7 @@ describe('migrations buildMappings', () => {
       },
     ];
 
-    expect(() => buildMappings(plugins)).toThrow(
+    expect(() => buildMappings('7.2.3', plugins)).toThrow(
       /Invalid mapping \"_hm\" in plugin \"nadachance\"\. Mappings cannot start with _/
     );
   });

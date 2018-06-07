@@ -3,6 +3,9 @@
 exports[`migrations buildMappings combines all mappings and includes core mappings 1`] = `
 Object {
   "doc": Object {
+    "_meta": Object {
+      "kibanaVersion": "7.0.0",
+    },
     "dynamic": "strict",
     "properties": Object {
       "aaa": Object {

@@ -22,21 +22,8 @@ import { SavedObjectsClient } from './saved_objects_client';
 
 export function createSavedObjectsService(server) {
   const onBeforeWrite = async () => {
-    const adminCluster = server.plugins.elasticsearch.getCluster('admin');
-
     try {
-      const index = server.config().get('kibana.index');
-      await adminCluster.callWithInternalUser('indices.putTemplate', {
-        name: `kibana_index_template:${index}`,
-        body: {
-          template: index,
-          settings: {
-            number_of_shards: 1,
-            auto_expand_replicas: '0-1',
-          },
-          mappings: server.getKibanaIndexMappingsDsl(),
-        },
-      });
+      await server.plugins.elasticsearch.getMigrator().putTemplate();
     } catch (error) {
       server.log(['debug', 'savedObjects'], {
         tmpl:
@@ -54,6 +41,7 @@ export function createSavedObjectsService(server) {
       // We reject with `es.ServiceUnavailable` because writing an index
       // template is a very simple operation so if we get an error here
       // then something must be very broken
+      const adminCluster = server.plugins.elasticsearch.getCluster('admin');
       throw new adminCluster.errors.ServiceUnavailable();
     }
   };
