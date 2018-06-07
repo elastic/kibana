@@ -189,9 +189,10 @@ manages its dependencies {pull}17829[#17829]
 
 Management::
 
-* In 6.2.4, if users edit a watch and navigate away from the page without saving,
-a confirmation modals asks if they want to save the changes. In 6.3, the
-prompt was disabled to fix {pull}19488[#19488].
+* In 6.2.4, if users edit a watch or a logstash pipeline and navigate away from 
+the page without saving, a confirmation modals asks if they want to save the 
+changes. In 6.3, the prompt was disabled to fix {pull}19488[#19488] and 
+{pull}19608[#19608].
 
 
 [[release-notes-6.2.4]]
