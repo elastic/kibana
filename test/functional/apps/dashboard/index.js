@@ -32,7 +32,7 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
           defaultIndex: 'logstash-*',
         });
         await PageObjects.dashboard.preserveCrossAppState();
-        PageObjects.header.logSpinner();
+        // PageObjects.header.logSpinner();  // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       });
 
       after(async function () {
