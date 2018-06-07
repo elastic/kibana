@@ -102,9 +102,6 @@ export const security = (kibana) => new kibana.Plugin({
       await createDefaultRoles(server);
     });
 
-    const auditLogger = new SecurityAuditLogger(server.config(), new AuditLogger(server, 'security'));
-    server.expose('auditLogger', auditLogger);
-
     // Register a function that is called whenever the xpack info changes,
     // to re-compute the license check results for this plugin
     xpackMainPlugin.info.feature(this.id).registerLicenseCheckResultsGenerator(checkLicense);
@@ -118,6 +115,7 @@ export const security = (kibana) => new kibana.Plugin({
     // automatically assigned to all routes that don't contain an auth config.
     server.auth.strategy('session', 'login', 'required');
 
+    const auditLogger = new SecurityAuditLogger(server.config(), new AuditLogger(server, 'security'));
     if (config.get('xpack.security.rbac.enabled')) {
       const hasPrivilegesWithRequest = hasPrivilegesWithServer(server);
       const { savedObjects } = server;
