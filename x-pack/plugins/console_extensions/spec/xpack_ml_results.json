@@ -1,9 +1,9 @@
 {
-  "_xpack/ml/anomaly_detectors/{job_id}/results/buckets": {
+  "_xpack/ml/anomaly_detectors/{id}/results/buckets": {
     "methods": ["GET"],
     "patterns": [
-      "_xpack/ml/anomaly_detectors/{job_id}/results/buckets",
-      "_xpack/ml/anomaly_detectors/{job_id}/results/buckets/{timestamp}"
+      "_xpack/ml/anomaly_detectors/{id}/results/buckets",
+      "_xpack/ml/anomaly_detectors/{id}/results/buckets/{timestamp}"
     ],
     "data_autocomplete_rules": {
       "desc": [true, false],
@@ -20,10 +20,10 @@
     },
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-get-bucket.html"
   },
-  "_xpack/ml/anomaly_detectors/{job_id}/results/overall_buckets": {
+  "_xpack/ml/anomaly_detectors/{id}/results/overall_buckets": {
     "methods": ["GET"],
     "patterns": [
-      "_xpack/ml/anomaly_detectors/{job_id}/results/overall_buckets",
+      "_xpack/ml/anomaly_detectors/{id}/results/overall_buckets",
       "_xpack/ml/anomaly_detectors/_all/results/overall_buckets"
     ],
     "data_autocomplete_rules": {
@@ -37,11 +37,11 @@
     },
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-get-overall-buckets.html"
   },
-  "_xpack/ml/anomaly_detectors/{job_id}/results/categories": {
+  "_xpack/ml/anomaly_detectors/{id}/results/categories": {
     "methods": ["GET"],
     "patterns": [
-      "_xpack/ml/anomaly_detectors/{job_id}/results/categories",
-      "_xpack/ml/anomaly_detectors/{job_id}/results/categories/{category_id}"
+      "_xpack/ml/anomaly_detectors/{id}/results/categories",
+      "_xpack/ml/anomaly_detectors/{id}/results/categories/{id}"
     ],
     "data_autocomplete_rules": {
       "page": {
@@ -51,10 +51,10 @@
     },
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-get-category.html"
   },
-  "_xpack/ml/anomaly_detectors/{job_id}/results/influencers": {
+  "_xpack/ml/anomaly_detectors/{id}/results/influencers": {
     "methods": ["GET"],
     "patterns": [
-      "_xpack/ml/anomaly_detectors/{job_id}/results/influencers"
+      "_xpack/ml/anomaly_detectors/{id}/results/influencers"
     ],
     "data_autocomplete_rules": {
       "desc": [true, false],
@@ -70,10 +70,10 @@
     },
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-get-influencer.html"
   },  
-  "_xpack/ml/anomaly_detectors/{job_id}/results/records": {
+  "_xpack/ml/anomaly_detectors/{id}/results/records": {
     "methods": ["GET"],
     "patterns": [
-      "_xpack/ml/anomaly_detectors/{job_id}/results/records"
+      "_xpack/ml/anomaly_detectors/{id}/results/records"
     ],
     "data_autocomplete_rules": {
       "desc": [true, false],

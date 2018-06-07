@@ -50,6 +50,9 @@ const parametrizedComponentFactories = {
   id: function (name, parent) {
     return new IdAutocompleteComponent(name, parent);
   },
+  task_id: function (name, parent) {
+    return new IdAutocompleteComponent(name, parent);
+  },
   ids: function (name, parent) {
     return new IdAutocompleteComponent(name, parent, true);
   },
