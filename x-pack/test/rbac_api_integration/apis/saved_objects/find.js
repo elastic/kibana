@@ -13,7 +13,7 @@ export default function ({ getService }) {
 
   describe('find', () => {
 
-    const expectResults = (resp) => {
+    const expectVisualizationResults = (resp) => {
       expect(resp.body).to.eql({
         page: 1,
         per_page: 20,
@@ -31,6 +31,44 @@ export default function ({ getService }) {
       });
     };
 
+    const expectAllResults = (resp) => {
+      expect(resp.body).to.eql({
+        page: 1,
+        per_page: 20,
+        total: 4,
+        saved_objects: [
+          {
+            id: '91200a00-9efd-11e7-acb3-3dab96693fab',
+            type: 'index-pattern',
+            updated_at: '2017-09-21T18:49:16.270Z',
+            version: 1,
+            attributes: resp.body.saved_objects[0].attributes
+          },
+          {
+            id: '7.0.0-alpha1',
+            type: 'config',
+            updated_at: '2017-09-21T18:49:16.302Z',
+            version: 1,
+            attributes: resp.body.saved_objects[1].attributes
+          },
+          {
+            id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+            type: 'visualization',
+            updated_at: '2017-09-21T18:51:23.794Z',
+            version: 1,
+            attributes: resp.body.saved_objects[2].attributes
+          },
+          {
+            id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
+            type: 'dashboard',
+            updated_at: '2017-09-21T18:57:40.826Z',
+            version: 1,
+            attributes: resp.body.saved_objects[3].attributes
+          },
+        ]
+      });
+    };
+
     const createExpectEmpty = (page, perPage, total) => (resp) => {
       expect(resp.body).to.eql({
         page: page,
@@ -40,11 +78,19 @@ export default function ({ getService }) {
       });
     };
 
-    const createExpectForbidden = (canLogin, type) => resp => {
+    const createExpectActionForbidden = (canLogin, type) => resp => {
       expect(resp.body).to.eql({
         statusCode: 403,
         error: 'Forbidden',
         message: `Unable to find ${type}, missing ${canLogin ? '' : 'action:login,'}action:saved_objects/${type}/find`
+      });
+    };
+
+    const expectForbiddenCantFindAnyTypes = resp => {
+      expect(resp.body).to.eql({
+        statusCode: 403,
+        error: 'Forbidden',
+        message: `Not authorized to find saved_object`
       });
     };
 
@@ -90,6 +136,16 @@ export default function ({ getService }) {
               .then(tests.unknownSearchField.response)
           ));
         });
+
+        describe('no type', () => {
+          it(`should return ${tests.noType.statusCode} with ${tests.noType.description}`, async () => (
+            await supertest
+              .get('/api/saved_objects/_find')
+              .auth(auth.username, auth.password)
+              .expect(tests.noType.statusCode)
+              .then(tests.noType.response)
+          ));
+        });
       });
     };
 
@@ -102,23 +158,28 @@ export default function ({ getService }) {
         normal: {
           description: 'forbidden login and find visualization message',
           statusCode: 403,
-          response: createExpectForbidden(false, 'visualization'),
+          response: createExpectActionForbidden(false, 'visualization'),
         },
         unknownType: {
           description: 'forbidden login and find wigwags message',
           statusCode: 403,
-          response: createExpectForbidden(false, 'wigwags'),
+          response: createExpectActionForbidden(false, 'wigwags'),
         },
         pageBeyondTotal: {
           description: 'forbidden login and find visualization message',
           statusCode: 403,
-          response: createExpectForbidden(false, 'visualization'),
+          response: createExpectActionForbidden(false, 'visualization'),
         },
         unknownSearchField: {
           description: 'forbidden login and find wigwags message',
           statusCode: 403,
-          response: createExpectForbidden(false, 'wigwags'),
+          response: createExpectActionForbidden(false, 'wigwags'),
         },
+        noType: {
+          description: `forbidded can't find any types`,
+          statusCode: 403,
+          response: expectForbiddenCantFindAnyTypes,
+        }
       }
     });
 
@@ -129,9 +190,9 @@ export default function ({ getService }) {
       },
       tests: {
         normal: {
-          description: 'individual responses',
+          description: 'only the visualization',
           statusCode: 200,
-          response: expectResults,
+          response: expectVisualizationResults,
         },
         unknownType: {
           description: 'empty result',
@@ -147,6 +208,11 @@ export default function ({ getService }) {
           description: 'empty result',
           statusCode: 200,
           response: createExpectEmpty(1, 20, 0),
+        },
+        noType: {
+          description: 'all objects',
+          statusCode: 200,
+          response: expectAllResults,
         },
       },
     });
@@ -158,9 +224,9 @@ export default function ({ getService }) {
       },
       tests: {
         normal: {
-          description: 'individual responses',
+          description: 'only the visualization',
           statusCode: 200,
-          response: expectResults,
+          response: expectVisualizationResults,
         },
         unknownType: {
           description: 'empty result',
@@ -176,6 +242,11 @@ export default function ({ getService }) {
           description: 'empty result',
           statusCode: 200,
           response: createExpectEmpty(1, 20, 0),
+        },
+        noType: {
+          description: 'all objects',
+          statusCode: 200,
+          response: expectAllResults,
         },
       },
     });
@@ -187,14 +258,14 @@ export default function ({ getService }) {
       },
       tests: {
         normal: {
-          description: 'individual responses',
+          description: 'only the visualization',
           statusCode: 200,
-          response: expectResults,
+          response: expectVisualizationResults,
         },
         unknownType: {
           description: 'forbidden find wigwags message',
           statusCode: 403,
-          response: createExpectForbidden(true, 'wigwags'),
+          response: createExpectActionForbidden(true, 'wigwags'),
         },
         pageBeyondTotal: {
           description: 'empty result',
@@ -204,7 +275,12 @@ export default function ({ getService }) {
         unknownSearchField: {
           description: 'forbidden find wigwags message',
           statusCode: 403,
-          response: createExpectForbidden(true, 'wigwags'),
+          response: createExpectActionForbidden(true, 'wigwags'),
+        },
+        noType: {
+          description: 'all objects',
+          statusCode: 200,
+          response: expectAllResults,
         },
       }
     });

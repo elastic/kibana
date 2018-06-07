@@ -632,6 +632,83 @@ describe('SavedObjectsRepository', () => {
     });
   });
 
+  describe('#getTypes', () => {
+    it(`returns no types if mappings have no types`, () => {
+      const mappings = {
+        doc: {
+          properties: {
+            'updated_at': {
+              type: 'date'
+            },
+          }
+        }
+      };
+
+      savedObjectsRepository = new SavedObjectsRepository({
+        index: '.kibana-test',
+        mappings,
+        callCluster: callAdminCluster,
+        onBeforeWrite
+      });
+
+      const types = savedObjectsRepository.getTypes();
+      expect(types).toEqual([]);
+    });
+
+    it(`returns single type defined in mappings`, () => {
+      const mappings = {
+        doc: {
+          properties: {
+            'updated_at': {
+              type: 'date'
+            },
+            'index-pattern': {
+              properties: {}
+            }
+          }
+        }
+      };
+
+      savedObjectsRepository = new SavedObjectsRepository({
+        index: '.kibana-test',
+        mappings,
+        callCluster: callAdminCluster,
+        onBeforeWrite
+      });
+
+      const types = savedObjectsRepository.getTypes();
+      expect(types).toEqual(['index-pattern']);
+    });
+
+    it(`returns multiple types defined in mappings`, () => {
+      const mappings = {
+        doc: {
+          properties: {
+            'updated_at': {
+              type: 'date'
+            },
+            'index-pattern': {
+              properties: {}
+            },
+            'visualization': {
+              properties: {}
+            },
+          }
+        }
+      };
+
+      savedObjectsRepository = new SavedObjectsRepository({
+        index: '.kibana-test',
+        mappings,
+        callCluster: callAdminCluster,
+        onBeforeWrite
+      });
+
+      const types = savedObjectsRepository.getTypes();
+      expect(types).toEqual(['index-pattern', 'visualization']);
+    });
+  });
+
   describe('onBeforeWrite', () => {
     it('blocks calls to callCluster of requests', async () => {
       onBeforeWrite.returns(delay(500));
