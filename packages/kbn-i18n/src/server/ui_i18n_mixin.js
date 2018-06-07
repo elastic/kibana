@@ -17,6 +17,12 @@
  * under the License.
  */
 
+/**
+ @typedef Messages - messages tree, where leafs are translated strings
+ @type {object<string, object>}
+ @property {string} [locale] - locale of the messages
+ */
+
 import { I18nLoader } from './i18n_loader';
 
 export function uiI18nMixin(kbnServer, server, config) {
@@ -29,7 +35,7 @@ export function uiI18nMixin(kbnServer, server, config) {
   /**
    *  Fetch the translations matching the Accept-Language header for a requests.
    *  @name request.getUiTranslations
-   *  @returns {Promise<Object<id:string,value:string>>} translations
+   *  @returns {Promise<Messages>} translations - translation messages
    */
   server.decorate('request', 'getUiTranslations', async function() {
     const header = this.headers['accept-language'];
@@ -48,7 +54,8 @@ export function uiI18nMixin(kbnServer, server, config) {
   /**
    *  Return all translations for registered locales
    *  @name server.getAllUiTranslations
-   *  @return {Promise<Object<locale:string,Object<id:string,value:string>>>}
+   *  @return {Promise<Map<string, Messages>>} translations - A Promise object
+   *  where keys are the locale and values are objects of translation messages
    */
   server.decorate('server', 'getAllUiTranslations', async () => {
     return await i18nLoader.getAllTranslations();

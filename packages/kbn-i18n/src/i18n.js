@@ -18,40 +18,58 @@
  */
 
 /**
- @typedef Messages
+ @typedef Messages - messages tree, where leafs are translated strings
  @type {object<string, object>}
  @property {string} [locale] - locale of the messages
- @property {object} [localeData] - localization rules for IntlMessageFormat
  */
 
 import IntlMessageFormat from 'intl-messageformat';
+import IntlRelativeFormat from 'intl-relativeformat';
 import memoizeIntlConstructor from 'intl-format-cache';
 
 // Add all locale data to `IntlMessageFormat`.
 // TODO: Use dynamic import for asynchronous loading of specific locale data
-import 'intl-messageformat/lib/locales';
+import './locales';
 
 const isString = value => typeof value === 'string';
 const isObject = value => typeof value === 'object';
 const hasValues = values => Object.keys(values).length > 0;
-
 const showError = error => {
   if (process.env.NODE_ENV !== 'production') {
     console.error(error);
   }
 };
 
+/**
+ * Platform agnostic abstraction that helps to supply locale data to
+ * UI frameworks and provides methods for the direct translation.
+ */
 export class I18n {
   static EN_LOCALE = 'en';
   static LOCALE_DELIMITER = '-';
   static getMessageFormat = memoizeIntlConstructor(IntlMessageFormat);
+  static getRelativeFormat = memoizeIntlConstructor(IntlRelativeFormat);
 
+  /**
+   * Returns message by the given message id.
+   * @param {Messages} messages - messages tree
+   * @param {string} id - path to the message that consists of properties
+   * names separated by dots
+   * @returns {string} message - translated message from messages tree
+   * @example
+   * getMessageById({ a: { b: { c: 'test' } } }, 'a.b.c'); // => 'test'
+   */
   static getMessageById(messages, id) {
     return id
       .split('.')
       .reduce((val, key) => (val ? val[key] : null), messages);
   }
 
+  /**
+   * Normalizes locale to make it consistent with IntlMessageFormat locales
+   * @param {string} locale
+   * @returns {string} normalizedLocale
+   */
   static normalizeLocale(locale) {
     return locale.toLowerCase().replace('_', I18n.LOCALE_DELIMITER);
   }
@@ -61,15 +79,16 @@ export class I18n {
   _messages = {};
 
   /**
-   * Platform agnostic abstraction that helps to supply locale data to
-   * UI frameworks and provides methods for the direct translation.
-   * @param {Messages} messages
+   * Creates i18n engine instance and fills messages registry with a passed messages
+   * @constructor
+   * @param {Messages} [messages]
    * @param {string} [locale = messages.locale]
    */
   constructor(messages = {}, locale = messages.locale) {
     this.setLocale(locale || this._defaultLocale);
     this.addMessages(messages, this._currentLocale);
     IntlMessageFormat.defaultLocale = this._defaultLocale;
+    IntlRelativeFormat.defaultLocale = this._defaultLocale;
   }
 
   /**
@@ -128,6 +147,7 @@ export class I18n {
     } else {
       this._defaultLocale = I18n.normalizeLocale(locale);
       IntlMessageFormat.defaultLocale = this._defaultLocale;
+      IntlRelativeFormat.defaultLocale = this._defaultLocale;
     }
   }
 
