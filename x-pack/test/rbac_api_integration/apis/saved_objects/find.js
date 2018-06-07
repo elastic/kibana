@@ -90,7 +90,7 @@ export default function ({ getService }) {
       expect(resp.body).to.eql({
         statusCode: 403,
         error: 'Forbidden',
-        message: `Not authorized to find any types`
+        message: `Not authorized to find saved_object`
       });
     };
 

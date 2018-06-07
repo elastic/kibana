@@ -79,7 +79,7 @@ export class SecureSavedObjectsClient {
         hasPrivilegesResult.missing,
         { options }
       );
-      throw this.errors.decorateForbiddenError(new Error(`Not authorized to find any types`));
+      throw this.errors.decorateForbiddenError(new Error(`Not authorized to find saved_object`));
     }
     this._auditLogger.savedObjectsAuthorizationSuccess(hasPrivilegesResult.username, action, authorizedTypes, { options });
 
