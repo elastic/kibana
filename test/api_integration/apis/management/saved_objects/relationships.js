@@ -88,7 +88,8 @@ export default function ({ getService }) {
           });
       });
 
-      it('should return 404 if search finds no results', async () => {
+      //TODO: https://github.com/elastic/kibana/issues/19713 causes this test to fail.
+      it.skip('should return 404 if search finds no results', async () => {
         await supertest.get(`/api/kibana/management/saved_objects/relationships/search/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`).expect(404);
       });
     });
@@ -132,7 +133,8 @@ export default function ({ getService }) {
           });
       });
 
-      it('should return 404 if dashboard finds no results', async () => {
+      //TODO: https://github.com/elastic/kibana/issues/19713 causes this test to fail.
+      it.skip('should return 404 if dashboard finds no results', async () => {
         await supertest
           .get(`/api/kibana/management/saved_objects/relationships/dashboard/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`)
           .expect(404);

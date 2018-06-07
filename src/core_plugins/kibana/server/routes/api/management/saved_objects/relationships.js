@@ -33,7 +33,7 @@ export function registerRelationships(server) {
         }),
         query: Joi.object().keys({
           size: Joi.number(),
-        })
+        }),
       },
     },
 
@@ -43,18 +43,16 @@ export function registerRelationships(server) {
       const size = req.query.size || 10;
 
       try {
-        const response = await findRelationships(
-          type,
-          id,
-          size,
-          req.getSavedObjectsClient(),
-        );
+        const response = await findRelationships(type, id, size, req.getSavedObjectsClient());
+
+        if (typeof response === 'number') {
+          reply(Boom.boomify(new Error('Resource not found'), { statusCode: response }));
+        }
 
         reply(response);
-      }
-      catch (err) {
+      } catch (err) {
         reply(Boom.boomify(err, { statusCode: 500 }));
       }
-    }
+    },
   });
 }
