@@ -4,6 +4,6 @@ exports[`dashboard_only_user throws error when shield.getRole throws non 404 err
 
 exports[`dashboard_only_user throws error when shield.putRole throws error 1`] = `"Some other error"`;
 
-exports[`rbac_user throws error when sheild.getRole throws non 404 error 1`] = `undefined`;
+exports[`rbac_user throws error when shield.getRole throws non 404 error 1`] = `undefined`;
 
 exports[`rbac_user throws error when shield.putRole throws error 1`] = `"Some other error"`;
