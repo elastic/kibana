@@ -15,7 +15,7 @@ export function rollup(kibana)  {
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     uiExports: {
-      hacks: [
+      indexManagement: [
         'plugins/rollup/index_pattern_creation',
         'plugins/rollup/index_pattern_list',
       ],
