@@ -39,14 +39,12 @@ export default function ({ getService, getPageObjects }) {
       )));
       await Promise.all(TEST_FILTER_COLUMN_NAMES.map(async ([columnName, value]) => {
         await PageObjects.discover.clickFieldListItem(columnName);
-        console.log('-------------------------------------------- Promise.all step1');
         await PageObjects.discover.clickFieldListPlusFilter(columnName, value);
-        console.log('-------------------------------------------- Promise.all step2');
       }));
-      console.log('-------------------------------------------- after Promise.all');
     });
 
     it('should open the context view with the selected document as anchor', async function () {
+      await PageObjects.common.sleep(20000);
       const discoverDocTable = await docTable.getTable();
       const firstRow = (await docTable.getBodyRows(discoverDocTable))[0];
 

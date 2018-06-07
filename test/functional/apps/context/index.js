@@ -27,7 +27,6 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
       await remote.setWindowSize(1200, 800);
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('visualize');
-      PageObjects.header.logSpinner();
       await PageObjects.common.navigateToApp('discover');
     });
 
