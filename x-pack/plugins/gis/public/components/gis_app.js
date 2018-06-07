@@ -39,8 +39,8 @@ export class GISApp extends React.Component {
       urlTemplate: "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"
     });
 
-    const omsLayer = new TileLayer(osmSource);
-    await this._kbnMap.addLayer(omsLayer);
+    const osmLayer = new TileLayer(osmSource);
+    await this._kbnMap.addLayer(osmLayer);
 
     try {
       const kbnymlTmsSource = new KbnYmlTMSSource({ kbnCoreAPI: this.props.kbnCoreAPI });

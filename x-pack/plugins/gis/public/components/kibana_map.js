@@ -48,8 +48,8 @@ export class KibanaMap extends React.Component {
   reorderLayers(orderedLayers) {
     const newLayerOrder = [];
     for (let i = 0; i < orderedLayers.length; i++) {
-      const tuple = this._kbnOLLayers.find(tuple => {
-        return tuple.kbnLayer === orderedLayers[i];
+      const tuple = this._kbnOLLayers.find(layerTuple => {
+        return layerTuple.kbnLayer === orderedLayers[i];
       });
       if (tuple) {
         newLayerOrder.push(tuple);
