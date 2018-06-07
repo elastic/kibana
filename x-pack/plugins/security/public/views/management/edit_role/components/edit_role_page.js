@@ -54,26 +54,24 @@ export class EditRolePage extends Component {
 
   render() {
     return (
-      <div>
+      <EuiPage className="editRolePage">
         <PageHeader breadcrumbs={this.props.breadcrumbs} />
-        <EuiPage className="editRolePage">
-          <EuiForm {...this.state.formError}>
-            {this.getFormTitle()}
+        <EuiForm {...this.state.formError}>
+          {this.getFormTitle()}
 
-            <EuiSpacer />
+          <EuiSpacer />
 
-            {this.getRoleName()}
+          {this.getRoleName()}
 
-            {this.getElasticsearchPrivileges()}
+          {this.getElasticsearchPrivileges()}
 
-            {this.getKibanaPrivileges()}
+          {this.getKibanaPrivileges()}
 
-            <EuiSpacer />
+          <EuiSpacer />
 
-            {this.getFormButtons()}
-          </EuiForm>
-        </EuiPage>
-      </div>
+          {this.getFormButtons()}
+        </EuiForm>
+      </EuiPage>
     );
   }
 

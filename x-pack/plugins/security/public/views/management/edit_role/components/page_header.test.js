@@ -7,11 +7,11 @@
 import React from 'react';
 import { shallow, mount } from 'enzyme';
 import { PageHeader } from './page_header';
-import { EuiHeaderBreadcrumbs } from '@elastic/eui';
+import { EuiBreadcrumbs } from '@elastic/eui';
 
 test('it renders without crashing', () => {
   const wrapper = shallow(<PageHeader breadcrumbs={[]} />);
-  expect(wrapper.find(EuiHeaderBreadcrumbs)).toHaveLength(1);
+  expect(wrapper.find(EuiBreadcrumbs)).toHaveLength(1);
   expect(wrapper).toMatchSnapshot();
 });
 
@@ -28,5 +28,5 @@ test('it renders breadcrumbs', () => {
   }];
 
   const wrapper = mount(<PageHeader breadcrumbs={breadcrumbs} />);
-  expect(wrapper.find(EuiHeaderBreadcrumbs)).toHaveLength(1);
+  expect(wrapper.find(EuiBreadcrumbs)).toHaveLength(1);
 });

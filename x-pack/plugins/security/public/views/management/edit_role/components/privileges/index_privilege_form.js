@@ -102,6 +102,7 @@ export class IndexPrivilegeForm extends Component {
       allowFieldLevelSecurity,
       availableFields,
       indexPrivilege,
+      isReservedRole,
     } = this.props;
 
     if (!allowFieldLevelSecurity) {
@@ -118,7 +119,7 @@ export class IndexPrivilegeForm extends Component {
             fullWidth={true}
             className="indexPrivilegeForm__grantedFieldsRow"
             helpText={
-              grant.length === 0 ?
+              !isReservedRole && grant.length === 0 ?
                 'If no fields are granted, then users assigned to this role will not be able to see any data for this index.' : undefined
             }
           >
