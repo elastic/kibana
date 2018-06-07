@@ -870,7 +870,8 @@ describe('#update', () => {
       update: jest.fn().mockReturnValue(returnValue)
     };
     const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-      success: true
+      success: true,
+      username,
     }));
     const mockAuditLogger = createMockAuditLogger();
     const client = new SecureSavedObjectsClient({
