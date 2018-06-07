@@ -16,10 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import _ from 'lodash';
+import { ListComponent } from './list_component';
+import mappings from '../../mappings';
+function TypeGenerator(context) {
+  return mappings.getTypes(context.indices);
+}
+function nonValidIndexType(token) {
+  return !(token === '_all' || token[0] !== '_');
+}
+export class  TypeAutocompleteComponent extends ListComponent {
+  constructor(name, parent, multiValued) {
+    super(name, TypeGenerator, parent, multiValued);
+  }
+  validateTokens(tokens) {
+    if (!this.multiValued && tokens.length > 1) {
+      return false;
+    }
 
-import { uiRegistry } from 'ui/registry/_registry';
+    return !_.find(tokens, nonValidIndexType);
+  }
 
-export const DashboardPanelActionsRegistryProvider = uiRegistry({
-  name: 'dashboardPanelActions',
-  index: ['name'],
-});
+  getDefaultTermMeta() {
+    return 'type';
+  }
+
+  getContextKey() {
+    return 'types';
+  }
+}

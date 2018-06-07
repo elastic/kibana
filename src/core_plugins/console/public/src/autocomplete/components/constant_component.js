@@ -17,6 +17,34 @@
  * under the License.
  */
 
-export { DashboardPanelAction } from './dashboard_panel_action';
-export { DashboardPanelActionsRegistryProvider } from './dashboard_panel_actions_registry';
-export { DashboardContextMenuPanel } from './dashboard_context_menu_panel';
+import _ from 'lodash';
+import { SharedComponent } from './shared_component';
+export class ConstantComponent extends SharedComponent {
+  constructor(name, parent, options) {
+    super(name, parent);
+    if (_.isString(options)) {
+      options = [options];
+    }
+    this.options = options || [name];
+  }
+  getTerms() {
+    return this.options;
+  }
+
+  addOption(options) {
+    if (!Array.isArray(options)) {
+      options = [options];
+    }
+
+    [].push.apply(this.options, options);
+    this.options = _.uniq(this.options);
+  }
+  match(token, context, editor) {
+    if (token !== this.name) {
+      return null;
+    }
+
+    return super.match(token, context, editor);
+
+  }
+}

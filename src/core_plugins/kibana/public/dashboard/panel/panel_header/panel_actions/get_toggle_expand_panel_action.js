@@ -31,12 +31,15 @@ import { DashboardPanelAction } from 'ui/dashboard_panel_actions';
  * @return {DashboardPanelAction}
  */
 export function getToggleExpandPanelAction({ isExpanded, toggleExpandedPanel }) {
-  return new DashboardPanelAction({
-    displayName: isExpanded ? 'Minimize' : 'Full screen',
-    id: 'togglePanel',
-    parentPanelId: 'mainMenu',
-    // TODO: Update to minimize icon when https://github.com/elastic/eui/issues/837 is complete.
-    icon: <EuiIcon type={isExpanded ? 'expand' : 'expand'} />,
-    onClick: toggleExpandedPanel,
-  });
+  return new DashboardPanelAction(
+    {
+      displayName: isExpanded ? 'Minimize' : 'Full screen',
+      id: 'togglePanel',
+      parentPanelId: 'mainMenu',
+    },
+    {
+      // TODO: Update to minimize icon when https://github.com/elastic/eui/issues/837 is complete.
+      icon: <EuiIcon type={isExpanded ? 'expand' : 'expand'} />,
+      onClick: toggleExpandedPanel,
+    });
 }

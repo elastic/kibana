@@ -17,27 +17,29 @@
  * under the License.
  */
 
-export class DashboardContextMenuPanel {
-  /**
-   * @param {string} id
-   * @param {string} title
-   * @param {function} getContent
-   */
-  constructor({ id, title, getContent }) {
-    this.id = id;
-    this.title = title;
-
-    if (getContent) {
-      this.getContent = getContent;
-    }
+export class AutocompleteComponent {
+  constructor(name) {
+    this.name = name;
   }
-
-  /**
-   * Optional, could be composed of actions instead of content.
-   * @param {Embeddable} embeddable
-   * @param {ContainerState} containerState
+  /** called to get the possible suggestions for tokens, when this object is at the end of
+   * the resolving chain (and thus can suggest possible continuation paths)
    */
-  getContent(/*{ embeddable, containerState }*/) {
-    return null;
+  getTerms() {
+    return [];
+  }
+  /*
+ if the current matcher matches this term, this method should return an object with the following keys
+ {
+ context_values: {
+ values extract from term that should be added to the context
+ }
+ next: AutocompleteComponent(s) to use next
+ priority: optional priority to solve collisions between multiple paths. Min value is used across entire chain
+ }
+ */
+  match() {
+    return {
+      next: this.next,
+    };
   }
 }
