@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import eventEmitter from 'event-emitter';
 
 import {
   EuiFlexGroup,
@@ -12,15 +13,23 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
+
+import { VisibilityToggle } from '../components/visiblity_toggle';
+
+
 let idCounter = 0;
 
-import eventEmitter from 'event-emitter';
 
 export class ALayer {
 
   constructor() {
+
     this._id = (idCounter++).toString();
     this._visibility = true;
+
+    this._onVisibilityChange = (visibility) => {
+      this.setVisibility(visibility);
+    };
   }
 
   getId() {
@@ -59,7 +68,10 @@ export class ALayer {
       >
         <EuiFlexGroup gutterSize="s" responsive={false} className={this.getVisibility() ? 'visible' : 'notvisible'}>
           <EuiFlexItem grow={false} className="layerEntry--visibility">
-            {this.renderSmallLegend()}
+            <VisibilityToggle
+              checked={this.getVisibility()}
+              onChange={this._onVisibilityChange}
+            />
           </EuiFlexItem>
           <EuiFlexItem className="layerEntry--name">
             <button>
