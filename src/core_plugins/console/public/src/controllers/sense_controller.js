@@ -71,9 +71,9 @@ module.controller('SenseController', function SenseController(Private, $scope, $
     });
   });
   $scope.getDocumentation =  () => {
-
     input.getRequestsInRange(function (requests) {
       if (!requests || requests.length === 0) {
+        $scope.documentation = null;
         return;
       }
       const position = requests[0].range.end;
