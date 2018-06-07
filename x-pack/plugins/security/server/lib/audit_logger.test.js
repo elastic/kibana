@@ -11,10 +11,8 @@ const createMockConfig = (settings) => {
     get: jest.fn()
   };
 
-  const defaultSettings = {};
-
   mockConfig.get.mockImplementation(key => {
-    return key in settings ? settings[key] : defaultSettings[key];
+    return settings[key];
   });
 
   return mockConfig;
