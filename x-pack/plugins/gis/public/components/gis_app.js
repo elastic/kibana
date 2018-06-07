@@ -75,12 +75,10 @@ export class GISApp extends React.Component {
 
   }
 
-
   componentDidMount() {
     this._layerControl.setKbnMap(this._kbnMap);
     this._createPlaceholders();
   }
-
 
   render() {
     return (

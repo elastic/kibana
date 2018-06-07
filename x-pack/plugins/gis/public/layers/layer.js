@@ -14,10 +14,13 @@ import {
 
 let idCounter = 0;
 
+import eventEmitter from 'event-emitter';
+
 export class ALayer {
 
   constructor() {
     this._id = (idCounter++).toString();
+    this._visibility = true;
   }
 
   getId() {
@@ -25,7 +28,14 @@ export class ALayer {
   }
 
   getVisibility() {
-    return true;
+    return this._visibility;
+  }
+
+  setVisibility(newVisibility) {
+    if (newVisibility !== this._visibility) {
+      this._visibility = newVisibility;
+      this.emit('visibilityChanged', this);
+    }
   }
 
   getLayerName() {
@@ -43,11 +53,11 @@ export class ALayer {
   renderTOCEntry() {
     return (
       <div
-        className={`layerEntry ${this.getVisibility() ? 'visible' : 'invisible'}`}
+        className={`layerEntry`}
         id={this.getId()}
         data-layerid={this.getId()}
       >
-        <EuiFlexGroup gutterSize="s" responsive={false}>
+        <EuiFlexGroup gutterSize="s" responsive={false} className={this.getVisibility() ? 'visible' : 'notvisible'}>
           <EuiFlexItem grow={false} className="layerEntry--visibility">
             {this.renderSmallLegend()}
           </EuiFlexItem>
@@ -67,3 +77,5 @@ export class ALayer {
     );
   }
 }
+
+eventEmitter(ALayer.prototype);

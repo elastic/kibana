@@ -39,7 +39,6 @@ export class AVectorSource extends ASource {
         (layer.format.type && layer.format.type !== 'geojson') ||
         (!layer.format.type && layer.format !== 'geojson')
       ) {
-        console.log('is not geojson');
         throw new Error('Only geojson is implemented now');
       }
     }

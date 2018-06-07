@@ -19,11 +19,13 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import IndexPatternImport from './index_pattern_import';
+
 export class KibanaMap extends React.Component {
 
   constructor() {
     super();
     this._kbnOLLayers = [];
+    this._layerListeners = [];
   }
 
   componentDidMount() {
@@ -61,18 +63,41 @@ export class KibanaMap extends React.Component {
     this.emit('layers:reordered');
   }
 
+  destroy() {
+    //todo
+    this._layerListeners.forEach((listener) => {
+      listener.handle.remove();
+    });
+    this._layerListeners.length = 0;
+  }
+
   async addLayer(layer) {
+
     const olLayer = await layer.getOLLayer();
     if (!olLayer) {
       console.error('No OLLayer');
       return;
     }
+
+    const visibilityChangedHandle = layer.on('visibilityChanged', (layer) => {
+      const layerTuple = this._kbnOLLayers.find((layerTuple) => {
+        return (layer === layerTuple.kbnLayer);
+      });
+      if (layerTuple) {
+        layerTuple.olLayer.setVisible(layer.getVisibility());
+        this.emit('layer:visibilityChanged', layer);
+      }
+    });
+    this._layerListeners.push({
+      layer: layer,
+      handle: visibilityChangedHandle
+    });
     this._kbnOLLayers.push({
       kbnLayer: layer,
       olLayer: olLayer
     });
     this._olMap.addLayer(olLayer);
-    this.emit("layer:added");
+    this.emit("layer:added", layer);
   }
 
   getLayers() {
@@ -93,7 +118,7 @@ export class KibanaMap extends React.Component {
               <p>Choose a source from one of the following options, then click Add to map to continue.</p>
             </EuiText>
           </EuiTextColor>
-          <EuiSpacer />
+          <EuiSpacer/>
           <EuiHorizontalRule margin="none"/>
         </EuiFlyoutHeader>
 
@@ -104,7 +129,7 @@ export class KibanaMap extends React.Component {
             buttonClassName="euiAccordionForm__button"
             buttonContent="From Elasticsearch index"
             initialIsOpen={true}
-            ref={(ref)=>this._ipAccordion = ref}
+            ref={(ref) => this._ipAccordion = ref}
             onClick={this._onIPClick}
           >
             <div className="euiAccordionForm__children">
@@ -118,7 +143,7 @@ export class KibanaMap extends React.Component {
             buttonClassName="euiAccordionForm__button"
             buttonContent="Import from Elastic Maps Service"
             initialIsOpen={false}
-            ref={(ref)=>this._emsAccordion = ref}
+            ref={(ref) => this._emsAccordion = ref}
             onClick={this._onEMSClick}
           >
             <div className="euiAccordionForm__children"/>
@@ -130,7 +155,7 @@ export class KibanaMap extends React.Component {
             buttonClassName="euiAccordionForm__button"
             buttonContent="Import from local file"
             initialIsOpen={false}
-            ref={(ref)=>this._fileAccordion = ref}
+            ref={(ref) => this._fileAccordion = ref}
             onClick={this._onFileClick}
           >
             <div className="euiAccordionForm__children"/>
