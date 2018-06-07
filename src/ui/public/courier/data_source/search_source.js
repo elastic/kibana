@@ -227,10 +227,7 @@ export function SearchSourceProvider(Promise, PromiseEmitter, Private, config) {
      * @return {undefined|searchSource}
      */
     getParent() {
-      const self = this;
-      if (self._parent === false) return;
-      if (self._parent) return self._parent;
-      return undefined;
+      return this._parent || undefined;
     }
 
     /**

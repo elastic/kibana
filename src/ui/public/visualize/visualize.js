@@ -93,12 +93,6 @@ uiModules
           // fetching new data and rendering.
           if (!$scope.vis.initialized || !$scope.savedObj || destroyed) return;
 
-          // TODO: This should ALWAYS be passed into this component via the loader
-          // in the future. Unfortunately we need some refactoring in dashboard
-          // to make this working and correctly rerender, so for now we will either
-          // use the one passed in to us or look into the timefilter ourselfs (which
-          // will be removed in the future).
-
           $scope.vis.filters = { timeRange: $scope.timeRange };
 
           const handlerParams = {
@@ -149,7 +143,6 @@ uiModules
             });
         }, 100);
 
-        //todo: clean this one up as well
         const handleVisUpdate = () => {
           if ($scope.appState.vis) {
             $scope.appState.vis = $scope.vis.getState();
