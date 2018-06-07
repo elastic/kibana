@@ -99,7 +99,7 @@ describe(`rbac_user`, () => {
     });
   });
 
-  test(`throws error when sheild.getRole throws non 404 error`, async () => {
+  test(`throws error when shield.getRole throws non 404 error`, async () => {
     const { mockCallWithInternalUser } = mockShieldClient();
     const mockServer = createMockServer();
     mockCallWithInternalUser.mockImplementation(async (endpoint, params) => {
