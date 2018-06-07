@@ -10,7 +10,7 @@
 
 import { parseInterval } from 'ui/utils/parse_interval';
 
-import { ML_RESULTS_INDEX_PATTERN } from 'plugins/ml/constants/index_patterns';
+import { ML_RESULTS_INDEX_PATTERN } from 'plugins/ml/../common/constants/index_patterns';
 import { replaceTokensInUrlValue } from 'plugins/ml/util/custom_url_utils';
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { ml } from 'plugins/ml/services/ml_api_service';

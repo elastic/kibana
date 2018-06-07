@@ -1,0 +1,125 @@
+[role="xpack"]
+[[reporting-settings-kb]]
+=== {reporting} settings in Kibana
+++++
+<titleabbrev>Reporting Settings</titleabbrev>
+++++
+
+You can configure `xpack.reporting` settings in your `kibana.yml` to:
+
+* <<reporting-kibana-server-settings,Control how {reporting}  communicates with the {kib} server>>
+* <<reporting-job-queue-settings,Manage background jobs>>
+* <<reporting-capture-settings,Capture screenshots>>
+
+[float]
+[[general-reporting-settings]]
+==== General Reporting Settings
+[[xpack-enable-reporting]]`xpack.reporting.enabled`::
+Set to `false` to disable {reporting}.
+
+`xpack.reporting.encryptionKey`::
+Set to any text string. By default, Kibana generates a random key when it starts,
+which causes pending reports to fail on restart. Configure this setting to use
+the same key across restarts.
+
+[float]
+[[reporting-kibana-server-settings]]
+==== Kibana Server Settings
+
+Reporting uses the Kibana interface to generate reports. In most cases, you don't need
+to configure Reporting to communicate with Kibana. However, if you use a reverse-proxy
+to access Kibana, you must set the proxy port, protocol, and hostname.
+
+`xpack.reporting.kibanaServer.port`::
+The port for accessing Kibana, if different from the `server.port` value.
+
+`xpack.reporting.kibanaServer.protocol`::
+The protocol for accessing Kibana, typically `http` or `https`.
+
+`xpack.reporting.kibanaServer.hostname`::
+The hostname for accessing Kibana, if different from the `server.name` value.
+
+[float]
+[[reporting-job-queue-settings]]
+==== Background Job Settings
+
+Reporting generates reports in the background and jobs are coordinated using documents
+in Elasticsearch. Depending on how often you generate reports and the overall number of
+reports, you might need to change the following settings.
+
+`xpack.reporting.queue.indexInterval`::
+How often the index that stores reporting jobs rolls over to a new index.
+Valid values are `year`, `month`, `week`, `day`, and `hour`. Defaults to `week`.
+
+`xpack.reporting.queue.pollInterval`::
+How often idle workers poll the index for pending jobs. Defaults to `3000` (3 seconds).
+
+[[xpack-reporting-q-timeout]]`xpack.reporting.queue.timeout`::
+How long each worker has to produce a report. If your machine is slow or under
+heavy load, you might need to increase this timeout. Specified in milliseconds.
+Defaults to `30000` (30 seconds).
+
+[float]
+[[reporting-capture-settings]]
+==== Capture Settings
+
+Reporting works by capturing screenshots from Kibana. The following settings
+control the capturing process.
+
+`xpack.reporting.capture.loadDelay`::
+When visualizations are not evented, this is the amount of time before
+taking a screenshot. All visualizations that ship with Kibana are evented, so this
+setting should not have much effect. If you are seeing empty images instead of
+visualizations, try increasing this value.
+Defaults to `3000` (3 seconds).
+
+[[xpack-reporting-browser]]`xpack.reporting.capture.browser.type`::
+Specifies the browser to use to capture screenshots. Valid options are `phantom`
+and `chromium`. When `chromium` is set, the settings specified in the <<reporting-chromium-settings, Chromium settings>>
+are respected.
+Defaults to `phantom`.
+
+[float]
+[[reporting-chromium-settings]]
+==== Chromium Settings
+
+When `xpack.reporting.capture.browser.type` is set to `chromium` you can also specify the following settings.
+
+`xpack.reporting.capture.browser.chromium.disableSandbox`::
+Elastic recommends that you research the feasibility of enabling unprivileged user namespaces. 
+See Chromium Sandbox for additional information. Defaults to false for all operating systems except Debian,
+Red Hat Linux, and CentOS which use true
+
+`xpack.reporting.capture.browser.chromium.proxy.enabled`::
+Enables the proxy for Chromium to use. When set to `true`, you must also specify the
+`xpack.reporting.capture.browser.chromium.proxy.server` setting.
+Defaults to `false`
+
+`xpack.reporting.capture.browser.chromium.proxy.server`::
+The uri for the proxy server. Providing the username and password for the proxy server via the uri is not supported.
+
+`xpack.reporting.capture.browser.chromium.proxy.bypass`::
+An array of hosts that should not go through the proxy server and should use a direct connection instead.
+Examples of valid entries are "elastic.co", "*.elastic.co", ".elastic.co", ".elastic.co:5601"
+
+
+[float]
+[[reporting-csv-settings]]
+==== CSV Settings
+[[xpack-reporting-csv]]`xpack.reporting.csv.maxSizeBytes`::
+The maximum size of a CSV file before being truncated. This setting exists to prevent
+large exports from causing performance and storage issues.
+Defaults to `10485760` (10mB)
+
+[float]
+[[reporting-advanced-settings]]
+==== Advanced Settings
+
+`xpack.reporting.index`::
+Reporting uses a weekly index in Elasticsearch to store the reporting job and the report
+content. The index is automatically created if it does not already exist.
+Defaults to `.reporting`
+
+`xpack.reporting.roles.allow`::
+Specifies the roles in addition to superusers that are allowed to access reporting.
+Defaults to `[ "reporting_user" ]`

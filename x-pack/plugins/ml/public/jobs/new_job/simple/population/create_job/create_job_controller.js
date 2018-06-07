@@ -204,8 +204,8 @@ module
       query,
       filters,
       combinedQuery,
-      jobId: undefined,
-      description: undefined,
+      jobId: '',
+      description: '',
       jobGroups: [],
       useDedicatedIndex: false,
       modelMemoryLimit: DEFAULT_MODEL_MEMORY_LIMIT

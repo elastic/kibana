@@ -8,6 +8,7 @@ import expect from 'expect.js';
 import { Statement } from '../statement';
 
 describe('Statement class', () => {
+  let vertex;
   let meta;
 
   beforeEach(() => {
@@ -18,21 +19,25 @@ describe('Statement class', () => {
         password: 'password'
       }
     };
+    vertex = {
+      meta,
+      id: 'statement_id',
+      hasExplicitId: true,
+      stats: { }
+    };
   });
 
   describe('Statement from constructor', () => {
     it('creates a new Statement instance', () => {
       const statement = new Statement(
-        'statement_id',
-        true,
-        {},
-        meta
+        vertex
       );
 
       expect(statement.id).to.be('statement_id');
       expect(statement.hasExplicitId).to.be(true);
       expect(statement.stats).to.eql({});
       expect(statement.meta).to.equal(meta);
+      expect(statement.vertex).to.eql(vertex);
     });
   });
 });

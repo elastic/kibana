@@ -7,4 +7,4 @@ source "$(dirname $0)/../../src/dev/ci_setup/java_setup.sh"
 
 node scripts/build --release --debug --oss;
 
-xvfb-run "$(yarn bin)/grunt" jenkins:selenium --from=source;
+xvfb-run "$(FORCE_COLOR=0 yarn bin)/grunt" jenkins:selenium --from=source;

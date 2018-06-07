@@ -1,6 +1,25 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 const join = require('path').join;
 const relative = require('path').relative;
-const unlinkSync = require('fs').unlinkSync;
+const { readFileSync, writeFileSync, unlinkSync, existsSync } = require('fs');
 const execFileSync = require('child_process').execFileSync;
 const del = require('del');
 const vfs = require('vinyl-fs');
@@ -27,6 +46,22 @@ function removeSymlinkDependencies(root) {
 
     cb();
   });
+}
+
+// parse a ts config file
+function parseTsconfig(pluginSourcePath, configPath) {
+  const ts = require(join(pluginSourcePath, 'node_modules', 'typescript'));
+
+  const { error, config } = ts.parseConfigFileTextToJson(
+    configPath,
+    readFileSync(configPath, 'utf8')
+  );
+
+  if (error) {
+    throw error;
+  }
+
+  return config;
 }
 
 module.exports = function createBuild(
@@ -82,6 +117,45 @@ module.exports = function createBuild(
         ['install', '--production', '--pure-lockfile'],
         options
       );
+    })
+    .then(function() {
+      const buildConfigPath = join(buildRoot, 'tsconfig.json');
+
+      if (!existsSync(buildConfigPath)) {
+        return;
+      }
+
+      if (!plugin.pkg.devDependencies.typescript) {
+        throw new Error(
+          'Found tsconfig.json file in plugin but typescript is not a devDependency.'
+        );
+      }
+
+      // attempt to patch the extends path in the tsconfig file
+      const buildConfig = parseTsconfig(buildSource, buildConfigPath);
+
+      if (buildConfig.extends) {
+        buildConfig.extends = join(
+          relative(buildRoot, buildSource),
+          buildConfig.extends
+        );
+
+        writeFileSync(buildConfigPath, JSON.stringify(buildConfig));
+      }
+
+      execFileSync(
+        join(buildSource, 'node_modules', '.bin', winCmd('tsc')),
+        ['--pretty', 'true'],
+        {
+          cwd: buildRoot,
+          stdio: ['ignore', 'pipe', 'pipe'],
+        }
+      );
+
+      del.sync([
+        join(buildRoot, '**', '*.{ts,tsx,d.ts}'),
+        join(buildRoot, 'tsconfig.json'),
+      ]);
     })
     .then(function() {
       const buildFiles = [relative(buildTarget, buildRoot) + '/**/*'];

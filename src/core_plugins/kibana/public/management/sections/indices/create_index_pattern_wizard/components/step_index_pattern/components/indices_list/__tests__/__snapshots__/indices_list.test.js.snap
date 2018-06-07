@@ -73,24 +73,28 @@ exports[`IndicesList should change pages 1`] = `
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 5
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 10
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 20
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 50
               </EuiContextMenuItem>,
@@ -166,24 +170,28 @@ exports[`IndicesList should change per page 1`] = `
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 5
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 10
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 20
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 50
               </EuiContextMenuItem>,
@@ -284,24 +292,28 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 5
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 10
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 20
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 50
               </EuiContextMenuItem>,
@@ -387,24 +399,28 @@ exports[`IndicesList should render normally 1`] = `
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 5
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 10
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 20
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 50
               </EuiContextMenuItem>,
@@ -570,24 +586,28 @@ exports[`IndicesList updating props should render all new indices 1`] = `
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 5
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 10
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 20
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 50
               </EuiContextMenuItem>,

@@ -25,31 +25,24 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
       }
     >
       <ListControl
-        control={
-          Object {
-            "getMultiSelectDelimiter": [Function],
-            "id": "mock-list-control",
-            "isEnabled": [Function],
-            "label": "list control",
-            "options": Object {
-              "multiselect": true,
-              "type": "terms",
-            },
-            "selectOptions": Array [
-              Object {
-                "label": "choice1",
-                "value": "choice1",
-              },
-              Object {
-                "label": "choice2",
-                "value": "choice2",
-              },
-            ],
-            "type": "list",
-            "value": "",
-          }
-        }
         controlIndex={0}
+        disableMsg={null}
+        id="mock-list-control"
+        label="list control"
+        multiselect={true}
+        options={
+          Array [
+            Object {
+              "label": "choice1",
+              "value": "choice1",
+            },
+            Object {
+              "label": "choice2",
+              "value": "choice2",
+            },
+          ]
+        }
+        selectedOptions={Array []}
         stageFilter={[Function]}
       />
     </EuiFlexItem>
@@ -158,31 +151,24 @@ exports[`Clear btns enabled when there are values 1`] = `
       }
     >
       <ListControl
-        control={
-          Object {
-            "getMultiSelectDelimiter": [Function],
-            "id": "mock-list-control",
-            "isEnabled": [Function],
-            "label": "list control",
-            "options": Object {
-              "multiselect": true,
-              "type": "terms",
-            },
-            "selectOptions": Array [
-              Object {
-                "label": "choice1",
-                "value": "choice1",
-              },
-              Object {
-                "label": "choice2",
-                "value": "choice2",
-              },
-            ],
-            "type": "list",
-            "value": "",
-          }
-        }
         controlIndex={0}
+        disableMsg={null}
+        id="mock-list-control"
+        label="list control"
+        multiselect={true}
+        options={
+          Array [
+            Object {
+              "label": "choice1",
+              "value": "choice1",
+            },
+            Object {
+              "label": "choice2",
+              "value": "choice2",
+            },
+          ]
+        }
+        selectedOptions={Array []}
         stageFilter={[Function]}
       />
     </EuiFlexItem>
@@ -291,31 +277,24 @@ exports[`Renders list control 1`] = `
       }
     >
       <ListControl
-        control={
-          Object {
-            "getMultiSelectDelimiter": [Function],
-            "id": "mock-list-control",
-            "isEnabled": [Function],
-            "label": "list control",
-            "options": Object {
-              "multiselect": true,
-              "type": "terms",
-            },
-            "selectOptions": Array [
-              Object {
-                "label": "choice1",
-                "value": "choice1",
-              },
-              Object {
-                "label": "choice2",
-                "value": "choice2",
-              },
-            ],
-            "type": "list",
-            "value": "",
-          }
-        }
         controlIndex={0}
+        disableMsg={null}
+        id="mock-list-control"
+        label="list control"
+        multiselect={true}
+        options={
+          Array [
+            Object {
+              "label": "choice1",
+              "value": "choice1",
+            },
+            Object {
+              "label": "choice2",
+              "value": "choice2",
+            },
+          ]
+        }
+        selectedOptions={Array []}
         stageFilter={[Function]}
       />
     </EuiFlexItem>

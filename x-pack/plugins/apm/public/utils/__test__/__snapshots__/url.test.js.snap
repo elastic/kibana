@@ -12,9 +12,9 @@ exports[`KibanaLinkComponent should render correct markup 1`] = `
 exports[`RelativeLinkComponent should render correct markup 1`] = `
 <a
   className="euiLink euiLink--primary "
-  href="/opbeans-backend/errors?_g=(refreshInterval:(display:Off,pause:!f,value:0),time:(from:now-2y,mode:quick,to:now))"
+  href="/opbeans-node/errors?foo=bar&foo2=bar2"
   onClick={[Function]}
 >
-  Errors
+  Go to Discover
 </a>
 `;

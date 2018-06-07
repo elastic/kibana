@@ -1,5 +1,5 @@
 {
-  "_cluster/settings": {
+  "cluster.get_settings": {
     "url_params": {
       "flat_settings": "__flag__",
       "master_timeout": "",
@@ -11,6 +11,7 @@
     ],
     "patterns": [
       "_cluster/settings"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-update-settings.html"
   }
 }

@@ -32,12 +32,9 @@ export default function ({ getService }) {
 
       it('should summarize the non-system indices with stats', async () => {
         const { body } = await supertest
-          .post('/api/monitoring/v1/clusters/YCxj-RAgSZCP6GuOQ8M1EQ/elasticsearch/indices')
+          .post('/api/monitoring/v1/clusters/YCxj-RAgSZCP6GuOQ8M1EQ/elasticsearch/indices?show_system_indices=false')
           .set('kbn-xsrf', 'xxx')
-          .send({
-            timeRange,
-            showSystemIndices: false
-          })
+          .send({ timeRange })
           .expect(200);
 
         expect(body).to.eql(relocatingShardsFixture);
@@ -45,17 +42,15 @@ export default function ({ getService }) {
 
       it('should summarize all indices with stats', async () => {
         const { body } = await supertest
-          .post('/api/monitoring/v1/clusters/YCxj-RAgSZCP6GuOQ8M1EQ/elasticsearch/indices')
+          .post('/api/monitoring/v1/clusters/YCxj-RAgSZCP6GuOQ8M1EQ/elasticsearch/indices?show_system_indices=true')
           .set('kbn-xsrf', 'xxx')
-          .send({
-            timeRange,
-            showSystemIndices: true
-          })
+          .send({ timeRange })
           .expect(200);
 
         expect(body).to.eql(relocationShardsAllFixture);
       });
     });
+
     describe('health-red', () => {
       const archive = 'monitoring/singlecluster-red-platinum';
       const timeRange = {
@@ -73,25 +68,18 @@ export default function ({ getService }) {
 
       it('should summarize the non-system indices with stats', async () => {
         const { body } = await supertest
-          .post('/api/monitoring/v1/clusters/1LYuyvCCQFS3FAO_h65PQw/elasticsearch/indices')
+          .post('/api/monitoring/v1/clusters/1LYuyvCCQFS3FAO_h65PQw/elasticsearch/indices?show_system_indices=false')
           .set('kbn-xsrf', 'xxx')
-          .send({
-            timeRange,
-            showSystemIndices: false
-          })
+          .send({ timeRange })
           .expect(200);
-
         expect(body).to.eql(indicesRedClusterFixture);
       });
 
       it('should summarize all indices with stats', async () => {
         const { body } = await supertest
-          .post('/api/monitoring/v1/clusters/1LYuyvCCQFS3FAO_h65PQw/elasticsearch/indices')
+          .post('/api/monitoring/v1/clusters/1LYuyvCCQFS3FAO_h65PQw/elasticsearch/indices?show_system_indices=true')
           .set('kbn-xsrf', 'xxx')
-          .send({
-            timeRange,
-            showSystemIndices: true
-          })
+          .send({ timeRange })
           .expect(200);
 
         expect(body).to.eql(indicesRedClusterAllFixture);

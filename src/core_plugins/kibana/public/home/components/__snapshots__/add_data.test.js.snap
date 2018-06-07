@@ -73,6 +73,7 @@ exports[`apmUiEnabled 1`] = `
             type="apmApp"
           />
         }
+        layout="vertical"
         textAlign="center"
         title="APM"
       />
@@ -103,6 +104,7 @@ exports[`apmUiEnabled 1`] = `
             type="loggingApp"
           />
         }
+        layout="vertical"
         textAlign="center"
         title="Logging"
       />
@@ -133,6 +135,7 @@ exports[`apmUiEnabled 1`] = `
             type="monitoringApp"
           />
         }
+        layout="vertical"
         textAlign="center"
         title="Metrics"
       />
@@ -163,17 +166,22 @@ exports[`apmUiEnabled 1`] = `
             type="securityApp"
           />
         }
+        layout="vertical"
         textAlign="center"
         title="Security Analytics"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
+  <EuiHorizontalRule
+    margin="l"
+    size="full"
+  />
   <EuiFlexGroup
     alignItems="stretch"
     component="div"
     direction="row"
     gutterSize="l"
-    justifyContent="center"
+    justifyContent="spaceAround"
     responsive={true}
     wrap={false}
   >
@@ -184,7 +192,37 @@ exports[`apmUiEnabled 1`] = `
       <EuiText
         grow={true}
       >
-        <span
+        <strong
+          style={
+            Object {
+              "height": 38,
+            }
+          }
+        >
+          Fresh Elastic stack installation?
+        </strong>
+        <EuiLink
+          color="primary"
+          href="#/home/tutorial_directory/sampleData"
+          style={
+            Object {
+              "marginLeft": 8,
+            }
+          }
+          type="button"
+        >
+          Try some sample data sets
+        </EuiLink>
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiText
+        grow={true}
+      >
+        <strong
           style={
             Object {
               "height": 38,
@@ -192,7 +230,7 @@ exports[`apmUiEnabled 1`] = `
           }
         >
           Data already in Elasticsearch?
-        </span>
+        </strong>
         <EuiLink
           color="primary"
           href="#/management/kibana/index"
@@ -284,6 +322,7 @@ exports[`render 1`] = `
             type="loggingApp"
           />
         }
+        layout="vertical"
         textAlign="center"
         title="Logging"
       />
@@ -314,6 +353,7 @@ exports[`render 1`] = `
             type="monitoringApp"
           />
         }
+        layout="vertical"
         textAlign="center"
         title="Metrics"
       />
@@ -344,17 +384,22 @@ exports[`render 1`] = `
             type="securityApp"
           />
         }
+        layout="vertical"
         textAlign="center"
         title="Security Analytics"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
+  <EuiHorizontalRule
+    margin="l"
+    size="full"
+  />
   <EuiFlexGroup
     alignItems="stretch"
     component="div"
     direction="row"
     gutterSize="l"
-    justifyContent="center"
+    justifyContent="spaceAround"
     responsive={true}
     wrap={false}
   >
@@ -365,7 +410,37 @@ exports[`render 1`] = `
       <EuiText
         grow={true}
       >
-        <span
+        <strong
+          style={
+            Object {
+              "height": 38,
+            }
+          }
+        >
+          Fresh Elastic stack installation?
+        </strong>
+        <EuiLink
+          color="primary"
+          href="#/home/tutorial_directory/sampleData"
+          style={
+            Object {
+              "marginLeft": 8,
+            }
+          }
+          type="button"
+        >
+          Try some sample data sets
+        </EuiLink>
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiText
+        grow={true}
+      >
+        <strong
           style={
             Object {
               "height": 38,
@@ -373,7 +448,7 @@ exports[`render 1`] = `
           }
         >
           Data already in Elasticsearch?
-        </span>
+        </strong>
         <EuiLink
           color="primary"
           href="#/management/kibana/index"

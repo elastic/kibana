@@ -13,13 +13,13 @@ export function MonitoringElasticsearchIndicesProvider({ getService, getPageObje
 
   const SUBJ_LISTING_PAGE = 'elasticsearchIndicesListingPage';
 
-  const SUBJ_TABLE_CONTAINER = 'indicesTableContainer';
+  const SUBJ_TABLE_CONTAINER = 'elasticsearchIndicesTableContainer';
   const SUBJ_TABLE_NO_DATA = `${SUBJ_TABLE_CONTAINER} monitoringTableNoData`;
   const SUBJ_SEARCH_BAR = `${SUBJ_TABLE_CONTAINER} monitoringTableToolBar`;
 
   const SUBJ_TABLE_SORT_SEARCH_COL = `${SUBJ_TABLE_CONTAINER} tableHeaderCell-searchRate`;
 
-  const SUBJ_TABLE_BODY = 'indicesTableBody';
+  const SUBJ_TABLE_BODY = 'elasticsearchIndicesTableBody';
   const SUBJ_INDICES_NAMES = `${SUBJ_TABLE_BODY} name`;
   const SUBJ_INDICES_STATUSES = `${SUBJ_TABLE_BODY} statusIcon`;
   const SUBJ_INDICES_DOCUMENT_COUNTS = `${SUBJ_TABLE_BODY} documentCount`;

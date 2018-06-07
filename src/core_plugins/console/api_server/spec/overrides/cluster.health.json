@@ -1,5 +1,5 @@
 {
-  "_cluster/health": {
+  "cluster.health": {
     "url_params": {
       "master_timeout": "30s",
       "timeout": "30s",

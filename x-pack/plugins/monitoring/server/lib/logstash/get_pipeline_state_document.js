@@ -5,7 +5,7 @@
  */
 
 import { createQuery } from '../create_query';
-import { ElasticsearchMetric } from '../metrics';
+import { LogstashMetric } from '../metrics';
 import { get } from 'lodash';
 
 export async function getPipelineStateDocument(callWithRequest, req, logstashIndexPattern,
@@ -22,7 +22,7 @@ export async function getPipelineStateDocument(callWithRequest, req, logstashInd
     // that could result in us being unable to render the graph
     // Use the logstash_stats documents to determine whether the instance is up/down
     type: 'logstash_state',
-    metric: ElasticsearchMetric.getMetricFields(),
+    metric: LogstashMetric.getMetricFields(),
     clusterUuid,
     filters
   });

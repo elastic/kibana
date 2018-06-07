@@ -6,6 +6,7 @@
 
 import { KIBANA_STATS_TYPE } from '../../../common/constants';
 import { opsBuffer } from './ops_buffer';
+import { Collector } from '../classes/collector';
 
 /*
  * Initialize a collector for Kibana Ops Stats
@@ -20,11 +21,6 @@ export function getOpsStatsCollector(server) {
     monitor.on('ops', onOps);
   };
 
-  let _log;
-  const setLogger = logger => {
-    _log = logger;
-  };
-
   const cleanup = () => {
     if (monitor) {
       monitor.removeListener('ops', onOps);
@@ -34,7 +30,7 @@ export function getOpsStatsCollector(server) {
   // This needs to be removed once the FIXME for 1301 is fixed
   // `process` is a NodeJS global, and is always available without using require/import
   process.on('SIGHUP', () => {
-    _log.info('Re-initializing Kibana Monitoring due to SIGHUP');
+    this.log.info('Re-initializing Kibana Monitoring due to SIGHUP');
     /* This timeout is a temporary stop-gap until collecting stats is not bound to even-better
      * and collecting stats is not interfered by logging configuration reloading
      * Related to https://github.com/elastic/x-pack-kibana/issues/1301
@@ -42,16 +38,15 @@ export function getOpsStatsCollector(server) {
     setTimeout(() => {
       cleanup();
       init();
-      _log.info('Re-initialized Kibana Monitoring due to SIGHUP');
+      this.log.info('Re-initialized Kibana Monitoring due to SIGHUP');
     }, 5 * 1000); // wait 5 seconds to avoid race condition with reloading logging configuration
   });
 
-  return {
+  return new Collector(server, {
     type: KIBANA_STATS_TYPE,
     init,
-    setLogger,
     fetch: buffer.flush,
     fetchAfterInit: true,
     cleanup
-  };
+  });
 }
