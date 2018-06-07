@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import history from '../history';
 import 'ui/doc_title';
 import { useResizeChecker } from '../sense_editor_resize';
 import $ from 'jquery';
@@ -44,28 +43,14 @@ module.controller('SenseController', function SenseController(Private, $scope, $
   // and then initialize this app
   let input;
   let output;
-  let timer;
-  const saveDelay = 500;
-  function saveCurrentState() {
-    try {
-      const content = input.getValue();
-      history.updateCurrentState(content);
-    }
-    catch (e) {
-      console.log('Ignoring saving error: ' + e);
-    }
-  }
   $timeout(async () => {
     output = initializeOutput($('#output'));
     input = initializeInput($('#editor'), $('#editor_actions'), $('#copy_as_curl'), output, $scope.openDocumentation);
     init(input, output, $location.search().load_from);
     kbnUiAceKeyboardModeService.initialize($scope, $('#editor'));
-    input.getSession().on('change', () => {
+    const session = input.getSession();
+    session.getSelection().on('changeCursor', () => {
       $scope.getDocumentation();
-      if (timer) {
-        timer = clearTimeout(timer);
-      }
-      timer = setTimeout(saveCurrentState, saveDelay);
     });
     $scope.getDocumentation();
   });
