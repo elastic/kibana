@@ -45,7 +45,7 @@ function buildSavedObjectsReadPrivileges() {
 }
 
 function buildSavedObjectsPrivileges(actions) {
-  const objectTypes = ['config', 'dashboard', 'index-pattern', 'search', 'visualization', 'graph-workspace'];
+  const objectTypes = ['config', 'dashboard', 'graph-workspace', 'index-pattern', 'search', 'timelion-sheet', 'url', 'visualization'];
   return objectTypes
     .map(type => actions.map(action => `action:saved-objects/${type}/${action}`))
     .reduce((acc, types) => [...acc, ...types], []);

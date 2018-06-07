@@ -6,30 +6,28 @@
 
 import React from 'react';
 import { PageHeader } from './page_header';
-import { render } from 'enzyme';
-import renderer from 'react-test-renderer';
+import { mount, shallow } from 'enzyme';
 
 test('it renders without crashing', () => {
-  const component = renderer.create(
+  const component = shallow(
     <PageHeader breadcrumbs={[]}/>
   );
   expect(component).toMatchSnapshot();
 });
 
 test('it renders breadcrumbs', () => {
-  const component = render(
+  const component = mount(
     <PageHeader breadcrumbs={[{
-      id: 'id-1',
+      display: 'id-1',
       href: 'myhref-1',
-      current: false
     }, {
-      id: 'id-2',
+      display: 'id-2',
       href: 'myhref-2',
-      current: true
     }]}
     />
   );
 
-  expect(component.find('a')).toHaveLength(2);
+  expect(component.find('a.euiBreadcrumb')).toHaveLength(1);
+  expect(component.find('span.euiBreadcrumb')).toHaveLength(1);
 
 });

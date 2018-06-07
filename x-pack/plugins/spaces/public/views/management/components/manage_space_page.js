@@ -25,6 +25,8 @@ import { DeleteSpacesButton } from './delete_spaces_button';
 import { Notifier, toastNotifications } from 'ui/notify';
 import { UrlContext } from './url_context';
 import { toUrlContext, isValidUrlContext } from '../lib/url_context_utils';
+import { isReservedSpace } from '../../../../common';
+import { ReservedSpaceBadge } from './reserved_space_badge';
 
 export class ManageSpacePage extends React.Component {
   state = {
@@ -71,12 +73,7 @@ export class ManageSpacePage extends React.Component {
         <PageHeader breadcrumbs={this.props.breadcrumbs}/>
         <EuiPageContent>
           <EuiForm>
-            <EuiFlexGroup justifyContent={'spaceBetween'}>
-              <EuiFlexItem grow={false}>
-                <EuiText><h1>{this.getTitle()}</h1></EuiText>
-              </EuiFlexItem>
-              {this.getActionButton()}
-            </EuiFlexGroup>
+            {this.getFormHeading()}
 
             <EuiSpacer />
 
@@ -108,7 +105,7 @@ export class ManageSpacePage extends React.Component {
             <UrlContext
               space={this.state.space}
               editingExistingSpace={this.editingExistingSpace()}
-              editable={true}
+              editable={!isReservedSpace(this.state.space)}
               onChange={this.onUrlContextChange}
             />
 
@@ -128,6 +125,19 @@ export class ManageSpacePage extends React.Component {
     );
   }
 
+  getFormHeading = () => {
+    const isReserved = isReservedSpace(this.state.space);
+
+    return (
+      <EuiFlexGroup justifyContent={'spaceBetween'}>
+        <EuiFlexItem grow={false}>
+          <EuiText><h1>{this.getTitle()}</h1></EuiText>
+        </EuiFlexItem>
+        {isReserved ? this.getReservedBadge() : this.getActionButton()}
+      </EuiFlexGroup>
+    );
+  };
+
   getTitle = () => {
     if (this.editingExistingSpace()) {
       return `Edit space`;
@@ -135,8 +145,10 @@ export class ManageSpacePage extends React.Component {
     return `Create a space`;
   };
 
+  getReservedBadge = () => <ReservedSpaceBadge space={this.state.space} />;
+
   getActionButton = () => {
-    if (this.editingExistingSpace()) {
+    if (this.editingExistingSpace() && !isReservedSpace(this.state.space)) {
       return (
         <EuiFlexItem grow={false}>
           <DeleteSpacesButton

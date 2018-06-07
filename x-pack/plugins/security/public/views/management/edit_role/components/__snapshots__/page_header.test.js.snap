@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`it renders without crashing 1`] = `
+<div>
+  <EuiBreadcrumbs
+    breadcrumbs={Array []}
+    max={5}
+    responsive={true}
+    truncate={true}
+  />
+  <EuiSpacer
+    size="l"
+  />
+</div>
+`;
