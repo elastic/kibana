@@ -29,7 +29,7 @@ export class ALayer {
   }
 
   getLayerName() {
-    return "foobar";
+    throw new Error('Should implement Layer#getLayerName');
   }
 
   renderSmallLegend() {
