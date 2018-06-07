@@ -66,16 +66,22 @@ export class SecureSavedObjectsClient {
     // otherwise, we have to filter for only their authorized types
     const types = this._repository.getTypes();
     const typesToPrivilegesMap = new Map(types.map(type => [type, getPrivilege(type, action)]));
-    const result = await this._hasSavedObjectPrivileges(Array.from(typesToPrivilegesMap.values()));
+    const hasPrivilegesResult = await this._hasSavedObjectPrivileges(Array.from(typesToPrivilegesMap.values()));
     const authorizedTypes = Array.from(typesToPrivilegesMap.entries())
-      .filter(([ , privilege]) => !result.missing.includes(privilege))
+      .filter(([ , privilege]) => !hasPrivilegesResult.missing.includes(privilege))
       .map(([type]) => type);
 
     if (authorizedTypes.length === 0) {
-      this._auditLogger.savedObjectsAuthorizationFailure(result.username, action, types, result.missing, { options });
+      this._auditLogger.savedObjectsAuthorizationFailure(
+        hasPrivilegesResult.username,
+        action,
+        types,
+        hasPrivilegesResult.missing,
+        { options }
+      );
       throw this.errors.decorateForbiddenError(new Error(`Not authorized to find any types`));
     }
-    this._auditLogger.savedObjectsAuthorizationSuccess(result.username, action, authorizedTypes, { options });
+    this._auditLogger.savedObjectsAuthorizationSuccess(hasPrivilegesResult.username, action, authorizedTypes, { options });
 
     return await this._repository.find({
       ...options,
