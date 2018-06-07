@@ -634,12 +634,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async clickVisualizationByName(vizName) {
       log.debug('clickVisualizationByLinkText(' + vizName + ')');
 
-      return retry.try(function tryingForTime() {
+      await retry.try(function tryingForTime() {
         return remote
           .setFindTimeout(defaultFindTimeout)
           .findByPartialLinkText(vizName)
           .click();
       });
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     // this starts by clicking the Load Saved Viz button, not from the

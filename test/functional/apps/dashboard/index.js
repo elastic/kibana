@@ -20,7 +20,7 @@
 export default function ({ getService, loadTestFile, getPageObjects }) {
   const remote = getService('remote');
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['dashboard']);
+  const PageObjects = getPageObjects(['dashboard', 'header']);
 
   describe('dashboard app', function () {
     describe('using current data', function () {
@@ -32,6 +32,7 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
           defaultIndex: 'logstash-*',
         });
         await PageObjects.dashboard.preserveCrossAppState();
+        PageObjects.header.logSpinner();
       });
 
       after(async function () {

@@ -20,13 +20,14 @@
 export default function ({ getService, getPageObjects, loadTestFile }) {
   const remote = getService('remote');
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['common']);
+  const PageObjects = getPageObjects(['common', 'header']);
 
   describe('context app', function () {
     before(async function () {
       await remote.setWindowSize(1200, 800);
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('visualize');
+      PageObjects.header.logSpinner();
       await PageObjects.common.navigateToApp('discover');
     });
 

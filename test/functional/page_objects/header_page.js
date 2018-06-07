@@ -30,6 +30,19 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
 
   class HeaderPage {
 
+    async logSpinner() {
+      console.log('-------------------------------------------------------------starting loading monitoring');
+      setInterval(async () => {
+        await retry.silentTryForTime(200000, async () => {
+          const indicator = await remote.setFindTimeout(200).findByCssSelector('.loadingIndicator');
+          const hidden = await indicator.getAttribute('data-test-subj');
+          if (hidden === 'globalLoadingIndicator') {
+            console.log('----------------------------------------------------------- loading indicator is visible');
+          }
+        });
+      }, 200);
+    }
+
     async clickSelector(selector) {
       log.debug(`clickSelector(${selector})`);
       await find.clickByCssSelector(selector);

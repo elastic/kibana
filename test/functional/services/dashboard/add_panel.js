@@ -45,6 +45,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       for (let i = 0; i < embeddableRows.length; i++) {
         await embeddableRows[i].click();
       }
+      await PageObjects.header.waitUntilLoadingHasFinished();
       log.debug(`Added ${embeddableRows.length} embeddables`);
     }
 
@@ -98,6 +99,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       if (isOpen) {
         await retry.try(async () => {
           await testSubjects.click('closeAddPanelBtn');
+          await PageObjects.header.waitUntilLoadingHasFinished();
           const isOpen = await this.isAddPanelOpen();
           if (isOpen) {
             throw new Error('Add panel still open, trying again.');

@@ -51,20 +51,14 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
         .getVisibleText();
     }
 
-    saveSearch(searchName) {
-      return this.clickSaveSearchButton()
-        .then(() => {
-          log.debug('--saveSearch button clicked');
-          return getRemote().findDisplayedById('SaveSearch')
-            .pressKeys(searchName);
-        })
-        .then(() => {
-          log.debug('--find save button');
-          return testSubjects.click('discoverSaveSearchButton');
-        })
-        .then(async () => {
-          return await testSubjects.exists('saveSearchSuccess', 2000);
-        });
+    async saveSearch(searchName) {
+      await this.clickSaveSearchButton();
+      log.debug('--saveSearch button clicked');
+      await getRemote().findDisplayedById('SaveSearch').pressKeys(searchName);
+      log.debug('--find save button');
+      await testSubjects.click('discoverSaveSearchButton');
+      await testSubjects.exists('saveSearchSuccess', 2000);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async getColumnHeaders() {
@@ -96,10 +90,12 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     async clickNewSearchButton() {
       await testSubjects.click('discoverNewButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickSaveSearchButton() {
       await testSubjects.click('discoverSaveButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickLoadSavedSearchButton() {
@@ -289,33 +285,38 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     async clickFieldListItemAdd(field) {
       await testSubjects.moveMouseTo(`field-${field}`);
       await testSubjects.click(`fieldToggle-${field}`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickFieldListItemVisualize(field) {
-      return await retry.try(async () => {
+      await await retry.try(async () => {
         await testSubjects.click(`fieldVisualize-${field}`);
       });
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    clickFieldListPlusFilter(field, value) {
+    async clickFieldListPlusFilter(field, value) {
       // this method requires the field details to be open from clickFieldListItem()
       // testSubjects.find doesn't handle spaces in the data-test-subj value
-      return getRemote()
+      await getRemote()
         .findByCssSelector(`[data-test-subj="plus-${field}-${value}"]`)
         .click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    clickFieldListMinusFilter(field, value) {
+    async clickFieldListMinusFilter(field, value) {
       // this method requires the field details to be open from clickFieldListItem()
       // testSubjects.find doesn't handle spaces in the data-test-subj value
-      return getRemote()
+      await getRemote()
         .findByCssSelector('[data-test-subj="minus-' + field + '-' + value + '"]')
         .click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async selectIndexPattern(indexPattern) {
       await getRemote().findByClassName('index-pattern-selection').click();
       await getRemote().findByClassName('ui-select-search').type(indexPattern + '\n');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async removeAllFilters() {
@@ -328,6 +329,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     async removeHeaderColumn(name) {
       await testSubjects.moveMouseTo(`docTableHeader-${name}`);
       await testSubjects.click(`docTableRemoveHeader-${name}`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
   }
 

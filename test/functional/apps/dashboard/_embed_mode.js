@@ -38,6 +38,7 @@ export default function ({ getService, getPageObjects }) {
       // Embed parameter only works on a hard refresh.
       const useTimeStamp = true;
       await remote.get(newUrl.toString(), useTimeStamp);
+      await PageObjects.header.waitUntilLoadingHasFinished();
 
       await retry.try(async () => {
         isChromeVisible = await PageObjects.common.isChromeVisible();
@@ -51,10 +52,10 @@ export default function ({ getService, getPageObjects }) {
       // First use the timestamp to cause a hard refresh so the new embed parameter works correctly.
       let useTimeStamp = true;
       await remote.get(newUrl.toString(), useTimeStamp);
+      await PageObjects.header.waitUntilLoadingHasFinished();
       // Then get rid of the timestamp so the rest of the tests work with state and app switching.
       useTimeStamp = false;
       await remote.get(newUrl.toString(), useTimeStamp);
     });
   });
 }
-
