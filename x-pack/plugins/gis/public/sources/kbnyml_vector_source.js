@@ -6,17 +6,15 @@
 
 import { AVectorSource } from './vector_source';
 
-export class EMSVectorSource extends AVectorSource {
+export class KbnYmlVectorSource extends AVectorSource {
 
   constructor(options) {
     super(options);
   }
 
-  getDisplayName() {
-    return `EMS: ${this._layerName}`;
+  async getAvailableLayers() {
+    return this._kbnCoreAPI.mapConfig.regionmap.layers;
   }
 
-  async getAvailableLayers() {
-    return await this._kbnCoreAPI.serviceSettings.getFileLayers();
-  }
+
 }
