@@ -4,12 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ASource } from './source';
+import { parse as parseUrl } from 'url';
 
 
-export class TMSSource {
+export class TMSSource extends ASource {
 
   constructor(options) {
+    super();
     this._urlTemplate = options.urlTemplate;
+  }
+
+  getDisplayName() {
+    const parsedUrl = parseUrl(this._urlTemplate);
+    return parsedUrl.hostname;
   }
 
   async getUrlTemplate() {

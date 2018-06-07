@@ -6,7 +6,6 @@
 
 import { ALayer } from './layer';
 import * as ol from 'openlayers';
-
 import {} from '@elastic/eui';
 
 export class TileLayer extends ALayer {
@@ -17,7 +16,7 @@ export class TileLayer extends ALayer {
   }
 
   getLayerName() {
-    return JSON.stringify(this._tmsSource);
+    return this._tmsSource.getDisplayName();
   }
 
   async getOLLayer() {

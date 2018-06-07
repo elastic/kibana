@@ -18,7 +18,7 @@ export class VectorLayer extends ALayer {
   }
 
   getLayerName() {
-    return JSON.stringify(this._vectorSource);
+    return this._vectorSource.getDisplayName();
   }
 
   async getOLLayer() {
