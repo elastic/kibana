@@ -20,7 +20,7 @@ export function MonitoringPageProvider({ getService }) {
 
     getToasterContents() {
       return getRemote()
-        .findByCssSelector('div.toaster-container.ng-isolate-scope')
+        .findByCssSelector('div.toaster-container')
         .getVisibleText();
     }
 
