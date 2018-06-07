@@ -72,6 +72,7 @@ module.controller('SenseController', function SenseController(Private, $scope, $
     input.getRequestsInRange(function (requests) {
       if (!requests || requests.length === 0) {
         $scope.documentation = null;
+        $scope.$apply();
         return;
       }
       const position = requests[0].range.end;
@@ -79,8 +80,10 @@ module.controller('SenseController', function SenseController(Private, $scope, $
       const endpoint = getEndpointFromPosition(input, position);
       if (endpoint && endpoint.documentation) {
         $scope.documentation = endpoint.documentation.replace('master', DOC_LINK_VERSION);
+        $scope.$apply();
       } else {
         $scope.documentation = null;
+        $scope.$apply();
       }
     });
   };
