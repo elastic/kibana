@@ -46,7 +46,16 @@
   min-width: 17rem;
 }
 
+.layerEntry {
+}
 
+.layerEntry > .visible {
+  opacity: 1;
+}
+
+.layerEntry > .notvisible { //ugh, already global classname named `invisible`
+    opacity: 0.5;
+}
 
 .layerEntry .euiIcon .grab:hover {
   cursor: -webkit-grab;

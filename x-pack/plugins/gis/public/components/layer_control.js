@@ -22,7 +22,6 @@ export class LayerControl extends React.Component {
     this.state = {
       layers: []
     };
-
     this._onLayerOrderChange = (newOrder) => {
       this._kbnMap.reorderLayers(newOrder);
     };
@@ -36,6 +35,7 @@ export class LayerControl extends React.Component {
       });
     };
     this._kbnMap.on('layer:added', syncLayers);
+    this._kbnMap.on('layer:visibilityChanged', syncLayers);
     this._kbnMap.on('layer:removed', syncLayers);
     this._kbnMap.on('layers:reordered', syncLayers);
   }
