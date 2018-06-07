@@ -26,6 +26,7 @@ import { initializeOutput } from '../output';
 import init from '../app';
 import { SenseTopNavController } from './sense_top_nav_controller';
 import { getEndpointFromPosition } from '../autocomplete';
+import { DOC_LINK_VERSION } from 'ui/documentation_links';
 
 const module = require('ui/modules').get('app/sense');
 
@@ -79,7 +80,7 @@ module.controller('SenseController', function SenseController(Private, $scope, $
       position.column = position.column - 1;
       const endpoint = getEndpointFromPosition(input, position);
       if (endpoint && endpoint.documentation) {
-        $scope.documentation = endpoint.documentation;
+        $scope.documentation = endpoint.documentation.replace('master', DOC_LINK_VERSION);
       } else {
         $scope.documentation = null;
       }
