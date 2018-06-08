@@ -21,7 +21,7 @@ import chalk from 'chalk';
 import dedent from 'dedent';
 import { createToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
 
-export const options = {
+const options = {
   help: { desc: 'Display this menu and exit.' },
   config: {
     arg: '<file>',
