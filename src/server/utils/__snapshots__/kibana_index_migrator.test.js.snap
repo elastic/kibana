@@ -1,0 +1,34 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`kibana_index_migrator buildKibanaMappings builds a mapping from those defined by plugins 1`] = `
+Object {
+  "doc": Object {
+    "_meta": Object {
+      "kibanaVersion": "8.2.4",
+    },
+    "dynamic": "strict",
+    "properties": Object {
+      "aaa": Object {
+        "type": "text",
+      },
+      "ccc": Object {
+        "type": "keyword",
+      },
+      "config": Object {
+        "dynamic": true,
+        "properties": Object {
+          "buildNum": Object {
+            "type": "keyword",
+          },
+        },
+      },
+      "type": Object {
+        "type": "keyword",
+      },
+      "updated_at": Object {
+        "type": "date",
+      },
+    },
+  },
+}
+`;

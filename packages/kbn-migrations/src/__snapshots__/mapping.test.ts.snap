@@ -1,0 +1,34 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`migrations buildMappings combines all mappings and includes core mappings 1`] = `
+Object {
+  "doc": Object {
+    "_meta": Object {
+      "kibanaVersion": "7.0.0",
+    },
+    "dynamic": "strict",
+    "properties": Object {
+      "aaa": Object {
+        "type": "text",
+      },
+      "bbb": Object {
+        "type": "long",
+      },
+      "config": Object {
+        "dynamic": true,
+        "properties": Object {
+          "buildNum": Object {
+            "type": "keyword",
+          },
+        },
+      },
+      "type": Object {
+        "type": "keyword",
+      },
+      "updated_at": Object {
+        "type": "date",
+      },
+    },
+  },
+}
+`;

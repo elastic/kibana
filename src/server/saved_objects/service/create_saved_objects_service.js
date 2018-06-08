@@ -19,24 +19,20 @@
 
 import { SavedObjectsRepository, ScopedSavedObjectsClientProvider } from './lib';
 import { SavedObjectsClient } from './saved_objects_client';
+import { getKibanaIndexMigrator } from '../../utils';
 
-export function createSavedObjectsService(server) {
+export function createSavedObjectsService(kbnServer, server) {
+  // getKibanaIndexMigrator could fail (e.g. if elasticsearch is unavailable)
+  // but we don't want to create a new migrator with every call, as it's relatively
+  // expensive, so we'll cache the first successful instance.
+  const getMigrator = (() => {
+    let migrator;
+    return async () => migrator || await getKibanaIndexMigrator();
+  });
   const onBeforeWrite = async () => {
-    const adminCluster = server.plugins.elasticsearch.getCluster('admin');
-
     try {
-      const index = server.config().get('kibana.index');
-      await adminCluster.callWithInternalUser('indices.putTemplate', {
-        name: `kibana_index_template:${index}`,
-        body: {
-          template: index,
-          settings: {
-            number_of_shards: 1,
-            auto_expand_replicas: '0-1',
-          },
-          mappings: server.getKibanaIndexMappingsDsl(),
-        },
-      });
+      const migrator = await getMigrator();
+      await migrator.putTemplate();
     } catch (error) {
       server.log(['debug', 'savedObjects'], {
         tmpl:
@@ -54,6 +50,7 @@ export function createSavedObjectsService(server) {
       // We reject with `es.ServiceUnavailable` because writing an index
       // template is a very simple operation so if we get an error here
       // then something must be very broken
+      const adminCluster = server.plugins.elasticsearch.getCluster('admin');
       throw new adminCluster.errors.ServiceUnavailable();
     }
   };

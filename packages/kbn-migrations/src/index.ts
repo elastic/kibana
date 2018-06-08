@@ -16,6 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-export { confirm, question } from './prompt';
-export { getKibanaIndexMigrator, buildKibanaMappings, initializeKibanaIndex } from './kibana_index_migrator';
+export { buildMappings } from './mapping';
+export { createMigrator } from './migrator';
+export * from './types';

@@ -1,0 +1,24 @@
+{
+  "name": "@kbn/migrations",
+  "main": "target/index.js",
+  "typings": "target/index.d.ts",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "kbn:bootstrap": "yarn build"
+  },
+  "dependencies": {
+    "lodash": "^3.10.1",
+    "semver": "^5.5.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^22.1.3",
+    "@types/lodash": "^3.10.1",
+    "@types/semver": "^5.5.0",
+    "@types/sinon": "^5.0.1",
+    "sinon": "^5.0.7",
+    "typescript": "^2.8.1"
+  }
+}

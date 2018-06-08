@@ -17,5 +17,14 @@
  * under the License.
  */
 
-export { confirm, question } from './prompt';
-export { getKibanaIndexMigrator, buildKibanaMappings, initializeKibanaIndex } from './kibana_index_migrator';
+export function fetchOrDefault<T>(
+  promise: Promise<T>,
+  defaultValue: T
+): Promise<T> {
+  return promise.catch(error => {
+    if (error.status === 404) {
+      return defaultValue;
+    }
+    throw error;
+  });
+}
