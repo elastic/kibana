@@ -17,6 +17,29 @@ const { JsonHighlightRules } = ace.acequire('ace/mode/json_highlight_rules');
 //   return items.map(item => Object.assign(item, { next: parentRule }));
 // }
 
+const array = [
+  {
+    token: 'brace',
+    regex: /\[/,
+    push: 'arrayValues'
+  }
+];
+
+const arrayValues = [
+  {
+    include: 'value'
+  },
+  {
+    token: 'operator',
+    regex: /\,/
+  },
+  {
+    token: 'brace',
+    regex: /\]/,
+    next: 'pop'
+  }
+];
+
 export class PipelineHighlightRules extends TextHighlightRules {
   constructor() {
     super();
@@ -40,27 +63,8 @@ export class PipelineHighlightRules extends TextHighlightRules {
           defaultToken: 'error'
         }
       ],
-      array: [
-        {
-          token: 'brace',
-          regex: /\[/,
-          push: 'arrayValues'
-        }
-      ],
-      arrayValues: [
-        {
-          include: 'value'
-        },
-        {
-          token: 'operator',
-          regex: /\,/
-        },
-        {
-          token: 'brace',
-          regex: /\]/,
-          next: 'pop'
-        }
-      ],
+      array,
+      arrayValues,
       value: [
         { include: ['number', 'array', 'string', 'bareword'] }
       ],
@@ -80,28 +84,20 @@ export class PipelineHighlightRules extends TextHighlightRules {
         { include: [ 'string', 'number', 'array', 'regexp' ] }
       ],
       branch: [
-        {
-          token: 'brace',
-          regex: /\(/,
-          next: 'condition'
-        },
+        { include: 'condition' },
         {
           token: 'brace',
           regex: /\{/,
+          push: 'branchOrPlugin'
         },
         {
           token: 'brace',
           regex: /(\})/,
-          next: 'branchOrPlugin'
+          next: 'pop'
         }
       ],
       condition: [
-        {
-          token: 'brace',
-          regex: /\)/,
-          next: 'branch'
-        },
-        { include: ['bareword', 'number', 'operator'] }
+        { include: ['number', 'operator', 'rvalue', 'bareword'] }
       ],
       regexp: [
         {
@@ -201,7 +197,7 @@ export class PipelineHighlightRules extends TextHighlightRules {
       operator: [
         {
           token: 'operator',
-          regex: /==/
+          regex: /(==|in|not|\!|\(|\))/
         }
       ],
 
