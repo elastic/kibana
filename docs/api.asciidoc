@@ -28,6 +28,9 @@ entirely.
 == APIs
 
 * <<saved-objects-api>>
+* <<logstash-configuration-management-api>>
 --
 
 include::api/saved-objects.asciidoc[]
+include::api/logstash-configuration-management.asciidoc[]
+
