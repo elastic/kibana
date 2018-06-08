@@ -120,3 +120,26 @@ number of occurrences.
 
 [role="screenshot"]
 image::images/management_watcher_assistant.png[Index Management UI]
+
+[float]
+=== Job validation
+
+There is now an option in the {ml} job creation wizards to validate your choices
+before you create the job. The wizards provide advice based on your settings and 
+the characteristics of your data. For example, you might be advised to reconsider 
+your bucket span or choice of influencers. By heeding these suggestions, you can 
+create jobs that are more likely to produce insightful machine learning results. 
+For more information, see <<job-tips>>.
+
+[float]
+=== Custom URL improvements
+
+The inclusion of custom URLs in your {ml} jobs enables users to follow links 
+from the results in the *Anomaly Explorer* to your URL of choice. For example, 
+you could create a link to an operational dashboard that provides contextual 
+information to help explain the anomaly. The custom URL can include targeted
+date ranges and optional query parameters as string substitutions.  As a result, 
+custom URLs have been challenging to create. In 6.3, when you edit your job in 
+{kib}, there are new custom URL options to help you create a link to the 
+*Discover* page, new controls for configuring the time range of the target page, 
+and a button to test the URL. 
