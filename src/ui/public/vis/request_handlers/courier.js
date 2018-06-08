@@ -58,7 +58,7 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
         return vis.onSearchRequestStart(searchSource, searchRequest);
       });
 
-      timeFilterSearchSource.filter(() => {
+      timeFilterSearchSource.set('filter', () => {
         return timefilter.get(searchSource.get('index'), timeRange);
       });
 
