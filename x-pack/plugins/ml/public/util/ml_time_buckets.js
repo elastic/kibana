@@ -164,9 +164,8 @@ export function calcEsInterval(duration) {
     // find a unit that rounds neatly
     if (val >= 1 && Math.floor(val) === val) {
 
-      // if the unit is "large", like years, but
-      // isn't set to 1, ES will puke. So keep going until
-      // we get out of the "large" units
+      // if the unit is "large", like years, but isn't set to 1, ES will throw an error.
+      // So keep going until we get out of the "large" units.
       if (i <= largeMax && val !== 1) {
         continue;
       }
