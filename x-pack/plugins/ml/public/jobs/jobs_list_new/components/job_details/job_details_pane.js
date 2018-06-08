@@ -36,7 +36,7 @@ function SectionItem({ item }) {
 
 function Section({ section }) {
   if (section.items.length === 0) {
-    return (<div />);
+    return <div />;
   }
 
   return (
