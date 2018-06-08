@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import _ from 'lodash';
+import { getActiveMappings } from '../core';
+import { getMigrationPlugins } from './get_migration_plugins';
+import { PlguinSpecable } from './types';
 
-export {
-  getTypes,
-  getRootType,
-  getProperty,
-  getRootProperties,
-  getRootPropertiesObjects,
-} from './lib';
+export function getPluginMappings(kbnServer: PlguinSpecable) {
+  return _.cloneDeep(getActiveMappings(getMigrationPlugins(kbnServer)));
+}

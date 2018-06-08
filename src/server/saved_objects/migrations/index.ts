@@ -18,9 +18,6 @@
  */
 
 export {
-  getTypes,
-  getRootType,
-  getProperty,
-  getRootProperties,
-  getRootPropertiesObjects,
-} from './lib';
+  getPluginMappings,
+  initializeSavedObjectIndices,
+} from './kibana_index';

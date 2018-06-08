@@ -16,11 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { CallCluster, MappingDefinition } from '../core';
 
-export {
-  getTypes,
-  getRootType,
-  getProperty,
-  getRootProperties,
-  getRootPropertiesObjects,
-} from './lib';
+export interface KibanaPluginSpec {
+  mappings: MappingDefinition;
+}
+
+export interface KibanaPlugin {
+  getId: (() => string);
+  getExportSpecs: (() => KibanaPluginSpec | undefined);
+}
+
+export interface ElasticsearchPlugin {
+  getCluster: ((name: 'admin') => { callWithInternalUser: CallCluster });
+  waitUntilReady: () => Promise<any>;
+}
+
+export interface Server {
+  config: () => { get: (path: 'kibana.index') => string };
+  log: (path: string[], msg: string) => void;
+  plugins: { elasticsearch: ElasticsearchPlugin | undefined };
+}
+
+export interface PlguinSpecable {
+  pluginSpecs: KibanaPlugin[];
+}
+
+export interface KbnServer extends PlguinSpecable {
+  server: Server;
+}

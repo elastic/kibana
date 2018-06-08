@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import _ from 'lodash';
 import { createSavedObjectsService } from './service';
-
+import { getPluginMappings, initializeSavedObjectIndices } from './migrations';
 import {
   createBulkGetRoute,
   createCreateRoute,
@@ -28,13 +28,18 @@ import {
   createUpdateRoute,
 } from './routes';
 
-export function savedObjectsMixin(kbnServer, server) {
+export async function savedObjectsMixin(kbnServer, server) {
+  const mappings = getPluginMappings(kbnServer);
+  server.decorate('server', 'getKibanaIndexMappingsDsl', () => _.cloneDeep(mappings));
+
   // we use kibana.index which is technically defined in the kibana plugin, so if
   // we don't have the plugin (mainly tests) we can't initialize the saved objects
   if (!kbnServer.pluginSpecs.some(p => p.getId() === 'kibana')) {
     server.log(['warning', 'saved-objects'], `Saved Objects uninitialized because the Kibana plugin is disabled.`);
     return;
   }
+
+  await initializeSavedObjectIndices(kbnServer);
 
   const prereqs = {
     getSavedObjectsClient: {

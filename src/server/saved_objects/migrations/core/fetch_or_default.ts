@@ -17,10 +17,14 @@
  * under the License.
  */
 
-export {
-  getTypes,
-  getRootType,
-  getProperty,
-  getRootProperties,
-  getRootPropertiesObjects,
-} from './lib';
+export function fetchOrDefault<T>(
+  promise: Promise<T>,
+  defaultValue: T
+): Promise<T> {
+  return promise.catch(error => {
+    if (error.status === 404) {
+      return defaultValue;
+    }
+    throw error;
+  });
+}

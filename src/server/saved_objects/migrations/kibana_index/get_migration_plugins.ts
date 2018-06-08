@@ -17,10 +17,15 @@
  * under the License.
  */
 
-export {
-  getTypes,
-  getRootType,
-  getProperty,
-  getRootProperties,
-  getRootPropertiesObjects,
-} from './lib';
+import { MigrationPlugin } from '../core';
+import { PlguinSpecable } from './types';
+
+export function getMigrationPlugins({
+  pluginSpecs,
+}: PlguinSpecable): MigrationPlugin[] {
+  const emptySpec = { mappings: undefined };
+  return pluginSpecs.map(p => ({
+    id: p.getId(),
+    mappings: (p.getExportSpecs() || emptySpec).mappings,
+  }));
+}

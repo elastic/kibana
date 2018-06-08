@@ -17,10 +17,7 @@
  * under the License.
  */
 
+export { getPluginMappings } from './get_plugin_mappings';
 export {
-  getTypes,
-  getRootType,
-  getProperty,
-  getRootProperties,
-  getRootPropertiesObjects,
-} from './lib';
+  initializeSavedObjectIndices,
+} from './initialize_saved_object_indices';

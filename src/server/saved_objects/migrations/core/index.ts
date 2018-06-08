@@ -17,10 +17,6 @@
  * under the License.
  */
 
-export {
-  getTypes,
-  getRootType,
-  getProperty,
-  getRootProperties,
-  getRootPropertiesObjects,
-} from './lib';
+export { createMigrator, Migrator, MigratorOpts } from './create_migrator';
+export { getActiveMappings, fetchMapping } from './mappings';
+export * from './types';
