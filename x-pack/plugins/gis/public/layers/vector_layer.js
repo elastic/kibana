@@ -18,6 +18,10 @@ export class VectorLayer extends ALayer {
     this._vectorSource = vectorSource;
   }
 
+  getType() {
+    return "Vector";
+  }
+
   getLayerName() {
     return this._vectorSource.getDisplayName();
   }

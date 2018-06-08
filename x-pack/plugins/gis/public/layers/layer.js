@@ -59,6 +59,11 @@ export class ALayer {
     return null;
   }
 
+
+  getType() {
+    throw new Error('should implement getType');
+  }
+
   renderTOCEntry(onButtonClick) {
     return (
       <div
