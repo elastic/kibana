@@ -24,7 +24,14 @@ describe('CollectorSet', () => {
     let fetch;
     beforeEach(() => {
       server = {
-        log: sinon.spy()
+        log: sinon.spy(),
+        plugins: {
+          elasticsearch: {
+            getCluster: () => ({
+              callWithInternalUser: sinon.spy() // this tests internal collection and bulk upload, not HTTP API
+            })
+          }
+        }
       };
       init = noop;
       cleanup = noop;

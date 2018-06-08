@@ -52,7 +52,7 @@ export default function () {
         '--env=development',
         '--logging.json=false',
         `--server.port=${kbnTestConfig.getPort()}`,
-        `--optimize.watchPort=${kbnTestConfig.getPort()}`,
+        `--optimize.watchPort=${kbnTestConfig.getPort() + 10}`,
         '--optimize.watchPrebuild=true',
         '--status.allowAnonymous=true',
         '--optimize.enabled=true',

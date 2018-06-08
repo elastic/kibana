@@ -1,10 +1,10 @@
 {
-  "{index_name}/_xpack/graph/_explore": {
+  "{index}/_xpack/graph/_explore": {
     "methods": [
       "POST"
     ],
     "patterns": [
-      "{index_name}/_xpack/graph/_explore"
+      "{index}/_xpack/graph/_explore"
     ],
     "data_autocomplete_rules": {
       "query": {},

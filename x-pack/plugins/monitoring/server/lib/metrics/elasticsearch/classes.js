@@ -194,3 +194,102 @@ export class SingleIndexMemoryMetric extends IndexMemoryMetric {
     this.field = 'index_stats.total.segments.' + opts.field;
   }
 }
+
+export class WriteThreadPoolQueueMetric extends ElasticsearchMetric {
+  constructor(opts) {
+    super({
+      ...opts,
+      field: 'node_stats.thread_pool.write.queue', // in 7.0, we can only check for this threadpool
+      type: 'node',
+      format: SMALL_FLOAT,
+      metricAgg: 'max',
+      units: '',
+    });
+
+    this.dateHistogramSubAggs = {
+      index: {
+        max: { field: 'node_stats.thread_pool.index.queue' },
+      },
+      bulk: {
+        max: { field: 'node_stats.thread_pool.bulk.queue' },
+      },
+      write: {
+        max: { field: 'node_stats.thread_pool.write.queue' },
+      },
+    };
+
+    this.calculation = bucket => {
+      const index = _.get(bucket, 'index.value', null);
+      const bulk = _.get(bucket, 'bulk.value', null);
+      const write = _.get(bucket, 'write.value', null);
+
+      if (index !== null || bulk !== null || write !== null) {
+        return (index || 0) + (bulk || 0) + (write || 0);
+      }
+
+      // ignore the data if none of them exist
+      return null;
+    };
+  }
+}
+
+export class WriteThreadPoolRejectedMetric extends ElasticsearchMetric {
+  constructor(opts) {
+    super({
+      ...opts,
+      field: 'node_stats.thread_pool.write.rejected', // in 7.0, we can only check for this threadpool
+      type: 'node',
+      format: SMALL_FLOAT,
+      metricAgg: 'max',
+      units: '',
+    });
+
+    this.dateHistogramSubAggs = {
+      index_rejections: {
+        max: { field: 'node_stats.thread_pool.index.rejected' },
+      },
+      bulk_rejections: {
+        max: { field: 'node_stats.thread_pool.bulk.rejected' },
+      },
+      write_rejections: {
+        max: { field: 'node_stats.thread_pool.write.rejected' },
+      },
+      index_deriv: {
+        derivative: {
+          buckets_path: 'index_rejections',
+          gap_policy: 'skip',
+          unit: NORMALIZED_DERIVATIVE_UNIT,
+        },
+      },
+      bulk_deriv: {
+        derivative: {
+          buckets_path: 'bulk_rejections',
+          gap_policy: 'skip',
+          unit: NORMALIZED_DERIVATIVE_UNIT,
+        },
+      },
+      write_deriv: {
+        derivative: {
+          buckets_path: 'write_rejections',
+          gap_policy: 'skip',
+          unit: NORMALIZED_DERIVATIVE_UNIT,
+        },
+      },
+    };
+
+    this.calculation = bucket => {
+      const index = _.get(bucket, 'index_deriv.normalized_value', null);
+      const bulk = _.get(bucket, 'bulk_deriv.normalized_value', null);
+      const write = _.get(bucket, 'write_deriv.normalized_value', null);
+
+      if (index !== null || bulk !== null || write !== null) {
+        const valueOrZero = value => (value < 0 ? 0 : value || 0);
+
+        return valueOrZero(index) + valueOrZero(bulk) + valueOrZero(write);
+      }
+
+      // ignore the data if none of them exist
+      return null;
+    };
+  }
+}
