@@ -1,24 +1,27 @@
-@import (reference) "../../style/main";
+@import (reference) '../../style/main';
 
 .canvas__palette-picker {
   display: inline-block;
   width: 100%;
 }
 
+.canvas__palette-picker--swatches-popover {
+  .popover-content {
+    padding: 0;
+  }
+}
+
 .canvas__palette-picker--swatches {
-  height: 200px;
-  width: 200px;
-  margin-right: 20px;
+  width: 280px;
+  height: 250px;
+  overflow-y: scroll;
 }
 
 .canvas__palette-picker--swatch {
-  margin: @spacingS 0;
-  display: flex;
+  padding: @spacingS;
 }
 
 .canvas__palette-picker--label {
-  width: 100%;
-  line-height: 25px;
   font-size: @textXSmall;
   text-transform: capitalize;
 }

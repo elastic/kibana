@@ -1,42 +1,53 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Popover, OverlayTrigger } from 'react-bootstrap';
 import { map } from 'lodash';
+import { EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { Popover } from '../popover';
 import { PaletteSwatch } from '../palette_swatch';
 import { palettes } from '../../../common/lib/palettes';
 import './palette_picker.less';
 
-export const PalettePicker = ({ onChange, value, placement }) => {
-  const picker = (
-    <Popover id="popover-trigger-click">
-      <div className="canvas__palette-picker--swatches">
-        {map(palettes, (palette, name) => (
-          <div
-            key={name}
-            onClick={() => onChange(palette)}
-            className="clickable canvas__palette-picker--swatch"
-          >
-            <div className="clickable canvas__palette-picker--label">{name.replace(/_/g, ' ')}</div>
-            <PaletteSwatch colors={palette.colors} gradient={palette.gradient} />
-          </div>
-        ))}
-      </div>
-    </Popover>
+export const PalettePicker = ({ onChange, value, anchorPosition }) => {
+  const button = handleClick => (
+    <EuiLink style={{ width: '100%' }} onClick={handleClick}>
+      <PaletteSwatch colors={value.colors} gradient={value.gradient} />
+    </EuiLink>
   );
 
   return (
-    <div className="canvas__palette-picker">
-      <OverlayTrigger rootClose overlay={picker} placement={placement || 'bottom'} trigger="click">
-        <div style={{ width: '100%' }}>
-          <PaletteSwatch colors={value.colors} gradient={value.gradient} />
+    <Popover
+      id="palette-picker-popover"
+      button={button}
+      anchorPosition={anchorPosition}
+      panelClassName="canvas__palette-picker--swatches-popover"
+    >
+      {() => (
+        <div className="canvas canvas__palette-picker--swatches">
+          {map(palettes, (palette, name) => (
+            <EuiLink
+              key={name}
+              onClick={() => onChange(palette)}
+              className="canvas__palette-picker--swatch"
+              style={{ width: '100%' }}
+            >
+              <EuiFlexGroup gutterSize="none" alignItems="center">
+                <EuiFlexItem grow={1}>
+                  <span className="canvas__palette-picker--label">{name.replace(/_/g, ' ')}</span>
+                </EuiFlexItem>
+                <EuiFlexItem grow={2}>
+                  <PaletteSwatch colors={palette.colors} gradient={palette.gradient} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiLink>
+          ))}
         </div>
-      </OverlayTrigger>
-    </div>
+      )}
+    </Popover>
   );
 };
 
 PalettePicker.propTypes = {
   value: PropTypes.object,
   onChange: PropTypes.func,
-  placement: PropTypes.string,
+  anchorPosition: PropTypes.string,
 };
