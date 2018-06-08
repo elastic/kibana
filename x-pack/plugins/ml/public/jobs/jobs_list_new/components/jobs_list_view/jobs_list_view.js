@@ -10,6 +10,9 @@ import { mlJobService } from 'plugins/ml/services/job_service';
 import { mlCalendarService } from 'plugins/ml/services/calendar_service';
 import { JobsList } from '../jobs_list';
 import { JobDetails } from '../job_details';
+import { EditJobModal } from '../edit_job_modal';
+import { DeleteJobModal } from '../delete_job_modal';
+import { StartDatafeedModal } from '../start_datafeed_modal';
 
 import React, {
   Component
@@ -46,11 +49,13 @@ function latestTimeStamp(dataCounts) {
 }
 
 function loadJobDetails(jobId) {
-  return new Promise((resolve) => {
-    window.setTimeout(() => {
-      resolve(mlJobService.getJob(jobId));
-    }, 100);
-  });
+  return mlJobService.refreshJob(jobId)
+  	.then(() => {
+      return mlJobService.getJob(jobId);
+    })
+    .catch((error) => {
+      console.log(error);
+    });
 }
 
 export class JobsListView extends Component {
@@ -63,7 +68,21 @@ export class JobsListView extends Component {
       itemIdToExpandedRowMap: {}
     };
 
-    this.refreshJobs();
+    this.updateFunctions = {};
+    this.listComponent = null;
+
+    this.showEditJobModal = null;
+    this.showDeleteJobModal = null;
+    this.showStartDatafeedModal = null;
+
+    this.blockAutoRefresh = false;
+
+    this.refreshJobSummaryList();
+    console.log('JobsListView constructor');
+  }
+
+  componentWillUnmount() {
+    this.blockAutoRefresh = true;
   }
 
   toggleRow = (jobId) => {
@@ -80,68 +99,106 @@ export class JobsListView extends Component {
           <JobDetails
             jobId={jobId}
             job={this.state.fullJobsList[jobId]}
+            addYourself={this.addUpdateFunction}
           />
         );
       } else {
         itemIdToExpandedRowMap[jobId] = (
           <JobDetails
             jobId={jobId}
+            addYourself={this.addUpdateFunction}
           />
         );
       }
 
-      this.setState({ itemIdToExpandedRowMap });
+      this.setState({ itemIdToExpandedRowMap }, () => {
 
-      loadJobDetails(jobId)
-        .then((job) => {
-          const fullJobsList = { ...this.state.fullJobsList };
-          fullJobsList[jobId] = job;
-          // take a fresh copy of the itemIdToExpandedRowMap object
-          itemIdToExpandedRowMap = { ...this.state.itemIdToExpandedRowMap };
-          if (itemIdToExpandedRowMap[jobId] !== undefined) {
-            // wrap in a check, in case the user closes the expansion before the
-            // loading has finished
-            itemIdToExpandedRowMap[jobId] = (
-              <JobDetails
-                jobId={jobId}
-                job={job}
-              />
-            );
+        loadJobDetails(jobId)
+          .then((job) => {
+            const fullJobsList = { ...this.state.fullJobsList };
+            fullJobsList[jobId] = job;
+            this.setState({ fullJobsList }, () => {
+              // take a fresh copy of the itemIdToExpandedRowMap object
+              itemIdToExpandedRowMap = { ...this.state.itemIdToExpandedRowMap };
+              if (itemIdToExpandedRowMap[jobId] !== undefined) {
+                // wrap in a check, in case the user closes the expansion before the
+                // loading has finished
+                itemIdToExpandedRowMap[jobId] = (
+                  <JobDetails
+                    jobId={jobId}
+                    job={job}
+                    addYourself={this.addUpdateFunction}
+                    removeYourself={this.removeUpdateFunction}
+                  />
+                );
+              }
+              this.setState({ itemIdToExpandedRowMap });
+            });
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      });
+    }
+  }
+
+  addUpdateFunction = (id, f) => {
+    this.updateFunctions[id] = f;
+  }
+  removeUpdateFunction = (id) => {
+    delete this.updateFunctions[id];
+  }
+
+  setShowEditJobModalFunction = (func) => {
+    this.showEditJobModal = func;
+  }
+  setShowDeleteJobModalFunction = (func) => {
+    this.showDeleteJobModal = func;
+  }
+  setShowStartDatafeedModalFunction = (func) => {
+    this.showStartDatafeedModal = func;
+  }
+
+
+  refreshJobSummaryList(autoRefresh = true) {
+    if (this.blockAutoRefresh === false) {
+      loadJobs()
+        .then((resp) => {
+          const fullJobsList = this.state.fullJobsList;
+          const jobsSummaryList = resp.map((job) => {
+
+            // if the full job already exists, replace it with a fresh copy
+            if (fullJobsList[job.job_id] !== undefined) {
+              fullJobsList[job.job_id] = job;
+            }
+            const hasDatafeed = (job.datafeed_config !== undefined);
+            return {
+              id: job.job_id,
+              description: (job.description || ''),
+              processed_record_count: job.data_counts.processed_record_count,
+              memory_status: (job.model_size_stats) ? job.model_size_stats.memory_status : '',
+              jobState: job.state,
+              hasDatafeed,
+              datafeedState: (hasDatafeed && job.datafeed_config.state) ? job.datafeed_config.state : '',
+              latestTimeStamp: latestTimeStamp(job.data_counts).string,
+            };
+          });
+          this.setState({ jobsSummaryList, fullJobsList });
+
+          Object.keys(this.updateFunctions).forEach((j) => {
+            this.updateFunctions[j].setState({ job: fullJobsList[j] });
+          });
+
+          if (autoRefresh === true) {
+            setTimeout(() => {
+              this.refreshJobSummaryList();
+            }, 10000);
           }
-          this.setState({ fullJobsList, itemIdToExpandedRowMap });
         })
         .catch((error) => {
           console.log(error);
         });
     }
-  }
-
-  refreshJobs() {
-    loadJobs()
-    	.then((resp) => {
-        const fullJobsList = this.state.fullJobsList;
-        const jobsSummaryList = resp.map((job) => {
-
-          // if the full job already exists, replace it with a fresh copy
-          if (fullJobsList[job.job_id] !== undefined) {
-            fullJobsList[job.job_id] = job;
-          }
-
-          return {
-            id: job.job_id,
-            description: (job.description || ''),
-            processed_record_count: job.data_counts.processed_record_count,
-            memory_status: (job.model_size_stats) ? job.model_size_stats.memory_status : '',
-            jobState: job.state,
-            datafeedState: (job.datafeed_config.state) ? job.datafeed_config.state : '',
-            latestTimeStamp: latestTimeStamp(job.data_counts).string
-          };
-        });
-        this.setState({ jobsSummaryList, fullJobsList });
-      })
-      .catch((error) => {
-        console.log(error);
-      });
   }
 
   render() {
@@ -152,7 +209,14 @@ export class JobsListView extends Component {
           fullJobsList={this.state.fullJobsList}
           itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
           toggleRow={this.toggleRow}
+          showEditJobModal={this.showEditJobModal}
+          showDeleteJobModal={this.showDeleteJobModal}
+          showStartDatafeedModal={this.showStartDatafeedModal}
+          refreshJobs={() => this.refreshJobSummaryList(false)}
         />
+        <EditJobModal showFunction={this.setShowEditJobModalFunction} refreshJobs={() => this.refreshJobSummaryList(false)} />
+        <DeleteJobModal showFunction={this.setShowDeleteJobModalFunction} refreshJobs={() => this.refreshJobSummaryList(false)} />
+        <StartDatafeedModal showFunction={this.setShowStartDatafeedModalFunction} refreshJobs={() => this.refreshJobSummaryList(false)} />
       </div>
     );
   }

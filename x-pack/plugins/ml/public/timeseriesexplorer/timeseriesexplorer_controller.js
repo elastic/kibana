@@ -268,7 +268,7 @@ module.controller('MlTimeSeriesExplorerController', function (
       nonBlankEntities,
       searchBounds.min.valueOf(),
       searchBounds.max.valueOf(),
-      $scope.contextAggregationInterval.expression
+      $scope.contextAggregationInterval.asMilliseconds()
     ).then((resp) => {
       const fullRangeChartData = processMetricPlotResults(resp.results, $scope.modelPlotEnabled);
       $scope.contextChartData = fullRangeChartData;
@@ -286,7 +286,7 @@ module.controller('MlTimeSeriesExplorerController', function (
       $scope.criteriaFields,
       searchBounds.min.valueOf(),
       searchBounds.max.valueOf(),
-      $scope.contextAggregationInterval.expression
+      $scope.contextAggregationInterval.asMilliseconds()
     ).then((resp) => {
       const fullRangeRecordScoreData = processRecordScoreResults(resp.results);
       $scope.swimlaneData = fullRangeRecordScoreData;
@@ -328,7 +328,7 @@ module.controller('MlTimeSeriesExplorerController', function (
         nonBlankEntities,
         searchBounds.min.valueOf(),
         searchBounds.max.valueOf(),
-        $scope.contextAggregationInterval.expression,
+        $scope.contextAggregationInterval.asMilliseconds(),
         aggType)
         .then((resp) => {
           $scope.contextForecastData = processForecastResults(resp.results);
@@ -397,7 +397,7 @@ module.controller('MlTimeSeriesExplorerController', function (
       nonBlankEntities,
       searchBounds.min.valueOf(),
       searchBounds.max.valueOf(),
-      $scope.focusAggregationInterval.expression
+      $scope.focusAggregationInterval.asMilliseconds()
     ).then((resp) => {
       refreshFocusData.focusChartData = processMetricPlotResults(resp.results, $scope.modelPlotEnabled);
       $scope.showModelBoundsCheckbox = ($scope.modelPlotEnabled === true) &&
@@ -430,7 +430,7 @@ module.controller('MlTimeSeriesExplorerController', function (
       [$scope.selectedJob.job_id],
       searchBounds.min.valueOf(),
       searchBounds.max.valueOf(),
-      $scope.focusAggregationInterval.expression,
+      $scope.focusAggregationInterval.asMilliseconds(),
       1,
       MAX_SCHEDULED_EVENTS
     ).then((resp) => {
@@ -458,7 +458,7 @@ module.controller('MlTimeSeriesExplorerController', function (
         nonBlankEntities,
         searchBounds.min.valueOf(),
         searchBounds.max.valueOf(),
-        $scope.focusAggregationInterval.expression,
+        $scope.focusAggregationInterval.asMilliseconds(),
         aggType)
         .then((resp) => {
           refreshFocusData.focusForecastData = processForecastResults(resp.results);

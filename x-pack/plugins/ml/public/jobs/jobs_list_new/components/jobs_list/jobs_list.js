@@ -9,22 +9,27 @@ import React, {
   Component
 } from 'react';
 
-// import { JobDetails } from '../job_details';
+import { ResultLinks, actionsMenuContent } from './job_actions';
 import './styles/main.less';
 
 import {
-  EuiInMemoryTable,
+  EuiBasicTable,
   EuiButtonIcon,
+
 } from '@elastic/eui';
+
+const PAGE_SIZE = 10;
+const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
 export class JobsList extends Component {
   constructor(props) {
     super(props);
+    console.log('new JobsList');
 
     this.state = {
       jobsSummaryList: props.jobsSummaryList,
       pageIndex: 0,
-      pageSize: 5,
+      pageSize: PAGE_SIZE,
       selection: [],
       itemIdToExpandedRowMap: {}
     };
@@ -32,20 +37,25 @@ export class JobsList extends Component {
 
   static getDerivedStateFromProps(props) {
     const itemIdToExpandedRowMap = props.itemIdToExpandedRowMap;
-    return { itemIdToExpandedRowMap };
+    const jobsSummaryList = props.jobsSummaryList;
+    return {
+      itemIdToExpandedRowMap,
+      jobsSummaryList
+    };
   }
 
-  // onTableChange = ({ page = {} }) => {
-  //   const {
-  //     index: pageIndex,
-  //     size: pageSize,
-  //   } = page;
+  onTableChange = ({ page = {} }) => {
+    const {
+      index: pageIndex,
+      size: pageSize,
+    } = page;
 
-  //   this.setState({
-  //     pageIndex,
-  //     pageSize,
-  //   });
-  // };
+    this.setState({
+      pageIndex,
+      pageSize,
+    });
+  };
+
   toggleRow = (item) => {
     this.props.toggleRow(item.id);
     // const itemIdToExpandedRowMap = { ...this.state.itemIdToExpandedRowMap };
@@ -61,6 +71,15 @@ export class JobsList extends Component {
 
   };
 
+  getPageOfJobs(index, size) {
+    const list = this.state.jobsSummaryList;
+    const pageStart = (index * size);
+    return {
+      pageOfItems: list.slice(pageStart, (pageStart + size)),
+      totalItemCount: list.length,
+    };
+  }
+
   render() {
     const selectionControls = {
       selectable: () => true,
@@ -74,7 +93,7 @@ export class JobsList extends Component {
     // } = this.state;
 
     // const pagedJobsSummary = this.props.jobsSummaryList;
-    const { jobsSummaryList } = this.props;
+    // const { jobsSummaryList } = this.props;
 
     const columns = [
       {
@@ -90,58 +109,83 @@ export class JobsList extends Component {
       }, {
         field: 'id',
         name: 'ID',
-        truncateText: true,
+        truncateText: false,
         hideForMobile: true,
       }, {
         field: 'description',
         name: 'Description',
-        truncateText: true,
+        truncateText: false,
         hideForMobile: true,
       }, {
         field: 'processed_record_count',
         name: 'Processed records',
-        truncateText: true,
+        truncateText: false,
         hideForMobile: true,
       }, {
         field: 'memory_status',
         name: 'Memory status',
-        truncateText: true,
+        truncateText: false,
         hideForMobile: true,
       }, {
         field: 'jobState',
         name: 'Job state',
-        truncateText: true,
+        truncateText: false,
         hideForMobile: true,
       }, {
         field: 'datafeedState',
         name: 'Datafeed state',
-        truncateText: true,
+        truncateText: false,
         hideForMobile: true,
       }, {
         field: 'latestTimeStamp',
         name: 'Latest timestamp',
-        truncateText: true,
+        truncateText: false,
         hideForMobile: true,
+      }, {
+        name: 'Actions',
+        render: (item) => (
+          <ResultLinks job={item} />
+        )
+      }, {
+        name: '',
+        actions: actionsMenuContent(
+          this.props.showEditJobModal,
+          this.props.showDeleteJobModal,
+          this.props.showStartDatafeedModal,
+          this.props.refreshJobs,
+        )
       }
     ];
 
-    // const pagination = {
-    //   pageIndex: pageIndex,
-    //   pageSize: pageSize,
-    //   totalItemCount: jobsSummaryList.length,
-    //   pageSizeOptions: [3, 5, 8]
-    // };
+    const {
+      pageIndex,
+      pageSize,
+    } = this.state;
+
+    const {
+      pageOfItems,
+      totalItemCount,
+    } = this.getPageOfJobs(pageIndex, pageSize);
+
+    const pagination = {
+      pageIndex,
+      pageSize,
+      totalItemCount,
+      pageSizeOptions: PAGE_SIZE_OPTIONS
+    };
 
     return (
-      <EuiInMemoryTable
-        className="jobs-list-table"
-        items={jobsSummaryList}
-        columns={columns}
-        pagination={true}
+      <EuiBasicTable
         itemId="id"
+        className="jobs-list-table"
+        items={pageOfItems}
+        columns={columns}
+        pagination={pagination}
+        onChange={this.onTableChange}
         selection={selectionControls}
         itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
         isExpandable={true}
+        hasActions={true}
       />
     );
   }

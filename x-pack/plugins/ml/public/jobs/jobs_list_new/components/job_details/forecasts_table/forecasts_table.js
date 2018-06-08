@@ -156,7 +156,7 @@ class ForecastsTable extends Component {
         >
           <p>
             To run a forecast,
-            open the <EuiLink onClick={() => this.openSingleMetricView()}>Single Metric Viewer</EuiLink>.
+            open the <EuiLink onClick={() => this.openSingleMetricView()}>Single Metric Viewer</EuiLink>
           </p>
         </EuiCallOut>
       );

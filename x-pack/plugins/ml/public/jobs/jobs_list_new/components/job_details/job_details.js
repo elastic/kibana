@@ -10,12 +10,6 @@ import React, {
 } from 'react';
 
 import {
-  EuiTitle,
-  EuiTable,
-  EuiTableBody,
-  EuiTableRow,
-  EuiTableRowCell,
-  EuiSpacer,
   EuiTabbedContent
 } from '@elastic/eui';
 
@@ -25,81 +19,32 @@ import { extractJobDetails } from './extract_job_details';
 import { JsonPane } from './json_tab';
 import { DatafeedPreviewPane } from './datafeed_preview_tab';
 import { ForecastsTable } from './forecasts_table';
-
-function SectionItem({ item }) {
-  return (
-    <EuiTableRow>
-      {item[0] !== '' &&
-        <EuiTableRowCell>
-          <span className="job-item header">{item[0]}</span>
-        </EuiTableRowCell>
-      }
-      <EuiTableRowCell>
-        <span className="job-item">{item[1]}</span>
-      </EuiTableRowCell>
-    </EuiTableRow>
-  );
-}
-
-
-function Section({ section }) {
-  if (section.items.length === 0) {
-    return <div />;
-  }
-
-  return (
-    <React.Fragment>
-      <EuiTitle size="xs"><h4>{section.title}</h4></EuiTitle>
-      <div className="job-section">
-        <EuiTable compressed={true}>
-          <EuiTableBody>
-            { section.items.map((item, i) => (<SectionItem item={item} key={i} />)) }
-          </EuiTableBody>
-        </EuiTable>
-      </div>
-    </React.Fragment>
-  );
-}
-
-function JobDetailsPane({ sections }) {
-  return (
-    <React.Fragment>
-      <EuiSpacer size="s" />
-      <div className="row">
-        <div className="col-md-6">
-          {
-            sections
-              .filter(s => s.position === 'left')
-              .map((s, i) => (<Section section={s} key={i} />))
-          }
-        </div>
-        <div className="col-md-6">
-          {
-            sections
-              .filter(s => s.position === 'right')
-              .map((s, i) => (<Section section={s} key={i} />))
-          }
-        </div>
-      </div>
-    </React.Fragment>
-  );
-}
+import { JobDetailsPane } from './job_details_pane';
 
 export class JobDetails extends Component {
   constructor(props) {
     super(props);
+    console.log('new JobDetails');
 
     this.state = {};
+    if (this.props.addYourself) {
+      this.props.addYourself(props.jobId, this);
+    }
   }
 
-  // static getDerivedStateFromProps(props, state) {
-  //   const { job, loading } = props;
-  //   // debugger
-  //   return { job, loading };
-  // }
+  componentWillUnmount() {
+    this.props.removeYourself(this.props.jobId);
+  }
+
+  static getDerivedStateFromProps(props) {
+    const { job, loading } = props;
+    console.log('preview getDerivedStateFromProps ');
+    return { job, loading };
+  }
 
   render() {
-    const { job } = this.props;
+    const { job } = this.state;
+    console.log('JobDetails render', this.state);
     if (job === undefined) {
       return (
         <div>loading</div>
@@ -124,6 +69,7 @@ export class JobDetails extends Component {
         id: 'job-settings',
         name: 'Job settings',
         content: <JobDetailsPane sections={[general, customUrl, node]} />,
+        time: job.open_time
       }, {
         id: 'job-config',
         name: 'Job config',
@@ -154,6 +100,7 @@ export class JobDetails extends Component {
         content: <ForecastsTable job={job} />,
       }
       ];
+      console.log('new tabs array', tabs);
 
       return (
         <div className="tab-contents">

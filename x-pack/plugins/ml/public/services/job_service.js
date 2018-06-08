@@ -139,7 +139,6 @@ class JobService {
     return new Promise((resolve, reject) => {
       ml.jobs({ jobId })
         .then((resp) => {
-          console.log('refreshJob query response:', resp);
           const newJob = {};
           if (resp.jobs && resp.jobs.length) {
             angular.copy(resp.jobs[0], newJob);

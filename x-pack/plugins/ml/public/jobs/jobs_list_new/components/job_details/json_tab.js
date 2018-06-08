@@ -14,6 +14,7 @@ import {
 import { MLJobEditor } from './ml_job_editor';
 
 export function JsonPane({ job }) {
+  console.log('JsonPane');
   const json = JSON.stringify(job, null, 2);
   return (
     <React.Fragment>

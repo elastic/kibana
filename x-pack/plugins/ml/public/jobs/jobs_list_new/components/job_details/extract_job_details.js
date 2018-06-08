@@ -10,6 +10,10 @@ import { formatValues, filterObjects } from './format_values';
 
 export function extractJobDetails(job) {
 
+  if (Object.keys(job).length === 0) {
+    return {};
+  }
+
   const general = {
     title: 'General',
     position: 'left',
@@ -43,7 +47,6 @@ export function extractJobDetails(job) {
   if (job.analysis_config && job.analysis_config.detectors) {
     detectors.items.push(...job.analysis_config.detectors.map((d) => {
       const stringifiedDtr = detectorToString(d);
-      console.log(stringifiedDtr, d);
       return [
         stringifiedDtr,
         (stringifiedDtr !== d.detector_description) ? d.detector_description : ''

@@ -6,8 +6,6 @@
 
 
 
-import chrome from 'ui/chrome';
-
 import React from 'react';
 import './styles/main.less';
 
@@ -16,7 +14,7 @@ import {
 } from '@elastic/eui';
 
 function newJob() {
-  window.location.href = `${chrome.getBasePath()}/app/ml#/jobs/new_job`;
+  window.location.href = `#/jobs/new_job`;
 }
 
 export function NewJobButton() {
