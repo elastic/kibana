@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import chalk from 'chalk';
 import getopts from 'getopts';
 import { runTests } from '../../../';
 import { processOptions, displayHelp } from './args';
@@ -38,8 +39,7 @@ export async function runTestsCli(defaultConfigPaths) {
     const { configs } = options;
     await runTests(configs, options);
   } catch (err) {
-    console.log('FATAL ERROR');
-    console.log(err);
+    console.log(chalk.red(err));
     process.exit(1);
   }
 }

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import chalk from 'chalk';
 import dedent from 'dedent';
 import { createToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
 
@@ -92,8 +91,7 @@ export function processOptions(userOptions, defaultConfigPaths) {
     configs = [].concat(userOptions.config);
   } else {
     if (!defaultConfigPaths || defaultConfigPaths.length === 0) {
-      console.log(chalk.red(`functional_tests: config is required`));
-      throw new Error();
+      throw new Error(`functional_tests: config is required`);
     } else {
       configs = defaultConfigPaths;
     }
@@ -116,8 +114,7 @@ function validateOptions(userOptions) {
 
     // Validate flags passed
     if (options[key] === undefined) {
-      console.log(chalk.red(`functional_tests: invalid option [${key}]`));
-      throw new Error();
+      throw new Error(`functional_tests: invalid option [${key}]`);
     }
 
     if (
@@ -128,12 +125,9 @@ function validateOptions(userOptions) {
       // Validate enum flags
       (options[key].choices && !options[key].choices.includes(val))
     ) {
-      console.log(
-        chalk.red(
-          `functional_tests: invalid argument [${val}] to option [${key}]`
-        )
+      throw new Error(
+        `functional_tests: invalid argument [${val}] to option [${key}]`
       );
-      throw new Error();
     }
   });
 }

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import chalk from 'chalk';
 import dedent from 'dedent';
 import { createToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
 
@@ -62,7 +61,7 @@ export function displayHelp() {
 
   console.log(
     dedent(`
-    Run Functional Tests
+    Start Functional Test Servers
 
     Usage:
       node scripts/functional_tests_server --help
@@ -81,8 +80,7 @@ export function processOptions(userOptions, defaultConfigPath) {
   const config = userOptions.config || defaultConfigPath;
 
   if (!config) {
-    console.log(chalk.red(`functional_tests_server: config is required`));
-    throw new Error();
+    throw new Error(`functional_tests_server: config is required`);
   }
 
   const log = createToolingLog(pickLevelFromFlags(userOptions));
@@ -102,10 +100,7 @@ function validateOptions(userOptions) {
 
     // Validate flags passed
     if (options[key] === undefined) {
-      console.log(
-        chalk.red(`functional_tests_server: invalid option [${key}]`)
-      );
-      throw new Error();
+      throw new Error(`functional_tests_server: invalid option [${key}]`);
     }
 
     if (
@@ -116,12 +111,9 @@ function validateOptions(userOptions) {
       // Validate enum flags
       (options[key].choices && !options[key].choices.includes(val))
     ) {
-      console.log(
-        chalk.red(
-          `functional_tests_server: invalid argument [${val}] to option [${key}]`
-        )
+      throw new Error(
+        `functional_tests_server: invalid argument [${val}] to option [${key}]`
       );
-      throw new Error();
     }
   });
 }

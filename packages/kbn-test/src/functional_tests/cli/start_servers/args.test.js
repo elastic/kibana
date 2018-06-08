@@ -21,29 +21,10 @@ import { processOptions } from './args';
 
 describe('process options for run tests CLI', () => {
   describe('options', () => {
-    const originalObjects = {};
-    // mocking instead of spying so that no output is sent to the test results
-    const logMock = jest.fn();
-
-    beforeAll(() => {
-      originalObjects.console = console;
-      global.console = { log: logMock };
-    });
-
-    afterAll(() => {
-      global.console = originalObjects.console;
-    });
-
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
-
     it('rejects boolean config value', () => {
       expect(() => {
         processOptions({ config: true });
-      }).toThrow();
-
-      expect(logMock.mock.calls[0][0]).toContain(
+      }).toThrow(
         'functional_tests_server: invalid argument [true] to option [config]'
       );
     });
@@ -51,11 +32,7 @@ describe('process options for run tests CLI', () => {
     it('rejects empty config value if no default passed', () => {
       expect(() => {
         processOptions({});
-      }).toThrow();
-
-      expect(logMock.mock.calls[0][0]).toContain(
-        'functional_tests_server: config is required'
-      );
+      }).toThrow('functional_tests_server: config is required');
     });
 
     it('accepts empty config value if default passed', () => {
@@ -67,11 +44,7 @@ describe('process options for run tests CLI', () => {
     it('rejects bail', () => {
       expect(() => {
         processOptions({ bail: 'peanut' }, ['foo']);
-      }).toThrow();
-
-      expect(logMock.mock.calls[0][0]).toContain(
-        'functional_tests_server: invalid option [bail]'
-      );
+      }).toThrow('functional_tests_server: invalid option [bail]');
     });
 
     it('accepts string value for kibana-install-dir', () => {
@@ -83,9 +56,7 @@ describe('process options for run tests CLI', () => {
     it('rejects boolean value for kibana-install-dir', () => {
       expect(() => {
         processOptions({ 'kibana-install-dir': true }, ['foo']);
-      }).toThrow();
-
-      expect(logMock.mock.calls[0][0]).toContain(
+      }).toThrow(
         'functional_tests_server: invalid argument [true] to option [kibana-install-dir]'
       );
     });
@@ -99,9 +70,7 @@ describe('process options for run tests CLI', () => {
     it('rejects non-enum value for es-from', () => {
       expect(() => {
         processOptions({ 'es-from': 'butter' }, ['foo']);
-      }).toThrow();
-
-      expect(logMock.mock.calls[0][0]).toContain(
+      }).toThrow(
         'functional_tests_server: invalid argument [butter] to option [es-from]'
       );
     });
@@ -139,11 +108,7 @@ describe('process options for run tests CLI', () => {
     it('rejects invalid options even if valid options exist', () => {
       expect(() => {
         processOptions({ debug: true, aintnothang: true, bail: true }, ['foo']);
-      }).toThrow();
-
-      expect(logMock.mock.calls[0][0]).toContain(
-        'functional_tests_server: invalid option [aintnothang]'
-      );
+      }).toThrow('functional_tests_server: invalid option [aintnothang]');
     });
   });
 });
