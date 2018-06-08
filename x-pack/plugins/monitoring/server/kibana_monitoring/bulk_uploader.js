@@ -13,6 +13,12 @@ import {
 } from './lib';
 
 /*
+ * A singleton timeout object is needed, as monitoring/init can be called
+ * multiple times. (Server restarts do not stop the timer?)
+ */
+let _timer = null;
+
+/*
  * TODO: remove this in 7.0
  * - Ops Events - essentially Kibana's /api/status
  * - Usage Stats - essentially Kibana's /api/stats
@@ -22,8 +28,6 @@ import {
  */
 export class BulkUploader {
   constructor(server, collectorSet, { interval, combineTypes }) {
-    this._timer = null;
-
     if (typeof interval !== 'number') {
       throw new Error('interval number of milliseconds is required');
     }
@@ -46,16 +50,26 @@ export class BulkUploader {
      * Defined as an enclosed function to effectively have no need for a `this.collectorSet`
      */
     this.start = () => {
-      if (this._timer) {
+      if (_timer) {
         throw new Error('BulkUploader timer already started');
       }
 
       this._log.info(`Starting monitoring stats collection`);
 
-      this._timer = setInterval(() => {
+      this._fetchAndUpload(collectorSet); // initial fetch
+      _timer = setInterval(() => {
         this._fetchAndUpload(collectorSet);
       }, this._interval);
     };
+  }
+
+  /*
+   * start() and stop() are lifecycle event handlers for
+   * xpackMainPlugin state changes
+   */
+  stop() {
+    clearInterval(_timer);
+    _timer = null;
   }
 
   async _fetchAndUpload(collectorSet) {

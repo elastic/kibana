@@ -4,10 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG, } from './common/constants';
 import { requireUIRoutes } from './server/routes';
 import { instantiateClient } from './server/es_client/instantiate_client';
 import { initMonitoringXpackInfo } from './server/init_monitoring_xpack_info';
-import { initKibanaMonitoring } from './server/kibana_monitoring';
+import { CollectorSet } from './server/kibana_monitoring/classes';
+import { initBulkUploader } from './server/kibana_monitoring';
+import {
+  getKibanaUsageCollector,
+  getOpsStatsCollector,
+  getSettingsCollector,
+} from './server/kibana_monitoring/collectors';
 
 /**
  * Initialize the Kibana Monitoring plugin by starting up asynchronous server tasks
@@ -21,32 +28,62 @@ import { initKibanaMonitoring } from './server/kibana_monitoring';
  * @param server {Object} HapiJS server instance
  */
 export const init = (monitoringPlugin, server) => {
-  monitoringPlugin.status.yellow('Initializing');
-  const xpackMainPlugin = server.plugins.xpack_main;
+  const config = server.config();
 
-  xpackMainPlugin.status.once('green', async () => {
-    const config = server.config();
+  const collectorSet = new CollectorSet(server);
+  server.expose('collectorSet', collectorSet); // expose the collectorSet service
+  /*
+   * Register collector objects for stats to show up in the APIs
+   * QUESTION: do the collectors need to be concerned with ES plugin status, or
+   *   should the collectorSet handle that?
+   */
+  collectorSet.register(getOpsStatsCollector(server)); // does not rely on ES
+  collectorSet.register(getKibanaUsageCollector(server));
+  collectorSet.register(getSettingsCollector(server));
+
+  /*
+   * Instantiate and start the internal background task that calls collector
+   * fetch methods and uploads to the ES monitoring bulk endpoint
+   */
+  const bulkUploader = initBulkUploader(monitoringPlugin.kbnServer, server, collectorSet);
+
+  const xpackMainPlugin = server.plugins.xpack_main;
+  xpackMainPlugin.status.once('green', async () => { // first time xpack_main turns green
+    /*
+     * End-user-facing services
+     */
     const uiEnabled = config.get('xpack.monitoring.ui.enabled');
-    const kibanaCollectionEnabled = config.get('xpack.monitoring.kibana.collection.enabled');
-    const mainXpackInfo = server.plugins.xpack_main.info;
-    const mainMonitoring = mainXpackInfo.feature('monitoring');
-    const monitoringBulkEnabled = mainMonitoring.isAvailable() && mainMonitoring.isEnabled();
 
     if (uiEnabled) {
       await instantiateClient(server); // Instantiate the dedicated ES client
       await initMonitoringXpackInfo(server); // Route handlers depend on this for xpackInfo
       await requireUIRoutes(server);
     }
-
-    const { collectorSet, bulkUploader } = initKibanaMonitoring(monitoringPlugin.kbnServer, server); // instantiate objects for collecting stats and uploading stats
-    server.expose('collectorSet', collectorSet); // expose the collectorSet service
+  });
+  xpackMainPlugin.status.on('green', async () => { // any time xpack_main turns green
+    /*
+     * Bulk uploading of Kibana stats
+     */
+    const kibanaCollectionEnabled = config.get('xpack.monitoring.kibana.collection.enabled');
+    const { info: xpackMainInfo } = xpackMainPlugin;
+    const mainMonitoring = xpackMainInfo && xpackMainInfo.feature('monitoring');
+    const monitoringBulkEnabled = mainMonitoring && mainMonitoring.isAvailable() && mainMonitoring.isEnabled();
 
     if (kibanaCollectionEnabled && monitoringBulkEnabled) {
-      bulkUploader.start(); // start the internal uploader for collected metrics
+      bulkUploader.start();
+    } else if (!kibanaCollectionEnabled) {
+      server.log(
+        ['info', LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG],
+        'Internal collection for Kibana monitoring will is disabled per configuration.'
+      );
+    } else if (!monitoringBulkEnabled) {
+      server.log(
+        ['error', LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG],
+        'Unable to retrieve X-Pack info from the admin cluster. Kibana monitoring will be disabled until Kibana is restarted.'
+      );
     }
-
-    monitoringPlugin.status.green('Ready');
   });
+  xpackMainPlugin.status.on('red', bulkUploader.stop); // any time xpack_main turns red
 
   server.injectUiAppVars('monitoring', (server) => {
     const config = server.config();
