@@ -27,6 +27,10 @@ export const init = (monitoringPlugin, server) => {
   xpackMainPlugin.status.once('green', async () => {
     const config = server.config();
     const uiEnabled = config.get('xpack.monitoring.ui.enabled');
+    const kibanaCollectionEnabled = config.get('xpack.monitoring.kibana.collection.enabled');
+    const mainXpackInfo = server.plugins.xpack_main.info;
+    const mainMonitoring = mainXpackInfo.feature('monitoring');
+    const monitoringBulkEnabled = mainMonitoring.isAvailable() && mainMonitoring.isEnabled();
 
     if (uiEnabled) {
       await instantiateClient(server); // Instantiate the dedicated ES client
@@ -34,11 +38,10 @@ export const init = (monitoringPlugin, server) => {
       await requireUIRoutes(server);
     }
 
-    if (config.get('xpack.monitoring.kibana.collection.enabled')) {
-      const { collectorSet, bulkUploader } = initKibanaMonitoring(monitoringPlugin.kbnServer, server); // instantiate objects for collecting stats and uploading stats
-      if (collectorSet) {
-        server.expose('collectorSet', collectorSet); // expose the collectorSet service
-      }
+    const { collectorSet, bulkUploader } = initKibanaMonitoring(monitoringPlugin.kbnServer, server); // instantiate objects for collecting stats and uploading stats
+    server.expose('collectorSet', collectorSet); // expose the collectorSet service
+
+    if (kibanaCollectionEnabled && monitoringBulkEnabled) {
       bulkUploader.start(); // start the internal uploader for collected metrics
     }
 

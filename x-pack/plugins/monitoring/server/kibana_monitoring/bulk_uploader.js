@@ -6,8 +6,20 @@
 
 import { isEmpty, flatten } from 'lodash';
 import { callClusterFactory } from '../../../xpack_main';
-import { getCollectorLogger, sendBulkPayload, monitoringBulk } from './lib';
+import {
+  getCollectorLogger,
+  sendBulkPayload,
+  monitoringBulk,
+} from './lib';
 
+/*
+ * TODO: remove this in 7.0
+ * - Ops Events - essentially Kibana's /api/status
+ * - Usage Stats - essentially Kibana's /api/stats
+ * - Kibana Settings - select uiSettings
+ * @param kbnServer {Object} manager of Kibana services - see `src/server/kbn_server` in Kibana core
+ * @param server {Object} HapiJS server instance
+ */
 export class BulkUploader {
   constructor(server, collectorSet, { interval, combineTypes }) {
     this._timer = null;
@@ -31,7 +43,7 @@ export class BulkUploader {
 
     /*
      * Start the interval
-     * Defined as an enclosed function to avoid setting a `this.collectorSet`
+     * Defined as an enclosed function to effectively have no need for a `this.collectorSet`
      */
     this.start = () => {
       if (this._timer) {

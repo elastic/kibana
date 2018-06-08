@@ -12,8 +12,6 @@ import {
   getSettingsCollector,
 } from './collectors';
 import { BulkUploader } from './bulk_uploader';
-import { monitoringBulk } from './lib/monitoring_bulk';
-import { sendBulkPayload } from './lib/send_bulk_payload';
 import { getCollectorTypesCombiner } from './lib';
 
 /**
@@ -29,19 +27,20 @@ export function initKibanaMonitoring(kbnServer, server) {
   const mainXpackInfo = server.plugins.xpack_main.info;
   const mainMonitoring = mainXpackInfo.feature('monitoring');
 
-  let collectorSet = null;
+  const collectorSet = new CollectorSet(server);
+  // register collector objects with the usage collection service for stats to show up in the API
+  collectorSet.register(getKibanaUsageCollector(server));
+  collectorSet.register(getOpsStatsCollector(server));
+  collectorSet.register(getSettingsCollector(server));
+
+  let bulkUploader;
   if (mainXpackInfo && mainMonitoring.isAvailable() && mainMonitoring.isEnabled()) {
+    // wrap the collectorSet with a bulk uploader for collecting monitoring stats
     const config = server.config();
     const interval = config.get('xpack.monitoring.kibana.collection.interval');
-    const client = server.plugins.elasticsearch.getCluster('admin').createClient({
-      plugins: [monitoringBulk]
-    });
-    collectorSet = new CollectorSet(server, {
+    bulkUploader = new BulkUploader(server, collectorSet, {
       interval,
-      combineTypes: getCollectorTypesCombiner(kbnServer, config),
-      onPayload(payload) {
-        return sendBulkPayload(client, interval, payload);
-      }
+      combineTypes: getCollectorTypesCombiner(kbnServer, config)
     });
   } else {
     server.log(
@@ -50,24 +49,8 @@ export function initKibanaMonitoring(kbnServer, server) {
     );
   }
 
-  if (collectorSet) {
-    // register collector objects with the usage collection service for stats to show up in the API
-    collectorSet.register(getKibanaUsageCollector(server));
-    collectorSet.register(getOpsStatsCollector(server));
-    collectorSet.register(getSettingsCollector(server));
-
-    // wrap the collectorSet with a bulk uploader for collecting monitoring stats
-    const config = server.config();
-    const interval = config.get('xpack.monitoring.kibana.collection.interval');
-
-    const bulkUploader = new BulkUploader(server, collectorSet, {
-      interval,
-      combineTypes: getCollectorTypesCombiner(kbnServer, config),
-    });
-
-    return {
-      collectorSet,
-      bulkUploader
-    };
-  }
+  return {
+    collectorSet,
+    bulkUploader
+  };
 }
