@@ -41,30 +41,30 @@ in another terminal session by running this command from this directory:
 
 /**
  * Run servers and tests for each config
- * @param {string[]} configPaths          Array of paths to configs
  * @param {object} options                Optional
+ * @property {string[]} configPaths       Array of paths to configs
  * @property {Log} options.log            Optional logger
  * @property {string} options.installDir  Optional installation dir from which to run Kibana
  * @property {boolean} options.bail       Whether to exit test run at the first failure
  * @property {string} options.esFrom      Optionally run from source instead of snapshot
  */
-export async function runTests(configPaths, options) {
-  for (const configPath of configPaths) {
+export async function runTests(options) {
+  for (const configPath of options.configs) {
     await runSingleConfig(resolve(process.cwd(), configPath), options);
   }
 }
 
 /**
  * Start only servers using single config
- * @param {string} configPath            Path to a config file
  * @param {object} options               Optional
+ * @property {string} options.configPath Path to a config file
  * @property {Log} options.log           Optional logger
  * @property {string} options.installDir Optional installation dir from which to run Kibana
  * @property {string} options.esFrom     Optionally run from source instead of snapshot
  */
-export async function startServers(configPath, options) {
-  const { log } = options;
-  configPath = resolve(process.cwd(), configPath);
+export async function startServers(options) {
+  const { config: configOption, log } = options;
+  const configPath = resolve(process.cwd(), configOption);
 
   await withProcRunner(log, async procs => {
     const config = await readConfigFile(log, configPath);

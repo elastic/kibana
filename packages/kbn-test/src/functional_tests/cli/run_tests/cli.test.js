@@ -21,7 +21,7 @@ import { runTestsCli } from './cli';
 
 // Note: Stub the runTests function to keep testing only around the cli
 // method and arguments.
-jest.mock('../../../', () => ({
+jest.mock('../../tasks', () => ({
   runTests: jest.fn(),
 }));
 

@@ -19,7 +19,7 @@
 
 import chalk from 'chalk';
 import getopts from 'getopts';
-import { startServers } from '../../../';
+import { startServers } from '../../tasks';
 import { processOptions, displayHelp } from './args';
 
 /**
@@ -33,8 +33,7 @@ export async function startServersCli(defaultConfigPath) {
     if (userOptions.help) return displayHelp();
 
     const options = processOptions(userOptions, defaultConfigPath);
-    const { config } = options;
-    await startServers(config, options);
+    await startServers(options);
   } catch (err) {
     console.log(chalk.red(err));
     process.exit(1);

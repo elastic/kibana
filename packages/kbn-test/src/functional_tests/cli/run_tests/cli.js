@@ -19,7 +19,7 @@
 
 import chalk from 'chalk';
 import getopts from 'getopts';
-import { runTests } from '../../../';
+import { runTests } from '../../tasks';
 import { processOptions, displayHelp } from './args';
 
 /**
@@ -36,8 +36,7 @@ export async function runTestsCli(defaultConfigPaths) {
     if (userOptions.help) return displayHelp();
 
     const options = processOptions(userOptions, defaultConfigPaths);
-    const { configs } = options;
-    await runTests(configs, options);
+    await runTests(options);
   } catch (err) {
     console.log(chalk.red(err));
     process.exit(1);
