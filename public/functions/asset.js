@@ -17,9 +17,11 @@ export const asset = () => ({
     },
   },
   fn: (context, args) => {
-    // TODO: handle the case where the asset id provided doesn't exist
     const assetId = args._;
-    const { value } = getAssetById(getState(), assetId);
-    return value;
+    const asset = getAssetById(getState(), assetId);
+    if (asset !== undefined) {
+      return asset.value;
+    }
+    throw new Error('Could not get the asset by ID: ' + assetId);
   },
 });
