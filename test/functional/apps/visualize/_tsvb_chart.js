@@ -72,11 +72,11 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show correct data', async function () {
         const expectedMetricValue =  '157';
-        return PageObjects.visualBuilder.getMetricValue()
-          .then(function (value) {
-            log.debug(`metric value: ${value}`);
-            expect(value).to.eql(expectedMetricValue);
-          });
+        await PageObjects.common.sleep(30000);
+        const value = PageObjects.visualBuilder.getMetricValue();
+        log.debug(`metric value: ${JSON.stringify(value)}`);
+        log.debug(`metric value: ${value}`);
+        expect(value).to.eql(expectedMetricValue);
       });
 
     });
@@ -94,11 +94,9 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show correct data', async function () {
         const expectedMetricValue =  '156';
-        return PageObjects.visualBuilder.getMetricValue()
-          .then(function (value) {
-            log.debug(`metric value: ${value}`);
-            expect(value).to.eql(expectedMetricValue);
-          });
+        const value = PageObjects.visualBuilder.getMetricValue();
+        log.debug(`metric value: ${value}`);
+        expect(value).to.eql(expectedMetricValue);
       });
 
     });

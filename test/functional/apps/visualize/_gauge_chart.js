@@ -28,20 +28,14 @@ export default function ({ getService, getPageObjects }) {
     const fromTime = '2015-09-19 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';
 
-    before(function () {
+    before(async function () {
       log.debug('navigateToApp visualize');
-      return PageObjects.common.navigateToUrl('visualize', 'new')
-        .then(function () {
-          log.debug('clickGauge');
-          return PageObjects.visualize.clickGauge();
-        })
-        .then(function clickNewSearch() {
-          return PageObjects.visualize.clickNewSearch();
-        })
-        .then(function setAbsoluteRange() {
-          log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-          return PageObjects.header.setAbsoluteRange(fromTime, toTime);
-        });
+      await PageObjects.common.navigateToUrl('visualize', 'new');
+      log.debug('clickGauge');
+      await PageObjects.visualize.clickGauge();
+      await PageObjects.visualize.clickNewSearch();
+      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
     });
 
     it('should display spy panel toggle button', async function () {
@@ -49,53 +43,36 @@ export default function ({ getService, getPageObjects }) {
       expect(spyToggleExists).to.be(true);
     });
 
-    it('should show Count', function () {
+    it('should show Count', async function () {
       const expectedCount = ['14,004', 'Count'];
 
       // initial metric of "Count" is selected by default
-      return retry.try(function tryingForTime() {
-        return PageObjects.visualize.getGaugeValue()
-          .then(function (metricValue) {
-            expect(expectedCount).to.eql(metricValue[0].split('\n'));
-          });
+      await retry.try(async function tryingForTime() {
+        const metricValue = await PageObjects.visualize.getGaugeValue();
+        expect(expectedCount).to.eql(metricValue[0].split('\n'));
       });
     });
 
-    it('should show Split Gauges', function () {
+    it('should show Split Gauges', async function () {
       const expectedTexts = [ 'win 8', 'win xp', 'win 7', 'ios' ];
-      return PageObjects.visualize.clickMetricEditor()
-        .then(function clickBucket() {
-          log.debug('Bucket = Split Group');
-          return PageObjects.visualize.clickBucket('Split Group');
-        })
-        .then(function selectAggregation() {
-          log.debug('Aggregation = Terms');
-          return PageObjects.visualize.selectAggregation('Terms');
-        })
-        .then(function selectField() {
-          log.debug('Field = machine.os.raw');
-          return PageObjects.visualize.selectField('machine.os.raw');
-        })
-        .then(function setSize() {
-          log.debug('Size = 4');
-          return PageObjects.visualize.setSize('4');
-        })
-        .then(function clickGo() {
-          return PageObjects.visualize.clickGo();
-        })
-        .then(function () {
-          return retry.try(function tryingForTime() {
-            return PageObjects.visualize.getGaugeValue()
-              .then(function (metricValue) {
-                expect(expectedTexts).to.eql(metricValue);
-              });
-          });
-        });
+      await PageObjects.visualize.clickMetricEditor();
+      log.debug('Bucket = Split Group');
+      await PageObjects.visualize.clickBucket('Split Group');
+      log.debug('Aggregation = Terms');
+      await PageObjects.visualize.selectAggregation('Terms');
+      log.debug('Field = machine.os.raw');
+      await PageObjects.visualize.selectField('machine.os.raw');
+      log.debug('Size = 4');
+      await PageObjects.visualize.setSize('4');
+      await PageObjects.visualize.clickGo();
+      await retry.try(async function tryingForTime() {
+        const metricValue = await PageObjects.visualize.getGaugeValue();
+        expect(expectedTexts).to.eql(metricValue);
+      });
     });
 
     it('should show correct values for fields with fieldFormatters', async function () {
       const expectedTexts = [ '2,904\nwin 8: Count', '0B\nwin 8: Min bytes' ];
-
 
       await PageObjects.visualize.clickMetricEditor();
       await PageObjects.visualize.clickBucket('Split Group');
@@ -108,11 +85,9 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.selectField('bytes', 'metrics');
       await PageObjects.visualize.clickGo();
 
-      return retry.try(function tryingForTime() {
-        return PageObjects.visualize.getGaugeValue()
-          .then(async function (metricValue) {
-            expect(expectedTexts).to.eql(metricValue);
-          });
+      await retry.try(async function tryingForTime() {
+        const metricValue = await PageObjects.visualize.getGaugeValue();
+        expect(expectedTexts).to.eql(metricValue);
       });
     });
 

@@ -24,64 +24,38 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
-  describe('heatmap chart', function indexPatternCreation() {
+  describe('heatmap chart', function () {
     const vizName1 = 'Visualization HeatmapChart';
     const fromTime = '2015-09-19 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';
 
-    before(function () {
+    before(async function () {
       log.debug('navigateToApp visualize');
-      return PageObjects.common.navigateToUrl('visualize', 'new')
-        .then(function () {
-          log.debug('clickHeatmapChart');
-          return PageObjects.visualize.clickHeatmapChart();
-        })
-        .then(function clickNewSearch() {
-          return PageObjects.visualize.clickNewSearch();
-        })
-        .then(function setAbsoluteRange() {
-          log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-          return PageObjects.header.setAbsoluteRange(fromTime, toTime);
-        })
-        .then(function clickBucket() {
-          log.debug('Bucket = X-Axis');
-          return PageObjects.visualize.clickBucket('X-Axis');
-        })
-        .then(function selectAggregation() {
-          log.debug('Aggregation = Date Histogram');
-          return PageObjects.visualize.selectAggregation('Date Histogram');
-        })
-        .then(function selectField() {
-          log.debug('Field = @timestamp');
-          return PageObjects.visualize.selectField('@timestamp');
-        })
+      await PageObjects.common.navigateToUrl('visualize', 'new');
+      log.debug('clickHeatmapChart');
+      await PageObjects.visualize.clickHeatmapChart();
+      await PageObjects.visualize.clickNewSearch();
+      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      log.debug('Bucket = X-Axis');
+      await PageObjects.visualize.clickBucket('X-Axis');
+      log.debug('Aggregation = Date Histogram');
+      await PageObjects.visualize.selectAggregation('Date Histogram');
+      log.debug('Field = @timestamp');
+      await PageObjects.visualize.selectField('@timestamp');
       // leaving Interval set to Auto
-        .then(function clickGo() {
-          return PageObjects.visualize.clickGo();
-        })
-        .then(function waitForVisualization() {
-          return PageObjects.visualize.waitForVisualization();
-        });
+      await PageObjects.visualize.clickGo();
+      await PageObjects.visualize.waitForVisualization();
     });
 
-    it('should save and load', function () {
-      return PageObjects.visualize.saveVisualization(vizName1)
-        .then(() => {
-          return PageObjects.common.getBreadcrumbPageTitle();
-        })
-        .then(pageTitle => {
-          log.debug(`Save viz page title is ${pageTitle}`);
-          expect(pageTitle).to.contain(vizName1);
-        })
-        .then(function testVisualizeWaitForToastMessageGone() {
-          return PageObjects.header.waitForToastMessageGone();
-        })
-        .then(function () {
-          return PageObjects.visualize.loadSavedVisualization(vizName1);
-        })
-        .then(function waitForVisualization() {
-          return PageObjects.visualize.waitForVisualization();
-        });
+    it('should save and load', async function () {
+      await PageObjects.visualize.saveVisualization(vizName1);
+      const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
+      log.debug(`Save viz page title is ${pageTitle}`);
+      expect(pageTitle).to.contain(vizName1);
+      await PageObjects.header.waitForToastMessageGone();
+      await PageObjects.visualize.loadSavedVisualization(vizName1);
+      await PageObjects.visualize.waitForVisualization();
     });
 
     it('should display spy panel toggle button', async function () {
@@ -104,7 +78,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
 
-    it('should show correct data', function () {
+    it('should show correct data', async function () {
       // this is only the first page of the tabular data.
       const expectedChartData =  [ '2015-09-20 00:00', '37',
         '2015-09-20 03:00', '202',
@@ -118,14 +92,10 @@ export default function ({ getService, getPageObjects }) {
         '2015-09-21 03:00', '202'
       ];
 
-      return PageObjects.visualize.toggleSpyPanel()
-        .then(function showData() {
-          return PageObjects.visualize.getDataTableData();
-        })
-        .then(function showData(data) {
-          log.debug(data.split('\n'));
-          expect(data.trim().split('\n')).to.eql(expectedChartData);
-        });
+      await PageObjects.visualize.toggleSpyPanel();
+      const data = await PageObjects.visualize.getDataTableData();
+      log.debug(data.split('\n'));
+      expect(data.trim().split('\n')).to.eql(expectedChartData);
     });
   });
 }
