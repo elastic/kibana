@@ -31,6 +31,7 @@ export class BulkUploader {
 
     /*
      * Start the interval
+     * Defined as an enclosed function to avoid setting a `this.collectorSet`
      */
     this.start = () => {
       if (this._timer) {
