@@ -8,7 +8,8 @@
     },
     "patterns": [
       "_xpack/license"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/get-license.html"
   },
   "DELETE _xpack/license": {
     "methods": [
@@ -16,7 +17,8 @@
     ],
     "patterns": [
       "_xpack/license"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/delete-license.html"
   },
   "PUT _xpack/license": {
     "methods": [
@@ -30,7 +32,8 @@
     ],
     "data_autocomplete_rules": {
       "licenses": []
-    }
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/update-license.html"
   },
   "_xpack/license/trial_status": {
     "methods": [
@@ -38,7 +41,8 @@
     ],
     "patterns": [
       "_xpack/license/trial_status"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/get-trial-status.html"
   },
   "_xpack/license/start_trial": {
     "methods": [
@@ -46,7 +50,8 @@
     ],
     "patterns": [
       "_xpack/license/start_trial"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/start-trial.html"
   },
   "_xpack/license/start_basic": {
     "url_params": {
@@ -57,6 +62,7 @@
     ],
     "patterns": [
       "_xpack/license/start_basic"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/start-basic.html"
   }
 }
