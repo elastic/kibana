@@ -10,10 +10,11 @@
     esutils "^2.0.2"
     js-tokens "^3.0.0"
 
-"@elastic/eui@0.0.52":
-  version "0.0.52"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-0.0.52.tgz#c34c6cd482b458015e0d2b410f98652053994138"
+"@elastic/eui@0.0.51":
+  version "0.0.51"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-0.0.51.tgz#5d809af270dd9994a609fd01eaa84e21a62fff98"
   dependencies:
+    brace "^0.10.0"
     classnames "^2.2.5"
     core-js "^2.5.1"
     focus-trap-react "^3.0.4"
@@ -1095,7 +1096,7 @@ brace-expansion@^1.0.0, brace-expansion@^1.1.7:
     balanced-match "^1.0.0"
     concat-map "0.0.1"
 
-brace@0.10.0:
+brace@0.10.0, brace@^0.10.0:
   version "0.10.0"
   resolved "https://registry.yarnpkg.com/brace/-/brace-0.10.0.tgz#edef4eb9b0928ba1ee5f717ffc157749a6dd5d76"
   dependencies:
