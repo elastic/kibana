@@ -6,7 +6,8 @@
     "patterns": [
       "_xpack/migration/assistance",
       "_xpack/migration/assistance/{index}"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/migration-api-assistance.html"
   },
   "_xpack/migration/upgrade/{index}": {
     "url_params": {
@@ -17,7 +18,8 @@
     ],
     "patterns": [
       "_xpack/migration/upgrade/{index}"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/migration-api-upgrade.html"
   },
   "_xpack/migration/deprecations": {
     "methods": [
@@ -26,6 +28,7 @@
     "patterns": [
       "_xpack/migration/deprecations",
       "{index}/_xpack/migration/deprecations"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/migration-api-deprecation.html"
   }
 }
