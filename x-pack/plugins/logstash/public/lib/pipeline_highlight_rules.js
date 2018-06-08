@@ -23,6 +23,7 @@ export class PipelineHighlightRules extends TextHighlightRules {
     console.log(JsonHighlightRules);
     this.$rules = {
       start: [
+        // keep this as example of how to enter a string
         // {
         //   token: 'quote',
         //   regex: /\"/,
@@ -33,13 +34,19 @@ export class PipelineHighlightRules extends TextHighlightRules {
         //   regex: /\'/,
         //   push: 'singleQuotedString'
         // }
+        // {
+        //   token: 'name',
+        //   regex: /[A-Za-z0-9_]+/,
+        //   push: 'attribute'
+        // },
         {
           token: ['pipelineSection'],
-          regex: /^(input|filter|output)/
+          regex: /\b^(input|filter|output)\b/,
         },
         {
           token: ['brace'],
-          regex: /(\{|\})/
+          regex: /(\{)/,
+          push: 'branchOrPlugin'
         },
         {
           token: 'whitespace',
@@ -49,6 +56,81 @@ export class PipelineHighlightRules extends TextHighlightRules {
           defaultToken: 'error'
         }
       ],
+      branchOrPlugin: [
+        {
+          // TODO: address not highlighting the "if" in "elseif"
+          token: 'branch',
+          regex: /(\bif\b|else ([\s]+)?if)/,
+          next: 'branch'
+        },
+        {
+          token: 'brace',
+          regex: /\}/,
+          next: 'pop'
+        }
+      ],
+      branch: [
+        {
+          token: 'brace',
+          regex: /\(/,
+          next: 'condition'
+        },
+        {
+          token: 'brace',
+          regex: /\{/,
+        },
+        {
+          token: 'brace',
+          regex: /(\})/,
+          next: 'branchOrPlugin'
+        }
+      ],
+      condition: [
+        {
+          token: 'brace',
+          regex: /\)/,
+          next: 'branch'
+        },
+        { include: ['bareword', 'number', 'operator'] }
+      ],
+
+      // attribute: [
+      //   // this could be any "value", make sure each of those states includes a pop
+      //   {
+      //     token: 'operator',
+      //     regex: /([\s]+)?=>([\s]+)?/,
+      //     push: 'attributeValue'
+      //   },
+      //   {
+      //     token: 'operator',
+      //     regex: /^$/,
+      //     next: 'pop',
+      //     onMatch: (a, b, c) => {console.log('matched'); return 'fubar';}
+      //   },
+      // ],
+      // attributeValue: [
+      //   {
+      //     token: 'attributeValue',
+      //     regex: /(end)/,
+      //     next: 'pop'
+      //   }
+      //],
+      // hash: [
+      //   {
+      //     token: 'name',
+      //     regex: /[A-Za-z0-9_-]+/,
+      //     push: 'hashEntry'
+      //   },
+      //   {
+      //     token: 'brace',
+      //     regex: /(\})/
+      //   },
+      // ],
+      // hashEntry: [
+      //   {
+
+      //   }
+      // ],
       doubleQuotedString: [
         {
           token: 'escapeQuote',
@@ -87,6 +169,12 @@ export class PipelineHighlightRules extends TextHighlightRules {
         {
           token: ['number'],
           regex: /[0-9]+(.[0-9]+)?/
+        }
+      ],
+      operator: [
+        {
+          token: 'operator',
+          regex: /==/
         }
       ],
 
