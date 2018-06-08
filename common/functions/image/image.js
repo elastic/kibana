@@ -15,7 +15,7 @@ export const image = () => ({
       // This was accepting dataurl, but there was no facility in fn for checking type and handling a dataurl type.
       types: ['string', 'null'],
       help: 'Base64 encoded image',
-      aliases: ['_'],
+      aliases: ['_', 'url'],
       default: elasticLogo,
     },
     mode: {
@@ -27,16 +27,16 @@ export const image = () => ({
       default: 'contain',
     },
   },
-  fn: (context, args) => {
-    if (!includes(['contain', 'cover', 'stretch'], args.mode))
+  fn: (context, { dataurl, mode }) => {
+    if (!includes(['contain', 'cover', 'stretch'], mode))
       throw '"mode" must be "contain", "cover", or "stretch"';
 
-    const mode = args.mode === 'stretch' ? '100% 100%' : args.mode;
+    const modeStyle = mode === 'stretch' ? '100% 100%' : mode;
 
     return {
       type: 'image',
-      mode,
-      dataurl: resolveWithMissingImage(args.dataurl, elasticLogo),
+      mode: modeStyle,
+      dataurl: resolveWithMissingImage(dataurl, elasticLogo),
     };
   },
 });

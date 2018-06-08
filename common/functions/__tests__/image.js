@@ -14,8 +14,15 @@ describe('image', () => {
 
   describe('args', () => {
     describe('dataurl', () => {
-      it('sets the source of the image', () => {
+      it('sets the source of the image using dataurl', () => {
         const result = fn(null, { dataurl: elasticOutline });
+        expect(result).to.have.property('dataurl', elasticOutline);
+      });
+
+      it.skip('sets the source of the image using url', () => {
+        // This is skipped because functionWrapper doesn't use the actual
+        // interpreter and doesn't resolve aliases
+        const result = fn(null, { url: elasticOutline });
         expect(result).to.have.property('dataurl', elasticOutline);
       });
 
@@ -27,25 +34,25 @@ describe('image', () => {
 
     describe('mode', () => {
       it('sets the mode', () => {
-        it('returns an image object using a dataUrl', () => {
+        it('to contain', () => {
           const result = fn(null, { mode: 'contain' });
           expect(result).to.have.property('mode', 'contain');
         });
 
-        it('returns an image object using a dataUrl', () => {
+        it('to cover', () => {
           const result = fn(null, { mode: 'cover' });
           expect(result).to.have.property('mode', 'cover');
         });
 
-        it('returns an image object using a dataUrl', () => {
+        it('to stretch', () => {
           const result = fn(null, { mode: 'stretch' });
           expect(result).to.have.property('mode', 'stretch');
         });
-      });
 
-      it("defaults to 'contain' if not provided", () => {
-        const result = fn(null);
-        expect(result).to.have.property('mode', 'contain');
+        it("defaults to 'contain' if not provided", () => {
+          const result = fn(null);
+          expect(result).to.have.property('mode', 'contain');
+        });
       });
     });
   });
