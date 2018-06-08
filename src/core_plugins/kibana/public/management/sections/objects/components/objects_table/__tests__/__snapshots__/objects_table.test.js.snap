@@ -123,9 +123,7 @@ exports[`ObjectsTable relationships should show the flyout 1`] = `
 `;
 
 exports[`ObjectsTable should render normally 1`] = `
-<EuiPage
-  restrictWidth={false}
->
+<EuiPage>
   <EuiPageContent
     horizontalPosition="center"
     panelPaddingSize="l"
