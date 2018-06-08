@@ -89,7 +89,7 @@ the find API from from the POST API used to create Saved Objects.
 Starting in {kib} 6.3, endpoints that are not simple CRUD operations on a single
 object will be named and their name will start with an underscore. For example,
 {es} `GET /api/saved_objects` is now `GET /api/saved_objects/_find`,
-`GET /api/saved_objects/\{type\}` is now `GET /api/saved_objects/_find?type=\{type\}`,
+`GET /api/saved_objects/{type}` is now `GET /api/saved_objects/_find?type={type}`,
 and `GET /api/saved_objects/bulk_get` is now `GET /api/saved_objects/_bulk_get`.
 
 [float]
@@ -146,8 +146,8 @@ Security::
 * Preserves boom error headers for index pattern exceptions {pull}17725[#17725]
 +
 This fix resolves the issue with the index pattern APIs not responding with
-WWW-Authenticate headers on 401s that cause basic authentication via {kib} to not
-work appropriately in some configurations.
+WWW-Authenticate headers on 401s. This caused basic authentication via {kib} to not
+work properly in some configurations.
 
 Sharing::
 * [Fixes #17611] Sets a minimum width on the range slider control
