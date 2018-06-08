@@ -56,7 +56,6 @@ export default function ({ getPageObjects, getService }) {
       const markdown2 = '## Heading 2';
       await PageObjects.visualize.toggleAutoMode();
       await PageObjects.visualize.setMarkdownTxt(markdown2);
-      await PageObjects.header.waitUntilLoadingHasFinished();
       const h1Txt = await PageObjects.visualize.getMarkdownBodyDescendentText('h2');
       expect(h1Txt).to.equal('Heading 2');
     });

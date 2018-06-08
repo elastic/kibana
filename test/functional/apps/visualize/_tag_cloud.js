@@ -67,9 +67,6 @@ export default function ({ getService, getPageObjects }) {
         })
         .then(function () {
           return PageObjects.visualize.clickGo();
-        })
-        .then(function () {
-          return PageObjects.header.waitUntilLoadingHasFinished();
         });
     });
 
@@ -131,9 +128,6 @@ export default function ({ getService, getPageObjects }) {
         .then(function () {
           return PageObjects.visualize.loadSavedVisualization(vizName1);
         })
-        .then(function () {
-          return PageObjects.header.waitUntilLoadingHasFinished();
-        })
         .then(function waitForVisualization() {
           return PageObjects.visualize.waitForVisualization();
         });
@@ -180,7 +174,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.controlChangeSave();
         await PageObjects.common.navigateToUrl('visualize', 'new');
         await PageObjects.visualize.loadSavedVisualization(vizName1);
-        await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.header.setAbsoluteRange(fromTime, toTime);
         await PageObjects.visualize.waitForVisualization();
       });

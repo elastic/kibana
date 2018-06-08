@@ -35,7 +35,6 @@ export default function ({ getService, getPageObjects }) {
       log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
       await PageObjects.visualize.clickGo();
-      await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
     it('should update table header when columns change', async function () {

@@ -39,8 +39,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.common.sleep(1000); // give time for index-pattern to be fetched
       await PageObjects.visualize.setComboBox('fieldSelect-0', FIELD_NAME);
       await PageObjects.visualize.clickGo();
-
-      await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
     it('should not display spy panel toggle button', async function () {
@@ -126,16 +124,12 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickVisEditorTab('options');
         await PageObjects.visualize.checkCheckbox('inputControlEditorUpdateFiltersOnChangeCheckbox');
         await PageObjects.visualize.clickGo();
-
-        await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
       after(async () => {
         await PageObjects.visualize.clickVisEditorTab('options');
         await PageObjects.visualize.uncheckCheckbox('inputControlEditorUpdateFiltersOnChangeCheckbox');
         await PageObjects.visualize.clickGo();
-
-        await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
       it('should not display staging control buttons', async () => {
@@ -163,7 +157,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickVisEditorTab('options');
         await PageObjects.visualize.checkCheckbox('inputControlEditorUseTimeFilterCheckbox');
         await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
 
         // Expect control to be disabled because no terms could be gathered with time filter applied
         const input = await find.byCssSelector('[data-test-subj="inputControl0"] input');
@@ -173,7 +166,6 @@ export default function ({ getService, getPageObjects }) {
 
       it('should re-create control when global time filter is updated', async () => {
         await PageObjects.header.setAbsoluteRange('2015-01-01', '2016-01-01');
-        await PageObjects.header.waitUntilLoadingHasFinished();
 
         // Expect control to have values for selected time filter
         const menu = await PageObjects.visualize.getComboBoxOptions('listControlSelect0');
@@ -200,7 +192,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.setSelectByOptionText('parentSelect-1', 'geo.src');
 
         await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
       it('should disable child control when parent control is not set', async () => {

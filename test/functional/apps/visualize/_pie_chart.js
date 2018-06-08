@@ -67,9 +67,6 @@ export default function ({ getService, getPageObjects }) {
         .then(function () {
           log.debug('clickGo');
           return PageObjects.visualize.clickGo();
-        })
-        .then(function () {
-          return PageObjects.header.waitUntilLoadingHasFinished();
         });
     });
 
@@ -166,9 +163,6 @@ export default function ({ getService, getPageObjects }) {
         .then(function () {
           log.debug('clickGo');
           return PageObjects.visualize.clickGo();
-        })
-        .then(function waitForVisualization() {
-          return PageObjects.header.waitUntilLoadingHasFinished();
         })
         .then(function sleep() {
           return PageObjects.common.sleep(1003);

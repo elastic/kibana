@@ -58,9 +58,6 @@ export default function ({ getService, getPageObjects }) {
         })
         .then(function () {
           return PageObjects.visualize.clickGo();
-        })
-        .then(function () {
-          return PageObjects.header.waitUntilLoadingHasFinished();
         });
     });
 

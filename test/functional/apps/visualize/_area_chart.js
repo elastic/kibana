@@ -69,10 +69,6 @@ export default function ({ getService, getPageObjects }) {
         })
         .then(function clickGo() {
           return PageObjects.visualize.clickGo();
-        })
-        .then(function waitUntilLoadingHasFinished() {
-          log.debug('Waiting...');
-          return PageObjects.header.waitUntilLoadingHasFinished();
         });
     });
 

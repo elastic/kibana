@@ -59,9 +59,6 @@ export default function ({ getService, getPageObjects }) {
         .then(function clickGo() {
           return PageObjects.visualize.clickGo();
         })
-        .then(function () {
-          return PageObjects.header.waitUntilLoadingHasFinished();
-        })
         .then(function waitForVisualization() {
           return PageObjects.visualize.waitForVisualization();
         });
@@ -81,9 +78,6 @@ export default function ({ getService, getPageObjects }) {
         })
         .then(function () {
           return PageObjects.visualize.loadSavedVisualization(vizName1);
-        })
-        .then(function () {
-          return PageObjects.header.waitUntilLoadingHasFinished();
         })
         .then(function waitForVisualization() {
           return PageObjects.visualize.waitForVisualization();

@@ -86,7 +86,6 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.visualize.selectField('geo.coordinates');
         });
         await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
       /**
@@ -142,7 +141,6 @@ export default function ({ getService, getPageObjects }) {
         it('when not checked does not add filters to aggregation', async () => {
           await PageObjects.visualize.toggleIsFilteredByCollarCheckbox();
           await PageObjects.visualize.clickGo();
-          await PageObjects.header.waitUntilLoadingHasFinished();
           const tableHeaders = await PageObjects.visualize.getDataTableHeaders();
           expect(tableHeaders.trim()).to.equal('geohash_grid Count Geo Centroid');
         });
@@ -151,7 +149,6 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.visualize.closeSpyPanel();
           await PageObjects.visualize.toggleIsFilteredByCollarCheckbox();
           await PageObjects.visualize.clickGo();
-          await PageObjects.header.waitUntilLoadingHasFinished();
         });
       });
 

@@ -20,7 +20,7 @@
 export default function ({ getService, getPageObjects, loadTestFile }) {
   const remote = getService('remote');
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['common', 'header']);
+  const PageObjects = getPageObjects(['common']);
 
   describe.skip('context app', function () {
     before(async function () {

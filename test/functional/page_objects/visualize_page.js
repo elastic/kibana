@@ -176,6 +176,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const input = await testSubjects.find('markdownTextarea');
       await input.clearValue();
       await input.type(markdownTxt);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async getMarkdownText() {
@@ -311,6 +312,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clickGoButton() {
       await testSubjects.click('timepickerGoButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async getSpyToggleExists() {
@@ -652,6 +654,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async openSavedVisualization(vizName) {
       await this.clickVisualizationByName(vizName);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async getXAxisLabels() {

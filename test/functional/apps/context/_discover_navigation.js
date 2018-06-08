@@ -44,7 +44,6 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should open the context view with the selected document as anchor', async function () {
-      await PageObjects.common.sleep(20000);
       const discoverDocTable = await docTable.getTable();
       const firstRow = (await docTable.getBodyRows(discoverDocTable))[0];
 

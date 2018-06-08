@@ -62,9 +62,6 @@ export default function ({ getService, getPageObjects }) {
         })
         .then(function clickGo() {
           return PageObjects.visualize.clickGo();
-        })
-        .then(function () {
-          return PageObjects.header.waitUntilLoadingHasFinished();
         });
     });
 
@@ -120,7 +117,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.selectField('@timestamp');
       await PageObjects.visualize.setInterval('Daily');
       await PageObjects.visualize.clickGo();
-      await PageObjects.header.waitUntilLoadingHasFinished();
       const data = await PageObjects.visualize.getDataTableData();
       expect(data.trim().split('\n')).to.be.eql([
         '2015-09-20', '4,757',
