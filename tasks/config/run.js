@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { esTestConfig, kbnTestConfig } from '@kbn/test';
 import { resolve } from 'path';
 
 const PKG_VERSION = require('../../package.json').version;
@@ -54,12 +53,6 @@ module.exports = function (grunt) {
       ]
     };
   }
-
-  const funcTestServerFlags = [
-    '--server.maxPayloadBytes=1648576', //default is 1048576
-    '--elasticsearch.url=' + esTestConfig.getUrl(),
-    '--server.port=' + kbnTestConfig.getPort(),
-  ];
 
   const browserTestServerFlags = [
     '--plugins.initialize=false',
@@ -106,37 +99,6 @@ module.exports = function (grunt) {
       ]
     },
 
-    // used by test:ui task
-    //    runs the kibana server prepared for the functional tests
-    funcTestServer: createKbnServerTask({
-      flags: [
-        ...funcTestServerFlags,
-      ]
-    }),
-
-    // used by the test:ui:server task
-    //    runs the kibana server in dev mode, prepared for the functional tests
-    devFuncTestServer: createKbnServerTask({
-      flags: [
-        ...funcTestServerFlags,
-        '--dev',
-        '--dev_mode.enabled=false',
-        '--no-base-path',
-        '--optimize.watchPort=5611',
-        '--optimize.watchPrebuild=true',
-        '--optimize.bundleDir=' + resolve(__dirname, '../../optimize/testUiServer'),
-      ]
-    }),
-
-    // used by test:uiRelease task
-    //    runs the kibana server from the oss distributable prepared for the functional tests
-    ossDistFuncTestServer: createKbnServerTask({
-      runBuild: `oss/kibana-${PKG_VERSION}-${process.platform}-x86_64`,
-      flags: [
-        ...funcTestServerFlags,
-      ]
-    }),
-
     // used by the test:browser task
     //    runs the kibana server to serve the browser test bundle
     browserTestServer: createKbnServerTask({
@@ -168,22 +130,6 @@ module.exports = function (grunt) {
         '--optimize.bundleDir=' + resolve(__dirname, '../../optimize/testdev'),
       ]
     }),
-
-    testEsServer: {
-      options: {
-        wait: false,
-        ready: /started/,
-        quiet: false,
-      },
-      cmd: process.execPath,
-      args: [
-        'scripts/es',
-        grunt.option('from') || 'snapshot',
-        '--license', 'oss',
-        '-E', `http.port=${esTestConfig.getPort()}`,
-        '-E', `discovery.zen.ping.unicast.hosts=localhost:${esTestConfig.getPort()}`,
-      ],
-    },
 
     verifyNotice: {
       options: {
