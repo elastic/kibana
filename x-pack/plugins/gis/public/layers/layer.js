@@ -85,7 +85,7 @@ export class ALayer {
             </div>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="grab" className="grab"/>
+            <span className="grab"><EuiIcon type="grab" className="grab"/></span>
           </EuiFlexItem>
         </EuiFlexGroup>
       </div>
