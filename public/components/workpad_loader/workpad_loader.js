@@ -27,7 +27,7 @@ export class WorkpadLoader extends React.PureComponent {
     createPending: false,
   };
 
-  async componentWillMount() {
+  async componentDidMount() {
     // on component load, kick off the workpad search
     this.props.findWorkpads();
   }
@@ -60,37 +60,10 @@ export class WorkpadLoader extends React.PureComponent {
     this.closeRemoveConfirm();
   };
 
-  render() {
-    const { deletingWorkpad } = this.state;
+  renderWorkpadTable = () => {
     const { workpads } = this.props;
-    const isLoading = this.props.workpads == null;
 
-    const wrapContent = content => (
-      <div className="canvas__workpad_loader">
-        <WorkpadUpload onUpload={this.uploadWorkpad}>
-          <Form className="canvas__workpad_loader--controls">
-            <WorkpadCreate onCreate={this.createWorkpad} />
-            <WorkpadSearch onChange={this.props.findWorkpads} />
-          </Form>
-
-          {content}
-        </WorkpadUpload>
-
-        <ConfirmModal
-          isOpen={deletingWorkpad.id != null}
-          message={`Are you sure you want to remove the workpad '${deletingWorkpad.name}'?`}
-          confirmButtonText="Remove"
-          onConfirm={() => this.removeWorkpad(deletingWorkpad.id)}
-          onCancel={this.closeRemoveConfirm}
-        />
-      </div>
-    );
-
-    if (isLoading) return wrapContent(<div>Fetching Workpads...</div>);
-
-    if (this.state.createPending) return wrapContent(<div>Creating Workpad...</div>);
-
-    return wrapContent(
+    return (
       <Table condensed className="canvas__workpad_loader--workpads">
         <thead>
           <tr>
@@ -101,48 +74,72 @@ export class WorkpadLoader extends React.PureComponent {
           </tr>
         </thead>
         <tbody>
-          {isLoading && (
+          {workpads.total === 0 && (
             <tr>
-              <td colSpan="3">Fetching workpads...</td>
+              <td colSpan="3">No matching workpads found</td>
             </tr>
           )}
-          {!isLoading &&
-            workpads.total === 0 && (
-              <tr>
-                <td colSpan="3">No matching workpads found</td>
-              </tr>
-            )}
-          {!isLoading &&
-            workpads.workpads.map(wp => (
-              <tr key={wp.id} className="canvas__workpad_loader--workpad">
-                <td width="97%" className="canvas__workpad_loader--name">
-                  <Link
-                    name="loadWorkpad"
-                    params={{ id: wp.id }}
-                    aria-label={`Load workpad ${wp.id}`}
-                  >
-                    {wp.name}
-                  </Link>
-                </td>
-                <td width="1%" className="canvas__workpad_loader--created">
-                  {formatDate(wp['@created'])}
-                </td>
-                <td width="1%" className="canvas__workpad_loader--updated">
-                  {formatDate(wp['@timestamp'])}
-                </td>
-                <td width="1%" className="canvas__workpad_loader--export">
-                  <span
-                    onClick={() => this.props.downloadWorkpad(wp.id)}
-                    className="fa fa-download"
-                  />
-                </td>
-                <td width="1%" className="canvas__workpad_loader--delete">
-                  <span onClick={() => this.removeConfirm(wp)} className="fa fa-trash" />
-                </td>
-              </tr>
-            ))}
+          {workpads.workpads.map(this.renderWorkpadRow)}
         </tbody>
       </Table>
+    );
+  };
+
+  renderWorkpadRow = workpad => {
+    const workpadName = workpad.name.length ? workpad.name : <em>{workpad.id}</em>;
+
+    return (
+      <tr key={workpad.id} className="canvas__workpad_loader--workpad">
+        <td width="97%" className="canvas__workpad_loader--name">
+          <Link
+            name="loadWorkpad"
+            params={{ id: workpad.id }}
+            aria-label={`Load workpad ${workpadName}`}
+          >
+            {workpadName}
+          </Link>
+        </td>
+        <td width="1%" className="canvas__workpad_loader--created">
+          {formatDate(workpad['@created'])}
+        </td>
+        <td width="1%" className="canvas__workpad_loader--updated">
+          {formatDate(workpad['@timestamp'])}
+        </td>
+        <td width="1%" className="canvas__workpad_loader--export">
+          <span onClick={() => this.props.downloadWorkpad(workpad.id)} className="fa fa-download" />
+        </td>
+        <td width="1%" className="canvas__workpad_loader--delete">
+          <span onClick={() => this.removeConfirm(workpad)} className="fa fa-trash" />
+        </td>
+      </tr>
+    );
+  };
+
+  render() {
+    const { deletingWorkpad, createPending } = this.state;
+    const isLoading = this.props.workpads == null;
+
+    return (
+      <div className="canvas__workpad_loader">
+        <WorkpadUpload onUpload={this.uploadWorkpad}>
+          <Form className="canvas__workpad_loader--controls">
+            <WorkpadCreate onCreate={this.createWorkpad} />
+            <WorkpadSearch onChange={this.props.findWorkpads} />
+          </Form>
+
+          {createPending && <div>Creating Workpad...</div>}
+          {!createPending && isLoading && <div>Fetching Workpads...</div>}
+          {!createPending && !isLoading && this.renderWorkpadTable()}
+        </WorkpadUpload>
+
+        <ConfirmModal
+          isOpen={deletingWorkpad.id != null}
+          message={`Are you sure you want to remove the workpad '${deletingWorkpad.name}'?`}
+          confirmButtonText="Remove"
+          onConfirm={() => this.removeWorkpad(deletingWorkpad.id)}
+          onCancel={this.closeRemoveConfirm}
+        />
+      </div>
     );
   }
 }
