@@ -35,12 +35,12 @@ export class LayerPanel extends React.Component {
       <EuiFlyout onClose={this.props.onCancel} style={{ maxWidth: 768 }}>
         <EuiFlyoutHeader>
           <EuiTitle size="l">
-            <h2>Layer Name</h2>
+            <h2>{this.props.layer.getLayerName()}</h2>
           </EuiTitle>
           <EuiSpacer size="m"/>
           <EuiTextColor color="subdued">
             <EuiText size="s">
-              <p className="layerSettings__type">layer id</p>
+              <p className="layerSettings__type">{this.props.layer.renderSmallLegend()} {this.props.layer.getType()}</p>
             </EuiText>
           </EuiTextColor>
           <EuiSpacer />

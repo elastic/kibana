@@ -20,6 +20,10 @@ export class TileLayer extends ALayer {
     return this._tmsSource.getDisplayName();
   }
 
+  getType() {
+    return "Tile";
+  }
+
   renderSmallLegend() {
     return (<EuiIcon type="grid" />);
   }
