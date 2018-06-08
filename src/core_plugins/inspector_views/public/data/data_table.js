@@ -27,6 +27,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
+  EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
 
@@ -120,6 +121,7 @@ class DataTableFormat extends Component {
             />
           </EuiFlexItem>
         </EuiFlexGroup>
+        <EuiSpacer size="s" />
         <EuiInMemoryTable
           data-test-subj="inspectorTable"
           columns={columns}

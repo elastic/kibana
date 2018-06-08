@@ -61,6 +61,7 @@ class DataDownloadOptions extends Component {
   renderUnformattedDownload() {
     return (
       <EuiButton
+        size="s"
         onClick={this.exportCsv}
       >
         Download CSV
@@ -73,6 +74,7 @@ class DataDownloadOptions extends Component {
       <EuiButton
         iconType="arrowDown"
         iconSide="right"
+        size="s"
         onClick={this.onTogglePopover}
       >
         Download CSV
