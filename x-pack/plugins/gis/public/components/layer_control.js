@@ -53,7 +53,6 @@ export class LayerControl extends React.Component {
       });
     };
     this._removeLayer = (layer) => {
-      console.log('must remove layer');
       this._kbnMap.removeLayer(layer);
       this.setState({
         flyoutState: FLYOUT_STATE.NONE,
