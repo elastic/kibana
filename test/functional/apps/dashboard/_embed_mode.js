@@ -21,7 +21,7 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['dashboard', 'common']);
+  const PageObjects = getPageObjects(['dashboard', 'common', 'header']);
   const remote = getService('remote');
 
   describe('embed mode', async () => {
