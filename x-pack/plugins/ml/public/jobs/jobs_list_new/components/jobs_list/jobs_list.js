@@ -58,17 +58,6 @@ export class JobsList extends Component {
 
   toggleRow = (item) => {
     this.props.toggleRow(item.id);
-    // const itemIdToExpandedRowMap = { ...this.state.itemIdToExpandedRowMap };
-    // if (itemIdToExpandedRowMap[item.id]) {
-    //   delete itemIdToExpandedRowMap[item.id];
-    // } else {
-    //   itemIdToExpandedRowMap[item.id] = (
-    //     <JobDetails jobId={item.id} />
-    //   );
-    // }
-    // this.setState({ itemIdToExpandedRowMap });
-
-
   };
 
   getPageOfJobs(index, size) {
@@ -86,14 +75,6 @@ export class JobsList extends Component {
       selectableMessage: (selectable) => (!selectable) ? 'Cannot select job' : undefined,
       onSelectionChange: (selection) => this.setState({ selection })
     };
-    // const {
-    //   pageIndex,
-    //   pageSize,
-    //   jobsSummaryList
-    // } = this.state;
-
-    // const pagedJobsSummary = this.props.jobsSummaryList;
-    // const { jobsSummaryList } = this.props;
 
     const columns = [
       {
