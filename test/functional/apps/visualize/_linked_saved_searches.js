@@ -23,7 +23,8 @@ export default function ({ getPageObjects, getService }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'discover', 'visualize', 'header']);
 
-  describe('visualize app', function describeIndexTests() {
+  // Blocked by: https://github.com/elastic/kibana/issues/19750
+  describe.skip('visualize app', function describeIndexTests() {
     const fromTime = '2015-09-19 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';
 
