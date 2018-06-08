@@ -1,9 +1,8 @@
 @import (reference) '../../style/main';
 
 .canvas__refresh_control {
-  .canvas__refresh_control--popover {
-    min-width: 250px;
-  }
+  display: flex;
+  align-items: center;
 
   .canvas__auto_refresh {
     color: #93c83d;
@@ -13,15 +12,12 @@
     -webkit-animation: refreshInFlight 3s 0s linear infinite;
     animation: refreshInFlight 3s linear 0s infinite;
   }
+}
 
+.canvas__refresh_control--popover {
+  width: 250px;
   .canvas__refresh_control--auto-refresh--submit {
     min-width: @spacingXXXL;
-  }
-
-  .canvas__refresh_control--auto-refresh--preset-intervals {
-    .items > * {
-      width: 100%;
-    }
   }
 }
 

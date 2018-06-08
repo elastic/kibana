@@ -7,7 +7,6 @@ import {
   EuiButton,
   EuiLink,
   EuiFieldText,
-  EuiTitle,
   EuiSpacer,
 } from '@elastic/eui';
 import { timeDurationString } from '../../lib/time_duration';
@@ -18,22 +17,16 @@ export const AutoRefreshControls = ({ refreshInterval, setRefresh, disableInterv
   return (
     <div>
       {refreshInterval > 0 ? (
-        <EuiFlexGroup gutterSize="xs" alignItems="center">
+        <EuiFlexGroup gutterSize="xs" alignItems="baseline">
           <EuiFlexItem grow={false}>
-            <EuiTitle size="s">
-              <span>Interval: {timeDurationString(refreshInterval)}</span>
-            </EuiTitle>
+            <h5>Interval: {timeDurationString(refreshInterval)}</h5>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiLink size="xs" onClick={disableInterval}>
-              Disable
-            </EuiLink>
+            <EuiLink onClick={disableInterval}>Disable</EuiLink>
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        <EuiTitle size="s">
-          <div>Interval: disabled</div>
-        </EuiTitle>
+        <h5>Interval: disabled</h5>
       )}
 
       <EuiSpacer size="m" />
