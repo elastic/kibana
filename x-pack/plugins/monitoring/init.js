@@ -36,7 +36,9 @@ export const init = (monitoringPlugin, server) => {
 
     if (config.get('xpack.monitoring.kibana.collection.enabled')) {
       const { collectorSet, bulkUploader } = initKibanaMonitoring(monitoringPlugin.kbnServer, server); // instantiate objects for collecting stats and uploading stats
-      server.expose('collectorSet', collectorSet); // expose the collectorSet service
+      if (collectorSet) {
+        server.expose('collectorSet', collectorSet); // expose the collectorSet service
+      }
       bulkUploader.start(); // start the internal uploader for collected metrics
     }
 
