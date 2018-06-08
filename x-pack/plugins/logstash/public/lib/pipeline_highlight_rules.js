@@ -23,25 +23,6 @@ export class PipelineHighlightRules extends TextHighlightRules {
     console.log(JsonHighlightRules);
     this.$rules = {
       start: [
-        // keep this as example of how to enter a string
-        // {
-        //   token: 'quote',
-        //   regex: /\"/,
-        //   push: 'doubleQuotedString'
-        // },
-        // {
-        //   token: 'quote',
-        //   regex: /\'/,
-        //   push: 'singleQuotedString'
-        // }
-        // {
-        //   token: 'name',
-        //   regex: /[A-Za-z0-9_]+/,
-        //   push: 'attribute'
-        // },
-        {
-          include: 'rvalue'
-        },
         {
           token: ['pipelineSection'],
           regex: /\b^(input|filter|output)\b/,
@@ -58,6 +39,30 @@ export class PipelineHighlightRules extends TextHighlightRules {
         {
           defaultToken: 'error'
         }
+      ],
+      array: [
+        {
+          token: 'brace',
+          regex: /\[/,
+          push: 'arrayValues'
+        }
+      ],
+      arrayValues: [
+        {
+          include: 'value'
+        },
+        {
+          token: 'operator',
+          regex: /\,/
+        },
+        {
+          token: 'brace',
+          regex: /\]/,
+          next: 'pop'
+        }
+      ],
+      value: [
+        { include: ['number', 'array', 'string', 'bareword'] }
       ],
       branchOrPlugin: [
         {
