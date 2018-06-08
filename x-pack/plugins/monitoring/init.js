@@ -34,10 +34,8 @@ export const init = (monitoringPlugin, server) => {
   server.expose('collectorSet', collectorSet); // expose the collectorSet service
   /*
    * Register collector objects for stats to show up in the APIs
-   * QUESTION: do the collectors need to be concerned with ES plugin status, or
-   *   should the collectorSet handle that?
    */
-  collectorSet.register(getOpsStatsCollector(server)); // does not rely on ES
+  collectorSet.register(getOpsStatsCollector(server));
   collectorSet.register(getKibanaUsageCollector(server));
   collectorSet.register(getSettingsCollector(server));
 
@@ -83,7 +81,9 @@ export const init = (monitoringPlugin, server) => {
       );
     }
   });
-  xpackMainPlugin.status.on('red', bulkUploader.stop); // any time xpack_main turns red
+  xpackMainPlugin.status.on('red', () => { // any time xpack_main turns red
+    bulkUploader.stop();
+  });
 
   server.injectUiAppVars('monitoring', (server) => {
     const config = server.config();

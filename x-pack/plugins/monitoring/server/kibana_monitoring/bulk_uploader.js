@@ -13,13 +13,22 @@ import {
 } from './lib';
 
 /*
- * A singleton timeout object is needed, as monitoring/init can be called
- * multiple times. (Server restarts do not stop the timer?)
+ * A singleton timeout object is needed, as plugin lifecycle events can be
+ * called multiple times successively (e.g. Elasticsearch plugin can go from
+ * red status to red status)
  */
 let _timer = null;
 
 /*
- * TODO: remove this in 7.0
+ * Handles internal Kibana stats collection and uploading data to Monitoring
+ * bulk endpoint.
+ *
+ * NOTE: internal collection will be removed in 7.0
+ *
+ * Depends on
+ *   - 'xpack.monitoring.kibana.collection.enabled' config
+ *   - monitoring feature from xpack_main.info isAvailable() and isEnabled()
+ * The dependencies are handled upstream
  * - Ops Events - essentially Kibana's /api/status
  * - Usage Stats - essentially Kibana's /api/stats
  * - Kibana Settings - select uiSettings
