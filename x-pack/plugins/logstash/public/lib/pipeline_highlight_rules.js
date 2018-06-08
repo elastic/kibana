@@ -66,7 +66,6 @@ export class PipelineHighlightRules extends TextHighlightRules {
       ],
       branchOrPlugin: [
         {
-          // TODO: address not highlighting the "if" in "elseif"
           token: 'branch',
           regex: /(\bif\b|else ([\s]+)?if)/,
           next: 'branch'
@@ -78,7 +77,7 @@ export class PipelineHighlightRules extends TextHighlightRules {
         }
       ],
       rvalue: [
-        { include: [ 'string', 'number', 'bareword' ] }
+        { include: [ 'string', 'number', 'array', 'regexp' ] }
       ],
       branch: [
         {
@@ -104,7 +103,12 @@ export class PipelineHighlightRules extends TextHighlightRules {
         },
         { include: ['bareword', 'number', 'operator'] }
       ],
-
+      regexp: [
+        {
+          token: 'regexp',
+          regex: /\/(.*)\//
+        }
+      ],
       // attribute: [
       //   // this could be any "value", make sure each of those states includes a pop
       //   {
