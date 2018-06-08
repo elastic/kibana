@@ -1,8 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import './font_picker.less';
-import { Popover, OverlayTrigger } from 'react-bootstrap';
+import { EuiLink } from '@elastic/eui';
+import { Popover } from '../popover';
 import { FauxSelect } from '../faux_select';
+import './font_picker.less';
 
 const fonts = [
   {
@@ -47,45 +48,43 @@ const fonts = [
   },
 ];
 
-export const FontPicker = ({ onSelect, value, placement }) => {
+export const FontPicker = ({ onSelect, value, anchorPosition }) => {
   const selected = fonts.find(font => font.value === value) || { label: value, value };
 
-  const picker = (
-    <Popover
-      className="canvas__font-picker--popover"
-      id="popover-trigger-click"
-      style={{ width: 207 }}
-    >
-      <div className="canvas__font-picker">
-        {fonts.map((
-          font // TODO: Make a custom select using bootstrap dropdowns. This is lame and causes inconsistent styling in popover selects
-        ) => (
-          <div
-            key={font.label}
-            className="canvas__font-picker--font"
-            style={{ fontFamily: font.value }}
-            onClick={() => onSelect(font.value)}
-          >
-            {font.label}
-          </div>
-        ))}
-      </div>
-    </Popover>
+  // TODO: replace faux select with better EUI custom select or dropdown when it becomes available
+  const popoverButton = handleClick => (
+    <FauxSelect handleClick={handleClick}>
+      <div style={{ fontFamily: selected.value }}>{selected.label}</div>
+    </FauxSelect>
   );
 
   return (
-    <OverlayTrigger rootClose overlay={picker} placement={placement || 'bottom'} trigger="click">
-      <div style={{ display: 'inline-block' }} className="canvas__font-picker--preview">
-        <FauxSelect>
-          <div style={{ fontFamily: selected.value }}>{selected.label}</div>
-        </FauxSelect>
-      </div>
-    </OverlayTrigger>
+    <Popover
+      id="font-picker-popover"
+      button={popoverButton}
+      panelClassName="canvas__font-picker--popover"
+      anchorPosition={anchorPosition}
+    >
+      {() => (
+        <div className="canvas__font-picker">
+          {fonts.map(font => (
+            <EuiLink
+              key={font.label}
+              className="canvas__font-picker--font"
+              style={{ fontFamily: font.value }}
+              onClick={() => onSelect(font.value)}
+            >
+              {font.label}
+            </EuiLink>
+          ))}
+        </div>
+      )}
+    </Popover>
   );
 };
 
 FontPicker.propTypes = {
   value: PropTypes.string,
   onSelect: PropTypes.func,
-  placement: PropTypes.string,
+  anchorPosition: PropTypes.string,
 };

@@ -1,20 +1,19 @@
-@import (reference) "../../style/main";
-
-.canvas__font-picker--popover {
-  .popover-content {
-    padding: 0px;
-  }
-}
+@import (reference) '../../style/main';
 
 .canvas__font-picker {
   height: 200px;
+  overflow-y: scroll;
 
   .canvas__font-picker--font {
+    display: block;
+    width: 100%;
     padding: @spacingXS @spacingM;
+    color: black;
+  }
+}
 
-    &:hover {
-      background-color: @lightestGrey;
-      cursor: pointer;
-    }
+.canvas__font-picker--popover {
+  .popover-content {
+    padding: 0;
   }
 }
