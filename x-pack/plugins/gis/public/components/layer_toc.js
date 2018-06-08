@@ -40,7 +40,8 @@ export class LayerTOC extends React.Component {
     const topToBottomOrder = this.props.layers.slice();
     topToBottomOrder.reverse();
     return topToBottomOrder.map((layer) => {
-      return (<div key={layer.getId()} data-layerid={layer.getId()}>{layer.renderTOCEntry()}</div>);
+      const layerTOCEntry = layer.renderTOCEntry(this.props.showLayerDetails);
+      return (<div key={layer.getId()} data-layerid={layer.getId()}>{layerTOCEntry}</div>);
     });
   }
 

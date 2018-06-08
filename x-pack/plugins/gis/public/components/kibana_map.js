@@ -64,22 +64,46 @@ export class KibanaMap extends React.Component {
   }
 
   destroy() {
-    //todo
-    this._layerListeners.forEach((listener) => {
-      listener.handle.remove();
+    //todo (cleanup olMap etc...)
+    this._layerListeners.forEach((listener) => listener.remove());
+    this._layerListeners = null;
+  }
+
+  removeLayer(layer) {
+
+    const index = this._kbnOLLayers.findIndex(layerTuple => {
+      return layerTuple.kbnLayer === layer;
     });
-    this._layerListeners.length = 0;
+
+    if (index < 0) {
+      console.warn("Trying to remove layer that is not on the map.");
+      return;
+    }
+
+    const toRemove = this._kbnOLLayers[index];
+    this._olMap.removeLayer(toRemove.olLayer);
+    this._kbnOLLayers.splice(index, 1);
+    this._layerListeners = this._layerListeners.filter(listener => {
+      if (listener.kbnLayer === layer) {
+        listener.remove();
+        return false;
+      } else {
+        return true;
+      }
+    });
+
+    this.emit('layer:removed');
   }
 
   async addLayer(layer) {
 
     const olLayer = await layer.getOLLayer();
     if (!olLayer) {
-      console.error('No OLLayer');
+      console.error('Cannot get OLLayer');
       return;
     }
 
-    const visibilityChangedHandle = layer.on('visibilityChanged', (layer) => {
+    const onVisibilityChanged = (layer) => {
       const layerTuple = this._kbnOLLayers.find((layerTuple) => {
         return (layer === layerTuple.kbnLayer);
       });
@@ -87,10 +111,13 @@ export class KibanaMap extends React.Component {
         layerTuple.olLayer.setVisible(layer.getVisibility());
         this.emit('layer:visibilityChanged', layer);
       }
-    });
+    };
+    layer.on('visibilityChanged', onVisibilityChanged);
     this._layerListeners.push({
-      layer: layer,
-      handle: visibilityChangedHandle
+      kbnLayer: layer,
+      remove: () => {
+        layer.off('visibilityChanged', onVisibilityChanged);
+      }
     });
     this._kbnOLLayers.push({
       kbnLayer: layer,
