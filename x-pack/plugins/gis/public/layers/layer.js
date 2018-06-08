@@ -59,7 +59,7 @@ export class ALayer {
     return null;
   }
 
-  renderTOCEntry() {
+  renderTOCEntry(onButtonClick) {
     return (
       <div
         className={`layerEntry`}
@@ -77,7 +77,7 @@ export class ALayer {
             />
           </EuiFlexItem>
           <EuiFlexItem className="layerEntry--name">
-            <button>
+            <button onClick={() => onButtonClick(this)}>
               {this.getLayerName()}
             </button>
             <div className="legendEntry">
