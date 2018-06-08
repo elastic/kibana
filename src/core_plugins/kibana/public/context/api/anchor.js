@@ -21,7 +21,7 @@ import _ from 'lodash';
 
 import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
 
-function fetchAnchorProvider(courier, Private) {
+export function fetchAnchorProvider(courier, Private) {
   const SearchSource = Private(SearchSourceProvider);
 
   return async function fetchAnchor(
@@ -64,5 +64,3 @@ function fetchAnchorProvider(courier, Private) {
     };
   };
 }
-
-export { fetchAnchorProvider };
