@@ -58,8 +58,8 @@ export class SearchEmbeddable extends Embeddable {
     this.searchScope.sort = this.customization.sort || this.savedSearch.sort;
     this.searchScope.sharedItemTitle = this.panelTitle;
 
-    this.searchScope.searchSource.getParent().set('filter', this.filters);
-    this.searchScope.searchSource.getParent().set('query', this.query);
+    this.filtersSearchSource.set('filter', this.filters);
+    this.filtersSearchSource.set('query', this.query);
   }
 
   onContainerStateChanged(containerState) {
@@ -90,10 +90,10 @@ export class SearchEmbeddable extends Embeddable {
       return getTime(this.searchScope.searchSource.get('index'), this.timeRange);
     });
 
-    const filtersSearchSource = this.searchScope.searchSource.new();
-    filtersSearchSource.inherits(timeRangeSearchSource);
+    this.filtersSearchSource = this.searchScope.searchSource.new();
+    this.filtersSearchSource.inherits(timeRangeSearchSource);
 
-    this.searchScope.searchSource.inherits(filtersSearchSource);
+    this.searchScope.searchSource.inherits(this.filtersSearchSource);
 
     this.pushContainerStateParamsToScope();
 
