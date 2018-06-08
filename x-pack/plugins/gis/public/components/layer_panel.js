@@ -32,7 +32,6 @@ export class LayerPanel extends React.Component {
   render() {
 
     return (
-
       <EuiFlyout onClose={this.props.onCancel} style={{ maxWidth: 768 }}>
         <EuiFlyoutHeader>
           <EuiTitle size="l">
