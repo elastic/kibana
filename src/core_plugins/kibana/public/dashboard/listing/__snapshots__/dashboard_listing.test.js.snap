@@ -3,7 +3,6 @@
 exports[`after fetch hideWriteControls 1`] = `
 <EuiPage
   data-test-subj="dashboardLandingPage"
-  restrictWidth={false}
 >
   <EuiFlexGroup
     alignItems="flexEnd"
@@ -116,7 +115,6 @@ exports[`after fetch hideWriteControls 1`] = `
 exports[`after fetch renders call to action when no dashboards exist 1`] = `
 <EuiPage
   data-test-subj="dashboardLandingPage"
-  restrictWidth={false}
 >
   <EuiFlexGroup
     alignItems="flexEnd"
@@ -265,7 +263,6 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
 exports[`after fetch renders table rows 1`] = `
 <EuiPage
   data-test-subj="dashboardLandingPage"
-  restrictWidth={false}
 >
   <EuiFlexGroup
     alignItems="flexEnd"
@@ -402,7 +399,6 @@ exports[`after fetch renders table rows 1`] = `
 exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
 <EuiPage
   data-test-subj="dashboardLandingPage"
-  restrictWidth={false}
 >
   <EuiFlexGroup
     alignItems="flexEnd"
@@ -570,7 +566,6 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
 exports[`initialFilter 1`] = `
 <EuiPage
   data-test-subj="dashboardLandingPage"
-  restrictWidth={false}
 >
   <EuiFlexGroup
     alignItems="flexEnd"
@@ -694,7 +689,6 @@ exports[`initialFilter 1`] = `
 exports[`renders table in loading state 1`] = `
 <EuiPage
   data-test-subj="dashboardLandingPage"
-  restrictWidth={false}
 >
   <EuiFlexGroup
     alignItems="flexEnd"
