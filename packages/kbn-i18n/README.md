@@ -264,7 +264,7 @@ when missing translations
 - `getRegisteredLocales()` - returns array of locales having translations
 
 The translation `service` provides only one method:
-- `translate(id: string, [{values: object, defaultMessage: string}])` – translate message by id
+- `i18n(id: string, [{values: object, defaultMessage: string}])` – translate message by id
 
 The translation `filter` is used for attributes translation and has
 the following syntax:

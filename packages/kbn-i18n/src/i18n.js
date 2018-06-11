@@ -99,14 +99,14 @@ export class I18n {
   addMessages(messages = {}, locale = messages.locale) {
     if (!locale) {
       showError('[I18n] A `locale` must be provided to add messages.');
+    } else {
+      const normalizedLocale = I18n.normalizeLocale(locale);
+
+      this._messages[normalizedLocale] = {
+        ...this._messages[normalizedLocale],
+        ...messages,
+      };
     }
-
-    const normalizedLocale = I18n.normalizeLocale(locale);
-
-    this._messages[normalizedLocale] = {
-      ...this._messages[normalizedLocale],
-      ...messages,
-    };
   }
 
   /**

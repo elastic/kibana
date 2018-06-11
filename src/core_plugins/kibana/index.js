@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-
 import Promise from 'bluebird';
 import { mkdirp as mkdirpNode } from 'mkdirp';
 
