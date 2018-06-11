@@ -41,9 +41,9 @@ export default function () {
         })
       }
     },
-    config: function () {
+    config: () => {
       return {
-        get: function (key) {
+        get: (key) => {
           switch (key) {
             case 'elasticsearch.shardTimeout':
               return 30000;
