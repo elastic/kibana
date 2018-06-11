@@ -14,6 +14,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-5.6.10>>
 * <<release-notes-5.6.9>>
 * <<release-notes-5.6.8>>
 * <<release-notes-5.6.7>>
@@ -83,6 +84,11 @@ This section summarizes the changes in each release.
 //[float]
 //=== Known Issues
 ////
+
+[[release-notes-5.6.10]]
+== {kib} 5.6.10
+
+There are no changes for Kibana in this version.
 
 [[release-notes-5.6.9]]
 == {kib} 5.6.9
@@ -402,11 +408,11 @@ Visualization::
 == {kib} 5.6.1
 
 Important Note::
-* The 5.6.1 release of the Elastic Stack has an important fix for an issue 
-affecting users upgrading with indexes created in Elasticsearch 2.x and earlier 
-where Kibana becomes unavailable. We recommend that you upgrade to 5.6.1 to 
-avoid the issue. You can read the details of the problem and about mitigation 
-if you are already experiencing the issue in this https://discuss.elastic.co/t/upgrade-issue-with-elastic-stack-5-6-0-workaround-option-until-fix-is-available/100595[forum post]. If you are an Elastic Cloud user then Elastic Cloud support is working 
+* The 5.6.1 release of the Elastic Stack has an important fix for an issue
+affecting users upgrading with indexes created in Elasticsearch 2.x and earlier
+where Kibana becomes unavailable. We recommend that you upgrade to 5.6.1 to
+avoid the issue. You can read the details of the problem and about mitigation
+if you are already experiencing the issue in this https://discuss.elastic.co/t/upgrade-issue-with-elastic-stack-5-6-0-workaround-option-until-fix-is-available/100595[forum post]. If you are an Elastic Cloud user then Elastic Cloud support is working
 to mitigate this issue for you.
 
 //[float]
@@ -975,7 +981,7 @@ Dashboard::
 Discover::
 * [Fix for #11925] [context view] Use _doc for tie-breaking instead of _uid {pull}12096[#12096]
   - To avoid filling up Elasticsearch's fielddata cache by sorting on the _uid field in the context view, the field _doc is now used as a tiebreaker by default. The field to be used can now be configured using the context:tieBreakingFields advanced setting.
-  
+
 Visualize::
 * [Fix for #11982] Fixed point series label ids {pull}12065[#12065]
 * [Fix for #12000] Hid the last bucket error when switching from parent pipeline agg {pull}12066[#12066]
