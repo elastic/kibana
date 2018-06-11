@@ -217,6 +217,74 @@ export default function ({ getService }) {
       },
     });
 
+    findTest(`kibana legacy user`, {
+      auth: {
+        username: AUTHENTICATION.KIBANA_LEGACY_USER.USERNAME,
+        password: AUTHENTICATION.KIBANA_LEGACY_USER.PASSWORD,
+      },
+      tests: {
+        normal: {
+          description: 'only the visualization',
+          statusCode: 200,
+          response: expectVisualizationResults,
+        },
+        unknownType: {
+          description: 'empty result',
+          statusCode: 200,
+          response: createExpectEmpty(1, 20, 0),
+        },
+        pageBeyondTotal: {
+          description: 'empty result',
+          statusCode: 200,
+          response: createExpectEmpty(100, 100, 1),
+        },
+        unknownSearchField: {
+          description: 'empty result',
+          statusCode: 200,
+          response: createExpectEmpty(1, 20, 0),
+        },
+        noType: {
+          description: 'all objects',
+          statusCode: 200,
+          response: expectAllResults,
+        },
+      },
+    });
+
+    findTest(`kibana legacy dashboard only user`, {
+      auth: {
+        username: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.USERNAME,
+        password: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.PASSWORD,
+      },
+      tests: {
+        normal: {
+          description: 'only the visualization',
+          statusCode: 200,
+          response: expectVisualizationResults,
+        },
+        unknownType: {
+          description: 'forbidden find wigwags message',
+          statusCode: 403,
+          response: createExpectActionForbidden(true, 'wigwags'),
+        },
+        pageBeyondTotal: {
+          description: 'empty result',
+          statusCode: 200,
+          response: createExpectEmpty(100, 100, 1),
+        },
+        unknownSearchField: {
+          description: 'forbidden find wigwags message',
+          statusCode: 403,
+          response: createExpectActionForbidden(true, 'wigwags'),
+        },
+        noType: {
+          description: 'all objects',
+          statusCode: 200,
+          response: expectAllResults,
+        },
+      }
+    });
+
     findTest(`kibana rbac user`, {
       auth: {
         username: AUTHENTICATION.KIBANA_RBAC_USER.USERNAME,
