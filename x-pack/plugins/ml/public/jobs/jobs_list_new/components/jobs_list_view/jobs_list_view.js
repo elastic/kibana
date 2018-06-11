@@ -175,6 +175,7 @@ export class JobsListView extends Component {
             return {
               id: job.job_id,
               description: (job.description || ''),
+              groups: (job.groups || []),
               processed_record_count: job.data_counts.processed_record_count,
               memory_status: (job.model_size_stats) ? job.model_size_stats.memory_status : '',
               jobState: job.state,

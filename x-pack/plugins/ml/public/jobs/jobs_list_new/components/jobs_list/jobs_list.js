@@ -10,6 +10,7 @@ import React, {
 } from 'react';
 
 import { ResultLinks, actionsMenuContent } from './job_actions';
+import { JobDescription } from './job_description';
 import './styles/main.less';
 
 import {
@@ -91,37 +92,31 @@ export class JobsList extends Component {
         field: 'id',
         name: 'ID',
         truncateText: false,
-        hideForMobile: true,
       }, {
-        field: 'description',
         name: 'Description',
-        truncateText: false,
-        hideForMobile: true,
+        render: (item) => (
+          <JobDescription job={item} />
+        )
       }, {
         field: 'processed_record_count',
         name: 'Processed records',
         truncateText: false,
-        hideForMobile: true,
       }, {
         field: 'memory_status',
         name: 'Memory status',
         truncateText: false,
-        hideForMobile: true,
       }, {
         field: 'jobState',
         name: 'Job state',
         truncateText: false,
-        hideForMobile: true,
       }, {
         field: 'datafeedState',
         name: 'Datafeed state',
         truncateText: false,
-        hideForMobile: true,
       }, {
         field: 'latestTimeStamp',
         name: 'Latest timestamp',
         truncateText: false,
-        hideForMobile: true,
       }, {
         name: 'Actions',
         render: (item) => (
@@ -171,3 +166,5 @@ export class JobsList extends Component {
     );
   }
 }
+
+

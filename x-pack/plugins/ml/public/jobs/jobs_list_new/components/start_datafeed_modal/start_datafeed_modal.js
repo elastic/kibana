@@ -169,12 +169,14 @@ function startDatafeed(jobId, duration, createWatch, finish) {
         .then(() => {
           // $rootScope.$broadcast('jobsUpdated');
           finish();
+          toastNotifications.addSuccess(`${jobId} started successfully`);
 
           if (createWatch) {
             // $rootScope.$broadcast('openCreateWatchWindow', job);
           }
         })
-        .catch(() => {
+        .catch((resp) => {
+          toastNotifications.addDanger(`Could not start ${jobId}`, resp);
           // $scope.saveLock = false;
         });
     }

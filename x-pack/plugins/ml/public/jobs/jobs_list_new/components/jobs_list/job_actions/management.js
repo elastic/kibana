@@ -35,7 +35,11 @@ export function actionsMenuContent(showEditJobModal, showDeleteJobModal, showSta
   }, {
     render: (item) => {
       return (
-        <MLText onClick={() => showEditJobModal(item)}>
+        <MLText onClick={() => {
+          showEditJobModal(item);
+          closeMenu();
+        }}
+        >
           <EuiIcon type="copy" />
           Edit job
         </MLText>
@@ -44,7 +48,13 @@ export function actionsMenuContent(showEditJobModal, showDeleteJobModal, showSta
   }, {
     render: (item) => {
       return (
-        <MLText color="danger"  onClick={() => showDeleteJobModal(item)}>
+        <MLText
+          color="danger"
+          onClick={() => {
+            showDeleteJobModal(item);
+            closeMenu();
+          }}
+        >
           <EuiIcon type="trash" />
           Delete job
         </MLText>
@@ -57,7 +67,11 @@ export function actionsMenuContent(showEditJobModal, showDeleteJobModal, showSta
 function getStartStop(item, showStartDatafeedModal, refreshJobs) {
   if (item.datafeedState === 'stopped') {
     return (
-      <MLText onClick={() => showStartDatafeedModal(item)}>
+      <MLText onClick={() => {
+        showStartDatafeedModal(item);
+        closeMenu();
+      }}
+      >
         <EuiIcon type="play" />
         Start datafeed
       </MLText>
@@ -66,7 +80,11 @@ function getStartStop(item, showStartDatafeedModal, refreshJobs) {
 
   if (item.datafeedState === 'started') {
     return (
-      <MLText onClick={() => stopDatafeed(item.id, refreshJobs)}>
+      <MLText onClick={() => {
+        stopDatafeed(item.id, refreshJobs);
+        closeMenu(true);
+      }}
+      >
         <EuiIcon type="stop" />
         Stop datafeed
       </MLText>
@@ -77,6 +95,7 @@ function getStartStop(item, showStartDatafeedModal, refreshJobs) {
 function stopDatafeed(jobId, finish) {
   const datafeedId = mlJobService.getDatafeedId(jobId);
   mlJobService.stopDatafeed(datafeedId, jobId).then(() => {
+    toastNotifications.addSuccess(`${jobId} stopped successfully`);
     finish();
   });
 }
@@ -101,4 +120,19 @@ function MLText({ onClick, ...rest }) {
     onClick();
   };
   return <EuiText onClick={click} {...rest} />;
+}
+
+function closeMenu(now = false) {
+  if (now) {
+    document.querySelector('.euiTable').click();
+  } else {
+    window.setTimeout(() => {
+      const modalBody = document.querySelector('.euiModalBody');
+      if (modalBody) {
+        modalBody.click();
+      } else {
+        document.querySelector('.euiTable').click();
+      }
+    }, 500);
+  }
 }
