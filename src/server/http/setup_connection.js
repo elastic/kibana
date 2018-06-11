@@ -47,7 +47,11 @@ export function setupConnection(server, config) {
 
   // not using https? well that's easy!
   if (!useSsl) {
-    server.connection(connectionOptions);
+    const connection = server.connection(connectionOptions);
+
+    // revert to previous 5m keepalive timeout in Node < 8
+    connection.listener.keepAliveTimeout = 120e3;
+
     return;
   }
 
@@ -65,6 +69,9 @@ export function setupConnection(server, config) {
       secureOptions: secureOptions(config.get('server.ssl.supportedProtocols'))
     }
   });
+
+  // revert to previous 5m keepalive timeout in Node < 8
+  connection.listener.keepAliveTimeout = 120e3;
 
   const badRequestResponse = new Buffer('HTTP/1.1 400 Bad Request\r\n\r\n', 'ascii');
   connection.listener.on('clientError', (err, socket) => {
