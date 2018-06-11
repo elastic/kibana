@@ -16,30 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { createDocTransform } from './create_doc_transform';
 import { loadMappings } from './mappings';
-import {
-  CallCluster,
-  IndexMapping,
-  MigrationPlugin,
-  SavedObjectDoc,
-  TransformFn,
-} from './types';
+import { CallCluster, IndexMapping, MigrationPlugin } from './types';
 
-export interface Migrator {
-  patchIndex: () => Promise<any>;
-  transformDoc: TransformFn;
-}
-
-export interface MigratorOpts {
-  kibanaVersion: string;
+export interface InitializeOpts {
   callCluster: CallCluster;
   index: string;
   plugins: MigrationPlugin[];
   log: (meta: string[], message: string) => void;
 }
 
-interface MigrationContext extends MigratorOpts {
+interface MigrationContext extends InitializeOpts {
   activeMappings: IndexMapping;
   fullMappings: IndexMapping;
 }
@@ -50,42 +37,20 @@ interface MigrationContext extends MigratorOpts {
  * @param opts
  * @prop {CallCluster} callCluster - The Elasticsearch connection to be used
  * @prop {string} index - The name of the index or alias being managed
- * @prop {string} kibanaVersion - The current version of Kibana
- * @prop {LogFunction} log - A function which writes out to logs `log(['debug', 'migration'], 'Hello world!')`
  * @prop {MigrationPlugin[]} plugins - A list of plugins whose mappings and transforms will be applied to the index
  */
-export async function createMigrator(opts: MigratorOpts): Promise<Migrator> {
+export async function initializeIndex(opts: InitializeOpts) {
   const context = await migrationContext(opts);
-  const docTransformer = createDocTransform(opts);
 
-  return {
-    /**
-     * Patches the index template and mappings, if the index is out of date.
-     */
-    patchIndex: () => patchIndex(context),
-
-    /**
-     * Transforms a document from one version to the current version.
-     * @param {SavedObjectDoc} doc - A saved object client document
-     * @returns {SavedObjectDoc}
-     */
-    transformDoc(doc: SavedObjectDoc): SavedObjectDoc {
-      try {
-        return docTransformer(doc);
-      } catch (error) {
-        opts.log(
-          ['info', 'migration'],
-          `Failed to transform doc: ${error.message}, context: ${JSON.stringify(
-            error.transform
-          )}`
-        );
-        throw error;
-      }
-    },
-  };
+  await putTemplate(context);
+  if (await indexExists(context)) {
+    await putMappings(context);
+  }
 }
 
-async function migrationContext(opts: MigratorOpts): Promise<MigrationContext> {
+async function migrationContext(
+  opts: InitializeOpts
+): Promise<MigrationContext> {
   const { activeMappings, fullMappings } = await loadMappings(opts);
 
   return {
@@ -93,13 +58,6 @@ async function migrationContext(opts: MigratorOpts): Promise<MigrationContext> {
     activeMappings,
     fullMappings,
   };
-}
-
-async function patchIndex(context: MigrationContext) {
-  await putTemplate(context);
-  if (await indexExists(context)) {
-    await putMappings(context);
-  }
 }
 
 function putTemplate({ callCluster, index, fullMappings }: MigrationContext) {

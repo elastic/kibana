@@ -34,7 +34,6 @@ export interface ElasticsearchPlugin {
 
 export interface Server {
   config: () => { get: (path: 'kibana.index') => string };
-  log: (path: string[], msg: string) => void;
   plugins: { elasticsearch: ElasticsearchPlugin | undefined };
 }
 

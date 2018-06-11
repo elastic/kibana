@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createMigrator, fetchMapping, Migrator } from '../core';
+import { fetchMapping, initializeIndex } from '../core';
 import { getMigrationPlugins } from './get_migration_plugins';
 import { KbnServer } from './types';
 
@@ -29,7 +29,7 @@ const { getTypes } = require('../../../mappings');
 export async function initializeSavedObjectIndices(kbnServer: KbnServer) {
   await waitForElasticsearch(kbnServer);
   await assertNotV5Index(kbnServer);
-  return await patchIndex(kbnServer);
+  await initializeKibanaIndex(kbnServer);
 }
 
 async function waitForElasticsearch({ server }: KbnServer) {
@@ -59,25 +59,17 @@ async function assertNotV5Index({ server }: KbnServer) {
   return mappings;
 }
 
-async function patchIndex(kbnServer: KbnServer) {
-  const migrator = await getMigrator(kbnServer);
-  await migrator.patchIndex();
-  return migrator;
-}
-
-export function getMigrator(kbnServer: KbnServer): Promise<Migrator> {
+async function initializeKibanaIndex(kbnServer: KbnServer) {
   const { server } = kbnServer;
   if (!server.plugins.elasticsearch) {
     throw new Error(
       'Saved objects require the elasticsearch plugin, but it is disabled'
     );
   }
-  return createMigrator({
+  return initializeIndex({
     callCluster: server.plugins.elasticsearch.getCluster('admin')
       .callWithInternalUser,
     index: server.config().get('kibana.index'),
-    kibanaVersion: kbnServer.version,
-    log: (path: string[], msg: string) => kbnServer.server.log(path, msg),
     plugins: getMigrationPlugins(kbnServer),
   });
 }

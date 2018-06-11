@@ -17,6 +17,6 @@
  * under the License.
  */
 
-export { createMigrator, Migrator, MigratorOpts } from './create_migrator';
+export { initializeIndex } from './initialize_index';
 export { getActiveMappings, fetchMapping } from './mappings';
 export * from './types';

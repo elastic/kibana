@@ -119,7 +119,6 @@ function mockKbnServer({ mappings }: { mappings?: object } = {}) {
           }
         },
       }),
-      log: () => undefined,
       plugins: {
         elasticsearch: {
           getCluster: () => ({
@@ -129,7 +128,6 @@ function mockKbnServer({ mappings }: { mappings?: object } = {}) {
         },
       },
     },
-    version: '7.8.9',
   };
   callCluster
     .withArgs('indices.getMapping', sinon.match.any)
