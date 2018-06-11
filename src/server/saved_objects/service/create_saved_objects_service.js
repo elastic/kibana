@@ -19,8 +19,10 @@
 
 import { SavedObjectsRepository, ScopedSavedObjectsClientProvider } from './lib';
 import { SavedObjectsClient } from './saved_objects_client';
+import { initializeSavedObjectIndices } from '../migrations';
 
-export function createSavedObjectsService(server) {
+export function createSavedObjectsService(kbnServer, server) {
+  const initializeIndicesOnce = createInitFunction(kbnServer);
   const scopedClientProvider = new ScopedSavedObjectsClientProvider({
     index: server.config().get('kibana.index'),
     mappings: server.getKibanaIndexMappingsDsl(),
@@ -36,8 +38,13 @@ export function createSavedObjectsService(server) {
       const repository = new SavedObjectsRepository({
         index,
         mappings,
-        onBeforeWrite,
-        callCluster
+        callCluster,
+        async onBeforeWrite() {
+          await initializeIndicesOnce();
+          if (onBeforeWrite) {
+            return onBeforeWrite();
+          }
+        },
       });
 
       return new SavedObjectsClient(repository);
@@ -53,5 +60,21 @@ export function createSavedObjectsService(server) {
       scopedClientProvider.setClientFactory(...args),
     addScopedSavedObjectsClientWrapperFactory: (...args) =>
       scopedClientProvider.addClientWrapperFactory(...args),
+  };
+}
+
+// Creates a migrator object and initializes the associated indices.
+// The initializeSavedObjectIndices call is somewhat expensive, so we
+// don't want to do it prior to *every* write, so we cache it.
+// This can fail (e.g. if elasticsearch is unavailable), which is why
+// we don't use something like lodash's 'once', as we only want to
+// cache the resulting migrator once it's succeeded.
+function createInitFunction(kbnServer) {
+  let initialized = false;
+  return async function getMigrator() {
+    if (!initialized) {
+      await initializeSavedObjectIndices(kbnServer);
+      initialized = true;
+    }
   };
 }

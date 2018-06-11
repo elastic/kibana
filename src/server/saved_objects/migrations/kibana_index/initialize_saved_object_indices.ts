@@ -76,6 +76,8 @@ export function getMigrator(kbnServer: KbnServer): Promise<Migrator> {
     callCluster: server.plugins.elasticsearch.getCluster('admin')
       .callWithInternalUser,
     index: server.config().get('kibana.index'),
+    kibanaVersion: kbnServer.version,
+    log: (path: string[], msg: string) => kbnServer.server.log(path, msg),
     plugins: getMigrationPlugins(kbnServer),
   });
 }
