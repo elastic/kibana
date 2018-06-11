@@ -18,7 +18,7 @@
  */
 import _ from 'lodash';
 import { createSavedObjectsService } from './service';
-import { getPluginMappings, initializeSavedObjectIndices } from './migrations';
+import { getPluginMappings } from './migrations';
 import {
   createBulkGetRoute,
   createCreateRoute,
@@ -28,7 +28,7 @@ import {
   createUpdateRoute,
 } from './routes';
 
-export async function savedObjectsMixin(kbnServer, server) {
+export function savedObjectsMixin(kbnServer, server) {
   const mappings = getPluginMappings(kbnServer);
   server.decorate('server', 'getKibanaIndexMappingsDsl', () => _.cloneDeep(mappings));
 
@@ -38,8 +38,6 @@ export async function savedObjectsMixin(kbnServer, server) {
     server.log(['warning', 'saved-objects'], `Saved Objects uninitialized because the Kibana plugin is disabled.`);
     return;
   }
-
-  await initializeSavedObjectIndices(kbnServer);
 
   const prereqs = {
     getSavedObjectsClient: {
@@ -57,7 +55,7 @@ export async function savedObjectsMixin(kbnServer, server) {
   server.route(createGetRoute(prereqs));
   server.route(createUpdateRoute(prereqs));
 
-  server.decorate('server', 'savedObjects', createSavedObjectsService(server));
+  server.decorate('server', 'savedObjects', createSavedObjectsService(kbnServer, server));
 
   const savedObjectsClientCache = new WeakMap();
   server.decorate('request', 'getSavedObjectsClient', function () {
