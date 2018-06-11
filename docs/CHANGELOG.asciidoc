@@ -54,9 +54,6 @@ This section summarizes the changes in each release.
 //=== Breaking Changes
 
 //[float]
-//=== Breaking Java Changes
-
-//[float]
 //=== Deprecations
 
 //[float]
@@ -78,20 +75,28 @@ This section summarizes the changes in each release.
 [[release-notes-6.3.0]]
 == {kib} 6.3.0
 
-coming[6.3.0]
+[float]
+[[breaking-6.3.0]]
+=== Breaking Changes
 
-//[float]
-//[[breaking-6.3.0]]
-//=== Breaking Changes
+Platform::
+* Renames saved objects bulk_get and find endpoints {pull}17512[#17512]
++
+To support sending larger and more expressive queries to the Saved Objects find
+API, we added a POST endpoint for find and therefore needed a way to disambiguate
+the find API from from the POST API used to create Saved Objects.
++
+Starting in {kib} 6.3, endpoints that are not simple CRUD operations on a single
+object will be named and their name will start with an underscore. For example,
+{es} `GET /api/saved_objects` is now `GET /api/saved_objects/_find`,
+`GET /api/saved_objects/{type}` is now `GET /api/saved_objects/_find?type={type}`,
+and `GET /api/saved_objects/bulk_get` is now `GET /api/saved_objects/_bulk_get`.
 
-//[float]
-//=== Breaking Java Changes
+[float]
+=== New Features
 
-//[float]
-//=== Deprecations
-
-//[float]
-//=== New Features
+For an overview of the features that were added in 6.3 and how the user experience
+improved, see <<release-highlights-6.3.0, 6.3.0 Release Highlights>>.
 
 [float]
 === Enhancements
@@ -101,102 +106,142 @@ Machine learning::
 in the {ml} features in {kib}. If you have configured a cross cluster index
 pattern in {kib}, you can use that index pattern when you create jobs.
 
-//[float]
-//=== Bug Fixes
+Platform::
+* Angular was upgraded to version 1.6.9 {pull}17677[#17677]
 
-//[float]
-//=== Regressions
 
-//[float]
-//=== Known Issues
+[float]
+=== Bug Fixes
+
+Accessibility::
+* [Fixes #19009] Adds alt text to the icons on the home page for accessibility
+{pull}19083[#19083]
+
+APM::
+* Fixes links in APM {pull}19391[#19391]
+
+Machine Learning::
+* [Fixes #18722] Increases the calculated model memory limit {pull}18723[#18723]
+
+Management::
+* [Fixes #17147] Always sends a comma delimited index to support commas in
+index patterns {pull}17173[#17173]
+* Fixes issues with autocomplete and bucket aggregations {pull}17695[#17695]
+* Removes the unsupported type from autocomplete options {pull}17694[#17694]
+* Fixes an issue with autocomplete in the console {pull}17678[#17678]
++
+Endpoint definitions are expected to have unique names, and the code was using
+the same name for endpoints with overloaded HTTP verb semantics. This code fixes
+those names by adding a timestamp.
+
+Monitoring::
+* Changes the Advanced Node page for {es} to recognize the `write` threadpool
+{pull}18147[#18147]
+
+Operations::
+* [Fixes #6688] Adds support for environment variable injection in the
+`kibana.yml` file {pull}16988[#16988]
+
+Security::
+* Preserves boom error headers for index pattern exceptions {pull}17725[#17725]
++
+This fix resolves the issue with the index pattern APIs not responding with
+WWW-Authenticate headers on 401s. This caused basic authentication via {kib} to not
+work properly in some configurations.
+
+Sharing::
+* [Fixes #17611] Sets a minimum width on the range slider control
+{pull}17620[#17620]
+* [Fixes #17657] Allows wrapping of the recently viewed items on the {kib} home
+page {pull}18726[#18726]
+* [Fixes #18915] Fixes the arrows in the input control so that the up icon moves
+the control up and the down icon moves the control down {pull}18929[#18929]
+* [Fixes #18882] Disables an input control when an index pattern no longer exists
+{pull}18931[#18931]
+* [Fixes #19252] Fixes copy to the clipboard in Internet Explorer
+{pull}19281[#19281]
+* Fixes the date math parser to allow longer expressions {pull}17751[#17751]
+
+Visualization::
+*  Updates the `geo_bounds` request to inherit from the visualize search
+source so that all application state filters are applied {pull}17727[#17727]
+* [Fixes #17839] Normalizes longitudes so that they fall within the acceptable [-180,180]
+range {pull}18674[#18674]
+* [Fixes #18765] Fixes problem handling precision changes on a coordinate
+map when no aggregations are configured {pull}18826[#18826]
+* [Fixes #18761] Fixes problem when clicking on a map and no aggregation is
+specified {pull}18825[#18825]
+* [Fixes #19095] Avoids shard failures when performing `geo_bounding_box` filter
+on coordinate maps {pull}19416[#19416]
+* [Fixes #17623] Fixes negative unit formatting in Timelion {pull}17624[#17624]
+* [Fixes #12408, #14382] Fixes 0 values in percentage mode {pull}15765[#15765]
+* [Fixes #17721] Adds proper labeling for pie chart without buckets
+{pull}17739[#17739]
+* [Fixes #17352] Removes other bucket configuration from significant terms
+aggregation {pull}17810[#17810]
+* [Fixes #15912] Ensures type is defined and has `postFlightRequest` function
+{pull}17809[#17809]
+* Bumps Vega lib version to 3.3.1 to fix problem with how the Vega library
+manages its dependencies {pull}17829[#17829]
+
+[float]
+=== Regressions
+
+Management::
+
+* In 6.2.4, if users edit a watch or a logstash pipeline and navigate away from 
+the page without saving, a confirmation modals asks if they want to save the 
+changes. In 6.3, the prompt was disabled to fix {pull}19488[#19488] and 
+{pull}19608[#19608].
+
 
 [[release-notes-6.2.4]]
 == {kib} 6.2.4
-
-//[float]
-//[[breaking-6.2.4]]
-//=== Breaking Changes
-
-//[float]
-//=== Breaking Java Changes
-
-//[float]
-//=== Deprecations
-
-//[float]
-//=== New Features
 
 [float]
 === Enhancements
 
 Machine Learning::
 * Adds bucket span to the chart labels in the Single Metric Viewer.
-* Adds checks for web URLs prior to adding to the links menu in the anomalies 
+* Adds checks for web URLs prior to adding to the links menu in the anomalies
 table.
 
 Visualization::
-* Upgraded Vega libraries:  `vega-lib` to 3.2.1 and `vega-lite` to 2.3.1 {pull}17314[#17314]
+* Upgrade Vega libraries:  `vega-lib` to 3.2.1 and `vega-lite` to 2.3.1
+{pull}17314[#17314]
 
 [float]
 === Bug Fixes
 
 Logstash::
-* Fixes unhandled rejection error in {kib} server log. 
-* Fixes Pipeline Viewer to correctly format percentages.  
+* Fixes unhandled rejection error in {kib} server log.
+* Fixes Pipeline Viewer to correctly format percentages.
 
 Machine Learning::
 * Fixes the formatting of HTML characters so that text is rendered correctly.
 * Formats the field name in the tooltip for swimlane labels.
-* Fixes the formatting of partition titles in multi-metric and population job 
-wizards. 
+* Fixes the formatting of partition titles in multi-metric and population job
+wizards.
 
 Management::
-* Added better support for discarding results of older queries {pull}17148[#17148]
+* Adds better support for discarding results of older queries {pull}17148[#17148]
 
 Monitoring::
-* Fixes some {kib} metrics which are not derivatives. 
-* Fixed the handing of window resizing to more smoothly resize charts whenever 
+* Fixes some {kib} metrics which are not derivatives.
+* Fixes the handing of window resizing to more smoothly resize charts whenever
 the window size changes.
 
 Platform::
-* Fixed an issue with the numeric formatter to handle small exponential numbers {pull}17508[#17508]
-* Fixed deprecation logging warnings {pull}17439[#17439]
+* Fixes an issue with the numeric formatter to handle small exponential numbers {pull}17508[#17508]
+* Fixes deprecation logging warnings {pull}17439[#17439]
 
 Visualization::
-* Fixed map zoom settings {pull}17367[#17367]
-* Enabled Option change to show on map {pull}17405[#17405]
-* Added support for percentiles and percentile ranks to metrics visualizations {pull}17243[#17243]
-
-//[float]
-//=== Regressions
-
-//[float]
-//=== Known Issues
+* Fixes map zoom settings {pull}17367[#17367]
+* Enables Option change to show on map {pull}17405[#17405]
+* Adds support for percentiles and percentile ranks to metrics visualizations {pull}17243[#17243]
 
 [[release-notes-6.2.3]]
 == {kib} 6.2.3
-
-//[float]
-//[[breaking-6.2.3]]
-//=== Breaking Changes
-
-//[float]
-//=== Breaking Java Changes
-
-//[float]
-//=== Deprecations
-
-//[float]
-//=== New Features
-
-//[float]
-//=== Enhancements
-
-//[float]
-//=== Bug Fixes
-
-//[float]
-//=== Regressions
 
 [float]
 === Known Issues
@@ -206,22 +251,6 @@ Visualization::
 
 [[release-notes-6.2.2]]
 == {kib} 6.2.2
-
-//[float]
-//[[breaking-6.2.2]]
-//=== Breaking Changes
-
-//[float]
-//=== Breaking Java Changes
-
-//[float]
-//=== Deprecations
-
-//[float]
-//=== New Features
-
-//[float]
-//=== Enhancements
 
 [float]
 === Bug Fixes
@@ -248,54 +277,13 @@ Security::
 * Enabled users that have the `kibana_dashboard_only_user` role to change their
 passwords in {kib}. For more information, see <<xpack-dashboard-only-mode>>.
 
-//[float]
-//=== Regressions
-
-//[float]
-//=== Known Issues
-
 [[release-notes-6.2.1]]
 == {kib} 6.2.1
 
 There were no changes for this release.
 
-//[float]
-//[[breaking-6.2.1]]
-//=== Breaking Changes
-
-//[float]
-//=== Breaking Java Changes
-
-//[float]
-//=== Deprecations
-
-//[float]
-//=== New Features
-
-//[float]
-//=== Enhancements
-
-//[float]
-//=== Bug Fixes
-
-//[float]
-//=== Regressions
-
-//[float]
-//=== Known Issues
-
 [[release-notes-6.2.0]]
 == {kib} 6.2.0
-
-//[float]
-//[[breaking-6.2.4]]
-//=== Breaking Changes
-
-//[float]
-//=== Breaking Java Changes
-
-//[float]
-//=== Deprecations
 
 [float]
 === New Features
@@ -340,8 +328,6 @@ form.
 automatically grows or shrinks as you type out a pipeline definition.
 // Repo: x-pack-kibana
 // Pull: 4026
-
-Management::
 * [Fixes #9228, #8983] add support for number format internationalization {pull}14019[#14019]
 * [Fixes #15922] [Management] Index pattern step in React! {pull}15936[#15936]
 * Advanced Settings - Image Input {pull}15342[#15342]
@@ -511,58 +497,13 @@ Visualization::
 * [Fixes #16216] Prevent rendering into 0 size containers {pull}16287[#16287]
 * [Fixes #14331] Add topojson support / EMS v3 support {pull}15361[#15361]
 
-//[float]
-//=== Regressions
-
-//[float]
-//=== Known Issues
-
 [[release-notes-6.1.4]]
 == {kib} 6.1.4
 
 There are no user-facing changes in this release.
 
-//[float]
-//=== Breaking Changes
-
-//[float]
-//=== Breaking Java Changes
-
-//[float]
-//=== Deprecations
-
-//[float]
-//=== New Features
-
-//[float]
-//=== Enhancements
-
-//[float]
-//=== Bug Fixes
-
-//[float]
-//=== Regressions
-
-//[float]
-//=== Known Issues
-
 [[release-notes-6.1.3]]
 == {kib} 6.1.3
-
-//[float]
-//=== Breaking Changes
-
-//[float]
-//=== Breaking Java Changes
-
-//[float]
-//=== Deprecations
-
-//[float]
-//=== New Features
-
-//[float]
-//=== Enhancements
 
 [float]
 === Bug Fixes
@@ -575,26 +516,8 @@ forecasts in {kib}.
 Visualization::
 * Use textContent and jQuery to set label and title {pull}16178[#16178]
 
-//[float]
-//=== Regressions
-
-//[float]
-//=== Known Issues
-
 [[release-notes-6.1.2]]
 == {kib} 6.1.2
-
-//[float]
-//=== Breaking Changes
-
-//[float]
-//=== Breaking Java Changes
-
-//[float]
-//=== Deprecations
-
-//[float]
-//=== New Features
 
 [float]
 === Security Issues
@@ -636,36 +559,15 @@ Watcher::
 * Fixed error that prevented users from creating threshold alerts with email
 actions.
 
-//[float]
-//=== Regressions
-
-//[float]
-//=== Known Issues
-
 [[release-notes-6.1.1]]
 == {kib} 6.1.1
-
-//[float]
-//=== Breaking Changes
-
-//[float]
-//=== Breaking Java Changes
-
-//[float]
-//=== Deprecations
-
-//[float]
-//=== New Features
-
-//[float]
-//=== Enhancements
 
 [float]
 === Bug Fixes
 
 Machine Learning::
 * Removed incorrect job group information from the URL when linking to the
-results page after job creation. 
+results page after job creation.
 * Fixed bug related to cloning jobs that do not have {dfeeds}.
 * Fixed issues with the first and last buckets in the Anomaly Explorer swimlanes
 and in the Single Metric Viewer charts.
@@ -691,26 +593,8 @@ Watcher::
 for a watch without a body or subject. For more information, see
 {stack-ov}/actions-email.html[Email Action].
 
-//[float]
-//=== Regressions
-
-//[float]
-//=== Known Issues
-
 [[release-notes-6.1.0]]
 == {kib} 6.1.0
-
-//[float]
-//=== Breaking Changes
-
-//[float]
-//=== Breaking Java Changes
-
-//[float]
-//=== Deprecations
-
-//[float]
-//=== New Features
 
 [float]
 === Enhancements
@@ -892,7 +776,7 @@ Monitoring::
 For more information, see
 {logstash-ref}/logstash-pipeline-viewer.html[Pipeline Viewer UI].
 * The `xpack.monitoring.node_resolver` setting, which was deprecated in 5.5.0,
-now allows only the `uuid` value to be used. This setting will be removed in 7.0. 
+now allows only the `uuid` value to be used. This setting will be removed in 7.0.
 
 Operations::
 * Removes webpack-directory-name-as-main dependency {pull}13584[#13584]
@@ -923,31 +807,8 @@ Visualization::
 * [Fixes #2908] Scale histogram aggregation interval to avoid crashing browser {pull}14157[#14157]
 * [Fixes #12545] [timelion] trim number of colors when there are more colors than gradient stops {pull}14906[#14906]
 
-
-
-//[float]
-//=== Regressions
-
-//[float]
-//=== Known Issues
-
 [[release-notes-6.0.1]]
 == {kib} 6.0.1
-
-//[float]
-//=== Breaking Changes
-
-//[float]
-//=== Breaking Java Changes
-
-//[float]
-//=== Deprecations
-
-//[float]
-//=== New Features
-
-//[float]
-//=== Enhancements
 
 [float]
 [[security-6.0.1]]
@@ -993,12 +854,6 @@ Visualization::
 * fixing field formatters for gauge {pull}15145[#15145]
 * [Fixes #13947] fix metric align and size {pull}15141[#15141]
 
-//[float]
-//=== Regressions
-
-//[float]
-//=== Known Issues
-
 [[release-notes-6.0.0]]
 == {kib} 6.0.0
 
@@ -1026,15 +881,6 @@ This results in the need to always escape all parts of an URL.
 * The new built-in HTTP client also enforces a maximum request size, which defaults to 10mb.
 * The watch `_status` field has been renamed to `status`, as underscores in
 field names will not be allowed.
-
-//[float]
-//=== Breaking Java Changes
-
-//[float]
-//=== Deprecations
-
-//[float]
-//=== New Features
 
 [float]
 === Enhancements
@@ -1443,21 +1289,6 @@ actual state of the watch when exceptions occur in its input or condition.
 [[release-notes-6.0.0-rc2]]
 == {kib} 6.0.0-rc2
 
-//[float]
-//=== Breaking Changes
-
-//[float]
-//=== Breaking Java Changes
-
-//[float]
-//=== Deprecations
-
-//[float]
-//=== New Features
-
-//[float]
-//=== Enhancements
-
 [float]
 === Bug Fixes
 
@@ -1547,12 +1378,6 @@ aggregations were not shown in that browser.
 * Fixed incorrect watch states in {kib}. In particular, the UI now respects the
 actual state of the watch when exceptions occur in its input or condition.
 
-//[float]
-//=== Regressions
-
-//[float]
-//=== Known Issues
-
 [[release-notes-6.0.0-rc1]]
 == {kib} 6.0.0-rc1
 
@@ -1562,7 +1387,7 @@ actual state of the watch when exceptions occur in its input or condition.
 Management::
 * [indexPatterns] remove support for time patterns {pull}12158[#12158]
   - - Removes ability to create index patterns based on time patterns/intervals  - Adds a warning that informs users when they are using an index pattern that is now unsupported (disabled by default until #10442 is done, #12322)  - Does not address editing/remapping index patterns, see last task in #12242
-  
+
 Operations::
 * Updates to status API, re-align status page {pull}10180[#10180]
 * [Fixes #10181] Revert same port http -&gt; https redirect {pull}10930[#10930]
@@ -1578,20 +1403,14 @@ Platform::
 Visualization::
 * [Fixes #10907] allows more flexible timelion queries {pull}10961[#10961]
 
-//[float]
-//=== Breaking Java Changes
-
-//[float]
-//=== Deprecations
-
 [float]
 === New Features
 
 Operations::
 * Use single ES document type {pull}12794[#12794]
-  - Starting in Elasticsearch 6.0, you are no longer able to create new indices 
-  with multiple index types. To accomplish the same effect as index types, a new 
-  type field was added to identify the document and the value mapped under the 
+  - Starting in Elasticsearch 6.0, you are no longer able to create new indices
+  with multiple index types. To accomplish the same effect as index types, a new
+  type field was added to identify the document and the value mapped under the
   index to allow for strict mapping.
 
 [float]
@@ -1603,7 +1422,7 @@ Design::
 * [UI Framework] Allow custom placeholder for Tool Bar Search Box {pull}12959[#12959]
 * Palette swap for accessibility / kibana 6 {pull}12085[#12085]
   - We re-skinned a decent portion of Kibana to be mostly AA accessibility compatible in regards to coloring of major navigation elements.
-  
+
 Discover::
 * [Fixes #4785] Timepicker on the right {pull}11980[#11980]
 * [Fixes #12635]  Improve the accessibility of the Discover screen {pull}12681[#12681]
@@ -1660,7 +1479,7 @@ Dev Tools::
 * [Fixes #10504] [console] Replace text/plain fallback with application/json {pull}12294[#12294]
 * [Fixes #13142] Allow console to send multiline strings with CRLF line endings {pull}14094[#14094]
   - Console will now allow sending multiline strings on Windows.
-  
+
 Discover::
 * [Fixes #12970] Make 'time picker' button in Discover no results prompt keyboard and screen-reader accessible. {pull}13046[#13046]
 * [Fixes #12692] Re-enable filter editor suggestions {pull}13376[#13376]
@@ -1741,11 +1560,11 @@ Platform::
   * [ftr/config] prevent mochaOpts and timeouts conflict {pull}14060[#14060]
   * create babel-preset and babel-register modules {pull}13973[#13973]
   * [vis/requesting] only call when actually requesting {pull}14017[#14017]
-    
+
 Reporting::
 * Fixed generated reports such that they show the time zone on the client, as
 specified in the `dateFormat` field in the Advanced Settings.
-    
+
 Sharing::
 * [Fixes #13421] Dashboard dark-theme fixes {pull}13690[#13690]
 * [Fixes #12987] Children of buttons won't capture hover events in firefox {pull}13015[#13015]
@@ -1813,12 +1632,6 @@ Visualization::
 * wrap responsehandler in angular promise {pull}14095[#14095]
 * [Fixes #13572] Show a warning for non accessible charts for screen readers {pull}13573[#13573]
 
-//[float]
-//=== Regressions
-
-//[float]
-//=== Known Issues
-
 [[release-notes-6.0.0-beta2]]
 == {kib} 6.0.0-beta2
 
@@ -1830,15 +1643,6 @@ Discover::
 
 Visualization::
 * [Fix for #13425] Replace "marked" with "markdown-it" {pull}13623[#13623]
-
-//[float]
-//=== Breaking Java Changes
-
-//[float]
-//=== Deprecations
-
-//[float]
-//=== New Features
 
 [float]
 === Enhancements
@@ -1929,7 +1733,7 @@ Sharing::
 * Stabilize and bring back flaky tests {pull}13034[#13034]
 * [Fix for #12484, #12485, #12483] Fix accessibility issues with saved object finder {pull}13152[#13152]
 * [Fix for #12987] Children of buttons won't capture hover events in firefox {pull}13015[#13015]
-  
+
 Visualization::
 * Fixes #12685 - Improve error handling for TSVB {pull}12688[#12688]
 * [Fix for #13246] Fixes #13246 - Add checks for empty annotations {pull}13422[#13422]
@@ -1962,12 +1766,6 @@ Visualization::
 * [Fix for #13424] Exclude filter agg from visualizations {pull}13680[#13680]
 * [Fix for #13572] Show a warning for non accessible charts for screen readers {pull}13573[#13573]
 
-//[float]
-//=== Regressions
-
-//[float]
-//=== Known Issues
-
 [[release-notes-6.0.0-beta1]]
 == {kib} 6.0.0-beta1
 
@@ -1977,7 +1775,7 @@ Visualization::
 Management::
 * [indexPatterns] remove support for time patterns {pull}12158[#12158]
   - - Removes ability to create index patterns based on time patterns/intervals  - Adds a warning that informs users when they are using an index pattern that is now unsupported (disabled by default until #10442 is done, #12322)  - Does not address editing/remapping index patterns, see last task in #12242
-  
+
 Operations::
 * Updates to status API, re-align status page {pull}10180[#10180]
 * [Fix for #10181] Revert same port http -> https redirect {pull}10930[#10930]
@@ -2001,23 +1799,17 @@ role will need to be added to the `xpack-reporting.roles.allow` setting.
 Visualization::
 * [Fix for #10907] allows more flexible timelion queries {pull}10961[#10961]
 
-//[float]
-//=== Breaking Java Changes
-
-//[float]
-//=== Deprecations
-
 [float]
 === New Features
 
 Discover::
 * Implement new Kibana query language {pull}12624[#12624]
   - This PR adds a new experimental query language to Kibana. The new language is turned off by default but can be enabled in the Management > Advanced Settings via the search:queryLanguage:switcher:enable option. Changing this setting to true will add a language selector to the query bar that allows users to choose the new language for their query. Details of the new query language can be found in the issue description (#12282).
-  
+
 Sharing::
 * Full screen mode implementation for dashboard {pull}12265[#12265]
   - You can now enter full screen mode when viewing a dashboard. This hides the Chrome and the top nav bar.  If you have any filters applied, you'll see the filter bar, otherwise that will be hidden as well.  To exit full screen mode, hover over and click the Kibana button on the lower left side of the page, or simple press the ESC key.
-  
+
 Visualization::
 * Visualize Refactor {pull}11786[#11786]
   - When creating new visualizations, developers are no longer restricted to using just Angular as a rendering technology. The changes now also enables developers to create custom editors that do not conform to the current sidebar-layout. Commonly used functionality - such as access to the query bar or timefilter - is now also exposed on the visualization object. This avoids the need to import individual modules from inside Kibana. These changes are a first step in a longer term effort to provide a robust long-lived programming interface for building visualizations in Kibana.
@@ -2240,12 +2032,6 @@ Visualization::
   - the Timelion backend no longer includes the stacktrace as part of the server response. This stacktrace is now logged to the server console.
 * Visualization accessibility issues {pull}13226[#13226]
 
-//[float]
-//=== Regressions
-
-//[float]
-//=== Known Issues
-
 [[release-notes-6.0.0-alpha2]]
 == {kib} 6.0.0-alpha2
 
@@ -2260,12 +2046,6 @@ Core::
 Watcher::
 * The watch `_status` field has been renamed to `status`, as underscores in
 field names will not be allowed.
-
-//[float]
-//=== Breaking Java Changes
-
-//[float]
-//=== Deprecations
 
 [float]
 === New Features
@@ -2330,12 +2110,6 @@ Time series visual builder::
 Visualize::
 * Disable save button if visualization is dirty {pull}11576[#11576]
 
-//[float]
-//=== Regressions
-
-//[float]
-//=== Known Issues
-
 [[release-notes-6.0.0-alpha1]]
 == {kib} 6.0.0-alpha1
 
@@ -2346,15 +2120,6 @@ Watcher::
 * The built-in HTTP client used in webhooks, the http input and the http email attachment has been replaced.
 This results in the need to always escape all parts of an URL.
 * The new built-in HTTP client also enforces a maximum request size, which defaults to 10mb.
-
-//[float]
-//=== Breaking Java Changes
-
-//[float]
-//=== Deprecations
-
-//[float]
-//=== New Features
 
 [float]
 === Enhancements
@@ -2436,9 +2201,3 @@ Visualize::
 
 Watcher::
 * The HTTP client respects timeouts now and does not get stuck leading to stuck watches.
-
-//[float]
-//=== Regressions
-
-//[float]
-//=== Known Issues
