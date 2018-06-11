@@ -34,10 +34,10 @@ image::images/management_basic_license.png[]
 [float]
 === Autocomplete in the query bar
 
-{kib}'s experimental autocomplete feature can help you create 
-queries. To turn on autocomplete, click *Options* on the right of the query bar
-and opt in. Once enabled, just start typing in the query bar, and you will 
-get suggestions for fields, values for keyword fields, and query operators.
+{kib}'s experimental autocomplete and simple syntax features can help you 
+create queries. To turn these features on, click *Options* on the right of the 
+query bar and opt in. Once enabled, just start typing in the query bar, and 
+you'll get suggestions for fields, values for keyword fields, and query operators.
 
 [role="screenshot"]
 image::images/query-bar-autocomplete.png[]
@@ -105,9 +105,8 @@ suggestions to try.
 [float]
 === Enhancements to the Console
 
-The autocomplete function in the Dev Tools Console is now expanded to use {kib} 
-and Basic {xpack} APIs. This ensures that the same APIs that are available
-through Elasticsearch also support autocomplete in the Console.
+The autocompletion feature in the Dev Tools Console is now expanded to use all 
+{kib} and Basic {xpack} APIs.  
 
 [float]
 === APM Watcher Assistant
