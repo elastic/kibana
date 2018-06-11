@@ -181,13 +181,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async getMarkdownText() {
       const markdownContainer = await testSubjects.find('markdownBody');
-      return markdownContainer.getVisibleText();
+      return await markdownContainer.getVisibleText();
     }
 
     async getMarkdownBodyDescendentText(selector) {
       const markdownContainer = await testSubjects.find('markdownBody');
       const element = await find.descendantDisplayedByCssSelector(selector, markdownContainer);
-      return element.getVisibleText();
+      return await element.getVisibleText();
     }
 
     async getVegaSpec() {
