@@ -44,6 +44,10 @@ export class BulkUploader {
       throw new Error('combineTypes function is required');
     }
 
+    if (_timer) {
+      this.stop(); // stop timer if already started
+    }
+
     this._interval = interval;
     this._combineTypes = combineTypes;
     this._log = getCollectorLogger(server);

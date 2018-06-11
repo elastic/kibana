@@ -10,12 +10,13 @@ import expect from 'expect.js';
 import { Collector, CollectorSet } from '../classes';
 import { BulkUploader } from '../bulk_uploader';
 
-const FETCH_INTERVAL = 600;
-const CHECK_DELAY = 1000;
+const FETCH_INTERVAL = 300;
+const CHECK_DELAY = 500;
 
 describe('BulkUploader', () => {
   describe('registers a collector set and runs lifecycle events', () => {
     let server;
+
     beforeEach(() => {
       server = {
         log: sinon.spy(),
@@ -42,6 +43,7 @@ describe('BulkUploader', () => {
           fetch: noop, // empty payloads
         })
       );
+
       const uploader = new BulkUploader(server, collectors, {
         interval: FETCH_INTERVAL,
         combineTypes: noop,
@@ -51,22 +53,23 @@ describe('BulkUploader', () => {
 
       // allow interval to tick a few times
       setTimeout(() => {
-        const calls = server.log.getCalls();
-        expect(calls.length).to.be(3);
-        expect(calls[0].args).to.eql([
+        const loggingCalls = server.log.getCalls();
+        expect(loggingCalls.length).to.be.greaterThan(2); // should be 3-5: start, fetch, skip, fetch, skip
+        expect(loggingCalls[0].args).to.eql([
           ['info', 'monitoring-ui', 'kibana-monitoring'],
           'Starting monitoring stats collection',
         ]);
-        expect(calls[1].args).to.eql([
+        expect(loggingCalls[1].args).to.eql([
           ['debug', 'monitoring-ui', 'kibana-monitoring'],
           'Fetching data from type_collector_test collector',
         ]);
-        expect(calls[2].args).to.eql([
+        expect(loggingCalls[2].args).to.eql([
           ['debug', 'monitoring-ui', 'kibana-monitoring'],
           'Skipping bulk uploading of an empty stats payload',
         ]);
 
-        done(); // for async exit
+        uploader.stop();
+        done();
       }, CHECK_DELAY);
     });
 
@@ -92,7 +95,7 @@ describe('BulkUploader', () => {
       // allow interval to tick a few times
       setTimeout(() => {
         const loggingCalls = server.log.getCalls();
-        expect(loggingCalls.length).to.be(3);
+        expect(loggingCalls.length).to.be.greaterThan(2); // should be 3-5: start, fetch, upload, fetch, upload
         expect(loggingCalls[0].args).to.eql([
           ['info', 'monitoring-ui', 'kibana-monitoring'],
           'Starting monitoring stats collection',
@@ -108,12 +111,13 @@ describe('BulkUploader', () => {
 
         // un-flattened
         const combineCalls = combineTypes.getCalls();
-        expect(combineCalls.length).to.be(1);
+        expect(combineCalls.length).to.be.greaterThan(0); // should be 1-2 fetch and combine cycles
         expect(combineCalls[0].args).to.eql([
           [[{ index: { _type: 'type_collector_test' } }, { testData: 12345 }]],
         ]);
 
-        done(); // for async exit
+        uploader.stop();
+        done();
       }, CHECK_DELAY);
     });
   });
