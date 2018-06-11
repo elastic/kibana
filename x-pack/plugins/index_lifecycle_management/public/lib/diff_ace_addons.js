@@ -22,6 +22,16 @@ function findInObject(key, obj, debug) {
   return false;
 }
 
+/**
+ * Utilty method that will determine if the current key/value pair
+ * is an addition or removal and return the appropriate ace classes
+ * for styling. This is called after finding a valid key/value match
+ * in our custom JSON diff mode for ace.
+ *
+ * @param {string} key
+ * @param {string} val
+ * @param {object} jsonObject
+ */
 function getDiffClasses(key, val, jsonObject) {
   let value = val;
   if (value.endsWith(',')) {
@@ -57,6 +67,14 @@ let currentJsonObject;
 const getCurrentJsonObject = () => currentJsonObject;
 export const setCurrentJsonObject = jsonObject => currentJsonObject = jsonObject;
 
+/**
+ * This function will update the ace editor to support a `DiffJsonMode` that will
+ * show a merged object (merged through `diff_tools:mergeAndPreserveDuplicateKeys`)
+ * and highlight additions and removals. The goal of this from a UI perspective is
+ * to help the user see a visual result of merging two javascript objects.
+ *
+ * Read this as a starter: https://github.com/ajaxorg/ace/wiki/Creating-or-Extending-an-Edit-Mode
+ */
 export const addDiffAddonsForAce = () => {
   const JsonHighlightRules = ace.acequire('ace/mode/json_highlight_rules')
     .JsonHighlightRules;
@@ -72,6 +90,11 @@ export const addDiffAddonsForAce = () => {
             token: (key, val) => {
               return getDiffClasses(key, val, getCurrentJsonObject());
             },
+            // This is designed to match a key:value pair represented in JSON
+            // like:
+            //    "foo": "bar"
+            // Be aware when tweaking this that there are idiosyncracies with
+            // how these work internally in ace.
             regex: '(?:"([\\w-+]+)"\\s*:\\s*([^\\n\\[]+)$)',
           },
           {

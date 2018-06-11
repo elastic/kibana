@@ -6,6 +6,13 @@
 
 export const ADDITION_PREFIX = '$$$';
 export const REMOVAL_PREFIX = '^^^';
+
+/**
+ * Utility method that will properly escape the prefixes to use in a valid
+ * RegExp
+ *
+ * @param {string} prefix
+ */
 const escapePrefix = prefix =>
   prefix
     .split('')
@@ -19,6 +26,15 @@ const removePrefixRegex = new RegExp(
 export const isBoolean = value =>
   JSON.parse(value) === true || JSON.parse(value) === false;
 const isObject = value => typeof value === 'object' && !Array.isArray(value);
+
+/**
+ * Utility method that will determine if the key/value pair provided is different
+ * than the value found using the key in the provided obj.
+ *
+ * @param {object} obj
+ * @param {string} key
+ * @param {object} value
+ */
 const isDifferent = (obj, key, value) => {
   // If the object does not contain the key, then ignore since it's not a removal or addition
   if (!obj.hasOwnProperty(key)) {
@@ -39,6 +55,14 @@ const isDifferent = (obj, key, value) => {
   // We should be dealing with primitives so do a basic comparison
   return obj[key] !== value;
 };
+
+/**
+ * This utility method is called when an object exists in the target object
+ * but not in the source and we want to mark each part of the object as an
+ * addition
+ *
+ * @param {*} obj
+ */
 const getAdditions = obj => {
   const result = {};
   for (const [key, value] of Object.entries(obj)) {
@@ -51,6 +75,12 @@ const getAdditions = obj => {
   return result;
 };
 
+/**
+ * This method is designed to remove all prefixes from the object previously added
+ * by `mergeAndPreserveDuplicateKeys`
+ *
+ * @param {object} obj
+ */
 export const removePrefixes = obj => {
   if (typeof obj === 'string') {
     return obj.replace(removePrefixRegex, '');
@@ -70,6 +100,13 @@ export const removePrefixes = obj => {
   );
 };
 
+/**
+ * This function is designed to recursively remove any prefixes added through the
+ * `mergeAndPreserveDuplicateKeys` process.
+ *
+ * @param {string} key
+ * @param {object} value
+ */
 const normalizeChange = (key, value) => {
   if (typeof value === 'string') {
     return {
@@ -88,6 +125,17 @@ const normalizeChange = (key, value) => {
   }, {});
 };
 
+/**
+ * This function is designed to merge two objects together, but instead of
+ * overriding key collisions, it will create two keys for each collision - the key
+ * from the source object will start with the `REMOVAL_PREFIX` and the key from the
+ * target object will start with the `ADDITION_PREFIX`. The resulting object from
+ * this function call will contain the merged object and potentially some
+ * `REMOVAL_PREFIX` and `ADDITION_PREFIX` keys.
+ *
+ * @param {object} source
+ * @param {object} target
+ */
 export const mergeAndPreserveDuplicateKeys = (
   source,
   target,
