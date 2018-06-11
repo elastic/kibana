@@ -55,38 +55,6 @@ export function RetryProvider({ getService }) {
       return bluebird.try(attempt);
     }
 
-    silentTryForTime(timeout, block) {
-      const start = Date.now();
-      const retryDelay = 402;
-      let lastTry = 0;
-      let finalMessage;
-      let prevMessage;
-
-      function attempt() {
-        lastTry = Date.now();
-
-        if (lastTry - start > timeout) {
-          throw new Error('tryForTime timeout: ' + finalMessage);
-        }
-
-        return bluebird
-          .try(block)
-          .catch(function tryForTimeCatch(err) {
-            if (err.message === prevMessage) {
-              // log.debug('--- tryForTime failed again with the same message  ...');
-            } else {
-              prevMessage = err.message;
-              // log.debug('--- tryForTime failure: ' + prevMessage);
-            }
-            finalMessage = err.stack || err.message;
-            return bluebird.delay(retryDelay).then(attempt);
-          });
-      }
-
-      return bluebird.try(attempt);
-    }
-
-
     try(block) {
       return this.tryForTime(config.get('timeouts.try'), block);
     }
