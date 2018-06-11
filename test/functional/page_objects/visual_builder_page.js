@@ -55,7 +55,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
 
     async getMetricValue() {
       const metricValue = await find.byCssSelector('.rhythm_metric__primary-value');
-      return metricValue.getVisibleText();
+      return await metricValue.getVisibleText();
     }
 
     async enterMarkdown(markdown) {
