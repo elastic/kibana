@@ -21,7 +21,7 @@ import expect from 'expect.js';
 import _ from 'lodash';
 import { join } from 'path';
 
-import { I18nLoader } from '../i18n_loader';
+import { I18nLoader } from '../loader';
 
 const FIXTURES = join(__dirname, 'fixtures');
 

@@ -17,5 +17,10 @@
  * under the License.
  */
 
+import * as angular from './angular';
+import * as react from './react';
+
+export const AngularI18n = angular;
+export const ReactI18n = react;
+
 export { I18n, i18n } from './core/i18n';
-export { I18nLoader } from './core/loader';

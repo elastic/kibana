@@ -21,7 +21,7 @@ import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { IntlProvider } from 'react-intl';
 
-import { i18n } from '../i18n';
+import { i18n } from '../core/i18n';
 
 /**
  * The library uses the provider pattern to scope an i18n context to a tree

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '../i18n';
+import { i18n } from '../core/i18n';
 
 export function i18nProvider() {
   this.addMessages = function(messages, locale) {

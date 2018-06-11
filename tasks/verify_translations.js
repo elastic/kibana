@@ -18,7 +18,7 @@
  */
 
 // TODO: Integrate a new tool for translations checking
-import { I18nLoader } from '@kbn/i18n/src/loader';
+import { I18nLoader } from '@kbn/i18n';
 
 import { fromRoot, formatListAsProse } from '../src/utils';
 import { findPluginSpecs } from '../src/plugin_discovery';
