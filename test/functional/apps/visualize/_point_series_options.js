@@ -68,7 +68,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('secondary value axis', function () {
 
-      it('should show correct chart, take screenshot', async function () {
+      it('should show correct chart', async function () {
         const expectedChartValues = [
           [ 37, 202, 740, 1437, 1371, 751, 188, 31, 42, 202, 683,
             1361, 1415, 707, 177, 27, 32, 175, 707, 1408, 1355, 726, 201, 29 ],
@@ -93,7 +93,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should put secondary axis on the right', async function () {
-        const length = pointSeriesVis.getRightValueAxes();
+        const length = await pointSeriesVis.getRightValueAxes();
         expect(length).to.be(1);
       });
     });
@@ -103,7 +103,7 @@ export default function ({ getService, getPageObjects }) {
         await pointSeriesVis.toggleCollapsibleTitle('RightAxis-1');
         await pointSeriesVis.setSeriesType(1, 'bar');
         await PageObjects.visualize.clickGo();
-        const length = pointSeriesVis.getHistogramSeries();
+        const length = await pointSeriesVis.getHistogramSeries();
         expect(length).to.be(1);
       });
     });
