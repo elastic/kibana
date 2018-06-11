@@ -1,5 +1,27 @@
-apply plugin: 'war'
-apply plugin: 'idea'
+plugins {
+  id 'com.gradle.build-scan' version '1.13.4'
+}
+
+allprojects {
+  repositories {
+    mavenCentral()
+    maven {
+      url "https://dl.bintray.com/netflixoss/maven/"
+    }
+  }
+  apply {
+    plugin "idea"
+  }
+}
+
+buildScan {
+  licenseAgreementUrl = 'https://gradle.com/terms-of-service'
+  licenseAgree = 'yes'
+  if (System.getenv('CI')) {
+    publishAlways()
+    tag 'CI'
+  }
+}
 
 task startDeps(type: Exec) {
   commandLine "docker-compose", "up", "-d"
@@ -13,4 +35,8 @@ idea {
   module {
     excludeDirs += [file("kibana")]
   }
+}
+
+task wrapper(type: Wrapper) {
+  distributionUrl = "https://services.gradle.org/distributions/gradle-4.8-all.zip"
 }

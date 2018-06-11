@@ -1,0 +1,16 @@
+plugins {
+  id 'java'
+  id 'application'
+}
+
+dependencies {
+  compile project(':model')
+  compile 'org.rocksdb:rocksdbjni:5.13.2'
+  compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.23.1'
+
+//  compile "com.netflix.sstableadaptor:sstable-adaptor-core:0.1.0-rc.1"
+//  compile group: 'com.netflix.sstableadaptor', name: 'sstable-adaptor-cassandra', version: '0.1.0-rc.1'
+}
+
+
+mainClassName = "asdf"

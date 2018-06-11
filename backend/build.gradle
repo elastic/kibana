@@ -1,34 +1,14 @@
 plugins {
-  id "com.google.protobuf" version "0.8.5"
+  id 'java'
+  id 'application'
 }
 
-apply plugin: 'java'
+mainClassName = 'castro.backend.Main'
 
-repositories {
-	mavenCentral()
-}
-
-apply plugin: 'java'
-
+task backend(dependsOn: run)
 
 dependencies {
-  compile "com.google.protobuf:protobuf-java:${rootProject.protobufJavaVersion}"
-}
+  compile project(":model")
 
-task startBackend(type: JavaExec) {
-  main = 'castro.Main'
-  classpath = sourceSets.main.runtimeClasspath
-  // For future args and system property
-  // args 'args'
-  // systemProperty 'key' 'value'
-}
-
-protobuf {
-  generateProtoTasks {
-    all().each { task ->
-      task.builtins {
-	 	js { }
-      }
-    }
-  }
+  compile "org.eclipse.jgit:org.eclipse.jgit:5.0.0.201805301535-rc2"
 }

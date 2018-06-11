@@ -1,0 +1,10 @@
+plugins {
+  id 'java'
+  id 'application'
+}
+
+dependencies {
+  compile project(':model')
+}
+
+mainClassName = "castro.pipeline.Main"

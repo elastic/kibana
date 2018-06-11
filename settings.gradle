@@ -1,2 +1,7 @@
 include 'backend'
-include 'kibana-extra/castro'
+include 'model'
+include 'pipeline'
+include 'kibana-extra:castro'
+
+include 'analyzer'
+include 'analyzer:common'

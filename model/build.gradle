@@ -1,0 +1,22 @@
+plugins {
+  id 'java'
+  id 'com.google.protobuf' version "0.8.5"
+}
+
+protobuf {
+  protoc {
+    artifact = "com.google.protobuf:protoc:${protocVersion}"
+  }
+}
+
+sourceSets {
+  main {
+    proto {
+      srcDirs = ['src']
+    }
+  }
+}
+
+dependencies {
+  compile "com.google.protobuf:protobuf-java:${protocVersion}"
+}
