@@ -48,6 +48,13 @@ export interface CallCluster {
   (path: 'indices.exists', opts: { index: string }): Promise<boolean>;
 }
 
+export interface SavedObjectDoc {
+  attributes: any;
+  id: string;
+  type: string;
+  semver?: string;
+}
+
 export interface MappingDefinition {
   [type: string]: any;
 }
@@ -61,7 +68,18 @@ export interface IndexMapping {
   doc: DocMapping;
 }
 
+export type TransformFn = (doc: SavedObjectDoc) => SavedObjectDoc;
+
+export interface SemverTransforms {
+  [semver: string]: TransformFn;
+}
+
+export interface MigrationDefinition {
+  [type: string]: SemverTransforms;
+}
+
 export interface MigrationPlugin {
   id: string;
   mappings?: MappingDefinition;
+  migrations?: MigrationDefinition;
 }

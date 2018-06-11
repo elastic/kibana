@@ -16,17 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { createDocTransform } from './create_doc_transform';
 import { loadMappings } from './mappings';
-import { CallCluster, IndexMapping, MigrationPlugin } from './types';
+import {
+  CallCluster,
+  IndexMapping,
+  MigrationPlugin,
+  SavedObjectDoc,
+  TransformFn,
+} from './types';
 
 export interface Migrator {
   patchIndex: () => Promise<any>;
+  transformDoc: TransformFn;
 }
 
 export interface MigratorOpts {
+  kibanaVersion: string;
   callCluster: CallCluster;
   index: string;
   plugins: MigrationPlugin[];
+  log: (meta: string[], message: string) => void;
 }
 
 interface MigrationContext extends MigratorOpts {
@@ -46,12 +56,32 @@ interface MigrationContext extends MigratorOpts {
  */
 export async function createMigrator(opts: MigratorOpts): Promise<Migrator> {
   const context = await migrationContext(opts);
+  const docTransformer = createDocTransform(opts);
 
   return {
     /**
      * Patches the index template and mappings, if the index is out of date.
      */
     patchIndex: () => patchIndex(context),
+
+    /**
+     * Transforms a document from one version to the current version.
+     * @param {SavedObjectDoc} doc - A saved object client document
+     * @returns {SavedObjectDoc}
+     */
+    transformDoc(doc: SavedObjectDoc): SavedObjectDoc {
+      try {
+        return docTransformer(doc);
+      } catch (error) {
+        opts.log(
+          ['info', 'migration'],
+          `Failed to transform doc: ${error.message}, context: ${JSON.stringify(
+            error.transform
+          )}`
+        );
+        throw error;
+      }
+    },
   };
 }
 
