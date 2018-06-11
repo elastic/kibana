@@ -37,7 +37,7 @@
     "chance": "1.0.10",
     "checksum": "0.1.1",
     "commander": "2.12.2",
-    "del": "2.2.0",
+    "del": "^3.0.0",
     "dotenv": "2.0.0",
     "enzyme": "3.2.0",
     "enzyme-adapter-react-16": "^1.1.1",

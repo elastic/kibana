@@ -1,5 +1,5 @@
 {
-  "_xpack/security/realm/{realms}/_clear_cache": {
+  "_xpack/security/realm/{ids}/_clear_cache": {
     "methods": [
       "POST"
     ],
@@ -7,7 +7,8 @@
       "usernames": ""
     },
     "patterns": [
-      "_xpack/security/realm/{realms}/_clear_cache"
-    ]
+      "_xpack/security/realm/{ids}/_clear_cache"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-clear-cache.html"
   }
 }
