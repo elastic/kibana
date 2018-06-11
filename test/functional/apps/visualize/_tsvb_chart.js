@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }) {
       it('should show correct data', async function () {
         const expectedMetricValue =  '157';
         await PageObjects.common.sleep(30000);
-        const value = PageObjects.visualBuilder.getMetricValue();
+        const value = await PageObjects.visualBuilder.getMetricValue();
         log.debug(`metric value: ${JSON.stringify(value)}`);
         log.debug(`metric value: ${value}`);
         expect(value).to.eql(expectedMetricValue);
@@ -94,7 +94,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show correct data', async function () {
         const expectedMetricValue =  '156';
-        const value = PageObjects.visualBuilder.getMetricValue();
+        const value = await PageObjects.visualBuilder.getMetricValue();
         log.debug(`metric value: ${value}`);
         expect(value).to.eql(expectedMetricValue);
       });
