@@ -1,6 +1,0 @@
-- PUT to override does not work, is there a PATCH or something?
-- Rename PRIMARY_NODES to PRIMARY_SHARDS per configuration.js label change
-- Policy type in the UI anywhere?
-- Diff editor to EUI
-- Index management changes to see status
-- CRUD UIs for managing policies and index templates
