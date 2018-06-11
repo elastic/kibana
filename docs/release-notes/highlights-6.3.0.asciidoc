@@ -135,11 +135,11 @@ For more information, see <<job-tips>>.
 === Custom URL improvements
 
 The inclusion of custom URLs in your {ml} jobs enables users to follow links 
-from the results in the *Anomaly Explorer* to your URL of choice. For example, 
-you could create a link to an operational dashboard that provides contextual 
-information to help explain the anomaly. The custom URL can include targeted
-date ranges and optional query parameters as string substitutions.  As a result, 
-custom URLs have been challenging to create. In 6.3, when you edit your job in 
-{kib}, there are new custom URL options to help you create a link to the 
-*Discover* page, new controls for configuring the time range of the target page, 
-and a button to test the URL. 
+from the anomalies table in the *Anomaly Explorer* and the *Single Metric Viewer* 
+to your URL of choice. For example, you could create a link to an operational 
+dashboard that provides contextual information to help explain the anomaly. The 
+custom URL can include targeted date ranges and optional query parameters as 
+string substitutions.  As a result, custom URLs have been challenging to create. 
+In 6.3, when you edit your job in {kib}, there are new custom URL options to 
+help you create a link to the *Discover* page, new controls for configuring the 
+time range of the target page, and a button to test the URL. 
