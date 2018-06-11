@@ -23,7 +23,7 @@
  @property {string} [locale] - locale of the messages
  */
 
-import { I18nLoader } from './i18n_loader';
+import { I18nLoader } from '@kbn/i18n/src/loader';
 
 export function uiI18nMixin(kbnServer, server, config) {
   const defaultLocale = config.get('i18n.defaultLocale');
