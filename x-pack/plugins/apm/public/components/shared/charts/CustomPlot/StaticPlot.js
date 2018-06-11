@@ -35,7 +35,7 @@ class StaticPlot extends PureComponent {
       case 'area':
         return (
           <AreaSeries
-            getNull={d => d.y !== null}
+            getNull={serie.getNull}
             key={serie.title}
             xType="time"
             curve={'curveMonotoneX'}

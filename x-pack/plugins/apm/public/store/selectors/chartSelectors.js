@@ -5,7 +5,14 @@
  */
 
 import d3 from 'd3';
-import { zipObject, difference, memoize } from 'lodash';
+import {
+  zipObject,
+  difference,
+  memoize,
+  get,
+  findLastIndex,
+  isEmpty
+} from 'lodash';
 import { colors } from '../../style/variables';
 import {
   asMillisWithDefault,
@@ -52,14 +59,15 @@ export function getCharts(urlParams, charts) {
 
 export function getResponseTimeSeries(chartsData) {
   const { dates, weightedAverage } = chartsData;
-  const { avg, p95, p99 } = chartsData.responseTimes;
+  const { avg, p95, p99, mlAvg } = chartsData.responseTimes;
 
-  return [
+  const series = [
     {
       title: 'Avg.',
       data: getChartValues(dates, avg),
+      getNull: d => d.y !== null,
       legendValue: `${asMillisWithDefault(weightedAverage)}`,
-      type: 'area',
+      type: 'line',
       color: colors.apmBlue,
       areaColor: 'rgba(49, 133, 252, 0.1)' // apmBlue
     },
@@ -67,7 +75,8 @@ export function getResponseTimeSeries(chartsData) {
       title: '95th percentile',
       titleShort: '95th',
       data: getChartValues(dates, p95),
-      type: 'area',
+      getNull: d => d.y !== null,
+      type: 'line',
       color: colors.apmYellow,
       areaColor: 'rgba(236, 174, 35, 0.1)' // apmYellow
     },
@@ -75,11 +84,24 @@ export function getResponseTimeSeries(chartsData) {
       title: '99th percentile',
       titleShort: '99th',
       data: getChartValues(dates, p99),
-      type: 'area',
+      getNull: d => d.y !== null,
+      type: 'line',
       color: colors.apmOrange,
       areaColor: 'rgba(249, 133, 16, 0.1)' // apmOrange
     }
   ];
+
+  if (!isEmpty(mlAvg)) {
+    series.push({
+      title: 'ML Avg.',
+      data: getMlChartValues(dates, mlAvg),
+      type: 'area',
+      color: 'rgba(73, 0, 146, 0.3)',
+      areaColor: 'rgba(73, 0, 146, 0.3)'
+    });
+  }
+
+  return series;
 }
 
 function getTpmLegendTitle(bucketKey) {
@@ -131,5 +153,27 @@ function getChartValues(dates = [], yValues = []) {
   return dates.map((x, i) => ({
     x,
     y: yValues[i]
+  }));
+}
+
+function getMlChartValues(dates = [], yValues = []) {
+  const lastIndex = findLastIndex(yValues, item => get(item, 'lower') != null);
+
+  // TODO: Temporary workaround to get rid of null values
+  // Replaces null values with the previous value in the list
+  const yValuesWithoutGaps = yValues.reduce((acc, item, i) => {
+    if (get(item, 'lower') === null && i < lastIndex && i > 0) {
+      acc.push(acc[i - 1]);
+    } else {
+      acc.push(item);
+    }
+
+    return acc;
+  }, []);
+
+  return dates.map((x, i) => ({
+    x,
+    y0: get(yValuesWithoutGaps[i], 'lower'),
+    y: get(yValuesWithoutGaps[i], 'upper')
   }));
 }

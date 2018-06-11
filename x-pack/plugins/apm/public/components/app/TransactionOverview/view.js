@@ -13,6 +13,7 @@ import List from './List';
 import { OverviewChartsRequest } from '../../../store/reactReduxRequest/overviewCharts';
 import { TransactionListRequest } from '../../../store/reactReduxRequest/transactionList';
 import { ServiceDetailsRequest } from '../../../store/reactReduxRequest/serviceDetails';
+import { startMlJob } from '../../../services/rest';
 
 function ServiceDetailsAndTransactionList({ urlParams, render }) {
   return (
@@ -35,6 +36,12 @@ function ServiceDetailsAndTransactionList({ urlParams, render }) {
   );
 }
 
+function onClickButton(serviceName, transactionType) {
+  if (serviceName && transactionType) {
+    startMlJob({ serviceName, transactionType });
+  }
+}
+
 export default function TransactionOverview({
   changeTransactionSorting,
   transactionSorting,
@@ -44,7 +51,9 @@ export default function TransactionOverview({
 
   return (
     <div>
-      <HeaderLarge>{serviceName}</HeaderLarge>
+      <HeaderLarge onClick={() => onClickButton(serviceName, transactionType)}>
+        {serviceName}
+      </HeaderLarge>
 
       <TabNavigation />
 

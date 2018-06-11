@@ -11,6 +11,7 @@ import { memoize, isEmpty, first, startsWith } from 'lodash';
 import chrome from 'ui/chrome';
 import { convertKueryToEsQuery } from './kuery';
 import { getFromSavedObject } from 'ui/index_patterns/static_utils';
+import { SERVICE_NAME, TRANSACTION_TYPE } from '../../common/constants';
 
 function fetchOptionsWithDebug(fetchOptions) {
   const debugEnabled =
@@ -62,6 +63,28 @@ export const getAPMIndexPattern = memoize(async () => {
 
   return getFromSavedObject(apmSavedObject);
 });
+
+export async function startMlJob({ serviceName }) {
+  const transactionType = 'request';
+  return callApi({
+    method: 'POST',
+    pathname: `/api/ml/modules/setup/apm_transaction`,
+    body: JSON.stringify({
+      prefix: `${serviceName}-`,
+      groups: ['apm', serviceName],
+      indexPatternName: 'apm*',
+      startDatafeed: true,
+      query: {
+        bool: {
+          filter: [
+            { term: { [SERVICE_NAME]: serviceName } },
+            { term: { [TRANSACTION_TYPE]: transactionType } }
+          ]
+        }
+      }
+    })
+  });
+}
 
 export async function loadLicense() {
   return callApi({
