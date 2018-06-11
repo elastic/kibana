@@ -121,7 +121,7 @@ module.directive('mlEventRateChart', function () {
       swimlaneXScale.domain(d3.extent(finerData, d => d.date));
 
 
-      // Extent the time range/domain at the end by 1 barsInterval,
+      // Extend the time range/domain at the end by 1 barsInterval,
       // otherwise the last bar will start at the end of vizWidth
       // and overflow the chart.
       const timeExtent = d3.extent(data, d => d.date);
