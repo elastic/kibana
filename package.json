@@ -246,6 +246,7 @@
     "chromedriver": "2.36",
     "classnames": "2.2.5",
     "dedent": "^0.7.0",
+    "del": "^3.0.0",
     "enzyme": "3.2.0",
     "enzyme-adapter-react-16": "^1.1.1",
     "enzyme-to-json": "3.3.1",
@@ -320,7 +321,8 @@
     "typescript": "^2.8.3",
     "vinyl-fs": "^3.0.2",
     "xml2js": "^0.4.19",
-    "xmlbuilder": "9.0.4"
+    "xmlbuilder": "9.0.4",
+    "zlib": "^1.0.5"
   },
   "engines": {
     "node": "8.11.0",
