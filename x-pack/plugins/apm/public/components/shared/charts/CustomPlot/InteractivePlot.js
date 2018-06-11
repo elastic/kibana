@@ -34,11 +34,16 @@ class InteractivePlot extends PureComponent {
       return [];
     }
 
-    return this.props.series.map(serie => ({
-      color: serie.color,
-      value: this.props.formatTooltipValue(_.get(serie.data[hoverIndex], 'y')),
-      text: serie.titleShort || serie.title
-    }));
+    return this.props.series.map(serie => {
+      const formatTooltipValue =
+        serie.formatTooltipValue || this.props.formatTooltipValue;
+
+      return {
+        color: serie.color,
+        value: formatTooltipValue(serie.data[hoverIndex]),
+        text: serie.titleShort || serie.title
+      };
+    });
   };
 
   getHoveredX = hoverIndex => {

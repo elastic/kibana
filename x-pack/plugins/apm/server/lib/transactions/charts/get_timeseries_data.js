@@ -153,6 +153,7 @@ export async function getTimeseriesData({
 
   const mlAvgResponseTimes = await getMlAvgResponseTimes({
     serviceName,
+    transactionType,
     setup
   });
 

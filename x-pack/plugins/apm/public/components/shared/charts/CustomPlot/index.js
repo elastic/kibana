@@ -186,7 +186,7 @@ InnerCustomPlot.propTypes = {
 };
 
 InnerCustomPlot.defaultProps = {
-  formatTooltipValue: y => y,
+  formatTooltipValue: p => p,
   tickFormatY: y => y,
   truncateLegends: false
 };

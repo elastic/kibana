@@ -65,39 +65,36 @@ export function getResponseTimeSeries(chartsData) {
     {
       title: 'Avg.',
       data: getChartValues(dates, avg),
-      getNull: d => d.y !== null,
       legendValue: `${asMillisWithDefault(weightedAverage)}`,
       type: 'line',
-      color: colors.apmBlue,
-      areaColor: 'rgba(49, 133, 252, 0.1)' // apmBlue
+      color: colors.apmBlue
     },
     {
       title: '95th percentile',
       titleShort: '95th',
       data: getChartValues(dates, p95),
-      getNull: d => d.y !== null,
       type: 'line',
-      color: colors.apmYellow,
-      areaColor: 'rgba(236, 174, 35, 0.1)' // apmYellow
+      color: colors.apmYellow
     },
     {
       title: '99th percentile',
       titleShort: '99th',
       data: getChartValues(dates, p99),
-      getNull: d => d.y !== null,
       type: 'line',
-      color: colors.apmOrange,
-      areaColor: 'rgba(249, 133, 16, 0.1)' // apmOrange
+      color: colors.apmOrange
     }
   ];
 
   if (!isEmpty(mlAvg)) {
-    series.push({
-      title: 'ML Avg.',
+    // insert after Avg. serie
+    series.splice(1, 0, {
+      title: 'Anomaly score',
+      hideLegend: true,
+      formatTooltipValue: (p = {}) => asDecimal(p.anomalyScore),
       data: getMlChartValues(dates, mlAvg),
       type: 'area',
-      color: 'rgba(73, 0, 146, 0.3)',
-      areaColor: 'rgba(73, 0, 146, 0.3)'
+      color: 'none',
+      areaColor: 'rgba(49, 133, 252, 0.1)' // apmBlue
     });
   }
 
@@ -174,6 +171,7 @@ function getMlChartValues(dates = [], yValues = []) {
   return dates.map((x, i) => ({
     x,
     y0: get(yValuesWithoutGaps[i], 'lower'),
-    y: get(yValuesWithoutGaps[i], 'upper')
+    y: get(yValuesWithoutGaps[i], 'upper'),
+    anomalyScore: get(yValuesWithoutGaps[i], 'anomalyScore')
   }));
 }

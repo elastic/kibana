@@ -55,18 +55,18 @@ export class Charts extends Component {
     return this.props.charts.noHits ? '- ms' : asMillis(t);
   };
 
-  getResponseTimeTooltipFormatter = t => {
+  getResponseTimeTooltipFormatter = (p = {}) => {
     if (this.props.charts.noHits) {
       return '- ms';
     } else {
-      return t == null ? 'N/A' : asMillis(t);
+      return p.y == null ? 'N/A' : asMillis(p.y);
     }
   };
 
-  getTPMFormatter = t => {
+  getTPMFormatter = (p = {}) => {
     const { urlParams, charts } = this.props;
     const unit = tpmUnit(urlParams.transactionType);
-    return charts.noHits ? `- ${unit}` : `${asInteger(t)} ${unit}`;
+    return charts.noHits ? `- ${unit}` : `${asInteger(p.y)} ${unit}`;
   };
 
   render() {

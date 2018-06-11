@@ -64,15 +64,15 @@ export const getAPMIndexPattern = memoize(async () => {
   return getFromSavedObject(apmSavedObject);
 });
 
-export async function startMlJob({ serviceName }) {
-  const transactionType = 'request';
+export async function startMlJob({ serviceName, transactionType }) {
+  const apmIndexPattern = chrome.getInjected('apmIndexPattern');
   return callApi({
     method: 'POST',
     pathname: `/api/ml/modules/setup/apm_transaction`,
     body: JSON.stringify({
-      prefix: `${serviceName}-`,
-      groups: ['apm', serviceName],
-      indexPatternName: 'apm*',
+      prefix: `${serviceName}-${transactionType}-`,
+      groups: ['apm', serviceName, transactionType],
+      indexPatternName: apmIndexPattern,
       startDatafeed: true,
       query: {
         bool: {

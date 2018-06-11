@@ -7,12 +7,16 @@
 import { get } from 'lodash';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 
-export async function getMlAvgResponseTimes({ serviceName, setup }) {
+export async function getMlAvgResponseTimes({
+  serviceName,
+  transactionType,
+  setup
+}) {
   const { start, end, client } = setup;
   const { intervalString } = getBucketSize(start, end, 'auto');
 
   const params = {
-    index: `.ml-anomalies-${serviceName}-high_mean_response_time`,
+    index: `.ml-anomalies-${serviceName}-${transactionType}-high_mean_response_time`,
     body: {
       size: 0,
       query: {
@@ -42,21 +46,9 @@ export async function getMlAvgResponseTimes({ serviceName, setup }) {
             }
           },
           aggs: {
-            lower: {
-              avg: {
-                field: 'model_lower'
-              }
-            },
-            upper: {
-              avg: {
-                field: 'model_upper'
-              }
-            },
-            actual: {
-              avg: {
-                field: 'actual'
-              }
-            }
+            anomaly_score: { avg: { field: 'anomaly_score' } },
+            lower: { avg: { field: 'model_lower' } },
+            upper: { avg: { field: 'model_upper' } }
           }
         }
       }
@@ -77,7 +69,7 @@ export async function getMlAvgResponseTimes({ serviceName, setup }) {
     .slice(1, -1)
     .map(bucket => {
       return {
-        actual: bucket.actual.value,
+        anomaly_score: bucket.anomaly_score.value,
         lower: bucket.lower.value,
         upper: bucket.upper.value
       };

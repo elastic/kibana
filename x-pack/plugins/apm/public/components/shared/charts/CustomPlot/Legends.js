@@ -67,6 +67,9 @@ export default function Legends({
   return (
     <Container>
       {series.map((serie, i) => {
+        if (serie.hideLegend) {
+          return null;
+        }
         const text = (
           <LegendContent>
             {truncateLegends ? (
