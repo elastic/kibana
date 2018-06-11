@@ -6,14 +6,27 @@ import { RenderToDom } from '../render_to_dom';
 
 export class RenderWithFn extends React.Component {
   static propTypes = {
-    name: PropTypes.string,
+    name: PropTypes.string.isRequired,
     renderFn: PropTypes.func.isRequired,
     reuseNode: PropTypes.bool,
-    handlers: PropTypes.object,
-    destroyFn: PropTypes.func,
-    config: PropTypes.object,
-    size: PropTypes.object,
+    handlers: PropTypes.shape({
+      // element handlers, see components/element_wrapper/lib/handlers.js
+      setFilter: PropTypes.func.isRequired,
+      getFilter: PropTypes.func.isRequired,
+      done: PropTypes.func.isRequired,
+      // render handlers, see lib/handlers.js
+      resize: PropTypes.func.isRequired,
+      onResize: PropTypes.func.isRequired,
+      destroy: PropTypes.func.isRequired,
+      onDestroy: PropTypes.func.isRequired,
+    }),
+    config: PropTypes.object.isRequired,
+    size: PropTypes.object.isRequired,
     onError: PropTypes.func.isRequired,
+  };
+
+  static defaultProps = {
+    reuseNode: false,
   };
 
   static domNode = null;
@@ -109,7 +122,6 @@ export class RenderWithFn extends React.Component {
     return (
       <div
         className="canvas__workpad--element_render canvas__element"
-        data-render-complete="true"
         style={{ height: '100%', width: '100%' }}
       >
         <RenderToDom

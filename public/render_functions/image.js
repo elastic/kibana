@@ -22,7 +22,5 @@ export const image = () => ({
     ReactDOM.render(<div style={style} />, domNode, () => handlers.done());
 
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
-
-    handlers.done();
   },
 });

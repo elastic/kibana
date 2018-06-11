@@ -1,8 +1,7 @@
 export class ElementHandlers {
-  constructor() {
-    this.resize = () => {};
-    this.destroy = () => {};
-  }
+  resize() {}
+
+  destroy() {}
 
   onResize(fn) {
     this.resize = fn;

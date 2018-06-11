@@ -11,8 +11,7 @@ export const ElementContent = compose(
 )(Component);
 
 ElementContent.propTypes = {
-  renderable: PropTypes.object,
-  size: PropTypes.object,
-  handlers: PropTypes.object,
-  state: PropTypes.string,
+  renderable: PropTypes.shape({
+    as: PropTypes.string,
+  }),
 };

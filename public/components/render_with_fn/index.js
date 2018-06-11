@@ -12,11 +12,12 @@ export const RenderWithFn = compose(
     })
   ),
   withProps(({ handlers, elementHandlers }) => ({
-    handlers: Object.assign(elementHandlers, handlers, { done: () => {} }),
+    handlers: Object.assign(elementHandlers, handlers),
     onError: message => notify.error(message),
   }))
 )(Component);
 
 RenderWithFn.propTypes = {
   handlers: PropTypes.object,
+  elementHandlers: PropTypes.object,
 };

@@ -1,10 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { pure, compose, branch, renderComponent, withProps } from 'recompose';
+import { pure, compose, branch, renderComponent } from 'recompose';
 import Style from 'style-it';
+import { getType } from '../../../common/lib/get_type';
 import { Loading } from '../loading';
 import { RenderWithFn } from '../render_with_fn';
-import { getType } from '../../../common/lib/get_type';
+import { ElementShareContainer } from '../element_share_container';
 import { InvalidExpression } from './invalid_expression';
 import { InvalidElementType } from './invalid_element_type';
 
@@ -31,21 +32,20 @@ const branches = [
       !renderFunction // We can't find an element in the registry for this
     );
   }, renderComponent(InvalidExpression)),
-  withProps(({ handlers }) => ({
-    handlers: {
-      done() {},
-      ...handlers,
-    },
-  })),
 ];
 
-// NOTE: the data-shared-* attributes here are used for reporting
 export const ElementContent = compose(pure, ...branches)(
   ({ renderable, renderFunction, size, handlers }) => {
+    const { getFilter, setFilter, done, onComplete } = handlers;
+
     return Style.it(
       renderable.css,
       <div style={{ ...renderable.containerStyle, ...size }}>
-        <div className="canvas__element--content" data-shared-item>
+        <ElementShareContainer
+          className="canvas__element--content"
+          onComplete={onComplete}
+          functionName={renderFunction.name}
+        >
           <RenderWithFn
             name={renderFunction.name}
             renderFn={renderFunction.render}
@@ -53,18 +53,30 @@ export const ElementContent = compose(pure, ...branches)(
             config={renderable.value}
             css={renderable.css} // This is an actual CSS stylesheet string, it will be scoped by RenderElement
             size={size} // Size is only passed for the purpose of triggering the resize event, it isn't really used otherwise
-            handlers={handlers}
+            handlers={{ getFilter, setFilter, done }}
           />
-        </div>
+        </ElementShareContainer>
       </div>
     );
   }
 );
 
 ElementContent.propTypes = {
-  renderable: PropTypes.object,
-  renderFunction: PropTypes.object,
+  renderable: PropTypes.shape({
+    css: PropTypes.string,
+    value: PropTypes.object,
+  }),
+  renderFunction: PropTypes.shape({
+    name: PropTypes.string,
+    render: PropTypes.func,
+    reuseDomNode: PropTypes.bool,
+  }),
   size: PropTypes.object,
-  handlers: PropTypes.object,
+  handlers: PropTypes.shape({
+    setFilter: PropTypes.func.isRequired,
+    getFilter: PropTypes.func.isRequired,
+    done: PropTypes.func.isRequired,
+    onComplete: PropTypes.func.isRequired, // local, not passed through
+  }).isRequired,
   state: PropTypes.string,
 };

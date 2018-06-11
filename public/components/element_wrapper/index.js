@@ -47,5 +47,7 @@ const mergeProps = (stateProps, dispatchProps, { element }) => {
 export const ElementWrapper = connect(mapStateToProps, mapDispatchToProps, mergeProps)(Component);
 
 ElementWrapper.propTypes = {
-  element: PropTypes.object,
+  element: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+  }).isRequired,
 };
