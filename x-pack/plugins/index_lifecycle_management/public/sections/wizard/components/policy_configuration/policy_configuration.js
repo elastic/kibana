@@ -97,27 +97,6 @@ export class PolicyConfiguration extends Component {
       );
     }
 
-    // const singleTemplate = (
-    //   <span>
-    //     This policy is only attached to the selected template{' '}
-    //     <strong>{selectedIndexTemplateName}</strong>.
-    //   </span>
-    // );
-
-    // const multiTemplate = (
-    //   <span>
-    //     This policy is attached to{' '}
-    //     <strong>{affectedIndexTemplates.length - 1} other template(s)</strong>{' '}
-    //     besides <strong>{selectedIndexTemplateName}</strong>.
-    //   </span>
-    // );
-
-    // const warningMessage =
-    //   affectedIndexTemplates.length === 1 &&
-    //   affectedIndexTemplates[0] === selectedIndexTemplateName
-    //     ? singleTemplate
-    //     : multiTemplate;
-
     return (
       <div className="euiAnimateContentLoad">
         <PolicySelection/>
@@ -158,89 +137,6 @@ export class PolicyConfiguration extends Component {
           isShowingErrors={isShowingErrors && hasErrors(errors[PHASE_DELETE])}
         />
         <EuiHorizontalRule className="ilmHrule" />
-
-        {/* <EuiCallOut size="s" color="warning" title={warningMessage} />
-        <EuiSpacer />
-
-        <Fragment>
-          {originalPolicyName ? (
-            <EuiFormRow label="Policy options" style={{ maxWidth: '100%' }}>
-              <EuiSwitch
-                style={{ maxWidth: '100%' }}
-                checked={saveAsNewPolicy}
-                onChange={async e => {
-                  await setSaveAsNewPolicy(e.target.checked);
-                  validate();
-                }}
-                label={
-                  <span>
-                    Save this <strong>as a new policy</strong> so it does not
-                    effect other templates.
-                  </span>
-                }
-              />
-            </EuiFormRow>
-          ) : null}
-          {saveAsNewPolicy ? (
-            <ErrableFormRow
-              label="Policy name"
-              errorKey={STRUCTURE_POLICY_NAME}
-              isShowingErrors={isShowingErrors}
-              errors={errors}
-            >
-              <EuiFieldText
-                value={selectedPolicyName}
-                onChange={async e => {
-                  await setSelectedPolicyName(e.target.value);
-                  validate();
-                }}
-              />
-            </ErrableFormRow>
-          ) : null}
-          <EuiSpacer size="m" />
-          <EuiFormRow label="Bootstrap options" style={{ maxWidth: '100%' }}>
-            <EuiSwitch
-              style={{ maxWidth: '100%' }}
-              checked={bootstrapEnabled}
-              onChange={e => setBootstrapEnabled(e.target.checked)}
-              label={<span>Create an index and alias for this template</span>}
-            />
-          </EuiFormRow>
-          {bootstrapEnabled ? (
-            <Fragment>
-              <ErrableFormRow
-                label="Name your index"
-                errorKey={STRUCTURE_INDEX_NAME}
-                isShowingErrors={isShowingErrors}
-                errors={errors}
-              >
-                <EuiFieldText
-                  value={indexName}
-                  onChange={async e => {
-                    await setIndexName(e.target.value);
-                    validate();
-                  }}
-                />
-              </ErrableFormRow>
-              <ErrableFormRow
-                label="Name your alias"
-                errorKey={STRUCTURE_ALIAS_NAME}
-                isShowingErrors={isShowingErrors}
-                errors={errors}
-              >
-                <EuiFieldText
-                  value={aliasName}
-                  onChange={async e => {
-                    await setAliasName(e.target.value);
-                    validate();
-                  }}
-                />
-              </ErrableFormRow>
-            </Fragment>
-          ) : null}
-        </Fragment> */}
-
-        {/* <EuiSpacer /> */}
 
         <EuiButtonEmpty
           iconSide="left"

@@ -8,7 +8,6 @@ import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
 import { toastNotifications } from 'ui/notify';
 
-// import DiffEditor from 'react-ace/lib/diff';
 import './review.less';
 
 import 'brace/theme/github';
@@ -111,8 +110,6 @@ export class Review extends Component {
     const {
       done,
       back,
-
-      /* Start might move */
       setSelectedPolicyName,
       setSaveAsNewPolicy,
       validate,
@@ -121,8 +118,6 @@ export class Review extends Component {
       selectedPolicyName,
       saveAsNewPolicy,
       originalPolicyName,
-      /* End might move */
-
       selectedIndexTemplateName,
       affectedIndexTemplates,
       templateDiff,
@@ -139,10 +134,6 @@ export class Review extends Component {
 
     return (
       <div className="euiAnimateContentLoad">
-        {/* <EuiTitle>
-          <h4>Changes that will occur</h4>
-        </EuiTitle>
-        <EuiSpacer /> */}
         <EuiSpacer />
         <EuiTitle size="s">
           <h3>Review your policy changes</h3>
@@ -198,21 +189,6 @@ export class Review extends Component {
             <DiffView
               templateDiff={templateDiff}
             />
-            {/* <DiffEditor
-              editorProps={{
-                $blockScrolling: Infinity,
-                autoScrollEditorIntoView: false,
-              }}
-              value={[
-                JSON.stringify(templateDiff.originalFullIndexTemplate, null, 2),
-                JSON.stringify(templateDiff.newFullIndexTemplate, null, 2),
-              ]}
-              readOnly={true}
-              height="300px"
-              width="100%"
-              mode="json"
-            /> */}
-
             <EuiHorizontalRule className="ilmHrule" />
           </Fragment>
         ) : null}

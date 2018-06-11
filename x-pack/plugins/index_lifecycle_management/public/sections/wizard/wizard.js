@@ -8,7 +8,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { toastNotifications } from 'ui/notify';
 import { IndexTemplate } from './components/index_template';
-// import { PolicySelection } from './components/policy_selection';
 import { PolicyConfiguration } from './components/policy_configuration';
 import { Review } from './components/review';
 import {
@@ -25,8 +24,6 @@ import {
   STRUCTURE_POLICY_CONFIGURATION,
   STRUCTURE_REVIEW,
 } from '../../store/constants';
-// import { DiffView } from './components/review/diff_view';
-// import diff from './diff.json';
 
 export class Wizard extends Component {
   static propTypes = {
@@ -100,13 +97,6 @@ export class Wizard extends Component {
             done={() => this.onSelectedStepChanged(2)}
           />
         );
-      // case 2:
-      //   return (
-      //     <PolicySelection
-      //       done={() => this.onSelectedStepChanged(3)}
-      //       back={() => this.onSelectedStepChanged(1)}
-      //     />
-      //   );
       case 2:
         return (
           <PolicyConfiguration
@@ -136,13 +126,6 @@ export class Wizard extends Component {
         isComplete: this.state.selectedStep > 1,
         onClick: () => this.onSelectedStepChanged(1),
       },
-      // {
-      //   title: 'Select or create policy',
-      //   isSelected: this.state.selectedStep === 2,
-      //   isComplete: this.state.selectedStep > 2,
-      //   disabled: this.state.selectedStep < 2,
-      //   onClick: () => this.onSelectedStepChanged(2),
-      // },
       {
         title: 'Configure a policy',
         isSelected: this.state.selectedStep === 2,
@@ -159,8 +142,6 @@ export class Wizard extends Component {
       },
     ];
 
-    // const templateDiff = diff;
-
     return (
       <EuiPage>
         <EuiPageBody>
@@ -172,9 +153,6 @@ export class Wizard extends Component {
             <EuiStepsHorizontal steps={steps} />
 
             <EuiSpacer />
-            {/* <DiffView
-              templateDiff={diff}
-            /> */}
             {this.renderContent()}
           </EuiPageContent>
         </EuiPageBody>
