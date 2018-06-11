@@ -29,7 +29,7 @@ module.directive('mlEventRateChart', function () {
 
     let svgWidth = 0;
     const barChartHeight = scope.eventRateChartHeight;
-    const margin = { top: 0, right: 0, bottom: 20, left: scope.chartTicksMargin.width };
+    const margin = { top: 5, right: 1, bottom: 20, left: scope.chartTicksMargin.width };
     const svgHeight = barChartHeight + margin.top + margin.bottom;
     let vizWidth  = svgWidth  - margin.left - margin.right;
     const chartLimits = { max: 0, min: 0 };
@@ -120,9 +120,15 @@ module.directive('mlEventRateChart', function () {
       }
       swimlaneXScale.domain(d3.extent(finerData, d => d.date));
 
+
+      // Extend the time range/domain at the end by 1 barsInterval,
+      // otherwise the last bar will start at the end of vizWidth
+      // and overflow the chart.
+      const timeExtent = d3.extent(data, d => d.date);
+      timeExtent[1] = new Date(timeExtent[1].getTime() + scope.chartData.barsInterval);
       barChartXScale = d3.time.scale()
         .range([0, vizWidth])
-        .domain(d3.extent(data, d => d.date));
+        .domain(timeExtent);
 
       chartLimits.max = d3.max(data, (d) => d.value);
       chartLimits.min = 0;
