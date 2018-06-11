@@ -11,6 +11,36 @@ export default function ({ loadTestFile, getService }) {
 
   describe('saved_objects', () => {
     before(async () => {
+      await es.shield.putRole({
+        name: 'kibana_rbac_user',
+        body: {
+          cluster: [],
+          index: [],
+          applications: [
+            {
+              application: 'kibana',
+              privileges: [ 'all' ],
+              resources: [ 'default' ]
+            }
+          ]
+        }
+      });
+
+      await es.shield.putRole({
+        name: 'kibana_rbac_dashboard_only_user',
+        body: {
+          cluster: [],
+          index: [],
+          applications: [
+            {
+              application: 'kibana',
+              privileges: [ 'read' ],
+              resources: [ 'default' ]
+            }
+          ]
+        }
+      });
+
       await es.shield.putUser({
         username: AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME,
         body: {
