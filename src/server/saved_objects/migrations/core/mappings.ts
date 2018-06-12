@@ -47,7 +47,7 @@ export function getActiveMappings(plugins: MigrationPlugin[]): IndexMapping {
   };
 }
 
-export async function loadMappings({
+export async function loadFullMappings({
   plugins,
   callCluster,
   index,
@@ -171,8 +171,12 @@ function assertNonDestructiveChanges(
     const indexValue = indexProp[key];
     const kibanaValue = activeProp[key];
 
-    // Dynamic documents are going to possibly have mismatched mappings, and that's OK
-    if (parseBool(indexValue && indexValue.dynamic)) {
+    // Dynamic documents are going to possibly have mismatched mappings, and that's OK,
+    // as is moving from dynamic: strict to removing the dynamic property, as our doc is strict
+    if (
+      parseBool(_.get(indexValue, 'dynamic')) ||
+      removingDynamic(indexValue, kibanaValue)
+    ) {
       return;
     }
 
@@ -208,6 +212,12 @@ function assertNonDestructiveChanges(
       );
     }
   }
+}
+
+function removingDynamic(indexValue: any, kibanaValue: any) {
+  return (
+    _.get(indexValue, 'dynamic') === 'strict' && !_.has(kibanaValue, 'dynamic')
+  );
 }
 
 function parseBool(value: string | boolean | undefined) {
