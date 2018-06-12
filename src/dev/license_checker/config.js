@@ -72,4 +72,5 @@ export const LICENSE_OVERRIDES = {
   'uglify-js@2.2.5': ['BSD'],
   'png-js@0.1.1': ['MIT'],
   'sha.js@2.4.11': ['BSD-3-Clause AND MIT'],
+  'xmldom@0.1.19': ['MIT'],
 };
