@@ -21,7 +21,8 @@ const createMockServer = ({ settings = {} } = {}) => {
   const mockServer = {
     config: jest.fn().mockReturnValue({
       get: jest.fn()
-    })
+    }),
+    log: jest.fn()
   };
 
   const defaultSettings = {
@@ -72,6 +73,14 @@ const createMockCallWithRequest = (responses) => {
   return mockCallWithRequest;
 };
 
+const expectNoDeprecationLogged = (mockServer) => {
+  expect(mockServer.log).not.toHaveBeenCalled();
+};
+
+const expectDeprecationLogged = (mockServer) => {
+  expect(mockServer.log).toHaveBeenCalledWith(['warning', 'deprecated', 'security'], expect.stringContaining('deprecated'));
+};
+
 test(`returns success of true if they have all application privileges`, async () => {
   const privilege = 'action:saved_objects/config/get';
   const username = 'foo-username';
@@ -95,6 +104,7 @@ test(`returns success of true if they have all application privileges`, async ()
   const privileges = [privilege];
   const result = await hasPrivileges(privileges);
 
+  expectNoDeprecationLogged(mockServer);
   expect(mockCallWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
     body: {
       applications: [{
@@ -138,6 +148,7 @@ test(`returns success of false if they have only one application privilege`, asy
   const privileges = [privilege1, privilege2];
   const result = await hasPrivileges(privileges);
 
+  expectNoDeprecationLogged(mockServer);
   expect(mockCallWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
     body: {
       applications: [{
@@ -174,6 +185,7 @@ test(`throws error if missing version privilege and has login privilege`, async 
   const hasPrivileges = hasPrivilegesWithRequest({});
 
   await expect(hasPrivileges([privilege])).rejects.toThrowErrorMatchingSnapshot();
+  expectNoDeprecationLogged(mockServer);
 });
 
 test(`uses application privileges if the user has the login privilege`, async () => {
@@ -198,6 +210,7 @@ test(`uses application privileges if the user has the login privilege`, async ()
   const privileges = [privilege];
   const result = await hasPrivileges(privileges);
 
+  expectNoDeprecationLogged(mockServer);
   expect(callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
     body: {
       applications: [{
@@ -238,6 +251,7 @@ test(`returns success of false using application privileges if the user has the 
   const privileges = [privilege];
   const result = await hasPrivileges(privileges);
 
+  expectNoDeprecationLogged(mockServer);
   expect(callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
     body: {
       applications: [{
@@ -287,6 +301,7 @@ describe('legacy fallback with no application privileges', () => {
     const privileges = [privilege];
     const result = await hasPrivileges(privileges);
 
+    expectNoDeprecationLogged(mockServer);
     expect(callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
       body: {
         applications: [{
@@ -343,6 +358,7 @@ describe('legacy fallback with no application privileges', () => {
     const privileges = ['foo'];
     const result = await hasPrivileges(privileges);
 
+    expectDeprecationLogged(mockServer);
     expect(callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
       body: {
         applications: [{
@@ -399,6 +415,7 @@ describe('legacy fallback with no application privileges', () => {
     const privileges = [privilege];
     const result = await hasPrivileges(privileges);
 
+    expectDeprecationLogged(mockServer);
     expect(callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
       body: {
         applications: [{
@@ -457,6 +474,7 @@ describe('legacy fallback with no application privileges', () => {
     const privileges = [privilege1, privilege2];
     const result = await hasPrivileges(privileges);
 
+    expectDeprecationLogged(mockServer);
     expect(callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
       body: {
         applications: [{
@@ -513,6 +531,7 @@ describe('legacy fallback with no application privileges', () => {
     const privileges = [privilege];
     const result = await hasPrivileges(privileges);
 
+    expectDeprecationLogged(mockServer);
     expect(callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
       body: {
         applications: [{

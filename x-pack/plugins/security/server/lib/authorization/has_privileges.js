@@ -35,7 +35,7 @@ const hasApplicationPrivileges = async (callWithRequest, request, kibanaVersion,
   };
 };
 
-const hasLegacyPrivileges = async (callWithRequest, request, kibanaVersion, application, kibanaIndex, privileges) => {
+const hasLegacyPrivileges = async (deprecationLogger, callWithRequest, request, kibanaVersion, application, kibanaIndex, privileges) => {
   const privilegeCheck = await callWithRequest(request, 'shield.hasPrivileges', {
     body: {
       index: [{
@@ -46,6 +46,9 @@ const hasLegacyPrivileges = async (callWithRequest, request, kibanaVersion, appl
   });
 
   if (privilegeCheck.index[kibanaIndex].index) {
+    deprecationLogger(
+      `Relying on implicit privileges determined from the index privileges is deprecated and will be removed in the next major version`
+    );
     return {
       username: privilegeCheck.username,
       hasAllRequested: true,
@@ -57,6 +60,9 @@ const hasLegacyPrivileges = async (callWithRequest, request, kibanaVersion, appl
   }
 
   if (privilegeCheck.index[kibanaIndex].read) {
+    deprecationLogger(
+      `Relying on implicit privileges determined from the index privileges is deprecated and will be removed in the next major version`
+    );
     const privilegeMap = buildPrivilegeMap(application, kibanaVersion);
     const implicitPrivileges = privileges.reduce((acc, name) => {
       acc[name] = privilegeMap.read.actions.includes(name);
@@ -87,6 +93,7 @@ export function hasPrivilegesWithServer(server) {
   const kibanaVersion = config.get('pkg.version');
   const application = config.get('xpack.security.rbac.application');
   const kibanaIndex = config.get('kibana.index');
+  const deprecationLogger = (msg) => server.log(['warning', 'deprecated', 'security'], msg);
 
   return function hasPrivilegesWithRequest(request) {
     return async function hasPrivileges(privileges) {
@@ -104,6 +111,7 @@ export function hasPrivilegesWithServer(server) {
 
       if (!privilegesCheck.privileges[loginPrivilege]) {
         privilegesCheck = await hasLegacyPrivileges(
+          deprecationLogger,
           callWithRequest,
           request,
           kibanaVersion,
