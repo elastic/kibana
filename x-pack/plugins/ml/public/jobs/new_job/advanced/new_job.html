@@ -1,10 +1,14 @@
 <ml-nav-menu name="new_job_advanced"></ml-nav-menu>
-<ml-new-job>
+<ml-new-job class="euiPage euiPage--widthIsNotRestricted">
   <ml-message-bar></ml-message-bar>
-  <div ng-controller="MlNewJob" class="container">
-    <div>
-      <h3 class="euiTitle euiTitle--large">{{ui.pageTitle}}</h3>
-      <div class="euiSpacer euiSpacer--s"></div>
+  <div ng-controller="MlNewJob" class="euiPageBody">
+    <div class="euiPanel euiPanel--paddingLarge euiPageContent">
+      <div class="euiPageContentHeader">
+        <div class="euiPageContentHeaderSection">
+          <h3 class="euiTitle euiTitle--large">{{ui.pageTitle}}</h3>
+        </div>
+      </div>
+      <div class="euiPageContentBody">
         <ul class="nav nav-tabs">
           <li
             class="kbn-settings-tab"
@@ -538,5 +542,6 @@
         </div>
 
       </div>
+    </div>
   </div>
 </ml-new-job>
