@@ -11,6 +11,19 @@ import { buildPrivilegeMap } from './privileges';
 import { getClient } from '../../../../../server/lib/get_client_shield';
 import { equivalentPrivileges } from './equivalent_privileges';
 
+export async function registerPrivilegesIfNecessary(server, plugin, xpackInfo) {
+  const { allowRbac } = xpackInfo.feature('security').getLicenseCheckResults();
+
+  if (allowRbac) {
+    try {
+      await registerPrivilegesWithCluster(server);
+    } catch (e) {
+      plugin.status.red(`Unable to register privileges`);
+      server.log(['security', 'error'], `Unable to register privileges with cluster: ${e}`);
+    }
+  }
+}
+
 export async function registerPrivilegesWithCluster(server) {
   const config = server.config();
   const kibanaVersion = config.get('pkg.version');

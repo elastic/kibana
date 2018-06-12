@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { registerPrivilegesWithCluster } from './privilege_action_registry';
+export { registerPrivilegesIfNecessary } from './privilege_action_registry';
 export { getLoginPrivilege, getVersionPrivilege } from './privileges';

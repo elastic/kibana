@@ -16,8 +16,8 @@ import { validateConfig } from './server/lib/validate_config';
 import { authenticateFactory } from './server/lib/auth_redirect';
 import { checkLicense } from './server/lib/check_license';
 import { initAuthenticator } from './server/lib/authentication/authenticator';
-import { mirrorStatusAndInitialize } from './server/lib/mirror_status_and_initialize';
-import { registerPrivilegesWithCluster } from './server/lib/privileges';
+import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
+import { registerPrivilegesIfNecessary } from './server/lib/privileges';
 import { initPrivilegesApi } from './server/routes/api/v1/privileges';
 import { hasPrivilegesWithServer } from './server/lib/authorization/has_privileges';
 import { SecurityAuditLogger } from './server/lib/audit_logger';
@@ -94,21 +94,20 @@ export const security = (kibana) => new kibana.Plugin({
     const xpackMainPlugin = server.plugins.xpack_main;
     const xpackInfo = xpackMainPlugin.info;
 
-    mirrorStatusAndInitialize(xpackMainPlugin.status, this.status, async () => {
-      if (!config.get('xpack.security.rbac.enabled')) {
-        return;
-      }
+    const plugin = this;
 
-      if (!xpackInfo.feature(pluginId).getLicenseCheckResults().allowRbac) {
-        return;
-      }
+    mirrorPluginStatus(xpackMainPlugin, plugin);
 
-      await registerPrivilegesWithCluster(server);
-    });
+    const xpackInfoFeature = xpackInfo.feature(this.id);
 
     // Register a function that is called whenever the xpack info changes,
     // to re-compute the license check results for this plugin
-    xpackInfo.feature(this.id).registerLicenseCheckResultsGenerator(checkLicense);
+    xpackInfoFeature.registerLicenseCheckResultsGenerator(checkLicense);
+
+    // Register a function to respond to xpack license changes
+    xpackInfoFeature.registerLicenseChangeCallback(() => {
+      registerPrivilegesIfNecessary(server, plugin, xpackInfo);
+    });
 
     validateConfig(config, message => server.log(['security', 'warning'], message));
 
