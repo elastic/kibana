@@ -46,9 +46,9 @@ export async function getMlAvgResponseTimes({
             }
           },
           aggs: {
-            anomaly_score: { avg: { field: 'anomaly_score' } },
-            lower: { avg: { field: 'model_lower' } },
-            upper: { avg: { field: 'model_upper' } }
+            anomaly_score: { max: { field: 'anomaly_score' } },
+            lower: { min: { field: 'model_lower' } },
+            upper: { max: { field: 'model_upper' } }
           }
         }
       }
