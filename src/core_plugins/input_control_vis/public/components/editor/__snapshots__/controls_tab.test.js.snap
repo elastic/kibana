@@ -97,7 +97,6 @@ exports[`renders ControlsTab 1`] = `
         >
           <EuiSelect
             aria-label="Select control type"
-            compressed={false}
             fullWidth={false}
             hasNoInitialSelection={false}
             isLoading={false}
