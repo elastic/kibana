@@ -84,7 +84,7 @@ export class GISApp extends React.Component {
     return (
       <div className="wrapper">
         <KibanaMap ref={(kbnMap) => this._kbnMap = kbnMap}/>
-        <LayerControl ref={(layerControl) => this._layerControl = layerControl}/>
+        <LayerControl ref={(layerControl) => this._layerControl = layerControl.getWrappedInstance()}/>
       </div>
     );
   }
