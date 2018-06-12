@@ -54,6 +54,7 @@ exports[`renders DashboardSaveModal 1`] = `
             data-test-subj="dashboardDescription"
             fullWidth={false}
             onChange={[Function]}
+            resize="vertical"
             value="dash description"
           />
         </EuiFormRow>
