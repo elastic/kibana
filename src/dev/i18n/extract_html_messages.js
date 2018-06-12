@@ -114,7 +114,7 @@ function* getFilterMessages(htmlContent) {
   }
 }
 
-function* getDirectiveMessages(htmlContent) {
+export function* getDirectiveMessages(htmlContent) {
   const document = jsdom(htmlContent, {
     features: { ProcessExternalResources: false },
   }).defaultView.document;
@@ -130,7 +130,7 @@ function* getDirectiveMessages(htmlContent) {
       throw new Error(`Cannot parse "${messageId}" message: default message is required.`);
     }
 
-    const context = formatHTMLString(element.getAttribute('i18n-context'));
+    const context = formatHTMLString(element.getAttribute('i18n-context')) || undefined;
     yield [messageId, { message, context }];
   }
 }
