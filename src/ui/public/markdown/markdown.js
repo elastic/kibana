@@ -63,7 +63,7 @@ export const markdownFactory = memoize((whiteListedRules = [], openLinksInNewTab
   /**
    * This method is used to render markdown from the passed parameter
    * into HTML. It will just return an empty string when the markdown is empty.
-   * @param {String} markdown - Rhe markdown String
+   * @param {String} markdown - The markdown String
    * @return {String} - Returns the rendered HTML as string.
    */
   return (markdown) => {
