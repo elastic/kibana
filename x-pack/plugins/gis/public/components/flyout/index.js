@@ -18,4 +18,5 @@ const mapDispatchToProps = {
   toggleFlyout
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(FlyOut);
+const connectedFlyOut = connect(mapStateToProps, mapDispatchToProps, null, { withRef: true })(FlyOut);
+export { connectedFlyOut as FlyOut };
