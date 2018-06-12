@@ -132,7 +132,6 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     $scope.indexPatterns = $route.current.locals.indexPatterns;
     $scope.privileges = shieldPrivileges;
 
-    $scope.rbacEnabled = rbacEnabled;
     const kibanaApplicationPrivilege = $route.current.locals.kibanaApplicationPrivilege;
     const role = $route.current.locals.role;
     $scope.kibanaPrivileges = getKibanaPrivileges(kibanaApplicationPrivilege, role, rbacApplication);
