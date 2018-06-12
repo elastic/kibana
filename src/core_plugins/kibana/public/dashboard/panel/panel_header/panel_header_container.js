@@ -26,8 +26,10 @@ const mapStateToProps = ({ dashboard }, { panelId }) => {
   const embeddable = getEmbeddable(dashboard, panelId);
   const panel = getPanel(dashboard, panelId);
   const embeddableTitle = embeddable ? embeddable.title : '';
+  const embeddableCustomDashboardLink = embeddable ? embeddable.customDashboardLink : '';
   return {
     title: panel.title === undefined ? embeddableTitle : panel.title,
+    customDashboardLink: panel.customDashboardLink == undefined ? embeddableCustomDashboardLink : panel.customDashboardLink,
     isExpanded: getMaximizedPanelId(dashboard) === panelId,
     isViewOnlyMode: getFullScreenMode(dashboard) || getViewMode(dashboard) === DashboardViewMode.VIEW,
     hidePanelTitles: getHidePanelTitles(dashboard),
@@ -40,7 +42,7 @@ const mapDispatchToProps = (dispatch, { panelId }) => ({
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
-  const { isExpanded, isViewOnlyMode, title, hidePanelTitles } = stateProps;
+  const { isExpanded, isViewOnlyMode, title, customDashboardLink, hidePanelTitles } = stateProps;
   const { onMaximizePanel, onMinimizePanel } = dispatchProps;
   const { panelId, embeddableFactory } = ownProps;
   let actions;
@@ -60,6 +62,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 
   return {
     title,
+    customDashboardLink,
     actions,
     isViewOnlyMode,
     hidePanelTitles,

@@ -57,6 +57,8 @@ export const getEmbeddableError = (dashboard, panelId) => getEmbeddable(dashboar
  * @return {string}
  */
 export const getEmbeddableTitle = (dashboard, panelId) => getEmbeddable(dashboard, panelId).title;
+
+export const getEmbeddableCustomDashboardLink = (dashboard, panelId) => getEmbeddable(dashboard, panelId).customDashboardLink;
 /**
  * @param dashboard {DashboardState}
  * @param panelId {string}

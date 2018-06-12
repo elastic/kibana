@@ -91,6 +91,8 @@ export class PanelOptionsMenu extends React.Component {
         onReset={this.props.onResetPanelTitle}
         onUpdatePanelTitle={this.props.onUpdatePanelTitle}
         title={this.props.panelTitle}
+	onUpdatePanelCustomDashboardLink={this.props.onUpdatePanelCustomDashboardLink}
+	customDashboardLink={this.props.panelCustomDashboardLink}
         onClose={this.closePopover}
       />,
     };
@@ -136,8 +138,10 @@ export class PanelOptionsMenu extends React.Component {
 
 PanelOptionsMenu.propTypes = {
   panelTitle: PropTypes.string,
+  panelCustomDashboardLink: PropTypes.string,
   onUpdatePanelTitle: PropTypes.func.isRequired,
   onResetPanelTitle: PropTypes.func.isRequired,
+  onUpdatePanelCustomDashboardLink: PropTypes.func.isRequired,
   editUrl: PropTypes.string, // May be empty if the embeddable is still loading
   toggleExpandedPanel: PropTypes.func.isRequired,
   isExpanded: PropTypes.bool.isRequired,

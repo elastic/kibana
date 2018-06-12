@@ -15,6 +15,7 @@ import {
   getFullScreenMode,
   getViewMode,
   getEmbeddableTitle,
+  getEmbeddableCustomDashboardLink,
   getEmbeddableEditUrl,
   getMaximizedPanelId,
   getEmbeddableError,
@@ -24,6 +25,7 @@ const mapStateToProps = ({ dashboard }, { panelId }) => {
   const embeddable = getEmbeddable(dashboard, panelId);
   return {
     title: embeddable ? getEmbeddableTitle(dashboard, panelId) : '',
+    customDashboardLink: embeddable ? getEmbeddableCustomDashboardLink(dashboard, panelId): '',
     editUrl: embeddable ? getEmbeddableEditUrl(dashboard, panelId) : '',
     error: embeddable ? getEmbeddableError(dashboard, panelId) : '',
 

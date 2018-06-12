@@ -8,6 +8,7 @@ import {
   setPanels,
   resetPanelTitle,
   setPanelTitle,
+  setPanelCustomDashboardLink,
 } from '../actions';
 
 /**
@@ -98,4 +99,18 @@ export const panels = handleActions({
       ...panels,
       [payload.panelIndex]: mergePanelData(payload, panels),
     }),
+
+  [setPanelCustomDashboardLink]:
+    /**
+     * @param panels {Object.<string, PanelState>}
+     * @param payload {PanelState} The new panel state (is merged with existing).
+     * @param payload.panelIndex {String} The id of the panel to reset it's title.
+     * @param payload.customDashboardLink {String} The new title to use.
+     * @return {Object.<string, PanelState>}
+     */
+    (panels, { payload }) => ({
+      ...panels,
+      [payload.panelIndex]: mergePanelData(payload, panels),
+    }),
+
 }, {});

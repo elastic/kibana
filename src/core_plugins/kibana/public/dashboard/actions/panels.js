@@ -11,6 +11,14 @@ export const setPanelTitle = createAction('SET_PANEl_TITLE',
    */
   (title, panelIndex) => ({ title, panelIndex })
 );
+export const setPanelCustomDashboardLink = createAction('SET_PANEl_CUSTOMDASHBORDLINK',
+  /**
+   * @param customDashboardLink {string}
+   * @param panelIndex {string}
+   */
+  (customDashboardLink, panelIndex) => ({ customDashboardLink, panelIndex })
+);
+
 
 
 function panelArrayToMap(panels) {
