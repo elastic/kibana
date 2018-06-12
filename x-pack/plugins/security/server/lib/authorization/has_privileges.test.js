@@ -73,6 +73,7 @@ const createMockCallWithRequest = (responses) => {
 };
 
 test(`uses application privileges if they have all privileges`, async () => {
+  const privilege = 'action:saved_objects/config/get';
   const username = 'foo-username';
   const mockServer = createMockServer();
   const mockCallWithRequest = createMockCallWithRequest([
@@ -81,7 +82,7 @@ test(`uses application privileges if they have all privileges`, async () => {
       privileges: {
         [getVersionPrivilege(defaultVersion)]: true,
         [getLoginPrivilege()]: true,
-        foo: true,
+        [privilege]: true,
       },
       application: defaultApplication,
       username,
@@ -91,7 +92,7 @@ test(`uses application privileges if they have all privileges`, async () => {
   const hasPrivilegesWithRequest = hasPrivilegesWithServer(mockServer);
   const request = Symbol();
   const hasPrivileges = hasPrivilegesWithRequest(request);
-  const privileges = ['foo'];
+  const privileges = [privilege];
   const result = await hasPrivileges(privileges);
 
   expect(mockCallWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
@@ -113,6 +114,7 @@ test(`uses application privileges if they have all privileges`, async () => {
 });
 
 test(`throws error if missing version privilege and has login privilege`, async () => {
+  const privilege = 'action:saved_objects/config/get';
   const mockServer = createMockServer();
   createMockCallWithRequest([
     mockApplicationPrivilegeResponse({
@@ -120,7 +122,7 @@ test(`throws error if missing version privilege and has login privilege`, async 
       privileges: {
         [getVersionPrivilege(defaultVersion)]: false,
         [getLoginPrivilege()]: true,
-        foo: true,
+        [privilege]: true,
       }
     })
   ]);
@@ -128,10 +130,51 @@ test(`throws error if missing version privilege and has login privilege`, async 
   const hasPrivilegesWithRequest = hasPrivilegesWithServer(mockServer);
   const hasPrivileges = hasPrivilegesWithRequest({});
 
-  await expect(hasPrivileges(['foo'])).rejects.toThrowErrorMatchingSnapshot();
+  await expect(hasPrivileges([privilege])).rejects.toThrowErrorMatchingSnapshot();
+});
+
+test(`uses application privileges if the user has the login privilege`, async () => {
+  const privilege = 'action:saved_objects/config/get';
+  const username = 'foo-username';
+  const mockServer = createMockServer();
+  const callWithRequest = createMockCallWithRequest([
+    mockApplicationPrivilegeResponse({
+      hasAllRequested: false,
+      privileges: {
+        [getVersionPrivilege(defaultVersion)]: true,
+        [getLoginPrivilege()]: true,
+        [privilege]: false,
+      },
+      username,
+    }),
+  ]);
+
+  const hasPrivilegesWithRequest = hasPrivilegesWithServer(mockServer);
+  const request = Symbol();
+  const hasPrivileges = hasPrivilegesWithRequest(request);
+  const privileges = [privilege];
+  const result = await hasPrivileges(privileges);
+
+  expect(callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
+    body: {
+      applications: [{
+        application: defaultApplication,
+        resources: [DEFAULT_RESOURCE],
+        privileges: [
+          getVersionPrivilege(defaultVersion), getLoginPrivilege(), ...privileges
+        ]
+      }]
+    }
+  });
+  expect(result).toEqual({
+    success: false,
+    missing: [...privileges],
+    username,
+  });
 });
 
 test(`returns success of false if the user doesn't have any application privileges and no legacy privileges`, async () => {
+  const privilege = 'action:saved_objects/config/get';
   const username = 'foo-username';
   const mockServer = createMockServer();
   const callWithRequest = createMockCallWithRequest([
@@ -140,7 +183,7 @@ test(`returns success of false if the user doesn't have any application privileg
       privileges: {
         [getVersionPrivilege(defaultVersion)]: false,
         [getLoginPrivilege()]: false,
-        foo: false,
+        [privilege]: false,
       },
       username,
     }),
@@ -149,6 +192,63 @@ test(`returns success of false if the user doesn't have any application privileg
       privileges: {
         read: false,
         index: false,
+      },
+      username,
+    })
+  ]);
+
+  const hasPrivilegesWithRequest = hasPrivilegesWithServer(mockServer);
+  const request = Symbol();
+  const hasPrivileges = hasPrivilegesWithRequest(request);
+  const privileges = [privilege];
+  const result = await hasPrivileges(privileges);
+
+  expect(callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
+    body: {
+      applications: [{
+        application: defaultApplication,
+        resources: [DEFAULT_RESOURCE],
+        privileges: [
+          getVersionPrivilege(defaultVersion), getLoginPrivilege(), ...privileges
+        ]
+      }]
+    }
+  });
+  expect(callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
+    body: {
+      index: [{
+        names: [ defaultKibanaIndex ],
+        privileges: ['read', 'index']
+      }]
+    }
+  });
+  expect(result).toEqual({
+    success: false,
+    missing: [getLoginPrivilege(), ...privileges],
+    username,
+  });
+});
+
+//eslint-disable-next-line max-len
+test(`returns success of true if the user doesn't have any application privileges but they have index privilege on kibana index`, async () => {
+  const privilege = 'action:saved_objects/config/create';
+  const username = 'foo-username';
+  const mockServer = createMockServer();
+  const callWithRequest = createMockCallWithRequest([
+    mockApplicationPrivilegeResponse({
+      hasAllRequested: false,
+      privileges: {
+        [getVersionPrivilege(defaultVersion)]: false,
+        [getLoginPrivilege()]: false,
+        [privilege]: false,
+      },
+      username,
+    }),
+    mockLegacyResponse({
+      hasAllRequested: false,
+      privileges: {
+        read: false,
+        index: true,
       },
       username,
     })
@@ -180,12 +280,11 @@ test(`returns success of false if the user doesn't have any application privileg
     }
   });
   expect(result).toEqual({
-    success: false,
-    missing: [getLoginPrivilege(), ...privileges],
+    success: true,
+    missing: [],
     username,
   });
 });
-
 test.skip(`returns missing privileges`, async () => {
   const mockServer = createMockServer();
   mockResponse(false, {
