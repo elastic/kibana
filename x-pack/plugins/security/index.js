@@ -44,7 +44,6 @@ export const security = (kibana) => new kibana.Plugin({
         port: Joi.number().integer().min(0).max(65535)
       }).default(),
       rbac: Joi.object({
-        enabled: Joi.boolean().default(false),
         application: Joi.string().default('kibana').regex(
           /[a-zA-Z0-9-_]+/,
           `may contain alphanumeric characters (a-z, A-Z, 0-9), underscores and hyphens`
@@ -92,10 +91,6 @@ export const security = (kibana) => new kibana.Plugin({
     const xpackMainPlugin = server.plugins.xpack_main;
 
     mirrorStatusAndInitialize(xpackMainPlugin.status, this.status, async () => {
-      if (!config.get('xpack.security.rbac.enabled')) {
-        return;
-      }
-
       await registerPrivilegesWithCluster(server);
     });
 
@@ -113,36 +108,34 @@ export const security = (kibana) => new kibana.Plugin({
     server.auth.strategy('session', 'login', 'required');
 
     const auditLogger = new SecurityAuditLogger(server.config(), new AuditLogger(server, 'security'));
-    if (config.get('xpack.security.rbac.enabled')) {
-      const hasPrivilegesWithRequest = hasPrivilegesWithServer(server);
-      const { savedObjects } = server;
+    const hasPrivilegesWithRequest = hasPrivilegesWithServer(server);
+    const { savedObjects } = server;
 
-      savedObjects.setScopedSavedObjectsClientFactory(({
-        request,
+    savedObjects.setScopedSavedObjectsClientFactory(({
+      request,
+      index,
+      mappings,
+      onBeforeWrite
+    }) => {
+      const hasPrivileges = hasPrivilegesWithRequest(request);
+
+      const adminCluster = server.plugins.elasticsearch.getCluster('admin');
+      const { callWithInternalUser } = adminCluster;
+
+      const repository = new savedObjects.SavedObjectsRepository({
         index,
         mappings,
-        onBeforeWrite
-      }) => {
-        const hasPrivileges = hasPrivilegesWithRequest(request);
-
-        const adminCluster = server.plugins.elasticsearch.getCluster('admin');
-        const { callWithInternalUser } = adminCluster;
-
-        const repository = new savedObjects.SavedObjectsRepository({
-          index,
-          mappings,
-          onBeforeWrite,
-          callCluster: callWithInternalUser
-        });
-
-        return new SecureSavedObjectsClient({
-          repository,
-          errors: savedObjects.SavedObjectsClient.errors,
-          hasPrivileges,
-          auditLogger,
-        });
+        onBeforeWrite,
+        callCluster: callWithInternalUser
       });
-    }
+
+      return new SecureSavedObjectsClient({
+        repository,
+        errors: savedObjects.SavedObjectsClient.errors,
+        hasPrivileges,
+        auditLogger,
+      });
+    });
 
     getUserProvider(server);
 
