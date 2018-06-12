@@ -10,6 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
+  EuiButtonEmpty,
   EuiTitle
 } from '@elastic/eui';
 
@@ -92,6 +93,10 @@ export class LayerControl extends React.Component {
 
   render() {
     const layerFlyout = this._renderLayerFlyout();
+    const addLayer = (
+      <EuiButtonEmpty size="xs" flush="right" onClick={this._showAddLayerWizard}>
+        Add layer
+      </EuiButtonEmpty>);
     return (
       <div>
         <EuiPanel className="LayerControl" hasShadow paddingSize="none">
@@ -103,6 +108,9 @@ export class LayerControl extends React.Component {
           >
             <EuiFlexItem>
               <EuiTitle><h2>Layers</h2></EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {addLayer}
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiFlexGroup>
