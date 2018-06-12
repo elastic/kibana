@@ -72,6 +72,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.clickAddNewVisualizationLink();
       await PageObjects.visualize.clickPieChart();
       await PageObjects.visualize.selectSearch('bytes < 90');
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.visualize.clickBucket('Split Slices');
       await PageObjects.visualize.selectAggregation('Terms');
       await PageObjects.visualize.selectField('memory');
