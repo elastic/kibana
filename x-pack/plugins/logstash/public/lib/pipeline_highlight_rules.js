@@ -31,8 +31,9 @@ const pop = (values) => {
   };
 };
 
-function ValueRule(popStates) {
+function ValueRule(popStates = []) {
   return [
+    new HashRule(pop(['hash', ...popStates])),
     new NumberRule(pop(['number', ...popStates])),
     new ArrayRule(pop(['array', ...popStates])),
     ...getStringRules(pop(['quote', ...popStates])),
@@ -66,6 +67,25 @@ function BarewordRule(next) {
     token: 'bareword',
     regex: /[A-Za-z0-9_]+/,
     next
+  };
+}
+
+function HashRule(next) {
+  return {
+    token: 'hash',
+    regex: openBraceRegex,
+    push: [
+      {
+        token: 'hash',
+        regex: closeBraceRegex,
+        next
+      },
+      {
+        token: 'hashEntryName',
+        regex: /([a-zA-Z]+)/,
+        next: 'hashOperator'
+      }
+    ]
   };
 }
 
@@ -216,16 +236,16 @@ export class PipelineHighlightRules extends TextHighlightRules {
       ],
       attributeValue: [
         ...new ValueRule(['attributeValue', 'attributeOperator'])
-        // {
-        //   token: 'attribute',
-        //   regex: /[a-zA-Z_-]+/,
-        //   next: pop(['attributeValue', 'attributeOperator'])
-        // }
-        // {
-        //   token: 'attribute',
-        //   regex: /.*/,
-        //   next: (state, stack) => pop(stack, ['attributeValue', 'attributeOperator'])
-        // }
+      ],
+      hashOperator: [
+        {
+          token: 'operator',
+          regex: /=>/,
+          next: 'hashValue'
+        }
+      ],
+      hashValue: [
+        ...new ValueRule(['hashValue', 'hashOperator', 'hashEntry'])
       ],
       // pluginSection: [
       //   {
