@@ -64,14 +64,10 @@ export const markdownFactory = memoize((whiteListedRules = [], openLinksInNewTab
    * This method is used to render markdown from the passed parameter
    * into HTML. It will just return an empty string when the markdown is empty.
    * @param {String} markdown - Rhe markdown String
-   * @return {Object} - Returns the dangerouslySetInnerHTML required object
-   * with the rendered HTML stored in the __html key.
+   * @return {String} - Returns the rendered HTML as string.
    */
   return (markdown) => {
-    if (!markdown) {
-      return { __html: '' };
-    }
-    return { __html: markdownIt.render(markdown) };
+    return markdown ? markdownIt.render(markdown) : '';
   };
 }, (whiteListedRules = [], openLinksInNewTab = false) => {
   return whiteListedRules.join('_').concat(openLinksInNewTab);
@@ -99,7 +95,7 @@ export class Markdown extends PureComponent {
          * The Markdown Visulization is, believe it or not, responsible for rendering Markdown.
          * This relies on `markdown-it` to produce safe and correct HTML.
          */
-        dangerouslySetInnerHTML={renderedMarkdown} //eslint-disable-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: renderedMarkdown }} //eslint-disable-line react/no-danger
       />
     );
   }
