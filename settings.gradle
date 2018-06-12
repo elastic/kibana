@@ -4,4 +4,4 @@ include 'pipeline'
 include 'kibana-extra:castro'
 
 include 'analyzer'
-include 'analyzer:common'
+include 'analyzer:common', 'analyzer:java'
