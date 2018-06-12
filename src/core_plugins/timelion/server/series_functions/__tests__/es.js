@@ -85,48 +85,63 @@ describe(filename, () => {
 
 
   describe('createDateAgg', () => {
+    const emptyScriptedFields = [];
     let tlConfig;
     let config;
-    let agg;
     beforeEach(() => {
       tlConfig = tlConfigFn();
       config = {
         timefield: '@timestamp',
         interval: '1y'
       };
-      agg = createDateAgg(config, tlConfig);
     });
 
-
     it('creates a date_histogram with meta.type of time_buckets', () => {
+      const agg = createDateAgg(config, tlConfig, emptyScriptedFields);
       expect(agg.time_buckets.meta.type).to.eql('time_buckets');
       expect(agg.time_buckets.date_histogram).to.be.an('object');
     });
 
     it('has extended_bounds that match tlConfig', () => {
+      const agg = createDateAgg(config, tlConfig, emptyScriptedFields);
       expect(agg.time_buckets.date_histogram.extended_bounds.min).to.equal(tlConfig.time.from);
       expect(agg.time_buckets.date_histogram.extended_bounds.max).to.equal(tlConfig.time.to);
     });
 
     it('sets the timezone', () => {
+      const agg = createDateAgg(config, tlConfig, emptyScriptedFields);
       expect(agg.time_buckets.date_histogram.time_zone).to.equal('Etc/UTC');
     });
 
     it('sets the field and interval', () => {
+      const agg = createDateAgg(config, tlConfig, emptyScriptedFields);
       expect(agg.time_buckets.date_histogram.field).to.equal('@timestamp');
       expect(agg.time_buckets.date_histogram.interval).to.equal('1y');
     });
 
     it('sets min_doc_count to 0', () => {
+      const agg = createDateAgg(config, tlConfig, emptyScriptedFields);
       expect(agg.time_buckets.date_histogram.min_doc_count).to.equal(0);
     });
 
-    describe('metric aggs', () => {
-      const emptyScriptedFields = [];
+    it('sets datehistogram to a scripted time field', () => {
+      config.timefield = 'scriptedTimestamp';
+      const scriptedFields = [{
+        name: 'scriptedTimestamp',
+        script: 'doc["@timestamp"].value',
+        lang: 'painless'
+      }];
+      const agg = createDateAgg(config, tlConfig, scriptedFields);
+      expect(agg.time_buckets.date_histogram).not.to.have.property('field');
+      expect(agg.time_buckets.date_histogram).to.have.property('script');
+      expect(agg.time_buckets.date_histogram.script.inline).to.eql('doc["@timestamp"].value');
+      expect(agg.time_buckets.date_histogram.script.lang).to.eql('painless');
+    });
 
+    describe('metric aggs', () => {
       it('adds a metric agg for each metric', () => {
         config.metric = ['sum:beer', 'avg:bytes', 'percentiles:bytes'];
-        agg = createDateAgg(config, tlConfig, emptyScriptedFields);
+        const agg = createDateAgg(config, tlConfig, emptyScriptedFields);
         expect(agg.time_buckets.aggs['sum(beer)']).to.eql({ sum: { field: 'beer' } });
         expect(agg.time_buckets.aggs['avg(bytes)']).to.eql({ avg: { field: 'bytes' } });
         expect(agg.time_buckets.aggs['percentiles(bytes)']).to.eql({ percentiles: { field: 'bytes' } });
@@ -139,7 +154,7 @@ describe(filename, () => {
           script: 'doc["bytes"].value',
           lang: 'painless'
         }];
-        agg = createDateAgg(config, tlConfig, scriptedFields);
+        const agg = createDateAgg(config, tlConfig, scriptedFields);
         expect(agg.time_buckets.aggs['avg(scriptedBytes)']).to.eql({
           avg: {
             script: {
@@ -152,7 +167,7 @@ describe(filename, () => {
 
       it('has a special `count` metric that uses a script', () => {
         config.metric = ['count'];
-        agg = createDateAgg(config, tlConfig, emptyScriptedFields);
+        const agg = createDateAgg(config, tlConfig, emptyScriptedFields);
         expect(agg.time_buckets.aggs.count.bucket_script).to.be.an('object');
         expect(agg.time_buckets.aggs.count.bucket_script.buckets_path).to.eql('_count');
       });

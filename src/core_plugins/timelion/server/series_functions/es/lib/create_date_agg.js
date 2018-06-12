@@ -25,18 +25,16 @@ export default function createDateAgg(config, tlConfig, scriptedFields) {
   const dateAgg = {
     time_buckets: {
       meta: { type: 'time_buckets' },
-      date_histogram: Object.assign(
-        {
-          interval: config.interval,
-          time_zone: tlConfig.time.timezone,
-          extended_bounds: {
-            min: tlConfig.time.from,
-            max: tlConfig.time.to
-          },
-          min_doc_count: 0
+      date_histogram: {
+        interval: config.interval,
+        time_zone: tlConfig.time.timezone,
+        extended_bounds: {
+          min: tlConfig.time.from,
+          max: tlConfig.time.to
         },
-        buildAggBody(config.timefield, scriptedFields)
-      )
+        min_doc_count: 0,
+        ...buildAggBody(config.timefield, scriptedFields)
+      }
     }
   };
 
