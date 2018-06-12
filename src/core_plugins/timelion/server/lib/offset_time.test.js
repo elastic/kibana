@@ -27,8 +27,12 @@ describe('offset', () => {
     const from = moment('2018-01-01T00:00:00.000Z').valueOf();
     const to = moment('2018-01-01T00:15:00.000Z').valueOf();
 
+    test('throws error when no number is provided', () => {
+      expect(() => preprocessOffset('timerange', from, to)).to.throwError();
+    });
+
     test('throws error with malformed', () => {
-      expect(() => preprocessOffset('kibana_time:notANumber', from, to)).to.throwError();
+      expect(() => preprocessOffset('timerange:notANumber', from, to)).to.throwError();
     });
 
     test('does not modify offset when value is not requesting relative offset', () => {
@@ -36,13 +40,8 @@ describe('offset', () => {
       expect(preprocessOffset(offset, from, to)).to.eql(offset);
     });
 
-    test('converts offset when value is requesting relative offset', () => {
-      const offset = 'kibana_time';
-      expect(preprocessOffset(offset, from, to)).to.eql('-900s');
-    });
-
     test('converts offset when value is requesting relative offset with multiplier', () => {
-      const offset = 'kibana_time:-2';
+      const offset = 'timerange:-2';
       expect(preprocessOffset(offset, from, to)).to.eql('-1800s');
     });
   });

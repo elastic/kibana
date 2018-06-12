@@ -35,6 +35,10 @@ export function offsetTime(milliseconds, offset, reverse) {
   return momentObj.valueOf();
 }
 
+function timeRangeErrorMsg(offset) {
+  return `Malformed timerange offset, expecting "timerange:<number>", received: ${offset}`;
+}
+
 /*
  * Calculate offset when parameter is requesting a relative offset based on requested time range.
  *
@@ -43,17 +47,18 @@ export function offsetTime(milliseconds, offset, reverse) {
  * @param {number} to - kibana global time 'to' in milliseconds
  */
 export function preprocessOffset(offset, from, to) {
-  if (!offset.startsWith('kibana_time')) {
+  if (!offset.startsWith('timerange')) {
     return offset;
   }
 
   const parts = offset.split(':');
-  let factor = -1;
-  if (parts.length > 1) {
-    factor = parseFloat(parts[1]);
-    if (isNaN(factor)) {
-      throw new Error ('Malformed `offset` at ' + offset);
-    }
+  if (parts.length === 1) {
+    throw new Error(timeRangeErrorMsg(offset));
+  }
+
+  const factor = parseFloat(parts[1]);
+  if (isNaN(factor)) {
+    throw new Error(timeRangeErrorMsg(offset));
   }
 
   const deltaSeconds = (to - from) / 1000;

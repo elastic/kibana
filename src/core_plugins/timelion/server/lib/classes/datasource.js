@@ -41,9 +41,9 @@ export default class Datasource extends TimelionFunction {
       name: 'offset',
       types: ['string', 'null'],
       help: 'Offset the series retrieval by a date expression. ' +
-        'Eg -1M to make events from one month ago appear as if they are happening now. ' +
-        'Offset the series relative to Kibana\'s time range by using the value "kibana_time". ' +
-        'Eg kibana_time:-2 will specify an offset that is twice the selected kibana time.'
+        'e.g. "-1M" to make events from one month ago appear as if they are happening now. ' +
+        'Offset the series relative to the charts overall time range, by using the value "timerange", ' +
+        'e.g. "timerange:-2" will specify an offset that is twice the overall chart time range to the past.'
     });
 
     config.args.push({
