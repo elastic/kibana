@@ -19,10 +19,19 @@ const hasApplicationPrivileges = async (callWithRequest, request, kibanaVersion,
     }
   });
 
+  const hasPrivileges = privilegeCheck.application[application][DEFAULT_RESOURCE];
+
+  // We include the login privilege on all privileges, so the existence of it and not the version privilege
+  // lets us know that we're running in an incorrect configuration. Without the login privilege check, we wouldn't
+  // know whether the user just wasn't authorized for this instance of Kibana in general
+  if (!hasPrivileges[getVersionPrivilege(kibanaVersion)] && hasPrivileges[getLoginPrivilege()]) {
+    throw new Error('Multiple versions of Kibana are running against the same Elasticsearch cluster, unable to authorize user.');
+  }
+
   return {
     username: privilegeCheck.username,
     hasAllRequested: privilegeCheck.has_all_requested,
-    privileges: privilegeCheck.application[application][DEFAULT_RESOURCE]
+    privileges: hasPrivileges
   };
 };
 
@@ -40,12 +49,10 @@ const hasLegacyPrivileges = async (callWithRequest, request, kibanaVersion, appl
     return {
       username: privilegeCheck.username,
       hasAllRequested: true,
-      privileges: {
-        ...privileges.reduce((acc, name) => {
-          acc[name] = true;
-          return acc;
-        }, {})
-      }
+      privileges: privileges.reduce((acc, name) => {
+        acc[name] = true;
+        return acc;
+      }, {})
     };
   }
 
@@ -86,7 +93,7 @@ export function hasPrivilegesWithServer(server) {
       const loginPrivilege = getLoginPrivilege();
       const versionPrivilege = getVersionPrivilege(kibanaVersion);
 
-      const allPrivileges = [...privileges, loginPrivilege, versionPrivilege];
+      const allPrivileges = [versionPrivilege, loginPrivilege, ...privileges];
       let privilegesCheck = await hasApplicationPrivileges(callWithRequest, request, kibanaVersion, application, allPrivileges);
 
       if (!privilegesCheck.privileges[loginPrivilege]) {
@@ -101,13 +108,6 @@ export function hasPrivilegesWithServer(server) {
       }
 
       const success = privilegesCheck.hasAllRequested;
-
-      // We include the login privilege on all privileges, so the existence of it and not the version privilege
-      // lets us know that we're running in an incorrect configuration. Without the login privilege check, we wouldn't
-      // know whether the user just wasn't authorized for this instance of Kibana in general
-      if (!privilegesCheck.privileges[versionPrivilege] && privilegesCheck.privileges[loginPrivilege]) {
-        throw new Error('Multiple versions of Kibana are running against the same Elasticsearch cluster, unable to authorize user.');
-      }
 
       return {
         success,
