@@ -45,6 +45,7 @@ export function uiI18nMixin(kbnServer, server, config) {
     ]);
 
     return {
+      locale: defaultLocale,
       ...defaultTranslations,
       ...requestedTranslations,
     };
