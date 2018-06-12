@@ -35,208 +35,182 @@ const isString = value => typeof value === 'string';
 const isObject = value => typeof value === 'object';
 const hasValues = values => Object.keys(values).length > 0;
 
+const EN_LOCALE = 'en';
+const LOCALE_DELIMITER = '-';
+const messages = {};
+const getMessageFormat = memoizeIntlConstructor(IntlMessageFormat);
+
+let defaultLocale = EN_LOCALE;
+let currentLocale = EN_LOCALE;
+let formats = {};
+
+IntlMessageFormat.defaultLocale = defaultLocale;
+IntlRelativeFormat.defaultLocale = defaultLocale;
+
 /**
- * Platform agnostic abstraction that helps to supply locale data to
- * UI frameworks and provides methods for the direct translation.
+ * Returns message by the given message id.
+ * @param {Messages} messages - messages tree
+ * @param {string} id - path to the message that consists of properties
+ * names separated by dots
+ * @returns {string} message - translated message from messages tree
+ * @example
+ * getMessageById({ a: { b: { c: 'test' } } }, 'a.b.c'); // => 'test'
  */
-export class I18n {
-  static EN_LOCALE = 'en';
-  static LOCALE_DELIMITER = '-';
-  static getMessageFormat = memoizeIntlConstructor(IntlMessageFormat);
-  static getRelativeFormat = memoizeIntlConstructor(IntlRelativeFormat);
+function getMessageById(messages, id) {
+  return id.split('.').reduce((val, key) => (val ? val[key] : null), messages);
+}
 
-  /**
-   * Returns message by the given message id.
-   * @param {Messages} messages - messages tree
-   * @param {string} id - path to the message that consists of properties
-   * names separated by dots
-   * @returns {string} message - translated message from messages tree
-   * @example
-   * getMessageById({ a: { b: { c: 'test' } } }, 'a.b.c'); // => 'test'
-   */
-  static getMessageById(messages, id) {
-    return id
-      .split('.')
-      .reduce((val, key) => (val ? val[key] : null), messages);
-  }
+/**
+ * Normalizes locale to make it consistent with IntlMessageFormat locales
+ * @param {string} locale
+ * @returns {string} normalizedLocale
+ */
+function normalizeLocale(locale) {
+  return locale.toLowerCase().replace('_', LOCALE_DELIMITER);
+}
 
-  /**
-   * Normalizes locale to make it consistent with IntlMessageFormat locales
-   * @param {string} locale
-   * @returns {string} normalizedLocale
-   */
-  static normalizeLocale(locale) {
-    return locale.toLowerCase().replace('_', I18n.LOCALE_DELIMITER);
-  }
+/**
+ * Provides a way to register translations with the engine
+ * @param {Messages} newMessages
+ * @param {string} [locale = messages.locale]
+ */
+export function addMessages(newMessages = {}, locale = newMessages.locale) {
+  if (!locale) {
+    throw new Error('[I18n] A `locale` must be provided to add messages.');
+  } else {
+    const normalizedLocale = normalizeLocale(locale);
 
-  _defaultLocale = I18n.EN_LOCALE;
-  _formats = {};
-  _messages = {};
-
-  /**
-   * Creates i18n engine instance and fills messages registry with a passed messages
-   * @constructor
-   * @param {Messages} [messages]
-   * @param {string} [locale = messages.locale]
-   */
-  constructor(messages = {}, locale = messages.locale) {
-    this.setLocale(locale || this._defaultLocale);
-    this.addMessages(messages, this._currentLocale);
-    IntlMessageFormat.defaultLocale = this._defaultLocale;
-    IntlRelativeFormat.defaultLocale = this._defaultLocale;
-  }
-
-  /**
-   * Provides a way to register translations with the engine
-   * @param {Messages} messages
-   * @param {string} [locale = messages.locale]
-   */
-  addMessages(messages = {}, locale = messages.locale) {
-    if (!locale) {
-      throw new Error('[I18n] A `locale` must be provided to add messages.');
-    } else {
-      const normalizedLocale = I18n.normalizeLocale(locale);
-
-      this._messages[normalizedLocale] = {
-        ...this._messages[normalizedLocale],
-        ...messages,
-      };
-    }
-  }
-
-  /**
-   * Returns messages for the current language
-   * @returns {Messages} messages
-   */
-  getMessages() {
-    return this._messages[this._currentLocale];
-  }
-
-  /**
-   * Tells the engine which language to use by given language key
-   * @param {string} locale
-   */
-  setLocale(locale) {
-    if (!locale || !isString(locale)) {
-      throw new Error('[I18n] A `locale` must be non-empty string.');
-    } else {
-      this._currentLocale = I18n.normalizeLocale(locale);
-    }
-  }
-
-  /**
-   * Returns the current locale
-   * @returns {string} locale
-   */
-  getLocale() {
-    return this._currentLocale;
-  }
-
-  /**
-   * Tells the library which language to fallback when missing translations
-   * @param {string} locale
-   */
-  setDefaultLocale(locale) {
-    if (!locale || !isString(locale)) {
-      throw new Error('[I18n] A `locale` must be non-empty string.');
-    } else {
-      this._defaultLocale = I18n.normalizeLocale(locale);
-      IntlMessageFormat.defaultLocale = this._defaultLocale;
-      IntlRelativeFormat.defaultLocale = this._defaultLocale;
-    }
-  }
-
-  /**
-   * Returns the default locale
-   * @returns {string} defaultLocale
-   */
-  getDefaultLocale() {
-    return this._defaultLocale;
-  }
-
-  /**
-   * Supplies a set of options to the underlying formatter
-   * @param {object} formats
-   */
-  setFormats(formats) {
-    if (!isObject(formats) || !hasValues(formats)) {
-      throw new Error('[I18n] A `formats` must be non-empty object.');
-    } else {
-      this._formats = formats;
-    }
-  }
-
-  /**
-   * Returns current formats
-   * @returns {object} formats
-   */
-  getFormats() {
-    return this._formats;
-  }
-
-  /**
-   * Returns array of locales having translations
-   * @returns {string[]} locales
-   */
-  getRegisteredLocales() {
-    return Object.keys(this._messages);
-  }
-
-  /**
-   * Translate message by id
-   * @param {string} id - translation id to be translated
-   * @param {object} [options]
-   * @param {object} [options.values] - values to pass into translation
-   * @param {string} [options.defaultMessage] - will be used unless translation was successful
-   * @returns {string}
-   */
-  translate(id, { values = {}, defaultMessage = '' } = {}) {
-    if (!id) {
-      throw new Error(
-        '[I18n] An `id` must be provided to translate a message.'
-      );
-    }
-
-    const message = I18n.getMessageById(this.getMessages(), id);
-
-    if (!hasValues(values) && process.env.NODE_ENV === 'production') {
-      return message || defaultMessage || id;
-    }
-
-    if (message) {
-      try {
-        const msg = I18n.getMessageFormat(
-          message,
-          this.getLocale(),
-          this.getFormats()
-        );
-
-        return msg.format(values);
-      } catch (e) {
-        throw new Error(
-          `[I18n] Error formatting message: "${id}" for locale: "${this.getLocale()}".\n${e}`
-        );
-      }
-    } else if (defaultMessage) {
-      try {
-        const msg = I18n.getMessageFormat(
-          defaultMessage,
-          this.getDefaultLocale(),
-          this.getFormats()
-        );
-
-        return msg.format(values);
-      } catch (e) {
-        throw new Error(
-          `[I18n] Error formatting the default message for: "${id}".\n${e}`
-        );
-      }
-    } else {
-      throw new Error(
-        `[I18n] Cannot format message: "${id}". Default message must be provided.`
-      );
-    }
+    messages[normalizedLocale] = {
+      ...messages[normalizedLocale],
+      ...newMessages,
+    };
   }
 }
 
-export const i18n = new I18n();
+/**
+ * Returns messages for the current language
+ * @returns {Messages} messages
+ */
+export function getMessages() {
+  return messages[currentLocale];
+}
+
+/**
+ * Tells the engine which language to use by given language key
+ * @param {string} locale
+ */
+export function setLocale(locale) {
+  if (!locale || !isString(locale)) {
+    throw new Error('[I18n] A `locale` must be non-empty string.');
+  } else {
+    currentLocale = normalizeLocale(locale);
+  }
+}
+
+/**
+ * Returns the current locale
+ * @returns {string} locale
+ */
+export function getLocale() {
+  return currentLocale;
+}
+
+/**
+ * Tells the library which language to fallback when missing translations
+ * @param {string} locale
+ */
+export function setDefaultLocale(locale) {
+  if (!locale || !isString(locale)) {
+    throw new Error('[I18n] A `locale` must be non-empty string.');
+  } else {
+    defaultLocale = normalizeLocale(locale);
+    IntlMessageFormat.defaultLocale = defaultLocale;
+    IntlRelativeFormat.defaultLocale = defaultLocale;
+  }
+}
+
+/**
+ * Returns the default locale
+ * @returns {string} defaultLocale
+ */
+export function getDefaultLocale() {
+  return defaultLocale;
+}
+
+/**
+ * Supplies a set of options to the underlying formatter
+ * @param {object} newFormats
+ */
+export function setFormats(newFormats) {
+  if (!isObject(newFormats) || !hasValues(newFormats)) {
+    throw new Error('[I18n] A `formats` must be non-empty object.');
+  } else {
+    formats = newFormats;
+  }
+}
+
+/**
+ * Returns current formats
+ * @returns {object} formats
+ */
+export function getFormats() {
+  return formats;
+}
+
+/**
+ * Returns array of locales having translations
+ * @returns {string[]} locales
+ */
+export function getRegisteredLocales() {
+  return Object.keys(messages);
+}
+
+/**
+ * Translate message by id
+ * @param {string} id - translation id to be translated
+ * @param {object} [options]
+ * @param {object} [options.values] - values to pass into translation
+ * @param {string} [options.defaultMessage] - will be used unless translation was successful
+ * @returns {string}
+ */
+export function translate(id, { values = {}, defaultMessage = '' } = {}) {
+  if (!id) {
+    throw new Error('[I18n] An `id` must be provided to translate a message.');
+  }
+
+  const message = getMessageById(getMessages(), id);
+
+  if (!hasValues(values) && process.env.NODE_ENV === 'production') {
+    return message || defaultMessage || id;
+  }
+
+  if (message) {
+    try {
+      const msg = getMessageFormat(message, getLocale(), getFormats());
+
+      return msg.format(values);
+    } catch (e) {
+      throw new Error(
+        `[I18n] Error formatting message: "${id}" for locale: "${getLocale()}".\n${e}`
+      );
+    }
+  } else if (defaultMessage) {
+    try {
+      const msg = getMessageFormat(
+        defaultMessage,
+        getDefaultLocale(),
+        getFormats()
+      );
+
+      return msg.format(values);
+    } catch (e) {
+      throw new Error(
+        `[I18n] Error formatting the default message for: "${id}".\n${e}`
+      );
+    }
+  } else {
+    throw new Error(
+      `[I18n] Cannot format message: "${id}". Default message must be provided.`
+    );
+  }
+}

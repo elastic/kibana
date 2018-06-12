@@ -30,10 +30,7 @@ const {
 
 if (metadata.translations) {
   i18n.addMessages(metadata.translations);
-
-  if (metadata.translations.locale) {
-    i18n.setLocale(metadata.translations.locale);
-  }
+  i18n.setLocale(metadata.translations.locale);
 }
 
 uiModules.get('i18n')

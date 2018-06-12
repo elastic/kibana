@@ -23,12 +23,11 @@
  @property {string} [locale] - locale of the messages
  */
 
-import { I18nLoader } from '@kbn/i18n';
+import { i18nLoader } from '@kbn/i18n';
 
 export function uiI18nMixin(kbnServer, server, config) {
   const defaultLocale = config.get('i18n.defaultLocale');
   const { translationPaths = [] } = kbnServer.uiExports;
-  const i18nLoader = new I18nLoader();
 
   i18nLoader.registerTranslationFiles(translationPaths);
 
@@ -37,7 +36,7 @@ export function uiI18nMixin(kbnServer, server, config) {
    *  @name request.getUiTranslations
    *  @returns {Promise<Messages>} translations - translation messages
    */
-  server.decorate('request', 'getUiTranslations', async function() {
+  server.decorate('request', 'getUiTranslations', async function () {
     const header = this.headers['accept-language'];
 
     const [defaultTranslations, requestedTranslations] = await Promise.all([

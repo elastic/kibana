@@ -19,8 +19,8 @@
 
 import * as angular from './angular';
 import * as react from './react';
+import * as i18nCore from './core/i18n';
 
 export const AngularI18n = angular;
 export const ReactI18n = react;
-
-export { I18n, i18n } from './core/i18n';
+export const i18n = i18nCore;

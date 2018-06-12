@@ -18,7 +18,7 @@
  */
 
 // TODO: Integrate a new tool for translations checking
-import { I18nLoader } from '@kbn/i18n';
+import { i18nLoader } from '@kbn/i18n';
 
 import { fromRoot, formatListAsProse } from '../src/utils';
 import { findPluginSpecs } from '../src/plugin_discovery';
@@ -66,7 +66,7 @@ async function verifyTranslations(uiExports) {
   }
 
   // get all of the translations from uiExports
-  const translations = await I18nLoader.getAllTranslationsFromPaths(uiExports.translationPaths);
+  const translations = await i18nLoader.getAllTranslationsFromPaths(uiExports.translationPaths);
   const keysWithoutTranslations = Object.entries(
     i18nVerify.getNonTranslatedKeys(keysUsedInViews, translations)
   );

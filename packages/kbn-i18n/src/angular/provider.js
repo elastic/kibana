@@ -17,46 +17,17 @@
  * under the License.
  */
 
-import { i18n } from '../core/i18n';
+import * as i18n from '../core/i18n';
 
 export function i18nProvider() {
-  this.addMessages = function(messages, locale) {
-    i18n.addMessages(messages, locale);
-  };
-
-  this.getMessages = function() {
-    return i18n.getMessages();
-  };
-
-  this.setLocale = function(locale) {
-    i18n.setLocale(locale);
-  };
-
-  this.getLocale = function() {
-    return i18n.getLocale();
-  };
-
-  this.setDefaultLocale = function(locale) {
-    i18n.setDefaultLocale(locale);
-  };
-
-  this.getDefaultLocale = function() {
-    return i18n.getDefaultLocale();
-  };
-
-  this.setFormats = function(formats) {
-    i18n.setFormats(formats);
-  };
-
-  this.getFormats = function() {
-    return i18n.getFormats();
-  };
-
-  this.getRegisteredLocales = function() {
-    return i18n.getRegisteredLocales();
-  };
-
-  this.$get = function() {
-    return i18n.translate.bind(i18n);
-  };
+  this.addMessages = i18n.addMessages;
+  this.getMessages = i18n.getMessages;
+  this.setLocale = i18n.setLocale;
+  this.getLocale = i18n.getLocale;
+  this.setDefaultLocale = i18n.setDefaultLocale;
+  this.getDefaultLocale = i18n.getDefaultLocale;
+  this.setFormats = i18n.setFormats;
+  this.getFormats = i18n.getFormats;
+  this.getRegisteredLocales = i18n.getRegisteredLocales;
+  this.$get = i18n.translate;
 }

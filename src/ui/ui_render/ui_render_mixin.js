@@ -21,7 +21,7 @@ import { defaults } from 'lodash';
 import { props, reduce as reduceAsync } from 'bluebird';
 import Boom from 'boom';
 import { resolve } from 'path';
-import { I18n } from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { AppBootstrap } from './bootstrap';
 
 export function uiRenderMixin(kbnServer, server, config) {
@@ -139,7 +139,9 @@ export function uiRenderMixin(kbnServer, server, config) {
     try {
       const request = reply.request;
       const translations = await request.getUiTranslations();
-      const i18n = new I18n(translations);
+
+      i18n.addMessages(translations);
+      i18n.setLocale(translations.locale);
 
       return reply.view('ui_app', {
         app,
