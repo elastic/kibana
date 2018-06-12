@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { KibanaMap } from './kibana_map';
-import { LayerControl } from './layer_control';
+import LayerControl from './layer_control';
 
 import { TMSSource } from '../sources/tms_source';
 import { EMSVectorSource } from '../sources/ems_vector_source';
