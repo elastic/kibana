@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import eventEmitter from 'event-emitter';
 import React from 'react';
-import * as ol from 'openlayers';
 import FlyOut from './flyout';
+import * as ol from 'openlayers';
+import eventEmitter from 'event-emitter';
 
 export class KibanaMap extends React.Component {
 

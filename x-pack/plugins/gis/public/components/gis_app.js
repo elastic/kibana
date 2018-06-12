@@ -6,8 +6,6 @@
 
 import React from 'react';
 import { KibanaMap } from './kibana_map';
-import LayerControl from './layer_control';
-
 import { TMSSource } from '../sources/tms_source';
 import { EMSVectorSource } from '../sources/ems_vector_source';
 import { EMSTMSSource } from '../sources/ems_tms_source';
@@ -16,6 +14,7 @@ import { KbnYmlVectorSource } from '../sources/kbnyml_vector_source';
 
 import { TileLayer } from '../layers/tile_layer';
 import { VectorLayer } from '../layers/vector_layer';
+import { LayerControl } from './layer_control';
 
 export class GISApp extends React.Component {
 

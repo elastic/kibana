@@ -18,4 +18,5 @@ const mapDispatchToProps = {
   toggleFlyout
 };
 
-export default connect(mapStateToProps, mapDispatchToProps, null, { withRef: true })(LayerControl);
+const connectedLayerControl = connect(mapStateToProps, mapDispatchToProps, null, { withRef: true })(LayerControl);
+export { connectedLayerControl as LayerControl };
