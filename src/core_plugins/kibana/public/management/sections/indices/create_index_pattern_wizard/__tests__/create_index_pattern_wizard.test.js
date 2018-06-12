@@ -77,6 +77,25 @@ describe('CreateIndexPatternWizard', () => {
     expect(component).toMatchSnapshot();
   });
 
+  it('shows system indices even if there are no other indices if the include system indices is toggled', async () => {
+    const component = shallow(
+      <CreateIndexPatternWizard
+        loadingDataDocUrl={loadingDataDocUrl}
+        initialQuery={initialQuery}
+        services={services}
+      />
+    );
+
+    component.setState({
+      isInitiallyLoadingIndices: false,
+      isIncludingSystemIndices: true,
+      allIndices: [{ name: '.kibana ' }]
+    });
+
+    await component.update();
+    expect(component).toMatchSnapshot();
+  });
+
   it('renders index pattern step when there are indices', async () => {
     const component = shallow(
       <CreateIndexPatternWizard

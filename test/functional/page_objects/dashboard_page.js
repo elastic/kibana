@@ -167,8 +167,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('clonedDashboardTitle', title);
     }
 
-    async isCloneDuplicateTitleWarningDisplayed() {
-      return await testSubjects.exists('cloneModalTitleDupicateWarnMsg');
+    async isDuplicateTitleWarningDisplayed() {
+      return await testSubjects.exists('titleDupicateWarnMsg');
     }
 
     async clickEdit() {
@@ -286,13 +286,25 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await this.enterDashboardTitleAndClickSave(dashName, saveOptions);
 
       if (saveOptions.needsConfirm) {
-        await PageObjects.common.clickConfirmOnModal();
+        await this.clickSave();
       }
 
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       // Confirm that the Dashboard has been saved.
       return await testSubjects.exists('saveDashboardSuccess');
+    }
+
+    async cancelSave() {
+      log.debug('Canceling save');
+      await testSubjects.click('saveCancelButton');
+    }
+
+    async clickSave() {
+      await retry.try(async () => {
+        log.debug('clicking final Save button for named dashboard');
+        return await testSubjects.click('confirmSaveDashboardButton');
+      });
     }
 
     /**
@@ -316,10 +328,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         await this.setSaveAsNewCheckBox(saveOptions.saveAsNew);
       }
 
-      await retry.try(async () => {
-        log.debug('clicking final Save button for named dashboard');
-        return await testSubjects.click('confirmSaveDashboardButton');
-      });
+      await this.clickSave();
     }
 
     async selectDashboard(dashName) {
@@ -449,14 +458,20 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await dashboardAddPanel.addVisualizations(visualizations);
     }
 
-    async setTimepickerInDataRange() {
+    async setTimepickerInHistoricalDataRange() {
       const fromTime = '2015-09-19 06:31:44.000';
       const toTime = '2015-09-23 18:31:44.000';
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
     }
 
-    async setTimepickerIn63DataRange() {
+    async setTimepickerInDataRange() {
       const fromTime = '2018-01-01 00:00:00.000';
+      const toTime = '2018-04-13 00:00:00.000';
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+    }
+
+    async setTimepickerInLogstashDataRange() {
+      const fromTime = '2018-04-09 00:00:00.000';
       const toTime = '2018-04-13 00:00:00.000';
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
     }

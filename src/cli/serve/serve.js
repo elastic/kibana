@@ -217,6 +217,9 @@ export default function (program) {
       const KbnServer = require('../../server/kbn_server');
       try {
         kbnServer = new KbnServer(settings);
+        if (shouldStartRepl(opts)) {
+          startRepl(kbnServer);
+        }
         await kbnServer.ready();
       } catch (error) {
         const { server } = kbnServer;
@@ -247,10 +250,6 @@ export default function (program) {
         await kbnServer.applyLoggingConfiguration(settings);
         kbnServer.server.log(['info', 'config'], 'Reloaded logging configuration due to SIGHUP.');
       });
-
-      if (shouldStartRepl(opts)) {
-        startRepl(kbnServer);
-      }
 
       return kbnServer;
     });

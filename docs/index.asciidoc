@@ -4,7 +4,6 @@
 :include-xpack:  true
 :lang:           en
 :kib-repo-dir:   {docdir}
-:xkb-repo-dir:   {docdir}/../x-pack/docs/{lang}
 :blog-ref:       https://www.elastic.co/blog/
 :wikipedia:      https://en.wikipedia.org/wiki
 
@@ -25,13 +24,13 @@ include::introduction.asciidoc[]
 
 include::setup.asciidoc[]
 
-include::{xkb-repo-dir}/setup/setup-xkb.asciidoc[]
+include::setup/setup-xkb.asciidoc[]
 
-include::{xkb-repo-dir}/monitoring/monitoring-xkib.asciidoc[]
+include::monitoring/monitoring-xkib.asciidoc[]
 
-include::{xkb-repo-dir}/security/securing-kibana.asciidoc[]
+include::security/securing-kibana.asciidoc[]
 
-include::{xkb-repo-dir}/settings/settings-xkb.asciidoc[]
+include::settings/settings-xkb.asciidoc[]
 
 include::migration.asciidoc[]
 
@@ -45,31 +44,29 @@ include::dashboard.asciidoc[]
 
 include::timelion.asciidoc[]
 
-include::{xkb-repo-dir}/ml/index.asciidoc[]
+include::ml/index.asciidoc[]
 
-include::{xkb-repo-dir}/apm/index.asciidoc[]
+include::apm/index.asciidoc[]
 
-include::{xkb-repo-dir}/graph/index.asciidoc[]
+include::graph/index.asciidoc[]
 
 include::dev-tools.asciidoc[]
 
-include::{xkb-repo-dir}/searchprofiler/index.asciidoc[]
-
-include::{xkb-repo-dir}/grokdebugger/index.asciidoc[]
-
-include::{xkb-repo-dir}/monitoring/index.asciidoc[]
+include::monitoring/index.asciidoc[]
 
 include::management.asciidoc[]
 
-include::{xkb-repo-dir}/security/index.asciidoc[]
+include::security/index.asciidoc[]
 
-include::{xkb-repo-dir}/management/watcher-ui/index.asciidoc[]
+include::management/watcher-ui/index.asciidoc[]
 
-include::{xkb-repo-dir}/upgrade-assistant/index.asciidoc[]
+include::management/upgrade-assistant/index.asciidoc[]
 
-include::{xkb-repo-dir}/dashboard_only_mode/index.asciidoc[]
+include::management/dashboard_only_mode/index.asciidoc[]
 
-include::{xkb-repo-dir}/reporting/index.asciidoc[]
+include::reporting/index.asciidoc[]
+
+include::api.asciidoc[]
 
 include::plugins.asciidoc[]
 

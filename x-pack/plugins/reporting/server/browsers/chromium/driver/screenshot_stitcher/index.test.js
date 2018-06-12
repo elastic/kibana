@@ -10,6 +10,10 @@ import { promisify } from 'bluebird';
 
 import { screenshotStitcher } from './index';
 
+const loggerMock = {
+  debug: () => {}
+};
+
 const fsp = {
   readFile: promisify(fs.readFile)
 };
@@ -53,7 +57,7 @@ test(`single screenshot`, async () => {
 
   const fn = jest.fn();
   fn.mockReturnValueOnce(getSingleWhitePixel());
-  const data = await screenshotStitcher(clip, 1, 1, fn);
+  const data = await screenshotStitcher(clip, 1, 1, fn, loggerMock);
 
   expect(fn.mock.calls.length).toBe(1);
   expect(fn.mock.calls[0][0]).toEqual({ x: 0, y: 0, width: 1, height: 1 });
@@ -72,7 +76,7 @@ test(`single screenshot, when zoom creates partial pixel we round up`, async () 
 
   const fn = jest.fn();
   fn.mockReturnValueOnce(get2x2White());
-  const data = await screenshotStitcher(clip, 2, 1, fn);
+  const data = await screenshotStitcher(clip, 2, 1, fn, loggerMock);
 
   expect(fn.mock.calls.length).toBe(1);
   expect(fn.mock.calls[0][0]).toEqual({ x: 0, y: 0, width: 1, height: 1 });
@@ -92,7 +96,7 @@ test(`two screenshots, no zoom`, async () => {
   const fn = jest.fn();
   fn.mockReturnValueOnce(getSingleWhitePixel());
   fn.mockReturnValueOnce(getSingleBlackPixel());
-  const data = await screenshotStitcher(clip, 1, 1, fn);
+  const data = await screenshotStitcher(clip, 1, 1, fn, loggerMock);
 
   expect(fn.mock.calls.length).toBe(2);
   expect(fn.mock.calls[0][0]).toEqual({ x: 0, y: 0, width: 1, height: 1 });
@@ -116,7 +120,7 @@ test(`four screenshots, zoom`, async () => {
   fn.mockReturnValueOnce(get2x2Black());
   fn.mockReturnValueOnce(get2x2White());
 
-  const data = await screenshotStitcher(clip, 2, 1, fn);
+  const data = await screenshotStitcher(clip, 2, 1, fn, loggerMock);
 
   expect(fn.mock.calls.length).toBe(4);
   expect(fn.mock.calls[0][0]).toEqual({ x: 0, y: 0, width: 1, height: 1 });
@@ -143,7 +147,7 @@ test(`four screenshots, zoom and offset`, async () => {
   fn.mockReturnValueOnce(get2x2Black());
   fn.mockReturnValueOnce(get2x2White());
 
-  const data = await screenshotStitcher(clip, 2, 1, fn);
+  const data = await screenshotStitcher(clip, 2, 1, fn, loggerMock);
 
   expect(fn.mock.calls.length).toBe(4);
   expect(fn.mock.calls[0][0]).toEqual({ x: 1, y: 1, width: 1, height: 1 });

@@ -143,6 +143,17 @@ export class Config {
     return clone(value);
   }
 
+  getDefault(key) {
+    const schemaKey = Array.isArray(key) ? key.join('.') : key;
+
+    const subSchema = Joi.reach(this.getSchema(), schemaKey);
+    if (!subSchema) {
+      throw new Error(`Unknown config key: ${key}.`);
+    }
+
+    return clone(_.get(Joi.describe(subSchema), 'flags.default'));
+  }
+
   has(key) {
     function has(key, schema, path) {
       path = path || [];

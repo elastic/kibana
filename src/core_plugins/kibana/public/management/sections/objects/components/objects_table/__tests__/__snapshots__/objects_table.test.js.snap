@@ -123,93 +123,100 @@ exports[`ObjectsTable relationships should show the flyout 1`] = `
 `;
 
 exports[`ObjectsTable should render normally 1`] = `
-<div
-  style={
-    Object {
-      "padding": "0 1rem",
-    }
-  }
->
-  <Header
-    onExportAll={[Function]}
-    onImport={[Function]}
-    onRefresh={[Function]}
-    totalCount={4}
-  />
-  <EuiSpacer
-    size="xs"
-  />
-  <Table
-    filterOptions={
-      Array [
-        Object {
-          "name": "index-pattern",
-          "value": "index-pattern",
-          "view": "index-pattern (0)",
-        },
-        Object {
-          "name": "visualization",
-          "value": "visualization",
-          "view": "visualization (0)",
-        },
-        Object {
-          "name": "dashboard",
-          "value": "dashboard",
-          "view": "dashboard (0)",
-        },
-        Object {
-          "name": "search",
-          "value": "search",
-          "view": "search (0)",
-        },
-      ]
-    }
-    getEditUrl={[Function]}
-    goInApp={[Function]}
-    isSearching={false}
-    itemId="id"
-    items={
-      Array [
-        Object {
-          "icon": "indexPatternApp",
-          "id": "1",
-          "title": "MyIndexPattern*",
-          "type": "index-pattern",
-        },
-        Object {
-          "icon": "search",
-          "id": "2",
-          "title": "MySearch",
-          "type": "search",
-        },
-        Object {
-          "icon": "dashboardApp",
-          "id": "3",
-          "title": "MyDashboard",
-          "type": "dashboard",
-        },
-        Object {
-          "icon": "visualizeApp",
-          "id": "4",
-          "title": "MyViz",
-          "type": "visualization",
-        },
-      ]
-    }
-    onDelete={[Function]}
-    onExport={[Function]}
-    onQueryChange={[Function]}
-    onShowRelationships={[Function]}
-    onTableChange={[Function]}
-    pageIndex={0}
-    pageSize={15}
-    selectedSavedObjects={Array []}
-    selectionConfig={
+<EuiPage>
+  <EuiPageContent
+    horizontalPosition="center"
+    panelPaddingSize="l"
+    style={
       Object {
-        "onSelectionChange": [Function],
+        "marginBottom": 16,
+        "marginTop": 16,
+        "maxWidth": 1000,
       }
     }
-    totalItemCount={4}
-  />
-</div>
+    verticalPosition="center"
+  >
+    <Header
+      onExportAll={[Function]}
+      onImport={[Function]}
+      onRefresh={[Function]}
+      totalCount={4}
+    />
+    <EuiSpacer
+      size="xs"
+    />
+    <Table
+      filterOptions={
+        Array [
+          Object {
+            "name": "index-pattern",
+            "value": "index-pattern",
+            "view": "index-pattern (0)",
+          },
+          Object {
+            "name": "visualization",
+            "value": "visualization",
+            "view": "visualization (0)",
+          },
+          Object {
+            "name": "dashboard",
+            "value": "dashboard",
+            "view": "dashboard (0)",
+          },
+          Object {
+            "name": "search",
+            "value": "search",
+            "view": "search (0)",
+          },
+        ]
+      }
+      getEditUrl={[Function]}
+      goInApp={[Function]}
+      isSearching={false}
+      itemId="id"
+      items={
+        Array [
+          Object {
+            "icon": "indexPatternApp",
+            "id": "1",
+            "title": "MyIndexPattern*",
+            "type": "index-pattern",
+          },
+          Object {
+            "icon": "search",
+            "id": "2",
+            "title": "MySearch",
+            "type": "search",
+          },
+          Object {
+            "icon": "dashboardApp",
+            "id": "3",
+            "title": "MyDashboard",
+            "type": "dashboard",
+          },
+          Object {
+            "icon": "visualizeApp",
+            "id": "4",
+            "title": "MyViz",
+            "type": "visualization",
+          },
+        ]
+      }
+      onDelete={[Function]}
+      onExport={[Function]}
+      onQueryChange={[Function]}
+      onShowRelationships={[Function]}
+      onTableChange={[Function]}
+      pageIndex={0}
+      pageSize={15}
+      selectedSavedObjects={Array []}
+      selectionConfig={
+        Object {
+          "onSelectionChange": [Function],
+        }
+      }
+      totalItemCount={4}
+    />
+  </EuiPageContent>
+</EuiPage>
 `;

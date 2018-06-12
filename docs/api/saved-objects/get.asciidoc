@@ -1,0 +1,46 @@
+[[saved-objects-api-get]]
+=== Get Object
+
+experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+
+The get saved object API enables you to retrieve a single Kibana saved object
+by id.
+
+==== Request
+
+`GET /api/saved_objects/<type>/<id>`
+
+==== Path Parameters
+
+`type` (required)::
+  (string) Valid options, include: `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`
+
+`id` (required)::
+  (string) ID of object to retrieve
+
+
+==== Examples
+
+The following example retrieves the index pattern object with an id of
+`my-pattern`.
+
+[source,js]
+--------------------------------------------------
+GET api/saved_objects/index-pattern/my-pattern
+--------------------------------------------------
+// KIBANA
+
+A successful call returns a response code of `200` and a response body
+containing a JSON structure similar to the following example:
+
+[source,js]
+--------------------------------------------------
+{
+  "id": "my-pattern",
+  "type": "index-pattern",
+  "version": 1,
+  "attributes": {
+    "title": "my-pattern-*"
+  }
+}
+--------------------------------------------------

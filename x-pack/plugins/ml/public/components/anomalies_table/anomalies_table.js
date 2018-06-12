@@ -11,7 +11,6 @@
 
 import PropTypes from 'prop-types';
 import _ from 'lodash';
-import $ from 'jquery';
 
 import React, {
   Component
@@ -290,45 +289,27 @@ class AnomaliesTable extends Component {
     this.setState({ itemIdToExpandedRowMap });
   };
 
-  onMouseOver = (event) => {
-    // Triggered when the mouse is somewhere over the table.
-    // Traverse through the table DOM to find the expand/collapse
-    // button which stores the ID of the row.
-    let mouseOverRecord = undefined;
-    const target = $(event.target);
-    const parentRow = target.closest('tr');
-    const firstCell = parentRow.children('td').first();
-    if (firstCell !== undefined) {
-      const expandButton = firstCell.find('button').first();
-      if (expandButton.length > 0) {
-        const rowId = expandButton.attr('data-row-id');
-        mouseOverRecord = this.props.tableData.anomalies.find((anomaly) => {
-          return (anomaly.rowId === rowId);
-        });
-      }
-    }
-
+  onMouseOverRow = (record) => {
     if (this.mouseOverRecord !== undefined) {
-      if (mouseOverRecord === undefined || this.mouseOverRecord.rowId !== mouseOverRecord.rowId) {
+      if (this.mouseOverRecord.rowId !== record.rowId) {
         // Mouse is over a different row, fire mouseleave on the previous record.
         mlAnomaliesTableService.anomalyRecordMouseleave.changed(this.mouseOverRecord);
 
-        if (mouseOverRecord !== undefined) {
-          // Mouse is over a new row, fire mouseenter on the new record.
-          mlAnomaliesTableService.anomalyRecordMouseenter.changed(mouseOverRecord);
-        }
+        // fire mouseenter on the new record.
+        mlAnomaliesTableService.anomalyRecordMouseenter.changed(record);
       }
-    } else if (mouseOverRecord !== undefined) {
+    } else {
       // Mouse is now over a row, fire mouseenter on the record.
-      mlAnomaliesTableService.anomalyRecordMouseenter.changed(mouseOverRecord);
+      mlAnomaliesTableService.anomalyRecordMouseenter.changed(record);
     }
 
-    this.mouseOverRecord = mouseOverRecord;
-  };
+    this.mouseOverRecord = record;
+  }
 
-  onMouseLeave = () => {
+  onMouseLeaveRow = () => {
     if (this.mouseOverRecord !== undefined) {
       mlAnomaliesTableService.anomalyRecordMouseleave.changed(this.mouseOverRecord);
+      this.mouseOverRecord = undefined;
     }
   };
 
@@ -366,6 +347,13 @@ class AnomaliesTable extends Component {
       }
     };
 
+    const getRowProps = (item) => {
+      return {
+        onMouseOver: () => this.onMouseOverRow(item),
+        onMouseLeave: () => this.onMouseLeaveRow()
+      };
+    };
+
     return (
       <EuiInMemoryTable
         className="ml-anomalies-table"
@@ -379,8 +367,7 @@ class AnomaliesTable extends Component {
         itemId="rowId"
         itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
         compressed={true}
-        onMouseOver={this.onMouseOver}
-        onMouseLeave={this.onMouseLeave}
+        rowProps={getRowProps}
       />
     );
   }

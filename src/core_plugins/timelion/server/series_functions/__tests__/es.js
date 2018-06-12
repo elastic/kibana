@@ -181,6 +181,13 @@ describe(filename, () => {
       expect(request.index).to.equal('beer');
     });
 
+    it('sets the timeout on the request', () => {
+      config.index = 'beer';
+      const request = fn(config, tlConfig, emptyScriptedFields);
+
+      expect(request.timeout).to.equal('30000ms');
+    });
+
     it('always sets body.size to 0', () => {
       const request = fn(config, tlConfig, emptyScriptedFields);
 
