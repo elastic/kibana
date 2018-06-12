@@ -24,7 +24,9 @@ export const WorkpadHeader = ({ workpadName, editing, toggleEditing }) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <FullscreenControl className={`clickable`}>
-            {({ toggleFullscreen }) => <EuiIcon type="play" size="xl" onClick={toggleFullscreen} />}
+            {({ toggleFullscreen }) => (
+              <EuiIcon type="fullScreen" size="l" onClick={toggleFullscreen} />
+            )}
           </FullscreenControl>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
