@@ -10,7 +10,7 @@ import {
   EuiSpacer,
   EuiRadio
 } from '@elastic/eui';
-import * as util from './util';
+import * as util from '../util';
 
 const GEO_LAYERS_URL = `http://layers.url.tbd`;
 
