@@ -45,29 +45,34 @@ const hasLegacyPrivileges = async (deprecationLogger, callWithRequest, request, 
     }
   });
 
+  const createPrivileges = (cb) => {
+    return privileges.reduce((acc, name) => {
+      acc[name] = cb(name);
+      return acc;
+    }, {});
+  };
+
+  // if they have the index privilege, then we grant them all actions
   if (privilegeCheck.index[kibanaIndex].index) {
     deprecationLogger(
       `Relying on implicit privileges determined from the index privileges is deprecated and will be removed in the next major version`
     );
+
+    const implicitPrivileges = createPrivileges(() => true);
     return {
       username: privilegeCheck.username,
       hasAllRequested: true,
-      privileges: privileges.reduce((acc, name) => {
-        acc[name] = true;
-        return acc;
-      }, {})
+      privileges: implicitPrivileges
     };
   }
 
+  // if they have the read privilege, then we only grant them the read actions
   if (privilegeCheck.index[kibanaIndex].read) {
     deprecationLogger(
       `Relying on implicit privileges determined from the index privileges is deprecated and will be removed in the next major version`
     );
     const privilegeMap = buildPrivilegeMap(application, kibanaVersion);
-    const implicitPrivileges = privileges.reduce((acc, name) => {
-      acc[name] = privilegeMap.read.actions.includes(name);
-      return acc;
-    }, {});
+    const implicitPrivileges = createPrivileges(name => privilegeMap.read.actions.includes(name));
 
     return {
       username: privilegeCheck.username,
@@ -79,10 +84,7 @@ const hasLegacyPrivileges = async (deprecationLogger, callWithRequest, request, 
   return {
     username: privilegeCheck.username,
     hasAllRequested: false,
-    privileges: privileges.reduce((acc, name) => {
-      acc[name] = false;
-      return acc;
-    }, {})
+    privileges: createPrivileges(() => false)
   };
 };
 
