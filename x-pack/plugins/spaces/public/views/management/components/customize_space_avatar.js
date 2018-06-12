@@ -38,12 +38,12 @@ export class CustomizeSpaceAvatar extends Component {
       <Fragment>
         <EuiFlexItem grow={false}>
           <EuiFormRow label={'Initials (2 max)'}>
-            <EuiFieldText name="spaceInitials" value={getSpaceInitials(space)} onChange={() => { }} />
+            <EuiFieldText name="spaceInitials" value={getSpaceInitials(space)} onChange={this.onInitialsChange} />
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormRow label={'Color'}>
-            <EuiColorPicker color={getSpaceColor(space)} onChange={() => { }} />
+            <EuiColorPicker color={getSpaceColor(space)} onChange={this.onColorChange} />
           </EuiFormRow>
         </EuiFlexItem>
       </Fragment>
@@ -63,6 +63,20 @@ export class CustomizeSpaceAvatar extends Component {
   showFields = () => {
     this.setState({
       expanded: true
+    });
+  }
+
+  onInitialsChange = (initials) => {
+    this.props.onChange({
+      ...this.props.space,
+      initials
+    });
+  };
+
+  onColorChange = (color) => {
+    this.props.onChange({
+      ...this.props.space,
+      color
     });
   }
 }

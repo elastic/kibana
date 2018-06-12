@@ -17,7 +17,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
-  EuiAvatar,
   EuiPanel,
 } from '@elastic/eui';
 
@@ -28,6 +27,7 @@ import { Notifier, toastNotifications } from 'ui/notify';
 import { UrlContext } from './url_context';
 import { toUrlContext, isValidUrlContext } from '../lib/url_context_utils';
 import { CustomizeSpaceAvatar } from './customize_space_avatar';
+import { SpaceAvatar } from './space_avatar';
 
 export class ManageSpacePage extends React.Component {
   state = {
@@ -103,10 +103,10 @@ export class ManageSpacePage extends React.Component {
                   <EuiFlexGroup responsive={false}>
                     <EuiFlexItem grow={false}>
                       <EuiFormRow hasEmptyLabelSpace={true}>
-                        <EuiAvatar name={this.state.space.name || ''} />
+                        <SpaceAvatar space={this.state.space} />
                       </EuiFormRow>
                     </EuiFlexItem>
-                    <CustomizeSpaceAvatar space={this.state.space} onChange={() => { }} />
+                    <CustomizeSpaceAvatar space={this.state.space} onChange={this.onAvatarChange} />
                   </EuiFlexGroup>
                 </EuiFlexItem>
 
@@ -214,6 +214,12 @@ export class ManageSpacePage extends React.Component {
       }
     });
   };
+
+  onAvatarChange = (space) => {
+    this.setState({
+      space
+    });
+  }
 
   saveSpace = () => {
     this.setState({
