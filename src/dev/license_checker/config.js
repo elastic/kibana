@@ -28,6 +28,7 @@ export const LICENSE_WHITELIST = [
   '(WTFPL OR MIT)',
   'AFLv2.1',
   'Apache 2.0',
+  'Apache2',
   'Apache License, v2.0',
   'Apache License, Version 2.0',
   'Apache',
@@ -48,6 +49,7 @@ export const LICENSE_WHITELIST = [
   'CC-BY-3.0',
   'CC-BY-4.0',
   'ISC',
+  'ISC*',
   'MIT OR GPL-2.0',
   'MIT',
   'MIT*',
@@ -61,16 +63,20 @@ export const LICENSE_WHITELIST = [
 ];
 
 export const LICENSE_OVERRIDES = {
-  // TODO can be removed once we upgrade past elasticsearch-browser@14.0.0
-  'elasticsearch-browser@13.0.1': ['Apache-2.0'],
 
   // TODO can be removed once we upgrade past colors.js@1.0.0
   'colors@0.5.1': ['MIT'],
 
   // TODO can be removed once we upgrade past map-stream@0.5.0
   'map-stream@0.1.0': ['MIT'],
+
   'uglify-js@2.2.5': ['BSD'],
   'png-js@0.1.1': ['MIT'],
   'sha.js@2.4.11': ['BSD-3-Clause AND MIT'],
+
+  // TODO can be removed if the ISSUE#239 was accepted on the source
   'xmldom@0.1.19': ['MIT'],
+
+  // TODO can be removed if the PR#41 was accepted on the source
+  'pdf-image@1.1.0': ['MIT'],
 };
