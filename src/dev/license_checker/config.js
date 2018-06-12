@@ -28,7 +28,6 @@ export const LICENSE_WHITELIST = [
   '(WTFPL OR MIT)',
   'AFLv2.1',
   'Apache 2.0',
-  'Apache2',
   'Apache License, v2.0',
   'Apache License, Version 2.0',
   'Apache',
@@ -43,6 +42,7 @@ export const LICENSE_WHITELIST = [
   'BSD-3-Clause AND MIT',
   'BSD-3-Clause OR MIT',
   'BSD-3-Clause',
+  '(BSD-3-Clause OR GPL-2.0)',
   'BSD-like',
   'CC0-1.0',
   'CC-BY',
@@ -74,9 +74,15 @@ export const LICENSE_OVERRIDES = {
   'png-js@0.1.1': ['MIT'],
   'sha.js@2.4.11': ['BSD-3-Clause AND MIT'],
 
-  // TODO can be removed if the ISSUE#239 was accepted on the source
+  // TODO can be removed if the ISSUE#239 is accepted on the source
   'xmldom@0.1.19': ['MIT'],
 
-  // TODO can be removed if the PR#41 was accepted on the source
+  // TODO can be removed if the PR#41 is accepted on the source
   'pdf-image@1.1.0': ['MIT'],
+
+  // TODO can be removed if the PR#9 is accepted on the source
+  'pause-stream@0.0.11': ['MIT'],
+
+  // TODO can be removed if the request change is made on the source
+  'walk@2.3.9': ['MIT']
 };
