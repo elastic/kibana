@@ -34,7 +34,7 @@ export class TimeRangeSelector extends Component {
     this.setState({ startTab: tab });
     switch (tab) {
       case 0:
-        this.setStartTime(this.latestTimeStamp.valueOf());
+        this.setStartTime(undefined);
         break;
       case 1:
         this.setStartTime('now');

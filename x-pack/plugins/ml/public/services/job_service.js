@@ -915,6 +915,10 @@ class JobService {
     });
   }
 
+  // forceStartDatafeeds(datafeedIds, jobIds, start, end) {
+
+  // }
+
   validateDetector(detector) {
     return new Promise((resolve, reject) => {
       if (detector) {
@@ -963,6 +967,10 @@ class JobService {
       groups.push({ id, jobs: js });
     });
     return groups;
+  }
+
+  createResultsUrl(jobIds, from, to, resultsPage) {
+    return createResultsUrl(jobIds, from, to, resultsPage);
   }
 }
 
@@ -1111,10 +1119,7 @@ function createJobUrls(jobsList, jobUrls) {
     if (job.data_counts) {
       const from = moment(job.data_counts.earliest_record_timestamp).toISOString();
       const to = moment(job.data_counts.latest_record_timestamp).toISOString();
-      let path = `?_g=(ml:(jobIds:!('${job.job_id}'))`;
-      path += `,refreshInterval:(display:Off,pause:!f,value:0),time:(from:'${from}'`;
-      path += `,mode:absolute,to:'${to}'`;
-      path += '))&_a=(filters:!(),query:(query_string:(analyze_wildcard:!t,query:\'*\')))';
+      const path = createResultsUrl([job.job_id], to, from);
 
       if (jobUrls[job.job_id]) {
         jobUrls[job.job_id].url = path;
@@ -1123,6 +1128,25 @@ function createJobUrls(jobsList, jobUrls) {
       }
     }
   });
+}
+
+function createResultsUrl(jobIds, start, end, resultsPage) {
+  const idString = jobIds.map(j => `'${j}'`).join(',');
+  const from = moment(start).toISOString();
+  const to = moment(end).toISOString();
+  let path = '';
+
+  if (resultsPage !== undefined) {
+    path += 'ml#/';
+    path += resultsPage;
+  }
+
+  path += `?_g=(ml:(jobIds:!(${idString}))`;
+  path += `,refreshInterval:(display:Off,pause:!f,value:0),time:(from:'${from}'`;
+  path += `,mode:absolute,to:'${to}'`;
+  path += '))&_a=(filters:!(),query:(query_string:(analyze_wildcard:!t,query:\'*\')))';
+
+  return path;
 }
 
 export const mlJobService = new JobService();

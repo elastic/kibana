@@ -32,9 +32,11 @@ export class StartDatafeedModal extends Component {
     super(props);
 
     this.state = {
+      job: this.props.job,
       isModalVisible: false,
       startTime: moment(),
-      endTime: moment()
+      endTime: moment(),
+      initialSpecifiedStartTime: moment()
     };
 
     if (typeof this.props.showFunction === 'function') {
@@ -43,7 +45,7 @@ export class StartDatafeedModal extends Component {
     if (typeof this.props.saveFunction === 'function') {
       this.externalSave = this.props.saveFunction;
     }
-    this.job = this.props.job;
+    this.initialSpecifiedStartTime = moment();
     this.refreshJobs = this.props.refreshJobs;
   }
 
@@ -60,12 +62,16 @@ export class StartDatafeedModal extends Component {
   }
 
   showModal = (job) => {
-    let startTime = moment();
-    if (job !== undefined) {
-      this.job = job;
-      startTime = moment(this.job.latestTimeStamp);
-    }
-    this.setState({ isModalVisible: true, startTime });
+    const startTime = undefined;
+    const endTime = moment();
+    const initialSpecifiedStartTime = moment(job.latestTimeStamp);
+    this.setState({
+      job,
+      isModalVisible: true,
+      startTime,
+      endTime,
+      initialSpecifiedStartTime
+    });
   }
 
   save = () => {
@@ -73,7 +79,7 @@ export class StartDatafeedModal extends Component {
       start: moment.isMoment(this.state.startTime) ? this.state.startTime.valueOf() : this.state.startTime,
       end: moment.isMoment(this.state.endTime) ? this.state.endTime.valueOf() : this.state.endTime,
     };
-    startDatafeed(this.job.id, duration, false, this.refreshJobs);
+    startDatafeed(this.state.job.id, duration, false, this.refreshJobs);
     this.closeModal();
   }
 
@@ -89,13 +95,13 @@ export class StartDatafeedModal extends Component {
           >
             <EuiModalHeader>
               <EuiModalHeaderTitle>
-                Start {this.job.id}
+                Start {this.state.job.id}
               </EuiModalHeaderTitle>
             </EuiModalHeader>
 
             <EuiModalBody>
               <TimeRangeSelector
-                startTime={this.state.startTime}
+                startTime={this.state.initialSpecifiedStartTime}
                 endTime={this.state.endTime}
                 setStartTime={this.setStartTime}
                 setEndTime={this.setEndTime}

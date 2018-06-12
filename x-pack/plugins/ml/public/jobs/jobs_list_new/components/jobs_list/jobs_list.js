@@ -9,7 +9,7 @@ import React, {
   Component
 } from 'react';
 
-import { ResultLinks, actionsMenuContent } from './job_actions';
+import { ResultLinks, actionsMenuContent } from '../job_actions';
 import { JobDescription } from './job_description';
 import './styles/main.less';
 
@@ -31,7 +31,7 @@ export class JobsList extends Component {
       jobsSummaryList: props.jobsSummaryList,
       pageIndex: 0,
       pageSize: PAGE_SIZE,
-      selection: [],
+      // selection: [],
       itemIdToExpandedRowMap: {}
     };
   }
@@ -74,7 +74,7 @@ export class JobsList extends Component {
     const selectionControls = {
       selectable: () => true,
       selectableMessage: (selectable) => (!selectable) ? 'Cannot select job' : undefined,
-      onSelectionChange: (selection) => this.setState({ selection })
+      onSelectionChange: this.props.selectJobChange
     };
 
     const columns = [
@@ -114,13 +114,17 @@ export class JobsList extends Component {
         name: 'Datafeed state',
         truncateText: false,
       }, {
-        field: 'latestTimeStamp',
         name: 'Latest timestamp',
         truncateText: false,
+        render: (item) => (
+          <span className="euiTableCellContent__text">
+            { item.latestTimeStamp.string }
+          </span>
+        ),
       }, {
         name: 'Actions',
         render: (item) => (
-          <ResultLinks job={item} />
+          <ResultLinks jobs={[item]} />
         )
       }, {
         name: '',

@@ -6,6 +6,8 @@
 
 
 import moment from 'moment';
+import './styles/main.less';
+
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { mlCalendarService } from 'plugins/ml/services/calendar_service';
 import { JobsList } from '../jobs_list';
@@ -13,6 +15,7 @@ import { JobDetails } from '../job_details';
 import { EditJobModal } from '../edit_job_modal';
 import { DeleteJobModal } from '../delete_job_modal';
 import { StartDatafeedModal } from '../start_datafeed_modal';
+import { MultiJobActions } from '../multi_job_actions';
 
 import React, {
   Component
@@ -38,13 +41,24 @@ function loadJobs() {
   });
 }
 
-function latestTimeStamp(dataCounts) {
-  const obj = { string: '', unix: 0 };
+function earliestAndLatestTimeStamps(dataCounts) {
+  const obj = {
+    earliest: { string: '', unix: 0 },
+    latest: { string: '', unix: 0 },
+  };
+
+  if (dataCounts.earliest_record_timestamp) {
+    const ts = moment(dataCounts.earliest_record_timestamp);
+    obj.earliest.string = ts.format(TIME_FORMAT);
+    obj.earliest.unix = ts;
+  }
+
   if (dataCounts.latest_record_timestamp) {
     const ts = moment(dataCounts.latest_record_timestamp);
-    obj.string = ts.format(TIME_FORMAT);
-    obj.unix = ts;
+    obj.latest.string = ts.format(TIME_FORMAT);
+    obj.latest.unix = ts;
   }
+
   return obj;
 }
 
@@ -65,6 +79,7 @@ export class JobsListView extends Component {
     this.state = {
       jobsSummaryList: [],
       fullJobsList: {},
+      selectedJobs: [],
       itemIdToExpandedRowMap: {}
     };
 
@@ -159,6 +174,11 @@ export class JobsListView extends Component {
     this.showStartDatafeedModal = func;
   }
 
+  selectJobChange = (selectedJobs) => {
+    this.setState({ selectedJobs });
+    console.log(selectedJobs);
+  }
+
 
   refreshJobSummaryList(autoRefresh = true) {
     if (this.blockAutoRefresh === false) {
@@ -172,6 +192,9 @@ export class JobsListView extends Component {
               fullJobsList[job.job_id] = job;
             }
             const hasDatafeed = (job.datafeed_config !== undefined);
+            const {
+              earliest: earliestTimeStamp,
+              latest: latestTimeStamp } = earliestAndLatestTimeStamps(job.data_counts);
             return {
               id: job.job_id,
               description: (job.description || ''),
@@ -181,7 +204,8 @@ export class JobsListView extends Component {
               jobState: job.state,
               hasDatafeed,
               datafeedState: (hasDatafeed && job.datafeed_config.state) ? job.datafeed_config.state : '',
-              latestTimeStamp: latestTimeStamp(job.data_counts).string,
+              latestTimeStamp,
+              earliestTimeStamp,
             };
           });
           this.setState({ jobsSummaryList, fullJobsList });
@@ -205,11 +229,15 @@ export class JobsListView extends Component {
   render() {
     return (
       <div>
+        <div className="actions-bar">
+          <MultiJobActions selectedJobs={this.state.selectedJobs} />
+        </div>
         <JobsList
           jobsSummaryList={this.state.jobsSummaryList}
           fullJobsList={this.state.fullJobsList}
           itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
           toggleRow={this.toggleRow}
+          selectJobChange={this.selectJobChange}
           showEditJobModal={this.showEditJobModal}
           showDeleteJobModal={this.showDeleteJobModal}
           showStartDatafeedModal={this.showStartDatafeedModal}
