@@ -94,7 +94,13 @@ export function hasPrivilegesWithServer(server) {
       const versionPrivilege = getVersionPrivilege(kibanaVersion);
 
       const allPrivileges = [versionPrivilege, loginPrivilege, ...privileges];
-      let privilegesCheck = await hasApplicationPrivileges(callWithRequest, request, kibanaVersion, application, allPrivileges);
+      let privilegesCheck = await hasApplicationPrivileges(
+        callWithRequest,
+        request,
+        kibanaVersion,
+        application,
+        allPrivileges
+      );
 
       if (!privilegesCheck.privileges[loginPrivilege]) {
         privilegesCheck = await hasLegacyPrivileges(
