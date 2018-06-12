@@ -62,8 +62,13 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     async clickDashboard() {
       log.debug('click Dashboard tab');
       await this.clickSelector('a[href*=\'dashboard\']');
-      await PageObjects.common.waitForTopNavToBeVisible();
-      await this.confirmTopNavTextContains('dashboard');
+      await retry.try(async () => {
+        const isNavVisible = await testSubjects.exists('top-nav');
+        const isLandingPageVisible = await testSubjects.exists('dashboardLandingPage');
+        if (!isNavVisible && !isLandingPageVisible) {
+          throw new Error('Dashboard application not loaded yet');
+        }
+      });
       await this.awaitGlobalLoadingIndicatorHidden();
     }
 
