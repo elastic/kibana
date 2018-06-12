@@ -72,7 +72,7 @@ const createMockCallWithRequest = (responses) => {
   return mockCallWithRequest;
 };
 
-test(`uses application privileges if they have all privileges`, async () => {
+test(`returns success of true if they have all application privileges`, async () => {
   const privilege = 'action:saved_objects/config/get';
   const username = 'foo-username';
   const mockServer = createMockServer();
@@ -113,6 +113,49 @@ test(`uses application privileges if they have all privileges`, async () => {
   });
 });
 
+test(`returns success of false if they have only one application privilege`, async () => {
+  const privilege1 = 'action:saved_objects/config/get';
+  const privilege2 = 'action:saved_objects/config/create';
+  const username = 'foo-username';
+  const mockServer = createMockServer();
+  const mockCallWithRequest = createMockCallWithRequest([
+    mockApplicationPrivilegeResponse({
+      hasAllRequested: false,
+      privileges: {
+        [getVersionPrivilege(defaultVersion)]: true,
+        [getLoginPrivilege()]: true,
+        [privilege1]: true,
+        [privilege2]: false,
+      },
+      application: defaultApplication,
+      username,
+    })
+  ]);
+
+  const hasPrivilegesWithRequest = hasPrivilegesWithServer(mockServer);
+  const request = Symbol();
+  const hasPrivileges = hasPrivilegesWithRequest(request);
+  const privileges = [privilege1, privilege2];
+  const result = await hasPrivileges(privileges);
+
+  expect(mockCallWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
+    body: {
+      applications: [{
+        application: defaultApplication,
+        resources: [DEFAULT_RESOURCE],
+        privileges: [
+          getVersionPrivilege(defaultVersion), getLoginPrivilege(), ...privileges
+        ]
+      }]
+    }
+  });
+  expect(result).toEqual({
+    success: false,
+    missing: [privilege2],
+    username
+  });
+});
+
 test(`throws error if missing version privilege and has login privilege`, async () => {
   const privilege = 'action:saved_objects/config/get';
   const mockServer = createMockServer();
@@ -134,6 +177,46 @@ test(`throws error if missing version privilege and has login privilege`, async 
 });
 
 test(`uses application privileges if the user has the login privilege`, async () => {
+  const privilege = 'action:saved_objects/config/get';
+  const username = 'foo-username';
+  const mockServer = createMockServer();
+  const callWithRequest = createMockCallWithRequest([
+    mockApplicationPrivilegeResponse({
+      hasAllRequested: false,
+      privileges: {
+        [getVersionPrivilege(defaultVersion)]: true,
+        [getLoginPrivilege()]: true,
+        [privilege]: false,
+      },
+      username,
+    }),
+  ]);
+
+  const hasPrivilegesWithRequest = hasPrivilegesWithServer(mockServer);
+  const request = Symbol();
+  const hasPrivileges = hasPrivilegesWithRequest(request);
+  const privileges = [privilege];
+  const result = await hasPrivileges(privileges);
+
+  expect(callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
+    body: {
+      applications: [{
+        application: defaultApplication,
+        resources: [DEFAULT_RESOURCE],
+        privileges: [
+          getVersionPrivilege(defaultVersion), getLoginPrivilege(), ...privileges
+        ]
+      }]
+    }
+  });
+  expect(result).toEqual({
+    success: false,
+    missing: [...privileges],
+    username,
+  });
+});
+
+test(`returns sucess of false application privileges if the user has the login privilege`, async () => {
   const privilege = 'action:saved_objects/config/get';
   const username = 'foo-username';
   const mockServer = createMockServer();
@@ -231,7 +314,7 @@ test(`returns success of false if the user doesn't have any application privileg
 
 //eslint-disable-next-line max-len
 test(`returns success of true if the user doesn't have any application privileges but they have index privilege on kibana index`, async () => {
-  const privilege = 'action:saved_objects/config/create';
+  const privilege = 'something-completely-arbitrary';
   const username = 'foo-username';
   const mockServer = createMockServer();
   const callWithRequest = createMockCallWithRequest([
@@ -285,46 +368,176 @@ test(`returns success of true if the user doesn't have any application privilege
     username,
   });
 });
-test.skip(`returns missing privileges`, async () => {
+
+//eslint-disable-next-line max-len
+test(`returns success of false if the user doesn't have any application privileges and they have the read privilege on kibana but the privilege isn't a read action`, async () => {
+  const privilege = 'something-completely-arbitrary';
+  const username = 'foo-username';
   const mockServer = createMockServer();
-  mockResponse(false, {
-    [getVersionPrivilege(defaultVersion)]: true,
-    [getLoginPrivilege()]: true,
-    foo: false,
-  });
+  const callWithRequest = createMockCallWithRequest([
+    mockApplicationPrivilegeResponse({
+      hasAllRequested: false,
+      privileges: {
+        [getVersionPrivilege(defaultVersion)]: false,
+        [getLoginPrivilege()]: false,
+        [privilege]: false,
+      },
+      username,
+    }),
+    mockLegacyResponse({
+      hasAllRequested: false,
+      privileges: {
+        read: true,
+        index: false,
+      },
+      username,
+    })
+  ]);
 
   const hasPrivilegesWithRequest = hasPrivilegesWithServer(mockServer);
-  const hasPrivileges = hasPrivilegesWithRequest({});
-  const result = await hasPrivileges(['foo']);
-  expect(result.missing).toEqual(['foo']);
+  const request = Symbol();
+  const hasPrivileges = hasPrivilegesWithRequest(request);
+  const privileges = [privilege];
+  const result = await hasPrivileges(privileges);
+
+  expect(callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
+    body: {
+      applications: [{
+        application: defaultApplication,
+        resources: [DEFAULT_RESOURCE],
+        privileges: [
+          getVersionPrivilege(defaultVersion), getLoginPrivilege(), ...privileges
+        ]
+      }]
+    }
+  });
+  expect(callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
+    body: {
+      index: [{
+        names: [ defaultKibanaIndex ],
+        privileges: ['read', 'index']
+      }]
+    }
+  });
+  expect(result).toEqual({
+    success: false,
+    missing: [ privilege ],
+    username,
+  });
 });
 
-test.skip(`excludes granted privileges from missing privileges`, async () => {
+//eslint-disable-next-line max-len
+test(`returns success of false if the user doesn't have any application privileges and they have the read privilege on kibana but one privilege isn't a read action`, async () => {
+  const privilege1 = 'something-completely-arbitrary';
+  const privilege2 = 'action:saved_objects/config/get';
+  const username = 'foo-username';
   const mockServer = createMockServer();
-  mockResponse(false, {
-    [getVersionPrivilege(defaultVersion)]: true,
-    [getLoginPrivilege()]: true,
-    foo: false,
-    bar: true,
-  });
+  const callWithRequest = createMockCallWithRequest([
+    mockApplicationPrivilegeResponse({
+      hasAllRequested: false,
+      privileges: {
+        [getVersionPrivilege(defaultVersion)]: false,
+        [getLoginPrivilege()]: false,
+        [privilege1]: false,
+        [privilege2]: true
+      },
+      username,
+    }),
+    mockLegacyResponse({
+      hasAllRequested: false,
+      privileges: {
+        read: true,
+        index: false,
+      },
+      username,
+    })
+  ]);
 
   const hasPrivilegesWithRequest = hasPrivilegesWithServer(mockServer);
-  const hasPrivileges = hasPrivilegesWithRequest({});
-  const result = await hasPrivileges(['foo']);
-  expect(result.missing).toEqual(['foo']);
+  const request = Symbol();
+  const hasPrivileges = hasPrivilegesWithRequest(request);
+  const privileges = [privilege1, privilege2];
+  const result = await hasPrivileges(privileges);
+
+  expect(callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
+    body: {
+      applications: [{
+        application: defaultApplication,
+        resources: [DEFAULT_RESOURCE],
+        privileges: [
+          getVersionPrivilege(defaultVersion), getLoginPrivilege(), ...privileges
+        ]
+      }]
+    }
+  });
+  expect(callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
+    body: {
+      index: [{
+        names: [ defaultKibanaIndex ],
+        privileges: ['read', 'index']
+      }]
+    }
+  });
+  expect(result).toEqual({
+    success: false,
+    missing: [ privilege1 ],
+    username,
+  });
 });
 
-
-test.skip(`excludes version privilege when missing version privilege and missing login privilege`, async () => {
+//eslint-disable-next-line max-len
+test(`returns success of true if the user doesn't have any application privileges and they have the read privilege on kibana and the privilege is a read action`, async () => {
+  const privilege = 'action:saved_objects/config/get';
+  const username = 'foo-username';
   const mockServer = createMockServer();
-  mockResponse(false, {
-    [getVersionPrivilege(defaultVersion)]: false,
-    [getLoginPrivilege()]: false,
-    foo: true,
-  });
+  const callWithRequest = createMockCallWithRequest([
+    mockApplicationPrivilegeResponse({
+      hasAllRequested: false,
+      privileges: {
+        [getVersionPrivilege(defaultVersion)]: false,
+        [getLoginPrivilege()]: false,
+        [privilege]: false,
+      },
+      username,
+    }),
+    mockLegacyResponse({
+      hasAllRequested: false,
+      privileges: {
+        read: true,
+        index: false,
+      },
+      username,
+    })
+  ]);
 
   const hasPrivilegesWithRequest = hasPrivilegesWithServer(mockServer);
-  const hasPrivileges = hasPrivilegesWithRequest({});
-  const result = await hasPrivileges(['foo']);
-  expect(result.missing).toEqual([getLoginPrivilege()]);
+  const request = Symbol();
+  const hasPrivileges = hasPrivilegesWithRequest(request);
+  const privileges = [privilege];
+  const result = await hasPrivileges(privileges);
+
+  expect(callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
+    body: {
+      applications: [{
+        application: defaultApplication,
+        resources: [DEFAULT_RESOURCE],
+        privileges: [
+          getVersionPrivilege(defaultVersion), getLoginPrivilege(), ...privileges
+        ]
+      }]
+    }
+  });
+  expect(callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
+    body: {
+      index: [{
+        names: [ defaultKibanaIndex ],
+        privileges: ['read', 'index']
+      }]
+    }
+  });
+  expect(result).toEqual({
+    success: true,
+    missing: [],
+    username,
+  });
 });
