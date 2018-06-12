@@ -31,6 +31,10 @@ describe('offset', () => {
       expect(() => preprocessOffset('timerange', from, to)).to.throwError();
     });
 
+    test('throws error when zero is provided', () => {
+      expect(() => preprocessOffset('timerange:0', from, to)).to.throwError();
+    });
+
     test('throws error with malformed', () => {
       expect(() => preprocessOffset('timerange:notANumber', from, to)).to.throwError();
     });

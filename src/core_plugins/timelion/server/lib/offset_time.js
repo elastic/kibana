@@ -60,8 +60,11 @@ export function preprocessOffset(offset, from, to) {
   if (isNaN(factor)) {
     throw new Error(timeRangeErrorMsg(offset));
   }
+  if (factor === 0) {
+    throw new Error('Malformed timerange offset, factor can not be zero.');
+  }
 
   const deltaSeconds = (to - from) / 1000;
-  const processedOffset = deltaSeconds * factor;
+  const processedOffset = Math.round(deltaSeconds * factor);
   return `${processedOffset}s`;
 }
