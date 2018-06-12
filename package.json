@@ -54,7 +54,7 @@
     "test:ui:runner": "echo 'use `node scripts/functional_test_runner`' && false",
     "test:server": "grunt test:server",
     "test:coverage": "grunt test:coverage",
-    "checkLicenses": "grunt licenses",
+    "checkLicenses": "grunt licenses --dev",
     "build": "node scripts/build",
     "start": "node scripts/kibana --dev",
     "debug": "node --nolazy --inspect scripts/kibana --dev",
