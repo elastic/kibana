@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { loadMappings } from './mappings';
+import { loadFullMappings } from './mappings';
 import { CallCluster, IndexMapping, MigrationPlugin } from './types';
 
 export interface InitializeOpts {
@@ -26,7 +26,7 @@ export interface InitializeOpts {
   log: (meta: string[], message: string) => void;
 }
 
-interface MigrationContext extends InitializeOpts {
+interface InitializeContext extends InitializeOpts {
   activeMappings: IndexMapping;
   fullMappings: IndexMapping;
 }
@@ -40,7 +40,7 @@ interface MigrationContext extends InitializeOpts {
  * @prop {MigrationPlugin[]} plugins - A list of plugins whose mappings and transforms will be applied to the index
  */
 export async function initializeIndex(opts: InitializeOpts) {
-  const context = await migrationContext(opts);
+  const context = await getContext(opts);
 
   await putTemplate(context);
   if (await indexExists(context)) {
@@ -48,10 +48,8 @@ export async function initializeIndex(opts: InitializeOpts) {
   }
 }
 
-async function migrationContext(
-  opts: InitializeOpts
-): Promise<MigrationContext> {
-  const { activeMappings, fullMappings } = await loadMappings(opts);
+async function getContext(opts: InitializeOpts): Promise<InitializeContext> {
+  const { activeMappings, fullMappings } = await loadFullMappings(opts);
 
   return {
     ...opts,
@@ -60,7 +58,7 @@ async function migrationContext(
   };
 }
 
-function putTemplate({ callCluster, index, fullMappings }: MigrationContext) {
+function putTemplate({ callCluster, index, fullMappings }: InitializeContext) {
   return callCluster('indices.putTemplate', {
     body: {
       mappings: fullMappings,
@@ -74,7 +72,7 @@ function putTemplate({ callCluster, index, fullMappings }: MigrationContext) {
   });
 }
 
-function putMappings({ callCluster, index, fullMappings }: MigrationContext) {
+function putMappings({ callCluster, index, fullMappings }: InitializeContext) {
   return callCluster('indices.putMapping', {
     body: fullMappings.doc,
     index,
@@ -82,6 +80,6 @@ function putMappings({ callCluster, index, fullMappings }: MigrationContext) {
   });
 }
 
-function indexExists({ callCluster, index }: MigrationContext) {
+function indexExists({ callCluster, index }: InitializeContext) {
   return callCluster('indices.exists', { index });
 }
