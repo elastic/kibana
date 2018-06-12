@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiText,
@@ -30,12 +30,17 @@ import { CustomizeSpaceAvatar } from './customize_space_avatar';
 import { SpaceAvatar } from './space_avatar';
 import { isReservedSpace } from '../../../../common';
 import { ReservedSpaceBadge } from './reserved_space_badge';
+import { SpaceValidator } from '../lib/validate_space';
 
-export class ManageSpacePage extends React.Component {
+export class ManageSpacePage extends Component {
   state = {
     space: {},
-    validate: false
   };
+
+  constructor(props) {
+    super(props);
+    this.validator = new SpaceValidator({ shouldValidate: false });
+  }
 
   componentDidMount() {
     this.notifier = new Notifier({ location: 'Spaces' });
@@ -85,8 +90,7 @@ export class ManageSpacePage extends React.Component {
                 <EuiFlexItem style={{ maxWidth: '400px' }}>
                   <EuiFormRow
                     label="Name"
-                    helpText="Name your space"
-                    {...this.validateName()}
+                    {...this.validator.validateSpaceName(this.state.space)}
                   >
                     <EuiFieldText
                       name="name"
@@ -109,17 +113,27 @@ export class ManageSpacePage extends React.Component {
 
               </EuiFlexGroup>
 
-              <UrlContext
-                space={this.state.space}
-                editingExistingSpace={this.editingExistingSpace()}
-                editable={true}
-                onChange={this.onUrlContextChange}
-              />
+              <EuiSpacer />
+
+              {isReservedSpace(this.state.space)
+                ? null
+                : (
+                  <Fragment>
+                    <UrlContext
+                      space={this.state.space}
+                      editingExistingSpace={this.editingExistingSpace()}
+                      editable={true}
+                      onChange={this.onUrlContextChange}
+                      validator={this.validator}
+                    />
+                    <EuiSpacer />
+                  </Fragment>
+                )
+              }
 
               <EuiFormRow
                 label="Description"
-                helpText="Describe your space"
-                {...this.validateDescription()}
+                {...this.validator.validateSpaceDescription(this.state.space)}
               >
                 <EuiFieldText
                   name="description"
@@ -234,13 +248,18 @@ export class ManageSpacePage extends React.Component {
   }
 
   saveSpace = () => {
-    this.setState({
-      validate: true
-    }, () => {
-      const { isInvalid } = this.validateForm();
-      if (isInvalid) return;
-      this._performSave();
-    });
+    this.validator.enableValidation();
+
+    const result = this.validator.validateForSave(this.state.space);
+    if (result.isInvalid) {
+      this.setState({
+        formError: result
+      });
+
+      return;
+    }
+
+    this._performSave();
   };
 
   _performSave = () => {

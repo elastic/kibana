@@ -14,6 +14,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { getSpaceInitials, getSpaceColor } from '../../../../common/space_attributes';
+import { MAX_SPACE_INITIALS } from '../../../../common/constants';
 
 export class CustomizeSpaceAvatar extends Component {
   static propTypes = {
@@ -22,7 +23,9 @@ export class CustomizeSpaceAvatar extends Component {
   }
 
   state = {
-    expanded: false
+    expanded: false,
+    initialsHasFocus: false,
+    pendingInitials: null
   }
 
   render() {
@@ -34,11 +37,23 @@ export class CustomizeSpaceAvatar extends Component {
       space
     } = this.props;
 
+    const {
+      initialsHasFocus,
+      pendingInitials,
+    } = this.state;
+
     return (
       <Fragment>
         <EuiFlexItem grow={false}>
           <EuiFormRow label={'Initials (2 max)'}>
-            <EuiFieldText name="spaceInitials" value={getSpaceInitials(space)} onChange={this.onInitialsChange} />
+            <EuiFieldText
+              inputRef={this.initialsInputRef}
+              name="spaceInitials"
+              // allows input to be cleared or otherwise invalidated while user is editing the initials,
+              // without defaulting to the derived initials provided by `getSpaceInitials`
+              value={initialsHasFocus ? pendingInitials : getSpaceInitials(space)}
+              onChange={this.onInitialsChange}
+            />
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -48,6 +63,34 @@ export class CustomizeSpaceAvatar extends Component {
         </EuiFlexItem>
       </Fragment>
     );
+  }
+
+  initialsInputRef = (ref) => {
+    if (ref) {
+      this.initialsRef = ref;
+      this.initialsRef.addEventListener('focus', this.onInitialsFocus);
+      this.initialsRef.addEventListener('blur', this.onInitialsBlur);
+    } else {
+      if (this.initialsRef) {
+        this.initialsRef.removeEventListener('focus', this.onInitialsFocus);
+        this.initialsRef.removeEventListener('blur', this.onInitialsBlur);
+        this.initialsRef = null;
+      }
+    }
+  }
+
+  onInitialsFocus = () => {
+    this.setState({
+      initialsHasFocus: true,
+      pendingInitials: getSpaceInitials(this.props.space)
+    });
+  }
+
+  onInitialsBlur = () => {
+    this.setState({
+      initialsHasFocus: false,
+      pendingInitials: null,
+    });
   }
 
   getCustomizeLink = () => {
@@ -66,7 +109,13 @@ export class CustomizeSpaceAvatar extends Component {
     });
   }
 
-  onInitialsChange = (initials) => {
+  onInitialsChange = (e) => {
+    const initials = (e.target.value || '').substring(0, MAX_SPACE_INITIALS);
+
+    this.setState({
+      pendingInitials: initials,
+    });
+
     this.props.onChange({
       ...this.props.space,
       initials

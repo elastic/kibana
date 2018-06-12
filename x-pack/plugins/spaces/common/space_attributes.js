@@ -14,17 +14,17 @@ import { MAX_SPACE_INITIALS } from './constants';
  *
  * @param {Space} space
  */
-export function getSpaceColor(space) {
+export function getSpaceColor(space = {}) {
   const {
     color,
-    name,
+    name = '',
   } = space;
 
   if (color) {
     return color;
   }
 
-  return VISUALIZATION_COLORS[Math.floor(name.length % VISUALIZATION_COLORS.length)];
+  return VISUALIZATION_COLORS[name.codePointAt(0) % VISUALIZATION_COLORS.length];
 }
 
 /**
@@ -34,10 +34,10 @@ export function getSpaceColor(space) {
  *
  * @param {Space} space
  */
-export function getSpaceInitials(space) {
+export function getSpaceInitials(space = {}) {
   const {
     initials,
-    name
+    name = ''
   } = space;
 
   if (initials) {
