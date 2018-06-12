@@ -88,13 +88,22 @@ export function getResponseTimeSeries(chartsData) {
   if (!isEmpty(mlAvg)) {
     // insert after Avg. serie
     series.splice(1, 0, {
-      title: 'Anomaly score',
       hideLegend: true,
-      formatTooltipValue: (p = {}) => asDecimal(p.anomalyScore),
-      data: getMlChartValues(dates, mlAvg),
+      hideTooltipValue: true,
+      data: getAnomalyBoundaries(dates, mlAvg),
       type: 'area',
       color: 'none',
       areaColor: 'rgba(49, 133, 252, 0.1)' // apmBlue
+    });
+
+    series.splice(1, 0, {
+      title: 'Anomaly score',
+      hideLegend: true,
+      formatTooltipValue: (p = {}) => asDecimal(p.anomalyScore),
+      data: getAnomalyScore(dates, mlAvg),
+      type: 'area',
+      color: 'none',
+      areaColor: 'rgba(146, 0, 0, 0.1)' // apmRed
     });
   }
 
@@ -153,14 +162,22 @@ function getChartValues(dates = [], yValues = []) {
   }));
 }
 
-function getMlChartValues(dates = [], yValues = []) {
+function getAnomalyScore(dates = [], yValues = []) {
+  return dates.map((x, i) => ({
+    x,
+    anomalyScore: get(yValues[i], 'anomalyScore')
+  }));
+}
+
+function getAnomalyBoundaries(dates = [], yValues = []) {
   const lastIndex = findLastIndex(yValues, item => get(item, 'lower') != null);
 
   // TODO: Temporary workaround to get rid of null values
   // Replaces null values with the previous value in the list
   const yValuesWithoutGaps = yValues.reduce((acc, item, i) => {
     if (get(item, 'lower') === null && i < lastIndex && i > 0) {
-      acc.push(acc[i - 1]);
+      const prevItem = acc[i - 1];
+      acc.push(prevItem);
     } else {
       acc.push(item);
     }
@@ -171,7 +188,6 @@ function getMlChartValues(dates = [], yValues = []) {
   return dates.map((x, i) => ({
     x,
     y0: get(yValuesWithoutGaps[i], 'lower'),
-    y: get(yValuesWithoutGaps[i], 'upper'),
-    anomalyScore: get(yValuesWithoutGaps[i], 'anomalyScore')
+    y: get(yValuesWithoutGaps[i], 'upper')
   }));
 }

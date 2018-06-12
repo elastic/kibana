@@ -23,7 +23,11 @@ const Title = styled.div`
   margin-bottom: ${px(units.half)};
 `;
 
-const VISIBLE_SERIES_COUNT = 4;
+const VISIBLE_LEGEND_COUNT = 4;
+
+function getHiddenLegendCount(series) {
+  return series.filter(serie => serie.hideLegend).length;
+}
 
 export class InnerCustomPlot extends PureComponent {
   state = {
@@ -49,7 +53,12 @@ export class InnerCustomPlot extends PureComponent {
 
   getVisibleSeries = createSelector(
     state => state.series,
-    series => series.slice(0, VISIBLE_SERIES_COUNT)
+    series => {
+      return series.slice(
+        0,
+        VISIBLE_LEGEND_COUNT + getHiddenLegendCount(series)
+      );
+    }
   );
 
   clickLegend = i => {
@@ -108,7 +117,10 @@ export class InnerCustomPlot extends PureComponent {
       return null;
     }
 
-    const hiddenSeriesCount = Math.max(series.length - VISIBLE_SERIES_COUNT, 0);
+    const hiddenSeriesCount = Math.max(
+      series.length - VISIBLE_LEGEND_COUNT - getHiddenLegendCount(series),
+      0
+    );
     const visibleSeries = this.getVisibleSeries({ series });
     const enabledSeries = this.getEnabledSeries({
       visibleSeries,
