@@ -59,7 +59,7 @@ const hasLegacyPrivileges = async (callWithRequest, request, kibanaVersion, appl
   if (privilegeCheck.index[kibanaIndex].read) {
     const privilegeMap = buildPrivilegeMap(application, kibanaVersion);
     const implicitPrivileges = privileges.reduce((acc, name) => {
-      acc[name] = privilegeMap[application].read.actions.includes(name);
+      acc[name] = privilegeMap.read.actions.includes(name);
       return acc;
     }, {});
 
