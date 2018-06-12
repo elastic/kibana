@@ -216,7 +216,7 @@ test(`uses application privileges if the user has the login privilege`, async ()
   });
 });
 
-test(`returns sucess of false application privileges if the user has the login privilege`, async () => {
+test(`returns success of false application privileges if the user has the login privilege`, async () => {
   const privilege = 'action:saved_objects/config/get';
   const username = 'foo-username';
   const mockServer = createMockServer();
