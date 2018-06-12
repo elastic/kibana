@@ -63,10 +63,14 @@ export class Charts extends Component {
     }
   };
 
-  getTPMFormatter = (p = {}) => {
+  getTPMFormatter = t => {
     const { urlParams, charts } = this.props;
     const unit = tpmUnit(urlParams.transactionType);
-    return charts.noHits ? `- ${unit}` : `${asInteger(p.y)} ${unit}`;
+    return charts.noHits ? `- ${unit}` : `${asInteger(t)} ${unit}`;
+  };
+
+  getTPMTooltipFormatter = (p = {}) => {
+    return this.getTPMFormatter(p.y);
   };
 
   render() {
@@ -99,7 +103,7 @@ export class Charts extends Component {
             onSelectionEnd={this.onSelectionEnd}
             hoverIndex={this.state.hoverIndex}
             tickFormatY={this.getTPMFormatter}
-            formatTooltipValue={this.getTPMFormatter}
+            formatTooltipValue={this.getTPMTooltipFormatter}
             truncateLegends
           />
         </Chart>
