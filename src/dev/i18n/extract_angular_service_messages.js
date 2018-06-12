@@ -17,11 +17,23 @@
  * under the License.
  */
 
-import { run } from './run';
-import { extractDefaultTranslations } from './i18n/extract_default_translations';
+import { isObjectExpression, isStringLiteral } from '@babel/types';
 
-run(async () => {
-  for (const inputPath of process.argv.slice(2)) {
-    await extractDefaultTranslations(inputPath);
+import { parseConditionalOperatorAST, isPropertyWithKey } from './utils';
+import { DEFAULT_MESSAGE_KEY } from './constants';
+
+export function extractAngularServiceMessages(node) {
+  const [idsSubTree, optionsSubTree] = node.arguments;
+  const messagesIds = parseConditionalOperatorAST(idsSubTree);
+
+  if (isObjectExpression(optionsSubTree)) {
+    const property = optionsSubTree.properties.find(
+      prop =>
+        isPropertyWithKey(prop, DEFAULT_MESSAGE_KEY) &&
+        isStringLiteral(prop.value)
+    );
+
+    const messageValue = property.value.value;
+    return messagesIds.map(id => [id, messageValue]);
   }
-});
+}
