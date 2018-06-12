@@ -14,8 +14,8 @@ import {
   EuiTitle
 } from '@elastic/eui';
 
-import { LayerTOC } from './layer_toc';
-import { LayerPanel } from './layer_panel';
+import { LayerTOC } from '../layer_toc';
+import { LayerPanel } from '../layer_panel';
 
 const FLYOUT_STATE = {
   NONE: 'NONE',
@@ -27,6 +27,7 @@ export class LayerControl extends React.Component {
 
   constructor(props) {
     super(props);
+    this._kbnMap = props.kbnMap;
     this.state = {
       layers: [],
       flyoutState: FLYOUT_STATE.NONE
@@ -94,7 +95,7 @@ export class LayerControl extends React.Component {
   render() {
     const layerFlyout = this._renderLayerFlyout();
     const addLayer = (
-      <EuiButtonEmpty size="xs" flush="right" onClick={this._showAddLayerWizard}>
+      <EuiButtonEmpty size="xs" flush="right" onClick={this.props.toggleFlyout}>
         Add layer
       </EuiButtonEmpty>);
     return (
@@ -124,4 +125,6 @@ export class LayerControl extends React.Component {
     );
   }
 }
+
+export default LayerControl;
 
