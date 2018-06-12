@@ -132,7 +132,7 @@ export const security = (kibana) => new kibana.Plugin({
         const adminCluster = server.plugins.elasticsearch.getCluster('admin');
 
         if (!xpackInfo.feature(pluginId).getLicenseCheckResults().allowRbac) {
-          const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
+          const { callWithRequest } = adminCluster;
           const callCluster = (...args) => callWithRequest(request, ...args);
 
           const repository = new savedObjects.SavedObjectsRepository({

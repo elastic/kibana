@@ -225,7 +225,7 @@ export class XPackInfo {
       /**
        * Registers a callback function that will be called whenever the XPack license changes.
        * Callback will be invoked after the license change have been applied to this XPack Info instance.
-       * Callbacks may be asyncronous, but will not be awaited.
+       * Callbacks may be asynchronous, but will not be awaited.
        * @param {Function} callback Function to call whenever the XPack license changes.
        */
       registerLicenseChangeCallback: (callback) => {
