@@ -21,7 +21,7 @@ const hasApplicationPrivileges = async (callWithRequest, request, kibanaVersion,
 
   const hasPrivileges = privilegeCheck.application[application][DEFAULT_RESOURCE];
 
-  // We include the login privilege on all privileges, so the existence of it and not the version privilege
+  // We include the login action in all privileges, so the existence of it and not the version privilege
   // lets us know that we're running in an incorrect configuration. Without the login privilege check, we wouldn't
   // know whether the user just wasn't authorized for this instance of Kibana in general
   if (!hasPrivileges[getVersionPrivilege(kibanaVersion)] && hasPrivileges[getLoginPrivilege()]) {
