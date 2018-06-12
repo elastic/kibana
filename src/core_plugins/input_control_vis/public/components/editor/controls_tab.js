@@ -138,6 +138,7 @@ export class ControlsTab extends Component {
                   ]}
                   value={this.state.type}
                   onChange={evt => this.setState({ type: evt.target.value })}
+                  aria-label="Select control type"
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -150,6 +151,7 @@ export class ControlsTab extends Component {
                   onClick={this.handleAddControl}
                   iconType="plusInCircle"
                   data-test-subj="inputControlEditorAddBtn"
+                  aria-label="Add control"
                 >
                   Add
                 </EuiButton>
