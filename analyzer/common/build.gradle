@@ -4,6 +4,8 @@ plugins {
 
 dependencies {
   compile project(':model')
-  compile 'org.rocksdb:rocksdbjni:5.13.2'
-  compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.23.1'
+  compile project(':logging')
+//  compile 'org.rocksdb:rocksdbjni:5.13.2'
+//  compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.23.1'
+  testCompile 'junit:junit:4.12'
 }

@@ -10,5 +10,5 @@ task backend(dependsOn: run)
 dependencies {
   compile project(":model")
 
-  compile "org.eclipse.jgit:org.eclipse.jgit:5.0.0.201805301535-rc2"
+  compile "org.eclipse.jgit:org.eclipse.jgit:$jgitVersion"
 }

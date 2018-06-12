@@ -1,3 +1,6 @@
+include 'logging'
+include 'elasticsearch'
+
 include 'backend'
 include 'model'
 include 'pipeline'

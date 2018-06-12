@@ -4,6 +4,7 @@ bin
 .gradle/
 .idea/
 .cache/
+out/
 .settings/
 build
 *.iws
