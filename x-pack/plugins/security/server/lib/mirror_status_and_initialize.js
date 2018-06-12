@@ -25,28 +25,6 @@ export function mirrorStatusAndInitialize(upstreamStatus, downstreamStatus, onGr
 
   const state$ = Observable.merge(currentState$, newState$);
 
-  let onGreenPromise;
-  const onGreen$ = Observable.create(observer => {
-    if (!onGreenPromise) {
-      onGreenPromise = onGreen();
-    }
-
-    onGreenPromise
-      .then(() => {
-        observer.next({
-          state: 'green',
-          message: 'Ready',
-        });
-      })
-      .catch((err) => {
-        onGreenPromise = null;
-        observer.next({
-          state: 'red',
-          message: err.message
-        });
-      });
-  });
-
 
   state$
     .switchMap(({ state, message }) => {
@@ -54,7 +32,21 @@ export function mirrorStatusAndInitialize(upstreamStatus, downstreamStatus, onGr
         return Observable.of({ state, message });
       }
 
-      return onGreen$;
+      return Observable.create(observer => {
+        onGreen()
+          .then(() => {
+            observer.next({
+              state: 'green',
+              message: 'Ready',
+            });
+          })
+          .catch((err) => {
+            observer.next({
+              state: 'red',
+              message: err.message
+            });
+          });
+      });
     })
     .do(({ state, message }) => {
       downstreamStatus[state](message);

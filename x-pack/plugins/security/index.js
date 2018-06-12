@@ -88,11 +88,18 @@ export const security = (kibana) => new kibana.Plugin({
   },
 
   async init(server) {
+    const pluginId = 'security';
+
     const config = server.config();
     const xpackMainPlugin = server.plugins.xpack_main;
+    const xpackInfo = xpackMainPlugin.info;
 
     mirrorStatusAndInitialize(xpackMainPlugin.status, this.status, async () => {
       if (!config.get('xpack.security.rbac.enabled')) {
+        return;
+      }
+
+      if (!xpackInfo.feature(pluginId).getLicenseCheckResults().allowRbac) {
         return;
       }
 
@@ -101,7 +108,7 @@ export const security = (kibana) => new kibana.Plugin({
 
     // Register a function that is called whenever the xpack info changes,
     // to re-compute the license check results for this plugin
-    xpackMainPlugin.info.feature(this.id).registerLicenseCheckResultsGenerator(checkLicense);
+    xpackInfo.feature(this.id).registerLicenseCheckResultsGenerator(checkLicense);
 
     validateConfig(config, message => server.log(['security', 'warning'], message));
 
@@ -123,9 +130,23 @@ export const security = (kibana) => new kibana.Plugin({
         mappings,
         onBeforeWrite
       }) => {
-        const hasPrivileges = hasPrivilegesWithRequest(request);
-
         const adminCluster = server.plugins.elasticsearch.getCluster('admin');
+
+        if (!xpackInfo.feature(pluginId).getLicenseCheckResults().allowRbac) {
+          const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
+          const callCluster = (...args) => callWithRequest(request, ...args);
+
+          const repository = new savedObjects.SavedObjectsRepository({
+            index,
+            mappings,
+            onBeforeWrite,
+            callCluster,
+          });
+
+          return new savedObjects.SavedObjectsClient(repository);
+        }
+
+        const hasPrivileges = hasPrivilegesWithRequest(request);
         const { callWithInternalUser } = adminCluster;
 
         const repository = new savedObjects.SavedObjectsRepository({
@@ -156,8 +177,6 @@ export const security = (kibana) => new kibana.Plugin({
     initLogoutView(server);
 
     server.injectUiAppVars('login', () => {
-      const pluginId = 'security';
-      const xpackInfo = server.plugins.xpack_main.info;
       const { showLogin, loginMessage, allowLogin } = xpackInfo.feature(pluginId).getLicenseCheckResults() || {};
 
       return {
