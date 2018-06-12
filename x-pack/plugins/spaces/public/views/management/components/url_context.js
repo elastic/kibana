@@ -35,7 +35,7 @@ export class UrlContext extends Component {
           <div>
             <EuiFieldText
               readOnly={!this.state.editing}
-              placeholder={this.state.editing ? null : 'give your space a name to see its URL Context'}
+              placeholder={this.state.editing || !this.props.editable ? null : 'give your space a name to see its URL Context'}
               value={urlContext}
               onChange={this.onChange}
               inputRef={(ref) => this.textFieldRef = ref}
@@ -48,6 +48,10 @@ export class UrlContext extends Component {
   }
 
   getLabel = () => {
+    if (!this.props.editable) {
+      return (<p>URL Context</p>);
+    }
+
     const editLinkText = this.state.editing ? `[stop editing]` : `[edit]`;
     return (<p>URL Context <EuiLink onClick={this.onEditClick}>{editLinkText}</EuiLink></p>);
   };
