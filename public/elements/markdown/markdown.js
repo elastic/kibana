@@ -18,5 +18,5 @@ The datatable contains
 
 You can use standard Markdown in here, but you can also access your piped-in data using Handlebars. If you want to know more, check out the [Handlebars Documentation](http://handlebarsjs.com/expressions.html)
 
-#### Enjoy!"`,
+#### Enjoy!" | render`,
 });
