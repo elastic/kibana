@@ -71,7 +71,7 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
         return false;
       };
 
-      return new Promise(async (resolve, reject) => {
+      return new Promise((resolve, reject) => {
         return requestSearchSource.getSearchRequestBody().then(q => {
           const queryHash = calculateObjectHash(q);
           if (shouldQuery(queryHash)) {
