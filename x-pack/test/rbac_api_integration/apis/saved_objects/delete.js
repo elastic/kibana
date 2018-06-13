@@ -90,6 +90,40 @@ export default function ({ getService }) {
       }
     });
 
+    deleteTest(`kibana legacy user`, {
+      auth: {
+        username: AUTHENTICATION.KIBANA_LEGACY_USER.USERNAME,
+        password: AUTHENTICATION.KIBANA_LEGACY_USER.PASSWORD,
+      },
+      tests: {
+        actualId: {
+          statusCode: 200,
+          response: expectEmpty,
+        },
+        invalidId: {
+          statusCode: 404,
+          response: expectNotFound,
+        }
+      }
+    });
+
+    deleteTest(`kibana legacy dashboard only user`, {
+      auth: {
+        username: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.USERNAME,
+        password: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.PASSWORD,
+      },
+      tests: {
+        actualId: {
+          statusCode: 403,
+          response: createExpectForbidden(true),
+        },
+        invalidId: {
+          statusCode: 403,
+          response: createExpectForbidden(true),
+        }
+      }
+    });
+
     deleteTest(`kibana rbac user`, {
       auth: {
         username: AUTHENTICATION.KIBANA_RBAC_USER.USERNAME,

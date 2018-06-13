@@ -44,7 +44,6 @@ export const security = (kibana) => new kibana.Plugin({
         port: Joi.number().integer().min(0).max(65535)
       }).default(),
       rbac: Joi.object({
-        enabled: Joi.boolean().default(false),
         application: Joi.string().default('kibana').regex(
           /[a-zA-Z0-9-_]+/,
           `may contain alphanumeric characters (a-z, A-Z, 0-9), underscores and hyphens`
@@ -81,7 +80,6 @@ export const security = (kibana) => new kibana.Plugin({
       return {
         secureCookies: config.get('xpack.security.secureCookies'),
         sessionTimeout: config.get('xpack.security.sessionTimeout'),
-        rbacEnabled: config.get('xpack.security.rbac.enabled'),
         rbacApplication: config.get('xpack.security.rbac.application'),
       };
     }
@@ -116,50 +114,48 @@ export const security = (kibana) => new kibana.Plugin({
     server.auth.strategy('session', 'login', 'required');
 
     const auditLogger = new SecurityAuditLogger(server.config(), new AuditLogger(server, 'security'));
-    if (config.get('xpack.security.rbac.enabled')) {
-      const hasPrivilegesWithRequest = hasPrivilegesWithServer(server);
-      const { savedObjects } = server;
+    const hasPrivilegesWithRequest = hasPrivilegesWithServer(server);
+    const { savedObjects } = server;
 
-      savedObjects.setScopedSavedObjectsClientFactory(({
-        request,
-        index,
-        mappings,
-        onBeforeWrite
-      }) => {
-        const adminCluster = server.plugins.elasticsearch.getCluster('admin');
+    savedObjects.setScopedSavedObjectsClientFactory(({
+      request,
+      index,
+      mappings,
+      onBeforeWrite
+    }) => {
+      const adminCluster = server.plugins.elasticsearch.getCluster('admin');
 
-        if (!xpackInfoFeature.getLicenseCheckResults().allowRbac) {
-          const { callWithRequest } = adminCluster;
-          const callCluster = (...args) => callWithRequest(request, ...args);
-
-          const repository = new savedObjects.SavedObjectsRepository({
-            index,
-            mappings,
-            onBeforeWrite,
-            callCluster,
-          });
-
-          return new savedObjects.SavedObjectsClient(repository);
-        }
-
-        const hasPrivileges = hasPrivilegesWithRequest(request);
-        const { callWithInternalUser } = adminCluster;
+      if (!xpackInfoFeature.getLicenseCheckResults().allowRbac) {
+        const { callWithRequest } = adminCluster;
+        const callCluster = (...args) => callWithRequest(request, ...args);
 
         const repository = new savedObjects.SavedObjectsRepository({
           index,
           mappings,
           onBeforeWrite,
-          callCluster: callWithInternalUser
+          callCluster,
         });
 
-        return new SecureSavedObjectsClient({
-          repository,
-          errors: savedObjects.SavedObjectsClient.errors,
-          hasPrivileges,
-          auditLogger,
-        });
+        return new savedObjects.SavedObjectsClient(repository);
+      }
+
+      const hasPrivileges = hasPrivilegesWithRequest(request);
+      const { callWithInternalUser } = adminCluster;
+
+      const repository = new savedObjects.SavedObjectsRepository({
+        index,
+        mappings,
+        onBeforeWrite,
+        callCluster: callWithInternalUser
       });
-    }
+
+      return new SecureSavedObjectsClient({
+        repository,
+        errors: savedObjects.SavedObjectsClient.errors,
+        hasPrivileges,
+        auditLogger,
+      });
+    });
 
     getUserProvider(server);
 

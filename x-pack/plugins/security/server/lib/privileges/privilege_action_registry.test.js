@@ -55,7 +55,9 @@ const registerPrivilegesWithClusterTest = (description, { settings = {}, expecte
       expect(mockCallWithInternalUser).toHaveBeenCalledWith(
         'shield.postPrivileges',
         {
-          body: privileges,
+          body: {
+            [defaultApplication]: privileges
+          },
         }
       );
 
@@ -93,7 +95,7 @@ const registerPrivilegesWithClusterTest = (description, { settings = {}, expecte
   test(description, async () => {
     const mockServer = createMockServer();
     const mockCallWithInternalUser = registerMockCallWithInternalUser();
-    mockCallWithInternalUser.mockImplementationOnce(async () => (existingPrivileges));
+    mockCallWithInternalUser.mockImplementationOnce(async () => ({ [defaultApplication]: existingPrivileges }));
     buildPrivilegeMap.mockReturnValue(expectedPrivileges);
 
     await registerPrivilegesWithCluster(mockServer);

@@ -120,6 +120,32 @@ export default function ({ getService }) {
       }
     });
 
+    bulkGetTest(`kibana legacy user`, {
+      auth: {
+        username: AUTHENTICATION.KIBANA_LEGACY_USER.USERNAME,
+        password: AUTHENTICATION.KIBANA_LEGACY_USER.PASSWORD,
+      },
+      tests: {
+        default: {
+          statusCode: 200,
+          response: expectResults,
+        },
+      }
+    });
+
+    bulkGetTest(`kibana legacy dashboard only user`, {
+      auth: {
+        username: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.USERNAME,
+        password: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.PASSWORD,
+      },
+      tests: {
+        default: {
+          statusCode: 200,
+          response: expectResults,
+        },
+      }
+    });
+
     bulkGetTest(`kibana rbac user`, {
       auth: {
         username: AUTHENTICATION.KIBANA_RBAC_USER.USERNAME,
