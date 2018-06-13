@@ -52,6 +52,8 @@ import { EmbeddedVisualizeHandler } from './embedded_visualize_handler';
  *    will be set to the root visuzalize element.
  * @property {object} dataAttrs An object of key-value pairs, that will be set
  *    as data-{key}="{value}" attributes on the visualization element.
+ * @property {array} filters Specifies the filters that should be applied to that visualization.
+ * @property {object} query The query that should apply to that visualization.
  */
 
 const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
