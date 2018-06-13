@@ -41,7 +41,7 @@ export class Root {
 
   constructor(
     rawConfig$: Observable<RawConfig>,
-    protected readonly env: Env,
+    private readonly env: Env,
     private readonly onShutdown: OnShutdown = () => {
       // noop
     }

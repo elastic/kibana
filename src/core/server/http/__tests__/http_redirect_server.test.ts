@@ -25,6 +25,7 @@ import Chance from 'chance';
 import { Server } from 'http';
 import supertest from 'supertest';
 
+import { ByteSizeValue } from '../../config/schema';
 import { logger } from '../../logging/__mocks__';
 import { HttpConfig } from '../http_config';
 import { HttpsRedirectServer } from '../https_redirect_server';
@@ -41,6 +42,7 @@ function getServerListener(httpServer: HttpsRedirectServer) {
 beforeEach(() => {
   config = {
     host: '127.0.0.1',
+    maxPayload: new ByteSizeValue(1024),
     port: chance.integer({ min: 10000, max: 15000 }),
     ssl: {
       enabled: true,

@@ -24,7 +24,7 @@ import { ByteSizeValue } from '../config/schema';
 import { DevConfig } from '../dev';
 import { Logger } from '../logging';
 import { HttpConfig } from './http_config';
-import { configureHttpServer } from './http_server';
+import { createServer, getServerOptions } from './http_tools';
 
 const alphabet = 'abcdefghijklmnopqrztuvwxyz'.split('');
 
@@ -61,7 +61,9 @@ export class BasePathProxyServer {
 
   public async start() {
     const { httpConfig, devConfig, blockUntil, isKibanaPath } = this.options;
-    const { server, options } = configureHttpServer(httpConfig);
+
+    const options = getServerOptions(httpConfig);
+    const server = createServer(options);
 
     await server.register({ plugin: require('h2o2-latest') });
 

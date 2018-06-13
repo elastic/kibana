@@ -17,69 +17,14 @@
  * under the License.
  */
 
-import { readFileSync } from 'fs';
-import { Server, ServerOptions } from 'hapi-latest';
-import { ServerOptions as TLSOptions } from 'https';
+import { Server } from 'hapi-latest';
 
 import { modifyUrl } from '../../utils';
 import { Env } from '../config';
 import { Logger } from '../logging';
 import { HttpConfig } from './http_config';
+import { createServer, getServerOptions } from './http_tools';
 import { Router } from './router';
-
-export function configureHttpServer(config: HttpConfig) {
-  const options: ServerOptions = {
-    host: config.host,
-    port: config.port,
-    routes: {
-      cors: config.cors,
-      payload: {
-        maxBytes: config.maxPayload.getValueInBytes(),
-      },
-      validate: {
-        options: {
-          abortEarly: false,
-        },
-      },
-    },
-    state: {
-      strictHeader: false,
-    },
-  };
-
-  const ssl = config.ssl;
-  if (ssl.enabled) {
-    const tlsOptions: TLSOptions = {
-      ca:
-        config.ssl.certificateAuthorities &&
-        config.ssl.certificateAuthorities.map(caFilePath =>
-          readFileSync(caFilePath)
-        ),
-      cert: readFileSync(ssl.certificate!),
-      ciphers: config.ssl.cipherSuites.join(':'),
-      // We use the server's cipher order rather than the client's to prevent the BEAST attack.
-      honorCipherOrder: true,
-      key: readFileSync(ssl.key!),
-      passphrase: ssl.keyPassphrase,
-      secureOptions: ssl.getSecureOptions(),
-    };
-
-    // TODO: Hapi types have a typo in `tls` property type definition: `https.RequestOptions` is used instead of
-    // `https.ServerOptions`, and `honorCipherOrder` isn't presented in `https.RequestOptions`.
-    options.tls = tlsOptions as any;
-  }
-
-  const server = new Server(options);
-  server.listener.on('clientError', (err, socket) => {
-    if (socket.writable) {
-      socket.end(new Buffer('HTTP/1.1 400 Bad Request\r\n\r\n', 'ascii'));
-    } else {
-      socket.destroy(err);
-    }
-  });
-
-  return { server, options };
-}
 
 export class HttpServer {
   private server?: Server;
@@ -102,7 +47,7 @@ export class HttpServer {
   }
 
   public async start(config: HttpConfig) {
-    this.server = configureHttpServer(config).server;
+    this.server = createServer(getServerOptions(config));
 
     this.setupBasePathRewrite(this.server, config);
 

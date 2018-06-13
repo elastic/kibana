@@ -22,6 +22,7 @@ import { format as formatUrl } from 'url';
 
 import { Logger } from '../logging';
 import { HttpConfig } from './http_config';
+import { createServer, getServerOptions } from './http_tools';
 
 export class HttpsRedirectServer {
   private server?: Server;
@@ -42,8 +43,11 @@ export class HttpsRedirectServer {
       }]`
     );
 
-    this.server = new Server({
-      host: config.host,
+    // Redirect server is configured in the same way as any other HTTP server
+    // within the platform with the only exception that it should always be a
+    // plain HTTP server, so we just ignore `tls` part of options.
+    this.server = createServer({
+      ...getServerOptions(config, { configureTLS: false }),
       port: config.ssl.redirectHttpFromPort,
     });
 

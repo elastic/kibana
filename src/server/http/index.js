@@ -35,6 +35,9 @@ export default async function (kbnServer, server, config) {
 
   const shortUrlLookup = shortUrlLookupProvider(server);
 
+  // Note that all connection options configured here should be exactly the same
+  // as in `getServerOptions()` in the new platform (see `core/server/http/http_tools`).
+  // Any change SHOULD BE applied in both places.
   server.connection({
     host: config.get('server.host'),
     port: config.get('server.port'),
