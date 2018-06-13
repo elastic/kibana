@@ -37,6 +37,13 @@ export class XPackInfo {
   _licenseInfoChangedListeners = new Set();
 
   /**
+   * Feature name <-> license change callback mapping.
+   * @type {Map<string, Function>}
+   * @private
+   */
+  _featureLicenseChangeCallbacks = new Map();
+
+  /**
    * Cache that may contain last xpack info API response or error, json representation
    * of xpack info and xpack info signature.
    * @type {{response: Object|undefined, error: Object|undefined, json: Object|undefined, signature: string|undefined}}
@@ -150,7 +157,7 @@ export class XPackInfo {
         this._log(
           ['license', 'info', 'xpack'],
           `Imported ${this._cache.response ? 'changed ' : ''}license information` +
-            ` from Elasticsearch for the [${this._clusterSource}] cluster: ${licenseInfo}`
+          ` from Elasticsearch for the [${this._clusterSource}] cluster: ${licenseInfo}`
         );
       }
 
@@ -165,9 +172,9 @@ export class XPackInfo {
 
     } catch(error) {
       this._log(
-        [ 'license', 'warning', 'xpack' ],
+        ['license', 'warning', 'xpack'],
         `License information from the X-Pack plugin could not be obtained from Elasticsearch` +
-          ` for the [${this._clusterSource}] cluster. ${error}`
+        ` for the [${this._clusterSource}] cluster. ${error}`
       );
 
       this._cache = { error };
@@ -215,6 +222,16 @@ export class XPackInfo {
         // include results from newly registered generator when they are requested.
         this._cache.json = undefined;
         this._cache.signature = undefined;
+      },
+
+      /**
+       * Registers a callback function that will be called whenever the XPack license changes.
+       * Callback will be invoked after the license change have been applied to this XPack Info instance.
+       * Callbacks may be asynchronous, but will not be awaited.
+       * @param {Function} callback Function to call whenever the XPack license changes.
+       */
+      registerLicenseChangeCallback: (callback) => {
+        this._featureLicenseChangeCallbacks.set(name, callback);
       },
 
       /**
