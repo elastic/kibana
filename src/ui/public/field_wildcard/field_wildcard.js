@@ -26,7 +26,7 @@ export function FieldWildcardProvider(config) {
     return new RegExp('^' + glob.split('*').map(escapeRegExp).join('.*') + '$');
   });
 
-  function fieldWildcardMatcher(globs) {
+  function fieldWildcardMatcher(globs = []) {
     return function matcher(val) {
       // do not test metaFields or keyword
       if (metaFields.indexOf(val) !== -1) {
@@ -36,7 +36,7 @@ export function FieldWildcardProvider(config) {
     };
   }
 
-  function fieldWildcardFilter(globs) {
+  function fieldWildcardFilter(globs = []) {
     const matcher = fieldWildcardMatcher(globs);
     return function filter(val) {
       return !matcher(val);
