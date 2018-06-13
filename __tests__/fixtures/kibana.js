@@ -1,4 +1,4 @@
-import { get, has } from 'lodash';
+import { get, has, noop } from 'lodash';
 import mockElasticsearch from './elasticsearch_plugin';
 
 const config = {
@@ -17,6 +17,7 @@ export class Plugin {
         [this.props.name]: {},
         elasticsearch: mockElasticsearch,
       },
+      injectUiAppVars: noop,
       config: () => ({
         get: key => get(config, key),
         has: key => has(config, key),

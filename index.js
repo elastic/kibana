@@ -1,5 +1,4 @@
 import init from './init';
-import { functionsRegistry } from './common/lib/functions_registry';
 import { mappings } from './server/mappings';
 
 export default function(kibana) {
@@ -12,21 +11,6 @@ export default function(kibana) {
         description: 'Data driven workpads',
         icon: 'plugins/canvas/icon.svg',
         main: 'plugins/canvas/app',
-        injectVars: server => {
-          const config = server.config();
-          const basePath = config.get('server.basePath');
-
-          const kibanaVars = server.plugins.kibana.injectVars(server);
-
-          return {
-            ...kibanaVars,
-            kbnIndex: config.get('kibana.index'),
-            esShardTimeout: config.get('elasticsearch.shardTimeout'),
-            esApiVersion: config.get('elasticsearch.apiVersion'),
-            serverFunctions: functionsRegistry.toArray(),
-            basePath,
-          };
-        },
       },
       hacks: [
         // window.onerror override

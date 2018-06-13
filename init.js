@@ -22,6 +22,19 @@ export default function(server /*options*/) {
     },
   };
 
+  server.injectUiAppVars('canvas', () => {
+    const config = server.config();
+    const basePath = config.get('server.basePath');
+
+    return {
+      kbnIndex: config.get('kibana.index'),
+      esShardTimeout: config.get('elasticsearch.shardTimeout'),
+      esApiVersion: config.get('elasticsearch.apiVersion'),
+      serverFunctions: functionsRegistry.toArray(),
+      basePath,
+    };
+  });
+
   // register all of the functions and types using the plugin's methods
   const { addFunction, addType } = server.plugins.canvas;
   serverFunctions.forEach(addFunction);
