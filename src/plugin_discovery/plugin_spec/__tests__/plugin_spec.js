@@ -340,13 +340,6 @@ describe('plugin discovery/plugin spec', () => {
     });
 
     describe('#getPublicDir()', () => {
-      it('defaults if scss is specified', () => {
-        const spec = new PluginSpec(fooPack, { scss: 'foo.scss' });
-        expect(spec.getStyleSheet()).to.eql('foo.css');
-      });
-    });
-
-    describe('#getPublicDir()', () => {
       describe('spec.publicDir === false', () => {
         it('returns null', () => {
           const spec = new PluginSpec(fooPack, { publicDir: false });
@@ -389,6 +382,40 @@ describe('plugin discovery/plugin spec', () => {
         });
 
         expect(spec.getExportSpecs()).to.be('foo');
+      });
+    });
+
+    describe('#getExportAppStyleSheetToCompilePath', () => {
+      it('returns undefined if styleSheetToCompile is not defined', () => {
+        const spec = new PluginSpec(fooPack, {});
+
+        expect(spec.getExportAppStyleSheetToCompilePath()).to.be(undefined);
+      });
+
+      it('returns path to styleSheetToCompile in publicDir', () => {
+        const spec = new PluginSpec(fooPack, {
+          publicDir: '/var/www/public',
+          uiExports: { app: { styleSheetToCompile: 'styles/foo.scss' } }
+        });
+
+        expect(spec.getExportAppStyleSheetToCompilePath()).to.eql('/var/www/public/styles/foo.scss');
+      });
+    });
+
+    describe('#getExportAppStyleSheetPath', () => {
+      it('returns undefined if styleSheetToCompile is not defined', () => {
+        const spec = new PluginSpec(fooPack, {});
+
+        expect(spec.getExportAppStyleSheetPath()).to.be(undefined);
+      });
+
+      it('returns path to styleSheetToCompile in publicDir', () => {
+        const spec = new PluginSpec(fooPack, {
+          publicDir: '/var/www/public',
+          uiExports: { app: { styleSheetPath: 'styles/foo.scss' } }
+        });
+
+        expect(spec.getExportAppStyleSheetPath()).to.eql('/var/www/public/styles/foo.scss');
       });
     });
 
