@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
 import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
 import 'ui/autoload/all';
