@@ -136,7 +136,7 @@
       </div>
     </nav>
 
-    <div class="vis-editor-config" ng-show="sidebar.section == 'data'">
+    <div class="vis-editor-config" ng-if="sidebar.section == 'data'">
       <!-- metrics -->
       <vis-editor-agg-group ng-if="vis.type.schemas.metrics" group-name="metrics"></vis-editor-agg-group>
 
@@ -144,7 +144,7 @@
       <vis-editor-agg-group ng-if="vis.type.schemas.buckets" group-name="buckets"></vis-editor-agg-group>
     </div>
 
-    <div class="vis-editor-config" ng-repeat="tab in vis.type.editorConfig.optionTabs" ng-show="sidebar.section == tab.name">
+    <div class="vis-editor-config" ng-repeat="tab in vis.type.editorConfig.optionTabs" ng-if="sidebar.section == tab.name">
       <vis-editor-vis-options
         vis="vis"
         vis-data="visData"
