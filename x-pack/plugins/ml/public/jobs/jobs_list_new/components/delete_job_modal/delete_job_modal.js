@@ -65,7 +65,12 @@ export class DeleteJobModal extends Component {
             buttonColor="danger"
             defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
           >
-            <p>Are you sure you want to delete this job?</p>
+            <p>Are you sure you want to delete {(this.state.jobs.length > 1) ? 'these jobs' : 'this job'}</p>
+            {(this.state.jobs.length > 1) &&
+              <p>Deleting multiple jobs can be time consuming.
+                They will be deleted in the background and may not disappear from the jobs list instantly
+              </p>
+            }
           </EuiConfirmModal>
         </EuiOverlayMask>
       );
