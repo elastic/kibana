@@ -5,14 +5,7 @@
  */
 
 import d3 from 'd3';
-import {
-  zipObject,
-  difference,
-  memoize,
-  get,
-  findLastIndex,
-  isEmpty
-} from 'lodash';
+import { zipObject, difference, memoize, get, isEmpty } from 'lodash';
 import { colors } from '../../style/variables';
 import {
   asMillisWithDefault,
@@ -59,7 +52,7 @@ export function getCharts(urlParams, charts) {
 
 export function getResponseTimeSeries(chartsData) {
   const { dates, weightedAverage } = chartsData;
-  const { avg, p95, p99, mlAvg } = chartsData.responseTimes;
+  const { avg, p95, p99, avgAnomalies } = chartsData.responseTimes;
 
   const series = [
     {
@@ -85,13 +78,13 @@ export function getResponseTimeSeries(chartsData) {
     }
   ];
 
-  if (!isEmpty(mlAvg)) {
+  if (!isEmpty(avgAnomalies.buckets)) {
     // insert after Avg. serie
     series.splice(1, 0, {
       title: 'Anomaly Boundaries',
       hideLegend: true,
       hideTooltipValue: true,
-      data: getAnomalyBoundaries(dates, mlAvg),
+      data: getAnomalyBoundaries(dates, avgAnomalies.buckets),
       type: 'area',
       color: 'none',
       areaColor: 'rgba(49, 133, 252, 0.1)' // apmBlue
@@ -101,7 +94,11 @@ export function getResponseTimeSeries(chartsData) {
       title: 'Anomaly score',
       hideLegend: true,
       hideTooltipValue: true,
-      data: getAnomalyScore(dates, mlAvg),
+      data: getAnomalyScore(
+        dates,
+        avgAnomalies.buckets,
+        avgAnomalies.bucketSpanInSeconds
+      ),
       type: 'areaMaxHeight',
       color: 'none',
       areaColor: 'rgba(146, 0, 0, 0.1)' // apmRed
@@ -156,56 +153,44 @@ function getColorByKey(keys) {
   return key => assignedColors[key] || unassignedColors[key];
 }
 
-function getChartValues(dates = [], yValues = []) {
+function getChartValues(dates = [], buckets = []) {
   return dates.map((x, i) => ({
     x,
-    y: yValues[i]
+    y: buckets[i]
   }));
 }
 
-function getClosest(arr, targetNumber) {
-  if (arr.includes(targetNumber)) {
-    return targetNumber;
-  }
+function getAnomalyScore(dates = [], buckets = [], bucketSpanInSeconds) {
+  const ANOMALY_THRESHOLD = 75;
+  return dates
+    .map((x, i) => {
+      const anomalyScore = get(buckets[i], 'anomalyScore');
+      return {
+        x,
+        anomalyScore
+      };
+    })
+    .filter(p => p.anomalyScore > ANOMALY_THRESHOLD)
+    .reduce((acc, p, i, points) => {
+      acc.push({ x: p.x });
+      const nextX = get(points, `${i + 1}.x`);
+      const endX = p.x + bucketSpanInSeconds * 1000;
+      if (nextX == null || nextX > endX) {
+        acc.push({
+          x: endX
+        });
+      }
 
-  return arr.reduce(
-    (prev, curr) =>
-      Math.abs(curr - targetNumber) < Math.abs(prev - targetNumber)
-        ? curr
-        : prev
-  );
+      return acc;
+    }, []);
 }
 
-function getAnomalyScore(dates = [], yValues = []) {
-  return dates.map((x, i) => {
-    const anomalyScore = get(yValues[i], 'anomalyScore');
-    return {
+function getAnomalyBoundaries(dates = [], buckets = []) {
+  return dates
+    .map((x, i) => ({
       x,
-      draw: anomalyScore > 75,
-      anomalyScore
-    };
-  });
-}
-
-function getAnomalyBoundaries(dates = [], yValues = []) {
-  const lastIndex = findLastIndex(yValues, item => get(item, 'lower') != null);
-
-  // TODO: Temporary workaround to get rid of null values
-  // Replaces null values with the previous value in the list
-  const yValuesWithoutGaps = yValues.reduce((acc, item, i) => {
-    if (get(item, 'lower') === null && i < lastIndex && i > 0) {
-      const prevItem = acc[i - 1];
-      acc.push(prevItem);
-    } else {
-      acc.push(item);
-    }
-
-    return acc;
-  }, []);
-
-  return dates.map((x, i) => ({
-    x,
-    y0: get(yValuesWithoutGaps[i], 'lower'),
-    y: get(yValuesWithoutGaps[i], 'upper')
-  }));
+      y0: get(buckets[i], 'lower'),
+      y: get(buckets[i], 'upper')
+    }))
+    .filter(point => point.y != null);
 }

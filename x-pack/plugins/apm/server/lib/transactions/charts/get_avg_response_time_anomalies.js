@@ -7,7 +7,7 @@
 import { get } from 'lodash';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 
-export async function getMlAvgResponseTimes({
+export async function getAvgResponseTimeAnomalies({
   serviceName,
   transactionType,
   setup
@@ -35,6 +35,12 @@ export async function getMlAvgResponseTimes({
         }
       },
       aggs: {
+        top_hits: {
+          top_hits: {
+            _source: { includes: ['bucket_span'] },
+            size: 1
+          }
+        },
         ml_avg_response_times: {
           date_histogram: {
             field: 'timestamp',
@@ -65,7 +71,7 @@ export async function getMlAvgResponseTimes({
     throw e;
   }
 
-  return get(resp, 'aggregations.ml_avg_response_times.buckets', [])
+  const buckets = get(resp, 'aggregations.ml_avg_response_times.buckets', [])
     .slice(1, -1)
     .map(bucket => {
       return {
@@ -74,4 +80,14 @@ export async function getMlAvgResponseTimes({
         upper: bucket.upper.value
       };
     });
+
+  const bucketSpanInSeconds = get(
+    resp,
+    'aggregations.top_hits.hits.hits[0]._source.bucket_span'
+  );
+
+  return {
+    bucketSpanInSeconds,
+    buckets
+  };
 }

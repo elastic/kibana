@@ -55,10 +55,10 @@ class StaticPlot extends PureComponent {
         );
       case 'areaMaxHeight':
         const yMax = last(plotValues.yTickValues);
-        const data = serie.data.map(point => ({
-          ...point,
-          y0: point.draw ? 0 : null,
-          y: point.draw ? yMax : null
+        const data = serie.data.map(p => ({
+          x: p.x,
+          y0: 0,
+          y: yMax
         }));
 
         return (

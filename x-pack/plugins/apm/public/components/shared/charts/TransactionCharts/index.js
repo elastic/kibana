@@ -37,13 +37,13 @@ const Chart = styled.div`
 
 export class Charts extends Component {
   state = {
-    hoverIndex: null
+    hoverX: null
   };
 
-  onHover = hoverIndex => this.setState({ hoverIndex });
-  onMouseLeave = () => this.setState({ hoverIndex: null });
+  onHover = hoverX => this.setState({ hoverX });
+  onMouseLeave = () => this.setState({ hoverX: null });
   onSelectionEnd = selection => {
-    this.setState({ hoverIndex: null });
+    this.setState({ hoverX: null });
     timefilter.setTime({
       from: moment(selection.start).toISOString(),
       to: moment(selection.end).toISOString(),
@@ -87,7 +87,7 @@ export class Charts extends Component {
             onHover={this.onHover}
             onMouseLeave={this.onMouseLeave}
             onSelectionEnd={this.onSelectionEnd}
-            hoverIndex={this.state.hoverIndex}
+            hoverX={this.state.hoverX}
             tickFormatY={this.getResponseTimeTickFormatter}
             formatTooltipValue={this.getResponseTimeTooltipFormatter}
           />
@@ -101,7 +101,7 @@ export class Charts extends Component {
             onHover={this.onHover}
             onMouseLeave={this.onMouseLeave}
             onSelectionEnd={this.onSelectionEnd}
-            hoverIndex={this.state.hoverIndex}
+            hoverX={this.state.hoverX}
             tickFormatY={this.getTPMFormatter}
             formatTooltipValue={this.getTPMTooltipFormatter}
             truncateLegends

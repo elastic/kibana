@@ -100,10 +100,7 @@ export class InnerCustomPlot extends PureComponent {
   };
 
   onHover = node => {
-    const index = this.props.series[0].data.findIndex(
-      item => item.x === node.x
-    );
-    this.props.onHover(index);
+    this.props.onHover(node.x);
 
     if (this.state.isDrawing) {
       this.setState({ selectionEnd: node.x });
@@ -161,7 +158,7 @@ export class InnerCustomPlot extends PureComponent {
 
           <InteractivePlot
             plotValues={plotValues}
-            hoverIndex={this.props.hoverIndex}
+            hoverX={this.props.hoverX}
             series={enabledSeries}
             formatTooltipValue={this.props.formatTooltipValue}
             isDrawing={this.state.isDrawing}
@@ -186,7 +183,7 @@ export class InnerCustomPlot extends PureComponent {
 
 InnerCustomPlot.propTypes = {
   formatTooltipValue: PropTypes.func,
-  hoverIndex: PropTypes.number,
+  hoverX: PropTypes.number,
   noHits: PropTypes.bool.isRequired,
   onHover: PropTypes.func.isRequired,
   onMouseLeave: PropTypes.func.isRequired,
