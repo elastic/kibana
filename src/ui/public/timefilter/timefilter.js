@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import moment from 'moment';
-import dateMath from '@kbn/datemath';
+import { calculateBounds, getTime } from './get_time';
 import '../state_management/global_state';
 import '../config';
 import { EventsProvider } from '../events';
@@ -98,33 +98,6 @@ uiModules
       $rootScope.$apply();
     };
 
-    Timefilter.prototype.get = function (indexPattern, timeRange) {
-
-      if (!indexPattern) {
-      //in CI, we sometimes seem to fail here.
-        return;
-      }
-
-      let filter;
-      const timefield = indexPattern.timeFieldName && _.find(indexPattern.fields, { name: indexPattern.timeFieldName });
-
-      if (timefield) {
-        const bounds = timeRange ? this.calculateBounds(timeRange) : this.getBounds();
-        filter = { range: {} };
-        filter.range[timefield.name] = {
-          gte: bounds.min.valueOf(),
-          lte: bounds.max.valueOf(),
-          format: 'epoch_millis'
-        };
-      }
-
-      return filter;
-    };
-
-    Timefilter.prototype.getBounds = function () {
-      return this.calculateBounds(this.time);
-    };
-
     Timefilter.prototype.getForceNow = function () {
       const query = $location.search().forceNow;
       if (!query) {
@@ -138,13 +111,16 @@ uiModules
       return new Date(ticks);
     };
 
-    Timefilter.prototype.calculateBounds = function (timeRange) {
-      const forceNow = this.getForceNow();
+    Timefilter.prototype.get = function (indexPattern, timeRange) {
+      return getTime(indexPattern, timeRange ? timeRange : this.time, this.getForceNow());
+    };
 
-      return {
-        min: dateMath.parse(timeRange.from, { forceNow }),
-        max: dateMath.parse(timeRange.to, { roundUp: true, forceNow })
-      };
+    Timefilter.prototype.calculateBounds = function (timeRange) {
+      return calculateBounds(timeRange, { forceNow: this.getForceNow() });
+    };
+
+    Timefilter.prototype.getBounds = function () {
+      return this.calculateBounds(this.time);
     };
 
     Timefilter.prototype.getActiveBounds = function () {
