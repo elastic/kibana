@@ -58,7 +58,7 @@ export class SpacesGridPage extends Component {
 
     return (
       <EuiPage>
-        <PageHeader breadcrumbs={this.props.breadcrumbs}/>
+        <PageHeader breadcrumbs={this.props.breadcrumbs} />
         <EuiPageContent>
           <EuiFlexGroup justifyContent={'spaceBetween'}>
             <EuiFlexItem grow={false}>
@@ -170,20 +170,20 @@ export class SpacesGridPage extends Component {
     };
   }
 
- onTableChange = ({ page = {} }) => {
-   const {
-     index: pageIndex,
-     size: pageSize
-   } = page;
+  onTableChange = ({ page = {} }) => {
+    const {
+      index: pageIndex,
+      size: pageSize
+    } = page;
 
-   this.setState({
-     pagination: {
-       ...this.state.pagination,
-       pageIndex,
-       pageSize
-     }
-   });
- };
+    this.setState({
+      pagination: {
+        ...this.state.pagination,
+        pageIndex,
+        pageSize
+      }
+    });
+  };
 
   onSelectionChange = (selectedSpaces) => {
     this.setState({ selectedSpaces });

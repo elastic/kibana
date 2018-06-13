@@ -100,17 +100,20 @@ export class ManageSpacePage extends Component {
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup responsive={false}>
+                {
+                  name && (
                     <EuiFlexItem grow={false}>
-                      <EuiFormRow hasEmptyLabelSpace={true}>
-                        <SpaceAvatar space={this.state.space} />
-                      </EuiFormRow>
+                      <EuiFlexGroup responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <EuiFormRow hasEmptyLabelSpace={true}>
+                            <SpaceAvatar space={this.state.space} />
+                          </EuiFormRow>
+                        </EuiFlexItem>
+                        <CustomizeSpaceAvatar space={this.state.space} onChange={this.onAvatarChange} />
+                      </EuiFlexGroup>
                     </EuiFlexItem>
-                    <CustomizeSpaceAvatar space={this.state.space} onChange={this.onAvatarChange} />
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-
+                  )
+                }
               </EuiFlexGroup>
 
               <EuiSpacer />
@@ -126,7 +129,6 @@ export class ManageSpacePage extends Component {
                       onChange={this.onUrlContextChange}
                       validator={this.validator}
                     />
-                    <EuiSpacer />
                   </Fragment>
                 )
               }
@@ -267,6 +269,8 @@ export class ManageSpacePage extends Component {
       name = '',
       id = toUrlContext(name),
       description,
+      initials,
+      color,
       urlContext
     } = this.state.space;
 
@@ -274,6 +278,8 @@ export class ManageSpacePage extends Component {
       name,
       id,
       description,
+      initials,
+      color,
       urlContext
     };
 
