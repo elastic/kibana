@@ -190,6 +190,7 @@ exports[`InspectorPanel should render as expected 1`] = `
                                         <arrowDown
                                           aria-hidden="true"
                                           className="euiIcon euiIcon--medium euiButtonEmpty__icon"
+                                          focusable="false"
                                           height="16"
                                           style={
                                             Object {
@@ -204,6 +205,7 @@ exports[`InspectorPanel should render as expected 1`] = `
                                           <svg
                                             aria-hidden="true"
                                             className="euiIcon euiIcon--medium euiButtonEmpty__icon"
+                                            focusable="false"
                                             height="16"
                                             style={
                                               Object {
@@ -298,6 +300,7 @@ exports[`InspectorPanel should render as expected 1`] = `
                         <cross
                           aria-hidden="true"
                           className="euiIcon euiIcon--medium euiButtonEmpty__icon"
+                          focusable="false"
                           height="16"
                           style={
                             Object {
@@ -312,6 +315,7 @@ exports[`InspectorPanel should render as expected 1`] = `
                           <svg
                             aria-hidden="true"
                             className="euiIcon euiIcon--medium euiButtonEmpty__icon"
+                            focusable="false"
                             height="16"
                             style={
                               Object {
