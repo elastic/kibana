@@ -52,13 +52,14 @@ const createMockXpackMainPluginAndFeature = (featureId) => {
 };
 
 const createMockDownstreamPlugin = (id) => {
+  const defaultImplementation = () => { throw new Error('Not implemented'); };
   return {
     id,
     status: {
-      disabled: jest.fn(),
-      yellow: jest.fn(),
-      green: jest.fn(),
-      red: jest.fn(),
+      disabled: jest.fn().mockImplementation(defaultImplementation),
+      yellow: jest.fn().mockImplementation(defaultImplementation),
+      green: jest.fn().mockImplementation(defaultImplementation),
+      red: jest.fn().mockImplementation(defaultImplementation),
     },
   };
 };
@@ -71,6 +72,7 @@ const createMockDownstreamPlugin = (id) => {
     mockXpackMainPlugin.mock.setStatus(state, message);
     const downstreamPlugin = createMockDownstreamPlugin(pluginId);
     const initializeMock = jest.fn();
+    downstreamPlugin.status[state].mockImplementation(() => {});
 
     watchStatusAndLicenseToInitialize(mockXpackMainPlugin, downstreamPlugin, initializeMock);
 
