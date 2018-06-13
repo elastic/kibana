@@ -126,7 +126,7 @@ test(`sets downstream plugin's status to red when initialize rejects`, (done) =>
   downstreamPlugin.status.red.mockImplementation(() => done());
 });
 
-test(`calls initialize twice when it gets a new license`, (done) => {
+test(`calls initialize twice when it gets a new license and the status is green`, (done) => {
   const pluginId = 'foo-plugin';
   const { mockXpackMainPlugin, mockFeature } = createMockXpackMainPluginAndFeature(pluginId);
   mockXpackMainPlugin.mock.setStatus('green');
@@ -149,6 +149,31 @@ test(`calls initialize twice when it gets a new license`, (done) => {
       expect(initializeMock).toHaveBeenCalledTimes(2);
       done();
     }
+  });
+
+  watchStatusAndLicenseToInitialize(mockXpackMainPlugin, downstreamPlugin, initializeMock);
+});
+
+test(`doesn't call initialize twice when it gets a new license when the status isn't green`, (done) => {
+  const pluginId = 'foo-plugin';
+  const { mockXpackMainPlugin, mockFeature } = createMockXpackMainPluginAndFeature(pluginId);
+  mockXpackMainPlugin.mock.setStatus('green');
+  const firstLicenseCheckResults = Symbol();
+  const secondLicenseCheckResults = Symbol();
+  mockFeature.mock.setLicenseCheckResults(firstLicenseCheckResults);
+  const downstreamPlugin = createMockDownstreamPlugin(pluginId);
+  const initializeMock = jest.fn().mockImplementation(() => Promise.resolve());
+
+  downstreamPlugin.status.green.mockImplementation(() => {
+    mockXpackMainPlugin.mock.setStatus('red');
+    mockFeature.mock.setLicenseCheckResults(secondLicenseCheckResults);
+    mockFeature.mock.triggerLicenseChange();
+  });
+
+  downstreamPlugin.status.red.mockImplementation(() => {
+    expect(initializeMock).toHaveBeenCalledTimes(1);
+    expect(initializeMock).toHaveBeenCalledWith(firstLicenseCheckResults);
+    done();
   });
 
   watchStatusAndLicenseToInitialize(mockXpackMainPlugin, downstreamPlugin, initializeMock);
@@ -178,3 +203,4 @@ test(`calls initialize twice when the status changes to green twice`, (done) => 
 
   watchStatusAndLicenseToInitialize(mockXpackMainPlugin, downstreamPlugin, initializeMock);
 });
+
