@@ -21,7 +21,7 @@ const REACT_NODE_ID_NO_DATA = 'noDataReact';
 export class NoDataController {
   constructor($injector, $scope) {
     const $executor = $injector.get('$executor');
-    this.enableTimefilter($injector, $executor);
+    this.enableTimefilter($executor);
     this.registerCleanup($scope, $executor);
 
     Object.assign(this, this.getDefaultModel());
@@ -98,7 +98,7 @@ export class NoDataController {
     $executor.start(); // start the executor to keep refreshing the search for data
   }
 
-  enableTimefilter() {
+  enableTimefilter($executor) {
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
     timefilter.on('update', () => $executor.run()); // re-fetch if they change the time filter

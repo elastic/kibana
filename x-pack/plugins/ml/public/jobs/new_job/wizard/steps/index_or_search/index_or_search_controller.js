@@ -43,9 +43,7 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 module.controller('MlNewJobStepIndexOrSearch',
-  function (
-    $scope,
-    $route) {
+  function ($scope) {
 
     timefilter.disableTimeRangeSelector(); // remove time picker from top of page
     timefilter.disableAutoRefreshSelector(); // remove time picker from top of page

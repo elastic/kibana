@@ -22,7 +22,7 @@ import moment from 'moment';
 import { expect } from 'chai';
 
 describe('createBrushHandler', () => {
-  let timefilter;
+  let mockTimefilter;
   let fn;
   let range;
 

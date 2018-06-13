@@ -19,7 +19,7 @@ import moment from 'moment';
 import rison from 'rison-node';
 
 import chrome from 'ui/chrome';
-import { timefilter} from 'ui/timefilter';
+import { timefilter } from 'ui/timefilter';
 import template from './explorer_charts_container.html';
 
 import { uiModules } from 'ui/modules';

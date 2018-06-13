@@ -31,8 +31,7 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 module.controller('MlSettings',
-  function (
-    $scope) {
+  function () {
 
     timefilter.disableTimeRangeSelector(); // remove time picker from top of page
     timefilter.disableAutoRefreshSelector(); // remove time picker from top of page
