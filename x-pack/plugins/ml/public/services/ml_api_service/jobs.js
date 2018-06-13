@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// Service for obtaining data for the ML Results dashboards.
-
 import chrome from 'ui/chrome';
 
 import { http } from 'plugins/ml/services/http_service';
@@ -31,6 +29,16 @@ export const jobs = {
       method: 'POST',
       data: {
         datafeedIds,
+      }
+    });
+  },
+
+  deleteJobs(jobIds) {
+    return http({
+      url: `${basePath}/jobs/delete_jobs`,
+      method: 'POST',
+      data: {
+        jobIds,
       }
     });
   }

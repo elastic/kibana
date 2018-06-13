@@ -236,6 +236,7 @@ export class JobsListView extends Component {
           <MultiJobActions
             selectedJobs={this.state.selectedJobs}
             showStartDatafeedModal={this.showStartDatafeedModal}
+            showDeleteJobModal={this.showDeleteJobModal}
             refreshJobs={() => this.refreshJobSummaryList(false)}
           />
         </div>

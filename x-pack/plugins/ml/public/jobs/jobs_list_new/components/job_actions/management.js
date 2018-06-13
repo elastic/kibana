@@ -51,7 +51,7 @@ export function actionsMenuContent(showEditJobModal, showDeleteJobModal, showSta
         <MLText
           color="danger"
           onClick={() => {
-            showDeleteJobModal(item);
+            showDeleteJobModal([item]);
             closeMenu();
           }}
         >

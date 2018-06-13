@@ -5,7 +5,7 @@
  */
 
 
-export function datafeedServiceProvider(callWithRequest) {
+export function datafeedsProvider(callWithRequest) {
 
   async function forceStartDatafeeds(datafeedIds, start, end) {
     const jobIds = {};
@@ -60,7 +60,7 @@ export function datafeedServiceProvider(callWithRequest) {
   }
 
   async function startDatafeed(datafeedId, start, end) {
-    return await callWithRequest('ml.startDatafeed', { datafeedId, start, end });
+    return callWithRequest('ml.startDatafeed', { datafeedId, start, end });
   }
 
   async function stopDatafeeds(datafeedIds) {
@@ -73,8 +73,13 @@ export function datafeedServiceProvider(callWithRequest) {
     return results;
   }
 
+  async function forceDeleteDatafeed(datafeedId) {
+    return callWithRequest('ml.deleteDatafeed', { datafeedId, force: true });
+  }
+
   return {
     forceStartDatafeeds,
-    stopDatafeeds
+    stopDatafeeds,
+    forceDeleteDatafeed,
   };
 }

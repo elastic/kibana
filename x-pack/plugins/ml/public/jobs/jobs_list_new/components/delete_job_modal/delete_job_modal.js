@@ -15,21 +15,20 @@ import {
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
-import { toastNotifications } from 'ui/notify';
-import { mlJobService } from 'plugins/ml/services/job_service';
+import { deleteJobs } from '../utils';
 
 export class DeleteJobModal extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
+      jobs: this.props.jobs,
       isModalVisible: false,
     };
     if (typeof this.props.showFunction === 'function') {
       this.props.showFunction(this.showModal);
     }
 
-    this.job = this.props.job;
     this.refreshJobs = this.props.refreshJobs;
   }
 
@@ -37,23 +36,24 @@ export class DeleteJobModal extends Component {
     this.setState({ isModalVisible: false });
   }
 
-  showModal = (job) => {
-    if (job !== undefined) {
-      this.job = job;
-    }
-    this.setState({ isModalVisible: true });
+  showModal = (jobs) => {
+    this.setState({
+      jobs,
+      isModalVisible: true
+    });
   }
 
   deleteJob = () => {
     this.closeModal();
-    deleteJob(this.job, this.refreshJobs);
+    deleteJobs(this.state.jobs, this.refreshJobs);
   }
 
   render() {
     let modal;
 
     if (this.state.isModalVisible) {
-      const title = `Delete ${this.job.id}`;
+      const title = `Delete ${(this.state.jobs.length > 1) ? `${this.state.jobs.length} jobs` : this.state.jobs[0].id}`;
+
       modal = (
         <EuiOverlayMask>
           <EuiConfirmModal
@@ -77,25 +77,4 @@ export class DeleteJobModal extends Component {
       </div>
     );
   }
-}
-
-function deleteJob(job, finish) {
-  const status = { deleteLock: false, deleteDatafeed: 0, deleteJob: 0, errorMessage: '' };
-  const tempJob = {
-    job_id: job.id,
-  };
-  if (job.hasDatafeed) {
-    tempJob.datafeed_config = {
-      exists: true
-    };
-  }
-
-  mlJobService.deleteJob(tempJob, status)
-    .then(() => {
-      toastNotifications.addSuccess(`${tempJob.job_id} successfully deleted`);
-      finish();
-    })
-    .catch(() => {
-      toastNotifications.addDanger(`${tempJob.job_id} could not be deleted`);
-    });
 }

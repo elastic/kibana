@@ -47,4 +47,20 @@ export function jobServiceRoutes(server, commonRouteConfig) {
     }
   });
 
+  server.route({
+    method: 'POST',
+    path: '/api/ml/jobs/delete_jobs',
+    handler(request, reply) {
+      const callWithRequest = callWithRequestFactory(server, request);
+      const { deleteJobs } = jobServiceProvider(callWithRequest);
+      const { jobIds } = request.payload;
+      return deleteJobs(jobIds)
+        .then(resp => reply(resp))
+        .catch(resp => reply(wrapError(resp)));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
 }

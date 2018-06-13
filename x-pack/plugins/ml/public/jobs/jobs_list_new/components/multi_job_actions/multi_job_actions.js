@@ -32,6 +32,7 @@ export class MultiJobActions extends Component {
             <MultiJobActionsMenu
               jobs={this.props.selectedJobs}
               showStartDatafeedModal={this.props.showStartDatafeedModal}
+              showDeleteJobModal={this.props.showDeleteJobModal}
               refreshJobs={this.props.refreshJobs}
             />
           </React.Fragment>

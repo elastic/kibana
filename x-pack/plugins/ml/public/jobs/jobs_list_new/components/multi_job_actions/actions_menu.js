@@ -59,7 +59,7 @@ export class MultiJobActionsMenu extends Component {
         <EuiContextMenuItem
           key="delete"
           icon="trash"
-          onClick={() => { this.closePopover(); }}
+          onClick={() => { this.props.showDeleteJobModal(this.props.jobs); this.closePopover(); }}
         >
           Delete job{s}
         </EuiContextMenuItem>

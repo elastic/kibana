@@ -13,6 +13,7 @@ import { mlJobService } from 'plugins/ml/services/job_service';
 const ACTION = {
   START: 'started',
   STOP: 'stopped',
+  DELETE: 'deleted',
 };
 
 export function isStartable(jobs) {
@@ -79,16 +80,25 @@ function showResults(resp, action) {
   } else if (action === ACTION.STOP) {
     actionText = 'stop';
     actionTextPT = 'stopped';
+  } else if (action === ACTION.DELETE) {
+    actionText = 'delete';
+    actionTextPT = 'deleted';
   }
 
   if (successes.length > 0) {
-    const txt = (successes.length === 1) ? `${successes[0]}` : `${successes.length} jobs `;
-    toastNotifications.addSuccess(`${txt} ${actionTextPT} successfully`);
+    // const txt = (successes.length === 1) ? `${successes[0]}` : `${successes.length} jobs `;
+    // toastNotifications.addSuccess(`${txt} ${actionTextPT} successfully`);
+    successes.forEach((s) => {
+      toastNotifications.addSuccess(`${s} ${actionTextPT} successfully`);
+    });
   }
 
   if (failures.length > 0) {
-    const txt = (failures.length === 1) ? `${failures[0]}` : `${failures.length} jobs `;
-    toastNotifications.addDanger(`${txt} failed to ${actionText}`);
+    // const txt = (failures.length === 1) ? `${failures[0]}` : `${failures.length} jobs `;
+    // toastNotifications.addDanger(`${txt} failed to ${actionText}`);
+    failures.forEach((s) => {
+      toastNotifications.addDanger(`${s} failed to ${actionText}`);
+    });
   }
 }
 
@@ -107,14 +117,14 @@ export function deleteJobs(jobs, finish) {
   const jobIds = jobs.map(j => j.id);
   mlJobService.deleteJobs(jobIds)
   	.then((resp) => {
-      showResults(resp, ACTION.STOP);
+      showResults(resp, ACTION.DELETE);
 
       if (typeof finish === 'function') {
         finish();
       }
     })
     .catch((error) => {
-      toastNotifications.addDanger(`Jobs failed to stop`, error);
+      toastNotifications.addDanger(`Jobs failed to delete`, error);
       if (typeof finish === 'function') {
         finish();
       }

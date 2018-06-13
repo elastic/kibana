@@ -5,10 +5,12 @@
  */
 
 
-import { datafeedServiceProvider } from './datafeeds';
+import { datafeedsProvider } from './datafeeds';
+import { jobsProvider } from './jobs';
 
 export function jobServiceProvider(callWithRequest) {
   return {
-    ...datafeedServiceProvider(callWithRequest)
+    ...datafeedsProvider(callWithRequest),
+    ...jobsProvider(callWithRequest),
   };
 }
