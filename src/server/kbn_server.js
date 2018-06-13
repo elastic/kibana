@@ -76,6 +76,9 @@ export default class KbnServer {
       uiMixin,
       indexPatternsMixin,
 
+      // setup saved object routes
+      savedObjectsMixin,
+
       // setup routes for installing/uninstalling sample data sets
       sampleDataMixin,
 
@@ -85,9 +88,6 @@ export default class KbnServer {
 
       // initialize the plugins
       Plugins.initializeMixin,
-
-      // setup saved object routes
-      savedObjectsMixin,
 
       // notify any deffered setup logic that plugins have intialized
       Plugins.waitForInitResolveMixin,
