@@ -219,6 +219,9 @@ export default function (program) {
       const KbnServer = require('../../server/kbn_server');
       try {
         kbnServer = new KbnServer(settings);
+        if (shouldStartRepl(opts)) {
+          startRepl(kbnServer);
+        }
         await kbnServer.ready();
       } catch (error) {
         const { server } = kbnServer;
@@ -256,10 +259,6 @@ export default function (program) {
           kbnServer.newPlatform.updateConfig(config);
         }
       });
-
-      if (shouldStartRepl(opts)) {
-        startRepl(kbnServer);
-      }
 
       return kbnServer;
     });

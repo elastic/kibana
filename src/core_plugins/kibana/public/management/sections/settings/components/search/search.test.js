@@ -41,6 +41,8 @@ describe('Search', () => {
   });
 
   it('should call parent function when query is changed', async () => {
+    //This test is brittle as it knows about implementation details
+    // (EuiFieldSearch uses onKeyup instead of onChange to handle input)
     const onQueryChange = jest.fn();
     const component = mount(
       <Search
@@ -49,8 +51,7 @@ describe('Search', () => {
         onQueryChange={onQueryChange}
       />
     );
-    component.find('input').simulate('keyUp');
-    component.find('EuiSearchFilters').prop('onChange')(query);
-    expect(onQueryChange).toHaveBeenCalledTimes(2);
+    component.find('input').simulate('keyup', { target: { value: 'new filter' } });
+    expect(onQueryChange).toHaveBeenCalledTimes(1);
   });
 });

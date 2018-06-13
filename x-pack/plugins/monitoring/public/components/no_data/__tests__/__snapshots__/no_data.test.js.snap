@@ -2,7 +2,7 @@
 
 exports[`NoData should show a default message if reason is unknown 1`] = `
 <div
-  class="euiPage"
+  class="euiPage euiPage--widthIsNotRestricted"
 >
   <div
     class="euiPageBody"
@@ -12,6 +12,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
     >
       <svg
         class="euiIcon euiIcon--xxLarge"
+        focusable="false"
         height="32"
         viewBox="0 0 32 32"
         width="32"
@@ -81,7 +82,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
 
 exports[`NoData should show text next to the spinner while checking a setting 1`] = `
 <div
-  class="euiPage"
+  class="euiPage euiPage--widthIsNotRestricted"
 >
   <div
     class="euiPageBody"
@@ -91,6 +92,7 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
     >
       <svg
         class="euiIcon euiIcon--xxLarge"
+        focusable="false"
         height="32"
         viewBox="0 0 32 32"
         width="32"

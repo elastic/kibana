@@ -13,14 +13,14 @@ import { Collector } from '../classes/collector';
  * Check if Cluster Alert email notifications is enabled in config
  * If so, use uiSettings API to fetch the X-Pack default admin email
  */
-export async function getDefaultAdminEmail(config, callWithInternalUser) {
+export async function getDefaultAdminEmail(config, callCluster) {
   if (!config.get('xpack.monitoring.cluster_alerts.email_notifications.enabled')) {
     return null;
   }
 
   const index = config.get('kibana.index');
   const version = config.get('pkg.version');
-  const uiSettingsDoc = await callWithInternalUser('get', {
+  const uiSettingsDoc = await callCluster('get', {
     index,
     type: 'doc',
     id: `config:${version}`,
@@ -35,11 +35,11 @@ let shouldUseNull = true;
 
 export async function checkForEmailValue(
   config,
-  callWithInternalUser,
+  callCluster,
   _shouldUseNull = shouldUseNull,
   _getDefaultAdminEmail = getDefaultAdminEmail
 ) {
-  const defaultAdminEmail = await _getDefaultAdminEmail(config, callWithInternalUser);
+  const defaultAdminEmail = await _getDefaultAdminEmail(config, callCluster);
 
   // Allow null so clearing the advanced setting will be reflected in the data
   const isAcceptableNull = defaultAdminEmail === null && _shouldUseNull;
@@ -55,14 +55,13 @@ export async function checkForEmailValue(
 }
 
 export function getSettingsCollector(server) {
-  const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const config = server.config();
 
   return new Collector(server, {
     type: KIBANA_SETTINGS_TYPE,
-    async fetch() {
+    async fetch(callCluster) {
       let kibanaSettingsData;
-      const defaultAdminEmail = await checkForEmailValue(config, callWithInternalUser);
+      const defaultAdminEmail = await checkForEmailValue(config, callCluster);
 
       // skip everything if defaultAdminEmail === undefined
       if (defaultAdminEmail || (defaultAdminEmail === null && shouldUseNull)) {

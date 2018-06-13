@@ -24,15 +24,15 @@ import { kfetch } from '../../kfetch';
 
 const type = 'value';
 
-const requestSuggestions = memoize((query, field) => {
+const requestSuggestions = memoize((query, field, boolFilter) => {
   return kfetch({
     pathname: `/api/kibana/suggestions/values/${field.indexPatternTitle}`,
     method: 'POST',
-    body: JSON.stringify({ query, field: field.name }),
+    body: JSON.stringify({ query, field: field.name, boolFilter }),
   });
 }, resolver);
 
-export function getSuggestionsProvider({ config, indexPatterns }) {
+export function getSuggestionsProvider({ config, indexPatterns, boolFilter }) {
   const allFields = flatten(
     indexPatterns.map(indexPattern => {
       return indexPattern.fields.map(field => ({
@@ -64,7 +64,7 @@ export function getSuggestionsProvider({ config, indexPatterns }) {
         return [];
       }
 
-      return requestSuggestions(query, field).then(data => {
+      return requestSuggestions(query, field, boolFilter).then(data => {
         const quotedValues = data.map(value => `"${escapeQuotes(value)}"`);
         return wrapAsSuggestions(start, end, query, quotedValues);
       });
@@ -85,8 +85,8 @@ function wrapAsSuggestions(start, end, query, values) {
     });
 }
 
-function resolver(query, field) {
+function resolver(query, field, boolFilter) {
   // Only cache results for a minute
   const ttl = Math.floor(Date.now() / 1000 / 60);
-  return [ttl, query, field.indexPatternTitle, field.name].join('|');
+  return [ttl, query, field.indexPatternTitle, field.name, JSON.stringify(boolFilter)].join('|');
 }

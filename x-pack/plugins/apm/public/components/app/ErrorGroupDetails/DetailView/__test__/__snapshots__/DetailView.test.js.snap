@@ -262,6 +262,7 @@ exports[`DetailView should render with data 1`] = `
           <svg
             aria-hidden="true"
             className="euiIcon euiIcon--medium euiButton__icon"
+            focusable="false"
             height="32"
             style={
               Object {

@@ -71,7 +71,7 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
 
       // Add the explicit passed timeRange as a filter to the requestSearchSource.
       requestSearchSource.filter(() => {
-        return timefilter.get(searchSource.index(), timeRange);
+        return timefilter.get(searchSource.get('index'), timeRange);
       });
 
       removeSearchSourceParentTimefilter(requestSearchSource);

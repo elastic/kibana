@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }) {
       before(async () => {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.setTimepickerIn63DataRange();
+        await PageObjects.dashboard.setTimepickerInDataRange();
       });
 
       it('are not selected by default', async function () {

@@ -70,9 +70,9 @@ export function CommonPageProvider({ getService, getPageObjects }) {
             .then(function (defaultIndex) {
               if (appName === 'discover' || appName === 'visualize' || appName === 'dashboard') {
                 if (!defaultIndex) {
-                // https://github.com/elastic/kibana/issues/7496
-                // Even though most tests are using esClient to set the default index, sometimes Kibana clobbers
-                // that change.  If we got here, fix it.
+                  // https://github.com/elastic/kibana/issues/7496
+                  // Even though most tests are using esClient to set the default index, sometimes Kibana clobbers
+                  // that change.  If we got here, fix it.
                   log.debug(' >>>>>>>> WARNING Navigating to [' + appName + '] with defaultIndex=' + defaultIndex);
                   log.debug(' >>>>>>>> Setting defaultIndex to "logstash-*""');
                   return kibanaServer.uiSettings.update({
@@ -127,14 +127,14 @@ export function CommonPageProvider({ getService, getPageObjects }) {
               // Browsers don't show the ':port' if it's 80 or 443 so we have to
               // remove that part so we can get a match in the tests.
               const navSuccessful = new RegExp(appUrl.replace(':80', '').replace(':443', '')
-             + '.{0,' + maxAdditionalLengthOnNavUrl + '}$')
+                + '.{0,' + maxAdditionalLengthOnNavUrl + '}$')
                 .test(currentUrl);
 
               if (!navSuccessful) {
                 const msg = 'App failed to load: ' + appName +
-              ' in ' + defaultFindTimeout + 'ms' +
-              ' appUrl = ' + appUrl +
-              ' currentUrl = ' + currentUrl;
+                  ' in ' + defaultFindTimeout + 'ms' +
+                  ' appUrl = ' + appUrl +
+                  ' currentUrl = ' + currentUrl;
                 log.debug(msg);
                 throw new Error(msg);
               }
@@ -149,7 +149,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
           .then(function (currentUrl) {
             let lastUrl = currentUrl;
             return retry.try(function () {
-            // give the app time to update the URL
+              // give the app time to update the URL
               return self.sleep(501)
                 .then(function () {
                   return remote.getCurrentUrl();
@@ -303,11 +303,18 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       });
     }
 
+    async closeToast() {
+      const toast = await find.byCssSelector('.euiToast');
+      await remote.moveMouseTo(toast);
+      await find.clickByCssSelector('.euiToast__closeButton');
+    }
+
     async clearAllToasts() {
       const toasts = await find.allByCssSelector('.euiToast');
       for (const toastElement of toasts) {
         try {
-          const closeBtn = await toastElement.findByCssSelector('euiToast__closeButton');
+          await remote.moveMouseTo(toastElement);
+          const closeBtn = await toastElement.findByCssSelector('.euiToast__closeButton');
           await closeBtn.click();
         } catch (err) {
           // ignore errors, toast clear themselves after timeout

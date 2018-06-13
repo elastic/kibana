@@ -17,24 +17,24 @@
  * under the License.
  */
 
-let _ = require('lodash');
-let ace = require('ace');
-let $ = require('jquery');
-let curl = require('../curl');
-let RowParser = require('./row_parser');
-let InputMode = require('./mode/input');
-let utils = require('../utils');
-let es = require('../es');
+const _ = require('lodash');
+const ace = require('brace');
+const $ = require('jquery');
+const curl = require('../curl');
+const RowParser = require('./row_parser');
+const InputMode = require('./mode/input');
+const utils = require('../utils');
+const es = require('../es');
 import chrome from 'ui/chrome';
 
 const smartResize = require('../smart_resize');
 
 function createInstance($el) {
-  var aceEditor = ace.edit($el[0]);
+  const aceEditor = ace.edit($el[0]);
 
   // we must create a custom class for each instance, so that the prototype
   // can be the unique aceEditor it extends
-  var CustomSenseEditor = function () {
+  const CustomSenseEditor = function () {
   };
   CustomSenseEditor.prototype = {};
 
@@ -50,7 +50,8 @@ function createInstance($el) {
   }
 
   // iterate all of the accessible properties/method, on the prototype and beyond
-  for (var key in aceEditor) {
+  // eslint-disable-next-line guard-for-in
+  for (const key in aceEditor) {
     switch (typeof aceEditor[key]) {
       case 'function':
         CustomSenseEditor.prototype[key] = _.bindKey(aceEditor, key);
@@ -61,14 +62,14 @@ function createInstance($el) {
     }
   }
 
-  var editor = new CustomSenseEditor();
+  const editor = new CustomSenseEditor();
   editor.__ace = aceEditor;
   return editor;
 }
 
 export default function SenseEditor($el) {
-  var editor = createInstance($el);
-  var CURRENT_REQ_RANGE = null;
+  const editor = createInstance($el);
+  let CURRENT_REQ_RANGE = null;
 
   editor.$el = $el;
   // place holder for an action bar, needs to be set externally.
@@ -80,14 +81,14 @@ export default function SenseEditor($el) {
 
   // dirty check for tokenizer state, uses a lot less cycles
   // than listening for tokenizerUpdate
-  var onceDoneTokenizing = function (func, cancelAlreadyScheduledCalls) {
-    var session = editor.getSession();
-    var timer = false;
-    var checkInterval = 25;
+  const onceDoneTokenizing = function (func, cancelAlreadyScheduledCalls) {
+    const session = editor.getSession();
+    let timer = false;
+    const checkInterval = 25;
 
     return function () {
-      var self = this;
-      var args = [].slice.call(arguments, 0);
+      const self = this;
+      const args = [].slice.call(arguments, 0);
 
       if (cancelAlreadyScheduledCalls) {
         timer = clearTimeout(timer);
@@ -110,12 +111,12 @@ export default function SenseEditor($el) {
     session.setFoldStyle('markbeginend');
     session.setTabSize(2);
     session.setUseWrapMode(true);
-  })(editor.getSession());
+  }(editor.getSession()));
 
   editor.prevRequestStart = function (rowOrPos) {
-    rowOrPos = _.isUndefined(rowOrPos) || rowOrPos == null ? editor.getCursorPosition() : rowOrPos;
+    rowOrPos = _.isUndefined(rowOrPos) || rowOrPos === null ? editor.getCursorPosition() : rowOrPos;
 
-    var curRow = _.isObject(rowOrPos) ? rowOrPos.row : rowOrPos;
+    let curRow = _.isObject(rowOrPos) ? rowOrPos.row : rowOrPos;
     while (curRow > 0 && !editor.parser.isStartRequestRow(curRow, editor)) curRow--;
 
     return {
@@ -125,10 +126,10 @@ export default function SenseEditor($el) {
   };
 
   editor.nextRequestStart = function (rowOrPos) {
-    rowOrPos = _.isUndefined(rowOrPos) || rowOrPos == null ? editor.getCursorPosition() : rowOrPos;
-    var session = editor.getSession();
-    var curRow = _.isObject(rowOrPos) ? rowOrPos.row : rowOrPos;
-    var maxLines = session.getLength();
+    rowOrPos = _.isUndefined(rowOrPos) || rowOrPos === null ? editor.getCursorPosition() : rowOrPos;
+    const session = editor.getSession();
+    let curRow = _.isObject(rowOrPos) ? rowOrPos.row : rowOrPos;
+    const maxLines = session.getLength();
     for (; curRow < maxLines - 1; curRow++) {
       if (editor.parser.isStartRequestRow(curRow, editor)) {
         break;
@@ -141,22 +142,22 @@ export default function SenseEditor($el) {
   };
 
   editor.autoIndent = onceDoneTokenizing(function () {
-    editor.getRequestRange(function (req_range) {
-      if (!req_range) {
+    editor.getRequestRange(function (reqRange) {
+      if (!reqRange) {
         return;
       }
-      editor.getRequest(function (parsed_req) {
-        if (parsed_req.data && parsed_req.data.length > 0) {
-          var indent = parsed_req.data.length == 1; // unindent multi docs by default
-          var formatted_data = utils.reformatData(parsed_req.data, indent);
-          if (!formatted_data.changed) {
+      editor.getRequest(function (parsedReq) {
+        if (parsedReq.data && parsedReq.data.length > 0) {
+          let indent = parsedReq.data.length === 1; // unindent multi docs by default
+          let formattedData = utils.reformatData(parsedReq.data, indent);
+          if (!formattedData.changed) {
             // toggle.
             indent = !indent;
-            formatted_data = utils.reformatData(parsed_req.data, indent);
+            formattedData = utils.reformatData(parsedReq.data, indent);
           }
-          parsed_req.data = formatted_data.data;
+          parsedReq.data = formattedData.data;
 
-          editor.replaceRequestRange(parsed_req, req_range);
+          editor.replaceRequestRange(parsedReq, reqRange);
         }
       });
     });
@@ -164,13 +165,13 @@ export default function SenseEditor($el) {
 
   editor.update = function (data, callback) {
     callback = typeof callback === 'function' ? callback : null;
-    var session = editor.getSession();
+    const session = editor.getSession();
 
     session.setValue(data);
     if (callback) {
       // force update of tokens, but not on this thread to allow for ace rendering.
       setTimeout(function () {
-        var i;
+        let i;
         for (i = 0; i < session.getLength(); i++) {
           session.getTokens(i);
         }
@@ -181,12 +182,12 @@ export default function SenseEditor($el) {
   };
 
   editor.replaceRequestRange = function (newRequest, requestRange) {
-    var text = utils.textFromRequest(newRequest);
+    const text = utils.textFromRequest(newRequest);
     if (requestRange) {
-      var pos = editor.getCursorPosition();
+      const pos = editor.getCursorPosition();
       editor.getSession().replace(requestRange, text);
-      var max_row = Math.max(requestRange.start.row + text.split('\n').length - 1, 0);
-      pos.row = Math.min(pos.row, max_row);
+      const maxRow = Math.max(requestRange.start.row + text.split('\n').length - 1, 0);
+      pos.row = Math.min(pos.row, maxRow);
       editor.moveCursorToPosition(pos);
       // ACE UPGRADE - check if needed - at the moment the above may trigger a selection.
       editor.clearSelection();
@@ -198,7 +199,7 @@ export default function SenseEditor($el) {
   };
 
   editor.iterForCurrentLoc = function () {
-    var pos = editor.getCursorPosition();
+    const pos = editor.getCursorPosition();
     return editor.iterForPosition(pos.row, pos.column, editor);
   };
 
@@ -217,7 +218,7 @@ export default function SenseEditor($el) {
 
     if (editor.parser.isInBetweenRequestsRow(row)) {
       cb(null);
-      return
+      return;
     }
 
     const reqStart = editor.prevRequestStart(row, editor);
@@ -236,10 +237,10 @@ export default function SenseEditor($el) {
 
     range = range || editor.getSelectionRange();
 
-    var session = editor.getSession();
-    var startRow = range.start.row;
-    var endRow = range.end.row;
-    var maxLine = Math.max(0, session.getLength() - 1);
+    const session = editor.getSession();
+    let startRow = range.start.row;
+    let endRow = range.end.row;
+    const maxLine = Math.max(0, session.getLength() - 1);
 
     // move start row to the previous request start if in body, o.w. forward
     if (editor.parser.isInBetweenRequestsRow(startRow)) {
@@ -290,27 +291,27 @@ export default function SenseEditor($el) {
 
 
   editor.getRequestInRange = onceDoneTokenizing(function (range, cb) {
-    var request = {
-      method: "",
+    const request = {
+      method: '',
       data: [],
       url: null,
       range: range
     };
 
-    var pos = range.start;
-    var tokenIter = editor.iterForPosition(pos.row, pos.column, editor);
-    var t = tokenIter.getCurrentToken();
+    const pos = range.start;
+    const tokenIter = editor.iterForPosition(pos.row, pos.column, editor);
+    let t = tokenIter.getCurrentToken();
     if (editor.parser.isEmptyToken(t)) {
       // if the row starts with some spaces, skip them.
       t = editor.parser.nextNonEmptyToken(tokenIter);
     }
     request.method = t.value;
     t = editor.parser.nextNonEmptyToken(tokenIter);
-    if (!t || t.type == "method") {
+    if (!t || t.type === 'method') {
       return null;
     }
-    request.url = "";
-    while (t && t.type && t.type.indexOf("url") == 0) {
+    request.url = '';
+    while (t && t.type && t.type.indexOf('url') === 0) {
       request.url += t.value;
       t = tokenIter.stepForward();
     }
@@ -319,10 +320,10 @@ export default function SenseEditor($el) {
       t = editor.parser.nextNonEmptyToken(tokenIter);
     }
 
-    var bodyStartRow = (t ? 0 : 1) + tokenIter.getCurrentTokenRow(); // artificially increase end of docs.
-    var dataEndPos;
+    let bodyStartRow = (t ? 0 : 1) + tokenIter.getCurrentTokenRow(); // artificially increase end of docs.
+    let dataEndPos;
     while (bodyStartRow < range.end.row || (
-      bodyStartRow == range.end.row && 0 < range.end.column
+      bodyStartRow === range.end.row && 0 < range.end.column
     )) {
       dataEndPos = editor.nextDataDocEnd({
         row: bodyStartRow,
@@ -332,7 +333,7 @@ export default function SenseEditor($el) {
         bodyStartRow, 0,
         dataEndPos.row, dataEndPos.column
       );
-      var data = editor.getSession().getTextRange(bodyRange);
+      const data = editor.getSession().getTextRange(bodyRange);
       request.data.push(data.trim());
       bodyStartRow = dataEndPos.row + 1;
     }
@@ -356,20 +357,20 @@ export default function SenseEditor($el) {
         return;
       }
 
-      var startRow = requestsRange.start.row;
-      var endRow = requestsRange.end.row;
+      const startRow = requestsRange.start.row;
+      const endRow = requestsRange.end.row;
 
       // move to the next request start (during the second iterations this may not be exactly on a request
-      var currentRow = startRow;
+      let currentRow = startRow;
       for (; currentRow <= endRow; currentRow++) {
         if (editor.parser.isStartRequestRow(currentRow)) {
           break;
         }
       }
 
-      var nonRequestPrefixBlock = null;
-      if (includeNonRequestBlocks && currentRow != startRow) {
-        nonRequestPrefixBlock = editor.getSession().getLines(startRow, currentRow - 1).join("\n");
+      let nonRequestPrefixBlock = null;
+      if (includeNonRequestBlocks && currentRow !== startRow) {
+        nonRequestPrefixBlock = editor.getSession().getLines(startRow, currentRow - 1).join('\n');
       }
 
       if (currentRow > endRow) {
@@ -379,22 +380,22 @@ export default function SenseEditor($el) {
 
       editor.getRequest(currentRow, function (request) {
         explicitRangeToRequests({
-            start: {
-              row: request.range.end.row + 1
-            },
-            end: {
-              row: requestsRange.end.row
-            }
+          start: {
+            row: request.range.end.row + 1
           },
-          function (rest_of_requests) {
-            rest_of_requests.unshift(request);
-            if (nonRequestPrefixBlock != null) {
-              rest_of_requests.unshift(nonRequestPrefixBlock);
-            }
-            tempCb(rest_of_requests);
+          end: {
+            row: requestsRange.end.row
           }
-        )
-      })
+        },
+        function (restOfRequests) {
+          restOfRequests.unshift(request);
+          if (nonRequestPrefixBlock !== null) {
+            restOfRequests.unshift(nonRequestPrefixBlock);
+          }
+          tempCb(restOfRequests);
+        }
+        );
+      });
     }
 
     editor.getEngulfingRequestsRange(range, function (requestRange) {
@@ -420,39 +421,41 @@ export default function SenseEditor($el) {
   });
 
   editor.moveToPreviousRequestEdge = onceDoneTokenizing(function () {
-    var pos = editor.getCursorPosition();
+    const pos = editor.getCursorPosition();
     for (pos.row--; pos.row > 0 && !editor.parser.isRequestEdge(pos.row); pos.row--) {
+      // loop for side effects
     }
     editor.moveCursorTo(pos.row, 0);
   });
 
   editor.moveToNextRequestEdge = onceDoneTokenizing(function (moveOnlyIfNotOnEdge) {
-    var pos = editor.getCursorPosition();
-    var maxRow = editor.getSession().getLength();
+    const pos = editor.getCursorPosition();
+    const maxRow = editor.getSession().getLength();
     if (!moveOnlyIfNotOnEdge) {
       pos.row++;
     }
     for (; pos.row < maxRow && !editor.parser.isRequestEdge(pos.row); pos.row++) {
+      // loop for side effects
     }
     editor.moveCursorTo(pos.row, 0);
   });
 
   editor.nextRequestEnd = function (pos) {
     pos = pos || editor.getCursorPosition();
-    var session = editor.getSession();
-    var curRow = pos.row;
-    var maxLines = session.getLength();
+    const session = editor.getSession();
+    let curRow = pos.row;
+    const maxLines = session.getLength();
     for (; curRow < maxLines - 1; curRow++) {
-      var curRowMode = editor.parser.getRowParseMode(curRow, editor);
+      const curRowMode = editor.parser.getRowParseMode(curRow, editor);
       if ((curRowMode & editor.parser.MODE.REQUEST_END) > 0) {
         break;
       }
-      if (curRow != pos.row && (curRowMode & editor.parser.MODE.REQUEST_START) > 0) {
+      if (curRow !== pos.row && (curRowMode & editor.parser.MODE.REQUEST_START) > 0) {
         break;
       }
     }
 
-    var column = (session.getLine(curRow) || "").replace(/\s+$/, "").length;
+    const column = (session.getLine(curRow) || '').replace(/\s+$/, '').length;
 
     return {
       row: curRow,
@@ -462,23 +465,23 @@ export default function SenseEditor($el) {
 
   editor.nextDataDocEnd = function (pos) {
     pos = pos || editor.getCursorPosition();
-    var session = editor.getSession();
-    var curRow = pos.row;
-    var maxLines = session.getLength();
+    const session = editor.getSession();
+    let curRow = pos.row;
+    const maxLines = session.getLength();
     for (; curRow < maxLines - 1; curRow++) {
-      var curRowMode = editor.parser.getRowParseMode(curRow, editor);
+      const curRowMode = editor.parser.getRowParseMode(curRow, editor);
       if ((curRowMode & RowParser.REQUEST_END) > 0) {
         break;
       }
       if ((curRowMode & editor.parser.MODE.MULTI_DOC_CUR_DOC_END) > 0) {
         break;
       }
-      if (curRow != pos.row && (curRowMode & editor.parser.MODE.REQUEST_START) > 0) {
+      if (curRow !== pos.row && (curRowMode & editor.parser.MODE.REQUEST_START) > 0) {
         break;
       }
     }
 
-    var column = (session.getLine(curRow) || "").length;
+    const column = (session.getLine(curRow) || '').length;
 
     return {
       row: curRow,
@@ -487,7 +490,7 @@ export default function SenseEditor($el) {
   };
 
   // overwrite the actual aceEditor's onPaste method
-  var origOnPaste = editor.__ace.onPaste;
+  const origOnPaste = editor.__ace.onPaste;
   editor.__ace.onPaste = function (text) {
     if (text && curl.detectCURL(text)) {
       editor.handleCURLPaste(text);
@@ -497,24 +500,24 @@ export default function SenseEditor($el) {
   };
 
   editor.handleCURLPaste = function (text) {
-    var curlInput = curl.parseCURL(text);
+    const curlInput = curl.parseCURL(text);
 
     editor.insert(curlInput);
   };
 
   editor.highlightCurrentRequestsAndUpdateActionBar = onceDoneTokenizing(function () {
-    var session = editor.getSession();
-    editor.getEngulfingRequestsRange(function (new_current_req_range) {
-      if (new_current_req_range == null && CURRENT_REQ_RANGE == null) {
+    const session = editor.getSession();
+    editor.getEngulfingRequestsRange(function (newCurrentReqRange) {
+      if (newCurrentReqRange === null && CURRENT_REQ_RANGE === null) {
         return;
       }
-      if (new_current_req_range != null && CURRENT_REQ_RANGE != null &&
-        new_current_req_range.start.row == CURRENT_REQ_RANGE.start.row &&
-        new_current_req_range.end.row == CURRENT_REQ_RANGE.end.row
+      if (newCurrentReqRange !== null && CURRENT_REQ_RANGE !== null &&
+        newCurrentReqRange.start.row === CURRENT_REQ_RANGE.start.row &&
+        newCurrentReqRange.end.row === CURRENT_REQ_RANGE.end.row
       ) {
         // same request, now see if we are on the first line and update the action bar
-        var cursorRow = editor.getCursorPosition().row;
-        if (cursorRow == CURRENT_REQ_RANGE.start.row) {
+        const cursorRow = editor.getCursorPosition().row;
+        if (cursorRow === CURRENT_REQ_RANGE.start.row) {
           editor.updateActionsBar();
         }
         return; // nothing to do..
@@ -524,9 +527,9 @@ export default function SenseEditor($el) {
         session.removeMarker(CURRENT_REQ_RANGE.marker_id);
       }
 
-      CURRENT_REQ_RANGE = new_current_req_range;
+      CURRENT_REQ_RANGE = newCurrentReqRange;
       if (CURRENT_REQ_RANGE) {
-        CURRENT_REQ_RANGE.marker_id = session.addMarker(CURRENT_REQ_RANGE, "ace_snippet-marker", "fullLine");
+        CURRENT_REQ_RANGE.marker_id = session.addMarker(CURRENT_REQ_RANGE, 'ace_snippet-marker', 'fullLine');
       }
       editor.updateActionsBar();
     });
@@ -544,36 +547,35 @@ export default function SenseEditor($el) {
 
     editor.getRequestsInRange(range, true, function (requests) {
 
-      var result = _.map(requests, function requestToCurl(req) {
+      const result = _.map(requests, function requestToCurl(req) {
 
-        if (typeof req === "string") {
+        if (typeof req === 'string') {
           // no request block
           return req;
         }
 
-        var
-          es_path = req.url,
-          es_method = req.method,
-          es_data = req.data;
+        const esPath = req.url;
+        const  esMethod = req.method;
+        const  esData = req.data;
 
         const elasticsearchBaseUrl = chrome.getInjected('elasticsearchUrl');
-        var url = es.constructESUrl(elasticsearchBaseUrl, es_path);
+        const url = es.constructESUrl(elasticsearchBaseUrl, esPath);
 
-        var ret = 'curl -X' + es_method + ' "' + url + '"';
-        if (es_data && es_data.length) {
-          ret += " -H 'Content-Type: application/json' -d'\n";
-          var data_as_string = utils.collapseLiteralStrings(es_data.join("\n"))
+        let ret = 'curl -X' + esMethod + ' "' + url + '"';
+        if (esData && esData.length) {
+          ret += ' -H \'Content-Type: application/json\' -d\'\n';
+          const dataAsString = utils.collapseLiteralStrings(esData.join('\n'));
           // since Sense doesn't allow single quote json string any single qoute is within a string.
-          ret += data_as_string.replace(/'/g, '\\"');
-          if (es_data.length > 1) {
-            ret += "\n";
+          ret += dataAsString.replace(/'/g, '\\"');
+          if (esData.length > 1) {
+            ret += '\n';
           } // end with a new line
-          ret += "'";
+          ret += '\'';
         }
         return ret;
       });
 
-      cb(result.join("\n"));
+      cb(result.join('\n'));
     });
   };
 
@@ -586,8 +588,8 @@ export default function SenseEditor($el) {
   });
 
   editor.updateActionsBar = (function () {
-    var set = function (top) {
-      if (top == null) {
+    const set = function (top) {
+      if (top === null) {
         editor.$actions.css('visibility', 'hidden');
       }
       else {
@@ -598,7 +600,7 @@ export default function SenseEditor($el) {
       }
     };
 
-    var hide = function () {
+    const hide = function () {
       set();
     };
 
@@ -610,11 +612,11 @@ export default function SenseEditor($el) {
         // elements are positioned relative to the editor's container
         // pageY is relative to page, so subtract the offset
         // from pageY to get the new top value
-        var offsetFromPage = editor.$el.offset().top;
-        var startRow = CURRENT_REQ_RANGE.start.row;
-        var startColumn = CURRENT_REQ_RANGE.start.column;
-        var session = editor.session;
-        var firstLine = session.getLine(startRow);
+        const offsetFromPage = editor.$el.offset().top;
+        let startRow = CURRENT_REQ_RANGE.start.row;
+        const startColumn = CURRENT_REQ_RANGE.start.column;
+        const session = editor.session;
+        const firstLine = session.getLine(startRow);
 
         if (firstLine.length > session.getWrapLimit() - 5) {
           // overlap first row
@@ -627,16 +629,16 @@ export default function SenseEditor($el) {
         }
 
 
-        var topOfReq = editor.renderer.textToScreenCoordinates(startRow, startColumn).pageY - offsetFromPage;
+        const topOfReq = editor.renderer.textToScreenCoordinates(startRow, startColumn).pageY - offsetFromPage;
 
         if (topOfReq >= 0) {
           return set(topOfReq);
         }
 
-        var bottomOfReq = editor.renderer.textToScreenCoordinates(
-            CURRENT_REQ_RANGE.end.row,
-            CURRENT_REQ_RANGE.end.column
-          ).pageY - offsetFromPage;
+        const bottomOfReq = editor.renderer.textToScreenCoordinates(
+          CURRENT_REQ_RANGE.end.row,
+          CURRENT_REQ_RANGE.end.column
+        ).pageY - offsetFromPage;
 
         if (bottomOfReq >= 0) {
           return set(0);
@@ -644,10 +646,10 @@ export default function SenseEditor($el) {
       }
 
       hide();
-    }
+    };
   }());
 
-  editor.getSession().on("changeScrollTop", editor.updateActionsBar);
+  editor.getSession().on('changeScrollTop', editor.updateActionsBar);
 
   return editor;
 }

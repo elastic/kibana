@@ -34,7 +34,9 @@ import {
   EuiOverlayMask,
   EUI_MODAL_CONFIRM_BUTTON,
   EuiCheckboxGroup,
-  EuiToolTip
+  EuiToolTip,
+  EuiPage,
+  EuiPageContent,
 } from '@elastic/eui';
 import {
   retrieveAndExportDocs,
@@ -75,7 +77,7 @@ export class ObjectsTable extends Component {
     this.state = {
       totalCount: 0,
       page: 0,
-      perPage: props.perPageConfig || 10,
+      perPage: props.perPageConfig || 50,
       savedObjects: [],
       savedObjectCounts: INCLUDED_TYPES.reduce((accum, type) => {
         accum[type] = 0;
@@ -192,7 +194,7 @@ export class ObjectsTable extends Component {
     this.setState({ selectedSavedObjects });
   };
 
-  onQueryChange = query => {
+  onQueryChange = ({ query }) => {
     // TODO: investigate why this happens at EUI level
     if (isSameQuery(query, this.state.activeQuery)) {
       return;
@@ -464,39 +466,41 @@ export class ObjectsTable extends Component {
     }));
 
     return (
-      <div style={{ padding: '0 1rem' }}>
-        {this.renderFlyout()}
-        {this.renderRelationships()}
-        {this.renderDeleteConfirmModal()}
-        {this.renderExportAllOptionsModal()}
-        <Header
-          onExportAll={() =>
-            this.setState({ isShowingExportAllOptionsModal: true })
-          }
-          onImport={this.showImportFlyout}
-          onRefresh={this.refreshData}
-          totalCount={totalItemCount}
-        />
-        <EuiSpacer size="xs" />
-        <Table
-          itemId={'id'}
-          selectionConfig={selectionConfig}
-          selectedSavedObjects={selectedSavedObjects}
-          onQueryChange={this.onQueryChange}
-          onTableChange={this.onTableChange}
-          filterOptions={filterOptions}
-          onExport={this.onExport}
-          onDelete={this.onDelete}
-          getEditUrl={this.props.getEditUrl}
-          goInApp={this.props.goInApp}
-          pageIndex={page}
-          pageSize={perPage}
-          items={savedObjects}
-          totalItemCount={totalItemCount}
-          isSearching={isSearching}
-          onShowRelationships={this.onShowRelationships}
-        />
-      </div>
+      <EuiPage>
+        <EuiPageContent verticalPosition="center" horizontalPosition="center" style={{ maxWidth: 1000, marginTop: 16, marginBottom: 16 }}>
+          {this.renderFlyout()}
+          {this.renderRelationships()}
+          {this.renderDeleteConfirmModal()}
+          {this.renderExportAllOptionsModal()}
+          <Header
+            onExportAll={() =>
+              this.setState({ isShowingExportAllOptionsModal: true })
+            }
+            onImport={this.showImportFlyout}
+            onRefresh={this.refreshData}
+            totalCount={totalItemCount}
+          />
+          <EuiSpacer size="xs" />
+          <Table
+            itemId={'id'}
+            selectionConfig={selectionConfig}
+            selectedSavedObjects={selectedSavedObjects}
+            onQueryChange={this.onQueryChange}
+            onTableChange={this.onTableChange}
+            filterOptions={filterOptions}
+            onExport={this.onExport}
+            onDelete={this.onDelete}
+            getEditUrl={this.props.getEditUrl}
+            goInApp={this.props.goInApp}
+            pageIndex={page}
+            pageSize={perPage}
+            items={savedObjects}
+            totalItemCount={totalItemCount}
+            isSearching={isSearching}
+            onShowRelationships={this.onShowRelationships}
+          />
+        </EuiPageContent>
+      </EuiPage>
     );
   }
 }

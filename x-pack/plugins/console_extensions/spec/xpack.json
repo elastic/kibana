@@ -17,6 +17,7 @@
     ],
     "patterns": [
       "_xpack"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/info-api.html"
   }
 }

@@ -42,14 +42,14 @@ const history = {
   },
 
   addToHistory(endpoint, method, data) {
-    var keys = history.getHistoryKeys();
+    const keys = history.getHistoryKeys();
     keys.splice(0, 500); // only maintain most recent X;
     $.each(keys, function (i, k) {
       storage.delete(k);
     });
 
-    var timestamp = new Date().getTime();
-    var k = "hist_elem_" + timestamp;
+    const timestamp = new Date().getTime();
+    const k = 'hist_elem_' + timestamp;
     storage.set(k, {
       time: timestamp,
       endpoint: endpoint,
@@ -59,8 +59,8 @@ const history = {
   },
 
   updateCurrentState(content) {
-    var timestamp = new Date().getTime();
-    storage.set("editor_state", {
+    const timestamp = new Date().getTime();
+    storage.set('editor_state', {
       time: timestamp,
       content: content
     });

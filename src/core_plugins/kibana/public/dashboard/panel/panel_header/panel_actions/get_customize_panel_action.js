@@ -34,21 +34,27 @@ import { DashboardViewMode } from '../../../dashboard_view_mode';
  * @return {DashboardPanelAction}
  */
 export function getCustomizePanelAction({ onResetPanelTitle, onUpdatePanelTitle, title, closeContextMenu }) {
-  return new DashboardPanelAction({
-    displayName: 'Customize panel',
-    id: 'customizePanel',
-    parentPanelId: 'mainMenu',
-    icon: <EuiIcon type="pencil" />,
-    isVisible: ({ containerState }) => (containerState.viewMode === DashboardViewMode.EDIT),
-    childContextMenuPanel: new DashboardContextMenuPanel({
-      id: 'panelSubOptionsMenu',
-      title: 'Customize panel',
-      getContent: () => (<PanelOptionsMenuForm
-        onReset={onResetPanelTitle}
-        onUpdatePanelTitle={onUpdatePanelTitle}
-        title={title}
-        onClose={closeContextMenu}
-      />),
-    }),
-  });
+  return new DashboardPanelAction(
+    {
+      id: 'customizePanel',
+      displayName: 'Customize panel',
+      parentPanelId: 'mainMenu',
+    },
+    {
+      icon: <EuiIcon type="pencil" />,
+      isVisible: ({ containerState }) => (containerState.viewMode === DashboardViewMode.EDIT),
+      childContextMenuPanel: new DashboardContextMenuPanel(
+        {
+          id: 'panelSubOptionsMenu',
+          title: 'Customize panel',
+        },
+        {
+          getContent: () => (<PanelOptionsMenuForm
+            onReset={onResetPanelTitle}
+            onUpdatePanelTitle={onUpdatePanelTitle}
+            title={title}
+            onClose={closeContextMenu}
+          />),
+        }),
+    });
 }

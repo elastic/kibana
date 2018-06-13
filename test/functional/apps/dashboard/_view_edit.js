@@ -20,24 +20,14 @@
 import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
-  const testSubjects = getService('testSubjects');
-  const kibanaServer = getService('kibanaServer');
-  const retry = getService('retry');
-  const remote = getService('remote');
   const queryBar = getService('queryBar');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects(['dashboard', 'header', 'common', 'visualize']);
-  const dashboardName = 'Dashboard View Edit Test';
+  const dashboardName = 'dashboard with filter';
+  const filterBar = getService('filterBar');
 
   describe('dashboard view edit mode', function viewEditModeTests() {
-    before(async function () {
-      await PageObjects.dashboard.initTests();
-      await PageObjects.dashboard.preserveCrossAppState();
-      await kibanaServer.uiSettings.disableToastAutohide();
-      await remote.refresh();
-    });
-
-    after(async function () {
+    before(async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
@@ -46,17 +36,9 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.clickCancelOutOfEditMode();
     });
 
-    it('create test dashboard', async function () {
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.clickNewDashboard();
-      await dashboardAddPanel.addVisualizations(PageObjects.dashboard.getTestVisualizationNames());
-      const isDashboardSaved = await PageObjects.dashboard.saveDashboard(dashboardName);
-      expect(isDashboardSaved).to.eql(true);
-    });
-
     it('existing dashboard opens in view mode', async function () {
       await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.selectDashboard(dashboardName);
+      await PageObjects.dashboard.loadSavedDashboard(dashboardName);
       const inViewMode = await PageObjects.dashboard.getIsInViewMode();
 
       expect(inViewMode).to.equal(true);
@@ -77,11 +59,12 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
         });
 
+        it('when time changed is stored with dashboard', async function () {
+          await PageObjects.dashboard.setTimepickerInDataRange();
 
-        it.skip('when time changed is stored with dashboard', async function () {
-          const originalFromTime = '2015-09-19 06:31:44.000';
-          const originalToTime = '2015-09-19 06:31:44.000';
-          await PageObjects.header.setAbsoluteRange(originalFromTime, originalToTime);
+          const originalFromTime = await PageObjects.header.getFromTime();
+          const originalToTime = await PageObjects.header.getToTime();
+
           await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
 
           await PageObjects.dashboard.clickEdit();
@@ -113,39 +96,31 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('when a filter is deleted', async function () {
-          await PageObjects.dashboard.setTimepickerInDataRange();
-          await PageObjects.dashboard.filterOnPieSlice();
-          await PageObjects.dashboard.saveDashboard(dashboardName);
-
           // This may seem like a pointless line but there was a bug that only arose when the dashboard
           // was loaded initially
           await PageObjects.dashboard.loadSavedDashboard(dashboardName);
           await PageObjects.dashboard.clickEdit();
-          const originalFilters = await retry.try(async () => {
-            const filters = await PageObjects.dashboard.getFilters();
-            if (!filters.length) throw new Error('expected filters');
-            return filters;
-          });
-          // Click to cause hover menu to show up, but it will also actually click the filter, which will turn
-          // it off, so we need to click twice to turn it back on.
-          await originalFilters[0].click();
-          await originalFilters[0].click();
 
-          await testSubjects.click('removeFilter-memory');
+          let hasFilter = await filterBar.hasFilter('animal', 'dog');
+          expect(hasFilter).to.be(true);
 
-          const noFilters = await PageObjects.dashboard.getFilters(1000);
-          expect(noFilters.length).to.equal(0);
+          await filterBar.removeFilter('animal');
+
+          hasFilter = await filterBar.hasFilter('animal', 'dog');
+          expect(hasFilter).to.be(false);
 
           await PageObjects.dashboard.clickCancelOutOfEditMode();
 
           // confirm lose changes
           await PageObjects.common.clickConfirmOnModal();
 
-          const reloadedFilters = await PageObjects.dashboard.getFilters();
-          expect(reloadedFilters.length).to.equal(1);
+          hasFilter = await filterBar.hasFilter('animal', 'dog');
+          expect(hasFilter).to.be(true);
         });
 
         it('when a new vis is added', async function () {
+          const originalPanelCount = await PageObjects.dashboard.getPanelCount();
+
           await dashboardAddPanel.ensureAddPanelIsShowing();
           await dashboardAddPanel.clickAddNewEmbeddableLink();
           await PageObjects.visualize.clickAreaChart();
@@ -157,26 +132,26 @@ export default function ({ getService, getPageObjects }) {
           // confirm lose changes
           await PageObjects.common.clickConfirmOnModal();
 
-          const visualizations = PageObjects.dashboard.getTestVisualizations();
           const panelCount = await PageObjects.dashboard.getPanelCount();
-          expect(panelCount).to.eql(visualizations.length);
+          expect(panelCount).to.eql(originalPanelCount);
         });
 
         it('when an existing vis is added', async function () {
+          const originalPanelCount = await PageObjects.dashboard.getPanelCount();
+
           await dashboardAddPanel.addVisualization('new viz panel');
           await PageObjects.dashboard.clickCancelOutOfEditMode();
 
           // confirm lose changes
           await PageObjects.common.clickConfirmOnModal();
 
-          const visualizations = PageObjects.dashboard.getTestVisualizations();
           const panelCount = await PageObjects.dashboard.getPanelCount();
-          expect(panelCount).to.eql(visualizations.length);
+          expect(panelCount).to.eql(originalPanelCount);
         });
       });
 
       describe('and preserves edits on cancel', function () {
-        it.skip('when time changed is stored with dashboard', async function () {
+        it('when time changed is stored with dashboard', async function () {
           await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
           const newFromTime = '2015-09-19 06:31:44.000';
           const newToTime = '2015-09-19 06:31:44.000';
@@ -200,15 +175,17 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe.skip('and preserves edits on cancel', function () {
+    describe('and preserves edits on cancel', function () {
       it('when time changed is stored with dashboard', async function () {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
-        const newFromTime = '2015-09-19 06:31:44.000';
-        const newToTime = '2015-09-19 06:31:44.000';
-        await PageObjects.header.setAbsoluteRange('2013-09-19 06:31:44.000', '2013-09-19 06:31:44.000');
+        await PageObjects.dashboard.setTimepickerInDataRange();
         await PageObjects.dashboard.saveDashboard(dashboardName, true);
         await PageObjects.dashboard.clickEdit();
-        await PageObjects.header.setAbsoluteRange(newToTime, newToTime);
+        await PageObjects.header.setAbsoluteRange('2013-09-19 06:31:44.000', '2013-09-19 06:31:44.000');
+
+        const newFromTime = await PageObjects.header.getFromTime();
+        const newToTime = await PageObjects.header.getToTime();
+
         await PageObjects.dashboard.clickCancelOutOfEditMode();
 
         await PageObjects.common.clickCancelOnModal();
@@ -229,19 +206,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
         await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: false });
         await PageObjects.dashboard.clickEdit();
-        await PageObjects.header.setAbsoluteRange('2013-10-19 06:31:44.000', '2013-12-19 06:31:44.000');
-        await PageObjects.dashboard.clickCancelOutOfEditMode();
-
-        const isOpen = await PageObjects.common.isConfirmModalOpen();
-        expect(isOpen).to.be(false);
-      });
-
-      it('when a dashboard has a filter and remains unchanged', async function () {
-        await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
-        await PageObjects.dashboard.setTimepickerInDataRange();
-        await PageObjects.dashboard.filterOnPieSlice();
-        await PageObjects.dashboard.saveDashboard(dashboardName);
-        await PageObjects.dashboard.clickEdit();
+        await PageObjects.header.setAbsoluteRange('2014-10-19 06:31:44.000', '2014-12-19 06:31:44.000');
         await PageObjects.dashboard.clickCancelOutOfEditMode();
 
         const isOpen = await PageObjects.common.isConfirmModalOpen();
