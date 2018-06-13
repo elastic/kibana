@@ -79,6 +79,8 @@ export class SassBuilder {
     const rendered = await sass.renderSync({
       file: this.input,
       outfile,
+      sourceMap: true,
+      sourceMapEmbed: true,
     });
 
     fs.writeFileSync(outfile, rendered.css);
