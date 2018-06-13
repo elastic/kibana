@@ -29,7 +29,11 @@ export class MultiJobActions extends Component {
             <span className="jobs-selected-title">{this.props.selectedJobs.length} job{s} selected</span>
             <div className="actions-border-large" />
             <ResultLinks jobs={this.props.selectedJobs} />
-            <MultiJobActionsMenu jobs={this.props.selectedJobs}/>
+            <MultiJobActionsMenu
+              jobs={this.props.selectedJobs}
+              showStartDatafeedModal={this.props.showStartDatafeedModal}
+              refreshJobs={this.props.refreshJobs}
+            />
           </React.Fragment>
         }
       </div>

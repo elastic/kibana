@@ -68,7 +68,7 @@ function getStartStop(item, showStartDatafeedModal, refreshJobs) {
   if (item.datafeedState === 'stopped') {
     return (
       <MLText onClick={() => {
-        showStartDatafeedModal(item);
+        showStartDatafeedModal([item]);
         closeMenu();
       }}
       >

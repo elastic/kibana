@@ -50,13 +50,15 @@ function earliestAndLatestTimeStamps(dataCounts) {
   if (dataCounts.earliest_record_timestamp) {
     const ts = moment(dataCounts.earliest_record_timestamp);
     obj.earliest.string = ts.format(TIME_FORMAT);
-    obj.earliest.unix = ts;
+    obj.earliest.unix = ts.valueOf();
+    obj.earliest.moment = ts;
   }
 
   if (dataCounts.latest_record_timestamp) {
     const ts = moment(dataCounts.latest_record_timestamp);
     obj.latest.string = ts.format(TIME_FORMAT);
-    obj.latest.unix = ts;
+    obj.latest.unix = ts.valueOf();
+    obj.latest.moment = ts;
   }
 
   return obj;
@@ -231,7 +233,11 @@ export class JobsListView extends Component {
     return (
       <div>
         <div className="actions-bar">
-          <MultiJobActions selectedJobs={this.state.selectedJobs} />
+          <MultiJobActions
+            selectedJobs={this.state.selectedJobs}
+            showStartDatafeedModal={this.showStartDatafeedModal}
+            refreshJobs={() => this.refreshJobSummaryList(false)}
+          />
         </div>
         <JobsList
           jobsSummaryList={this.state.jobsSummaryList}

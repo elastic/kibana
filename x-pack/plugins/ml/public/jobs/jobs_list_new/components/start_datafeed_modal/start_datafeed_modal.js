@@ -22,8 +22,7 @@ import {
 
 import moment from 'moment';
 
-import { mlJobService } from 'plugins/ml/services/job_service';
-import { toastNotifications } from 'ui/notify';
+import { forceStartDatafeeds } from '../utils';
 
 import { TimeRangeSelector } from './time_range_selector';
 
@@ -32,7 +31,7 @@ export class StartDatafeedModal extends Component {
     super(props);
 
     this.state = {
-      job: this.props.job,
+      jobs: this.props.jobs,
       isModalVisible: false,
       startTime: moment(),
       endTime: moment(),
@@ -61,12 +60,12 @@ export class StartDatafeedModal extends Component {
     this.setState({ isModalVisible: false });
   }
 
-  showModal = (job) => {
+  showModal = (jobs) => {
     const startTime = undefined;
     const endTime = moment();
-    const initialSpecifiedStartTime = moment(job.latestTimeStamp);
+    const initialSpecifiedStartTime = getLowestLatestTime(jobs);
     this.setState({
-      job,
+      jobs,
       isModalVisible: true,
       startTime,
       endTime,
@@ -75,11 +74,9 @@ export class StartDatafeedModal extends Component {
   }
 
   save = () => {
-    const duration = {
-      start: moment.isMoment(this.state.startTime) ? this.state.startTime.valueOf() : this.state.startTime,
-      end: moment.isMoment(this.state.endTime) ? this.state.endTime.valueOf() : this.state.endTime,
-    };
-    startDatafeed(this.state.job.id, duration, false, this.refreshJobs);
+    const start = moment.isMoment(this.state.startTime) ? this.state.startTime.valueOf() : this.state.startTime;
+    const end = moment.isMoment(this.state.endTime) ? this.state.endTime.valueOf() : this.state.endTime;
+    forceStartDatafeeds(this.state.jobs, start, end, this.refreshJobs);
     this.closeModal();
   }
 
@@ -95,7 +92,7 @@ export class StartDatafeedModal extends Component {
           >
             <EuiModalHeader>
               <EuiModalHeaderTitle>
-                Start {this.state.job.id}
+                Start {(this.state.jobs.length > 1) ? `${this.state.jobs.length} jobs` : this.state.jobs[0].id}
               </EuiModalHeaderTitle>
             </EuiModalHeader>
 
@@ -135,56 +132,7 @@ export class StartDatafeedModal extends Component {
   }
 }
 
-function startDatafeed(jobId, duration, createWatch, finish) {
-  let doStartCalled = false;
-  // in 10s call the function to start the datafeed.
-  // if the job has already opened and doStart has already been called, nothing will happen.
-  // However, if the job is still waiting to be opened, the datafeed can be started anyway.
-  window.setTimeout(doStart, 10000);
-
-  // Attempt to open the job first.
-  // If it's already open, ignore the 409 error
-  mlJobService.openJob(jobId)
-    .then(() => {
-      doStart();
-    })
-    .catch((resp) => {
-      if (resp.statusCode === 409) {
-        doStart();
-      } else {
-        if (resp.statusCode === 500) {
-          if (doStartCalled === false) {
-            // doStart hasn't been called yet, this 500 has returned before 10s,
-            // so it's not due to a timeout
-            toastNotifications.addDanger(`Could not open ${jobId}`, resp);
-          }
-        } else {
-          // console.log(resp);
-          toastNotifications.addDanger(`Could not open ${jobId}`, resp);
-        }
-        // $scope.saveLock = false;
-      }
-    });
-
-  // start the datafeed
-  function doStart() {
-    if (doStartCalled === false) {
-      const datafeedId = mlJobService.getDatafeedId(jobId);
-      doStartCalled = true;
-      mlJobService.startDatafeed(datafeedId, jobId, duration.start, duration.end)
-        .then(() => {
-          // $rootScope.$broadcast('jobsUpdated');
-          finish();
-          toastNotifications.addSuccess(`${jobId} started successfully`);
-
-          if (createWatch) {
-            // $rootScope.$broadcast('openCreateWatchWindow', job);
-          }
-        })
-        .catch((resp) => {
-          toastNotifications.addDanger(`Could not start ${jobId}`, resp);
-          // $scope.saveLock = false;
-        });
-    }
-  }
+function getLowestLatestTime(jobs) {
+  const times = jobs.map(j => j.latestTimeStamp.unix.valueOf());
+  return moment(Math.min(...times));
 }

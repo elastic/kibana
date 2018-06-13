@@ -23,9 +23,9 @@ export function isStoppable(jobs) {
   return (jobs.find(j => j.datafeedState === 'started') !== undefined);
 }
 
-export function forceStartDatafeeds(jobs, finish) {
+export function forceStartDatafeeds(jobs, start, end, finish) {
   const datafeedIds = jobs.filter(j => j.hasDatafeed).map(j => j.datafeedId);
-  mlJobService.forceStartDatafeeds(datafeedIds)
+  mlJobService.forceStartDatafeeds(datafeedIds, start, end)
     .then((resp) => {
       showResults(resp, ACTION.START);
 

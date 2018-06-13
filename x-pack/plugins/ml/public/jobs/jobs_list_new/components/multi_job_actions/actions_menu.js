@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 
 import {
-  forceStartDatafeeds,
   stopDatafeeds,
   isStartable,
   isStoppable } from '../utils';
@@ -72,7 +71,7 @@ export class MultiJobActionsMenu extends Component {
         <EuiContextMenuItem
           key="stop datafeed"
           icon="stop"
-          onClick={() => { stopDatafeeds(this.props.jobs); this.closePopover(); }}
+          onClick={() => { stopDatafeeds(this.props.jobs, this.props.refreshJobs); this.closePopover(); }}
         >
           Stop datafeed{s}
         </EuiContextMenuItem>
@@ -84,7 +83,7 @@ export class MultiJobActionsMenu extends Component {
         <EuiContextMenuItem
           key="start datafeed"
           icon="play"
-          onClick={() => { forceStartDatafeeds(this.props.jobs); this.closePopover(); }}
+          onClick={() => { this.props.showStartDatafeedModal(this.props.jobs); this.closePopover(); }}
         >
           Start datafeed{s}
         </EuiContextMenuItem>
