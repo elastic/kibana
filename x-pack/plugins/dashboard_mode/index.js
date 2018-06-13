@@ -29,7 +29,7 @@ export function dashboardMode(kibana) {
         [CONFIG_DASHBOARD_ONLY_MODE_ROLES]: {
           name: 'Dashboards only roles',
           description: `Roles that belong to View Dashboards Only mode`,
-          value: ['kibana_dashboard_only_user', 'kibana_rbac_dashboard_only_user'],
+          value: ['kibana_dashboard_only_user'],
           category: ['dashboard'],
         }
       },
