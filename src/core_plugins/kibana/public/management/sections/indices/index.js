@@ -129,7 +129,7 @@ uiModules.get('apps/management')
             }
             return 0;
           });
-          console.log('hellooooooo');
+
           updateIndexPatternList($scope, indexPatternCreationOptions, $scope.defaultIndex, $scope.indexPatternList);
         };
 

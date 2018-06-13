@@ -12,7 +12,7 @@ export function registerIndicesRoute(server) {
   const isEsError = isEsErrorFactory(server);
 
   server.route({
-    path: '/api/rollup/indices/{index*}',
+    path: '/api/rollup/indices',
     method: 'GET',
     handler: async (request, reply) => {
       const { index } = request.params;
@@ -29,8 +29,5 @@ export function registerIndicesRoute(server) {
         reply(wrapUnknownError(err));
       }
     },
-    // config: {
-    //   pre: [ licensePreRouting ]
-    // }
   });
 }
