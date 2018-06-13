@@ -46,8 +46,9 @@ export class TagCloudVisualization {
       if (!this._bucketAgg) {
         return;
       }
-      const filter = this._bucketAgg.createFilter(event);
-      this._vis.API.queryFilter.addFilters(filter);
+      this._vis.API.events.filter(
+        this._data, 0, this._data.rows.findIndex(row => row[0] === event)
+      );
     });
     this._renderComplete$ = Observable.fromEvent(this._tagCloud, 'renderComplete');
 
@@ -112,6 +113,7 @@ export class TagCloudVisualization {
     }
 
     const data = response.tables[0];
+    this._data = data;
     const segmentAggs = this._vis.aggs.bySchemaName.segment;
     if (segmentAggs && segmentAggs.length > 0) {
       this._bucketAgg = segmentAggs[0];

@@ -40,6 +40,15 @@ import { queryManagerFactory } from '../query_manager';
 import { SearchSourceProvider } from '../courier/data_source/search_source';
 import { SavedObjectsClientProvider } from '../saved_objects';
 
+const getTerms = (table, columnIndex, rowIndex) => {
+  return [...new Set(
+    table.rows.filter(row => {
+      if (row[columnIndex] === '__other__') return false;
+      return row.every((cell, i) => cell === table.rows[rowIndex][i] || i >= columnIndex);
+    }).map(row => row[columnIndex])
+  )];
+};
+
 export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppState) {
   const visTypes = Private(VisTypesRegistryProvider);
   const brushEvent = Private(UtilsBrushEventProvider);
@@ -75,9 +84,21 @@ export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppS
         queryFilter: queryFilter,
         queryManager: queryManagerFactory(getAppState),
         events: {
-          filter: (event) => {
+          filter_legacy: (event) => {
             const appState = getAppState();
             filterBarClickHandler(appState)(event);
+          },
+          filter: (data, columnIndex, rowIndex) => {
+            const agg = data.columns[columnIndex].aggConfig;
+            let filter = [];
+            const value = data.rows[rowIndex][columnIndex];
+            if (agg.type.name === 'terms' && agg.params.otherBucket) {
+              const terms = getTerms(data, columnIndex, rowIndex);
+              filter = agg.createFilter(value, { terms });
+            } else {
+              filter = agg.createFilter(value);
+            }
+            queryFilter.addFilters(filter);
           }, brush: (event) => {
             const appState = getAppState();
             brushEvent(appState)(event);
