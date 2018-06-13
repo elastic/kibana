@@ -98,7 +98,7 @@ function isIndexPattern(val) {
   return Boolean(val && typeof val.toIndexList === 'function');
 }
 
-export function SearchSourceProvider(Promise, PromiseEmitter, Private, config) {
+export function SearchSourceProvider(Promise, Private, config) {
   const SearchRequest = Private(SearchRequestProvider);
   const SegmentedRequest = Private(SegmentedRequestProvider);
   const normalizeSortRequest = Private(NormalizeSortRequestProvider);
@@ -373,10 +373,10 @@ export function SearchSourceProvider(Promise, PromiseEmitter, Private, config) {
      * be fetched on the next run of the courier
      * @return {Promise}
      */
-    onResults(handler) {
+    onResults() {
       const self = this;
 
-      return new PromiseEmitter(function (resolve, reject) {
+      return new Promise(function (resolve, reject) {
         const defer = Promise.defer();
         defer.promise.then(resolve, reject);
 
@@ -386,8 +386,7 @@ export function SearchSourceProvider(Promise, PromiseEmitter, Private, config) {
           reject(error);
           request.abort();
         });
-
-      }, handler);
+      });
     }
 
     /**
