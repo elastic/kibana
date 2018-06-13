@@ -1,16 +1,5 @@
 <div class="ml-field-data-card">
-  <div class="euiText title-bar" ng-class="card.fieldName===undefined ? 'document_count': card.isUnsupportedType===true ? 'type-other' : card.type">
-    <ml-field-type-icon
-      type="card.type"
-      tooltip-enabled="true"
-    />
-    <div
-      class="field-name"
-      tooltip="{{ mlEscape(card.fieldName) || 'document count' }}"
-      tooltip-append-to-body="true">
-      {{ card.fieldName || 'document count' }}
-    </div>
-  </div>
+  <ml-field-title-bar card="card" />
 
   <div ng-if="card.loading === true" class="card-contents">
     <ml-loading-indicator
