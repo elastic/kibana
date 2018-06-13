@@ -6,7 +6,7 @@
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../lib/error_wrappers';
-import { mapCapabilities } from '../../lib/map_capabilities';
+import { getIndexNameToCapabilitiesMap } from '../../lib/map_capabilities';
 
 export function registerIndicesRoute(server) {
   const isEsError = isEsErrorFactory(server);
@@ -21,7 +21,7 @@ export function registerIndicesRoute(server) {
         const capabilities = await callWithRequest('rollup.capabilities', {
           indices: '_all'
         });
-        reply(mapCapabilities(capabilities, index));
+        reply(getIndexNameToCapabilitiesMap(capabilities, index));
       } catch(err) {
         if (isEsError(err)) {
           return reply(wrapEsError(err));

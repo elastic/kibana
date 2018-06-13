@@ -3,29 +3,49 @@
 * or more contributor license agreements. Licensed under the Elastic License;
 * you may not use this file except in compliance with the Elastic License.
 */
-export const mapCapabilities = (capabilities, index) => {
-  const capabilitiesByIndex = {};
 
-  if(capabilities) {
-    Object.keys(capabilities).forEach(pattern => {
-      capabilities[pattern].rollup_jobs.forEach(job => {
-        if(index && job.rollup_index !== index) {
-          return;
-        }
-
-        if(!capabilitiesByIndex[job.rollup_index]) {
-          capabilitiesByIndex[job.rollup_index] = {
-            rollup_index: job.rollup_index,
-            capabilities: {},
-          };
-        }
-
-        capabilitiesByIndex[job.rollup_index].capabilities[job.job_id] = {
-          fields: job.fields,
-        };
-      });
-    });
+const mapCapabilities = (capabilities, optionalIndexName) => {
+  if (!capabilities) {
+    return {};
   }
 
-  return capabilitiesByIndex;
+  const indexNameToCapabilitiesMap = {};
+
+  Object.keys(capabilities).forEach(pattern => {
+    capabilities[pattern].rollup_jobs.forEach(job => {
+      const {
+        job_id: jobId,
+        rollup_index: rollupIndexName,
+        fields,
+      } = job;
+
+      // If we're looking for a particular index, ignore ones which don't match.
+      if(optionalIndexName && rollupIndexName !== optionalIndexName) {
+        return;
+      }
+
+      if(!indexNameToCapabilitiesMap[rollupIndexName]) {
+        indexNameToCapabilitiesMap[rollupIndexName] = {
+          rollup_index: rollupIndexName,
+          capabilities: {},
+        };
+      }
+
+      // Collect capabilities for each job within the index.
+      indexNameToCapabilitiesMap[rollupIndexName].capabilities[jobId] = {
+        fields,
+      };
+    });
+  });
+
+  return indexNameToCapabilitiesMap;
+};
+
+export const getIndexNameToCapabilitiesMap = (capabilities) => {
+  return mapCapabilities(capabilities);
+};
+
+
+export const getCapabilitiesForIndexName = (capabilities, indexName) => {
+  return mapCapabilities(capabilities, indexName)[indexName].capabilities;
 };

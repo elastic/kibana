@@ -6,7 +6,7 @@
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../lib/error_wrappers';
-import { mapCapabilities } from '../../lib/map_capabilities';
+import { getCapabilitiesForIndexName } from '../../lib/map_capabilities';
 
 import indexBy from 'lodash/collection/indexBy';
 
@@ -19,7 +19,7 @@ export function registerFieldsForWildcardRoute(server) {
     config: {
       handler: async (request, reply) => {
         const {
-          pattern: index,
+          pattern: indexName,
           fields,
           meta_fields: metaFields,
         } = request.query;
@@ -28,14 +28,14 @@ export function registerFieldsForWildcardRoute(server) {
         const callWithRequest = callWithRequestFactory(server, request);
 
         try {
-          const capabilities = await callWithRequest('rollup.capabilities', {
+          const allCapabilities = await callWithRequest('rollup.capabilities', {
             indices: '_all'
           });
 
           const rollupFields = [];
-          const capabilitiesByIndex = mapCapabilities(capabilities, index)[index];
-          const jobs = capabilitiesByIndex.capabilities && Object.keys(capabilitiesByIndex.capabilities);
-          const fieldsFromFieldCapsByName = jobs && capabilitiesByIndex.capabilities[jobs[0]].fields;
+          const indexCapabilities = getCapabilitiesForIndexName(allCapabilities, indexName);
+          const jobs = indexCapabilities && Object.keys(indexCapabilities);
+          const fieldsFromFieldCapsByName = jobs && indexCapabilities[jobs[0]].fields;
 
           // Keep meta fields
           JSON.parse(metaFields).forEach(field => fieldsFromIndex[field] && rollupFields.push(fieldsFromIndex[field]));
