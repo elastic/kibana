@@ -66,6 +66,7 @@ module.exports = function({ name }) {
       generateScss: {
         type: 'confirm',
         message: 'Should SCSS be used?',
+        when: answers => answers.generateApp,
         default: true,
       },
     },
