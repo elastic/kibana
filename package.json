@@ -27,7 +27,7 @@
     "lint": "eslint ./src",
     "prepush": "npm run lint",
     "precommit": "lint-staged",
-    "postinstall": "scripts/postinstall.js"
+    "postinstall": "node scripts/postinstall.js"
   },
   "lint-staged": {
     "*.js": ["prettier --write", "git add"]

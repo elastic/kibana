@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 const { getGlobalConfigPath } = require('../src/lib/env');
 const { maybeCreateGlobalConfigAndFolder } = require('../src/lib/configs');
 
