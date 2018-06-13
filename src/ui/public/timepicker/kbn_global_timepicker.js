@@ -30,9 +30,11 @@ uiModules
     const listenForUpdates = once(() => {
       timefilter.on('refreshIntervalUpdate', () => {
         globalState.refreshInterval = clone(timefilter.getRefreshInterval());
+        globalState.time = clone(timefilter.getTime());
         globalState.save();
       });
       timefilter.on('timeUpdate', () => {
+        globalState.refreshInterval = clone(timefilter.getRefreshInterval());
         globalState.time = clone(timefilter.getTime());
         globalState.save();
       });
