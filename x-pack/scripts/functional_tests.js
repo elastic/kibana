@@ -6,9 +6,8 @@
 
 require('@kbn/plugin-helpers').babelRegister();
 require('@kbn/test').runTestsCli([
-  // Uncomment when https://github.com/elastic/kibana/issues/19563 is resolved.
-  // require.resolve('../test/reporting/configs/chromium_api.js'),
-  // require.resolve('../test/reporting/configs/chromium_functional.js'),
+  require.resolve('../test/reporting/configs/chromium_api.js'),
+  require.resolve('../test/reporting/configs/chromium_functional.js'),
   require.resolve('../test/reporting/configs/phantom_api.js'),
   require.resolve('../test/reporting/configs/phantom_functional.js'),
   require.resolve('../test/functional/config.js'),

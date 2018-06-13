@@ -74,6 +74,7 @@ export class HeadlessChromiumDriver {
         width: layoutViewport.clientWidth,
         height: layoutViewport.clientHeight,
       };
+      this._logger.debug(`elementPosition is null, output clip is ${JSON.stringify(outputClip)}`);
     } else {
       const { boundingClientRect, scroll = { x: 0, y: 0 } } = elementPosition;
       outputClip = {
@@ -82,6 +83,7 @@ export class HeadlessChromiumDriver {
         height: boundingClientRect.height,
         width: boundingClientRect.width,
       };
+      this._logger.debug(`elementPosition is not null, boundingClientRect is ${JSON.stringify(boundingClientRect)}`);
     }
 
     return await screenshotStitcher(outputClip, this._zoom, this._maxScreenshotDimension, async screenshotClip => {
