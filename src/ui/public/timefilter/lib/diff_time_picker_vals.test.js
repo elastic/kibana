@@ -19,26 +19,19 @@
 
 
 import moment from 'moment';
-import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import { UtilsDiffTimePickerValsProvider } from '../diff_time_picker_vals';
+import { areTimePickerValsDifferent } from './diff_time_picker_vals';
 
-describe('Diff Time Picker Values', function () {
-  let diffTimePickerValues;
+describe('Diff Time Picker Values', () => {
 
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    diffTimePickerValues = Private(UtilsDiffTimePickerValsProvider);
-  }));
-
-  it('accepts two undefined values', function () {
-    const diff = diffTimePickerValues(undefined, undefined);
+  test('accepts two undefined values', () => {
+    const diff = areTimePickerValsDifferent(undefined, undefined);
     expect(diff).to.be(false);
   });
 
-  describe('dateMath ranges', function () {
-    it('knows a match', function () {
-      const diff = diffTimePickerValues(
+  describe('dateMath ranges', () => {
+    test('knows a match', () => {
+      const diff = areTimePickerValsDifferent(
         {
           to: 'now',
           from: 'now-7d'
@@ -51,8 +44,8 @@ describe('Diff Time Picker Values', function () {
 
       expect(diff).to.be(false);
     });
-    it('knows a difference', function () {
-      const diff = diffTimePickerValues(
+    test('knows a difference', () => {
+      const diff = areTimePickerValsDifferent(
         {
           to: 'now',
           from: 'now-7d'
@@ -67,9 +60,9 @@ describe('Diff Time Picker Values', function () {
     });
   });
 
-  describe('a dateMath range, and a moment range', function () {
-    it('is always different', function () {
-      const diff = diffTimePickerValues(
+  describe('a dateMath range, and a moment range', () => {
+    test('is always different', () => {
+      const diff = areTimePickerValsDifferent(
         {
           to: moment(),
           from: moment()
@@ -84,12 +77,12 @@ describe('Diff Time Picker Values', function () {
     });
   });
 
-  describe('moment ranges', function () {
-    it('uses the time value of moments for comparison', function () {
+  describe('moment ranges', () => {
+    test('uses the time value of moments for comparison', () => {
       const to = moment();
       const from = moment().add(1, 'day');
 
-      const diff = diffTimePickerValues(
+      const diff = areTimePickerValsDifferent(
         {
           to: to.clone(),
           from: from.clone()
@@ -103,12 +96,12 @@ describe('Diff Time Picker Values', function () {
       expect(diff).to.be(false);
     });
 
-    it('fails if any to or from is different', function () {
+    test('fails if any to or from is different', () => {
       const to = moment();
       const from = moment().add(1, 'day');
       const from2 = moment().add(2, 'day');
 
-      const diff = diffTimePickerValues(
+      const diff = areTimePickerValsDifferent(
         {
           to: to.clone(),
           from: from.clone()
@@ -123,8 +116,8 @@ describe('Diff Time Picker Values', function () {
     });
   });
 
-  it('does not fall apart with unusual values', function () {
-    const diff = diffTimePickerValues({}, {});
+  test('does not fall apart with unusual values', () => {
+    const diff = areTimePickerValsDifferent({}, {});
     expect(diff).to.be(false);
   });
 });

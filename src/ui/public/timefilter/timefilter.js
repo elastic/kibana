@@ -23,8 +23,8 @@ import { calculateBounds, getTime } from './get_time';
 import '../state_management/global_state';
 import '../config';
 import { EventsProvider } from '../events';
-import { TimefilterLibDiffTimeProvider } from './lib/diff_time';
-import { TimefilterLibDiffIntervalProvider } from './lib/diff_interval';
+import { diffTimeFactory } from './lib/diff_time';
+import { diffIntervalFactory } from './lib/diff_interval';
 import uiRoutes from '../routes';
 import { uiModules } from '../modules';
 import { createLegacyClass } from '../utils/legacy_class';
@@ -49,8 +49,8 @@ uiModules
       Timefilter.Super.call(this);
 
       const self = this;
-      const diffTime = Private(TimefilterLibDiffTimeProvider)(self);
-      const diffInterval = Private(TimefilterLibDiffIntervalProvider)(self);
+      const diffTime = diffTimeFactory(self);
+      const diffInterval = diffIntervalFactory(self);
 
       self.isTimeRangeSelectorEnabled = false;
       self.isAutoRefreshSelectorEnabled = false;
