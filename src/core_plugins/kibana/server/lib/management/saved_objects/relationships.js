@@ -45,11 +45,11 @@ async function findDashboardRelationships(id, size, savedObjectsClient) {
     );
   }
 
-  visualizations.length > 0  ? { visualizations } : 404;
   return { visualizations };
 }
 
 async function findVisualizationRelationships(id, size, savedObjectsClient) {
+  await savedObjectsClient.get('visualization', id);
   const allDashboardsResponse = await savedObjectsClient.find({
     type: 'dashboard',
     fields: ['title', 'panelsJSON'],
@@ -76,7 +76,7 @@ async function findVisualizationRelationships(id, size, savedObjectsClient) {
       break;
     }
   }
-  return dashboards.length > 0 ? { dashboards } : 404;
+  return { dashboards };
 }
 
 async function findSavedSearchRelationships(id, size, savedObjectsClient) {
@@ -109,10 +109,11 @@ async function findSavedSearchRelationships(id, size, savedObjectsClient) {
     return accum;
   }, []);
 
-  return visualizations.length > 0 && indexPatterns.length > 0 ? { visualizations, indexPatterns } : 404;
+  return { visualizations, indexPatterns };
 }
 
 async function findIndexPatternRelationships(id, size, savedObjectsClient) {
+  await savedObjectsClient.get('index-pattern', id);
   const [allVisualizationsResponse, savedSearchResponse] = await Promise.all([
     savedObjectsClient.find({
       type: 'visualization',
@@ -163,7 +164,7 @@ async function findIndexPatternRelationships(id, size, savedObjectsClient) {
       break;
     }
   }
-  return visualizations.length > 0 && searches.length > 0 ? { visualizations, searches } : 404;
+  return { visualizations, searches };
 }
 
 export async function findRelationships(type, id, size, savedObjectsClient) {

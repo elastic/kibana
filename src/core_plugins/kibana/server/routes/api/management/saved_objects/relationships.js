@@ -20,6 +20,7 @@
 import Boom from 'boom';
 import Joi from 'joi';
 import { findRelationships } from '../../../../lib/management/saved_objects/relationships';
+import { isNotFoundError } from '../../../../../../../server/saved_objects/service/lib/errors';
 
 export function registerRelationships(server) {
   server.route({
@@ -44,13 +45,12 @@ export function registerRelationships(server) {
 
       try {
         const response = await findRelationships(type, id, size, req.getSavedObjectsClient());
-
-        if (typeof response === 'number') {
-          reply(Boom.boomify(new Error('Resource not found'), { statusCode: response }));
-        }
-
         reply(response);
       } catch (err) {
+        if (isNotFoundError(err)) {
+          reply(Boom.boomify(new Error('Resource not found'), { statusCode: 404 }));
+          return;
+        }
         reply(Boom.boomify(err, { statusCode: 500 }));
       }
     },
