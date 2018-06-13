@@ -74,15 +74,16 @@ export class SassBuilder {
    */
 
   async build() {
-    const outfile = this.outputPath();
+    const outFile = this.outputPath();
 
     const rendered = await sass.renderSync({
       file: this.input,
-      outfile,
+      outFile,
       sourceMap: true,
       sourceMapEmbed: true,
+      sourceComments: true,
     });
 
-    fs.writeFileSync(outfile, rendered.css);
+    fs.writeFileSync(outFile, rendered.css);
   }
 }
