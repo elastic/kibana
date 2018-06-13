@@ -19,7 +19,9 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import Select from 'react-select';
+import {
+  EuiComboBox,
+} from '@elastic/eui';
 function GroupBySelect(props) {
   const modeOptions = [
     { label: 'Everything', value: 'everything' },
@@ -27,12 +29,17 @@ function GroupBySelect(props) {
     { label: 'Filters', value: 'filters' },
     { label: 'Terms', value: 'terms' }
   ];
+  const selectedValue = props.value || 'everything';
+  const selectedOption = modeOptions.find(option => {
+    return selectedValue === option.value;
+  });
   return (
-    <Select
-      clearable={false}
-      value={props.value || 'everything'}
-      onChange={props.onChange}
+    <EuiComboBox
+      isClearable={false}
       options={modeOptions}
+      selectedOptions={[selectedOption]}
+      onChange={props.onChange}
+      singleSelection={true}
     />
   );
 

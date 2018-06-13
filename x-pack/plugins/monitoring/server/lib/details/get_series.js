@@ -216,6 +216,9 @@ export async function getSeries(req, indexPattern, metricName, filters, { min, m
   checkParam(indexPattern, 'indexPattern in details/getSeries');
 
   const metric = metrics[metricName];
+  if (!metric) {
+    throw new Error(`Not a valid metric: ${metricName}`);
+  }
   const response = await fetchSeries(req, indexPattern, metric, min, max, bucketSize, filters);
 
   return handleSeries(metric, min, max, bucketSize, response);

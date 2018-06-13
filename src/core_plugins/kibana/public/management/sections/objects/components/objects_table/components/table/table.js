@@ -170,7 +170,6 @@ export class Table extends PureComponent {
               key="deleteSO"
               iconType="trash"
               color="danger"
-              size="s"
               onClick={onDelete}
               isDisabled={selectedSavedObjects.length === 0}
             >
@@ -179,7 +178,6 @@ export class Table extends PureComponent {
             <EuiButton
               key="exportSO"
               iconType="exportAction"
-              size="s"
               onClick={onExport}
               isDisabled={selectedSavedObjects.length === 0}
             >

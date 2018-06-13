@@ -21,14 +21,16 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import SeriesEditor from '../series_editor';
 import { IndexPattern } from '../index_pattern';
-import Select from 'react-select';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import ColorRules from '../color_rules';
 import ColorPicker from '../color_picker';
 import uuid from 'uuid';
 import YesNo from '../yes_no';
-import { htmlIdGenerator } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiComboBox,
+} from '@elastic/eui';
 
 class GaugePanelConfig extends Component {
 
@@ -71,6 +73,9 @@ class GaugePanelConfig extends Component {
       { label: 'Half Circle', value: 'half' }
     ];
     const htmlId = htmlIdGenerator();
+    const selectedGaugeStyleOption = styleOptions.find(option => {
+      return model.gauge_style === option.value;
+    });
     let view;
     if (selectedTab === 'data') {
       view = (
@@ -129,13 +134,13 @@ class GaugePanelConfig extends Component {
             <label className="vis_editor__label" htmlFor={htmlId('gaugeStyle')}>
               Gauge Style
             </label>
-            <Select
-              inputProps={{ id: htmlId('gaugeStyle') }}
-              autosize={false}
-              clearable={false}
+            <EuiComboBox
+              isClearable={false}
+              id={htmlId('gaugeStyle')}
               options={styleOptions}
-              value={model.gauge_style}
+              selectedOptions={selectedGaugeStyleOption ? [selectedGaugeStyleOption] : []}
               onChange={handleSelectChange('gauge_style')}
+              singleSelection={true}
             />
 
           </div>

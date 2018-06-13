@@ -19,7 +19,6 @@
 
 import Boom from 'boom';
 import { resolveApi } from './api_server/server';
-import { existsSync } from 'fs';
 import { resolve, join, sep } from 'path';
 import { has, isEmpty } from 'lodash';
 import setHeaders from '../elasticsearch/lib/set_headers';
@@ -36,17 +35,6 @@ export default function (kibana) {
   const src = resolve(__dirname, 'public/src/');
 
   const apps = [];
-
-  if (existsSync(resolve(__dirname, 'public/tests'))) {
-    apps.push({
-      title: 'Console Tests',
-      id: 'sense-tests',
-      main: 'plugins/console/tests',
-      hidden: true
-      //listed: false // uncomment after https://github.com/elastic/kibana/pull/4755
-    });
-  }
-
   return new kibana.Plugin({
     id: 'console',
     require: [ 'elasticsearch' ],
@@ -135,17 +123,6 @@ export default function (kibana) {
           return resolveApi(version, apis.split(','), reply);
         }
       });
-
-      const testApp = server.getHiddenUiAppById('sense-tests');
-      if (testApp) {
-        server.route({
-          path: '/app/sense-tests',
-          method: 'GET',
-          handler: function (req, reply) {
-            return reply.renderApp(testApp);
-          }
-        });
-      }
     },
 
     uiExports: {

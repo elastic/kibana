@@ -115,7 +115,7 @@ export class AdvancedSettings extends Component {
     return this.props.config.remove(name);
   }
 
-  onQueryChange = (query) => {
+  onQueryChange = ({ query }) => {
     this.setState({
       query,
       filteredSettings: this.mapSettings(Query.execute(query, this.settings)),

@@ -29,7 +29,7 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
         await PageObjects.dashboard.initTests({
           kibanaIndex: 'dashboard/current/kibana',
           dataIndex: 'dashboard/current/data',
-          defaultIndex: 'logstash-*'
+          defaultIndex: 'logstash-*',
         });
         await PageObjects.dashboard.preserveCrossAppState();
       });
@@ -53,6 +53,8 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
       loadTestFile(require.resolve('./_dashboard_filtering'));
       loadTestFile(require.resolve('./_panel_expand_toggle'));
       loadTestFile(require.resolve('./_dashboard_grid'));
+      loadTestFile(require.resolve('./_dashboard_snapshots'));
+      loadTestFile(require.resolve('./_view_edit'));
     });
 
     // Each of these tests call initTests themselves, the way it was originally written.  The above tests only load
@@ -63,9 +65,7 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
 
       loadTestFile(require.resolve('./_dashboard_time_picker'));
       loadTestFile(require.resolve('./_bwc_shared_urls'));
-      loadTestFile(require.resolve('./_dashboard_snapshots'));
       loadTestFile(require.resolve('./_panel_controls'));
-      loadTestFile(require.resolve('./_view_edit'));
       loadTestFile(require.resolve('./_dashboard_state'));
       loadTestFile(require.resolve('./_dashboard_save'));
       loadTestFile(require.resolve('./_dashboard_time'));

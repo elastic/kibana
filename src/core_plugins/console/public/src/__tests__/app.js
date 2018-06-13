@@ -27,7 +27,8 @@ import init from '../app';
 describe('app initialization', () => {
   const sandbox = sinon.createSandbox();
 
-  let inputMock, outputMock;
+  let inputMock;
+  let outputMock;
   let ajaxDoneStub;
   beforeEach(() => {
     ajaxDoneStub = sinon.stub();
@@ -87,7 +88,7 @@ describe('app initialization', () => {
       url: 'https://api.github.com/content',
       dataType: 'text',
       kbnXsrfToken: false,
-      headers: { Accept: "application/vnd.github.v3.raw" }
+      headers: { Accept: 'application/vnd.github.v3.raw' }
     });
 
     sinon.assert.calledTwice(inputMock.moveToNextRequestEdge);

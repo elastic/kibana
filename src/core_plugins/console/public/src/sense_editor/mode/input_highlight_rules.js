@@ -17,8 +17,8 @@
  * under the License.
  */
 
-let ace = require('ace');
-let x_json = require('./x_json_highlight_rules');
+const ace = require('brace');
+import { addToRules } from './x_json_highlight_rules';
 
 const oop = ace.acequire('ace/lib/oop');
 const { TextHighlightRules } = ace.acequire('ace/mode/text_highlight_rules');
@@ -28,11 +28,11 @@ export function InputHighlightRules() {
   }
 
   function addEOL(tokens, reg, nextIfEOL, normalNext) {
-    if (typeof reg == "object") {
+    if (typeof reg === 'object') {
       reg = reg.source;
     }
     return [
-      { token: tokens.concat(["whitespace"]), regex: reg + "(\\s*)$", next: nextIfEOL },
+      { token: tokens.concat(['whitespace']), regex: reg + '(\\s*)$', next: nextIfEOL },
       { token: tokens, regex: reg, next: normalNext }
     ];
   }
@@ -41,43 +41,43 @@ export function InputHighlightRules() {
   // regexps are ordered -> the first match is used
   /*jshint -W015 */
   this.$rules = {
-    "start": mergeTokens([
-        { "token": "warning", "regex": "#!.*$" },
-        { token: "comment", regex: /^#.*$/ },
-        { token: "paren.lparen", regex: "{", next: "json", push: true }
-      ],
-      addEOL(["method"], /([a-zA-Z]+)/, "start", "method_sep")
+    'start': mergeTokens([
+      { 'token': 'warning', 'regex': '#!.*$' },
+      { token: 'comment', regex: /^#.*$/ },
+      { token: 'paren.lparen', regex: '{', next: 'json', push: true }
+    ],
+    addEOL(['method'], /([a-zA-Z]+)/, 'start', 'method_sep')
       ,
-      [
-        {
-          token: "whitespace",
-          regex: "\\s+"
-        },
-        {
-          token: "text",
-          regex: ".+?"
-        }
-      ]),
-    "method_sep": mergeTokens(
-      addEOL(["whitespace", "url.protocol_host", "url.slash"], /(\s+)(https?:\/\/[^?\/,]+)(\/)/, "start", "url"),
-      addEOL(["whitespace", "url.protocol_host"], /(\s+)(https?:\/\/[^?\/,]+)/, "start", "url"),
-      addEOL(["whitespace", "url.slash"], /(\s+)(\/)/, "start", "url"),
-      addEOL(["whitespace"], /(\s+)/, "start", "url")
+    [
+      {
+        token: 'whitespace',
+        regex: '\\s+'
+      },
+      {
+        token: 'text',
+        regex: '.+?'
+      }
+    ]),
+    'method_sep': mergeTokens(
+      addEOL(['whitespace', 'url.protocol_host', 'url.slash'], /(\s+)(https?:\/\/[^?\/,]+)(\/)/, 'start', 'url'),
+      addEOL(['whitespace', 'url.protocol_host'], /(\s+)(https?:\/\/[^?\/,]+)/, 'start', 'url'),
+      addEOL(['whitespace', 'url.slash'], /(\s+)(\/)/, 'start', 'url'),
+      addEOL(['whitespace'], /(\s+)/, 'start', 'url')
     ),
-    "url": mergeTokens(
-      addEOL(["url.part"], /([^?\/,\s]+)/, "start"),
-      addEOL(["url.comma"], /(,)/, "start"),
-      addEOL(["url.slash"], /(\/)/, "start"),
-      addEOL(["url.questionmark"], /(\?)/, "start", "urlParams")
+    'url': mergeTokens(
+      addEOL(['url.part'], /([^?\/,\s]+)/, 'start'),
+      addEOL(['url.comma'], /(,)/, 'start'),
+      addEOL(['url.slash'], /(\/)/, 'start'),
+      addEOL(['url.questionmark'], /(\?)/, 'start', 'urlParams')
     ),
-    "urlParams": mergeTokens(
-      addEOL(["url.param", "url.equal", "url.value"], /([^&=]+)(=)([^&]*)/, "start"),
-      addEOL(["url.param"], /([^&=]+)/, "start"),
-      addEOL(["url.amp"], /(&)/, "start")
+    'urlParams': mergeTokens(
+      addEOL(['url.param', 'url.equal', 'url.value'], /([^&=]+)(=)([^&]*)/, 'start'),
+      addEOL(['url.param'], /([^&=]+)/, 'start'),
+      addEOL(['url.amp'], /(&)/, 'start')
     )
   };
 
-  x_json.addToRules(this);
+  addToRules(this);
 
   if (this.constructor === InputHighlightRules) {
     this.normalizeRules();
