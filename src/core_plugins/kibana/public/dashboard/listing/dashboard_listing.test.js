@@ -57,28 +57,34 @@ const find = (num) => {
   });
 };
 
-test('renders table in loading state', () => {
+test('renders empty page in before initial fetch to avoid flickering', () => {
   const component = shallow(<DashboardListing
     find={find.bind(null, 2)}
     delete={() => {}}
     listingLimit={1000}
     hideWriteControls={false}
-  />);
-  expect(component).toMatchSnapshot();
-});
-
-test('initialFilter', () => {
-  const component = shallow(<DashboardListing
-    find={find.bind(null, 2)}
-    delete={() => {}}
-    listingLimit={1000}
-    hideWriteControls={false}
-    initialFilter="my dashboard"
   />);
   expect(component).toMatchSnapshot();
 });
 
 describe('after fetch', () => {
+  test('initialFilter', async () => {
+    const component = shallow(<DashboardListing
+      find={find.bind(null, 2)}
+      delete={() => {}}
+      listingLimit={1000}
+      hideWriteControls={false}
+      initialFilter="my dashboard"
+    />);
+
+    // Ensure all promises resolve
+    await new Promise(resolve => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
+    expect(component).toMatchSnapshot();
+  });
+
   test('renders table rows', async () => {
     const component = shallow(<DashboardListing
       find={find.bind(null, 2)}
