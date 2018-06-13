@@ -84,6 +84,9 @@ export const updateOldState = (visState) => {
     delete newState.params.metric.autoExtend;
     newState.params.metric.metricColorMode = newState.params.metric.gaugeColorMode;
     delete newState.params.metric.gaugeColorMode;
+  } else if(visState.type === 'metric' && _.get(visState.params, 'gauge.gaugeType', null) !== 'Metric') {
+    newState.type = 'gauge';
+    newState.params.type = 'gauge';
   }
 
   convertHeatmapLabelColor(newState);
