@@ -33,9 +33,9 @@ export function StatementSection({
   );
 }
 
-function getCollapsedChildIds(elements, collapsedIds) {
+function getCollapsedChildIds(statements, collapsedIds) {
   const collapsedChildIds = new Set();
-  elements.forEach(({ id, parentId }) => {
+  statements.forEach(({ id, parentId }) => {
     if (collapsedIds.has(parentId) || collapsedChildIds.has(parentId)) {
       collapsedChildIds.add(id);
     }
@@ -53,20 +53,21 @@ class StatementList extends React.PureComponent {
     };
   }
 
-  expand = elementId => {
+  expand = statementId => {
     const collapsedIds = new Set(this.state.collapsedIds);
-    collapsedIds.delete(elementId);
-    this.updateCollapsedElements(collapsedIds);
+    collapsedIds.delete(statementId);
+    this.updateCollapsedStatements(collapsedIds);
   }
 
-  collapse = elementId => {
+  collapse = statementId => {
     const collapsedIds = new Set(this.state.collapsedIds);
-    collapsedIds.add(elementId);
-    this.updateCollapsedElements(collapsedIds);
+    collapsedIds.add(statementId);
+    this.updateCollapsedStatements(collapsedIds);
   }
 
-  updateCollapsedElements = collapsedIds => {
-    const collapsedChildIds = getCollapsedChildIds(this.props.elements, collapsedIds);
+  updateCollapsedStatements = collapsedIds => {
+    const { statements } = this.props;
+    const collapsedChildIds = getCollapsedChildIds(statements, collapsedIds);
 
     this.setState({
       collapsedIds,
@@ -74,10 +75,10 @@ class StatementList extends React.PureComponent {
     });
   }
 
-  elementIsCollapsed = elementId => this.state.collapsedIds.has(elementId);
+  statementIsCollapsed = statementId => this.state.collapsedIds.has(statementId);
 
-  renderStatement = element => {
-    const { id, parentId } = element;
+  renderStatement = statement => {
+    const { id, parentId } = statement;
     const { onShowVertexDetails } = this.props;
 
     return this.state.collapsedIds.has(parentId) || this.state.collapsedChildIds.has(parentId)
@@ -85,22 +86,22 @@ class StatementList extends React.PureComponent {
       : (
         <Statement
           key={id}
-          element={element}
+          element={statement}
           collapse={this.collapse}
           expand={this.expand}
-          isCollapsed={this.elementIsCollapsed(id)}
+          isCollapsed={this.statementIsCollapsed(id)}
           onShowVertexDetails={onShowVertexDetails}
         />
       );
   }
 
   render() {
-    const { elements } = this.props;
+    const { statements } = this.props;
 
     return (
       <ul className="configViewer__list">
         {
-          elements.map(this.renderStatement)
+          statements.map(this.renderStatement)
         }
       </ul>
     );
@@ -108,10 +109,10 @@ class StatementList extends React.PureComponent {
 }
 
 StatementList.propTypes = {
-  elements: PropTypes.arrayOf(
+  statements: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,
-      // top-level elements have null parentId
+      // top-level statements have null parentId
       parentId: PropTypes.string
     })
   ).isRequired,
