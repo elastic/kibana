@@ -12,6 +12,30 @@ export default function ({ loadTestFile, getService }) {
   describe('saved_objects', () => {
     before(async () => {
       await es.shield.putRole({
+        name: 'kibana_legacy_user',
+        body: {
+          cluster: [],
+          index: [{
+            names: ['.kibana'],
+            privileges: ['manage', 'read', 'index', 'delete']
+          }],
+          applications: []
+        }
+      });
+
+      await es.shield.putRole({
+        name: 'kibana_legacy_dashboard_only_user',
+        body: {
+          cluster: [],
+          index: [{
+            names: ['.kibana'],
+            privileges: ['read', 'view_index_metadata']
+          }],
+          applications: []
+        }
+      });
+
+      await es.shield.putRole({
         name: 'kibana_rbac_user',
         body: {
           cluster: [],
@@ -52,12 +76,32 @@ export default function ({ loadTestFile, getService }) {
       });
 
       await es.shield.putUser({
+        username: AUTHENTICATION.KIBANA_LEGACY_USER.USERNAME,
+        body: {
+          password: AUTHENTICATION.KIBANA_LEGACY_USER.PASSWORD,
+          roles: ['kibana_legacy_user'],
+          full_name: 'a kibana legacy user',
+          email: 'a_kibana_legacy_user@elastic.co',
+        }
+      });
+
+      await es.shield.putUser({
+        username: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.USERNAME,
+        body: {
+          password: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.PASSWORD,
+          roles: ["kibana_legacy_dashboard_only_user"],
+          full_name: 'a kibana legacy dashboard only user',
+          email: 'a_kibana_legacy_dashboard_only_user@elastic.co',
+        }
+      });
+
+      await es.shield.putUser({
         username: AUTHENTICATION.KIBANA_RBAC_USER.USERNAME,
         body: {
           password: AUTHENTICATION.KIBANA_RBAC_USER.PASSWORD,
           roles: ['kibana_rbac_user'],
           full_name: 'a kibana user',
-          email: 'a_kibana_user@elastic.co',
+          email: 'a_kibana_rbac_user@elastic.co',
         }
       });
 
@@ -67,7 +111,7 @@ export default function ({ loadTestFile, getService }) {
           password: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.PASSWORD,
           roles: ["kibana_rbac_dashboard_only_user"],
           full_name: 'a kibana dashboard only user',
-          email: 'a_kibana_dashboard_only_user@elastic.co',
+          email: 'a_kibana_rbac_dashboard_only_user@elastic.co',
         }
       });
     });

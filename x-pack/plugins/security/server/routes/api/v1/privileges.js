@@ -23,7 +23,7 @@ export function initPrivilegesApi(server) {
       // with our view of them to allow users to more efficiently edit privileges for roles, and serialize it
       // into a different structure for enforcement within Elasticsearch
       const privileges = buildPrivilegeMap(application, kibanaVersion);
-      reply(Object.values(privileges[application]));
+      reply(Object.values(privileges));
     }
   });
 }

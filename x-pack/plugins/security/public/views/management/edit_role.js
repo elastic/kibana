@@ -118,7 +118,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     }
   },
   controllerAs: 'editRole',
-  controller($injector, $scope, rbacEnabled, rbacApplication) {
+  controller($injector, $scope, rbacApplication) {
     const $route = $injector.get('$route');
     const kbnUrl = $injector.get('kbnUrl');
     const shieldPrivileges = $injector.get('shieldPrivileges');
@@ -132,7 +132,6 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     $scope.indexPatterns = $route.current.locals.indexPatterns;
     $scope.privileges = shieldPrivileges;
 
-    $scope.rbacEnabled = rbacEnabled;
     const kibanaApplicationPrivilege = $route.current.locals.kibanaApplicationPrivilege;
     const role = $route.current.locals.role;
     $scope.kibanaPrivileges = getKibanaPrivileges(kibanaApplicationPrivilege, role, rbacApplication);

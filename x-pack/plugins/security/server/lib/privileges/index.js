@@ -5,4 +5,4 @@
  */
 
 export { registerPrivilegesWithCluster } from './privilege_action_registry';
-export { getLoginPrivilege, getVersionPrivilege } from './privileges';
+export { buildPrivilegeMap, getLoginPrivilege, getVersionPrivilege } from './privileges';

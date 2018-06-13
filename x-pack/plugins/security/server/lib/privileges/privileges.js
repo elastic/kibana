@@ -35,9 +35,7 @@ export function buildPrivilegeMap(application, kibanaVersion) {
     metadata: {}
   };
 
-  return {
-    [application]: privilegeActions
-  };
+  return privilegeActions;
 }
 
 function buildSavedObjectsReadPrivileges() {
