@@ -52,9 +52,12 @@ describe('SASS builder', () => {
     builder.build();
 
     sinon.assert.calledOnce(sass.renderSync);
-    sinon.assert.calledWithExactly(sass.renderSync, {
+    sinon.assert.calledWithExactly(sass.renderSync,  {
       file: '/foo/style.sass',
-      outfile: '/foo/style.css',
+      outFile: '/foo/style.css',
+      sourceComments: true,
+      sourceMap: true,
+      sourceMapEmbed: true
     });
   });
 
