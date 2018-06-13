@@ -46,3 +46,6 @@ build
 # JetBrains IDEs
 .idea
 *.iml
+
+# TEMPORARY: sass build output
+public/style/index.css

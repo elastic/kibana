@@ -9,6 +9,7 @@
   "scripts": {
     "start": "gulp dev",
     "build": "gulp build",
+    "build:sass": "gulp sass",
     "fix": "gulp lint-fix",
     "lint": "gulp lint",
     "test": "gulp test",
@@ -112,6 +113,7 @@
     "gulp-if": "^2.0.2",
     "gulp-mocha": "^4.3.1",
     "gulp-pegjs": "^0.1.0",
+    "gulp-sass": "^4.0.1",
     "gulp-webserver": "^0.9.1",
     "husky": "^0.13.3",
     "just-compose": "^1.0.6",
