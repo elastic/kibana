@@ -915,9 +915,18 @@ class JobService {
     });
   }
 
-  // forceStartDatafeeds(datafeedIds, jobIds, start, end) {
+  forceStartDatafeeds(dIds, start, end) {
+    return ml.jobService.forceStartDatafeeds(dIds, start, end);
+  }
 
-  // }
+  stopDatafeeds(dIds) {
+    return ml.jobService.stopDatafeeds(dIds);
+  }
+
+  deleteJobs(jIds) {
+    return ml.jobService.deleteJobs(jIds);
+  }
+
 
   validateDetector(detector) {
     return new Promise((resolve, reject) => {

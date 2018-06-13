@@ -12,6 +12,7 @@ import chrome from 'ui/chrome';
 import { http } from 'plugins/ml/services/http_service';
 
 import { results } from './results';
+import { jobs } from './jobs';
 
 const basePath = chrome.addBasePath('/api/ml');
 
@@ -406,5 +407,6 @@ export const ml = {
     });
   },
 
-  results
+  results,
+  jobService: jobs
 };

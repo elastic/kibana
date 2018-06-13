@@ -12,9 +12,9 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
-import { toastNotifications } from 'ui/notify';
-
-import { mlJobService } from 'plugins/ml/services/job_service';
+import {
+  stopDatafeeds,
+  cloneJob } from '../utils';
 
 export function actionsMenuContent(showEditJobModal, showDeleteJobModal, showStartDatafeedModal, refreshJobs) {
   return [{
@@ -81,7 +81,7 @@ function getStartStop(item, showStartDatafeedModal, refreshJobs) {
   if (item.datafeedState === 'started') {
     return (
       <MLText onClick={() => {
-        stopDatafeed(item.id, refreshJobs);
+        stopDatafeeds([item], refreshJobs);
         closeMenu(true);
       }}
       >
@@ -90,25 +90,6 @@ function getStartStop(item, showStartDatafeedModal, refreshJobs) {
       </MLText>
     );
   }
-}
-
-function stopDatafeed(jobId, finish) {
-  const datafeedId = mlJobService.getDatafeedId(jobId);
-  mlJobService.stopDatafeed(datafeedId, jobId).then(() => {
-    toastNotifications.addSuccess(`${jobId} stopped successfully`);
-    finish();
-  });
-}
-
-function cloneJob(jobId) {
-  mlJobService.refreshJob(jobId)
-  	.then(() => {
-      mlJobService.currentJob =  mlJobService.getJob(jobId);
-      window.location.href = `#/jobs/new_job/advanced`;
-    })
-    .catch(() => {
-      toastNotifications.addDanger(`Could not clone ${jobId}, job could not be found`);
-    });
 }
 
 // EuiText wrapper to stop event propagation so the menu items don't fire twice.

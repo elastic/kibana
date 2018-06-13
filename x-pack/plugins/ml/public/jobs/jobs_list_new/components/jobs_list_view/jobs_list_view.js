@@ -203,6 +203,7 @@ export class JobsListView extends Component {
               memory_status: (job.model_size_stats) ? job.model_size_stats.memory_status : '',
               jobState: job.state,
               hasDatafeed,
+              datafeedId: (hasDatafeed && job.datafeed_config.datafeed_id) ? job.datafeed_config.datafeed_id : '',
               datafeedState: (hasDatafeed && job.datafeed_config.state) ? job.datafeed_config.state : '',
               latestTimeStamp,
               earliestTimeStamp,
