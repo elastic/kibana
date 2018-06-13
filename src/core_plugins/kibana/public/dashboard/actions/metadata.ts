@@ -17,27 +17,33 @@
  * under the License.
  */
 
+import { Action } from 'redux';
 import { createAction } from 'redux-actions';
 
-export const deletePanel = createAction('DELETE_PANEL');
-export const updatePanel = createAction('UPDATE_PANEL');
-export const resetPanelTitle = createAction('RESET_PANEl_TITLE');
-export const setPanelTitle = createAction('SET_PANEl_TITLE',
-  /**
-   * @param title {string}
-   * @param panelIndex {string}
-   */
-  (title, panelIndex) => ({ title, panelIndex })
+export enum MetadataActionTypeKeys {
+  UPDATE_DESCRIPTION = 'UPDATE_DESCRIPTION',
+  UPDATE_TITLE = 'UPDATE_TITLE',
+}
+
+export type UpdateTitleActionPayload = string;
+
+export interface UpdateTitleAction extends Action {
+  type: MetadataActionTypeKeys.UPDATE_TITLE;
+  payload: UpdateTitleActionPayload;
+}
+
+export type UpdateDescriptionActionPayload = string;
+
+export interface UpdateDescriptionAction extends Action {
+  type: MetadataActionTypeKeys.UPDATE_DESCRIPTION;
+  payload: UpdateDescriptionActionPayload;
+}
+
+export type MetadataActions = UpdateDescriptionAction | UpdateTitleAction;
+
+export const updateDescription = createAction<UpdateDescriptionAction>(
+  MetadataActionTypeKeys.UPDATE_DESCRIPTION
 );
-
-/**
- * @param panels {Array<PanelState>}
- * @return {Object}
- */
-export const updatePanels = createAction('UPDATE_PANELS');
-
-/**
- * @param panels {Array<PanelState>}
- * @return {Object}
- */
-export const setPanels = createAction('SET_PANELS');
+export const updateTitle = createAction<UpdateTitleAction>(
+  MetadataActionTypeKeys.UPDATE_TITLE
+);

@@ -19,25 +19,24 @@
 
 import { store } from '../../store';
 import { updatePanel, updatePanels } from '../actions';
-import {
-  getPanel,
-  getPanelType,
-} from '../../selectors';
+import { getPanel, getPanelType } from '../../selectors';
 
 test('UpdatePanel updates a panel', () => {
   store.dispatch(updatePanels([{ panelIndex: '1', gridData: {} }]));
 
-  store.dispatch(updatePanel({
-    panelIndex: '1',
-    type: 'mySpecialType',
-    gridData: {
-      x: 1,
-      y: 5,
-      w: 10,
-      h: 1,
-      id: '1'
-    }
-  }));
+  store.dispatch(
+    updatePanel({
+      panelIndex: '1',
+      type: 'mySpecialType',
+      gridData: {
+        x: 1,
+        y: 5,
+        w: 10,
+        h: 1,
+        id: '1',
+      },
+    })
+  );
 
   const panel = getPanel(store.getState(), '1');
   expect(panel.gridData.x).toBe(1);

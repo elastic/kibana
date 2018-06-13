@@ -17,21 +17,6 @@
  * under the License.
  */
 
-import { handleActions } from 'redux-actions';
-import { updateTitle, updateDescription } from '../actions';
+export * from './types';
 
-export const metadata = handleActions({
-  [updateTitle]: (state, { payload }) => ({
-    ...state,
-    title: payload
-  }),
-
-  [updateDescription]: (state, { payload }) => ({
-    ...state,
-    description: payload
-  }),
-
-}, {
-  title: '',
-  description: '',
-});
+export * from './dashboard';

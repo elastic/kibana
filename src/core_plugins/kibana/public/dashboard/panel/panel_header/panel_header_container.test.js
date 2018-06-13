@@ -62,12 +62,12 @@ test('Panel header shows embeddable title when nothing is set on the panel', () 
 });
 
 test('Panel header shows panel title when it is set on the panel', () => {
-  store.dispatch(setPanelTitle('my custom panel title', 'foo1'));
+  store.dispatch(setPanelTitle({ title: 'my custom panel title', panelId: 'foo1' }));
   expect(findTestSubject(component, 'dashboardPanelTitle').text()).toBe('my custom panel title');
 });
 
 test('Panel header shows no panel title when it is set to an empty string on the panel', () => {
-  store.dispatch(setPanelTitle('', 'foo1'));
+  store.dispatch(setPanelTitle({ title: '', panelId: 'foo1' }));
   expect(findTestSubject(component, 'dashboardPanelTitle').text()).toBe('');
 });
 

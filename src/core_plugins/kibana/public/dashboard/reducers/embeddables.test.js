@@ -18,16 +18,11 @@
  */
 
 import { store } from '../../store';
-import {
-  embeddableIsInitializing, setPanels,
-} from '../actions';
-import {
-  getEmbeddableError,
-  getEmbeddableInitialized,
-} from '../../selectors';
+import { embeddableIsInitializing, setPanels } from '../actions';
+import { getEmbeddableError, getEmbeddableInitialized } from '../../selectors';
 
 beforeAll(() => {
-  store.dispatch(setPanels({ 'foo1': { panelIndex: 'foo1' } }));
+  store.dispatch(setPanels({ foo1: { panelIndex: 'foo1' } }));
 });
 
 describe('embeddableIsInitializing', () => {
@@ -42,4 +37,3 @@ describe('embeddableIsInitializing', () => {
     expect(error).toBe(undefined);
   });
 });
-
