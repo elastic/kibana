@@ -4,7 +4,7 @@ option java_package = "castro.repository";
 option java_multiple_files = true;
 
 message Repository {
-  string uri = 1;
+  string repositoryId = 1;
 
   string domain = 2;
   string name = 3;

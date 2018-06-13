@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option java_package = "castro.syntaxhighlight";
+option java_multiple_files = true;
+
+import "File.proto";
+
+message FileSyntaxHighlight {
+  FileLocation fileLocation = 1;
+
+  message LineSyntaxHight {
+    int32 line = 1;
+    repeated SyntaxHightTag tags = 2;
+  }
+
+  message SyntaxHightTag {
+    int32 start = 1;
+    int32 end = 2;
+    string tag = 3;
+  }
+}

@@ -1,4 +1,4 @@
-include 'logging'
+include 'util'
 include 'elasticsearch'
 
 include 'backend'
