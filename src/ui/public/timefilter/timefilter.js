@@ -75,7 +75,7 @@ class Timefilter extends SimpleEmitter {
   }
 
   createFilter = (indexPattern, timeRange) => {
-    return getTime(indexPattern, timeRange ? timeRange : this.time, this.getForceNow());
+    return getTime(indexPattern, timeRange ? timeRange : this._time, this.getForceNow());
   }
 
   getBounds = () => {

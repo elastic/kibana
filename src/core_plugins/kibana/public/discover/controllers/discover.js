@@ -201,7 +201,7 @@ function discoverController(
   // searchSource which applies time range
   const timeRangeSearchSource = savedSearch.searchSource.new();
   timeRangeSearchSource.set('filter', () => {
-    return timefilter.get($scope.indexPattern);
+    return timefilter.createFilter($scope.indexPattern);
   });
 
   $scope.searchSource.inherits(timeRangeSearchSource);
