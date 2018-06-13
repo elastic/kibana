@@ -5,7 +5,7 @@
  */
 import { Observable } from 'rxjs';
 
-export function watchStatusAndLicenseToInitialize(xpackMainPlugin, downstreamPlugin, onGreen) {
+export function watchStatusAndLicenseToInitialize(xpackMainPlugin, downstreamPlugin, initialize) {
   const xpackInfo = xpackMainPlugin.info;
   const xpackInfoFeature = xpackInfo.feature(downstreamPlugin.id);
 
@@ -38,7 +38,7 @@ export function watchStatusAndLicenseToInitialize(xpackMainPlugin, downstreamPlu
         return Observable.of({ state: status.state, message: status.message });
       }
 
-      return onGreen(license)
+      return initialize(license)
         .then(() => ({
           state: 'green',
           message: 'Ready',
