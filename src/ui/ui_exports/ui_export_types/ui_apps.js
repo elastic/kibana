@@ -33,6 +33,8 @@ function applySpecDefaults(spec, type, pluginSpec) {
     linkToLastSubUrl = true,
     listed = !hidden,
     url = `/app/${id}`,
+    styleSheetPath,
+    styleSheetToCompile,
   } = spec;
 
   if (spec.injectVars) {
@@ -57,6 +59,8 @@ function applySpecDefaults(spec, type, pluginSpec) {
     linkToLastSubUrl,
     listed,
     url,
+    styleSheetPath,
+    styleSheetToCompile,
   };
 }
 

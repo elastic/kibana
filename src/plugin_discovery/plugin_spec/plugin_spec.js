@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { resolve, basename, isAbsolute as isAbsolutePath } from 'path';
+import { resolve, join, basename, isAbsolute as isAbsolutePath } from 'path';
 
 import toPath from 'lodash/internal/toPath';
 import { get } from 'lodash';
@@ -166,6 +166,26 @@ export class PluginSpec {
 
   getExportSpecs() {
     return this._uiExports;
+  }
+
+  getExportAppSpecs() {
+    return (this.getExportSpecs() || {}).app;
+  }
+
+  getExportAppStyleSheetToCompilePath() {
+    const styleSheetToCompile = (this.getExportAppSpecs() || {}).styleSheetToCompile;
+
+    if (styleSheetToCompile) {
+      return join(this.getPublicDir(), styleSheetToCompile);
+    }
+  }
+
+  getExportAppStyleSheetPath() {
+    const styleSheetPath = (this.getExportAppSpecs() || {}).styleSheetPath;
+
+    if (styleSheetPath) {
+      return join(this.getPublicDir(), styleSheetPath);
+    }
   }
 
   getPreInitHandler() {

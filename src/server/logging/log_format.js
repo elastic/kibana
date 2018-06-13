@@ -46,7 +46,7 @@ const levelColor = function (code) {
 
 
 export default class TransformObjStream extends Stream.Transform {
-  constructor(config) {
+  constructor(config = {}) {
     super({
       readableObjectMode: false,
       writableObjectMode: true

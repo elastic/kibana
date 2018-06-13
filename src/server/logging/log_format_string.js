@@ -49,7 +49,8 @@ const typeColors = {
   optmzr: 'white',
   managr: 'green',
   optimize: 'magentaBright',
-  listening: 'magentaBright'
+  listening: 'magentaBright',
+  scss: 'magentaBright',
 };
 
 const color = _.memoize(function (name) {
@@ -60,9 +61,11 @@ const type = _.memoize(function (t) {
   return color(t)(_.pad(t, 7).slice(0, 7));
 });
 
-const workerType = process.env.kbnWorkerType ? `${type(process.env.kbnWorkerType)} ` : '';
-
 export default class KbnLoggerStringFormat extends LogFormat {
+  constructor(config) {
+    super(config);
+    this.workerType = process.env.kbnWorkerType ? `${type(process.env.kbnWorkerType)} ` : '';
+  }
   format(data) {
     const time = color('time')(this.extractAndFormatTimestamp(data, 'HH:mm:ss.SSS'));
     const msg = data.error ? color('error')(data.error.stack) : color('message')(data.message);
@@ -77,6 +80,6 @@ export default class KbnLoggerStringFormat extends LogFormat {
         return s + `[${ color(t)(t) }]`;
       }, '');
 
-    return `${workerType}${type(data.type)} [${time}] ${tags} ${msg}`;
+    return `${this.workerType}${type(data.type)} [${time}] ${tags} ${msg}`;
   }
 }

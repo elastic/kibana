@@ -1,0 +1,5 @@
+{
+  <% if (generateApp) { %>
+    "styleSheetToCompile": "public/app.scss"
+  <% } %>
+}

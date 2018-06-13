@@ -340,6 +340,13 @@ describe('plugin discovery/plugin spec', () => {
     });
 
     describe('#getPublicDir()', () => {
+      it('defaults if scss is specified', () => {
+        const spec = new PluginSpec(fooPack, { scss: 'foo.scss' });
+        expect(spec.getStyleSheet()).to.eql('foo.css');
+      });
+    });
+
+    describe('#getPublicDir()', () => {
       describe('spec.publicDir === false', () => {
         it('returns null', () => {
           const spec = new PluginSpec(fooPack, { publicDir: false });

@@ -84,7 +84,7 @@ export default class Worker extends EventEmitter {
 
     if (this.crashed) {
       this.emit('crashed');
-      this.log.bad(`${this.title} crashed`, 'with status code', code);
+      this.log.warning(`${this.title} crashed`, 'with status code', code);
       if (!this.watch) process.exit(code);
     } else {
       // restart after graceful shutdowns
@@ -160,10 +160,10 @@ export default class Worker extends EventEmitter {
     }
 
     if (this.changes.length) {
-      this.log.warn(`restarting ${this.title}`, `due to changes in ${this.flushChangeBuffer()}`);
+      this.log.warning(`restarting ${this.title}`, `due to changes in ${this.flushChangeBuffer()}`);
     }
     else if (this.startCount++) {
-      this.log.warn(`restarting ${this.title}...`);
+      this.log.warning(`restarting ${this.title}...`);
     }
 
     this.fork = cluster.fork(this.env);

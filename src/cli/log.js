@@ -17,18 +17,32 @@
  * under the License.
  */
 
-import _ from 'lodash';
-
-const log = _.restParam(function (color, label, rest1) {
-  console.log.apply(console, [color(` ${_.trim(label)} `)].concat(rest1));
-});
-
-import { green, yellow, red } from './color';
+import { format } from 'util';
 
 export default class Log {
-  constructor(quiet, silent) {
-    this.good = quiet || silent ? _.noop : _.partial(log, green);
-    this.warn = quiet || silent ? _.noop : _.partial(log, yellow);
-    this.bad = silent ? _.noop : _.partial(log, red);
+  constructor({ quiet, silent, useUTC }) {
+    const KbnLoggerStringFormat = require('../server/logging/log_format_string');
+    const logger = new KbnLoggerStringFormat({ useUTC });
+
+    this.format = (data = {}) => {
+      if (silent) {
+        return;
+      }
+
+      // only surface errors when running with quiet
+      if (quiet && data.type === 'error') {
+        return;
+      }
+
+      console.log(logger.format(data));
+    };
+
+    this.info = (...msg) =>
+      this.format({ type: 'info', message: format(...msg) });
+
+    this.warning = (...msg) =>
+      this.format({ type: 'warning', message: format(...msg) });
+
+    this.error = error => this.format({ type: 'error', error });
   }
 }
