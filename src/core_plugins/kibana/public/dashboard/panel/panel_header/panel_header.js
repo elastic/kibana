@@ -21,7 +21,13 @@ export function PanelHeader({ title, customDashboardLink, actions, isViewOnlyMod
           title={title}
           aria-label={`Dashboard panel: ${title}`}
         >
-        <a href={customDashboardLink}><u>{title}</u></a>
+          <a
+            href={customDashboardLink}
+          >
+            <u>
+              {title}
+            </u>
+          </a>
         </span>
         <div className="kuiMicroButtonGroup">
           {actions}
@@ -36,7 +42,8 @@ export function PanelHeader({ title, customDashboardLink, actions, isViewOnlyMod
           className="panel-title"
           title={title}
           aria-label={`Dashboard panel: ${title}`}
-        >{title}
+        >
+          {title}
         </span>
         <div className="kuiMicroButtonGroup">
           {actions}

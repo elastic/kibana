@@ -51,7 +51,7 @@ const mapDispatchToProps = (dispatch, { embeddableFactory, panelId }) => ({
 });
 
 const mergeProps = (stateProps, dispatchProps) => {
-  const { isExpanded, editUrl, panelTitle , panelCustomDashboardLink} = stateProps;
+  const { isExpanded, editUrl, panelTitle, panelCustomDashboardLink } = stateProps;
   const { onMaximizePanel, onMinimizePanel, ...dispatchers } = dispatchProps;
   const toggleExpandedPanel = () => isExpanded ? onMinimizePanel() : onMaximizePanel();
 

@@ -9,7 +9,8 @@ import {
   keyCodes,
 } from 'ui_framework/services';
 
-export function PanelOptionsMenuForm({ title, customDashboardLink, onReset, onUpdatePanelTitle, onUpdatePanelCustomDashboardLink, onClose }) {
+export function PanelOptionsMenuForm({ title, customDashboardLink, onReset,
+  onUpdatePanelTitle, onUpdatePanelCustomDashboardLink, onClose }) {
   function onTitleInputChange(event) {
     onUpdatePanelTitle(event.target.value);
   }

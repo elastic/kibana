@@ -91,8 +91,8 @@ export class PanelOptionsMenu extends React.Component {
         onReset={this.props.onResetPanelTitle}
         onUpdatePanelTitle={this.props.onUpdatePanelTitle}
         title={this.props.panelTitle}
-	onUpdatePanelCustomDashboardLink={this.props.onUpdatePanelCustomDashboardLink}
-	customDashboardLink={this.props.panelCustomDashboardLink}
+        onUpdatePanelCustomDashboardLink={this.props.onUpdatePanelCustomDashboardLink}
+        customDashboardLink={this.props.panelCustomDashboardLink}
         onClose={this.closePopover}
       />,
     };

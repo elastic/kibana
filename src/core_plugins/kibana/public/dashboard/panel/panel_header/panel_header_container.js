@@ -29,7 +29,7 @@ const mapStateToProps = ({ dashboard }, { panelId }) => {
   const embeddableCustomDashboardLink = embeddable ? embeddable.customDashboardLink : '';
   return {
     title: panel.title === undefined ? embeddableTitle : panel.title,
-    customDashboardLink: panel.customDashboardLink == undefined ? embeddableCustomDashboardLink : panel.customDashboardLink,
+    customDashboardLink: panel.customDashboardLink === undefined ? embeddableCustomDashboardLink : panel.customDashboardLink,
     isExpanded: getMaximizedPanelId(dashboard) === panelId,
     isViewOnlyMode: getFullScreenMode(dashboard) || getViewMode(dashboard) === DashboardViewMode.VIEW,
     hidePanelTitles: getHidePanelTitles(dashboard),
