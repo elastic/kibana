@@ -88,6 +88,7 @@ export function getResponseTimeSeries(chartsData) {
   if (!isEmpty(mlAvg)) {
     // insert after Avg. serie
     series.splice(1, 0, {
+      title: 'Anomaly Boundaries',
       hideLegend: true,
       hideTooltipValue: true,
       data: getAnomalyBoundaries(dates, mlAvg),
@@ -99,9 +100,9 @@ export function getResponseTimeSeries(chartsData) {
     series.splice(1, 0, {
       title: 'Anomaly score',
       hideLegend: true,
-      formatTooltipValue: (p = {}) => asDecimal(p.anomalyScore),
+      hideTooltipValue: true,
       data: getAnomalyScore(dates, mlAvg),
-      type: 'area',
+      type: 'areaMaxHeight',
       color: 'none',
       areaColor: 'rgba(146, 0, 0, 0.1)' // apmRed
     });
@@ -162,11 +163,28 @@ function getChartValues(dates = [], yValues = []) {
   }));
 }
 
+function getClosest(arr, targetNumber) {
+  if (arr.includes(targetNumber)) {
+    return targetNumber;
+  }
+
+  return arr.reduce(
+    (prev, curr) =>
+      Math.abs(curr - targetNumber) < Math.abs(prev - targetNumber)
+        ? curr
+        : prev
+  );
+}
+
 function getAnomalyScore(dates = [], yValues = []) {
-  return dates.map((x, i) => ({
-    x,
-    anomalyScore: get(yValues[i], 'anomalyScore')
-  }));
+  return dates.map((x, i) => {
+    const anomalyScore = get(yValues[i], 'anomalyScore');
+    return {
+      x,
+      draw: anomalyScore > 75,
+      anomalyScore
+    };
+  });
 }
 
 function getAnomalyBoundaries(dates = [], yValues = []) {

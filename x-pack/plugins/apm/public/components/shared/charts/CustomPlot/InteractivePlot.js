@@ -19,14 +19,16 @@ class InteractivePlot extends PureComponent {
       return [];
     }
 
-    return this.props.series.map(serie => {
-      const { x, y } = serie.data[hoverIndex] || {};
-      return {
-        x,
-        y,
-        color: serie.color
-      };
-    });
+    return this.props.series
+      .map(serie => {
+        const { x, y } = serie.data[hoverIndex] || {};
+        return {
+          x,
+          y,
+          color: serie.color
+        };
+      })
+      .filter(point => point.y);
   };
 
   getTooltipPoints = hoverIndex => {
