@@ -16,13 +16,13 @@ import { validateConfig } from './server/lib/validate_config';
 import { authenticateFactory } from './server/lib/auth_redirect';
 import { checkLicense } from './server/lib/check_license';
 import { initAuthenticator } from './server/lib/authentication/authenticator';
-import { mirrorStatusAndInitialize } from './server/lib/mirror_status_and_initialize';
-import { registerPrivilegesWithCluster } from './server/lib/privileges';
 import { initPrivilegesApi } from './server/routes/api/v1/privileges';
 import { hasPrivilegesWithServer } from './server/lib/authorization/has_privileges';
 import { SecurityAuditLogger } from './server/lib/audit_logger';
 import { AuditLogger } from '../../server/lib/audit_logger';
 import { SecureSavedObjectsClient } from './server/lib/saved_objects_client/secure_saved_objects_client';
+import { registerPrivilegesWithCluster } from './server/lib/privileges';
+import { watchStatusAndLicenseToInitialize } from './server/lib/watch_status_and_license_to_initialize';
 
 export const security = (kibana) => new kibana.Plugin({
   id: 'security',
@@ -88,20 +88,23 @@ export const security = (kibana) => new kibana.Plugin({
   },
 
   async init(server) {
+    const plugin = this;
+
     const config = server.config();
     const xpackMainPlugin = server.plugins.xpack_main;
+    const xpackInfo = xpackMainPlugin.info;
 
-    mirrorStatusAndInitialize(xpackMainPlugin.status, this.status, async () => {
-      if (!config.get('xpack.security.rbac.enabled')) {
-        return;
-      }
-
-      await registerPrivilegesWithCluster(server);
-    });
+    const xpackInfoFeature = xpackInfo.feature(plugin.id);
 
     // Register a function that is called whenever the xpack info changes,
     // to re-compute the license check results for this plugin
-    xpackMainPlugin.info.feature(this.id).registerLicenseCheckResultsGenerator(checkLicense);
+    xpackInfoFeature.registerLicenseCheckResultsGenerator(checkLicense);
+
+    watchStatusAndLicenseToInitialize(xpackMainPlugin, plugin, async (license) => {
+      if (license.allowRbac) {
+        await registerPrivilegesWithCluster(server);
+      }
+    });
 
     validateConfig(config, message => server.log(['security', 'warning'], message));
 
@@ -123,9 +126,23 @@ export const security = (kibana) => new kibana.Plugin({
         mappings,
         onBeforeWrite
       }) => {
-        const hasPrivileges = hasPrivilegesWithRequest(request);
-
         const adminCluster = server.plugins.elasticsearch.getCluster('admin');
+
+        if (!xpackInfoFeature.getLicenseCheckResults().allowRbac) {
+          const { callWithRequest } = adminCluster;
+          const callCluster = (...args) => callWithRequest(request, ...args);
+
+          const repository = new savedObjects.SavedObjectsRepository({
+            index,
+            mappings,
+            onBeforeWrite,
+            callCluster,
+          });
+
+          return new savedObjects.SavedObjectsClient(repository);
+        }
+
+        const hasPrivileges = hasPrivilegesWithRequest(request);
         const { callWithInternalUser } = adminCluster;
 
         const repository = new savedObjects.SavedObjectsRepository({
@@ -156,9 +173,7 @@ export const security = (kibana) => new kibana.Plugin({
     initLogoutView(server);
 
     server.injectUiAppVars('login', () => {
-      const pluginId = 'security';
-      const xpackInfo = server.plugins.xpack_main.info;
-      const { showLogin, loginMessage, allowLogin } = xpackInfo.feature(pluginId).getLicenseCheckResults() || {};
+      const { showLogin, loginMessage, allowLogin } = xpackInfo.feature(plugin.id).getLicenseCheckResults() || {};
 
       return {
         loginState: {
