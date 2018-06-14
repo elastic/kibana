@@ -6,7 +6,9 @@ import { ColorPickerMini } from '../color_picker_mini';
 export const PageConfig = ({ setBackground, background }) => {
   return (
     <EuiFormRow label="Page Background">
-      <ColorPickerMini onChange={setBackground} value={background} />
+      <span style={{ fontSize: 0, width: 'fit-content' }}>
+        <ColorPickerMini id="page-config" onChange={setBackground} value={background} />
+      </span>
     </EuiFormRow>
   );
 };
