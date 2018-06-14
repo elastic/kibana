@@ -6,17 +6,22 @@
 
 import { connect } from 'react-redux';
 import { LayerControl } from './view';
-import { getFlyoutOpen, toggleFlyout } from '../../store/ui';
+import { updateFlyout, getFlyoutDisplay, FLYOUT_STATE } from '../../store/ui';
+
+const mapDispatchToProps = {
+  showAddLayerWizard: () => updateFlyout(FLYOUT_STATE.ADD_LAYER_WIZARD),
+  showLayerDetails: () => updateFlyout(FLYOUT_STATE.LAYER_PANEL)
+};
 
 function mapStateToProps(state = {}) {
+  const flyoutDisplay = getFlyoutDisplay(state);
   return {
-    flyoutOpen: getFlyoutOpen(state)
+    layerDetailsVisible: flyoutDisplay === FLYOUT_STATE.LAYER_PANEL,
+    addLayerVisible: flyoutDisplay === FLYOUT_STATE.ADD_LAYER_WIZARD,
+    noFlyoutVisible: flyoutDisplay === FLYOUT_STATE.NONE
   };
 }
 
-const mapDispatchToProps = {
-  toggleFlyout
-};
-
-const connectedLayerControl = connect(mapStateToProps, mapDispatchToProps, null, { withRef: true })(LayerControl);
+const connectedLayerControl = connect(mapStateToProps, mapDispatchToProps, null,
+  { withRef: true })(LayerControl);
 export { connectedLayerControl as LayerControl };

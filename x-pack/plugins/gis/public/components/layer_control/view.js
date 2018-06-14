@@ -28,32 +28,11 @@ export class LayerControl extends React.Component {
   constructor(props) {
     super(props);
     this._kbnMap = props.kbnMap;
-    this.state = {
-      layers: [],
-      flyoutState: FLYOUT_STATE.NONE
-    };
+
     this._onLayerOrderChange = (newOrder) => {
       this._kbnMap.reorderLayers(newOrder);
     };
-    this._showLayerDetails = (layer) => {
-      this.setState({
-        flyoutState: FLYOUT_STATE.LAYER_PANEL,
-        selectedLayer: layer
-      });
-    };
-    this._cancelLayerPanel = () => {
-      this.setState({
-        flyoutState: FLYOUT_STATE.NONE,
-        selectedLayer: null
-      });
-    };
-    this._saveLayerEdits = () => {
-      //todo
-      this.setState({
-        flyoutState: FLYOUT_STATE.NONE,
-        selectedLayer: null
-      });
-    };
+
     this._removeLayer = (layer) => {
       this._kbnMap.removeLayer(layer);
       this.setState({
@@ -77,16 +56,19 @@ export class LayerControl extends React.Component {
   }
 
   _renderLayerFlyout() {
-    if (this.state.flyoutState === FLYOUT_STATE.NONE) {
+    const {
+      layerDetailsVisible,
+      addLayerVisible,
+      noFlyoutVisible
+    } = this.props;
+
+    if (noFlyoutVisible) {
       return null;
-    } else if (this.state.flyoutState === FLYOUT_STATE.ADD_LAYER_WIZARD) {
+    } else if (addLayerVisible) {
       return null; //todo
-    } else if (this.state.flyoutState === FLYOUT_STATE.LAYER_PANEL) {
+    } else if (layerDetailsVisible) {
       return (
         <LayerPanel
-          layer={this.state.selectedLayer}
-          onCancel={this._cancelLayerPanel}
-          saveLayerEdits={this._saveLayerEdits}
           removeLayer={this._removeLayer}
         />);
     }
@@ -95,7 +77,7 @@ export class LayerControl extends React.Component {
   render() {
     const layerFlyout = this._renderLayerFlyout();
     const addLayer = (
-      <EuiButtonEmpty size="xs" flush="right" onClick={this.props.toggleFlyout}>
+      <EuiButtonEmpty size="xs" flush="right" onClick={this.props.showAddLayerWizard}>
         Add layer
       </EuiButtonEmpty>);
     return (
