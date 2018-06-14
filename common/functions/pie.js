@@ -1,6 +1,7 @@
 import { get, map, groupBy, sortBy } from 'lodash';
 import keyBy from 'lodash.keyby';
 import { getColorsFromPalette } from '../lib/get_colors_from_palette';
+import { getLegendConfig } from '../lib/get_legend_config';
 
 export const pie = () => ({
   name: 'pie',
@@ -51,6 +52,11 @@ export const pie = () => ({
       help: 'Label font',
       default: '{font}',
     },
+    legend: {
+      types: ['string', 'boolean'],
+      help: 'Legend position, nw, sw, ne, se or false',
+      default: false,
+    },
   },
   fn: (context, args) => {
     const rows = sortBy(context.rows, ['color', 'size']);
@@ -81,9 +87,7 @@ export const pie = () => ({
         options: {
           canvas: false,
           colors: getColorsFromPalette(args.palette, data.length),
-          legend: {
-            show: false,
-          },
+          legend: getLegendConfig(args.legend, data.length),
           grid: {
             show: false,
           },

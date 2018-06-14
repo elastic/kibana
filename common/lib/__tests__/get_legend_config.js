@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import { getLegendConfig } from '../plot/get_legend_config';
+import { getLegendConfig } from '../get_legend_config';
 
 describe('getLegendConfig', () => {
   describe('show', () => {

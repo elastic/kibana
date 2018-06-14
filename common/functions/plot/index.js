@@ -1,8 +1,8 @@
 import { groupBy, get, set, map, sortBy } from 'lodash';
 import keyBy from 'lodash.keyby';
 import { getColorsFromPalette } from '../../lib/get_colors_from_palette';
+import { getLegendConfig } from '../../lib/get_legend_config';
 import { getFlotAxisConfig } from './get_flot_axis_config';
-import { getLegendConfig } from './get_legend_config';
 import { seriesStyleToFlot } from './series_style_to_flot';
 import { getTickHash } from './get_tick_hash';
 

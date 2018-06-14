@@ -25,6 +25,13 @@ export const pie = () => ({
       default: '{seriesStyle}',
       multi: true,
     },
+    {
+      name: 'legend',
+      displayName: 'Legend Visibility',
+      help: 'Enable or disable the legend',
+      argType: 'toggle',
+      default: 'false',
+    },
   ],
   resolve({ context }) {
     if (getState(context) !== 'ready') return { labels: [] };
