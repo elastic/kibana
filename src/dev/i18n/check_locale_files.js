@@ -30,7 +30,7 @@ async function checkFile(localePath) {
     path.resolve(path.dirname(localePath), 'defaultMessages.json')
   );
   const defaultMessagesIds = Object.keys(
-    JSON.parse(defaultMessagesBuffer.toString())
+    plainify(JSON.parse(defaultMessagesBuffer.toString()))
   );
 
   const localeBuffer = await readFileAsync(localePath);
