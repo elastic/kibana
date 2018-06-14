@@ -1,13 +1,14 @@
 {
-  "DELETE _xpack/ml/anomaly_detectors/{job_id}/model_snapshots/{snapshot_id}": {
+  "DELETE _xpack/ml/anomaly_detectors/{id}/model_snapshots/{id}": {
     "methods": ["DELETE"],
-    "patterns": ["_xpack/ml/anomaly_detectors/{job_id}/model_snapshots/{snapshot_id}"]
+    "patterns": ["_xpack/ml/anomaly_detectors/{id}/model_snapshots/{id}"],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-delete-snapshot.html"
   },
-  "_xpack/ml/anomaly_detectors/{job_id}/model_snapshots": {
+  "_xpack/ml/anomaly_detectors/{id}/model_snapshots": {
     "methods": ["GET"],
     "patterns": [
-      "_xpack/ml/anomaly_detectors/{job_id}/model_snapshots",
-      "_xpack/ml/anomaly_detectors/{job_id}/model_snapshots/{snapshot_id}"
+      "_xpack/ml/anomaly_detectors/{id}/model_snapshots",
+      "_xpack/ml/anomaly_detectors/{id}/model_snapshots/{id}"
     ],
     "data_autocomplete_rules": {
       "desc": [true, false],
@@ -16,21 +17,24 @@
       "size": 1000,
       "sort": "",
       "start": ""
-    }
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-get-snapshot.html"
   },
-  "_xpack/ml/anomaly_detectors/{job_id}/model_snapshots/{snapshot_id}/_revert": {
+  "_xpack/ml/anomaly_detectors/{id}/model_snapshots/{id}/_revert": {
     "methods": ["POST"],
-    "patterns": ["_xpack/ml/anomaly_detectors/{job_id}/model_snapshots/{snapshot_id}/_revert"],
+    "patterns": ["_xpack/ml/anomaly_detectors/{id}/model_snapshots/{id}/_revert"],
     "data_autocomplete_rules": {
       "delete_intervening_results": [true, false]
-    }
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-revert-snapshot.html"
   },
-  "_xpack/ml/anomaly_detectors/{job_id}/model_snapshots/{snapshot_id}/_update": {
+  "_xpack/ml/anomaly_detectors/{id}/model_snapshots/{id}/_update": {
     "methods": ["POST"],
-    "patterns": ["_xpack/ml/anomaly_detectors/{job_id}/model_snapshots/{snapshot_id}/_update"],
+    "patterns": ["_xpack/ml/anomaly_detectors/{id}/model_snapshots/{id}/_update"],
     "data_autocomplete_rules": {
       "description": "",
       "retain": [true, false]
-    }
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-update-snapshot.html"
   }
 }

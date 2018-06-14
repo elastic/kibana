@@ -7,8 +7,17 @@
 
 export function UsageAPIProvider({ getService }) {
   const supertest = getService('supertest');
+  const supertestNoAuth = getService('supertestWithoutAuth');
 
   return {
+    async getUsageStatsNoAuth() {
+      const { body } = await supertestNoAuth
+        .get('/api/_xpack/usage')
+        .set('kbn-xsrf', 'xxx')
+        .expect(401);
+      return body;
+    },
+
     async getUsageStats() {
       const { body } = await supertest
         .get('/api/_xpack/usage')

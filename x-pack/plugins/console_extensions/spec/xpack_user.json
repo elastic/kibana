@@ -1,53 +1,58 @@
 {
-  "POST _xpack/security/user/{name}": {
+  "POST _xpack/security/user/{id}": {
     "methods": [
       "PUT",
       "POST"
     ],
     "patterns": [
-      "_xpack/security/user/{name}"
+      "_xpack/security/user/{id}"
     ],
     "data_autocomplete_rules": {
       "metadata": {},
       "password": "",
       "fullname": "",
       "roles": []
-    }
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-users.html"
   },
-  "_xpack/security/user/{name}/_enable": {
+  "_xpack/security/user/{id}/_enable": {
     "methods": [
       "PUT"
     ],
     "patterns": [
-      "_xpack/security/user/{name}/_enable"
-    ]
+      "_xpack/security/user/{id}/_enable"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-users.html"
   },
-  "_xpack/security/user/{name}/_disable": {
+  "_xpack/security/user/{id}/_disable": {
     "methods": [
       "PUT"
     ],
     "patterns": [
-      "_xpack/security/user/{name}/_disable"
-    ]
+      "_xpack/security/user/{id}/_disable"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-users.html"
   },
-  "_xpack/security/user/{name}/_password": {
+  "_xpack/security/user/{id}/_password": {
     "methods": [
       "PUT"
     ],
     "patterns": [
-      "_xpack/security/user/{name}/_password"
+      "_xpack/security/user/{id}/_password"
     ],
     "data_autocomplete_rules": {
       "password": ""
-    }
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-users.html"
   },
-  "DELETE _xpack/security/user/{name}": {
+  "DELETE _xpack/security/user/{id}": {
     "methods": [
       "DELETE"
     ],
     "patterns": [
-      "_xpack/security/user/{name}"
-    ]
+      "_xpack/security/user/{id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-users.html"
   },
   "_xpack/security/user": {
     "methods": [
@@ -55,8 +60,9 @@
     ],
     "patterns": [
       "_xpack/security/user",
-      "_xpack/security/user/{name}"
-    ]
+      "_xpack/security/user/{id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-users.html"
   },
   "_xpack/security/user/_password": {
     "methods": [
@@ -64,11 +70,12 @@
     ],
     "patterns": [
       "_xpack/security/user/_password",
-      "_xpack/security/user/{username}/_password"
+      "_xpack/security/user/{id}/_password"
     ],
     "data_autocomplete_rules": {
       "password": ""
-    }
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-users.html"
   },
   "_xpack/security/user/_has_privileges": {
     "methods": [
@@ -76,6 +83,7 @@
     ],
     "patterns": [
       "_xpack/security/user/_has_privileges"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-users.html"
   }
 }

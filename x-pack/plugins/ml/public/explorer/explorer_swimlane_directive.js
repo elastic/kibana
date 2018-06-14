@@ -131,7 +131,6 @@ module.directive('mlExplorerSwimlane', function ($compile, Private, mlExplorerDa
       const timeBuckets = new MlTimeBuckets();
       timeBuckets.setInterval(`${stepSecs}s`);
       const xAxisTickFormat = timeBuckets.getScaledDateFormat();
-      const xAxisTicks = xAxisScale.ticks(numTicksForDateFormat(scope.chartWidth, xAxisTickFormat));
 
       function cellMouseover($event, laneLabel, bucketScore, index, time) {
         if (bucketScore === undefined || cellMouseoverActive === false) {
@@ -263,26 +262,45 @@ module.directive('mlExplorerSwimlane', function ($compile, Private, mlExplorerDa
         $compile($lane)(rowScope);
       });
 
-      const $laneTimes = $('<div>', {
-        class: 'time-tick-labels'
-      });
-      _.each(xAxisTicks, (tick) => {
-        const $tickLabel = $('<div>', {
-          class: 'tick-label',
-          text: moment(tick).format(xAxisTickFormat)
-        });
-        const $tickLabelWrapper = $('<div>', {
-          class: 'tick-label-wrapper',
-          css: {
-            'margin-left': (xAxisScale(tick)) + 'px'
-          }
-        });
+      const laneTimes = d3.select($swimlanes.get(0))
+        .append('div')
+        .classed('time-tick-labels', true);
 
-        $tickLabelWrapper.append($tickLabel);
-        $laneTimes.append($tickLabelWrapper);
+      // height of .time-tick-labels
+      const svgHeight = 25;
+      const svg = laneTimes.append('svg')
+        .attr('width', scope.chartWidth)
+        .attr('height', svgHeight);
+
+      const xAxis = d3.svg.axis()
+        .scale(xAxisScale)
+        .ticks(numTicksForDateFormat(scope.chartWidth, xAxisTickFormat))
+        .tickFormat(tick => moment(tick).format(xAxisTickFormat));
+
+      const gAxis = svg.append('g').attr('class', 'x axis').call(xAxis);
+
+      // remove overlapping labels
+      let overlapCheck = 0;
+      gAxis.selectAll('g.tick').each(function () {
+        const tick = d3.select(this);
+        const xTransform = d3.transform(tick.attr('transform')).translate[0];
+        const tickWidth = tick.select('text').node().getBBox().width;
+        const xMinOffset = xTransform - (tickWidth / 2);
+        const xMaxOffset = xTransform + (tickWidth / 2);
+        // if the tick label overlaps the previous label
+        // (or overflows the chart to the left), remove it;
+        // otherwise pick that label's offset as the new offset to check against
+        if (xMinOffset < overlapCheck) {
+          tick.remove();
+        } else {
+          overlapCheck = xTransform + (tickWidth / 2);
+        }
+        // if the last tick label overflows the chart to the right, remove it
+        if (xMaxOffset > scope.chartWidth) {
+          tick.remove();
+        }
       });
 
-      $swimlanes.append($laneTimes);
       mlExplorerDashboardService.swimlaneRenderDone.changed();
     }
 

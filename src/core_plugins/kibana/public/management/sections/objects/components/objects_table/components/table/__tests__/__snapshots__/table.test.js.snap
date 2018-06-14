@@ -10,7 +10,9 @@ exports[`Table should render normally 1`] = `
           "multiSelect": "or",
           "name": "Type",
           "options": Array [
-            2,
+            Object {
+              "value": 2,
+            },
           ],
           "type": "field_value_selection",
         },
@@ -26,7 +28,6 @@ exports[`Table should render normally 1`] = `
           iconType="trash"
           isDisabled={false}
           onClick={[Function]}
-          size="s"
           type="button"
         >
           Delete
@@ -38,7 +39,6 @@ exports[`Table should render normally 1`] = `
           iconType="exportAction"
           isDisabled={false}
           onClick={[Function]}
-          size="s"
           type="button"
         >
           Export

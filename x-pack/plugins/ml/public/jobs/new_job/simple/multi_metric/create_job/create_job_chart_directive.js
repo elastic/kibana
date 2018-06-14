@@ -27,7 +27,7 @@ module.directive('mlMultiMetricJobChart', function () {
 
     let svgWidth = 0;
     const lineChartHeight = scope.chartHeight;
-    const margin = { top: 0, right: 0, bottom: 20, left: scope.chartTicksMargin.width };
+    const margin = { top: 5, right: 1, bottom: 20, left: scope.chartTicksMargin.width };
     const svgHeight = lineChartHeight + margin.top + margin.bottom;
     let vizWidth  = svgWidth  - margin.left - margin.right;
     const chartLimits = { max: 0, min: 0 };
