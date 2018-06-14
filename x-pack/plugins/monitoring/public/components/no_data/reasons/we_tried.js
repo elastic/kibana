@@ -26,16 +26,11 @@ export function WeTried() {
       <EuiHorizontalRule size="half" />
       <EuiText className="noData__alignLeft">
         <p>
-          No Monitoring data could be found for the selected time period, but we
-          could not find the cluster setting that makes the data unavailable.
+          No monitoring data found. Try setting the time filter to &quot;Last 1
+          hour&quot; or see if data is available for a different time period.
         </p>
         <p>
-          There may be data available for a different time period than we have
-          selected. Make sure the time filter is set to &quot;Last 1 hour.&quot;
-        </p>
-        <p>
-          We are refreshing the search for data in the background. If cluster data
-          is found, we will redirect to the cluster overview page.
+          If data is in your cluster, you&apos;ll see your monitoring dashboards here.
         </p>
       </EuiText>
     </Fragment>

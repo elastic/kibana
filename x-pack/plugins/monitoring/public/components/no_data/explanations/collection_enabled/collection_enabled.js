@@ -97,7 +97,7 @@ export class ExplainCollectionEnabled extends React.Component {
         <EuiText>
           <p>
             When the data is in your cluster, your monitoring dashboard will
-            show up here. This only takes a few seconds.
+            show up here. This might take a few seconds.
           </p>
         </EuiText>
         <EuiSpacer />
