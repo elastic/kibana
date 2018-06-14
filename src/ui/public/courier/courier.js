@@ -29,7 +29,6 @@ import { SearchSourceProvider } from './data_source/search_source';
 import { requestQueue } from './_request_queue';
 import { FetchSoonProvider } from './fetch';
 import { SearchLooperProvider } from './looper/search';
-import { RootSearchSourceProvider } from './data_source/_root_search_source';
 import { SavedObjectProvider } from './saved_object';
 import { RedirectWhenMissingProvider } from './_redirect_when_missing';
 
@@ -41,9 +40,6 @@ uiModules.get('kibana/courier')
       const SearchSource = Private(SearchSourceProvider);
       const fetchSoon = Private(FetchSoonProvider);
       const searchLooper = self.searchLooper = Private(SearchLooperProvider);
-
-      // expose some internal modules
-      self.setRootSearchSource = Private(RootSearchSourceProvider).set;
 
       self.SavedObject = Private(SavedObjectProvider);
       self.indexPatterns = indexPatterns;

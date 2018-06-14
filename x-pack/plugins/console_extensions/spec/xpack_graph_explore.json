@@ -1,15 +1,16 @@
 {
-  "{index_name}/_xpack/graph/_explore": {
+  "{index}/_xpack/graph/_explore": {
     "methods": [
       "POST"
     ],
     "patterns": [
-      "{index_name}/_xpack/graph/_explore"
+      "{index}/_xpack/graph/_explore"
     ],
     "data_autocomplete_rules": {
       "query": {},
       "vertices": [{}],
       "connections": {}
-    }
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/graph-explore-api.html"
   }
 }

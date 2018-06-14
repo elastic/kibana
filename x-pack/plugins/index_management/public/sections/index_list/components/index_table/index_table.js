@@ -259,6 +259,7 @@ export class IndexTable extends Component {
               }}
               data-test-subj="indexTableFilterInput"
               placeholder="Search"
+              aria-label="Search indices"
             />
           </EuiFlexItem>
         </EuiFlexGroup>

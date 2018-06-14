@@ -27,3 +27,5 @@ export const updateIsFullScreenMode = createAction('UPDATE_IS_FULL_SCREEN_MODE')
 export const updateUseMargins = createAction('UPDATE_USE_MARGINS');
 export const updateHidePanelTitles = createAction('HIDE_PANEL_TITLES');
 export const updateTimeRange = createAction('UPDATE_TIME_RANGE');
+export const updateFilters = createAction('UPDATE_FILTERS');
+export const updateQuery = createAction('UPDATE_QUERY');

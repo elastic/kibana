@@ -18,7 +18,6 @@ import { exportTypesRegistryFactory } from './server/lib/export_types_registry';
 import { createBrowserDriverFactory, getDefaultBrowser, getDefaultChromiumSandboxDisabled } from './server/browsers';
 import { logConfiguration } from './log_configuration';
 
-import { callClusterFactory } from '../xpack_main';
 import { getReportingUsageCollector } from './server/usage';
 
 const kbToBase64Length = (kb) => {
@@ -160,8 +159,7 @@ export const reporting = (kibana) => {
       // Register a function to with Monitoring to manage the collection of usage stats
       monitoringPlugin && monitoringPlugin.status.once('green', () => {
         if (monitoringPlugin.collectorSet) {
-          const callCluster = callClusterFactory(server).getCallClusterInternal(); // uses callWithInternal as this is for internal collection
-          monitoringPlugin.collectorSet.register(getReportingUsageCollector(server, callCluster));
+          monitoringPlugin.collectorSet.register(getReportingUsageCollector(server));
         }
       });
 

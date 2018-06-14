@@ -27,7 +27,6 @@ exports[`Table editing should show an input field 1`] = `
 <EuiFormControlLayout
   compressed={false}
   fullWidth={false}
-  iconSide="left"
   isLoading={false}
 >
   <EuiValidatableControl>
