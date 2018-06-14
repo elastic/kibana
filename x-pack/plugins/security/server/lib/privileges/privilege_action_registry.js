@@ -15,9 +15,10 @@ export async function registerPrivilegesWithCluster(server) {
   const config = server.config();
   const kibanaVersion = config.get('pkg.version');
   const application = config.get('xpack.security.rbac.application');
+  const savedObjectTypes = server.savedObjects.types;
 
   const expectedPrivileges = {
-    [application]: buildPrivilegeMap(application, kibanaVersion)
+    [application]: buildPrivilegeMap(savedObjectTypes, application, kibanaVersion)
   };
 
   server.log(['security', 'debug'], `Registering Kibana Privileges with Elasticsearch for ${application}`);
