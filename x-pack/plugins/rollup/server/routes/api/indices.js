@@ -15,13 +15,12 @@ export function registerIndicesRoute(server) {
     path: '/api/rollup/indices',
     method: 'GET',
     handler: async (request, reply) => {
-      const { index } = request.params;
       const callWithRequest = callWithRequestFactory(server, request);
       try {
         const capabilities = await callWithRequest('rollup.capabilities', {
           indices: '_all'
         });
-        reply(getIndexNameToCapabilitiesMap(capabilities, index));
+        reply(getIndexNameToCapabilitiesMap(capabilities));
       } catch(err) {
         if (isEsError(err)) {
           return reply(wrapEsError(err));
@@ -29,5 +28,8 @@ export function registerIndicesRoute(server) {
         reply(wrapUnknownError(err));
       }
     },
+    // config: {
+    //   pre: [ licensePreRouting ]
+    // }
   });
 }
