@@ -66,9 +66,9 @@ export default function buildRequest(config, tlConfig, scriptedFields) {
 
   _.assign(aggCursor, createDateAgg(config, tlConfig, scriptedFields));
 
-
   return {
     index: config.index,
+    timeout: tlConfig.server.config().get('elasticsearch.shardTimeout') + 'ms',
     body: {
       query: {
         bool: bool
