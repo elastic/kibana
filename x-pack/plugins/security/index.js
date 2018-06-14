@@ -119,9 +119,6 @@ export const security = (kibana) => new kibana.Plugin({
 
     savedObjects.setScopedSavedObjectsClientFactory(({
       request,
-      index,
-      mappings,
-      onBeforeWrite
     }) => {
       const adminCluster = server.plugins.elasticsearch.getCluster('admin');
 
@@ -129,12 +126,7 @@ export const security = (kibana) => new kibana.Plugin({
         const { callWithRequest } = adminCluster;
         const callCluster = (...args) => callWithRequest(request, ...args);
 
-        const repository = new savedObjects.SavedObjectsRepository({
-          index,
-          mappings,
-          onBeforeWrite,
-          callCluster,
-        });
+        const repository = savedObjects.getSavedObjectsRepository(callCluster);
 
         return new savedObjects.SavedObjectsClient(repository);
       }
@@ -142,12 +134,7 @@ export const security = (kibana) => new kibana.Plugin({
       const hasPrivileges = hasPrivilegesWithRequest(request);
       const { callWithInternalUser } = adminCluster;
 
-      const repository = new savedObjects.SavedObjectsRepository({
-        index,
-        mappings,
-        onBeforeWrite,
-        callCluster: callWithInternalUser
-      });
+      const repository = savedObjects.getSavedObjectsRepository(callWithInternalUser);
 
       return new SecureSavedObjectsClient({
         repository,
