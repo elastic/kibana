@@ -17,9 +17,34 @@
  * under the License.
  */
 
-export { SavedObjectsRepository } from './repository';
-export { ScopedSavedObjectsClientProvider } from './scoped_client_provider';
-export { SavedObjectsRepositoryProvider } from './repository_provider';
+import { SavedObjectsRepository } from './repository';
 
-import * as errors from './errors';
-export { errors };
+/**
+ * Provider for the Saved Object Reppository.
+ */
+export class SavedObjectsRepositoryProvider {
+
+  constructor({
+    index,
+    mappings,
+    onBeforeWrite
+  }) {
+    this._index = index;
+    this._mappings = mappings;
+    this._onBeforeWrite = onBeforeWrite;
+  }
+
+  getRepository(callCluster) {
+
+    if (typeof callCluster !== 'function') {
+      throw new TypeError('Repository requires a "callCluster" function to be provided.');
+    }
+
+    return new SavedObjectsRepository({
+      index: this._index,
+      mappings: this._mappings,
+      onBeforeWrite: this._onBeforeWrite,
+      callCluster
+    });
+  }
+}
