@@ -12,17 +12,25 @@ const { TextHighlightRules } = ace.acequire('ace/mode/text_highlight_rules');
 const openBraceRegex = /(\{)/;
 const closeBraceRegex = /(\})/;
 
-const pop = (values) => {
+const performPop = (stack, value) => {
+  while (stack[0] === value) {
+    stack.shift();
+  }
+};
+
+const pop = (popValues = [], pushValues = []) => {
   return (state, stack) => {
     console.log(state);
     console.log(stack);
-    if (stack[0] === state) {
-      stack.shift();
+    if (stack[0] !== state) {
+      console.log('stack !== state');
     }
-    values.forEach(item => {
-      while (stack[0] === item) {
-        stack.shift();
-      }
+    performPop(stack, state);
+    popValues.forEach(item => {
+      performPop(stack, item);
+    });
+    pushValues.forEach(item => {
+      stack.unshift(item);
     });
     console.log(stack);
     return stack[0]
@@ -33,9 +41,9 @@ const pop = (values) => {
 
 function ValueRule(popStates = []) {
   return [
+    new ArrayRule(pop(['array', ...popStates])),
     new HashRule(pop(['hash', ...popStates])),
     new NumberRule(pop(['number', ...popStates])),
-    new ArrayRule(pop(['array', ...popStates])),
     ...getStringRules(pop(['quote', ...popStates])),
     new BarewordRule(pop(['bareword', ...popStates]))
   ];
@@ -52,12 +60,31 @@ function ArrayRule(next) {
         next
       },
       {
+        token: 'array',
+        regex: /(\[)/,
+        push: 'arrayEntry'
+      },
+      {
         token: 'operator',
         regex: /\,/
       },
       {
-        defaultToken: 'hash'
-      }
+        token: 'quote',
+        regex: /\'/,
+        push: 'singleQuoteString'
+      },
+      {
+        token: 'quote',
+        regex: /\"/,
+        push: 'doubleQuoteString'
+      },
+      {
+        token: 'hash',
+        regex: openBraceRegex,
+        push: 'hashEntries'
+      },
+      new NumberRule(),
+      new BarewordRule(),
     ]
   };
 }
@@ -82,9 +109,15 @@ function HashRule(next) {
       },
       {
         token: 'hashEntryName',
-        regex: /([a-zA-Z]+)/,
+        regex: /([a-zA-Z0-9]+)/,
         next: 'hashOperator'
-      }
+      },
+      {
+        token: 'array',
+        regex: /(\[)/,
+        push: 'arrayEntry'
+      },
+      ...getStringRules(pop([], ['hashOperator']))
     ]
   };
 }
@@ -237,6 +270,62 @@ export class PipelineHighlightRules extends TextHighlightRules {
       attributeValue: [
         ...new ValueRule(['attributeValue', 'attributeOperator'])
       ],
+      arrayEntry: [
+        {
+          token: 'array',
+          regex: /(\])/,
+          next: pop()
+        },
+        {
+          token: 'array',
+          regex: /(\[)/,
+          push: 'arrayEntry'
+        },
+        {
+          token: 'operator',
+          regex: /\,/
+        },
+        {
+          token: 'quote',
+          regex: /\'/,
+          push: 'singleQuoteString'
+        },
+        {
+          token: 'quote',
+          regex: /\"/,
+          push: 'doubleQuoteString'
+        },
+        {
+          token: 'hash',
+          regex: openBraceRegex,
+          push: 'hashEntries'
+        },
+        new NumberRule(),
+        new BarewordRule(),
+      ],
+      arrayOperator: [
+        {
+          token: 'operator',
+          regex: /\,/,
+          next: pop()
+        }
+      ],
+      arrayValue: [
+        ...new ValueRule([], 'arrayOperator')
+      ],
+      hashEntries: [
+        {
+          token: 'hash',
+          regex: closeBraceRegex,
+          next: pop()
+        },
+        {
+          token: 'hashEntryName',
+          regex: /([a-zA-Z0-9]+)/,
+          next: 'hashOperator'
+        },
+        ...getStringRules(pop([], ['hashOperator']))
+      ],
       hashOperator: [
         {
           token: 'operator',
@@ -246,6 +335,34 @@ export class PipelineHighlightRules extends TextHighlightRules {
       ],
       hashValue: [
         ...new ValueRule(['hashValue', 'hashOperator', 'hashEntry'])
+      ],
+      singleQuoteString: [
+        {
+          token: 'quote',
+          regex: /\'/,
+          next: 'pop'
+        },
+        {
+          token: 'escapeQuote',
+          regex: singleQuoteEscapeRegex
+        },
+        {
+          defaultToken: 'quote'
+        }
+      ],
+      doubleQuoteString: [
+        {
+          token: 'quote',
+          regex: /\"/,
+          next: 'pop'
+        },
+        {
+          token: 'escapeQuote',
+          regex: doubleQuoteEscapeRegex
+        },
+        {
+          defaultToken: 'quote'
+        }
       ],
       // pluginSection: [
       //   {
