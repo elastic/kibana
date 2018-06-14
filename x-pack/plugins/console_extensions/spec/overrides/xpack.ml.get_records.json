@@ -1,0 +1,16 @@
+{
+  "xpack.ml.get_records": {
+    "data_autocomplete_rules": {
+      "desc": "__flag__",
+      "exclude_interim": "__flag__",
+      "record_score": 0,
+      "end": "",
+      "page": {
+        "from": 0,
+        "size": 100
+      },
+      "sort": "",
+      "start": ""
+    }
+  }
+}

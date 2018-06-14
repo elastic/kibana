@@ -1,0 +1,19 @@
+{
+  "xpack.rollup.put_job": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_xpack/rollup/job/{id}"
+    ],
+    "data_autocomplete_rules": {
+      "index_pattern": "",
+      "rollup_index": "",
+      "cron": "",
+      "page_size": 100,
+      "groups": {},
+      "metrics": {}
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/rollup-job-config.html"
+  }
+}

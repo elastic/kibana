@@ -1,0 +1,16 @@
+{
+  "xpack.ml.get_influencers": {
+    "data_autocomplete_rules": {
+      "desc": "__flag__",
+      "exclude_interim": "__flag__",
+      "influencer_score": 0,
+      "end": "",
+      "page": {
+        "from": 0,
+        "size": 100
+      },
+      "sort": "",
+      "start": ""
+    }
+  }
+}

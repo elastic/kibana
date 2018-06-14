@@ -1,0 +1,10 @@
+{
+  "xpack.ml.get_categories": {
+    "data_autocomplete_rules": {
+      "page": {
+        "from": 0,
+        "size": 100
+      }
+    }
+  }
+}
