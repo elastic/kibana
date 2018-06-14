@@ -5,7 +5,7 @@
  */
 
 import React, { Component } from 'react';
-
+import PropTypes from 'prop-types';
 import FilterableAPMTable from '../../../shared/APMTable/FilterableAPMTable';
 import { AlignmentKuiTableHeaderCell } from '../../../shared/APMTable/APMTable';
 
@@ -78,5 +78,13 @@ class List extends Component {
     );
   }
 }
+
+List.propTypes = {
+  items: PropTypes.array
+};
+
+List.defaultProps = {
+  items: []
+};
 
 export default List;

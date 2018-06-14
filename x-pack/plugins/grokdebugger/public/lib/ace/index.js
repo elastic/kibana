@@ -5,3 +5,4 @@
  */
 
 export { GrokMode } from './grok_mode';
+export { applyEditorOptions } from './apply_editor_options';

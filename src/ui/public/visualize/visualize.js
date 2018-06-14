@@ -1,6 +1,24 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import { uiModules } from '../modules';
-import { stateMonitorFactory } from '../state_management/state_monitor_factory';
 import visualizeTemplate from './visualize.html';
 import { VisRequestHandlersRegistryProvider } from '../registry/vis_request_handlers';
 import { VisResponseHandlersRegistryProvider } from '../registry/vis_response_handlers';
@@ -36,10 +54,13 @@ uiModules
         appState: '=?',
         uiState: '=?',
         timeRange: '=?',
+        filters: '=?',
+        query: '=?',
       },
       template: visualizeTemplate,
       link: async function ($scope, $el) {
         let destroyed = false;
+        let forceFetch = false;
         if (!$scope.savedObj) throw(`saved object was not provided to <visualize> directive`);
         if (!$scope.appState) $scope.appState = getAppState();
 
@@ -72,22 +93,22 @@ uiModules
           // fetching new data and rendering.
           if (!$scope.vis.initialized || !$scope.savedObj || destroyed) return;
 
-          // TODO: This should ALWAYS be passed into this component via the loader
-          // in the future. Unfortunately we need some refactoring in dashboard
-          // to make this working and correctly rerender, so for now we will either
-          // use the one passed in to us or look into the timefilter ourselfs (which
-          // will be removed in the future).
-          const timeRange = $scope.timeRange || timefilter.time;
-
-          $scope.vis.filters = { timeRange };
+          $scope.vis.filters = { timeRange: $scope.timeRange };
 
           const handlerParams = {
             appState: $scope.appState,
             uiState: $scope.uiState,
             queryFilter: queryFilter,
             searchSource: $scope.savedObj.searchSource,
-            timeRange: timeRange,
+            timeRange: $scope.timeRange,
+            filters: $scope.filters,
+            query: $scope.query,
+            forceFetch,
           };
+
+          // Reset forceFetch flag, since we are now executing our forceFetch in case it was true
+          forceFetch = false;
+
           // searchSource is only there for courier request handler
           requestHandler($scope.vis, handlerParams)
             .then(requestHandlerResponse => {
@@ -122,51 +143,27 @@ uiModules
             });
         }, 100);
 
-        //todo: clean this one up as well
         const handleVisUpdate = () => {
-          if ($scope.editorMode) {
+          if ($scope.appState.vis) {
             $scope.appState.vis = $scope.vis.getState();
             $scope.appState.save();
-          } else {
-            $scope.fetch();
           }
+          $scope.fetch();
         };
         $scope.vis.on('update', handleVisUpdate);
 
 
         const reload = () => {
-          $scope.vis.reload = true;
+          forceFetch = true;
           $scope.fetch();
         };
         $scope.vis.on('reload', reload);
         // auto reload will trigger this event
         $scope.$on('courier:searchRefresh', reload);
-        // dashboard will fire fetch event when it wants to refresh
-        $scope.$on('fetch', reload);
 
-
-
-        const handleQueryUpdate = ()=> {
-          $scope.fetch();
-        };
-        queryFilter.on('update', handleQueryUpdate);
-
-        if ($scope.appState) {
-          const stateMonitor = stateMonitorFactory.create($scope.appState);
-          stateMonitor.onChange((status, type, keys) => {
-            if (keys[0] === 'vis') {
-              if ($scope.appState.vis) $scope.vis.setState($scope.appState.vis);
-              $scope.fetch();
-            }
-            if ($scope.vis.type.requiresSearch && ['query', 'filters'].includes(keys[0])) {
-              $scope.fetch();
-            }
-          });
-
-          $scope.$on('$destroy', () => {
-            stateMonitor.destroy();
-          });
-        }
+        $scope.$watch('filters', $scope.fetch, true);
+        $scope.$watch('query', $scope.fetch, true);
+        $scope.$watch('timeRange', $scope.fetch, true);
 
         // Listen on uiState changes to start fetching new data again.
         // Some visualizations might need different data depending on their uiState,
@@ -174,16 +171,13 @@ uiModules
         // checking if anything changed, that actually require a new fetch or return
         // cached data otherwise.
         $scope.uiState.on('change', $scope.fetch);
-        resizeChecker.on('resize', $scope.fetch);
 
-        // visualize needs to know about timeFilter
-        $scope.$listen(timefilter, 'fetch', $scope.fetch);
+        resizeChecker.on('resize', $scope.fetch);
 
         $scope.$on('$destroy', () => {
           destroyed = true;
           $scope.vis.removeListener('reload', reload);
           $scope.vis.removeListener('update', handleVisUpdate);
-          queryFilter.off('update', handleQueryUpdate);
           $scope.uiState.off('change', $scope.fetch);
           resizeChecker.destroy();
         });

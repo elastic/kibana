@@ -6,7 +6,7 @@
 
 import { get, pluck, min, max, last } from 'lodash';
 import { filterPartialBuckets } from '../../../filter_partial_buckets';
-import { metrics, serializeMetric } from '../../../metrics';
+import { metrics } from '../../../metrics';
 
 function calcSlope(data) {
   const length = data.length;
@@ -85,7 +85,7 @@ function reduceMetric(metricName, metricBuckets, { min: startTime, max: endTime,
   const slope = calcSlope(mappedData) > 0 ? 1 : -1; // no need for the entire precison, it's just an up/down arrow
 
   return {
-    metric: serializeMetric(metric),
+    metric: metric.serialize(),
     summary: { minVal, maxVal, lastVal, slope }
   };
 }

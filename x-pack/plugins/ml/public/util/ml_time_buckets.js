@@ -6,17 +6,20 @@
 
 
 
-// custom TimeBuckets which inherits from the standrd kibana TimeBuckets
+// custom TimeBuckets which inherits from the standard kibana TimeBuckets
 // this adds the ability to override the barTarget and maxBars settings
 // allowing for a more granular visualization interval without having to
 // modify the global settings stored in the kibana config
 
 import _ from 'lodash';
 import moment from 'moment';
+import dateMath from '@kbn/datemath';
 
 import { TimeBucketsCalcAutoIntervalProvider } from 'plugins/ml/util/ml_calc_auto_interval';
 import { inherits } from 'plugins/ml/util/inherits';
-import { calcEsInterval } from 'ui/time_buckets/calc_es_interval';
+
+const unitsDesc = dateMath.unitsDesc;
+const largeMax = unitsDesc.indexOf('w');    // Multiple units of week or longer converted to days for ES intervals.
 
 import { TimeBuckets } from 'ui/time_buckets';
 export function IntervalHelperProvider(Private, timefilter, config) {
@@ -147,3 +150,39 @@ export function getBoundsRoundedToInterval(bounds, interval, inclusiveEnd = fals
   }
   return { min: moment(adjustedMinMs), max: moment(adjustedMaxMs) };
 }
+
+export function calcEsInterval(duration) {
+  // Converts a moment.duration into an Elasticsearch compatible interval expression,
+  // and provides associated metadata.
+
+  // Note this is a copy of Kibana's ui/time_buckets/calc_es_interval,
+  // but with the definition of a 'large' unit changed from 'M' to 'w',
+  // bringing it into line with the time units supported by Elasticsearch
+  for (let i = 0; i < unitsDesc.length; i++) {
+    const unit = unitsDesc[i];
+    const val = duration.as(unit);
+    // find a unit that rounds neatly
+    if (val >= 1 && Math.floor(val) === val) {
+
+      // if the unit is "large", like years, but isn't set to 1, ES will throw an error.
+      // So keep going until we get out of the "large" units.
+      if (i <= largeMax && val !== 1) {
+        continue;
+      }
+
+      return {
+        value: val,
+        unit: unit,
+        expression: val + unit
+      };
+    }
+  }
+
+  const ms = duration.as('ms');
+  return {
+    value: ms,
+    unit: 'ms',
+    expression: ms + 'ms'
+  };
+}
+

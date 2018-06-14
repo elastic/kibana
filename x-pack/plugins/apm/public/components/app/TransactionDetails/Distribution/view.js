@@ -13,7 +13,6 @@ import { HeaderSmall } from '../../../shared/UIComponents';
 import EmptyMessage from '../../../shared/EmptyMessage';
 import { getTimeFormatter, timeUnit } from '../../../../utils/formatters';
 import SamplingTooltip from './SamplingTooltip';
-import { getKey } from '../../../../store/apiHelpers';
 
 export function getFormattedBuckets(buckets, bucketSize) {
   if (!buckets) {
@@ -32,29 +31,7 @@ export function getFormattedBuckets(buckets, bucketSize) {
   });
 }
 
-function loadTransactionDistribution(props) {
-  const { serviceName, start, end, transactionName } = props.urlParams;
-  const key = getKey({ serviceName, start, end, transactionName });
-
-  if (key && props.distribution.key !== key) {
-    props.loadTransactionDistribution({
-      serviceName,
-      start,
-      end,
-      transactionName
-    });
-  }
-}
-
 class Distribution extends Component {
-  componentDidMount() {
-    loadTransactionDistribution(this.props);
-  }
-
-  componentWillReceiveProps(nextProps) {
-    loadTransactionDistribution(nextProps);
-  }
-
   formatYShort = t => {
     return `${t} ${unitShort(this.props.urlParams.transactionType)}`;
   };
@@ -67,11 +44,11 @@ class Distribution extends Component {
     const { location, distribution } = this.props;
 
     const buckets = getFormattedBuckets(
-      distribution.data.buckets,
-      distribution.data.bucketSize
+      distribution.buckets,
+      distribution.bucketSize
     );
 
-    const isEmpty = distribution.data.totalHits === 0;
+    const isEmpty = distribution.totalHits === 0;
     const xMax = d3.max(buckets, d => d.x);
     const timeFormatter = getTimeFormatter(xMax);
     const unit = timeUnit(xMax);
@@ -99,7 +76,7 @@ class Distribution extends Component {
         </HeaderSmall>
         <Histogram
           buckets={buckets}
-          bucketSize={distribution.data.bucketSize}
+          bucketSize={distribution.bucketSize}
           bucketIndex={bucketIndex}
           onClick={bucket => {
             if (bucket.sampled && bucket.y > 0) {
@@ -143,7 +120,9 @@ function unitLong(type, count) {
 }
 
 Distribution.propTypes = {
-  location: PropTypes.object.isRequired
+  urlParams: PropTypes.object.isRequired,
+  location: PropTypes.object.isRequired,
+  distribution: PropTypes.object
 };
 
 export default Distribution;

@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import moment from 'moment';
 
@@ -54,12 +73,18 @@ export class FilterUtils {
   }
 
   /**
-   * Converts the time to a string, if it isn't already.
+   * Converts the time to a utc formatted string. If the time is not valid (e.g. it might be in a relative format like
+   * 'now-15m', then it just returns what it was passed).
    * @param time {string|Moment}
-   * @returns {string}
+   * @returns {string} the time represented in utc format, or if the time range was not able to be parsed into a moment
+   * object, it returns the same object it was given.
    */
-  static convertTimeToString(time) {
-    return typeof time === 'string' ? time : moment(time).toString();
+  static convertTimeToUTCString(time) {
+    if (moment(time).isValid()) {
+      return moment(time).utc();
+    }  else {
+      return time;
+    }
   }
 
   /**
@@ -71,7 +96,7 @@ export class FilterUtils {
    * @returns {boolean}
    */
   static areTimesEqual(timeA, timeB) {
-    return this.convertTimeToString(timeA) === this.convertTimeToString(timeB);
+    return this.convertTimeToUTCString(timeA) === this.convertTimeToUTCString(timeB);
   }
 
   /**

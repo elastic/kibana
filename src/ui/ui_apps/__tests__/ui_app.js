@@ -1,11 +1,27 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import sinon from 'sinon';
 import expect from 'expect.js';
-import Chance from 'chance';
 
 import { UiApp } from '../ui_app';
 import { UiNavLink } from '../../ui_nav_links';
-
-const chance = new Chance();
 
 function createStubUiAppSpec(extraParams) {
   return {
@@ -18,11 +34,6 @@ function createStubUiAppSpec(extraParams) {
     linkToLastSubUrl: true,
     hidden: false,
     listed: false,
-    uses: [
-      'visTypes',
-      'chromeNavControls',
-      'hacks',
-    ],
     ...extraParams
   };
 }
@@ -30,13 +41,6 @@ function createStubUiAppSpec(extraParams) {
 function createStubKbnServer() {
   return {
     plugins: [],
-    uiExports: {
-      appExtensions: {
-        hacks: [
-          'plugins/foo/hack'
-        ]
-      }
-    },
     config: {
       get: sinon.stub()
         .withArgs('server.basePath')
@@ -129,7 +133,6 @@ describe('ui apps / UiApp', () => {
       it('includes main and hack modules', () => {
         expect(app.getModules()).to.eql([
           'main.js',
-          'plugins/foo/hack'
         ]);
       });
 
@@ -304,35 +307,6 @@ describe('ui apps / UiApp', () => {
     it('returns main module if not using appExtensions', () => {
       const app = createUiApp({ id: 'foo', main: 'bar' });
       expect(app.getModules()).to.eql(['bar']);
-    });
-
-    it('returns appExtensions for used types only, in alphabetical order, starting with main module', () => {
-      const kbnServer = createStubKbnServer();
-      kbnServer.uiExports.appExtensions = {
-        abc: chance.shuffle([
-          'a',
-          'b',
-          'c',
-        ]),
-        def: chance.shuffle([
-          'd',
-          'e',
-          'f',
-        ])
-      };
-
-      const appExtensionType = chance.shuffle(Object.keys(kbnServer.uiExports.appExtensions))[0];
-      const appSpec = {
-        id: 'foo',
-        main: 'bar',
-        uses: [appExtensionType],
-      };
-
-      const app = createUiApp(appSpec, kbnServer);
-      expect(app.getModules()).to.eql([
-        'bar',
-        ...appExtensionType.split(''),
-      ]);
     });
   });
 });

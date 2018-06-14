@@ -8,6 +8,10 @@ import d3 from 'd3';
 import 'ace';
 import rison from 'rison-node';
 
+// import the uiExports that we want to "use"
+import 'uiExports/fieldFormats';
+import 'uiExports/savedObjectTypes';
+
 import 'ui/autoload/all';
 import 'ui/directives/saved_object_finder';
 import chrome from 'ui/chrome';

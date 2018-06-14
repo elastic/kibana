@@ -31,7 +31,7 @@ Object {
           "html": "Your service \\"opbeans-node\\" has error groups which exceeds 10 occurrences within \\"24h\\"<br/><br/><br/><strong>this is a string</strong><br/>N/A<br/>7761 occurrences<br/><br/><strong>foo</strong><br/><anonymous> (server/coffee.js)<br/>7752 occurrences<br/><br/><strong>socket hang up</strong><br/>createHangUpError (_http_client.js)<br/>3887 occurrences<br/><br/><strong>this will not get captured by express</strong><br/><anonymous> (server/coffee.js)<br/>3886 occurrences<br/>",
         },
         "subject": "\\"opbeans-node\\" has error groups which exceeds the threshold",
-        "to": "my@email.dk",
+        "to": "my@email.dk,mySecond@email.dk",
       },
     },
     "log_error": Object {
@@ -128,6 +128,7 @@ Object {
   "metadata": Object {
     "emails": Array [
       "my@email.dk",
+      "mySecond@email.dk",
     ],
     "serviceName": "opbeans-node",
     "slackUrlPath": "/services/slackid1/slackid2/slackid3",

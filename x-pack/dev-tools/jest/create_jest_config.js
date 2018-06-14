@@ -12,12 +12,16 @@ export function createJestConfig({
     rootDir: xPackKibanaDirectory,
     roots: [
       "<rootDir>/plugins",
+      "<rootDir>/server",
     ],
     moduleFileExtensions: [
       "js",
-      "json"
+      "json",
+      "ts",
+      "tsx",
     ],
     moduleNameMapper: {
+      "^ui/(.*)": `${kibanaDirectory}/src/ui/public/$1`,
       "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$":
         `${kibanaDirectory}/src/dev/jest/mocks/file_mock.js`,
       "\\.(css|less|scss)$": `${kibanaDirectory}/src/dev/jest/mocks/style_mock.js`
@@ -27,10 +31,11 @@ export function createJestConfig({
       `<rootDir>/dev-tools/jest/setup/enzyme.js`
     ],
     testMatch: [
-      "**/*.test.js"
+      "**/*.test.{js,ts,tsx}"
     ],
     transform: {
-      "^.+\\.js$": `${kibanaDirectory}/src/dev/jest/babel_transform.js`
+      "^.+\\.js$": `${kibanaDirectory}/src/dev/jest/babel_transform.js`,
+      "^.+\\.tsx?$": `${kibanaDirectory}/src/dev/jest/ts_transform.js`,
     },
     transformIgnorePatterns: [
       "[/\\\\]node_modules[/\\\\].+\\.js$"

@@ -1,5 +1,5 @@
 {
-  "{index}/_alias/{name}": {
+  "indices.put_alias": {
     "data_autocomplete_rules": {
       "filter": {},
       "routing": "1",

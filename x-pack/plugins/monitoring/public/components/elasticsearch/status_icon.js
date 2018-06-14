@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { StatusIcon } from 'plugins/monitoring/components/status_icon';
+import { StatusIcon } from '../status_icon';
 
 export function ElasticsearchStatusIcon({ status }) {
   const type = (() => {

@@ -1,0 +1,16 @@
+{
+  "ingest.simulate": {
+    "url_params": {
+      "verbose": "__flag__"
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_ingest/pipeline/_simulate",
+      "_ingest/pipeline/{id}/_simulate"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/plugins/master/ingest.html"
+  }
+}

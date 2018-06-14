@@ -1,5 +1,5 @@
 {
-  "{index}/_shrink/{target}": {
+  "indices.shrink": {
     "url_params": {
       "timeout": "",
       "master_timeout": "",
@@ -11,6 +11,7 @@
     ],
     "patterns": [
       "{indices}/_shrink/{target}"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-shrink-index.html"
   }
 }

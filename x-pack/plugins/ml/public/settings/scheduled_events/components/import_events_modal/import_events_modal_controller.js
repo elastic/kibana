@@ -17,7 +17,6 @@ const module = uiModules.get('apps/ml');
 
 module.controller('MlImportEventsModal', function (
   $scope,
-  $q,
   $timeout,
   $modalInstance) {
 
@@ -67,7 +66,7 @@ module.controller('MlImportEventsModal', function (
   };
 
   function readFile(file) {
-    return $q((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       $scope.loadingLock = true;
 
       if (file && file.size) {

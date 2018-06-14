@@ -12,7 +12,7 @@ import {
 } from '../../../../common/constants';
 
 async function getSpans({ transactionId, setup }) {
-  const { start, end, client, config } = setup;
+  const { start, end, esFilterQuery, client, config } = setup;
 
   const params = {
     index: config.get('xpack.apm.indexPattern'),
@@ -21,6 +21,8 @@ async function getSpans({ transactionId, setup }) {
       query: {
         bool: {
           filter: [
+            { term: { [TRANSACTION_ID]: transactionId } },
+            { term: { [PROCESSOR_EVENT]: 'span' } },
             {
               range: {
                 '@timestamp': {
@@ -29,9 +31,7 @@ async function getSpans({ transactionId, setup }) {
                   format: 'epoch_millis'
                 }
               }
-            },
-            { term: { [TRANSACTION_ID]: transactionId } },
-            { term: { [PROCESSOR_EVENT]: 'span' } }
+            }
           ]
         }
       },
@@ -46,6 +46,10 @@ async function getSpans({ transactionId, setup }) {
       }
     }
   };
+
+  if (esFilterQuery) {
+    params.body.query.bool.filter.push(esFilterQuery);
+  }
 
   const resp = await client('search', params);
   return {

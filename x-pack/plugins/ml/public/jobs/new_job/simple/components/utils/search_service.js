@@ -8,86 +8,85 @@
 
 import _ from 'lodash';
 
-import { ML_RESULTS_INDEX_PATTERN } from 'plugins/ml/constants/index_patterns';
+import { ML_RESULTS_INDEX_PATTERN } from 'plugins/ml/../common/constants/index_patterns';
 import { escapeForElasticsearchQuery } from 'plugins/ml/util/string_utils';
+import { ml } from 'plugins/ml/services/ml_api_service';
 
-export function SimpleJobSearchServiceProvider($q, es) {
-  // detector swimlane search
-  function getScoresByRecord(jobId, earliestMs, latestMs, interval, firstSplitField) {
-    return $q((resolve, reject) => {
-      const obj = {
-        success: true,
-        results: {}
-      };
+// detector swimlane search
+function getScoresByRecord(jobId, earliestMs, latestMs, interval, firstSplitField) {
+  return new Promise((resolve, reject) => {
+    const obj = {
+      success: true,
+      results: {}
+    };
 
-      let jobIdFilterStr = 'job_id: ' + jobId;
-      if (firstSplitField && firstSplitField.value !== undefined) {
-        // Escape any reserved characters for the query_string query,
-        // wrapping the value in quotes to do a phrase match.
-        // Backslash is a special character in JSON strings, so doubly escape
-        // any backslash characters which exist in the field value.
-        jobIdFilterStr += ` AND ${escapeForElasticsearchQuery(firstSplitField.name)}:`;
-        jobIdFilterStr += `"${String(firstSplitField.value).replace(/\\/g, '\\\\')}"`;
-      }
+    let jobIdFilterStr = 'job_id: ' + jobId;
+    if (firstSplitField && firstSplitField.value !== undefined) {
+      // Escape any reserved characters for the query_string query,
+      // wrapping the value in quotes to do a phrase match.
+      // Backslash is a special character in JSON strings, so doubly escape
+      // any backslash characters which exist in the field value.
+      jobIdFilterStr += ` AND ${escapeForElasticsearchQuery(firstSplitField.name)}:`;
+      jobIdFilterStr += `"${String(firstSplitField.value).replace(/\\/g, '\\\\')}"`;
+    }
 
-      es.search({
-        index: ML_RESULTS_INDEX_PATTERN,
-        size: 0,
-        body: {
-          query: {
-            bool: {
-              filter: [{
-                query_string: {
-                  query: 'result_type:record'
-                }
-              }, {
-                bool: {
-                  must: [{
-                    range: {
-                      timestamp: {
-                        gte: earliestMs,
-                        lte: latestMs,
-                        format: 'epoch_millis'
-                      }
+    ml.esSearch({
+      index: ML_RESULTS_INDEX_PATTERN,
+      size: 0,
+      body: {
+        query: {
+          bool: {
+            filter: [{
+              query_string: {
+                query: 'result_type:record'
+              }
+            }, {
+              bool: {
+                must: [{
+                  range: {
+                    timestamp: {
+                      gte: earliestMs,
+                      lte: latestMs,
+                      format: 'epoch_millis'
                     }
-                  }, {
-                    query_string: {
-                      query: jobIdFilterStr
-                    }
-                  }]
-                }
-              }]
-            }
-          },
-          aggs: {
-            detector_index: {
-              terms: {
-                field: 'detector_index',
-                order: {
-                  recordScore: 'desc'
+                  }
+                }, {
+                  query_string: {
+                    query: jobIdFilterStr
+                  }
+                }]
+              }
+            }]
+          }
+        },
+        aggs: {
+          detector_index: {
+            terms: {
+              field: 'detector_index',
+              order: {
+                recordScore: 'desc'
+              }
+            },
+            aggs: {
+              recordScore: {
+                max: {
+                  field: 'record_score'
                 }
               },
-              aggs: {
-                recordScore: {
-                  max: {
-                    field: 'record_score'
+              byTime: {
+                date_histogram: {
+                  field: 'timestamp',
+                  interval: interval,
+                  min_doc_count: 1,
+                  extended_bounds: {
+                    min: earliestMs,
+                    max: latestMs
                   }
                 },
-                byTime: {
-                  date_histogram: {
-                    field: 'timestamp',
-                    interval: interval,
-                    min_doc_count: 1,
-                    extended_bounds: {
-                      min: earliestMs,
-                      max: latestMs
-                    }
-                  },
-                  aggs: {
-                    recordScore: {
-                      max: {
-                        field: 'record_score'
-                      }
+                aggs: {
+                  recordScore: {
+                    max: {
+                      field: 'record_score'
                     }
                   }
                 }
@@ -95,73 +94,74 @@ export function SimpleJobSearchServiceProvider($q, es) {
             }
           }
         }
-      })
-        .then((resp) => {
-          const detectorsByIndex = _.get(resp, ['aggregations', 'detector_index', 'buckets'], []);
-          _.each(detectorsByIndex, (dtr) => {
-            const dtrResults = {};
-            const dtrIndex = +dtr.key;
+      }
+    })
+      .then((resp) => {
+        const detectorsByIndex = _.get(resp, ['aggregations', 'detector_index', 'buckets'], []);
+        _.each(detectorsByIndex, (dtr) => {
+          const dtrResults = {};
+          const dtrIndex = +dtr.key;
 
-            const buckets = _.get(dtr, ['byTime', 'buckets'], []);
-            for (let j = 0; j < buckets.length; j++) {
-              const bkt = buckets[j];
-              const time = bkt.key;
-              dtrResults[time] = {
-                recordScore: _.get(bkt, ['recordScore', 'value']),
-              };
-            }
-            obj.results[dtrIndex] = dtrResults;
-          });
-
-          resolve(obj);
-        })
-        .catch((resp) => {
-          reject(resp);
+          const buckets = _.get(dtr, ['byTime', 'buckets'], []);
+          for (let j = 0; j < buckets.length; j++) {
+            const bkt = buckets[j];
+            const time = bkt.key;
+            dtrResults[time] = {
+              recordScore: _.get(bkt, ['recordScore', 'value']),
+            };
+          }
+          obj.results[dtrIndex] = dtrResults;
         });
-    });
-  }
 
-  function getCategoryFields(index, field, size, query) {
-    return $q((resolve, reject) => {
-      const obj = {
-        success: true,
-        results: {}
-      };
+        resolve(obj);
+      })
+      .catch((resp) => {
+        reject(resp);
+      });
+  });
+}
 
-      es.search({
-        index,
-        size: 0,
-        body: {
-          query: query,
-          aggs: {
-            catFields: {
-              terms: {
-                field: field,
-                size: size
-              }
+function getCategoryFields(index, field, size, query) {
+  return new Promise((resolve, reject) => {
+    const obj = {
+      success: true,
+      results: {}
+    };
+
+    ml.esSearch({
+      index,
+      size: 0,
+      body: {
+        query: query,
+        aggs: {
+          catFields: {
+            terms: {
+              field: field,
+              size: size
             }
           }
         }
-      })
-        .then((resp) => {
-          obj.results.values  = [];
-          const catFields = _.get(resp, ['aggregations', 'catFields', 'buckets'], []);
-          _.each(catFields, (f) => {
-            obj.results.values.push(f.key);
-          });
-
-          resolve(obj);
-        })
-        .catch((resp) => {
-          reject(resp);
+      }
+    })
+      .then((resp) => {
+        obj.results.values  = [];
+        const catFields = _.get(resp, ['aggregations', 'catFields', 'buckets'], []);
+        _.each(catFields, (f) => {
+          obj.results.values.push(f.key);
         });
 
-    });
-  }
+        resolve(obj);
+      })
+      .catch((resp) => {
+        reject(resp);
+      });
 
-  return {
-    getScoresByRecord,
-    getCategoryFields
-  };
-
+  });
 }
+
+export const mlSimpleJobSearchService = {
+  getScoresByRecord,
+  getCategoryFields
+};
+
+

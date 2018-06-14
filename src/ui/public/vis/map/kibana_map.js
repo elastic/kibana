@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { EventEmitter } from 'events';
 import L from 'leaflet';
 import $ from 'jquery';
@@ -353,48 +372,11 @@ export class KibanaMap extends EventEmitter {
     return _.min([distanceX, distanceY]);
   }
 
-  getBounds() {
-
-    const bounds = this._leafletMap.getBounds();
-    if (!bounds) {
-      return null;
-    }
-
-    const southEast = bounds.getSouthEast();
-    const northWest = bounds.getNorthWest();
-    let southEastLng = southEast.lng;
-    if (southEastLng > 180) {
-      southEastLng -= 360;
-    }
-    let northWestLng = northWest.lng;
-    if (northWestLng < -180) {
-      northWestLng += 360;
-    }
-
-    const southEastLat = southEast.lat;
-    const northWestLat = northWest.lat;
-
-    //Bounds cannot be created unless they form a box with larger than 0 dimensions
-    //Invalid areas are rejected by ES.
-    if (southEastLat === northWestLat || southEastLng === northWestLng) {
-      return;
-    }
-
-    return {
-      bottom_right: {
-        lat: southEastLat,
-        lon: southEastLng
-      },
-      top_left: {
-        lat: northWestLat,
-        lon: northWestLng
-      }
-    };
-  }
-
   _getLeafletBounds(resizeOnFail) {
 
-    const bounds = this._leafletMap.getBounds();
+    const boundsRaw = this._leafletMap.getBounds();
+    const bounds = this._leafletMap.wrapLatLngBounds(boundsRaw);
+
     if (!bounds) {
       return null;
     }
@@ -416,7 +398,8 @@ export class KibanaMap extends EventEmitter {
     }
   }
 
-  getUntrimmedBounds() {
+  getBounds() {
+
     const bounds = this._getLeafletBounds(true);
     if (!bounds) {
       return null;
@@ -664,14 +647,14 @@ export class KibanaMap extends EventEmitter {
       if (!centerFromUIState || centerFromMap.lon !== centerFromUIState[1] || centerFromMap.lat !== centerFromUIState[0]) {
         visualization.uiStateVal('mapCenter', [centerFromMap.lat, centerFromMap.lon]);
       }
-      visualization.sessionState.mapBounds = this.getUntrimmedBounds();
+      visualization.sessionState.mapBounds = this.getBounds();
     }
 
     this._leafletMap.on('resize', () => {
-      visualization.sessionState.mapBounds = this.getUntrimmedBounds();
+      visualization.sessionState.mapBounds = this.getBounds();
     });
     this._leafletMap.on('load', () => {
-      visualization.sessionState.mapBounds = this.getUntrimmedBounds();
+      visualization.sessionState.mapBounds = this.getBounds();
     });
     this.on('dragend', persistMapStateInUiState);
     this.on('zoomend', persistMapStateInUiState);

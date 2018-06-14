@@ -6,7 +6,7 @@
 
 import { uiModules } from 'ui/modules'; // eslint-disable-line no-unused-vars
 import chrome from 'ui/chrome';
-import React from 'react';
+import React, { Fragment } from 'react';
 import { Provider } from 'react-redux';
 import { Router } from 'react-router-dom';
 import ReactDOM from 'react-dom';
@@ -21,6 +21,8 @@ import Breadcrumbs from './components/app/Main/Breadcrumbs';
 
 import { initTimepicker } from './utils/timepicker';
 import configureStore from './store/config/configureStore';
+import GlobalProgess from './components/app/Main/GlobalProgess';
+import LicenseChecker from './components/app/Main/LicenseChecker';
 
 import { history } from './utils/url';
 
@@ -38,9 +40,13 @@ initTimepicker(history, store.dispatch, () => {
 
   ReactDOM.render(
     <Provider store={store}>
-      <Router history={history}>
-        <Main />
-      </Router>
+      <Fragment>
+        <GlobalProgess />
+        <LicenseChecker />
+        <Router history={history}>
+          <Main />
+        </Router>
+      </Fragment>
     </Provider>,
     document.getElementById('react-apm-root')
   );

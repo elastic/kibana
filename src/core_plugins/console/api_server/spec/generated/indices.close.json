@@ -1,5 +1,5 @@
 {
-  "{index}/_close": {
+  "indices.close": {
     "url_params": {
       "timeout": "",
       "master_timeout": "",
@@ -17,6 +17,7 @@
     ],
     "patterns": [
       "{indices}/_close"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-open-close.html"
   }
 }

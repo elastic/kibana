@@ -12,7 +12,6 @@ import './status_icon';
 import './cluster/overview';
 import './cluster/listing';
 import './elasticsearch/cluster_status';
-import './elasticsearch/index_listing';
 import './elasticsearch/index_summary';
 import './elasticsearch/node_summary';
 import './elasticsearch/ml_job_listing';

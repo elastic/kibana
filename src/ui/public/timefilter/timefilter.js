@@ -1,11 +1,30 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import moment from 'moment';
-import dateMath from '@kbn/datemath';
+import { calculateBounds, getTime } from './get_time';
 import '../state_management/global_state';
 import '../config';
 import { EventsProvider } from '../events';
-import { TimefilterLibDiffTimeProvider } from './lib/diff_time';
-import { TimefilterLibDiffIntervalProvider } from './lib/diff_interval';
+import { diffTimeFactory } from './lib/diff_time';
+import { diffIntervalFactory } from './lib/diff_interval';
 import uiRoutes from '../routes';
 import { uiModules } from '../modules';
 import { createLegacyClass } from '../utils/legacy_class';
@@ -30,8 +49,8 @@ uiModules
       Timefilter.Super.call(this);
 
       const self = this;
-      const diffTime = Private(TimefilterLibDiffTimeProvider)(self);
-      const diffInterval = Private(TimefilterLibDiffIntervalProvider)(self);
+      const diffTime = diffTimeFactory(self);
+      const diffInterval = diffIntervalFactory(self);
 
       self.isTimeRangeSelectorEnabled = false;
       self.isAutoRefreshSelectorEnabled = false;
@@ -79,33 +98,6 @@ uiModules
       $rootScope.$apply();
     };
 
-    Timefilter.prototype.get = function (indexPattern, timeRange) {
-
-      if (!indexPattern) {
-      //in CI, we sometimes seem to fail here.
-        return;
-      }
-
-      let filter;
-      const timefield = indexPattern.timeFieldName && _.find(indexPattern.fields, { name: indexPattern.timeFieldName });
-
-      if (timefield) {
-        const bounds = timeRange ? this.calculateBounds(timeRange) : this.getBounds();
-        filter = { range: {} };
-        filter.range[timefield.name] = {
-          gte: bounds.min.valueOf(),
-          lte: bounds.max.valueOf(),
-          format: 'epoch_millis'
-        };
-      }
-
-      return filter;
-    };
-
-    Timefilter.prototype.getBounds = function () {
-      return this.calculateBounds(this.time);
-    };
-
     Timefilter.prototype.getForceNow = function () {
       const query = $location.search().forceNow;
       if (!query) {
@@ -119,13 +111,16 @@ uiModules
       return new Date(ticks);
     };
 
-    Timefilter.prototype.calculateBounds = function (timeRange) {
-      const forceNow = this.getForceNow();
+    Timefilter.prototype.get = function (indexPattern, timeRange) {
+      return getTime(indexPattern, timeRange ? timeRange : this.time, this.getForceNow());
+    };
 
-      return {
-        min: dateMath.parse(timeRange.from, { forceNow }),
-        max: dateMath.parse(timeRange.to, { roundUp: true, forceNow })
-      };
+    Timefilter.prototype.calculateBounds = function (timeRange) {
+      return calculateBounds(timeRange, { forceNow: this.getForceNow() });
+    };
+
+    Timefilter.prototype.getBounds = function () {
+      return this.calculateBounds(this.time);
     };
 
     Timefilter.prototype.getActiveBounds = function () {

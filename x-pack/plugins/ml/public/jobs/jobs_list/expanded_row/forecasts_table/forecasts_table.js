@@ -27,6 +27,7 @@ import chrome from 'ui/chrome';
 
 import { FORECAST_REQUEST_STATE } from 'plugins/ml/../common/constants/states';
 import { addItemToRecentlyAccessed } from 'plugins/ml/util/recently_accessed';
+import { mlForecastService } from 'plugins/ml/services/forecast_service';
 
 const MAX_FORECASTS = 500;
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
@@ -47,7 +48,7 @@ class ForecastsTable extends Component {
     const dataCounts = this.props.job.data_counts;
     if (dataCounts.processed_record_count > 0) {
       // Get the list of all the forecasts with results at or later than the specified 'from' time.
-      this.props.mlForecastService.getForecastsSummary(
+      mlForecastService.getForecastsSummary(
         this.props.job,
         null,
         dataCounts.earliest_record_timestamp,
@@ -247,7 +248,6 @@ class ForecastsTable extends Component {
 }
 ForecastsTable.propTypes = {
   job: PropTypes.object.isRequired,
-  mlForecastService: PropTypes.object.isRequired
 };
 
 export { ForecastsTable };

@@ -1,37 +1,33 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import React from 'react';
 import sinon from 'sinon';
 import { mount, shallow } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { getIndexPatternMock } from './__tests__/get_index_pattern_mock';
+import { getIndexPatternsMock } from './__tests__/get_index_patterns_mock';
 
 import {
   ListControlEditor,
 } from './list_control_editor';
 
-const getIndexPatterns = () => {
-  return Promise.resolve([
-    {
-      id: 'indexPattern1',
-      attributes: {
-        title: 'indexPattern1'
-      }
-    },
-    {
-      id: 'indexPattern2',
-      attributes: {
-        title: 'indexPattern2'
-      }
-    }
-  ]);
-};
-const getIndexPattern = () => {
-  return Promise.resolve({
-    fields: [
-      { name: 'keywordField', type: 'string', aggregatable: true },
-      { name: 'textField', type: 'string', aggregatable: false },
-      { name: 'numberField', type: 'number', aggregatable: true }
-    ]
-  });
-};
 const controlParams = {
   id: '1',
   indexPattern: 'indexPattern1',
@@ -58,8 +54,8 @@ beforeEach(() => {
 
 test('renders ListControlEditor', () => {
   const component = shallow(<ListControlEditor
-    getIndexPatterns={getIndexPatterns}
-    getIndexPattern={getIndexPattern}
+    getIndexPatterns={getIndexPatternsMock}
+    getIndexPattern={getIndexPatternMock}
     controlIndex={0}
     controlParams={controlParams}
     handleFieldNameChange={handleFieldNameChange}
@@ -78,8 +74,8 @@ test('parentCandidates', () => {
     { value: '2', text: 'fieldB' }
   ];
   const component = shallow(<ListControlEditor
-    getIndexPatterns={getIndexPatterns}
-    getIndexPattern={getIndexPattern}
+    getIndexPatterns={getIndexPatternsMock}
+    getIndexPattern={getIndexPatternMock}
     controlIndex={0}
     controlParams={controlParams}
     handleFieldNameChange={handleFieldNameChange}
@@ -94,8 +90,8 @@ test('parentCandidates', () => {
 
 test('handleCheckboxOptionChange - multiselect', () => {
   const component = mount(<ListControlEditor
-    getIndexPatterns={getIndexPatterns}
-    getIndexPattern={getIndexPattern}
+    getIndexPatterns={getIndexPatternsMock}
+    getIndexPattern={getIndexPatternMock}
     controlIndex={0}
     controlParams={controlParams}
     handleFieldNameChange={handleFieldNameChange}
@@ -126,8 +122,8 @@ test('handleCheckboxOptionChange - multiselect', () => {
 
 test('handleNumberOptionChange - size', () => {
   const component = mount(<ListControlEditor
-    getIndexPatterns={getIndexPatterns}
-    getIndexPattern={getIndexPattern}
+    getIndexPatterns={getIndexPatternsMock}
+    getIndexPattern={getIndexPatternMock}
     controlIndex={0}
     controlParams={controlParams}
     handleFieldNameChange={handleFieldNameChange}

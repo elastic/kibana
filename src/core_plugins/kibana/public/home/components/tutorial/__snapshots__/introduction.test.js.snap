@@ -4,6 +4,7 @@ exports[`props exportedFieldsUrl 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
   component="div"
+  direction="row"
   gutterSize="l"
   justifyContent="flexStart"
   responsive={true}
@@ -54,6 +55,7 @@ exports[`props iconType 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
   component="div"
+  direction="row"
   gutterSize="l"
   justifyContent="flexStart"
   responsive={true}
@@ -97,6 +99,7 @@ exports[`props previewUrl 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
   component="div"
+  direction="row"
   gutterSize="l"
   justifyContent="flexStart"
   responsive={true}
@@ -140,6 +143,7 @@ exports[`render 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
   component="div"
+  direction="row"
   gutterSize="l"
   justifyContent="flexStart"
   responsive={true}
