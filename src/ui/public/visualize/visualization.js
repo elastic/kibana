@@ -67,8 +67,8 @@ export class Visualization extends Component {
   };
 
   static getDerivedStateFromProps(props, prevState) {
-    const listenOnChangeChanged = props.listenOnChange !== prevState.listenOnChange;
-    const uiStateChanged = props.uiState !== props.vis.getUiState();
+    const listenOnChangeChanged = props.listenOnChange && props.listenOnChange !== prevState.listenOnChange;
+    const uiStateChanged = props.uiState && props.uiState !== props.vis.getUiState();
     if (listenOnChangeChanged || uiStateChanged) {
       throw new Error('Changing listenOnChange or uiState props is not allowed!');
     }
