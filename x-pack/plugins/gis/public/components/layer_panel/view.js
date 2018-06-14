@@ -22,76 +22,65 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 
+export function LayerPanel({
+  cancelLayerPanel,
+  saveLayerEdits,
+  selectedLayer
+}) {
+  return (
+    <EuiFlyout onClose={cancelLayerPanel} style={{ maxWidth: 768 }}>
+      <EuiFlyoutHeader>
+        <EuiTitle size="l">
+          <h2>{selectedLayer.getLayerName()}</h2>
+        </EuiTitle>
+        <EuiSpacer size="m"/>
+        <EuiTextColor color="subdued">
+          <EuiText size="s">
+            <p className="layerSettings__type">{selectedLayer.renderSmallLegend()} {selectedLayer.getType()}</p>
+          </EuiText>
+        </EuiTextColor>
+        <EuiSpacer />
+        <EuiHorizontalRule margin="none"/>
+      </EuiFlyoutHeader>
 
-export class LayerPanel extends React.Component {
+      <EuiFlyoutBody style={{ paddingTop: 0 }}>
+        <EuiSpacer size="l"/>
+        styling + analytics
+      </EuiFlyoutBody>
 
-  constructor() {
-    super();
-  }
-
-  render() {
-
-    return (
-      <EuiFlyout onClose={this.props.onCancel} style={{ maxWidth: 768 }}>
-        <EuiFlyoutHeader>
-          <EuiTitle size="l">
-            <h2>{this.props.layer.getLayerName()}</h2>
-          </EuiTitle>
-          <EuiSpacer size="m"/>
-          <EuiTextColor color="subdued">
-            <EuiText size="s">
-              <p className="layerSettings__type">{this.props.layer.renderSmallLegend()} {this.props.layer.getType()}</p>
-            </EuiText>
-          </EuiTextColor>
-          <EuiSpacer />
-          <EuiHorizontalRule margin="none"/>
-        </EuiFlyoutHeader>
-
-        <EuiFlyoutBody style={{ paddingTop: 0 }}>
-          <EuiSpacer size="l"/>
-         styling + analytics
-        </EuiFlyoutBody>
-
-        <EuiFlyoutFooter>
-          <EuiFlexGroup responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                onClick={this.props.onCancel}
-                flush="left"
-              >
-                Cancel
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiSpacer />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                color="danger"
-                onClick={() => this.props.removeLayer(this.props.layer)}
-                flush="right"
-              >
-                Remove layer
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                iconType="check"
-                onClick={this.props.saveLayerEdits}
-                fill
-              >
-                Save &amp; Close
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
-      </EuiFlyout>
-
-    );
-
-
-  }
-
-
-
+      <EuiFlyoutFooter>
+        <EuiFlexGroup responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              onClick={cancelLayerPanel}
+              flush="left"
+            >
+              Cancel
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiSpacer />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              color="danger"
+              onClick={() => this.props.removeLayer(selectedLayer)}
+              flush="right"
+            >
+              Remove layer
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              iconType="check"
+              onClick={saveLayerEdits}
+              fill
+            >
+              Save &amp; Close
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
+  );
 }
