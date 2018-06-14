@@ -52,6 +52,10 @@ export class FilterManager {
     throw new Error('Must implement getValueFromFilterBar.');
   }
 
+  setUnsetValue(unsetValue) {
+    this.unsetValue = unsetValue;
+  }
+
   getUnsetValue() {
     return this.unsetValue;
   }

@@ -74,7 +74,7 @@ class RangeControl extends Control {
     if (!minMaxReturnedFromAggregation) {
       this.disable(noValuesDisableMsg(fieldName, indexPattern.title));
     } else {
-      this.unsetValue = { min: min, max: min };
+      this.setUnsetValue({ min: min, max: min });
       this.min = min;
       this.max = max;
       this.enable = true;

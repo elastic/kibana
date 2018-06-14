@@ -133,6 +133,14 @@ export class Control {
     return this._kbnFilter;
   }
 
+  setUnsetValue(unsetValue) {
+    const hasValue = this.hasValue();
+    this.filterManager.setUnsetValue(unsetValue);
+    if (!hasValue) {
+      this.reset();
+    }
+  }
+
   hasValue() {
     return !_.isEqual(this.value, this.filterManager.getUnsetValue());
   }
