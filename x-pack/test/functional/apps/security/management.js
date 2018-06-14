@@ -133,11 +133,12 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.settings.clickLinkText('kibana_dashboard_only_user');
           const currentUrl = await remote.getCurrentUrl();
           expect(currentUrl).to.contain(EDIT_ROLES_PATH);
-
-          await PageObjects.header.waitUntilLoadingHasFinished();
         });
 
         it('Reserved roles are not editable', async () => {
+          // wait for role tab to finish loading from previous test
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
           const allInputs = await find.allByCssSelector('input');
           for (let i = 0; i < allInputs.length; i++) {
             const input = allInputs[i];
