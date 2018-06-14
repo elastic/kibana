@@ -5,5 +5,5 @@
  */
 
 
-
-import './select_severity.js';
+import './select_severity_directive';
+import './styles/main.less';
