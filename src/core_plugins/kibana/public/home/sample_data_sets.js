@@ -77,7 +77,7 @@ export async function installSampleDataSet(id, name, defaultIndex, getConfig, se
   clearIndexPatternsCache();
 
   toastNotifications.addSuccess({
-    title: `${name} sample data set successfully installed`,
+    title: `Sample ${name} data set installed`,
     ['data-test-subj']: 'sampleDataSetInstallToast'
   });
 }
