@@ -10,9 +10,11 @@ import { DEFAULT_SPACE_ID } from '../../common/constants';
 export async function createDefaultSpace(server) {
   const { callWithInternalUser: callCluster } = getClient(server);
 
-  const savedObjectsClient = server.savedObjectsClientFactory({ callCluster });
+  const { getSavedObjectsRepository, SavedObjectsClient } = server.savedObjects;
 
-  const defaultSpaceExists = await doesDefaultSpaceExist(savedObjectsClient);
+  const savedObjectsRepository = getSavedObjectsRepository(callCluster);
+
+  const defaultSpaceExists = await doesDefaultSpaceExist(SavedObjectsClient, savedObjectsRepository);
 
   if (defaultSpaceExists) {
     return;
@@ -22,7 +24,7 @@ export async function createDefaultSpace(server) {
     id: DEFAULT_SPACE_ID
   };
 
-  await savedObjectsClient.create('space', {
+  await savedObjectsRepository.create('space', {
     name: 'Default Space',
     description: 'This is your Default Space!',
     urlContext: '',
@@ -30,12 +32,12 @@ export async function createDefaultSpace(server) {
   }, options);
 }
 
-async function doesDefaultSpaceExist(savedObjectsClient) {
+async function doesDefaultSpaceExist(SavedObjectsClient, savedObjectsRepository) {
   try {
-    await savedObjectsClient.get('space', DEFAULT_SPACE_ID);
+    await savedObjectsRepository.get('space', DEFAULT_SPACE_ID);
     return true;
   } catch (e) {
-    if (savedObjectsClient.errors.isNotFoundError(e)) {
+    if (SavedObjectsClient.errors.isNotFoundError(e)) {
       return false;
     }
     throw e;
