@@ -13,7 +13,7 @@ export async function getAvgResponseTimeAnomalies({
   setup
 }) {
   const { start, end, client } = setup;
-  const { intervalString } = getBucketSize(start, end, 'auto');
+  const { intervalString, bucketSize } = getBucketSize(start, end, 'auto');
 
   const params = {
     index: `.ml-anomalies-${serviceName}-${transactionType}-high_mean_response_time`,
@@ -81,13 +81,13 @@ export async function getAvgResponseTimeAnomalies({
       };
     });
 
-  const bucketSpanInSeconds = get(
+  const anomalyBucketSpan = get(
     resp,
     'aggregations.top_hits.hits.hits[0]._source.bucket_span'
   );
 
   return {
-    bucketSpanInSeconds,
+    bucketSpanInSeconds: Math.max(bucketSize, anomalyBucketSpan),
     buckets
   };
 }

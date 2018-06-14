@@ -160,11 +160,13 @@ function getChartValues(dates = [], buckets = []) {
   }));
 }
 
-function getAnomalyScore(dates = [], buckets = [], bucketSpanInSeconds) {
+export function getAnomalyScore(dates = [], buckets = [], bucketSpanInSeconds) {
   const ANOMALY_THRESHOLD = 75;
+  const getX = (currentX, i) => currentX + bucketSpanInSeconds * 1000 * i;
+
   return dates
     .map((x, i) => {
-      const anomalyScore = get(buckets[i], 'anomalyScore');
+      const { anomalyScore } = buckets[i] || {};
       return {
         x,
         anomalyScore
@@ -172,12 +174,16 @@ function getAnomalyScore(dates = [], buckets = [], bucketSpanInSeconds) {
     })
     .filter(p => p.anomalyScore > ANOMALY_THRESHOLD)
     .reduce((acc, p, i, points) => {
-      acc.push({ x: p.x });
-      const nextX = get(points, `${i + 1}.x`);
-      const endX = p.x + bucketSpanInSeconds * 1000;
+      acc.push({ x: p.x, y: 1 });
+      const { x: nextX } = points[i + 1] || {};
+      const endX = getX(p.x, 1);
       if (nextX == null || nextX > endX) {
         acc.push({
-          x: endX
+          x: endX,
+          y: 1
+        });
+        acc.push({
+          x: getX(p.x, 2)
         });
       }
 

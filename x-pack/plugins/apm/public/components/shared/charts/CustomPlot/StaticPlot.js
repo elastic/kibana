@@ -58,7 +58,7 @@ class StaticPlot extends PureComponent {
         const data = serie.data.map(p => ({
           x: p.x,
           y0: 0,
-          y: yMax
+          y: p.y ? yMax : null
         }));
 
         return (
