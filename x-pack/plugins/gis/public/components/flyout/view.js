@@ -92,7 +92,7 @@ export class FlyOut extends React.Component {
           <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                onClick={this.props.toggleFlyout}
+                onClick={this.props.closeFlyout}
                 flush="left"
               >
                 Cancel
@@ -108,8 +108,8 @@ export class FlyOut extends React.Component {
   }
 
   render() {
-    const { flyoutOpen } = this.props;
-    return (flyoutOpen ? this._renderFlyout() : null);
+    const { flyoutVisible } = this.props;
+    return (flyoutVisible ? this._renderFlyout() : null);
   }
 }
 

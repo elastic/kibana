@@ -6,16 +6,16 @@
 
 import { connect } from 'react-redux';
 import { FlyOut } from './view';
-import { getFlyoutOpen, toggleFlyout } from '../../store/ui';
+import { getFlyoutDisplay, updateFlyout, FLYOUT_STATE } from '../../store/ui';
 
 function mapStateToProps(state = {}) {
   return {
-    flyoutOpen: getFlyoutOpen(state)
+    flyoutVisible: getFlyoutDisplay(state) !== FLYOUT_STATE.NONE
   };
 }
 
 const mapDispatchToProps = {
-  toggleFlyout
+  closeFlyout: () => updateFlyout(FLYOUT_STATE.NONE)
 };
 
 const connectedFlyOut = connect(mapStateToProps, mapDispatchToProps, null, { withRef: true })(FlyOut);
