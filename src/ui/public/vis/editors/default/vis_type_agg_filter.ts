@@ -24,6 +24,10 @@ import { propFilter } from '../../../filters/_prop_filter';
 
 const filterByName = propFilter('name');
 
+/**
+ * This filter checks the defined aggFilter in the schemas of that visualization
+ * and limits available aggregations based on that.
+ */
 aggTypeFilters.register((aggType: AggType, vis: Vis, aggConfig: AggConfig) => {
   return filterByName([aggType], aggConfig.schema.aggFilter).length === 1;
 });
