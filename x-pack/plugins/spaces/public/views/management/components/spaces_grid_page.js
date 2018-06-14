@@ -20,29 +20,15 @@ import {
 } from '@elastic/eui';
 
 import { PageHeader } from './page_header';
-import { SpacesDataStore } from '../lib/spaces_data_store';
 import { DeleteSpacesButton } from './delete_spaces_button';
-
+import { isReservedSpace } from '../../../../common';
 
 export class SpacesGridPage extends Component {
   state = {
     selectedSpaces: [],
-    displayedSpaces: [],
     spaces: [],
-    loading: true,
-    searchCriteria: '',
-    pagination: {
-      pageIndex: 0,
-      pageSize: 10,
-      totalItemCount: 0,
-      pageSizeOptions: [10, 25, 50]
-    }
+    loading: true
   };
-
-  constructor(props) {
-    super(props);
-    this.dataStore = new SpacesDataStore();
-  }
 
   componentDidMount() {
     this.loadGrid();
@@ -62,14 +48,17 @@ export class SpacesGridPage extends Component {
           <EuiSpacer size={'xl'} />
 
           <EuiInMemoryTable
+            itemId={"id"}
             items={this.state.spaces}
             columns={this.getColumnConfig()}
             selection={{
-              selectable: (space) => space.id,
+              selectable: (space) => !isReservedSpace(space),
               onSelectionChange: this.onSelectionChange
             }}
             pagination={true}
             search={true}
+            loading={this.state.loading}
+            message={this.state.loading ? "loading..." : undefined}
           />
         </EuiPageContent>
       </EuiPage>
@@ -101,18 +90,13 @@ export class SpacesGridPage extends Component {
 
     this.setState({
       loading: true,
-      displayedSpaces: [],
       selectedSpaces: [],
       spaces: []
     });
 
-    this.dataStore.loadSpaces([]);
-
     const setSpaces = (spaces) => {
-      this.dataStore.loadSpaces(spaces);
       this.setState({
         loading: false,
-        displayedSpaces: this.dataStore.getPage(this.state.pagination.pageIndex, this.state.pagination.pageSize),
         spaces,
       });
     };
@@ -153,38 +137,8 @@ export class SpacesGridPage extends Component {
     }];
   }
 
-  getSelectionConfig() {
-    return {
-      selectable: (space) => space.id,
-      onSelectionChange: this.onSelectionChange
-    };
-  }
-
-  onTableChange = ({ page = {} }) => {
-    const {
-      index: pageIndex,
-      size: pageSize
-    } = page;
-
-    this.setState({
-      pagination: {
-        ...this.state.pagination,
-        pageIndex,
-        pageSize
-      }
-    });
-  };
-
   onSelectionChange = (selectedSpaces) => {
     this.setState({ selectedSpaces });
-  };
-
-  onSearchChange = ({ text = '' }) => {
-    this.dataStore.search(text);
-    this.setState({
-      searchCriteria: text,
-      displayedSpaces: this.dataStore.getPage(this.state.pagination.pageIndex, this.state.pagination.pageSize)
-    });
   };
 }
 

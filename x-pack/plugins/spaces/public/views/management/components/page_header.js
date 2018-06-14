@@ -8,19 +8,17 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import {
-  EuiHeader,
-  EuiHeaderSection,
-  EuiHeaderBreadcrumbs
+  EuiBreadcrumbs,
+  EuiSpacer,
 } from '@elastic/eui';
 
 export class PageHeader extends Component {
   render() {
     return (
-      <EuiHeader>
-        <EuiHeaderSection>
-          <EuiHeaderBreadcrumbs breadcrumbs={this.props.breadcrumbs.map(this.buildBreadcrumb)} />
-        </EuiHeaderSection>
-      </EuiHeader>
+      <div>
+        <EuiBreadcrumbs breadcrumbs={this.props.breadcrumbs.map(this.buildBreadcrumb)} />
+        <EuiSpacer />
+      </div>
     );
   }
 
