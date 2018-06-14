@@ -54,7 +54,7 @@
     "test:ui:runner": "echo 'use `node scripts/functional_test_runner`' && false",
     "test:server": "grunt test:server",
     "test:coverage": "grunt test:coverage",
-    "checkLicenses": "grunt licenses",
+    "checkLicenses": "grunt licenses --dev",
     "build": "node scripts/build",
     "start": "node scripts/kibana --dev",
     "debug": "node --nolazy --inspect scripts/kibana --dev",
@@ -77,7 +77,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "dependencies": {
-    "@elastic/eui": "v0.0.51",
+    "@elastic/eui": "v0.0.52",
     "@elastic/filesaver": "1.1.2",
     "@elastic/numeral": "2.3.2",
     "@elastic/ui-ace": "0.2.3",

@@ -18,17 +18,24 @@
  */
 
 import _ from 'lodash';
-import { areTimePickerValsDifferent } from './diff_time_picker_vals';
-import { timeHistory } from '../time_history';
 
-export function diffTimeFactory(self) {
-  let oldTime = _.clone(self.time);
-  return function () {
-    if (areTimePickerValsDifferent(self.time, oldTime)) {
-      timeHistory.add(self.time);
-      self.emit('update');
-      self.emit('fetch');
+const valueOf = function (o) {
+  if (o) return o.valueOf();
+};
+
+export function areTimePickerValsDifferent(rangeA, rangeB) {
+  if (_.isObject(rangeA) && _.isObject(rangeB)) {
+    if (
+      valueOf(rangeA.to) !== valueOf(rangeB.to)
+      || valueOf(rangeA.from) !== valueOf(rangeB.from)
+      || valueOf(rangeA.value) !== valueOf(rangeB.value)
+      || valueOf(rangeA.pause) !== valueOf(rangeB.pause)
+    ) {
+      return true;
     }
-    oldTime = _.clone(self.time);
-  };
+  } else {
+    return !_.isEqual(rangeA, rangeB);
+  }
+
+  return false;
 }

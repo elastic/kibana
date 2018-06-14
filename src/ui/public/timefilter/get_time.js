@@ -18,28 +18,33 @@
  */
 
 import _ from 'lodash';
-import angular from 'angular';
+import dateMath from '@kbn/datemath';
 
-export function UtilsDiffTimePickerValsProvider() {
-
-  const valueOf = function (o) {
-    if (o) return o.valueOf();
+export function calculateBounds(timeRange, options = {}) {
+  return {
+    min: dateMath.parse(timeRange.from, { forceNow: options.forceNow }),
+    max: dateMath.parse(timeRange.to, { roundUp: true, forceNow: options.forceNow })
   };
+}
 
-  return function (rangeA, rangeB) {
-    if (_.isObject(rangeA) && _.isObject(rangeB)) {
-      if (
-        valueOf(rangeA.to) !== valueOf(rangeB.to)
-        || valueOf(rangeA.from) !== valueOf(rangeB.from)
-        || valueOf(rangeA.value) !== valueOf(rangeB.value)
-        || valueOf(rangeA.pause) !== valueOf(rangeB.pause)
-      ) {
-        return true;
-      }
-    } else {
-      return !angular.equals(rangeA, rangeB);
-    }
+export function getTime(indexPattern, timeRange, forceNow) {
+  if (!indexPattern) {
+    //in CI, we sometimes seem to fail here.
+    return;
+  }
 
-    return false;
-  };
+  let filter;
+  const timefield = indexPattern.timeFieldName && _.find(indexPattern.fields, { name: indexPattern.timeFieldName });
+
+  if (timefield) {
+    const bounds = calculateBounds(timeRange, { forceNow });
+    filter = { range: {} };
+    filter.range[timefield.name] = {
+      gte: bounds.min.valueOf(),
+      lte: bounds.max.valueOf(),
+      format: 'epoch_millis'
+    };
+  }
+
+  return filter;
 }

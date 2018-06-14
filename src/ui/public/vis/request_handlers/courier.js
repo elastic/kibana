@@ -25,21 +25,9 @@ import { calculateObjectHash } from '../lib/calculate_object_hash';
 const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
   const SearchSource = Private(SearchSourceProvider);
 
-  /**
-   * TODO: This code can be removed as soon as we got rid of inheritance in the
-   * searchsource and pass down every filter explicitly.
-   * We are filtering out the global timefilter by the meta key set by the root
-   * search source on that filter.
-   */
-  function removeSearchSourceParentTimefilter(searchSource) {
-    searchSource.addFilterPredicate((filter) => {
-      return !_.get(filter, 'meta._globalTimefilter', false);
-    });
-  }
-
   return {
     name: 'courier',
-    handler: function (vis, { appState, queryFilter, searchSource, timeRange, forceFetch }) {
+    handler: function (vis, { searchSource, timeRange, query, filters, forceFetch }) {
 
       // Create a new search source that inherits the original search source
       // but has the propriate timeRange applied via a filter.
@@ -48,16 +36,17 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
       // Using callParentStartHandlers: true we make sure, that the parent searchSource
       // onSearchRequestStart will be called properly even though we use an inherited
       // search source.
-      const requestSearchSource = new SearchSource().inherits(searchSource, { callParentStartHandlers: true });
+      const timeFilterSearchSource = searchSource.makeChild();
+      const requestSearchSource = timeFilterSearchSource.makeChild();
 
       // For now we need to mirror the history of the passed search source, since
       // the spy panel wouldn't work otherwise.
       Object.defineProperty(requestSearchSource, 'history', {
         get() {
-          return requestSearchSource._parent.history;
+          return searchSource.history;
         },
         set(history) {
-          return requestSearchSource._parent.history = history;
+          return searchSource.history = history;
         }
       });
 
@@ -69,57 +58,44 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
         return vis.onSearchRequestStart(searchSource, searchRequest);
       });
 
-      // Add the explicit passed timeRange as a filter to the requestSearchSource.
-      requestSearchSource.filter(() => {
+      timeFilterSearchSource.set('filter', () => {
         return timefilter.get(searchSource.get('index'), timeRange);
       });
 
-      removeSearchSourceParentTimefilter(requestSearchSource);
+      requestSearchSource.set('filter', filters);
+      requestSearchSource.set('query', query);
 
-      if (queryFilter && vis.editorMode) {
-        searchSource.set('filter', queryFilter.getFilters());
-        searchSource.set('query', appState.query);
-      }
-
-      const shouldQuery = () => {
+      const shouldQuery = (requestBodyHash) => {
         if (!searchSource.lastQuery || forceFetch) return true;
-        if (!_.isEqual(_.cloneDeep(searchSource.get('filter')), searchSource.lastQuery.filter)) return true;
-        if (!_.isEqual(_.cloneDeep(searchSource.get('query')), searchSource.lastQuery.query)) return true;
-        if (!_.isEqual(calculateObjectHash(vis.getAggConfig()), searchSource.lastQuery.aggs)) return true;
-        if (!_.isEqual(_.cloneDeep(timeRange), searchSource.lastQuery.timeRange)) return true;
-
+        if (searchSource.lastQuery !== requestBodyHash) return true;
         return false;
       };
 
       return new Promise((resolve, reject) => {
-        if (shouldQuery()) {
-          requestSearchSource.onResults().then(resp => {
-            searchSource.lastQuery = {
-              filter: _.cloneDeep(searchSource.get('filter')),
-              query: _.cloneDeep(searchSource.get('query')),
-              aggs: calculateObjectHash(vis.getAggConfig()),
-              timeRange: _.cloneDeep(timeRange)
-            };
-
-            searchSource.rawResponse = resp;
-
-            return _.cloneDeep(resp);
-          }).then(async resp => {
-            for (const agg of vis.getAggConfig()) {
-              if (_.has(agg, 'type.postFlightRequest')) {
-                const nestedSearchSource = new SearchSource().inherits(requestSearchSource);
-                resp = await agg.type.postFlightRequest(resp, vis.aggs, agg, nestedSearchSource);
+        return requestSearchSource.getSearchRequestBody().then(q => {
+          const queryHash = calculateObjectHash(q);
+          if (shouldQuery(queryHash)) {
+            requestSearchSource.onResults().then(resp => {
+              searchSource.lastQuery = queryHash;
+              searchSource.rawResponse = resp;
+              return _.cloneDeep(resp);
+            }).then(async resp => {
+              for (const agg of vis.getAggConfig()) {
+                if (_.has(agg, 'type.postFlightRequest')) {
+                  const nestedSearchSource = new SearchSource().inherits(requestSearchSource);
+                  resp = await agg.type.postFlightRequest(resp, vis.aggs, agg, nestedSearchSource);
+                }
               }
-            }
 
-            searchSource.finalResponse = resp;
-            resolve(resp);
-          }).catch(e => reject(e));
+              searchSource.finalResponse = resp;
+              resolve(resp);
+            }).catch(e => reject(e));
 
-          courier.fetch();
-        } else {
-          resolve(searchSource.finalResponse);
-        }
+            courier.fetch();
+          } else {
+            resolve(searchSource.finalResponse);
+          }
+        });
       });
     }
   };

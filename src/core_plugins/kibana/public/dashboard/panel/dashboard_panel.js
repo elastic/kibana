@@ -161,7 +161,9 @@ DashboardPanel.propTypes = {
   ]),
   destroy: PropTypes.func.isRequired,
   containerState: PropTypes.shape({
-    timeRange: PropTypes.object.isRequired,
+    timeRange: PropTypes.object,
+    filters: PropTypes.array,
+    query: PropTypes.object,
     embeddableCustomization: PropTypes.object,
     hidePanelTitles: PropTypes.bool.isRequired,
   }),
