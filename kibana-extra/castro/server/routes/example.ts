@@ -43,6 +43,5 @@ export default function (server: Hapi.Server) {
         handler(req: Hapi.Request, reply: any) {
             getHeadCommit().then((result: Commit) => reply(result))
         }
-    })
-
+    });
 }

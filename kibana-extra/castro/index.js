@@ -1,4 +1,7 @@
 import exampleRoute from './server/routes/example';
+import personRoute from './server/routes/person';
+
+import mappings from './mappings';
 
 export default function (kibana) {
   return new kibana.Plugin({
@@ -14,12 +17,16 @@ export default function (kibana) {
       
       hacks: [
         'plugins/castro/hack'
-      ]
+      ],
+
+      mappings
     },
 
     config(Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
+        index: Joi.string().default('.castro'),
+        fromyaml: Joi.string().default('empty')
       }).default();
     },
 
@@ -27,6 +34,7 @@ export default function (kibana) {
     init(server, options) {
       // Add server routes and initialize the plugin here
       exampleRoute(server);
+      personRoute(server);
     }
     
 

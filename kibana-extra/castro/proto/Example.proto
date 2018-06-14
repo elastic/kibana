@@ -16,3 +16,8 @@ message Entry {
     string blob = 2;
     bool isBinary = 3;
 }
+
+message Person {
+    string firstName = 1;
+    string lastName = 2;
+}

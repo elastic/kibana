@@ -1,0 +1,12 @@
+{
+  "person": {
+    "properties": {
+      "firstName": {
+        "type": "text"
+      },
+      "lastName": {
+        "type": "text"
+      }
+    }
+  }
+}
