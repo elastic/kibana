@@ -31,7 +31,7 @@ export function executorProvider(Promise, $timeout) {
      */
   function cancel() {
     killTimer();
-    timefilter.off('update', killIfPaused);
+    timefilter.off('refreshIntervalUpdate', killIfPaused);
     timefilter.off('fetch', reFetch);
   }
 
@@ -85,7 +85,7 @@ export function executorProvider(Promise, $timeout) {
      */
   function start() {
     timefilter.on('fetch', reFetch);
-    timefilter.on('update', killIfPaused);
+    timefilter.on('refreshIntervalUpdate', killIfPaused);
     if ((ignorePaused || timefilter.getRefreshInterval().pause === false) && timefilter.getRefreshInterval().value > 0) {
       executionTimer = $timeout(run, timefilter.getRefreshInterval().value);
     }
