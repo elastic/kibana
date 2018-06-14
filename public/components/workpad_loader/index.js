@@ -62,11 +62,13 @@ export const WorkpadLoader = compose(
         const nextWorkpad = workpadState.workpads[0];
         if (nextWorkpad != null) {
           props.router.navigateTo('loadWorkpad', { id: nextWorkpad.id, page: 1 });
+
+          // update the workpad list, filtering out the removed workpad
+          setWorkpads(workpadState);
+        } else {
+          props.router.navigateTo('home');
         }
       }
-
-      // update the workpad list, filtering out the removed workpad
-      setWorkpads(workpadState);
     },
   })
 )(Component);
