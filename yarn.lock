@@ -1675,17 +1675,18 @@ backo2@1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/backo2/-/backo2-1.0.2.tgz#31ab1ac8b129363463e35b3ebb69f4dfcfba7947"
 
-backport@3.0.2:
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/backport/-/backport-3.0.2.tgz#a95e20a2399f5a5f4de07070c9a369ef48a70ce7"
+backport@3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/backport/-/backport-3.0.3.tgz#18a23890fd8a0e291b266de13c7d15277127ee81"
   dependencies:
     axios "^0.18.0"
-    chalk "^2.3.2"
+    chalk "^2.4.1"
     find-up "^2.1.0"
     inquirer "^5.2.0"
-    joi "^13.1.2"
+    joi "^13.2.0"
     lodash.get "^4.4.2"
     lodash.isempty "^4.4.0"
+    lodash.last "^3.0.0"
     mkdirp "^0.5.1"
     ora "^2.0.0"
     strip-json-comments "^2.0.1"
@@ -1899,12 +1900,6 @@ brace-expansion@^1.0.0, brace-expansion@^1.1.7:
   dependencies:
     balanced-match "^1.0.0"
     concat-map "0.0.1"
-
-brace@0.10.0:
-  version "0.10.0"
-  resolved "https://registry.yarnpkg.com/brace/-/brace-0.10.0.tgz#edef4eb9b0928ba1ee5f717ffc157749a6dd5d76"
-  dependencies:
-    w3c-blob "0.0.1"
 
 brace@0.11.1, brace@^0.11.0:
   version "0.11.1"
@@ -7304,7 +7299,7 @@ joi@9.X.X, joi@9.x.x:
     moment "2.x.x"
     topo "2.x.x"
 
-joi@^13.1.2:
+joi@^13.2.0:
   version "13.4.0"
   resolved "https://registry.yarnpkg.com/joi/-/joi-13.4.0.tgz#afc359ee3d8bc5f9b9ba6cdc31b46d44af14cecc"
   dependencies:
@@ -8118,6 +8113,10 @@ lodash.keys@^3.0.0:
     lodash._getnative "^3.0.0"
     lodash.isarguments "^3.0.0"
     lodash.isarray "^3.0.0"
+
+lodash.last@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/lodash.last/-/lodash.last-3.0.0.tgz#242f663112dd4c6e63728c60a3c909d1bdadbd4c"
 
 lodash.map@^4.4.0:
   version "4.6.0"
@@ -13395,10 +13394,6 @@ vm-browserify@0.0.4:
 void-elements@^2.0.0, void-elements@~2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/void-elements/-/void-elements-2.0.1.tgz#c066afb582bb1cb4128d60ea92392e94d5e9dbec"
-
-w3c-blob@0.0.1:
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/w3c-blob/-/w3c-blob-0.0.1.tgz#b0cd352a1a50f515563420ffd5861f950f1d85b8"
 
 w3c-hr-time@^1.0.1:
   version "1.0.1"
