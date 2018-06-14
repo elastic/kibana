@@ -97,7 +97,7 @@ export class CustomizeSpaceAvatar extends Component {
     return (
       <EuiFlexItem grow={false}>
         <EuiFormRow hasEmptyLabelSpace={true}>
-          <EuiLink onClick={this.showFields}>Customize</EuiLink>
+          <EuiLink name="customize_space_link" onClick={this.showFields}>Customize</EuiLink>
         </EuiFormRow>
       </EuiFlexItem>
     );

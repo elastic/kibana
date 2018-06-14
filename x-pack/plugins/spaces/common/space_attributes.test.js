@@ -21,7 +21,7 @@ describe("getSpaceColor", () => {
       name: 'Foo',
     };
 
-    expect(getSpaceColor(space)).toMatch(/^#[a-f0-9]{6}$/);
+    expect(getSpaceColor(space)).toMatch(/^#[a-f0-9]{6}$/i);
   });
 
   test('derives the same color for the same name', () => {

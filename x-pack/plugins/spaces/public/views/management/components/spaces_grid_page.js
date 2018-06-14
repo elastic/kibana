@@ -10,8 +10,7 @@ import PropTypes from 'prop-types';
 import {
   EuiPage,
   EuiPageContent,
-  EuiBasicTable,
-  EuiSearchBar,
+  EuiInMemoryTable,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
@@ -29,6 +28,7 @@ export class SpacesGridPage extends Component {
   state = {
     selectedSpaces: [],
     displayedSpaces: [],
+    spaces: [],
     loading: true,
     searchCriteria: '',
     pagination: {
@@ -49,13 +49,6 @@ export class SpacesGridPage extends Component {
   }
 
   render() {
-    const filteredSpaces = this.dataStore.search(this.state.searchCriteria);
-
-    const pagination = {
-      ...this.state.pagination,
-      totalItemCount: filteredSpaces.length
-    };
-
     return (
       <EuiPage>
         <PageHeader breadcrumbs={this.props.breadcrumbs} />
@@ -67,20 +60,16 @@ export class SpacesGridPage extends Component {
             <EuiFlexItem grow={false}>{this.getPrimaryActionButton()}</EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size={'xl'} />
-          <EuiSearchBar
-            box={{
-              placeholder: 'Search for a space...',
-              incremental: true
-            }}
-            onChange={this.onSearchChange}
-          />
-          <EuiSpacer size={'xl'} />
-          <EuiBasicTable
-            items={this.state.displayedSpaces}
+
+          <EuiInMemoryTable
+            items={this.state.spaces}
             columns={this.getColumnConfig()}
-            selection={this.getSelectionConfig()}
-            pagination={pagination}
-            onChange={this.onTableChange}
+            selection={{
+              selectable: (space) => space.id,
+              onSelectionChange: this.onSelectionChange
+            }}
+            pagination={true}
+            search={true}
           />
         </EuiPageContent>
       </EuiPage>
@@ -113,7 +102,8 @@ export class SpacesGridPage extends Component {
     this.setState({
       loading: true,
       displayedSpaces: [],
-      selectedSpaces: []
+      selectedSpaces: [],
+      spaces: []
     });
 
     this.dataStore.loadSpaces([]);
@@ -122,7 +112,8 @@ export class SpacesGridPage extends Component {
       this.dataStore.loadSpaces(spaces);
       this.setState({
         loading: false,
-        displayedSpaces: this.dataStore.getPage(this.state.pagination.pageIndex, this.state.pagination.pageSize)
+        displayedSpaces: this.dataStore.getPage(this.state.pagination.pageIndex, this.state.pagination.pageSize),
+        spaces,
       });
     };
 
@@ -164,7 +155,6 @@ export class SpacesGridPage extends Component {
 
   getSelectionConfig() {
     return {
-      itemId: 'id',
       selectable: (space) => space.id,
       onSelectionChange: this.onSelectionChange
     };
