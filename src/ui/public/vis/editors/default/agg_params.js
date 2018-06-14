@@ -27,6 +27,7 @@ import { aggTypes } from '../../../agg_types';
 import { uiModules } from '../../../modules';
 import { documentationLinks } from '../../../documentation_links/documentation_links';
 import aggParamsTemplate from './agg_params.html';
+import { aggTypeFilters } from '../../../agg_types/filter';
 
 uiModules
   .get('app/visualize')
@@ -40,7 +41,14 @@ uiModules
         $scope.$bind('agg', attr.agg);
         $scope.$bind('groupName', attr.groupName);
 
-        $scope.aggTypeOptions = aggTypes.byType[$scope.groupName];
+        const aggTypeSubscription = aggTypeFilters
+          .filter$(aggTypes.byType[$scope.groupName], $scope.vis, $scope.agg)
+          .subscribe(aggTypes => $scope.aggTypeOptions = aggTypes);
+
+        $scope.$on('$destroy', () => {
+          aggTypeSubscription.unsubscribe();
+        });
+
         $scope.advancedToggled = false;
 
         // We set up this watch prior to adding the controls below, because when the controls are added,

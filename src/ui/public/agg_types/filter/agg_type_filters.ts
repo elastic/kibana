@@ -1,0 +1,70 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+import { BehaviorSubject } from 'rxjs';
+import { AggType } from '..';
+import { AggConfig, Vis } from '../../vis';
+
+type AggTypeFilter = (
+  aggType: AggType,
+  vis: Vis,
+  aggConfig: AggConfig
+) => boolean;
+
+/**
+ * A registry to store {@link AggTypeFilter} which are used to filter down
+ * available aggregations for a specific visualization and {@link AggConfig}.
+ */
+class AggTypeFilters {
+  private filters = new Set<AggTypeFilter>();
+  private subject = new BehaviorSubject<Set<AggTypeFilter>>(this.filters);
+
+  /**
+   * Register a new {@link AggTypeFilter} with this registry.
+   * This will emit a new set of filtered aggTypes on every Observer returned
+   * by the {@link #filter$|filter method}.
+   *
+   * @param filter The filter to register.
+   */
+  public register(filter: AggTypeFilter): void {
+    this.filters.add(filter);
+    this.subject.next(this.filters);
+  }
+
+  /**
+   * Returns an Observable that will emit a filtered list of the passed {@link AggType|aggTypes}.
+   * A new filtered list will always be emitted when the {@link AggTypeFilter}
+   * registered with this registry will change.
+   *
+   * @param aggTypes  A list of aggTypes that will be filtered down by this registry.
+   * @param vis The vis for which this list should be filtered down.
+   * @param aggConfig The aggConfig for which the returning list will be used.
+   * @return  A filtered list of the passed aggTypes.
+   */
+  public filter$(aggTypes: AggType[], vis: Vis, aggConfig: AggConfig) {
+    return this.subject.map(filters => {
+      return aggTypes.filter(aggType =>
+        Array.from(filters).every(filter => filter(aggType, vis, aggConfig))
+      );
+    });
+  }
+}
+
+const aggTypeFilters = new AggTypeFilters();
+
+export { aggTypeFilters, AggTypeFilters };

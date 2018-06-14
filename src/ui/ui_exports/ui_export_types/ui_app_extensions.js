@@ -50,6 +50,8 @@ export const devTools = appExtension;
 export const docViews = appExtension;
 export const hacks = appExtension;
 export const home = appExtension;
+// Add a visualize app extension that should be used for visualize specific stuff
+export const visualize = appExtension;
 
 // aliases visTypeEnhancers to the visTypes group
 export const visTypeEnhancers = wrap(alias('visTypes'), appExtension);

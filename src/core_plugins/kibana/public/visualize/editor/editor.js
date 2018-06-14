@@ -20,7 +20,6 @@
 import _ from 'lodash';
 import '../saved_visualizations/saved_visualizations';
 import 'ui/vis/editors/default/sidebar';
-import './agg_filter';
 import 'ui/visualize';
 import 'ui/collapsible_sidebar';
 import 'ui/share';
