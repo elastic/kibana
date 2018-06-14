@@ -4,8 +4,6 @@ import { FormControl } from 'react-bootstrap';
 import './dropdown_filter.less';
 
 export const DropdownFilter = ({ value, onChange, commit, choices }) => {
-  console.log(value);
-
   return (
     <form
       onSubmit={e => {
