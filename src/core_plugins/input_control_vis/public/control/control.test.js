@@ -19,6 +19,7 @@
 
 import expect from 'expect.js';
 import { Control } from './control';
+import { FilterManager } from './filter_manager/filter_manager';
 
 function createControlParams(id, label) {
   return {
@@ -114,5 +115,36 @@ describe('ancestors', () => {
     expect(ancestorFilters.length).to.be(2);
     expect(ancestorFilters[0]).to.eql('mockKbnFilter:myParentValue');
     expect(ancestorFilters[1]).to.eql('mockKbnFilter:myGrandParentValue');
+  });
+});
+
+describe('empty state', () => {
+  class SimpleFilterManager extends FilterManager {
+    getValueFromFilterBar() {
+      return this.getUnsetValue();
+    }
+    createFilter() {
+      return {};
+    }
+  }
+  const indexPatternMock = {};
+  const queryFilterMock = {};
+  const controlParams = {};
+  const filterManager = new SimpleFilterManager('controlId', 'myField', indexPatternMock, queryFilterMock, 'originalUnsetValue');
+  const control = new Control(controlParams, filterManager);
+
+  test('should be in empty state when created', function () {
+    expect(control.value).to.be('originalUnsetValue');
+  });
+
+  test('should update control value when unset value changes and control is in empty state', function () {
+    control.setUnsetValue('updatedUnsetValue');
+    expect(control.value).to.be('updatedUnsetValue');
+  });
+
+  test('should not update control value when unset value changes and control is has a value', function () {
+    control.set(42);
+    control.setUnsetValue('evenNewerUnsetValue');
+    expect(control.value).to.be(42);
   });
 });
