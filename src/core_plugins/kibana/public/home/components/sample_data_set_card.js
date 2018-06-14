@@ -99,7 +99,7 @@ export class SampleDataSetCard extends React.Component {
                 href={this.props.launchUrl}
                 data-test-subj={`launchSampleDataSet${this.props.id}`}
               >
-                Launch
+                View data
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
