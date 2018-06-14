@@ -18,17 +18,19 @@ import {
   EuiHealth,
 } from '@elastic/eui';
 
+import { getSeverityColor } from 'plugins/ml/../common/util/anomaly_utils';
+
 const OPTIONS = [
-  { value: 0, label: 'warning', color: '#8bc8fb' },
-  { value: 25, label: 'minor', color: '#fdec25' },
-  { value: 50, label: 'major', color: '#fba740' },
-  { value: 75, label: 'critical', color: '#fe5050' }
+  { value: 0, label: 'warning', color: getSeverityColor(0) },
+  { value: 25, label: 'minor', color: getSeverityColor(25) },
+  { value: 50, label: 'major', color: getSeverityColor(50) },
+  { value: 75, label: 'critical', color: getSeverityColor(75) }
 ];
 
 function optionValueToThreshold(value) {
   // Builds the corresponding threshold object with the required display and val properties
   // from the specified value.
-  const option = OPTIONS.find(opt => opt.value === value);
+  const option = OPTIONS.find(opt => (opt.value === value));
 
   // Default to warning if supplied value doesn't map to one of the options.
   let threshold = OPTIONS[0];
@@ -44,13 +46,13 @@ class SelectSeverity extends Component {
     super(props);
 
     // Restore the threshold from the state, or default to warning.
-    const mlSelectSeverityService = this.props.mlSelectSeverityService;
-    const thresholdState = mlSelectSeverityService.state.get('threshold');
+    this.mlSelectSeverityService = this.props.mlSelectSeverityService;
+    const thresholdState = this.mlSelectSeverityService.state.get('threshold');
     const thresholdValue = _.get(thresholdState, 'val', 0);
     const threshold = optionValueToThreshold(thresholdValue);
-    const selectedOption = OPTIONS.find(opt => opt.value === threshold.val);
+    const selectedOption = OPTIONS.find(opt => (opt.value === threshold.val));
 
-    mlSelectSeverityService.state.set('threshold', threshold);
+    this.mlSelectSeverityService.state.set('threshold', threshold);
 
     this.state = {
       selectedOptions: [selectedOption]
@@ -68,8 +70,7 @@ class SelectSeverity extends Component {
     });
 
     const threshold = optionValueToThreshold(selectedOptions[0].value);
-    const mlSelectSeverityService = this.props.mlSelectSeverityService;
-    mlSelectSeverityService.state.set('threshold', threshold).changed();
+    this.mlSelectSeverityService.state.set('threshold', threshold).changed();
   };
 
   renderOption = (option, searchValue, contentClassName) => {

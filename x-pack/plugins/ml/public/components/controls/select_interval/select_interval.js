@@ -27,7 +27,7 @@ const OPTIONS = [
 function optionValueToInterval(value) {
   // Builds the corresponding interval object with the required display and val properties
   // from the specified value.
-  const option = OPTIONS.find(opt => opt.value === value);
+  const option = OPTIONS.find(opt => (opt.value === value));
 
   // Default to auto if supplied value doesn't map to one of the options.
   let interval = OPTIONS[0];
@@ -43,11 +43,11 @@ class SelectInterval extends Component {
     super(props);
 
     // Restore the interval from the state, or default to auto.
-    const mlSelectIntervalService = this.props.mlSelectIntervalService;
-    const intervalState = mlSelectIntervalService.state.get('interval');
+    this.mlSelectIntervalService = this.props.mlSelectIntervalService;
+    const intervalState = this.mlSelectIntervalService.state.get('interval');
     const intervalValue = _.get(intervalState, 'val', 'auto');
     const interval = optionValueToInterval(intervalValue);
-    mlSelectIntervalService.state.set('interval', interval);
+    this.mlSelectIntervalService.state.set('interval', interval);
 
     this.state = {
       value: interval.val
@@ -60,8 +60,7 @@ class SelectInterval extends Component {
     });
 
     const interval = optionValueToInterval(e.target.value);
-    const mlSelectIntervalService = this.props.mlSelectIntervalService;
-    mlSelectIntervalService.state.set('interval', interval).changed();
+    this.mlSelectIntervalService.state.set('interval', interval).changed();
   };
 
   render() {

@@ -22,8 +22,8 @@ class CheckboxShowCharts extends Component {
     super(props);
 
     // Restore the checked setting from the state.
-    const mlCheckboxShowChartsService = this.props.mlCheckboxShowChartsService;
-    const showCharts = mlCheckboxShowChartsService.state.get('showCharts');
+    this.mlCheckboxShowChartsService = this.props.mlCheckboxShowChartsService;
+    const showCharts = this.mlCheckboxShowChartsService.state.get('showCharts');
 
     this.state = {
       checked: showCharts
@@ -32,9 +32,8 @@ class CheckboxShowCharts extends Component {
 
   onChange = (e) => {
     const showCharts = e.target.checked;
-    const mlCheckboxShowChartsService = this.props.mlCheckboxShowChartsService;
-    mlCheckboxShowChartsService.state.set('showCharts', showCharts);
-    mlCheckboxShowChartsService.state.changed();
+    this.mlCheckboxShowChartsService.state.set('showCharts', showCharts);
+    this.mlCheckboxShowChartsService.state.changed();
 
     this.setState({
       checked: showCharts,
