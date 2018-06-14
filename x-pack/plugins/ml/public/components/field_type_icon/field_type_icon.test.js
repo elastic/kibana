@@ -7,7 +7,7 @@
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
-import { FieldTypeIcon } from './field_type_icon_view';
+import { FieldTypeIcon } from './field_type_icon';
 
 describe('FieldTypeIcon', () => {
 
