@@ -4,4 +4,6 @@ plugins {
 
 dependencies {
   compile 'ch.qos.logback:logback-classic:1.2.3'
+  compile 'com.ibm.icu:icu4j:61.1'
+  compile 'commons-io:commons-io:2.6'
 }

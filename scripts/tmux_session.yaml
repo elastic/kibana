@@ -1,0 +1,26 @@
+# download: pip install --user tmuxp
+# usage: tmuxp load tmux_session.yaml
+# see: https://github.com/tmux-python/tmuxp
+session_name: castro-dev
+windows:
+- window_name: elk
+  layout: even-horizontal
+  panes:
+    - shell_command:
+        - ./gradlew startKibana
+    - shell_command:
+        - ./gradlew startDeps
+- window_name: backend
+  layout: even-horizontal
+  panes:
+    - shell_command:
+        - ./gradlew bootRun
+    - shell_command:
+        - ./gradlew -t build
+- window_name: others
+  layout: even-horizontal
+  panes:
+    - shell_command:
+        -
+    - shell_command:
+        -

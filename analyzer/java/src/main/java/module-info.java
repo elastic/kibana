@@ -1,3 +1,3 @@
-module castro.analyzer.java {
-  requires jdk.compiler;
-}
+//module castro.analyzer.java {
+//  requires jdk.compiler;
+//}

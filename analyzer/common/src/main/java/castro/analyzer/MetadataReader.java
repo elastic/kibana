@@ -4,7 +4,7 @@ import castro.metadata.Node;
 
 import java.io.IOException;
 
-interface MetadataReader {
+public interface MetadataReader {
   Node readNode() throws IOException;
   void close();
 }

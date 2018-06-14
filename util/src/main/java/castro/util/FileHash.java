@@ -1,4 +1,4 @@
-package castro.hash;
+package castro.util;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;

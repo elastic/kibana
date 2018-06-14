@@ -1,14 +1,34 @@
 plugins {
   id 'java'
-  id 'application'
+  id "org.springframework.boot" version "2.0.2.RELEASE"
+  id "io.spring.dependency-management" version "1.0.5.RELEASE"
 }
 
-mainClassName = 'castro.backend.Main'
+// https://dzone.com/articles/continuous-auto-restart-with-spring-boot-devtools
+configurations {
+  dev
+}
 
-task backend(dependsOn: run)
+bootRun {
+  // Use Spring Boot DevTool only when we run Gradle bootRun task
+  classpath = sourceSets.main.runtimeClasspath + configurations.dev
+}
 
 dependencies {
   compile project(":model")
 
+  compile "org.springframework.boot:spring-boot-starter-web"
+  // http://localhost:8080/swagger-ui.html
+//  compile "com.hubspot.jackson:jackson-datatype-protobuf:0.9.9-jackson2.9-proto3"
+//  compile "io.springfox:springfox-swagger-ui:2.8.0"
+//  compile "io.springfox:springfox-swagger2:2.8.0"
+//  compile "javax.xml.bind:jaxb-api:2.3.0"
+
+  compile "com.google.protobuf:protobuf-java-util:$protocVersion"
   compile "org.eclipse.jgit:org.eclipse.jgit:$jgitVersion"
+
+  dev("org.springframework.boot:spring-boot-devtools")
+
 }
+
+task backend(dependsOn: bootRun)
