@@ -12,6 +12,11 @@ import { EuiText, EuiToolTip } from '@elastic/eui';
 import { FieldTypeIcon } from '../field_type_icon';
 
 export function FieldTitleBar({ card }) {
+  // don't render and fail gracefully if card prop isn't set
+  if (typeof card !== 'object' || card === null) {
+    return null;
+  }
+
   const classNames = ['ml-field-title-bar'];
   if (card.fieldName === undefined) {
     classNames.push('document_count');

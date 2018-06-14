@@ -9,7 +9,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { FieldTitleBar } from './field_title_bar_view.js';
+import { FieldTitleBar } from './field_title_bar';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
