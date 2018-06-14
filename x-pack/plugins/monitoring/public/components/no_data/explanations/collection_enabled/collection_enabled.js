@@ -23,10 +23,15 @@ export class ExplainCollectionEnabled extends React.Component {
   constructor(props) {
     super(props);
     this.handleClick = this.handleClick.bind(this);
+    this.waitedTooLongTimer = null;
 
     this.state = {
       waitedTooLong: false
     };
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.waitedTooLongTimer);
   }
 
   handleClick() {
@@ -34,7 +39,7 @@ export class ExplainCollectionEnabled extends React.Component {
     enabler.enableCollectionEnabled();
 
     // wait 19 seconds, show link to reload
-    setTimeout(() => {
+    this.waitedTooLongTimer = setTimeout(() => {
       this.setState({ waitedTooLong: true });
     }, 19 * 1000);
   }
