@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { Action } from 'redux';
 import { createAction } from 'redux-actions';
+import { KibanaAction } from '../../selectors/types';
 
 export enum MetadataActionTypeKeys {
   UPDATE_DESCRIPTION = 'UPDATE_DESCRIPTION',
@@ -27,17 +27,19 @@ export enum MetadataActionTypeKeys {
 
 export type UpdateTitleActionPayload = string;
 
-export interface UpdateTitleAction extends Action {
-  type: MetadataActionTypeKeys.UPDATE_TITLE;
-  payload: UpdateTitleActionPayload;
-}
+export interface UpdateTitleAction
+  extends KibanaAction<
+      MetadataActionTypeKeys.UPDATE_TITLE,
+      UpdateTitleActionPayload
+    > {}
 
 export type UpdateDescriptionActionPayload = string;
 
-export interface UpdateDescriptionAction extends Action {
-  type: MetadataActionTypeKeys.UPDATE_DESCRIPTION;
-  payload: UpdateDescriptionActionPayload;
-}
+export interface UpdateDescriptionAction
+  extends KibanaAction<
+      MetadataActionTypeKeys.UPDATE_DESCRIPTION,
+      UpdateDescriptionActionPayload
+    > {}
 
 export type MetadataActions = UpdateDescriptionAction | UpdateTitleAction;
 

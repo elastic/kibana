@@ -275,6 +275,10 @@
   dependencies:
     "@types/node" "*"
 
+"@types/jest@^22.2.3":
+  version "22.2.3"
+  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-22.2.3.tgz#0157c0316dc3722c43a7b71de3fdf3acbccef10d"
+
 "@types/json-schema@*":
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-6.0.1.tgz#a761975746f1c1b2579c62e3a4b5e88f986f7e2e"
@@ -289,9 +293,9 @@
   dependencies:
     "@types/node" "*"
 
-"@types/lodash@3.10.1":
-  version "3.10.1"
-  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-3.10.1.tgz#ef8c8c35649f07884e0fb7763b24baaf7e175c36"
+"@types/lodash@^3.10.1":
+  version "3.10.2"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-3.10.2.tgz#c1fbda1562ef5603c8192fe1fe65b017849d5873"
 
 "@types/loglevel@^1.5.3":
   version "1.5.3"
@@ -344,9 +348,9 @@
   dependencies:
     csstype "^2.2.0"
 
-"@types/redux-actions@2.2.1":
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/@types/redux-actions/-/redux-actions-2.2.1.tgz#c1f4a7283ecd3cd696291550361e441bf9389370"
+"@types/redux-actions@^2.2.1":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@types/redux-actions/-/redux-actions-2.3.0.tgz#d28d7913ec86ee9e20ecb33a1fed887ecb538149"
 
 "@types/redux@^3.6.31":
   version "3.6.31"

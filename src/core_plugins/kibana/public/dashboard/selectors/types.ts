@@ -18,64 +18,64 @@
  */
 
 import { EmbeddableMetadata, Filters, Query, TimeRange } from 'ui/embeddable';
-
-export type ViewMode = string;
+import { DashboardViewMode } from '../dashboard_view_mode';
 
 export interface ViewState {
-  viewMode: ViewMode;
-  isFullScreenMode: boolean;
-  maximizedPanelId: string | undefined;
-  visibleContextMenuPanelId: string | undefined;
-  timeRange: TimeRange;
-  hidePanelTitles: boolean;
-  useMargins: boolean;
-  query: Query;
-  filters: Filters;
+  readonly viewMode: DashboardViewMode;
+  readonly isFullScreenMode: boolean;
+  readonly maximizedPanelId?: string;
+  readonly visibleContextMenuPanelId?: string;
+  readonly timeRange: TimeRange;
+  readonly hidePanelTitles: boolean;
+  readonly useMargins: boolean;
+  readonly query: Query;
+  readonly filters: Filters;
 }
 
 export interface GridData {
-  w: number;
-  h: number;
-  x: number;
-  y: number;
+  readonly w: number;
+  readonly h: number;
+  readonly x: number;
+  readonly y: number;
+  readonly id: string;
 }
 
 export type PanelId = string;
 export type SavedObjectId = string;
 
 export interface PanelState {
-  id: SavedObjectId;
-  version: string;
-  type: string;
-  panelIndex: PanelId;
-  embeddableConfig: object;
-  gridData: GridData;
-  title: string | undefined;
+  readonly id: SavedObjectId;
+  readonly version: string;
+  readonly type: string;
+  readonly panelIndex: PanelId;
+  readonly embeddableConfig: object;
+  readonly gridData: GridData;
+  readonly title?: string;
 }
 
 export interface EmbeddableReduxState {
-  metadata: EmbeddableMetadata | undefined;
-  error: string | object | undefined;
-  initialized: boolean;
-  stagedFilter: object | undefined;
+  readonly metadata?: EmbeddableMetadata;
+  readonly error?: string | object;
+  readonly initialized: boolean;
+  readonly stagedFilter?: object;
 }
 
 export interface PanelsMap {
-  [panelId: string]: PanelState;
+  readonly [panelId: string]: PanelState;
 }
 
 export interface EmbeddablesMap {
-  [panelId: string]: EmbeddableReduxState;
+  readonly [panelId: string]: EmbeddableReduxState;
 }
 
 export interface DashboardMetadata {
-  title: string;
-  description: string | undefined;
+  readonly title: string;
+  readonly description?: string;
 }
 
 export interface DashboardState {
-  view: ViewState;
-  panels: PanelsMap;
-  embeddables: EmbeddablesMap;
-  metadata: DashboardMetadata;
+  readonly view: ViewState;
+  readonly panels: PanelsMap;
+  readonly embeddables: EmbeddablesMap;
+  readonly metadata: DashboardMetadata;
 }

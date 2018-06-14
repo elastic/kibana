@@ -17,8 +17,14 @@
  * under the License.
  */
 
+import { Action } from 'redux';
 import { DashboardState } from '../dashboard/selectors';
 
 export interface CoreKibanaState {
-  dashboard: DashboardState;
+  readonly dashboard: DashboardState;
+}
+
+export interface KibanaAction<T, P> extends Action {
+  readonly type: T;
+  readonly payload: P;
 }

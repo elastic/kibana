@@ -24,7 +24,6 @@ import {
   EmbeddableActionTypeKeys,
   EmbeddableErrorActionPayload,
   EmbeddableIsInitializedActionPayload,
-  EmbeddableIsInitializingActionPayload,
   PanelActionTypeKeys,
   SetStagedFilterActionPayload,
 } from '../actions';
@@ -36,10 +35,10 @@ import {
 
 const embeddableIsInitializing = (
   embeddables: EmbeddablesMap,
-  payload: EmbeddableIsInitializingActionPayload
+  panelId: PanelId
 ): EmbeddablesMap => ({
   ...embeddables,
-  [payload]: {
+  [panelId]: {
     error: undefined,
     initialized: false,
     metadata: {},
@@ -49,24 +48,24 @@ const embeddableIsInitializing = (
 
 const embeddableIsInitialized = (
   embeddables: EmbeddablesMap,
-  payload: EmbeddableIsInitializedActionPayload
+  { panelId, metadata }: EmbeddableIsInitializedActionPayload
 ): EmbeddablesMap => ({
   ...embeddables,
-  [payload.panelId]: {
-    ...embeddables[payload.panelId],
+  [panelId]: {
+    ...embeddables[panelId],
     initialized: true,
-    metadata: { ...payload.metadata },
+    metadata: { ...metadata },
   },
 });
 
 const setStagedFilter = (
   embeddables: EmbeddablesMap,
-  payload: SetStagedFilterActionPayload
+  { panelId, stagedFilter }: SetStagedFilterActionPayload
 ): EmbeddablesMap => ({
   ...embeddables,
-  [payload.panelId]: {
-    ...embeddables[payload.panelId],
-    stagedFilter: payload.stagedFilter,
+  [panelId]: {
+    ...embeddables[panelId],
+    stagedFilter,
   },
 });
 
@@ -98,10 +97,12 @@ const deleteEmbeddable = (
 };
 
 export const embeddablesReducer: Reducer<EmbeddablesMap> = (
-  embeddables: EmbeddablesMap = {},
+  embeddables = {},
   action
 ): EmbeddablesMap => {
-  switch (action.type) {
+  switch (
+    action.type as EmbeddableActionTypeKeys | PanelActionTypeKeys.DELETE_PANEL
+  ) {
     case EmbeddableActionTypeKeys.EMBEDDABLE_IS_INITIALIZING:
       return embeddableIsInitializing(embeddables, action.payload);
     case EmbeddableActionTypeKeys.EMBEDDABLE_IS_INITIALIZED:

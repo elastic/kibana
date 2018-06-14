@@ -81,7 +81,7 @@ const setPanels = (panels: PanelsMap, newPanels: PanelsMap) =>
   _.cloneDeep(newPanels);
 
 export const panelsReducer: Reducer<PanelsMap> = (
-  panels: PanelsMap = {},
+  panels = {},
   action
 ): PanelsMap => {
   switch ((action as PanelActions).type) {

@@ -43,7 +43,7 @@ const updateDescription = (
 });
 
 export const metadataReducer: Reducer<DashboardMetadata> = (
-  metadata: DashboardMetadata = {
+  metadata = {
     description: '',
     title: '',
   },

@@ -18,19 +18,18 @@
  */
 
 import _ from 'lodash';
-import { Action, Dispatch } from 'redux';
+import { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
-import { CoreKibanaState } from '../../selectors';
+import {
+  CoreKibanaState,
+  getEmbeddableCustomization,
+  getPanel,
+} from '../../selectors';
 import { PanelId, PanelState } from '../selectors';
 import { updatePanel } from './panels';
 
 import { EmbeddableMetadata, EmbeddableState } from 'ui/embeddable';
-import {
-  getEmbeddableCustomization,
-  getPanel,
-} from '../../selectors/dashboard_selectors';
-
-export type EmbeddableIsInitializingActionPayload = string;
+import { KibanaAction } from '../../selectors/types';
 
 export enum EmbeddableActionTypeKeys {
   EMBEDDABLE_IS_INITIALIZING = 'EMBEDDABLE_IS_INITIALIZING',
@@ -40,45 +39,50 @@ export enum EmbeddableActionTypeKeys {
   EMBEDDABLE_ERROR = 'EMBEDDABLE_ERROR',
 }
 
-export interface EmbeddableIsInitializingAction extends Action {
-  type: EmbeddableActionTypeKeys.EMBEDDABLE_IS_INITIALIZING;
-  payload: EmbeddableIsInitializingActionPayload;
-}
+export interface EmbeddableIsInitializingAction
+  extends KibanaAction<
+      EmbeddableActionTypeKeys.EMBEDDABLE_IS_INITIALIZING,
+      PanelId
+    > {}
 
 export interface EmbeddableIsInitializedActionPayload {
   panelId: PanelId;
   metadata: EmbeddableMetadata;
 }
 
-export interface EmbeddableIsInitializedAction extends Action {
-  type: EmbeddableActionTypeKeys.EMBEDDABLE_IS_INITIALIZED;
-  payload: EmbeddableIsInitializedActionPayload;
-}
+export interface EmbeddableIsInitializedAction
+  extends KibanaAction<
+      EmbeddableActionTypeKeys.EMBEDDABLE_IS_INITIALIZED,
+      EmbeddableIsInitializedActionPayload
+    > {}
 
 export interface SetStagedFilterActionPayload {
   panelId: PanelId;
   stagedFilter: object;
 }
 
-export interface SetStagedFilterAction extends Action {
-  type: EmbeddableActionTypeKeys.SET_STAGED_FILTER;
-  payload: SetStagedFilterActionPayload;
-}
+export interface SetStagedFilterAction
+  extends KibanaAction<
+      EmbeddableActionTypeKeys.SET_STAGED_FILTER,
+      SetStagedFilterActionPayload
+    > {}
 
-export interface ClearStagedFiltersAction extends Action {
-  type: EmbeddableActionTypeKeys.CLEAR_STAGED_FILTERS;
-  payload: undefined;
-}
+export interface ClearStagedFiltersAction
+  extends KibanaAction<
+      EmbeddableActionTypeKeys.CLEAR_STAGED_FILTERS,
+      undefined
+    > {}
 
 export interface EmbeddableErrorActionPayload {
   error: string | object;
   panelId: PanelId;
 }
 
-export interface EmbeddableErrorAction extends Action {
-  type: EmbeddableActionTypeKeys.EMBEDDABLE_ERROR;
-  payload: EmbeddableErrorActionPayload;
-}
+export interface EmbeddableErrorAction
+  extends KibanaAction<
+      EmbeddableActionTypeKeys.EMBEDDABLE_ERROR,
+      EmbeddableErrorActionPayload
+    > {}
 
 export type EmbeddableActions =
   | EmbeddableIsInitializingAction
@@ -87,16 +91,16 @@ export type EmbeddableActions =
   | SetStagedFilterAction
   | EmbeddableErrorAction;
 
-export const embeddableIsInitializing = createAction<
-  EmbeddableIsInitializingActionPayload
->(EmbeddableActionTypeKeys.EMBEDDABLE_IS_INITIALIZING);
+export const embeddableIsInitializing = createAction<PanelId>(
+  EmbeddableActionTypeKeys.EMBEDDABLE_IS_INITIALIZING
+);
 export const embeddableIsInitialized = createAction<
   EmbeddableIsInitializedActionPayload
 >(EmbeddableActionTypeKeys.EMBEDDABLE_IS_INITIALIZED);
 export const setStagedFilter = createAction<SetStagedFilterActionPayload>(
   EmbeddableActionTypeKeys.SET_STAGED_FILTER
 );
-export const clearStagedFilters = createAction<void>(
+export const clearStagedFilters = createAction(
   EmbeddableActionTypeKeys.CLEAR_STAGED_FILTERS
 );
 export const embeddableError = createAction<EmbeddableErrorActionPayload>(
@@ -108,11 +112,11 @@ export const embeddableError = createAction<EmbeddableErrorActionPayload>(
  * changes, this function will be called. The data is then extracted from EmbeddableState and stored in
  * redux so the appropriate actions are taken and UI updated.
  *
- * @param {string} panelId - the id of the panel whose state has changed.
- * @param {EmbeddableState} embeddableState - the new state of the embeddable.
+ * @param changeData.panelId - the id of the panel whose state has changed.
+ * @param changeDataembeddableState - the new state of the embeddable.
  */
 export function embeddableStateChanged(changeData: {
-  panelId: string;
+  panelId: PanelId;
   embeddableState: EmbeddableState;
 }) {
   const { panelId, embeddableState } = changeData;

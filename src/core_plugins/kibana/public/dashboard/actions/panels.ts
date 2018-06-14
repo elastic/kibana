@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { Action } from 'redux';
 import { createAction } from 'redux-actions';
+import { KibanaAction } from '../../selectors/types';
 import { PanelId, PanelsMap, PanelState } from '../selectors';
 
 export enum PanelActionTypeKeys {
@@ -30,43 +30,31 @@ export enum PanelActionTypeKeys {
   SET_PANELS = 'SET_PANELS',
 }
 
-export interface DeletePanelAction extends Action {
-  type: PanelActionTypeKeys.DELETE_PANEL;
-  payload: PanelId;
-}
+export interface DeletePanelAction
+  extends KibanaAction<PanelActionTypeKeys.DELETE_PANEL, PanelId> {}
 
-export interface UpdatePanelAction extends Action {
-  type: PanelActionTypeKeys.UPDATE_PANEL;
-  payload: PanelState;
-}
+export interface UpdatePanelAction
+  extends KibanaAction<PanelActionTypeKeys.UPDATE_PANEL, PanelState> {}
 
-export interface UpdatePanelsAction extends Action {
-  type: PanelActionTypeKeys.UPDATE_PANELS;
-  payload: PanelsMap;
-}
+export interface UpdatePanelsAction
+  extends KibanaAction<PanelActionTypeKeys.UPDATE_PANELS, PanelsMap> {}
 
-export interface ResetPanelTitleAction extends Action {
-  type: PanelActionTypeKeys.RESET_PANEl_TITLE;
-  /**
-   * The PanelId of the panel whose title should be reset.
-   */
-  payload: PanelId;
-}
+export interface ResetPanelTitleAction
+  extends KibanaAction<PanelActionTypeKeys.RESET_PANEl_TITLE, PanelId> {}
 
 export interface SetPanelTitleActionPayload {
   panelId: PanelId;
   title: string;
 }
 
-export interface SetPanelTitleAction extends Action {
-  type: PanelActionTypeKeys.SET_PANEl_TITLE;
-  payload: SetPanelTitleActionPayload;
-}
+export interface SetPanelTitleAction
+  extends KibanaAction<
+      PanelActionTypeKeys.SET_PANEl_TITLE,
+      SetPanelTitleActionPayload
+    > {}
 
-export interface SetPanelsAction extends Action {
-  type: PanelActionTypeKeys.SET_PANELS;
-  payload: PanelsMap;
-}
+export interface SetPanelsAction
+  extends KibanaAction<PanelActionTypeKeys.SET_PANELS, PanelsMap> {}
 
 export type PanelActions =
   | DeletePanelAction

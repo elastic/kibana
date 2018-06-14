@@ -20,9 +20,9 @@
 import { store } from '../../store';
 import {
   clearStagedFilters,
-  setStagedFilter,
   embeddableIsInitialized,
   embeddableIsInitializing,
+  setStagedFilter,
 } from '../actions';
 
 import { getStagedFilters } from '../../selectors';

@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import { Action } from 'redux';
 import { createAction } from 'redux-actions';
 import { Filters, Query, TimeRange } from 'ui/embeddable';
+import { KibanaAction } from '../../selectors/types';
+import { DashboardViewMode } from '../dashboard_view_mode';
 import { PanelId } from '../selectors';
 
 export enum ViewActionTypeKeys {
@@ -35,59 +36,44 @@ export enum ViewActionTypeKeys {
   UPDATE_QUERY = 'UPDATE_QUERY',
 }
 
-export interface UpdateViewModeAction extends Action {
-  type: ViewActionTypeKeys.UPDATE_VIEW_MODE;
-  payload: string;
-}
+export interface UpdateViewModeAction
+  extends KibanaAction<
+      ViewActionTypeKeys.UPDATE_VIEW_MODE,
+      DashboardViewMode
+    > {}
 
-export interface SetVisibleContextMenuPanelIdAction extends Action {
-  type: ViewActionTypeKeys.SET_VISIBLE_CONTEXT_MENU_PANEL_ID;
-  payload: PanelId;
-}
+export interface SetVisibleContextMenuPanelIdAction
+  extends KibanaAction<
+      ViewActionTypeKeys.SET_VISIBLE_CONTEXT_MENU_PANEL_ID,
+      PanelId
+    > {}
 
-export interface SetVisibleContextMenuPanelIdAction extends Action {
-  type: ViewActionTypeKeys.SET_VISIBLE_CONTEXT_MENU_PANEL_ID;
-  payload: PanelId;
-}
+export interface MaximizePanelAction
+  extends KibanaAction<ViewActionTypeKeys.MAXIMIZE_PANEl, PanelId> {}
 
-export interface MaximizePanelAction extends Action {
-  type: ViewActionTypeKeys.MAXIMIZE_PANEl;
-  payload: PanelId;
-}
+export interface MinimizePanelAction
+  extends KibanaAction<ViewActionTypeKeys.MINIMIZE_PANEL, undefined> {}
 
-export interface MinimizePanelAction extends Action {
-  type: ViewActionTypeKeys.MINIMIZE_PANEL;
-}
+export interface UpdateIsFullScreenModeAction
+  extends KibanaAction<
+      ViewActionTypeKeys.UPDATE_IS_FULL_SCREEN_MODE,
+      boolean
+    > {}
 
-export interface UpdateIsFullScreenModeAction extends Action {
-  type: ViewActionTypeKeys.UPDATE_IS_FULL_SCREEN_MODE;
-  payload: boolean;
-}
+export interface UpdateUseMarginsAction
+  extends KibanaAction<ViewActionTypeKeys.UPDATE_USE_MARGINS, boolean> {}
 
-export interface UpdateUseMarginsAction extends Action {
-  type: ViewActionTypeKeys.UPDATE_USE_MARGINS;
-  payload: boolean;
-}
+export interface UpdateHidePanelTitlesAction
+  extends KibanaAction<ViewActionTypeKeys.UPDATE_HIDE_PANEL_TITLES, boolean> {}
 
-export interface UpdateHidePanelTitlesAction extends Action {
-  type: ViewActionTypeKeys.UPDATE_HIDE_PANEL_TITLES;
-  payload: boolean;
-}
+export interface UpdateTimeRangeAction
+  extends KibanaAction<ViewActionTypeKeys.UPDATE_TIME_RANGE, TimeRange> {}
 
-export interface UpdateTimeRangeAction extends Action {
-  type: ViewActionTypeKeys.UPDATE_TIME_RANGE;
-  payload: TimeRange;
-}
+export interface UpdateFiltersAction
+  extends KibanaAction<ViewActionTypeKeys.UPDATE_FILTERS, Filters> {}
 
-export interface UpdateFiltersAction extends Action {
-  type: ViewActionTypeKeys.UPDATE_FILTERS;
-  payload: Filters;
-}
-
-export interface UpdateQueryAction extends Action {
-  type: ViewActionTypeKeys.UPDATE_QUERY;
-  payload: Query;
-}
+export interface UpdateQueryAction
+  extends KibanaAction<ViewActionTypeKeys.UPDATE_QUERY, Query> {}
 
 export type ViewActions =
   | UpdateViewModeAction
@@ -110,9 +96,7 @@ export const setVisibleContextMenuPanelId = createAction<PanelId>(
 export const maximizePanel = createAction<PanelId>(
   ViewActionTypeKeys.MAXIMIZE_PANEl
 );
-export const minimizePanel = createAction<PanelId>(
-  ViewActionTypeKeys.MINIMIZE_PANEL
-);
+export const minimizePanel = createAction(ViewActionTypeKeys.MINIMIZE_PANEL);
 export const updateIsFullScreenMode = createAction<boolean>(
   ViewActionTypeKeys.UPDATE_IS_FULL_SCREEN_MODE
 );

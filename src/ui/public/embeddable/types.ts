@@ -31,8 +31,8 @@ export interface Filter {
 export type Filters = Filter[];
 
 export enum QueryLanguageType {
-  'kuery',
-  'lucene',
+  KUERY = 'kuery',
+  LUCENE = 'lucene',
 }
 
 export interface Query {

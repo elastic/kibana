@@ -17,23 +17,14 @@
  * under the License.
  */
 
-import { store } from '../../store';
-import { embeddableIsInitializing, setPanels } from '../actions';
-import { getEmbeddableError, getEmbeddableInitialized } from '../../selectors';
+import { combineReducers } from 'redux';
+import { dashboard } from './dashboard/reducers';
+import { CoreKibanaState } from './selectors';
 
-beforeAll(() => {
-  store.dispatch(setPanels({ foo1: { panelIndex: 'foo1' } }));
-});
-
-describe('embeddableIsInitializing', () => {
-  test('clears the error', () => {
-    store.dispatch(embeddableIsInitializing('foo1'));
-    const initialized = getEmbeddableInitialized(store.getState(), 'foo1');
-    expect(initialized).toBe(false);
-  });
-
-  test('and clears the error', () => {
-    const error = getEmbeddableError(store.getState(), 'foo1');
-    expect(error).toBe(undefined);
-  });
+/**
+ * Only a single reducer now, but eventually there should be one for each sub app that is part of the
+ * core kibana plugins.
+ */
+export const reducers = combineReducers<CoreKibanaState>({
+  dashboard,
 });

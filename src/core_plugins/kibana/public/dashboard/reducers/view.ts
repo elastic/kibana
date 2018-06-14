@@ -73,22 +73,20 @@ const updateUseMargins = (view: ViewState, useMargins: boolean) => ({
   useMargins,
 });
 
-const updateViewMode = (view: ViewState, viewMode: string) => ({
+const updateViewMode = (view: ViewState, viewMode: DashboardViewMode) => ({
   ...view,
   viewMode,
 });
 
 export const viewReducer: Reducer<ViewState> = (
-  view: ViewState = {
+  view = {
     filters: [],
     hidePanelTitles: false,
     isFullScreenMode: false,
-    maximizedPanelId: undefined,
-    query: { language: QueryLanguageType.lucene, query: '' },
+    query: { language: QueryLanguageType.LUCENE, query: '' },
     timeRange: { to: 'now', from: 'now-15m' },
     useMargins: true,
     viewMode: DashboardViewMode.VIEW,
-    visibleContextMenuPanelId: undefined,
   },
   action
 ): ViewState => {

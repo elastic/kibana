@@ -25,6 +25,7 @@ import {
   Query,
   TimeRange,
 } from 'ui/embeddable';
+import { DashboardViewMode } from '../dashboard_view_mode';
 import {
   DashboardMetadata,
   DashboardState,
@@ -110,7 +111,7 @@ export const getVisibleContextMenuPanelId = (
 export const getUseMargins = (dashboard: DashboardState): boolean =>
   dashboard.view.useMargins;
 
-export const getViewMode = (dashboard: DashboardState): string =>
+export const getViewMode = (dashboard: DashboardState): DashboardViewMode =>
   dashboard.view.viewMode;
 
 export const getFullScreenMode = (dashboard: DashboardState): boolean =>
@@ -166,5 +167,5 @@ export const getContainerState = (
 /**
  * @return an array of filters any embeddables wish dashboard to apply
  */
-export const getStagedFilters = (dashboard: DashboardState) =>
+export const getStagedFilters = (dashboard: DashboardState): Filters =>
   _.compact(_.map(dashboard.embeddables, 'stagedFilter'));
