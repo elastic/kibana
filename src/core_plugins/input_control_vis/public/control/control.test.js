@@ -137,7 +137,7 @@ describe('empty state', () => {
     expect(control.value).to.be('originalUnsetValue');
   });
 
-  test('should update control value when unset value changes and control is in empty state', function () {
+  test('should update control value to new empty state when unset value changes and control is in empty state', function () {
     control.setUnsetValue('updatedUnsetValue');
     expect(control.value).to.be('updatedUnsetValue');
   });
