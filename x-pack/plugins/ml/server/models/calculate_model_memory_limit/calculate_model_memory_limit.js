@@ -110,7 +110,7 @@ export function calculateModelMemoryLimitProvider(callWithRequest) {
             mmlMB = (maxBytes / numeral('1MB').value());
           }
         }
-        response(`${mmlMB}MB`);
+        response({ modelMemoryLimit: `${mmlMB}MB` });
       })
         .catch((error) => {
           reject(error);

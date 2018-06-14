@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import sinon from 'sinon';
 import expect from 'expect.js';
 
@@ -8,7 +27,7 @@ import * as SchemaNS from '../schema';
 import * as SettingsNS from '../settings';
 
 describe('plugin discovery/extend config service', () => {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
   afterEach(() => sandbox.restore());
 
   const pluginSpec = new PluginPack({
@@ -77,21 +96,21 @@ describe('plugin discovery/extend config service', () => {
     });
 
     it('adds the schema for a plugin spec to its config prefix', async () => {
-      const config = Config.withDefaultSchema();
+      const config = await Config.withDefaultSchema();
       expect(config.has('foo.bar.baz')).to.be(false);
       await extendConfigService(pluginSpec, config);
       expect(config.has('foo.bar.baz')).to.be(true);
     });
 
     it('initializes it with the default settings', async () => {
-      const config = Config.withDefaultSchema();
+      const config = await Config.withDefaultSchema();
       await extendConfigService(pluginSpec, config);
       expect(config.get('foo.bar.baz.enabled')).to.be(true);
       expect(config.get('foo.bar.baz.test')).to.be('bonk');
     });
 
     it('initializes it with values from root settings if defined', async () => {
-      const config = Config.withDefaultSchema();
+      const config = await Config.withDefaultSchema();
       await extendConfigService(pluginSpec, config, {
         foo: {
           bar: {
@@ -106,7 +125,7 @@ describe('plugin discovery/extend config service', () => {
     });
 
     it('throws if root settings are invalid', async () => {
-      const config = Config.withDefaultSchema();
+      const config = await Config.withDefaultSchema();
       try {
         await extendConfigService(pluginSpec, config, {
           foo: {
@@ -126,7 +145,7 @@ describe('plugin discovery/extend config service', () => {
     });
 
     it('calls logDeprecation() with deprecation messages', async () => {
-      const config = Config.withDefaultSchema();
+      const config = await Config.withDefaultSchema();
       const logDeprecation = sinon.stub();
       await extendConfigService(pluginSpec, config, {
         foo: {
@@ -142,7 +161,7 @@ describe('plugin discovery/extend config service', () => {
     });
 
     it('uses settings after transforming deprecations', async () => {
-      const config = Config.withDefaultSchema();
+      const config = await Config.withDefaultSchema();
       await extendConfigService(pluginSpec, config, {
         foo: {
           bar: {
@@ -158,7 +177,7 @@ describe('plugin discovery/extend config service', () => {
 
   describe('disableConfigExtension()', () => {
     it('removes added config', async () => {
-      const config = Config.withDefaultSchema();
+      const config = await Config.withDefaultSchema();
       await extendConfigService(pluginSpec, config);
       expect(config.has('foo.bar.baz.test')).to.be(true);
       await disableConfigExtension(pluginSpec, config);
@@ -166,7 +185,7 @@ describe('plugin discovery/extend config service', () => {
     });
 
     it('leaves {configPrefix}.enabled config', async () => {
-      const config = Config.withDefaultSchema();
+      const config = await Config.withDefaultSchema();
       expect(config.has('foo.bar.baz.enabled')).to.be(false);
       await extendConfigService(pluginSpec, config);
       expect(config.get('foo.bar.baz.enabled')).to.be(true);

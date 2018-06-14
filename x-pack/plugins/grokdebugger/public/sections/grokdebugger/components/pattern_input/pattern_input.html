@@ -3,14 +3,16 @@
     <label class="kuiLabel kuiVerticalRhythmSmall">
       Grok Pattern
     </label>
-    <div
-      class="pattern-input-editor grokdebugger-ace-editor kuiVerticalRhythmSmall"
-      require-keys="true"
-      ui-ace="{
-        onLoad: aceLoaded
-      }"
-      ng-model="patternInput.pattern"
-      data-test-subj="acePatternInput"
-    ></div>
+    <div class="grokdebugger-ace-editor">
+      <div
+        class="pattern-input-editor kuiVerticalRhythmSmall"
+        require-keys="true"
+        ui-ace="{
+          onLoad: aceLoaded
+        }"
+        ng-model="patternInput.pattern"
+        data-test-subj="acePatternInput"
+      ></div>
+    </div>
   </div>
 </form>

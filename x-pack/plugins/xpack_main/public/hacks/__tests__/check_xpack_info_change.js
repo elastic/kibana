@@ -12,7 +12,7 @@ const XPACK_INFO_SIG_KEY = 'xpackMain.infoSignature';
 const XPACK_INFO_KEY = 'xpackMain.info';
 
 describe('CheckXPackInfoChange Factory', () => {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
 
   let mockSessionStorage;
   beforeEach(ngMock.module('kibana', ($provide) => {
@@ -95,7 +95,7 @@ describe('CheckXPackInfoChange Factory', () => {
     });
 
     // If license didn't change banner shouldn't be displayed.
-    Notifier.prototype.directive.reset();
+    Notifier.prototype.directive.resetHistory();
     mockSessionStorage.getItem.withArgs(XPACK_INFO_SIG_KEY).returns('bar');
 
     $http.post('/api/test');

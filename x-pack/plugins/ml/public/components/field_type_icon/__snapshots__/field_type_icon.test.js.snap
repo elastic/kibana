@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FieldTypeIcon render component when type matches a field type 1`] = `
+<FieldTypeIconContainer
+  ariaLabel="Aggregatable string field"
+  className="field-type-icon"
+  iconChar="t"
+/>
+`;
+
+exports[`FieldTypeIcon update component 1`] = `
+<FieldTypeIconContainer
+  ariaLabel="Aggregatable string field"
+  className="field-type-icon"
+  iconChar="t"
+/>
+`;

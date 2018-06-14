@@ -73,7 +73,7 @@ export async function validateModelMemoryLimit(callWithRequest, job, duration) {
       duration.start,
       duration.end,
       true);
-    const mmlEstimateBytes = numeral(mmlEstimate).value();
+    const mmlEstimateBytes = numeral(mmlEstimate.modelMemoryLimit).value();
 
     let runEstimateGreaterThenMml = true;
     // if max_model_memory_limit has been set,

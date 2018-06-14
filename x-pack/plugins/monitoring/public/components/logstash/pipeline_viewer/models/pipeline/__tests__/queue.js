@@ -37,6 +37,7 @@ describe('Queue class', () => {
       expect(queue.stats).to.eql({});
       expect(queue.meta).to.be(meta);
       expect(queue).to.be.a(Queue);
+      expect(queue.vertex).to.eql(queueVertex);
     });
   });
 });

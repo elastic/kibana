@@ -105,6 +105,10 @@ export class DataRecognizer {
   }
 
   async searchForFields(moduleConfig, indexPattern) {
+    if (moduleConfig.query === undefined) {
+      return false;
+    }
+
     const index = indexPattern;
     const size = 0;
     const body = {
@@ -158,21 +162,23 @@ export class DataRecognizer {
     }));
 
     // load all of the kibana saved objects
-    const kKeys = Object.keys(manifestJSON.kibana);
-    await Promise.all(kKeys.map(async (key) => {
-      kibana[key] = [];
-      await Promise.all(manifestJSON.kibana[key].map(async (obj) => {
-        const kConfig = await this.readFile(`${this.modulesDir}/${dirName}/${KIBANA_DIR}/${key}/${obj.file}`);
-        // use the file name for the id
-        const kId = obj.file.replace('.json', '');
-        const config = JSON.parse(kConfig);
-        kibana[key].push({
-          id: kId,
-          title: config.title,
-          config
-        });
+    if (manifestJSON.kibana !== undefined) {
+      const kKeys = Object.keys(manifestJSON.kibana);
+      await Promise.all(kKeys.map(async (key) => {
+        kibana[key] = [];
+        await Promise.all(manifestJSON.kibana[key].map(async (obj) => {
+          const kConfig = await this.readFile(`${this.modulesDir}/${dirName}/${KIBANA_DIR}/${key}/${obj.file}`);
+          // use the file name for the id
+          const kId = obj.file.replace('.json', '');
+          const config = JSON.parse(kConfig);
+          kibana[key].push({
+            id: kId,
+            title: config.title,
+            config
+          });
+        }));
       }));
-    }));
+    }
 
     return {
       jobs,
@@ -185,7 +191,17 @@ export class DataRecognizer {
   // takes a module config id, an optional jobPrefix and the request object
   // creates all of the jobs, datafeeds and savedObjects  listed in the module config.
   // if any of the savedObjects already exist, they will not be overwritten.
-  async setupModuleItems(moduleId, jobPrefix, groups, indexPatternName, query, request) {
+  async setupModuleItems(
+    moduleId,
+    jobPrefix,
+    groups,
+    indexPatternName,
+    query,
+    startDatafeed,
+    start,
+    end,
+    request
+  ) {
     this.savedObjectsClient = request.getSavedObjectsClient();
     this.indexPatterns = await this.loadIndexPatterns();
 
@@ -229,6 +245,24 @@ export class DataRecognizer {
         });
       }
       saveResults.datafeeds = await this.saveDatafeeds(moduleConfig.datafeeds);
+
+      if (startDatafeed) {
+        const savedDatafeeds = moduleConfig.datafeeds.filter((df) => {
+          const datafeedResult = saveResults.datafeeds.find(d => d.id === df.id);
+          return (datafeedResult !== undefined && datafeedResult.success === true);
+        });
+
+        const startResults = await this.startDatafeeds(savedDatafeeds, start, end);
+        saveResults.datafeeds.forEach((df) => {
+          const startedDatafeed = startResults[df.id];
+          if (startedDatafeed !== undefined) {
+            df.started = startedDatafeed.started;
+            if (startedDatafeed.error !== undefined) {
+              df.error = startedDatafeed.error;
+            }
+          }
+        });
+      }
     }
 
     // create the savedObjects
@@ -361,14 +395,11 @@ export class DataRecognizer {
   // as success: false
   async saveDatafeeds(datafeeds) {
     return await Promise.all(datafeeds.map(async (datafeed) => {
-      const datafeedId = datafeed.id;
-
       try {
-        datafeed.id = datafeedId;
         await this.saveDatafeed(datafeed);
-        return { id: datafeedId, success: true };
+        return { id: datafeed.id, success: true, started: false };
       } catch (error) {
-        return { id: datafeedId, success: false, error };
+        return { id: datafeed.id, success: false, started: false, error };
       }
     }));
   }
@@ -377,6 +408,51 @@ export class DataRecognizer {
     const { id: datafeedId, config: body } = datafeed;
     return this.callWithRequest('ml.addDatafeed', { datafeedId, body });
   }
+
+  async startDatafeeds(datafeeds, start, end) {
+    const results = {};
+    for (const datafeed of datafeeds) {
+      results[datafeed.id] = await this.startDatafeed(datafeed, start, end);
+    }
+    return results;
+  }
+
+  async startDatafeed(datafeed, start, end) {
+    const result = { started: false };
+    let opened = false;
+    try {
+      const openResult = await this.callWithRequest('ml.openJob', { jobId: datafeed.config.job_id });
+      opened = openResult.opened;
+    } catch (error) {
+      // if the job is already open, a 409 will be returned.
+      if (error.statusCode === 409) {
+        opened = true;
+      } else {
+        opened = false;
+        result.started =  false;
+        result.error =  error;
+      }
+    }
+    if (opened) {
+      try {
+        const duration = { start: 0 };
+        if (start !== undefined) {
+          duration.start = start;
+        }
+        if (end !== undefined) {
+          duration.end = end;
+        }
+
+        await this.callWithRequest('ml.startDatafeed', { datafeedId: datafeed.id, ...duration });
+        result.started =  true;
+      } catch (error) {
+        result.started =  false;
+        result.error =  error;
+      }
+    }
+    return result;
+  }
+
 
   // merge all of the save results into one result object
   // which is returned from the endpoint
@@ -398,6 +474,7 @@ export class DataRecognizer {
       saveResults.datafeeds.forEach((d2) => {
         if (d.id === d2.id) {
           d.success = d2.success;
+          d.started = d2.started;
           if (d2.error !== undefined) {
             d.error = d2.error;
           }

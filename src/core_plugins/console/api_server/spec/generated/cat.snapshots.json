@@ -1,5 +1,5 @@
 {
-  "_cat/snapshots": {
+  "cat.snapshots": {
     "url_params": {
       "format": "",
       "ignore_unavailable": "__flag__",
@@ -15,6 +15,7 @@
     "patterns": [
       "_cat/snapshots",
       "_cat/snapshots/{repository}"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cat-snapshots.html"
   }
 }

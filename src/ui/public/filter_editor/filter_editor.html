@@ -55,6 +55,7 @@
 
         <div class="kuiFieldGroupSection">
           <filter-operator-select
+            data-test-subj="filterOperatorList"
             ng-if="filterEditor.field"
             field="filterEditor.field"
             operator="filterEditor.operator"
@@ -64,6 +65,7 @@
 
         <div class="kuiFieldGroupSection kuiFieldGroupSection--wide filterEditor__wideField filterEditorParamsInput">
           <filter-params-editor
+            data-test-subj="filterParams"
             ng-if="filterEditor.field && filterEditor.operator"
             field="filterEditor.field"
             operator="filterEditor.operator"

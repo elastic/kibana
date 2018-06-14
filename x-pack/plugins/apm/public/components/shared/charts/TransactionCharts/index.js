@@ -39,14 +39,6 @@ export class Charts extends Component {
     hoverIndex: null
   };
 
-  componentDidMount() {
-    this.props.loadCharts(this.props);
-  }
-
-  componentWillReceiveProps(nextProps) {
-    nextProps.loadCharts(nextProps);
-  }
-
   onHover = hoverIndex => this.setState({ hoverIndex });
   onMouseLeave = () => this.setState({ hoverIndex: null });
   onSelectionEnd = selection => {
@@ -56,11 +48,11 @@ export class Charts extends Component {
   };
 
   getResponseTimeTickFormatter = t => {
-    return this.props.charts.data.noHits ? '- ms' : asMillis(t);
+    return this.props.charts.noHits ? '- ms' : asMillis(t);
   };
 
   getResponseTimeTooltipFormatter = t => {
-    if (this.props.charts.data.noHits) {
+    if (this.props.charts.noHits) {
       return '- ms';
     } else {
       return t == null ? 'N/A' : asMillis(t);
@@ -70,12 +62,12 @@ export class Charts extends Component {
   getTPMFormatter = t => {
     const { urlParams, charts } = this.props;
     const unit = tpmUnit(urlParams.transactionType);
-    return charts.data.noHits ? `- ${unit}` : `${asInteger(t)} ${unit}`;
+    return charts.noHits ? `- ${unit}` : `${asInteger(t)} ${unit}`;
   };
 
   render() {
     const { charts, urlParams } = this.props;
-    const { noHits, responseTimeSeries, tpmSeries } = charts.data;
+    const { noHits, responseTimeSeries, tpmSeries } = charts;
 
     return (
       <ChartsWrapper>

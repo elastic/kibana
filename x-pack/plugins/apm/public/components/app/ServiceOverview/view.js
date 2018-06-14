@@ -5,52 +5,40 @@
  */
 
 import React, { Component } from 'react';
-import withErrorHandler from '../../shared/withErrorHandler';
 import { STATUS } from '../../../constants';
 import { isEmpty } from 'lodash';
 import { loadAgentStatus } from '../../../services/rest';
 import { KibanaLink } from '../../../utils/url';
 import { EuiButton } from '@elastic/eui';
 import List from './List';
-import { getKey } from '../../../store/apiHelpers';
 import { HeaderContainer } from '../../shared/UIComponents';
 
-function fetchData(props) {
-  const { start, end } = props.urlParams;
-  const key = getKey({ start, end });
-
-  if (key && props.serviceList.key !== key) {
-    props.loadServiceList({ start, end });
-  }
-}
+import { ServiceListRequest } from '../../../store/reactReduxRequest/serviceList';
 
 class ServiceOverview extends Component {
   state = {
     noHistoricalDataFound: false
   };
 
-  checkForHistoricalData({ serviceList }) {
+  async checkForHistoricalData({ serviceList }) {
     if (serviceList.status === STATUS.SUCCESS && isEmpty(serviceList.data)) {
-      loadAgentStatus().then(result => {
-        if (!result.dataFound) {
-          this.setState({ noHistoricalDataFound: true });
-        }
-      });
+      const result = await loadAgentStatus();
+      if (!result.dataFound) {
+        this.setState({ noHistoricalDataFound: true });
+      }
     }
   }
 
   componentDidMount() {
-    fetchData(this.props);
     this.checkForHistoricalData(this.props);
   }
 
   componentWillReceiveProps(nextProps) {
-    fetchData(nextProps);
     this.checkForHistoricalData(nextProps);
   }
 
   render() {
-    const { serviceList, changeServiceSorting, serviceSorting } = this.props;
+    const { changeServiceSorting, serviceSorting, urlParams } = this.props;
     const { noHistoricalDataFound } = this.state;
 
     const emptyMessageHeading = noHistoricalDataFound
@@ -68,12 +56,17 @@ class ServiceOverview extends Component {
           <SetupInstructionsLink />
         </HeaderContainer>
 
-        <List
-          items={serviceList.data}
-          changeServiceSorting={changeServiceSorting}
-          serviceSorting={serviceSorting}
-          emptyMessageHeading={emptyMessageHeading}
-          emptyMessageSubHeading={emptyMessageSubHeading}
+        <ServiceListRequest
+          urlParams={urlParams}
+          render={({ data }) => (
+            <List
+              items={data}
+              changeServiceSorting={changeServiceSorting}
+              serviceSorting={serviceSorting}
+              emptyMessageHeading={emptyMessageHeading}
+              emptyMessageSubHeading={emptyMessageSubHeading}
+            />
+          )}
         />
       </div>
     );
@@ -90,4 +83,4 @@ function SetupInstructionsLink({ buttonFill = false }) {
   );
 }
 
-export default withErrorHandler(ServiceOverview, ['serviceList']);
+export default ServiceOverview;

@@ -62,7 +62,7 @@ describe('PipelineViewer component', () => {
         ]
       });
 
-      timeseriesTooltipXValueFormatter = {};
+      timeseriesTooltipXValueFormatter = () => {};
       pipelineState = {
         config: {
           graph

@@ -1,20 +1,21 @@
 {
-  "_xpack/ml/datafeeds/{datafeed_id}": {
+  "_xpack/ml/datafeeds/{id}": {
     "methods": [
       "GET"
     ],
     "patterns": [
       "_xpack/ml/datafeeds/",
-      "_xpack/ml/datafeeds/{datafeed_id}",
+      "_xpack/ml/datafeeds/{id}",
       "_xpack/ml/datafeeds/_all"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-get-datafeed.html"
   },
-  "PUT _xpack/ml/datafeeds/{datafeed_id}": {
+  "PUT _xpack/ml/datafeeds/{id}": {
     "methods": [
       "PUT"
     ],
     "patterns": [
-      "_xpack/ml/datafeeds/{datafeed_id}"
+      "_xpack/ml/datafeeds/{id}"
     ],
     "data_autocomplete_rules": {
       "aggregations": {},
@@ -27,56 +28,62 @@
       "script_field": {},
       "scroll_size": 1000,
       "types": []
-    }
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-put-datafeed.html"
   },
-  "DELETE _xpack/ml/datafeeds/{datafeed_id}": {
+  "DELETE _xpack/ml/datafeeds/{id}": {
     "methods": [
       "DELETE"
     ],
     "patterns": [
-      "_xpack/ml/datafeeds/{datafeed_id}"
-    ]
+      "_xpack/ml/datafeeds/{id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-delete-datafeed.html"
   },
-  "_xpack/ml/datafeeds/{datafeed_id}/_start": {
+  "_xpack/ml/datafeeds/{id}/_start": {
     "methods": [
       "POST"
     ],
     "patterns": [
-      "_xpack/ml/datafeeds/{datafeed_id}/_start"
-    ]
+      "_xpack/ml/datafeeds/{id}/_start"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-start-datafeed.html"
   },
-  "_xpack/ml/datafeeds/{datafeed_id}/_stop": {
+  "_xpack/ml/datafeeds/{id}/_stop": {
     "methods": [
       "POST"
     ],
     "patterns": [
-      "_xpack/ml/datafeeds/{datafeed_id}/_stop"
-    ]
+      "_xpack/ml/datafeeds/{id}/_stop"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-stop-datafeed.html"
   },
-  "_xpack/ml/datafeeds/{datafeed_id}/stats": {
+  "_xpack/ml/datafeeds/{id}/stats": {
     "methods": [
       "GET"
     ],
     "patterns": [
       "_xpack/ml/datafeeds/stats",
-      "_xpack/ml/datafeeds/{datafeed_id}/stats",
+      "_xpack/ml/datafeeds/{id}/stats",
       "_xpack/ml/datafeeds/_all/stats"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-get-datafeed-stats.html"
   },
-  "_xpack/ml/datafeeds/{datafeed_id}/_preview": {
+  "_xpack/ml/datafeeds/{id}/_preview": {
     "methods": [
       "GET"
     ],
     "patterns": [
-      "_xpack/ml/datafeeds/{datafeed_id}_preview"
-    ]
+      "_xpack/ml/datafeeds/{id}_preview"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-preview-datafeed.html"
   },
-  "_xpack/ml/datafeeds/{datafeed_id}/_update": {
+  "_xpack/ml/datafeeds/{id}/_update": {
     "methods": [
       "POST"
     ],
     "patterns": [
-      "_xpack/ml/datafeeds/{datafeed_id}/_update"
+      "_xpack/ml/datafeeds/{id}/_update"
     ],
     "data_autocomplete_rules": {
       "aggregations": {},
@@ -89,6 +96,7 @@
       "script_field": {},
       "scroll_size": 1000,
       "types": []
-    }
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-update-datafeed.html"
   }
 }

@@ -113,7 +113,8 @@ describe('ML - job utils', () => {
           { 'function': 'sum', 'field_name': 'bytes', 'partition_field_name': 'clientip', 'detector_description': 'High bytes client IP' }, // eslint-disable-line max-len
           { 'function': 'freq_rare', 'by_field_name': 'uri', 'over_field_name': 'clientip', 'detector_description': 'Freq rare URI' },
           { 'function': 'count', 'by_field_name': 'mlcategory', 'detector_description': 'Count by category' },
-          { 'function': 'count', 'by_field_name': 'hrd', 'detector_description': 'count by hrd' }
+          { 'function': 'count', 'by_field_name': 'hrd', 'detector_description': 'count by hrd' },
+          { 'function': 'mean', 'field_name': 'NetworkDiff', 'detector_description': 'avg NetworkDiff' }
         ]
       },
       datafeed_config: {
@@ -121,6 +122,12 @@ describe('ML - job utils', () => {
           'hrd': {
             'script': {
               'inline': 'return domainSplit(doc["query"].value, params).get(1);',
+              'lang': 'painless'
+            }
+          },
+          'NetworkDiff': {
+            'script': {
+              'source': 'doc["NetworkOut"].value - doc["NetworkIn"].value',
               'lang': 'painless'
             }
           }
@@ -140,8 +147,12 @@ describe('ML - job utils', () => {
       expect(isTimeSeriesViewDetector(job, 2)).to.be(false);
     });
 
-    it('returns false for a detector using count on a scripted field', () => {
+    it('returns false for a detector using a script field as a by field', () => {
       expect(isTimeSeriesViewDetector(job, 3)).to.be(false);
+    });
+
+    it('returns false for a detector using a script field as a metric field_name', () => {
+      expect(isTimeSeriesViewDetector(job, 4)).to.be(false);
     });
 
   });

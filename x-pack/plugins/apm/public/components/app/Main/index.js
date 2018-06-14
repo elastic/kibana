@@ -8,8 +8,6 @@ import React from 'react';
 import styled from 'styled-components';
 import { Route, Switch } from 'react-router-dom';
 import { routes } from './routeConfig';
-import GlobalProgess from './GlobalProgess';
-import LicenseChecker from './LicenseChecker';
 import ScrollToTopOnPathChange from './ScrollToTopOnPathChange';
 import { px, units, unit } from '../../../style/variables';
 import ConnectRouterToRedux from '../../shared/ConnectRouterToRedux';
@@ -22,8 +20,6 @@ const MainContainer = styled.div`
 export default function Main() {
   return (
     <MainContainer>
-      <GlobalProgess />
-      <LicenseChecker />
       <Route component={ConnectRouterToRedux} />
       <Route component={ScrollToTopOnPathChange} />
       {routes.map((route, i) => {

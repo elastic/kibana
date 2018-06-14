@@ -10,18 +10,12 @@ import _ from 'lodash';
 
 import { EVENT_RATE_COUNT_FIELD } from 'plugins/ml/jobs/new_job/simple/components/constants/general';
 import { ML_MEDIAN_PERCENTS } from 'plugins/ml/../common/util/job_utils';
-import { FieldFormatServiceProvider } from 'plugins/ml/services/field_format_service';
-import { JobServiceProvider } from 'plugins/ml/services/job_service';
+import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
+import { mlJobService } from 'plugins/ml/services/job_service';
 import { createJobForSaving } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
+import { ml } from 'plugins/ml/services/ml_api_service';
 
-export function MultiMetricJobServiceProvider(
-  $q,
-  es,
-  timefilter,
-  Private) {
-
-  const mlJobService = Private(JobServiceProvider);
-  const fieldFormatService = Private(FieldFormatServiceProvider);
+export function MultiMetricJobServiceProvider() {
 
   class MultiMetricJobService {
 
@@ -57,7 +51,7 @@ export function MultiMetricJobServiceProvider(
     }
 
     getLineChartResults(formConfig, thisLoadTimestamp) {
-      return $q((resolve, reject) => {
+      return new Promise((resolve, reject) => {
 
         const fieldIds = Object.keys(formConfig.fields).sort();
 
@@ -80,7 +74,7 @@ export function MultiMetricJobServiceProvider(
 
         const searchJson = getSearchJsonFromConfig(formConfig);
 
-        es.search(searchJson)
+        ml.esSearch(searchJson)
           .then((resp) => {
             // if this is the last chart load, wipe all previous chart data
             if (thisLoadTimestamp === this.chartData.lastLoadTimestamp) {
@@ -94,7 +88,7 @@ export function MultiMetricJobServiceProvider(
                 if (fieldId !== EVENT_RATE_COUNT_FIELD) {
                   const field = formConfig.fields[fieldId];
                   const aggType = field.agg.type.dslName;
-                  this.chartData.detectors[fieldId].fieldFormat = fieldFormatService.getFieldFormatFromIndexPattern(
+                  this.chartData.detectors[fieldId].fieldFormat = mlFieldFormatService.getFieldFormatFromIndexPattern(
                     formConfig.indexPattern,
                     fieldId,
                     aggType);
@@ -245,7 +239,7 @@ export function MultiMetricJobServiceProvider(
     }
 
     createJob(formConfig) {
-      return $q((resolve, reject) => {
+      return new Promise((resolve, reject) => {
 
         this.job = this.getJobFromConfig(formConfig);
         const job = createJobForSaving(this.job);

@@ -8,19 +8,18 @@
 
 import { getQueryFromSavedSearch } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
-import { JobServiceProvider } from 'plugins/ml/services/job_service';
+import { mlJobService } from 'plugins/ml/services/job_service';
 import { ml } from 'plugins/ml/services/ml_api_service';
 
-export function CreateRecognizerJobsServiceProvider(Private, $q) {
+export function CreateRecognizerJobsServiceProvider(Private) {
 
-  const mlJobService = Private(JobServiceProvider);
   const savedObjectsClient = Private(SavedObjectsClientProvider);
   class CreateRecognizerJobsService {
 
     constructor() {}
 
     createDatafeed(job, formConfig) {
-      return $q((resolve, reject) => {
+      return new Promise((resolve, reject) => {
         const jobId = formConfig.jobLabel + job.id;
 
         mlJobService.saveNewDatafeed(job.datafeedConfig, jobId)

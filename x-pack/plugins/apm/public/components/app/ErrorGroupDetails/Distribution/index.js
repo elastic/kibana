@@ -4,22 +4,50 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { connect } from 'react-redux';
-import Distribution from './view';
-import { getUrlParams } from '../../../../store/urlParams';
-import {
-  loadErrorDistribution,
-  getErrorDistribution
-} from '../../../../store/errorDistribution';
+import React from 'react';
+import Histogram from '../../../shared/charts/Histogram';
+import EmptyMessage from '../../../shared/EmptyMessage';
+import { HeaderSmall } from '../../../shared/UIComponents';
 
-function mapStateToProps(state = {}) {
-  return {
-    urlParams: getUrlParams(state),
-    distribution: getErrorDistribution(state)
-  };
+export function getFormattedBuckets(buckets, bucketSize) {
+  if (!buckets) {
+    return null;
+  }
+
+  return buckets.map(({ count, key }) => {
+    return {
+      x0: key,
+      x: key + bucketSize,
+      y: count
+    };
+  });
 }
 
-const mapDispatchToProps = {
-  loadErrorDistribution
-};
-export default connect(mapStateToProps, mapDispatchToProps)(Distribution);
+function Distribution({ distribution }) {
+  const buckets = getFormattedBuckets(
+    distribution.buckets,
+    distribution.bucketSize
+  );
+
+  const isEmpty = distribution.totalHits === 0;
+
+  if (isEmpty) {
+    return <EmptyMessage heading="No errors in the selected time range." />;
+  }
+
+  return (
+    <div>
+      <HeaderSmall>Occurrences</HeaderSmall>
+      <Histogram
+        verticalLineHover={bucket => bucket.x}
+        xType="time"
+        buckets={buckets}
+        bucketSize={distribution.bucketSize}
+        formatYShort={value => `${value} occ.`}
+        formatYLong={value => `${value} occurrences`}
+      />
+    </div>
+  );
+}
+
+export default Distribution;

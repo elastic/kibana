@@ -1,5 +1,5 @@
 {
-  "_shard_stores": {
+  "indices.shard_stores": {
     "url_params": {
       "status": [],
       "ignore_unavailable": "__flag__",
@@ -17,6 +17,7 @@
     "patterns": [
       "_shard_stores",
       "{indices}/_shard_stores"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-shards-stores.html"
   }
 }

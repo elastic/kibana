@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import Keys from 'leadfoot/keys';
 
 export function VisualBuilderPageProvider({ getService, getPageObjects }) {
@@ -5,7 +24,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
   const retry = getService('retry');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'header']);
+  const PageObjects = getPageObjects(['common', 'header', 'visualize']);
 
   class VisualBuilderPage {
 
@@ -133,12 +152,9 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async selectAggType(type, nth = 0) {
+    async selectAggType(value, nth = 0) {
       const elements = await testSubjects.findAll('aggSelector');
-      const input = await elements[nth].findByCssSelector('.Select-input input');
-      await input.type(type);
-      const option = await elements[nth].findByCssSelector('.Select-option');
-      await option.click();
+      await PageObjects.visualize.setComboBoxElement(elements[nth], value);
       return await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -150,22 +166,17 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
 
     async fillInVariable(name = 'test', metric = 'count', nth = 0) {
       const elements = await testSubjects.findAll('varRow');
-      const input = await elements[nth].findByCssSelector('.vis_editor__calc_vars-name input');
-      await input.type(name);
-      const select = await elements[nth].findByCssSelector('.Select-input input');
-      await select.type(metric);
-      const option = await elements[nth].findByCssSelector('.Select-option');
-      await option.click();
+      const varNameInput = await elements[nth].findByCssSelector('.vis_editor__calc_vars-name input');
+      await varNameInput.type(name);
+      const metricSelectWrapper = await elements[nth].findByCssSelector('.vis_editor__calc_vars-var');
+      await PageObjects.visualize.setComboBoxElement(metricSelectWrapper, metric);
       return await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
 
     async selectGroupByField(fieldName) {
       const element = await testSubjects.find('groupByField');
-      const input = await element.findByCssSelector('.Select-input input');
-      await input.type(fieldName);
-      const option = await element.findByCssSelector('.Select-option');
-      await option.click();
+      await PageObjects.visualize.setComboBoxElement(element, fieldName);
     }
 
     async setLabelValue(value) {

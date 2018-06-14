@@ -5,12 +5,14 @@
  */
 
 import React from 'react';
-import { EuiProgress } from '@elastic/eui';
+import { EuiProgress, EuiDelayHide } from '@elastic/eui';
 
 export default ({ isLoading }) => {
-  if (!isLoading) {
-    return null;
-  }
-
-  return <EuiProgress size="xs" position="fixed" />;
+  return (
+    <EuiDelayHide
+      hide={!isLoading}
+      minimumDuration={1000}
+      render={() => <EuiProgress size="xs" position="fixed" />}
+    />
+  );
 };
