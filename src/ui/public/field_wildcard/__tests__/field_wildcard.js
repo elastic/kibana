@@ -57,6 +57,18 @@ describe('fieldWildcard', function () {
   });
 
   describe('filter', function () {
+    it('filters nothing when given undefined', function () {
+      const filter = fieldWildcardFilter();
+      const original = [
+        'foo',
+        'bar',
+        'baz',
+        1234
+      ];
+
+      expect(original.filter(filter)).to.eql(original);
+    });
+
     it('filters nothing when given an empty array', function () {
       const filter = fieldWildcardFilter([]);
       const original = [

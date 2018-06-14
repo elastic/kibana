@@ -4,4 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './watch_type_select';
+
+
+import './field_title_bar_directive';
+import './styles/main.less';
