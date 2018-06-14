@@ -60,7 +60,6 @@
     "joi": "^13.2.0",
     "lodash.get": "^4.4.2",
     "lodash.isempty": "^4.4.0",
-    "lodash.last": "^3.0.0",
     "mkdirp": "^0.5.1",
     "ora": "^2.0.0",
     "strip-json-comments": "^2.0.1",
@@ -77,6 +76,7 @@
     "husky": "^0.14.3",
     "jest": "^22.4.3",
     "lint-staged": "^7.0.5",
+    "lodash.last": "^3.0.0",
     "nock": "^9.2.5",
     "prettier": "^1.12.1"
   }
