@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import moment from 'moment';
 import { calculateBounds, getTime } from './get_time';
-import { parseQueryString } from './lib/parse_querystring';
+import { parseQueryString } from 'ui/timefilter/lib/parse_querystring';
 import { diffTimeFactory } from './lib/diff_time';
 import { diffIntervalFactory } from './lib/diff_interval';
 import { SimpleEmitter } from 'ui/utils/simple_emitter';
