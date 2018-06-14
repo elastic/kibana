@@ -167,6 +167,6 @@ export async function getTimeseriesData({
       avg_anomalies: avgResponseTimesAnomalies
     },
     tpm_buckets: tpmBuckets,
-    weighted_average: overallAvgDuration || 0
+    overall_avg_duration: overallAvgDuration || 0
   };
 }

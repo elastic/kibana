@@ -51,14 +51,14 @@ export function getCharts(urlParams, charts) {
 }
 
 export function getResponseTimeSeries(chartsData) {
-  const { dates, weightedAverage } = chartsData;
+  const { dates, overallAvgDuration } = chartsData;
   const { avg, p95, p99, avgAnomalies } = chartsData.responseTimes;
 
   const series = [
     {
       title: 'Avg.',
       data: getChartValues(dates, avg),
-      legendValue: `${asMillisWithDefault(weightedAverage)}`,
+      legendValue: `${asMillisWithDefault(overallAvgDuration)}`,
       type: 'line',
       color: colors.apmBlue
     },
@@ -84,7 +84,7 @@ export function getResponseTimeSeries(chartsData) {
       title: 'Anomaly Boundaries',
       hideLegend: true,
       hideTooltipValue: true,
-      data: getAnomalyBoundaries(dates, avgAnomalies.buckets),
+      data: getAnomalyBoundaryValues(dates, avgAnomalies.buckets),
       type: 'area',
       color: 'none',
       areaColor: 'rgba(49, 133, 252, 0.1)' // apmBlue
@@ -94,7 +94,7 @@ export function getResponseTimeSeries(chartsData) {
       title: 'Anomaly score',
       hideLegend: true,
       hideTooltipValue: true,
-      data: getAnomalyScore(
+      data: getAnomalyScoreValues(
         dates,
         avgAnomalies.buckets,
         avgAnomalies.bucketSpanInSeconds
@@ -108,18 +108,17 @@ export function getResponseTimeSeries(chartsData) {
   return series;
 }
 
-function getTpmLegendTitle(bucketKey) {
-  // hide legend text for transactions without "result"
-  if (bucketKey === 'transaction_result_missing') {
-    return '';
-  }
-
-  return bucketKey;
-}
-
-function getTpmSeries(chartsData, transactionType) {
+export function getTpmSeries(chartsData, transactionType) {
   const { dates, tpmBuckets } = chartsData;
   const getColor = getColorByKey(tpmBuckets.map(({ key }) => key));
+  const getTpmLegendTitle = bucketKey => {
+    // hide legend text for transactions without "result"
+    if (bucketKey === 'transaction_result_missing') {
+      return '';
+    }
+
+    return bucketKey;
+  };
 
   return tpmBuckets.map(bucket => {
     return {
@@ -160,7 +159,11 @@ function getChartValues(dates = [], buckets = []) {
   }));
 }
 
-export function getAnomalyScore(dates = [], buckets = [], bucketSpanInSeconds) {
+export function getAnomalyScoreValues(
+  dates = [],
+  buckets = [],
+  bucketSpanInSeconds
+) {
   const ANOMALY_THRESHOLD = 75;
   const getX = (currentX, i) => currentX + bucketSpanInSeconds * 1000 * i;
 
@@ -178,20 +181,22 @@ export function getAnomalyScore(dates = [], buckets = [], bucketSpanInSeconds) {
       const { x: nextX } = points[i + 1] || {};
       const endX = getX(p.x, 1);
       if (nextX == null || nextX > endX) {
-        acc.push({
-          x: endX,
-          y: 1
-        });
-        acc.push({
-          x: getX(p.x, 2)
-        });
+        acc.push(
+          {
+            x: endX,
+            y: 1
+          },
+          {
+            x: getX(p.x, 2)
+          }
+        );
       }
 
       return acc;
     }, []);
 }
 
-function getAnomalyBoundaries(dates = [], buckets = []) {
+function getAnomalyBoundaryValues(dates = [], buckets = []) {
   return dates
     .map((x, i) => ({
       x,

@@ -515,6 +515,6 @@ Object {
       "values": Array [],
     },
   ],
-  "weighted_average": 20729.95283018868,
+  "overall_avg_duration": 20729.95283018868,
 }
 `;

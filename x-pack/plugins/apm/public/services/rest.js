@@ -7,7 +7,7 @@
 import 'isomorphic-fetch';
 import { camelizeKeys } from 'humps';
 import { kfetch } from 'ui/kfetch';
-import { memoize, isEmpty, first, startsWith } from 'lodash';
+import { memoize, isEmpty, first, startsWith, lowerCase } from 'lodash';
 import chrome from 'ui/chrome';
 import { convertKueryToEsQuery } from './kuery';
 import { getFromSavedObject } from 'ui/index_patterns/static_utils';
@@ -70,7 +70,7 @@ export async function startMlJob({ serviceName, transactionType }) {
     method: 'POST',
     pathname: `/api/ml/modules/setup/apm_transaction`,
     body: JSON.stringify({
-      prefix: `${serviceName}-${transactionType}-`,
+      prefix: `${lowerCase(serviceName)}-${lowerCase(transactionType)}-`,
       groups: ['apm', serviceName, transactionType],
       indexPatternName: apmIndexPattern,
       startDatafeed: true,

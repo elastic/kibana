@@ -18,7 +18,7 @@ const INITIAL_DATA = {
   dates: [],
   responseTimes: {},
   tpmBuckets: [],
-  weightedAverage: null
+  overallAvgDuration: null
 };
 
 export const getDetailsCharts = createSelector(
