@@ -48,7 +48,7 @@ class Timefilter extends SimpleEmitter {
    * @param {Object} time
    * @param {string|moment} from
    * @param {string|moment} to
-   * @param {string} mode
+   * @param {string} mode (quick | relative | absolute)
    */
   setTime = (time) => {
     this._time = Object.assign(this._time, time);
