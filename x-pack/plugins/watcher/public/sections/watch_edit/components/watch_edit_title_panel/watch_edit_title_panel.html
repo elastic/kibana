@@ -34,7 +34,7 @@
             class="kuiInputNote kuiInputNote--danger"
             ng-if="watchEditTitlePanel.isValidationMessageVisible('watchName', 'required')"
           >
-            A name is required.
+            Name is required
           </div>
           &nbsp;
         </div>
@@ -45,7 +45,7 @@
         <label
           for="indexSelectSearchBox"
           class="kuiLabel kuiVerticalRhythmSmall">
-          Select an Index
+          Indices to query
         </label>
         <div
           class="kuiVerticalRhythmSmall watchEditTitleIndexSelectContainer"
@@ -67,7 +67,7 @@
             class="kuiInputNote kuiInputNote--danger"
             ng-if="watchEditTitlePanel.showRequiredIndexSelectionValidationMessage()"
           >
-            At least one index is required.
+            Enter one or more indices
           </div>
           <div
             id="{{watchEditTitlePanel.makeId(['indexSelectSearchBox', 'invalid'])}}"
@@ -75,7 +75,7 @@
             class="kuiInputNote kuiInputNote--danger"
             ng-if="watchEditTitlePanel.showInvalidIndexValidationMessage()"
           >
-            Your index query does not match any valid indices.
+            Your index query does not match any valid indices
           </div>
           <div
             id="{{watchEditTitlePanel.makeId(['indexSelectSearchBox', 'notimefield'])}}"
@@ -83,9 +83,9 @@
             class="kuiInputNote kuiInputNote--danger"
             ng-if="watchEditTitlePanel.showNoTimeFieldsValidationMessage()"
           >
-            Your index query has no associated time fields.
+            Your index query does not have an associated time field
           </div>
-          <span>Broad searches can be done by adding * to your query</span>
+          <span>Use * to broaden your search query</span>
         </div>
       </div>
 
@@ -93,7 +93,7 @@
         <label
           for="{{watchEditTitlePanel.makeId('timeField')}}"
           class="kuiLabel kuiVerticalRhythmSmall">
-          Select a time field
+          Time field
         </label>
         <div class="kuiVerticalRhythmSmall">
           <select
@@ -104,7 +104,7 @@
             ng-model="watchEditTitlePanel.watch.timeField"
             ng-options="timeField.name as timeField.name group by timeField.normalizedType for timeField in watchEditTitlePanel.timeFields"
           >
-            <option value="">Select a field...</option>
+            <option value="">Select a field</option>
           </select>
         </div>
         <div class="kuiSubText kuiSubduedText kuiVerticalRhythmSmall">
@@ -114,7 +114,7 @@
             class="kuiInputNote kuiInputNote--danger"
             ng-if="watchEditTitlePanel.isValidationMessageVisible('timeField', 'required')"
           >
-            A time field is required.
+            A time field is required
           </div>
           &nbsp;
         </div>
@@ -146,7 +146,7 @@
             class="kuiInputNote kuiInputNote--danger"
             ng-if="watchEditTitlePanel.isValidationMessageVisible('durationSelectTriggerIntervalSize', 'required')"
           >
-            An interval size is required.
+            Interval size is required
           </div>
           <div
             id="{{watchEditTitlePanel.makeId(['durationSelectTriggerIntervalSize', 'min'])}}"
@@ -154,7 +154,7 @@
             class="kuiInputNote kuiInputNote--danger"
             ng-if="watchEditTitlePanel.isValidationMessageVisible('durationSelectTriggerIntervalSize', 'min')"
           >
-            Interval size can not be a negative number.
+            Interval size cannot be a negative number
           </div>
           <div
             id="{{watchEditTitlePanel.makeId(['durationSelectTriggerIntervalSize', 'number'])}}"
@@ -162,7 +162,7 @@
             class="kuiInputNote kuiInputNote--danger"
             ng-if="watchEditTitlePanel.isValidationMessageVisible('durationSelectTriggerIntervalSize', 'number')"
           >
-            Interval size must be a valid number.
+            Interval size must be a valid number
           </div>
           <div
             id="{{watchEditTitlePanel.makeId(['durationSelectTriggerIntervalUnit', 'required'])}}"
@@ -170,7 +170,7 @@
             class="kuiInputNote kuiInputNote--danger"
             ng-if="watchEditTitlePanel.isValidationMessageVisible('durationSelectTriggerIntervalUnit', 'required')"
           >
-            An interval unit is required.
+            An interval size is required
           </div>
           <div
             id="{{watchEditTitlePanel.makeId(['durationSelectTriggerIntervalSize', 'minimumDuration'])}}"
@@ -178,8 +178,7 @@
             class="kuiInputNote kuiInputNote--danger"
             ng-if="watchEditTitlePanel.isValidationMessageVisible('durationSelectTriggerIntervalSize', 'minimumDuration', false)"
           >
-            Interval duration is too short.
-            The miminum allowed is {{watchEditTitlePanel.triggerIntervalMinimumSize}}{{watchEditTitlePanel.triggerIntervalMinimumUnit}}.
+            The miminum duration is {{watchEditTitlePanel.triggerIntervalMinimumSize}}{{watchEditTitlePanel.triggerIntervalMinimumUnit}}
           </div>
         </div>
       </div>

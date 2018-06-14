@@ -56,13 +56,13 @@ export class ThresholdWatch extends BaseWatch {
   }
 
   get titleDescription() {
-    const staticPart = `Send out an alert when specific conditions are met.`;
+    const staticPart = `Send an alert when a specific condition is met.`;
     if (isNaN(this.triggerIntervalSize)) {
       return staticPart;
     }
 
     const timeUnitLabel = getTimeUnitsLabel(this.triggerIntervalUnit, this.triggerIntervalSize);
-    return `${staticPart} This will run once every ${this.triggerIntervalSize} ${timeUnitLabel}.`;
+    return `${staticPart} This will run every ${this.triggerIntervalSize} ${timeUnitLabel}.`;
   }
 
   get upstreamJson() {
@@ -95,7 +95,7 @@ export class ThresholdWatch extends BaseWatch {
 
   static typeName = 'Threshold Alert';
   static iconClass = '';
-  static selectMessage = 'Send out an alert on a specific condition.';
+  static selectMessage = 'Send an alert on a specific condition';
   static isCreatable = true;
   static selectSortOrder = 1;
 }
