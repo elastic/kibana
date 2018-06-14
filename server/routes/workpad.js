@@ -9,11 +9,21 @@ export function workpad(server) {
 
   function formatResponse(reply, returnResponse = false) {
     return resp => {
-      if (resp instanceof esErrors['400']) return reply(boom.badRequest(resp));
-      if (resp instanceof esErrors['401']) return reply(boom.unauthorized());
-      if (resp instanceof esErrors['403'])
+      if (resp.isBoom) {
+        return reply(resp); // can't wrap it if it's already a boom error
+      }
+      if (resp instanceof esErrors['400']) {
+        return reply(boom.badRequest(resp));
+      }
+      if (resp instanceof esErrors['401']) {
+        return reply(boom.unauthorized());
+      }
+      if (resp instanceof esErrors['403']) {
         return reply(boom.forbidden("Sorry, you don't have access to that"));
-      if (resp instanceof esErrors['404']) return reply(boom.wrap(resp, 404));
+      }
+      if (resp instanceof esErrors['404']) {
+        return reply(boom.wrap(resp, 404));
+      }
       return returnResponse ? resp : reply(resp);
     };
   }
