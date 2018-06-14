@@ -490,9 +490,7 @@ describe('#find', () => {
     test(`throws decorated ForbiddenError when user has no authorized types`, async () => {
       const type = 'foo';
       const username = Symbol();
-      const mockRepository = {
-        getTypes: jest.fn().mockReturnValue([type])
-      };
+      const mockRepository = {};
       const mockErrors = createMockErrors();
       const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
         success: false,
@@ -507,6 +505,7 @@ describe('#find', () => {
         repository: mockRepository,
         hasPrivileges: mockHasPrivileges,
         auditLogger: mockAuditLogger,
+        savedObjectTypes: [type]
       });
       const options = Symbol();
 
@@ -529,9 +528,7 @@ describe('#find', () => {
     test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
       const type1 = 'foo';
       const type2 = 'bar';
-      const mockRepository = {
-        getTypes: jest.fn().mockReturnValue([type1, type2])
-      };
+      const mockRepository = {};
       const mockErrors = createMockErrors();
       const mockHasPrivileges = jest.fn().mockImplementation(async () => {
         throw new Error();
@@ -542,6 +539,7 @@ describe('#find', () => {
         repository: mockRepository,
         hasPrivileges: mockHasPrivileges,
         auditLogger: mockAuditLogger,
+        savedObjectTypes: [type1, type2]
       });
 
       await expect(client.find()).rejects.toThrowError(mockErrors.generalError);
@@ -556,7 +554,6 @@ describe('#find', () => {
       const type1 = 'foo';
       const type2 = 'bar';
       const mockRepository = {
-        getTypes: jest.fn().mockReturnValue([type1, type2]),
         find: jest.fn(),
       };
       const mockErrors = createMockErrors();
@@ -572,6 +569,7 @@ describe('#find', () => {
         repository: mockRepository,
         hasPrivileges: mockHasPrivileges,
         auditLogger: mockAuditLogger,
+        savedObjectTypes: [type1, type2]
       });
 
       await client.find();
@@ -587,7 +585,6 @@ describe('#find', () => {
       const username = Symbol();
       const returnValue = Symbol();
       const mockRepository = {
-        getTypes: jest.fn().mockReturnValue([type]),
         find: jest.fn().mockReturnValue(returnValue)
       };
       const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
@@ -600,6 +597,7 @@ describe('#find', () => {
         repository: mockRepository,
         hasPrivileges: mockHasPrivileges,
         auditLogger: mockAuditLogger,
+        savedObjectTypes: [type]
       });
       const options = Symbol();
 
