@@ -1,7 +1,6 @@
 import { axisConfig } from './axis_config';
 import { containerStyle } from './container_style';
 import { datacolumn } from './datacolumn';
-import { expression } from './expression';
 import { font } from './font';
 import { imageUpload } from './image_upload';
 import { number } from './number';
@@ -16,7 +15,6 @@ export const argTypeSpecs = [
   axisConfig,
   containerStyle,
   datacolumn,
-  expression,
   font,
   imageUpload,
   number,
