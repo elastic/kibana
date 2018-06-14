@@ -23,3 +23,7 @@ exports.parseEsLog = require('./parse_es_log').parseEsLog;
 exports.extractTarball = require('./tarball').extractTarball;
 exports.findMostRecentlyChanged = require('./find_most_recently_changed').findMostRecentlyChanged;
 exports.extractConfigFiles = require('./extract_config_files').extractConfigFiles;
+
+const { createKeystore, keystoreAdd } = require('./keystore');
+exports.createKeystore = createKeystore;
+exports.keystoreAdd = keystoreAdd;

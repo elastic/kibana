@@ -20,9 +20,13 @@
 const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
-const execa = require('execa');
-const { log: defaultLog, extractTarball } = require('../utils');
-const { BASE_PATH, ES_CONFIG, ES_KEYSTORE_BIN } = require('../paths');
+const {
+  log: defaultLog,
+  extractTarball,
+  createKeystore,
+  keystoreAdd,
+} = require('../utils');
+const { BASE_PATH, ES_CONFIG } = require('../paths');
 
 /**
  * Extracts an ES archive and optionally installs plugins
@@ -109,22 +113,17 @@ async function appendToConfig(installPath, key, value) {
  * @param {ToolingLog} log
  */
 async function configureKeystore(installPath, password, log = defaultLog) {
-  const configPath =
-    process.env.ES_PATH_CONF || path.join(installPath, 'config');
-  const keystorePath = path.join(configPath, 'elasticsearch.keystore');
-
-  if (fs.existsSync(keystorePath)) {
-    log.info('keystore already exists at %s', chalk.bold(keystorePath));
-    log.warning('unable to bootstrap password');
-    return;
+  try {
+    await createKeystore(installPath);
+    log.info('keystore created');
+  } catch (e) {
+    log.info('Keystore not created,', chalk.bold(e));
   }
 
-  log.info('setting bootstrap password to %s', chalk.bold(password));
-
-  await execa(ES_KEYSTORE_BIN, ['create'], { cwd: installPath });
-
-  await execa(ES_KEYSTORE_BIN, ['add', 'bootstrap.password', '-x'], {
-    input: password,
-    cwd: installPath,
-  });
+  try {
+    await keystoreAdd(installPath, 'bootstrap.password', password);
+    log.info('set bootstrap password to %s', chalk.bold(password));
+  } catch (e) {
+    log.info('Unable to bootstrap Keystore,', chalk.bold(e));
+  }
 }
