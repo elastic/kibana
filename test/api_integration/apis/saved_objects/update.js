@@ -70,7 +70,7 @@ export default function ({ getService }) {
               expect(resp.body).eql({
                 statusCode: 404,
                 error: 'Not Found',
-                message: 'Saved object [visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab] not found'
+                message: 'Saved object [visualization/not an id] not found'
               });
             });
         });
