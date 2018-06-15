@@ -21,6 +21,7 @@
  @typedef Messages - messages tree, where leafs are translated strings
  @type {object<string, object>}
  @property {string} [locale] - locale of the messages
+ @property {object} [formats] - set of options to the underlying formatter
  */
 
 import path from 'path';
@@ -28,11 +29,9 @@ import { readFile } from 'fs';
 import { promisify } from 'util';
 import { pick } from 'accept-language-parser';
 import JSON5 from 'json5';
+import { unique } from './helper';
 
 const asyncReadFile = promisify(readFile);
-
-const unique = (arr = []) =>
-  arr.filter((value, index, array) => array.indexOf(value) === index);
 
 const TRANSLATION_FILE_EXTENSION = '.json';
 

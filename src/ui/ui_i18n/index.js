@@ -21,6 +21,7 @@
  @typedef Messages - messages tree, where leafs are translated strings
  @type {object<string, object>}
  @property {string} [locale] - locale of the messages
+ @property {object} [formats] - set of options to the underlying formatter
  */
 
 import { i18nLoader } from '@kbn/i18n';

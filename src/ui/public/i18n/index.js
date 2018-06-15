@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { AngularI18n, i18n } from '@kbn/i18n';
-
+import { AngularI18n } from '@kbn/i18n';
 import { uiModules } from 'ui/modules';
 import { metadata } from 'ui/metadata';
 
@@ -28,12 +27,10 @@ const {
   i18nDirective,
 } = AngularI18n;
 
-if (metadata.translations) {
-  i18n.addMessages(metadata.translations);
-  i18n.setLocale(metadata.translations.locale);
-}
-
 uiModules.get('i18n')
   .provider('i18n', i18nProvider)
   .filter('i18n', i18nFilter)
-  .directive('i18nId', i18nDirective);
+  .directive('i18nId', i18nDirective)
+  .config((i18nProvider) => {
+    i18nProvider.init(metadata.translations);
+  });

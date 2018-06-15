@@ -140,8 +140,7 @@ export function uiRenderMixin(kbnServer, server, config) {
       const request = reply.request;
       const translations = await request.getUiTranslations();
 
-      i18n.addMessages(translations);
-      i18n.setLocale(translations.locale);
+      i18n.init(translations);
 
       return reply.view('ui_app', {
         app,

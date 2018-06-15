@@ -21,19 +21,17 @@
  @typedef Messages - messages tree, where leafs are translated strings
  @type {object<string, object>}
  @property {string} [locale] - locale of the messages
+ @property {object} [formats] - set of options to the underlying formatter
  */
 
 import IntlMessageFormat from 'intl-messageformat';
 import IntlRelativeFormat from 'intl-relativeformat';
 import memoizeIntlConstructor from 'intl-format-cache';
+import { isString, isObject, hasValues, deepMerge } from './helper';
 
 // Add all locale data to `IntlMessageFormat`.
 // TODO: Use dynamic import for asynchronous loading of specific locale data
 import './locales';
-
-const isString = value => typeof value === 'string';
-const isObject = value => typeof value === 'object';
-const hasValues = values => Object.keys(values).length > 0;
 
 const EN_LOCALE = 'en';
 const LOCALE_DELIMITER = '-';
@@ -139,13 +137,20 @@ export function getDefaultLocale() {
 
 /**
  * Supplies a set of options to the underlying formatter
+ * [Default format options used as the prototype of the formats]
+ * {@link https://github.com/yahoo/intl-messageformat/blob/master/src/core.js#L62}
+ * These are used when constructing the internal Intl.NumberFormat
+ * and Intl.DateTimeFormat instances.
  * @param {object} newFormats
+ * @param {object} [newFormats.number]
+ * @param {object} [newFormats.date]
+ * @param {object} [newFormats.time]
  */
 export function setFormats(newFormats) {
   if (!isObject(newFormats) || !hasValues(newFormats)) {
     throw new Error('[I18n] A `formats` must be non-empty object.');
   } else {
-    formats = newFormats;
+    formats = deepMerge(formats, newFormats);
   }
 }
 
@@ -212,5 +217,23 @@ export function translate(id, { values = {}, defaultMessage = '' } = {}) {
     throw new Error(
       `[I18n] Cannot format message: "${id}". Default message must be provided.`
     );
+  }
+}
+
+/**
+ * Initializes the engine
+ * @param {Messages} newMessages
+ */
+export function init(newMessages) {
+  if (newMessages) {
+    addMessages(newMessages);
+
+    if (newMessages.locale) {
+      setLocale(newMessages.locale);
+    }
+
+    if (newMessages.formats) {
+      setFormats(newMessages.formats);
+    }
   }
 }

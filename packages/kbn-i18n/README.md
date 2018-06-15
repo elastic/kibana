@@ -112,6 +112,7 @@ For the detailed explanation, see the section below
 - `getFormats()` - returns current formats
 - `getRegisteredLocales()` - returns array of locales having translations
 - `translate(id: string, [{values: object, defaultMessage: string}])` – translate message by id
+- `init(messages: Map<string, string>)` - initializes the engine
 
 #### I18n engine internals
 
@@ -262,6 +263,7 @@ when missing translations
 - `setFormats(formats: object)` - supplies a set of options to the underlying formatter
 - `getFormats()` - returns current formats
 - `getRegisteredLocales()` - returns array of locales having translations
+- `init(messages: Map<string, string>)` - initializes the engine
 
 The translation `service` provides only one method:
 - `i18n(id: string, [{values: object, defaultMessage: string}])` – translate message by id

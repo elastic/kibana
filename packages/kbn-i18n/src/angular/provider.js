@@ -29,5 +29,6 @@ export function i18nProvider() {
   this.setFormats = i18n.setFormats;
   this.getFormats = i18n.getFormats;
   this.getRegisteredLocales = i18n.getRegisteredLocales;
-  this.$get = i18n.translate;
+  this.init = i18n.init;
+  this.$get = () => i18n.translate;
 }
