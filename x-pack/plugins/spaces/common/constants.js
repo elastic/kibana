@@ -5,3 +5,5 @@
  */
 
 export const DEFAULT_SPACE_ID = `default`;
+
+export const MAX_SPACE_INITIALS = 2;

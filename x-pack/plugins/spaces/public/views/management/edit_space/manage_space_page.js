@@ -4,35 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
 import {
-  EuiText,
+  EuiTitle,
+  EuiButtonEmpty,
   EuiSpacer,
   EuiPage,
-  EuiPageContent,
   EuiForm,
   EuiFormRow,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
+  EuiPanel,
 } from '@elastic/eui';
 
-import { PageHeader } from './page_header';
-import { DeleteSpacesButton } from './delete_spaces_button';
+import { DeleteSpacesButton, PageHeader } from '../components';
+import { SpaceAvatar } from '../../components';
 
 import { Notifier, toastNotifications } from 'ui/notify';
 import { UrlContext } from './url_context';
 import { toUrlContext, isValidUrlContext } from '../lib/url_context_utils';
+import { CustomizeSpaceAvatar } from './customize_space_avatar';
 import { isReservedSpace } from '../../../../common';
 import { ReservedSpaceBadge } from './reserved_space_badge';
+import { SpaceValidator } from '../lib/validate_space';
 
-export class ManageSpacePage extends React.Component {
+export class ManageSpacePage extends Component {
   state = {
     space: {},
-    validate: false
   };
+
+  constructor(props) {
+    super(props);
+    this.validator = new SpaceValidator({ shouldValidate: false });
+  }
 
   componentDidMount() {
     this.notifier = new Notifier({ location: 'Spaces' });
@@ -65,34 +72,68 @@ export class ManageSpacePage extends React.Component {
   render() {
     const {
       name = '',
-      description = ''
+      description = '',
     } = this.state.space;
 
     return (
-      <EuiPage>
-        <PageHeader breadcrumbs={this.props.breadcrumbs}/>
-        <EuiPageContent>
-          <EuiForm>
-            {this.getFormHeading()}
+      <EuiPage className="editSpacePage">
+        <PageHeader breadcrumbs={this.props.breadcrumbs} />
+        <EuiForm>
+          {this.getFormHeading()}
+
+          <EuiSpacer />
+
+          <EuiPanel>
+            <EuiFlexGroup>
+              <EuiFlexItem style={{ maxWidth: '400px' }}>
+                <EuiFormRow
+                  label="Name"
+                  {...this.validator.validateSpaceName(this.state.space)}
+                >
+                  <EuiFieldText
+                    name="name"
+                    placeholder={'Awesome space'}
+                    value={name}
+                    onChange={this.onNameChange}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              {
+                name && (
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiFormRow hasEmptyLabelSpace={true}>
+                          <SpaceAvatar space={this.state.space} />
+                        </EuiFormRow>
+                      </EuiFlexItem>
+                      <CustomizeSpaceAvatar space={this.state.space} onChange={this.onAvatarChange} />
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                )
+              }
+            </EuiFlexGroup>
 
             <EuiSpacer />
 
-            <EuiFormRow
-              label="Name"
-              helpText="Name your space"
-              {...this.validateName()}
-            >
-              <EuiFieldText
-                name="name"
-                placeholder={'Awesome space'}
-                value={name}
-                onChange={this.onNameChange}
-              />
-            </EuiFormRow>
+            {isReservedSpace(this.state.space)
+              ? null
+              : (
+                <Fragment>
+                  <UrlContext
+                    space={this.state.space}
+                    editingExistingSpace={this.editingExistingSpace()}
+                    editable={true}
+                    onChange={this.onUrlContextChange}
+                    validator={this.validator}
+                  />
+                </Fragment>
+              )
+            }
+
             <EuiFormRow
               label="Description"
-              helpText="Describe your space"
-              {...this.validateDescription()}
+              {...this.validator.validateSpaceDescription(this.state.space)}
             >
               <EuiFieldText
                 name="description"
@@ -102,39 +143,20 @@ export class ManageSpacePage extends React.Component {
               />
             </EuiFormRow>
 
-            <UrlContext
-              space={this.state.space}
-              editingExistingSpace={this.editingExistingSpace()}
-              editable={!isReservedSpace(this.state.space)}
-              onChange={this.onUrlContextChange}
-            />
+          </EuiPanel>
 
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <EuiButton fill onClick={this.saveSpace}>Save</EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton onClick={this.backToSpacesList}>
-                  Cancel
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiForm>
-        </EuiPageContent>
+          <EuiSpacer />
+
+          {this.getFormButtons()}
+
+        </EuiForm>
       </EuiPage>
     );
   }
 
   getFormHeading = () => {
-    const isReserved = isReservedSpace(this.state.space);
-
     return (
-      <EuiFlexGroup justifyContent={'spaceBetween'}>
-        <EuiFlexItem grow={false}>
-          <EuiText><h1>{this.getTitle()}</h1></EuiText>
-        </EuiFlexItem>
-        {isReserved ? this.getReservedBadge() : this.getActionButton()}
-      </EuiFlexGroup>
+      <EuiTitle size="l"><h1>{this.getTitle()} <ReservedSpaceBadge space={this.state.space} /></h1></EuiTitle>
     );
   };
 
@@ -142,10 +164,27 @@ export class ManageSpacePage extends React.Component {
     if (this.editingExistingSpace()) {
       return `Edit space`;
     }
-    return `Create a space`;
+    return `Create space`;
   };
 
-  getReservedBadge = () => <ReservedSpaceBadge space={this.state.space} />;
+  getFormButtons = () => {
+    const saveText = this.editingExistingSpace() ? 'Update space' : 'Create space';
+    return (
+      <EuiFlexGroup responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiButton fill onClick={this.saveSpace}>{saveText}</EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty onClick={this.backToSpacesList}>
+            Cancel
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={true} />
+        {this.getActionButton()}
+      </EuiFlexGroup>
+    );
+  }
+
 
   getActionButton = () => {
     if (this.editingExistingSpace() && !isReservedSpace(this.state.space)) {
@@ -153,8 +192,7 @@ export class ManageSpacePage extends React.Component {
         <EuiFlexItem grow={false}>
           <DeleteSpacesButton
             spaces={[this.state.space]}
-            httpAgent={this.props.httpAgent}
-            chrome={this.props.chrome}
+            spacesManager={this.props.spacesManager}
             onDelete={this.backToSpacesList}
           />
         </EuiFlexItem>
@@ -202,14 +240,25 @@ export class ManageSpacePage extends React.Component {
     });
   };
 
-  saveSpace = () => {
+  onAvatarChange = (space) => {
     this.setState({
-      validate: true
-    }, () => {
-      const { isInvalid } = this.validateForm();
-      if (isInvalid) return;
-      this._performSave();
+      space
     });
+  }
+
+  saveSpace = () => {
+    this.validator.enableValidation();
+
+    const result = this.validator.validateForSave(this.state.space);
+    if (result.isInvalid) {
+      this.setState({
+        formError: result
+      });
+
+      return;
+    }
+
+    this._performSave();
   };
 
   _performSave = () => {
@@ -217,6 +266,8 @@ export class ManageSpacePage extends React.Component {
       name = '',
       id = toUrlContext(name),
       description,
+      initials,
+      color,
       urlContext
     } = this.state.space;
 
@@ -224,6 +275,8 @@ export class ManageSpacePage extends React.Component {
       name,
       id,
       description,
+      initials,
+      color,
       urlContext
     };
 
@@ -340,7 +393,5 @@ export class ManageSpacePage extends React.Component {
 ManageSpacePage.propTypes = {
   space: PropTypes.string,
   spacesManager: PropTypes.object,
-  httpAgent: PropTypes.func.isRequired,
-  chrome: PropTypes.object,
   breadcrumbs: PropTypes.array.isRequired,
 };

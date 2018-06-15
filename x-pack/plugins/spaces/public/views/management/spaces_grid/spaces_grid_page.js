@@ -10,8 +10,7 @@ import PropTypes from 'prop-types';
 import {
   EuiPage,
   EuiPageContent,
-  EuiBasicTable,
-  EuiSearchBar,
+  EuiInMemoryTable,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
@@ -20,45 +19,24 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
-import { PageHeader } from './page_header';
-import { SpacesDataStore } from '../lib/spaces_data_store';
-import { DeleteSpacesButton } from './delete_spaces_button';
-
+import { DeleteSpacesButton, PageHeader } from '../components';
+import { isReservedSpace } from '../../../../common';
 
 export class SpacesGridPage extends Component {
   state = {
     selectedSpaces: [],
-    displayedSpaces: [],
-    loading: true,
-    searchCriteria: '',
-    pagination: {
-      pageIndex: 0,
-      pageSize: 10,
-      totalItemCount: 0,
-      pageSizeOptions: [10, 25, 50]
-    }
+    spaces: [],
+    loading: true
   };
-
-  constructor(props) {
-    super(props);
-    this.dataStore = new SpacesDataStore();
-  }
 
   componentDidMount() {
     this.loadGrid();
   }
 
   render() {
-    const filteredSpaces = this.dataStore.search(this.state.searchCriteria);
-
-    const pagination = {
-      ...this.state.pagination,
-      totalItemCount: filteredSpaces.length
-    };
-
     return (
       <EuiPage>
-        <PageHeader breadcrumbs={this.props.breadcrumbs}/>
+        <PageHeader breadcrumbs={this.props.breadcrumbs} />
         <EuiPageContent>
           <EuiFlexGroup justifyContent={'spaceBetween'}>
             <EuiFlexItem grow={false}>
@@ -67,20 +45,19 @@ export class SpacesGridPage extends Component {
             <EuiFlexItem grow={false}>{this.getPrimaryActionButton()}</EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size={'xl'} />
-          <EuiSearchBar
-            box={{
-              placeholder: 'Search for a space...',
-              incremental: true
-            }}
-            onChange={this.onSearchChange}
-          />
-          <EuiSpacer size={'xl'} />
-          <EuiBasicTable
-            items={this.state.displayedSpaces}
+
+          <EuiInMemoryTable
+            itemId={"id"}
+            items={this.state.spaces}
             columns={this.getColumnConfig()}
-            selection={this.getSelectionConfig()}
-            pagination={pagination}
-            onChange={this.onTableChange}
+            selection={{
+              selectable: (space) => !isReservedSpace(space),
+              onSelectionChange: this.onSelectionChange
+            }}
+            pagination={true}
+            search={true}
+            loading={this.state.loading}
+            message={this.state.loading ? "loading..." : undefined}
           />
         </EuiPageContent>
       </EuiPage>
@@ -92,8 +69,7 @@ export class SpacesGridPage extends Component {
       return (
         <DeleteSpacesButton
           spaces={this.state.selectedSpaces}
-          httpAgent={this.props.httpAgent}
-          chrome={this.props.chrome}
+          spacesManager={this.props.spacesManager}
           onDelete={this.loadGrid}
         />
       );
@@ -106,30 +82,25 @@ export class SpacesGridPage extends Component {
 
   loadGrid = () => {
     const {
-      httpAgent,
-      chrome
+      spacesManager
     } = this.props;
 
     this.setState({
       loading: true,
-      displayedSpaces: [],
-      selectedSpaces: []
+      selectedSpaces: [],
+      spaces: []
     });
 
-    this.dataStore.loadSpaces([]);
-
     const setSpaces = (spaces) => {
-      this.dataStore.loadSpaces(spaces);
       this.setState({
         loading: false,
-        displayedSpaces: this.dataStore.getPage(this.state.pagination.pageIndex, this.state.pagination.pageSize)
+        spaces,
       });
     };
 
-    httpAgent
-      .get(chrome.addBasePath(`/api/spaces/v1/spaces`))
-      .then(response => {
-        setSpaces(response.data);
+    spacesManager.getSpaces()
+      .then(spaces => {
+        setSpaces(spaces);
       })
       .catch(error => {
         this.setState({
@@ -162,44 +133,12 @@ export class SpacesGridPage extends Component {
     }];
   }
 
-  getSelectionConfig() {
-    return {
-      itemId: 'id',
-      selectable: (space) => space.id,
-      onSelectionChange: this.onSelectionChange
-    };
-  }
-
- onTableChange = ({ page = {} }) => {
-   const {
-     index: pageIndex,
-     size: pageSize
-   } = page;
-
-   this.setState({
-     pagination: {
-       ...this.state.pagination,
-       pageIndex,
-       pageSize
-     }
-   });
- };
-
   onSelectionChange = (selectedSpaces) => {
     this.setState({ selectedSpaces });
-  };
-
-  onSearchChange = ({ text = '' }) => {
-    this.dataStore.search(text);
-    this.setState({
-      searchCriteria: text,
-      displayedSpaces: this.dataStore.getPage(this.state.pagination.pageIndex, this.state.pagination.pageSize)
-    });
   };
 }
 
 SpacesGridPage.propTypes = {
-  chrome: PropTypes.object.isRequired,
-  httpAgent: PropTypes.func.isRequired,
-  breadcrumbs: PropTypes.array.isRequired
+  spacesManager: PropTypes.object.isRequired,
+  breadcrumbs: PropTypes.array.isRequired,
 };

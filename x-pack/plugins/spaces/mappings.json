@@ -19,6 +19,12 @@
       "description": {
         "type": "text"
       },
+      "initials": {
+        "type": "keyword"
+      },
+      "color": {
+        "type": "keyword"
+      },
       "_reserved": {
         "type": "boolean"
       }

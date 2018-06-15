@@ -31,6 +31,7 @@ export class UrlContext extends Component {
         <EuiFormRow
           label={this.getLabel()}
           helpText={this.getHelpText()}
+          {...this.props.validator.validateUrlContext(this.props.space)}
         >
           <div>
             <EuiFieldText
@@ -97,5 +98,6 @@ UrlContext.propTypes = {
   space: PropTypes.object.isRequired,
   editable: PropTypes.bool.isRequired,
   editingExistingSpace: PropTypes.bool.isRequired,
-  onChange: PropTypes.func
+  onChange: PropTypes.func,
+  validator: PropTypes.object.isRequired,
 };
