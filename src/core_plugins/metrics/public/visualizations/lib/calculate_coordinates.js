@@ -19,7 +19,7 @@
 
 import { findDOMNode } from 'react-dom';
 import calcDimensions from './calc_dimensions';
-export default function calculateCorrdinates(innerRef, resizeRef, state) {
+export default function calculateCoordinates(innerRef, resizeRef, state) {
   const inner = findDOMNode(innerRef);
   const resize = findDOMNode(resizeRef);
   let scale = state.scale;
@@ -44,7 +44,7 @@ export default function calculateCorrdinates(innerRef, resizeRef, state) {
   [ newWidth, newHeight ] = calcDimensions(inner, scale);
 
   // Because scale is middle out we need to translate
-  // the new X,Y corrdinates
+  // the new X,Y coordinates
   const translateX = (newWidth - inner.clientWidth) / 2;
   const translateY = (newHeight - inner.clientHeight) / 2;
 
