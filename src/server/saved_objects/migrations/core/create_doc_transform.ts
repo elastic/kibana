@@ -122,7 +122,12 @@ function decorateTransformError(
     try {
       return { ...transform(doc), migrationVersion: version };
     } catch (error) {
-      error.transform = { type: doc.type, pluginId: plugin.id, version };
+      error.transform = {
+        docId: doc.id,
+        pluginId: plugin.id,
+        type: doc.type,
+        version,
+      };
       throw error;
     }
   };

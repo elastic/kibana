@@ -184,6 +184,7 @@ describe('createDocTransform', () => {
     }
     expect(error.message).toMatch(/Bang boom pow/);
     expect(error.transform).toEqual({
+      docId: 'bar',
       pluginId: 'aaa',
       type: 'gee',
       version: '1',
