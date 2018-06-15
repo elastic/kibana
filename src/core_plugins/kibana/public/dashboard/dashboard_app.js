@@ -285,7 +285,7 @@ app.directive('dashboardApp', function ($injector) {
        * @return {Promise}
        * @resolved {String} - The id of the doc
        */
-      $scope.save = function (saveOptions) {
+      function save (saveOptions) {
         return saveDashboard(angular.toJson, timefilter, dashboardStateManager, saveOptions)
           .then(function (id) {
             $scope.kbnTopNav.close('save');
@@ -341,7 +341,7 @@ app.directive('dashboardApp', function ($injector) {
             isTitleDuplicateConfirmed,
             onTitleDuplicate,
           };
-          return $scope.save(saveOptions).then(id => {
+          return save(saveOptions).then(id => {
             // If the save wasn't successful, put the original values back.
             if (!id) {
               dashboardStateManager.setTitle(currentTitle);
@@ -370,7 +370,7 @@ app.directive('dashboardApp', function ($injector) {
             isTitleDuplicateConfirmed,
             onTitleDuplicate,
           };
-          return $scope.save(saveOptions).then(id => {
+          return save(saveOptions).then(id => {
             // If the save wasn't successful, put the original title back.
             if (!id) {
               dashboardStateManager.setTitle(currentTitle);
