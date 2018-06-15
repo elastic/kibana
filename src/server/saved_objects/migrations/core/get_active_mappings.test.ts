@@ -16,7 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { getActiveMappings } from './mappings';
+
+import { getActiveMappings } from './get_active_mappings';
 
 describe('getActiveMappings', () => {
   test('combines all mappings and includes core mappings', () => {
@@ -35,7 +36,7 @@ describe('getActiveMappings', () => {
       },
     ];
 
-    expect(getActiveMappings(plugins)).toMatchSnapshot();
+    expect(getActiveMappings({ plugins })).toMatchSnapshot();
   });
 
   test('disallows duplicate mappings', () => {
@@ -53,7 +54,7 @@ describe('getActiveMappings', () => {
       },
     ];
 
-    expect(() => getActiveMappings(plugins)).toThrow(
+    expect(() => getActiveMappings({ plugins })).toThrow(
       /Plugin \"(hello|cartoons)\" is attempting to redefine mapping \"stuff\"/
     );
   });
@@ -66,7 +67,7 @@ describe('getActiveMappings', () => {
       },
     ];
 
-    expect(() => getActiveMappings(plugins)).toThrow(
+    expect(() => getActiveMappings({ plugins })).toThrow(
       /Invalid mapping \"_hm\" in plugin \"nadachance\"\. Mappings cannot start with _/
     );
   });

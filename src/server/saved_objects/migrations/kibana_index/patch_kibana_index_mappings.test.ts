@@ -17,9 +17,9 @@
  * under the License.
  */
 import sinon from 'sinon';
-import { initializeSavedObjectIndices } from './initialize_saved_object_indices';
+import { patchKibanaIndexMappings } from './patch_kibana_index_mappings';
 
-describe('initializeSavedObjectIndices', () => {
+describe('patchKibanaIndexMappings', () => {
   test('fails if there are multiple root doc types', async () => {
     const { kbnServer } = mockKbnServer({
       mappings: {
@@ -27,7 +27,7 @@ describe('initializeSavedObjectIndices', () => {
         spock: {},
       },
     });
-    await expect(initializeSavedObjectIndices(kbnServer)).rejects.toThrow(
+    await expect(patchKibanaIndexMappings(kbnServer)).rejects.toThrow(
       /Your Kibana index is out of date, reset it or use the X-Pack upgrade assistant/
     );
   });
@@ -38,7 +38,7 @@ describe('initializeSavedObjectIndices', () => {
         spock: {},
       },
     });
-    await expect(initializeSavedObjectIndices(kbnServer)).rejects.toThrow(
+    await expect(patchKibanaIndexMappings(kbnServer)).rejects.toThrow(
       /Your Kibana index is out of date, reset it or use the X-Pack upgrade assistant/
     );
   });
@@ -56,7 +56,7 @@ describe('initializeSavedObjectIndices', () => {
     callCluster
       .withArgs('indices.exists', { index })
       .returns(Promise.resolve(true));
-    await initializeSavedObjectIndices(kbnServer);
+    await patchKibanaIndexMappings(kbnServer);
     sinon.assert.calledOnce(
       kbnServer.server.plugins.elasticsearch.waitUntilReady
     );
@@ -100,7 +100,7 @@ describe('initializeSavedObjectIndices', () => {
 
   test('passes if there is no index', async () => {
     const { kbnServer } = mockKbnServer();
-    await initializeSavedObjectIndices(kbnServer);
+    await patchKibanaIndexMappings(kbnServer);
   });
 });
 

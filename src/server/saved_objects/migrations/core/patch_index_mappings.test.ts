@@ -18,8 +18,8 @@
  */
 import _ from 'lodash';
 import sinon from 'sinon';
-import { initializeIndex } from './initialize_index';
-import { getActiveMappings } from './mappings';
+import { getActiveMappings } from './get_active_mappings';
+import { patchIndexMappings } from './patch_index_mappings';
 import { IndexMapping, MappingDefinition, MigrationPlugin } from './types';
 
 describe('initializeIndex', async () => {
@@ -33,7 +33,7 @@ describe('initializeIndex', async () => {
       },
     ];
     await expectInitializeIndex({
-      expectedMappings: getActiveMappings(plugins),
+      expectedMappings: getActiveMappings({ plugins }),
       originalPlugins,
       plugins,
     });
@@ -221,17 +221,17 @@ async function expectInitializeIndex(opts: ExpectInitializeOpts) {
   const index = randomName();
   const { originalPlugins, plugins, expectedMappings } = opts;
   const callCluster = createCallCluster(
-    createIndex(index, getActiveMappings(originalPlugins))
+    createIndex(index, getActiveMappings({ plugins: originalPlugins }))
   );
 
   if (opts.throws) {
     await expect(
-      initializeIndex({ callCluster, index, plugins })
+      patchIndexMappings({ callCluster, index, plugins })
     ).rejects.toThrow(opts.throws);
   }
 
   if (expectedMappings) {
-    await initializeIndex({
+    await patchIndexMappings({
       callCluster,
       index,
       plugins,

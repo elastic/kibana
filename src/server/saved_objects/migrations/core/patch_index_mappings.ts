@@ -18,7 +18,8 @@
  */
 
 import _ from 'lodash';
-import { fetchOrDefault } from './fetch_or_default';
+import { fetchMapping } from './fetch_mapping';
+import { getActiveMappings } from './get_active_mappings';
 import {
   CallCluster,
   IndexMapping,
@@ -26,33 +27,80 @@ import {
   MigrationPlugin,
 } from './types';
 
-export interface GetFullMappingsOpts {
+export interface InitializeOpts {
   callCluster: CallCluster;
   index: string;
   plugins: MigrationPlugin[];
 }
 
-export interface MigrationMappings {
+interface InitializeContext extends InitializeOpts {
   activeMappings: IndexMapping;
   fullMappings: IndexMapping;
 }
 
-export function getActiveMappings(plugins: MigrationPlugin[]): IndexMapping {
-  const mapping = defaultMapping();
+interface MigrationMappings {
+  activeMappings: IndexMapping;
+  fullMappings: IndexMapping;
+}
+
+/**
+ * Updates the mappings and template for the specified index.
+ *
+ * @param opts
+ * @prop {CallCluster} callCluster - The Elasticsearch connection to be used
+ * @prop {string} index - The name of the index or alias being managed
+ * @prop {MigrationPlugin[]} plugins - A list of plugins whose mappings will be applied to the index
+ */
+export async function patchIndexMappings(opts: InitializeOpts) {
+  const context = await getContext(opts);
+
+  await putTemplate(context);
+  if (await indexExists(context)) {
+    await putMappings(context);
+  }
+}
+
+async function getContext(opts: InitializeOpts): Promise<InitializeContext> {
+  const { activeMappings, fullMappings } = await loadFullMappings(opts);
+
   return {
-    doc: {
-      ...mapping.doc,
-      properties: plugins.reduce(validateAndMerge, mapping.doc.properties),
-    },
+    ...opts,
+    activeMappings,
+    fullMappings,
   };
 }
 
-export async function loadFullMappings({
-  plugins,
-  callCluster,
-  index,
-}: GetFullMappingsOpts): Promise<MigrationMappings> {
-  const activeMappings = getActiveMappings(plugins);
+function putTemplate({ callCluster, index, fullMappings }: InitializeContext) {
+  return callCluster('indices.putTemplate', {
+    body: {
+      mappings: fullMappings,
+      settings: {
+        auto_expand_replicas: '0-1',
+        number_of_shards: 1,
+      },
+      template: index,
+    },
+    name: `kibana_index_template:${index}`,
+  });
+}
+
+function putMappings({ callCluster, index, fullMappings }: InitializeContext) {
+  return callCluster('indices.putMapping', {
+    body: fullMappings.doc,
+    index,
+    type: 'doc',
+  });
+}
+
+function indexExists({ callCluster, index }: InitializeContext) {
+  return callCluster('indices.exists', { index });
+}
+
+async function loadFullMappings(
+  opts: InitializeOpts
+): Promise<MigrationMappings> {
+  const { callCluster, index } = opts;
+  const activeMappings = getActiveMappings(opts);
   const indexMappings = await fetchMapping(callCluster, index);
   if (indexMappings) {
     assertNonDestructiveChanges(
@@ -67,78 +115,6 @@ export async function loadFullMappings({
       activeMappings
     ),
   };
-}
-
-export async function fetchMapping(
-  callCluster: CallCluster,
-  index: string
-): Promise<IndexMapping | null> {
-  const result = await fetchOrDefault(
-    callCluster('indices.getMapping', { index }),
-    null
-  );
-  if (!result) {
-    return null;
-  }
-  return Object.values(result)[0].mappings || null;
-}
-
-function defaultMapping(): IndexMapping {
-  return _.cloneDeep({
-    doc: {
-      dynamic: 'strict',
-      properties: {
-        config: {
-          dynamic: 'true',
-          properties: {
-            buildNum: {
-              type: 'keyword',
-            },
-          },
-        },
-        type: {
-          type: 'keyword',
-        },
-        updated_at: {
-          type: 'date',
-        },
-      },
-    },
-  });
-}
-
-function validateAndMerge(
-  definedMappings: MappingDefinition,
-  { id, mappings }: MigrationPlugin
-) {
-  if (!mappings) {
-    return definedMappings;
-  }
-  return Object.entries(mappings).reduce((acc, [type, definition]) => {
-    assertUnique(id, acc, type);
-    assertValidPTypeName(id, type);
-    return _.set(acc, type, definition);
-  }, definedMappings);
-}
-
-function assertUnique(
-  pluginId: string,
-  mappings: MappingDefinition,
-  propertyName: string
-) {
-  if (mappings.hasOwnProperty(propertyName)) {
-    throw new Error(
-      `Plugin "${pluginId}" is attempting to redefine mapping "${propertyName}".`
-    );
-  }
-}
-
-function assertValidPTypeName(pluginId: string, propertyName: string) {
-  if (propertyName.startsWith('_')) {
-    throw new Error(
-      `Invalid mapping "${propertyName}" in plugin "${pluginId}". Mappings cannot start with _.`
-    );
-  }
 }
 
 function mergeMappings(

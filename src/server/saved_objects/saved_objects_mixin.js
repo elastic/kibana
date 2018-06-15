@@ -18,7 +18,7 @@
  */
 import _ from 'lodash';
 import { createSavedObjectsService } from './service';
-import { getPluginMappings } from './migrations';
+import { getActiveMappings, getMigrationPlugins } from './migrations';
 import {
   createBulkGetRoute,
   createCreateRoute,
@@ -29,7 +29,7 @@ import {
 } from './routes';
 
 export function savedObjectsMixin(kbnServer, server) {
-  const mappings = getPluginMappings(kbnServer);
+  const mappings = getActiveMappings(getMigrationPlugins(kbnServer));
   server.decorate('server', 'getKibanaIndexMappingsDsl', () => _.cloneDeep(mappings));
 
   // we use kibana.index which is technically defined in the kibana plugin, so if

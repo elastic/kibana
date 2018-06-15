@@ -36,11 +36,3 @@ export interface Server {
   config: () => { get: (path: 'kibana.index') => string };
   plugins: { elasticsearch: ElasticsearchPlugin | undefined };
 }
-
-export interface PlguinSpecable {
-  pluginSpecs: KibanaPlugin[];
-}
-
-export interface KbnServer extends PlguinSpecable {
-  server: Server;
-}
