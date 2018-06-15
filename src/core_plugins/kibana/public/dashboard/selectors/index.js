@@ -158,6 +158,10 @@ export const getMaximizedPanelId = dashboard => dashboard.view.maximizedPanelId;
  */
 export const getTimeRange = dashboard => dashboard.view.timeRange;
 
+export const getFilters = dashboard => dashboard.view.filters;
+
+export const getQuery = dashboard => dashboard.view.query;
+
 /**
  * @typedef {Object} DashboardMetadata
  * @property {string} title
@@ -205,6 +209,8 @@ export const getContainerState = (dashboard, panelId) => {
       to: time.to,
       from: time.from,
     },
+    filters: getFilters(dashboard),
+    query: getQuery(dashboard),
     embeddableCustomization: _.cloneDeep(getEmbeddableCustomization(dashboard, panelId) || {}),
     hidePanelTitles: getHidePanelTitles(dashboard),
     customTitle: getPanel(dashboard, panelId).title,

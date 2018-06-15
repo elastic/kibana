@@ -386,7 +386,9 @@ export function queryDsl(api) {
       _scope: '',
       query: {},
     },
-    match_all: {},
+    match_all: {
+      boost: 1,
+    },
     more_like_this: {
       __template: {
         fields: ['FIELD'],

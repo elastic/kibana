@@ -22,3 +22,4 @@ export * from './embeddable';
 export {
   EmbeddableFactoriesRegistryProvider,
 } from './embeddable_factories_registry';
+export { ContainerState } from './types';

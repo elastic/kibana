@@ -26,6 +26,8 @@ import {
   updateHidePanelTitles,
   updateIsFullScreenMode,
   updateTimeRange,
+  updateFilters,
+  updateQuery,
   setVisibleContextMenuPanelId,
 } from '../actions';
 
@@ -45,6 +47,16 @@ export const view = handleActions({
   [updateTimeRange]: (state, { payload }) => ({
     ...state,
     timeRange: payload
+  }),
+
+  [updateFilters]: (state, { payload }) => ({
+    ...state,
+    filters: payload
+  }),
+
+  [updateQuery]: (state, { payload }) => ({
+    ...state,
+    query: payload
   }),
 
   [updateUseMargins]: (state, { payload }) => ({

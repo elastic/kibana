@@ -141,26 +141,26 @@ export function AddData({ apmUiEnabled }) {
         <EuiFlexItem grow={false}>
           <EuiText>
             <strong style={{ height: 38 }}>
-              Fresh Elastic stack installation?
+              Need data?
             </strong>
             <EuiLink
               style={{ marginLeft: 8 }}
               href="#/home/tutorial_directory/sampleData"
             >
-              Try some sample data sets
+              Load sample data, visualizations, and dashboards
             </EuiLink>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText>
             <strong style={{ height: 38 }}>
-              Data already in Elasticsearch?
+              Have data?
             </strong>
             <EuiLink
               style={{ marginLeft: 8 }}
               href="#/management/kibana/index"
             >
-              Set up index patterns
+              Connect to your Elasticsearch index
             </EuiLink>
           </EuiText>
         </EuiFlexItem>

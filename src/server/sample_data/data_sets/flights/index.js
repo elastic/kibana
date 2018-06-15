@@ -23,7 +23,7 @@ export function flightsSpecProvider() {
   return {
     id: 'flights',
     name: 'Sample flight data',
-    description: 'Installs fictional flight tracking data, visualizations and dashboards to monitor plane routes.',
+    description: 'Sample data, visualizations, and dashboards for monitoring flight routes.',
     previewImagePath: '/plugins/kibana/home/sample_data_resources/flights/dashboard.png',
     overviewDashboard: '7adfa750-4c81-11e8-b3d7-01146121b73d',
     defaultIndex: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
