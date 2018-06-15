@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 
 
-import { VisibilityToggle } from '../components/visiblity_toggle';
+import { VisibilityToggle } from '../../visiblity_toggle';
 
 
 let idCounter = 0;

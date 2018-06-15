@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { FlyOut } from './flyout';
+import { FlyOut } from '../flyout/index';
 import * as ol from 'openlayers';
 import eventEmitter from 'event-emitter';
 
