@@ -12,9 +12,8 @@ import './vendor/jquery_ui_sortable.css';
 import chrome from 'ui/chrome';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { createStore } from 'redux';
 import { Provider } from 'react-redux';
-import reducer from './store/root_reducer';
+import { getStore } from './store/store';
 import 'ui/autoload/styles';
 import 'ui/autoload/all';
 import 'react-vis/dist/style.css';
@@ -31,31 +30,11 @@ import 'ui/vis/map/service_settings';
 chrome.setRootTemplate(template);
 initTimepicker(init);
 
-
-let kbnCoreAPI = null;
-
-uiModules
-  .get('kibana')
-  .run((Private, $injector) => {
-    const serviceSettings = $injector.get('serviceSettings');
-    const mapConfig = $injector.get('mapConfig');
-    kbnCoreAPI = {
-      serviceSettings: serviceSettings,
-      mapConfig: mapConfig
-    };
-  });
-
-
 async function init() {
-  const handle = setInterval(() => {
-    if (kbnCoreAPI !== null) {
-      clearInterval(handle);
-      const root = document.getElementById('react-gis-root');
-      ReactDOM.render(
-        <Provider store={createStore(reducer)}>
-          <GISApp kbnCoreAPI={kbnCoreAPI}/>
-        </Provider>,
-        root);
-    }
-  }, 10);
+  const root = document.getElementById('react-gis-root');
+  getStore().then(store => ReactDOM.render(
+    <Provider store={store}>
+      <GISApp/>
+    </Provider>,
+    root));
 }

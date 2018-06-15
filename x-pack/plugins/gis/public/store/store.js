@@ -4,15 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uiModules } from 'ui/modules'; // eslint-disable-line no-unused-vars
-import { combineReducers } from 'redux';
+import { uiModules } from 'ui/modules';
+import { combineReducers, createStore } from 'redux';
 import ui from './ui';
+import config from './config';
 
-const rootReducer = combineReducers({
-  ui
-});
+const reducers = {
+  ui,
+  config
+};
+const rootReducer = combineReducers(reducers);
 
-const appConfigData = () => {
+let initConfig = null;
+uiModules
+  .get('kibana')
+  .run((Private, $injector) => {
+    const serviceSettings = $injector.get('serviceSettings');
+    const mapConfig = $injector.get('mapConfig');
+    initConfig = {
+      config: {
+        serviceSettings: serviceSettings,
+        mapConfig: mapConfig
+      }
+    };
+  });
 
-}
-export default rootReducer;
+export const getStore = async function () {
+  return new Promise(resolve => {
+    const handle = setInterval(() => {
+      if (initConfig !== null) {
+        clearInterval(handle);
+        const store = createStore(rootReducer, { ...reducers, ...initConfig });
+        resolve(store);
+      }
+    }, 10);
+  });
+};
