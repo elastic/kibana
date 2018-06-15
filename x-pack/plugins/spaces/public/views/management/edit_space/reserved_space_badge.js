@@ -9,9 +9,8 @@ import PropTypes from 'prop-types';
 
 import { isReservedSpace } from '../../../../common';
 import {
-  EuiBadge,
+  EuiIcon,
   EuiToolTip,
-  EuiFlexItem,
 } from '@elastic/eui';
 
 
@@ -22,11 +21,9 @@ export const ReservedSpaceBadge = (props) => {
 
   if (isReservedSpace(space)) {
     return (
-      <EuiFlexItem grow={false}>
-        <EuiToolTip content={'Reserved spaces are built-in and can only be partially changed.'}>
-          <EuiBadge iconType={'lock'}>Reserved Space</EuiBadge>
-        </EuiToolTip>
-      </EuiFlexItem>
+      <EuiToolTip content={'Reserved spaces are built-in and can only be partially modified.'}>
+        <EuiIcon style={{ verticalAlign: "super" }} type={'lock'} />
+      </EuiToolTip>
     );
   }
   return null;

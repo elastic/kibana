@@ -7,10 +7,10 @@
 import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
 import {
-  EuiText,
+  EuiTitle,
+  EuiButtonEmpty,
   EuiSpacer,
   EuiPage,
-  EuiPageContent,
   EuiForm,
   EuiFormRow,
   EuiFieldText,
@@ -20,14 +20,13 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 
-import { PageHeader } from './page_header';
-import { DeleteSpacesButton } from './delete_spaces_button';
+import { DeleteSpacesButton, PageHeader } from '../components';
+import { SpaceAvatar } from '../../components';
 
 import { Notifier, toastNotifications } from 'ui/notify';
 import { UrlContext } from './url_context';
 import { toUrlContext, isValidUrlContext } from '../lib/url_context_utils';
 import { CustomizeSpaceAvatar } from './customize_space_avatar';
-import { SpaceAvatar } from './space_avatar';
 import { isReservedSpace } from '../../../../common';
 import { ReservedSpaceBadge } from './reserved_space_badge';
 import { SpaceValidator } from '../lib/validate_space';
@@ -79,103 +78,85 @@ export class ManageSpacePage extends Component {
     return (
       <EuiPage className="editSpacePage">
         <PageHeader breadcrumbs={this.props.breadcrumbs} />
-        <EuiPageContent className="editSpacePage__content">
-          <EuiForm>
-            {this.getFormHeading()}
+        <EuiForm>
+          {this.getFormHeading()}
+
+          <EuiSpacer />
+
+          <EuiPanel>
+            <EuiFlexGroup>
+              <EuiFlexItem style={{ maxWidth: '400px' }}>
+                <EuiFormRow
+                  label="Name"
+                  {...this.validator.validateSpaceName(this.state.space)}
+                >
+                  <EuiFieldText
+                    name="name"
+                    placeholder={'Awesome space'}
+                    value={name}
+                    onChange={this.onNameChange}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              {
+                name && (
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiFormRow hasEmptyLabelSpace={true}>
+                          <SpaceAvatar space={this.state.space} />
+                        </EuiFormRow>
+                      </EuiFlexItem>
+                      <CustomizeSpaceAvatar space={this.state.space} onChange={this.onAvatarChange} />
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                )
+              }
+            </EuiFlexGroup>
 
             <EuiSpacer />
 
-            <EuiPanel>
-              <EuiFlexGroup>
-                <EuiFlexItem style={{ maxWidth: '400px' }}>
-                  <EuiFormRow
-                    label="Name"
-                    {...this.validator.validateSpaceName(this.state.space)}
-                  >
-                    <EuiFieldText
-                      name="name"
-                      placeholder={'Awesome space'}
-                      value={name}
-                      onChange={this.onNameChange}
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-                {
-                  name && (
-                    <EuiFlexItem grow={false}>
-                      <EuiFlexGroup responsive={false}>
-                        <EuiFlexItem grow={false}>
-                          <EuiFormRow hasEmptyLabelSpace={true}>
-                            <SpaceAvatar space={this.state.space} />
-                          </EuiFormRow>
-                        </EuiFlexItem>
-                        <CustomizeSpaceAvatar space={this.state.space} onChange={this.onAvatarChange} />
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-                  )
-                }
-              </EuiFlexGroup>
+            {isReservedSpace(this.state.space)
+              ? null
+              : (
+                <Fragment>
+                  <UrlContext
+                    space={this.state.space}
+                    editingExistingSpace={this.editingExistingSpace()}
+                    editable={true}
+                    onChange={this.onUrlContextChange}
+                    validator={this.validator}
+                  />
+                </Fragment>
+              )
+            }
 
-              <EuiSpacer />
+            <EuiFormRow
+              label="Description"
+              {...this.validator.validateSpaceDescription(this.state.space)}
+            >
+              <EuiFieldText
+                name="description"
+                placeholder={'This is where the magic happens'}
+                value={description}
+                onChange={this.onDescriptionChange}
+              />
+            </EuiFormRow>
 
-              {isReservedSpace(this.state.space)
-                ? null
-                : (
-                  <Fragment>
-                    <UrlContext
-                      space={this.state.space}
-                      editingExistingSpace={this.editingExistingSpace()}
-                      editable={true}
-                      onChange={this.onUrlContextChange}
-                      validator={this.validator}
-                    />
-                  </Fragment>
-                )
-              }
+          </EuiPanel>
 
-              <EuiFormRow
-                label="Description"
-                {...this.validator.validateSpaceDescription(this.state.space)}
-              >
-                <EuiFieldText
-                  name="description"
-                  placeholder={'This is where the magic happens'}
-                  value={description}
-                  onChange={this.onDescriptionChange}
-                />
-              </EuiFormRow>
+          <EuiSpacer />
 
+          {this.getFormButtons()}
 
-
-              <EuiFlexGroup>
-                <EuiFlexItem grow={false}>
-                  <EuiButton fill onClick={this.saveSpace}>
-                    {this.editingExistingSpace() ? 'Update space' : 'Create space'}
-                  </EuiButton>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton onClick={this.backToSpacesList}>
-                    Cancel
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-          </EuiForm>
-        </EuiPageContent>
+        </EuiForm>
       </EuiPage>
     );
   }
 
   getFormHeading = () => {
-    const isReserved = isReservedSpace(this.state.space);
-
     return (
-      <EuiFlexGroup justifyContent={'spaceBetween'}>
-        <EuiFlexItem grow={false}>
-          <EuiText><h1>{this.getTitle()}</h1></EuiText>
-        </EuiFlexItem>
-        {isReserved ? this.getReservedBadge() : this.getActionButton()}
-      </EuiFlexGroup>
+      <EuiTitle size="l"><h1>{this.getTitle()} <ReservedSpaceBadge space={this.state.space} /></h1></EuiTitle>
     );
   };
 
@@ -183,10 +164,27 @@ export class ManageSpacePage extends Component {
     if (this.editingExistingSpace()) {
       return `Edit space`;
     }
-    return `New space`;
+    return `Create space`;
   };
 
-  getReservedBadge = () => <ReservedSpaceBadge space={this.state.space} />;
+  getFormButtons = () => {
+    const saveText = this.editingExistingSpace() ? 'Update space' : 'Create space';
+    return (
+      <EuiFlexGroup responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiButton fill onClick={this.saveSpace}>{saveText}</EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty onClick={this.backToSpacesList}>
+            Cancel
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={true} />
+        {this.getActionButton()}
+      </EuiFlexGroup>
+    );
+  }
+
 
   getActionButton = () => {
     if (this.editingExistingSpace() && !isReservedSpace(this.state.space)) {
@@ -194,8 +192,7 @@ export class ManageSpacePage extends Component {
         <EuiFlexItem grow={false}>
           <DeleteSpacesButton
             spaces={[this.state.space]}
-            httpAgent={this.props.httpAgent}
-            chrome={this.props.chrome}
+            spacesManager={this.props.spacesManager}
             onDelete={this.backToSpacesList}
           />
         </EuiFlexItem>
@@ -396,7 +393,5 @@ export class ManageSpacePage extends Component {
 ManageSpacePage.propTypes = {
   space: PropTypes.string,
   spacesManager: PropTypes.object,
-  httpAgent: PropTypes.func.isRequired,
-  chrome: PropTypes.object,
   breadcrumbs: PropTypes.array.isRequired,
 };

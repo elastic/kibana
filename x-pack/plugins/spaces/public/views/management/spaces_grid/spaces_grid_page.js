@@ -19,8 +19,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
-import { PageHeader } from './page_header';
-import { DeleteSpacesButton } from './delete_spaces_button';
+import { DeleteSpacesButton, PageHeader } from '../components';
 import { isReservedSpace } from '../../../../common';
 
 export class SpacesGridPage extends Component {
@@ -70,8 +69,7 @@ export class SpacesGridPage extends Component {
       return (
         <DeleteSpacesButton
           spaces={this.state.selectedSpaces}
-          httpAgent={this.props.httpAgent}
-          chrome={this.props.chrome}
+          spacesManager={this.props.spacesManager}
           onDelete={this.loadGrid}
         />
       );
@@ -84,8 +82,7 @@ export class SpacesGridPage extends Component {
 
   loadGrid = () => {
     const {
-      httpAgent,
-      chrome
+      spacesManager
     } = this.props;
 
     this.setState({
@@ -101,10 +98,9 @@ export class SpacesGridPage extends Component {
       });
     };
 
-    httpAgent
-      .get(chrome.addBasePath(`/api/spaces/v1/spaces`))
-      .then(response => {
-        setSpaces(response.data);
+    spacesManager.getSpaces()
+      .then(spaces => {
+        setSpaces(spaces);
       })
       .catch(error => {
         this.setState({
@@ -143,7 +139,6 @@ export class SpacesGridPage extends Component {
 }
 
 SpacesGridPage.propTypes = {
-  chrome: PropTypes.object.isRequired,
-  httpAgent: PropTypes.func.isRequired,
-  breadcrumbs: PropTypes.array.isRequired
+  spacesManager: PropTypes.object.isRequired,
+  breadcrumbs: PropTypes.array.isRequired,
 };

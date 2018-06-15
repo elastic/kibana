@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { isReservedSpace } from './is_reserved_space';
-export { MAX_SPACE_INITIALS } from './constants';
+export {
+  toUrlContext,
+  isValidUrlContext
+} from './url_context_utils';
 
 export {
-  getSpaceInitials,
-  getSpaceColor,
-} from './space_attributes';
+  SpaceValidator
+} from './validate_space';

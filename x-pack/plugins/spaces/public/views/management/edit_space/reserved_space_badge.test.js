@@ -6,7 +6,7 @@
 
 import React from 'react';
 import {
-  EuiBadge
+  EuiIcon
 } from '@elastic/eui';
 import { ReservedSpaceBadge } from './reserved_space_badge';
 import {
@@ -21,7 +21,7 @@ const unreservedSpace = {};
 
 test('it renders without crashing', () => {
   const wrapper = shallow(<ReservedSpaceBadge space={reservedSpace} />);
-  expect(wrapper.find(EuiBadge)).toHaveLength(1);
+  expect(wrapper.find(EuiIcon)).toHaveLength(1);
 });
 
 test('it renders nothing for an unreserved space', () => {

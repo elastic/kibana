@@ -8,8 +8,7 @@ import React from 'react';
 import {
   EuiAvatar
 } from '@elastic/eui';
-import { MAX_SPACE_INITIALS } from '../../../../common/constants';
-import { getSpaceInitials, getSpaceColor } from '../../../../common/space_attributes';
+import { MAX_SPACE_INITIALS, getSpaceInitials, getSpaceColor } from '../../../common';
 
 export const SpaceAvatar = (props) => {
   return (
