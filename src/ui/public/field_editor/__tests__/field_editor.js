@@ -206,7 +206,7 @@ describe('FieldEditor directive', function () {
         expect(editor.fieldTypes).to.contain('ip');
         expect(editor.fieldTypes).to.not.contain('text');
         expect(editor.fieldTypes).to.not.contain('keyword');
-        expect(editor.fieldTypes).to.not.contain('attachement');
+        expect(editor.fieldTypes).to.not.contain('attachment');
       });
 
       it('updates formatter options based on field type', function () {
