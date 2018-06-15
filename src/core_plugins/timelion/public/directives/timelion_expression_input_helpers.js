@@ -129,7 +129,7 @@ async function extractSuggestionsFromParsedResult(result, cursorPosition, functi
     return { list: [functionHelp], location: activeFunc.location, type: SUGGESTION_TYPE.FUNCTIONS };
   }
 
-  // return argument value suggestions when cursor is inside agrument value
+  // return argument value suggestions when cursor is inside argument value
   const activeArg = activeFunc.arguments.find((argument) => {
     return inLocation(cursorPosition, argument.location);
   });
