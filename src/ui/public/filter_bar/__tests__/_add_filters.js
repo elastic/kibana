@@ -126,6 +126,29 @@ describe('add filters', function () {
       expect(appState.filters[0]).to.eql(negatedFilter);
     });
 
+    it('should allow overwriting a negated filter by a positive one', () => {
+      $rootScope.$digest();
+
+      // Add negate: true version of the same filter
+      const negatedFilter = _.cloneDeep(filters[0]);
+      negatedFilter.meta.negate = true;
+
+      queryFilter.addFilters(negatedFilter);
+      $rootScope.$digest();
+      // The negated filter should overwrite the positive one
+      expect(appState.filters.length).to.be(1);
+      expect(appState.filters[0]).to.eql(negatedFilter);
+
+      // Add negate: false version of the filter
+      const filter = _.cloneDeep(filters[0]);
+      filter.meta.negate = false;
+
+      queryFilter.addFilters(filter);
+      $rootScope.$digest();
+      expect(appState.filters.length).to.be(1);
+      expect(appState.filters[0]).to.eql(filter);
+    });
+
     it('should fire the update and fetch events', function () {
       const emitSpy = sinon.spy(queryFilter, 'emit');
 
