@@ -7,7 +7,7 @@
 import React from 'react';
 import { withInitialData } from './helpers';
 import { Request } from 'react-redux-request';
-import { loadTransactionDistribution } from '../../services/rest';
+import { loadTransactionDistribution } from '../../services/rest/apm';
 
 const ID = 'transactionDistribution';
 const INITIAL_DATA = { buckets: [], totalHits: 0 };

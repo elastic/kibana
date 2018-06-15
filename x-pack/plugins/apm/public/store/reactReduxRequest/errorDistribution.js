@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { Request } from 'react-redux-request';
-import { loadErrorDistribution } from '../../services/rest';
+import { loadErrorDistribution } from '../../services/rest/apm';
 import { withInitialData } from './helpers';
 
 const ID = 'errorDistribution';

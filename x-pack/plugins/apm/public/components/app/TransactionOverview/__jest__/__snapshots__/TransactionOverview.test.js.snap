@@ -2,7 +2,9 @@
 
 exports[`TransactionOverview should not call loadTransactionList without any props 1`] = `
 <div>
-  <styled.h1>
+  <styled.h1
+    onClick={[Function]}
+  >
     MyServiceName
   </styled.h1>
   <Connect(TabNavigation) />

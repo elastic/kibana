@@ -7,7 +7,7 @@
 import React from 'react';
 import { withInitialData } from './helpers';
 import { Request } from 'react-redux-request';
-import { loadErrorGroupDetails } from '../../services/rest';
+import { loadErrorGroupDetails } from '../../services/rest/apm';
 
 const ID = 'errorGroupDetails';
 const INITIAL_DATA = {};

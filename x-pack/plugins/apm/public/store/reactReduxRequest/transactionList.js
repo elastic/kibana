@@ -8,7 +8,7 @@ import React from 'react';
 import orderBy from 'lodash.orderby';
 import { createSelector } from 'reselect';
 import { Request } from 'react-redux-request';
-import { loadTransactionList } from '../../services/rest';
+import { loadTransactionList } from '../../services/rest/apm';
 import { withInitialData } from './helpers';
 
 const ID = 'transactionList';

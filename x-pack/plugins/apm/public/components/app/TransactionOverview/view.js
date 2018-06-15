@@ -13,7 +13,7 @@ import List from './List';
 import { OverviewChartsRequest } from '../../../store/reactReduxRequest/overviewCharts';
 import { TransactionListRequest } from '../../../store/reactReduxRequest/transactionList';
 import { ServiceDetailsRequest } from '../../../store/reactReduxRequest/serviceDetails';
-import { startMlJob } from '../../../services/rest';
+import { startMlJob } from '../../../services/rest/ml';
 
 function ServiceDetailsAndTransactionList({ urlParams, render }) {
   return (

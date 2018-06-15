@@ -9,7 +9,7 @@ import { createSelector } from 'reselect';
 import { getCharts } from '../selectors/chartSelectors';
 import { getUrlParams } from '../urlParams';
 import { Request } from 'react-redux-request';
-import { loadCharts } from '../../services/rest';
+import { loadCharts } from '../../services/rest/apm';
 import { withInitialData } from './helpers';
 
 const ID = 'detailsCharts';

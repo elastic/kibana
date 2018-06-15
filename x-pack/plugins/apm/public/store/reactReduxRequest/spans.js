@@ -7,7 +7,7 @@
 import React from 'react';
 import { withInitialData } from './helpers';
 import { Request } from 'react-redux-request';
-import { loadSpans } from '../../services/rest';
+import { loadSpans } from '../../services/rest/apm';
 
 const ID = 'spans';
 const INITIAL_DATA = {};

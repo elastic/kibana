@@ -7,7 +7,7 @@
 import React from 'react';
 import { withInitialData } from './helpers';
 import { Request } from 'react-redux-request';
-import { loadTransaction } from '../../services/rest';
+import { loadTransaction } from '../../services/rest/apm';
 
 const ID = 'transactionDetails';
 const INITIAL_DATA = {};
