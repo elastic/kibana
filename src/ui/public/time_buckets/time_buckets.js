@@ -203,7 +203,7 @@ TimeBuckets.prototype.setInterval = function (input) {
  *   expression it will be forced into one.
  *
  * interval.scaled: the interval was adjusted to
- *   accomidate the maxBars setting.
+ *   accommodate the maxBars setting.
  *
  * interval.scale: the numer that y-values should be
  *   multiplied by
