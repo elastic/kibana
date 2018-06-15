@@ -156,7 +156,7 @@ TabbedAggResponseWriter.prototype._removeAggFromColumns = function (agg) {
 
   if (this.minimalColumns) return;
 
-  // hierarchical vis creats additional columns for each bucket
+  // hierarchical vis creates additional columns for each bucket
   // we will remove those too
   const mCol = this.columns.splice(i, 1).pop();
   const mI = _.findIndex(this.aggStack, function (agg) {
