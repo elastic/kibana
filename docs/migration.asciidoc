@@ -9,6 +9,8 @@ your application from one version of Kibana to another.
 * <<breaking-changes-6.0>>
 * <<migrating-6.0-index>>
 
+See also <<release-highlights>> and <<release-notes>>. 
+
 --
 include::migration/migrate_6_0.asciidoc[]
 include::migration/migrate_6_0_index.asciidoc[]
