@@ -1,39 +1,34 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiFieldText, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { ColorDot } from '../color_dot/color_dot';
+import { FormControl } from 'react-bootstrap';
+import { readableColor } from '../../lib/readable_color';
+
+import './color_manager.less';
 
 export const ColorManager = ({ value, addColor, removeColor, onChange }) => (
-  <EuiFlexGroup gutterSize="xs" alignItems="center">
-    <EuiFlexItem grow={1}>
-      <ColorDot value={value} />
-    </EuiFlexItem>
-    <EuiFlexItem grow={5} style={{ display: 'inline-block' }}>
-      <EuiFieldText
+  <div className="canvas__color-manager">
+    <div
+      style={{ display: 'inline-block' }}
+      className="canvas__checkered canvas__color-manager--input"
+    >
+      <FormControl
+        type="text"
         value={value || ''}
         placeholder="#hex color"
+        style={{ backgroundColor: value, color: readableColor(value) }}
         onChange={e => onChange(e.target.value)}
       />
-    </EuiFlexItem>
-    {(addColor || removeColor) && (
-      <EuiFlexItem grow={false}>
-        {addColor && (
-          <EuiButtonIcon
-            aria-label="Add Color"
-            iconType="plusInCircle"
-            onClick={() => addColor(value)}
-          />
-        )}
-        {removeColor && (
-          <EuiButtonIcon
-            aria-label="Remove Color"
-            iconType="minusInCircle"
-            onClick={() => removeColor(value)}
-          />
-        )}
-      </EuiFlexItem>
+    </div>
+    {addColor && (
+      <i onClick={() => addColor(value)} className="canvas__color-manager--add fa fa-plus-circle" />
     )}
-  </EuiFlexGroup>
+    {removeColor && (
+      <i
+        onClick={() => removeColor(value)}
+        className="canvas__color-manager--remove fa fa-times-circle"
+      />
+    )}
+  </div>
 );
 
 ColorManager.propTypes = {

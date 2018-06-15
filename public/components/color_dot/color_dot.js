@@ -16,5 +16,4 @@ export const ColorDot = ({ value, children }) => {
 ColorDot.propTypes = {
   value: PropTypes.string,
   children: PropTypes.node,
-  handleClick: PropTypes.func,
 };

@@ -1,8 +1,8 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { set, del } from 'object-path-immutable';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiButtonIcon } from '@elastic/eui';
+import { EuiIcon, EuiLink, EuiButtonIcon } from '@elastic/eui';
 import { ColorPickerMini } from '../../../components/color_picker_mini';
 import { TooltipIcon } from '../../../components/tooltip_icon';
 
@@ -22,56 +22,40 @@ export const SimpleTemplate = props => {
   const handlePlain = (argName, val) => handleChange(argName, { target: { value: val } });
 
   return (
-    <EuiFlexGroup
-      gutterSize="none"
-      alignItems="center"
-      className="canvas__argtype--seriesStyle--color-picker"
-    >
+    <div>
+      <label>Color&nbsp;</label>
       {!color || color.length === 0 ? (
-        <Fragment>
-          <EuiFlexItem grow={false}>
-            <label>Color&nbsp;</label>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiLink onClick={() => handlePlain('color', '#000000')}>
-              Auto <EuiIcon type="bolt" />
-            </EuiLink>
-          </EuiFlexItem>
-        </Fragment>
+        <span>
+          <EuiLink onClick={() => handlePlain('color', '#000000')}>
+            Auto <EuiIcon type="bolt" />
+          </EuiLink>
+        </span>
       ) : (
-        <Fragment>
-          <EuiFlexItem grow={false}>
-            <label>Color&nbsp;</label>
-          </EuiFlexItem>
-          <EuiFlexItem style={{ fontSize: 0 }}>
-            <ColorPickerMini
-              id={'series-style'}
-              value={color}
-              onChange={val => handlePlain('color', val)}
-              colors={workpad.colors}
-              placement="leftCenter"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
+        <span className="canvas__argtype--seriesStyle--color-picker">
+          <ColorPickerMini
+            value={color}
+            onChange={val => handlePlain('color', val)}
+            colors={workpad.colors}
+          />
+          <span>
             <EuiButtonIcon
               iconType="cross"
               color="danger"
               onClick={() => handlePlain('color', '')}
               aria-label="Remove Series Color"
             />
-          </EuiFlexItem>
-        </Fragment>
+          </span>
+        </span>
       )}
+      &nbsp;
       {(!labels || labels.length === 0) && (
-        <EuiFlexItem grow={false}>
-          <TooltipIcon
-            placement="left"
-            icon="warning"
-            text="Data has no series to style, add a color dimension"
-          />
-        </EuiFlexItem>
+        <TooltipIcon
+          placement="left"
+          icon="warning"
+          text="Data has no series to style, add a color dimension"
+        />
       )}
-    </EuiFlexGroup>
+    </div>
   );
 };
 

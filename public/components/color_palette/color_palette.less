@@ -1,11 +1,17 @@
-@import (reference) '../../style/main';
+@import (reference) "../../style/main";
 
 .canvas__color-palette {
+
 }
 
 .canvas__color-palette--dot {
   display: inline-block;
   margin: 0px @spacingXS @spacingXS 0px;
+
+  .fa {
+    font-size: @textXSmall;
+    margin-left: @spacingXS;
+  }
 
   &:hover {
     cursor: pointer;

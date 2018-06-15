@@ -54,13 +54,8 @@ export const BorderForm = ({ value, radius, onChange, colors }) => {
       </EuiFlexItem>
 
       <EuiFlexItem grow={1}>
-        <EuiFormRow label="Color" style={{ fontSize: 0 }}>
-          <ColorPickerMini
-            value={borderColor}
-            onChange={borderColorChange}
-            colors={colors}
-            anchorPosition="upCenter"
-          />
+        <EuiFormRow label="Color">
+          <ColorPickerMini value={borderColor} onChange={borderColorChange} colors={colors} />
         </EuiFormRow>
       </EuiFlexItem>
     </EuiFlexGroup>
