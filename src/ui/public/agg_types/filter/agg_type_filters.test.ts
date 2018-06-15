@@ -41,14 +41,14 @@ describe('AggTypeFilters', () => {
     const spy = jest.fn();
     observable.subscribe(spy);
     expect(spy).toHaveBeenCalledTimes(1);
-    registry.register(() => true);
+    registry.addFilter(() => true);
     expect(spy).toHaveBeenCalledTimes(2);
   });
 
   it('should pass all aggTypes to the registered filter', async () => {
     const aggTypes = [{ name: 'count' }, { name: 'sum' }];
     const filter = jest.fn();
-    registry.register(filter);
+    registry.addFilter(filter);
     await registry
       .filter$(aggTypes, vis, aggConfig)
       .first()
@@ -63,12 +63,12 @@ describe('AggTypeFilters', () => {
     let filtered = await observable.first().toPromise();
     expect(filtered).toEqual(aggTypes);
 
-    registry.register(() => true);
-    registry.register(aggType => aggType.name !== 'count');
+    registry.addFilter(() => true);
+    registry.addFilter(aggType => aggType.name !== 'count');
     filtered = await observable.first().toPromise();
     expect(filtered).toEqual([aggTypes[1], aggTypes[2]]);
 
-    registry.register(aggType => aggType.name !== 'avg');
+    registry.addFilter(aggType => aggType.name !== 'avg');
     filtered = await observable.first().toPromise();
     expect(filtered).toEqual([aggTypes[1]]);
   });

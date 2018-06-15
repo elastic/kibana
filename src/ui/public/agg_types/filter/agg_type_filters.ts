@@ -41,7 +41,7 @@ class AggTypeFilters {
    *
    * @param filter The filter to register.
    */
-  public register(filter: AggTypeFilter): void {
+  public addFilter(filter: AggTypeFilter): void {
     this.filters.add(filter);
     this.subject.next(this.filters);
   }
@@ -58,9 +58,14 @@ class AggTypeFilters {
    */
   public filter$(aggTypes: AggType[], vis: Vis, aggConfig: AggConfig) {
     return this.subject.map(filters => {
-      return aggTypes.filter(aggType =>
-        Array.from(filters).every(filter => filter(aggType, vis, aggConfig))
-      );
+      const allFilters = Array.from(filters);
+      const allowedAggTypes = aggTypes.filter(aggType => {
+        const isAggTypeAllowed = allFilters.every(filter =>
+          filter(aggType, vis, aggConfig)
+        );
+        return isAggTypeAllowed;
+      });
+      return allowedAggTypes;
     });
   }
 }
