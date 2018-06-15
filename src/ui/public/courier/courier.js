@@ -79,7 +79,7 @@ uiModules.get('kibana/courier')
 
 
       /**
-     * is the currior currently fetching search
+     * is the courier currently fetching search
      * results automatically?
      *
      * @return {boolean}
