@@ -236,16 +236,19 @@ function indexName(prefix: string, version: number) {
 async function failIfIndexIsNewer(context: MigrationContext): MigrationPromise {
   const { callCluster, index, kibanaVersion } = context;
   const mappings = await fetchMapping(callCluster, index);
-  const semver = _.get(mappings, 'doc._meta.kibanaVersion', null);
+  const indexVersion = _.get(mappings, 'doc._meta.kibanaVersion', null);
 
-  if (semver && Version.gt(Version.coerce(semver)!, kibanaVersion)) {
+  if (
+    indexVersion &&
+    Version.gt(Version.coerce(indexVersion)!, Version.coerce(kibanaVersion)!)
+  ) {
     return {
       details: {
         code: 'indexNewer',
-        indexVersion: semver,
+        indexVersion,
         kibanaVersion,
       },
-      reason: `Index "${index} v${semver}" is newer than Kibana (v${kibanaVersion}).`,
+      reason: `Index "${index} v${indexVersion}" is newer than Kibana (v${kibanaVersion}).`,
       status: 'failed',
     };
   }

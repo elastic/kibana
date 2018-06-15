@@ -66,6 +66,25 @@ export default function({ getService }: { getService: any }) {
       });
     });
 
+    it('migrates the index if it is not an alias, even if versions match', async () => {
+      await createIndex({
+        body: {
+          mappings: {
+            doc: {
+              _meta: { kibanaVersion: '7.0.0-alpha1' },
+            },
+          },
+        },
+        index: '.test-migrations',
+      });
+      const result = await migrateIndex({
+        ...opts,
+        kibanaVersion: '7.0.0-alpha1',
+      });
+      assert.equal(result.status, 'success');
+      assert.equal(await countIndices(), 2);
+    });
+
     it('fails if the index is newer than Kibana', async () => {
       await createIndex({
         body: {
@@ -383,7 +402,7 @@ export default function({ getService }: { getService: any }) {
     }
 
     async function createIndex(definition: any) {
-      await callCluster('indices.create', definition);
+      return await callCluster('indices.create', definition);
     }
 
     async function refreshIndex() {
