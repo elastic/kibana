@@ -37,13 +37,10 @@ class InteractivePlot extends PureComponent {
     return this.props.series
       .filter(series => !series.hideTooltipValue)
       .map(serie => {
-        const formatTooltipValue =
-          serie.formatTooltipValue || this.props.formatTooltipValue;
-
-        const point = getPointByX(serie, hoverX);
+        const point = getPointByX(serie, hoverX) || {};
         return {
           color: serie.color,
-          value: formatTooltipValue(point),
+          value: this.props.formatTooltipValue(point),
           text: serie.titleShort || serie.title
         };
       });

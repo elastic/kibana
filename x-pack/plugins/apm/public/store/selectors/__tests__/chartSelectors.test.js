@@ -56,7 +56,7 @@ describe('chartSelectors', () => {
         avg: [100, 200, 150, 250, 100, 50],
         p95: [200, 300, 250, 350, 200, 150],
         p99: [300, 400, 350, 450, 100, 50],
-        avgAnomalies: []
+        avgAnomalies: {}
       },
       overallAvgDuration: 200
     };

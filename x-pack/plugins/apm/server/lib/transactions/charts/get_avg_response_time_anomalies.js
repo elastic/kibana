@@ -37,6 +37,7 @@ export async function getAvgResponseTimeAnomalies({
       aggs: {
         top_hits: {
           top_hits: {
+            sort: ['bucket_span'],
             _source: { includes: ['bucket_span'] },
             size: 1
           }
@@ -66,7 +67,9 @@ export async function getAvgResponseTimeAnomalies({
     resp = await client('search', params);
   } catch (e) {
     if (e.statusCode === 404) {
-      return [];
+      return {
+        message: 'ml index does not exist'
+      };
     }
     throw e;
   }
