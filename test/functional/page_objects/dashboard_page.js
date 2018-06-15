@@ -187,7 +187,14 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async clickNewDashboard() {
-      return await testSubjects.click('newDashboardLink');
+      // newDashboardLink button is only visible when dashboard listing table is displayed (at least one dashboard).
+      const exists = await testSubjects.exists('newDashboardLink');
+      if (exists) {
+        return await testSubjects.click('newDashboardLink');
+      }
+
+      // no dashboards exist, click createDashboardPromptButton to create new dashboard
+      return await this.clickCreateDashboardPrompt();
     }
 
     async clickCreateDashboardPrompt() {

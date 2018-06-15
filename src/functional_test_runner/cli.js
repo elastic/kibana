@@ -32,6 +32,7 @@ cmd
   .option('--config [path]', 'Path to a config file', resolveConfigPath, defaultConfigPath)
   .option('--bail', 'stop tests after the first failure', false)
   .option('--grep <pattern>', 'pattern used to select which tests to run')
+  .option('--invert', 'invert grep to exclude tests', false)
   .option('--verbose', 'Log everything', false)
   .option('--quiet', 'Only log errors', false)
   .option('--silent', 'Log nothing', false)
@@ -55,6 +56,7 @@ const functionalTestRunner = createFunctionalTestRunner({
     mochaOpts: {
       bail: cmd.bail,
       grep: cmd.grep,
+      invert: cmd.invert,
     },
     updateBaselines: cmd.updateBaselines
   }

@@ -6,83 +6,101 @@
 
     <div
       ng-if="!watchList.forbidden"
-      class="kuiViewContentItem kuiControlledTable kuiVerticalRhythm"
+      class="kuiViewContentItem kuiVerticalRhythm"
     >
-      <div class="kuiToolBar">
-        <div class="kuiToolBarSearch">
-          <tool-bar-search-box
-            filter="watchList.query"
-            on-filter="watchList.onQueryChange"
-          ></tool-bar-search-box>
-        </div>
+      <div class="kuiVerticalRhythm">
+        <button
+          class="kuiButton kuiButton--primary"
+          ng-click="watchList.onClickCreateThresholdAlert()"
+          data-test-subj="createThresholdAlertButton"
+          tooltip="Set up a custom watch in raw JSON"
+        >
+          Create threshold alert
+        </button>
 
-        <div class="kuiToolBarSection">
-          <watch-type-select
-            class="watchTypeSelect"
-            on-change="watchList.onWatchTypeChange"
-          ></watch-type-select>
-          <button
-            class="kuiButton kuiButton--danger"
-            ng-disabled="!watchList.hasSelectedWatches"
-            ng-click="watchList.onSelectedWatchesDelete()"
-            data-test-subj="btnDeleteWatches"
-          >
-            Delete
-          </button>
-        </div>
-
-        <div class="kuiToolBarSection">
-          <tool-bar-pager-text
-            start-item="watchList.pager.startItem"
-            end-item="watchList.pager.endItem"
-            total-items="watchList.pager.totalItems"
-          ></tool-bar-pager-text>
-          <tool-bar-pager-buttons
-            has-previous-page="watchList.pager.hasPreviousPage"
-            has-next-page="watchList.pager.hasNextPage"
-            on-page-next="watchList.onPageNext"
-            on-page-previous="watchList.onPagePrevious"
-          ></tool-bar-pager-buttons>
-        </div>
+        <button
+          class="kuiButton kuiButton--primary"
+          ng-click="watchList.onClickCreateAdvancedWatch()"
+          data-test-subj="createAdvancedWatchButton"
+          tooltip="Send an alert on a specific condition"
+        >
+          Create advanced watch
+        </button>
       </div>
 
-      <watch-table
-        watches="watchList.pageOfWatches"
-        watches-being-deleted="watchList.watchesBeingDeleted"
-        sort-field="watchList.sortField"
-        sort-reverse="watchList.sortReverse"
-        on-sort-change="watchList.onSortChange"
-        on-select-change="watchList.onSelectedChange"
-        ng-show="watchList.hasPageOfWatches"
-      >
-      </watch-table>
+      <div class="kuiControlledTable kuiVerticalRhythm">
+        <div class="kuiToolBar">
+          <div class="kuiToolBarSearch">
+            <tool-bar-search-box
+              filter="watchList.query"
+              on-filter="watchList.onQueryChange"
+            ></tool-bar-search-box>
+          </div>
 
-      <table-info ng-show="!watchList.hasPageOfWatches">
-        No watches found.
-      </table-info>
+          <div class="kuiToolBarSection">
+            <button
+              class="kuiButton kuiButton--danger"
+              ng-disabled="!watchList.hasSelectedWatches"
+              ng-click="watchList.onSelectedWatchesDelete()"
+              data-test-subj="btnDeleteWatches"
+            >
+              Delete
+            </button>
+          </div>
 
-      <div class="kuiToolBarFooter">
-        <div class="kuiToolBarFooterSection">
-          <tool-bar-selected-count
-            count="watchList.selectedWatches.length"
-            singular-name="watch"
-            plural-name="watches"
-            ng-show="watchList.hasSelectedWatches"
-          ></tool-bar-selected-count>
+          <div class="kuiToolBarSection">
+            <tool-bar-pager-text
+              start-item="watchList.pager.startItem"
+              end-item="watchList.pager.endItem"
+              total-items="watchList.pager.totalItems"
+            ></tool-bar-pager-text>
+            <tool-bar-pager-buttons
+              has-previous-page="watchList.pager.hasPreviousPage"
+              has-next-page="watchList.pager.hasNextPage"
+              on-page-next="watchList.onPageNext"
+              on-page-previous="watchList.onPagePrevious"
+            ></tool-bar-pager-buttons>
+          </div>
         </div>
 
-        <div class="kuiToolBarFooterSection">
-          <tool-bar-pager-text
-            start-item="watchList.pager.startItem"
-            end-item="watchList.pager.endItem"
-            total-items="watchList.pager.totalItems"
-          ></tool-bar-pager-text>
-          <tool-bar-pager-buttons
-            has-previous-page="watchList.pager.hasPreviousPage"
-            has-next-page="watchList.pager.hasNextPage"
-            on-page-next="watchList.onPageNext"
-            on-page-previous="watchList.onPagePrevious"
-          ></tool-bar-pager-buttons>
+        <watch-table
+          watches="watchList.pageOfWatches"
+          watches-being-deleted="watchList.watchesBeingDeleted"
+          sort-field="watchList.sortField"
+          sort-reverse="watchList.sortReverse"
+          on-sort-change="watchList.onSortChange"
+          on-select-change="watchList.onSelectedChange"
+          ng-show="watchList.hasPageOfWatches"
+        >
+        </watch-table>
+
+        <table-info ng-show="!watchList.hasPageOfWatches">
+          No watches found.
+        </table-info>
+
+        <div class="kuiToolBarFooter">
+          <div class="kuiToolBarFooterSection">
+            <tool-bar-selected-count
+              count="watchList.selectedWatches.length"
+              singular-name="watch"
+              plural-name="watches"
+              ng-show="watchList.hasSelectedWatches"
+            ></tool-bar-selected-count>
+          </div>
+
+          <div class="kuiToolBarFooterSection">
+            <tool-bar-pager-text
+              start-item="watchList.pager.startItem"
+              end-item="watchList.pager.endItem"
+              total-items="watchList.pager.totalItems"
+            ></tool-bar-pager-text>
+            <tool-bar-pager-buttons
+              has-previous-page="watchList.pager.hasPreviousPage"
+              has-next-page="watchList.pager.hasNextPage"
+              on-page-next="watchList.onPageNext"
+              on-page-previous="watchList.onPagePrevious"
+            ></tool-bar-pager-buttons>
+          </div>
         </div>
       </div>
     </div>
