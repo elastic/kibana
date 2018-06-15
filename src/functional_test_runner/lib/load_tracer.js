@@ -35,7 +35,7 @@ function addPathToMessage(message, startAt) {
  *  Trace the path followed as dependencies are loaded and
  *  check for circular dependencies at each step
  *
- *  @param  {Any} ident identity of this load step, === compaired
+ *  @param  {Any} ident identity of this load step, === compared
  *                         to identities of previous steps to find circles
  *  @param  {String} descrption description of this step
  *  @param  {Function} load function that executes this step
