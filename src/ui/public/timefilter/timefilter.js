@@ -46,11 +46,12 @@ class Timefilter extends SimpleEmitter {
   /**
    * Updates timefilter time.
    * @param {Object} time
-   * @param {string|moment} from
-   * @param {string|moment} to
-   * @param {string} mode (quick | relative | absolute)
+   * @property {string|moment} time.from
+   * @property {string|moment} time.to
+   * @property {string} time.mode (quick | relative | absolute)
    */
   setTime = (time) => {
+    // Object.assign used for partially composed updates
     this._time = Object.assign(this._time, time);
     this.diffTime();
   }
@@ -62,10 +63,11 @@ class Timefilter extends SimpleEmitter {
   /**
    * Set timefilter refresh interval.
    * @param {Object} refreshInterval
-   * @param {number} value
-   * @param {boolean} pause
+   * @property {number} time.value
+   * @property {boolean} time.pause
    */
   setRefreshInterval = (refreshInterval) => {
+    // Object.assign used for partially composed updates
     this._refreshInterval = Object.assign(this._refreshInterval, refreshInterval);
     this.diffInterval();
   }
