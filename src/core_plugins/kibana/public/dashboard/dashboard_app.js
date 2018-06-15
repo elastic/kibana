@@ -58,7 +58,6 @@ const app = uiModules.get('app/dashboard', [
   'react',
   'kibana/courier',
   'kibana/config',
-  'kibana/notify',
   'kibana/typeahead',
 ]);
 
@@ -67,7 +66,6 @@ app.directive('dashboardViewportProvider', function (reactDirective) {
 });
 
 app.directive('dashboardApp', function ($injector) {
-  const Notifier = $injector.get('Notifier');
   const courier = $injector.get('courier');
   const AppState = $injector.get('AppState');
   const timefilter = $injector.get('timefilter');
@@ -83,7 +81,6 @@ app.directive('dashboardApp', function ($injector) {
       const filterManager = Private(FilterManagerProvider);
       const filterBar = Private(FilterBarQueryFilterProvider);
       const docTitle = Private(DocTitleProvider);
-      const notify = new Notifier({ location: 'Dashboard' });
       const embeddableFactories = Private(EmbeddableFactoriesRegistryProvider);
       const panelActionsRegistry = Private(DashboardPanelActionsRegistryProvider);
 
@@ -305,8 +302,14 @@ app.directive('dashboardApp', function ($injector) {
                 updateViewMode(DashboardViewMode.VIEW);
               }
             }
-            return id;
-          }).catch(notify.error);
+            return { id };
+          }).catch((error) => {
+            toastNotifications.addDanger({
+              title: `Dashboard '${dash.title}' was not saved. Error: ${error.message}`,
+              'data-test-subj': 'saveDashboardFailure',
+            });
+            return { error };
+          });
       };
 
       $scope.showFilterBar = () => filterBar.getFilters().length > 0 || !dashboardStateManager.getFullScreenMode();
