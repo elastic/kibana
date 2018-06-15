@@ -32,6 +32,7 @@ This list of plugins is not guaranteed to work on your version of Kibana. Instea
 * https://github.com/DeanF/health_metric_vis[Colored Metric Visualization] (deanf)
 * https://github.com/JuanCarniglia/dendrogram_vis[Dendrogram] (JuanCarniglia)
 * https://github.com/dlumbrer/kbn_dotplot[Dotplot] (dlumbrer)
+* https://github.com/AnnaGerber/kibana_dropdown[Dropdown] (AnnaGerber)
 * https://github.com/fbaligand/kibana-enhanced-table[Enhanced Table] (fbaligand)
 * https://github.com/nreese/enhanced_tilemap[Enhanced Tilemap] (nreese)
 * https://github.com/ommsolutions/kibana_ext_metrics_vis[Extended Metric] (ommsolutions)
