@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Rx from 'rxjs/Rx';
+import { fromEvent, race, throwError } from 'rxjs';
 
 /**
  *  Produces an Observable from a ReadableSteam that:
@@ -28,13 +28,13 @@ import Rx from 'rxjs/Rx';
  *  @return {Rx.Observable}
  */
 export function observeReadable(readable) {
-  return Rx.Observable.race(
-    Rx.Observable.fromEvent(readable, 'end')
+  return race(
+    fromEvent(readable, 'end')
       .first()
       .ignoreElements(),
 
-    Rx.Observable.fromEvent(readable, 'error')
+    fromEvent(readable, 'error')
       .first()
-      .map(err => Rx.Observable.throw(err))
+      .map(err => throwError(err))
   );
 }

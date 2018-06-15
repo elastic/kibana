@@ -18,7 +18,7 @@
  */
 
 import { relative, resolve } from 'path';
-import Rx from 'rxjs/Rx';
+import { fromEvent, timer } from 'rxjs/Rx';
 import { withProcRunner } from '@kbn/dev-utils';
 
 import {
@@ -87,9 +87,9 @@ export async function startServers(configPath, options) {
 }
 
 async function silence(milliseconds, { log }) {
-  await Rx.Observable.fromEvent(log, 'data')
+  await fromEvent(log, 'data')
     .startWith(null)
-    .switchMap(() => Rx.Observable.timer(milliseconds))
+    .switchMap(() => timer(milliseconds))
     .take(1)
     .toPromise();
 }

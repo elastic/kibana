@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Rx from 'rxjs/Rx';
+import {
+  fromEvent,
+  fromEventPattern,
+  NEVER,
+  Observable,
+  of,
+  throwError
+} from 'rxjs/Rx';
+
 import phantom from '@elastic/node-phantom-simple';
 import { getPhantomOptions } from './phantom_options';
 import { PhantomDriver } from '../driver';
@@ -19,7 +27,7 @@ export class PhantomDriverFactory {
   type = 'phantom';
 
   create({ bridgePort, viewport, zoom, logger }) {
-    return Rx.Observable.create(observer => {
+    return Observable.create(observer => {
       let killed = false;
       let browser;
       let page;
@@ -64,8 +72,8 @@ export class PhantomDriverFactory {
           return;
         }
 
-        const exit$ = Rx.Observable.fromEvent(browser.process, 'exit')
-          .mergeMap(code => Rx.Observable.throw(new Error(`Phantom exited with code: ${code}. ${exitCodeSuggestion(code)}`)));
+        const exit$ = fromEvent(browser.process, 'exit')
+          .mergeMap(code => throwError(new Error(`Phantom exited with code: ${code}. ${exitCodeSuggestion(code)}`)));
 
         const driver = new PhantomDriver({
           page,
@@ -73,15 +81,15 @@ export class PhantomDriverFactory {
           zoom,
           logger,
         });
-        const driver$ = Rx.Observable.of(driver);
+        const driver$ = of(driver);
 
-        const consoleMessage$ = Rx.Observable.fromEventPattern(handler => {
+        const consoleMessage$ = fromEventPattern(handler => {
           page.onConsoleMessage = handler;
         }, () => {
           page.onConsoleMessage = null;
         });
 
-        const message$ = Rx.Observable.never();
+        const message$ = NEVER;
 
         observer.next({
           driver$,

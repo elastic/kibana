@@ -5,7 +5,7 @@
  */
 
 import url from 'url';
-import Rx from 'rxjs/Rx';
+import { fromEventPattern, of, throwError } from 'rxjs';
 import { omit } from 'lodash';
 import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '../../../../common/constants';
 import { oncePerServer } from '../../../../server/lib/once_per_server';
@@ -77,9 +77,9 @@ function executeJobFn(server) {
   };
 
   return compatibilityShim(function executeJob(jobToExecute, cancellationToken) {
-    const process$ = Rx.Observable.of(jobToExecute)
+    const process$ = of(jobToExecute)
       .mergeMap(decryptJobHeaders)
-      .catch(() => Rx.Observable.throw('Failed to decrypt report job data. Please re-generate this report.'))
+      .catch(() => throwError('Failed to decrypt report job data. Please re-generate this report.'))
       .map(omitBlacklistedHeaders)
       .mergeMap(getCustomLogo)
       .mergeMap(addForceNowQuerystring)
@@ -91,7 +91,7 @@ function executeJobFn(server) {
         content: buffer.toString('base64')
       }));
 
-    const stop$ = Rx.Observable.fromEventPattern(cancellationToken.on);
+    const stop$ = fromEventPattern(cancellationToken.on);
 
     return process$.takeUntil(stop$).toPromise();
   });

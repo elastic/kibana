@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Rx from 'rxjs/Rx';
+import { empty, fromEvent, merge } from 'rxjs';
 
 const SEP = /\r?\n/;
 
@@ -35,7 +35,7 @@ import { observeReadable } from './observe_readable';
 export function observeLines(readable) {
   const done$ = observeReadable(readable).share();
 
-  const scan$ = Rx.Observable.fromEvent(readable, 'data')
+  const scan$ = fromEvent(readable, 'data')
     .scan(
       ({ buffer }, chunk) => {
         buffer += chunk;
@@ -54,7 +54,7 @@ export function observeLines(readable) {
     // stop if done completes or errors
     .takeUntil(done$.materialize());
 
-  return Rx.Observable.merge(
+  return merge(
     // use done$ to provide completion/errors
     done$,
 
@@ -66,6 +66,6 @@ export function observeLines(readable) {
       .last()
       .mergeMap(({ buffer }) => (buffer ? [buffer] : []))
       // if there were no lines, last() will error, so catch and complete
-      .catch(() => Rx.Observable.empty())
+      .catch(() => empty())
   );
 }
