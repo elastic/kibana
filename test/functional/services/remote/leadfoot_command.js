@@ -41,7 +41,7 @@ async function attemptToCreateCommand(log, server, driverApi) {
   await server._fillCapabilities(session);
   if (attemptId !== attemptCounter) return; // abort
 
-  // command looks like a promise beacuse it has a `.then()` function
+  // command looks like a promise because it has a `.then()` function
   // so we wrap it in an object to prevent async/await from trying to
   // unwrap/resolve it
   return { command: new Command(session) };
