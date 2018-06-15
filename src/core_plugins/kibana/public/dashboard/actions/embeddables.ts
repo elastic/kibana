@@ -113,7 +113,7 @@ export const embeddableError = createAction<EmbeddableErrorActionPayload>(
  * redux so the appropriate actions are taken and UI updated.
  *
  * @param changeData.panelId - the id of the panel whose state has changed.
- * @param changeDataembeddableState - the new state of the embeddable.
+ * @param changeData.embeddableState - the new state of the embeddable.
  */
 export function embeddableStateChanged(changeData: {
   panelId: PanelId;

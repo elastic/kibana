@@ -18,8 +18,9 @@
  */
 
 import { Filters, Query, TimeRange } from 'ui/embeddable';
+import { DashboardViewMode } from '../dashboard/dashboard_view_mode';
 import * as DashboardSelectors from '../dashboard/selectors';
-import { PanelId, ViewMode } from '../dashboard/selectors/types';
+import { PanelId } from '../dashboard/selectors/types';
 import { CoreKibanaState } from './types';
 
 export const getDashboard = (
@@ -57,7 +58,7 @@ export const getEmbeddableMetadata = (
 
 export const getStagedFilters = (state: CoreKibanaState): Filters =>
   DashboardSelectors.getStagedFilters(getDashboard(state));
-export const getViewMode = (state: CoreKibanaState): ViewMode =>
+export const getViewMode = (state: CoreKibanaState): DashboardViewMode =>
   DashboardSelectors.getViewMode(getDashboard(state));
 export const getFullScreenMode = (state: CoreKibanaState): boolean =>
   DashboardSelectors.getFullScreenMode(getDashboard(state));
