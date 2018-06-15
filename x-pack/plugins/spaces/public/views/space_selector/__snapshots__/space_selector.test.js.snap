@@ -2,7 +2,8 @@
 
 exports[`it renders without crashing 1`] = `
 <div
-  className="euiPage spaceSelector__page"
+  className="euiPage euiPage--widthIsNotRestricted spaceSelector__page"
+  style={undefined}
 >
   <div
     className="euiPageHeader spaceSelector__heading"
@@ -15,12 +16,14 @@ exports[`it renders without crashing 1`] = `
       >
         <svg
           className="euiIcon euiIcon--xxLarge"
+          focusable="false"
           height="40"
           style={
             Object {
               "fill": undefined,
             }
           }
+          tabIndex={undefined}
           viewBox="0 0 30 40"
           width="30"
           xmlns="http://www.w3.org/2000/svg"

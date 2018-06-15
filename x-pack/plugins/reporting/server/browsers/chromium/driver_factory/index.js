@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -14,6 +13,7 @@ import cdp from 'chrome-remote-interface';
 import { HeadlessChromiumDriver } from '../driver';
 import { args } from './args';
 import { safeChildProcess, exitCodeSuggestion } from '../../safe_child_process';
+import { ensureChromiumIsListening } from './ensure_chromium_is_listening';
 
 const compactWhitespace = (str) => {
   return str.replace(/\s+/, ' ');
@@ -35,6 +35,7 @@ export class HeadlessChromiumDriverFactory {
         userDataDir,
         bridgePort,
         viewport,
+        verboseLogging: this.logger.isVerbose,
         disableSandbox: this.browserConfig.disableSandbox,
         proxyConfig: this.browserConfig.proxy,
       });
@@ -56,7 +57,9 @@ export class HeadlessChromiumDriverFactory {
 
       const driver$ = message$
         .first(line => line.indexOf(`DevTools listening on ws://127.0.0.1:${bridgePort}`) >= 0)
-        .do(() => this.logger.debug('Connecting chrome remote inspector'))
+        .do(() => this.logger.debug('Ensure chromium is running and listening'))
+        .mergeMap(() => ensureChromiumIsListening(bridgePort, this.logger))
+        .do(() => this.logger.debug('Connecting chrome remote interface'))
         .mergeMap(() => cdp({ port: bridgePort, local: true }))
         .do(() => this.logger.debug('Initializing chromium driver'))
         .map(client => new HeadlessChromiumDriver(client, {

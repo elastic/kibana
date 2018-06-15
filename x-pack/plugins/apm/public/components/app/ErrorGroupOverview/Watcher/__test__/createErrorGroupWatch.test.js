@@ -26,7 +26,7 @@ describe('createErrorGroupWatch', () => {
     jest.spyOn(rest, 'createWatch').mockReturnValue();
 
     createWatchResponse = await createErrorGroupWatch({
-      emails: ['my@email.dk'],
+      emails: ['my@email.dk', 'mySecond@email.dk'],
       schedule: {
         daily: {
           at: '08:00'
@@ -63,7 +63,9 @@ describe('createErrorGroupWatch', () => {
   });
 
   it('should format email correctly', () => {
-    expect(tmpl.actions.email.email.to).toBe('my@email.dk');
+    expect(tmpl.actions.email.email.to).toEqual(
+      'my@email.dk,mySecond@email.dk'
+    );
     expect(tmpl.actions.email.email.subject).toBe(
       '"opbeans-node" has error groups which exceeds the threshold'
     );
@@ -85,7 +87,10 @@ describe('createErrorGroupWatch', () => {
 // Recusively iterate a nested structure and render strings as mustache templates
 function renderMustache(input, ctx) {
   if (isString(input)) {
-    return mustache.render(input, { ctx });
+    return mustache.render(input, {
+      ctx,
+      join: () => (text, render) => render(`{{${text}}}`, { ctx })
+    });
   }
 
   if (isArray(input)) {

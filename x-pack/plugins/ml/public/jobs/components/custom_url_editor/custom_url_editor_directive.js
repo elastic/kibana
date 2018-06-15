@@ -33,7 +33,7 @@ module.directive('mlCustomUrlEditor', function (Private) {
     replace: true,
     transclude: true,
     template,
-    controller: function ($scope, $q) {
+    controller: function ($scope) {
       const URL_TYPE = {
         KIBANA_DASHBOARD: 'KIBANA_DASHBOARD',
         KIBANA_DISCOVER: 'KIBANA_DISCOVER',
@@ -88,7 +88,7 @@ module.directive('mlCustomUrlEditor', function (Private) {
         });
       }
 
-      $q.all([
+      Promise.all([
         getSavedDashboards(),
         getSavedIndexPatterns()
       ])

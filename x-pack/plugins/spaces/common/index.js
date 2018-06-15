@@ -5,3 +5,9 @@
  */
 
 export { isReservedSpace } from './is_reserved_space';
+export { MAX_SPACE_INITIALS } from './constants';
+
+export {
+  getSpaceInitials,
+  getSpaceColor,
+} from './space_attributes';

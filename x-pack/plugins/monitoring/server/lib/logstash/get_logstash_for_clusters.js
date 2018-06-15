@@ -8,7 +8,7 @@ import Promise from 'bluebird';
 import { get } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { createQuery } from '../create_query.js';
-import { ElasticsearchMetric } from '../metrics';
+import { LogstashClusterMetric } from '../metrics';
 import { LOGSTASH } from '../../../common/constants';
 
 const {
@@ -47,17 +47,17 @@ export function getLogstashForClusters(req, lsIndexPattern, clusters) {
 
   return Promise.map(clusters, cluster => {
     const clusterUuid = cluster.cluster_uuid;
-    const metric = ElasticsearchMetric.getMetricFields();
     const params = {
       index: lsIndexPattern,
       size: 0,
       ignoreUnavailable: true,
       body: {
         query: createQuery({
+          type: 'logstash_stats',
           start,
           end,
           clusterUuid,
-          metric
+          metric: LogstashClusterMetric.getMetricFields()
         }),
         aggs: {
           logstash_uuids: {

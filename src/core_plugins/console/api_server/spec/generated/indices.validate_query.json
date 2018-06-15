@@ -1,5 +1,5 @@
 {
-  "_validate/query": {
+  "indices.validate_query": {
     "url_params": {
       "explain": "__flag__",
       "ignore_unavailable": "__flag__",
@@ -30,6 +30,7 @@
       "_validate/query",
       "{indices}/_validate/query",
       "{indices}/{type}/_validate/query"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/search-validate.html"
   }
 }

@@ -1,17 +1,34 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import expect from 'expect.js';
-import ngMock from 'ng_mock';
 import { getSuggestionsProvider } from '../operator';
-import StubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import indexPatternResponse from '../../__tests__/index_pattern_response.json';
 
 describe('Kuery operator suggestions', function () {
   let indexPatterns;
   let getSuggestions;
 
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    indexPatterns = [Private(StubbedLogstashIndexPatternProvider)];
+  beforeEach(() => {
+    indexPatterns = [indexPatternResponse];
     getSuggestions = getSuggestionsProvider({ indexPatterns });
-  }));
+  });
 
   it('should return a function', function () {
     expect(typeof getSuggestions).to.be('function');

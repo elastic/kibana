@@ -12,9 +12,6 @@
 */
 import numeral from '@elastic/numeral';
 
-import { uiModules } from 'ui/modules';
-const module = uiModules.get('apps/ml');
-
 export function abbreviateWholeNumber(value, maxDigits) {
   const maxNumDigits = (maxDigits !== undefined ? maxDigits : 3);
   if (Math.abs(value) < Math.pow(10, maxNumDigits)) {
@@ -23,6 +20,3 @@ export function abbreviateWholeNumber(value, maxDigits) {
     return numeral(value).format('0a');
   }
 }
-
-// TODO - remove the filter once all uses of the abbreviateWholeNumber Angular filter have been removed.
-module.filter('abbreviateWholeNumber', () => abbreviateWholeNumber);

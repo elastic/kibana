@@ -22,15 +22,17 @@ MSG message-id=<%{GREEDYDATA}></code></pre>
           </div>
         </div>
       </div>
-      <div
-        class="custom-patterns-input-editor grokdebugger-ace-editor kuiVerticalRhythm"
-        require-keys="true"
-        ui-ace="{
-          onLoad: aceLoaded
-        }"
-        ng-model="customPatternsInput.customPatterns"
-        data-test-subj="aceCustomPatternsInput"
+      <div class="grokdebugger-ace-editor">
+        <div
+          class="custom-patterns-input-editor kuiVerticalRhythm"
+          require-keys="true"
+          ui-ace="{
+            onLoad: aceLoaded
+          }"
+          ng-model="customPatternsInput.customPatterns"
+          data-test-subj="aceCustomPatternsInput"
         ></div>
+      </div>
     </div>
   </toggle-panel>
 </form>

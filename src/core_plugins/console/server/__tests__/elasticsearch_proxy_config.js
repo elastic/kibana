@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import expect from 'expect.js';
 import { getElasticsearchProxyConfig } from '../elasticsearch_proxy_config';
 import https from 'https';
@@ -99,22 +118,22 @@ describe('plugins/console', function () {
         expect(agent.options.ca).to.contain('test ca certificate\n');
       });
 
-      it(`sets cert and key when certificate and key paths are specified`, function () {
+      it(`doesn't set cert and key when certificate and key paths are specified`, function () {
         setElasticsearchConfig('ssl.certificate', __dirname + '/fixtures/cert.crt');
         setElasticsearchConfig('ssl.key', __dirname + '/fixtures/cert.key');
 
         const { agent } = getElasticsearchProxyConfig(server);
-        expect(agent.options.cert).to.be('test certificate\n');
-        expect(agent.options.key).to.be('test key\n');
+        expect(agent.options.cert).to.be(undefined);
+        expect(agent.options.key).to.be(undefined);
       });
 
-      it(`sets passphrase when certificate, key and keyPassphrase are specified`, function () {
+      it(`doesn't set passphrase when certificate, key and keyPassphrase are specified`, function () {
         setElasticsearchConfig('ssl.certificate', __dirname + '/fixtures/cert.crt');
         setElasticsearchConfig('ssl.key', __dirname + '/fixtures/cert.key');
         setElasticsearchConfig('ssl.keyPassphrase', 'secret');
 
         const { agent } = getElasticsearchProxyConfig(server);
-        expect(agent.options.passphrase).to.be('secret');
+        expect(agent.options.passphrase).to.be(undefined);
       });
     });
   });

@@ -1,0 +1,27 @@
+{
+  "name": "@kbn/test",
+  "main": "./target/index.js",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "scripts": {
+    "build": "babel src --out-dir target",
+    "kbn:bootstrap": "yarn build",
+    "kbn:watch": "yarn build --watch"
+  },
+  "devDependencies": {
+    "@kbn/babel-preset": "link:../kbn-babel-preset",
+    "@kbn/dev-utils": "link:../kbn-dev-utils",
+    "babel-cli": "^6.26.0"
+  },
+  "dependencies": {
+    "chalk": "^2.4.1",
+    "dedent": "^0.7.0",
+    "getopts": "^2.0.6",
+    "glob": "^7.1.2",
+    "rxjs": "^5.4.3",
+    "tar-fs": "^1.16.2",
+    "tmp": "^0.0.33",
+    "zlib": "^1.0.5"
+  }
+}

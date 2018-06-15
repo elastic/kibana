@@ -49,7 +49,7 @@ const PanelExtras = ({ extras }) => {
 
 export function ClusterItemContainer(props) {
   const iconMap = {
-    elasticsearch: 'logoElasticSearch',
+    elasticsearch: 'logoElasticsearch',
     kibana: 'logoKibana',
     logstash: 'logoLogstash',
     beats: 'logoBeats',
@@ -64,7 +64,7 @@ export function ClusterItemContainer(props) {
             <EuiFlexItem grow={false}>
               <EuiIcon type={icon} size="l" />
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiTitle>
                 <h2>
                   { props.title }

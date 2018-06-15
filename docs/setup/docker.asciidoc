@@ -7,6 +7,8 @@ A list of all published Docker images and tags can be found at
 https://www.docker.elastic.co[www.docker.elastic.co]. The source code can be
 found on https://github.com/elastic/kibana-docker/tree/{branch}[GitHub].
 
+[float]
+[[image-type]]
 === Image types
 
 These images are free to use under the Elastic license. They contain open source 
@@ -19,6 +21,8 @@ Elastic license levels.
 Alternatively, you can download `-oss` images, which contain only features that 
 are available under the Apache 2.0 license.
 
+[float]
+[[pull-image]]
 === Pulling the image
 Obtaining Kibana for Docker is as simple as issuing a +docker pull+ command
 against the Elastic Docker registry.
@@ -42,6 +46,8 @@ docker pull {docker-repo}-oss:{version}
 
 endif::[]
 
+[float]
+[[configuring-kibana-docker]]
 === Configuring Kibana on Docker
 
 The Docker images provide several methods for configuring Kibana. The
@@ -49,7 +55,8 @@ conventional approach is to provide a `kibana.yml` file as described in
 {kibana-ref}/settings.html[Configuring Kibana], but it's also possible to use
 environment variables to define settings.
 
-[[docker-bind-mount-config]]
+[float]
+[[bind-mount-config]]
 ==== Bind-mounted configuration
 
 One way to configure Kibana on Docker is to provide `kibana.yml` via bind-mounting.
@@ -65,7 +72,8 @@ services:
       - ./kibana.yml:/usr/share/kibana/config/kibana.yml
 --------------------------------------------
 
-[[docker-env-config]]
+[float]
+[[environment-variable-config]]
 ==== Environment variable configuration
 
 Under Docker, Kibana can be configured via environment variables. When
@@ -86,9 +94,8 @@ Some example translations are shown here:
 `KIBANA_DEFAULTAPPID`:: `kibana.defaultAppId`
 `XPACK_MONITORING_ENABLED`:: `xpack.monitoring.enabled`
 
-In general, any setting listed in <<settings>> or
-{xpack-ref}/xpack-settings.html[X-Pack Settings] can be configured
-with this technique.
+In general, any setting listed in <<settings>> or <<settings-xpack-kb>> can be 
+configured with this technique.
 
 These variables can be set with +docker-compose+ like this:
 
@@ -106,6 +113,8 @@ services:
 Since environment variables are translated to CLI arguments, they take
 precedence over settings configured in `kibana.yml`.
 
+[float]
+[[docker-defaults]]
 ==== Docker defaults
 The following settings have different default values when using the Docker
 images:
@@ -114,17 +123,14 @@ images:
 `server.name`:: `kibana`
 `server.host`:: `"0"`
 `elasticsearch.url`:: `http://elasticsearch:9200`
-
-In the `x-pack` image, the following additional defaults are also set:
-
-[horizontal]
-`elasticsearch.username`:: `elastic`
-`elasticsearch.password`:: `changeme`
 `xpack.monitoring.ui.container.elasticsearch.enabled`:: `true`
 
+NOTE: The setting `xpack.monitoring.ui.container.elasticsearch.enabled` is not
+defined in the `-oss` image.
+
 These settings are defined in the default `kibana.yml`. They can be overridden
-with a <<docker-bind-mount-config,custom `kibana.yml`>> or via
-<<docker-env-config,environment variables>>.
+with a <<bind-mount-config,custom `kibana.yml`>> or via
+<<environment-variable-config,environment variables>>.
 
 IMPORTANT: If replacing `kibana.yml` with a custom version, be sure to copy the
 above defaults to the custom file if you want to retain them. If not, they will

@@ -72,3 +72,20 @@ Setting | Description
 `skipInstallDependencies` | Don't install dependencies defined in package.json into build output
 `buildVersion` | Version for the build output
 `kibanaVersion` | Kibana version for the build output (added to package.json)
+
+## TypeScript support
+
+Plugin code can be written in [TypeScript](http://www.typescriptlang.org/) if desired. To enable TypeScript support create a `tsconfig.json` file at the root of your plugin that looks something like this:
+
+```js
+{
+  // extend Kibana's tsconfig, or use your own settings
+  "extends": "../../kibana/tsconfig.json",
+
+  // tell the TypeScript compiler where to find your source files
+  "include": [
+    "server/**/*",
+    "public/**/*"
+  ]
+}
+```

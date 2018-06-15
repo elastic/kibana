@@ -22,25 +22,40 @@ beforeEach(() => {
 const createMockServer = (settings = {}) => {
 
   const {
-    defaultExists = false
+    defaultExists = false,
+    simulateErrorCondition = false
   } = settings;
+
+  const mockGet = jest.fn().mockImplementation(() => {
+    if (simulateErrorCondition) {
+      throw new Error('unit test: unexpected exception condition');
+    }
+
+    if (defaultExists) {
+      return;
+    }
+    throw Boom.notFound('unit test: default space not found');
+  });
+
+  const mockCreate = jest.fn().mockReturnValue();
 
   const mockServer = {
     config: jest.fn().mockReturnValue({
       get: jest.fn()
     }),
-    savedObjectsClientFactory: jest.fn().mockReturnValue({
-      get: jest.fn().mockImplementation(() => {
-        if (defaultExists) {
-          return;
+    savedObjects: {
+      SavedObjectsClient: {
+        errors: {
+          isNotFoundError: (e) => e.message === 'unit test: default space not found'
         }
-        throw Boom.notFound('unit test: default space not found');
-      }),
-      create: jest.fn().mockReturnValue(),
-      errors: {
-        isNotFoundError: (e) => e.message === 'unit test: default space not found'
-      }
-    })
+      },
+      getSavedObjectsRepository: jest.fn().mockImplementation(() => {
+        return {
+          get: mockGet,
+          create: mockCreate,
+        };
+      })
+    }
   };
 
   mockServer.config().get.mockImplementation(key => {
@@ -57,11 +72,11 @@ test(`it creates the default space when one does not exist`, async () => {
 
   await createDefaultSpace(server);
 
-  const client = server.savedObjectsClientFactory();
+  const repository = server.savedObjects.getSavedObjectsRepository();
 
-  expect(client.get).toHaveBeenCalledTimes(1);
-  expect(client.create).toHaveBeenCalledTimes(1);
-  expect(client.create).toHaveBeenCalledWith(
+  expect(repository.get).toHaveBeenCalledTimes(1);
+  expect(repository.create).toHaveBeenCalledTimes(1);
+  expect(repository.create).toHaveBeenCalledWith(
     'space',
     { "_reserved": true, "description": "This is your Default Space!", "name": "Default Space", "urlContext": "" },
     { "id": "default" }
@@ -75,19 +90,17 @@ test(`it does not attempt to recreate the default space if it already exists`, a
 
   await createDefaultSpace(server);
 
-  const client = server.savedObjectsClientFactory();
+  const repository = server.savedObjects.getSavedObjectsRepository();
 
-  expect(client.get).toHaveBeenCalledTimes(1);
-  expect(client.create).toHaveBeenCalledTimes(0);
+  expect(repository.get).toHaveBeenCalledTimes(1);
+  expect(repository.create).toHaveBeenCalledTimes(0);
 });
 
 test(`it throws all other errors from the saved objects client`, async () => {
   const server = createMockServer({
     defaultExists: true,
+    simulateErrorCondition: true,
   });
-
-  const client = server.savedObjectsClientFactory();
-  client.get = () => { throw new Error('unit test: unexpected exception condition'); };
 
   try {
     await createDefaultSpace(server);

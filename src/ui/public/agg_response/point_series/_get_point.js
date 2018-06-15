@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 
 export function PointSeriesGetPointProvider() {
@@ -25,8 +44,9 @@ export function PointSeriesGetPointProvider() {
     }
 
     if (series) {
-      point.aggConfig = series.agg;
-      point.series = series.agg.fieldFormatter()(unwrap(row[series.i]));
+      const seriesArray = series.length ? series : [ series ];
+      point.aggConfig = seriesArray[0].agg;
+      point.series = seriesArray.map(s => s.agg.fieldFormatter()(unwrap(row[s.i]))).join(' - ');
     } else if (y) {
       // If the data is not split up with a series aspect, then
       // each point's "series" becomes the y-agg that produced it

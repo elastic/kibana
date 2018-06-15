@@ -1,22 +1,41 @@
-import del from 'del';
-import { relative, resolve, join } from 'path';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import copy from 'cpy';
+import del from 'del';
+import { join, relative, resolve } from 'path';
 
 import { getProjectPaths } from '../config';
-import {
-  getProjects,
-  buildProjectGraph,
-  topologicallyBatchProjects,
-  ProjectMap,
-  includeTransitiveProjects,
-} from '../utils/projects';
+import { isDirectory, isFile } from '../utils/fs';
+import { log } from '../utils/log';
 import {
   createProductionPackageJson,
-  writePackageJson,
   readPackageJson,
+  writePackageJson,
 } from '../utils/package_json';
-import { isDirectory, isFile } from '../utils/fs';
 import { Project } from '../utils/project';
+import {
+  buildProjectGraph,
+  getProjects,
+  includeTransitiveProjects,
+  topologicallyBatchProjects,
+} from '../utils/projects';
 
 export async function buildProductionProjects({
   kibanaRoot,
@@ -30,7 +49,7 @@ export async function buildProductionProjects({
   const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
 
   const projectNames = [...projects.values()].map(project => project.name);
-  console.log(`Preparing production build for [${projectNames.join(', ')}]`);
+  log.write(`Preparing production build for [${projectNames.join(', ')}]`);
 
   for (const batch of batchedProjects) {
     for (const project of batch) {
@@ -99,9 +118,9 @@ async function copyToBuild(
 
   await copy(['**/*', '!node_modules/**'], buildProjectPath, {
     cwd: project.getIntermediateBuildDirectory(),
-    parents: true,
-    nodir: true,
     dot: true,
+    nodir: true,
+    parents: true,
   });
 
   // If a project is using an intermediate build directory, we special-case our

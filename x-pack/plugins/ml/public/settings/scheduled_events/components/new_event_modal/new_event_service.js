@@ -11,10 +11,10 @@ import template from './new_event_modal.html';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.service('mlNewEventService', function ($q, $modal) {
+module.service('mlNewEventService', function ($modal) {
 
   this.openNewEventWindow = function () {
-    return $q((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const modal = $modal.open({
         template,
         controller: 'MlNewEventModal',

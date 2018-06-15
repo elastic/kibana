@@ -10,3 +10,8 @@ export const DEFAULT_SPACE_ID = `default`;
  * The minimum number of spaces required to show a search control.
  */
 export const SPACE_SEARCH_COUNT_THRESHOLD = 8;
+
+/**
+ * The maximum number of characters allowed in the Space Avatar's initials
+ */
+export const MAX_SPACE_INITIALS = 2;

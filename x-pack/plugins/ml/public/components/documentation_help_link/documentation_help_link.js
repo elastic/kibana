@@ -6,7 +6,8 @@
 
 
 
-// the tooltip descriptions are located in tooltips.json
+import React from 'react';
+import ReactDOM from 'react-dom';
 
 import './styles/main.less';
 
@@ -14,6 +15,8 @@ import { metadata } from 'ui/metadata';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
+
+import { DocumentationHelpLink } from './documentation_help_link_view';
 
 module.directive('mlDocumentationHelpLink', function () {
   return {
@@ -23,17 +26,20 @@ module.directive('mlDocumentationHelpLink', function () {
     },
     restrict: 'AE',
     replace: true,
-    template: '<a href="{{fullUrl()}}" rel="noopener noreferrer" target="_blank"' +
-                'class="documentation-help-link" tooltip="{{label}}">' +
-                '{{label}}<i class="fa fa-external-link"></i></a>',
-    controller: function ($scope) {
+    link: function (scope, element) {
       const baseUrl = 'https://www.elastic.co';
       // metadata.branch corresponds to the version used in documentation links.
       const version = metadata.branch;
 
-      $scope.fullUrl = function () {
-        return `${baseUrl}/guide/en/x-pack/${version}/${$scope.uri}`;
+      const props = {
+        fullUrl: `${baseUrl}/guide/en/x-pack/${version}/${scope.uri}`,
+        label: scope.label
       };
+
+      ReactDOM.render(
+        React.createElement(DocumentationHelpLink, props),
+        element[0]
+      );
     }
   };
 

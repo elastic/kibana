@@ -68,20 +68,20 @@ module.directive('mlChartTooltip', function (mlChartTooltipService) {
           'display': 'block'
         });
       }
+    };
 
-      this.hide = function () {
-        if (this.element !== null) {
-          this.element.css({
-            'opacity': '0',
-          });
+    this.hide = function () {
+      if (this.element !== null) {
+        this.element.css({
+          'opacity': '0',
+        });
 
-          // after the fade out transition has finished, set the display to
-          // none so it doesn't block any mouse events underneath it.
-          this.fadeTimeout = $timeout(() => {
-            this.element.css('display', 'none');
-            this.fadeTimeout = null;
-          }, FADE_TIMEOUT_MS);
-        }
-      };
+        // after the fade out transition has finished, set the display to
+        // none so it doesn't block any mouse events underneath it.
+        this.fadeTimeout = $timeout(() => {
+          this.element.css('display', 'none');
+          this.fadeTimeout = null;
+        }, FADE_TIMEOUT_MS);
+      }
     };
   });

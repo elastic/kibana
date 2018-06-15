@@ -1,5 +1,5 @@
 {
-  "_cat/repositories": {
+  "cat.repositories": {
     "url_params": {
       "format": "",
       "local": "__flag__",
@@ -14,6 +14,7 @@
     ],
     "patterns": [
       "_cat/repositories"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cat-repositories.html"
   }
 }

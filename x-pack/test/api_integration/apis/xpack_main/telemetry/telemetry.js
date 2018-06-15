@@ -11,7 +11,7 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('clusters/_stats', () => {
+  describe('/api/telemetry/v1/clusters/_stats', () => {
     describe('with trial license clusters', () => {
       const archive = 'monitoring/multicluster';
       const timeRange = {

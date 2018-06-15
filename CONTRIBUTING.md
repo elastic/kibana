@@ -265,8 +265,29 @@ Once that's done, just run:
 yarn test && yarn build --skip-os-packages
 ```
 
+You can get all build options using the following command:
+
+```bash
+yarn build --help
+```
+
 ### Debugging Server Code
-`yarn debug` will start the server with Node's inspect and debug-brk flags.  Kibana's development mode will start three processes.  Chrome's developer tools can be configured to connect to all three under the connection tab.
+`yarn debug` will start the server with Node's inspect flag.  Kibana's development mode will start three processes.  Chrome's developer tools can be configured to connect to all three under the connection tab.
+
+### Unit testing frameworks
+Kibana is migrating unit testing from Mocha to Jest. Legacy unit tests still exist in Mocha but all new unit tests should be written in Jest.
+
+#### Mocha (legacy)
+Mocha tests are contained in `__tests__` directories.
+
+#### Jest
+Jest tests are stored in the same directory as source code files with the `.test.js` suffix.
+
+### Running Jest Unit Tests
+
+```bash
+node scripts/jest
+```
 
 ### Debugging Unit Tests
 
@@ -342,6 +363,7 @@ yarn test:browser --dev # remove the --dev flag to run them once and close
 
 [Read about the `FunctionalTestRunner`](https://www.elastic.co/guide/en/kibana/current/development-functional-tests.html) to learn more about how you can run and develop functional tests for Kibana core and plugins.
 
+You can also look into the [Scripts README.md](./scripts/README.md) to learn more about using the node scripts we provide for building Kibana, running integration tests, and starting up Kibana and Elasticsearch while you develop.
 
 ### Building OS packages
 

@@ -1,6 +1,24 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import moment from 'moment';
 
-import { log } from './log';
 import { createCliError } from './errors';
 import { createProc } from './proc';
 import { observeSignals } from './observe_signals';
@@ -15,9 +33,12 @@ const noop = () => {};
  *  @class ProcRunner
  */
 export class ProcRunner {
-  constructor() {
+  constructor(options) {
+    const { log } = options;
+
     this._closing = false;
     this._procs = [];
+    this._log = log;
     this._signalSubscription = observeSignals(process).subscribe({
       next: async signal => {
         await this.teardown(signal);
@@ -75,7 +96,7 @@ export class ProcRunner {
           .catch(err => {
             if (err.name !== 'EmptyError') {
               throw createCliError(
-                `[${name}] exitted without matching pattern: ${wait}`
+                `[${name}] exited without matching pattern: ${wait}`
               );
             } else {
               throw err;
@@ -86,7 +107,7 @@ export class ProcRunner {
 
       // wait for process to complete
       if (wait === true) {
-        await proc.outcomePromise;
+        await proc.getOutcomePromise();
       }
     } finally {
       // while the procRunner closes promises will resolve/reject because
@@ -109,7 +130,7 @@ export class ProcRunner {
     if (proc) {
       await proc.stop(signal);
     } else {
-      log.warning('[%s] already stopped', name);
+      this._log.warning('[%s] already stopped', name);
     }
   }
 
@@ -118,7 +139,7 @@ export class ProcRunner {
    *  @return {Promise<undefined>}
    */
   async waitForAllToStop() {
-    await Promise.all(this._procs.map(proc => proc.closedPromise));
+    await Promise.all(this._procs.map(proc => proc.getOutcomePromise()));
   }
 
   /**
@@ -136,7 +157,7 @@ export class ProcRunner {
     this._signalSubscription = null;
 
     if (!signal && this._procs.length > 0) {
-      log.warning(
+      this._log.warning(
         '%d processes left running, stop them with procs.stop(name):',
         this._procs.length,
         this._procs.map(proc => proc.name)
@@ -153,7 +174,10 @@ export class ProcRunner {
 
   _createProc(name, options) {
     const startMs = Date.now();
-    const proc = createProc(name, options);
+    const proc = createProc(name, {
+      ...options,
+      log: this._log,
+    });
 
     this._procs.push(proc);
     const remove = () => {
@@ -164,8 +188,8 @@ export class ProcRunner {
     proc.outcome$.subscribe({
       next: code => {
         const duration = moment.duration(Date.now() - startMs);
-        log.info(
-          '[%s] exitted with %s after %s',
+        this._log.info(
+          '[%s] exited with %s after %s',
           name,
           code,
           duration.humanize()
@@ -176,7 +200,7 @@ export class ProcRunner {
       },
       error: error => {
         if (this._closing) {
-          log.error(error);
+          this._log.error(error);
         }
         remove();
       },

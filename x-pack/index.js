@@ -22,6 +22,7 @@ import { cloud } from './plugins/cloud';
 import { indexManagement } from './plugins/index_management';
 import { consoleExtensions } from './plugins/console_extensions';
 import { spaces } from './plugins/spaces';
+import { notifications } from './plugins/notifications';
 
 module.exports = function (kibana) {
   return [
@@ -42,6 +43,7 @@ module.exports = function (kibana) {
     cloud(kibana),
     indexManagement(kibana),
     consoleExtensions(kibana),
-    spaces(kibana)
+    spaces(kibana),
+    notifications(kibana),
   ];
 };

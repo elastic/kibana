@@ -1,18 +1,19 @@
 {
-  "_xpack/rollup/job/{job_id}": {
+  "_xpack/rollup/job/{id}": {
     "patterns": [
-      "_xpack/rollup/job/{job_id}"
+      "_xpack/rollup/job/{id}"
     ],
     "methods": [
       "GET"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/rollup-get-job.html"
   },
-  "PUT _xpack/rollup/job/{job_id}": {
+  "PUT _xpack/rollup/job/{id}": {
     "methods": [
       "PUT"
     ],
     "patterns": [
-      "_xpack/rollup/job/{job_id}"
+      "_xpack/rollup/job/{id}"
     ],
     "data_autocomplete_rules": {
       "index_pattern": "",
@@ -21,11 +22,12 @@
       "page_size": 100,
       "groups": {},
       "metrics": {}
-    }
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/rollup-job-config.html"
   },
-  "DELETE _xpack/rollup/job/{job_id}": {
+  "DELETE _xpack/rollup/job/{id}": {
     "patterns": [
-      "_xpack/rollup/job/{job_id}"
+      "_xpack/rollup/job/{id}"
     ],
     "methods": [
       "DELETE"
@@ -37,35 +39,39 @@
       "page_size": 100,
       "groups": {},
       "metrics": {}
-    }
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/rollup-delete-job.html"
   },
-  "_xpack/rollup/job/{job_id}/_start": {
+  "_xpack/rollup/job/{id}/_start": {
     "patterns": [
-      "_xpack/rollup/job/{job_id}/_start"
+      "_xpack/rollup/job/{id}/_start"
     ],
     "methods": [
       "POST"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/rollup-start-job.html"
   },
-  "_xpack/rollup/job/{job_id}/_stop": {
+  "_xpack/rollup/job/{id}/_stop": {
     "patterns": [
-      "_xpack/rollup/job/{job_id}/_stop"
+      "_xpack/rollup/job/{id}/_stop"
     ],
     "methods": [
       "POST"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/rollup-stop-job.html"
   },
-  "_xpack/rollup/data/{index_name}": {
+  "_xpack/rollup/data/{index}": {
     "patterns": [
-      "_xpack/rollup/data/{index_name}"
+      "_xpack/rollup/data/{index}"
     ],
     "methods": [
       "GET"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/rollup-get-rollup-caps.html"
   },
-  "{index_name}/_rollup_search": {
+  "{index}/_rollup_search": {
     "patterns": [
-      "{index_name}/_rollup_search"
+      "{index}/_rollup_search"
     ],
     "methods": [
       "GET"
@@ -73,6 +79,7 @@
     "data_autocomplete_rules": {
       "query": {},
       "aggregations": {}
-    }
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/rollup-search.html"
   }
 }

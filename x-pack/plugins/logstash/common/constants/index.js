@@ -13,3 +13,4 @@ export { ES_SCROLL_SETTINGS } from './es_scroll_settings';
 export { TOOLTIPS } from './tooltips';
 export { PIPELINE } from './pipeline';
 export { MONITORING } from './monitoring';
+export { EDITOR } from './editor';

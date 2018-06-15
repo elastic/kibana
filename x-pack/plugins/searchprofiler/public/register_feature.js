@@ -13,7 +13,7 @@ FeatureCatalogueRegistryProvider.register(() => {
     id: 'searchprofiler',
     title: 'Search Profiler',
     description: 'Quickly check the performance of any Elasticsearch query.',
-    icon: '/plugins/searchprofiler/assets/app_search_profiler.svg',
+    icon: 'searchProfilerApp',
     path: '/app/kibana#/dev_tools/searchprofiler',
     showOnHomePage: false,
     category: FeatureCatalogueCategory.ADMIN

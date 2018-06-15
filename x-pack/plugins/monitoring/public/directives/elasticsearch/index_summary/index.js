@@ -4,15 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
+import { render } from 'react-dom';
 import { uiModules } from 'ui/modules';
-import template from './index.html';
+import { IndexDetailStatus } from 'plugins/monitoring/components/elasticsearch/index_detail_status';
 
 const uiModule = uiModules.get('monitoring/directives', []);
 uiModule.directive('monitoringIndexSummary', () => {
   return {
     restrict: 'E',
-    template: template,
-    scope: { summary: '=' }
+    scope: { summary: '=' },
+    link(scope, $el) {
+      scope.$watch('summary', summary => {
+        render(<IndexDetailStatus stats={summary} />, $el[0]);
+      });
+    }
   };
 });
 

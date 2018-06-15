@@ -9,6 +9,7 @@ exports[`DetailDrawer component If vertices shows basic info and no stats for if
     <EuiFlexGroup
       alignItems="center"
       component="div"
+      direction="row"
       gutterSize="l"
       justifyContent="flexStart"
       responsive={true}
@@ -79,6 +80,7 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
     <EuiFlexGroup
       alignItems="center"
       component="div"
+      direction="row"
       gutterSize="l"
       justifyContent="flexStart"
       responsive={true}
@@ -371,6 +373,7 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
     <EuiFlexGroup
       alignItems="center"
       component="div"
+      direction="row"
       gutterSize="l"
       justifyContent="flexStart"
       responsive={true}
@@ -656,6 +659,7 @@ exports[`DetailDrawer component Queue vertices shows basic info and no stats for
     <EuiFlexGroup
       alignItems="center"
       component="div"
+      direction="row"
       gutterSize="l"
       justifyContent="flexStart"
       responsive={true}
@@ -716,6 +720,7 @@ exports[`DetailDrawer component shows vertex title 1`] = `
     <EuiFlexGroup
       alignItems="center"
       component="div"
+      direction="row"
       gutterSize="l"
       justifyContent="flexStart"
       responsive={true}
