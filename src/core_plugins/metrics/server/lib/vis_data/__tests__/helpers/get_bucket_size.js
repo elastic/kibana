@@ -30,7 +30,7 @@ describe('getBucketSize', () => {
     }
   };
 
-  it('returns auto calulated buckets', () => {
+  it('returns auto calculated buckets', () => {
     const result = getBucketSize(req, 'auto');
     expect(result).to.have.property('bucketSize', 30);
     expect(result).to.have.property('intervalString', '30s');
