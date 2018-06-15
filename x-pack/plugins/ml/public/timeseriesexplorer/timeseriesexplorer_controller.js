@@ -560,7 +560,7 @@ module.controller('MlTimeSeriesExplorerController', function (
   };
 
   // Refresh the data when the time range is altered.
-  timefilter.on('fetch', $scope.refresh);
+  $scope.$listen(timefilter, 'fetch', $scope.refresh);
 
   // Add a watcher for auto-refresh of the time filter to refresh all the data.
   const refreshWatcher = Private(refreshIntervalWatcher);
@@ -579,7 +579,6 @@ module.controller('MlTimeSeriesExplorerController', function (
 
 
   $scope.$on('$destroy', () => {
-    timefilter.off('fetch', $scope.refresh);
     refreshWatcher.cancel();
     mlSelectIntervalService.state.unwatch(tableControlsListener);
     mlSelectSeverityService.state.unwatch(tableControlsListener);

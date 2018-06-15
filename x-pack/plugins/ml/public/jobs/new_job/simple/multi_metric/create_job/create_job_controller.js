@@ -688,7 +688,7 @@ module
       populateAppStateSettings(appState, $scope);
     });
 
-    timefilter.on('fetch', () => {
+    $scope.$listen(timefilter, 'fetch', () => {
       $scope.loadVis();
       if ($scope.formConfig.splitField !== undefined) {
         $scope.setModelMemoryLimit();

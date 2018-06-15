@@ -143,7 +143,7 @@ module
 
 
     // Refresh the data when the time range is altered.
-    timefilter.on('fetch', function () {
+    $scope.$listen(timefilter, 'fetch', function () {
       $scope.earliest = timefilter.getActiveBounds().min.valueOf();
       $scope.latest = timefilter.getActiveBounds().max.valueOf();
       loadOverallStats();

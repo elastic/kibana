@@ -27,13 +27,13 @@ import { timefilter } from 'ui/timefilter';
 uiModules
   .get('kibana')
   .directive('kbnGlobalTimepicker', (globalState, $rootScope) => {
-    const listenForUpdates = once(() => {
-      timefilter.on('refreshIntervalUpdate', () => {
+    const listenForUpdates = once(($scope) => {
+      $scope.$listen(timefilter, 'refreshIntervalUpdate', () => {
         globalState.refreshInterval = clone(timefilter.getRefreshInterval());
         globalState.time = clone(timefilter.getTime());
         globalState.save();
       });
-      timefilter.on('timeUpdate', () => {
+      $scope.$listen(timefilter, 'timeUpdate', () => {
         globalState.refreshInterval = clone(timefilter.getRefreshInterval());
         globalState.time = clone(timefilter.getTime());
         globalState.save();
@@ -45,7 +45,7 @@ uiModules
       replace: true,
       require: '^kbnTopNav',
       link: ($scope, element, attributes, kbnTopNav) => {
-        listenForUpdates();
+        listenForUpdates($scope);
 
         $scope.timefilter = timefilter;
         $rootScope.toggleRefresh = () => {

@@ -567,11 +567,10 @@ module
       mlFullTimeRangeSelectorService.setFullTimeRange($scope.ui.indexPattern, $scope.formConfig.combinedQuery);
     };
 
-    timefilter.on('fetch', $scope.loadVis);
+    $scope.$listen(timefilter, 'fetch', $scope.loadVis);
 
     $scope.$on('$destroy', () => {
       globalForceStop = true;
-      timefilter.off('fetch', $scope.loadVis);
     });
 
     $scope.$evalAsync(() => {

@@ -246,7 +246,7 @@ module.controller('MlExplorerController', function (
   };
 
   // Refresh all the data when the time range is altered.
-  timefilter.on('fetch', () => {
+  $scope.$listen(timefilter, 'fetch', () => {
     loadOverallData();
     clearSelectedAnomalies();
   });

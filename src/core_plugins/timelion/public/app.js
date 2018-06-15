@@ -196,7 +196,7 @@ app.controller('timelion', function (
     $scope.search();
 
     $scope.$listen($scope.state, 'fetch_with_changes', $scope.search);
-    timefilter.on('fetch', $scope.search);
+    $scope.$listen(timefilter, 'fetch', $scope.search);
 
     $scope.opts = {
       saveExpression: saveExpression,
@@ -213,7 +213,7 @@ app.controller('timelion', function (
   };
 
   let refresher;
-  timefilter.on('refreshIntervalUpdate', function () {
+  $scope.$listen(timefilter, 'refreshIntervalUpdate', function () {
     if (refresher) $timeout.cancel(refresher);
     const interval = timefilter.getRefreshInterval();
     if (interval.value > 0 && !interval.pause) {

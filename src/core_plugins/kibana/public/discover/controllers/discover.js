@@ -334,7 +334,7 @@ function discoverController(
 
     $scope.updateDataSource()
       .then(function () {
-        timefilter.on('fetch', function () {
+        $scope.$listen(timefilter, 'fetch', function () {
           $scope.fetch();
         });
 
