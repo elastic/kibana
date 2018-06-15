@@ -341,14 +341,14 @@ app.directive('dashboardApp', function ($injector) {
             isTitleDuplicateConfirmed,
             onTitleDuplicate,
           };
-          return save(saveOptions).then(id => {
+          return save(saveOptions).then(({id, error}) => {
             // If the save wasn't successful, put the original values back.
-            if (!id) {
+            if (!id || error) {
               dashboardStateManager.setTitle(currentTitle);
               dashboardStateManager.setDescription(currentDescription);
               dashboardStateManager.setTimeRestore(currentTimeRestore);
             }
-            return id;
+            return { id, error };
           });
         };
 
