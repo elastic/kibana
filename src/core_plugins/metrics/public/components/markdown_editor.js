@@ -146,7 +146,7 @@ class MarkdownEditor extends Component {
             <tbody>{rows}</tbody>
           </table>
           {rows.length === 0 && (
-            <div className="vis_editor__no-markdown-variables">No variables avaliable for the selected data metrics.</div>
+            <div className="vis_editor__no-markdown-variables">No variables available for the selected data metrics.</div>
           )}
 
           <div className="vis_editor__markdown-code-desc">
