@@ -36,12 +36,12 @@ import classNames from 'classnames';
  * const columns = [
  *  {
  *    title: 'Name', // visible title string
- *    sortKey: 'metadata.name', // sording this colunn sorts by the `metadata.name` field in the data
+ *    sortKey: 'metadata.name', // sording this column sorts by the `metadata.name` field in the data
  *    secondarySortOrder: 1, // optional field, makes the column secondarily sorted by default
  *  },
  *  {
  *    title: 'Status', // visible title string
- *    sortKey: 'status', // sording this colunn sorts by the `metadata.name` field in the data
+ *    sortKey: 'status', // sording this column sorts by the `metadata.name` field in the data
  *    sortOrder: -1, // optional field, makes the column sorted by default
  *  }
  * ];
