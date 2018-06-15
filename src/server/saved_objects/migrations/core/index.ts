@@ -17,6 +17,10 @@
  * under the License.
  */
 
+export { migrateIndex } from './migrate_index';
+export { computeDroppedTypes } from './compute_dropped_types';
+export { createDocTransform } from './create_doc_transform';
 export { initializeIndex } from './initialize_index';
-export { getActiveMappings, fetchMapping } from './mappings';
+export { getActiveMappings } from './get_active_mappings';
+export { fetchMapping } from './fetch_mapping';
 export * from './types';

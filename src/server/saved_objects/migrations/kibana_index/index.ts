@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export { getPluginMappings } from './get_plugin_mappings';
+export { getMigrationPlugins } from './get_migration_plugins';
 export {
   initializeSavedObjectIndices,
 } from './initialize_saved_object_indices';

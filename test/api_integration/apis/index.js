@@ -19,6 +19,7 @@
 
 export default function ({ loadTestFile }) {
   describe('apis', () => {
+    loadTestFile(require.resolve('./migrations'));
     loadTestFile(require.resolve('./elasticsearch'));
     loadTestFile(require.resolve('./general'));
     loadTestFile(require.resolve('./index_patterns'));

@@ -16,10 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import _ from 'lodash';
 import sinon from 'sinon';
+import { getActiveMappings } from './get_active_mappings';
 import { initializeIndex } from './initialize_index';
-import { getActiveMappings } from './mappings';
 import { IndexMapping, MappingDefinition, MigrationPlugin } from './types';
 
 describe('initializeIndex', async () => {
@@ -33,7 +34,8 @@ describe('initializeIndex', async () => {
       },
     ];
     await expectInitializeIndex({
-      expectedMappings: getActiveMappings(plugins),
+      expectedMappings: getActiveMappings({ kibanaVersion: '9.8.7', plugins }),
+      kibanaVersion: '9.8.7',
       originalPlugins,
       plugins,
     });
@@ -211,6 +213,7 @@ describe('initializeIndex', async () => {
 });
 
 interface ExpectInitializeOpts {
+  kibanaVersion?: string;
   originalPlugins: MigrationPlugin[];
   plugins: MigrationPlugin[];
   expectedMappings?: MappingDefinition;
@@ -219,14 +222,22 @@ interface ExpectInitializeOpts {
 
 async function expectInitializeIndex(opts: ExpectInitializeOpts) {
   const index = randomName();
-  const { originalPlugins, plugins, expectedMappings } = opts;
+  const {
+    kibanaVersion = '2.4.6',
+    originalPlugins,
+    plugins,
+    expectedMappings,
+  } = opts;
   const callCluster = createCallCluster(
-    createIndex(index, getActiveMappings(originalPlugins))
+    createIndex(
+      index,
+      getActiveMappings({ kibanaVersion, plugins: originalPlugins })
+    )
   );
 
   if (opts.throws) {
     await expect(
-      initializeIndex({ callCluster, index, plugins })
+      initializeIndex({ callCluster, index, kibanaVersion, plugins })
     ).rejects.toThrow(opts.throws);
   }
 
@@ -234,6 +245,7 @@ async function expectInitializeIndex(opts: ExpectInitializeOpts) {
     await initializeIndex({
       callCluster,
       index,
+      kibanaVersion,
       plugins,
     });
 

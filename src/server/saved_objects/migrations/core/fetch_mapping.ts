@@ -17,14 +17,26 @@
  * under the License.
  */
 
-import { MappingDefinition, MigrationDefinition } from '../core';
+import { fetchOrDefault } from './fetch_or_default';
+import { CallCluster, IndexMapping } from './types';
 
-export interface KibanaPluginSpec {
-  mappings: MappingDefinition;
-}
-
-export interface KibanaPlugin {
-  getId: (() => string);
-  getExportSpecs: (() => KibanaPluginSpec | undefined);
-  getMigrations: (() => MigrationDefinition | undefined);
+/**
+ * fetchMapping retrieves the mappings for the specified index,
+ * returning null if the mappings are not found.
+ * @param {CallCluster} callCluster - The elasticsearch.js function
+ * @param {string} index - The name of the index whose mappings are being retrieved
+ * @returns {Promise<IndexMapping | null>}
+ */
+export async function fetchMapping(
+  callCluster: CallCluster,
+  index: string
+): Promise<IndexMapping | null> {
+  const result = await fetchOrDefault(
+    callCluster('indices.getMapping', { index }),
+    null
+  );
+  if (!result) {
+    return null;
+  }
+  return Object.values(result)[0].mappings || null;
 }

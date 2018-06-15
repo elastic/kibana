@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import _ from 'lodash';
 import { createDocTransform } from './create_doc_transform';
 import { SavedObjectDoc, TransformFn } from './types';
@@ -29,10 +30,10 @@ describe('createDocTransform', () => {
           id: 'foo-plugin',
           migrations: {
             foo: {
-              '1.0.1': addAttribute('a', 0),
-              '1.0.2': addAttribute('b', 1),
-              '2.0.0': addAttribute('c', 2),
-              '3.1.0': addAttribute('d', 3),
+              '1': addAttribute('a', 0),
+              '2': addAttribute('b', 1),
+              '3': addAttribute('c', 2),
+              '4': addAttribute('d', 3),
             },
           },
         },
@@ -43,7 +44,7 @@ describe('createDocTransform', () => {
         hello: 'world',
       },
       id: 'bar',
-      semver: '1.0.1',
+      migrationVersion: 2,
       type: 'foo',
     };
     expect(createDocTransform(opts)(original)).toMatchObject({
@@ -57,7 +58,7 @@ describe('createDocTransform', () => {
     });
   });
 
-  test('applies transforms in semver order', () => {
+  test('applies transforms in version order', () => {
     const opts = {
       kibanaVersion: '11.0.0',
       plugins: [
@@ -65,18 +66,18 @@ describe('createDocTransform', () => {
           id: 'muy-plugin',
           migrations: {
             boo: {
-              '1.0.1': _.compose<TransformFn>(
+              '1': _.compose<TransformFn>(
                 addAttribute('un', 1),
                 assertAttribute({})
               ),
-              '10.1.2': _.compose<TransformFn>(
+              '10': _.compose<TransformFn>(
                 addAttribute('dix', 10),
                 assertAttribute({
                   deux: 2,
                   un: 1,
                 })
               ),
-              '2.0.0': _.compose<TransformFn>(
+              '2': _.compose<TransformFn>(
                 addAttribute('deux', 2),
                 assertAttribute({ un: 1 })
               ),
@@ -88,7 +89,7 @@ describe('createDocTransform', () => {
     const original = {
       attributes: {},
       id: 'dang',
-      semver: '1.0.0',
+      migrationVersion: 0,
       type: 'boo',
     };
     expect(createDocTransform(opts)(original)).toMatchObject({
@@ -102,7 +103,7 @@ describe('createDocTransform', () => {
     });
   });
 
-  test('assigns the current kibanaVersion as semver', () => {
+  test('assigns the current kibanaVersion as the migration Version', () => {
     const opts = {
       kibanaVersion: '11.0.0',
       plugins: [
@@ -110,7 +111,7 @@ describe('createDocTransform', () => {
           id: 'muy-plugin',
           migrations: {
             boo: {
-              '1.0.1': _.identity,
+              '2': _.identity,
             },
           },
         },
@@ -119,11 +120,11 @@ describe('createDocTransform', () => {
     const original = {
       attributes: {},
       id: 'bar',
-      semver: '1.0.0',
+      migrationVersion: 1,
       type: 'boo',
     };
     expect(createDocTransform(opts)(original)).toMatchObject({
-      semver: opts.kibanaVersion,
+      migrationVersion: 11,
     });
   });
 
@@ -135,10 +136,10 @@ describe('createDocTransform', () => {
           id: 'aaa',
           migrations: {
             aaa: {
-              '1.0.1': addAttribute('hi', 'there'),
+              '1': addAttribute('hi', 'there'),
             },
             bbb: {
-              '1.0.1': addAttribute('bye', 'there'),
+              '1': addAttribute('bye', 'there'),
             },
           },
         },
@@ -147,7 +148,7 @@ describe('createDocTransform', () => {
     const doc = createDocTransform(opts)({
       attributes: {},
       id: 'shazm',
-      semver: '1.0.0',
+      migrationVersion: 0,
       type: 'aaa',
     });
     expect(doc.attributes).toEqual({ hi: 'there' });
@@ -161,7 +162,7 @@ describe('createDocTransform', () => {
           id: 'aaa',
           migrations: {
             gee: {
-              '1.0.1': () => {
+              '1': () => {
                 throw new Error('Bang boom pow!');
               },
             },
@@ -172,7 +173,7 @@ describe('createDocTransform', () => {
     const doc = {
       attributes: {},
       id: 'bar',
-      semver: '1.0.0',
+      migrationVersion: 0,
       type: 'gee',
     };
     let error;
@@ -184,12 +185,43 @@ describe('createDocTransform', () => {
     expect(error.message).toMatch(/Bang boom pow/);
     expect(error.transform).toEqual({
       pluginId: 'aaa',
-      semver: '1.0.1',
+      type: 'gee',
+      version: '1',
+    });
+  });
+
+  test('up-to-date documents are run through the major version transform', () => {
+    const opts = {
+      kibanaVersion: '11.0.0',
+      plugins: [
+        {
+          id: 'aaa',
+          migrations: {
+            gee: {
+              '10': () => {
+                throw new Error('Never runs, hopefully!');
+              },
+              '11': addAttribute('foo', 'bar'),
+            },
+          },
+        },
+      ],
+    };
+    const doc = {
+      attributes: {},
+      id: 'bar',
+      migrationVersion: 11,
+      type: 'gee',
+    };
+    expect(createDocTransform(opts)(doc)).toEqual({
+      attributes: { foo: 'bar' },
+      id: 'bar',
+      migrationVersion: 11,
       type: 'gee',
     });
   });
 
-  test('up-to-date documents are untouched', () => {
+  test('unversioned documents are assumed to be current major', () => {
     const opts = {
       kibanaVersion: '11.0.0',
       plugins: [
@@ -197,32 +229,8 @@ describe('createDocTransform', () => {
           id: 'aaa',
           migrations: {
             gee: {
-              '1.0.1': () => {
-                throw new Error('Never runs, hopefully!');
-              },
-            },
-          },
-        },
-      ],
-    };
-    const doc = {
-      attributes: {},
-      id: 'bar',
-      semver: '11.0.0',
-      type: 'gee',
-    };
-    expect(createDocTransform(opts)(_.cloneDeep(doc))).toEqual(doc);
-  });
-
-  test('unversioned documents get all transforms', () => {
-    const opts = {
-      kibanaVersion: '11.0.0',
-      plugins: [
-        {
-          id: 'aaa',
-          migrations: {
-            gee: {
-              '0.0.1': addAttribute('boiled', 'peanuts'),
+              '10': addAttribute('ten', 'ten'),
+              '11': addAttribute('leven', 'leaven'),
             },
           },
         },
@@ -233,9 +241,11 @@ describe('createDocTransform', () => {
       id: 'bar',
       type: 'gee',
     };
-    expect(createDocTransform(opts)(doc)).toMatchObject({
-      attributes: { boiled: 'peanuts' },
-      semver: '11.0.0',
+    expect(createDocTransform(opts)(doc)).toEqual({
+      attributes: { leven: 'leaven' },
+      id: 'bar',
+      migrationVersion: 11,
+      type: 'gee',
     });
   });
 
@@ -255,7 +265,6 @@ describe('createDocTransform', () => {
     };
     expect(createDocTransform(opts)(doc)).toMatchObject({
       attributes: { here: 'you go' },
-      semver: '11.0.0',
     });
   });
 
@@ -267,14 +276,14 @@ describe('createDocTransform', () => {
           id: 'aaa',
           migrations: {
             aaa: {
-              '1.0.0': addAttribute('one', 1),
-              '2.0.0': (doc: SavedObjectDoc) => ({ ...doc, type: 'bbb' }),
+              '1': addAttribute('one', 1),
+              '2': (doc: SavedObjectDoc) => ({ ...doc, type: 'bbb' }),
             },
             bbb: {
-              '2.0.0': () => {
+              '1': () => {
                 throw new Error('DOH!');
               },
-              '2.0.1': addAttribute('bee', 'cool'),
+              '2': addAttribute('bee', 'cool'),
             },
           },
         },
@@ -283,6 +292,7 @@ describe('createDocTransform', () => {
     const original = {
       attributes: { here: 'you go' },
       id: 'bar',
+      migrationVersion: 1,
       type: 'aaa',
     };
     expect(createDocTransform(opts)(original)).toMatchObject({
@@ -291,7 +301,7 @@ describe('createDocTransform', () => {
         here: 'you go',
         one: 1,
       },
-      semver: '11.0.0',
+      migrationVersion: 11,
     });
   });
 });

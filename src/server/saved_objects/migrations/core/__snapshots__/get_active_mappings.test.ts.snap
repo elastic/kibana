@@ -3,6 +3,9 @@
 exports[`getActiveMappings combines all mappings and includes core mappings 1`] = `
 Object {
   "doc": Object {
+    "_meta": Object {
+      "kibanaVersion": "8.7.6",
+    },
     "dynamic": "strict",
     "properties": Object {
       "aaa": Object {
@@ -18,6 +21,12 @@ Object {
             "type": "keyword",
           },
         },
+      },
+      "migrationVersion": Object {
+        "type": "integer",
+      },
+      "semver": Object {
+        "type": "keyword",
       },
       "type": Object {
         "type": "keyword",

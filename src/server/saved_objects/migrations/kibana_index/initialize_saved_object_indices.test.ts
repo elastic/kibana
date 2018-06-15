@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import sinon from 'sinon';
 import { initializeSavedObjectIndices } from './initialize_saved_object_indices';
 
@@ -119,6 +120,7 @@ function mockKbnServer({ mappings }: { mappings?: object } = {}) {
           }
         },
       }),
+      log: sinon.spy(),
       plugins: {
         elasticsearch: {
           getCluster: () => ({
@@ -128,6 +130,7 @@ function mockKbnServer({ mappings }: { mappings?: object } = {}) {
         },
       },
     },
+    version: '7.8.9',
   };
   callCluster
     .withArgs('indices.getMapping', sinon.match.any)

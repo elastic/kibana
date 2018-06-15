@@ -18,7 +18,11 @@
  */
 
 import { MigrationPlugin } from '../core';
-import { PlguinSpecable } from './types';
+import { KibanaPlugin } from './types';
+
+export interface PlguinSpecable {
+  pluginSpecs: KibanaPlugin[];
+}
 
 export function getMigrationPlugins({
   pluginSpecs,
@@ -27,5 +31,6 @@ export function getMigrationPlugins({
   return pluginSpecs.map(p => ({
     id: p.getId(),
     mappings: (p.getExportSpecs() || emptySpec).mappings,
+    migrations: p.getMigrations(),
   }));
 }

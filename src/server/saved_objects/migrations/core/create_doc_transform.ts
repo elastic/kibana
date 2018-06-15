@@ -18,12 +18,12 @@
  */
 
 import _ from 'lodash';
-import Version, { SemVer } from 'semver';
+import Version from 'semver';
 import {
   MigrationPlugin,
   SavedObjectDoc,
-  SemverTransforms,
   TransformFn,
+  VersionTransforms,
 } from './types';
 
 export interface TransformOpts {
@@ -31,87 +31,99 @@ export interface TransformOpts {
   plugins: MigrationPlugin[];
 }
 
-interface SemverTransform {
-  semver: string;
-  transform: TransformFn;
+interface TypeTransforms {
+  [type: string]: Array<{ version: number; transform: TransformFn }>;
 }
 
-interface TypeToTransforms {
-  [type: string]: SemverTransform[];
-}
+/**
+ * createDocTransform creates a function which, when passed
+ * a saved object document, will upgrade it to be the same version as
+ * the plugins to which the document belongs. This uses the migrations (if any)
+ * that are defined by the plugins.
+ *
+ * @param {TransformOpts} opts
+ * @prop {string} kibanaVersion - The current version of Kibana
+ * @prop {MigrationPlugin[]} plugins - The plugins whose migrations will be used
+ *    to update documents.
+ * @returns {TransformFn} - A function (doc) => doc
+ */
+export function createDocTransform({ kibanaVersion, plugins }: TransformOpts) {
+  const kibanaMajorVersion = Version.major(kibanaVersion);
+  const typeTransforms: TypeTransforms = plugins
+    .filter(p => p.migrations)
+    .reduce(
+      (acc, p) => Object.assign(acc, transformsByType(p, kibanaMajorVersion)),
+      {}
+    );
 
-export function createDocTransform({
-  kibanaVersion,
-  plugins,
-}: TransformOpts): TransformFn {
-  const typeTransforms = buildTypeTransforms(kibanaVersion, plugins);
-
-  return function docTransform(doc): SavedObjectDoc {
-    if (doc.semver === kibanaVersion) {
-      return doc;
-    }
-    const docSemver = parseSemver(doc.semver || '0.0.0');
-    const docType = doc.type;
-    const transforms = typeTransforms[docType] || [];
-    for (const { semver, transform } of transforms) {
-      if (Version.gt(semver, docSemver)) {
+  return function transformDoc(doc: SavedObjectDoc): SavedObjectDoc {
+    const transforms = typeTransforms[doc.type] || [];
+    const docVersion = getDocVersion(doc, kibanaMajorVersion);
+    const originalDocType = doc.type;
+    for (const { version, transform } of transforms) {
+      if (version >= docVersion) {
         doc = transform(doc);
-
-        // In major-version upgrades, we support breaking changes, including
-        // renaming types (e.g. "dash" -> "dashboard")
-        if (doc.type !== docType) {
-          return docTransform(doc);
-        }
+      }
+      // We can make breaking changes between major versions, including
+      // renaming types (e.g. dash -> dashboard). This is also why we
+      // are in a for loop, rather than a reduce (so we can short-circuit here).
+      if (doc.type !== originalDocType) {
+        return transformDoc(doc);
       }
     }
-
-    return { ...doc, semver: kibanaVersion };
+    return { ...doc, migrationVersion: kibanaMajorVersion };
   };
 }
 
-function buildTypeTransforms(
-  kibanaVersion: string,
-  plugins: MigrationPlugin[]
-): TypeToTransforms {
-  return plugins.reduce(
-    (acc, plugin) => Object.assign(acc, migrationArrays(kibanaVersion, plugin)),
-    {}
+function transformsByType(plugin: MigrationPlugin, kibanaMajorVersion: number) {
+  return _.mapValues(plugin.migrations, transforms =>
+    transformsToArray(plugin, kibanaMajorVersion, transforms)
   );
 }
 
-function migrationArrays(kibanaVersion: string, plugin: MigrationPlugin) {
-  return _.mapValues(plugin.migrations, (semvers: SemverTransforms) =>
-    Object.entries(semvers)
-      .map(([semver, transform]) =>
-        buildSemverTransform(plugin.id, semver, transform)
-      )
-      .sort((a, b) => Version.compare(a.semver, b.semver))
-      .filter(({ semver }) => Version.lte(semver, kibanaVersion))
-  );
+function transformsToArray(
+  plugin: MigrationPlugin,
+  kibanaMajorVersion: number,
+  transforms: VersionTransforms
+) {
+  return Object.entries(transforms)
+    .map(([version, transform]) => ({
+      transform: decorateTransformError(transform, version, plugin),
+      version: toInt(version, plugin),
+    }))
+    .sort((a, b) => a.version - b.version)
+    .filter(({ version }) => version <= kibanaMajorVersion);
 }
 
-function buildSemverTransform(
-  pluginId: string,
-  semver: string,
-  transform: TransformFn
-): SemverTransform {
-  return {
-    semver,
-    transform(doc) {
-      try {
-        return { ...transform(doc), semver };
-      } catch (error) {
-        error.transform = { pluginId, semver, type: doc.type };
-        throw error;
-      }
-    },
-  };
-}
-
-function parseSemver(version: string): SemVer {
-  const result = Version.coerce(version);
-  if (!result) {
-    throw new Error(`Invalid semver "${version}".`);
+function toInt(version: string, plugin: MigrationPlugin) {
+  const result = parseInt(version, 10);
+  if (isNaN(result)) {
+    throw new Error(
+      `Plugin "${
+        plugin.id
+      }" defined non-numeric migration version "${version}".`
+    );
   }
   return result;
+}
+
+function getDocVersion(doc: SavedObjectDoc, kibanaMajorVersion: number) {
+  return doc.migrationVersion === undefined
+    ? kibanaMajorVersion
+    : doc.migrationVersion;
+}
+
+function decorateTransformError(
+  transform: TransformFn,
+  version: string,
+  plugin: MigrationPlugin
+) {
+  return function tryTransformDoc(doc: SavedObjectDoc) {
+    try {
+      return { ...transform(doc), migrationVersion: version };
+    } catch (error) {
+      error.transform = { type: doc.type, pluginId: plugin.id, version };
+      throw error;
+    }
+  };
 }

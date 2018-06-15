@@ -17,15 +17,35 @@
  * under the License.
  */
 
-import { fetchMapping, initializeIndex } from '../core';
+import { CallCluster, fetchMapping, initializeIndex } from '../core';
 import { getMigrationPlugins } from './get_migration_plugins';
-import { KbnServer } from './types';
+import { KibanaPlugin } from './types';
 
-// Require rather than import gets us around the lack of TypeScript definitions
-// for "getTypes"
-// tslint:disable-next-line:no-var-requires
-const { getTypes } = require('../../../mappings');
+export interface ElasticsearchPlugin {
+  getCluster: ((name: 'admin') => { callWithInternalUser: CallCluster });
+  waitUntilReady: () => Promise<any>;
+}
 
+export interface Server {
+  config: () => { get: (path: 'kibana.index') => string };
+  plugins: { elasticsearch: ElasticsearchPlugin | undefined };
+}
+
+export interface KbnServer {
+  version: string;
+  pluginSpecs: KibanaPlugin[];
+  server: Server;
+}
+
+/**
+ * initializeSavedObjectIndices applies changes to the saved object client
+ * index (or indices) which are required for the saved objects to function
+ * properly. This includes patching the index mappings, and setting up an index
+ * template.
+ *
+ * @param {KbnServer} kbnServer - The root Kibana server instance
+ * @returns {Promise<void>}
+ */
 export async function initializeSavedObjectIndices(kbnServer: KbnServer) {
   await waitForElasticsearch(kbnServer);
   await assertNotV5Index(kbnServer);
@@ -49,7 +69,9 @@ async function assertNotV5Index({ server }: KbnServer) {
   if (!mappings) {
     return;
   }
-  const currentTypes = getTypes(mappings);
+  const currentTypes = Object.keys(mappings).filter(
+    type => type !== '_default_'
+  );
   const isV5Index = currentTypes.length > 1 || currentTypes[0] !== 'doc';
   if (isV5Index) {
     throw new Error(
@@ -70,6 +92,7 @@ async function initializeKibanaIndex(kbnServer: KbnServer) {
     callCluster: server.plugins.elasticsearch.getCluster('admin')
       .callWithInternalUser,
     index: server.config().get('kibana.index'),
+    kibanaVersion: kbnServer.version,
     plugins: getMigrationPlugins(kbnServer),
   });
 }

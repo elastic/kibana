@@ -17,14 +17,24 @@
  * under the License.
  */
 
-import { MappingDefinition, MigrationDefinition } from '../core';
+import { fetchMapping } from './fetch_mapping';
 
-export interface KibanaPluginSpec {
-  mappings: MappingDefinition;
-}
+describe('fetchMapping', () => {
+  test('returns null if not found', () => {
+    const callCluster = () => Promise.reject({ status: 404 });
+    expect(fetchMapping(callCluster, '.kibana')).resolves.toBeNull();
+  });
 
-export interface KibanaPlugin {
-  getId: (() => string);
-  getExportSpecs: (() => KibanaPluginSpec | undefined);
-  getMigrations: (() => MigrationDefinition | undefined);
-}
+  test('returns the index mapping', () => {
+    const callCluster = (path: string, { index }: { index: string }) => {
+      expect(index).toEqual('.foo');
+      expect(path).toEqual('indices.getMapping');
+      return Promise.resolve({
+        [index]: { mappings: { doc: { hello: 'world' } } },
+      });
+    };
+    expect(fetchMapping(callCluster as any, '.foo')).resolves.toEqual({
+      doc: { hello: 'world' },
+    });
+  });
+});

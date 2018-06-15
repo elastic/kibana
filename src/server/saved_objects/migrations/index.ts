@@ -17,7 +17,9 @@
  * under the License.
  */
 
-export {
-  getPluginMappings,
+import {
+  getMigrationPlugins,
   initializeSavedObjectIndices,
 } from './kibana_index';
+
+export const KbnServer = { getMigrationPlugins, initializeSavedObjectIndices };
