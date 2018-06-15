@@ -14,8 +14,8 @@ export async function startMlJob({ serviceName, transactionType }) {
     method: 'POST',
     pathname: `/api/ml/modules/setup/apm_transaction`,
     body: JSON.stringify({
-      prefix: `${serviceName.toLowerCase()}-${transactionType.toLowerCase()}-`,
-      groups: ['apm', serviceName, transactionType],
+      prefix: `${serviceName}-${transactionType}-`.toLowerCase(),
+      groups: ['apm', serviceName.toLowerCase(), transactionType.toLowerCase()],
       indexPatternName: apmIndexPattern,
       startDatafeed: true,
       query: {

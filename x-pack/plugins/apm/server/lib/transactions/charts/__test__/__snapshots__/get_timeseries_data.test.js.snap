@@ -160,7 +160,7 @@ Array [
         },
         "size": 0,
       },
-      "index": ".ml-anomalies-myServiceName-myTransactionType-high_mean_response_time",
+      "index": ".ml-anomalies-myservicename-mytransactiontype-high_mean_response_time",
     },
   ],
 ]

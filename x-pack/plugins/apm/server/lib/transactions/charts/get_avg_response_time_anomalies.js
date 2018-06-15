@@ -16,7 +16,7 @@ export async function getAvgResponseTimeAnomalies({
   const { intervalString, bucketSize } = getBucketSize(start, end, 'auto');
 
   const params = {
-    index: `.ml-anomalies-${serviceName}-${transactionType}-high_mean_response_time`,
+    index: `.ml-anomalies-${serviceName}-${transactionType}-high_mean_response_time`.toLowerCase(),
     body: {
       size: 0,
       query: {
