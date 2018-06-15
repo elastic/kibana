@@ -65,7 +65,7 @@ export default function scale(dataTuples, targetTuples) {
       step = nextRealNumber;
       // Backfill null buckets
       if (spreadCount > 0) {
-        // Naively distibute the nextRealNumber amoungst the buckets
+        // Naively distibute the nextRealNumber amongst the buckets
         // Without considering where it is headed next
         // We do spreadCount + 1 so that we include nextRealNumber when we smooth things out,
         // since we'll overwrite it anyway.
