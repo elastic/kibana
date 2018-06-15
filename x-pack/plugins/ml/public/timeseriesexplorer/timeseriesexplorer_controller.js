@@ -359,6 +359,7 @@ module.controller('MlTimeSeriesExplorerController', function (
       awaitingCount--;
       if (awaitingCount === 0) {
         // Tell the results container directives to render the focus chart.
+        // Need to use $timeout to ensure the broadcast happens after the child scope is updated with the new data.
         refreshFocusData.focusChartData = processDataForFocusAnomalies(
           refreshFocusData.focusChartData,
           refreshFocusData.anomalyRecords,
@@ -368,8 +369,7 @@ module.controller('MlTimeSeriesExplorerController', function (
           refreshFocusData.focusChartData,
           refreshFocusData.scheduledEvents);
 
-        // All the data is ready now for a scope update.
-        // Use $evalAsync to ensure the update happens after the child scope is updated with the new data.
+        // All the data is ready now for a scope update
         $scope.$evalAsync(() => {
           $scope = Object.assign($scope, refreshFocusData);
           console.log('Time series explorer focus chart data set:', $scope.focusChartData);
