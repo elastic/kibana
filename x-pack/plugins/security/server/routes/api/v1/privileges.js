@@ -13,6 +13,7 @@ export function initPrivilegesApi(server) {
   const config = server.config();
   const kibanaVersion = config.get('pkg.version');
   const application = config.get('xpack.security.rbac.application');
+  const savedObjectTypes = server.savedObjects.types;
 
   server.route({
     method: 'GET',
@@ -22,7 +23,7 @@ export function initPrivilegesApi(server) {
       // in Elasticsearch because our current thinking is that we'll associate additional structure/metadata
       // with our view of them to allow users to more efficiently edit privileges for roles, and serialize it
       // into a different structure for enforcement within Elasticsearch
-      const privileges = buildPrivilegeMap(application, kibanaVersion);
+      const privileges = buildPrivilegeMap(savedObjectTypes, application, kibanaVersion);
       reply(Object.values(privileges));
     }
   });

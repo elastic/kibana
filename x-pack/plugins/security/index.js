@@ -141,6 +141,7 @@ export const security = (kibana) => new kibana.Plugin({
         errors: savedObjects.SavedObjectsClient.errors,
         hasPrivileges,
         auditLogger,
+        savedObjectTypes: savedObjects.types,
       });
     });
 

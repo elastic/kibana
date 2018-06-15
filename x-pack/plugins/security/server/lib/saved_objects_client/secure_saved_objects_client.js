@@ -17,12 +17,14 @@ export class SecureSavedObjectsClient {
       repository,
       hasPrivileges,
       auditLogger,
+      savedObjectTypes,
     } = options;
 
     this.errors = errors;
     this._repository = repository;
     this._hasPrivileges = hasPrivileges;
     this._auditLogger = auditLogger;
+    this._savedObjectTypes = savedObjectTypes;
   }
 
   async create(type, attributes = {}, options = {}) {
@@ -64,7 +66,7 @@ export class SecureSavedObjectsClient {
     }
 
     // otherwise, we have to filter for only their authorized types
-    const types = this._repository.getTypes();
+    const types = this._savedObjectTypes;
     const typesToPrivilegesMap = new Map(types.map(type => [type, getPrivilege(type, action)]));
     const hasPrivilegesResult = await this._hasSavedObjectPrivileges(Array.from(typesToPrivilegesMap.values()));
     const authorizedTypes = Array.from(typesToPrivilegesMap.entries())

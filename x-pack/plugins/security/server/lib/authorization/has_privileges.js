@@ -35,7 +35,16 @@ const hasApplicationPrivileges = async (callWithRequest, request, kibanaVersion,
   };
 };
 
-const hasLegacyPrivileges = async (deprecationLogger, callWithRequest, request, kibanaVersion, application, kibanaIndex, privileges) => {
+const hasLegacyPrivileges = async (
+  savedObjectTypes,
+  deprecationLogger,
+  callWithRequest,
+  request,
+  kibanaVersion,
+  application,
+  kibanaIndex,
+  privileges
+) => {
   const privilegeCheck = await callWithRequest(request, 'shield.hasPrivileges', {
     body: {
       index: [{
@@ -72,7 +81,7 @@ const hasLegacyPrivileges = async (deprecationLogger, callWithRequest, request, 
   // if they have the read privilege, then we only grant them the read actions
   if (privilegeCheck.index[kibanaIndex].read) {
     logDeprecation();
-    const privilegeMap = buildPrivilegeMap(application, kibanaVersion);
+    const privilegeMap = buildPrivilegeMap(savedObjectTypes, application, kibanaVersion);
     const implicitPrivileges = createPrivileges(name => privilegeMap.read.actions.includes(name));
 
     return {
@@ -96,6 +105,7 @@ export function hasPrivilegesWithServer(server) {
   const kibanaVersion = config.get('pkg.version');
   const application = config.get('xpack.security.rbac.application');
   const kibanaIndex = config.get('kibana.index');
+  const savedObjectTypes = server.savedObjects.types;
   const deprecationLogger = (msg) => server.log(['warning', 'deprecated', 'security'], msg);
 
   return function hasPrivilegesWithRequest(request) {
@@ -114,6 +124,7 @@ export function hasPrivilegesWithServer(server) {
 
       if (!privilegesCheck.privileges[loginPrivilege]) {
         privilegesCheck = await hasLegacyPrivileges(
+          savedObjectTypes,
           deprecationLogger,
           callWithRequest,
           request,
