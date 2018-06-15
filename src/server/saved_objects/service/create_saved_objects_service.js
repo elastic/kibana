@@ -17,63 +17,30 @@
  * under the License.
  */
 
-import { SavedObjectsRepository, ScopedSavedObjectsClientProvider, SavedObjectsRepositoryProvider } from './lib';
+import { SavedObjectsRepository, ScopedSavedObjectsClientProvider } from './lib';
 import { SavedObjectsClient } from './saved_objects_client';
+import { initializeSavedObjectIndices } from '../migrations';
 
-export function createSavedObjectsService(server) {
-  const onBeforeWrite = async () => {
-    const adminCluster = server.plugins.elasticsearch.getCluster('admin');
-
-    try {
-      const index = server.config().get('kibana.index');
-      await adminCluster.callWithInternalUser('indices.putTemplate', {
-        name: `kibana_index_template:${index}`,
-        body: {
-          template: index,
-          settings: {
-            number_of_shards: 1,
-            auto_expand_replicas: '0-1',
-          },
-          mappings: server.getKibanaIndexMappingsDsl(),
-        },
-      });
-    } catch (error) {
-      server.log(['debug', 'savedObjects'], {
-        tmpl:
-          'Attempt to write indexTemplate for SavedObjects index failed: <%= err.message %>',
-        es: {
-          resp: error.body,
-          status: error.status,
-        },
-        err: {
-          message: error.message,
-          stack: error.stack,
-        },
-      });
-
-      // We reject with `es.ServiceUnavailable` because writing an index
-      // template is a very simple operation so if we get an error here
-      // then something must be very broken
-      throw new adminCluster.errors.ServiceUnavailable();
-    }
-  };
-
-  const repositoryProvider = new SavedObjectsRepositoryProvider({
-    index: server.config().get('kibana.index'),
-    mappings: server.getKibanaIndexMappingsDsl(),
-    onBeforeWrite,
-  });
-
+export function createSavedObjectsService(kbnServer, server) {
   const scopedClientProvider = new ScopedSavedObjectsClientProvider({
     index: server.config().get('kibana.index'),
     mappings: server.getKibanaIndexMappingsDsl(),
+    onBeforeWrite: createInitFunction(kbnServer),
     defaultClientFactory({
       request,
+      index,
+      mappings,
+      onBeforeWrite
     }) {
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
       const callCluster = (...args) => callWithRequest(request, ...args);
 
-      const repository = repositoryProvider.getRepository(callCluster);
+      const repository = new SavedObjectsRepository({
+        index,
+        mappings,
+        callCluster,
+        onBeforeWrite,
+      });
 
       return new SavedObjectsClient(repository);
     }
@@ -82,13 +49,27 @@ export function createSavedObjectsService(server) {
   return {
     SavedObjectsClient,
     SavedObjectsRepository,
-    getSavedObjectsRepository: (...args) =>
-      repositoryProvider.getRepository(...args),
     getScopedSavedObjectsClient: (...args) =>
       scopedClientProvider.getClient(...args),
     setScopedSavedObjectsClientFactory: (...args) =>
       scopedClientProvider.setClientFactory(...args),
     addScopedSavedObjectsClientWrapperFactory: (...args) =>
       scopedClientProvider.addClientWrapperFactory(...args),
+  };
+}
+
+// Creates a migrator object and initializes the associated indices.
+// The initializeSavedObjectIndices call is somewhat expensive, so we
+// don't want to do it prior to *every* write, so we cache it.
+// This can fail (e.g. if elasticsearch is unavailable), which is why
+// we don't use something like lodash's 'once', as we only want to
+// cache the resulting migrator once it's succeeded.
+function createInitFunction(kbnServer) {
+  let initialized = false;
+  return async function getMigrator() {
+    if (!initialized) {
+      await initializeSavedObjectIndices(kbnServer);
+      initialized = true;
+    }
   };
 }
