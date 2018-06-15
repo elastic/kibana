@@ -18,6 +18,4 @@
  */
 
 export { getMigrationPlugins } from './get_migration_plugins';
-export {
-  initializeSavedObjectIndices,
-} from './initialize_saved_object_indices';
+export { patchKibanaIndexMappings } from './patch_kibana_index_mappings';

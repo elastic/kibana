@@ -17,9 +17,5 @@
  * under the License.
  */
 
-import {
-  getMigrationPlugins,
-  initializeSavedObjectIndices,
-} from './kibana_index';
-
-export const KbnServer = { getMigrationPlugins, initializeSavedObjectIndices };
+export { getActiveMappings } from './core';
+export { getMigrationPlugins, patchKibanaIndexMappings } from './kibana_index';

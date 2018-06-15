@@ -65,7 +65,6 @@ function defaultMapping(): IndexMapping {
         migrationVersion: {
           type: 'integer',
         },
-        semver: { type: 'keyword' },
         type: {
           type: 'keyword',
         },

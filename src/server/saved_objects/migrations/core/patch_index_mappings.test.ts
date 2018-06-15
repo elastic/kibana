@@ -20,10 +20,10 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import { getActiveMappings } from './get_active_mappings';
-import { initializeIndex } from './initialize_index';
+import { patchIndexMappings } from './patch_index_mappings';
 import { IndexMapping, MappingDefinition, MigrationPlugin } from './types';
 
-describe('initializeIndex', async () => {
+describe('patchIndexMappings', async () => {
   test('upgrades if mappings new mappings have been added', async () => {
     const originalPlugins = [{ id: 'sample', mappings: randomMappings() }];
     const plugins = [
@@ -33,7 +33,7 @@ describe('initializeIndex', async () => {
         mappings: { dangIt: { type: 'keyword' } },
       },
     ];
-    await expectInitializeIndex({
+    await expectPatchIndexMappings({
       expectedMappings: getActiveMappings({ kibanaVersion: '9.8.7', plugins }),
       kibanaVersion: '9.8.7',
       originalPlugins,
@@ -54,7 +54,7 @@ describe('initializeIndex', async () => {
         mappings: { dangIt: { type: 'text' } },
       },
     ];
-    await expectInitializeIndex({
+    await expectPatchIndexMappings({
       originalPlugins,
       plugins,
       throws: /Invalid mapping change: property "dangIt.type" changed from "keyword" to "text"/,
@@ -72,7 +72,7 @@ describe('initializeIndex', async () => {
         mappings: { aaa: { type: 'text' } },
       },
     ];
-    await expectInitializeIndex({
+    await expectPatchIndexMappings({
       originalPlugins: [],
       plugins,
       throws: /Plugin "slang" is attempting to redefine mapping "aaa"/,
@@ -113,7 +113,11 @@ describe('initializeIndex', async () => {
         },
       },
     };
-    await expectInitializeIndex({ originalPlugins, plugins, expectedMappings });
+    await expectPatchIndexMappings({
+      originalPlugins,
+      plugins,
+      expectedMappings,
+    });
   });
 
   test('allows removing dynamic: strict mappings', async () => {
@@ -151,7 +155,11 @@ describe('initializeIndex', async () => {
         },
       },
     };
-    await expectInitializeIndex({ originalPlugins, plugins, expectedMappings });
+    await expectPatchIndexMappings({
+      originalPlugins,
+      plugins,
+      expectedMappings,
+    });
   });
 
   test('disallows going from strict to dynamic', async () => {
@@ -178,7 +186,7 @@ describe('initializeIndex', async () => {
       },
     ];
     const throws = /Invalid mapping change: property "dangIt.dynamic" changed from "strict" to "true"/;
-    await expectInitializeIndex({ originalPlugins, plugins, throws });
+    await expectPatchIndexMappings({ originalPlugins, plugins, throws });
   });
 
   test('ignores extra properties in the index', async () => {
@@ -208,11 +216,15 @@ describe('initializeIndex', async () => {
         },
       },
     };
-    await expectInitializeIndex({ originalPlugins, plugins, expectedMappings });
+    await expectPatchIndexMappings({
+      originalPlugins,
+      plugins,
+      expectedMappings,
+    });
   });
 });
 
-interface ExpectInitializeOpts {
+interface ExpectPatchOpts {
   kibanaVersion?: string;
   originalPlugins: MigrationPlugin[];
   plugins: MigrationPlugin[];
@@ -220,7 +232,7 @@ interface ExpectInitializeOpts {
   throws?: RegExp;
 }
 
-async function expectInitializeIndex(opts: ExpectInitializeOpts) {
+async function expectPatchIndexMappings(opts: ExpectPatchOpts) {
   const index = randomName();
   const {
     kibanaVersion = '2.4.6',
@@ -237,12 +249,12 @@ async function expectInitializeIndex(opts: ExpectInitializeOpts) {
 
   if (opts.throws) {
     await expect(
-      initializeIndex({ callCluster, index, kibanaVersion, plugins })
+      patchIndexMappings({ callCluster, index, kibanaVersion, plugins })
     ).rejects.toThrow(opts.throws);
   }
 
   if (expectedMappings) {
-    await initializeIndex({
+    await patchIndexMappings({
       callCluster,
       index,
       kibanaVersion,

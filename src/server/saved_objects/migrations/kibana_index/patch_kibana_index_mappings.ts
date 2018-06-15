@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CallCluster, fetchMapping, initializeIndex } from '../core';
+import { CallCluster, fetchMapping, patchIndexMappings } from '../core';
 import { getMigrationPlugins } from './get_migration_plugins';
 import { KibanaPlugin } from './types';
 
@@ -38,18 +38,21 @@ export interface KbnServer {
 }
 
 /**
- * initializeSavedObjectIndices applies changes to the saved object client
- * index (or indices) which are required for the saved objects to function
- * properly. This includes patching the index mappings, and setting up an index
- * template.
+ * patchKibanaIndexMappings applies changes to the Kibana index, including
+ * patching the index mappings, and setting up an index template.
  *
  * @param {KbnServer} kbnServer - The root Kibana server instance
  * @returns {Promise<void>}
  */
-export async function initializeSavedObjectIndices(kbnServer: KbnServer) {
-  await waitForElasticsearch(kbnServer);
+export async function patchKibanaIndexMappings(kbnServer: KbnServer) {
+  const { server } = kbnServer;
+  const callCluster = await waitForElasticsearch(kbnServer);
   await assertNotV5Index(kbnServer);
-  await initializeKibanaIndex(kbnServer);
+  return patchIndexMappings({
+    callCluster,
+    index: server.config().get('kibana.index'),
+    plugins: getMigrationPlugins(kbnServer),
+  });
 }
 
 async function waitForElasticsearch({ server }: KbnServer) {
@@ -59,6 +62,7 @@ async function waitForElasticsearch({ server }: KbnServer) {
     );
   }
   await server.plugins.elasticsearch.waitUntilReady();
+  return server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
 }
 
 async function assertNotV5Index({ server }: KbnServer) {
@@ -79,20 +83,4 @@ async function assertNotV5Index({ server }: KbnServer) {
     );
   }
   return mappings;
-}
-
-async function initializeKibanaIndex(kbnServer: KbnServer) {
-  const { server } = kbnServer;
-  if (!server.plugins.elasticsearch) {
-    throw new Error(
-      'Saved objects require the elasticsearch plugin, but it is disabled'
-    );
-  }
-  return initializeIndex({
-    callCluster: server.plugins.elasticsearch.getCluster('admin')
-      .callWithInternalUser,
-    index: server.config().get('kibana.index'),
-    kibanaVersion: kbnServer.version,
-    plugins: getMigrationPlugins(kbnServer),
-  });
 }

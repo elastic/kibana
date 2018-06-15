@@ -167,13 +167,6 @@ describe('visualize directive', function () {
         assertParam({ forceFetch: true });
       });
 
-      it('should be true if triggered via fetch event', async () => {
-        $scope.$emit('fetch');
-        await waitForFetch();
-        sinon.assert.calledOnce(requestHandler);
-        assertParam({ forceFetch: true });
-      });
-
       it('should be false if triggered via resize event', async () => {
         $el.width(400);
         $el.height(500);

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectDoc } from '../core';
+import { SavedObjectDoc } from '../core/types';
 import { getMigrationPlugins } from './get_migration_plugins';
 
 describe('getMigrationPlugins', () => {

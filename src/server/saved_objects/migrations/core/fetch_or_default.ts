@@ -17,6 +17,15 @@
  * under the License.
  */
 
+/**
+ * fetchOrDefault returns the resolved value of the promise, or
+ * if the promise rejects with a { status: 404 }, returns the
+ * specified default value.
+ *
+ * @param {Promise<T>} promise - The promise to wrap
+ * @param {T} defaultValue - The default value to be returned in the event of a 404
+ * @returns {Promise<T>}
+ */
 export function fetchOrDefault<T>(
   promise: Promise<T>,
   defaultValue: T

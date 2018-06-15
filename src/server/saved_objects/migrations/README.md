@@ -2,6 +2,7 @@
 
 This is the system that manages the versioning of saved object indices. It manages changes to the index, including mappings, index templates, and changes to the shape of documents from one version of Kibana to another.
 
+## Source code
 
 ## What migrations are for
 

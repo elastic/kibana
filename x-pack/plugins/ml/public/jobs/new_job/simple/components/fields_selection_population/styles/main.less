@@ -33,12 +33,37 @@
 
       .agg-type {
         float: right;
-        width: 152px;
+        width: 162px;
         flex-grow: 0;
         white-space: nowrap;
-        select {
-          width: 120px;
+
+        .agg-type-select-wrapper {
           display: inline-block;
+          vertical-align: top;
+
+          .agg-type-select {
+            width: 130px;
+            flex-grow: 0;
+            padding: 5px 10px;
+            -webkit-appearance: none; 
+            -moz-appearance: none;
+            appearance: none;
+          }
+
+          &::after {
+            content: "";
+            position: absolute;
+            width: 0;
+            height: 0;
+            margin-left: 2px;
+            vertical-align: middle;
+            border-top: 4px dashed;
+            border-top: 4px solid #000;
+            border-right: 4px solid transparent;
+            border-left: 4px solid transparent;
+            right: 43px;
+            top: 14px;
+          }
         }
 
         .remove-button {
@@ -64,4 +89,3 @@
     margin: 6px 2px 0px 0px;
   }
 }
-

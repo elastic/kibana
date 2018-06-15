@@ -20,17 +20,26 @@
 import { MigrationPlugin } from '../core';
 import { KibanaPlugin } from './types';
 
-export interface PlguinSpecable {
+export interface PluginSpecable {
   pluginSpecs: KibanaPlugin[];
 }
 
+/**
+ * getMigrationPlugins extracts migration plugins from kbnServer. Migration
+ * plugins are a simple data structure that the core migration system expects.
+ *
+ * @param {KbnServer} kbnServer - An instance of the Kibana server
+ * @returns {MigrationPlugin[]}
+ */
 export function getMigrationPlugins({
   pluginSpecs,
-}: PlguinSpecable): MigrationPlugin[] {
+}: PluginSpecable): MigrationPlugin[] {
   const emptySpec = { mappings: undefined };
-  return pluginSpecs.map(p => ({
-    id: p.getId(),
-    mappings: (p.getExportSpecs() || emptySpec).mappings,
-    migrations: p.getMigrations(),
-  }));
+  return pluginSpecs
+    .map(p => ({
+      id: p.getId(),
+      mappings: (p.getExportSpecs() || emptySpec).mappings,
+      migrations: p.getMigrations(),
+    }))
+    .filter(p => !!p.mappings || !!p.migrations);
 }

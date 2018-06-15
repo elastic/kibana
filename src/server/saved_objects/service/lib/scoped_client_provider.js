@@ -25,14 +25,8 @@ export class ScopedSavedObjectsClientProvider {
   _wrapperFactories = [];
 
   constructor({
-    index,
-    mappings,
-    onBeforeWrite,
     defaultClientFactory
   }) {
-    this._index = index;
-    this._mappings = mappings;
-    this._onBeforeWrite = onBeforeWrite;
     this._originalClientFactory = this._clientFactory = defaultClientFactory;
   }
 
@@ -59,9 +53,6 @@ export class ScopedSavedObjectsClientProvider {
   getClient(request) {
     const client = this._clientFactory({
       request,
-      index: this._index,
-      mappings: this._mappings,
-      onBeforeWrite: this._onBeforeWrite,
     });
 
     return this._wrapperFactories.reduce((clientToWrap, wrapperFactory) => {

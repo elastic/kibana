@@ -17,35 +17,30 @@
  * under the License.
  */
 
-import { SavedObjectsRepository, ScopedSavedObjectsClientProvider } from './lib';
+import { patchKibanaIndexMappings } from '../migrations';
+import { SavedObjectsRepository, ScopedSavedObjectsClientProvider, SavedObjectsRepositoryProvider } from './lib';
 import { SavedObjectsClient } from './saved_objects_client';
-import { initializeSavedObjectIndices } from '../migrations';
 
 export function createSavedObjectsService(kbnServer, server) {
-  const initializeIndicesOnce = createInitFunction(kbnServer);
+  const onBeforeWrite = createPatchKibanaIndexFunction(kbnServer);
+
+  const repositoryProvider = new SavedObjectsRepositoryProvider({
+    index: server.config().get('kibana.index'),
+    mappings: server.getKibanaIndexMappingsDsl(),
+    onBeforeWrite,
+  });
+
   const scopedClientProvider = new ScopedSavedObjectsClientProvider({
     index: server.config().get('kibana.index'),
     mappings: server.getKibanaIndexMappingsDsl(),
+    onBeforeWrite,
     defaultClientFactory({
       request,
-      index,
-      mappings,
-      onBeforeWrite
     }) {
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
       const callCluster = (...args) => callWithRequest(request, ...args);
 
-      const repository = new SavedObjectsRepository({
-        index,
-        mappings,
-        callCluster,
-        async onBeforeWrite() {
-          await initializeIndicesOnce();
-          if (onBeforeWrite) {
-            return onBeforeWrite();
-          }
-        },
-      });
+      const repository = repositoryProvider.getRepository(callCluster);
 
       return new SavedObjectsClient(repository);
     }
@@ -54,6 +49,8 @@ export function createSavedObjectsService(kbnServer, server) {
   return {
     SavedObjectsClient,
     SavedObjectsRepository,
+    getSavedObjectsRepository: (...args) =>
+      repositoryProvider.getRepository(...args),
     getScopedSavedObjectsClient: (...args) =>
       scopedClientProvider.getClient(...args),
     setScopedSavedObjectsClientFactory: (...args) =>
@@ -63,17 +60,16 @@ export function createSavedObjectsService(kbnServer, server) {
   };
 }
 
-// Creates a migrator object and initializes the associated indices.
-// The initializeSavedObjectIndices call is somewhat expensive, so we
-// don't want to do it prior to *every* write, so we cache it.
-// This can fail (e.g. if elasticsearch is unavailable), which is why
-// we don't use something like lodash's 'once', as we only want to
-// cache the resulting migrator once it's succeeded.
-function createInitFunction(kbnServer) {
+// Creates a function that sets the mappings / index templates for the
+// Kibana index. The patchKibanaIndexMappings call is somewhat expensive,
+// so we do a little caching to prevent it from being called more than
+// once. This can fail (e.g. if elasticsearch is unavailable), which is why
+// we don't use something like lodash's 'once'.
+function createPatchKibanaIndexFunction(kbnServer) {
   let initialized = false;
-  return async function getMigrator() {
+  return async function patchIndexOnce() {
     if (!initialized) {
-      await initializeSavedObjectIndices(kbnServer);
+      await patchKibanaIndexMappings(kbnServer);
       initialized = true;
     }
   };

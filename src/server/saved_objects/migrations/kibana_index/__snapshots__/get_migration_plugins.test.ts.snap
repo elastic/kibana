@@ -12,11 +12,6 @@ Array [
     "migrations": undefined,
   },
   Object {
-    "id": "nuthin",
-    "mappings": undefined,
-    "migrations": undefined,
-  },
-  Object {
     "id": "sumthin",
     "mappings": Object {
       "fud": Object {

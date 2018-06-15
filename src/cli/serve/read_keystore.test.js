@@ -17,29 +17,30 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import angular from 'angular';
+import path from 'path';
+import { readKeystore }  from './read_keystore';
 
-export function UtilsDiffTimePickerValsProvider() {
+jest.mock('../../server/keystore');
+import { Keystore } from '../../server/keystore';
 
-  const valueOf = function (o) {
-    if (o) return o.valueOf();
-  };
+describe('cli/serve/read_keystore', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
 
-  return function (rangeA, rangeB) {
-    if (_.isObject(rangeA) && _.isObject(rangeB)) {
-      if (
-        valueOf(rangeA.to) !== valueOf(rangeB.to)
-        || valueOf(rangeA.from) !== valueOf(rangeB.from)
-        || valueOf(rangeA.value) !== valueOf(rangeB.value)
-        || valueOf(rangeA.pause) !== valueOf(rangeB.pause)
-      ) {
-        return true;
-      }
-    } else {
-      return !angular.equals(rangeA, rangeB);
-    }
+  it('returns keystore data', () => {
+    const keystoreData = { 'foo': 'bar' };
+    Keystore.prototype.data = keystoreData;
 
-    return false;
-  };
-}
+    const data = readKeystore();
+    expect(data).toEqual(keystoreData);
+  });
+
+  it('uses data path provided', () => {
+    const keystoreDir = '/foo/';
+    const keystorePath = path.join(keystoreDir, 'kibana.keystore');
+
+    readKeystore(keystoreDir);
+    expect(Keystore.mock.calls[0][0]).toEqual(keystorePath);
+  });
+});

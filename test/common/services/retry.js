@@ -42,10 +42,10 @@ export function RetryProvider({ getService }) {
           .try(block)
           .catch(function tryForTimeCatch(err) {
             if (err.message === prevMessage) {
-              log.debug('--- tryForTime failed again with the same message  ...');
+              log.debug('--- tryForTime errored again with the same message  ...');
             } else {
               prevMessage = err.message;
-              log.debug('--- tryForTime failure: ' + prevMessage);
+              log.debug('--- tryForTime error: ' + prevMessage);
             }
             finalMessage = err.stack || err.message;
             return bluebird.delay(retryDelay).then(attempt);
