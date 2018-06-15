@@ -64,7 +64,11 @@ app.directive('pipelineEdit', function ($injector) {
             maxLines: Infinity,
           });
 
-          editor.getSession().setMode(new PipelineMode());
+          const pipelineMode = new PipelineMode();
+          pipelineMode.lineCommentStart = /\#/;
+          console.log(pipelineMode);
+          console.log(pipelineMode.lineCommentStart);
+          editor.getSession().setMode(pipelineMode);
 
           editor.$blockScrolling = Infinity;
         };

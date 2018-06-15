@@ -13,6 +13,5 @@ export class PipelineMode extends TextMode {
   constructor() {
     super();
     this.HighlightRules = PipelineHighlightRules;
-    console.log(this);
   }
 }

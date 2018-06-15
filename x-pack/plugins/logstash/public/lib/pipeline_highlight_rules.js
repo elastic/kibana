@@ -228,11 +228,18 @@ function NumberRule(next) {
   };
 }
 
+const getCommentRule = () => ({
+  token: 'ccc',
+  regex: /(\#)/,
+  push: 'ccc'
+});
+
 export class PipelineHighlightRules extends TextHighlightRules {
   constructor() {
     super();
     this.$rules = {
       start: [
+        getCommentRule(),
         {
           token: 'pipelineSection',
           regex: /(input|filter|output)/
@@ -243,7 +250,16 @@ export class PipelineHighlightRules extends TextHighlightRules {
           next: push('branchOrPlugin')
         },
       ],
+      ccc: [
+        {
+          token: 'comment',
+          regex: /$/,
+          next: popSingle()
+        },
+        { defaultToken: 'ccc' }
+      ],
       branchOrPlugin: [
+        getCommentRule(),
         {
           token: 'brace',
           regex: closeBraceRegex,
@@ -261,6 +277,7 @@ export class PipelineHighlightRules extends TextHighlightRules {
         }
       ],
       branch: [
+        getCommentRule(),
         {
           token: 'operator',
           regex: /(\(|\)|in|not ([\s]+)?|and|or|xor|nand|==|!=|<=|>=|<|>|=~|\!~|\!)/
@@ -509,6 +526,7 @@ export class PipelineHighlightRules extends TextHighlightRules {
       //   },
       // ],
       plugin: [
+        getCommentRule(),
         {
           token: 'brace',
           regex: openBraceRegex
@@ -525,6 +543,7 @@ export class PipelineHighlightRules extends TextHighlightRules {
         }
       ],
       attributeOperator: [
+        getCommentRule(),
         {
           token: 'operator',
           regex: /=>/,
@@ -532,9 +551,11 @@ export class PipelineHighlightRules extends TextHighlightRules {
         }
       ],
       attributeValue: [
+        getCommentRule(),
         ...new ValueRule(['attributeValue', 'attributeOperator'])
       ],
       arrayEntry: [
+        getCommentRule(),
         {
           token: 'array',
           regex: /(\])/,
@@ -568,6 +589,7 @@ export class PipelineHighlightRules extends TextHighlightRules {
         new BarewordRule(),
       ],
       arrayOperator: [
+        getCommentRule(),
         {
           token: 'operator',
           regex: /\,/,
@@ -575,9 +597,11 @@ export class PipelineHighlightRules extends TextHighlightRules {
         }
       ],
       arrayValue: [
+        getCommentRule(),
         ...new ValueRule([], 'arrayOperator')
       ],
       hashEntries: [
+        getCommentRule(),
         {
           token: 'hash',
           regex: closeBraceRegex,
@@ -591,6 +615,7 @@ export class PipelineHighlightRules extends TextHighlightRules {
         ...getStringRules(pop([], ['hashOperator']))
       ],
       hashOperator: [
+        getCommentRule(),
         {
           token: 'operator',
           regex: /=>/,
@@ -598,6 +623,7 @@ export class PipelineHighlightRules extends TextHighlightRules {
         }
       ],
       hashValue: [
+        getCommentRule(),
         ...new ValueRule(['hashValue', 'hashOperator', 'hashEntry'])
       ],
       sqs: [
