@@ -39,6 +39,51 @@ const pop = (popValues = [], pushValues = []) => {
   };
 };
 
+const popMatch = (value, stack) => {
+  if (stack.length && stack[0] === value) {
+    stack.shift();
+  }
+};
+
+const popSingle = (popValues = [], pushValues = []) => {
+  return (state, stack) => {
+    console.log(state);
+    console.log(stack);
+    if (!popValues.length) {
+      stack.shift();
+    } else {
+      popValues.forEach(value => {
+        popMatch(value, stack);
+      });
+    }
+    pushValues.forEach(value => {
+      stack.unshift(value);
+    });
+    console.log(stack);
+    return stack[0]
+      ? stack[0]
+      : 'start';
+  };
+};
+
+const push = (pushState = [], nextState) => {
+  return (state, stack) => {
+    console.log(stack);
+    if (typeof pushState === 'string') {
+      stack.unshift(pushState);
+    } else {
+      pushState.forEach(value => {
+        stack.unshift(value);
+      });
+    }
+    console.log(stack);
+    console.log(nextState);
+    return nextState
+      ? nextState
+      : stack[0];
+  };
+};
+
 function ValueRule(popStates = []) {
   return [
     new ArrayRule(pop(['array', ...popStates])),
@@ -190,60 +235,279 @@ export class PipelineHighlightRules extends TextHighlightRules {
       start: [
         {
           token: 'pipelineSection',
-          regex: /(input|filter|output)/,
-          push: 'pipelineSection'
-        }
-      ],
-      pipelineSection: [
-        {
-          token: 'brace',
-          regex: openBraceRegex
+          regex: /(input|filter|output)/
         },
-        {
-          token: 'brace',
-          regex: closeBraceRegex,
-          next: 'pop'
-        },
-        { include: 'branchOrPlugin' },
-        {
-          defaultToken: 'pipelineSection'
-        }
-      ],
-      ifHead: [
         {
           token: 'brace',
           regex: openBraceRegex,
-          next: 'ifBody'
+          next: push('branchOrPlugin')
         },
-        {
-          defaultToken: 'condition'
-        }
-      ],
-      ifBody: [
-        {
-          token: 'brace',
-          regex: closeBraceRegex,
-          next: pop(['ifBody', 'ifHead'])
-        },
-        {
-          include: 'branchOrPlugin'
-        },
-        {
-          defaultToken: 'rvalue'
-        }
       ],
       branchOrPlugin: [
         {
+          token: 'brace',
+          regex: closeBraceRegex,
+          next: popSingle(['branchOrPlugin', 'branch'])
+        },
+        {
           token: 'control',
           regex: /if/,
-          push: 'ifHead'
+          next: push('branch')
         },
         {
           token: 'plugin',
           regex: /[a-zA-Z0-9_-]+/,
-          push: 'plugin'
+          next: push('plugin')
         }
       ],
+      branch: [
+        {
+          token: 'operator',
+          regex: /(\(|\)|in|not ([\s]+)?|and|or|xor|nand|==|!=|<=|>=|<|>|=~|\!~|\!)/
+        },
+        {
+          token: 'brace',
+          regex: openBraceRegex,
+          next: push('branchOrPlugin')
+        },
+        {
+          token: 'quote',
+          regex: /\'/,
+          next: push('sqs')
+        },
+        {
+          token: 'quote',
+          regex: /\"/,
+          next: push('dqs')
+        },
+        {
+          token: 'array',
+          regex: /\[/,
+          next: push('arrayEntry')
+        },
+        {
+          token: 'bareword',
+          regex: /[A-Za-z0-9]+/
+        }
+      ],
+      // branch: [
+      //   {
+      //     token: 'operator',
+      //     regex: /\(/,
+      //     next: push('parenSection')
+      //   },
+      //   {
+      //     token: 'operator',
+      //     regex: /!([\s]+)?\(/,
+      //     next: push('negativeExpression')
+      //   },
+      //   {
+      //     token: 'rvalue',
+      //     regex: /rvalue/,
+      //     next: push('expression')
+      //   }
+      // ],
+      // expression: [
+      //   {
+      //     token: 'brace',
+      //     regex: openBraceRegex,
+      //     next: (state, stack) => {
+      //       if (stack[1] === 'branch') {
+      //         return popSingle(['expression'], ['branchOrPlugin'])(state, stack);
+      //       }
+      //       return state;
+      //     }
+      //   },
+      //   {
+      //     token: 'operator',
+      //     regex: /(and|or|xor|nand)/,
+      //     next: push('expressionPredicate')
+      //   },
+      //   {
+      //     token: 'operator',
+      //     regex: /in/,
+      //     next: push('expressionPredicate')
+      //   }
+      // ],
+      // expressionPredicate: [
+      //   {
+      //     token: 'rvalue',
+      //     regex: /rvalue/,
+      //     next: popSingle()
+      //   }
+      // ],
+      // parenSection: [
+      //   {
+      //     token: 'operator',
+      //     regex: /\)/,
+      //     next: pop()
+      //   }
+      // ],
+      // negativeExpression: [
+      //   {
+      //     token: 'operator',
+      //     regex: /\)/,
+      //     next: pop()
+      //   }
+      // ],
+
+
+
+      // condition: [
+      //   {
+      //     token: 'brace',
+      //     regex: openBraceRegex,
+      //     next: 'ifBody'
+      //   },
+      //   {
+      //     token: 'operator',
+      //     regex: /\(/,
+      //     next: push('parensCondition')
+      //   },
+      //   {
+      //     token: 'operator',
+      //     regex: /\!/,
+      //     next: push('negativeExpressionOpen')
+      //   },
+      //   {
+      //     token: 'rvalue',
+      //     regex: /rvalue/,
+      //     next: push('exitableExpression')
+      //   },
+      // ],
+      // parensCondition: [
+      //   {
+      //     token: 'operator',
+      //     regex: /\)/,
+      //     next: popSingle()
+      //   },
+      //   {
+      //     token: 'operator',
+      //     regex: /\!/,
+      //     next: push('negativeExpressionOpen')
+      //   },
+      //   {
+      //     token: 'rvalue',
+      //     regex: /rvalue/,
+      //     next: push('containedExpression', 'containedExpression')
+      //   },
+      //   {
+      //     token: 'operator',
+      //     regex: /\(/,
+      //     next: push('parensCondition', 'parensCondition')
+      //   },
+      // ],
+      // containedExpression: [
+      //   {
+      //     token: 'operator',
+      //     regex: /\)/,
+      //     next: popSingle(['containedExpression', 'parensCondition'])
+      //   },
+      //   {
+      //     token: 'operator',
+      //     regex: /in/,
+      //     next: 'containedExpressionPredicate'
+      //   },
+      //   {
+      //     token: 'operator',
+      //     regex: /not ([\s]+)?in/,
+      //     next: push('containedExpressionPredicate')
+      //   },
+      //   {
+      //     token: 'operator',
+      //     regex: /(==|!=|<=|>=|<|>)/,
+      //     next: push('containedComparePredicate')
+      //   }
+      // ],
+      // containedComparePredicate: [
+      //   {
+      //     token: 'rvalue',
+      //     regex: /rvalue/,
+      //     next: popSingle(['containedComparePredicate', 'containedExpression'])
+      //   }
+      // ],
+      // containedExpressionPredicate: [
+      //   {
+      //     token: 'rvalue',
+      //     regex: /rvalue/,
+      //     next: popSingle(['containedExpressionPredicate', 'containedExpression'])
+      //   }
+      // ],
+      // exitableExpression: [
+      //   {
+      //     token: 'brace',
+      //     regex: openBraceRegex,
+      //     next: pop([], ['ifBody'])
+      //   },
+      //   {
+      //     token: 'operator',
+      //     regex: /in/,
+      //     next: push('expressionPredicate')
+      //   },
+      //   {
+      //     token: 'operator',
+      //     regex: /not ([\s]+)?in/,
+      //     next: push('expressionPredicate')
+      //   },
+      //   {
+      //     token: 'operator',
+      //     regex: /(==|!=|<=|>=|<|>)/,
+      //     next: push('comparePredicate')
+      //   },
+      //   {
+      //     token: 'operator',
+      //     regex: /(and|or|xor|nand)/,
+      //     next: push('condition')
+      //   },
+      //   {
+      //     token: 'operator',
+      //     regex: /\)/,
+      //     next: pop(['negativeExpression', 'negativeExpressionOpen'])
+      //   }
+      // ],
+      // comparePredicate: [
+      //   {
+      //     token: 'rvalue',
+      //     regex: /rvalue/,
+      //     next: popSingle(['comparePredicate', 'exitableExpression'])
+      //   }
+      // ],
+      // expressionPredicate: [
+      //   {
+      //     token: 'rvalue',
+      //     regex: /rvalue/,
+      //     next: pop()
+      //   }
+      // ],
+      // negativeExpressionOpen: [
+      //   {
+      //     token: 'operator',
+      //     regex: /\(/,
+      //     push: 'negativeExpression'
+      //   }
+      // ],
+      // negativeExpression: [
+      //   {
+      //     token: 'operator',
+      //     regex: /\)/,
+      //     next: pop(['negativeExpression', 'negativeExpressionOpen'])
+      //   },
+      //   {
+      //     token: 'operator',
+      //     regex: /\!/,
+      //     next: push('negativeExpressionOpen')
+      //   },
+      //   {
+      //     token: 'rvalue',
+      //     regex: /rvalue/,
+      //     next: push('exitableExpression')
+      //   },
+      //   {
+      //     token: 'operator',
+      //     regex: /\(/,
+      //     next: push('parensCondition')
+      //   },
+      // ],
       plugin: [
         {
           token: 'brace',
@@ -335,6 +599,34 @@ export class PipelineHighlightRules extends TextHighlightRules {
       ],
       hashValue: [
         ...new ValueRule(['hashValue', 'hashOperator', 'hashEntry'])
+      ],
+      sqs: [
+        {
+          token: 'quote',
+          regex: /\'/,
+          next: popSingle()
+        },
+        {
+          token: 'escapeQuote',
+          regex: singleQuoteEscapeRegex
+        },
+        {
+          defaultToken: 'quote'
+        }
+      ],
+      dqs: [
+        {
+          token: 'quote',
+          regex: /\"/,
+          next: popSingle()
+        },
+        {
+          token: 'escapeQuote',
+          regex: doubleQuoteEscapeRegex
+        },
+        {
+          defaultToken: 'quote'
+        }
       ],
       singleQuoteString: [
         {
