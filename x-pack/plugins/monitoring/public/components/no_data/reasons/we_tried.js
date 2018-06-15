@@ -8,7 +8,6 @@ import React, { Fragment } from 'react';
 import {
   EuiText,
   EuiHorizontalRule,
-  EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -18,19 +17,14 @@ export function WeTried() {
       <EuiTitle size="l">
         <h2>We couldn&apos;t activate monitoring</h2>
       </EuiTitle>
-      <EuiTextColor color="subdued">
-        <EuiText>
-          <p>Here might be some things to check</p>
-        </EuiText>
-      </EuiTextColor>
       <EuiHorizontalRule size="half" />
       <EuiText className="noData__alignLeft">
         <p>
           No monitoring data found. Try setting the time filter to &quot;Last 1
-          hour&quot; or see if data is available for a different time period.
+          hour&quot; or check if data is available for a different time period.
         </p>
         <p>
-          If data is in your cluster, you&apos;ll see your monitoring dashboards here.
+          If data is in your cluster, your monitoring dashboards will show up here.
         </p>
       </EuiText>
     </Fragment>
