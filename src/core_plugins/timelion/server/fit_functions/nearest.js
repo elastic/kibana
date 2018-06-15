@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 
-// Upsampling and downsampling of non-cummulative sets
+// Upsampling and downsampling of non-cumulative sets
 // Good: average, min, max
 // Bad: sum, count
 export default function nearest(dataTuples, targetTuples) {

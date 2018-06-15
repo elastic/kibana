@@ -19,12 +19,12 @@
 
 import _ from 'lodash';
 
-// Downsampling of cummulative metrics
+// Downsampling of cumulative metrics
 // Good: count, sum
 // Bad: avg, min, max
 
 
-// For upsampling cummulative metrics (eg sum from 1M to 1d), could rename this scale.
+// For upsampling cumulative metrics (eg sum from 1M to 1d), could rename this scale.
 // Really only the 0s that screws this up, need to distribute contents of spikes to empty buckets
 // Empty is currently 0, which is not right
 

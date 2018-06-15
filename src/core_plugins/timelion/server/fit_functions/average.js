@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 
-// Upsampling and down sampling of non-cummulative sets
+// Upsampling and down sampling of non-cumulative sets
 // Good: min, max, average
 // Bad: sum, count
 
