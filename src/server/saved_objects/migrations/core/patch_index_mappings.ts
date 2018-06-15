@@ -53,7 +53,7 @@ interface MigrationMappings {
  * @prop {MigrationPlugin[]} plugins - A list of plugins whose mappings will be applied to the index
  * @returns {Promise<void>}
  */
-export async function initializeIndex(opts: InitializeOpts) {
+export async function patchIndexMappings(opts: InitializeOpts) {
   const context = await getContext(opts);
   await putTemplate(context);
   if (await indexExists(context)) {

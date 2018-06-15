@@ -25,9 +25,6 @@ Object {
       "migrationVersion": Object {
         "type": "integer",
       },
-      "semver": Object {
-        "type": "keyword",
-      },
       "type": Object {
         "type": "keyword",
       },

@@ -24,7 +24,7 @@ describe('computeSupportedTypes', () => {
   test('always includes the core types', () => {
     expect(
       computeSupportedTypes({ plugins: [], kibanaVersion: '8.8.8' })
-    ).toEqual(['config', 'migrationVersion', 'semver', 'type', 'updated_at']);
+    ).toEqual(['config', 'migrationVersion', 'type', 'updated_at']);
   });
 
   test('includes types from both mappings and migrations', () => {
@@ -57,7 +57,6 @@ describe('computeSupportedTypes', () => {
         'bar',
         'baz',
         'migrationVersion',
-        'semver',
         'type',
         'updated_at',
       ].sort()

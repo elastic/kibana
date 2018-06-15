@@ -154,7 +154,7 @@ describe('createDocTransform', () => {
     expect(doc.attributes).toEqual({ hi: 'there' });
   });
 
-  test('decorates errors with the failed plugin, semver, and type', () => {
+  test('decorates errors with the failed plugin, version, and type', () => {
     const opts = {
       kibanaVersion: '11.0.0',
       plugins: [

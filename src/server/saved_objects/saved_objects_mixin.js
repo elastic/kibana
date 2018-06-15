@@ -29,7 +29,10 @@ import {
 } from './routes';
 
 export function savedObjectsMixin(kbnServer, server) {
-  const mappings = getActiveMappings({ plugins: getMigrationPlugins(kbnServer) });
+  const mappings = getActiveMappings({
+    kibanaVersion: kbnServer.version,
+    plugins: getMigrationPlugins(kbnServer),
+  });
   server.decorate('server', 'getKibanaIndexMappingsDsl', () => _.cloneDeep(mappings));
 
   // we use kibana.index which is technically defined in the kibana plugin, so if
