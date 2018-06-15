@@ -66,7 +66,7 @@ watch.put(...)
 For example, see `clamp`.
 
 ## Controller classes
-- All functions in controller classes should be defined as arrow function constants. This is to ensure the `this` context is consistant, regardless of where it is being called.
+- All functions in controller classes should be defined as arrow function constants. This is to ensure the `this` context is consistent, regardless of where it is being called.
 
 GOOD
 ```
