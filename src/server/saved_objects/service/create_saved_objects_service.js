@@ -22,10 +22,10 @@ import { SavedObjectsClient } from './saved_objects_client';
 import { initializeSavedObjectIndices } from '../migrations';
 
 export function createSavedObjectsService(kbnServer, server) {
-  const initializeIndicesOnce = createInitFunction(kbnServer);
   const scopedClientProvider = new ScopedSavedObjectsClientProvider({
     index: server.config().get('kibana.index'),
     mappings: server.getKibanaIndexMappingsDsl(),
+    onBeforeWrite: createInitFunction(kbnServer),
     defaultClientFactory({
       request,
       index,
@@ -39,12 +39,7 @@ export function createSavedObjectsService(kbnServer, server) {
         index,
         mappings,
         callCluster,
-        async onBeforeWrite() {
-          await initializeIndicesOnce();
-          if (onBeforeWrite) {
-            return onBeforeWrite();
-          }
-        },
+        onBeforeWrite,
       });
 
       return new SavedObjectsClient(repository);
