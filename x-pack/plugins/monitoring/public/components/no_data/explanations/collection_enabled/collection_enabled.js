@@ -23,11 +23,25 @@ export class ExplainCollectionEnabled extends React.Component {
   constructor(props) {
     super(props);
     this.handleClick = this.handleClick.bind(this);
+    this.waitedTooLongTimer = null;
+
+    this.state = {
+      waitedTooLong: false
+    };
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.waitedTooLongTimer);
   }
 
   handleClick() {
     const { enabler } = this.props;
     enabler.enableCollectionEnabled();
+
+    // wait 19 seconds, show link to reload
+    this.waitedTooLongTimer = setTimeout(() => {
+      this.setState({ waitedTooLong: true });
+    }, 19 * 1000);
   }
 
   render() {
@@ -72,6 +86,13 @@ export class ExplainCollectionEnabled extends React.Component {
         </EuiFlexGroup>
       </Fragment>
     );
+
+    const stillWaiting = this.state.waitedTooLong ? (
+      <p>
+        <a href="#/">Still waiting?</a>
+      </p>
+    ) : null;
+
     const renderSuccess = () => (
       <Fragment>
         <EuiTitle size="l" data-test-subj="monitoringCollectionEnabledMessage">
@@ -80,13 +101,14 @@ export class ExplainCollectionEnabled extends React.Component {
         <EuiHorizontalRule size="half" />
         <EuiText>
           <p>
-            When the data is in your
-            cluster, your monitoring
-            dashboard will show up here. This only takes a few seconds.
+            When the data is in your cluster, your monitoring dashboard will
+            show up here. This might take a few seconds.
           </p>
         </EuiText>
         <EuiSpacer />
         <EuiLoadingSpinner size="l" />
+        <EuiSpacer />
+        {stillWaiting}
       </Fragment>
     );
 
