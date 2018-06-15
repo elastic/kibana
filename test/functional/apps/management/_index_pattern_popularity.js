@@ -25,62 +25,52 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['settings', 'common']);
 
   describe('index result popularity', function describeIndexTests() {
-    before(function () {
+    const fieldName = 'geo.coordinates';
+    before(async function () {
       // delete .kibana index and then wait for Kibana to re-create it
-      return kibanaServer.uiSettings.replace({})
-        .then(function () {
-          return PageObjects.settings.navigateTo();
-        });
+      await kibanaServer.uiSettings.replace({});
+      await PageObjects.settings.navigateTo();
+
     });
 
-    beforeEach(function be() {
-      return PageObjects.settings.createIndexPattern();
+    beforeEach(async () => {
+      await PageObjects.settings.createIndexPattern();
+      // increase Popularity of geo.coordinates
+      log.debug('Starting openControlsByName (' + fieldName + ')');
+      await PageObjects.settings.openControlsByName(fieldName);
+      log.debug('increasePopularity');
+      await PageObjects.settings.increasePopularity();
     });
 
-    afterEach(function ae() {
-      return PageObjects.settings.removeIndexPattern();
+    afterEach(async () =>  {
+      await PageObjects.settings.controlChangeCancel();
+      await PageObjects.settings.removeIndexPattern();
+      // Cancel saving the popularity change (we didn't make a change in this case, just checking the value)
     });
 
-    describe('change popularity', function indexPatternCreation() {
-      const fieldName = 'geo.coordinates';
+    it('should update the popularity input', async function () {
+      const popularity = await PageObjects.settings.getPopularity();
+      log.debug('popularity = ' + popularity);
+      expect(popularity).to.be('1');
+    });
 
-      beforeEach(async function () {
-        // increase Popularity of geo.coordinates
-        log.debug('Starting openControlsByName (' + fieldName + ')');
-        await PageObjects.settings.openControlsByName(fieldName);
-        log.debug('increasePopularity');
-        await PageObjects.settings.increasePopularity();
-      });
+    it('should be reset on cancel', async function () {
+      // Cancel saving the popularity change
+      await PageObjects.settings.controlChangeCancel();
+      await PageObjects.settings.openControlsByName(fieldName);
+      // check that it is 0 (previous increase was cancelled
+      const popularity = await PageObjects.settings.getPopularity();
+      log.debug('popularity = ' + popularity);
+      expect(popularity).to.be('0');
+    });
 
-      afterEach(async function () {
-        // Cancel saving the popularity change (we didn't make a change in this case, just checking the value)
-        await PageObjects.settings.controlChangeCancel();
-      });
-
-      it('should update the popularity input', async function () {
-        const popularity = await PageObjects.settings.getPopularity();
-        log.debug('popularity = ' + popularity);
-        expect(popularity).to.be('1');
-      });
-
-      it('should be reset on cancel', async function () {
-        // Cancel saving the popularity change
-        await PageObjects.settings.controlChangeCancel();
-        await PageObjects.settings.openControlsByName(fieldName);
-        // check that it is 0 (previous increase was cancelled
-        const popularity = await PageObjects.settings.getPopularity();
-        log.debug('popularity = ' + popularity);
-        expect(popularity).to.be('0');
-      });
-
-      it('can be saved', async function () {
-        // Saving the popularity change
-        await PageObjects.settings.controlChangeSave();
-        await PageObjects.settings.openControlsByName(fieldName);
-        const popularity = await PageObjects.settings.getPopularity();
-        log.debug('popularity = ' + popularity);
-        expect(popularity).to.be('1');
-      });
-    }); // end 'change popularity'
-  }); // end index result popularity
+    it('can be saved', async function () {
+      // Saving the popularity change
+      await PageObjects.settings.controlChangeSave();
+      await PageObjects.settings.openControlsByName(fieldName);
+      const popularity = await PageObjects.settings.getPopularity();
+      log.debug('popularity = ' + popularity);
+      expect(popularity).to.be('1');
+    });
+  }); // end 'change popularity'
 }
