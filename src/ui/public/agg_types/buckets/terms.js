@@ -81,9 +81,9 @@ export const termsBucketAgg = new BucketAggType({
       const filterAgg = buildOtherBucketAgg(aggConfigs, aggConfig, resp);
       nestedSearchSource.set('aggs', filterAgg);
 
-      const request = aggConfigs.vis.API.inspectorAdapters.requests.start('Other Bucket', {
-        description: `This request counts how much documents aren't included in the
-               actual data to build the "Other" bucket from that information.`
+      const request = aggConfigs.vis.API.inspectorAdapters.requests.start('Other bucket', {
+        description: `This request counts the number of documents that fall
+          outside the criterion of the data buckets.`
       });
       nestedSearchSource.getSearchRequestBody().then(body => {
         request.json(body);

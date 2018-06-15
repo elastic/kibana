@@ -136,8 +136,7 @@ RequestsViewComponent.propTypes = {
 const RequestsView = {
   title: 'Requests',
   order: 20,
-  help: `The requests inspector allows you to inspect the requests the visualization
-    did to collect its data.`,
+  help: `View the requests that collected the data`,
   shouldShow(adapters) {
     return Boolean(adapters.requests);
   },

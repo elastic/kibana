@@ -84,7 +84,7 @@ class DataDownloadOptions extends Component {
       <EuiContextMenuItem
         key="csv"
         onClick={this.exportFormattedCsv}
-        toolTipContent="Downloads the data as shown in the table."
+        toolTipContent="Download the data in table format"
         toolTipPosition="left"
       >
         Formatted CSV
@@ -92,8 +92,7 @@ class DataDownloadOptions extends Component {
       <EuiContextMenuItem
         key="rawCsv"
         onClick={this.exportFormattedAsRawCsv}
-        toolTipContent={`Downloads the raw data i.e. dates as timestamps,
-          numeric values without thousand separators, etc.`}
+        toolTipContent={`Download the data as provided, for example, dates as timestamps`}
         toolTipPosition="left"
       >
         Raw CSV

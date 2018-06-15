@@ -28,13 +28,13 @@ function getRequestInspectorStats(searchSource) {
   const index = searchSource.get('index');
 
   if (index) {
-    stats['Index Pattern Title'] = {
+    stats['Index pattern'] = {
       value: index.title,
-      description: 'The index pattern against which this query was executed.',
+      description: 'The index pattern that connected to the Elasticsearch indices',
     };
-    stats ['Index Pattern ID'] = {
+    stats ['Index pattern ID'] = {
       value: index.id,
-      description: 'The ID of the saved index pattern object in the .kibana index.',
+      description: 'The ID in the .kibana index',
     };
   }
 
@@ -46,27 +46,25 @@ function getResponseInspectorStats(searchSource, resp) {
   const stats = {};
 
   if (resp && resp.took) {
-    stats['Query Time'] = {
+    stats['Query time'] = {
       value: `${resp.took}ms`,
-      description: `The time it took Elasticsearch to process the query.
-        This does not include the time it takes to send the request to Elasticsearch
-        or parse it in the browser.`,
+      description: `The time it took to process the query.
+        Does not include the time to send the request or parse it in the browser.`,
     };
   }
 
   if (resp && resp.hits) {
     stats.Hits = {
       value: `${resp.hits.total}`,
-      description: 'The total number of documents that matched the query.',
+      description: 'The number of documents that match the query',
     };
   }
 
   if (lastRequest && (lastRequest.ms === 0 || lastRequest.ms)) {
     stats['Request time'] = {
       value: `${lastRequest.ms}ms`,
-      description: `The time this request took from the browser to Elasticsearch
-        and back again. This does not include the time the request waited in the queue
-        to be executed.`
+      description: `The time of the request from the browser to Elasticsearch and back.
+        Does not include the time the requested waited in the queue.`
     };
   }
 
