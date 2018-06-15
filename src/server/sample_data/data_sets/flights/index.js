@@ -112,7 +112,7 @@ export function flightsSpecProvider() {
       }
     },
     timeFields: ['timestamp'],
-    currentTimeMarker: '2018-01-02T00:00:00Z',
+    currentTimeMarker: '2018-01-02T00:00:00',
     preserveDayOfWeekTimeOfDay: true,
     savedObjects: savedObjects,
   };
