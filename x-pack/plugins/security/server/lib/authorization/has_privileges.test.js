@@ -16,6 +16,7 @@ jest.mock('../../../../../server/lib/get_client_shield', () => ({
 const defaultKibanaIndex = 'default-kibana-index';
 const defaultVersion = 'default-version';
 const defaultApplication = 'default-application';
+const savedObjectTypes = ['foo-type', 'bar-type'];
 
 const createMockServer = ({ settings = {} } = {}) => {
   const mockServer = {
@@ -34,6 +35,10 @@ const createMockServer = ({ settings = {} } = {}) => {
   mockServer.config().get.mockImplementation(key => {
     return key in settings ? settings[key] : defaultSettings[key];
   });
+
+  mockServer.savedObjects = {
+    types: savedObjectTypes
+  };
 
   return mockServer;
 };
@@ -82,7 +87,7 @@ const expectDeprecationLogged = (mockServer) => {
 };
 
 test(`returns success of true if they have all application privileges`, async () => {
-  const privilege = 'action:saved_objects/config/get';
+  const privilege = `action:saved_objects/${savedObjectTypes[0]}/get`;
   const username = 'foo-username';
   const mockServer = createMockServer();
   const mockCallWithRequest = createMockCallWithRequest([
@@ -124,8 +129,8 @@ test(`returns success of true if they have all application privileges`, async ()
 });
 
 test(`returns success of false if they have only one application privilege`, async () => {
-  const privilege1 = 'action:saved_objects/config/get';
-  const privilege2 = 'action:saved_objects/config/create';
+  const privilege1 = `action:saved_objects/${savedObjectTypes[0]}/get`;
+  const privilege2 = `action:saved_objects/${savedObjectTypes[0]}/create`;
   const username = 'foo-username';
   const mockServer = createMockServer();
   const mockCallWithRequest = createMockCallWithRequest([
@@ -168,7 +173,7 @@ test(`returns success of false if they have only one application privilege`, asy
 });
 
 test(`throws error if missing version privilege and has login privilege`, async () => {
-  const privilege = 'action:saved_objects/config/get';
+  const privilege = `action:saved_objects/${savedObjectTypes[0]}/get`;
   const mockServer = createMockServer();
   createMockCallWithRequest([
     mockApplicationPrivilegeResponse({
@@ -189,7 +194,7 @@ test(`throws error if missing version privilege and has login privilege`, async 
 });
 
 test(`uses application privileges if the user has the login privilege`, async () => {
-  const privilege = 'action:saved_objects/config/get';
+  const privilege = `action:saved_objects/${savedObjectTypes[0]}/get`;
   const username = 'foo-username';
   const mockServer = createMockServer();
   const callWithRequest = createMockCallWithRequest([
@@ -230,7 +235,7 @@ test(`uses application privileges if the user has the login privilege`, async ()
 });
 
 test(`returns success of false using application privileges if the user has the login privilege`, async () => {
-  const privilege = 'action:saved_objects/config/get';
+  const privilege = `action:saved_objects/${savedObjectTypes[0]}/get`;
   const username = 'foo-username';
   const mockServer = createMockServer();
   const callWithRequest = createMockCallWithRequest([
@@ -272,7 +277,7 @@ test(`returns success of false using application privileges if the user has the 
 
 describe('legacy fallback with no application privileges', () => {
   test(`returns success of false if the user has no legacy privileges`, async () => {
-    const privilege = 'action:saved_objects/config/get';
+    const privilege = `action:saved_objects/${savedObjectTypes[0]}/get`;
     const username = 'foo-username';
     const mockServer = createMockServer();
     const callWithRequest = createMockCallWithRequest([
@@ -443,7 +448,7 @@ describe('legacy fallback with no application privileges', () => {
   });
 
   test(`returns success of false if the user has the read privilege on kibana index but one privilege isn't a read action`, async () => {
-    const privilegeMap = buildPrivilegeMap(defaultApplication, defaultVersion);
+    const privilegeMap = buildPrivilegeMap(savedObjectTypes, defaultApplication, defaultVersion);
 
     const actions = privilegeMap.read.actions.filter(a => a !== getVersionPrivilege(defaultVersion) && a !== getLoginPrivilege());
     for (const action of actions) {
@@ -506,7 +511,7 @@ describe('legacy fallback with no application privileges', () => {
   });
 
   test(`returns success of true if the user has the read privilege on kibana index and the privilege is a read action`, async () => {
-    const privilegeMap = buildPrivilegeMap(defaultApplication, defaultVersion);
+    const privilegeMap = buildPrivilegeMap(savedObjectTypes, defaultApplication, defaultVersion);
     for (const action of privilegeMap.read.actions) {
       const privilege = action;
       const username = 'foo-username';
@@ -566,7 +571,7 @@ describe('legacy fallback with no application privileges', () => {
   });
 
   test(`returns success of true if the user has the read privilege on kibana index and all privileges are read actions`, async () => {
-    const privilegeMap = buildPrivilegeMap(defaultApplication, defaultVersion);
+    const privilegeMap = buildPrivilegeMap(savedObjectTypes, defaultApplication, defaultVersion);
     const privileges = privilegeMap.read.actions;
     const username = 'foo-username';
     const mockServer = createMockServer();

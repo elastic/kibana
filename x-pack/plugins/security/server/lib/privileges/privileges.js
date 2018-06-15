@@ -16,8 +16,8 @@ export function getLoginPrivilege() {
   return `action:login`;
 }
 
-export function buildPrivilegeMap(application, kibanaVersion) {
-  const readSavedObjectsPrivileges = buildSavedObjectsReadPrivileges();
+export function buildPrivilegeMap(savedObjectTypes, application, kibanaVersion) {
+  const readSavedObjectsPrivileges = buildSavedObjectsReadPrivileges(savedObjectTypes);
 
   const privilegeActions = {};
 
@@ -38,14 +38,13 @@ export function buildPrivilegeMap(application, kibanaVersion) {
   return privilegeActions;
 }
 
-function buildSavedObjectsReadPrivileges() {
+function buildSavedObjectsReadPrivileges(savedObjectTypes) {
   const readActions = ['get', 'bulk_get', 'find'];
-  return buildSavedObjectsPrivileges(readActions);
+  return buildSavedObjectsPrivileges(savedObjectTypes, readActions);
 }
 
-function buildSavedObjectsPrivileges(actions) {
-  const objectTypes = ['config', 'dashboard', 'graph-workspace', 'index-pattern', 'search', 'timelion-sheet', 'url', 'visualization'];
-  return objectTypes
+function buildSavedObjectsPrivileges(savedObjectTypes, actions) {
+  return savedObjectTypes
     .map(type => actions.map(action => `action:saved_objects/${type}/${action}`))
     .reduce((acc, types) => [...acc, ...types], []);
 }
