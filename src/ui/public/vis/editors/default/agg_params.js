@@ -40,6 +40,7 @@ uiModules
       link: function ($scope, $el, attr) {
         $scope.$bind('agg', attr.agg);
         $scope.$bind('groupName', attr.groupName);
+        $scope.$bind('vis', attr.vis);
 
         const aggTypeSubscription = aggTypeFilters
           .filter$(aggTypes.byType[$scope.groupName], $scope.vis, $scope.agg)

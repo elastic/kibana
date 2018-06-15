@@ -51,10 +51,10 @@ class AggTypeFilters {
    * A new filtered list will always be emitted when the {@link AggTypeFilter}
    * registered with this registry will change.
    *
-   * @param aggTypes  A list of aggTypes that will be filtered down by this registry.
+   * @param aggTypes A list of aggTypes that will be filtered down by this registry.
    * @param vis The vis for which this list should be filtered down.
    * @param aggConfig The aggConfig for which the returning list will be used.
-   * @return  A filtered list of the passed aggTypes.
+   * @return A filtered list of the passed aggTypes.
    */
   public filter$(aggTypes: AggType[], vis: Vis, aggConfig: AggConfig) {
     return this.subject.map(filters => {
