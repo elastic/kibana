@@ -29,7 +29,7 @@ export function showSaveModal({ onSave, title, description, timeRestore, showCop
   };
 
   const onSaveConfirmed = (...args) => {
-    onSave(...args).then(({id, error}) => {
+    onSave(...args).then(({ id, error }) => {
       if (id || error) {
         closeModal();
       }

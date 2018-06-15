@@ -285,7 +285,7 @@ app.directive('dashboardApp', function ($injector) {
        * @return {Promise}
        * @resolved {String} - The id of the doc
        */
-      function save (saveOptions) {
+      function save(saveOptions) {
         return saveDashboard(angular.toJson, timefilter, dashboardStateManager, saveOptions)
           .then(function (id) {
             $scope.kbnTopNav.close('save');
@@ -310,7 +310,7 @@ app.directive('dashboardApp', function ($injector) {
             });
             return { error };
           });
-      };
+      }
 
       $scope.showFilterBar = () => filterBar.getFilters().length > 0 || !dashboardStateManager.getFullScreenMode();
 
@@ -341,7 +341,7 @@ app.directive('dashboardApp', function ($injector) {
             isTitleDuplicateConfirmed,
             onTitleDuplicate,
           };
-          return save(saveOptions).then(({id, error}) => {
+          return save(saveOptions).then(({ id, error }) => {
             // If the save wasn't successful, put the original values back.
             if (!id || error) {
               dashboardStateManager.setTitle(currentTitle);
