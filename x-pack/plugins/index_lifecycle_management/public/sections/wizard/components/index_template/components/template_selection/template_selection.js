@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, PureComponent } from 'react';
+import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
 
 import {
@@ -14,6 +14,7 @@ import {
   EuiFieldText,
   EuiDescribedFormGroup,
   EuiLink,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { ErrableFormRow } from '../../../../form_errors';
@@ -23,7 +24,7 @@ import {
   STRUCTURE_ALIAS_NAME,
 } from '../../../../../../store/constants';
 
-export class TemplateSelection extends PureComponent {
+export class TemplateSelection extends Component {
   static propTypes = {
     fetchIndexTemplates: PropTypes.func.isRequired,
     setSelectedIndexTemplate: PropTypes.func.isRequired,
@@ -35,9 +36,20 @@ export class TemplateSelection extends PureComponent {
     isShowingErrors: PropTypes.bool.isRequired,
   };
 
+  constructor(props) {
+    super(props);
+    this.state = {
+      isIncludingSystemIndices: false,
+    };
+  }
+
   componentWillMount() {
     this.props.fetchIndexTemplates();
   }
+
+  onChangeIncludingSystemIndices = e => {
+    this.setState({ isIncludingSystemIndices: e.target.checked });
+  };
 
   render() {
     const {
@@ -48,7 +60,6 @@ export class TemplateSelection extends PureComponent {
       setAliasName,
 
       bootstrapEnabled,
-      templateOptions,
       selectedIndexTemplateIndices,
       indexName,
       aliasName,
@@ -56,6 +67,15 @@ export class TemplateSelection extends PureComponent {
       errors,
       isShowingErrors,
     } = this.props;
+
+    const { isIncludingSystemIndices } = this.state;
+
+    const templateOptions = this.props.templateOptions.filter(option => {
+      if (option.value && option.value.startsWith('.') && !isIncludingSystemIndices) {
+        return false;
+      }
+      return true;
+    });
 
     return (
       <EuiDescribedFormGroup
@@ -72,6 +92,12 @@ export class TemplateSelection extends PureComponent {
           </p>
         }
       >
+        <EuiSwitch
+          label="Include system indices"
+          checked={isIncludingSystemIndices}
+          onChange={this.onChangeIncludingSystemIndices}
+        />
+        <EuiSpacer/>
         <ErrableFormRow
           label="Your existing templates"
           errorKey={STRUCTURE_TEMPLATE_NAME}
