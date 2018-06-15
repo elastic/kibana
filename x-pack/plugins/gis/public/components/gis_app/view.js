@@ -5,16 +5,16 @@
  */
 
 import React from 'react';
-import { KibanaMap } from './kibana_map';
-import { TMSSource } from '../sources/tms_source';
-import { EMSVectorSource } from '../sources/ems_vector_source';
-import { EMSTMSSource } from '../sources/ems_tms_source';
-import { KbnYmlTMSSource } from '../sources/kbnyml_tms_source';
-import { KbnYmlVectorSource } from '../sources/kbnyml_vector_source';
+import { KibanaMap } from '../map/view';
+import { TMSSource } from '../map/layers/sources/tms_source';
+import { EMSVectorSource } from '../map/layers/sources/ems_vector_source';
+import { EMSTMSSource } from '../map/layers/sources/ems_tms_source';
+import { KbnYmlTMSSource } from '../map/layers/sources/kbnyml_tms_source';
+import { KbnYmlVectorSource } from '../map/layers/sources/kbnyml_vector_source';
 
-import { TileLayer } from '../layers/tile_layer';
-import { VectorLayer } from '../layers/vector_layer';
-import { LayerControl } from './layer_control';
+import { TileLayer } from '../map/layers/tile_layer';
+import { VectorLayer } from '../map/layers/vector_layer';
+import { LayerControl } from '../layer_control/index';
 
 export class GISApp extends React.Component {
 
@@ -23,7 +23,6 @@ export class GISApp extends React.Component {
     this._kbnMap = null;
     this._layerControl = null;
   }
-
 
   async _createPlaceholders() {
 
