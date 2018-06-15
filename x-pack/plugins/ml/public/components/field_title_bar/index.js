@@ -6,7 +6,5 @@
 
 
 
-import './field_type_icon_directive';
+import './field_title_bar_directive';
 import './styles/main.less';
-
-export { FieldTypeIcon } from './field_type_icon';

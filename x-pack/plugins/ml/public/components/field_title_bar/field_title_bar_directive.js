@@ -9,32 +9,30 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { FieldTypeIcon } from './field_type_icon.js';
+import { FieldTitleBar } from './field_title_bar';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlFieldTypeIcon', function () {
+module.directive('mlFieldTitleBar', function () {
   return {
     restrict: 'E',
     replace: false,
     scope: {
-      tooltipEnabled: '=',
-      type: '='
+      card: '='
     },
     link: function (scope, element) {
-      scope.$watch('type', updateComponent);
+      scope.$watch('card', updateComponent);
 
       updateComponent();
 
       function updateComponent() {
         const props = {
-          tooltipEnabled: scope.tooltipEnabled,
-          type: scope.type
+          card: scope.card
         };
 
         ReactDOM.render(
-          React.createElement(FieldTypeIcon, props),
+          React.createElement(FieldTitleBar, props),
           element[0]
         );
       }
