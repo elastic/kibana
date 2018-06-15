@@ -33,7 +33,7 @@ describe('calculateLabel(metric, metrics)', () => {
     expect(calculateLabel({ type: 'count' })).to.equal('Count');
   });
 
-  it('returns "Calcuation" for a bucket script metric', () => {
+  it('returns "Calculation" for a bucket script metric', () => {
     expect(calculateLabel({ type: 'calculation' })).to.equal('Bucket Script');
   });
 
