@@ -16,20 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Client, Element } from 'webdriverio';
+import { Client, Element, RawResult } from 'webdriverio';
+import BasePage from './base_page';
 
-export default class BasePage {
-  private driver: Client<void>;
-
-  constructor(driver: any) {
-    this.driver = driver;
+export class PageRegion extends BasePage {
+  private root: string;
+  constructor(driver: Client<void>, root: string) {
+    super(driver);
+    this.root = root;
   }
 
-  public title(): string {
-    return '';
+  public findElement(selector: string): RawResult<Element> {
+    return this.driver.element(this.root).element(selector);
   }
-
-  public findElement(): Element {}
-  public findElements(): [Element] {}
-  public typeInto(): void {}
 }
