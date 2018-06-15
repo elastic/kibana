@@ -1,7 +1,11 @@
 @import "~ui/styles/variables";
 
-#spaceSelectorRoot, #spaceSelectorRoot .euiPanel {
+#spaceSelectorRootWrap, #spaceSelectorRoot, #spaceSelectorRoot .euiPanel {
   background-color: @globalColorLightestGray;
+}
+
+#spaceSelectorRootWrap {
+  flex-grow: 1;
 }
 .spaceSelector__page {
   padding: 0;
@@ -15,7 +19,7 @@
 .logoHeader {
   width: 100%;
   text-align: center;
-  
+
   .logoCircle {
     width: 80px;
     height: 80px;

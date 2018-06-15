@@ -86,7 +86,7 @@ exports[`it renders without crashing 1`] = `
         className="spaceCards"
       >
         <div
-          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceEvenly euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
         />
       </div>
     </div>

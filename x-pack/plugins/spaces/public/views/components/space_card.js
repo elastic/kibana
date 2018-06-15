@@ -8,10 +8,12 @@ import React from 'react';
 import {
   EuiCard,
   EuiText,
-  EuiAvatar,
   EuiSpacer,
 } from '@elastic/eui';
 import './space_card.less';
+import {
+  SpaceAvatar
+} from './space_avatar';
 
 export const SpaceCard = (props) => {
   const {
@@ -32,7 +34,7 @@ export const SpaceCard = (props) => {
 function renderSpaceTitle(space) {
   return (
     <div className="spaceCardTitle">
-      <EuiAvatar size="l" name={space.name} />
+      <SpaceAvatar space={space} size={"l"} />
       <EuiSpacer size="s" />
       <EuiText className="spaceCardTitle__name"><h3>{space.name}</h3></EuiText>
     </div>

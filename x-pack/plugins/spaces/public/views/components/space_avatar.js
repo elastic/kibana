@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import {
   EuiAvatar
 } from '@elastic/eui';
@@ -21,4 +22,9 @@ export const SpaceAvatar = (props) => {
       color={getSpaceColor(props.space)}
     />
   );
+};
+
+SpaceAvatar.propTypes = {
+  space: PropTypes.object.isRequired,
+  size: PropTypes.string,
 };
