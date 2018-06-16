@@ -269,9 +269,9 @@ export function screenshotsObservableFactory(server) {
           ),
           tap(() => logger.debug('waiting for elements or items count attribute; or not found to interrupt')),
           mergeMap(
-            browser => Rx.Observable.race(
-              Rx.Observable.from(waitForElementOrItemsCountAttribute(browser, layout)),
-              Rx.Observable.from(waitForNotFoundError(browser))
+            browser => Rx.race(
+              Rx.from(waitForElementOrItemsCountAttribute(browser, layout)),
+              Rx.from(waitForNotFoundError(browser))
             ),
             browser => browser
           ),
@@ -319,7 +319,7 @@ export function screenshotsObservableFactory(server) {
           )
         );
 
-        return Rx.Observable.race(screenshot$, exit$);
+        return Rx.race(screenshot$, exit$);
       }),
       first()
     );

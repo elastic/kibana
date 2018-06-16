@@ -77,7 +77,7 @@ export function observeLines(readable) {
       last(),
       mergeMap(({ buffer }) => (buffer ? [buffer] : [])),
       // if there were no lines, last() will error, so catch and complete
-      catchError(() => Rx.Observable.empty())
+      catchError(() => Rx.empty())
     )
   );
 }

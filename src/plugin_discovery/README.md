@@ -70,7 +70,7 @@ const {
   invalidVersionSpec$,
 } = findPluginSpecs(settings);
 
-Observable.merge(
+Rx.merge(
   pack$.pipe(
     tap(pluginPack => console.log('Found plugin pack', pluginPack))
   ),
