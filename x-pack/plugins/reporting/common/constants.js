@@ -13,3 +13,9 @@ export const API_BASE_URL = '/api/reporting';
 export const WHITELISTED_JOB_CONTENT_TYPES = [ 'application/json', 'application/pdf', 'text/csv' ];
 
 export const UI_SETTINGS_CUSTOM_PDF_LOGO = 'xpackReporting:customPdfLogo';
+
+/**
+ * The type name used within the Monitoring index to publish reporting stats.
+ * @type {string}
+ */
+export const KIBANA_REPORTING_TYPE = 'reporting_stats';

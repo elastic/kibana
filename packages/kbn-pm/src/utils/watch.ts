@@ -1,5 +1,33 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import * as Rx from 'rxjs';
-import { first, mapTo, delay, map, timeout, catchError, mergeMap, finalize } from 'rxjs/operators';
+import {
+  catchError,
+  delay,
+  finalize,
+  first,
+  map,
+  mapTo,
+  mergeMap,
+  timeout,
+} from 'rxjs/operators';
 
 /**
  * Number of milliseconds we wait before we fall back to the default watch handler.
@@ -15,7 +43,7 @@ const defaultHandlerReadinessTimeout = 2000;
 /**
  * Describes configurable watch options.
  */
-interface WatchOptions {
+interface IWatchOptions {
   /**
    * Number of milliseconds to wait before we fall back to default watch handler.
    */
@@ -34,7 +62,7 @@ function getWatchHandlers(
   {
     handlerDelay = defaultHandlerDelay,
     handlerReadinessTimeout = defaultHandlerReadinessTimeout,
-  }: WatchOptions
+  }: IWatchOptions
 ) {
   const typescriptHandler = buildOutput$.pipe(
     first(data => data.includes('$ tsc')),
@@ -44,7 +72,7 @@ function getWatchHandlers(
         mapTo('tsc')
       )
     )
-  )
+  );
 
   const webpackHandler = buildOutput$.pipe(
     first(data => data.includes('$ webpack')),
@@ -71,7 +99,7 @@ function getWatchHandlers(
 
 export function waitUntilWatchIsReady(
   stream: NodeJS.EventEmitter,
-  opts: WatchOptions = {}
+  opts: IWatchOptions = {}
 ) {
   const buildOutput$ = new Rx.Subject<string>();
   const onDataListener = (data: Buffer) =>
@@ -83,15 +111,16 @@ export function waitUntilWatchIsReady(
   stream.once('error', onErrorListener);
   stream.on('data', onDataListener);
 
-  return Rx.race(getWatchHandlers(buildOutput$, opts)).pipe(
-    mergeMap(whenReady => whenReady),
-    finalize(() => {
-      stream.removeListener('data', onDataListener);
-      stream.removeListener('end', onEndListener);
-      stream.removeListener('error', onErrorListener);
+  return Rx.race(getWatchHandlers(buildOutput$, opts))
+    .pipe(
+      mergeMap(whenReady => whenReady),
+      finalize(() => {
+        stream.removeListener('data', onDataListener);
+        stream.removeListener('end', onEndListener);
+        stream.removeListener('error', onErrorListener);
 
-      buildOutput$.complete();
-    })
-  )
+        buildOutput$.complete();
+      })
+    )
     .toPromise();
 }

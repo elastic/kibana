@@ -36,9 +36,13 @@ export function buildAnomalyTableItems(anomalyRecords, aggregationInterval) {
 
   // Fill out the remaining properties in each display record
   // for the columns to be displayed in the table.
-  return displayRecords.map((record) => {
+  const time = (new Date()).getTime();
+  return displayRecords.map((record, index) => {
     const source = record.source;
     const jobId = source.job_id;
+
+    // Identify each row with a unique ID which is used by the table for row expansion.
+    record.rowId = `${time}_${index}`;
 
     record.jobId = jobId;
     record.detectorIndex = source.detector_index;
@@ -64,27 +68,46 @@ export function buildAnomalyTableItems(anomalyRecords, aggregationInterval) {
       record.influencers = influencers;
     }
 
+    // Add fields to the display records for the actual and typical values.
+    // To ensure sorting in the EuiTable works correctly, add extra 'sort'
+    // properties which are single numeric values rather than the underlying arrays.
+    // These properties can be removed if EuiTable sorting logic can be customized
+    // - see https://github.com/elastic/eui/issues/425
     const functionDescription = source.function_description || '';
     const causes = source.causes || [];
     if (showActualForFunction(functionDescription) === true) {
       if (source.actual !== undefined) {
         record.actual = source.actual;
+        record.actualSort = getMetricSortValue(source.actual);
       } else {
         // If only a single cause, copy values to the top level.
         if (causes.length === 1) {
           record.actual = causes[0].actual;
+          record.actualSort = getMetricSortValue(causes[0].actual);
         }
       }
     }
     if (showTypicalForFunction(functionDescription) === true) {
       if (source.typical !== undefined) {
         record.typical = source.typical;
+        record.typicalSort = getMetricSortValue(source.typical);
       } else {
         // If only a single cause, copy values to the top level.
         if (causes.length === 1) {
           record.typical = causes[0].typical;
+          record.typicalSort = getMetricSortValue(causes[0].typical);
         }
       }
+    }
+
+    // Add a sortable property for the magnitude of the factor by
+    // which the actual value is different from the typical.
+    if (Array.isArray(record.actual) && record.actual.length === 1 &&
+      Array.isArray(record.typical) && record.typical.length === 1) {
+      const actualVal = Number(record.actual[0]);
+      const typicalVal = Number(record.typical[0]);
+      record.metricDescriptionSort = (actualVal > typicalVal) ?
+        actualVal / typicalVal : typicalVal / actualVal;
     }
 
     return record;
@@ -159,4 +182,11 @@ function aggregateAnomalies(anomalyRecords, interval) {
 
   return summaryRecords;
 
+}
+
+function getMetricSortValue(value) {
+  // Returns a sortable value for a metric field (actual and typical values)
+  // from the supplied value, which for metric functions will be a single
+  // valued array.
+  return (Array.isArray(value) && value.length > 0) ? value[0] : value;
 }

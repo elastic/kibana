@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { PersistedState } from 'ui/persisted_state';
 import { Embeddable } from 'ui/embeddable';
 import chrome from 'ui/chrome';
@@ -5,7 +24,13 @@ import _ from 'lodash';
 
 export class VisualizeEmbeddable extends Embeddable  {
   constructor({ onEmbeddableStateChanged, savedVisualization, editUrl, loader }) {
-    super();
+    super({
+      metadata: {
+        title: savedVisualization.title,
+        editUrl,
+        indexPattern: savedVisualization.vis.indexPattern
+      }
+    });
     this._onEmbeddableStateChanged = onEmbeddableStateChanged;
     this.savedVisualization = savedVisualization;
     this.loader = loader;
@@ -14,15 +39,6 @@ export class VisualizeEmbeddable extends Embeddable  {
     this.uiState = new PersistedState(parsedUiState);
 
     this.uiState.on('change', this._uiStateChangeHandler);
-
-    /**
-     * @type {EmbeddableMetadata}
-     */
-    this.metadata = {
-      title: savedVisualization.title,
-      editUrl,
-      indexPattern: this.savedVisualization.vis.indexPattern
-    };
   }
 
   _uiStateChangeHandler = () => {
@@ -82,6 +98,18 @@ export class VisualizeEmbeddable extends Embeddable  {
       this.timeRange = containerState.timeRange;
     }
 
+    // Check if filters has changed
+    if (containerState.filters !== this.filters) {
+      updatedParams.filters = containerState.filters;
+      this.filters = containerState.filters;
+    }
+
+    // Check if query has changed
+    if (containerState.query !== this.query) {
+      updatedParams.query = containerState.query;
+      this.query = containerState.query;
+    }
+
     const derivedPanelTitle = this.getPanelTitle(containerState);
     if (this.panelTitle !== derivedPanelTitle) {
       updatedParams.dataAttrs = {
@@ -103,6 +131,8 @@ export class VisualizeEmbeddable extends Embeddable  {
   render(domNode, containerState) {
     this.panelTitle = this.getPanelTitle(containerState);
     this.timeRange = containerState.timeRange;
+    this.query = containerState.query;
+    this.filters = containerState.filters;
 
     this.transferCustomizationsToUiState(containerState);
 
@@ -111,6 +141,8 @@ export class VisualizeEmbeddable extends Embeddable  {
       // Append visualization to container instead of replacing its content
       append: true,
       timeRange: containerState.timeRange,
+      query: containerState.query,
+      filters: containerState.filters,
       cssClass: `panel-content panel-content--fullWidth`,
       // The chrome is permanently hidden in "embed mode" in which case we don't want to show the spy pane, since
       // we deem that situation to be more public facing and want to hide more detailed information.

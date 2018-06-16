@@ -1,0 +1,84 @@
+[[saved-objects-api-find]]
+=== Find Objects
+
+experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+
+The find saved object API enables you to retrieve a paginated set of Kibana
+saved objects by various conditions.
+
+==== Request
+
+`GET /api/saved_objects/_find`
+
+==== Query Parameters
+
+`per_page` (optional)::
+  (number) The number of objects to return per page
+`page` (optional)::
+  (number) The page of objects to return
+`type` (optional)::
+  (array|string) The saved object type(s) that the response should be limited to
+`search` (optional)::
+  (string) A {ref}/query-dsl-simple-query-string-query.html[simple_query_string] Elasticsearch query to filter the objects in the response
+`search_fields` (optional)::
+  (array|string) The fields to perform the `simple_query_string` parsed query against
+`fields` (optional)::
+  (array|string) The fields to return in the response
+`sort_field` (optional)::
+  (string) The field on which the response will be sorted
+
+[NOTE]
+==============================================
+
+As objects change in Kibana, the results on each page of this response can
+change. This makes the `find` API suitable for traditional paginated results
+but not a reliable way to safely export large amounts of data.
+
+==============================================
+
+
+==== Examples
+
+The following example attempts to find index patterns with titles that start
+with `my`:
+
+[source,js]
+--------------------------------------------------
+GET api/saved_objects/_find?type=index-pattern&search_fields=title&search=my*
+--------------------------------------------------
+// KIBANA
+
+A successful call returns a response code of `200` and a response body
+containing a JSON structure similar to the following example:
+
+[source,js]
+--------------------------------------------------
+{
+  "total": 1,
+  "data": [
+    {
+      "id": "my-pattern",
+      "type": "index-pattern",
+      "version": 1,
+      "attributes": {
+        "title": "my-pattern-*"
+      }
+    }
+  ]
+}
+--------------------------------------------------
+
+[NOTE]
+.Multiple values for a parameter
+==============================================
+
+For parameters that can accept multiple values (e.g. `fields`), repeat the
+query parameter for each value:
+
+[source,js]
+--------------------------------------------------
+GET api/saved_objects/_find?fields=id&fields=title
+--------------------------------------------------
+// KIBANA
+
+==============================================

@@ -7,11 +7,9 @@
 import expect from 'expect.js';
 import Puid from 'puid';
 import sinon from 'sinon';
-import 'sinon-as-promised';
 import nodeCrypto from '@elastic/node-crypto';
 
 import { CancellationToken } from '../../../../server/lib/esqueue/helpers/cancellation_token';
-import { SavedObjectsClient } from  '../../../../../../../src/server/saved_objects/client/saved_objects_client.js';
 import { FieldFormat } from  '../../../../../../../src/ui/field_formats/field_format.js';
 import { FieldFormatsService } from  '../../../../../../../src/ui/field_formats/field_formats_service.js';
 import { createStringFormat } from  '../../../../../../../src/core_plugins/kibana/common/field_formats/types/string.js';
@@ -98,18 +96,12 @@ describe('CSV Execute Job', function () {
           get: configGetStub
         };
       },
-      savedObjectsClientFactory: (opts) => {
-        return new SavedObjectsClient({
-          index: '.kibana',
-          mappings: { rootType: { properties: {} } },
-          callCluster: opts.callCluster
-        });
+      savedObjects: {
+        getScopedSavedObjectsClient: sinon.stub()
       },
-      uiSettingsServiceFactory: () => {
-        return {
-          get: uiSettingsGetStub
-        };
-      },
+      uiSettingsServiceFactory: sinon.stub().returns({
+        get: uiSettingsGetStub
+      }),
       log: function () {}
     };
     mockServer.config().get.withArgs('xpack.reporting.encryptionKey').returns(encryptionKey);
@@ -117,12 +109,23 @@ describe('CSV Execute Job', function () {
     mockServer.config().get.withArgs('xpack.reporting.csv.scroll').returns({});
   });
 
-  describe('uiSettings', function () {
-    it('always calls callWithRequest with decrypted headers', async function () {
+  describe('savedObjects', function () {
+    it('calls getScopedSavedObjectsClient with request containing decrypted headers', async function () {
       const executeJob = executeJobFactory(mockServer);
       await executeJob({ headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } }, cancellationToken);
-      const requestMatch = sinon.match.has('headers', headers).and(sinon.match.has('path', sinon.match.string));
-      callWithRequestStub.alwaysCalledWith(requestMatch, sinon.match.any, sinon.match.any);
+      expect(mockServer.savedObjects.getScopedSavedObjectsClient.calledOnce).to.be(true);
+      expect(mockServer.savedObjects.getScopedSavedObjectsClient.firstCall.args[0].headers).to.be.eql(headers);
+    });
+  });
+
+  describe('uiSettings', function () {
+    it('passed scoped SavedObjectsClient to uiSettingsServiceFactory', async function () {
+      const returnValue = Symbol();
+      mockServer.savedObjects.getScopedSavedObjectsClient.returns(returnValue);
+      const executeJob = executeJobFactory(mockServer);
+      await executeJob({ headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } }, cancellationToken);
+      expect(mockServer.uiSettingsServiceFactory.calledOnce).to.be(true);
+      expect(mockServer.uiSettingsServiceFactory.firstCall.args[0].savedObjectsClient).to.be(returnValue);
     });
   });
 
@@ -370,7 +373,7 @@ describe('CSV Execute Job', function () {
       // that delays the Promise resolution so we have a chance to call cancellationToken.cancel().
       // Otherwise, we get into an endless loop, and don't have a chance to call cancel
       callWithRequestStub.restore();
-      callWithRequestStub = sinon.stub(clusterStub, 'callWithRequest', async function () {
+      callWithRequestStub = sinon.stub(clusterStub, 'callWithRequest').callsFake(async function () {
         await delay(1);
         return {
           hits: {

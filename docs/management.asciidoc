@@ -19,6 +19,8 @@ include::management/index-patterns.asciidoc[]
 
 include::management/managing-fields.asciidoc[]
 
+include::management/managing-indices.asciidoc[]
+
 include::management/advanced-options.asciidoc[]
 
 include::management/managing-saved-objects.asciidoc[]

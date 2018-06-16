@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
+  const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects([
     'security',
     'common',
@@ -136,7 +137,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('can filter on a visualization', async () => {
-        await PageObjects.dashboard.setTimepickerInDataRange();
+        await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
         await PageObjects.dashboard.filterOnPieSlice();
         const filters = await PageObjects.dashboard.getFilters();
         expect(filters.length).to.equal(1);
@@ -163,17 +164,12 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('does not show the visualization edit icon', async () => {
-        const editIconExists = await testSubjects.exists('dashboardPanelEditLink');
-        expect(editIconExists).to.be(false);
-      });
-
-      it('does not show the visualization move icon', async () => {
-        const moveIconExists = await testSubjects.exists('dashboardPanelMoveIcon');
-        expect(moveIconExists).to.be(false);
+        const editLinkExists = await dashboardPanelActions.editPanelActionExists();
+        expect(editLinkExists).to.be(false);
       });
 
       it('does not show the visualization delete icon', async () => {
-        const deleteIconExists = await testSubjects.exists('dashboardPanelRemoveIcon');
+        const deleteIconExists = await dashboardPanelActions.removePanelActionExists();
         expect(deleteIconExists).to.be(false);
       });
 

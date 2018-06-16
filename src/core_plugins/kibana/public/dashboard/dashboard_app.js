@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import angular from 'angular';
 import { uiModules } from 'ui/modules';
@@ -6,6 +25,8 @@ import { applyTheme } from 'ui/theme';
 import { toastNotifications } from 'ui/notify';
 
 import 'ui/query_bar';
+
+import { panelActionsStore } from './store/panel_actions_store';
 
 import { getDashboardTitle } from './dashboard_strings';
 import { DashboardViewMode } from './dashboard_view_mode';
@@ -19,10 +40,15 @@ import { VisualizeConstants } from '../visualize/visualize_constants';
 import { DashboardStateManager } from './dashboard_state_manager';
 import { saveDashboard } from './lib';
 import { showCloneModal } from './top_nav/show_clone_modal';
+import { showSaveModal } from './top_nav/show_save_modal';
+import { showAddPanel } from './top_nav/show_add_panel';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import * as filterActions from 'ui/doc_table/actions/filter';
 import { FilterManagerProvider } from 'ui/filter_manager';
 import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_factories_registry';
+import { DashboardPanelActionsRegistryProvider } from 'ui/dashboard_panel_actions/dashboard_panel_actions_registry';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
 import { DashboardViewportProvider } from './viewport/dashboard_viewport_provider';
 
@@ -53,12 +79,18 @@ app.directive('dashboardApp', function ($injector) {
   return {
     restrict: 'E',
     controllerAs: 'dashboardApp',
-    controller: function ($scope, $rootScope, $route, $routeParams, $location, getAppState, $compile, dashboardConfig, localStorage) {
+    controller: function ($scope, $rootScope, $route, $routeParams, $location, getAppState, dashboardConfig, localStorage) {
       const filterManager = Private(FilterManagerProvider);
       const filterBar = Private(FilterBarQueryFilterProvider);
       const docTitle = Private(DocTitleProvider);
       const notify = new Notifier({ location: 'Dashboard' });
       const embeddableFactories = Private(EmbeddableFactoriesRegistryProvider);
+      const panelActionsRegistry = Private(DashboardPanelActionsRegistryProvider);
+
+      panelActionsStore.initializeFromRegistry(panelActionsRegistry);
+
+      const savedObjectsClient = Private(SavedObjectsClientProvider);
+      const visTypes = Private(VisTypesRegistryProvider);
       $scope.getEmbeddableFactory = panelType => embeddableFactories.byName[panelType];
 
       const dash = $scope.dash = $route.current.locals.dash;
@@ -128,9 +160,6 @@ app.directive('dashboardApp', function ($injector) {
 
       timefilter.enableAutoRefreshSelector();
       timefilter.enableTimeRangeSelector();
-      dash.searchSource.highlightAll(true);
-      dash.searchSource.version(true);
-      courier.setRootSearchSource(dash.searchSource);
 
       updateState();
 
@@ -178,25 +207,6 @@ app.directive('dashboardApp', function ($injector) {
         $scope.refresh();
       };
 
-      // called by the saved-object-finder when a user clicks a vis
-      $scope.addVis = function (hit, showToast = true) {
-        dashboardStateManager.addNewPanel(hit.id, 'visualization');
-        if (showToast) {
-          toastNotifications.addSuccess({
-            title: 'Visualization was added to your dashboard',
-            'data-test-subj': 'addVisualizationToDashboardSuccess',
-          });
-        }
-      };
-
-      $scope.addSearch = function (hit) {
-        dashboardStateManager.addNewPanel(hit.id, 'search');
-        toastNotifications.addSuccess({
-          title: 'Saved search was added to your dashboard',
-          'data-test-subj': 'addSavedSearchToDashboardSuccess',
-        });
-      };
-
       $scope.$watch('model.hidePanelTitles', () => {
         dashboardStateManager.setHidePanelTitles($scope.model.hidePanelTitles);
       });
@@ -207,9 +217,6 @@ app.directive('dashboardApp', function ($injector) {
         dashboardStateManager.setDarkTheme($scope.model.darkTheme);
         updateTheme();
       });
-      $scope.$watch('model.description', () => dashboardStateManager.setDescription($scope.model.description));
-      $scope.$watch('model.title', () => dashboardStateManager.setTitle($scope.model.title));
-      $scope.$watch('model.timeRestore', () => dashboardStateManager.setTimeRestore($scope.model.timeRestore));
       $scope.indexPatterns = [];
 
       $scope.onPanelRemoved = (panelIndex) => {
@@ -269,8 +276,20 @@ app.directive('dashboardApp', function ($injector) {
         );
       };
 
-      $scope.save = function () {
-        return saveDashboard(angular.toJson, timefilter, dashboardStateManager)
+      /**
+       * Saves the dashboard.
+       *
+       * @param {object} [saveOptions={}]
+       * @property {boolean} [saveOptions.confirmOverwrite=false] - If true, attempts to create the source so it
+       * can confirm an overwrite if a document with the id already exists.
+       * @property {boolean} [saveOptions.isTitleDuplicateConfirmed=false] - If true, save allowed with duplicate title
+       * @property {func} [saveOptions.onTitleDuplicate] - function called if duplicate title exists.
+       * When not provided, confirm modal will be displayed asking user to confirm or cancel save.
+       * @return {Promise}
+       * @resolved {String} - The id of the doc
+       */
+      $scope.save = function (saveOptions) {
+        return saveDashboard(angular.toJson, timefilter, dashboardStateManager, saveOptions)
           .then(function (id) {
             $scope.kbnTopNav.close('save');
             if (id) {
@@ -294,7 +313,7 @@ app.directive('dashboardApp', function ($injector) {
 
       $scope.showAddPanel = () => {
         dashboardStateManager.setFullScreenMode(false);
-        $scope.kbnTopNav.open('add');
+        $scope.kbnTopNav.click(TopNavIds.ADD);
       };
       $scope.enterEditMode = () => {
         dashboardStateManager.setFullScreenMode(false);
@@ -305,24 +324,72 @@ app.directive('dashboardApp', function ($injector) {
         dashboardStateManager.setFullScreenMode(true);
       navActions[TopNavIds.EXIT_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.VIEW);
       navActions[TopNavIds.ENTER_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.EDIT);
+      navActions[TopNavIds.SAVE] = () => {
+        const currentTitle = dashboardStateManager.getTitle();
+        const currentDescription = dashboardStateManager.getDescription();
+        const currentTimeRestore = dashboardStateManager.getTimeRestore();
+        const onSave = ({ newTitle, newDescription, newCopyOnSave, newTimeRestore, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
+          dashboardStateManager.setTitle(newTitle);
+          dashboardStateManager.setDescription(newDescription);
+          dashboardStateManager.savedDashboard.copyOnSave = newCopyOnSave;
+          dashboardStateManager.setTimeRestore(newTimeRestore);
+          const saveOptions = {
+            confirmOverwrite: false,
+            isTitleDuplicateConfirmed,
+            onTitleDuplicate,
+          };
+          return $scope.save(saveOptions).then(id => {
+            // If the save wasn't successful, put the original values back.
+            if (!id) {
+              dashboardStateManager.setTitle(currentTitle);
+              dashboardStateManager.setDescription(currentDescription);
+              dashboardStateManager.setTimeRestore(currentTimeRestore);
+            }
+            return id;
+          });
+        };
+
+        showSaveModal({
+          onSave,
+          title: currentTitle,
+          description: currentDescription,
+          timeRestore: currentTimeRestore,
+          showCopyOnSave: dash.id ? true : false,
+        });
+      };
       navActions[TopNavIds.CLONE] = () => {
-        const currentTitle = $scope.model.title;
-        const onClone = (newTitle) => {
+        const currentTitle = dashboardStateManager.getTitle();
+        const onClone = (newTitle, isTitleDuplicateConfirmed, onTitleDuplicate) => {
           dashboardStateManager.savedDashboard.copyOnSave = true;
           dashboardStateManager.setTitle(newTitle);
-          return $scope.save().then(id => {
+          const saveOptions = {
+            confirmOverwrite: false,
+            isTitleDuplicateConfirmed,
+            onTitleDuplicate,
+          };
+          return $scope.save(saveOptions).then(id => {
             // If the save wasn't successful, put the original title back.
             if (!id) {
-              $scope.model.title = currentTitle;
-              // There is a watch on $scope.model.title that *should* call this automatically but
-              // angular is failing to trigger it, so do so manually here.
               dashboardStateManager.setTitle(currentTitle);
             }
             return id;
           });
         };
 
-        showCloneModal(onClone, currentTitle, $rootScope, $compile);
+        showCloneModal(onClone, currentTitle);
+      };
+      navActions[TopNavIds.ADD] = () => {
+        const addNewVis = () => {
+          kbnUrl.change(
+            `${VisualizeConstants.WIZARD_STEP_1_PAGE_PATH}?${DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM}`);
+          // Function is called outside of angular. Must apply digest cycle to trigger URL update
+          $scope.$apply();
+        };
+
+        const isLabsEnabled = config.get('visualize:enableLabs');
+        const listingLimit = config.get('savedObjects:listingLimit');
+
+        showAddPanel(savedObjectsClient, dashboardStateManager.addNewPanel, addNewVis, listingLimit, isLabsEnabled, visTypes);
       };
       updateViewMode(dashboardStateManager.getViewMode());
 
@@ -358,28 +425,15 @@ app.directive('dashboardApp', function ($injector) {
       }
 
       if ($route.current.params && $route.current.params[DashboardConstants.NEW_VISUALIZATION_ID_PARAM]) {
-        // Hide the toast message since they will already see a notification from saving the visualization,
-        // and one is sufficient (especially given how the screen jumps down a bit for each unique notification).
-        const showToast = false;
-        $scope.addVis({ id: $route.current.params[DashboardConstants.NEW_VISUALIZATION_ID_PARAM] }, showToast);
+        dashboardStateManager.addNewPanel($route.current.params[DashboardConstants.NEW_VISUALIZATION_ID_PARAM], 'visualization');
 
         kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
         kbnUrl.removeParam(DashboardConstants.NEW_VISUALIZATION_ID_PARAM);
       }
 
-      const addNewVis = function addNewVis() {
-        kbnUrl.change(
-          `${VisualizeConstants.WIZARD_STEP_1_PAGE_PATH}?${DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM}`);
-      };
-
+      // TODO remove opts once share has been converted to react
       $scope.opts = {
-        displayName: dash.getDisplayName(),
-        dashboard: dash,
-        save: $scope.save,
-        addVis: $scope.addVis,
-        addNewVis,
-        addSearch: $scope.addSearch,
-        timefilter: $scope.timefilter
+        dashboard: dash, // used in share.html
       };
     }
   };

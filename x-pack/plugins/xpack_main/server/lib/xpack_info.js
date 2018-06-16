@@ -6,7 +6,7 @@
 
 import { createHash } from 'crypto';
 import moment from 'moment';
-import { get } from 'lodash';
+import { get, has } from 'lodash';
 import { Poller } from '../../../../common/poller';
 import { XPackInfoLicense } from './xpack_info_license';
 
@@ -117,11 +117,17 @@ export class XPackInfo {
       });
 
       if (this._hasLicenseInfoChanged(response)) {
-        const licenseInfo = [
+        const licenseInfoParts = [
           `mode: ${get(response, 'license.mode')}`,
           `status: ${get(response, 'license.status')}`,
-          `expiry date: ${moment(get(response, 'license.expiry_date_in_millis'), 'x').format()}`
-        ].join(' | ');
+        ];
+
+        if (has(response, 'license.expiry_date_in_millis')) {
+          const expiryDate = moment(response.license.expiry_date_in_millis, 'x').format();
+          licenseInfoParts.push(`expiry date: ${expiryDate}`);
+        }
+
+        const licenseInfo = licenseInfoParts.join(' | ');
 
         this._log(
           ['license', 'info', 'xpack'],

@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { Config } from './config';
 import _ from 'lodash';
 import Joi from 'joi';
@@ -211,6 +230,79 @@ describe('lib/config/config', function () {
         expect(run).not.toThrow();
       });
 
+    });
+
+    describe('#getDefault(key)', function () {
+      let config;
+
+      beforeEach(function () {
+        config = new Config(schema);
+        config.set(data);
+      });
+
+      describe('dot notation key', function () {
+        it('should return undefined if there is no default', function () {
+          const hostDefault = config.getDefault('test.client.host');
+          expect(hostDefault).toBeUndefined();
+        });
+
+        it('should return default if specified', function () {
+          const typeDefault = config.getDefault('test.client.type');
+          expect(typeDefault).toBe('datastore');
+        });
+
+        it('should throw exception for unknown key', function () {
+          expect(() => {
+            config.getDefault('foo.bar');
+          }).toThrowErrorMatchingSnapshot();
+        });
+      });
+
+      describe('array key', function () {
+        it('should return undefined if there is no default', function () {
+          const hostDefault = config.getDefault(['test', 'client', 'host']);
+          expect(hostDefault).toBeUndefined();
+        });
+
+        it('should return default if specified', function () {
+          const typeDefault = config.getDefault(['test', 'client', 'type']);
+          expect(typeDefault).toBe('datastore');
+        });
+
+        it('should throw exception for unknown key', function () {
+          expect(() => {
+            config.getDefault(['foo', 'bar']);
+          }).toThrowErrorMatchingSnapshot();
+        });
+      });
+
+      it('object schema with no default should return default value for property', function () {
+        const noDefaultSchema = Joi.object().keys({
+          foo: Joi.array().items(Joi.string().min(1)).default(['bar'])
+        }).required();
+
+        const config = new Config(noDefaultSchema);
+        config.set({
+          foo: ['baz']
+        });
+
+        const fooDefault = config.getDefault('foo');
+        expect(fooDefault).toEqual(['bar']);
+      });
+
+      it('should return clone of the default', function () {
+        const schemaWithArrayDefault = Joi.object().keys({
+          foo: Joi.array().items(Joi.string().min(1)).default(['bar'])
+        }).default();
+
+        const config = new Config(schemaWithArrayDefault);
+        config.set({
+          foo: ['baz']
+        });
+
+        expect(config.getDefault('foo')).not.toBe(config.getDefault('foo'));
+        expect(config.getDefault('foo')).toEqual(config.getDefault('foo'));
+      });
     });
 
     describe('#extendSchema(key, schema)', function () {

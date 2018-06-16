@@ -48,7 +48,7 @@ function getSignature(object) {
 }
 
 describe('XPackInfo', () => {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
 
   let mockServer;
   let mockElasticsearchCluster;
@@ -188,7 +188,7 @@ describe('XPackInfo', () => {
           'mode: gold | status: active | expiry date: '
         )
       );
-      mockServer.log.reset();
+      mockServer.log.resetHistory();
 
       await xPackInfo.refreshNow();
 
@@ -212,7 +212,7 @@ describe('XPackInfo', () => {
     });
 
     it('restarts the poller.', async () => {
-      mockElasticsearchCluster.callWithInternalUser.reset();
+      mockElasticsearchCluster.callWithInternalUser.resetHistory();
 
       sandbox.clock.tick(1499);
       sinon.assert.notCalled(mockElasticsearchCluster.callWithInternalUser);
@@ -231,7 +231,7 @@ describe('XPackInfo', () => {
 
       sandbox.clock.tick(1499);
       await xPackInfo.refreshNow();
-      mockElasticsearchCluster.callWithInternalUser.reset();
+      mockElasticsearchCluster.callWithInternalUser.resetHistory();
 
       // Since poller has been restarted, it should not be called now.
       sandbox.clock.tick(1);

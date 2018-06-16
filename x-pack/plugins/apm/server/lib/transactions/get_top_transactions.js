@@ -19,7 +19,7 @@ export async function getTopTransactions({
   serviceName,
   setup
 }) {
-  const { start, end, client, config } = setup;
+  const { start, end, esFilterQuery, client, config } = setup;
 
   const duration = moment.duration(end - start);
   const minutes = duration.asMinutes();
@@ -74,6 +74,10 @@ export async function getTopTransactions({
       }
     }
   };
+
+  if (esFilterQuery) {
+    params.body.query.bool.filter.push(esFilterQuery);
+  }
 
   const resp = await client('search', params);
   const buckets = get(resp, 'aggregations.transactions.buckets', []);

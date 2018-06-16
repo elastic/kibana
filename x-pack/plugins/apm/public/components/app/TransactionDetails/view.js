@@ -8,10 +8,10 @@ import React from 'react';
 import { HeaderLarge } from '../../shared/UIComponents';
 import Transaction from './Transaction';
 import Distribution from './Distribution';
-import { DetailsChartsRequest } from '../../../store/reduxRequest/detailsCharts';
+import { DetailsChartsRequest } from '../../../store/reactReduxRequest/detailsCharts';
 import Charts from '../../shared/charts/TransactionCharts';
-import { TransactionDistributionRequest } from '../../../store/reduxRequest/transactionDistribution';
-import { TransactionDetailsRequest } from '../../../store/reduxRequest/transactionDetails';
+import { TransactionDistributionRequest } from '../../../store/reactReduxRequest/transactionDistribution';
+import { TransactionDetailsRequest } from '../../../store/reactReduxRequest/transactionDetails';
 
 function TransactionDetails({ urlParams }) {
   return (

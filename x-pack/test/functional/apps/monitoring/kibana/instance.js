@@ -34,12 +34,12 @@ export default function ({ getService, getPageObjects }) {
       await tearDown();
     });
 
-    it('Kibana Instance Summary Status shows correct info', async () => {
+    it('should have Instance Summary Status showing correct info', async () => {
       expect(await instance.getSummary()).to.eql({
         transportAddress: 'tsullivan.local:5601',
-        osFreeMemory: '1.5 GB',
-        version: '7.0.0-alpha1',
-        uptime: '3 minutes',
+        osFreeMemory: 'OS Free Memory: 1.5 GB',
+        version: 'Version: 7.0.0-alpha1',
+        uptime: 'Uptime: 3 minutes',
         health: 'Health: green',
       });
     });

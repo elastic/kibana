@@ -17,6 +17,7 @@ import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patter
 // ML Results dashboards.
 
 const DEFAULT_QUERY_SIZE = 500;
+const DEFAULT_MAX_EXAMPLES = 500;
 
 export function resultsServiceProvider(callWithRequest) {
 
@@ -28,13 +29,14 @@ export function resultsServiceProvider(callWithRequest) {
   // anomalies are categorization anomalies in mlcategory.
   async function getAnomaliesTableData(
     jobIds,
+    criteriaFields,
     influencers,
     aggregationInterval,
     threshold,
     earliestMs,
     latestMs,
-    maxRecords,
-    maxExamples) {
+    maxRecords = DEFAULT_QUERY_SIZE,
+    maxExamples = DEFAULT_MAX_EXAMPLES) {
 
     // Build the query to return the matching anomaly record results.
     // Add criteria for the time range, record score, plus any specified job IDs.
@@ -74,6 +76,15 @@ export function resultsServiceProvider(callWithRequest) {
       });
     }
 
+    // Add in term queries for each of the specified criteria.
+    criteriaFields.forEach((criteria) => {
+      boolCriteria.push({
+        term: {
+          [criteria.fieldName]: criteria.fieldValue
+        }
+      });
+    });
+
     // Add a nested query to filter for each of the specified influencers.
     if (influencers.length > 0) {
       boolCriteria.push({
@@ -108,7 +119,7 @@ export function resultsServiceProvider(callWithRequest) {
 
     const resp = await callWithRequest('search', {
       index: ML_RESULTS_INDEX_PATTERN,
-      size: maxRecords !== undefined ? maxRecords : DEFAULT_QUERY_SIZE,
+      size: maxRecords,
       body: {
         query: {
           bool: {

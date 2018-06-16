@@ -1,7 +1,7 @@
 {
-  "PUT _xpack/ml/anomaly_detectors/{job_id}": {
+  "PUT _xpack/ml/anomaly_detectors/{id}": {
     "methods": ["PUT"],
-    "patterns": ["_xpack/ml/anomaly_detectors/{job_id}"],
+    "patterns": ["_xpack/ml/anomaly_detectors/{id}"],
     "data_autocomplete_rules": {
       "analysis_config": {},
       "background_persist_interval": "",
@@ -14,53 +14,61 @@
       "renormalization_window_days": 1,
       "results_index_name": "",
       "results_retention_days": 1
-    }
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-put-job.html"
   },
-  "DELETE _xpack/ml/anomaly_detectors/{job_id}": {
+  "DELETE _xpack/ml/anomaly_detectors/{id}": {
     "methods": ["DELETE"],
-    "patterns": ["_xpack/ml/anomaly_detectors/{job_id}"]
+    "patterns": ["_xpack/ml/anomaly_detectors/{id}"],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-delete-job.html"
   },
-  "_xpack/ml/anomaly_detectors/{job_id}/_open": {
+  "_xpack/ml/anomaly_detectors/{id}/_open": {
     "methods": ["POST"],
-    "patterns": ["_xpack/ml/anomaly_detectors/{job_id}/_open"]
+    "patterns": ["_xpack/ml/anomaly_detectors/{id}/_open"],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-open-job.html"
   },
-  "_xpack/ml/anomaly_detectors/{job_id}/_close": {
+  "_xpack/ml/anomaly_detectors/{id}/_close": {
     "methods": ["POST"],
-    "patterns": ["_xpack/ml/anomaly_detectors/{job_id}/_close"]
+    "patterns": ["_xpack/ml/anomaly_detectors/{id}/_close"],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-close-job.html"
   },
-  "_xpack/ml/anomaly_detectors/{job_id}": {
+  "_xpack/ml/anomaly_detectors/{id}": {
     "methods": ["GET"],
     "patterns": [
       "_xpack/ml/anomaly_detectors/",
-      "_xpack/ml/anomaly_detectors/{job_id}",
+      "_xpack/ml/anomaly_detectors/{id}",
       "_xpack/ml/anomaly_detectors/_all"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-get-job.html"
   },
-  "_xpack/ml/anomaly_detectors/{job_id}/stats": {
+  "_xpack/ml/anomaly_detectors/{id}/stats": {
     "methods": ["GET"],
     "patterns": [
       "_xpack/ml/anomaly_detectors/stats",
-      "_xpack/ml/anomaly_detectors/{job_id}/stats",
+      "_xpack/ml/anomaly_detectors/{id}/stats",
       "_xpack/ml/anomaly_detectors/_all/stats"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-get-job-stats.html"
   },
-  "_xpack/ml/anomaly_detectors/{job_id}/_flush": {
+  "_xpack/ml/anomaly_detectors/{id}/_flush": {
     "methods": ["POST"],
-    "patterns": ["_xpack/ml/anomaly_detectors/{job_id}/_flush"],
+    "patterns": ["_xpack/ml/anomaly_detectors/{id}/_flush"],
     "url_params": {
       "advance_time": "",
       "calc_interim": ["true", "false"],
       "end": "",
       "start": ""
-    }
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-flush-job.html"
   },
-  "_xpack/ml/anomaly_detectors/{job_id}/_data": {
+  "_xpack/ml/anomaly_detectors/{id}/_data": {
     "methods": ["POST"],
-    "patterns": ["_xpack/ml/anomaly_detectors/{job_id}/_data"]
+    "patterns": ["_xpack/ml/anomaly_detectors/{id}/_data"],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-post-data.html"
   },
-  "_xpack/ml/anomaly_detectors/{job_id}/_update": {
+  "_xpack/ml/anomaly_detectors/{id}/_update": {
     "methods": ["POST"],
-    "patterns": ["_xpack/ml/anomaly_detectors/{job_id}/_update"],
+    "patterns": ["_xpack/ml/anomaly_detectors/{id}/_update"],
     "data_autocomplete_rules": {
       "analysis_limits": {},
       "background_persist_interval": "",
@@ -72,10 +80,12 @@
       "renormalization_window_days": 1,
       "results_index_name": "",
       "results_retention_days": 1
-    }
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-update-job.html"
   },
-  "_xpack/ml/anomaly_detectors/{job_id}/_forecast": {
+  "_xpack/ml/anomaly_detectors/{id}/_forecast": {
     "methods": ["POST"],
-    "patterns": ["_xpack/ml/anomaly_detectors/{job_id}/_forecast"]
+    "patterns": ["_xpack/ml/anomaly_detectors/{id}/_forecast"],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-forecast.html"
   }
 }

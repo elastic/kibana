@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 
 /**
@@ -5,6 +24,7 @@ import _ from 'lodash';
  * @property {DashboardViewMode} viewMode
  * @property {boolean} isFullScreenMode
  * @property {string|undefined} maximizedPanelId
+ * @property {string|undefined} getVisibleContextMenuPanelId
  */
 
 /**
@@ -103,6 +123,9 @@ export const getEmbeddableEditUrl = (dashboard, panelId) =>  {
   return embeddable && embeddable.initialized ? embeddable.metadata.editUrl : '';
 };
 
+
+export const getVisibleContextMenuPanelId = dashboard => dashboard.view.visibleContextMenuPanelId;
+
 /**
  * @param dashboard {DashboardState}
  * @return {boolean}
@@ -135,6 +158,10 @@ export const getMaximizedPanelId = dashboard => dashboard.view.maximizedPanelId;
  */
 export const getTimeRange = dashboard => dashboard.view.timeRange;
 
+export const getFilters = dashboard => dashboard.view.filters;
+
+export const getQuery = dashboard => dashboard.view.query;
+
 /**
  * @typedef {Object} DashboardMetadata
  * @property {string} title
@@ -161,10 +188,12 @@ export const getDescription = dashboard => dashboard.metadata.description;
  * This state object is specifically for communicating to embeddables and it's structure is not tied to
  * the redux tree structure.
  * @typedef {Object} ContainerState
+ * @property {DashboardViewMode} viewMode - edit or view mode.
  * @property {String} timeRange.to - either an absolute time range in utc format or a relative one (e.g. now-15m)
  * @property {String} timeRange.from - either an absolute time range in utc format or a relative one (e.g. now-15m)
  * @property {Object} embeddableCustomization
  * @property {boolean} hidePanelTitles
+ * @property {boolean} isPanelExpanded
  */
 
 /**
@@ -180,9 +209,13 @@ export const getContainerState = (dashboard, panelId) => {
       to: time.to,
       from: time.from,
     },
+    filters: getFilters(dashboard),
+    query: getQuery(dashboard),
     embeddableCustomization: _.cloneDeep(getEmbeddableCustomization(dashboard, panelId) || {}),
     hidePanelTitles: getHidePanelTitles(dashboard),
     customTitle: getPanel(dashboard, panelId).title,
+    viewMode: getViewMode(dashboard),
+    isPanelExpanded: getMaximizedPanelId(dashboard) === panelId,
   };
 };
 
