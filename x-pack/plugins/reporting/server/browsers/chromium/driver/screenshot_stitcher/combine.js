@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import $streamToObservable from 'stream-to-observable';
+import $streamToObservable from '@samverschueren/stream-to-observable';
 import { PNG } from 'pngjs';
 import * as Rx from 'rxjs';
 import { mergeMap, reduce, tap, switchMap, toArray, map } from 'rxjs/operators';
