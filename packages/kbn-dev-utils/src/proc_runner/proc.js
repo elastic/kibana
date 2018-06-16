@@ -119,7 +119,7 @@ export function createProc(name, { cmd, args, cwd, env, stdin, log }) {
       );
 
       return Rx.race(exit$, error$);
-    }).share();
+    }).pipe(share());
 
     _outcomePromise = Rx.merge(
       this.lines$.pipe(ignoreElements()),
