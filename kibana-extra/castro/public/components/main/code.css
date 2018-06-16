@@ -1,0 +1,35 @@
+
+.code .comment {
+  color: #998;
+  font-style: italic;
+}
+
+
+
+.string {
+  color: #DD0A73;
+}
+
+.numeric,
+.variable {
+  color: #00A69B;
+}
+.keyword,
+.primitive,
+.modifier {
+  color: #333;
+  font-weight: bold;
+}
+
+.type,
+.class  {
+  color: #0079a5;
+  font-weight: bold;
+}
+
+
+
+
+.parameter {
+  color: inherit;
+}

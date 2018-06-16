@@ -15,6 +15,7 @@ message Entry {
     string path = 1;
     string blob = 2;
     bool isBinary = 3;
+    string html = 4;
 }
 
 message Person {

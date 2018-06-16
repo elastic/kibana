@@ -11,9 +11,13 @@ import {
     EuiDescriptionList,
     EuiAccordion,
     EuiCodeBlock,
+    EuiCode,
     EuiSpacer
 } from "@elastic/eui";
+
 import {ICommit, IEntry} from '../../../common/proto'
+
+import Code from './code'
 
 interface MainProps {
     title: String,
@@ -60,8 +64,9 @@ export class Main extends React.Component<MainProps, MainState> {
                     description: data.message
                 }
             ];
+            let entries = data.entries || [];
 
-            this.setState({commitInfo, entries: data.entries || []});
+            this.setState({commitInfo, entries: entries});
         });
     }
 
@@ -88,6 +93,8 @@ export class Main extends React.Component<MainProps, MainState> {
                                 style={{maxWidth: '800px'}}
                             />
                             <EuiSpacer size="xl"/>
+                            <Code httpClient={this.props.httpClient}/>
+                            <EuiSpacer size="xl"/>
                             <EuiTitle>
                                 <h2>Changed files</h2>
                             </EuiTitle>
@@ -99,10 +106,10 @@ export class Main extends React.Component<MainProps, MainState> {
                                         key={"fid" + idx}
                                         buttonContent={entry.path}
                                     >
-                                        <EuiCodeBlock language="javascript">
-                                            {entry.blob}
-                                        </EuiCodeBlock>
-
+                                        {
+                                            entry.html &&
+                                            <EuiCode dangerouslySetInnerHTML={{ __html: entry.html }} />
+                                        }
                                     </EuiAccordion>
                                 )
                             }

@@ -33,9 +33,9 @@
     "eslint-plugin-prefer-object-spread": "^1.2.1",
     "eslint-plugin-react": "^7.0.1",
     "expect.js": "^0.3.1"
-
   },
   "dependencies": {
+    "highlights": "^3.1.1",
     "nodegit": "^0.22.1",
     "protobufjs": "^6.8.6"
   }

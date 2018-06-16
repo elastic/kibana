@@ -2,6 +2,9 @@ import {TreeEntry} from "nodegit";
 import * as Hapi from 'hapi';
 import {Commit} from '../../common/proto'
 
+import {render, computeRanges, tokenizeLines} from '../highlights';
+
+
 const Git = require("nodegit");
 const Path = require("path");
 
@@ -22,11 +25,20 @@ async function getHeadCommit(): Promise<Commit> {
     const walker = tree.walk(true);
     walker.on("entry", async (entry: TreeEntry) => {
         const blob = await entry.getBlob();
-        result.entries.push({
+        const isBinary = blob.isBinary() === 1;
+        let e = {
             path: entry.path(),
-            isBinary: blob.isBinary() === 1,
-            blob: blob.isBinary() === 1 ? "binary" : blob.toString()
-        })
+            isBinary: isBinary,
+            blob: isBinary ? "binary" : blob.toString()
+        };
+        if(!isBinary) {
+            const lines = tokenizeLines(e.path, e.blob);
+            computeRanges(lines);
+            const result = render(lines);
+            e.html = result;
+        }
+
+        result.entries.push(e)
     });
     walker.start();
     return await (new Promise<Commit>(function (resolve, reject) {
@@ -44,4 +56,16 @@ export default function (server: Hapi.Server) {
             getHeadCommit().then((result: Commit) => reply(result))
         }
     });
+    server.route({
+        path: '/api/castro/highlight/{path}',
+        method: 'POST',
+        handler(req: Hapi.Request, reply: any) {
+            const { content }= req.payload;
+            const path = req.params.path;
+            const lines = tokenizeLines(path, content);
+            computeRanges(lines);
+            const result = render(lines);
+            reply(result)
+        }
+    })
 }
