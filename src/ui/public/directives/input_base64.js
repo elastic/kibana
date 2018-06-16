@@ -25,7 +25,7 @@ import { map, switchMap, share } from 'rxjs/operators';
 const multipleUsageErrorMessage = 'Cannot use input-base-sixty-four directive on input with `multiple` attribute';
 
 const createFileContent$ = (file) => {
-  return Rx.create(observer => {
+  return Rx.Observable.create(observer => {
     const reader = new FileReader();
     reader.onerror = (err) => {
       observer.error(err);

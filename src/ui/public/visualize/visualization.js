@@ -82,7 +82,7 @@ uiModules
 
         $scope.vis.initialized = true;
 
-        const render$ = Rx.create(observer => {
+        const render$ = Rx.Observable.create(observer => {
           $scope.$on('render', () => {
             observer.next({
               vis: $scope.vis,

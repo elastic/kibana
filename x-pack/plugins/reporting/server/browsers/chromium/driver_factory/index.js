@@ -30,7 +30,7 @@ export class HeadlessChromiumDriverFactory {
   type = 'chromium';
 
   create({ bridgePort, viewport }) {
-    return Rx.create(async observer => {
+    return Rx.Observable.create(async observer => {
       const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-'));
       const chromiumArgs = args({
         userDataDir,
