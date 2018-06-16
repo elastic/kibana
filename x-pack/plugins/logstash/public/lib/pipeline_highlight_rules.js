@@ -7,6 +7,8 @@
 import ace from 'ace';
 // import { isValidElement } from 'react';
 
+// TODO: allow strings for attribute names
+
 const { TextHighlightRules } = ace.acequire('ace/mode/text_highlight_rules');
 
 const openBraceRegex = /(\{)/;
@@ -267,14 +269,26 @@ export class PipelineHighlightRules extends TextHighlightRules {
         },
         {
           token: 'control',
-          regex: /if/,
+          regex: /(if|else ([\s]+)?if)/,
           next: push('branch')
+        },
+        {
+          token: 'control',
+          regex: /(else)/,
+          next: push('else')
         },
         {
           token: 'plugin',
           regex: /[a-zA-Z0-9_-]+/,
           next: push('plugin')
         }
+      ],
+      else: [
+        {
+          token: 'brace',
+          regex: openBraceRegex,
+          next: popSingle(['else'], ['branch', 'branchOrPlugin'])
+        },
       ],
       branch: [
         getCommentRule(),
