@@ -92,8 +92,8 @@ export default class ChoroplethLayer extends KibanaMapLayer {
           mouseover: () => {
             const tooltipContents = this._tooltipFormatter(feature);
             if (!location) {
-              const leafletGeojon = L.geoJson(feature);
-              location = leafletGeojon.getBounds().getCenter();
+              const leafletGeojson = L.geoJson(feature);
+              location = leafletGeojson.getBounds().getCenter();
             }
             this.emit('showTooltip', {
               content: tooltipContents,
