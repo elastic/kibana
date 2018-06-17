@@ -87,7 +87,7 @@ module.controller('MlDetectorFilterModal', function ($scope, $modalInstance, par
       value_list: []
     };
   } else {
-    // edting an existing filter
+    // editing an existing filter
     $scope.editMode = true;
     $scope.filter = params.filter;
     $scope.title = 'Edit filter';
