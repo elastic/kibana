@@ -621,7 +621,7 @@ More detail and specific examples can be found in the included HTML file.
 							arrPoly = [[0, 0], [p1X, p1Y], [p2X, p2Y], [p3X, p3Y], [p4X, p4Y], [p5X, p5Y]],
 							arrPoint = [x, y];
 
-						// TODO: perhaps do some mathmatical trickery here with the Y-coordinate to compensate for pie tilt?
+						// TODO: perhaps do some mathematical trickery here with the Y-coordinate to compensate for pie tilt?
 
 						if (isPointInPoly(arrPoly, arrPoint)) {
 							ctx.restore();
