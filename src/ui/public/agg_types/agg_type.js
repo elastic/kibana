@@ -70,7 +70,7 @@ function AggType(config) {
    * Describes if this aggType creates data that is ordered, and if that ordered data
    * is some sort of time series.
    *
-   * If the aggType does not create ordered data, set this to something "falsey".
+   * If the aggType does not create ordered data, set this to something "falsy".
    *
    * If this does create orderedData, then the value should be an object.
    *
