@@ -64,7 +64,7 @@ describe('$executor service', () => {
     expect($timeout.callCount).to.equal(1);
   });
 
-  it('should execute function if ingorePause is passed (interval set to 1000ms)', (done) => {
+  it('should execute function if ignorePause is passed (interval set to 1000ms)', (done) => {
     timefilter.refreshInterval.value = 1000;
     executor.register({ execute: () => Promise.resolve().then(() => done(), done) });
     executor.start({ ignorePaused: true });
