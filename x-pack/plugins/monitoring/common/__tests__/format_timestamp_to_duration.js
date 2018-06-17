@@ -19,8 +19,8 @@ describe('formatTimestampToDuration', () => {
   describe('format timestamp to duration - time since', () => {
     it('should format timstamp to human-readable duration', () => {
       // time inputs are a few "moments" extra from the time advertised by name
-      const fiftynineSeconds = getTestTime().subtract(59, 'seconds');
-      expect(formatTimestampToDuration(fiftynineSeconds, CALCULATE_DURATION_SINCE, getTestTime())).to.be('59 seconds');
+      const fiftyNineSeconds = getTestTime().subtract(59, 'seconds');
+      expect(formatTimestampToDuration(fiftyNineSeconds, CALCULATE_DURATION_SINCE, getTestTime())).to.be('59 seconds');
 
       const fiveMins = getTestTime().subtract(5, 'minutes').subtract(30, 'seconds');
       expect(formatTimestampToDuration(fiveMins, CALCULATE_DURATION_SINCE, getTestTime())).to.be('5 min');
@@ -48,8 +48,8 @@ describe('formatTimestampToDuration', () => {
   describe('format timestamp to duration - time until', () => {
     it('should format timstamp to human-readable duration', () => {
       // time inputs are a few "moments" extra from the time advertised by name
-      const fiftynineSeconds = getTestTime().add(59, 'seconds');
-      expect(formatTimestampToDuration(fiftynineSeconds, CALCULATE_DURATION_UNTIL, getTestTime())).to.be('59 seconds');
+      const fiftyNineSeconds = getTestTime().add(59, 'seconds');
+      expect(formatTimestampToDuration(fiftyNineSeconds, CALCULATE_DURATION_UNTIL, getTestTime())).to.be('59 seconds');
 
       const fiveMins = getTestTime().add(10, 'minutes');
       expect(formatTimestampToDuration(fiveMins, CALCULATE_DURATION_UNTIL, getTestTime())).to.be('10 min');
