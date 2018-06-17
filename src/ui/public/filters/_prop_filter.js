@@ -20,7 +20,7 @@
 import _ from 'lodash';
 
 /**
- * Filters out a list by a given filter. This is currently used to impelment:
+ * Filters out a list by a given filter. This is currently used to implement:
  *   - fieldType filters a list of fields by their type property
  *   - aggFilter filters a list of aggs by their name property
  *
