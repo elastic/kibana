@@ -21,7 +21,7 @@ const globalLoadPath = [];
 function getPath(startAt = 0) {
   return globalLoadPath
     .slice(startAt)
-    .map(step => step.descrption)
+    .map(step => step.description)
     .join(' -> ');
 }
 
@@ -37,25 +37,25 @@ function addPathToMessage(message, startAt) {
  *
  *  @param  {Any} ident identity of this load step, === compared
  *                         to identities of previous steps to find circles
- *  @param  {String} descrption description of this step
+ *  @param  {String} description description of this step
  *  @param  {Function} load function that executes this step
  *  @return {Any} the value produced by load()
  */
-export function loadTracer(ident, descrption, load) {
+export function loadTracer(ident, description, load) {
   const isCircular = globalLoadPath.find(step => step.ident === ident);
   if (isCircular) {
-    throw new Error(addPathToMessage(`Circular reference to "${descrption}"`));
+    throw new Error(addPathToMessage(`Circular reference to "${description}"`));
   }
 
   try {
-    globalLoadPath.unshift({ ident, descrption });
+    globalLoadPath.unshift({ ident, description });
     return load();
   } catch (err) {
     if (err.__fromLoadTracer) {
       throw err;
     }
 
-    const wrapped = new Error(addPathToMessage(`Failure to load ${descrption}`, 1));
+    const wrapped = new Error(addPathToMessage(`Failure to load ${description}`, 1));
     wrapped.stack = `${wrapped.message}\n\n  Original Error: ${err.stack}`;
     wrapped.__fromLoadTracer = true;
     throw wrapped;
