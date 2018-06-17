@@ -35,7 +35,7 @@ export default function HitSortFnFactory() {
    *       _id: i,
    *       _source: {},
    *       sort: [
-   *         // all values used to sort, in the order of precidance
+   *         // all values used to sort, in the order of precedence
    *       ]
    *     }
    *   ]
