@@ -181,7 +181,7 @@ export async function suggest(expression, functionList, Parser, cursorPosition, 
     let message;
     try {
       // The grammar will throw an error containing a message if the expression is formatted
-      // correctly and is prepared to accept suggestions. If the expression is not formmated
+      // correctly and is prepared to accept suggestions. If the expression is not formatted
       // correctly the grammar will just throw a regular PEG SyntaxError, and this JSON.parse
       // attempt will throw an error.
       message = JSON.parse(e.message);
