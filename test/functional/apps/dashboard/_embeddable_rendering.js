@@ -75,7 +75,7 @@ export default function ({ getService, getPageObjects }) {
       await dashboardExpect.savedSearchRowCount(50);
     });
 
-    it('goal and guage render', async () => {
+    it('goal and gauge render', async () => {
       await dashboardExpect.goalAndGuageLabelsExist(['63%', '56%', '11.915 GB']);
     });
 
@@ -103,7 +103,7 @@ export default function ({ getService, getPageObjects }) {
       await dashboardExpect.timelionLegendCount(0);
     });
 
-    it('tsvb guage renders', async () => {
+    it('tsvb gauge renders', async () => {
       const tsvbGuageExists = await find.existsByCssSelector('.thorHalfGauge');
       expect(tsvbGuageExists).to.be(true);
     });
