@@ -57,7 +57,7 @@ MetricAggType.prototype.getValue = function (agg, bucket) {
  * number
  *
  * @param  {agg} agg - the agg to pick a format for
- * @return {FieldFromat}
+ * @return {FieldFormat}
  */
 MetricAggType.prototype.getFormat = function (agg) {
   const field = agg.getField();

@@ -178,7 +178,7 @@ function AggType(config) {
  * number
  *
  * @param  {agg} agg - the agg to pick a format for
- * @return {FieldFromat}
+ * @return {FieldFormat}
  */
 AggType.prototype.getFormat = function (agg) {
   const field = agg.getField();
