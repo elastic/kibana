@@ -144,7 +144,7 @@ function pickPlacement(prop, pos, overflow, prev, pref, fallback, placement) {
   }
 
   // if we don't find one that doesn't overflow, use
-  // the first choice and offset based on overflo
+  // the first choice and offset based on overflow
   if (value == null) {
     dir = dirs[0];
 
