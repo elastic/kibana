@@ -26,7 +26,7 @@ import _ from 'lodash';
 export default function average(dataTuples, targetTuples) {
 
   // Phase 1: Downsample
-  // We nessecarily won't well match the dataSource here as we don't know how much data
+  // We necessarily won't well match the dataSource here as we don't know how much data
   // they had when creating their own average
   const resultTimes = _.pluck(targetTuples, 0);
   const dataTuplesQueue = _.clone(dataTuples);
