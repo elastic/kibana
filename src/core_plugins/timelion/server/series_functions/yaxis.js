@@ -39,7 +39,7 @@ export default new Chainable('yaxis', {
     {
       name: 'yaxis',
       types: ['number', 'null'],
-      help: 'The numbered y-axis to plot this series on, eg .yaxis(2) for a 2nd y-axis.'
+      help: 'The numbered y-axis to plot this series on, e.g., .yaxis(2) for a 2nd y-axis.'
     },
     {
       name: 'min',

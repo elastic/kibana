@@ -28,7 +28,7 @@ export default function nearest(dataTuples, targetTuples) {
     let i = 0;
     while (i < dataTuples.length - 1 &&
       (Math.abs(dataTuples[i + 1][0] - time) < Math.abs(dataTuples[i][0] - time) ||
-       // TODO: Certain offset= args can cause buckets with duplicate times, eg, offset=-1M
+       // TODO: Certain offset= args can cause buckets with duplicate times, e.g., offset=-1M
        // check for that, and only use the last of the duplicates. The reason this happens?
        // What is 1M before Mar 30th? What about 1M before Mar 31st? Both are the last day
        // in Feb. Something has to be chucked. If offsetting by M user might want to use

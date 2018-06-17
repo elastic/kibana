@@ -404,7 +404,7 @@ Please make sure you have signed the [Contributor License Agreement](http://www.
 
 ## Submitting a Pull Request
 
-Push your local changes to your forked copy of the repository and submit a Pull Request. In the Pull Request, describe what your changes do and mention the number of the issue where discussion has taken place, eg “Closes #123″.
+Push your local changes to your forked copy of the repository and submit a Pull Request. In the Pull Request, describe what your changes do and mention the number of the issue where discussion has taken place, e.g., “Closes #123″.
 
 Always submit your pull against `master` unless the bug is only present in an older version. If the bug affects both `master` and another branch say so in your pull.
 
