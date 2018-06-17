@@ -221,7 +221,7 @@ uiModules
         function initDefaultFormat() {
           const def = Object.create(fieldFormats.getDefaultType(self.field.type));
 
-          // explicitly set to undefined to prevent inheritting the prototypes id
+          // explicitly set to undefined to prevent inheriting the prototypes id
           def.id = undefined;
           def.resolvedTitle = def.title;
           def.title = '- default - ';
