@@ -64,7 +64,7 @@ class MarkdownEditor extends Component {
     const rows = [];
     const rawFormatter = tickFormatter('0.[0000]');
 
-    const createPrimativeRow = key => {
+    const createPrimitiveRow = key => {
       const snippet = `{{ ${key} }}`;
       let value = _.get(variables, key);
       if (/raw$/.test(key)) value = rawFormatter(value);
@@ -106,7 +106,7 @@ class MarkdownEditor extends Component {
         } else if (_.isObject(obj[name])) {
           walk(obj[name], path.concat(name));
         } else {
-          createPrimativeRow(path.concat(name).join('.'));
+          createPrimitiveRow(path.concat(name).join('.'));
         }
       }
     }
