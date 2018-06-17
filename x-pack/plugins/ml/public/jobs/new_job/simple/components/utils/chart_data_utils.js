@@ -178,13 +178,13 @@ export function ChartDataUtilsProvider(Private, timefilter) {
     // on the highest value multiplied by an irrational number, to minimize the chances
     // of the highestValue not corresponding to the full quota of decimal places
     // when formatted e.g. 12.340KB would be formatted to only 2 decimal places 12.34KB
-    const textCheckMultipler = 1 + (Math.sqrt(2) / 100);
+    const textCheckMultiplier = 1 + (Math.sqrt(2) / 100);
     _.each(chartData.detectors, (detector) => {
       let longestWidthForDetector = 0;
       if (detector.fieldFormat !== undefined) {
         const longestTextForDetector = detector.fieldFormat.convert(detector.highestValue, 'text');
         longestWidthForDetector = calculateTextWidth(longestTextForDetector, false);
-        const longestTextCheck = detector.fieldFormat.convert(detector.highestValue * textCheckMultipler, 'text');
+        const longestTextCheck = detector.fieldFormat.convert(detector.highestValue * textCheckMultiplier, 'text');
         const longestWidthCheck = calculateTextWidth(longestTextCheck, false);
         longestWidthForDetector = Math.max(longestWidthForDetector, longestWidthCheck);
       } else {

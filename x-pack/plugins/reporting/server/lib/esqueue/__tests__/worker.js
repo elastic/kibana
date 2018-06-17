@@ -89,7 +89,7 @@ describe('Worker class', function () {
       expect(init).to.throwException(/opts\.interval.+number/i);
     });
 
-    it('should throw with an invalid opts.intervalErrorMultipler', function () {
+    it('should throw with an invalid opts.intervalErrorMultiplier', function () {
       const init = () => new Worker(mockQueue, 'test', noop, { interval: 1 });
       expect(init).to.throwException(/opts\.intervalErrorMultiplier.+number/i);
     });
