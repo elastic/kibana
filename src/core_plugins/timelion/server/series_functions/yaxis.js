@@ -126,7 +126,7 @@ export default new Chainable('yaxis', {
 
         if (unitType === 'percent') {
           // jquery.flot uses axis.tickDecimals to generate tick values
-          // need 2 extra decimal places to perserve percision when percent shifts value to left
+          // need 2 extra decimal places to perserve precision when percent shifts value to left
           myAxis.units.tickDecimalsShift = 2;
           if (tickDecimals) {
             myAxis.tickDecimals += myAxis.units.tickDecimalsShift;
