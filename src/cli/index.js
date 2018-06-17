@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const yargs = require('yargs');
+const flatten = require('lodash.flatten');
 const initSteps = require('./steps');
 const {
   getCombinedConfig,
@@ -80,7 +81,9 @@ async function initYargs() {
   };
 
   const options = {
-    branches: cliArgs.branch,
+    branches: flatten(cliArgs.branch.map(b => b.toString().split(','))).filter(
+      b => !!b
+    ),
     sha: cliArgs.sha
   };
 

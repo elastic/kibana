@@ -58,6 +58,7 @@
     "find-up": "^2.1.0",
     "inquirer": "^6.0.0",
     "joi": "^13.4.0",
+    "lodash.flatten": "^4.4.0",
     "lodash.get": "^4.4.2",
     "lodash.isempty": "^4.4.0",
     "mkdirp": "^0.5.1",
