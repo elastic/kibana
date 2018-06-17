@@ -126,7 +126,7 @@ dataTypesArray.forEach(function (dataType) {
       function checkChart(chart) {
         const rect = $(chart.chartEl).find('.series rect').get(0);
 
-        // check for existance of stuff and things
+        // check for existence of stuff and things
         return {
           click: !!rect.__onclick,
           mouseOver: !!rect.__onmouseover,
