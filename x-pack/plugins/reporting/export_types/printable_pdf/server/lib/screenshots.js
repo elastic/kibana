@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Rx from 'rxjs/Rx';
+import { defer, from, race } from 'rxjs';
 import path from 'path';
 import fs from 'fs';
 import moment from 'moment';
@@ -232,10 +232,9 @@ export function screenshotsObservableFactory(server) {
 
   return function screenshotsObservable(url, headers, layout) {
 
-    return Rx.Observable
-      .defer(async () => {
-        return await getPort();
-      })
+    return defer(async () => {
+      return await getPort();
+    })
       .mergeMap(bridgePort => {
         logger.debug(`Creating browser driver factory`);
         return browserDriverFactory.create({
@@ -271,9 +270,9 @@ export function screenshotsObservableFactory(server) {
           )
           .do(() => logger.debug('waiting for elements or items count attribute; or not found to interrupt'))
           .mergeMap(
-            browser => Rx.Observable.race(
-              Rx.Observable.from(waitForElementOrItemsCountAttribute(browser, layout)),
-              Rx.Observable.from(waitForNotFoundError(browser))
+            browser => race(
+              from(waitForElementOrItemsCountAttribute(browser, layout)),
+              from(waitForNotFoundError(browser))
             ),
             browser => browser
           )
@@ -320,7 +319,7 @@ export function screenshotsObservableFactory(server) {
             ({ timeRange }, screenshots) => ({ timeRange, screenshots })
           );
 
-        return Rx.Observable.race(screenshot$, exit$);
+        return race(screenshot$, exit$);
       })
       .first();
   };

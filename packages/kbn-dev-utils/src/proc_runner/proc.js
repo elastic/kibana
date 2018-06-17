@@ -20,7 +20,7 @@
 import execa from 'execa';
 import { statSync } from 'fs';
 
-import Rx from 'rxjs/Rx';
+import { defer, fromEvent, merge, race, throwError } from 'rxjs';
 import { gray } from 'chalk';
 
 import treeKill from 'tree-kill';
@@ -82,16 +82,16 @@ export function createProc(name, { cmd, args, cwd, env, stdin, log }) {
   return new class Proc {
     name = name;
 
-    lines$ = Rx.Observable.merge(
+    lines$ = merge(
       observeLines(childProcess.stdout),
       observeLines(childProcess.stderr)
     )
       .do(line => log.write(` ${gray('proc')}  [${gray(name)}] ${line}`))
       .share();
 
-    outcome$ = Rx.Observable.defer(() => {
+    outcome$ = defer(() => {
       // observe first exit event
-      const exit$ = Rx.Observable.fromEvent(childProcess, 'exit')
+      const exit$ = fromEvent(childProcess, 'exit')
         .take(1)
         .map(code => {
           // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat then as errors
@@ -103,14 +103,14 @@ export function createProc(name, { cmd, args, cwd, env, stdin, log }) {
         });
 
       // observe first error event until there is a close event
-      const error$ = Rx.Observable.fromEvent(childProcess, 'error')
+      const error$ = fromEvent(childProcess, 'error')
         .take(1)
-        .mergeMap(err => Rx.Observable.throw(err));
+        .mergeMap(err => throwError(err));
 
-      return Rx.Observable.race(exit$, error$);
+      return race(exit$, error$);
     }).share();
 
-    _outcomePromise = Rx.Observable.merge(
+    _outcomePromise = merge(
       this.lines$.ignoreElements(),
       this.outcome$
     ).toPromise();

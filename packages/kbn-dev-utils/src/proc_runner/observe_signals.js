@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Rx from 'rxjs/Rx';
+import { fromEvent, merge } from 'rxjs';
 
 /**
  *  Creates an Observable from a Process object that:
@@ -27,9 +27,9 @@ import Rx from 'rxjs/Rx';
  *  @return {Rx.Observable}
  */
 export function observeSignals(process) {
-  return Rx.Observable.merge(
-    Rx.Observable.fromEvent(process, 'exit').mapTo('exit'),
-    Rx.Observable.fromEvent(process, 'SIGINT').mapTo('SIGINT'),
-    Rx.Observable.fromEvent(process, 'SIGTERM').mapTo('SIGTERM')
+  return merge(
+    fromEvent(process, 'exit').mapTo('exit'),
+    fromEvent(process, 'SIGINT').mapTo('SIGINT'),
+    fromEvent(process, 'SIGTERM').mapTo('SIGTERM')
   );
 }
