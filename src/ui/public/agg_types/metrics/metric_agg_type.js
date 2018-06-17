@@ -53,7 +53,7 @@ MetricAggType.prototype.getValue = function (agg, bucket) {
 
 /**
  * Pick a format for the values produced by this agg type,
- * overriden by several metrics that always output a simple
+ * overridden by several metrics that always output a simple
  * number
  *
  * @param  {agg} agg - the agg to pick a format for
