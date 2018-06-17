@@ -62,7 +62,7 @@ function AggType(config) {
    *
    * @method makeLabel
    * @param {AggConfig} aggConfig - an agg config of this type
-   * @returns {string} - label that can be used in the ui to descripe the aggConfig
+   * @returns {string} - label that can be used in the ui to describe the aggConfig
    */
   this.makeLabel = config.makeLabel || _.constant(this.name);
 
