@@ -504,7 +504,7 @@ function discoverController(
     function flushResponseData() {
       $scope.fetchError = undefined;
       $scope.hits = 0;
-      $scope.faliures = [];
+      $scope.failures = [];
       $scope.rows = [];
       $scope.fieldCounts = {};
     }
