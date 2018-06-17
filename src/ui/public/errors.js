@@ -146,7 +146,7 @@ export class RestrictedMapping extends KbnError {
 }
 
 /**
- * a non-critical cache write to elasticseach failed
+ * a non-critical cache write to elasticsearch failed
  */
 export class CacheWriteFailure extends KbnError {
   constructor() {
