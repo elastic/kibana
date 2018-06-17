@@ -1,3 +1,4 @@
+const isEmpty = require('lodash.isempty');
 const github = require('../lib/github');
 const {
   getCommitByPrompt,
@@ -8,9 +9,9 @@ const {
   maybeSetupRepo
 } = require('./cliService');
 
-async function initSteps(options) {
-  const [owner, repoName] = options.upstream.split('/');
-  github.setAccessToken(options.accessToken);
+async function initSteps(config, options = {}) {
+  const [owner, repoName] = config.upstream.split('/');
+  github.setAccessToken(config.accessToken);
 
   try {
     const commits = options.sha
@@ -18,23 +19,22 @@ async function initSteps(options) {
       : await getCommitByPrompt({
           owner,
           repoName,
-          author: options.all ? null : options.username,
-          multipleCommits: options.multipleCommits
+          author: config.all ? null : config.username,
+          multipleCommits: config.multipleCommits
         });
 
-    const branches = await getBranchesByPrompt(
-      options.branches,
-      options.multipleBranches
-    );
+    const branches = !isEmpty(options.branches)
+      ? options.branches
+      : await getBranchesByPrompt(config.branches, config.multipleBranches);
 
-    await maybeSetupRepo(owner, repoName, options.username);
+    await maybeSetupRepo(owner, repoName, config.username);
     await doBackportVersions({
       owner,
       repoName,
       commits,
       branches,
-      username: options.username,
-      labels: options.labels
+      username: config.username,
+      labels: config.labels
     });
   } catch (e) {
     handleErrors(e);

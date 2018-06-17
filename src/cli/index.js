@@ -2,46 +2,18 @@
 
 const yargs = require('yargs');
 const initSteps = require('./steps');
-const { getCombinedConfig } = require('../lib/configs');
+const {
+  getCombinedConfig,
+  validateConfigWithCliArgs
+} = require('../lib/configs');
 const { ERROR_CODES } = require('../lib/errors');
 const logger = require('../lib/logger');
 
-const args = yargs
-  .usage('$0 [args]')
-  .option('multiple', {
-    default: undefined,
-    description: 'Select multiple branches and/or commits',
-    type: 'boolean'
-  })
-  .option('multiple-commits', {
-    default: undefined,
-    description: 'Backport multiple commits',
-    type: 'boolean'
-  })
-  .option('multiple-branches', {
-    default: undefined,
-    description: 'Backport to multiple branches',
-    type: 'boolean'
-  })
-  .option('all', {
-    default: undefined,
-    description: 'List all commits',
-    type: 'boolean'
-  })
-  .option('show-config', {
-    description: 'Show config settings',
-    type: 'boolean'
-  })
-  .option('sha', {
-    description: 'Commit sha to backport',
-    type: 'string'
-  })
-  .alias('v', 'version')
-  .version()
-  .help().argv;
-
-getCombinedConfig()
-  .catch(e => {
+async function initYargs() {
+  let config;
+  try {
+    config = await getCombinedConfig();
+  } catch (e) {
     switch (e.code) {
       case ERROR_CODES.INVALID_CONFIG_ERROR_CODE:
       case ERROR_CODES.INVALID_JSON_ERROR_CODE:
@@ -52,33 +24,79 @@ getCombinedConfig()
     }
 
     process.exit(1);
-  })
-  .then(config => {
-    if (args.showConfig) {
-      logger.log(JSON.stringify(config, null, 4));
-      process.exit(0);
-    }
+  }
 
-    const options = {
-      multipleBranches: true,
-      multipleCommits: false,
-      all: false,
-      ...config,
-      ...removeUndefined(args),
-      ...removeUndefined({
-        multipleBranches: args.multiple,
-        multipleCommits: args.multiple
-      })
-    };
+  const cliArgs = yargs
+    .usage('$0 [args]')
+    .option('multiple', {
+      default: config.multiple,
+      description: 'Select multiple branches and/or commits',
+      type: 'boolean'
+    })
+    .option('multiple-commits', {
+      default: config.multipleCommits,
+      description: 'Backport multiple commits',
+      type: 'boolean'
+    })
+    .option('multiple-branches', {
+      default: config.multipleBranches,
+      description: 'Backport to multiple branches',
+      type: 'boolean'
+    })
+    .option('all', {
+      default: config.all,
+      description: 'List all commits',
+      type: 'boolean'
+    })
+    .option('upstream', {
+      default: config.upstream,
+      description: 'Name of repository',
+      type: 'string'
+    })
+    .option('branch', {
+      default: [],
+      description: 'Branch to backport',
+      type: 'array'
+    })
+    .option('sha', {
+      description: 'Commit sha to backport',
+      type: 'string'
+    })
+    .option('show-config', {
+      description: 'Show config settings',
+      type: 'boolean'
+    })
+    .alias('v', 'version')
+    .version()
+    .help().argv;
 
-    return initSteps(options);
-  });
+  const configWithCliArgs = {
+    ...config,
+    multiple: cliArgs.multiple,
+    multipleCommits: cliArgs.multipleCommits,
+    multipleBranches: cliArgs.multipleBranches,
+    all: cliArgs.all,
+    upstream: cliArgs.upstream
+  };
 
-function removeUndefined(obj = {}) {
-  return Object.keys(obj).reduce((acc, k) => {
-    if (obj[k] !== undefined) {
-      acc[k] = obj[k];
-    }
-    return acc;
-  }, {});
+  const options = {
+    branches: cliArgs.branch,
+    sha: cliArgs.sha
+  };
+
+  try {
+    validateConfigWithCliArgs(configWithCliArgs, options);
+  } catch (e) {
+    console.log(e.message);
+    process.exit(1);
+  }
+
+  if (cliArgs.showConfig) {
+    logger.log(JSON.stringify(configWithCliArgs, null, 4));
+    process.exit(0);
+  }
+
+  return initSteps(configWithCliArgs, options);
 }
+
+initYargs();

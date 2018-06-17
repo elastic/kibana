@@ -9,8 +9,6 @@ const initSteps = require('../src/cli/steps');
 const github = require('../src/lib/github');
 const rpc = require('../src/lib/rpc');
 
-jest.mock('child_process');
-
 describe('run through steps', () => {
   beforeEach(() => {
     const owner = 'elastic';
@@ -19,27 +17,23 @@ describe('run through steps', () => {
     axios.defaults.host = 'http://localhost';
     axios.defaults.adapter = httpAdapter;
 
-    jest.spyOn(rpc, 'writeFile').mockReturnValue(Promise.resolve());
-    jest.spyOn(rpc, 'mkdirp').mockReturnValue(Promise.resolve());
+    jest.spyOn(rpc, 'writeFile').mockResolvedValue();
+    jest.spyOn(rpc, 'mkdirp').mockResolvedValue();
 
     jest.spyOn(github, 'getCommits');
     jest.spyOn(github, 'createPullRequest');
 
     inquirer.prompt = jest
       .fn()
-      .mockReturnValueOnce(
-        Promise.resolve({
-          promptResult: {
-            message: 'myCommitMessage',
-            sha: 'mySha'
-          }
-        })
-      )
-      .mockReturnValueOnce(
-        Promise.resolve({
-          promptResult: '6.2'
-        })
-      );
+      .mockResolvedValueOnce({
+        promptResult: {
+          message: 'myCommitMessage',
+          sha: 'mySha'
+        }
+      })
+      .mockResolvedValueOnce({
+        promptResult: '6.2'
+      });
 
     nock('https://api.github.com')
       .get(`/repos/${owner}/${repoName}/commits`)

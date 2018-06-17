@@ -11,6 +11,7 @@ module.exports = {
   writeFile: promisify(fs.writeFile),
   readFile: promisify(fs.readFile),
   stat: promisify(fs.stat),
+  chmod: promisify(fs.chmod),
   statSync: fs.statSync,
   mkdirp: promisify(mkdirp)
 };

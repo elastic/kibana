@@ -1,28 +1,28 @@
 const path = require('path');
-const fs = require('fs');
-const findUp = require('find-up');
 const isEmpty = require('lodash.isempty');
-const get = require('lodash.get');
+const findUp = require('find-up');
 const stripJsonComments = require('strip-json-comments');
-const Joi = require('joi');
 const { InvalidConfigError, InvalidJsonError } = require('./errors');
 const env = require('./env');
 const rpc = require('./rpc');
-const prompts = require('./prompts');
 const schemas = require('./schemas');
 
 async function maybeCreateGlobalConfigAndFolder() {
-  const REPOS_PATH = env.getReposPath();
-  await rpc.mkdirp(REPOS_PATH);
-  await maybeCreateGlobalConfig();
+  const reposPath = env.getReposPath();
+  const globalConfigPath = env.getGlobalConfigPath();
+  const configTemplate = await getConfigTemplate();
+  await rpc.mkdirp(reposPath);
+  await maybeCreateGlobalConfig(globalConfigPath, configTemplate);
+  await ensureCorrectPermissions(globalConfigPath);
 }
 
-async function maybeCreateGlobalConfig() {
-  const GLOBAL_CONFIG_PATH = env.getGlobalConfigPath();
+function ensureCorrectPermissions(globalConfigPath) {
+  return rpc.chmod(globalConfigPath, '600');
+}
 
+async function maybeCreateGlobalConfig(globalConfigPath, configTemplate) {
   try {
-    const configTemplate = await getConfigTemplate();
-    await rpc.writeFile(GLOBAL_CONFIG_PATH, configTemplate, {
+    await rpc.writeFile(globalConfigPath, configTemplate, {
       flag: 'wx', // create and write file. Error if it already exists
       mode: 0o600 // give the owner read-write privleges, no access for others
     });
@@ -39,11 +39,7 @@ function getConfigTemplate() {
 }
 
 function validateGlobalConfig(config, filename) {
-  const { error } = Joi.validate(
-    config,
-    schemas.globalConfig,
-    schemas.joiOptions
-  );
+  const { error } = schemas.validate(config, schemas.globalConfig);
 
   if (error) {
     throw new InvalidConfigError(
@@ -53,22 +49,11 @@ function validateGlobalConfig(config, filename) {
     );
   }
 
-  if (!hasRestrictedPermissions(filename)) {
-    throw new InvalidConfigError(
-      `The global config file (${filename}) needs to have more restrictive permissions. Run the following to limit access to the file to just your user account:
-      chmod 600 "${filename}"\n`
-    );
-  }
-
   return config;
 }
 
 function validateProjectConfig(config, filepath) {
-  const { error } = Joi.validate(
-    config,
-    schemas.projectConfig,
-    schemas.joiOptions
-  );
+  const { error } = schemas.validate(config, schemas.projectConfig);
 
   if (error) {
     throw new InvalidConfigError(
@@ -78,27 +63,6 @@ function validateProjectConfig(config, filepath) {
     );
   }
   return config;
-}
-
-function validateCombinedConfig(config) {
-  const { branches } = config;
-  if (isEmpty(branches)) {
-    throw new InvalidConfigError(
-      `"branches" array in config cannot be empty:\n ${JSON.stringify(
-        config,
-        null,
-        4
-      )}`
-    );
-  }
-  return config;
-}
-
-function hasRestrictedPermissions(GLOBAL_CONFIG_PATH) {
-  const stat = rpc.statSync(GLOBAL_CONFIG_PATH);
-  const hasGroupRead = stat.mode & fs.constants.S_IRGRP; // eslint-disable-line no-bitwise
-  const hasOthersRead = stat.mode & fs.constants.S_IROTH; // eslint-disable-line no-bitwise
-  return !hasGroupRead && !hasOthersRead;
 }
 
 async function readConfigFile(filepath) {
@@ -115,9 +79,9 @@ async function readConfigFile(filepath) {
 async function getGlobalConfig() {
   await maybeCreateGlobalConfigAndFolder();
 
-  const GLOBAL_CONFIG_PATH = env.getGlobalConfigPath();
-  const config = await readConfigFile(GLOBAL_CONFIG_PATH);
-  return validateGlobalConfig(config, GLOBAL_CONFIG_PATH);
+  const globalConfigPath = env.getGlobalConfigPath();
+  const config = await readConfigFile(globalConfigPath);
+  return validateGlobalConfig(config, globalConfigPath);
 }
 
 async function getProjectConfig() {
@@ -136,56 +100,40 @@ async function getCombinedConfig() {
     getGlobalConfig()
   ]);
 
-  return _getCombinedConfig(projectConfig, globalConfig);
-}
-
-async function _getCombinedConfig(projectConfig, globalConfig) {
-  if (!projectConfig) {
-    const globalProjects = get(globalConfig, 'projects', []).filter(
-      project => !isEmpty(project.branches) && project.upstream
-    );
-
-    if (isEmpty(globalProjects)) {
-      throw new InvalidConfigError(
-        `No project config (.backportrc.json) was found.\nDocumentation: https://github.com/sqren/backport/blob/master/docs/configuration.md#project-specific-configuration`
-      );
-    }
-
-    const upstream = await prompts.listProjects(
-      globalProjects.map(project => project.upstream)
-    );
-
-    return validateCombinedConfig(
-      mergeConfigs(projectConfig, globalConfig, upstream)
-    );
-  }
-
-  return validateCombinedConfig(
-    mergeConfigs(projectConfig, globalConfig, projectConfig.upstream)
-  );
-}
-
-function mergeConfigs(projectConfig, globalConfig, upstream) {
-  const globalProjectConfig =
-    !isEmpty(globalConfig.projects) &&
-    globalConfig.projects.find(project => project.upstream === upstream);
-
   return {
-    ...projectConfig,
-    accessToken: globalConfig.accessToken,
-    username: globalConfig.username,
-    ...globalProjectConfig
+    // defaults
+    multiple: false,
+    multipleCommits: false,
+    multipleBranches: true,
+    all: false,
+
+    // configs
+    ...globalConfig,
+    ...projectConfig
   };
 }
 
+function validateConfigWithCliArgs(config, options) {
+  if (isEmpty(config.branches) && isEmpty(options.branches)) {
+    throw new Error(
+      `Missing branch\n\nYou must either:\n - Add a .backportrc.json. Read more: https://github.com/sqren/backport/blob/master/docs/configuration.md#project-specific-configuration\n - Add branch as CLI argument: "--branch 6.1" `
+    );
+  }
+
+  if (!config.upstream) {
+    throw new Error(
+      `Missing upstream\n\nYou must either:\n - Add a .backportrc.json. Read more: https://github.com/sqren/backport/blob/master/docs/configuration.md#project-specific-configuration\n - Add upstream as CLI argument: "--upstream elastic/kibana" `
+    );
+  }
+}
+
 module.exports = {
-  _getCombinedConfig,
+  validateConfigWithCliArgs,
   getCombinedConfig,
   getGlobalConfig,
   getProjectConfig,
   maybeCreateGlobalConfig,
   maybeCreateGlobalConfigAndFolder,
-  mergeConfigs,
   validateGlobalConfig,
   validateProjectConfig
 };

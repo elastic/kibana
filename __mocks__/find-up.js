@@ -1,10 +1,13 @@
-let returnVal = '/path/to/config';
+const defaultReturnValue = '/path/to/project/config';
+let returnVal = defaultReturnValue;
 
 const findUp = jest.fn(() => {
-  return Promise.resolve(returnVal);
+  const p = Promise.resolve(returnVal);
+  returnVal = defaultReturnValue;
+  return p;
 });
 
-findUp.__set = val => {
+findUp.__setMockPath = val => {
   returnVal = val;
 };
 

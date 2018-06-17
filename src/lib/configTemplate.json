@@ -4,8 +4,5 @@
   "accessToken": "",
 
   // Github username, eg. kimchy
-  "username": "",
-
-  // Override project-specific settings
-  "projects": []
+  "username": ""
 }

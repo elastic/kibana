@@ -1,6 +1,5 @@
 const configs = require('../src/lib/configs');
 const rpc = require('../src/lib/rpc');
-const inquirer = require('inquirer');
 const findUp = require('find-up');
 
 describe('config.js', () => {
@@ -12,8 +11,8 @@ describe('config.js', () => {
       beforeEach(async () => {
         jest
           .spyOn(rpc, 'readFile')
-          .mockReturnValue(
-            Promise.resolve(JSON.stringify({ upstream: 'elastic/kibana' }))
+          .mockResolvedValue(
+            JSON.stringify({ upstream: 'elastic/kibana', branches: ['6.x'] })
           );
 
         projectConfig = await configs.getProjectConfig();
@@ -24,26 +23,29 @@ describe('config.js', () => {
       });
 
       it('should return config', () => {
-        expect(projectConfig).toEqual({ upstream: 'elastic/kibana' });
+        expect(projectConfig).toEqual({
+          upstream: 'elastic/kibana',
+          branches: ['6.x']
+        });
       });
     });
 
     describe('when projectConfig is empty', () => {
       it('should throw error', () => {
-        jest.spyOn(rpc, 'readFile').mockReturnValueOnce(Promise.resolve('{}'));
+        jest.spyOn(rpc, 'readFile').mockResolvedValueOnce('{}');
         expect.assertions(1);
 
         return configs.getProjectConfig().catch(e => {
           expect(e.message).toContain(
-            'The project config file (/path/to/config) is not valid'
+            'The project config file (/path/to/project/config) is not valid'
           );
         });
       });
     });
 
     describe('when projectConfig is missing', () => {
-      it('should throw error', () => {
-        findUp.mockReturnValue(Promise.resolve(null));
+      it('should return null', () => {
+        findUp.__setMockPath();
         expect.assertions(1);
         return expect(configs.getProjectConfig()).resolves.toBe(null);
       });
@@ -53,16 +55,15 @@ describe('config.js', () => {
   describe('getGlobalConfig', () => {
     let res;
     beforeEach(async () => {
-      jest.spyOn(rpc, 'mkdirp').mockReturnValue(Promise.resolve());
-      jest.spyOn(rpc, 'writeFile').mockReturnValue(Promise.resolve());
+      jest.spyOn(rpc, 'chmod').mockResolvedValue();
+      jest.spyOn(rpc, 'mkdirp').mockResolvedValue();
+      jest.spyOn(rpc, 'writeFile').mockResolvedValue();
       jest.spyOn(rpc, 'statSync').mockReturnValue({ mode: 33152 });
-      jest.spyOn(rpc, 'readFile').mockReturnValue(
-        Promise.resolve(
-          JSON.stringify({
-            accessToken: 'myAccessToken',
-            username: 'sqren'
-          })
-        )
+      jest.spyOn(rpc, 'readFile').mockResolvedValue(
+        JSON.stringify({
+          accessToken: 'myAccessToken',
+          username: 'sqren'
+        })
       );
       res = await configs.getGlobalConfig();
     });
@@ -105,12 +106,15 @@ describe('config.js', () => {
 
   describe('maybeCreateGlobalConfig', () => {
     it('should create config and succeed', async () => {
-      jest.spyOn(rpc, 'writeFile').mockReturnValue(Promise.resolve());
-      await configs.maybeCreateGlobalConfig();
+      jest.spyOn(rpc, 'writeFile').mockResolvedValue();
+      await configs.maybeCreateGlobalConfig(
+        '/path/to/globalConfig',
+        'myConfigTemplate'
+      );
 
       expect(rpc.writeFile).toHaveBeenCalledWith(
-        '/myHomeDir/.backport/config.json',
-        expect.stringContaining('"accessToken": ""'),
+        '/path/to/globalConfig',
+        expect.stringContaining('myConfigTemplate'),
         { flag: 'wx', mode: 384 }
       );
     });
@@ -126,155 +130,38 @@ describe('config.js', () => {
     });
   });
 
-  describe('mergeConfigs', () => {
-    it('should use globalConfig if projectConfig is missing', () => {
-      const projectConfig = null;
-      const globalConfig = {
-        accessToken: 'myAccessToken',
-        username: 'sqren',
-        projects: [
-          {
-            upstream: 'elastic/kibana',
-            branches: ['6.1', '6.0']
-          }
-        ]
-      };
-      const upstream = 'elastic/kibana';
-      expect(
-        configs.mergeConfigs(projectConfig, globalConfig, upstream)
-      ).toEqual({
-        accessToken: 'myAccessToken',
-        username: 'sqren',
-        upstream: 'elastic/kibana',
-        branches: ['6.1', '6.0']
-      });
-    });
-
-    it('should use projectConfig', () => {
-      const projectConfig = {
-        upstream: 'elastic/kibana',
-        branches: ['6.2', '6.0']
-      };
-      const globalConfig = {
-        accessToken: 'myAccessToken',
-        username: 'sqren',
-        projects: []
-      };
-      const upstream = 'elastic/kibana';
-      expect(
-        configs.mergeConfigs(projectConfig, globalConfig, upstream)
-      ).toEqual({
-        accessToken: 'myAccessToken',
-        username: 'sqren',
-        upstream: 'elastic/kibana',
-        branches: ['6.2', '6.0']
-      });
-    });
-
-    it('should override projectConfig with globalConfig', () => {
-      const projectConfig = {
-        upstream: 'elastic/kibana',
-        branches: ['6.2', '6.0']
-      };
-      const globalConfig = {
-        accessToken: 'myAccessToken',
-        username: 'sqren',
-        projects: [
-          {
-            upstream: 'elastic/kibana',
-            branches: ['6.1', '6.0']
-          }
-        ]
-      };
-      const upstream = 'elastic/kibana';
-      expect(
-        configs.mergeConfigs(projectConfig, globalConfig, upstream)
-      ).toEqual({
-        accessToken: 'myAccessToken',
-        username: 'sqren',
-        upstream: 'elastic/kibana',
-        branches: ['6.1', '6.0']
-      });
-    });
-  });
-
   describe('getCombinedConfig', () => {
-    describe('when both configs are empty', () => {
-      it('should throw InvalidConfigError', () => {
-        expect.assertions(1);
-        return configs._getCombinedConfig(null, {}).catch(e => {
-          expect(e.message).toEqual(
-            'Global config (/myHomeDir/.backport/config.json) does not contain any valid projects, and no project config (.backportrc.json) was found.\nDocumentation: https://github.com/sqren/backport#global-configuration'
-          );
-        });
-      });
-    });
+    let res;
 
-    describe('when project config exists', () => {
-      let res;
-      beforeEach(async () => {
-        res = await configs._getCombinedConfig(
-          {
+    beforeEach(async () => {
+      jest.spyOn(rpc, 'readFile').mockImplementation(filepath => {
+        if (filepath.includes('/configTemplate.json')) {
+          return 'myConfigTemplate';
+        } else if (filepath === '/path/to/project/config') {
+          return JSON.stringify({
             upstream: 'elastic/kibana',
             branches: ['6.x', '6.1']
-          },
-          {
+          });
+        } else if (filepath === '/myHomeDir/.backport/config.json') {
+          return JSON.stringify({
             username: 'sqren',
             accessToken: 'myAccessToken'
-          }
-        );
+          });
+        }
       });
-
-      it('should return correct config', () => {
-        expect(res).toEqual({
-          accessToken: 'myAccessToken',
-          username: 'sqren',
-          upstream: 'elastic/kibana',
-          branches: ['6.x', '6.1']
-        });
-      });
+      res = await configs.getCombinedConfig();
     });
 
-    describe('when project config does not exists and global config has projects', () => {
-      let res;
-      beforeEach(async () => {
-        jest.spyOn(inquirer, 'prompt').mockReturnValueOnce(
-          Promise.resolve({
-            promptResult: 'elastic/kibana'
-          })
-        );
-
-        res = await configs._getCombinedConfig(null, {
-          username: 'sqren',
-          accessToken: 'myAccessToken',
-          projects: [
-            {
-              upstream: 'elastic/kibana',
-              branches: ['6.x', '6.1']
-            },
-            {
-              upstream: 'elastic/elasticsearch',
-              branches: ['6.x', '6.1']
-            }
-          ]
-        });
-      });
-
-      it('should call prompt with correct args', () => {
-        expect(inquirer.prompt).toHaveBeenCalledWith([
-          expect.objectContaining({
-            choices: ['elastic/kibana', 'elastic/elasticsearch']
-          })
-        ]);
-      });
-
-      it('should return correct config', () => {
-        expect(res).toEqual({
-          accessToken: 'myAccessToken',
-          username: 'sqren',
-          upstream: 'elastic/kibana',
-          branches: ['6.x', '6.1']
-        });
+    it('should return correct config', () => {
+      expect(res).toEqual({
+        accessToken: 'myAccessToken',
+        all: false,
+        branches: ['6.x', '6.1'],
+        multiple: false,
+        multipleBranches: true,
+        multipleCommits: false,
+        upstream: 'elastic/kibana',
+        username: 'sqren'
       });
     });
   });

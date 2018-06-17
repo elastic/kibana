@@ -1,10 +1,5 @@
 const Joi = require('joi');
 
-const joiOptions = {
-  abortEarly: false,
-  convert: false
-};
-
 const branchesSchema = Joi.array().items(
   Joi.object().keys({
     name: Joi.string().required(),
@@ -13,22 +8,25 @@ const branchesSchema = Joi.array().items(
   Joi.string()
 );
 
+const configOptions = {
+  all: Joi.bool(),
+  multiple: Joi.bool(),
+  multipleCommits: Joi.bool(),
+  multipleBranches: Joi.bool()
+};
+
 const projectConfig = Joi.object().keys({
   upstream: Joi.string().required(),
-  branches: branchesSchema,
-  all: Joi.bool(),
-  multipleCommits: Joi.bool(),
-  multipleBranches: Joi.bool(),
-  labels: Joi.array().items(Joi.string())
+  branches: branchesSchema.required(),
+  labels: Joi.array().items(Joi.string()),
+  ...configOptions
 });
 
 const globalConfig = Joi.object().keys({
   username: Joi.string().required(),
   accessToken: Joi.string().required(),
-  all: Joi.bool(),
-  multipleCommits: Joi.bool(),
-  multipleBranches: Joi.bool(),
-  projects: Joi.array().items(projectConfig)
+  projects: Joi.array(), // deprecated
+  ...configOptions
 });
 
 const formatError = error => {
@@ -41,8 +39,16 @@ const formatError = error => {
     .join('\n');
 };
 
+function validate(config, schema) {
+  const options = {
+    abortEarly: false,
+    convert: false
+  };
+  return Joi.validate(config, schema, options);
+}
+
 module.exports = {
-  joiOptions,
+  validate,
   globalConfig,
   projectConfig,
   formatError

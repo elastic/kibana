@@ -34,7 +34,7 @@ function getRemoteUrl(owner, repoName) {
 
 function cloneRepo(owner, repoName, callback) {
   return new Promise((resolve, reject) => {
-    const cloneProc = exec(
+    const execProcess = exec(
       `git clone ${getRemoteUrl(owner, repoName)} --progress`,
       { cwd: env.getRepoOwnerPath(owner), maxBuffer: 100 * 1024 * 1024 },
       error => {
@@ -45,7 +45,7 @@ function cloneRepo(owner, repoName, callback) {
       }
     );
 
-    cloneProc.stderr.on('data', data => {
+    execProcess.stderr.on('data', data => {
       const regex = /^Receiving objects:\s+(\d+)%/;
       const [, progress] = data.toString().match(regex) || [];
       if (callback && progress) {
