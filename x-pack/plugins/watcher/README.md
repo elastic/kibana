@@ -25,7 +25,7 @@ public/
           my_directive_name.js
           my_directive_name.less
           my_directive_name.html
-        index.js (imports the directives in this folder, ie: my_directive_name)
+        index.js (imports the directives in this folder, i.e.,my_directive_name)
       routes/
         index.js (no code here; only imports routes.js)
         routes.js
