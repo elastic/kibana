@@ -69,7 +69,7 @@ export function mathAgg(resp, panel, series) {
           return acc;
         }, {});
         // Get the first var and check that it shows up in the split data otherwise
-        // we need to return an empty array for the data since we can't opperate
+        // we need to return an empty array for the data since we can't operate
         // without the first varaible
         const firstVar = first(mathMetric.variables);
         if (!splitData[firstVar.name]) {
