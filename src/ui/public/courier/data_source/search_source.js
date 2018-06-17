@@ -622,7 +622,7 @@ export function SearchSourceProvider(Promise, Private, config) {
 
       // call the ittr and return it's promise
       return (function ittr() {
-        // itterate the _state object (not array) and
+        // iterate the _state object (not array) and
         // pass each key:value pair to source._mergeProp. if _mergeProp
         // returns a promise, then wait for it to complete and call _mergeProp again
         return Promise.all(_.map(current._state, function ittr(value, key) {
