@@ -125,7 +125,7 @@ export default props => (
     >
       <GuideText>
         The alignment and arrow on your popover can be set with
-        the anchorPostion prop.
+        the anchorPosition prop.
       </GuideText>
 
       <GuideDemo>
