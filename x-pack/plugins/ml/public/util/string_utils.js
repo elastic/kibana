@@ -285,7 +285,7 @@ export function guessTimeFormat(time) {
   } else {
     // time field is a number, so probably epoch or epoch_ms
     if (time > 10000000000) {
-      // probably millseconds
+      // probably milliseconds
       format = 'epoch_ms';
 
     } else {
