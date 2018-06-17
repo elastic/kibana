@@ -444,7 +444,7 @@ The above example might look WET to you, since the localNavButton and
 localNavCallOutButton have so many common properties.
 
 In general, it's more important to keep styles tightly-scoped to clearly-defined
-components (which increases readability and maintainabilty) than it is to keep
+components (which increases readability and maintainability) than it is to keep
 them DRY.
 
 But if you really think there is a compelling reason to deduplicate code, then
