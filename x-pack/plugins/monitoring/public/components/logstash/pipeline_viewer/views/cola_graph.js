@@ -359,7 +359,7 @@ export class ColaGraph extends React.Component {
           offsets: [
             { node: group.ifVertex.colaIndex, offset: 0 },
             // The offsets here are oddly sensitive. If you use lower values than the width of
-            // the node the layout gets all crazy and overlappy for reasons I don't understand
+            // the node the layout gets all crazy and overlapping for reasons I don't understand
             { node: group.trueVertex.colaIndex, offset: -LOGSTASH.PIPELINE_VIEWER.GRAPH.VERTICES.WIDTH_PX },
             { node: group.falseVertex.colaIndex, offset: LOGSTASH.PIPELINE_VIEWER.GRAPH.VERTICES.WIDTH_PX }
           ]
