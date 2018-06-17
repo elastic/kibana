@@ -90,7 +90,7 @@ BAD
   }
 ```
 
-- Constructors should be used to initiallize state and define $scope.$watch(es)
+- Constructors should be used to initialize state and define $scope.$watch(es)
 
 GOOD
 ```
