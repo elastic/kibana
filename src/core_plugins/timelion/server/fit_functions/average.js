@@ -67,7 +67,7 @@ export default function average(dataTuples, targetTuples) {
     while (i < resultValues.length) {
       if (isNaN(resultValues[i])) {
         if (i === 0) {
-          // If our first number is NaN, intialize from dataTuples;
+          // If our first number is NaN, initialize from dataTuples;
           previousRealNumber = dataTuples[0][1];
         }
         naNCount++;
