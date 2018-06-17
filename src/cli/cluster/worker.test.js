@@ -124,7 +124,7 @@ describe('CLI cluster manager', function () {
     });
 
     describe('do after', function () {
-      it('ignores non-array messsages', function () {
+      it('ignores non-array messages', function () {
         const worker = setup();
         worker.parseIncomingMessage('some string thing');
         worker.parseIncomingMessage(0);
