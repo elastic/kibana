@@ -146,9 +146,8 @@ async function _getCombinedConfig(projectConfig, globalConfig) {
     );
 
     if (isEmpty(globalProjects)) {
-      const GLOBAL_CONFIG_PATH = env.getGlobalConfigPath();
       throw new InvalidConfigError(
-        `Global config (${GLOBAL_CONFIG_PATH}) does not contain any valid projects, and no project config (.backportrc.json) was found.\nDocumentation: https://github.com/sqren/backport#global-configuration`
+        `No project config (.backportrc.json) was found.\nDocumentation: https://github.com/sqren/backport/blob/master/docs/configuration.md#project-specific-configuration`
       );
     }
 

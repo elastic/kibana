@@ -34,26 +34,6 @@ Please select the necessary access scopes:
 
 Your Github username
 
-##### `projects` (object[])
-
-_Note: This field is optional, and you probably don't need it_
-A list of project-specific settings. This is useful if you want to override project-specific configurations.
-[Read more about the project-specific configuration](#project-specific-configuration)
-
-The `upstream` property will determine which project-specific config to override. The following will override `own` and `multipleCommits` for `elastic/kibana`:
-
-```json
-{
-  "projects": [
-    {
-      "upstream": "elastic/kibana",
-      "own": false,
-      "multipleCommits": true
-    }
-  ]
-}
-```
-
 ### Project-specific configuration
 
 `.backportrc.json` can be added to every project where you use `backport`. This is useful for sharing configuration options with other project contributors.
@@ -64,7 +44,7 @@ Example:
 {
   "upstream": "elastic/kibana",
   "branches": [{ "name": "6.x", "checked": true }, "6.3", "6.2", "6.1", "6.0"],
-  "own": true,
+  "all": false,
   "multipleCommits": false,
   "multipleBranches": true,
   "labels": ["backport"]
@@ -79,13 +59,13 @@ Github organization/user and repository name separated with forward slash.
 
 List of branches that will be available to backport to. The list can contain string and objects. If a string is given, it must be the name of a branch, if an object is given it must use the format `{"name": "<string>", "checked": <boolean>}` where `name` is the branch name and `"checked"` indicates whether the branch should be auto-selected. It is useful to auto-select branches you often backport to.
 
-##### `own` (boolean)
+##### `all` (boolean)
 
-`true`: only commits by you will be available to backport.
+`true`: list all commits
 
-`false`: all commits in the repository will be displayed.
+`false`: list commits by you only
 
-Default: `true`
+Default: `false`
 
 ##### `multipleCommits` (boolean)
 
