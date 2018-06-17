@@ -37,7 +37,7 @@ describe('projectConfig', () => {
       {
         upstream: 'elastic/kibana',
         branches: ['6.1', { name: '6.x', checked: true }, '5.7'],
-        own: true,
+        all: false,
         multipleCommits: true,
         multipleBranches: true,
         labels: ['test']

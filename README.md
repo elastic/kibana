@@ -49,16 +49,14 @@ Follow the steps. You can use the `arrow keys` to choose options, `<space>` to s
 
 ### Options
 
-| Option              | Description                               | Accepts                     |
-| ------------------- | ----------------------------------------- | --------------------------- |
-| --multiple          | Backport multiple commits and/or branches | boolean                     |
-| --multiple-commits  | Backport multiple commits                 | boolean (defaults to false) |
-| --multiple-branches | Backport to multiple branches             | boolean (defaults to true)  |
-| --own               | Only show own commits                     | boolean (defaults to true)  |
-| --show-config       | Show configuration                        |                             |
-| --sha               | Commit sha to backport                    | string                      |
-| --help              | Show help                                 |                             |
-| -v, --version       | Show version number                       |                             |
+| Option        | Description                               | Accepts                     |
+| ------------- | ----------------------------------------- | --------------------------- |
+| --all         | Show all commits                          | boolean (defaults to false) |
+| --multiple    | Backport multiple commits and/or branches | boolean                     |
+| --show-config | Show configuration                        |                             |
+| --sha         | Commit sha to backport                    | string                      |
+| --help        | Show help                                 |                             |
+| -v, --version | Show version number                       |                             |
 
 ### Documentation
 

@@ -18,7 +18,7 @@ async function initSteps(options) {
       : await getCommitByPrompt({
           owner,
           repoName,
-          author: options.own ? options.username : null,
+          author: options.all ? null : options.username,
           multipleCommits: options.multipleCommits
         });
 

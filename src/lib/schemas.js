@@ -16,7 +16,7 @@ const branchesSchema = Joi.array().items(
 const projectConfig = Joi.object().keys({
   upstream: Joi.string().required(),
   branches: branchesSchema,
-  own: Joi.bool(),
+  all: Joi.bool(),
   multipleCommits: Joi.bool(),
   multipleBranches: Joi.bool(),
   labels: Joi.array().items(Joi.string())
@@ -25,7 +25,7 @@ const projectConfig = Joi.object().keys({
 const globalConfig = Joi.object().keys({
   username: Joi.string().required(),
   accessToken: Joi.string().required(),
-  own: Joi.bool(),
+  all: Joi.bool(),
   multipleCommits: Joi.bool(),
   multipleBranches: Joi.bool(),
   projects: Joi.array().items(projectConfig)

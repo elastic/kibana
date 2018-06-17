@@ -72,7 +72,7 @@ describe('run through steps', () => {
       accessToken: 'myAccessToken',
       upstream,
       branches: ['6.x', '6.0', '5.6', '5.5', '5.4'],
-      own: true
+      all: false
     });
   });
 

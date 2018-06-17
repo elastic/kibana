@@ -23,9 +23,9 @@ const args = yargs
     description: 'Backport to multiple branches',
     type: 'boolean'
   })
-  .option('own', {
+  .option('all', {
     default: undefined,
-    description: 'Only show own commits',
+    description: 'List all commits',
     type: 'boolean'
   })
   .option('show-config', {
@@ -62,7 +62,7 @@ getCombinedConfig()
     const options = {
       multipleBranches: true,
       multipleCommits: false,
-      own: true,
+      all: false,
       ...config,
       ...removeUndefined(args),
       ...removeUndefined({
