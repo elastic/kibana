@@ -29,9 +29,9 @@
  *   modifyAggConfigOnSearchRequestStart: forwardModifyAggConfigOnSearchRequestStart('customBucket')
  * }
  *
- * @param {string} paramName - The name of the parameter, that this function should foward
+ * @param {string} paramName - The name of the parameter, that this function should forward
  *      calls to. That should match the name of the parameter the function is called on.
- * @returns {function} A function, that fowards the calls.
+ * @returns {function} A function, that forwards the calls.
  */
 function forwardModifyAggConfigOnSearchRequestStart(paramName) {
   return (aggConfig, ...args) => {
