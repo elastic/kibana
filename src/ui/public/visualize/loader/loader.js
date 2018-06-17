@@ -124,7 +124,7 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
      *    You can alternatively pass a jQuery element instead.
      * @param {Object} savedObj The savedObject as it could be retrieved by the
      *    `savedVisualizations` service.
-     * @param {VisualizeLoaderParams} params A list of paramters that will influence rendering.
+     * @param {VisualizeLoaderParams} params A list of parameters that will influence rendering.
      *
      * @return {EmbeddedVisualizeHandler} The handler to the visualization.
      */

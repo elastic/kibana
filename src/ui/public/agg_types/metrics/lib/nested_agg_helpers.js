@@ -20,7 +20,7 @@
 /**
  * Forwards modifyAggConfigOnSearchRequestStart calls to a nested AggConfig.
  * This must be used for each parameter, that accepts a nested aggregation, otherwise
- * some paramters of the nested aggregation might not work properly (like auto interval
+ * some parameters of the nested aggregation might not work properly (like auto interval
  * on a nested date histogram).
  * You should assign the return value of this function to the modifyAggConfigOnSearchRequestStart
  * of the parameter that accepts a nested aggregation. Example:
