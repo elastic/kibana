@@ -177,7 +177,7 @@ class Timeseries extends Component {
 }
 
 Timeseries.defaultProps = {
-  legned: true,
+  legend: true,
   showGrid: true
 };
 
