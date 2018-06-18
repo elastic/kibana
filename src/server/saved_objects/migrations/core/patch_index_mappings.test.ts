@@ -114,9 +114,9 @@ describe('patchIndexMappings', async () => {
       },
     };
     await expectPatchIndexMappings({
+      expectedMappings,
       originalPlugins,
       plugins,
-      expectedMappings,
     });
   });
 
@@ -156,9 +156,9 @@ describe('patchIndexMappings', async () => {
       },
     };
     await expectPatchIndexMappings({
+      expectedMappings,
       originalPlugins,
       plugins,
-      expectedMappings,
     });
   });
 
@@ -217,9 +217,9 @@ describe('patchIndexMappings', async () => {
       },
     };
     await expectPatchIndexMappings({
+      expectedMappings,
       originalPlugins,
       plugins,
-      expectedMappings,
     });
   });
 });
