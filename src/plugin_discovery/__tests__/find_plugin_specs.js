@@ -18,6 +18,7 @@
  */
 
 import { resolve } from 'path';
+import { toArray } from 'rxjs/operators';
 
 import expect from 'expect.js';
 import { isEqual } from 'lodash';
@@ -43,7 +44,7 @@ describe('plugin discovery', () => {
           }
         });
 
-        const specs = await spec$.toArray().toPromise();
+        const specs = await spec$.pipe(toArray()).toPromise();
         expect(specs).to.have.length(3);
         specs.forEach(spec => {
           expect(spec).to.be.a(PluginSpec);
@@ -62,7 +63,7 @@ describe('plugin discovery', () => {
           }
         });
 
-        const specs = await spec$.toArray().toPromise();
+        const specs = await spec$.pipe(toArray()).toPromise();
         expect(specs).to.have.length(3);
         specs.forEach(spec => {
           expect(spec).to.be.a(PluginSpec);
@@ -86,7 +87,7 @@ describe('plugin discovery', () => {
           }
         });
 
-        const specs = await spec$.toArray().toPromise();
+        const specs = await spec$.pipe(toArray()).toPromise();
         expect(specs).to.have.length(2);
         specs.forEach(spec => {
           expect(spec).to.be.a(PluginSpec);
@@ -110,7 +111,7 @@ describe('plugin discovery', () => {
           }
         });
 
-        const specs = await spec$.toArray().toPromise();
+        const specs = await spec$.pipe(toArray()).toPromise();
         expect(specs).to.have.length(3);
         specs.forEach(spec => {
           expect(spec).to.be.a(PluginSpec);
@@ -131,7 +132,7 @@ describe('plugin discovery', () => {
           });
 
           try {
-            await spec$.toArray().toPromise();
+            await spec$.pipe(toArray()).toPromise();
             throw new Error('expected spec$ to throw an error');
           } catch (error) {
             expect(error.message).to.contain('Multple plugins found with the id "foo"');
@@ -173,7 +174,7 @@ describe('plugin discovery', () => {
           }
         });
 
-        const packageJsons = await packageJson$.toArray().toPromise();
+        const packageJsons = await packageJson$.pipe(toArray()).toPromise();
         checkPackageJsons(packageJsons);
       });
 
@@ -187,7 +188,7 @@ describe('plugin discovery', () => {
           }
         });
 
-        const packageJsons = await packageJson$.toArray().toPromise();
+        const packageJsons = await packageJson$.pipe(toArray()).toPromise();
         checkPackageJsons(packageJsons);
       });
 
@@ -206,7 +207,7 @@ describe('plugin discovery', () => {
           }
         });
 
-        const packageJsons = await packageJson$.toArray().toPromise();
+        const packageJsons = await packageJson$.pipe(toArray()).toPromise();
         checkPackageJsons(packageJsons);
       });
     });

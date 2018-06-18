@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { Observable, ReplaySubject } from 'rxjs';
+import * as Rx from 'rxjs';
+import { mergeMap, take } from 'rxjs/operators';
 
 import BaseOptimizer from '../base_optimizer';
 
@@ -35,7 +36,7 @@ export default class WatchOptimizer extends BaseOptimizer {
     super(opts);
     this.log = opts.log || (() => null);
     this.prebuild = opts.prebuild || false;
-    this.status$ = new ReplaySubject(1);
+    this.status$ = new Rx.ReplaySubject(1);
   }
 
   async init() {
@@ -78,9 +79,10 @@ export default class WatchOptimizer extends BaseOptimizer {
   }
 
   async onceBuildOutcome() {
-    return await this.status$
-      .mergeMap(this.mapStatusToOutcomes)
-      .take(1)
+    return await this.status$.pipe(
+      mergeMap(this.mapStatusToOutcomes),
+      take(1)
+    )
       .toPromise();
   }
 
@@ -94,7 +96,7 @@ export default class WatchOptimizer extends BaseOptimizer {
 
       case STATUS.FAILURE:
       case STATUS.FATAL:
-        return Observable.throw(error);
+        return Rx.throwError(error);
     }
   }
 
