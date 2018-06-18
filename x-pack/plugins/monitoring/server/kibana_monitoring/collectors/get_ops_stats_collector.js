@@ -8,12 +8,11 @@ import { KIBANA_STATS_TYPE } from '../../../common/constants';
 import { opsBuffer } from './ops_buffer';
 import { Collector } from '../classes';
 
-let monitor = null; // singleton because start and stop can be called repeatedly because of status event repetitions
-
 /*
  * Initialize a collector for Kibana Ops Stats
  */
 export function getOpsStatsCollector(server) {
+  let monitor;
   const buffer = opsBuffer(server);
   const onOps = event => buffer.push(event);
 
@@ -25,7 +24,6 @@ export function getOpsStatsCollector(server) {
     if (monitor) {
       monitor.removeListener('ops', onOps);
     }
-    monitor = null;
   };
 
   /* Handle stopping / restarting the event listener if Elasticsearch stops and restarts
