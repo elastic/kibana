@@ -676,13 +676,13 @@ Also, if the chain is long, each method should be on a new line.
 ```js
 // good
 $http.get('/info')
-  .then(({ data }) => this.transfromInfo(data))
+  .then(({ data }) => this.transformInfo(data))
   .then((transformed) => $http.post('/new-info', transformed))
   .then(({ data }) => console.log(data));
 
 // bad
 $http.get('/info')
-.then(({ data }) => this.transfromInfo(data))
+.then(({ data }) => this.transformInfo(data))
 .then((transformed) => $http.post('/new-info', transformed))
 .then(({ data }) => console.log(data));
 ```
