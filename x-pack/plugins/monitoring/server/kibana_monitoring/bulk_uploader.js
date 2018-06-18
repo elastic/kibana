@@ -54,7 +54,8 @@ export class BulkUploader {
      */
     this.start = () => {
       if (this._timer) {
-        throw new Error('BulkUploader timer already started');
+        this._log.warn('BulkUploader timer already started');
+        return;
       }
 
       this._log.info(`Starting monitoring stats collection`);
