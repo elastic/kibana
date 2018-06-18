@@ -1,21 +1,23 @@
 {
-  "_xpack/watcher/watch/{watch_id}": {
+  "_xpack/watcher/watch/{id}": {
     "methods": [
       "GET"
     ],
     "patterns": [
-      "_xpack/watcher/watch/{watch_id}"
-    ]
+      "_xpack/watcher/watch/{id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/watcher-api-get-watch.html"
   },
-  "DELETE _xpack/watcher/watch/{watch_id}": {
+  "DELETE _xpack/watcher/watch/{id}": {
     "methods": [
       "DELETE"
     ],
     "patterns": [
-      "_xpack/watcher/watch/{watch_id}"
-    ]
+      "_xpack/watcher/watch/{id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/watcher-api-delete-watch.html"
   },
-  "PUT _xpack/watcher/watch/{watch_id}": {
+  "PUT _xpack/watcher/watch/{id}": {
     "methods": [
       "PUT"
     ],
@@ -23,7 +25,7 @@
       "active": ["true", "false"]
     },
     "patterns": [
-      "_xpack/watcher/watch/{watch_id}"
+      "_xpack/watcher/watch/{id}"
     ],
     "data_autocomplete_rules": {
       "metadata": {},
@@ -32,7 +34,8 @@
       "condition": {},
       "throttle_period": 5,
       "actions": {}
-    }
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/watcher-api-put-watch.html"
   },
   "_xpack/watcher/watch/_execute": {
     "methods": [
@@ -43,7 +46,7 @@
     },
     "patterns": [
       "_xpack/watcher/watch/_execute",
-      "_xpack/watcher/watch/{watch_id}/_execute"
+      "_xpack/watcher/watch/{id}/_execute"
     ],
     "data_autocomplete_rules": {
       "trigger_data": {},
@@ -52,32 +55,36 @@
       "watch": {},
       "alternative_input": {},
       "action_modes": {}
-    }
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/watcher-api-execute-watch.html"
   }, 
-  "_xpack/watcher/watch/{watch_id}/_ack": {
+  "_xpack/watcher/watch/{id}/_ack": {
     "methods": [
       "PUT"
     ],
     "patterns": [
-      "_xpack/watcher/watch/{watch_id}/_ack",
-      "_xpack/watcher/watch/{watch_id}/_ack/{action_id}"
-    ]
+      "_xpack/watcher/watch/{id}/_ack",
+      "_xpack/watcher/watch/{id}/_ack/{id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/watcher-api-ack-watch.html"
   }, 
-  "_xpack/watcher/watch/{watch_id}/_activate": {
+  "_xpack/watcher/watch/{id}/_activate": {
     "methods": [
       "PUT"
     ],
     "patterns": [
-      "_xpack/watcher/watch/{watch_id}/_activate"
-    ]
+      "_xpack/watcher/watch/{id}/_activate"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/watcher-api-activate-watch.html"
   },  
-  "_xpack/watcher/watch/{watch_id}/_deactivate": {
+  "_xpack/watcher/watch/{id}/_deactivate": {
     "methods": [
       "PUT"
     ],
     "patterns": [
-      "_xpack/watcher/watch/{watch_id}/_deactivate"
-    ]
+      "_xpack/watcher/watch/{id}/_deactivate"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/watcher-api-deactivate-watch.html"
   },
   "_xpack/watcher/stats": {
     "url_params": {
@@ -88,7 +95,8 @@
     ],
     "patterns": [
       "_xpack/watcher/stats"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/watcher-api-stats.html"
   },
   "_xpack/watcher/_start": {
     "methods": [
@@ -96,7 +104,8 @@
     ],
     "patterns": [
       "_xpack/watcher/_start"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/watcher-api-start.html"
   },
   "_xpack/watcher/_stop": {
     "methods": [
@@ -104,7 +113,8 @@
     ],
     "patterns": [
       "_xpack/watcher/_stop"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/watcher-api-stop.html"
   },
   "_xpack/watcher/_restart": {
     "methods": [

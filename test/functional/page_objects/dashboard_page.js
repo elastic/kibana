@@ -167,8 +167,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('clonedDashboardTitle', title);
     }
 
-    async isCloneDuplicateTitleWarningDisplayed() {
-      return await testSubjects.exists('cloneModalTitleDupicateWarnMsg');
+    async isDuplicateTitleWarningDisplayed() {
+      return await testSubjects.exists('titleDupicateWarnMsg');
     }
 
     async clickEdit() {
@@ -187,7 +187,14 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async clickNewDashboard() {
-      return await testSubjects.click('newDashboardLink');
+      // newDashboardLink button is only visible when dashboard listing table is displayed (at least one dashboard).
+      const exists = await testSubjects.exists('newDashboardLink');
+      if (exists) {
+        return await testSubjects.click('newDashboardLink');
+      }
+
+      // no dashboards exist, click createDashboardPromptButton to create new dashboard
+      return await this.clickCreateDashboardPrompt();
     }
 
     async clickCreateDashboardPrompt() {
@@ -286,13 +293,25 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await this.enterDashboardTitleAndClickSave(dashName, saveOptions);
 
       if (saveOptions.needsConfirm) {
-        await PageObjects.common.clickConfirmOnModal();
+        await this.clickSave();
       }
 
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       // Confirm that the Dashboard has been saved.
       return await testSubjects.exists('saveDashboardSuccess');
+    }
+
+    async cancelSave() {
+      log.debug('Canceling save');
+      await testSubjects.click('saveCancelButton');
+    }
+
+    async clickSave() {
+      await retry.try(async () => {
+        log.debug('clicking final Save button for named dashboard');
+        return await testSubjects.click('confirmSaveDashboardButton');
+      });
     }
 
     /**
@@ -316,10 +335,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         await this.setSaveAsNewCheckBox(saveOptions.saveAsNew);
       }
 
-      await retry.try(async () => {
-        log.debug('clicking final Save button for named dashboard');
-        return await testSubjects.click('confirmSaveDashboardButton');
-      });
+      await this.clickSave();
     }
 
     async selectDashboard(dashName) {

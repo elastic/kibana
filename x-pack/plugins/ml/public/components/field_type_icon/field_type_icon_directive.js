@@ -9,7 +9,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { FieldTypeIcon } from './field_type_icon_view.js';
+import { FieldTypeIcon } from './field_type_icon.js';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');

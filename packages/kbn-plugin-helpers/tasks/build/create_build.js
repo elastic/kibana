@@ -144,7 +144,7 @@ module.exports = function createBuild(
       }
 
       execFileSync(
-        join(buildSource, 'node_modules', '.bin', 'tsc'),
+        join(buildSource, 'node_modules', '.bin', winCmd('tsc')),
         ['--pretty', 'true'],
         {
           cwd: buildRoot,

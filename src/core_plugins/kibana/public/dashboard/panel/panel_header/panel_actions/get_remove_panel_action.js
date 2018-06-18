@@ -31,14 +31,17 @@ import { DashboardViewMode } from '../../../dashboard_view_mode';
  * @return {DashboardPanelAction}
  */
 export function getRemovePanelAction(onDeletePanel) {
-  return new DashboardPanelAction({
-    displayName: 'Delete from dashboard',
-    id: 'deletePanel',
-    parentPanelId: 'mainMenu',
-    icon: <EuiIcon type="trash" />,
-    isVisible: ({ containerState }) => (
-      containerState.viewMode === DashboardViewMode.EDIT && !containerState.isPanelExpanded
-    ),
-    onClick: onDeletePanel,
-  });
+  return new DashboardPanelAction(
+    {
+      displayName: 'Delete from dashboard',
+      id: 'deletePanel',
+      parentPanelId: 'mainMenu',
+    },
+    {
+      icon: <EuiIcon type="trash" />,
+      isVisible: ({ containerState }) => (
+        containerState.viewMode === DashboardViewMode.EDIT && !containerState.isPanelExpanded
+      ),
+      onClick: onDeletePanel,
+    });
 }
