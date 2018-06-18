@@ -34,7 +34,6 @@ export class UiApp {
       listed,
       url = `/app/${id}`,
       styleSheetPath,
-      styleSheetToCompile,
     } = spec;
 
     if (!id) {
@@ -54,7 +53,6 @@ export class UiApp {
     this._pluginId = pluginId;
     this._kbnServer = kbnServer;
     this._styleSheetPath = styleSheetPath;
-    this._styleSheetToCompile = styleSheetToCompile;
 
     if (this._pluginId && !this._getPlugin()) {
       throw new Error(`Unknown plugin id "${this._pluginId}"`);
@@ -106,14 +104,17 @@ export class UiApp {
     return this._main ? [this._main] : [];
   }
 
-  getStyleSheetPath() {
-    if (this._styleSheetPath) {
-      return `plugins/${this.getId()}/${this._styleSheetPath}`;
+  getStyleSheetPublicPath() {
+    if (!this._styleSheetPath) {
+      return;
     }
-  }
 
-  getStyleSheetToCompile() {
-    return this._styleSheetToCompile;
+    // captures everything after public excluding the file extension
+    const match = this._styleSheetPath.match(/\/public\/(.*)\.[a-zA-Z]{3,4}$/);
+
+    if (match) {
+      return `plugins/${this.getId()}/${match[1]}.css`;
+    }
   }
 
   _getPlugin() {
@@ -134,7 +135,7 @@ export class UiApp {
       main: this._main,
       navLink: this._navLink,
       linkToLastSubUrl: this._linkToLastSubUrl,
-      styleSheet: this._styleSheet,
+      styleSheetPath: this._styleSheetPath,
     };
   }
 }

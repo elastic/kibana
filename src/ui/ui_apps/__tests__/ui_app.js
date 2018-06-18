@@ -89,6 +89,10 @@ describe('ui apps / UiApp', () => {
         expect(app.getModules()).to.eql([]);
       });
 
+      it('has no styleSheetPath', () => {
+        expect(app.getStyleSheetPublicPath()).to.be(undefined);
+      });
+
       it('has a mostly empty JSON representation', () => {
         expect(JSON.parse(JSON.stringify(app))).to.eql({
           id: spec.id,
@@ -307,6 +311,13 @@ describe('ui apps / UiApp', () => {
     it('returns main module if not using appExtensions', () => {
       const app = createUiApp({ id: 'foo', main: 'bar' });
       expect(app.getModules()).to.eql(['bar']);
+    });
+  });
+
+  describe('#getStyleSheetPublicPath', () => {
+    it('returns public path to styleSheetPath', () => {
+      const app = createUiApp({ id: 'foo', styleSheetPath: '/bar/public/baz/style.scss' });
+      expect(app.getStyleSheetPublicPath()).to.eql('plugins/foo/baz/style.css');
     });
   });
 });

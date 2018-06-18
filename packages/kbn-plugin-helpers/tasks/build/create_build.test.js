@@ -118,7 +118,7 @@ describe('creating the build', () => {
   });
 
   describe('with styleSheetToCompile', () => {
-    const sassPath = 'public/styles.sass';
+    const sassPath = 'public/styles.scss';
     const cssPath = resolve(PLUGIN_BUILD_TARGET, 'public/styles.css');
 
     // set skipInstallDependencies to true for these tests

@@ -136,7 +136,11 @@ module.exports = function createBuild(
       }
 
       const outputFileName = path.basename(file, path.extname(file)) + '.css';
-      const output = path.join(path.dirname(file), outputFileName);
+      const output = path.join(
+        buildRoot,
+        path.dirname(plugin.styleSheetToCompile),
+        outputFileName
+      );
 
       const rendered = await sass.renderSync({ file, output });
       writeFileSync(output, rendered.css);

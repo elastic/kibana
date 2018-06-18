@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { isAbsolute } from 'path';
 import { flatConcatAtType } from './reduce';
 import { alias, mapSpec, wrap } from './modify_reduce';
 
@@ -34,16 +35,23 @@ function applySpecDefaults(spec, type, pluginSpec) {
     listed = !hidden,
     url = `/app/${id}`,
     styleSheetPath,
-    styleSheetToCompile,
   } = spec;
 
   if (spec.injectVars) {
-    throw new Error(`[plugin:${pluginId}] uiExports.app.injectVars has been removed. Use server.injectUiAppVars('${id}', () => { ... })`);
+    throw new Error(
+      `[plugin:${pluginId}] uiExports.app.injectVars has been removed. Use server.injectUiAppVars('${id}', () => { ... })`
+    );
   }
 
   if (spec.uses) {
     throw new Error(
       `[plugin:${pluginId}] uiExports.app.uses has been removed. Import these uiExport types with "import 'uiExports/{type}'"`
+    );
+  }
+
+  if (styleSheetPath && (!isAbsolute(styleSheetPath) || !styleSheetPath.startsWith(pluginSpec.getPublicDir()))) {
+    throw new Error(
+      `[plugin:${pluginId}] uiExports.app.styleSheetPath must be an absolute path within the public directory`
     );
   }
 
@@ -60,7 +68,6 @@ function applySpecDefaults(spec, type, pluginSpec) {
     listed,
     url,
     styleSheetPath,
-    styleSheetToCompile,
   };
 }
 

@@ -30,11 +30,11 @@ export const TranspileScssTask = {
     const enabledPlugins = await spec$.toArray().toPromise();
 
     await Promise.all(enabledPlugins.map(async plugin => {
-      if (!plugin.getExportAppStyleSheetToCompilePath()) {
+      if (!plugin.getExportAppStyleSheetToCompile()) {
         return;
       }
 
-      const builder = new SassBuilder(plugin.getExportAppStyleSheetToCompilePath());
+      const builder = new SassBuilder(plugin.getExportAppStyleSheetToCompile());
 
       try {
         await builder.build();

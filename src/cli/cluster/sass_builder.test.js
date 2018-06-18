@@ -21,7 +21,9 @@ import sinon from 'sinon';
 import sass from 'node-sass';
 import { SassBuilder } from './sass_builder';
 
+
 describe('SASS builder', () => {
+  jest.mock('fs');
   const sandbox = sinon.createSandbox();
 
   it('generates a glob', () => {

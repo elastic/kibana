@@ -202,11 +202,11 @@ export default class ClusterManager {
 
     const enabledPlugins = await spec$.toArray().toPromise();
     const scssBundles = enabledPlugins.reduce((acc, plugin) => {
-      if (!plugin.getExportAppStyleSheetToCompilePath()) {
+      if (!plugin.getExportAppStyleSheetToCompile()) {
         return acc;
       }
 
-      const builder = new SassBuilder(plugin.getExportAppStyleSheetToCompilePath(), { watcher });
+      const builder = new SassBuilder(plugin.getExportAppStyleSheetToCompile(), { watcher });
 
       builder.build().then(onSuccess.bind(this, builder)).catch(onError.bind(this, builder));
       builder.addToWatcher();

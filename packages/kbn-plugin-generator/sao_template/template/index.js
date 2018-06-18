@@ -10,9 +10,8 @@ export default function (kibana) {
         title: '<%= startCase(name) %>',
         description: '<%= description %>',
         main: 'plugins/<%= kebabCase(name) %>/app',
-
         <% if (generateScss) { %>
-        styleSheetPath: 'app.css',
+        styleSheetPath: `${__dirname}/public/app.scss`,
         <% } %>
       },
       <% } %>
