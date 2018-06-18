@@ -29,8 +29,8 @@ export function showCloneModal(onClone, title) {
   };
 
   const onCloneConfirmed = (newTitle, isTitleDuplicateConfirmed, onTitleDuplicate) => {
-    onClone(newTitle, isTitleDuplicateConfirmed, onTitleDuplicate).then(id => {
-      if (id) {
+    onClone(newTitle, isTitleDuplicateConfirmed, onTitleDuplicate).then(({ id, error }) => {
+      if (id || error) {
         closeModal();
       }
     });
