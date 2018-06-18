@@ -87,7 +87,7 @@ export class UrlPatternMatcher {
                 );
                 c = new SharedComponent(part);
               }
-            } else if ((c = this[method].parametrizedComponentFactories[part])) {
+            } else if ((c = this[method].parametrizedComponentFactories.getComponent(part))) {
               // c is a f
               c = c(part, activeComponent);
             } else {
