@@ -31,7 +31,6 @@ import {
   PHASE_PRIMARY_SHARD_COUNT,
   PHASE_REPLICA_COUNT,
   PHASE_ENABLED,
-  PHASE_ROLLOVER_ALIAS,
   PHASE_ATTRIBUTES_THAT_ARE_NUMBERS,
   MAX_SIZE_TYPE_DOCUMENT
 } from '../constants';
@@ -182,9 +181,7 @@ export const phaseToES = (state, phase) => {
   esPhase.actions = {};
 
   if (phase[PHASE_ROLLOVER_ENABLED]) {
-    esPhase.actions.rollover = {
-      alias: phase[PHASE_ROLLOVER_ALIAS],
-    };
+    esPhase.actions.rollover = {};
 
     if (isNumber(phase[PHASE_ROLLOVER_MAX_AGE])) {
       esPhase.actions.rollover.max_age = `${phase[PHASE_ROLLOVER_MAX_AGE]}${
