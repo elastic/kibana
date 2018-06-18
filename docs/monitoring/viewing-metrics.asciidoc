@@ -1,0 +1,71 @@
+[role="xpack"]
+[[monitoring-data]]
+== Viewing Monitoring Data in {kib}
+++++
+<titleabbrev>Viewing Monitoring Data</titleabbrev>
+++++
+
+You can enable {monitoring} in {es}, Logstash, {kib}, and Beats. By default, the
+monitoring agents on {es} index data within the same cluster.
+
+TIP: If you have a dedicated monitoring cluster, the information is accessible
+even if the {es} cluster you're monitoring is not. You can send data from
+multiple clusters to the same monitoring cluster and view them all through the
+same instance of {kib}. For  more information, see
+
+To view and analyze the health and performance of {es}, Logstash, {kib}, and
+Beats:
+
+. {ref}/configuring-monitoring.html[Configure monitoring in {es}]. If you want
+to use a separate monitoring cluster, see
+{xpack-ref}/monitoring-production.html[Monitoring in a Production Environment].
+
+. <<monitoring-xpack-kibana,Configure monitoring in {kib}>>.
+
+. {logstash-ref}/configuring-logstash.html[Configure monitoring in Logstash].
+
+. Configure monitoring in {auditbeat-ref}/monitoring.html[Auditbeat],
+{filebeat-ref}/monitoring.html[Filebeat],
+{heartbeat-ref}/monitoring.html[Heartbeat],
+{metricbeat-ref}/monitoring.html[Metricbeat],
+{packetbeat-ref}/monitoring.html[Packetbeat], and
+{winlogbeat-ref}/monitoring.html[Winlogbeat].
+
+. Open {kib} in your web browser and log in. If you are running {kib}
+locally, go to `http://localhost:5601/`. To access {kib} and view the
+monitoring dashboards, you must log in as a user who has the `kibana_user`
+and `monitoring_user` roles.
+
+. In the side navigation, click *Monitoring*. The first time you open {kib}
+monitoring, data collection is
+disabled. You will be prompted to turn on data collection.
++
+If you have permission to turn on data collection and there is data in the cluster,
+{kib} displays the monitoring dashboards.  You'll see cluster alerts
+that require your attention and a summary of the available monitoring metrics
+for {es}, Logstash, {kib}, and Beats. To view additional information, click the
+Overview, Nodes, Indices, or Instances links.
++
+[role="screenshot"]
+image::images/monitoring-dashboard.png[Monitoring dashboard]
++
+If {kib} can't activate monitoring, here are some things to do:
++
+* If you don't have permission to activate monitoring,
+contact your system administrator.
++
+* If {kib} can't find monitoring data, set the time filter to
+“Last 1 hour”.  When monitoring data appears in your cluster, the page
+automatically refreshes with the monitoring summary.
++
+* Check your `xpack.monitoring.elasticsearch.url` setting.
+See <<monitoring-settings-kb, Monitoring Settings in Kibana>>.
+
+
+
+include::cluster-alerts-license.asciidoc[]
+include::beats-details.asciidoc[]
+include::cluster-alerts.asciidoc[]
+include::elasticsearch-details.asciidoc[]
+include::kibana-details.asciidoc[]
+include::logstash-details.asciidoc[]

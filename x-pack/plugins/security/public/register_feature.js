@@ -13,7 +13,7 @@ FeatureCatalogueRegistryProvider.register(() => {
     id: 'security',
     title: 'Security Settings',
     description: 'Protect your data and easily manage who has access to what with users and roles.',
-    icon: '/plugins/kibana/assets/app_security.svg',
+    icon: 'securityApp',
     path: '/app/kibana#/management/security',
     showOnHomePage: true,
     category: FeatureCatalogueCategory.ADMIN

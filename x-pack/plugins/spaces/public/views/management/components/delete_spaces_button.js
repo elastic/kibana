@@ -60,18 +60,11 @@ export class DeleteSpacesButton extends Component {
 
   deleteSpaces = () => {
     const {
-      httpAgent,
-      chrome,
+      spacesManager,
       spaces
     } = this.props;
 
-    console.log(this.props, spaces);
-
-    const deleteOperations = spaces.map(space => {
-      return httpAgent.delete(
-        chrome.addBasePath(`/api/spaces/v1/spaces/${encodeURIComponent(space.id)}`)
-      );
-    });
+    const deleteOperations = spaces.map(space => spacesManager.deleteSpace(space));
 
     Promise.all(deleteOperations)
       .then(() => {
@@ -101,7 +94,6 @@ export class DeleteSpacesButton extends Component {
 
 DeleteSpacesButton.propTypes = {
   spaces: PropTypes.array.isRequired,
-  httpAgent: PropTypes.func.isRequired,
-  chrome: PropTypes.object.isRequired,
+  spacesManager: PropTypes.object.isRequired,
   onDelete: PropTypes.func
 };

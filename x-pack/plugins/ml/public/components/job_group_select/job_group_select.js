@@ -10,13 +10,13 @@ import _ from 'lodash';
 
 import template from './job_group_select.html';
 
-import { JobServiceProvider } from 'plugins/ml/services/job_service';
-import { CalendarServiceProvider } from 'plugins/ml/services/calendar_service';
+import { mlJobService } from 'plugins/ml/services/job_service';
+import { mlCalendarService } from 'plugins/ml/services/calendar_service';
 import { InitAfterBindingsWorkaround } from 'ui/compat';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlJobGroupSelect', function (es, $timeout, Private) {
+module.directive('mlJobGroupSelect', function () {
   return {
     restrict: 'E',
     template,
@@ -30,8 +30,6 @@ module.directive('mlJobGroupSelect', function (es, $timeout, Private) {
     controller: class MlGroupSelectController extends InitAfterBindingsWorkaround {
 
       initAfterBindings($scope) {
-        const mlJobService = Private(JobServiceProvider);
-        const mlCalendarService = Private(CalendarServiceProvider);
         this.$scope = $scope;
         this.selectedGroups = [];
         this.groups = [];

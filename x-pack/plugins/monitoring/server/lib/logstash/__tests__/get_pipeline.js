@@ -15,7 +15,7 @@ describe('get_pipeline', () => {
     let vertex;
     let vertexStatsBucket;
     let totalProcessorsDurationInMillis;
-    let timeboundsInMillis;
+    let timeseriesIntervalInSeconds;
 
     beforeEach(() => {
       vertex = {
@@ -31,16 +31,16 @@ describe('get_pipeline', () => {
       };
 
       totalProcessorsDurationInMillis = 24000;
-      timeboundsInMillis = 15 * 60 * 1000;
+      timeseriesIntervalInSeconds = 15 * 60;
     });
 
     it('returns correct stats', () => {
-      const result = _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationInMillis, timeboundsInMillis);
+      const result = _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationInMillis, timeseriesIntervalInSeconds);
       expect(result).to.eql({
         events_in: 10000,
         events_out: 9000,
         duration_in_millis: 18000,
-        events_per_millisecond: 0.00001,
+        events_out_per_millisecond: 0.01,
         millis_per_event: 2,
         queue_push_duration_in_millis: 100000,
         queue_push_duration_in_millis_per_event: 11.11111111111111
@@ -55,12 +55,13 @@ describe('get_pipeline', () => {
       });
 
       it('returns correct stats', () => {
-        const result = _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationInMillis, timeboundsInMillis);
+        const result = _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationInMillis, timeseriesIntervalInSeconds);
         expect(result).to.eql({
           events_in: 10000,
           events_out: 9000,
           duration_in_millis: 18000,
-          events_per_millisecond: 0.000011111111111111112,
+          events_in_per_millisecond: 0.011111111111111112,
+          events_out_per_millisecond: 0.01,
           millis_per_event: 1.8,
           percent_of_total_processor_duration: 0.75
         });
@@ -75,12 +76,13 @@ describe('get_pipeline', () => {
       });
 
       it('returns correct stats', () => {
-        const result = _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationInMillis, timeboundsInMillis);
+        const result = _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationInMillis, timeseriesIntervalInSeconds);
         expect(result).to.eql({
           events_in: 10000,
           events_out: 9000,
           duration_in_millis: 18000,
-          events_per_millisecond: 0.000011111111111111112,
+          events_in_per_millisecond: 0.011111111111111112,
+          events_out_per_millisecond: 0.01,
           millis_per_event: 1.8,
           percent_of_total_processor_duration: 0.75
         });
@@ -289,7 +291,7 @@ describe('get_pipeline', () => {
                         max: 1516135440463
                       }
                     },
-                    events_per_millisecond: {
+                    events_out_per_millisecond: {
                       data: [
                         [ 1516131120000, 0.03333333333333333 ],
                         [ 1516131180000, 0.06666666666666667 ]
@@ -367,7 +369,17 @@ describe('get_pipeline', () => {
                         max: 1516135440463
                       }
                     },
-                    events_per_millisecond: {
+                    events_in_per_millisecond: {
+                      data: [
+                        [1516131120000, 0.03333333333333333],
+                        [1516131180000, 0.06666666666666667]
+                      ],
+                      timeRange: {
+                        min: 1516131138639,
+                        max: 1516135440463
+                      }
+                    },
+                    events_out_per_millisecond: {
                       data: [
                         [ 1516131120000, 0.03333333333333333 ],
                         [ 1516131180000, 0.06666666666666667 ]

@@ -4,39 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component }  from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import {
-  EuiHeader,
-  EuiHeaderSection,
-  EuiHeaderBreadcrumb,
-  EuiHeaderBreadcrumbs
+  EuiBreadcrumbs,
+  EuiSpacer,
 } from '@elastic/eui';
 
 export class PageHeader extends Component {
   render() {
     return (
-      <EuiHeader>
-        <EuiHeaderSection>
-          <EuiHeaderBreadcrumbs>
-            {this.props.breadcrumbs.map(this.buildBreadcrumb)}
-          </EuiHeaderBreadcrumbs>
-        </EuiHeaderSection>
-      </EuiHeader>
+      <div>
+        <EuiBreadcrumbs breadcrumbs={this.props.breadcrumbs.map(this.buildBreadcrumb)} />
+        <EuiSpacer />
+      </div>
     );
   }
 
   buildBreadcrumb = (breadcrumb) => {
-    return (
-      <EuiHeaderBreadcrumb key={breadcrumb.id} href={breadcrumb.href} isActive={breadcrumb.current}>
-        {breadcrumb.display}
-      </EuiHeaderBreadcrumb>
-    );
+    return {
+      text: breadcrumb.display,
+      href: breadcrumb.href,
+    };
   }
 }
-
-
 
 PageHeader.propTypes = {
   breadcrumbs: PropTypes.array.isRequired

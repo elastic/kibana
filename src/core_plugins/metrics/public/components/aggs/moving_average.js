@@ -1,14 +1,35 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import PropTypes from 'prop-types';
 import React from 'react';
 import AggRow from './agg_row';
 import AggSelect from './agg_select';
 import MetricSelect from './metric_select';
-import Select from 'react-select';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import createNumberHandler from '../lib/create_number_handler';
-import { htmlIdGenerator } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiComboBox,
+} from '@elastic/eui';
 
 export const MovingAverageAgg = props => {
   const { siblings } = props;
@@ -35,6 +56,13 @@ export const MovingAverageAgg = props => {
     { label: 'False', value: 0 }
   ];
   const htmlId = htmlIdGenerator();
+  const selectedModelOption = modelOptions.find(option => {
+    return model.model === option.value;
+  });
+  const selectedMinimizeOption = minimizeOptions.find(option => {
+    return model.minimize === option.value;
+  });
+
   return (
     <AggRow
       disableDelete={props.disableDelete}
@@ -67,13 +95,14 @@ export const MovingAverageAgg = props => {
         <div className="vis_editor__agg_row-item">
           <div className="vis_editor__row_item">
             <label className="vis_editor__label" htmlFor={htmlId('model')}>Model</label>
-            <Select
-              inputProps={{ id: htmlId('model') }}
-              clearable={false}
+            <EuiComboBox
+              isClearable={false}
+              id={htmlId('model')}
               placeholder="Select..."
-              onChange={handleSelectChange('model')}
-              value={props.model.model}
               options={modelOptions}
+              selectedOptions={selectedModelOption ? [selectedModelOption] : []}
+              onChange={handleSelectChange('model')}
+              singleSelection={true}
             />
           </div>
           <div className="vis_editor__row_item">
@@ -90,12 +119,13 @@ export const MovingAverageAgg = props => {
           </div>
           <div className="vis_editor__row_item">
             <label className="vis_editor__label" htmlFor={htmlId('minimize')}>Minimize</label>
-            <Select
-              inputProps={{ id: htmlId('minimize') }}
+            <EuiComboBox
+              id={htmlId('minimize')}
               placeholder="Select..."
-              onChange={handleSelectChange('minimize')}
-              value={model.minimize}
               options={minimizeOptions}
+              selectedOptions={selectedMinimizeOption ? [selectedMinimizeOption] : []}
+              onChange={handleSelectChange('minimize')}
+              singleSelection={true}
             />
           </div>
           <div className="vis_editor__row_item">

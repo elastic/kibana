@@ -8,11 +8,10 @@
 
 
 import 'ngreact';
-import { dataRecognizerProvider } from './data_recognizer';
+import { DataRecognizer } from './data_recognizer';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
-module.directive('mlDataRecognizer', function (reactDirective, Private) {
-  const DataRecognizer = Private(dataRecognizerProvider);
+module.directive('mlDataRecognizer', function (reactDirective) {
   return reactDirective(DataRecognizer, undefined, { restrict: 'AE' });
 });

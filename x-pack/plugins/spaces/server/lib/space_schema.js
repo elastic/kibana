@@ -5,11 +5,14 @@
  */
 
 import Joi from 'joi';
+import { MAX_SPACE_INITIALS } from '../../common/constants';
 
 export const spaceSchema = Joi.object({
   id: Joi.string(),
   name: Joi.string().required(),
   description: Joi.string().required(),
-  urlContext: Joi.string().regex(/[a-z0-9\-]+/, `lower case, a-z, 0-9, and "-" are allowed`).required(),
+  urlContext: Joi.string().regex(/[a-z0-9\-]*/, `lower case, a-z, 0-9, and "-" are allowed`),
+  initials: Joi.string().max(MAX_SPACE_INITIALS),
+  color: Joi.string().regex(/^#[a-z0-9]{6}$/, `6 digit hex color, starting with a #`),
   _reserved: Joi.boolean()
 }).default();

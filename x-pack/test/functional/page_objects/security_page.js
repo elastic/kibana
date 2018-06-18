@@ -346,7 +346,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       log.debug('Delete user ' + username);
       return remote.findDisplayedByLinkText(username).click()
         .then(() => {
-          return PageObjects.header.isGlobalLoadingIndicatorHidden();
+          return PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         })
         .then(() => {
           log.debug('Find delete button and click');

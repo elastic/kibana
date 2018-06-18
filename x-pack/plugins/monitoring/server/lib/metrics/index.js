@@ -4,12 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  LatencyMetric,
-  QuotaMetric,
-  ElasticsearchMetric,
-  LogstashClusterMetric,
-  BeatsMetric,
-} from './classes';
+export { ElasticsearchMetric } from './elasticsearch/classes';
+export { KibanaClusterMetric, KibanaMetric } from './kibana/classes';
+export { LogstashClusterMetric, LogstashMetric } from './logstash/classes';
+export { BeatsClusterMetric, BeatsMetric } from './beats/classes';
 export { metrics } from './metrics';
-export { serializeMetric } from './serialize_metric';

@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import React from 'react';
 import sinon from 'sinon';
 import { mount, shallow } from 'enzyme';
@@ -16,8 +35,7 @@ const mockListControl = {
   },
   type: 'list',
   label: 'list control',
-  value: '',
-  getMultiSelectDelimiter: () => { return ','; },
+  value: [],
   selectOptions: [
     { label: 'choice1', value: 'choice1' },
     { label: 'choice2', value: 'choice2' }
@@ -158,29 +176,4 @@ test('resetControls', () => {
   sinon.assert.notCalled(clearControls);
   sinon.assert.notCalled(submitFilters);
   sinon.assert.notCalled(stageFilter);
-});
-
-test('stageFilter list control', () => {
-  const component = mount(<InputControlVis
-    stageFilter={stageFilter}
-    submitFilters={submitFilters}
-    resetControls={resetControls}
-    clearControls={clearControls}
-    controls={[mockListControl]}
-    updateFiltersOnChange={updateFiltersOnChange}
-    hasChanges={() => { return true; }}
-    hasValues={() => { return true; }}
-  />);
-  const reactSelectInput = component.find(`#${mockListControl.id}`).hostNodes();
-  reactSelectInput.simulate('change', { target: { value: 'choice1' } });
-  reactSelectInput.simulate('keyDown', { keyCode: 9, key: 'Tab' });
-  sinon.assert.notCalled(clearControls);
-  sinon.assert.notCalled(submitFilters);
-  sinon.assert.notCalled(resetControls);
-  const expectedControlIndex = 0;
-  const expectedControlValue = 'choice1';
-  sinon.assert.calledWith(stageFilter,
-    expectedControlIndex,
-    expectedControlValue
-  );
 });

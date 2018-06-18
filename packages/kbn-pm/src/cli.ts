@@ -1,17 +1,37 @@
-import getopts from 'getopts';
-import dedent from 'dedent';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import chalk from 'chalk';
+import dedent from 'dedent';
+import getopts from 'getopts';
 import { resolve } from 'path';
 
 import { commands } from './commands';
 import { runCommand } from './run';
+import { log } from './utils/log';
 
 function help() {
   const availableCommands = Object.keys(commands)
     .map(commandName => commands[commandName])
     .map(command => `${command.name} - ${command.description}`);
 
-  console.log(dedent`
+  log.write(dedent`
     usage: kbn <command> [<args>]
 
     By default commands are run for Kibana itself, all packages in the 'packages/'
@@ -35,7 +55,7 @@ export async function run(argv: string[]) {
   // starts forwarding the `--` directly to this script, see
   // https://github.com/yarnpkg/yarn/blob/b2d3e1a8fe45ef376b716d597cc79b38702a9320/src/cli/index.js#L174-L182
   if (argv.includes('--')) {
-    console.log(
+    log.write(
       chalk.red(
         `Using "--" is not allowed, as it doesn't work with 'yarn kbn'.`
       )
@@ -45,9 +65,9 @@ export async function run(argv: string[]) {
 
   const options = getopts(argv, {
     alias: {
+      e: 'exclude',
       h: 'help',
       i: 'include',
-      e: 'exclude',
     },
   });
 
@@ -69,7 +89,7 @@ export async function run(argv: string[]) {
 
   const command = commands[commandName];
   if (command === undefined) {
-    console.log(
+    log.write(
       chalk.red(`[${commandName}] is not a valid command, see 'kbn --help'`)
     );
     process.exit(1);

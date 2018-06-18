@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SpacesGridPage } from './spaces_grid_page';
-export { ManageSpacePage } from './manage_space_page';
+export { PageHeader } from './page_header';
+export { DeleteSpacesButton } from './delete_spaces_button';

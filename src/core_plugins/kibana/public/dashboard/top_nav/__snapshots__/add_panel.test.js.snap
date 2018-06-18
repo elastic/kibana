@@ -1,0 +1,91 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`render 1`] = `
+<EuiFlyout
+  className="addPanelFlyout"
+  data-test-subj="dashboardAddPanel"
+  onClose={[Function]}
+  ownFocus={true}
+  size="s"
+>
+  <EuiFlyoutBody>
+    <EuiFlexGroup
+      alignItems="stretch"
+      component="div"
+      direction="row"
+      gutterSize="l"
+      justifyContent="flexStart"
+      responsive={true}
+      wrap={false}
+    >
+      <EuiFlexItem
+        component="div"
+        grow={true}
+      >
+        <EuiTitle
+          size="m"
+        >
+          <h2>
+            Add Panels
+          </h2>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem
+        component="div"
+        grow={false}
+      >
+        <EuiButtonIcon
+          aria-label="close add panel"
+          color="primary"
+          data-test-subj="closeAddPanelBtn"
+          iconType="cross"
+          onClick={[Function]}
+          type="button"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiTabs>
+      <EuiTab
+        data-test-subj="addVisualizationTab"
+        disabled={false}
+        isSelected={true}
+        key="vis"
+        onClick={[Function]}
+      >
+        Visualization
+      </EuiTab>
+      <EuiTab
+        data-test-subj="addSavedSearchTab"
+        disabled={false}
+        isSelected={false}
+        key="search"
+        onClick={[Function]}
+      >
+        Saved Search
+      </EuiTab>
+    </EuiTabs>
+    <EuiSpacer
+      size="s"
+    />
+    <SavedObjectFinder
+      callToActionButton={
+        <EuiButton
+          color="primary"
+          data-test-subj="addNewSavedObjectLink"
+          fill={false}
+          iconSide="left"
+          onClick={[Function]}
+          type="button"
+        >
+          Add new Visualization
+        </EuiButton>
+      }
+      find={[Function]}
+      key="visSavedObjectFinder"
+      noItemsMessage="No matching visualizations found."
+      onChoose={[Function]}
+      savedObjectType="visualization"
+    />
+  </EuiFlyoutBody>
+</EuiFlyout>
+`;

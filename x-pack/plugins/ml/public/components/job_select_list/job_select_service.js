@@ -11,12 +11,11 @@
 import _ from 'lodash';
 import { notify } from 'ui/notify';
 
-import { JobServiceProvider } from 'plugins/ml/services/job_service';
+import { mlJobService } from 'plugins/ml/services/job_service';
 
 let jobSelectService = undefined;
 
-export function JobSelectServiceProvider($rootScope, Private, globalState) {
-  const mlJobService = Private(JobServiceProvider);
+export function JobSelectServiceProvider($rootScope, globalState) {
 
   function checkGlobalState() {
     if (globalState.ml === undefined) {

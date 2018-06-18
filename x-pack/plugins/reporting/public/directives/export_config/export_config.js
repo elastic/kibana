@@ -71,7 +71,7 @@ module.directive('exportConfig', ($rootScope, reportingDocumentControl, reportin
           return;
         }
 
-        this.updateUrl();
+        $scope.updateUrl();
       });
 
       const onResize = debounce(() => {
@@ -104,9 +104,13 @@ module.directive('exportConfig', ($rootScope, reportingDocumentControl, reportin
               });
             }
 
+            const defaultMessage = err.status === 403
+              ? `You don't have permission to generate this report.`
+              : `Can't reach the server. Please try again.`;
+
             toastNotifications.addDanger({
               title: 'Reporting error',
-              text: err.message || `Can't reach the server. Please try again.`,
+              text: err.message || defaultMessage,
               'data-test-subj': 'queueReportError',
             });
           });

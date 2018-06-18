@@ -6,9 +6,8 @@
 
 import { get } from 'lodash';
 import { checkParam } from '../../error_missing_required';
-import { createQuery } from '../../create_query.js';
+import { createQuery } from '../../create_query';
 import { ElasticsearchMetric } from '../../metrics';
-
 import { getDefaultNodeFromId } from './get_default_node_from_id';
 import { calculateNodeType } from './calculate_node_type';
 import { getNodeTypeClassLabel } from './get_node_type_class_label';
@@ -46,9 +45,14 @@ export function handleResponse(clusterState, shardStats, resolver) {
         freeSpace: get(sourceStats, 'fs.total.available_in_bytes'),
         usedHeap: get(sourceStats, 'jvm.mem.heap_used_percent'),
         status: 'Online',
+        isOnline: true,
       };
     } else {
-      nodeSummary = { nodeTypeLabel: 'Offline Node', status: 'Offline', };
+      nodeSummary = {
+        nodeTypeLabel: 'Offline Node',
+        status: 'Offline',
+        isOnline: false,
+      };
     }
 
     return {

@@ -1,53 +1,58 @@
 {
-  "_xpack/ml/calendars/{calendar_id}": {
+  "_xpack/ml/calendars/{id}": {
     "methods": [
       "GET"
     ],
     "patterns": [
-      "_xpack/ml/calendars/{calendar_id}",
+      "_xpack/ml/calendars/{id}",
       "_xpack/ml/calendars/_all"
     ],
     "data_autocomplete_rules": {
       "from": 0,
       "size": 100
-    }
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-get-calendar.html"
   },
-  "PUT _xpack/ml/calendars/{calendar_id}": {
+  "PUT _xpack/ml/calendars/{id}": {
     "methods": [
       "PUT"
     ],
     "patterns": [
-      "_xpack/ml/calendars/{calendar_id}"
+      "_xpack/ml/calendars/{id}"
     ],
     "data_autocomplete_rules": {
       "description": ""
-    }
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-put-calendar.html"
   },
-  "DELETE _xpack/ml/calendars/{calendar_id}": {
+  "DELETE _xpack/ml/calendars/{id}": {
     "methods": [
       "DELETE"
     ],
     "patterns": [
-      "_xpack/ml/calendars/{calendar_id}"
-    ]
+      "_xpack/ml/calendars/{id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-delete-calendar.html"
   },
-  "_xpack/ml/calendars/{calendar_id}/jobs/{job_id}": {
+  "_xpack/ml/calendars/{id}/jobs/{id}": {
     "methods": [
       "PUT"
     ],
     "patterns": [
-      "_xpack/ml/calendars/{calendar_id}/jobs/{job_id}"
-    ]
+      "_xpack/ml/calendars/{id}/jobs/{id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-put-calendar-job.html"
   },
-  "DELETE _xpack/ml/calendars/{calendar_id}/jobs/{job_id}": {
+  "DELETE _xpack/ml/calendars/{id}/jobs/{id}": {
     "methods": [
       "DELETE"
     ],
     "patterns": [
-      "_xpack/ml/calendars/{calendar_id}/jobs/{job_id}"
-    ]
+      "_xpack/ml/calendars/{id}/jobs/{id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-delete-calendar-job.html"
   },
-  "_xpack/ml/calendars/{calendar_id}/events": {
+  "_xpack/ml/calendars/{id}/events": {
     "methods": [
       "GET"
     ],
@@ -56,27 +61,30 @@
       "size": 100
     },
     "patterns": [
-      "_xpack/ml/calendars/{calendar_id}/events",
+      "_xpack/ml/calendars/{id}/events",
       "_xpack/ml/calendars/_all/events"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-get-calendar-event.html"
   },
-  "POST _xpack/ml/calendars/{calendar_id}/events": {
+  "POST _xpack/ml/calendars/{id}/events": {
     "methods": [
       "POST"
     ],
     "patterns": [
-      "_xpack/ml/calendars/{calendar_id}/events"
+      "_xpack/ml/calendars/{id}/events"
     ],
     "data_autocomplete_rules": {
       "events": [{}]
-    }
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-post-calendar-event.html"
   },
-  "_xpack/ml/calendars/{calendar_id}/events/{event_id}": {
+  "_xpack/ml/calendars/{id}/events/{event_id}": {
     "methods": [
       "DELETE"
     ],
     "patterns": [
-      "_xpack/ml/calendars/{calendar_id}/events/{event_id}"
-    ]
+      "_xpack/ml/calendars/{id}/events/{event_id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-delete-calendar-event.html"
   }
 }

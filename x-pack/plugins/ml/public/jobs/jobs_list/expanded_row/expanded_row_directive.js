@@ -14,7 +14,7 @@ import { copyTextToClipboard } from 'plugins/ml/util/clipboard_utils';
 import { JOB_STATE, DATAFEED_STATE } from 'plugins/ml/../common/constants/states';
 import { ML_DATA_PREVIEW_COUNT } from 'plugins/ml/../common/util/job_utils';
 import { checkPermission } from 'plugins/ml/privilege/check_privilege';
-import { JobServiceProvider } from 'plugins/ml/services/job_service';
+import { mlJobService } from 'plugins/ml/services/job_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 import numeral from '@elastic/numeral';
 import chrome from 'ui/chrome';
@@ -24,7 +24,7 @@ import template from './expanded_row.html';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlJobListExpandedRow', function ($location, Private) {
+module.directive('mlJobListExpandedRow', function ($location) {
   return {
     restrict: 'AE',
     replace: false,
@@ -40,7 +40,6 @@ module.directive('mlJobListExpandedRow', function ($location, Private) {
     template,
     link: function ($scope, $element) {
       const msgs = mlMessageBarService; // set a reference to the message bar service
-      const mlJobService = Private(JobServiceProvider);
       const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
       const DATA_FORMAT = '0.0 b';
 

@@ -53,7 +53,7 @@ export const spaces = (kibana) => new kibana.Plugin({
           valid: true,
           space: await getActiveSpace(request.getSavedObjectsClient(), request.getBasePath())
         };
-      } catch(e) {
+      } catch (e) {
         vars.activeSpace = {
           valid: false,
           error: wrapError(e).output.payload
@@ -75,8 +75,8 @@ export const spaces = (kibana) => new kibana.Plugin({
     const config = server.config();
     validateConfig(config, message => server.log(['spaces', 'warning'], message));
 
-    const savedObjectsClientProvider = server.getSavedObjectsClientProvider();
-    savedObjectsClientProvider.addClientWrapper(spacesSavedObjectsClientWrapper);
+    const { addScopedSavedObjectsClientWrapperFactory } = server.savedObjects;
+    addScopedSavedObjectsClientWrapperFactory(spacesSavedObjectsClientWrapper);
 
     initSpacesApi(server);
 

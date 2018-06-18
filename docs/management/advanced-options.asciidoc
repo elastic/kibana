@@ -8,7 +8,7 @@ for displayed decimal values.
 To set advanced options:
 
 . Go to *Settings > Advanced*.
-. Click the *Edit* button for the option you want to modify.
+. Scroll or use the search bar to find the option you want to modify.
 . Enter a new value for the option.
 . Click the *Save* button.
 

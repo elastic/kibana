@@ -1,10 +1,29 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { AggConfig } from '../agg_config';
 import { VisProvider } from '..';
-import { VisAggConfigsProvider } from '../agg_configs';
+import { AggConfigs } from '../agg_configs';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { Schemas } from '../editors/default/schemas';
 import { IndexedArray } from '../../indexed_array';
@@ -12,12 +31,10 @@ import { IndexedArray } from '../../indexed_array';
 describe('AggConfigs', function () {
 
   let Vis;
-  let AggConfigs;
   let indexPattern;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    AggConfigs = Private(VisAggConfigsProvider);
     // replace the AggConfig module with a spy
 
     const spy = sinon.spy(AggConfig);
@@ -241,9 +258,7 @@ describe('AggConfigs', function () {
       const aggInfos = vis.aggs.map(function (aggConfig) {
         const football = {};
 
-        sinon.stub(aggConfig, 'toDsl', function () {
-          return football;
-        });
+        sinon.stub(aggConfig, 'toDsl').returns(football);
 
         return {
           id: aggConfig.id,

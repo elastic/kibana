@@ -1,5 +1,5 @@
 {
-  "_cat/pending_tasks": {
+  "cat.pending_tasks": {
     "url_params": {
       "format": "",
       "local": "__flag__",
@@ -14,6 +14,7 @@
     ],
     "patterns": [
       "_cat/pending_tasks"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cat-pending-tasks.html"
   }
 }

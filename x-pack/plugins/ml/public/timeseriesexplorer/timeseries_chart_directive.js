@@ -20,18 +20,19 @@ import 'ui/timefilter';
 
 import { ResizeChecker } from 'ui/resize_checker';
 
+import { getSeverityWithLow } from 'plugins/ml/../common/util/anomaly_utils';
 import { formatValue } from 'plugins/ml/formatters/format_value';
-import { getSeverityWithLow } from 'plugins/ml/util/anomaly_utils';
 import {
   drawLineChartDots,
   filterAxisLabels,
   numTicksForDateFormat
 } from 'plugins/ml/util/chart_utils';
 import { TimeBuckets } from 'ui/time_buckets';
+import { mlAnomaliesTableService } from 'plugins/ml/components/anomalies_table/anomalies_table_service';
 import ContextChartMask from 'plugins/ml/timeseriesexplorer/context_chart_mask';
 import { findNearestChartPointToTime } from 'plugins/ml/timeseriesexplorer/timeseriesexplorer_utils';
 import { mlEscape } from 'plugins/ml/util/string_utils';
-import { FieldFormatServiceProvider } from 'plugins/ml/services/field_format_service';
+import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
@@ -40,13 +41,11 @@ module.directive('mlTimeseriesChart', function (
   $compile,
   $timeout,
   timefilter,
-  mlAnomaliesTableService,
   Private,
   mlChartTooltipService) {
 
   function link(scope, element) {
 
-    const mlFieldFormatService = Private(FieldFormatServiceProvider);
     // Key dimensions for the viz and constituent charts.
     let svgWidth = angular.element('.results-container').width();
     const focusZoomPanelHeight = 25;
@@ -113,9 +112,9 @@ module.directive('mlTimeseriesChart', function (
       drawContextChartSelection();
     });
 
-    scope.$on('renderFocusChart', () => {
-      renderFocusChart();
-    });
+    scope.$watchCollection('focusForecastData', renderFocusChart);
+    scope.$watchCollection('focusChartData', renderFocusChart);
+    scope.$watchGroup(['showModelBounds', 'showForecast'], renderFocusChart);
 
     // Redraw the charts when the container is resize.
     const resizeChecker = new ResizeChecker(angular.element('.ml-timeseries-chart'));

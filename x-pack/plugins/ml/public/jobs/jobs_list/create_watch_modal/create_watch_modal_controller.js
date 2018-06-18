@@ -5,7 +5,8 @@
  */
 
 
-import { CreateWatchServiceProvider } from 'plugins/ml/jobs/new_job/simple/components/watcher/create_watch_service';
+import { mlCreateWatchService } from 'plugins/ml/jobs/new_job/simple/components/watcher/create_watch_service';
+import { xpackFeatureProvider } from 'plugins/ml/license/check_license';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
@@ -13,14 +14,14 @@ const module = uiModules.get('apps/ml');
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 
 module.controller('MlCreateWatchModal', function ($scope, $modalInstance, params, Private) {
-  const mlCreateWatchService = Private(CreateWatchServiceProvider);
+  const xpackFeature = Private(xpackFeatureProvider);
   const msgs = mlMessageBarService; // set a reference to the message bar service
   msgs.clear();
 
   $scope.jobId = params.job.job_id;
   $scope.bucketSpan = params.job.analysis_config.bucket_span;
 
-  $scope.watcherEnabled = mlCreateWatchService.isWatcherEnabled();
+  $scope.watcherEnabled = xpackFeature.isAvailable('watcher');
   $scope.status = mlCreateWatchService.status;
   $scope.STATUS = mlCreateWatchService.STATUS;
 

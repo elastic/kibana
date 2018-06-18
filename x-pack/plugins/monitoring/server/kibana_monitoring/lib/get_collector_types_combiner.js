@@ -9,16 +9,28 @@ import {
   KIBANA_STATS_TYPE,
   KIBANA_SETTINGS_TYPE,
   KIBANA_USAGE_TYPE,
-  KIBANA_REPORTING_TYPE,
 } from '../../../common/constants';
+import { KIBANA_REPORTING_TYPE } from '../../../../reporting/common/constants';
 import { sourceKibana } from './source_kibana';
 
 /*
- * Note: The ES Bulk Data Format is an array with 2 objects.
- * The first object is the header, it has a field for the action (index), and
- * metadata of the document (_index, _type, _id).
- * Since the action types are always "index", there second object which is the
- * payload, or the actual document to index.
+ * Combine stats collected from different sources into a single bulk payload.
+ *
+ * The ES Bulk Data Format is an array with 2 objects:
+ * - The first object is the header, it has a field for the action (index), and
+ *   metadata of the document (_index, _type, _id).
+ * - The second object is the actual document to index.
+ *
+ * NOTE: https://github.com/elastic/kibana/issues/12504 asks that plugins have
+ * a way to register their own stats. It's not hard to move the stats collector
+ * methods under the ownership of the plugins that want it, but this module's
+ * behavior doesn't fit well with plugins registering their own stats. See the
+ * abstraction leak comments in the code.
+ *
+ * This module should go away when stats are collected by a Kibana metricbeat moduleset.
+ *  - Individual plugin operational stats can be added to the `/stats?extended` API response.
+ *  - Individual plugin usage stats can go into a new API similar to the `_xpack/usage` API in ES.
+ *  - Each plugin will have its own top-level property in the responses for these APIs.
  */
 export function getCollectorTypesCombiner(kbnServer, config, _sourceKibana = sourceKibana) {
   return payload => {
@@ -37,7 +49,7 @@ export function getCollectorTypesCombiner(kbnServer, config, _sourceKibana = sou
     if (statsHeader && statsPayload) {
       const [ usageHeader, usagePayload ] = findItem(KIBANA_USAGE_TYPE);
       const kibanaUsage = (usageHeader && usagePayload) ? usagePayload : null;
-      const reportingUsage = (reportingHeader && reportingPayload) ? reportingPayload : null;
+      const reportingUsage = (reportingHeader && reportingPayload) ? reportingPayload : null; // this is an abstraction leak
       statsResult = [
         statsHeader,
         {
@@ -49,7 +61,7 @@ export function getCollectorTypesCombiner(kbnServer, config, _sourceKibana = sou
         set(statsResult, '[1].usage', kibanaUsage);
       }
       if (reportingUsage) {
-        set(statsResult, '[1].usage.xpack.reporting', reportingUsage);
+        set(statsResult, '[1].usage.xpack.reporting', reportingUsage); // this is an abstraction leak
       }
     }
 

@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { SummaryStatus } from '../../';
+import React, { Fragment } from 'react';
+import { SummaryStatus } from '../../summary_status';
+import { ElasticsearchStatusIcon } from '../status_icon';
 import { formatMetric } from '../../../lib/format_number';
 
 export function ClusterStatus({ stats }) {
@@ -21,7 +22,7 @@ export function ClusterStatus({ stats }) {
     status
   } = stats;
 
-  const children = [
+  const metrics = [
     {
       label: 'Nodes',
       value: nodesCount,
@@ -59,11 +60,18 @@ export function ClusterStatus({ stats }) {
     }
   ];
 
+  const IconComponent = ({ status }) => (
+    <Fragment>
+      Health: <ElasticsearchStatusIcon status={status} />
+    </Fragment>
+  );
+
   return (
     <SummaryStatus
-      children={children}
+      metrics={metrics}
       status={status}
-      data-test-subj="elasticsearchSummaryStatus"
+      IconComponent={IconComponent}
+      data-test-subj="elasticsearchClusterStatus"
     />
   );
 }

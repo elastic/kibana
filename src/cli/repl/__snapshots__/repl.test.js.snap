@@ -1,0 +1,90 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`repl it allows print depth to be specified 1`] = `"{ [32m'0'[39m: { [32m'1'[39m: { [32m'2'[39m: [36m[Object][39m } }, whoops: [36m[Circular][39m }"`;
+
+exports[`repl it colorizes raw values 1`] = `"{ meaning: [33m42[39m }"`;
+
+exports[`repl it handles deep and recursive objects 1`] = `
+"{ [32m'0'[39m: { [32m'1'[39m: { [32m'2'[39m: { [32m'3'[39m: { [32m'4'[39m: { [32m'5'[39m: [36m[Object][39m } } } } },
+  whoops: [36m[Circular][39m }"
+`;
+
+exports[`repl it handles undefined 1`] = `"[90mundefined[39m"`;
+
+exports[`repl it prints promise rejects 1`] = `
+Array [
+  Array [
+    "Waiting for promise...",
+  ],
+  Array [
+    "Promise Rejected: 
+",
+    "[32m'Dang, diggity!'[39m",
+  ],
+]
+`;
+
+exports[`repl it prints promise resolves 1`] = `
+Array [
+  Array [
+    "Waiting for promise...",
+  ],
+  Array [
+    "Promise Resolved: 
+",
+    "[ [33m1[39m, [33m2[39m, [33m3[39m ]",
+  ],
+]
+`;
+
+exports[`repl promises rejects only write to a specific depth 1`] = `
+Array [
+  Array [
+    "Waiting for promise...",
+  ],
+  Array [
+    "Promise Rejected: 
+",
+    "{ [32m'0'[39m: { [32m'1'[39m: { [32m'2'[39m: { [32m'3'[39m: { [32m'4'[39m: { [32m'5'[39m: [36m[Object][39m } } } } },
+  whoops: [36m[Circular][39m }",
+  ],
+]
+`;
+
+exports[`repl promises resolves only write to a specific depth 1`] = `
+Array [
+  Array [
+    "Waiting for promise...",
+  ],
+  Array [
+    "Promise Resolved: 
+",
+    "{ [32m'0'[39m: { [32m'1'[39m: { [32m'2'[39m: { [32m'3'[39m: { [32m'4'[39m: { [32m'5'[39m: [36m[Object][39m } } } } },
+  whoops: [36m[Circular][39m }",
+  ],
+]
+`;
+
+exports[`repl repl exposes a print object that lets you tailor depth 1`] = `
+Array [
+  Array [
+    "{ hello: { world: [36m[Object][39m } }",
+  ],
+]
+`;
+
+exports[`repl repl exposes a print object that prints promises 1`] = `
+Array [
+  Array [
+    "",
+  ],
+  Array [
+    "Waiting for promise...",
+  ],
+  Array [
+    "Promise Resolved: 
+",
+    "{ hello: { world: [36m[Object][39m } }",
+  ],
+]
+`;
