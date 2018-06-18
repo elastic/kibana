@@ -18,7 +18,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { scan, takeUntil, share, mergeMap, last, catchError } from 'rxjs/operators';
+import { scan, takeUntil, share, mergeMap, last, catchError, materialize } from 'rxjs/operators';
 
 const SEP = /\r?\n/;
 
@@ -51,7 +51,7 @@ export function observeLines(readable) {
     }, { buffer: '' }),
 
     // stop if done completes or errors
-    takeUntil(done$.materialize())
+    takeUntil(done$.pipe(materialize()))
   );
 
   return Rx.merge(
