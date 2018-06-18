@@ -92,7 +92,7 @@ export class Markdown extends PureComponent {
         className={classes}
         /*
          * Justification for dangerouslySetInnerHTML:
-         * The Markdown Visulization is, believe it or not, responsible for rendering Markdown.
+         * The Markdown Visualization is, believe it or not, responsible for rendering Markdown.
          * This relies on `markdown-it` to produce safe and correct HTML.
          */
         dangerouslySetInnerHTML={{ __html: renderedMarkdown }} //eslint-disable-line react/no-danger
