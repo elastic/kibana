@@ -17,11 +17,30 @@
  * under the License.
  */
 
-function getDocumentUid(type, id) {
-  return `${type}#${id}`;
-}
+import path from 'path';
+import { readKeystore }  from './read_keystore';
 
+jest.mock('../../server/keystore');
+import { Keystore } from '../../server/keystore';
 
-export {
-  getDocumentUid,
-};
+describe('cli/serve/read_keystore', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it('returns keystore data', () => {
+    const keystoreData = { 'foo': 'bar' };
+    Keystore.prototype.data = keystoreData;
+
+    const data = readKeystore();
+    expect(data).toEqual(keystoreData);
+  });
+
+  it('uses data path provided', () => {
+    const keystoreDir = '/foo/';
+    const keystorePath = path.join(keystoreDir, 'kibana.keystore');
+
+    readKeystore(keystoreDir);
+    expect(Keystore.mock.calls[0][0]).toEqual(keystorePath);
+  });
+});
