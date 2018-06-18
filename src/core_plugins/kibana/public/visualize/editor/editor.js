@@ -242,7 +242,7 @@ function VisEditor($scope, $route, AppState, $window, kbnUrl, courier, Private, 
     };
 
     timefilter.enableAutoRefreshSelector();
-    timefilter.on('update', updateTimeRange);
+    $scope.$listen(timefilter, 'timeUpdate', updateTimeRange);
 
     // update the searchSource when filters update
     $scope.$listen(queryFilter, 'update', function () {
@@ -260,7 +260,6 @@ function VisEditor($scope, $route, AppState, $window, kbnUrl, courier, Private, 
     $scope.$on('$destroy', function () {
       savedVis.destroy();
       stateMonitor.destroy();
-      timefilter.off('update', updateTimeRange);
     });
   }
 

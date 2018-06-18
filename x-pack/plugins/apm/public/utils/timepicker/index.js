@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import moment from 'moment';
 import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
 import 'ui/autoload/all';
@@ -49,15 +50,21 @@ export function initTimepicker(history, dispatch, callback) {
       });
 
       history.listen(() => {
-        updateRefreshRate(dispatch, timefilter);
+        updateRefreshRate(dispatch);
         globalState.fetch();
       });
+      timefilter.setTime = (from, to) => {
+        timefilter.time.from = moment(from).toISOString();
+        timefilter.time.to = moment(to).toISOString();
+      };
       timefilter.enableTimeRangeSelector();
       timefilter.enableAutoRefreshSelector();
 
-      updateRefreshRate(dispatch, timefilter);
+      updateRefreshRate(dispatch);
 
-      timefilter.on('update', () => dispatch(getAction(timefilter)));
+      $scope.$listen(timefilter, 'timeUpdate', () =>
+        dispatch(getAction(timefilter))
+      );
 
       // hack to access timefilter outside Angular
       globalTimefilter = timefilter;
@@ -73,7 +80,7 @@ function getAction(timefilter) {
   });
 }
 
-function updateRefreshRate(dispatch, timefilter) {
+function updateRefreshRate(dispatch) {
   const refreshInterval = timefilter.getRefreshInterval().value;
   if (currentInterval) {
     clearInterval(currentInterval);
