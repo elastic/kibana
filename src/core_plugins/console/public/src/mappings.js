@@ -223,7 +223,7 @@ function loadMappings(mappings) {
 function loadAliases(aliases) {
   perAliasIndexes = {};
   $.each(aliases || {}, function (index, omdexAliases) {
-    // verify we have an index defined. usefull when mapping loading is disabled
+    // verify we have an index defined. useful when mapping loading is disabled
     perIndexTypes[index] = perIndexTypes[index] || {};
 
     $.each(omdexAliases.aliases || {}, function (alias) {
