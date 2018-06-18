@@ -61,7 +61,7 @@ export const init = (monitoringPlugin, server) => {
   const { info: xpackMainInfo } = xpackMainPlugin;
 
   if (kibanaCollectionEnabled && xpackMainInfo) {
-    const bulkUploader = initBulkUploader(monitoringPlugin.kbnServer, server, collectorSet, xpackMainInfo);
+    const bulkUploader = initBulkUploader(monitoringPlugin.kbnServer, server, xpackMainInfo);
 
     xpackMainPlugin.status.on('green', async () => { // any time xpack_main turns green
       /*
