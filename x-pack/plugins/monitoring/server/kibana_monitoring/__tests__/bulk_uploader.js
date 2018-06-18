@@ -52,8 +52,9 @@ describe('BulkUploader', () => {
       uploader.start();
 
       // allow interval to tick a few times
+      let loggingCalls;
       setTimeout(() => {
-        const loggingCalls = server.log.getCalls();
+        loggingCalls = server.log.getCalls();
         expect(loggingCalls.length).to.be.greaterThan(2); // should be 3-5: start, fetch, skip, fetch, skip
         expect(loggingCalls[0].args).to.eql([
           ['info', 'monitoring-ui', 'kibana-monitoring'],
@@ -69,6 +70,11 @@ describe('BulkUploader', () => {
         ]);
 
         uploader.stop();
+        loggingCalls = server.log.getCalls();
+        expect(loggingCalls[loggingCalls.length - 1].args).to.eql([
+          ['info', 'monitoring-ui', 'kibana-monitoring'],
+          'Stopping monitoring stats collection',
+        ]);
         done();
       }, CHECK_DELAY);
     });

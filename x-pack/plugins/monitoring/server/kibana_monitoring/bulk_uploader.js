@@ -74,6 +74,7 @@ export class BulkUploader {
    * xpackMainPlugin state changes
    */
   stop() {
+    this._log.info('Stopping monitoring stats collection');
     clearInterval(this._timer);
     this._timer = null;
   }
