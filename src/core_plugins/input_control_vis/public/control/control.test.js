@@ -139,7 +139,7 @@ describe('empty state', () => {
     expect(control.value).to.be(originalUnsetValue);
   });
 
-  test('should have value when set to unsetValue', function () {
+  test('should not have value when set to unsetValue', function () {
     control.setUnsetValue(originalUnsetValue);
     control.set(originalUnsetValue);
     expect(control.hasValue()).to.be(false);
