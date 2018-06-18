@@ -26,7 +26,7 @@ const TAGS_WITH_WS = />\s+</g;
  * If you have inline elements (span, a, em, etc.) and any
  * amount of whitespace around them in your markup, then the
  * browser will push them apart. This is ugly in certain
- * senarios and is only fixed by removing the whitespace
+ * scenarios and is only fixed by removing the whitespace
  * from the html in the first place (or ugly css hacks).
  *
  * @param  {string} html - the html to modify
