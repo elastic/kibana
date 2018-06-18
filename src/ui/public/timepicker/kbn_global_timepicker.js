@@ -32,13 +32,30 @@ uiModules
         globalState.refreshInterval = clone(timefilter.getRefreshInterval());
         globalState.time = clone(timefilter.getTime());
         globalState.save();
+        syncTimefilterValues($scope);
       });
       $scope.$listen(timefilter, 'timeUpdate', () => {
         globalState.refreshInterval = clone(timefilter.getRefreshInterval());
         globalState.time = clone(timefilter.getTime());
         globalState.save();
+        syncTimefilterValues($scope);
+      });
+      $scope.$listen(timefilter, 'isEnabledUpdate', () => {
+        syncTimefilterValues($scope);
       });
     });
+
+    // timefilter listeners are not executed in context of angular.
+    function syncTimefilterValues($scope) {
+      $scope.$evalAsync(() => {
+        $scope.timefilterValues = {
+          refreshInterval: timefilter.getRefreshInterval(),
+          time: timefilter.getTime(),
+          isAutoRefreshSelectorEnabled: timefilter.isAutoRefreshSelectorEnabled,
+          isTimeRangeSelectorEnabled: timefilter.isTimeRangeSelectorEnabled,
+        };
+      });
+    }
 
     return {
       template: toggleHtml,
@@ -47,7 +64,7 @@ uiModules
       link: ($scope, element, attributes, kbnTopNav) => {
         listenForUpdates($scope);
 
-        $scope.timefilter = timefilter;
+        syncTimefilterValues($scope);
         $rootScope.toggleRefresh = () => {
           timefilter.toggleRefresh();
         };
