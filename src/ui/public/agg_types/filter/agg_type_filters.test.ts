@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { first } from 'rxjs/operators';
 import { AggTypeFilters } from './agg_type_filters';
 
 describe('AggTypeFilters', () => {
@@ -31,7 +32,7 @@ describe('AggTypeFilters', () => {
   it('should filter nothing without registered filters', async () => {
     const aggTypes = [{ name: 'count' }, { name: 'sum' }];
     const observable = registry.filter$(aggTypes, vis, aggConfig);
-    const filtered = await observable.first().toPromise();
+    const filtered = await observable.pipe(first()).toPromise();
     expect(filtered).toEqual(aggTypes);
   });
 
@@ -51,7 +52,7 @@ describe('AggTypeFilters', () => {
     registry.addFilter(filter);
     await registry
       .filter$(aggTypes, vis, aggConfig)
-      .first()
+      .pipe(first())
       .toPromise();
     expect(filter).toHaveBeenCalledWith(aggTypes[0], vis, aggConfig);
     expect(filter).toHaveBeenCalledWith(aggTypes[1], vis, aggConfig);
@@ -60,16 +61,16 @@ describe('AggTypeFilters', () => {
   it('should allow registered filters to filter out aggTypes', async () => {
     const aggTypes = [{ name: 'count' }, { name: 'sum' }, { name: 'avg' }];
     const observable = registry.filter$(aggTypes, vis, aggConfig);
-    let filtered = await observable.first().toPromise();
+    let filtered = await observable.pipe(first()).toPromise();
     expect(filtered).toEqual(aggTypes);
 
     registry.addFilter(() => true);
     registry.addFilter(aggType => aggType.name !== 'count');
-    filtered = await observable.first().toPromise();
+    filtered = await observable.pipe(first()).toPromise();
     expect(filtered).toEqual([aggTypes[1], aggTypes[2]]);
 
     registry.addFilter(aggType => aggType.name !== 'avg');
-    filtered = await observable.first().toPromise();
+    filtered = await observable.pipe(first()).toPromise();
     expect(filtered).toEqual([aggTypes[1]]);
   });
 });
