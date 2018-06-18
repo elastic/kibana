@@ -69,14 +69,20 @@ export class DetailPanel extends Component {
         component = <Summary />;
     }
     return (
-      <EuiFlyout data-test-subj="indexDetailFlyout" onClose={closeDetailPanel}>
+      <EuiFlyout
+        data-test-subj="indexDetailFlyout"
+        onClose={closeDetailPanel}
+        aria-labelledby="indexDetailsFlyoutTitle"
+      >
         <EuiFlyoutHeader>
-          <EuiTitle size="l">
+          <EuiTitle size="l" id="indexDetailsFlyoutTitle">
             <h2>{indexName}</h2>
           </EuiTitle>
           <EuiTabs>{this.renderTabs()}</EuiTabs>
         </EuiFlyoutHeader>
+
         <EuiFlyoutBody>{component}</EuiFlyoutBody>
+
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
@@ -84,6 +90,7 @@ export class DetailPanel extends Component {
                 Close
               </EuiButtonEmpty>
             </EuiFlexItem>
+
             <EuiFlexItem grow={false}>
               <Route
                 key="menu"

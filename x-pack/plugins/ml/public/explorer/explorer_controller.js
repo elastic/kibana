@@ -120,7 +120,6 @@ module.controller('MlExplorerController', function (
   });
 
   $scope.selectedJobs = null;
-  $scope.influencersData = {};
 
   $scope.getSelectedJobIds = function () {
     const selectedJobs = _.filter($scope.jobs, job => job.selected);
@@ -355,23 +354,42 @@ module.controller('MlExplorerController', function (
       clearSelectedAnomalies();
     } else {
       const timerange = getSelectionTimeRange(cellData);
-
-      if (cellData.fieldName === undefined) {
-        // Click is in one of the cells in the Overall swimlane - reload the 'view by' swimlane
-        // to show the top 'view by' values for the selected time.
-        loadViewBySwimlaneForSelectedTime(timerange.earliestMs, timerange.latestMs);
-        $scope.viewByLoadedForTimeFormatted = moment(timerange.earliestMs).format('MMMM Do YYYY, HH:mm');
-      }
-
-      const jobIds = (cellData.fieldName === VIEW_BY_JOB_LABEL) ?
-        cellData.laneLabels : $scope.getSelectedJobIds();
-      const influencers = getSelectionInfluencers(cellData);
-
       $scope.cellData = cellData;
-      loadAnomaliesTableData();
 
-      const args = [jobIds, influencers, timerange.earliestMs, timerange.latestMs];
-      loadDataForCharts(...args);
+      if (cellData.score > 0) {
+        if (cellData.fieldName === undefined) {
+          // Click is in one of the cells in the Overall swimlane - reload the 'view by' swimlane
+          // to show the top 'view by' values for the selected time.
+          loadViewBySwimlaneForSelectedTime(timerange.earliestMs, timerange.latestMs);
+          $scope.viewByLoadedForTimeFormatted = moment(timerange.earliestMs).format('MMMM Do YYYY, HH:mm');
+        }
+
+        const jobIds = (cellData.fieldName === VIEW_BY_JOB_LABEL) ?
+          cellData.laneLabels : $scope.getSelectedJobIds();
+        const influencers = getSelectionInfluencers(cellData);
+
+        loadAnomaliesTableData();
+        loadDataForCharts(jobIds, influencers, timerange.earliestMs, timerange.latestMs);
+      } else {
+        // Multiple cells are selected, all with a score of 0 - clear all anomalies.
+        $scope.$evalAsync(() => {
+          $scope.influencers = {};
+          $scope.anomalyChartRecords = [];
+
+          $scope.tableData = {
+            anomalies: [],
+            interval: mlSelectIntervalService.state.get('interval').val,
+            examplesByJobId: {},
+            showViewSeriesLink: true
+          };
+        });
+
+        mlExplorerDashboardService.anomalyDataChange.changed(
+          [],
+          timerange.earliestMs,
+          timerange.latestMs
+        );
+      }
     }
   };
   mlExplorerDashboardService.swimlaneCellClick.watch(swimlaneCellClickListener);
@@ -459,6 +477,18 @@ module.controller('MlExplorerController', function (
           // Filter the Top Influencers list to show just the influencers from
           // the records in the selected time range.
           const recordInfluencersByName = {};
+
+          // Add the specified influencer(s) to ensure they are used in the filter
+          // even if their influencer score for the selected time range is zero.
+          influencers.forEach((influencer) => {
+            const fieldName = influencer.fieldName;
+            if (recordInfluencersByName[influencer.fieldName] === undefined) {
+              recordInfluencersByName[influencer.fieldName] = [];
+            }
+            recordInfluencersByName[fieldName].push(influencer.fieldValue);
+          });
+
+          // Add the influencers from the top scoring anomalies.
           resp.records.forEach((record) => {
             const influencersByName = record.influencers || [];
             influencersByName.forEach((influencer) => {

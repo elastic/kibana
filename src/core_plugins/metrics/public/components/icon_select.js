@@ -1,77 +1,31 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import Select from 'react-select';
+import React from 'react';
+import {
+  EuiComboBox,
+} from '@elastic/eui';
 
-class IconOption extends Component {
-
-  constructor(props) {
-    super(props);
-    this.handleMouseMove = this.handleMouseMove.bind(this);
-    this.handleMouseEnter = this.handleMouseEnter.bind(this);
-    this.handleMouseDown = this.handleMouseDown.bind(this);
-  }
-
-  handleMouseDown(event) {
-    event.preventDefault();
-    event.stopPropagation();
-    this.props.onSelect(this.props.option, event);
-  }
-
-  handleMouseEnter(event) {
-    this.props.onFocus(this.props.option, event);
-  }
-
-  handleMouseMove(event) {
-    if (this.props.isFocused) return;
-    this.props.onFocus(this.props.option, event);
-  }
-
-  render() {
-    const icon = this.props.option.value;
-    const label = this.props.option.label;
-    // We can ignore that the <div> does not have keyboard handlers even though
-    // it has mouse handlers, since react-select still takes care, that this works
-    // well with keyboard.
-    /* eslint-disable jsx-a11y/no-static-element-interactions */
-    return (
-      <div
-        className={this.props.className}
-        onMouseEnter={this.handleMouseEnter}
-        onMouseDown={this.handleMouseDown}
-        onMouseMove={this.handleMouseMove}
-      >
-        <span
-          className="Select-value-label"
-          aria-label={`${label} icon`}
-        >
-          <span
-            className={`vis_editor__icon_select-option kuiIcon ${icon}`}
-            aria-hidden="true"
-          />
-          { this.props.children }
-        </span>
-      </div>
-    );
-    /* eslint-enable jsx-a11y/no-static-element-interactions */
-  }
-
-}
-
-IconOption.propTypes = {
-  children: PropTypes.node,
-  className: PropTypes.string,
-  isDisabled: PropTypes.bool,
-  isFocused: PropTypes.bool,
-  isSelected: PropTypes.bool,
-  onFocus: PropTypes.func,
-  onSelect: PropTypes.func,
-  option: PropTypes.object.isRequired,
-};
-
-
-function IconValue(props) {
-  const icon = props.value && props.value.value;
-  const label = props.value && props.value.label;
+function renderOption(option) {
+  const icon = option.value;
+  const label = option.label;
   return (
     <div className="Select-value">
       <span
@@ -79,28 +33,25 @@ function IconValue(props) {
         aria-label={`${label} icon`}
       >
         <span className={`vis_editor__icon_select-value kuiIcon ${icon}`} />
-        { props.children }
+        { label }
       </span>
     </div>
   );
 }
 
-IconValue.propTypes = {
-  children: PropTypes.node,
-  placeholder: PropTypes.string,
-  value: PropTypes.object.isRequired
-};
-
 function IconSelect(props) {
+  const selectedIcon = props.icons.find(option => {
+    return props.value === option.value;
+  });
   return (
-    <Select
-      inputProps={{ id: props.id }}
-      clearable={false}
-      onChange={props.onChange}
-      value={props.value}
-      optionComponent={IconOption}
-      valueComponent={IconValue}
+    <EuiComboBox
+      isClearable={false}
+      id={props.id}
       options={props.icons}
+      selectedOptions={selectedIcon ? [selectedIcon] : []}
+      onChange={props.onChange}
+      singleSelection={true}
+      renderOption={renderOption}
     />
   );
 }

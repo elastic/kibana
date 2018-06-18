@@ -101,8 +101,9 @@ export class HeadlessChromiumDriver {
           scale: 1
         }
       });
+      this._logger.debug(`captured screenshot clip ${JSON.stringify(screenshotClip)}`);
       return data;
-    });
+    }, this._logger);
   }
 
   async _writeData(writePath, base64EncodedData) {

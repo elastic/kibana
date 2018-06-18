@@ -21,7 +21,7 @@ export async function getTimeseriesData({
   transactionName,
   setup
 }) {
-  const { start, end, client, config } = setup;
+  const { start, end, esFilterQuery, client, config } = setup;
   const { intervalString, bucketSize } = getBucketSize(start, end, 'auto');
 
   const params = {
@@ -93,6 +93,10 @@ export async function getTimeseriesData({
       }
     }
   };
+
+  if (esFilterQuery) {
+    params.body.query.bool.filter.push(esFilterQuery);
+  }
 
   if (transactionName) {
     params.body.query.bool.must = [

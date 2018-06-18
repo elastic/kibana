@@ -29,6 +29,11 @@ export const getServiceList = createSelector(
 
 export function ServiceListRequest({ urlParams, render }) {
   const { start, end, kuery } = urlParams;
+
+  if (!(start && end)) {
+    return null;
+  }
+
   return (
     <Request
       id={ID}

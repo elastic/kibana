@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 /**
  * IMPORTANT: If you make changes to this API, please make sure to check that
  * the docs (docs/development/visualize/development-create-visualization.asciidoc)
@@ -33,6 +52,8 @@ import { EmbeddedVisualizeHandler } from './embedded_visualize_handler';
  *    will be set to the root visuzalize element.
  * @property {object} dataAttrs An object of key-value pairs, that will be set
  *    as data-{key}="{value}" attributes on the visualization element.
+ * @property {array} filters Specifies the filters that should be applied to that visualization.
+ * @property {object} query The query that should apply to that visualization.
  */
 
 const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
@@ -43,6 +64,8 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
     scope.appState = params.appState;
     scope.uiState = params.uiState;
     scope.timeRange = params.timeRange;
+    scope.filters = params.filters;
+    scope.query = params.query;
     scope.showSpyPanel = params.showSpyPanel;
 
     const container = angular.element(el);

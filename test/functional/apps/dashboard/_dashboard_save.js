@@ -1,8 +1,27 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['dashboard', 'header', 'common']);
+  const PageObjects = getPageObjects(['dashboard', 'header']);
 
   describe('dashboard save', function describeIndexTests() {
     const dashboardName = 'Dashboard Save Test';
@@ -19,19 +38,19 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.saveDashboard(dashboardName);
 
-      let isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
-      expect(isConfirmOpen).to.equal(false);
+      let isWarningDisplayed = await PageObjects.dashboard.isDuplicateTitleWarningDisplayed();
+      expect(isWarningDisplayed).to.equal(false);
 
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName);
 
-      isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
-      expect(isConfirmOpen).to.equal(true);
+      isWarningDisplayed = await PageObjects.dashboard.isDuplicateTitleWarningDisplayed();
+      expect(isWarningDisplayed).to.equal(true);
     });
 
     it('does not save on reject confirmation', async function () {
-      await PageObjects.common.clickCancelOnModal();
+      await PageObjects.dashboard.cancelSave();
 
       const countOfDashboards = await PageObjects.dashboard.getDashboardCountWithName(dashboardName);
       expect(countOfDashboards).to.equal(1);
@@ -42,7 +61,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName);
 
-      await PageObjects.common.clickConfirmOnModal();
+      await PageObjects.dashboard.clickSave();
 
       // This is important since saving a new dashboard will cause a refresh of the page. We have to
       // wait till it finishes reloading or it might reload the url after simulating the
@@ -60,8 +79,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.clickEdit();
         await PageObjects.dashboard.saveDashboard(dashboardName);
 
-        const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
-        expect(isConfirmOpen).to.equal(false);
+        const isWarningDisplayed = await PageObjects.dashboard.isDuplicateTitleWarningDisplayed();
+        expect(isWarningDisplayed).to.equal(false);
       }
     );
 
@@ -69,30 +88,30 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.clickEdit();
       await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName, { saveAsNew: true });
 
-      const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
-      expect(isConfirmOpen).to.equal(true);
+      const isWarningDisplayed = await PageObjects.dashboard.isDuplicateTitleWarningDisplayed();
+      expect(isWarningDisplayed).to.equal(true);
 
-      await PageObjects.common.clickCancelOnModal();
+      await PageObjects.dashboard.cancelSave();
     });
 
     it('Does not warn when only the prefix matches', async function () {
       await PageObjects.dashboard.saveDashboard(dashboardName.split(' ')[0]);
 
-      const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
-      expect(isConfirmOpen).to.equal(false);
+      const isWarningDisplayed = await PageObjects.dashboard.isDuplicateTitleWarningDisplayed();
+      expect(isWarningDisplayed).to.equal(false);
     });
 
     it('Warns when case is different', async function () {
       await PageObjects.dashboard.clickEdit();
       await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName.toUpperCase());
 
-      // We expect isConfirmModalOpen to be open, hence the retry if not found.
+      // We expect isWarningDisplayed to be open, hence the retry if not found.
       await retry.try(async () => {
-        const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
-        expect(isConfirmOpen).to.equal(true);
+        const isWarningDisplayed = await PageObjects.dashboard.isDuplicateTitleWarningDisplayed();
+        expect(isWarningDisplayed).to.equal(true);
       });
 
-      await PageObjects.common.clickCancelOnModal();
+      await PageObjects.dashboard.cancelSave();
     });
   });
 }

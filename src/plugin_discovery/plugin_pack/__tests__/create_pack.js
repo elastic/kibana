@@ -1,5 +1,25 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { resolve } from 'path';
-import { Observable } from 'rxjs';
+import * as Rx from 'rxjs';
+import { toArray } from 'rxjs/operators';
 import expect from 'expect.js';
 
 import { createPack$ } from '../create_pack';
@@ -12,7 +32,7 @@ import {
 
 describe('plugin discovery/create pack', () => {
   it('creates PluginPack', async () => {
-    const packageJson$ = Observable.from([
+    const packageJson$ = Rx.from([
       {
         packageJson: {
           directoryPath: resolve(PLUGINS_DIR, 'prebuilt'),
@@ -22,7 +42,7 @@ describe('plugin discovery/create pack', () => {
         }
       }
     ]);
-    const results = await createPack$(packageJson$).toArray().toPromise();
+    const results = await createPack$(packageJson$).pipe(toArray()).toPromise();
     expect(results).to.have.length(1);
     expect(results[0]).to.only.have.keys(['pack']);
     const { pack } = results[0];
@@ -31,13 +51,13 @@ describe('plugin discovery/create pack', () => {
 
   describe('errors thrown', () => {
     async function checkError(path, check) {
-      const packageJson$ = Observable.from([{
+      const packageJson$ = Rx.from([{
         packageJson: {
           directoryPath: path
         }
       }]);
 
-      const results = await createPack$(packageJson$).toArray().toPromise();
+      const results = await createPack$(packageJson$).pipe(toArray()).toPromise();
       expect(results).to.have.length(1);
       expect(results[0]).to.only.have.keys(['error']);
       const { error } = results[0];

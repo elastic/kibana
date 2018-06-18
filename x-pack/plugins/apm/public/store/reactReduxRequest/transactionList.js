@@ -9,23 +9,20 @@ import orderBy from 'lodash.orderby';
 import { createSelector } from 'reselect';
 import { Request } from 'react-redux-request';
 import { loadTransactionList } from '../../services/rest';
+import { withInitialData } from './helpers';
 
 const ID = 'transactionList';
 const INITIAL_DATA = [];
 
 export const getTransactionList = createSelector(
-  state => state.reactReduxRequest[ID],
+  state => withInitialData(state.reactReduxRequest[ID], INITIAL_DATA),
   state => state.sorting.transaction,
   (transactionList = {}, transactionSorting) => {
     const { key: sortKey, descending } = transactionSorting;
 
     return {
       ...transactionList,
-      data: orderBy(
-        transactionList.data || INITIAL_DATA,
-        sortKey,
-        descending ? 'desc' : 'asc'
-      )
+      data: orderBy(transactionList.data, sortKey, descending ? 'desc' : 'asc')
     };
   }
 );

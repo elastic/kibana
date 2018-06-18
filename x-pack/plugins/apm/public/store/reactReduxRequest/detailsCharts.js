@@ -8,9 +8,9 @@ import React from 'react';
 import { createSelector } from 'reselect';
 import { getCharts } from '../selectors/chartSelectors';
 import { getUrlParams } from '../urlParams';
-import { withInitialData } from './helpers';
 import { Request } from 'react-redux-request';
 import { loadCharts } from '../../services/rest';
+import { withInitialData } from './helpers';
 
 const ID = 'detailsCharts';
 const INITIAL_DATA = {
@@ -24,7 +24,12 @@ const INITIAL_DATA = {
 export const getDetailsCharts = createSelector(
   getUrlParams,
   state => withInitialData(state.reactReduxRequest[ID], INITIAL_DATA),
-  getCharts
+  (urlParams, detailCharts) => {
+    return {
+      ...detailCharts,
+      data: getCharts(urlParams, detailCharts.data)
+    };
+  }
 );
 
 export function DetailsChartsRequest({ urlParams, render }) {

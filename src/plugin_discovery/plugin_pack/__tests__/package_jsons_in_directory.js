@@ -1,5 +1,25 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { resolve } from 'path';
 
+import { toArray } from 'rxjs/operators';
 import expect from 'expect.js';
 
 import { createPackageJsonsInDirectory$ } from '../package_jsons_in_directory';
@@ -13,7 +33,7 @@ describe('plugin discovery/packs in directory', () => {
   describe('createPackageJsonsInDirectory$()', () => {
     describe('errors emitted as { error } results', () => {
       async function checkError(path, check) {
-        const results = await createPackageJsonsInDirectory$(path).toArray().toPromise();
+        const results = await createPackageJsonsInDirectory$(path).pipe(toArray()).toPromise();
         expect(results).to.have.length(1);
         expect(results[0]).to.only.have.keys('error');
         const { error } = results[0];
@@ -43,7 +63,7 @@ describe('plugin discovery/packs in directory', () => {
     });
 
     it('includes child errors for invalid packageJsons within a valid directory', async () => {
-      const results = await createPackageJsonsInDirectory$(PLUGINS_DIR).toArray().toPromise();
+      const results = await createPackageJsonsInDirectory$(PLUGINS_DIR).pipe(toArray()).toPromise();
 
       const errors = results
         .map(result => result.error)
@@ -55,9 +75,9 @@ describe('plugin discovery/packs in directory', () => {
 
       packageJsons.forEach(pack => expect(pack).to.be.an(Object));
       // there should be one result for each item in PLUGINS_DIR
-      expect(results).to.have.length(9);
+      expect(results).to.have.length(8);
       // three of the fixtures are errors of some sort
-      expect(errors).to.have.length(3);
+      expect(errors).to.have.length(2);
       // six of them are valid
       expect(packageJsons).to.have.length(6);
     });
