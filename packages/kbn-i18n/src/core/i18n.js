@@ -28,6 +28,7 @@ import IntlMessageFormat from 'intl-messageformat';
 import IntlRelativeFormat from 'intl-relativeformat';
 import memoizeIntlConstructor from 'intl-format-cache';
 import { isString, isObject, hasValues, deepMerge } from './helper';
+import { formats as EN_FORMATS } from './formats';
 
 // Add all locale data to `IntlMessageFormat`.
 // TODO: Use dynamic import for asynchronous loading of specific locale data
@@ -40,7 +41,7 @@ const getMessageFormat = memoizeIntlConstructor(IntlMessageFormat);
 
 let defaultLocale = EN_LOCALE;
 let currentLocale = EN_LOCALE;
-let formats = {};
+let formats = EN_FORMATS;
 
 IntlMessageFormat.defaultLocale = defaultLocale;
 IntlRelativeFormat.defaultLocale = defaultLocale;
