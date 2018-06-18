@@ -17,6 +17,8 @@ describe('BulkUploader', () => {
   describe('registers a collector set and runs lifecycle events', () => {
     let server;
     let xpackInfo;
+    let isAvailableStub;
+    let isEnabledStub;
 
     beforeEach(() => {
       server = {
@@ -35,10 +37,12 @@ describe('BulkUploader', () => {
         },
       };
 
+      isAvailableStub = sinon.stub().returns(true);
+      isEnabledStub = sinon.stub().returns(true);
       xpackInfo = {
         feature: () => ({
-          isAvailable: () => sinon.stub().returns(true),
-          isEnabled: () => sinon.stub().returns(true),
+          isAvailable: isAvailableStub,
+          isEnabled: isEnabledStub,
         })
       };
     });
@@ -83,6 +87,45 @@ describe('BulkUploader', () => {
           ['info', 'monitoring-ui', 'kibana-monitoring'],
           'Stopping monitoring stats collection',
         ]);
+        done();
+      }, CHECK_DELAY);
+    });
+
+    it('should skip bulk upload if monitoring bulk is not enabled', done => {
+      isAvailableStub.returns(false); // cause the fail
+
+      const combineTypes = sinon.spy(data => {
+        return [data[0][0], { ...data[0][1], combined: true }];
+      });
+
+      const collectors = new CollectorSet(server);
+      collectors.register(
+        new Collector(server, {
+          type: 'type_collector_test',
+          fetch: () => ({ testData: 12345 }),
+        })
+      );
+      const uploader = new BulkUploader(server, xpackInfo, {
+        interval: FETCH_INTERVAL,
+        combineTypes,
+      });
+
+      uploader.start(collectors);
+
+      // allow interval to tick a few times
+      setTimeout(() => {
+        const loggingCalls = server.log.getCalls();
+        expect(loggingCalls.length).to.be.greaterThan(1); // should be 3-5: start, fetch, upload, fetch, upload
+        expect(loggingCalls[0].args).to.eql([
+          ['info', 'monitoring-ui', 'kibana-monitoring'],
+          'Starting monitoring stats collection',
+        ]);
+        expect(loggingCalls[1].args).to.eql([
+          ['debug', 'monitoring-ui', 'kibana-monitoring'],
+          'Skipping fetch and upload of monitoring stats due to monitoring bulk endpoint not being available',
+        ]);
+
+        uploader.stop();
         done();
       }, CHECK_DELAY);
     });

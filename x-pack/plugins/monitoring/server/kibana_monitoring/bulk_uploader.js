@@ -89,7 +89,9 @@ export class BulkUploader {
     const monitoringBulkEnabled = mainMonitoring && mainMonitoring.isAvailable() && mainMonitoring.isEnabled();
 
     if (!monitoringBulkEnabled) {
-      return; // upload will not work
+      // debug level to not spam the logs
+      this._log.debug(`Skipping fetch and upload of monitoring stats due to monitoring bulk endpoint not being available`);
+      return;
     }
 
     const data = await collectorSet.bulkFetch(this._callClusterWithInternalUser);
