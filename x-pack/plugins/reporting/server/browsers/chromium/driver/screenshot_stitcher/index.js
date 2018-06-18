@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { toArray, map, mergeMap, switchMap } from 'rxjs/operators';
 import { $getClips } from './get_clips';
 import { $combine } from './combine';
 
@@ -22,28 +23,33 @@ export async function screenshotStitcher(outputClip, zoom, max, captureScreensho
   // want the zoom to affect the clipping rects that we use
   const screenshotClips$ = $getClips(outputClip, Math.ceil(max / zoom));
 
-  const screenshots$ = screenshotClips$.mergeMap(
-    clip => captureScreenshotFn(clip),
-    (clip, data) => ({ clip, data }),
-    1
+  const screenshots$ = screenshotClips$.pipe(
+    mergeMap(
+      clip => captureScreenshotFn(clip),
+      (clip, data) => ({ clip, data }),
+      1
+    )
   );
 
   // when we take the screenshots we don't have to scale the rects
   // but the PNGs don't know about the zoom, so we have to scale them
-  const screenshotPngDimensions$ = screenshots$.map(
-    ({ data, clip }) => ({
-      data,
-      dimensions: scaleRect({
-        x: clip.x - outputClip.x,
-        y: clip.y - outputClip.y,
-        width: clip.width,
-        height: clip.height,
-      }, zoom)
-    })
+  const screenshotPngDimensions$ = screenshots$.pipe(
+    map(
+      ({ data, clip }) => ({
+        data,
+        dimensions: scaleRect({
+          x: clip.x - outputClip.x,
+          y: clip.y - outputClip.y,
+          width: clip.width,
+          height: clip.height,
+        }, zoom)
+      })
+    )
   );
 
-  return screenshotPngDimensions$
-    .toArray()
-    .switchMap(screenshots => $combine(screenshots, scaleRect(outputClip, zoom), logger))
+  return screenshotPngDimensions$.pipe(
+    toArray(),
+    switchMap(screenshots => $combine(screenshots, scaleRect(outputClip, zoom), logger)),
+  )
     .toPromise();
 }
