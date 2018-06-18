@@ -43,8 +43,6 @@ export const init = (monitoringPlugin, server) => {
    * Instantiate and start the internal background task that calls collector
    * fetch methods and uploads to the ES monitoring bulk endpoint
    */
-  const bulkUploader = initBulkUploader(monitoringPlugin.kbnServer, server, collectorSet);
-
   const xpackMainPlugin = server.plugins.xpack_main;
   xpackMainPlugin.status.once('green', async () => { // first time xpack_main turns green
     /*
@@ -58,32 +56,38 @@ export const init = (monitoringPlugin, server) => {
       await requireUIRoutes(server);
     }
   });
-  xpackMainPlugin.status.on('green', async () => { // any time xpack_main turns green
-    /*
-     * Bulk uploading of Kibana stats
-     */
-    const kibanaCollectionEnabled = config.get('xpack.monitoring.kibana.collection.enabled');
-    const { info: xpackMainInfo } = xpackMainPlugin;
-    const mainMonitoring = xpackMainInfo && xpackMainInfo.feature('monitoring');
-    const monitoringBulkEnabled = mainMonitoring && mainMonitoring.isAvailable() && mainMonitoring.isEnabled();
 
-    if (kibanaCollectionEnabled && monitoringBulkEnabled) {
-      bulkUploader.start();
-    } else if (!kibanaCollectionEnabled) {
-      server.log(
-        ['info', LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG],
-        'Internal collection for Kibana monitoring will is disabled per configuration.'
-      );
-    } else if (!monitoringBulkEnabled) {
-      server.log(
-        ['error', LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG],
-        'Unable to retrieve X-Pack info from the admin cluster. Kibana monitoring will be disabled until Kibana is restarted.'
-      );
-    }
-  });
-  xpackMainPlugin.status.on('red', () => { // any time xpack_main turns red
-    bulkUploader.stop();
-  });
+  const kibanaCollectionEnabled = config.get('xpack.monitoring.kibana.collection.enabled');
+  if (kibanaCollectionEnabled) {
+    const bulkUploader = initBulkUploader(monitoringPlugin.kbnServer, server, collectorSet);
+
+    xpackMainPlugin.status.on('green', async () => { // any time xpack_main turns green
+      /*
+       * Bulk uploading of Kibana stats
+       */
+      const { info: xpackMainInfo } = xpackMainPlugin;
+      const mainMonitoring = xpackMainInfo && xpackMainInfo.feature('monitoring');
+      const monitoringBulkEnabled = mainMonitoring && mainMonitoring.isAvailable() && mainMonitoring.isEnabled();
+
+      if (monitoringBulkEnabled) {
+        bulkUploader.start();
+      } else {
+        server.log(
+          ['error', LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG],
+          'Unable to retrieve X-Pack info from the admin cluster. Kibana monitoring will be disabled until Kibana is restarted.'
+        );
+      }
+    });
+
+    xpackMainPlugin.status.on('red', () => { // any time xpack_main turns red
+      bulkUploader.stop();
+    });
+  } else {
+    server.log(
+      ['info', LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG],
+      'Internal collection for Kibana monitoring will is disabled per configuration.'
+    );
+  }
 
   server.injectUiAppVars('monitoring', (server) => {
     const config = server.config();
