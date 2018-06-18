@@ -17,7 +17,7 @@ const getTestTime = () => moment(testTime); // clones the obj so it's not mutate
  */
 describe('formatTimestampToDuration', () => {
   describe('format timestamp to duration - time since', () => {
-    it('should format timstamp to human-readable duration', () => {
+    it('should format timestamp to human-readable duration', () => {
       // time inputs are a few "moments" extra from the time advertised by name
       const fiftyNineSeconds = getTestTime().subtract(59, 'seconds');
       expect(formatTimestampToDuration(fiftyNineSeconds, CALCULATE_DURATION_SINCE, getTestTime())).to.be('59 seconds');
@@ -46,7 +46,7 @@ describe('formatTimestampToDuration', () => {
   });
 
   describe('format timestamp to duration - time until', () => {
-    it('should format timstamp to human-readable duration', () => {
+    it('should format timestamp to human-readable duration', () => {
       // time inputs are a few "moments" extra from the time advertised by name
       const fiftyNineSeconds = getTestTime().add(59, 'seconds');
       expect(formatTimestampToDuration(fiftyNineSeconds, CALCULATE_DURATION_UNTIL, getTestTime())).to.be('59 seconds');
