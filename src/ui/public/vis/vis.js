@@ -84,11 +84,13 @@ export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppS
         queryFilter: queryFilter,
         queryManager: queryManagerFactory(getAppState),
         events: {
-          filter_legacy: (event) => {
+          // the filter method will be removed in the near feature
+          // you should rather use addFilter method below
+          filter: (event) => {
             const appState = getAppState();
             filterBarClickHandler(appState)(event);
           },
-          filter: (data, columnIndex, rowIndex) => {
+          addFilter: (data, columnIndex, rowIndex) => {
             const agg = data.columns[columnIndex].aggConfig;
             let filter = [];
             const value = data.rows[rowIndex][columnIndex];

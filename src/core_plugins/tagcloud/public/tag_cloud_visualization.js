@@ -46,7 +46,7 @@ export class TagCloudVisualization {
       if (!this._bucketAgg) {
         return;
       }
-      this._vis.API.events.filter(
+      this._vis.API.events.addFilter(
         this._data, 0, this._data.rows.findIndex(row => row[0] === event)
       );
     });
