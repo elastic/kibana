@@ -27,7 +27,7 @@ Then `backport` might save you a lot of time and effort. The CLI will ask you wh
 
 ## Requirements
 
-* Node 8 or higher
+- Node 8 or higher
 
 ## Install
 
@@ -49,16 +49,17 @@ Follow the steps. You can use the `arrow keys` to choose options, `<space>` to s
 
 ### Options
 
-| Option        | Description                               | Accepts                     |
-| ------------- | ----------------------------------------- | --------------------------- |
-| --all         | Show all commits                          | boolean (defaults to false) |
-| --multiple    | Backport multiple commits and/or branches | boolean                     |
-| --show-config | Show configuration                        |                             |
-| --sha         | Commit sha to backport                    | string                      |
-| --help        | Show help                                 |                             |
-| -v, --version | Show version number                       |                             |
+| Option        | Description                               | Accepts                  |
+| ------------- | ----------------------------------------- | ------------------------ |
+| --all         | Show all commits                          | boolean (default: false) |
+| --branch      | Branch to backport                        | array (default: [])      |
+| --multiple    | Backport multiple commits and/or branches | boolean                  |
+| --upstream    | Name of repository                        | string                   |
+| --sha         | Commit sha to backport                    | string                   |
+| --help        | Show help                                 |                          |
+| -v, --version | Show version number                       |                          |
 
 ### Documentation
 
-* [Getting started guide](https://github.com/sqren/backport/blob/master/docs/getting-started.md)
-* [Configuration options](https://github.com/sqren/backport/blob/master/docs/configuration.md)
+- [Getting started guide](https://github.com/sqren/backport/blob/master/docs/getting-started.md)
+- [Configuration options](https://github.com/sqren/backport/blob/master/docs/configuration.md)
