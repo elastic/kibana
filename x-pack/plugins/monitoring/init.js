@@ -58,34 +58,35 @@ export const init = (monitoringPlugin, server) => {
   });
 
   const kibanaCollectionEnabled = config.get('xpack.monitoring.kibana.collection.enabled');
-  if (kibanaCollectionEnabled) {
-    const bulkUploader = initBulkUploader(monitoringPlugin.kbnServer, server, collectorSet);
+  const { info: xpackMainInfo } = xpackMainPlugin;
+
+  if (kibanaCollectionEnabled && xpackMainInfo) {
+    const bulkUploader = initBulkUploader(monitoringPlugin.kbnServer, server, collectorSet, xpackMainInfo);
 
     xpackMainPlugin.status.on('green', async () => { // any time xpack_main turns green
       /*
        * Bulk uploading of Kibana stats
        */
-      const { info: xpackMainInfo } = xpackMainPlugin;
-      const mainMonitoring = xpackMainInfo && xpackMainInfo.feature('monitoring');
-      const monitoringBulkEnabled = mainMonitoring && mainMonitoring.isAvailable() && mainMonitoring.isEnabled();
 
-      if (monitoringBulkEnabled) {
-        bulkUploader.start();
-      } else {
-        server.log(
-          ['error', LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG],
-          'Unable to retrieve X-Pack info from the admin cluster. Kibana monitoring will be disabled until Kibana is restarted.'
-        );
-      }
+      bulkUploader.start();
     });
 
     xpackMainPlugin.status.on('red', () => { // any time xpack_main turns red
       bulkUploader.stop();
     });
-  } else {
+  }
+
+  if (!kibanaCollectionEnabled) {
     server.log(
       ['info', LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG],
       'Internal collection for Kibana monitoring will is disabled per configuration.'
+    );
+  }
+
+  if (!xpackMainInfo) {
+    server.log(
+      ['error', LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG],
+      'Unable to retrieve X-Pack info from the admin cluster. Kibana monitoring will be disabled until Kibana is restarted.'
     );
   }
 

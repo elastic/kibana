@@ -25,11 +25,12 @@ import {
  * - Ops Events - essentially Kibana's /api/status
  * - Usage Stats - essentially Kibana's /api/stats
  * - Kibana Settings - select uiSettings
- * @param kbnServer {Object} manager of Kibana services - see `src/server/kbn_server` in Kibana core
- * @param server {Object} HapiJS server instance
+ * @param {Object} server HapiJS server instance
+ * @param {CollectorSet} collectorSet a set of collectors to use for the initial fetch and upload
+ * @param {Object} xpackInfo server.plugins.xpack_main.info object
  */
 export class BulkUploader {
-  constructor(server, collectorSet, { interval, combineTypes }) {
+  constructor(server, collectorSet, xpackMainInfo, { interval, combineTypes }) {
     if (typeof interval !== 'number') {
       throw new Error('interval number of milliseconds is required');
     }
@@ -38,6 +39,7 @@ export class BulkUploader {
     }
 
     this._timer =  null;
+    this._xpackMainInfo = xpackMainInfo;
     this._interval = interval;
     this._combineTypes = combineTypes;
     this._log = getCollectorLogger(server);
@@ -76,7 +78,19 @@ export class BulkUploader {
     this._timer = null;
   }
 
+  /*
+   * @param {CollectorSet} collectorSet
+   * @return undefined
+   */
   async _fetchAndUpload(collectorSet) {
+    // Before every fetch, check the license and make sure the bulk endpoint on the ES side is up
+    const mainMonitoring = this._xpackMainInfo.feature('monitoring');
+    const monitoringBulkEnabled = mainMonitoring && mainMonitoring.isAvailable() && mainMonitoring.isEnabled();
+
+    if (!monitoringBulkEnabled) {
+      return; // upload will not work
+    }
+
     const data = await collectorSet.bulkFetch(this._callClusterWithInternalUser);
     const usableData = data.filter(d => Boolean(d) && !isEmpty(d.result));
     const payload = usableData.map(({ result, type }) => {
