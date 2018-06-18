@@ -17,6 +17,7 @@
  * under the License.
  */
 import { BehaviorSubject } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { AggType } from '..';
 import { AggConfig, Vis } from '../../vis';
 
@@ -57,16 +58,18 @@ class AggTypeFilters {
    * @return A filtered list of the passed aggTypes.
    */
   public filter$(aggTypes: AggType[], vis: Vis, aggConfig: AggConfig) {
-    return this.subject.map(filters => {
-      const allFilters = Array.from(filters);
-      const allowedAggTypes = aggTypes.filter(aggType => {
-        const isAggTypeAllowed = allFilters.every(filter =>
-          filter(aggType, vis, aggConfig)
-        );
-        return isAggTypeAllowed;
-      });
-      return allowedAggTypes;
-    });
+    return this.subject.pipe(
+      map(filters => {
+        const allFilters = Array.from(filters);
+        const allowedAggTypes = aggTypes.filter(aggType => {
+          const isAggTypeAllowed = allFilters.every(filter =>
+            filter(aggType, vis, aggConfig)
+          );
+          return isAggTypeAllowed;
+        });
+        return allowedAggTypes;
+      })
+    );
   }
 }
 
