@@ -28,15 +28,13 @@ function createControlParams(id, label) {
   };
 }
 
-const UNSET_VALUE = '';
 const mockFilterManager = {
   getValueFromFilterBar: () => {
-    return '';
+    return;
   },
   createFilter: (value) => {
     return `mockKbnFilter:${value}`;
   },
-  getUnsetValue: () => { return UNSET_VALUE; },
   getIndexPattern: () => { return 'mockIndexPattern'; }
 };
 const mockKbnApi = {};
@@ -57,6 +55,8 @@ describe('ancestors', () => {
       grandParentControl.set('myGrandParentValue');
 
       childControl.setAncestors([parentControl, grandParentControl]);
+      expect(grandParentControl.hasValue()).to.be(true);
+      expect(parentControl.hasValue()).to.be(false);
       expect(childControl.hasUnsetAncestor()).to.be(true);
     });
 
@@ -64,6 +64,8 @@ describe('ancestors', () => {
       parentControl.set('myParentValue');
 
       childControl.setAncestors([parentControl, grandParentControl]);
+      expect(grandParentControl.hasValue()).to.be(false);
+      expect(parentControl.hasValue()).to.be(true);
       expect(childControl.hasUnsetAncestor()).to.be(true);
     });
 
@@ -72,6 +74,8 @@ describe('ancestors', () => {
       parentControl.set('myParentValue');
 
       childControl.setAncestors([parentControl, grandParentControl]);
+      expect(grandParentControl.hasValue()).to.be(true);
+      expect(parentControl.hasValue()).to.be(true);
       expect(childControl.hasUnsetAncestor()).to.be(false);
     });
   });
