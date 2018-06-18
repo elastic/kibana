@@ -387,7 +387,7 @@ import { VisFactoryProvider } from 'ui/vis/vis_factory';
 
 const myResponseHandler = (vis, response) => {
    // transform the response (based on vis object?)
-   const resposne = ... transform data ...;
+   const response = ... transform data ...;
    return response;
 };
 
