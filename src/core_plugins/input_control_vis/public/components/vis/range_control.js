@@ -30,8 +30,18 @@ import {
 } from '@elastic/eui';
 
 const toState = (props) => {
+  let sliderValue = props.control.value;
+  if (!props.control.value) {
+    // InputRange component does not have an "empty state"
+    // props.control.value will be undefined when there is not a kibana filter for the control
+    // Faking an empty state by setting the slider value range to length of zero anchored at the range minimum
+    sliderValue = {
+      min: props.control.min,
+      max: props.control.min
+    };
+  }
   const state = {
-    sliderValue: props.control.value ? props.control.value : { min: props.control.min, max: props.control.min },
+    sliderValue: sliderValue,
     minValue: '',
     maxValue: '',
     isRangeValid: true,
