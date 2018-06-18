@@ -48,8 +48,8 @@ export default function ({ getService, getPageObjects }) {
       await retry.try(async function () {
         actualRequest = await PageObjects.console.getRequest();
         log.debug(actualRequest);
+        expect(actualRequest.trim()).to.eql(DEFAULT_REQUEST);
       });
-      expect(actualRequest.trim()).to.eql(DEFAULT_REQUEST);
     });
 
     it('default request response should include `"timed_out": false`', async function () {
