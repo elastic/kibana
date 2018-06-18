@@ -58,7 +58,7 @@ export class BulkUploader {
         return;
       }
 
-      this._log.info(`Starting monitoring stats collection`);
+      this._log.info('Starting monitoring stats collection');
 
       this._fetchAndUpload(collectorSet); // initial fetch
       this._timer = setInterval(() => {
