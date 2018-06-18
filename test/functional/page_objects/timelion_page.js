@@ -66,6 +66,7 @@ export function TimelionPageProvider({ getService, getPageObjects }) {
         throw new Error(`Unable to select suggestion ${suggestionIndex}, only ${elements.length} suggestions available.`);
       }
       await elements[suggestionIndex].click();
+      // Wait for timelion expression to be updated after clicking suggestions
       await PageObjects.common.sleep(waitTime);
     }
   }
