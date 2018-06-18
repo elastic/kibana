@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ElasticsearchPrivileges } from './elasticsearch_privileges';
-export { KibanaPrivileges } from './kibana/kibana_privileges';
+export { SpacesManager } from './spaces_manager';

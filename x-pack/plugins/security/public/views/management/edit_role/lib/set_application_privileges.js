@@ -28,22 +28,3 @@ export function setApplicationPrivileges(kibanaPrivileges, role, application) {
   }
 }
 
-export function togglePrivilege(role, application, permission) {
-  const appPermissions = role.applications
-    .find(a => a.application === application && a.resources[0] === DEFAULT_RESOURCE);
-
-  if (!appPermissions) {
-    role.applications.push({
-      application,
-      privileges: [permission],
-      resources: [DEFAULT_RESOURCE]
-    });
-  } else {
-    const indexOfExisting = appPermissions.privileges.indexOf(permission);
-    if (indexOfExisting >= 0) {
-      appPermissions.privileges.splice(indexOfExisting, 1);
-    } else {
-      appPermissions.privileges.push(permission);
-    }
-  }
-}

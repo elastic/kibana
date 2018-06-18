@@ -41,6 +41,7 @@ export class EditRolePage extends Component {
     allowFieldLevelSecurity: PropTypes.bool.isRequired,
     kibanaAppPrivileges: PropTypes.array.isRequired,
     notifier: PropTypes.func.isRequired,
+    spaces: PropTypes.array,
   };
 
   constructor(props) {
@@ -163,16 +164,15 @@ export class EditRolePage extends Component {
   }
 
   getKibanaPrivileges = () => {
-    if (!this.props.rbacEnabled) {
-      return null;
-    }
-
     return (
       <div>
         <EuiSpacer />
         <KibanaPrivileges
           kibanaAppPrivileges={this.props.kibanaAppPrivileges}
           rbacApplication={this.props.rbacApplication}
+          spaces={this.props.spaces}
+          editable={!isReservedRole(this.state.role)}
+          spacesEnabled={this.props.spaces.length > 1}
           role={this.state.role}
           onChange={this.onRoleChange}
         />

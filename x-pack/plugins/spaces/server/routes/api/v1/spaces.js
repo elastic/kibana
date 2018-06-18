@@ -28,6 +28,7 @@ export function initSpacesApi(server) {
   const config = server.config();
 
   async function checkForDuplicateContext(space) {
+    return {};
     const query = createDuplicateContextQuery(config.get('kibana.index'), space);
 
     // TODO(legrego): Once the SOC is split into a client & repository, this "callWithInternalUser" call should
