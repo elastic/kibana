@@ -59,8 +59,8 @@ export default function ({ getService, getPageObjects }) {
       await retry.try(async function () {
         actualResponse = await PageObjects.console.getResponse();
         log.debug(actualResponse);
+        expect(actualResponse).to.contain(expectedResponseContains);
       });
-      expect(actualResponse).to.contain(expectedResponseContains);
     });
 
     it('settings should allow changing the text size', async function () {
