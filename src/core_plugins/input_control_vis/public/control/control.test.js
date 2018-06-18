@@ -130,11 +130,19 @@ describe('empty state', () => {
   const indexPatternMock = {};
   const queryFilterMock = {};
   const controlParams = {};
-  const filterManager = new SimpleFilterManager('controlId', 'myField', indexPatternMock, queryFilterMock, 'originalUnsetValue');
+  const originalUnsetValue = 'originalUnsetValue';
+  const filterManager = new SimpleFilterManager('controlId', 'myField', indexPatternMock, queryFilterMock, originalUnsetValue);
   const control = new Control(controlParams, filterManager);
 
   test('should be in empty state when created', function () {
-    expect(control.value).to.be('originalUnsetValue');
+    expect(control.hasValue()).to.be(false);
+    expect(control.value).to.be(originalUnsetValue);
+  });
+
+  test('should have value when set to unsetValue', function () {
+    control.setUnsetValue(originalUnsetValue);
+    control.set(originalUnsetValue);
+    expect(control.hasValue()).to.be(false);
   });
 
   test('should update control value to new empty state when unset value changes and control is in empty state', function () {
