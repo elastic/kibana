@@ -32,7 +32,7 @@ import { EmbeddedVisualizeHandler } from './embedded_visualize_handler';
  * The parameters accepted by the embedVisualize calls.
  * @typedef {object} VisualizeLoaderParams
  * @property {AppState} appState The appState this visualization should use.
- *    If you don't spyecify it, the global AppState (that is decoded in the URL)
+ *    If you don't specify it, the global AppState (that is decoded in the URL)
  *    will be used. Usually you don't need to overwrite this, unless you don't
  *    want the visualization to use the global AppState.
  * @property {UiState} uiState The current uiState of the application. If you

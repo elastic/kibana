@@ -103,7 +103,7 @@ export default new Chainable('holt', {
 
       if (alpha != null && beta != null && gamma != null) {
         if (!sample || !args.byName.season || sample < 2) {
-          throw new Error('Must specificy a season length and a sample size >= 2');
+          throw new Error('Must specify a season length and a sample size >= 2');
         }
         const season = Math.round(toMilliseconds(args.byName.season) / toMilliseconds(tlConfig.time.interval));
         points = tes(points, alpha, beta, gamma, season, sample);
