@@ -33,7 +33,7 @@ async function attemptToCreateCommand(log, server, driverApi) {
   const session = await server.createSession({}, driverApi.getRequiredCapabilities());
   if (attemptId !== attemptCounter) return; // abort
 
-  log.debug('[leadfoot:command] Registerying session for teardown');
+  log.debug('[leadfoot:command] Registering session for teardown');
   driverApi.beforeStop(async () => session.quit());
   if (attemptId !== attemptCounter) return; // abort
 
