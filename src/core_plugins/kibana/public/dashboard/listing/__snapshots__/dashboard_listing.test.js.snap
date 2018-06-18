@@ -2,80 +2,17 @@
 
 exports[`after fetch hideWriteControls 1`] = `
 <EuiPage
+  className="dashboardLandingPage"
   data-test-subj="dashboardLandingPage"
+  restrictWidth={false}
 >
-  <EuiFlexGroup
-    alignItems="flexEnd"
-    component="div"
-    data-test-subj="top-nav"
-    direction="row"
-    gutterSize="l"
-    justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
-  >
-    <EuiFlexItem
-      component="div"
-      grow={false}
+  <EuiPageBody>
+    <EuiPageContent
+      className="dashboardLandingPage__content"
+      horizontalPosition="center"
+      panelPaddingSize="l"
+      verticalPosition="center"
     >
-      <EuiTitle
-        size="l"
-      >
-        <h1>
-          Dashboard
-        </h1>
-      </EuiTitle>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiSpacer
-    size="m"
-  />
-  <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
-  >
-    <EuiFlexItem
-      component="div"
-      grow={true}
-    >
-      <EuiFieldSearch
-        compressed={false}
-        data-test-subj="searchFilter"
-        fullWidth={true}
-        incremental={false}
-        isLoading={false}
-        onChange={[Function]}
-        placeholder="Search..."
-        value=""
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiBasicTable
-    columns={
-      Array [
-        Object {
-          "field": "title",
-          "name": "Title",
-          "render": [Function],
-          "sortable": true,
-        },
-        Object {
-          "dataType": "string",
-          "field": "description",
-          "name": "Description",
-          "sortable": true,
-        },
-      ]
-    }
-    itemId="id"
-    items={Array []}
-    loading={false}
-    noItemsMessage={
       <EuiText
         grow={true}
       >
@@ -87,724 +24,564 @@ exports[`after fetch hideWriteControls 1`] = `
           </EuiTextColor>
         </h2>
       </EuiText>
-    }
-    onChange={[Function]}
-    pagination={
-      Object {
-        "pageIndex": 0,
-        "pageSize": 20,
-        "pageSizeOptions": Array [
-          10,
-          20,
-          50,
-        ],
-        "totalItemCount": 0,
-      }
-    }
-    responsive={true}
-    selection={
-      Object {
-        "onSelectionChange": [Function],
-      }
-    }
-    sorting={Object {}}
-  />
+    </EuiPageContent>
+  </EuiPageBody>
+</EuiPage>
+`;
+
+exports[`after fetch initialFilter 1`] = `
+<EuiPage
+  className="dashboardLandingPage"
+  data-test-subj="dashboardLandingPage"
+  restrictWidth={false}
+>
+  <EuiPageBody>
+    <EuiPageContent
+      className="dashboardLandingPage__content"
+      horizontalPosition="center"
+      panelPaddingSize="l"
+      verticalPosition="center"
+    >
+      <div>
+        <EuiFlexGroup
+          alignItems="flexEnd"
+          component="div"
+          data-test-subj="top-nav"
+          direction="row"
+          gutterSize="l"
+          justifyContent="spaceBetween"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            component="div"
+            grow={false}
+          >
+            <EuiTitle
+              size="l"
+            >
+              <h1>
+                Dashboards
+              </h1>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem
+            component="div"
+            grow={false}
+          >
+            <EuiButton
+              color="primary"
+              data-test-subj="newDashboardLink"
+              fill={false}
+              href="#/dashboard"
+              iconSide="left"
+              type="button"
+            >
+              Create new dashboard
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer
+          size="m"
+        />
+        <EuiFlexGroup
+          alignItems="stretch"
+          component="div"
+          direction="row"
+          gutterSize="l"
+          justifyContent="flexStart"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            component="div"
+            grow={true}
+          >
+            <EuiFieldSearch
+              compressed={false}
+              data-test-subj="searchFilter"
+              fullWidth={true}
+              incremental={false}
+              isLoading={false}
+              onChange={[Function]}
+              placeholder="Search..."
+              value="my dashboard"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer
+          size="m"
+        />
+        <EuiBasicTable
+          columns={
+            Array [
+              Object {
+                "field": "title",
+                "name": "Title",
+                "render": [Function],
+                "sortable": true,
+              },
+              Object {
+                "dataType": "string",
+                "field": "description",
+                "name": "Description",
+                "sortable": true,
+              },
+              Object {
+                "actions": Array [
+                  Object {
+                    "render": [Function],
+                  },
+                ],
+                "name": "Actions",
+              },
+            ]
+          }
+          itemId="id"
+          items={
+            Array [
+              Object {
+                "description": "dashboard0 desc",
+                "id": "dashboard0",
+                "title": "dashboard0 title",
+              },
+              Object {
+                "description": "dashboard1 desc",
+                "id": "dashboard1",
+                "title": "dashboard1 title",
+              },
+            ]
+          }
+          loading={false}
+          noItemsMessage="No dashboards matched your search."
+          onChange={[Function]}
+          pagination={
+            Object {
+              "pageIndex": 0,
+              "pageSize": 20,
+              "pageSizeOptions": Array [
+                10,
+                20,
+                50,
+              ],
+              "totalItemCount": 2,
+            }
+          }
+          responsive={true}
+          selection={
+            Object {
+              "onSelectionChange": [Function],
+            }
+          }
+          sorting={Object {}}
+        />
+      </div>
+    </EuiPageContent>
+  </EuiPageBody>
 </EuiPage>
 `;
 
 exports[`after fetch renders call to action when no dashboards exist 1`] = `
 <EuiPage
+  className="dashboardLandingPage"
   data-test-subj="dashboardLandingPage"
+  restrictWidth={false}
 >
-  <EuiFlexGroup
-    alignItems="flexEnd"
-    component="div"
-    data-test-subj="top-nav"
-    direction="row"
-    gutterSize="l"
-    justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
-  >
-    <EuiFlexItem
-      component="div"
-      grow={false}
+  <EuiPageBody>
+    <EuiPageContent
+      className="dashboardLandingPage__content"
+      horizontalPosition="center"
+      panelPaddingSize="l"
+      verticalPosition="center"
     >
-      <EuiTitle
-        size="l"
-      >
-        <h1>
-          Dashboard
-        </h1>
-      </EuiTitle>
-    </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={false}
-    >
-      <EuiButton
-        color="primary"
-        data-test-subj="newDashboardLink"
-        fill={false}
-        href="#/dashboard"
-        iconSide="left"
-        type="button"
-      >
-        Create new dashboard
-      </EuiButton>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiSpacer
-    size="m"
-  />
-  <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
-  >
-    <EuiFlexItem
-      component="div"
-      grow={true}
-    >
-      <EuiFieldSearch
-        compressed={false}
-        data-test-subj="searchFilter"
-        fullWidth={true}
-        incremental={false}
-        isLoading={false}
-        onChange={[Function]}
-        placeholder="Search..."
-        value=""
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiBasicTable
-    columns={
-      Array [
-        Object {
-          "field": "title",
-          "name": "Title",
-          "render": [Function],
-          "sortable": true,
-        },
-        Object {
-          "dataType": "string",
-          "field": "description",
-          "name": "Description",
-          "sortable": true,
-        },
-        Object {
-          "actions": Array [
-            Object {
-              "render": [Function],
-            },
-          ],
-          "name": "Actions",
-        },
-      ]
-    }
-    itemId="id"
-    items={Array []}
-    loading={false}
-    noItemsMessage={
-      <UNDEFINED>
-        <EuiText
-          grow={true}
-        >
-          <h2>
-            <EuiTextColor
-              color="subdued"
+      <div>
+        <EuiEmptyPrompt
+          actions={
+            <EuiButton
+              color="primary"
+              data-test-subj="createDashboardPromptButton"
+              fill={true}
+              href="#/dashboard"
+              iconSide="left"
+              iconType="plusInCircle"
+              type="button"
             >
-              Looks like you don't have any dashboards. Let's create some!
-            </EuiTextColor>
-          </h2>
-        </EuiText>
-        <EuiButton
-          color="primary"
-          data-test-subj="createDashboardPromptButton"
-          fill={true}
-          href="#/dashboard"
-          iconSide="left"
-          iconType="plusInCircle"
-          type="button"
-        >
-          Create new dashboard
-        </EuiButton>
-      </UNDEFINED>
-    }
-    onChange={[Function]}
-    pagination={
-      Object {
-        "pageIndex": 0,
-        "pageSize": 20,
-        "pageSizeOptions": Array [
-          10,
-          20,
-          50,
-        ],
-        "totalItemCount": 0,
-      }
-    }
-    responsive={true}
-    selection={
-      Object {
-        "onSelectionChange": [Function],
-      }
-    }
-    sorting={Object {}}
-  />
+              Create new dashboard
+            </EuiButton>
+          }
+          body={
+            <UNDEFINED>
+              <p>
+                You can combine data views from any Kibana app into one dashboard and see everything in one place.
+              </p>
+              <p>
+                New to Kibana? 
+                <EuiLink
+                  color="primary"
+                  href="#/home/tutorial_directory/sampleData"
+                  type="button"
+                >
+                  Install some sample data
+                </EuiLink>
+                 to take a test drive.
+              </p>
+            </UNDEFINED>
+          }
+          iconColor="subdued"
+          iconType="dashboardApp"
+          title={
+            <h2>
+              Create your first dashboard
+            </h2>
+          }
+        />
+      </div>
+    </EuiPageContent>
+  </EuiPageBody>
 </EuiPage>
 `;
 
 exports[`after fetch renders table rows 1`] = `
 <EuiPage
+  className="dashboardLandingPage"
   data-test-subj="dashboardLandingPage"
+  restrictWidth={false}
 >
-  <EuiFlexGroup
-    alignItems="flexEnd"
-    component="div"
-    data-test-subj="top-nav"
-    direction="row"
-    gutterSize="l"
-    justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
-  >
-    <EuiFlexItem
-      component="div"
-      grow={false}
+  <EuiPageBody>
+    <EuiPageContent
+      className="dashboardLandingPage__content"
+      horizontalPosition="center"
+      panelPaddingSize="l"
+      verticalPosition="center"
     >
-      <EuiTitle
-        size="l"
-      >
-        <h1>
-          Dashboard
-        </h1>
-      </EuiTitle>
-    </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={false}
-    >
-      <EuiButton
-        color="primary"
-        data-test-subj="newDashboardLink"
-        fill={false}
-        href="#/dashboard"
-        iconSide="left"
-        type="button"
-      >
-        Create new dashboard
-      </EuiButton>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiSpacer
-    size="m"
-  />
-  <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
-  >
-    <EuiFlexItem
-      component="div"
-      grow={true}
-    >
-      <EuiFieldSearch
-        compressed={false}
-        data-test-subj="searchFilter"
-        fullWidth={true}
-        incremental={false}
-        isLoading={false}
-        onChange={[Function]}
-        placeholder="Search..."
-        value=""
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiBasicTable
-    columns={
-      Array [
-        Object {
-          "field": "title",
-          "name": "Title",
-          "render": [Function],
-          "sortable": true,
-        },
-        Object {
-          "dataType": "string",
-          "field": "description",
-          "name": "Description",
-          "sortable": true,
-        },
-        Object {
-          "actions": Array [
+      <div>
+        <EuiFlexGroup
+          alignItems="flexEnd"
+          component="div"
+          data-test-subj="top-nav"
+          direction="row"
+          gutterSize="l"
+          justifyContent="spaceBetween"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            component="div"
+            grow={false}
+          >
+            <EuiTitle
+              size="l"
+            >
+              <h1>
+                Dashboards
+              </h1>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem
+            component="div"
+            grow={false}
+          >
+            <EuiButton
+              color="primary"
+              data-test-subj="newDashboardLink"
+              fill={false}
+              href="#/dashboard"
+              iconSide="left"
+              type="button"
+            >
+              Create new dashboard
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer
+          size="m"
+        />
+        <EuiFlexGroup
+          alignItems="stretch"
+          component="div"
+          direction="row"
+          gutterSize="l"
+          justifyContent="flexStart"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            component="div"
+            grow={true}
+          >
+            <EuiFieldSearch
+              compressed={false}
+              data-test-subj="searchFilter"
+              fullWidth={true}
+              incremental={false}
+              isLoading={false}
+              onChange={[Function]}
+              placeholder="Search..."
+              value=""
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer
+          size="m"
+        />
+        <EuiBasicTable
+          columns={
+            Array [
+              Object {
+                "field": "title",
+                "name": "Title",
+                "render": [Function],
+                "sortable": true,
+              },
+              Object {
+                "dataType": "string",
+                "field": "description",
+                "name": "Description",
+                "sortable": true,
+              },
+              Object {
+                "actions": Array [
+                  Object {
+                    "render": [Function],
+                  },
+                ],
+                "name": "Actions",
+              },
+            ]
+          }
+          itemId="id"
+          items={
+            Array [
+              Object {
+                "description": "dashboard0 desc",
+                "id": "dashboard0",
+                "title": "dashboard0 title",
+              },
+              Object {
+                "description": "dashboard1 desc",
+                "id": "dashboard1",
+                "title": "dashboard1 title",
+              },
+            ]
+          }
+          loading={false}
+          noItemsMessage="No dashboards matched your search."
+          onChange={[Function]}
+          pagination={
             Object {
-              "render": [Function],
-            },
-          ],
-          "name": "Actions",
-        },
-      ]
-    }
-    itemId="id"
-    items={
-      Array [
-        Object {
-          "description": "dashboard0 desc",
-          "id": "dashboard0",
-          "title": "dashboard0 title",
-        },
-        Object {
-          "description": "dashboard1 desc",
-          "id": "dashboard1",
-          "title": "dashboard1 title",
-        },
-      ]
-    }
-    loading={false}
-    noItemsMessage="No dashboards matched your search."
-    onChange={[Function]}
-    pagination={
-      Object {
-        "pageIndex": 0,
-        "pageSize": 20,
-        "pageSizeOptions": Array [
-          10,
-          20,
-          50,
-        ],
-        "totalItemCount": 2,
-      }
-    }
-    responsive={true}
-    selection={
-      Object {
-        "onSelectionChange": [Function],
-      }
-    }
-    sorting={Object {}}
-  />
+              "pageIndex": 0,
+              "pageSize": 20,
+              "pageSizeOptions": Array [
+                10,
+                20,
+                50,
+              ],
+              "totalItemCount": 2,
+            }
+          }
+          responsive={true}
+          selection={
+            Object {
+              "onSelectionChange": [Function],
+            }
+          }
+          sorting={Object {}}
+        />
+      </div>
+    </EuiPageContent>
+  </EuiPageBody>
 </EuiPage>
 `;
 
 exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
 <EuiPage
+  className="dashboardLandingPage"
   data-test-subj="dashboardLandingPage"
+  restrictWidth={false}
 >
-  <EuiFlexGroup
-    alignItems="flexEnd"
-    component="div"
-    data-test-subj="top-nav"
-    direction="row"
-    gutterSize="l"
-    justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
-  >
-    <EuiFlexItem
-      component="div"
-      grow={false}
+  <EuiPageBody>
+    <EuiPageContent
+      className="dashboardLandingPage__content"
+      horizontalPosition="center"
+      panelPaddingSize="l"
+      verticalPosition="center"
     >
-      <EuiTitle
-        size="l"
-      >
-        <h1>
-          Dashboard
-        </h1>
-      </EuiTitle>
-    </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={false}
-    >
-      <EuiButton
-        color="primary"
-        data-test-subj="newDashboardLink"
-        fill={false}
-        href="#/dashboard"
-        iconSide="left"
-        type="button"
-      >
-        Create new dashboard
-      </EuiButton>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiSpacer
-    size="m"
-  />
-  <React.Fragment>
-    <EuiCallOut
-      color="warning"
-      iconType="help"
-      size="m"
-      title="Listing limit exceeded"
-    >
-      <p>
-        You have 
-        2
-         dashboards, but your 
-        <strong>
-          listingLimit
-        </strong>
-         setting prevents the table below from displaying more than 
-        1
-        . You can change this setting under 
-        <EuiLink
-          color="primary"
-          href="#/management/kibana/settings"
-          type="button"
+      <div>
+        <EuiFlexGroup
+          alignItems="flexEnd"
+          component="div"
+          data-test-subj="top-nav"
+          direction="row"
+          gutterSize="l"
+          justifyContent="spaceBetween"
+          responsive={true}
+          wrap={false}
         >
-          Advanced Settings
-        </EuiLink>
-        .
-      </p>
-    </EuiCallOut>
-    <EuiSpacer
-      size="m"
-    />
-  </React.Fragment>
-  <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
-  >
-    <EuiFlexItem
-      component="div"
-      grow={true}
-    >
-      <EuiFieldSearch
-        compressed={false}
-        data-test-subj="searchFilter"
-        fullWidth={true}
-        incremental={false}
-        isLoading={false}
-        onChange={[Function]}
-        placeholder="Search..."
-        value=""
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiBasicTable
-    columns={
-      Array [
-        Object {
-          "field": "title",
-          "name": "Title",
-          "render": [Function],
-          "sortable": true,
-        },
-        Object {
-          "dataType": "string",
-          "field": "description",
-          "name": "Description",
-          "sortable": true,
-        },
-        Object {
-          "actions": Array [
+          <EuiFlexItem
+            component="div"
+            grow={false}
+          >
+            <EuiTitle
+              size="l"
+            >
+              <h1>
+                Dashboards
+              </h1>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem
+            component="div"
+            grow={false}
+          >
+            <EuiButton
+              color="primary"
+              data-test-subj="newDashboardLink"
+              fill={false}
+              href="#/dashboard"
+              iconSide="left"
+              type="button"
+            >
+              Create new dashboard
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer
+          size="m"
+        />
+        <React.Fragment>
+          <EuiCallOut
+            color="warning"
+            iconType="help"
+            size="m"
+            title="Listing limit exceeded"
+          >
+            <p>
+              You have 
+              2
+               dashboards, but your 
+              <strong>
+                listingLimit
+              </strong>
+               setting prevents the table below from displaying more than 
+              1
+              . You can change this setting under 
+              <EuiLink
+                color="primary"
+                href="#/management/kibana/settings"
+                type="button"
+              >
+                Advanced Settings
+              </EuiLink>
+              .
+            </p>
+          </EuiCallOut>
+          <EuiSpacer
+            size="m"
+          />
+        </React.Fragment>
+        <EuiFlexGroup
+          alignItems="stretch"
+          component="div"
+          direction="row"
+          gutterSize="l"
+          justifyContent="flexStart"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            component="div"
+            grow={true}
+          >
+            <EuiFieldSearch
+              compressed={false}
+              data-test-subj="searchFilter"
+              fullWidth={true}
+              incremental={false}
+              isLoading={false}
+              onChange={[Function]}
+              placeholder="Search..."
+              value=""
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer
+          size="m"
+        />
+        <EuiBasicTable
+          columns={
+            Array [
+              Object {
+                "field": "title",
+                "name": "Title",
+                "render": [Function],
+                "sortable": true,
+              },
+              Object {
+                "dataType": "string",
+                "field": "description",
+                "name": "Description",
+                "sortable": true,
+              },
+              Object {
+                "actions": Array [
+                  Object {
+                    "render": [Function],
+                  },
+                ],
+                "name": "Actions",
+              },
+            ]
+          }
+          itemId="id"
+          items={
+            Array [
+              Object {
+                "description": "dashboard0 desc",
+                "id": "dashboard0",
+                "title": "dashboard0 title",
+              },
+              Object {
+                "description": "dashboard1 desc",
+                "id": "dashboard1",
+                "title": "dashboard1 title",
+              },
+            ]
+          }
+          loading={false}
+          noItemsMessage="No dashboards matched your search."
+          onChange={[Function]}
+          pagination={
             Object {
-              "render": [Function],
-            },
-          ],
-          "name": "Actions",
-        },
-      ]
-    }
-    itemId="id"
-    items={
-      Array [
-        Object {
-          "description": "dashboard0 desc",
-          "id": "dashboard0",
-          "title": "dashboard0 title",
-        },
-        Object {
-          "description": "dashboard1 desc",
-          "id": "dashboard1",
-          "title": "dashboard1 title",
-        },
-      ]
-    }
-    loading={false}
-    noItemsMessage="No dashboards matched your search."
-    onChange={[Function]}
-    pagination={
-      Object {
-        "pageIndex": 0,
-        "pageSize": 20,
-        "pageSizeOptions": Array [
-          10,
-          20,
-          50,
-        ],
-        "totalItemCount": 2,
-      }
-    }
-    responsive={true}
-    selection={
-      Object {
-        "onSelectionChange": [Function],
-      }
-    }
-    sorting={Object {}}
-  />
+              "pageIndex": 0,
+              "pageSize": 20,
+              "pageSizeOptions": Array [
+                10,
+                20,
+                50,
+              ],
+              "totalItemCount": 2,
+            }
+          }
+          responsive={true}
+          selection={
+            Object {
+              "onSelectionChange": [Function],
+            }
+          }
+          sorting={Object {}}
+        />
+      </div>
+    </EuiPageContent>
+  </EuiPageBody>
 </EuiPage>
 `;
 
-exports[`initialFilter 1`] = `
+exports[`renders empty page in before initial fetch to avoid flickering 1`] = `
 <EuiPage
+  className="dashboardLandingPage"
   data-test-subj="dashboardLandingPage"
+  restrictWidth={false}
 >
-  <EuiFlexGroup
-    alignItems="flexEnd"
-    component="div"
-    data-test-subj="top-nav"
-    direction="row"
-    gutterSize="l"
-    justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
-  >
-    <EuiFlexItem
-      component="div"
-      grow={false}
-    >
-      <EuiTitle
-        size="l"
-      >
-        <h1>
-          Dashboard
-        </h1>
-      </EuiTitle>
-    </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={false}
-    >
-      <EuiButton
-        color="primary"
-        data-test-subj="newDashboardLink"
-        fill={false}
-        href="#/dashboard"
-        iconSide="left"
-        type="button"
-      >
-        Create new dashboard
-      </EuiButton>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiSpacer
-    size="m"
-  />
-  <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
-  >
-    <EuiFlexItem
-      component="div"
-      grow={true}
-    >
-      <EuiFieldSearch
-        compressed={false}
-        data-test-subj="searchFilter"
-        fullWidth={true}
-        incremental={false}
-        isLoading={false}
-        onChange={[Function]}
-        placeholder="Search..."
-        value="my dashboard"
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiBasicTable
-    columns={
-      Array [
-        Object {
-          "field": "title",
-          "name": "Title",
-          "render": [Function],
-          "sortable": true,
-        },
-        Object {
-          "dataType": "string",
-          "field": "description",
-          "name": "Description",
-          "sortable": true,
-        },
-        Object {
-          "actions": Array [
-            Object {
-              "render": [Function],
-            },
-          ],
-          "name": "Actions",
-        },
-      ]
-    }
-    itemId="id"
-    items={Array []}
-    loading={true}
-    noItemsMessage=""
-    onChange={[Function]}
-    pagination={
-      Object {
-        "pageIndex": 0,
-        "pageSize": 20,
-        "pageSizeOptions": Array [
-          10,
-          20,
-          50,
-        ],
-        "totalItemCount": 0,
-      }
-    }
-    responsive={true}
-    selection={
-      Object {
-        "onSelectionChange": [Function],
-      }
-    }
-    sorting={Object {}}
-  />
-</EuiPage>
-`;
-
-exports[`renders table in loading state 1`] = `
-<EuiPage
-  data-test-subj="dashboardLandingPage"
->
-  <EuiFlexGroup
-    alignItems="flexEnd"
-    component="div"
-    data-test-subj="top-nav"
-    direction="row"
-    gutterSize="l"
-    justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
-  >
-    <EuiFlexItem
-      component="div"
-      grow={false}
-    >
-      <EuiTitle
-        size="l"
-      >
-        <h1>
-          Dashboard
-        </h1>
-      </EuiTitle>
-    </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={false}
-    >
-      <EuiButton
-        color="primary"
-        data-test-subj="newDashboardLink"
-        fill={false}
-        href="#/dashboard"
-        iconSide="left"
-        type="button"
-      >
-        Create new dashboard
-      </EuiButton>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiSpacer
-    size="m"
-  />
-  <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
-  >
-    <EuiFlexItem
-      component="div"
-      grow={true}
-    >
-      <EuiFieldSearch
-        compressed={false}
-        data-test-subj="searchFilter"
-        fullWidth={true}
-        incremental={false}
-        isLoading={false}
-        onChange={[Function]}
-        placeholder="Search..."
-        value=""
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiBasicTable
-    columns={
-      Array [
-        Object {
-          "field": "title",
-          "name": "Title",
-          "render": [Function],
-          "sortable": true,
-        },
-        Object {
-          "dataType": "string",
-          "field": "description",
-          "name": "Description",
-          "sortable": true,
-        },
-        Object {
-          "actions": Array [
-            Object {
-              "render": [Function],
-            },
-          ],
-          "name": "Actions",
-        },
-      ]
-    }
-    itemId="id"
-    items={Array []}
-    loading={true}
-    noItemsMessage=""
-    onChange={[Function]}
-    pagination={
-      Object {
-        "pageIndex": 0,
-        "pageSize": 20,
-        "pageSizeOptions": Array [
-          10,
-          20,
-          50,
-        ],
-        "totalItemCount": 0,
-      }
-    }
-    responsive={true}
-    selection={
-      Object {
-        "onSelectionChange": [Function],
-      }
-    }
-    sorting={Object {}}
-  />
+  <EuiPageBody />
 </EuiPage>
 `;

@@ -76,7 +76,7 @@
     "yargs": "4.7.1"
   },
   "dependencies": {
-    "@elastic/eui": "0.0.51",
+    "@elastic/eui": "0.0.52",
     "@elastic/node-crypto": "0.1.2",
     "@elastic/node-phantom-simple": "2.2.4",
     "@elastic/numeral": "2.3.2",
@@ -93,7 +93,7 @@
     "babel-runtime": "^6.26.0",
     "bluebird": "3.1.1",
     "boom": "3.1.1",
-    "brace": "0.10.0",
+    "brace": "0.11.1",
     "chrome-remote-interface": "0.24.2",
     "classnames": "2.2.5",
     "concat-stream": "1.5.1",

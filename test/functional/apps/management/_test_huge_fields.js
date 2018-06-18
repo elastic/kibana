@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'home', 'settings']);
 
-  describe('test large number of fields', function () {
+  describe('test large number of fields @skipcloud', function () {
     const EXPECTED_FIELD_COUNT = '10006';
     before(async function () {
       await esArchiver.loadIfNeeded('large_fields');

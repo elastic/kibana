@@ -55,6 +55,12 @@ export class EmbeddedVisualizeHandler {
       if (params.hasOwnProperty('timeRange')) {
         this._scope.timeRange = params.timeRange;
       }
+      if (params.hasOwnProperty('filters')) {
+        this._scope.filters = params.filters;
+      }
+      if (params.hasOwnProperty('query')) {
+        this._scope.query = params.query;
+      }
 
       // Apply data- attributes to the element if specified
       if (params.dataAttrs) {

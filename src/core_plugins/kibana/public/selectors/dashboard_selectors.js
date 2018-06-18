@@ -52,6 +52,8 @@ export const getMaximizedPanelId = state => DashboardSelectors.getMaximizedPanel
 export const getUseMargins = state => DashboardSelectors.getUseMargins(getDashboard(state));
 export const getHidePanelTitles = state => DashboardSelectors.getHidePanelTitles(getDashboard(state));
 export const getTimeRange = state => DashboardSelectors.getTimeRange(getDashboard(state));
+export const getFilters = state => DashboardSelectors.getFilters(getDashboard(state));
+export const getQuery = state => DashboardSelectors.getQuery(getDashboard(state));
 
 export const getTitle = state => DashboardSelectors.getTitle(getDashboard(state));
 export const getDescription = state => DashboardSelectors.getDescription(getDashboard(state));

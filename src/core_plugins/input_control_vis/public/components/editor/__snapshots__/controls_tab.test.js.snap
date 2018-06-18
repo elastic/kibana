@@ -98,6 +98,7 @@ exports[`renders ControlsTab 1`] = `
           id="selectControlType"
         >
           <EuiSelect
+            aria-label="Select control type"
             compressed={false}
             fullWidth={false}
             hasNoInitialSelection={false}
@@ -130,6 +131,7 @@ exports[`renders ControlsTab 1`] = `
           id="addControl"
         >
           <EuiButton
+            aria-label="Add control"
             color="primary"
             data-test-subj="inputControlEditorAddBtn"
             fill={true}

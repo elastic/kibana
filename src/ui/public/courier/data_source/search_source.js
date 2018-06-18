@@ -75,7 +75,6 @@ import angular from 'angular';
 import '../../promises';
 
 import { NormalizeSortRequestProvider } from './_normalize_sort_request';
-import { RootSearchSourceProvider } from './_root_search_source';
 import { SearchRequestProvider } from '../fetch/request';
 import { SegmentedRequestProvider } from '../fetch/request/segmented';
 
@@ -99,7 +98,7 @@ function isIndexPattern(val) {
   return Boolean(val && typeof val.toIndexList === 'function');
 }
 
-export function SearchSourceProvider(Promise, PromiseEmitter, Private, config) {
+export function SearchSourceProvider(Promise, Private, config) {
   const SearchRequest = Private(SearchRequestProvider);
   const SegmentedRequest = Private(SegmentedRequestProvider);
   const normalizeSortRequest = Private(NormalizeSortRequestProvider);
@@ -227,11 +226,8 @@ export function SearchSourceProvider(Promise, PromiseEmitter, Private, config) {
      * Get the parent of this SearchSource
      * @return {undefined|searchSource}
      */
-    getParent(onlyHardLinked) {
-      const self = this;
-      if (self._parent === false) return;
-      if (self._parent) return self._parent;
-      return onlyHardLinked ? undefined : Private(RootSearchSourceProvider).get();
+    getParent() {
+      return this._parent || undefined;
     }
 
     /**
@@ -280,6 +276,14 @@ export function SearchSourceProvider(Promise, PromiseEmitter, Private, config) {
       clone.set('index', this.get('index'));
       clone.inherits(this.getParent());
       return clone;
+    }
+
+    makeChild() {
+      return new SearchSource().inherits(this, { callParentStartHandlers: true });
+    }
+
+    new() {
+      return new SearchSource();
     }
 
     async getSearchRequestBody() {
@@ -369,10 +373,10 @@ export function SearchSourceProvider(Promise, PromiseEmitter, Private, config) {
      * be fetched on the next run of the courier
      * @return {Promise}
      */
-    onResults(handler) {
+    onResults() {
       const self = this;
 
-      return new PromiseEmitter(function (resolve, reject) {
+      return new Promise(function (resolve, reject) {
         const defer = Promise.defer();
         defer.promise.then(resolve, reject);
 
@@ -382,8 +386,7 @@ export function SearchSourceProvider(Promise, PromiseEmitter, Private, config) {
           reject(error);
           request.abort();
         });
-
-      }, handler);
+      });
     }
 
     /**
