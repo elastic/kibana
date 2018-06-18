@@ -51,6 +51,7 @@ export async function patchKibanaIndexMappings(kbnServer: KbnServer) {
   return patchIndexMappings({
     callCluster,
     index: server.config().get('kibana.index'),
+    kibanaVersion: kbnServer.version,
     plugins: getMigrationPlugins(kbnServer),
   });
 }
