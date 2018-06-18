@@ -173,7 +173,7 @@ describe('#isCustom', () => {
     expect(config.isCustom('dateFormat')).toBe(false);
   });
 
-  it('returns false for unkown name', () => {
+  it('returns false for unknown name', () => {
     const { config } = setup();
     expect(config.isCustom('foo')).toBe(false);
   });

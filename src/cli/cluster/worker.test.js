@@ -165,7 +165,7 @@ describe('CLI cluster manager', function () {
       });
     });
 
-    describe('when passed an unkown message', function () {
+    describe('when passed an unknown message', function () {
       it('does nothing', function () {
         const worker = setup();
         worker.onMessage('asdlfkajsdfahsdfiohuasdofihsdoif');

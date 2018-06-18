@@ -21,7 +21,7 @@ import { expect } from 'chai';
 import calculateLabel from '../calculate_label';
 
 describe('calculateLabel(metric, metrics)', () => {
-  it('returns "Unkonwn" for empty metric', () => {
+  it('returns "Unknown" for empty metric', () => {
     expect(calculateLabel()).to.equal('Unknown');
   });
 

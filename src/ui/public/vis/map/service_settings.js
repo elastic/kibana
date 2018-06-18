@@ -76,7 +76,7 @@ uiModules.get('kibana')
             return response.data;
           } catch (e) {
             if (!e) {
-              e = new Error('Unkown error');
+              e = new Error('Unknown error');
             }
             if (!(e instanceof Error)) {
               e = new Error(e.data || `status ${e.statusText || e.status}`);
