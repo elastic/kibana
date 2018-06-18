@@ -35,6 +35,10 @@ describe('offset', () => {
       expect(() => preprocessOffset('timerange:0', from, to)).to.throwError();
     });
 
+    test('throws error when factor is larger than zero', () => {
+      expect(() => preprocessOffset('timerange:1', from, to)).to.throwError();
+    });
+
     test('throws error with malformed', () => {
       expect(() => preprocessOffset('timerange:notANumber', from, to)).to.throwError();
     });
