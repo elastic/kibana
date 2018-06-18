@@ -104,7 +104,7 @@ export default props => (
       <GuideText>
         Popovers often have need for titling. This can be applied through
         a prop or used separately as its own component
-        KuiPopoverTitle nested somwhere in the child
+        KuiPopoverTitle nested somewhere in the child
         prop.
       </GuideText>
 
