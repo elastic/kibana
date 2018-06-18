@@ -7,9 +7,11 @@
 import { uiModules } from 'ui/modules';
 import { combineReducers, createStore } from 'redux';
 import ui from './ui';
+import map from './map';
 import config from './config';
 
 const reducers = {
+  map,
   ui,
   config
 };
