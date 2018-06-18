@@ -519,7 +519,7 @@ export function SearchSourceProvider(Promise, Private, config) {
 
     /**
      * Create a common search request object, which should
-     * be put into the pending request queye, for this search
+     * be put into the pending request queue, for this search
      * source
      *
      * @param {Deferred} defer - the deferred object that should be resolved
