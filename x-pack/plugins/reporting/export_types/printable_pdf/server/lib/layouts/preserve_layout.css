@@ -9,7 +9,7 @@
  *  global
  */
 
-/* elements can hide themself when shared */
+/* elements can hide themselves when shared */
 .hide-for-sharing {
   display: none;
 }
