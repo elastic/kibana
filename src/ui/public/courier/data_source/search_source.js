@@ -604,7 +604,7 @@ export function SearchSourceProvider(Promise, Private, config) {
 
     /**
      * Walk the inheritance chain of a source and return it's
-     * flat representaion (taking into account merging rules)
+     * flat representation (taking into account merging rules)
      * @returns {Promise}
      * @resolved {Object|null} - the flat state of the SearchSource
      */
