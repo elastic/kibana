@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'console']);
 
-  describe('console app', function describeIndexTests() {
+  describe('console app@', function describeIndexTests() {
     before(async function () {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
@@ -55,9 +55,8 @@ export default function ({ getService, getPageObjects }) {
     it('default request response should include `"timed_out": false`', async function () {
       const expectedResponseContains = '"timed_out": false,';
       await PageObjects.console.clickPlay();
-      let  actualResponse;
       await retry.try(async function () {
-        actualResponse = await PageObjects.console.getResponse();
+        const actualResponse = await PageObjects.console.getResponse();
         log.debug(actualResponse);
         expect(actualResponse).to.contain(expectedResponseContains);
       });
