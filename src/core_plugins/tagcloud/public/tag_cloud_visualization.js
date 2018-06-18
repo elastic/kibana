@@ -18,7 +18,8 @@
  */
 
 import TagCloud from './tag_cloud';
-import { Observable } from 'rxjs';
+import * as Rx from 'rxjs';
+import { take } from 'rxjs/operators';
 import { render, unmountComponentAtNode } from 'react-dom';
 import React from 'react';
 
@@ -49,7 +50,7 @@ export class TagCloudVisualization {
       const filter = this._bucketAgg.createFilter(event);
       this._vis.API.queryFilter.addFilters(filter);
     });
-    this._renderComplete$ = Observable.fromEvent(this._tagCloud, 'renderComplete');
+    this._renderComplete$ = Rx.fromEvent(this._tagCloud, 'renderComplete');
 
 
     this._feedbackNode = document.createElement('div');
@@ -77,7 +78,7 @@ export class TagCloudVisualization {
       this._resize();
     }
 
-    await this._renderComplete$.take(1).toPromise();
+    await this._renderComplete$.pipe(take(1)).toPromise();
 
     const hasAggDefined = this._vis.aggs[0] && this._vis.aggs[1];
     if (!hasAggDefined) {
