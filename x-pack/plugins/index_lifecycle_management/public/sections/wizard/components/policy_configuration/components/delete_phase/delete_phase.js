@@ -26,7 +26,6 @@ import {
 } from '@elastic/eui';
 import {
   PHASE_ENABLED,
-  PHASE_ROLLOVER_ENABLED,
   PHASE_ROLLOVER_AFTER,
   PHASE_ROLLOVER_AFTER_UNITS,
 } from '../../../../../../store/constants';
@@ -41,7 +40,6 @@ export class DeletePhase extends PureComponent {
     errors: PropTypes.object.isRequired,
     phaseData: PropTypes.shape({
       [PHASE_ENABLED]: PropTypes.bool.isRequired,
-      [PHASE_ROLLOVER_ENABLED]: PropTypes.bool.isRequired,
       [PHASE_ROLLOVER_AFTER]: PropTypes.oneOfType([
         PropTypes.number,
         PropTypes.string

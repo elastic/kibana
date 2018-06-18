@@ -23,7 +23,6 @@ import {
 } from '@elastic/eui';
 import {
   PHASE_ENABLED,
-  PHASE_ROLLOVER_ENABLED,
   PHASE_ROLLOVER_ALIAS,
   PHASE_ROLLOVER_AFTER,
   PHASE_ROLLOVER_AFTER_UNITS,
@@ -42,7 +41,6 @@ export class ColdPhase extends PureComponent {
     errors: PropTypes.object.isRequired,
     phaseData: PropTypes.shape({
       [PHASE_ENABLED]: PropTypes.bool.isRequired,
-      [PHASE_ROLLOVER_ENABLED]: PropTypes.bool.isRequired,
       [PHASE_ROLLOVER_ALIAS]: PropTypes.string.isRequired,
       [PHASE_ROLLOVER_AFTER]: PropTypes.oneOfType([
         PropTypes.number,

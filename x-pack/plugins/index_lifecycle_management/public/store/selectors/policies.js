@@ -83,7 +83,7 @@ export const splitSizeAndUnits = field => {
 
 export const isNumber = value => typeof value === 'number';
 
-export const phaseFromES = (phase, defaultPolicy) => {
+export const phaseFromES = (phase, phaseName, defaultPolicy) => {
   const policy = { ...defaultPolicy };
 
   if (!phase) {
@@ -91,13 +91,20 @@ export const phaseFromES = (phase, defaultPolicy) => {
   }
 
   policy[PHASE_ENABLED] = true;
+  policy[PHASE_ROLLOVER_ENABLED] = false;
 
   if (phase.after) {
     const { size: after, units: afterUnits } = splitSizeAndUnits(
       phase.after
     );
-    policy[PHASE_ROLLOVER_AFTER] = after;
-    policy[PHASE_ROLLOVER_AFTER_UNITS] = afterUnits;
+    // If the after is set to 0s, it effectively means we are moving
+    // to the warm phase after rollover from the hot phase
+    if (phaseName === PHASE_WARM && after === 0) {
+      policy[PHASE_ROLLOVER_ENABLED] = true;
+    } else {
+      policy[PHASE_ROLLOVER_AFTER] = after;
+      policy[PHASE_ROLLOVER_AFTER_UNITS] = afterUnits;
+    }
   }
 
   if (phase.actions) {
@@ -124,8 +131,6 @@ export const phaseFromES = (phase, defaultPolicy) => {
         policy[PHASE_ROLLOVER_MAX_SIZE_STORED] = rollover.max_docs;
         policy[PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS] = MAX_SIZE_TYPE_DOCUMENT;
       }
-    } else {
-      policy[PHASE_ROLLOVER_ENABLED] = false;
     }
 
     if (actions.allocate) {
@@ -159,10 +164,10 @@ export const policyFromES = ({ name, type, phases }) => {
     name,
     type,
     phases: {
-      [PHASE_HOT]: phaseFromES(phases[PHASE_HOT], defaultHotPhase),
-      [PHASE_WARM]: phaseFromES(phases[PHASE_WARM], defaultWarmPhase),
-      [PHASE_COLD]: phaseFromES(phases[PHASE_COLD], defaultColdPhase),
-      [PHASE_DELETE]: phaseFromES(phases[PHASE_DELETE], defaultDeletePhase)
+      [PHASE_HOT]: phaseFromES(phases[PHASE_HOT], PHASE_HOT, defaultHotPhase),
+      [PHASE_WARM]: phaseFromES(phases[PHASE_WARM], PHASE_WARM, defaultWarmPhase),
+      [PHASE_COLD]: phaseFromES(phases[PHASE_COLD], PHASE_COLD, defaultColdPhase),
+      [PHASE_DELETE]: phaseFromES(phases[PHASE_DELETE], PHASE_DELETE, defaultDeletePhase)
     }
   };
 };
