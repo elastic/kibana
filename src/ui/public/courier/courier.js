@@ -91,7 +91,7 @@ uiModules.get('kibana/courier')
 
       /**
      * stop the courier from fetching more search
-     * results, does not stop vaidating docs.
+     * results, does not stop validating docs.
      *
      * @chainable
      */
