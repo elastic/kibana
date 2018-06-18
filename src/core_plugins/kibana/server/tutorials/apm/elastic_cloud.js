@@ -26,6 +26,7 @@ import {
   RAILS_CLIENT_INSTRUCTIONS,
   RACK_CLIENT_INSTRUCTIONS,
   JS_CLIENT_INSTRUCTIONS,
+  GO_CLIENT_INSTRUCTIONS,
 } from './apm_client_instructions';
 
 const SERVER_URL_INSTRUCTION = {
@@ -63,6 +64,10 @@ export const ELASTIC_CLOUD_INSTRUCTIONS = {
         {
           id: INSTRUCTION_VARIANT.JS,
           instructions: [SERVER_URL_INSTRUCTION, ...JS_CLIENT_INSTRUCTIONS],
+        },
+        {
+          id: INSTRUCTION_VARIANT.GO,
+          instructions: [SERVER_URL_INSTRUCTION, ...GO_CLIENT_INSTRUCTIONS],
         },
       ],
     },
