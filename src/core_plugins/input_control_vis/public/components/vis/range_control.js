@@ -31,7 +31,7 @@ import {
 
 const toState = (props) => {
   const state = {
-    sliderValue: props.control.value,
+    sliderValue: props.control.value ? props.control.value : { min: props.control.min, max: props.control.min },
     minValue: '',
     maxValue: '',
     isRangeValid: true,
@@ -56,6 +56,7 @@ export class RangeControl extends Component {
   };
 
   handleOnChange = (value) => {
+    // ensure value is within min/max - sometimes grabbing circle at min will provide a number below min
     this.setState({
       sliderValue: value,
       minValue: value.min,

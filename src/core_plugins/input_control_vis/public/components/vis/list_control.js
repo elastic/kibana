@@ -29,7 +29,12 @@ import {
 export class ListControl extends Component {
 
   handleOnChange = (selectedOptions) => {
-    this.props.stageFilter(this.props.controlIndex, selectedOptions);
+    let newValue = selectedOptions;
+    if (selectedOptions.length === 0) {
+      // control is empty
+      newValue = undefined;
+    }
+    this.props.stageFilter(this.props.controlIndex, newValue);
   }
 
   renderControl() {
@@ -93,5 +98,6 @@ ListControl.propTypes = {
 };
 
 ListControl.defaultProps = {
+  selectedOptions: [],
   options: [],
 };

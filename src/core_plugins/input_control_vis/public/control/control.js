@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import _ from 'lodash';
-
 export function noValuesDisableMsg(fieldName, indexPatternName) {
   return `Filtering occurs on the "${fieldName}" field,
 which doesn't exist on any documents in the "${indexPatternName}" index pattern.
@@ -115,7 +113,7 @@ export class Control {
   }
 
   clear() {
-    this.set(this.filterManager.getUnsetValue());
+    this.set();
   }
 
   hasChanged() {
@@ -134,6 +132,6 @@ export class Control {
   }
 
   hasValue() {
-    return !_.isEqual(this.value, this.filterManager.getUnsetValue());
+    return this.value !== undefined;
   }
 }
