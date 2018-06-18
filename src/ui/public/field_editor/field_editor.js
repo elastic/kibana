@@ -174,7 +174,7 @@ uiModules
         });
 
         // copy the defined properties of the field to a plain object
-        // which is mutable, and capture the changed seperately.
+        // which is mutable, and capture the changed separately.
         function shadowCopy(field) {
           const changes = {};
           const shadowProps = {

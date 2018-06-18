@@ -35,7 +35,7 @@ function isValidMoment(m) {
 
 /**
  * Helper class for wrapping the concept of an "Interval",
- * which describes a timespan that will seperate moments.
+ * which describes a timespan that will separate moments.
  *
  * @param {state} object - one of ""
  * @param {[type]} display [description]
