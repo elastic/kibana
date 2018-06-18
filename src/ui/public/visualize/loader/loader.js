@@ -49,7 +49,7 @@ import { EmbeddedVisualizeHandler } from './embedded_visualize_handler';
  * @property {boolean} append If set to true, the visualization will be appended
  *    to the passed element instead of replacing all its content. (default: false)
  * @property {string} cssClass If specified this CSS class (or classes with space separated)
- *    will be set to the root visuzalize element.
+ *    will be set to the root visualize element.
  * @property {object} dataAttrs An object of key-value pairs, that will be set
  *    as data-{key}="{value}" attributes on the visualization element.
  * @property {array} filters Specifies the filters that should be applied to that visualization.

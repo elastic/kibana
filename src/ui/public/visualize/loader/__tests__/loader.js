@@ -216,7 +216,7 @@ describe('visualize loader', () => {
         expect(handler instanceof EmbeddedVisualizeHandler).to.be(true);
       });
 
-      it('should give access to the visualzie element', () => {
+      it('should give access to the visualize element', () => {
         const container = newContainer();
         const handler = loader.embedVisualizationWithSavedObject(container, createSavedObject(), {});
         expect(handler.getElement()[0]).to.be(container.find('visualize')[0]);
