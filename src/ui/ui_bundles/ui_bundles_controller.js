@@ -128,10 +128,6 @@ export class UiBundlesController {
     return this._appExtensions;
   }
 
-  isDevMode() {
-    return this._env === 'development';
-  }
-
   getContext() {
     return JSON.stringify(this._context, null, '  ');
   }
