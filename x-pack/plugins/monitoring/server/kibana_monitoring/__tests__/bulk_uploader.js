@@ -16,6 +16,7 @@ const CHECK_DELAY = 500;
 describe('BulkUploader', () => {
   describe('registers a collector set and runs lifecycle events', () => {
     let server;
+    let xpackInfo;
 
     beforeEach(() => {
       server = {
@@ -33,6 +34,13 @@ describe('BulkUploader', () => {
           },
         },
       };
+
+      xpackInfo = {
+        feature: () => ({
+          isAvailable: () => sinon.stub().returns(true),
+          isEnabled: () => sinon.stub().returns(true),
+        })
+      };
     });
 
     it('should skip bulk upload if payload is empty', done => {
@@ -44,12 +52,12 @@ describe('BulkUploader', () => {
         })
       );
 
-      const uploader = new BulkUploader(server, collectors, {
+      const uploader = new BulkUploader(server, xpackInfo, {
         interval: FETCH_INTERVAL,
         combineTypes: noop,
       });
 
-      uploader.start();
+      uploader.start(collectors);
 
       // allow interval to tick a few times
       let loggingCalls;
@@ -91,12 +99,12 @@ describe('BulkUploader', () => {
           fetch: () => ({ testData: 12345 }),
         })
       );
-      const uploader = new BulkUploader(server, collectors, {
+      const uploader = new BulkUploader(server, xpackInfo, {
         interval: FETCH_INTERVAL,
         combineTypes,
       });
 
-      uploader.start();
+      uploader.start(collectors);
 
       // allow interval to tick a few times
       setTimeout(() => {

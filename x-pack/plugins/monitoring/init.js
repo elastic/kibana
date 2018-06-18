@@ -68,7 +68,7 @@ export const init = (monitoringPlugin, server) => {
        * Bulk uploading of Kibana stats
        */
 
-      bulkUploader.start();
+      bulkUploader.start(collectorSet);
     });
 
     xpackMainPlugin.status.on('red', () => { // any time xpack_main turns red

@@ -26,11 +26,10 @@ import {
  * - Usage Stats - essentially Kibana's /api/stats
  * - Kibana Settings - select uiSettings
  * @param {Object} server HapiJS server instance
- * @param {CollectorSet} collectorSet a set of collectors to use for the initial fetch and upload
  * @param {Object} xpackInfo server.plugins.xpack_main.info object
  */
 export class BulkUploader {
-  constructor(server, collectorSet, xpackMainInfo, { interval, combineTypes }) {
+  constructor(server, xpackMainInfo, { interval, combineTypes }) {
     if (typeof interval !== 'number') {
       throw new Error('interval number of milliseconds is required');
     }
@@ -50,23 +49,24 @@ export class BulkUploader {
 
     this._callClusterWithInternalUser = callClusterFactory(server).getCallClusterInternal();
 
-    /*
-     * Start the interval
-     * Defined as an enclosed function to effectively have no need for a `this.collectorSet`
-     */
-    this.start = () => {
-      if (this._timer) {
-        this._log.warn('BulkUploader timer already started');
-        return;
-      }
+  }
 
-      this._log.info('Starting monitoring stats collection');
+  /*
+   * Start the interval timer
+   * @param {CollectorSet} collectorSet object to use for initial the fetch/upload and fetch/uploading on interval
+   * @return undefined
+   */
+  start(collectorSet) {
+    this._log.info('Starting monitoring stats collection');
+    if (this._timer) {
+      this._log.warn('BulkUploader timer already started');
+      return;
+    }
 
-      this._fetchAndUpload(collectorSet); // initial fetch
-      this._timer = setInterval(() => {
-        this._fetchAndUpload(collectorSet);
-      }, this._interval);
-    };
+    this._fetchAndUpload(collectorSet); // initial fetch
+    this._timer = setInterval(() => {
+      this._fetchAndUpload(collectorSet);
+    }, this._interval);
   }
 
   /*
@@ -81,7 +81,7 @@ export class BulkUploader {
 
   /*
    * @param {CollectorSet} collectorSet
-   * @return undefined
+   * @return {Promise} - resolves to undefined
    */
   async _fetchAndUpload(collectorSet) {
     // Before every fetch, check the license and make sure the bulk endpoint on the ES side is up
@@ -107,9 +107,7 @@ export class BulkUploader {
         this._onPayload(flatten(combinedData));
       } catch (err) {
         this._log.warn(err.stack);
-        this._log.warn(
-          `Unable to bulk upload the stats payload to the local cluster`
-        );
+        this._log.warn(`Unable to bulk upload the stats payload to the local cluster`);
       }
     } else {
       this._log.debug(`Skipping bulk uploading of an empty stats payload`);
