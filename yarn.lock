@@ -77,9 +77,30 @@
   version "0.0.0"
   uid ""
 
-"@elastic/eui@0.0.52", "@elastic/eui@v0.0.52":
+"@elastic/eui@0.0.52":
   version "0.0.52"
   resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-0.0.52.tgz#c34c6cd482b458015e0d2b410f98652053994138"
+  dependencies:
+    classnames "^2.2.5"
+    core-js "^2.5.1"
+    focus-trap-react "^3.0.4"
+    highlight.js "^9.12.0"
+    html "^1.0.0"
+    keymirror "^0.1.1"
+    lodash "^3.10.1"
+    numeral "^2.0.6"
+    prop-types "^15.6.0"
+    react-ace "^5.5.0"
+    react-color "^2.13.8"
+    react-datepicker v1.4.1
+    react-input-autosize "^2.2.1"
+    react-virtualized "^9.18.5"
+    tabbable "^1.1.0"
+    uuid "^3.1.0"
+
+"@elastic/eui@0.0.53":
+  version "0.0.53"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-0.0.53.tgz#73c8e73e0b2a5574748d2a95416e99e78f355f07"
   dependencies:
     classnames "^2.2.5"
     core-js "^2.5.1"

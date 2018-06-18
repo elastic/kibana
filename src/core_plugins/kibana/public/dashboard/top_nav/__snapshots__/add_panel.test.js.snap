@@ -4,6 +4,7 @@ exports[`render 1`] = `
 <EuiFlyout
   className="addPanelFlyout"
   data-test-subj="dashboardAddPanel"
+  hideCloseButton={false}
   onClose={[Function]}
   ownFocus={true}
   size="s"
