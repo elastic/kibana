@@ -1,15 +1,12 @@
 {
-  "_xpack": {
+  "xpack.info": {
     "url_params": {
       "categories": [
         "build",
         "license",
         "features"
       ],
-      "human": [
-        "true",
-        "false"
-      ]
+      "human": "__flag__"
     }
   }
 }
