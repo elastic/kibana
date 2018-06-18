@@ -56,7 +56,6 @@ export class RangeControl extends Component {
   };
 
   handleOnChange = (value) => {
-    // ensure value is within min/max - sometimes grabbing circle at min will provide a number below min
     this.setState({
       sliderValue: value,
       minValue: value.min,
