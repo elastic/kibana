@@ -122,9 +122,7 @@ describe('config.js', () => {
     it('should not fail if config already exists', () => {
       const err = new Error();
       err.code = 'EEXIST';
-      jest
-        .spyOn(rpc, 'writeFile')
-        .mockImplementationOnce(() => Promise.reject(err));
+      jest.spyOn(rpc, 'writeFile').mockRejectedValueOnce(err);
 
       return configs.maybeCreateGlobalConfig();
     });

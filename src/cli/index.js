@@ -31,7 +31,7 @@ async function initYargs() {
     .usage('$0 [args]')
     .option('multiple', {
       default: config.multiple,
-      description: 'Select multiple branches and/or commits',
+      description: 'Select multiple branches/commits',
       type: 'boolean'
     })
     .option('multiple-commits', {
@@ -74,16 +74,14 @@ async function initYargs() {
   const configWithCliArgs = {
     ...config,
     multiple: cliArgs.multiple,
-    multipleCommits: cliArgs.multipleCommits,
-    multipleBranches: cliArgs.multipleBranches,
+    multipleCommits: cliArgs.multipleCommits || cliArgs.multiple,
+    multipleBranches: cliArgs.multipleBranches || cliArgs.multiple,
     all: cliArgs.all,
     upstream: cliArgs.upstream
   };
 
   const options = {
-    branches: flatten(cliArgs.branch.map(b => b.toString().split(','))).filter(
-      b => !!b
-    ),
+    branches: flattenBranches(cliArgs.branch),
     sha: cliArgs.sha
   };
 
@@ -100,6 +98,10 @@ async function initYargs() {
   }
 
   return initSteps(configWithCliArgs, options);
+}
+
+function flattenBranches(branches) {
+  return flatten(branches.map(b => b.toString().split(','))).filter(b => !!b);
 }
 
 initYargs();

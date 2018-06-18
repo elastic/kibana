@@ -13,8 +13,6 @@ axios.defaults.adapter = httpAdapter;
 describe('doBackportVersion', () => {
   let addLabelMock;
   beforeEach(() => {
-    rpc.mkdirp = jest.fn().mockResolvedValue();
-
     addLabelMock = nock('https://api.github.com')
       .post(`/repos/elastic/kibana/issues/1337/labels`, ['backport'])
       .query(true)
