@@ -44,10 +44,6 @@ export const essql = () => ({
           columns,
           rows,
         };
-      })
-      .catch(err => {
-        console.log(err);
-        return `ERROR: ${err.message}`;
       });
   },
 });
