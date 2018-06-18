@@ -18,11 +18,10 @@
  */
 
 import _ from 'lodash';
-import expect from 'expect.js';
-import { updateOldState } from '../vis_update_state';
+import { updateOldState } from './vis_update_state';
 
 // eslint-disable-next-line camelcase
-import { pre_6_1, since_6_1 } from './vis_update_objs/gauge_objs';
+import { pre_6_1, since_6_1 } from './__tests__/vis_update_objs/gauge_objs';
 
 function watchForChanges(obj) {
   const originalObject = _.cloneDeep(obj);
@@ -34,7 +33,7 @@ function watchForChanges(obj) {
 describe('updateOldState', () => {
 
   it('needs to be a function', () => {
-    expect(updateOldState).to.be.a('function');
+    expect(typeof updateOldState).toBe('function');
   });
 
   describe('gauge conversion', () => {
@@ -47,7 +46,7 @@ describe('updateOldState', () => {
     it('needs to convert fontSize for old gauge charts', () => {
       const isUnchanged = watchForChanges(oldGaugeChart);
       const state = updateOldState(oldGaugeChart);
-      expect(state).to.be.eql({
+      expect(state).toEqual({
         type: 'gauge',
         gauge: {
           style: {
@@ -56,16 +55,32 @@ describe('updateOldState', () => {
         }
       });
       // The method is not allowed to modify the passed in object
-      expect(isUnchanged()).to.be(true);
+      expect(isUnchanged()).toBe(true);
     });
 
     it('needs to convert gauge metrics (pre 6.1) to real metrics', () => {
       const isUnchanged = watchForChanges(pre_6_1);
       const state = updateOldState(pre_6_1);
 
-      expect(state).to.be.eql(since_6_1);
+      expect(state).toEqual(since_6_1);
       // The method is not allowed to modify the passed in object
-      expect(isUnchanged()).to.be(true);
+      expect(isUnchanged()).toBe(true);
+    });
+
+    it('it needs to convert gauges created as metrics (pre 6.1) to real gauges', () => {
+      const oldState = {
+        type: 'metric',
+        params: {
+          type: 'gauge',
+          gauge: {
+            gaugeType: 'Arc',
+          }
+        }
+      };
+      const state = updateOldState(oldState);
+      expect(state.type).toBe('gauge');
+      expect(state.params.type).toBe('gauge');
+      expect(state.params.gauge.gaugeType).toBe('Arc');
     });
 
   });
@@ -78,7 +93,7 @@ describe('updateOldState', () => {
         ]
       };
       const state = updateOldState(oldState);
-      expect(state.aggs[0].params.orderBy).to.be('_key');
+      expect(state.aggs[0].params.orderBy).toBe('_key');
     });
   });
 

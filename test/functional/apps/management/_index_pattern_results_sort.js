@@ -25,89 +25,70 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['settings', 'common']);
 
   describe('index result field sort', function describeIndexTests() {
-    before(function () {
+    before(async function () {
       // delete .kibana index and then wait for Kibana to re-create it
-      return kibanaServer.uiSettings.replace({});
+      await kibanaServer.uiSettings.replace({});
     });
 
     const columns = [{
       heading: 'Name',
       first: '@message',
       last: 'xss.raw',
-      selector: function () {
-        return PageObjects.settings.getTableRow(0, 0).getVisibleText();
+      selector: async function () {
+        return await PageObjects.settings.getTableRow(0, 0).getVisibleText();
       }
     }, {
       heading: 'Type',
       first: '_source',
       last: 'string',
-      selector: function () {
-        return PageObjects.settings.getTableRow(0, 1).getVisibleText();
+      selector: async function () {
+        return await PageObjects.settings.getTableRow(0, 1).getVisibleText();
       }
     }];
 
     columns.forEach(function (col) {
       describe('sort by heading - ' + col.heading, function indexPatternCreation() {
-        before(function () {
-          return PageObjects.settings.navigateTo()
-            .then(function () {
-              return PageObjects.settings.clickKibanaIndices();
-            });
+        before(async function () {
+          await PageObjects.settings.navigateTo();
+          await PageObjects.settings.clickKibanaIndices();
+          await PageObjects.settings.createIndexPattern();
         });
 
-        beforeEach(function () {
-          return PageObjects.settings.createIndexPattern();
+        after(async function () {
+          return await PageObjects.settings.removeIndexPattern();
         });
 
-        afterEach(function () {
-          return PageObjects.settings.removeIndexPattern();
+        it('should sort ascending', async function () {
+          await PageObjects.settings.sortBy(col.heading);
+          const rowText = await col.selector();
+          expect(rowText).to.be(col.first);
         });
 
-        it('should sort ascending', function () {
-          return PageObjects.settings.sortBy(col.heading)
-            .then(function getText() {
-              return col.selector();
-            })
-            .then(function (rowText) {
-              expect(rowText).to.be(col.first);
-            });
-        });
-
-        it('should sort descending', function () {
-          return PageObjects.settings.sortBy(col.heading)
-            .then(function sortAgain() {
-              return PageObjects.settings.sortBy(col.heading);
-            })
-            .then(function getText() {
-              return col.selector();
-            })
-            .then(function (rowText) {
-              expect(rowText).to.be(col.last);
-            });
+        it('should sort descending', async function () {
+          await PageObjects.settings.sortBy(col.heading);
+          const getText = await col.selector();
+          expect(getText).to.be(col.last);
         });
       });
     });
-
     describe('field list pagination', function () {
       const EXPECTED_FIELD_COUNT = 86;
 
-      before(function () {
-        return PageObjects.settings.navigateTo()
-          .then(function () {
-            return PageObjects.settings.createIndexPattern();
-          });
+      before(async function () {
+        await PageObjects.settings.navigateTo();
+        await PageObjects.settings.createIndexPattern();
+
       });
 
-      after(function () {
-        return PageObjects.settings.removeIndexPattern();
+      after(async function () {
+        return await PageObjects.settings.removeIndexPattern();
       });
 
-      it('makelogs data should have expected number of fields', function () {
-        return retry.try(function () {
-          return PageObjects.settings.getFieldsTabCount()
-            .then(function (tabCount) {
-              expect(tabCount).to.be('' + EXPECTED_FIELD_COUNT);
-            });
+      it('makelogs data should have expected number of fields', async function () {
+        await retry.try(async function () {
+          const TabCount = await PageObjects.settings.getFieldsTabCount();
+          expect(TabCount).to.be('' + EXPECTED_FIELD_COUNT);
+
         });
       });
     }); // end describe pagination
