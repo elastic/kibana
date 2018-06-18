@@ -123,7 +123,7 @@ module.exports = function createBuild(
         options
       );
     })
-    .then(async function() {
+    .then(function() {
       if (!plugin.styleSheetToCompile) {
         return;
       }
@@ -142,7 +142,7 @@ module.exports = function createBuild(
         outputFileName
       );
 
-      const rendered = await sass.renderSync({ file, output });
+      const rendered = sass.renderSync({ file, output });
       writeFileSync(output, rendered.css);
 
       del.sync([path.join(buildRoot, '**', '*.s{a,c}ss')]);
