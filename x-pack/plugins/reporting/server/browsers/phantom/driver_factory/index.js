@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Rx from 'rxjs/Rx';
+import * as Rx from 'rxjs';
+import { mergeMap } from 'rxjs/operators';
 import phantom from '@elastic/node-phantom-simple';
 import { getPhantomOptions } from './phantom_options';
 import { PhantomDriver } from '../driver';
@@ -65,8 +66,9 @@ export class PhantomDriverFactory {
           return;
         }
 
-        const exit$ = Rx.Observable.fromEvent(browser.process, 'exit')
-          .mergeMap(code => Rx.Observable.throw(new Error(`Phantom exited with code: ${code}`)));
+        const exit$ = Rx.fromEvent(browser.process, 'exit').pipe(
+          mergeMap(([code]) => Rx.throwError(new Error(`Phantom exited with code: ${code}`)))
+        );
 
         const driver = new PhantomDriver({
           page,
@@ -74,15 +76,15 @@ export class PhantomDriverFactory {
           zoom,
           logger,
         });
-        const driver$ = Rx.Observable.of(driver);
+        const driver$ = Rx.of(driver);
 
-        const consoleMessage$ = Rx.Observable.fromEventPattern(handler => {
+        const consoleMessage$ = Rx.fromEventPattern(handler => {
           page.onConsoleMessage = handler;
         }, () => {
           page.onConsoleMessage = null;
         });
 
-        const message$ = Rx.Observable.never();
+        const message$ = Rx.never();
 
         observer.next({
           driver$,
@@ -98,4 +100,3 @@ export class PhantomDriverFactory {
     });
   }
 }
-
