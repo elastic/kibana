@@ -1,0 +1,28 @@
+.canvas__navbarButton {
+  line-height: ($euiSizeXL * 2);
+  height: 64px;
+  font-size: $euiFontSizeS;
+  color: $euiColorLightShade;
+  padding-right: $euiSize;
+  padding-left: $euiSize;
+  cursor: pointer;
+  border: 0;
+  background: transparent;
+
+  &:focus, &:active {
+    border: 0;
+    outline: none;
+  }
+
+  i.fa {
+    margin-right: $euiSizeXS;
+  }
+
+  &:hover {
+    color: $euiColorEmptyShade;
+  }
+
+  &:disabled {
+    color: $euiColorDarkShade;
+  }
+}

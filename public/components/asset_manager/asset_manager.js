@@ -5,7 +5,6 @@ import { ConfirmModal } from '../confirm_modal';
 import { RemoveIcon } from '../remove_icon';
 import { Clipboard } from '../clipboard';
 import { Download } from '../download';
-import './asset_manager.less';
 
 export class AssetManager extends React.PureComponent {
   static propTypes = {

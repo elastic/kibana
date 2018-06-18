@@ -8,7 +8,6 @@ import { ESIndexSelect } from '../../../components/es_index_select';
 import { TooltipIcon } from '../../../components/tooltip_icon';
 import { templateFromReactComponent } from '../../../lib/template_from_react_component';
 import header from './header.png';
-import './esdocs.less';
 
 const EsdocsDatasource = ({ args, updateArgs }) => {
   const setArg = (name, value) => {

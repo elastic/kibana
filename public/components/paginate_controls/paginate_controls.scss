@@ -1,0 +1,10 @@
+.canvas__paginate--page-controls {
+  overflow: hidden;
+  text-align: center;
+
+  .page-navigate,
+  .page-number {
+    padding: ($euiSizeXS / 2);
+    vertical-align: middle;
+  }
+}

@@ -1,0 +1,77 @@
+// EUI global scope
+@import '../../node_modules/@elastic/eui/src/themes/k6/k6_globals';
+@import '../../node_modules/@elastic/eui/src/themes/k6/k6_colors_light';
+@import '../../node_modules/@elastic/eui/src/global_styling/functions/index';
+@import '../../node_modules/@elastic/eui/src/global_styling/variables/index';
+@import '../../node_modules/@elastic/eui/src/global_styling/mixins/index';
+
+// Canvas core
+@import 'hackery';
+@import 'main';
+
+// Canvas apps
+@import '../apps/home/home_app';
+@import '../apps/workpad/workpad_app/workpad_app';
+
+// Canvas components
+@import '../components/arg_add/arg_add';
+@import '../components/arg_add_popover/arg_add_popover';
+@import '../components/arg_form/arg_form';
+@import '../components/asset_manager/asset_manager';
+@import '../components/color_dot/color_dot';
+@import '../components/color_manager/color_manager';
+@import '../components/color_palette/color_palette';
+@import '../components/color_picker_mini/color_picker_mini';
+@import '../components/context_menu/context_menu';
+@import '../components/datasource/datasource_preview/datasource_preview';
+@import '../components/datatable/datatable';
+@import '../components/element_wrapper/element_wrapper';
+@import '../components/expression/expression';
+@import '../components/expression_input/suggestion';
+@import '../components/feedback_button/feedback_button';
+@import '../components/font_picker/font_picker';
+@import '../components/fullscreen/fullscreen';
+@import '../components/function_form/function_form';
+@import '../components/loading/loading';
+@import '../components/media_card/media_card';
+@import '../components/navbar/navbar';
+@import '../components/navbar_button/navbar_button';
+@import '../components/navbar_divider/navbar_divider';
+@import '../components/page_manager/page_manager';
+@import '../components/paginate_controls/paginate_controls';
+@import '../components/palette_picker/palette_picker';
+@import '../components/palette_swatch/palette_swatch';
+@import '../components/pill_select/pill_select';
+@import '../components/positionable/positionable';
+@import '../components/refresh_control/refresh_control';
+@import '../components/remove_icon/remove_icon';
+@import '../components/render_with_fn/render_with_fn';
+@import '../components/sidebar/sidebar';
+@import '../components/text_style_picker/text_style_picker';
+@import '../components/toolbar/toolbar';
+@import '../components/toolbar/tray/tray';
+@import '../components/update_modal/update_modal';
+@import '../components/workpad/workpad';
+@import '../components/workpad_header/workpad_header';
+@import '../components/workpad_loader/workpad_loader';
+@import '../components/workpad_page/workpad_page';
+
+// Canvas expressions
+@import '../expression_types/arg_types/axis_config/axis_config';
+@import '../expression_types/arg_types/font/font';
+@import '../expression_types/arg_types/image_upload/image_upload';
+@import '../expression_types/arg_types/series_style/series_style';
+@import '../expression_types/datasources/esdocs/esdocs';
+@import '../expression_types/datasources/timelion/timelion';
+
+// Canvas render functions
+@import '../render_functions/advanced_filter/component/advanced_filter';
+@import '../render_functions/dropdown_filter/component/dropdown_filter';
+@import '../render_functions/error/error';
+@import '../render_functions/markdown/markdown';
+@import '../render_functions/plot/plot';
+@import '../render_functions/reveal_image/reveal_image';
+@import '../render_functions/time_filter/components/datetime_calendar/datetime_calendar';
+@import '../render_functions/time_filter/components/datetime_input/datetime_input';
+@import '../render_functions/time_filter/components/datetime_range_absolute/datetime_range_absolute';
+@import '../render_functions/time_filter/components/time_picker/time_picker';

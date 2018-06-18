@@ -1,0 +1,25 @@
+.canvas__palette-picker {
+  display: inline-block;
+  width: 100%;
+}
+
+.canvas__palette-picker--swatches-popover {
+  .popover-content {
+    padding: 0;
+  }
+}
+
+.canvas__palette-picker--swatches {
+  width: 280px;
+  height: 250px;
+  overflow-y: scroll;
+}
+
+.canvas__palette-picker--swatch {
+  padding: $euiSizeS;
+}
+
+.canvas__palette-picker--label {
+  font-size: $euiFontSizeS;
+  text-transform: capitalize;
+}

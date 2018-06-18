@@ -1,0 +1,94 @@
+/*
+  This file contains all the global scope and bootstrap garbage that should be removed
+  when the UI framework implements everything we need
+*/
+
+// Give buttons some room to the right
+.btn-toolbar {
+  .btn {
+    margin-right: $euiSizeXS;
+  }
+}
+
+.btn-link,
+.btn-link:focus,
+.btn-link:hover {
+  background-color: transparent;
+  color: $euiColorPrimary;
+}
+
+.btn-link:focus,
+.btn-link:hover {
+  text-decoration: underline;
+}
+
+.text-warning {
+  color: $euiColorWarning;
+}
+
+.text-danger {
+  color: $euiColorDanger;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.popover-content {
+  overflow: auto;
+}
+
+.form-control[type='checkbox'],
+button:focus {
+  box-shadow: none !important;
+}
+
+.table > thead > tr > th {
+  border-bottom: 0px;
+}
+
+.muted {
+  color: $euiColorDarkShade;
+}
+
+.popover {
+  max-width: 2000px !important; // React-Bootstrap popovers are hardcoded to 276px;
+}
+
+// fix modal focus index, set to bootstrap values
+// broken upstream by focus mixin: https://github.com/elastic/kibana/blob/d77cc5676bc534c1d1de1f160e213bd66fb8a78c/packages/kbn-ui-framework/src/global_styling/reset/_reset.scss
+[role='dialog'] {
+  .modal-backdrop {
+    z-index: 1040;
+  }
+
+  .modal {
+    z-index: 1050;
+  }
+}
+
+// TODO: remove when kibana v6.3.0 is released
+// fixes EuiToolTip flicker problem
+
+body {
+  min-height: 100%;
+}
+
+// TODO: remove when bootstrap is removed
+// overrides base font-size set by bootstrap
+html {
+  font-size: $euiFontSize;
+}
+
+// TODO: remove if fix is provided for https://github.com/elastic/eui/issues/833
+// temp fix for SVGs not appearing in the EuiImage fullscreen view
+.euiImageFullScreen {
+  min-width: 100px;
+}
+
+// this makes the eui file picker smaller and fit better next to the image preview in imageUpload
+.euiFilePicker {
+  .euiFilePicker__promptText {
+    font-size: 0.75rem;
+  }
+}

@@ -5,7 +5,6 @@ import { Loading } from '../../../components/loading';
 import { FileUpload } from '../../../components/file_upload';
 import { encode, isValid } from '../../../../common/lib/dataurl';
 import { templateFromReactComponent } from '../../../lib/template_from_react_component';
-import './image_upload.less';
 
 class ImageUpload extends React.Component {
   static propTypes = {

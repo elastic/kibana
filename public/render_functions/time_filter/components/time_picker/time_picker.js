@@ -5,7 +5,6 @@ import { Button } from 'react-bootstrap';
 import moment from 'moment';
 import { DatetimeRangeAbsolute } from '../datetime_range_absolute';
 import { DatetimeQuickList } from '../datetime_quick_list';
-import './time_picker.less';
 
 export const quickRanges = [
   { from: 'now-24h', to: 'now', display: 'Last 24 hours' },

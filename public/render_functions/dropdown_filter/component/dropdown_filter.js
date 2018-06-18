@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormControl } from 'react-bootstrap';
-import './dropdown_filter.less';
 
 export const DropdownFilter = ({ value, onChange, commit, choices }) => {
   return (

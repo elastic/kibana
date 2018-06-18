@@ -1,0 +1,32 @@
+.canvas__palette-swatch {
+  display: inline-block;
+  position: relative;
+  height: $euiSizeL;
+  width: 100%;
+  overflow: hidden;
+  border-radius: $euiSize;
+  border: 2px solid $euiColorDarkShade;
+
+  .canvas__palette-swatch--background {
+    position: absolute;
+    height: $euiSizeL;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+
+  .canvas__palette-swatch--foreground {
+    position: absolute;
+    height: $euiSizeL + 2px; // TODO: No idea why this can't be 25, but it leaves a 1px white spot in the palettePicker if its 25
+    top: 0;
+    left: 0;
+    white-space: nowrap;
+    width: 100%;
+    display: flex;
+  }
+
+  .canvas__palette-swatch--box {
+    display: inline-block;
+    width: 100%;
+  }
+}

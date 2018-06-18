@@ -1,0 +1,44 @@
+.canvas__asset-manager {
+  .canvas__asset-manager--thumb {
+    display: inline-block;
+    position: relative;
+    height: 200px;
+    width: 200px;
+    border-radius: $euiBorderThin;
+    border: $euiBorderThin;
+    margin-right: $euiSize;
+    margin-bottom: $euiSize;
+    background-color: $euiColorLightestShade;
+    background-size: cover;
+    background-position: left;
+    background-repeat: no-repeat;
+  }
+
+  .canvas__asset-manager--asset-identifier {
+    position: absolute;
+    bottom: 0;
+    background-color: transparentize($euiColorDarkestShade, .2);
+    border-radius: 0 0 $euiBorderThin $euiBorderThin;
+    padding: $euiSizeXS;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 100%;
+
+    .asset-copy,
+    .asset-download {
+      float: right;
+      margin-right: $euiSizeXS;
+
+      &:first-child {
+        margin-right: 0px;
+      }
+    }
+
+    .asset-id {
+      font-size: $euiFontSizeS;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+}

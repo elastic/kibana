@@ -1,4 +1,3 @@
-import './reveal_image.less';
 import { elasticOutline } from '../../../common/functions/revealImage/elastic_outline';
 import { isValid } from '../../../common/lib/dataurl';
 

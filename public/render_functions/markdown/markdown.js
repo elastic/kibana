@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Markdown from 'markdown-it';
-import './markdown.less';
 
 const md = new Markdown();
 

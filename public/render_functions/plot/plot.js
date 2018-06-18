@@ -4,8 +4,6 @@ import { size } from './plugins/size';
 import { text } from './plugins/text';
 import '../../lib/flot-charts';
 
-import './plot.less';
-
 const render = (domNode, config, handlers) => {
   // TODO: OH NOES
   if (!includes($.plot.plugins, size)) $.plot.plugins.push(size);

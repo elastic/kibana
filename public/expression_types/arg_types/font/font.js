@@ -1,6 +1,5 @@
 import { templateFromReactComponent } from '../../../lib/template_from_react_component';
 import { ExtendedTemplate } from './extended_template';
-import './font.less';
 
 export const font = () => ({
   name: 'font',

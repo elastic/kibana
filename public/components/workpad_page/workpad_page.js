@@ -1,7 +1,6 @@
 import React from 'react';
 import { PropTypes } from 'prop-types';
 import { ElementWrapper } from '../element_wrapper';
-import './workpad_page.less';
 
 // NOTE: the data-shared-* attributes here are used for reporting
 export const WorkpadPage = ({ page, isSelected, height, width }) => {

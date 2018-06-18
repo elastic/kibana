@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Datetime from 'react-datetime';
 import 'react-datetime/css/react-datetime.css';
-import './datetime_calendar.less';
 import dateMath from '@elastic/datemath';
 import { DatetimeInput } from '../datetime_input';
 

@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormGroup, Button, ButtonToolbar } from 'react-bootstrap';
-import './expression.less';
 import { ExpressionInput } from '../expression_input';
 
 export const Expression = ({ formState, updateValue, setExpression, done, error }) => {

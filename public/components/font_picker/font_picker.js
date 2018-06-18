@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { EuiLink } from '@elastic/eui';
 import { Popover } from '../popover';
 import { FauxSelect } from '../faux_select';
-import './font_picker.less';
 
 const fonts = [
   {

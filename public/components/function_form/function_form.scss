@@ -1,0 +1,16 @@
+.canvas__function {
+  & > .canvas__loading {
+    text-align: center;
+    font-size: 20px;
+  }
+}
+
+.canvas__function__arg--add {
+  display: inline-block;
+  padding-left: $euiSizeXS;
+
+  .label {
+    margin: ($euiSizeXS / 2);
+    cursor: pointer;
+  }
+}

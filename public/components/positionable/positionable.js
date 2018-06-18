@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { lifecycle, compose } from 'recompose';
 import $ from 'jquery';
 import { move, resize, rotate, remove } from './interaction';
-import './positionable.less';
 
 let wrapperNode;
 

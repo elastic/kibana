@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { Modal, Button } from 'react-bootstrap';
 import { Changes } from './changes';
 import goat from './goat.png';
-import './update_modal.less';
 
 export const UpdateModal = ({ filename, setFilename, changes }) => {
   if (!filename) return null;

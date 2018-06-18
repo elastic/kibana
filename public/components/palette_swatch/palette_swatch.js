@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import './palette_swatch.less';
 
 export const PaletteSwatch = ({ colors, gradient }) => {
   let colorBoxes;

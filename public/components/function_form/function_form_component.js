@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import './function_form.less';
 
 export const FunctionFormComponent = props => {
   const passedProps = {

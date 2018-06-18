@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormControl } from 'react-bootstrap';
 import moment from 'moment';
-import './datetime_input.less';
 
 export const DatetimeInput = ({ strValue, setStrValue, setMoment, valid, setValid }) => {
   function check(e) {

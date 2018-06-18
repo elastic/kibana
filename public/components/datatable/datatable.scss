@@ -1,0 +1,30 @@
+.canvas__datatable {
+  height: 100%;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+
+  td, th {
+    border-top: 0px !important;
+    border-bottom: 0px !important;
+  }
+
+  th {
+    white-space: nowrap;
+  }
+
+  .controls--perpage {
+    padding: $euiSizeXS $euiSize;
+    text-align: right;
+
+    label {
+      color: $euiColorDarkestShade;
+      font-weight: bold;
+    }
+
+    select {
+      width: 60px;
+      margin-left: $euiSizeS;
+    }
+  }
+}

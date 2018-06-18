@@ -1,0 +1,28 @@
+.contextMenu {
+  position: relative;
+
+  .contextMenuItems {
+    position: absolute;
+    z-index: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    background: $euiColorEmptyShade;
+    border: $euiBorderThin;
+
+    .contextMenuItem {
+      padding: $euiSizeS;
+      background-color: $euiColorEmptyShade;
+      border: $euiBorderThin;
+      color: $euiTextColor;
+      display: flex;
+      align-self: flex-start;
+      width: 100%;
+    }
+
+    .contextMenuItem.active {
+      background-color: $euiColorDarkShade;
+      color: $euiColorGhost;
+    }
+  }
+}

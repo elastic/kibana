@@ -7,7 +7,6 @@ import { Link } from '../link';
 import { WorkpadUpload } from './workpad_upload';
 import { WorkpadCreate } from './workpad_create';
 import { WorkpadSearch } from './workpad_search';
-import './workpad_loader.less';
 
 const formatDate = date => date && moment(date).format('MMM D, YYYY @ h:mma');
 

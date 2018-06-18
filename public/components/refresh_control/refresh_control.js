@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { EuiIcon, EuiButtonIcon } from '@elastic/eui';
 import { Popover } from '../popover';
 import { AutoRefreshControls } from './auto_refresh_controls';
-import './refresh_control.less';
 
 const refreshClass = active => {
   const baseClass = 'canvas__refresh_control--refresh';

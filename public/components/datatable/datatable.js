@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import moment from 'moment';
 import { Paginate } from '../paginate';
 import { PageControls } from '../paginate_controls';
-import './datatable.less';
 
 const getIcon = type => {
   if (type === null) return;

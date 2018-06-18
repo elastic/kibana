@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import './media_card.less';
 
 const noop = () => {};
 

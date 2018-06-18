@@ -1,0 +1,11 @@
+.canvas__tray {
+  max-height: 400px;
+  overflow: auto;
+  padding: $euiSize $euiSize $euiSizeXS $euiSize;
+  display: flex;
+  flex-direction: column;
+
+  textarea {
+    min-height: 300px;
+  }
+}

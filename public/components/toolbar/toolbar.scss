@@ -1,0 +1,7 @@
+.canvas__toolbar {
+  width: 100%;
+  background-color: $euiColorDarkestShade;
+  color: $euiColorGhost;
+  border-top: $euiBorderThin;
+  border-color: lighten($euiColorDarkestShade, 10%);
+}

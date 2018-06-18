@@ -3,7 +3,6 @@ import { PropTypes } from 'prop-types';
 import { EuiButtonIcon } from '@elastic/eui';
 import { Popover } from '../popover';
 import { ArgAdd } from '../arg_add';
-import './arg_add_popover.less';
 
 export const ArgAddPopover = ({ options }) => {
   const button = handleClick => (

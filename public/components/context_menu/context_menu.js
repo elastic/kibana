@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import './context_menu.less';
 
 export const ContextMenu = ({
   items,

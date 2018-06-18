@@ -11,7 +11,6 @@ import { PageManager } from '../page_manager';
 import { AssetManager } from '../asset_manager';
 import { ElementTypes } from './element_types';
 import { Tray } from './tray';
-import './toolbar.less';
 
 export const Toolbar = props => {
   const {

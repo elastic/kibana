@@ -4,7 +4,6 @@ import { Sidebar } from '../../../components/sidebar';
 import { Toolbar } from '../../../components/toolbar';
 import { Workpad } from '../../../components/workpad';
 import { WorkpadHeader } from '../../../components/workpad_header';
-import './workpad_app.less';
 
 export class WorkpadApp extends React.PureComponent {
   static propTypes = {

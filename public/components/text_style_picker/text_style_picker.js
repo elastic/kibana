@@ -5,7 +5,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { FontPicker } from '../font_picker';
 import { ColorPickerMini } from '../color_picker_mini';
 import { fontSizes } from './font_sizes';
-import './text_style_picker.less';
 
 export const TextStylePicker = ({
   family,

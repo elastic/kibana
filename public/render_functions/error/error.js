@@ -3,7 +3,6 @@ import React from 'react';
 import { Alert } from 'react-bootstrap';
 import { get } from 'lodash';
 import { ShowDebugging } from './show_debugging';
-import './error.less';
 
 export const error = () => ({
   name: 'error',

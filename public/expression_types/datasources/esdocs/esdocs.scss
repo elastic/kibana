@@ -1,0 +1,22 @@
+.canvas__esdocs--row {
+  display: flex;
+  margin-bottom: $euiSize;
+
+  .canvas__esdocs--index {
+    margin-right: $euiSize;
+    width: ($euiSizeXXL + $euiSizeS) * 3;
+  }
+
+  .canvas__esdocs--sort-field {
+    width: ($euiSizeXXL + $euiSizeS) * 3;
+  }
+
+  .canvas__esdocs--sort-dir {
+    width: ($euiSizeXL * 2);
+  }
+
+  .canvas__esdocs--query {
+    flex-grow: 1;
+    margin-right: $euiSize;
+  }
+}

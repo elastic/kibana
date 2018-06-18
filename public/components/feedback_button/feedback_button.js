@@ -3,8 +3,6 @@ import PropTypes from 'prop-types';
 import { Modal, Button } from 'react-bootstrap';
 import { NavbarButton } from '../navbar_button';
 
-import './feedback_button.less';
-
 export const FeedbackButton = ({ show, setShow }) => {
   const formId = '1FAIpQLSfrHmSrLAWcLx8s4RM_pKP8_BvRGbASGeG-F_fagxUtGu7q4A';
   const feedbackFormUrl = `https://docs.google.com/a/elastic.co/forms/d/e/${formId}/viewform?embedded=true`;

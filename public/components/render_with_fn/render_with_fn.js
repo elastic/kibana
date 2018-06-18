@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { isEqual, cloneDeep } from 'lodash';
-import './render_with_fn.less';
 import { RenderToDom } from '../render_to_dom';
 
 export class RenderWithFn extends React.Component {

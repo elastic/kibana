@@ -1,0 +1,8 @@
+.canvas__argtype--font {
+  display: flex;
+
+  & > div {
+    flex: 1;
+    margin-right: $euiSizeXS;
+  }
+}

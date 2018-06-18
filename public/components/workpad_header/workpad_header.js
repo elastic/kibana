@@ -4,7 +4,6 @@ import { Shortcuts } from 'react-shortcuts';
 import { EuiIcon, EuiSwitch, EuiTitle, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { FullscreenControl } from '../fullscreen_control';
 import { RefreshControl } from '../refresh_control';
-import './workpad_header.less';
 
 export const WorkpadHeader = ({ workpadName, editing, toggleEditing }) => {
   const keyHandler = action => {

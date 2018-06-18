@@ -1,0 +1,36 @@
+.canvas__workpad_app {
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.canvas__workpad_app--main {
+  background-color: $euiColorLightestShade;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: row;
+  height: 0px; // Essentially a hack to make the sidebar and workspace scroll when the tray is open
+}
+
+.canvas__workpad_app--workpad {
+  background-color: $euiColorLightestShade;
+  padding: $euiSize;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
+
+.canvas__workpad_app--workspace {
+  flex: 0 0;
+  width: 0;
+}
+
+.canvas__workpad_app--sidebar {
+  background-color: darken($euiColorLightestShade, 2%);
+  width: 350px;
+  flex-grow: 0;
+  overflow: auto;
+  border-left: $euiBorderThin;
+}

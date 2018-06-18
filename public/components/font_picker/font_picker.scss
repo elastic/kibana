@@ -1,0 +1,17 @@
+.canvas__font-picker {
+  height: 200px;
+  overflow-y: scroll;
+
+  .canvas__font-picker--font {
+    display: block;
+    width: 100%;
+    padding: $euiSizeXS $euiSize;
+    color: black;
+  }
+}
+
+.canvas__font-picker--popover {
+  .popover-content {
+    padding: 0;
+  }
+}

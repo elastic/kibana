@@ -3,8 +3,6 @@ import PropTypes from 'prop-types';
 import { FormControl } from 'react-bootstrap';
 import { readableColor } from '../../lib/readable_color';
 
-import './color_manager.less';
-
 export const ColorManager = ({ value, addColor, removeColor, onChange }) => (
   <div className="canvas__color-manager">
     <div

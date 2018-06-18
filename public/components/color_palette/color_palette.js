@@ -4,8 +4,6 @@ import { readableColor } from '../../lib/readable_color';
 import { ColorDot } from '../color_dot';
 import { ItemGrid } from '../item_grid';
 
-import './color_palette.less';
-
 export const ColorPalette = ({ value, colors, colorsPerRow, onChange }) => (
   <div className="canvas__color-palette">
     <ItemGrid items={colors} itemsPerRow={colorsPerRow || 6}>

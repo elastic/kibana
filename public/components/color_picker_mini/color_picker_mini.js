@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { Popover, OverlayTrigger } from 'react-bootstrap';
 import { ColorPicker } from '../color_picker';
 import { ColorDot } from '../color_dot';
-import './color_picker_mini.less';
 import { WorkpadColorPicker } from '../workpad_color_picker/';
 
 export const ColorPickerMini = ({ onChange, value, placement, colors }) => {

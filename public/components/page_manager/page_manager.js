@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { ConfirmModal } from '../confirm_modal';
 import { Link } from '../link';
 import { PagePreview } from '../page_preview';
-import './page_manager.less';
 
 export class PageManager extends React.PureComponent {
   static propTypes = {

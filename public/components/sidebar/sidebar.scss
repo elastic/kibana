@@ -1,0 +1,22 @@
+.canvas__sidebar {
+  padding: $euiSizeS;
+}
+
+.canvas__sidebar-section-title {
+  font-size: $euiFontSize;
+  font-weight: 200;
+  display: flex;
+  align-items: center;
+}
+
+.canvas__sidebar-section-tip {
+  font-size: $euiFontSizeS;
+  margin-left: $euiSizeS;
+}
+
+.canvas__sidebar-section-body {
+  margin-bottom: $euiSizeS;
+  padding: $euiSizeS;
+  background-color: $euiColorEmptyShade;
+  border: $euiBorderThin;
+}

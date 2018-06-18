@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { compose, withPropsOnChange, withProps } from 'recompose';
 import { RenderToDom } from '../render_to_dom';
 import { ExpressionFormHandlers } from '../../../common/lib/expression_form_handlers';
-import './arg_form.less';
 
 class ArgTemplateFormComponent extends React.Component {
   static propTypes = {

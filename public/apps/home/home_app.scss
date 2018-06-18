@@ -1,0 +1,9 @@
+.canvas__home_app {
+  padding: $euiSizeS;
+
+  .canvas__workpad_loader {
+    background-color: $euiColorDarkestShade;
+    color: $euiColorLightShade;
+    padding: $euiSizeS;
+  }
+}

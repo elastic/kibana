@@ -1,0 +1,30 @@
+.canvas__update-model {
+  .modal-dialog {
+    width: 700px;
+  }
+
+  .modal-footer {
+    display: flex;
+  }
+}
+
+.canvas__update-model--header {
+  display: flex;
+}
+
+.canvas__update-model--goat {
+  display: flex;
+  padding-right: $euiSizeXL;
+}
+
+.canvas__update-model--goat_news {
+  margin-top: ($euiSizeXL * 2);
+
+  strike {
+    color: $euiColorDanger;
+
+    span {
+      color: $euiTextColor;
+    }
+  }
+}

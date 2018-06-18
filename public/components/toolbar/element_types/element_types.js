@@ -4,7 +4,6 @@ import { FormControl } from 'react-bootstrap';
 import { map, includes, sortBy } from 'lodash';
 import lowerCase from 'lodash.lowercase';
 import { MediaCard } from '../../media_card';
-import './element_types.less';
 
 export const ElementTypes = ({ elements, onClick, search, setSearch }) => {
   search = lowerCase(search);

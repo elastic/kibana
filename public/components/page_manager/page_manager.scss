@@ -1,0 +1,104 @@
+.canvas__page-manager {
+  white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  .canvas__page-manager--pages {
+    max-height: ($euiSizeXXL + $euiSizeS) * 3;
+    padding-top: $euiSizeS;
+    margin-bottom: $euiSizeS;
+  }
+
+  .canvas__page-manager--pages a {
+    box-shadow: none;
+    padding-left: $euiSizeXS;
+  }
+
+  .canvas__page-manager--page.active {
+    box-shadow: 0 0 1px 2px $euiColorPrimary;
+  }
+
+  .canvas__page-manager--page {
+    white-space: initial;
+    position: relative;
+    color: initial;
+    border: $euiBorderThin;
+    display: inline-block;
+    vertical-align: top;
+    font-weight: bold;
+    width: ($euiSizeXL * 2);
+    height: ($euiSizeXXL + $euiSizeS) * 2;
+    margin: 0 $euiSize $euiSizeS 0;
+    cursor: pointer;
+
+    &:hover {
+      background-color: $euiColorMediumShade;
+      .canvas__page-manager--page-controls {
+        bottom: 0;
+        color: $euiColorLightShade;
+        display: block;
+        position: absolute;
+        text-align: center;
+        width: 100%;
+        background-color: $euiColorDarkestShade;
+        opacity: 0.75;
+
+        > * {
+          padding: $euiSizeXS;
+        }
+
+        .delete,
+        .duplicate {
+          font-size: $euiFontSize;
+        }
+
+        .delete {
+          color: $euiColorDanger;
+        }
+
+        .duplicate {
+          color: $euiColorPrimary;
+        }
+      }
+
+      .canvas__page-manager--page-remove {
+        display: inline;
+      }
+    }
+
+    .canvas__page-manager--page-remove {
+      display: none;
+      position: absolute;
+      top: -$euiSizeS;
+      right: -$euiSizeM;
+    }
+
+    .canvas__page-manager--page-controls {
+      display: none;
+    }
+
+    .canvas__page-manager--page-index {
+      overflow: hidden;
+      height: ($euiSizeXXL + $euiSizeS) * 2;
+    }
+
+    .canvas--interactable-actions,
+    .canvas--interactable-meta,
+    .canvas--interactable-resize,
+    .canvas__element--remove-icon {
+      display: none;
+    }
+  }
+
+  .canvas__page-manager--page-add {
+    display: inline-block;
+    line-height: $euiSizeXXL * 2;
+    font-size: $euiFontSizeXXL;
+    padding: 0 $euiSizeS;
+    color: $euiColorMediumShade;
+
+    &:hover {
+      color: $euiColorEmptyShade;
+    }
+  }
+}

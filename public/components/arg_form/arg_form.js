@@ -8,7 +8,6 @@ import { SimpleFailure } from './simple_failure';
 import { AdvancedFailure } from './advanced_failure';
 import { ArgLabel } from './arg_label';
 import { PendingArgValue } from './pending_arg_value';
-import './arg_form.less';
 
 const branches = [
   // rendered argType args should be resolved, but are not

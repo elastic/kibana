@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiLoadingSpinner, EuiIcon } from '@elastic/eui';
-import './loading.less';
 
 export const Loading = ({ animated, text }) => {
   if (animated) {

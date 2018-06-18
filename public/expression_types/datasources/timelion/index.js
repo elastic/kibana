@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { ControlLabel, FormControl } from 'react-bootstrap';
 import { getSimpleArg, setSimpleArg } from '../../../lib/arg_helpers';
 import { TooltipIcon } from '../../../components/tooltip_icon';
-import './timelion.less';
 import { templateFromReactComponent } from '../../../lib/template_from_react_component';
 import header from './header.png';
 

@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import './remove_icon.less';
 
 export const RemoveIcon = ({ onClick, style, className }) => (
   <div className={className} style={{ height: 20, width: 20, ...style }} onClick={onClick}>

@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { Shortcuts } from 'react-shortcuts';
 import { WorkpadPage } from '../workpad_page';
 import { Fullscreen } from '../fullscreen';
-import './workpad.less';
 
 export const Workpad = props => {
   const {

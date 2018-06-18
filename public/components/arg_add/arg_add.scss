@@ -1,0 +1,18 @@
+
+.canvas__arg--add {
+  cursor: pointer;
+  padding: $euiSizeXS;
+  padding-left: $euiSizeS;
+
+  &:not(:last-child) {
+    border-bottom: $euiBorderThin;
+  }
+
+  &:hover {
+    background-color: $euiColorLightestShade;
+
+    label {
+      color: $euiColorDarkestShade;
+    }
+  }
+}

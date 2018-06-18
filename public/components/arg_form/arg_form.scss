@@ -1,0 +1,46 @@
+.canvas__arg {
+  &:not(:last-child) {
+    border-bottom: $euiBorderThin;
+  }
+
+  .form-control {
+    font-size: $euiFontSizeS;
+  }
+
+  &:hover {
+    .canvas__arg--remove {
+      visibility: visible;
+    }
+  }
+
+  .canvas__arg--label {
+    margin: $euiSizeS;
+    flex-shrink: 0;
+  }
+
+  .canvas__arg--simple {
+    display: flex;
+    align-items: center;
+  }
+
+  .canvas__arg--simple-controls {
+    width: 100%;
+    margin: $euiSizeS;
+  }
+
+  .canvas__arg--controls {
+    padding: $euiSizeS;
+
+    .canvas__arg--controls--submit {
+      text-align: right;
+
+      button {
+        margin-left: $euiSize;
+      }
+    }
+  }
+
+  .canvas__arg--remove {
+    visibility: hidden;
+  }
+}

@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { difference, without } from 'lodash';
 import { FormControl, Popover, Overlay } from 'react-bootstrap';
-import './pill_select.less';
 
 export const PillSelect = ({
   values,

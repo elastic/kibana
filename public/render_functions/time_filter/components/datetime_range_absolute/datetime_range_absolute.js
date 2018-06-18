@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { DatetimeCalendar } from '../datetime_calendar';
-import './datetime_range_absolute.less';
 
 export const DatetimeRangeAbsolute = ({ from, to, onSelect }) => (
   <div className="canvas__datetime-range-absolute">

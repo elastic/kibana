@@ -1,0 +1,26 @@
+.canvas__color-dot {
+  display: inline-block;
+  position: relative;
+  height: $euiSizeL;
+  width: $euiSizeL;
+
+
+  .canvas__color-dot--background {
+    position: absolute;
+    height: $euiSizeL;
+    width: $euiSizeL;
+    border-radius: $euiSize;
+    top: 0;
+    left: 0;
+  }
+
+  .canvas__color-dot--foreground {
+    position: absolute;
+    border: $euiBorderThick;
+    height: $euiSizeL;
+    width: $euiSizeL;
+    border-radius: $euiSize;
+    top: 0;
+    left: 0;
+  }
+}
