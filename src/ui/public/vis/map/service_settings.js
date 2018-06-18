@@ -39,7 +39,7 @@ uiModules.get('kibana')
 
     /**
      *  Unescape a url template that was escaped by encodeURI() so leaflet
-     *  will be able to correctly locate the varables in the template
+     *  will be able to correctly locate the variables in the template
      *  @param  {String} url
      *  @return {String}
      */
