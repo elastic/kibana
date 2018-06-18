@@ -13,13 +13,6 @@ import {
 } from './lib';
 
 /*
- * A singleton timeout object is needed, as plugin lifecycle events can be
- * called multiple times successively (e.g. Elasticsearch plugin can go from
- * red status to red status)
- */
-let _timer = null;
-
-/*
  * Handles internal Kibana stats collection and uploading data to Monitoring
  * bulk endpoint.
  *
@@ -44,10 +37,7 @@ export class BulkUploader {
       throw new Error('combineTypes function is required');
     }
 
-    if (_timer) {
-      this.stop(); // stop timer if already started
-    }
-
+    this._timer =  null;
     this._interval = interval;
     this._combineTypes = combineTypes;
     this._log = getCollectorLogger(server);
@@ -63,14 +53,14 @@ export class BulkUploader {
      * Defined as an enclosed function to effectively have no need for a `this.collectorSet`
      */
     this.start = () => {
-      if (_timer) {
+      if (this._timer) {
         throw new Error('BulkUploader timer already started');
       }
 
       this._log.info(`Starting monitoring stats collection`);
 
       this._fetchAndUpload(collectorSet); // initial fetch
-      _timer = setInterval(() => {
+      this._timer = setInterval(() => {
         this._fetchAndUpload(collectorSet);
       }, this._interval);
     };
@@ -81,8 +71,8 @@ export class BulkUploader {
    * xpackMainPlugin state changes
    */
   stop() {
-    clearInterval(_timer);
-    _timer = null;
+    clearInterval(this._timer);
+    this._timer = null;
   }
 
   async _fetchAndUpload(collectorSet) {
