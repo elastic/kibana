@@ -5,16 +5,15 @@
  */
 
 import { uiModules } from 'ui/modules';
-import template from './grokdebugger.html';
-import { Notifier } from 'ui/notify';
-import { GrokdebuggerRequest } from 'plugins/grokdebugger/models/grokdebugger_request';
 import 'plugins/grokdebugger/services/grokdebugger';
 import './grokdebugger.less';
+import { GrokDebugger } from '../../components/grok_debugger';
 import '../../components/event_input';
 import '../../components/event_output';
 import '../../components/pattern_input';
 import '../../components/custom_patterns_input';
-import { isEmpty, trim } from 'lodash';
+import { render } from 'react-dom';
+import React from 'react';
 
 const app = uiModules.get('xpack/grokdebugger');
 
@@ -23,9 +22,12 @@ app.directive('grokdebugger', function ($injector) {
 
   return {
     restrict: 'E',
-    template: template,
-    bindToController: true,
-    controllerAs: 'grokdebugger',
+    link: (scope, el) => {
+      render(<GrokDebugger grokdebuggerService={grokdebuggerService} />, el[0]);
+    }
+  };
+});
+/*
     controller: class GrokdebuggerController {
       constructor() {
         this.structuredEvent = {};
@@ -85,3 +87,4 @@ app.directive('grokdebugger', function ($injector) {
     }
   };
 });
+*/

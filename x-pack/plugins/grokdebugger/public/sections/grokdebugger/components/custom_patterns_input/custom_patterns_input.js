@@ -4,47 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uiModules } from 'ui/modules';
-import { InitAfterBindingsWorkaround } from 'ui/compat';
-import { EDITOR } from '../../../../../common/constants';
-import { applyEditorOptions } from '../../../../lib/ace';
-import template from './custom_patterns_input.html';
-import './custom_patterns_input.less';
-import 'ui/toggle_panel';
-import 'ace';
+import React from 'react';
+import {
+  EuiAccordion,
+  EuiCallOut,
+  EuiCodeBlock,
+  EuiFormRow,
+  EuiCodeEditor
+} from '@elastic/eui';
 
-const app = uiModules.get('xpack/grokdebugger');
+export function CustomPatternsInput({ value, onChange }) {
+  const sampleCustomPatterns = `
+    POSTFIX_QUEUEID [0-9A-F]{10,11}
+    MSG message-id=<%{GREEDYDATA}>
+  `;
 
-app.directive('customPatternsInput', function () {
-  return {
-    restrict: 'E',
-    template: template,
-    scope: {
-      onChange: '='
-    },
-    bindToController: true,
-    controllerAs: 'customPatternsInput',
-    controller: class CustomPatternsInputController extends InitAfterBindingsWorkaround {
-      initAfterBindings($scope) {
-        this.isCollapsed = {
-          action: true
-        };
-        $scope.$watch('customPatternsInput.customPatterns', () => {
-          this.onChange(this.customPatterns);
-        });
-        $scope.aceLoaded = (editor) => {
-          this.editor = editor;
-          applyEditorOptions(editor, EDITOR.PATTERN_MIN_LINES, EDITOR.PATTERN_MAX_LINES);
-        };
-      }
+  return (
+    <EuiAccordion
+      id="customPatternsInput"
+      buttonContent="Custom Patterns"
+      data-test-subj="btnToggleCustomPatternsInput"
+    >
+      <EuiCallOut
+        title="Enter one custom pattern per line. For example:"
+      >
+        <EuiCodeBlock>
+          { sampleCustomPatterns }
+        </EuiCodeBlock>
+      </EuiCallOut>
 
-      onSectionToggle = (sectionId) => {
-        this.isCollapsed[sectionId] = !this.isCollapsed[sectionId];
-      }
-
-      isSectionCollapsed = (sectionId) => {
-        return this.isCollapsed[sectionId];
-      }
-    }
-  };
-});
+      <EuiFormRow>
+        <EuiCodeEditor
+          value={value}
+          onChange={onChange}
+          data-test-subj="aceCustomPatternsInput"
+        />
+      </EuiFormRow>
+    </EuiAccordion>
+  );
+}
