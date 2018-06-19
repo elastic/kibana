@@ -22,11 +22,13 @@ import React from 'react';
 import AggRow from './agg_row';
 import MetricSelect from './metric_select';
 import AggSelect from './agg_select';
-import Select from 'react-select';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
-import { htmlIdGenerator } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiComboBox,
+} from '@elastic/eui';
 
 export const StandardSiblingAgg = props => {
   const { siblings } = props;
@@ -58,15 +60,19 @@ export const StandardSiblingAgg = props => {
       { label: 'Lower Bound', value: 'lower' },
       { label: 'Bounds Band', value: 'band' }
     ];
+    const selectedModeOption = modeOptions.find(option => {
+      return model.mode === option.value;
+    });
 
     stdDev.mode = (
       <div className="vis_editor__row_item">
         <label className="vis_editor__label" htmlFor={htmlId('mode')}>Mode</label>
-        <Select
-          inputProps={{ id: htmlId('mode') }}
+        <EuiComboBox
+          id={htmlId('mode')}
           options={modeOptions}
+          selectedOptions={selectedModeOption ? [selectedModeOption] : []}
           onChange={handleSelectChange('mode')}
-          value={model.mode}
+          singleSelection={true}
         />
       </div>
     );

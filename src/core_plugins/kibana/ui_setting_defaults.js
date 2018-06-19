@@ -54,7 +54,7 @@ export function getUiSettingDefaults() {
     'sort:options': {
       name: 'Sort options',
       value: '{ "unmapped_type": "boolean" }',
-      description: `<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-sort.html" 
+      description: `<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-sort.html"
         target="_blank" rel="noopener noreferrer">Options</a> for the Elasticsearch sort parameter`,
       type: 'json'
     },
@@ -210,8 +210,8 @@ export function getUiSettingDefaults() {
     'visualization:tileMap:maxPrecision': {
       name: 'Maximum tile map precision',
       value: 7,
-      description: `The maximum geoHash precision displayed on tile maps: 7 is high, 10 is very high, 12 is the max. 
-      <a href="http://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator" 
+      description: `The maximum geoHash precision displayed on tile maps: 7 is high, 10 is very high, 12 is the max.
+      <a href="http://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator"
       target="_blank" rel="noopener noreferrer">Explanation of cell dimensions</a>`,
       category: ['visualization'],
     },
@@ -349,7 +349,7 @@ export function getUiSettingDefaults() {
     },
     'savedObjects:perPage': {
       name: 'Objects per page',
-      value: 5,
+      value: 20,
       type: 'number',
       description: `Number of objects to show per page in the load dialog`
     },
@@ -414,7 +414,7 @@ export function getUiSettingDefaults() {
       description: `The list of ranges to show in the Quick section of the time picker.
         This should be an array of objects, with each object containing "from", "to" (see
         <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/common-options.html#date-math"
-        target="_blank" rel="noopener noreferrer">accepted formats</a>), 
+        target="_blank" rel="noopener noreferrer">accepted formats</a>),
         "display" (the title to be displayed), and "section" (which column to put the option in).`
     },
     'dashboard:defaultDarkTheme': {

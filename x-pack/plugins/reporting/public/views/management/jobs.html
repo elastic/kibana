@@ -30,9 +30,15 @@
             </div>
             <div
               class="metadata"
-              ng-if="job.status !== 'pending'"
+              ng-if="job.status === 'processing'"
               >
               {{ job.started_at | date : 'yyyy-MM-dd @ h:mm a' }}
+            </div>
+            <div
+              class="metadata"
+              ng-if="job.status === 'completed' || job.status === 'failed'"
+            >
+              {{ job.completed_at | date : 'yyyy-MM-dd @ h:mm a' }}
             </div>
           </td>
           <td class="actions">

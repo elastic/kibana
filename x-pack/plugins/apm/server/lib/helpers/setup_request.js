@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable no-console */
 import moment from 'moment';
 
 function decodeEsQuery(esQuery) {
@@ -17,7 +18,18 @@ export function setupRequest(req, reply) {
     start: moment.utc(req.query.start).valueOf(),
     end: moment.utc(req.query.end).valueOf(),
     esFilterQuery: decodeEsQuery(req.query.esFilterQuery),
-    client: cluster.callWithRequest.bind(null, req),
+    client: (type, params) => {
+      if (req.query._debug) {
+        console.log(`DEBUG ES QUERY:`);
+        console.log(
+          `${req.method.toUpperCase()} ${req.url.pathname} ${JSON.stringify(
+            req.query
+          )}`
+        );
+        console.log(JSON.stringify(params.body, null, 4));
+      }
+      return cluster.callWithRequest(req, type, params);
+    },
     config: req.server.config()
   };
 

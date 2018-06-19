@@ -18,8 +18,10 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import Select from 'react-select';
+import React from 'react';
+import {
+  EuiComboBox,
+} from '@elastic/eui';
 
 const metricAggs = [
   { label: 'Average', value: 'avg' },
@@ -63,89 +65,12 @@ const specialAggs = [
   { label: 'Math', value: 'math' },
 ];
 
-class AggSelectOption extends Component {
-  constructor(props) {
-    super(props);
-    this.handleMouseMove = this.handleMouseMove.bind(this);
-    this.handleMouseEnter = this.handleMouseEnter.bind(this);
-    this.handleMouseDown = this.handleMouseDown.bind(this);
-  }
-
-  handleMouseDown(event) {
-    event.preventDefault();
-    event.stopPropagation();
-    this.props.onSelect(this.props.option, event);
-  }
-
-  handleMouseEnter(event) {
-    this.props.onFocus(this.props.option, event);
-  }
-
-  handleMouseMove(event) {
-    if (this.props.isFocused) return;
-    this.props.onFocus(this.props.option, event);
-  }
-
-  render() {
-    const { label, heading, pipeline } = this.props.option;
-    const style = {
-      paddingLeft: heading ? 0 : 10,
-    };
-    // We can ignore that the <div> does not have keyboard handlers even though
-    // it has mouse handlers, since react-select still takes care, that this works
-    // well with keyboard.
-    /* eslint-disable jsx-a11y/no-static-element-interactions */
-    if (heading) {
-      let note;
-      if (pipeline) {
-        note = (
-          <span className="vis_editor__agg_select-note">
-            (requires child aggregation)
-          </span>
-        );
-      }
-      return (
-        <div
-          className="Select-option vis_editor__agg_select-heading"
-          onMouseEnter={this.handleMouseEnter}
-          onMouseDown={this.handleMouseDown}
-          onMouseMove={this.handleMouseMove}
-          aria-label={label}
-        >
-          <span className="Select-value-label" style={style}>
-            <strong>{label}</strong>
-            {note}
-          </span>
-        </div>
-      );
-    }
-    return (
-      <div
-        className={this.props.className}
-        onMouseEnter={this.handleMouseEnter}
-        onMouseDown={this.handleMouseDown}
-        onMouseMove={this.handleMouseMove}
-        aria-label={label}
-      >
-        <span className="Select-value-label" style={style}>
-          {this.props.children}
-        </span>
-      </div>
-    );
-    /* eslint-enable jsx-a11y/no-static-element-interactions */
-  }
-}
-
-AggSelectOption.props = {
-  children: PropTypes.node,
-  className: PropTypes.string,
-  isDisabled: PropTypes.bool,
-  isFocused: PropTypes.bool,
-  isSelected: PropTypes.bool,
-  onFocus: PropTypes.func,
-  onSelect: PropTypes.func,
-  option: PropTypes.object.isRequired,
-};
+const allAggOptions = [
+  ...metricAggs,
+  ...pipelineAggs,
+  ...siblingAggs,
+  ...specialAggs
+];
 
 function filterByPanelType(panelType) {
   return agg => {
@@ -155,7 +80,12 @@ function filterByPanelType(panelType) {
 }
 
 function AggSelect(props) {
-  const { siblings, panelType } = props;
+  const { siblings, panelType, value } = props;
+
+  const selectedOption = allAggOptions.find(option => {
+    return value === option.value;
+  });
+  const selectedOptions = selectedOption ? [selectedOption] : [];
 
   let enablePipelines = siblings.some(
     s => !!metricAggs.find(m => m.value === s.type)
@@ -169,55 +99,39 @@ function AggSelect(props) {
     options = [
       {
         label: 'Metric Aggregations',
-        value: null,
-        heading: true,
-        disabled: true,
+        options: metricAggs,
       },
-      ...metricAggs,
       {
         label: 'Parent Pipeline Aggregations',
-        value: null,
-        pipeline: true,
-        heading: true,
-        disabled: true,
+        options: pipelineAggs
+          .filter(filterByPanelType(panelType))
+          .map(agg => ({ ...agg, disabled: !enablePipelines }))
       },
-      ...pipelineAggs
-        .filter(filterByPanelType(panelType))
-        .map(agg => ({ ...agg, disabled: !enablePipelines })),
       {
         label: 'Sibling Pipeline Aggregations',
-        value: null,
-        pipeline: true,
-        heading: true,
-        disabled: true,
+        options: siblingAggs.map(agg => ({ ...agg, disabled: !enablePipelines })),
       },
-      ...siblingAggs.map(agg => ({ ...agg, disabled: !enablePipelines })),
       {
         label: 'Special Aggregations',
-        value: null,
-        pipeline: true,
-        heading: true,
-        disabled: true,
+        options: specialAggs.map(agg => ({ ...agg, disabled: !enablePipelines })),
       },
-      ...specialAggs.map(agg => ({ ...agg, disabled: !enablePipelines })),
     ];
   }
 
-  const handleChange = value => {
-    if (!value) return;
-    if (value.disabled) return;
-    if (value.value) props.onChange(value);
+  const handleChange = selectedOptions => {
+    if (!selectedOptions || selectedOptions.length <= 0) return;
+    props.onChange(selectedOptions);
   };
 
   return (
     <div data-test-subj="aggSelector" className="vis_editor__row_item">
-      <Select
-        aria-label="Select aggregation"
-        clearable={false}
+      <EuiComboBox
+        isClearable={false}
+        placeholder="Select aggregation"
         options={options}
-        value={props.value}
-        optionComponent={AggSelectOption}
+        selectedOptions={selectedOptions}
         onChange={handleChange}
+        singleSelection={true}
       />
     </div>
   );

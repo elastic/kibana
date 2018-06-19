@@ -18,7 +18,9 @@
  */
 
 /* eslint import/no-unresolved: 0 */
-const ace = require('ace');
+/* eslint  no-multi-str: 0 */
+/* eslint  max-len: 0 */
+const ace = require('brace');
 
 ace.define('ace/theme/sense-dark', ['require', 'exports', 'module'],
   function (require, exports) {
@@ -129,7 +131,7 @@ text-decoration: underline\
 background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAACCAYAAACZgbYnAAAAEklEQVQImWNQ11D6z7Bq1ar/ABCKBG6g04U2AAAAAElFTkSuQmCC) right repeat-y\
 }';
 
-    let dom = require('ace/lib/dom');
+    const dom = require('ace/lib/dom');
     dom.importCssString(exports.cssText, exports.cssClass);
   });
 

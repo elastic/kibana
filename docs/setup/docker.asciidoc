@@ -94,9 +94,8 @@ Some example translations are shown here:
 `KIBANA_DEFAULTAPPID`:: `kibana.defaultAppId`
 `XPACK_MONITORING_ENABLED`:: `xpack.monitoring.enabled`
 
-In general, any setting listed in <<settings>> or
-{xpack-ref}/xpack-settings.html[{xpack} Settings] can be configured
-with this technique.
+In general, any setting listed in <<settings>> or <<settings-xpack-kb>> can be 
+configured with this technique.
 
 These variables can be set with +docker-compose+ like this:
 
@@ -124,13 +123,10 @@ images:
 `server.name`:: `kibana`
 `server.host`:: `"0"`
 `elasticsearch.url`:: `http://elasticsearch:9200`
-
-In the {xpack} image, the following additional defaults are also set:
-
-[horizontal]
-`elasticsearch.username`:: `elastic`
-`elasticsearch.password`:: `changeme`
 `xpack.monitoring.ui.container.elasticsearch.enabled`:: `true`
+
+NOTE: The setting `xpack.monitoring.ui.container.elasticsearch.enabled` is not
+defined in the `-oss` image.
 
 These settings are defined in the default `kibana.yml`. They can be overridden
 with a <<bind-mount-config,custom `kibana.yml`>> or via

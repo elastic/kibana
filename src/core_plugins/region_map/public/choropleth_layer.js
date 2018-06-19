@@ -219,7 +219,7 @@ CORS configuration of the server permits requests from the Kibana application on
         return '';
       }
       const match = this._metrics.find((bucket) => {
-        return bucket.term === geojsonFeature.properties[this._joinField];
+        return compareLexographically(bucket.term, geojsonFeature.properties[this._joinField]) === 0;
       });
       return tooltipFormatter(metricsAgg, match, fieldName);
     };

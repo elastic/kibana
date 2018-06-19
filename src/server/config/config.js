@@ -21,7 +21,7 @@ import Joi from 'joi';
 import _ from 'lodash';
 import override from './override';
 import createDefaultSchema from './schema';
-import { pkg, unset, deepCloneWithBuffers as clone } from '../../utils';
+import { pkg, unset, deepCloneWithBuffers as clone, IS_KIBANA_DISTRIBUTABLE } from '../../utils';
 
 const schema = Symbol('Joi Schema');
 const schemaExts = Symbol('Schema Extensions');
@@ -107,8 +107,8 @@ export class Config {
       notDev: !dev,
       version: _.get(pkg, 'version'),
       branch: _.get(pkg, 'branch'),
-      buildNum: dev ? Math.pow(2, 53) - 1 : _.get(pkg, 'build.number', NaN),
-      buildSha: dev ? 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX' : _.get(pkg, 'build.sha', '')
+      buildNum: IS_KIBANA_DISTRIBUTABLE ? pkg.build.number : Number.MAX_SAFE_INTEGER,
+      buildSha: IS_KIBANA_DISTRIBUTABLE ? pkg.build.sha : 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
     };
 
     if (!context.dev && !context.prod) {
@@ -141,6 +141,17 @@ export class Config {
       }
     }
     return clone(value);
+  }
+
+  getDefault(key) {
+    const schemaKey = Array.isArray(key) ? key.join('.') : key;
+
+    const subSchema = Joi.reach(this.getSchema(), schemaKey);
+    if (!subSchema) {
+      throw new Error(`Unknown config key: ${key}.`);
+    }
+
+    return clone(_.get(Joi.describe(subSchema), 'flags.default'));
   }
 
   has(key) {

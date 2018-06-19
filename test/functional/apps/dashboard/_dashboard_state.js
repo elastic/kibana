@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
       await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.setTimepickerInDataRange();
+      await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
 
       await dashboardAddPanel.addVisualization(AREA_CHART_VIS_NAME);
       await PageObjects.dashboard.saveDashboard('Overridden colors');
@@ -70,7 +70,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
       await PageObjects.header.clickDiscover();
-      await PageObjects.dashboard.setTimepickerInDataRange();
+      await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
       await PageObjects.discover.clickFieldListItemAdd('bytes');
       await PageObjects.discover.saveSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -120,7 +120,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
       await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.setTimepickerInDataRange();
+      await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
 
       await dashboardAddPanel.addVisualization('Visualization TileMap');
       await PageObjects.dashboard.saveDashboard('No local edits');

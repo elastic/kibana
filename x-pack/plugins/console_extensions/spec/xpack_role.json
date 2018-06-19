@@ -1,11 +1,12 @@
 {
   "_xpack/security/role": {
     "methods": ["GET"],
-    "patterns": ["_xpack/security/role", "_xpack/security/role/{name}"]
+    "patterns": ["_xpack/security/role", "_xpack/security/role/{id}"],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-roles.html"
   },
-  "_xpack/security/role/{name}": {
+  "_xpack/security/role/{id}": {
     "methods": ["PUT", "POST"],
-    "patterns": ["_xpack/security/role/{name}"],
+    "patterns": ["_xpack/security/role/{id}"],
     "data_autocomplete_rules": {
       "cluster": [],
       "indices": [
@@ -18,14 +19,16 @@
       ],
       "run_as": [],
       "metadata": {}
-    }
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-roles.html"
   },
-  "_xpack/security/role/{name}/_clear_cache": {
+  "_xpack/security/role/{id}/_clear_cache": {
     "methods": [
       "POST"
     ],
     "patterns": [
-      "_xpack/security/role/{name}/_clear_cache"
-    ]
+      "_xpack/security/role/{id}/_clear_cache"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-roles.html"
   }
 }

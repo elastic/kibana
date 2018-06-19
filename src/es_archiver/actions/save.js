@@ -35,7 +35,7 @@ import {
   createGenerateDocRecordsStream,
 } from '../lib';
 
-export async function saveAction({ name, indices, client, dataDir, log }) {
+export async function saveAction({ name, indices, client, dataDir, log, raw }) {
   const outputDir = resolve(dataDir, name);
   const stats = createStats(name, log);
 
@@ -60,8 +60,8 @@ export async function saveAction({ name, indices, client, dataDir, log }) {
     createPromiseFromStreams([
       createListStream(resolvedIndexes),
       createGenerateDocRecordsStream(client, stats),
-      ...createFormatArchiveStreams({ gzip: true }),
-      createWriteStream(resolve(outputDir, 'data.json.gz'))
+      ...createFormatArchiveStreams({ gzip: !raw }),
+      createWriteStream(resolve(outputDir, `data.json${raw ? '' : '.gz'}`))
     ])
   ]);
 

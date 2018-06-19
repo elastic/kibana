@@ -19,11 +19,13 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import Select from 'react-select';
+import {
+  EuiComboBox,
+} from '@elastic/eui';
 import generateByTypeFilter from '../lib/generate_by_type_filter';
 
 function FieldSelect(props) {
-  const { type, fields, indexPattern } = props;
+  const { type, fields, indexPattern, value, onChange, disabled } = props;
   if (type === 'count') {
     return null;
   }
@@ -33,14 +35,19 @@ function FieldSelect(props) {
       return { label: field.name, value: field.name };
     });
 
+  const selectedOption = options.find(option => {
+    return value === option.value;
+  });
+  const selectedOptions = selectedOption ? [selectedOption] : [];
+
   return (
-    <Select
-      inputProps={{ id: props.id }}
+    <EuiComboBox
       placeholder="Select field..."
-      disabled={props.disabled}
+      isDisabled={disabled}
       options={options}
-      value={props.value}
-      onChange={props.onChange}
+      selectedOptions={selectedOptions}
+      onChange={onChange}
+      singleSelection={true}
     />
   );
 }

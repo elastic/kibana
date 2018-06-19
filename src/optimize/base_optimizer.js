@@ -27,7 +27,7 @@ import webpackMerge from 'webpack-merge';
 
 import { defaults } from 'lodash';
 
-import { fromRoot } from '../utils';
+import { IS_KIBANA_DISTRIBUTABLE, fromRoot } from '../utils';
 
 import { PUBLIC_PATH_PLACEHOLDER } from './public_path_placeholder';
 
@@ -122,7 +122,7 @@ export default class BaseOptimizer {
      * of Kibana and just make compressing and extracting it more difficult.
      */
     const maybeAddCacheLoader = (cacheName, loaders) => {
-      if (!this.uiBundles.isDevMode()) {
+      if (IS_KIBANA_DISTRIBUTABLE) {
         return loaders;
       }
 
@@ -286,7 +286,7 @@ export default class BaseOptimizer {
       },
     };
 
-    if (this.uiBundles.isDevMode()) {
+    if (!IS_KIBANA_DISTRIBUTABLE) {
       return webpackMerge(commonConfig, {
         module: {
           rules: [

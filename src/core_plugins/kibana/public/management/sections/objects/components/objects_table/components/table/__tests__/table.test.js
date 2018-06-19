@@ -46,7 +46,7 @@ describe('Table', () => {
       selectionConfig: {
         onSelectionChange: () => {},
       },
-      filterOptions: [2],
+      filterOptions: [{ value: 2 }],
       onDelete: () => {},
       onExport: () => {},
       getEditUrl: () => {},

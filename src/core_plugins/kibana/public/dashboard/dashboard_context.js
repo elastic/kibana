@@ -29,30 +29,30 @@ export function dashboardContextProvider(Private, getAppState) {
     const appState = getAppState();
     const queryFilter = Private(FilterBarQueryFilterProvider);
     const bool = { must: [], must_not: [] };
-    if (!appState) return { bool: bool };
+    if (!appState) { return { bool: bool }; }
     const filterBarFilters = queryFilter.getFilters();
     const queryBarQuery = appState.query;
 
     if (queryBarQuery.language === 'lucene') {
       // Add the query bar filter, its handled differently.
       const query = luceneStringToDsl(queryBarQuery.query);
-      if (query) bool.must.push(query);
+      if (query) { bool.must.push(query); }
     }
 
     // Add each of the filter bar filters
     _.each(filterBarFilters, function (filter) {
       const esFilter = _.omit(filter, function (val, key) {
-        if (key === 'meta' || key[0] === '$') return true;
+        if (key === 'meta' || key[0] === '$') { return true; }
         return false;
       });
 
-      if (filter.meta.disabled) return;
+      if (filter.meta.disabled) { return; }
       if (filter.meta.negate) {
         bool.must_not = bool.must_not || [];
-        if (esFilter.query || esFilter) bool.must_not.push(migrateFilter(esFilter.query || esFilter));
+        if (esFilter.query || esFilter) { bool.must_not.push(migrateFilter(esFilter.query || esFilter)); }
       } else {
         bool.must = bool.must || [];
-        if (esFilter.query || esFilter) bool.must.push(migrateFilter(esFilter.query || esFilter));
+        if (esFilter.query || esFilter) { bool.must.push(migrateFilter(esFilter.query || esFilter)); }
       }
     });
 

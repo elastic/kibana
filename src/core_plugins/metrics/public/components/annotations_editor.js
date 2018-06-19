@@ -56,7 +56,7 @@ class AnnotationsEditor extends Component {
     return (e) => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
       const part = {};
-      part[name] = _.get(e, 'value', _.get(e, 'target.value'));
+      part[name] = _.get(e, '[0].value', _.get(e, 'target.value'));
       handleChange(_.assign({}, item, part));
     };
   }

@@ -21,8 +21,8 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
     async initTests() {
       log.debug('ReportingPage:initTests');
       await PageObjects.settings.navigateTo();
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.load('reporting/historic');
+      await esArchiver.loadIfNeeded('../../functional/es_archives/logstash_functional');
+      await esArchiver.load('historic');
       await kibanaServer.uiSettings.replace({
         'dateFormat:tz': 'UTC',
         'defaultIndex': 'logstash-*'

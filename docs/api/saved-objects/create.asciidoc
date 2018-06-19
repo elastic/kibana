@@ -1,0 +1,73 @@
+[[saved-objects-api-create]]
+=== Create Object
+
+experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+
+The create saved object API enables you to persist a Kibana saved object.
+
+==== Request
+
+`POST /api/saved_objects/<type>` +
+
+`POST /api/saved_objects/<type>/<id>`
+
+==== Path Parameters
+
+`type` (required)::
+  (string) Valid options, include: `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`
+
+`id` (optional)::
+  (string) Enables specifying an ID to use, as opposed to one being randomly generated
+
+
+==== Query Parameters
+
+`overwrite` (optional)::
+  (boolean) If true, will overwrite the document with the same ID.
+
+
+==== Request Body
+
+`attributes` (required)::
+  (object) The data to persist
+
+
+==== Examples
+
+The following example creates an index pattern object with a pattern of
+`my-pattern-*`.
+
+[source,js]
+--------------------------------------------------
+POST api/saved_objects/index-pattern/my-pattern
+{
+  "attributes": {
+    "title": "my-pattern-*"
+  }
+}
+--------------------------------------------------
+// KIBANA
+
+A successful call returns a response code of `200` and a response body
+containing a JSON structure similar to the following example:
+
+[source,js]
+--------------------------------------------------
+{
+  "id": "my-pattern", <1>
+  "type": "index-pattern",
+  "version": 1,
+  "attributes": {
+    "title": "my-pattern-*"
+  }
+}
+--------------------------------------------------
+
+<1> If `my-pattern` was not specified in the path, a unique ID would have been
+generated.
+
+==== Known issues
+
+1. *Attributes are not validated at creation time*. This means you can pass
+arbitrary and ill-formed data into this API that can break Kibana. Make sure
+any data you send to this API is properly formed.
