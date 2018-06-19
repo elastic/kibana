@@ -5,6 +5,7 @@
  */
 
 import _ from 'lodash';
+import chrome from 'ui/chrome';
 import routes from 'ui/routes';
 import { fatalError, toastNotifications } from 'ui/notify';
 import { toggle } from 'plugins/security/lib/util';
@@ -38,7 +39,7 @@ const getKibanaPrivileges = (kibanaApplicationPrivilege, role, application) => {
   const applications = role.applications
     .filter(x => x.application === application && x.resources.every(r => r === DEFAULT_RESOURCE));
 
-  const assigned =  _.uniq(_.flatten(_.pluck(applications, 'privileges')));
+  const assigned = _.uniq(_.flatten(_.pluck(applications, 'privileges')));
   assigned.forEach(a => {
     kibanaPrivileges[a] = true;
   });
@@ -63,7 +64,7 @@ const setApplicationPrivileges = (kibanaPrivileges, role, application) => {
     role.applications = [...role.applications, {
       application,
       privileges,
-      resources: [ DEFAULT_RESOURCE ]
+      resources: [DEFAULT_RESOURCE]
     }];
   }
 };
@@ -118,7 +119,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     }
   },
   controllerAs: 'editRole',
-  controller($injector, $scope, rbacApplication) {
+  controller($injector, $scope) {
     const $route = $injector.get('$route');
     const kbnUrl = $injector.get('kbnUrl');
     const shieldPrivileges = $injector.get('shieldPrivileges');
@@ -126,6 +127,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     const Private = $injector.get('Private');
     const confirmModal = $injector.get('confirmModal');
     const shieldIndices = $injector.get('shieldIndices');
+    const rbacApplication = chrome.getInjected('rbacApplication');
 
     $scope.role = $route.current.locals.role;
     $scope.users = $route.current.locals.users;

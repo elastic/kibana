@@ -48,7 +48,7 @@ const hasLegacyPrivileges = async (
   const privilegeCheck = await callWithRequest(request, 'shield.hasPrivileges', {
     body: {
       index: [{
-        names: [ kibanaIndex ],
+        names: [kibanaIndex],
         privileges: ['read', 'index']
       }]
     }
@@ -63,7 +63,7 @@ const hasLegacyPrivileges = async (
 
   const logDeprecation = () => {
     deprecationLogger(
-      `Relying on implicit privileges determined from the index privileges is deprecated and will be removed in the next major version`
+      `Relying on implicit privileges determined from the index privileges is deprecated and will be removed in Kibana 7.0`
     );
   };
 

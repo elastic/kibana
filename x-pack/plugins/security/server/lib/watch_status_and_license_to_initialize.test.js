@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/*! Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one or more contributor license agreements.
- * Licensed under the Elastic License; you may not use this file except in compliance with the Elastic License. */
 import { EventEmitter } from 'events';
 import { watchStatusAndLicenseToInitialize } from './watch_status_and_license_to_initialize';
 
@@ -29,7 +27,7 @@ const createMockXpackMainPluginAndFeature = (featureId) => {
     }
   };
 
-  const mockXpackMainPlugin =  {
+  const mockXpackMainPlugin = {
     info: {
       feature: (id) => {
         if (id === featureId) {
@@ -64,7 +62,7 @@ const createMockDownstreamPlugin = (id) => {
   };
 };
 
-['red', 'yellow', 'disabled' ].forEach(state => {
+['red', 'yellow', 'disabled'].forEach(state => {
   test(`mirrors ${state} immediately`, () => {
     const pluginId = 'foo-plugin';
     const message = `${state} is now the state`;
@@ -72,7 +70,7 @@ const createMockDownstreamPlugin = (id) => {
     mockXpackMainPlugin.mock.setStatus(state, message);
     const downstreamPlugin = createMockDownstreamPlugin(pluginId);
     const initializeMock = jest.fn();
-    downstreamPlugin.status[state].mockImplementation(() => {});
+    downstreamPlugin.status[state].mockImplementation(() => { });
 
     watchStatusAndLicenseToInitialize(mockXpackMainPlugin, downstreamPlugin, initializeMock);
 
@@ -89,7 +87,7 @@ test(`calls initialize and doesn't immediately set downstream status when the in
   const licenseCheckResults = Symbol();
   mockFeature.mock.setLicenseCheckResults(licenseCheckResults);
   const downstreamPlugin = createMockDownstreamPlugin(pluginId);
-  const initializeMock = jest.fn().mockImplementation(() => new Promise(() => {}));
+  const initializeMock = jest.fn().mockImplementation(() => new Promise(() => { }));
 
   watchStatusAndLicenseToInitialize(mockXpackMainPlugin, downstreamPlugin, initializeMock);
 
@@ -111,8 +109,7 @@ test(`sets downstream plugin's status to green when initialize resolves`, (done)
 
   expect(initializeMock).toHaveBeenCalledTimes(1);
   expect(initializeMock).toHaveBeenCalledWith(licenseCheckResults);
-  downstreamPlugin.status.green.mockImplementation(actualMessage =>
-  {
+  downstreamPlugin.status.green.mockImplementation(actualMessage => {
     expect(actualMessage).toBe('Ready');
     done();
   });
