@@ -9,7 +9,7 @@ const fonts = [
     label: 'American Typewriter',
     value: `'American Typewriter', 'Courier New', Courier, Monaco, mono`,
   },
-  { label: 'Arial', value: `'Arial, sans-serif` },
+  { label: 'Arial', value: `Arial, sans-serif` },
   {
     label: 'Baskerville',
     value: `Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif`,
