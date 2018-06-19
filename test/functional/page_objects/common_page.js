@@ -262,7 +262,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
 
     async isConfirmModalOpen() {
       log.debug('isConfirmModalOpen');
-      return await testSubjects.exists('confirmModalCancelButton', 2000);
+      return await testSubjects.exists('confirmModalCancelButton', 5000);
     }
 
     async getBreadcrumbPageTitle() {
