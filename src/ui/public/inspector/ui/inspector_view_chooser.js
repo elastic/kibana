@@ -71,7 +71,6 @@ class InspectorViewChooser extends Component {
         iconSide="right"
         onClick={this.toggleSelector}
         data-test-subj="inspectorViewChooser"
-        flush="right"
       >
         View: { this.props.selectedView.title }
       </EuiButtonEmpty>

@@ -36,7 +36,9 @@ exports[`InspectorPanel should render as expected 1`] = `
 >
   <EuiFlyout
     data-test-subj="inspectorPanel"
+    hideCloseButton={false}
     onClose={[Function]}
+    ownFocus={false}
     size="m"
   >
     <span>
@@ -57,11 +59,79 @@ exports[`InspectorPanel should render as expected 1`] = `
             className="euiFlyout euiFlyout--medium"
             data-test-subj="inspectorPanel"
             onKeyDown={[Function]}
+            role="dialog"
             tabIndex={0}
           >
-            <EuiFlyoutHeader>
+            <EuiButtonIcon
+              aria-label="Closes this dialog"
+              className="euiFlyout__closeButton"
+              color="text"
+              iconType="cross"
+              onClick={[Function]}
+              type="button"
+            >
+              <button
+                aria-label="Closes this dialog"
+                className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
+                onClick={[Function]}
+                type="button"
+              >
+                <EuiIcon
+                  aria-hidden="true"
+                  className="euiButtonIcon__icon"
+                  size="m"
+                  type="cross"
+                >
+                  <cross
+                    aria-hidden="true"
+                    className="euiIcon euiIcon--medium euiButtonIcon__icon"
+                    focusable="false"
+                    height="16"
+                    style={
+                      Object {
+                        "fill": undefined,
+                      }
+                    }
+                    viewBox="0 0 16 16"
+                    width="16"
+                    xmlns="http://www.w3.org/2000/svg"
+                    xmlnsXlink="http://www.w3.org/1999/xlink"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      className="euiIcon euiIcon--medium euiButtonIcon__icon"
+                      focusable="false"
+                      height="16"
+                      style={
+                        Object {
+                          "fill": undefined,
+                        }
+                      }
+                      viewBox="0 0 16 16"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                      xmlnsXlink="http://www.w3.org/1999/xlink"
+                    >
+                      <defs>
+                        <path
+                          d="M7.293 8l-4.147 4.146a.5.5 0 0 0 .708.708L8 8.707l4.146 4.147a.5.5 0 0 0 .708-.708L8.707 8l4.147-4.146a.5.5 0 0 0-.708-.708L8 7.293 3.854 3.146a.5.5 0 1 0-.708.708L7.293 8z"
+                          id="cross-a"
+                        />
+                      </defs>
+                      <use
+                        fillRule="nonzero"
+                        xlinkHref="#cross-a"
+                      />
+                    </svg>
+                  </cross>
+                </EuiIcon>
+              </button>
+            </EuiButtonIcon>
+            <EuiFlyoutHeader
+              hasBorder={true}
+            >
               <div
-                className="euiFlyoutHeader"
+                className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
               >
                 <EuiFlexGroup
                   alignItems="center"
@@ -137,7 +207,6 @@ exports[`InspectorPanel should render as expected 1`] = `
                               <EuiButtonEmpty
                                 color="primary"
                                 data-test-subj="inspectorViewChooser"
-                                flush="right"
                                 iconSide="right"
                                 iconType="arrowDown"
                                 onClick={[Function]}
@@ -165,7 +234,6 @@ exports[`InspectorPanel should render as expected 1`] = `
                                 <EuiButtonEmpty
                                   color="primary"
                                   data-test-subj="inspectorViewChooser"
-                                  flush="right"
                                   iconSide="right"
                                   iconType="arrowDown"
                                   onClick={[Function]}
@@ -173,7 +241,7 @@ exports[`InspectorPanel should render as expected 1`] = `
                                   type="button"
                                 >
                                   <button
-                                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--iconRight euiButtonEmpty--flushRight"
+                                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--iconRight"
                                     data-test-subj="inspectorViewChooser"
                                     onClick={[Function]}
                                     type="button"
@@ -245,14 +313,6 @@ exports[`InspectorPanel should render as expected 1`] = `
                     </EuiFlexItem>
                   </div>
                 </EuiFlexGroup>
-                <EuiHorizontalRule
-                  margin="s"
-                  size="full"
-                >
-                  <hr
-                    className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
-                  />
-                </EuiHorizontalRule>
               </div>
             </EuiFlyoutHeader>
             <component
@@ -270,84 +330,6 @@ exports[`InspectorPanel should render as expected 1`] = `
                 View 1
               </h1>
             </component>
-            <EuiFlyoutFooter>
-              <div
-                className="euiFlyoutFooter"
-              >
-                <EuiButtonEmpty
-                  color="primary"
-                  data-test-subj="inspectorPanel-close"
-                  iconSide="left"
-                  iconType="cross"
-                  onClick={[Function]}
-                  type="button"
-                >
-                  <button
-                    className="euiButtonEmpty euiButtonEmpty--primary"
-                    data-test-subj="inspectorPanel-close"
-                    onClick={[Function]}
-                    type="button"
-                  >
-                    <span
-                      className="euiButtonEmpty__content"
-                    >
-                      <EuiIcon
-                        aria-hidden="true"
-                        className="euiButtonEmpty__icon"
-                        size="m"
-                        type="cross"
-                      >
-                        <cross
-                          aria-hidden="true"
-                          className="euiIcon euiIcon--medium euiButtonEmpty__icon"
-                          focusable="false"
-                          height="16"
-                          style={
-                            Object {
-                              "fill": undefined,
-                            }
-                          }
-                          viewBox="0 0 16 16"
-                          width="16"
-                          xmlns="http://www.w3.org/2000/svg"
-                          xmlnsXlink="http://www.w3.org/1999/xlink"
-                        >
-                          <svg
-                            aria-hidden="true"
-                            className="euiIcon euiIcon--medium euiButtonEmpty__icon"
-                            focusable="false"
-                            height="16"
-                            style={
-                              Object {
-                                "fill": undefined,
-                              }
-                            }
-                            viewBox="0 0 16 16"
-                            width="16"
-                            xmlns="http://www.w3.org/2000/svg"
-                            xmlnsXlink="http://www.w3.org/1999/xlink"
-                          >
-                            <defs>
-                              <path
-                                d="M7.293 8l-4.147 4.146a.5.5 0 0 0 .708.708L8 8.707l4.146 4.147a.5.5 0 0 0 .708-.708L8.707 8l4.147-4.146a.5.5 0 0 0-.708-.708L8 7.293 3.854 3.146a.5.5 0 1 0-.708.708L7.293 8z"
-                                id="cross-a"
-                              />
-                            </defs>
-                            <use
-                              fillRule="nonzero"
-                              xlinkHref="#cross-a"
-                            />
-                          </svg>
-                        </cross>
-                      </EuiIcon>
-                      <span>
-                        Close
-                      </span>
-                    </span>
-                  </button>
-                </EuiButtonEmpty>
-              </div>
-            </EuiFlyoutFooter>
           </div>
         </div>
       </FocusTrap>

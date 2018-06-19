@@ -20,13 +20,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiHorizontalRule,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -90,7 +87,7 @@ class InspectorPanel extends Component {
         onClose={onClose}
         data-test-subj="inspectorPanel"
       >
-        <EuiFlyoutHeader>
+        <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup
             justifyContent="spaceBetween"
             alignItems="center"
@@ -108,18 +105,8 @@ class InspectorPanel extends Component {
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiHorizontalRule margin="s"/>
         </EuiFlyoutHeader>
         { this.renderSelectedPanel() }
-        <EuiFlyoutFooter>
-          <EuiButtonEmpty
-            iconType="cross"
-            onClick={this.props.onClose}
-            data-test-subj="inspectorPanel-close"
-          >
-            Close
-          </EuiButtonEmpty>
-        </EuiFlyoutFooter>
       </EuiFlyout>
     );
   }
