@@ -59,7 +59,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('delete', async function () {
+    describe.skip('delete', async function () {
       it('default confirm action is cancel', async function () {
         await PageObjects.dashboard.searchForDashboardWithName(dashboardName);
         await PageObjects.dashboard.checkDashboardListingSelectAllCheckbox();
