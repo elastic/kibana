@@ -30,11 +30,11 @@ function getRequestInspectorStats(searchSource) {
   if (index) {
     stats['Index pattern'] = {
       value: index.title,
-      description: 'The index pattern that connected to the Elasticsearch indices',
+      description: 'The index pattern that connected to the Elasticsearch indices.',
     };
     stats ['Index pattern ID'] = {
       value: index.id,
-      description: 'The ID in the .kibana index',
+      description: 'The ID in the .kibana index.',
     };
   }
 
@@ -56,7 +56,7 @@ function getResponseInspectorStats(searchSource, resp) {
   if (resp && resp.hits) {
     stats.Hits = {
       value: `${resp.hits.total}`,
-      description: 'The number of documents that match the query',
+      description: 'The number of documents that match the query.',
     };
   }
 
