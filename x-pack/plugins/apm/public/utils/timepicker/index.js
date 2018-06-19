@@ -8,7 +8,7 @@ import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
 import 'ui/autoload/all';
 import { updateTimePicker } from '../../store/urlParams';
-import { timefilter } from 'ui/timefilter';
+import { timefilter, registerTimefilterWithGlobalState } from 'ui/timefilter';
 
 let currentInterval;
 
@@ -59,6 +59,8 @@ export function initTimepicker(history, dispatch, callback) {
       $scope.$listen(timefilter, 'timeUpdate', () =>
         dispatch(updateTimePickerAction())
       );
+
+      registerTimefilterWithGlobalState(globalState);
 
       Promise.all([waitForAngularReady]).then(callback);
     });

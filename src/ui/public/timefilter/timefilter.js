@@ -160,7 +160,11 @@ function convertISO8601(stringTime) {
   return obj.isValid() ? obj : stringTime;
 }
 
-const registerWithGlobalState = _.once((globalState) => {
+// Currently some parts of Kibana (index patterns, timefilter) rely on addSetupWork in the uiRouter
+// and require it to be executed to properly function.
+// This function is exposed for applications that do not use uiRoutes like APM
+// Kibana issue https://github.com/elastic/kibana/issues/19110 tracks the removal of this dependency on uiRouter
+export const registerTimefilterWithGlobalState = _.once((globalState) => {
   const uiSettings = chrome.getUiSettingsClient();
   const timeDefaults = uiSettings.get('timepicker:timeDefaults');
   const refreshIntervalDefaults = uiSettings.get('timepicker:refreshIntervalDefaults');
@@ -185,5 +189,5 @@ const registerWithGlobalState = _.once((globalState) => {
 
 uiRoutes
   .addSetupWork((globalState) => {
-    return registerWithGlobalState(globalState);
+    return registerTimefilterWithGlobalState(globalState);
   });
