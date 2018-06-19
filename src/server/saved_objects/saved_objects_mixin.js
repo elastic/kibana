@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import _ from 'lodash';
 import { createSavedObjectsService } from './service';
-
+import { getActiveMappings, getMigrationPlugins } from './migrations';
 import {
   createBulkGetRoute,
   createCreateRoute,
@@ -29,6 +29,9 @@ import {
 } from './routes';
 
 export function savedObjectsMixin(kbnServer, server) {
+  const mappings = getActiveMappings({ plugins: getMigrationPlugins(kbnServer) });
+  server.decorate('server', 'getKibanaIndexMappingsDsl', () => _.cloneDeep(mappings));
+
   // we use kibana.index which is technically defined in the kibana plugin, so if
   // we don't have the plugin (mainly tests) we can't initialize the saved objects
   if (!kbnServer.pluginSpecs.some(p => p.getId() === 'kibana')) {
@@ -52,7 +55,7 @@ export function savedObjectsMixin(kbnServer, server) {
   server.route(createGetRoute(prereqs));
   server.route(createUpdateRoute(prereqs));
 
-  server.decorate('server', 'savedObjects', createSavedObjectsService(server));
+  server.decorate('server', 'savedObjects', createSavedObjectsService(kbnServer, server));
 
   const savedObjectsClientCache = new WeakMap();
   server.decorate('request', 'getSavedObjectsClient', function () {

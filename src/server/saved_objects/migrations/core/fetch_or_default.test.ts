@@ -17,10 +17,24 @@
  * under the License.
  */
 
-export {
-  getTypes,
-  getRootType,
-  getProperty,
-  getRootProperties,
-  getRootPropertiesObjects,
-} from './lib';
+import { fetchOrDefault } from './fetch_or_default';
+
+describe('fetchOrDefault', () => {
+  test('returns default if not found', () => {
+    expect(
+      fetchOrDefault(Promise.reject({ status: 404 }), 'hoi')
+    ).resolves.toEqual('hoi');
+  });
+
+  test('errors if rejected w/ non status 404', () => {
+    expect(
+      fetchOrDefault(Promise.reject({ status: 500 }), 'hoi')
+    ).rejects.toThrow();
+  });
+
+  test('returns resolved value if found', () => {
+    expect(
+      fetchOrDefault(Promise.resolve({ hello: 'world' }), { hello: 'you' })
+    ).resolves.toEqual({ hello: 'world' });
+  });
+});

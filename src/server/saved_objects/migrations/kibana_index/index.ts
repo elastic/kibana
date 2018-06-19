@@ -17,10 +17,5 @@
  * under the License.
  */
 
-export {
-  getTypes,
-  getRootType,
-  getProperty,
-  getRootProperties,
-  getRootPropertiesObjects,
-} from './lib';
+export { getMigrationPlugins } from './get_migration_plugins';
+export { patchKibanaIndexMappings } from './patch_kibana_index_mappings';

@@ -17,10 +17,24 @@
  * under the License.
  */
 
-export {
-  getTypes,
-  getRootType,
-  getProperty,
-  getRootProperties,
-  getRootPropertiesObjects,
-} from './lib';
+import { fetchMapping } from './fetch_mapping';
+
+describe('fetchMapping', () => {
+  test('returns null if not found', () => {
+    const callCluster = () => Promise.reject({ status: 404 });
+    expect(fetchMapping(callCluster, '.kibana')).resolves.toBeNull();
+  });
+
+  test('returns the index mapping', () => {
+    const callCluster = (path: string, { index }: { index: string }) => {
+      expect(index).toEqual('.foo');
+      expect(path).toEqual('indices.getMapping');
+      return Promise.resolve({
+        [index]: { mappings: { doc: { hello: 'world' } } },
+      });
+    };
+    expect(fetchMapping(callCluster as any, '.foo')).resolves.toEqual({
+      doc: { hello: 'world' },
+    });
+  });
+});
