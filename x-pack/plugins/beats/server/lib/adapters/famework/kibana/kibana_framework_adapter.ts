@@ -5,6 +5,8 @@ import {
   WrappableRequest,
 } from '../../../lib';
 
+import { once } from 'lodash';
+
 import { IStrictReply, Request, Server } from 'hapi';
 import {
   internalFrameworkRequest,
@@ -44,6 +46,19 @@ export class InfraKibanaBackendFrameworkAdapter
       method: route.method,
       handler: wrappedHandler,
     });
+  }
+
+  installIndexTemplate(name: string, template: {}) {
+    return this.callWithInternalUser('indices.putTemplate', {
+      name,
+      body: template,
+    });
+  }
+
+  async callWithInternalUser(esMethod: string, options: {}) {
+    const { elasticsearch } = this.server.plugins;
+    const { callWithInternalUser } = elasticsearch.getCluster('admin');
+    return await callWithInternalUser(esMethod, options);
   }
 
   async callWithRequest(req: FrameworkRequest<Request>, ...rest: any[]) {

@@ -14,6 +14,7 @@ export interface CMServerLibs extends CMDomainLibs {
 export interface BackendFrameworkAdapter {
   version: string;
   exposeStaticDir(urlPath: string, dir: string): void;
+  installIndexTemplate(name: string, template: {}): void;
   registerRoute<RouteRequest extends WrappableRequest, RouteResponse>(
     route: FrameworkRouteOptions<RouteRequest, RouteResponse>
   ): void;

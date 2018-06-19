@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { installIndexTemplate } from './install_index_template';
+import beatsIndexTemplate from './beats_template';
+export { beatsIndexTemplate };
