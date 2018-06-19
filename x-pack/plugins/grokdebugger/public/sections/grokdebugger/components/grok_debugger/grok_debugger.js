@@ -9,29 +9,66 @@ import { EventInput } from '../event_input';
 import { PatternInput } from '../pattern_input';
 import { CustomPatternsInput } from '../custom_patterns_input';
 import { EventOutput } from '../event_output';
+import { GrokdebuggerRequest } from '../../../../models/grokdebugger_request';
 
 export class GrokDebugger extends React.Component {
-  state = {
-    rawEvent: '',
-    pattern: '',
-    customPatterns: '',
-    structuredEvent: ''
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      rawEvent: '',
+      pattern: '',
+      customPatterns: '',
+      structuredEvent: {}
+    };
+    this.grokdebuggerRequest = new GrokdebuggerRequest();
+  }
 
   onRawEventChange = (rawEvent) => {
     this.setState({ rawEvent });
+    this.grokdebuggerRequest.rawEvent = rawEvent;
   }
 
   onPatternChange = (pattern) => {
     this.setState({ pattern });
+    this.grokdebuggerRequest.pattern = pattern;
   }
 
   onCustomPatternsChange = (customPatterns) => {
     this.setState({ customPatterns });
+
+    customPatterns = customPatterns.trim();
+    if (!customPatterns) {
+      return;
+    }
+
+    const customPatternsObj = {};
+    customPatterns.split('\n').forEach(customPattern => {
+      // Patterns are defined like so:
+      // patternName patternDefinition
+      // For example:
+      // POSTGRESQL %{DATESTAMP:timestamp} %{TZ} %{DATA:user_id} %{GREEDYDATA:connection_id} %{POSINT:pid}
+      const [ , patternName, patternDefinition ] = customPattern.match(/(\S+)\s+(.+)/) || [];
+      if (patternName && patternDefinition) {
+        customPatternsObj[patternName] = patternDefinition;
+      }
+    });
+
+    this.grokdebuggerRequest.customPatterns = customPatternsObj;
   }
 
-  onSimulateClick = () => {
-    console.log('simulate clicked');
+  onSimulateClick = async () => {
+    try {
+      const simulateResponse = await this.props.grokdebuggerService.simulate(this.grokdebuggerRequest);
+      this.setState({
+        structuredEvent: simulateResponse.structuredEvent
+      });
+
+      if (simulateResponse.error) {
+        // TODO: toast error
+      }
+    } catch (e) {
+      // TODO: toast error
+    }
   }
 
   isSimulateDisabled = () => {

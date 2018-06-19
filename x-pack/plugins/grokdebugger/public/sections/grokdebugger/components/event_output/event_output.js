@@ -14,9 +14,10 @@ export function EventOutput({ value }) {
   return (
     <EuiFormRow label="Structured Data">
       <EuiCodeEditor
+        mode="javascript"
         width="100%"
         height="340px"
-        value={value}
+        value={JSON.stringify(value)}
         data-test-subj="aceEventOutput"
         isReadOnly
       />

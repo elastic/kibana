@@ -71,19 +71,6 @@ app.directive('grokdebugger', function ($injector) {
 
         this.grokdebuggerRequest.customPatterns = customPatternsObj;
       }
-
-      onRawEventChange = (rawEvent) => {
-        this.grokdebuggerRequest.rawEvent = rawEvent;
-      }
-
-      onPatternChange = (pattern) => {
-        this.grokdebuggerRequest.pattern = pattern;
-      }
-
-      get isSimulateEnabled() {
-        return !(isEmpty(trim(this.grokdebuggerRequest.rawEvent)) ||
-          isEmpty(trim(this.grokdebuggerRequest.pattern)));
-      }
     }
   };
 });
