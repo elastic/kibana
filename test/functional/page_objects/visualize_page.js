@@ -28,6 +28,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
   const retry = getService('retry');
   const find = getService('find');
   const log = getService('log');
+  const flyout = getService('flyout');
   const PageObjects = getPageObjects(['common', 'header']);
   const defaultFindTimeout = config.get('timeouts.find');
 
@@ -340,7 +341,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       let isOpen = await testSubjects.exists('inspectorPanel');
       if (isOpen) {
         await retry.try(async () => {
-          await testSubjects.click('inspectorPanel-close');
+          await flyout.close('inspectorPanel');
           isOpen = await testSubjects.exists('inspectorPanel');
           if (isOpen) {
             throw new Error('Failed to close inspector');
