@@ -56,6 +56,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       };
 
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), appConfig);
+      log.debug(`navigating to URL ${appUrl}`);
       return remote.get(appUrl);
     }
 

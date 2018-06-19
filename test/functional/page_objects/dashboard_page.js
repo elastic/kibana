@@ -138,6 +138,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       if (!onPage) {
         await retry.try(async () => {
           await this.clickDashboardBreadcrumbLink();
+          await PageObjects.header.waitUntilLoadingHasFinished();
           const onDashboardLandingPage = await this.onDashboardLandingPage();
           if (!onDashboardLandingPage) throw new Error('Not on the landing page.');
         });
@@ -336,10 +337,12 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       }
 
       await this.clickSave();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async selectDashboard(dashName) {
       await testSubjects.click(`dashboardListingTitleLink-${dashName.split(' ').join('-')}`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clearSearchValue() {
@@ -351,6 +354,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         const searchFilter = await testSubjects.find('searchFilter');
         await searchFilter.clearValue();
         await PageObjects.common.pressEnterKey();
+        await PageObjects.header.waitUntilLoadingHasFinished();
       });
     }
 
@@ -530,9 +534,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         await retry.try(async () => {
           const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice');
           log.debug('Slices found:' + slices.length);
-          return slices[0].click();
+          await slices[0].click();
         });
       }
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async getSharedItemsCount() {

@@ -176,17 +176,18 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const input = await testSubjects.find('markdownTextarea');
       await input.clearValue();
       await input.type(markdownTxt);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async getMarkdownText() {
       const markdownContainer = await testSubjects.find('markdownBody');
-      return markdownContainer.getVisibleText();
+      return await markdownContainer.getVisibleText();
     }
 
     async getMarkdownBodyDescendentText(selector) {
       const markdownContainer = await testSubjects.find('markdownBody');
       const element = await find.descendantDisplayedByCssSelector(selector, markdownContainer);
-      return element.getVisibleText();
+      return await element.getVisibleText();
     }
 
     async getVegaSpec() {
@@ -311,6 +312,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clickGoButton() {
       await testSubjects.click('timepickerGoButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async getSpyToggleExists() {
@@ -639,12 +641,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async clickVisualizationByName(vizName) {
       log.debug('clickVisualizationByLinkText(' + vizName + ')');
 
-      return retry.try(function tryingForTime() {
+      await retry.try(function tryingForTime() {
         return remote
           .setFindTimeout(defaultFindTimeout)
           .findByPartialLinkText(vizName)
           .click();
       });
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     // this starts by clicking the Load Saved Viz button, not from the
@@ -656,6 +659,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async openSavedVisualization(vizName) {
       await this.clickVisualizationByName(vizName);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async getXAxisLabels() {

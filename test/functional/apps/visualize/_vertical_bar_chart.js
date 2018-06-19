@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
-  describe('visualize app', function describeIndexTests() {
+  describe('vertical bar chart', function describeIndexTests() {
     const fromTime = '2015-09-19 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';
 
@@ -58,9 +58,6 @@ export default function ({ getService, getPageObjects }) {
         .then(function clickGo() {
           return PageObjects.visualize.clickGo();
         })
-        .then(function () {
-          return PageObjects.header.waitUntilLoadingHasFinished();
-        })
         .then(function waitForVisualization() {
           return PageObjects.visualize.waitForVisualization();
         });
@@ -85,9 +82,6 @@ export default function ({ getService, getPageObjects }) {
           })
           .then(function () {
             return PageObjects.visualize.loadSavedVisualization(vizName1);
-          })
-          .then(function () {
-            return PageObjects.header.waitUntilLoadingHasFinished();
           })
           .then(function waitForVisualization() {
             return PageObjects.visualize.waitForVisualization();
@@ -153,7 +147,6 @@ export default function ({ getService, getPageObjects }) {
 
         await PageObjects.common.sleep(1003);
         await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
 
         const expectedEntries = ['200', '404', '503'];
         const legendEntries = await PageObjects.visualize.getLegendEntries();
@@ -195,7 +188,6 @@ export default function ({ getService, getPageObjects }) {
       it('should show correct series when disabling first agg', async function () {
         await PageObjects.visualize.toggleDisabledAgg(3);
         await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
 
         const expectedEntries = [ 'win 8', 'win xp', 'ios', 'osx', 'win 7' ];
         const legendEntries = await PageObjects.visualize.getLegendEntries();
@@ -215,7 +207,6 @@ export default function ({ getService, getPageObjects }) {
 
         await PageObjects.common.sleep(1003);
         await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
 
         const expectedEntries = [
           'Derivative of Count'

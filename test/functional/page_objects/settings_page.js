@@ -512,6 +512,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         log.debug(`Leaving overwriteAll alone`);
       }
       await testSubjects.click('importSavedObjectsImportBtn');
+      await PageObjects.header.waitUntilLoadingHasFinished();
       log.debug(`done importing the file`);
     }
 

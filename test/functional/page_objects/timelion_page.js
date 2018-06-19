@@ -52,7 +52,7 @@ export function TimelionPageProvider({ getService, getPageObjects }) {
 
     async getExpression() {
       const input = await testSubjects.find('timelionExpressionTextArea');
-      return input.getVisibleText();
+      return await input.getVisibleText();
     }
 
     async getSuggestionItemsText() {
