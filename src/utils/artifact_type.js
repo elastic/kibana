@@ -17,11 +17,6 @@
  * under the License.
  */
 
-function getDocumentUid(type, id) {
-  return `${type}#${id}`;
-}
+import { pkg } from './package_json';
 
-
-export {
-  getDocumentUid,
-};
+export const IS_KIBANA_DISTRIBUTABLE = pkg.build && pkg.build.distributable === true;

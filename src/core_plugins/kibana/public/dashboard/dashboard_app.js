@@ -59,7 +59,6 @@ const app = uiModules.get('app/dashboard', [
   'react',
   'kibana/courier',
   'kibana/config',
-  'kibana/notify',
   'kibana/typeahead',
 ]);
 
@@ -68,7 +67,6 @@ app.directive('dashboardViewportProvider', function (reactDirective) {
 });
 
 app.directive('dashboardApp', function ($injector) {
-  const Notifier = $injector.get('Notifier');
   const courier = $injector.get('courier');
   const AppState = $injector.get('AppState');
   const kbnUrl = $injector.get('kbnUrl');
@@ -83,7 +81,6 @@ app.directive('dashboardApp', function ($injector) {
       const filterManager = Private(FilterManagerProvider);
       const filterBar = Private(FilterBarQueryFilterProvider);
       const docTitle = Private(DocTitleProvider);
-      const notify = new Notifier({ location: 'Dashboard' });
       const embeddableFactories = Private(EmbeddableFactoriesRegistryProvider);
       const panelActionsRegistry = Private(DashboardPanelActionsRegistryProvider);
 
@@ -287,7 +284,7 @@ app.directive('dashboardApp', function ($injector) {
        * @return {Promise}
        * @resolved {String} - The id of the doc
        */
-      $scope.save = function (saveOptions) {
+      function save(saveOptions) {
         return saveDashboard(angular.toJson, timefilter, dashboardStateManager, saveOptions)
           .then(function (id) {
             $scope.kbnTopNav.close('save');
@@ -304,9 +301,15 @@ app.directive('dashboardApp', function ($injector) {
                 updateViewMode(DashboardViewMode.VIEW);
               }
             }
-            return id;
-          }).catch(notify.error);
-      };
+            return { id };
+          }).catch((error) => {
+            toastNotifications.addDanger({
+              title: `Dashboard '${dash.title}' was not saved. Error: ${error.message}`,
+              'data-test-subj': 'saveDashboardFailure',
+            });
+            return { error };
+          });
+      }
 
       $scope.showFilterBar = () => filterBar.getFilters().length > 0 || !dashboardStateManager.getFullScreenMode();
 
@@ -337,14 +340,14 @@ app.directive('dashboardApp', function ($injector) {
             isTitleDuplicateConfirmed,
             onTitleDuplicate,
           };
-          return $scope.save(saveOptions).then(id => {
+          return save(saveOptions).then(({ id, error }) => {
             // If the save wasn't successful, put the original values back.
-            if (!id) {
+            if (!id || error) {
               dashboardStateManager.setTitle(currentTitle);
               dashboardStateManager.setDescription(currentDescription);
               dashboardStateManager.setTimeRestore(currentTimeRestore);
             }
-            return id;
+            return { id, error };
           });
         };
 
@@ -366,12 +369,12 @@ app.directive('dashboardApp', function ($injector) {
             isTitleDuplicateConfirmed,
             onTitleDuplicate,
           };
-          return $scope.save(saveOptions).then(id => {
+          return save(saveOptions).then(({ id, error }) => {
             // If the save wasn't successful, put the original title back.
-            if (!id) {
+            if (!id || error) {
               dashboardStateManager.setTitle(currentTitle);
             }
-            return id;
+            return { id, error };
           });
         };
 

@@ -76,7 +76,7 @@
     "yargs": "4.7.1"
   },
   "dependencies": {
-    "@elastic/eui": "0.0.52",
+    "@elastic/eui": "0.0.53",
     "@elastic/node-crypto": "0.1.2",
     "@elastic/node-phantom-simple": "2.2.4",
     "@elastic/numeral": "2.3.2",
@@ -152,9 +152,9 @@
     "reselect": "3.0.1",
     "rimraf": "^2.6.2",
     "rison-node": "0.3.1",
-    "rxjs": "5.3.0",
+    "rxjs": "^6.1.0",
     "semver": "5.1.0",
-    "stream-to-observable": "0.2.0",
+    "@samverschueren/stream-to-observable": "^0.3.0",
     "styled-components": "2.3.2",
     "tar-fs": "1.13.0",
     "tinycolor2": "1.3.0",

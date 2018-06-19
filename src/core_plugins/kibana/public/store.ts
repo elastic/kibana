@@ -17,16 +17,35 @@
  * under the License.
  */
 
-import { createStore, applyMiddleware, compose } from 'redux';
+import { applyMiddleware, compose, createStore } from 'redux';
 import thunk from 'redux-thunk';
 
+import { QueryLanguageType } from 'ui/embeddable/types';
+import { DashboardViewMode } from './dashboard/dashboard_view_mode';
 import { reducers } from './reducers';
+import { CoreKibanaState } from './selectors';
 
-const enhancers = [ applyMiddleware(thunk) ];
-window.__REDUX_DEVTOOLS_EXTENSION__ && enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());
+const enhancers = [applyMiddleware(thunk)];
 
-export const store = createStore(
+export const store = createStore<CoreKibanaState>(
   reducers,
-  {},
+  {
+    dashboard: {
+      embeddables: {},
+      metadata: {
+        title: 'New Dashboard',
+      },
+      panels: {},
+      view: {
+        filters: [],
+        hidePanelTitles: false,
+        isFullScreenMode: false,
+        query: { language: QueryLanguageType.LUCENE, query: '' },
+        timeRange: { from: 'now-15m', to: 'now' },
+        useMargins: true,
+        viewMode: DashboardViewMode.VIEW,
+      },
+    },
+  },
   compose(...enhancers)
 );

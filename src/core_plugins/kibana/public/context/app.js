@@ -53,7 +53,8 @@ module.directive('contextApp', function ContextApp() {
     controllerAs: 'contextApp',
     restrict: 'E',
     scope: {
-      anchorUid: '=',
+      anchorType: '=',
+      anchorId: '=',
       columns: '=',
       indexPattern: '=',
       filters: '=',
@@ -107,7 +108,8 @@ function ContextAppController($scope, config, Private) {
       const { queryParameters } = this.state;
       if (
         (newQueryParameters.indexPatternId !== queryParameters.indexPatternId)
-        || (newQueryParameters.anchorUid !== queryParameters.anchorUid)
+        || (newQueryParameters.anchorType !== queryParameters.anchorType)
+        || (newQueryParameters.anchorId !== queryParameters.anchorId)
         || (!_.isEqual(newQueryParameters.sort, queryParameters.sort))
       ) {
         this.actions.fetchAllRowsWithNewQueryParameters(_.cloneDeep(newQueryParameters));

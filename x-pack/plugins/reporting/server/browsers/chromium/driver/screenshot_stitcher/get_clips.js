@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Observable } from 'rxjs';
+import * as Rx from 'rxjs';
 
 export function $getClips(dimensions, max) {
-  return Observable.from(function* () {
+  return Rx.from(function* () {
     const columns = Math.ceil(dimensions.width / max) || 1;
     const rows = Math.ceil(dimensions.height / max) || 1;
 
