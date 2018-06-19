@@ -93,5 +93,188 @@ export default function ({ getService, getPageObjects }) {
         await pipelineEditor.assertNoDeleteButton();
       });
     });
+
+    describe('pipeline editor syntax highlighting', () => {
+      const COMMENT = 'singleLineComment';
+      const PIPELINE_SECTION = 'pipelineSection';
+      const BRACE = 'brace';
+      const PLUGIN = 'plugin';
+      const ATTRIBUTE = 'attribute';
+      const OPERATOR = 'operator';
+      const QUOTE = 'quote';
+      const ARRAY = 'array';
+      const HASH = 'hash';
+      const HASH_ENTRY_NAME = 'hashEntryName';
+      const BAREWORD = 'bareword';
+      const NUMBER = 'number';
+
+      before(async () => {
+        await PageObjects.logstash.gotoNewPipelineEditor();
+      });
+
+      const assertHighlightTokens = async (pattern, expectedHighlights, filterClasses) => {
+        await pipelineEditor.setPatternInput(pattern);
+        await pipelineEditor.assertPatterInputSyntaxHighlighting(expectedHighlights, filterClasses);
+      };
+
+      it('applies single-line comment highlights outside of pipeline section', async () => {
+        const pattern = '# this is a comment';
+
+        const expectedHighlights = [
+          { token: COMMENT, content: '# this is a comment' }
+        ];
+
+        await assertHighlightTokens(pattern, expectedHighlights);
+      });
+
+      it('applies single-line comment highlights inside pipeline section', async () => {
+        const pattern =
+          `input {
+            # this is a comment
+          }`;
+
+        const expectedHighlights = [
+          { token: PIPELINE_SECTION, content: 'input' },
+          { token: BRACE, content: '{' },
+          { token: COMMENT, content: '# this is a comment' },
+          { token: BRACE, content: '}' }
+        ];
+
+        const filterClasses = ['ace_indent-guide'];
+
+        await assertHighlightTokens(pattern, expectedHighlights, filterClasses);
+      });
+
+      // TODO: test for single-line comments in other scopes
+
+      it('applies pipelineSection classes', async () => {
+        const pipelinePattern = 'input { } filter { } output { }';
+        const expectedHighlights = [
+          { token: PIPELINE_SECTION, content: 'input' },
+          { token: BRACE, content: '{' },
+          { token: BRACE, content: '}' },
+          { token: PIPELINE_SECTION, content: 'filter' },
+          { token: BRACE, content: '{' },
+          { token: BRACE, content: '}' },
+          { token: PIPELINE_SECTION, content: 'output' },
+          { token: BRACE, content: '{' },
+          { token: BRACE, content: '}' },
+        ];
+
+        await assertHighlightTokens(pipelinePattern, expectedHighlights);
+      });
+
+      it('applies plugin and attribute highlight classes', async () => {
+        const pattern = 'input { file { path => \'thePath\' } }';
+        const expectedHighlights = [
+          { token: PIPELINE_SECTION, content: 'input' },
+          { token: BRACE, content: '{' },
+          { token: PLUGIN, content: 'file' },
+          { token: BRACE, content: '{' },
+          { token: ATTRIBUTE, content: 'path' },
+          { token: OPERATOR, content: '=>' },
+          { token: QUOTE, content: '\'thePath\'' },
+          { token: BRACE, content: '}' },
+          { token: BRACE, content: '}' },
+        ];
+
+        await assertHighlightTokens(pattern, expectedHighlights);
+      });
+
+      it('applies highlights for array, number, single/double quote, bareword, nested array, and nested hash', async () => {
+        const pattern = `input { file { path => [ "first", 'second', 123.45, [ bareword ], { hash => "value" } ] } } `;
+
+        const expectedHighlights = [
+          { token: PIPELINE_SECTION, content: 'input' },
+          { token: BRACE, content: '{' },
+          { token: PLUGIN, content: 'file' },
+          { token: BRACE, content: '{' },
+          { token: ATTRIBUTE, content: 'path' },
+          { token: OPERATOR, content: '=>' },
+          { token: ARRAY, content: '[' },
+          { token: QUOTE, content: '"first"' },
+          { token: OPERATOR, content: ',' },
+          { token: QUOTE, content: `'second'` },
+          { token: OPERATOR, content: ',' },
+          { token: NUMBER, content: '123.45' },
+          { token: OPERATOR, content: ',' },
+          { token: ARRAY, content: '[' },
+          { token: BAREWORD, content: 'bareword' },
+          { token: ARRAY, content: ']' },
+          { token: OPERATOR, content: ',' },
+          { token: HASH, content: '{' },
+          { token: HASH_ENTRY_NAME, content: 'hash' },
+          { token: OPERATOR, content: '=>' },
+          { token: QUOTE, content: '"value"' },
+          { token: HASH, content: '}' },
+          { token: ARRAY, content: ']' },
+          { token: BRACE, content: '}' },
+          { token: BRACE, content: '}' },
+        ];
+
+        await assertHighlightTokens(pattern, expectedHighlights);
+      });
+
+      it('applies hash highlights for string, bareword, number', async () => {
+        const pattern = `input { file { path => { first => 'firstValue' 'second' => secondBareword numVal => 123.45 } } } `;
+
+        const expectedHighlights = [
+          { token: PIPELINE_SECTION, content: 'input' },
+          { token: BRACE, content: '{' },
+          { token: PLUGIN, content: 'file' },
+          { token: BRACE, content: '{' },
+          { token: ATTRIBUTE, content: 'path' },
+          { token: OPERATOR, content: '=>' },
+          { token: HASH, content: '{' },
+          { token: HASH_ENTRY_NAME, content: 'first' },
+          { token: OPERATOR, content: '=>' },
+          { token: QUOTE, content: `'firstValue'` },
+          { token: QUOTE, content: `'second'` },
+          { token: OPERATOR, content: '=>' },
+          { token: BAREWORD, content: 'secondBareword' },
+          { token: HASH_ENTRY_NAME, content: 'numVal' },
+          { token: OPERATOR, content: '=>' },
+          { token: NUMBER, content: '123.45' },
+          { token: HASH, content: '}' },
+          { token: BRACE, content: '}' },
+          { token: BRACE, content: '}' },
+        ];
+
+        await assertHighlightTokens(pattern, expectedHighlights);
+      });
+
+      it('applies hash highlights for array and hash', async () => {
+        const pattern = `input {  file { path => { "array" => [ 1, 2 ] 'nestedHash' => { nestedHashVal => 123.45 } } } } `;
+
+        const expectedHighlights = [
+          { token: PIPELINE_SECTION, content: 'input' },
+          { token: BRACE, content: '{' },
+          { token: PLUGIN, content: 'file' },
+          { token: BRACE, content: '{' },
+          { token: ATTRIBUTE, content: 'path' },
+          { token: OPERATOR, content: '=>' },
+          { token: HASH, content: '{' },
+          { token: QUOTE, content: `"array"` },
+          { token: OPERATOR, content: '=>' },
+          { token: ARRAY, content: '[' },
+          { token: NUMBER, content: '1' },
+          { token: OPERATOR, content: ',' },
+          { token: NUMBER, content: '2' },
+          { token: ARRAY, content: ']' },
+          { token: QUOTE, content: `'nestedHash'` },
+          { token: OPERATOR, content: '=>' },
+          { token: HASH, content: '{' },
+          { token: HASH_ENTRY_NAME, content: 'nestedHashVal' },
+          { token: OPERATOR, content: '=>' },
+          { token: NUMBER, content: '123.45' },
+          { token: HASH, content: '}' },
+          { token: HASH, content: '}' },
+          { token: BRACE, content: '}' },
+          { token: BRACE, content: '}' },
+        ];
+
+        await assertHighlightTokens(pattern, expectedHighlights);
+      });
+    });
   });
 }

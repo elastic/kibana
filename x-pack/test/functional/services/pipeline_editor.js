@@ -6,6 +6,7 @@
 
 import expect from 'expect.js';
 import { props as propsAsync } from 'bluebird';
+// import { highlight } from 'lowlight';
 
 export function PipelineEditorProvider({ getService }) {
   const aceEditor = getService('aceEditor');
@@ -72,6 +73,9 @@ export function PipelineEditorProvider({ getService }) {
     }
     async setPipeline(value) {
       await aceEditor.setValue(SUBJ_UI_ACE_PIPELINE, value);
+    }
+    async setPatternInput(value) {
+      await aceEditor.setValue(SUBJ_CONTAINER, value);
     }
     async setWorkers(value) {
       await testSubjects.setValue(SUBJ_INPUT_WORKERS, value);
@@ -148,6 +152,37 @@ export function PipelineEditorProvider({ getService }) {
       if (await testSubjects.exists(SUBJ_BTN_DELETE)) {
         throw new Error('Expected there to be no delete button');
       }
+    }
+
+    async assertPatterInputSyntaxHighlighting(expectedHighlights, filterClasses) {
+      const patternInputElement = await testSubjects.find(SUBJ_CONTAINER);
+      let highlightedElements = await patternInputElement.findAllByXpath('.//div[@class="ace_line"]/*');
+
+      highlightedElements = await Promise.all(highlightedElements.map(async (element) => {
+        const highlightClass = await element.getAttribute('class');
+        const highlightedContent = await element.getVisibleText();
+
+        return {
+          highlightClass,
+          highlightedContent
+        };
+      }));
+
+      if (filterClasses) {
+        highlightedElements = highlightedElements.filter(({ highlightClass }) =>
+          filterClasses.some(filterClass => filterClass !== highlightClass)
+        );
+      }
+
+      expect(highlightedElements.length).to.be(expectedHighlights.length);
+      highlightedElements.forEach(({ highlightClass, highlightedContent }, index) => {
+        const expectedHighlight = expectedHighlights[index];
+        const expectedHighlightClass = `ace_${expectedHighlight.token}`;
+        const expectedHighlightedContent = expectedHighlight.content;
+
+        expect(highlightClass).to.be(expectedHighlightClass);
+        expect(highlightedContent).to.be(expectedHighlightedContent);
+      });
     }
 
     assertUnsavedChangesModal() {

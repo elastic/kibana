@@ -231,9 +231,9 @@ function NumberRule(next) {
 }
 
 const getCommentRule = () => ({
-  token: 'ccc',
+  token: 'singleLineComment',
   regex: /(\#)/,
-  push: 'ccc'
+  push: 'singleLineComment'
 });
 
 export class PipelineHighlightRules extends TextHighlightRules {
@@ -252,13 +252,13 @@ export class PipelineHighlightRules extends TextHighlightRules {
           next: push('branchOrPlugin')
         },
       ],
-      ccc: [
+      singleLineComment: [
         {
           token: 'comment',
           regex: /$/,
           next: popSingle()
         },
-        { defaultToken: 'ccc' }
+        { defaultToken: 'singleLineComment' }
       ],
       branchOrPlugin: [
         getCommentRule(),
