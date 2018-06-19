@@ -11,7 +11,7 @@ import {
   EuiSpacer
 } from '@elastic/eui';
 
-import { MLJobEditor } from './ml_job_editor';
+import { MLJobEditor } from '../ml_job_editor';
 
 export function JsonPane({ job }) {
   console.log('JsonPane');
@@ -19,7 +19,7 @@ export function JsonPane({ job }) {
   return (
     <React.Fragment>
       <EuiSpacer size="s" />
-      <MLJobEditor value={json} />
+      <MLJobEditor value={json} readOnly={true} />
     </React.Fragment>
   );
 }

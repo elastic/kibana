@@ -1,0 +1,128 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+
+import React, {
+  Component
+} from 'react';
+
+import {
+  EuiFieldText,
+  EuiForm,
+  EuiFormRow,
+  EuiSpacer,
+  EuiComboBox,
+} from '@elastic/eui';
+
+import '../styles/main.less';
+import { mlJobService } from 'plugins/ml/services/job_service';
+
+export class JobDetails extends Component {
+  constructor(props) {
+    super(props);
+
+    this.groups = mlJobService.getJobGroups().map((g) => ({ label: g.id }));
+
+    this.state = {
+      description: '',
+      selectedGroups: [],
+      mml: '',
+    };
+
+    this.setJobDetails = props.setJobDetails;
+  }
+
+  static getDerivedStateFromProps(props) {
+    const selectedGroups = (props.jobGroups !== undefined) ?
+      props.jobGroups.map(g => ({ label: g })) :
+      [];
+
+    return {
+      description: props.jobDescription,
+      selectedGroups,
+      mml: props.jobModelMemoryLimit,
+    };
+  }
+
+  descriptionChange = (e) => {
+    this.setJobDetails({ jobDescription: e.target.value });
+  }
+
+  mmlChange = (e) => {
+    this.setJobDetails({ jobModelMemoryLimit: e.target.value });
+  }
+
+  groupsChange = (selectedGroups) => {
+    this.setJobDetails({ jobGroups: selectedGroups.map(g => g.label) });
+  }
+
+  onCreateGroup = (input, flattenedOptions) => {
+    const normalizedSearchValue = input.trim().toLowerCase();
+
+    if (!normalizedSearchValue) {
+      return;
+    }
+
+    const newGroup = {
+      label: input,
+    };
+
+    // Create the option if it doesn't exist.
+    if (flattenedOptions.findIndex(option =>
+      option.label.trim().toLowerCase() === normalizedSearchValue
+    ) === -1) {
+      this.groups.push(newGroup);
+    }
+
+    // Select the option.
+    this.setState(prevState => ({
+      selectedGroups: prevState.selectedGroups.concat(newGroup),
+    }));
+  };
+
+  render() {
+    const {
+      description,
+      selectedGroups,
+      mml
+    } = this.state;
+    return (
+      <React.Fragment>
+        <EuiSpacer size="m" />
+        <EuiForm>
+          <EuiFormRow
+            label="Job description"
+          >
+            <EuiFieldText
+              value={description}
+              onChange={this.descriptionChange}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            label="Job groups"
+          >
+            <EuiComboBox
+              placeholder="Select or create groups"
+              options={this.groups}
+              selectedOptions={selectedGroups}
+              onChange={this.groupsChange}
+              onCreateOption={this.onCreateGroup}
+              isClearable={true}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            label="Model memory limit"
+          >
+            <EuiFieldText
+              value={mml}
+              onChange={this.mmlChange}
+            />
+          </EuiFormRow>
+        </EuiForm>
+      </React.Fragment>
+    );
+  }
+}

@@ -129,7 +129,7 @@ export class JobsList extends Component {
       }, {
         name: '',
         actions: actionsMenuContent(
-          this.props.showEditJobModal,
+          this.props.showEditJobFlyout,
           this.props.showDeleteJobModal,
           this.props.showStartDatafeedModal,
           this.props.refreshJobs,

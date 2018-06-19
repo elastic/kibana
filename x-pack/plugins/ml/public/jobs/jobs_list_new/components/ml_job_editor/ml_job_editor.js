@@ -11,17 +11,18 @@ import {
   EuiCodeEditor
 } from '@elastic/eui';
 
-export function MLJobEditor({ value, height = '500px', width = '100%', mode = 'json' }) {
+export function MLJobEditor({ value, height = '500px', width = '100%', mode = 'json', readOnly = false, onChange = () => {} }) {
   return (
     <EuiCodeEditor
       value={value}
       width={width}
       height={height}
       mode={mode}
-      readOnly={true}
+      readOnly={readOnly}
       wrapEnabled={true}
       showPrintMargin={false}
       editorProps={{ $blockScrolling: true }}
+      onChange={onChange}
     />
   );
 }

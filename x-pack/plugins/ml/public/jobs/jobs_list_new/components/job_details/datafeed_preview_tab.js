@@ -17,7 +17,7 @@ import {
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { checkPermission } from 'plugins/ml/privilege/check_privilege';
 import { ML_DATA_PREVIEW_COUNT } from 'plugins/ml/../common/util/job_utils';
-import { MLJobEditor } from './ml_job_editor';
+import { MLJobEditor } from '../ml_job_editor';
 
 function updateDatafeedPreview(job) {
   return new Promise((resolve, reject) => {
@@ -61,7 +61,7 @@ export class DatafeedPreviewPane extends Component {
     return (
       <React.Fragment>
         <EuiSpacer size="s" />
-        <MLJobEditor value={this.state.previewJson} />
+        <MLJobEditor value={this.state.previewJson} readOnly={true} />
       </React.Fragment>
     );
   }

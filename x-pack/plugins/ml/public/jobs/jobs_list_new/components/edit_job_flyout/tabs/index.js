@@ -5,4 +5,6 @@
  */
 
 
-export { EditJobModal } from './edit_job_modal';
+export { JobDetails } from './job_details';
+export { Detectors } from './detectors';
+export { Datafeed } from './datafeed';

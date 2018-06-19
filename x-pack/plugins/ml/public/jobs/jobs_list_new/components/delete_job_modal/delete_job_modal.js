@@ -13,6 +13,8 @@ import {
   EuiConfirmModal,
   EuiOverlayMask,
   EUI_MODAL_CONFIRM_BUTTON,
+  EuiLoadingSpinner,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { deleteJobs } from '../utils';
@@ -24,6 +26,7 @@ export class DeleteJobModal extends Component {
     this.state = {
       jobs: this.props.jobs,
       isModalVisible: false,
+      deleting: false,
     };
     if (typeof this.props.showFunction === 'function') {
       this.props.showFunction(this.showModal);
@@ -39,24 +42,41 @@ export class DeleteJobModal extends Component {
   showModal = (jobs) => {
     this.setState({
       jobs,
-      isModalVisible: true
+      isModalVisible: true,
+      deleting: false,
     });
   }
 
   deleteJob = () => {
-    this.closeModal();
-    deleteJobs(this.state.jobs, this.refreshJobs);
+    this.setState({ deleting: true });
+    deleteJobs(this.state.jobs, () => {
+      this.refreshJobs();
+      this.closeModal();
+    });
+  }
+
+  getRef = (el) => {
+    if (el) {
+      this.el = el;
+    }
   }
 
   render() {
     let modal;
 
     if (this.state.isModalVisible) {
-      const title = `Delete ${(this.state.jobs.length > 1) ? `${this.state.jobs.length} jobs` : this.state.jobs[0].id}`;
 
+      if (this.el && this.state.deleting === true) {
+        // work around to disable the modal's buttons if the jobs are being deleted
+        this.el.confirmButton.style.display = 'none';
+        this.el.cancelButton.textContent = 'Close';
+      }
+
+      const title = `Delete ${(this.state.jobs.length > 1) ? `${this.state.jobs.length} jobs` : this.state.jobs[0].id}`;
       modal = (
         <EuiOverlayMask>
           <EuiConfirmModal
+            ref={this.getRef}
             title={title}
             onCancel={this.closeModal}
             onConfirm={this.deleteJob}
@@ -65,12 +85,25 @@ export class DeleteJobModal extends Component {
             buttonColor="danger"
             defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
           >
-            <p>Are you sure you want to delete {(this.state.jobs.length > 1) ? 'these jobs' : 'this job'}</p>
-            {(this.state.jobs.length > 1) &&
-              <p>Deleting multiple jobs can be time consuming.
-                They will be deleted in the background and may not disappear from the jobs list instantly
-              </p>
+            {(this.state.deleting === true) &&
+              <div>
+                Deleting jobs
+                <EuiSpacer />
+                <div style={{ textAlign: 'center' }}>
+                  <EuiLoadingSpinner size="l"/>
+                </div>
+              </div>
             }
+
+            {(this.state.deleting === false && this.state.jobs.length > 1) &&
+              <React.Fragment>
+                <p>Are you sure you want to delete {(this.state.jobs.length > 1) ? 'these jobs' : 'this job'}</p>
+                <p>Deleting multiple jobs can be time consuming.
+                  They will be deleted in the background and may not disappear from the jobs list instantly
+                </p>
+              </React.Fragment>
+            }
+
           </EuiConfirmModal>
         </EuiOverlayMask>
       );

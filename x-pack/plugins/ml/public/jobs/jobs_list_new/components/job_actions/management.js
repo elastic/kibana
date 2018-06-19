@@ -16,7 +16,7 @@ import {
   stopDatafeeds,
   cloneJob } from '../utils';
 
-export function actionsMenuContent(showEditJobModal, showDeleteJobModal, showStartDatafeedModal, refreshJobs) {
+export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showStartDatafeedModal, refreshJobs) {
   return [{
     render: (item) => {
       return (
@@ -36,7 +36,7 @@ export function actionsMenuContent(showEditJobModal, showDeleteJobModal, showSta
     render: (item) => {
       return (
         <MLText onClick={() => {
-          showEditJobModal(item);
+          showEditJobFlyout(item);
           closeMenu();
         }}
         >

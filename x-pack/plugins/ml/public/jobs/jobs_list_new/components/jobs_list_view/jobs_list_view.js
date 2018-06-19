@@ -12,7 +12,7 @@ import { mlJobService } from 'plugins/ml/services/job_service';
 import { mlCalendarService } from 'plugins/ml/services/calendar_service';
 import { JobsList } from '../jobs_list';
 import { JobDetails } from '../job_details';
-import { EditJobModal } from '../edit_job_modal';
+import { EditJobFlyout } from '../edit_job_flyout';
 import { DeleteJobModal } from '../delete_job_modal';
 import { StartDatafeedModal } from '../start_datafeed_modal';
 import { MultiJobActions } from '../multi_job_actions';
@@ -88,7 +88,7 @@ export class JobsListView extends Component {
     this.updateFunctions = {};
     this.listComponent = null;
 
-    this.showEditJobModal = null;
+    this.showEditJobFlyout = null;
     this.showDeleteJobModal = null;
     this.showStartDatafeedModal = null;
 
@@ -166,8 +166,8 @@ export class JobsListView extends Component {
     delete this.updateFunctions[id];
   }
 
-  setShowEditJobModalFunction = (func) => {
-    this.showEditJobModal = func;
+  setShowEditJobFlyoutFunction = (func) => {
+    this.showEditJobFlyout = func;
   }
   setShowDeleteJobModalFunction = (func) => {
     this.showDeleteJobModal = func;
@@ -246,12 +246,12 @@ export class JobsListView extends Component {
           itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
           toggleRow={this.toggleRow}
           selectJobChange={this.selectJobChange}
-          showEditJobModal={this.showEditJobModal}
+          showEditJobFlyout={this.showEditJobFlyout}
           showDeleteJobModal={this.showDeleteJobModal}
           showStartDatafeedModal={this.showStartDatafeedModal}
           refreshJobs={() => this.refreshJobSummaryList(false)}
         />
-        <EditJobModal showFunction={this.setShowEditJobModalFunction} refreshJobs={() => this.refreshJobSummaryList(false)} />
+        <EditJobFlyout showFunction={this.setShowEditJobFlyoutFunction} refreshJobs={() => this.refreshJobSummaryList(false)} />
         <DeleteJobModal showFunction={this.setShowDeleteJobModalFunction} refreshJobs={() => this.refreshJobSummaryList(false)} />
         <StartDatafeedModal showFunction={this.setShowStartDatafeedModalFunction} refreshJobs={() => this.refreshJobSummaryList(false)} />
       </div>
