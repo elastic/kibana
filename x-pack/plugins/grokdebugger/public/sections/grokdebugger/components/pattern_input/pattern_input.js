@@ -14,6 +14,8 @@ export function PatternInput({ value, onChange }) {
   return (
     <EuiFormRow label="Grok Pattern">
       <EuiCodeEditor
+        width="100%"
+        height="51px"
         value={value}
         onChange={onChange}
         data-test-subj="acePatternInput"

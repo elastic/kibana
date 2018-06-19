@@ -14,6 +14,8 @@ export function EventInput({ value, onChange }) {
   return (
     <EuiFormRow label="Sample Data">
       <EuiCodeEditor
+        width="100%"
+        height="51px"
         value={value}
         onChange={onChange}
         data-test-subj="aceEventInput"
