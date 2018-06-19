@@ -59,11 +59,13 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe.skip('delete', async function () {
+    describe('delete', async function () {
       it('default confirm action is cancel', async function () {
         await PageObjects.dashboard.searchForDashboardWithName(dashboardName);
         await PageObjects.dashboard.checkDashboardListingSelectAllCheckbox();
         await PageObjects.dashboard.clickDeleteSelectedDashboards();
+
+        await PageObjects.common.expectConfirmModalOpenState(true);
 
         await PageObjects.common.pressEnterKey();
 
