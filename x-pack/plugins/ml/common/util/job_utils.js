@@ -67,13 +67,14 @@ export function isTimeSeriesViewDetector(job, dtrIndex) {
       (dtr.partition_field_name !== 'mlcategory') &&
       (dtr.over_field_name !== 'mlcategory');
 
-    const usesScriptedFields = _.has(job, 'datafeed_config.script_fields');
-    const scriptedFields = usesScriptedFields ? _.keys(job.datafeed_config.script_fields) : [];
-    if (isDetectorViewable === true && usesScriptedFields === true) {
+    const usesScriptFields = _.has(job, 'datafeed_config.script_fields');
+    if (isDetectorViewable === true && usesScriptFields === true) {
       // Perform extra check to see if the detector is using a scripted field.
-      isDetectorViewable = (dtr.partition_field_name === undefined || scriptedFields.indexOf(dtr.partition_field_name) === -1) &&
-          (dtr.by_field_name === undefined || scriptedFields.indexOf(dtr.by_field_name) === -1) &&
-          (dtr.over_field_name === undefined || scriptedFields.indexOf(dtr.over_field_name) === -1);
+      const scriptFields = usesScriptFields ? _.keys(job.datafeed_config.script_fields) : [];
+      isDetectorViewable = scriptFields.indexOf(dtr.field_name) === -1 &&
+        scriptFields.indexOf(dtr.partition_field_name) === -1 &&
+        scriptFields.indexOf(dtr.by_field_name) === -1 &&
+        scriptFields.indexOf(dtr.over_field_name) === -1;
     }
   }
 
