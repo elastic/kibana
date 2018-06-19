@@ -32,13 +32,20 @@ export function extractAngularServiceMessages(node) {
   const messageId = idSubTree.value;
 
   if (isObjectExpression(optionsSubTree)) {
-    const property = optionsSubTree.properties.find(
+    const defaultMessageProperty = optionsSubTree.properties.find(
       prop =>
         isPropertyWithKey(prop, DEFAULT_MESSAGE_KEY) &&
         isStringLiteral(prop.value)
     );
+    const contextProperty = optionsSubTree.properties.find(
+      prop => isPropertyWithKey(prop, 'context') && isStringLiteral(prop.value)
+    );
 
-    const messageValue = property.value.value;
-    return [messageId, messageValue];
+    const message = defaultMessageProperty.value.value;
+    const context = contextProperty.value.value;
+
+    return [messageId, { message, context }];
   }
+
+  return [];
 }

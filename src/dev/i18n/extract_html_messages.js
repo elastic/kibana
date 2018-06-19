@@ -40,7 +40,8 @@ const ANGULAR_EXPRESSION_REGEX = /\{\{+([\s\S]*?)\}\}+/g;
  * @returns {string} Default message
  */
 function parseFilterObjectExpression(expression) {
-  let defaultMessage = '';
+  let message = '';
+  let context;
 
   // parse an object expression instead of block statement
   const filterObjectAST = parse(`+${expression}`);
@@ -53,7 +54,13 @@ function parseFilterObjectExpression(expression) {
             isPropertyWithKey(property, DEFAULT_MESSAGE_KEY) &&
             isStringLiteral(property.value)
           ) {
-            defaultMessage = escapeLineBreak(property.value.value);
+            message = escapeLineBreak(property.value.value);
+          }
+          if (
+            isPropertyWithKey(property, 'context') &&
+            isStringLiteral(property.value)
+          ) {
+            context = property.value.value;
           }
         }
         path.stop();
@@ -61,7 +68,7 @@ function parseFilterObjectExpression(expression) {
     },
   });
 
-  return defaultMessage;
+  return { message, context };
 }
 
 function parseIdExpression(expression) {
@@ -100,9 +107,11 @@ function* getFilterMessages(htmlContent) {
     }
 
     const messageId = parseIdExpression(idExpression);
-    const messageValue = parseFilterObjectExpression(filterObjectExpression);
+    const { message, context } = parseFilterObjectExpression(
+      filterObjectExpression
+    );
 
-    yield [messageId, messageValue];
+    yield [messageId, { message, context }];
   }
 }
 
@@ -117,12 +126,13 @@ function* getDirectiveMessages(htmlContent) {
       throw new Error('Empty "i18n-id" value is not allowed.');
     }
 
-    const messageValue = element.getAttribute('i18n-default-message');
-    if (!messageValue) {
+    const message = element.getAttribute('i18n-default-message');
+    if (!message) {
       throw new Error(`Default message is required for id: ${messageId}.`);
     }
 
-    yield [messageId, messageValue];
+    const context = element.getAttribute('i18n-context');
+    yield [messageId, { message, context }];
   }
 }
 

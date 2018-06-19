@@ -37,7 +37,8 @@ export function extractIntlMessages(node) {
   const options = node.arguments[0];
 
   let messageId = '';
-  let messageValue = '';
+  let message = '';
+  let context;
 
   if (isObjectExpression(options)) {
     for (const property of options.properties) {
@@ -53,7 +54,13 @@ export function extractIntlMessages(node) {
         isPropertyWithKey(property, DEFAULT_MESSAGE_KEY) &&
         isStringLiteral(property.value)
       ) {
-        messageValue = property.value.value;
+        message = property.value.value;
+      }
+      if (
+        isPropertyWithKey(property, 'context') &&
+        isStringLiteral(property.value)
+      ) {
+        context = property.value.value;
       }
     }
   }
@@ -62,11 +69,11 @@ export function extractIntlMessages(node) {
     throw new Error('Empty "id" value in Intl.formatMessage() is not allowed.');
   }
 
-  if (!messageValue) {
+  if (!message) {
     throw new Error(`Default message is required for id: ${messageId}.`);
   }
 
-  return [messageId, messageValue];
+  return [messageId, { message, context }];
 }
 
 /**
@@ -76,7 +83,8 @@ export function extractIntlMessages(node) {
  */
 export function extractFormattedMessages(node) {
   let messageId = '';
-  let messageValue = '';
+  let message = '';
+  let context;
 
   for (const attribute of node.attributes) {
     if (!isJSXAttribute(attribute)) {
@@ -97,11 +105,26 @@ export function extractFormattedMessages(node) {
       })
     ) {
       if (isJSXExpressionContainer(attribute.value)) {
-        messageValue = escapeLineBreak(
+        message = escapeLineBreak(
           attribute.value.expression.quasis[0].value.raw
         );
       } else if (isStringLiteral(attribute.value)) {
-        messageValue = escapeLineBreak(attribute.value.value);
+        message = escapeLineBreak(attribute.value.value);
+      }
+    }
+
+    if (
+      isJSXAttribute(attribute) &&
+      isJSXIdentifier(attribute.name, {
+        name: 'context',
+      })
+    ) {
+      if (isJSXExpressionContainer(attribute.value)) {
+        context = escapeLineBreak(
+          attribute.value.expression.quasis[0].value.raw
+        );
+      } else if (isStringLiteral(attribute.value)) {
+        context = escapeLineBreak(attribute.value.value);
       }
     }
   }
@@ -110,9 +133,9 @@ export function extractFormattedMessages(node) {
     throw new Error('Empty "id" value in <FormattedMessage> is not allowed.');
   }
 
-  if (!messageValue) {
+  if (!message) {
     throw new Error(`Default message is required for id: ${messageId}.`);
   }
 
-  return [messageId, messageValue];
+  return [messageId, { message, context }];
 }

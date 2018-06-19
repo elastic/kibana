@@ -17,14 +17,15 @@
  * under the License.
  */
 
-import { resolve as resolvePath } from 'path';
+import { resolve } from 'path';
+import JSON5 from 'json5';
 
 import { extractHtmlMessages } from './extract_html_messages';
 import { extractCodeMessages } from './extract_code_messages';
+import { writeContextToJSON } from './write_context_comments';
 import {
   globAsync,
   makeDirAsync,
-  writeFileAsync,
   pathExists,
   readFileAsync,
   throwEntryException,
@@ -75,7 +76,7 @@ function buildDefaultMessagesObject(map) {
       );
     }
 
-    nestedObject[messageId] = mapValue;
+    nestedObject[messageId] = mapValue.message;
   }
 
   return result;
@@ -89,7 +90,7 @@ export async function extractDefaultTranslations(inputPath) {
 
   const { htmlEntries, codeEntries } = entries.reduce(
     (paths, entry) => {
-      const resolvedPath = resolvePath(inputPath, entry);
+      const resolvedPath = resolve(inputPath, entry);
 
       if (resolvedPath.endsWith('.html')) {
         paths.htmlEntries.push(resolvedPath);
@@ -149,13 +150,15 @@ export async function extractDefaultTranslations(inputPath) {
   const defaultMessages = buildDefaultMessagesObject(defaultMessagesMap);
 
   try {
-    await pathExists(resolvePath(inputPath, 'translations'));
+    await pathExists(resolve(inputPath, 'translations'));
   } catch (_) {
-    await makeDirAsync(resolvePath(inputPath, 'translations'));
+    await makeDirAsync(resolve(inputPath, 'translations'));
   }
 
-  await writeFileAsync(
-    resolvePath(inputPath, 'translations', 'defaultMessages.json'),
-    JSON.stringify(defaultMessages, null, 2)
-  );
+  const defaultMessagesJSON = JSON5.stringify(defaultMessages, {
+    space: 2,
+    quote: `'`,
+  }).concat('\n');
+
+  await writeContextToJSON(inputPath, defaultMessagesJSON, defaultMessagesMap);
 }
