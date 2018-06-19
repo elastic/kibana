@@ -18,51 +18,40 @@
  */
 
 import expect from 'expect.js';
-const Ajv = require('ajv');
-const ajv = new Ajv();
+const Joi = require('joi');
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  //TODO: Add pattern matching to ensure that the id is a UUID.
-  const GENERIC_RESPONSE_SCHEMA = {
-    type: 'array',
-    items: {
-      type: 'object',
-      properties: {
-        id: {
-          type: 'string',
-        },
-        title: {
-          type: 'string',
-          minLength: 1,
-        },
-      },
-      required: ['id', 'title'],
-    },
-  };
+
+  const GENERIC_RESPONSE_SCHEMA = Joi.array().items(
+    Joi.object().keys({
+      id: Joi.string()
+        .uuid()
+        .required(),
+      title: Joi.string()
+        .required()
+        .min(1),
+    })
+  );
 
   describe('relationships', () => {
     before(() => esArchiver.load('management/saved_objects'));
     after(() => esArchiver.unload('management/saved_objects'));
 
-    const SEARCH_RESPONSE_SCHEMA = {
-      type: 'object',
-      properties: {
-        visualizations: GENERIC_RESPONSE_SCHEMA,
-        indexPatterns: GENERIC_RESPONSE_SCHEMA,
-      },
-    };
+    const SEARCH_RESPONSE_SCHEMA = Joi.object().keys({
+      visualizations: GENERIC_RESPONSE_SCHEMA,
+      indexPatterns: GENERIC_RESPONSE_SCHEMA,
+    });
 
     describe('searches', async () => {
-      const validate = ajv.compile(SEARCH_RESPONSE_SCHEMA);
       it('should validate search response schema', async () => {
         await supertest
           .get(`/api/kibana/management/saved_objects/relationships/search/960372e0-3224-11e8-a572-ffca06da1357`)
           .expect(200)
           .then(resp => {
-            const validationResult = validate(resp.body);
-            expect(validationResult).to.eql(true);
+            const validationResult = Joi.validate(resp.body, SEARCH_RESPONSE_SCHEMA);
+            expect(validationResult.error).to.be(null);
           });
       });
 
@@ -95,21 +84,17 @@ export default function ({ getService }) {
     });
 
     describe('dashboards', async () => {
-      const DASHBOARD_RESPONSE_SCHEMA = {
-        type: 'object',
-        properties: {
-          visualizations: GENERIC_RESPONSE_SCHEMA,
-        },
-      };
+      const DASHBOARD_RESPONSE_SCHEMA = Joi.object().keys({
+        visualizations: GENERIC_RESPONSE_SCHEMA,
+      });
 
-      const validate = ajv.compile(DASHBOARD_RESPONSE_SCHEMA);
       it('should validate dashboard response schema', async () => {
         await supertest
           .get(`/api/kibana/management/saved_objects/relationships/dashboard/b70c7ae0-3224-11e8-a572-ffca06da1357`)
           .expect(200)
           .then(resp => {
-            const validationResult = validate(resp.body);
-            expect(validationResult).to.eql(true);
+            const validationResult = Joi.validate(resp.body, DASHBOARD_RESPONSE_SCHEMA);
+            expect(validationResult.error).to.be(null);
           });
       });
 
@@ -142,21 +127,17 @@ export default function ({ getService }) {
     });
 
     describe('visualizations', async () => {
-      const VISUALIZATIONS_RESPONSE_SCHEMA = {
-        type: 'object',
-        properties: {
-          visualizations: GENERIC_RESPONSE_SCHEMA,
-        },
-      };
+      const VISUALIZATIONS_RESPONSE_SCHEMA = Joi.object().keys({
+        dashboards: GENERIC_RESPONSE_SCHEMA,
+      });
 
-      const validate = ajv.compile(VISUALIZATIONS_RESPONSE_SCHEMA);
       it('should validate visualization response schema', async () => {
         await supertest
           .get(`/api/kibana/management/saved_objects/relationships/visualization/a42c0580-3224-11e8-a572-ffca06da1357`)
           .expect(200)
           .then(resp => {
-            const validationResult = validate(resp.body);
-            expect(validationResult).to.eql(true);
+            const validationResult = Joi.validate(resp.body, VISUALIZATIONS_RESPONSE_SCHEMA);
+            expect(validationResult.error).to.be(null);
           });
       });
 
@@ -184,22 +165,18 @@ export default function ({ getService }) {
     });
 
     describe('index patterns', async () => {
-      const INDEX_PATTERN_RESPONSE_SCHEMA = {
-        type: 'object',
-        properties: {
-          searches: GENERIC_RESPONSE_SCHEMA,
-          visualizations: GENERIC_RESPONSE_SCHEMA,
-        },
-      };
+      const INDEX_PATTERN_RESPONSE_SCHEMA = Joi.object().keys({
+        searches: GENERIC_RESPONSE_SCHEMA,
+        visualizations: GENERIC_RESPONSE_SCHEMA,
+      });
 
-      const validate = ajv.compile(INDEX_PATTERN_RESPONSE_SCHEMA);
       it('should validate visualization response schema', async () => {
         await supertest
           .get(`/api/kibana/management/saved_objects/relationships/index-pattern/8963ca30-3224-11e8-a572-ffca06da1357`)
           .expect(200)
           .then(resp => {
-            const validationResult = validate(resp.body);
-            expect(validationResult).to.eql(true);
+            const validationResult = Joi.validate(resp.body, INDEX_PATTERN_RESPONSE_SCHEMA);
+            expect(validationResult.error).to.be(null);
           });
       });
 
