@@ -98,7 +98,7 @@ class DataTableFormat extends Component {
     const columns = data.columns.map(col => ({
       name: col.name,
       field: col.field,
-      sortable: true,
+      sortable: isFormatted ? row => row[col.field].raw : true,
       render: (value) => DataTableFormat.renderCell(col, value, isFormatted),
     }));
 
