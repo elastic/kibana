@@ -24,12 +24,10 @@ import { toastNotifications } from 'ui/notify';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFlyout,
+  EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiButton,
-  EuiButtonIcon,
   EuiTabs,
   EuiTab,
   EuiSpacer,
@@ -134,23 +132,12 @@ export class DashboardAddPanel extends React.Component {
         size="s"
         data-test-subj="dashboardAddPanel"
       >
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle>
+            <h2>Add Panels</h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
         <EuiFlyoutBody>
-
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiTitle>
-                <h2>Add Panels</h2>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="cross"
-                onClick={this.props.onClose}
-                aria-label="close add panel"
-                data-test-subj="closeAddPanelBtn"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
 
           <EuiTabs>
             {this.renderTabs()}
