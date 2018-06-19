@@ -10,10 +10,10 @@ import { Notifier } from 'ui/notify';
 import { GrokdebuggerRequest } from 'plugins/grokdebugger/models/grokdebugger_request';
 import 'plugins/grokdebugger/services/grokdebugger';
 import './grokdebugger.less';
-import '../event_input';
-import '../event_output';
-import '../pattern_input';
-import '../custom_patterns_input';
+import '../../components/event_input';
+import '../../components/event_output';
+import '../../components/pattern_input';
+import '../../components/custom_patterns_input';
 import { isEmpty, trim } from 'lodash';
 
 const app = uiModules.get('xpack/grokdebugger');
