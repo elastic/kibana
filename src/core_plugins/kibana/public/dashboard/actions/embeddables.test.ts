@@ -20,14 +20,12 @@
 import { store } from '../../store';
 import {
   clearStagedFilters,
-  setStagedFilter,
   embeddableIsInitialized,
   embeddableIsInitializing,
+  setStagedFilter,
 } from '../actions';
 
-import {
-  getStagedFilters,
-} from '../../selectors';
+import { getStagedFilters } from '../../selectors';
 
 beforeAll(() => {
   store.dispatch(embeddableIsInitializing('foo1'));
@@ -43,13 +41,17 @@ describe('staged filters', () => {
   });
 
   test('can set a staged filter', () => {
-    store.dispatch(setStagedFilter({ stagedFilter: ['imafilter'], panelId: 'foo1' }));
+    store.dispatch(
+      setStagedFilter({ stagedFilter: ['imafilter'], panelId: 'foo1' })
+    );
     const stagedFilters = getStagedFilters(store.getState());
     expect(stagedFilters.length).toBe(1);
   });
 
   test('getStagedFilters returns filters for all embeddables', () => {
-    store.dispatch(setStagedFilter({ stagedFilter: ['imafilter'], panelId: 'foo2' }));
+    store.dispatch(
+      setStagedFilter({ stagedFilter: ['imafilter'], panelId: 'foo2' })
+    );
     const stagedFilters = getStagedFilters(store.getState());
     expect(stagedFilters.length).toBe(2);
   });
@@ -60,4 +62,3 @@ describe('staged filters', () => {
     expect(stagedFilters.length).toBe(0);
   });
 });
-
