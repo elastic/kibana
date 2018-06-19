@@ -18,6 +18,7 @@
  */
 
 import { delay } from 'bluebird';
+import expect from 'expect';
 
 import getUrl from '../../../src/test_utils/get_url';
 
@@ -260,9 +261,17 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       }
     }
 
-    async isConfirmModalOpen() {
-      log.debug('isConfirmModalOpen');
-      return await testSubjects.exists('confirmModalCancelButton', 5000);
+    async expectConfirmModalOpenState(state) {
+      if (typeof state !== 'boolean') {
+        throw new Error('pass true or false to expectConfirmModalOpenState()');
+      }
+
+      log.debug(`expectConfirmModalOpenState(${state})`);
+
+      await retry.try(async () => {
+        const actualState = await testSubjects.exists('confirmModalCancelButton');
+        expect(actualState).to.be(state);
+      });
     }
 
     async getBreadcrumbPageTitle() {
