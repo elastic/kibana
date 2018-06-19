@@ -77,8 +77,12 @@ export const termsBucketAgg = new BucketAggType({
     return {
       getConverterFor: (type) => {
         return (val) => {
-          if (val === '__other__') return bucket.params.otherBucketLabel;
-          if (val === '__missing__') return bucket.params.missingBucketLabel;
+          if (val === '__other__') {
+            return bucket.params.otherBucketLabel;
+          }
+          if (val === '__missing__') {
+            return bucket.params.missingBucketLabel;
+          }
           const converter = bucket.params.field.format.getConverterFor(type);
           return converter(val);
         };
