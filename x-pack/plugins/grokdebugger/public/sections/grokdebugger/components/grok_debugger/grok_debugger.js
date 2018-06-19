@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { EuiForm, EuiButton, EuiPanel } from '@elastic/eui';
+import { EuiForm, EuiButton, EuiFormRow } from '@elastic/eui';
 import { EventInput } from '../event_input';
 import { PatternInput } from '../pattern_input';
 import { CustomPatternsInput } from '../custom_patterns_input';
@@ -15,8 +15,7 @@ export class GrokDebugger extends React.Component {
     rawEvent: '',
     pattern: '',
     customPatterns: '',
-    structuredEvent: '',
-    isSimulateEnabled: false
+    structuredEvent: ''
   };
 
   onRawEventChange = (rawEvent) => {
@@ -35,35 +34,40 @@ export class GrokDebugger extends React.Component {
     console.log('simulate clicked');
   }
 
+  isSimulateDisabled = () => {
+    return this.state.rawEvent.trim() === ''
+      || this.state.pattern.trim() === '';
+  }
+
   render() {
     return (
-      <EuiPanel paddingSize="l">
-        <EuiForm
-          className="grokdebugger-container"
-          data-test-subj="grokDebugger"
-        >
-          <EventInput
-            value={this.state.rawEvent}
-            onChange={this.onRawEventChange}
-          />
-          <PatternInput
-            value={this.state.pattern}
-            onChange={this.onPatternChange}
-          />
-          <CustomPatternsInput
-            value={this.state.customPatterns}
-            onChange={this.onCustomPatternsChange}
-          />
+      <EuiForm
+        className="grokdebugger-container"
+        data-test-subj="grokDebugger"
+      >
+        <EventInput
+          value={this.state.rawEvent}
+          onChange={this.onRawEventChange}
+        />
+        <PatternInput
+          value={this.state.pattern}
+          onChange={this.onPatternChange}
+        />
+        <CustomPatternsInput
+          value={this.state.customPatterns}
+          onChange={this.onCustomPatternsChange}
+        />
+        <EuiFormRow>
           <EuiButton
             fill
             onClick={this.onSimulateClick}
-            isDisabled={!this.state.isSimulateEnabled}
+            isDisabled={this.isSimulateDisabled()}
           >
             Simulate
           </EuiButton>
-          <EventOutput value={this.state.structuredEvent} />
-        </EuiForm>
-      </EuiPanel>
+        </EuiFormRow>
+        <EventOutput value={this.state.structuredEvent} />
+      </EuiForm>
     );
   }
 }
