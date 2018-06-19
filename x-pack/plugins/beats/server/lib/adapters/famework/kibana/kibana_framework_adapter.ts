@@ -19,8 +19,9 @@ import {
 
 export class InfraKibanaBackendFrameworkAdapter
   implements BackendFrameworkAdapter {
-  private server: Server;
   public version: string;
+
+  private server: Server;
 
   constructor(hapiServer: Server) {
     this.server = hapiServer;
