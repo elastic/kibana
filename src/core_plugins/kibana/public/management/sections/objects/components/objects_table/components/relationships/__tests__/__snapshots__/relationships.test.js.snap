@@ -100,32 +100,6 @@ exports[`Relationships should render dashboards normally 1`] = `
       </React.Fragment>
     </EuiDescriptionList>
   </EuiFlyoutBody>
-  <EuiFlyoutFooter>
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="spaceBetween"
-      responsive={true}
-      wrap={false}
-    >
-      <EuiFlexItem
-        component="div"
-        grow={false}
-      >
-        <EuiButtonEmpty
-          color="primary"
-          iconSide="left"
-          onClick={[MockFunction]}
-          size="s"
-          type="button"
-        >
-          Close
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiFlyoutFooter>
 </EuiFlyout>
 `;
 
@@ -167,32 +141,6 @@ exports[`Relationships should render errors 1`] = `
       foo
     </EuiCallOut>
   </EuiFlyoutBody>
-  <EuiFlyoutFooter>
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="spaceBetween"
-      responsive={true}
-      wrap={false}
-    >
-      <EuiFlexItem
-        component="div"
-        grow={false}
-      >
-        <EuiButtonEmpty
-          color="primary"
-          iconSide="left"
-          onClick={[MockFunction]}
-          size="s"
-          type="button"
-        >
-          Close
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiFlyoutFooter>
 </EuiFlyout>
 `;
 
@@ -352,32 +300,6 @@ exports[`Relationships should render index patterns normally 1`] = `
       </React.Fragment>
     </EuiDescriptionList>
   </EuiFlyoutBody>
-  <EuiFlyoutFooter>
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="spaceBetween"
-      responsive={true}
-      wrap={false}
-    >
-      <EuiFlexItem
-        component="div"
-        grow={false}
-      >
-        <EuiButtonEmpty
-          color="primary"
-          iconSide="left"
-          onClick={[MockFunction]}
-          size="s"
-          type="button"
-        >
-          Close
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiFlyoutFooter>
 </EuiFlyout>
 `;
 
@@ -535,32 +457,6 @@ exports[`Relationships should render searches normally 1`] = `
       </React.Fragment>
     </EuiDescriptionList>
   </EuiFlyoutBody>
-  <EuiFlyoutFooter>
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="spaceBetween"
-      responsive={true}
-      wrap={false}
-    >
-      <EuiFlexItem
-        component="div"
-        grow={false}
-      >
-        <EuiButtonEmpty
-          color="primary"
-          iconSide="left"
-          onClick={[MockFunction]}
-          size="s"
-          type="button"
-        >
-          Close
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiFlyoutFooter>
 </EuiFlyout>
 `;
 
@@ -664,31 +560,5 @@ exports[`Relationships should render visualizations normally 1`] = `
       </React.Fragment>
     </EuiDescriptionList>
   </EuiFlyoutBody>
-  <EuiFlyoutFooter>
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="spaceBetween"
-      responsive={true}
-      wrap={false}
-    >
-      <EuiFlexItem
-        component="div"
-        grow={false}
-      >
-        <EuiButtonEmpty
-          color="primary"
-          iconSide="left"
-          onClick={[MockFunction]}
-          size="s"
-          type="button"
-        >
-          Close
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiFlyoutFooter>
 </EuiFlyout>
 `;
