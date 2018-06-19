@@ -65,6 +65,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.checkDashboardListingSelectAllCheckbox();
         await PageObjects.dashboard.clickDeleteSelectedDashboards();
 
+        await PageObjects.common.expectConfirmModalOpenState(true);
+
         await PageObjects.common.pressEnterKey();
 
         await PageObjects.common.expectConfirmModalOpenState(false);

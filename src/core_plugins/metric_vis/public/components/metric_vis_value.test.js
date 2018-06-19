@@ -16,14 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
+import { shallow } from 'enzyme';
 
-import { combineReducers } from 'redux';
-import { dashboard } from './dashboard/reducers';
+import { MetricVisValue } from './metric_vis_value';
 
-/**
- * Only a single reducer now, but eventually there should be one for each sub app that is part of the
- * core kibana plugins.
- */
-export const reducers = combineReducers({
-  dashboard
+describe('MetricVisValue', () => {
+  it('should be wrapped in EuiKeyboardAccessible if having a click listener', () => {
+    const component = shallow(
+      <MetricVisValue
+        fontSize={12}
+        metric={{ label: 'Foo', value: 'foo' }}
+        onFilter={() => {}}
+      />
+    );
+    expect(component.find('EuiKeyboardAccessible').exists()).toBe(true);
+  });
+
+  it('should not be wrapped in EuiKeyboardAccessible without having a click listener', () => {
+    const component = shallow(
+      <MetricVisValue
+        fontSize={12}
+        metric={{ label: 'Foo', value: 'foo' }}
+      />
+    );
+    expect(component.find('EuiKeyboardAccessible').exists()).toBe(false);
+  });
+
 });

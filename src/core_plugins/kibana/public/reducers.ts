@@ -17,11 +17,14 @@
  * under the License.
  */
 
-export * from './view';
-export * from './panels';
-export * from './embeddables';
+import { combineReducers } from 'redux';
+import { dashboard } from './dashboard/reducers';
+import { CoreKibanaState } from './selectors';
 
-export {
-  updateDescription,
-  updateTitle,
-} from './metadata';
+/**
+ * Only a single reducer now, but eventually there should be one for each sub app that is part of the
+ * core kibana plugins.
+ */
+export const reducers = combineReducers<CoreKibanaState>({
+  dashboard,
+});
