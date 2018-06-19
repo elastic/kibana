@@ -17,19 +17,24 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('apis', () => {
-    loadTestFile(require.resolve('./migrations'));
-    loadTestFile(require.resolve('./elasticsearch'));
-    loadTestFile(require.resolve('./general'));
-    loadTestFile(require.resolve('./index_patterns'));
-    loadTestFile(require.resolve('./management'));
-    loadTestFile(require.resolve('./saved_objects'));
-    loadTestFile(require.resolve('./scripts'));
-    loadTestFile(require.resolve('./search'));
-    loadTestFile(require.resolve('./shorten'));
-    loadTestFile(require.resolve('./suggestions'));
-    loadTestFile(require.resolve('./status'));
-    loadTestFile(require.resolve('./stats'));
+import { fetchOrDefault } from './fetch_or_default';
+
+describe('fetchOrDefault', () => {
+  test('returns default if not found', () => {
+    expect(
+      fetchOrDefault(Promise.reject({ status: 404 }), 'hoi')
+    ).resolves.toEqual('hoi');
   });
-}
+
+  test('errors if rejected w/ non status 404', () => {
+    expect(
+      fetchOrDefault(Promise.reject({ status: 500 }), 'hoi')
+    ).rejects.toThrow();
+  });
+
+  test('returns resolved value if found', () => {
+    expect(
+      fetchOrDefault(Promise.resolve({ hello: 'world' }), { hello: 'you' })
+    ).resolves.toEqual({ hello: 'world' });
+  });
+});

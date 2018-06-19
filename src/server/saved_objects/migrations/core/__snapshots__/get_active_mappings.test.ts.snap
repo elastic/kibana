@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getActiveMappings combines all mappings and includes core mappings 1`] = `
+Object {
+  "doc": Object {
+    "_meta": Object {
+      "kibanaVersion": "8.7.6",
+    },
+    "dynamic": "strict",
+    "properties": Object {
+      "aaa": Object {
+        "type": "text",
+      },
+      "bbb": Object {
+        "type": "long",
+      },
+      "config": Object {
+        "dynamic": "true",
+        "properties": Object {
+          "buildNum": Object {
+            "type": "keyword",
+          },
+        },
+      },
+      "migrationVersion": Object {
+        "type": "integer",
+      },
+      "type": Object {
+        "type": "keyword",
+      },
+      "updated_at": Object {
+        "type": "date",
+      },
+    },
+  },
+}
+`;

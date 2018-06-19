@@ -17,19 +17,10 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('apis', () => {
-    loadTestFile(require.resolve('./migrations'));
-    loadTestFile(require.resolve('./elasticsearch'));
-    loadTestFile(require.resolve('./general'));
-    loadTestFile(require.resolve('./index_patterns'));
-    loadTestFile(require.resolve('./management'));
-    loadTestFile(require.resolve('./saved_objects'));
-    loadTestFile(require.resolve('./scripts'));
-    loadTestFile(require.resolve('./search'));
-    loadTestFile(require.resolve('./shorten'));
-    loadTestFile(require.resolve('./suggestions'));
-    loadTestFile(require.resolve('./status'));
-    loadTestFile(require.resolve('./stats'));
-  });
-}
+export { migrateIndex } from './migrate_index';
+export { computeDroppedTypes } from './compute_dropped_types';
+export { createDocTransform } from './create_doc_transform';
+export { patchIndexMappings } from './patch_index_mappings';
+export { getActiveMappings } from './get_active_mappings';
+export { fetchMapping } from './fetch_mapping';
+export * from './types';

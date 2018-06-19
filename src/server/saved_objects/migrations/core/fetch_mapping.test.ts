@@ -17,19 +17,24 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('apis', () => {
-    loadTestFile(require.resolve('./migrations'));
-    loadTestFile(require.resolve('./elasticsearch'));
-    loadTestFile(require.resolve('./general'));
-    loadTestFile(require.resolve('./index_patterns'));
-    loadTestFile(require.resolve('./management'));
-    loadTestFile(require.resolve('./saved_objects'));
-    loadTestFile(require.resolve('./scripts'));
-    loadTestFile(require.resolve('./search'));
-    loadTestFile(require.resolve('./shorten'));
-    loadTestFile(require.resolve('./suggestions'));
-    loadTestFile(require.resolve('./status'));
-    loadTestFile(require.resolve('./stats'));
+import { fetchMapping } from './fetch_mapping';
+
+describe('fetchMapping', () => {
+  test('returns null if not found', () => {
+    const callCluster = () => Promise.reject({ status: 404 });
+    expect(fetchMapping(callCluster, '.kibana')).resolves.toBeNull();
   });
-}
+
+  test('returns the index mapping', () => {
+    const callCluster = (path: string, { index }: { index: string }) => {
+      expect(index).toEqual('.foo');
+      expect(path).toEqual('indices.getMapping');
+      return Promise.resolve({
+        [index]: { mappings: { doc: { hello: 'world' } } },
+      });
+    };
+    expect(fetchMapping(callCluster as any, '.foo')).resolves.toEqual({
+      doc: { hello: 'world' },
+    });
+  });
+});

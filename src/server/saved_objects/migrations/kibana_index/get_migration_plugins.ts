@@ -17,19 +17,29 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('apis', () => {
-    loadTestFile(require.resolve('./migrations'));
-    loadTestFile(require.resolve('./elasticsearch'));
-    loadTestFile(require.resolve('./general'));
-    loadTestFile(require.resolve('./index_patterns'));
-    loadTestFile(require.resolve('./management'));
-    loadTestFile(require.resolve('./saved_objects'));
-    loadTestFile(require.resolve('./scripts'));
-    loadTestFile(require.resolve('./search'));
-    loadTestFile(require.resolve('./shorten'));
-    loadTestFile(require.resolve('./suggestions'));
-    loadTestFile(require.resolve('./status'));
-    loadTestFile(require.resolve('./stats'));
-  });
+import { MigrationPlugin } from '../core';
+import { KibanaPlugin } from './types';
+
+export interface PluginSpecable {
+  pluginSpecs: KibanaPlugin[];
+}
+
+/**
+ * getMigrationPlugins extracts migration plugins from kbnServer. Migration
+ * plugins are a simple data structure that the core migration system expects.
+ *
+ * @param {KbnServer} kbnServer - An instance of the Kibana server
+ * @returns {MigrationPlugin[]}
+ */
+export function getMigrationPlugins({
+  pluginSpecs,
+}: PluginSpecable): MigrationPlugin[] {
+  const emptySpec = { mappings: undefined };
+  return pluginSpecs
+    .map(p => ({
+      id: p.getId(),
+      mappings: (p.getExportSpecs() || emptySpec).mappings,
+      migrations: p.getMigrations(),
+    }))
+    .filter(p => !!p.mappings || !!p.migrations);
 }

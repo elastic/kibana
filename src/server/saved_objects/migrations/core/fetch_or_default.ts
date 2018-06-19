@@ -17,19 +17,23 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('apis', () => {
-    loadTestFile(require.resolve('./migrations'));
-    loadTestFile(require.resolve('./elasticsearch'));
-    loadTestFile(require.resolve('./general'));
-    loadTestFile(require.resolve('./index_patterns'));
-    loadTestFile(require.resolve('./management'));
-    loadTestFile(require.resolve('./saved_objects'));
-    loadTestFile(require.resolve('./scripts'));
-    loadTestFile(require.resolve('./search'));
-    loadTestFile(require.resolve('./shorten'));
-    loadTestFile(require.resolve('./suggestions'));
-    loadTestFile(require.resolve('./status'));
-    loadTestFile(require.resolve('./stats'));
+/**
+ * fetchOrDefault returns the resolved value of the promise, or
+ * if the promise rejects with a { status: 404 }, returns the
+ * specified default value.
+ *
+ * @param {Promise<T>} promise - The promise to wrap
+ * @param {T} defaultValue - The default value to be returned in the event of a 404
+ * @returns {Promise<T>}
+ */
+export function fetchOrDefault<T>(
+  promise: Promise<T>,
+  defaultValue: T
+): Promise<T> {
+  return promise.catch(error => {
+    if (error.status === 404) {
+      return defaultValue;
+    }
+    throw error;
   });
 }

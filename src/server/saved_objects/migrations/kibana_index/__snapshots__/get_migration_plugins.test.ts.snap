@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getMigrationPlugins converts Kibana plugins to migration plugins 1`] = `
+Array [
+  Object {
+    "id": "hello",
+    "mappings": Object {
+      "hoi": Object {
+        "type": "text",
+      },
+    },
+    "migrations": undefined,
+  },
+  Object {
+    "id": "sumthin",
+    "mappings": Object {
+      "fud": Object {
+        "properties": Object {
+          "name": Object {
+            "type": "text",
+          },
+        },
+      },
+    },
+    "migrations": Object {
+      "fud": Object {
+        "4": [Function],
+      },
+      "mud": Object {
+        "3": [Function],
+      },
+    },
+  },
+]
+`;

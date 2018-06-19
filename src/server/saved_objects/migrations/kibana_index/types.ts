@@ -17,19 +17,14 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('apis', () => {
-    loadTestFile(require.resolve('./migrations'));
-    loadTestFile(require.resolve('./elasticsearch'));
-    loadTestFile(require.resolve('./general'));
-    loadTestFile(require.resolve('./index_patterns'));
-    loadTestFile(require.resolve('./management'));
-    loadTestFile(require.resolve('./saved_objects'));
-    loadTestFile(require.resolve('./scripts'));
-    loadTestFile(require.resolve('./search'));
-    loadTestFile(require.resolve('./shorten'));
-    loadTestFile(require.resolve('./suggestions'));
-    loadTestFile(require.resolve('./status'));
-    loadTestFile(require.resolve('./stats'));
-  });
+import { MappingDefinition, MigrationDefinition } from '../core';
+
+export interface KibanaPluginSpec {
+  mappings: MappingDefinition;
+}
+
+export interface KibanaPlugin {
+  getId: (() => string);
+  getExportSpecs: (() => KibanaPluginSpec | undefined);
+  getMigrations: (() => MigrationDefinition | undefined);
 }

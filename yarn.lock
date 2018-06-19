@@ -220,6 +220,10 @@
     url-join "^4.0.0"
     ws "^4.1.0"
 
+"@types/chai@^4.1.4":
+  version "4.1.4"
+  resolved "https://registry.yarnpkg.com/@types/chai/-/chai-4.1.4.tgz#5ca073b330d90b4066d6ce18f60d57f2084ce8ca"
+
 "@types/delay@^2.0.1":
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@types/delay/-/delay-2.0.1.tgz#61bcf318a74b61e79d1658fbf054f984c90ef901"
@@ -275,6 +279,10 @@
   dependencies:
     "@types/node" "*"
 
+"@types/jest@^22.1.3":
+  version "22.2.3"
+  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-22.2.3.tgz#0157c0316dc3722c43a7b71de3fdf3acbccef10d"
+
 "@types/json-schema@*":
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-6.0.1.tgz#a761975746f1c1b2579c62e3a4b5e88f986f7e2e"
@@ -288,6 +296,10 @@
   resolved "https://registry.yarnpkg.com/@types/listr/-/listr-0.13.0.tgz#6250bc4a04123cafa24fc73d1b880653a6ae6721"
   dependencies:
     "@types/node" "*"
+
+"@types/lodash@^3.10.1":
+  version "3.10.2"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-3.10.2.tgz#c1fbda1562ef5603c8192fe1fe65b017849d5873"
 
 "@types/loglevel@^1.5.3":
   version "1.5.3"
@@ -343,6 +355,14 @@
 "@types/retry@*", "@types/retry@^0.10.2":
   version "0.10.2"
   resolved "https://registry.yarnpkg.com/@types/retry/-/retry-0.10.2.tgz#bd1740c4ad51966609b058803ee6874577848b37"
+
+"@types/semver@^5.5.0":
+  version "5.5.0"
+  resolved "https://registry.yarnpkg.com/@types/semver/-/semver-5.5.0.tgz#146c2a29ee7d3bae4bf2fcb274636e264c813c45"
+
+"@types/sinon@^5.0.1":
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/@types/sinon/-/sinon-5.0.1.tgz#a15b36ec42f1f53166617491feabd1734cb03e21"
 
 "@types/url-join@^0.8.2":
   version "0.8.2"

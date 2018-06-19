@@ -17,19 +17,26 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('apis', () => {
-    loadTestFile(require.resolve('./migrations'));
-    loadTestFile(require.resolve('./elasticsearch'));
-    loadTestFile(require.resolve('./general'));
-    loadTestFile(require.resolve('./index_patterns'));
-    loadTestFile(require.resolve('./management'));
-    loadTestFile(require.resolve('./saved_objects'));
-    loadTestFile(require.resolve('./scripts'));
-    loadTestFile(require.resolve('./search'));
-    loadTestFile(require.resolve('./shorten'));
-    loadTestFile(require.resolve('./suggestions'));
-    loadTestFile(require.resolve('./status'));
-    loadTestFile(require.resolve('./stats'));
-  });
+import { fetchOrDefault } from './fetch_or_default';
+import { CallCluster, IndexMapping } from './types';
+
+/**
+ * fetchMapping retrieves the mappings for the specified index,
+ * returning null if the mappings are not found.
+ * @param {CallCluster} callCluster - The elasticsearch.js function
+ * @param {string} index - The name of the index whose mappings are being retrieved
+ * @returns {Promise<IndexMapping | null>}
+ */
+export async function fetchMapping(
+  callCluster: CallCluster,
+  index: string
+): Promise<IndexMapping | null> {
+  const result = await fetchOrDefault(
+    callCluster('indices.getMapping', { index }),
+    null
+  );
+  if (!result) {
+    return null;
+  }
+  return Object.values(result)[0].mappings || null;
 }
