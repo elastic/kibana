@@ -77,9 +77,9 @@
   version "0.0.0"
   uid ""
 
-"@elastic/eui@0.0.52", "@elastic/eui@v0.0.52":
-  version "0.0.52"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-0.0.52.tgz#c34c6cd482b458015e0d2b410f98652053994138"
+"@elastic/eui@0.0.53":
+  version "0.0.53"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-0.0.53.tgz#73c8e73e0b2a5574748d2a95416e99e78f355f07"
   dependencies:
     classnames "^2.2.5"
     core-js "^2.5.1"

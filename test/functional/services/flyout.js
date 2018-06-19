@@ -17,32 +17,27 @@
  * under the License.
  */
 
-import React from 'react';
-import sinon from 'sinon';
-import { shallow } from 'enzyme';
+export function FlyoutProvider({ getService }) {
+  const testSubjects = getService('testSubjects');
+  const find = getService('find');
 
-import {
-  DashboardAddPanel,
-} from './add_panel';
+  class Flyout {
 
-jest.mock('ui/notify',
-  () => ({
-    toastNotifications: {
-      addDanger: () => {},
+    async getFlyout(testSubj) {
+      if (testSubj) {
+        return await testSubjects.find(testSubj);
+      } else {
+        return await find.byCssSelector('.euiFlyout');
+      }
     }
-  }), { virtual: true });
 
-let onClose;
-beforeEach(() => {
-  onClose = sinon.spy();
-});
+    async close(panelTestSubj) {
+      const panelElement = await this.getFlyout(panelTestSubj);
+      const closeBtn = await panelElement.findByCssSelector('[aria-label*="Close"]');
+      await closeBtn.click();
+    }
 
-test('render', () => {
-  const component = shallow(<DashboardAddPanel
-    onClose={onClose}
-    find={() => {}}
-    addNewPanel={() => {}}
-    addNewVis={() => {}}
-  />);
-  expect(component).toMatchSnapshot();
-});
+  }
+
+  return new Flyout();
+}
