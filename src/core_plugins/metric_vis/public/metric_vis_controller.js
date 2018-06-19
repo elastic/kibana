@@ -145,7 +145,7 @@ export class MetricVisComponent extends Component {
             filterKey: rowHeaderIndex !== undefined ? row[rowHeaderIndex] : null,
             tableIndex: tableIndex,
             rowIndex: rowIndex,
-            columnIndex: columnIndex,
+            columnIndex: rowHeaderIndex,
             bucketAgg: bucketAgg,
           });
         });
@@ -160,7 +160,7 @@ export class MetricVisComponent extends Component {
       return;
     }
     const table = this.props.visData.tables[metric.tableIndex];
-    this._vis.API.events.addFilter(table, metric.columnIndex, metric.rowIndex);
+    this.props.vis.API.events.addFilter(table, metric.columnIndex, metric.rowIndex);
   };
 
   _renderMetric = (metric, index) => {

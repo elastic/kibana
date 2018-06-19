@@ -47,7 +47,7 @@ export class TagCloudVisualization {
         return;
       }
       this._vis.API.events.addFilter(
-        this._data, 0, this._data.rows.findIndex(row => row[0] === event)
+        event.meta.data, 0, event.meta.rowIndex
       );
     });
     this._renderComplete$ = Observable.fromEvent(this._tagCloud, 'renderComplete');
@@ -121,12 +121,16 @@ export class TagCloudVisualization {
       this._bucketAgg = null;
     }
 
-    const tags = data.rows.map(row => {
+    const tags = data.rows.map((row, rowIndex) => {
       const [tag, count] = row;
       return {
         displayText: this._bucketAgg ? this._bucketAgg.fieldFormatter()(tag) : tag,
         rawText: tag,
-        value: count
+        value: count,
+        meta: {
+          data: data,
+          rowIndex: rowIndex,
+        }
       };
     });
 
