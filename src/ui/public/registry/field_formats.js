@@ -86,6 +86,7 @@ class FieldFormatRegistry extends IndexedArray {
    */
   getInstance = _.memoize(function (formatId) {
     const FieldFormat = this.byId[formatId];
+    if (!FieldFormat) throw new Error(`Field Format '${formatId}' not found!`);
     return new FieldFormat(null, this.getConfig);
   });
 
