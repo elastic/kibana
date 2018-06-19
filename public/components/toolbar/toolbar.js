@@ -33,8 +33,8 @@ export const Toolbar = props => {
     setTray(exp);
   };
 
-  const createElement = expression => {
-    addElement(expression);
+  const createElement = element => {
+    addElement(element);
 
     // close the tray
     done();

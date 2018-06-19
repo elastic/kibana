@@ -5,6 +5,7 @@ export const timeFilter = () => ({
   displayName: 'Time Filter',
   help: 'Set a time window',
   image: header,
+  height: 50,
   expression: 'timefilterControl compact=true column=@timestamp | render as=time_filter',
   filter: 'timefilter column=@timestamp from=now-24h to=now',
 });

@@ -9,8 +9,8 @@ export const ElementTypes = ({ elements, onClick, search, setSearch }) => {
   search = lowerCase(search);
   elements = sortBy(map(elements, (element, name) => ({ name, ...element })), 'displayName');
   const elementList = map(elements, (element, name) => {
-    const { help, image, displayName, expression, filter } = element;
-    const whenClicked = () => onClick({ expression, filter });
+    const { help, image, displayName, expression, filter, width, height } = element;
+    const whenClicked = () => onClick({ expression, filter, width, height });
     const card = (
       <MediaCard key={name} image={image} title={displayName} onClick={whenClicked}>
         {help}

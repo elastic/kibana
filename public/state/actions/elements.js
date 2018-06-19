@@ -333,6 +333,8 @@ export const deleteArgumentAtIndex = createThunk('deleteArgumentAtIndex', ({ dis
 */
 export const addElement = createThunk('addElement', ({ dispatch }, pageId, element) => {
   const newElement = { ...getDefaultElement(), ...getBareElement(element) };
+  if (element.width) newElement.position.width = element.width;
+  if (element.height) newElement.position.height = element.height;
   const _addElement = createAction('addElement');
   dispatch(_addElement({ pageId, element: newElement }));
 
