@@ -111,7 +111,9 @@ when missing translations
 For the detailed explanation, see the section below
 - `getFormats()` - returns current formats
 - `getRegisteredLocales()` - returns array of locales having translations
-- `translate(id: string, [{values: object, defaultMessage: string}])` – translate message by id
+- `translate(id: string, [{values: object, defaultMessage: string, context: string}])` –
+translate message by id. `context` is optional context comment that will be extracted
+by i18n tools and added as a comment next to translation message at `defaultMessages.json`.
 - `init(messages: Map<string, string>)` - initializes the engine
 
 #### I18n engine internals
@@ -184,8 +186,8 @@ React Intl uses the provider pattern to scope an i18n context to a tree of compo
 are able to use `FormattedMessage` component in order to translate messages.
 `IntlProvider` should wrap react app's root component (inside each react render method).
 
-In order to translate messages we need to use custom `I18nProvider` component
-that uses I18n engine under the hood:
+In order to translate messages we need to use `I18nProvider` component that
+uses I18n engine under the hood:
 
 ```js
 import React from 'react';
@@ -244,6 +246,62 @@ class RootComponent extends Component {
 }
 ```
 
+Optionally we can pass `context` prop into `FormattedMessage` component.
+This prop is optional context comment that will be extracted by i18n tools
+and added as a comment next to translation message at `defaultMessages.json`
+
+
+#### Attributes translation in React
+React wrapper provides an API to inject the imperative formatting API into a React
+component via its `props`. This should be used when your React component needs to
+format data to a string value where a React element is not suitable; e.g., a `title`
+or `aria` attribute, or for side-effect in `componentDidMount`. Another approach
+is to use render callback pattern by wrapping your components into `I18nContext`
+component. The child of this component should be a function that takes `intl` object
+into parameters.
+
+Example using `injectIntl`:
+```js
+import React from 'react';
+import { ReactI18n } from '@kbn/i18n';
+
+const { injectIntl } = ReactI18n;
+
+const MyComponent = ({ intl }) => (
+  <input
+    type="text"
+    placeholder={intl.formatMessage({
+      id: 'KIBANA-MANAGEMENT-OBJECTS-SEARCH_PLACEHOLDER',
+      defaultMessage: 'Search',
+    })}
+  />
+);
+
+export default injectIntl(MyComponent);
+```
+
+Example using `I18nContext`:
+```js
+import React from 'react';
+import { ReactI18n } from '@kbn/i18n';
+
+const { I18nContext } = ReactI18n;
+
+const MyComponent = () => (
+  <I18nContext>
+    {intl => (
+      <input
+        type="text"
+        placeholder={intl.formatMessage({
+          id: 'KIBANA-MANAGEMENT-OBJECTS-SEARCH_PLACEHOLDER',
+          defaultMessage: 'Search',
+        })}
+      />
+    )}
+  </I18nContext>
+);
+```
+
 ## Angular
 
 Angular wrapper has 4 entities: translation `provider`, `service`, `directive`
@@ -266,12 +324,13 @@ when missing translations
 - `init(messages: Map<string, string>)` - initializes the engine
 
 The translation `service` provides only one method:
-- `i18n(id: string, [{values: object, defaultMessage: string}])` – translate message by id
+- `i18n(id: string, [{values: object, defaultMessage: string, context: string }])`–
+translate message by id
 
 The translation `filter` is used for attributes translation and has
 the following syntax:
 ```
-{{'translationId' | i18n[:{ values: object, defaultMessage: string }]}}
+{{'translationId' | i18n[:{ values: object, defaultMessage: string, context: string }]}}
 ```
 
 Where:
@@ -279,6 +338,8 @@ Where:
 - `values` - values to pass into translation
 - `defaultMessage` - will be used unless translation was successful (the final
   fallback in english, will be used for generating `en.json`)
+- `context` - optional context comment that will be extracted by i18n tools
+and added as a comment next to translation message at `defaultMessages.json`
 
 The translation `directive` has the following syntax:
 ```html
@@ -286,6 +347,7 @@ The translation `directive` has the following syntax:
   i18n-id="{string}"
   [i18n-values="{object}"]
   [i18n-default-message="{string}"]
+  [i18n-context="{string}"]
 ></ANY>
 ```
 
@@ -293,6 +355,8 @@ Where:
 - `i18n-id` - translation id to be translated
 - `i18n-values` - values to pass into translation
 - `i18n-default-message` - will be used unless translation was successful
+- `i18n-context` - optional context comment that will be extracted by i18n tools
+and added as a comment next to translation message at `defaultMessages.json`
 
 Angular `I18n` module is placed into `autoload` module, so it will be
 loaded automatically. After that we can use i18n directive in Angular templates:
@@ -301,6 +365,16 @@ loaded automatically. After that we can use i18n directive in Angular templates:
   i18n-id="welcome"
   i18n-default-message="Hello!"
 ></span>
+```
+
+In order to translate attributes in Angular we should use `i18nFilter`:
+```html
+<input
+  type="text"
+  placeholder="{{'KIBANA-MANAGEMENT-OBJECTS-SEARCH_PLACEHOLDER' | i18n: {
+    defaultMessage: 'Search'
+  } }}"
+>
 ```
 
 ## Node.JS
@@ -312,12 +386,12 @@ browsers and Node.js 0.10+. In order to load i18n engine
 in Node.js we should simply `import` this module (in Node.js, the
 [data](https://github.com/yahoo/intl-messageformat/tree/master/dist/locale-data)
 for all 200+ languages is loaded along with the library) and pass the translation
-messages into the constructor:
+messages into `init` method:
 
 ```js
-import { I18n } from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 
-const i18n = new I18n(messages);
+i18n.init(messages);
 ```
 
 After that we are able to use all methods exposed by the i18n engine
