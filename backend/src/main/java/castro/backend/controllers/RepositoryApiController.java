@@ -13,6 +13,7 @@ public class RepositoryApiController implements RepositoryApi {
 
   @Override
   public Repository repositoryImpl(String id) {
+    logger.debug("Repository {}", id);
     return Repository.newBuilder().setDomain("github.com").setMainBranch("master").setRepositoryId(id).build();
   }
 

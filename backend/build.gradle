@@ -24,6 +24,12 @@ dependencies {
 //  compile "io.springfox:springfox-swagger2:2.8.0"
 //  compile "javax.xml.bind:jaxb-api:2.3.0"
 
+  compile "net.logstash.logback:logstash-logback-encoder:4.11"
+  compile "ch.qos.logback:logback-classic:$logbackVersion"
+  compile "ch.qos.logback:logback-core:$logbackVersion"
+  compile "ch.qos.logback:logback-access:$logbackVersion"
+  compile "org.slf4j:slf4j-api:$slf4jVersion"
+
   compile "com.google.protobuf:protobuf-java-util:$protocVersion"
   compile "org.eclipse.jgit:org.eclipse.jgit:$jgitVersion"
 

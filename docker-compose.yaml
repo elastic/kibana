@@ -10,3 +10,16 @@ services:
     environment:
       ES_JAVA_OPTS: "-Xms768m -Xmx768m"
     restart: on-failure
+
+  logstash:
+    image: 'elastic/logstash:6.3.0'
+    volumes:
+      - ./config/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
+      - ./config/logstash/pipeline/:/usr/share/logstash/pipeline/
+    ports:
+      - "5000:5000"
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+    depends_on:
+      - elasticsearch
+    restart: on-failure
