@@ -6,12 +6,7 @@
 
 import { uiModules } from 'ui/modules';
 import 'plugins/grokdebugger/services/grokdebugger';
-import './grokdebugger.less';
 import { GrokDebugger } from '../../components/grok_debugger';
-import '../../components/event_input';
-import '../../components/event_output';
-import '../../components/pattern_input';
-import '../../components/custom_patterns_input';
 import { render } from 'react-dom';
 import React from 'react';
 
@@ -27,51 +22,3 @@ app.directive('grokdebugger', function ($injector) {
     }
   };
 });
-/*
-    controller: class GrokdebuggerController {
-      constructor() {
-        this.structuredEvent = {};
-        this.grokdebuggerRequest = new GrokdebuggerRequest();
-        this.notifier = new Notifier({ location: 'GrokDebugger' });
-      }
-
-      onSimulateClick = () => {
-        return grokdebuggerService.simulate(this.grokdebuggerRequest)
-          .then(simulateResponse => {
-            this.structuredEvent = simulateResponse.structuredEvent;
-            // this error block is for responses which are 200, but still contain
-            // a grok debugger error like pattern not matched.
-            if (!isEmpty(simulateResponse.error)) {
-              this.notifier.error(simulateResponse.error);
-            }
-          })
-          .catch(e => {
-          // this error is for 4xx and 5xx responses
-            this.notifier.error(e);
-          });
-      }
-
-      onCustomPatternsChange = (customPatterns = '') => {
-        customPatterns = customPatterns.trim();
-        if (!customPatterns) {
-          return;
-        }
-
-        const customPatternsObj = {};
-        customPatterns.split('\n').forEach(customPattern => {
-          // Patterns are defined like so:
-          // patternName patternDefinition
-          // For example:
-          // POSTGRESQL %{DATESTAMP:timestamp} %{TZ} %{DATA:user_id} %{GREEDYDATA:connection_id} %{POSINT:pid}
-          const [ , patternName, patternDefinition ] = customPattern.match(/(\S+)\s+(.+)/) || [];
-          if (patternName && patternDefinition) {
-            customPatternsObj[patternName] = patternDefinition;
-          }
-        });
-
-        this.grokdebuggerRequest.customPatterns = customPatternsObj;
-      }
-    }
-  };
-});
-*/
