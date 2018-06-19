@@ -15,6 +15,7 @@ function getAnomaliesTableData(callWithRequest, payload) {
   const rs = resultsServiceProvider(callWithRequest);
   const {
     jobIds,
+    criteriaFields,
     influencers,
     aggregationInterval,
     threshold,
@@ -24,6 +25,7 @@ function getAnomaliesTableData(callWithRequest, payload) {
     maxExamples } = payload;
   return rs.getAnomaliesTableData(
     jobIds,
+    criteriaFields,
     influencers,
     aggregationInterval,
     threshold,

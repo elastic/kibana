@@ -8,7 +8,7 @@ import { SERVICE_NAME, ERROR_GROUP_ID } from '../../../common/constants';
 import { get } from 'lodash';
 
 export async function getErrorGroup({ serviceName, groupId, setup }) {
-  const { start, end, client, config } = setup;
+  const { start, end, esFilterQuery, client, config } = setup;
 
   const params = {
     index: config.get('xpack.apm.indexPattern'),
@@ -38,6 +38,10 @@ export async function getErrorGroup({ serviceName, groupId, setup }) {
       ]
     }
   };
+
+  if (esFilterQuery) {
+    params.body.query.bool.filter.push(esFilterQuery);
+  }
 
   const resp = await client('search', params);
 

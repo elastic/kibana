@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 /* eslint-disable max-len */
 
 export const NODE_CLIENT_INSTRUCTIONS = [
@@ -213,5 +232,59 @@ var apm = initApm({curlyOpen}
       'See the [documentation]' +
       '({config.docs.base_url}guide/en/apm/agent/js-base/0.x/index.html)  for advanced usage.\n\n' +
       '**Warning: The JS agent is currently in Beta and not meant for production use.**',
+  },
+];
+
+export const GO_CLIENT_INSTRUCTIONS = [
+  {
+    title: 'Install the APM agent',
+    textPre: 'Install the APM agent packages for Go.',
+    commands: ['go get github.com/elastic/apm-agent-go'],
+  },
+  {
+    title: 'Configure the agent',
+    textPre:
+      'Agents are libraries that run inside of your application process.' +
+      ' APM services are created programmatically based on the executable ' +
+      ' file name, or the `ELASTIC_APM_SERVICE_NAME` environment variable.',
+    commands: `# Initialize using environment variables:
+
+# Set the service name. Allowed characters: # a-z, A-Z, 0-9, -, _, and space.
+# If ELASTIC_APM_SERVICE_NAME is not specified, the executable name will be used.
+export ELASTIC_APM_SERVICE_NAME=
+
+# Set the APM Server URL. If unspecified, the agent will effectively be disabled.
+export ELASTIC_APM_SERVER_URL=
+
+# Set if APM Server requires a token.
+export ELASTIC_APM_SECRET_TOKEN=
+`.split('\n'),
+    textPost:
+      'See the [documentation]' +
+      '({config.docs.base_url}guide/en/apm/agent/go/current/configuration.html) for advanced configuration.',
+  },
+  {
+    title: 'Instrument your application',
+    textPre:
+      'Instrument your Go application by using one of the provided instrumentation modules or ' +
+      'by using the tracer API directly.',
+    commands: `
+import (
+	"net/http"
+
+	"github.com/elastic/apm-agent-go/module/apmhttp"
+)
+
+func main() {curlyOpen}
+	mux := http.NewServeMux()
+	...
+	http.ListenAndServe(":8080", apmhttp.Wrap(mux))
+{curlyClose}
+`.split('\n'),
+    textPost:
+      'See the [documentation]' +
+      '({config.docs.base_url}guide/en/apm/agent/go/current/instrumenting-source.html) for a detailed ' +
+      'guide to instrumenting Go source code.\n\n' +
+      '**Warning: The Go agent is currently in Beta and not meant for production use.**',
   },
 ];

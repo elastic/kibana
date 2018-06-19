@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SupertestWithoutAuthProvider } from './services';
+import {
+  SupertestWithoutAuthProvider,
+  UsageAPIProvider,
+} from './services';
 
 export default async function ({ readConfigFile }) {
 
@@ -21,6 +24,8 @@ export default async function ({ readConfigFile }) {
       supertestWithoutAuth: SupertestWithoutAuthProvider,
       es: kibanaCommonConfig.get('services.es'),
       esArchiver: kibanaCommonConfig.get('services.esArchiver'),
+      usageAPI: UsageAPIProvider,
+      kibanaServer: kibanaCommonConfig.get('services.kibanaServer'),
       chance: kibanaAPITestsConfig.get('services.chance'),
     },
     esArchiver: xPackFunctionalTestsConfig.get('esArchiver'),
@@ -28,7 +33,13 @@ export default async function ({ readConfigFile }) {
       reportName: 'X-Pack API Integration Tests',
     },
     env: xPackFunctionalTestsConfig.get('env'),
-    kbnTestServer: xPackFunctionalTestsConfig.get('kbnTestServer'),
+    kbnTestServer: {
+      ...xPackFunctionalTestsConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...xPackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
+        '--optimize.enabled=false',
+      ],
+    },
     esTestCluster: xPackFunctionalTestsConfig.get('esTestCluster'),
   };
 }

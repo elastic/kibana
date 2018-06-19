@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
@@ -24,7 +43,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it ('should continue to show for visualizations with no search source', async () => {
-        await dashboardAddPanel.addVisualization('input control');
+        await dashboardAddPanel.addVisualization('Rendering-Test:-input-control');
         const hasAddFilter = await testSubjects.exists('addFilter');
         expect(hasAddFilter).to.be(true);
       });
@@ -42,7 +61,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('shows index pattern of vis when one is added', async () => {
-        await dashboardAddPanel.addVisualization('animal sounds pie');
+        await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await filterBar.ensureFieldEditorModalIsClosed();
         await testSubjects.click('addFilter');
@@ -50,7 +69,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('works when a vis with no index pattern is added', async () => {
-        await dashboardAddPanel.addVisualization('markdown');
+        await dashboardAddPanel.addVisualization('Rendering-Test:-markdown');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await filterBar.ensureFieldEditorModalIsClosed();
         await testSubjects.click('addFilter');
@@ -62,7 +81,7 @@ export default function ({ getService, getPageObjects }) {
       before(async () => {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.setTimepickerIn63DataRange();
+        await PageObjects.dashboard.setTimepickerInDataRange();
       });
 
       it('are not selected by default', async function () {

@@ -9,7 +9,10 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import moment from 'moment';
-import { IntervalHelperProvider, getBoundsRoundedToInterval } from '../ml_time_buckets';
+import {
+  IntervalHelperProvider,
+  getBoundsRoundedToInterval,
+  calcEsInterval } from '../ml_time_buckets';
 
 describe('ML - time buckets', () => {
 
@@ -125,7 +128,7 @@ describe('ML - time buckets', () => {
 
   });
 
-  describe('getBoundsRoundedToInterval ', () => {
+  describe('getBoundsRoundedToInterval', () => {
     // Must include timezone when creating moments for this test to ensure
     // checks are correct when running tests in different timezones.
     const testBounds = { min: moment('2017-01-05T10:11:12.000+00:00'), max: moment('2017-10-26T09:08:07.000+00:00') };
@@ -154,6 +157,26 @@ describe('ML - time buckets', () => {
       expect(bounds4h.max.valueOf()).to.be(moment('2017-10-27T00:00:00.000+00:00').valueOf());
     });
 
+  });
+
+  describe('calcEsInterval', () => {
+    it('returns correct interval for various durations', () => {
+      expect(calcEsInterval(moment.duration(500, 'ms'))).to.eql({ value: 500, unit: 'ms', expression: '500ms' });
+      expect(calcEsInterval(moment.duration(1000, 'ms'))).to.eql({ value: 1, unit: 's', expression: '1s' });
+      expect(calcEsInterval(moment.duration(15, 's'))).to.eql({ value: 15, unit: 's', expression: '15s' });
+      expect(calcEsInterval(moment.duration(60, 's'))).to.eql({ value: 1, unit: 'm', expression: '1m' });
+      expect(calcEsInterval(moment.duration(1, 'm'))).to.eql({ value: 1, unit: 'm', expression: '1m' });
+      expect(calcEsInterval(moment.duration(60, 'm'))).to.eql({ value: 1, unit: 'h', expression: '1h' });
+      expect(calcEsInterval(moment.duration(3, 'h'))).to.eql({ value: 3, unit: 'h', expression: '3h' });
+      expect(calcEsInterval(moment.duration(24, 'h'))).to.eql({ value: 1, unit: 'd', expression: '1d' });
+      expect(calcEsInterval(moment.duration(3, 'd'))).to.eql({ value: 3, unit: 'd', expression: '3d' });
+      expect(calcEsInterval(moment.duration(7, 'd'))).to.eql({ value: 1, unit: 'w', expression: '1w' });
+      expect(calcEsInterval(moment.duration(1, 'w'))).to.eql({ value: 1, unit: 'w', expression: '1w' });
+      expect(calcEsInterval(moment.duration(4, 'w'))).to.eql({ value: 28, unit: 'd', expression: '28d' });
+      expect(calcEsInterval(moment.duration(1, 'M'))).to.eql({ value: 1, unit: 'M', expression: '1M' });
+      expect(calcEsInterval(moment.duration(12, 'M'))).to.eql({ value: 1, unit: 'y', expression: '1y' });
+      expect(calcEsInterval(moment.duration(1, 'y'))).to.eql({ value: 1, unit: 'y', expression: '1y' });
+    });
   });
 
 });

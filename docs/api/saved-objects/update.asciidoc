@@ -1,0 +1,63 @@
+[[saved-objects-api-update]]
+=== Update Object
+
+experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+
+The update saved object API enables you to update the attributes for an
+existing Kibana saved object.
+
+==== Request
+
+`PUT /api/saved_objects/<type>/<id>`
+
+==== Path Parameters
+
+`type` (required)::
+  (string) Valid options, include: `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`
+
+`id` (required)::
+  (string) ID of object to update
+
+
+==== Request Body
+
+`attributes` (required)::
+  (object) The data to persist
+
+
+==== Examples
+
+The following example updates an existing index pattern object identified as
+`my-pattern` with a different index pattern title.
+
+[source,js]
+--------------------------------------------------
+PUT api/saved_objects/index-pattern/my-pattern
+{
+  "attributes": {
+    "title": "some-other-pattern-*"
+  }
+}
+--------------------------------------------------
+// KIBANA
+
+A successful call returns a response code of `200` and a response body
+containing a JSON structure similar to the following example:
+
+[source,js]
+--------------------------------------------------
+{
+  "id": "my-pattern",
+  "type": "index-pattern",
+  "version": 2,
+  "attributes": {
+    "title": "some-other-pattern-*"
+  }
+}
+--------------------------------------------------
+
+==== Known issues
+
+1. *Attributes are not validated at update time*. This means you can pass
+arbitrary and ill-formed data into this API that can break Kibana. Make sure
+any data you send to this API is properly formed.

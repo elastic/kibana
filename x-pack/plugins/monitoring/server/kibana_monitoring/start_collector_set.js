@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { callClusterFactory } from '../../../xpack_main';
 import { CollectorSet } from './classes/collector_set';
 import { getOpsStatsCollector } from './collectors/get_ops_stats_collector';
 import { getSettingsCollector } from './collectors/get_settings_collector';
 import { getKibanaUsageCollector } from './collectors/get_kibana_usage_collector';
-import { getReportingUsageCollector } from './collectors/get_reporting_usage_collector';
 import { sendBulkPayload } from './lib/send_bulk_payload';
 import { getCollectorTypesCombiner } from './lib/get_collector_types_combiner';
 
@@ -34,12 +32,10 @@ export function startCollectorSet(kbnServer, server, client, _sendBulkPayload = 
       return _sendBulkPayload(client, interval, payload);
     }
   });
-  const callCluster = callClusterFactory(server).getCallClusterInternal();
 
-  collectorSet.register(getKibanaUsageCollector(server, callCluster));
+  collectorSet.register(getKibanaUsageCollector(server));
   collectorSet.register(getOpsStatsCollector(server));
   collectorSet.register(getSettingsCollector(server));
-  collectorSet.register(getReportingUsageCollector(server, callCluster)); // TODO: move this to Reporting init
 
   // Startup Kibana cleanly or reconnect to Elasticsearch
   server.plugins.elasticsearch.status.on('green', () => {

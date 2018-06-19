@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }) {
         await tearDown();
       });
 
-      it('green status index with full shard allocation', async () => {
+      it('should have an index summary with green status index with full shard allocation', async () => {
         await indicesList.clickRowByName('avocado-tweets-2017.10.02');
 
         expect(await indexDetail.getSummary()).to.eql({
@@ -51,7 +51,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      it('green status index with single relocating shard', async () => {
+      it('should have an index summary with green status index with single relocating shard', async () => {
         await indicesList.clickRowByName('relocation_test');
 
         expect(await indexDetail.getSummary()).to.eql({
@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      it('yellow status index with single unallocated shard', async () => {
+      it('should have an index summary with yellow status index with single unallocated shard', async () => {
         await indicesList.clickRowByName('phone-home');
 
         expect(await indexDetail.getSummary()).to.eql({
@@ -96,7 +96,7 @@ export default function ({ getService, getPageObjects }) {
         await tearDown();
       });
 
-      it.skip('shows NA', async () => {
+      it.skip('should have an index summary with NA for deleted index', async () => {
         await indicesList.setFilter('deleted');
         await indicesList.clickRowByName('many-0001_clruksahirti');
 

@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
@@ -6,11 +25,13 @@ import FieldSelect from './field_select';
 import AggRow from './agg_row';
 import * as collectionActions from '../lib/collection_actions';
 import AddDeleteButtons from '../add_delete_buttons';
-import Select from 'react-select';
 import uuid from 'uuid';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
-import { htmlIdGenerator } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiComboBox,
+} from '@elastic/eui';
 const newPercentile = (opts) => {
   return _.assign({ id: uuid.v1(), mode: 'line', shade: 0.2 }, opts);
 };
@@ -26,7 +47,7 @@ class Percentiles extends Component {
     return (e) => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
       const part = {};
-      part[name] = _.get(e, 'value', _.get(e, 'target.value'));
+      part[name] = _.get(e, '[0].value', _.get(e, 'target.value'));
       handleChange(_.assign({}, item, part));
     };
   }
@@ -45,6 +66,9 @@ class Percentiles extends Component {
       optionsStyle.display = 'none';
     }
     const htmlId = htmlIdGenerator(model.id);
+    const selectedModeOption = modeOptions.find(option => {
+      return model.mode === option.value;
+    });
     return  (
       <div className="vis_editor__percentiles-row" key={model.id}>
         <div className="vis_editor__percentiles-content">
@@ -59,12 +83,13 @@ class Percentiles extends Component {
           />
           <label className="vis_editor__label" htmlFor={htmlId('mode')}>Mode</label>
           <div className="vis_editor__row_item">
-            <Select
-              inputProps={{ id: htmlId('mode') }}
-              clearable={false}
-              onChange={this.handleTextChange(model, 'mode')}
+            <EuiComboBox
+              isClearable={false}
+              id={htmlId('mode')}
               options={modeOptions}
-              value={model.mode}
+              selectedOptions={selectedModeOption ? [selectedModeOption] : []}
+              onChange={this.handleTextChange(model, 'mode')}
+              singleSelection={true}
             />
           </div>
           <label style={optionsStyle} className="vis_editor__label" htmlFor={htmlId('fillTo')}>

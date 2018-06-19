@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
@@ -16,7 +35,6 @@ export class Table extends PureComponent {
   static propTypes = {
     selectedSavedObjects: PropTypes.array.isRequired,
     selectionConfig: PropTypes.shape({
-      itemId: PropTypes.string.isRequired,
       selectable: PropTypes.func,
       selectableMessage: PropTypes.func,
       onSelectionChange: PropTypes.func.isRequired,
@@ -30,6 +48,10 @@ export class Table extends PureComponent {
     pageIndex: PropTypes.number.isRequired,
     pageSize: PropTypes.number.isRequired,
     items: PropTypes.array.isRequired,
+    itemId: PropTypes.oneOfType([
+      PropTypes.string, // the name of the item id property
+      PropTypes.func    // (item) => string
+    ]),
     totalItemCount: PropTypes.number.isRequired,
     onQueryChange: PropTypes.func.isRequired,
     onTableChange: PropTypes.func.isRequired,
@@ -42,6 +64,7 @@ export class Table extends PureComponent {
     const {
       pageIndex,
       pageSize,
+      itemId,
       items,
       totalItemCount,
       isSearching,
@@ -147,7 +170,6 @@ export class Table extends PureComponent {
               key="deleteSO"
               iconType="trash"
               color="danger"
-              size="s"
               onClick={onDelete}
               isDisabled={selectedSavedObjects.length === 0}
             >
@@ -156,7 +178,6 @@ export class Table extends PureComponent {
             <EuiButton
               key="exportSO"
               iconType="exportAction"
-              size="s"
               onClick={onExport}
               isDisabled={selectedSavedObjects.length === 0}
             >
@@ -168,6 +189,7 @@ export class Table extends PureComponent {
         <div data-test-subj="savedObjectsTable">
           <EuiBasicTable
             loading={isSearching}
+            itemId={itemId}
             items={items}
             columns={columns}
             pagination={pagination}

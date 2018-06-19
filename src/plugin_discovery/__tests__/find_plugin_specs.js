@@ -1,4 +1,24 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { resolve } from 'path';
+import { toArray } from 'rxjs/operators';
 
 import expect from 'expect.js';
 import { isEqual } from 'lodash';
@@ -24,7 +44,7 @@ describe('plugin discovery', () => {
           }
         });
 
-        const specs = await spec$.toArray().toPromise();
+        const specs = await spec$.pipe(toArray()).toPromise();
         expect(specs).to.have.length(3);
         specs.forEach(spec => {
           expect(spec).to.be.a(PluginSpec);
@@ -43,7 +63,7 @@ describe('plugin discovery', () => {
           }
         });
 
-        const specs = await spec$.toArray().toPromise();
+        const specs = await spec$.pipe(toArray()).toPromise();
         expect(specs).to.have.length(3);
         specs.forEach(spec => {
           expect(spec).to.be.a(PluginSpec);
@@ -67,7 +87,7 @@ describe('plugin discovery', () => {
           }
         });
 
-        const specs = await spec$.toArray().toPromise();
+        const specs = await spec$.pipe(toArray()).toPromise();
         expect(specs).to.have.length(2);
         specs.forEach(spec => {
           expect(spec).to.be.a(PluginSpec);
@@ -91,7 +111,7 @@ describe('plugin discovery', () => {
           }
         });
 
-        const specs = await spec$.toArray().toPromise();
+        const specs = await spec$.pipe(toArray()).toPromise();
         expect(specs).to.have.length(3);
         specs.forEach(spec => {
           expect(spec).to.be.a(PluginSpec);
@@ -112,7 +132,7 @@ describe('plugin discovery', () => {
           });
 
           try {
-            await spec$.toArray().toPromise();
+            await spec$.pipe(toArray()).toPromise();
             throw new Error('expected spec$ to throw an error');
           } catch (error) {
             expect(error.message).to.contain('Multple plugins found with the id "foo"');
@@ -154,7 +174,7 @@ describe('plugin discovery', () => {
           }
         });
 
-        const packageJsons = await packageJson$.toArray().toPromise();
+        const packageJsons = await packageJson$.pipe(toArray()).toPromise();
         checkPackageJsons(packageJsons);
       });
 
@@ -168,7 +188,7 @@ describe('plugin discovery', () => {
           }
         });
 
-        const packageJsons = await packageJson$.toArray().toPromise();
+        const packageJsons = await packageJson$.pipe(toArray()).toPromise();
         checkPackageJsons(packageJsons);
       });
 
@@ -187,7 +207,7 @@ describe('plugin discovery', () => {
           }
         });
 
-        const packageJsons = await packageJson$.toArray().toPromise();
+        const packageJsons = await packageJson$.pipe(toArray()).toPromise();
         checkPackageJsons(packageJsons);
       });
     });

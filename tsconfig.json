@@ -1,6 +1,11 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
+    "paths": {
+      "ui/*": ["src/ui/public/*"]
+    },
+    // Support .tsx files and transform JSX into calls to React.createElement
+    "jsx": "react",
 
     // Enables all strict type checking options.
     "strict": true,
