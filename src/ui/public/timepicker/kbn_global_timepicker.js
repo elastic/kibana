@@ -74,8 +74,8 @@ uiModules
           timefilter.setTime(timeNavigation.stepBackward(timefilter.getBounds()));
         };
 
-        $scope.updateFilter = function (from, to) {
-          timefilter.setTime({ from, to });
+        $scope.updateFilter = function (from, to, mode) {
+          timefilter.setTime({ from, to, mode });
           kbnTopNav.close('filter');
         };
 
