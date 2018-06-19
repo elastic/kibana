@@ -1,3 +1,10 @@
 {
-  "presets": ["@kbn/babel-preset/node_preset"]
+  "env": {
+    "web": {
+      "presets": ["@kbn/babel-preset/webpack_preset"]
+    },
+    "node": {
+      "presets": ["@kbn/babel-preset/node_preset"]
+    }
+  }
 }

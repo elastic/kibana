@@ -1,20 +1,23 @@
 {
   "name": "@kbn/i18n",
-  "browser": "./target/browser.js",
-  "main": "./target/index.js",
+  "browser": "./target/web/browser.js",
+  "main": "./target/node/index.js",
   "module": "./src/index.js",
   "version": "1.0.0",
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
-    "build": "babel src --out-dir target",
+    "build": "yarn build:web && yarn build:node",
+    "build:web": "cross-env BABEL_ENV=web babel src --out-dir target/web",
+    "build:node": "cross-env BABEL_ENV=node babel src --out-dir target/node",
     "kbn:bootstrap": "yarn build",
     "kbn:watch": "yarn build --watch"
   },
   "devDependencies": {
     "@kbn/babel-preset": "link:../kbn-babel-preset",
     "@kbn/dev-utils": "link:../kbn-dev-utils",
-    "babel-cli": "^6.26.0"
+    "babel-cli": "^6.26.0",
+    "cross-env": "^5.2.0"
   },
   "dependencies": {
     "accept-language-parser": "^1.5.0",
