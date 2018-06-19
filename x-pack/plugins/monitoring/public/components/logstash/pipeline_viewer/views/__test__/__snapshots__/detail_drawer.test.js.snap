@@ -5,51 +5,21 @@ exports[`DetailDrawer component If vertices shows basic info and no stats for if
   onClose={[MockFunction]}
   size="s"
 >
-  <EuiFlyoutHeader>
-    <EuiFlexGroup
-      alignItems="baseline"
-      component="div"
-      direction="row"
-      gutterSize="s"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
+    <EuiTitle
+      size="m"
     >
-      <EuiFlexItem
-        component="div"
-        grow={false}
-      >
+      <h2>
         <img
           className="lspvDetailDrawerIcon"
           height={18}
           width={18}
         />
-      </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
-        <EuiTitle
-          size="m"
-        >
-          <h2>
-            if
-          </h2>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={false}
-      >
-        <EuiButtonIcon
-          aria-label="Close"
-          color="text"
-          iconType="cross"
-          onClick={[MockFunction]}
-          type="button"
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        if
+      </h2>
+    </EuiTitle>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <EuiText
@@ -81,51 +51,21 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
   onClose={[MockFunction]}
   size="s"
 >
-  <EuiFlyoutHeader>
-    <EuiFlexGroup
-      alignItems="baseline"
-      component="div"
-      direction="row"
-      gutterSize="s"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
+    <EuiTitle
+      size="m"
     >
-      <EuiFlexItem
-        component="div"
-        grow={false}
-      >
+      <h2>
         <img
           className="lspvDetailDrawerIcon"
           height={18}
           width={18}
         />
-      </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
-        <EuiTitle
-          size="m"
-        >
-          <h2>
-            grok filter
-          </h2>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={false}
-      >
-        <EuiButtonIcon
-          aria-label="Close"
-          color="text"
-          iconType="cross"
-          onClick={[MockFunction]}
-          type="button"
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        grok filter
+      </h2>
+    </EuiTitle>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <EuiText
@@ -133,12 +73,12 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
     >
       <div>
         <p>
-          This 
+          This
           plugin
            does not have an ID explicitly specified. Specifying an ID allows you to track differences across pipeline changes. You can explicitly specify an ID for this plugin like so:
         </p>
         <EuiCodeBlock>
-           
+
           {
   id =&gt; "mySpecialId"
 }
@@ -379,60 +319,30 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
   onClose={[MockFunction]}
   size="s"
 >
-  <EuiFlyoutHeader>
-    <EuiFlexGroup
-      alignItems="baseline"
-      component="div"
-      direction="row"
-      gutterSize="s"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
+    <EuiTitle
+      size="m"
     >
-      <EuiFlexItem
-        component="div"
-        grow={false}
-      >
+      <h2>
         <img
           className="lspvDetailDrawerIcon"
           height={18}
           width={18}
         />
-      </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
-        <EuiTitle
-          size="m"
-        >
-          <h2>
-            grok filter
-          </h2>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={false}
-      >
-        <EuiButtonIcon
-          aria-label="Close"
-          color="text"
-          iconType="cross"
-          onClick={[MockFunction]}
-          type="button"
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        grok filter
+      </h2>
+    </EuiTitle>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <EuiText
       grow={true}
     >
       <p>
-        This 
+        This
         plugin
-        's ID is 
+        's ID is
         <EuiBadge
           color="default"
           iconSide="left"
@@ -673,51 +583,21 @@ exports[`DetailDrawer component Queue vertices shows basic info and no stats for
   onClose={[MockFunction]}
   size="s"
 >
-  <EuiFlyoutHeader>
-    <EuiFlexGroup
-      alignItems="baseline"
-      component="div"
-      direction="row"
-      gutterSize="s"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
+    <EuiTitle
+      size="m"
     >
-      <EuiFlexItem
-        component="div"
-        grow={false}
-      >
+      <h2>
         <img
           className="lspvDetailDrawerIcon"
           height={18}
           width={18}
         />
-      </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
-        <EuiTitle
-          size="m"
-        >
-          <h2>
-            queue
-          </h2>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={false}
-      >
-        <EuiButtonIcon
-          aria-label="Close"
-          color="text"
-          iconType="cross"
-          onClick={[MockFunction]}
-          type="button"
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        queue
+      </h2>
+    </EuiTitle>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <EuiText
@@ -739,49 +619,20 @@ exports[`DetailDrawer component shows vertex title 1`] = `
   onClose={[MockFunction]}
   size="s"
 >
-  <EuiFlyoutHeader>
-    <EuiFlexGroup
-      alignItems="baseline"
-      component="div"
-      direction="row"
-      gutterSize="s"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
+    <EuiTitle
+      size="m"
     >
-      <EuiFlexItem
-        component="div"
-        grow={false}
-      >
+      <h2>
         <img
           className="lspvDetailDrawerIcon"
           height={18}
           width={18}
         />
-      </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
-        <EuiTitle
-          size="m"
-        >
-          <h2 />
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={false}
-      >
-        <EuiButtonIcon
-          aria-label="Close"
-          color="text"
-          iconType="cross"
-          onClick={[MockFunction]}
-          type="button"
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      </h2>
+    </EuiTitle>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <EuiText

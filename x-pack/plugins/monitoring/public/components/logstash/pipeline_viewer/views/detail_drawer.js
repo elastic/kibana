@@ -17,11 +17,7 @@ import {
   EuiTableRow,
   EuiTableRowCell,
   EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonIcon,
-  EuiSpacer,
-  EuiBadge,
+  EuiSpacer
 } from '@elastic/eui';
 import { Sparkline } from '../../../sparkline';
 import { formatMetric } from '../../../../lib/format_number';
@@ -267,28 +263,10 @@ export function DetailDrawer({ vertex, onHide, timeseriesTooltipXValueFormatter 
       size="s"
       onClose={onHide}
     >
-      <EuiFlyoutHeader>
-        <EuiFlexGroup
-          alignItems="baseline"
-          gutterSize="s"
-        >
-          <EuiFlexItem grow={false}>
-            { renderIcon(vertex) }
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiTitle>
-              <h2>{ renderTitle(vertex) }</h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              onClick={onHide}
-              iconType="cross"
-              color="text"
-              aria-label="Close"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle>
+          <h2>{ renderIcon(vertex) }{ renderTitle(vertex) }</h2>
+        </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiText>

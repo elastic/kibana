@@ -8,42 +8,18 @@ exports[`render 1`] = `
   ownFocus={true}
   size="s"
 >
-  <EuiFlyoutBody>
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
+    <EuiTitle
+      size="m"
     >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
-        <EuiTitle
-          size="m"
-        >
-          <h2>
-            Add Panels
-          </h2>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={false}
-      >
-        <EuiButtonIcon
-          aria-label="close add panel"
-          color="primary"
-          data-test-subj="closeAddPanelBtn"
-          iconType="cross"
-          onClick={[Function]}
-          type="button"
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      <h2>
+        Add Panels
+      </h2>
+    </EuiTitle>
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
     <EuiTabs>
       <EuiTab
         data-test-subj="addVisualizationTab"
