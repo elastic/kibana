@@ -100,7 +100,7 @@ export class XPackInfo {
    */
   unavailableReason() {
     if (!this._cache.error && this._cache.response && !this._cache.response.license) {
-      return `[${this._clusterSource}] Elasticsearch cluster did not response with license information.`;
+      return `[${this._clusterSource}] Elasticsearch cluster did not respond with license information.`;
     }
 
     if (this._cache.error instanceof Error && this._cache.error.status === 400) {
