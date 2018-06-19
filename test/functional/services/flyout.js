@@ -17,15 +17,27 @@
  * under the License.
  */
 
-import { createAction } from 'redux-actions';
+export function FlyoutProvider({ getService }) {
+  const testSubjects = getService('testSubjects');
+  const find = getService('find');
 
-export const updateViewMode = createAction('UPDATE_VIEW_MODE');
-export const setVisibleContextMenuPanelId = createAction('SET_VISIBLE_CONTEXT_MENU_PANEL_ID');
-export const maximizePanel = createAction('MAXIMIZE_PANEl');
-export const minimizePanel = createAction('MINIMIZE_PANEL');
-export const updateIsFullScreenMode = createAction('UPDATE_IS_FULL_SCREEN_MODE');
-export const updateUseMargins = createAction('UPDATE_USE_MARGINS');
-export const updateHidePanelTitles = createAction('HIDE_PANEL_TITLES');
-export const updateTimeRange = createAction('UPDATE_TIME_RANGE');
-export const updateFilters = createAction('UPDATE_FILTERS');
-export const updateQuery = createAction('UPDATE_QUERY');
+  class Flyout {
+
+    async getFlyout(testSubj) {
+      if (testSubj) {
+        return await testSubjects.find(testSubj);
+      } else {
+        return await find.byCssSelector('.euiFlyout');
+      }
+    }
+
+    async close(panelTestSubj) {
+      const panelElement = await this.getFlyout(panelTestSubj);
+      const closeBtn = await panelElement.findByCssSelector('[aria-label*="Close"]');
+      await closeBtn.click();
+    }
+
+  }
+
+  return new Flyout();
+}

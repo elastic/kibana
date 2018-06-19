@@ -18,25 +18,17 @@
  */
 
 import { combineReducers } from 'redux';
-import {
-  embeddables,
-} from './embeddables';
+import { embeddablesReducer } from './embeddables';
 
-import {
-  panels,
-} from './panels';
+import { panelsReducer } from './panels';
 
-import {
-  view,
-} from './view';
+import { viewReducer } from './view';
 
-import {
-  metadata,
-} from './metadata';
+import { metadataReducer } from './metadata';
 
 export const dashboard = combineReducers({
-  view,
-  panels,
-  embeddables,
-  metadata,
+  embeddables: embeddablesReducer,
+  metadata: metadataReducer,
+  panels: panelsReducer,
+  view: viewReducer,
 });
