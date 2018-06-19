@@ -109,7 +109,7 @@ export const CleanExtraFilesFromModulesTask = {
       'gulpfile.js',
       'Makefile',
     ];
-    const transpiledSources = ['*.coffee', '*.scss', '*.sass'];
+    const untranspiledSources = ['*.coffee', '*.scss', '*.sass', '.ts', '.tsx'];
     const editors = ['.editorconfig', '.vscode'];
     const git = [
       '.gitattributes',
@@ -141,7 +141,7 @@ export const CleanExtraFilesFromModulesTask = {
     await deleteFromNodeModules(linters);
     await deleteFromNodeModules(hints);
     await deleteFromNodeModules(scripts);
-    await deleteFromNodeModules(transpiledSources);
+    await deleteFromNodeModules(untranspiledSources);
     await deleteFromNodeModules(editors);
     await deleteFromNodeModules(git);
     await deleteFromNodeModules(ci);
