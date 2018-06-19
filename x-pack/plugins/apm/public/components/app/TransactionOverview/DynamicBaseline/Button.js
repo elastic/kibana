@@ -1,0 +1,68 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import React, { Component } from 'react';
+import { EuiButton, EuiPopover, EuiIcon, EuiContextMenu } from '@elastic/eui';
+
+export default class DynamicBaselineButton extends Component {
+  state = {
+    isPopoverOpen: false
+  };
+
+  onButtonClick = () => this.setState({ isPopoverOpen: true });
+  closePopover = () => this.setState({ isPopoverOpen: false });
+
+  popOverPanels = [
+    {
+      id: 0,
+      title: 'Machine learning',
+      items: [
+        {
+          name: 'Create dynamic baseline',
+          icon: <EuiIcon type="plusInCircle" size="m" />,
+          onClick: () => {
+            this.closePopover();
+            this.props.onOpenFlyout();
+          }
+        },
+        {
+          name: 'View existing jobs',
+          icon: 'tableOfContents',
+          href: '/app/ml',
+          target: '_blank',
+          onClick: () => this.closePopover()
+        }
+      ]
+    }
+  ];
+
+  button = (
+    <EuiButton
+      size="s"
+      iconType="arrowDown"
+      iconSide="right"
+      onClick={this.onButtonClick}
+    >
+      Integrations
+    </EuiButton>
+  );
+
+  render() {
+    return (
+      <EuiPopover
+        id="watcher"
+        button={this.button}
+        isOpen={this.state.isPopoverOpen}
+        closePopover={this.closePopover}
+        panelPaddingSize="none"
+        anchorPosition="downRight"
+        ownFocus
+      >
+        <EuiContextMenu initialPanelId={0} panels={this.popOverPanels} />
+      </EuiPopover>
+    );
+  }
+}

@@ -77,7 +77,7 @@ export function KibanaLinkComponent({
   location,
   pathname,
   hash,
-  query,
+  query = {},
   ...props
 }) {
   const currentQuery = toQuery(location.search);

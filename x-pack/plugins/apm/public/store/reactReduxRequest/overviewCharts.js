@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { createSelector } from 'reselect';
+import { get, isEmpty } from 'lodash';
 import { getCharts } from '../selectors/chartSelectors';
 import { getUrlParams } from '../urlParams';
 import { Request } from 'react-redux-request';
@@ -31,6 +32,15 @@ export const getOverviewCharts = createSelector(
     };
   }
 );
+
+export function hasDynamicBaseline(state) {
+  return !isEmpty(
+    get(
+      state,
+      `reactReduxRequest[${ID}].data.responseTimes.avgAnomalies.buckets`
+    )
+  );
+}
 
 export function OverviewChartsRequest({ urlParams, render }) {
   const { serviceName, start, end, transactionType, kuery } = urlParams;
