@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const PLUGIN = {
-  ID: 'beats'
-};
+declare module '*.json' {
+  const value: any;
+  export default value;
+}

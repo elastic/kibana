@@ -6,6 +6,7 @@
 
 import { PLUGIN } from './common/constants';
 import { initServerWithKibana } from './server/kibana.index';
+import './types/json';
 
 const DEFAULT_ENROLLMENT_TOKENS_TTL_S = 10 * 60; // 10 minutes
 
