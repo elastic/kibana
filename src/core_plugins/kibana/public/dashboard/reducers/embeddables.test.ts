@@ -17,17 +17,26 @@
  * under the License.
  */
 
+import { getEmbeddableError, getEmbeddableInitialized } from '../../selectors';
 import { store } from '../../store';
-import {
-  embeddableIsInitializing, setPanels,
-} from '../actions';
-import {
-  getEmbeddableError,
-  getEmbeddableInitialized,
-} from '../../selectors';
+import { embeddableIsInitializing, setPanels } from '../actions';
 
 beforeAll(() => {
-  store.dispatch(setPanels({ 'foo1': { panelIndex: 'foo1' } }));
+  const panelData = {
+    embeddableConfig: {},
+    gridData: {
+      h: 0,
+      id: '0',
+      w: 0,
+      x: 0,
+      y: 0,
+    },
+    id: '123',
+    panelIndex: 'foo1',
+    type: 'mySpecialType',
+    version: '123',
+  };
+  store.dispatch(setPanels({ foo1: panelData }));
 });
 
 describe('embeddableIsInitializing', () => {
@@ -42,4 +51,3 @@ describe('embeddableIsInitializing', () => {
     expect(error).toBe(undefined);
   });
 });
-

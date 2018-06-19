@@ -59,7 +59,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('delete', async function () {
+    describe.skip('delete', async function () {
       it('default confirm action is cancel', async function () {
         await PageObjects.dashboard.searchForDashboardWithName(dashboardName);
         await PageObjects.dashboard.checkDashboardListingSelectAllCheckbox();
@@ -67,8 +67,7 @@ export default function ({ getService, getPageObjects }) {
 
         await PageObjects.common.pressEnterKey();
 
-        const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
-        expect(isConfirmOpen).to.be(false);
+        await PageObjects.common.expectConfirmModalOpenState(false);
 
         const countOfDashboards = await PageObjects.dashboard.getDashboardCountWithName(dashboardName);
         expect(countOfDashboards).to.equal(1);

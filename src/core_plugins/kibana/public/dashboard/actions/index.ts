@@ -17,4 +17,7 @@
  * under the License.
  */
 
-export * from './dashboard_selectors';
+export * from './view';
+export * from './panels';
+export * from './embeddables';
+export * from './metadata';

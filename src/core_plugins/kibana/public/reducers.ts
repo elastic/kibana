@@ -19,11 +19,12 @@
 
 import { combineReducers } from 'redux';
 import { dashboard } from './dashboard/reducers';
+import { CoreKibanaState } from './selectors';
 
 /**
  * Only a single reducer now, but eventually there should be one for each sub app that is part of the
  * core kibana plugins.
  */
-export const reducers = combineReducers({
-  dashboard
+export const reducers = combineReducers<CoreKibanaState>({
+  dashboard,
 });

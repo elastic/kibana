@@ -22,6 +22,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const flyout = getService('flyout');
   const PageObjects = getPageObjects(['header', 'common']);
 
   return new class DashboardAddPanel {
@@ -93,11 +94,11 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
     }
 
     async closeAddPanel() {
-      log.debug('closeAddPanel');
+      log.debug('DashboardAddPanel.closeAddPanel');
       const isOpen = await this.isAddPanelOpen();
       if (isOpen) {
         await retry.try(async () => {
-          await testSubjects.click('closeAddPanelBtn');
+          await flyout.close('dashboardAddPanel');
           const isOpen = await this.isAddPanelOpen();
           if (isOpen) {
             throw new Error('Add panel still open, trying again.');

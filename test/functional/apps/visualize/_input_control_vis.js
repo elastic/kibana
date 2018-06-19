@@ -183,7 +183,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      describe('nested controls', () => {
+      describe('chained controls', () => {
 
         before(async () => {
           await PageObjects.common.navigateToUrl('visualize', 'new');
