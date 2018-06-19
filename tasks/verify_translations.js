@@ -20,6 +20,7 @@
 // TODO: Integrate a new tool for translations checking
 import { i18nLoader } from '@kbn/i18n';
 
+import { toArray } from 'rxjs/operators';
 import { fromRoot, formatListAsProse } from '../src/utils';
 import { findPluginSpecs } from '../src/plugin_discovery';
 import { collectUiExports } from '../src/ui';
@@ -38,7 +39,7 @@ export default function (grunt) {
         }
       });
 
-      const specs = await spec$.toArray().toPromise();
+      const specs = await spec$.pipe(toArray()).toPromise();
       const uiExports = collectUiExports(specs);
       await verifyTranslations(uiExports);
 

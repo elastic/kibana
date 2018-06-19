@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { Observable } from 'rxjs/Rx';
+import * as Rx from 'rxjs';
+import { tap, debounceTime, filter, share, switchMap } from 'rxjs/operators';
 import './spy';
 import './visualize.less';
 import _ from 'lodash';
@@ -81,7 +82,7 @@ uiModules
 
         $scope.vis.initialized = true;
 
-        const render$ = Observable.create(observer => {
+        const render$ = Rx.Observable.create(observer => {
           $scope.$on('render', () => {
             observer.next({
               vis: $scope.vis,
@@ -89,25 +90,30 @@ uiModules
               container: getVisContainer(),
             });
           });
-        }).share();
+        }).pipe(
+          share()
+        );
 
-        const success$ = render$
-          .do(() => {
+        const success$ = render$.pipe(
+          tap(() => {
             dispatchRenderStart($el[0]);
-          })
-          .filter(({ vis, visData, container }) => vis && vis.initialized && container && (!vis.type.requiresSearch || visData))
-          .debounceTime(100)
-          .switchMap(async ({ vis, visData, container }) => {
+          }),
+          filter(({ vis, visData, container }) => vis && vis.initialized && container && (!vis.type.requiresSearch || visData)),
+          debounceTime(100),
+          switchMap(async ({ vis, visData, container }) => {
             vis.size = [container.width(), container.height()];
             const status = getUpdateStatus(vis.type.requiresUpdateStatus, $scope);
             const renderPromise = visualization.render(visData, status);
             $scope.$apply();
             return renderPromise;
-          });
+          })
+        );
 
-        const requestError$ = render$.filter(({ vis }) => vis.requestError);
+        const requestError$ = render$.pipe(
+          filter(({ vis }) => vis.requestError)
+        );
 
-        const renderSubscription = Observable.merge(success$, requestError$)
+        const renderSubscription = Rx.merge(success$, requestError$)
           .subscribe(() => {
             dispatchRenderComplete($el[0]);
           });

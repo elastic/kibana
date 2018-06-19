@@ -284,9 +284,17 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
       appFilters.splice(i, 1);
     });
 
+    // Reverse the order of globalFilters and appFilters, since uniqFilters
+    // will throw out duplicates from the back of the array, but we want
+    // newer filters to overwrite previously created filters.
+    globalFilters.reverse();
+    appFilters.reverse();
+
     return [
-      uniqFilters(globalFilters, { disabled: true }),
-      uniqFilters(appFilters, { disabled: true })
+      // Reverse filters after uniq again, so they are still in the order, they
+      // were before updating them
+      uniqFilters(globalFilters, { disabled: true }).reverse(),
+      uniqFilters(appFilters, { disabled: true }).reverse()
     ];
   }
 
