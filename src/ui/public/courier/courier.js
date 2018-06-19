@@ -115,7 +115,7 @@ uiModules.get('kibana/courier')
         }
       };
 
-      timefilter.on('refreshIntervalUpdate', function () {
+      $rootScope.$listen(timefilter, 'refreshIntervalUpdate', function () {
         const refreshValue = _.get(timefilter.getRefreshInterval(), 'value');
         const refreshPause = _.get(timefilter.getRefreshInterval(), 'pause');
         if (_.isNumber(refreshValue) && !refreshPause) {

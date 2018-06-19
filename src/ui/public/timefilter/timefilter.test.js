@@ -26,7 +26,7 @@ jest.mock('ui/chrome',
             case 'timepicker:timeDefaults':
               return { from: 'now-15m', to: 'now', mode: 'quick' };
             case 'timepicker:refreshIntervalDefaults':
-              return { display: 'Off', pause: false, value: 0 };
+              return { pause: false, value: 0 };
             default:
               throw new Error(`Unexpected config key: ${key}`);
           }
@@ -56,6 +56,116 @@ function stubNowTime(nowTime) {
 function clearNowTimeStub() {
   delete global.nowTime;
 }
+
+describe('setTime', () => {
+  let update;
+  let fetch;
+
+  beforeEach(() => {
+    update = sinon.spy();
+    fetch = sinon.spy();
+    timefilter.setTime({
+      from: 0,
+      to: 1,
+      mode: 'absolute'
+    });
+    timefilter.on('timeUpdate', update);
+    timefilter.on('fetch', fetch);
+  });
+
+  test('should update time', () => {
+    timefilter.setTime({ from: 5, to: 10, mode: 'absolute' });
+    expect(timefilter.getTime()).to.eql({ from: 5, to: 10, mode: 'absolute' });
+  });
+
+  test('should allow partial updates to time', () => {
+    timefilter.setTime({ from: 5, to: 10 });
+    expect(timefilter.getTime()).to.eql({ from: 5, to: 10, mode: 'absolute' });
+  });
+
+  test('not emit anything if the time has not changed', () => {
+    timefilter.setTime({ from: 0, to: 1 });
+    expect(update.called).to.be(false);
+    expect(fetch.called).to.be(false);
+  });
+
+  test('emit update and fetch if the time has changed', () => {
+    timefilter.setTime({ from: 5, to: 10 });
+    expect(update.called).to.be(true);
+    expect(fetch.called).to.be(true);
+  });
+
+});
+
+describe('setRefreshInterval', () => {
+
+  let update;
+  let fetch;
+
+  beforeEach(()  => {
+    update = sinon.spy();
+    fetch = sinon.spy();
+    timefilter.setRefreshInterval({
+      pause: false,
+      value: 0
+    });
+    timefilter.on('refreshIntervalUpdate', update);
+    timefilter.on('fetch', fetch);
+  });
+
+  test('should update refresh interval', () => {
+    timefilter.setRefreshInterval({ pause: true, value: 10 });
+    expect(timefilter.getRefreshInterval()).to.eql({ pause: true, value: 10 });
+  });
+
+  test('should allow partial updates to refresh interval', () => {
+    timefilter.setRefreshInterval({ value: 10 });
+    expect(timefilter.getRefreshInterval()).to.eql({ pause: false, value: 10 });
+  });
+
+  test('not emit anything if nothing has changed', () => {
+    timefilter.setRefreshInterval({ pause: false, value: 0 });
+    expect(update.called).to.be(false);
+    expect(fetch.called).to.be(false);
+  });
+
+  test('emit only an update when paused', () => {
+    timefilter.setRefreshInterval({ pause: true, value: 5000 });
+    expect(update.called).to.be(true);
+    expect(fetch.called).to.be(false);
+  });
+
+  test('emit update, not fetch, when switching to value: 0', () => {
+    timefilter.setRefreshInterval({ pause: false, value: 5000 });
+    expect(update.calledOnce).to.be(true);
+    expect(fetch.calledOnce).to.be(true);
+
+    timefilter.setRefreshInterval({ pause: false, value: 0 });
+    expect(update.calledTwice).to.be(true);
+    expect(fetch.calledTwice).to.be(false);
+  });
+
+  test('should emit update, not fetch, when moving from unpaused to paused', () => {
+    timefilter.setRefreshInterval({ pause: false, value: 5000 });
+    expect(update.calledOnce).to.be(true);
+    expect(fetch.calledOnce).to.be(true);
+
+    timefilter.setRefreshInterval({ pause: true, value: 5000 });
+    expect(update.calledTwice).to.be(true);
+    expect(fetch.calledTwice).to.be(false);
+  });
+
+  test('should emit update and fetch when unpaused', () => {
+    timefilter.setRefreshInterval({ pause: true, value: 5000 });
+    expect(update.calledOnce).to.be(true);
+    expect(fetch.calledOnce).to.be(false);
+
+    timefilter.setRefreshInterval({ pause: false, value: 5000 });
+    expect(update.calledTwice).to.be(true);
+    expect(fetch.calledOnce).to.be(true);
+  });
+
+});
 
 describe('calculateBounds', () => {
 

@@ -21,18 +21,15 @@ import _ from 'lodash';
 import moment from 'moment';
 import { calculateBounds, getTime } from './get_time';
 import { parseQueryString } from 'ui/timefilter/lib/parse_querystring';
-import { diffTimeFactory } from './lib/diff_time';
-import { diffIntervalFactory } from './lib/diff_interval';
 import { SimpleEmitter } from 'ui/utils/simple_emitter';
 import uiRoutes from '../routes';
 import chrome from 'ui/chrome';
+import { areTimePickerValsDifferent } from './lib/diff_time_picker_vals';
+import { timeHistory } from './time_history';
 
 class Timefilter extends SimpleEmitter {
   constructor() {
     super();
-    const self = this;
-    this.diffTime = diffTimeFactory(self);
-    this.diffInterval = diffIntervalFactory(self);
     this.isTimeRangeSelectorEnabled = false;
     this.isAutoRefreshSelectorEnabled = false;
     this._time = chrome.getUiSettingsClient().get('timepicker:timeDefaults');
@@ -40,11 +37,12 @@ class Timefilter extends SimpleEmitter {
   }
 
   getTime = () => {
-    return this._time;
+    return _.clone(this._time);
   }
 
   /**
    * Updates timefilter time.
+   * Emits 'timeUpdate' and 'fetch' events when time changes
    * @param {Object} time
    * @property {string|moment} time.from
    * @property {string|moment} time.to
@@ -52,12 +50,17 @@ class Timefilter extends SimpleEmitter {
    */
   setTime = (time) => {
     // Object.assign used for partially composed updates
-    this._time = Object.assign(this._time, time);
-    this.diffTime();
+    const newTime = Object.assign(this.getTime(), time);
+    if (areTimePickerValsDifferent(this.getTime(), newTime)) {
+      this._time = newTime;
+      timeHistory.add(newTime);
+      this.emit('timeUpdate');
+      this.emit('fetch');
+    }
   }
 
   getRefreshInterval = () => {
-    return this._refreshInterval;
+    return _.clone(this._refreshInterval);
   }
 
   /**
@@ -68,8 +71,14 @@ class Timefilter extends SimpleEmitter {
    */
   setRefreshInterval = (refreshInterval) => {
     // Object.assign used for partially composed updates
-    this._refreshInterval = Object.assign(this._refreshInterval, refreshInterval);
-    this.diffInterval();
+    const newRefreshInterval = Object.assign(this.getRefreshInterval(), refreshInterval);
+    if (areTimePickerValsDifferent(this.getRefreshInterval(), newRefreshInterval)) {
+      this._refreshInterval = newRefreshInterval;
+      this.emit('refreshIntervalUpdate');
+      if (!newRefreshInterval.pause && newRefreshInterval.value !== 0) {
+        this.emit('fetch');
+      }
+    }
   }
 
   toggleRefresh = () => {
