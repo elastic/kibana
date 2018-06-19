@@ -39,10 +39,6 @@ exports[`props exportedFieldsUrl 1`] = `
           </h2>
         </EuiTitle>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={false}
-      />
     </EuiFlexGroup>
     <Content
       text="this is a great tutorial about..."
@@ -120,10 +116,6 @@ exports[`props iconType 1`] = `
           </h2>
         </EuiTitle>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={false}
-      />
     </EuiFlexGroup>
     <Content
       text="this is a great tutorial about..."
@@ -236,10 +228,6 @@ exports[`props previewUrl 1`] = `
           </h2>
         </EuiTitle>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={false}
-      />
     </EuiFlexGroup>
     <Content
       text="this is a great tutorial about..."
@@ -300,10 +288,6 @@ exports[`render 1`] = `
           </h2>
         </EuiTitle>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={false}
-      />
     </EuiFlexGroup>
     <Content
       text="this is a great tutorial about..."
