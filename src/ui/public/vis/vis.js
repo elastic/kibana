@@ -41,12 +41,10 @@ import { SearchSourceProvider } from '../courier/data_source/search_source';
 import { SavedObjectsClientProvider } from '../saved_objects';
 
 const getTerms = (table, columnIndex, rowIndex) => {
-  return [...new Set(
-    table.rows.filter(row => {
-      if (row[columnIndex] === '__other__') return false;
-      return row.every((cell, i) => cell === table.rows[rowIndex][i] || i >= columnIndex);
-    }).map(row => row[columnIndex])
-  )];
+  // get only rows where cell value matches current row for all the fields before columnIndex
+  const rows = table.rows.filter(row => row.every((cell, i) => cell === table.rows[rowIndex][i] || i >= columnIndex));
+  const terms = rows.map(row => row[columnIndex]);
+  return [...new Set(terms.filter(term => term !== '__other__'))];
 };
 
 export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppState) {
