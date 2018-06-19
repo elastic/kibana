@@ -17,15 +17,27 @@
  * under the License.
  */
 
-export { QueryBarProvider } from './query_bar';
-export { FilterBarProvider } from './filter_bar';
-export { FindProvider } from './find';
-export { TestSubjectsProvider } from './test_subjects';
-export { RemoteProvider } from './remote';
-export { DocTableProvider } from './doc_table';
-export { ScreenshotsProvider } from './screenshots';
-export { FailureDebuggingProvider } from './failure_debugging';
-export { VisualizeListingTableProvider } from './visualize_listing_table';
-export { FlyoutProvider } from './flyout';
+export function FlyoutProvider({ getService }) {
+  const testSubjects = getService('testSubjects');
+  const find = getService('find');
 
-export * from './dashboard';
+  class Flyout {
+
+    async getFlyout(testSubj) {
+      if (testSubj) {
+        return await testSubjects.find(testSubj);
+      } else {
+        return await find.byCssSelector('.euiFlyout');
+      }
+    }
+
+    async close(panelTestSubj) {
+      const panelElement = await this.getFlyout(panelTestSubj);
+      const closeBtn = await panelElement.findByCssSelector('[aria-label*="Close"]');
+      await closeBtn.click();
+    }
+
+  }
+
+  return new Flyout();
+}
