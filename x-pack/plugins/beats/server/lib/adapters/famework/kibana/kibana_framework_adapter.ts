@@ -1,11 +1,15 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import {
   BackendFrameworkAdapter,
   FrameworkRequest,
   FrameworkRouteOptions,
   WrappableRequest,
 } from '../../../lib';
-
-import { once } from 'lodash';
 
 import { IStrictReply, Request, Server } from 'hapi';
 import {
@@ -23,45 +27,45 @@ export class InfraKibanaBackendFrameworkAdapter
     this.version = hapiServer.plugins.kibana.status.plugin.version;
   }
 
-  exposeStaticDir(urlPath: string, dir: string): void {
+  public exposeStaticDir(urlPath: string, dir: string): void {
     this.server.route({
-      method: 'GET',
-      path: urlPath,
       handler: {
         directory: {
           path: dir,
         },
       },
+      method: 'GET',
+      path: urlPath,
     });
   }
 
-  registerRoute<RouteRequest extends WrappableRequest, RouteResponse>(
+  public registerRoute<RouteRequest extends WrappableRequest, RouteResponse>(
     route: FrameworkRouteOptions<RouteRequest, RouteResponse>
   ) {
     const wrappedHandler = (request: any, reply: IStrictReply<RouteResponse>) =>
       route.handler(wrapRequest(request), reply);
 
     this.server.route({
-      path: route.path,
-      method: route.method,
       handler: wrappedHandler,
+      method: route.method,
+      path: route.path,
     });
   }
 
-  installIndexTemplate(name: string, template: {}) {
+  public installIndexTemplate(name: string, template: {}) {
     return this.callWithInternalUser('indices.putTemplate', {
-      name,
       body: template,
+      name,
     });
   }
 
-  async callWithInternalUser(esMethod: string, options: {}) {
+  public async callWithInternalUser(esMethod: string, options: {}) {
     const { elasticsearch } = this.server.plugins;
     const { callWithInternalUser } = elasticsearch.getCluster('admin');
     return await callWithInternalUser(esMethod, options);
   }
 
-  async callWithRequest(req: FrameworkRequest<Request>, ...rest: any[]) {
+  public async callWithRequest(req: FrameworkRequest<Request>, ...rest: any[]) {
     const internalRequest = req[internalFrameworkRequest];
     const { elasticsearch } = internalRequest.server.plugins;
     const { callWithRequest } = elasticsearch.getCluster('data');

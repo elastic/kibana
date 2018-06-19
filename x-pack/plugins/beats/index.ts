@@ -11,9 +11,6 @@ const DEFAULT_ENROLLMENT_TOKENS_TTL_S = 10 * 60; // 10 minutes
 
 export function beats(kibana) {
   return new kibana.Plugin({
-    id: PLUGIN.ID,
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
-    configPrefix: 'xpack.beats',
     config: Joi =>
       Joi.object({
         enabled: Joi.boolean().default(true),
@@ -22,6 +19,9 @@ export function beats(kibana) {
           .min(1)
           .default(DEFAULT_ENROLLMENT_TOKENS_TTL_S),
       }).default(),
+    configPrefix: 'xpack.beats',
+    id: PLUGIN.ID,
+    require: ['kibana', 'elasticsearch', 'xpack_main'],
     async init(server) {
       initServerWithKibana(server);
     },
