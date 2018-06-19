@@ -28,7 +28,7 @@ export const embeddableShape = PropTypes.shape({
   render: PropTypes.func.isRequired,
 });
 
-interface EmbeddableMetadata {
+export interface EmbeddableMetadata {
   // TODO: change to an array, embeddables should be able to specify multiple index patterns they use. Also
   // see https://github.com/elastic/kibana/issues/19408 - this needs to be generalized to support embeddables that
   // use dynamic index patterns (vega, TSVB) instead of saved object index patterns (most other visualizations).

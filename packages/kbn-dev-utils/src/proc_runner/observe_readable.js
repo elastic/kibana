@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import Rx from 'rxjs/Rx';
+import * as Rx from 'rxjs';
+import { first, ignoreElements, map } from 'rxjs/operators';
 
 /**
  *  Produces an Observable from a ReadableSteam that:
@@ -28,13 +29,12 @@ import Rx from 'rxjs/Rx';
  *  @return {Rx.Observable}
  */
 export function observeReadable(readable) {
-  return Rx.Observable.race(
-    Rx.Observable.fromEvent(readable, 'end')
-      .first()
-      .ignoreElements(),
+  return Rx.race(
+    Rx.fromEvent(readable, 'end').pipe(first(), ignoreElements()),
 
-    Rx.Observable.fromEvent(readable, 'error')
-      .first()
-      .map(err => Rx.Observable.throw(err))
+    Rx.fromEvent(readable, 'error').pipe(
+      first(),
+      map(err => Rx.throwError(err))
+    )
   );
 }

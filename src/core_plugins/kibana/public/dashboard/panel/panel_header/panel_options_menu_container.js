@@ -83,7 +83,7 @@ const mapDispatchToProps = (dispatch, { panelId }) => ({
   onMaximizePanel: () => dispatch(maximizePanel(panelId)),
   onMinimizePanel: () => dispatch(minimizePanel()),
   onResetPanelTitle: () => dispatch(resetPanelTitle(panelId)),
-  onUpdatePanelTitle: (newTitle) => dispatch(setPanelTitle(newTitle, panelId)),
+  onUpdatePanelTitle: (newTitle) => dispatch(setPanelTitle({ title: newTitle, panelId: panelId })),
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
