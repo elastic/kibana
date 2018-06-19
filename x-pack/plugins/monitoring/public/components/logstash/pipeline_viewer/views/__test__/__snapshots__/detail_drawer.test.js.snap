@@ -7,14 +7,24 @@ exports[`DetailDrawer component If vertices shows basic info and no stats for if
 >
   <EuiFlyoutHeader>
     <EuiFlexGroup
-      alignItems="center"
+      alignItems="baseline"
       component="div"
       direction="row"
-      gutterSize="l"
+      gutterSize="s"
       justifyContent="flexStart"
       responsive={true}
       wrap={false}
     >
+      <EuiFlexItem
+        component="div"
+        grow={false}
+      >
+        <img
+          className="lspvDetailDrawerIcon"
+          height={18}
+          width={18}
+        />
+      </EuiFlexItem>
       <EuiFlexItem
         component="div"
         grow={true}
@@ -23,11 +33,6 @@ exports[`DetailDrawer component If vertices shows basic info and no stats for if
           size="m"
         >
           <h2>
-            <img
-              className="lspvDetailDrawerIcon"
-              height={18}
-              width={18}
-            />
             if
           </h2>
         </EuiTitle>
@@ -38,7 +43,7 @@ exports[`DetailDrawer component If vertices shows basic info and no stats for if
       >
         <EuiButtonIcon
           aria-label="Close"
-          color="primary"
+          color="text"
           iconType="cross"
           onClick={[MockFunction]}
           type="button"
@@ -78,14 +83,24 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
 >
   <EuiFlyoutHeader>
     <EuiFlexGroup
-      alignItems="center"
+      alignItems="baseline"
       component="div"
       direction="row"
-      gutterSize="l"
+      gutterSize="s"
       justifyContent="flexStart"
       responsive={true}
       wrap={false}
     >
+      <EuiFlexItem
+        component="div"
+        grow={false}
+      >
+        <img
+          className="lspvDetailDrawerIcon"
+          height={18}
+          width={18}
+        />
+      </EuiFlexItem>
       <EuiFlexItem
         component="div"
         grow={true}
@@ -94,11 +109,6 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
           size="m"
         >
           <h2>
-            <img
-              className="lspvDetailDrawerIcon"
-              height={18}
-              width={18}
-            />
             grok filter
           </h2>
         </EuiTitle>
@@ -109,7 +119,7 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
       >
         <EuiButtonIcon
           aria-label="Close"
-          color="primary"
+          color="text"
           iconType="cross"
           onClick={[MockFunction]}
           type="button"
@@ -371,14 +381,24 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
 >
   <EuiFlyoutHeader>
     <EuiFlexGroup
-      alignItems="center"
+      alignItems="baseline"
       component="div"
       direction="row"
-      gutterSize="l"
+      gutterSize="s"
       justifyContent="flexStart"
       responsive={true}
       wrap={false}
     >
+      <EuiFlexItem
+        component="div"
+        grow={false}
+      >
+        <img
+          className="lspvDetailDrawerIcon"
+          height={18}
+          width={18}
+        />
+      </EuiFlexItem>
       <EuiFlexItem
         component="div"
         grow={true}
@@ -387,11 +407,6 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
           size="m"
         >
           <h2>
-            <img
-              className="lspvDetailDrawerIcon"
-              height={18}
-              width={18}
-            />
             grok filter
           </h2>
         </EuiTitle>
@@ -402,7 +417,7 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
       >
         <EuiButtonIcon
           aria-label="Close"
-          color="primary"
+          color="text"
           iconType="cross"
           onClick={[MockFunction]}
           type="button"
@@ -418,9 +433,12 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
         This 
         plugin
         's ID is 
-        <strong>
+        <EuiBadge
+          color="default"
+          iconSide="left"
+        >
           parse_apache_logline
-        </strong>
+        </EuiBadge>
         .
       </p>
       <EuiTable
@@ -657,14 +675,24 @@ exports[`DetailDrawer component Queue vertices shows basic info and no stats for
 >
   <EuiFlyoutHeader>
     <EuiFlexGroup
-      alignItems="center"
+      alignItems="baseline"
       component="div"
       direction="row"
-      gutterSize="l"
+      gutterSize="s"
       justifyContent="flexStart"
       responsive={true}
       wrap={false}
     >
+      <EuiFlexItem
+        component="div"
+        grow={false}
+      >
+        <img
+          className="lspvDetailDrawerIcon"
+          height={18}
+          width={18}
+        />
+      </EuiFlexItem>
       <EuiFlexItem
         component="div"
         grow={true}
@@ -673,11 +701,6 @@ exports[`DetailDrawer component Queue vertices shows basic info and no stats for
           size="m"
         >
           <h2>
-            <img
-              className="lspvDetailDrawerIcon"
-              height={18}
-              width={18}
-            />
             queue
           </h2>
         </EuiTitle>
@@ -688,7 +711,7 @@ exports[`DetailDrawer component Queue vertices shows basic info and no stats for
       >
         <EuiButtonIcon
           aria-label="Close"
-          color="primary"
+          color="text"
           iconType="cross"
           onClick={[MockFunction]}
           type="button"
@@ -718,14 +741,24 @@ exports[`DetailDrawer component shows vertex title 1`] = `
 >
   <EuiFlyoutHeader>
     <EuiFlexGroup
-      alignItems="center"
+      alignItems="baseline"
       component="div"
       direction="row"
-      gutterSize="l"
+      gutterSize="s"
       justifyContent="flexStart"
       responsive={true}
       wrap={false}
     >
+      <EuiFlexItem
+        component="div"
+        grow={false}
+      >
+        <img
+          className="lspvDetailDrawerIcon"
+          height={18}
+          width={18}
+        />
+      </EuiFlexItem>
       <EuiFlexItem
         component="div"
         grow={true}
@@ -733,13 +766,7 @@ exports[`DetailDrawer component shows vertex title 1`] = `
         <EuiTitle
           size="m"
         >
-          <h2>
-            <img
-              className="lspvDetailDrawerIcon"
-              height={18}
-              width={18}
-            />
-          </h2>
+          <h2 />
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem
@@ -748,7 +775,7 @@ exports[`DetailDrawer component shows vertex title 1`] = `
       >
         <EuiButtonIcon
           aria-label="Close"
-          color="primary"
+          color="text"
           iconType="cross"
           onClick={[MockFunction]}
           type="button"
