@@ -166,7 +166,7 @@ export class MetricVisComponent extends Component {
         key={index}
         metric={metric}
         fontSize={this.props.vis.params.metric.style.fontSize}
-        onFilter={metric.filterKey ? this._filterBucket : null}
+        onFilter={metric.filterKey && metric.bucketAgg ? this._filterBucket : null}
         showLabel={this.props.vis.params.metric.labels.show}
       />
     );
