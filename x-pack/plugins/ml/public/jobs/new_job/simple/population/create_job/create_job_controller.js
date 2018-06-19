@@ -695,7 +695,7 @@ module
       populateAppStateSettings(appState, $scope);
     });
 
-    timefilter.on('fetch', $scope.loadVis);
+    $scope.$listen(timefilter, 'fetch', $scope.loadVis);
 
     angular.element(window).resize(() => {
       resize();
@@ -704,6 +704,5 @@ module
     $scope.$on('$destroy', () => {
       globalForceStop = true;
       angular.element(window).off('resize');
-      timefilter.off('fetch', $scope.loadVis);
     });
   });

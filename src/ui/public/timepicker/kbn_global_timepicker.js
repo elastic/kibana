@@ -28,33 +28,30 @@ uiModules
   .get('kibana')
   .directive('kbnGlobalTimepicker', (globalState, $rootScope) => {
     const listenForUpdates = once(($scope) => {
-      $scope.$listen(timefilter, 'refreshIntervalUpdate', () => {
+      $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', () => {
         globalState.refreshInterval = clone(timefilter.getRefreshInterval());
         globalState.time = clone(timefilter.getTime());
         globalState.save();
-        syncTimefilterValues($scope);
+        setTimefilterValues($scope);
       });
-      $scope.$listen(timefilter, 'timeUpdate', () => {
+      $scope.$listenAndDigestAsync(timefilter, 'timeUpdate', () => {
         globalState.refreshInterval = clone(timefilter.getRefreshInterval());
         globalState.time = clone(timefilter.getTime());
         globalState.save();
-        syncTimefilterValues($scope);
+        setTimefilterValues($scope);
       });
-      $scope.$listen(timefilter, 'isEnabledUpdate', () => {
-        syncTimefilterValues($scope);
+      $scope.$listenAndDigestAsync(timefilter, 'isEnabledUpdate', () => {
+        setTimefilterValues($scope);
       });
     });
 
-    // timefilter listeners are not executed in context of angular.
-    function syncTimefilterValues($scope) {
-      $scope.$evalAsync(() => {
-        $scope.timefilterValues = {
-          refreshInterval: timefilter.getRefreshInterval(),
-          time: timefilter.getTime(),
-          isAutoRefreshSelectorEnabled: timefilter.isAutoRefreshSelectorEnabled,
-          isTimeRangeSelectorEnabled: timefilter.isTimeRangeSelectorEnabled,
-        };
-      });
+    function setTimefilterValues($scope) {
+      $scope.timefilterValues = {
+        refreshInterval: timefilter.getRefreshInterval(),
+        time: timefilter.getTime(),
+        isAutoRefreshSelectorEnabled: timefilter.isAutoRefreshSelectorEnabled,
+        isTimeRangeSelectorEnabled: timefilter.isTimeRangeSelectorEnabled,
+      };
     }
 
     return {
@@ -64,7 +61,7 @@ uiModules
       link: ($scope, element, attributes, kbnTopNav) => {
         listenForUpdates($scope);
 
-        syncTimefilterValues($scope);
+        setTimefilterValues($scope);
         $rootScope.toggleRefresh = () => {
           timefilter.toggleRefresh();
         };

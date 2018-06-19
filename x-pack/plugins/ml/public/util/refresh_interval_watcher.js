@@ -14,27 +14,32 @@ import { timefilter } from 'ui/timefilter';
 export function refreshIntervalWatcher($timeout) {
 
   let refresher;
+  let listener;
 
-  function init(listener) {
+  const onRefreshIntervalChange = () => {
+    if (refresher) {
+      $timeout.cancel(refresher);
+    }
+    const interval = timefilter.getRefreshInterval();
+    if (interval.value > 0 && !interval.pause) {
+      function startRefresh() {
+        refresher = $timeout(() => {
+          startRefresh();
+          listener();
+        }, interval.value);
+      }
+      startRefresh();
+    }
+  };
 
-    timefilter.on('refreshIntervalUpdate', (interval) => {
-      if (refresher) {
-        $timeout.cancel(refresher);
-      }
-      if (interval.value > 0 && !interval.pause) {
-        function startRefresh() {
-          refresher = $timeout(() => {
-            startRefresh();
-            listener();
-          }, interval.value);
-        }
-        startRefresh();
-      }
-    });
+  function init(listenerCallback) {
+    listener = listenerCallback;
+    timefilter.on('refreshIntervalUpdate', onRefreshIntervalChange);
   }
 
   function cancel() {
     $timeout.cancel(refresher);
+    timefilter.off('refreshIntervalUpdate', onRefreshIntervalChange);
   }
 
   return {

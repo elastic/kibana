@@ -242,7 +242,7 @@ function VisEditor($scope, $route, AppState, $window, kbnUrl, courier, Private, 
     };
 
     timefilter.enableAutoRefreshSelector();
-    $scope.$listen(timefilter, 'timeUpdate', updateTimeRange);
+    $scope.$listenAndDigestAsync(timefilter, 'timeUpdate', updateTimeRange);
 
     // update the searchSource when filters update
     $scope.$listen(queryFilter, 'update', function () {
