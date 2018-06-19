@@ -261,14 +261,15 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clearComboBox(comboBoxSelector) {
       const comboBox = await testSubjects.find(comboBoxSelector);
-      const clearBtn = await comboBox.findByCssSelector('button.euiFormControlLayoutClearButton');
+      const clearBtn = await comboBox.findByCssSelector('[data-test-subj="comboBoxClearButton"]');
       await clearBtn.click();
+      await this.closeComboBoxOptionsList(comboBox);
     }
 
     async closeComboBoxOptionsList(comboBoxElement) {
       const isOptionsListOpen = await testSubjects.exists('comboBoxOptionsList');
       if (isOptionsListOpen) {
-        const closeBtn = await comboBoxElement.findByCssSelector('button.euiFormControlLayoutCustomIcon');
+        const closeBtn = await comboBoxElement.findByCssSelector('[data-test-subj="comboBoxToggleListButton"]');
         await closeBtn.click();
       }
     }
