@@ -31,6 +31,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardVisualizations.createAndAddTSVBVisualization('TSVB');
       await PageObjects.dashboard.addVisualizations(PageObjects.dashboard.getTestVisualizationNames());
+      await PageObjects.common.clearAllToasts();
       await dashboardVisualizations.createAndAddSavedSearch({ name: 'saved search', fields: ['bytes', 'agent'] });
       testVisualizationTitles.push('TSVB');
       testVisualizationTitles.splice(1, 0, ...PageObjects.dashboard.getTestVisualizationNames());
