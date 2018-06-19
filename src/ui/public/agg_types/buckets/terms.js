@@ -76,10 +76,10 @@ export const termsBucketAgg = new BucketAggType({
   getFormat: function (bucket) {
     return {
       getConverterFor: (type) => {
-        const converter = bucket.params.field.format.getConverterFor(type);
         return (val) => {
           if (val === '__other__') return bucket.params.otherBucketLabel;
           if (val === '__missing__') return bucket.params.missingBucketLabel;
+          const converter = bucket.params.field.format.getConverterFor(type);
           return converter(val);
         };
       }
