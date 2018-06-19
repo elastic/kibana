@@ -30,7 +30,8 @@ export class KibanaMap extends React.Component {
   }
 
   getLayerById(id) {
-    const index = this._kbnOLLayers.findIndex(layerTuple => layerTuple.kbnLayer.getId() === id);
+    const index = this._kbnOLLayers.findIndex(
+      layerTuple => layerTuple.kbnLayer.getId() === id);
     return (index >= 0) ? this._kbnOLLayers[index].kbnLayer : null;
   }
 

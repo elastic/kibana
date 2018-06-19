@@ -5,7 +5,8 @@
  */
 const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 const INITIAL_STATE = {
-  selectedLayer: null
+  selectedLayer: null,
+  layerList: []
 };
 
 // Reducer
@@ -27,7 +28,7 @@ export function setSelectedLayer(layer) {
 }
 
 // Selectors
-export const getSelectedLayer = ({ ui }) => ui && ui.selectedLayer
+export const getSelectedLayer = ({ map }) => map && map.selectedLayer
   || INITIAL_STATE.selectedLayer;
 
 export default map;
