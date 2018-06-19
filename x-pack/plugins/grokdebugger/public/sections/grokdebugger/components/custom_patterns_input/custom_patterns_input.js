@@ -14,10 +14,8 @@ import {
 } from '@elastic/eui';
 
 export function CustomPatternsInput({ value, onChange }) {
-  const sampleCustomPatterns = `
-    POSTFIX_QUEUEID [0-9A-F]{10,11}
-    MSG message-id=<%{GREEDYDATA}>
-  `;
+  const sampleCustomPatterns = `POSTFIX_QUEUEID [0-9A-F]{10,11}
+MSG message-id=<%{GREEDYDATA}>`;
 
   return (
     <EuiAccordion
