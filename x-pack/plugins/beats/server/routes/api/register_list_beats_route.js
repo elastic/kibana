@@ -4,19 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  get,
-  omit
-} from "lodash";
-import { INDEX_NAMES } from "../../../common/constants";
-import { callWithRequestFactory } from '../../lib/client';
-import { wrapEsError } from "../../lib/error_wrappers";
+import { get, omit } from 'lodash';
+import { INDEX_NAMES } from '../../../common/constants';
+import { callWithRequestFactory } from '../../utils/client';
+import { wrapEsError } from '../../utils/error_wrappers';
 
 async function getBeats(callWithRequest) {
   const params = {
     index: INDEX_NAMES.BEATS,
     type: '_doc',
-    q: 'type:beat'
+    q: 'type:beat',
   };
 
   const response = await callWithRequest('search', params);
@@ -39,9 +36,9 @@ export function registerListBeatsRoute(server) {
       }
 
       const response = {
-        beats: beats.map(beat => omit(beat._source.beat, ['access_token']))
+        beats: beats.map(beat => omit(beat._source.beat, ['access_token'])),
       };
       reply(response);
-    }
+    },
   });
 }

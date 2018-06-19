@@ -5,18 +5,18 @@
  */
 
 import Joi from 'joi';
-import {  get } from 'lodash';
+import { get } from 'lodash';
 import { INDEX_NAMES } from '../../../common/constants';
-import { callWithInternalUserFactory } from '../../lib/client';
-import { wrapEsError } from '../../lib/error_wrappers';
-import { areTokensEqual } from '../../lib/crypto';
+import { callWithInternalUserFactory } from '../../utils/client';
+import { wrapEsError } from '../../utils/error_wrappers';
+import { areTokensEqual } from '../../utils/crypto';
 
 async function getBeat(callWithInternalUser, beatId) {
   const params = {
     index: INDEX_NAMES.BEATS,
     type: '_doc',
     id: `beat:${beatId}`,
-    ignore: [ 404 ]
+    ignore: [404],
   };
 
   const response = await callWithInternalUser('get', params);
@@ -30,7 +30,7 @@ async function getBeat(callWithInternalUser, beatId) {
 function persistBeat(callWithInternalUser, beat) {
   const body = {
     type: 'beat',
-    beat
+    beat,
   };
 
   const params = {
@@ -38,7 +38,7 @@ function persistBeat(callWithInternalUser, beat) {
     type: '_doc',
     id: `beat:${beat.id}`,
     body,
-    refresh: 'wait_for'
+    refresh: 'wait_for',
   };
   return callWithInternalUser('index', params);
 }
@@ -57,13 +57,13 @@ export function registerUpdateBeatRoute(server) {
           host_name: Joi.string(),
           ephemeral_id: Joi.string(),
           local_configuration_yml: Joi.string(),
-          metadata: Joi.object()
+          metadata: Joi.object(),
         }).required(),
         headers: Joi.object({
-          'kbn-beats-access-token': Joi.string().required()
-        }).options({ allowUnknown: true })
+          'kbn-beats-access-token': Joi.string().required(),
+        }).options({ allowUnknown: true }),
       },
-      auth: false
+      auth: false,
     },
     handler: async (request, reply) => {
       const callWithInternalUser = callWithInternalUserFactory(server);
@@ -75,7 +75,10 @@ export function registerUpdateBeatRoute(server) {
           return reply({ message: 'Beat not found' }).code(404);
         }
 
-        const isAccessTokenValid = areTokensEqual(beat.access_token, request.headers['kbn-beats-access-token']);
+        const isAccessTokenValid = areTokensEqual(
+          beat.access_token,
+          request.headers['kbn-beats-access-token']
+        );
         if (!isAccessTokenValid) {
           return reply({ message: 'Invalid access token' }).code(401);
         }
@@ -89,13 +92,13 @@ export function registerUpdateBeatRoute(server) {
         await persistBeat(callWithInternalUser, {
           ...beat,
           ...request.payload,
-          host_ip: remoteAddress
+          host_ip: remoteAddress,
         });
       } catch (err) {
         return reply(wrapEsError(err));
       }
 
       reply().code(204);
-    }
+    },
   });
 }

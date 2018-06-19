@@ -5,21 +5,17 @@
  */
 
 import Joi from 'joi';
-import {
-  get,
-  flatten,
-  uniq
-} from 'lodash';
+import { get, flatten, uniq } from 'lodash';
 import { INDEX_NAMES } from '../../../common/constants';
-import { callWithRequestFactory } from '../../lib/client';
-import { wrapEsError } from '../../lib/error_wrappers';
+import { callWithRequestFactory } from '../../utils/client';
+import { wrapEsError } from '../../utils/error_wrappers';
 
 async function getDocs(callWithRequest, ids) {
   const params = {
     index: INDEX_NAMES.BEATS,
     type: '_doc',
     body: { ids },
-    _source: false
+    _source: false,
   };
 
   const response = await callWithRequest('mget', params);
@@ -55,46 +51,55 @@ function findNonExistentTags(callWithRequest, tags) {
 }
 
 async function persistAssignments(callWithRequest, assignments) {
-  const body = flatten(assignments.map(({ beatId, tag }) => {
-    const script = ''
-      + 'def beat = ctx._source.beat; '
-      + 'if (beat.tags == null) { '
-      + '  beat.tags = []; '
-      + '} '
-      + 'if (!beat.tags.contains(params.tag)) { '
-      + '  beat.tags.add(params.tag); '
-      + '}';
+  const body = flatten(
+    assignments.map(({ beatId, tag }) => {
+      const script =
+        '' +
+        'def beat = ctx._source.beat; ' +
+        'if (beat.tags == null) { ' +
+        '  beat.tags = []; ' +
+        '} ' +
+        'if (!beat.tags.contains(params.tag)) { ' +
+        '  beat.tags.add(params.tag); ' +
+        '}';
 
-    return [
-      { update: { _id: `beat:${beatId}` } },
-      { script: { source: script, params: { tag } } }
-    ];
-  }));
+      return [
+        { update: { _id: `beat:${beatId}` } },
+        { script: { source: script, params: { tag } } },
+      ];
+    })
+  );
 
   const params = {
     index: INDEX_NAMES.BEATS,
     type: '_doc',
     body,
-    refresh: 'wait_for'
+    refresh: 'wait_for',
   };
 
   const response = await callWithRequest('bulk', params);
-  return get(response, 'items', [])
-    .map((item, resultIdx) => ({
-      status: item.update.status,
-      result: item.update.result,
-      idxInRequest: assignments[resultIdx].idxInRequest
-    }));
+  return get(response, 'items', []).map((item, resultIdx) => ({
+    status: item.update.status,
+    result: item.update.result,
+    idxInRequest: assignments[resultIdx].idxInRequest,
+  }));
 }
 
-function addNonExistentItemAssignmentsToResponse(response, assignments, nonExistentBeatIds, nonExistentTags) {
+function addNonExistentItemAssignmentsToResponse(
+  response,
+  assignments,
+  nonExistentBeatIds,
+  nonExistentTags
+) {
   assignments.forEach(({ beat_id: beatId, tag }, idx) => {
     const isBeatNonExistent = nonExistentBeatIds.includes(beatId);
     const isTagNonExistent = nonExistentTags.includes(tag);
 
     if (isBeatNonExistent && isTagNonExistent) {
       response.assignments[idx].status = 404;
-      response.assignments[idx].result = `Beat ${beatId} and tag ${tag} not found`;
+      response.assignments[
+        idx
+      ].result = `Beat ${beatId} and tag ${tag} not found`;
     } else if (isBeatNonExistent) {
       response.assignments[idx].status = 404;
       response.assignments[idx].result = `Beat ${beatId} not found`;
@@ -122,12 +127,14 @@ export function registerAssignTagsToBeatsRoute(server) {
     config: {
       validate: {
         payload: Joi.object({
-          assignments: Joi.array().items(Joi.object({
-            beat_id: Joi.string().required(),
-            tag: Joi.string().required()
-          }))
-        }).required()
-      }
+          assignments: Joi.array().items(
+            Joi.object({
+              beat_id: Joi.string().required(),
+              tag: Joi.string().required(),
+            })
+          ),
+        }).required(),
+      },
     },
     handler: async (request, reply) => {
       const callWithRequest = callWithRequestFactory(server, request);
@@ -137,26 +144,42 @@ export function registerAssignTagsToBeatsRoute(server) {
       const tags = uniq(assignments.map(assignment => assignment.tag));
 
       const response = {
-        assignments: assignments.map(() => ({ status: null }))
+        assignments: assignments.map(() => ({ status: null })),
       };
 
       try {
         // Handle assignments containing non-existing beat IDs or tags
-        const nonExistentBeatIds = await findNonExistentBeatIds(callWithRequest, beatIds);
-        const nonExistentTags = await findNonExistentTags(callWithRequest, tags);
+        const nonExistentBeatIds = await findNonExistentBeatIds(
+          callWithRequest,
+          beatIds
+        );
+        const nonExistentTags = await findNonExistentTags(
+          callWithRequest,
+          tags
+        );
 
-        addNonExistentItemAssignmentsToResponse(response, assignments, nonExistentBeatIds, nonExistentTags);
+        addNonExistentItemAssignmentsToResponse(
+          response,
+          assignments,
+          nonExistentBeatIds,
+          nonExistentTags
+        );
 
         const validAssignments = assignments
           .map((assignment, idxInRequest) => ({
             beatId: assignment.beat_id,
             tag: assignment.tag,
-            idxInRequest // so we can add the result of this assignment to the correct place in the response
+            idxInRequest, // so we can add the result of this assignment to the correct place in the response
           }))
-          .filter((assignment, idx) => response.assignments[idx].status === null);
+          .filter(
+            (assignment, idx) => response.assignments[idx].status === null
+          );
 
         if (validAssignments.length > 0) {
-          const assignmentResults = await persistAssignments(callWithRequest, validAssignments);
+          const assignmentResults = await persistAssignments(
+            callWithRequest,
+            validAssignments
+          );
           addAssignmentResultsToResponse(response, assignmentResults);
         }
       } catch (err) {
@@ -164,6 +187,6 @@ export function registerAssignTagsToBeatsRoute(server) {
       }
 
       reply(response);
-    }
+    },
   });
 }

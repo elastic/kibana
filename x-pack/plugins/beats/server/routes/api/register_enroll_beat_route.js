@@ -7,20 +7,17 @@
 import Joi from 'joi';
 import uuid from 'uuid';
 import moment from 'moment';
-import {
-  get,
-  omit
-} from 'lodash';
+import { get, omit } from 'lodash';
 import { INDEX_NAMES } from '../../../common/constants';
-import { callWithInternalUserFactory } from '../../lib/client';
-import { wrapEsError } from '../../lib/error_wrappers';
+import { callWithInternalUserFactory } from '../../utils/client';
+import { wrapEsError } from '../../utils/error_wrappers';
 
 async function getEnrollmentToken(callWithInternalUser, enrollmentToken) {
   const params = {
     index: INDEX_NAMES.BEATS,
     type: '_doc',
     id: `enrollment_token:${enrollmentToken}`,
-    ignore: [ 404 ]
+    ignore: [404],
   };
 
   const response = await callWithInternalUser('get', params);
@@ -31,14 +28,16 @@ async function getEnrollmentToken(callWithInternalUser, enrollmentToken) {
   // out whether a token is valid or not. So we introduce a random delay in returning from
   // this function to obscure the actual time it took for Elasticsearch to find the token.
   const randomDelayInMs = 25 + Math.round(Math.random() * 200); // between 25 and 225 ms
-  return new Promise(resolve => setTimeout(() => resolve(token), randomDelayInMs));
+  return new Promise(resolve =>
+    setTimeout(() => resolve(token), randomDelayInMs)
+  );
 }
 
 function deleteUsedEnrollmentToken(callWithInternalUser, enrollmentToken) {
   const params = {
     index: INDEX_NAMES.BEATS,
     type: '_doc',
-    id: `enrollment_token:${enrollmentToken}`
+    id: `enrollment_token:${enrollmentToken}`,
   };
 
   return callWithInternalUser('delete', params);
@@ -47,7 +46,7 @@ function deleteUsedEnrollmentToken(callWithInternalUser, enrollmentToken) {
 function persistBeat(callWithInternalUser, beat) {
   const body = {
     type: 'beat',
-    beat
+    beat,
   };
 
   const params = {
@@ -55,7 +54,7 @@ function persistBeat(callWithInternalUser, beat) {
     type: '_doc',
     id: `beat:${beat.id}`,
     body,
-    refresh: 'wait_for'
+    refresh: 'wait_for',
   };
   return callWithInternalUser('create', params);
 }
@@ -71,13 +70,13 @@ export function registerEnrollBeatRoute(server) {
         payload: Joi.object({
           type: Joi.string().required(),
           version: Joi.string().required(),
-          host_name: Joi.string().required()
+          host_name: Joi.string().required(),
         }).required(),
         headers: Joi.object({
-          'kbn-beats-enrollment-token': Joi.string().required()
-        }).options({ allowUnknown: true })
+          'kbn-beats-enrollment-token': Joi.string().required(),
+        }).options({ allowUnknown: true }),
       },
-      auth: false
+      auth: false,
     },
     handler: async (request, reply) => {
       const callWithInternalUser = callWithInternalUserFactory(server);
@@ -86,7 +85,10 @@ export function registerEnrollBeatRoute(server) {
 
       try {
         const enrollmentToken = request.headers['kbn-beats-enrollment-token'];
-        const { token, expires_on: expiresOn } = await getEnrollmentToken(callWithInternalUser, enrollmentToken);
+        const { token, expires_on: expiresOn } = await getEnrollmentToken(
+          callWithInternalUser,
+          enrollmentToken
+        );
         if (!token) {
           return reply({ message: 'Invalid enrollment token' }).code(400);
         }
@@ -94,13 +96,13 @@ export function registerEnrollBeatRoute(server) {
           return reply({ message: 'Expired enrollment token' }).code(400);
         }
 
-        accessToken = uuid.v4().replace(/-/g, "");
+        accessToken = uuid.v4().replace(/-/g, '');
         const remoteAddress = request.info.remoteAddress;
         await persistBeat(callWithInternalUser, {
           ...omit(request.payload, 'enrollment_token'),
           id: beatId,
           access_token: accessToken,
-          host_ip: remoteAddress
+          host_ip: remoteAddress,
         });
 
         await deleteUsedEnrollmentToken(callWithInternalUser, enrollmentToken);
@@ -110,6 +112,6 @@ export function registerEnrollBeatRoute(server) {
 
       const response = { access_token: accessToken };
       reply(response).code(201);
-    }
+    },
   });
 }

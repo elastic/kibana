@@ -5,21 +5,17 @@
  */
 
 import Joi from 'joi';
-import {
-  get,
-  flatten,
-  uniq
-} from 'lodash';
+import { get, flatten, uniq } from 'lodash';
 import { INDEX_NAMES } from '../../../common/constants';
-import { callWithRequestFactory } from '../../lib/client';
-import { wrapEsError } from '../../lib/error_wrappers';
+import { callWithRequestFactory } from '../../utils/client';
+import { wrapEsError } from '../../utils/error_wrappers';
 
 async function getDocs(callWithRequest, ids) {
   const params = {
     index: INDEX_NAMES.BEATS,
     type: '_doc',
     body: { ids },
-    _source: false
+    _source: false,
   };
 
   const response = await callWithRequest('mget', params);
@@ -55,36 +51,43 @@ function findNonExistentTags(callWithRequest, tags) {
 }
 
 async function persistRemovals(callWithRequest, removals) {
-  const body = flatten(removals.map(({ beatId, tag }) => {
-    const script = ''
-      + 'def beat = ctx._source.beat; '
-      + 'if (beat.tags != null) { '
-      + '  beat.tags.removeAll([params.tag]); '
-      + '}';
+  const body = flatten(
+    removals.map(({ beatId, tag }) => {
+      const script =
+        '' +
+        'def beat = ctx._source.beat; ' +
+        'if (beat.tags != null) { ' +
+        '  beat.tags.removeAll([params.tag]); ' +
+        '}';
 
-    return [
-      { update: { _id: `beat:${beatId}` } },
-      { script: { source: script, params: { tag } } }
-    ];
-  }));
+      return [
+        { update: { _id: `beat:${beatId}` } },
+        { script: { source: script, params: { tag } } },
+      ];
+    })
+  );
 
   const params = {
     index: INDEX_NAMES.BEATS,
     type: '_doc',
     body,
-    refresh: 'wait_for'
+    refresh: 'wait_for',
   };
 
   const response = await callWithRequest('bulk', params);
-  return get(response, 'items', [])
-    .map((item, resultIdx) => ({
-      status: item.update.status,
-      result: item.update.result,
-      idxInRequest: removals[resultIdx].idxInRequest
-    }));
+  return get(response, 'items', []).map((item, resultIdx) => ({
+    status: item.update.status,
+    result: item.update.result,
+    idxInRequest: removals[resultIdx].idxInRequest,
+  }));
 }
 
-function addNonExistentItemRemovalsToResponse(response, removals, nonExistentBeatIds, nonExistentTags) {
+function addNonExistentItemRemovalsToResponse(
+  response,
+  removals,
+  nonExistentBeatIds,
+  nonExistentTags
+) {
   removals.forEach(({ beat_id: beatId, tag }, idx) => {
     const isBeatNonExistent = nonExistentBeatIds.includes(beatId);
     const isTagNonExistent = nonExistentTags.includes(tag);
@@ -119,12 +122,14 @@ export function registerRemoveTagsFromBeatsRoute(server) {
     config: {
       validate: {
         payload: Joi.object({
-          removals: Joi.array().items(Joi.object({
-            beat_id: Joi.string().required(),
-            tag: Joi.string().required()
-          }))
-        }).required()
-      }
+          removals: Joi.array().items(
+            Joi.object({
+              beat_id: Joi.string().required(),
+              tag: Joi.string().required(),
+            })
+          ),
+        }).required(),
+      },
     },
     handler: async (request, reply) => {
       const callWithRequest = callWithRequestFactory(server, request);
@@ -134,26 +139,40 @@ export function registerRemoveTagsFromBeatsRoute(server) {
       const tags = uniq(removals.map(removal => removal.tag));
 
       const response = {
-        removals: removals.map(() => ({ status: null }))
+        removals: removals.map(() => ({ status: null })),
       };
 
       try {
         // Handle removals containing non-existing beat IDs or tags
-        const nonExistentBeatIds = await findNonExistentBeatIds(callWithRequest, beatIds);
-        const nonExistentTags = await findNonExistentTags(callWithRequest, tags);
+        const nonExistentBeatIds = await findNonExistentBeatIds(
+          callWithRequest,
+          beatIds
+        );
+        const nonExistentTags = await findNonExistentTags(
+          callWithRequest,
+          tags
+        );
 
-        addNonExistentItemRemovalsToResponse(response, removals, nonExistentBeatIds, nonExistentTags);
+        addNonExistentItemRemovalsToResponse(
+          response,
+          removals,
+          nonExistentBeatIds,
+          nonExistentTags
+        );
 
         const validRemovals = removals
           .map((removal, idxInRequest) => ({
             beatId: removal.beat_id,
             tag: removal.tag,
-            idxInRequest // so we can add the result of this removal to the correct place in the response
+            idxInRequest, // so we can add the result of this removal to the correct place in the response
           }))
           .filter((removal, idx) => response.removals[idx].status === null);
 
         if (validRemovals.length > 0) {
-          const removalResults = await persistRemovals(callWithRequest, validRemovals);
+          const removalResults = await persistRemovals(
+            callWithRequest,
+            validRemovals
+          );
           addRemovalResultsToResponse(response, removalResults);
         }
       } catch (err) {
@@ -161,6 +180,6 @@ export function registerRemoveTagsFromBeatsRoute(server) {
       }
 
       reply(response);
-    }
+    },
   });
 }

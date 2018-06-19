@@ -5,24 +5,20 @@
  */
 
 import Joi from 'joi';
-import {
-  get,
-  uniq,
-  intersection
-} from 'lodash';
-import {
-  INDEX_NAMES,
-  CONFIGURATION_BLOCKS
-} from '../../../common/constants';
-import { callWithRequestFactory } from '../../lib/client';
-import { wrapEsError } from '../../lib/error_wrappers';
+import { get, uniq, intersection } from 'lodash';
+import { INDEX_NAMES, CONFIGURATION_BLOCKS } from '../../../common/constants';
+import { callWithRequestFactory } from '../../utils/client';
+import { wrapEsError } from '../../utils/error_wrappers';
 
 function validateUniquenessEnforcingTypes(configurationBlocks) {
   const types = uniq(configurationBlocks.map(block => block.type));
 
   // If none of the types in the given configuration blocks are uniqueness-enforcing,
   // we don't need to perform any further validation checks.
-  const uniquenessEnforcingTypes = intersection(types, CONFIGURATION_BLOCKS.UNIQUENESS_ENFORCING_TYPES);
+  const uniquenessEnforcingTypes = intersection(
+    types,
+    CONFIGURATION_BLOCKS.UNIQUENESS_ENFORCING_TYPES
+  );
   if (uniquenessEnforcingTypes.length === 0) {
     return { isValid: true };
   }
@@ -37,7 +33,7 @@ function validateUniquenessEnforcingTypes(configurationBlocks) {
     const count = typeCountMap[type] || 0;
     return {
       ...typeCountMap,
-      [type]: count + 1
+      [type]: count + 1,
     };
   }, {});
 
@@ -49,12 +45,15 @@ function validateUniquenessEnforcingTypes(configurationBlocks) {
 
   const message = Object.entries(typeCountMap)
     .filter(([, count]) => count > 1)
-    .map(([type, count]) => `Expected only one configuration block of type '${type}' but found ${count}`)
+    .map(
+      ([type, count]) =>
+        `Expected only one configuration block of type '${type}' but found ${count}`
+    )
     .join(' ');
 
   return {
     isValid: false,
-    message
+    message,
   };
 }
 
@@ -65,7 +64,7 @@ async function validateConfigurationBlocks(configurationBlocks) {
 async function persistTag(callWithRequest, tag) {
   const body = {
     type: 'tag',
-    tag
+    tag,
   };
 
   const params = {
@@ -73,7 +72,7 @@ async function persistTag(callWithRequest, tag) {
     type: '_doc',
     id: `tag:${tag.id}`,
     body,
-    refresh: 'wait_for'
+    refresh: 'wait_for',
   };
 
   const response = await callWithRequest('index', params);
@@ -91,27 +90,35 @@ export function registerSetTagRoute(server) {
         payload: Joi.object({
           configuration_blocks: Joi.array().items(
             Joi.object({
-              type: Joi.string().required().valid(Object.values(CONFIGURATION_BLOCKS.TYPES)),
-              block_yml: Joi.string().required()
+              type: Joi.string()
+                .required()
+                .valid(Object.values(CONFIGURATION_BLOCKS.TYPES)),
+              block_yml: Joi.string().required(),
             })
-          )
-        }).allow(null)
-      }
+          ),
+        }).allow(null),
+      },
     },
     handler: async (request, reply) => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       let result;
       try {
-        const configurationBlocks = get(request, 'payload.configuration_blocks', []);
-        const { isValid, message } = await validateConfigurationBlocks(configurationBlocks);
+        const configurationBlocks = get(
+          request,
+          'payload.configuration_blocks',
+          []
+        );
+        const { isValid, message } = await validateConfigurationBlocks(
+          configurationBlocks
+        );
         if (!isValid) {
           return reply({ message }).code(400);
         }
 
         const tag = {
           id: request.params.tag,
-          configuration_blocks: configurationBlocks
+          configuration_blocks: configurationBlocks,
         };
         result = await persistTag(callWithRequest, tag);
       } catch (err) {
@@ -119,6 +126,6 @@ export function registerSetTagRoute(server) {
       }
 
       reply().code(result === 'created' ? 201 : 200);
-    }
+    },
   });
 }

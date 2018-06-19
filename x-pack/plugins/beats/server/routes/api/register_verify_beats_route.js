@@ -6,13 +6,10 @@
 
 import Joi from 'joi';
 import moment from 'moment';
-import {
-  get,
-  flatten
-} from 'lodash';
+import { get, flatten } from 'lodash';
 import { INDEX_NAMES } from '../../../common/constants';
-import { callWithRequestFactory } from '../../lib/client';
-import { wrapEsError } from '../../lib/error_wrappers';
+import { callWithRequestFactory } from '../../utils/client';
+import { wrapEsError } from '../../utils/error_wrappers';
 
 async function getBeats(callWithRequest, beatIds) {
   const ids = beatIds.map(beatId => `beat:${beatId}`);
@@ -20,7 +17,7 @@ async function getBeats(callWithRequest, beatIds) {
     index: INDEX_NAMES.BEATS,
     type: '_doc',
     body: { ids },
-    _sourceInclude: [ 'beat.id', 'beat.verified_on' ]
+    _sourceInclude: ['beat.id', 'beat.verified_on'],
   };
 
   const response = await callWithRequest('mget', params);
@@ -28,21 +25,23 @@ async function getBeats(callWithRequest, beatIds) {
 }
 
 async function verifyBeats(callWithRequest, beatIds) {
-  if (!Array.isArray(beatIds) || (beatIds.length === 0)) {
+  if (!Array.isArray(beatIds) || beatIds.length === 0) {
     return [];
   }
 
   const verifiedOn = moment().toJSON();
-  const body = flatten(beatIds.map(beatId => [
-    { update: { _id: `beat:${beatId}` } },
-    { doc: { beat: { verified_on: verifiedOn } } }
-  ]));
+  const body = flatten(
+    beatIds.map(beatId => [
+      { update: { _id: `beat:${beatId}` } },
+      { doc: { beat: { verified_on: verifiedOn } } },
+    ])
+  );
 
   const params = {
     index: INDEX_NAMES.BEATS,
     type: '_doc',
     body,
-    refresh: 'wait_for'
+    refresh: 'wait_for',
   };
 
   const response = await callWithRequest('bulk', params);
@@ -91,10 +90,10 @@ export function registerVerifyBeatsRoute(server) {
       validate: {
         payload: Joi.object({
           beats: Joi.array({
-            id: Joi.string().required()
-          }).min(1)
-        }).required()
-      }
+            id: Joi.string().required(),
+          }).min(1),
+        }).required(),
+      },
     },
     handler: async (request, reply) => {
       const callWithRequest = callWithRequestFactory(server, request);
@@ -113,9 +112,14 @@ export function registerVerifyBeatsRoute(server) {
         alreadyVerifiedBeatIds = findAlreadyVerifiedBeatIds(beatsFromEs);
         const toBeVerifiedBeatIds = findToBeVerifiedBeatIds(beatsFromEs);
 
-        const verifications = await verifyBeats(callWithRequest, toBeVerifiedBeatIds);
-        verifiedBeatIds = findVerifiedBeatIds(verifications, toBeVerifiedBeatIds);
-
+        const verifications = await verifyBeats(
+          callWithRequest,
+          toBeVerifiedBeatIds
+        );
+        verifiedBeatIds = findVerifiedBeatIds(
+          verifications,
+          toBeVerifiedBeatIds
+        );
       } catch (err) {
         return reply(wrapEsError(err));
       }
@@ -138,6 +142,6 @@ export function registerVerifyBeatsRoute(server) {
 
       const response = { beats };
       reply(response);
-    }
+    },
   });
 }
