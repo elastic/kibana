@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'console']);
 
-  describe('console app@', function describeIndexTests() {
+  describe('console app', function describeIndexTests() {
     before(async function () {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
@@ -44,9 +44,8 @@ export default function ({ getService, getPageObjects }) {
     it('should show the default request', async function () {
       // collapse the help pane because we only get the VISIBLE TEXT, not the part that is scrolled
       await PageObjects.console.collapseHelp();
-      let  actualRequest;
       await retry.try(async function () {
-        actualRequest = await PageObjects.console.getRequest();
+        const actualRequest = await PageObjects.console.getRequest();
         log.debug(actualRequest);
         expect(actualRequest.trim()).to.eql(DEFAULT_REQUEST);
       });
