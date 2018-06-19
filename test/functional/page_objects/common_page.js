@@ -18,6 +18,7 @@
  */
 
 import { delay } from 'bluebird';
+import expect from 'expect.js';
 
 import getUrl from '../../../src/test_utils/get_url';
 
@@ -260,9 +261,20 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       }
     }
 
-    async isConfirmModalOpen() {
-      log.debug('isConfirmModalOpen');
-      return await testSubjects.exists('confirmModalCancelButton', 2000);
+    async expectConfirmModalOpenState(state) {
+      if (typeof state !== 'boolean') {
+        throw new Error('pass true or false to expectConfirmModalOpenState()');
+      }
+
+      log.debug(`expectConfirmModalOpenState(${state})`);
+
+      // we use retry here instead of a simple .exists() check because the modal
+      // fades in/out, which takes time, and we really only care that at some point
+      // the modal is either open or closed
+      await retry.try(async () => {
+        const actualState = await testSubjects.exists('confirmModalCancelButton');
+        expect(actualState).to.be(state);
+      });
     }
 
     async getBreadcrumbPageTitle() {
