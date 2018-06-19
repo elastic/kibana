@@ -6,3 +6,4 @@
 
 export { registerIndicesRoute } from './indices';
 export { registerFieldsForWildcardRoute } from './index_patterns';
+export { registerSearchRoute } from './search';
