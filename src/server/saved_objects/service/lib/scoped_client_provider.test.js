@@ -22,15 +22,9 @@ import { ScopedSavedObjectsClientProvider } from './scoped_client_provider';
 test(`uses default client factory when one isn't set`, () => {
   const returnValue = Symbol();
   const defaultClientFactoryMock = jest.fn().mockReturnValue(returnValue);
-  const index = Symbol();
-  const mappings = Symbol();
-  const onBeforeWrite = () => {};
   const request = Symbol();
 
   const clientProvider = new ScopedSavedObjectsClientProvider({
-    index,
-    mappings,
-    onBeforeWrite,
     defaultClientFactory: defaultClientFactoryMock
   });
   const result = clientProvider.getClient(request);
@@ -39,25 +33,16 @@ test(`uses default client factory when one isn't set`, () => {
   expect(defaultClientFactoryMock).toHaveBeenCalledTimes(1);
   expect(defaultClientFactoryMock).toHaveBeenCalledWith({
     request,
-    index,
-    mappings,
-    onBeforeWrite,
   });
 });
 
 test(`uses custom client factory when one is set`, () => {
   const defaultClientFactoryMock = jest.fn();
-  const index = Symbol();
-  const mappings = Symbol();
-  const onBeforeWrite = () => {};
   const request = Symbol();
   const returnValue = Symbol();
   const customClientFactoryMock = jest.fn().mockReturnValue(returnValue);
 
   const clientProvider = new ScopedSavedObjectsClientProvider({
-    index,
-    mappings,
-    onBeforeWrite,
     defaultClientFactory: defaultClientFactoryMock
   });
   clientProvider.setClientFactory(customClientFactoryMock);
@@ -68,17 +53,14 @@ test(`uses custom client factory when one is set`, () => {
   expect(customClientFactoryMock).toHaveBeenCalledTimes(1);
   expect(customClientFactoryMock).toHaveBeenCalledWith({
     request,
-    index,
-    mappings,
-    onBeforeWrite,
   });
 });
 
 test(`throws error when more than one scoped saved objects client factory is set`, () => {
   const clientProvider = new ScopedSavedObjectsClientProvider({});
-  clientProvider.setClientFactory(() => {});
+  clientProvider.setClientFactory(() => { });
   expect(() => {
-    clientProvider.setClientFactory(() => {});
+    clientProvider.setClientFactory(() => { });
   }).toThrowErrorMatchingSnapshot();
 });
 

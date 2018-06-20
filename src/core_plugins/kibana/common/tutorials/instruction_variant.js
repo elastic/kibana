@@ -29,6 +29,7 @@ export const INSTRUCTION_VARIANT = {
   RAILS: 'rails',
   RACK: 'rack',
   JS: 'js',
+  GO: 'go',
 };
 
 const DISPLAY_MAP = {
@@ -43,6 +44,7 @@ const DISPLAY_MAP = {
   [INSTRUCTION_VARIANT.RAILS]: 'Ruby on Rails',
   [INSTRUCTION_VARIANT.RACK]: 'Rack',
   [INSTRUCTION_VARIANT.JS]: 'JS',
+  [INSTRUCTION_VARIANT.GO]: 'Go',
 };
 
 /**

@@ -131,6 +131,21 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     template: require('plugins/kibana/visualize/editor/panels/share.html'),
     testId: 'visualizeShareButton',
   }, {
+    key: 'inspector',
+    description: 'Open Inspector for visualization',
+    testId: 'openInspectorButton',
+    disableButton() {
+      return !vis.hasInspector();
+    },
+    run() {
+      vis.openInspector().bindToAngularScope($scope);
+    },
+    tooltip() {
+      if (!vis.hasInspector()) {
+        return 'This visualization doesn\'t support any inspectors.';
+      }
+    }
+  }, {
     key: 'refresh',
     description: 'Refresh',
     run: function () {
@@ -246,12 +261,14 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
 
     // update the searchSource when filters update
     $scope.$listen(queryFilter, 'update', function () {
-      $state.save();
+      $scope.fetch();
     });
 
     // update the searchSource when query updates
     $scope.fetch = function () {
       $state.save();
+      savedVis.searchSource.set('query', $state.query);
+      savedVis.searchSource.set('filter', $state.filters);
       $scope.vis.forceReload();
     };
 

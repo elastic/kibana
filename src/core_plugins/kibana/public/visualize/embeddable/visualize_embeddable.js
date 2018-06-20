@@ -19,7 +19,6 @@
 
 import { PersistedState } from 'ui/persisted_state';
 import { Embeddable } from 'ui/embeddable';
-import chrome from 'ui/chrome';
 import _ from 'lodash';
 
 export class VisualizeEmbeddable extends Embeddable  {
@@ -45,6 +44,10 @@ export class VisualizeEmbeddable extends Embeddable  {
     this.customization = this.uiState.toJSON();
     this._onEmbeddableStateChanged(this.getEmbeddableState());
   };
+
+  getInspectorAdapters() {
+    return this.savedVisualization.vis.API.inspectorAdapters;
+  }
 
   getEmbeddableState() {
     return {
@@ -98,6 +101,18 @@ export class VisualizeEmbeddable extends Embeddable  {
       this.timeRange = containerState.timeRange;
     }
 
+    // Check if filters has changed
+    if (containerState.filters !== this.filters) {
+      updatedParams.filters = containerState.filters;
+      this.filters = containerState.filters;
+    }
+
+    // Check if query has changed
+    if (containerState.query !== this.query) {
+      updatedParams.query = containerState.query;
+      this.query = containerState.query;
+    }
+
     const derivedPanelTitle = this.getPanelTitle(containerState);
     if (this.panelTitle !== derivedPanelTitle) {
       updatedParams.dataAttrs = {
@@ -119,6 +134,8 @@ export class VisualizeEmbeddable extends Embeddable  {
   render(domNode, containerState) {
     this.panelTitle = this.getPanelTitle(containerState);
     this.timeRange = containerState.timeRange;
+    this.query = containerState.query;
+    this.filters = containerState.filters;
 
     this.transferCustomizationsToUiState(containerState);
 
@@ -127,10 +144,11 @@ export class VisualizeEmbeddable extends Embeddable  {
       // Append visualization to container instead of replacing its content
       append: true,
       timeRange: containerState.timeRange,
+      query: containerState.query,
+      filters: containerState.filters,
       cssClass: `panel-content panel-content--fullWidth`,
       // The chrome is permanently hidden in "embed mode" in which case we don't want to show the spy pane, since
       // we deem that situation to be more public facing and want to hide more detailed information.
-      showSpyPanel: !chrome.getIsChromePermanentlyHidden(),
       dataAttrs: {
         'shared-item': '',
         title: this.panelTitle,
