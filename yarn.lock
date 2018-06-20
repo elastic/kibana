@@ -14032,7 +14032,12 @@ watchpack@^1.4.0:
     graceful-fs "^4.1.2"
     neo-async "^2.5.0"
 
-<<<<<<< HEAD
+wcwidth@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/wcwidth/-/wcwidth-1.0.1.tgz#f0b0dcf915bc5ff1528afadb2c0e17b532da2fe8"
+  dependencies:
+    defaults "^1.0.3"
+
 wdio-chromedriver-service@^0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/wdio-chromedriver-service/-/wdio-chromedriver-service-0.1.2.tgz#e9a70dce9258740280dc9193bebd15cad43e639b"
@@ -14105,13 +14110,6 @@ wdio@^2.0.2:
     selenium-standalone "~6.6.0"
     tcp-port-used "^0.1.2"
     webdriverio "^4.12.0"
-=======
-wcwidth@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/wcwidth/-/wcwidth-1.0.1.tgz#f0b0dcf915bc5ff1528afadb2c0e17b532da2fe8"
-  dependencies:
-    defaults "^1.0.3"
->>>>>>> 9f1fd9b93cda3e3120f46d46f6f07dc36957ebfd
 
 webcola@3.3.6:
   version "3.3.6"
@@ -14465,7 +14463,7 @@ xml-parse-from-string@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/xml-parse-from-string/-/xml-parse-from-string-1.0.1.tgz#a9029e929d3dbcded169f3c6e28238d95a5d5a28"
 
-xml2js@0.4.19, xml2js@^0.4.5:
+xml2js@^0.4.19, xml2js@^0.4.5:
   version "0.4.19"
   resolved "https://registry.yarnpkg.com/xml2js/-/xml2js-0.4.19.tgz#686c20f213209e94abf0d1bcf1efaa291c7827a7"
   dependencies:
