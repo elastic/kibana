@@ -2,11 +2,20 @@
 
 exports[`TransactionOverview should not call loadTransactionList without any props 1`] = `
 <div>
-  <styled.h1
-    onClick={[Function]}
-  >
-    MyServiceName
-  </styled.h1>
+  <styled.div>
+    <h1>
+      MyServiceName
+    </h1>
+    <DynamicBaselineButton
+      onOpenFlyout={[Function]}
+    />
+  </styled.div>
+  <DynamicBaselineFlyout
+    isOpen={false}
+    onClose={[Function]}
+    serviceName="MyServiceName"
+    transactionType="request"
+  />
   <Connect(TabNavigation) />
   <OverviewChartsRequest
     render={[Function]}
