@@ -174,14 +174,14 @@ export function PipelineEditorProvider({ getService }) {
       }
 
       expect(highlightedElements.length).to.be(expectedHighlights.length);
-      highlightedElements.forEach(({ highlightClass, highlightedContent }, index) => {
+      await Promise.all(highlightedElements.map(async ({ highlightClass, highlightedContent }, index) => {
         const expectedHighlight = expectedHighlights[index];
         const expectedHighlightClass = `ace_${expectedHighlight.token}`;
         const expectedHighlightedContent = expectedHighlight.content;
 
         expect(highlightClass).to.be(expectedHighlightClass);
         expect(highlightedContent).to.be(expectedHighlightedContent);
-      });
+      }));
     }
 
     assertUnsavedChangesModal() {
