@@ -10,6 +10,7 @@
       "query": {},
       "vertices": [{}],
       "connections": {}
-    }
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/graph-explore-api.html"
   }
 }

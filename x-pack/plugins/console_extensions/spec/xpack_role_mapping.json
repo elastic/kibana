@@ -3,21 +3,24 @@
     "methods": ["GET"],
     "patterns": [
       "_xpack/security/role_mapping",
-      "_xpack/security/role_mapping/{name}"
-    ]
+      "_xpack/security/role_mapping/{id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-role-mapping.html"
   },
-  "_xpack/security/role_mapping/{name}": {
+  "_xpack/security/role_mapping/{id}": {
     "methods": ["PUT", "POST"],
-    "patterns": ["_xpack/security/role_mapping/{name}"],
+    "patterns": ["_xpack/security/role_mapping/{id}"],
     "data_autocomplete_rules": {
       "enabled": true,
       "metadata": {},
       "roles": [],
       "rules": {}
     },
-    "DELETE _xpack/security/role_mapping/{name}": {
-      "methods": ["DELETE"],
-      "patterns": ["_xpack/security/role_mapping/{name}"]
-    }
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-role-mapping.html"
+  },  
+  "DELETE _xpack/security/role_mapping/{id}": {
+    "methods": ["DELETE"],
+    "patterns": ["_xpack/security/role_mapping/{id}"],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-role-mapping.html"
   }
 }

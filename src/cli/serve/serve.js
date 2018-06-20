@@ -128,8 +128,8 @@ function readServerSettings(opts, extraCliOptions) {
       : [],
   )));
 
-  merge(readKeystore());
   merge(extraCliOptions);
+  merge(readKeystore(get('path.data')));
 
   return settings;
 }

@@ -38,13 +38,13 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
-    describe('spy panel tabel', function indexPatternCreation() {
+    describe('inspector table', function indexPatternCreation() {
 
       it('should update table header when columns change', async function () {
 
-        await PageObjects.visualize.openSpyPanel();
-        let headers = await PageObjects.visualize.getDataTableHeaders();
-        expect(headers.trim()).to.equal('Count');
+        await PageObjects.visualize.openInspector();
+        let headers = await PageObjects.visualize.getInspectorTableHeaders();
+        expect(headers).to.eql(['Count']);
 
         log.debug('Add Average Metric on machine.ram field');
         await PageObjects.visualize.clickAddMetric();
@@ -52,10 +52,10 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.selectAggregation('Average', 'metrics');
         await PageObjects.visualize.selectField('machine.ram', 'metrics');
         await PageObjects.visualize.clickGo();
-        await PageObjects.visualize.openSpyPanel();
+        await PageObjects.visualize.openInspector();
 
-        headers = await PageObjects.visualize.getDataTableHeaders();
-        expect(headers.trim()).to.equal('Count Average machine.ram');
+        headers = await PageObjects.visualize.getInspectorTableHeaders();
+        expect(headers).to.eql(['Count', 'Average machine.ram']);
       });
     });
   });

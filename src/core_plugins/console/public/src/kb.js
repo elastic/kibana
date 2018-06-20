@@ -50,6 +50,9 @@ const parametrizedComponentFactories = {
   id: function (name, parent) {
     return new IdAutocompleteComponent(name, parent);
   },
+  task_id: function (name, parent) {
+    return new IdAutocompleteComponent(name, parent);
+  },
   ids: function (name, parent) {
     return new IdAutocompleteComponent(name, parent, true);
   },
@@ -148,7 +151,6 @@ export function setActiveApi(api) {
     );
     return;
   }
-  console.log('setting active api to [' + api.name + ']');
 
   ACTIVE_API = api;
 }

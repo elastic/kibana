@@ -76,10 +76,12 @@ class MarkdownVisComponent extends Component {
    */
   render() {
     return (
-      <div className="markdown-vis">
+      <div
+        className="markdown-vis"
+        style={{ fontSize: `${this.props.fontSize}pt` }}
+      >
         <Markdown
           data-test-subj="markdownBody"
-          style={{ fontSize: `${this.props.fontSize}pt` }}
           markdown={this.props.markdown}
           openLinksInNewTab={this.props.openLinksInNewTab}
         />

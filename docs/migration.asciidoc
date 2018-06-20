@@ -5,8 +5,8 @@
 --
 This section discusses the changes that you need to be aware of when migrating
 your application from one version of Kibana to another.
---
 
-include::migration/migrate_6_0.asciidoc[]
+See also <<release-highlights>> and <<release-notes>>. 
+--
 
 include::migration/migrate_7_0.asciidoc[]

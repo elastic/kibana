@@ -356,7 +356,7 @@ class AnomaliesTable extends Component {
 
     return (
       <EuiInMemoryTable
-        className="ml-anomalies-table"
+        className="ml-anomalies-table eui-textBreakWord"
         items={tableData.anomalies}
         columns={columns}
         pagination={{

@@ -161,7 +161,6 @@ module.exports = function (grunt) {
         '--bail',
         '--',
         '--server.maxPayloadBytes=1648576',
-        '--dev_mode.enabled=false',
       ],
     },
 
@@ -175,7 +174,6 @@ module.exports = function (grunt) {
         '--kibana-install-dir', `./build/oss/kibana-${PKG_VERSION}-${process.platform}-x86_64`,
         '--',
         '--server.maxPayloadBytes=1648576',
-        '--dev_mode.enabled=false',
       ],
     },
 
@@ -187,7 +185,6 @@ module.exports = function (grunt) {
         '--es-from', 'source',
         '--',
         '--server.maxPayloadBytes=1648576',
-        '--dev_mode.enabled=false',
       ],
     },
   };

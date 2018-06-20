@@ -40,6 +40,18 @@ export default function () {
           }
         })
       }
+    },
+    config: () => {
+      return {
+        get: (key) => {
+          switch (key) {
+            case 'elasticsearch.shardTimeout':
+              return 30000;
+            default:
+              throw new Error(`unexpected config ${key}`);
+          }
+        }
+      };
     }
   };
 
