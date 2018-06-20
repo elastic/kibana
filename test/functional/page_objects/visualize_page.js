@@ -28,6 +28,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
   const retry = getService('retry');
   const find = getService('find');
   const log = getService('log');
+  const flyout = getService('flyout');
   const PageObjects = getPageObjects(['common', 'header']);
   const defaultFindTimeout = config.get('timeouts.find');
 
@@ -314,47 +315,45 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await testSubjects.click('timepickerGoButton');
     }
 
-    async getSpyToggleExists() {
-      return await testSubjects.exists('spyToggleButton');
+    async isInspectorButtonEnabled() {
+      const button = await testSubjects.find('openInspectorButton');
+      const ariaDisabled = await button.getAttribute('aria-disabled');
+      return ariaDisabled !== 'true';
     }
 
     async getSideEditorExists() {
       return await find.existsByCssSelector('.collapsible-sidebar');
     }
 
-    async openSpyPanel() {
-      log.debug('openSpyPanel');
-      const isOpen = await testSubjects.exists('spyContentContainer');
+    async openInspector() {
+      log.debug('Open Inspector');
+      const isOpen = await testSubjects.exists('inspectorPanel');
       if (!isOpen) {
         await retry.try(async () => {
-          await this.toggleSpyPanel();
-          await testSubjects.find('spyContentContainer');
+          await testSubjects.click('openInspectorButton');
+          await testSubjects.find('inspectorPanel');
         });
       }
     }
 
-    async closeSpyPanel() {
-      log.debug('closeSpyPanel');
-      let isOpen = await testSubjects.exists('spyContentContainer');
+    async closeInspector() {
+      log.debug('Close Inspector');
+      let isOpen = await testSubjects.exists('inspectorPanel');
       if (isOpen) {
         await retry.try(async () => {
-          await this.toggleSpyPanel();
-          isOpen = await testSubjects.exists('spyContentContainer');
+          await flyout.close('inspectorPanel');
+          isOpen = await testSubjects.exists('inspectorPanel');
           if (isOpen) {
-            throw new Error('Failed to close spy panel');
+            throw new Error('Failed to close inspector');
           }
         });
       }
     }
 
-    async toggleSpyPanel() {
-      await testSubjects.click('spyToggleButton');
-    }
-
-    async setSpyPanelPageSize(size) {
-      await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector(`[data-test-subj="paginateControlsPageSizeSelect"] option[label="${size}"]`)
-        .click();
+    async setInspectorTablePageSize(size) {
+      const panel = await testSubjects.find('inspectorPanel');
+      await find.clickByButtonText('Rows per page: 10', panel);
+      await find.clickByButtonText(`${size} rows`, panel);
     }
 
     async getMetric() {
@@ -799,23 +798,35 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await rect.getAttribute('height');
     }
 
-    async selectTableInSpyPaneSelect() {
-      await testSubjects.click('spyModeSelect-table');
-    }
-
-    async getDataTableData() {
+    async getTableVisData() {
       const dataTable = await testSubjects.find('paginated-table-body');
       return await dataTable.getVisibleText();
     }
 
-    async getDataTableHeaders(parent) {
-      const dataTableHeader = await retry.try(
-        async () => (
-          parent ?
-            testSubjects.findDescendant('paginated-table-header', parent) :
-            testSubjects.find('paginated-table-header')
-        ));
-      return await dataTableHeader.getVisibleText();
+    async getInspectorTableData() {
+      // TODO: we should use datat-test-subj=inspectorTable as soon as EUI supports it
+      const inspectorPanel = await testSubjects.find('inspectorPanel');
+      const tableBody = await retry.try(async () => inspectorPanel.findByTagName('tbody'));
+      // Convert the data into a nested array format:
+      // [ [cell1_in_row1, cell2_in_row1], [cell1_in_row2, cell2_in_row2] ]
+      const rows = await tableBody.findAllByTagName('tr');
+      return await Promise.all(rows.map(async row => {
+        const cells = await row.findAllByTagName('td');
+        return await Promise.all(cells.map(async cell => cell.getVisibleText()));
+      }));
+    }
+
+    async getInspectorTableHeaders() {
+      // TODO: we should use datat-test-subj=inspectorTable as soon as EUI supports it
+      const dataTableHeader = await retry.try(async () => {
+        const inspectorPanel = await testSubjects.find('inspectorPanel');
+        return await inspectorPanel.findByTagName('thead');
+      });
+      const cells = await dataTableHeader.findAllByTagName('th');
+      return await Promise.all(cells.map(async (cell) => {
+        const untrimmed = await cell.getVisibleText();
+        return untrimmed.trim();
+      }));
     }
 
     async toggleIsFilteredByCollarCheckbox() {
@@ -849,16 +860,20 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async getVisualizationRequest() {
       log.debug('getVisualizationRequest');
-      await this.openSpyPanel();
-      await testSubjects.click('spyModeSelect-request');
-      return await testSubjects.getVisibleText('visualizationEsRequestBody');
+      await this.openInspector();
+      await testSubjects.click('inspectorViewChooser');
+      await testSubjects.click('inspectorViewChooserRequests');
+      await testSubjects.click('inspectorRequestDetailRequest');
+      return await testSubjects.getVisibleText('inspectorRequestBody');
     }
 
     async getVisualizationResponse() {
       log.debug('getVisualizationResponse');
-      await this.openSpyPanel();
-      await testSubjects.click('spyModeSelect-response');
-      return await testSubjects.getVisibleText('visualizationEsResponseBody');
+      await this.openInspector();
+      await testSubjects.click('inspectorViewChooser');
+      await testSubjects.click('inspectorViewChooserRequests');
+      await testSubjects.click('inspectorRequestDetailResponse');
+      return await testSubjects.getVisibleText('inspectorResponseBody');
     }
 
     async getMapBounds() {

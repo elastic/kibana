@@ -1,0 +1,200 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Inspector Data View component should render empty state 1`] = `
+<DataViewComponent
+  adapters={
+    Object {
+      "data": DataAdapter {
+        "_events": Object {
+          "change": [Function],
+        },
+        "_eventsCount": 1,
+        "_maxListeners": undefined,
+        "domain": null,
+        "tabular": [Function],
+        "tabularOptions": Object {},
+      },
+    }
+  }
+  title="Test Data"
+>
+  <InspectorView
+    useFlex={true}
+  >
+    <EuiFlyoutBody
+      className="inspector-view__flex"
+    >
+      <div
+        className="euiFlyoutBody inspector-view__flex"
+      >
+        <EuiEmptyPrompt
+          body={
+            <UNDEFINED>
+              <p>
+                The element did not provide any data.
+              </p>
+            </UNDEFINED>
+          }
+          iconColor="subdued"
+          title={
+            <h2>
+              No data available
+            </h2>
+          }
+        >
+          <div
+            className="euiEmptyPrompt"
+          >
+            <EuiTextColor
+              color="subdued"
+            >
+              <span
+                className="euiTextColor euiTextColor--subdued"
+              >
+                <EuiTitle
+                  size="m"
+                >
+                  <h2
+                    className="euiTitle euiTitle--medium"
+                  >
+                    No data available
+                  </h2>
+                </EuiTitle>
+                <EuiSpacer
+                  size="m"
+                >
+                  <div
+                    className="euiSpacer euiSpacer--m"
+                  />
+                </EuiSpacer>
+                <EuiText
+                  grow={true}
+                >
+                  <div
+                    className="euiText"
+                  >
+                    <p>
+                      The element did not provide any data.
+                    </p>
+                  </div>
+                </EuiText>
+                <EuiSpacer
+                  size="l"
+                >
+                  <div
+                    className="euiSpacer euiSpacer--l"
+                  />
+                </EuiSpacer>
+              </span>
+            </EuiTextColor>
+          </div>
+        </EuiEmptyPrompt>
+      </div>
+    </EuiFlyoutBody>
+  </InspectorView>
+</DataViewComponent>
+`;
+
+exports[`Inspector Data View component should render loading state 1`] = `
+<DataViewComponent
+  adapters={
+    Object {
+      "data": DataAdapter {
+        "_events": Object {
+          "change": [Function],
+        },
+        "_eventsCount": 1,
+        "_maxListeners": undefined,
+        "domain": null,
+      },
+    }
+  }
+  title="Test Data"
+>
+  <InspectorView
+    useFlex={true}
+  >
+    <EuiFlyoutBody
+      className="inspector-view__flex"
+    >
+      <div
+        className="euiFlyoutBody inspector-view__flex"
+      >
+        <EuiFlexGroup
+          alignItems="center"
+          component="div"
+          direction="row"
+          gutterSize="l"
+          justifyContent="center"
+          responsive={true}
+          wrap={false}
+        >
+          <div
+            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+          >
+            <EuiFlexItem
+              component="div"
+              grow={false}
+            >
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <EuiPanel
+                  className="eui-textCenter"
+                  grow={true}
+                  hasShadow={false}
+                  paddingSize="m"
+                >
+                  <div
+                    className="euiPanel euiPanel--paddingMedium eui-textCenter"
+                  >
+                    <EuiLoadingChart
+                      mono={false}
+                      size="m"
+                    >
+                      <div
+                        className="euiLoadingChart euiLoadingChart--medium"
+                      >
+                        <div
+                          className="euiLoadingChart__bar"
+                        />
+                        <div
+                          className="euiLoadingChart__bar"
+                        />
+                        <div
+                          className="euiLoadingChart__bar"
+                        />
+                        <div
+                          className="euiLoadingChart__bar"
+                        />
+                      </div>
+                    </EuiLoadingChart>
+                    <EuiSpacer
+                      size="s"
+                    >
+                      <div
+                        className="euiSpacer euiSpacer--s"
+                      />
+                    </EuiSpacer>
+                    <EuiText
+                      grow={true}
+                    >
+                      <div
+                        className="euiText"
+                      >
+                        <p>
+                          Gathering data
+                        </p>
+                      </div>
+                    </EuiText>
+                  </div>
+                </EuiPanel>
+              </div>
+            </EuiFlexItem>
+          </div>
+        </EuiFlexGroup>
+      </div>
+    </EuiFlyoutBody>
+  </InspectorView>
+</DataViewComponent>
+`;
