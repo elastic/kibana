@@ -64,7 +64,22 @@ export function $combine(
         const parseAsObservable = Rx.bindNodeCallback(png.parse.bind(png));
         return parseAsObservable(buffer);
       },
-      (screenshot: Screenshot, png: PNG) => ({ screenshot, png })
+      (screenshot: Screenshot, png: PNG) => {
+        if (
+          png.width !== screenshot.dimensions.width ||
+          png.height !== screenshot.dimensions.height
+        ) {
+          const errorMessage = `Screenshot captured with width:${
+            png.width
+          } and height: ${png.height}) is not of expected width: ${
+            screenshot.dimensions.width
+          } and height: ${screenshot.dimensions.height}`;
+
+          logger.error(errorMessage);
+          throw new Error(errorMessage);
+        }
+        return { screenshot, png };
+      }
     )
   );
 
