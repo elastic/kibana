@@ -24,7 +24,7 @@ export class LicenseStatus extends React.PureComponent {
     if (isExpired) {
       icon = <EuiIcon color="danger" type="alert" />;
       message = (
-        <span>
+        <span data-test-subj="licenseSubText">
           Your license expired on <strong>{expiryDate}</strong>
         </span>
       );
@@ -32,11 +32,11 @@ export class LicenseStatus extends React.PureComponent {
     } else {
       icon = <EuiIcon color="success" type="checkInCircleFilled" />;
       message = expiryDate ? (
-        <span>
+        <span data-test-subj="licenseSubText">
           Your license will expire on <strong>{expiryDate}</strong>
         </span>
       ) : (
-        <span>
+        <span data-test-subj="licenseSubText">
         Your license will never expire.
         </span>
       );
@@ -57,7 +57,7 @@ export class LicenseStatus extends React.PureComponent {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiTitle size="l">
-                  <h2>
+                  <h2 data-test-subj="licenseText">
                     {title}
                   </h2>
                 </EuiTitle>
