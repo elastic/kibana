@@ -107,18 +107,18 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should visualize scripted field in vertical bar chart', async function () {
-        const expectedChartValues = [ '14', '31', '10', '29', '7', '24', '11', '24', '12', '23',
-          '20', '23', '19', '21', '6', '20', '17', '20', '30', '20', '13', '19', '18', '18', '16', '17', '5', '16',
-          '8', '16', '15', '14', '3', '13', '2', '12', '9', '10', '4', '9'
+        const expectedChartValues = [ ['14', '31'], ['10', '29'], ['7', '24'], ['11', '24'], ['12', '23'],
+          ['20', '23'], ['19', '21'], ['6', '20'], ['17', '20'], ['30', '20'], ['13', '19'], ['18', '18'], ['16', '17'], ['5', '16'],
+          ['8', '16'], ['15', '14'], ['3', '13'], ['2', '12'], ['9', '10'], ['4', '9']
         ];
         await PageObjects.discover.removeAllFilters();
         await PageObjects.discover.clickFieldListItemVisualize(scriptedExpressionFieldName);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
-        await PageObjects.visualize.toggleSpyPanel();
-        await PageObjects.visualize.setSpyPanelPageSize('All');
-        const data = await PageObjects.visualize.getDataTableData();
-        await log.debug('getDataTableData = ' + data.split('\n'));
+        await PageObjects.visualize.openInspector();
+        await PageObjects.visualize.setInspectorTablePageSize(50);
+        const data = await PageObjects.visualize.getInspectorTableData();
+        await log.debug('getDataTableData = ' + data);
         await log.debug('data=' + data);
         await log.debug('data.length=' + data.length);
         expect(data.trim().split('\n')).to.eql(expectedChartValues);
