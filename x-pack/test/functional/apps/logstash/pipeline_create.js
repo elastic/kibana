@@ -362,6 +362,72 @@ export default function ({ getService, getPageObjects }) {
 
         await assertHighlightTokens(pattern, expectedHighlights);
       });
+
+      it('applies boolean highlighting in branch conditions', async () => {
+        const pattern = `filter { if and or nand xor == != <= >= < > =~ !~ { } }`;
+
+        const expectedHighlights = [
+          { token: PIPELINE_SECTION, content: 'filter' },
+          { token: BRACE, content: '{' },
+          { token: CONTROL, content: 'if' },
+          { token: OPERATOR, content: 'and' },
+          { token: OPERATOR, content: 'or' },
+          { token: OPERATOR, content: 'nand' },
+          { token: OPERATOR, content: 'xor' },
+          { token: OPERATOR, content: '==' },
+          { token: OPERATOR, content: '!=' },
+          { token: OPERATOR, content: '<=' },
+          { token: OPERATOR, content: '>=' },
+          { token: OPERATOR, content: '<' },
+          { token: OPERATOR, content: '>' },
+          { token: OPERATOR, content: '=~' },
+          { token: OPERATOR, content: '!~' },
+          { token: BRACE, content: '{' },
+          { token: BRACE, content: '}' },
+          { token: BRACE, content: '}' },
+        ];
+
+        await assertHighlightTokens(pattern, expectedHighlights, defaultFilterClasses);
+      });
+
+      it('applies branch condition highlighting', async () => {
+        const pattern = `input { if (condition == condition) and [tag] in ['tags', "moreTags"]
+          or [tag] not in ['tag'] { } }`;
+
+        const expectedHighlights = [
+          { token: PIPELINE_SECTION, content: 'input' },
+          { token: BRACE, content: '{' },
+          { token: CONTROL, content: 'if' },
+          { token: OPERATOR, content: '(' },
+          { token: BAREWORD, content: 'condition' },
+          { token: OPERATOR, content: '==' },
+          { token: BAREWORD, content: 'condition' },
+          { token: OPERATOR, content: ')' },
+          { token: OPERATOR, content: 'and' },
+          { token: ARRAY, content: '[' },
+          { token: BAREWORD, content: 'tag' },
+          { token: ARRAY, content: ']' },
+          { token: OPERATOR, content: 'in' },
+          { token: ARRAY, content: '[' },
+          { token: QUOTE, content: `'tags'` },
+          { token: OPERATOR, content: ',' },
+          { token: QUOTE, content: `"moreTags"` },
+          { token: ARRAY, content: ']' },
+          { token: OPERATOR, content: 'or' },
+          { token: ARRAY, content: '[' },
+          { token: BAREWORD, content: 'tag' },
+          { token: ARRAY, content: ']' },
+          { token: OPERATOR, content: 'not in' },
+          { token: ARRAY, content: '[' },
+          { token: QUOTE, content: `'tag'` },
+          { token: ARRAY, content: ']' },
+          { token: BRACE, content: '{' },
+          { token: BRACE, content: '}' },
+          { token: BRACE, content: '}' },
+        ];
+
+        await assertHighlightTokens(pattern, expectedHighlights, defaultFilterClasses);
+      });
     });
   });
 }
