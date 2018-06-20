@@ -20,16 +20,30 @@
 import { ConfigService, Env } from './config';
 import { HttpConfig, HttpModule, Router } from './http';
 import { Logger, LoggerFactory } from './logging';
+import { SavedObjectsConfig, SavedObjectsModule } from './saved_objects';
 
 export class Server {
   private readonly http: HttpModule;
+  private readonly savedObjects: SavedObjectsModule;
   private readonly log: Logger;
 
   constructor(private readonly configService: ConfigService, logger: LoggerFactory, env: Env) {
     this.log = logger.get('server');
 
     const httpConfig$ = configService.atPath('server', HttpConfig);
+    const savedObjectsConfig$ = configService.atPath(
+      'savedObjects',
+      SavedObjectsConfig
+    );
+
     this.http = new HttpModule(httpConfig$, logger, env);
+    this.savedObjects = new SavedObjectsModule(
+      savedObjectsConfig$,
+      this.http.service,
+      // elasticsearch service here too?
+      logger,
+      env
+    );
   }
 
   public async start() {
@@ -40,6 +54,12 @@ export class Server {
     this.http.service.registerRouter(router);
 
     await this.http.service.start();
+    await this.savedObjects.service.start(); // TODO: this starts a saved objects client
+
+    this.http.service.registerRouter(
+      // TODO: maybe the service creates the routes and passes them to here and to the client?
+      this.savedObjects.service.client$.createRoutes()
+    );
 
     const unhandledConfigPaths = await this.configService.getUnusedPaths();
     if (unhandledConfigPaths.length > 0) {

@@ -1,7 +1,7 @@
 import { Observable } from '@elastic/kbn-observable';
 import { KibanaPluginConfig } from '../plugins/types';
 
-import { SavedObjectsConfig } from './SavedObjectsConfig';
+import { SavedObjectsConfig } from './saved_objects_config';
 import { registerEndpoints } from './register_endpoints';
 
 export { SavedObjectsConfig };
