@@ -18,46 +18,32 @@
  */
 
 import path from 'path';
+import { promisify } from 'util';
 import fs from 'fs';
 import sass from 'node-sass';
 import minimatch from 'minimatch';
 
-export class SassBuilder {
-  /**
-   * @param {String} input - Full path to SASS file
-   * @param {String} output - Full path to CSS to write to
-   * @param {Object|null} options
-   * @property {FSWatcher|null} options.watcher - Instance of Chokidar to use
-   */
+const renderSass = promisify(sass.render);
+const writeFile = promisify(fs.writeFile);
 
-  constructor(input, options = {}) {
-    this.input = input;
-    this.watcher = options.watcher;
-  }
-
-  /**
-   * Adds glob to instance of Watcher
-   */
-
-  addToWatcher() {
-    if (!this.watcher) {
-      return false;
-    }
-
-    this.watcher.add(this.getGlob());
+export class Build {
+  constructor(source, options = {}) {
+    this.source = source;
+    this.onSuccess = options.onSuccess || (() => {});
+    this.onError = options.onError || (() => {});
   }
 
   outputPath() {
-    const fileName = path.basename(this.input, path.extname(this.input)) + '.css';
-    return path.join(path.dirname(this.input), fileName);
+    const fileName = path.basename(this.source, path.extname(this.source)) + '.css';
+    return path.join(path.dirname(this.source), fileName);
   }
 
   /**
-   * Glob based on input path
+   * Glob based on source path
    */
 
   getGlob() {
-    return path.join(path.dirname(this.input), '**', '*.s{a,c}ss');
+    return path.join(path.dirname(this.source), '**', '*.s{a,c}ss');
   }
 
   async buildIfInPath(path) {
@@ -74,16 +60,24 @@ export class SassBuilder {
    */
 
   async build() {
-    const outFile = this.outputPath();
+    try {
+      const outFile = this.outputPath();
 
-    const rendered = await sass.renderSync({
-      file: this.input,
-      outFile,
-      sourceMap: true,
-      sourceMapEmbed: true,
-      sourceComments: true,
-    });
+      const rendered = await renderSass({
+        file: this.source,
+        outFile,
+        sourceMap: true,
+        sourceMapEmbed: true,
+        sourceComments: true,
+      });
 
-    fs.writeFileSync(outFile, rendered.css);
+      await writeFile(outFile, rendered.css);
+
+      this.onSuccess(this);
+    } catch(e) {
+      this.onError(this, e);
+    } finally {
+      return this;
+    }
   }
 }

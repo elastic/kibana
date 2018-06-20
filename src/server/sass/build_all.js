@@ -17,18 +17,19 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { Build } from './build';
 
-const log = _.restParam(function (color, label, rest1) {
-  console.log.apply(console, [color(` ${_.trim(label)} `)].concat(rest1));
-});
+export function buildAll(enabledPlugins, { onSuccess, onError }) {
+  return Promise.all(enabledPlugins.reduce((acc, plugin) => {
+    if (!plugin.getExportAppStyleSheetToCompile()) {
+      return acc;
+    }
 
-import { green, yellow, red } from './color';
+    const builder = new Build(plugin.getExportAppStyleSheetToCompile(), {
+      onSuccess,
+      onError,
+    });
 
-export default class Log {
-  constructor(quiet, silent) {
-    this.good = quiet || silent ? _.noop : _.partial(log, green);
-    this.warn = quiet || silent ? _.noop : _.partial(log, yellow);
-    this.bad = silent ? _.noop : _.partial(log, red);
-  }
+    return [...acc, builder.build()];
+  }, []));
 }

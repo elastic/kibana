@@ -37,9 +37,7 @@ export default class ClusterManager {
   }
 
   constructor(opts, config) {
-    const useUTC = config.get('logging.useUTC');
-
-    this.log = new Log({ quiet: opts.quiet, silent: opts.silent, useUTC });
+    this.log = new Log(opts.quiet, opts.silent);
     this.addedCount = 0;
     this.inReplMode = !!opts.repl;
 
@@ -54,35 +52,36 @@ export default class ClusterManager {
 
       optimizerArgv.push(
         `--server.basePath=${this.basePathProxy.basePath}`,
-        '--server.rewriteBasePath=true'
+        '--server.rewriteBasePath=true',
       );
 
       serverArgv.push(
         `--server.port=${this.basePathProxy.targetPort}`,
         `--server.basePath=${this.basePathProxy.basePath}`,
-        '--server.rewriteBasePath=true'
+        '--server.rewriteBasePath=true',
       );
     }
 
     this.workers = [
-      (this.optimizer = new Worker({
+      this.optimizer = new Worker({
         type: 'optmzr',
         title: 'optimizer',
         log: this.log,
         argv: optimizerArgv,
-        watch: false,
-      })),
-      (this.server = new Worker({
+        watch: false
+      }),
+
+      this.server = new Worker({
         type: 'server',
         log: this.log,
-        argv: serverArgv,
-      })),
+        argv: serverArgv
+      })
     ];
 
     // broker messages between workers
-    this.workers.forEach(worker => {
-      worker.on('broadcast', msg => {
-        this.workers.forEach(to => {
+    this.workers.forEach((worker) => {
+      worker.on('broadcast', (msg) => {
+        this.workers.forEach((to) => {
           if (to !== worker && to.online) {
             to.fork.send(msg);
           }
@@ -95,28 +94,26 @@ export default class ClusterManager {
     if (opts.watch) {
       const pluginPaths = config.get('plugins.paths');
       const scanDirs = config.get('plugins.scanDirs');
-      const extraPaths = [...pluginPaths, ...scanDirs];
+      const extraPaths = [
+        ...pluginPaths,
+        ...scanDirs,
+      ];
 
       const extraIgnores = scanDirs
         .map(scanDir => resolve(scanDir, '*'))
         .concat(pluginPaths)
-        .reduce(
-          (acc, path) =>
-            acc.concat(
-              resolve(path, 'test'),
-              resolve(path, 'build'),
-              resolve(path, 'target'),
-              resolve(path, 'scripts'),
-              resolve(path, 'docs')
-            ),
-          []
-        );
+        .reduce((acc, path) => acc.concat(
+          resolve(path, 'test'),
+          resolve(path, 'build'),
+          resolve(path, 'target'),
+          resolve(path, 'scripts'),
+          resolve(path, 'docs'),
+        ), []);
 
       this.setupWatching(extraPaths, extraIgnores);
-      this.setupScssWatching(pluginPaths, scanDirs);
-    } else {
-      this.startCluster();
     }
+
+    else this.startCluster();
   }
 
   startCluster() {
@@ -141,7 +138,7 @@ export default class ClusterManager {
       fromRoot('x-pack/server'),
       fromRoot('x-pack/webpackShims'),
       fromRoot('config'),
-      ...extraPaths,
+      ...extraPaths
     ].map(path => resolve(path));
 
     this.watcher = chokidar.watch(uniq(watchPaths), {
@@ -149,83 +146,21 @@ export default class ClusterManager {
       ignored: [
         /[\\\/](\..*|node_modules|bower_components|public|__[a-z0-9_]+__|coverage)[\\\/]/,
         /\.test\.js$/,
-        /.*\.s(c|a)ss/,
-        ...extraIgnores,
-      ],
+        ...extraIgnores
+      ]
     });
 
     this.watcher.on('add', this.onWatcherAdd);
     this.watcher.on('error', this.onWatcherError);
 
-    this.watcher.on(
-      'ready',
-      once(() => {
-        // start sending changes to workers
-        this.watcher.removeListener('add', this.onWatcherAdd);
-        this.watcher.on('all', this.onWatcherChange);
+    this.watcher.on('ready', once(() => {
+      // start sending changes to workers
+      this.watcher.removeListener('add', this.onWatcherAdd);
+      this.watcher.on('all', this.onWatcherChange);
 
-        this.log.info('watching for changes', `(${this.addedCount} files)`);
-        this.startCluster();
-      })
-    );
-  }
-
-  async setupScssWatching(pluginPaths, scanDirs) {
-    const { SassBuilder } = require('./sass_builder');
-    const { findPluginSpecs } = require('../../plugin_discovery/find_plugin_specs');
-    const { FSWatcher } = require('chokidar');
-
-    const watcher = new FSWatcher({ ignoreInitial: true });
-    const { spec$ } = findPluginSpecs({ plugins: { paths: pluginPaths, scanDirs } });
-    const log = this.log;
-
-    function onSuccess(builder) {
-      log.format({
-        type: 'info',
-        message: `Compiled CSS: ${builder.input}`,
-        tags: ['scss']
-      });
-    }
-
-    function onError(builder, error) {
-      log.format({
-        type: 'error',
-        message: `Compiling CSS failed: ${builder.input}`,
-        tags: ['scss']
-      });
-      log.format({
-        error,
-        type: 'error',
-        tags: ['scss']
-      });
-    }
-
-    const enabledPlugins = await spec$.toArray().toPromise();
-    const scssBundles = enabledPlugins.reduce((acc, plugin) => {
-      if (!plugin.getExportAppStyleSheetToCompile()) {
-        return acc;
-      }
-
-      const builder = new SassBuilder(plugin.getExportAppStyleSheetToCompile(), { watcher });
-
-      builder.build().then(onSuccess.bind(this, builder)).catch(onError.bind(this, builder));
-      builder.addToWatcher();
-
-      return [ ...acc, builder ];
-    }, []);
-
-    watcher.on('all', async (event, path) => {
-      for (let i = 0; i < scssBundles.length; i++) {
-        try {
-          if (await scssBundles[i].buildIfInPath(path)) {
-            onSuccess(scssBundles[i]);
-            return;
-          }
-        } catch(e) {
-          onError(scssBundles[i], e);
-        }
-      }
-    });
+      this.log.good('watching for changes', `(${this.addedCount} files)`);
+      this.startCluster();
+    }));
   }
 
   setupManualRestart() {
@@ -239,7 +174,7 @@ export default class ClusterManager {
     const rl = readline.createInterface(process.stdin, process.stdout);
 
     let nls = 0;
-    const clear = () => (nls = 0);
+    const clear = () => nls = 0;
     const clearSoon = debounce(clear, 2000);
 
     rl.setPrompt('');
@@ -274,7 +209,7 @@ export default class ClusterManager {
   }
 
   onWatcherError(err) {
-    this.log.error('failed to watch files!\n', err.stack);
+    this.log.bad('failed to watch files!\n', err.stack);
     process.exit(1); // eslint-disable-line no-process-exit
   }
 }

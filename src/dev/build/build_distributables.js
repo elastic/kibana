@@ -110,8 +110,8 @@ export async function buildDistributables(options) {
   await run(UpdateLicenseFileTask);
   await run(RemovePackageJsonDepsTask);
   await run(CleanExtraFilesFromModulesTask);
-  await run(OptimizeBuildTask);
   await run(TranspileScssTask);
+  await run(OptimizeBuildTask);
 
   /**
    * copy generic build outputs into platform-specific build

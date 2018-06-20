@@ -17,44 +17,25 @@
  * under the License.
  */
 
-import sinon from 'sinon';
 import sass from 'node-sass';
-import { SassBuilder } from './sass_builder';
+import { Build } from './build';
 
+jest.mock('node-sass');
 
 describe('SASS builder', () => {
   jest.mock('fs');
-  const sandbox = sinon.createSandbox();
 
   it('generates a glob', () => {
-    const builder = new SassBuilder('/foo/style.sass');
+    const builder = new Build('/foo/style.sass');
     expect(builder.getGlob()).toEqual('/foo/**/*.s{a,c}ss');
   });
 
-  it('adds a watch for SASS files on the basePath', () => {
-    const watcher = {
-      add: sinon.stub(),
-    };
-    const builder = new SassBuilder('/foo/style.sass', {
-      watcher,
-    });
-
-    builder.addToWatcher();
-
-    sinon.assert.calledOnce(watcher.add);
-    sinon.assert.calledWithExactly(watcher.add, builder.getGlob());
-  });
-
   it('builds SASS', () => {
-    sandbox.stub(sass, 'renderSync').callsFake(() => {
-      return { css: 'test' };
-    });
-
-    const builder = new SassBuilder('/foo/style.sass');
+    sass.render.mockImplementation(() => Promise.resolve(null, { css: 'test' }));
+    const builder = new Build('/foo/style.sass');
     builder.build();
 
-    sinon.assert.calledOnce(sass.renderSync);
-    sinon.assert.calledWithExactly(sass.renderSync,  {
+    expect(sass.render.mock.calls[0][0]).toEqual({
       file: '/foo/style.sass',
       outFile: '/foo/style.css',
       sourceComments: true,
@@ -64,7 +45,7 @@ describe('SASS builder', () => {
   });
 
   it('has an output file with a different extension', () => {
-    const builder = new SassBuilder('/foo/style.sass');
+    const builder = new Build('/foo/style.sass');
     expect(builder.outputPath()).toEqual('/foo/style.css');
   });
 });

@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { SassBuilder } from '../../../cli/cluster/sass_builder';
+import { toArray } from 'rxjs/operators';
+import { buildAll } from '../../../server/sass/build_all';
 import { findPluginSpecs } from '../../../plugin_discovery/find_plugin_specs';
 
 export const TranspileScssTask = {
@@ -26,23 +27,17 @@ export const TranspileScssTask = {
   async run(config, log, build) {
     const scanDirs = [ build.resolvePath('src/core_plugins') ];
     const { spec$ } = findPluginSpecs({ plugins: { scanDirs, paths: [] } });
+    const enabledPlugins = await spec$.pipe(toArray()).toPromise();
 
-    const enabledPlugins = await spec$.toArray().toPromise();
+    function onSuccess(builder) {
+      log.info(`Compiled SCSS: ${builder.source}`);
+    }
 
-    await Promise.all(enabledPlugins.map(async plugin => {
-      if (!plugin.getExportAppStyleSheetToCompile()) {
-        return;
-      }
+    function onError(builder, e) {
+      log.error(`Compiling SCSS failed: ${builder.source}`);
+      throw e;
+    }
 
-      const builder = new SassBuilder(plugin.getExportAppStyleSheetToCompile());
-
-      try {
-        await builder.build();
-        log.info(`Compiled SCSS: ${builder.input}`);
-      } catch(e) {
-        log.error(`Compiling SCSS failed: ${builder.input}`);
-        throw e;
-      }
-    }));
+    await buildAll(enabledPlugins, { onSuccess, onError });
   }
 };

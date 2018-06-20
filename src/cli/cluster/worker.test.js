@@ -41,7 +41,7 @@ function assertListenerRemoved(emitter, event) {
 
 function setup(opts = {}) {
   const worker = new Worker({
-    log: new Log({ quiet: false, silent: true }),
+    log: new Log(false, true),
     ...opts,
     baseArgv: []
   });
