@@ -20,95 +20,92 @@
 import { processOptions } from './args';
 
 describe('process options for run tests CLI', () => {
-  describe('options', () => {
-    it('rejects boolean config value', () => {
-      expect(() => {
-        processOptions({ config: true });
-      }).toThrow(
-        'functional_tests_server: invalid argument [true] to option [config]'
-      );
-    });
+  it('rejects boolean config value', () => {
+    expect(() => {
+      processOptions({ config: true });
+    }).toThrow(
+      'functional_tests_server: invalid argument [true] to option [config]'
+    );
+  });
 
-    it('rejects empty config value if no default passed', () => {
-      expect(() => {
-        processOptions({});
-      }).toThrow('functional_tests_server: config is required');
-    });
+  it('rejects empty config value if no default passed', () => {
+    expect(() => {
+      processOptions({});
+    }).toThrow('functional_tests_server: config is required');
+  });
 
-    it('accepts empty config value if default passed', () => {
-      expect(() => {
-        processOptions({ config: '' }, ['foo']);
-      }).not.toThrow();
-    });
+  it('accepts empty config value if default passed', () => {
+    const options = processOptions({ config: '' }, ['foo']);
+    expect(options.config).toEqual(['foo']);
+  });
 
-    it('rejects bail', () => {
-      expect(() => {
-        processOptions({ bail: 'peanut' }, ['foo']);
-      }).toThrow('functional_tests_server: invalid option [bail]');
-    });
+  it('rejects invalid option', () => {
+    expect(() => {
+      processOptions({ bail: true }, ['foo']);
+    }).toThrow('functional_tests_server: invalid option [bail]');
+  });
 
-    it('accepts string value for kibana-install-dir', () => {
-      expect(() => {
-        processOptions({ 'kibana-install-dir': 'foo' }, ['foo']);
-      }).not.toThrow();
-    });
+  it('accepts string value for kibana-install-dir', () => {
+    const options = processOptions({ 'kibana-install-dir': 'foo' }, ['foo']);
+    expect(options['kibana-install-dir']).toEqual('foo');
+    expect(options.config).toEqual(['foo']);
+  });
 
-    it('rejects boolean value for kibana-install-dir', () => {
-      expect(() => {
-        processOptions({ 'kibana-install-dir': true }, ['foo']);
-      }).toThrow(
-        'functional_tests_server: invalid argument [true] to option [kibana-install-dir]'
-      );
-    });
+  it('rejects boolean value for kibana-install-dir', () => {
+    expect(() => {
+      processOptions({ 'kibana-install-dir': true }, ['foo']);
+    }).toThrow(
+      'functional_tests_server: invalid argument [true] to option [kibana-install-dir]'
+    );
+  });
 
-    it('accepts source value for es-from', () => {
-      expect(() => {
-        processOptions({ 'es-from': 'source' }, ['foo']);
-      }).not.toThrow();
-    });
+  it('accepts source value for es-from', () => {
+    const options = processOptions({ 'es-from': 'source' }, ['foo']);
+    expect(options['es-from']).toEqual('source');
+    expect(options.config).toEqual(['foo']);
+  });
 
-    it('rejects non-enum value for es-from', () => {
-      expect(() => {
-        processOptions({ 'es-from': 'butter' }, ['foo']);
-      }).toThrow(
-        'functional_tests_server: invalid argument [butter] to option [es-from]'
-      );
-    });
+  it('rejects non-enum value for es-from', () => {
+    expect(() => {
+      processOptions({ 'es-from': 'butter' }, ['foo']);
+    }).toThrow(
+      'functional_tests_server: invalid argument [butter] to option [es-from]'
+    );
+  });
 
-    it('accepts debug option', () => {
-      expect(() => {
-        processOptions({ debug: true }, ['foo']);
-      }).not.toThrow();
-    });
+  it('accepts debug option', () => {
+    const options = processOptions({ debug: true }, ['foo']);
+    expect(options.debug).toEqual(true);
+    expect(options.config).toEqual(['foo']);
+  });
 
-    it('accepts silent option', () => {
-      expect(() => {
-        processOptions({ silent: true }, ['foo']);
-      }).not.toThrow();
-    });
+  it('accepts silent option', () => {
+    const options = processOptions({ silent: true }, ['foo']);
+    expect(options.silent).toEqual(true);
+    expect(options.config).toEqual(['foo']);
+  });
 
-    it('accepts quiet option', () => {
-      expect(() => {
-        processOptions({ quiet: true }, ['foo']);
-      }).not.toThrow();
-    });
+  it('accepts quiet option', () => {
+    const options = processOptions({ quiet: true }, ['foo']);
+    expect(options.quiet).toEqual(true);
+    expect(options.config).toEqual(['foo']);
+  });
 
-    it('accepts verbose option', () => {
-      expect(() => {
-        processOptions({ verbose: true }, ['foo']);
-      }).not.toThrow();
-    });
+  it('accepts verbose option', () => {
+    const options = processOptions({ verbose: true }, ['foo']);
+    expect(options.verbose).toEqual(true);
+    expect(options.config).toEqual(['foo']);
+  });
 
-    it('accepts extra server options', () => {
-      expect(() => {
-        processOptions({ _: { 'server.foo': 'bar' } }, ['foo']);
-      }).not.toThrow();
-    });
+  it('accepts extra server options', () => {
+    const options = processOptions({ _: { 'server.foo': 'bar' } }, ['foo']);
+    expect(options._['server.foo']).toEqual('bar');
+    expect(options.config).toEqual(['foo']);
+  });
 
-    it('rejects invalid options even if valid options exist', () => {
-      expect(() => {
-        processOptions({ debug: true, aintnothang: true, bail: true }, ['foo']);
-      }).toThrow('functional_tests_server: invalid option [aintnothang]');
-    });
+  it('rejects invalid options even if valid options exist', () => {
+    expect(() => {
+      processOptions({ debug: true, aintnothang: true, bail: true }, ['foo']);
+    }).toThrow('functional_tests_server: invalid option [aintnothang]');
   });
 });

@@ -53,14 +53,12 @@ const options = {
 
 export function displayHelp() {
   const helpOptions = Object.keys(options)
-    .filter(opt => opt !== '_')
-    .map(name => {
+    .filter(name => name !== '_')
+    .map(([name, option]) => {
       return {
-        ...options[name],
-        usage: `${name} ${options[name].arg || ''}`,
-        default: options[name].default
-          ? `Default: ${options[name].default}`
-          : '',
+        ...option,
+        usage: `${name} ${option.arg || ''}`,
+        default: option.default ? `Default: ${option.default}` : '',
       };
     })
     .map(option => {
