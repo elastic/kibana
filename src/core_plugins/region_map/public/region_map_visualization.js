@@ -153,9 +153,8 @@ export function RegionMapsVisualizationProvider(Private, Notifier, config) {
           return;
         }
 
-        const agg = this._vis.aggs.bySchemaName.segment[0];
-        const filter = agg.createFilter(event);
-        this._vis.API.queryFilter.addFilters(filter);
+        const rowIndex = this._chartData.tables[0].rows.findIndex(row => row[0] === event);
+        this._vis.API.events.addFilter(this._chartData.tables[0], 0, rowIndex);
       });
       this._choroplethLayer.on('styleChanged', (event) => {
         const shouldShowWarning = this._vis.params.isDisplayWarning && config.get('visualization:regionmap:showWarnings');
