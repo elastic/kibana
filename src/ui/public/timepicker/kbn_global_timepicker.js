@@ -18,7 +18,6 @@
  */
 
 import { uiModules } from '../modules';
-import { once, clone } from 'lodash';
 
 import toggleHtml from './kbn_global_timepicker.html';
 import { timeNavigation } from './time_navigation';
@@ -26,24 +25,24 @@ import { timefilter } from 'ui/timefilter';
 
 uiModules
   .get('kibana')
-  .directive('kbnGlobalTimepicker', (globalState, $rootScope) => {
-    const listenForUpdates = once(($scope) => {
+  .directive('kbnGlobalTimepicker', (globalState) => {
+    const listenForUpdates = ($scope) => {
       $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', () => {
-        globalState.refreshInterval = clone(timefilter.getRefreshInterval());
-        globalState.time = clone(timefilter.getTime());
+        globalState.refreshInterval = timefilter.getRefreshInterval();
+        globalState.time = timefilter.getTime();
         globalState.save();
         setTimefilterValues($scope);
       });
       $scope.$listenAndDigestAsync(timefilter, 'timeUpdate', () => {
-        globalState.refreshInterval = clone(timefilter.getRefreshInterval());
-        globalState.time = clone(timefilter.getTime());
+        globalState.refreshInterval = timefilter.getRefreshInterval();
+        globalState.time = timefilter.getTime();
         globalState.save();
         setTimefilterValues($scope);
       });
-      $scope.$listenAndDigestAsync(timefilter, 'isEnabledUpdate', () => {
+      $scope.$listenAndDigestAsync(timefilter, 'enabledUpdated', () => {
         setTimefilterValues($scope);
       });
-    });
+    };
 
     function setTimefilterValues($scope) {
       $scope.timefilterValues = {
@@ -62,7 +61,7 @@ uiModules
         listenForUpdates($scope);
 
         setTimefilterValues($scope);
-        $rootScope.toggleRefresh = () => {
+        $scope.toggleRefresh = () => {
           timefilter.toggleRefresh();
         };
 

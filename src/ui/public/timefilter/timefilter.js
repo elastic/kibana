@@ -121,7 +121,7 @@ class Timefilter extends SimpleEmitter {
    */
   enableTimeRangeSelector = () => {
     this.isTimeRangeSelectorEnabled = true;
-    this.emit('isEnabledUpdate');
+    this.emit('enabledUpdated');
   }
 
   /**
@@ -129,7 +129,7 @@ class Timefilter extends SimpleEmitter {
    */
   disableTimeRangeSelector = () => {
     this.isTimeRangeSelectorEnabled = false;
-    this.emit('isEnabledUpdate');
+    this.emit('enabledUpdated');
   }
 
   /**
@@ -137,7 +137,7 @@ class Timefilter extends SimpleEmitter {
    */
   enableAutoRefreshSelector = () => {
     this.isAutoRefreshSelectorEnabled = true;
-    this.emit('isEnabledUpdate');
+    this.emit('enabledUpdated');
   }
 
   /**
@@ -145,7 +145,7 @@ class Timefilter extends SimpleEmitter {
    */
   disableAutoRefreshSelector = () => {
     this.isAutoRefreshSelectorEnabled = false;
-    this.emit('isEnabledUpdate');
+    this.emit('enabledUpdated');
   }
 
 }

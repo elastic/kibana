@@ -167,6 +167,48 @@ describe('setRefreshInterval', () => {
 
 });
 
+describe('isTimeRangeSelectorEnabled', () => {
+  let update;
+
+  beforeEach(()  => {
+    update = sinon.spy();
+    timefilter.on('enabledUpdated', update);
+  });
+
+  test('should emit updated when disabled', () => {
+    timefilter.disableTimeRangeSelector();
+    expect(timefilter.isTimeRangeSelectorEnabled).to.be(false);
+    expect(update.called).to.be(true);
+  });
+
+  test('should emit updated when enabled', () => {
+    timefilter.enableTimeRangeSelector();
+    expect(timefilter.isTimeRangeSelectorEnabled).to.be(true);
+    expect(update.called).to.be(true);
+  });
+});
+
+describe('isAutoRefreshSelectorEnabled', () => {
+  let update;
+
+  beforeEach(()  => {
+    update = sinon.spy();
+    timefilter.on('enabledUpdated', update);
+  });
+
+  test('should emit updated when disabled', () => {
+    timefilter.disableAutoRefreshSelector();
+    expect(timefilter.isAutoRefreshSelectorEnabled).to.be(false);
+    expect(update.called).to.be(true);
+  });
+
+  test('should emit updated when enabled', () => {
+    timefilter.enableAutoRefreshSelector();
+    expect(timefilter.isAutoRefreshSelectorEnabled).to.be(true);
+    expect(update.called).to.be(true);
+  });
+});
+
 describe('calculateBounds', () => {
 
   const fifteenMinutesInMilliseconds = 15 * 60 * 1000;
