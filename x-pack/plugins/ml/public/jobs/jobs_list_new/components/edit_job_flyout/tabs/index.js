@@ -8,3 +8,4 @@
 export { JobDetails } from './job_details';
 export { Detectors } from './detectors';
 export { Datafeed } from './datafeed';
+export { CustomUrls } from './custom_urls';

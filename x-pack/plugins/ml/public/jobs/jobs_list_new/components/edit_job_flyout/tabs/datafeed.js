@@ -87,6 +87,7 @@ export class Datafeed extends Component {
         <EuiForm>
           <EuiFormRow
             label="Query"
+            style={{ maxWidth: 'inherit' }}
           >
             <MLJobEditor
               value={query}

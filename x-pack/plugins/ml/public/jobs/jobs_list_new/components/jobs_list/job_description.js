@@ -29,12 +29,13 @@ const colorMap = {};
 export function JobDescription({ job }) {
   return (
     <React.Fragment>
-      {job.description} &nbsp;
-      {
-        job.groups.map(group => (
-          <JobGroup key={group} name={group} />
-        ))
-      }
+      <div className="job-description">{job.description} &nbsp;
+        {
+          job.groups.map(group => (
+            <JobGroup key={group} name={group} />
+          ))
+        }
+      </div>
     </React.Fragment>
   );
 }

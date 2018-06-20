@@ -19,15 +19,11 @@ import {
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  // EuiSpacer,
-  // EuiTabs,
-  // EuiTab,
-  // EuiText,
-  // EuiTextColor,
+  EuiHorizontalRule,
   // EuiTabbedContent,
 } from '@elastic/eui';
 
-import { JobDetails, Detectors, Datafeed } from './tabs';
+import { JobDetails, Detectors, Datafeed, CustomUrls } from './tabs';
 import { saveJob, loadJobDetails } from './edit_utils';
 import { toastNotifications } from 'ui/notify';
 
@@ -43,6 +39,7 @@ export class EditJobFlyout extends Component {
       jobGroups: [],
       jobModelMemoryLimit: '',
       jobDetectors: [],
+      jobCustomUrls: [],
     };
 
     if (typeof this.props.showFunction === 'function') {
@@ -83,6 +80,8 @@ export class EditJobFlyout extends Component {
 
     const datafeedConfig = job.datafeed_config;
     const frequency = (datafeedConfig.frequency !== undefined) ? datafeedConfig.frequency : '';
+    const customUrls = (job.custom_settings && job.custom_settings.custom_urls) ?
+      job.custom_settings.custom_urls : [];
 
     this.setState({
       job,
@@ -93,6 +92,7 @@ export class EditJobFlyout extends Component {
       jobDetectors: detectors,
       jobDetectorDescriptions: detectors.map(d => d.detector_description),
       jobBucketSpan: bucketSpan,
+      jobCustomUrls: customUrls,
       datafeedQuery: (hasDatafeed) ? JSON.stringify(datafeedConfig.query, null, 2) : '',
       datafeedQueryDelay: (hasDatafeed) ? datafeedConfig.query_delay : '',
       datafeedFrequency: (hasDatafeed) ? frequency : '',
@@ -117,6 +117,13 @@ export class EditJobFlyout extends Component {
       ...datafeed
     });
   }
+
+  setCustomUrls = (jobCustomUrls) => {
+    this.setState({
+      ...jobCustomUrls
+    });
+  }
+
 
   save = () => {
     const newJobData = {
@@ -154,35 +161,51 @@ export class EditJobFlyout extends Component {
         jobDetectors,
         jobDetectorDescriptions,
         jobBucketSpan,
+        jobCustomUrls,
         datafeedQuery,
         datafeedQueryDelay,
         datafeedFrequency,
         datafeedScrollSize,
       } = this.state;
 
-      // const tabs = [{
-      //   id: 'job-details',
-      //   name: 'Job details',
-      //   content: <JobDetails
-      //     jobDescription={jobDescription}
-      //     jobGroups={jobGroups}
-      //     jobModelMemoryLimit={jobModelMemoryLimit}
-      //     setJobDetails={this.setJobDetails}
-      //   />,
-      // }, {
-      //   id: 'detectors',
-      //   name: 'Detectors',
-      //   content: <div />,
-      // }, {
-      //   id: 'datafeed',
-      //   name: 'Datafeed',
-      //   content: <div />,
-      // }, {
-      //   id: 'custom-urls',
-      //   name: 'Custom URLs',
-      //   content: <div />,
-      // }
-      // ];
+      const tabs = [{
+        id: 'job-details',
+        name: 'Job details',
+        content: <JobDetails
+          jobDescription={jobDescription}
+          jobGroups={jobGroups}
+          jobModelMemoryLimit={jobModelMemoryLimit}
+          setJobDetails={this.setJobDetails}
+        />,
+      }, {
+        id: 'detectors',
+        name: 'Detectors',
+        content: <Detectors
+          jobDetectors={jobDetectors}
+          jobDetectorDescriptions={jobDetectorDescriptions}
+          setDetectorDescriptions={this.setDetectorDescriptions}
+        />,
+      }, {
+        id: 'datafeed',
+        name: 'Datafeed',
+        content: <Datafeed
+          datafeedQuery={datafeedQuery}
+          datafeedQueryDelay={datafeedQueryDelay}
+          datafeedFrequency={datafeedFrequency}
+          datafeedScrollSize={datafeedScrollSize}
+          jobBucketSpan={jobBucketSpan}
+          setDatafeed={this.setDatafeed}
+        />,
+      }, {
+        id: 'custom-urls',
+        name: 'Custom URLs',
+        content: <CustomUrls
+          job={job}
+          jobCustomUrls={jobCustomUrls}
+          setCustomUrls={this.setCustomUrls}
+        />,
+      }
+      ];
 
       flyout = (
         <EuiFlyout
@@ -198,42 +221,24 @@ export class EditJobFlyout extends Component {
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
+
             {/* <EuiTabbedContent
               tabs={tabs}
               initialSelectedTab={tabs[0]}
               onTabClick={(tab) => { console.log('clicked tab', tab); }}
             /> */}
-            <EuiTitle size="s">
-              <h3>Job details</h3>
-            </EuiTitle>
 
-            <JobDetails
-              jobDescription={jobDescription}
-              jobGroups={jobGroups}
-              jobModelMemoryLimit={jobModelMemoryLimit}
-              setJobDetails={this.setJobDetails}
-            />
-
-            <EuiTitle size="s">
-              <h3>Detectors</h3>
-            </EuiTitle>
-            <Detectors
-              jobDetectors={jobDetectors}
-              jobDetectorDescriptions={jobDetectorDescriptions}
-              setDetectorDescriptions={this.setDetectorDescriptions}
-            />
-
-            <EuiTitle size="s">
-              <h3>Datafeed</h3>
-            </EuiTitle>
-            <Datafeed
-              datafeedQuery={datafeedQuery}
-              datafeedQueryDelay={datafeedQueryDelay}
-              datafeedFrequency={datafeedFrequency}
-              datafeedScrollSize={datafeedScrollSize}
-              jobBucketSpan={jobBucketSpan}
-              setDatafeed={this.setDatafeed}
-            />
+            {
+              tabs.map((t, i) => (
+                <React.Fragment key={i}>
+                  <EuiTitle size="s">
+                    <h3>{t.name}</h3>
+                  </EuiTitle>
+                  {t.content}
+                  <EuiHorizontalRule margin="m" />
+                </React.Fragment>
+              ))
+            }
 
           </EuiFlyoutBody>
           <EuiFlyoutFooter>
