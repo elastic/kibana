@@ -21,12 +21,12 @@ import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 
-import { SegmentedRequestProvider } from '../segmented';
-import { SearchRequestProvider } from '../search_request';
+import { SegmentedSearchRequestProvider } from '../segmented_search_request';
+import { SearchRequestProvider } from '../../search_request';
 
-describe('SegmentedRequestProvider', () => {
+describe('SegmentedSearchRequest', () => {
   let Promise;
-  let SegmentedReq;
+  let SegmentedSearchRequest;
   let segmentedReq;
   let abstractReqStart;
 
@@ -34,7 +34,7 @@ describe('SegmentedRequestProvider', () => {
 
   beforeEach(ngMock.inject((Private, $injector) => {
     Promise = $injector.get('Promise');
-    SegmentedReq = Private(SegmentedRequestProvider);
+    SegmentedSearchRequest = Private(SegmentedSearchRequestProvider);
 
     const SearchRequest = Private(SearchRequestProvider);
     abstractReqStart = sinon.stub(SearchRequest.prototype, 'start').callsFake(() => {
@@ -67,7 +67,7 @@ describe('SegmentedRequestProvider', () => {
   });
 
   function init() {
-    segmentedReq = new SegmentedReq({ source: mockSource(), errorHandler: () => {} });
+    segmentedReq = new SegmentedSearchRequest({ source: mockSource(), errorHandler: () => {} });
   }
 
   function mockSource() {

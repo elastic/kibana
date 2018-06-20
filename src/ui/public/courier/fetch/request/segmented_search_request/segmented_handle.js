@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { EventsProvider } from '../../../events';
+import { EventsProvider } from '../../../../events';
 
 export function SegmentedHandleProvider(Private) {
   const Events = Private(EventsProvider);
@@ -26,13 +26,13 @@ export function SegmentedHandleProvider(Private) {
 
   /**
    * Simple class for creating an object to send to the
-   * requester of a SegmentedRequest. Since the SegmentedRequest
+   * requester of a SegmentedSearchRequest. Since the SegmentedSearchRequest
    * extends AbstractRequest, it wasn't able to be the event
    * emitter it was born to be. This provides a channel for
    * setting values on the segmented request, and an event
    * emitter for the request to speak outwardly
    *
-   * @param {SegmentedRequest} - req - the request this handle relates to
+   * @param {SegmentedSearchRequest} - req - the request this handle relates to
    */
   return class SegmentedHandle extends Events {
     constructor(req) {

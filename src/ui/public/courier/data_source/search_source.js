@@ -76,7 +76,7 @@ import '../../promises';
 
 import { NormalizeSortRequestProvider } from './_normalize_sort_request';
 import { SearchRequestProvider } from '../fetch/request';
-import { SegmentedRequestProvider } from '../fetch/request/segmented';
+import { SegmentedSearchRequestProvider } from '../fetch/request/segmented_search_request';
 
 import { requestQueue } from '../_request_queue';
 import { FetchSoonProvider } from '../fetch';
@@ -100,7 +100,7 @@ function isIndexPattern(val) {
 
 export function SearchSourceProvider(Promise, Private, config) {
   const SearchRequest = Private(SearchRequestProvider);
-  const SegmentedRequest = Private(SegmentedRequestProvider);
+  const SegmentedSearchRequest = Private(SegmentedSearchRequestProvider);
   const normalizeSortRequest = Private(NormalizeSortRequestProvider);
   const fetchSoon = Private(FetchSoonProvider);
   const buildESQuery = Private(BuildESQueryProvider);
@@ -253,7 +253,7 @@ export function SearchSourceProvider(Promise, Private, config) {
             reject(error);
             request.abort();
           };
-          const req = new SegmentedRequest({ source: self, defer, errorHandler, initFn: initFunction });
+          const req = new SegmentedSearchRequest({ source: self, defer, errorHandler, initFn: initFunction });
 
           // Return promises created by the completion handler so that
           // errors will bubble properly
