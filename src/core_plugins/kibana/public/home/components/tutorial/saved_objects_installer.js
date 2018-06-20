@@ -78,7 +78,8 @@ export class SavedObjectsInstaller extends React.Component {
           <EuiFlexItem>
             <EuiText>
               <p>
-                Click button to add Saved Searches, Visualizations, and Dashboards for module
+                Imports index pattern, visualizations and pre-defined dashboards.
+                Index pattern is required for some features in the APM UI.
               </p>
             </EuiText>
           </EuiFlexItem>
@@ -90,7 +91,7 @@ export class SavedObjectsInstaller extends React.Component {
               onClick={this.installSavedObjects}
               isLoading={this.state.isInstalling}
             >
-              Add
+              Load/Import Kibana objects
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -102,7 +103,7 @@ export class SavedObjectsInstaller extends React.Component {
     );
 
     return {
-      title: 'Load Kibana objects',
+      title: 'Kibana objects',
       status: this.state.isInstalled ? 'complete' : 'incomplete',
       children: installStep,
       key: 'installStep'
