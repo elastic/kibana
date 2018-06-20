@@ -32,7 +32,6 @@ import 'uiExports/visRequestHandlers';
 import 'uiExports/visEditorTypes';
 import 'uiExports/visualize';
 import 'uiExports/savedObjectTypes';
-import 'uiExports/spyModes';
 import 'uiExports/fieldFormats';
 import 'uiExports/fieldFormatEditors';
 import 'uiExports/navbarExtensions';
@@ -41,6 +40,7 @@ import 'uiExports/managementSections';
 import 'uiExports/devTools';
 import 'uiExports/docViews';
 import 'uiExports/embeddableFactories';
+import 'uiExports/inspectorViews';
 
 import 'ui/autoload/all';
 import './home';

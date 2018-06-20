@@ -227,6 +227,8 @@
     "@kbn/plugin-generator": "link:packages/kbn-plugin-generator",
     "@kbn/test": "link:packages/kbn-test",
     "@types/babel-core": "^6.25.5",
+    "@types/angular": "^1.6.45",
+    "@types/classnames": "^2.2.3",
     "@types/eslint": "^4.16.2",
     "@types/execa": "^0.9.0",
     "@types/getopts": "^2.0.0",
