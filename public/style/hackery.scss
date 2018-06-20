@@ -98,3 +98,13 @@ html {
     font-size: 0.75rem;
   }
 }
+
+// TODO: remove when bootstrap is removed
+// overrides code styles set by bootstrap
+code {
+  padding: unset;
+  font-size: unset;
+  color: unset;
+  background-color: unset;
+  border-radius: unset;
+}

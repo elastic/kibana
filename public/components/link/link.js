@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { EuiLink } from '@elastic/eui';
 
 const isModifiedEvent = ev => !!(ev.metaKey || ev.altKey || ev.ctrlKey || ev.shiftKey);
 
@@ -41,7 +42,7 @@ export class Link extends React.PureComponent {
         onClick: this.navigateTo(name, params),
       };
 
-      return <a {...props}>{children}</a>;
+      return <EuiLink {...props}>{children}</EuiLink>;
     } catch (e) {
       console.error(e);
       return <div>LINK ERROR: {e.message}</div>;

@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Dropzone from 'react-dropzone';
+import { EuiCode } from '@elastic/eui';
 import { getId } from '../../lib/get_id';
 
 export class WorkpadUpload extends React.PureComponent {
@@ -45,12 +46,11 @@ export class WorkpadUpload extends React.PureComponent {
         <center>
           <p>
             <i>
-              Tip: Drag and drop a <code>JSON</code> exported workpad into this dialog to load new
-              workpad from a file
+              Tip: Drag and drop a <EuiCode>JSON</EuiCode> exported workpad into this dialog to load
+              new workpad from a file
             </i>
           </p>
         </center>
-
         {this.props.children}
       </Dropzone>
     );

@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Form, Table } from 'react-bootstrap';
 import moment from 'moment';
+import { sortByOrder } from 'lodash';
+import { EuiFlexGroup, EuiFlexItem, EuiBasicTable, EuiButtonIcon, EuiSpacer } from '@elastic/eui';
 import { ConfirmModal } from '../confirm_modal';
 import { Link } from '../link';
 import { WorkpadUpload } from './workpad_upload';
@@ -24,6 +25,8 @@ export class WorkpadLoader extends React.PureComponent {
   state = {
     deletingWorkpad: {},
     createPending: false,
+    sortField: '@timestamp',
+    sortDirection: 'desc',
   };
 
   async componentDidMount() {
@@ -59,58 +62,106 @@ export class WorkpadLoader extends React.PureComponent {
     this.closeRemoveConfirm();
   };
 
-  renderWorkpadTable = () => {
-    const { workpads } = this.props;
-
-    return (
-      <Table condensed className="canvas__workpad_loader--workpads">
-        <thead>
-          <tr>
-            <th>Workpad name</th>
-            <th>Created</th>
-            <th>Updated</th>
-            <th>&nbsp;</th>
-          </tr>
-        </thead>
-        <tbody>
-          {workpads.total === 0 && (
-            <tr>
-              <td colSpan="3">No matching workpads found</td>
-            </tr>
-          )}
-          {workpads.workpads.map(this.renderWorkpadRow)}
-        </tbody>
-      </Table>
-    );
+  downloadWorkpad = workpad => {
+    this.props.downloadWorkpad(workpad.id);
   };
 
-  renderWorkpadRow = workpad => {
-    const workpadName = workpad.name.length ? workpad.name : <em>{workpad.id}</em>;
+  onTableChange = ({ sort = {} }) => {
+    const { field: sortField, direction: sortDirection } = sort;
+    this.setState({
+      sortField,
+      sortDirection,
+    });
+  };
+
+  renderWorkpadTable = () => {
+    const { sortField, sortDirection } = this.state;
+    const { workpads } = this.props.workpads;
+
+    const actions = [
+      {
+        render: workpad => (
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType="exportAction"
+                onClick={() => this.downloadWorkpad(workpad)}
+                aria-label="Export Workpad"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiButtonIcon
+                iconType="trash"
+                color="danger"
+                onClick={() => this.removeConfirm(workpad)}
+                aria-label="Delete Workpad"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+      },
+    ];
+
+    const columns = [
+      {
+        field: 'name',
+        name: 'Workpad Name',
+        sortable: true,
+        dataType: 'string',
+        render: (name, workpad) => {
+          const workpadName = workpad.name.length ? workpad.name : <em>{workpad.id}</em>;
+
+          return (
+            <Link
+              name="loadWorkpad"
+              params={{ id: workpad.id }}
+              aria-label={`Load workpad ${workpadName}`}
+            >
+              {workpadName}
+            </Link>
+          );
+        },
+      },
+      {
+        field: '@created',
+        name: 'Created',
+        sortable: true,
+        dataType: 'date',
+        width: '20%',
+        render: date => formatDate(date),
+      },
+      {
+        field: '@timestamp',
+        name: 'Updated',
+        sortable: true,
+        dataType: 'date',
+        width: '20%',
+        render: date => formatDate(date),
+      },
+      { name: '', actions, width: '5%' },
+    ];
+
+    const sorting = {
+      sort: {
+        field: sortField,
+        direction: sortDirection,
+      },
+    };
+
+    const sortedWorkpads = sortByOrder(
+      workpads,
+      [sortField, '@timestamp'],
+      [sortDirection, 'desc']
+    );
 
     return (
-      <tr key={workpad.id} className="canvas__workpad_loader--workpad">
-        <td width="97%" className="canvas__workpad_loader--name">
-          <Link
-            name="loadWorkpad"
-            params={{ id: workpad.id }}
-            aria-label={`Load workpad ${workpadName}`}
-          >
-            {workpadName}
-          </Link>
-        </td>
-        <td width="1%" className="canvas__workpad_loader--created">
-          {formatDate(workpad['@created'])}
-        </td>
-        <td width="1%" className="canvas__workpad_loader--updated">
-          {formatDate(workpad['@timestamp'])}
-        </td>
-        <td width="1%" className="canvas__workpad_loader--export">
-          <span onClick={() => this.props.downloadWorkpad(workpad.id)} className="fa fa-download" />
-        </td>
-        <td width="1%" className="canvas__workpad_loader--delete">
-          <span onClick={() => this.removeConfirm(workpad)} className="fa fa-trash" />
-        </td>
-      </tr>
+      <EuiBasicTable
+        items={sortedWorkpads}
+        columns={columns}
+        sorting={sorting}
+        message="No matching workpads found"
+        onChange={this.onTableChange}
+      />
     );
   };
 
@@ -121,10 +172,16 @@ export class WorkpadLoader extends React.PureComponent {
     return (
       <div className="canvas__workpad_loader">
         <WorkpadUpload onUpload={this.uploadWorkpad}>
-          <Form className="canvas__workpad_loader--controls">
-            <WorkpadCreate onCreate={this.createWorkpad} />
-            <WorkpadSearch onChange={this.props.findWorkpads} />
-          </Form>
+          <EuiFlexGroup gutterSize="s" className="canvas__workpad_loader--controls">
+            <EuiFlexItem grow={false}>
+              <WorkpadCreate createPending={createPending} onCreate={this.createWorkpad} />
+            </EuiFlexItem>
+            <EuiFlexItem className="canvas__workpad_loader--search">
+              <WorkpadSearch onChange={this.props.findWorkpads} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          <EuiSpacer size="l" />
 
           {createPending && <div>Creating Workpad...</div>}
           {!createPending && isLoading && <div>Fetching Workpads...</div>}
@@ -133,6 +190,7 @@ export class WorkpadLoader extends React.PureComponent {
 
         <ConfirmModal
           isOpen={deletingWorkpad.id != null}
+          title="Remove Workpad"
           message={`Are you sure you want to remove the workpad '${deletingWorkpad.name}'?`}
           confirmButtonText="Remove"
           onConfirm={() => this.removeWorkpad(deletingWorkpad.id)}

@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Modal, Button } from 'react-bootstrap';
+import { EuiCode } from '@elastic/eui';
 import { Changes } from './changes';
 import goat from './goat.png';
 
@@ -38,12 +39,12 @@ export const UpdateModal = ({ filename, setFilename, changes }) => {
           need these steps:
         </p>
         <h5>1. Stop Kibana and remove the old version of Canvas</h5>
-        <code>./bin/kibana-plugin remove canvas</code>
+        <EuiCode>./bin/kibana-plugin remove canvas</EuiCode>
         <h5>2. Install the new version</h5>
-        <code>
+        <EuiCode>
           NODE_OPTIONS="--max-old-space-size=4096" ./bin/kibana-plugin install
           https://download.elastic.co/kibana/canvas/{filename}
-        </code>
+        </EuiCode>
         <h5>3. Start Kibana and refresh your browser</h5>
         You should be good to go. Good luck!
       </Modal.Body>

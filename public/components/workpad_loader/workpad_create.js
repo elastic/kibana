@@ -1,36 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Button } from 'react-bootstrap';
+import { EuiButton } from '@elastic/eui';
 
-export class WorkpadCreate extends React.PureComponent {
-  static propTypes = {
-    onCreate: PropTypes.func.isRequired,
-  };
+export const WorkpadCreate = ({ createPending, onCreate }) => (
+  <EuiButton
+    fill
+    onClick={onCreate}
+    isLoading={createPending}
+    iconType={!createPending ? 'plusInCircle' : null}
+  >
+    Create Workpad
+  </EuiButton>
+);
 
-  state = {
-    createPending: false,
-  };
-
-  create = () => {
-    this.setState({ createPending: true });
-    this.props.onCreate();
-  };
-
-  render() {
-    const { createPending } = this.state;
-
-    return (
-      <Button
-        bsSize="xsmall"
-        bsStyle="primary"
-        onClick={this.create}
-        disabled={createPending}
-        className="canvas__workpad_loader--new"
-      >
-        {createPending && <i className="fa fa-spinner fa-pulse" />}
-        {!createPending && <i className="fa fa-plus" />}
-        &nbsp;New Workpad
-      </Button>
-    );
-  }
-}
+WorkpadCreate.propTypes = {
+  onCreate: PropTypes.func.isRequired,
+  createPending: PropTypes.bool,
+};

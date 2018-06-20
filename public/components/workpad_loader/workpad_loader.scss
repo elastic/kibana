@@ -1,35 +1,7 @@
 .canvas__workpad_loader {
-  height: 400px;
-  display: flex;
+  height: fit-content;
 
-  & > div {
-    width: 100%;
-  }
-
-  .canvas__workpad_loader--created,
-  .canvas__workpad_loader--updated {
-    white-space: nowrap;
-  }
-
-  .canvas__workpad_loader--delete:hover {
-    color: $euiColorDanger;
-  }
-
-  .canvas__workpad_loader--export:hover {
-    color: $euiColorSecondary;
-  }
-
-  .canvas__workpad_loader--workpad a {
-    color: $euiColorEmptyShade;
-  }
-
-  .canvas__workpad_loader--controls {
-    display: flex;
-    flex-direction: row;
-    margin-bottom: $euiSize;
-  }
-
-  .canvas__workpad_loader--new {
-    margin-right: $euiSize;
+  .canvas__workpad_loader--search {
+    color: $euiColorDarkestShade;
   }
 }

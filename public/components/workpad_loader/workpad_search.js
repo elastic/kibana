@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormControl } from 'react-bootstrap';
+import { EuiFieldSearch } from '@elastic/eui';
 import { debounce } from 'lodash';
 
 export class WorkpadSearch extends React.PureComponent {
@@ -23,11 +23,12 @@ export class WorkpadSearch extends React.PureComponent {
 
   render() {
     return (
-      <FormControl
-        type="text"
-        placeholder="Find Workpads"
+      <EuiFieldSearch
+        placeholder="Find workpad"
         value={this.state.searchText}
         onChange={this.setSearchText}
+        fullWidth
+        incremental
       />
     );
   }
