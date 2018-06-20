@@ -20,9 +20,11 @@
 import { Notifier } from 'ui/notify';
 import { VegaView } from './vega_view/vega_view';
 import { VegaMapView } from './vega_view/vega_map_view';
+import { SavedObjectsClientProvider, findObjectByTitle } from 'ui/saved_objects';
 
-export function VegaVisualizationProvider(vegaConfig, serviceSettings) {
+export function VegaVisualizationProvider(Private, vegaConfig, serviceSettings) {
 
+  const savedObjectsClient = Private(SavedObjectsClientProvider);
   const notify = new Notifier({ location: 'Vega' });
 
   return class VegaVisualization {
@@ -32,12 +34,36 @@ export function VegaVisualizationProvider(vegaConfig, serviceSettings) {
     }
 
     /**
+     * Find index pattern by its title, of if not given, gets default
+     * @param {string} [index]
+     * @returns {Promise<string>} index id
+     */
+    async findIndex(index) {
+      let idxObj;
+      if (index) {
+        idxObj = await findObjectByTitle(savedObjectsClient, 'index-pattern', index);
+        if (!idxObj) throw new Error(`Index "${index}" not found`);
+      } else {
+        idxObj = await this._vis.API.indexPatterns.getDefault();
+        if (!idxObj) throw new Error('Unable to find default index');
+      }
+      return idxObj.id;
+    }
+
+    /**
      *
      * @param {VegaParser} visData
      * @param {*} status
      * @returns {Promise<void>}
      */
     async render(visData, status) {
+
+
+
+      console.log('render()', new Date());
+
+
+
       if (!visData && !this._vegaView) {
         notify.warning('Unable to render without data');
         return;
@@ -65,10 +91,21 @@ export function VegaVisualizationProvider(vegaConfig, serviceSettings) {
           this._vegaView = null;
         }
 
+        const vegaViewParams = {
+          vegaConfig,
+          editorMode: this._vis.editorMode,
+          parentEl: this._el,
+          vegaParser,
+          serviceSettings,
+          queryfilter: this._vis.API.queryFilter,
+          timefilter: this._vis.API.timeFilter,
+          findIndex: this.findIndex.bind(this),
+        };
+
         if (vegaParser.useMap) {
-          this._vegaView = new VegaMapView(vegaConfig, this._vis.editorMode, this._el, vegaParser, serviceSettings);
+          this._vegaView = new VegaMapView(vegaViewParams);
         } else {
-          this._vegaView = new VegaView(vegaConfig, this._vis.editorMode, this._el, vegaParser, serviceSettings);
+          this._vegaView = new VegaView(vegaViewParams);
         }
         await this._vegaView.init();
 

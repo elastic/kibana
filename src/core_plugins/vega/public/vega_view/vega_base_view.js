@@ -18,13 +18,46 @@
  */
 
 import $ from 'jquery';
+import moment from 'moment';
 import * as vega from 'vega-lib';
 import * as vegaLite from 'vega-lite';
 import { Utils } from '../data_model/utils';
 import { VISUALIZATION_COLORS } from '@elastic/eui';
 import { TooltipHandler } from './vega_tooltip';
+import { buildQueryFilter } from 'ui/filter_manager/lib';
 
 vega.scheme('elastic', VISUALIZATION_COLORS);
+
+// Vega's extension functions are global. When called,
+// we forward execution to the instance-specific handler
+// This functions must be declared in the VegaBaseView class
+const vegaFunctions = {
+  kibanaAddFilter: 'addFilterHandler',
+  kibanaRemoveFilter: 'removeFilterHandler',
+  kibanaRemoveAllFilters: 'removeAllFiltersHandler',
+  kibanaSetTimeFilter: 'setTimeFilterHandler',
+};
+
+for (const funcName of Object.keys(vegaFunctions)) {
+  if (!vega.expressionFunction(funcName)) {
+    vega.expressionFunction(
+      funcName,
+      function handlerFwd(...args) {
+
+
+
+
+        console.log('Handling ' + funcName, ...args);
+
+
+
+
+        const view = this.context.dataflow;
+        view.runAfter(() => view._kibanaView.vegaFunctionsHandler(funcName, ...args));
+      }
+    );
+  }
+}
 
 const bypassToken = Symbol();
 
@@ -34,12 +67,15 @@ export function bypassExternalUrlCheck(url) {
 }
 
 export class VegaBaseView {
-  constructor(vegaConfig, editorMode, parentEl, vegaParser, serviceSettings) {
-    this._vegaConfig = vegaConfig;
-    this._editorMode = editorMode;
-    this._$parentEl = $(parentEl);
-    this._parser = vegaParser;
-    this._serviceSettings = serviceSettings;
+  constructor(opts) {
+    this._vegaConfig = opts.vegaConfig;
+    this._editorMode = opts.editorMode;
+    this._$parentEl = $(opts.parentEl);
+    this._parser = opts.vegaParser;
+    this._serviceSettings = opts.serviceSettings;
+    this._queryfilter = opts.queryfilter;
+    this._timefilter = opts.timefilter;
+    this._findIndex = opts.findIndex;
     this._view = null;
     this._vegaViewConfig = null;
     this._$messages = null;
@@ -175,6 +211,10 @@ export class VegaBaseView {
     this._view = view;
 
     if (view) {
+
+      // Global vega expression handler uses it to call custom functions
+      view._kibanaView = this;
+
       if (this._parser.tooltips) {
         // position and padding can be specified with
         // {config:{kibana:{tooltips: {position: 'top', padding: 15 } }}}
@@ -186,6 +226,96 @@ export class VegaBaseView {
 
       return view.runAsync(); // Allows callers to await rendering
     }
+  }
+
+  /**
+   * Handle
+   * @param funcName
+   * @param args
+   * @returns {Promise<void>}
+   */
+  async vegaFunctionsHandler(funcName, ...args) {
+
+
+
+
+
+    console.log('Executing ' + funcName, ...args);
+
+
+
+
+
+    try {
+      const handlerFunc = vegaFunctions[funcName];
+      if (!handlerFunc || !this[handlerFunc]) {
+        // in case functions don't match the list above
+        throw new Error(`${funcName}() is not defined for this graph`);
+      }
+      await this[handlerFunc].apply(this, args);
+    } catch (err) {
+      this.onError(err);
+    }
+  }
+
+  /**
+   * @param {object} query Elastic Query DSL snippet, as used in the query DSL editor
+   * @param {string} [index] as defined in Kibana, or default if missing
+   */
+  async addFilterHandler(query, index) {
+    const indexId = await this._findIndex(index);
+    const filter = buildQueryFilter(query, indexId);
+    this._queryfilter.addFilters(filter);
+  }
+
+  /**
+   * @param {object} query Elastic Query DSL snippet, as used in the query DSL editor
+   * @param {string} [index] as defined in Kibana, or default if missing
+   */
+  async removeFilterHandler(query, index) {
+    const indexId = await this._findIndex(index);
+    const filter = buildQueryFilter(query, indexId);
+
+
+
+    console.log('removing filter', filter);
+
+
+
+    this._queryfilter.removeFilter(filter);
+  }
+
+  removeAllFiltersHandler() {
+    this._queryfilter.removeAll();
+  }
+
+  /**
+   * @param {number|string|Date} start
+   * @param {number|string|Date} end
+   * @param {string} [mode]
+   */
+  setTimeFilterHandler(start, end, mode) {
+    const tf = this._timefilter;
+
+    let from = moment(start);
+    let to = moment(end);
+
+    if (from.isValid() && to.isValid()) {
+      if (from.isAfter(to)) {
+        [from, to] = [to, from];
+      }
+    } else if (typeof start === 'string' && typeof end === 'string') {
+
+      // TODO/FIXME:  should strings be allowed as is, or is there a parser?
+      // Also, should the default mode be changed in this case?
+
+      [from, to] = [start, end];
+    }
+
+    tf.time.from = from;
+    tf.time.to = to;
+    tf.time.mode = mode || 'absolute';
+    tf.update();
   }
 
   /**
