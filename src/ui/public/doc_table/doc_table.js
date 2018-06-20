@@ -112,28 +112,29 @@ uiModules.get('kibana')
           });
 
           function onResults(resp) {
-          // Reset infinite scroll limit
-            $scope.limit = 50;
+            $scope.$evalAsync(() => {
+              // Reset infinite scroll limit
+              $scope.limit = 50;
 
-            // Abort if something changed
-            if ($scope.searchSource !== $scope.searchSource) return;
+              // Abort if something changed
+              if ($scope.searchSource !== $scope.searchSource) return;
 
-            $scope.hits = resp.hits.hits;
-            if ($scope.hits.length === 0) {
-              dispatchRenderComplete($el[0]);
-            }
-            // We limit the number of returned results, but we want to show the actual number of hits, not
-            // just how many we retrieved.
-            $scope.totalHitCount = resp.hits.total;
-            $scope.pager = pagerFactory.create($scope.hits.length, 50, 1);
-            calculateItemsOnPage();
+              $scope.hits = resp.hits.hits;
+              if ($scope.hits.length === 0) {
+                dispatchRenderComplete($el[0]);
+              }
+              // We limit the number of returned results, but we want to show the actual number of hits, not
+              // just how many we retrieved.
+              $scope.totalHitCount = resp.hits.total;
+              $scope.pager = pagerFactory.create($scope.hits.length, 50, 1);
+              calculateItemsOnPage();
+            });
 
             return $scope.searchSource.onResults().then(onResults);
           }
 
           function startSearching() {
-            $scope.searchSource.onResults()
-              .then(onResults)
+            $scope.searchSource.onResults().then(onResults)
               .catch(error => {
                 notify.error(error);
                 startSearching();

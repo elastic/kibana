@@ -103,6 +103,7 @@ uiModules
             filters: $scope.filters,
             query: $scope.query,
             forceFetch,
+            evalAsync: $scope.$evalAsync,
           };
 
           // Reset forceFetch flag, since we are now executing our forceFetch in case it was true

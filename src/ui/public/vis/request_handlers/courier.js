@@ -73,7 +73,7 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
 
   return {
     name: 'courier',
-    handler: function (vis, { searchSource, timeRange, query, filters, forceFetch }) {
+    handler: function (vis, { searchSource, timeRange, query, filters, forceFetch, evalAsync }) {
 
       // Create a new search source that inherits the original search source
       // but has the propriate timeRange applied via a filter.
@@ -128,30 +128,32 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
             request.stats(getRequestInspectorStats(requestSearchSource));
 
             requestSearchSource.onResults().then(resp => {
-              searchSource.lastQuery = queryHash;
+              evalAsync(async () => {
+                searchSource.lastQuery = queryHash;
 
-              request
-                .stats(getResponseInspectorStats(searchSource, resp))
-                .ok({ json: resp });
+                request
+                  .stats(getResponseInspectorStats(searchSource, resp))
+                  .ok({ json: resp });
 
-              searchSource.rawResponse = resp;
-              return _.cloneDeep(resp);
-            }).then(async resp => {
-              for (const agg of vis.getAggConfig()) {
-                if (_.has(agg, 'type.postFlightRequest')) {
-                  const nestedSearchSource = new SearchSource().inherits(requestSearchSource);
-                  resp = await agg.type.postFlightRequest(resp, vis.aggs, agg, nestedSearchSource);
+                searchSource.rawResponse = resp;
+                let clonedResponse = _.cloneDeep(resp);
+
+                for (const agg of vis.getAggConfig()) {
+                  if (_.has(agg, 'type.postFlightRequest')) {
+                    const nestedSearchSource = new SearchSource().inherits(requestSearchSource);
+                    clonedResponse = await agg.type.postFlightRequest(resp, vis.aggs, agg, nestedSearchSource);
+                  }
                 }
-              }
 
-              searchSource.finalResponse = resp;
+                searchSource.finalResponse = clonedResponse;
 
-              vis.API.inspectorAdapters.data.setTabularLoader(
-                () => buildTabularInspectorData(vis, searchSource),
-                { returnsFormattedValues: true }
-              );
+                vis.API.inspectorAdapters.data.setTabularLoader(
+                  () => buildTabularInspectorData(vis, searchSource),
+                  { returnsFormattedValues: true }
+                );
 
-              resolve(resp);
+                resolve(clonedResponse);
+              });
             }).catch(e => reject(e));
 
             requestSearchSource.getSearchRequestBody().then(req => {
