@@ -21,6 +21,8 @@ export function PatternInput({ value, onChange }) {
         setOptions={{
           highlightActiveLine: false,
           highlightGutterLine: false,
+          minLines: 3,
+          maxLines: 10,
         }}
         data-test-subj="acePatternInput"
       />

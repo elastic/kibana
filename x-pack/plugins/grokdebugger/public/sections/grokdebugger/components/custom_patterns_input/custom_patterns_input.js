@@ -10,7 +10,8 @@ import {
   EuiCallOut,
   EuiCodeBlock,
   EuiFormRow,
-  EuiCodeEditor
+  EuiCodeEditor,
+  EuiSpacer
 } from '@elastic/eui';
 
 export function CustomPatternsInput({ value, onChange }) {
@@ -31,6 +32,8 @@ MSG message-id=<%{GREEDYDATA}>`;
         </EuiCodeBlock>
       </EuiCallOut>
 
+      <EuiSpacer />
+
       <EuiFormRow>
         <EuiCodeEditor
           width="100%"
@@ -40,6 +43,8 @@ MSG message-id=<%{GREEDYDATA}>`;
           setOptions={{
             highlightActiveLine: false,
             highlightGutterLine: false,
+            minLines: 3,
+            maxLines: 10,
           }}
           data-test-subj="aceCustomPatternsInput"
         />

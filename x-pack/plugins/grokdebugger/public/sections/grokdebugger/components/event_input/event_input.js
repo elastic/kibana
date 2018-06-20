@@ -21,6 +21,8 @@ export function EventInput({ value, onChange }) {
         setOptions={{
           highlightActiveLine: false,
           highlightGutterLine: false,
+          minLines: 3,
+          maxLines: 50,
         }}
         data-test-subj="aceEventInput"
       />
