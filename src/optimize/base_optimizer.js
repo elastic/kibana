@@ -36,6 +36,7 @@ const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
 const BABEL_EXCLUDE_RE = [
   /[\/\\](webpackShims|node_modules|bower_components)[\/\\]/,
 ];
+const STATS_WARNINGS_FILTER = /export .* was not found in/;
 
 export default class BaseOptimizer {
   constructor(opts) {
@@ -320,16 +321,6 @@ export default class BaseOptimizer {
           ]
         },
 
-        stats: {
-          // when typescript doesn't do a full type check, as we have the ts-loader
-          // configured here, it does not have enough information to determine
-          // whether an imported name is a type or not, so when the name is then
-          // exported, typescript has no choice but to emit the export. Fortunately,
-          // the extraneous export should not be harmful, so we just suppress these warnings
-          // https://github.com/TypeStrong/ts-loader#transpileonly-boolean-defaultfalse
-          warningsFilter: /export .* was not found in/
-        },
-
         resolve: {
           extensions: ['.ts', '.tsx'],
         },
@@ -364,16 +355,37 @@ export default class BaseOptimizer {
     });
   }
 
+  isFailure(stats) {
+    if (stats.hasErrors()) {
+      return true;
+    }
+
+    const { warnings } = stats.toJson({ all: false, warnings: true });
+
+    // when typescript doesn't do a full type check, as we have the ts-loader
+    // configured here, it does not have enough information to determine
+    // whether an imported name is a type or not, so when the name is then
+    // exported, typescript has no choice but to emit the export. Fortunately,
+    // the extraneous export should not be harmful, so we just suppress these warnings
+    // https://github.com/TypeStrong/ts-loader#transpileonly-boolean-defaultfalse
+    const filteredWarnings = Stats.filterWarnings(warnings, STATS_WARNINGS_FILTER);
+
+    return filteredWarnings.length > 0;
+  }
+
   failedStatsToError(stats) {
     const details = stats.toString(defaults(
-      { colors: true },
+      { colors: true, warningsFilter: STATS_WARNINGS_FILTER },
       Stats.presetToOptions('minimal')
     ));
 
     return Boom.create(
       500,
       `Optimizations failure.\n${details.split('\n').join('\n    ')}\n`,
-      stats.toJson(Stats.presetToOptions('detailed'))
+      stats.toJson(defaults({
+        warningsFilter: STATS_WARNINGS_FILTER,
+        ...Stats.presetToOptions('detailed')
+      }))
     );
   }
 }

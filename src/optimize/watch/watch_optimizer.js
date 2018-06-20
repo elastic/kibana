@@ -115,7 +115,7 @@ export default class WatchOptimizer extends BaseOptimizer {
       this.initialBuildComplete = true;
       const seconds = parseFloat((stats.endTime - stats.startTime) / 1000).toFixed(2);
 
-      if (stats.hasErrors() || stats.hasWarnings()) {
+      if (this.isFailure(stats)) {
         this.status$.next({
           type: STATUS.FAILURE,
           seconds,
