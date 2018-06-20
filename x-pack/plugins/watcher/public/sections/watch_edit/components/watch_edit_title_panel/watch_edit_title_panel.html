@@ -122,17 +122,21 @@
 
       <div class="kuiFieldGroupSection">
         <label
+          id="durationSelectTriggerIntervalSizeLabel"
           for="durationSelectTriggerIntervalSize"
-          class="kuiLabel kuiVerticalRhythmSmall">
+          class="kuiLabel kuiVerticalRhythmSmall"
+        >
           Run watch every
         </label>
-        <div class="kuiVerticalRhythmSmall">
+
+        <div class="kuiVerticalRhythmSmall" id="durationSelectTriggerIntervalSize" role="group">
           <duration-select
             duration-id="triggerInterval"
             minimum-unit="watchEditTitlePanel.triggerIntervalMinimumUnit"
             minimum-size="watchEditTitlePanel.triggerIntervalMinimumSize"
             unit="watchEditTitlePanel.triggerIntervalUnit"
             size="watchEditTitlePanel.triggerIntervalSize"
+            described-by="durationSelectTriggerIntervalSizeLabel"
           ></duration-select>
         </div>
         <div class="kuiSubText kuiSubduedText kuiVerticalRhythmSmall watchEditTitlePanelIntervalValidation">

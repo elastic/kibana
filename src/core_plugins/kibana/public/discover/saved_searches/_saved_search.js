@@ -42,7 +42,7 @@ module.factory('SavedSearch', function (courier) {
         hits: 0,
         sort: [],
         version: 1
-      }
+      },
     });
 
     this.showInRecenltyAccessed = true;
