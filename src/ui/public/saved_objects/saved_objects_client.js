@@ -40,7 +40,7 @@ export class SavedObjectsClient {
       $http,
       basePath = chrome.getBasePath(),
       PromiseConstructor = Promise,
-      onCreateFailure = () => {},
+      onCreateFailure = () => { },
     } = options;
 
     this._$http = $http;

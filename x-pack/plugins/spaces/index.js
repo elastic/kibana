@@ -10,6 +10,7 @@ import { checkLicense } from './server/lib/check_license';
 import { initSpacesApi } from './server/routes/api/v1/spaces';
 import { initSpacesRequestInterceptors } from './server/lib/space_request_interceptors';
 import { createDefaultSpace } from './server/lib/create_default_space';
+import { createSpacesService } from './server/lib/create_spaces_service';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import { getActiveSpace } from './server/lib/get_active_space';
 import { wrapError } from './server/lib/errors';
@@ -75,8 +76,11 @@ export const spaces = (kibana) => new kibana.Plugin({
     const config = server.config();
     validateConfig(config, message => server.log(['spaces', 'warning'], message));
 
+    const spacesService = createSpacesService(server);
+    server.decorate('server', 'spaces', spacesService);
+
     const { addScopedSavedObjectsClientWrapperFactory } = server.savedObjects;
-    addScopedSavedObjectsClientWrapperFactory(spacesSavedObjectsClientWrapper);
+    addScopedSavedObjectsClientWrapperFactory(spacesSavedObjectsClientWrapper(spacesService));
 
     initSpacesApi(server);
 

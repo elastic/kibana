@@ -7,7 +7,6 @@
 import { wrapError } from './errors';
 
 export function initSpacesRequestInterceptors(server) {
-  const contextCache = new WeakMap();
 
   server.ext('onRequest', async function spacesOnRequestHandler(request, reply) {
     const path = request.path;
@@ -31,7 +30,6 @@ export function initSpacesRequestInterceptors(server) {
       };
 
       request.setUrl(newUrl);
-      contextCache.set(request, spaceUrlContext);
     }
 
     return reply.continue();
@@ -41,7 +39,8 @@ export function initSpacesRequestInterceptors(server) {
     const path = request.path;
 
     const isRequestingKibanaRoot = path === '/';
-    const urlContext = contextCache.get(request);
+    const { spaces } = server;
+    const urlContext = await spaces.getUrlContext(request);
 
     // if requesting the application root, then show the Space Selector UI to allow the user to choose which space
     // they wish to visit. This is done "onPostAuth" to allow the Saved Objects Client to use the request's auth scope,

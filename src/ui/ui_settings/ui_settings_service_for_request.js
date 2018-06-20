@@ -35,12 +35,10 @@ import { uiSettingsServiceFactory } from './ui_settings_service_factory';
 export function getUiSettingsServiceForRequest(server, request, options = {}) {
   const {
     getDefaults,
-    idSuffix,
   } = options;
 
   const uiSettingsService = uiSettingsServiceFactory(server, {
     getDefaults,
-    idSuffix,
     savedObjectsClient: request.getSavedObjectsClient()
   });
 

@@ -6,9 +6,10 @@
 
 import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';
 
-export function spacesSavedObjectsClientWrapper(baseClient, options) {
-  return new SpacesSavedObjectsClient({
-    baseClient,
-    ...options
+export function spacesSavedObjectsClientWrapper(spacesService) {
+  return ({ client, request }) => new SpacesSavedObjectsClient({
+    baseClient: client,
+    request,
+    spacesService,
   });
 }

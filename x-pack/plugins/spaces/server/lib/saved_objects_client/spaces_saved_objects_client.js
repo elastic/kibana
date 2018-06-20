@@ -9,7 +9,7 @@ export class SpacesSavedObjectsClient {
     const {
       request,
       baseClient,
-      spaceUrlContext,
+      spacesService,
     } = options;
 
     this.errors = baseClient.errors;
@@ -17,7 +17,7 @@ export class SpacesSavedObjectsClient {
     this._client = baseClient;
     this._request = request;
 
-    this._spaceUrlContext = spaceUrlContext;
+    this._spaceUrlContext = spacesService.getUrlContext(this._request);
   }
 
   async create(type, attributes = {}, options = {}) {
@@ -48,7 +48,13 @@ export class SpacesSavedObjectsClient {
   async find(options = {}) {
     const spaceOptions = {};
 
-    if (this._isTypeSpaceAware(options.type)) {
+    // TODO(legrego) handle multiple types
+    let type = options.type;
+    if (Array.isArray(type)) {
+      type = type[0];
+    }
+
+    if (this._isTypeSpaceAware(type)) {
       const spaceId = await this._getSpaceId();
       if (spaceId) {
         spaceOptions.extraFilters = [{
@@ -71,7 +77,7 @@ export class SpacesSavedObjectsClient {
     });
 
     result.saved_objects = result.saved_objects.filter(savedObject => {
-      const { type, spaceId } = savedObject.attributes;
+      const { type, spaceId } = savedObject;
 
       if (this._isTypeSpaceAware(type)) {
         return spaceId === thisSpaceId;
@@ -94,7 +100,7 @@ export class SpacesSavedObjectsClient {
       extraSourceProperties: ['spaceId']
     });
 
-    const { spaceId: objectSpaceId } = response.attributes;
+    const { spaceId: objectSpaceId } = response;
 
     if (objectSpaceId !== thisSpaceId) {
       throw this._client.errors.createGenericNotFoundError();
@@ -104,7 +110,10 @@ export class SpacesSavedObjectsClient {
   }
 
   async update(type, id, attributes, options = {}) {
-    attributes.spaceId = await this._getSpaceId();
+    options.extraBodyProperties = {
+      ...options.extraBodyProperties,
+      spaceId: await this._getSpaceId()
+    };
     return await this._client.update(type, id, attributes, options);
   }
 
@@ -116,7 +125,7 @@ export class SpacesSavedObjectsClient {
     if (!this._spaceId) {
       const {
         saved_objects: spaces = []
-      } =  await this.find({
+      } = await this.find({
         type: 'space',
         search: `"${this._spaceUrlContext}"`,
         search_fields: ['urlContext'],

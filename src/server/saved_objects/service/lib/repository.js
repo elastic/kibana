@@ -36,7 +36,7 @@ export class SavedObjectsRepository {
       index,
       mappings,
       callCluster,
-      onBeforeWrite = () => {},
+      onBeforeWrite = () => { },
     } = options;
 
     this._index = index;
@@ -341,11 +341,10 @@ export class SavedObjectsRepository {
           type,
           ...time && { updated_at: time },
           version: doc._version,
+          ...extraSourceProperties
+            .map(s => ({ [s]: doc._source[s] }))
+            .reduce((acc, prop) => ({ ...acc, ...prop }), {}),
           attributes: {
-            ...extraSourceProperties
-              .map(s => doc._source[s])
-              .reduce((acc, prop) => ({ ...acc, ...prop }), {}),
-
             ...doc._source[type],
           }
         };
@@ -386,11 +385,10 @@ export class SavedObjectsRepository {
       type,
       ...updatedAt && { updated_at: updatedAt },
       version: response._version,
+      ...extraSourceProperties
+        .map(s => response._source[s])
+        .reduce((acc, prop) => ({ ...acc, ...prop }), {}),
       attributes: {
-        ...extraSourceProperties
-          .map(s => response._source[s])
-          .reduce((acc, prop) => ({ ...acc, ...prop }), {}),
-
         ...response._source[type],
       }
     };

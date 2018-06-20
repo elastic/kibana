@@ -70,7 +70,7 @@ export class SecureSavedObjectsClient {
     const typesToPrivilegesMap = new Map(types.map(type => [type, getPrivilege(type, action)]));
     const hasPrivilegesResult = await this._hasSavedObjectPrivileges(Array.from(typesToPrivilegesMap.values()));
     const authorizedTypes = Array.from(typesToPrivilegesMap.entries())
-      .filter(([ , privilege]) => !hasPrivilegesResult.missing.includes(privilege))
+      .filter(([, privilege]) => !hasPrivilegesResult.missing.includes(privilege))
       .map(([type]) => type);
 
     if (authorizedTypes.length === 0) {
@@ -91,13 +91,13 @@ export class SecureSavedObjectsClient {
     });
   }
 
-  async bulkGet(objects = []) {
+  async bulkGet(objects = [], options = {}) {
     const types = uniq(objects.map(o => o.type));
     await this._performAuthorizationCheck(types, 'bulk_get', {
       objects,
     });
 
-    return await this._repository.bulkGet(objects);
+    return await this._repository.bulkGet(objects, options);
   }
 
   async get(type, id) {
@@ -137,7 +137,7 @@ export class SecureSavedObjectsClient {
   async _hasSavedObjectPrivileges(privileges) {
     try {
       return await this._hasPrivileges(privileges);
-    } catch(error) {
+    } catch (error) {
       const { reason } = get(error, 'body.error', {});
       throw this.errors.decorateGeneralError(error, reason);
     }
