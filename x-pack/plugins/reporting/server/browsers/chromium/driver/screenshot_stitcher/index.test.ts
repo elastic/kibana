@@ -14,6 +14,12 @@ const loggerMock = {
   debug: () => {
     return;
   },
+  error: () => {
+    return;
+  },
+  warning: () => {
+    return;
+  },
 };
 
 const fsp = {
