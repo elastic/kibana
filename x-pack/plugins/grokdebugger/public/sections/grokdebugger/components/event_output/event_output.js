@@ -18,7 +18,7 @@ export function EventOutput({ value }) {
         isReadOnly
         width="100%"
         height="340px"
-        value={JSON.stringify(value)}
+        value={JSON.stringify(value, null, 2)}
         setOptions={{
           highlightActiveLine: false,
           highlightGutterLine: false,
