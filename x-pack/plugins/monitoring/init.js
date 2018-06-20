@@ -78,11 +78,6 @@ export const init = (monitoringPlugin, server) => {
       ['info', LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG],
       'Internal collection for Kibana monitoring will is disabled per configuration.'
     );
-  } else if (!xpackMainInfo) {
-    server.log(
-      ['error', LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG],
-      'Unable to retrieve X-Pack info from the admin cluster. Kibana monitoring will be disabled until Kibana is restarted.'
-    );
   }
 
   server.injectUiAppVars('monitoring', (server) => {
