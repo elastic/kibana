@@ -4,5 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { registerPrivilegesWithCluster } from './privilege_action_registry';
-export { buildPrivilegeMap, getLoginPrivilege, getVersionPrivilege } from './privileges';
+export default function ({ loadTestFile }) {
+  describe('apis RBAC', () => {
+    loadTestFile(require.resolve('./saved_objects'));
+  });
+}
