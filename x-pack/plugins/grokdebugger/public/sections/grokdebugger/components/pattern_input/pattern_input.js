@@ -10,6 +10,7 @@ import {
   EuiCodeEditor
 } from '@elastic/eui';
 import { EDITOR } from '../../../../../common/constants';
+import { GrokMode } from '../../../../lib/ace';
 
 export function PatternInput({ value, onChange }) {
   return (
@@ -22,6 +23,7 @@ export function PatternInput({ value, onChange }) {
         height="51px"
         value={value}
         onChange={onChange}
+        mode={new GrokMode()}
         setOptions={{
           highlightActiveLine: false,
           highlightGutterLine: false,
