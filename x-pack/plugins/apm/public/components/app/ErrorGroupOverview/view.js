@@ -11,7 +11,7 @@ import TabNavigation from '../../shared/TabNavigation';
 import List from './List';
 import WatcherFlyout from './Watcher/WatcherFlyOut';
 import OpenWatcherDialogButton from './Watcher/OpenWatcherDialogButton';
-import { ErrorGroupDetailsRequest } from '../../../store/reduxRequest/errorGroupList';
+import { ErrorGroupDetailsRequest } from '../../../store/reactReduxRequest/errorGroupList';
 
 class ErrorGroupOverview extends Component {
   state = {

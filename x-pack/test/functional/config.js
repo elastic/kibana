@@ -7,17 +7,16 @@
 /* eslint-disable kibana-custom/no-default-export */
 
 import { resolve } from 'path';
-import { resolveKibanaPath } from '@kbn/plugin-helpers';
 import { format as formatUrl } from 'url';
 
 import {
   SecurityPageProvider,
-  ReportingPageProvider,
   MonitoringPageProvider,
   LogstashPageProvider,
   GraphPageProvider,
   GrokDebuggerPageProvider,
   WatcherPageProvider,
+  ReportingPageProvider,
 } from './page_objects';
 
 import {
@@ -54,9 +53,9 @@ import {
 // that returns an object with the projects config values
 export default async function ({ readConfigFile }) {
 
-  const kibanaCommonConfig = await readConfigFile(resolveKibanaPath('test/common/config.js'));
-  const kibanaFunctionalConfig = await readConfigFile(resolveKibanaPath('test/functional/config.js'));
-  const kibanaAPITestsConfig = await readConfigFile(resolveKibanaPath('test/api_integration/config.js'));
+  const kibanaCommonConfig = await readConfigFile(require.resolve('../../../test/common/config.js'));
+  const kibanaFunctionalConfig = await readConfigFile(require.resolve('../../../test/functional/config.js'));
+  const kibanaAPITestsConfig = await readConfigFile(require.resolve('../../../test/api_integration/config.js'));
 
   const servers = {
     elasticsearch: {
@@ -93,7 +92,6 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/watcher'),
       resolve(__dirname, './apps/dashboard_mode'),
       resolve(__dirname, './apps/security'),
-      resolve(__dirname, './apps/reporting'),
       resolve(__dirname, './apps/logstash'),
       resolve(__dirname, './apps/grok_debugger'),
     ],
@@ -137,12 +135,12 @@ export default async function ({ readConfigFile }) {
     pageObjects: {
       ...kibanaFunctionalConfig.get('pageObjects'),
       security: SecurityPageProvider,
-      reporting: ReportingPageProvider,
       monitoring: MonitoringPageProvider,
       logstash: LogstashPageProvider,
       graph: GraphPageProvider,
       grokDebugger: GrokDebuggerPageProvider,
       watcher: WatcherPageProvider,
+      reporting: ReportingPageProvider,
     },
 
     servers,
@@ -158,15 +156,17 @@ export default async function ({ readConfigFile }) {
       ],
     },
 
-    kibanaServerArgs: [
-      ...kibanaCommonConfig.get('kibanaServerArgs'),
-      `--server.uuid=${env.kibana.server.uuid}`,
-      `--server.port=${servers.kibana.port}`,
-      `--elasticsearch.url=${formatUrl(servers.elasticsearch)}`,
-      '--xpack.monitoring.kibana.collection.enabled=false',
-      '--xpack.xpack_main.telemetry.enabled=false',
-      '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
-    ],
+    kbnTestServer: {
+      ...kibanaCommonConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...kibanaCommonConfig.get('kbnTestServer.serverArgs'),
+        `--server.uuid=${env.kibana.server.uuid}`,
+        `--server.port=${servers.kibana.port}`,
+        `--elasticsearch.url=${formatUrl(servers.elasticsearch)}`,
+        '--xpack.xpack_main.telemetry.enabled=false',
+        '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
+      ],
+    },
 
     // the apps section defines the urls that
     // `PageObjects.common.navigateTo(appKey)` will use.

@@ -1579,6 +1579,185 @@ describe('Pipeline class', () => {
     });
   });
 
+  describe('Pipeline with if having two nested output statements', () => {
+    beforeEach(() => {
+      graph = new Graph();
+      graph.update({
+        vertices: [
+          {
+            id: "the_if",
+            explicit_id: false,
+            type: "if",
+            condition: "[is_rt] == \"RT\"",
+            stats: {}
+          },
+          {
+            plugin_type: "output",
+            type: "plugin",
+            config_name: "stdout",
+            id: "plugin_1",
+            meta: {
+              source: {
+                line: 124,
+                protocol: "str",
+                id: "pipeline",
+                column: 5
+              }
+            },
+            explicit_id: false,
+            stats: null
+          },
+          {
+            plugin_type: "output",
+            type: "plugin",
+            config_name: "elasticsearch",
+            id: "plugin_2",
+            meta: {
+              source: {
+                line: 117,
+                protocol: "str",
+                id: "pipeline",
+                column: 5
+              }
+            },
+            explicit_id: true,
+            stats: null
+          },
+        ],
+        edges: [
+          {
+            id: "35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5",
+            from: "the_if",
+            to: "plugin_1",
+            type: "boolean",
+            when: true
+          },
+          {
+            id: "591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc535",
+            from: "the_if",
+            to: "plugin_2",
+            type: "boolean",
+            when: true
+          }
+        ]
+      });
+    });
+
+    it('has two child statements', () => {
+      const pipeline = Pipeline.fromPipelineGraph(graph);
+
+      expect(pipeline.outputStatements.length).to.be(1);
+      const { trueStatements } = pipeline.outputStatements[0];
+      expect(trueStatements.length).to.be(2);
+      expect(trueStatements[0].id).to.be('plugin_1');
+      expect(trueStatements[1].id).to.be('plugin_2');
+      expect(pipeline.outputStatements[0].elseStatements.length).to.be(0);
+    });
+  });
+
+  describe('Pipeline with if having two nested else statements', () => {
+    beforeEach(() => {
+      graph = new Graph();
+      graph.update({
+        vertices: [
+          {
+            id: "the_if",
+            explicit_id: false,
+            type: "if",
+            condition: "[is_rt] == \"RT\"",
+            stats: {}
+          },
+          {
+            plugin_type: "output",
+            type: "plugin",
+            config_name: "stdout",
+            id: "plugin_1",
+            meta: {
+              source: {
+                line: 124,
+                protocol: "str",
+                id: "pipeline",
+                column: 5
+              }
+            },
+            explicit_id: false,
+            stats: null
+          },
+          {
+            plugin_type: "output",
+            type: "plugin",
+            config_name: "elasticsearch",
+            id: "plugin_2",
+            meta: {
+              source: {
+                line: 117,
+                protocol: "str",
+                id: "pipeline",
+                column: 5
+              }
+            },
+            explicit_id: true,
+            stats: null
+          },
+          {
+            plugin_type: "output",
+            type: "plugin",
+            config_name: "stdout",
+            id: "plugin_3",
+            meta: {
+              source: {
+                line: 120,
+                protocol: "str",
+                id: "pipeline",
+                column: 5
+              }
+            },
+            explicit_id: false,
+            stats: null
+          },
+        ],
+        edges: [
+          {
+            id: "35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5",
+            from: "the_if",
+            to: "plugin_1",
+            type: "boolean",
+            when: false
+          },
+          {
+            id: "591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc535",
+            from: "the_if",
+            to: "plugin_2",
+            type: "boolean",
+            when: false
+          },
+          {
+            id: "637281923dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5",
+            from: "the_if",
+            to: "plugin_3",
+            type: "boolean",
+            when: true
+          }
+        ]
+      });
+    });
+
+    it('has two child else statements', () => {
+      const pipeline = Pipeline.fromPipelineGraph(graph);
+
+      expect(pipeline.outputStatements.length).to.be(1);
+      const {
+        trueStatements,
+        elseStatements
+      } = pipeline.outputStatements[0];
+      expect(trueStatements.length).to.be(1);
+      expect(trueStatements[0].id).to.be('plugin_3');
+      expect(elseStatements.length).to.be(2);
+      expect(elseStatements[0].id).to.be('plugin_1');
+      expect(elseStatements[1].id).to.be('plugin_2');
+    });
+  });
+
   describe('Pipeline with nested ifs', () => {
     beforeEach(() => {
       graph = new Graph();

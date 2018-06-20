@@ -1,5 +1,5 @@
 {
-  "_aliases": {
+  "indices.update_aliases": {
     "data_autocomplete_rules": {
       "actions": {
         "__template": [

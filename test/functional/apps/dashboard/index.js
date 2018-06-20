@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 export default function ({ getService, loadTestFile, getPageObjects }) {
   const remote = getService('remote');
   const esArchiver = getService('esArchiver');
@@ -10,7 +29,7 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
         await PageObjects.dashboard.initTests({
           kibanaIndex: 'dashboard/current/kibana',
           dataIndex: 'dashboard/current/data',
-          defaultIndex: 'logstash-*'
+          defaultIndex: 'logstash-*',
         });
         await PageObjects.dashboard.preserveCrossAppState();
       });
@@ -34,6 +53,8 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
       loadTestFile(require.resolve('./_dashboard_filtering'));
       loadTestFile(require.resolve('./_panel_expand_toggle'));
       loadTestFile(require.resolve('./_dashboard_grid'));
+      loadTestFile(require.resolve('./_dashboard_snapshots'));
+      loadTestFile(require.resolve('./_view_edit'));
     });
 
     // Each of these tests call initTests themselves, the way it was originally written.  The above tests only load
@@ -44,9 +65,7 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
 
       loadTestFile(require.resolve('./_dashboard_time_picker'));
       loadTestFile(require.resolve('./_bwc_shared_urls'));
-      loadTestFile(require.resolve('./_dashboard_snapshots'));
       loadTestFile(require.resolve('./_panel_controls'));
-      loadTestFile(require.resolve('./_view_edit'));
       loadTestFile(require.resolve('./_dashboard_state'));
       loadTestFile(require.resolve('./_dashboard_save'));
       loadTestFile(require.resolve('./_dashboard_time'));

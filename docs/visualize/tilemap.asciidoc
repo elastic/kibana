@@ -7,10 +7,14 @@ NOTE: By default, Kibana uses the https://www.elastic.co/elastic-maps-service[El
 to display map tiles. To use other tile service providers, configure the <<tilemap-settings,tilemap settings>>
 in `kibana.yml`.
 
+[float]
+[[configuration]]
 === Configuration
 
+[float]
 ==== Data
 
+[float]
 ===== Metrics
 
 The default _metrics_ aggregation for a coordinate map is the *Count* aggregation. You can select any of the following
@@ -31,6 +35,7 @@ the number of unique values in a field. Select a field from the drop-down.
 
 Enter a string in the *Custom Label* field to change the display label.
 
+[float]
 ===== Buckets
 
 Coordinate maps use the {ref}/search-aggregations-bucket-geohashgrid-aggregation.html[_geohash_] aggregation. Select a field, typically coordinates, from the
@@ -66,6 +71,7 @@ NOTE: In Elasticsearch releases 1.4.3 and later, this functionality requires you
 
 The availability of these options varies depending on the aggregation you choose.
 
+[float]
 ==== Options
 
 
@@ -98,8 +104,7 @@ After changing options, click the  *Apply changes* button to update your visuali
 changes* button to keep your visualization in its current state.
 
 [float]
-[[navigating-map]]
-
+[[navigate-map]]
 === Navigating the Map
 
 Once your tilemap visualization is ready, you can explore the map in several ways:

@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 export default {
   rootDir: '../../..',
   roots: [
@@ -8,6 +27,8 @@ export default {
     '<rootDir>/src/cli_keystore',
     '<rootDir>/src/cli_plugin',
     '<rootDir>/src/dev',
+    '<rootDir>/src/utils',
+    '<rootDir>/src/setup_node_env',
     '<rootDir>/packages',
   ],
   collectCoverageFrom: [
@@ -35,7 +56,6 @@ export default {
   ],
   globals: {
     'ts-jest': {
-      tsConfigFile: 'src/dev/jest/tsconfig.json',
       skipBabel: true,
     },
   },
@@ -43,14 +63,14 @@ export default {
     'js',
     'json',
     'ts',
+    'tsx',
   ],
   modulePathIgnorePatterns: [
     '__fixtures__/',
     'target/',
   ],
   testMatch: [
-    '**/*.test.js',
-    '**/*.test.ts',
+    '**/*.test.{js,ts,tsx}'
   ],
   testPathIgnorePatterns: [
     '<rootDir>/packages/kbn-ui-framework/(dist|doc_site|generator-kui)/',
@@ -59,7 +79,9 @@ export default {
   ],
   transform: {
     '^.+\\.js$': '<rootDir>/src/dev/jest/babel_transform.js',
-    '^.+\\.ts$': 'ts-jest',
+    '^.+\\.tsx?$': '<rootDir>/src/dev/jest/ts_transform.js',
+    '^.+\\.txt?$': 'jest-raw-loader',
+    '^.+\\.html?$': 'jest-raw-loader',
   },
   transformIgnorePatterns: [
     '[/\\\\]node_modules[/\\\\].+\\.js$',

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+import { merge } from 'lodash';
 import { ACTION_TYPES } from '../../../common/constants';
 
 function isEnabledByDefault(actionType) {
@@ -47,9 +47,21 @@ function getAccounts({ account, default_account: defaultAccount }) {
   }, {});
 }
 
+function getNotifications(json) {
+  if (!json) {
+    return {};
+  }
+  return Object.values(json).reduce((accum, value) => {
+    if (value.hasOwnProperty('xpack') && value.xpack.hasOwnProperty('notification')) {
+      accum = merge(accum, value.xpack.notification);
+    }
+    return accum;
+  }, {});
+}
+
 
 function getActionTypesSettings(upstreamJson) {
-  const upstreamActionTypes = get(upstreamJson, 'defaults.xpack.notification', {});
+  const upstreamActionTypes = getNotifications(upstreamJson);
 
   // Initialize settings for known action types
   const actionTypes = Object.keys(ACTION_TYPES).reduce((types, typeName) => {

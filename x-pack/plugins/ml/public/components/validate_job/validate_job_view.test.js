@@ -9,8 +9,6 @@ import React from 'react';
 
 import { ValidateJob } from './validate_job_view';
 
-jest.mock('ui/chrome', () => { }, { virtual: true });
-
 const job = {
   job_id: 'test-id'
 };

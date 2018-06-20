@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import { onlyDisabled } from './lib/only_disabled';
 import { onlyStateChanged } from './lib/only_state_changed';
@@ -265,9 +284,17 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
       appFilters.splice(i, 1);
     });
 
+    // Reverse the order of globalFilters and appFilters, since uniqFilters
+    // will throw out duplicates from the back of the array, but we want
+    // newer filters to overwrite previously created filters.
+    globalFilters.reverse();
+    appFilters.reverse();
+
     return [
-      uniqFilters(globalFilters, { disabled: true }),
-      uniqFilters(appFilters, { disabled: true })
+      // Reverse filters after uniq again, so they are still in the order, they
+      // were before updating them
+      uniqFilters(globalFilters, { disabled: true }).reverse(),
+      uniqFilters(appFilters, { disabled: true }).reverse()
     ];
   }
 

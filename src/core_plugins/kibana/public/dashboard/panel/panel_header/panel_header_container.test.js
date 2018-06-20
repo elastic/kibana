@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import React from 'react';
 import { Provider } from 'react-redux';
 import _ from 'lodash';
@@ -12,6 +31,7 @@ import {
   setPanelTitle,
   resetPanelTitle,
   embeddableIsInitialized,
+  updateTimeRange,
 } from '../../actions';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
@@ -25,6 +45,7 @@ function getProps(props = {}) {
 let component;
 
 beforeAll(() => {
+  store.dispatch(updateTimeRange({ to: 'now', from: 'now-15m' }));
   store.dispatch(updateViewMode(DashboardViewMode.EDIT));
   store.dispatch(setPanels({ 'foo1': { panelIndex: 'foo1' } }));
   const metadata = { title: 'my embeddable title', editUrl: 'editme' };
@@ -41,12 +62,12 @@ test('Panel header shows embeddable title when nothing is set on the panel', () 
 });
 
 test('Panel header shows panel title when it is set on the panel', () => {
-  store.dispatch(setPanelTitle('my custom panel title', 'foo1'));
+  store.dispatch(setPanelTitle({ title: 'my custom panel title', panelId: 'foo1' }));
   expect(findTestSubject(component, 'dashboardPanelTitle').text()).toBe('my custom panel title');
 });
 
 test('Panel header shows no panel title when it is set to an empty string on the panel', () => {
-  store.dispatch(setPanelTitle('', 'foo1'));
+  store.dispatch(setPanelTitle({ title: '', panelId: 'foo1' }));
   expect(findTestSubject(component, 'dashboardPanelTitle').text()).toBe('');
 });
 

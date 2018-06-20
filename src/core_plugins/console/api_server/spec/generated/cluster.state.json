@@ -1,5 +1,5 @@
 {
-  "_cluster/state": {
+  "cluster.state": {
     "url_params": {
       "local": "__flag__",
       "master_timeout": "",
@@ -33,6 +33,7 @@
         "routing_table",
         "version"
       ]
-    }
+    },
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-state.html"
   }
 }

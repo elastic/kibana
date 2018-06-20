@@ -3,6 +3,7 @@
 exports[`isCloudEnabled is false should not render instruction toggle when ON_PREM_ELASTIC_CLOUD instructions are not provided 1`] = `
 <EuiPage
   className="home"
+  restrictWidth={false}
 >
   <EuiLink
     color="primary"
@@ -56,9 +57,11 @@ exports[`isCloudEnabled is false should not render instruction toggle when ON_PR
         }
         key="0"
         offset={1}
+        onStatusCheck={[Function]}
         paramValues={Object {}}
         replaceTemplateStrings={[Function]}
         setParameter={[Function]}
+        statusCheckState="NOT_CHECKED"
         title="Instruction title"
       />
     </EuiPanel>
@@ -69,6 +72,7 @@ exports[`isCloudEnabled is false should not render instruction toggle when ON_PR
 exports[`isCloudEnabled is false should render ON_PREM instructions with instruction toggle 1`] = `
 <EuiPage
   className="home"
+  restrictWidth={false}
 >
   <EuiLink
     color="primary"
@@ -141,9 +145,11 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
         }
         key="0"
         offset={1}
+        onStatusCheck={[Function]}
         paramValues={Object {}}
         replaceTemplateStrings={[Function]}
         setParameter={[Function]}
+        statusCheckState="NOT_CHECKED"
         title="Instruction title"
       />
     </EuiPanel>
@@ -154,6 +160,7 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
 exports[`should render ELASTIC_CLOUD instructions when isCloudEnabled is true 1`] = `
 <EuiPage
   className="home"
+  restrictWidth={false}
 >
   <EuiLink
     color="primary"
@@ -208,9 +215,11 @@ exports[`should render ELASTIC_CLOUD instructions when isCloudEnabled is true 1`
         }
         key="0"
         offset={1}
+        onStatusCheck={[Function]}
         paramValues={Object {}}
         replaceTemplateStrings={[Function]}
         setParameter={[Function]}
+        statusCheckState="NOT_CHECKED"
         title="Instruction title"
       />
     </EuiPanel>

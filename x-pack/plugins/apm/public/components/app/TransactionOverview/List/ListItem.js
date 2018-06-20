@@ -86,7 +86,7 @@ function TransactionListItem({ serviceName, transaction, type, impact }) {
     <KuiTableRow>
       <TransactionNameCell>
         <TooltipOverlay content={transactionName || 'N/A'}>
-          <TransactionNameLink path={transactionUrl}>
+          <TransactionNameLink path={`/${transactionUrl}`}>
             {transactionName || 'N/A'}
           </TransactionNameLink>
         </TooltipOverlay>

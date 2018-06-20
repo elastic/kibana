@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { VisualizeConstants } from '../../../src/core_plugins/kibana/public/visualize/visualize_constants';
 import Keys from 'leadfoot/keys';
 import Bluebird from 'bluebird';
@@ -109,7 +128,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getChartTypeCount() {
-      const tags = await find.allByCssSelector('a.wizard-vis-type.ng-scope');
+      const tags = await find.allByCssSelector('a.wizard-vis-type');
       return tags.length;
     }
 
@@ -200,12 +219,15 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async setComboBox(comboBoxSelector, value) {
       const comboBox = await testSubjects.find(comboBoxSelector);
-      const input = await comboBox.findByTagName('input');
+      await this.setComboBoxElement(comboBox, value);
+    }
+
+    async setComboBoxElement(element, value) {
+      const input = await element.findByTagName('input');
       await input.clearValue();
       await input.type(value);
       await find.clickByCssSelector('.euiComboBoxOption');
-      await this.closeComboBoxOptionsList(comboBox);
-      await remote.pressKeys('\uE004');
+      await this.closeComboBoxOptionsList(element);
     }
 
     async getComboBoxOptions(comboBoxSelector) {
@@ -239,14 +261,15 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clearComboBox(comboBoxSelector) {
       const comboBox = await testSubjects.find(comboBoxSelector);
-      const clearBtn = await comboBox.findByCssSelector('button.euiFormControlLayout__clear');
+      const clearBtn = await comboBox.findByCssSelector('[data-test-subj="comboBoxClearButton"]');
       await clearBtn.click();
+      await this.closeComboBoxOptionsList(comboBox);
     }
 
     async closeComboBoxOptionsList(comboBoxElement) {
       const isOptionsListOpen = await testSubjects.exists('comboBoxOptionsList');
       if (isOptionsListOpen) {
-        const closeBtn = await comboBoxElement.findByCssSelector('button.euiFormControlLayout__icon');
+        const closeBtn = await comboBoxElement.findByCssSelector('[data-test-subj="comboBoxToggleListButton"]');
         await closeBtn.click();
       }
     }
@@ -353,6 +376,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
+    async clickSavedSearch(savedSearchName) {
+      await find.clickByPartialLinkText(savedSearchName);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
     async setValue(newValue) {
       await find.clickByCssSelector('button[ng-click="numberListCntr.add()"]', defaultFindTimeout * 2);
       const input = await find.byCssSelector('input[ng-model="numberListCntr.getList()[$index]"]');
@@ -372,7 +400,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     // clickBucket(bucketType) 'X-Axis', 'Split Area', 'Split Chart'
     async clickBucket(bucketName) {
       const chartTypes = await retry.try(
-        async () => await find.allByCssSelector('li.list-group-item.list-group-menu-item.ng-binding.ng-scope'));
+        async () => await find.allByCssSelector('li.list-group-item.list-group-menu-item'));
       log.debug('found bucket types ' + chartTypes.length);
 
       async function getChartType(chart) {
@@ -420,7 +448,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const aggItem = await find.byCssSelector(`[data-test-subj="${agg}"]`);
       await aggItem.click();
       const fieldSelect = await find
-        .byCssSelector(`#visAggEditorParams${index} > [agg-param="agg.type.params[0]"] > div > div > div.ui-select-match.ng-scope > span`);
+        .byCssSelector(`#visAggEditorParams${index} > [agg-param="agg.type.params[0]"] > div > div > div.ui-select-match > span`);
       // open field selection list
       await fieldSelect.click();
       // select our field
@@ -488,7 +516,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async orderBy(fieldValue) {
       await find.clickByCssSelector(
         'select.form-control.ng-pristine.ng-valid.ng-untouched.ng-valid-required[ng-model="agg.params.orderBy"]'
-        + `option.ng-binding.ng-scope:contains("${fieldValue}")`);
+        + `option:contains("${fieldValue}")`);
     }
 
     async selectOrderBy(fieldValue) {
@@ -518,6 +546,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const input = await find.byCssSelector('input[name="size"]');
       await input.clearValue();
       await input.type(newValue);
+    }
+
+    async toggleDisabledAgg(agg) {
+      await testSubjects.click(`aggregationEditor${agg} disableAggregationBtn`);
     }
 
     async toggleOtherBucket() {
@@ -791,12 +823,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getMarkdownData() {
-      const markdown = await retry.try(async () => find.byCssSelector('visualize.ng-isolate-scope'));
+      const markdown = await retry.try(async () => find.byCssSelector('visualize'));
       return await markdown.getVisibleText();
     }
 
     async clickColumns() {
-      await find.clickByCssSelector('div.schemaEditors.ng-scope > div > div > button:nth-child(2)');
+      await find.clickByCssSelector('div.schemaEditors > div > div > button:nth-child(2)');
     }
 
     async waitForVisualization() {
@@ -905,8 +937,21 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await Promise.all(legendEntries.map(async chart => await chart.getAttribute('data-label')));
     }
 
-    async clickLegendOption(name) {
-      await testSubjects.click(`legend-${name}`);
+    async openLegendOptionColors(name) {
+      await retry.try(async () => {
+        // This click has been flaky in opening the legend, hence the retry.  See
+        // https://github.com/elastic/kibana/issues/17468
+        await testSubjects.click(`legend-${name}`);
+        // arbitrary color chosen, any available would do
+        const isOpen = await this.doesLegendColorChoiceExist('#EF843C');
+        if (!isOpen) {
+          throw new Error('legend color selector not open');
+        }
+      });
+    }
+
+    async doesLegendColorChoiceExist(color) {
+      return await testSubjects.exists(`legendSelectColor-${color}`);
     }
 
     async selectNewLegendColorChoice(color) {

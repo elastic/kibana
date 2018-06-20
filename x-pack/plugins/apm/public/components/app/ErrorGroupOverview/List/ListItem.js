@@ -73,13 +73,13 @@ function ListItem({ error, serviceName }) {
   return (
     <KuiTableRow>
       <GroupIdCell>
-        <GroupIdLink path={`${serviceName}/errors/${groupId}`}>
+        <GroupIdLink path={`/${serviceName}/errors/${groupId}`}>
           {groupId.slice(0, 5) || 'N/A'}
         </GroupIdLink>
       </GroupIdCell>
       <MessageAndCulpritCell>
         <TooltipOverlay content={message || 'N/A'}>
-          <MessageLink path={`${serviceName}/errors/${groupId}`}>
+          <MessageLink path={`/${serviceName}/errors/${groupId}`}>
             {message || 'N/A'}
           </MessageLink>
         </TooltipOverlay>

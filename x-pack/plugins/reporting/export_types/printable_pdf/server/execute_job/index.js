@@ -5,7 +5,8 @@
  */
 
 import url from 'url';
-import Rx from 'rxjs/Rx';
+import * as Rx from 'rxjs';
+import { mergeMap, catchError, map, takeUntil } from 'rxjs/operators';
 import { omit } from 'lodash';
 import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '../../../../common/constants';
 import { oncePerServer } from '../../../../server/lib/once_per_server';
@@ -21,7 +22,6 @@ const KBN_SCREENSHOT_HEADER_BLACKLIST = [
 ];
 
 function executeJobFn(server) {
-  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
   const generatePdfObservable = generatePdfObservableFactory(server);
   const crypto = cryptoFactory(server);
   const compatibilityShim = compatibilityShimFactory(server);
@@ -41,12 +41,8 @@ function executeJobFn(server) {
       headers: filteredHeaders,
     };
 
-    const callEndpoint = (endpoint, clientParams = {}, options = {}) => {
-      return callWithRequest(fakeRequest, endpoint, clientParams, options);
-    };
-    const savedObjectsClient = server.savedObjectsClientFactory({
-      callCluster: callEndpoint
-    });
+    const savedObjects = server.savedObjects;
+    const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(fakeRequest);
     const uiSettings = server.uiSettingsServiceFactory({
       savedObjectsClient
     });
@@ -82,23 +78,26 @@ function executeJobFn(server) {
   };
 
   return compatibilityShim(function executeJob(jobToExecute, cancellationToken) {
-    const process$ = Rx.Observable.of(jobToExecute)
-      .mergeMap(decryptJobHeaders)
-      .catch(() => Rx.Observable.throw('Failed to decrypt report job data. Please re-generate this report.'))
-      .map(omitBlacklistedHeaders)
-      .mergeMap(getCustomLogo)
-      .mergeMap(addForceNowQuerystring)
-      .mergeMap(({ job, filteredHeaders, logo, urls }) => {
+    const process$ = Rx.of(jobToExecute).pipe(
+      mergeMap(decryptJobHeaders),
+      catchError(() => Rx.throwError('Failed to decrypt report job data. Please re-generate this report.')),
+      map(omitBlacklistedHeaders),
+      mergeMap(getCustomLogo),
+      mergeMap(addForceNowQuerystring),
+      mergeMap(({ job, filteredHeaders, logo, urls }) => {
         return generatePdfObservable(job.title, urls, job.browserTimezone, filteredHeaders, job.layout, logo);
-      })
-      .map(buffer => ({
+      }),
+      map(buffer => ({
         content_type: 'application/pdf',
         content: buffer.toString('base64')
-      }));
+      }))
+    );
 
-    const stop$ = Rx.Observable.fromEventPattern(cancellationToken.on);
+    const stop$ = Rx.fromEventPattern(cancellationToken.on);
 
-    return process$.takeUntil(stop$).toPromise();
+    return process$.pipe(
+      takeUntil(stop$)
+    ).toPromise();
   });
 }
 

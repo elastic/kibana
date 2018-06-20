@@ -86,6 +86,9 @@
 # Time in milliseconds to wait for Elasticsearch at Kibana startup before retrying.
 #elasticsearch.startupTimeout: 5000
 
+# Logs queries sent to Elasticsearch. Requires logging.verbose set to true.
+#elasticsearch.logQueries: false
+
 # Specifies the path where Kibana creates the process ID file.
 #pid.file: /var/run/kibana.pid
 

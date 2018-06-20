@@ -52,7 +52,7 @@ function ListItem({ service }) {
     <KuiTableRow>
       <ServiceNameCell>
         <TooltipOverlay content={formatString(serviceName)}>
-          <AppLink path={`${serviceName}/transactions`}>
+          <AppLink path={`/${serviceName}/transactions`}>
             {formatString(serviceName)}
           </AppLink>
         </TooltipOverlay>

@@ -15,7 +15,7 @@ import { initUsersApi } from '../users';
 import * as ClientShield from '../../../../../../../server/lib/get_client_shield';
 
 describe('User routes', () => {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
 
   let clusterStub;
   let serverStub;

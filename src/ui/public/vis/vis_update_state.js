@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 
 /**
@@ -16,6 +35,21 @@ function convertHeatmapLabelColor(visState) {
 }
 
 /**
+ * Update old terms aggregation format to new terms aggregation format. This will
+ * update the following things:
+ * - Rewrite orderBy: _term to orderBy: _key (new API in Elasticsearch)
+ */
+function convertTermAggregation(visState) {
+  if (visState.aggs) {
+    visState.aggs.forEach(agg => {
+      if (agg.type === 'terms' && agg.params && agg.params.orderBy === '_term') {
+        agg.params.orderBy = '_key';
+      }
+    });
+  }
+}
+
+/**
  * This function is responsible for updating old visStates - the actual saved object
  * object - into the format, that will be required by the current Kibana version.
  * This method will be executed for each saved vis object, that will be loaded.
@@ -26,12 +60,15 @@ export const updateOldState = (visState) => {
   if (!visState) return visState;
   const newState = _.cloneDeep(visState);
 
+  convertTermAggregation(newState);
+
   if (visState.type === 'gauge' && visState.fontSize) {
     delete newState.fontSize;
     _.set(newState, 'gauge.style.fontSize', visState.fontSize);
   }
 
   // update old metric to the new one
+  // Changed from 6.0 -> 6.1
   if (['gauge', 'metric'].includes(visState.type) && _.get(visState.params, 'gauge.gaugeType', null) === 'Metric') {
     newState.type = 'metric';
     newState.params.addLegend = false;
@@ -48,6 +85,9 @@ export const updateOldState = (visState) => {
     delete newState.params.metric.autoExtend;
     newState.params.metric.metricColorMode = newState.params.metric.gaugeColorMode;
     delete newState.params.metric.gaugeColorMode;
+  } else if(visState.type === 'metric' && _.get(visState.params, 'gauge.gaugeType', 'Metric') !== 'Metric') {
+    newState.type = 'gauge';
+    newState.params.type = 'gauge';
   }
 
   convertHeatmapLabelColor(newState);

@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 export function HeaderPageProvider({ getService, getPageObjects }) {
   const config = getService('config');
   const remote = getService('remote');
@@ -13,7 +32,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
 
     async clickSelector(selector) {
       log.debug(`clickSelector(${selector})`);
-      await retry.try(async () => await remote.findByCssSelector(selector).click());
+      await find.clickByCssSelector(selector);
     }
 
     async confirmTopNavTextContains(text) {
@@ -43,8 +62,13 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     async clickDashboard() {
       log.debug('click Dashboard tab');
       await this.clickSelector('a[href*=\'dashboard\']');
-      await PageObjects.common.waitForTopNavToBeVisible();
-      await this.confirmTopNavTextContains('dashboard');
+      await retry.try(async () => {
+        const isNavVisible = await testSubjects.exists('top-nav');
+        const isLandingPageVisible = await testSubjects.exists('dashboardLandingPage');
+        if (!isNavVisible && !isLandingPageVisible) {
+          throw new Error('Dashboard application not loaded yet');
+        }
+      });
       await this.awaitGlobalLoadingIndicatorHidden();
     }
 
@@ -206,7 +230,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
 
     async getToastMessage(findTimeout = defaultFindTimeout) {
       const toastMessage =
-        await find.displayedByCssSelector('kbn-truncated.toast-message.ng-isolate-scope', findTimeout);
+        await find.displayedByCssSelector('kbn-truncated.toast-message', findTimeout);
       const messageText = await toastMessage.getVisibleText();
       log.debug(`getToastMessage: ${messageText}`);
       return messageText;

@@ -1,18 +1,37 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 export type SystemName = string;
-export type SystemMetadata = {
+export interface ISystemMetadata {
   [key: string]: any;
-};
+}
 
-export type SystemsType = {
+export interface ISystemsType {
   [systemName: string]: any;
-};
+}
 
-export abstract class KibanaSystem<C, D extends SystemsType, E = void> {
+export abstract class KibanaSystem<C, D extends ISystemsType, E = void> {
   constructor(readonly kibana: C, readonly deps: D) {}
 
-  abstract start(): E;
+  public abstract start(): E;
 
-  stop() {
+  public stop() {
     // default implementation of stop does nothing
   }
 }
@@ -27,6 +46,6 @@ export abstract class KibanaSystem<C, D extends SystemsType, E = void> {
  *
  * See https://www.typescriptlang.org/docs/handbook/interfaces.html#difference-between-the-static-and-instance-sides-of-classes
  */
-export interface KibanaSystemClassStatic<C, D extends SystemsType, E = void> {
+export interface IKibanaSystemClassStatic<C, D extends ISystemsType, E = void> {
   new (kibana: C, deps: D): KibanaSystem<C, D, E>;
 }

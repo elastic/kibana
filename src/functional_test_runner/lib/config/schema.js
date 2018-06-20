@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { resolve, dirname } from 'path';
 
 import Joi from 'joi';
@@ -62,6 +81,7 @@ export const schema = Joi.object().keys({
   mochaOpts: Joi.object().keys({
     bail: Joi.boolean().default(false),
     grep: Joi.string(),
+    invert: Joi.boolean().default(false),
     slow: Joi.number().default(30000),
     timeout: Joi.number().default(INSPECTING ? Infinity : 180000),
     ui: Joi.string().default('bdd'),
@@ -94,7 +114,11 @@ export const schema = Joi.object().keys({
     serverArgs: Joi.array(),
   }).default(),
 
-  kibanaServerArgs: Joi.array(),
+  kbnTestServer: Joi.object().keys({
+    buildArgs: Joi.array(),
+    sourceArgs: Joi.array(),
+    serverArgs: Joi.array(),
+  }).default(),
 
   // env allows generic data, but should be removed
   env: Joi.object().default(),

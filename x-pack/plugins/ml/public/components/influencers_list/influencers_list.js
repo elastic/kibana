@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 
 import { abbreviateWholeNumber } from 'plugins/ml/formatters/abbreviate_whole_number';
-import { getSeverity } from 'plugins/ml/util/anomaly_utils';
+import { getSeverity } from 'plugins/ml/../common/util/anomaly_utils';
 
 
 function getTooltipContent(maxScoreLabel, totalScoreLabel) {

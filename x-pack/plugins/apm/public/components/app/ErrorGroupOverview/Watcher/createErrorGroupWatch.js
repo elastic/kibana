@@ -150,9 +150,9 @@ export async function createErrorGroupWatch({
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
+        body: `__json__::${JSON.stringify({
           text: slackTemplate
-        })
+        })}`
       }
     };
   }
@@ -160,7 +160,7 @@ export async function createErrorGroupWatch({
   if (!isEmpty(emails)) {
     body.actions.email = {
       email: {
-        to: '{{ctx.metadata.emails}}',
+        to: '{{#join}}ctx.metadata.emails{{/join}}',
         subject: `"{{ctx.metadata.serviceName}}" has error groups which exceeds the threshold`,
         body: {
           html: emailTemplate

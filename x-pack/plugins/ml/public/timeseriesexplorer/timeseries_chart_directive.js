@@ -20,14 +20,15 @@ import 'ui/timefilter';
 
 import { ResizeChecker } from 'ui/resize_checker';
 
+import { getSeverityWithLow } from 'plugins/ml/../common/util/anomaly_utils';
 import { formatValue } from 'plugins/ml/formatters/format_value';
-import { getSeverityWithLow } from 'plugins/ml/util/anomaly_utils';
 import {
   drawLineChartDots,
   filterAxisLabels,
   numTicksForDateFormat
 } from 'plugins/ml/util/chart_utils';
 import { TimeBuckets } from 'ui/time_buckets';
+import { mlAnomaliesTableService } from 'plugins/ml/components/anomalies_table/anomalies_table_service';
 import ContextChartMask from 'plugins/ml/timeseriesexplorer/context_chart_mask';
 import { findNearestChartPointToTime } from 'plugins/ml/timeseriesexplorer/timeseriesexplorer_utils';
 import { mlEscape } from 'plugins/ml/util/string_utils';
@@ -40,7 +41,6 @@ module.directive('mlTimeseriesChart', function (
   $compile,
   $timeout,
   timefilter,
-  mlAnomaliesTableService,
   Private,
   mlChartTooltipService) {
 
