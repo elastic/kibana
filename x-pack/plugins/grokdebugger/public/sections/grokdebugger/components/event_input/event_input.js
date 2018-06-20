@@ -9,6 +9,7 @@ import {
   EuiFormRow,
   EuiCodeEditor
 } from '@elastic/eui';
+import { EDITOR } from '../../../../../common/constants';
 
 export function EventInput({ value, onChange }) {
   return (
@@ -24,8 +25,8 @@ export function EventInput({ value, onChange }) {
         setOptions={{
           highlightActiveLine: false,
           highlightGutterLine: false,
-          minLines: 3,
-          maxLines: 50,
+          minLines: EDITOR.SAMPLE_DATA_MIN_LINES,
+          maxLines: EDITOR.SAMPLE_DATA_MAX_LINES
         }}
         data-test-subj="aceEventInput"
       />

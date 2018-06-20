@@ -13,6 +13,7 @@ import {
   EuiCodeEditor,
   EuiSpacer
 } from '@elastic/eui';
+import { EDITOR } from '../../../../../common/constants';
 
 export function CustomPatternsInput({ value, onChange }) {
   const sampleCustomPatterns = `POSTFIX_QUEUEID [0-9A-F]{10,11}
@@ -43,8 +44,8 @@ MSG message-id=<%{GREEDYDATA}>`;
           setOptions={{
             highlightActiveLine: false,
             highlightGutterLine: false,
-            minLines: 3,
-            maxLines: 10,
+            minLines: EDITOR.PATTERN_MIN_LINES,
+            maxLines: EDITOR.PATTERN_MAX_LINES,
           }}
           data-test-subj="aceCustomPatternsInput"
         />

@@ -9,6 +9,7 @@ import {
   EuiFormRow,
   EuiCodeEditor
 } from '@elastic/eui';
+import { EDITOR } from '../../../../../common/constants';
 
 export function PatternInput({ value, onChange }) {
   return (
@@ -24,8 +25,8 @@ export function PatternInput({ value, onChange }) {
         setOptions={{
           highlightActiveLine: false,
           highlightGutterLine: false,
-          minLines: 3,
-          maxLines: 10,
+          minLines: EDITOR.PATTERN_MIN_LINES,
+          maxLines: EDITOR.PATTERN_MAX_LINES,
         }}
         data-test-subj="acePatternInput"
       />
