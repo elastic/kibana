@@ -2,74 +2,109 @@
 
 exports[`it renders without crashing 1`] = `
 <div
-  className="euiPage euiPage--widthIsNotRestricted"
+  className="euiPage euiPage--widthIsNotRestricted spaceSelector__page"
   style={undefined}
 >
   <div
-    className="euiPageHeader"
+    className="euiPageHeader spaceSelector__heading"
   >
     <div
-      className="euiPageHeaderSection logoHeader"
+      className="euiPageHeaderSection spaceSelector__logoHeader"
     >
-      <svg
-        className="euiIcon euiIcon--xxLarge"
-        focusable="false"
-        height="40"
-        style={
-          Object {
-            "fill": undefined,
-          }
-        }
-        tabIndex={undefined}
-        viewBox="0 0 30 40"
-        width="30"
-        xmlns="http://www.w3.org/2000/svg"
+      <div
+        className="spaceSelector__logoCircle"
       >
-        <path
-          d="M.874 40H30c0-8.046-4.566-15.197-11.652-19.768L.874 40z"
-          fill="#3EBEB0"
-        />
-        <path
-          d="M0 26v14h1.873L18.35 20.229a31.291 31.291 0 0 0-3.562-1.974L0 26z"
-          fill="#37A595"
-        />
-        <path
-          d="M0 13v23l14.79-17.748C10.424 16.186 15.38 14 10 14L0 13z"
-          fill="#353535"
-        />
-        <path
-          d="M30 0H0v15c5.38 0 10.424 1.186 14.79 3.252L30 0z"
-          fill="#E9478B"
-        />
-      </svg>
+        <svg
+          className="euiIcon euiIcon--xxLarge"
+          focusable="false"
+          height="40"
+          style={
+            Object {
+              "fill": undefined,
+            }
+          }
+          tabIndex={undefined}
+          viewBox="0 0 30 40"
+          width="30"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M.874 40H30c0-8.046-4.566-15.197-11.652-19.768L.874 40z"
+            fill="#3EBEB0"
+          />
+          <path
+            d="M0 26v14h1.873L18.35 20.229a31.291 31.291 0 0 0-3.562-1.974L0 26z"
+            fill="#37A595"
+          />
+          <path
+            d="M0 13v23l14.79-17.748C10.424 16.186 15.38 14 10 14L0 13z"
+            fill="#353535"
+          />
+          <path
+            d="M30 0H0v15c5.38 0 10.424 1.186 14.79 3.252L30 0z"
+            fill="#E9478B"
+          />
+        </svg>
+      </div>
+      <div
+        className="euiSpacer euiSpacer--l"
+      />
+      <span
+        className="euiTextColor euiTextColor--ghost euiTitle euiTitle--large"
+      >
+        <p>
+          Select your space
+        </p>
+      </span>
     </div>
   </div>
   <div
     className="euiPageBody"
   >
     <div
-      className="euiPanel euiPanel--paddingLarge euiPageContent spaceSelectorPageContent"
+      className="euiPanel euiPanel--paddingLarge euiPageContent spaceSelector__pageContent"
     >
       <div
-        className="euiText spaceWelcomeText"
+        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn"
       >
-        <p
-          className="welcomeLarge"
+        <div
+          className="euiFlexItem"
         >
-          Welcome to Kibana.
-        </p>
-        <p
-          className="welcomeMedium"
-        >
-          Select a space to begin.
-        </p>
+          <div
+            className="euiText euiText--extraSmall"
+          >
+            <p>
+              You can change your space at anytime from within Kibana.
+            </p>
+          </div>
+        </div>
       </div>
-      <hr
-        className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
+      <div
+        className="euiSpacer euiSpacer--xl"
       />
+      <div
+        className="spaceCards"
+      >
+        <div
+          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--wrap"
+        />
+      </div>
       <div
         className="euiSpacer euiSpacer--l"
       />
+      <div
+        className="euiText"
+      >
+        <div
+          className="euiTextAlign euiTextAlign--center"
+        >
+          <span
+            className="euiTextColor euiTextColor--subdued"
+          >
+            No spaces match search criteria
+          </span>
+        </div>
+      </div>
     </div>
   </div>
 </div>

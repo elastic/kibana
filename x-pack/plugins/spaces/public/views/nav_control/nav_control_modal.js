@@ -14,120 +14,120 @@ import {
   EuiOverlayMask,
   EuiAvatar,
 } from '@elastic/eui';
-import { SpaceCards } from '../components/space_cards';
+import { SpaceCards, SpaceAvatar } from '../components';
 import { Notifier } from 'ui/notify';
 
 export class NavControlModal extends Component {
-    state = {
-      isOpen: false,
-      loading: false,
-      spaces: []
-    };
+  state = {
+    isOpen: false,
+    loading: false,
+    spaces: []
+  };
 
-    notifier = new Notifier(`Spaces`);
+  notifier = new Notifier(`Spaces`);
 
-    async loadSpaces() {
-      const {
-        spacesManager
-      } = this.props;
+  async loadSpaces() {
+    const {
+      spacesManager
+    } = this.props;
 
-      this.setState({
-        loading: true
-      });
+    this.setState({
+      loading: true
+    });
 
-      const spaces = await spacesManager.getSpaces();
-      this.setState({
-        spaces,
-        loading: false
-      });
-    }
+    const spaces = await spacesManager.getSpaces();
+    this.setState({
+      spaces,
+      loading: false
+    });
+  }
 
-    componentDidMount() {
-      const {
-        activeSpace
-      } = this.props;
+  componentDidMount() {
+    const {
+      activeSpace
+    } = this.props;
 
-      if (activeSpace && !activeSpace.valid) {
-        const { error = {} } = activeSpace;
-        if (error.message) {
-          this.notifier.error(error.message);
-        }
+    if (activeSpace && !activeSpace.valid) {
+      const { error = {} } = activeSpace;
+      if (error.message) {
+        this.notifier.error(error.message);
       }
     }
+  }
 
-    render() {
-      let modal;
-      if (this.state.isOpen) {
-        modal = (
-          <EuiOverlayMask>
-            <EuiModal onClose={this.closePortal} className={'selectSpaceModal'}>
-              <EuiModalHeader>
-                <EuiModalHeaderTitle>Select a space</EuiModalHeaderTitle>
-              </EuiModalHeader>
-              <EuiModalBody>
-                <SpaceCards spaces={this.state.spaces} />
-              </EuiModalBody>
-            </EuiModal>
-          </EuiOverlayMask>
-        );
-      }
-
-      return (
-        <div>{this.getActiveSpaceButton()}{modal}</div>
+  render() {
+    let modal;
+    if (this.state.isOpen) {
+      modal = (
+        <EuiOverlayMask>
+          <EuiModal onClose={this.closePortal} className={'selectSpaceModal'}>
+            <EuiModalHeader>
+              <EuiModalHeaderTitle>Select a space</EuiModalHeaderTitle>
+            </EuiModalHeader>
+            <EuiModalBody>
+              <SpaceCards spaces={this.state.spaces} />
+            </EuiModalBody>
+          </EuiModal>
+        </EuiOverlayMask>
       );
     }
 
-    getActiveSpaceButton = () => {
-      const {
-        activeSpace
-      } = this.props;
+    return (
+      <div>{this.getActiveSpaceButton()}{modal}</div>
+    );
+  }
 
-      if (!activeSpace) {
-        return null;
-      }
+  getActiveSpaceButton = () => {
+    const {
+      activeSpace
+    } = this.props;
 
-      if (activeSpace.valid && activeSpace.space) {
-        return this.getButton(
-          <EuiAvatar size={'s'} className={'spaceNavGraphic'} name={activeSpace.space.name} />,
-          activeSpace.space.name
-        );
-      } else if (activeSpace.error) {
-        return this.getButton(
-          <EuiAvatar size={'s'} className={'spaceNavGraphic'} name={'error'} />,
-          'error'
-        );
-      }
-
+    if (!activeSpace) {
       return null;
-    };
-
-    getButton = (linkIcon, linkTitle) => {
-      return (
-        <div className="global-nav-link">
-          <a className="global-nav-link__anchor" onClick={this.togglePortal}>
-            <div className="global-nav-link__icon">{linkIcon}</div>
-            <div className="global-nav-link__title">{linkTitle}</div>
-          </a>
-        </div>
-      );
-    };
-
-    togglePortal = () => {
-      const isOpening = !this.state.isOpen;
-      if (isOpening) {
-        this.loadSpaces();
-      }
-
-      this.setState({
-        isOpen: !this.state.isOpen
-      });
-    };
-
-    closePortal = () => {
-      this.setState({
-        isOpen: false
-      });
     }
+
+    if (activeSpace.valid && activeSpace.space) {
+      return this.getButton(
+        <SpaceAvatar space={activeSpace.space} size={'s'} className={'spaceNavGraphic'} />,
+        activeSpace.space.name
+      );
+    } else if (activeSpace.error) {
+      return this.getButton(
+        <EuiAvatar size={'s'} className={'spaceNavGraphic'} name={'error'} />,
+        'error'
+      );
+    }
+
+    return null;
+  };
+
+  getButton = (linkIcon, linkTitle) => {
+    return (
+      <div className="global-nav-link">
+        <a className="global-nav-link__anchor" onClick={this.togglePortal}>
+          <div className="global-nav-link__icon">{linkIcon}</div>
+          <div className="global-nav-link__title">{linkTitle}</div>
+        </a>
+      </div>
+    );
+  };
+
+  togglePortal = () => {
+    const isOpening = !this.state.isOpen;
+    if (isOpening) {
+      this.loadSpaces();
+    }
+
+    this.setState({
+      isOpen: !this.state.isOpen
+    });
+  };
+
+  closePortal = () => {
+    this.setState({
+      isOpen: false
+    });
+  }
 }
 
 NavControlModal.propTypes = {
