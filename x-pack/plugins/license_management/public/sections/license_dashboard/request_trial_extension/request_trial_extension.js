@@ -31,6 +31,7 @@ export const RequestTrialExtension = ({ shouldShowRequestTrialExtension }) => {
         description={description}
         footer={
           <EuiButton
+            data-test-subj="extendTrialButton"
             style={{ marginTop: 'auto' }}
             target="_blank"
             href="https://www.elastic.co/trialextension"
