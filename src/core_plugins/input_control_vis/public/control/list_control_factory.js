@@ -107,7 +107,13 @@ class ListControl extends Control {
       ancestorFilters);
 
     this.lastQuery = query;
-    const resp = await searchSource.fetch();
+    let resp;
+    try {
+      resp = await searchSource.fetchAsRejectablePromise();
+    } catch(error) {
+      this.disable(`Unable to fetch terms, error: ${error.message}`);
+      return;
+    }
     if (query && this.lastQuery !== query) {
       // search results returned out of order - ignore results from old query
       return;
