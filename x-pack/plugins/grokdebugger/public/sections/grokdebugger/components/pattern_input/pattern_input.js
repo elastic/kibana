@@ -12,7 +12,10 @@ import {
 
 export function PatternInput({ value, onChange }) {
   return (
-    <EuiFormRow label="Grok Pattern">
+    <EuiFormRow
+      label="Grok Pattern"
+      fullWidth
+    >
       <EuiCodeEditor
         width="100%"
         height="51px"

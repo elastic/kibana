@@ -34,7 +34,7 @@ MSG message-id=<%{GREEDYDATA}>`;
 
       <EuiSpacer />
 
-      <EuiFormRow>
+      <EuiFormRow fullWidth>
         <EuiCodeEditor
           width="100%"
           height="51px"

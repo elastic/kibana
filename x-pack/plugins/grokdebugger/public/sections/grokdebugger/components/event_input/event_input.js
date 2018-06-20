@@ -12,7 +12,10 @@ import {
 
 export function EventInput({ value, onChange }) {
   return (
-    <EuiFormRow label="Sample Data">
+    <EuiFormRow
+      label="Sample Data"
+      fullWidth
+    >
       <EuiCodeEditor
         width="100%"
         height="51px"
