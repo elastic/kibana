@@ -98,25 +98,25 @@ export class MetricVisComponent extends Component {
     const labels = this._getLabels();
     const metrics = [];
 
-    tableGroups.tables.forEach((table) => {
+    tableGroups.tables.forEach((table, tableIndex) => {
       let bucketAgg;
       let rowHeaderIndex;
 
-      table.columns.forEach((column, i) => {
+      table.columns.forEach((column, columnIndex) => {
         const aggConfig = column.aggConfig;
 
         if (aggConfig && aggConfig.schema.group === 'buckets') {
           bucketAgg = aggConfig;
           // Store the current index, so we later know in which position in the
           // row array, the bucket agg key will be, so we can create filters on it.
-          rowHeaderIndex = i;
+          rowHeaderIndex = columnIndex;
           return;
         }
 
-        table.rows.forEach(row => {
+        table.rows.forEach((row, rowIndex) => {
 
           let title = column.title;
-          let value = row[i];
+          let value = row[columnIndex];
           const color = this._getColor(value, labels, colors);
 
           if (isPercentageMode) {
@@ -143,6 +143,9 @@ export class MetricVisComponent extends Component {
             bgColor: shouldColor && config.style.bgColor ? color : null,
             lightText: shouldColor && config.style.bgColor && this._needsLightText(color),
             filterKey: rowHeaderIndex !== undefined ? row[rowHeaderIndex] : null,
+            tableIndex: tableIndex,
+            rowIndex: rowIndex,
+            columnIndex: rowHeaderIndex,
             bucketAgg: bucketAgg,
           });
         });
@@ -156,8 +159,8 @@ export class MetricVisComponent extends Component {
     if (!metric.filterKey || !metric.bucketAgg) {
       return;
     }
-    const filter = metric.bucketAgg.createFilter(metric.filterKey);
-    this.props.vis.API.queryFilter.addFilters(filter);
+    const table = this.props.visData.tables[metric.tableIndex];
+    this.props.vis.API.events.addFilter(table, metric.columnIndex, metric.rowIndex);
   };
 
   _renderMetric = (metric, index) => {
