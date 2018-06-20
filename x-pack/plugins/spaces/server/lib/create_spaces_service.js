@@ -19,27 +19,15 @@ export function createSpacesService() {
     return urlContext;
   }
 
-  async function getSpaceId(request) {
-    if (!contextCache.has(request)) {
-      await populateCache(request);
-    }
-
-    const { spaceId } = contextCache.get(request);
-    return spaceId;
-  }
-
   function populateCache(request) {
     const urlContext = getSpaceUrlContext(request.getBasePath());
-    const spaceId = 'TODO';
 
     contextCache.set(request, {
-      urlContext,
-      spaceId
+      urlContext
     });
   }
 
   return {
     getUrlContext,
-    getSpaceId,
   };
 }
