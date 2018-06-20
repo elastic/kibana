@@ -16,23 +16,5 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { AggType } from '../../../agg_types';
-import { aggTypeFilters } from '../../../agg_types/filter';
-import { IndexPattern } from '../../../index_patterns';
-import { AggConfig } from '../../../vis';
 
-import { propFilter } from '../../../filters/_prop_filter';
-
-const filterByName = propFilter('name');
-
-/**
- * This filter checks the defined aggFilter in the schemas of that visualization
- * and limits available aggregations based on that.
- */
-aggTypeFilters.addFilter(
-  (aggType: AggType, indexPatterns: IndexPattern, aggConfig: AggConfig) => {
-    const doesSchemaAllowAggType =
-      filterByName([aggType], aggConfig.schema.aggFilter).length !== 0;
-    return doesSchemaAllowAggType;
-  }
-);
+export type IndexPattern = any;

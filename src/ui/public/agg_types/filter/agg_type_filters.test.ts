@@ -22,7 +22,7 @@ import { AggTypeFilters } from './agg_type_filters';
 
 describe('AggTypeFilters', () => {
   let registry: AggTypeFilters;
-  const vis = {};
+  const indexPattern = {};
   const aggConfig = {};
 
   beforeEach(() => {
@@ -31,14 +31,14 @@ describe('AggTypeFilters', () => {
 
   it('should filter nothing without registered filters', async () => {
     const aggTypes = [{ name: 'count' }, { name: 'sum' }];
-    const observable = registry.filter$(aggTypes, vis, aggConfig);
+    const observable = registry.filter$(aggTypes, indexPattern, aggConfig);
     const filtered = await observable.pipe(first()).toPromise();
     expect(filtered).toEqual(aggTypes);
   });
 
   it('should emit a new filtered list when registering a new filter', async () => {
     const aggTypes = [{ name: 'count' }, { name: 'sum' }];
-    const observable = registry.filter$(aggTypes, vis, aggConfig);
+    const observable = registry.filter$(aggTypes, indexPattern, aggConfig);
     const spy = jest.fn();
     observable.subscribe(spy);
     expect(spy).toHaveBeenCalledTimes(1);
@@ -51,16 +51,16 @@ describe('AggTypeFilters', () => {
     const filter = jest.fn();
     registry.addFilter(filter);
     await registry
-      .filter$(aggTypes, vis, aggConfig)
+      .filter$(aggTypes, indexPattern, aggConfig)
       .pipe(first())
       .toPromise();
-    expect(filter).toHaveBeenCalledWith(aggTypes[0], vis, aggConfig);
-    expect(filter).toHaveBeenCalledWith(aggTypes[1], vis, aggConfig);
+    expect(filter).toHaveBeenCalledWith(aggTypes[0], indexPattern, aggConfig);
+    expect(filter).toHaveBeenCalledWith(aggTypes[1], indexPattern, aggConfig);
   });
 
   it('should allow registered filters to filter out aggTypes', async () => {
     const aggTypes = [{ name: 'count' }, { name: 'sum' }, { name: 'avg' }];
-    const observable = registry.filter$(aggTypes, vis, aggConfig);
+    const observable = registry.filter$(aggTypes, indexPattern, aggConfig);
     let filtered = await observable.pipe(first()).toPromise();
     expect(filtered).toEqual(aggTypes);
 

@@ -19,11 +19,12 @@
 import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { AggType } from '..';
-import { AggConfig, Vis } from '../../vis';
+import { IndexPattern } from '../../index_patterns';
+import { AggConfig } from '../../vis';
 
 type AggTypeFilter = (
   aggType: AggType,
-  vis: Vis,
+  indexPattern: IndexPattern,
   aggConfig: AggConfig
 ) => boolean;
 
@@ -57,13 +58,17 @@ class AggTypeFilters {
    * @param aggConfig The aggConfig for which the returning list will be used.
    * @return A filtered list of the passed aggTypes.
    */
-  public filter$(aggTypes: AggType[], vis: Vis, aggConfig: AggConfig) {
+  public filter$(
+    aggTypes: AggType[],
+    indexPattern: IndexPattern,
+    aggConfig: AggConfig
+  ) {
     return this.subject.pipe(
       map(filters => {
         const allFilters = Array.from(filters);
         const allowedAggTypes = aggTypes.filter(aggType => {
           const isAggTypeAllowed = allFilters.every(filter =>
-            filter(aggType, vis, aggConfig)
+            filter(aggType, indexPattern, aggConfig)
           );
           return isAggTypeAllowed;
         });

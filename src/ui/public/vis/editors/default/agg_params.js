@@ -40,10 +40,10 @@ uiModules
       link: function ($scope, $el, attr) {
         $scope.$bind('agg', attr.agg);
         $scope.$bind('groupName', attr.groupName);
-        $scope.$bind('vis', attr.vis);
+        $scope.$bind('indexPattern', attr.indexPattern);
 
         const aggTypeSubscription = aggTypeFilters
-          .filter$(aggTypes.byType[$scope.groupName], $scope.vis, $scope.agg)
+          .filter$(aggTypes.byType[$scope.groupName], $scope.indexPattern, $scope.agg)
           .subscribe(aggTypes => $scope.aggTypeOptions = aggTypes);
 
         $scope.$on('$destroy', () => {
