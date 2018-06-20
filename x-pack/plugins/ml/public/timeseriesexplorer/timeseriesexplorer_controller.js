@@ -560,7 +560,7 @@ module.controller('MlTimeSeriesExplorerController', function (
   };
 
   // Refresh the data when the time range is altered.
-  $scope.$listen(timefilter, 'fetch', $scope.refresh);
+  $scope.$listenAndDigestAsync(timefilter, 'fetch', $scope.refresh);
 
   // Add a watcher for auto-refresh of the time filter to refresh all the data.
   const refreshWatcher = Private(refreshIntervalWatcher);

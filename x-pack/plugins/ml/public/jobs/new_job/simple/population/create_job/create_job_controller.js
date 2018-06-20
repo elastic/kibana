@@ -695,7 +695,7 @@ module
       populateAppStateSettings(appState, $scope);
     });
 
-    $scope.$listen(timefilter, 'fetch', $scope.loadVis);
+    $scope.$listenAndDigestAsync(timefilter, 'fetch', $scope.loadVis);
 
     angular.element(window).resize(() => {
       resize();
