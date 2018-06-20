@@ -15,13 +15,12 @@ import { getCollectorTypesCombiner } from './lib';
  * - Kibana Settings - select uiSettings
  * @param {Object} kbnServer manager of Kibana services - see `src/server/kbn_server` in Kibana core
  * @param {Object} server HapiJS server instance
- * @param {Object} xpackInfo server.plugins.xpack_main.info object
  */
-export function initBulkUploader(kbnServer, server, xpackMainInfo) {
+export function initBulkUploader(kbnServer, server) {
 
   const config = server.config();
   const interval = config.get('xpack.monitoring.kibana.collection.interval');
-  return new BulkUploader(server, xpackMainInfo, {
+  return new BulkUploader(server, {
     interval,
     combineTypes: getCollectorTypesCombiner(kbnServer, config)
   });

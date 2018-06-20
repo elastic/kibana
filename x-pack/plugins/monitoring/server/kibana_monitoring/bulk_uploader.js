@@ -20,7 +20,7 @@ import {
  *
  * Depends on
  *   - 'xpack.monitoring.kibana.collection.enabled' config
- *   - monitoring feature from xpack_main.info isAvailable() and isEnabled()
+ *   - monitoring enabled in ES (checked against xpack_main.info license info change)
  * The dependencies are handled upstream
  * - Ops Events - essentially Kibana's /api/status
  * - Usage Stats - essentially Kibana's /api/stats
@@ -29,7 +29,7 @@ import {
  * @param {Object} xpackInfo server.plugins.xpack_main.info object
  */
 export class BulkUploader {
-  constructor(server, xpackMainInfo, { interval, combineTypes }) {
+  constructor(server, { interval, combineTypes }) {
     if (typeof interval !== 'number') {
       throw new Error('interval number of milliseconds is required');
     }
@@ -38,7 +38,6 @@ export class BulkUploader {
     }
 
     this._timer =  null;
-    this._xpackMainInfo = xpackMainInfo;
     this._interval = interval;
     this._combineTypes = combineTypes;
     this._log = getCollectorLogger(server);
@@ -71,10 +70,12 @@ export class BulkUploader {
 
   /*
    * start() and stop() are lifecycle event handlers for
-   * xpackMainPlugin state changes
+   * xpackMainPlugin license changes
    */
   stop() {
-    this._log.info('Stopping monitoring stats collection');
+    if (this._timer) {
+      this._log.info('Stopping monitoring stats collection');
+    }
     clearInterval(this._timer);
     this._timer = null;
   }
@@ -84,16 +85,6 @@ export class BulkUploader {
    * @return {Promise} - resolves to undefined
    */
   async _fetchAndUpload(collectorSet) {
-    // Before every fetch, check the license and make sure the bulk endpoint on the ES side is up
-    const mainMonitoring = this._xpackMainInfo.feature('monitoring');
-    const monitoringBulkEnabled = mainMonitoring && mainMonitoring.isAvailable() && mainMonitoring.isEnabled();
-
-    if (!monitoringBulkEnabled) {
-      // debug level to not spam the logs
-      this._log.debug(`Skipping fetch and upload of monitoring stats due to monitoring bulk endpoint not being available`);
-      return;
-    }
-
     const data = await collectorSet.bulkFetch(this._callClusterWithInternalUser);
     const payload = data
       .filter(d => Boolean(d) && !isEmpty(d.result))

@@ -21,9 +21,8 @@ import {
  * - [1] instantiation of an elasticsearch-js client exposed as a server plugin object
  * - [2] start monitoring cluster x-pack license and features check
  * - [3] webserver route handling
- * - [4] start the internal monitoring collectors
+ * - [4] start the internal monitoring collector/bulk uploader
  * - [5] expose the monitoring collector object for other plugins to register with
- * - [6] set monitoring plugin status to green
  * @param monitoringPlugin {Object} Monitoring UI plugin
  * @param server {Object} HapiJS server instance
  */
@@ -61,18 +60,22 @@ export const init = (monitoringPlugin, server) => {
   const { info: xpackMainInfo } = xpackMainPlugin;
 
   if (kibanaCollectionEnabled && xpackMainInfo) {
-    const bulkUploader = initBulkUploader(monitoringPlugin.kbnServer, server, xpackMainInfo);
+    const bulkUploader = initBulkUploader(monitoringPlugin.kbnServer, server);
 
-    xpackMainPlugin.status.on('green', async () => { // any time xpack_main turns green
-      /*
-       * Bulk uploading of Kibana stats
-       */
-      bulkUploader.start(collectorSet);
-    });
-
-    xpackMainPlugin.status.on('red', () => { // any time xpack_main turns red
-      bulkUploader.stop();
-    });
+    /*
+     * Bulk uploading of Kibana stats
+     */
+    const startStopBulkUpload = () => {
+      // Check the updated xpack info and make sure the bulk endpoint on the ES side is up
+      const mainMonitoring = xpackMainInfo.feature('monitoring');
+      const monitoringBulkEnabled = mainMonitoring && mainMonitoring.isAvailable() && mainMonitoring.isEnabled();
+      if (monitoringBulkEnabled) {
+        bulkUploader.start(collectorSet);
+      } else {
+        bulkUploader.stop();
+      }
+    };
+    xpackMainInfo.onLicenseInfoChange(startStopBulkUpload);
   } else if (!kibanaCollectionEnabled) {
     server.log(
       ['info', LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG],
