@@ -21,6 +21,7 @@ import angular from 'angular';
 import { Embeddable } from 'ui/embeddable';
 import searchTemplate from './search_template.html';
 import * as columnActions from 'ui/doc_table/actions/columns';
+import { getTime } from 'ui/timefilter/get_time';
 
 export class SearchEmbeddable extends Embeddable {
   constructor({ onEmbeddableStateChanged, savedSearch, editUrl, loader, $rootScope, $compile }) {
@@ -52,13 +53,20 @@ export class SearchEmbeddable extends Embeddable {
   pushContainerStateParamsToScope() {
     // If there is column or sort data on the panel, that means the original columns or sort settings have
     // been overridden in a dashboard.
+
     this.searchScope.columns = this.customization.columns || this.savedSearch.columns;
     this.searchScope.sort = this.customization.sort || this.savedSearch.sort;
     this.searchScope.sharedItemTitle = this.panelTitle;
+
+    this.filtersSearchSource.set('filter', this.filters);
+    this.filtersSearchSource.set('query', this.query);
   }
 
   onContainerStateChanged(containerState) {
     this.customization = containerState.embeddableCustomization || {};
+    this.filters = containerState.filters;
+    this.query = containerState.query;
+    this.timeRange = containerState.timeRange;
     this.panelTitle = '';
     if (!containerState.hidePanelTitles) {
       this.panelTitle = containerState.customTitle !== undefined ?
@@ -74,10 +82,20 @@ export class SearchEmbeddable extends Embeddable {
   initializeSearchScope() {
     this.searchScope = this.$rootScope.$new();
 
-    this.pushContainerStateParamsToScope();
-
     this.searchScope.description = this.savedSearch.description;
     this.searchScope.searchSource = this.savedSearch.searchSource;
+
+    const timeRangeSearchSource = this.searchScope.searchSource.new();
+    timeRangeSearchSource.filter(() => {
+      return getTime(this.searchScope.searchSource.get('index'), this.timeRange);
+    });
+
+    this.filtersSearchSource = this.searchScope.searchSource.new();
+    this.filtersSearchSource.inherits(timeRangeSearchSource);
+
+    this.searchScope.searchSource.inherits(this.filtersSearchSource);
+
+    this.pushContainerStateParamsToScope();
 
     this.searchScope.setSortOrder = (columnName, direction) => {
       this.searchScope.sort = this.customization.sort = [columnName, direction];

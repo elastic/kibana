@@ -2,10 +2,14 @@
 
 exports[`Flyout conflicts should allow conflict resolution 1`] = `
 <EuiFlyout
+  hideCloseButton={false}
   onClose={[MockFunction]}
+  ownFocus={false}
   size="m"
 >
-  <EuiFlyoutHeader>
+  <EuiFlyoutHeader
+    hasBorder={false}
+  >
     <EuiTitle
       size="m"
     >
@@ -157,10 +161,14 @@ exports[`Flyout conflicts should handle errors 1`] = `
 
 exports[`Flyout should render import step 1`] = `
 <EuiFlyout
+  hideCloseButton={false}
   onClose={[MockFunction]}
+  ownFocus={false}
   size="m"
 >
-  <EuiFlyoutHeader>
+  <EuiFlyoutHeader
+    hasBorder={false}
+  >
     <EuiTitle
       size="m"
     >
