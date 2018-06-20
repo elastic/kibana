@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Button } from 'react-bootstrap';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiImage, EuiButtonIcon } from '@elastic/eui';
 import { ConfirmModal } from '../confirm_modal';
 import { RemoveIcon } from '../remove_icon';
 import { Clipboard } from '../clipboard';
@@ -25,35 +25,50 @@ export class AssetManager extends React.PureComponent {
 
   renderAsset = asset => {
     return (
-      <div
+      <EuiPanel
         key={asset.id}
-        className="canvas__asset-manager--thumb"
-        style={{
-          backgroundImage: `url("${asset.value}")`,
-        }}
+        className="canvas__asset-manager--asset canvas__checkered clickable"
+        paddingSize="none"
       >
+        <div className="canvas__asset-manager--thumb">
+          <EuiImage
+            size="m"
+            url={asset.value}
+            allowFullScreen
+            fullScreenIconColor="dark"
+            className="canvas__asset-manager--image"
+            alt="Asset Thumbnail"
+          />
+          <EuiFlexGroup
+            className="canvas__asset-manager--asset-identifier"
+            gutterSize="none"
+            alignItems="baseline"
+          >
+            <EuiFlexItem className="asset-id" grow={false}>
+              {asset.id}
+            </EuiFlexItem>
+            <EuiFlexItem className="asset-download" title="Download" grow={false}>
+              <Download fileName={asset.id} content={asset.value}>
+                <EuiButtonIcon iconType="exportAction" color="ghost" aria-label="Download" />
+              </Download>
+            </EuiFlexItem>
+            <EuiFlexItem title="Copy to Clipboard" grow={false}>
+              <Clipboard content={asset.id}>
+                <EuiButtonIcon
+                  iconType="copyClipboard"
+                  color="ghost"
+                  aria-label="Copy to Clipboard"
+                />
+              </Clipboard>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+
         <RemoveIcon
-          style={{ position: 'absolute', top: 0, right: 0 }}
+          style={{ position: 'absolute', top: -12, right: -12 }}
           onClick={() => this.setState({ deleteId: asset.id })}
         />
-        <div className="canvas__asset-manager--asset-identifier">
-          <div className="asset-copy" title="Copy to Clipboard">
-            <Clipboard content={asset.id}>
-              <Button bsSize="xsmall">
-                <span className="fa fa-clipboard" />
-              </Button>
-            </Clipboard>
-          </div>
-          <div className="asset-download">
-            <Download fileName={asset.id} content={asset.value}>
-              <Button bsSize="xsmall" title="Download">
-                <span className="fa fa-download" />
-              </Button>
-            </Download>
-          </div>
-          <div className="asset-id">{asset.id}</div>
-        </div>
-      </div>
+      </EuiPanel>
     );
   };
 
@@ -78,7 +93,6 @@ export class AssetManager extends React.PureComponent {
             </strong>
           </p>
         </div>
-
         {this.props.assets.map(this.renderAsset)}
 
         <ConfirmModal

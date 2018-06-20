@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Modal, Button } from 'react-bootstrap';
+import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 
 export const ConfirmModal = props => {
   const {
@@ -26,26 +26,19 @@ export const ConfirmModal = props => {
   if (!isOpen) return null;
 
   return (
-    <Modal
-      show
-      className={`canvas__confirm_modal ${className || ''}`}
-      onHide={cancel}
-      backdrop="static"
-      aria-labelledby="confirm-modal-title"
-    >
-      <Modal.Header>
-        <Modal.Title id="confirm-modal-title">{title || 'Confirm'}</Modal.Title>
-      </Modal.Header>
-
-      <Modal.Body>{message}</Modal.Body>
-
-      <Modal.Footer>
-        <Button onClick={cancel}>{cancelButtonText || 'Cancel'}</Button>
-        <Button bsStyle="primary" onClick={confirm} autoFocus>
-          {confirmButtonText || 'Confirm'}
-        </Button>
-      </Modal.Footer>
-    </Modal>
+    <EuiOverlayMask>
+      <EuiConfirmModal
+        className={`canvas__confirm_modal ${className || ''}`}
+        title={title}
+        onCancel={cancel}
+        onConfirm={confirm}
+        confirmButtonText={confirmButtonText}
+        cancelButtonText={cancelButtonText}
+        buttonColor="danger"
+      >
+        {message}
+      </EuiConfirmModal>
+    </EuiOverlayMask>
   );
 };
 
@@ -58,4 +51,10 @@ ConfirmModal.propTypes = {
   cancelButtonText: PropTypes.string,
   confirmButtonText: PropTypes.string,
   className: PropTypes.string,
+};
+
+ConfirmModal.defaultProps = {
+  title: 'Confirm',
+  confirmButtonText: 'Confirm',
+  cancelButtonText: 'Cancel',
 };

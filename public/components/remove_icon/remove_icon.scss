@@ -1,4 +1,5 @@
-.canvas__remove-icon--background, .canvas__remove-icon--foreground{
+.canvas__remove-icon--background,
+.canvas__remove-icon--foreground {
   position: absolute;
 }
 
@@ -17,6 +18,6 @@
   cursor: pointer;
 
   &:hover {
-    color: darken($euiColorDanger, 10%);;
+    color: darken($euiColorDanger, 10%);
   }
 }
