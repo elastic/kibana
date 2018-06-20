@@ -9,10 +9,10 @@ exports[`it renders without crashing 1`] = `
     className="euiPageHeader spaceSelector__heading"
   >
     <div
-      className="euiPageHeaderSection logoHeader"
+      className="euiPageHeaderSection spaceSelector__logoHeader"
     >
       <div
-        className="logoCircle"
+        className="spaceSelector__logoCircle"
       >
         <svg
           className="euiIcon euiIcon--xxLarge"
@@ -50,31 +50,28 @@ exports[`it renders without crashing 1`] = `
         className="euiSpacer euiSpacer--l"
       />
       <span
-        className="euiTextColor euiTextColor--ghost euiTitle euiTitle--medium"
+        className="euiTextColor euiTextColor--ghost euiTitle euiTitle--large"
       >
         <p>
           Select your space
         </p>
       </span>
-      <div
-        className="euiSpacer euiSpacer--l"
-      />
     </div>
   </div>
   <div
     className="euiPageBody"
   >
     <div
-      className="euiPanel euiPanel--paddingLarge euiPageContent spaceSelectorPageContent"
+      className="euiPanel euiPanel--paddingLarge euiPageContent spaceSelector__pageContent"
     >
       <div
-        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn"
       >
         <div
           className="euiFlexItem"
         >
           <div
-            className="euiText"
+            className="euiText euiText--extraSmall"
           >
             <p>
               You can change your space at anytime from within Kibana.
@@ -83,13 +80,13 @@ exports[`it renders without crashing 1`] = `
         </div>
       </div>
       <div
-        className="euiSpacer euiSpacer--l"
+        className="euiSpacer euiSpacer--xl"
       />
       <div
         className="spaceCards"
       >
         <div
-          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--wrap"
         />
       </div>
       <div
