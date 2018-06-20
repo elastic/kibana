@@ -10,19 +10,14 @@ import { startMlJob } from '../../../../services/rest/ml';
 
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiText,
   EuiGlobalToastList
 } from '@elastic/eui';
-
-import { KibanaLink } from '../../../../utils/url';
 
 export default class DynamicBaselineFlyout extends Component {
   state = {
@@ -52,16 +47,17 @@ export default class DynamicBaselineFlyout extends Component {
   };
 
   addErrorToast = () => {
+    const { serviceName, transactionType } = this.props;
     this.setState({
       toasts: [
         {
           id: 2,
-          title: 'Creating dynamic baseline failed',
+          title: 'Baseline job already exists',
           color: 'warning',
           text: (
             <p>
-              Make sure a dynamic baseline does not already exist for this
-              service
+              There&apos;s already a baseline job running on {serviceName} for{' '}
+              {transactionType}. <a href="/app/ml">View existing job.</a>
             </p>
           )
         }
@@ -69,24 +65,19 @@ export default class DynamicBaselineFlyout extends Component {
     });
   };
 
-  addSuccessToast = id => {
+  addSuccessToast = () => {
+    const { serviceName } = this.props;
     this.setState({
       toasts: [
         {
           id: 1,
-          title: 'Dynamic baseline created!',
+          title: 'Baseline job created',
           color: 'success',
           text: (
             <p>
-              The watch is now ready and will send error reports for{' '}
-              {this.props.serviceName}.{' '}
-              <KibanaLink
-                pathname={'/app/kibana'}
-                hash={`/management/elasticsearch/watcher/watches/watch/${id}`}
-                query={{}}
-              >
-                View watch.
-              </KibanaLink>
+              The analysis is now running on {serviceName} and you will start
+              seeing results show up on the response times graph.{' '}
+              <a href="">View job.</a>
             </p>
           )
         }
@@ -102,7 +93,7 @@ export default class DynamicBaselineFlyout extends Component {
 
   render() {
     const flyout = (
-      <EuiFlyout onClose={this.props.onClose} size="m">
+      <EuiFlyout onClose={this.props.onClose} size="s">
         <EuiFlyoutHeader>
           <EuiTitle>
             <h2>Create dynamic baseline</h2>
@@ -117,6 +108,10 @@ export default class DynamicBaselineFlyout extends Component {
               the 95th percentile response time, which is great to catching
               performance issues that might be on the rise.
             </p>
+            <img
+              src="/plugins/apm/images/dynamic_baseline.png"
+              alt="Machine Learning in APM"
+            />
             <p>
               Once the job has been created, you will immediately see a baseline
               on the Response times graph. You can always stop or remove your
@@ -128,27 +123,19 @@ export default class DynamicBaselineFlyout extends Component {
               'A dynamic baseline already exists'}
           </EuiText>
         </EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconType="cross"
-                onClick={this.props.onClose}
-                flush="left"
-              >
-                Close
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                onClick={this.createDynamicBaseline}
-                fill
-                disabled={this.state.isLoading || this.props.hasDynamicBaseline}
-              >
-                Create watch
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+        <EuiFlyoutFooter
+          style={{
+            flexDirection: 'row-reverse',
+            display: 'flex'
+          }}
+        >
+          <EuiButton
+            onClick={this.createDynamicBaseline}
+            fill
+            disabled={this.state.isLoading || this.props.hasDynamicBaseline}
+          >
+            Create dynamic baseline
+          </EuiButton>
         </EuiFlyoutFooter>
       </EuiFlyout>
     );

@@ -12,7 +12,6 @@ import _ from 'lodash';
 
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
@@ -242,7 +241,7 @@ export default class WatcherFlyout extends Component {
       return { value: `${hour}:00`, text: `${hour}:00 UTC` };
     });
 
-    const flyoutContent = (
+    const flyoutBody = (
       <EuiText>
         <p>
           This form will assist in creating a Watch that can notify you of error
@@ -423,30 +422,20 @@ export default class WatcherFlyout extends Component {
             <h2>Create new watch assistant</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
-        <EuiFlyoutBody>{flyoutContent}</EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconType="cross"
-                onClick={this.props.onClose}
-                flush="left"
-              >
-                Cancel
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                onClick={this.createWatch}
-                fill
-                disabled={
-                  !this.state.actions.email && !this.state.actions.slack
-                }
-              >
-                Create watch
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+        <EuiFlyoutBody>{flyoutBody}</EuiFlyoutBody>
+        <EuiFlyoutFooter
+          style={{
+            flexDirection: 'row-reverse',
+            display: 'flex'
+          }}
+        >
+          <EuiButton
+            onClick={this.createWatch}
+            fill
+            disabled={!this.state.actions.email && !this.state.actions.slack}
+          >
+            Create watch
+          </EuiButton>
         </EuiFlyoutFooter>
       </EuiFlyout>
     );

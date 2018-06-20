@@ -5,13 +5,7 @@
  */
 
 import React, { Component } from 'react';
-import {
-  EuiButton,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiPopover
-} from '@elastic/eui';
-import chrome from 'ui/chrome';
+import { EuiButton, EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
 
 export default class WatcherButton extends Component {
   state = {
@@ -21,28 +15,28 @@ export default class WatcherButton extends Component {
   onButtonClick = () => this.setState({ isPopoverOpen: true });
   closePopover = () => this.setState({ isPopoverOpen: false });
 
-  popOverItems = [
-    <EuiContextMenuItem
-      key="create"
-      icon="plusInCircle"
-      onClick={() => {
-        this.closePopover();
-        this.props.onOpenFlyout();
-      }}
-    >
-      Create new watch
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="view"
-      icon="tableOfContents"
-      onClick={() => {
-        window.location = chrome.addBasePath(
-          '/app/kibana#/management/elasticsearch/watcher/'
-        );
-      }}
-    >
-      View existing watches
-    </EuiContextMenuItem>
+  popOverPanels = [
+    {
+      id: 0,
+      title: 'Watcher',
+      items: [
+        {
+          name: 'Create new watch',
+          icon: <EuiIcon type="plusInCircle" size="m" />,
+          onClick: () => {
+            this.closePopover();
+            this.props.onOpenFlyout();
+          }
+        },
+        {
+          name: 'View existing watches',
+          icon: 'tableOfContents',
+          href: '/app/kibana#/management/elasticsearch/watcher/',
+          target: '_blank',
+          onClick: () => this.closePopover()
+        }
+      ]
+    }
   ];
 
   button = (
@@ -67,9 +61,7 @@ export default class WatcherButton extends Component {
         anchorPosition="downRight"
         ownFocus
       >
-        <div style={{ width: '210px' }}>
-          <EuiContextMenuPanel items={this.popOverItems} />
-        </div>
+        <EuiContextMenu initialPanelId={0} panels={this.popOverPanels} />
       </EuiPopover>
     );
   }
