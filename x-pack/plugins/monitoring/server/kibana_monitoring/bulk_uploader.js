@@ -95,12 +95,9 @@ export class BulkUploader {
     }
 
     const data = await collectorSet.bulkFetch(this._callClusterWithInternalUser);
-    const usableData = data.filter(d => Boolean(d) && !isEmpty(d.result));
-    const payload = usableData.map(({ result, type }) => {
-      if (!isEmpty(result)) {
-        return [{ index: { _type: type } }, result];
-      }
-    });
+    const payload = data
+      .filter(d => Boolean(d) && !isEmpty(d.result))
+      .map(({ result, type }) => [{ index: { _type: type } }, result]);
 
     if (payload.length > 0) {
       try {
