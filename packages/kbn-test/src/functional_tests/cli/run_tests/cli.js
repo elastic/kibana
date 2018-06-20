@@ -27,13 +27,16 @@ import { processOptions, displayHelp } from './args';
  * Only cares about --config option. Other options
  * are passed directly to functional_test_runner, such as
  * --bail, --verbose, etc.
- * @param {string[]} defaultConfigPaths  Array of paths to configs to use
- *                                       if no config option is passed
+ * @param {string[]} defaultConfigPaths Optional paths to configs
+ *                                      if no config option is passed
  */
 export async function runTestsCli(defaultConfigPaths) {
   try {
     const userOptions = getopts(process.argv.slice(2)) || {};
-    if (userOptions.help) return displayHelp();
+    if (userOptions.help) {
+      console.log(displayHelp());
+      return undefined;
+    }
 
     const options = processOptions(userOptions, defaultConfigPaths);
     await runTests(options);

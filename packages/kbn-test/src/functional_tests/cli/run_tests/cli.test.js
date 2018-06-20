@@ -62,6 +62,7 @@ describe('run tests CLI', () => {
       await runTestsCli();
 
       expect(exitMock).toHaveBeenCalledWith(1);
+      expect(logMock.mock.calls).toMatchSnapshot();
     });
 
     it('rejects empty config value if no default passed', async () => {
@@ -70,6 +71,7 @@ describe('run tests CLI', () => {
       await runTestsCli();
 
       expect(exitMock).toHaveBeenCalledWith(1);
+      expect(logMock.mock.calls).toMatchSnapshot();
     });
 
     it('accepts empty config value if default passed', async () => {
@@ -86,6 +88,7 @@ describe('run tests CLI', () => {
       await runTestsCli(['foo']);
 
       expect(exitMock).toHaveBeenCalledWith(1);
+      expect(logMock.mock.calls).toMatchSnapshot();
     });
 
     it('accepts string value for kibana-install-dir', async () => {
@@ -102,6 +105,7 @@ describe('run tests CLI', () => {
       await runTestsCli(['foo']);
 
       expect(exitMock).toHaveBeenCalledWith(1);
+      expect(logMock.mock.calls).toMatchSnapshot();
     });
 
     it('accepts boolean value for updateBaselines', async () => {
@@ -126,6 +130,7 @@ describe('run tests CLI', () => {
       await runTestsCli(['foo']);
 
       expect(exitMock).toHaveBeenCalledWith(1);
+      expect(logMock.mock.calls).toMatchSnapshot();
     });
 
     it('accepts value for grep', async () => {
@@ -182,6 +187,7 @@ describe('run tests CLI', () => {
       await runTestsCli(['foo']);
 
       expect(exitMock).not.toHaveBeenCalledWith(1);
+      expect(logMock.mock.calls).toMatchSnapshot();
     });
 
     it('rejects invalid options even if valid options exist', async () => {
@@ -190,6 +196,7 @@ describe('run tests CLI', () => {
       await runTestsCli(['foo']);
 
       expect(exitMock).toHaveBeenCalledWith(1);
+      expect(logMock.mock.calls).toMatchSnapshot();
     });
   });
 });

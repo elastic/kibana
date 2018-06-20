@@ -45,7 +45,8 @@ const options = {
 export function displayHelp() {
   const helpOptions = Object.keys(options)
     .filter(name => name !== '_')
-    .map(([name, option]) => {
+    .map(name => {
+      const option = options[name];
       return {
         ...option,
         usage: `${name} ${option.arg || ''}`,
@@ -57,8 +58,7 @@ export function displayHelp() {
     })
     .join(`\n      `);
 
-  console.log(
-    dedent(`
+  return dedent(`
     Start Functional Test Servers
 
     Usage:
@@ -68,8 +68,7 @@ export function displayHelp() {
 
     Options:
       ${helpOptions}
-    `)
-  );
+    `);
 }
 
 export function processOptions(userOptions, defaultConfigPath) {
@@ -81,13 +80,16 @@ export function processOptions(userOptions, defaultConfigPath) {
     throw new Error(`functional_tests_server: config is required`);
   }
 
-  const log = createToolingLog(pickLevelFromFlags(userOptions));
-  log.pipe(process.stdout);
+  function createLogger() {
+    const log = createToolingLog(pickLevelFromFlags(userOptions));
+    log.pipe(process.stdout);
+    return log;
+  }
 
   return {
     ...userOptions,
     config,
-    log,
+    createLogger,
     extraKbnOpts: userOptions._,
   };
 }

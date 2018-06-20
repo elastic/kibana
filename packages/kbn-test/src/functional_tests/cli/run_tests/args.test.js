@@ -17,7 +17,13 @@
  * under the License.
  */
 
-import { processOptions } from './args';
+import { displayHelp, processOptions } from './args';
+
+describe('display help for run tests CLI', () => {
+  it('displays as expected', () => {
+    expect(displayHelp()).toMatchSnapshot();
+  });
+});
 
 describe('process options for run tests CLI', () => {
   it('rejects boolean config value', () => {
@@ -34,7 +40,7 @@ describe('process options for run tests CLI', () => {
 
   it('accepts empty config value if default passed', () => {
     const options = processOptions({ config: '' }, ['foo']);
-    expect(options.configs).toEqual(['foo']);
+    expect(options).toMatchSnapshot();
   });
 
   it('rejects non-boolean value for bail', () => {
@@ -45,8 +51,7 @@ describe('process options for run tests CLI', () => {
 
   it('accepts string value for kibana-install-dir', () => {
     const options = processOptions({ 'kibana-install-dir': 'foo' }, ['foo']);
-    expect(options['kibana-install-dir']).toEqual('foo');
-    expect(options.configs).toEqual(['foo']);
+    expect(options).toMatchSnapshot();
   });
 
   it('rejects boolean value for kibana-install-dir', () => {
@@ -59,14 +64,12 @@ describe('process options for run tests CLI', () => {
 
   it('accepts boolean value for updateBaselines', () => {
     const options = processOptions({ updateBaselines: true }, ['foo']);
-    expect(options.updateBaselines).toEqual(true);
-    expect(options.configs).toEqual(['foo']);
+    expect(options).toMatchSnapshot();
   });
 
   it('accepts source value for es-from', () => {
     const options = processOptions({ 'es-from': 'source' }, ['foo']);
-    expect(options['es-from']).toEqual('source');
-    expect(options.configs).toEqual(['foo']);
+    expect(options).toMatchSnapshot();
   });
 
   it('rejects non-enum value for es-from', () => {
@@ -79,38 +82,32 @@ describe('process options for run tests CLI', () => {
 
   it('accepts value for grep', () => {
     const options = processOptions({ grep: 'management' }, ['foo']);
-    expect(options.grep).toEqual('management');
-    expect(options.configs).toEqual(['foo']);
+    expect(options).toMatchSnapshot();
   });
 
   it('accepts debug option', () => {
     const options = processOptions({ debug: true }, ['foo']);
-    expect(options.debug).toEqual(true);
-    expect(options.configs).toEqual(['foo']);
+    expect(options).toMatchSnapshot();
   });
 
   it('accepts silent option', () => {
     const options = processOptions({ silent: true }, ['foo']);
-    expect(options.silent).toEqual(true);
-    expect(options.configs).toEqual(['foo']);
+    expect(options).toMatchSnapshot();
   });
 
   it('accepts quiet option', () => {
     const options = processOptions({ quiet: true }, ['foo']);
-    expect(options.quiet).toEqual(true);
-    expect(options.configs).toEqual(['foo']);
+    expect(options).toMatchSnapshot();
   });
 
   it('accepts verbose option', () => {
     const options = processOptions({ verbose: true }, ['foo']);
-    expect(options.verbose).toEqual(true);
-    expect(options.configs).toEqual(['foo']);
+    expect(options).toMatchSnapshot();
   });
 
   it('accepts extra server options', () => {
     const options = processOptions({ _: { 'server.foo': 'bar' } }, ['foo']);
-    expect(options._['server.foo']).toEqual('bar');
-    expect(options.configs).toEqual(['foo']);
+    expect(options).toMatchSnapshot();
   });
 
   it('rejects invalid options even if valid options exist', () => {

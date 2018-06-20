@@ -42,12 +42,12 @@ in another terminal session by running this command from this directory:
 
 /**
  * Run servers and tests for each config
- * @param {object} options                Optional
- * @property {string[]} configPaths       Array of paths to configs
- * @property {Log} options.log            Optional logger
- * @property {string} options.installDir  Optional installation dir from which to run Kibana
- * @property {boolean} options.bail       Whether to exit test run at the first failure
- * @property {string} options.esFrom      Optionally run from source instead of snapshot
+ * @param {object} options                   Optional
+ * @property {string[]} configPaths          Array of paths to configs
+ * @property {function} options.createLogger Optional logger creation function
+ * @property {string} options.installDir     Optional installation dir from which to run Kibana
+ * @property {boolean} options.bail          Whether to exit test run at the first failure
+ * @property {string} options.esFrom         Optionally run from source instead of snapshot
  */
 export async function runTests(options) {
   for (const configPath of options.configs) {
@@ -57,15 +57,16 @@ export async function runTests(options) {
 
 /**
  * Start only servers using single config
- * @param {object} options               Optional
- * @property {string} options.configPath Path to a config file
- * @property {Log} options.log           Optional logger
- * @property {string} options.installDir Optional installation dir from which to run Kibana
- * @property {string} options.esFrom     Optionally run from source instead of snapshot
+ * @param {object} options                   Optional
+ * @property {string} options.configPath     Path to a config file
+ * @property {function} options.createLogger Optional logger creation function
+ * @property {string} options.installDir     Optional installation dir from which to run Kibana
+ * @property {string} options.esFrom         Optionally run from source instead of snapshot
  */
 export async function startServers(options) {
-  const { config: configOption, log } = options;
+  const { config: configOption, createLogger } = options;
   const configPath = resolve(process.cwd(), configOption);
+  const log = createLogger();
 
   await withProcRunner(log, async procs => {
     const config = await readConfigFile(log, configPath);
@@ -97,7 +98,7 @@ async function silence(milliseconds, { log }) {
  * Start servers and run tests for single config
  */
 async function runSingleConfig(configPath, options) {
-  const { log } = options;
+  const log = options.createLogger();
 
   await withProcRunner(log, async procs => {
     const config = await readConfigFile(log, configPath);

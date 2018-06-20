@@ -62,6 +62,7 @@ describe('start servers CLI', () => {
       await startServersCli();
 
       expect(exitMock).toHaveBeenCalledWith(1);
+      expect(logMock.mock.calls).toMatchSnapshot();
     });
 
     it('rejects empty config value if no default passed', async () => {
@@ -70,6 +71,7 @@ describe('start servers CLI', () => {
       await startServersCli();
 
       expect(exitMock).toHaveBeenCalledWith(1);
+      expect(logMock.mock.calls).toMatchSnapshot();
     });
 
     it('accepts empty config value if default passed', async () => {
@@ -80,12 +82,13 @@ describe('start servers CLI', () => {
       expect(exitMock).not.toHaveBeenCalled();
     });
 
-    it('rejects non-boolean value for bail', async () => {
-      global.process.argv.push('--bail', 'peanut');
+    it('rejects bail', async () => {
+      global.process.argv.push('--bail', true);
 
       await startServersCli('foo');
 
       expect(exitMock).toHaveBeenCalledWith(1);
+      expect(logMock.mock.calls).toMatchSnapshot();
     });
 
     it('accepts string value for kibana-install-dir', async () => {
@@ -102,6 +105,7 @@ describe('start servers CLI', () => {
       await startServersCli('foo');
 
       expect(exitMock).toHaveBeenCalledWith(1);
+      expect(logMock.mock.calls).toMatchSnapshot();
     });
 
     it('accepts boolean value for updateBaselines', async () => {
@@ -109,7 +113,8 @@ describe('start servers CLI', () => {
 
       await startServersCli('foo');
 
-      expect(exitMock).not.toHaveBeenCalledWith();
+      expect(exitMock).toHaveBeenCalledWith(1);
+      expect(logMock.mock.calls).toMatchSnapshot();
     });
 
     it('accepts source value for es-from', async () => {
@@ -126,6 +131,7 @@ describe('start servers CLI', () => {
       await startServersCli('foo');
 
       expect(exitMock).toHaveBeenCalledWith(1);
+      expect(logMock.mock.calls).toMatchSnapshot();
     });
 
     it('accepts debug option', async () => {
@@ -182,6 +188,7 @@ describe('start servers CLI', () => {
       await startServersCli('foo');
 
       expect(exitMock).toHaveBeenCalledWith(1);
+      expect(logMock.mock.calls).toMatchSnapshot();
     });
   });
 });
