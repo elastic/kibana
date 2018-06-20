@@ -18,6 +18,10 @@ export function EventInput({ value, onChange }) {
         height="51px"
         value={value}
         onChange={onChange}
+        setOptions={{
+          highlightActiveLine: false,
+          highlightGutterLine: false,
+        }}
         data-test-subj="aceEventInput"
       />
     </EuiFormRow>
