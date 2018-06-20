@@ -31,7 +31,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardVisualizations.createAndAddTSVBVisualization('TSVB');
       await PageObjects.dashboard.addVisualizations(PageObjects.dashboard.getTestVisualizationNames());
-      await PageObjects.common.clearAllToasts();
       await dashboardVisualizations.createAndAddSavedSearch({ name: 'saved search', fields: ['bytes', 'agent'] });
       testVisualizationTitles.push('TSVB');
       testVisualizationTitles.splice(1, 0, ...PageObjects.dashboard.getTestVisualizationNames());
@@ -42,6 +41,7 @@ export default function ({ getService, getPageObjects }) {
         1, 0, ...PageObjects.dashboard.getTestVisualizations().map(visualization => visualization.description)
       );
       testVisualizationDescriptions.push('');
+      await PageObjects.common.clearAllToasts();
     });
 
     it('set the timepicker time to that which contains our test data', async function setTimepicker() {
