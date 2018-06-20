@@ -6,7 +6,6 @@
 
 import expect from 'expect.js';
 import { props as propsAsync } from 'bluebird';
-// import { highlight } from 'lowlight';
 
 export function PipelineEditorProvider({ getService }) {
   const aceEditor = getService('aceEditor');

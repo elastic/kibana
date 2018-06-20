@@ -99,6 +99,7 @@ export default function ({ getService, getPageObjects }) {
       const PIPELINE_SECTION = 'pipelineSection';
       const BRACE = 'brace';
       const PLUGIN = 'plugin';
+      const CONTROL = 'control';
       const ATTRIBUTE = 'attribute';
       const OPERATOR = 'operator';
       const QUOTE = 'quote';
@@ -107,6 +108,7 @@ export default function ({ getService, getPageObjects }) {
       const HASH_ENTRY_NAME = 'hashEntryName';
       const BAREWORD = 'bareword';
       const NUMBER = 'number';
+      const defaultFilterClasses = ['ace_indent-guide'];
 
       before(async () => {
         await PageObjects.logstash.gotoNewPipelineEditor();
@@ -140,12 +142,97 @@ export default function ({ getService, getPageObjects }) {
           { token: BRACE, content: '}' }
         ];
 
-        const filterClasses = ['ace_indent-guide'];
-
-        await assertHighlightTokens(pattern, expectedHighlights, filterClasses);
+        await assertHighlightTokens(pattern, expectedHighlights, defaultFilterClasses);
       });
 
-      // TODO: test for single-line comments in other scopes
+      it('applies single-line comment highlights inside attribute scopes', async () => {
+        const pattern =
+          `input { file # plugin declaration
+            { # plugin body
+            }
+          } `;
+
+        const expectedHighlights = [
+          { token: PIPELINE_SECTION, content: 'input' },
+          { token: BRACE, content: '{' },
+          { token: PLUGIN, content: 'file' },
+          { token: COMMENT, content: '# plugin declaration' },
+          { token: BRACE, content: '{' },
+          { token: COMMENT, content: '# plugin body' },
+          { token: BRACE, content: '}' },
+          { token: BRACE, content: '}' },
+        ];
+
+        await assertHighlightTokens(pattern, expectedHighlights, defaultFilterClasses);
+      });
+
+      it('applies single-line comment highlights inside hash scope', async () => {
+        const pattern =
+          `input { file { path => { # hash comment
+          } } }`;
+
+        const expectedHighlights = [
+          { token: PIPELINE_SECTION, content: 'input' },
+          { token: BRACE, content: '{' },
+          { token: PLUGIN, content: 'file' },
+          { token: BRACE, content: '{' },
+          { token: ATTRIBUTE, content: 'path' },
+          { token: OPERATOR, content: '=>' },
+          { token: HASH, content: '{' },
+          { token: COMMENT, content: '# hash comment' },
+          { token: HASH, content: '}' },
+          { token: BRACE, content: '}' },
+          { token: BRACE, content: '}' },
+        ];
+
+        await assertHighlightTokens(pattern, expectedHighlights, defaultFilterClasses);
+      });
+
+      it('applies single-line comment highlights inside array scope', async () => {
+        const pattern = `input { file { path => [ # array comment
+          ] } }`;
+
+        const expectedHighlights = [
+          { token: PIPELINE_SECTION, content: 'input' },
+          { token: BRACE, content: '{' },
+          { token: PLUGIN, content: 'file' },
+          { token: BRACE, content: '{' },
+          { token: ATTRIBUTE, content: 'path' },
+          { token: OPERATOR, content: '=>' },
+          { token: ARRAY, content: '[' },
+          { token: COMMENT, content: '# array comment' },
+          { token: ARRAY, content: ']' },
+          { token: BRACE, content: '}' },
+          { token: BRACE, content: '}' },
+        ];
+
+        await assertHighlightTokens(pattern, expectedHighlights, defaultFilterClasses);
+      });
+
+      it('applies single-line comment highlights inside branch conditions', async () => {
+        const pattern = `filter { if
+          # comment inside condition
+          val in [1, 2] { } }`;
+
+        const expectedHighlights = [
+          { token: PIPELINE_SECTION, content: 'filter' },
+          { token: BRACE, content: '{' },
+          { token: CONTROL, content: 'if' },
+          { token: COMMENT, content: '# comment inside condition' },
+          { token: BAREWORD, content: 'val' },
+          { token: OPERATOR, content: 'in' },
+          { token: ARRAY, content: '[' },
+          { token: NUMBER, content: '1' },
+          { token: OPERATOR, content: ',' },
+          { token: NUMBER, content: '2' },
+          { token: ARRAY, content: ']' },
+          { token: BRACE, content: '{' },
+          { token: BRACE, content: '}' },
+          { token: BRACE, content: '}' },
+        ];
+
+        await assertHighlightTokens(pattern, expectedHighlights, defaultFilterClasses);
+      });
 
       it('applies pipelineSection classes', async () => {
         const pipelinePattern = 'input { } filter { } output { }';
