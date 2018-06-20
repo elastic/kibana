@@ -3,11 +3,14 @@ import PropTypes from 'prop-types';
 import { ColorPickerMini } from '../../../components/color_picker_mini';
 
 export const SimpleTemplate = ({ getArgValue, setArgValue, workpad }) => (
-  <ColorPickerMini
-    value={getArgValue('backgroundColor')}
-    onChange={color => setArgValue('backgroundColor', color)}
-    colors={workpad.colors}
-  />
+  <div style={{ fontSize: 0 }}>
+    <ColorPickerMini
+      value={getArgValue('backgroundColor')}
+      onChange={color => setArgValue('backgroundColor', color)}
+      colors={workpad.colors}
+      anchorPosition="leftCenter"
+    />
+  </div>
 );
 
 SimpleTemplate.displayName = 'ContainerStyleArgSimpleInput';

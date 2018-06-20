@@ -1,13 +1,6 @@
-.canvas__color-palette--dot {
-  display: inline-block;
-  margin: 0px $euiSizeXS $euiSizeXS 0px;
-
-  .fa {
-    font-size: $euiFontSizeS;
-    margin-left: $euiSizeXS;
-  }
-
-  &:hover {
-    cursor: pointer;
+.canvas__color-palette {
+  .canvas__color-palette--dot {
+    display: inline-block;
+    margin: 0px $euiSizeXS $euiSizeXS 0px;
   }
 }

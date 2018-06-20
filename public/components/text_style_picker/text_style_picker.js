@@ -48,7 +48,7 @@ export const TextStylePicker = ({
       <EuiSpacer size="m" />
 
       <EuiFlexGroup gutterSize="none" justifyContent="spaceAround" alignItems="flexEnd">
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} style={{ fontSize: 0 }}>
           <ColorPickerMini
             value={color}
             onChange={value => doChange('color', value)}
