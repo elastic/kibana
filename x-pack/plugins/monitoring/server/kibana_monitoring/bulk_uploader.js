@@ -56,14 +56,10 @@ export class BulkUploader {
    * @return undefined
    */
   start(collectorSet) {
-    if (this._timer) {
-      this._log.warn('Not re-starting monitoring stats collection: the BulkUploader timer is already started');
-      return;
-    }
-
     this._log.info('Starting monitoring stats collection');
     this._fetchAndUpload(collectorSet); // initial fetch
     this._timer = setInterval(() => {
+      console.log('FETCH');
       this._fetchAndUpload(collectorSet);
     }, this._interval);
   }
@@ -71,13 +67,21 @@ export class BulkUploader {
   /*
    * start() and stop() are lifecycle event handlers for
    * xpackMainPlugin license changes
+   * @param {String} logPrefix
    */
-  stop() {
-    if (this._timer) {
-      this._log.info('Stopping monitoring stats collection');
-    }
+  stop(logPrefix = '') {
     clearInterval(this._timer);
     this._timer = null;
+
+    const logMessages = [ logPrefix, 'Monitoring stats collection is stopped' ];
+    this._log.info(logMessages.join(': '));
+  }
+
+  handleNotEnabled() {
+    this.stop('Monitoring status upload endpoint is not enabled in Elasticsearch');
+  }
+  handleConnectionLost() {
+    this.stop('Connection issue detected');
   }
 
   /*

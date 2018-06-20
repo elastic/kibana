@@ -56,32 +56,35 @@ export const init = (monitoringPlugin, server) => {
     }
   });
 
+  const bulkUploader = initBulkUploader(monitoringPlugin.kbnServer, server);
   const kibanaCollectionEnabled = config.get('xpack.monitoring.kibana.collection.enabled');
   const { info: xpackMainInfo } = xpackMainPlugin;
 
-  if (kibanaCollectionEnabled && xpackMainInfo) {
-    const bulkUploader = initBulkUploader(monitoringPlugin.kbnServer, server);
-
+  if (kibanaCollectionEnabled) {
     /*
      * Bulk uploading of Kibana stats
      */
-    const startStopBulkUpload = () => {
-      // Check the updated xpack info and make sure the bulk endpoint on the ES side is up
+    xpackMainInfo.onLicenseInfoChange(() => {
+      // use updated xpack license info to start/stop bulk upload
       const mainMonitoring = xpackMainInfo.feature('monitoring');
       const monitoringBulkEnabled = mainMonitoring && mainMonitoring.isAvailable() && mainMonitoring.isEnabled();
       if (monitoringBulkEnabled) {
         bulkUploader.start(collectorSet);
       } else {
-        bulkUploader.stop();
+        bulkUploader.handleNotEnabled();
       }
-    };
-    xpackMainInfo.onLicenseInfoChange(startStopBulkUpload);
+    });
   } else if (!kibanaCollectionEnabled) {
     server.log(
       ['info', LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG],
       'Internal collection for Kibana monitoring will is disabled per configuration.'
     );
   }
+
+  // xpack main plugin status goes red if ES client lost connection
+  xpackMainPlugin.status.on('red', () => {
+    bulkUploader.handleConnectionLost();
+  });
 
   server.injectUiAppVars('monitoring', (server) => {
     const config = server.config();
