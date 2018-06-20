@@ -59,7 +59,6 @@ export class BulkUploader {
     this._log.info('Starting monitoring stats collection');
     this._fetchAndUpload(collectorSet); // initial fetch
     this._timer = setInterval(() => {
-      console.log('FETCH');
       this._fetchAndUpload(collectorSet);
     }, this._interval);
   }
@@ -67,14 +66,14 @@ export class BulkUploader {
   /*
    * start() and stop() are lifecycle event handlers for
    * xpackMainPlugin license changes
-   * @param {String} logPrefix
+   * @param {String} logPrefix help give context to the reason for stopping
    */
-  stop(logPrefix = '') {
+  stop(logPrefix) {
     clearInterval(this._timer);
     this._timer = null;
 
-    const logMessages = [ logPrefix, 'Monitoring stats collection is stopped' ];
-    this._log.info(logMessages.join(': '));
+    const prefix = logPrefix ? logPrefix + ':' : '';
+    this._log.info(prefix + 'Monitoring stats collection is stopped');
   }
 
   handleNotEnabled() {

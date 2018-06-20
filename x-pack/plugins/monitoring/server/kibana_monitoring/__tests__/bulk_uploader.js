@@ -16,10 +16,6 @@ const CHECK_DELAY = 500;
 describe('BulkUploader', () => {
   describe('registers a collector set and runs lifecycle events', () => {
     let server;
-    let xpackInfo;
-    let isAvailableStub;
-    let isEnabledStub;
-
     beforeEach(() => {
       server = {
         log: sinon.spy(),
@@ -36,15 +32,6 @@ describe('BulkUploader', () => {
           },
         },
       };
-
-      isAvailableStub = sinon.stub().returns(true);
-      isEnabledStub = sinon.stub().returns(true);
-      xpackInfo = {
-        feature: () => ({
-          isAvailable: isAvailableStub,
-          isEnabled: isEnabledStub,
-        })
-      };
     });
 
     it('should skip bulk upload if payload is empty', done => {
@@ -56,7 +43,7 @@ describe('BulkUploader', () => {
         })
       );
 
-      const uploader = new BulkUploader(server, xpackInfo, {
+      const uploader = new BulkUploader(server, {
         interval: FETCH_INTERVAL,
         combineTypes: noop,
       });
@@ -64,9 +51,10 @@ describe('BulkUploader', () => {
       uploader.start(collectors);
 
       // allow interval to tick a few times
-      let loggingCalls;
       setTimeout(() => {
-        loggingCalls = server.log.getCalls();
+        uploader.stop();
+
+        const loggingCalls = server.log.getCalls();
         expect(loggingCalls.length).to.be.greaterThan(2); // should be 3-5: start, fetch, skip, fetch, skip
         expect(loggingCalls[0].args).to.eql([
           ['info', 'monitoring-ui', 'kibana-monitoring'],
@@ -80,52 +68,11 @@ describe('BulkUploader', () => {
           ['debug', 'monitoring-ui', 'kibana-monitoring'],
           'Skipping bulk uploading of an empty stats payload',
         ]);
-
-        uploader.stop();
-        loggingCalls = server.log.getCalls();
         expect(loggingCalls[loggingCalls.length - 1].args).to.eql([
           ['info', 'monitoring-ui', 'kibana-monitoring'],
-          'Stopping monitoring stats collection',
-        ]);
-        done();
-      }, CHECK_DELAY);
-    });
-
-    it('should skip bulk upload if monitoring bulk is not enabled', done => {
-      isAvailableStub.returns(false); // cause the fail
-
-      const combineTypes = sinon.spy(data => {
-        return [data[0][0], { ...data[0][1], combined: true }];
-      });
-
-      const collectors = new CollectorSet(server);
-      collectors.register(
-        new Collector(server, {
-          type: 'type_collector_test',
-          fetch: () => ({ testData: 12345 }),
-        })
-      );
-      const uploader = new BulkUploader(server, xpackInfo, {
-        interval: FETCH_INTERVAL,
-        combineTypes,
-      });
-
-      uploader.start(collectors);
-
-      // allow interval to tick a few times
-      setTimeout(() => {
-        const loggingCalls = server.log.getCalls();
-        expect(loggingCalls.length).to.be.greaterThan(1); // should be 3-5: start, fetch, upload, fetch, upload
-        expect(loggingCalls[0].args).to.eql([
-          ['info', 'monitoring-ui', 'kibana-monitoring'],
-          'Starting monitoring stats collection',
-        ]);
-        expect(loggingCalls[1].args).to.eql([
-          ['debug', 'monitoring-ui', 'kibana-monitoring'],
-          'Skipping fetch and upload of monitoring stats due to monitoring bulk endpoint not being available',
+          'Monitoring stats collection is stopped',
         ]);
 
-        uploader.stop();
         done();
       }, CHECK_DELAY);
     });
@@ -142,7 +89,7 @@ describe('BulkUploader', () => {
           fetch: () => ({ testData: 12345 }),
         })
       );
-      const uploader = new BulkUploader(server, xpackInfo, {
+      const uploader = new BulkUploader(server, {
         interval: FETCH_INTERVAL,
         combineTypes,
       });
@@ -151,6 +98,8 @@ describe('BulkUploader', () => {
 
       // allow interval to tick a few times
       setTimeout(() => {
+        uploader.stop();
+
         const loggingCalls = server.log.getCalls();
         expect(loggingCalls.length).to.be.greaterThan(2); // should be 3-5: start, fetch, upload, fetch, upload
         expect(loggingCalls[0].args).to.eql([
@@ -173,7 +122,6 @@ describe('BulkUploader', () => {
           [[{ index: { _type: 'type_collector_test' } }, { testData: 12345 }]],
         ]);
 
-        uploader.stop();
         done();
       }, CHECK_DELAY);
     });
