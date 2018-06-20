@@ -8,6 +8,7 @@ import React from 'react';
 import {
   EuiCard,
   EuiText,
+  EuiTextColor,
   EuiSpacer,
 } from '@elastic/eui';
 import './space_card.less';
@@ -42,5 +43,5 @@ function renderSpaceTitle(space) {
 }
 
 function renderSpaceDescription(space) {
-  return <span className="spaceCardDescription">{space.description}</span>;
+  return <EuiTextColor color={"subdued"}>{space.description}</EuiTextColor>;
 }

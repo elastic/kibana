@@ -56,6 +56,9 @@ exports[`it renders without crashing 1`] = `
           Select your space
         </p>
       </span>
+      <div
+        className="euiSpacer euiSpacer--l"
+      />
     </div>
   </div>
   <div

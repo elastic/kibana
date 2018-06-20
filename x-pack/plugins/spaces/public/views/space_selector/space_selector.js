@@ -82,6 +82,8 @@ export class SpaceSelector extends Component {
             <EuiTitle color="ghost">
               <EuiTextColor color="ghost"><p>Select your space</p></EuiTextColor>
             </EuiTitle>
+
+            <EuiSpacer />
           </EuiPageHeaderSection>
         </EuiPageHeader>
         <EuiPageBody>
