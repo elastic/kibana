@@ -8,7 +8,9 @@ import React from 'react';
 import { render } from 'react-dom';
 import moment from 'moment';
 import { uiModules } from 'ui/modules';
-import { PipelineViewer } from 'plugins/monitoring/components/logstash/pipeline_viewer';
+import { ConfigViewer } from 'plugins/monitoring/components/logstash/pipeline_viewer/views/config_viewer';
+import { Pipeline } from 'plugins/monitoring/components/logstash/pipeline_viewer/models/pipeline';
+import { List } from 'plugins/monitoring/components/logstash/pipeline_viewer/models/list';
 import { PipelineState } from 'plugins/monitoring/components/logstash/pipeline_viewer/models/pipeline_state';
 
 const uiModule = uiModules.get('monitoring/directives', []);
@@ -28,13 +30,19 @@ uiModule.directive('monitoringLogstashPipelineViewer', ($injector) => {
 
       scope.$watch('pipeline', (updatedPipeline) => {
         pipelineState.update(updatedPipeline);
-        const pipelineViewer = (
-          <PipelineViewer
-            pipelineState={pipelineState}
+        const configViewer = (
+          <ConfigViewer
+            pipeline={
+              List.fromPipeline(
+                Pipeline.fromPipelineGraph(
+                  pipelineState.config.graph
+                )
+              )
+            }
             timeseriesTooltipXValueFormatter={timeseriesTooltipXValueFormatter}
           />
         );
-        render(pipelineViewer, $el[0]);
+        render(configViewer, $el[0]);
       });
     }
   };

@@ -16,37 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
+import { shallow } from 'enzyme';
 
-import { store } from '../../store';
-import { updatePanel, updatePanels } from '../actions';
-import {
-  getPanel,
-  getPanelType,
-} from '../../selectors';
+import { MetricVisValue } from './metric_vis_value';
 
-test('UpdatePanel updates a panel', () => {
-  store.dispatch(updatePanels([{ panelIndex: '1', gridData: {} }]));
+describe('MetricVisValue', () => {
+  it('should be wrapped in EuiKeyboardAccessible if having a click listener', () => {
+    const component = shallow(
+      <MetricVisValue
+        fontSize={12}
+        metric={{ label: 'Foo', value: 'foo' }}
+        onFilter={() => {}}
+      />
+    );
+    expect(component.find('EuiKeyboardAccessible').exists()).toBe(true);
+  });
 
-  store.dispatch(updatePanel({
-    panelIndex: '1',
-    type: 'mySpecialType',
-    gridData: {
-      x: 1,
-      y: 5,
-      w: 10,
-      h: 1,
-      id: '1'
-    }
-  }));
+  it('should not be wrapped in EuiKeyboardAccessible without having a click listener', () => {
+    const component = shallow(
+      <MetricVisValue
+        fontSize={12}
+        metric={{ label: 'Foo', value: 'foo' }}
+      />
+    );
+    expect(component.find('EuiKeyboardAccessible').exists()).toBe(false);
+  });
 
-  const panel = getPanel(store.getState(), '1');
-  expect(panel.gridData.x).toBe(1);
-  expect(panel.gridData.y).toBe(5);
-  expect(panel.gridData.w).toBe(10);
-  expect(panel.gridData.h).toBe(1);
-  expect(panel.gridData.id).toBe('1');
-});
-
-test('getPanelType', () => {
-  expect(getPanelType(store.getState(), '1')).toBe('mySpecialType');
 });

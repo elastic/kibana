@@ -48,6 +48,7 @@ import {
   VisualizeListingTableProvider,
   DashboardAddPanelProvider,
   DashboardPanelActionsProvider,
+  FlyoutProvider,
 } from './services';
 
 export default async function ({ readConfigFile }) {
@@ -101,6 +102,7 @@ export default async function ({ readConfigFile }) {
       visualizeListingTable: VisualizeListingTableProvider,
       dashboardAddPanel: DashboardAddPanelProvider,
       dashboardPanelActions: DashboardPanelActionsProvider,
+      flyout: FlyoutProvider,
     },
     servers: commonConfig.get('servers'),
 

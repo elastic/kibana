@@ -17,11 +17,18 @@
  * under the License.
  */
 
-export * from './view';
-export * from './panels';
-export * from './embeddables';
+import { combineReducers } from 'redux';
+import { embeddablesReducer } from './embeddables';
 
-export {
-  updateDescription,
-  updateTitle,
-} from './metadata';
+import { panelsReducer } from './panels';
+
+import { viewReducer } from './view';
+
+import { metadataReducer } from './metadata';
+
+export const dashboard = combineReducers({
+  embeddables: embeddablesReducer,
+  metadata: metadataReducer,
+  panels: panelsReducer,
+  view: viewReducer,
+});
