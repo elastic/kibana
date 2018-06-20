@@ -47,14 +47,14 @@ export default function ({ getPageObjects, getService }) {
         await PageObjects.visualize.clickSavedSearch(savedSearchName);
         await PageObjects.header.setAbsoluteRange(fromTime, toTime);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        const data = await PageObjects.visualize.getDataTableData();
+        const data = await PageObjects.visualize.getTableVisData();
         expect(data.trim()).to.be('14,004');
       });
 
       it('should respect the time filter when linked to a saved search', async () => {
         await PageObjects.header.setAbsoluteRange('2015-09-19 06:31:44.000', '2015-09-21 10:00:00.000');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        const data = await PageObjects.visualize.getDataTableData();
+        const data = await PageObjects.visualize.getTableVisData();
         expect(data.trim()).to.be('6,086');
       });
     });
