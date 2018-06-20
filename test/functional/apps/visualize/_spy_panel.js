@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
@@ -19,13 +38,13 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
-    describe('spy panel tabel', function indexPatternCreation() {
+    describe('inspector table', function indexPatternCreation() {
 
       it('should update table header when columns change', async function () {
 
-        await PageObjects.visualize.openSpyPanel();
-        let headers = await PageObjects.visualize.getDataTableHeaders();
-        expect(headers.trim()).to.equal('Count');
+        await PageObjects.visualize.openInspector();
+        let headers = await PageObjects.visualize.getInspectorTableHeaders();
+        expect(headers).to.eql(['Count']);
 
         log.debug('Add Average Metric on machine.ram field');
         await PageObjects.visualize.clickAddMetric();
@@ -33,10 +52,10 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.selectAggregation('Average', 'metrics');
         await PageObjects.visualize.selectField('machine.ram', 'metrics');
         await PageObjects.visualize.clickGo();
-        await PageObjects.visualize.openSpyPanel();
+        await PageObjects.visualize.openInspector();
 
-        headers = await PageObjects.visualize.getDataTableHeaders();
-        expect(headers.trim()).to.equal('Count Average machine.ram');
+        headers = await PageObjects.visualize.getInspectorTableHeaders();
+        expect(headers).to.eql(['Count', 'Average machine.ram']);
       });
     });
   });

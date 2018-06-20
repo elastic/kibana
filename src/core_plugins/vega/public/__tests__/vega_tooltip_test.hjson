@@ -2,7 +2,6 @@
 # backed by a datum with two fields - fld1 & fld2
 # On mouse over, with 0 delay, it should show tooltip
 {
-  v: 1
   config: {
     kibana: {
       tooltips: {

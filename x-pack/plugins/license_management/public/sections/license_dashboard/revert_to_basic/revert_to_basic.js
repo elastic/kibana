@@ -37,7 +37,7 @@ export class RevertToBasic extends React.PureComponent {
         <EuiConfirmModal
           title="Confirm Revert to Basic License"
           onCancel={cancelStartBasicLicense}
-          onConfirm={() => startBasicLicense(licenseType, HTMLMarqueeElement)}
+          onConfirm={() => startBasicLicense(licenseType, true)}
           cancelButtonText="Cancel"
           confirmButtonText="Confirm"
         >
@@ -82,7 +82,7 @@ export class RevertToBasic extends React.PureComponent {
           title="Revert to Basic license"
           description={description}
           footer={
-            <EuiButton onClick={() => startBasicLicense(licenseType)}>
+            <EuiButton data-test-subj="revertToBasicButton" onClick={() => startBasicLicense(licenseType)}>
               Revert to Basic
             </EuiButton>
           }

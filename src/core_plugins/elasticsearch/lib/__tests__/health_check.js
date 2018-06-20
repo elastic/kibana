@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import Promise from 'bluebird';
 import sinon from 'sinon';
 import expect from 'expect.js';
@@ -15,19 +34,18 @@ const esUrl = esTestConfig.getUrl();
 
 describe('plugins/elasticsearch', () => {
   describe('lib/health_check', function () {
-    this.timeout(3000);
-
     let health;
     let plugin;
     let cluster;
     let server;
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
 
     function getTimerCount() {
       return Object.keys(sandbox.clock.timers || {}).length;
     }
 
     beforeEach(() => {
+      sandbox.useFakeTimers();
       const COMPATIBLE_VERSION_NUMBER = '5.0.0';
 
       // Stub the Kibana version instead of drawing from package.json.
@@ -90,8 +108,6 @@ describe('plugins/elasticsearch', () => {
     afterEach(() => sandbox.restore());
 
     it('should stop when cluster is shutdown', () => {
-      sandbox.useFakeTimers();
-
       // ensure that health.start() is responsible for the timer we are observing
       expect(getTimerCount()).to.be(0);
       health.start();
@@ -127,13 +143,19 @@ describe('plugins/elasticsearch', () => {
         });
     });
 
-    it('should set the cluster red if the ping fails, then to green', function () {
+    it('should set the cluster red if the ping fails, then to green', async () => {
       const ping = cluster.callWithInternalUser.withArgs('ping');
       ping.onCall(0).returns(Promise.reject(new NoConnections()));
       ping.onCall(1).returns(Promise.resolve());
 
-      return health.run()
-        .then(function () {
+      const healthRunPromise = health.run();
+
+      // Exhaust micro-task queue, to make sure that next health check is rescheduled.
+      await Promise.resolve();
+      sandbox.clock.runAll();
+
+      return healthRunPromise
+        .then(() => {
           sinon.assert.calledOnce(plugin.status.yellow);
           sinon.assert.calledWithExactly(plugin.status.yellow, 'Waiting for Elasticsearch');
 
@@ -157,7 +179,11 @@ describe('plugins/elasticsearch', () => {
           setImmediate(handler);
         });
 
-        return health.waitUntilReady().then(function () {
+        const waitUntilReadyPromise = health.waitUntilReady();
+
+        sandbox.clock.runAll();
+
+        return waitUntilReadyPromise.then(function () {
           sinon.assert.calledOnce(plugin.status.once);
         });
       });

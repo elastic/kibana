@@ -22,14 +22,15 @@ describe('getKibanaUsageCollector', () => {
           getCluster: sinon.stub()
         }
       },
-      config: () => ({ get: sinon.stub() })
+      config: () => ({ get: sinon.stub() }),
+      log: sinon.stub(),
     };
     serverStub.plugins.elasticsearch.getCluster.withArgs('admin').returns(clusterStub);
     callClusterStub = callClusterFactory(serverStub).getCallClusterInternal();
   });
 
   it('correctly defines usage collector.', () => {
-    const usageCollector = getKibanaUsageCollector(serverStub, callClusterStub);
+    const usageCollector = getKibanaUsageCollector(serverStub);
 
     expect(usageCollector.type).to.be('kibana');
     expect(usageCollector.fetch).to.be.a(Function);
@@ -44,8 +45,8 @@ describe('getKibanaUsageCollector', () => {
       }
     });
 
-    const usageCollector = getKibanaUsageCollector(serverStub, callClusterStub);
-    await usageCollector.fetch();
+    const usageCollector = getKibanaUsageCollector(serverStub);
+    await usageCollector.fetch(callClusterStub);
 
     sinon.assert.calledOnce(clusterStub.callWithInternalUser);
     sinon.assert.calledWithExactly(clusterStub.callWithInternalUser, 'search', sinon.match({

@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import { BucketAggType } from './_bucket_agg_type';
 import { AggConfig } from '../../vis/agg_config';
@@ -5,7 +24,9 @@ import { Schemas } from '../../vis/editors/default/schemas';
 import { createFilterTerms } from './create_filter/terms';
 import orderAggTemplate from '../controls/order_agg.html';
 import orderAndSizeTemplate from '../controls/order_and_size.html';
-import otherBucketTemplate from 'ui/agg_types/controls/other_bucket.html';
+import otherBucketTemplate from '../controls/other_bucket.html';
+
+import { getRequestInspectorStats, getResponseInspectorStats } from '../../courier/utils/courier_inspector_utils';
 import { buildOtherBucketAgg, mergeOtherBucketAggResponse, updateMissingBucket } from './_terms_other_bucket_helper';
 import { toastNotifications } from '../../notify';
 
@@ -54,12 +75,41 @@ export const termsBucketAgg = new BucketAggType({
     const params = agg.params;
     return agg.getFieldDisplayName() + ': ' + params.order.display;
   },
+  getFormat: function (bucket) {
+    return {
+      getConverterFor: (type) => {
+        return (val) => {
+          if (val === '__other__') {
+            return bucket.params.otherBucketLabel;
+          }
+          if (val === '__missing__') {
+            return bucket.params.missingBucketLabel;
+          }
+          const converter = bucket.params.field.format.getConverterFor(type);
+          return converter(val);
+        };
+      }
+    };
+  },
   createFilter: createFilterTerms,
   postFlightRequest: async (resp, aggConfigs, aggConfig, nestedSearchSource) => {
     if (aggConfig.params.otherBucket) {
       const filterAgg = buildOtherBucketAgg(aggConfigs, aggConfig, resp);
       nestedSearchSource.set('aggs', filterAgg);
+
+      const request = aggConfigs.vis.API.inspectorAdapters.requests.start('Other bucket', {
+        description: `This request counts the number of documents that fall
+          outside the criterion of the data buckets.`
+      });
+      nestedSearchSource.getSearchRequestBody().then(body => {
+        request.json(body);
+      });
+      request.stats(getRequestInspectorStats(nestedSearchSource));
+
       const response = await nestedSearchSource.fetchAsRejectablePromise();
+      request
+        .stats(getResponseInspectorStats(nestedSearchSource, response))
+        .ok({ json: response });
       resp = mergeOtherBucketAggResponse(aggConfigs, resp, response, aggConfig, filterAgg());
     }
     if (aggConfig.params.missingBucket) {

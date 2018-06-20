@@ -6,4 +6,4 @@
 
 export { createCollectorSet } from './create_collector_set';
 export { getKibanaUsageCollector } from './collectors/get_kibana_usage_collector';
-export { getReportingUsageCollector } from './collectors/get_reporting_usage_collector';
+export { UsageCollector } from './classes/usage_collector';

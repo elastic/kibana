@@ -42,11 +42,14 @@ export default async function ({ readConfigFile }) {
       ],
     },
 
-    kibanaServerArgs: [
-      ...xPackAPITestsConfig.get('kibanaServerArgs'),
-      '--optimize.enabled=false',
-      '--server.xsrf.whitelist=[\"/api/security/v1/saml\"]',
-      '--xpack.security.authProviders=[\"saml\"]',
-    ],
+    kbnTestServer: {
+      ...xPackAPITestsConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
+        '--optimize.enabled=false',
+        '--server.xsrf.whitelist=[\"/api/security/v1/saml\"]',
+        '--xpack.security.authProviders=[\"saml\"]',
+      ],
+    },
   };
 }

@@ -4,25 +4,19 @@ exports[`GlobalBannerList is rendered 1`] = `null`;
 
 exports[`GlobalBannerList props banners is rendered 1`] = `
 <div
-  class="euiPanel euiPanel--paddingMedium"
-  style="border:none"
+  class="globalBanner__list"
 >
   <div
-    class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
-    style="flex-direction:column"
+    class="globalBanner__item"
+    data-test-priority="1"
   >
-    <div
-      class="euiFlexItem"
-      data-test-priority="1"
-    >
-      a component
-    </div>
-    <div
-      class="euiFlexItem"
-      data-test-subj="b"
-    >
-      b good
-    </div>
+    a component
+  </div>
+  <div
+    class="globalBanner__item"
+    data-test-subj="b"
+  >
+    b good
   </div>
 </div>
 `;

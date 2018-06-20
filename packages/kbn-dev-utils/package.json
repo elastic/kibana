@@ -1,6 +1,7 @@
 {
   "name": "@kbn/dev-utils",
   "main": "./target/index.js",
+  "types": "./index.d.ts",
   "version": "1.0.0",
   "license": "Apache-2.0",
   "private": true,
@@ -12,6 +13,7 @@
     "chalk": "^2.3.0",
     "execa": "^0.10.0",
     "moment": "^2.20.1",
+    "rxjs": "^6.1.0",
     "tree-kill": "^1.2.0"
   },
   "devDependencies": {

@@ -30,20 +30,20 @@ export default function ({ getService, getPageObjects }) {
       await tearDown();
     });
 
-    it('Elasticsearch Cluster Summary Status shows correct info', async () => {
+    it('should have an Elasticsearch cluster summary with correct info', async () => {
       expect(await esClusterSummaryStatus.getContent()).to.eql({
-        nodesCount: '1',
-        indicesCount: '19',
-        memory: '267.7 MB / 676.8 MB',
-        totalShards: '46',
-        unassignedShards: '23',
-        documentCount: '4,535',
-        dataSize: '8.6 MB',
+        nodesCount: 'Nodes: 1',
+        indicesCount: 'Indices: 19',
+        memory: 'Memory: 267.7 MB / 676.8 MB',
+        totalShards: 'Total Shards: 46',
+        unassignedShards: 'Unassigned Shards: 23',
+        documentCount: 'Documents: 4,535',
+        dataSize: 'Data: 8.6 MB',
         health: 'Health: red',
       });
     });
 
-    it('Indices Table shows correct rows with default sorting', async () => {
+    it('should have an indices table with correct rows with default sorting', async () => {
       const rows = await indicesList.getRows();
       expect(rows.length).to.be(20);
 
@@ -84,7 +84,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('Indices Table shows correct rows after sorting by Search Rate Desc', async () => {
+    it('should show indices table with correct rows after sorting by Search Rate Desc', async () => {
       await indicesList.clickSearchCol();
       await indicesList.clickSearchCol();
 
@@ -128,14 +128,14 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('filters for specific indices', async () => {
+    it('should filter for specific indices', async () => {
       await indicesList.setFilter('000');
       const rows = await indicesList.getRows();
       expect(rows.length).to.be(9);
       await indicesList.clearFilter();
     });
 
-    it('filters for non-existent index', async () => {
+    it('should filter for non-existent index', async () => {
       await indicesList.setFilter('foobar');
       await indicesList.assertNoData();
       await indicesList.clearFilter();

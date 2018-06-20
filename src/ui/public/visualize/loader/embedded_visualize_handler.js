@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { EventEmitter } from 'events';
 
 const RENDER_COMPLETE_EVENT = 'render_complete';
@@ -7,9 +26,10 @@ const RENDER_COMPLETE_EVENT = 'render_complete';
  * with the visualization.
  */
 export class EmbeddedVisualizeHandler {
-  constructor(element, scope) {
+  constructor(element, scope, savedObject) {
     this._element = element;
     this._scope = scope;
+    this._savedObject = savedObject;
     this._listeners = new EventEmitter();
     // Listen to the first RENDER_COMPLETE_EVENT to resolve this promise
     this._firstRenderComplete = new Promise(resolve => {
@@ -17,6 +37,38 @@ export class EmbeddedVisualizeHandler {
     });
     this._element.on('renderComplete', () => {
       this._listeners.emit(RENDER_COMPLETE_EVENT);
+    });
+  }
+
+  /**
+   * Update properties of the embedded visualization. This method does not allow
+   * updating all initial parameters, but only a subset of the ones allowed
+   * in {@link VisualizeLoaderParams}.
+   *
+   * @param {Object} [params={}] The parameters that should be updated.
+   * @property {Object} [timeRange] A new time range for this visualization.
+   * @property {Object} [dataAttrs] An object of data attributes to modify. The
+   *    key will be the name of the data attribute and the value the value that
+   *    attribute will get. Use null to remove a specific data attribute from the visualization.
+   */
+  update(params = {}) {
+    this._scope.$evalAsync(() => {
+      if (params.hasOwnProperty('timeRange')) {
+        this._scope.timeRange = params.timeRange;
+      }
+      if (params.hasOwnProperty('filters')) {
+        this._scope.filters = params.filters;
+      }
+      if (params.hasOwnProperty('query')) {
+        this._scope.query = params.query;
+      }
+
+      // Apply data- attributes to the element if specified
+      if (params.dataAttrs) {
+        Object.keys(params.dataAttrs).forEach(key => {
+          this._element.attr(`data-${key}`, params.dataAttrs[key]);
+        });
+      }
     });
   }
 
@@ -35,6 +87,15 @@ export class EmbeddedVisualizeHandler {
    */
   getElement() {
     return this._element;
+  }
+
+  /**
+   * Opens the inspector for the embedded visualization. This will return an
+   * handler to the inspector to close and interact with it.
+   * @return {InspectorSession} An inspector session to interact with the opened inspector.
+   */
+  openInspector() {
+    return this._savedObject.vis.openInspector();
   }
 
   /**

@@ -6,6 +6,14 @@ dir="$(pwd)"
 cacheDir="${CACHE_DIR:-"$HOME/.kibana"}"
 
 ###
+### Since the Jenkins logging output collector doesn't look like a TTY
+### Node/Chalk and other color libs disable their color output. But Jenkins
+### can handle color fine, so this forces https://github.com/chalk/supports-color
+### to enable color support in Chalk and other related modules.
+###
+export FORCE_COLOR=1
+
+###
 ### check that we seem to be in a kibana project
 ###
 if [ -f "$dir/package.json" ] && [ -f "$dir/.node-version" ]; then

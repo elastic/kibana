@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import '../saved_visualizations/saved_visualizations';
 import 'ui/vis/editors/default/sidebar';
@@ -111,6 +130,21 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     description: 'Share Visualization',
     template: require('plugins/kibana/visualize/editor/panels/share.html'),
     testId: 'visualizeShareButton',
+  }, {
+    key: 'inspector',
+    description: 'Open Inspector for visualization',
+    testId: 'openInspectorButton',
+    disableButton() {
+      return !vis.hasInspector();
+    },
+    run() {
+      vis.openInspector().bindToAngularScope($scope);
+    },
+    tooltip() {
+      if (!vis.hasInspector()) {
+        return 'This visualization doesn\'t support any inspectors.';
+      }
+    }
   }, {
     key: 'refresh',
     description: 'Refresh',
@@ -227,12 +261,14 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
 
     // update the searchSource when filters update
     $scope.$listen(queryFilter, 'update', function () {
-      $state.save();
+      $scope.fetch();
     });
 
     // update the searchSource when query updates
     $scope.fetch = function () {
       $state.save();
+      savedVis.searchSource.set('query', $state.query);
+      savedVis.searchSource.set('filter', $state.filters);
       $scope.vis.forceReload();
     };
 

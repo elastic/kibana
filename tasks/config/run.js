@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { esTestConfig, kbnTestConfig } from '@kbn/test';
 import { resolve } from 'path';
 
@@ -70,6 +89,34 @@ module.exports = function (grunt) {
       ]
     },
 
+    // used by the test tasks
+    //    runs the check_file_casing script to ensure filenames use correct casing
+    checkFileCasing: {
+      cmd: process.execPath,
+      args: [
+        require.resolve('../../scripts/check_file_casing'),
+        '--quiet' // only log errors, not warnings
+      ]
+    },
+
+    // used by the test and jenkins:unit tasks
+    //    runs the tslint script to check for Typescript linting errors
+    tslint: {
+      cmd: process.execPath,
+      args: [
+        require.resolve('../../scripts/tslint')
+      ]
+    },
+
+    // used by the test:server task
+    //    runs all node.js/server mocha tests
+    mocha: {
+      cmd: process.execPath,
+      args: [
+        require.resolve('../../scripts/mocha')
+      ]
+    },
+
     // used by the test:api task
     //    runs the kibana server prepared for the api_integration tests
     apiTestServer: createKbnServerTask({
@@ -103,7 +150,6 @@ module.exports = function (grunt) {
       flags: [
         ...funcTestServerFlags,
         '--dev',
-        '--dev_mode.enabled=false',
         '--no-base-path',
         '--optimize.watchPort=5611',
         '--optimize.watchPrebuild=true',

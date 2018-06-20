@@ -27,6 +27,7 @@ import 'plugins/ml/explorer';
 import 'plugins/ml/timeseriesexplorer';
 import 'plugins/ml/components/form_label';
 import 'plugins/ml/components/json_tooltip';
+import 'plugins/ml/components/tooltip';
 import 'plugins/ml/components/confirm_modal';
 import 'plugins/ml/components/nav_menu';
 import 'plugins/ml/components/loading_indicator';

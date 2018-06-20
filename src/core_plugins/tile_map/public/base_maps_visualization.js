@@ -1,6 +1,26 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import { KibanaMap } from 'ui/vis/map/kibana_map';
-import { Observable } from 'rxjs/Rx';
+import * as Rx from 'rxjs';
+import { filter, first } from 'rxjs/operators';
 import 'ui/vis/map/service_settings';
 
 
@@ -207,13 +227,12 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
       }
 
       const maxTimeForBaseLayer = 10000;
-      const interval$ = Observable.interval(10).filter(() => !this._baseLayerDirty);
-      const timer$ = Observable.timer(maxTimeForBaseLayer);
+      const interval$ = Rx.interval(10).pipe(filter(() => !this._baseLayerDirty));
+      const timer$ = Rx.timer(maxTimeForBaseLayer);
 
-      return Observable.race(interval$, timer$).first().toPromise();
+      return Rx.race(interval$, timer$).pipe(first()).toPromise();
 
     }
 
   };
 }
-

@@ -1,9 +1,1 @@
-[[kibana-guide]]
-= Kibana User Guide
-
-:include-xpack:  true
-:lang:           en
-:kib-repo-dir:   {docdir}
-:xkb-repo-dir:   {docdir}/../x-pack/docs/{lang}
-
-include::{xkb-repo-dir}/index.asciidoc[]
+include::index.asciidoc[]

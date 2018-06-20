@@ -1,5 +1,24 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
-const ace = require('ace');
+const ace = require('brace');
 const settings = require('./settings');
 const OutputMode = require('./sense_editor/mode/output');
 const smartResize = require('./smart_resize');
@@ -10,6 +29,7 @@ export function initializeOutput($el) {
 
   const outputMode = new OutputMode.Mode();
 
+  output.$blockScrolling = Infinity;
   output.resize = smartResize(output);
   output.update = function (val, mode, cb) {
     if (typeof mode === 'function') {
@@ -26,17 +46,17 @@ export function initializeOutput($el) {
     }
   };
 
-  output.append = function (val, fold_previous, cb) {
-    if (typeof fold_previous === 'function') {
-      cb = fold_previous;
-      fold_previous = true;
+  output.append = function (val, foldPrevious, cb) {
+    if (typeof foldPrevious === 'function') {
+      cb = foldPrevious;
+      foldPrevious = true;
     }
-    if (_.isUndefined(fold_previous)) {
-      fold_previous = true;
+    if (_.isUndefined(foldPrevious)) {
+      foldPrevious = true;
     }
     const session = output.getSession();
     const lastLine = session.getLength();
-    if (fold_previous) {
+    if (foldPrevious) {
       output.moveCursorTo(Math.max(0, lastLine - 1), 0);
       session.toggleFold(false);
 

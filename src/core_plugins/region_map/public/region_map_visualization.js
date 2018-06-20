@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
 import _ from 'lodash';
 import { BaseMapsVisualizationProvider } from '../../tile_map/public/base_maps_visualization';
@@ -134,9 +153,8 @@ export function RegionMapsVisualizationProvider(Private, Notifier, config) {
           return;
         }
 
-        const agg = this._vis.aggs.bySchemaName.segment[0];
-        const filter = agg.createFilter(event);
-        this._vis.API.queryFilter.addFilters(filter);
+        const rowIndex = this._chartData.tables[0].rows.findIndex(row => row[0] === event);
+        this._vis.API.events.addFilter(this._chartData.tables[0], 0, rowIndex);
       });
       this._choroplethLayer.on('styleChanged', (event) => {
         const shouldShowWarning = this._vis.params.isDisplayWarning && config.get('visualization:regionmap:showWarnings');

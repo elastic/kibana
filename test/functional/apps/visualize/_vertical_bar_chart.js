@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
@@ -9,7 +28,7 @@ export default function ({ getService, getPageObjects }) {
     const fromTime = '2015-09-19 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';
 
-    beforeEach(function () {
+    const initBarChart = () => {
       log.debug('navigateToApp visualize');
       return PageObjects.common.navigateToUrl('visualize', 'new')
         .then(function () {
@@ -45,10 +64,12 @@ export default function ({ getService, getPageObjects }) {
         .then(function waitForVisualization() {
           return PageObjects.visualize.waitForVisualization();
         });
-    });
+    };
 
     describe('vertical bar chart', function indexPatternCreation() {
       const vizName1 = 'Visualization VerticalBarChart';
+
+      before(initBarChart);
 
       it('should save and load', function () {
         return PageObjects.visualize.saveVisualization(vizName1)
@@ -73,8 +94,8 @@ export default function ({ getService, getPageObjects }) {
           });
       });
 
-      it('should display spy panel toggle button', async function () {
-        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
+      it('should have inspector enabled', async function () {
+        const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
         expect(spyToggleExists).to.be(true);
       });
 
@@ -96,30 +117,33 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show correct data', function () {
         // this is only the first page of the tabular data.
-        const expectedChartData =  [ '2015-09-20 00:00', '37',
-          '2015-09-20 03:00', '202',
-          '2015-09-20 06:00', '740',
-          '2015-09-20 09:00', '1,437',
-          '2015-09-20 12:00', '1,371',
-          '2015-09-20 15:00', '751',
-          '2015-09-20 18:00', '188',
-          '2015-09-20 21:00', '31',
-          '2015-09-21 00:00', '42',
-          '2015-09-21 03:00', '202'
+        const expectedChartData =  [
+          ['2015-09-20 00:00', '37'],
+          ['2015-09-20 03:00', '202'],
+          ['2015-09-20 06:00', '740'],
+          ['2015-09-20 09:00', '1,437'],
+          ['2015-09-20 12:00', '1,371'],
+          ['2015-09-20 15:00', '751'],
+          ['2015-09-20 18:00', '188'],
+          ['2015-09-20 21:00', '31'],
+          ['2015-09-21 00:00', '42'],
+          ['2015-09-21 03:00', '202'],
         ];
 
-        return PageObjects.visualize.toggleSpyPanel()
+        return PageObjects.visualize.openInspector()
           .then(function showData() {
-            return PageObjects.visualize.getDataTableData();
+            return PageObjects.visualize.getInspectorTableData();
           })
           .then(function showData(data) {
-            log.debug(data.split('\n'));
-            expect(data.trim().split('\n')).to.eql(expectedChartData);
+            log.debug(data);
+            expect(data).to.eql(expectedChartData);
           });
       });
     });
 
     describe('vertical bar with split series', function () {
+      before(initBarChart);
+
       it('should show correct series', async function () {
         await PageObjects.visualize.toggleOpenEditor(2, 'false');
         await PageObjects.visualize.clickAddBucket();
@@ -139,6 +163,8 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('vertical bar with multiple splits', function () {
+      before(initBarChart);
+
       it('should show correct series', async function () {
         await PageObjects.visualize.toggleOpenEditor(2, 'false');
         await PageObjects.visualize.clickAddBucket();
@@ -166,9 +192,21 @@ export default function ({ getService, getPageObjects }) {
         const legendEntries = await PageObjects.visualize.getLegendEntries();
         expect(legendEntries).to.eql(expectedEntries);
       });
+
+      it('should show correct series when disabling first agg', async function () {
+        await PageObjects.visualize.toggleDisabledAgg(3);
+        await PageObjects.visualize.clickGo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        const expectedEntries = [ 'win 8', 'win xp', 'ios', 'osx', 'win 7' ];
+        const legendEntries = await PageObjects.visualize.getLegendEntries();
+        expect(legendEntries).to.eql(expectedEntries);
+      });
     });
 
     describe('vertical bar with derivative', function () {
+      before(initBarChart);
+
       it('should show correct series', async function () {
         await PageObjects.visualize.toggleOpenEditor(2, 'false');
         await PageObjects.visualize.toggleOpenEditor(1);
@@ -186,6 +224,7 @@ export default function ({ getService, getPageObjects }) {
         const legendEntries = await PageObjects.visualize.getLegendEntries();
         expect(legendEntries).to.eql(expectedEntries);
       });
+
     });
   });
 }

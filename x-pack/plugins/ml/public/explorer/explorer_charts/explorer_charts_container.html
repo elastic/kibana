@@ -7,7 +7,7 @@
           <span ng-if="series.entityFields.length > 0">{{series.detectorLabel}} - </span>
           <span ng-if="series.entityFields.length === 0">{{series.detectorLabel}}</span>
           <span ng-repeat='entity in series.entityFields'>
-            {{entity.fieldName}} {{entity.fieldValue}} {{entity.fieldValueTest}}
+            {{entity.fieldName}} {{entity.fieldValue}}
           </span>
         </div>
         <i aria-hidden="true" class="fa fa-info-circle" tooltip-placement="left" tooltip-html-unsafe="{{series.infoTooltip}}" tooltip-append-to-body="false"></i>

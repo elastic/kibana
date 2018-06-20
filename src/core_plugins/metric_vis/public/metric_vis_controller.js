@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { getHeatmapColors } from 'ui/vislib/components/color/heatmap_color';
@@ -79,25 +98,25 @@ export class MetricVisComponent extends Component {
     const labels = this._getLabels();
     const metrics = [];
 
-    tableGroups.tables.forEach((table) => {
+    tableGroups.tables.forEach((table, tableIndex) => {
       let bucketAgg;
       let rowHeaderIndex;
 
-      table.columns.forEach((column, i) => {
+      table.columns.forEach((column, columnIndex) => {
         const aggConfig = column.aggConfig;
 
         if (aggConfig && aggConfig.schema.group === 'buckets') {
           bucketAgg = aggConfig;
           // Store the current index, so we later know in which position in the
           // row array, the bucket agg key will be, so we can create filters on it.
-          rowHeaderIndex = i;
+          rowHeaderIndex = columnIndex;
           return;
         }
 
-        table.rows.forEach(row => {
+        table.rows.forEach((row, rowIndex) => {
 
           let title = column.title;
-          let value = row[i];
+          let value = row[columnIndex];
           const color = this._getColor(value, labels, colors);
 
           if (isPercentageMode) {
@@ -124,6 +143,9 @@ export class MetricVisComponent extends Component {
             bgColor: shouldColor && config.style.bgColor ? color : null,
             lightText: shouldColor && config.style.bgColor && this._needsLightText(color),
             filterKey: rowHeaderIndex !== undefined ? row[rowHeaderIndex] : null,
+            tableIndex: tableIndex,
+            rowIndex: rowIndex,
+            columnIndex: rowHeaderIndex,
             bucketAgg: bucketAgg,
           });
         });
@@ -137,8 +159,8 @@ export class MetricVisComponent extends Component {
     if (!metric.filterKey || !metric.bucketAgg) {
       return;
     }
-    const filter = metric.bucketAgg.createFilter(metric.filterKey);
-    this.props.vis.API.queryFilter.addFilters(filter);
+    const table = this.props.visData.tables[metric.tableIndex];
+    this.props.vis.API.events.addFilter(table, metric.columnIndex, metric.rowIndex);
   };
 
   _renderMetric = (metric, index) => {
@@ -147,7 +169,7 @@ export class MetricVisComponent extends Component {
         key={index}
         metric={metric}
         fontSize={this.props.vis.params.metric.style.fontSize}
-        onFilter={metric.filterKey ? this._filterBucket : null}
+        onFilter={metric.filterKey && metric.bucketAgg ? this._filterBucket : null}
         showLabel={this.props.vis.params.metric.labels.show}
       />
     );

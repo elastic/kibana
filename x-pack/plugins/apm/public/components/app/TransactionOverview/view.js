@@ -10,9 +10,9 @@ import { HeaderLarge, HeaderMedium } from '../../shared/UIComponents';
 import TabNavigation from '../../shared/TabNavigation';
 import Charts from '../../shared/charts/TransactionCharts';
 import List from './List';
-import { OverviewChartsRequest } from '../../../store/reduxRequest/overviewCharts';
-import { TransactionListRequest } from '../../../store/reduxRequest/transactionList';
-import { ServiceDetailsRequest } from '../../../store/reduxRequest/serviceDetails';
+import { OverviewChartsRequest } from '../../../store/reactReduxRequest/overviewCharts';
+import { TransactionListRequest } from '../../../store/reactReduxRequest/transactionList';
+import { ServiceDetailsRequest } from '../../../store/reactReduxRequest/serviceDetails';
 
 function ServiceDetailsAndTransactionList({ urlParams, render }) {
   return (
@@ -45,6 +45,7 @@ export default function TransactionOverview({
   return (
     <div>
       <HeaderLarge>{serviceName}</HeaderLarge>
+
       <TabNavigation />
 
       <OverviewChartsRequest

@@ -53,9 +53,9 @@ export const createAceEditor = (
   editor.setValue(value, -1);
   const session = editor.getSession();
   session.setUseWrapMode(true);
-  session.setMode("brace/mode/json");
+  session.setMode("ace/mode/json");
   if (autocompleteArray) {
-    const languageTools = ace.acequire("brace/ext/language_tools");
+    const languageTools = ace.acequire("ace/ext/language_tools");
     const autocompleter = wordCompleter(autocompleteArray);
     languageTools.setCompleters([autocompleter]);
   }

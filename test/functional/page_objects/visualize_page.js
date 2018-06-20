@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { VisualizeConstants } from '../../../src/core_plugins/kibana/public/visualize/visualize_constants';
 import Keys from 'leadfoot/keys';
 import Bluebird from 'bluebird';
@@ -9,6 +28,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
   const retry = getService('retry');
   const find = getService('find');
   const log = getService('log');
+  const flyout = getService('flyout');
   const PageObjects = getPageObjects(['common', 'header']);
   const defaultFindTimeout = config.get('timeouts.find');
 
@@ -109,7 +129,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getChartTypeCount() {
-      const tags = await find.allByCssSelector('a.wizard-vis-type.ng-scope');
+      const tags = await find.allByCssSelector('a.wizard-vis-type');
       return tags.length;
     }
 
@@ -200,12 +220,15 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async setComboBox(comboBoxSelector, value) {
       const comboBox = await testSubjects.find(comboBoxSelector);
-      const input = await comboBox.findByTagName('input');
+      await this.setComboBoxElement(comboBox, value);
+    }
+
+    async setComboBoxElement(element, value) {
+      const input = await element.findByTagName('input');
       await input.clearValue();
       await input.type(value);
       await find.clickByCssSelector('.euiComboBoxOption');
-      await this.closeComboBoxOptionsList(comboBox);
-      await remote.pressKeys('\uE004');
+      await this.closeComboBoxOptionsList(element);
     }
 
     async filterComboBoxOptions(comboBoxSelector, value) {
@@ -247,14 +270,15 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clearComboBox(comboBoxSelector) {
       const comboBox = await testSubjects.find(comboBoxSelector);
-      const clearBtn = await comboBox.findByCssSelector('button.euiFormControlLayout__clear');
+      const clearBtn = await comboBox.findByCssSelector('[data-test-subj="comboBoxClearButton"]');
       await clearBtn.click();
+      await this.closeComboBoxOptionsList(comboBox);
     }
 
     async closeComboBoxOptionsList(comboBoxElement) {
       const isOptionsListOpen = await testSubjects.exists('comboBoxOptionsList');
       if (isOptionsListOpen) {
-        const closeBtn = await comboBoxElement.findByCssSelector('button.euiFormControlLayout__icon');
+        const closeBtn = await comboBoxElement.findByCssSelector('[data-test-subj="comboBoxToggleListButton"]');
         await closeBtn.click();
       }
     }
@@ -299,47 +323,45 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await testSubjects.click('timepickerGoButton');
     }
 
-    async getSpyToggleExists() {
-      return await testSubjects.exists('spyToggleButton');
+    async isInspectorButtonEnabled() {
+      const button = await testSubjects.find('openInspectorButton');
+      const ariaDisabled = await button.getAttribute('aria-disabled');
+      return ariaDisabled !== 'true';
     }
 
     async getSideEditorExists() {
       return await find.existsByCssSelector('.collapsible-sidebar');
     }
 
-    async openSpyPanel() {
-      log.debug('openSpyPanel');
-      const isOpen = await testSubjects.exists('spyContentContainer');
+    async openInspector() {
+      log.debug('Open Inspector');
+      const isOpen = await testSubjects.exists('inspectorPanel');
       if (!isOpen) {
         await retry.try(async () => {
-          await this.toggleSpyPanel();
-          await testSubjects.find('spyContentContainer');
+          await testSubjects.click('openInspectorButton');
+          await testSubjects.find('inspectorPanel');
         });
       }
     }
 
-    async closeSpyPanel() {
-      log.debug('closeSpyPanel');
-      let isOpen = await testSubjects.exists('spyContentContainer');
+    async closeInspector() {
+      log.debug('Close Inspector');
+      let isOpen = await testSubjects.exists('inspectorPanel');
       if (isOpen) {
         await retry.try(async () => {
-          await this.toggleSpyPanel();
-          isOpen = await testSubjects.exists('spyContentContainer');
+          await flyout.close('inspectorPanel');
+          isOpen = await testSubjects.exists('inspectorPanel');
           if (isOpen) {
-            throw new Error('Failed to close spy panel');
+            throw new Error('Failed to close inspector');
           }
         });
       }
     }
 
-    async toggleSpyPanel() {
-      await testSubjects.click('spyToggleButton');
-    }
-
-    async setSpyPanelPageSize(size) {
-      await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector(`[data-test-subj="paginateControlsPageSizeSelect"] option[label="${size}"]`)
-        .click();
+    async setInspectorTablePageSize(size) {
+      const panel = await testSubjects.find('inspectorPanel');
+      await find.clickByButtonText('Rows per page: 10', panel);
+      await find.clickByButtonText(`${size} rows`, panel);
     }
 
     async getMetric() {
@@ -358,6 +380,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clickNewSearch(indexPattern = 'logstash-*') {
       await testSubjects.click(`paginatedListItem-${indexPattern}`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async clickSavedSearch(savedSearchName) {
+      await find.clickByPartialLinkText(savedSearchName);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -380,7 +407,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     // clickBucket(bucketType) 'X-Axis', 'Split Area', 'Split Chart'
     async clickBucket(bucketName) {
       const chartTypes = await retry.try(
-        async () => await find.allByCssSelector('li.list-group-item.list-group-menu-item.ng-binding.ng-scope'));
+        async () => await find.allByCssSelector('li.list-group-item.list-group-menu-item'));
       log.debug('found bucket types ' + chartTypes.length);
 
       async function getChartType(chart) {
@@ -428,7 +455,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const aggItem = await find.byCssSelector(`[data-test-subj="${agg}"]`);
       await aggItem.click();
       const fieldSelect = await find
-        .byCssSelector(`#visAggEditorParams${index} > [agg-param="agg.type.params[0]"] > div > div > div.ui-select-match.ng-scope > span`);
+        .byCssSelector(`#visAggEditorParams${index} > [agg-param="agg.type.params[0]"] > div > div > div.ui-select-match > span`);
       // open field selection list
       await fieldSelect.click();
       // select our field
@@ -496,7 +523,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async orderBy(fieldValue) {
       await find.clickByCssSelector(
         'select.form-control.ng-pristine.ng-valid.ng-untouched.ng-valid-required[ng-model="agg.params.orderBy"]'
-        + `option.ng-binding.ng-scope:contains("${fieldValue}")`);
+        + `option:contains("${fieldValue}")`);
     }
 
     async selectOrderBy(fieldValue) {
@@ -526,6 +553,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const input = await find.byCssSelector('input[name="size"]');
       await input.clearValue();
       await input.type(newValue);
+    }
+
+    async toggleDisabledAgg(agg) {
+      await testSubjects.click(`aggregationEditor${agg} disableAggregationBtn`);
     }
 
     async toggleOtherBucket() {
@@ -775,23 +806,35 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await rect.getAttribute('height');
     }
 
-    async selectTableInSpyPaneSelect() {
-      await testSubjects.click('spyModeSelect-table');
-    }
-
-    async getDataTableData() {
+    async getTableVisData() {
       const dataTable = await testSubjects.find('paginated-table-body');
       return await dataTable.getVisibleText();
     }
 
-    async getDataTableHeaders(parent) {
-      const dataTableHeader = await retry.try(
-        async () => (
-          parent ?
-            testSubjects.findDescendant('paginated-table-header', parent) :
-            testSubjects.find('paginated-table-header')
-        ));
-      return await dataTableHeader.getVisibleText();
+    async getInspectorTableData() {
+      // TODO: we should use datat-test-subj=inspectorTable as soon as EUI supports it
+      const inspectorPanel = await testSubjects.find('inspectorPanel');
+      const tableBody = await retry.try(async () => inspectorPanel.findByTagName('tbody'));
+      // Convert the data into a nested array format:
+      // [ [cell1_in_row1, cell2_in_row1], [cell1_in_row2, cell2_in_row2] ]
+      const rows = await tableBody.findAllByTagName('tr');
+      return await Promise.all(rows.map(async row => {
+        const cells = await row.findAllByTagName('td');
+        return await Promise.all(cells.map(async cell => cell.getVisibleText()));
+      }));
+    }
+
+    async getInspectorTableHeaders() {
+      // TODO: we should use datat-test-subj=inspectorTable as soon as EUI supports it
+      const dataTableHeader = await retry.try(async () => {
+        const inspectorPanel = await testSubjects.find('inspectorPanel');
+        return await inspectorPanel.findByTagName('thead');
+      });
+      const cells = await dataTableHeader.findAllByTagName('th');
+      return await Promise.all(cells.map(async (cell) => {
+        const untrimmed = await cell.getVisibleText();
+        return untrimmed.trim();
+      }));
     }
 
     async toggleIsFilteredByCollarCheckbox() {
@@ -799,12 +842,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getMarkdownData() {
-      const markdown = await retry.try(async () => find.byCssSelector('visualize.ng-isolate-scope'));
+      const markdown = await retry.try(async () => find.byCssSelector('visualize'));
       return await markdown.getVisibleText();
     }
 
     async clickColumns() {
-      await find.clickByCssSelector('div.schemaEditors.ng-scope > div > div > button:nth-child(2)');
+      await find.clickByCssSelector('div.schemaEditors > div > div > button:nth-child(2)');
     }
 
     async waitForVisualization() {
@@ -825,16 +868,20 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async getVisualizationRequest() {
       log.debug('getVisualizationRequest');
-      await this.openSpyPanel();
-      await testSubjects.click('spyModeSelect-request');
-      return await testSubjects.getVisibleText('visualizationEsRequestBody');
+      await this.openInspector();
+      await testSubjects.click('inspectorViewChooser');
+      await testSubjects.click('inspectorViewChooserRequests');
+      await testSubjects.click('inspectorRequestDetailRequest');
+      return await testSubjects.getVisibleText('inspectorRequestBody');
     }
 
     async getVisualizationResponse() {
       log.debug('getVisualizationResponse');
-      await this.openSpyPanel();
-      await testSubjects.click('spyModeSelect-response');
-      return await testSubjects.getVisibleText('visualizationEsResponseBody');
+      await this.openInspector();
+      await testSubjects.click('inspectorViewChooser');
+      await testSubjects.click('inspectorViewChooserRequests');
+      await testSubjects.click('inspectorRequestDetailResponse');
+      return await testSubjects.getVisibleText('inspectorResponseBody');
     }
 
     async getMapBounds() {

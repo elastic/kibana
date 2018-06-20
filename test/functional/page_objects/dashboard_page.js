@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 
 import { DashboardConstants } from '../../../src/core_plugins/kibana/public/dashboard/dashboard_constants';
@@ -51,20 +70,6 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await PageObjects.settings.clickKibanaIndices();
       await PageObjects.settings.clickLinkText(indexName);
       await PageObjects.settings.clickDefaultIndexButton();
-    }
-
-    async clickEditVisualization() {
-      log.debug('clickEditVisualization');
-
-      // Edit link may sometimes be disabled if the embeddable isn't rendered yet.
-      await retry.try(async () => {
-        await this.showPanelEditControlsDropdownMenu();
-        await testSubjects.click('dashboardPanelEditLink');
-        const current = await remote.getCurrentUrl();
-        if (current.indexOf('visualize') < 0) {
-          throw new Error('not on visualize page');
-        }
-      });
     }
 
     async clickFullScreenMode() {
@@ -162,6 +167,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('clonedDashboardTitle', title);
     }
 
+    async isDuplicateTitleWarningDisplayed() {
+      return await testSubjects.exists('titleDupicateWarnMsg');
+    }
+
     async clickEdit() {
       log.debug('Clicking edit');
       return await testSubjects.click('dashboardEditMode');
@@ -178,7 +187,14 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async clickNewDashboard() {
-      return await testSubjects.click('newDashboardLink');
+      // newDashboardLink button is only visible when dashboard listing table is displayed (at least one dashboard).
+      const exists = await testSubjects.exists('newDashboardLink');
+      if (exists) {
+        return await testSubjects.click('newDashboardLink');
+      }
+
+      // no dashboards exist, click createDashboardPromptButton to create new dashboard
+      return await this.clickCreateDashboardPrompt();
     }
 
     async clickCreateDashboardPrompt() {
@@ -277,13 +293,25 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await this.enterDashboardTitleAndClickSave(dashName, saveOptions);
 
       if (saveOptions.needsConfirm) {
-        await PageObjects.common.clickConfirmOnModal();
+        await this.clickSave();
       }
 
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       // Confirm that the Dashboard has been saved.
       return await testSubjects.exists('saveDashboardSuccess');
+    }
+
+    async cancelSave() {
+      log.debug('Canceling save');
+      await testSubjects.click('saveCancelButton');
+    }
+
+    async clickSave() {
+      await retry.try(async () => {
+        log.debug('clicking final Save button for named dashboard');
+        return await testSubjects.click('confirmSaveDashboardButton');
+      });
     }
 
     /**
@@ -307,10 +335,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         await this.setSaveAsNewCheckBox(saveOptions.saveAsNew);
       }
 
-      await retry.try(async () => {
-        log.debug('clicking final Save button for named dashboard');
-        return await testSubjects.click('confirmSaveDashboardButton');
-      });
+      await this.clickSave();
     }
 
     async selectDashboard(dashName) {
@@ -392,10 +417,6 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return Promise.all(getTitlePromises);
     }
 
-    async getPanelHeading(title) {
-      return await testSubjects.find(`dashboardPanelHeading-${title.replace(/\s/g, '')}`);
-    }
-
     async getPanelDimensions() {
       const panels = await find.allByCssSelector('.react-grid-item'); // These are gridster-defined elements and classes
       async function getPanelDimensions(panel) {
@@ -436,46 +457,28 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return this.getTestVisualizations().map(visualization => visualization.description);
     }
 
-    async showPanelEditControlsDropdownMenu() {
-      log.debug('showPanelEditControlsDropdownMenu');
-      const editLinkExists = await testSubjects.exists('dashboardPanelEditLink');
-      if (editLinkExists) return;
-
-      await retry.try(async () => {
-        await testSubjects.click('dashboardPanelToggleMenuIcon');
-        const editLinkExists = await testSubjects.exists('dashboardPanelEditLink');
-        if (!editLinkExists) {
-          throw new Error('No edit link exists, toggle menu not open. Try again.');
-        }
-      });
-    }
-
     async getDashboardPanels() {
       return await testSubjects.findAll('dashboardPanel');
-    }
-
-    async clickDashboardPanelEditLink() {
-      await this.showPanelEditControlsDropdownMenu();
-      await testSubjects.click('dashboardPanelEditLink');
-    }
-
-    async clickDashboardPanelRemoveIcon() {
-      await this.showPanelEditControlsDropdownMenu();
-      await testSubjects.click('dashboardPanelRemoveIcon');
     }
 
     async addVisualizations(visualizations) {
       await dashboardAddPanel.addVisualizations(visualizations);
     }
 
-    async setTimepickerInDataRange() {
+    async setTimepickerInHistoricalDataRange() {
       const fromTime = '2015-09-19 06:31:44.000';
       const toTime = '2015-09-23 18:31:44.000';
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
     }
 
-    async setTimepickerIn63DataRange() {
+    async setTimepickerInDataRange() {
       const fromTime = '2018-01-01 00:00:00.000';
+      const toTime = '2018-04-13 00:00:00.000';
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+    }
+
+    async setTimepickerInLogstashDataRange() {
+      const fromTime = '2018-04-09 00:00:00.000';
       const toTime = '2018-04-13 00:00:00.000';
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
     }
@@ -532,63 +535,6 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       }
     }
 
-    async arePanelMainMenuOptionsOpen(parent) {
-      log.debug('arePanelMainMenuOptionsOpen');
-      // Sub menu used arbitrarily - any option on the main menu panel would do.
-      return parent ?
-        await testSubjects.descendantExists('dashboardPanelOptionsSubMenuLink', parent) :
-        await testSubjects.exists('dashboardPanelOptionsSubMenuLink');
-    }
-
-    async openPanelOptions(parent) {
-      log.debug('openPanelOptions');
-      const panelOpen = await this.arePanelMainMenuOptionsOpen(parent);
-      if (!panelOpen) {
-        await retry.try(async () => {
-          await (parent ? remote.moveMouseTo(parent) : testSubjects.moveMouseTo('dashboardPanelTitle'));
-          const toggleMenuItem = parent ?
-            await testSubjects.findDescendant('dashboardPanelToggleMenuIcon', parent) :
-            await testSubjects.find('dashboardPanelToggleMenuIcon');
-          await toggleMenuItem.click();
-          const panelOpen = await this.arePanelMainMenuOptionsOpen(parent);
-          if (!panelOpen) { throw new Error('Panel menu still not open'); }
-        });
-      }
-    }
-
-    async toggleExpandPanel(parent) {
-      await (parent ? remote.moveMouseTo(parent) : testSubjects.moveMouseTo('dashboardPanelTitle'));
-      const expandShown = await testSubjects.exists('dashboardPanelExpandIcon');
-      if (!expandShown) {
-        await this.openPanelOptions(parent);
-      }
-      await testSubjects.click('dashboardPanelExpandIcon');
-    }
-
-    /**
-     *
-     * @param customTitle
-     * @param originalTitle - optional to specify which panel to change the title on.
-     * @return {Promise<void>}
-     */
-    async setCustomPanelTitle(customTitle, originalTitle) {
-      log.debug(`setCustomPanelTitle(${customTitle}, ${originalTitle})`);
-      let panelOptions = null;
-      if (originalTitle) {
-        panelOptions = await this.getPanelHeading(originalTitle);
-      }
-      await this.openPanelOptions(panelOptions);
-      await testSubjects.click('dashboardPanelOptionsSubMenuLink');
-      await testSubjects.setValue('customDashboardPanelTitleInput', customTitle);
-    }
-
-    async resetCustomPanelTitle(panel) {
-      log.debug('resetCustomPanelTitle');
-      await this.openPanelOptions(panel);
-      await testSubjects.click('dashboardPanelOptionsSubMenuLink');
-      await testSubjects.click('resetCustomDashboardPanelTitle');
-    }
-
     async getSharedItemsCount() {
       log.debug('in getSharedItemsCount');
       const attributeName = 'data-shared-items-count';
@@ -607,11 +553,14 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
           return await sharedItem.getAttribute('data-render-complete');
         }));
         if (renderComplete.length !== sharedItems.length) {
-          throw new Error('Some shared items dont have data-render-complete attribute');
+          const expecting = `expecting: ${sharedItems.length}, received: ${renderComplete.length}`;
+          throw new Error(
+            `Some shared items dont have data-render-complete attribute, ${expecting}`);
         }
         const totalCount = renderComplete.filter(value => value === 'true' || value === 'disabled').length;
         if (totalCount < sharedItems.length) {
-          throw new Error('Still waiting on more visualizations to finish rendering');
+          const expecting = `${sharedItems.length}, received: ${totalCount}`;
+          throw new Error(`Still waiting on more visualizations to finish rendering, expecting: ${expecting}`);
         }
       });
     }

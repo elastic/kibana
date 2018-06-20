@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import chalk from 'chalk';
 import dedent from 'dedent';
 import getopts from 'getopts';
@@ -9,7 +28,7 @@ import { startServers } from '../../';
  * @param {string} configPath path to config
  */
 export async function startServersCli(defaultConfigPath) {
-  const { config, log, help } = processArgv(defaultConfigPath);
+  const { config, log, help, installDir } = processArgv(defaultConfigPath);
 
   if (help) return displayHelp();
 
@@ -21,7 +40,7 @@ export async function startServersCli(defaultConfigPath) {
   }
 
   try {
-    await startServers(config, { log });
+    await startServers(config, { log, installDir });
   } catch (err) {
     log.error('FATAL ERROR');
     log.error(err);
@@ -50,6 +69,7 @@ function processArgv(defaultConfigPath) {
   return {
     config,
     log,
+    installDir: options.kibanaInstallDir,
     help: options.help,
     rest: options._,
   };
@@ -63,6 +83,9 @@ function displayHelp() {
     Usage:  node scripts/functional_tests_server [options]
 
     --config      Option to pass in a config
+    --kibana-install-dir
+                  Run Kibana from an existing install directory
+                  Default: run from source
     --help        Display this menu and exit
 
     Log level options:

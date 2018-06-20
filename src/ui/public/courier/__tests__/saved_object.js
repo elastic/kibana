@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import sinon from 'sinon';
@@ -169,7 +188,7 @@ describe('Saved Object', function () {
         const mockDocResponse = getMockedDocResponse('myId');
         stubESResponse(mockDocResponse);
         return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(savedObject => {
-          sinon.stub(savedObjectsClientStub, 'create', function () {
+          sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
             return BluebirdPromise.resolve({ type: 'dashboard', id: 'newUniqueId' });
           });
 
@@ -185,7 +204,7 @@ describe('Saved Object', function () {
         const mockDocResponse = getMockedDocResponse(originalId);
         stubESResponse(mockDocResponse);
         return createInitializedSavedObject({ type: 'dashboard', id: originalId }).then(savedObject => {
-          sinon.stub(savedObjectsClientStub, 'create', function () {
+          sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
             return BluebirdPromise.reject('simulated error');
           });
           savedObject.copyOnSave = true;
@@ -203,7 +222,7 @@ describe('Saved Object', function () {
         stubESResponse(mockDocResponse);
 
         return createInitializedSavedObject({ type: 'dashboard', id: id }).then(savedObject => {
-          sinon.stub(savedObjectsClientStub, 'create', function () {
+          sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
             expect(savedObject.id).to.be(id);
             return BluebirdPromise.resolve(id);
           });
@@ -218,7 +237,7 @@ describe('Saved Object', function () {
     it('returns id from server on success', function () {
       return createInitializedSavedObject({ type: 'dashboard' }).then(savedObject => {
         const mockDocResponse = getMockedDocResponse('myId');
-        sinon.stub(savedObjectsClientStub, 'create', function () {
+        sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
           return BluebirdPromise.resolve({ type: 'dashboard', id: 'myId', _version: 2 });
         });
 
@@ -235,7 +254,7 @@ describe('Saved Object', function () {
         stubESResponse(getMockedDocResponse(id));
 
         return createInitializedSavedObject({ type: 'dashboard', id: id }).then(savedObject => {
-          sinon.stub(savedObjectsClientStub, 'create', () => {
+          sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
             expect(savedObject.isSaving).to.be(true);
             return BluebirdPromise.resolve({
               type: 'dashboard', id, version: 2
@@ -251,7 +270,7 @@ describe('Saved Object', function () {
       it('on failure', function () {
         stubESResponse(getMockedDocResponse('id'));
         return createInitializedSavedObject({ type: 'dashboard' }).then(savedObject => {
-          sinon.stub(savedObjectsClientStub, 'create', () => {
+          sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
             expect(savedObject.isSaving).to.be(true);
             return BluebirdPromise.reject();
           });

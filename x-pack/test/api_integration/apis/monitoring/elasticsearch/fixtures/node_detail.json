@@ -990,6 +990,7 @@
     "documents": 24830,
     "freeSpace": 186755088384,
     "indexCount": 20,
+    "isOnline": true,
     "name": "whatever-01",
     "nodeTypeClass": "fa-star",
     "nodeTypeLabel": "Master Node",
