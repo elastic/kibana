@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiPage,
@@ -100,6 +100,14 @@ export class SpaceSelector extends Component {
             <EuiSpacer />
 
             <SpaceCards spaces={filteredSpaces} />
+
+            {
+              filteredSpaces.length === 0 &&
+              <Fragment>
+                <EuiSpacer />
+                <EuiText color="subdued" textAlign="center">No spaces match search criteria</EuiText>
+              </Fragment>
+            }
 
           </EuiPageContent>
         </EuiPageBody>

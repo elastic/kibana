@@ -92,6 +92,22 @@ exports[`it renders without crashing 1`] = `
           className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
         />
       </div>
+      <div
+        className="euiSpacer euiSpacer--l"
+      />
+      <div
+        className="euiText"
+      >
+        <div
+          className="euiTextAlign euiTextAlign--center"
+        >
+          <span
+            className="euiTextColor euiTextColor--subdued"
+          >
+            No spaces match search criteria
+          </span>
+        </div>
+      </div>
     </div>
   </div>
 </div>
