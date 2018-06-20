@@ -22,17 +22,17 @@ import expect from 'expect.js';
 
 import StubIndexPatternProvider from 'test_utils/stub_index_pattern';
 
-import { RequestFetchParamsToBodyProvider } from '../request_fetch_params_to_body_provider';
+import { SerializeFetchParamsProvider } from '../serialize_fetch_params_provider';
 
-describe('RequestFetchParamsToBodyProvider', () => {
-  let requestFetchParamsToBody;
+describe('SerializeFetchParamsProvider', () => {
+  let serializeFetchParams;
   let IndexPattern;
 
   require('test_utils/no_digest_promises').activateForSuite();
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject((Private) => {
-    requestFetchParamsToBody = Private(RequestFetchParamsToBodyProvider);
+    serializeFetchParams = Private(SerializeFetchParamsProvider);
     IndexPattern = Private(StubIndexPatternProvider);
   }));
 
@@ -60,7 +60,7 @@ describe('RequestFetchParamsToBodyProvider', () => {
           body: { foo: 'saturn' }
         }
       ];
-      return requestFetchParamsToBody(reqsFetchParams).then(value => {
+      return serializeFetchParams(reqsFetchParams).then(value => {
         const indexLineMatch = value.match(/"index":\[".kibana"\]/g);
         expect(indexLineMatch).to.not.be(null);
         expect(indexLineMatch.length).to.be(2);
