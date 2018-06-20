@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
+import { isEmpty } from 'lodash';
 import {
   EuiForm,
   EuiButton,
@@ -18,6 +19,7 @@ import { PatternInput } from '../pattern_input';
 import { CustomPatternsInput } from '../custom_patterns_input';
 import { EventOutput } from '../event_output';
 import { GrokdebuggerRequest } from '../../../../models/grokdebugger_request';
+import { toastNotifications } from 'ui/notify';
 
 export class GrokDebugger extends React.Component {
   constructor(props) {
@@ -71,11 +73,11 @@ export class GrokDebugger extends React.Component {
         structuredEvent: simulateResponse.structuredEvent
       });
 
-      if (simulateResponse.error) {
-        // TODO: toast error
+      if (!isEmpty(simulateResponse.error)) {
+        toastNotifications.addDanger(simulateResponse.error);
       }
     } catch (e) {
-      // TODO: toast error
+      toastNotifications.addDanger(e);
     }
   }
 
