@@ -132,7 +132,7 @@ export class UploadLicense extends React.PureComponent {
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton fill isLoading={applying} onClick={this.submit}>
+                <EuiButton data-test-subj="updateLicenseButton" fill isLoading={applying} onClick={this.submit}>
                   {applying ? 'Uploading...' : 'Upload'}
                 </EuiButton>
               </EuiFlexItem>
