@@ -23,7 +23,6 @@ import moment from 'moment';
 import { requestQueue } from '../../_request_queue';
 
 export function SearchRequestProvider(Promise) {
-
   return class SearchRequest {
     constructor(source, defer) {
       this.source = source;

@@ -44,7 +44,7 @@ function emptySearch() {
  * @param sessionId
  * @return {Promise.<string>}
  */
-export function requestFetchParamsToBody(
+export function serializeFetchParams(
   requestsFetchParams,
   Promise,
   timeFilter,

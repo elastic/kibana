@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { requestFetchParamsToBody } from './request_fetch_params_to_body';
+import { serializeFetchParams } from './serialize_fetch_params';
 import _ from 'lodash';
 
 const DEFAULT_SESSION_ID = '1';
 
-function requestFetchParamsToBodyWithDefaults(paramOverrides) {
+function serializeFetchParamsWithDefaults(paramOverrides) {
   const paramDefaults = {
     requestFetchParams: [],
     Promise,
@@ -39,7 +39,7 @@ function requestFetchParamsToBodyWithDefaults(paramOverrides) {
   };
   const params = { ...paramDefaults, ...paramOverrides };
 
-  return requestFetchParamsToBody(
+  return serializeFetchParams(
     params.requestFetchParams,
     Promise,
     params.timeFilter,
@@ -58,7 +58,7 @@ test('filters out any body properties that begin with $', () => {
       body: { foo: 'bar', $foo: 'bar' }
     }
   ];
-  return requestFetchParamsToBodyWithDefaults({ requestFetchParams }).then(value => {
+  return serializeFetchParamsWithDefaults({ requestFetchParams }).then(value => {
     expect(_.includes(value, 'foo')).toBe(true);
     expect(_.includes(value, '$foo')).toBe(false);
   });
@@ -74,7 +74,7 @@ describe('when indexList is not empty', () => {
         body: { foo: 'bar', $foo: 'bar' }
       }
     ];
-    return requestFetchParamsToBodyWithDefaults({ requestFetchParams }).then(value => {
+    return serializeFetchParamsWithDefaults({ requestFetchParams }).then(value => {
       expect(_.includes(value, '"index":["logstash-123"]')).toBe(true);
     });
   });
@@ -101,7 +101,7 @@ describe('when indexList is empty', () => {
   ];
 
   test('queries the kibana index (.kibana) with a must_not match_all boolean', () => {
-    return requestFetchParamsToBodyWithDefaults({ requestFetchParams }).then(value => {
+    return serializeFetchParamsWithDefaults({ requestFetchParams }).then(value => {
       expect(_.includes(value, '"index":[".kibana"]')).toBe(true);
       expect(_.includes(value, emptyMustNotQuery)).toBe(true);
     });
@@ -120,7 +120,7 @@ describe('headers', () => {
   ];
 
   const getHeader = async (paramOverrides) => {
-    const request = await requestFetchParamsToBodyWithDefaults(paramOverrides);
+    const request = await serializeFetchParamsWithDefaults(paramOverrides);
     const requestParts = request.split('\n');
     if (requestParts.length < 2) {
       throw new Error('fetch Body does not contain expected format header newline body.');

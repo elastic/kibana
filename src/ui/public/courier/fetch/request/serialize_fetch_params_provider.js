@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { requestFetchParamsToBody } from './request_fetch_params_to_body';
+import { serializeFetchParams } from './serialize_fetch_params';
 
-export function RequestFetchParamsToBodyProvider(Promise, timefilter, kbnIndex, sessionId, config, esShardTimeout) {
-  return (requestsFetchParams) => (
-    requestFetchParamsToBody(
-      requestsFetchParams,
+export function SerializeFetchParamsProvider(Promise, timefilter, kbnIndex, sessionId, config, esShardTimeout) {
+  return (fetchParams) => (
+    serializeFetchParams(
+      fetchParams,
       Promise,
       timefilter,
       kbnIndex,
