@@ -79,6 +79,20 @@ This section summarizes the changes in each release.
 [[breaking-6.3.0]]
 === Breaking Changes
 
+Operations::
++
+In version 6.3.0 x-pack is bundled as a module and you do not need to install it as a plugin. 
+For users already using x-pack, upgrading from an earlier version of to 6.3.0
+without removing the older x-pack plugin will prevent Kibana from starting. Also the kibana-plugin 
+tool will not allow you to remove the older x-pack plugin after the upgrade. 
+A fix for this is planned for the next 6.3.1 patch version but for now some steps are required 
+in order to prevent/solve this problem:
++
+* `bin/kibana-plugin remove x-pack` (**Before upgrade to 6.3.0**)
++
+**OR**
+* Manually removing the x-pack plugin folder from Kibana plugins folder (**After upgrade to 6.3.0**).
+
 Platform::
 * Renames saved objects bulk_get and find endpoints {pull}17512[#17512]
 +
