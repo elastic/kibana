@@ -1,0 +1,339 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`InspectorPanel should render as expected 1`] = `
+<InspectorPanel
+  adapters={
+    Object {
+      "bardapter": Object {},
+      "foodapter": Object {
+        "foo": [Function],
+      },
+    }
+  }
+  onClose={[Function]}
+  title="Inspector"
+  views={
+    Array [
+      Object {
+        "component": [Function],
+        "order": 200,
+        "title": "View 1",
+      },
+      Object {
+        "component": [Function],
+        "order": 100,
+        "shouldShow": [Function],
+        "title": "Foo View",
+      },
+      Object {
+        "component": [Function],
+        "order": 200,
+        "shouldShow": [Function],
+        "title": "Never",
+      },
+    ]
+  }
+>
+  <EuiFlyout
+    data-test-subj="inspectorPanel"
+    hideCloseButton={false}
+    onClose={[Function]}
+    ownFocus={false}
+    size="m"
+  >
+    <span>
+      <FocusTrap
+        _createFocusTrap={[Function]}
+        active={true}
+        focusTrapOptions={
+          Object {
+            "clickOutsideDeactivates": true,
+            "fallbackFocus": [Function],
+          }
+        }
+        paused={false}
+        tag="div"
+      >
+        <div>
+          <div
+            className="euiFlyout euiFlyout--medium"
+            data-test-subj="inspectorPanel"
+            onKeyDown={[Function]}
+            role="dialog"
+            tabIndex={0}
+          >
+            <EuiButtonIcon
+              aria-label="Closes this dialog"
+              className="euiFlyout__closeButton"
+              color="text"
+              iconType="cross"
+              onClick={[Function]}
+              type="button"
+            >
+              <button
+                aria-label="Closes this dialog"
+                className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
+                onClick={[Function]}
+                type="button"
+              >
+                <EuiIcon
+                  aria-hidden="true"
+                  className="euiButtonIcon__icon"
+                  size="m"
+                  type="cross"
+                >
+                  <cross
+                    aria-hidden="true"
+                    className="euiIcon euiIcon--medium euiButtonIcon__icon"
+                    focusable="false"
+                    height="16"
+                    style={
+                      Object {
+                        "fill": undefined,
+                      }
+                    }
+                    viewBox="0 0 16 16"
+                    width="16"
+                    xmlns="http://www.w3.org/2000/svg"
+                    xmlnsXlink="http://www.w3.org/1999/xlink"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      className="euiIcon euiIcon--medium euiButtonIcon__icon"
+                      focusable="false"
+                      height="16"
+                      style={
+                        Object {
+                          "fill": undefined,
+                        }
+                      }
+                      viewBox="0 0 16 16"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                      xmlnsXlink="http://www.w3.org/1999/xlink"
+                    >
+                      <defs>
+                        <path
+                          d="M7.293 8l-4.147 4.146a.5.5 0 0 0 .708.708L8 8.707l4.146 4.147a.5.5 0 0 0 .708-.708L8.707 8l4.147-4.146a.5.5 0 0 0-.708-.708L8 7.293 3.854 3.146a.5.5 0 1 0-.708.708L7.293 8z"
+                          id="cross-a"
+                        />
+                      </defs>
+                      <use
+                        fillRule="nonzero"
+                        xlinkHref="#cross-a"
+                      />
+                    </svg>
+                  </cross>
+                </EuiIcon>
+              </button>
+            </EuiButtonIcon>
+            <EuiFlyoutHeader
+              hasBorder={true}
+            >
+              <div
+                className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+              >
+                <EuiFlexGroup
+                  alignItems="center"
+                  component="div"
+                  direction="row"
+                  gutterSize="l"
+                  justifyContent="spaceBetween"
+                  responsive={true}
+                  wrap={false}
+                >
+                  <div
+                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                  >
+                    <EuiFlexItem
+                      component="div"
+                      grow={true}
+                    >
+                      <div
+                        className="euiFlexItem"
+                      >
+                        <EuiTitle
+                          size="s"
+                        >
+                          <h1
+                            className="euiTitle euiTitle--small"
+                          >
+                            Inspector
+                          </h1>
+                        </EuiTitle>
+                      </div>
+                    </EuiFlexItem>
+                    <EuiFlexItem
+                      component="div"
+                      grow={false}
+                    >
+                      <div
+                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <InspectorViewChooser
+                          onViewSelected={[Function]}
+                          selectedView={
+                            Object {
+                              "component": [Function],
+                              "order": 200,
+                              "title": "View 1",
+                            }
+                          }
+                          views={
+                            Array [
+                              Object {
+                                "component": [Function],
+                                "order": 200,
+                                "title": "View 1",
+                              },
+                              Object {
+                                "component": [Function],
+                                "order": 100,
+                                "shouldShow": [Function],
+                                "title": "Foo View",
+                              },
+                              Object {
+                                "component": [Function],
+                                "order": 200,
+                                "shouldShow": [Function],
+                                "title": "Never",
+                              },
+                            ]
+                          }
+                        >
+                          <EuiPopover
+                            anchorPosition="downRight"
+                            button={
+                              <EuiButtonEmpty
+                                color="primary"
+                                data-test-subj="inspectorViewChooser"
+                                iconSide="right"
+                                iconType="arrowDown"
+                                onClick={[Function]}
+                                size="s"
+                                type="button"
+                              >
+                                View: 
+                                View 1
+                              </EuiButtonEmpty>
+                            }
+                            closePopover={[Function]}
+                            id="inspectorViewChooser"
+                            isOpen={false}
+                            ownFocus={true}
+                            panelPaddingSize="none"
+                          >
+                            <EuiOutsideClickDetector
+                              onOutsideClick={[Function]}
+                            >
+                              <div
+                                className="euiPopover euiPopover--anchorDownRight"
+                                id="inspectorViewChooser"
+                                onKeyDown={[Function]}
+                              >
+                                <EuiButtonEmpty
+                                  color="primary"
+                                  data-test-subj="inspectorViewChooser"
+                                  iconSide="right"
+                                  iconType="arrowDown"
+                                  onClick={[Function]}
+                                  size="s"
+                                  type="button"
+                                >
+                                  <button
+                                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--iconRight"
+                                    data-test-subj="inspectorViewChooser"
+                                    onClick={[Function]}
+                                    type="button"
+                                  >
+                                    <span
+                                      className="euiButtonEmpty__content"
+                                    >
+                                      <EuiIcon
+                                        aria-hidden="true"
+                                        className="euiButtonEmpty__icon"
+                                        size="m"
+                                        type="arrowDown"
+                                      >
+                                        <arrowDown
+                                          aria-hidden="true"
+                                          className="euiIcon euiIcon--medium euiButtonEmpty__icon"
+                                          focusable="false"
+                                          height="16"
+                                          style={
+                                            Object {
+                                              "fill": undefined,
+                                            }
+                                          }
+                                          viewBox="0 0 16 16"
+                                          width="16"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          xmlnsXlink="http://www.w3.org/1999/xlink"
+                                        >
+                                          <svg
+                                            aria-hidden="true"
+                                            className="euiIcon euiIcon--medium euiButtonEmpty__icon"
+                                            focusable="false"
+                                            height="16"
+                                            style={
+                                              Object {
+                                                "fill": undefined,
+                                              }
+                                            }
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            xmlnsXlink="http://www.w3.org/1999/xlink"
+                                          >
+                                            <defs>
+                                              <path
+                                                d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
+                                                id="arrow_down-a"
+                                              />
+                                            </defs>
+                                            <use
+                                              fillRule="nonzero"
+                                              xlinkHref="#arrow_down-a"
+                                            />
+                                          </svg>
+                                        </arrowDown>
+                                      </EuiIcon>
+                                      <span>
+                                        View: 
+                                        View 1
+                                      </span>
+                                    </span>
+                                  </button>
+                                </EuiButtonEmpty>
+                              </div>
+                            </EuiOutsideClickDetector>
+                          </EuiPopover>
+                        </InspectorViewChooser>
+                      </div>
+                    </EuiFlexItem>
+                  </div>
+                </EuiFlexGroup>
+              </div>
+            </EuiFlyoutHeader>
+            <component
+              adapters={
+                Object {
+                  "bardapter": Object {},
+                  "foodapter": Object {
+                    "foo": [Function],
+                  },
+                }
+              }
+              title="Inspector"
+            >
+              <h1>
+                View 1
+              </h1>
+            </component>
+          </div>
+        </div>
+      </FocusTrap>
+    </span>
+  </EuiFlyout>
+</InspectorPanel>
+`;

@@ -42,7 +42,6 @@ export const embeddableFactories = appExtension;
 export const dashboardPanelActions = appExtension;
 export const fieldFormats = appExtension;
 export const fieldFormatEditors = appExtension;
-export const spyModes = appExtension;
 export const chromeNavControls = appExtension;
 export const navbarExtensions = appExtension;
 export const managementSections = appExtension;
@@ -50,6 +49,7 @@ export const devTools = appExtension;
 export const docViews = appExtension;
 export const hacks = appExtension;
 export const home = appExtension;
+export const inspectorViews = appExtension;
 
 // aliases visTypeEnhancers to the visTypes group
 export const visTypeEnhancers = wrap(alias('visTypes'), appExtension);

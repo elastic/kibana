@@ -24,7 +24,9 @@ import { Schemas } from '../../vis/editors/default/schemas';
 import { createFilterTerms } from './create_filter/terms';
 import orderAggTemplate from '../controls/order_agg.html';
 import orderAndSizeTemplate from '../controls/order_and_size.html';
-import otherBucketTemplate from 'ui/agg_types/controls/other_bucket.html';
+import otherBucketTemplate from '../controls/other_bucket.html';
+
+import { getRequestInspectorStats, getResponseInspectorStats } from '../../courier/utils/courier_inspector_utils';
 import { buildOtherBucketAgg, mergeOtherBucketAggResponse, updateMissingBucket } from './_terms_other_bucket_helper';
 import { toastNotifications } from '../../notify';
 
@@ -94,7 +96,20 @@ export const termsBucketAgg = new BucketAggType({
     if (aggConfig.params.otherBucket) {
       const filterAgg = buildOtherBucketAgg(aggConfigs, aggConfig, resp);
       nestedSearchSource.set('aggs', filterAgg);
+
+      const request = aggConfigs.vis.API.inspectorAdapters.requests.start('Other bucket', {
+        description: `This request counts the number of documents that fall
+          outside the criterion of the data buckets.`
+      });
+      nestedSearchSource.getSearchRequestBody().then(body => {
+        request.json(body);
+      });
+      request.stats(getRequestInspectorStats(nestedSearchSource));
+
       const response = await nestedSearchSource.fetchAsRejectablePromise();
+      request
+        .stats(getResponseInspectorStats(nestedSearchSource, response))
+        .ok({ json: response });
       resp = mergeOtherBucketAggResponse(aggConfigs, resp, response, aggConfig, filterAgg());
     }
     if (aggConfig.params.missingBucket) {
