@@ -7,7 +7,6 @@ import React from 'react';
 import {
   EuiForm,
   EuiButton,
-  EuiFormRow,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -108,15 +107,14 @@ export class GrokDebugger extends React.Component {
                   onChange={this.onCustomPatternsChange}
                 />
                 <EuiSpacer />
-                <EuiFormRow>
-                  <EuiButton
-                    fill
-                    onClick={this.onSimulateClick}
-                    isDisabled={this.isSimulateDisabled()}
-                  >
-                    Simulate
-                  </EuiButton>
-                </EuiFormRow>
+                <EuiButton
+                  fill
+                  onClick={this.onSimulateClick}
+                  isDisabled={this.isSimulateDisabled()}
+                >
+                  Simulate
+                </EuiButton>
+                <EuiSpacer />
                 <EventOutput value={this.state.structuredEvent} />
               </EuiForm>
             </EuiPageContentBody>
