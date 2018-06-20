@@ -19,7 +19,6 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
   EuiSpacer,
   EuiBadge,
 } from '@elastic/eui';
@@ -279,14 +278,6 @@ export function DetailDrawer({ vertex, onHide, timeseriesTooltipXValueFormatter 
             <EuiTitle>
               <h2>{ renderTitle(vertex) }</h2>
             </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              onClick={onHide}
-              iconType="cross"
-              color="text"
-              aria-label="Close"
-            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>

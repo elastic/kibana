@@ -23,8 +23,6 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const log = getService('log');
-  const es = getService('es');
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'visualize']);
 
   describe('discover app', function describeIndexTests() {
@@ -86,85 +84,6 @@ export default function ({ getService, getPageObjects }) {
         return PageObjects.discover.getDocHeader()
           .then(function (header) {
             expect(header).to.be(expectedHeader);
-          });
-      });
-
-      it('doc view should show oldest time first', function () {
-        // Note: Could just check the timestamp, but might as well check that the whole doc is as expected.
-        const ExpectedDoc =
-          'September 22nd 2015, 23:50:13.253\ntype:apache index:logstash-2015.09.22 @timestamp:September 22nd 2015, 23:50:13.253'
-          + ' ip:238.171.34.42 extension:jpg response:200 geo.coordinates:{ "lat": 38.66494528, "lon": -88.45299556'
-          + ' } geo.src:FR geo.dest:KH geo.srcdest:FR:KH @tags:success, info utc_time:September 22nd 2015,'
-          + ' 23:50:13.253 referer:http://twitter.com/success/nancy-currie agent:Mozilla/4.0 (compatible; MSIE 6.0;'
-          + ' Windows NT 5.1; SV1; .NET CLR 1.1.4322) clientip:238.171.34.42 bytes:7,124'
-          + ' host:media-for-the-masses.theacademyofperformingartsandscience.org request:/uploads/karl-henize.jpg'
-          + ' url:https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/karl-henize.jpg'
-          + ' @message:238.171.34.42 - - [2015-09-22T23:50:13.253Z] "GET /uploads/karl-henize.jpg HTTP/1.1" 200 7124'
-          + ' "-" "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)" spaces:this is a'
-          + ' thing with lots of spaces wwwwoooooo xss:<script>console.log("xss")</script>'
-          + ' headings:<h3>alexander-viktorenko</h5>, http://nytimes.com/warning/michael-massimino'
-          + ' links:@www.slate.com, http://www.slate.com/security/frederick-w-leslie, www.www.slate.com'
-          + ' relatedContent:{ "url": "http://www.laweekly.com/music/bjork-at-the-nokia-theatre-12-12-2408191",'
-          + ' "og:type": "article", "og:title": "Bjork at the Nokia Theatre, 12/12", "og:description": "Bjork at the'
-          + ' Nokia Theater, December 12 By Randall Roberts Last night&rsquo;s Bjork show at the Dystopia &ndash;'
-          + ' er, I mean Nokia -- Theatre downtown di...", "og:url": "'
-          + 'http://www.laweekly.com/music/bjork-at-the-nokia-theatre-12-12-2408191", "article:published_time":'
-          + ' "2007-12-13T12:19:35-08:00", "article:modified_time": "2014-11-27T08:28:42-08:00", "article:section":'
-          + ' "Music", "og:image": "'
-          + 'http://IMAGES1.laweekly.com/imager/bjork-at-the-nokia-theatre-12-12/u/original/2470701/bjorktn003.jpg",'
-          + ' "og:image:height": "334", "og:image:width": "480", "og:site_name": "LA Weekly", "twitter:title":'
-          + ' "Bjork at the Nokia Theatre, 12/12", "twitter:description": "Bjork at the Nokia Theater, December 12'
-          + ' By Randall Roberts Last night&rsquo;s Bjork show at the Dystopia &ndash; er, I mean Nokia -- Theatre'
-          + ' downtown di...", "twitter:card": "summary", "twitter:image": "'
-          + 'http://IMAGES1.laweekly.com/imager/bjork-at-the-nokia-theatre-12-12/u/original/2470701/bjorktn003.jpg",'
-          + ' "twitter:site": "@laweekly" }, { "url": "'
-          + 'http://www.laweekly.com/music/the-rapture-at-the-mayan-7-25-2401011", "og:type": "article", "og:title":'
-          + ' "The Rapture at the Mayan, 7/25", "og:description": "If you haven&rsquo;t yet experienced the'
-          + ' phenomenon of people walk-dancing, apparently the best place to witness this is at a Rapture show.'
-          + ' Here&rsquo;s...", "og:url": "http://www.laweekly.com/music/the-rapture-at-the-mayan-7-25-2401011",'
-          + ' "article:published_time": "2007-07-26T12:42:30-07:00", "article:modified_time":'
-          + ' "2014-11-27T08:00:51-08:00", "article:section": "Music", "og:image": "'
-          + 'http://IMAGES1.laweekly.com/imager/the-rapture-at-the-mayan-7-25/u/original/2463272/rapturetn05.jpg",'
-          + ' "og:image:height": "321", "og:image:width": "480", "og:site_name": "LA Weekly", "twitter:title": "The'
-          + ' Rapture at the Mayan, 7/25", "twitter:description": "If you haven&rsquo;t yet experienced the'
-          + ' phenomenon of people walk-dancing, apparently the best place to witness this is at a Rapture show.'
-          + ' Here&rsquo;s...", "twitter:card": "summary", "twitter:image": "'
-          + 'http://IMAGES1.laweekly.com/imager/the-rapture-at-the-mayan-7-25/u/original/2463272/rapturetn05.jpg",'
-          + ' "twitter:site": "@laweekly" } machine.os:win 7 machine.ram:7,516,192,768 _id:AU_x3_g4GFA8no6QjkYX'
-          + ' _type:doc _index:logstash-2015.09.22 _score: - relatedContent.article:modified_time:November 27th'
-          + ' 2014, 16:00:51.000, November 27th 2014, 16:28:42.000 relatedContent.article:published_time:July 26th'
-          + ' 2007, 19:42:30.000, December 13th 2007, 20:19:35.000';
-        return PageObjects.discover.getDocTableIndex(1)
-          .then(async function (rowData) {
-            try {
-              expect(rowData).to.be(ExpectedDoc);
-            }
-            catch (e) {
-              log.info('Attemping to get more debug info on this flaky test. Ping @bargs if you see this fail');
-
-              log.info('Actual doc from ES ====================');
-              const response = await es.search({
-                index: 'logstash-2015.09.22',
-                body: {
-                  query: {
-                    term: { _id: 'AU_x3_g4GFA8no6QjkYX' }
-                  },
-                  _source: true,
-                  docvalue_fields: ['relatedContent.article:modified_time', 'relatedContent.article:published_time']
-                }
-              });
-              log.info(JSON.stringify(response));
-
-              log.info('Doc from response in spy panel ========');
-              const esResponse = JSON.parse(await PageObjects.visualize.getVisualizationResponse());
-              const spyPanelDoc = esResponse.hits.hits.find(function (hit) {
-                return hit._id === 'AU_x3_g4GFA8no6QjkYX' && hit._index === 'logstash-2015.09.22';
-              });
-              log.info(JSON.stringify(spyPanelDoc));
-              await PageObjects.visualize.closeSpyPanel();
-
-              throw e;
-            }
           });
       });
 

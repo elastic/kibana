@@ -40,7 +40,7 @@ export {
   embeddableFactories,
   fieldFormats,
   fieldFormatEditors,
-  spyModes,
+  inspectorViews,
   chromeNavControls,
   navbarExtensions,
   dashboardPanelActions,
