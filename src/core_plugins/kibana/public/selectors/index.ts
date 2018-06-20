@@ -17,16 +17,5 @@
  * under the License.
  */
 
-/**
- * A dashboard mode.
- * @typedef {string} DashboardMode
- */
-
-/**
- * Dashboard view modes.
- * @type {{EDIT: DashboardViewMode, VIEW: DashboardViewMode}}
- */
-export const DashboardViewMode = {
-  EDIT: 'edit',
-  VIEW: 'view'
-};
+export * from './dashboard_selectors';
+export { CoreKibanaState } from './types';
