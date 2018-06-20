@@ -76,7 +76,7 @@ import '../../promises';
 
 import { NormalizeSortRequestProvider } from './_normalize_sort_request';
 import { SearchRequestProvider } from '../fetch/request';
-import { SegmentedRequestProvider } from '../fetch/request/segmented';
+import { SegmentedSearchRequestProvider } from '../fetch/request/segmented_search_request';
 
 import { requestQueue } from '../_request_queue';
 import { FetchSoonProvider } from '../fetch';
@@ -100,7 +100,7 @@ function isIndexPattern(val) {
 
 export function SearchSourceProvider(Promise, Private, config) {
   const SearchRequest = Private(SearchRequestProvider);
-  const SegmentedRequest = Private(SegmentedRequestProvider);
+  const SegmentedSearchRequest = Private(SegmentedSearchRequestProvider);
   const normalizeSortRequest = Private(NormalizeSortRequestProvider);
   const fetchSoon = Private(FetchSoonProvider);
   const buildESQuery = Private(BuildESQueryProvider);
@@ -249,7 +249,7 @@ export function SearchSourceProvider(Promise, Private, config) {
       return new Promise((resolve, reject) => {
         function addRequest() {
           const defer = Promise.defer();
-          const req = new SegmentedRequest(self, defer, initFunction);
+          const req = new SegmentedSearchRequest(self, defer, initFunction);
 
           req.setErrorHandler((request, error) => {
             reject(error);

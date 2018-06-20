@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import moment from 'moment';
 
-import { requestQueue } from '../../_request_queue';
+import { requestQueue } from '../../../_request_queue';
 
 export function SearchRequestProvider(Promise) {
   return class SearchRequest {

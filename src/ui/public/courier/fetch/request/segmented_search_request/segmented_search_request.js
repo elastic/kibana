@@ -18,12 +18,12 @@
  */
 
 import _ from 'lodash';
-import { Notifier } from '../../../notify';
-import { SearchRequestProvider } from './search_request';
+import { Notifier } from '../../../../notify';
+import { SearchRequestProvider } from '../search_request';
 import { SegmentedHandleProvider } from './segmented_handle';
-import { pushAll } from '../../../utils/collection';
+import { pushAll } from '../../../../utils/collection';
 
-export function SegmentedRequestProvider(Private, timefilter, config) {
+export function SegmentedSearchRequestProvider(Private, timefilter, config) {
   const SearchRequest = Private(SearchRequestProvider);
   const SegmentedHandle = Private(SegmentedHandleProvider);
 
@@ -31,7 +31,7 @@ export function SegmentedRequestProvider(Private, timefilter, config) {
     location: 'Segmented Fetch'
   });
 
-  class SegmentedReq extends SearchRequest {
+  class SegmentedSearchRequest extends SearchRequest {
     constructor(source, defer, initFn) {
       super(source, defer);
 
@@ -135,7 +135,7 @@ export function SegmentedRequestProvider(Private, timefilter, config) {
     }
 
     clone() {
-      return new SegmentedReq(this.source, this.defer, this._initFn);
+      return new SegmentedSearchRequest(this.source, this.defer, this._initFn);
     }
 
     complete() {
@@ -145,7 +145,7 @@ export function SegmentedRequestProvider(Private, timefilter, config) {
     }
 
     /*********
-    ** SegmentedReq specific methods
+    ** SegmentedSearchRequest specific methods
     *********/
 
 
@@ -348,7 +348,7 @@ export function SegmentedRequestProvider(Private, timefilter, config) {
     }
   }
 
-  SegmentedReq.prototype.mergedSegment = notify.timed('merge response segment', SegmentedReq.prototype.mergedSegment);
+  SegmentedSearchRequest.prototype.mergedSegment = notify.timed('merge response segment', SegmentedSearchRequest.prototype.mergedSegment);
 
-  return SegmentedReq;
+  return SegmentedSearchRequest;
 }

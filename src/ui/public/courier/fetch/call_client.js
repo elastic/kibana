@@ -23,7 +23,7 @@ import { ErrorAllowExplicitIndexProvider } from '../../error_allow_explicit_inde
 import { IsRequestProvider } from './is_request';
 import { MergeDuplicatesRequestProvider } from './merge_duplicate_requests';
 import { RequestStatus } from './req_status';
-import { SerializeFetchParamsProvider } from './request/serialize_fetch_params_provider';
+import { SerializeFetchParamsProvider } from './request/serialize_fetch_params';
 
 export function CallClientProvider(Private, Promise, es) {
   const errorAllowExplicitIndex = Private(ErrorAllowExplicitIndexProvider);

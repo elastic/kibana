@@ -23,11 +23,11 @@ import ngMock from 'ng_mock';
 
 import StubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
 
-import { SegmentedRequestProvider } from '../segmented';
+import { SegmentedSearchRequestProvider } from '../segmented_search_request';
 
-describe('ui/courier/fetch/request/segmented/_createQueue', () => {
+describe('SegmentedSearchRequest _createQueue', () => {
   let Promise;
-  let SegmentedReq;
+  let SegmentedSearchRequest;
   let MockSource;
 
   require('test_utils/no_digest_promises').activateForSuite();
@@ -35,7 +35,7 @@ describe('ui/courier/fetch/request/segmented/_createQueue', () => {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject((Private, $injector) => {
     Promise = $injector.get('Promise');
-    SegmentedReq = Private(SegmentedRequestProvider);
+    SegmentedSearchRequest = Private(SegmentedSearchRequestProvider);
 
     MockSource = class {
       constructor() {
@@ -45,7 +45,7 @@ describe('ui/courier/fetch/request/segmented/_createQueue', () => {
   }));
 
   it('manages the req._queueCreated flag', async function () {
-    const req = new SegmentedReq(new MockSource());
+    const req = new SegmentedSearchRequest(new MockSource());
     req._queueCreated = null;
 
     const promise = req._createQueue();
@@ -60,7 +60,7 @@ describe('ui/courier/fetch/request/segmented/_createQueue', () => {
     const indices = [1, 2, 3];
     sinon.stub(ip, 'toDetailedIndexList').returns(Promise.resolve(indices));
 
-    const req = new SegmentedReq(source);
+    const req = new SegmentedSearchRequest(source);
     const output = await req._createQueue();
     expect(output).to.equal(indices);
   });
@@ -68,7 +68,7 @@ describe('ui/courier/fetch/request/segmented/_createQueue', () => {
   it('tells the index pattern its direction', async function () {
     const source = new MockSource();
     const ip = source.get('index');
-    const req = new SegmentedReq(source);
+    const req = new SegmentedSearchRequest(source);
     sinon.stub(ip, 'toDetailedIndexList').returns(Promise.resolve([1, 2, 3]));
 
     req.setDirection('asc');
