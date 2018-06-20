@@ -58,6 +58,13 @@ export function VegaVisualizationProvider(Private, vegaConfig, serviceSettings, 
      * @returns {Promise<void>}
      */
     async render(visData, status) {
+
+
+
+      console.log('render()', new Date());
+
+
+
       if (!visData && !this._vegaView) {
         notify.warning('Unable to render without data');
         return;
