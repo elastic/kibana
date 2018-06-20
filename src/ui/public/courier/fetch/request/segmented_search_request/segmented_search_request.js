@@ -32,8 +32,8 @@ export function SegmentedSearchRequestProvider(Private, timefilter, config) {
   });
 
   class SegmentedSearchRequest extends SearchRequest {
-    constructor(source, defer, initFn) {
-      super(source, defer);
+    constructor(source, deferred, initFn) {
+      super(source, deferred);
 
       this.type = 'segmented';
 
@@ -135,7 +135,7 @@ export function SegmentedSearchRequestProvider(Private, timefilter, config) {
     }
 
     clone() {
-      return new SegmentedSearchRequest(this.source, this.defer, this._initFn);
+      return new SegmentedSearchRequest(this.source, this._deferred, this._initFn);
     }
 
     complete() {

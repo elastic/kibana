@@ -69,7 +69,7 @@ describe('SearchSource', function () {
         expect(results).to.be(fakeResults);
       });
 
-      requestQueue[0].defer.resolve(fakeResults);
+      requestQueue[0]._deferred.resolve(fakeResults);
       return promise;
     });
   });

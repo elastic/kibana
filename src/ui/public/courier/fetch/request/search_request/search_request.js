@@ -21,13 +21,14 @@ import _ from 'lodash';
 import moment from 'moment';
 
 import { requestQueue } from '../../../_request_queue';
+import { Deferred } from '../../../../promises';
 
 export function SearchRequestProvider(Promise) {
   return class SearchRequest {
-    constructor(source, defer) {
+    constructor(source, deferred) {
       this.source = source;
-      this.defer = defer || Promise.defer();
-      this.abortedDefer = Promise.defer();
+      this._deferred = deferred;
+      this._abortedDefer = new Deferred();
       this.type = 'search';
       requestQueue.push(this);
     }
@@ -120,32 +121,32 @@ export function SearchRequestProvider(Promise) {
 
     abort() {
       this._markStopped();
-      this.defer = null;
+      this._deferred = null;
       this.aborted = true;
-      this.abortedDefer.resolve();
-      this.abortedDefer = null;
+      this._abortedDefer.resolve();
+      this._abortedDefer = null;
     }
 
     whenAborted(cb) {
-      this.abortedDefer.promise.then(cb);
+      this._abortedDefer.promise.then(cb);
     }
 
     complete() {
       this._markStopped();
       this.ms = this.moment.diff() * -1;
-      this.defer.resolve(this.resp);
+      this._deferred.resolve(this.resp);
     }
 
     getCompletePromise() {
-      return this.defer.promise;
+      return this._deferred.promise;
     }
 
     getCompleteOrAbortedPromise() {
-      return Promise.race([ this.defer.promise, this.abortedDefer.promise ]);
+      return Promise.race([ this.getCompletePromise(), this._abortedDefer.promise ]);
     }
 
     clone() {
-      return new this.constructor(this.source, this.defer);
+      return new this.constructor(this.source, this._deferred);
     }
 
     setErrorHandler(errorHandler) {

@@ -17,10 +17,16 @@
  * under the License.
  */
 
-import './promises';
-export { Deferred } from './deferred';
-export {
-  tryPromise,
-  isPromise,
-  mapPromises,
-} from './promise_helpers';
+/**
+ * This class exists to help us migrate away from $q.defer() and Promise.defer().
+ */
+export class Deferred {
+  constructor() {
+    this.resolve = undefined;
+    this.reject = undefined;
+    this.promise = new Promise((resolve, reject) => {
+      this.resolve = resolve;
+      this.reject = reject;
+    });
+  }
+}

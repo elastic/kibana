@@ -17,10 +17,30 @@
  * under the License.
  */
 
-import './promises';
-export { Deferred } from './deferred';
-export {
-  tryPromise,
-  isPromise,
-  mapPromises,
-} from './promise_helpers';
+export function tryPromise(fn, args, ctx) {
+  if (typeof fn !== 'function') {
+    return Promise.reject(new TypeError('fn must be a function'));
+  }
+
+  let value;
+
+  if (Array.isArray(args)) {
+    try { value = fn.apply(ctx, args); }
+    catch (e) { return Promise.reject(e); }
+  } else {
+    try { value = fn.call(ctx, args); }
+    catch (e) { return Promise.reject(e); }
+  }
+
+  return Promise.resolve(value);
+}
+
+export function isPromise(obj) {
+  return obj && typeof obj.then === 'function';
+}
+
+export function mapPromises(arr, fn) {
+  return Promise.all(arr.map(function (i, el, list) {
+    return tryPromise(fn, [i, el, list]);
+  }));
+}

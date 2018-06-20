@@ -72,17 +72,20 @@
 import _ from 'lodash';
 import angular from 'angular';
 
-import '../../promises';
-
 import { NormalizeSortRequestProvider } from './_normalize_sort_request';
 import { SearchRequestProvider } from '../fetch/request';
+import { BuildESQueryProvider } from './build_query';
 import { SegmentedSearchRequestProvider } from '../fetch/request/segmented_search_request';
 
 import { requestQueue } from '../_request_queue';
 import { FetchSoonProvider } from '../fetch';
 import { FieldWildcardProvider } from '../../field_wildcard';
 import { getHighlightRequest } from '../../../../core_plugins/kibana/common/highlight';
-import { BuildESQueryProvider } from './build_query';
+import {
+  isPromise,
+  mapPromises,
+  Deferred,
+} from '../../promises';
 
 function parseInitialState(initialState) {
   if (!initialState) {
@@ -98,7 +101,7 @@ function isIndexPattern(val) {
   return Boolean(val && typeof val.toIndexList === 'function');
 }
 
-export function SearchSourceProvider(Promise, Private, config) {
+export function SearchSourceProvider(Private, config) {
   const SearchRequest = Private(SearchRequestProvider);
   const SegmentedSearchRequest = Private(SegmentedSearchRequestProvider);
   const normalizeSortRequest = Private(NormalizeSortRequestProvider);
@@ -248,8 +251,9 @@ export function SearchSourceProvider(Promise, Private, config) {
       const self = this;
       return new Promise((resolve, reject) => {
         function addRequest() {
-          const defer = Promise.defer();
-          const req = new SegmentedSearchRequest(self, defer, initFunction);
+          // const defer = Promise.defer();
+          const deferred = new Deferred();
+          const req = new SegmentedSearchRequest(self, deferred, initFunction);
 
           req.setErrorHandler((request, error) => {
             reject(error);
@@ -373,16 +377,19 @@ export function SearchSourceProvider(Promise, Private, config) {
      * be fetched on the next run of the courier
      * @return {Promise}
      */
-    onResults() {
-      const self = this;
+    onResults = () => {
+      return new Promise((resolve, reject) => {
+        // const defer = Promise.defer();
+        // defer.promise.then(resolve, reject);
 
-      return new Promise(function (resolve, reject) {
-        const defer = Promise.defer();
-        defer.promise.then(resolve, reject);
+        // const request = self._createRequest(defer);
 
-        const request = self._createRequest(defer);
+        const deferred = new Deferred();
+        deferred.promise.then(resolve, reject);
 
-        request.setErrorHandler((request, error) => {
+        const searchRequest = this._createRequest(deferred);
+
+        searchRequest.setErrorHandler((request, error) => {
           reject(error);
           request.abort();
         });
@@ -420,20 +427,20 @@ export function SearchSourceProvider(Promise, Private, config) {
      */
     fetchAsRejectablePromise() {
       const self = this;
-      let req = _.first(self._myStartableQueued());
+      let searchRequest = _.first(self._myStartableQueued());
 
-      if (!req) {
-        req = self._createRequest();
+      if (!searchRequest) {
+        searchRequest = self._createRequest();
       }
 
-      req.setErrorHandler((request, error) => {
-        request.defer.reject(error);
+      searchRequest.setErrorHandler((request, error) => {
+        request.deferred.reject(error);
         request.abort();
       });
 
-      fetchSoon.these([req]);
+      fetchSoon.these([searchRequest]);
 
-      return req.getCompletePromise();
+      return searchRequest.getCompletePromise();
     }
 
 
@@ -451,8 +458,8 @@ export function SearchSourceProvider(Promise, Private, config) {
      */
     cancelQueued() {
       requestQueue
-        .filter(req => req.source === this)
-        .forEach(req => req.abort());
+        .filter(searchRequest => searchRequest.source === this)
+        .forEach(searchRequest => searchRequest.abort());
     }
 
     /**
@@ -493,9 +500,7 @@ export function SearchSourceProvider(Promise, Private, config) {
         }
       }
 
-      return Promise
-        .map(handlers, fn => fn(this, request))
-        .then(_.noop);
+      return mapPromises(handlers, fn => fn(this, request)).then(_.noop);
     }
 
 
@@ -522,12 +527,12 @@ export function SearchSourceProvider(Promise, Private, config) {
      * be put into the pending request queye, for this search
      * source
      *
-     * @param {Deferred} defer - the deferred object that should be resolved
+     * @param {Deferred} deferred - the deferred object that should be resolved
      *                         when the request is complete
      * @return {SearchRequest}
      */
-    _createRequest(defer) {
-      return new SearchRequest(this, defer);
+    _createRequest(deferred) {
+      return new SearchRequest(this, deferred);
     }
 
     /**
@@ -539,13 +544,13 @@ export function SearchSourceProvider(Promise, Private, config) {
      * @param  {*} key - The key of `val`
      * @return {undefined}
      */
-    _mergeProp(state, val, key) {
+    _mergeProp = (state, val, key) => {
       if (typeof val === 'function') {
-        const source = this;
-        return Promise.cast(val(this))
-          .then(function (newVal) {
-            return source._mergeProp(state, newVal, key);
-          });
+        return new Promise(resolve => {
+          return resolve(val(this));
+        }).then(newVal => {
+          return this._mergeProp(state, newVal, key);
+        });
       }
 
       if (val == null || !key || !_.isString(key)) return;
@@ -626,16 +631,16 @@ export function SearchSourceProvider(Promise, Private, config) {
         // pass each key:value pair to source._mergeProp. if _mergeProp
         // returns a promise, then wait for it to complete and call _mergeProp again
         return Promise.all(_.map(current._state, function ittr(value, key) {
-          if (Promise.is(value)) {
+          if (isPromise(value)) {
             return value.then(function (value) {
               return ittr(value, key);
             });
           }
 
           const prom = root._mergeProp(flatState, value, key);
-          return Promise.is(prom) ? prom : null;
+          return isPromise(prom) ? prom : null;
         }))
-          .then(function () {
+          .then(() => {
             // move to this sources parent
             const parent = current.getParent();
             // keep calling until we reach the top parent
