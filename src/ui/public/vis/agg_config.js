@@ -182,7 +182,7 @@ AggConfig.prototype.isFilterable = function () {
   return _.isFunction(this.type.createFilter);
 };
 
-AggConfig.prototype.createFilter = function (key) {
+AggConfig.prototype.createFilter = function (key, params = {}) {
   if (!this.isFilterable()) {
     throw new TypeError('The "' + this.type.title + '" aggregation does not support filtering.');
   }
@@ -197,7 +197,7 @@ AggConfig.prototype.createFilter = function (key) {
     throw new TypeError(message);
   }
 
-  return this.type.createFilter(this, key);
+  return this.type.createFilter(this, key, params);
 };
 
 /**

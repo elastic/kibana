@@ -40,6 +40,18 @@ import { queryManagerFactory } from '../query_manager';
 import { SearchSourceProvider } from '../courier/data_source/search_source';
 import { SavedObjectsClientProvider } from '../saved_objects';
 
+const getTerms = (table, columnIndex, rowIndex) => {
+  // get only rows where cell value matches current row for all the fields before columnIndex
+  const rows = table.rows.filter(row => row.every((cell, i) => cell === table.rows[rowIndex][i] || i >= columnIndex));
+  const terms = rows.map(row => row[columnIndex]);
+
+  return [...new Set(terms.filter(term => {
+    const notOther = term !== '__other__';
+    const notMissing = term !== '__missing__';
+    return notOther && notMissing;
+  }))];
+};
+
 export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppState) {
   const visTypes = Private(VisTypesRegistryProvider);
   const brushEvent = Private(UtilsBrushEventProvider);
@@ -75,9 +87,23 @@ export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppS
         queryFilter: queryFilter,
         queryManager: queryManagerFactory(getAppState),
         events: {
+          // the filter method will be removed in the near feature
+          // you should rather use addFilter method below
           filter: (event) => {
             const appState = getAppState();
             filterBarClickHandler(appState)(event);
+          },
+          addFilter: (data, columnIndex, rowIndex) => {
+            const agg = data.columns[columnIndex].aggConfig;
+            let filter = [];
+            const value = data.rows[rowIndex][columnIndex];
+            if (agg.type.name === 'terms' && agg.params.otherBucket) {
+              const terms = getTerms(data, columnIndex, rowIndex);
+              filter = agg.createFilter(value, { terms });
+            } else {
+              filter = agg.createFilter(value);
+            }
+            queryFilter.addFilters(filter);
           }, brush: (event) => {
             const appState = getAppState();
             brushEvent(appState)(event);
