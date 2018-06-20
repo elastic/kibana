@@ -19,7 +19,7 @@ export class SpaceCards extends Component {
   render() {
     return (
       <div className="spaceCards">
-        <EuiFlexGroup gutterSize="l" justifyContent="center" wrap>
+        <EuiFlexGroup gutterSize="l" justifyContent="center" wrap responsive={false}>
           {this.props.spaces.map(this.renderSpace)}
         </EuiFlexGroup>
       </div>

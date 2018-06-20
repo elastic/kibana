@@ -7,9 +7,7 @@
 import React from 'react';
 import {
   EuiCard,
-  EuiText,
   EuiTextColor,
-  EuiSpacer,
 } from '@elastic/eui';
 import './space_card.less';
 import {
@@ -25,23 +23,25 @@ export const SpaceCard = (props) => {
   return (
     <EuiCard
       className="spaceCard"
-      title={renderSpaceTitle(space)}
+      icon={renderSpaceAvatar(space)}
+      title={space.name}
       description={renderSpaceDescription(space)}
       onClick={onClick}
     />
   );
 };
 
-function renderSpaceTitle(space) {
-  return (
-    <div className="spaceCardTitle">
-      <SpaceAvatar space={space} size={"l"} />
-      <EuiSpacer size="s" />
-      <EuiText className="spaceCardTitle__name"><h3>{space.name}</h3></EuiText>
-    </div>
-  );
+function renderSpaceAvatar(space) {
+  return <SpaceAvatar space={space} size={"l"} />;
 }
 
 function renderSpaceDescription(space) {
-  return <EuiTextColor color={"subdued"}>{space.description}</EuiTextColor>;
+  let description = space.description;
+  const needsTruncation = space.description.length > 120;
+  if (needsTruncation) {
+    description = (
+      <span title={description}>{space.description.substr(0, 120) + '…'}</span>
+    );
+  }
+  return <EuiTextColor className="eui-textBreakWord" color={"subdued"}>{description}</EuiTextColor>;
 }

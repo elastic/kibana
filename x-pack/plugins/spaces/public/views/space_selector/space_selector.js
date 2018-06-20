@@ -72,32 +72,30 @@ export class SpaceSelector extends Component {
     return (
       <EuiPage className="spaceSelector__page">
         <EuiPageHeader className="spaceSelector__heading">
-          <EuiPageHeaderSection className="logoHeader">
-            <div className="logoCircle">
+          <EuiPageHeaderSection className="spaceSelector__logoHeader">
+            <div className="spaceSelector__logoCircle">
               <EuiIcon size="xxl" type={`logoKibana`} />
             </div>
 
             <EuiSpacer />
 
-            <EuiTitle color="ghost">
+            <EuiTitle size="l">
               <EuiTextColor color="ghost"><p>Select your space</p></EuiTextColor>
             </EuiTitle>
-
-            <EuiSpacer />
           </EuiPageHeaderSection>
         </EuiPageHeader>
         <EuiPageBody>
-          <EuiPageContent className="spaceSelectorPageContent">
+          <EuiPageContent className="spaceSelector__pageContent">
 
-            <EuiFlexGroup direction="column" alignItems="center">
+            <EuiFlexGroup direction="column" alignItems="center" responsive={false}>
               {this.getSearchField()}
 
               <EuiFlexItem>
-                <EuiText><p>You can change your space at anytime from within Kibana.</p></EuiText>
+                <EuiText size="xs"><p>You can change your space at anytime from within Kibana.</p></EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
 
-            <EuiSpacer />
+            <EuiSpacer size="xl" />
 
             <SpaceCards spaces={filteredSpaces} />
 
@@ -120,7 +118,7 @@ export class SpaceSelector extends Component {
       return null;
     }
     return (
-      <EuiFlexItem>
+      <EuiFlexItem className="spaceSelector__searchHolder">
         <EuiFieldSearch
           className="spaceSelector__searchField"
           placeholder="Find a space"
