@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import * as Rx from 'rxjs';
-import { tap, debounceTime, filter, share, switchMap } from 'rxjs/operators';
 import './visualize.less';
 import _ from 'lodash';
 import React, { Component } from 'react';

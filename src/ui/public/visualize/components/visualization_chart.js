@@ -19,7 +19,8 @@
 
 import $ from 'jquery';
 import React, { Component } from 'react';
-import { Observable } from 'rxjs/Rx';
+import * as Rx from 'rxjs';
+import { tap, debounceTime, filter, share, switchMap } from 'rxjs/operators';
 import { ResizeChecker } from 'ui/resize_checker';
 import { getUpdateStatus } from 'ui/vis/update_status';
 import { dispatchRenderComplete, dispatchRenderStart } from 'ui/render_complete';
@@ -28,22 +29,32 @@ export class VisualizationChart extends Component {
   constructor(props) {
     super(props);
 
-    this._renderVisualization = new Observable(observer => {
+    const render$ = Rx.Observable.create(observer => {
       this._observer = observer;
-    });
+    }).pipe(
+      share()
+    );
 
-    this._renderVisualization
-      .do(() => {
+    const success$ = render$.pipe(
+      tap(() => {
         dispatchRenderStart(this.chartDiv);
-      })
-      .filter(({ vis, visData, container }) => vis && vis.initialized && container && (!vis.type.requiresSearch || visData))
-      .debounceTime(100)
-      .switchMap(async ({ vis, visData, container }) => {
+      }),
+      filter(({ vis, visData, container }) => vis && vis.initialized && container && (!vis.type.requiresSearch || visData)),
+      debounceTime(100),
+      switchMap(async ({ vis, visData, container }) => {
         vis.size = [container.width(), container.height()];
         const status = getUpdateStatus(vis.type.requiresUpdateStatus, this, this.props);
         const renderPromise = this.visualization.render(visData, status);
         return renderPromise;
-      }).subscribe(() => {
+      })
+    );
+
+    const requestError$ = render$.pipe(
+      filter(({ vis }) => vis.requestError)
+    );
+
+    this.renderSubscription = Rx.merge(success$, requestError$)
+      .subscribe(() => {
         dispatchRenderComplete(this.chartDiv);
       });
 
@@ -89,6 +100,7 @@ export class VisualizationChart extends Component {
   }
 
   componentWillUnmount() {
+    if (this.renderSubscription) this.renderSubscription.unsubscribe();
     if (this.resizeChecker) this.resizeChecker.destroy();
     if (this.visualization) this.visualization.destroy();
   }
