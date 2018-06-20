@@ -132,6 +132,21 @@ function VisEditor($scope, $route, AppState, $window, kbnUrl, courier, Private, 
     template: require('plugins/kibana/visualize/editor/panels/share.html'),
     testId: 'visualizeShareButton',
   }, {
+    key: 'inspector',
+    description: 'Open Inspector for visualization',
+    testId: 'openInspectorButton',
+    disableButton() {
+      return !vis.hasInspector();
+    },
+    run() {
+      vis.openInspector().bindToAngularScope($scope);
+    },
+    tooltip() {
+      if (!vis.hasInspector()) {
+        return 'This visualization doesn\'t support any inspectors.';
+      }
+    }
+  }, {
     key: 'refresh',
     description: 'Refresh',
     run: function () {

@@ -22,9 +22,55 @@ import { SearchSourceProvider } from '../../courier/data_source/search_source';
 import { VisRequestHandlersRegistryProvider } from '../../registry/vis_request_handlers';
 import { calculateObjectHash } from '../lib/calculate_object_hash';
 import { timefilter } from 'ui/timefilter';
+import { getRequestInspectorStats, getResponseInspectorStats } from '../../courier/utils/courier_inspector_utils';
+import { tabifyAggResponse } from '../../agg_response/tabify/tabify';
+
+import { FormattedData } from '../../inspector/adapters';
 
 const CourierRequestHandlerProvider = function (Private, courier) {
   const SearchSource = Private(SearchSourceProvider);
+
+  /**
+   * This function builds tabular data from the response and attaches it to the
+   * inspector. It will only be called when the data view in the inspector is opened.
+   */
+  async function buildTabularInspectorData(vis, searchSource) {
+    const table = tabifyAggResponse(vis.getAggConfig().getResponseAggs(), searchSource.finalResponse, {
+      canSplit: false,
+      asAggConfigResults: false,
+      partialRows: true,
+      isHierarchical: vis.isHierarchical(),
+    });
+    const columns = table.columns.map((col, index) => {
+      const field = col.aggConfig.getField();
+      const isCellContentFilterable =
+        col.aggConfig.isFilterable()
+        && (!field || field.filterable);
+      return ({
+        name: col.title,
+        field: `col${index}`,
+        filter: isCellContentFilterable && ((value) => {
+          const filter = col.aggConfig.createFilter(value.raw);
+          vis.API.queryFilter.addFilters(filter);
+        }),
+        filterOut: isCellContentFilterable && ((value) => {
+          const filter = col.aggConfig.createFilter(value.raw);
+          filter.meta = filter.meta || {};
+          filter.meta.negate = true;
+          vis.API.queryFilter.addFilters(filter);
+        }),
+      });
+    });
+    const rows = table.rows.map(row => {
+      return row.reduce((prev, cur, index) => {
+        const fieldFormatter = table.columns[index].aggConfig.fieldFormatter('text');
+        prev[`col${index}`] = new FormattedData(cur, fieldFormatter(cur));
+        return prev;
+      }, {});
+    });
+
+    return { columns, rows };
+  }
 
   return {
     name: 'courier',
@@ -76,8 +122,19 @@ const CourierRequestHandlerProvider = function (Private, courier) {
         return requestSearchSource.getSearchRequestBody().then(q => {
           const queryHash = calculateObjectHash(q);
           if (shouldQuery(queryHash)) {
+            vis.API.inspectorAdapters.requests.reset();
+            const request = vis.API.inspectorAdapters.requests.start('Data', {
+              description: `This request queries Elasticsearch to fetch the data for the visualization.`,
+            });
+            request.stats(getRequestInspectorStats(requestSearchSource));
+
             requestSearchSource.onResults().then(resp => {
               searchSource.lastQuery = queryHash;
+
+              request
+                .stats(getResponseInspectorStats(searchSource, resp))
+                .ok({ json: resp });
+
               searchSource.rawResponse = resp;
               return _.cloneDeep(resp);
             }).then(async resp => {
@@ -89,8 +146,18 @@ const CourierRequestHandlerProvider = function (Private, courier) {
               }
 
               searchSource.finalResponse = resp;
+
+              vis.API.inspectorAdapters.data.setTabularLoader(
+                () => buildTabularInspectorData(vis, searchSource),
+                { returnsFormattedValues: true }
+              );
+
               resolve(resp);
             }).catch(e => reject(e));
+
+            requestSearchSource.getSearchRequestBody().then(req => {
+              request.json(req);
+            });
 
             courier.fetch();
           } else {
