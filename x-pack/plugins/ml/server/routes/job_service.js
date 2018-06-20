@@ -63,4 +63,36 @@ export function jobServiceRoutes(server, commonRouteConfig) {
     }
   });
 
+  server.route({
+    method: 'POST',
+    path: '/api/ml/jobs/jobs_summary',
+    handler(request, reply) {
+      const callWithRequest = callWithRequestFactory(server, request);
+      const { jobsSummary } = jobServiceProvider(callWithRequest);
+      const { jobIds } = request.payload;
+      return jobsSummary(jobIds)
+        .then(resp => reply(resp))
+        .catch(resp => reply(wrapError(resp)));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
+  server.route({
+    method: 'POST',
+    path: '/api/ml/jobs/jobs',
+    handler(request, reply) {
+      const callWithRequest = callWithRequestFactory(server, request);
+      const { createFullJobsList } = jobServiceProvider(callWithRequest);
+      const { jobIds } = request.payload;
+      return createFullJobsList(jobIds)
+        .then(resp => reply(resp))
+        .catch(resp => reply(wrapError(resp)));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
 }

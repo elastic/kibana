@@ -11,6 +11,27 @@ import { http } from 'plugins/ml/services/http_service';
 const basePath = chrome.addBasePath('/api/ml');
 
 export const jobs = {
+
+  jobsSummary(jobIds) {
+    return http({
+      url: `${basePath}/jobs/jobs_summary`,
+      method: 'POST',
+      data: {
+        jobIds,
+      }
+    });
+  },
+
+  jobs(jobIds) {
+    return http({
+      url: `${basePath}/jobs/jobs`,
+      method: 'POST',
+      data: {
+        jobIds,
+      }
+    });
+  },
+
   forceStartDatafeeds(datafeedIds, start, end) {
     return http({
       url: `${basePath}/jobs/force_start_datafeeds`,
@@ -41,5 +62,5 @@ export const jobs = {
         jobIds,
       }
     });
-  }
+  },
 };
