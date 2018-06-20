@@ -4,21 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { promisify } from 'bluebird';
 import fs from 'fs';
 import path from 'path';
-import { promisify } from 'bluebird';
 
 import { screenshotStitcher } from './index';
 
 const loggerMock = {
-  debug: () => {}
+  debug: () => {
+    return;
+  },
 };
 
 const fsp = {
-  readFile: promisify(fs.readFile)
+  readFile: promisify(fs.readFile),
 };
 
-const readPngFixture = async (filename) => {
+const readPngFixture = async (filename: string) => {
   const buffer = await fsp.readFile(path.join(__dirname, 'fixtures', filename));
   return buffer.toString('base64');
 };
@@ -49,10 +51,10 @@ const get4x4Checkerboard = () => {
 
 test(`single screenshot`, async () => {
   const clip = {
-    x: 0,
-    y: 0,
     height: 1,
     width: 1,
+    x: 0,
+    y: 0,
   };
 
   const fn = jest.fn();
@@ -68,10 +70,10 @@ test(`single screenshot`, async () => {
 
 test(`single screenshot, when zoom creates partial pixel we round up`, async () => {
   const clip = {
-    x: 0,
-    y: 0,
     height: 1,
     width: 1,
+    x: 0,
+    y: 0,
   };
 
   const fn = jest.fn();
@@ -87,10 +89,31 @@ test(`single screenshot, when zoom creates partial pixel we round up`, async () 
 
 test(`two screenshots, no zoom`, async () => {
   const clip = {
-    x: 0,
-    y: 0,
     height: 1,
     width: 2,
+    x: 0,
+    y: 0,
+  };
+
+  const fn = jest.fn();
+  fn.mockReturnValueOnce(getSingleWhitePixel());
+  fn.mockReturnValueOnce(getSingleBlackPixel());
+  const data = await screenshotStitcher(clip, 1, 1, fn, loggerMock);
+
+  expect(fn.mock.calls.length).toBe(2);
+  expect(fn.mock.calls[0][0]).toEqual({ x: 0, y: 0, width: 1, height: 1 });
+  expect(fn.mock.calls[1][0]).toEqual({ x: 1, y: 0, width: 1, height: 1 });
+
+  const expectedData = await get2x1Checkerboard();
+  expect(data).toEqual(expectedData);
+});
+
+test(`two screenshots, no zoom`, async () => {
+  const clip = {
+    height: 1,
+    width: 2,
+    x: 0,
+    y: 0,
   };
 
   const fn = jest.fn();
@@ -108,10 +131,10 @@ test(`two screenshots, no zoom`, async () => {
 
 test(`four screenshots, zoom`, async () => {
   const clip = {
-    x: 0,
-    y: 0,
     height: 2,
     width: 2,
+    x: 0,
+    y: 0,
   };
 
   const fn = jest.fn();
@@ -132,13 +155,12 @@ test(`four screenshots, zoom`, async () => {
   expect(data).toEqual(expectedData);
 });
 
-
 test(`four screenshots, zoom and offset`, async () => {
   const clip = {
-    x: 1,
-    y: 1,
     height: 2,
     width: 2,
+    x: 1,
+    y: 1,
   };
 
   const fn = jest.fn();

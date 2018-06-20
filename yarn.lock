@@ -224,6 +224,10 @@
   version "1.6.45"
   resolved "https://registry.yarnpkg.com/@types/angular/-/angular-1.6.45.tgz#5b0b91a51d717f6fc816d59e1234d5292f33f7b9"
 
+"@types/bluebird@^3.1.1":
+  version "3.5.20"
+  resolved "https://registry.yarnpkg.com/@types/bluebird/-/bluebird-3.5.20.tgz#f6363172add6f4eabb8cada53ca9af2781e8d6a1"
+
 "@types/classnames@^2.2.3":
   version "2.2.3"
   resolved "https://registry.yarnpkg.com/@types/classnames/-/classnames-2.2.3.tgz#3f0ff6873da793870e20a260cada55982f38a9e5"
@@ -338,6 +342,12 @@
   resolved "https://registry.yarnpkg.com/@types/p-retry/-/p-retry-1.0.1.tgz#2302bc3da425014208c8a9b68293d37325124785"
   dependencies:
     "@types/retry" "*"
+
+"@types/pngjs@^3.3.1":
+  version "3.3.1"
+  resolved "https://registry.yarnpkg.com/@types/pngjs/-/pngjs-3.3.1.tgz#47d97bd29dd6372856050e9e5e366517dd1ba2d8"
+  dependencies:
+    "@types/node" "*"
 
 "@types/prop-types@^15.5.3":
   version "15.5.3"
