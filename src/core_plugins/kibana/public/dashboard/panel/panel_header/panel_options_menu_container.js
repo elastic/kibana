@@ -25,6 +25,7 @@ import { PanelOptionsMenu } from './panel_options_menu';
 import {
   buildEuiContextMenuPanels,
   getEditPanelAction,
+  getInspectorPanelAction,
   getRemovePanelAction,
   getCustomizePanelAction,
   getToggleExpandPanelAction,
@@ -124,6 +125,10 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
     });
 
     const actions = [
+      getInspectorPanelAction({
+        closeContextMenu: closeMyContextMenuPanel,
+        panelTitle,
+      }),
       getEditPanelAction(),
       getCustomizePanelAction({
         onResetPanelTitle,
