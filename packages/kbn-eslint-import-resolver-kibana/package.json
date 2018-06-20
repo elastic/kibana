@@ -12,10 +12,10 @@
   "dependencies": {
     "debug": "^2.6.6",
     "eslint-import-resolver-node": "^0.3.0",
-    "eslint-import-resolver-webpack": "^0.8.1",
+    "eslint-import-resolver-webpack": "^0.10.0",
     "glob-all": "^3.1.0",
     "lru-cache": "^4.1.2",
     "resolve": "^1.7.1",
-    "webpack": "3.6.0"
+    "webpack": "^4.12.0"
   }
 }
