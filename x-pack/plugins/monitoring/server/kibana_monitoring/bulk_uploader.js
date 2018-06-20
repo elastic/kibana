@@ -57,12 +57,12 @@ export class BulkUploader {
    * @return undefined
    */
   start(collectorSet) {
-    this._log.info('Starting monitoring stats collection');
     if (this._timer) {
-      this._log.warn('BulkUploader timer already started');
+      this._log.warn('Not re-starting monitoring stats collection: the BulkUploader timer is already started');
       return;
     }
 
+    this._log.info('Starting monitoring stats collection');
     this._fetchAndUpload(collectorSet); // initial fetch
     this._timer = setInterval(() => {
       this._fetchAndUpload(collectorSet);
