@@ -67,7 +67,7 @@ describe('XPackInfo', () => {
 
     mockServer = sinon.stub({
       plugins: { elasticsearch: mockElasticsearchPlugin },
-      log() {}
+      log() { }
     });
   });
 
@@ -151,9 +151,9 @@ describe('XPackInfo', () => {
       expect(xPackInfo.unavailableReason()).to.be(randomError);
       sinon.assert.calledWithExactly(
         mockServer.log,
-        [ 'license', 'warning', 'xpack' ],
+        ['license', 'warning', 'xpack'],
         `License information from the X-Pack plugin could not be obtained from Elasticsearch` +
-          ` for the [data] cluster. ${randomError}`
+        ` for the [data] cluster. ${randomError}`
       );
 
       const badRequestError = new Error('Bad request');
@@ -168,9 +168,9 @@ describe('XPackInfo', () => {
       );
       sinon.assert.calledWithExactly(
         mockServer.log,
-        [ 'license', 'warning', 'xpack' ],
+        ['license', 'warning', 'xpack'],
         `License information from the X-Pack plugin could not be obtained from Elasticsearch` +
-          ` for the [data] cluster. ${badRequestError}`
+        ` for the [data] cluster. ${badRequestError}`
       );
 
       mockElasticsearchCluster.callWithInternalUser.returns(getMockXPackInfoAPIResponse());
@@ -460,6 +460,72 @@ describe('XPackInfo', () => {
         license: 'platinum',
         someAnotherCustomValue: 500100
       });
+    });
+
+    it('registerLicenseChangeCallback() does not invoke callbacks if license has not changed', async () => {
+      const securityFeature = xPackInfo.feature('security');
+      const watcherFeature = xPackInfo.feature('watcher');
+
+      const securityChangeCallback = sinon.stub();
+      securityFeature.registerLicenseChangeCallback(securityChangeCallback);
+
+      const watcherChangeCallback = sinon.stub();
+      watcherFeature.registerLicenseChangeCallback(watcherChangeCallback);
+
+      mockElasticsearchCluster.callWithInternalUser.returns(
+        getMockXPackInfoAPIResponse({ mode: 'gold' })
+      );
+
+      await xPackInfo.refreshNow();
+
+      sinon.assert.notCalled(securityChangeCallback);
+      sinon.assert.notCalled(watcherChangeCallback);
+    });
+
+    it('registerLicenseChangeCallback() invokes callbacks on license change', async () => {
+      const securityFeature = xPackInfo.feature('security');
+      const watcherFeature = xPackInfo.feature('watcher');
+
+      const securityChangeCallback = sinon.stub();
+      securityFeature.registerLicenseChangeCallback(securityChangeCallback);
+
+      const watcherChangeCallback = sinon.stub();
+      watcherFeature.registerLicenseChangeCallback(watcherChangeCallback);
+
+      mockElasticsearchCluster.callWithInternalUser.returns(
+        getMockXPackInfoAPIResponse({ mode: 'platinum' })
+      );
+
+      await xPackInfo.refreshNow();
+
+      sinon.assert.calledOnce(securityChangeCallback);
+      sinon.assert.calledOnce(watcherChangeCallback);
+    });
+
+    it('registerLicenseChangeCallback() gracefully handles callbacks that throw errors', async () => {
+      const securityFeature = xPackInfo.feature('security');
+      const watcherFeature = xPackInfo.feature('watcher');
+
+      const securityChangeCallback = sinon.stub().throws(new Error(`Something happened`));
+      securityFeature.registerLicenseChangeCallback(securityChangeCallback);
+
+      const watcherChangeCallback = sinon.stub();
+      watcherFeature.registerLicenseChangeCallback(watcherChangeCallback);
+
+      mockElasticsearchCluster.callWithInternalUser.returns(
+        getMockXPackInfoAPIResponse({ mode: 'platinum' })
+      );
+
+      await xPackInfo.refreshNow();
+
+      sinon.assert.calledOnce(securityChangeCallback);
+      sinon.assert.calledOnce(watcherChangeCallback);
+
+      sinon.assert.calledWithExactly(
+        mockServer.log,
+        ['license', 'error', 'xpack'],
+        `Error during invocation of license change callback for security. Error: Something happened`
+      );
     });
 
     it('getLicenseCheckResults() correctly returns feature specific info.', async () => {

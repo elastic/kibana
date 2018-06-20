@@ -42,7 +42,6 @@ function executeJobFn(server) {
 
     const savedObjects = server.savedObjects;
     const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(fakeRequest);
-
     const uiSettings = server.uiSettingsServiceFactory({
       savedObjectsClient
     });
