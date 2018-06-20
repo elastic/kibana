@@ -30,18 +30,11 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-const INCOMPLETE = 'incomplete';
-const COMPLETE = 'complete';
-
 export class SavedObjectsInstaller extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      isInstalling: false,
-      installStatus: INCOMPLETE,
-    };
-  }
+  state = {
+    isInstalling: false,
+    isInstalled: false,
+  };
 
   installSavedObjects = async () => {
     this.setState({
@@ -52,16 +45,16 @@ export class SavedObjectsInstaller extends React.Component {
     const errors = resp.savedObjects.filter(savedObjectCreateResult => {
       return savedObjectCreateResult.hasOwnProperty('error');
     });
+    const hasErrors = errors.length > 0;
 
-    let statusMsg = `${this.props.savedObjects.length} saved objects successfully added`;
-    if (errors.length > 0) {
-      statusMsg = `Unable to load kibana saved objects, Error: ${errors[0]}`;
-    }
+    const statusMsg = hasErrors
+      ? `Unable to load kibana saved objects, Error: ${errors[0]}`
+      : `${this.props.savedObjects.length} saved objects successfully added`;
 
     this.setState({
       isInstalling: false,
       installStatusMsg: statusMsg,
-      installStatus: errors.length === 0 ? COMPLETE : INCOMPLETE,
+      isInstalled: !hasErrors,
     });
   }
 
@@ -73,12 +66,12 @@ export class SavedObjectsInstaller extends React.Component {
     return (
       <EuiCallOut
         title={this.state.installStatusMsg}
-        color={this.state.installStatus === COMPLETE ? 'success' : 'warning'}
+        color={this.state.isInstalled ? 'success' : 'warning'}
       />
     );
   }
 
-  renderInstallStep() {
+  renderInstallStep = () => {
     const installStep = (
       <Fragment>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -110,7 +103,7 @@ export class SavedObjectsInstaller extends React.Component {
 
     return {
       title: 'Load Kibana objects',
-      status: this.state.installStatus,
+      status: this.state.isInstalled ? 'complete' : 'incomplete',
       children: installStep,
       key: 'installStep'
     };
