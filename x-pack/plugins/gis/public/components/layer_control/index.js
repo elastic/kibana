@@ -22,6 +22,5 @@ function mapStateToProps(state = {}) {
   };
 }
 
-const connectedLayerControl = connect(mapStateToProps, mapDispatchToProps, null,
-  { withRef: true })(LayerControl);
+const connectedLayerControl = connect(mapStateToProps, mapDispatchToProps)(LayerControl);
 export { connectedLayerControl as LayerControl };

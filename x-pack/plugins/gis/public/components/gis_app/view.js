@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { KibanaMap } from '../map/view';
+import { KibanaMap } from '../map';
 import { TMSSource } from '../map/layers/sources/tms_source';
 import { EMSVectorSource } from '../map/layers/sources/ems_vector_source';
 import { EMSTMSSource } from '../map/layers/sources/ems_tms_source';
@@ -21,7 +21,6 @@ export class GISApp extends React.Component {
   constructor() {
     super();
     this._kbnMap = null;
-    this._layerControl = null;
   }
 
   async _createPlaceholders() {
@@ -73,16 +72,11 @@ export class GISApp extends React.Component {
 
   }
 
-  componentDidMount() {
-    this._layerControl.setKbnMap(this._kbnMap);
-    this._createPlaceholders();
-  }
-
   render() {
     return (
       <div className="wrapper">
         <KibanaMap ref={(kbnMap) => this._kbnMap = kbnMap}/>
-        <LayerControl ref={(layerControl) => this._layerControl = layerControl.getWrappedInstance()}/>
+        <LayerControl/>
       </div>
     );
   }
