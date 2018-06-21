@@ -11,7 +11,7 @@
       width: auto;
     }
     th:nth-child(4) {
-      width: 34px;
+      width: 20px;
     }
     th:nth-child(5) {
       width: auto;
@@ -42,6 +42,11 @@
     }
   }
   & > tbody {
+
+    td:nth-child(4) .euiTableCellContent {
+      padding: 0px;
+    }
+
     td:nth-child(10) {
       white-space: nowrap;
     }
@@ -49,6 +54,7 @@
     .euiTableCellContent {
       animation: unset;
     }
+
     .euiTableRow.euiTableRow-isExpandedRow > td > div > .euiTableCellContent__text {
       width: 100%;
     }
