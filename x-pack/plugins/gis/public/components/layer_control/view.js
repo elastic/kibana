@@ -14,45 +14,13 @@ import {
   EuiTitle
 } from '@elastic/eui';
 
-import { LayerTOC } from '../layer_toc';
+// import { LayerTOC } from '../layer_toc';
 import { LayerPanel } from '../layer_panel';
-
-const FLYOUT_STATE = {
-  NONE: 'NONE',
-  LAYER_PANEL: 'LAYER_PANEL',
-  ADD_LAYER_WIZARD: 'ADD_LAYER_WIZARD'
-};
 
 export class LayerControl extends React.Component {
 
   constructor(props) {
     super(props);
-    this._kbnMap = props.kbnMap;
-
-    this._onLayerOrderChange = (newOrder) => {
-      this._kbnMap.reorderLayers(newOrder);
-    };
-
-    this._removeLayer = (layer) => {
-      this._kbnMap.removeLayer(layer);
-      this.setState({
-        flyoutState: FLYOUT_STATE.NONE,
-        selectedLayer: null
-      });
-    };
-  }
-
-  setKbnMap(kbnMap) {
-    this._kbnMap = kbnMap;
-    const syncLayers = () => {
-      this.setState({
-        layers: this._kbnMap.getLayers()
-      });
-    };
-    this._kbnMap.on('layer:added', syncLayers);
-    this._kbnMap.on('layer:removed', syncLayers);
-    this._kbnMap.on('layer:visibilityChanged', syncLayers);
-    this._kbnMap.on('layers:reordered', syncLayers);
   }
 
   _renderLayerFlyout() {
@@ -98,7 +66,9 @@ export class LayerControl extends React.Component {
           </EuiFlexGroup>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <LayerTOC layers={this.state.layers} layerOrderChange={this._onLayerOrderChange} showLayerDetails={this._showLayerDetails}/>
+              {/*<LayerTOC layers={this.state.layers}
+              layerOrderChange={this._onLayerOrderChange}
+              showLayerDetails={this._showLayerDetails}/>*/}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
