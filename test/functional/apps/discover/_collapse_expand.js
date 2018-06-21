@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }) {
       // delete .kibana index and update configDoc
       await kibanaServer.uiSettings.replace({
         'dateFormat:tz': 'UTC',
-        'defaultIndex': 'logstash-*'
+        defaultIndex: 'logstash-*',
       });
 
       log.debug('load kibana index with default index pattern');
@@ -47,7 +47,6 @@ export default function ({ getService, getPageObjects }) {
 
       log.debug('setAbsoluteRange');
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-
     });
 
     describe('field data', function () {
@@ -63,7 +62,6 @@ export default function ({ getService, getPageObjects }) {
         const width = await PageObjects.discover.getSidebarWidth();
         log.debug('collapsed sidebar width = ' + width);
         expect(width < 20).to.be(true);
-
       });
 
       it('should expand when clicked', async function () {

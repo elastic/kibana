@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }) {
       // delete .kibana index and update configDoc
       await kibanaServer.uiSettings.replace({
         'dateFormat:tz': 'UTC',
-        'defaultIndex': 'logstash-*'
+        defaultIndex: 'logstash-*',
       });
 
       log.debug('load kibana index with default index pattern');
@@ -62,7 +62,6 @@ export default function ({ getService, getPageObjects }) {
       return PageObjects.common.sleep(1000);
     });
 
-
     describe('shared link', function () {
       it('should show "Share a link" caption', async function () {
         const expectedCaption = 'Share saved';
@@ -74,17 +73,19 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should show the correct formatted URL', async function () {
-        const expectedUrl = baseUrl
-        + '/app/kibana?_t=1453775307251#'
-        + '/discover?_g=(refreshInterval:(display:Off,pause:!f,value:0),time'
-        + ':(from:\'2015-09-19T06:31:44.000Z\',mode:absolute,to:\'2015-09'
-        + '-23T18:31:44.000Z\'))&_a=(columns:!(_source),index:\'logstash-'
-        + '*\',interval:auto,query:(language:lucene,query:\'\')'
-        + ',sort:!(\'@timestamp\',desc))';
+        const expectedUrl =
+          baseUrl +
+          '/app/kibana?_t=1453775307251#' +
+          '/discover?_g=(refreshInterval:(display:Off,pause:!f,value:0),time' +
+          ':(from:\'2015-09-19T06:31:44.000Z\',mode:absolute,to:\'2015-09' +
+          '-23T18:31:44.000Z\'))&_a=(columns:!(_source),index:\'logstash-' +
+          '*\',interval:auto,query:(language:lucene,query:\'\')' +
+          ',sort:!(\'@timestamp\',desc))';
         const actualUrl = await PageObjects.discover.getSharedUrl();
         // strip the timestamp out of each URL
-        expect(actualUrl.replace(/_t=\d{13}/, '_t=TIMESTAMP'))
-          .to.be(expectedUrl.replace(/_t=\d{13}/, '_t=TIMESTAMP'));
+        expect(actualUrl.replace(/_t=\d{13}/, '_t=TIMESTAMP')).to.be(
+          expectedUrl.replace(/_t=\d{13}/, '_t=TIMESTAMP')
+        );
       });
 
       it('gets copied to clipboard', async function () {

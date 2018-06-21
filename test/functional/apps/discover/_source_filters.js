@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }) {
       // delete .kibana index and update configDoc
       await kibanaServer.uiSettings.replace({
         'dateFormat:tz': 'UTC',
-        'defaultIndex': 'logstash-*'
+        defaultIndex: 'logstash-*',
       });
 
       log.debug('load kibana index with default index pattern');
@@ -57,7 +57,9 @@ export default function ({ getService, getPageObjects }) {
       //let  fieldNames;
       const fieldNames = await PageObjects.discover.getAllFieldNames();
       expect(fieldNames).to.not.contain('referer');
-      const relatedContentFields = fieldNames.filter((fieldName) => fieldName.indexOf('relatedContent') === 0);
+      const relatedContentFields = fieldNames.filter(
+        fieldName => fieldName.indexOf('relatedContent') === 0
+      );
       expect(relatedContentFields).to.have.length(0);
     });
   });
