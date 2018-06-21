@@ -5,28 +5,34 @@
  */
 
 import { uiModules } from 'ui/modules';
-import { combineReducers, createStore } from 'redux';
+import { combineReducers, applyMiddleware, createStore, compose }
+  from 'redux';
+import thunk from 'redux-thunk';
 import ui from './ui';
-import map from './map';
+import { map } from './map';
+import { loadMapResources } from "../actions/map_actions";
 import config from './config';
 
-const reducers = {
+const rootReducer = combineReducers({
   map,
   ui,
   config
-};
-const rootReducer = combineReducers(reducers);
+});
+
+const enhancers = [ applyMiddleware(thunk) ];
+window.__REDUX_DEVTOOLS_EXTENSION
+  && enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());
 
 let initConfig = null;
+let serviceSettings = null;
 uiModules
   .get('kibana')
   .run((Private, $injector) => {
-    const serviceSettings = $injector.get('serviceSettings');
+    serviceSettings = $injector.get('serviceSettings');
     const mapConfig = $injector.get('mapConfig');
     initConfig = {
       config: {
-        serviceSettings: serviceSettings,
-        mapConfig: mapConfig
+        mapConfig
       }
     };
   });
@@ -36,9 +42,15 @@ export const getStore = async function () {
     const handle = setInterval(() => {
       if (initConfig !== null) {
         clearInterval(handle);
-        const store = createStore(rootReducer, { ...reducers, ...initConfig });
+        const store = createStore(
+          rootReducer,
+          { ...initConfig },
+          compose(...enhancers)
+        );
         resolve(store);
+        loadMapResources(serviceSettings, store.dispatch);
       }
     }, 10);
   });
 };
+
