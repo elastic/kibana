@@ -20,7 +20,7 @@
 import angular from 'angular';
 import _ from 'lodash';
 
-export function FilterBarLibMapDefaultProvider(Promise) {
+export function FilterBarLibMapDefaultProvider() {
 
   const metaProperty = /(^\$|meta)/;
 

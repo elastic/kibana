@@ -65,7 +65,6 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
    * @returns {Promise} filter map promise
    */
   queryFilter.addFilters = function (filters, global) {
-
     if (global === undefined) {
       const configDefault = config.get('filters:pinnedByDefault');
 
@@ -343,7 +342,9 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
         // the filters were changed, apply to state (re-triggers this watcher)
         if (globalChanged || appChanged) {
           globalState.filters = globalFilters;
-          if (appState) appState.filters = appFilters;
+          if (appState) {
+            appState.filters = appFilters;
+          }
           return;
         }
 

@@ -20,14 +20,14 @@
 import _ from 'lodash';
 import { FilterBarLibMapFilterProvider } from './map_filter';
 
-export function FilterBarLibMapAndFlattenFiltersProvider(Private, Promise) {
+export function FilterBarLibMapAndFlattenFiltersProvider(Private) {
   const mapFilter = Private(FilterBarLibMapFilterProvider);
   return function (filters) {
     return _(filters)
       .flatten()
       .compact()
       .map(mapFilter)
-      .thru(Promise.all)
+      .thru(val => Promise.all(val))
       .value();
   };
 }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export function FilterBarLibMapQueryStringProvider(Promise) {
+export function FilterBarLibMapQueryStringProvider() {
   return function (filter) {
     if (filter.query && filter.query.query_string) {
       const type = 'query_string';

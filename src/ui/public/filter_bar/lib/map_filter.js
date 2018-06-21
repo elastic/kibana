@@ -30,7 +30,7 @@ import { FilterBarLibMapGeoBoundingBoxProvider } from './map_geo_bounding_box';
 import { FilterBarLibMapGeoPolygonProvider } from './map_geo_polygon';
 import { FilterBarLibMapDefaultProvider } from './map_default';
 
-export function FilterBarLibMapFilterProvider(Promise, Private) {
+export function FilterBarLibMapFilterProvider(Private) {
 
   const generateMappingChain = Private(FilterBarLibGenerateMappingChainProvider);
 
@@ -69,8 +69,8 @@ export function FilterBarLibMapFilterProvider(Promise, Private) {
 
   // Create a chain of responsibility by reducing all the
   // mappers down into one function.
-  const mapFn = _.reduceRight(mappers, function (memo, map) {
-    const filterChainFn = generateMappingChain(map);
+  const mapFn = _.reduceRight(mappers, function (memo, mapper) {
+    const filterChainFn = generateMappingChain(mapper);
     return filterChainFn(memo);
   }, noop);
 

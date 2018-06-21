@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export function FilterBarLibMapPhrasesProvider(Promise) {
+export function FilterBarLibMapPhrasesProvider() {
   return function (filter) {
     const { type, key, value, params } = filter.meta;
     if (type !== 'phrases') {

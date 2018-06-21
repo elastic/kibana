@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export function FilterBarLibMapMatchAllProvider(Promise) {
+export function FilterBarLibMapMatchAllProvider() {
   return function (filter) {
     if (filter.match_all) {
       const type = 'match_all';

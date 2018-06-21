@@ -27,11 +27,11 @@ import $ from 'jquery';
 import '..';
 import { FilterBarLibMapFilterProvider } from '../lib/map_filter';
 import { FilterBarQueryFilterProvider } from '../query_filter';
+import { mapPromises } from '../../promises';
 
 describe('Filter Bar Directive', function () {
   let $rootScope;
   let $compile;
-  let Promise;
   let appState;
   let mapFilter;
   let $el;
@@ -54,7 +54,6 @@ describe('Filter Bar Directive', function () {
     ngMock.inject(function (Private, $injector, _$rootScope_, _$compile_) {
       $rootScope = _$rootScope_;
       $compile = _$compile_;
-      Promise = $injector.get('Promise');
       mapFilter = Private(FilterBarLibMapFilterProvider);
 
       const queryFilter = Private(FilterBarQueryFilterProvider);
@@ -74,20 +73,23 @@ describe('Filter Bar Directive', function () {
         { meta: { index: 'logstash-*', alias: 'foo' }, query: { match: { '_type': { query: 'nginx' } } } },
       ];
 
-      Promise.map(filters, mapFilter).then(function (filters) {
+      mapPromises(filters, mapFilter).then(function (filters) {
         appState.filters = filters;
         $el = $compile('<filter-bar></filter-bar>')($rootScope);
         $scope = $el.isolateScope();
       });
 
-      const off = $rootScope.$on('filterbar:updated', function () {
-        off();
-        // force a nextTick so it continues *after* the $digest loop completes
-        setTimeout(done, 0);
-      });
+      // kick off the digest loop after a brief delay, because we need to wait for mapAndFlattenFilters
+      // to resolve in filter_bar, so that the evalAsync call will execute before we try to re-digest.
+      setTimeout(() => {
+        const off = $rootScope.$on('filterbar:updated', function () {
+          off();
+          // force a nextTick so it continues *after* the $digest loop completes
+          setTimeout(done, 0);
+        });
 
-      // kick off the digest loop
-      $rootScope.$digest();
+        $rootScope.$digest();
+      }, 10);
     });
 
     it('should render all the filters in state', function () {

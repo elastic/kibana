@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export function FilterBarLibMapMissingProvider(Promise) {
+export function FilterBarLibMapMissingProvider() {
   return function (filter) {
     if (filter.missing) {
       const type = 'missing';

@@ -20,7 +20,7 @@
 import { has, get } from 'lodash';
 import { SavedObjectNotFound } from '../../errors';
 
-export function FilterBarLibMapRangeProvider(Promise, courier) {
+export function FilterBarLibMapRangeProvider(courier) {
   return function (filter) {
     const isScriptedRangeFilter = isScriptedRange(filter);
     if (!filter.range && !isScriptedRangeFilter) {

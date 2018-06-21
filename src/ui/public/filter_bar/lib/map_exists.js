@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export function FilterBarLibMapExistsProvider(Promise) {
+export function FilterBarLibMapExistsProvider() {
   return function (filter) {
     if (filter.exists) {
       const type = 'exists';

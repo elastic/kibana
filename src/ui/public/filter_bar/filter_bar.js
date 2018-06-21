@@ -37,7 +37,7 @@ export { disableFilter, enableFilter, toggleFilterDisabled } from './lib/disable
 
 const module = uiModules.get('kibana');
 
-module.directive('filterBar', function (Private, Promise, getAppState) {
+module.directive('filterBar', function (Private, getAppState) {
   const mapAndFlattenFilters = Private(FilterBarLibMapAndFlattenFiltersProvider);
   const mapFlattenAndWrapFilters = Private(FilterBarLibMapFlattenAndWrapFiltersProvider);
   const extractTimeFilter = Private(FilterBarLibExtractTimeFilterProvider);
@@ -200,11 +200,13 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
       function updateFilters() {
         const filters = queryFilter.getFilters();
         mapAndFlattenFilters(filters).then(function (results) {
-          // used to display the current filters in the state
-          $scope.filters = _.sortBy(results, function (filter) {
-            return !filter.meta.pinned;
+          $scope.$evalAsync(() => {
+            // used to display the current filters in the state
+            $scope.filters = _.sortBy(results, function (filter) {
+              return !filter.meta.pinned;
+            });
+            $scope.$emit('filterbar:updated');
           });
-          $scope.$emit('filterbar:updated');
         });
       }
 

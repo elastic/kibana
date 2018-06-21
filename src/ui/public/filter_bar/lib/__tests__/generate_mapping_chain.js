@@ -28,16 +28,14 @@ describe('Filter Bar Directive', function () {
     let generateMappingChain;
 
     let $rootScope;
-    let Promise;
     beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private, _$rootScope_, _Promise_) {
+    beforeEach(ngMock.inject(function (Private, _$rootScope_) {
       $rootScope = _$rootScope_;
-      Promise    = _Promise_;
       generateMappingChain = Private(FilterBarLibGenerateMappingChainProvider);
     }));
 
 
-    it('should create a chaning function which calls the next function if the promise is rejected', function (done) {
+    it('should create a chaining function which calls the next function if the promise is rejected', function (done) {
       const filter = {};
       const mapping = sinon.stub();
       mapping.returns(Promise.reject(filter));
@@ -53,7 +51,7 @@ describe('Filter Bar Directive', function () {
       $rootScope.$apply();
     });
 
-    it('should create a chaning function which DOES NOT call the next function if the result is resolved', function (done) {
+    it('should create a chaining function which DOES NOT call the next function if the result is resolved', function (done) {
       const mapping = sinon.stub();
       mapping.returns(Promise.resolve('good'));
       const mappingChainFn = generateMappingChain(mapping);

@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import { SavedObjectNotFound } from '../../errors';
 
-export function FilterBarLibMapPhraseProvider(Promise, courier) {
+export function FilterBarLibMapPhraseProvider(courier) {
   return function (filter) {
     const isScriptedPhraseFilter = isScriptedPhrase(filter);
     if (!_.has(filter, ['query', 'match']) && !isScriptedPhraseFilter) {

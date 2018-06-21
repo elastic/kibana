@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export function FilterBarLibGenerateMappingChainProvider(Promise) {
+export function FilterBarLibGenerateMappingChainProvider() {
 
   const noop = function () {
     return Promise.reject(new Error('No mappings have been found for filter.'));
