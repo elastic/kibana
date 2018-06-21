@@ -25,20 +25,18 @@ import { CallClientProvider } from '../call_client';
 import { CallResponseHandlersProvider } from '../call_response_handlers';
 import { ContinueIncompleteProvider } from '../continue_incomplete';
 import { FetchNowProvider } from '../fetch_now';
+import { mapPromises } from '../../../promises';
 
 describe('FetchNowProvider', () => {
-
-  let Promise;
-  let $rootScope;
   let fetchNow;
   let request;
   let requests;
   let fakeResponses;
 
   beforeEach(ngMock.module('kibana', (PrivateProvider) => {
-    function FakeResponsesProvider(Promise) {
+    function FakeResponsesProvider() {
       fakeResponses = sinon.spy(function () {
-        return Promise.map(requests, mockRequest => {
+        return mapPromises(requests, mockRequest => {
           return { mockRequest };
         });
       });
@@ -50,9 +48,7 @@ describe('FetchNowProvider', () => {
     PrivateProvider.swap(ContinueIncompleteProvider, FakeResponsesProvider);
   }));
 
-  beforeEach(ngMock.inject((Private, $injector) => {
-    $rootScope = $injector.get('$rootScope');
-    Promise = $injector.get('Promise');
+  beforeEach(ngMock.inject((Private) => {
     fetchNow = Private(FetchNowProvider);
     request = mockRequest();
     requests = [ request ];
@@ -67,43 +63,45 @@ describe('FetchNowProvider', () => {
       expect(request.continue.called).to.be(false);
     });
 
-    it('waits for returned promise from start() to be fulfilled', () => {
+    it('waits for returned promise from start() to be fulfilled', async () => {
       request.start = sinon.stub().returns(Promise.resolve(request));
-      fetchNow(requests);
+      await fetchNow(requests);
 
       expect(request.start.callCount).to.be(1);
-      expect(fakeResponses.callCount).to.be(0);
-      $rootScope.$apply();
+
+      // This tests an implementation detail; that fetchNow calls callClient, callResponseHandlers,
+      // and continueIncomplete internally.
       expect(fakeResponses.callCount).to.be(3);
     });
 
-    it('invokes request failure handler if starting fails', () => {
+    it('invokes request failure handler if starting fails', async () => {
       request.start = sinon.stub().returns(Promise.reject('some error'));
-      fetchNow(requests);
-      $rootScope.$apply();
+      await fetchNow(requests);
       sinon.assert.calledWith(request.handleFailure, 'some error');
     });
   });
 
   describe('when request has already started', () => {
-    it('continues request', () => {
-      fetchNow(requests);
+    it('continues request', async () => {
+      await fetchNow(requests);
       expect(request.start.called).to.be(false);
       expect(request.continue.called).to.be(true);
     });
-    it('waits for returned promise to be fulfilled', () => {
+
+    it('waits for returned promise to be fulfilled', async () => {
       request.continue = sinon.stub().returns(Promise.resolve(request));
-      fetchNow(requests);
+      await fetchNow(requests);
 
       expect(request.continue.callCount).to.be(1);
-      expect(fakeResponses.callCount).to.be(0);
-      $rootScope.$apply();
+
+      // This tests an implementation detail; that fetchNow calls callClient, callResponseHandlers,
+      // and continueIncomplete internally.
       expect(fakeResponses.callCount).to.be(3);
     });
-    it('invokes request failure handler if continuing fails', () => {
+
+    it('invokes request failure handler if continuing fails', async () => {
       request.continue = sinon.stub().returns(Promise.reject('some error'));
-      fetchNow(requests);
-      $rootScope.$apply();
+      await fetchNow(requests);
       sinon.assert.calledWith(request.handleFailure, 'some error');
     });
   });

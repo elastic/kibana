@@ -23,6 +23,7 @@ import { CallResponseHandlersProvider } from './call_response_handlers';
 import { ContinueIncompleteProvider } from './continue_incomplete';
 import { RequestStatus } from './req_status';
 import { location } from './notifier';
+import { mapPromises } from '../../promises';
 
 /**
  * Fetch now provider should be used if you want the results searched and returned immediately.
@@ -35,7 +36,7 @@ import { location } from './notifier';
  * @return {fetchNow}
  * @constructor
  */
-export function FetchNowProvider(Private, Promise) {
+export function FetchNowProvider(Private) {
   // core tasks
   const callClient = Private(CallClientProvider);
   const callResponseHandlers = Private(CallResponseHandlersProvider);
@@ -45,32 +46,32 @@ export function FetchNowProvider(Private, Promise) {
   const DUPLICATE = RequestStatus.DUPLICATE;
   const INCOMPLETE = RequestStatus.INCOMPLETE;
 
-  function fetchNow(requests) {
-    return fetchSearchResults(requests.map(function (req) {
-      if (!req.started) return req;
-      return req.retry();
+  function fetchNow(searchRequests) {
+    return fetchSearchResults(searchRequests.map(function (searchRequest) {
+      if (!searchRequest.started) return searchRequest;
+      return searchRequest.retry();
     }))
       .catch(error => fatalError(error, location));
   }
 
-  function fetchSearchResults(requests) {
+  function fetchSearchResults(searchRequests) {
     function replaceAbortedRequests() {
-      requests = requests.map(r => r.aborted ? ABORTED : r);
+      searchRequests = searchRequests.map(searchRequest => searchRequest.aborted ? ABORTED : searchRequest);
     }
 
     replaceAbortedRequests();
-    return startRequests(requests)
+    return startRequests(searchRequests)
       .then(function () {
         replaceAbortedRequests();
-        return callClient(requests);
+        return callClient(searchRequests);
       })
       .then(function (responses) {
         replaceAbortedRequests();
-        return callResponseHandlers(requests, responses);
+        return callResponseHandlers(searchRequests, responses);
       })
       .then(function (responses) {
         replaceAbortedRequests();
-        return continueIncomplete(requests, responses, fetchSearchResults);
+        return continueIncomplete(searchRequests, responses, fetchSearchResults);
       })
       .then(function (responses) {
         replaceAbortedRequests();
@@ -88,17 +89,20 @@ export function FetchNowProvider(Private, Promise) {
       });
   }
 
-  function startRequests(requests) {
-    return Promise.map(requests, function (req) {
-      if (req === ABORTED) {
-        return req;
+  function startRequests(searchRequests) {
+    return mapPromises(searchRequests, (searchRequest) => {
+      if (searchRequest === ABORTED) {
+        return searchRequest;
       }
 
-      return new Promise(function (resolve) {
-        const action = req.started ? req.continue : req.start;
-        resolve(action.call(req));
+      return new Promise((resolve) => {
+        if (searchRequest.started) {
+          resolve(searchRequest.continue());
+        } else {
+          resolve(searchRequest.start());
+        }
       })
-        .catch(err => req.handleFailure(err));
+        .catch(err => searchRequest.handleFailure(err));
     });
   }
 
