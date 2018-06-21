@@ -385,40 +385,6 @@ describe('plugin discovery/plugin spec', () => {
       });
     });
 
-    describe('#getExportAppStyleSheetPath', () => {
-      it('returns undefined if styleSheetToCompile is not defined', () => {
-        const spec = new PluginSpec(fooPack, {});
-
-        expect(spec.getExportAppStyleSheetPath()).to.be(undefined);
-      });
-
-      it('returns path to styleSheetPath', () => {
-        const spec = new PluginSpec(fooPack, {
-          publicDir: '/var/www/public',
-          uiExports: { app: { styleSheetPath: '/var/www/public/styles/foo.scss' } }
-        });
-
-        expect(spec.getExportAppStyleSheetPath()).to.eql('/var/www/public/styles/foo.css');
-      });
-    });
-
-    describe('#getExportAppStyleSheetToCompile', () => {
-      it('returns undefined if styleSheetPath is not defined', () => {
-        const spec = new PluginSpec(fooPack, {});
-
-        expect(spec.getExportAppStyleSheetToCompile()).to.be(undefined);
-      });
-
-      it('returns path to styleSheetToCompile', () => {
-        const spec = new PluginSpec(fooPack, {
-          publicDir: '/var/www/public',
-          uiExports: { app: { styleSheetPath: '/var/www/public/styles/foo.scss' } }
-        });
-
-        expect(spec.getExportAppStyleSheetToCompile()).to.eql('/var/www/public/styles/foo.scss');
-      });
-    });
-
     describe('#getPreInitHandler()', () => {
       it('returns spec.preInit', () => {
         const spec = new PluginSpec(fooPack, {

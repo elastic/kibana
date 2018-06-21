@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { resolve, extname, join, dirname, basename, isAbsolute as isAbsolutePath } from 'path';
+import { resolve, basename, isAbsolute as isAbsolutePath } from 'path';
 
 import toPath from 'lodash/internal/toPath';
 import { get } from 'lodash';
@@ -166,36 +166,6 @@ export class PluginSpec {
 
   getExportSpecs() {
     return this._uiExports;
-  }
-
-  getExportAppSpecs() {
-    return (this.getExportSpecs() || {}).app;
-  }
-
-  getExportAppStyleSheetPath() {
-    const styleSheetPath = (this.getExportAppSpecs() || {}).styleSheetPath;
-
-    if (!styleSheetPath) {
-      return;
-    }
-
-    const fileName = basename(styleSheetPath, extname(styleSheetPath)) + '.css';
-    return join(dirname(styleSheetPath), fileName);
-  }
-
-  getExportAppStyleSheetToCompile() {
-    const styleSheetPath = (this.getExportAppSpecs() || {}).styleSheetPath;
-
-    if (!styleSheetPath) {
-      return;
-    }
-
-    const ext = extname(styleSheetPath);
-    if (ext === '.css') {
-      return;
-    }
-
-    return styleSheetPath;
   }
 
   getPreInitHandler() {
