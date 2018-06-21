@@ -5,6 +5,7 @@
  */
 
 import { datafeedsProvider } from './datafeeds';
+import { jobAuditMessagesProvider } from '../job_audit_messages';
 import { CalendarManager } from '../calendar';
 import moment from 'moment';
 import { uniq } from 'lodash';
@@ -14,6 +15,7 @@ const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 export function jobsProvider(callWithRequest) {
 
   const { forceDeleteDatafeed } = datafeedsProvider(callWithRequest);
+  const { getAuditMessagesSummary } = jobAuditMessagesProvider(callWithRequest);
   const calMngr = new CalendarManager(callWithRequest);
 
   async function forceDeleteJob(jobId) {
@@ -47,6 +49,11 @@ export function jobsProvider(callWithRequest) {
 
   async function jobsSummary(jobIds = []) {
     const fullJobsList = await createFullJobsList();
+    const auditMessages = await getAuditMessagesSummary();
+    const auditMessagesByJob = auditMessages.reduce((p, c) => {
+      p[c.job_id] = c;
+      return p;
+    }, {});
 
     const jobs = fullJobsList.map((job) => {
       const hasDatafeed = (job.datafeed_config !== undefined);
@@ -69,6 +76,13 @@ export function jobsProvider(callWithRequest) {
       };
       if (jobIds.find(j => (j === tempJob.id))) {
         tempJob.fullJob = job;
+      }
+      const auditMessage = auditMessagesByJob[tempJob.id];
+      if (auditMessage !== undefined) {
+        tempJob.auditMessage = {
+          level: auditMessage.highestLevel,
+          text: auditMessage.highestLevelText
+        };
       }
       return tempJob;
     });

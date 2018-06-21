@@ -11,12 +11,12 @@ import React, {
 
 import { ResultLinks, actionsMenuContent } from '../job_actions';
 import { JobDescription } from './job_description';
+import { JobIcon } from './job_icon';
 import './styles/main.less';
 
 import {
   EuiBasicTable,
   EuiButtonIcon,
-
 } from '@elastic/eui';
 
 const PAGE_SIZE = 10;
@@ -92,6 +92,13 @@ export class JobsList extends Component {
         field: 'id',
         name: 'ID',
         truncateText: false,
+
+      }, {
+        field: 'auditMessage',
+        name: '',
+        render: (item) => (
+          <JobIcon message={item} />
+        )
       }, {
         name: 'Description',
         render: (item) => (
@@ -170,5 +177,3 @@ export class JobsList extends Component {
     );
   }
 }
-
-

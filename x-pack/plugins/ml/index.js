@@ -22,6 +22,7 @@ import { calendars } from './server/routes/calendars';
 import { fieldsService } from './server/routes/fields_service';
 import { resultsServiceRoutes } from './server/routes/results_service';
 import { jobServiceRoutes } from './server/routes/job_service';
+import { jobAuditMessagesRoutes } from './server/routes/job_audit_messages';
 
 export const ml = (kibana) => {
   return new kibana.Plugin({
@@ -86,6 +87,7 @@ export const ml = (kibana) => {
       fieldsService(server, commonRouteConfig);
       resultsServiceRoutes(server, commonRouteConfig);
       jobServiceRoutes(server, commonRouteConfig);
+      jobAuditMessagesRoutes(server, commonRouteConfig);
     }
 
   });
