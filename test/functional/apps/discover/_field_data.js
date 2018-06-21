@@ -103,7 +103,7 @@ export default function ({ getService, getPageObjects }) {
           + ' headings:<h3>kimiya-yui</h5>, http://www.slate.com/success/koichi-wakata'
           + ' links:thomas-marshburn@twitter.com, http://www.slate.com/info/michael-p-anderson, www.twitter.com'
           + ' relatedContent:{ "url":'
-          + ' "http://www.lawegetRequestInspectorStatsekly.com/music/jay-electronica-much-better-than-his-name-would-suggest-2412364",'
+          + ' "http://www.laweekly.com/music/jay-electronica-much-better-than-his-name-would-suggest-2412364",'
           + ' "og:type": "article", "og:title": "Jay Electronica: Much Better Than His Name Would Suggest",'
           + ' "og:description": "You may not know who Jay Electronica is yet, but I&#039;m willing to bet that you'
           + ' would had he chosen a better name. Jay Electronica does not sound like the ...", "og:url":'
