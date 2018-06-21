@@ -5,12 +5,10 @@
  */
 
 
-// import moment from 'moment';
 import './styles/main.less';
 
 import { ml } from 'plugins/ml/services/ml_api_service';
-// import { mlJobService } from 'plugins/ml/services/job_service';
-// import { mlCalendarService } from 'plugins/ml/services/calendar_service';
+import { loadFullJob } from '../utils';
 import { JobsList } from '../jobs_list';
 import { JobDetails } from '../job_details';
 import { EditJobFlyout } from '../edit_job_flyout';
@@ -21,59 +19,6 @@ import { MultiJobActions } from '../multi_job_actions';
 import React, {
   Component
 } from 'react';
-
-// const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
-
-// function loadJobs() {
-//   return new Promise((resolve) => {
-//     mlJobService.loadJobs()
-//       .then((resp) => {
-//         mlCalendarService.loadCalendars(resp.jobs)
-//           .then(() => {
-//             resolve(resp.jobs);
-//           })
-//           .catch(() => {
-//             resolve(resp.jobs);
-//           });
-//       })
-//       .catch((resp) => {
-//         resolve(resp.jobs);
-//       });
-//   });
-// }
-
-// function earliestAndLatestTimeStamps(dataCounts) {
-//   const obj = {
-//     earliest: { string: '', unix: 0 },
-//     latest: { string: '', unix: 0 },
-//   };
-
-//   if (dataCounts.earliest_record_timestamp) {
-//     const ts = moment(dataCounts.earliest_record_timestamp);
-//     obj.earliest.string = ts.format(TIME_FORMAT);
-//     obj.earliest.unix = ts.valueOf();
-//     obj.earliest.moment = ts;
-//   }
-
-//   if (dataCounts.latest_record_timestamp) {
-//     const ts = moment(dataCounts.latest_record_timestamp);
-//     obj.latest.string = ts.format(TIME_FORMAT);
-//     obj.latest.unix = ts.valueOf();
-//     obj.latest.moment = ts;
-//   }
-
-//   return obj;
-// }
-
-// function loadJobDetails(jobId) {
-//   return mlJobService.refreshJob(jobId)
-//   	.then(() => {
-//       return mlJobService.getJob(jobId);
-//     })
-//     .catch((error) => {
-//       console.log(error);
-//     });
-// }
 
 export class JobsListView extends Component {
   constructor(props) {
@@ -130,30 +75,27 @@ export class JobsListView extends Component {
       }
 
       this.setState({ itemIdToExpandedRowMap }, () => {
-        ml.jobService.jobs(jobId)
-          .then((jobs) => {
-            if (jobs.length) {
-              const job = jobs[0];
-              const fullJobsList = { ...this.state.fullJobsList };
-              fullJobsList[jobId] = job;
-              this.setState({ fullJobsList }, () => {
-                // take a fresh copy of the itemIdToExpandedRowMap object
-                itemIdToExpandedRowMap = { ...this.state.itemIdToExpandedRowMap };
-                if (itemIdToExpandedRowMap[jobId] !== undefined) {
-                  // wrap in a check, in case the user closes the expansion before the
-                  // loading has finished
-                  itemIdToExpandedRowMap[jobId] = (
-                    <JobDetails
-                      jobId={jobId}
-                      job={job}
-                      addYourself={this.addUpdateFunction}
-                      removeYourself={this.removeUpdateFunction}
-                    />
-                  );
-                }
-                this.setState({ itemIdToExpandedRowMap });
-              });
-            }
+        loadFullJob(jobId)
+          .then((job) => {
+            const fullJobsList = { ...this.state.fullJobsList };
+            fullJobsList[jobId] = job;
+            this.setState({ fullJobsList }, () => {
+              // take a fresh copy of the itemIdToExpandedRowMap object
+              itemIdToExpandedRowMap = { ...this.state.itemIdToExpandedRowMap };
+              if (itemIdToExpandedRowMap[jobId] !== undefined) {
+                // wrap in a check, in case the user closes the expansion before the
+                // loading has finished
+                itemIdToExpandedRowMap[jobId] = (
+                  <JobDetails
+                    jobId={jobId}
+                    job={job}
+                    addYourself={this.addUpdateFunction}
+                    removeYourself={this.removeUpdateFunction}
+                  />
+                );
+              }
+              this.setState({ itemIdToExpandedRowMap });
+            });
           })
           .catch((error) => {
             console.log(error);

@@ -7,6 +7,7 @@
 import { toastNotifications } from 'ui/notify';
 
 import { mlJobService } from 'plugins/ml/services/job_service';
+import { ml } from 'plugins/ml/services/ml_api_service';
 
 // action values match the response from the endpoint.
 // e.g. { started: true }
@@ -15,6 +16,22 @@ const ACTION = {
   STOP: 'stopped',
   DELETE: 'deleted',
 };
+
+export function loadFullJob(jobId) {
+  return new Promise((resolve, reject) => {
+    ml.jobService.jobs(jobId)
+      .then((jobs) => {
+        if (jobs.length) {
+          resolve(jobs[0]);
+        } else {
+          reject(`Could not find job ${jobId}`);
+        }
+      })
+      .catch(() => {
+        reject(`Could not find job ${jobId}`);
+      });
+  });
+}
 
 export function isStartable(jobs) {
   return (jobs.find(j => j.datafeedState === 'stopped') !== undefined);

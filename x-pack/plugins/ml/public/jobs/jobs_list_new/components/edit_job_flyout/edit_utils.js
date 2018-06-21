@@ -8,7 +8,6 @@
 import { newJobLimits } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
 import { mlJobService } from 'plugins/ml/services/job_service';
 
-
 export function saveJob(job, newJobData, finish) {
 
   return new Promise((resolve, reject) => {
@@ -146,14 +145,3 @@ function extractDatafeed(job, newDatafeedData) {
 
   return datafeedData;
 }
-
-export function loadJobDetails(jobId) {
-  return mlJobService.refreshJob(jobId)
-  	.then(() => {
-      return mlJobService.getJob(jobId);
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-}
-

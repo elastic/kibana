@@ -24,7 +24,8 @@ import {
 } from '@elastic/eui';
 
 import { JobDetails, Detectors, Datafeed, CustomUrls } from './tabs';
-import { saveJob, loadJobDetails } from './edit_utils';
+import { saveJob } from './edit_utils';
+import { loadFullJob } from '../utils';
 import { toastNotifications } from 'ui/notify';
 
 export class EditJobFlyout extends Component {
@@ -55,7 +56,7 @@ export class EditJobFlyout extends Component {
 
   showFlyout = (jobLite) => {
     const hasDatafeed = jobLite.hasDatafeed;
-    loadJobDetails(jobLite.id)
+    loadFullJob(jobLite.id)
     	.then((job) => {
         this.extractJob(job, hasDatafeed);
         this.setState({
