@@ -75,7 +75,7 @@ class ServiceOverview extends Component {
 
 function SetupInstructionsLink({ buttonFill = false }) {
   return (
-    <KibanaLink pathname={'/app/kibana'} hash={'/home/tutorial/apm'} query={{}}>
+    <KibanaLink pathname={'/app/kibana'} hash={'/home/tutorial/apm'}>
       <EuiButton size="s" color="primary" fill={buttonFill}>
         Setup Instructions
       </EuiButton>

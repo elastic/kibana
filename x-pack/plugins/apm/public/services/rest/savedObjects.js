@@ -18,7 +18,7 @@ export const getAPMIndexPattern = memoize(async () => {
   });
 
   if (isEmpty(res.savedObjects)) {
-    return {};
+    return;
   }
 
   const apmIndexPattern = chrome.getInjected('apmIndexPattern');
@@ -27,6 +27,10 @@ export const getAPMIndexPattern = memoize(async () => {
       savedObject => savedObject.attributes.title === apmIndexPattern
     )
   );
+
+  if (!apmSavedObject) {
+    return;
+  }
 
   return getFromSavedObject(apmSavedObject);
 });

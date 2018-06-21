@@ -7,23 +7,31 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { startMlJob } from '../../../../services/rest/ml';
-
+import { getAPMIndexPattern } from '../../../../services/rest/savedObjects';
 import {
   EuiButton,
+  EuiCallOut,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiTitle,
+  EuiGlobalToastList,
   EuiText,
-  EuiGlobalToastList
+  EuiTitle
 } from '@elastic/eui';
 
 export default class DynamicBaselineFlyout extends Component {
   state = {
     toasts: [],
-    isLoading: false
+    isLoading: false,
+    hasIndexPattern: null
   };
+
+  componentDidMount() {
+    getAPMIndexPattern().then(indexPattern => {
+      this.setState({ hasIndexPattern: indexPattern != null });
+    });
+  }
 
   createDynamicBaseline = async () => {
     this.setState({ isLoading: true });
@@ -92,14 +100,46 @@ export default class DynamicBaselineFlyout extends Component {
   };
 
   render() {
+    const { isOpen, onClose, hasDynamicBaseline } = this.props;
+    const { isLoading, hasIndexPattern, toasts } = this.state;
+
     const flyout = (
-      <EuiFlyout onClose={this.props.onClose} size="s">
+      <EuiFlyout onClose={onClose} size="s">
         <EuiFlyoutHeader>
           <EuiTitle>
             <h2>Create dynamic baseline</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
+          {hasDynamicBaseline && (
+            <EuiCallOut
+              title={
+                <span>
+                  A dynamic baseline has already been created.{' '}
+                  <a href="/app/ml">View it here</a>
+                </span>
+              }
+              color="success"
+              iconType="check"
+            />
+          )}
+
+          {!hasIndexPattern && (
+            <EuiCallOut
+              title={
+                <span>
+                  There is no APM index pattern available. To create a dynamic
+                  baseline, please import the APM index pattern via the{' '}
+                  <a href="/app/kibana#/home/tutorial/apm">
+                    APM Setup Instructions
+                  </a>
+                </span>
+              }
+              color="warning"
+              iconType="alert"
+            />
+          )}
+
           <EuiText>
             <p>
               You can create a dynamic baseline with Machine Learning by the
@@ -119,8 +159,6 @@ export default class DynamicBaselineFlyout extends Component {
               <a href="/app/ml">viewing your Machine Learning jobs</a> and edit
               it from there.
             </p>
-            {this.props.hasDynamicBaseline &&
-              'A dynamic baseline already exists'}
           </EuiText>
         </EuiFlyoutBody>
         <EuiFlyoutFooter
@@ -132,7 +170,7 @@ export default class DynamicBaselineFlyout extends Component {
           <EuiButton
             onClick={this.createDynamicBaseline}
             fill
-            disabled={this.state.isLoading || this.props.hasDynamicBaseline}
+            disabled={isLoading || hasDynamicBaseline || !hasIndexPattern}
           >
             Create dynamic baseline
           </EuiButton>
@@ -142,9 +180,9 @@ export default class DynamicBaselineFlyout extends Component {
 
     return (
       <React.Fragment>
-        {this.props.isOpen && flyout}
+        {isOpen && flyout}
         <EuiGlobalToastList
-          toasts={this.state.toasts}
+          toasts={toasts}
           dismissToast={this.removeToasts}
           toastLifeTimeMs={5000}
         />

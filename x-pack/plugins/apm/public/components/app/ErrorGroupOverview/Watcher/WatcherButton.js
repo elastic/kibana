@@ -53,13 +53,11 @@ export default class WatcherButton extends Component {
   render() {
     return (
       <EuiPopover
-        id="watcher"
         button={this.button}
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover}
         panelPaddingSize="none"
         anchorPosition="downRight"
-        ownFocus
       >
         <EuiContextMenu initialPanelId={0} panels={this.popOverPanels} />
       </EuiPopover>
