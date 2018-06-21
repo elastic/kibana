@@ -24,6 +24,7 @@ import ngMock from 'ng_mock';
 import StubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
 
 import { SegmentedSearchRequestProvider } from '../segmented_search_request';
+import { Deferred } from '../../../../../promises';
 
 describe('SegmentedSearchRequest _createQueue', () => {
   let Promise;
@@ -45,7 +46,7 @@ describe('SegmentedSearchRequest _createQueue', () => {
   }));
 
   it('manages the req._queueCreated flag', async function () {
-    const req = new SegmentedSearchRequest(new MockSource());
+    const req = new SegmentedSearchRequest(new MockSource(), new Deferred());
     req._queueCreated = null;
 
     const promise = req._createQueue();
@@ -60,7 +61,7 @@ describe('SegmentedSearchRequest _createQueue', () => {
     const indices = [1, 2, 3];
     sinon.stub(ip, 'toDetailedIndexList').returns(Promise.resolve(indices));
 
-    const req = new SegmentedSearchRequest(source);
+    const req = new SegmentedSearchRequest(source, new Deferred());
     const output = await req._createQueue();
     expect(output).to.equal(indices);
   });
@@ -68,7 +69,7 @@ describe('SegmentedSearchRequest _createQueue', () => {
   it('tells the index pattern its direction', async function () {
     const source = new MockSource();
     const ip = source.get('index');
-    const req = new SegmentedSearchRequest(source);
+    const req = new SegmentedSearchRequest(source, new Deferred());
     sinon.stub(ip, 'toDetailedIndexList').returns(Promise.resolve([1, 2, 3]));
 
     req.setDirection('asc');

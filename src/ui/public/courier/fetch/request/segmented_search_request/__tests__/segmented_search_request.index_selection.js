@@ -27,6 +27,7 @@ import NoDigestPromises from 'test_utils/no_digest_promises';
 import StubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
 
 import { SegmentedSearchRequestProvider } from '../segmented_search_request';
+import { Deferred } from '../../../../../promises';
 
 describe('SegmentedSearchRequest index selection', function () {
   let Promise;
@@ -60,7 +61,7 @@ describe('SegmentedSearchRequest index selection', function () {
       { index: 'five', min: 0, max: 1 },
     ]));
 
-    const req = new SegmentedSearchRequest(search);
+    const req = new SegmentedSearchRequest(search, new Deferred());
     req._handle.setDirection('desc');
     req._handle.setSortFn(new HitSortFn('desc'));
     req._handle.setSize(500);
@@ -111,7 +112,7 @@ describe('SegmentedSearchRequest index selection', function () {
       { index: 'five', min: 5, max: 50 },
     ]));
 
-    const req = new SegmentedSearchRequest(search);
+    const req = new SegmentedSearchRequest(search, new Deferred());
     req._handle.setDirection('desc');
     req._handle.setSortFn(new HitSortFn('desc'));
     req._handle.setSize(10);

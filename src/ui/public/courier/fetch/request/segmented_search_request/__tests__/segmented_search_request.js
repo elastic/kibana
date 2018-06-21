@@ -23,6 +23,7 @@ import ngMock from 'ng_mock';
 
 import { SegmentedSearchRequestProvider } from '../segmented_search_request';
 import { SearchRequestProvider } from '../../search_request';
+import { Deferred } from '../../../../../promises';
 
 describe('SegmentedSearchRequest', () => {
   let Promise;
@@ -67,7 +68,7 @@ describe('SegmentedSearchRequest', () => {
   });
 
   function init() {
-    segmentedReq = new SegmentedSearchRequest(mockSource());
+    segmentedReq = new SegmentedSearchRequest(mockSource(), new Deferred());
   }
 
   function mockSource() {

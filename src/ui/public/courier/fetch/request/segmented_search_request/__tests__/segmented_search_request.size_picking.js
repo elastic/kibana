@@ -25,6 +25,7 @@ import NoDigestPromises from 'test_utils/no_digest_promises';
 import StubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
 
 import { SegmentedSearchRequestProvider } from '../segmented_search_request';
+import { Deferred } from '../../../../../promises';
 
 describe('SegmentedSearchRequest size picking', function () {
   let SegmentedSearchRequest;
@@ -47,7 +48,7 @@ describe('SegmentedSearchRequest size picking', function () {
 
   describe('without a size', function () {
     it('does not set the request size', async function () {
-      const req = new SegmentedSearchRequest(new MockSource());
+      const req = new SegmentedSearchRequest(new MockSource(), new Deferred());
       req._handle.setDirection('desc');
       req._handle.setSortFn(new HitSortFn('desc'));
       await req.start();
@@ -58,7 +59,7 @@ describe('SegmentedSearchRequest size picking', function () {
 
   describe('with a size', function () {
     it('sets the request size to the entire desired size', async function () {
-      const req = new SegmentedSearchRequest(new MockSource());
+      const req = new SegmentedSearchRequest(new MockSource(), new Deferred());
       req._handle.setDirection('desc');
       req._handle.setSize(555);
       req._handle.setSortFn(new HitSortFn('desc'));
