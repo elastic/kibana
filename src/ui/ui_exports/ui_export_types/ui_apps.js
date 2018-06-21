@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isAbsolute } from 'path';
+import { isAbsolute, normalize } from 'path';
 import { flatConcatAtType } from './reduce';
 import { alias, mapSpec, wrap } from './modify_reduce';
 
@@ -34,7 +34,6 @@ function applySpecDefaults(spec, type, pluginSpec) {
     linkToLastSubUrl = true,
     listed = !hidden,
     url = `/app/${id}`,
-    styleSheetPath,
   } = spec;
 
   if (spec.injectVars) {
@@ -48,6 +47,8 @@ function applySpecDefaults(spec, type, pluginSpec) {
       `[plugin:${pluginId}] uiExports.app.uses has been removed. Import these uiExport types with "import 'uiExports/{type}'"`
     );
   }
+
+  const styleSheetPath = spec.styleSheetPath ? normalize(spec.styleSheetPath) : undefined;
 
   if (styleSheetPath && (!isAbsolute(styleSheetPath) || !styleSheetPath.startsWith(pluginSpec.getPublicDir()))) {
     throw new Error(
