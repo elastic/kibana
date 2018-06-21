@@ -410,7 +410,8 @@ export function SearchSourceProvider(Private, config) {
       let req = _.first(self._myStartableQueued());
 
       if (!req) {
-        req = self._createRequest();
+        const deferred = new Deferred();
+        req = self._createRequest(deferred);
       }
 
       fetchSoon.these([req]);
@@ -430,7 +431,8 @@ export function SearchSourceProvider(Private, config) {
       let searchRequest = _.first(self._myStartableQueued());
 
       if (!searchRequest) {
-        searchRequest = self._createRequest();
+        const deferred = new Deferred();
+        searchRequest = self._createRequest(deferred);
       }
 
       searchRequest.setErrorHandler((request, error) => {

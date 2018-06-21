@@ -23,14 +23,11 @@ import { FilterBarLibMapMatchAllProvider } from '../map_match_all';
 
 describe('ui/filter_bar/lib', function () {
   describe('mapMatchAll()', function () {
-    let $rootScope;
     let mapMatchAll;
     let filter;
 
-
     beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private, _$rootScope_) {
-      $rootScope = _$rootScope_;
+    beforeEach(ngMock.inject(function (Private) {
       mapMatchAll = Private(FilterBarLibMapMatchAllProvider);
       filter = {
         match_all: {},
@@ -48,15 +45,13 @@ describe('ui/filter_bar/lib', function () {
           expect(result).to.be(filter);
           done();
         });
-        $rootScope.$apply();
       });
     });
 
     describe('when given a match_all filter', function () {
       let result;
-      beforeEach(function () {
-        mapMatchAll(filter).then(r => result = r);
-        $rootScope.$apply();
+      beforeEach(async () => {
+        await mapMatchAll(filter).then(r => result = r);
       });
 
       it('key is set to meta field', function () {
