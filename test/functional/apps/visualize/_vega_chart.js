@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }) {
         expect(spyToggleExists).to.be(false);
       });
 
-      it('should have some initial vega spec text', async function () {
+      it.skip('should have some initial vega spec text', async function () {
         const vegaSpec = await PageObjects.visualize.getVegaSpec();
         expect(vegaSpec).to.contain('{').and.to.contain('data');
         expect(vegaSpec.length).to.be.above(500);
