@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { initBulkUploader } from './init';
+export { CollectorSet } from './collector_set';
+export { Collector } from './collector';
+export { UsageCollector } from './usage_collector';

@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { initBulkUploader } from './init';
+export { getKibanaUsageCollector } from './get_kibana_usage_collector';
+export { getOpsStatsCollector } from './get_ops_stats_collector';
+export { getSettingsCollector } from './get_settings_collector';
