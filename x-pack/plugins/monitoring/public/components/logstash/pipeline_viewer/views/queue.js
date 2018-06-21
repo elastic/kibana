@@ -16,7 +16,7 @@ export function Queue() {
         title="Queue"
       />
       <EuiSpacer size="s" />
-      <EuiText className="configViewer__queueMessage">
+      <EuiText className="pipelineViewer__queueMessage">
         Queue metrics not available
       </EuiText>
     </div>

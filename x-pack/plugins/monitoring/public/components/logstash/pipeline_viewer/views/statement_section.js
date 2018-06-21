@@ -99,7 +99,7 @@ class StatementList extends React.PureComponent {
     const { elements } = this.props;
 
     return (
-      <ul className="configViewer__list">
+      <ul className="pipelineViewer__list">
         {
           elements.map(this.renderStatement)
         }

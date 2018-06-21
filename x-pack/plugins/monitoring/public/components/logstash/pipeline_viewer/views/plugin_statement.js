@@ -12,14 +12,14 @@ import {
   EuiFlexItem,
   EuiBadge,
 } from '@elastic/eui';
-import { formatMetric } from '../../../../../lib/format_number';
+import { formatMetric } from '../../../../lib/format_number';
 import { Metric } from './metric';
 
 function getInputStatementMetrics({ latestEventsPerSecond }) {
   return [(
     <Metric
       key="eventsEmitted"
-      className="configViewer__metric--eventsEmitted"
+      className="pipelineViewer__metric--eventsEmitted"
       value={formatMetric(latestEventsPerSecond, '0.[00]a', 'e/s emitted')}
     />
   )];
@@ -36,7 +36,7 @@ function getProcessorStatementMetrics(processorVertex) {
     (
       <Metric
         key="cpuMetric"
-        className="configViewer__metric--cpuTime"
+        className="pipelineViewer__metric--cpuTime"
         warning={processorVertex.isTimeConsuming()}
         value={formatMetric(Math.round(percentOfTotalProcessorTime || 0), '0', '%', { prependSpace: false })}
       />
@@ -44,7 +44,7 @@ function getProcessorStatementMetrics(processorVertex) {
     (
       <Metric
         key="eventMillis"
-        className="configViewer__metric--eventMillis"
+        className="pipelineViewer__metric--eventMillis"
         warning={processorVertex.isSlow()}
         value={formatMetric(latestMillisPerEvent, '0.[00]a', 'ms/e')}
       />
@@ -52,7 +52,7 @@ function getProcessorStatementMetrics(processorVertex) {
     (
       <Metric
         key="eventsReceived"
-        className="configViewer__metric--events"
+        className="pipelineViewer__metric--events"
         value={formatMetric(latestEventsPerSecond, '0.[00]a', 'e/s received')}
       />
     )
@@ -83,7 +83,7 @@ export function PluginStatement({
       gutterSize="none"
       justifyContent="spaceBetween"
       alignItems="center"
-      className="configViewer__statement"
+      className="pipelineViewer__statement"
     >
       <EuiFlexItem grow={false}>
         <EuiFlexGroup
@@ -97,7 +97,7 @@ export function PluginStatement({
               color="primary"
               iconType="dot"
               flush="left"
-              className="configViewer__plugin"
+              className="pipelineViewer__plugin"
               onClick={onNameButtonClick}
             >
               <span>{name}</span>
