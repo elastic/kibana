@@ -79,6 +79,18 @@ This section summarizes the changes in each release.
 [[breaking-6.3.0]]
 === Breaking Changes
 
+Operations::
++
+As of Kibana 6.3.0, X-Pack is bundled by default in the default distribution. 
+Existing X-Pack users should remove the plugin before upgrading.
++
+There is a known issue preventing `bin/kibana-plugin` from removing the pre-existing 
+plugin after upgrading. This will be resolved in 6.3.1. If you happen to encounter this issue, 
+there are a few options:
++
+* **Uninstall the plugin before upgrading:** `bin/kibana-plugin remove x-pack`
+* **Uninstall the plugin after upgrading:** Manually delete the `plugins/x-pack` directory.
+
 Platform::
 * Renames saved objects bulk_get and find endpoints {pull}17512[#17512]
 +
