@@ -81,11 +81,6 @@ export const init = (monitoringPlugin, server) => {
     );
   }
 
-  // xpack main plugin status goes red if ES client lost connection
-  xpackMainPlugin.status.on('red', () => {
-    bulkUploader.handleConnectionLost();
-  });
-
   server.injectUiAppVars('monitoring', (server) => {
     const config = server.config();
     return {
