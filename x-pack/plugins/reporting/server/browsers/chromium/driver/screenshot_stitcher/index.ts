@@ -7,9 +7,9 @@
 import { map, mergeMap, switchMap, toArray } from 'rxjs/operators';
 import { $combine } from './combine';
 import { $getClips } from './get_clips';
-import { Dimension, Logger, Screenshot } from './types';
+import { Logger, Rectangle, Screenshot } from './types';
 
-const scaleRect = (rect: Dimension, scale: number): Dimension => {
+const scaleRect = (rect: Rectangle, scale: number): Rectangle => {
   return {
     height: rect.height * scale,
     width: rect.width * scale,
@@ -31,10 +31,10 @@ const scaleRect = (rect: Dimension, scale: number): Dimension => {
  * @param logger
  */
 export async function screenshotStitcher(
-  outputClip: Dimension,
+  outputClip: Rectangle,
   zoom: number,
   maxDimensionPerClip: number,
-  captureScreenshotFn: (dimension: Dimension) => Promise<string>,
+  captureScreenshotFn: (rect: Rectangle) => Promise<string>,
   logger: Logger
 ): Promise<string> {
   // We have to divide the max by the zoom because we will be multiplying each clip's dimensions
@@ -52,7 +52,7 @@ export async function screenshotStitcher(
 
   // when we take the screenshots we don't have to scale the rects
   // but the PNGs don't know about the zoom, so we have to scale them
-  const screenshotPngDimensions$ = screenshots$.pipe(
+  const screenshotPngRects$ = screenshots$.pipe(
     map(({ data, clip }) => {
       // At this point we don't care about the offset - the screenshots have been taken.
       // We need to adjust the x & y values so they all are adjusted for the top-left most
@@ -60,7 +60,7 @@ export async function screenshotStitcher(
       const x = clip.x - outputClip.x;
       const y = clip.y - outputClip.y;
 
-      const scaledScreenshotDimensions = scaleRect(
+      const scaledScreenshotRects = scaleRect(
         {
           height: clip.height,
           width: clip.width,
@@ -71,21 +71,21 @@ export async function screenshotStitcher(
       );
       return {
         data,
-        dimensions: scaledScreenshotDimensions,
+        rectangle: scaledScreenshotRects,
       };
     })
   );
 
-  const scaledOutputDimensions = scaleRect(outputClip, zoom);
-  return screenshotPngDimensions$
+  const scaledOutputRects = scaleRect(outputClip, zoom);
+  return screenshotPngRects$
     .pipe(
       toArray(),
       switchMap<Screenshot[], string>((screenshots: Screenshot[]) =>
         $combine(
           screenshots,
           {
-            height: scaledOutputDimensions.height,
-            width: scaledOutputDimensions.width,
+            height: scaledOutputRects.height,
+            width: scaledOutputRects.width,
           },
           logger
         )

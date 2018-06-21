@@ -13,7 +13,7 @@ import { ObservableInput } from 'rxjs';
 import { map, mergeMap, reduce, switchMap, tap, toArray } from 'rxjs/operators';
 import { Logger, Screenshot, Size } from './types';
 
-// if we're only given one screenshot, and it matches the output dimensions
+// if we're only given one screenshot, and it matches the given size
 // we're going to skip the combination and just use it
 const canUseFirstScreenshot = (
   screenshots: Screenshot[],
@@ -25,13 +25,13 @@ const canUseFirstScreenshot = (
 
   const firstScreenshot = screenshots[0];
   return (
-    firstScreenshot.dimensions.width === size.width &&
-    firstScreenshot.dimensions.height === size.height
+    firstScreenshot.rectangle.width === size.width &&
+    firstScreenshot.rectangle.height === size.height
   );
 };
 
 /**
- * Combines the screenshot clips into a single screenshot of size `outputDimensions`.
+ * Combines the screenshot clips into a single screenshot of size `outputSize`.
  * @param screenshots - Array of screenshots to combine
  * @param outputSize - Final output size that the screenshots should match up with
  * @param logger - logger for extra debug output
@@ -66,14 +66,14 @@ export function $combine(
       },
       (screenshot: Screenshot, png: PNG) => {
         if (
-          png.width !== screenshot.dimensions.width ||
-          png.height !== screenshot.dimensions.height
+          png.width !== screenshot.rectangle.width ||
+          png.height !== screenshot.rectangle.height
         ) {
           const errorMessage = `Screenshot captured with width:${
             png.width
           } and height: ${png.height}) is not of expected width: ${
-            screenshot.dimensions.width
-          } and height: ${screenshot.dimensions.height}`;
+            screenshot.rectangle.width
+          } and height: ${screenshot.rectangle.height}`;
 
           logger.error(errorMessage);
           throw new Error(errorMessage);
@@ -91,17 +91,17 @@ export function $combine(
       logger.debug(`Output dimensions is ${JSON.stringify(outputSize)}`);
       logger.debug(`Input png w: ${png.width} and h: ${png.height}`);
       logger.debug(
-        `Creating output png with ${JSON.stringify(screenshot.dimensions)}`
+        `Creating output png with ${JSON.stringify(screenshot.rectangle)}`
       );
-      const { dimensions } = screenshot;
+      const { rectangle } = screenshot;
       png.bitblt(
         output,
         0,
         0,
-        dimensions.width,
-        dimensions.height,
-        dimensions.x,
-        dimensions.y
+        rectangle.width,
+        rectangle.height,
+        rectangle.x,
+        rectangle.y
       );
       return output;
     }, new PNG({ width: outputSize.width, height: outputSize.height }))

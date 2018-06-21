@@ -6,15 +6,15 @@
 
 import { toArray } from 'rxjs/operators';
 import { $getClips } from './get_clips';
-import { Dimension } from './types';
+import { Rectangle } from './types';
 
 function getClipsTest(
   description: string,
-  input: { dimensions: Dimension; max: number },
-  expectedClips: { clips: Dimension[] }
+  input: { rectangle: Rectangle; max: number },
+  expectedClips: { clips: Rectangle[] }
 ) {
   test(description, async () => {
-    const clips = await $getClips(input.dimensions, input.max)
+    const clips = await $getClips(input.rectangle, input.max)
       .pipe(toArray())
       .toPromise();
     expect(clips.length).toBe(expectedClips.clips.length);
@@ -27,8 +27,8 @@ function getClipsTest(
 getClipsTest(
   `creates one rect if 0, 0`,
   {
-    dimensions: { x: 0, y: 0, height: 0, width: 0 },
     max: 100,
+    rectangle: { x: 0, y: 0, height: 0, width: 0 },
   },
   {
     clips: [{ x: 0, y: 0, height: 0, width: 0 }],
@@ -38,8 +38,8 @@ getClipsTest(
 getClipsTest(
   `creates one rect if smaller than max`,
   {
-    dimensions: { x: 0, y: 0, height: 99, width: 99 },
     max: 100,
+    rectangle: { x: 0, y: 0, height: 99, width: 99 },
   },
   {
     clips: [{ x: 0, y: 0, height: 99, width: 99 }],
@@ -49,8 +49,8 @@ getClipsTest(
 getClipsTest(
   `create one rect if equal to max`,
   {
-    dimensions: { x: 0, y: 0, height: 100, width: 100 },
     max: 100,
+    rectangle: { x: 0, y: 0, height: 100, width: 100 },
   },
   {
     clips: [{ x: 0, y: 0, height: 100, width: 100 }],
@@ -60,8 +60,8 @@ getClipsTest(
 getClipsTest(
   `creates two rects if width is 1.5 * max`,
   {
-    dimensions: { x: 0, y: 0, height: 100, width: 150 },
     max: 100,
+    rectangle: { x: 0, y: 0, height: 100, width: 150 },
   },
   {
     clips: [
@@ -74,8 +74,8 @@ getClipsTest(
 getClipsTest(
   `creates two rects if height is 1.5 * max`,
   {
-    dimensions: { x: 0, y: 0, height: 150, width: 100 },
     max: 100,
+    rectangle: { x: 0, y: 0, height: 150, width: 100 },
   },
   {
     clips: [
@@ -88,8 +88,8 @@ getClipsTest(
 getClipsTest(
   `created four rects if height and width is 1.5 * max`,
   {
-    dimensions: { x: 0, y: 0, height: 150, width: 150 },
     max: 100,
+    rectangle: { x: 0, y: 0, height: 150, width: 150 },
   },
   {
     clips: [
@@ -104,8 +104,8 @@ getClipsTest(
 getClipsTest(
   `creates one rect if height and width is equal to max and theres a y equal to the max`,
   {
-    dimensions: { x: 0, y: 100, height: 100, width: 100 },
     max: 100,
+    rectangle: { x: 0, y: 100, height: 100, width: 100 },
   },
   {
     clips: [{ x: 0, y: 100, height: 100, width: 100 }],

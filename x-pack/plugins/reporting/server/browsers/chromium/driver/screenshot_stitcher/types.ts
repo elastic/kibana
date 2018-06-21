@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface Dimension {
+export interface Rectangle {
   width: number;
   height: number;
   x: number;
@@ -18,7 +18,7 @@ export interface Size {
 
 export interface Screenshot {
   data: string;
-  dimensions: Dimension;
+  rectangle: Rectangle;
 }
 
 export interface Logger {
