@@ -4,16 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const CONFIGURATION_BLOCKS: any = {
-  TYPES: {
-    FILEBEAT_INPUTS: 'filebeat.inputs',
-    FILEBEAT_MODULES: 'filebeat.modules',
-    METRICBEAT_MODULES: 'metricbeat.modules',
-    OUTPUT: 'output',
-    PROCESSORS: 'processors',
-  },
-};
+export enum ConfigurationBlockTypes {
+  FilebeatInputs = 'filebeat.inputs',
+  FilebeatModules = 'filebeat.modules',
+  MetricbeatModules = 'metricbeat.modules',
+  Output = 'output',
+  Processors = 'processors',
+}
 
-CONFIGURATION_BLOCKS.UNIQUENESS_ENFORCING_TYPES = [
-  CONFIGURATION_BLOCKS.TYPES.OUTPUT,
-];
+export const UNIQUENESS_ENFORCING_TYPES = [ConfigurationBlockTypes.Output];

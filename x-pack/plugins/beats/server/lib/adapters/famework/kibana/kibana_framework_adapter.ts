@@ -17,8 +17,7 @@ import {
   wrapRequest,
 } from '../../../../utils/wrap_request';
 
-export class InfraKibanaBackendFrameworkAdapter
-  implements BackendFrameworkAdapter {
+export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
   public version: string;
 
   private server: Server;
@@ -26,6 +25,12 @@ export class InfraKibanaBackendFrameworkAdapter
   constructor(hapiServer: Server) {
     this.server = hapiServer;
     this.version = hapiServer.plugins.kibana.status.plugin.version;
+  }
+
+  public getSetting(settingPath: string) {
+    // TODO type check this properly
+    // @ts-ignore
+    return this.server.config().get(settingPath);
   }
 
   public exposeStaticDir(urlPath: string, dir: string): void {

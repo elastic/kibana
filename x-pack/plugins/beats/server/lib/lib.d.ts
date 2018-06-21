@@ -1,23 +1,120 @@
-import { internalFrameworkRequest } from '../utils/wrap_request';
-import {
-  Request,
-  IStrictReply,
-  IRouteAdditionalConfigurationOptions,
-} from 'hapi';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
 
-export interface CMDomainLibs {}
+import {
+  IRouteAdditionalConfigurationOptions,
+  IStrictReply,
+  Request,
+} from 'hapi';
+import { internalFrameworkRequest } from '../utils/wrap_request';
+import { CMBeatsDomain } from './domains/beats';
+import { CMTagsDomain } from './domains/tags';
+import { CMTokensDomain } from './domains/tokens';
+
+import { ConfigurationBlockTypes } from '../../common/constants';
+
+export interface CMDomainLibs {
+  beats: CMBeatsDomain;
+  tags: CMTagsDomain;
+  tokens: CMTokensDomain;
+}
 
 export interface CMServerLibs extends CMDomainLibs {
   framework: BackendFrameworkAdapter;
 }
 
+interface CMReturnedTagAssignment {
+  status: number | null;
+  result?: string;
+}
+
+interface CMAssignmentReturn {
+  assignments: CMReturnedTagAssignment[];
+}
+
+interface CMRemovalReturn {
+  removals: CMReturnedTagAssignment[];
+}
+
+export interface ConfigurationBlock {
+  type: ConfigurationBlockTypes;
+  block_yml: string;
+}
+
+export interface CMBeat {
+  id: string;
+  access_token: string;
+  verified_on: string;
+  type: string;
+  version: string;
+  host_ip: string;
+  host_name: string;
+  ephemeral_id: string;
+  local_configuration_yml: string;
+  tags: string;
+  central_configuration_yml: string;
+  metadata: {};
+}
+
+export interface BeatTag {
+  id: string;
+  configuration_blocks: ConfigurationBlock[];
+}
+
+export interface EnrollmentToken {
+  token: string;
+  expires_on: number;
+}
+
+export interface CMTokensAdapter {
+  deleteEnrollmentToken(enrollmentToken: string): Promise<void>;
+  getEnrollmentToken(enrollmentToken: string): Promise<EnrollmentToken>;
+  upsertTokens(req: FrameworkRequest, tokens: EnrollmentToken[]): Promise<void>;
+}
+
+// FIXME: fix getTagsWithIds return type
+export interface CMTagsAdapter {
+  getTagsWithIds(req: FrameworkRequest, tagIds: string[]): any;
+  upsertTag(req: FrameworkRequest, tag: BeatTag): Promise<boolean>;
+}
+
+// FIXME: fix getBeatsWithIds return type
+export interface CMBeatsAdapter {
+  insertBeat(beat: CMBeat): Promise<void>;
+  getBeatsWithIds(req: FrameworkRequest, beatIds: string[]): any;
+  getBeats(req: FrameworkRequest): any;
+  removeTagsFromBeats(
+    req: FrameworkRequest,
+    removals: CMTagAssignment[]
+  ): Promise<CMTagAssignment[]>;
+  assignTagsToBeats(
+    req: FrameworkRequest,
+    assignments: CMTagAssignment[]
+  ): Promise<CMTagAssignment[]>;
+}
+
+export interface CMTagAssignment {
+  beatId: string;
+  tag: string;
+  idxInRequest?: number;
+}
+
+/**
+ * The following are generic types, sharable between projects
+ */
+
 export interface BackendFrameworkAdapter {
   version: string;
+  getSetting(settingPath: string): string | number;
   exposeStaticDir(urlPath: string, dir: string): void;
   installIndexTemplate(name: string, template: {}): void;
   registerRoute<RouteRequest extends WrappableRequest, RouteResponse>(
     route: FrameworkRouteOptions<RouteRequest, RouteResponse>
   ): void;
+  callWithInternalUser(esMethod: string, options: {}): Promise<any>;
   callWithRequest<Hit = {}, Aggregation = undefined>(
     req: FrameworkRequest,
     method: 'search',
@@ -75,7 +172,8 @@ export interface FrameworkRouteOptions<
     Exclude<keyof IRouteAdditionalConfigurationOptions, 'handler'>
   >;
 }
-
+// TODO fix this, conflicting lint rules for type vs interface on callable type
+/* tslint:disable */
 export interface FrameworkRouteHandler<
   RouteRequest extends WrappableRequest,
   RouteResponse
@@ -85,6 +183,7 @@ export interface FrameworkRouteHandler<
     reply: IStrictReply<RouteResponse>
   ): void;
 }
+/* tslint:enable */
 
 export interface WrappableRequest<Payload = any, Params = any, Query = any> {
   payload: Payload;

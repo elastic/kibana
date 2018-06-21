@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { PLUGIN } from './plugin';
-export { INDEX_NAMES } from './index_names';
-export {
-  UNIQUENESS_ENFORCING_TYPES,
-  ConfigurationBlockTypes,
-} from './configuration_blocks';
+export function findNonExistentItems(items, requestedItems) {
+  return items.reduce((nonExistentItems, item, idx) => {
+    if (!item.found) {
+      nonExistentItems.push(requestedItems[idx]);
+    }
+    return nonExistentItems;
+  }, []);
+}
