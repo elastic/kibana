@@ -17,17 +17,12 @@
  * under the License.
  */
 
-import {
-  isConditionalExpression,
-  isIdentifier,
-  isObjectProperty,
-  isStringLiteral,
-} from '@babel/types';
+import { isIdentifier, isObjectProperty } from '@babel/types';
 import fs from 'fs';
 import glob from 'glob';
 import { promisify } from 'util';
 
-import { ESCAPE_LINE_BREAK_REGEX } from './constants';
+const ESCAPE_LINE_BREAK_REGEX = /(?<!\\)\\\n/g;
 
 export const readFileAsync = promisify(fs.readFile);
 export const writeFileAsync = promisify(fs.writeFile);
@@ -43,31 +38,6 @@ export function isPropertyWithKey(property, identifierName) {
     isObjectProperty(property) &&
     isIdentifier(property.key, { name: identifierName })
   );
-}
-
-/**
- * Parse an angular expression with a string literal or consitional expresssion.
- * @param subTree Babel parser AST node.
- * @returns {string[]} Array of expression ids
- */
-export function parseConditionalOperatorAST(subTree) {
-  if (isStringLiteral(subTree)) {
-    // Subtree contains a single message id
-    return [subTree.value];
-  }
-
-  if (isConditionalExpression(subTree)) {
-    /*
-    Subtree contains a conditional expression:
-    subTree.test ? subTree.consequent : subTree.alternate
-    There may be a nested conditional expression, so consequent and alternate should be parsed too
-    */
-    return parseConditionalOperatorAST(subTree.consequent).concat(
-      parseConditionalOperatorAST(subTree.alternate)
-    );
-  }
-
-  return [];
 }
 
 export function throwEntryException(exception, entry) {

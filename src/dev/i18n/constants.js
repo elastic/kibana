@@ -18,14 +18,3 @@
  */
 
 export const DEFAULT_MESSAGE_KEY = 'defaultMessage';
-
-export const ESCAPE_LINE_BREAK_REGEX = /(?<!\\)\\\n/g;
-
-/**
- * Find all substrings of "{{ any text }}" pattern
- */
-export const ANGULAR_EXPRESSION_REGEX = /\{\{+([\s\S]*?)\}\}+/g;
-
-export const I18N_FILTER_IDS_REGEX = /[\s\S]+(?=\|[\s]*i18n)/g;
-
-export const I18N_FILTER_ARGS_REGEX = /(?<=\|[\s]*i18n[\s]*:)[\s\S]+/g;

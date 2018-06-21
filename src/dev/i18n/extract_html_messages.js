@@ -21,23 +21,18 @@ import { jsdom } from 'jsdom';
 import traverse from '@babel/traverse';
 import { parse } from '@babel/parser';
 import {
-  isConditionalExpression,
   isDirectiveLiteral,
   isObjectExpression,
   isStringLiteral,
 } from '@babel/types';
 
-import {
-  isPropertyWithKey,
-  parseConditionalOperatorAST,
-  throwEntryException,
-} from './utils';
-import {
-  DEFAULT_MESSAGE_KEY,
-  ANGULAR_EXPRESSION_REGEX,
-  I18N_FILTER_IDS_REGEX,
-  I18N_FILTER_ARGS_REGEX,
-} from './constants';
+import { isPropertyWithKey, escapeLineBreak } from './utils';
+import { DEFAULT_MESSAGE_KEY } from './constants';
+
+/**
+ * Find all substrings of "{{ any text }}" pattern
+ */
+const ANGULAR_EXPRESSION_REGEX = /\{\{+([\s\S]*?)\}\}+/g;
 
 /**
  * Extract default message from an angular filter expression argument
@@ -47,7 +42,9 @@ import {
 function parseFilterObjectExpression(expression) {
   let defaultMessage = '';
 
-  const filterObjectAST = parse(`+${expression}`); // parse an object expresssion instead of block statement
+  // parse an object expression instead of block statement
+  const filterObjectAST = parse(`+${expression}`);
+
   traverse(filterObjectAST, {
     enter(path) {
       if (isObjectExpression(path.node)) {
@@ -56,7 +53,7 @@ function parseFilterObjectExpression(expression) {
             isPropertyWithKey(property, DEFAULT_MESSAGE_KEY) &&
             isStringLiteral(property.value)
           ) {
-            defaultMessage = property.value.value;
+            defaultMessage = escapeLineBreak(property.value.value);
           }
         }
         path.stop();
@@ -67,67 +64,46 @@ function parseFilterObjectExpression(expression) {
   return defaultMessage;
 }
 
-function parseConditionalOperatorExpression(expression) {
-  const ids = [];
+function parseIdExpression(expression) {
+  let id = '';
 
   traverse(parse(expression), {
     enter(path) {
       if (isDirectiveLiteral(path.node)) {
-        ids.push(path.node.value);
-        path.stop();
-      } else if (isConditionalExpression(path.node)) {
-        ids.push(...parseConditionalOperatorAST(path.node));
+        id = path.node.value;
         path.stop();
       }
     },
   });
 
-  return ids;
+  return id;
+}
+
+function trimCurlyBraces(string) {
+  return string.slice(2, -2).trim();
 }
 
 function* getFilterMessages(htmlContent) {
   const expressions = (htmlContent.match(ANGULAR_EXPRESSION_REGEX) || [])
-    .filter(
-      expression => expression.includes('|') && expression.includes('i18n')
-    )
-    .map(expression => expression.slice(2, -2).trim()); // remove opening and closing double curly braces
+    .filter(expression => expression.includes('| i18n: {'))
+    .map(trimCurlyBraces);
 
   for (const expression of expressions) {
-    const [idsExpression] = expression.match(I18N_FILTER_IDS_REGEX) || [];
-    const [filterObjectExpression] =
-      expression.match(I18N_FILTER_ARGS_REGEX) || [];
+    const filterStart = expression.indexOf('| i18n: {');
+    const [idExpression] = expression.slice(0, filterStart).trim();
+    const [filterObjectExpression] = expression.slice(filterStart + 8).trim();
 
-    if (!filterObjectExpression || !idsExpression) {
+    if (!filterObjectExpression || !idExpression) {
       throw new Error(
         `Cannot parse i18n filter expression: {{ ${expression} }}`
       );
     }
 
-    const messagesIds = parseConditionalOperatorExpression(idsExpression);
+    const messageId = parseIdExpression(idExpression);
     const messageValue = parseFilterObjectExpression(filterObjectExpression);
 
-    yield* messagesIds.map(id => [id, messageValue]);
+    yield [messageId, messageValue];
   }
-}
-
-/**
- * Get messages from i18n-id attribute value.
- * The value can contain a conditional expression in AngularJS curly braces
- * @param {string} attributeValue AngularJS expresssion or an id string
- * @returns {string[]} Array of messages ids
- */
-function getMessagesIdsFromHTMLElement(attributeValue) {
-  if (!attributeValue) {
-    return [];
-  }
-
-  const [expression] = attributeValue.match(ANGULAR_EXPRESSION_REGEX) || [];
-
-  if (expression) {
-    return parseConditionalOperatorExpression(expression.slice(2, -2).trim());
-  }
-
-  return [attributeValue];
 }
 
 function* getDirectiveMessages(htmlContent) {
@@ -135,36 +111,22 @@ function* getDirectiveMessages(htmlContent) {
     features: { ProcessExternalResources: false },
   }).defaultView.document;
 
-  for (const element of document.getElementsByTagName('*')) {
-    if (!element.hasAttribute('i18n-id')) {
-      continue;
-    }
-
-    const messagesIds = getMessagesIdsFromHTMLElement(
-      element.getAttribute('i18n-id')
-    );
-    if (messagesIds.length === 0) {
-      throw new Error('Empty "i18n-id" values are not allowed.');
+  for (const element of document.querySelectorAll('[i18n-id]')) {
+    const messageId = element.getAttribute('i18n-id');
+    if (!messageId) {
+      throw new Error('Empty "i18n-id" value is not allowed.');
     }
 
     const messageValue = element.getAttribute('i18n-default-message');
     if (!messageValue) {
-      throw new Error(
-        `Default messages are required for ids: ${messagesIds.join(', ')}.`
-      );
+      throw new Error(`Default message is required for id: ${messageId}.`);
     }
 
-    yield* messagesIds.map(id => [id, messageValue]);
+    yield [messageId, messageValue];
   }
 }
 
-export function* extractHtmlMessages(files) {
-  for (const { name, content } of files) {
-    try {
-      yield* getDirectiveMessages(content);
-      yield* getFilterMessages(content);
-    } catch (error) {
-      throwEntryException(error, name);
-    }
-  }
+export function* extractHtmlMessages(content) {
+  yield* getDirectiveMessages(content.toString());
+  yield* getFilterMessages(content.toString());
 }

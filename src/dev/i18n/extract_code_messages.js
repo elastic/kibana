@@ -27,9 +27,6 @@ import {
   isMemberExpression,
 } from '@babel/types';
 
-import {
-  throwEntryException,
-} from './utils';
 import { extractAngularServiceMessages } from './extract_angular_service_messages';
 import {
   extractIntlMessages,
@@ -56,8 +53,8 @@ function isFormattedMessageElement(node) {
   );
 }
 
-function getMessagesFromJSFile(jsFile) {
-  const content = parse(jsFile, {
+export function extractCodeMessages(file) {
+  const content = parse(file, {
     sourceType: 'module',
     plugins: [
       'jsx',
@@ -74,25 +71,13 @@ function getMessagesFromJSFile(jsFile) {
     enter(path) {
       if (isI18nTranslateFunction(path.node)) {
         messagesPairs.push(...extractAngularServiceMessages(path.node));
-      }
-      if (isIntlFormatMessageFunction(path.node)) {
+      } else if (isIntlFormatMessageFunction(path.node)) {
         messagesPairs.push(...extractIntlMessages(path.node));
-      }
-      if (isFormattedMessageElement(path.node)) {
+      } else if (isFormattedMessageElement(path.node)) {
         messagesPairs.push(...extractFormattedMessages(path.node));
       }
     },
   });
 
   return messagesPairs;
-}
-
-export function* extractCodeMessages(files) {
-  for (const { name, content } of files) {
-    try {
-      yield* getMessagesFromJSFile(content);
-    } catch (error) {
-      throwEntryException(error, name);
-    }
-  }
 }

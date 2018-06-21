@@ -19,12 +19,17 @@
 
 import { isObjectExpression, isStringLiteral } from '@babel/types';
 
-import { parseConditionalOperatorAST, isPropertyWithKey } from './utils';
+import { isPropertyWithKey } from './utils';
 import { DEFAULT_MESSAGE_KEY } from './constants';
 
 export function extractAngularServiceMessages(node) {
-  const [idsSubTree, optionsSubTree] = node.arguments;
-  const messagesIds = parseConditionalOperatorAST(idsSubTree);
+  const [idSubTree, optionsSubTree] = node.arguments;
+
+  if (!isStringLiteral(idSubTree)) {
+    throw new Error('Message id should be a string literal.');
+  }
+
+  const messageId = idSubTree.value;
 
   if (isObjectExpression(optionsSubTree)) {
     const property = optionsSubTree.properties.find(
@@ -34,6 +39,6 @@ export function extractAngularServiceMessages(node) {
     );
 
     const messageValue = property.value.value;
-    return messagesIds.map(id => [id, messageValue]);
+    return [messageId, messageValue];
   }
 }

@@ -25,11 +25,7 @@ import {
   isStringLiteral,
 } from '@babel/types';
 
-import {
-  isPropertyWithKey,
-  parseConditionalOperatorAST,
-  escapeLineBreak,
-} from './utils';
+import { isPropertyWithKey, escapeLineBreak } from './utils';
 import { DEFAULT_MESSAGE_KEY } from './constants';
 
 /**
@@ -40,14 +36,19 @@ import { DEFAULT_MESSAGE_KEY } from './constants';
 export function extractIntlMessages(node) {
   const options = node.arguments[0];
 
-  const messagesIds = [];
+  let messageId = '';
   let messageValue = '';
 
   if (isObjectExpression(options)) {
     for (const property of options.properties) {
       if (isPropertyWithKey(property, 'id')) {
-        messagesIds.push(...parseConditionalOperatorAST(property.value));
+        if (!isStringLiteral(property.value)) {
+          throw new Error('Message id should be a string literal.');
+        }
+
+        messageId = property.value.value;
       }
+
       if (
         isPropertyWithKey(property, DEFAULT_MESSAGE_KEY) &&
         isStringLiteral(property.value)
@@ -57,19 +58,15 @@ export function extractIntlMessages(node) {
     }
   }
 
-  if (messagesIds.length === 0) {
-    throw new Error(
-      'Empty "id" values in Intl.formatMessage() are not allowed.'
-    );
+  if (!messageId) {
+    throw new Error('Empty "id" value in Intl.formatMessage() is not allowed.');
   }
 
   if (!messageValue) {
-    throw new Error(
-      `Default messages are required for ids: ${messagesIds.join(', ')}.`
-    );
+    throw new Error(`Default message is required for id: ${messageId}.`);
   }
 
-  return messagesIds.map(id => [id, messageValue]);
+  return [messageId, messageValue];
 }
 
 /**
@@ -78,19 +75,23 @@ export function extractIntlMessages(node) {
  * @returns {[string, string][]} Array of id-message tuples
  */
 export function extractFormattedMessages(node) {
-  const messagesIds = [];
+  let messageId = '';
   let messageValue = '';
 
   for (const attribute of node.attributes) {
-    if (
-      isJSXAttribute(attribute) &&
-      isJSXIdentifier(attribute.name, { name: 'id' })
-    ) {
-      messagesIds.push(...parseConditionalOperatorAST(attribute.value));
+    if (!isJSXAttribute(attribute)) {
+      continue;
+    }
+
+    if (isJSXIdentifier(attribute.name, { name: 'id' })) {
+      if (!isStringLiteral(attribute.value)) {
+        throw new Error('Message id should be a string literal.');
+      }
+
+      messageId = attribute.value.value;
     }
 
     if (
-      isJSXAttribute(attribute) &&
       isJSXIdentifier(attribute.name, {
         name: DEFAULT_MESSAGE_KEY,
       })
@@ -105,17 +106,13 @@ export function extractFormattedMessages(node) {
     }
   }
 
-  if (messagesIds.length === 0) {
-    throw new Error(
-      'Empty "id" values in <FormattedMessage> are not allowed.'
-    );
+  if (!messageId) {
+    throw new Error('Empty "id" value in <FormattedMessage> is not allowed.');
   }
 
   if (!messageValue) {
-    throw new Error(
-      `Default messages are required for ids: ${messagesIds.join(', ')}.`
-    );
+    throw new Error(`Default message is required for id: ${messageId}.`);
   }
 
-  return messagesIds.map(id => [id, messageValue]);
+  return [messageId, messageValue];
 }

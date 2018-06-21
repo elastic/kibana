@@ -27,11 +27,15 @@ import {
   writeFileAsync,
   pathExists,
   readFileAsync,
+  throwEntryException,
 } from './utils';
 
 function addMessageToMap(targetMap, key, value) {
-  if (targetMap.has(key) && targetMap.get(key) !== value) {
-    throw new Error(`Default messages are different for id "${key}"`);
+  const existingValue = targetMap.get(key);
+  if (targetMap.has(key) && existingValue !== value) {
+    throw new Error(
+      `There is more than one default message for the same id "${key}": "${existingValue}" and "${value}"`
+    );
   }
   targetMap.set(key, value);
 }
@@ -103,32 +107,43 @@ export async function extractDefaultTranslations(inputPath) {
   // If some file contains an error, we cannot handle it until all files are read.
   // TODO: move files reading to "extract*" async generators after async iterators implementation (for-await-of syntax)
   // to get rid of Promise.all().
-  // Run NodeJS with --harmony-async-iteration flag to use async iterators in NodeJS 8 or wait for NodeJS 10 LTS
 
   const htmlFiles = await Promise.all(
-    htmlEntries.map(entry => {
-      return readFileAsync(entry).then(buffer => ({
+    htmlEntries.map(async entry => {
+      return {
         name: entry,
-        content: buffer.toString(),
-      }));
+        content: await readFileAsync(entry),
+      };
     })
   );
 
-  for (const [id, value] of extractHtmlMessages(htmlFiles)) {
-    addMessageToMap(defaultMessagesMap, id, value);
+  for (const { name, content } of htmlFiles) {
+    try {
+      for (const [id, value] of extractHtmlMessages(content)) {
+        addMessageToMap(defaultMessagesMap, id, value);
+      }
+    } catch (error) {
+      throwEntryException(error, name);
+    }
   }
 
   const codeFiles = await Promise.all(
-    codeEntries.map(entry => {
-      return readFileAsync(entry).then(buffer => ({
+    codeEntries.map(async entry => {
+      return {
         name: entry,
-        content: buffer.toString(),
-      }));
+        content: readFileAsync(entry),
+      };
     })
   );
 
-  for (const [id, value] of extractCodeMessages(codeFiles)) {
-    addMessageToMap(defaultMessagesMap, id, value);
+  for (const { name, content } of codeFiles) {
+    try {
+      for (const [id, value] of extractCodeMessages(content)) {
+        addMessageToMap(defaultMessagesMap, id, value);
+      }
+    } catch (error) {
+      throwEntryException(error, name);
+    }
   }
 
   const defaultMessages = buildDefaultMessagesObject(defaultMessagesMap);
@@ -140,7 +155,7 @@ export async function extractDefaultTranslations(inputPath) {
   }
 
   await writeFileAsync(
-    resolvePath(inputPath, 'translations/defaultMessages.json'),
+    resolvePath(inputPath, 'translations', 'defaultMessages.json'),
     JSON.stringify(defaultMessages, null, 2)
   );
 }
