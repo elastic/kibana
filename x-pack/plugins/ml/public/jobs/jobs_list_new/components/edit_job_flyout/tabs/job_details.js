@@ -18,13 +18,11 @@ import {
 } from '@elastic/eui';
 
 import '../styles/main.less';
-import { mlJobService } from 'plugins/ml/services/job_service';
+import { ml } from 'plugins/ml/services/ml_api_service';
 
 export class JobDetails extends Component {
   constructor(props) {
     super(props);
-
-    this.groups = mlJobService.getJobGroups().map((g) => ({ label: g.id }));
 
     this.state = {
       description: '',
@@ -33,6 +31,18 @@ export class JobDetails extends Component {
     };
 
     this.setJobDetails = props.setJobDetails;
+  }
+
+  componentDidMount() {
+    // load groups to populate the select options
+    ml.jobService.groups()
+      .then((resp) => {
+        const groups = resp.map(g => ({ label: g.id }));
+        this.setState({ groups });
+      })
+      .catch((error) => {
+        console.error('Could not load groups', error);
+      });
   }
 
   static getDerivedStateFromProps(props) {
@@ -70,24 +80,28 @@ export class JobDetails extends Component {
       label: input,
     };
 
+    const groups = this.state.groups;
     // Create the option if it doesn't exist.
     if (flattenedOptions.findIndex(option =>
       option.label.trim().toLowerCase() === normalizedSearchValue
     ) === -1) {
-      this.groups.push(newGroup);
+      groups.push(newGroup);
     }
 
-    // Select the option.
-    this.setState(prevState => ({
-      selectedGroups: prevState.selectedGroups.concat(newGroup),
-    }));
+    const selectedGroups = this.state.selectedGroups.concat(newGroup);
+
+    // update the groups in local state and call groupsChange to
+    // update the selected groups in the component above which manages this
+    // component's state
+    this.setState({ groups }, () => this.groupsChange(selectedGroups));
   };
 
   render() {
     const {
       description,
       selectedGroups,
-      mml
+      mml,
+      groups,
     } = this.state;
     return (
       <React.Fragment>
@@ -106,7 +120,7 @@ export class JobDetails extends Component {
           >
             <EuiComboBox
               placeholder="Select or create groups"
-              options={this.groups}
+              options={groups}
               selectedOptions={selectedGroups}
               onChange={this.groupsChange}
               onCreateOption={this.onCreateGroup}

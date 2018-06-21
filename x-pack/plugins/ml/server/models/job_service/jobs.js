@@ -14,6 +14,7 @@ const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 export function jobsProvider(callWithRequest) {
 
   const { forceDeleteDatafeed } = datafeedsProvider(callWithRequest);
+  const calMngr = new CalendarManager(callWithRequest);
 
   async function forceDeleteJob(jobId) {
     return callWithRequest('ml.deleteJob', { jobId, force: true });
@@ -76,8 +77,6 @@ export function jobsProvider(callWithRequest) {
   }
 
   async function createFullJobsList(jobIds = []) {
-    const calMngr = new CalendarManager(callWithRequest);
-
     const [ JOBS, JOB_STATS, DATAFEEDS, DATAFEED_STATS, CALENDARS ] = [0, 1, 2, 3, 4];
 
     const jobs = [];
@@ -209,10 +208,61 @@ export function jobsProvider(callWithRequest) {
     return obj;
   }
 
+  async function getAllGroups() {
+    const groups = {};
+    const jobIds = {};
+    const [ JOBS, CALENDARS ] = [0, 1];
+    const results = await Promise.all([
+      callWithRequest('ml.jobs'),
+      calMngr.getAllCalendars(),
+    ]);
+
+    if (results[JOBS] && results[JOBS].jobs) {
+      results[JOBS].jobs.forEach((job) => {
+        jobIds[job.job_id] = null;
+        if (job.groups !== undefined) {
+          job.groups.forEach((g) => {
+            if (groups[g] === undefined) {
+              groups[g] = {
+                id: g,
+                jobIds: [job.job_id],
+                calendarIds: []
+              };
+            } else {
+              groups[g].jobIds.push(job.job_id);
+            }
+
+          });
+
+        }
+      });
+    }
+    if (results[CALENDARS]) {
+      results[CALENDARS].forEach((cal) => {
+        cal.job_ids.forEach((jId) => {
+          if (jobIds[jId] === undefined) {
+            if (groups[jId] === undefined) {
+              groups[jId] = {
+                id: jId,
+                jobIds: [],
+                calendarIds: [cal.calendar_id]
+              };
+            } else {
+              groups[jId].calendarIds.push(cal.calendar_id);
+            }
+          }
+        });
+      });
+    }
+
+    return Object.keys(groups).map(g => groups[g]);
+  }
+
   return {
     forceDeleteJob,
     deleteJobs,
     jobsSummary,
     createFullJobsList,
+    getAllGroups,
   };
 }

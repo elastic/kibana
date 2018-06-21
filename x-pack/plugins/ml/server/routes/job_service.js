@@ -95,4 +95,19 @@ export function jobServiceRoutes(server, commonRouteConfig) {
     }
   });
 
+  server.route({
+    method: 'GET',
+    path: '/api/ml/jobs/groups',
+    handler(request, reply) {
+      const callWithRequest = callWithRequestFactory(server, request);
+      const { getAllGroups } = jobServiceProvider(callWithRequest);
+      return getAllGroups()
+        .then(resp => reply(resp))
+        .catch(resp => reply(wrapError(resp)));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
 }

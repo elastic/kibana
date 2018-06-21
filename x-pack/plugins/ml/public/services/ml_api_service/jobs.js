@@ -32,6 +32,13 @@ export const jobs = {
     });
   },
 
+  groups() {
+    return http({
+      url: `${basePath}/jobs/groups`,
+      method: 'GET',
+    });
+  },
+
   forceStartDatafeeds(datafeedIds, start, end) {
     return http({
       url: `${basePath}/jobs/force_start_datafeeds`,
