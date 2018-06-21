@@ -5,7 +5,9 @@
  */
 
 import { datafeedsProvider } from './datafeeds';
+import { CalendarManager } from '../calendar';
 import moment from 'moment';
+import { uniq } from 'lodash';
 
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
@@ -74,15 +76,20 @@ export function jobsProvider(callWithRequest) {
   }
 
   async function createFullJobsList(jobIds = []) {
-    const [ JOBS, JOB_STATS, DATAFEEDS, DATAFEED_STATS ] = [0, 1, 2, 3];
+    const calMngr = new CalendarManager(callWithRequest);
+
+    const [ JOBS, JOB_STATS, DATAFEEDS, DATAFEED_STATS, CALENDARS ] = [0, 1, 2, 3, 4];
 
     const jobs = [];
-    const datafeeds = [];
+    const groups = {};
+    const datafeeds = {};
+    const calendarsByJobId = {};
     const results = await Promise.all([
       callWithRequest('ml.jobs', { jobId: jobIds }),
       callWithRequest('ml.jobStats', { jobId: jobIds }),
       callWithRequest('ml.datafeeds'),
       callWithRequest('ml.datafeedStats'),
+      calMngr.getAllCalendars(),
     ]);
 
     if (results[DATAFEEDS] && results[DATAFEEDS].datafeeds) {
@@ -93,15 +100,65 @@ export function jobsProvider(callWithRequest) {
             datafeed.state = datafeedStats.state;
           }
         }
-        datafeeds.push(datafeed);
+        datafeeds[datafeed.job_id] = datafeed;
       });
     }
 
+    // create list of jobs per group.
+    // used for assigning calendars to jobs when a calendar has
+    // only been attached to a group
+    if (results[JOBS] && results[JOBS].jobs) {
+      results[JOBS].jobs.forEach((job) => {
+        calendarsByJobId[job.job_id] = [];
+
+        if (job.groups !== undefined) {
+          job.groups.forEach((gId) => {
+            if (groups[gId] === undefined) {
+              groups[gId] = [];
+            }
+            groups[gId].push(job.job_id);
+          });
+        }
+      });
+    }
+
+    // assign calendars to jobs
+    if (results[CALENDARS]) {
+      results[CALENDARS].forEach((cal) => {
+        cal.job_ids.forEach((id) => {
+          if (groups[id]) {
+            groups[id].forEach((jId) => {
+              if (calendarsByJobId[jId] !== undefined) {
+                calendarsByJobId[jId].push(cal.calendar_id);
+              }
+            });
+          } else {
+            if (calendarsByJobId[id] !== undefined) {
+              calendarsByJobId[id].push(cal.calendar_id);
+            }
+          }
+        });
+      });
+
+      // de-duplicate calendars
+      for (const cal in calendarsByJobId) {
+        if (calendarsByJobId.hasOwnProperty(cal)) {
+          calendarsByJobId[cal] = uniq(calendarsByJobId[cal]);
+        }
+      }
+    }
+
+
+    // create jobs objects containing job stats, datafeeds, datafeed stats and calendars
     if (results[JOBS] && results[JOBS].jobs) {
       results[JOBS].jobs.forEach((job) => {
         job.data_counts = {};
         job.model_size_stats = {};
         job.datafeed_config = {};
+
+        if (calendarsByJobId[job.job_id].length) {
+          job.calendars = calendarsByJobId[job.job_id];
+        }
 
         if (results[JOB_STATS] && results[JOB_STATS].jobs) {
           const jobStats = results[JOB_STATS].jobs.find(js => (js.job_id === job.job_id));
@@ -118,7 +175,7 @@ export function jobsProvider(callWithRequest) {
           }
         }
 
-        const datafeed = datafeeds.find(df => (df.job_id === job.job_id));
+        const datafeed = datafeeds[job.job_id];
         if (datafeed !== undefined) {
           job.datafeed_config = datafeed;
         }
