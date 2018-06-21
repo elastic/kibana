@@ -19,6 +19,9 @@ export function rollup(kibana)  {
         'plugins/rollup/index_pattern_creation',
         'plugins/rollup/index_pattern_list',
       ],
+      visualize: [
+        'plugins/rollup/vis_type_agg_filter',
+      ],
     },
     init: function (server) {
       registerLicenseChecker(server);
