@@ -33,7 +33,7 @@ class VisualizationStub {
 
   render() {
     renderPromise = new Promise((resolve) => {
-      this.el.innerText = this.vis.params.markdown;
+      this.el.textContent = this.vis.params.markdown;
       resolve();
     });
 
@@ -76,9 +76,10 @@ describe('VisualizationChart', () => {
 
   });
 
-  it('should render visualization', () => {
+  it('should render visualization', async () => {
     const wrapper = mount(<VisualizationChart vis={vis} listenOnChange={true} />);
     jest.runAllTimers();
+    await renderPromise;
     expect(wrapper.find('.visualize-chart').text()).toMatch(/markdown/);
   });
 
@@ -90,10 +91,12 @@ describe('VisualizationChart', () => {
     jest.runAllTimers();
     await renderPromise;
     expect(renderComplete).toHaveBeenCalledTimes(1);
+
     vis.params.markdown = 'new text';
     wrapper.setProps({ vis });
     jest.runAllTimers();
     await renderPromise;
+
     expect(wrapper.find('.visualize-chart').text()).toBe('new text');
     expect(renderComplete).toHaveBeenCalledTimes(2);
   });

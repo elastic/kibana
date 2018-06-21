@@ -33,27 +33,30 @@ const _showNoResultsMessage = (vis, visData) => {
 export class Visualization extends Component {
   constructor(props) {
     super(props);
-    props.vis.initialized = true;
 
-    props.vis._setUiState(props.uiState);
-    if (props.listenOnChange) {
-      props.uiState.on('change', this._onChangeListener);
+    const { vis, visData, uiState, listenOnChange } = props;
+    vis.initialized = true;
+
+    vis._setUiState(props.uiState);
+    if (listenOnChange) {
+      uiState.on('change', this._onChangeListener);
     }
 
     this.state = {
-      listenOnChange: props.listenOnChange,
-      showNoResultsMessage: _showNoResultsMessage(props.vis, props.visData)
+      listenOnChange: listenOnChange,
+      showNoResultsMessage: _showNoResultsMessage(vis, visData)
     };
   }
 
   render() {
+    const { vis, visData, listenOnChange } = this.props;
     return (
       <div className="visualization">
         {this.state.showNoResultsMessage ? (<VisualizationNoResults />) :
           (<VisualizationChart
-            vis={this.props.vis}
-            visData={this.props.visData}
-            listenOnChange={this.props.listenOnChange}
+            vis={vis}
+            visData={visData}
+            listenOnChange={listenOnChange}
           />)
         }
       </div>
@@ -65,7 +68,7 @@ export class Visualization extends Component {
   };
 
   static getDerivedStateFromProps(props, prevState) {
-    const listenOnChangeChanged = props.listenOnChange && props.listenOnChange !== prevState.listenOnChange;
+    const listenOnChangeChanged = props.hasOwnProperty('listenOnChange') && props.listenOnChange !== prevState.listenOnChange;
     const uiStateChanged = props.uiState && props.uiState !== props.vis.getUiState();
     if (listenOnChangeChanged || uiStateChanged) {
       throw new Error('Changing listenOnChange or uiState props is not allowed!');

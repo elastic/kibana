@@ -37,12 +37,12 @@ export class VisualizationChart extends Component {
 
     const success$ = render$.pipe(
       tap(() => {
-        dispatchRenderStart(this.chartDiv);
+        dispatchRenderStart(this.chartDiv.current);
       }),
       filter(({ vis, visData, container }) => vis && vis.initialized && container && (!vis.type.requiresSearch || visData)),
       debounceTime(100),
       switchMap(async ({ vis, visData, container }) => {
-        vis.size = [container.width(), container.height()];
+        vis.size = [$(container).width(), $(container).height()];
         const status = getUpdateStatus(vis.type.requiresUpdateStatus, this, this.props);
         const renderPromise = this.visualization.render(visData, status);
         return renderPromise;
@@ -55,21 +55,23 @@ export class VisualizationChart extends Component {
 
     this.renderSubscription = Rx.merge(success$, requestError$)
       .subscribe(() => {
-        dispatchRenderComplete(this.chartDiv);
+        dispatchRenderComplete(this.chartDiv.current);
       });
 
+    this.chartDiv = React.createRef();
+    this.containerDiv = React.createRef();
   }
 
   render() {
     return (
-      <div className="vis-container" tabIndex="0" ref={c => this.containerDiv = c}>
+      <div className="vis-container" tabIndex="0" ref={this.containerDiv}>
         <span className="kuiScreenReaderOnly">
           {this.props.vis.type.title} visualization, not yet accessible
         </span>
         <div
           aria-hidden={!this.props.vis.type.isAccessible}
           className="visualize-chart"
-          ref={c => this.chartDiv = c}
+          ref={this.chartDiv}
         />
       </div>
     );
@@ -79,16 +81,17 @@ export class VisualizationChart extends Component {
     this._observer.next({
       vis: this.props.vis,
       visData: this.props.visData,
-      container: $(this.containerDiv)
+      container: this.containerDiv.current
     });
   };
 
   componentDidMount() {
     const Visualization = this.props.vis.type.visualization;
-    this.visualization = new Visualization(this.chartDiv, this.props.vis);
+
+    this.visualization = new Visualization(this.chartDiv.current, this.props.vis);
 
     if (this.props.listenOnChange) {
-      this.resizeChecker = new ResizeChecker(this.containerDiv);
+      this.resizeChecker = new ResizeChecker(this.containerDiv.current);
       this.resizeChecker.on('resize', this._startRenderVisualization);
     }
 
