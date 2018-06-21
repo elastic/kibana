@@ -17,23 +17,22 @@
  * under the License.
  */
 
-export * from './bootstrap_task';
-export * from './build_packages_task';
-export * from './clean_tasks';
-export * from './copy_source_task';
-export * from './create_archives_sources_task';
-export * from './create_archives_task';
-export * from './create_empty_dirs_and_files_task';
-export * from './create_package_json_task';
-export * from './create_readme_task';
-export * from './install_dependencies_task';
-export * from './license_file_task';
-export * from './nodejs';
-export * from './notice_file_task';
-export * from './optimize_task';
-export * from './os_packages';
-export * from './transpile_babel_task';
-export * from './transpile_typescript_task';
-export * from './transpile_scss_task';
-export * from './verify_env_task';
-export * from './write_sha_sums_task';
+import { Build } from './build';
+import { collectUiExports } from '../../ui/ui_exports';
+
+export function buildAll(enabledPluginSpecs, { onSuccess, onError }) {
+  const { uiAppSpecs = [] } = collectUiExports(enabledPluginSpecs);
+
+  return Promise.all(uiAppSpecs.reduce((acc, uiAppSpec) => {
+    if (!uiAppSpec.styleSheetPath) {
+      return acc;
+    }
+
+    const builder = new Build(uiAppSpec.styleSheetPath, {
+      onSuccess,
+      onError,
+    });
+
+    return [...acc, builder.build()];
+  }, []));
+}
