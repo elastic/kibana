@@ -29,7 +29,6 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiButton,
-  EuiButtonIcon,
   EuiTabs,
   EuiTab,
   EuiSpacer,
@@ -141,14 +140,6 @@ export class DashboardAddPanel extends React.Component {
               <EuiTitle>
                 <h2>Add Panels</h2>
               </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="cross"
-                onClick={this.props.onClose}
-                aria-label="close add panel"
-                data-test-subj="closeAddPanelBtn"
-              />
             </EuiFlexItem>
           </EuiFlexGroup>
 

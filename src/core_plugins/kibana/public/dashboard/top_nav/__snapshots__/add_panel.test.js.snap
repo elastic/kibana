@@ -4,6 +4,7 @@ exports[`render 1`] = `
 <EuiFlyout
   className="addPanelFlyout"
   data-test-subj="dashboardAddPanel"
+  hideCloseButton={false}
   onClose={[Function]}
   ownFocus={true}
   size="s"
@@ -29,19 +30,6 @@ exports[`render 1`] = `
             Add Panels
           </h2>
         </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={false}
-      >
-        <EuiButtonIcon
-          aria-label="close add panel"
-          color="primary"
-          data-test-subj="closeAddPanelBtn"
-          iconType="cross"
-          onClick={[Function]}
-          type="button"
-        />
       </EuiFlexItem>
     </EuiFlexGroup>
     <EuiTabs>

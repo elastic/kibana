@@ -77,9 +77,9 @@
   version "0.0.0"
   uid ""
 
-"@elastic/eui@0.0.52", "@elastic/eui@v0.0.52":
-  version "0.0.52"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-0.0.52.tgz#c34c6cd482b458015e0d2b410f98652053994138"
+"@elastic/eui@0.0.53":
+  version "0.0.53"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-0.0.53.tgz#73c8e73e0b2a5574748d2a95416e99e78f355f07"
   dependencies:
     classnames "^2.2.5"
     core-js "^2.5.1"
@@ -220,6 +220,14 @@
     url-join "^4.0.0"
     ws "^4.1.0"
 
+"@types/angular@^1.6.45":
+  version "1.6.45"
+  resolved "https://registry.yarnpkg.com/@types/angular/-/angular-1.6.45.tgz#5b0b91a51d717f6fc816d59e1234d5292f33f7b9"
+
+"@types/classnames@^2.2.3":
+  version "2.2.3"
+  resolved "https://registry.yarnpkg.com/@types/classnames/-/classnames-2.2.3.tgz#3f0ff6873da793870e20a260cada55982f38a9e5"
+
 "@types/delay@^2.0.1":
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@types/delay/-/delay-2.0.1.tgz#61bcf318a74b61e79d1658fbf054f984c90ef901"
@@ -275,6 +283,10 @@
   dependencies:
     "@types/node" "*"
 
+"@types/jest@^22.2.3":
+  version "22.2.3"
+  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-22.2.3.tgz#0157c0316dc3722c43a7b71de3fdf3acbccef10d"
+
 "@types/json-schema@*":
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-6.0.1.tgz#a761975746f1c1b2579c62e3a4b5e88f986f7e2e"
@@ -288,6 +300,10 @@
   resolved "https://registry.yarnpkg.com/@types/listr/-/listr-0.13.0.tgz#6250bc4a04123cafa24fc73d1b880653a6ae6721"
   dependencies:
     "@types/node" "*"
+
+"@types/lodash@^3.10.1":
+  version "3.10.2"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-3.10.2.tgz#c1fbda1562ef5603c8192fe1fe65b017849d5873"
 
 "@types/loglevel@^1.5.3":
   version "1.5.3"
@@ -339,6 +355,14 @@
   resolved "https://registry.yarnpkg.com/@types/react/-/react-16.3.14.tgz#f90ac6834de172e13ecca430dcb6814744225d36"
   dependencies:
     csstype "^2.2.0"
+
+"@types/redux-actions@^2.2.1":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@types/redux-actions/-/redux-actions-2.3.0.tgz#d28d7913ec86ee9e20ecb33a1fed887ecb538149"
+
+"@types/redux@^3.6.31":
+  version "3.6.31"
+  resolved "https://registry.yarnpkg.com/@types/redux/-/redux-3.6.31.tgz#40eafa7575db36b912ce0059b85de98c205b0708"
 
 "@types/retry@*", "@types/retry@^0.10.2":
   version "0.10.2"
@@ -10353,8 +10377,8 @@ react-dom@^16.0.0:
     prop-types "^15.6.0"
 
 react-dom@^16.3.0:
-  version "16.3.2"
-  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.3.2.tgz#cb90f107e09536d683d84ed5d4888e9640e0e4df"
+  version "16.3.1"
+  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.3.1.tgz#6a3c90a4fb62f915bdbcf6204422d93a7d4ca573"
   dependencies:
     fbjs "^0.8.16"
     loose-envify "^1.1.0"
@@ -10586,8 +10610,8 @@ react@>=0.13.3, react@^16.2.0:
     prop-types "^15.6.0"
 
 react@^16.3.0:
-  version "16.3.2"
-  resolved "https://registry.yarnpkg.com/react/-/react-16.3.2.tgz#fdc8420398533a1e58872f59091b272ce2f91ea9"
+  version "16.3.1"
+  resolved "https://registry.yarnpkg.com/react/-/react-16.3.1.tgz#4a2da433d471251c69b6033ada30e2ed1202cfd8"
   dependencies:
     fbjs "^0.8.16"
     loose-envify "^1.1.0"

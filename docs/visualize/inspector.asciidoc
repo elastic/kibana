@@ -1,0 +1,17 @@
+[[vis-inspector]]
+== Inspector
+
+Many visualizations have an Inspector that can help you gain insight to the data
+behind the visualization.
+
+To open the Inspector use the Inspector button while in the editor or select Inspector
+from the Dashboard panel menu.
+
+From the Inspector, you can download the visualization data as a comma separated
+values (CSV) file in Formatted or Raw format. Formatted downloads the data in table format.
+Raw downloads the data as provided -- dates are timestamps, numbers don’t have
+thousand separators, and so on.
+
+To view the requests that collected the data, select Requests from the View menu in the upper right.
+
+Which views are available depends on the inspected visualization.
