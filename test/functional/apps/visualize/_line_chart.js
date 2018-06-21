@@ -69,6 +69,10 @@ export default function ({ getService, getPageObjects }) {
     describe('line charts', function indexPatternCreation() {
       const vizName1 = 'Visualization LineChart';
 
+      afterEach(async () => {
+        await PageObjects.visualize.closeInspector();
+      });
+
       it('should show correct chart, take screenshot', function () {
 
         // this test only verifies the numerical part of this data
@@ -93,8 +97,8 @@ export default function ({ getService, getPageObjects }) {
           });
       });
 
-      it('should display spy panel toggle button', async function () {
-        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
+      it('should have inspector enabled', async function () {
+        const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
         expect(spyToggleExists).to.be(true);
       });
 
@@ -130,15 +134,15 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show correct data, ordered by Term', function () {
 
-        const expectedChartData = ['png', '1,373', 'php', '445', 'jpg', '9,109', 'gif', '918', 'css', '2,159'];
+        const expectedChartData = [['png', '1,373'], ['php', '445'], ['jpg', '9,109'], ['gif', '918'], ['css', '2,159']];
 
-        return PageObjects.visualize.toggleSpyPanel()
-          .then(function getDataTableData() {
-            return PageObjects.visualize.getDataTableData();
+        return PageObjects.visualize.openInspector()
+          .then(function getInspectorTableData() {
+            return PageObjects.visualize.getInspectorTableData();
           })
           .then(function showData(data) {
-            log.debug(data.split('\n'));
-            expect(data.trim().split('\n')).to.eql(expectedChartData);
+            log.debug(data);
+            expect(data).to.eql(expectedChartData);
           });
       });
 
