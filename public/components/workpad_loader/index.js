@@ -19,7 +19,7 @@ export const WorkpadLoader = compose(
   withHandlers({
     // Workpad creation via navigation
     createWorkpad: props => async workpad => {
-      // workpad passed in, create and load it
+      // workpad data uploaded, create and load it
       if (workpad != null) {
         await workpadService.create(workpad);
         props.router.navigateTo('loadWorkpad', { id: workpad.id, page: 1 });

@@ -98,7 +98,8 @@ export function workpad(server) {
       return savedObjectsClient
         .get(CANVAS_TYPE, id)
         .then(obj => obj.attributes)
-        .then(formatResponse(reply));
+        .then(formatResponse(reply))
+        .catch(formatResponse(reply));
     },
   });
 

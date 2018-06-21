@@ -1,8 +1,12 @@
 import { notify as kbnNotify } from 'ui/notify';
 
 export const notify = {
-  error(msg, opts = {}) {
-    kbnNotify.error(msg, opts);
+  /*
+   * @param {Object} err: Error object
+   * @param {Object} opts: option to override notification icon
+   */
+  error(err, opts = {}) {
+    kbnNotify.error(err, opts);
   },
   warning(msg, opts = {}) {
     kbnNotify.warning(msg, opts);

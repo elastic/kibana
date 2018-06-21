@@ -1,4 +1,5 @@
 import * as workpadService from '../../lib/workpad_service';
+import { notify } from '../../lib/notify';
 import { getDefaultWorkpad } from '../../state/defaults';
 import { setWorkpad } from '../../state/actions/workpad';
 import { setAssets, resetAssets } from '../../state/actions/assets';
@@ -32,10 +33,13 @@ export const routes = [
           // load workpad if given a new id via url param
           const currentWorkpad = getWorkpad(getState());
           if (params.id !== currentWorkpad.id) {
-            // TODO: handle missing/invalid workpad id's (mostly 404)
-            const { assets, ...workpad } = await workpadService.get(params.id);
-            dispatch(setWorkpad(workpad));
-            dispatch(setAssets(assets));
+            try {
+              const { assets, ...workpad } = await workpadService.get(params.id);
+              dispatch(setWorkpad(workpad));
+              dispatch(setAssets(assets));
+            } catch (fetchErr) {
+              notify.error(fetchErr);
+            }
           }
 
           // fetch the workpad again, to get changes

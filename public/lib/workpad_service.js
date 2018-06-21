@@ -10,7 +10,10 @@ export function create(workpad) {
 }
 
 export function get(workpadId) {
-  return fetch.get(`${apiPath}/${workpadId}`).then(res => res.data);
+  return fetch
+    .get(`${apiPath}/${workpadId}`)
+    .then(res => res.data)
+    .catch(({ response }) => Promise.reject(response));
 }
 
 export function update(id, workpad) {
