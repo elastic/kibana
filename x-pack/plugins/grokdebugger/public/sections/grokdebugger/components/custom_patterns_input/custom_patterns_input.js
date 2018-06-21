@@ -35,7 +35,10 @@ MSG message-id=<%{GREEDYDATA}>`;
 
       <EuiSpacer />
 
-      <EuiFormRow fullWidth>
+      <EuiFormRow
+        fullWidth
+        data-test-subj="aceCustomPatternsInput"
+      >
         <EuiCodeEditor
           width="100%"
           height="51px"
@@ -47,7 +50,6 @@ MSG message-id=<%{GREEDYDATA}>`;
             minLines: EDITOR.PATTERN_MIN_LINES,
             maxLines: EDITOR.PATTERN_MAX_LINES,
           }}
-          data-test-subj="aceCustomPatternsInput"
         />
       </EuiFormRow>
     </EuiAccordion>

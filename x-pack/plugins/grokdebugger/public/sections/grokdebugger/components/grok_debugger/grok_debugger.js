@@ -113,6 +113,7 @@ export class GrokDebugger extends React.Component {
                   fill
                   onClick={this.onSimulateClick}
                   isDisabled={this.isSimulateDisabled()}
+                  data-test-subj="btnSimulate"
                 >
                   Simulate
                 </EuiButton>

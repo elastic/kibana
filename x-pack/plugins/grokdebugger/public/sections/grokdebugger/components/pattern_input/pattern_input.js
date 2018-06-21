@@ -17,6 +17,7 @@ export function PatternInput({ value, onChange }) {
     <EuiFormRow
       label="Grok Pattern"
       fullWidth
+      data-test-subj="acePatternInput"
     >
       <EuiCodeEditor
         width="100%"
@@ -30,7 +31,6 @@ export function PatternInput({ value, onChange }) {
           minLines: EDITOR.PATTERN_MIN_LINES,
           maxLines: EDITOR.PATTERN_MAX_LINES,
         }}
-        data-test-subj="acePatternInput"
       />
     </EuiFormRow>
   );

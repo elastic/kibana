@@ -12,7 +12,10 @@ import {
 
 export function EventOutput({ value }) {
   return (
-    <EuiFormRow label="Structured Data">
+    <EuiFormRow
+      label="Structured Data"
+      data-test-subj="aceEventOutput"
+    >
       <EuiCodeEditor
         mode="json"
         isReadOnly
@@ -23,7 +26,6 @@ export function EventOutput({ value }) {
           highlightActiveLine: false,
           highlightGutterLine: false,
         }}
-        data-test-subj="aceEventOutput"
       />
     </EuiFormRow>
   );

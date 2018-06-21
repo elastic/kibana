@@ -16,6 +16,7 @@ export function EventInput({ value, onChange }) {
     <EuiFormRow
       label="Sample Data"
       fullWidth
+      data-test-subj="aceEventInput"
     >
       <EuiCodeEditor
         width="100%"
@@ -28,7 +29,6 @@ export function EventInput({ value, onChange }) {
           minLines: EDITOR.SAMPLE_DATA_MIN_LINES,
           maxLines: EDITOR.SAMPLE_DATA_MAX_LINES
         }}
-        data-test-subj="aceEventInput"
       />
     </EuiFormRow>
   );
