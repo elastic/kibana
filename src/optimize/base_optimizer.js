@@ -338,18 +338,15 @@ export default class BaseOptimizer {
     }
 
     return webpackMerge(commonConfig, {
+      optimization: {
+        minimize: true
+      },
+
       plugins: [
         new webpack.DefinePlugin({
           'process.env': {
             'NODE_ENV': '"production"'
           }
-        }),
-        new webpack.optimize.UglifyJsPlugin({
-          compress: {
-            warnings: false
-          },
-          sourceMap: false,
-          mangle: false
         }),
       ]
     });
