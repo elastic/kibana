@@ -70,4 +70,21 @@ export const jobs = {
       }
     });
   },
+
+  jobAuditMessages(jobId, from) {
+    const jobIdString = (jobId !== undefined) ? `/${jobId}` : '';
+    const fromString = (from !== undefined) ? `?from=${from}` : '';
+    return http({
+      url: `${basePath}/job_audit_messages/messages${jobIdString}${fromString}`,
+      method: 'GET',
+    });
+  },
+
+  jobAuditSummary() {
+    return http({
+      url: `${basePath}/job_audit_messages/summary`,
+      method: 'GET',
+    });
+  },
+
 };

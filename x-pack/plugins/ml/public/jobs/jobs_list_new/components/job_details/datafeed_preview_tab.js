@@ -19,6 +19,36 @@ import { checkPermission } from 'plugins/ml/privilege/check_privilege';
 import { ML_DATA_PREVIEW_COUNT } from 'plugins/ml/../common/util/job_utils';
 import { MLJobEditor } from '../ml_job_editor';
 
+export class DatafeedPreviewPane extends Component {
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      previewJson: ''
+    };
+  }
+
+  componentDidMount() {
+    updateDatafeedPreview(this.props.job)
+      .then((previewJson) => {
+        this.setState({ previewJson });
+      })
+      .catch((error) => {
+        console.log('Datafeed preview could not be loaded', error);
+      });
+  }
+
+  render() {
+    return (
+      <React.Fragment>
+        <EuiSpacer size="s" />
+        <MLJobEditor value={this.state.previewJson} readOnly={true} />
+      </React.Fragment>
+    );
+  }
+}
+
 function updateDatafeedPreview(job) {
   return new Promise((resolve, reject) => {
     const canPreviewDatafeed = checkPermission('canPreviewDatafeed');
@@ -37,32 +67,4 @@ function updateDatafeedPreview(job) {
         });
     }
   });
-}
-
-export class DatafeedPreviewPane extends Component {
-
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      previewJson: ''
-    };
-
-    updateDatafeedPreview(props.job)
-      .then((previewJson) => {
-        this.setState({ previewJson });
-      })
-      .catch((error) => {
-        console.log('Datafeed preview could not be loaded', error);
-      });
-  }
-
-  render() {
-    return (
-      <React.Fragment>
-        <EuiSpacer size="s" />
-        <MLJobEditor value={this.state.previewJson} readOnly={true} />
-      </React.Fragment>
-    );
-  }
 }

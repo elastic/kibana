@@ -20,6 +20,7 @@ import { JsonPane } from './json_tab';
 import { DatafeedPreviewPane } from './datafeed_preview_tab';
 import { ForecastsTable } from './forecasts_table';
 import { JobDetailsPane } from './job_details_pane';
+import { JobMessagesPane } from './job_messages_pane';
 
 export class JobDetails extends Component {
   constructor(props) {
@@ -87,9 +88,9 @@ export class JobDetails extends Component {
         name: 'JSON',
         content: <JsonPane job={job} />,
       }, {
-        id: 'job-message',
+        id: 'job-messages',
         name: 'Job messages',
-        content: <div />,
+        content: <JobMessagesPane job={job} />,
       }, {
         id: 'datafeed-preview',
         name: 'Datafeed preview',

@@ -18,8 +18,8 @@ export function jobAuditMessagesRoutes(server, commonRouteConfig) {
       const callWithRequest = callWithRequestFactory(server, request);
       const { getJobAuditMessages } = jobAuditMessagesProvider(callWithRequest);
       const { jobId } = request.params;
-      const fromRange = request.query.fromRange;
-      return getJobAuditMessages(fromRange, jobId)
+      const from = request.query.from;
+      return getJobAuditMessages(jobId, from)
         .then(resp => reply(resp))
         .catch(resp => reply(wrapError(resp)));
     },
@@ -34,8 +34,8 @@ export function jobAuditMessagesRoutes(server, commonRouteConfig) {
     handler(request, reply) {
       const callWithRequest = callWithRequestFactory(server, request);
       const { getJobAuditMessages } = jobAuditMessagesProvider(callWithRequest);
-      const fromRange = request.query.fromRange;
-      return getJobAuditMessages(fromRange, undefined)
+      const from = request.query.from;
+      return getJobAuditMessages(undefined, from)
         .then(resp => reply(resp))
         .catch(resp => reply(wrapError(resp)));
     },

@@ -11,7 +11,7 @@ import React, {
 
 import { ResultLinks, actionsMenuContent } from '../job_actions';
 import { JobDescription } from './job_description';
-import { JobIcon } from './job_icon';
+import { JobIcon } from '../job_message_icon';
 import './styles/main.less';
 
 import {
@@ -31,7 +31,6 @@ export class JobsList extends Component {
       jobsSummaryList: props.jobsSummaryList,
       pageIndex: 0,
       pageSize: PAGE_SIZE,
-      // selection: [],
       itemIdToExpandedRowMap: {}
     };
   }
@@ -97,7 +96,7 @@ export class JobsList extends Component {
         field: 'auditMessage',
         name: '',
         render: (item) => (
-          <JobIcon message={item} />
+          <JobIcon message={item} showTooltip={true} />
         )
       }, {
         name: 'Description',
