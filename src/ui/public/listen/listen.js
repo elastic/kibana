@@ -51,10 +51,7 @@ uiModules.get('kibana')
       const evalAsyncWrappedHandler = (...args) => {
         this.$evalAsync(() => handler(args));
       };
-      emitter.on(eventName, evalAsyncWrappedHandler);
-      this.$on('$destroy', function () {
-        emitter.off(eventName, evalAsyncWrappedHandler);
-      });
+      this.$listen(emitter, eventName, evalAsyncWrappedHandler);
     };
 
   });
