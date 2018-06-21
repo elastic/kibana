@@ -21,7 +21,6 @@ export function PatternInput({ value, onChange }) {
     >
       <EuiCodeEditor
         width="100%"
-        height="51px"
         value={value}
         onChange={onChange}
         mode={new GrokMode()}
