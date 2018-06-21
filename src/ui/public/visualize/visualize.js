@@ -186,6 +186,7 @@ uiModules
           $scope.vis.removeListener('update', handleVisUpdate);
           $scope.uiState.off('change', $scope.fetch);
           resizeChecker.destroy();
+          visualizationLoader.destroy($el[0]);
         });
 
         if ($scope.editorMode) {
