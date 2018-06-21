@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import path from 'path';
 import { UiNavLink } from '../ui_nav_links';
 
 export class UiApp {
@@ -104,17 +105,23 @@ export class UiApp {
     return this._main ? [this._main] : [];
   }
 
-  getStyleSheetPublicPath() {
+  getStyleSheetUrlPath() {
     if (!this._styleSheetPath) {
       return;
     }
 
-    // captures everything after public excluding the file extension
-    const match = this._styleSheetPath.match(/\/public\/(.*)\.[a-zA-Z]{3,4}$/);
+    const plugin = this._getPlugin();
 
-    if (match) {
-      return `plugins/${this.getId()}/${match[1]}.css`;
-    }
+    // get the path of the stylesheet relative to the public dir for the plugin
+    let relativePath = path.relative(plugin.publicDir, this._styleSheetPath);
+
+    // replace back slashes on windows
+    relativePath = relativePath.split('\\').join('/');
+
+    // replace the extension of relativePath to be .css
+    relativePath = relativePath.slice(0, -path.extname(relativePath).length) + '.css';
+
+    return `plugins/${this.getId()}/${relativePath}`;
   }
 
   _getPlugin() {

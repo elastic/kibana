@@ -11,7 +11,7 @@ export default function (kibana) {
         description: '<%= description %>',
         main: 'plugins/<%= kebabCase(name) %>/app',
         <% if (generateScss) { %>
-        styleSheetPath: `${__dirname}/public/app.scss`,
+        styleSheetPath: `${require('path').resolve(__dirname, 'public/app.scss')}`,
         <% } %>
       },
       <% } %>

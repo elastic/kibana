@@ -18,14 +18,17 @@
  */
 
 import { Build } from './build';
+import { collectUiExports } from '../../ui/ui_exports';
 
-export function buildAll(enabledPlugins, { onSuccess, onError }) {
-  return Promise.all(enabledPlugins.reduce((acc, plugin) => {
-    if (!plugin.getExportAppStyleSheetToCompile()) {
+export function buildAll(enabledPluginSpecs, { onSuccess, onError }) {
+  const { uiAppSpecs = [] } = collectUiExports(enabledPluginSpecs);
+
+  return Promise.all(uiAppSpecs.reduce((acc, uiAppSpec) => {
+    if (!uiAppSpec.styleSheetPath) {
       return acc;
     }
 
-    const builder = new Build(plugin.getExportAppStyleSheetToCompile(), {
+    const builder = new Build(uiAppSpec.styleSheetPath, {
       onSuccess,
       onError,
     });

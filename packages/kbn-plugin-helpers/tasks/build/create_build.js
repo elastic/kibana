@@ -128,7 +128,7 @@ module.exports = function createBuild(
         return;
       }
 
-      const file = path.join(plugin.root, plugin.styleSheetToCompile);
+      const file = path.resolve(plugin.root, plugin.styleSheetToCompile);
       if (!existsSync(file)) {
         throw new Error(
           `Path provided for styleSheetToCompile does not exist: ${file}`

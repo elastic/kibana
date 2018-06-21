@@ -67,7 +67,7 @@ export function uiRenderMixin(kbnServer, server, config) {
           templateData: {
             appId: app.getId(),
             bundlePath: `${basePath}/bundles`,
-            styleSheetPath: app.getStyleSheetPublicPath() ? `${basePath}/${app.getStyleSheetPublicPath()}` : null,
+            styleSheetPath: app.getStyleSheetUrlPath() ? `${basePath}/${app.getStyleSheetUrlPath()}` : null,
           },
           translations: await request.getUiTranslations()
         });
