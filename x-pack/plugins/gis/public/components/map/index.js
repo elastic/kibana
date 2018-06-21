@@ -6,8 +6,9 @@
 
 import { connect } from 'react-redux';
 import { KibanaMap } from './view';
-import { updateFlyout, setSelectedLayer, getSelectedLayer, FLYOUT_STATE }
-  from '../../store/ui';
+import { getOlLayers } from "../../selectors/ol_map_selectors";
+import { updateFlyout, FLYOUT_STATE } from '../../store/ui';
+import { setSelectedLayer } from '../../actions/map_actions';
 
 const mapDispatchToProps = {
   showLayerDetails: layer =>
@@ -16,7 +17,7 @@ const mapDispatchToProps = {
 
 function mapStateToProps(state = {}) {
   return {
-    selectedLayer: getSelectedLayer(state)
+    olLayers: getOlLayers(state)
   };
 }
 

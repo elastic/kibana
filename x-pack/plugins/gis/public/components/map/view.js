@@ -8,6 +8,7 @@ import React from 'react';
 import { FlyOut } from '../flyout/index';
 import * as ol from 'openlayers';
 import eventEmitter from 'event-emitter';
+import _ from 'lodash';
 
 export class KibanaMap extends React.Component {
 
@@ -27,12 +28,17 @@ export class KibanaMap extends React.Component {
       layers: [],
       view: olView
     });
+    this.addLayers(this.props.olLayers);
   }
 
-  getLayerById(id) {
-    const index = this._kbnOLLayers.findIndex(
-      layerTuple => layerTuple.kbnLayer.getId() === id);
-    return (index >= 0) ? this._kbnOLLayers[index].kbnLayer : null;
+  addLayers = (layers) => {
+    _.each(layers, (layersArr) => {
+      layersArr.forEach(layer=> this._olMap.addLayer(layer));
+    });
+  };
+
+  componentWillReceiveProps(props) {
+    this.addLayers(props.olLayers);
   }
 
   reorderLayers(orderedLayers) {
@@ -51,12 +57,6 @@ export class KibanaMap extends React.Component {
       this._olMap.addLayer(tuple.olLayer);
     });
     this.emit('layers:reordered');
-  }
-
-  destroy() {
-    //todo (cleanup olMap etc...)
-    this._layerListeners.forEach((listener) => listener.remove());
-    this._layerListeners = null;
   }
 
   removeLayer(layer) {
@@ -83,42 +83,6 @@ export class KibanaMap extends React.Component {
     });
 
     this.emit('layer:removed');
-  }
-
-  async addLayer(layer) {
-
-    const olLayer = await layer.getOLLayer();
-    if (!olLayer) {
-      console.error('Cannot get OLLayer');
-      return;
-    }
-
-    const onVisibilityChanged = (layer) => {
-      const layerTuple = this._kbnOLLayers.find((layerTuple) => {
-        return (layer === layerTuple.kbnLayer);
-      });
-      if (layerTuple) {
-        layerTuple.olLayer.setVisible(layer.getVisibility());
-        this.emit('layer:visibilityChanged', layer);
-      }
-    };
-    layer.on('visibilityChanged', onVisibilityChanged);
-    this._layerListeners.push({
-      kbnLayer: layer,
-      remove: () => {
-        layer.off('visibilityChanged', onVisibilityChanged);
-      }
-    });
-    this._kbnOLLayers.push({
-      kbnLayer: layer,
-      olLayer: olLayer
-    });
-    this._olMap.addLayer(olLayer);
-    this.emit("layer:added", layer);
-  }
-
-  getLayers() {
-    return this._kbnOLLayers.map(layerTuple => layerTuple.kbnLayer);
   }
 
   render() {
