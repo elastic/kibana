@@ -24,11 +24,6 @@ export class HeadlessChromiumDriver {
     ];
   }
 
-  async destroy() {
-    this.killed = true;
-    await this._client.close();
-  }
-
   async evaluate({ fn, args = [], awaitPromise = false, returnByValue = false }) {
     const { Runtime } = this._client;
 
@@ -66,9 +61,7 @@ export class HeadlessChromiumDriver {
 
     Page.screencastFrame(async ({ data, sessionId }) => {
       await this._writeData(path.join(recordPath, `${moment().utc().format('HH_mm_ss_SSS')}.png`), data);
-      if (!this.killed) {
-        await Page.screencastFrameAck({ sessionId });
-      }
+      await Page.screencastFrameAck({ sessionId });
     });
   }
 
@@ -126,13 +119,13 @@ export class HeadlessChromiumDriver {
   }
 
   async waitFor({ fn, args, toEqual }) {
-    while (!this.killed && (await this.evaluate({ fn, args })) !== toEqual) {
+    while ((await this.evaluate({ fn, args })) !== toEqual) {
       await delay(this._waitForDelayMs);
     }
   }
 
   async waitForSelector(selector) {
-    while (!this.killed) {
+    while (true) {
       const { nodeId } = await this._client.DOM.querySelector({ nodeId: this.documentNode.root.nodeId, selector });
       if (nodeId) {
         break;
