@@ -121,7 +121,7 @@ export default function ({ getService, getPageObjects }) {
         await log.debug('getDataTableData = ' + data);
         await log.debug('data=' + data);
         await log.debug('data.length=' + data.length);
-        expect(data.trim().split('\n')).to.eql(expectedChartValues);
+        expect(data).to.eql(expectedChartValues);
       });
     });
 
