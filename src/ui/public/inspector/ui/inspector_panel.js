@@ -22,9 +22,9 @@ import PropTypes from 'prop-types';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
   EuiFlyoutHeader,
   EuiTitle,
+  EuiFlyoutBody
 } from '@elastic/eui';
 
 import { InspectorViewChooser } from './inspector_view_chooser';
@@ -79,14 +79,11 @@ class InspectorPanel extends Component {
   }
 
   render() {
-    const { views, onClose, title } = this.props;
+    const { views, title } = this.props;
     const { selectedView } = this.state;
 
     return (
-      <EuiFlyout
-        onClose={onClose}
-        data-test-subj="inspectorPanel"
-      >
+      <EuiFlyoutBody>
         <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup
             justifyContent="spaceBetween"
@@ -107,7 +104,7 @@ class InspectorPanel extends Component {
           </EuiFlexGroup>
         </EuiFlyoutHeader>
         { this.renderSelectedPanel() }
-      </EuiFlyout>
+      </EuiFlyoutBody>
     );
   }
 }
@@ -125,7 +122,6 @@ InspectorPanel.propTypes = {
       );
     }
   },
-  onClose: PropTypes.func.isRequired,
   title: PropTypes.string,
 };
 
