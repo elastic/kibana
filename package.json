@@ -55,7 +55,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "chalk": "^2.4.1",
-    "find-up": "^2.1.0",
+    "find-up": "^3.0.0",
     "inquirer": "^6.0.0",
     "joi": "^13.4.0",
     "lodash.flatten": "^4.4.0",
@@ -67,7 +67,7 @@
     "yargs": "^11.0.0"
   },
   "devDependencies": {
-    "@types/jest": "^23.1.0",
+    "@types/jest": "^23.1.1",
     "babel-eslint": "^8.2.3",
     "eslint": "^4.19.1",
     "eslint-config-airbnb-base": "^13.0.0",
