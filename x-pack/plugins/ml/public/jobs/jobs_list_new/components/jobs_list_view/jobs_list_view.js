@@ -41,7 +41,6 @@ export class JobsListView extends Component {
     this.blockAutoRefresh = false;
 
     this.refreshJobSummaryList();
-    console.log('JobsListView constructor');
   }
 
   componentWillUnmount() {
@@ -98,7 +97,7 @@ export class JobsListView extends Component {
             });
           })
           .catch((error) => {
-            console.log(error);
+            console.error(error);
           });
       });
     }
@@ -123,7 +122,6 @@ export class JobsListView extends Component {
 
   selectJobChange = (selectedJobs) => {
     this.setState({ selectedJobs });
-    console.log(selectedJobs);
   }
 
   refreshJobSummaryList(autoRefresh = true) {
@@ -152,7 +150,7 @@ export class JobsListView extends Component {
           }
         })
         .catch((error) => {
-          console.log(error);
+          console.error(error);
         });
     }
   }

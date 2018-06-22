@@ -25,7 +25,6 @@ import { JobMessagesPane } from './job_messages_pane';
 export class JobDetails extends Component {
   constructor(props) {
     super(props);
-    console.log('new JobDetails');
 
     this.state = {};
     if (this.props.addYourself) {
@@ -39,13 +38,11 @@ export class JobDetails extends Component {
 
   static getDerivedStateFromProps(props) {
     const { job, loading } = props;
-    console.log('preview getDerivedStateFromProps ');
     return { job, loading };
   }
 
   render() {
     const { job } = this.state;
-    console.log('JobDetails render', this.state);
     if (job === undefined) {
       return (
         <div>loading</div>
@@ -101,14 +98,13 @@ export class JobDetails extends Component {
         content: <ForecastsTable job={job} />,
       }
       ];
-      console.log('new tabs array', tabs);
 
       return (
         <div className="tab-contents">
           <EuiTabbedContent
             tabs={tabs}
             initialSelectedTab={tabs[0]}
-            onTabClick={(tab) => { console.log('clicked tab', tab); }}
+            onTabClick={() => { }}
           />
         </div>
       );

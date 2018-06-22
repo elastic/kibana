@@ -25,7 +25,6 @@ const PAGE_SIZE_OPTIONS = [10, 25, 50];
 export class JobsList extends Component {
   constructor(props) {
     super(props);
-    console.log('new JobsList');
 
     this.state = {
       jobsSummaryList: props.jobsSummaryList,

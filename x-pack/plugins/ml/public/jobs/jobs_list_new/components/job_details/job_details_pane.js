@@ -61,14 +61,11 @@ export class JobDetailsPane  extends Component {
 
   static getDerivedStateFromProps(props) {
     const { sections, time } = props;
-    console.log('JobDetailsPane getDerivedStateFromProps', sections);
     return { sections, time };
   }
 
   render() {
     const { sections, time } = this.state;
-    console.log('JobDetailsPane render', sections);
-    console.log(sections);
     return (
       <React.Fragment>
         <EuiSpacer size="s" />
@@ -93,26 +90,3 @@ export class JobDetailsPane  extends Component {
   }
 }
 
-// function JobDetailsPane({ sections, time }) {
-//   return (
-//     <React.Fragment>
-//       <EuiSpacer size="s" />
-//       <div className="row" time={time}>
-//         <div className="col-md-6">
-//           {
-//             sections
-//               .filter(s => s.position === 'left')
-//               .map((s, i) => (<Section section={s} key={i} />))
-//           }
-//         </div>
-//         <div className="col-md-6">
-//           {
-//             sections
-//               .filter(s => s.position === 'right')
-//               .map((s, i) => (<Section section={s} key={i} />))
-//           }
-//         </div>
-//       </div>
-//     </React.Fragment>
-//   );
-// }
