@@ -37,11 +37,11 @@ export class XPackInfo {
   _licenseInfoChangedListeners = new Set();
 
   /**
-   * Feature name <-> license change callback mapping.
-   * @type {Map<string, Function>}
-   * @private
+   * Set of listener functions that will be called whenever the license
+   * info changes
+   * @type {Set<Function>}
    */
-  _featureLicenseChangeCallbacks = new Map();
+  _licenseInfoChangedListeners = new Set();
 
   /**
    * Cache that may contain last xpack info API response or error, json representation
@@ -170,7 +170,7 @@ export class XPackInfo {
         }
       }
 
-    } catch(error) {
+    } catch (error) {
       this._log(
         ['license', 'warning', 'xpack'],
         `License information from the X-Pack plugin could not be obtained from Elasticsearch` +
@@ -222,16 +222,6 @@ export class XPackInfo {
         // include results from newly registered generator when they are requested.
         this._cache.json = undefined;
         this._cache.signature = undefined;
-      },
-
-      /**
-       * Registers a callback function that will be called whenever the XPack license changes.
-       * Callback will be invoked after the license change have been applied to this XPack Info instance.
-       * Callbacks may be asynchronous, but will not be awaited.
-       * @param {Function} callback Function to call whenever the XPack license changes.
-       */
-      registerLicenseChangeCallback: (callback) => {
-        this._featureLicenseChangeCallbacks.set(name, callback);
       },
 
       /**
