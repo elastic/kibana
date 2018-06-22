@@ -24,6 +24,8 @@
     "@types/hapi": "^17.0.12",
     "@types/nodegit": "^0.18.8",
     "@types/react": "^16.3.16",
+    "@types/react-redux": "^6.0.2",
+    "@types/redux-actions": "^2.3.0",
     "babel-eslint": "^8.0.2",
     "eslint": "^4.11.0",
     "eslint-plugin-babel": "^4.1.1",
@@ -37,6 +39,10 @@
   "dependencies": {
     "highlights": "^3.1.1",
     "nodegit": "^0.22.1",
-    "protobufjs": "^6.8.6"
+    "protobufjs": "^6.8.6",
+    "react-redux": "^5.0.7",
+    "redux": "^4.0.0",
+    "redux-actions": "^2.4.0",
+    "redux-saga": "^0.16.0"
   }
 }

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Provider } from 'react-redux'
 import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -6,6 +7,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import 'ui/autoload/styles';
 import './less/main.less';
 import { Main } from './components/main';
+import store from './stores';
 
 const app = uiModules.get("apps/castro");
 
@@ -24,7 +26,12 @@ function RootController($scope, $element, $http) {
   const domNode = $element[0];
 
   // render react to DOM
-  render(<Main title="castro" httpClient={$http} />, domNode);
+  render(
+    <Provider store={store}>
+      <Main title="castro" httpClient={$http} />
+    </Provider>,
+    domNode
+  );
 
   // unmount react on controller destroy
   $scope.$on('$destroy', () => {

@@ -1,4 +1,4 @@
-import React, {Component} from "react";
+import React from "react";
 
 import {
     EuiButton,
@@ -23,12 +23,7 @@ interface State {
     html? : string
 }
 
-
-
-
-
-
-export default class Code extends Component<any, State> {
+export default class Code extends React.Component<any, State> {
     constructor(props: any) {
         super(props);
         this.state = {

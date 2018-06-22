@@ -17,7 +17,8 @@ import {
 
 import {ICommit, IEntry} from '../../../common/proto'
 
-import Code from './code'
+import Code from './code';
+import Counter from '../counter';
 
 interface MainProps {
     title: String,
@@ -87,6 +88,8 @@ export class Main extends React.Component<MainProps, MainState> {
                             </EuiTitle>
                         </EuiPageContentHeader>
                         <EuiPageContentBody>
+                            <Counter />
+
                             <EuiDescriptionList
                                 type="column"
                                 listItems={this.state.commitInfo}
