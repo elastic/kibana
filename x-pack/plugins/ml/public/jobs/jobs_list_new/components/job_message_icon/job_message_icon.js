@@ -5,6 +5,7 @@
  */
 
 
+import PropTypes from 'prop-types';
 import React from 'react';
 
 import {
@@ -43,4 +44,7 @@ export function JobIcon({ message, showTooltip = false }) {
     return (<span />);
   }
 }
-
+JobIcon.propTypes = {
+  message: PropTypes.object,
+  showTooltip: PropTypes.bool,
+};

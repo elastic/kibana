@@ -5,6 +5,7 @@
  */
 
 
+import PropTypes from 'prop-types';
 import React, {
   Component
 } from 'react';
@@ -175,3 +176,14 @@ export class JobsList extends Component {
     );
   }
 }
+JobsList.propTypes = {
+  jobsSummaryList: PropTypes.array.isRequired,
+  fullJobsList: PropTypes.object.isRequired,
+  itemIdToExpandedRowMap: PropTypes.object.isRequired,
+  toggleRow: PropTypes.func.isRequired,
+  selectJobChange: PropTypes.func.isRequired,
+  showEditJobFlyout: PropTypes.func.isRequired,
+  showDeleteJobModal: PropTypes.func.isRequired,
+  showStartDatafeedModal: PropTypes.func.isRequired,
+  refreshJobs: PropTypes.func.isRequired,
+};

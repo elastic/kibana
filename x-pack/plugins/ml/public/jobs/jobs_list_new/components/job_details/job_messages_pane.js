@@ -5,7 +5,7 @@
  */
 
 
-
+import PropTypes from 'prop-types';
 import React, {
   Component
 } from 'react';
@@ -72,4 +72,7 @@ export class JobMessagesPane extends Component {
     );
   }
 }
+JobMessagesPane.propTypes = {
+  job: PropTypes.object.isRequired,
+};
 

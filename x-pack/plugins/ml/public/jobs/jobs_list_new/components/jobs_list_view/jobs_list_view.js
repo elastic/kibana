@@ -32,11 +32,10 @@ export class JobsListView extends Component {
     };
 
     this.updateFunctions = {};
-    this.listComponent = null;
 
-    this.showEditJobFlyout = null;
-    this.showDeleteJobModal = null;
-    this.showStartDatafeedModal = null;
+    this.showEditJobFlyout = () => {};
+    this.showDeleteJobModal = () => {};
+    this.showStartDatafeedModal = () => {};
 
     this.blockAutoRefresh = false;
 
@@ -129,7 +128,7 @@ export class JobsListView extends Component {
       const expandedJobsIds = Object.keys(this.state.itemIdToExpandedRowMap);
       ml.jobService.jobsSummary(expandedJobsIds)
         .then((jobs) => {
-          const fullJobsList = [];
+          const fullJobsList = {};
           const jobsSummaryList = jobs.map((job) => {
             if (job.fullJob !== undefined) {
               fullJobsList[job.id] = job.fullJob;

@@ -5,6 +5,7 @@
  */
 
 
+import PropTypes from 'prop-types';
 import React, {
   Component,
 } from 'react';
@@ -131,6 +132,10 @@ export class StartDatafeedModal extends Component {
 
   }
 }
+StartDatafeedModal.propTypes = {
+  showFunction: PropTypes.func.isRequired,
+  refreshJobs: PropTypes.func.isRequired,
+};
 
 function getLowestLatestTime(jobs) {
   const times = jobs.map(j => j.latestTimeStamp.unix.valueOf());

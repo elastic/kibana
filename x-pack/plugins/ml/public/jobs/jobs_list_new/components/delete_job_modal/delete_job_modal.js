@@ -5,6 +5,7 @@
  */
 
 
+import PropTypes from 'prop-types';
 import React, {
   Component,
 } from 'react';
@@ -24,7 +25,7 @@ export class DeleteJobModal extends Component {
     super(props);
 
     this.state = {
-      jobs: this.props.jobs,
+      jobs: [],
       isModalVisible: false,
       deleting: false,
     };
@@ -116,3 +117,8 @@ export class DeleteJobModal extends Component {
     );
   }
 }
+
+DeleteJobModal.propTypes = {
+  showFunction: PropTypes.func.isRequired,
+  refreshJobs: PropTypes.func.isRequired,
+};

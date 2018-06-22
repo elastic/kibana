@@ -5,6 +5,7 @@
  */
 
 
+import PropTypes from 'prop-types';
 import React, {
   Component
 } from 'react';
@@ -111,3 +112,9 @@ export class JobDetails extends Component {
     }
   }
 }
+JobDetails.propTypes = {
+  jobId: PropTypes.string.isRequired,
+  job: PropTypes.object,
+  addYourself: PropTypes.func.isRequired,
+  removeYourself: PropTypes.func,
+};

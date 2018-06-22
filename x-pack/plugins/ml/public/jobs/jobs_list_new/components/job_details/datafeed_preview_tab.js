@@ -6,6 +6,7 @@
 
 
 
+import PropTypes from 'prop-types';
 import React, {
   Component
 } from 'react';
@@ -48,6 +49,9 @@ export class DatafeedPreviewPane extends Component {
     );
   }
 }
+DatafeedPreviewPane.propTypes = {
+  job: PropTypes.object.isRequired,
+};
 
 function updateDatafeedPreview(job) {
   return new Promise((resolve, reject) => {

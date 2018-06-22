@@ -5,6 +5,7 @@
  */
 
 
+import PropTypes from 'prop-types';
 import React, {
   Component,
 } from 'react';
@@ -154,3 +155,9 @@ function TabStack({ title, items, switchState, switchFunc }) {
     </div>
   );
 }
+TimeRangeSelector.propTypes = {
+  startTime: PropTypes.object.isRequired,
+  endTime: PropTypes.object,
+  setStartTime: PropTypes.func.isRequired,
+  setEndTime: PropTypes.func.isRequired,
+};

@@ -5,6 +5,7 @@
  */
 
 
+import PropTypes from 'prop-types';
 import React from 'react';
 
 import {
@@ -31,6 +32,9 @@ export function ResultLinks({ jobs })  {
     </React.Fragment>
   );
 }
+ResultLinks.propTypes = {
+  jobs: PropTypes.array.isRequired,
+};
 
 function getLink(location, jobs) {
   let from = 0;
@@ -44,7 +48,6 @@ function getLink(location, jobs) {
     from = froms[0].string;
     to = tos[0].string;
   }
-
 
   const jobIds = jobs.map(j => j.id);
   const url = mlJobService.createResultsUrl(jobIds, from, to, location);

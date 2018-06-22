@@ -5,6 +5,7 @@
  */
 
 
+import PropTypes from 'prop-types';
 import React, {
   Component
 } from 'react';
@@ -32,6 +33,10 @@ function SectionItem({ item }) {
     </EuiTableRow>
   );
 }
+SectionItem.propTypes = {
+  item: PropTypes.array.isRequired,
+};
+
 
 
 function Section({ section }) {
@@ -52,6 +57,10 @@ function Section({ section }) {
     </React.Fragment>
   );
 }
+Section.propTypes = {
+  section: PropTypes.object.isRequired,
+};
+
 
 export class JobDetailsPane  extends Component {
   constructor(props) {
@@ -89,4 +98,7 @@ export class JobDetailsPane  extends Component {
     );
   }
 }
+JobDetailsPane.propTypes = {
+  sections: PropTypes.array.isRequired,
+};
 

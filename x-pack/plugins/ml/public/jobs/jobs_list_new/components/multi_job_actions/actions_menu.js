@@ -5,6 +5,7 @@
  */
 
 
+import PropTypes from 'prop-types';
 import React, {
   Component,
 } from 'react';
@@ -105,3 +106,9 @@ export class MultiJobActionsMenu extends Component {
     );
   }
 }
+MultiJobActionsMenu.propTypes = {
+  jobs: PropTypes.array.isRequired,
+  showStartDatafeedModal: PropTypes.func.isRequired,
+  showDeleteJobModal: PropTypes.func.isRequired,
+  refreshJobs: PropTypes.func.isRequired,
+};

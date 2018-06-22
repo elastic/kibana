@@ -5,6 +5,7 @@
  */
 
 
+import PropTypes from 'prop-types';
 import React from 'react';
 
 import {
@@ -22,3 +23,6 @@ export function JsonPane({ job }) {
     </React.Fragment>
   );
 }
+JsonPane.propTypes = {
+  job: PropTypes.object.isRequired,
+};

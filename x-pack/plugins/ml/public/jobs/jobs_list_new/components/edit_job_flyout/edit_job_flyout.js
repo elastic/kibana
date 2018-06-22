@@ -5,6 +5,7 @@
  */
 
 
+import PropTypes from 'prop-types';
 import React, {
   Component,
 } from 'react';
@@ -19,8 +20,7 @@ import {
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
-  // EuiTabbedContent,
+  EuiTabbedContent,
 } from '@elastic/eui';
 
 import { JobDetails, Detectors, Datafeed, CustomUrls } from './tabs';
@@ -223,23 +223,11 @@ export class EditJobFlyout extends Component {
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
 
-            {/* <EuiTabbedContent
+            <EuiTabbedContent
               tabs={tabs}
               initialSelectedTab={tabs[0]}
               onTabClick={(tab) => { console.log('clicked tab', tab); }}
-            /> */}
-
-            {
-              tabs.map((t, i) => (
-                <React.Fragment key={i}>
-                  <EuiTitle size="s">
-                    <h3>{t.name}</h3>
-                  </EuiTitle>
-                  {t.content}
-                  <EuiHorizontalRule margin="m" />
-                </React.Fragment>
-              ))
-            }
+            />
 
           </EuiFlyoutBody>
           <EuiFlyoutFooter>
@@ -275,3 +263,8 @@ export class EditJobFlyout extends Component {
 
   }
 }
+
+EditJobFlyout.propTypes = {
+  showFunction: PropTypes.func.isRequired,
+  refreshJobs: PropTypes.func.isRequired,
+};

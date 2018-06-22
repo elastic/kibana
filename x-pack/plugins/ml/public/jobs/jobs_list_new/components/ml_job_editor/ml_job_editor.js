@@ -5,6 +5,7 @@
  */
 
 
+import PropTypes from 'prop-types';
 import React from 'react';
 
 import {
@@ -26,3 +27,11 @@ export function MLJobEditor({ value, height = '500px', width = '100%', mode = 'j
     />
   );
 }
+MLJobEditor.propTypes = {
+  value: PropTypes.string.isRequired,
+  height: PropTypes.string,
+  width: PropTypes.string,
+  mode: PropTypes.string,
+  readOnly: PropTypes.bool,
+  onChange: PropTypes.func,
+};

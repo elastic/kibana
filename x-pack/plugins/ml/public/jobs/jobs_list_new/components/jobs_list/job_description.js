@@ -5,7 +5,7 @@
  */
 
 
-
+import PropTypes from 'prop-types';
 import React from 'react';
 
 const COLORS = [
@@ -39,6 +39,9 @@ export function JobDescription({ job }) {
     </React.Fragment>
   );
 }
+JobDescription.propTypes = {
+  job: PropTypes.object.isRequired,
+};
 
 function JobGroup({ name }) {
   return (
@@ -50,6 +53,9 @@ function JobGroup({ name }) {
     </div>
   );
 }
+JobGroup.propTypes = {
+  name: PropTypes.string.isRequired,
+};
 
 function tabColor(name) {
   if (colorMap[name] === undefined) {
