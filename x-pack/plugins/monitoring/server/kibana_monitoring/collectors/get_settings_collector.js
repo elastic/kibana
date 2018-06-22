@@ -7,7 +7,7 @@
 import { get } from 'lodash';
 import { XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING } from '../../../../../server/lib/constants';
 import { KIBANA_SETTINGS_TYPE } from '../../../common/constants';
-import { Collector } from '../classes/collector';
+import { Collector } from '../classes';
 
 /*
  * Check if Cluster Alert email notifications is enabled in config
