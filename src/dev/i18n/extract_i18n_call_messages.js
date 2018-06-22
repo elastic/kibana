@@ -37,12 +37,17 @@ export function extractI18nCallMessages(node) {
         isPropertyWithKey(prop, DEFAULT_MESSAGE_KEY) &&
         isStringLiteral(prop.value)
     );
+
+    if (!defaultMessageProperty) {
+      throw new Error(`Default message is required for ${messageId} id.`);
+    }
+
     const contextProperty = optionsSubTree.properties.find(
       prop => isPropertyWithKey(prop, 'context') && isStringLiteral(prop.value)
     );
 
     const message = defaultMessageProperty.value.value;
-    const context = contextProperty.value.value;
+    const context = contextProperty ? contextProperty.value.value : '';
 
     return [messageId, { message, context }];
   }

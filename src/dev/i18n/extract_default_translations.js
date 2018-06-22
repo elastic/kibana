@@ -33,7 +33,7 @@ import {
 
 function addMessageToMap(targetMap, key, value) {
   const existingValue = targetMap.get(key);
-  if (targetMap.has(key) && existingValue !== value) {
+  if (targetMap.has(key) && existingValue.message !== value.message) {
     throw new Error(
       `There is more than one default message for the same id "${key}": "${existingValue}" and "${value}"`
     );
@@ -132,7 +132,7 @@ export async function extractDefaultTranslations(inputPath) {
     codeEntries.map(async entry => {
       return {
         name: entry,
-        content: readFileAsync(entry),
+        content: await readFileAsync(entry),
       };
     })
   );

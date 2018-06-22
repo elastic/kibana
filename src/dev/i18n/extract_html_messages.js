@@ -97,8 +97,8 @@ function* getFilterMessages(htmlContent) {
 
   for (const expression of expressions) {
     const filterStart = expression.indexOf('| i18n: {');
-    const [idExpression] = expression.slice(0, filterStart).trim();
-    const [filterObjectExpression] = expression.slice(filterStart + 8).trim();
+    const idExpression = expression.slice(0, filterStart).trim();
+    const filterObjectExpression = expression.slice(filterStart + 8).trim();
 
     if (!filterObjectExpression || !idExpression) {
       throw new Error(
@@ -136,7 +136,7 @@ function* getDirectiveMessages(htmlContent) {
   }
 }
 
-export function* extractHtmlMessages(content) {
-  yield* getDirectiveMessages(content.toString());
-  yield* getFilterMessages(content.toString());
+export function* extractHtmlMessages(buffer) {
+  yield* getDirectiveMessages(buffer.toString());
+  yield* getFilterMessages(buffer.toString());
 }

@@ -74,8 +74,8 @@ function isFormattedMessageElement(node) {
   );
 }
 
-export function extractCodeMessages(file) {
-  const content = parse(file, {
+export function extractCodeMessages(buffer) {
+  const content = parse(buffer.toString(), {
     sourceType: 'module',
     plugins: [
       'jsx',
@@ -87,15 +87,14 @@ export function extractCodeMessages(file) {
   });
 
   const messagesPairs = [];
-
   traverse(content, {
     enter(path) {
       if (isI18nTranslateFunction(path.node)) {
-        messagesPairs.push(...extractI18nCallMessages(path.node));
+        messagesPairs.push(extractI18nCallMessages(path.node));
       } else if (isIntlFormatMessageFunction(path.node)) {
-        messagesPairs.push(...extractIntlMessages(path.node));
+        messagesPairs.push(extractIntlMessages(path.node));
       } else if (isFormattedMessageElement(path.node)) {
-        messagesPairs.push(...extractFormattedMessages(path.node));
+        messagesPairs.push(extractFormattedMessages(path.node));
       }
     },
   });
