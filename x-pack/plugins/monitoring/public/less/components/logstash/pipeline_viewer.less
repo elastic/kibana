@@ -2,49 +2,6 @@
   border-bottom: 1px solid #d4d4d4;
 }
 
-.lspvEdge {
-  stroke: #000;
-  stroke-width: 2px;
-  stroke-linejoin: round;
-  opacity: 0.5;
-  marker-end: url(#lspvPlainMarker);
-  fill: none;
-
-  &.lspvEdge-grayed {
-    opacity: 0.1;
-  }
-}
-
-.lspvEdgeBoolean {
-  text {
-    font-size: 14px;
-    font-weight: bold;
-    fill: #fff;
-    stroke: none;
-  }
-}
-
-@trueBooleanFill: #1BAFD2;
-@falseBooleanFill: #EE408A;
-
-.lspvEdgeBoolean--true {
-  stroke: @trueBooleanFill;
-  marker-end: url(#lspvTrueMarker);
-
-  circle {
-    fill: @trueBooleanFill;
-  }
-}
-
-.lspvEdgeBoolean--false {
-  stroke: @falseBooleanFill;
-  marker-end: url(#lspvFalseMarker);
-
-  circle {
-    fill: @falseBooleanFill;
-  }
-}
-
 img.lspvDetailDrawerIcon {
   display: inline;
   margin: 0 5px 0 0;

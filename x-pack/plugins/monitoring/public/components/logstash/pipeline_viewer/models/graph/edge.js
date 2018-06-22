@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LOGSTASH } from '../../../../../../common/constants';
-
 export class Edge {
   constructor(graph, json) {
     this.graph = graph;
@@ -50,9 +48,5 @@ export class Edge {
 
   get toId() {
     return this.json.to;
-  }
-
-  get svgClass() {
-    return LOGSTASH.PIPELINE_VIEWER.GRAPH.EDGES.SVG_CLASS;
   }
 }

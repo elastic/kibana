@@ -6,7 +6,6 @@
 
 import expect from 'expect.js';
 import { Edge } from '../edge';
-import { LOGSTASH } from '../../../../../../../common/constants';
 
 describe('Edge', () => {
   let graph;
@@ -50,10 +49,5 @@ describe('Edge', () => {
     const edge = new Edge(graph, edgeJson);
     expect(edge.toId).to.be('myes');
     expect(edge.to).to.be(graph.verticesById.myes);
-  });
-
-  it('should have the correct SVG CSS class', () => {
-    const edge = new Edge(graph, edgeJson);
-    expect(edge.svgClass).to.be(LOGSTASH.PIPELINE_VIEWER.GRAPH.EDGES.SVG_CLASS);
   });
 });

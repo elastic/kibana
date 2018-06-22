@@ -123,7 +123,6 @@ export const LOGSTASH = {
   PIPELINE_VIEWER: {
     GRAPH: {
       EDGES: {
-        SVG_CLASS: 'lspvEdge',
         LABEL_RADIUS: 8,
         // This is something we may play with later.
         // 1 seems to be the best value however, without it the edges sometimes make weird loops in complex graphs
