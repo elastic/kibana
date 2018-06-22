@@ -52,11 +52,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async saveSearch(searchName) {
-        log.debug('saveSearch');
-        await this.clickSaveSearchButton();
-        await getRemote().findDisplayedById('SaveSearch').pressKeys(searchName);
-        await testSubjects.click('discoverSaveSearchButton');
-        await PageObjects.header.waitUntilLoadingHasFinished();
+      log.debug('saveSearch');
+      await this.clickSaveSearchButton();
+      await getRemote().findDisplayedById('SaveSearch').pressKeys(searchName);
+      await testSubjects.click('discoverSaveSearchButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async getColumnHeaders() {
