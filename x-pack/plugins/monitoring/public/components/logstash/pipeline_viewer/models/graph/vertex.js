@@ -49,75 +49,12 @@ export class Vertex {
     return this.outgoingEdges.map(e => e.to);
   }
 
-  get isRoot() {
-    return this.incomingVertices.length === 0;
-  }
-
-  get isLeaf() {
-    return this.outgoingVertices.length === 0;
-  }
-
-  get sourceLocation() {
-    return `apc.conf@${this.meta.source_line}:${this.meta.source_column}`;
-  }
-
-  get sourceText() {
-    return this.meta.source_text;
-  }
-
   get meta() {
     return this.json.meta;
   }
 
   get stats() {
     return this.json.stats || {};
-  }
-
-  get hasCustomStats() {
-    return Object.keys(this.customStats).length > 0;
-  }
-  get customStats() {
-    return Object.keys(this.stats)
-      .filter(k => !(k.match(/^events\./)))
-      .filter(k => k !== 'name')
-      .reduce((acc, k) => {
-        acc[k] = this.stats[k];
-        return acc;
-      }, {});
-  }
-
-  lineage() {
-    const ancestors = this.ancestors();
-    const descendants = this.descendants();
-
-    const vertices = [];
-    vertices.push.apply(vertices, ancestors.vertices);
-    vertices.push(this);
-    vertices.push.apply(vertices, descendants.vertices);
-
-    const edges = ancestors.edges.concat(descendants.edges);
-
-    return { vertices, edges };
-  }
-
-  ancestors() {
-    const vertices = [];
-    const edges = [];
-    const pending = [this];
-    const seen = {};
-    while (pending.length > 0) {
-      const vertex = pending.pop();
-      vertex.incomingEdges.forEach(edge => {
-        edges.push(edge);
-        const from = edge.from;
-        if (seen[from.id] !== true) {
-          vertices.push(from);
-          pending.push(from);
-          seen[from.id] = true;
-        }
-      });
-    }
-    return { vertices, edges };
   }
 
   descendants() {
@@ -138,14 +75,6 @@ export class Vertex {
       });
     }
     return { vertices, edges };
-  }
-
-  get eventsPerCurrentPeriod() {
-    if (!this.stats.hasOwnProperty('events.in')) {
-      return null;
-    }
-
-    return (this.stats['events.in'].max - this.stats['events.in'].min);
   }
 
   get hasExplicitId() {

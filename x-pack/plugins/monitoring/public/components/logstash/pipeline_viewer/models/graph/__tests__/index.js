@@ -154,27 +154,6 @@ describe('Graph', () => {
       });
     });
 
-    it('identifies its root vertices correctly', () => {
-      const roots = graph.roots;
-      expect(roots).to.be.an(Array);
-      expect(roots.length).to.be(1);
-
-      roots.forEach(root => {
-        expect(root).to.be.a(Vertex);
-        expect(root.json.id).to.be('my-prefix:my-really-long-named-generator');
-      });
-    });
-
-    it('identifies its leaf vertices correctly', () => {
-      const leaves = graph.leaves;
-      expect(leaves).to.be.an(Array);
-      expect(leaves.length).to.be(2);
-
-      leaves.forEach(leaf => {
-        expect(leaf).to.be.a(Vertex);
-      });
-    });
-
     it('identifies the highest vertex rank correctly', () => {
       expect(graph.maxRank).to.be(3);
     });

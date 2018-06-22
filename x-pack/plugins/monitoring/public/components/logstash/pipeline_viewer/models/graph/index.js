@@ -7,7 +7,6 @@
 import { vertexFactory } from './vertex_factory';
 import { edgeFactory } from './edge_factory';
 import { QueueVertex } from './queue_vertex';
-import { IfVertex } from './if_vertex';
 import { PluginVertex } from './plugin_vertex';
 
 export class Graph {
@@ -32,24 +31,12 @@ export class Graph {
     return this.vertexCache;
   }
 
-  get inputVertices() {
-    return this.getVertices().filter(v => v.isInput);
-  }
-
   get queueVertex() {
     return this.getVertices().find(v => v instanceof QueueVertex);
   }
 
   get processorVertices() {
     return this.getVertices().filter(v => v.isProcessor);
-  }
-
-  get outputVertices() {
-    return this.getVertices().filter(v => v.isOutput);
-  }
-
-  get ifVertices() {
-    return this.getVertices().filter(v => v instanceof IfVertex);
   }
 
   get edges() {
@@ -89,14 +76,6 @@ export class Graph {
     });
 
     this.annotateVerticesWithStages();
-  }
-
-  get roots() {
-    return this.getVertices().filter((v) => v.isRoot);
-  }
-
-  get leaves() {
-    return this.getVertices().filter((v) => v.isLeaf);
   }
 
   get startVertices() {
