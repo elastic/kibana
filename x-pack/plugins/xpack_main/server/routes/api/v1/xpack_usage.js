@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { wrap, serverTimeout as serverUnavailable } from 'boom';
+import { wrap as wrapError } from 'boom';
 
 const getClusterUuid = async callCluster => {
   const { cluster_uuid: uuid } = await callCluster('info', { filterPath: 'cluster_uuid', });
@@ -15,12 +15,8 @@ const getClusterUuid = async callCluster => {
  * @return {Object} data from usage stats collectors registered with Monitoring CollectorSet
  * @throws {Error} if the Monitoring CollectorSet is not ready
  */
-const getUsage = async (callCluster, server) => {
+const getUsage = (callCluster, server) => {
   const { collectorSet } = server.plugins.monitoring;
-  if (collectorSet === undefined) {
-    const error = new Error('CollectorSet from Monitoring plugin is not ready for collecting usage'); // moving kibana_monitoring lib to xpack_main will make this unnecessary
-    throw serverUnavailable(error);
-  }
   return collectorSet.bulkFetchUsage(callCluster);
 };
 
@@ -44,11 +40,11 @@ export function xpackUsageRoute(server) {
           ...xpackUsage
         });
       } catch(err) {
-        req.log(['error'], err);
+        req.log(['error'], err); // FIXME doesn't seem to log anything useful if ES times out
         if (err.isBoom) {
           reply(err);
         } else {
-          reply(wrap(err, err.statusCode, err.message));
+          reply(wrapError(err, err.statusCode, err.message));
         }
       }
     }
