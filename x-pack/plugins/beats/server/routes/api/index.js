@@ -1,0 +1,25 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { registerCreateEnrollmentTokensRoute } from './register_create_enrollment_tokens_route';
+import { registerEnrollBeatRoute } from './register_enroll_beat_route';
+import { registerListBeatsRoute } from './register_list_beats_route';
+import { registerVerifyBeatsRoute } from './register_verify_beats_route';
+import { registerUpdateBeatRoute } from './register_update_beat_route';
+import { registerSetTagRoute } from './register_set_tag_route';
+import { registerAssignTagsToBeatsRoute } from './register_assign_tags_to_beats_route';
+import { registerRemoveTagsFromBeatsRoute } from './register_remove_tags_from_beats_route';
+
+export function registerApiRoutes(server) {
+  registerCreateEnrollmentTokensRoute(server);
+  registerEnrollBeatRoute(server);
+  registerListBeatsRoute(server);
+  registerVerifyBeatsRoute(server);
+  registerUpdateBeatRoute(server);
+  registerSetTagRoute(server);
+  registerAssignTagsToBeatsRoute(server);
+  registerRemoveTagsFromBeatsRoute(server);
+}

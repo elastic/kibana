@@ -77,6 +77,7 @@ describe('findRelationships', () => {
     const size = 10;
 
     const savedObjectsClient = {
+      get: () => {},
       find: () => ({
         saved_objects: [
           {
@@ -202,6 +203,7 @@ describe('findRelationships', () => {
     const size = 10;
 
     const savedObjectsClient = {
+      get: () => {},
       find: options => {
         if (options.type === 'visualization') {
           return {
