@@ -6,6 +6,7 @@
 
 import _ from 'lodash';
 import { createSelector } from 'reselect';
+import { getOlLayers } from "./ol_map_selectors";
 
 export const getSelectedLayer = ({ map }) => map && map.selectedLayer;
 
@@ -13,14 +14,14 @@ export const getLayerList = ({ map }) => map && map.layerList;
 
 export function getLayersBySource(state) {
   return createSelector(
-    getLayerList,
+    getOlLayers,
     layers => _.groupBy(layers, ({ appData }) => appData.source)
   )(state);
 }
 
 export function getLayersByType(state) {
   return createSelector(
-    getLayerList,
+    getOlLayers,
     layers => _.groupBy(layers, ({ appData }) => appData.layerType)
   )(state);
 }

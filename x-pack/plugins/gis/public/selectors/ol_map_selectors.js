@@ -5,39 +5,36 @@
  */
 
 import { createSelector } from 'reselect';
-import { getLayersByType } from "./map_selectors";
+import { getLayerList } from "./map_selectors";
 import * as ol from 'openlayers';
-import _ from 'lodash';
 import { LAYER_TYPE } from "../actions/map_actions";
 
 // Layer-specific logic
-function convertTmsLayersToOl(tmsLayerArr) {
-  return tmsLayerArr.map(layer => {
-    return new ol.layer.Tile({
-      source: new ol.source.XYZ({
-        url: layer.details.service[0].url
-      })
-    });
+function convertTmsLayersToOl({ details }) {
+  return new ol.layer.Tile({
+    source: new ol.source.XYZ({
+      url: details.service[0].url
+    })
   });
 }
 
-function updateLayersByType(layersObject) {
-  _.each(layersObject, (layerArr, layerType) => {
-    switch (layerType) {
+function updateLayersByType(layerList) {
+  return layerList.map(layer => {
+    switch (layer.appData.layerType) {
       case LAYER_TYPE.TMS:
-        layersObject[layerType] = convertTmsLayersToOl(layerArr);
+        layer.olLayer = convertTmsLayersToOl(layer);
         break;
       default:
         break;
     }
+    return layer;
   });
-  return layersObject;
 }
 
 // Selectors
 export function getOlLayers(state) {
   return createSelector(
-    getLayersByType,
-    layersObject => updateLayersByType(layersObject)
+    getLayerList,
+    layerList => updateLayersByType(layerList)
   )(state);
 }

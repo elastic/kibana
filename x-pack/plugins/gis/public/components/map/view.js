@@ -8,7 +8,6 @@ import React from 'react';
 import { FlyOut } from '../flyout/index';
 import * as ol from 'openlayers';
 import eventEmitter from 'event-emitter';
-import _ from 'lodash';
 
 export class KibanaMap extends React.Component {
 
@@ -32,9 +31,7 @@ export class KibanaMap extends React.Component {
   }
 
   addLayers = (layers) => {
-    _.each(layers, (layersArr) => {
-      layersArr.forEach(layer=> this._olMap.addLayer(layer));
-    });
+    layers.forEach(layer=> this._olMap.addLayer(layer.olLayer));
   };
 
   componentWillReceiveProps(props) {
