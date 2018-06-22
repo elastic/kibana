@@ -307,6 +307,7 @@
     "murmurhash3js": "3.0.1",
     "ncp": "2.0.0",
     "nock": "8.0.0",
+    "node-sass": "^4.9.0",
     "pixelmatch": "4.0.2",
     "prettier": "^1.12.1",
     "proxyquire": "1.7.11",

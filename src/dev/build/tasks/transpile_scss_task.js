@@ -17,23 +17,27 @@
  * under the License.
  */
 
-export * from './bootstrap_task';
-export * from './build_packages_task';
-export * from './clean_tasks';
-export * from './copy_source_task';
-export * from './create_archives_sources_task';
-export * from './create_archives_task';
-export * from './create_empty_dirs_and_files_task';
-export * from './create_package_json_task';
-export * from './create_readme_task';
-export * from './install_dependencies_task';
-export * from './license_file_task';
-export * from './nodejs';
-export * from './notice_file_task';
-export * from './optimize_task';
-export * from './os_packages';
-export * from './transpile_babel_task';
-export * from './transpile_typescript_task';
-export * from './transpile_scss_task';
-export * from './verify_env_task';
-export * from './write_sha_sums_task';
+import { toArray } from 'rxjs/operators';
+import { buildAll } from '../../../server/sass/build_all';
+import { findPluginSpecs } from '../../../plugin_discovery/find_plugin_specs';
+
+export const TranspileScssTask = {
+  description: 'Transpiling SCSS to CSS',
+
+  async run(config, log, build) {
+    const scanDirs = [ build.resolvePath('src/core_plugins') ];
+    const { spec$ } = findPluginSpecs({ plugins: { scanDirs, paths: [] } });
+    const enabledPlugins = await spec$.pipe(toArray()).toPromise();
+
+    function onSuccess(builder) {
+      log.info(`Compiled SCSS: ${builder.source}`);
+    }
+
+    function onError(builder, e) {
+      log.error(`Compiling SCSS failed: ${builder.source}`);
+      throw e;
+    }
+
+    await buildAll(enabledPlugins, { onSuccess, onError });
+  }
+};
