@@ -4,7 +4,7 @@
       "aggregations": {},
       "chunking_config": {},
       "frequency": "",
-      "indices": [""],
+      "indices": ["INDEX"],
       "job_id": "",
       "query": {},
       "query_delay": "",
