@@ -44,10 +44,10 @@ export class GrokDebugger extends React.Component {
   }
 
   onCustomPatternsChange = (customPatterns) => {
+    this.setState({ customPatterns });
+
     customPatterns = customPatterns.trim();
     const customPatternsObj = {};
-
-    this.setState({ customPatterns });
 
     if (!customPatterns) {
       this.grokdebuggerRequest.customPatterns = customPatternsObj;
