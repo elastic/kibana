@@ -29,7 +29,7 @@ export function getSearchDsl(mappings, options = {}) {
     searchFields,
     sortField,
     sortOrder,
-    extraFilters,
+    extraQueryParams,
   } = options;
 
   if (!type && sortField) {
@@ -40,12 +40,12 @@ export function getSearchDsl(mappings, options = {}) {
     throw Boom.notAcceptable('sortOrder requires a sortField');
   }
 
-  if (extraFilters && !Array.isArray(extraFilters)) {
-    throw Boom.notAcceptable('extraFilters must be an array');
+  if (extraQueryParams && typeof extraQueryParams !== 'object') {
+    throw Boom.notAcceptable('extraQueryParams must be an object');
   }
 
   return {
-    ...getQueryParams(mappings, type, search, searchFields, extraFilters),
+    ...getQueryParams(mappings, type, search, searchFields, extraQueryParams),
     ...getSortingParams(mappings, type, sortField, sortOrder),
   };
 }

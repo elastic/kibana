@@ -4,20 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { DEFAULT_SPACE_ID } from '../../../common/constants';
+
 export class SpacesSavedObjectsClient {
   constructor(options) {
     const {
       request,
       baseClient,
       spacesService,
+      types,
     } = options;
 
     this.errors = baseClient.errors;
 
     this._client = baseClient;
     this._request = request;
+    this._types = types;
 
-    this._spaceUrlContext = spacesService.getUrlContext(this._request);
+    this._spaceUrlContext = spacesService.getUrlContext(this._request, '');
   }
 
   async create(type, attributes = {}, options = {}) {
@@ -48,21 +52,62 @@ export class SpacesSavedObjectsClient {
   async find(options = {}) {
     const spaceOptions = {};
 
-    // TODO(legrego) handle multiple types
-    let type = options.type;
-    if (Array.isArray(type)) {
-      type = type[0];
+    let types = options.type || this._types;
+    if (!Array.isArray(types)) {
+      types = [types];
     }
 
-    if (this._isTypeSpaceAware(type)) {
-      const spaceId = await this._getSpaceId();
-      if (spaceId) {
-        spaceOptions.extraFilters = [{
+    const spaceId = await this._getSpaceId();
+    console.log('got space id', spaceId);
+
+    let minimumShouldMatch = 0;
+
+    const typeClauses = types.map(t => {
+
+      const shouldFilterOnSpace = this._isTypeSpaceAware(t) && spaceId;
+      const isDefaultSpace = spaceId === DEFAULT_SPACE_ID;
+
+      const bool = {
+        must: []
+      };
+
+      if (t) {
+        minimumShouldMatch = 1;
+        bool.must.push({
           term: {
-            spaceId
+            type: t
           }
-        }];
+        });
       }
+
+      if (shouldFilterOnSpace) {
+        if (isDefaultSpace) {
+          bool.must_not = {
+            exists: {
+              field: "spaceId"
+            }
+          };
+        } else {
+          bool.must.push({
+            term: {
+              spaceId
+            }
+          });
+        }
+      }
+
+      return {
+        bool
+      };
+    });
+
+    if (typeClauses.length > 0) {
+      spaceOptions.extraQueryParams = {
+        bool: {
+          should: typeClauses,
+          minimum_should_match: minimumShouldMatch
+        }
+      };
     }
 
     return await this._client.find({ ...options, ...spaceOptions });
@@ -100,7 +145,7 @@ export class SpacesSavedObjectsClient {
       extraSourceProperties: ['spaceId']
     });
 
-    const { spaceId: objectSpaceId } = response;
+    const { spaceId: objectSpaceId = DEFAULT_SPACE_ID } = response;
 
     if (objectSpaceId !== thisSpaceId) {
       throw this._client.errors.createGenericNotFoundError();
@@ -122,20 +167,30 @@ export class SpacesSavedObjectsClient {
   }
 
   async _getSpaceId() {
-    if (!this._spaceId) {
-      const {
-        saved_objects: spaces = []
-      } = await this.find({
-        type: 'space',
-        search: `"${this._spaceUrlContext}"`,
-        search_fields: ['urlContext'],
-      });
+    if (!this._spaceUrlContext) {
+      return DEFAULT_SPACE_ID;
+    }
 
-      if (spaces.length > 0) {
-        this._spaceId = spaces[0].id;
-      }
+    if (!this._spaceId) {
+      this._spaceId = await this._findSpace(this._spaceUrlContext);
     }
 
     return this._spaceId;
+  }
+
+  async _findSpace(urlContext) {
+    const {
+      saved_objects: spaces = []
+    } = await this._client.find({
+      type: 'space',
+      search: `${urlContext}`,
+      search_fields: ['urlContext']
+    });
+
+    if (spaces.length > 0) {
+      return spaces[0].id;
+    }
+
+    return null;
   }
 }

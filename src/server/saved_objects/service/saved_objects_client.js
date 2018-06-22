@@ -160,8 +160,8 @@ export class SavedObjectsClient {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
-  async bulkGet(objects = []) {
-    return this._repository.bulkGet(objects);
+  async bulkGet(objects = [], options = {}) {
+    return this._repository.bulkGet(objects, options);
   }
 
   /**
@@ -171,8 +171,8 @@ export class SavedObjectsClient {
    * @param {string} id
    * @returns {promise} - { id, type, version, attributes }
    */
-  async get(type, id) {
-    return this._repository.get(type, id);
+  async get(type, id, options = {}) {
+    return this._repository.get(type, id, options);
   }
 
   /**

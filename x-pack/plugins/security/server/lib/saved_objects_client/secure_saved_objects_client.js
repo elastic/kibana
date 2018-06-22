@@ -100,13 +100,13 @@ export class SecureSavedObjectsClient {
     return await this._repository.bulkGet(objects, options);
   }
 
-  async get(type, id) {
+  async get(type, id, options = {}) {
     await this._performAuthorizationCheck(type, 'get', {
       type,
       id,
     });
 
-    return await this._repository.get(type, id);
+    return await this._repository.get(type, id, options);
   }
 
   async update(type, id, attributes, options = {}) {

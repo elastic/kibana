@@ -227,7 +227,7 @@ export class SavedObjectsRepository {
       sortField,
       sortOrder,
       fields,
-      extraFilters,
+      extraQueryParams,
     } = options;
 
     if (searchFields && !Array.isArray(searchFields)) {
@@ -238,8 +238,8 @@ export class SavedObjectsRepository {
       throw new TypeError('options.searchFields must be an array');
     }
 
-    if (extraFilters && !Array.isArray(extraFilters)) {
-      throw new TypeError('options.extraFilters must be an array');
+    if (extraQueryParams && typeof extraQueryParams !== 'object') {
+      throw new TypeError('options.extraQueryParams must be an object');
     }
 
     const esOptions = {
@@ -256,10 +256,12 @@ export class SavedObjectsRepository {
           type,
           sortField,
           sortOrder,
-          extraFilters
+          extraQueryParams
         })
       }
     };
+
+    console.log('finding with query', JSON.stringify(esOptions));
 
     const response = await this._callCluster('search', esOptions);
 
@@ -386,7 +388,7 @@ export class SavedObjectsRepository {
       ...updatedAt && { updated_at: updatedAt },
       version: response._version,
       ...extraSourceProperties
-        .map(s => response._source[s])
+        .map(s => ({ [s]: response._source[s] }))
         .reduce((acc, prop) => ({ ...acc, ...prop }), {}),
       attributes: {
         ...response._source[type],

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { defaultsDeep } from 'lodash';
 import { getRootPropertiesObjects } from '../../../../mappings';
 
 /**
@@ -67,24 +68,15 @@ function getFieldsForTypes(searchFields, types) {
  *  @param  {Array<string>} searchFields
  *  @return {Object}
  */
-export function getQueryParams(mappings, type, search, searchFields, extraFilters) {
+export function getQueryParams(mappings, type, search, searchFields, extraQueryParams) {
   if (!type && !search) {
     return {};
   }
 
   const bool = {};
 
-  const filters = [];
   if (type) {
-    filters.push({ [Array.isArray(type) ? 'terms' : 'term']: { type } });
-  }
-
-  if (extraFilters) {
-    filters.push(...extraFilters);
-  }
-
-  if (filters.length > 0) {
-    bool.filter = filters;
+    bool.filter = [{ [Array.isArray(type) ? 'terms' : 'term']: { type } }];
   }
 
   if (search) {
@@ -102,7 +94,11 @@ export function getQueryParams(mappings, type, search, searchFields, extraFilter
     ];
   }
 
-  return { query: { bool } };
+  const query = defaultsDeep({
+    bool
+  }, extraQueryParams);
+
+  return { query };
 }
 
 
