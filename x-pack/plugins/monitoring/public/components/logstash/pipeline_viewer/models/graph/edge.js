@@ -8,16 +8,6 @@ export class Edge {
   constructor(graph, json) {
     this.graph = graph;
     this.update(json);
-
-    this.cola = this._makeCola();
-  }
-
-  _makeCola() {
-    return {
-      edge: this,
-      source: this.from.cola,
-      target: this.to.cola
-    };
   }
 
   update(json) {
@@ -26,12 +16,6 @@ export class Edge {
 
   get id() {
     return this.json.id;
-  }
-
-  get htmlAttrId() {
-    // Substitute any non-word characters with an underscore so
-    // D3 selections don't interpret them as special selector syntax
-    return this.json.id.replace(/\W/, '_');
   }
 
   get from() {

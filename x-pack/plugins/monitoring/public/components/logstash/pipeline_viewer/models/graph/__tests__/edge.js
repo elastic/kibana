@@ -25,20 +25,6 @@ describe('Edge', () => {
     };
   });
 
-  it('should initialize the webcola representation', () => {
-    const edge = new Edge(graph, edgeJson);
-    expect(edge.cola).to.eql({
-      edge: edge,
-      source: 'bar',
-      target: 17
-    });
-  });
-
-  it('should have a D3-friendly ID', () => {
-    const edge = new Edge(graph, edgeJson);
-    expect(edge.htmlAttrId).to.be('myif_myes');
-  });
-
   it('should have the correct from vertex', () => {
     const edge = new Edge(graph, edgeJson);
     expect(edge.fromId).to.be('myif');

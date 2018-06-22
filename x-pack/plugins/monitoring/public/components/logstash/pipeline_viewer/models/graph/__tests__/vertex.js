@@ -6,7 +6,6 @@
 
 import expect from 'expect.js';
 import { Graph } from '../';
-import { LOGSTASH } from '../../../../../../../common/constants';
 
 describe('Vertex', () => {
   let graph;
@@ -44,16 +43,6 @@ describe('Vertex', () => {
     graph.update(graphJson);
   });
 
-  it('should initialize the webcola representation', () => {
-    const margin = LOGSTASH.PIPELINE_VIEWER.GRAPH.VERTICES.MARGIN_PX;
-    const vertex = graph.getVertexById('my-queue');
-    expect(vertex.cola).to.eql({
-      vertex: vertex,
-      width: LOGSTASH.PIPELINE_VIEWER.GRAPH.VERTICES.WIDTH_PX + margin,
-      height: LOGSTASH.PIPELINE_VIEWER.GRAPH.VERTICES.HEIGHT_PX + margin
-    });
-  });
-
   it('should update the internal json property when update() is called', () => {
     const vertex = graph.getVertexById('my-queue');
     const updatedJson = {
@@ -61,18 +50,6 @@ describe('Vertex', () => {
     };
     vertex.update(updatedJson);
     expect(vertex.json).to.eql(updatedJson);
-  });
-
-  it('should not change the webcola index after update', () => {
-    const verticesIds = graph.getVertices().map(v => [v.id, v.colaIndex]);
-    graph.update(graphJson);
-    verticesIds.forEach(idAndIndex => {
-      const [id, colaIndex] = idAndIndex;
-      const v = graph.getVertexById(id);
-      console.log("MATCH", v.id, id);
-      expect(v).not.to.be(undefined);
-      expect(v.colaIndex).to.be(colaIndex);
-    });
   });
 
   it('should have the correct name', () => {
@@ -83,14 +60,6 @@ describe('Vertex', () => {
   it('should return the JSON id directly as the id', () => {
     const vertex1 = graph.getVertexById('my-prefix:my-really-long-named-generator');
     expect(vertex1.id).to.be(vertex1.json.id);
-  });
-
-  it('should have the correct htmlAttrId', () => {
-    const vertex1 = graph.getVertexById('my-prefix:my-really-long-named-generator');
-    expect(vertex1.htmlAttrId).to.be('my_prefix_my_really_long_named_generator');
-
-    const vertex2 = graph.getVertexById('my-queue');
-    expect(vertex2.htmlAttrId).to.be('my_queue');
   });
 
   it('should have the correct subtitle', () => {
@@ -201,23 +170,6 @@ describe('Vertex', () => {
 
     const vertex5 = graph.getVertexById('my-sleep');
     expect(vertex5.isLeaf).to.be(true);
-  });
-
-  it('should have the correct rank', () => {
-    const vertex1 = graph.getVertexById('my-prefix:my-really-long-named-generator');
-    expect(vertex1.rank).to.be(0);
-
-    const vertex2 = graph.getVertexById('my-queue');
-    expect(vertex2.rank).to.be(1);
-
-    const vertex3 = graph.getVertexById('my-if');
-    expect(vertex3.rank).to.be(2);
-
-    const vertex4 = graph.getVertexById('my-grok');
-    expect(vertex4.rank).to.be(3);
-
-    const vertex5 = graph.getVertexById('my-sleep');
-    expect(vertex5.rank).to.be(3);
   });
 
   it('should have the correct source location', () => {

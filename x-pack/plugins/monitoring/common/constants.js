@@ -131,7 +131,6 @@ export const LOGSTASH = {
       },
       VERTICES: {
         BORDER_RADIUS_PX: 4,
-        MARGIN_PX: 35,
         WIDTH_PX: 320,
         HEIGHT_PX: 85,
 
