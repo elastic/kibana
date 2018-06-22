@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { withInitialData } from './helpers';
+import { createInitialDataSelector } from './helpers';
 import { Request } from 'react-redux-request';
 import { loadLicense } from '../../services/rest/apm';
 
@@ -14,8 +14,10 @@ const INITIAL_DATA = {
   license: { isActive: false }
 };
 
+const withInitialData = createInitialDataSelector(INITIAL_DATA);
+
 export function getLicense(state) {
-  return withInitialData(state.reactReduxRequest[ID], INITIAL_DATA);
+  return withInitialData(state.reactReduxRequest[ID]);
 }
 
 export function LicenceRequest({ render }) {

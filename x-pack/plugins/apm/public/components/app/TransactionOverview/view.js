@@ -49,9 +49,10 @@ class TransactionOverview extends Component {
   render() {
     const {
       changeTransactionSorting,
+      hasDynamicBaseline,
+      location,
       transactionSorting,
-      urlParams,
-      hasDynamicBaseline
+      urlParams
     } = this.props;
     const { serviceName, transactionType } = urlParams;
 
@@ -64,10 +65,11 @@ class TransactionOverview extends Component {
 
         <DynamicBaselineFlyout
           hasDynamicBaseline={hasDynamicBaseline}
+          isOpen={this.state.isFlyoutOpen}
+          location={location}
+          onClose={this.onCloseFlyout}
           serviceName={serviceName}
           transactionType={transactionType}
-          isOpen={this.state.isFlyoutOpen}
-          onClose={this.onCloseFlyout}
         />
 
         <TabNavigation />

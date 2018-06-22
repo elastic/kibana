@@ -9,13 +9,14 @@ import orderBy from 'lodash.orderby';
 import { createSelector } from 'reselect';
 import { loadServiceList } from '../../services/rest/apm';
 import { Request } from 'react-redux-request';
-import { withInitialData } from './helpers';
+import { createInitialDataSelector } from './helpers';
 
 const ID = 'serviceList';
 const INITIAL_DATA = [];
+const withInitialData = createInitialDataSelector(INITIAL_DATA);
 
 export const getServiceList = createSelector(
-  state => withInitialData(state.reactReduxRequest[ID], INITIAL_DATA),
+  state => withInitialData(state.reactReduxRequest[ID]),
   state => state.sorting.service,
   (serviceList, serviceSorting) => {
     const { key: sortKey, descending } = serviceSorting;

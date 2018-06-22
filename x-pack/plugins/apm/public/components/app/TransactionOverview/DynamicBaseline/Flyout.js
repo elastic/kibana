@@ -19,6 +19,25 @@ import {
   EuiText,
   EuiTitle
 } from '@elastic/eui';
+import {
+  decodeKibanaSearchParams,
+  encodeKibanaSearchParams
+} from '../../../../utils/url';
+
+function getJobUrl(serviceName, transactionType, location) {
+  const { _g, _a } = decodeKibanaSearchParams(location.search);
+  const nextSearch = encodeKibanaSearchParams({
+    _g: {
+      ..._g,
+      ml: {
+        jobIds: [`${serviceName}-${transactionType}-high_mean_response_time`]
+      }
+    },
+    _a
+  });
+
+  return `/app/ml#/timeseriesexplorer/?${nextSearch}`;
+}
 
 export default class DynamicBaselineFlyout extends Component {
   state = {
@@ -55,7 +74,7 @@ export default class DynamicBaselineFlyout extends Component {
   };
 
   addErrorToast = () => {
-    const { serviceName, transactionType } = this.props;
+    const { serviceName, transactionType, location } = this.props;
     this.setState({
       toasts: [
         {
@@ -65,7 +84,10 @@ export default class DynamicBaselineFlyout extends Component {
           text: (
             <p>
               There&apos;s already a baseline job running on {serviceName} for{' '}
-              {transactionType}. <a href="/app/ml">View existing job.</a>
+              {transactionType}.{' '}
+              <a href={getJobUrl(serviceName, transactionType, location)}>
+                View existing job.
+              </a>
             </p>
           )
         }
@@ -74,7 +96,7 @@ export default class DynamicBaselineFlyout extends Component {
   };
 
   addSuccessToast = () => {
-    const { serviceName } = this.props;
+    const { serviceName, transactionType, location } = this.props;
     this.setState({
       toasts: [
         {
@@ -85,7 +107,9 @@ export default class DynamicBaselineFlyout extends Component {
             <p>
               The analysis is now running on {serviceName} and you will start
               seeing results show up on the response times graph.{' '}
-              <a href="">View job.</a>
+              <a href={getJobUrl(serviceName, transactionType, location)}>
+                View job.
+              </a>
             </p>
           )
         }
@@ -100,7 +124,14 @@ export default class DynamicBaselineFlyout extends Component {
   };
 
   render() {
-    const { isOpen, onClose, hasDynamicBaseline } = this.props;
+    const {
+      hasDynamicBaseline,
+      isOpen,
+      location,
+      onClose,
+      serviceName,
+      transactionType
+    } = this.props;
     const { isLoading, hasIndexPattern, toasts } = this.state;
 
     const flyout = (
@@ -116,7 +147,9 @@ export default class DynamicBaselineFlyout extends Component {
               title={
                 <span>
                   A dynamic baseline has already been created.{' '}
-                  <a href="/app/ml">View it here</a>
+                  <a href={getJobUrl(serviceName, transactionType, location)}>
+                    View it here
+                  </a>
                 </span>
               }
               color="success"
@@ -192,7 +225,10 @@ export default class DynamicBaselineFlyout extends Component {
 }
 
 DynamicBaselineFlyout.propTypes = {
+  hasDynamicBaseline: PropTypes.bool.isRequired,
   isOpen: PropTypes.bool.isRequired,
+  location: PropTypes.object.isRequired,
+  onClose: PropTypes.func.isRequired,
   serviceName: PropTypes.string,
-  onClose: PropTypes.func.isRequired
+  transactionType: PropTypes.string
 };

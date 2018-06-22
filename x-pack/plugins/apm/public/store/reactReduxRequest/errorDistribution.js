@@ -7,13 +7,14 @@
 import React from 'react';
 import { Request } from 'react-redux-request';
 import { loadErrorDistribution } from '../../services/rest/apm';
-import { withInitialData } from './helpers';
+import { createInitialDataSelector } from './helpers';
 
 const ID = 'errorDistribution';
 const INITIAL_DATA = { buckets: [], totalHits: 0 };
+const withInitialData = createInitialDataSelector(INITIAL_DATA);
 
 export function getErrorDistribution(state) {
-  return withInitialData(state.reactReduxRequest[ID], INITIAL_DATA);
+  return withInitialData(state.reactReduxRequest[ID]);
 }
 
 export function ErrorDistributionRequest({ urlParams, render }) {

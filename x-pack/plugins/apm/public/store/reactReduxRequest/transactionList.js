@@ -9,13 +9,14 @@ import orderBy from 'lodash.orderby';
 import { createSelector } from 'reselect';
 import { Request } from 'react-redux-request';
 import { loadTransactionList } from '../../services/rest/apm';
-import { withInitialData } from './helpers';
+import { createInitialDataSelector } from './helpers';
 
 const ID = 'transactionList';
 const INITIAL_DATA = [];
+const withInitialData = createInitialDataSelector(INITIAL_DATA);
 
 export const getTransactionList = createSelector(
-  state => withInitialData(state.reactReduxRequest[ID], INITIAL_DATA),
+  state => withInitialData(state.reactReduxRequest[ID]),
   state => state.sorting.transaction,
   (transactionList = {}, transactionSorting) => {
     const { key: sortKey, descending } = transactionSorting;

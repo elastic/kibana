@@ -33,6 +33,8 @@ jest.mock('../../../../utils/timepicker', () => {});
 
 const setup = () => {
   const props = {
+    hasDynamicBaseline: false,
+    location: {},
     urlParams: { transactionType: 'request', serviceName: 'MyServiceName' }
   };
 

@@ -11,7 +11,6 @@ import { getCharts } from '../selectors/chartSelectors';
 import { getUrlParams } from '../urlParams';
 import { Request } from 'react-redux-request';
 import { loadCharts } from '../../services/rest/apm';
-import { withInitialData } from './helpers';
 
 const ID = 'overviewCharts';
 const INITIAL_DATA = {
@@ -24,11 +23,11 @@ const INITIAL_DATA = {
 
 export const getOverviewCharts = createSelector(
   getUrlParams,
-  state => withInitialData(state.reactReduxRequest[ID], INITIAL_DATA),
-  (urlParams, overviewCharts) => {
+  state => state.reactReduxRequest[ID],
+  (urlParams, overviewCharts = {}) => {
     return {
       ...overviewCharts,
-      data: getCharts(urlParams, overviewCharts.data)
+      data: getCharts(urlParams, overviewCharts.data || INITIAL_DATA)
     };
   }
 );

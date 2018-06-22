@@ -202,7 +202,6 @@ export default class WatcherFlyout extends Component {
               <KibanaLink
                 pathname={'/app/kibana'}
                 hash={`/management/elasticsearch/watcher/watches/watch/${id}`}
-                query={{}}
               >
                 View watch.
               </KibanaLink>

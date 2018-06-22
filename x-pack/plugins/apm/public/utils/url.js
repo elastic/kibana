@@ -40,6 +40,21 @@ function stringifyWithoutEncoding(query) {
   });
 }
 
+export function decodeKibanaSearchParams(search) {
+  const query = toQuery(search);
+  return {
+    _g: query._g ? rison.decode(query._g) : null,
+    _a: query._a ? rison.decode(query._a) : null
+  };
+}
+
+export function encodeKibanaSearchParams(query) {
+  return stringifyWithoutEncoding({
+    _g: rison.encode(query._g),
+    _a: rison.encode(query._a)
+  });
+}
+
 export function RelativeLinkComponent({
   location,
   path,
@@ -85,6 +100,7 @@ export function KibanaLinkComponent({
     _g: query._g ? rison.encode(query._g) : currentQuery._g,
     _a: query._a ? rison.encode(query._a) : ''
   };
+
   const search = stringifyWithoutEncoding(nextQuery);
   const href = url.format({
     pathname: chrome.addBasePath(pathname),
