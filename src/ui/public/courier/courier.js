@@ -28,7 +28,7 @@ import { addFatalErrorCallback } from '../notify';
 import { SearchSourceProvider } from './data_source/search_source';
 import { requestQueue } from './_request_queue';
 import { FetchSoonProvider } from './fetch';
-import { SearchLooperProvider } from './looper/search';
+import { SearchLooperProvider } from './search_looper';
 import { SavedObjectProvider } from './saved_object';
 import { RedirectWhenMissingProvider } from './_redirect_when_missing';
 import { timefilter } from 'ui/timefilter';
