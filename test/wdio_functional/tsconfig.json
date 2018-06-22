@@ -14,10 +14,12 @@
         ]
     },
     "exclude": [
-        "node_modules"
+        "../../node_modules",
+        "build"
     ],
     "include": [
-        "test/wdio_functional/**/*"
+        "**/*",
+        "helpers/**/*"
     ],
     "compileOnSave": false
 }

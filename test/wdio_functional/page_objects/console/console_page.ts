@@ -134,7 +134,6 @@ GET _search
   private init(): void {
     this.driver.waitForExist(this.breadCrumbSelector);
     expect('Dev Tools').toBe(this.getElementText(this.breadCrumbSelector));
-    const self = this;
     this.driver.waitUntil(() => {
       return this.title() === 'Console - Kibana';
     });

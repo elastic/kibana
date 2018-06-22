@@ -1,4 +1,3 @@
-import { CssProperty } from 'webdriverio';
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -18,7 +17,7 @@ import { CssProperty } from 'webdriverio';
  * under the License.
  */
 
-import { Client, Element, RawResult } from 'webdriverio';
+import { Client, CssProperty, Element, RawResult } from 'webdriverio';
 
 export default class Web {
   protected driver: Client<void>;
@@ -67,5 +66,5 @@ export default class Web {
     this.driver.addValue(selector, value);
   }
 
-  protected waitForCondition(callback: () => boolean): void { }
+  // protected waitForCondition(callback: () => boolean): void { }
 }
