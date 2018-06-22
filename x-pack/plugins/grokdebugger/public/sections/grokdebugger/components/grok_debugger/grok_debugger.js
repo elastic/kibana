@@ -48,6 +48,7 @@ export class GrokDebugger extends React.Component {
 
     customPatterns = customPatterns.trim();
     if (!customPatterns) {
+      this.grokdebuggerRequest.customPatterns = {};
       return;
     }
 
