@@ -14,6 +14,7 @@ export function EventOutput({ value }) {
   return (
     <EuiFormRow
       label="Structured Data"
+      fullWidth
       data-test-subj="aceEventOutput"
     >
       <EuiCodeEditor
