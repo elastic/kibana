@@ -68,16 +68,16 @@ export default function ({ getService, getPageObjects }) {
 
     describe('vector map', function indexPatternCreation() {
 
-      it('should display spy panel toggle button', async function () {
-        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
+      it('should have inspector enabled', async function () {
+        const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
         expect(spyToggleExists).to.be(true);
       });
 
       it('should show results after clicking play (join on states)', async function () {
-        const expectedData = 'CN,2,592,IN,2,373,US,1,194,ID,489,BR,415';
-        await PageObjects.visualize.openSpyPanel();
-        const data = await PageObjects.visualize.getDataTableData();
-        expect(data.trim().split('\n').join(',')).to.eql(expectedData);
+        const expectedData = [['CN', '2,592'], ['IN', '2,373'], ['US', '1,194'], ['ID', '489'], ['BR', '415']];
+        await PageObjects.visualize.openInspector();
+        const data = await PageObjects.visualize.getInspectorTableData();
+        expect(data).to.eql(expectedData);
       });
 
       it('should change results after changing layer to world', async function () {
@@ -95,10 +95,10 @@ export default function ({ getService, getPageObjects }) {
 
         await PageObjects.common.sleep(2000);//need some time for the data to load
 
-        await PageObjects.visualize.openSpyPanel();
-        const actualData = await PageObjects.visualize.getDataTableData();
-        const expectedData = 'CN,2,592,IN,2,373,US,1,194,ID,489,BR,415';
-        expect(actualData.trim().split('\n').join(',')).to.eql(expectedData);
+        await PageObjects.visualize.openInspector();
+        const actualData = await PageObjects.visualize.getInspectorTableData();
+        const expectedData = [['CN', '2,592'], ['IN', '2,373'], ['US', '1,194'], ['ID', '489'], ['BR', '415']];
+        expect(actualData).to.eql(expectedData);
 
 
       });

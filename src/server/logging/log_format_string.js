@@ -49,7 +49,8 @@ const typeColors = {
   optmzr: 'white',
   managr: 'green',
   optimize: 'magentaBright',
-  listening: 'magentaBright'
+  listening: 'magentaBright',
+  scss: 'magentaBright',
 };
 
 const color = _.memoize(function (name) {

@@ -40,6 +40,21 @@ import { queryManagerFactory } from '../query_manager';
 import { SearchSourceProvider } from '../courier/data_source/search_source';
 import { SavedObjectsClientProvider } from '../saved_objects';
 
+import { Inspector } from '../inspector';
+import { RequestAdapter, DataAdapter } from '../inspector/adapters';
+
+const getTerms = (table, columnIndex, rowIndex) => {
+  // get only rows where cell value matches current row for all the fields before columnIndex
+  const rows = table.rows.filter(row => row.every((cell, i) => cell === table.rows[rowIndex][i] || i >= columnIndex));
+  const terms = rows.map(row => row[columnIndex]);
+
+  return [...new Set(terms.filter(term => {
+    const notOther = term !== '__other__';
+    const notMissing = term !== '__missing__';
+    return notOther && notMissing;
+  }))];
+};
+
 export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppState) {
   const visTypes = Private(VisTypesRegistryProvider);
   const brushEvent = Private(UtilsBrushEventProvider);
@@ -75,9 +90,23 @@ export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppS
         queryFilter: queryFilter,
         queryManager: queryManagerFactory(getAppState),
         events: {
+          // the filter method will be removed in the near feature
+          // you should rather use addFilter method below
           filter: (event) => {
             const appState = getAppState();
             filterBarClickHandler(appState)(event);
+          },
+          addFilter: (data, columnIndex, rowIndex) => {
+            const agg = data.columns[columnIndex].aggConfig;
+            let filter = [];
+            const value = data.rows[rowIndex][columnIndex];
+            if (agg.type.name === 'terms' && agg.params.otherBucket) {
+              const terms = getTerms(data, columnIndex, rowIndex);
+              filter = agg.createFilter(value, { terms });
+            } else {
+              filter = agg.createFilter(value);
+            }
+            queryFilter.addFilters(filter);
           }, brush: (event) => {
             const appState = getAppState();
             brushEvent(appState)(event);
@@ -88,8 +117,57 @@ export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppS
             throw new Error('Unable to inherit search source, visualize saved object does not have search source.');
           }
           return new SearchSource().inherits(parentSearchSource);
-        }
+        },
+        inspectorAdapters: this._getActiveInspectorAdapters(),
       };
+    }
+
+    /**
+     * Open the inspector for this visualization.
+     * @return {InspectorSession} the handler for the session of this inspector.
+     */
+    openInspector() {
+      return Inspector.open(this.API.inspectorAdapters, {
+        title: this.title
+      });
+    }
+
+    hasInspector() {
+      return Inspector.isAvailable(this.API.inspectorAdapters);
+    }
+
+    /**
+     * Returns an object of all inspectors for this vis object.
+     * This must only be called after this.type has properly be initialized,
+     * since we need to read out data from the the vis type to check which
+     * inspectors are available.
+     */
+    _getActiveInspectorAdapters() {
+      const adapters = {};
+      const { inspectorAdapters: typeAdapters } = this.type;
+
+      // Add the requests inspector adapters if the vis type explicitly requested it via
+      // inspectorAdapters.requests: true in its definition or if it's using the courier
+      // request handler, since that will automatically log its requests.
+      if (typeAdapters && typeAdapters.requests || this.type.requestHandler === 'courier') {
+        adapters.requests = new RequestAdapter();
+      }
+
+      // Add the data inspector adapter if the vis type requested it or if the
+      // vis is using courier, since we know that courier supports logging
+      // its data.
+      if (typeAdapters && typeAdapters.data || this.type.requestHandler === 'courier') {
+        adapters.data = new DataAdapter();
+      }
+
+      // Add all inspectors, that are explicitly registered with this vis type
+      if (typeAdapters && typeAdapters.custom) {
+        Object.entries(typeAdapters.custom).forEach(([key, Adapter]) => {
+          adapters[key] = new Adapter();
+        });
+      }
+
+      return adapters;
     }
 
     isEditorMode() {
