@@ -261,8 +261,6 @@ export class SavedObjectsRepository {
       }
     };
 
-    console.log('finding with query', JSON.stringify(esOptions));
-
     const response = await this._callCluster('search', esOptions);
 
     if (response.status === 404) {

@@ -121,13 +121,20 @@ export class SpacesSavedObjectsClient {
       extraSourceProperties: ['spaceId', 'type']
     });
 
-    result.saved_objects = result.saved_objects.filter(savedObject => {
-      const { type, spaceId } = savedObject;
+    result.saved_objects = result.saved_objects.map(savedObject => {
+      const { id, type, spaceId } = savedObject;
 
       if (this._isTypeSpaceAware(type)) {
-        return spaceId === thisSpaceId;
+        if (spaceId !== thisSpaceId) {
+          return {
+            id,
+            type,
+            error: { statusCode: 404, message: 'Not found' }
+          };
+        }
       }
-      return true;
+
+      return savedObject;
     });
 
     return result;

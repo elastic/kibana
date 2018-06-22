@@ -5,10 +5,11 @@
  */
 
 import expect from 'expect.js';
-import { AUTHENTICATION } from './lib/authentication';
+import { SPACES } from './lib/spaces';
+import { getIdPrefix, getUrlPrefix, getExpectedSpaceIdProperty } from './lib/space_test_utils';
 
 export default function ({ getService }) {
-  const supertest = getService('supertestWithoutAuth');
+  const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
   const BULK_REQUESTS = [
@@ -26,15 +27,53 @@ export default function ({ getService }) {
     },
   ];
 
+  const createBulkRequests = (spaceId) => BULK_REQUESTS.map(r => ({
+    ...r,
+    id: `${getIdPrefix(spaceId)}${r.id}`
+  }));
+
   describe('_bulk_get', () => {
-    const expectResults = resp => {
+    const expectNotFoundResults = (spaceId) => resp => {
       expect(resp.body).to.eql({
         saved_objects: [
           {
-            id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+            id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
+            type: 'visualization',
+            error: {
+              statusCode: 404,
+              message: 'Not found',
+            },
+          },
+          {
+            id: `${getIdPrefix(spaceId)}does not exist`,
+            type: 'dashboard',
+            error: {
+              statusCode: 404,
+              message: 'Not found',
+            },
+          },
+          //todo(legrego) fix when config is space aware
+          {
+            id: `${getIdPrefix(spaceId)}7.0.0-alpha1`,
+            type: 'config',
+            error: {
+              statusCode: 404,
+              message: 'Not found',
+            },
+          },
+        ],
+      });
+    };
+
+    const expectResults = (spaceId) => resp => {
+      expect(resp.body).to.eql({
+        saved_objects: [
+          {
+            id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
             type: 'visualization',
             updated_at: '2017-09-21T18:51:23.794Z',
             version: resp.body.saved_objects[0].version,
+            ...getExpectedSpaceIdProperty(spaceId),
             attributes: {
               title: 'Count of requests',
               description: '',
@@ -47,129 +86,61 @@ export default function ({ getService }) {
             },
           },
           {
-            id: 'does not exist',
+            id: `${getIdPrefix(spaceId)}does not exist`,
             type: 'dashboard',
             error: {
               statusCode: 404,
               message: 'Not found',
             },
           },
+          //todo(legrego) fix when config is space aware
           {
-            id: '7.0.0-alpha1',
+            id: `${getIdPrefix(spaceId)}7.0.0-alpha1`,
             type: 'config',
-            updated_at: '2017-09-21T18:49:16.302Z',
-            version: resp.body.saved_objects[2].version,
-            attributes: {
-              buildNum: 8467,
-              defaultIndex: '91200a00-9efd-11e7-acb3-3dab96693fab',
+            error: {
+              statusCode: 404,
+              message: 'Not found',
             },
           },
         ],
       });
     };
 
-    const expectForbidden = resp => {
-      //eslint-disable-next-line max-len
-      const missingActions = `action:login,action:saved_objects/config/bulk_get,action:saved_objects/dashboard/bulk_get,action:saved_objects/visualization/bulk_get`;
-      expect(resp.body).to.eql({
-        statusCode: 403,
-        error: 'Forbidden',
-        message: `Unable to bulk_get config,dashboard,visualization, missing ${missingActions}`
-      });
-    };
-
-    const bulkGetTest = (description, { auth, tests }) => {
+    const bulkGetTest = (description, { spaceId, urlContext, tests }) => {
       describe(description, () => {
-        before(() => esArchiver.load('saved_objects/basic'));
-        after(() => esArchiver.unload('saved_objects/basic'));
+        before(() => esArchiver.load('saved_objects/spaces'));
+        after(() => esArchiver.unload('saved_objects/spaces'));
 
         it(`should return ${tests.default.statusCode}`, async () => {
           await supertest
-            .post(`/api/saved_objects/_bulk_get`)
-            .auth(auth.username, auth.password)
-            .send(BULK_REQUESTS)
+            .post(`${getUrlPrefix(urlContext)}/api/saved_objects/_bulk_get`)
+            .send(createBulkRequests(spaceId))
             .expect(tests.default.statusCode)
             .then(tests.default.response);
         });
       });
     };
 
-    bulkGetTest(`not a kibana user`, {
-      auth: {
-        username: AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME,
-        password: AUTHENTICATION.NOT_A_KIBANA_USER.PASSWORD,
-      },
-      tests: {
-        default: {
-          statusCode: 403,
-          response: expectForbidden,
-        }
-      }
-    });
-
-    bulkGetTest(`superuser`, {
-      auth: {
-        username: AUTHENTICATION.SUPERUSER.USERNAME,
-        password: AUTHENTICATION.SUPERUSER.PASSWORD,
-      },
+    bulkGetTest(`objects within the current space (space_1)`, {
+      ...SPACES.SPACE_1,
       tests: {
         default: {
           statusCode: 200,
-          response: expectResults,
+          response: expectResults(SPACES.SPACE_1.spaceId),
         },
       }
     });
 
-    bulkGetTest(`kibana legacy user`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_LEGACY_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_LEGACY_USER.PASSWORD,
-      },
+    bulkGetTest(`objects within another space`, {
+      ...SPACES.SPACE_1,
+      urlContext: SPACES.SPACE_2.urlContext,
       tests: {
         default: {
           statusCode: 200,
-          response: expectResults,
+          response: expectNotFoundResults(SPACES.SPACE_1.spaceId)
         },
       }
     });
 
-    bulkGetTest(`kibana legacy dashboard only user`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.PASSWORD,
-      },
-      tests: {
-        default: {
-          statusCode: 200,
-          response: expectResults,
-        },
-      }
-    });
-
-    bulkGetTest(`kibana rbac user`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_RBAC_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_RBAC_USER.PASSWORD,
-      },
-      tests: {
-        default: {
-          statusCode: 200,
-          response: expectResults,
-        },
-      }
-    });
-
-    bulkGetTest(`kibana rbac dashboard only user`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.PASSWORD,
-      },
-      tests: {
-        default: {
-          statusCode: 200,
-          response: expectResults,
-        },
-      }
-    });
   });
 }
