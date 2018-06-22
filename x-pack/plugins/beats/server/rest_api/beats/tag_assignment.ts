@@ -5,9 +5,10 @@
  */
 
 import Joi from 'joi';
+import { CMServerLibs } from '../../lib/lib';
 import { wrapEsError } from '../../utils/error_wrappers';
 
-export const createTagAssignmentRoute = libs => ({
+export const createTagAssignmentRoute = (libs: CMServerLibs) => ({
   config: {
     validate: {
       payload: Joi.object({
@@ -30,7 +31,11 @@ export const createTagAssignmentRoute = libs => ({
     }));
 
     try {
-      reply(await libs.beats.assignTagsToBeats(request, tweakedAssignments));
+      const response = await libs.beats.assignTagsToBeats(
+        request,
+        tweakedAssignments
+      );
+      reply(response);
     } catch (err) {
       // TODO move this to kibana route thing in adapter
       return reply(wrapEsError(err));

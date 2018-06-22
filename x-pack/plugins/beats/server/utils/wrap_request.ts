@@ -11,10 +11,12 @@ export const internalFrameworkRequest = Symbol('internalFrameworkRequest');
 export function wrapRequest<InternalRequest extends WrappableRequest>(
   req: InternalRequest
 ): FrameworkRequest<InternalRequest> {
-  const { params, payload, query } = req;
+  const { params, payload, query, headers, info } = req;
 
   return {
     [internalFrameworkRequest]: req,
+    headers,
+    info,
     params,
     payload,
     query,

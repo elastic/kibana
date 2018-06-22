@@ -9,6 +9,8 @@ import { createBeatEnrollmentRoute } from './rest_api/beats/enroll';
 import { createListAgentsRoute } from './rest_api/beats/list';
 import { createTagAssignmentRoute } from './rest_api/beats/tag_assignment';
 import { createTagRemovalRoute } from './rest_api/beats/tag_removal';
+import { createBeatUpdateRoute } from './rest_api/beats/update';
+import { createBeatVerificationRoute } from './rest_api/beats/verify';
 import { createSetTagRoute } from './rest_api/tags/set';
 import { createTokenRoute } from './rest_api/tokens/create';
 
@@ -16,10 +18,13 @@ import { beatsIndexTemplate } from './utils/index_templates';
 
 export const initManagementServer = (libs: CMServerLibs) => {
   libs.framework.installIndexTemplate('beats-template', beatsIndexTemplate);
+
   libs.framework.registerRoute(createTagAssignmentRoute(libs));
   libs.framework.registerRoute(createListAgentsRoute(libs));
   libs.framework.registerRoute(createTagRemovalRoute(libs));
   libs.framework.registerRoute(createBeatEnrollmentRoute(libs));
   libs.framework.registerRoute(createSetTagRoute(libs));
   libs.framework.registerRoute(createTokenRoute(libs));
+  libs.framework.registerRoute(createBeatVerificationRoute(libs));
+  libs.framework.registerRoute(createBeatUpdateRoute(libs));
 };

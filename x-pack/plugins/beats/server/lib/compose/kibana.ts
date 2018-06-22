@@ -21,10 +21,19 @@ import { Server } from 'hapi';
 export function compose(server: Server): CMServerLibs {
   const framework = new KibanaBackendFrameworkAdapter(server);
 
+  const tags = new CMTagsDomain(new ElasticsearchTagsAdapter(framework));
+  const tokens = new CMTokensDomain(new ElasticsearchTokensAdapter(framework), {
+    framework,
+  });
+  const beats = new CMBeatsDomain(new ElasticsearchBeatsAdapter(framework), {
+    tags,
+    tokens,
+  });
+
   const domainLibs: CMDomainLibs = {
-    beats: new CMBeatsDomain(new ElasticsearchBeatsAdapter(framework)),
-    tags: new CMTagsDomain(new ElasticsearchTagsAdapter(framework)),
-    tokens: new CMTokensDomain(new ElasticsearchTokensAdapter(framework)),
+    beats,
+    tags,
+    tokens,
   };
 
   const libs: CMServerLibs = {

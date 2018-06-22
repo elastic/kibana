@@ -17,14 +17,50 @@ import {
   FrameworkRequest,
 } from '../lib';
 import { CMTagsDomain } from './tags';
+import { CMTokensDomain } from './tokens';
 
 export class CMBeatsDomain {
   private adapter: CMBeatsAdapter;
   private tags: CMTagsDomain;
+  private tokens: CMTokensDomain;
 
-  constructor(adapter: CMBeatsAdapter, libs: { tags: CMTagsDomain }) {
+  constructor(
+    adapter: CMBeatsAdapter,
+    libs: { tags: CMTagsDomain; tokens: CMTokensDomain }
+  ) {
     this.adapter = adapter;
     this.tags = libs.tags;
+    this.tokens = libs.tokens;
+  }
+
+  public async update(
+    beatId: string,
+    accessToken: string,
+    beatData: Partial<CMBeat>
+  ) {
+    const beat = await this.adapter.get(beatId);
+
+    // TODO make return type enum
+    if (beat === null) {
+      return 'beat-not-found';
+    }
+
+    const isAccessTokenValid = this.tokens.areTokensEqual(
+      beat.access_token,
+      accessToken
+    );
+    if (!isAccessTokenValid) {
+      return 'invalid-access-token';
+    }
+    const isBeatVerified = beat.hasOwnProperty('verified_on');
+    if (!isBeatVerified) {
+      return 'beat-not-verified';
+    }
+
+    await this.adapter.update({
+      ...beat,
+      ...beatData,
+    });
   }
 
   // TODO more strongly type this
@@ -35,7 +71,7 @@ export class CMBeatsDomain {
   ) {
     // TODO move this to the token lib
     const accessToken = uuid.v4().replace(/-/g, '');
-    await this.adapter.insertBeat({
+    await this.adapter.insert({
       ...beat,
       access_token: accessToken,
       host_ip: remoteAddress,
@@ -55,7 +91,7 @@ export class CMBeatsDomain {
       removals: removals.map(() => ({ status: null })),
     };
 
-    const beats = await this.adapter.getBeatsWithIds(req, beatIds);
+    const beats = await this.adapter.getWithIds(req, beatIds);
     const tags = await this.tags.getTagsWithIds(req, tagIds);
 
     // Handle assignments containing non-existing beat IDs or tags
@@ -66,7 +102,8 @@ export class CMBeatsDomain {
       response,
       removals,
       nonExistentBeatIds,
-      nonExistentTags
+      nonExistentTags,
+      'removals'
     );
 
     // TODO abstract this
@@ -89,7 +126,43 @@ export class CMBeatsDomain {
   }
 
   public async getAllBeats(req: FrameworkRequest) {
-    return await this.adapter.getBeats(req);
+    return await this.adapter.getAll(req);
+  }
+
+  // TODO cleanup return value, should return a status enum
+  public async verifyBeats(req: FrameworkRequest, beatIds: string[]) {
+    const beatsFromEs = await this.adapter.getVerifiedWithIds(req, beatIds);
+
+    const nonExistentBeatIds = beatsFromEs.reduce(
+      (nonExistentIds, beatFromEs, idx) => {
+        if (!beatFromEs.found) {
+          nonExistentIds.push(beatIds[idx]);
+        }
+        return nonExistentIds;
+      },
+      []
+    );
+
+    const alreadyVerifiedBeatIds = beatsFromEs
+      .filter(beat => beat.found)
+      .filter(beat => beat._source.beat.hasOwnProperty('verified_on'))
+      .map(beat => beat._source.beat.id);
+
+    const toBeVerifiedBeatIds = beatsFromEs
+      .filter(beat => beat.found)
+      .filter(beat => !beat._source.beat.hasOwnProperty('verified_on'))
+      .map(beat => beat._source.beat.id);
+
+    const verifications = await this.adapter.verifyBeats(
+      req,
+      toBeVerifiedBeatIds
+    );
+    return {
+      alreadyVerifiedBeatIds,
+      nonExistentBeatIds,
+      toBeVerifiedBeatIds,
+      verifications,
+    };
   }
 
   public async assignTagsToBeats(
@@ -102,7 +175,7 @@ export class CMBeatsDomain {
     const response = {
       assignments: assignments.map(() => ({ status: null })),
     };
-    const beats = await this.adapter.getBeatsWithIds(req, beatIds);
+    const beats = await this.adapter.getWithIds(req, beatIds);
     const tags = await this.tags.getTagsWithIds(req, tagIds);
 
     // Handle assignments containing non-existing beat IDs or tags
@@ -115,7 +188,8 @@ export class CMBeatsDomain {
       response,
       assignments,
       nonExistentBeatIds,
-      nonExistentTags
+      nonExistentTags,
+      'assignments'
     );
 
     // TODO abstract this
@@ -140,28 +214,27 @@ export class CMBeatsDomain {
   }
 }
 
-// TODO abstract to the route
+// TODO abstract to the route, also the key arg is a temp fix
 function addNonExistentItemToResponse(
   response,
   assignments,
   nonExistentBeatIds,
-  nonExistentTags
+  nonExistentTags,
+  key
 ) {
-  assignments.forEach(({ beatId: beatId, tag }, idx) => {
+  assignments.forEach(({ beatId, tag }, idx) => {
     const isBeatNonExistent = nonExistentBeatIds.includes(beatId);
     const isTagNonExistent = nonExistentTags.includes(tag);
 
     if (isBeatNonExistent && isTagNonExistent) {
-      response.assignments[idx].status = 404;
-      response.assignments[
-        idx
-      ].result = `Beat ${beatId} and tag ${tag} not found`;
+      response[key][idx].status = 404;
+      response[key][idx].result = `Beat ${beatId} and tag ${tag} not found`;
     } else if (isBeatNonExistent) {
-      response.assignments[idx].status = 404;
-      response.assignments[idx].result = `Beat ${beatId} not found`;
+      response[key][idx].status = 404;
+      response[key][idx].result = `Beat ${beatId} not found`;
     } else if (isTagNonExistent) {
-      response.assignments[idx].status = 404;
-      response.assignments[idx].result = `Tag ${tag} not found`;
+      response[key][idx].status = 404;
+      response[key][idx].result = `Tag ${tag} not found`;
     }
   });
 }

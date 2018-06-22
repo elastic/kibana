@@ -83,9 +83,13 @@ export interface CMTagsAdapter {
 
 // FIXME: fix getBeatsWithIds return type
 export interface CMBeatsAdapter {
-  insertBeat(beat: CMBeat): Promise<void>;
-  getBeatsWithIds(req: FrameworkRequest, beatIds: string[]): any;
-  getBeats(req: FrameworkRequest): any;
+  insert(beat: CMBeat): Promise<void>;
+  update(beat: CMBeat): Promise<void>;
+  get(id: string): any;
+  getAll(req: FrameworkRequest): any;
+  getWithIds(req: FrameworkRequest, beatIds: string[]): any;
+  getVerifiedWithIds(req: FrameworkRequest, beatIds: string[]): any;
+  verifyBeats(req: FrameworkRequest, beatIds: string[]);
   removeTagsFromBeats(
     req: FrameworkRequest,
     removals: CMTagAssignment[]
@@ -154,6 +158,8 @@ export interface FrameworkRequest<
   InternalRequest extends WrappableRequest = WrappableRequest
 > {
   [internalFrameworkRequest]: InternalRequest;
+  headers: InternalRequest['headers'];
+  info: InternalRequest['info'];
   payload: InternalRequest['payload'];
   params: InternalRequest['params'];
   query: InternalRequest['query'];
@@ -185,7 +191,15 @@ export interface FrameworkRouteHandler<
 }
 /* tslint:enable */
 
-export interface WrappableRequest<Payload = any, Params = any, Query = any> {
+export interface WrappableRequest<
+  Payload = any,
+  Params = any,
+  Query = any,
+  Headers = any,
+  Info = any
+> {
+  headers: Headers;
+  info: Info;
   payload: Payload;
   params: Params;
   query: Query;

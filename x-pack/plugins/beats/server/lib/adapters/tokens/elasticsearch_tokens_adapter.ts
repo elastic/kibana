@@ -44,7 +44,10 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
     const tokenDetails = get<EnrollmentToken>(
       response,
       '_source.enrollment_token',
-      null
+      {
+        expires_on: 0,
+        token: null,
+      }
     );
 
     // Elasticsearch might return fast if the token is not found. OR it might return fast
@@ -60,7 +63,7 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
   public async upsertTokens(req: FrameworkRequest, tokens: EnrollmentToken[]) {
     const body = flatten(
       tokens.map(token => [
-        { index: { _id: `enrollment_token:${token}` } },
+        { index: { _id: `enrollment_token:${token.token}` } },
         {
           enrollment_token: token,
           type: 'enrollment_token',

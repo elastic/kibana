@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { entries, intersection, uniq, values } from 'lodash';
+import { intersection, uniq, values } from 'lodash';
 import { UNIQUENESS_ENFORCING_TYPES } from '../../../common/constants';
 import { CMTagsAdapter, ConfigurationBlock, FrameworkRequest } from '../lib';
+import { entries } from './../../utils/pollyfills';
 
 export class CMTagsDomain {
   private adapter: CMTagsAdapter;

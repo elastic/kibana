@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { CMServerLibs } from '../../lib/lib';
 import { wrapEsError } from '../../utils/error_wrappers';
 
-export const createListAgentsRoute = libs => ({
+export const createListAgentsRoute = (libs: CMServerLibs) => ({
   handler: async (request, reply) => {
     try {
-      reply(await libs.beats.getAllBeats());
+      const beats = await libs.beats.getAllBeats(request);
+      reply({ beats });
     } catch (err) {
       // TODO move this to kibana route thing in adapter
       return reply(wrapEsError(err));

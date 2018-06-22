@@ -9,6 +9,7 @@ import { get, values } from 'lodash';
 import { ConfigurationBlockTypes } from '../../../common/constants';
 import { CMServerLibs } from '../../lib/lib';
 import { wrapEsError } from '../../utils/error_wrappers';
+
 export const createSetTagRoute = (libs: CMServerLibs) => ({
   config: {
     validate: {
@@ -17,7 +18,7 @@ export const createSetTagRoute = (libs: CMServerLibs) => ({
           Joi.object({
             block_yml: Joi.string().required(),
             type: Joi.string()
-              .valid(values(ConfigurationBlockTypes))
+              .only(values(ConfigurationBlockTypes))
               .required(),
           })
         ),

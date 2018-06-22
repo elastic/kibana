@@ -52,6 +52,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
       route.handler(wrapRequest(request), reply);
 
     this.server.route({
+      config: route.config,
       handler: wrappedHandler,
       method: route.method,
       path: route.path,

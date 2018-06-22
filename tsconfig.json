@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
+    "sourceMap": true,
     "paths": {
       "ui/*": ["src/ui/public/*"]
     },
@@ -41,7 +42,5 @@
     // Disallow inconsistently-cased references to the same file.
     "forceConsistentCasingInFileNames": true
   },
-  "include": [
-    "src/**/*"
-  ]
+  "include": ["src/**/*"]
 }

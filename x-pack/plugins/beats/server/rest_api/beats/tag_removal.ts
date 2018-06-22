@@ -5,9 +5,10 @@
  */
 
 import Joi from 'joi';
+import { CMServerLibs } from '../../lib/lib';
 import { wrapEsError } from '../../utils/error_wrappers';
 
-export const createTagRemovalRoute = libs => ({
+export const createTagRemovalRoute = (libs: CMServerLibs) => ({
   config: {
     validate: {
       payload: Joi.object({
@@ -30,7 +31,11 @@ export const createTagRemovalRoute = libs => ({
     }));
 
     try {
-      reply(await libs.beats.assignTagsToBeats(request, tweakedRemovals));
+      const response = await libs.beats.removeTagsFromBeats(
+        request,
+        tweakedRemovals
+      );
+      reply(response);
     } catch (err) {
       // TODO move this to kibana route thing in adapter
       return reply(wrapEsError(err));
