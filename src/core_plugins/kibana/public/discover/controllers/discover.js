@@ -67,7 +67,7 @@ uiRoutes
     template: indexTemplate,
     reloadOnSearch: false,
     resolve: {
-      ip: function (Promise, courier, config, $location, Private) {
+      ip: function (Promise, indexPatterns, config, $location, Private) {
         const State = Private(StateProvider);
         const savedObjectsClient = Private(SavedObjectsClientProvider);
 
@@ -95,7 +95,7 @@ uiRoutes
 
             return Promise.props({
               list: savedObjects,
-              loaded: courier.indexPatterns.get(id),
+              loaded: indexPatterns.get(id),
               stateVal: state.index,
               stateValFound: specified && exists
             });

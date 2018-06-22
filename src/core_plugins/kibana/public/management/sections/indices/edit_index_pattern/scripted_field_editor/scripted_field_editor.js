@@ -43,8 +43,8 @@ uiRoutes
       });
     },
     resolve: {
-      indexPattern: function ($route, courier) {
-        return courier.indexPatterns.get($route.current.params.indexPatternId)
+      indexPattern: function ($route, courier, indexPatterns) {
+        return indexPatterns.get($route.current.params.indexPatternId)
           .catch(courier.redirectWhenMissing('/management/kibana/indices'));
       }
     },

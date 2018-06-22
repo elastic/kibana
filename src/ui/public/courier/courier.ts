@@ -34,60 +34,57 @@ import { FetchSoonProvider } from './fetch';
 import { SavedObjectProvider } from './saved_object';
 import { SearchLooperProvider } from './search_looper';
 
-uiModules
-  .get('kibana/courier')
-  .service('courier', ($rootScope, Private, indexPatterns) => {
-    const SearchSource = Private(SearchSourceProvider);
-    const fetchSoon = Private(FetchSoonProvider);
+uiModules.get('kibana/courier').service('courier', ($rootScope, Private) => {
+  const SearchSource = Private(SearchSourceProvider);
+  const fetchSoon = Private(FetchSoonProvider);
 
-    // This manages the doc fetch interval.
-    const searchLooper = Private(SearchLooperProvider);
+  // This manages the doc fetch interval.
+  const searchLooper = Private(SearchLooperProvider);
 
-    class Courier {
-      constructor() {
-        this.indexPatterns = indexPatterns;
-        this.redirectWhenMissing = Private(RedirectWhenMissingProvider);
-        this.SavedObject = Private(SavedObjectProvider);
-        this.SearchSource = SearchSource;
+  class Courier {
+    constructor() {
+      this.redirectWhenMissing = Private(RedirectWhenMissingProvider);
+      this.SavedObject = Private(SavedObjectProvider);
+      this.SearchSource = SearchSource;
 
-        // Listen for refreshInterval changes
-        $rootScope.$listen(timefilter, 'refreshIntervalUpdate', function () {
-          const refreshValue = _.get(timefilter.getRefreshInterval(), 'value');
-          const refreshPause = _.get(timefilter.getRefreshInterval(), 'pause');
+      // Listen for refreshInterval changes
+      $rootScope.$listen(timefilter, 'refreshIntervalUpdate', function () {
+        const refreshValue = _.get(timefilter.getRefreshInterval(), 'value');
+        const refreshPause = _.get(timefilter.getRefreshInterval(), 'pause');
 
-          // Update the time between automatic search requests.
-          if (_.isNumber(refreshValue) && !refreshPause) {
-            searchLooper.setIntervalInMs(refreshValue);
-          } else {
-            searchLooper.setIntervalInMs(0);
-          }
-        });
+        // Update the time between automatic search requests.
+        if (_.isNumber(refreshValue) && !refreshPause) {
+          searchLooper.setIntervalInMs(refreshValue);
+        } else {
+          searchLooper.setIntervalInMs(0);
+        }
+      });
 
-        // Abort all pending requests if there's a fatal error.
-        const closeOnFatal = _.once(() => {
-          searchLooper.stop();
+      // Abort all pending requests if there's a fatal error.
+      const closeOnFatal = _.once(() => {
+        searchLooper.stop();
 
-          _.invoke(requestQueue, 'abort');
+        _.invoke(requestQueue, 'abort');
 
-          if (requestQueue.length) {
-            throw new Error('Aborting all pending requests failed.');
-          }
-        });
+        if (requestQueue.length) {
+          throw new Error('Aborting all pending requests failed.');
+        }
+      });
 
-        addFatalErrorCallback(closeOnFatal);
-      }
-
-      /**
-       * Process the pending request queue right now, returns
-       * a promise that resembles the success of the fetch completing,
-       * individual errors are routed to their respective requests.
-       */
-      public fetch = () => {
-        fetchSoon.fetchQueued().then(() => {
-          searchLooper.restart();
-        });
-      };
+      addFatalErrorCallback(closeOnFatal);
     }
 
-    return new Courier();
-  });
+    /**
+     * Process the pending request queue right now, returns
+     * a promise that resembles the success of the fetch completing,
+     * individual errors are routed to their respective requests.
+     */
+    public fetch = () => {
+      fetchSoon.fetchQueued().then(() => {
+        searchLooper.restart();
+      });
+    };
+  }
+
+  return new Courier();
+});
