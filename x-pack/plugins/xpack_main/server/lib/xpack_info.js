@@ -37,6 +37,13 @@ export class XPackInfo {
   _licenseInfoChangedListeners = new Set();
 
   /**
+   * Set of listener functions that will be called whenever the license
+   * info changes
+   * @type {Set<Function>}
+   */
+  _licenseInfoChangedListeners = new Set();
+
+  /**
    * Cache that may contain last xpack info API response or error, json representation
    * of xpack info and xpack info signature.
    * @type {{response: Object|undefined, error: Object|undefined, json: Object|undefined, signature: string|undefined}}
@@ -150,7 +157,7 @@ export class XPackInfo {
         this._log(
           ['license', 'info', 'xpack'],
           `Imported ${this._cache.response ? 'changed ' : ''}license information` +
-            ` from Elasticsearch for the [${this._clusterSource}] cluster: ${licenseInfo}`
+          ` from Elasticsearch for the [${this._clusterSource}] cluster: ${licenseInfo}`
         );
       }
 
@@ -163,11 +170,11 @@ export class XPackInfo {
         }
       }
 
-    } catch(error) {
+    } catch (error) {
       this._log(
-        [ 'license', 'warning', 'xpack' ],
+        ['license', 'warning', 'xpack'],
         `License information from the X-Pack plugin could not be obtained from Elasticsearch` +
-          ` for the [${this._clusterSource}] cluster. ${error}`
+        ` for the [${this._clusterSource}] cluster. ${error}`
       );
 
       this._cache = { error };
