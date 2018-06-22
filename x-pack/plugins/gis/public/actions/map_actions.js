@@ -45,38 +45,44 @@ const addLayer = (appData, details) => {
 export async function loadMapResources(serviceSettings, dispatch) {
   // Hard-coded associated values
   const tmsServices = await serviceSettings.getTMSServices();
-  const tmsService = {
+  const fileLayers = await serviceSettings.getFileLayers();
+  console.log(fileLayers, tmsServices);
+  // Sample TMS
+  const roadMapTms = {
     type: LAYER_TYPE.TMS,
     source: LAYER_SOURCE.EMS,
     serviceId: 'road_map',
     service: tmsServices
   };
-  const mapServices = [
-    tmsService
-  ];
-  dispatch(fetchServiceLayers(mapServices));
-}
-
-export function fetchServiceLayers(services = []) {
-  return dispatch => {
-    services.forEach(service => {
-      switch(service.type) {
-        case LAYER_TYPE.TMS:
-          dispatch(addTmsService(service));
-          break;
-        default:
-          break;
-      }
-    });
+  // Sample OSM service
+  const osmTms = {
+    type: LAYER_TYPE.TMS,
+    source: LAYER_SOURCE.TMS,
+    serviceId: 'osm',
+    service: [{ url: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png' }]
   };
-}
+  // Sample Vector File
+  const worldCountriesVector = {
+    type: LAYER_TYPE.VECTOR_FILE,
+    source: LAYER_SOURCE.CONFIG,
+    serviceId: 'World Countries',
+  };
+  const response = await fetch(fileLayers[0].url);
+  worldCountriesVector.service = await response.json();
+  console.log(worldCountriesVector);
 
-function addTmsService(tms) {
-  return addLayer({
-    source: tms.source,
-    layerType: tms.type
-  },
-  tms);
+  const mapServices = [
+    roadMapTms,
+    osmTms,
+    worldCountriesVector
+  ];
+  mapServices.forEach(service => {
+    dispatch(addLayer({
+      source: service.source,
+      layerType: service.type
+    },
+    service));
+  });
 }
 
 export function setSelectedLayer(layer) {
