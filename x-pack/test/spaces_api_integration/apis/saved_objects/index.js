@@ -12,7 +12,7 @@ export default function ({ loadTestFile, getService }) {
     // loadTestFile(require.resolve('./create'));
     // loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./find'));
-    //loadTestFile(require.resolve('./get'));
+    loadTestFile(require.resolve('./get'));
     // loadTestFile(require.resolve('./update'));
   });
 }
