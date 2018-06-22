@@ -32,22 +32,6 @@ describe('DetailDrawer component', () => {
     expect(renderedComponent).toMatchSnapshot();
   });
 
-  test('calls onHide function when close button is clicked', () => {
-    const vertex = {
-      title: 'grok'
-    };
-
-    const component = (
-      <DetailDrawer
-        vertex={vertex}
-        onHide={onHide}
-      />
-    );
-    const renderedComponent = shallow(component);
-    renderedComponent.find('EuiButtonIcon').simulate('click');
-    expect(onHide.mock.calls.length).toEqual(1);
-  });
-
   describe('Plugin vertices', () => {
     describe('Plugin has explicit ID', () => {
       test('shows basic info and stats for plugin, including explicit ID', () => {
