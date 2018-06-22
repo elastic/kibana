@@ -22,6 +22,7 @@ import JSON5 from 'json5';
 
 import { extractHtmlMessages } from './extract_html_messages';
 import { extractCodeMessages } from './extract_code_messages';
+import { extractJadeMessages } from './extract_jade_messages';
 import { writeContextToJSON } from './write_context_comments';
 import {
   globAsync,
@@ -83,69 +84,60 @@ function buildDefaultMessagesObject(map) {
 }
 
 export async function extractDefaultTranslations(inputPath) {
-  const entries = await globAsync('*.{js,jsx,ts,tsx,html}', {
+  const entries = await globAsync('*.{js,jsx,jade,ts,tsx,html}', {
     cwd: inputPath,
     matchBase: true,
   });
 
-  const { htmlEntries, codeEntries } = entries.reduce(
+  const { htmlEntries, codeEntries, jadeEntries } = entries.reduce(
     (paths, entry) => {
       const resolvedPath = resolve(inputPath, entry);
 
       if (resolvedPath.endsWith('.html')) {
         paths.htmlEntries.push(resolvedPath);
+      } else if (resolvedPath.endsWith('.jade')) {
+        paths.jadeEntries.push(resolvedPath);
       } else {
         paths.codeEntries.push(resolvedPath);
       }
 
       return paths;
     },
-    { htmlEntries: [], codeEntries: [] }
+    { htmlEntries: [], codeEntries: [], jadeEntries: [] }
   );
 
   const defaultMessagesMap = new Map();
 
-  // If some file contains an error, we cannot handle it until all files are read.
-  // TODO: move files reading to "extract*" async generators after async iterators implementation (for-await-of syntax)
-  // to get rid of Promise.all().
+  await Promise.all(
+    [
+      [htmlEntries, extractHtmlMessages],
+      [codeEntries, extractCodeMessages],
+      [jadeEntries, extractJadeMessages],
+    ].map(async ([entries, extractFunction]) => {
+      // If some file contains an error, we cannot handle it until all files are read.
+      // TODO: move files reading to "extract*" async generators after async iterators implementation (for-await-of syntax)
+      // to get rid of Promise.all().
 
-  const htmlFiles = await Promise.all(
-    htmlEntries.map(async entry => {
-      return {
-        name: entry,
-        content: await readFileAsync(entry),
-      };
+      const files = await Promise.all(
+        entries.map(async entry => {
+          return {
+            name: entry,
+            content: await readFileAsync(entry),
+          };
+        })
+      );
+
+      for (const { name, content } of files) {
+        try {
+          for (const [id, value] of extractFunction(content)) {
+            addMessageToMap(defaultMessagesMap, id, value);
+          }
+        } catch (error) {
+          throwEntryException(error, name);
+        }
+      }
     })
   );
-
-  for (const { name, content } of htmlFiles) {
-    try {
-      for (const [id, value] of extractHtmlMessages(content)) {
-        addMessageToMap(defaultMessagesMap, id, value);
-      }
-    } catch (error) {
-      throwEntryException(error, name);
-    }
-  }
-
-  const codeFiles = await Promise.all(
-    codeEntries.map(async entry => {
-      return {
-        name: entry,
-        content: await readFileAsync(entry),
-      };
-    })
-  );
-
-  for (const { name, content } of codeFiles) {
-    try {
-      for (const [id, value] of extractCodeMessages(content)) {
-        addMessageToMap(defaultMessagesMap, id, value);
-      }
-    } catch (error) {
-      throwEntryException(error, name);
-    }
-  }
 
   const defaultMessages = buildDefaultMessagesObject(defaultMessagesMap);
 

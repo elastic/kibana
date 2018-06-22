@@ -28,25 +28,11 @@ import {
 } from '@babel/types';
 
 import { extractI18nCallMessages } from './extract_i18n_call_messages';
+import { isI18nTranslateFunction } from './utils';
 import {
   extractIntlMessages,
   extractFormattedMessages,
 } from './extract_react_messages';
-
-/**
- * Detect angular i18n service call or from `@kbn/i18n` translate function call.
- *
- * Service call example: `i18n('message-id', { defaultMessage: 'Message text'})`
- *
- * `@kbn/i18n` example: `i18n.translate('message-id', { defaultMessage: 'Message text'})`
- */
-function isI18nTranslateFunction(node) {
-  return (
-    isCallExpression(node) &&
-    (isIdentifier(node.callee, { name: 'i18n' }) ||
-      isIdentifier(node.callee, { name: 'translate' }))
-  );
-}
 
 /**
  * Detect Intl.formatMessage() function call (React).

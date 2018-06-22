@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isIdentifier, isObjectProperty } from '@babel/types';
+import { isCallExpression, isIdentifier, isObjectProperty } from '@babel/types';
 import fs from 'fs';
 import glob from 'glob';
 import { promisify } from 'util';
@@ -37,6 +37,21 @@ export function isPropertyWithKey(property, identifierName) {
   return (
     isObjectProperty(property) &&
     isIdentifier(property.key, { name: identifierName })
+  );
+}
+
+/**
+ * Detect angular i18n service call or `@kbn/i18n` translate function call.
+ *
+ * Service call example: `i18n('message-id', { defaultMessage: 'Message text'})`
+ *
+ * `@kbn/i18n` example: `i18n.translate('message-id', { defaultMessage: 'Message text'})`
+ */
+export function isI18nTranslateFunction(node) {
+  return (
+    isCallExpression(node) &&
+    (isIdentifier(node.callee, { name: 'i18n' }) ||
+      isIdentifier(node.callee, { name: 'translate' }))
   );
 }
 

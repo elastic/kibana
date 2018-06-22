@@ -22,6 +22,9 @@ import { isObjectExpression, isStringLiteral } from '@babel/types';
 import { isPropertyWithKey } from './utils';
 import { DEFAULT_MESSAGE_KEY } from './constants';
 
+/**
+ * Extract messages from `funcName('id', { defaultMessage: 'Message text' })` call expression AST
+ */
 export function extractI18nCallMessages(node) {
   const [idSubTree, optionsSubTree] = node.arguments;
 
@@ -52,5 +55,7 @@ export function extractI18nCallMessages(node) {
     return [messageId, { message, context }];
   }
 
-  return [];
+  throw new Error(
+    `Object with defaultMessage property is not provided for ${messageId} id.`
+  );
 }
