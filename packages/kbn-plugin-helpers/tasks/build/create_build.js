@@ -20,7 +20,7 @@
 const path = require('path');
 const relative = require('path').relative;
 const { readFileSync, writeFileSync, unlinkSync, existsSync } = require('fs');
-const execFileSync = require('child_process').execFileSync;
+const execa = require('execa');
 const sass = require('node-sass');
 const del = require('del');
 const vfs = require('vinyl-fs');
@@ -104,12 +104,13 @@ module.exports = function createBuild(
       }
 
       // install packages in build
-      const options = {
-        cwd: buildRoot,
-        stdio: ['ignore', 'ignore', 'pipe'],
-      };
-
-      execFileSync(winCmd('yarn'), ['install', '--production', '--pure-lockfile'], options);
+      execa.sync(
+        winCmd('yarn'),
+        ['install', '--production', '--pure-lockfile'],
+        {
+          cwd: buildRoot,
+        }
+      );
     })
     .then(function () {
       if (!plugin.styleSheetToCompile) {
@@ -160,13 +161,10 @@ module.exports = function createBuild(
         writeFileSync(buildConfigPath, JSON.stringify(buildConfig));
       }
 
-      execFileSync(
+      execa.sync(
         path.join(buildSource, 'node_modules', '.bin', winCmd('tsc')),
         ['--pretty', 'true'],
-        {
-          cwd: buildRoot,
-          stdio: ['ignore', 'pipe', 'pipe'],
-        }
+        { cwd: buildRoot }
       );
 
       del.sync([
