@@ -1,7 +1,7 @@
 {
   "xpack.ml.get_influencers": {
     "data_autocomplete_rules": {
-      "desc": { "__one_of": ["true", "false"] },,
+      "desc": { "__one_of": ["true", "false"] },
       "exclude_interim": { "__one_of": ["true", "false"] },
       "influencer_score": 0,
       "end": "",
