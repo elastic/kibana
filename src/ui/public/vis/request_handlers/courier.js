@@ -100,11 +100,7 @@ const CourierRequestHandlerProvider = function () {
       });
 
       requestSearchSource.onRequestStart((searchSource, searchRequest) => {
-        return Promise.all(
-          aggs.getRequestAggs().map(agg =>
-            agg.onSearchRequestStart(searchSource, searchRequest)
-          )
-        );
+        return aggs.onSearchRequestStart(searchSource, searchRequest);
       });
 
       timeFilterSearchSource.set('filter', () => {

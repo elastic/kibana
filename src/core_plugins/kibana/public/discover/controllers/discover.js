@@ -726,7 +726,7 @@ function discoverController(
       });
 
       $scope.searchSource.onRequestStart((searchSource, searchRequest) => {
-        return $scope.vis.onSearchRequestStart(searchSource, searchRequest);
+        return $scope.visgetAggConfig().onSearchRequestStart(searchSource, searchRequest);
       });
 
       $scope.searchSource.aggs(function () {
