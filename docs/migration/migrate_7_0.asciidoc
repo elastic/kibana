@@ -4,6 +4,7 @@
 This section discusses the changes that you need to be aware of when migrating
 your application to Kibana 7.0.
 
+See also <<release-highlights>> and <<release-notes>>. 
 
 [float]
 === Removed support for tribe nodes

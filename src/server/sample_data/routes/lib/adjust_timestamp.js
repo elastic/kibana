@@ -40,7 +40,7 @@ export function adjustTimestamp(timestamp, currentTimeMarker, now, preserveDayOf
 
   // Move timestamp to current week, preserving day of week and time of day
   const weekDelta = Math.round((timestampDate.getTime() - currentTimeMarker.getTime()) / (MILLISECONDS_IN_DAY * 7));
-  const dayOfWeekDelta = timestampDate.getUTCDay() - now.getUTCDay();
+  const dayOfWeekDelta = timestampDate.getDay() - now.getDay();
   const daysDelta = dayOfWeekDelta * MILLISECONDS_IN_DAY + (weekDelta * MILLISECONDS_IN_DAY * 7);
   const yearMonthDay = (new Date(now.getTime() + daysDelta)).toISOString().substring(0, 10);
   return `${yearMonthDay}T${timestamp.substring(11)}`;

@@ -19,8 +19,8 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
-  EuiSpacer
+  EuiSpacer,
+  EuiBadge,
 } from '@elastic/eui';
 import { Sparkline } from '../../../sparkline';
 import { formatMetric } from '../../../../lib/format_number';
@@ -189,7 +189,7 @@ function renderBasicStats(vertex, timeseriesTooltipXValueFormatter) {
 function renderPluginBasicInfo(vertex) {
   if (vertex.hasExplicitId) {
     return (
-      <p>This {vertex.typeString}&#39;s ID is <strong>{ vertex.id }</strong>.</p>
+      <p>This {vertex.typeString}&#39;s ID is <EuiBadge>{ vertex.id }</EuiBadge>.</p>
     );
   }
 
@@ -268,19 +268,16 @@ export function DetailDrawer({ vertex, onHide, timeseriesTooltipXValueFormatter 
     >
       <EuiFlyoutHeader>
         <EuiFlexGroup
-          alignItems="center"
+          alignItems="baseline"
+          gutterSize="s"
         >
+          <EuiFlexItem grow={false}>
+            { renderIcon(vertex) }
+          </EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle>
-              <h2>{ renderIcon(vertex) }{ renderTitle(vertex) }</h2>
+              <h2>{ renderTitle(vertex) }</h2>
             </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              onClick={onHide}
-              iconType="cross"
-              aria-label="Close"
-            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
