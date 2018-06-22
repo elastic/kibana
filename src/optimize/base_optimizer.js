@@ -296,52 +296,51 @@ export default class BaseOptimizer {
       },
     };
 
-    if (!IS_KIBANA_DISTRIBUTABLE) {
-      return webpackMerge(commonConfig, {
-        module: {
-          rules: [
-            {
-              resource: createSourceFileResourceSelector(/\.tsx?$/),
-              use: maybeAddCacheLoader('typescript', [
-                {
-                  loader: 'ts-loader',
-                  options: {
-                    transpileOnly: true,
-                    experimentalWatchApi: true,
-                    onlyCompileBundledFiles: true,
-                    compilerOptions: {
-                      sourceMap: Boolean(this.sourceMaps),
-                      target: 'es5',
-                      module: 'esnext',
-                    }
+    // we transpile typescript in the optimizer unless we are running the distributable
+    const transpileTsConfig = {
+      module: {
+        rules: [
+          {
+            resource: createSourceFileResourceSelector(/\.tsx?$/),
+            use: maybeAddCacheLoader('typescript', [
+              {
+                loader: 'ts-loader',
+                options: {
+                  transpileOnly: true,
+                  experimentalWatchApi: true,
+                  onlyCompileBundledFiles: true,
+                  compilerOptions: {
+                    sourceMap: Boolean(this.sourceMaps),
+                    target: 'es5',
+                    module: 'esnext',
                   }
                 }
-              ]),
-            }
-          ]
-        },
+              }
+            ]),
+          }
+        ]
+      },
+      resolve: {
+        extensions: ['.ts', '.tsx'],
+      },
+    };
 
-        resolve: {
-          extensions: ['.ts', '.tsx'],
-        },
+    // We need to add react-addons (and a few other bits) for enzyme to work.
+    // https://github.com/airbnb/enzyme/blob/master/docs/guides/webpack.md
+    const supportEnzymeConfig = {
+      externals: {
+        'mocha': 'mocha',
+        'react/lib/ExecutionEnvironment': true,
+        'react/addons': true,
+        'react/lib/ReactContext': true,
+      }
+    };
 
-        // In the test env we need to add react-addons (and a few other bits) for the
-        // enzyme tests to work.
-        // https://github.com/airbnb/enzyme/blob/master/docs/guides/webpack.md
-        externals: {
-          'mocha': 'mocha',
-          'react/lib/ExecutionEnvironment': true,
-          'react/addons': true,
-          'react/lib/ReactContext': true,
-        }
-      });
-    }
-
-    return webpackMerge(commonConfig, {
+    // in production we set the process.env.NODE_ENV and uglify our bundles
+    const productionConfig = {
       optimization: {
         minimize: true
       },
-
       plugins: [
         new webpack.DefinePlugin({
           'process.env': {
@@ -349,7 +348,17 @@ export default class BaseOptimizer {
           }
         }),
       ]
-    });
+    };
+
+    return webpackMerge(
+      commonConfig,
+      IS_KIBANA_DISTRIBUTABLE
+        ? {}
+        : transpileTsConfig,
+      this.uiBundles.isDevMode()
+        ? supportEnzymeConfig
+        : productionConfig
+    );
   }
 
   isFailure(stats) {
