@@ -10,6 +10,9 @@ const { TextHighlightRules } = ace.acequire('ace/mode/text_highlight_rules');
 
 const openBraceRegex = /(\{)/;
 const closeBraceRegex = /(\})/;
+const openArrayRegex = /\[/;
+const hashValuePopRules = ['hashValue', 'hashOperator'];
+const attributeValuePopRules = ['attributeValue', 'attributeOperator'];
 
 const performPop = (stack, value) => {
   while (stack[0] === value) {
@@ -89,151 +92,64 @@ const getCommentRule = () => ({
   next: push('singleLineComment')
 });
 
-function ValueRule(popStates = []) {
-  return [
-    new ArrayRule(pop(['array', ...popStates])),
-    new HashRule(pop(['hash', ...popStates])),
-    new NumberRule(pop(['number', ...popStates])),
-    ...getStringRules(pop(['quote', ...popStates])),
-    new BarewordRule(pop(['bareword', ...popStates]))
-  ];
-}
+const getNext = (popState, nextState) => (
+  popState
+    ? popSingle(popState, [nextState])
+    : push(nextState)
+);
 
-function ArrayRule(next) {
-  return {
-    token: 'array',
-    regex: /(\[)/,
-    push: [
-      getCommentRule(),
-      {
-        token: 'array',
-        regex: /(\])/,
-        next
-      },
-      {
-        token: 'array',
-        regex: /(\[)/,
-        push: 'arrayEntry'
-      },
-      {
-        token: 'operator',
-        regex: /\,/
-      },
-      {
-        token: 'quote',
-        regex: /\'/,
-        push: 'singleQuoteString'
-      },
-      {
-        token: 'quote',
-        regex: /\"/,
-        push: 'doubleQuoteString'
-      },
-      {
-        token: 'hash',
-        regex: openBraceRegex,
-        push: 'hashEntries'
-      },
-      new NumberRule(),
-      new BarewordRule(),
-    ]
-  };
-}
+const getArrayRule = (popState) => ({
+  token: 'array',
+  regex: openArrayRegex,
+  next: getNext(popState, 'arrayEntry')
+});
 
-function BarewordRule(next) {
-  return {
-    token: 'bareword',
-    regex: /[A-Za-z0-9_]+/,
-    next
-  };
-}
+const getHashRule = (popState) => ({
+  token: 'hash',
+  regex: openBraceRegex,
+  next: getNext(popState, 'hashEntries')
+});
 
-function HashRule(next) {
-  return {
-    token: 'hash',
-    regex: openBraceRegex,
-    push: [
-      getCommentRule(),
-      {
-        token: 'hash',
-        regex: closeBraceRegex,
-        next
-      },
-      {
-        token: 'hashEntryName',
-        regex: /([a-zA-Z0-9]+)/,
-        next: 'hashOperator'
-      },
-      {
-        token: 'array',
-        regex: /(\[)/,
-        push: 'arrayEntry'
-      },
-      ...getStringRules(pop([], ['hashOperator']))
-    ]
-  };
-}
+const getSqsRule = (popState) => ({
+  token: 'quote',
+  regex: /\'/,
+  next: getNext(popState, 'sqs')
+});
 
-function getStringRules(next) {
-  return [
-    new SingleQuotedStringRule(next),
-    new DoubleQuotedStringRule(next)
-  ];
-}
+const getDqsRule = (popState) => ({
+  token: 'quote',
+  regex: /\"/,
+  next: getNext(popState, 'dqs')
+});
 
-const singleQuoteRegex = /\'/;
+const getNumberRule = (popState) => (
+  popState
+    ? {
+      token: ['number'],
+      regex: /[0-9]+(.[0-9]+)?/,
+      next: popSingle(popState),
+    }
+    : {
+      token: ['number'],
+      regex: /[0-9]+(.[0-9]+)?/,
+    }
+);
+
+const getBarewordRule = (popState) => (
+  popState
+    ? {
+      token: 'bareword',
+      regex: /[A-Za-z0-9]+/,
+      next: popSingle(popState),
+    }
+    : {
+      token: 'bareword',
+      regex: /[A-Za-z0-9]+/,
+    }
+);
+
 const singleQuoteEscapeRegex = /\\\'/;
-function SingleQuotedStringRule(next) {
-  return {
-    token: 'quote',
-    regex: singleQuoteRegex,
-    push: [
-      {
-        token: 'escapeQuote',
-        regex: singleQuoteEscapeRegex
-      },
-      {
-        token: 'quote',
-        regex: singleQuoteRegex,
-        next
-      },
-      {
-        defaultToken: 'quote'
-      }
-    ]
-  };
-}
-
-const doubleQuoteRegex = /\"/;
 const doubleQuoteEscapeRegex = /\\\"/;
-function DoubleQuotedStringRule(next) {
-  return {
-    token: 'quote',
-    regex: doubleQuoteRegex,
-    push: [
-      {
-        token: 'escapeQuote',
-        regex: doubleQuoteEscapeRegex
-      },
-      {
-        token: 'quote',
-        regex: doubleQuoteRegex,
-        next
-      },
-      {
-        defaultToken: 'quote'
-      }
-    ]
-  };
-}
-
-function NumberRule(next) {
-  return {
-    token: ['number'],
-    regex: /[0-9]+(.[0-9]+)?/,
-    next
-  };
-}
 
 export class PipelineHighlightRules extends TextHighlightRules {
   constructor() {
@@ -310,15 +226,8 @@ export class PipelineHighlightRules extends TextHighlightRules {
           regex: /\"/,
           next: push('dqs')
         },
-        {
-          token: 'array',
-          regex: /\[/,
-          next: push('arrayEntry')
-        },
-        {
-          token: 'bareword',
-          regex: /[A-Za-z0-9]+/
-        }
+        getArrayRule(),
+        getBarewordRule(),
       ],
       plugin: [
         getCommentRule(),
@@ -329,7 +238,7 @@ export class PipelineHighlightRules extends TextHighlightRules {
         {
           token: 'attribute',
           regex: /[a-zA-Z0-9_-]+/,
-          push: 'attributeOperator'
+          next: push('attributeOperator')
         },
         {
           token: 'brace',
@@ -342,25 +251,27 @@ export class PipelineHighlightRules extends TextHighlightRules {
         {
           token: 'operator',
           regex: /=>/,
-          next: 'attributeValue'
+          next: push('attributeValue')
         }
       ],
       attributeValue: [
         getCommentRule(),
-        ...new ValueRule(['attributeValue', 'attributeOperator'])
+        getArrayRule(attributeValuePopRules),
+        getHashRule(attributeValuePopRules),
+        getSqsRule(attributeValuePopRules),
+        getDqsRule(attributeValuePopRules),
+        getNumberRule(attributeValuePopRules),
+        getBarewordRule(attributeValuePopRules),
+        //...new ValueRule(['attributeValue', 'attributeOperator'])
       ],
       arrayEntry: [
         getCommentRule(),
         {
           token: 'array',
           regex: /(\])/,
-          next: pop()
+          next: popSingle()
         },
-        {
-          token: 'array',
-          regex: /(\[)/,
-          push: 'arrayEntry'
-        },
+        getArrayRule(),
         {
           token: 'operator',
           regex: /\,/
@@ -378,10 +289,10 @@ export class PipelineHighlightRules extends TextHighlightRules {
         {
           token: 'hash',
           regex: openBraceRegex,
-          push: 'hashEntries'
+          next: push('hashEntries')
         },
-        new NumberRule(),
-        new BarewordRule(),
+        getNumberRule(),
+        getBarewordRule(),
       ],
       arrayOperator: [
         getCommentRule(),
@@ -391,35 +302,48 @@ export class PipelineHighlightRules extends TextHighlightRules {
           next: pop()
         }
       ],
-      arrayValue: [
-        getCommentRule(),
-        ...new ValueRule([], 'arrayOperator')
-      ],
       hashEntries: [
         getCommentRule(),
+        getArrayRule(),
         {
           token: 'hash',
           regex: closeBraceRegex,
-          next: pop()
+          next: popSingle()
         },
         {
           token: 'hashEntryName',
           regex: /([a-zA-Z0-9]+)/,
           next: 'hashOperator'
         },
-        ...getStringRules(pop([], ['hashOperator']))
+        {
+          token: 'quote',
+          regex: /\"/,
+          next: push(['hashOperator', 'dqs'])
+        },
+        {
+          token: 'quote',
+          regex: /\'/,
+          next: push(['hashOperator', 'sqs'])
+        },
+        //...getStringRules(popSingle([], ['hashOperator']))
       ],
       hashOperator: [
         getCommentRule(),
         {
           token: 'operator',
           regex: /=>/,
-          next: 'hashValue'
+          next: push(['hashValue'])
         }
       ],
       hashValue: [
         getCommentRule(),
-        ...new ValueRule(['hashValue', 'hashOperator', 'hashEntry'])
+        getHashRule(hashValuePopRules),
+        getArrayRule(hashValuePopRules),
+        getNumberRule(hashValuePopRules),
+        getBarewordRule(hashValuePopRules),
+        getSqsRule(hashValuePopRules),
+        getDqsRule(hashValuePopRules)
+        // ...new ValueRule(['hashValue', 'hashOperator', 'hashEntry'])
       ],
       sqs: [
         {

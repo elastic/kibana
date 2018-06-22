@@ -268,7 +268,7 @@ export default function ({ getService, getPageObjects }) {
         await assertHighlightTokens(pattern, expectedHighlights);
       });
 
-      it('applies highlights for array, number, single/double quote, bareword, nested array, and nested hash', async () => {
+      it('applies highlights for array, number, single, double quote, bareword, nested array, and nested hash', async () => {
         const pattern = `input { file { path => [ "first", 'second', 123.45, [ bareword ], { hash => "value" } ] } } `;
 
         const expectedHighlights = [
