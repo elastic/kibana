@@ -24,7 +24,7 @@ import Log from '../log';
 import Worker from './worker';
 import { Config } from '../../server/config/config';
 import { transformDeprecations } from '../../server/config/transform_deprecations';
-import { configureBasePathProxy } from './base_path_proxy';
+import { configureBasePathProxy } from './configure_base_path_proxy';
 
 process.env.kbnWorkerType = 'managr';
 

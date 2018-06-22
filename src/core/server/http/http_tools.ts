@@ -30,7 +30,7 @@ export function getServerOptions(
   { configureTLS = true } = {}
 ) {
   // Note that all connection options configured here should be exactly the same
-  // as in the legacy platform server (see `server/http/index`). Any change
+  // as in the legacy platform server (see `src/server/http/index`). Any change
   // SHOULD BE applied in both places. The only exception is TLS-specific options,
   // that are configured only here.
   const options: ServerOptions = {
@@ -57,7 +57,7 @@ export function getServerOptions(
 
     // TODO: Hapi types have a typo in `tls` property type definition: `https.RequestOptions` is used instead of
     // `https.ServerOptions`, and `honorCipherOrder` isn't presented in `https.RequestOptions`.
-    options.tls = {
+    const tlsOptions: TLSOptions = {
       ca:
         config.ssl.certificateAuthorities &&
         config.ssl.certificateAuthorities.map(caFilePath =>
@@ -70,7 +70,9 @@ export function getServerOptions(
       key: readFileSync(ssl.key!),
       passphrase: ssl.keyPassphrase,
       secureOptions: ssl.getSecureOptions(),
-    } as TLSOptions;
+    };
+
+    options.tls = tlsOptions;
   }
 
   return options;

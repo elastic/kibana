@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { RouteOptions, Server } from 'hapi-latest';
+import { Server } from 'hapi-latest';
 import { Agent as HttpsAgent, ServerOptions as TlsOptions } from 'https';
 import { sample } from 'lodash';
 import { ByteSizeValue } from '../config/schema';
@@ -32,7 +32,7 @@ export interface BasePathProxyServerOptions {
   httpConfig: HttpConfig;
   devConfig: DevConfig;
   isKibanaPath: (path: string) => boolean;
-  blockUntil?: () => Promise<void>;
+  blockUntil: () => Promise<void>;
 }
 
 export class BasePathProxyServer {
@@ -60,12 +60,14 @@ export class BasePathProxyServer {
   }
 
   public async start() {
-    const { httpConfig, devConfig, blockUntil, isKibanaPath } = this.options;
+    const { httpConfig } = this.options;
 
     const options = getServerOptions(httpConfig);
-    const server = createServer(options);
+    this.server = createServer(options);
 
-    await server.register({ plugin: require('h2o2-latest') });
+    // Register hapi plugin that adds proxying functionality. It can be configured
+    // through the route configuration object (see { handler: { proxy: ... } }).
+    await this.server.register({ plugin: require('h2o2-latest') });
 
     if (httpConfig.ssl.enabled) {
       const tlsOptions = options.tls as TlsOptions;
@@ -78,64 +80,7 @@ export class BasePathProxyServer {
       });
     }
 
-    // Always redirect from root URL to the URL with basepath.
-    server.route({
-      handler: (request, responseToolkit) => {
-        return responseToolkit.redirect(httpConfig.basePath);
-      },
-      method: 'GET',
-      path: '/',
-    });
-
-    // Before we proxy request to a target port we may want to wait until some
-    // condition is met (e.g. until target listener is ready).
-    let routeOptions: RouteOptions | undefined;
-    if (blockUntil !== undefined) {
-      routeOptions = {
-        pre: [
-          async (request, responseToolkit) => {
-            await blockUntil();
-            return responseToolkit.continue;
-          },
-        ],
-      };
-    }
-
-    server.route({
-      handler: {
-        proxy: {
-          agent: this.httpsAgent,
-          host: server.info.host,
-          passThrough: true,
-          port: devConfig.basePathProxyTargetPort,
-          protocol: server.info.protocol,
-          xforward: true,
-        },
-      },
-      method: '*',
-      options: routeOptions,
-      path: `${httpConfig.basePath}/{kbnPath*}`,
-    });
-
-    // It may happen that basepath has changed, but user still uses the old one,
-    // so we can try to check if that's the case and just redirect user to the
-    // same URL, but with valid basepath.
-    server.route({
-      handler: (request, responseToolkit) => {
-        const { oldBasePath, kbnPath = '' } = request.params;
-
-        const isGet = request.method === 'get';
-        const isBasepathLike = oldBasePath.length === 3;
-
-        return isGet && isBasepathLike && isKibanaPath(kbnPath)
-          ? responseToolkit.redirect(`${httpConfig.basePath}/${kbnPath}`)
-          : responseToolkit.response('Not Found').code(404);
-      },
-      method: '*',
-      path: `/{oldBasePath}/{kbnPath*}`,
-    });
-
-    this.server = server;
+    this.setupRoutes();
 
     this.log.info(
       `starting basepath proxy server at ${this.server.info.uri}${
@@ -158,5 +103,67 @@ export class BasePathProxyServer {
       this.httpsAgent.destroy();
       this.httpsAgent = undefined;
     }
+  }
+
+  private setupRoutes() {
+    if (this.server === undefined) {
+      throw new Error(
+        `Routes cannot be set up since server is not initialized.`
+      );
+    }
+
+    const { httpConfig, devConfig, blockUntil, isKibanaPath } = this.options;
+
+    // Always redirect from root URL to the URL with basepath.
+    this.server.route({
+      handler: (request, responseToolkit) => {
+        return responseToolkit.redirect(httpConfig.basePath);
+      },
+      method: 'GET',
+      path: '/',
+    });
+
+    this.server.route({
+      handler: {
+        proxy: {
+          agent: this.httpsAgent,
+          host: this.server.info.host,
+          passThrough: true,
+          port: devConfig.basePathProxyTargetPort,
+          protocol: this.server.info.protocol,
+          xforward: true,
+        },
+      },
+      method: '*',
+      options: {
+        pre: [
+          // Before we proxy request to a target port we may want to wait until some
+          // condition is met (e.g. until target listener is ready).
+          async (request, responseToolkit) => {
+            await blockUntil();
+            return responseToolkit.continue;
+          },
+        ],
+      },
+      path: `${httpConfig.basePath}/{kbnPath*}`,
+    });
+
+    // It may happen that basepath has changed, but user still uses the old one,
+    // so we can try to check if that's the case and just redirect user to the
+    // same URL, but with valid basepath.
+    this.server.route({
+      handler: (request, responseToolkit) => {
+        const { oldBasePath, kbnPath = '' } = request.params;
+
+        const isGet = request.method === 'get';
+        const isBasepathLike = oldBasePath.length === 3;
+
+        return isGet && isBasepathLike && isKibanaPath(kbnPath)
+          ? responseToolkit.redirect(`${httpConfig.basePath}/${kbnPath}`)
+          : responseToolkit.response('Not Found').code(404);
+      },
+      method: '*',
+      path: `/{oldBasePath}/{kbnPath*}`,
+    });
   }
 }

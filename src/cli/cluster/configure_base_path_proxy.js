@@ -30,7 +30,7 @@ export async function configureBasePathProxy(config) {
   const basePathProxy = createBasePathProxy({ server, config });
 
   await basePathProxy.configure({
-    isKibanaPath: (path) => {
+    isKibanaPath: path => {
       const isApp = path.startsWith('app/');
       const isKnownShortPath = ['login', 'logout', 'status'].includes(path);
 
@@ -46,7 +46,7 @@ export async function configureBasePathProxy(config) {
         return Promise.resolve();
       }
 
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         const done = () => {
           serverWorker.removeListener('listening', done);
           serverWorker.removeListener('crashed', done);
@@ -57,7 +57,7 @@ export async function configureBasePathProxy(config) {
         serverWorker.on('listening', done);
         serverWorker.on('crashed', done);
       });
-    }
+    },
   });
 
   return basePathProxy;
