@@ -105,10 +105,14 @@ export function extractFormattedMessages(node) {
       })
     ) {
       if (isJSXExpressionContainer(attribute.value)) {
+        // Example: {`Multiline message without
+        //escaping line break`}
         message = escapeLineBreak(
           attribute.value.expression.quasis[0].value.raw
         );
       } else if (isStringLiteral(attribute.value)) {
+        // Example: 'Single- or multiline message with \
+        //escaping line break'
         message = escapeLineBreak(attribute.value.value);
       }
     }

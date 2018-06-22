@@ -27,16 +27,32 @@ import {
   isMemberExpression,
 } from '@babel/types';
 
-import { extractAngularServiceMessages } from './extract_angular_service_messages';
+import { extractI18nCallMessages } from './extract_i18n_call_messages';
 import {
   extractIntlMessages,
   extractFormattedMessages,
 } from './extract_react_messages';
 
+/**
+ * Detect angular i18n service call or from `@kbn/i18n` translate function call.
+ *
+ * Service call example: `i18n('message-id', { defaultMessage: 'Message text'})`
+ *
+ * `@kbn/i18n` example: `i18n.translate('message-id', { defaultMessage: 'Message text'})`
+ */
 function isI18nTranslateFunction(node) {
-  return isCallExpression(node) && isIdentifier(node.callee, { name: 'i18n' });
+  return (
+    isCallExpression(node) &&
+    (isIdentifier(node.callee, { name: 'i18n' }) ||
+      isIdentifier(node.callee, { name: 'translate' }))
+  );
 }
 
+/**
+ * Detect Intl.formatMessage() function call (React).
+ *
+ * Example: `intl.formatMessage({ id: 'message-id', defaultMessage: 'Message text' });`
+ */
 function isIntlFormatMessageFunction(node) {
   return (
     isCallExpression(node) &&
@@ -46,6 +62,11 @@ function isIntlFormatMessageFunction(node) {
   );
 }
 
+/**
+ * Detect <FormattedMessage> elements in JSX.
+ *
+ * Example: `<FormattedMessage id="message-id" defaultMessage="Message text"/>`
+ */
 function isFormattedMessageElement(node) {
   return (
     isJSXOpeningElement(node) &&
@@ -70,7 +91,7 @@ export function extractCodeMessages(file) {
   traverse(content, {
     enter(path) {
       if (isI18nTranslateFunction(path.node)) {
-        messagesPairs.push(...extractAngularServiceMessages(path.node));
+        messagesPairs.push(...extractI18nCallMessages(path.node));
       } else if (isIntlFormatMessageFunction(path.node)) {
         messagesPairs.push(...extractIntlMessages(path.node));
       } else if (isFormattedMessageElement(path.node)) {

@@ -22,7 +22,7 @@ import { isObjectExpression, isStringLiteral } from '@babel/types';
 import { isPropertyWithKey } from './utils';
 import { DEFAULT_MESSAGE_KEY } from './constants';
 
-export function extractAngularServiceMessages(node) {
+export function extractI18nCallMessages(node) {
   const [idSubTree, optionsSubTree] = node.arguments;
 
   if (!isStringLiteral(idSubTree)) {
