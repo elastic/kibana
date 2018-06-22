@@ -4,7 +4,7 @@
       "allow_no_jobs": [true, false],
       "bucket_span": "",
       "end": "",
-      "exclude_interim": [true, false],
+      "exclude_interim": ["true", "false"],
       "overall_score": 0,
       "start": "",
       "top_n": 0
