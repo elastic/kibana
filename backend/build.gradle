@@ -28,7 +28,6 @@ dependencies {
   compile "ch.qos.logback:logback-classic:$logbackVersion"
   compile "ch.qos.logback:logback-core:$logbackVersion"
   compile "ch.qos.logback:logback-access:$logbackVersion"
-  compile "org.slf4j:slf4j-api:$slf4jVersion"
 
   compile "com.google.protobuf:protobuf-java-util:$protocVersion"
   compile "org.eclipse.jgit:org.eclipse.jgit:$jgitVersion"

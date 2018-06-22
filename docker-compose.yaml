@@ -23,3 +23,16 @@ services:
     depends_on:
       - elasticsearch
     restart: on-failure
+
+  metricbeat:
+    image: 'elastic/metricbeat:6.3.0'
+    volumes:
+      - ./config/beats/config/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml
+      - /proc:/hostfs/proc:ro
+      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+      - /:/hostfs:ro
+    command:
+      - "-system.hostfs=/hostfs"
+    depends_on:
+      - elasticsearch
+    restart: on-failure

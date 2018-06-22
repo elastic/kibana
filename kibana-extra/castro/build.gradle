@@ -28,7 +28,7 @@ task bootstrap(type: YarnTask, dependsOn: [yarn]) {
 }
 
 task startKibana(type: YarnTask, dependsOn: [yarn, generateProto]) {
-  args = ['start', '--elasticsearch.url', 'http://localhost:9201']
+  args = ['start', '--elasticsearch.url', 'http://localhost:9201', '--no-base-path']
 }
 
 task downloadKibana(type: Download) {

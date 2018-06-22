@@ -1,0 +1,18 @@
+metricbeat.modules:
+- module: system
+  metricsets:
+    - cpu
+    - filesystem
+    - memory
+    - network
+    - process
+  enabled: true
+  period: 10s
+  processes: ['.*']
+  cpu_ticks: false
+
+output.elasticsearch:
+  hosts: [ "docker.for.mac.localhost:9201" ]
+
+setup.kibana:
+  host: "docker.for.mac.localhost:5601"
