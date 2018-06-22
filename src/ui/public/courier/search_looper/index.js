@@ -56,17 +56,6 @@ export function SearchLooperProvider(Private, Promise, $timeout, $rootScope) {
     };
 
     /**
-     * Cancels the current looper while keeping internal
-     * state as started
-     *
-     * @chainable
-     */
-    pause = () => {
-      this._unScheduleLoop();
-      return this;
-    };
-
-    /**
      * Start the looping madness
      *
      * @chainable
@@ -118,15 +107,6 @@ export function SearchLooperProvider(Private, Promise, $timeout, $rootScope) {
      */
     started = () => {
       return !!this._started;
-    };
-
-    /**
-     * Returns the current loop interval
-     *
-     * @return {number}
-     */
-    loopInterval = () => {
-      return this._ms;
     };
 
     /**
@@ -210,15 +190,7 @@ export function SearchLooperProvider(Private, Promise, $timeout, $rootScope) {
         this._timer = null;
       }
     };
-
-    /**
-     * execute the this._fn, and restart the timer
-     */
-    run = () => {
-      this.start();
-    };
   }
 
-  // This manages the doc fetch interval.
   return new SearchLooper();
 }

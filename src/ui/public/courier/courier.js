@@ -40,7 +40,9 @@ uiModules.get('kibana/courier')
       const self = this;
       const SearchSource = Private(SearchSourceProvider);
       const fetchSoon = Private(FetchSoonProvider);
-      const searchLooper = self.searchLooper = Private(SearchLooperProvider);
+
+      // This manages the doc fetch interval.
+      const searchLooper = Private(SearchLooperProvider);
 
       self.SavedObject = Private(SavedObjectProvider);
       self.indexPatterns = indexPatterns;
