@@ -33,10 +33,10 @@ export function SearchLooperProvider(Private, Promise, $rootScope) {
   const searchLooper = new Looper(null, function () {
     $rootScope.$broadcast('courier:searchRefresh');
     const requests = requestQueue.getInactive();
-    // promise returned from fetch.these() only resolves when
+    // promise returned from fetch.fetchSearchRequests() only resolves when
     // the requests complete, but we want to continue even if
     // the requests abort so we make our own
-    fetchSoon.these(requests);
+    fetchSoon.fetchSearchRequests(requests);
     return Promise.all(requests.map(request => request.getCompleteOrAbortedPromise()));
   });
 

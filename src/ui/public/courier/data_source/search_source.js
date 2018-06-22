@@ -404,18 +404,16 @@ export function SearchSourceProvider(Promise, Private, config) {
         req = self._createRequest({ errorHandler });
       }
 
-      fetchSoon.these([req]);
-
+      fetchSoon.fetchSearchRequests([req]);
       return req.getCompletePromise();
     }
-
 
     /**
      * Fetch all pending requests for this source ASAP
      * @async
      */
     fetchQueued() {
-      return fetchSoon.these(this._myStartableQueued());
+      return fetchSoon.fetchSearchRequests(this._myStartableQueued());
     }
 
     /**
