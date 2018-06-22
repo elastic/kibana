@@ -19,17 +19,17 @@
 
 import _ from 'lodash';
 
-import { FetchSoonProvider } from '../fetch';
-import { requestQueue } from '../_request_queue';
-import '../../promises';
 import { fatalError } from '../../notify';
+import '../../promises';
+import { requestQueue } from '../_request_queue';
+import { FetchSoonProvider } from '../fetch';
 
 export function SearchLooperProvider(Private, Promise, $timeout, $rootScope) {
   const fetchSoon = Private(FetchSoonProvider);
 
   class SearchLooper {
     constructor() {
-      this._ms = 1500;
+      this._intervalInMs = 1500;
       this._timer = null;
       this._started = false;
     }
@@ -38,66 +38,51 @@ export function SearchLooperProvider(Private, Promise, $timeout, $rootScope) {
      * Set the number of milliseconds between
      * each loop
      *
-     * @param  {integer} ms
-     * @chainable
+     * @param  {integer} intervalInMs
      */
-    ms = (ms) => {
-      this._ms = _.parseInt(ms) || 0;
+    public setIntervalInMs = intervalInMs => {
+      this._intervalInMs = _.parseInt(intervalInMs) || 0;
 
-      if (!this._started) return;
-
-      if (this._ms) {
-        this.start(false);
-      } else {
-        this._unScheduleLoop();
+      if (!this._started) {
+        return;
       }
 
-      return this;
+      if (this._intervalInMs) {
+        this.start(false);
+      } else {
+        this.unscheduleLoop();
+      }
     };
 
-    /**
-     * Start the looping madness
-     *
-     * @chainable
-     */
-    start = (loopOver) => {
-      if (loopOver == null) loopOver = true;
+    public start = loopOver => {
+      if (loopOver == null) {
+        loopOver = true;
+      }
 
       if (!this._started) {
         this._started = true;
       } else {
-        this._unScheduleLoop();
+        this.unscheduleLoop();
       }
 
       if (loopOver) {
-        this._loopTheLoop();
+        this.executeLoop();
       } else {
-        this._scheduleLoop();
+        this.scheduleLoop();
       }
-
-      return this;
     };
 
-    /**
-     * ...
-     *
-     * @chainable
-     */
-    stop = () => {
-      this._unScheduleLoop();
+    public stop = () => {
+      this.unscheduleLoop();
       this._started = false;
-      return this;
     };
 
     /**
      * Restart the looper only if it is already started.
      * Called automatically when ms is changed
-     *
-     * @chainable
      */
-    restart = () => {
+    public restart = () => {
       this.start(false);
-      return this;
     };
 
     /**
@@ -105,7 +90,7 @@ export function SearchLooperProvider(Private, Promise, $timeout, $rootScope) {
      *
      * @return {boolean}
      */
-    started = () => {
+    public started = () => {
       return !!this._started;
     };
 
@@ -116,12 +101,14 @@ export function SearchLooperProvider(Private, Promise, $timeout, $rootScope) {
      * @override
      * @return {undefined}
      */
-    _onHastyLoop = () => {
-      if (this.afterHastyQueued) return;
+    private onHastyLoop = () => {
+      if (this.afterHastyQueued) {
+        return;
+      }
 
       this.afterHastyQueued = Promise.resolve(this.active)
         .then(() => {
-          return this._loopTheLoop();
+          return this.executeLoop();
         })
         .finally(() => {
           this.afterHastyQueued = null;
@@ -136,18 +123,17 @@ export function SearchLooperProvider(Private, Promise, $timeout, $rootScope) {
      * @private
      * @return {undefined}
      */
-    _loopTheLoop = () => {
+    private executeLoop = () => {
       if (this.active) {
-        this._onHastyLoop();
+        this.onHastyLoop();
         return;
       }
 
-      this.active = Promise
-        .try(this._action)
+      this.active = Promise.try(this.executeLoopAction)
         .then(() => {
-          this._scheduleLoop();
+          this.scheduleLoop();
         })
-        .catch((err) => {
+        .catch(err => {
           this.stop();
           fatalError(err);
         })
@@ -156,14 +142,18 @@ export function SearchLooperProvider(Private, Promise, $timeout, $rootScope) {
         });
     };
 
-    _action = () => {
+    private executeLoopAction = () => {
       $rootScope.$broadcast('courier:searchRefresh');
       const requests = requestQueue.getInactive();
+
       // promise returned from fetch.fetchSearchRequests() only resolves when
       // the requests complete, but we want to continue even if
       // the requests abort so we make our own
       fetchSoon.fetchSearchRequests(requests);
-      return Promise.all(requests.map(request => request.getCompleteOrAbortedPromise()));
+
+      return Promise.all(
+        requests.map(request => request.getCompleteOrAbortedPromise())
+      );
     };
 
     /**
@@ -172,9 +162,13 @@ export function SearchLooperProvider(Private, Promise, $timeout, $rootScope) {
      * @private
      * @return {number} - the timer promise
      */
-    _scheduleLoop = () => {
-      this._unScheduleLoop();
-      this._timer = this._ms ? $timeout(this._loopTheLoop, this._ms) : null;
+    private scheduleLoop = () => {
+      this.unscheduleLoop();
+
+      this._timer = this._intervalInMs
+        ? $timeout(this.executeLoop, this._intervalInMs)
+        : null;
+
       return this._timer;
     };
 
@@ -184,7 +178,7 @@ export function SearchLooperProvider(Private, Promise, $timeout, $rootScope) {
      * @private
      * @return {number} - the timer promise
      */
-    _unScheduleLoop = () => {
+    private unscheduleLoop = () => {
       if (this._timer) {
         $timeout.cancel(this._timer);
         this._timer = null;

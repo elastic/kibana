@@ -51,19 +51,16 @@ uiModules.get('kibana/courier')
       self.SearchSource = SearchSource;
 
       /**
-     * update the time between automatic search requests
-     *
-     * @chainable
-     */
-      self.fetchInterval = function (ms) {
-        searchLooper.ms(ms);
-        return this;
+       * update the time between automatic search requests
+       */
+      self._setFetchIntervalInMs = function (intervalInMs) {
+        searchLooper.setIntervalInMs(intervalInMs);
       };
 
       /**
-     * Start fetching search requests on an interval
-     * @chainable
-     */
+       * Start fetching search requests on an interval
+       * @chainable
+       */
       self.start = function () {
         searchLooper.start();
         return this;
@@ -121,9 +118,9 @@ uiModules.get('kibana/courier')
         const refreshValue = _.get(timefilter.getRefreshInterval(), 'value');
         const refreshPause = _.get(timefilter.getRefreshInterval(), 'pause');
         if (_.isNumber(refreshValue) && !refreshPause) {
-          self.fetchInterval(refreshValue);
+          self._setFetchIntervalInMs(refreshValue);
         } else {
-          self.fetchInterval(0);
+          self._setFetchIntervalInMs(0);
         }
       });
 
