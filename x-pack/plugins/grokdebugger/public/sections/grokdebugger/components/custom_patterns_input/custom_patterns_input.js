@@ -26,6 +26,9 @@ MSG message-id=<%{GREEDYDATA}>`;
       buttonContent="Custom Patterns"
       data-test-subj="btnToggleCustomPatternsInput"
     >
+
+      <EuiSpacer size="m" />
+
       <EuiCallOut
         title="Enter one custom pattern per line. For example:"
       >
@@ -34,7 +37,7 @@ MSG message-id=<%{GREEDYDATA}>`;
         </EuiCodeBlock>
       </EuiCallOut>
 
-      <EuiSpacer />
+      <EuiSpacer size="m" />
 
       <EuiFormRow
         fullWidth
