@@ -64,10 +64,10 @@ describe('Vertex', () => {
 
   it('should have the correct subtitle', () => {
     const vertex1 = graph.getVertexById('my-prefix:my-really-long-named-generator');
-    expect(vertex1.subtitle).to.eql({ display: 'my-prefi … enerator', complete: 'my-prefix:my-really-long-named-generator' });
+    expect(vertex1.subtitle).to.eql('my-prefix:my-really-long-named-generator');
 
     const vertex2 = graph.getVertexById('my-queue');
-    expect(vertex2.subtitle).to.eql({ display: 'my-queue', complete: 'my-queue' });
+    expect(vertex2.subtitle).to.eql('my-queue');
   });
 
   it('should have the correct number of incoming edges', () => {

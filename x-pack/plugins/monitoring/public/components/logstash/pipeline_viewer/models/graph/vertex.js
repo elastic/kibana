@@ -23,14 +23,7 @@ export class Vertex {
   }
 
   get subtitle() {
-    return {
-      complete: this.id,
-      display: this.truncateStringForDisplay(this.id, this.displaySubtitleMaxLength)
-    };
-  }
-
-  get displaySubtitleMaxLength() {
-    return 19;
+    return this.id;
   }
 
   get incomingEdges() {
@@ -79,16 +72,5 @@ export class Vertex {
 
   get hasExplicitId() {
     return Boolean(this.json.explicit_id);
-  }
-
-  truncateStringForDisplay(completeString, maxDisplayLength) {
-    if (completeString.length <= maxDisplayLength) {
-      return completeString;
-    }
-
-    const ellipses = ' \u2026 ';
-    const eachHalfMaxDisplayLength = Math.floor((maxDisplayLength - ellipses.length) / 2);
-
-    return `${completeString.substr(0, eachHalfMaxDisplayLength)}${ellipses}${completeString.substr(-eachHalfMaxDisplayLength)}`;
   }
 }
