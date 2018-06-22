@@ -1,21 +1,21 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
+* Licensed to Elasticsearch B.V. under one or more contributor
+* license agreements. See the NOTICE file distributed with
+* this work for additional information regarding copyright
+* ownership. Elasticsearch B.V. licenses this file to you under
+* the Apache License, Version 2.0 (the "License"); you may
+* not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+*/
 
 import expect from 'expect.js';
 
@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'visualize']);
 
-  describe('discover app', function describeIndexTests() {
+  describe('discover tab', function describeIndexTests() {
     before(async function () {
       const fromTime = '2015-09-19 06:31:44.000';
       const toTime = '2015-09-23 18:31:44.000';
@@ -42,52 +42,42 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
     });
 
-
     describe('field data', function () {
-      it('search php should show the correct hit count', function () {
+      it('search php should show the correct hit count', async function () {
         const expectedHitCount = '445';
-        return PageObjects.discover.query('php')
-          .then(function () {
-            return retry.try(function tryingForTime() {
-              return PageObjects.discover.getHitCount()
-                .then(function compareData(hitCount) {
-                  expect(hitCount).to.be(expectedHitCount);
-                });
-            });
-          });
+        await PageObjects.discover.query('php');
+
+        await retry.try(async function tryingForTime() {
+          const hitCount = await PageObjects.discover.getHitCount();
+          expect(hitCount).to.be(expectedHitCount);
+        });
+
       });
 
-      it('the search term should be highlighted in the field data', function () {
+      it('the search term should be highlighted in the field data', async function () {
         // marks is the style that highlights the text in yellow
-        return PageObjects.discover.getMarks()
-          .then(function (marks) {
-            expect(marks.length).to.be(50);
-            expect(marks.indexOf('php')).to.be(0);
-          });
+        const marks = await PageObjects.discover.getMarks();
+        expect(marks.length).to.be(50);
+        expect(marks.indexOf('php')).to.be(0);
       });
 
-      it('search type:apache should show the correct hit count', function () {
+      it('search type:apache should show the correct hit count', async function () {
         const expectedHitCount = '11,156';
-        return PageObjects.discover.query('type:apache')
-          .then(function () {
-            return retry.try(function tryingForTime() {
-              return PageObjects.discover.getHitCount()
-                .then(function compareData(hitCount) {
-                  expect(hitCount).to.be(expectedHitCount);
-                });
-            });
-          });
+        await PageObjects.discover.query('type:apache');
+        await retry.try(async function tryingForTime() {
+          const hitCount = await PageObjects.discover.getHitCount();
+          expect(hitCount).to.be(expectedHitCount);
+        });
       });
 
-      it('doc view should show Time and _source columns', function () {
+      it('doc view should show Time and _source columns', async function () {
         const expectedHeader = 'Time _source';
-        return PageObjects.discover.getDocHeader()
-          .then(function (header) {
-            expect(header).to.be(expectedHeader);
-          });
+        const Docheader = await PageObjects.discover.getDocHeader();
+        expect(Docheader).to.be(expectedHeader);
       });
 
-      it('doc view should sort ascending', function () {
+      it('doc view should sort ascending', async function () {
+
         // Note: Could just check the timestamp, but might as well check that the whole doc is as expected.
         const ExpectedDoc =
           'September 20th 2015, 00:00:00.000\ntype:apache index:logstash-2015.09.20 @timestamp:September 20th 2015, 00:00:00.000'
@@ -161,36 +151,24 @@ export default function ({ getService, getPageObjects }) {
           + ' 16:01:03.000 relatedContent.article:published_time:October 21st 2005, 01:10:25.000, March 5th 2006,'
           + ' 01:03:42.000, December 13th 2006, 20:12:04.000, April 4th 2008, 23:00:00.000, April 25th 2008,'
           + ' 14:26:41.000';
-        return PageObjects.discover.clickDocSortDown()
-          .then(function () {
-          // we don't technically need this sleep here because the tryForTime will retry and the
-          // results will match on the 2nd or 3rd attempt, but that debug output is huge in this
-          // case and it can be avoided with just a few seconds sleep.
-            return PageObjects.common.sleep(2000);
-          })
-          .then(function () {
-            return retry.try(function tryingForTime() {
-              return PageObjects.discover.getDocTableIndex(1)
-                .then(function (rowData) {
-                  expect(rowData).to.be(ExpectedDoc);
-                });
-            });
-          });
+        await PageObjects.discover.clickDocSortDown();
+
+        // we don't technically need this sleep here because the tryForTime will retry and the
+        // results will match on the 2nd or 3rd attempt, but that debug output is huge in this
+        // case and it can be avoided with just a few seconds sleep.
+        await PageObjects.common.sleep(2000);
+        await retry.try(async function tryingForTime() {
+          const rowData = await PageObjects.discover.getDocTableIndex(1);
+          expect(rowData).to.be(ExpectedDoc);
+        });
       });
 
-
-      it('a bad syntax query should show an error message', function () {
+      it('a bad syntax query should show an error message', async function () {
         const expectedError = 'Discover: Failed to parse query [xxx(yyy]';
-        return PageObjects.discover.query('xxx(yyy')
-          .then(function () {
-            return PageObjects.header.getToastMessage();
-          })
-          .then(function (toastMessage) {
-            expect(toastMessage).to.contain(expectedError);
-          })
-          .then(function () {
-            return PageObjects.header.clickToastOK();
-          });
+        await PageObjects.discover.query('xxx(yyy');
+        const toastMessage =  await PageObjects.header.getToastMessage();
+        expect(toastMessage).to.contain(expectedError);
+        await PageObjects.header.clickToastOK();
       });
     });
   });
