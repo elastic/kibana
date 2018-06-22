@@ -7,6 +7,7 @@
 import React from 'react';
 import {
   EuiFormRow,
+  EuiPanel,
   EuiCodeEditor
 } from '@elastic/eui';
 import { EDITOR } from '../../../../../common/constants';
@@ -19,18 +20,20 @@ export function PatternInput({ value, onChange }) {
       fullWidth
       data-test-subj="acePatternInput"
     >
-      <EuiCodeEditor
-        width="100%"
-        value={value}
-        onChange={onChange}
-        mode={new GrokMode()}
-        setOptions={{
-          highlightActiveLine: false,
-          highlightGutterLine: false,
-          minLines: EDITOR.PATTERN_MIN_LINES,
-          maxLines: EDITOR.PATTERN_MAX_LINES,
-        }}
-      />
+      <EuiPanel paddingSize="s">
+        <EuiCodeEditor
+          width="100%"
+          value={value}
+          onChange={onChange}
+          mode={new GrokMode()}
+          setOptions={{
+            highlightActiveLine: false,
+            highlightGutterLine: false,
+            minLines: EDITOR.PATTERN_MIN_LINES,
+            maxLines: EDITOR.PATTERN_MAX_LINES,
+          }}
+        />
+      </EuiPanel>
     </EuiFormRow>
   );
 }

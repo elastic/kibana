@@ -10,6 +10,7 @@ import {
   EuiCallOut,
   EuiCodeBlock,
   EuiFormRow,
+  EuiPanel,
   EuiCodeEditor,
   EuiSpacer
 } from '@elastic/eui';
@@ -39,17 +40,19 @@ MSG message-id=<%{GREEDYDATA}>`;
         fullWidth
         data-test-subj="aceCustomPatternsInput"
       >
-        <EuiCodeEditor
-          width="100%"
-          value={value}
-          onChange={onChange}
-          setOptions={{
-            highlightActiveLine: false,
-            highlightGutterLine: false,
-            minLines: EDITOR.PATTERN_MIN_LINES,
-            maxLines: EDITOR.PATTERN_MAX_LINES,
-          }}
-        />
+        <EuiPanel paddingSize="s">
+          <EuiCodeEditor
+            width="100%"
+            value={value}
+            onChange={onChange}
+            setOptions={{
+              highlightActiveLine: false,
+              highlightGutterLine: false,
+              minLines: EDITOR.PATTERN_MIN_LINES,
+              maxLines: EDITOR.PATTERN_MAX_LINES,
+            }}
+          />
+        </EuiPanel>
       </EuiFormRow>
     </EuiAccordion>
   );

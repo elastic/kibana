@@ -7,6 +7,7 @@
 import React from 'react';
 import {
   EuiFormRow,
+  EuiPanel,
   EuiCodeEditor
 } from '@elastic/eui';
 
@@ -17,17 +18,19 @@ export function EventOutput({ value }) {
       fullWidth
       data-test-subj="aceEventOutput"
     >
-      <EuiCodeEditor
-        mode="json"
-        isReadOnly
-        width="100%"
-        height="340px"
-        value={JSON.stringify(value, null, 2)}
-        setOptions={{
-          highlightActiveLine: false,
-          highlightGutterLine: false,
-        }}
-      />
+      <EuiPanel paddingSize="s">
+        <EuiCodeEditor
+          mode="json"
+          isReadOnly
+          width="100%"
+          height="340px"
+          value={JSON.stringify(value, null, 2)}
+          setOptions={{
+            highlightActiveLine: false,
+            highlightGutterLine: false,
+          }}
+        />
+      </EuiPanel>
     </EuiFormRow>
   );
 }
