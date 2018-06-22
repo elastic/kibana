@@ -6,7 +6,7 @@
         "max_docs": 1000,
         "max_size": "5gb"
       },
-      "settings": {}
+      "settings": { "__scope_link": "put_settings" }
     }
   }
 }
