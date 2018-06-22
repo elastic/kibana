@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AsyncResource } from 'async_hooks';
 import { flatten, get, omit } from 'lodash';
 import moment from 'moment';
 import { INDEX_NAMES } from '../../../../common/constants';
