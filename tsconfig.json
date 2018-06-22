@@ -41,5 +41,5 @@
     // Disallow inconsistently-cased references to the same file.
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/**/*", "test/wdio_functional/**/*"]
+  "include": ["src/**/*"]
 }

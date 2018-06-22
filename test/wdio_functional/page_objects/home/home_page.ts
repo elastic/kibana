@@ -17,26 +17,25 @@
  * under the License.
  */
 
-import { Client, Element, RawResult } from 'webdriverio';
+import { Client } from 'webdriverio';
 import BasePage from '../common/base_page';
 
 export default class HomePage extends BasePage {
   private addDataHeaderSelector: string;
   constructor(driver: Client<void>) {
     super(driver);
-    this.addDataHeaderSelector = '//div[contains(@class, "euiTitle") and text()="Add Data To Kibana"';
+    this.addDataHeaderSelector =
+      '//h3[contains(@class, "euiTitle") and text()="Add Data to Kibana"]';
+    this.init();
   }
 
-  protected init(): void {
+  private init(): void {
     this.driver.waitForExist(this.addDataHeaderSelector);
-    assert.equal(
-      'Add Data To Kibana',
-      this.findElement(this.addDataHeaderSelector).value
+    expect('Add Data to Kibana').toBe(
+      this.getElementText(this.addDataHeaderSelector)
     );
-    this.driver.waitUntil(
-      function() {
-        return this.title === 'Kibana';
-      }.bind(this)
-    );
+    this.driver.waitUntil(() => {
+      return this.title() === 'Kibana';
+    });
   }
 }

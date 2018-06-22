@@ -17,21 +17,18 @@
  * under the License.
  */
 
-import { Client } from 'webdriverio';
-import { Navigation } from './navigation_menu';
-import Web from './web';
+export function stripRequest(requestString: string): string {
+  return requestString
+    .trim()
+    .replace(/\n|\r/g, '')
+    .replace(/\s+/g, '');
+}
 
-export default class BasePage extends Web {
-  public nav: Navigation;
-  protected driver: Client<void>;
-
-  constructor(driver: any) {
-    super(driver);
-    this.driver = driver;
-    this.nav = new Navigation(this.driver);
-  }
-
-  public title(): string {
-    return this.driver.getTitle().toString();
-  }
+export function testSubjectifySelector(
+  selector: string,
+  strategy: string
+): string {
+  return strategy === 'xpath'
+    ? `[@data-test-subj="${selector}"]`
+    : `[data-test-subj="${selector}"]`;
 }

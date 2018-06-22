@@ -1,0 +1,23 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "target": "es6",
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "removeComments": true,
+        "noImplicitAny": false,
+        "outDir": "./build",
+        "types": [
+            "webdriverio"
+        ]
+    },
+    "exclude": [
+        "node_modules"
+    ],
+    "include": [
+        "test/wdio_functional/**/*"
+    ],
+    "compileOnSave": false
+}

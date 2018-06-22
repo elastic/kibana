@@ -16,17 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Client, Element, RawResult } from 'webdriverio';
-import BasePage from './base_page';
+import { Client } from 'webdriverio';
+import { testSubjectifySelector } from '../../helpers/helpers';
+import Web from './web';
 
-export class PageRegion extends BasePage {
-  private root: string;
-  constructor(driver: Client<void>, root: string) {
+export class Navigation extends Web {
+  protected driver: Client<void>;
+  private baseNavLinkSelector: string;
+  private consoleNavLinkSelector: string;
+
+  constructor(driver: Client<void>) {
     super(driver);
-    this.root = root;
+    this.driver = driver;
+    this.baseNavLinkSelector =
+      '//a' + testSubjectifySelector('appLink', 'xpath');
+    this.consoleNavLinkSelector =
+      this.baseNavLinkSelector + '[@aria-label="Dev Tools"]';
+  }
+  public navigateToConsole(): void {
+    this.driver.click(this.consoleNavLinkSelector);
   }
 
-  public findElement(selector: string): RawResult<Element> {
-    return this.driver.element(this.root).element(selector);
+  public navigateToHome(): void {
+    this.driver.url('/');
   }
 }
