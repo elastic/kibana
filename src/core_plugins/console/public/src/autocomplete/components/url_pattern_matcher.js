@@ -44,7 +44,9 @@ export class UrlPatternMatcher {
     ['HEAD', 'GET', 'PUT', 'POST', 'DELETE'].forEach((method) => {
       this[method] = {
         rootComponent: new SharedComponent('ROOT'),
-        parametrizedComponentFactories: parametrizedComponentFactories || {}
+        parametrizedComponentFactories: parametrizedComponentFactories || {
+          getComponent: () => {}
+        }
       };
     });
   }
