@@ -226,7 +226,7 @@ export class EditJobFlyout extends Component {
             <EuiTabbedContent
               tabs={tabs}
               initialSelectedTab={tabs[0]}
-              onTabClick={(tab) => { console.log('clicked tab', tab); }}
+              onTabClick={() => { }}
             />
 
           </EuiFlyoutBody>
