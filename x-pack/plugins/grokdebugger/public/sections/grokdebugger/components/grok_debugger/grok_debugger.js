@@ -44,15 +44,16 @@ export class GrokDebugger extends React.Component {
   }
 
   onCustomPatternsChange = (customPatterns) => {
+    customPatterns = customPatterns.trim();
+    const customPatternsObj = {};
+
     this.setState({ customPatterns });
 
-    customPatterns = customPatterns.trim();
     if (!customPatterns) {
-      this.grokdebuggerRequest.customPatterns = {};
+      this.grokdebuggerRequest.customPatterns = customPatternsObj;
       return;
     }
 
-    const customPatternsObj = {};
     customPatterns.split('\n').forEach(customPattern => {
       // Patterns are defined like so:
       // patternName patternDefinition
@@ -67,7 +68,7 @@ export class GrokDebugger extends React.Component {
     this.grokdebuggerRequest.customPatterns = customPatternsObj;
   }
 
-  onSimulateClick = async () => {
+  simulateGrok = async () => {
     try {
       const simulateResponse = await this.props.grokdebuggerService.simulate(this.grokdebuggerRequest);
       this.setState({
@@ -80,6 +81,12 @@ export class GrokDebugger extends React.Component {
     } catch (e) {
       toastNotifications.addDanger(e);
     }
+  }
+
+  onSimulateClick = () => {
+    this.setState({
+      structuredEvent: {}
+    }, this.simulateGrok);
   }
 
   isSimulateDisabled = () => {
