@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
     });
 
-    describe('field data', function () {
+    describe('collapse expand', function () {
       it('should initially be expanded', async function () {
         const width = await PageObjects.discover.getSidebarWidth();
         log.debug('expanded sidebar width = ' + width);
