@@ -1,11 +1,5 @@
 {
   "xpack.rollup.put_job": {
-    "methods": [
-      "PUT"
-    ],
-    "patterns": [
-      "_xpack/rollup/job/{id}"
-    ],
     "data_autocomplete_rules": {
       "index_pattern": "",
       "rollup_index": "",
