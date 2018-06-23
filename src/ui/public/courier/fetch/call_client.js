@@ -45,7 +45,8 @@ export function CallClientProvider(Private, Promise, es) {
     if (!execCount) return Promise.resolve([]);
 
     // resolved by respond()
-    let esPromise;
+    let esPromise = undefined;
+    let isRequestAborted = false;
     const defer = Promise.defer();
 
     // for each respond with either the response or ABORTED
@@ -88,7 +89,8 @@ export function CallClientProvider(Private, Promise, es) {
         esPromise.abort();
       }
 
-      esPromise = ABORTED;
+      esPromise = undefined;
+      isRequestAborted = true;
 
       return respond();
     });
@@ -119,7 +121,7 @@ export function CallClientProvider(Private, Promise, es) {
 
       try {
         // The request was aborted while we were doing the above logic.
-        if (esPromise === ABORTED) {
+        if (isRequestAborted) {
           throw ABORTED;
         }
 
