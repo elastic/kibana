@@ -18,3 +18,4 @@
  */
 
 import './courier';
+export { SavedObjectProvider } from './saved_object';

@@ -29,13 +29,10 @@ import '../promises';
 
 import { RedirectWhenMissingProvider } from './_redirect_when_missing';
 import { requestQueue } from './_request_queue';
-import { SearchSourceProvider } from './data_source/search_source';
 import { FetchSoonProvider } from './fetch';
-import { SavedObjectProvider } from './saved_object';
 import { SearchLooperProvider } from './search_looper';
 
 uiModules.get('kibana/courier').service('courier', ($rootScope, Private) => {
-  const SearchSource = Private(SearchSourceProvider);
   const fetchSoon = Private(FetchSoonProvider);
 
   // This manages the doc fetch interval.
@@ -44,8 +41,6 @@ uiModules.get('kibana/courier').service('courier', ($rootScope, Private) => {
   class Courier {
     constructor() {
       this.redirectWhenMissing = Private(RedirectWhenMissingProvider);
-      this.SavedObject = Private(SavedObjectProvider);
-      this.SearchSource = SearchSource;
 
       // Listen for refreshInterval changes
       $rootScope.$listen(timefilter, 'refreshIntervalUpdate', function () {
