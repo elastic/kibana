@@ -140,10 +140,6 @@ export class UiBundlesController {
     return resolve(this._workingDir, ...args);
   }
 
-  getCacheDirectory(...subPath) {
-    return this.resolvePath('../.cache', this.hashBundleEntries(), ...subPath);
-  }
-
   getDescription() {
     switch (this._bundles.length) {
       case 0:

@@ -24,6 +24,7 @@ import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import webpack from 'webpack';
 import Stats from 'webpack/lib/Stats';
 import webpackMerge from 'webpack-merge';
+import HardSourceWebpackPlugin from 'hard-source-webpack-plugin';
 
 import { defaults } from 'lodash';
 
@@ -114,28 +115,6 @@ export default class BaseOptimizer {
     }
 
     /**
-     * Adds a cache loader if we're running in dev mode. The reason we're not adding
-     * the cache-loader when running in production mode is that it creates cache
-     * files in optimize/.cache that are not necessary for distributable versions
-     * of Kibana and just make compressing and extracting it more difficult.
-     */
-    const maybeAddCacheLoader = (cacheName, loaders) => {
-      if (IS_KIBANA_DISTRIBUTABLE) {
-        return loaders;
-      }
-
-      return [
-        {
-          loader: 'cache-loader',
-          options: {
-            cacheDirectory: this.uiBundles.getCacheDirectory(cacheName)
-          }
-        },
-        ...loaders
-      ];
-    };
-
-    /**
      * Creates the selection rules for a loader that will only pass for
      * source files that are eligible for automatic transpilation.
      */
@@ -195,6 +174,21 @@ export default class BaseOptimizer {
       },
 
       plugins: [
+        new HardSourceWebpackPlugin({
+          cacheDirectory: this.uiBundles.resolvePath('../.webpack/[configHash]'),
+        }),
+
+        new HardSourceWebpackPlugin.ExcludeModulePlugin([
+          {
+            // HardSource works with mini-css-extract-plugin but due to how
+            // mini-css emits assets, assets are not emitted on repeated builds with
+            // mini-css and hard-source together. Ignoring the mini-css loader
+            // modules, but not the other css loader modules, excludes the modules
+            // that mini-css needs rebuilt to output assets every time.
+            test: /mini-css-extract-plugin[\\/]dist[\\/]loader/,
+          }
+        ]),
+
         new MiniCssExtractPlugin({
           filename: '[name].style.css',
         }),
@@ -233,10 +227,7 @@ export default class BaseOptimizer {
         rules: [
           {
             test: /\.less$/,
-            use: getStyleLoaders(
-              ['less-loader'],
-              maybeAddCacheLoader('less', [])
-            ),
+            use: getStyleLoaders(['less-loader']),
           },
           {
             test: /\.css$/,
@@ -261,7 +252,7 @@ export default class BaseOptimizer {
           },
           {
             resource: createSourceFileResourceSelector(/\.js$/),
-            use: maybeAddCacheLoader('babel', [
+            use: [
               {
                 loader: 'babel-loader',
                 options: {
@@ -271,7 +262,7 @@ export default class BaseOptimizer {
                   ],
                 },
               }
-            ]),
+            ]
           },
           ...this.uiBundles.getPostLoaders().map(loader => ({
             enforce: 'post',
@@ -302,7 +293,7 @@ export default class BaseOptimizer {
         rules: [
           {
             resource: createSourceFileResourceSelector(/\.tsx?$/),
-            use: maybeAddCacheLoader('typescript', [
+            use: [
               {
                 loader: 'ts-loader',
                 options: {
@@ -316,7 +307,7 @@ export default class BaseOptimizer {
                   }
                 }
               }
-            ]),
+            ],
           }
         ]
       },
