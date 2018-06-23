@@ -17,12 +17,20 @@
  * under the License.
  */
 
-import './courier';
-export { SavedObjectProvider } from './saved_object';
-export {
-  SearchSourceProvider,
-  migrateFilter,
-  decorateQuery,
-  buildQueryFromFilters,
-  luceneStringToDsl,
-} from './search_source';
+import expect from 'expect.js';
+import chrome from '../../../chrome';
+import { decorateQuery } from '../decorate_query';
+
+const config = chrome.getUiSettingsClient();
+describe('Query decorator', function () {
+
+  it('should be a function', function () {
+    expect(decorateQuery).to.be.a(Function);
+  });
+
+  it('should merge in the query string options', function () {
+    config.set('query:queryString:options', { analyze_wildcard: true });
+    const decoratedQuery = decorateQuery({ query_string: { query: '*' } });
+    expect(decoratedQuery).to.eql({ query_string: { query: '*', analyze_wildcard: true } });
+  });
+});

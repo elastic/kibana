@@ -18,8 +18,8 @@
  */
 
 import { buildQueryFromLucene } from '../from_lucene';
-import { decorateQuery } from '../../_decorate_query.js';
-import { expectDeepEqual } from '../../../../../../test_utils/expect_deep_equal.js';
+import { decorateQuery } from '../../decorate_query';
+import { expectDeepEqual } from '../../../../../../test_utils/expect_deep_equal';
 import { luceneStringToDsl } from '../lucene_string_to_dsl';
 
 

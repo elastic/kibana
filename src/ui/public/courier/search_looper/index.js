@@ -17,12 +17,4 @@
  * under the License.
  */
 
-import './courier';
-export { SavedObjectProvider } from './saved_object';
-export {
-  SearchSourceProvider,
-  migrateFilter,
-  decorateQuery,
-  buildQueryFromFilters,
-  luceneStringToDsl,
-} from './search_source';
+export { SearchLooperProvider } from './search_looper';

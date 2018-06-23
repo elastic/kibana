@@ -19,7 +19,7 @@
 
 import expect from 'expect.js';
 import _ from 'lodash';
-import { migrateFilter } from '../_migrate_filter';
+import { migrateFilter } from '../migrate_filter';
 
 describe('migrateFilter', function () {
 

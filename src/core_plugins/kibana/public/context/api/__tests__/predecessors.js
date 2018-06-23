@@ -22,7 +22,7 @@ import ngMock from 'ng_mock';
 import * as _ from 'lodash';
 
 import { createCourierStub, createSearchSourceStubProvider } from './_stubs';
-import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
+import { SearchSourceProvider } from 'ui/courier';
 
 import { fetchContextProvider } from '../context';
 

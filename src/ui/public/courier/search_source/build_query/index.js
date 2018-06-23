@@ -17,20 +17,6 @@
  * under the License.
  */
 
-import expect from 'expect.js';
-import chrome from '../../../chrome';
-import { decorateQuery } from '../_decorate_query';
-
-const config = chrome.getUiSettingsClient();
-describe('Query decorator', function () {
-
-  it('should be a function', function () {
-    expect(decorateQuery).to.be.a(Function);
-  });
-
-  it('should merge in the query string options', function () {
-    config.set('query:queryString:options', { analyze_wildcard: true });
-    const decoratedQuery = decorateQuery({ query_string: { query: '*' } });
-    expect(decoratedQuery).to.eql({ query_string: { query: '*', analyze_wildcard: true } });
-  });
-});
+export { BuildESQueryProvider } from './build_es_query';
+export { buildQueryFromFilters } from './from_filters';
+export { luceneStringToDsl } from './lucene_string_to_dsl';

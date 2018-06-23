@@ -22,7 +22,7 @@ import ngMock from 'ng_mock';
 import sinon from 'sinon';
 
 import { createCourierStub } from './_stubs';
-import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
+import { SearchSourceProvider } from 'ui/courier';
 
 import { fetchAnchorProvider } from '../anchor';
 

@@ -20,7 +20,7 @@
 
 
 // @ts-ignore
-import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
+import { SearchSourceProvider } from 'ui/courier';
 
 import { reverseSortDirection } from './utils/sorting';
 

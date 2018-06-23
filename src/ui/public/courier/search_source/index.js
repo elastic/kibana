@@ -17,4 +17,7 @@
  * under the License.
  */
 
-export { BuildESQueryProvider } from './build_es_query';
+export { SearchSourceProvider } from './search_source';
+export { migrateFilter } from './migrate_filter';
+export { decorateQuery } from './decorate_query';
+export { buildQueryFromFilters, luceneStringToDsl } from './build_query';
