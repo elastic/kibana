@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.closeInspector();
     });
 
-    it('should show correct chart, take screenshot', async function () {
+    it('should show correct chart', async function () {
 
       // this test only verifies the numerical part of this data
       // it could also check the legend to verify the extensions

@@ -66,7 +66,7 @@ export default function ({ getService, getPageObjects }) {
       expect(spyToggleExists).to.be(true);
     });
 
-    it('should show correct data, take screenshot', async function () {
+    it('should show correct data', async function () {
       const expectedChartData = [
         '0B', '2,088', '1.953KB', '2,748', '3.906KB', '2,707', '5.859KB', '2,876', '7.813KB',
         '2,863', '9.766KB', '147', '11.719KB', '148', '13.672KB', '129', '15.625KB', '161', '17.578KB', '137'

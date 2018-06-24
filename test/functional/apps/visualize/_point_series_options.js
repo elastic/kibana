@@ -68,7 +68,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('secondary value axis', function () {
 
-      it('should show correct chart, take screenshot', async function () {
+      it('should show correct chart', async function () {
         const expectedChartValues = [
           [ 37, 202, 740, 1437, 1371, 751, 188, 31, 42, 202, 683,
             1361, 1415, 707, 177, 27, 32, 175, 707, 1408, 1355, 726, 201, 29 ],

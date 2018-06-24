@@ -68,7 +68,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
 
-    it('should show 10 slices in pie chart, take screenshot', async function () {
+    it('should show 10 slices in pie chart', async function () {
       const expectedPieChartSliceCount = 10;
 
       const pieData = await PageObjects.visualize.getPieChartData();
