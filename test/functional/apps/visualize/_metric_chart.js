@@ -51,6 +51,7 @@ export default function ({ getService, getPageObjects }) {
         const metricValue = await PageObjects.visualize.getMetric();
         expect(expectedCount).to.eql(metricValue.split('\n'));
       });
+    });
 
     it('should show Average', async function () {
       const avgMachineRam = ['13,104,036,080.615', 'Average machine.ram'];
