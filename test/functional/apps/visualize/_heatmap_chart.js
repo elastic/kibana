@@ -57,27 +57,15 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.waitForVisualization();
     });
 
-    it('should save and load', function () {
-      return PageObjects.visualize.saveVisualization(vizName1)
-        .then(() => {
-          return PageObjects.common.getBreadcrumbPageTitle();
-        })
-        .then(pageTitle => {
-          log.debug(`Save viz page title is ${pageTitle}`);
-          expect(pageTitle).to.contain(vizName1);
-        })
-        .then(function testVisualizeWaitForToastMessageGone() {
-          return PageObjects.header.waitForToastMessageGone();
-        })
-        .then(function () {
-          return PageObjects.visualize.loadSavedVisualization(vizName1);
-        })
-        .then(function () {
-          return PageObjects.header.waitUntilLoadingHasFinished();
-        })
-        .then(function waitForVisualization() {
-          return PageObjects.visualize.waitForVisualization();
-        });
+    it('should save and load', async function () {
+      await PageObjects.visualize.saveVisualization(vizName1);
+      const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
+      log.debug(`Save viz page title is ${pageTitle}`);
+      expect(pageTitle).to.contain(vizName1);
+      await PageObjects.header.waitForToastMessageGone();
+      await PageObjects.visualize.loadSavedVisualization(vizName1);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.visualize.waitForVisualization();
     });
 
     it('should have inspector enabled', async function () {

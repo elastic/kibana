@@ -87,7 +87,7 @@ export default function ({ getService, getPageObjects }) {
       expect(spyToggleExists).to.be(true);
     });
 
-    it('should show correct chart, take screenshot', async function () {
+    it('should show correct chart', async function () {
       const xAxisLabels = [ '2015-09-20 00:00', '2015-09-21 00:00',
         '2015-09-22 00:00', '2015-09-23 00:00'
       ];
