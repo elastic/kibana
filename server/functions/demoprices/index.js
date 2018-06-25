@@ -1,1 +1,0 @@
-export { demoprices } from './demoprices';

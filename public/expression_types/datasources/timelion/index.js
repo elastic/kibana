@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { ControlLabel, FormControl } from 'react-bootstrap';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldText, EuiCode } from '@elastic/eui';
 import { getSimpleArg, setSimpleArg } from '../../../lib/arg_helpers';
 import { TooltipIcon } from '../../../components/tooltip_icon';
 import { templateFromReactComponent } from '../../../lib/template_from_react_component';
@@ -32,46 +32,55 @@ const TimelionDatasource = ({ args, updateArgs }) => {
         pull back timeseries data in a tabular format that can be used with Canvas elements.
       </p>
 
-      <div className="canvas__timelion-row">
-        <div className="canvas__timelion-query">
-          <ControlLabel>
-            Query &nbsp;
-            <TooltipIcon text="Lucene Query String syntax" placement="right" />
-          </ControlLabel>
-          <FormControl
-            type="text"
-            value={getQuery()}
-            onChange={e => setArg('query', e.target.value)}
-          />
-        </div>
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiFormRow
+            fullWidth
+            label={
+              <Fragment>
+                Query &nbsp;
+                <TooltipIcon text="Lucene Query String syntax" placement="right" />
+              </Fragment>
+            }
+            helpText={
+              <small>
+                <strong>Tip 1:</strong> Timelion requires a time range, you should add a time filter
+                element to your page somewhere, or use the code editor to pass in a time filter.<br />
+                <strong>Tip 2:</strong> Some Timelion functions, such as <EuiCode>.color()</EuiCode>,
+                don't translate to a Canvas data table. Anything todo with data manipulation should
+                work grand.
+              </small>
+            }
+          >
+            <EuiFieldText
+              fullWidth
+              value={getQuery()}
+              onChange={e => setArg('query', e.target.value)}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
         {
           // TODO: Time timelion interval picker should be a drop down
         }
-        <div className="canvas__timelion-interval">
-          <ControlLabel>
-            Interval &nbsp;
-            <TooltipIcon
-              text="Elasticsearch date math, eg 1w, 5d, 10s, or auto"
-              placement="right"
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
+            label={
+              <Fragment>
+                Interval &nbsp;
+                <TooltipIcon
+                  text="Elasticsearch date math, eg 1w, 5d, 10s, or auto"
+                  placement="right"
+                />
+              </Fragment>
+            }
+          >
+            <EuiFieldText
+              value={getInterval()}
+              onChange={e => setArg('interval', e.target.value)}
             />
-          </ControlLabel>
-          <FormControl
-            type="text"
-            value={getInterval()}
-            onChange={e => setArg('interval', e.target.value)}
-          />
-        </div>
-      </div>
-
-      <p>
-        <small>
-          <strong>Tip 1:</strong>
-          Timelion requires a time range, you should add a time filter element to your page
-          somewhere, or use the code editor to pass in a time filter.<br />
-          <strong>Tip 2:</strong> Some Timelion functions, such as <code>.color()</code>, don't
-          translate to a Canvas data table. Anything todo with data manipulation should work grand.
-        </small>
-      </p>
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </div>
   );
 };

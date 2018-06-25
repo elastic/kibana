@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Button, ButtonToolbar } from 'react-bootstrap';
-
+import { EuiButton } from '@elastic/eui';
 export const NoDatasource = ({ done }) => (
   <div>
     <h3>No Datasource Detected</h3>
@@ -16,9 +15,9 @@ export const NoDatasource = ({ done }) => (
       more. What are you doing Thursday?
     </p>
     <br />
-    <ButtonToolbar>
-      <Button onClick={done}> Close</Button>
-    </ButtonToolbar>
+    <EuiButton fill onClick={done}>
+      Close
+    </EuiButton>
   </div>
 );
 

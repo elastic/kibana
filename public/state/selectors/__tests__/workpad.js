@@ -12,7 +12,7 @@ describe('workpad selectors', () => {
         chain: [
           {
             type: 'function',
-            function: 'demoprices',
+            function: 'markdown',
             arguments: {},
           },
         ],
@@ -56,7 +56,7 @@ describe('workpad selectors', () => {
               elements: [
                 {
                   id: 'element-0',
-                  expression: 'demoprices',
+                  expression: 'markdown',
                 },
                 {
                   id: 'element-1',

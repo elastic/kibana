@@ -1,6 +1,13 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { ControlLabel, FormControl } from 'react-bootstrap';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiFieldText,
+  EuiSelect,
+  EuiSpacer,
+} from '@elastic/eui';
 import { getSimpleArg, setSimpleArg } from '../../../lib/arg_helpers';
 import { ESFieldsSelect } from '../../../components/es_fields_select';
 import { ESFieldSelect } from '../../../components/es_field_select';
@@ -36,87 +43,104 @@ const EsdocsDatasource = ({ args, updateArgs }) => {
   const fields = getFields();
   const sort = getSort();
   const index = getSimpleArg('index', args)[0];
+  const [query] = getQuery();
 
   return (
-    <div>
+    <Fragment>
       <p>
         The Elasticsearch Docs datasource is used to pull documents directly from Elasticsearch
         without the use of aggregations. It is best used with low volume datasets and in situations
         where you need to view raw documents or plot exact, non-aggregated values on a chart.
       </p>
 
-      <div className="canvas__esdocs--row">
-        <div className="canvas__esdocs--index">
-          <label>
-            Index &nbsp;
-            <TooltipIcon
-              text="The index pattern to query. Time filters will apply to the timefield from this pattern."
-              placement="right"
-            />
-          </label>
-          <ESIndexSelect value={index} onChange={index => setArg('index', index)} />
-        </div>
-
-        <div className="canvas__esdocs--query">
-          <ControlLabel>
-            Query &nbsp;
-            <TooltipIcon text="Lucene Query String syntax" placement="right" />
-          </ControlLabel>
-          <FormControl
-            type="text"
-            value={getQuery()}
-            onChange={e => setArg('query', e.target.value)}
-          />
-        </div>
-
-        <div className="canvas__esdocs--sort-field">
-          <label>
-            Sort &nbsp;
-            <TooltipIcon text="Document sort order, field and direction" placement="right" />
-          </label>
-          <ESFieldSelect
-            index={index}
-            value={sort[0]}
-            onChange={field => setArg('sort', [field, sort[1]].join(', '))}
-          />
-        </div>
-
-        <div className="canvas__esdocs--sort-dir">
-          <ControlLabel>&nbsp;</ControlLabel>
-          <FormControl
-            componentClass="select"
-            value={sort[1]}
-            onChange={e => setArg('sort', [sort[0], e.target.value].join(', '))}
+      <EuiFlexGroup gutterSize="s" alignItems="flexEnd" className="canvas__esdocs--row">
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
+            label={
+              <Fragment>
+                Index &nbsp;
+                <TooltipIcon
+                  text="The index pattern to query. Time filters will apply to the timefield from this pattern."
+                  placement="right"
+                />
+              </Fragment>
+            }
           >
-            <option value="asc">asc</option>
-            <option value="desc">desc</option>
-          </FormControl>
-        </div>
-      </div>
+            <ESIndexSelect value={index} onChange={index => setArg('index', index)} />
+          </EuiFormRow>
+        </EuiFlexItem>
 
-      <div>
-        <label>
-          Fields &nbsp;
-          {fields.length <= 10 ? (
-            <TooltipIcon
-              text="The fields to extract. Kibana scripted fields are not currently available"
-              placement="right"
+        <EuiFlexItem>
+          <EuiFormRow
+            label={
+              <Fragment>
+                Query &nbsp;
+                <TooltipIcon text="Lucene Query String syntax" placement="right" />
+              </Fragment>
+            }
+            fullWidth
+          >
+            <EuiFieldText fullWidth value={query} onChange={e => setArg('query', e.target.value)} />
+          </EuiFormRow>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
+            label={
+              <Fragment>
+                Sort &nbsp;
+                <TooltipIcon text="Document sort order, field and direction" placement="right" />
+              </Fragment>
+            }
+          >
+            <ESFieldSelect
+              index={index}
+              value={sort[0]}
+              onChange={field => setArg('sort', [field, sort[1]].join(', '))}
             />
-          ) : (
-            <TooltipIcon
-              icon="warning"
-              text="This datasource performs best with 10 or fewer fields"
-              placement="right"
+          </EuiFormRow>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiFormRow hasEmptyLabelSpace>
+            <EuiSelect
+              defaultValue={sort[1]}
+              options={['asc', 'desc'].map(value => ({ value, text: value }))}
+              onChange={e => setArg('sort', [sort[0], e.target.value].join(', '))}
             />
-          )}
-        </label>
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="s" />
+
+      <EuiFormRow
+        label={
+          <Fragment>
+            Fields &nbsp;
+            {fields.length <= 10 ? (
+              <TooltipIcon
+                text="The fields to extract. Kibana scripted fields are not currently available"
+                placement="right"
+              />
+            ) : (
+              <TooltipIcon
+                icon="warning"
+                text="This datasource performs best with 10 or fewer fields"
+                placement="right"
+              />
+            )}
+          </Fragment>
+        }
+        fullWidth
+      >
         <ESFieldsSelect
           index={index}
           onChange={fields => setArg('fields', fields.join(', '))}
           selected={fields}
         />
-      </div>
-    </div>
+      </EuiFormRow>
+    </Fragment>
   );
 };
 

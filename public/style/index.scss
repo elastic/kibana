@@ -25,6 +25,7 @@
 @import '../components/datasource/datasource_preview/datasource_preview';
 @import '../components/datatable/datatable';
 @import '../components/element_wrapper/element_wrapper';
+@import '../components/es_fields_select/es_fields_select';
 @import '../components/expression/expression';
 @import '../components/expression_input/suggestion';
 @import '../components/feedback_button/feedback_button';
@@ -40,7 +41,6 @@
 @import '../components/paginate_controls/paginate_controls';
 @import '../components/palette_picker/palette_picker';
 @import '../components/palette_swatch/palette_swatch';
-@import '../components/pill_select/pill_select';
 @import '../components/positionable/positionable';
 @import '../components/refresh_control/refresh_control';
 @import '../components/remove_icon/remove_icon';
@@ -60,7 +60,6 @@
 @import '../expression_types/arg_types/font/font';
 @import '../expression_types/arg_types/image_upload/image_upload';
 @import '../expression_types/datasources/esdocs/esdocs';
-@import '../expression_types/datasources/timelion/timelion';
 
 // Canvas render functions
 @import '../render_functions/advanced_filter/component/advanced_filter';

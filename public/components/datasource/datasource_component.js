@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Button, ButtonToolbar, FormGroup } from 'react-bootstrap';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { DatasourceSelector } from './datasource_selector';
 import { DatasourcePreview } from './datasource_preview';
 
@@ -64,23 +64,36 @@ export const DatasourceComponent = props => {
 
   return (
     <div className="canvas__datasource">
-      <div>
-        <FormGroup>
-          {stateDatasource.render({ args: stateArgs, updateArgs, datasourceDef })}
-        </FormGroup>
-      </div>
-      <ButtonToolbar>
-        <Button bsStyle="success" onClick={save}>
-          Apply
-        </Button>
-        <Button bsStyle="primary" onClick={() => setPreviewing(true)}>
-          Preview
-        </Button>
-        <Button onClick={close}> Cancel</Button>
-        <a onClick={() => setSelecting(!selecting)} className="btn btn-link">
-          <i className="fa fa-database" /> Change Datasource
-        </a>
-      </ButtonToolbar>
+      <div>{stateDatasource.render({ args: stateArgs, updateArgs, datasourceDef })}</div>
+
+      <EuiSpacer size="m" />
+
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiButton fill color="secondary" onClick={save}>
+            Apply
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton fill color="primary" onClick={() => setPreviewing(true)}>
+            Preview
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton fill color="ghost" onClick={close}>
+            Cancel
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            iconType="logstashInput"
+            color="ghost"
+            onClick={() => setSelecting(!selecting)}
+          >
+            Change Datasource
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </div>
   );
 };

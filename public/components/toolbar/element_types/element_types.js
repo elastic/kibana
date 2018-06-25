@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormControl } from 'react-bootstrap';
+import { EuiFieldText } from '@elastic/eui';
 import { map, includes, sortBy } from 'lodash';
 import lowerCase from 'lodash.lowercase';
 import { MediaCard } from '../../media_card';
@@ -26,11 +26,9 @@ export const ElementTypes = ({ elements, onClick, search, setSearch }) => {
 
   return (
     <div>
-      <FormControl
-        spellCheck={false}
-        componentClass="input"
+      <EuiFieldText
+        fullWidth
         placeholder="Filter Elements"
-        type="text"
         onChange={e => setSearch(e.target.value)}
         value={search}
       />
