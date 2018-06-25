@@ -5,6 +5,8 @@
  */
 
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
+import { isTypeSpaceAware } from './lib/is_type_space_aware';
+import { getSpacesQueryParams } from './lib/query_params';
 
 export class SpacesSavedObjectsClient {
   constructor(options) {
@@ -26,7 +28,7 @@ export class SpacesSavedObjectsClient {
 
   async create(type, attributes = {}, options = {}) {
 
-    if (this._isTypeSpaceAware(type)) {
+    if (isTypeSpaceAware(type)) {
       options.extraBodyProperties = {
         ...options.extraBodyProperties,
         spaceId: await this._getSpaceId()
@@ -58,57 +60,8 @@ export class SpacesSavedObjectsClient {
     }
 
     const spaceId = await this._getSpaceId();
-    console.log('got space id', spaceId);
 
-    let minimumShouldMatch = 0;
-
-    const typeClauses = types.map(t => {
-
-      const shouldFilterOnSpace = this._isTypeSpaceAware(t) && spaceId;
-      const isDefaultSpace = spaceId === DEFAULT_SPACE_ID;
-
-      const bool = {
-        must: []
-      };
-
-      if (t) {
-        minimumShouldMatch = 1;
-        bool.must.push({
-          term: {
-            type: t
-          }
-        });
-      }
-
-      if (shouldFilterOnSpace) {
-        if (isDefaultSpace) {
-          bool.must_not = {
-            exists: {
-              field: "spaceId"
-            }
-          };
-        } else {
-          bool.must.push({
-            term: {
-              spaceId
-            }
-          });
-        }
-      }
-
-      return {
-        bool
-      };
-    });
-
-    if (typeClauses.length > 0) {
-      spaceOptions.extraQueryParams = {
-        bool: {
-          should: typeClauses,
-          minimum_should_match: minimumShouldMatch
-        }
-      };
-    }
+    spaceOptions.extraQueryParams = getSpacesQueryParams(spaceId, types);
 
     return await this._client.find({ ...options, ...spaceOptions });
   }
@@ -124,7 +77,7 @@ export class SpacesSavedObjectsClient {
     result.saved_objects = result.saved_objects.map(savedObject => {
       const { id, type, spaceId } = savedObject;
 
-      if (this._isTypeSpaceAware(type)) {
+      if (isTypeSpaceAware(type)) {
         if (spaceId !== thisSpaceId) {
           return {
             id,
@@ -144,7 +97,7 @@ export class SpacesSavedObjectsClient {
     // ES 'get' does not support queries, so we have to filter results after the fact.
     let thisSpaceId;
 
-    if (this._isTypeSpaceAware(type)) {
+    if (isTypeSpaceAware(type)) {
       thisSpaceId = await this._getSpaceId();
     }
 
@@ -167,10 +120,6 @@ export class SpacesSavedObjectsClient {
       spaceId: await this._getSpaceId()
     };
     return await this._client.update(type, id, attributes, options);
-  }
-
-  _isTypeSpaceAware(type) {
-    return type !== 'space';
   }
 
   async _getSpaceId() {
