@@ -52,11 +52,11 @@ image::apm/images/apm-error-group.png[Example view of the error group page in th
 [float]
 === Alerts with Watcher
 
-It’s possible to utilize the power of the Kibana Watcher feature, which is included in X-Pack Gold or Platinum, to get alerts on error occurrences. We’ve created an assistant to help you set up a watch per service, which can be found on the Errors overview page.
+It’s possible to utilize the power of the alerting features with Watcher to get alerts on error occurrences. We’ve created an assistant, which is available on the Errors overview page, to help you set up a watch per service.
 
-By setting some minor configurations like occurrences threshold and time interval and setting the desired actions like email or Slack notifications, you and your team can be set up with alerts in minutes.
+Configure the watch with occurrences threshold and time interval and set the desired actions like email or Slack notifications and your team can be set up with alerts in minutes.
 
-Created watches are managed separately in the Watcher UI available in Advanced Settings.
+Watches are managed separately in the dedicated Watcher UI available in Advanced Settings.
 
 [role="screenshot"]
 image::apm/images/apm-errors-watcher-assistant.png[Example view of the Watcher assistant for errors in APM UI in Kibana]
