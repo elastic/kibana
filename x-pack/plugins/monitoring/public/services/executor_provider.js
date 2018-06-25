@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaults } from 'lodash';
 import { timefilter } from 'ui/timefilter';
 export function executorProvider(Promise, $timeout) {
 
@@ -31,8 +30,6 @@ export function executorProvider(Promise, $timeout) {
      */
   function cancel() {
     killTimer();
-    timefilter.off('refreshIntervalUpdate', killIfPaused);
-    timefilter.off('fetch', reFetch);
   }
 
   /**
@@ -84,8 +81,6 @@ export function executorProvider(Promise, $timeout) {
      * @returns {void}
      */
   function start() {
-    timefilter.on('fetch', reFetch);
-    timefilter.on('refreshIntervalUpdate', killIfPaused);
     if ((ignorePaused || timefilter.getRefreshInterval().pause === false) && timefilter.getRefreshInterval().value > 0) {
       executionTimer = $timeout(run, timefilter.getRefreshInterval().value);
     }
@@ -96,17 +91,9 @@ export function executorProvider(Promise, $timeout) {
      */
   return {
     register,
-    start(options = {}) {
-      options = defaults(options, {
-        ignorePaused: false,
-        now: false
-      });
-      if (options.now) {
-        return run();
-      }
-      if (options.ignorePaused) {
-        ignorePaused = options.ignorePaused;
-      }
+    start($scope) {
+      $scope.$listenAndDigestAsync(timefilter, 'fetch', reFetch);
+      $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', killIfPaused);
       start();
     },
     run,

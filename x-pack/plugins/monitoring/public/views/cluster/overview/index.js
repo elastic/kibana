@@ -41,7 +41,7 @@ uiRoutes.when('/overview', {
       }
     });
 
-    $executor.start();
+    $executor.start($scope);
 
     $scope.$on('$destroy', $executor.destroy);
   }

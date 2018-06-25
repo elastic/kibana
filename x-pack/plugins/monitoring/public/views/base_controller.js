@@ -108,7 +108,7 @@ export class MonitoringViewBaseController {
     $executor.register({
       execute: () => this.updateData()
     });
-    $executor.start();
+    $executor.start($scope);
     $scope.$on('$destroy', () => {
       if (this.reactNodeId) { // WIP https://github.com/elastic/x-pack-kibana/issues/5198
         unmountComponentAtNode(document.getElementById(this.reactNodeId));

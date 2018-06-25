@@ -86,7 +86,7 @@ uiRoutes.when('/logstash/pipelines/:id/:hash?', {
         $scope.pageData = response;
       }
     });
-    $executor.start();
+    $executor.start($scope);
     $scope.$on('$destroy', $executor.destroy);
   }
 });

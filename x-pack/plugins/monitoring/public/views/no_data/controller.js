@@ -95,7 +95,7 @@ export class NoDataController {
       }
     });
 
-    $executor.start(); // start the executor to keep refreshing the search for data
+    $executor.start($scope); // start the executor to keep refreshing the search for data
   }
 
   enableTimefilter($executor, $scope) {

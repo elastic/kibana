@@ -66,7 +66,7 @@ uiRoutes.when('/elasticsearch/nodes/:node/advanced', {
       }
     });
 
-    $executor.start();
+    $executor.start($scope);
 
     $scope.$on('$destroy', $executor.destroy);
   }

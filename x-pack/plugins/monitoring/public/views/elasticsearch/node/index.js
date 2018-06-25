@@ -55,7 +55,7 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
       }
     });
 
-    $executor.start();
+    $executor.start($scope);
 
     $scope.$on('$destroy', $executor.destroy);
   }

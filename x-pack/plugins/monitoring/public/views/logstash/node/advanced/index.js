@@ -64,7 +64,7 @@ uiRoutes.when('/logstash/node/:uuid/advanced', {
       handleResponse: (response) => $scope.pageData = response
     });
 
-    $executor.start();
+    $executor.start($scope);
 
     $scope.$on('$destroy', $executor.destroy);
   }
