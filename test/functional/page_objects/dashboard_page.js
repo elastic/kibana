@@ -525,8 +525,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async filterOnPieSlice(sliceValue) {
       log.debug(`Filtering on a pie slice with optional value ${sliceValue}`);
       if (sliceValue) {
+        log.debug('Clicking slice');
         await testSubjects.click(`pieSlice-${sliceValue}`);
       } else {
+        log.debug('Could not find slice');
         await retry.try(async () => {
           const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice');
           log.debug('Slices found:' + slices.length);

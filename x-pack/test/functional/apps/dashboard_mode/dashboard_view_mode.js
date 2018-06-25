@@ -137,8 +137,11 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('can filter on a visualization', async () => {
+        log.debug('Setting time range');
         await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
+        log.debug('Filtering on pie slice');
         await PageObjects.dashboard.filterOnPieSlice();
+        log.debug('Getting filters');
         const filters = await PageObjects.dashboard.getFilters();
         expect(filters.length).to.equal(1);
       });

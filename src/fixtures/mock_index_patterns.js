@@ -25,10 +25,7 @@ export default function (Private, Promise) {
   const getIndexPatternStub = sinon.stub()
     .returns(Promise.resolve(indexPatterns));
 
-  const courier = {
-    indexPatterns: { get: getIndexPatternStub },
-    getStub: getIndexPatternStub
+  return {
+    get: getIndexPatternStub,
   };
-
-  return courier;
 }
