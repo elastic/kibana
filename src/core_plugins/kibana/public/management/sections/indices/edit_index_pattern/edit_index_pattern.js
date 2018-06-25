@@ -147,10 +147,10 @@ uiRoutes
   .when('/management/kibana/indices/:indexPatternId', {
     template,
     resolve: {
-      indexPattern: function ($route, courier, indexPatterns) {
+      indexPattern: function ($route, redirectWhenMissing, indexPatterns) {
         return indexPatterns
           .get($route.current.params.indexPatternId)
-          .catch(courier.redirectWhenMissing('/management/kibana/index'));
+          .catch(redirectWhenMissing('/management/kibana/index'));
       }
     }
   });

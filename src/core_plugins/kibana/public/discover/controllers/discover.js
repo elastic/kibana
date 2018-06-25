@@ -56,6 +56,7 @@ import '../components/fetch_error';
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
   'kibana/courier',
+  'kibana/url',
   'kibana/index_patterns'
 ]);
 
@@ -101,7 +102,7 @@ uiRoutes
             });
           });
       },
-      savedSearch: function (courier, savedSearches, $route) {
+      savedSearch: function (redirectWhenMissing, savedSearches, $route) {
         const savedSearchId = $route.current.params.id;
         return savedSearches.get(savedSearchId)
           .then((savedSearch) => {
@@ -113,7 +114,7 @@ uiRoutes
             }
             return savedSearch;
           })
-          .catch(courier.redirectWhenMissing({
+          .catch(redirectWhenMissing({
             'search': '/discover',
             'index-pattern': '/management/kibana/objects/savedSearches/' + $route.current.params.id
           }));

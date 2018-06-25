@@ -27,7 +27,6 @@ import { uiModules } from '../modules';
 import { addFatalErrorCallback } from '../notify';
 import '../promises';
 
-import { RedirectWhenMissingProvider } from './_redirect_when_missing';
 import { requestQueue } from './_request_queue';
 import { FetchSoonProvider } from './fetch';
 import { SearchLooperProvider } from './search_looper';
@@ -40,8 +39,6 @@ uiModules.get('kibana/courier').service('courier', ($rootScope, Private) => {
 
   class Courier {
     constructor() {
-      this.redirectWhenMissing = Private(RedirectWhenMissingProvider);
-
       // Listen for refreshInterval changes
       $rootScope.$listen(timefilter, 'refreshIntervalUpdate', function () {
         const refreshValue = _.get(timefilter.getRefreshInterval(), 'value');

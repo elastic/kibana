@@ -17,7 +17,12 @@
  * under the License.
  */
 
+
 import { SavedObjectNotFound } from '../errors';
+import { uiModules } from '../modules';
+
+uiModules.get('kibana/url')
+  .service('redirectWhenMissing', function (Private) { return Private(RedirectWhenMissingProvider); });
 
 export function RedirectWhenMissingProvider($location, kbnUrl, Notifier, Promise) {
   const notify = new Notifier();
@@ -39,8 +44,11 @@ export function RedirectWhenMissingProvider($location, kbnUrl, Notifier, Promise
       // if this error is not "404", rethrow
       const savedObjectNotFound = err instanceof SavedObjectNotFound;
       const unknownVisType = err.message.indexOf('Invalid type') === 0;
-      if (unknownVisType) err.savedObjectType = 'visualization';
-      else if (!savedObjectNotFound) throw err;
+      if (unknownVisType) {
+        err.savedObjectType = 'visualization';
+      } else if (!savedObjectNotFound) {
+        throw err;
+      }
 
       let url = mapping[err.savedObjectType] || mapping['*'];
       if (!url) url = '/';
