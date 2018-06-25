@@ -67,7 +67,7 @@ describe('SegmentedRequestProvider', () => {
   });
 
   function init() {
-    segmentedReq = new SegmentedReq(mockSource());
+    segmentedReq = new SegmentedReq({ source: mockSource(), errorHandler: () => {} });
   }
 
   function mockSource() {

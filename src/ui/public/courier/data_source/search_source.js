@@ -249,12 +249,11 @@ export function SearchSourceProvider(Promise, Private, config) {
       return new Promise((resolve, reject) => {
         function addRequest() {
           const defer = Promise.defer();
-          const req = new SegmentedRequest(self, defer, initFunction);
-
-          req.setErrorHandler((request, error) => {
+          const errorHandler = (request, error) => {
             reject(error);
             request.abort();
-          });
+          };
+          const req = new SegmentedRequest({ source: self, defer, errorHandler, initFn: initFunction });
 
           // Return promises created by the completion handler so that
           // errors will bubble properly
@@ -380,21 +379,16 @@ export function SearchSourceProvider(Promise, Private, config) {
         const defer = Promise.defer();
         defer.promise.then(resolve, reject);
 
-        const request = self._createRequest(defer);
-
-        request.setErrorHandler((request, error) => {
+        const errorHandler = (request, error) => {
           reject(error);
           request.abort();
-        });
+        };
+        self._createRequest({ defer, errorHandler });
       });
     }
 
     /**
-     * Fetch just this source ASAP
-     *
-     * ONLY USE IF YOU WILL BE USING THE RESULTS
-     * provided by the returned promise, otherwise
-     * call #fetchQueued()
+     * Fetch this source and reject the returned Promise on error
      *
      * @async
      */
@@ -403,33 +397,12 @@ export function SearchSourceProvider(Promise, Private, config) {
       let req = _.first(self._myStartableQueued());
 
       if (!req) {
-        req = self._createRequest();
+        const errorHandler = (request, error) => {
+          request.defer.reject(error);
+          request.abort();
+        };
+        req = self._createRequest({ errorHandler });
       }
-
-      fetchSoon.these([req]);
-
-      return req.getCompletePromise();
-    }
-
-    /**
-     * Fetch this source and reject the returned Promise on error
-     *
-     * Otherwise behaves like #fetch()
-     *
-     * @async
-     */
-    fetchAsRejectablePromise() {
-      const self = this;
-      let req = _.first(self._myStartableQueued());
-
-      if (!req) {
-        req = self._createRequest();
-      }
-
-      req.setErrorHandler((request, error) => {
-        request.defer.reject(error);
-        request.abort();
-      });
 
       fetchSoon.these([req]);
 
@@ -526,8 +499,8 @@ export function SearchSourceProvider(Promise, Private, config) {
      *                         when the request is complete
      * @return {SearchRequest}
      */
-    _createRequest(defer) {
-      return new SearchRequest(this, defer);
+    _createRequest({ defer, errorHandler }) {
+      return new SearchRequest({ source: this, defer, errorHandler });
     }
 
     /**
