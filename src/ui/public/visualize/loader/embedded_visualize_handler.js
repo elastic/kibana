@@ -26,9 +26,10 @@ const RENDER_COMPLETE_EVENT = 'render_complete';
  * with the visualization.
  */
 export class EmbeddedVisualizeHandler {
-  constructor(element, scope) {
+  constructor(element, scope, savedObject) {
     this._element = element;
     this._scope = scope;
+    this._savedObject = savedObject;
     this._listeners = new EventEmitter();
     // Listen to the first RENDER_COMPLETE_EVENT to resolve this promise
     this._firstRenderComplete = new Promise(resolve => {
@@ -55,6 +56,12 @@ export class EmbeddedVisualizeHandler {
       if (params.hasOwnProperty('timeRange')) {
         this._scope.timeRange = params.timeRange;
       }
+      if (params.hasOwnProperty('filters')) {
+        this._scope.filters = params.filters;
+      }
+      if (params.hasOwnProperty('query')) {
+        this._scope.query = params.query;
+      }
 
       // Apply data- attributes to the element if specified
       if (params.dataAttrs) {
@@ -80,6 +87,15 @@ export class EmbeddedVisualizeHandler {
    */
   getElement() {
     return this._element;
+  }
+
+  /**
+   * Opens the inspector for the embedded visualization. This will return an
+   * handler to the inspector to close and interact with it.
+   * @return {InspectorSession} An inspector session to interact with the opened inspector.
+   */
+  openInspector() {
+    return this._savedObject.vis.openInspector();
   }
 
   /**

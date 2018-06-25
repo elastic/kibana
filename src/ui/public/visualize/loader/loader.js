@@ -42,16 +42,14 @@ import { EmbeddedVisualizeHandler } from './embedded_visualize_handler';
  * @property {object} timeRange An object with a from/to key, that must be
  *    either a date in ISO format, or a valid datetime Elasticsearch expression,
  *    e.g.: { from: 'now-7d/d', to: 'now' }
- * @property {boolean} showSpyPanel Whether or not the spy panel should be available
- *    on this chart. If set to true, spy panels will only be shown if there are
- *    spy panels available for this specific visualization, since not every visualization
- *    supports all spy panels. (default: false)
  * @property {boolean} append If set to true, the visualization will be appended
  *    to the passed element instead of replacing all its content. (default: false)
  * @property {string} cssClass If specified this CSS class (or classes with space separated)
  *    will be set to the root visuzalize element.
  * @property {object} dataAttrs An object of key-value pairs, that will be set
  *    as data-{key}="{value}" attributes on the visualization element.
+ * @property {array} filters Specifies the filters that should be applied to that visualization.
+ * @property {object} query The query that should apply to that visualization.
  */
 
 const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
@@ -62,7 +60,8 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
     scope.appState = params.appState;
     scope.uiState = params.uiState;
     scope.timeRange = params.timeRange;
-    scope.showSpyPanel = params.showSpyPanel;
+    scope.filters = params.filters;
+    scope.query = params.query;
 
     const container = angular.element(el);
 
@@ -87,7 +86,7 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
       container.html(visHtml);
     }
 
-    return new EmbeddedVisualizeHandler(visHtml, scope);
+    return new EmbeddedVisualizeHandler(visHtml, scope, savedObj);
   };
 
   return {

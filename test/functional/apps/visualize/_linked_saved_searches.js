@@ -23,7 +23,8 @@ export default function ({ getPageObjects, getService }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'discover', 'visualize', 'header']);
 
-  describe('visualize app', function describeIndexTests() {
+  // Blocked by: https://github.com/elastic/kibana/issues/19750
+  describe.skip('visualize app', function describeIndexTests() {
     const fromTime = '2015-09-19 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';
 
@@ -46,14 +47,14 @@ export default function ({ getPageObjects, getService }) {
         await PageObjects.visualize.clickSavedSearch(savedSearchName);
         await PageObjects.header.setAbsoluteRange(fromTime, toTime);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        const data = await PageObjects.visualize.getDataTableData();
+        const data = await PageObjects.visualize.getTableVisData();
         expect(data.trim()).to.be('14,004');
       });
 
       it('should respect the time filter when linked to a saved search', async () => {
         await PageObjects.header.setAbsoluteRange('2015-09-19 06:31:44.000', '2015-09-21 10:00:00.000');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        const data = await PageObjects.visualize.getDataTableData();
+        const data = await PageObjects.visualize.getTableVisData();
         expect(data.trim()).to.be('6,086');
       });
     });

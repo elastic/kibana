@@ -26,6 +26,7 @@ exports[`<EditorOptionsGroup/> renders as expected 1`] = `
             >
               <svg
                 class="euiIcon euiIcon--medium"
+                focusable="false"
                 height="16"
                 viewBox="0 0 16 16"
                 width="16"
@@ -107,6 +108,7 @@ exports[`<EditorOptionsGroup/> renders as expected with actions 1`] = `
             >
               <svg
                 class="euiIcon euiIcon--medium"
+                focusable="false"
                 height="16"
                 viewBox="0 0 16 16"
                 width="16"
@@ -148,6 +150,7 @@ exports[`<EditorOptionsGroup/> renders as expected with actions 1`] = `
           <svg
             aria-hidden="true"
             class="euiIcon euiIcon--medium euiButtonIcon__icon"
+            focusable="false"
             height="16"
             viewBox="0 0 16 16"
             width="16"
@@ -214,6 +217,7 @@ exports[`<EditorOptionsGroup/> renders as expected with initial collapsed 1`] = 
             >
               <svg
                 class="euiIcon euiIcon--medium"
+                focusable="false"
                 height="16"
                 viewBox="0 0 16 16"
                 width="16"

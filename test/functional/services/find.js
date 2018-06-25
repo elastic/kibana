@@ -183,6 +183,29 @@ export function FindProvider({ getService }) {
       });
     }
 
+    async byButtonText(buttonText, element = remote, timeout = defaultFindTimeout) {
+      log.debug(`byButtonText(${buttonText})`);
+      return await retry.tryForTime(timeout, async () => {
+        const allButtons = await element.findAllByTagName('button');
+        const buttonTexts = await Promise.all(allButtons.map(async (el) => {
+          return el.getVisibleText();
+        }));
+        const index = buttonTexts.findIndex(text => text.trim() === buttonText.trim());
+        if (index === -1) {
+          throw new Error('Button not found');
+        }
+        return allButtons[index];
+      });
+    }
+
+    async clickByButtonText(buttonText, element = remote, timeout = defaultFindTimeout) {
+      log.debug(`clickByButtonText(${buttonText})`);
+      await retry.try(async () => {
+        const button = await this.byButtonText(buttonText, element, timeout);
+        await button.click();
+      });
+    }
+
     async clickByCssSelector(selector, timeout = defaultFindTimeout) {
       log.debug(`clickByCssSelector(${selector})`);
       await retry.try(async () => {
