@@ -8,6 +8,7 @@ import { createSelector } from 'reselect';
 import { getLayerList } from "./map_selectors";
 import { LAYER_TYPE } from "../components/map/layers/layer";
 import * as ol from 'openlayers';
+import _ from 'lodash';
 
 const FEATURE_PROJECTION = 'EPSG:3857';
 
@@ -55,5 +56,18 @@ export function getOlLayers(state) {
   return createSelector(
     getLayerList,
     layerList => convertLayersByType(layerList)
+  )(state);
+}
+export function getOlLayersBySource(state) {
+  return createSelector(
+    getOlLayers,
+    layers => _.groupBy(layers, ({ appData }) => appData.source)
+  )(state);
+}
+
+export function getOlLayersByType(state) {
+  return createSelector(
+    getOlLayers,
+    layers => _.groupBy(layers, ({ appData }) => appData.layerType)
   )(state);
 }
