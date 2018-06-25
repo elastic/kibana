@@ -127,7 +127,7 @@ export default function ({ getService, getPageObjects }) {
         '18,253,611,008', '679'
       ];
 
-      await PageObjects.visualize.toggleSpyPanel();
+      await PageObjects.visualize.openInspector();
       await PageObjects.visualize.setSpyPanelPageSize('All');
       const data = await PageObjects.visualize.getDataTableData();
       log.debug(data.split('\n'));
