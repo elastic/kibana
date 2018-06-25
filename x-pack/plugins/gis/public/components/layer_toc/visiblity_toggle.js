@@ -9,7 +9,7 @@ import React from 'react';
 
 export function VisibilityToggle(props) {
   const onChange = (event) => {
-    this.props.onChange(event.target.checked);
+    props.onChange(event.target.checked);
   };
 
   return (
