@@ -91,6 +91,7 @@ export const tutorialSchema = {
   id: Joi.string().regex(/^[a-zA-Z0-9-]+$/).required(),
   category: Joi.string().valid(Object.values(TUTORIAL_CATEGORY)).required(),
   name: Joi.string().required(),
+  isBeta: Joi.boolean().default(false),
   shortDescription: Joi.string().required(),
   euiIconType: Joi.string(), //EUI icon type string, one of https://elastic.github.io/eui/#/icons
   longDescription: Joi.string().required(),
