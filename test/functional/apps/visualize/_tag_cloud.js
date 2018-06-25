@@ -59,7 +59,7 @@ export default function ({ getService, getPageObjects }) {
       expect(spyToggleExists).to.be(true);
     });
 
-    it.skip('should show correct tag cloud data', async function () {
+    it('should show correct tag cloud data', async function () {
       const data = await PageObjects.visualize.getTextTag();
       log.debug(data);
       expect(data).to.eql([ '32,212,254,720', '21,474,836,480', '20,401,094,656', '19,327,352,832', '18,253,611,008' ]);
@@ -76,7 +76,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
 
-    it.skip('should still show all tags after sidebar has been collapsed', async function () {
+    it('should still show all tags after sidebar has been collapsed', async function () {
       await PageObjects.visualize.clickEditorSidebarCollapse();
       // Give d3 tag cloud some time to rearrange tags
       await PageObjects.common.sleep(1000);
@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }) {
       expect(data).to.eql(['32,212,254,720', '21,474,836,480', '20,401,094,656', '19,327,352,832', '18,253,611,008']);
     });
 
-    it.skip('should still show all tags after browser was resized very small', async function () {
+    it('should still show all tags after browser was resized very small', async function () {
       await remote.setWindowSize(200, 200);
       await PageObjects.common.sleep(1000);
       await remote.setWindowSize(1200, 800);
@@ -109,7 +109,7 @@ export default function ({ getService, getPageObjects }) {
 
 
 
-    it.skip('should show the tags and relative size', function () {
+    it('should show the tags and relative size', function () {
       return PageObjects.visualize.getTextSizes()
         .then(function (results) {
           log.debug('results here ' + results);
@@ -118,20 +118,20 @@ export default function ({ getService, getPageObjects }) {
     });
 
 
-    it.skip('should show correct data', async function () {
+    it('should show correct data', async function () {
       const expectedTableData =  [
-        '32,212,254,720', '737',
-        '21,474,836,480', '728',
-        '20,401,094,656', '687',
-        '19,327,352,832', '695',
-        '18,253,611,008', '679'
+        [ '32,212,254,720', '737' ],
+        [ '21,474,836,480', '728' ],
+        [ '20,401,094,656', '687' ],
+        [ '19,327,352,832', '695' ],
+        [ '18,253,611,008', '679' ]
       ];
 
       await PageObjects.visualize.openInspector();
-      await PageObjects.visualize.setSpyPanelPageSize('All');
-      const data = await PageObjects.visualize.getDataTableData();
-      log.debug(data.split('\n'));
-      expect(data.trim().split('\n')).to.eql(expectedTableData);
+      await await PageObjects.visualize.setInspectorTablePageSize('50');
+      const data = await PageObjects.visualize.getInspectorTableData();
+      log.debug(data);
+      expect(data).to.eql(expectedTableData);
     });
 
     describe('formatted field', function () {
