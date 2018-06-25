@@ -25,11 +25,13 @@ function getClauseForType(spaceId, type) {
 
   if (shouldFilterOnSpace) {
     if (isDefaultSpace) {
-      bool.must_not = {
+      // The default space does not add its spaceId to the objects that belong to it, in order
+      // to be compatible with installations that are not always space-aware.
+      bool.must_not = [{
         exists: {
           field: "spaceId"
         }
-      };
+      }];
     } else {
       bool.must.push({
         term: {
@@ -44,7 +46,7 @@ function getClauseForType(spaceId, type) {
   };
 }
 
-export function getSpacesQueryParams(spaceId, types) {
+export function getSpacesQueryParams(spaceId, types = []) {
   const typeClauses = types.map((type) => getClauseForType(spaceId, type));
 
   if (typeClauses.length > 0) {

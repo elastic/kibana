@@ -5,14 +5,17 @@
  */
 
 import expect from 'expect.js';
-import { AUTHENTICATION } from './lib/authentication';
+import { getUrlPrefix } from './lib/space_test_utils';
+import { SPACES } from './lib/spaces';
+import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 
 export default function ({ getService }) {
-  const supertest = getService('supertestWithoutAuth');
+  const supertest = getService('supertest');
+  const es = getService('es');
   const esArchiver = getService('esArchiver');
 
   describe('create', () => {
-    const expectResults = (resp) => {
+    const expectSpaceAwareResults = (spaceId) => async (resp) => {
       expect(resp.body).to.have.property('id').match(/^[0-9a-f-]{36}$/);
 
       // loose ISO8601 UTC time with milliseconds validation
@@ -27,110 +30,113 @@ export default function ({ getService }) {
           title: 'My favorite vis'
         }
       });
-    };
 
-    const createExpectForbidden = canLogin => resp => {
-      expect(resp.body).to.eql({
-        statusCode: 403,
-        error: 'Forbidden',
-        message: `Unable to create visualization, missing ${canLogin ? '' : 'action:login,'}action:saved_objects/visualization/create`
+      // query ES directory to assert on space id
+      const { _source } = await es.get({
+        id: `visualization:${resp.body.id}`,
+        type: 'doc',
+        index: '.kibana'
       });
+
+      const {
+        spaceId: actualSpaceId = '**not defined**'
+      } = _source;
+
+      if (spaceId === DEFAULT_SPACE_ID) {
+        expect(actualSpaceId).to.eql('**not defined**');
+      } else {
+        expect(actualSpaceId).to.eql(spaceId);
+      }
     };
 
-    const createTest = (description, { auth, tests }) => {
+    const expectNotSpaceAwareResults = () => async (resp) => {
+      expect(resp.body).to.have.property('id').match(/^[0-9a-f-]{36}$/);
+
+      // loose ISO8601 UTC time with milliseconds validation
+      expect(resp.body).to.have.property('updated_at').match(/^[\d-]{10}T[\d:\.]{12}Z$/);
+
+      expect(resp.body).to.eql({
+        id: resp.body.id,
+        type: 'space',
+        updated_at: resp.body.updated_at,
+        version: 1,
+        attributes: {
+          name: 'My favorite space',
+          urlContext: 'my-favorite-space'
+        }
+      });
+
+      // query ES directory to assert on space id
+      const { _source } = await es.get({
+        id: `space:${resp.body.id}`,
+        type: 'doc',
+        index: '.kibana'
+      });
+
+      const {
+        spaceId: actualSpaceId = '**not defined**'
+      } = _source;
+
+      expect(actualSpaceId).to.eql('**not defined**');
+    };
+
+    const createTest = (description, { urlContext, tests }) => {
       describe(description, () => {
-        before(() => esArchiver.load('saved_objects/basic'));
-        after(() => esArchiver.unload('saved_objects/basic'));
-        it(`should return ${tests.default.statusCode}`, async () => {
+        before(() => esArchiver.load('saved_objects/spaces'));
+        after(() => esArchiver.unload('saved_objects/spaces'));
+        it(`should return ${tests.spaceAware.statusCode} for a space-aware type`, async () => {
           await supertest
-            .post(`/api/saved_objects/visualization`)
-            .auth(auth.username, auth.password)
+            .post(`${getUrlPrefix(urlContext)}/api/saved_objects/visualization`)
             .send({
               attributes: {
                 title: 'My favorite vis'
               }
             })
-            .expect(tests.default.statusCode)
-            .then(tests.default.response);
+            .expect(tests.spaceAware.statusCode)
+            .then(tests.spaceAware.response);
         });
+
+        it(`should return ${tests.notSpaceAware.statusCode} for a non space-aware type`, async () => {
+          await supertest
+            .post(`${getUrlPrefix(urlContext)}/api/saved_objects/space`)
+            .send({
+              attributes: {
+                name: 'My favorite space',
+                urlContext: 'my-favorite-space'
+              }
+            })
+            .expect(tests.notSpaceAware.statusCode)
+            .then(tests.notSpaceAware.response);
+        });
+
       });
     };
 
-    createTest(`not a kibana user`, {
-      auth: {
-        username: AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME,
-        password: AUTHENTICATION.NOT_A_KIBANA_USER.PASSWORD,
-      },
+    createTest('in the current space (space_1)', {
+      ...SPACES.SPACE_1,
       tests: {
-        default: {
-          statusCode: 403,
-          response: createExpectForbidden(false),
-        },
-      }
-    });
-
-    createTest(`superuser`, {
-      auth: {
-        username: AUTHENTICATION.SUPERUSER.USERNAME,
-        password: AUTHENTICATION.SUPERUSER.PASSWORD,
-      },
-      tests: {
-        default: {
+        spaceAware: {
           statusCode: 200,
-          response: expectResults,
+          response: expectSpaceAwareResults(SPACES.SPACE_1.spaceId),
         },
-      }
-    });
-
-    createTest(`kibana legacy user`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_LEGACY_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_LEGACY_USER.PASSWORD,
-      },
-      tests: {
-        default: {
+        notSpaceAware: {
           statusCode: 200,
-          response: expectResults,
-        },
+          response: expectNotSpaceAwareResults(SPACES.SPACE_1.spaceId),
+        }
       }
     });
 
-    createTest(`kibana legacy dashboard only user`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.PASSWORD,
-      },
+    createTest('in the default space', {
+      ...SPACES.DEFAULT,
       tests: {
-        default: {
-          statusCode: 403,
-          response: createExpectForbidden(true),
-        },
-      }
-    });
-
-    createTest(`kibana rbac user`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_RBAC_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_RBAC_USER.PASSWORD,
-      },
-      tests: {
-        default: {
+        spaceAware: {
           statusCode: 200,
-          response: expectResults,
+          response: expectSpaceAwareResults(SPACES.DEFAULT.spaceId),
         },
-      }
-    });
-
-    createTest(`kibana rbac dashboard only user`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.PASSWORD,
-      },
-      tests: {
-        default: {
-          statusCode: 403,
-          response: createExpectForbidden(true),
-        },
+        notSpaceAware: {
+          statusCode: 200,
+          response: expectNotSpaceAwareResults(SPACES.SPACE_1.spaceId),
+        }
       }
     });
   });

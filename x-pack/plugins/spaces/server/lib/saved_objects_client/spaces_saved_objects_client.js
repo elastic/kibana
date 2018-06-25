@@ -28,7 +28,10 @@ export class SpacesSavedObjectsClient {
 
   async create(type, attributes = {}, options = {}) {
 
-    if (isTypeSpaceAware(type)) {
+    const spaceId = await this._getSpaceId();
+    const shouldAssignSpaceId = spaceId !== DEFAULT_SPACE_ID && isTypeSpaceAware(type);
+
+    if (shouldAssignSpaceId) {
       options.extraBodyProperties = {
         ...options.extraBodyProperties,
         spaceId: await this._getSpaceId()
@@ -48,6 +51,10 @@ export class SpacesSavedObjectsClient {
   }
 
   async delete(type, id) {
+    // attempt to retrieve document before deleting.
+    // this ensures that the document belongs to the current space.
+    await this.get(type, id);
+
     return await this._client.delete(type, id);
   }
 
@@ -95,11 +102,6 @@ export class SpacesSavedObjectsClient {
 
   async get(type, id) {
     // ES 'get' does not support queries, so we have to filter results after the fact.
-    let thisSpaceId;
-
-    if (isTypeSpaceAware(type)) {
-      thisSpaceId = await this._getSpaceId();
-    }
 
     const response = await this._client.get(type, id, {
       extraSourceProperties: ['spaceId']
@@ -107,18 +109,28 @@ export class SpacesSavedObjectsClient {
 
     const { spaceId: objectSpaceId = DEFAULT_SPACE_ID } = response;
 
-    if (objectSpaceId !== thisSpaceId) {
-      throw this._client.errors.createGenericNotFoundError();
+    if (isTypeSpaceAware(type)) {
+      const thisSpaceId = await this._getSpaceId();
+      if (objectSpaceId !== thisSpaceId) {
+        throw this._client.errors.createGenericNotFoundError();
+      }
     }
 
     return response;
   }
 
   async update(type, id, attributes, options = {}) {
-    options.extraBodyProperties = {
-      ...options.extraBodyProperties,
-      spaceId: await this._getSpaceId()
-    };
+    // attempt to retrieve document before updating.
+    // this ensures that the document belongs to the current space.
+    if (isTypeSpaceAware(type)) {
+      await this.get(type, id);
+
+      options.extraBodyProperties = {
+        ...options.extraBodyProperties,
+        spaceId: await this._getSpaceId()
+      };
+    }
+
     return await this._client.update(type, id, attributes, options);
   }
 

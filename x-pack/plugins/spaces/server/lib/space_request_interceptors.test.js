@@ -6,6 +6,7 @@
 import sinon from 'sinon';
 import { Server } from 'hapi';
 import { initSpacesRequestInterceptors } from './space_request_interceptors';
+import { createSpacesService } from './create_spaces_service';
 
 describe('interceptors', () => {
   const sandbox = sinon.sandbox.create();
@@ -19,6 +20,9 @@ describe('interceptors', () => {
       const server = new Server();
 
       server.connection({ port: 0 });
+
+      const spacesService = createSpacesService(server);
+      server.decorate('server', 'spaces', spacesService);
 
       initSpacesRequestInterceptors(server);
 

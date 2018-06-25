@@ -5,10 +5,11 @@
  */
 
 import expect from 'expect.js';
-import { AUTHENTICATION } from './lib/authentication';
+import { SPACES } from './lib/spaces';
+import { getUrlPrefix, getIdPrefix } from './lib/space_test_utils';
 
 export default function ({ getService }) {
-  const supertest = getService('supertestWithoutAuth');
+  const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
   describe('delete', () => {
@@ -25,135 +26,66 @@ export default function ({ getService }) {
       });
     };
 
-    const createExpectForbidden = canLogin => resp => {
-      expect(resp.body).to.eql({
-        statusCode: 403,
-        error: 'Forbidden',
-        message: `Unable to delete dashboard, missing ${canLogin ? '' : 'action:login,'}action:saved_objects/dashboard/delete`
-      });
-    };
-
-    const deleteTest = (description, { auth, tests }) => {
+    const deleteTest = (description, { urlContext, spaceId, tests }) => {
       describe(description, () => {
-        before(() => esArchiver.load('saved_objects/basic'));
-        after(() => esArchiver.unload('saved_objects/basic'));
+        before(() => esArchiver.load('saved_objects/spaces'));
+        after(() => esArchiver.unload('saved_objects/spaces'));
 
-        it(`should return ${tests.actualId.statusCode} when deleting a doc`, async () => (
+        it(`should return ${tests.spaceAware.statusCode} when deleting a space-aware doc`, async () => (
           await supertest
-            .delete(`/api/saved_objects/dashboard/be3733a0-9efe-11e7-acb3-3dab96693fab`)
-            .auth(auth.username, auth.password)
-            .expect(tests.actualId.statusCode)
-            .then(tests.actualId.response)
+            .delete(`${getUrlPrefix(urlContext)}/api/saved_objects/dashboard/${getIdPrefix(spaceId)}be3733a0-9efe-11e7-acb3-3dab96693fab`)
+            .expect(tests.spaceAware.statusCode)
+            .then(tests.spaceAware.response)
         ));
 
-        it(`should return ${tests.invalidId.statusCode} when deleting an unknown doc`, async () => (
+        it(`should return ${tests.notSpaceAware.statusCode} when deleting a non-space-aware doc`, async () => (
           await supertest
-            .delete(`/api/saved_objects/dashboard/not-a-real-id`)
-            .auth(auth.username, auth.password)
-            .expect(tests.invalidId.statusCode)
-            .then(tests.invalidId.response)
+            .delete(`${getUrlPrefix(urlContext)}/api/saved_objects/space/space_2`)
+            .expect(tests.notSpaceAware.statusCode)
+            .then(tests.notSpaceAware.response)
         ));
+
+        it(`should return ${tests.inOtherSpace.statusCode} when deleting a doc belonging to another space`, async () => {
+          await supertest
+            .delete(`${getUrlPrefix(urlContext)}/api/saved_objects/dashboard/${getIdPrefix('space_2')}be3733a0-9efe-11e7-acb3-3dab96693fab`)
+            .expect(tests.inOtherSpace.statusCode)
+            .then(tests.inOtherSpace.response);
+        });
       });
     };
 
-    deleteTest(`not a kibana user`, {
-      auth: {
-        username: AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME,
-        password: AUTHENTICATION.NOT_A_KIBANA_USER.PASSWORD,
-      },
+    deleteTest(`in the default space`, {
+      ...SPACES.DEFAULT,
       tests: {
-        actualId: {
-          statusCode: 403,
-          response: createExpectForbidden(false),
-        },
-        invalidId: {
-          statusCode: 403,
-          response: createExpectForbidden(false),
-        }
-      }
-    });
-
-    deleteTest(`superuser`, {
-      auth: {
-        username: AUTHENTICATION.SUPERUSER.USERNAME,
-        password: AUTHENTICATION.SUPERUSER.PASSWORD,
-      },
-      tests: {
-        actualId: {
+        spaceAware: {
           statusCode: 200,
-          response: expectEmpty,
+          response: expectEmpty
         },
-        invalidId: {
-          statusCode: 404,
-          response: expectNotFound,
-        }
-      }
-    });
-
-    deleteTest(`kibana legacy user`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_LEGACY_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_LEGACY_USER.PASSWORD,
-      },
-      tests: {
-        actualId: {
+        notSpaceAware: {
           statusCode: 200,
-          response: expectEmpty,
+          response: expectEmpty
         },
-        invalidId: {
+        inOtherSpace: {
           statusCode: 404,
-          response: expectNotFound,
+          response: expectNotFound
         }
       }
     });
 
-    deleteTest(`kibana legacy dashboard only user`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.PASSWORD,
-      },
+    deleteTest(`in the current space (space_1)`, {
+      ...SPACES.SPACE_1,
       tests: {
-        actualId: {
-          statusCode: 403,
-          response: createExpectForbidden(true),
-        },
-        invalidId: {
-          statusCode: 403,
-          response: createExpectForbidden(true),
-        }
-      }
-    });
-
-    deleteTest(`kibana rbac user`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_RBAC_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_RBAC_USER.PASSWORD,
-      },
-      tests: {
-        actualId: {
+        spaceAware: {
           statusCode: 200,
-          response: expectEmpty,
+          response: expectEmpty
         },
-        invalidId: {
+        notSpaceAware: {
+          statusCode: 200,
+          response: expectEmpty
+        },
+        inOtherSpace: {
           statusCode: 404,
-          response: expectNotFound,
-        }
-      }
-    });
-
-    deleteTest(`kibana rbac dashboard only user`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.PASSWORD,
-      },
-      tests: {
-        actualId: {
-          statusCode: 403,
-          response: createExpectForbidden(true),
-        },
-        invalidId: {
-          statusCode: 403,
-          response: createExpectForbidden(true),
+          response: expectNotFound
         }
       }
     });
