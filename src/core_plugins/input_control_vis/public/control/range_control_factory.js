@@ -60,7 +60,13 @@ class RangeControl extends Control {
     const aggs = minMaxAgg(indexPattern.fields.byName[fieldName]);
     const searchSource = createSearchSource(this.kbnApi, null, indexPattern, aggs, this.useTimeFilter);
 
-    const resp = await searchSource.fetch();
+    let resp;
+    try {
+      resp = await searchSource.fetch();
+    } catch(error) {
+      this.disable(`Unable to fetch range min and max, error: ${error.message}`);
+      return;
+    }
 
     let minMaxReturnedFromAggregation = true;
     let min = _.get(resp, 'aggregations.minAgg.value');

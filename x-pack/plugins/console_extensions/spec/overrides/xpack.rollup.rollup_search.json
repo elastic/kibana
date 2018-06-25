@@ -1,0 +1,9 @@
+{
+  "xpack.rollup.rollup_search": {
+    "data_autocomplete_rules": {
+      "query": {},
+      "aggregations": {}
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/rollup-search.html"
+  }
+}
