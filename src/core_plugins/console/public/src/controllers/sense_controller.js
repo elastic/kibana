@@ -64,7 +64,9 @@ module.controller('SenseController', function SenseController(Private, $scope, $
       const position = requests[0].range.end;
       position.column = position.column - 1;
       const endpoint = getEndpointFromPosition(input, position);
-      if (endpoint && endpoint.documentation) {
+      if (endpoint
+        && endpoint.documentation
+        && endpoint.documentation.indexOf('http') !== -1) {
         $scope.documentation = endpoint.documentation.replace('master', DOC_LINK_VERSION);
         $scope.$apply();
       } else {
