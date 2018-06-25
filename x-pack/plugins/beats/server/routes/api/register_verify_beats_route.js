@@ -49,7 +49,7 @@ async function verifyBeats(callWithRequest, beatIds) {
   return get(response, 'items', []);
 }
 
-function determineNonExistentBeatIds(beatsFromEs, beatIdsFromRequest) {
+function findNonExistentBeatIds(beatsFromEs, beatIdsFromRequest) {
   return beatsFromEs.reduce((nonExistentBeatIds, beatFromEs, idx) => {
     if (!beatFromEs.found) {
       nonExistentBeatIds.push(beatIdsFromRequest[idx]);
@@ -58,21 +58,21 @@ function determineNonExistentBeatIds(beatsFromEs, beatIdsFromRequest) {
   }, []);
 }
 
-function determineAlreadyVerifiedBeatIds(beatsFromEs) {
+function findAlreadyVerifiedBeatIds(beatsFromEs) {
   return beatsFromEs
     .filter(beat => beat.found)
     .filter(beat => beat._source.beat.hasOwnProperty('verified_on'))
     .map(beat => beat._source.beat.id);
 }
 
-function determineToBeVerifiedBeatIds(beatsFromEs) {
+function findToBeVerifiedBeatIds(beatsFromEs) {
   return beatsFromEs
     .filter(beat => beat.found)
     .filter(beat => !beat._source.beat.hasOwnProperty('verified_on'))
     .map(beat => beat._source.beat.id);
 }
 
-function determineVerifiedBeatIds(verifications, toBeVerifiedBeatIds) {
+function findVerifiedBeatIds(verifications, toBeVerifiedBeatIds) {
   return verifications.reduce((verifiedBeatIds, verification, idx) => {
     if (verification.update.status === 200) {
       verifiedBeatIds.push(toBeVerifiedBeatIds[idx]);
@@ -109,12 +109,12 @@ export function registerVerifyBeatsRoute(server) {
       try {
         const beatsFromEs = await getBeats(callWithRequest, beatIds);
 
-        nonExistentBeatIds = determineNonExistentBeatIds(beatsFromEs, beatIds);
-        alreadyVerifiedBeatIds = determineAlreadyVerifiedBeatIds(beatsFromEs);
-        const toBeVerifiedBeatIds = determineToBeVerifiedBeatIds(beatsFromEs);
+        nonExistentBeatIds = findNonExistentBeatIds(beatsFromEs, beatIds);
+        alreadyVerifiedBeatIds = findAlreadyVerifiedBeatIds(beatsFromEs);
+        const toBeVerifiedBeatIds = findToBeVerifiedBeatIds(beatsFromEs);
 
         const verifications = await verifyBeats(callWithRequest, toBeVerifiedBeatIds);
-        verifiedBeatIds = determineVerifiedBeatIds(verifications, toBeVerifiedBeatIds);
+        verifiedBeatIds = findVerifiedBeatIds(verifications, toBeVerifiedBeatIds);
 
       } catch (err) {
         return reply(wrapEsError(err));
