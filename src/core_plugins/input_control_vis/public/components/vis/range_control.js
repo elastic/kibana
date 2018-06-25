@@ -29,15 +29,14 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-const toState = (props) => {
-  let sliderValue = props.control.value;
-  if (!props.control.value) {
+const toState = ({ control }) => {
+  let sliderValue = control.value;
+  if (!control.hasValue()) {
     // InputRange component does not have an "empty state"
-    // props.control.value will be undefined when there is not a kibana filter for the control
     // Faking an empty state by setting the slider value range to length of zero anchored at the range minimum
     sliderValue = {
-      min: props.control.min,
-      max: props.control.min
+      min: control.min,
+      max: control.min
     };
   }
   const state = {
@@ -47,9 +46,9 @@ const toState = (props) => {
     isRangeValid: true,
     errorMessage: '',
   };
-  if (props.control.hasValue()) {
-    state.minValue = props.control.value.min;
-    state.maxValue = props.control.value.max;
+  if (control.hasValue()) {
+    state.minValue = control.value.min;
+    state.maxValue = control.value.max;
   }
   return state;
 };
