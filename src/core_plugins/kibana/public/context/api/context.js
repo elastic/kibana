@@ -32,7 +32,7 @@ import { reverseSortDirection } from './utils/sorting';
 
 /**
  * @typedef {Object} SearchSourceT
- * @prop {function(): Promise<SearchResult>} fetchAsRejectablePromise
+ * @prop {function(): Promise<SearchResult>} fetch
  * @prop {function(string, any): SearchSourceT} set
  * @prop {function(any): SearchSourceT} inherits
  */
@@ -234,7 +234,7 @@ function fetchContextProvider(courier, Private) {
         { [tieBreakerField]: tieBreakerSortDirection },
       ])
       .set('version', true)
-      .fetchAsRejectablePromise();
+      .fetch();
 
     return response.hits ? response.hits.hits : [];
   }
