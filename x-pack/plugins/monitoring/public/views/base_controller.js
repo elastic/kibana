@@ -119,12 +119,10 @@ export class MonitoringViewBaseController {
     // needed for chart pages
     this.onBrush = ({ xaxis }) => {
       const { to, from } = xaxis;
-      $scope.$evalAsync(() => {
-        timefilter.setTime({
-          from: moment(from),
-          to: moment(to),
-          mode: 'absolute'
-        });
+      timefilter.setTime({
+        from: moment(from),
+        to: moment(to),
+        mode: 'absolute'
       });
     };
   }

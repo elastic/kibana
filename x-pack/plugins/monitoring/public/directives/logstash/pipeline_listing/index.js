@@ -124,12 +124,10 @@ uiModule.directive('monitoringLogstashPipelineListing', ($injector) => {
     link: function (scope, $el) {
 
       function onBrush(xaxis) {
-        scope.$evalAsync(() => {
-          timefilter.setTime({
-            from: moment(xaxis.from),
-            to: moment(xaxis.to),
-            mode: 'absolute'
-          });
+        timefilter.setTime({
+          from: moment(xaxis.from),
+          to: moment(xaxis.to),
+          mode: 'absolute'
         });
       }
 
