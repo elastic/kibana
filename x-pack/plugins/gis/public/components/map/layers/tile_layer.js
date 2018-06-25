@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { ALayer } from './layer';
-import * as ol from 'openlayers';
 import { EuiIcon } from '@elastic/eui';
 
 export class TileLayer extends ALayer {
@@ -26,14 +25,5 @@ export class TileLayer extends ALayer {
 
   renderSmallLegend() {
     return (<EuiIcon type="grid" />);
-  }
-
-  async getOLLayer() {
-    const urlTemplate = await this._tmsSource.getUrlTemplate();
-    return new ol.layer.Tile({
-      source: new ol.source.XYZ({
-        url: urlTemplate
-      })
-    });
   }
 }
