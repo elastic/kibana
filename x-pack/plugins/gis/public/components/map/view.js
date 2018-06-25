@@ -7,9 +7,11 @@
 import React from 'react';
 import { FlyOut } from '../flyout/index';
 import * as ol from 'openlayers';
-import eventEmitter from 'event-emitter';
 
 export class KibanaMap extends React.Component {
+
+  MAP_CENTER = [37.41, 8.82];
+  MAP_INIT_ZOOM_LEVEL = 4;
 
   constructor() {
     super();
@@ -19,68 +21,28 @@ export class KibanaMap extends React.Component {
 
   componentDidMount() {
     const olView = new ol.View({
-      center: ol.proj.fromLonLat([37.41, 8.82]),
-      zoom: 4
+      center: ol.proj.fromLonLat(this.MAP_CENTER),
+      zoom: this.MAP_INIT_ZOOM_LEVEL
     });
     this._olMap = new ol.Map({
       target: this.refs.mapContainer,
       layers: [],
       view: olView
     });
-    this.addLayers(this.props.olLayers);
+    this._addLayers(this.props.olLayers);
   }
-
-  addLayers = (layers) => {
-    layers.forEach(layer=> this._olMap.addLayer(layer.olLayer));
-  };
 
   componentWillReceiveProps(props) {
-    this.addLayers(props.olLayers);
+    this._addLayers(props.olLayers);
   }
 
-  reorderLayers(orderedLayers) {
-    const newLayerOrder = [];
-    for (let i = 0; i < orderedLayers.length; i++) {
-      const tuple = this._kbnOLLayers.find(layerTuple => {
-        return layerTuple.kbnLayer === orderedLayers[i];
-      });
-      if (tuple) {
-        newLayerOrder.push(tuple);
-        this._olMap.removeLayer(tuple.olLayer);
-      }
-    }
-    this._kbnOLLayers = newLayerOrder;
-    this._kbnOLLayers.forEach((tuple) => {
-      this._olMap.addLayer(tuple.olLayer);
+  _addLayers = (layers) => {
+    // TODO: Use layer changes to filter what, if any, layers are removed
+    layers.forEach(layer=> {
+      this._olMap.removeLayer(layer);
+      this._olMap.addLayer(layer.olLayer);
     });
-    this.emit('layers:reordered');
-  }
-
-  removeLayer(layer) {
-
-    const index = this._kbnOLLayers.findIndex(layerTuple => {
-      return layerTuple.kbnLayer === layer;
-    });
-
-    if (index < 0) {
-      console.warn("Trying to remove layer that is not on the map.");
-      return;
-    }
-
-    const toRemove = this._kbnOLLayers[index];
-    this._olMap.removeLayer(toRemove.olLayer);
-    this._kbnOLLayers.splice(index, 1);
-    this._layerListeners = this._layerListeners.filter(listener => {
-      if (listener.kbnLayer === layer) {
-        listener.remove();
-        return false;
-      } else {
-        return true;
-      }
-    });
-
-    this.emit('layer:removed');
-  }
+  };
 
   render() {
     return (
@@ -91,5 +53,3 @@ export class KibanaMap extends React.Component {
     );
   }
 }
-
-eventEmitter(KibanaMap.prototype);
