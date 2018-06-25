@@ -295,6 +295,7 @@ export class Tutorial extends React.Component {
             previewUrl={previewUrl}
             exportedFieldsUrl={exportedFieldsUrl}
             iconType={this.state.tutorial.euiIconType}
+            isBeta={this.state.tutorial.isBeta}
           />
 
           <EuiSpacer />
