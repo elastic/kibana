@@ -95,7 +95,13 @@ class ListControl extends Control {
       this.useTimeFilter,
       ancestorFilters);
 
-    const resp = await searchSource.fetch();
+    let resp;
+    try {
+      resp = await searchSource.fetch();
+    } catch(error) {
+      this.disable(`Unable to fetch terms, error: ${error.message}`);
+      return;
+    }
     const selectOptions = _.get(resp, 'aggregations.termsAgg.buckets', []).map((bucket) => {
       return { label: this.format(bucket.key), value: bucket.key.toString() };
     }).sort((a, b) => {

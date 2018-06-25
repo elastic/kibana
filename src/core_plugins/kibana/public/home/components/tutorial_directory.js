@@ -96,6 +96,7 @@ export class TutorialDirectory extends React.Component {
         description: tutorialConfig.shortDescription,
         url: this.props.addBasePath(`#/home/tutorial/${tutorialConfig.id}`),
         elasticCloud: tutorialConfig.elasticCloud,
+        isBeta: tutorialConfig.isBeta,
       };
     });
 
@@ -179,6 +180,7 @@ export class TutorialDirectory extends React.Component {
               wrapInPanel
               url={tutorial.url}
               onClick={tutorial.onClick}
+              isBeta={tutorial.isBeta}
             />
           </EuiFlexItem>
         );
