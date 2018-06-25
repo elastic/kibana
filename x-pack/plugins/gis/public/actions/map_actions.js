@@ -6,6 +6,7 @@
 
 export const ADD_LAYER = 'ADD_LAYER';
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
+export const UPDATE_LAYER_ORDER = 'UPDATE_LAYER_ORDER';
 export const LAYER_TYPE = {
   VECTOR_FILE: 'VECTOR_FILE',
   TMS: 'TMS'
@@ -46,7 +47,6 @@ export async function loadMapResources(serviceSettings, dispatch) {
   // Hard-coded associated values
   const tmsServices = await serviceSettings.getTMSServices();
   const fileLayers = await serviceSettings.getFileLayers();
-  console.log(fileLayers, tmsServices);
   // Sample TMS
   const roadMapTms = {
     type: LAYER_TYPE.TMS,
@@ -69,7 +69,6 @@ export async function loadMapResources(serviceSettings, dispatch) {
   };
   const response = await fetch(fileLayers[0].url);
   worldCountriesVector.service = await response.json();
-  console.log(worldCountriesVector);
 
   const mapServices = [
     roadMapTms,
@@ -92,3 +91,9 @@ export function setSelectedLayer(layer) {
   };
 }
 
+export function updateLayerOrder(newLayerOrder) {
+  return {
+    type: UPDATE_LAYER_ORDER,
+    newLayerOrder
+  };
+}
