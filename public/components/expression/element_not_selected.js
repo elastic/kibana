@@ -1,11 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Button } from 'react-bootstrap';
+import { EuiButton } from '@elastic/eui';
 
 export const ElementNotSelected = ({ done }) => (
   <div>
     <div>Select an element to show expression input</div>
-    {done && <Button onClick={done}> Close</Button>}
+    {done && <EuiButton onClick={done}> Close</EuiButton>}
   </div>
 );
 

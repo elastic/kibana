@@ -1,6 +1,6 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
-import { Alert } from 'react-bootstrap';
+import { EuiCallOut } from '@elastic/eui';
 import { get } from 'lodash';
 import { ShowDebugging } from './show_debugging';
 
@@ -15,9 +15,7 @@ export const error = () => ({
 
     ReactDOM.render(
       <div className="canvas_error-render">
-        <Alert bsStyle="danger">
-          <h4>Whoops! Expression failed.</h4>
-
+        <EuiCallOut color="danger" iconType="cross" title="Whoops! Expression failed">
           <p>
             The function <strong>"{functionName}"</strong> failed
             {message ? ' with the following message:' : '.'}
@@ -25,7 +23,7 @@ export const error = () => ({
           {message && <p style={{ padding: '0 16px' }}>{message}</p>}
 
           <ShowDebugging payload={config} />
-        </Alert>
+        </EuiCallOut>
       </div>,
       domNode,
       () => handlers.done()
