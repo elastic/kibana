@@ -62,9 +62,9 @@ class RangeControl extends Control {
 
     let resp;
     try {
-      resp = await searchSource.fetchAsRejectablePromise();
+      resp = await searchSource.fetch();
     } catch(error) {
-      this.disable(`Unable to fetch min and max, error: ${error.message}`);
+      this.disable(`Unable to fetch range min and max, error: ${error.message}`);
       return;
     }
 

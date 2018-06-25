@@ -25,29 +25,34 @@ async function findDashboardRelationships(id, size, savedObjectsClient) {
   const panelsJSON = JSON.parse(dashboard.attributes.panelsJSON);
   if (panelsJSON) {
     const visualizationIds = panelsJSON.map(panel => panel.id);
-    const visualizationResponse = await savedObjectsClient.bulkGet(visualizationIds.slice(0, size).map(id => ({
-      id,
-      type: 'visualization',
-    })));
+    const visualizationResponse = await savedObjectsClient.bulkGet(
+      visualizationIds.slice(0, size).map(id => ({
+        id,
+        type: 'visualization',
+      }))
+    );
 
-    visualizations.push(...visualizationResponse.saved_objects.reduce((accum, object) => {
-      if (!object.error) {
-        accum.push({
-          id: object.id,
-          title: object.attributes.title,
-        });
-      }
-      return accum;
-    }, []));
+    visualizations.push(
+      ...visualizationResponse.saved_objects.reduce((accum, object) => {
+        if (!object.error) {
+          accum.push({
+            id: object.id,
+            title: object.attributes.title,
+          });
+        }
+        return accum;
+      }, [])
+    );
   }
 
   return { visualizations };
 }
 
 async function findVisualizationRelationships(id, size, savedObjectsClient) {
+  await savedObjectsClient.get('visualization', id);
   const allDashboardsResponse = await savedObjectsClient.find({
     type: 'dashboard',
-    fields: ['title', 'panelsJSON']
+    fields: ['title', 'panelsJSON'],
   });
 
   const dashboards = [];
@@ -71,7 +76,6 @@ async function findVisualizationRelationships(id, size, savedObjectsClient) {
       break;
     }
   }
-
   return { dashboards };
 }
 
@@ -92,7 +96,7 @@ async function findSavedSearchRelationships(id, size, savedObjectsClient) {
     type: 'visualization',
     searchFields: ['savedSearchId'],
     search: id,
-    fields: ['title']
+    fields: ['title'],
   });
 
   const visualizations = allVisualizationsResponse.saved_objects.reduce((accum, object) => {
@@ -109,6 +113,7 @@ async function findSavedSearchRelationships(id, size, savedObjectsClient) {
 }
 
 async function findIndexPatternRelationships(id, size, savedObjectsClient) {
+  await savedObjectsClient.get('index-pattern', id);
   const [allVisualizationsResponse, savedSearchResponse] = await Promise.all([
     savedObjectsClient.find({
       type: 'visualization',
@@ -159,7 +164,6 @@ async function findIndexPatternRelationships(id, size, savedObjectsClient) {
       break;
     }
   }
-
   return { visualizations, searches };
 }
 

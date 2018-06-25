@@ -109,11 +109,12 @@ class ListControl extends Control {
     this.lastQuery = query;
     let resp;
     try {
-      resp = await searchSource.fetchAsRejectablePromise();
+      resp = await searchSource.fetch();
     } catch(error) {
       this.disable(`Unable to fetch terms, error: ${error.message}`);
       return;
     }
+
     if (query && this.lastQuery !== query) {
       // search results returned out of order - ignore results from old query
       return;
