@@ -1,19 +1,20 @@
 .canvas__feedback-modal {
-  color: $euiTextColor;
-
-  .canvas__feedback-modal--header {
-    color: $euiTitleColor;
-    padding: 5px !important;
-    font-size: 1.2em;
-    font-weight: bold;
-  }
+  width: 600px;
 
   .canvas__feedback-modal--body {
     padding: 0px !important;
     height: 800px;
+    overflow: hidden;
 
     .message {
       padding: $euiSize;
+      padding-bottom: 0;
+    }
+
+    .feedback-form {
+      height: 450px;
+      width: 100%;
+      overflow-y: scroll;
     }
   }
 }

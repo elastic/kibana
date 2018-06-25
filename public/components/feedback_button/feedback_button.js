@@ -1,6 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Modal, Button } from 'react-bootstrap';
+import {
+  EuiButton,
+  EuiHorizontalRule,
+  EuiOverlayMask,
+  EuiModal,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiModalBody,
+  EuiModalFooter,
+} from '@elastic/eui';
 import { NavbarButton } from '../navbar_button';
 
 export const FeedbackButton = ({ show, setShow }) => {
@@ -12,41 +21,45 @@ export const FeedbackButton = ({ show, setShow }) => {
     </a>
   );
 
+  const showFeedbackModal = () => setShow(true);
+  const closeFeedbackModal = () => setShow(false);
+
   return (
     <span>
-      <NavbarButton onClick={() => setShow(true)} className="pull-right">
+      <NavbarButton onClick={showFeedbackModal} className="pull-right">
         <i className="fa fa-comment" />
         Give Feedback
       </NavbarButton>
 
       {show && (
-        <Modal.Dialog dialogClassName="canvas__feedback-modal">
-          <Modal.Header className="canvas__feedback-modal--header">Give Feedback</Modal.Header>
-          <Modal.Body
-            className="canvas__feedback-modal--body"
-            style={{ overflow: 'none', position: 'relative' }}
-          >
-            <div className="message">
-              <p>
-                Use the form below to provide feedback about Canvas, which only the people working
-                on Canvas will be able to see. Keep in mind that we won't be able to contact you
-                about your feedback.
-              </p>
-              <p>
-                If you have a question or would like to post public feedback and have a public
-                discussion, {forumLink('please use the Kibana forums instead')}.
-              </p>
+        <EuiOverlayMask>
+          <EuiModal className="canvas__feedback-modal" onClose={closeFeedbackModal}>
+            <EuiModalHeader className="canvas__feedback-modal--header">
+              <EuiModalHeaderTitle>Give Feedback</EuiModalHeaderTitle>
+            </EuiModalHeader>
+            <EuiModalBody
+              className="canvas__feedback-modal--body"
+              style={{ overflow: 'none', position: 'relative' }}
+            >
+              <div className="message">
+                <p>
+                  Use the form below to provide feedback about Canvas, which only the people working
+                  on Canvas will be able to see. Keep in mind that we won't be able to contact you
+                  about your feedback.
+                </p>
+                <p>
+                  If you have a question or would like to post public feedback and have a public
+                  discussion, {forumLink('please use the Kibana forums instead')}.
+                </p>
+              </div>
 
-              <hr />
-            </div>
+              <EuiHorizontalRule margin="s" />
 
-            <div style={{ position: 'absolute', width: '100%' }}>
-              <div style={{ overflow: 'hidden', position: 'relative' }}>
+              <div className="feedback-form">
                 <iframe
                   src={feedbackFormUrl}
                   width="100%"
-                  height="600px"
-                  scrolling="no"
+                  height="550px"
                   frameBorder="0"
                   marginHeight="0"
                   marginWidth="0"
@@ -54,13 +67,13 @@ export const FeedbackButton = ({ show, setShow }) => {
                   Loading...
                 </iframe>
               </div>
-            </div>
-          </Modal.Body>
+            </EuiModalBody>
 
-          <Modal.Footer>
-            <Button onClick={() => setShow(false)}>Dismiss</Button>
-          </Modal.Footer>
-        </Modal.Dialog>
+            <EuiModalFooter>
+              <EuiButton onClick={closeFeedbackModal}>Dismiss</EuiButton>
+            </EuiModalFooter>
+          </EuiModal>
+        </EuiOverlayMask>
       )}
     </span>
   );
