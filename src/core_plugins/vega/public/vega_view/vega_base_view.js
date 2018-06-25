@@ -43,15 +43,6 @@ for (const funcName of Object.keys(vegaFunctions)) {
     vega.expressionFunction(
       funcName,
       function handlerFwd(...args) {
-
-
-
-
-        console.log('Handling ' + funcName, ...args);
-
-
-
-
         const view = this.context.dataflow;
         view.runAfter(() => view._kibanaView.vegaFunctionsHandler(funcName, ...args));
       }
@@ -68,6 +59,8 @@ export function bypassExternalUrlCheck(url) {
 
 export class VegaBaseView {
   constructor(opts) {
+    // $rootScope is a temp workaround, see usage below
+    this._$rootScope = opts.$rootScope;
     this._vegaConfig = opts.vegaConfig;
     this._editorMode = opts.editorMode;
     this._$parentEl = $(opts.parentEl);
@@ -235,17 +228,6 @@ export class VegaBaseView {
    * @returns {Promise<void>}
    */
   async vegaFunctionsHandler(funcName, ...args) {
-
-
-
-
-
-    console.log('Executing ' + funcName, ...args);
-
-
-
-
-
     try {
       const handlerFunc = vegaFunctions[funcName];
       if (!handlerFunc || !this[handlerFunc]) {
@@ -276,13 +258,9 @@ export class VegaBaseView {
     const indexId = await this._findIndex(index);
     const filter = buildQueryFilter(query, indexId);
 
-
-
-    console.log('removing filter', filter);
-
-
-
-    this._queryfilter.removeFilter(filter);
+    // This is a workaround for the https://github.com/elastic/kibana/issues/18863
+    // Once fixed, replace with a direct call: this._queryfilter.removeFilter(filter)
+    this._$rootScope.$evalAsync(() => this._queryfilter.removeFilter(filter));
   }
 
   removeAllFiltersHandler() {
