@@ -69,13 +69,13 @@ class JobService {
       jobs = [];
       datafeedIds = {};
 
-      ml.jobs()
+      ml.getJobs()
         .then((resp) => {
           // make deep copy of jobs
           angular.copy(resp.jobs, jobs);
 
           // load jobs stats
-          ml.jobStats()
+          ml.getJobStats()
             .then((statsResp) => {
               // merge jobs stats into jobs
               for (let i = 0; i < jobs.length; i++) {
@@ -137,14 +137,14 @@ class JobService {
 
   refreshJob(jobId) {
     return new Promise((resolve, reject) => {
-      ml.jobs({ jobId })
+      ml.getJobs({ jobId })
         .then((resp) => {
           const newJob = {};
           if (resp.jobs && resp.jobs.length) {
             angular.copy(resp.jobs[0], newJob);
 
             // load jobs stats
-            ml.jobStats({ jobId })
+            ml.getJobStats({ jobId })
               .then((statsResp) => {
                 // merge jobs stats into jobs
                 for (let j = 0; j < statsResp.jobs.length; j++) {
@@ -213,7 +213,7 @@ class JobService {
       const datafeeds = [];
       const sId = (datafeedId !== undefined) ? { datafeed_id: datafeedId } : undefined;
 
-      ml.datafeeds(sId)
+      ml.getDatafeeds(sId)
         .then((resp) => {
           // console.log('loadDatafeeds query response:', resp);
 
@@ -221,7 +221,7 @@ class JobService {
           angular.copy(resp.datafeeds, datafeeds);
 
           // load datafeeds stats
-          ml.datafeedStats()
+          ml.getDatafeedStats()
             .then((statsResp) => {
               // merge datafeeds stats into datafeeds
               for (let i = 0; i < datafeeds.length; i++) {
@@ -253,7 +253,7 @@ class JobService {
   updateSingleJobCounts(jobId) {
     return new Promise((resolve, reject) => {
       console.log('jobService: update job counts and state for ' + jobId);
-      ml.jobStats({ jobId })
+      ml.getJobStats({ jobId })
         .then((resp) => {
           console.log('updateSingleJobCounts controller query response:', resp);
           if (resp.jobs && resp.jobs.length) {
@@ -319,7 +319,7 @@ class JobService {
   updateAllJobStats() {
     return new Promise((resolve, reject) => {
       console.log('jobService: update all jobs counts and state');
-      ml.jobStats().then((resp) => {
+      ml.getJobStats().then((resp) => {
         console.log('updateAllJobStats controller query response:', resp);
         let newJobsAdded = false;
         for (let d = 0; d < resp.jobs.length; d++) {
@@ -355,7 +355,7 @@ class JobService {
         }
 
         // load datafeeds stats
-        ml.datafeedStats()
+        ml.getDatafeedStats()
           .then((datafeedsResp) => {
             for (let i = 0; i < jobs.length; i++) {
               const datafeed = jobs[i].datafeed_config;
@@ -425,7 +425,7 @@ class JobService {
 
       const datafeedId = this.getDatafeedId(jobId);
 
-      ml.datafeedStats({ datafeedId })
+      ml.getDatafeedStats({ datafeedId })
         .then((resp) => {
         // console.log('updateSingleJobCounts controller query response:', resp);
           const datafeeds = resp.datafeeds;
@@ -601,7 +601,7 @@ class JobService {
     return new Promise((resolve, reject) => {
       const obj = { success: true, jobs: [] };
 
-      ml.jobs()
+      ml.getJobs()
         .then((resp) => {
           if (resp.jobs && resp.jobs.length > 0) {
             obj.jobs = processBasicJobInfo(this, resp.jobs);
@@ -630,7 +630,7 @@ class JobService {
     return new Promise((resolve, reject) => {
       const obj = { success: true, fieldsByJob: { '*': [] } };
 
-      ml.jobs()
+      ml.getJobs()
         .then(function (resp) {
           if (resp.jobs && resp.jobs.length > 0) {
             _.each(resp.jobs, (jobObj) => {
@@ -916,15 +916,15 @@ class JobService {
   }
 
   forceStartDatafeeds(dIds, start, end) {
-    return ml.jobService.forceStartDatafeeds(dIds, start, end);
+    return ml.jobs.forceStartDatafeeds(dIds, start, end);
   }
 
   stopDatafeeds(dIds) {
-    return ml.jobService.stopDatafeeds(dIds);
+    return ml.jobs.stopDatafeeds(dIds);
   }
 
   deleteJobs(jIds) {
-    return ml.jobService.deleteJobs(jIds);
+    return ml.jobs.deleteJobs(jIds);
   }
 
 

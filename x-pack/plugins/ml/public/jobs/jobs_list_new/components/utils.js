@@ -19,7 +19,7 @@ const ACTION = {
 
 export function loadFullJob(jobId) {
   return new Promise((resolve, reject) => {
-    ml.jobService.jobs(jobId)
+    ml.jobs.jobs(jobId)
       .then((jobs) => {
         if (jobs.length) {
           resolve(jobs[0]);

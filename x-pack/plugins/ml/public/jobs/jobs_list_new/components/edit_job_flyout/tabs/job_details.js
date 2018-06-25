@@ -35,7 +35,7 @@ export class JobDetails extends Component {
 
   componentDidMount() {
     // load groups to populate the select options
-    ml.jobService.groups()
+    ml.jobs.groups()
       .then((resp) => {
         const groups = resp.map(g => ({ label: g.id }));
         this.setState({ groups });

@@ -17,14 +17,14 @@ import { jobs } from './jobs';
 const basePath = chrome.addBasePath('/api/ml');
 
 export const ml = {
-  jobs(obj) {
+  getJobs(obj) {
     const jobId = (obj && obj.jobId) ? `/${obj.jobId}` : '';
     return http({
       url: `${basePath}/anomaly_detectors${jobId}`,
     });
   },
 
-  jobStats(obj) {
+  getJobStats(obj) {
     const jobId = (obj && obj.jobId) ? `/${obj.jobId}` : '';
     return http({
       url: `${basePath}/anomaly_detectors${jobId}/_stats`,
@@ -98,14 +98,14 @@ export const ml = {
     });
   },
 
-  datafeeds(obj) {
+  getDatafeeds(obj) {
     const datafeedId = (obj && obj.datafeedId) ? `/${obj.datafeedId}` : '';
     return http({
       url: `${basePath}/datafeeds${datafeedId}`,
     });
   },
 
-  datafeedStats(obj) {
+  getDatafeedStats(obj) {
     const datafeedId = (obj && obj.datafeedId) ? `/${obj.datafeedId}` : '';
     return http({
       url: `${basePath}/datafeeds${datafeedId}/_stats`,
@@ -408,5 +408,5 @@ export const ml = {
   },
 
   results,
-  jobService: jobs
+  jobs,
 };

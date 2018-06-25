@@ -34,7 +34,7 @@ export class JobMessagesPane extends Component {
   }
 
   componentDidMount() {
-    ml.jobService.jobAuditMessages(this.jobId)
+    ml.jobs.jobAuditMessages(this.jobId)
       .then((messages) => {
         this.setState({ messages });
       })

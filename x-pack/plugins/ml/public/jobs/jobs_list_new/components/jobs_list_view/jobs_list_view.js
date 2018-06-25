@@ -126,7 +126,7 @@ export class JobsListView extends Component {
   refreshJobSummaryList(autoRefresh = true) {
     if (this.blockAutoRefresh === false) {
       const expandedJobsIds = Object.keys(this.state.itemIdToExpandedRowMap);
-      ml.jobService.jobsSummary(expandedJobsIds)
+      ml.jobs.jobsSummary(expandedJobsIds)
         .then((jobs) => {
           const fullJobsList = {};
           const jobsSummaryList = jobs.map((job) => {
