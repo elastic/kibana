@@ -67,7 +67,7 @@ describe('XPackInfo', () => {
 
     mockServer = sinon.stub({
       plugins: { elasticsearch: mockElasticsearchPlugin },
-      log() {}
+      log() { }
     });
   });
 
@@ -151,9 +151,9 @@ describe('XPackInfo', () => {
       expect(xPackInfo.unavailableReason()).to.be(randomError);
       sinon.assert.calledWithExactly(
         mockServer.log,
-        [ 'license', 'warning', 'xpack' ],
+        ['license', 'warning', 'xpack'],
         `License information from the X-Pack plugin could not be obtained from Elasticsearch` +
-          ` for the [data] cluster. ${randomError}`
+        ` for the [data] cluster. ${randomError}`
       );
 
       const badRequestError = new Error('Bad request');
@@ -168,9 +168,9 @@ describe('XPackInfo', () => {
       );
       sinon.assert.calledWithExactly(
         mockServer.log,
-        [ 'license', 'warning', 'xpack' ],
+        ['license', 'warning', 'xpack'],
         `License information from the X-Pack plugin could not be obtained from Elasticsearch` +
-          ` for the [data] cluster. ${badRequestError}`
+        ` for the [data] cluster. ${badRequestError}`
       );
 
       mockElasticsearchCluster.callWithInternalUser.returns(getMockXPackInfoAPIResponse());

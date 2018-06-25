@@ -22,6 +22,7 @@ export function initRolesApi(server) {
       return callWithRequest(request, 'shield.getRole').then(
         (response) => {
           const roles = _.map(response, (role, name) => _.assign(role, { name }));
+
           return reply(roles);
         },
         _.flow(wrapError, reply)

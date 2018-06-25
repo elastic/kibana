@@ -35,6 +35,7 @@ describe('check_license', function () {
       showLinks: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
+      allowRbac: false,
       loginMessage: 'Login is currently disabled. Administrators should consult the Kibana logs for more details.'
     });
   });
@@ -53,6 +54,7 @@ describe('check_license', function () {
       showLinks: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
+      allowRbac: false,
       linksMessage: 'Your Basic license does not support Security. Please upgrade your license.'
     });
   });
@@ -71,6 +73,7 @@ describe('check_license', function () {
       showLinks: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
+      allowRbac: false,
       linksMessage: 'Access is denied because Security is disabled in Elasticsearch.'
     });
   });
@@ -94,7 +97,8 @@ describe('check_license', function () {
       allowLogin: true,
       showLinks: true,
       allowRoleDocumentLevelSecurity: false,
-      allowRoleFieldLevelSecurity: false
+      allowRoleFieldLevelSecurity: false,
+      allowRbac: true,
     });
 
     mockXPackInfo.license.isActive.returns(false);
@@ -103,7 +107,8 @@ describe('check_license', function () {
       allowLogin: true,
       showLinks: true,
       allowRoleDocumentLevelSecurity: false,
-      allowRoleFieldLevelSecurity: false
+      allowRoleFieldLevelSecurity: false,
+      allowRbac: true,
     });
   });
 
@@ -121,7 +126,8 @@ describe('check_license', function () {
       allowLogin: true,
       showLinks: true,
       allowRoleDocumentLevelSecurity: true,
-      allowRoleFieldLevelSecurity: true
+      allowRoleFieldLevelSecurity: true,
+      allowRbac: true,
     });
 
     mockXPackInfo.license.isActive.returns(false);
@@ -130,7 +136,8 @@ describe('check_license', function () {
       allowLogin: true,
       showLinks: true,
       allowRoleDocumentLevelSecurity: true,
-      allowRoleFieldLevelSecurity: true
+      allowRoleFieldLevelSecurity: true,
+      allowRbac: true,
     });
   });
 
@@ -148,7 +155,8 @@ describe('check_license', function () {
       allowLogin: true,
       showLinks: true,
       allowRoleDocumentLevelSecurity: true,
-      allowRoleFieldLevelSecurity: true
+      allowRoleFieldLevelSecurity: true,
+      allowRbac: true,
     });
 
     mockXPackInfo.license.isActive.returns(false);
@@ -157,7 +165,8 @@ describe('check_license', function () {
       allowLogin: true,
       showLinks: true,
       allowRoleDocumentLevelSecurity: true,
-      allowRoleFieldLevelSecurity: true
+      allowRoleFieldLevelSecurity: true,
+      allowRbac: true,
     });
   });
 });
