@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { isObjectExpression, isStringLiteral } from '@babel/types';
+import {
+  isObjectExpression,
+  isStringLiteral,
+  isTemplateLiteral,
+} from '@babel/types';
 
-import { isPropertyWithKey } from './utils';
+import { isPropertyWithKey, escapeLineBreak } from './utils';
 import { DEFAULT_MESSAGE_KEY } from './constants';
 
 /**
@@ -38,7 +42,7 @@ export function extractI18nCallMessages(node) {
     const defaultMessageProperty = optionsSubTree.properties.find(
       prop =>
         isPropertyWithKey(prop, DEFAULT_MESSAGE_KEY) &&
-        isStringLiteral(prop.value)
+        (isStringLiteral(prop.value) || isTemplateLiteral(prop.value))
     );
 
     if (!defaultMessageProperty) {
@@ -49,7 +53,11 @@ export function extractI18nCallMessages(node) {
       prop => isPropertyWithKey(prop, 'context') && isStringLiteral(prop.value)
     );
 
-    const message = defaultMessageProperty.value.value;
+    const message = escapeLineBreak(
+      isStringLiteral(defaultMessageProperty.value)
+        ? defaultMessageProperty.value.value
+        : defaultMessageProperty.value.quasis[0].value.raw
+    );
     const context = contextProperty ? contextProperty.value.value : '';
 
     return [messageId, { message, context }];

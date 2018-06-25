@@ -24,6 +24,7 @@ import {
   isDirectiveLiteral,
   isObjectExpression,
   isStringLiteral,
+  isTemplateLiteral,
 } from '@babel/types';
 
 import { isPropertyWithKey, escapeLineBreak } from './utils';
@@ -55,8 +56,12 @@ function parseFilterObjectExpression(expression) {
             isStringLiteral(property.value)
           ) {
             message = escapeLineBreak(property.value.value);
-          }
-          if (
+          } else if (
+            isPropertyWithKey(property, DEFAULT_MESSAGE_KEY) &&
+            isTemplateLiteral(property.value)
+          ) {
+            message = escapeLineBreak(property.value.quasis[0].value.raw);
+          } else if (
             isPropertyWithKey(property, 'context') &&
             isStringLiteral(property.value)
           ) {

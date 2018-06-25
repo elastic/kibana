@@ -23,6 +23,7 @@ import {
   isJSXIdentifier,
   isObjectExpression,
   isStringLiteral,
+  isTemplateLiteral,
 } from '@babel/types';
 
 import { isPropertyWithKey, escapeLineBreak } from './utils';
@@ -48,15 +49,13 @@ export function extractIntlMessages(node) {
         }
 
         messageId = property.value.value;
-      }
-
-      if (
-        isPropertyWithKey(property, DEFAULT_MESSAGE_KEY) &&
-        isStringLiteral(property.value)
-      ) {
-        message = property.value.value;
-      }
-      if (
+      } else if (isPropertyWithKey(property, DEFAULT_MESSAGE_KEY)) {
+        if (isStringLiteral(property.value)) {
+          message = escapeLineBreak(property.value.value);
+        } else if (isTemplateLiteral(property.value)) {
+          message = escapeLineBreak(property.value.quasis[0].value.raw);
+        }
+      } else if (
         isPropertyWithKey(property, 'context') &&
         isStringLiteral(property.value)
       ) {
@@ -97,9 +96,7 @@ export function extractFormattedMessages(node) {
       }
 
       messageId = attribute.value.value;
-    }
-
-    if (
+    } else if (
       isJSXIdentifier(attribute.name, {
         name: DEFAULT_MESSAGE_KEY,
       })
@@ -115,9 +112,7 @@ export function extractFormattedMessages(node) {
         //escaping line break'
         message = escapeLineBreak(attribute.value.value);
       }
-    }
-
-    if (
+    } else if (
       isJSXAttribute(attribute) &&
       isJSXIdentifier(attribute.name, {
         name: 'context',
