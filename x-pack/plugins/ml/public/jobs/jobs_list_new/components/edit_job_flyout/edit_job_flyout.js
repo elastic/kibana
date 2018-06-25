@@ -50,7 +50,7 @@ export class EditJobFlyout extends Component {
     this.refreshJobs = this.props.refreshJobs;
   }
 
-  closeModal = () => {
+  closeFlyout = () => {
     this.setState({ isModalVisible: false });
   }
 
@@ -142,7 +142,7 @@ export class EditJobFlyout extends Component {
       .then(() => {
         toastNotifications.addSuccess(`Changes to ${this.state.job.job_id} saved`);
         this.refreshJobs();
-        this.closeModal();
+        this.closeFlyout();
       })
       .catch((error) => {
         console.error(error);
@@ -211,7 +211,7 @@ export class EditJobFlyout extends Component {
       flyout = (
         <EuiFlyout
           // ownFocus
-          onClose={this.closeModal}
+          onClose={this.closeFlyout}
           size="m"
         >
           <EuiFlyoutHeader>
@@ -235,7 +235,7 @@ export class EditJobFlyout extends Component {
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   iconType="cross"
-                  onClick={this.closeModal}
+                  onClick={this.closeFlyout}
                   flush="left"
                 >
                   Close
