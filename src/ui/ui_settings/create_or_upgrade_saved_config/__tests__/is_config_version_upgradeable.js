@@ -25,7 +25,7 @@ import { pkg } from '../../../../utils';
 describe('savedObjects/health_check/isConfigVersionUpgradeable', function () {
   function isUpgradableTest(savedVersion, kibanaVersion, expected) {
     it(`should return ${expected} for config version ${savedVersion} and kibana version ${kibanaVersion}`, () => {
-      expect(isConfigVersionUpgradeable(savedVersion, kibanaVersion)).toBe(expected);
+      expect(isConfigVersionUpgradeable(savedVersion, kibanaVersion)).to.be(expected);
     });
   }
 

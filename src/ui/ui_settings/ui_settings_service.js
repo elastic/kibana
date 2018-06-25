@@ -46,7 +46,6 @@ export class UiSettingsService {
     const {
       type,
       id,
-      version,
       buildNum,
       savedObjectsClient,
       // we use a function for getDefaults() so that defaults can be different in
@@ -58,7 +57,6 @@ export class UiSettingsService {
 
     this._type = type;
     this._id = id;
-    this._version = version;
     this._buildNum = buildNum;
     this._savedObjectsClient = savedObjectsClient;
     this._getDefaults = getDefaults;
@@ -127,7 +125,7 @@ export class UiSettingsService {
 
       await createOrUpgradeSavedConfig({
         savedObjectsClient: this._savedObjectsClient,
-        version: this._version,
+        version: this._id,
         buildNum: this._buildNum,
         log: this._log,
       });

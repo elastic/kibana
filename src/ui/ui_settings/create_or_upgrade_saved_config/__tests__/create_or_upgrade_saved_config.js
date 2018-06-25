@@ -48,7 +48,6 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
       const resp = await createOrUpgradeSavedConfig({
         savedObjectsClient,
         version,
-        id: `${version}:foo`,
         buildNum,
         log,
       });
@@ -78,9 +77,8 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
       sinon.assert.calledOnce(savedObjectsClient.create);
       sinon.assert.calledWithExactly(savedObjectsClient.create, 'config', {
         buildNum,
-        version
       }, {
-        id: `${version}:foo`
+        id: version
       });
     });
   });
@@ -112,10 +110,9 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
         {
           ...savedAttributes,
           buildNum,
-          version,
         },
         {
-          id: `${version}:foo`,
+          id: version,
         }
       );
     });

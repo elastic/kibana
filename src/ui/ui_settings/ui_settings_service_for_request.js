@@ -34,7 +34,7 @@ import { uiSettingsServiceFactory } from './ui_settings_service_factory';
  */
 export function getUiSettingsServiceForRequest(server, request, options = {}) {
   const {
-    getDefaults,
+    getDefaults
   } = options;
 
   const uiSettingsService = uiSettingsServiceFactory(server, {

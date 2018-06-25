@@ -18,6 +18,7 @@
  */
 
 import sinon from 'sinon';
+import expect from 'expect.js';
 
 import { createEsTestCluster } from '@kbn/test';
 import { createServerWithCorePlugins } from '../../../../test_utils/kbn_server';
@@ -29,7 +30,7 @@ describe('createOrUpgradeSavedConfig()', () => {
   let kbnServer;
   const cleanup = [];
 
-  beforeAll(async function () {
+  before(async function () {
     const log = createToolingLog('debug');
     log.pipe(process.stdout);
     log.indent(6);
@@ -84,27 +85,26 @@ describe('createOrUpgradeSavedConfig()', () => {
         },
       },
     ]);
-  }, 30000);
+  });
 
-  afterAll(async () => {
+  after(async () => {
     await Promise.all(cleanup.map(fn => fn()));
     cleanup.length = 0;
   });
 
   it('upgrades the previous version on each increment', async function () {
+    this.timeout(30000);
 
     // ------------------------------------
     // upgrade to 5.4.0
     await createOrUpgradeSavedConfig({
       savedObjectsClient,
       version: '5.4.0',
-      id: '5.4.0',
       buildNum: 54099,
       log: sinon.stub(),
     });
 
     const config540 = await savedObjectsClient.get('config', '5.4.0');
-
     expect(config540)
       .to.have.property('attributes')
       .eql({
@@ -126,7 +126,6 @@ describe('createOrUpgradeSavedConfig()', () => {
     await createOrUpgradeSavedConfig({
       savedObjectsClient,
       version: '5.4.1',
-      id: '5.4.1',
       buildNum: 54199,
       log: sinon.stub(),
     });
@@ -153,7 +152,6 @@ describe('createOrUpgradeSavedConfig()', () => {
     await createOrUpgradeSavedConfig({
       savedObjectsClient,
       version: '7.0.0-rc1',
-      id: '7.0.0-rc1',
       buildNum: 70010,
       log: sinon.stub(),
     });
@@ -181,7 +179,6 @@ describe('createOrUpgradeSavedConfig()', () => {
     await createOrUpgradeSavedConfig({
       savedObjectsClient,
       version: '7.0.0',
-      id: '7.0.0',
       buildNum: 70099,
       log: sinon.stub(),
     });
@@ -210,7 +207,6 @@ describe('createOrUpgradeSavedConfig()', () => {
     await createOrUpgradeSavedConfig({
       savedObjectsClient,
       version: '6.2.3-rc1',
-      id: '6.2.3-rc1',
       buildNum: 62310,
       log: sinon.stub(),
     });
