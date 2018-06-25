@@ -116,16 +116,16 @@ describe('run tests CLI', () => {
       expect(exitMock).not.toHaveBeenCalledWith();
     });
 
-    it('accepts source value for es-from', async () => {
-      global.process.argv.push('--es-from', 'source');
+    it('accepts source value for esFrom', async () => {
+      global.process.argv.push('--esFrom', 'source');
 
       await runTestsCli(['foo']);
 
       expect(exitMock).not.toHaveBeenCalled();
     });
 
-    it('rejects non-enum value for es-from', async () => {
-      global.process.argv.push('--es-from', 'butter');
+    it('rejects non-enum value for esFrom', async () => {
+      global.process.argv.push('--esFrom', 'butter');
 
       await runTestsCli(['foo']);
 

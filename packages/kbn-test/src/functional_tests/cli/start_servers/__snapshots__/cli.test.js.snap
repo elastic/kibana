@@ -48,10 +48,10 @@ Array [
 ]
 `;
 
-exports[`start servers CLI options rejects non-enum value for es-from 1`] = `
+exports[`start servers CLI options rejects non-enum value for esFrom 1`] = `
 Array [
   Array [
-    "[31mError: functional_tests_server: invalid argument [butter] to option [es-from][39m",
+    "[31mError: functional_tests_server: invalid argument [butter] to option [esFrom][39m",
   ],
 ]
 `;

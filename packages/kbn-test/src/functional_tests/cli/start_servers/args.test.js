@@ -64,16 +64,16 @@ describe('process options for start servers CLI', () => {
     );
   });
 
-  it('accepts source value for es-from', () => {
-    const options = processOptions({ 'es-from': 'source' }, ['foo']);
+  it('accepts source value for esFrom', () => {
+    const options = processOptions({ esFrom: 'source' }, ['foo']);
     expect(options).toMatchSnapshot();
   });
 
-  it('rejects non-enum value for es-from', () => {
+  it('rejects non-enum value for esFrom', () => {
     expect(() => {
-      processOptions({ 'es-from': 'butter' }, ['foo']);
+      processOptions({ esFrom: 'butter' }, ['foo']);
     }).toThrow(
-      'functional_tests_server: invalid argument [butter] to option [es-from]'
+      'functional_tests_server: invalid argument [butter] to option [esFrom]'
     );
   });
 

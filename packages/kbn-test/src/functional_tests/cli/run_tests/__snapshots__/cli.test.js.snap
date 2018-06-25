@@ -13,7 +13,7 @@ Usage:
 Options:
   --help                         Display this menu and exit. 
   --config <file>                Pass in a config. Can pass in multiple configs. 
-  --es-from <snapshot|source>    Build Elasticsearch from source or run from snapshot. Default: snapshot
+  --esFrom <snapshot|source>     Build Elasticsearch from source or run from snapshot. Default: snapshot
   --kibana-install-dir <dir>     Run Kibana from existing install directory instead of from source. 
   --bail                         Stop the test run at the first failure. 
   --grep <pattern>               Pattern to select which tests to run. 
@@ -66,10 +66,10 @@ Array [
 ]
 `;
 
-exports[`run tests CLI options rejects non-enum value for es-from 1`] = `
+exports[`run tests CLI options rejects non-enum value for esFrom 1`] = `
 Array [
   Array [
-    "[31mError: functional_tests: invalid argument [butter] to option [es-from][39m",
+    "[31mError: functional_tests: invalid argument [butter] to option [esFrom][39m",
   ],
 ]
 `;

@@ -147,7 +147,7 @@ module.exports = function (grunt) {
       args: [
         'scripts/functional_tests',
         '--config', 'test/api_integration/config.js',
-        '--es-from', 'source',
+        '--esFrom', 'source',
         '--bail',
         '--debug',
       ],
@@ -158,7 +158,7 @@ module.exports = function (grunt) {
       args: [
         'scripts/functional_tests',
         '--config', 'test/functional/config.js',
-        '--es-from', 'source',
+        '--esFrom', 'source',
         '--bail',
         '--debug',
         '--',
@@ -171,7 +171,7 @@ module.exports = function (grunt) {
       args: [
         'scripts/functional_tests',
         '--config', 'test/functional/config.js',
-        '--es-from', 'source',
+        '--esFrom', 'source',
         '--bail',
         '--debug',
         '--kibana-install-dir', `./build/oss/kibana-${PKG_VERSION}-${process.platform}-x86_64`,
@@ -185,7 +185,7 @@ module.exports = function (grunt) {
       args: [
         'scripts/functional_tests_server',
         '--config', 'test/functional/config.js',
-        '--es-from', 'source',
+        '--esFrom', 'source',
         '--debug',
         '--',
         '--server.maxPayloadBytes=1648576',

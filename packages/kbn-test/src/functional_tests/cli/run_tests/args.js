@@ -26,7 +26,7 @@ const options = {
     arg: '<file>',
     desc: 'Pass in a config. Can pass in multiple configs.',
   },
-  'es-from': {
+  esFrom: {
     arg: '<snapshot|source>',
     choices: ['snapshot', 'source'],
     desc: 'Build Elasticsearch from source or run from snapshot.',
