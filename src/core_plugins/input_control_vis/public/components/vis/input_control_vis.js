@@ -153,10 +153,7 @@ export class InputControlVis extends Component {
 InputControlVis.propTypes = {
   stageFilter: PropTypes.func.isRequired,
   submitFilters: PropTypes.func.isRequired,
-  // resetControls removes any user changes to the form by
-  // resetting all values to those provided by Kibana filter pills
   resetControls: PropTypes.func.isRequired,
-  // clearControls clears the form by setting all controls to their empty state.
   clearControls: PropTypes.func.isRequired,
   controls: PropTypes.array.isRequired,
   updateFiltersOnChange: PropTypes.bool,

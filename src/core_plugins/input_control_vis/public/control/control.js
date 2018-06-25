@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import _ from 'lodash';
+
 export function noValuesDisableMsg(fieldName, indexPatternName) {
   return `Filtering occurs on the "${fieldName}" field,
 which doesn't exist on any documents in the "${indexPatternName}" index pattern.
@@ -98,7 +100,6 @@ export class Control {
 
   set(newValue) {
     this.value = newValue;
-    this._hasChanged = true;
     if (this.hasValue()) {
       this._kbnFilter = this.filterManager.createFilter(this.value);
     } else {
@@ -110,7 +111,6 @@ export class Control {
    * Remove any user changes to value by resetting value to that as provided by Kibana filter pills
    */
   reset() {
-    this._hasChanged = false;
     this._kbnFilter = null;
     this.value = this.filterManager.getValueFromFilterBar();
   }
@@ -123,7 +123,7 @@ export class Control {
   }
 
   hasChanged() {
-    return this._hasChanged;
+    return !_.isEqual(this.value, this.filterManager.getValueFromFilterBar());
   }
 
   hasKbnFilter() {
