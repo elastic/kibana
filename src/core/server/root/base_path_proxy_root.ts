@@ -43,8 +43,11 @@ export class BasePathProxyRoot extends Root {
 
   public async configure({
     blockUntil,
-    isKibanaPath,
-  }: Pick<BasePathProxyServerOptions, 'blockUntil' | 'isKibanaPath'>) {
+    shouldRedirectFromOldBasePath,
+  }: Pick<
+    BasePathProxyServerOptions,
+    'blockUntil' | 'shouldRedirectFromOldBasePath'
+  >) {
     const [devConfig, httpConfig] = await Promise.all([
       k$(this.configService.atPath('dev', DevConfig))(first(), toPromise()),
       k$(this.configService.atPath('server', HttpConfig))(first(), toPromise()),
@@ -54,7 +57,7 @@ export class BasePathProxyRoot extends Root {
       blockUntil,
       devConfig,
       httpConfig,
-      isKibanaPath,
+      shouldRedirectFromOldBasePath,
     });
   }
 

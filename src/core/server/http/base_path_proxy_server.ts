@@ -31,7 +31,7 @@ const alphabet = 'abcdefghijklmnopqrztuvwxyz'.split('');
 export interface BasePathProxyServerOptions {
   httpConfig: HttpConfig;
   devConfig: DevConfig;
-  isKibanaPath: (path: string) => boolean;
+  shouldRedirectFromOldBasePath: (path: string) => boolean;
   blockUntil: () => Promise<void>;
 }
 
@@ -112,7 +112,12 @@ export class BasePathProxyServer {
       );
     }
 
-    const { httpConfig, devConfig, blockUntil, isKibanaPath } = this.options;
+    const {
+      httpConfig,
+      devConfig,
+      blockUntil,
+      shouldRedirectFromOldBasePath,
+    } = this.options;
 
     // Always redirect from root URL to the URL with basepath.
     this.server.route({
@@ -158,7 +163,7 @@ export class BasePathProxyServer {
         const isGet = request.method === 'get';
         const isBasepathLike = oldBasePath.length === 3;
 
-        return isGet && isBasepathLike && isKibanaPath(kbnPath)
+        return isGet && isBasepathLike && shouldRedirectFromOldBasePath(kbnPath)
           ? responseToolkit.redirect(`${httpConfig.basePath}/${kbnPath}`)
           : responseToolkit.response('Not Found').code(404);
       },

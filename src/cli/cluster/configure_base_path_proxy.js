@@ -30,7 +30,7 @@ export async function configureBasePathProxy(config) {
   const basePathProxy = createBasePathProxy({ server, config });
 
   await basePathProxy.configure({
-    isKibanaPath: path => {
+    shouldRedirectFromOldBasePath: path => {
       const isApp = path.startsWith('app/');
       const isKnownShortPath = ['login', 'logout', 'status'].includes(path);
 

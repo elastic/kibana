@@ -60,14 +60,14 @@ describe('configureBasePathProxy()', () => {
     });
 
     expect(basePathProxyMock.configure).toHaveBeenCalledWith({
-      isKibanaPath: expect.any(Function),
+      shouldRedirectFromOldBasePath: expect.any(Function),
       blockUntil: expect.any(Function),
     });
   });
 
-  describe('configured with the correct `isKibanaPath` and `blockUntil` functions.', async () => {
+  describe('configured with the correct `shouldRedirectFromOldBasePath` and `blockUntil` functions.', async () => {
     let serverWorkerMock;
-    let isKibanaPath;
+    let shouldRedirectFromOldBasePath;
     let blockUntil;
     beforeEach(async () => {
       serverWorkerMock = {
@@ -86,20 +86,20 @@ describe('configureBasePathProxy()', () => {
 
       await configureBasePathProxy({});
 
-      [[{ blockUntil, isKibanaPath }]] = basePathProxyMock.configure.mock.calls;
+      [[{ blockUntil, shouldRedirectFromOldBasePath }]] = basePathProxyMock.configure.mock.calls;
     });
 
-    it('`isKibanaPath()` returns `false` for unknown paths.', async () => {
-      expect(isKibanaPath('')).toBe(false);
-      expect(isKibanaPath('some-path/')).toBe(false);
-      expect(isKibanaPath('some-other-path')).toBe(false);
+    it('`shouldRedirectFromOldBasePath()` returns `false` for unknown paths.', async () => {
+      expect(shouldRedirectFromOldBasePath('')).toBe(false);
+      expect(shouldRedirectFromOldBasePath('some-path/')).toBe(false);
+      expect(shouldRedirectFromOldBasePath('some-other-path')).toBe(false);
     });
 
-    it('`isKibanaPath()` returns `true` for `app` and other known paths.', async () => {
-      expect(isKibanaPath('app/')).toBe(true);
-      expect(isKibanaPath('login')).toBe(true);
-      expect(isKibanaPath('logout')).toBe(true);
-      expect(isKibanaPath('status')).toBe(true);
+    it('`shouldRedirectFromOldBasePath()` returns `true` for `app` and other known paths.', async () => {
+      expect(shouldRedirectFromOldBasePath('app/')).toBe(true);
+      expect(shouldRedirectFromOldBasePath('login')).toBe(true);
+      expect(shouldRedirectFromOldBasePath('logout')).toBe(true);
+      expect(shouldRedirectFromOldBasePath('status')).toBe(true);
     });
 
     it('`blockUntil()` resolves immediately if worker has already crashed.', async () => {
