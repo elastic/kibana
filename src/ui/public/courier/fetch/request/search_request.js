@@ -25,7 +25,11 @@ import { requestQueue } from '../../_request_queue';
 export function SearchRequestProvider(Promise) {
 
   return class SearchRequest {
-    constructor(source, defer) {
+    constructor({ source, defer, errorHandler }) {
+      if (!errorHandler) {
+        throw new Error('errorHandler is required');
+      }
+      this.errorHandler = errorHandler;
       this.source = source;
       this.defer = defer || Promise.defer();
       this.abortedDefer = Promise.defer();
@@ -147,10 +151,6 @@ export function SearchRequestProvider(Promise) {
 
     clone() {
       return new this.constructor(this.source, this.defer);
-    }
-
-    setErrorHandler(errorHandler) {
-      this.errorHandler = errorHandler;
     }
   };
 }
