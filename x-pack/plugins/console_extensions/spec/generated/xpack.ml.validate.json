@@ -1,0 +1,10 @@
+{
+  "xpack.ml.validate": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_xpack/ml/anomaly_detectors/_validate"
+    ]
+  }
+}
