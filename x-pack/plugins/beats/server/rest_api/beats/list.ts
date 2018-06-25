@@ -7,6 +7,7 @@
 import { CMServerLibs } from '../../lib/lib';
 import { wrapEsError } from '../../utils/error_wrappers';
 
+// TODO: add license check pre-hook
 export const createListAgentsRoute = (libs: CMServerLibs) => ({
   handler: async (request, reply) => {
     try {

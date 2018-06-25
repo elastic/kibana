@@ -9,8 +9,10 @@ import { get } from 'lodash';
 import { CMServerLibs } from '../../lib/lib';
 import { wrapEsError } from '../../utils/error_wrappers';
 
+// TODO: add license check pre-hook
+// TODO: write to Kibana audit log file
 const DEFAULT_NUM_TOKENS = 1;
-export const createTokenRoute = (libs: CMServerLibs) => ({
+export const createTokensRoute = (libs: CMServerLibs) => ({
   config: {
     validate: {
       payload: Joi.object({

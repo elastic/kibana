@@ -10,6 +10,8 @@ import { ConfigurationBlockTypes } from '../../../common/constants';
 import { CMServerLibs } from '../../lib/lib';
 import { wrapEsError } from '../../utils/error_wrappers';
 
+// TODO: add license check pre-hook
+// TODO: write to Kibana audit log file
 export const createSetTagRoute = (libs: CMServerLibs) => ({
   config: {
     validate: {
