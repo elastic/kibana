@@ -4,27 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { ASource } from './source';
 
-export class AVectorSource extends ASource {
+export class VectorSource extends ASource {
 
-  constructor(options) {
-    super(options);
-    this._kbnCoreAPI = options.kbnCoreAPI;
-    this._layerName = options.layerName;
+  constructor() {
+    super();
   }
 
-  getDisplayName() {
-    return this._layerName;
+  static async _setService({ service }) {
+    const fetchService = await fetch(service.url);
+    return fetchService.json();
   }
 
-  async getAvailableLayers() {
-    return [];
+  static async create(options) {
+    const vectorDescriptor = {};
+    // Required
+    vectorDescriptor.dataOrigin = this._setDataOrigin(options);
+    vectorDescriptor.service = await this._setService(options);
+    vectorDescriptor.layerName = options.layerName;
+    return vectorDescriptor;
   }
 
   async getGeoJsonFeatureCollection() {
-
     const files = await this.getAvailableLayers();
     const layer = files.find((file) => {
       return file.name === this._layerName;
@@ -47,7 +49,5 @@ export class AVectorSource extends ASource {
     return response.json();
 
   }
-
-
 }
 

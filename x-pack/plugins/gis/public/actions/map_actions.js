@@ -4,85 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const ADD_LAYER = 'ADD_LAYER';
+import { DATA_ORIGIN } from "../components/map/layers/sources/source";
+import { VectorSource } from "../components/map/layers/sources/vector_source";
+import { TMSSource } from "../components/map/layers/sources/tms_source";
+import { VectorLayer } from "../components/map/layers/vector_layer";
+import { TileLayer } from "../components/map/layers/tile_layer";
+
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 export const UPDATE_LAYER_ORDER = 'UPDATE_LAYER_ORDER';
-export const LAYER_TYPE = {
-  VECTOR_FILE: 'VECTOR_FILE',
-  TMS: 'TMS'
-};
-export const LAYER_SOURCE = {
-  EMS: 'EMS',
-  WMS: 'WMS',
-  TMS: 'TMS',
-  CONFIG: 'CONFIG',
-  INDEX_PATTERN: 'INDEX_PATTERN',
-  SAVED_SEARCH: 'SAVED_SEARCH'
-};
-
-const addLayer = (appData, details) => {
-  const {
-    source,
-    layerType,
-    visible,
-    style
-  } = appData;
-
-  return {
-    type: ADD_LAYER,
-    layer: {
-      appData: {
-        source,
-        layerType,
-        visible: visible || true,
-        style: style || {}
-      },
-      details
-    }
-  };
-};
-
-// TODO: Determine standard format for service/file descriptors
-export async function loadMapResources(serviceSettings, dispatch) {
-  // Hard-coded associated values
-  const tmsServices = await serviceSettings.getTMSServices();
-  const fileLayers = await serviceSettings.getFileLayers();
-  // Sample TMS
-  const roadMapTms = {
-    type: LAYER_TYPE.TMS,
-    source: LAYER_SOURCE.EMS,
-    serviceId: 'road_map',
-    service: tmsServices
-  };
-  // Sample OSM service
-  const osmTms = {
-    type: LAYER_TYPE.TMS,
-    source: LAYER_SOURCE.TMS,
-    serviceId: 'osm',
-    service: [{ url: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png' }]
-  };
-  // Sample Vector File
-  const worldCountriesVector = {
-    type: LAYER_TYPE.VECTOR_FILE,
-    source: LAYER_SOURCE.CONFIG,
-    serviceId: 'World Countries',
-  };
-  const response = await fetch(fileLayers[0].url);
-  worldCountriesVector.service = await response.json();
-
-  const mapServices = [
-    roadMapTms,
-    osmTms,
-    worldCountriesVector
-  ];
-  mapServices.forEach(service => {
-    dispatch(addLayer({
-      source: service.source,
-      layerType: service.type
-    },
-    service));
-  });
-}
+export const ADD_LAYER = 'ADD_LAYER';
 
 export function setSelectedLayer(layer) {
   return {
@@ -96,4 +26,46 @@ export function updateLayerOrder(newLayerOrder) {
     type: UPDATE_LAYER_ORDER,
     newLayerOrder
   };
+}
+
+export function addLayer(layer) {
+  return {
+    type: ADD_LAYER,
+    layer
+  };
+}
+
+export async function loadMapResources(serviceSettings, dispatch) {
+  const tmsServices = await serviceSettings.getTMSServices();
+  const fileLayers = await serviceSettings.getFileLayers();
+
+  // Sample TMS
+  const roadMapTms = TMSSource.create({
+    dataOrigin: DATA_ORIGIN.EMS,
+    service: tmsServices,
+    serviceId: 'road_map'
+  });
+  // Sample OSM service
+  const osmTms = TMSSource.create({
+    dataOrigin: DATA_ORIGIN.TMS,
+    service: [{ url: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png' }],
+    serviceId: 'osm'
+  });
+  // Sample Vector File
+  const wcLayerService = fileLayers.find(fileLayer =>
+    fileLayer.name === 'World Countries');
+  VectorSource.create({
+    dataOrigin: DATA_ORIGIN.CONFIG,
+    service: wcLayerService,
+    layerName: 'World Countries'
+  }).then(worldCountriesVector => {
+    // Add sample layers
+    [
+      TileLayer.create({ source: roadMapTms }),
+      TileLayer.create({ source: osmTms }),
+      VectorLayer.create({ source: worldCountriesVector })
+    ].forEach(layer => {
+      dispatch(addLayer(layer));
+    });
+  });
 }

@@ -6,16 +6,16 @@
 
 import { createSelector } from 'reselect';
 import { getLayerList } from "./map_selectors";
+import { LAYER_TYPE } from "../components/map/layers/layer";
 import * as ol from 'openlayers';
-import { LAYER_TYPE } from "../actions/map_actions";
 
 const FEATURE_PROJECTION = 'EPSG:3857';
 
 // Layer-specific logic
-function convertTmsLayersToOl({ details }) {
+function convertTmsLayersToOl({ source }) {
   return new ol.layer.Tile({
     source: new ol.source.XYZ({
-      url: details.service[0].url
+      url: source.service[0].url
     })
   });
 }
@@ -24,8 +24,8 @@ const convertVectorLayersToOl = (() => {
   const geojsonFormat = new ol.format.GeoJSON({
     featureProjection: FEATURE_PROJECTION
   });
-  return ({ details }) => {
-    const olFeatures = geojsonFormat.readFeatures(details.service);
+  return ({ source }) => {
+    const olFeatures = geojsonFormat.readFeatures(source.service);
     return new ol.layer.Vector({
       source: new ol.source.Vector({
         features: olFeatures
@@ -36,11 +36,11 @@ const convertVectorLayersToOl = (() => {
 
 function convertLayersByType(layerList) {
   return layerList.map(layer => {
-    switch (layer.appData.layerType) {
-      case LAYER_TYPE.TMS:
+    switch (layer.type) {
+      case LAYER_TYPE.TILE:
         layer.olLayer = convertTmsLayersToOl(layer);
         break;
-      case LAYER_TYPE.VECTOR_FILE:
+      case LAYER_TYPE.VECTOR:
         layer.olLayer = convertVectorLayersToOl(layer);
         break;
       default:

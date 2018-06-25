@@ -4,26 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { ALayer } from './layer';
-import { EuiIcon } from '@elastic/eui';
+import { ALayer, LAYER_TYPE } from './layer';
 
 export class TileLayer extends ALayer {
 
-  constructor(tmsSource) {
+  constructor() {
     super();
-    this._tmsSource = tmsSource;
   }
 
-  getLayerName() {
-    return this._tmsSource.getDisplayName();
-  }
-
-  getType() {
-    return "Tile";
-  }
-
-  renderSmallLegend() {
-    return (<EuiIcon type="grid" />);
+  static create(options) {
+    const tileLayerDescriptor = super.create(options);
+    tileLayerDescriptor.type = LAYER_TYPE.TILE;
+    return tileLayerDescriptor;
   }
 }

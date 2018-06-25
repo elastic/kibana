@@ -4,27 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { ALayer } from './layer';
-import { EuiIcon } from '@elastic/eui';
-
+import { ALayer, LAYER_TYPE } from './layer';
 
 export class VectorLayer extends ALayer {
 
-  constructor(vectorSource) {
+  constructor() {
     super();
-    this._vectorSource = vectorSource;
+  }
+
+  static create(options) {
+    const vectorLayerDescriptor = super.create(options);
+    vectorLayerDescriptor.type = LAYER_TYPE.VECTOR;
+    return vectorLayerDescriptor;
   }
 
   getType() {
     return "Vector";
-  }
-
-  getLayerName() {
-    return this._vectorSource.getDisplayName();
-  }
-
-  renderSmallLegend() {
-    return (<EuiIcon type="vector" />);
   }
 }

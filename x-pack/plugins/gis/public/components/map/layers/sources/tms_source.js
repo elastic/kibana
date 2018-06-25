@@ -5,22 +5,19 @@
  */
 
 import { ASource } from './source';
-import { parse as parseUrl } from 'url';
-
 
 export class TMSSource extends ASource {
 
-  constructor(options) {
+  constructor() {
     super();
-    this._urlTemplate = options.urlTemplate;
   }
 
-  getDisplayName() {
-    const parsedUrl = parseUrl(this._urlTemplate);
-    return parsedUrl.hostname;
-  }
-
-  async getUrlTemplate() {
-    return this._urlTemplate;
+  static create(options) {
+    const tmsDescriptor = {};
+    // Required
+    tmsDescriptor.dataOrigin = this._setDataOrigin(options);
+    tmsDescriptor.service = options.service;
+    tmsDescriptor.serviceId = options.serviceId;
+    return tmsDescriptor;
   }
 }
