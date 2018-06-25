@@ -12,7 +12,7 @@ import { createTagRemovalRoute } from './rest_api/beats/tag_removal';
 import { createBeatUpdateRoute } from './rest_api/beats/update';
 import { createBeatVerificationRoute } from './rest_api/beats/verify';
 import { createSetTagRoute } from './rest_api/tags/set';
-import { createTokenRoute } from './rest_api/tokens/create';
+import { createTokensRoute } from './rest_api/tokens/create';
 
 import { beatsIndexTemplate } from './utils/index_templates';
 
@@ -24,7 +24,7 @@ export const initManagementServer = (libs: CMServerLibs) => {
   libs.framework.registerRoute(createTagRemovalRoute(libs));
   libs.framework.registerRoute(createBeatEnrollmentRoute(libs));
   libs.framework.registerRoute(createSetTagRoute(libs));
-  libs.framework.registerRoute(createTokenRoute(libs));
+  libs.framework.registerRoute(createTokensRoute(libs));
   libs.framework.registerRoute(createBeatVerificationRoute(libs));
   libs.framework.registerRoute(createBeatUpdateRoute(libs));
 };
