@@ -33,14 +33,6 @@ import {
 export class BasePathProxyRoot extends Root {
   private basePathProxy?: BasePathProxyServer;
 
-  get basePath() {
-    return this.getBasePathProxy().basePath;
-  }
-
-  get targetPort() {
-    return this.getBasePathProxy().targetPort;
-  }
-
   public async configure({
     blockUntil,
     shouldRedirectFromOldBasePath,
@@ -59,6 +51,14 @@ export class BasePathProxyRoot extends Root {
       httpConfig,
       shouldRedirectFromOldBasePath,
     });
+  }
+
+  public getBasePath() {
+    return this.getBasePathProxy().basePath;
+  }
+
+  public getTargetPort() {
+    return this.getBasePathProxy().targetPort;
   }
 
   protected async startServer() {

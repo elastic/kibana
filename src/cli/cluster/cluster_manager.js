@@ -55,13 +55,13 @@ export default class ClusterManager {
       this.basePathProxy = basePathProxy;
 
       optimizerArgv.push(
-        `--server.basePath=${this.basePathProxy.basePath}`,
+        `--server.basePath=${this.basePathProxy.getBasePath()}`,
         '--server.rewriteBasePath=true',
       );
 
       serverArgv.push(
-        `--server.port=${this.basePathProxy.targetPort}`,
-        `--server.basePath=${this.basePathProxy.basePath}`,
+        `--server.port=${this.basePathProxy.getTargetPort()}`,
+        `--server.basePath=${this.basePathProxy.getBasePath()}`,
         '--server.rewriteBasePath=true',
       );
     }
