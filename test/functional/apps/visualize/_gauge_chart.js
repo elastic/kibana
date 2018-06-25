@@ -48,11 +48,9 @@ export default function ({ getService, getPageObjects }) {
       const expectedCount = ['14,004', 'Count'];
 
       // initial metric of "Count" is selected by default
-      return retry.try(function tryingForTime() {
-        return PageObjects.visualize.getGaugeValue()
-          .then(function (metricValue) {
-            expect(expectedCount).to.eql(metricValue[0].split('\n'));
-          });
+      return retry.try(async function tryingForTime() {
+        const metricValue = await PageObjects.visualize.getGaugeValue();
+        expect(expectedCount).to.eql(metricValue[0].split('\n'));
       });
     });
 
