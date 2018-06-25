@@ -25,5 +25,6 @@ export default function ({ getService, loadTestFile }) {
     loadTestFile(require.resolve('./set_tag'));
     loadTestFile(require.resolve('./assign_tags_to_beats'));
     loadTestFile(require.resolve('./remove_tags_from_beats'));
+    loadTestFile(require.resolve('./get_beat_configuration'));
   });
 }
