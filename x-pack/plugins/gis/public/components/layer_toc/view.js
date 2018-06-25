@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-
+import { TOCEntry } from './toc_entry';
 import $ from 'jquery';
 
 export class LayerTOC extends React.Component {
@@ -16,32 +16,37 @@ export class LayerTOC extends React.Component {
   }
 
   componentDidMount() {
+    this._attachSortHandler(this.props);
+  }
+
+  _attachSortHandler({ updateLayerOrder }) {
     $(this._domContainer).sortable({
-      update: () => {
-        this._syncLayerOrderFromUIToMap();
+      start: (evt, { item }) => {
+        $(this).attr('data-previndex', item.index());
+      },
+      update: (evt, { item }) => {
+        const newIndex = item.index();
+        const oldIndex = +$(this).attr('data-previndex');
+        const newOrder = Array.from(this._domContainer.children).map((el, idx) => idx);
+        newOrder.splice(oldIndex, 1);
+        newOrder.splice(newIndex, 0, oldIndex);
+        updateLayerOrder(newOrder);
       }
     });
   }
 
-  _syncLayerOrderFromUIToMap() {
-
-    const domnodes = [...this._domContainer.children];
-    const layers = domnodes.map((node) => {
-      const layerId = node.getAttribute("data-layerid");
-      return this.props.layers.find(layer => {
-        return layer.getId() === layerId;
-      });
-    });
-    layers.reverse();
-    this.props.layerOrderChange(layers);
-  }
-
   _renderLayers() {
-    const topToBottomOrder = this.props.layers.slice();
-    topToBottomOrder.reverse();
-    return topToBottomOrder.map((layer) => {
-      const layerTOCEntry = layer.renderTOCEntry(this.props.showLayerDetails);
-      return (<div key={layer.getId()} data-layerid={layer.getId()}>{layerTOCEntry}</div>);
+    const { layerList } = this.props;
+    return layerList.map((layer, i) => {
+      return (
+        <TOCEntry
+          key={i}
+          layerId={i}
+          visible={true}
+          layerName={`Layer #${i}`}
+          // onButtonClick={alert('clicked!')}
+        />
+      );
     });
   }
 

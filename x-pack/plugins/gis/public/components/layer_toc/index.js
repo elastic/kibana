@@ -6,17 +6,20 @@
 
 import { connect } from 'react-redux';
 import { LayerTOC } from './view';
-import { updateFlyout, setSelectedLayer, getSelectedLayer, FLYOUT_STATE }
+import { updateFlyout, setSelectedLayer, FLYOUT_STATE }
   from '../../store/ui';
+import { updateLayerOrder } from "../../actions/map_actions";
+import { getLayerList } from "../../selectors/map_selectors";
 
 const mapDispatchToProps = {
   showLayerDetails: layer =>
-    updateFlyout(FLYOUT_STATE.LAYER_PANEL) && setSelectedLayer(layer)
+    updateFlyout(FLYOUT_STATE.LAYER_PANEL) && setSelectedLayer(layer),
+  updateLayerOrder: newOrder => updateLayerOrder(newOrder)
 };
 
 function mapStateToProps(state = {}) {
   return {
-    selectedLayer: getSelectedLayer(state)
+    layerList: getLayerList(state)
   };
 }
 
