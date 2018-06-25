@@ -25,7 +25,7 @@ export function NewJobButton() {
       fill
     >
       <i className="new-job-button fa fa-plus" />
-      Create New Job
+      Create new job
     </EuiButton>
   );
 }
