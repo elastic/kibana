@@ -6,7 +6,17 @@
         "max_docs": 1000,
         "max_size": "5gb"
       },
-      "settings": { "__scope_link": "put_settings" }
+      "settings": {
+        "__scope_link": "put_settings"
+      },
+      "mappings": {
+        "__scope_link": "put_mapping"
+      },
+      "aliases": {
+        "__template": {
+          "NAME": {}
+        }
+      }
     }
   }
 }
