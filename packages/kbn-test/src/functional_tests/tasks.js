@@ -67,15 +67,22 @@ export async function startServers(options) {
   const { config: configOption, createLogger } = options;
   const configPath = resolve(process.cwd(), configOption);
   const log = createLogger();
+  const opts = {
+    ...options,
+    log,
+  };
 
   await withProcRunner(log, async procs => {
     const config = await readConfigFile(log, configPath);
 
-    const es = await runElasticsearch({ config, options });
+    const es = await runElasticsearch({ config, options: opts });
     await runKibanaServer({
       procs,
       config,
-      options: { ...options, extraKbnOpts: [...options.extraKbnOpts, '--dev'] },
+      options: {
+        ...opts,
+        extraKbnOpts: [...options.extraKbnOpts, '--dev'],
+      },
     });
 
     // wait for 5 seconds of silence before logging the
@@ -99,12 +106,16 @@ async function silence(milliseconds, { log }) {
  */
 async function runSingleConfig(configPath, options) {
   const log = options.createLogger();
+  const opts = {
+    ...options,
+    log,
+  };
 
   await withProcRunner(log, async procs => {
     const config = await readConfigFile(log, configPath);
 
-    const es = await runElasticsearch({ config, options });
-    await runKibanaServer({ procs, config, options });
+    const es = await runElasticsearch({ config, options: opts });
+    await runKibanaServer({ procs, config, options: opts });
 
     // Note: When solving how to incorporate functional_test_runner
     // clean this up
@@ -112,7 +123,7 @@ async function runSingleConfig(configPath, options) {
       procs,
       configPath,
       cwd: process.cwd(),
-      options,
+      options: opts,
     });
 
     await procs.stop('kibana');
