@@ -17,11 +17,6 @@
  * under the License.
  */
 
-import { propFilter } from 'ui/filters/_prop_filter';
-import { uiModules } from 'ui/modules';
+export type Vis = any;
 
-uiModules
-  .get('kibana')
-  .filter('aggFilter', function () {
-    return propFilter('name');
-  });
+export type VisProvider = (...dependencies: any[]) => Vis;
