@@ -153,10 +153,6 @@ describe('Graph', () => {
         expect(edge).to.be.an(Edge);
       });
     });
-
-    it('identifies the highest vertex rank correctly', () => {
-      expect(graph.maxRank).to.be(3);
-    });
   });
 
   describe('assigning pipeline stages', () => {
