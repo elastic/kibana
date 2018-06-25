@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`logs error is already started 1`] = `
+exports[`logs error if already started 1`] = `
 Object {
   "debug": Array [],
   "error": Array [],

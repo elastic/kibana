@@ -30,10 +30,12 @@ import { Env } from '../config';
 import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
 import { HttpServer } from './http_server';
+import { HttpsRedirectServer } from './https_redirect_server';
 import { Router } from './router';
 
 export class HttpService implements CoreService {
   private readonly httpServer: HttpServer;
+  private readonly httpsRedirectServer: HttpsRedirectServer;
   private configSubscription?: Subscription;
 
   private readonly log: Logger;
@@ -44,7 +46,11 @@ export class HttpService implements CoreService {
     env: Env
   ) {
     this.log = logger.get('http');
+
     this.httpServer = new HttpServer(logger.get('http', 'server'), env);
+    this.httpsRedirectServer = new HttpsRedirectServer(
+      logger.get('http', 'redirect', 'server')
+    );
   }
 
   public async start() {
@@ -60,6 +66,13 @@ export class HttpService implements CoreService {
     });
 
     const config = await k$(this.config$)(first(), toPromise());
+
+    // If a redirect port is specified, we start an HTTP server at this port and
+    // redirect all requests to the SSL port.
+    if (config.ssl.enabled && config.ssl.redirectHttpFromPort !== undefined) {
+      await this.httpsRedirectServer.start(config);
+    }
+
     await this.httpServer.start(config);
   }
 
@@ -72,6 +85,7 @@ export class HttpService implements CoreService {
     this.configSubscription = undefined;
 
     await this.httpServer.stop();
+    await this.httpsRedirectServer.stop();
   }
 
   public registerRouter(router: Router): void {

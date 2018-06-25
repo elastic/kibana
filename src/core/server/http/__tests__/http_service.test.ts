@@ -41,6 +41,7 @@ test('creates and starts http server', async () => {
   const config = {
     host: 'example.org',
     port: 1234,
+    ssl: {},
   } as HttpConfig;
 
   const config$ = new BehaviorSubject(config);
@@ -66,8 +67,8 @@ test('creates and starts http server', async () => {
   expect(httpServer.start).toHaveBeenCalledTimes(1);
 });
 
-test('logs error is already started', async () => {
-  const config = {} as HttpConfig;
+test('logs error if already started', async () => {
+  const config = { ssl: {} } as HttpConfig;
 
   const config$ = new BehaviorSubject(config);
 
@@ -90,7 +91,7 @@ test('logs error is already started', async () => {
 });
 
 test('stops http server', async () => {
-  const config = {} as HttpConfig;
+  const config = { ssl: {} } as HttpConfig;
 
   const config$ = new BehaviorSubject(config);
 
