@@ -7,7 +7,7 @@
 import { intersection, uniq, values } from 'lodash';
 import { UNIQUENESS_ENFORCING_TYPES } from '../../../common/constants';
 import { CMTagsAdapter, ConfigurationBlock, FrameworkRequest } from '../lib';
-import { entries } from './../../utils/pollyfills';
+import { entries } from './../../utils/polyfills';
 
 export class CMTagsDomain {
   private adapter: CMTagsAdapter;
