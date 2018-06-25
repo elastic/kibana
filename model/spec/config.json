@@ -1,0 +1,11 @@
+{
+  "modelPackage": "castro.model",
+  "apiPackage": "castro.backend.api",
+  "invokerPackage": "castro.backend.server",
+  "configPackage": "castro.backend.config",
+  "dateLibrary": "java8",
+  "async": true,
+  "java8": true,
+  "rxInterface": true,
+  "supportsES6": true
+}

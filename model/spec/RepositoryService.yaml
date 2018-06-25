@@ -1,0 +1,68 @@
+---
+  swagger: "2.0"
+  info: 
+    version: "1.0.0"
+    title: "Repository Service"
+    description: "A set of API that manages the Git repositories"
+#    termsOfService: "http://swagger.io/terms/"
+  host: "localhost:8080"
+  basePath: "/api"
+  schemes: 
+    - "http"
+#  consumes:
+#    - "application/json"
+  produces: 
+    - "application/json"
+  paths: 
+    /repository/{uri}:
+      get: 
+        description: "Return a repository with given uri"
+        operationId: findRepo
+        parameters:
+          - name: uri
+            in: path
+            type: string
+            required: true
+        responses:
+          "200":
+            schema:
+              $ref: "#/definitions/Repository"
+      delete:
+        description: "Delete a repository with given uri"
+        operationId: deleteRepo
+        parameters:
+          - name: uri
+            in: path
+            type: string
+            required: true
+        responses: "204"
+    /repository:
+      post:
+        description: "Import a repository with given url"
+        operationId: importRepo
+        parameters:
+          - name: url
+            in: body
+            schema:
+              $ref: "#/definitions/NewRepository"
+            required: true
+        responses: "200"
+  definitions:
+    Repository:
+      type: object
+      required:
+        - uri
+      properties:
+        uri:
+          type: string
+        name:
+          type: string
+        org:
+          type: string
+        url:
+          type: string
+    NewRepository:
+      type: object
+      properties:
+        url:
+          type: string

@@ -3,7 +3,6 @@ include 'elasticsearch'
 
 include 'backend'
 include 'model'
-include 'pipeline'
 include 'kibana-extra:castro'
 
 include 'analyzer'

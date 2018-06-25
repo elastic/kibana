@@ -16,7 +16,7 @@ windows:
     - shell_command:
         - ./gradlew bootRun
     - shell_command:
-        - ./gradlew -t build
+        - ./gradlew -t :backend:build
 - window_name: others
   layout: even-horizontal
   panes:
