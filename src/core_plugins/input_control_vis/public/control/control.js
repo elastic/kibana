@@ -106,12 +106,18 @@ export class Control {
     }
   }
 
+  /*
+   * Remove any user changes to value by resetting value to that as provided by Kibana filter pills
+   */
   reset() {
     this._hasChanged = false;
     this._kbnFilter = null;
     this.value = this.filterManager.getValueFromFilterBar();
   }
 
+  /*
+   * Clear any filter on the field by setting the control value to undefined.
+   */
   clear() {
     this.set();
   }
