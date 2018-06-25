@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { CustomPatternsInput } from './custom_patterns_input';
+export { GrokDebugger } from './grok_debugger';
