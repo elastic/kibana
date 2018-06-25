@@ -2,7 +2,7 @@
   "indices.get_template": {
     "patterns": [
       "_template",
-      "_template/{template_id}"
+      "_template/{template}"
     ]
   }
 }

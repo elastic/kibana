@@ -7,7 +7,7 @@
       "settings": { "__scope_link": "put_settings" }
     },
     "patterns": [
-      "_template/{template_id}"
+      "_template/{template}"
     ]
   }
 }

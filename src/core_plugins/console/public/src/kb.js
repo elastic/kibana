@@ -61,7 +61,7 @@ const parametrizedComponentFactories = {
   id: function (name, parent) {
     return idAutocompleteComponentFactory(name, parent);
   },
-  template_id: function (name, parent) {
+  template: function (name, parent) {
     return new TemplateAutocompleteComponent(name, parent);
   },
   task_id: function (name, parent) {
