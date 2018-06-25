@@ -102,8 +102,11 @@ export const shouldShowStartTrial = state => {
 };
 
 export const shouldShowRequestTrialExtension = state => {
+  if (state.trialStatus.canStartTrial) {
+    return false;
+  }
   const { type } = getLicense(state);
-  return (type !== 'platinum' || isExpired(state)) && !state.trialStatus.canStartTrial;
+  return type !== 'platinum' || isExpired(state);
 };
 
 export const startTrialError = state => {

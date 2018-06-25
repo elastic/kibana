@@ -62,7 +62,7 @@ describe('RequestTrialExtension component', () => {
     expect(html).not.toBeNull();
     expect(html).toMatchSnapshot();
   });
-  test('should display when platinum license is expired and trial has been used', () => {
+  test('should display when platinum license is not active and trial has been used', () => {
     const rendered = getComponent(
       {
         trialStatus: {
@@ -76,7 +76,7 @@ describe('RequestTrialExtension component', () => {
     expect(html).not.toBeNull();
     expect(html).toMatchSnapshot();
   });
-  test('should not display when platinum license is not expired and trial has been used', () => {
+  test('should not display when platinum license is active and trial has been used', () => {
     const rendered = getComponent(
       {
         trialStatus: {
