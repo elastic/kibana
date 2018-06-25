@@ -11,7 +11,7 @@
     "preinstall": "node ../../kibana/preinstall_check",
     "kbn": "node ../../kibana/scripts/kbn",
     "lint": "eslint **/*.js",
-    "start": "plugin-helpers start",
+    "start": "plugin-helpers start --elasticsearch.url http://localhost:9201 --no-base-path",
     "test:server": "plugin-helpers test:server",
     "test:browser": "plugin-helpers test:browser",
     "build": "plugin-helpers build"
@@ -21,7 +21,7 @@
     "@elastic/eslint-import-resolver-kibana": "^0.9.0",
     "@elastic/eui": "^0.0.51",
     "@kbn/plugin-helpers": "link:../../kibana/packages/kbn-plugin-helpers",
-    "@types/hapi": "^17.0.12",
+    "@types/hapi": "^15.0.0",
     "@types/nodegit": "^0.18.8",
     "@types/react": "^16.3.16",
     "@types/react-redux": "^6.0.2",
@@ -34,10 +34,13 @@
     "eslint-plugin-mocha": "^4.9.0",
     "eslint-plugin-prefer-object-spread": "^1.2.1",
     "eslint-plugin-react": "^7.0.1",
-    "expect.js": "^0.3.1"
+    "expect.js": "^0.3.1",
+    "mocha": "^5.2.0"
   },
   "dependencies": {
     "highlights": "^3.1.1",
+    "javascript-typescript-langserver": "^2.10.0",
+    "lsp-proxy": "link:../../lsp-proxy",
     "nodegit": "^0.22.1",
     "react-redux": "^5.0.7",
     "redux": "^4.0.0",

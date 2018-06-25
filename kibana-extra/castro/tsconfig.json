@@ -6,7 +6,7 @@
     "jsx": "react",
 
     // Enables all strict type checking options.
-    "strict": true,
+    "strict": false,
 
     // enables "core language features"
     "lib": [
@@ -37,11 +37,11 @@
     "moduleResolution": "node",
 
     // Disallow inconsistently-cased references to the same file.
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "sourceMap": true
   },
   "include": [
     "server/**/*",
-    "public/**/*",
     "common/**/*"
   ]
 }

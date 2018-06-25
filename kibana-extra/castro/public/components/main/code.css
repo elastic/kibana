@@ -27,7 +27,9 @@
   font-weight: bold;
 }
 
-
+.symbol {
+  text-decoration: underline;
+}
 
 
 .parameter {

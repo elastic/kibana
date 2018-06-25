@@ -1,0 +1,17 @@
+{
+  "name": "lsp-proxy",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "license": "MIT",
+  "dependencies": {
+    "@types/hapi": "^15.0.0",
+    "@types/node": "^10.3.5",
+    "hapi": "^14.2.0",
+    "javascript-typescript-langserver": "^2.10.0",
+    "vscode-languageserver": "^4.2.1"
+  },
+  "scripts": {
+    "build": "tsc"
+  }
+}

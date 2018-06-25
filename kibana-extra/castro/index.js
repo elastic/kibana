@@ -1,5 +1,6 @@
 import exampleRoute from './server/routes/example';
 import personRoute from './server/routes/person';
+import lspRoute from './server/routes/lsp';
 
 import mappings from './mappings';
 
@@ -35,6 +36,7 @@ export default function (kibana) {
       // Add server routes and initialize the plugin here
       exampleRoute(server);
       personRoute(server);
+      lspRoute(server)
     }
     
 

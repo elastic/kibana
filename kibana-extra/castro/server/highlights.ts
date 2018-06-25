@@ -1,6 +1,7 @@
 const Highlights = require('highlights');
 const highlighter = new Highlights();
 const Selector = require('first-mate-select-grammar');
+import {DocumentSymbolParams, SymbolInformation} from "vscode-languageserver";
 
 highlighter.loadGrammarsSync();
 
@@ -47,6 +48,20 @@ export function computeRanges(lines: CodeLine[]) {
             pos += len;
         }
         pos += 1;  // line break
+    }
+}
+
+export function mergeSymbols(codeLines: CodeLine[], symbols: SymbolInformation[]) {
+    for (const symbol of symbols) {
+        const {start, end} = symbol.location.range;
+        const codeLine = codeLines[start.line];
+        if (codeLine) {
+            for (const token of codeLine) {
+                if (token.range.start == start.character && token.range.end == end.character) {
+                    token.scopes.push('symbol')
+                }
+            }
+        }
     }
 }
 
