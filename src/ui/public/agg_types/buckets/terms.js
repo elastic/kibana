@@ -106,7 +106,7 @@ export const termsBucketAgg = new BucketAggType({
       });
       request.stats(getRequestInspectorStats(nestedSearchSource));
 
-      const response = await nestedSearchSource.fetchAsRejectablePromise();
+      const response = await nestedSearchSource.fetch();
       request
         .stats(getResponseInspectorStats(nestedSearchSource, response))
         .ok({ json: response });

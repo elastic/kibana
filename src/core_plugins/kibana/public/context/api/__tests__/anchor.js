@@ -47,12 +47,12 @@ describe('context app', function () {
       fetchAnchor = Private(fetchAnchorProvider);
     }));
 
-    it('should use the `fetchAsRejectablePromise` method of the SearchSource', function () {
+    it('should use the `fetch` method of the SearchSource', function () {
       const searchSourceStub = new SearchSourceStub();
 
       return fetchAnchor('INDEX_PATTERN_ID', 'doc', 'id', [{ '@timestamp': 'desc' }, { '_doc': 'asc' }])
         .then(() => {
-          expect(searchSourceStub.fetchAsRejectablePromise.calledOnce).to.be(true);
+          expect(searchSourceStub.fetch.calledOnce).to.be(true);
         });
     });
 
@@ -176,7 +176,7 @@ function createSearchSourceStubProvider(hits) {
   searchSourceStub.filter = sinon.stub().returns(searchSourceStub);
   searchSourceStub.inherits = sinon.stub().returns(searchSourceStub);
   searchSourceStub.set = sinon.stub().returns(searchSourceStub);
-  searchSourceStub.fetchAsRejectablePromise = sinon.spy(() => Promise.resolve({
+  searchSourceStub.fetch = sinon.spy(() => Promise.resolve({
     hits: {
       hits: searchSourceStub._stubHits,
       total: searchSourceStub._stubHits.length,
