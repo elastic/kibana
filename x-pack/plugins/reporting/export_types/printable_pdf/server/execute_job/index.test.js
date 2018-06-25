@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Rx from 'rxjs';
+import * as Rx from 'rxjs';
 import { memoize } from 'lodash';
 import { cryptoFactory } from '../../../../server/lib/crypto';
 import { executeJobFactory } from './index';
@@ -70,7 +70,7 @@ test(`passes in decrypted headers to generatePdf`, async () => {
   };
 
   const generatePdfObservable = generatePdfObservableFactory();
-  generatePdfObservable.mockReturnValue(Rx.Observable.of(Buffer.from('')));
+  generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
   const encryptedHeaders = await encryptHeaders(headers);
   const executeJob = executeJobFactory(mockServer);
@@ -98,7 +98,7 @@ test(`omits blacklisted headers`, async () => {
   });
 
   const generatePdfObservable = generatePdfObservableFactory();
-  generatePdfObservable.mockReturnValue(Rx.Observable.of(Buffer.from('')));
+  generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
   const executeJob = executeJobFactory(mockServer);
   await executeJob({ objects: [], headers: encryptedHeaders }, cancellationToken);
@@ -113,7 +113,7 @@ test(`gets logo from uiSettings`, async () => {
   mockServer.uiSettingsServiceFactory().get.mockReturnValue(logo);
 
   const generatePdfObservable = generatePdfObservableFactory();
-  generatePdfObservable.mockReturnValue(Rx.Observable.of(Buffer.from('')));
+  generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
   const executeJob = executeJobFactory(mockServer);
   await executeJob({ objects: [], headers: encryptedHeaders }, cancellationToken);
@@ -126,7 +126,7 @@ test(`passes browserTimezone to generatePdf`, async () => {
   const encryptedHeaders = await encryptHeaders({});
 
   const generatePdfObservable = generatePdfObservableFactory();
-  generatePdfObservable.mockReturnValue(Rx.Observable.of(Buffer.from('')));
+  generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
   const executeJob = executeJobFactory(mockServer);
   const browserTimezone = 'UTC';
@@ -140,7 +140,7 @@ test(`adds forceNow to hash's query, if it exists`, async () => {
   const encryptedHeaders = await encryptHeaders({});
 
   const generatePdfObservable = generatePdfObservableFactory();
-  generatePdfObservable.mockReturnValue(Rx.Observable.of(Buffer.from('')));
+  generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
   const executeJob = executeJobFactory(mockServer);
   const forceNow = '2000-01-01T00:00:00.000Z';
@@ -154,7 +154,7 @@ test(`appends forceNow to hash's query, if it exists`, async () => {
   const encryptedHeaders = await encryptHeaders({});
 
   const generatePdfObservable = generatePdfObservableFactory();
-  generatePdfObservable.mockReturnValue(Rx.Observable.of(Buffer.from('')));
+  generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
   const executeJob = executeJobFactory(mockServer);
   const forceNow = '2000-01-01T00:00:00.000Z';
@@ -172,7 +172,7 @@ test(`doesn't append forceNow query to url, if it doesn't exists`, async () => {
   const encryptedHeaders = await encryptHeaders({});
 
   const generatePdfObservable = generatePdfObservableFactory();
-  generatePdfObservable.mockReturnValue(Rx.Observable.of(Buffer.from('')));
+  generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
   const executeJob = executeJobFactory(mockServer);
 
@@ -186,7 +186,7 @@ test(`returns content_type of application/pdf`, async () => {
   const encryptedHeaders = await encryptHeaders({});
 
   const generatePdfObservable = generatePdfObservableFactory();
-  generatePdfObservable.mockReturnValue(Rx.Observable.of(Buffer.from('')));
+  generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
   const { content_type: contentType } = await executeJob({ objects: [], timeRange: {}, headers: encryptedHeaders }, cancellationToken);
   expect(contentType).toBe('application/pdf');
@@ -196,7 +196,7 @@ test(`returns content of generatePdf getBuffer base64 encoded`, async () => {
   const testContent = 'test content';
 
   const generatePdfObservable = generatePdfObservableFactory();
-  generatePdfObservable.mockReturnValue(Rx.Observable.of(Buffer.from(testContent)));
+  generatePdfObservable.mockReturnValue(Rx.of(Buffer.from(testContent)));
 
   const executeJob = executeJobFactory(mockServer);
   const encryptedHeaders = await encryptHeaders({});
@@ -204,4 +204,3 @@ test(`returns content of generatePdf getBuffer base64 encoded`, async () => {
 
   expect(content).toEqual(Buffer.from(testContent).toString('base64'));
 });
-

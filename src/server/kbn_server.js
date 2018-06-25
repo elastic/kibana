@@ -38,6 +38,7 @@ import { savedObjectsMixin } from './saved_objects';
 import { sampleDataMixin } from './sample_data';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
+import { sassMixin } from './sass';
 
 const rootDir = fromRoot('.');
 
@@ -85,6 +86,9 @@ export default class KbnServer {
       // ensure that all bundles are built, or that the
       // watch bundle server is running
       optimizeMixin,
+
+      // transpiles SCSS into CSS
+      sassMixin,
 
       // initialize the plugins
       Plugins.initializeMixin,

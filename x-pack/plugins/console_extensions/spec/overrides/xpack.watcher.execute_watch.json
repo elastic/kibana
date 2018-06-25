@@ -1,0 +1,12 @@
+{
+  "xpack.watcher.execute_watch": {
+    "data_autocomplete_rules": {
+      "trigger_data": {},
+      "ignore_condition": { "__one_of": ["true", "false"] },
+      "record_execution": { "__one_of": ["true", "false"] },
+      "watch": {},
+      "alternative_input": {},
+      "action_modes": {}
+    }
+  }
+}

@@ -18,7 +18,8 @@
  */
 
 import { readFileSync } from 'fs';
-import { Observable } from 'rxjs';
+import * as Rx from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { resolve } from 'path';
 import { createInvalidPackError } from '../errors';
 
@@ -50,7 +51,8 @@ async function createPackageJsonAtPath(path) {
 }
 
 export const createPackageJsonAtPath$ = (path) => (
-  Observable.defer(() => createPackageJsonAtPath(path))
-    .map(packageJson => ({ packageJson }))
-    .catch(error => [{ error }])
+  Rx.defer(() => createPackageJsonAtPath(path)).pipe(
+    map(packageJson => ({ packageJson })),
+    catchError(error => [{ error }])
+  )
 );
