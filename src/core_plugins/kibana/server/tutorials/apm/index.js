@@ -20,7 +20,7 @@
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions } from './on_prem';
 import { ELASTIC_CLOUD_INSTRUCTIONS } from './elastic_cloud';
-import { getSavedObjects } from './saved_objects';
+import { getSavedObjects } from './saved_objects/get_saved_objects';
 
 const apmIntro = 'Collect in-depth performance metrics and errors from inside your applications.';
 
