@@ -68,7 +68,7 @@ function getFieldsForTypes(searchFields, types) {
  *  @param  {Array<string>} searchFields
  *  @return {Object}
  */
-export function getQueryParams(mappings, type, search, searchFields, extraQueryParams) {
+export function getQueryParams(mappings, type, search, searchFields, extraQueryParams = {}) {
   if (!type && !search) {
     return {};
   }
@@ -94,9 +94,31 @@ export function getQueryParams(mappings, type, search, searchFields, extraQueryP
     ];
   }
 
-  const query = defaultsDeep({
-    bool
-  }, extraQueryParams);
+  const fieldsToMerge = ['filter', 'must'];
+
+  const extraParams = {
+    ...extraQueryParams.bool
+  };
+
+  fieldsToMerge.forEach(field => delete extraParams[field]);
+
+  let query = {
+    bool: defaultsDeep(bool, extraParams)
+  };
+
+  if (extraQueryParams.bool) {
+
+    const extraBoolParams = extraQueryParams.bool;
+
+    query = fieldsToMerge.reduce((queryAcc, field) => {
+      const prop = queryAcc.bool[field];
+      const extraProp = extraBoolParams[field];
+      if (Array.isArray(prop) && Array.isArray(extraProp)) {
+        queryAcc.bool[field] = [...prop, ...extraProp];
+      }
+      return queryAcc;
+    }, query);
+  }
 
   return { query };
 }

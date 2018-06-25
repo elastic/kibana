@@ -328,7 +328,7 @@ describe('SavedObjectsRepository', () => {
   });
 
   describe('#delete', () => {
-    it('throws notFound when ES is unable to find the document',  async () => {
+    it('throws notFound when ES is unable to find the document', async () => {
       expect.assertions(1);
 
       callAdminCluster.returns(Promise.resolve({
@@ -337,7 +337,7 @@ describe('SavedObjectsRepository', () => {
 
       try {
         await savedObjectsRepository.delete('index-pattern', 'logstash-*');
-      } catch(e) {
+      } catch (e) {
         expect(e.output.statusCode).toEqual(404);
       }
     });
@@ -388,13 +388,14 @@ describe('SavedObjectsRepository', () => {
       }
     });
 
-    it('passes mappings, search, searchFields, type, sortField, and sortOrder to getSearchDsl', async () => {
+    it('passes mappings, search, searchFields, type, sortField, extraQueryParams, and sortOrder to getSearchDsl', async () => {
       const relevantOpts = {
         search: 'foo*',
         searchFields: ['foo'],
         type: 'bar',
         sortField: 'name',
         sortOrder: 'desc',
+        extraQueryParams: { bool: {} },
       };
 
       await savedObjectsRepository.find(relevantOpts);

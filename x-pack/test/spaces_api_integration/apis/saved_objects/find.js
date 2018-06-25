@@ -41,6 +41,11 @@ export default function ({ getService }) {
       resp.body.saved_objects.sort(sortById);
 
       const expectedSavedObjects = [{
+        id: '7.0.0-alpha1',
+        type: 'config',
+        updated_at: '2017-09-21T18:49:16.302Z',
+        version: 3,
+      }, {
         id: `default`,
         type: 'space',
         updated_at: '2017-09-21T18:49:16.270Z',
@@ -64,14 +69,7 @@ export default function ({ getService }) {
         updated_at: '2017-09-21T18:49:16.270Z',
         version: 1,
       },
-      // {
-      //   id: '7.0.0-alpha1',
-      //   type: 'config',
-      //   updated_at: '2017-09-21T18:49:16.302Z',
-      //   version: 1,
-      //   ...getExpectedSpaceIdProperty(spaceId),
-      //   attributes: resp.body.saved_objects[objectIndex++].attributes
-      // },
+
       {
         id: `${getIdPrefix(spaceId)}be3733a0-9efe-11e7-acb3-3dab96693fab`,
         type: 'dashboard',
@@ -94,7 +92,7 @@ export default function ({ getService }) {
       expect(resp.body).to.eql({
         page: 1,
         per_page: 20,
-        total: 6,
+        total: expectedSavedObjects.length,
         saved_objects: expectedSavedObjects,
       });
     };
