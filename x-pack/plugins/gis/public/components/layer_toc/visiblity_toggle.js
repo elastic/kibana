@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-export function VisibilityToggle() {
+export function VisibilityToggle(props) {
   const onChange = (event) => {
     this.props.onChange(event.target.checked);
   };
@@ -17,7 +17,7 @@ export function VisibilityToggle() {
       <input
         className="euiSwitch__input"
         type="checkbox"
-        checked={this.props.checked}
+        checked={props.checked}
         onChange={onChange}
       />
     </div>
