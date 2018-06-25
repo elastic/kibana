@@ -14,7 +14,7 @@ import {
   EuiTitle
 } from '@elastic/eui';
 
-// import { LayerTOC } from '../layer_toc';
+import { LayerTOC } from '../layer_toc';
 import { LayerPanel } from '../layer_panel';
 
 export class LayerControl extends React.Component {
@@ -66,9 +66,10 @@ export class LayerControl extends React.Component {
           </EuiFlexGroup>
           <EuiFlexGroup>
             <EuiFlexItem>
-              {/*<LayerTOC layers={this.state.layers}
-              layerOrderChange={this._onLayerOrderChange}
-              showLayerDetails={this._showLayerDetails}/>*/}
+              <LayerTOC
+                layerOrderChange={this._onLayerOrderChange}
+                showLayerDetails={this._showLayerDetails}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
