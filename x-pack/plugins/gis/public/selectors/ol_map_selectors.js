@@ -19,6 +19,7 @@ function convertTmsLayersToOl({ details }) {
     })
   });
 }
+
 const convertVectorLayersToOl = (() => {
   const geojsonFormat = new ol.format.GeoJSON({
     featureProjection: FEATURE_PROJECTION
@@ -33,7 +34,7 @@ const convertVectorLayersToOl = (() => {
   };
 })();
 
-function updateLayersByType(layerList) {
+function convertLayersByType(layerList) {
   return layerList.map(layer => {
     switch (layer.appData.layerType) {
       case LAYER_TYPE.TMS:
@@ -53,6 +54,6 @@ function updateLayersByType(layerList) {
 export function getOlLayers(state) {
   return createSelector(
     getLayerList,
-    layerList => updateLayersByType(layerList)
+    layerList => convertLayersByType(layerList)
   )(state);
 }
