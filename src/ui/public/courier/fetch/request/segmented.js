@@ -33,8 +33,8 @@ export function SegmentedRequestProvider(Private, config) {
   });
 
   class SegmentedReq extends SearchRequest {
-    constructor(source, defer, initFn) {
-      super(source, defer);
+    constructor({ source, defer, errorHandler, initFn }) {
+      super({ source, defer, errorHandler });
 
       this.type = 'segmented';
 

@@ -32,7 +32,17 @@ import Api from './kb/api';
 let ACTIVE_API = new Api();
 const isNotAnIndexName = name => name[0] === '_' && name !== '_all';
 
+const idAutocompleteComponentFactory = (name, parent) => {
+  return new IdAutocompleteComponent(name, parent);
+};
 const parametrizedComponentFactories = {
+  getComponent: function (name, parent, provideDefault) {
+    if (this[name]) {
+      return this[name];
+    } else if (provideDefault) {
+      return idAutocompleteComponentFactory;
+    }
+  },
   index: function (name, parent) {
     if (isNotAnIndexName(name)) return;
     return new IndexAutocompleteComponent(name, parent, false);
@@ -48,13 +58,13 @@ const parametrizedComponentFactories = {
     return new TypeAutocompleteComponent(name, parent, true);
   },
   id: function (name, parent) {
-    return new IdAutocompleteComponent(name, parent);
+    return idAutocompleteComponentFactory(name, parent);
   },
   task_id: function (name, parent) {
-    return new IdAutocompleteComponent(name, parent);
+    return idAutocompleteComponentFactory(name, parent);
   },
   ids: function (name, parent) {
-    return new IdAutocompleteComponent(name, parent, true);
+    return idAutocompleteComponentFactory(name, parent, true);
   },
   fields: function (name, parent) {
     return new FieldAutocompleteComponent(name, parent, true);
