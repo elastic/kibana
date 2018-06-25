@@ -20,7 +20,6 @@
 import _ from 'lodash';
 import '../saved_visualizations/saved_visualizations';
 import 'ui/vis/editors/default/sidebar';
-import './agg_filter';
 import 'ui/visualize';
 import 'ui/collapsible_sidebar';
 import 'ui/share';
@@ -130,6 +129,21 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     description: 'Share Visualization',
     template: require('plugins/kibana/visualize/editor/panels/share.html'),
     testId: 'visualizeShareButton',
+  }, {
+    key: 'inspector',
+    description: 'Open Inspector for visualization',
+    testId: 'openInspectorButton',
+    disableButton() {
+      return !vis.hasInspector();
+    },
+    run() {
+      vis.openInspector().bindToAngularScope($scope);
+    },
+    tooltip() {
+      if (!vis.hasInspector()) {
+        return 'This visualization doesn\'t support any inspectors.';
+      }
+    }
   }, {
     key: 'refresh',
     description: 'Refresh',

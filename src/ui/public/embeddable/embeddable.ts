@@ -18,6 +18,7 @@
  */
 
 import * as PropTypes from 'prop-types';
+import { Adapters } from 'ui/inspector';
 import { ContainerState } from './types';
 
 // TODO: we'll be able to get rid of this shape once all of dashboard is typescriptified too.
@@ -88,6 +89,15 @@ export abstract class Embeddable {
     domNode: HTMLElement,
     containerState: ContainerState
   ): void;
+
+  /**
+   * An embeddable can return inspector adapters if it want the inspector to be
+   * available via the context menu of that panel.
+   * @return Inspector adapters that will be used to open an inspector for.
+   */
+  public getInspectorAdapters(): Adapters | undefined {
+    return undefined;
+  }
 
   public destroy(): void {
     return;

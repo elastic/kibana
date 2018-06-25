@@ -92,63 +92,41 @@ export default function ({ getService, getPageObjects }) {
       /**
        * manually compare data due to possible small difference in numbers. This is browser dependent.
        */
-      function compareTableData(expected, actual) {
+      function compareTableData(actual, expected) {
         log.debug('comparing expected: ', expected);
         log.debug('with actual: ', actual);
 
-        expect(actual.length).to.eql(expected.length);
-
-        function tokenize(row) {
-          const tokens = row.split(' ');
-
-          let geohashIndex;
-          let countIndex;
-          let latIndex;
-          let lonIndex;
-          if (tokens.length === 8) {
-            // table row aggregations: geohash_grid -> count -> geocentroid
-            geohashIndex = 0;
-            countIndex = 1;
-            latIndex = 4;
-            lonIndex = 6;
-          } else if (tokens.length === 9) {
-            // table row aggregations: filter -> geohash_grid -> count -> geocentroid
-            geohashIndex = 1;
-            countIndex = 2;
-            latIndex = 5;
-            lonIndex = 7;
-          } else {
-            log.error(`Unexpected number of tokens contained in spy table row: ${row}`);
-          }
-          return {
-            geohash: tokens[geohashIndex],
-            count: tokens[countIndex],
-            lat: Math.floor(parseFloat(tokens[latIndex])),
-            lon: Math.floor(parseFloat(tokens[lonIndex]))
+        const roundedValues = actual.map(row => {
+          // Parse last element in each row as JSON and floor the lat/long value
+          const coords = JSON.parse(row[row.length - 1]);
+          row[row.length - 1] = {
+            lat: Math.floor(parseFloat(coords.lat)),
+            lon: Math.floor(parseFloat(coords.lon)),
           };
-        }
+          return row;
+        });
 
-        expect(actual.map(tokenize)).to.eql(expected.map(tokenize));
+        expect(roundedValues).to.eql(expected);
       }
 
       describe('Only request data around extent of map option', async () => {
-        before(async () => await PageObjects.visualize.openSpyPanel());
+        before(async () => await PageObjects.visualize.openInspector());
 
         it('when checked adds filters to aggregation', async () => {
-          const tableHeaders = await PageObjects.visualize.getDataTableHeaders();
-          expect(tableHeaders.trim()).to.equal('filter geohash_grid Count Geo Centroid');
+          const tableHeaders = await PageObjects.visualize.getInspectorTableHeaders();
+          expect(tableHeaders).to.eql(['filter', 'geohash_grid', 'Count', 'Geo Centroid']);
         });
 
         it('when not checked does not add filters to aggregation', async () => {
           await PageObjects.visualize.toggleIsFilteredByCollarCheckbox();
           await PageObjects.visualize.clickGo();
           await PageObjects.header.waitUntilLoadingHasFinished();
-          const tableHeaders = await PageObjects.visualize.getDataTableHeaders();
-          expect(tableHeaders.trim()).to.equal('geohash_grid Count Geo Centroid');
+          const tableHeaders = await PageObjects.visualize.getInspectorTableHeaders();
+          expect(tableHeaders).to.eql(['geohash_grid', 'Count', 'Geo Centroid']);
         });
 
         after(async () => {
-          await PageObjects.visualize.closeSpyPanel();
+          await PageObjects.visualize.closeInspector();
           await PageObjects.visualize.toggleIsFilteredByCollarCheckbox();
           await PageObjects.visualize.clickGo();
           await PageObjects.header.waitUntilLoadingHasFinished();
@@ -156,29 +134,30 @@ export default function ({ getService, getPageObjects }) {
       });
 
       describe('tile map chart', function indexPatternCreation() {
-        it('should display spy panel toggle button', async function () {
-          const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
+        it('should have inspector enabled', async function () {
+          const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
           expect(spyToggleExists).to.be(true);
         });
 
         it('should show correct tile map data on default zoom level', async function () {
-          const expectedTableData = ['9 5,787 { "lat": 37.22448418632405, "lon": -103.01935195013255 }',
-            'd 5,600 { "lat": 37.44271478370398, "lon": -81.72692197253595 }',
-            'c 1,319 { "lat": 47.72720855392425, "lon": -109.84745063951028 }',
-            'b 999 { "lat": 62.04130042948433, "lon": -155.28087269195967 }',
-            'f 187 { "lat": 45.656166475784175, "lon": -82.45831044201545 }',
-            '8 108 { "lat": 18.85260305600241, "lon": -156.5148810390383 }'];
+          const expectedTableData = [
+            ['-', '9', '5,787', { 'lat': 37, 'lon': -104 } ],
+            ['-', 'd', '5,600', { 'lat': 37, 'lon': -82 } ],
+            ['-', 'c', '1,319', { 'lat': 47, 'lon': -110 } ],
+            ['-', 'b', '999', { 'lat': 62, 'lon': -156 } ],
+            ['-', 'f', '187', { 'lat': 45, 'lon': -83 } ],
+            ['-', '8', '108', { 'lat': 18, 'lon': -157 } ]
+          ];
           //level 1
           await PageObjects.visualize.clickMapZoomOut();
           //level 0
           await PageObjects.visualize.clickMapZoomOut();
 
-          await PageObjects.visualize.openSpyPanel();
-          await PageObjects.visualize.setSpyPanelPageSize('All');
-          await PageObjects.visualize.selectTableInSpyPaneSelect();
-          const actualTableData = await PageObjects.visualize.getDataTableData();
-          compareTableData(expectedTableData, actualTableData.trim().split('\n'));
-          await PageObjects.visualize.closeSpyPanel();
+          await PageObjects.visualize.openInspector();
+          await PageObjects.visualize.setInspectorTablePageSize(50);
+          const actualTableData = await PageObjects.visualize.getInspectorTableData();
+          await PageObjects.visualize.closeInspector();
+          compareTableData(actualTableData, expectedTableData);
         });
 
         it('should not be able to zoom out beyond 0', async function () {
@@ -190,24 +169,23 @@ export default function ({ getService, getPageObjects }) {
         // See https://github.com/elastic/kibana/issues/13137 if this test starts failing intermittently
         it('Fit data bounds should zoom to level 3', async function () {
           const expectedPrecision2DataTable = [
-            '- dn 1,429 { "lat": 36.38058884214008, "lon": -84.78904345856186 }',
-            '- dp 1,418 { "lat": 41.64735764514311, "lon": -84.89821054446622 }',
-            '- 9y 1,215 { "lat": 36.45605112115542, "lon": -95.0664575824997 }',
-            '- 9z 1,099 { "lat": 42.18533764798381, "lon": -95.16736779696697 }',
-            '- dr 1,076 { "lat": 42.02351013780139, "lon": -73.98091798822212 }',
-            '- dj 982 { "lat": 31.672735499211466, "lon": -84.50815450245526 }',
-            '- 9v 938 { "lat": 31.380767446489873, "lon": -95.2705099188121 }',
-            '- 9q 722 { "lat": 36.51360723008776, "lon": -119.18302692440686 }',
-            '- 9w 475 { "lat": 36.39264289740669, "lon": -106.91102287667363 }',
-            '- cb 457 { "lat": 46.70940601270996, "lon": -95.81077801137022 }'
+            ['-', 'dn', '1,429', { 'lat': 36, 'lon': -85 }],
+            ['-', 'dp', '1,418', { 'lat': 41, 'lon': -85 }],
+            ['-', '9y', '1,215', { 'lat': 36, 'lon': -96 }],
+            ['-', '9z', '1,099', { 'lat': 42, 'lon': -96 }],
+            ['-', 'dr', '1,076', { 'lat': 42, 'lon': -74 }],
+            ['-', 'dj', '982', { 'lat': 31, 'lon': -85 }],
+            ['-', '9v', '938', { 'lat': 31, 'lon': -96 }],
+            ['-', '9q', '722', { 'lat': 36, 'lon': -120 }],
+            ['-', '9w', '475', { 'lat': 36, 'lon': -107 }],
+            ['-', 'cb', '457', { 'lat': 46, 'lon': -96 }]
           ];
 
           await PageObjects.visualize.clickMapFitDataBounds();
-          await PageObjects.visualize.openSpyPanel();
-          await PageObjects.visualize.selectTableInSpyPaneSelect();
-          const data = await PageObjects.visualize.getDataTableData();
-          await compareTableData(expectedPrecision2DataTable, data.trim().split('\n'));
-          await PageObjects.visualize.closeSpyPanel();
+          await PageObjects.visualize.openInspector();
+          const data = await PageObjects.visualize.getInspectorTableData();
+          await PageObjects.visualize.closeInspector();
+          compareTableData(data, expectedPrecision2DataTable);
         });
 
         it('Newly saved visualization retains map bounds', async () => {
@@ -218,7 +196,7 @@ export default function ({ getService, getPageObjects }) {
 
           const mapBounds = await PageObjects.visualize.getMapBounds();
 
-          await PageObjects.visualize.closeSpyPanel();
+          await PageObjects.visualize.closeInspector();
           await PageObjects.visualize.saveVisualization(vizName1);
 
           const afterSaveMapBounds = await PageObjects.visualize.getMapBounds();

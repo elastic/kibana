@@ -48,7 +48,6 @@ uiModules
     return {
       restrict: 'E',
       scope: {
-        showSpyPanel: '=?',
         editorMode: '=?',
         savedObj: '=?',
         appState: '=?',
@@ -113,8 +112,8 @@ uiModules
           requestHandler($scope.vis, handlerParams)
             .then(requestHandlerResponse => {
 
-            //No need to call the response handler when there have been no data nor has been there changes
-            //in the vis-state (response handler does not depend on uiStat
+              //No need to call the response handler when there have been no data nor has been there changes
+              //in the vis-state (response handler does not depend on uiStat
               const canSkipResponseHandler = (
                 $scope.previousRequestHandlerResponse && $scope.previousRequestHandlerResponse === requestHandlerResponse &&
               $scope.previousVisState && _.isEqual($scope.previousVisState, $scope.vis.getState())
