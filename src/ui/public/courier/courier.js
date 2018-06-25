@@ -74,7 +74,7 @@ uiModules.get('kibana/courier').service('courier', ($rootScope, Private) => {
      * a promise that resembles the success of the fetch completing,
      * individual errors are routed to their respective requests.
      */
-    public fetch = () => {
+    fetch = () => {
       fetchSoon.fetchQueued().then(() => {
         searchLooper.restart();
       });

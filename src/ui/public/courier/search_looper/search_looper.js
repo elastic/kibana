@@ -40,7 +40,7 @@ export function SearchLooperProvider(Private, Promise, $timeout, $rootScope) {
      *
      * @param  {integer} intervalInMs
      */
-    public setIntervalInMs = intervalInMs => {
+    setIntervalInMs = intervalInMs => {
       this._intervalInMs = _.parseInt(intervalInMs) || 0;
 
       if (!this._started) {
@@ -50,11 +50,11 @@ export function SearchLooperProvider(Private, Promise, $timeout, $rootScope) {
       if (this._intervalInMs) {
         this.start(false);
       } else {
-        this.unscheduleLoop();
+        this._unscheduleLoop();
       }
     };
 
-    public start = loopOver => {
+    start = loopOver => {
       if (loopOver == null) {
         loopOver = true;
       }
@@ -62,18 +62,18 @@ export function SearchLooperProvider(Private, Promise, $timeout, $rootScope) {
       if (!this._started) {
         this._started = true;
       } else {
-        this.unscheduleLoop();
+        this._unscheduleLoop();
       }
 
       if (loopOver) {
-        this.executeLoop();
+        this._executeLoop();
       } else {
-        this.scheduleLoop();
+        this._scheduleLoop();
       }
     };
 
-    public stop = () => {
-      this.unscheduleLoop();
+    stop = () => {
+      this._unscheduleLoop();
       this._started = false;
     };
 
@@ -81,7 +81,7 @@ export function SearchLooperProvider(Private, Promise, $timeout, $rootScope) {
      * Restart the looper only if it is already started.
      * Called automatically when ms is changed
      */
-    public restart = () => {
+    restart = () => {
       this.start(false);
     };
 
@@ -90,7 +90,7 @@ export function SearchLooperProvider(Private, Promise, $timeout, $rootScope) {
      *
      * @return {boolean}
      */
-    public started = () => {
+    started = () => {
       return !!this._started;
     };
 
@@ -101,14 +101,14 @@ export function SearchLooperProvider(Private, Promise, $timeout, $rootScope) {
      * @override
      * @return {undefined}
      */
-    private onHastyLoop = () => {
+    _onHastyLoop = () => {
       if (this.afterHastyQueued) {
         return;
       }
 
       this.afterHastyQueued = Promise.resolve(this.active)
         .then(() => {
-          return this.executeLoop();
+          return this._executeLoop();
         })
         .finally(() => {
           this.afterHastyQueued = null;
@@ -123,15 +123,15 @@ export function SearchLooperProvider(Private, Promise, $timeout, $rootScope) {
      * @private
      * @return {undefined}
      */
-    private executeLoop = () => {
+    _executeLoop = () => {
       if (this.active) {
-        this.onHastyLoop();
+        this._onHastyLoop();
         return;
       }
 
-      this.active = Promise.try(this.executeLoopAction)
+      this.active = Promise.try(this._executeLoopAction)
         .then(() => {
-          this.scheduleLoop();
+          this._scheduleLoop();
         })
         .catch(err => {
           this.stop();
@@ -142,7 +142,7 @@ export function SearchLooperProvider(Private, Promise, $timeout, $rootScope) {
         });
     };
 
-    private executeLoopAction = () => {
+    _executeLoopAction = () => {
       $rootScope.$broadcast('courier:searchRefresh');
       const requests = requestQueue.getInactive();
 
@@ -162,11 +162,11 @@ export function SearchLooperProvider(Private, Promise, $timeout, $rootScope) {
      * @private
      * @return {number} - the timer promise
      */
-    private scheduleLoop = () => {
-      this.unscheduleLoop();
+    _scheduleLoop = () => {
+      this._unscheduleLoop();
 
       this._timer = this._intervalInMs
-        ? $timeout(this.executeLoop, this._intervalInMs)
+        ? $timeout(this._executeLoop, this._intervalInMs)
         : null;
 
       return this._timer;
@@ -178,7 +178,7 @@ export function SearchLooperProvider(Private, Promise, $timeout, $rootScope) {
      * @private
      * @return {number} - the timer promise
      */
-    private unscheduleLoop = () => {
+    _unscheduleLoop = () => {
       if (this._timer) {
         $timeout.cancel(this._timer);
         this._timer = null;
