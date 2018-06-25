@@ -949,18 +949,21 @@ export default function (editor) {
           } else {
             term = _.clone(term);
           }
-
-          return _.defaults(term, {
+          const defaults = {
             value: term.name,
             meta: 'API',
             score: 0,
             context: context,
-            completer: {
+          };
+          // we only need out custom insertMatch behavior for the body
+          if (context.autoCompleteType === 'body') {
+            defaults.completer = {
               insertMatch: function () {
                 return applyTerm(term);
               }
-            }
-          });
+            };
+          }
+          return _.defaults(term, defaults);
         });
 
         terms.sort(function (t1, t2) {
