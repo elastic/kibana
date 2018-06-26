@@ -63,10 +63,12 @@ export function uiRenderMixin(kbnServer, server, config) {
           throw Boom.notFound(`Unknown app: ${id}`);
         }
 
+        const basePath = config.get('server.basePath');
         const bootstrap = new AppBootstrap({
           templateData: {
             appId: app.getId(),
-            bundlePath: `${config.get('server.basePath')}/bundles`
+            bundlePath: `${basePath}/bundles`,
+            styleSheetPath: app.getStyleSheetUrlPath() ? `${basePath}/${app.getStyleSheetUrlPath()}` : null,
           },
           translations: await request.getUiTranslations()
         });

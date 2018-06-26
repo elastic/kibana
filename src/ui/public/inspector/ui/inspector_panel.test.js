@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { mount, shallow } from 'enzyme';
+import { mount } from 'enzyme';
 import { InspectorPanel } from './inspector_panel';
 
 describe('InspectorPanel', () => {
@@ -70,7 +70,7 @@ describe('InspectorPanel', () => {
   });
 
   it('should not allow updating adapters', () => {
-    const component = shallow(
+    const component = mount(
       <InspectorPanel
         adapters={adapters}
         onClose={() => true}

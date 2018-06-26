@@ -38,7 +38,7 @@ function createStubUiAppSpec(extraParams) {
   };
 }
 
-function createStubKbnServer() {
+function createStubKbnServer(extraParams) {
   return {
     plugins: [],
     config: {
@@ -46,7 +46,8 @@ function createStubKbnServer() {
         .withArgs('server.basePath')
         .returns('')
     },
-    server: {}
+    server: {},
+    ...extraParams,
   };
 }
 
@@ -87,6 +88,10 @@ describe('ui apps / UiApp', () => {
 
       it('has an empty modules list', () => {
         expect(app.getModules()).to.eql([]);
+      });
+
+      it('has no styleSheetPath', () => {
+        expect(app.getStyleSheetUrlPath()).to.be(undefined);
       });
 
       it('has a mostly empty JSON representation', () => {
@@ -307,6 +312,17 @@ describe('ui apps / UiApp', () => {
     it('returns main module if not using appExtensions', () => {
       const app = createUiApp({ id: 'foo', main: 'bar' });
       expect(app.getModules()).to.eql(['bar']);
+    });
+  });
+
+  describe('#getStyleSheetUrlPath', () => {
+    it('returns public path to styleSheetPath', () => {
+      const app = createUiApp(
+        createStubUiAppSpec({ pluginId: 'foo', id: 'foo', styleSheetPath: '/bar/public/baz/style.scss' }),
+        createStubKbnServer({ plugins: [{ id: 'foo', publicDir: '/bar/public' }] })
+      );
+
+      expect(app.getStyleSheetUrlPath()).to.eql('plugins/foo/baz/style.css');
     });
   });
 });
