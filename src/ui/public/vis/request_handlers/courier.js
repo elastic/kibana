@@ -126,7 +126,7 @@ const CourierRequestHandlerProvider = function () {
             });
             request.stats(getRequestInspectorStats(requestSearchSource));
 
-            requestSearchSource.fetchAsRejectablePromise().then(resp => {
+            requestSearchSource.fetch().then(resp => {
               searchSource.lastQuery = queryHash;
 
               request
