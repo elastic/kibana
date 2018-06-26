@@ -18,17 +18,15 @@
  */
 
 import _ from 'lodash';
-import { SearchSourceProvider } from '../../courier/data_source/search_source';
 import { VisRequestHandlersRegistryProvider } from '../../registry/vis_request_handlers';
 import { calculateObjectHash } from '../lib/calculate_object_hash';
-import { timefilter } from 'ui/timefilter';
 import { getRequestInspectorStats, getResponseInspectorStats } from '../../courier/utils/courier_inspector_utils';
 import { tabifyAggResponse } from '../../agg_response/tabify/tabify';
 
 import { FormattedData } from '../../inspector/adapters';
+import { getTime } from '../../timefilter/get_time';
 
-const CourierRequestHandlerProvider = function (Private, courier) {
-  const SearchSource = Private(SearchSourceProvider);
+const CourierRequestHandlerProvider = function () {
 
   /**
    * This function builds tabular data from the response and attaches it to the
@@ -74,7 +72,7 @@ const CourierRequestHandlerProvider = function (Private, courier) {
 
   return {
     name: 'courier',
-    handler: function (vis, { searchSource, timeRange, query, filters, forceFetch }) {
+    handler: function (vis, { searchSource, aggs, timeRange, query, filters, forceFetch }) {
 
       // Create a new search source that inherits the original search source
       // but has the propriate timeRange applied via a filter.
@@ -83,8 +81,8 @@ const CourierRequestHandlerProvider = function (Private, courier) {
       // Using callParentStartHandlers: true we make sure, that the parent searchSource
       // onSearchRequestStart will be called properly even though we use an inherited
       // search source.
-      const timeFilterSearchSource = searchSource.makeChild();
-      const requestSearchSource = timeFilterSearchSource.makeChild();
+      const timeFilterSearchSource = searchSource.makeChild({ callParentStartHandlers: true });
+      const requestSearchSource = timeFilterSearchSource.makeChild({ callParentStartHandlers: true });
 
       // For now we need to mirror the history of the passed search source, since
       // the spy panel wouldn't work otherwise.
@@ -98,15 +96,15 @@ const CourierRequestHandlerProvider = function (Private, courier) {
       });
 
       requestSearchSource.aggs(function () {
-        return vis.getAggConfig().toDsl();
+        return aggs.toDsl();
       });
 
       requestSearchSource.onRequestStart((searchSource, searchRequest) => {
-        return vis.onSearchRequestStart(searchSource, searchRequest);
+        return aggs.onSearchRequestStart(searchSource, searchRequest);
       });
 
       timeFilterSearchSource.set('filter', () => {
-        return timefilter.createFilter(searchSource.get('index'), timeRange);
+        return getTime(searchSource.get('index'), timeRange);
       });
 
       requestSearchSource.set('filter', filters);
@@ -128,7 +126,7 @@ const CourierRequestHandlerProvider = function (Private, courier) {
             });
             request.stats(getRequestInspectorStats(requestSearchSource));
 
-            requestSearchSource.onResults().then(resp => {
+            requestSearchSource.fetch().then(resp => {
               searchSource.lastQuery = queryHash;
 
               request
@@ -138,10 +136,10 @@ const CourierRequestHandlerProvider = function (Private, courier) {
               searchSource.rawResponse = resp;
               return _.cloneDeep(resp);
             }).then(async resp => {
-              for (const agg of vis.getAggConfig()) {
+              for (const agg of aggs) {
                 if (_.has(agg, 'type.postFlightRequest')) {
-                  const nestedSearchSource = new SearchSource().inherits(requestSearchSource);
-                  resp = await agg.type.postFlightRequest(resp, vis.aggs, agg, nestedSearchSource);
+                  const nestedSearchSource = requestSearchSource.makeChild();
+                  resp = await agg.type.postFlightRequest(resp, aggs, agg, nestedSearchSource);
                 }
               }
 
@@ -159,7 +157,6 @@ const CourierRequestHandlerProvider = function (Private, courier) {
               request.json(req);
             });
 
-            courier.fetch();
           } else {
             resolve(searchSource.finalResponse);
           }
