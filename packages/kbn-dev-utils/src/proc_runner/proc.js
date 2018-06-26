@@ -20,7 +20,15 @@
 import execa from 'execa';
 import { statSync } from 'fs';
 
-import Rx from 'rxjs/Rx';
+import * as Rx from 'rxjs';
+import {
+  tap,
+  share,
+  take,
+  mergeMap,
+  map,
+  ignoreElements,
+} from 'rxjs/operators';
 import { gray } from 'chalk';
 
 import treeKill from 'tree-kill';
@@ -82,36 +90,39 @@ export function createProc(name, { cmd, args, cwd, env, stdin, log }) {
   return new class Proc {
     name = name;
 
-    lines$ = Rx.Observable.merge(
+    lines$ = Rx.merge(
       observeLines(childProcess.stdout),
       observeLines(childProcess.stderr)
-    )
-      .do(line => log.write(` ${gray('proc')}  [${gray(name)}] ${line}`))
-      .share();
+    ).pipe(
+      tap(line => log.write(` ${gray('proc')}  [${gray(name)}] ${line}`)),
+      share()
+    );
 
-    outcome$ = Rx.Observable.defer(() => {
+    outcome$ = Rx.defer(() => {
       // observe first exit event
-      const exit$ = Rx.Observable.fromEvent(childProcess, 'exit')
-        .take(1)
-        .map(code => {
+      const exit$ = Rx.fromEvent(childProcess, 'exit').pipe(
+        take(1),
+        map(([code]) => {
           // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat then as errors
           if (code > 0 && !(code === 143 || code === 130)) {
             throw createCliError(`[${name}] exited with code ${code}`);
           }
 
           return code;
-        });
+        })
+      );
 
       // observe first error event until there is a close event
-      const error$ = Rx.Observable.fromEvent(childProcess, 'error')
-        .take(1)
-        .mergeMap(err => Rx.Observable.throw(err));
+      const error$ = Rx.fromEvent(childProcess, 'error').pipe(
+        take(1),
+        mergeMap(err => Rx.throwError(err))
+      );
 
-      return Rx.Observable.race(exit$, error$);
-    }).share();
+      return Rx.race(exit$, error$);
+    }).pipe(share());
 
-    _outcomePromise = Rx.Observable.merge(
-      this.lines$.ignoreElements(),
+    _outcomePromise = Rx.merge(
+      this.lines$.pipe(ignoreElements()),
       this.outcome$
     ).toPromise();
 

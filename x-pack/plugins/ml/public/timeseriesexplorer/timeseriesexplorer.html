@@ -121,9 +121,23 @@
         Anomalies
       </span>
 
-      <div class="ml-table-controls">
-        <ml-select-severity />
-        <ml-select-interval />
+      <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive ml-anomalies-controls">
+        <div class="euiFlexItem euiFlexItem--flexGrowZero" style="width:170px">
+          <div class="euiFormRow" id="select_severity_control">
+            <label class="euiFormLabel" for="select_severity">Severity threshold</label>
+            <div class="euiFormControlLayout">
+              <ml-select-severity id="select_severity" />
+            </div>
+          </div>
+        </div>
+        <div class="euiFlexItem euiFlexItem--flexGrowZero" style="width:170px">
+          <div class="euiFormRow" id="select_interval_control">
+            <label class="euiFormLabel" for="select_interval">Interval</label>
+            <div class="euiFormControlLayout">
+              <ml-select-interval id="select_interval" />
+            </div>
+          </div>
+        </div>
       </div>
 
       <ml-anomalies-table

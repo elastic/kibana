@@ -31,6 +31,18 @@ describe('ui/courier/fetch search request', () => {
     requestQueue.clear();
   });
 
+  it('throws exception when created without errorHandler', ngMock.inject((Private) => {
+    const SearchReq = Private(SearchRequestProvider);
+
+    let caughtError = false;
+    try {
+      new SearchReq({ source: {} });
+    } catch(error) {
+      caughtError = true;
+    }
+    expect(caughtError).to.be(true);
+  }));
+
   describe('#start()', () => {
     it('calls this.source.requestIsStarting(request)', ngMock.inject((Private) => {
       const SearchReq = Private(SearchRequestProvider);
@@ -38,7 +50,7 @@ describe('ui/courier/fetch search request', () => {
       const spy = sinon.spy(() => Promise.resolve());
       const source = { requestIsStarting: spy };
 
-      const req = new SearchReq(source);
+      const req = new SearchReq({ source, errorHandler: () => {} });
       expect(req.start()).to.have.property('then').a('function');
       sinon.assert.calledOnce(spy);
       sinon.assert.calledWithExactly(spy, req);

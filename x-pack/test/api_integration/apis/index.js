@@ -9,7 +9,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./security'));
     loadTestFile(require.resolve('./monitoring'));
     loadTestFile(require.resolve('./xpack_main'));
-    loadTestFile(require.resolve('./reporting'));
     loadTestFile(require.resolve('./logstash'));
   });
 }

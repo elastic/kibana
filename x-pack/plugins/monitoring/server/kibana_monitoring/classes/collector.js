@@ -9,19 +9,29 @@ import { getCollectorLogger } from '../lib';
 export class Collector {
   /*
    * @param {Object} server - server object
-   * @param {String} properties.type - property name as the key for the data
-   * @param {Function} properties.init (optional) - initialization function
-   * @param {Function} properties.fetch - function to query data
-   * @param {Function} properties.cleanup (optional) - cleanup function
-   * @param {Boolean} properties.fetchAfterInit (optional) - if collector should fetch immediately after init
+   * @param {String} options.type - property name as the key for the data
+   * @param {Function} options.init (optional) - initialization function
+   * @param {Function} options.fetch - function to query data
    */
-  constructor(server, { type, init, fetch, cleanup, fetchAfterInit }) {
+  constructor(server, { type, init, fetch } = {}) {
+    if (type === undefined) {
+      throw new Error('Collector must be instantiated with a options.type string property');
+    }
+    if (typeof fetch !== 'function') {
+      throw new Error('Collector must be instantiated with a options.fetch function property');
+    }
+
     this.type = type;
     this.init = init;
     this.fetch = fetch;
-    this.cleanup = cleanup;
-    this.fetchAfterInit = fetchAfterInit;
 
     this.log = getCollectorLogger(server);
+  }
+
+  fetchInternal(callCluster) {
+    if (typeof callCluster !== 'function') {
+      throw new Error('A `callCluster` function must be passed to the fetch methods of collectors');
+    }
+    return this.fetch(callCluster);
   }
 }

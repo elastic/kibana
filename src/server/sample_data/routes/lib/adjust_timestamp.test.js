@@ -61,5 +61,13 @@ describe('preserve day of week and time of day', () => {
     const timestamp = adjustTimestamp(originalTimestamp, currentTimeMarker, now, true);
     expect(timestamp).toBe('2018-05-04T23:50:00Z');
   });
+
+  test('adjusts timestamp to correct day of week even when UTC day is on different day.', () => {
+    const currentTimeMarker = new Date(Date.parse('2018-01-02T00:00:00')); // Tuesday
+    const now = new Date(Date.parse('2018-06-14T10:38')); // Thurs
+    const originalTimestamp = '2018-01-01T17:57:25'; // Monday
+    const timestamp = adjustTimestamp(originalTimestamp, currentTimeMarker, now, true);
+    expect(timestamp).toBe('2018-06-11T17:57:25'); // Monday
+  });
 });
 

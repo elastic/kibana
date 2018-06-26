@@ -101,8 +101,9 @@ export class HeadlessChromiumDriver {
           scale: 1
         }
       });
+      this._logger.debug(`Captured screenshot clip ${JSON.stringify(screenshotClip)}`);
       return data;
-    });
+    }, this._logger);
   }
 
   async _writeData(writePath, base64EncodedData) {
@@ -111,6 +112,7 @@ export class HeadlessChromiumDriver {
   }
 
   async setViewport({ width, height, zoom }) {
+    this._logger.debug(`Setting viewport to width: ${width}, height: ${height}, zoom: ${zoom}`);
     const { Emulation } = this._client;
 
     await Emulation.setDeviceMetricsOverride({
