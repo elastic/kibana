@@ -18,19 +18,20 @@
  */
 
 import { resolve } from 'path';
-import JSON5 from 'json5';
 
 import { extractHtmlMessages } from './extract_html_messages';
 import { extractCodeMessages } from './extract_code_messages';
 import { extractJadeMessages } from './extract_jade_messages';
-import { writeContextToJSON } from './write_context_comments';
 import {
   globAsync,
   makeDirAsync,
   pathExists,
   readFileAsync,
   throwEntryException,
+  writeFileAsync,
 } from './utils';
+
+const ESCAPE_CHARACTERS_REGEX = /\\([\s\S])|(')/g;
 
 function addMessageToMap(targetMap, key, value) {
   const existingValue = targetMap.get(key);
@@ -40,47 +41,6 @@ function addMessageToMap(targetMap, key, value) {
     );
   }
   targetMap.set(key, value);
-}
-
-function buildDefaultMessagesObject(map) {
-  const result = {};
-  let nestedObject;
-  let keysChain;
-  let messageId;
-
-  for (const [mapKey, mapValue] of map) {
-    if (!mapKey.includes('.')) {
-      throw new Error(`Wrong message id: "${mapKey}". Namespace is required`);
-    }
-
-    nestedObject = result;
-    keysChain = mapKey.split('.');
-    messageId = keysChain.pop();
-
-    for (const key of keysChain) {
-      if (!Object.keys(nestedObject).includes(key)) {
-        nestedObject[key] = {};
-      }
-
-      nestedObject = nestedObject[key];
-
-      if (typeof nestedObject !== 'object') {
-        throw new Error(
-          `Ids collision. ${key} in ${mapKey} is a message, not a namespace.`
-        );
-      }
-    }
-
-    if (typeof nestedObject[messageId] === 'object') {
-      throw new Error(
-        `Ids collision. ${messageId} in ${mapKey} is a namespace. Cannot override with a message.`
-      );
-    }
-
-    nestedObject[messageId] = mapValue.message;
-  }
-
-  return result;
 }
 
 export async function extractDefaultTranslations(inputPath) {
@@ -139,7 +99,19 @@ export async function extractDefaultTranslations(inputPath) {
     })
   );
 
-  const defaultMessages = buildDefaultMessagesObject(defaultMessagesMap);
+  let jsonBuffer = Buffer.from('{\n');
+
+  for (const [mapKey, mapValue] of [...defaultMessagesMap.entries()].sort()) {
+    const key = mapKey.replace(ESCAPE_CHARACTERS_REGEX, '\\$1$2');
+    const value = mapValue.message.replace(ESCAPE_CHARACTERS_REGEX, '\\$1$2');
+    jsonBuffer = Buffer.concat([
+      jsonBuffer,
+      Buffer.from(`  '${key}': '${value}',`),
+      Buffer.from(value.context ? ` // ${value.context}\n` : '\n'),
+    ]);
+  }
+
+  jsonBuffer = Buffer.concat([jsonBuffer, Buffer.from('}\n')]);
 
   try {
     await pathExists(resolve(inputPath, 'translations'));
@@ -147,10 +119,8 @@ export async function extractDefaultTranslations(inputPath) {
     await makeDirAsync(resolve(inputPath, 'translations'));
   }
 
-  const defaultMessagesJSON = JSON5.stringify(defaultMessages, {
-    space: 2,
-    quote: `'`,
-  }).concat('\n');
-
-  await writeContextToJSON(inputPath, defaultMessagesJSON, defaultMessagesMap);
+  await writeFileAsync(
+    resolve(inputPath, 'translations', 'defaultMessages.json'),
+    jsonBuffer
+  );
 }
