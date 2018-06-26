@@ -17,6 +17,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-6.3.1>>
 * <<release-notes-6.3.0>>
 * <<release-notes-6.2.4>>
 * <<release-notes-6.2.3>>
@@ -71,6 +72,80 @@ This section summarizes the changes in each release.
 //[float]
 //=== Known Issues
 ////
+
+[[release-notes-6.3.1]]
+== {kib} 6.3.1
+
+[float]
+[[breaking-6.3.]]
+=== Breaking Changes
+
+See <<breaking-6.3.0, Breaking Changes in 6.3.0>>.
+
+[float]
+[[enhancement-6.3.1]]
+=== Enhancements
+Management::
+* [Fixes #19475] Replaces the `watch-type-select` directive in Watcher 
+with buttons
+{pull}19782[#19782]
++
+[role="screenshot"]
+image::images/management-watcher-2-buttons.png[]
+
+Monitoring::
+* Improves the experience of enabling monitoring collection when the page is set 
+to an absolute time range. {pull}19451[#19451]
+
+Operations::
+* Bumps node to version 8.11.3 {pull}19861[#19861]
+
+[float]
+[[bug-6.3.1]]
+=== Bug fixes
+
+Machine Learning::
+* Fixes issues when watching the scope of single metric viewer 
+data {pull}19029[#19029]
+
+Management::
+* [Fixes #19617] Shows internal indices if *Include system indices* is toggled
+on and no other indices exist {pull}19618[#19618]
+* [Fixes #19483] Adds `aria-labelledby` to index details flyout to tell 
+screen reader what to announce when the flyout is opened {pull}19776[#19776] 
+* [Fixes #19048] Adds heading hierarchy to Management landing page and `role='group'`
+to panels to aid screen reader accessibility {pull}19777[#19777]
+* [Fixes #19482] Adds `aria-label` to Indices Management search input {pull}19778[#19778]
+* [Fixes #19474] Adds `described-by` attribute to `duration-selection` directive
+to make children inputs accessible to screen readers {pull}19779[#19779]
+* [Fixes #] Guards against calling `fieldWildcardMatcher` or `fieldWildcardFilter` 
+with undefined {pull}19865[#19865]
+
+
+Operations::
+* Allows the plugin installer to remove an {xpack} plugin if it exists {pull}19327[#19327]
+* Changes license checker and generator behavior to only add dev dependencies 
+with the `--dev` flag {pull}19626[#19626]
+
+Platform::
+* [Fixes #20017] Updates the {xpack} plugin status anytime the license changes
+{pull}20018[#20018]
++
+When using {xpack}, it was previously possible for {kib} to get stuck in a "red"
+state, preventing access to the {kib} applications, if {kib} and {es} were 
+started at the same time. We've fixed this issue to ensure that {kib} is always
+usable when it's able to talk to {es}.
+
+Sharing::
+* [Fixes #19320] Adds `aria-label` to input controls that don't have a
+label {pull}19830[#19830]
+
+Visualization::
+* [Fixes #19191] Shows tooltip when string and integer fields are used 
+for joining region maps to {es} results {pull}19447[#19447]
+
+
+
 
 [[release-notes-6.3.0]]
 == {kib} 6.3.0
@@ -1706,7 +1781,7 @@ Visualization::
 
 Design::
 * Make breadcrumb a heading for screen readers, fix #12885 {pull}13734[#13734]
-* [Accessibilty] Make kbn_accessible_click part of autoload/all  {pull}13299[#13299]
+* [Accessibility] Make kbn_accessible_click part of autoload/all  {pull}13299[#13299]
 
 Dev Tools::
 * [Fix for #10504] [console] Replace text/plain fallback with application/json {pull}12294[#12294]
@@ -1947,7 +2022,7 @@ Visualization::
 
 Design::
 * [UI Framework] Fix disappearing borders for LocalNav search select. {pull}12803[#12803]
-* [Accessibilty] Make kbn_accessible_click part of autoload/all  {pull}13299[#13299]
+* [Accessibility] Make kbn_accessible_click part of autoload/all  {pull}13299[#13299]
 
 Discover::
 * Fix call to suggestions API to correctly use index pattern title {pull}12917[#12917]
