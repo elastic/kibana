@@ -7,7 +7,7 @@
 The Kibana plugin interfaces are in a state of constant development.  We cannot provide backwards compatibility for plugins due to the high rate of change.  Kibana enforces that the installed plugins match the version of Kibana itself.  Plugin developers will have to release a new version of their plugin for each new Kibana release as a result.
 ==============================================
 
-This list of plugins is not guaranteed to work on your version of Kibana. Instead, these are plugins that were known to work at some point with Kibana *5.x*. The Kibana installer will reject any plugins that haven't been published for your specific version of Kibana.
+This list of plugins is not guaranteed to work on your version of Kibana. Instead, these are plugins that were known to work at some point with Kibana *5.x*. The Kibana installer will reject any plugins that haven't been published for your specific version of Kibana. These plugins are not evaluated or maintained by Elastic, so care should be taken before installing them into your environment.
 
 [float]
 === Apps
@@ -32,6 +32,7 @@ This list of plugins is not guaranteed to work on your version of Kibana. Instea
 * https://github.com/DeanF/health_metric_vis[Colored Metric Visualization] (deanf)
 * https://github.com/JuanCarniglia/dendrogram_vis[Dendrogram] (JuanCarniglia)
 * https://github.com/dlumbrer/kbn_dotplot[Dotplot] (dlumbrer)
+* https://github.com/AnnaGerber/kibana_dropdown[Dropdown] (AnnaGerber)
 * https://github.com/fbaligand/kibana-enhanced-table[Enhanced Table] (fbaligand)
 * https://github.com/nreese/enhanced_tilemap[Enhanced Tilemap] (nreese)
 * https://github.com/ommsolutions/kibana_ext_metrics_vis[Extended Metric] (ommsolutions)

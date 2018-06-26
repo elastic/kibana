@@ -105,7 +105,9 @@ export async function deleteAll(log, patterns) {
     assertAbsolute(pattern.startsWith('!') ? pattern.slice(1) : pattern);
   }
 
-  const files = await del(patterns);
+  const files = await del(patterns, {
+    concurrency: 4
+  });
   log.debug('Deleted %d files/directories', files.length);
   log.verbose('Deleted:', longInspect(files));
 }

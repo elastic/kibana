@@ -1,0 +1,98 @@
+@import (reference) '~ui/styles/variables/colors';
+
+monitoring-main[page="pipeline"] {
+  background: @globalColorLightestGray;
+  min-height: 100vh;
+}
+
+.configViewer {
+  max-width: 1000px;
+}
+
+.configViewer__statement {
+  padding-left: 12px;
+}
+
+.configViewer__plugin {
+  margin-left: 4px;
+}
+
+.configViewer__spaceContainer {
+  background-color: white;
+  align-self: stretch;
+  display: flex;
+  // Separates the left border spaces properly
+  border-bottom: solid 2px white;
+}
+
+.configViewer__spacer {
+  width: 12px;
+  align-self: stretch;
+  margin-left: 12px;
+  border-left: 1px @globalColorMediumGray dashed;
+
+  // This allows the border to be flush
+  &:last-child {
+    width: 0px;
+  }
+
+  &:first-child {
+    // Odd number is because of the single pixel border.
+    margin-left: 23px;
+  }
+}
+
+.configViewer__metric {
+  text-align: right;
+
+  &--cputTime {
+    width: 40px;
+  }
+
+  &--events, &--eventsEmitted {
+    width: 160px;
+  }
+
+  &--eventMillis {
+    width: 80px;
+  }
+}
+
+.configViewer__queueMessage {
+  margin-left: 24px;
+  color: @globalColorDarkGray;
+}
+
+.configViewer__list {
+  .configViewer__listItem {
+    display: flex;
+    min-height: 32px;
+    align-items: center;
+    padding-right: 12px;
+
+    &:nth-child(2n+1) {
+      background: #fafafa;
+    }
+  }
+}
+
+.configViewer__conditional {
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .configViewer {
+    .configViewer__spacer {
+      border: none;
+    }
+
+    .configViewer__metricFlexItem {
+      margin-bottom: 4px !important;
+    }
+
+    .configViewer__metric {
+      text-align: left;
+      padding-left: 32px;
+    }
+  }
+}

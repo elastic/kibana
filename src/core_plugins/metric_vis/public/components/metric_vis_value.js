@@ -72,7 +72,7 @@ class MetricVisValue extends Component {
       </div>
     );
 
-    if (this.onClick) {
+    if (hasFilter) {
       return (<EuiKeyboardAccessible>{metricComponent}</EuiKeyboardAccessible>);
     }
 

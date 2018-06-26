@@ -51,4 +51,14 @@ describe('props', () => {
     />);
     expect(component).toMatchSnapshot(); // eslint-disable-line
   });
+
+  test('isBeta', () => {
+    const component = shallow(<Synopsis
+      description="this is a great tutorial about..."
+      title="Great tutorial"
+      url="link_to_item"
+      isBeta={true}
+    />);
+    expect(component).toMatchSnapshot(); // eslint-disable-line
+  });
 });

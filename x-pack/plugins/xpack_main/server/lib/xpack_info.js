@@ -28,6 +28,14 @@ export class XPackInfo {
    */
   _featureLicenseCheckResultsGenerators = new Map();
 
+
+  /**
+   * Set of listener functions that will be called whenever the license
+   * info changes
+   * @type {Set<Function>}
+   */
+  _licenseInfoChangedListeners = new Set();
+
   /**
    * Feature name <-> license change callback mapping.
    * @type {Map<string, Function>}
@@ -98,11 +106,19 @@ export class XPackInfo {
    * @returns {Error|string}
    */
   unavailableReason() {
+    if (!this._cache.error && this._cache.response && !this._cache.response.license) {
+      return `[${this._clusterSource}] Elasticsearch cluster did not respond with license information.`;
+    }
+
     if (this._cache.error instanceof Error && this._cache.error.status === 400) {
       return `X-Pack plugin is not installed on the [${this._clusterSource}] Elasticsearch cluster.`;
     }
 
     return this._cache.error;
+  }
+
+  onLicenseInfoChange(handler) {
+    this._licenseInfoChangedListeners.add(handler);
   }
 
   /**
@@ -123,8 +139,9 @@ export class XPackInfo {
         path: '/_xpack'
       });
 
-      const hasLicenseInfoChanged = this._hasLicenseInfoChanged(response);
-      if (hasLicenseInfoChanged) {
+      const licenseInfoChanged = this._hasLicenseInfoChanged(response);
+
+      if (licenseInfoChanged) {
         const licenseInfoParts = [
           `mode: ${get(response, 'license.mode')}`,
           `status: ${get(response, 'license.status')}`,
@@ -146,29 +163,14 @@ export class XPackInfo {
 
       this._cache = { response };
 
-      if (hasLicenseInfoChanged) {
-
-        // Invoke all registered license change callbacks after this instance receives the update
-        for (const [feature, callback] of this._featureLicenseChangeCallbacks) {
-          this._log(
-            ['license', 'debug', 'xpack'],
-            `Invoking license change callback for ${feature}`
-          );
-
-          const previousLicense = this._license;
-          const newLicense = new XPackInfoLicense(() => response && response.license);
-
-          try {
-            callback(previousLicense, newLicense);
-          } catch (error) {
-            this._log(
-              ['license', 'error', 'xpack'],
-              `Error during invocation of license change callback for ${feature}. ${error}`
-            );
-          }
+      if (licenseInfoChanged) {
+        // call license info changed listeners
+        for (const listener of this._licenseInfoChangedListeners) {
+          listener();
         }
       }
-    } catch (error) {
+
+    } catch(error) {
       this._log(
         ['license', 'warning', 'xpack'],
         `License information from the X-Pack plugin could not be obtained from Elasticsearch` +
