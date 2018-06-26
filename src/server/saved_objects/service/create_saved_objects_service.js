@@ -17,23 +17,18 @@
  * under the License.
  */
 
-import { patchKibanaIndexMappings } from '../migrations';
 import { SavedObjectsRepository, ScopedSavedObjectsClientProvider, SavedObjectsRepositoryProvider } from './lib';
 import { SavedObjectsClient } from './saved_objects_client';
 
-export function createSavedObjectsService(kbnServer, server) {
-  const onBeforeWrite = createPatchKibanaIndexFunction(kbnServer);
-
+export function createSavedObjectsService(server) {
   const repositoryProvider = new SavedObjectsRepositoryProvider({
     index: server.config().get('kibana.index'),
     mappings: server.getKibanaIndexMappingsDsl(),
-    onBeforeWrite,
   });
 
   const scopedClientProvider = new ScopedSavedObjectsClientProvider({
     index: server.config().get('kibana.index'),
     mappings: server.getKibanaIndexMappingsDsl(),
-    onBeforeWrite,
     defaultClientFactory({
       request,
     }) {
@@ -57,20 +52,5 @@ export function createSavedObjectsService(kbnServer, server) {
       scopedClientProvider.setClientFactory(...args),
     addScopedSavedObjectsClientWrapperFactory: (...args) =>
       scopedClientProvider.addClientWrapperFactory(...args),
-  };
-}
-
-// Creates a function that sets the mappings / index templates for the
-// Kibana index. The patchKibanaIndexMappings call is somewhat expensive,
-// so we do a little caching to prevent it from being called more than
-// once. This can fail (e.g. if elasticsearch is unavailable), which is why
-// we don't use something like lodash's 'once'.
-function createPatchKibanaIndexFunction(kbnServer) {
-  let initialized = false;
-  return async function patchIndexOnce() {
-    if (!initialized) {
-      await patchKibanaIndexMappings(kbnServer);
-      initialized = true;
-    }
   };
 }

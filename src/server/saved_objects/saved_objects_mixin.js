@@ -18,7 +18,7 @@
  */
 import _ from 'lodash';
 import { createSavedObjectsService } from './service';
-import { getActiveMappings, getMigrationPlugins } from './migrations';
+import { buildActiveMappings, getMigrationPlugins } from './migrations';
 import {
   createBulkGetRoute,
   createCreateRoute,
@@ -29,7 +29,8 @@ import {
 } from './routes';
 
 export function savedObjectsMixin(kbnServer, server) {
-  const mappings = getActiveMappings({ plugins: getMigrationPlugins(kbnServer) });
+  const mappings = buildActiveMappings({ plugins: getMigrationPlugins(kbnServer) });
+
   server.decorate('server', 'getKibanaIndexMappingsDsl', () => _.cloneDeep(mappings));
 
   // we use kibana.index which is technically defined in the kibana plugin, so if
@@ -55,7 +56,7 @@ export function savedObjectsMixin(kbnServer, server) {
   server.route(createGetRoute(prereqs));
   server.route(createUpdateRoute(prereqs));
 
-  server.decorate('server', 'savedObjects', createSavedObjectsService(kbnServer, server));
+  server.decorate('server', 'savedObjects', createSavedObjectsService(server));
 
   const savedObjectsClientCache = new WeakMap();
   server.decorate('request', 'getSavedObjectsClient', function () {
