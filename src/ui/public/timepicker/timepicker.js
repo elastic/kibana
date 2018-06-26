@@ -165,7 +165,7 @@ module.directive('kbnTimepicker', function (refreshIntervals) {
       };
 
       $scope.setQuick = function (from, to) {
-        $scope.onFilterSelect({ from, to });
+        $scope.onFilterSelect({ from, to, mode: TIME_MODES.QUICK });
       };
 
       $scope.setToNow = function (key) {
@@ -203,7 +203,8 @@ module.directive('kbnTimepicker', function (refreshIntervals) {
       $scope.applyRelative = function () {
         $scope.onFilterSelect({
           from: getRelativeString('from'),
-          to: getRelativeString('to')
+          to: getRelativeString('to'),
+          mode: TIME_MODES.RELATIVE,
         });
       };
 
@@ -224,7 +225,8 @@ module.directive('kbnTimepicker', function (refreshIntervals) {
       $scope.applyAbsolute = function () {
         $scope.onFilterSelect({
           from: moment($scope.absolute.from),
-          to: moment($scope.absolute.to)
+          to: moment($scope.absolute.to),
+          mode: TIME_MODES.ABSOLUTE,
         });
       };
 

@@ -20,7 +20,7 @@ import 'plugins/ml/components/controls';
 
 import { notify } from 'ui/notify';
 import uiRoutes from 'ui/routes';
-import 'ui/timefilter';
+import { timefilter } from 'ui/timefilter';
 import { parseInterval } from 'ui/utils/parse_interval';
 import { checkLicense } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege, checkPermission } from 'plugins/ml/privilege/check_privilege';
@@ -70,7 +70,6 @@ module.controller('MlTimeSeriesExplorerController', function (
   $route,
   $timeout,
   Private,
-  timefilter,
   AppState,
   mlSelectIntervalService,
   mlSelectSeverityService) {
@@ -505,8 +504,8 @@ module.controller('MlTimeSeriesExplorerController', function (
       forecastId
     ).then((resp) => {
       const bounds = timefilter.getActiveBounds();
-      const earliest = moment(resp.earliest || timefilter.time.from);
-      const latest = moment(resp.latest || timefilter.time.to);
+      const earliest = moment(resp.earliest || timefilter.getTime().from);
+      const latest = moment(resp.latest || timefilter.getTime().to);
 
       // Store forecast ID in the appState.
       $scope.appState.mlTimeSeriesExplorer.forecastId = forecastId;
@@ -529,8 +528,10 @@ module.controller('MlTimeSeriesExplorerController', function (
       if (earliest.isBefore(bounds.min) || latest.isAfter(bounds.max)) {
         const earliestMs = Math.min(earliest.valueOf(), bounds.min.valueOf());
         const latestMs = Math.max(latest.valueOf(), bounds.max.valueOf());
-        timefilter.time.from = moment(earliestMs).toISOString();
-        timefilter.time.to = moment(latestMs).toISOString();
+        timefilter.setTime({
+          from: moment(earliestMs).toISOString(),
+          to: moment(latestMs).toISOString()
+        });
       } else {
         // Refresh to show the requested forecast data.
         $scope.refresh();
@@ -559,7 +560,7 @@ module.controller('MlTimeSeriesExplorerController', function (
   };
 
   // Refresh the data when the time range is altered.
-  $scope.$listen(timefilter, 'fetch', $scope.refresh);
+  $scope.$listenAndDigestAsync(timefilter, 'fetch', $scope.refresh);
 
   // Add a watcher for auto-refresh of the time filter to refresh all the data.
   const refreshWatcher = Private(refreshIntervalWatcher);

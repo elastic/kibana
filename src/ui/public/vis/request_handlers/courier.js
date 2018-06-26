@@ -21,12 +21,13 @@ import _ from 'lodash';
 import { SearchSourceProvider } from '../../courier/data_source/search_source';
 import { VisRequestHandlersRegistryProvider } from '../../registry/vis_request_handlers';
 import { calculateObjectHash } from '../lib/calculate_object_hash';
+import { timefilter } from 'ui/timefilter';
 import { getRequestInspectorStats, getResponseInspectorStats } from '../../courier/utils/courier_inspector_utils';
 import { tabifyAggResponse } from '../../agg_response/tabify/tabify';
 
 import { FormattedData } from '../../inspector/adapters';
 
-const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
+const CourierRequestHandlerProvider = function (Private, courier) {
   const SearchSource = Private(SearchSourceProvider);
 
   /**
@@ -105,7 +106,7 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
       });
 
       timeFilterSearchSource.set('filter', () => {
-        return timefilter.get(searchSource.get('index'), timeRange);
+        return timefilter.createFilter(searchSource.get('index'), timeRange);
       });
 
       requestSearchSource.set('filter', filters);

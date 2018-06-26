@@ -13,8 +13,9 @@ import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
 import { calculateTextWidth } from 'plugins/ml/util/string_utils';
 import { mlResultsService } from 'plugins/ml/services/results_service';
 import { mlSimpleJobSearchService } from 'plugins/ml/jobs/new_job/simple/components/utils/search_service';
+import { timefilter } from 'ui/timefilter';
 
-export function ChartDataUtilsProvider(Private, timefilter) {
+export function ChartDataUtilsProvider(Private) {
   const TimeBuckets = Private(IntervalHelperProvider);
 
   function loadDocCountData(formConfig, chartData) {
