@@ -27,7 +27,7 @@ export function extractJobDetails(job) {
     items: []
   };
   if (job.custom_settings && job.custom_settings.custom_urls) {
-    customUrl.items.push(...job.custom_settings.custom_urls.map(cu => [cu.url_name, cu.url_value]));
+    customUrl.items.push(...job.custom_settings.custom_urls.map(cu => [cu.url_name, cu.url_value, cu.time_range]));
   }
 
   const node = {

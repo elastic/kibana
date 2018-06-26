@@ -11,7 +11,8 @@ import React, {
 } from 'react';
 
 import {
-  EuiTabbedContent
+  EuiTabbedContent,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 
 import './styles/main.less';
@@ -46,7 +47,7 @@ export class JobDetails extends Component {
     const { job } = this.state;
     if (job === undefined) {
       return (
-        <div>loading</div>
+        <div className="job-loading-spinner"><EuiLoadingSpinner size="l"/></div>
       );
     } else {
 

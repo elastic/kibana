@@ -15,8 +15,7 @@ import {
   EuiBasicTable,
 } from '@elastic/eui';
 
-import moment from 'moment';
-
+import { formatDate } from '@elastic/eui/lib/services/format';
 import { ml } from 'plugins/ml/services/ml_api_service';
 import { JobIcon } from '../job_message_icon';
 
@@ -50,7 +49,7 @@ export class JobMessagesPane extends Component {
       render: item => (<JobIcon message={item} />)
     }, {
       name: 'Time',
-      render: item => moment(item.timestamp).format(TIME_FORMAT)
+      render: item => formatDate(item.timestamp, TIME_FORMAT)
     }, {
       field: 'node_name',
       name: 'Node',

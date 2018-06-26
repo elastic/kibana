@@ -33,7 +33,7 @@ export class CustomUrls extends Component {
   }
 
 
-  customUrlsChange = (urls) => {
+  onCustomUrlsChange = (urls) => {
     this.setCustomUrls({ jobCustomUrls: urls });
   }
 

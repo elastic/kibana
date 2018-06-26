@@ -24,6 +24,15 @@ import { newJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
 import { parseInterval } from 'plugins/ml/../common/util/parse_interval';
 import { MLJobEditor } from '../../ml_job_editor';
 
+function getDefaults(bucketSpan, jobDefaults) {
+  const bucketSpanSeconds = (bucketSpan !== undefined) ? parseInterval(bucketSpan).asSeconds() : '';
+  return {
+    queryDelay: '60s',
+    frequency: calculateDatafeedFrequencyDefaultSeconds(bucketSpanSeconds) + 's',
+    scrollSize: jobDefaults.datafeeds.scroll_size,
+  };
+}
+
 export class Datafeed extends Component {
   constructor(props) {
     super(props);
@@ -54,23 +63,19 @@ export class Datafeed extends Component {
     };
   }
 
-  setDefaults() {
-
-  }
-
-  queryChange = (query) => {
+  onQueryChange = (query) => {
     this.setDatafeed({ datafeedQuery: query });
   }
 
-  queryDelayChange = (e) => {
+  onQueryDelayChange = (e) => {
     this.setDatafeed({ datafeedQueryDelay: e.target.value });
   }
 
-  frequencyChange = (e) => {
+  onFrequencyChange = (e) => {
     this.setDatafeed({ datafeedFrequency: e.target.value });
   }
 
-  scrollSizeChange = (e) => {
+  onScrollSizeChange = (e) => {
     this.setDatafeed({ datafeedScrollSize: +e.target.value });
   }
 
@@ -92,7 +97,7 @@ export class Datafeed extends Component {
           >
             <MLJobEditor
               value={query}
-              onChange={this.queryChange}
+              onChange={this.onQueryChange}
               height="200px"
             />
           </EuiFormRow>
@@ -102,7 +107,7 @@ export class Datafeed extends Component {
             <EuiFieldText
               value={queryDelay}
               placeholder={defaults.queryDelay}
-              onChange={this.queryDelayChange}
+              onChange={this.onQueryDelayChange}
             />
           </EuiFormRow>
           <EuiFormRow
@@ -111,7 +116,7 @@ export class Datafeed extends Component {
             <EuiFieldText
               value={frequency}
               placeholder={defaults.frequency}
-              onChange={this.frequencyChange}
+              onChange={this.onFrequencyChange}
             />
           </EuiFormRow>
           <EuiFormRow
@@ -120,7 +125,7 @@ export class Datafeed extends Component {
             <EuiFieldNumber
               value={scrollSize}
               placeholder={defaults.scrollSize}
-              onChange={this.scrollSizeChange}
+              onChange={this.onScrollSizeChange}
             />
           </EuiFormRow>
 
@@ -137,12 +142,3 @@ Datafeed.propTypes = {
   jobBucketSpan: PropTypes.string.isRequired,
   setDatafeed: PropTypes.func.isRequired,
 };
-
-function getDefaults(bucketSpan, jobDefaults) {
-  const bucketSpanSeconds = (bucketSpan !== undefined) ? parseInterval(bucketSpan).asSeconds() : '';
-  return {
-    queryDelay: '60s',
-    frequency: calculateDatafeedFrequencyDefaultSeconds(bucketSpanSeconds) + 's',
-    scrollSize: jobDefaults.datafeeds.scroll_size,
-  };
-}

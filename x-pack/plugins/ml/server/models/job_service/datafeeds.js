@@ -11,26 +11,7 @@ export function datafeedsProvider(callWithRequest) {
     const jobIds = {};
     const doStartsCalled = {};
     const results = {};
-
-    datafeedIds.forEach((dId) => {
-      const jId = dId.replace('datafeed-', ''); // change this. this should be from a look up from the datafeeds endpoint
-      jobIds[dId] = jId;
-      doStartsCalled[dId] = false;
-    });
-
-    for (const datafeedId of datafeedIds) {
-      const jobId = jobIds[datafeedId];
-
-      setTimeout(async () => {
-        results[datafeedId] = await doStart(datafeedId);
-      }, 10000);
-
-      if (await openJob(jobId)) {
-        results[datafeedId] = await doStart(datafeedId);
-      }
-    }
-
-    return results;
+    const START_TIMEOUT = 10000; // 10s
 
     async function doStart(datafeedId) {
       if (doStartsCalled[datafeedId] === false) {
@@ -44,6 +25,30 @@ export function datafeedsProvider(callWithRequest) {
         }
       }
     }
+
+    datafeedIds.forEach((dId) => {
+      const jId = dId.replace('datafeed-', ''); // change this. this should be from a look up from the datafeeds endpoint
+      jobIds[dId] = jId;
+      doStartsCalled[dId] = false;
+    });
+
+    for (const datafeedId of datafeedIds) {
+      const jobId = jobIds[datafeedId];
+
+      setTimeout(async () => {
+        // in 10 seconds start the datafeed.
+        // this should give the openJob enough time.
+        // if not, the start request will be queued
+        // behind the open request on the server.
+        results[datafeedId] = await doStart(datafeedId);
+      }, START_TIMEOUT);
+
+      if (await openJob(jobId)) {
+        results[datafeedId] = await doStart(datafeedId);
+      }
+    }
+
+    return results;
   }
 
   async function openJob(jobId) {

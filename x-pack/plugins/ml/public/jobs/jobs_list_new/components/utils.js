@@ -8,14 +8,7 @@ import { toastNotifications } from 'ui/notify';
 
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { ml } from 'plugins/ml/services/ml_api_service';
-
-// action values match the response from the endpoint.
-// e.g. { started: true }
-const ACTION = {
-  START: 'started',
-  STOP: 'stopped',
-  DELETE: 'deleted',
-};
+import { DATAFEED_STATE } from 'plugins/ml/../common/constants/states';
 
 export function loadFullJob(jobId) {
   return new Promise((resolve, reject) => {
@@ -34,18 +27,18 @@ export function loadFullJob(jobId) {
 }
 
 export function isStartable(jobs) {
-  return (jobs.find(j => j.datafeedState === 'stopped') !== undefined);
+  return (jobs.find(j => j.datafeedState === DATAFEED_STATE.STOPPED) !== undefined);
 }
 
 export function isStoppable(jobs) {
-  return (jobs.find(j => j.datafeedState === 'started') !== undefined);
+  return (jobs.find(j => j.datafeedState === DATAFEED_STATE.STARTED) !== undefined);
 }
 
 export function forceStartDatafeeds(jobs, start, end, finish) {
   const datafeedIds = jobs.filter(j => j.hasDatafeed).map(j => j.datafeedId);
   mlJobService.forceStartDatafeeds(datafeedIds, start, end)
     .then((resp) => {
-      showResults(resp, ACTION.START);
+      showResults(resp, DATAFEED_STATE.STARTED);
 
       if (typeof finish === 'function') {
         finish();
@@ -64,7 +57,7 @@ export function stopDatafeeds(jobs, finish) {
   const datafeedIds = jobs.filter(j => j.hasDatafeed).map(j => j.datafeedId);
   mlJobService.stopDatafeeds(datafeedIds)
   	.then((resp) => {
-      showResults(resp, ACTION.STOP);
+      showResults(resp, DATAFEED_STATE.STOPPED);
 
       if (typeof finish === 'function') {
         finish();
@@ -91,28 +84,24 @@ function showResults(resp, action) {
 
   let actionText = '';
   let actionTextPT = '';
-  if (action === ACTION.START) {
+  if (action === DATAFEED_STATE.STARTED) {
     actionText = 'start';
     actionTextPT = 'started';
-  } else if (action === ACTION.STOP) {
+  } else if (action === DATAFEED_STATE.STOPPED) {
     actionText = 'stop';
     actionTextPT = 'stopped';
-  } else if (action === ACTION.DELETE) {
+  } else if (action === DATAFEED_STATE.DELETED) {
     actionText = 'delete';
     actionTextPT = 'deleted';
   }
 
   if (successes.length > 0) {
-    // const txt = (successes.length === 1) ? `${successes[0]}` : `${successes.length} jobs `;
-    // toastNotifications.addSuccess(`${txt} ${actionTextPT} successfully`);
     successes.forEach((s) => {
       toastNotifications.addSuccess(`${s} ${actionTextPT} successfully`);
     });
   }
 
   if (failures.length > 0) {
-    // const txt = (failures.length === 1) ? `${failures[0]}` : `${failures.length} jobs `;
-    // toastNotifications.addDanger(`${txt} failed to ${actionText}`);
     failures.forEach((s) => {
       toastNotifications.addDanger(`${s} failed to ${actionText}`);
     });
@@ -126,7 +115,7 @@ export function cloneJob(jobId) {
       window.location.href = `#/jobs/new_job/advanced`;
     })
     .catch(() => {
-      toastNotifications.addDanger(`Could not clone ${jobId}, job could not be found`);
+      toastNotifications.addDanger(`Could not clone ${jobId}. Job could not be found`);
     });
 }
 
@@ -134,7 +123,7 @@ export function deleteJobs(jobs, finish) {
   const jobIds = jobs.map(j => j.id);
   mlJobService.deleteJobs(jobIds)
   	.then((resp) => {
-      showResults(resp, ACTION.DELETE);
+      showResults(resp, DATAFEED_STATE.DELETED);
 
       if (typeof finish === 'function') {
         finish();

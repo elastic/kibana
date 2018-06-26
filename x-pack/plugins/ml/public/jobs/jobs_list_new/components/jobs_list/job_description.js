@@ -57,6 +57,8 @@ JobGroup.propTypes = {
   name: PropTypes.string.isRequired,
 };
 
+// to ensure the same color is always used for a group name
+// the color choice is based on a hash of the group name
 function tabColor(name) {
   if (colorMap[name] === undefined) {
     const n = stringHash(name);

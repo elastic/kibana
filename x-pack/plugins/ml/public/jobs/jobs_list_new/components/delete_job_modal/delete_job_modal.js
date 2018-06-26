@@ -56,7 +56,7 @@ export class DeleteJobModal extends Component {
     });
   }
 
-  getRef = (el) => {
+  setEL = (el) => {
     if (el) {
       this.el = el;
     }
@@ -77,7 +77,7 @@ export class DeleteJobModal extends Component {
       modal = (
         <EuiOverlayMask>
           <EuiConfirmModal
-            ref={this.getRef}
+            ref={this.setEL}
             title={title}
             onCancel={this.closeModal}
             onConfirm={this.deleteJob}
@@ -96,12 +96,14 @@ export class DeleteJobModal extends Component {
               </div>
             }
 
-            {(this.state.deleting === false && this.state.jobs.length > 1) &&
+            {(this.state.deleting === false) &&
               <React.Fragment>
                 <p>Are you sure you want to delete {(this.state.jobs.length > 1) ? 'these jobs' : 'this job'}</p>
-                <p>Deleting multiple jobs can be time consuming.
-                  They will be deleted in the background and may not disappear from the jobs list instantly
-                </p>
+                {(this.state.jobs.length > 1) &&
+                  <p>Deleting multiple jobs can be time consuming.
+                    They will be deleted in the background and may not disappear from the jobs list instantly
+                  </p>
+                }
               </React.Fragment>
             }
 

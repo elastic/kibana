@@ -42,7 +42,7 @@ export class Detectors extends Component {
     };
   }
 
-  descriptionChange = (e, i) => {
+  onDescriptionChange = (e, i) => {
     const jobDetectorDescriptions = this.state.detectorDescriptions;
     jobDetectorDescriptions[i] = e.target.value;
     this.setDetectorDescriptions({ jobDetectorDescriptions });
@@ -65,7 +65,7 @@ export class Detectors extends Component {
               >
                 <EuiFieldText
                   value={d}
-                  onChange={(e) => this.descriptionChange(e, i)}
+                  onChange={(e) => this.onDescriptionChange(e, i)}
                 />
               </EuiFormRow>
             ))

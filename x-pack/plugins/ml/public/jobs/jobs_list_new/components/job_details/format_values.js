@@ -6,7 +6,7 @@
 
 
 import numeral from '@elastic/numeral';
-import moment from 'moment';
+import { formatDate } from '@elastic/eui/lib/services/format';
 import { toLocaleString } from 'plugins/ml/util/string_utils';
 
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
@@ -15,10 +15,6 @@ const DATA_FORMAT = '0.0 b';
 
 function formatData(txt) {
   return numeral(txt).format(DATA_FORMAT);
-}
-
-function formatDate(txt) {
-  return moment(txt).format(TIME_FORMAT);
 }
 
 export function formatValues([key, value]) {
@@ -33,7 +29,7 @@ export function formatValues([key, value]) {
     case 'last_data_time':
     case 'latest_empty_bucket_timestamp':
     case 'latest_sparse_bucket_timestamp':
-      value = formatDate(value);
+      value = formatDate(value, TIME_FORMAT);
       break;
 
     // data
@@ -67,6 +63,9 @@ export function formatValues([key, value]) {
   return [key, value];
 }
 
+// utility function to filter child object and arrays out of the supplied object.
+// overrides can be supplied to allow either objects or arrays
+// used to remove lists or nested objects from the job config when displaying it in the expanded row
 export function filterObjects(obj, allowArrays, allowObjects) {
   return Object.keys(obj)
     .filter(k => (allowObjects || typeof obj[k] !== 'object' || (allowArrays && Array.isArray(obj[k]))))

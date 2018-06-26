@@ -58,15 +58,15 @@ export class JobDetails extends Component {
     };
   }
 
-  descriptionChange = (e) => {
+  onDescriptionChange = (e) => {
     this.setJobDetails({ jobDescription: e.target.value });
   }
 
-  mmlChange = (e) => {
+  onMmlChange = (e) => {
     this.setJobDetails({ jobModelMemoryLimit: e.target.value });
   }
 
-  groupsChange = (selectedGroups) => {
+  onGroupsChange = (selectedGroups) => {
     this.setJobDetails({ jobGroups: selectedGroups.map(g => g.label) });
   }
 
@@ -91,10 +91,10 @@ export class JobDetails extends Component {
 
     const selectedGroups = this.state.selectedGroups.concat(newGroup);
 
-    // update the groups in local state and call groupsChange to
+    // update the groups in local state and call onGroupsChange to
     // update the selected groups in the component above which manages this
     // component's state
-    this.setState({ groups }, () => this.groupsChange(selectedGroups));
+    this.setState({ groups }, () => this.onGroupsChange(selectedGroups));
   };
 
   render() {
@@ -113,7 +113,7 @@ export class JobDetails extends Component {
           >
             <EuiFieldText
               value={description}
-              onChange={this.descriptionChange}
+              onChange={this.onDescriptionChange}
             />
           </EuiFormRow>
           <EuiFormRow
@@ -123,7 +123,7 @@ export class JobDetails extends Component {
               placeholder="Select or create groups"
               options={groups}
               selectedOptions={selectedGroups}
-              onChange={this.groupsChange}
+              onChange={this.onGroupsChange}
               onCreateOption={this.onCreateGroup}
               isClearable={true}
             />
@@ -133,7 +133,7 @@ export class JobDetails extends Component {
           >
             <EuiFieldText
               value={mml}
-              onChange={this.mmlChange}
+              onChange={this.onMmlChange}
             />
           </EuiFormRow>
         </EuiForm>

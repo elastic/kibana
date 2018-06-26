@@ -8,6 +8,9 @@
 import { ML_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import moment from 'moment';
 
+const SIZE = 1000;
+const LEVEL = { system_info: -1, info: 0, warning: 1, error: 2 };
+
 export function jobAuditMessagesProvider(callWithRequest) {
 
   // search for audit messages,
@@ -77,7 +80,7 @@ export function jobAuditMessagesProvider(callWithRequest) {
       const resp = await callWithRequest('search', {
         index: ML_NOTIFICATION_INDEX_PATTERN,
         ignore_unavailable: true,
-        size: 1000,
+        size: SIZE,
         body:
         {
           sort: [
@@ -153,7 +156,6 @@ export function jobAuditMessagesProvider(callWithRequest) {
       });
 
       let messagesPerJob = [];
-      const LEVEL = { system_info: -1, info: 0, warning: 1, error: 2 };
       const jobMessages = [];
       if (resp.hits.total !== 0 &&
         resp.aggregations &&
@@ -212,18 +214,7 @@ export function jobAuditMessagesProvider(callWithRequest) {
   }
 
   function levelToText(level) {
-    if (level === 0) {
-      return 'info';
-    }
-    if (level === 1) {
-      return 'warning';
-    }
-    if (level === 2) {
-      return 'error';
-    }
-    if (level === -1) {
-      return 'system_info';
-    }
+    return Object.keys(LEVEL)[Object.values(LEVEL).indexOf(level)];
   }
 
   return {
@@ -231,5 +222,3 @@ export function jobAuditMessagesProvider(callWithRequest) {
     getAuditMessagesSummary
   };
 }
-
-

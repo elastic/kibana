@@ -107,7 +107,7 @@ function extractMML(job, newJobData) {
 function extractDetectorDescriptions(job, newJobData) {
   const detectors = [];
   const descriptions = newJobData.detectorDescriptions.map((d, i) => ({ detector_index: i, description: d }));
-  // let changes = 0;
+
   const originalDetectors = job.analysis_config.detectors;
   originalDetectors.forEach((d) => {
     if (descriptions[d.detector_index].description !== d.detector_description) {
