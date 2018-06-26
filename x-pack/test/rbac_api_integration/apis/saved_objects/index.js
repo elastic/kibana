@@ -42,7 +42,7 @@ export default function ({ loadTestFile, getService }) {
           index: [],
           applications: [
             {
-              application: 'kibana',
+              application: '.kibana',
               privileges: [ 'all' ],
               resources: [ 'default' ]
             }
@@ -57,7 +57,7 @@ export default function ({ loadTestFile, getService }) {
           index: [],
           applications: [
             {
-              application: 'kibana',
+              application: '.kibana',
               privileges: [ 'read' ],
               resources: [ 'default' ]
             }
