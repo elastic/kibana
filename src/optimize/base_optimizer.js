@@ -75,13 +75,58 @@ export default class BaseOptimizer {
     this.compiler.hooks.done.tap({
       name: 'kibana-writeStatsJson',
       fn: stats => {
-        if (!this.profile) return;
+        if (!this.profile) {
+          return;
+        }
 
         const path = this.uiBundles.resolvePath('stats.json');
         const content = JSON.stringify(stats.toJson());
         writeFile(path, content, function (err) {
           if (err) throw err;
         });
+      }
+    });
+
+    this.compiler.hooks.done.tap({
+      name: 'kibana-flushNonHardSourceCache',
+      fn: (stats) => {
+        // after a compilation we look through the compilation cache and eject
+        // items that were not loaded from the hard-source cache but will be
+        // the next time they are compiled. This causes subsequent compilations
+        // to read from the hard-source cache which is much faster
+        const { compilation } = stats;
+        for (const [key, module] of Object.entries(compilation.cache)) {
+          if (!module) {
+            continue;
+          }
+
+          if (module.cacheItem) {
+            // item was restored by hard-source-weback-plugin
+            // so don't flush it from the cache
+            continue;
+          }
+
+          // try to identify if this module is eligible for hard-source caching
+          const probablyCachedByHardSource = (
+            // only things webpack considers cacheable
+            (module.buildInfo ? module.buildInfo.cacheable : module.cacheable)
+
+            // ignored modules are cachable, but hard-source ignores them too
+            && !key.startsWith('mignored ')
+
+            // modules from mini-css-extract are ignored by hard-source because
+            // of how they are integrated with webpack
+            && !(
+              key.startsWith('mcss ')
+              || key.startsWith('mini-css-extract-plugin.')
+              || key.match(/mini-css-extract-plugin[\\/]dist[\\/]loader.js/)
+            )
+          );
+
+          if (probablyCachedByHardSource) {
+            compilation.cache[key] = null;
+          }
+        }
       }
     });
 
@@ -175,19 +220,12 @@ export default class BaseOptimizer {
 
       plugins: [
         new HardSourceWebpackPlugin({
-          cacheDirectory: this.uiBundles.resolvePath('../.webpack/[configHash]'),
+          cacheDirectory: this.uiBundles.resolvePath('../.cache/hard-source/[confighash]'),
+          info: {
+            mode: 'none',
+            level: 'warn',
+          },
         }),
-
-        new HardSourceWebpackPlugin.ExcludeModulePlugin([
-          {
-            // HardSource works with mini-css-extract-plugin but due to how
-            // mini-css emits assets, assets are not emitted on repeated builds with
-            // mini-css and hard-source together. Ignoring the mini-css loader
-            // modules, but not the other css loader modules, excludes the modules
-            // that mini-css needs rebuilt to output assets every time.
-            test: /mini-css-extract-plugin[\\/]dist[\\/]loader/,
-          }
-        ]),
 
         new MiniCssExtractPlugin({
           filename: '[name].style.css',
