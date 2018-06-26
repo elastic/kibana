@@ -189,13 +189,18 @@ uiModules
           visualizationLoader.destroy($el[0]);
         });
 
-        if ($scope.editorMode) {
-          $scope.$watch('vis.initialized', $scope.fetch);
-        } else {
-          $scope.vis.initialized = true;
-        }
+        $scope.$watch('vis.initialized', () => {
+          $scope.fetch();
+        });
 
-        $scope.fetch();
-      }
+        if (!$scope.editorMode) {
+          visualizationLoader(
+            $el[0],
+            $scope.vis,
+            $scope.visData,
+            $scope.uiState,
+            { listenOnChange: true }
+          );
+        }      }
     };
   });

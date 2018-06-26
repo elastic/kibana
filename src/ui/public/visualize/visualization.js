@@ -35,7 +35,6 @@ export class Visualization extends Component {
     super(props);
 
     const { vis, visData, uiState, listenOnChange } = props;
-    vis.initialized = true;
 
     vis._setUiState(props.uiState);
     if (listenOnChange) {
@@ -50,6 +49,7 @@ export class Visualization extends Component {
 
   render() {
     const { vis, visData, listenOnChange } = this.props;
+
     return (
       <div className="visualization">
         {this.state.showNoResultsMessage ? (<VisualizationNoResults />) :

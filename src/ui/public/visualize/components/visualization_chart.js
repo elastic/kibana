@@ -85,11 +85,20 @@ export class VisualizationChart extends Component {
   };
 
   componentDidMount() {
-    const Visualization = this.props.vis.type.visualization;
+    const { vis, listenOnChange } = this.props;
+    const Visualization = vis.type.visualization;
 
-    this.visualization = new Visualization(this.chartDiv.current, this.props.vis);
+    this.visualization = new Visualization(this.chartDiv.current, vis);
 
-    if (this.props.listenOnChange) {
+    if (this.visualization.isLoaded) {
+      this.visualization.isLoaded().then(() => {
+        vis.initialized = true;
+      });
+    } else {
+      vis.initialized = true;
+    }
+
+    if (listenOnChange) {
       this.resizeChecker = new ResizeChecker(this.containerDiv.current);
       this.resizeChecker.on('resize', this._startRenderVisualization);
     }
