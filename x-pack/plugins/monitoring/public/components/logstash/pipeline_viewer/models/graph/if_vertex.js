@@ -6,7 +6,6 @@
 
 import { intersection } from 'lodash';
 import { Vertex } from './vertex';
-import ifIcon from '@elastic/eui/src/components/icon/assets/logstash_if.svg';
 
 export class IfVertex extends Vertex {
   get typeString() {
@@ -17,8 +16,8 @@ export class IfVertex extends Vertex {
     return this.json.condition;
   }
 
-  get icon() {
-    return ifIcon;
+  get iconType() {
+    return 'logstashIf';
   }
 
   get title() {
