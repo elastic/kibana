@@ -21,11 +21,9 @@ import React from 'react';
 import { getDocLink } from 'ui/documentation_links';
 
 import {
-  EuiButtonEmpty,
   EuiCode,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiIcon,
   EuiLink,
   EuiText,
@@ -108,14 +106,6 @@ export const ScriptingHelpFlyout = ({
           </ul>
         </EuiText>
       </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiButtonEmpty
-          iconType="cross"
-          onClick={onClose}
-        >
-          Close
-        </EuiButtonEmpty>
-      </EuiFlyoutFooter>
     </EuiFlyout>
   ) : null;
 };

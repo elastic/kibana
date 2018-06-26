@@ -128,17 +128,6 @@ exports[`ScriptingHelpFlyout should render normally 1`] = `
       </ul>
     </EuiText>
   </EuiFlyoutBody>
-  <EuiFlyoutFooter>
-    <EuiButtonEmpty
-      color="primary"
-      iconSide="left"
-      iconType="cross"
-      onClick={[Function]}
-      type="button"
-    >
-      Close
-    </EuiButtonEmpty>
-  </EuiFlyoutFooter>
 </EuiFlyout>
 `;
 
