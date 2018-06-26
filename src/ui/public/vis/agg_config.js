@@ -205,15 +205,14 @@ class AggConfig {
   }
 
   toJSON() {
-    const self = this;
-    const params = self.params;
+    const params = this.params;
 
-    const outParams = _.transform(self.getAggParams(), function (out, aggParam) {
+    const outParams = _.transform(this.getAggParams(), (out, aggParam) => {
       let val = params[aggParam.name];
 
       // don't serialize undefined/null values
       if (val == null) return;
-      if (aggParam.serialize) val = aggParam.serialize(val, self);
+      if (aggParam.serialize) val = aggParam.serialize(val, this);
       if (val == null) return;
 
       // to prevent accidental leaking, we will clone all complex values
@@ -221,10 +220,10 @@ class AggConfig {
     }, {});
 
     return {
-      id: self.id,
-      enabled: self.enabled,
-      type: self.type && self.type.name,
-      schema: self.schema && self.schema.name,
+      id: this.id,
+      enabled: this.enabled,
+      type: this.type && this.type.name,
+      schema: this.schema && this.schema.name,
       params: outParams
     };
   }
