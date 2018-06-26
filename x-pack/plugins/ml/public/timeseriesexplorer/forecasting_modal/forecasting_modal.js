@@ -22,8 +22,6 @@ import {
   EuiToolTip
 } from '@elastic/eui';
 
-import 'ui/timefilter';
-
 // don't use something like plugins/ml/../common
 // because it won't work with the jest tests
 import { FORECAST_REQUEST_STATE, JOB_STATE } from '../../../common/constants/states';
@@ -402,6 +400,7 @@ ForecastingModal.propTypes = {
   detectorIndex: PropTypes.number,
   entities: PropTypes.array,
   loadForForecastId: PropTypes.func,
+  timefilter: PropTypes.object,
 };
 
 export { ForecastingModal };
