@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ConfigViewer } from './views/config_viewer';
+export { PipelineViewer } from './views';

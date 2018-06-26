@@ -27,7 +27,7 @@ function renderStatementName(name, onVertexSelected) {
         onClick={onVertexSelected}
         flush="left"
       >
-        <span className="configViewer__conditional">{name}</span>
+        <span className="pipelineViewer__conditional">{name}</span>
       </EuiButtonEmpty>
     </EuiFlexItem>
   );
@@ -91,7 +91,7 @@ export function CollapsibleStatement(props) {
       responsive={false}
       gutterSize="none"
       alignItems="center"
-      className="configViewer__statement"
+      className="pipelineViewer__statement"
     >
       <EuiFlexItem
         key={id}
