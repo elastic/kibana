@@ -235,6 +235,10 @@ export function MultiMetricJobServiceProvider() {
         job.results_index_name = job.job_id;
       }
 
+      job.custom_settings = {
+        created_by: 'multi-metric-wizard'
+      };
+
       return job;
     }
 

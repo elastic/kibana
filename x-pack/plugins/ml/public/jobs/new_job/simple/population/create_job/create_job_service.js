@@ -268,6 +268,10 @@ export function PopulationJobServiceProvider(Private) {
         job.results_index_name = job.job_id;
       }
 
+      job.custom_settings = {
+        created_by: 'population-wizard'
+      };
+
       return job;
     }
 
@@ -359,7 +363,7 @@ export function PopulationJobServiceProvider(Private) {
       const aggs = {};
       formConfig.fields.forEach((field, i) => {
         if (field.id === EVENT_RATE_COUNT_FIELD) {
-          if (field.splitField !== undefined) {
+          if (field.splitField !== undefined && field.firstSplitFieldName !== undefined) {
             // the event rate chart is draw using doc_values, so no need to specify a field.
             // however. if the event rate field is split, add a filter to just match the
             // fields which match the first split value (the front chart)
@@ -372,7 +376,7 @@ export function PopulationJobServiceProvider(Private) {
             };
           }
         } else {
-          if (field.splitField !== undefined) {
+          if (field.splitField !== undefined && field.firstSplitFieldName !== undefined) {
             // if the field is split, add a filter to the aggregation to just select the
             // fields which match the first split value (the front chart)
             aggs[i] = {

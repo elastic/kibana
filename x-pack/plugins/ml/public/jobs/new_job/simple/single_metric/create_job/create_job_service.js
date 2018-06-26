@@ -173,6 +173,10 @@ export function SingleMetricJobServiceProvider() {
         job.results_index_name = job.job_id;
       }
 
+      job.custom_settings = {
+        created_by: 'single-metric-wizard'
+      };
+
       // Use the original es agg type rather than the ML version
       // e.g. count rather than high_count
       const aggType = formConfig.agg.type.dslName;

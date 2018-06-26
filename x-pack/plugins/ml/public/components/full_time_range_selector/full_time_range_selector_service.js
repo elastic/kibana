@@ -18,7 +18,7 @@ export function FullTimeRangeSelectorServiceProvider(Notifier) {
 
   function setFullTimeRange(indexPattern, query) {
     // load the earliest and latest time stamps for the index
-    ml.getTimeFieldRange({
+    return ml.getTimeFieldRange({
       index: indexPattern.title,
       timeFieldName: indexPattern.timeFieldName,
       query
