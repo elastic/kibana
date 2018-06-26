@@ -253,11 +253,18 @@ module.controller('VisualizeWizardStep2', function ($route, $scope, timefilter, 
     if (!pattern) return;
 
     if (addToDashMode) {
-      return `#${VisualizeConstants.CREATE_PATH}` +
-        `?${DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM}` +
-        `&type=${type}&indexPattern=${pattern.id}`;
+      return kbnUrl.eval(
+        `#${VisualizeConstants.CREATE_PATH}` +
+        `?type={{type}}&indexPattern={{indexPattern}}` +
+        `&${DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM}`,
+        { type, indexPattern: pattern.id }
+      );
     }
 
-    return `#${VisualizeConstants.CREATE_PATH}?type=${type}&indexPattern=${pattern.id}`;
+    return kbnUrl.eval(
+      `#${VisualizeConstants.CREATE_PATH}` +
+      `?type={{type}}&indexPattern={{indexPattern}}`,
+      { type, indexPattern: pattern.id }
+    );
   };
 });
