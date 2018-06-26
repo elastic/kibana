@@ -6,6 +6,8 @@
 
 import fs from 'fs';
 import path from 'path';
+import { PNG } from 'pngjs';
+
 import moment from 'moment';
 import { promisify, delay } from 'bluebird';
 import { transformFn } from './transform_fn';
@@ -87,13 +89,31 @@ export class HeadlessChromiumDriver {
     }
 
     return await screenshotStitcher(outputClip, this._zoom, this._maxScreenshotDimension, async screenshotClip => {
+      this._logger.debug(`Capturing screenshot clip ${JSON.stringify(screenshotClip)}`);
       const { data } = await Page.captureScreenshot({
         clip: {
           ...screenshotClip,
           scale: 1
         }
       });
+
       this._logger.debug(`Captured screenshot clip ${JSON.stringify(screenshotClip)}`);
+
+      const png = new PNG();
+      const buffer = Buffer.from(data, 'base64');
+      await png.parse(buffer);
+      if (
+        png.width !== screenshotClip.width * 2 ||
+        png.height !== screenshotClip.height * 2
+      ) {
+        const errorMessage = `Screenshot captured with width:${
+          png.width
+        } and height: ${png.height}) is not of expected width: ${
+          screenshotClip.width * 2
+        } and height: ${screenshotClip.height * 2}`;
+
+        throw new Error(errorMessage);
+      }
       return data;
     }, this._logger);
   }
