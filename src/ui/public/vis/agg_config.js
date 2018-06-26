@@ -25,11 +25,11 @@
  */
 
 import _ from 'lodash';
-import { aggTypes } from '../agg_types/index';
+import { aggTypes as aggTypeRegistry } from '../agg_types/index';
 import { fieldFormats } from '../registry/field_formats';
 
 class AggConfig {
-  static aggTypes = aggTypes;
+  static aggTypes = aggTypeRegistry;
 
   /**
    * Ensure that all of the objects in the list have ids, the objects
@@ -90,11 +90,10 @@ class AggConfig {
    * @return {undefined}
    */
   setParams(from) {
-    const self = this;
-    from = from || self.params || {};
-    const to = self.params = {};
+    from = from || this.params || {};
+    const to = this.params = {};
 
-    self.getAggParams().forEach(function (aggParam) {
+    this.getAggParams().forEach(aggParam => {
       let val = from[aggParam.name];
 
       if (val == null) {
@@ -103,7 +102,7 @@ class AggConfig {
         if (!_.isFunction(aggParam.default)) {
           val = aggParam.default;
         } else {
-          val = aggParam.default(self);
+          val = aggParam.default(this);
           if (val == null) return;
         }
       }
@@ -116,7 +115,7 @@ class AggConfig {
         const isDeserialized = (isType || isObject);
 
         if (!isDeserialized) {
-          val = aggParam.deserialize(val, self);
+          val = aggParam.deserialize(val, this);
         }
 
         to[aggParam.name] = val;
