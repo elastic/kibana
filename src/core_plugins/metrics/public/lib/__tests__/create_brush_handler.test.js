@@ -17,11 +17,29 @@
  * under the License.
  */
 
-import { uiModules } from '../../modules';
+import createBrushHandler from '../create_brush_handler';
+import moment from 'moment';
+import { expect } from 'chai';
 
-uiModules.get('kibana').config(function ($provide) {
-  $provide.decorator('timefilter', function ($delegate) {
-    $delegate.init();
-    return $delegate;
+describe('createBrushHandler', () => {
+  let mockTimefilter;
+  let onBrush;
+  let range;
+
+  beforeEach(() => {
+    mockTimefilter = {
+      time: {},
+      setTime: function (time) { this.time = time; }
+    };
+    onBrush = createBrushHandler(mockTimefilter);
   });
+
+  test('returns brushHandler() that updates timefilter', () => {
+    range = { xaxis: { from: '2017-01-01T00:00:00Z', to: '2017-01-01T00:10:00Z' } };
+    onBrush(range);
+    expect(mockTimefilter.time.from).to.equal(moment(range.xaxis.from).toISOString());
+    expect(mockTimefilter.time.to).to.equal(moment(range.xaxis.to).toISOString());
+    expect(mockTimefilter.time.mode).to.equal('absolute');
+  });
+
 });

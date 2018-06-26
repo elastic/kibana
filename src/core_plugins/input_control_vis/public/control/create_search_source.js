@@ -25,7 +25,7 @@ export function createSearchSource(kbnApi, initialState, indexPattern, aggs, use
   searchSource.filter(() => {
     const activeFilters = [...filters];
     if (useTimeFilter) {
-      activeFilters.push(kbnApi.timeFilter.get(indexPattern));
+      activeFilters.push(kbnApi.timeFilter.createFilter(indexPattern));
     }
     return activeFilters;
   });

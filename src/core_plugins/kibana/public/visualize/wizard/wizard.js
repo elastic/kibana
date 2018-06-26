@@ -33,6 +33,7 @@ import { uiModules } from 'ui/modules';
 import visualizeWizardStep1Template from './step_1.html';
 import visualizeWizardStep2Template from './step_2.html';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
+import { timefilter } from 'ui/timefilter';
 
 const module = uiModules.get('app/visualize', ['kibana/courier']);
 
@@ -50,7 +51,7 @@ routes.when(VisualizeConstants.WIZARD_STEP_1_PAGE_PATH, {
   controller: 'VisualizeWizardStep1',
 });
 
-module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, timefilter, Private, config) {
+module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, Private, config) {
   timefilter.disableAutoRefreshSelector();
   timefilter.disableTimeRangeSelector();
 
@@ -220,7 +221,7 @@ routes.when(VisualizeConstants.WIZARD_STEP_2_PAGE_PATH, {
   }
 });
 
-module.controller('VisualizeWizardStep2', function ($route, $scope, timefilter, kbnUrl) {
+module.controller('VisualizeWizardStep2', function ($route, $scope, kbnUrl) {
   const type = $route.current.params.type;
   const addToDashMode = $route.current.params[DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM];
   kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
