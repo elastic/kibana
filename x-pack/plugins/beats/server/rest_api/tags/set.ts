@@ -15,6 +15,9 @@ import { wrapEsError } from '../../utils/error_wrappers';
 export const createSetTagRoute = (libs: CMServerLibs) => ({
   config: {
     validate: {
+      params: Joi.object({
+        tag: Joi.string(),
+      }),
       payload: Joi.object({
         configuration_blocks: Joi.array().items(
           Joi.object({

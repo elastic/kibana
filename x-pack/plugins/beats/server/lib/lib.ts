@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  IRouteAdditionalConfigurationOptions,
-  IStrictReply,
-  Request,
-} from 'hapi';
+import { IRouteAdditionalConfigurationOptions, IStrictReply } from 'hapi';
 import { internalFrameworkRequest } from '../utils/wrap_request';
 import { CMBeatsDomain } from './domains/beats';
 import { CMTagsDomain } from './domains/tags';
@@ -31,11 +27,11 @@ interface CMReturnedTagAssignment {
   result?: string;
 }
 
-interface CMAssignmentReturn {
+export interface CMAssignmentReturn {
   assignments: CMReturnedTagAssignment[];
 }
 
-interface CMRemovalReturn {
+export interface CMRemovalReturn {
   removals: CMReturnedTagAssignment[];
 }
 
@@ -178,18 +174,14 @@ export interface FrameworkRouteOptions<
     Exclude<keyof IRouteAdditionalConfigurationOptions, 'handler'>
   >;
 }
-// TODO fix this, conflicting lint rules for type vs interface on callable type
-/* tslint:disable */
-export interface FrameworkRouteHandler<
+
+export type FrameworkRouteHandler<
   RouteRequest extends WrappableRequest,
   RouteResponse
-> {
-  (
-    request: FrameworkRequest<RouteRequest>,
-    reply: IStrictReply<RouteResponse>
-  ): void;
-}
-/* tslint:enable */
+> = (
+  request: FrameworkRequest<RouteRequest>,
+  reply: IStrictReply<RouteResponse>
+) => void;
 
 export interface WrappableRequest<
   Payload = any,

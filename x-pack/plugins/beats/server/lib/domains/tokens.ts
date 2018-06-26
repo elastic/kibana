@@ -14,26 +14,7 @@ const RANDOM_TOKEN_1 = 'b48c4bda384a40cb91c6eb9b8849e77f';
 const RANDOM_TOKEN_2 = '80a3819e3cd64f4399f1d4886be7a08b';
 
 export class CMTokensDomain {
-  private adapter: CMTokensAdapter;
-  private framework: BackendFrameworkAdapter;
-
-  constructor(
-    adapter: CMTokensAdapter,
-    libs: { framework: BackendFrameworkAdapter }
-  ) {
-    this.adapter = adapter;
-    this.framework = libs.framework;
-  }
-
-  public async getEnrollmentToken(enrollmentToken: string) {
-    return await this.adapter.getEnrollmentToken(enrollmentToken);
-  }
-
-  public async deleteEnrollmentToken(enrollmentToken: string) {
-    return await this.adapter.deleteEnrollmentToken(enrollmentToken);
-  }
-
-  public areTokensEqual(token1, token2) {
+  public static areTokensEqual(token1, token2) {
     if (
       typeof token1 !== 'string' ||
       typeof token2 !== 'string' ||
@@ -52,6 +33,25 @@ export class CMTokensDomain {
       Buffer.from(token1, 'utf8'),
       Buffer.from(token2, 'utf8')
     );
+  }
+
+  private adapter: CMTokensAdapter;
+  private framework: BackendFrameworkAdapter;
+
+  constructor(
+    adapter: CMTokensAdapter,
+    libs: { framework: BackendFrameworkAdapter }
+  ) {
+    this.adapter = adapter;
+    this.framework = libs.framework;
+  }
+
+  public async getEnrollmentToken(enrollmentToken: string) {
+    return await this.adapter.getEnrollmentToken(enrollmentToken);
+  }
+
+  public async deleteEnrollmentToken(enrollmentToken: string) {
+    return await this.adapter.deleteEnrollmentToken(enrollmentToken);
   }
 
   public async createEnrollmentTokens(

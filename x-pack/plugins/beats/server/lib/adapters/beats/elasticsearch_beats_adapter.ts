@@ -176,7 +176,6 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     }));
   }
 
-  // formerly persistAssignments
   public async assignTagsToBeats(
     req: FrameworkRequest,
     assignments: CMTagAssignment[]

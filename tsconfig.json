@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
-    "sourceMap": true,
+
     "paths": {
       "ui/*": ["src/ui/public/*"]
     },

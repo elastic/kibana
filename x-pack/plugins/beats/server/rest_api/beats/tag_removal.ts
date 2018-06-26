@@ -10,7 +10,7 @@ import { wrapEsError } from '../../utils/error_wrappers';
 
 // TODO: add license check pre-hook
 // TODO: write to Kibana audit log file
-export const createTagRemovalRoute = (libs: CMServerLibs) => ({
+export const createTagRemovalsRoute = (libs: CMServerLibs) => ({
   config: {
     validate: {
       payload: Joi.object({

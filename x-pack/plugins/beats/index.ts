@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Joi from 'joi';
 import { PLUGIN } from './common/constants';
 import { initServerWithKibana } from './server/kibana.index';
 
 const DEFAULT_ENROLLMENT_TOKENS_TTL_S = 10 * 60; // 10 minutes
 
-export function beats(kibana) {
+export function beats(kibana: any) {
   return new kibana.Plugin({
-    config: Joi =>
+    config: () =>
       Joi.object({
         enabled: Joi.boolean().default(true),
         enrollmentTokensTtlInSeconds: Joi.number()
@@ -22,7 +23,7 @@ export function beats(kibana) {
     configPrefix: 'xpack.beats',
     id: PLUGIN.ID,
     require: ['kibana', 'elasticsearch', 'xpack_main'],
-    async init(server) {
+    init(server: any) {
       initServerWithKibana(server);
     },
   });

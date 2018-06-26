@@ -19,6 +19,9 @@ export const createBeatUpdateRoute = (libs: CMServerLibs) => ({
       }).options({
         allowUnknown: true,
       }),
+      params: Joi.object({
+        beatId: Joi.string(),
+      }),
       payload: Joi.object({
         ephemeral_id: Joi.string(),
         host_name: Joi.string(),
