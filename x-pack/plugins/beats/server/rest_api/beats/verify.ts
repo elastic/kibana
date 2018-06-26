@@ -23,7 +23,7 @@ export const createBeatVerificationRoute = (libs: CMServerLibs) => ({
       }).required(),
     },
   },
-  handler: async (request, reply) => {
+  handler: async (request: any, reply: any) => {
     const beats = [...request.payload.beats];
     const beatIds = beats.map(beat => beat.id);
 
@@ -36,7 +36,7 @@ export const createBeatVerificationRoute = (libs: CMServerLibs) => ({
       } = await libs.beats.verifyBeats(request, beatIds);
 
       const verifiedBeatIds = verifications.reduce(
-        (verifiedBeatList, verification, idx) => {
+        (verifiedBeatList: any, verification: any, idx: any) => {
           if (verification.update.status === 200) {
             verifiedBeatList.push(toBeVerifiedBeatIds[idx]);
           }

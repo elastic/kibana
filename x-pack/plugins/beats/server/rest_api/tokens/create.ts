@@ -23,7 +23,7 @@ export const createTokensRoute = (libs: CMServerLibs) => ({
       }).allow(null),
     },
   },
-  handler: async (request, reply) => {
+  handler: async (request: any, reply: any) => {
     const numTokens = get(request, 'payload.num_tokens', DEFAULT_NUM_TOKENS);
 
     try {

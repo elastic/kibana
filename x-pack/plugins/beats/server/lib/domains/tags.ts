@@ -41,8 +41,8 @@ export class CMTagsDomain {
     };
   }
 
-  private validateConfigurationBlocks(configurationBlocks) {
-    const types = uniq(configurationBlocks.map(block => block.type));
+  private validateConfigurationBlocks(configurationBlocks: any) {
+    const types = uniq(configurationBlocks.map((block: any) => block.type));
 
     // If none of the types in the given configuration blocks are uniqueness-enforcing,
     // we don't need to perform any further validation checks.
@@ -55,7 +55,7 @@ export class CMTagsDomain {
     }
 
     // Count the number of uniqueness-enforcing types in the given configuration blocks
-    const typeCountMap = configurationBlocks.reduce((map, block) => {
+    const typeCountMap = configurationBlocks.reduce((map: any, block: any) => {
       const { type } = block;
       if (!uniquenessEnforcingTypes.includes(type)) {
         return map;

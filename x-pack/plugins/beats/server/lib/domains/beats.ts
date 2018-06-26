@@ -4,6 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import { uniq } from 'lodash';
 import uuid from 'uuid';
 import { findNonExistentItems } from '../../utils/find_non_existent_items';
@@ -12,21 +18,20 @@ import {
   CMAssignmentReturn,
   CMBeat,
   CMBeatsAdapter,
+  CMDomainLibs,
   CMRemovalReturn,
   CMTagAssignment,
   FrameworkRequest,
 } from '../lib';
-import { CMTagsDomain } from './tags';
-import { CMTokensDomain } from './tokens';
 
 export class CMBeatsDomain {
   private adapter: CMBeatsAdapter;
-  private tags: CMTagsDomain;
-  private tokens: CMTokensDomain;
+  private tags: CMDomainLibs['tags'];
+  private tokens: CMDomainLibs['tokens'];
 
   constructor(
     adapter: CMBeatsAdapter,
-    libs: { tags: CMTagsDomain; tokens: CMTokensDomain }
+    libs: { tags: CMDomainLibs['tags']; tokens: CMDomainLibs['tokens'] }
   ) {
     this.adapter = adapter;
     this.tags = libs.tags;
@@ -134,7 +139,7 @@ export class CMBeatsDomain {
     const beatsFromEs = await this.adapter.getVerifiedWithIds(req, beatIds);
 
     const nonExistentBeatIds = beatsFromEs.reduce(
-      (nonExistentIds, beatFromEs, idx) => {
+      (nonExistentIds: any, beatFromEs: any, idx: any) => {
         if (!beatFromEs.found) {
           nonExistentIds.push(beatIds[idx]);
         }
@@ -144,14 +149,14 @@ export class CMBeatsDomain {
     );
 
     const alreadyVerifiedBeatIds = beatsFromEs
-      .filter(beat => beat.found)
-      .filter(beat => beat._source.beat.hasOwnProperty('verified_on'))
-      .map(beat => beat._source.beat.id);
+      .filter((beat: any) => beat.found)
+      .filter((beat: any) => beat._source.beat.hasOwnProperty('verified_on'))
+      .map((beat: any) => beat._source.beat.id);
 
     const toBeVerifiedBeatIds = beatsFromEs
-      .filter(beat => beat.found)
-      .filter(beat => !beat._source.beat.hasOwnProperty('verified_on'))
-      .map(beat => beat._source.beat.id);
+      .filter((beat: any) => beat.found)
+      .filter((beat: any) => !beat._source.beat.hasOwnProperty('verified_on'))
+      .map((beat: any) => beat._source.beat.id);
 
     const verifications = await this.adapter.verifyBeats(
       req,
@@ -216,13 +221,13 @@ export class CMBeatsDomain {
 
 // TODO abstract to the route, also the key arg is a temp fix
 function addNonExistentItemToResponse(
-  response,
-  assignments,
-  nonExistentBeatIds,
-  nonExistentTags,
-  key
+  response: any,
+  assignments: any,
+  nonExistentBeatIds: any,
+  nonExistentTags: any,
+  key: string
 ) {
-  assignments.forEach(({ beatId, tag }, idx) => {
+  assignments.forEach(({ beatId, tag }: CMTagAssignment, idx: any) => {
     const isBeatNonExistent = nonExistentBeatIds.includes(beatId);
     const isTagNonExistent = nonExistentTags.includes(tag);
 
@@ -240,8 +245,12 @@ function addNonExistentItemToResponse(
 }
 
 // TODO dont mutate response
-function addToResultsToResponse(key: string, response, assignmentResults) {
-  assignmentResults.forEach(assignmentResult => {
+function addToResultsToResponse(
+  key: string,
+  response: any,
+  assignmentResults: any
+) {
+  assignmentResults.forEach((assignmentResult: any) => {
     const { idxInRequest, status, result } = assignmentResult;
     response[key][idxInRequest].status = status;
     response[key][idxInRequest].result = result;

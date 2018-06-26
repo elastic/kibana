@@ -13,10 +13,12 @@ import Boom from 'boom';
  * @param err Object ES error
  * @return Object Boom error response
  */
-export function wrapEsError(err) {
+export function wrapEsError(err: any) {
   const statusCode = err.statusCode;
   if (statusCode === 403) {
-    return Boom.forbidden('Insufficient user permissions for managing Beats configuration');
+    return Boom.forbidden(
+      'Insufficient user permissions for managing Beats configuration'
+    );
   }
   return Boom.wrap(err, err.statusCode);
 }

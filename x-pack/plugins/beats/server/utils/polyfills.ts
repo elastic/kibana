@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const entries = obj => {
+export const entries = (obj: any) => {
   const ownProps = Object.keys(obj);
   let i = ownProps.length;
   const resArray = new Array(i); // preallocate the Array

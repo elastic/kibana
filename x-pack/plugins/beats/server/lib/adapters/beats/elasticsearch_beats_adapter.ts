@@ -137,8 +137,8 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       params
     );
 
-    const beats = get(response, 'hits.hits', []);
-    return beats.map(beat => omit(beat._source.beat, ['access_token']));
+    const beats = get<any>(response, 'hits.hits', []);
+    return beats.map((beat: any) => omit(beat._source.beat, ['access_token']));
   }
 
   public async removeTagsFromBeats(
@@ -169,11 +169,13 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     };
 
     const response = await this.framework.callWithRequest(req, 'bulk', params);
-    return get(response, 'items', []).map((item, resultIdx) => ({
-      idxInRequest: removals[resultIdx].idxInRequest,
-      result: item.update.result,
-      status: item.update.status,
-    }));
+    return get<any>(response, 'items', []).map(
+      (item: any, resultIdx: number) => ({
+        idxInRequest: removals[resultIdx].idxInRequest,
+        result: item.update.result,
+        status: item.update.status,
+      })
+    );
   }
 
   public async assignTagsToBeats(
@@ -207,7 +209,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     };
 
     const response = await this.framework.callWithRequest(req, 'bulk', params);
-    return get(response, 'items', []).map((item, resultIdx) => ({
+    return get<any>(response, 'items', []).map((item: any, resultIdx: any) => ({
       idxInRequest: assignments[resultIdx].idxInRequest,
       result: item.update.result,
       status: item.update.status,

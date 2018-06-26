@@ -45,7 +45,7 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
       response,
       '_source.enrollment_token',
       {
-        expires_on: 0,
+        expires_on: '0',
         token: null,
       }
     );

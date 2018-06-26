@@ -23,11 +23,11 @@ export const createTagRemovalsRoute = (libs: CMServerLibs) => ({
       }).required(),
     },
   },
-  handler: async (request, reply) => {
+  handler: async (request: any, reply: any) => {
     const { removals } = request.payload;
 
     // TODO abstract or change API to keep beatId consistent
-    const tweakedRemovals = removals.map(removal => ({
+    const tweakedRemovals = removals.map((removal: any) => ({
       beatId: removal.beat_id,
       tag: removal.tag,
     }));

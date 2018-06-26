@@ -23,11 +23,11 @@ export const createTagAssignmentsRoute = (libs: CMServerLibs) => ({
       }).required(),
     },
   },
-  handler: async (request, reply) => {
+  handler: async (request: any, reply: any) => {
     const { assignments } = request.payload;
 
     // TODO abstract or change API to keep beatId consistent
-    const tweakedAssignments = assignments.map(assignment => ({
+    const tweakedAssignments = assignments.map((assignment: any) => ({
       beatId: assignment.beat_id,
       tag: assignment.tag,
     }));

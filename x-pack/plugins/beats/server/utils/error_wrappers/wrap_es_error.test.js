@@ -8,7 +8,6 @@ import { wrapEsError } from './wrap_es_error';
 
 describe('wrap_es_error', () => {
   describe('#wrapEsError', () => {
-
     let originalError;
     beforeEach(() => {
       originalError = new Error('I am an error');
@@ -34,7 +33,9 @@ describe('wrap_es_error', () => {
       const wrappedError = wrapEsError(securityError);
 
       expect(wrappedError.isBoom).to.be(true);
-      expect(wrappedError.message).to.be('Insufficient user permissions for managing Logstash pipelines');
+      expect(wrappedError.message).to.be(
+        'Insufficient user permissions for managing Logstash pipelines'
+      );
     });
   });
 });

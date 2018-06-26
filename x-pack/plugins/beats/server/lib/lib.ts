@@ -61,8 +61,8 @@ export interface BeatTag {
 }
 
 export interface EnrollmentToken {
-  token: string;
-  expires_on: number;
+  token: string | null;
+  expires_on: string;
 }
 
 export interface CMTokensAdapter {
@@ -74,7 +74,7 @@ export interface CMTokensAdapter {
 // FIXME: fix getTagsWithIds return type
 export interface CMTagsAdapter {
   getTagsWithIds(req: FrameworkRequest, tagIds: string[]): any;
-  upsertTag(req: FrameworkRequest, tag: BeatTag): Promise<boolean>;
+  upsertTag(req: FrameworkRequest, tag: BeatTag): Promise<{}>;
 }
 
 // FIXME: fix getBeatsWithIds return type
@@ -85,7 +85,7 @@ export interface CMBeatsAdapter {
   getAll(req: FrameworkRequest): any;
   getWithIds(req: FrameworkRequest, beatIds: string[]): any;
   getVerifiedWithIds(req: FrameworkRequest, beatIds: string[]): any;
-  verifyBeats(req: FrameworkRequest, beatIds: string[]);
+  verifyBeats(req: FrameworkRequest, beatIds: string[]): any;
   removeTagsFromBeats(
     req: FrameworkRequest,
     removals: CMTagAssignment[]

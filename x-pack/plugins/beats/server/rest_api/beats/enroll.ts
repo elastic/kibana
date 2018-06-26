@@ -28,7 +28,7 @@ export const createBeatEnrollmentRoute = (libs: CMServerLibs) => ({
       }).required(),
     },
   },
-  handler: async (request, reply) => {
+  handler: async (request: any, reply: any) => {
     const { beatId } = request.params;
     const enrollmentToken = request.headers['kbn-beats-enrollment-token'];
 

@@ -30,7 +30,7 @@ export const createSetTagRoute = (libs: CMServerLibs) => ({
       }).allow(null),
     },
   },
-  handler: async (request, reply) => {
+  handler: async (request: any, reply: any) => {
     const configurationBlocks = get(
       request,
       'payload.configuration_blocks',

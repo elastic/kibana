@@ -32,7 +32,7 @@ export const createBeatUpdateRoute = (libs: CMServerLibs) => ({
       }).required(),
     },
   },
-  handler: async (request, reply) => {
+  handler: async (request: any, reply: any) => {
     const { beatId } = request.params;
     const accessToken = request.headers['kbn-beats-access-token'];
     const remoteAddress = request.info.remoteAddress;
