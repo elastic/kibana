@@ -22,9 +22,14 @@ export const table = () => ({
       default: 10,
       help: 'Show this many rows per page. You probably want to raise this is disabling pagination',
     },
+    showHeader: {
+      types: ['boolean'],
+      default: true,
+      help: 'Show or hide the header row with titles for each column.',
+    },
   },
   fn: (context, args) => {
-    const { font, paginate, perPage } = args;
+    const { font, paginate, perPage, showHeader } = args;
 
     return {
       type: 'render',
@@ -34,6 +39,7 @@ export const table = () => ({
         font,
         paginate,
         perPage,
+        showHeader,
       },
     };
   },

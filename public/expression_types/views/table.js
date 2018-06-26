@@ -27,5 +27,12 @@ export const table = () => ({
       argType: 'toggle',
       default: true,
     },
+    {
+      name: 'showHeader',
+      displayName: 'Header',
+      help: 'Show or hide the header row with titles for each column.',
+      argType: 'toggle',
+      default: true,
+    },
   ],
 });

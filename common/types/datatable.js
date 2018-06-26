@@ -57,6 +57,7 @@ export const datatable = () => ({
           datatable,
           paginate: true,
           perPage: 10,
+          showHeader: true,
         },
       };
     },

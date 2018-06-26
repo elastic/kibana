@@ -9,10 +9,15 @@ export const table = () => ({
   help: 'Render tabular data as HTML',
   reuseDomNode: true,
   render(domNode, config, handlers) {
-    const { datatable, paginate, perPage, font } = config;
+    const { datatable, paginate, perPage, font, showHeader } = config;
     ReactDOM.render(
       <div style={{ ...get(font, 'spec'), height: '100%' }}>
-        <Datatable datatable={datatable} perPage={perPage} paginate={paginate} />
+        <Datatable
+          datatable={datatable}
+          perPage={perPage}
+          paginate={paginate}
+          showHeader={showHeader}
+        />
       </div>,
       domNode,
       () => handlers.done()

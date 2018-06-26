@@ -31,7 +31,7 @@ const getFormattedValue = (val, type) => {
   return String(val);
 };
 
-export const Datatable = ({ datatable, perPage, paginate }) => (
+export const Datatable = ({ datatable, perPage, paginate, showHeader }) => (
   <Paginate rows={datatable.rows} perPage={perPage || 10}>
     {({
       rows,
@@ -46,16 +46,18 @@ export const Datatable = ({ datatable, perPage, paginate }) => (
       <div className="canvas__datatable">
         <div style={{ flexGrow: 1 }}>
           <Table condensed>
-            <thead>
-              <tr>
-                {datatable.columns.map(col => (
-                  <th key={`header-${getColumnName(col)}`}>
-                    {getColumnName(col)}{' '}
-                    <small className="muted">{getIcon(getColumnType(col))}</small>
-                  </th>
-                ))}
-              </tr>
-            </thead>
+            {!showHeader ? null : (
+              <thead>
+                <tr>
+                  {datatable.columns.map(col => (
+                    <th key={`header-${getColumnName(col)}`}>
+                      {getColumnName(col)}{' '}
+                      <small className="muted">{getIcon(getColumnType(col))}</small>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+            )}
             <tbody>
               {rows.map((row, i) => (
                 <tr key={i}>
@@ -90,4 +92,5 @@ Datatable.propTypes = {
   datatable: PropTypes.object.isRequired,
   perPage: PropTypes.number,
   paginate: PropTypes.bool,
+  showHeader: PropTypes.bool,
 };

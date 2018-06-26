@@ -64,5 +64,17 @@ describe('table', () => {
         expect(result).to.have.property('perPage', 10);
       });
     });
+
+    describe('showHeader', () => {
+      it('sets the showHeader property', () => {
+        const result = fn(testTable, { showHeader: false }).value;
+        expect(result).to.have.property('showHeader', false);
+      });
+
+      it('defaults to true', () => {
+        const result = fn(testTable).value;
+        expect(result).to.have.property('showHeader', true);
+      });
+    });
   });
 });

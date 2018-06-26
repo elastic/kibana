@@ -15,7 +15,10 @@ export const pointseries = () => ({
       return {
         type: 'render',
         as: 'table',
-        value: { datatable },
+        value: {
+          datatable,
+          showHeader: true,
+        },
       };
     },
   },
