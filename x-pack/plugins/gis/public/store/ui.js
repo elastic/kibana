@@ -3,8 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-const UPDATE_FLYOUT = 'UPDATE_FLYOUT';
-const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
+import { SET_SELECTED_LAYER } from "../actions/map_actions";
+
+export const UPDATE_FLYOUT = 'UPDATE_FLYOUT';
+
 export const FLYOUT_STATE = {
   NONE: 'NONE',
   LAYER_PANEL: 'LAYER_PANEL',
@@ -30,21 +32,12 @@ function ui(state = INITIAL_STATE, action) {
 // Actions
 export function updateFlyout(display) {
   return {
-    display,
-    type: UPDATE_FLYOUT
+    type: UPDATE_FLYOUT,
+    display
   };
 }
-export function setSelectedLayer(layer) {
-  return {
-    type: SET_SELECTED_LAYER,
-    selectedLayer: layer
-  };
-}
-
 // Selectors
 export const getFlyoutDisplay = ({ ui }) => ui && ui.flyoutDisplay
   || INITIAL_STATE.flyoutDisplay;
-export const getSelectedLayer = ({ ui }) => ui && ui.selectedLayer
-  || INITIAL_STATE.selectedLayer;
 
 export default ui;

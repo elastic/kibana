@@ -41,7 +41,7 @@ export class LayerTOC extends React.Component {
       return (
         <TOCEntry
           key={i}
-          layerId={i}
+          layerId={layer.id}
           visible={true}
           layerName={`Layer #${i}`}
           // onButtonClick={alert('clicked!')}
@@ -53,7 +53,7 @@ export class LayerTOC extends React.Component {
   render() {
     const layerEntries = this._renderLayers();
     return (
-      <div className="layerTOC" ref={node => this._domContainer = node}>
+      <div className="layerTOC">
         {layerEntries}
       </div>
     );
