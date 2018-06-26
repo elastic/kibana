@@ -26,14 +26,7 @@ export class IfVertex extends Vertex {
   }
 
   get subtitle() {
-    return {
-      complete: this.name,
-      display: this.truncateStringForDisplay(this.name, this.displaySubtitleMaxLength)
-    };
-  }
-
-  get displaySubtitleMaxLength() {
-    return 39;
+    return this.name;
   }
 
   get trueEdge() {

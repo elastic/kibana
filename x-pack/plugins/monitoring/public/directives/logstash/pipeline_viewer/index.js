@@ -8,7 +8,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import moment from 'moment';
 import { uiModules } from 'ui/modules';
-import { ConfigViewer } from 'plugins/monitoring/components/logstash/pipeline_viewer/views/config_viewer';
+import { ConfigViewer } from 'plugins/monitoring/components/logstash/pipeline_viewer';
 import { Pipeline } from 'plugins/monitoring/components/logstash/pipeline_viewer/models/pipeline';
 import { List } from 'plugins/monitoring/components/logstash/pipeline_viewer/models/list';
 import { PipelineState } from 'plugins/monitoring/components/logstash/pipeline_viewer/models/pipeline_state';

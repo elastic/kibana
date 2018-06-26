@@ -121,27 +121,6 @@ export const LOGSTASH = {
    * Constants used by Logstash Pipeline Viewer code
    */
   PIPELINE_VIEWER: {
-    GRAPH: {
-      EDGES: {
-        SVG_CLASS: 'lspvEdge',
-        LABEL_RADIUS: 8,
-        // This is something we may play with later.
-        // 1 seems to be the best value however, without it the edges sometimes make weird loops in complex graphs
-        ROUTING_MARGIN_PX: 1,
-        ARROW_START: 5
-      },
-      VERTICES: {
-        BORDER_RADIUS_PX: 4,
-        MARGIN_PX: 35,
-        WIDTH_PX: 320,
-        HEIGHT_PX: 85,
-
-        /**
-         * Vertical distance between vertices, as measured from top-border-to-top-border
-         */
-        VERTICAL_DISTANCE_PX: 20
-      }
-    },
     ICON: {
       HEIGHT_PX: 18,
       WIDTH_PX: 18
