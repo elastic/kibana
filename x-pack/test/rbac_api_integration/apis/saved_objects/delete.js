@@ -21,7 +21,7 @@ export default function ({ getService }) {
       expect(resp.body).to.eql({
         statusCode: 404,
         error: 'Not Found',
-        message: 'Not Found'
+        message: 'Saved object [dashboard/not-a-real-id] not found'
       });
     };
 

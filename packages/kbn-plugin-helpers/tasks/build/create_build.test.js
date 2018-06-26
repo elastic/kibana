@@ -18,7 +18,7 @@
  */
 
 const { resolve } = require('path');
-const { readdirSync } = require('fs');
+const { readdirSync, existsSync, unlink } = require('fs');
 const del = require('del');
 const createBuild = require('./create_build');
 
@@ -114,6 +114,33 @@ describe('creating the build', () => {
       expect(readdirSync(resolve(PLUGIN_BUILD_TARGET))).not.toContain(
         'node_modules'
       );
+    });
+  });
+
+  describe('with styleSheetToCompile', () => {
+    const sassPath = 'public/styles.scss';
+    const cssPath = resolve(PLUGIN_BUILD_TARGET, 'public/styles.css');
+
+    // set skipInstallDependencies to true for these tests
+    beforeEach(() => (PLUGIN.styleSheetToCompile = sassPath));
+    // set it back to false after
+    afterEach(() => {
+      PLUGIN.styleSheetToCompile = undefined;
+      unlink(cssPath);
+    });
+
+    it('produces CSS', async () => {
+      expect(PLUGIN.styleSheetToCompile).toBe(sassPath);
+
+      await createBuild(
+        PLUGIN,
+        buildTarget,
+        buildVersion,
+        kibanaVersion,
+        buildFiles
+      );
+
+      expect(existsSync(cssPath)).toBe(true);
     });
   });
 });
