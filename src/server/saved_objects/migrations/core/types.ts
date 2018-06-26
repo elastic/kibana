@@ -17,6 +17,38 @@
  * under the License.
  */
 
+export type LogFn = (path: string[], message: string) => void;
+
+///////////////////////////////////////////////////////////////////
+// elasticsearch.js wrapper function type definition
+///////////////////////////////////////////////////////////////////
+
+export interface CallCluster {
+  (path: 'bulk', opts: { body: object[] }): Promise<BulkResult>;
+  (path: 'indices.create', opts: IndexCreationOpts): Promise<any>;
+  (path: 'indices.get', opts: IndexOpts & Ignorable): Promise<
+    IndicesInfo | NotFound
+  >;
+  (path: 'indices.getAlias', opts: { name: string }): Promise<AliasResult>;
+  (path: 'indices.getMapping', opts: IndexOpts): Promise<MappingResult>;
+  (path: 'indices.getSettings', opts: IndexOpts): Promise<IndexSettingsResult>;
+  (path: 'indices.putMapping', opts: PutMappingOpts): Promise<any>;
+  (path: 'indices.putTemplate', opts: PutTemplateOpts): Promise<any>;
+  (path: 'indices.refresh', opts: IndexOpts): Promise<any>;
+  (path: 'indices.updateAliases', opts: UpdateAliasesOpts): Promise<any>;
+  (path: 'reindex', opts: ReindexOpts): Promise<any>;
+  (path: 'scroll', opts: ScrollOpts): Promise<SearchResults>;
+  (path: 'search', opts: SearchOpts): Promise<SearchResults>;
+}
+
+///////////////////////////////////////////////////////////////////
+// elasticsearch.js method argument types
+///////////////////////////////////////////////////////////////////
+
+export interface Ignorable {
+  ignore: number[];
+}
+
 export interface PutMappingOpts {
   body: DocMapping;
   index: string;
@@ -35,17 +67,133 @@ export interface PutTemplateOpts {
   };
 }
 
+export interface IndexOpts {
+  index: string;
+}
+
+export interface IndexCreationOpts {
+  index: string;
+  body?: {
+    mappings?: IndexMapping;
+    settings?: {
+      index: {
+        number_of_shards: string;
+        number_of_replicas: string;
+      };
+    };
+  };
+}
+
+export interface ReindexOpts {
+  body: {
+    dest: IndexOpts;
+    source: IndexOpts;
+  };
+  refresh: boolean;
+  waitForCompletion: boolean;
+}
+
+export type AliasAction =
+  | { remove_index: IndexOpts }
+  | { remove: { index: string; alias: string } }
+  | { add: { index: string; alias: string } };
+
+export interface UpdateAliasesOpts {
+  body: {
+    actions: AliasAction[];
+  };
+}
+
+export interface SearchOpts {
+  body: object;
+  index: string;
+  scroll?: string;
+}
+
+export interface ScrollOpts {
+  scroll: string;
+  scrollId: string;
+}
+
+///////////////////////////////////////////////////////////////////
+// elasticsearch.js method return value types
+///////////////////////////////////////////////////////////////////
+
+export interface NotFound {
+  status: 404;
+}
+
 export interface MappingResult {
   [index: string]: {
     mappings: IndexMapping;
   };
 }
 
-export interface CallCluster {
-  (path: 'indices.putMapping', opts: PutMappingOpts): Promise<any>;
-  (path: 'indices.getMapping', opts: { index: string }): Promise<MappingResult>;
-  (path: 'indices.putTemplate', opts: PutTemplateOpts): Promise<any>;
-  (path: 'indices.exists', opts: { index: string }): Promise<boolean>;
+export interface AliasResult {
+  [alias: string]: object;
+}
+
+export interface IndexSettingsResult {
+  [indexName: string]: {
+    settings: {
+      index: {
+        number_of_shards: string;
+        auto_expand_replicas: string;
+        provided_name: string;
+        creation_date: string;
+        number_of_replicas: string;
+        uuid: string;
+        version: { created: '7000001' };
+      };
+    };
+  };
+}
+
+export interface SearchResults {
+  hits: {
+    hits: RawDoc[];
+  };
+  _scroll_id?: string;
+}
+
+export interface BulkResult {
+  items: Array<{ index: { error?: { type: string; reason: string } } }>;
+}
+
+export interface IndexInfo {
+  aliases: AliasResult;
+  mappings: IndexMapping;
+}
+
+export interface IndicesInfo {
+  [index: string]: IndexInfo;
+}
+
+///////////////////////////////////////////////////////////////////
+// Documents
+///////////////////////////////////////////////////////////////////
+
+export interface RawDoc {
+  _id: string;
+  _source: any;
+  _type?: string;
+}
+
+export interface SavedObjectDoc {
+  attributes: any;
+  id: string;
+  type: string;
+  migrationVersion?: string;
+}
+
+///////////////////////////////////////////////////////////////////
+// Migration plugin and dependent types
+///////////////////////////////////////////////////////////////////
+
+export interface MigrationPlugin {
+  id: string;
+  mappings?: MappingDefinition;
+  migrations?: MigrationDefinition;
 }
 
 export interface MappingDefinition {
@@ -54,6 +202,7 @@ export interface MappingDefinition {
 
 export interface DocMapping {
   dynamic: string;
+  _meta?: { migrationVersion: string[] };
   properties: MappingDefinition;
 }
 
@@ -61,7 +210,12 @@ export interface IndexMapping {
   doc: DocMapping;
 }
 
-export interface MigrationPlugin {
-  id: string;
-  mappings?: MappingDefinition;
+export type TransformFn = (doc: SavedObjectDoc) => SavedObjectDoc;
+
+export interface VersionTransforms {
+  [version: string]: TransformFn;
+}
+
+export interface MigrationDefinition {
+  [type: string]: VersionTransforms;
 }
