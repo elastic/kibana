@@ -32,20 +32,12 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
         .getVisibleText();
     }
 
-    saveSearch(searchName) {
-      return this.clickSaveSearchButton()
-        .then(() => {
-          log.debug('--saveSearch button clicked');
-          return getRemote().findDisplayedById('SaveSearch')
-            .pressKeys(searchName);
-        })
-        .then(() => {
-          log.debug('--find save button');
-          return testSubjects.click('discoverSaveSearchButton');
-        })
-        .then(async () => {
-          return await testSubjects.exists('saveSearchSuccess', 2000);
-        });
+    async saveSearch(searchName) {
+      log.debug('saveSearch');
+      await this.clickSaveSearchButton();
+      await getRemote().findDisplayedById('SaveSearch').pressKeys(searchName);
+      await testSubjects.click('discoverSaveSearchButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async getColumnHeaders() {
@@ -56,6 +48,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     async openSavedSearch() {
       await this.clickLoadSavedSearchButton();
       await testSubjects.exists('loadSearchForm');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async hasSavedSearch(searchName) {
