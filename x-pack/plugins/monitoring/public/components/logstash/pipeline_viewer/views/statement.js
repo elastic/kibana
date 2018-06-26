@@ -6,15 +6,15 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { PluginStatement as PluginStatementModel } from '../../models/pipeline/plugin_statement';
+import { PluginStatement as PluginStatementModel } from '../models/pipeline/plugin_statement';
 import { CollapsibleStatement } from './collapsible_statement';
-import { IfElement } from '../../models/list/if_element';
+import { IfElement } from '../models/list/if_element';
 import { PluginStatement } from './plugin_statement';
 
 function renderNestingSpacers(depth) {
   const spacers = [];
   for (let i = 0; i < depth; i += 1) {
-    spacers.push(<div key={`spacer_${i}`} className="configViewer__spacer" />);
+    spacers.push(<div key={`spacer_${i}`} className="pipelineViewer__spacer" />);
   }
   return spacers;
 }
@@ -56,8 +56,8 @@ export function Statement(props) {
   const { depth } = props.element;
 
   return (
-    <li className={`configViewer__listItem`}>
-      <div className="configViewer__spaceContainer">
+    <li className={`pipelineViewer__listItem`}>
+      <div className="pipelineViewer__spaceContainer">
         {renderNestingSpacers(depth)}
       </div>
       {renderStatement(props)}

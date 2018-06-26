@@ -16,7 +16,7 @@ import classNames from 'classnames';
 export function Metric({ className, value, warning }) {
 
   const classes = classNames(
-    'configViewer__metric',
+    'pipelineViewer__metric',
     className,
   );
 
@@ -38,7 +38,7 @@ export function Metric({ className, value, warning }) {
   }
   return (
     <EuiFlexItem
-      className="configViewer__metricFlexItem"
+      className="pipelineViewer__metricFlexItem"
       grow={false}
     >
       {stylizedValue}
