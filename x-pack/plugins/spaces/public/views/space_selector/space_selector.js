@@ -97,7 +97,7 @@ export class SpaceSelector extends Component {
 
             <EuiSpacer size="xl" />
 
-            <SpaceCards spaces={filteredSpaces} />
+            <SpaceCards spaces={filteredSpaces} onSpaceSelect={this.onSelectSpace} />
 
             {
               filteredSpaces.length === 0 &&
@@ -133,6 +133,10 @@ export class SpaceSelector extends Component {
     this.setState({
       searchTerm: searchTerm.trim().toLowerCase()
     });
+  }
+
+  onSelectSpace = (space) => {
+    this.props.spacesManager.changeSelectedSpace(space);
   }
 }
 

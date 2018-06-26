@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { defaultsDeep } from 'lodash';
 import { getRootPropertiesObjects } from '../../../../mappings';
 
 /**
@@ -65,9 +66,10 @@ function getFieldsForTypes(searchFields, types) {
  *  @param  {(string|Array<string>)} type
  *  @param  {String} search
  *  @param  {Array<string>} searchFields
+ *  @param {Object} extraQueryParams query parameters to merge into the result
  *  @return {Object}
  */
-export function getQueryParams(mappings, type, search, searchFields) {
+export function getQueryParams(mappings, type, search, searchFields, extraQueryParams = {}) {
   if (!type && !search) {
     return {};
   }
@@ -75,9 +77,7 @@ export function getQueryParams(mappings, type, search, searchFields) {
   const bool = {};
 
   if (type) {
-    bool.filter = [
-      { [Array.isArray(type) ? 'terms' : 'term']: { type } }
-    ];
+    bool.filter = [{ [Array.isArray(type) ? 'terms' : 'term']: { type } }];
   }
 
   if (search) {
@@ -95,5 +95,35 @@ export function getQueryParams(mappings, type, search, searchFields) {
     ];
   }
 
-  return { query: { bool } };
+  // a list of fields to manually merge together
+  const fieldsToMerge = ['filter', 'must'];
+
+  const extraParams = {
+    ...extraQueryParams.bool
+  };
+
+  // Remove the manual merge fields from the collection of properties we will automatically combine.
+  fieldsToMerge.forEach(field => delete extraParams[field]);
+
+  let query = {
+    bool: defaultsDeep(bool, extraParams)
+  };
+
+  if (extraQueryParams.bool) {
+
+    const extraBoolParams = extraQueryParams.bool;
+
+    query = fieldsToMerge.reduce((queryAcc, field) => {
+      const prop = queryAcc.bool[field];
+      const extraProp = extraBoolParams[field];
+      if (Array.isArray(prop) && Array.isArray(extraProp)) {
+        queryAcc.bool[field] = [...prop, ...extraProp];
+      }
+      return queryAcc;
+    }, query);
+  }
+
+  return { query };
 }
+
+

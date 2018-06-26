@@ -28,7 +28,8 @@ export function getSearchDsl(mappings, options = {}) {
     search,
     searchFields,
     sortField,
-    sortOrder
+    sortOrder,
+    extraQueryParams,
   } = options;
 
   if (!type && sortField) {
@@ -39,8 +40,12 @@ export function getSearchDsl(mappings, options = {}) {
     throw Boom.notAcceptable('sortOrder requires a sortField');
   }
 
+  if (extraQueryParams && typeof extraQueryParams !== 'object') {
+    throw Boom.notAcceptable('extraQueryParams must be an object');
+  }
+
   return {
-    ...getQueryParams(mappings, type, search, searchFields),
+    ...getQueryParams(mappings, type, search, searchFields, extraQueryParams),
     ...getSortingParams(mappings, type, sortField, sortOrder),
   };
 }

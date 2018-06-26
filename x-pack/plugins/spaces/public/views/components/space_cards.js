@@ -6,9 +6,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import chrome from 'ui/chrome';
 import { SpaceCard } from './space_card';
-import { stripSpaceUrlContext } from '../../../common/spaces_url_parser';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -34,13 +32,12 @@ export class SpaceCards extends Component {
 
   createSpaceClickHandler = (space) => {
     return () => {
-      const baseUrlWithoutSpace = stripSpaceUrlContext(chrome.getBasePath());
-
-      window.location = `${baseUrlWithoutSpace}/s/${space.urlContext}`;
+      this.props.onSpaceSelect(space);
     };
   };
 }
 
 SpaceCards.propTypes = {
   spaces: PropTypes.array.isRequired,
+  onSpaceSelect: PropTypes.func.isRequired,
 };

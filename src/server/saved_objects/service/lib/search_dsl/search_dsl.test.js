@@ -46,13 +46,14 @@ describe('getSearchDsl', () => {
   });
 
   describe('passes control', () => {
-    it('passes (mappings, type, search, searchFields) to getQueryParams', () => {
+    it('passes (mappings, type, search, searchFields, extraQueryParams) to getQueryParams', () => {
       const spy = sandbox.spy(queryParamsNS, 'getQueryParams');
       const mappings = { type: { properties: {} } };
       const opts = {
         type: 'foo',
         search: 'bar',
         searchFields: ['baz'],
+        extraQueryParams: { bool: {} },
       };
 
       getSearchDsl(mappings, opts);
@@ -63,6 +64,7 @@ describe('getSearchDsl', () => {
         opts.type,
         opts.search,
         opts.searchFields,
+        opts.extraQueryParams,
       );
     });
 

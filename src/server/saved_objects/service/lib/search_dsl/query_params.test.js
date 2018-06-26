@@ -315,4 +315,76 @@ describe('searchDsl/queryParams', () => {
         });
     });
   });
+
+  describe('{extraQueryParams}', () => {
+    it('merges the extraQueryParams into the generated query params', () => {
+      const baseQueryParams = getQueryParams(MAPPINGS, 'saved', 'search');
+      expect(baseQueryParams)
+        .toEqual({
+          query: {
+            bool: {
+              filter: [
+                {
+                  term: { type: 'saved' }
+                }
+              ],
+              must: [{
+                simple_query_string: {
+                  all_fields: true,
+                  query: 'search'
+                }
+              }]
+            }
+          }
+        });
+
+      const result = getQueryParams(MAPPINGS, 'saved', 'search', null, {
+        bool: {
+          filter: [{
+            term: { type: 'foo' }
+          }],
+          must: [{
+            term: {
+              someField: 'bar'
+            }
+          }],
+          must_not: [{
+            term: {
+              field1: 'value'
+            }
+          }]
+        }
+      });
+
+      expect(result).toEqual({
+        query: {
+          bool: {
+            filter: [
+              {
+                term: { type: 'saved' }
+              },
+              {
+                term: { type: 'foo' }
+              }
+            ],
+            must: [{
+              simple_query_string: {
+                all_fields: true,
+                query: 'search'
+              }
+            }, {
+              term: {
+                someField: 'bar'
+              }
+            }],
+            must_not: [{
+              term: {
+                field1: 'value'
+              }
+            }]
+          }
+        }
+      });
+    });
+  });
 });

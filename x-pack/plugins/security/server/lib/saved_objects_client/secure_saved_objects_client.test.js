@@ -378,7 +378,7 @@ describe('#find', () => {
         hasPrivileges: mockHasPrivileges,
         auditLogger: mockAuditLogger,
       });
-      const options = { type: [ type1, type2 ] };
+      const options = { type: [type1, type2] };
 
       await expect(client.find(options)).rejects.toThrowError(mockErrors.forbiddenError);
 
@@ -417,7 +417,7 @@ describe('#find', () => {
         hasPrivileges: mockHasPrivileges,
         auditLogger: mockAuditLogger,
       });
-      const options = { type: [ type1, type2 ] };
+      const options = { type: [type1, type2] };
 
       await expect(client.find(options)).rejects.toThrowError(mockErrors.forbiddenError);
 
@@ -701,7 +701,7 @@ describe('#bulkGet', () => {
     const result = await client.bulkGet(objects);
 
     expect(result).toBe(returnValue);
-    expect(mockRepository.bulkGet).toHaveBeenCalledWith(objects);
+    expect(mockRepository.bulkGet).toHaveBeenCalledWith(objects, {});
     expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'bulk_get', [type1, type2], {
       objects,
@@ -789,7 +789,7 @@ describe('#get', () => {
     const result = await client.get(type, id);
 
     expect(result).toBe(returnValue);
-    expect(mockRepository.get).toHaveBeenCalledWith(type, id);
+    expect(mockRepository.get).toHaveBeenCalledWith(type, id, {});
     expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'get', [type], {
       type,

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function getSpaceUrlContext(basePath = '/', defaultContext = null) {
+export function getSpaceUrlContext(basePath = '/', defaultContext = '') {
   // Look for `/s/space-url-context` in the base path
   const matchResult = basePath.match(/\/s\/([a-z0-9\-]+)/);
 
@@ -41,4 +41,15 @@ export function stripSpaceUrlContext(basePath = '/') {
   }
 
   return basePathWithoutSpace;
+}
+
+export function addSpaceUrlContext(basePath = '/', urlContext = '', requestedPath = '') {
+  if (requestedPath && !requestedPath.startsWith('/')) {
+    throw new Error(`path must start with a /`);
+  }
+
+  if (urlContext) {
+    return `${basePath}/s/${urlContext}${requestedPath}`;
+  }
+  return `${basePath}${requestedPath}`;
 }

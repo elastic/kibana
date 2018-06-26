@@ -89,7 +89,7 @@ test(`#bulkGet`, async () => {
   const objects = {};
   const result = await client.bulkGet(objects);
 
-  expect(mockRepository.bulkGet).toHaveBeenCalledWith(objects);
+  expect(mockRepository.bulkGet).toHaveBeenCalledWith(objects, {});
   expect(result).toBe(returnValue);
 });
 
@@ -104,7 +104,7 @@ test(`#get`, async () => {
   const id = 1;
   const result = await client.get(type, id);
 
-  expect(mockRepository.get).toHaveBeenCalledWith(type, id);
+  expect(mockRepository.get).toHaveBeenCalledWith(type, id, {});
   expect(result).toBe(returnValue);
 });
 
