@@ -17,16 +17,28 @@
  * under the License.
  */
 
-export const functional = {
-  options: {
-    logLevel: 'debug',
-    configFile: require.resolve('../../test/functional/config.js')
-  }
-};
+import chalk from 'chalk';
+import getopts from 'getopts';
+import { startServers } from '../../tasks';
+import { processOptions, displayHelp } from './args';
 
-export const apiIntegration = {
-  options: {
-    logLevel: 'debug',
-    configFile: require.resolve('../../test/api_integration/config.js')
+/**
+ * Start servers
+ * @param {string} defaultConfigPath Optional path to config
+ *                                   if no config option is passed
+ */
+export async function startServersCli(defaultConfigPath) {
+  try {
+    const userOptions = getopts(process.argv.slice(2)) || {};
+    if (userOptions.help) {
+      console.log(displayHelp());
+      return undefined;
+    }
+
+    const options = processOptions(userOptions, defaultConfigPath);
+    await startServers(options);
+  } catch (err) {
+    console.log(chalk.red(err));
+    process.exit(1);
   }
-};
+}
