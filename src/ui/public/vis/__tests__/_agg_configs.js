@@ -35,14 +35,6 @@ describe('AggConfigs', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    // replace the AggConfig module with a spy
-
-    const spy = sinon.spy(AggConfig);
-    Object.defineProperty(spy, 'aggTypes', {
-      get: function () { return AggConfig.aggTypes; },
-      set: function (val) { AggConfig.aggTypes = val; }
-    });
-
     // load main deps
     Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);

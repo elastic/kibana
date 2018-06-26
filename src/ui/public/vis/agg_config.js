@@ -25,11 +25,9 @@
  */
 
 import _ from 'lodash';
-import { aggTypes as aggTypeRegistry } from '../agg_types/index';
 import { fieldFormats } from '../registry/field_formats';
 
 class AggConfig {
-  static aggTypes = aggTypeRegistry;
 
   /**
    * Ensure that all of the objects in the list have ids, the objects
@@ -321,7 +319,9 @@ class AggConfig {
     }
 
     if (_.isString(type)) {
-      type = AggConfig.aggTypes.byName[type];
+      // We need to inline require here, since we're having a cyclic dependency
+      // from somewhere inside agg_types back to AggConfig.
+      type = require('../agg_types').aggTypes.byName[type];
     }
 
     if (type && _.isFunction(type.decorateAggConfig)) {
