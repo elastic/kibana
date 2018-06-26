@@ -12,9 +12,6 @@ const createMockXpackMainPluginAndFeature = (featureId) => {
 
   const mockFeature = {
     getLicenseCheckResults: jest.fn(),
-    registerLicenseChangeCallback: (callback) => {
-      licenseChangeCallbacks.push(callback);
-    },
     mock: {
       triggerLicenseChange: () => {
         for (const callback of licenseChangeCallbacks) {
@@ -29,6 +26,9 @@ const createMockXpackMainPluginAndFeature = (featureId) => {
 
   const mockXpackMainPlugin = {
     info: {
+      onLicenseInfoChange: (callback) => {
+        licenseChangeCallbacks.push(callback);
+      },
       feature: (id) => {
         if (id === featureId) {
           return mockFeature;

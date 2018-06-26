@@ -224,7 +224,7 @@ class TagCloud extends EventEmitter {
       const self = this;
       enteringTags.on({
         click: function (event) {
-          self.emit('select', event.rawText);
+          self.emit('select', event);
         },
         mouseover: function () {
           d3.select(this).style('cursor', 'pointer');

@@ -794,20 +794,20 @@ module.controller('MlTimeSeriesExplorerController', function (
       // Calculate the 'auto' zoom duration which shows data at bucket span granularity.
       $scope.autoZoomDuration = getAutoZoomDuration();
 
+      // Check that the zoom times are valid.
+      // zoomFrom must be at or after dashboard earliest,
+      // zoomTo must be at or before dashboard latest plus context chart agg interval.
       const zoomFrom = moment(zoomState.from, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true);
       const zoomTo = moment(zoomState.to, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true);
-
-      // Get the time span of data in the context chart.
-      // Valid zoomTo is the time of the last bucket plus the aggregation interval.
-      const combinedData = $scope.contextForecastData === undefined ?
-        $scope.contextChartData : $scope.contextChartData.concat($scope.contextForecastData);
-      const earliestDataDate = _.first(combinedData).date;
-      const latestDataDate = new Date(_.last(combinedData).date.valueOf() +
-        $scope.contextAggregationInterval.asMilliseconds());
+      const aggIntervalMs = $scope.contextAggregationInterval.asMilliseconds();
+      const bounds = timefilter.getActiveBounds();
+      const earliest = bounds.min;
+      const latest = moment(bounds.max).add(aggIntervalMs, 'ms');
 
       if (zoomFrom.isValid() && zoomTo.isValid &&
-        zoomFrom.isBetween(earliestDataDate, latestDataDate, null, '[]') &&
-        zoomTo.isBetween(earliestDataDate, latestDataDate, null, '[]')) {
+        zoomTo.isAfter(zoomFrom) &&
+        zoomFrom.isBetween(earliest, latest, null, '[]') &&
+        zoomTo.isBetween(earliest, latest, null, '[]')) {
         return [zoomFrom.toDate(), zoomTo.toDate()];
       }
     }

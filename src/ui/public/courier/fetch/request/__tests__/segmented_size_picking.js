@@ -47,7 +47,7 @@ describe('Segmented Request Size Picking', function () {
 
   describe('without a size', function () {
     it('does not set the request size', async function () {
-      const req = new SegmentedReq(new MockSource());
+      const req = new SegmentedReq({ source: new MockSource(), errorHandler: () => {} });
       req._handle.setDirection('desc');
       req._handle.setSortFn(new HitSortFn('desc'));
       await req.start();
@@ -58,7 +58,7 @@ describe('Segmented Request Size Picking', function () {
 
   describe('with a size', function () {
     it('sets the request size to the entire desired size', async function () {
-      const req = new SegmentedReq(new MockSource());
+      const req = new SegmentedReq({ source: new MockSource(), errorHandler: () => {} });
       req._handle.setDirection('desc');
       req._handle.setSize(555);
       req._handle.setSortFn(new HitSortFn('desc'));

@@ -34,7 +34,7 @@ export default function ({ getService }) {
     const expectNotFound = (resp) => {
       expect(resp.body).to.eql({
         error: 'Not Found',
-        message: 'Not Found',
+        message: 'Saved object [visualization/foobar] not found',
         statusCode: 404,
       });
     };

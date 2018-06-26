@@ -32,12 +32,12 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('vega chart', () => {
-      it('should not display spy panel toggle button', async function () {
-        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
+      it('should not have inspector enabled', async function () {
+        const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
         expect(spyToggleExists).to.be(false);
       });
 
-      it('should have some initial vega spec text', async function () {
+      it.skip('should have some initial vega spec text', async function () {
         const vegaSpec = await PageObjects.visualize.getVegaSpec();
         expect(vegaSpec).to.contain('{').and.to.contain('data');
         expect(vegaSpec.length).to.be.above(500);

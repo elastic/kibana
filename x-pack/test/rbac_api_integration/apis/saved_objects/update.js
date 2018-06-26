@@ -34,7 +34,7 @@ export default function ({ getService }) {
       expect(resp.body).eql({
         statusCode: 404,
         error: 'Not Found',
-        message: 'Not Found'
+        message: 'Saved object [visualization/not an id] not found'
       });
     };
 
