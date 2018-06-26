@@ -15,7 +15,7 @@
     - "application/json"
   paths: 
     /repository/{uri}:
-      get: 
+      get:
         description: "Return a repository with given uri"
         operationId: findRepo
         parameters:
@@ -47,6 +47,56 @@
               $ref: "#/definitions/NewRepository"
             required: true
         responses: "200"
+    /person/{id}:
+      get:
+        description: "Return a person with a given id"
+        operationId: findPerson
+        parameters:
+          - name: id
+            in: path
+            type: string
+            required: true
+        responses:
+          "200":
+            schema:
+              $ref: "#/definitions/Person"
+      delete:
+        description: "Delete a person with a given id"
+        operationId: deletePerson
+        parameters:
+          - name: id
+            in: path
+            type: string
+            required: true
+        responses: "204"
+      put:
+        description: "Update a person with a given id"
+        operationId: updatePerson
+        parameters:
+          - name: id
+            in: path
+            type: string
+            required: true
+          - name: person
+            in: body
+            schema:
+              $ref: "#/definitions/Person"
+            required: true
+        responses: "200"
+      post:
+        description: "Create a new person with a given id"
+        operationId: createPerson
+        parameters:
+          - name: id
+            in: path
+            type: string
+            required: true
+          - name: person
+            in: body
+            schema:
+              $ref: "#/definitions/Person"
+            required: true
+        responses: "200"
   definitions:
     Repository:
       type: object
@@ -65,4 +115,11 @@
       type: object
       properties:
         url:
+          type: string
+    Person:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
           type: string

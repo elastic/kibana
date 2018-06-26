@@ -5,10 +5,11 @@ plugins {
 //  id 'io.vertx.vertx-plugin' version '0.0.4'
 }
 
-//vertx {
-//  mainVerticle = "castro.backend.server.MainApiVerticle"
-//  watch = ["src/**/*", "build.gradle"]
-//}
+repositories {
+  maven {
+    url 'https://repo.spring.io/libs-release'
+  }
+}
 
 // https://dzone.com/articles/continuous-auto-restart-with-spring-boot-devtools
 configurations {
@@ -29,7 +30,10 @@ dependencies {
 
 //  compile "io.vertx:vertx-web:3.5.2"
 
-  compile "org.springframework.boot:spring-boot-starter-web"
+  compile 'org.springframework.boot:spring-boot-starter-web:2.0.3.RELEASE'
+  compile 'org.elasticsearch.client:elasticsearch-rest-high-level-client:6.3.0'
+  compile 'org.elasticsearch:elasticsearch:6.3.0'
+
   // http://localhost:8080/swagger-ui.html
   compile "io.springfox:springfox-swagger-ui:2.8.0"
   compile "io.springfox:springfox-swagger2:2.8.0"
