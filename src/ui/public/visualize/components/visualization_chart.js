@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import $ from 'jquery';
 import React, { Component } from 'react';
 import * as Rx from 'rxjs';
 import { tap, debounceTime, filter, share, switchMap } from 'rxjs/operators';
@@ -42,7 +41,7 @@ export class VisualizationChart extends Component {
       filter(({ vis, visData, container }) => vis && vis.initialized && container && (!vis.type.requiresSearch || visData)),
       debounceTime(100),
       switchMap(async ({ vis, visData, container }) => {
-        vis.size = [$(container).width(), $(container).height()];
+        vis.size = [container.clientWidth, container.clientHeight];
         const status = getUpdateStatus(vis.type.requiresUpdateStatus, this, this.props);
         const renderPromise = this.visualization.render(visData, status);
         return renderPromise;
