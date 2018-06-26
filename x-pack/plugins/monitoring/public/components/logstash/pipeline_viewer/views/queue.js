@@ -10,7 +10,7 @@ import { EuiSpacer, EuiText } from '@elastic/eui';
 
 export function Queue() {
   return (
-    <div className="configStatementList">
+    <div>
       <StatementListHeading
         iconType="logstashQueue"
         title="Queue"

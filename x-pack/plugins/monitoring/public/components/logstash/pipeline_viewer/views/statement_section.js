@@ -19,7 +19,7 @@ export function StatementSection({
   if (!elements.length) { return null; }
 
   return (
-    <div className="configStatementList">
+    <div>
       <StatementListHeading
         iconType={iconType}
         title={headingText}
