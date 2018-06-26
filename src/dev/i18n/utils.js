@@ -17,7 +17,12 @@
  * under the License.
  */
 
-import { isCallExpression, isIdentifier, isObjectProperty } from '@babel/types';
+import {
+  isCallExpression,
+  isIdentifier,
+  isObjectProperty,
+  isMemberExpression,
+} from '@babel/types';
 import fs from 'fs';
 import glob from 'glob';
 import { promisify } from 'util';
@@ -52,7 +57,8 @@ export function isI18nTranslateFunction(node) {
   return (
     isCallExpression(node) &&
     (isIdentifier(node.callee, { name: 'i18n' }) ||
-      isIdentifier(node.callee, { name: 'translate' }))
+      (isMemberExpression(node.callee) &&
+        isIdentifier(node.callee.property, { name: 'translate' })))
   );
 }
 

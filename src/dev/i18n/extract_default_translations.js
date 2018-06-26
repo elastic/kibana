@@ -102,11 +102,14 @@ export async function extractDefaultTranslations(inputPath) {
 
   for (const [mapKey, mapValue] of [...defaultMessagesMap.entries()].sort()) {
     const key = mapKey.replace(ESCAPE_CHARACTERS_REGEX, '\\$1$2');
-    const value = mapValue.message.replace(ESCAPE_CHARACTERS_REGEX, '\\$1$2');
+    const value = mapValue.message
+      .replace(ESCAPE_CHARACTERS_REGEX, '\\$1$2')
+      .replace('\n', '\\n');
+
     jsonBuffer = Buffer.concat([
       jsonBuffer,
       Buffer.from(`  '${key}': '${value}',`),
-      Buffer.from(value.context ? ` // ${value.context}\n` : '\n'),
+      Buffer.from(mapValue.context ? ` // ${mapValue.context}\n` : '\n'),
     ]);
   }
 
