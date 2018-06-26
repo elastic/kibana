@@ -18,36 +18,32 @@
  */
 
 import path from 'path';
+import JSON5 from 'json5';
 
-import {
-  arraysDiff,
-  plainify,
-  readFileAsync,
-  touchPath,
-  writeFileAsync,
-} from './utils';
+import { arraysDiff, readFileAsync, pathExists, writeFileAsync } from './utils';
 
 export async function checkUpdates(pluginPath, log) {
   const defaultMessagesBuffer = await readFileAsync(
-    path.resolve(pluginPath, 'translations/defaultMessages.json')
+    path.resolve(pluginPath, 'translations', 'defaultMessages.json')
   );
   let messagesCacheBuffer;
 
   try {
     const resolvedPath = path.resolve(
       pluginPath,
-      'translations/messagesCache.json'
+      'translations',
+      'messagesCache.json'
     );
-    await touchPath(resolvedPath);
+    await pathExists(resolvedPath);
     messagesCacheBuffer = await readFileAsync(resolvedPath);
   } catch (_) {
     messagesCacheBuffer = new Buffer('[]');
   }
 
   const defaultMessagesIds = Object.keys(
-    plainify(JSON.parse(defaultMessagesBuffer.toString()))
+    JSON5.parse(defaultMessagesBuffer.toString())
   );
-  const cachedMessagesIds = JSON.parse(messagesCacheBuffer.toString());
+  const cachedMessagesIds = JSON5.parse(messagesCacheBuffer.toString());
 
   const [addedMessages, removedMessages] = arraysDiff(
     defaultMessagesIds,
@@ -67,7 +63,7 @@ export async function checkUpdates(pluginPath, log) {
   }
 
   await writeFileAsync(
-    path.resolve(pluginPath, 'translations/messagesCache.json'),
-    JSON.stringify(defaultMessagesIds, null, 2)
+    path.resolve(pluginPath, 'translations', 'messagesCache.json'),
+    JSON5.stringify(defaultMessagesIds, null, 2)
   );
 }

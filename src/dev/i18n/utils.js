@@ -25,24 +25,8 @@ export const writeFileAsync = promisify(fs.writeFile);
 
 const accessAsync = promisify(fs.access);
 
-export function touchPath(path) {
+export function pathExists(path) {
   return accessAsync(path, fs.constants.F_OK);
-}
-
-export function plainify(object) {
-  const result = {};
-
-  for (const [key, value] of Object.entries(object)) {
-    if (typeof value === 'object' && value !== null) {
-      for (const [nestedKey, nestedValue] of Object.entries(plainify(value))) {
-        result[`${key}.${nestedKey}`] = nestedValue;
-      }
-    } else {
-      result[key] = value;
-    }
-  }
-
-  return result;
 }
 
 export function arraysDiff(left = [], right = []) {
