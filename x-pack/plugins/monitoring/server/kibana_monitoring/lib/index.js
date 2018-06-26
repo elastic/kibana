@@ -5,3 +5,6 @@
  */
 
 export { getCollectorLogger } from './get_collector_logger';
+export { getCollectorTypesCombiner } from './get_collector_types_combiner';
+export { sendBulkPayload } from './send_bulk_payload';
+export { monitoringBulk } from './monitoring_bulk';

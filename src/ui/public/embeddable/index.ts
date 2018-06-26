@@ -22,4 +22,10 @@ export * from './embeddable';
 export {
   EmbeddableFactoriesRegistryProvider,
 } from './embeddable_factories_registry';
-export { ContainerState } from './types';
+export {
+  ContainerState,
+  EmbeddableState,
+  Query,
+  Filters,
+  TimeRange,
+} from './types';

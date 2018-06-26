@@ -75,7 +75,6 @@ import angular from 'angular';
 import '../../promises';
 
 import { NormalizeSortRequestProvider } from './_normalize_sort_request';
-import { RootSearchSourceProvider } from './_root_search_source';
 import { SearchRequestProvider } from '../fetch/request';
 import { SegmentedRequestProvider } from '../fetch/request/segmented';
 
@@ -99,7 +98,7 @@ function isIndexPattern(val) {
   return Boolean(val && typeof val.toIndexList === 'function');
 }
 
-export function SearchSourceProvider(Promise, PromiseEmitter, Private, config) {
+export function SearchSourceProvider(Promise, Private, config) {
   const SearchRequest = Private(SearchRequestProvider);
   const SegmentedRequest = Private(SegmentedRequestProvider);
   const normalizeSortRequest = Private(NormalizeSortRequestProvider);
@@ -227,11 +226,8 @@ export function SearchSourceProvider(Promise, PromiseEmitter, Private, config) {
      * Get the parent of this SearchSource
      * @return {undefined|searchSource}
      */
-    getParent(onlyHardLinked) {
-      const self = this;
-      if (self._parent === false) return;
-      if (self._parent) return self._parent;
-      return onlyHardLinked ? undefined : Private(RootSearchSourceProvider).get();
+    getParent() {
+      return this._parent || undefined;
     }
 
     /**
@@ -253,12 +249,11 @@ export function SearchSourceProvider(Promise, PromiseEmitter, Private, config) {
       return new Promise((resolve, reject) => {
         function addRequest() {
           const defer = Promise.defer();
-          const req = new SegmentedRequest(self, defer, initFunction);
-
-          req.setErrorHandler((request, error) => {
+          const errorHandler = (request, error) => {
             reject(error);
             request.abort();
-          });
+          };
+          const req = new SegmentedRequest({ source: self, defer, errorHandler, initFn: initFunction });
 
           // Return promises created by the completion handler so that
           // errors will bubble properly
@@ -280,6 +275,14 @@ export function SearchSourceProvider(Promise, PromiseEmitter, Private, config) {
       clone.set('index', this.get('index'));
       clone.inherits(this.getParent());
       return clone;
+    }
+
+    makeChild() {
+      return new SearchSource().inherits(this, { callParentStartHandlers: true });
+    }
+
+    new() {
+      return new SearchSource();
     }
 
     async getSearchRequestBody() {
@@ -369,29 +372,23 @@ export function SearchSourceProvider(Promise, PromiseEmitter, Private, config) {
      * be fetched on the next run of the courier
      * @return {Promise}
      */
-    onResults(handler) {
+    onResults() {
       const self = this;
 
-      return new PromiseEmitter(function (resolve, reject) {
+      return new Promise(function (resolve, reject) {
         const defer = Promise.defer();
         defer.promise.then(resolve, reject);
 
-        const request = self._createRequest(defer);
-
-        request.setErrorHandler((request, error) => {
+        const errorHandler = (request, error) => {
           reject(error);
           request.abort();
-        });
-
-      }, handler);
+        };
+        self._createRequest({ defer, errorHandler });
+      });
     }
 
     /**
-     * Fetch just this source ASAP
-     *
-     * ONLY USE IF YOU WILL BE USING THE RESULTS
-     * provided by the returned promise, otherwise
-     * call #fetchQueued()
+     * Fetch this source and reject the returned Promise on error
      *
      * @async
      */
@@ -400,33 +397,12 @@ export function SearchSourceProvider(Promise, PromiseEmitter, Private, config) {
       let req = _.first(self._myStartableQueued());
 
       if (!req) {
-        req = self._createRequest();
+        const errorHandler = (request, error) => {
+          request.defer.reject(error);
+          request.abort();
+        };
+        req = self._createRequest({ errorHandler });
       }
-
-      fetchSoon.these([req]);
-
-      return req.getCompletePromise();
-    }
-
-    /**
-     * Fetch this source and reject the returned Promise on error
-     *
-     * Otherwise behaves like #fetch()
-     *
-     * @async
-     */
-    fetchAsRejectablePromise() {
-      const self = this;
-      let req = _.first(self._myStartableQueued());
-
-      if (!req) {
-        req = self._createRequest();
-      }
-
-      req.setErrorHandler((request, error) => {
-        request.defer.reject(error);
-        request.abort();
-      });
 
       fetchSoon.these([req]);
 
@@ -523,8 +499,8 @@ export function SearchSourceProvider(Promise, PromiseEmitter, Private, config) {
      *                         when the request is complete
      * @return {SearchRequest}
      */
-    _createRequest(defer) {
-      return new SearchRequest(this, defer);
+    _createRequest({ defer, errorHandler }) {
+      return new SearchRequest({ source: this, defer, errorHandler });
     }
 
     /**

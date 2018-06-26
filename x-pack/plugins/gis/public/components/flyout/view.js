@@ -11,7 +11,6 @@ import {
   EuiButtonEmpty,
   EuiText,
   EuiHorizontalRule,
-  EuiAccordion,
   EuiSpacer,
   EuiFlyoutHeader,
   EuiFlexGroup,
@@ -20,7 +19,7 @@ import {
   EuiTitle,
   EuiTextColor,
 } from '@elastic/eui';
-import IndexPatternImport from './index_pattern_import';
+
 
 export class FlyOut extends React.Component {
 
@@ -32,7 +31,6 @@ export class FlyOut extends React.Component {
   }
 
   _renderFlyout() {
-    const handlePreviewLayer = () => console.log("Handle preview layer placeholder");
     return (
       <EuiFlyout onClose={this.props.onClose} style={{ maxWidth: 768 }}>
         <EuiFlyoutHeader>
@@ -50,44 +48,9 @@ export class FlyOut extends React.Component {
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody style={{ paddingTop: 0 }}>
-          <EuiAccordion
-            id="addIndexPattern"
-            className="euiAccordionForm"
-            buttonClassName="euiAccordionForm__button"
-            buttonContent="From Elasticsearch index"
-            initialIsOpen={true}
-            ref={(ref) => this._ipAccordion = ref}
-            onClick={this._onIPClick}
-          >
-            <div className="euiAccordionForm__children">
-              <IndexPatternImport kibanaMap={this._kibanaMap} onPreviewLayer={handlePreviewLayer}/>
-            </div>
-          </EuiAccordion>
-
-          <EuiAccordion
-            id="addEMS"
-            className="euiAccordionForm"
-            buttonClassName="euiAccordionForm__button"
-            buttonContent="Import from Elastic Maps Service"
-            initialIsOpen={false}
-            ref={(ref) => this._emsAccordion = ref}
-            onClick={this._onEMSClick}
-          >
-            <div className="euiAccordionForm__children"/>
-          </EuiAccordion>
-
-          <EuiAccordion
-            id="addFile"
-            className="euiAccordionForm"
-            buttonClassName="euiAccordionForm__button"
-            buttonContent="Import from local file"
-            initialIsOpen={false}
-            ref={(ref) => this._fileAccordion = ref}
-            onClick={this._onFileClick}
-          >
-            <div className="euiAccordionForm__children"/>
-          </EuiAccordion>
+          todo
         </EuiFlyoutBody>
+
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -112,5 +75,3 @@ export class FlyOut extends React.Component {
     return (flyoutVisible ? this._renderFlyout() : null);
   }
 }
-
-export default FlyOut;

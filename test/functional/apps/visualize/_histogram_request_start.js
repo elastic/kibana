@@ -51,7 +51,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickGo();
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const data = await PageObjects.visualize.getDataTableData();
+        const data = await PageObjects.visualize.getTableVisData();
         const dataArray = data.replace(/,/g, '').split('\n');
         expect(dataArray.length).to.eql(20);
         const bucketStart = parseInt(dataArray[0], 10);
@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickGo();
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const data = await PageObjects.visualize.getDataTableData();
+        const data = await PageObjects.visualize.getTableVisData();
         const dataArray = data.replace(/,/g, '').split('\n');
         expect(dataArray.length).to.eql(20);
         const bucketStart = parseInt(dataArray[0], 10);

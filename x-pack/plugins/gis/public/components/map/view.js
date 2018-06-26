@@ -15,8 +15,6 @@ export class KibanaMap extends React.Component {
 
   constructor() {
     super();
-    this._kbnOLLayers = [];
-    this._layerListeners = [];
   }
 
   componentDidMount() {
