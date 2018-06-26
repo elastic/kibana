@@ -34,7 +34,7 @@ export function initTimepicker(callback) {
   );
 
   uiModules
-    .get('app/apm', [])
+    .get('app/gis', [])
     .controller('TimePickerController', ($scope, timefilter) => {
       // Add APM feedback menu
       // TODO: move this somewhere else
