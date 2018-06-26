@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/*! Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one or more contributor license agreements.
- * Licensed under the Elastic License; you may not use this file except in compliance with the Elastic License. */
-
 import { buildPrivilegeMap } from './privileges';
 import { getClient } from '../../../../../server/lib/get_client_shield';
 import { equivalentPrivileges } from './equivalent_privileges';
@@ -15,8 +12,11 @@ export async function registerPrivilegesWithCluster(server) {
   const config = server.config();
   const kibanaVersion = config.get('pkg.version');
   const application = config.get('xpack.security.rbac.application');
+  const savedObjectTypes = server.savedObjects.types;
 
-  const expectedPrivileges = buildPrivilegeMap(application, kibanaVersion);
+  const expectedPrivileges = {
+    [application]: buildPrivilegeMap(savedObjectTypes, application, kibanaVersion)
+  };
 
   server.log(['security', 'debug'], `Registering Kibana Privileges with Elasticsearch for ${application}`);
 

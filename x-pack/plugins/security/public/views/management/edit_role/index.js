@@ -5,6 +5,7 @@
  */
 
 import _ from 'lodash';
+import chrome from 'ui/chrome';
 import routes from 'ui/routes';
 import { fatalError } from 'ui/notify';
 import template from 'plugins/security/views/management/edit_role/edit_role.html';
@@ -80,7 +81,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     }
   },
   controllerAs: 'editRole',
-  controller($injector, $scope, $http, rbacEnabled, rbacApplication) {
+  controller($injector, $scope, $http) {
     const $route = $injector.get('$route');
     const Private = $injector.get('Private');
 
@@ -92,6 +93,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     const xpackInfo = Private(XPackInfoProvider);
     const allowDocumentLevelSecurity = xpackInfo.get('features.security.allowRoleDocumentLevelSecurity');
     const allowFieldLevelSecurity = xpackInfo.get('features.security.allowRoleFieldLevelSecurity');
+    const rbacApplication = chrome.getInjected('rbacApplication');
 
     const domNode = document.getElementById('editRoleReactRoot');
 
@@ -108,7 +110,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
       role={role}
       kibanaAppPrivileges={kibanaApplicationPrivilege}
       indexPatterns={indexPatterns}
-      rbacEnabled={rbacEnabled}
+      rbacEnabled={true}
       rbacApplication={rbacApplication}
       httpClient={$http}
       breadcrumbs={transformBreadcrumbs(routeBreadcrumbs)}

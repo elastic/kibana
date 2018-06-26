@@ -5,3 +5,4 @@
  */
 
 export { SpaceAvatar } from './space_avatar';
+export { SpaceCards } from './space_cards';
