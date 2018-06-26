@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Rx from 'rxjs/Rx';
+import * as Rx from 'rxjs';
+import { first, tap, mergeMap } from 'rxjs/operators';
 import path from 'path';
 import fs from 'fs';
 import moment from 'moment';
@@ -232,11 +233,8 @@ export function screenshotsObservableFactory(server) {
 
   return function screenshotsObservable(url, headers, layout) {
 
-    return Rx.Observable
-      .defer(async () => {
-        return await getPort();
-      })
-      .mergeMap(bridgePort => {
+    return Rx.defer(async () => await getPort()).pipe(
+      mergeMap(bridgePort => {
         logger.debug(`Creating browser driver factory`);
         return browserDriverFactory.create({
           bridgePort,
@@ -244,9 +242,9 @@ export function screenshotsObservableFactory(server) {
           zoom: layout.getBrowserZoom(),
           logger,
         });
-      })
-      .do(() => logger.debug('Driver factory created'))
-      .mergeMap(({ driver$, exit$, message$, consoleMessage$ }) => {
+      }),
+      tap(() => logger.debug('Driver factory created')),
+      mergeMap(({ driver$, exit$, message$, consoleMessage$ }) => {
 
         message$.subscribe(line => {
           logger.debug(line, ['browser']);
@@ -257,71 +255,73 @@ export function screenshotsObservableFactory(server) {
         });
 
 
-        const screenshot$ = driver$
-          .do(browser => startRecording(browser))
-          .do(() => logger.debug(`opening ${url}`))
-          .mergeMap(
+        const screenshot$ = driver$.pipe(
+          tap(browser => startRecording(browser)),
+          tap(() => logger.debug(`opening ${url}`)),
+          mergeMap(
             browser => openUrl(browser, url, headers),
             browser => browser
-          )
-          .do(() => logger.debug('injecting custom css'))
-          .mergeMap(
+          ),
+          tap(() => logger.debug('injecting custom css')),
+          mergeMap(
             browser => injectCustomCss(browser, layout),
             browser => browser
-          )
-          .do(() => logger.debug('waiting for elements or items count attribute; or not found to interrupt'))
-          .mergeMap(
-            browser => Rx.Observable.race(
-              Rx.Observable.from(waitForElementOrItemsCountAttribute(browser, layout)),
-              Rx.Observable.from(waitForNotFoundError(browser))
+          ),
+          tap(() => logger.debug('waiting for elements or items count attribute; or not found to interrupt')),
+          mergeMap(
+            browser => Rx.race(
+              Rx.from(waitForElementOrItemsCountAttribute(browser, layout)),
+              Rx.from(waitForNotFoundError(browser))
             ),
             browser => browser
-          )
-          .do(() => logger.debug('determining how many items we have'))
-          .mergeMap(
+          ),
+          tap(() => logger.debug('determining how many items we have')),
+          mergeMap(
             browser => getNumberOfItems(browser, layout),
             (browser, itemsCount) => ({ browser, itemsCount })
-          )
-          .do(({ itemsCount }) => logger.debug(`waiting for ${itemsCount} to be in the DOM`))
-          .mergeMap(
+          ),
+          tap(({ itemsCount }) => logger.debug(`waiting for ${itemsCount} to be in the DOM`)),
+          mergeMap(
             ({ browser, itemsCount }) => waitForElementsToBeInDOM(browser, itemsCount, layout),
             ({ browser, itemsCount }) => ({ browser, itemsCount })
-          )
-          .do(() => logger.debug('setting viewport'))
-          .mergeMap(
+          ),
+          tap(() => logger.debug('setting viewport')),
+          mergeMap(
             ({ browser, itemsCount }) => setViewport(browser, itemsCount, layout),
             ({ browser }) => browser
-          )
-          .do(() => logger.debug('positioning elements'))
-          .mergeMap(
+          ),
+          tap(() => logger.debug('positioning elements')),
+          mergeMap(
             browser => positionElements(browser, layout),
             browser => browser
-          )
-          .do(() => logger.debug('waiting for rendering to complete'))
-          .mergeMap(
+          ),
+          tap(() => logger.debug('waiting for rendering to complete')),
+          mergeMap(
             browser => waitForRenderComplete(browser, layout),
             browser => browser
-          )
-          .do(() => logger.debug('rendering is complete'))
-          .mergeMap(
+          ),
+          tap(() => logger.debug('rendering is complete')),
+          mergeMap(
             browser => getTimeRange(browser, layout),
             (browser, timeRange) => ({ browser, timeRange })
-          )
-          .do(({ timeRange }) => logger.debug(timeRange ? `timeRange from ${timeRange.from} to ${timeRange.to}` : 'no timeRange'))
-          .mergeMap(
+          ),
+          tap(({ timeRange }) => logger.debug(timeRange ? `timeRange from ${timeRange.from} to ${timeRange.to}` : 'no timeRange')),
+          mergeMap(
             ({ browser }) => getElementPositionAndAttributes(browser, layout),
             ({ browser, timeRange }, elementsPositionAndAttributes) => {
               return { browser, timeRange, elementsPositionAndAttributes };
             }
-          )
-          .do(() => logger.debug(`taking screenshots`))
-          .mergeMap(
+          ),
+          tap(() => logger.debug(`taking screenshots`)),
+          mergeMap(
             ({ browser, elementsPositionAndAttributes }) => getScreenshots({ browser, elementsPositionAndAttributes }),
             ({ timeRange }, screenshots) => ({ timeRange, screenshots })
-          );
+          )
+        );
 
-        return Rx.Observable.race(screenshot$, exit$);
-      })
-      .first();
+        return Rx.race(screenshot$, exit$);
+      }),
+      first()
+    );
   };
 }

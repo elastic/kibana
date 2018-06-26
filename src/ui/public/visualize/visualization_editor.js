@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import './spy';
 import './visualize.less';
 import './visualize_legend';
 import { uiModules } from '../modules';
@@ -33,7 +32,6 @@ uiModules
     return {
       restrict: 'E',
       scope: {
-        showSpyPanel: '=',
         vis: '=',
         visData: '=',
         uiState: '=?',
@@ -44,7 +42,7 @@ uiModules
         const vis = $scope.vis;
         const Editor = typeof vis.type.editor === 'function' ? vis.type.editor :
           editorTypes.find(editor => editor.key === vis.type.editor);
-        const editor = new Editor(element[0], vis, $scope.showSpyPanel);
+        const editor = new Editor(element[0], vis);
 
         $scope.renderFunction = () => {
           if (!$scope.vis) return;

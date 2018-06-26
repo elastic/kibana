@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectsRepository, ScopedSavedObjectsClientProvider } from './lib';
+import { SavedObjectsRepository, ScopedSavedObjectsClientProvider, SavedObjectsRepositoryProvider } from './lib';
 import { SavedObjectsClient } from './saved_objects_client';
 
 export function createSavedObjectsService(server) {
@@ -58,25 +58,23 @@ export function createSavedObjectsService(server) {
     }
   };
 
+  const repositoryProvider = new SavedObjectsRepositoryProvider({
+    index: server.config().get('kibana.index'),
+    mappings: server.getKibanaIndexMappingsDsl(),
+    onBeforeWrite,
+  });
+
   const scopedClientProvider = new ScopedSavedObjectsClientProvider({
     index: server.config().get('kibana.index'),
     mappings: server.getKibanaIndexMappingsDsl(),
     onBeforeWrite,
     defaultClientFactory({
       request,
-      index,
-      mappings,
-      onBeforeWrite
     }) {
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
       const callCluster = (...args) => callWithRequest(request, ...args);
 
-      const repository = new SavedObjectsRepository({
-        index,
-        mappings,
-        onBeforeWrite,
-        callCluster
-      });
+      const repository = repositoryProvider.getRepository(callCluster);
 
       return new SavedObjectsClient(repository);
     }
@@ -85,6 +83,8 @@ export function createSavedObjectsService(server) {
   return {
     SavedObjectsClient,
     SavedObjectsRepository,
+    getSavedObjectsRepository: (...args) =>
+      repositoryProvider.getRepository(...args),
     getScopedSavedObjectsClient: (...args) =>
       scopedClientProvider.getClient(...args),
     setScopedSavedObjectsClientFactory: (...args) =>

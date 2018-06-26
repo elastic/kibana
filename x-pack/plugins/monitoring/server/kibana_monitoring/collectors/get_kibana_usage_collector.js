@@ -6,7 +6,7 @@
 
 import { get, snakeCase } from 'lodash';
 import { KIBANA_USAGE_TYPE } from '../../../common/constants';
-import { UsageCollector } from '../classes/usage_collector';
+import { UsageCollector } from '../classes';
 
 const TYPES = [
   'dashboard',

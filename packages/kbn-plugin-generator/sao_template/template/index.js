@@ -9,7 +9,10 @@ export default function (kibana) {
       app: {
         title: '<%= startCase(name) %>',
         description: '<%= description %>',
-        main: 'plugins/<%= kebabCase(name) %>/app'
+        main: 'plugins/<%= kebabCase(name) %>/app',
+        <% if (generateScss) { %>
+        styleSheetPath: require('path').resolve(__dirname, 'public/app.scss'),
+        <% } %>
       },
       <% } %>
       <% if (generateHack) { %>

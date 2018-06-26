@@ -5,7 +5,8 @@
  */
 
 import url from 'url';
-import Rx from 'rxjs/Rx';
+import * as Rx from 'rxjs';
+import { mergeMap, catchError, map, takeUntil } from 'rxjs/operators';
 import { omit } from 'lodash';
 import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '../../../../common/constants';
 import { oncePerServer } from '../../../../server/lib/once_per_server';
@@ -77,23 +78,26 @@ function executeJobFn(server) {
   };
 
   return compatibilityShim(function executeJob(jobToExecute, cancellationToken) {
-    const process$ = Rx.Observable.of(jobToExecute)
-      .mergeMap(decryptJobHeaders)
-      .catch(() => Rx.Observable.throw('Failed to decrypt report job data. Please re-generate this report.'))
-      .map(omitBlacklistedHeaders)
-      .mergeMap(getCustomLogo)
-      .mergeMap(addForceNowQuerystring)
-      .mergeMap(({ job, filteredHeaders, logo, urls }) => {
+    const process$ = Rx.of(jobToExecute).pipe(
+      mergeMap(decryptJobHeaders),
+      catchError(() => Rx.throwError('Failed to decrypt report job data. Please re-generate this report.')),
+      map(omitBlacklistedHeaders),
+      mergeMap(getCustomLogo),
+      mergeMap(addForceNowQuerystring),
+      mergeMap(({ job, filteredHeaders, logo, urls }) => {
         return generatePdfObservable(job.title, urls, job.browserTimezone, filteredHeaders, job.layout, logo);
-      })
-      .map(buffer => ({
+      }),
+      map(buffer => ({
         content_type: 'application/pdf',
         content: buffer.toString('base64')
-      }));
+      }))
+    );
 
-    const stop$ = Rx.Observable.fromEventPattern(cancellationToken.on);
+    const stop$ = Rx.fromEventPattern(cancellationToken.on);
 
-    return process$.takeUntil(stop$).toPromise();
+    return process$.pipe(
+      takeUntil(stop$)
+    ).toPromise();
   });
 }
 

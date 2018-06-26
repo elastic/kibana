@@ -44,6 +44,7 @@ import {
   RemovePackageJsonDepsTask,
   TranspileBabelTask,
   TranspileTypescriptTask,
+  TranspileScssTask,
   UpdateLicenseFileTask,
   VerifyEnvTask,
   VerifyExistingNodeBuildsTask,
@@ -109,6 +110,7 @@ export async function buildDistributables(options) {
   await run(UpdateLicenseFileTask);
   await run(RemovePackageJsonDepsTask);
   await run(CleanExtraFilesFromModulesTask);
+  await run(TranspileScssTask);
   await run(OptimizeBuildTask);
 
   /**
