@@ -74,7 +74,7 @@ export const init = (monitoringPlugin, server) => {
   } else if (!kibanaCollectionEnabled) {
     server.log(
       ['info', LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG],
-      'Internal collection for Kibana monitoring will is disabled per configuration.'
+      'Internal collection for Kibana monitoring is disabled per configuration.'
     );
   }
 
