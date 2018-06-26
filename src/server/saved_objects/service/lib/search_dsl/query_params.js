@@ -66,6 +66,7 @@ function getFieldsForTypes(searchFields, types) {
  *  @param  {(string|Array<string>)} type
  *  @param  {String} search
  *  @param  {Array<string>} searchFields
+ *  @param {Object} extraQueryParams query parameters to merge into the result
  *  @return {Object}
  */
 export function getQueryParams(mappings, type, search, searchFields, extraQueryParams = {}) {
@@ -94,12 +95,14 @@ export function getQueryParams(mappings, type, search, searchFields, extraQueryP
     ];
   }
 
+  // a list of fields to manually merge together
   const fieldsToMerge = ['filter', 'must'];
 
   const extraParams = {
     ...extraQueryParams.bool
   };
 
+  // Remove the manual merge fields from the collection of properties we will automatically combine.
   fieldsToMerge.forEach(field => delete extraParams[field]);
 
   let query = {
