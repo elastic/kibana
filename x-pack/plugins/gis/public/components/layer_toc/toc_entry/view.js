@@ -10,7 +10,7 @@ import {
   EuiFlexItem,
   EuiIcon,
 } from '@elastic/eui';
-import { VisibilityToggle } from './visiblity_toggle';
+import { VisibilityToggle } from '../visiblity_toggle';
 
 export function TOCEntry(props) {
   const {
@@ -34,7 +34,7 @@ export function TOCEntry(props) {
           />
         </EuiFlexItem>
         <EuiFlexItem className="layerEntry--name">
-          <button onClick={() => onButtonClick(this)}>
+          <button onClick={() => onButtonClick(layerId)}>
             {layerName}
           </button>
         </EuiFlexItem>
