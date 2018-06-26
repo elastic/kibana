@@ -43,12 +43,6 @@ export const security = (kibana) => new kibana.Plugin({
         hostname: Joi.string().hostname(),
         port: Joi.number().integer().min(0).max(65535)
       }).default(),
-      rbac: Joi.object({
-        application: Joi.string().default('kibana').regex(
-          /[a-zA-Z0-9-_]+/,
-          `may contain alphanumeric characters (a-z, A-Z, 0-9), underscores and hyphens`
-        ),
-      }).default(),
       audit: Joi.object({
         enabled: Joi.boolean().default(false)
       }).default(),
@@ -80,7 +74,7 @@ export const security = (kibana) => new kibana.Plugin({
       return {
         secureCookies: config.get('xpack.security.secureCookies'),
         sessionTimeout: config.get('xpack.security.sessionTimeout'),
-        rbacApplication: config.get('xpack.security.rbac.application'),
+        rbacApplication: config.get('kibana.index'),
       };
     }
   },

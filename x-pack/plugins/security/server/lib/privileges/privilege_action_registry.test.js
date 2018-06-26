@@ -30,7 +30,7 @@ const registerPrivilegesWithClusterTest = (description, {
   };
 
   const defaultVersion = 'default-version';
-  const defaultApplication = 'default-application';
+  const defaultKibanaIndex = 'default-kibana-index';
 
   const createMockServer = () => {
     const mockServer = {
@@ -42,7 +42,7 @@ const registerPrivilegesWithClusterTest = (description, {
 
     const defaultSettings = {
       'pkg.version': defaultVersion,
-      'xpack.security.rbac.application': defaultApplication,
+      'kibana.index': defaultKibanaIndex,
     };
 
     mockServer.config().get.mockImplementation(key => {
@@ -60,18 +60,18 @@ const registerPrivilegesWithClusterTest = (description, {
     return () => {
       expect(mockCallWithInternalUser).toHaveBeenCalledTimes(2);
       expect(mockCallWithInternalUser).toHaveBeenCalledWith('shield.getPrivilege', {
-        privilege: defaultApplication,
+        privilege: defaultKibanaIndex,
       });
       expect(mockCallWithInternalUser).toHaveBeenCalledWith(
         'shield.postPrivileges',
         {
           body: {
-            [defaultApplication]: privileges
+            [defaultKibanaIndex]: privileges
           },
         }
       );
 
-      const application = settings['xpack.security.rbac.application'] || defaultApplication;
+      const application = settings['kibana.index'] || defaultKibanaIndex;
       expect(mockServer.log).toHaveBeenCalledWith(
         ['security', 'debug'],
         `Registering Kibana Privileges with Elasticsearch for ${application}`
@@ -87,10 +87,10 @@ const registerPrivilegesWithClusterTest = (description, {
     return () => {
       expect(mockCallWithInternalUser).toHaveBeenCalledTimes(1);
       expect(mockCallWithInternalUser).toHaveBeenLastCalledWith('shield.getPrivilege', {
-        privilege: defaultApplication
+        privilege: defaultKibanaIndex
       });
 
-      const application = settings['xpack.security.rbac.application'] || defaultApplication;
+      const application = settings['kibana.index'] || defaultKibanaIndex;
       expect(mockServer.log).toHaveBeenCalledWith(
         ['security', 'debug'],
         `Registering Kibana Privileges with Elasticsearch for ${application}`
@@ -105,7 +105,7 @@ const registerPrivilegesWithClusterTest = (description, {
   test(description, async () => {
     const mockServer = createMockServer();
     const mockCallWithInternalUser = registerMockCallWithInternalUser();
-    mockCallWithInternalUser.mockImplementationOnce(async () => ({ [defaultApplication]: existingPrivileges }));
+    mockCallWithInternalUser.mockImplementationOnce(async () => ({ [defaultKibanaIndex]: existingPrivileges }));
     buildPrivilegeMap.mockReturnValue(expectedPrivileges);
 
     await registerPrivilegesWithCluster(mockServer);
@@ -123,14 +123,14 @@ const registerPrivilegesWithClusterTest = (description, {
 registerPrivilegesWithClusterTest(`passes saved object types, application and kibanaVersion to buildPrivilegeMap`, {
   settings: {
     'pkg.version': 'foo-version',
-    'xpack.security.rbac.application': 'foo-application',
+    'kibana.index': 'foo-index',
   },
   savedObjectTypes: [
     'foo-type',
     'bar-type',
   ],
   assert: ({ mocks }) => {
-    expect(mocks.buildPrivilegeMap).toHaveBeenCalledWith(['foo-type', 'bar-type'], 'foo-application', 'foo-version');
+    expect(mocks.buildPrivilegeMap).toHaveBeenCalledWith(['foo-type', 'bar-type'], 'foo-index', 'foo-version');
   },
 });
 

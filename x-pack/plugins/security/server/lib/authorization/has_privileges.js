@@ -103,8 +103,8 @@ export function hasPrivilegesWithServer(server) {
 
   const config = server.config();
   const kibanaVersion = config.get('pkg.version');
-  const application = config.get('xpack.security.rbac.application');
   const kibanaIndex = config.get('kibana.index');
+  const application = kibanaIndex;
   const savedObjectTypes = server.savedObjects.types;
   const deprecationLogger = (msg) => server.log(['warning', 'deprecated', 'security'], msg);
 

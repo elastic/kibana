@@ -9,7 +9,7 @@ import { buildPrivilegeMap } from '../../../lib/privileges/privileges';
 export function initPrivilegesApi(server) {
   const config = server.config();
   const kibanaVersion = config.get('pkg.version');
-  const application = config.get('xpack.security.rbac.application');
+  const application = config.get('kibana.index');
   const savedObjectTypes = server.savedObjects.types;
 
   server.route({

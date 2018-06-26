@@ -11,7 +11,7 @@ import { equivalentPrivileges } from './equivalent_privileges';
 export async function registerPrivilegesWithCluster(server) {
   const config = server.config();
   const kibanaVersion = config.get('pkg.version');
-  const application = config.get('xpack.security.rbac.application');
+  const application = config.get('kibana.index');
   const savedObjectTypes = server.savedObjects.types;
 
   const expectedPrivileges = {

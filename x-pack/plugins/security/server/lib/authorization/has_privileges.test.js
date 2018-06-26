@@ -15,7 +15,6 @@ jest.mock('../../../../../server/lib/get_client_shield', () => ({
 
 const defaultKibanaIndex = 'default-kibana-index';
 const defaultVersion = 'default-version';
-const defaultApplication = 'default-application';
 const savedObjectTypes = ['foo-type', 'bar-type'];
 
 const createMockServer = ({ settings = {} } = {}) => {
@@ -29,7 +28,6 @@ const createMockServer = ({ settings = {} } = {}) => {
   const defaultSettings = {
     'kibana.index': defaultKibanaIndex,
     'pkg.version': defaultVersion,
-    'xpack.security.rbac.application': defaultApplication
   };
 
   mockServer.config().get.mockImplementation(key => {
@@ -43,7 +41,7 @@ const createMockServer = ({ settings = {} } = {}) => {
   return mockServer;
 };
 
-const mockApplicationPrivilegeResponse = ({ hasAllRequested, privileges, application = defaultApplication, username = '' }) =>{
+const mockApplicationPrivilegeResponse = ({ hasAllRequested, privileges, application = defaultKibanaIndex, username = '' }) =>{
   return {
     username: username,
     has_all_requested: hasAllRequested,
@@ -98,7 +96,6 @@ test(`returns success of true if they have all application privileges`, async ()
         [getLoginPrivilege()]: true,
         [privilege]: true,
       },
-      application: defaultApplication,
       username,
     })
   ]);
@@ -113,7 +110,7 @@ test(`returns success of true if they have all application privileges`, async ()
   expect(mockCallWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
     body: {
       applications: [{
-        application: defaultApplication,
+        application: defaultKibanaIndex,
         resources: [DEFAULT_RESOURCE],
         privileges: [
           getVersionPrivilege(defaultVersion), getLoginPrivilege(), ...privileges
@@ -142,7 +139,7 @@ test(`returns success of false if they have only one application privilege`, asy
         [privilege1]: true,
         [privilege2]: false,
       },
-      application: defaultApplication,
+      application: defaultKibanaIndex,
       username,
     })
   ]);
@@ -157,7 +154,7 @@ test(`returns success of false if they have only one application privilege`, asy
   expect(mockCallWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
     body: {
       applications: [{
-        application: defaultApplication,
+        application: defaultKibanaIndex,
         resources: [DEFAULT_RESOURCE],
         privileges: [
           getVersionPrivilege(defaultVersion), getLoginPrivilege(), ...privileges
@@ -219,7 +216,7 @@ test(`uses application privileges if the user has the login privilege`, async ()
   expect(callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
     body: {
       applications: [{
-        application: defaultApplication,
+        application: defaultKibanaIndex,
         resources: [DEFAULT_RESOURCE],
         privileges: [
           getVersionPrivilege(defaultVersion), getLoginPrivilege(), ...privileges
@@ -260,7 +257,7 @@ test(`returns success of false using application privileges if the user has the 
   expect(callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
     body: {
       applications: [{
-        application: defaultApplication,
+        application: defaultKibanaIndex,
         resources: [DEFAULT_RESOURCE],
         privileges: [
           getVersionPrivilege(defaultVersion), getLoginPrivilege(), ...privileges
@@ -310,7 +307,7 @@ describe('legacy fallback with no application privileges', () => {
     expect(callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
       body: {
         applications: [{
-          application: defaultApplication,
+          application: defaultKibanaIndex,
           resources: [DEFAULT_RESOURCE],
           privileges: [
             getVersionPrivilege(defaultVersion), getLoginPrivilege(), ...privileges
@@ -367,7 +364,7 @@ describe('legacy fallback with no application privileges', () => {
     expect(callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
       body: {
         applications: [{
-          application: defaultApplication,
+          application: defaultKibanaIndex,
           resources: [DEFAULT_RESOURCE],
           privileges: [
             getVersionPrivilege(defaultVersion), getLoginPrivilege(), ...privileges
@@ -424,7 +421,7 @@ describe('legacy fallback with no application privileges', () => {
     expect(callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
       body: {
         applications: [{
-          application: defaultApplication,
+          application: defaultKibanaIndex,
           resources: [DEFAULT_RESOURCE],
           privileges: [
             getVersionPrivilege(defaultVersion), getLoginPrivilege(), ...privileges
@@ -448,7 +445,7 @@ describe('legacy fallback with no application privileges', () => {
   });
 
   test(`returns success of false if the user has the read privilege on kibana index but one privilege isn't a read action`, async () => {
-    const privilegeMap = buildPrivilegeMap(savedObjectTypes, defaultApplication, defaultVersion);
+    const privilegeMap = buildPrivilegeMap(savedObjectTypes, defaultKibanaIndex, defaultVersion);
 
     const actions = privilegeMap.read.actions.filter(a => a !== getVersionPrivilege(defaultVersion) && a !== getLoginPrivilege());
     for (const action of actions) {
@@ -486,7 +483,7 @@ describe('legacy fallback with no application privileges', () => {
       expect(callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
         body: {
           applications: [{
-            application: defaultApplication,
+            application: defaultKibanaIndex,
             resources: [DEFAULT_RESOURCE],
             privileges: [
               getVersionPrivilege(defaultVersion), getLoginPrivilege(), ...privileges
@@ -511,7 +508,7 @@ describe('legacy fallback with no application privileges', () => {
   });
 
   test(`returns success of true if the user has the read privilege on kibana index and the privilege is a read action`, async () => {
-    const privilegeMap = buildPrivilegeMap(savedObjectTypes, defaultApplication, defaultVersion);
+    const privilegeMap = buildPrivilegeMap(savedObjectTypes, defaultKibanaIndex, defaultVersion);
     for (const action of privilegeMap.read.actions) {
       const privilege = action;
       const username = 'foo-username';
@@ -546,7 +543,7 @@ describe('legacy fallback with no application privileges', () => {
       expect(callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
         body: {
           applications: [{
-            application: defaultApplication,
+            application: defaultKibanaIndex,
             resources: [DEFAULT_RESOURCE],
             privileges: [
               getVersionPrivilege(defaultVersion), getLoginPrivilege(), ...privileges
@@ -571,7 +568,7 @@ describe('legacy fallback with no application privileges', () => {
   });
 
   test(`returns success of true if the user has the read privilege on kibana index and all privileges are read actions`, async () => {
-    const privilegeMap = buildPrivilegeMap(savedObjectTypes, defaultApplication, defaultVersion);
+    const privilegeMap = buildPrivilegeMap(savedObjectTypes, defaultKibanaIndex, defaultVersion);
     const privileges = privilegeMap.read.actions;
     const username = 'foo-username';
     const mockServer = createMockServer();
@@ -607,7 +604,7 @@ describe('legacy fallback with no application privileges', () => {
     expect(callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
       body: {
         applications: [{
-          application: defaultApplication,
+          application: defaultKibanaIndex,
           resources: [DEFAULT_RESOURCE],
           privileges: [
             getVersionPrivilege(defaultVersion), getLoginPrivilege(), ...privileges
