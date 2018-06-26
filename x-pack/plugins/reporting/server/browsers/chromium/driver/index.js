@@ -89,32 +89,40 @@ export class HeadlessChromiumDriver {
     }
 
     return await screenshotStitcher(outputClip, this._zoom, this._maxScreenshotDimension, async screenshotClip => {
-      this._logger.debug(`Capturing screenshot clip ${JSON.stringify(screenshotClip)}`);
-      const { data } = await Page.captureScreenshot({
-        clip: {
-          ...screenshotClip,
-          scale: 1
+      let tryCount = 0;
+      while (tryCount < 3) {
+        this._logger.debug(`Try ${tryCount}) Capturing screenshot clip ${JSON.stringify(screenshotClip)}`);
+        const { data } = await Page.captureScreenshot({
+          clip: {
+            ...screenshotClip,
+            scale: 1
+          }
+        });
+
+        const png = new PNG();
+        const buffer = Buffer.from(data, 'base64');
+        await png.parse(buffer);
+
+        this._logger.debug(`Try ${tryCount}) Captured clip of width: ${png.width} and height: ${png.height}`);
+        if (
+          png.width !== screenshotClip.width * 2 ||
+          png.height !== screenshotClip.height * 2
+        ) {
+          const errorMessage = `Try ${tryCount}) Screenshot captured with width:${
+            png.width
+          } and height: ${png.height}) is not of expected width: ${
+            screenshotClip.width * 2
+          } and height: ${screenshotClip.height * 2}`;
+
+          if (tryCount < 3) {
+            tryCount++;
+          } else {
+            throw new Error(errorMessage);
+          }
+        } else {
+          return data;
         }
-      });
-
-      this._logger.debug(`Captured screenshot clip ${JSON.stringify(screenshotClip)}`);
-
-      const png = new PNG();
-      const buffer = Buffer.from(data, 'base64');
-      await png.parse(buffer);
-      if (
-        png.width !== screenshotClip.width * 2 ||
-        png.height !== screenshotClip.height * 2
-      ) {
-        const errorMessage = `Screenshot captured with width:${
-          png.width
-        } and height: ${png.height}) is not of expected width: ${
-          screenshotClip.width * 2
-        } and height: ${screenshotClip.height * 2}`;
-
-        throw new Error(errorMessage);
       }
-      return data;
     }, this._logger);
   }
 
