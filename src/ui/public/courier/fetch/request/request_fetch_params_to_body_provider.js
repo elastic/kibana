@@ -18,8 +18,9 @@
  */
 
 import { requestFetchParamsToBody } from './request_fetch_params_to_body';
+import { timefilter } from 'ui/timefilter';
 
-export function RequestFetchParamsToBodyProvider(Promise, timefilter, kbnIndex, sessionId, config, esShardTimeout) {
+export function RequestFetchParamsToBodyProvider(Promise, kbnIndex, sessionId, config, esShardTimeout) {
   return (requestsFetchParams) => (
     requestFetchParamsToBody(
       requestsFetchParams,

@@ -49,6 +49,7 @@ uiRoutes
     }
   });
 
+import { timefilter } from 'ui/timefilter';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
@@ -59,7 +60,6 @@ module
     $timeout,
     $window,
     Private,
-    timefilter,
     AppState) {
 
     timefilter.enableTimeRangeSelector();
@@ -143,7 +143,7 @@ module
 
 
     // Refresh the data when the time range is altered.
-    $scope.$listen(timefilter, 'fetch', function () {
+    $scope.$listenAndDigestAsync(timefilter, 'fetch', function () {
       $scope.earliest = timefilter.getActiveBounds().min.valueOf();
       $scope.latest = timefilter.getActiveBounds().max.valueOf();
       loadOverallStats();
