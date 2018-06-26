@@ -15,6 +15,14 @@ export const DATA_ORIGIN = {
 
 export class ASource {
 
+  static create(options) {
+    const sourceDescriptor = {};
+    sourceDescriptor.name = options.name;
+    sourceDescriptor.dataOrigin = this._setDataOrigin(options);
+    sourceDescriptor.service = options.service;
+    return sourceDescriptor;
+  }
+
   static _setDataOrigin({ dataOrigin }) {
     if (DATA_ORIGIN.hasOwnProperty(dataOrigin)) {
       return dataOrigin;

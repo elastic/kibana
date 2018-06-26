@@ -12,17 +12,8 @@ export class VectorSource extends ASource {
     super();
   }
 
-  static async _setService({ service }) {
-    const fetchService = await fetch(service.url);
-    return fetchService.json();
-  }
-
-  static async create(options) {
-    const vectorDescriptor = {};
-    // Required
-    vectorDescriptor.dataOrigin = this._setDataOrigin(options);
-    vectorDescriptor.service = await this._setService(options);
-    vectorDescriptor.layerName = options.layerName;
+  static create(options) {
+    const vectorDescriptor = super.create(options);
     return vectorDescriptor;
   }
 

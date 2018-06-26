@@ -15,6 +15,8 @@ export class TileLayer extends ALayer {
   static create(options) {
     const tileLayerDescriptor = super.create(options);
     tileLayerDescriptor.type = LAYER_TYPE.TILE;
+    tileLayerDescriptor.name = options.layerName ||
+      `${tileLayerDescriptor.type} Layer - ID: ${tileLayerDescriptor.id}`;
     return tileLayerDescriptor;
   }
 }

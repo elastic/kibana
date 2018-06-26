@@ -7,4 +7,3 @@
 export const getSelectedLayer = ({ map }) => map && map.selectedLayer;
 
 export const getLayerList = ({ map }) => map && map.layerList;
-

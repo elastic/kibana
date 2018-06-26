@@ -16,7 +16,7 @@ const FEATURE_PROJECTION = 'EPSG:3857';
 function convertTmsLayersToOl({ source }) {
   return new ol.layer.Tile({
     source: new ol.source.XYZ({
-      url: source.service[0].url
+      url: source
     })
   });
 }
@@ -26,7 +26,7 @@ const convertVectorLayersToOl = (() => {
     featureProjection: FEATURE_PROJECTION
   });
   return ({ source }) => {
-    const olFeatures = geojsonFormat.readFeatures(source.service);
+    const olFeatures = geojsonFormat.readFeatures(source);
     return new ol.layer.Vector({
       source: new ol.source.Vector({
         features: olFeatures

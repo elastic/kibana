@@ -16,6 +16,7 @@ export class ALayer {
     layerDescriptor.source = options.source;
     layerDescriptor.visible = options.visible || true;
     layerDescriptor.style = options.style || {};
+    layerDescriptor.id = Math.random().toString(36).substr(2, 5);
     return layerDescriptor;
   }
 }

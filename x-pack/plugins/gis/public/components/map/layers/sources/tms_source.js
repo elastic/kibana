@@ -13,11 +13,7 @@ export class TMSSource extends ASource {
   }
 
   static create(options) {
-    const tmsDescriptor = {};
-    // Required
-    tmsDescriptor.dataOrigin = this._setDataOrigin(options);
-    tmsDescriptor.service = options.service;
-    tmsDescriptor.serviceId = options.serviceId;
+    const tmsDescriptor = super.create(options);
     return tmsDescriptor;
   }
 }
