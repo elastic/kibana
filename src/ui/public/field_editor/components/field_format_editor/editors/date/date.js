@@ -72,6 +72,7 @@ export class DateFormatEditor extends DefaultFormatEditor {
           }
         >
           <EuiFieldText
+            data-test-subj="dateEditorPattern"
             value={formatParams.pattern}
             placeholder={defaultPattern}
             onChange={(e) => {

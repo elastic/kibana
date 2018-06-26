@@ -156,6 +156,7 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
         grow={false}
       >
         <eui-button
+          data-test-subj="fieldSaveButton"
           fill={true}
           isDisabled={true}
           onClick={[Function]}
@@ -167,6 +168,7 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
         grow={false}
       >
         <eui-button-empty
+          data-test-subj="fieldCancelButton"
           onClick={[Function]}
         >
           Cancel
@@ -323,6 +325,7 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
         grow={false}
       >
         <eui-button
+          data-test-subj="fieldSaveButton"
           fill={true}
           isDisabled={false}
           onClick={[Function]}
@@ -334,6 +337,7 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
         grow={false}
       >
         <eui-button-empty
+          data-test-subj="fieldCancelButton"
           onClick={[Function]}
         >
           Cancel
@@ -530,6 +534,7 @@ exports[`FieldEditor should show conflict field warning 1`] = `
         grow={false}
       >
         <eui-button
+          data-test-subj="fieldSaveButton"
           fill={true}
           isDisabled={true}
           onClick={[Function]}
@@ -541,6 +546,7 @@ exports[`FieldEditor should show conflict field warning 1`] = `
         grow={false}
       >
         <eui-button-empty
+          data-test-subj="fieldCancelButton"
           onClick={[Function]}
         >
           Cancel
@@ -753,6 +759,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
         grow={false}
       >
         <eui-button
+          data-test-subj="fieldSaveButton"
           fill={true}
           isDisabled={false}
           onClick={[Function]}
@@ -764,6 +771,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
         grow={false}
       >
         <eui-button-empty
+          data-test-subj="fieldCancelButton"
           onClick={[Function]}
         >
           Cancel

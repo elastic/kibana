@@ -126,6 +126,7 @@ export class UrlFormatEditor extends DefaultFormatEditor {
         />
         <EuiFormRow label="Type">
           <EuiSelect
+            data-test-subj="urlEditorType"
             value={formatParams.type}
             options={format.type.urlTypes.map(type => {
               return {
@@ -158,6 +159,7 @@ export class UrlFormatEditor extends DefaultFormatEditor {
           error={error}
         >
           <EuiFieldText
+            data-test-subj="urlEditorUrlTemplate"
             value={formatParams.urlTemplate || ''}
             onChange={(e) => {
               this.onChange({ urlTemplate: e.target.value });
@@ -172,6 +174,7 @@ export class UrlFormatEditor extends DefaultFormatEditor {
           error={error}
         >
           <EuiFieldText
+            data-test-subj="urlEditorLabelTemplate"
             value={formatParams.labelTemplate || ''}
             onChange={(e) => {
               this.onChange({ labelTemplate: e.target.value });

@@ -18,6 +18,7 @@ exports[`UrlFormatEditor should render label template help 1`] = `
   >
     <EuiSelect
       compressed={false}
+      data-test-subj="urlEditorType"
       fullWidth={false}
       hasNoInitialSelection={false}
       isLoading={false}
@@ -59,6 +60,7 @@ exports[`UrlFormatEditor should render label template help 1`] = `
   >
     <EuiFieldText
       compressed={false}
+      data-test-subj="urlEditorUrlTemplate"
       fullWidth={false}
       isLoading={false}
       onChange={[Function]}
@@ -84,6 +86,7 @@ exports[`UrlFormatEditor should render label template help 1`] = `
   >
     <EuiFieldText
       compressed={false}
+      data-test-subj="urlEditorLabelTemplate"
       fullWidth={false}
       isLoading={false}
       onChange={[Function]}
@@ -114,6 +117,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
   >
     <EuiSelect
       compressed={false}
+      data-test-subj="urlEditorType"
       fullWidth={false}
       hasNoInitialSelection={false}
       isLoading={false}
@@ -155,6 +159,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
   >
     <EuiFieldText
       compressed={false}
+      data-test-subj="urlEditorUrlTemplate"
       fullWidth={false}
       isLoading={false}
       onChange={[Function]}
@@ -180,6 +185,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
   >
     <EuiFieldText
       compressed={false}
+      data-test-subj="urlEditorLabelTemplate"
       fullWidth={false}
       isLoading={false}
       onChange={[Function]}
@@ -210,6 +216,7 @@ exports[`UrlFormatEditor should render url template help 1`] = `
   >
     <EuiSelect
       compressed={false}
+      data-test-subj="urlEditorType"
       fullWidth={false}
       hasNoInitialSelection={false}
       isLoading={false}
@@ -251,6 +258,7 @@ exports[`UrlFormatEditor should render url template help 1`] = `
   >
     <EuiFieldText
       compressed={false}
+      data-test-subj="urlEditorUrlTemplate"
       fullWidth={false}
       isLoading={false}
       onChange={[Function]}
@@ -276,6 +284,7 @@ exports[`UrlFormatEditor should render url template help 1`] = `
   >
     <EuiFieldText
       compressed={false}
+      data-test-subj="urlEditorLabelTemplate"
       fullWidth={false}
       isLoading={false}
       onChange={[Function]}

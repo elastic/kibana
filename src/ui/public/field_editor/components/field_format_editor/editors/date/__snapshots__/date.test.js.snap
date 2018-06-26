@@ -36,6 +36,7 @@ exports[`DateFormatEditor should render normally 1`] = `
   >
     <EuiFieldText
       compressed={false}
+      data-test-subj="dateEditorPattern"
       fullWidth={false}
       isInvalid={false}
       isLoading={false}

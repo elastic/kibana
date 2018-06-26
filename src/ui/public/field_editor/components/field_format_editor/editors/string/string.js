@@ -58,6 +58,7 @@ export class StringFormatEditor extends DefaultFormatEditor {
           error={error}
         >
           <EuiSelect
+            data-test-subj="stringEditorTransform"
             defaultValue={formatParams.transform}
             options={format.type.transformOptions.map(option => {
               return {

@@ -412,12 +412,18 @@ export class FieldEditor extends PureComponent {
             fill
             onClick={this.saveField}
             isDisabled={this.isSavingDisabled()}
+            data-test-subj="fieldSaveButton"
           >
             {isCreating ? 'Create field' : 'Edit field'}
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={redirectAway}>Cancel</EuiButtonEmpty>
+          <EuiButtonEmpty
+            onClick={redirectAway}
+            data-test-subj="fieldCancelButton"
+          >
+            Cancel
+          </EuiButtonEmpty>
         </EuiFlexItem>
         {
           !isCreating && field.scripted ? (
