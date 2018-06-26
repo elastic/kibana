@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { DetailDrawer } from '../detail_drawer';
+import { DetailDrawer } from './detail_drawer';
 import { Queue } from './queue';
 import { StatementSection } from './statement_section';
 import {
@@ -15,7 +15,7 @@ import {
   EuiPageContent,
 } from '@elastic/eui';
 
-export class ConfigViewer extends React.Component {
+export class PipelineViewer extends React.Component {
   constructor() {
     super();
     this.state = {
@@ -70,7 +70,7 @@ export class ConfigViewer extends React.Component {
 
     return (
       <EuiPage>
-        <EuiPageContent verticalPosition="center" horizontalPosition="center" className="configViewer">
+        <EuiPageContent verticalPosition="center" horizontalPosition="center" className="pipelineViewer">
           <StatementSection
             iconType="logstashInput"
             headingText="Inputs"
@@ -103,7 +103,7 @@ export class ConfigViewer extends React.Component {
   }
 }
 
-ConfigViewer.propTypes = {
+PipelineViewer.propTypes = {
   pipeline: PropTypes.shape({
     inputs: PropTypes.array.isRequired,
     filters: PropTypes.array.isRequired,
