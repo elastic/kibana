@@ -48,7 +48,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         await this.showPanelEditControlsDropdownMenu();
         await testSubjects.click('dashboardPanelEditLink');
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.common.sleep(1000);
         const current = await remote.getCurrentUrl();
         if (current.indexOf('visualize') < 0) {
           throw new Error('not on visualize page');
