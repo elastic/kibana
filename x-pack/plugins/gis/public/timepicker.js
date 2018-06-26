@@ -9,7 +9,6 @@ import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
 import 'ui/autoload/all';
 
-let globalTimefilter;
 
 // hack to wait for angular template to be ready
 const waitForAngularReady = new Promise(resolve => {
@@ -48,17 +47,8 @@ export function initTimepicker(callback) {
       timefilter.enableAutoRefreshSelector();
       timefilter.init();
 
-      globalTimefilter = timefilter;
 
       Promise.all([waitForAngularReady]).then(callback);
     });
 }
 
-export function getTimefilter() {
-  if (!globalTimefilter) {
-    throw new Error(
-      'Timepicker must be initialized before calling getTimefilter'
-    );
-  }
-  return globalTimefilter;
-}

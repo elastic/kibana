@@ -75,5 +75,3 @@ export class FlyOut extends React.Component {
     return (flyoutVisible ? this._renderFlyout() : null);
   }
 }
-
-export default FlyOut;

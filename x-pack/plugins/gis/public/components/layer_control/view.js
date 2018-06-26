@@ -79,5 +79,3 @@ export class LayerControl extends React.Component {
   }
 }
 
-export default LayerControl;
-

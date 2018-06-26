@@ -25,29 +25,5 @@ export class VectorSource extends ASource {
     vectorDescriptor.layerName = options.layerName;
     return vectorDescriptor;
   }
-
-  async getGeoJsonFeatureCollection() {
-    const files = await this.getAvailableLayers();
-    const layer = files.find((file) => {
-      return file.name === this._layerName;
-    });
-
-    if (!layer) {
-      return null;
-    }
-
-    if (layer.format) {
-      if (
-        (layer.format.type && layer.format.type !== 'geojson') ||
-        (!layer.format.type && layer.format !== 'geojson')
-      ) {
-        throw new Error('Only geojson is implemented now');
-      }
-    }
-
-    const response = await fetch(layer.url);
-    return response.json();
-
-  }
 }
 
