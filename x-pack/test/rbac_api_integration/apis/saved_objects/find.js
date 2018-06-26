@@ -31,7 +31,7 @@ export default function ({ getService }) {
       });
     };
 
-    const expectAllResults = (resp) => {
+    const expectResultsWithValidTypes = (resp) => {
       expect(resp.body).to.eql({
         page: 1,
         per_page: 20,
@@ -69,6 +69,50 @@ export default function ({ getService }) {
       });
     };
 
+    const expectAllResultsIncludingInvalidTypes = (resp) => {
+      expect(resp.body).to.eql({
+        page: 1,
+        per_page: 20,
+        total: 5,
+        saved_objects: [
+          {
+            id: '91200a00-9efd-11e7-acb3-3dab96693fab',
+            type: 'index-pattern',
+            updated_at: '2017-09-21T18:49:16.270Z',
+            version: 1,
+            attributes: resp.body.saved_objects[0].attributes
+          },
+          {
+            id: '7.0.0-alpha1',
+            type: 'config',
+            updated_at: '2017-09-21T18:49:16.302Z',
+            version: 1,
+            attributes: resp.body.saved_objects[1].attributes
+          },
+          {
+            id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+            type: 'visualization',
+            updated_at: '2017-09-21T18:51:23.794Z',
+            version: 1,
+            attributes: resp.body.saved_objects[2].attributes
+          },
+          {
+            id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
+            type: 'dashboard',
+            updated_at: '2017-09-21T18:57:40.826Z',
+            version: 1,
+            attributes: resp.body.saved_objects[3].attributes
+          },
+          {
+            id: 'visualization:dd7caf20-9efd-11e7-acb3-3dab96693faa',
+            type: 'not-a-visualization',
+            updated_at: '2017-09-21T18:51:23.794Z',
+            version: 1
+          },
+        ]
+      });
+    };
+
     const createExpectEmpty = (page, perPage, total) => (resp) => {
       expect(resp.body).to.eql({
         page: page,
@@ -86,11 +130,12 @@ export default function ({ getService }) {
       });
     };
 
-    const expectForbiddenCantFindAnyTypes = resp => {
+    const createExpectLegacyForbidden = username => resp => {
       expect(resp.body).to.eql({
         statusCode: 403,
         error: 'Forbidden',
-        message: `Not authorized to find saved_object`
+        //eslint-disable-next-line max-len
+        message: `action [indices:data/read/search] is unauthorized for user [${username}]: [security_exception] action [indices:data/read/search] is unauthorized for user [${username}]`
       });
     };
 
@@ -158,27 +203,27 @@ export default function ({ getService }) {
         normal: {
           description: 'forbidden login and find visualization message',
           statusCode: 403,
-          response: createExpectActionForbidden(false, 'visualization'),
+          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME),
         },
         unknownType: {
           description: 'forbidden login and find wigwags message',
           statusCode: 403,
-          response: createExpectActionForbidden(false, 'wigwags'),
+          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME),
         },
         pageBeyondTotal: {
           description: 'forbidden login and find visualization message',
           statusCode: 403,
-          response: createExpectActionForbidden(false, 'visualization'),
+          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME),
         },
         unknownSearchField: {
           description: 'forbidden login and find wigwags message',
           statusCode: 403,
-          response: createExpectActionForbidden(false, 'wigwags'),
+          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME),
         },
         noType: {
           description: `forbidded can't find any types`,
           statusCode: 403,
-          response: expectForbiddenCantFindAnyTypes,
+          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME),
         }
       }
     });
@@ -212,7 +257,7 @@ export default function ({ getService }) {
         noType: {
           description: 'all objects',
           statusCode: 200,
-          response: expectAllResults,
+          response: expectResultsWithValidTypes,
         },
       },
     });
@@ -246,7 +291,7 @@ export default function ({ getService }) {
         noType: {
           description: 'all objects',
           statusCode: 200,
-          response: expectAllResults,
+          response: expectAllResultsIncludingInvalidTypes,
         },
       },
     });
@@ -263,9 +308,9 @@ export default function ({ getService }) {
           response: expectVisualizationResults,
         },
         unknownType: {
-          description: 'forbidden find wigwags message',
-          statusCode: 403,
-          response: createExpectActionForbidden(true, 'wigwags'),
+          description: 'empty result',
+          statusCode: 200,
+          response: createExpectEmpty(1, 20, 0),
         },
         pageBeyondTotal: {
           description: 'empty result',
@@ -273,14 +318,14 @@ export default function ({ getService }) {
           response: createExpectEmpty(100, 100, 1),
         },
         unknownSearchField: {
-          description: 'forbidden find wigwags message',
-          statusCode: 403,
-          response: createExpectActionForbidden(true, 'wigwags'),
+          description: 'empty result',
+          statusCode: 200,
+          response: createExpectEmpty(1, 20, 0),
         },
         noType: {
           description: 'all objects',
           statusCode: 200,
-          response: expectAllResults,
+          response: expectAllResultsIncludingInvalidTypes,
         },
       }
     });
@@ -314,7 +359,7 @@ export default function ({ getService }) {
         noType: {
           description: 'all objects',
           statusCode: 200,
-          response: expectAllResults,
+          response: expectResultsWithValidTypes,
         },
       },
     });
@@ -348,7 +393,7 @@ export default function ({ getService }) {
         noType: {
           description: 'all objects',
           statusCode: 200,
-          response: expectAllResults,
+          response: expectResultsWithValidTypes,
         },
       }
     });

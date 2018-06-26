@@ -68,13 +68,12 @@ export default function ({ getService }) {
       });
     };
 
-    const expectForbidden = resp => {
-      //eslint-disable-next-line max-len
-      const missingActions = `action:login,action:saved_objects/config/bulk_get,action:saved_objects/dashboard/bulk_get,action:saved_objects/visualization/bulk_get`;
+    const createExpectLegacyForbidden = username => resp => {
       expect(resp.body).to.eql({
         statusCode: 403,
         error: 'Forbidden',
-        message: `Unable to bulk_get config,dashboard,visualization, missing ${missingActions}`
+        //eslint-disable-next-line max-len
+        message: `action [indices:data/read/mget] is unauthorized for user [${username}]: [security_exception] action [indices:data/read/mget] is unauthorized for user [${username}]`
       });
     };
 
@@ -102,7 +101,7 @@ export default function ({ getService }) {
       tests: {
         default: {
           statusCode: 403,
-          response: expectForbidden,
+          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME),
         }
       }
     });

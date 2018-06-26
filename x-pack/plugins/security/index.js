@@ -121,23 +121,21 @@ export const security = (kibana) => new kibana.Plugin({
       request,
     }) => {
       const adminCluster = server.plugins.elasticsearch.getCluster('admin');
+      const { callWithRequest, callWithInternalUser } = adminCluster;
+      const callCluster = (...args) => callWithRequest(request, ...args);
+
+      const callWithRequestRepository = savedObjects.getSavedObjectsRepository(callCluster);
 
       if (!xpackInfoFeature.getLicenseCheckResults().allowRbac) {
-        const { callWithRequest } = adminCluster;
-        const callCluster = (...args) => callWithRequest(request, ...args);
-
-        const repository = savedObjects.getSavedObjectsRepository(callCluster);
-
-        return new savedObjects.SavedObjectsClient(repository);
+        return new savedObjects.SavedObjectsClient(callWithRequestRepository);
       }
 
       const hasPrivileges = hasPrivilegesWithRequest(request);
-      const { callWithInternalUser } = adminCluster;
-
-      const repository = savedObjects.getSavedObjectsRepository(callWithInternalUser);
+      const internalRepository = savedObjects.getSavedObjectsRepository(callWithInternalUser);
 
       return new SecureSavedObjectsClient({
-        repository,
+        internalRepository,
+        callWithRequestRepository,
         errors: savedObjects.SavedObjectsClient.errors,
         hasPrivileges,
         auditLogger,

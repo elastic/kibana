@@ -29,11 +29,20 @@ export default function ({ getService }) {
       });
     };
 
-    const createExpectForbidden = canLogin => resp => {
+    const createExpectRbacForbidden = canLogin => resp => {
       expect(resp.body).to.eql({
         statusCode: 403,
         error: 'Forbidden',
         message: `Unable to create visualization, missing ${canLogin ? '' : 'action:login,'}action:saved_objects/visualization/create`
+      });
+    };
+
+    const createExpectLegacyForbidden = username => resp => {
+      expect(resp.body).to.eql({
+        statusCode: 403,
+        error: 'Forbidden',
+        //eslint-disable-next-line max-len
+        message: `action [indices:data/write/index] is unauthorized for user [${username}]: [security_exception] action [indices:data/write/index] is unauthorized for user [${username}]`
       });
     };
 
@@ -64,7 +73,7 @@ export default function ({ getService }) {
       tests: {
         default: {
           statusCode: 403,
-          response: createExpectForbidden(false),
+          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME),
         },
       }
     });
@@ -103,7 +112,7 @@ export default function ({ getService }) {
       tests: {
         default: {
           statusCode: 403,
-          response: createExpectForbidden(true),
+          response: createExpectLegacyForbidden(AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.USERNAME),
         },
       }
     });
@@ -129,7 +138,7 @@ export default function ({ getService }) {
       tests: {
         default: {
           statusCode: 403,
-          response: createExpectForbidden(true),
+          response: createExpectRbacForbidden(true),
         },
       }
     });

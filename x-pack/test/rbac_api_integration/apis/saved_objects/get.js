@@ -39,11 +39,12 @@ export default function ({ getService }) {
       });
     };
 
-    const expectForbidden = resp => {
+    const createExpectLegacyForbidden = username => resp => {
       expect(resp.body).to.eql({
         statusCode: 403,
         error: 'Forbidden',
-        message: `Unable to get visualization, missing action:login,action:saved_objects/visualization/get`
+        //eslint-disable-next-line max-len
+        message: `action [indices:data/read/get] is unauthorized for user [${username}]: [security_exception] action [indices:data/read/get] is unauthorized for user [${username}]`
       });
     };
 
@@ -80,11 +81,11 @@ export default function ({ getService }) {
       tests: {
         exists: {
           statusCode: 403,
-          response: expectForbidden,
+          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME),
         },
         doesntExist: {
           statusCode: 403,
-          response: expectForbidden,
+          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME),
         },
       }
     });
