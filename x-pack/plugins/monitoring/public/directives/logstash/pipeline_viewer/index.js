@@ -14,34 +14,34 @@ import { List } from 'plugins/monitoring/components/logstash/pipeline_viewer/mod
 import { PipelineState } from 'plugins/monitoring/components/logstash/pipeline_viewer/models/pipeline_state';
 
 const uiModule = uiModules.get('monitoring/directives', []);
-uiModule.directive('monitoringLogstashPipelineViewer', ($injector) => {
+uiModule.directive('monitoringLogstashPipelineViewer', $injector => {
   const config = $injector.get('config');
   const dateFormat = config.get('dateFormat');
 
-  const timeseriesTooltipXValueFormatter = xValue => moment(xValue).format(dateFormat);
+  const timeseriesTooltipXValueFormatter = xValue =>
+    moment(xValue).format(dateFormat);
 
   return {
     restrict: 'E',
     scope: {
-      pipeline: '='
+      pipeline: '=',
     },
-    link: function (scope, $el) {
+    link: (scope, $el) => {
       const pipelineState = new PipelineState(scope.pipeline);
 
-      scope.$watch('pipeline', (updatedPipeline) => {
+      scope.$watch('pipeline', updatedPipeline => {
         pipelineState.update(updatedPipeline);
 
-        render(<PipelineViewer
-          pipeline={
-            List.fromPipeline(
-              Pipeline.fromPipelineGraph(
-                pipelineState.config.graph
-              )
-            )
-          }
-          timeseriesTooltipXValueFormatter={timeseriesTooltipXValueFormatter}
-        />, $el[0]);
+        render(
+          <PipelineViewer
+            pipeline={List.fromPipeline(
+              Pipeline.fromPipelineGraph(pipelineState.config.graph)
+            )}
+            timeseriesTooltipXValueFormatter={timeseriesTooltipXValueFormatter}
+          />,
+          $el[0]
+        );
       });
-    }
+    },
   };
 });
