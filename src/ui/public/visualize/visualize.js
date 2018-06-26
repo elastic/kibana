@@ -99,6 +99,7 @@ uiModules
             uiState: $scope.uiState,
             queryFilter: queryFilter,
             searchSource: $scope.savedObj.searchSource,
+            aggs: $scope.vis.getAggConfig(),
             timeRange: $scope.timeRange,
             filters: $scope.filters,
             query: $scope.query,
