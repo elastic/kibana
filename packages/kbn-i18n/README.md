@@ -253,34 +253,12 @@ and added as a comment next to translation message at `defaultMessages.json`
 
 #### Attributes translation in React
 React wrapper provides an API to inject the imperative formatting API into a React
-component via its `props`. This should be used when your React component needs to
-format data to a string value where a React element is not suitable; e.g., a `title`
-or `aria` attribute, or for side-effect in `componentDidMount`. Another approach
-is to use render callback pattern by wrapping your components into `I18nContext`
-component. The child of this component should be a function that takes `intl` object
-into parameters.
+component by using render callback pattern. This should be used when your React
+component needs to format data to a string value where a React element is not
+suitable; e.g., a `title` or `aria` attribute. In order to use it, you should
+wrap your components into `I18nContext` component. The child of this component
+should be a function that takes `intl` object into parameters:
 
-Example using `injectIntl`:
-```js
-import React from 'react';
-import { ReactI18n } from '@kbn/i18n';
-
-const { injectIntl } = ReactI18n;
-
-const MyComponent = ({ intl }) => (
-  <input
-    type="text"
-    placeholder={intl.formatMessage({
-      id: 'KIBANA-MANAGEMENT-OBJECTS-SEARCH_PLACEHOLDER',
-      defaultMessage: 'Search',
-    })}
-  />
-);
-
-export default injectIntl(MyComponent);
-```
-
-Example using `I18nContext`:
 ```js
 import React from 'react';
 import { ReactI18n } from '@kbn/i18n';

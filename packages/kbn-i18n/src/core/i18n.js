@@ -27,7 +27,7 @@
 import IntlMessageFormat from 'intl-messageformat';
 import IntlRelativeFormat from 'intl-relativeformat';
 import memoizeIntlConstructor from 'intl-format-cache';
-import { isString, isObject, hasValues, deepMerge } from './helper';
+import { isString, isObject, hasValues, mergeAll } from './helper';
 import { formats as EN_FORMATS } from './formats';
 
 // Add all locale data to `IntlMessageFormat`.
@@ -48,15 +48,11 @@ IntlRelativeFormat.defaultLocale = defaultLocale;
 
 /**
  * Returns message by the given message id.
- * @param {Messages} messages - messages tree
- * @param {string} id - path to the message that consists of properties
- * names separated by dots
+ * @param {string} id - path to the message
  * @returns {string} message - translated message from messages tree
- * @example
- * getMessageById({ a: { b: { c: 'test' } } }, 'a.b.c'); // => 'test'
  */
-function getMessageById(messages, id) {
-  return id.split('.').reduce((val, key) => (val ? val[key] : null), messages);
+function getMessageById(id) {
+  return getMessages()[id];
 }
 
 /**
@@ -74,16 +70,18 @@ function normalizeLocale(locale) {
  * @param {string} [locale = messages.locale]
  */
 export function addMessages(newMessages = {}, locale = newMessages.locale) {
-  if (!locale) {
-    throw new Error('[I18n] A `locale` must be provided to add messages.');
-  } else {
-    const normalizedLocale = normalizeLocale(locale);
-
-    messages[normalizedLocale] = {
-      ...messages[normalizedLocale],
-      ...newMessages,
-    };
+  if (!locale || !isString(locale)) {
+    throw new Error(
+      '[I18n] A `locale` must be a non-empty string to add messages.'
+    );
   }
+
+  const normalizedLocale = normalizeLocale(locale);
+
+  messages[normalizedLocale] = {
+    ...messages[normalizedLocale],
+    ...newMessages,
+  };
 }
 
 /**
@@ -91,7 +89,7 @@ export function addMessages(newMessages = {}, locale = newMessages.locale) {
  * @returns {Messages} messages
  */
 export function getMessages() {
-  return messages[currentLocale];
+  return messages[currentLocale] || {};
 }
 
 /**
@@ -100,10 +98,10 @@ export function getMessages() {
  */
 export function setLocale(locale) {
   if (!locale || !isString(locale)) {
-    throw new Error('[I18n] A `locale` must be non-empty string.');
-  } else {
-    currentLocale = normalizeLocale(locale);
+    throw new Error('[I18n] A `locale` must be a non-empty string.');
   }
+
+  currentLocale = normalizeLocale(locale);
 }
 
 /**
@@ -120,12 +118,12 @@ export function getLocale() {
  */
 export function setDefaultLocale(locale) {
   if (!locale || !isString(locale)) {
-    throw new Error('[I18n] A `locale` must be non-empty string.');
-  } else {
-    defaultLocale = normalizeLocale(locale);
-    IntlMessageFormat.defaultLocale = defaultLocale;
-    IntlRelativeFormat.defaultLocale = defaultLocale;
+    throw new Error('[I18n] A `locale` must be a non-empty string.');
   }
+
+  defaultLocale = normalizeLocale(locale);
+  IntlMessageFormat.defaultLocale = defaultLocale;
+  IntlRelativeFormat.defaultLocale = defaultLocale;
 }
 
 /**
@@ -149,10 +147,10 @@ export function getDefaultLocale() {
  */
 export function setFormats(newFormats) {
   if (!isObject(newFormats) || !hasValues(newFormats)) {
-    throw new Error('[I18n] A `formats` must be non-empty object.');
-  } else {
-    formats = deepMerge(formats, newFormats);
+    throw new Error('[I18n] A `formats` must be a non-empty object.');
   }
+
+  formats = mergeAll(formats, newFormats);
 }
 
 /**
@@ -180,14 +178,22 @@ export function getRegisteredLocales() {
  * @returns {string}
  */
 export function translate(id, { values = {}, defaultMessage = '' } = {}) {
-  if (!id) {
-    throw new Error('[I18n] An `id` must be provided to translate a message.');
+  if (!id || !isString(id)) {
+    throw new Error(
+      '[I18n] An `id` must be a non-empty string to translate a message.'
+    );
   }
 
-  const message = getMessageById(getMessages(), id);
+  const message = getMessageById(id);
 
-  if (!hasValues(values) && process.env.NODE_ENV === 'production') {
-    return message || defaultMessage || id;
+  if (!message && !defaultMessage) {
+    throw new Error(
+      `[I18n] Cannot format message: "${id}". Default message must be provided.`
+    );
+  }
+
+  if (!hasValues(values)) {
+    return message || defaultMessage;
   }
 
   if (message) {
@@ -200,23 +206,19 @@ export function translate(id, { values = {}, defaultMessage = '' } = {}) {
         `[I18n] Error formatting message: "${id}" for locale: "${getLocale()}".\n${e}`
       );
     }
-  } else if (defaultMessage) {
-    try {
-      const msg = getMessageFormat(
-        defaultMessage,
-        getDefaultLocale(),
-        getFormats()
-      );
+  }
 
-      return msg.format(values);
-    } catch (e) {
-      throw new Error(
-        `[I18n] Error formatting the default message for: "${id}".\n${e}`
-      );
-    }
-  } else {
+  try {
+    const msg = getMessageFormat(
+      defaultMessage,
+      getDefaultLocale(),
+      getFormats()
+    );
+
+    return msg.format(values);
+  } catch (e) {
     throw new Error(
-      `[I18n] Cannot format message: "${id}". Default message must be provided.`
+      `[I18n] Error formatting the default message for: "${id}".\n${e}`
     );
   }
 }
@@ -226,15 +228,17 @@ export function translate(id, { values = {}, defaultMessage = '' } = {}) {
  * @param {Messages} newMessages
  */
 export function init(newMessages) {
-  if (newMessages) {
-    addMessages(newMessages);
+  if (!newMessages) {
+    return;
+  }
 
-    if (newMessages.locale) {
-      setLocale(newMessages.locale);
-    }
+  addMessages(newMessages);
 
-    if (newMessages.formats) {
-      setFormats(newMessages.formats);
-    }
+  if (newMessages.locale) {
+    setLocale(newMessages.locale);
+  }
+
+  if (newMessages.formats) {
+    setFormats(newMessages.formats);
   }
 }

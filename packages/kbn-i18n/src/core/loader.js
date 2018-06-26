@@ -105,21 +105,21 @@ async function loadAndCacheFiles(files) {
 
 /**
  * Registers translation file with i18n loader
- * @param {string} pluginTranslationFilePath - Absolute path to the translation file to register.
+ * @param {string} translationFilePath - Absolute path to the translation file to register.
  */
-export function registerTranslationFile(pluginTranslationFilePath) {
-  if (!path.isAbsolute(pluginTranslationFilePath)) {
+export function registerTranslationFile(translationFilePath) {
+  if (!path.isAbsolute(translationFilePath)) {
     throw new TypeError(
       'Paths to translation files must be absolute. ' +
-        `Got relative path: "${pluginTranslationFilePath}"`
+        `Got relative path: "${translationFilePath}"`
     );
   }
 
-  const locale = getLocaleFromFileName(pluginTranslationFilePath);
+  const locale = getLocaleFromFileName(translationFilePath);
 
   translationsRegistry[locale] = unique([
     ...(translationsRegistry[locale] || []),
-    pluginTranslationFilePath,
+    translationFilePath,
   ]);
 }
 

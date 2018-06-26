@@ -19,8 +19,6 @@
 
 export {
   intlShape,
-  injectIntl,
-  IntlProvider,
   FormattedDate,
   FormattedTime,
   FormattedRelative,

@@ -19,29 +19,31 @@
 
 export const isString = value => typeof value === 'string';
 
-export const isObject = value => typeof value === 'object';
-
-export const isUndefined = value => typeof value === 'undefined';
+export const isObject = value => typeof value === 'object' && value !== null;
 
 export const hasValues = values => Object.keys(values).length > 0;
 
-export const unique = (arr = []) =>
-  arr.filter((value, index, array) => array.indexOf(value) === index);
+export const unique = (arr = []) => [...new Set(arr)];
 
 const merge = (a, b) =>
   unique([...Object.keys(a), ...Object.keys(b)]).reduce((acc, key) => {
-    if (isObject(a[key]) && isObject(b[key])) {
+    if (
+      isObject(a[key]) &&
+      isObject(b[key]) &&
+      !Array.isArray(a[key]) &&
+      !Array.isArray(b[key])
+    ) {
       return {
         ...acc,
         [key]: merge(a[key], b[key]),
       };
-    } else {
-      return {
-        ...acc,
-        [key]: isUndefined(b[key]) ? a[key] : b[key],
-      };
     }
+
+    return {
+      ...acc,
+      [key]: b[key] === undefined ? a[key] : b[key],
+    };
   }, {});
 
-export const deepMerge = (...sources) =>
-  sources.reduce((acc, source) => merge(acc, source));
+export const mergeAll = (...sources) =>
+  sources.filter(isObject).reduce((acc, source) => merge(acc, source));
