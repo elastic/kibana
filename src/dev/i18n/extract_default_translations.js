@@ -27,7 +27,6 @@ import {
   makeDirAsync,
   pathExists,
   readFileAsync,
-  throwEntryException,
   writeFileAsync,
 } from './utils';
 
@@ -93,7 +92,7 @@ export async function extractDefaultTranslations(inputPath) {
             addMessageToMap(defaultMessagesMap, id, value);
           }
         } catch (error) {
-          throwEntryException(error, name);
+          throw new Error(`Error in ${name}\n${error.message || error}`);
         }
       }
     })

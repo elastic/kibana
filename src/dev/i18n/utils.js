@@ -28,9 +28,10 @@ export const readFileAsync = promisify(fs.readFile);
 export const writeFileAsync = promisify(fs.writeFile);
 export const makeDirAsync = promisify(fs.mkdir);
 export const globAsync = promisify(glob);
+const accessAsync = promisify(fs.access);
 
-export async function pathExists(path) {
-  await promisify(fs.access)(path, fs.constants.F_OK);
+export function pathExists(path) {
+  accessAsync(path, fs.constants.F_OK);
 }
 
 export function isPropertyWithKey(property, identifierName) {
@@ -53,10 +54,6 @@ export function isI18nTranslateFunction(node) {
     (isIdentifier(node.callee, { name: 'i18n' }) ||
       isIdentifier(node.callee, { name: 'translate' }))
   );
-}
-
-export function throwEntryException(exception, entry) {
-  throw new Error(`Error in ${entry}\n${exception.message || exception}`);
 }
 
 export function escapeLineBreak(string) {
