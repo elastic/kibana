@@ -23,11 +23,11 @@ import { readFileSync } from 'fs';
 import { merge } from 'lodash';
 
 const extensionSpecFilePaths = [];
-export function getSpec() {
-  const generatedFiles = glob.sync(join(__dirname, 'generated', '*.json'));
-  const overrideFiles = glob.sync(join(__dirname, 'overrides', '*.json'));
+function _getSpec(dirname = __dirname) {
+  const generatedFiles = glob.sync(join(dirname, 'generated', '*.json'));
+  const overrideFiles = glob.sync(join(dirname, 'overrides', '*.json'));
 
-  const result = generatedFiles.reduce((acc, file) => {
+  return generatedFiles.reduce((acc, file) => {
     const overrideFile = overrideFiles.find(f => basename(f) === basename(file));
     const loadedSpec = JSON.parse(readFileSync(file, 'utf8'));
     if (overrideFile) {
@@ -45,11 +45,11 @@ export function getSpec() {
 
     return { ...acc, ...spec };
   }, {});
+}
+export function getSpec() {
+  const result = _getSpec();
   extensionSpecFilePaths.forEach((extensionSpecFilePath) => {
-    const extensionFiles = glob.sync(join(extensionSpecFilePath, '*.json'));
-    extensionFiles.forEach((extensionFile) => {
-      merge(result, JSON.parse(readFileSync(extensionFile, 'utf8')));
-    });
+    merge(result, _getSpec(extensionSpecFilePath));
   });
   return result;
 }

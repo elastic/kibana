@@ -33,10 +33,31 @@
         }
       }
 
-      .agg-type {
-        float: right;
-        width: 120px;
-        flex-grow: 0;
+      .agg-type-select-wrapper {
+        .agg-type-select {
+          float: right;
+          width: 130px;
+          flex-grow: 0;
+          padding: 5px 10px;
+          -webkit-appearance: none; 
+          -moz-appearance: none;
+          appearance: none;
+        }
+
+        &::after {
+          content: "";
+          position: absolute;
+          width: 0;
+          height: 0;
+          margin-left: 2px;
+          vertical-align: middle;
+          border-top: 4px dashed;
+          border-top: 4px solid #000;
+          border-right: 4px solid transparent;
+          border-left: 4px solid transparent;
+          right: 10px;
+          top: 14px;
+        }
       }
     }
     .field-row:first-child {

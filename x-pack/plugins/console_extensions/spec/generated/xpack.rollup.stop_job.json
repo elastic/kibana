@@ -1,0 +1,10 @@
+{
+  "xpack.rollup.stop_job": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_xpack/rollup/job/{id}/_stop"
+    ]
+  }
+}

@@ -20,7 +20,7 @@
 const $ = require('jquery');
 require('brace');
 require('brace/ext/searchbox');
-const Autocomplete = require('./autocomplete');
+import  Autocomplete from './autocomplete';
 const SenseEditor = require('./sense_editor/editor');
 const settings = require('./settings');
 const utils = require('./utils');
@@ -29,7 +29,7 @@ const history = require('./history');
 import { uiModules } from 'ui/modules';
 
 let input;
-export function initializeInput($el, $actionsEl, $copyAsCurlEl, output) {
+export function initializeInput($el, $actionsEl, $copyAsCurlEl, output, openDocumentation = () => {}) {
   input = new SenseEditor($el);
 
   // this may not exist if running from tests
@@ -241,7 +241,13 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output) {
     bindKey: { win: 'Ctrl-Enter', mac: 'Command-Enter' },
     exec: sendCurrentRequestToES
   });
-
+  input.commands.addCommand({
+    name: 'open documentation',
+    bindKey: { win: 'Ctrl-/', mac: 'Command-/' },
+    exec: () => {
+      openDocumentation();
+    }
+  });
 
   /**
    * Init the editor

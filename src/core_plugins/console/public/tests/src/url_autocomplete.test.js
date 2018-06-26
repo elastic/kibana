@@ -304,6 +304,9 @@ describe('Url autocomplete', () => {
       p: function (name, parent) {
         return new ListComponent(name, ['g1', 'g2'], parent);
       },
+      getComponent(name) {
+        return this[name];
+      }
     };
 
     patternsTest(

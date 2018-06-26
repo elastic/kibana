@@ -34,24 +34,273 @@ const AceRange = ace.acequire('ace/range').Range;
 
 let LAST_EVALUATED_TOKEN = null;
 
-export default function (editor) {
+function isUrlParamsToken(token) {
+  switch ((token || {}).type) {
+    case 'url.param':
+    case 'url.equal':
+    case 'url.value':
+    case 'url.questionmark':
+    case 'url.amp':
+      return true;
+    default:
+      return false;
+  }
+}
+function getCurrentMethodAndTokenPaths(editor, pos, forceEndOfUrl) {
+  const tokenIter = editor.iterForPosition(pos.row, pos.column);
+  const startPos = pos;
+  let bodyTokenPath = [];
+  const ret = {};
 
-  function isSeparatorToken(token) {
-    switch ((token || {}).type) {
-      case 'url.slash':
-      case 'url.comma':
-      case 'url.questionmark':
-      case 'paren.lparen':
-      case 'paren.rparen':
-      case 'punctuation.colon':
-      case 'punctuation.comma':
-      case 'whitespace':
-        return true;
-      default:
-        // standing on white space, quotes or another punctuation - no replacing
-        return false;
+  const STATES = {
+    looking_for_key: 0, // looking for a key but without jumping over anything but white space and colon.
+    looking_for_scope_start: 1, // skip everything until scope start
+    start: 3
+  };
+  let state = STATES.start;
+
+  // initialization problems -
+  let t = tokenIter.getCurrentToken();
+  if (t) {
+    if (startPos.column === 0) {
+      // if we are at the beginning of the line, the current token is the one after cursor, not before which
+      // deviates from the standard.
+      t = tokenIter.stepBackward();
+      state = STATES.looking_for_scope_start;
     }
   }
+  else {
+    if (startPos.column === 0) {
+      // empty lines do no have tokens, move one back
+      t = tokenIter.stepBackward();
+      state = STATES.start;
+    }
+  }
+
+  let walkedSomeBody = false;
+
+  // climb one scope at a time and get the scope key
+  for (; t && t.type.indexOf('url') === -1 && t.type !== 'method'; t = tokenIter.stepBackward()) {
+
+    if (t.type !== 'whitespace') {
+      walkedSomeBody = true;
+    } // marks we saw something
+
+    switch (t.type) {
+      case 'variable':
+        if (state === STATES.looking_for_key) {
+          bodyTokenPath.unshift(t.value.trim().replace(/"/g, ''));
+        }
+        state = STATES.looking_for_scope_start; // skip everything until the beginning of this scope
+        break;
+
+      case 'paren.lparen':
+        bodyTokenPath.unshift(t.value);
+        if (state === STATES.looking_for_scope_start) {
+          // found it. go look for the relevant key
+          state = STATES.looking_for_key;
+        }
+        break;
+      case 'paren.rparen':
+        // reset he search for key
+        state = STATES.looking_for_scope_start;
+        // and ignore this sub scope..
+        let parenCount = 1;
+        t = tokenIter.stepBackward();
+        while (t && parenCount > 0) {
+          switch (t.type) {
+            case 'paren.lparen':
+              parenCount--;
+              break;
+            case 'paren.rparen':
+              parenCount++;
+              break;
+          }
+          if (parenCount > 0) {
+            t = tokenIter.stepBackward();
+          }
+        }
+        if (!t) // oops we run out.. we don't know what's up return null;
+        {
+          return {};
+        }
+        continue;
+      case 'punctuation.end_triple_quote':
+        // reset the search for key
+        state = STATES.looking_for_scope_start;
+        for (t = tokenIter.stepBackward(); t; t = tokenIter.stepBackward()) {
+          if (t.type === 'punctuation.start_triple_quote') {
+            t = tokenIter.stepBackward();
+            break;
+          }
+        }
+        if (!t) // oops we run out.. we don't know what's up return null;
+        {
+          return {};
+        }
+        continue;
+      case 'punctuation.start_triple_quote':
+        if (state === STATES.start) {
+          state = STATES.looking_for_key;
+        }
+        else if (state === STATES.looking_for_key) {
+          state = STATES.looking_for_scope_start;
+        }
+        bodyTokenPath.unshift('"""');
+        continue;
+      case 'string':
+      case 'constant.numeric':
+      case 'constant.language.boolean':
+      case 'text':
+        if (state === STATES.start) {
+          state = STATES.looking_for_key;
+        }
+        else if (state === STATES.looking_for_key) {
+          state = STATES.looking_for_scope_start;
+        }
+
+        break;
+      case 'punctuation.comma':
+        if (state === STATES.start) {
+          state = STATES.looking_for_scope_start;
+        }
+        break;
+      case 'punctuation.colon':
+      case 'whitespace':
+        if (state === STATES.start) {
+          state = STATES.looking_for_key;
+        }
+        break; // skip white space
+
+    }
+  }
+
+  if (walkedSomeBody && (!bodyTokenPath || bodyTokenPath.length === 0)) {
+    // we had some content and still no path -> the cursor is position after a closed body -> no auto complete
+    return {};
+  }
+  ret.urlTokenPath = [];
+  if (tokenIter.getCurrentTokenRow() === startPos.row) {
+    if (t.type === 'url.part' || t.type === 'url.param' || t.type === 'url.value') {
+      // we are forcing the end of the url for the purposes of determining an endpoint
+      if (forceEndOfUrl && t.type === 'url.part') {
+        ret.urlTokenPath.push(t.value);
+        ret.urlTokenPath.push(URL_PATH_END_MARKER);
+      }
+      // we are on the same line as cursor and dealing with a url. Current token is not part of the context
+      t = tokenIter.stepBackward();
+      // This will force method parsing
+      while (t.type === 'whitespace') {
+        t = tokenIter.stepBackward();
+      }
+    }
+    bodyTokenPath = null; // no not on a body line.
+  }
+
+  ret.bodyTokenPath = bodyTokenPath;
+
+  ret.urlParamsTokenPath = null;
+  ret.requestStartRow = tokenIter.getCurrentTokenRow();
+  let curUrlPart;
+
+  while (t && isUrlParamsToken(t)) {
+    switch (t.type) {
+      case 'url.value':
+        if (Array.isArray(curUrlPart)) {
+          curUrlPart.unshift(t.value);
+        }
+        else if (curUrlPart) {
+          curUrlPart = [t.value, curUrlPart];
+        }
+        else {
+          curUrlPart = t.value;
+        }
+        break;
+      case 'url.comma':
+        if (!curUrlPart) {
+          curUrlPart = [];
+        }
+        else if (!Array.isArray(curUrlPart)) {
+          curUrlPart = [curUrlPart];
+        }
+        break;
+      case 'url.param':
+        const v = curUrlPart;
+        curUrlPart = {};
+        curUrlPart[t.value] = v;
+        break;
+      case 'url.amp':
+      case 'url.questionmark':
+        if (!ret.urlParamsTokenPath) {
+          ret.urlParamsTokenPath = [];
+        }
+        ret.urlParamsTokenPath.unshift(curUrlPart || {});
+        curUrlPart = null;
+        break;
+    }
+    t = tokenIter.stepBackward();
+  }
+
+  curUrlPart = null;
+  while (t && t.type.indexOf('url') !== -1) {
+    switch (t.type) {
+      case 'url.part':
+        if (Array.isArray(curUrlPart)) {
+          curUrlPart.unshift(t.value);
+        }
+        else if (curUrlPart) {
+          curUrlPart = [t.value, curUrlPart];
+        }
+        else {
+          curUrlPart = t.value;
+        }
+        break;
+      case 'url.comma':
+        if (!curUrlPart) {
+          curUrlPart = [];
+        }
+        else if (!Array.isArray(curUrlPart)) {
+          curUrlPart = [curUrlPart];
+        }
+        break;
+      case 'url.slash':
+        if (curUrlPart) {
+          ret.urlTokenPath.unshift(curUrlPart);
+          curUrlPart = null;
+        }
+        break;
+    }
+    t = editor.parser.prevNonEmptyToken(tokenIter);
+  }
+
+  if (curUrlPart) {
+    ret.urlTokenPath.unshift(curUrlPart);
+  }
+
+  if (!ret.bodyTokenPath && !ret.urlParamsTokenPath) {
+
+    if (ret.urlTokenPath.length > 0) {
+    //   // started on the url, first token is current token
+      ret.otherTokenValues = ret.urlTokenPath[0];
+    }
+  }
+  else {
+    // mark the url as completed.
+    ret.urlTokenPath.push(URL_PATH_END_MARKER);
+  }
+
+  if (t && t.type === 'method') {
+    ret.method = t.value;
+  }
+  return ret;
+}
+export function getEndpointFromPosition(editor, pos) {
+  const context = { ...getCurrentMethodAndTokenPaths(editor, pos, true) };
+  const components = getTopLevelUrlCompleteComponents(context.method);
+  populateContext(context.urlTokenPath, context, editor, true, components);
+  return context.endpoint;
+}
+export default function (editor) {
 
   function isUrlPathToken(token) {
     switch ((token || {}).type) {
@@ -61,36 +310,6 @@ export default function (editor) {
         return true;
       default:
         return false;
-    }
-  }
-
-  function isUrlParamsToken(token) {
-    switch ((token || {}).type) {
-      case 'url.param':
-      case 'url.equal':
-      case 'url.value':
-      case 'url.questionmark':
-      case 'url.amp':
-        return true;
-      default:
-        return false;
-    }
-  }
-
-  function getAutoCompleteValueFromToken(token) {
-    switch ((token || {}).type) {
-      case 'variable':
-      case 'string':
-      case 'text':
-      case 'constant.numeric':
-      case 'constant.language.boolean':
-        return token.value.replace(/"/g, '');
-      case 'method':
-      case 'url.part':
-        return token.value;
-      default:
-        // standing on white space, quotes or another punctuation - no replacing
-        return '';
     }
   }
 
@@ -523,8 +742,9 @@ export default function (editor) {
     }));
   }
 
+
   function addPathAutoCompleteSetToContext(context, pos) {
-    const ret = getCurrentMethodAndTokenPaths(pos);
+    const ret = getCurrentMethodAndTokenPaths(editor, pos);
     context.method = ret.method;
     context.token = ret.token;
     context.otherTokenValues = ret.otherTokenValues;
@@ -537,7 +757,7 @@ export default function (editor) {
   }
 
   function addUrlParamsAutoCompleteSetToContext(context, pos) {
-    const ret = getCurrentMethodAndTokenPaths(pos);
+    const ret = getCurrentMethodAndTokenPaths(editor, pos);
     context.method = ret.method;
     context.otherTokenValues = ret.otherTokenValues;
     context.urlTokenPath = ret.urlTokenPath;
@@ -572,7 +792,7 @@ export default function (editor) {
 
   function addBodyAutoCompleteSetToContext(context, pos) {
 
-    const ret = getCurrentMethodAndTokenPaths(pos);
+    const ret = getCurrentMethodAndTokenPaths(editor, pos);
     context.method = ret.method;
     context.otherTokenValues = ret.otherTokenValues;
     context.urlTokenPath = ret.urlTokenPath;
@@ -606,247 +826,7 @@ export default function (editor) {
     return context;
   }
 
-  function getCurrentMethodAndTokenPaths(pos) {
-    const tokenIter = editor.iterForPosition(pos.row, pos.column);
-    const startPos = pos;
-    let bodyTokenPath = [];
-    const ret = {};
 
-    const STATES = {
-      looking_for_key: 0, // looking for a key but without jumping over anything but white space and colon.
-      looking_for_scope_start: 1, // skip everything until scope start
-      start: 3
-    };
-    let state = STATES.start;
-
-    // initialization problems -
-    let t = tokenIter.getCurrentToken();
-    if (t) {
-      if (startPos.column === 0) {
-        // if we are at the beginning of the line, the current token is the one after cursor, not before which
-        // deviates from the standard.
-        t = tokenIter.stepBackward();
-        state = STATES.looking_for_scope_start;
-      }
-    }
-    else {
-      if (startPos.column === 0) {
-        // empty lines do no have tokens, move one back
-        t = tokenIter.stepBackward();
-        state = STATES.start;
-      }
-    }
-
-    let walkedSomeBody = false;
-
-    // climb one scope at a time and get the scope key
-    for (; t && t.type.indexOf('url') === -1 && t.type !== 'method'; t = tokenIter.stepBackward()) {
-
-      if (t.type !== 'whitespace') {
-        walkedSomeBody = true;
-      } // marks we saw something
-
-      switch (t.type) {
-        case 'variable':
-          if (state === STATES.looking_for_key) {
-            bodyTokenPath.unshift(t.value.trim().replace(/"/g, ''));
-          }
-          state = STATES.looking_for_scope_start; // skip everything until the beginning of this scope
-          break;
-
-        case 'paren.lparen':
-          bodyTokenPath.unshift(t.value);
-          if (state === STATES.looking_for_scope_start) {
-            // found it. go look for the relevant key
-            state = STATES.looking_for_key;
-          }
-          break;
-        case 'paren.rparen':
-          // reset he search for key
-          state = STATES.looking_for_scope_start;
-          // and ignore this sub scope..
-          let parenCount = 1;
-          t = tokenIter.stepBackward();
-          while (t && parenCount > 0) {
-            switch (t.type) {
-              case 'paren.lparen':
-                parenCount--;
-                break;
-              case 'paren.rparen':
-                parenCount++;
-                break;
-            }
-            if (parenCount > 0) {
-              t = tokenIter.stepBackward();
-            }
-          }
-          if (!t) // oops we run out.. we don't know what's up return null;
-          {
-            return {};
-          }
-          continue;
-        case 'punctuation.end_triple_quote':
-          // reset the search for key
-          state = STATES.looking_for_scope_start;
-          for (t = tokenIter.stepBackward(); t; t = tokenIter.stepBackward()) {
-            if (t.type === 'punctuation.start_tripple_qoute') {
-              t = tokenIter.stepBackward();
-              break;
-            }
-          }
-          if (!t) // oops we run out.. we don't know what's up return null;
-          {
-            return {};
-          }
-          continue;
-        case 'punctuation.start_triple_quote':
-          if (state === STATES.start) {
-            state = STATES.looking_for_key;
-          }
-          else if (state === STATES.looking_for_key) {
-            state = STATES.looking_for_scope_start;
-          }
-          bodyTokenPath.unshift('"""');
-          continue;
-        case 'string':
-        case 'constant.numeric':
-        case 'constant.language.boolean':
-        case 'text':
-          if (state === STATES.start) {
-            state = STATES.looking_for_key;
-          }
-          else if (state === STATES.looking_for_key) {
-            state = STATES.looking_for_scope_start;
-          }
-
-          break;
-        case 'punctuation.comma':
-          if (state === STATES.start) {
-            state = STATES.looking_for_scope_start;
-          }
-          break;
-        case 'punctuation.colon':
-        case 'whitespace':
-          if (state === STATES.start) {
-            state = STATES.looking_for_key;
-          }
-          break; // skip white space
-
-      }
-    }
-
-    if (walkedSomeBody && (!bodyTokenPath || bodyTokenPath.length === 0)) {
-      // we had some content and still no path -> the cursor is position after a closed body -> no auto complete
-      return {};
-    }
-
-    if (tokenIter.getCurrentTokenRow() === startPos.row) {
-      if (t.type === 'url.part' || t.type === 'url.param' || t.type === 'url.value') {
-        // we are on the same line as cursor and dealing with a url. Current token is not part of the context
-        t = tokenIter.stepBackward();
-        // This will force method parsing
-        while (t.type === 'whitespace') {
-          t = tokenIter.stepBackward();
-        }
-      }
-      bodyTokenPath = null; // no not on a body line.
-    }
-
-    ret.bodyTokenPath = bodyTokenPath;
-    ret.urlTokenPath = [];
-    ret.urlParamsTokenPath = null;
-    ret.requestStartRow = tokenIter.getCurrentTokenRow();
-    let curUrlPart;
-
-    while (t && isUrlParamsToken(t)) {
-      switch (t.type) {
-        case 'url.value':
-          if (Array.isArray(curUrlPart)) {
-            curUrlPart.unshift(t.value);
-          }
-          else if (curUrlPart) {
-            curUrlPart = [t.value, curUrlPart];
-          }
-          else {
-            curUrlPart = t.value;
-          }
-          break;
-        case 'url.comma':
-          if (!curUrlPart) {
-            curUrlPart = [];
-          }
-          else if (!Array.isArray(curUrlPart)) {
-            curUrlPart = [curUrlPart];
-          }
-          break;
-        case 'url.param':
-          const v = curUrlPart;
-          curUrlPart = {};
-          curUrlPart[t.value] = v;
-          break;
-        case 'url.amp':
-        case 'url.questionmark':
-          if (!ret.urlParamsTokenPath) {
-            ret.urlParamsTokenPath = [];
-          }
-          ret.urlParamsTokenPath.unshift(curUrlPart || {});
-          curUrlPart = null;
-          break;
-      }
-      t = tokenIter.stepBackward();
-    }
-
-    curUrlPart = null;
-    while (t && t.type.indexOf('url') !== -1) {
-      switch (t.type) {
-        case 'url.part':
-          if (Array.isArray(curUrlPart)) {
-            curUrlPart.unshift(t.value);
-          }
-          else if (curUrlPart) {
-            curUrlPart = [t.value, curUrlPart];
-          }
-          else {
-            curUrlPart = t.value;
-          }
-          break;
-        case 'url.comma':
-          if (!curUrlPart) {
-            curUrlPart = [];
-          }
-          else if (!Array.isArray(curUrlPart)) {
-            curUrlPart = [curUrlPart];
-          }
-          break;
-        case 'url.slash':
-          ret.urlTokenPath.unshift(curUrlPart);
-          curUrlPart = null;
-          break;
-      }
-      t = editor.parser.prevNonEmptyToken(tokenIter);
-    }
-
-    if (curUrlPart) {
-      ret.urlTokenPath.unshift(curUrlPart);
-    }
-
-    if (!ret.bodyTokenPath && !ret.urlParamsTokenPath) {
-
-      if (ret.urlTokenPath.length > 0) {
-        // started on the url, first token is current token
-        ret.otherTokenValues = ret.urlTokenPath.splice(-1)[0];
-      }
-    }
-    else {
-      // mark the url as completed.
-      ret.urlTokenPath.push(URL_PATH_END_MARKER);
-    }
-
-    if (t && t.type === 'method') {
-      ret.method = t.value;
-    }
-    return ret;
-  }
 
   const evaluateCurrentTokenAfterAChange = _.debounce(function evaluateCurrentTokenAfterAChange(pos) {
     const session = editor.getSession();
@@ -934,18 +914,21 @@ export default function (editor) {
           } else {
             term = _.clone(term);
           }
-
-          return _.defaults(term, {
+          const defaults = {
             value: term.name,
             meta: 'API',
             score: 0,
             context: context,
-            completer: {
+          };
+          // we only need out custom insertMatch behavior for the body
+          if (context.autoCompleteType === 'body') {
+            defaults.completer = {
               insertMatch: function () {
-                applyTerm(term);
+                return applyTerm(term);
               }
-            }
-          });
+            };
+          }
+          return _.defaults(term, defaults);
         });
 
         terms.sort(function (t1, t2) {
@@ -992,10 +975,11 @@ export default function (editor) {
   });
 
   const langTools = ace.acequire('ace/ext/language_tools');
-  const aceUtils = ace.acequire('ace/autocomplete/util');
-  const aceAutoComplete = ace.acequire('ace/autocomplete');
 
   langTools.setCompleters([{
+    identifierRegexps: [
+      /[a-zA-Z_0-9\.\$\-\u00A2-\uFFFF]/ // adds support for dot character
+    ],
     getCompletions: getCompletions
   }]);
 
@@ -1003,50 +987,8 @@ export default function (editor) {
     enableBasicAutocompletion: true
   });
   editor.$blockScrolling = Infinity;
-  // Ace doesn't care about tokenization when calculating prefix. It will thus stop on . in keys names.
-  // we patch this behavior.
-  // CHECK ON ACE UPDATE
-  const aceAutoCompleteInstance = new aceAutoComplete.Autocomplete();
-  aceAutoCompleteInstance.autoInsert = false;
-  aceAutoCompleteInstance.gatherCompletions = function (aceEditor, callback) {
-    const session = aceEditor.getSession();
-    const pos = aceEditor.getCursorPosition();
-    let prefix = '';
-    // change starts here
-    const token = session.getTokenAt(pos.row, pos.column);
-    this.base = _.clone(pos);
-    this.base.detach = () => {};
-    if (!editor.parser.isEmptyToken(token) && !isSeparatorToken(token)) {
-      if (token.value.indexOf('"') === 0) {
-        this.base.column = token.start + 1;
-      }
-      else {
-        this.base.column = token.start;
-      }
-
-      prefix = getAutoCompleteValueFromToken(token);
-    }
-
-    let matches = [];
-    aceUtils.parForEach(aceEditor.completers, function (completer, next) {
-      completer.getCompletions(aceEditor, session, pos, prefix, function (err, results) {
-        if (!err) {
-          matches = matches.concat(results);
-        }
-        next();
-      });
-    }, function () {
-      callback(null, {
-        prefix: prefix,
-        matches: matches
-      });
-    });
-    return true;
-  };
-
-  editor.__ace.completer = aceAutoCompleteInstance;
-
   return {
+
     _test: {
       getCompletions: getCompletions,
       addReplacementInfoToContext: addReplacementInfoToContext,
