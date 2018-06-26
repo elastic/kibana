@@ -30,19 +30,17 @@ uiModule.directive('monitoringLogstashPipelineViewer', ($injector) => {
 
       scope.$watch('pipeline', (updatedPipeline) => {
         pipelineState.update(updatedPipeline);
-        const pipelineViewer = (
-          <PipelineViewer
-            pipeline={
-              List.fromPipeline(
-                Pipeline.fromPipelineGraph(
-                  pipelineState.config.graph
-                )
+
+        render(<PipelineViewer
+          pipeline={
+            List.fromPipeline(
+              Pipeline.fromPipelineGraph(
+                pipelineState.config.graph
               )
-            }
-            timeseriesTooltipXValueFormatter={timeseriesTooltipXValueFormatter}
-          />
-        );
-        render(pipelineViewer, $el[0]);
+            )
+          }
+          timeseriesTooltipXValueFormatter={timeseriesTooltipXValueFormatter}
+        />, $el[0]);
       });
     }
   };
