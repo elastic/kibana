@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import 'ui/field_editor';
 import { IndexPatternsFieldProvider } from 'ui/index_patterns/_field';
 import { RegistryFieldFormatEditorsProvider } from 'ui/registry/field_format_editors';
 import { KbnUrlProvider } from 'ui/url';
@@ -27,7 +26,7 @@ import template from './create_edit_field.html';
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { FieldEditor } from '../../field_editor';
+import { FieldEditor } from 'ui/field_editor';
 
 const REACT_FIELD_EDITOR_ID = 'reactFieldEditor';
 const renderFieldEditor = ($scope, indexPattern, field, {

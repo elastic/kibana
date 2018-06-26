@@ -39,7 +39,7 @@ export const UI_EXPORT_DEFAULTS = {
 
   appExtensions: {
     fieldFormatEditors: [
-      'ui/field_format_editor/register'
+      'ui/field_editor/components/field_format_editor/register'
     ],
     visRequestHandlers: [
       'ui/vis/request_handlers/courier',

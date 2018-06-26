@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { FieldEditor } from './field_editor';
+export { FieldFormatEditor } from './field_format_editor';
