@@ -155,11 +155,12 @@ describe('SavedObjectsRepository', () => {
     });
 
     it('should use create action if ID defined and overwrite=false', async () => {
-      await savedObjectsRepository.create('index-pattern', {
-        title: 'Logstash'
-      }, {
-        id: 'logstash-*',
-      });
+      await savedObjectsRepository.create('index-pattern',
+        {
+          title: 'Logstash'
+        }, {
+          id: 'logstash-*',
+        });
 
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWith(callAdminCluster, 'create');
@@ -187,6 +188,34 @@ describe('SavedObjectsRepository', () => {
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
         id: sinon.match(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/)
+      }));
+
+      sinon.assert.calledOnce(onBeforeWrite);
+    });
+
+    it('appends extraBodyProperties to the document', async () => {
+      await savedObjectsRepository.create('index-pattern',
+        {
+          title: 'Logstash'
+        },
+        {
+          extraBodyProperties: {
+            myExtraProp: 'myExtraValue',
+            myOtherExtraProp: true,
+          }
+        }
+      );
+
+      sinon.assert.calledOnce(callAdminCluster);
+      sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
+        id: sinon.match(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+        body: {
+          [`index-pattern`]: { title: 'Logstash' },
+          myExtraProp: 'myExtraValue',
+          myOtherExtraProp: true,
+          type: 'index-pattern',
+          updated_at: '2017-08-14T15:49:14.886Z'
+        }
       }));
 
       sinon.assert.calledOnce(onBeforeWrite);
@@ -324,6 +353,28 @@ describe('SavedObjectsRepository', () => {
           attributes: { title: 'Test Two' },
         }
       ]);
+    });
+
+    it('appends extraBodyProperties to each created object', async () => {
+      callAdminCluster.returns({ items: [] });
+
+      await savedObjectsRepository.bulkCreate(
+        [
+          { type: 'config', id: 'one', attributes: { title: 'Test One' }, extraBodyProperties: { extraConfigValue: true } },
+          { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' }, extraBodyProperties: { extraIndexValue: true } }
+        ]);
+
+      sinon.assert.calledOnce(callAdminCluster);
+      sinon.assert.calledWithExactly(callAdminCluster, 'bulk', sinon.match({
+        body: [
+          { create: { _type: 'doc', _id: 'config:one' } },
+          { type: 'config', ...mockTimestampFields, config: { title: 'Test One' }, extraConfigValue: true },
+          { create: { _type: 'doc', _id: 'index-pattern:two' } },
+          { type: 'index-pattern', ...mockTimestampFields, 'index-pattern': { title: 'Test Two' }, extraIndexValue: true }
+        ]
+      }));
+
+      sinon.assert.calledOnce(onBeforeWrite);
     });
   });
 

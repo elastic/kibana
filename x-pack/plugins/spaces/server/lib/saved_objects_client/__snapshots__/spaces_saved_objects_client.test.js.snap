@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#delete does not allow an object to be deleted via a different space 1`] = `"not found"`;
+
+exports[`#get returns error when the object belongs to a different space 1`] = `"not found"`;
+
+exports[`#update does not allow an object to be updated via a different space 1`] = `"not found"`;

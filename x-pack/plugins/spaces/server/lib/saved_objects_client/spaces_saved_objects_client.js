@@ -42,12 +42,21 @@ export class SpacesSavedObjectsClient {
   }
 
   async bulkCreate(objects, options = {}) {
-    options.extraBodyProperties = {
-      ...options.extraBodyProperties,
-      spaceId: await this._getSpaceId()
-    };
+    const spaceId = await this._getSpaceId();
+    const objectsToCreate = objects.map(o => {
+      if (isTypeSpaceAware(o.type)) {
+        return {
+          ...o,
+          extraBodyProperties: {
+            ...o.extraBodyProperties,
+            spaceId
+          }
+        };
+      }
+      return o;
+    });
 
-    return await this._client.bulkCreate(objects, options);
+    return await this._client.bulkCreate(objectsToCreate, options);
   }
 
   async delete(type, id) {

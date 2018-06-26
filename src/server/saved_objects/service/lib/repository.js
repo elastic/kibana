@@ -100,7 +100,7 @@ export class SavedObjectsRepository {
   /**
    * Creates multiple documents at once
    *
-   * @param {array} objects - [{ type, id, attributes }]
+   * @param {array} objects - [{ type, id, attributes, extraBodyProperties }]
    * @param {object} [options={}]
    * @property {boolean} [options.overwrite=false] - overwrites existing documents
    * @returns {promise} - [{ id, type, version, attributes, error: { message } }]
