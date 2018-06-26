@@ -24,22 +24,6 @@ import { promisify } from 'util';
 export const readFileAsync = promisify(fs.readFile);
 export const globAsync = promisify(glob);
 
-export function plainify(object) {
-  const result = {};
-
-  for (const [key, value] of Object.entries(object)) {
-    if (typeof value === 'object' && value !== null) {
-      for (const [nestedKey, nestedValue] of Object.entries(plainify(value))) {
-        result[`${key}.${nestedKey}`] = nestedValue;
-      }
-    } else {
-      result[key] = value;
-    }
-  }
-
-  return result;
-}
-
 export function arraysDiff(left = [], right = []) {
   const leftDiff = left.filter(value => right.includes(value));
   const rightDiff = right.filter(value => left.includes(value));

@@ -20,7 +20,7 @@
 import path from 'path';
 import JSON5 from 'json5';
 
-import { arraysDiff, globAsync, plainify, readFileAsync } from './utils';
+import { arraysDiff, globAsync, readFileAsync } from './utils';
 import { verifyJSON } from './verify_locale_json';
 
 async function checkFile(localePath) {
@@ -30,7 +30,7 @@ async function checkFile(localePath) {
     path.resolve(path.dirname(localePath), 'defaultMessages.json')
   );
   const defaultMessagesIds = Object.keys(
-    plainify(JSON.parse(defaultMessagesBuffer.toString()))
+    JSON.parse(defaultMessagesBuffer.toString())
   );
 
   const localeBuffer = await readFileAsync(localePath);
@@ -38,7 +38,7 @@ async function checkFile(localePath) {
   const namespace = verifyJSON(localeBuffer.toString(), localePath);
 
   const translations = JSON5.parse(localeBuffer.toString());
-  const translationsIds = Object.keys(plainify(translations));
+  const translationsIds = Object.keys(translations);
 
   const [unusedTranslations, missingTranslations] = arraysDiff(
     translationsIds,
