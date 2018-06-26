@@ -15,8 +15,9 @@ import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { createJobForSaving } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { ml } from 'plugins/ml/services/ml_api_service';
+import { timefilter } from 'ui/timefilter';
 
-export function PopulationJobServiceProvider(timefilter, Private) {
+export function PopulationJobServiceProvider(Private) {
 
   const TimeBuckets = Private(IntervalHelperProvider);
   const OVER_FIELD_EXAMPLES_COUNT = 40;

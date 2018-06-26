@@ -11,7 +11,9 @@ import moment from 'moment';
 
 import { ml } from 'plugins/ml/services/ml_api_service';
 
-export function FullTimeRangeSelectorServiceProvider(timefilter, Notifier) {
+import { timefilter } from 'ui/timefilter';
+
+export function FullTimeRangeSelectorServiceProvider(Notifier) {
   const notify = new Notifier();
 
   function setFullTimeRange(indexPattern, query) {
@@ -22,8 +24,10 @@ export function FullTimeRangeSelectorServiceProvider(timefilter, Notifier) {
       query
     })
       .then((resp) => {
-        timefilter.time.from = moment(resp.start.epoch).toISOString();
-        timefilter.time.to = moment(resp.end.epoch).toISOString();
+        timefilter.setTime({
+          from: moment(resp.start.epoch).toISOString(),
+          to: moment(resp.end.epoch).toISOString()
+        });
       })
       .catch((resp) => {
         notify.error(resp);

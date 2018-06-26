@@ -7,10 +7,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import CustomPlot from '../CustomPlot';
-import { getTimefilter } from '../../../../utils/timepicker';
 import { asMillis, tpmUnit, asInteger } from '../../../../utils/formatters';
 import styled from 'styled-components';
 import { units, unit, px } from '../../../../style/variables';
+import { timefilter } from 'ui/timefilter';
+import moment from 'moment';
 
 const ChartsWrapper = styled.div`
   display: flex;
@@ -42,9 +43,12 @@ export class Charts extends Component {
   onHover = hoverIndex => this.setState({ hoverIndex });
   onMouseLeave = () => this.setState({ hoverIndex: null });
   onSelectionEnd = selection => {
-    const timefilter = getTimefilter();
     this.setState({ hoverIndex: null });
-    timefilter.setTime(selection.start, selection.end);
+    timefilter.setTime({
+      from: moment(selection.start).toISOString(),
+      to: moment(selection.end).toISOString(),
+      mode: 'absolute'
+    });
   };
 
   getResponseTimeTickFormatter = t => {
