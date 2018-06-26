@@ -30,6 +30,7 @@ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logsta
 import { VisProvider } from '../../../vis';
 import { getVisualizeLoader } from '../loader';
 import { EmbeddedVisualizeHandler } from '../embedded_visualize_handler';
+import { Inspector } from '../../../inspector/inspector';
 
 describe('visualize loader', () => {
 
@@ -226,6 +227,15 @@ describe('visualize loader', () => {
         const handler = loader.embedVisualizationWithSavedObject(newContainer(), createSavedObject(), {});
         // Every jquery wrapper has a .jquery property with the version number
         expect(handler.getElement().jquery).to.be.ok();
+      });
+
+      it('should allow opening the inspector of the visualization and return its session', () => {
+        const handler = loader.embedVisualizationWithSavedObject(newContainer(), createSavedObject(), {});
+        sinon.spy(Inspector, 'open');
+        const inspectorSession = handler.openInspector();
+        expect(Inspector.open.calledOnce).to.be(true);
+        expect(inspectorSession.close).to.be.a('function');
+        inspectorSession.close();
       });
 
       it('should have whenFirstRenderComplete returns a promise resolving on first renderComplete event', async () => {

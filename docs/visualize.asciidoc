@@ -162,6 +162,6 @@ include::visualize/tagcloud.asciidoc[]
 
 include::visualize/heatmap.asciidoc[]
 
-include::visualize/visualization-raw-data.asciidoc[]
-
 include::visualize/vega.asciidoc[]
+
+include::visualize/inspector.asciidoc[]

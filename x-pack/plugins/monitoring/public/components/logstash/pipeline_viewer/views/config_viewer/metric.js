@@ -23,7 +23,7 @@ export function Metric({ className, value, warning }) {
   let stylizedValue;
   if (warning) {
     stylizedValue = (
-      <EuiBadge color="warning" classname={className}>
+      <EuiBadge color="warning" className={className}>
         {value}
       </EuiBadge>
     );

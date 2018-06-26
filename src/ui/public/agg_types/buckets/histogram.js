@@ -80,7 +80,7 @@ export const histogramBucketAgg = new BucketAggType({
               min: aggBody
             }
           })
-          .fetchAsRejectablePromise()
+          .fetch()
           .then((resp) => {
             aggConfig.setAutoBounds({
               min: _.get(resp, 'aggregations.minAgg.value'),

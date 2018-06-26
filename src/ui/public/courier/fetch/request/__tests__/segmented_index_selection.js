@@ -60,7 +60,7 @@ describe('Segmented Request Index Selection', function () {
       { index: 'five', min: 0, max: 1 },
     ]));
 
-    const req = new SegmentedReq(search);
+    const req = new SegmentedReq({ source: search, errorHandler: () => {} });
     req._handle.setDirection('desc');
     req._handle.setSortFn(new HitSortFn('desc'));
     req._handle.setSize(500);
@@ -111,7 +111,7 @@ describe('Segmented Request Index Selection', function () {
       { index: 'five', min: 5, max: 50 },
     ]));
 
-    const req = new SegmentedReq(search);
+    const req = new SegmentedReq({ source: search, errorHandler: () => {} });
     req._handle.setDirection('desc');
     req._handle.setSortFn(new HitSortFn('desc'));
     req._handle.setSize(10);

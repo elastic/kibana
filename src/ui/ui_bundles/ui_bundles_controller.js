@@ -100,6 +100,10 @@ export class UiBundlesController {
     }
   }
 
+  isDevMode() {
+    return this._env === 'development';
+  }
+
   getWebpackPluginProviders() {
     return this._webpackPluginProviders || [];
   }

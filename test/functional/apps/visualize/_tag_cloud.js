@@ -75,8 +75,8 @@ export default function ({ getService, getPageObjects }) {
     describe('tag cloud chart', function () {
       const vizName1 = 'Visualization tagCloud';
 
-      it('should display spy panel toggle button', async function () {
-        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
+      it('should have inspector enabled', async function () {
+        const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
         expect(spyToggleExists).to.be(true);
       });
 
@@ -152,23 +152,24 @@ export default function ({ getService, getPageObjects }) {
 
 
       it.skip('should show correct data', function () {
-        const expectedTableData =  [ '32,212,254,720', '737',
-          '21,474,836,480', '728',
-          '20,401,094,656', '687',
-          '19,327,352,832', '695',
-          '18,253,611,008', '679'
+        const expectedTableData =  [
+          ['32,212,254,720', '737'],
+          ['21,474,836,480', '728'],
+          ['20,401,094,656', '687'],
+          ['19,327,352,832', '695'],
+          ['18,253,611,008', '679'],
         ];
 
-        return PageObjects.visualize.toggleSpyPanel()
+        return PageObjects.visualize.openInspector()
           .then(function () {
-            return PageObjects.visualize.setSpyPanelPageSize('All');
+            return PageObjects.visualize.setInspectorTablePageSize(50);
           })
-          .then(function getDataTableData() {
-            return PageObjects.visualize.getDataTableData();
+          .then(function getInspectorTableData() {
+            return PageObjects.visualize.getInspectorTableData();
           })
           .then(function showData(data) {
-            log.debug(data.split('\n'));
-            expect(data.trim().split('\n')).to.eql(expectedTableData);
+            log.debug(data);
+            expect(data).to.eql(expectedTableData);
           });
       });
 
