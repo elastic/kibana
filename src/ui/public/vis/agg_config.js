@@ -134,15 +134,15 @@ class AggConfig {
 
   createFilter(key, params = {}) {
     if (!this.isFilterable()) {
-      throw new TypeError('The "' + this.type.title + '" aggregation does not support filtering.');
+      throw new TypeError(`The "${this.type.title}" aggregation does not support filtering.`);
     }
 
     const field = this.getField();
     const label = this.getFieldDisplayName();
     if (field && !field.filterable) {
-      let message = 'The "' + label + '" field can not be used for filtering.';
+      let message = `The "${label}" field can not be used for filtering.`;
       if (field.scripted) {
-        message = 'The "' + label + '" field is scripted and can not be used for filtering.';
+        message = `The "${label}" field is scripted and can not be used for filtering.`;
       }
       throw new TypeError(message);
     }
@@ -226,10 +226,10 @@ class AggConfig {
   }
 
   getAggParams() {
-    return [].concat(
-      (this.type) ? this.type.params.raw : [],
-      (_.has(this, 'schema.params')) ? this.schema.params.raw : []
-    );
+    return [
+      ...((this.type) ? this.type.params.raw : []),
+      ...((_.has(this, 'schema.params')) ? this.schema.params.raw : []),
+    ];
   }
 
   getRequestAggs() {
