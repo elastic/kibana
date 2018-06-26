@@ -5,6 +5,7 @@
  */
 
 
+import PropTypes from 'prop-types';
 import React, {
   Component
 } from 'react';
@@ -140,3 +141,9 @@ export class JobDetails extends Component {
     );
   }
 }
+JobDetails.propTypes = {
+  jobDescription: PropTypes.string.isRequired,
+  jobGroups: PropTypes.array.isRequired,
+  jobModelMemoryLimit: PropTypes.string.isRequired,
+  setJobDetails: PropTypes.func.isRequired,
+};

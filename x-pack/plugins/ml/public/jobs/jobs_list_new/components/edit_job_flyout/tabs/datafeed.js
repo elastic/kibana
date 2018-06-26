@@ -5,6 +5,7 @@
  */
 
 
+import PropTypes from 'prop-types';
 import React, {
   Component
 } from 'react';
@@ -128,6 +129,14 @@ export class Datafeed extends Component {
     );
   }
 }
+Datafeed.propTypes = {
+  datafeedQuery: PropTypes.string.isRequired,
+  datafeedQueryDelay: PropTypes.string.isRequired,
+  datafeedFrequency: PropTypes.string.isRequired,
+  datafeedScrollSize: PropTypes.number.isRequired,
+  jobBucketSpan: PropTypes.string.isRequired,
+  setDatafeed: PropTypes.func.isRequired,
+};
 
 function getDefaults(bucketSpan, jobDefaults) {
   const bucketSpanSeconds = (bucketSpan !== undefined) ? parseInterval(bucketSpan).asSeconds() : '';

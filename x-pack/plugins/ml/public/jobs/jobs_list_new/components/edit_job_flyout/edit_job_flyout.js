@@ -40,7 +40,12 @@ export class EditJobFlyout extends Component {
       jobGroups: [],
       jobModelMemoryLimit: '',
       jobDetectors: [],
+      jobDetectorDescriptions: [],
       jobCustomUrls: [],
+      datafeedQuery: '',
+      datafeedQueryDelay: '',
+      datafeedFrequency: '',
+      datafeedScrollSize: '',
     };
 
     if (typeof this.props.showFunction === 'function') {

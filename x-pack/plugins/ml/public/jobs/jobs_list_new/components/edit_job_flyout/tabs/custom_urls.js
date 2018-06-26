@@ -5,6 +5,7 @@
  */
 
 
+import PropTypes from 'prop-types';
 import React, {
   Component
 } from 'react';
@@ -46,3 +47,8 @@ export class CustomUrls extends Component {
     );
   }
 }
+CustomUrls.propTypes = {
+  job: PropTypes.object.isRequired,
+  jobCustomUrls: PropTypes.array.isRequired,
+  setCustomUrls: PropTypes.func.isRequired,
+};

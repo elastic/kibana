@@ -5,6 +5,7 @@
  */
 
 
+import PropTypes from 'prop-types';
 import React, {
   Component
 } from 'react';
@@ -74,3 +75,8 @@ export class Detectors extends Component {
     );
   }
 }
+Detectors.propTypes = {
+  jobDetectors: PropTypes.array.isRequired,
+  jobDetectorDescriptions: PropTypes.array.isRequired,
+  setDetectorDescriptions: PropTypes.func.isRequired,
+};
