@@ -36,12 +36,6 @@ export class XPackInfo {
    */
   _licenseInfoChangedListeners = new Set();
 
-  /**
-   * Feature name <-> license change callback mapping.
-   * @type {Map<string, Function>}
-   * @private
-   */
-  _featureLicenseChangeCallbacks = new Map();
 
   /**
    * Cache that may contain last xpack info API response or error, json representation
@@ -222,16 +216,6 @@ export class XPackInfo {
         // include results from newly registered generator when they are requested.
         this._cache.json = undefined;
         this._cache.signature = undefined;
-      },
-
-      /**
-       * Registers a callback function that will be called whenever the XPack license changes.
-       * Callback will be invoked after the license change have been applied to this XPack Info instance.
-       * Callbacks may be asynchronous, but will not be awaited.
-       * @param {Function} callback Function to call whenever the XPack license changes.
-       */
-      registerLicenseChangeCallback: (callback) => {
-        this._featureLicenseChangeCallbacks.set(name, callback);
       },
 
       /**
