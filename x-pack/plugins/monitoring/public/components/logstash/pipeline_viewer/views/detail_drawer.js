@@ -210,7 +210,7 @@ function renderPluginBasicInfo(vertex) {
 }
 
 function renderIfBasicInfo(vertex) {
-  const ifCode = `if (${vertex.subtitle.complete}) {
+  const ifCode = `if (${vertex.subtitle}) {
   ...
 }`;
 
