@@ -407,7 +407,7 @@ exports[`Renders range control 1`] = `
           Object {
             "id": "mock-range-control",
             "isEnabled": [Function],
-            "label": "ragne control",
+            "label": "range control",
             "max": 100,
             "min": 0,
             "options": Object {

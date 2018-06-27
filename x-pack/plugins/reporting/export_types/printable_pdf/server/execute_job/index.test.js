@@ -11,9 +11,9 @@ import { executeJobFactory } from './index';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
 
 jest.mock('../lib/generate_pdf', () => {
-  const generatePdfObserable = jest.fn();
+  const generatePdfObservable = jest.fn();
   return {
-    generatePdfObservableFactory: jest.fn().mockReturnValue(generatePdfObserable)
+    generatePdfObservableFactory: jest.fn().mockReturnValue(generatePdfObservable)
   };
 });
 

@@ -105,7 +105,7 @@ export class NoDataController {
   }
 
   registerCleanup($scope, $executor) {
-    // destory the executor, unmount the react component
+    // destroy the executor, unmount the react component
     $scope.$on('$destroy', () => {
       $executor.destroy();
       unmountComponentAtNode(document.getElementById(REACT_NODE_ID_NO_DATA));

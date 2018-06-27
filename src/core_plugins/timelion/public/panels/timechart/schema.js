@@ -118,14 +118,14 @@ export default function timechartFn(Private, config, $rootScope, $compile) {
           originalColorMap.set(series, series.color);
         });
 
-        let hightlightedSeries;
+        let highlightedSeries;
         let focusedSeries;
         function unhighlightSeries() {
-          if (hightlightedSeries === null) {
+          if (highlightedSeries === null) {
             return;
           }
 
-          hightlightedSeries = null;
+          highlightedSeries = null;
           focusedSeries = null;
           $scope.chart.forEach((series) => {
             series.color = originalColorMap.get(series); // reset the colors
@@ -133,11 +133,11 @@ export default function timechartFn(Private, config, $rootScope, $compile) {
           drawPlot($scope.chart);
         }
         $scope.highlightSeries = _.debounce(function (id) {
-          if (hightlightedSeries === id) {
+          if (highlightedSeries === id) {
             return;
           }
 
-          hightlightedSeries = id;
+          highlightedSeries = id;
           $scope.chart.forEach((series, seriesIndex) => {
             if (seriesIndex !== id) {
               series.color = 'rgba(128,128,128,0.1)'; // mark as grey

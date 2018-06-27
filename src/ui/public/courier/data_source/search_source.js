@@ -492,7 +492,7 @@ export function SearchSourceProvider(Promise, Private, config) {
 
     /**
      * Create a common search request object, which should
-     * be put into the pending request queye, for this search
+     * be put into the pending request queue, for this search
      * source
      *
      * @param {Deferred} defer - the deferred object that should be resolved
@@ -577,7 +577,7 @@ export function SearchSourceProvider(Promise, Private, config) {
 
     /**
      * Walk the inheritance chain of a source and return it's
-     * flat representaion (taking into account merging rules)
+     * flat representation (taking into account merging rules)
      * @returns {Promise}
      * @resolved {Object|null} - the flat state of the SearchSource
      */
@@ -595,7 +595,7 @@ export function SearchSourceProvider(Promise, Private, config) {
 
       // call the ittr and return it's promise
       return (function ittr() {
-        // itterate the _state object (not array) and
+        // iterate the _state object (not array) and
         // pass each key:value pair to source._mergeProp. if _mergeProp
         // returns a promise, then wait for it to complete and call _mergeProp again
         return Promise.all(_.map(current._state, function ittr(value, key) {

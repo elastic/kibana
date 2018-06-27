@@ -379,7 +379,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
           this.id = resp.id;
         })
         .then(() => {
-          if (this.showInRecenltyAccessed && this.getFullPath) {
+          if (this.showInRecentlyAccessed && this.getFullPath) {
             recentlyAccessed.add(this.getFullPath(), this.title, this.id);
           }
           this.isSaving = false;

@@ -22,7 +22,7 @@ export function injectVars(server) {
 
   //DEPRECATED SETTINGS
   //if the url is set, the old settings must be used.
-  //keeping this logic for backward compatibilty.
+  //keeping this logic for backward compatibility.
   const configuredUrl = serverConfig.get('tilemap.url');
   const isOverridden = typeof configuredUrl === 'string' && configuredUrl !== '';
   const mapConfig = serverConfig.get('map');

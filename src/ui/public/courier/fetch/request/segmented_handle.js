@@ -32,7 +32,7 @@ export function SegmentedHandleProvider(Private) {
    * setting values on the segmented request, and an event
    * emitter for the request to speak outwardly
    *
-   * @param {SegmentedRequest} - req - the requst this handle relates to
+   * @param {SegmentedRequest} - req - the request this handle relates to
    */
   return class SegmentedHandle extends Events {
     constructor(req) {

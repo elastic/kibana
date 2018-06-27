@@ -76,7 +76,7 @@ export class SavedObjectsClient {
    * error messages.
    *
    * From my (Spencer) perspective, a 404 from the SavedObjectsApi is a 404; The
-   * object the request/call was targetting could not be found. This is why #14141
+   * object the request/call was targeting could not be found. This is why #14141
    * takes special care to ensure that 404 errors are generic and don't distinguish
    * between index missing or document missing.
    *

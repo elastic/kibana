@@ -105,7 +105,7 @@ describe('FieldFormat class', function () {
         expect(html('formatted')).to.be('<span ng-non-bindable>formatted</span>');
       });
 
-      it('can be an object, with seperate text and html converter', function () {
+      it('can be an object, with separate text and html converter', function () {
         TestFormat.prototype._convert = {
           text: _.constant('formatted text'),
           html: _.constant('formatted html'),

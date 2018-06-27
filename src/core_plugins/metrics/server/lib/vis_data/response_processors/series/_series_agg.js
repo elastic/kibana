@@ -76,7 +76,7 @@ export default {
     return [keys.map(k => [k, fn(values)])];
   },
 
-  cumlative_sum(targetSeries) {
+  cumulative_sum(targetSeries) {
     const data = [];
     let sum = 0;
     _.zip(...targetSeries).forEach(row => {
