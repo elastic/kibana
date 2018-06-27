@@ -4,14 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import {
+  EuiAccordion,
+  EuiText,
+  EuiSelect,
+  EuiSpacer,
   EuiFlyout,
   EuiFlyoutBody,
   EuiButtonEmpty,
-  EuiText,
   EuiHorizontalRule,
-  EuiSpacer,
   EuiFlyoutHeader,
   EuiFlexGroup,
   EuiFlexItem,
@@ -27,10 +29,26 @@ export class FlyOut extends React.Component {
     super();
   }
 
-  componentDidMount() {
-  }
+  _renderFlexibleSelect = (options, selectAction) => {
+    const onChange = ({ target }) => selectAction(target.value);
+
+    return (
+      <Fragment>
+        <EuiSpacer size="m" />
+        <EuiSelect
+          options={options}
+          onChange={onChange}
+          aria-label="Use aria labels when no actual label is in use"
+        />
+      </Fragment>
+    );
+  };
 
   _renderFlyout() {
+    const options = this.props.emsLayerOptions &&
+      this.props.emsLayerOptions.map(service => ({ value: service.name, text: service.name }));
+    const { selectAction } = this.props;
+
     return (
       <EuiFlyout onClose={this.props.onClose} style={{ maxWidth: 768 }}>
         <EuiFlyoutHeader>
@@ -48,7 +66,18 @@ export class FlyOut extends React.Component {
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody style={{ paddingTop: 0 }}>
-          todo
+          <div>
+            <EuiSpacer size="l" />
+            <EuiAccordion
+              id="accordion2"
+              buttonContent="Import from Elastic Maps Service"
+              paddingSize="l"
+            >
+              <EuiText>
+                { this._renderFlexibleSelect(options, selectAction) }
+              </EuiText>
+            </EuiAccordion>
+          </div>
         </EuiFlyoutBody>
 
         <EuiFlyoutFooter>
