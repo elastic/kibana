@@ -91,20 +91,28 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
   ): Promise<CMTagAssignment[]> {
     const beatIds = assignments.map(r => r.beatId);
 
-    const response = this.beatsDB
-      .filter(beat => beatIds.includes(beat.id))
-      .map(beat => {
-        const tagData = assignments.find(a => a.beatId === beat.id);
-        if (tagData) {
-          if (!beat.tags) {
-            beat.tags = [];
-          }
-          beat.tags.push(tagData.tag);
-        }
-        return beat;
-      });
+    this.beatsDB.filter(beat => beatIds.includes(beat.id)).map(beat => {
+      // get tags that need to be assigned to this beat
+      const tags = assignments
+        .filter(a => a.beatId === beat.id)
+        .map((t: CMTagAssignment) => t.tag);
 
-    return response.map<any>((item: CMBeat, resultIdx: number) => ({
+      if (tags.length > 0) {
+        if (!beat.tags) {
+          beat.tags = [];
+        }
+        const nonExistingTags = tags.filter(
+          (t: string) => beat.tags && !beat.tags.includes(t)
+        );
+
+        if (nonExistingTags.length > 0) {
+          beat.tags = beat.tags.concat(nonExistingTags);
+        }
+      }
+      return beat;
+    });
+
+    return assignments.map<any>((item: CMTagAssignment, resultIdx: number) => ({
       idxInRequest: assignments[resultIdx].idxInRequest,
       result: 'updated',
       status: 200,
