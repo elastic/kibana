@@ -30,8 +30,7 @@ export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'header', 'discover']);
 
-  // Flaky: https://github.com/elastic/kibana/issues/20273
-  describe.skip('context link in discover', function contextSize() {
+  describe('context link in discover', function contextSize() {
     before(async function () {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.header.setAbsoluteRange(TEST_DISCOVER_START_TIME, TEST_DISCOVER_END_TIME);
