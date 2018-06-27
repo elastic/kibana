@@ -98,16 +98,24 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show correct data, take screenshot', function () {
         const expectedChartData = [
-          '0B', '2,088', '1.953KB', '2,748', '3.906KB', '2,707', '5.859KB', '2,876', '7.813KB',
-          '2,863', '9.766KB', '147', '11.719KB', '148', '13.672KB', '129', '15.625KB', '161', '17.578KB', '137'
+          [ '0B', '2,088' ],
+          [ '1.953KB', '2,748' ],
+          [ '3.906KB', '2,707' ],
+          [ '5.859KB', '2,876' ],
+          [ '7.813KB', '2,863' ],
+          [ '9.766KB', '147' ],
+          [ '11.719KB', '148' ],
+          [ '13.672KB', '129' ],
+          [ '15.625KB', '161' ],
+          [ '17.578KB', '137' ]
         ];
 
-        return retry.try(function () {
-          return PageObjects.visualize.getTableVisData()
-            .then(function showData(data) {
-              log.debug(data.split('\n'));
-              expect(data.split('\n')).to.eql(expectedChartData);
-            });
+        return retry.try(async function () {
+          await PageObjects.visualize.openInspector();
+          const data = await PageObjects.visualize.getInspectorTableData();
+          await PageObjects.visualize.closeInspector();
+          log.debug(data);
+          expect(data).to.eql(expectedChartData);
         });
       });
 
