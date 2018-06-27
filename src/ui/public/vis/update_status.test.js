@@ -55,7 +55,7 @@ describe('getUpdateStatus', () => {
   function initStatusCheckerAndChangeProperty(type, requiresUpdateStatus) {
     const $scope = getScope();
     // Call the getUpdateStatus function initially, so it can store it's current state
-    getUpdateStatus(requiresUpdateStatus, $scope);
+    getUpdateStatus(requiresUpdateStatus, $scope, $scope);
 
     // Get the change function for that specific change type
     const changeFn = changeFunctions[type];
@@ -66,7 +66,7 @@ describe('getUpdateStatus', () => {
     // Call that change function to manipulate the scope so it changed.
     changeFn($scope);
 
-    return getUpdateStatus(requiresUpdateStatus, $scope);
+    return getUpdateStatus(requiresUpdateStatus, $scope, $scope);
   }
 
   it('should be a function', () => {

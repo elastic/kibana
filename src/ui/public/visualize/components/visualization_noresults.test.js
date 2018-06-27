@@ -17,4 +17,13 @@
  * under the License.
  */
 
-export * from './visualize_loader';
+import React from 'react';
+import { render } from 'enzyme';
+import { VisualizationNoResults } from './visualization_noresults';
+
+describe('VisualizationNoResults', () => {
+  it('should set html', () => {
+    const wrapper = render(<VisualizationNoResults />);
+    expect(wrapper.text()).toBe('No results found');
+  });
+});
