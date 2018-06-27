@@ -32,7 +32,7 @@ import {
 
 uiModules
   .get('kibana/directive', ['ngSanitize'])
-  .directive('visualize', function ($timeout, Notifier, Private, getAppState, Promise) {
+  .directive('visualize', function ($timeout, Notifier, Private, Promise) {
     const notify = new Notifier({ location: 'Visualize' });
     const requestHandlers = Private(VisRequestHandlersRegistryProvider);
     const responseHandlers = Private(VisResponseHandlersRegistryProvider);
@@ -47,18 +47,17 @@ uiModules
       restrict: 'E',
       scope: {
         savedObj: '=?',
-        appState: '=?',
         uiState: '=?',
         timeRange: '=?',
         filters: '=?',
         query: '=?',
+        updateState: '=?',
       },
       link: async function ($scope, $el) {
         let destroyed = false;
         let loaded = false;
         let forceFetch = false;
         if (!$scope.savedObj) throw(`saved object was not provided to <visualize> directive`);
-        if (!$scope.appState) $scope.appState = getAppState();
 
         $scope.vis = $scope.savedObj.vis;
         $scope.vis.searchSource = $scope.savedObj.searchSource;
@@ -81,7 +80,6 @@ uiModules
           $scope.vis.filters = { timeRange: $scope.timeRange };
 
           const handlerParams = {
-            appState: $scope.appState,
             uiState: $scope.uiState,
             queryFilter: queryFilter,
             searchSource: $scope.savedObj.searchSource,
@@ -131,9 +129,9 @@ uiModules
         }, 100);
 
         const handleVisUpdate = () => {
-          if ($scope.appState.vis) {
-            $scope.appState.vis = $scope.vis.getState();
-            $scope.appState.save();
+          if ($scope.updateState) {
+            const visState = $scope.vis.getState();
+            $scope.updateState(visState);
           }
           $scope.fetch();
         };
