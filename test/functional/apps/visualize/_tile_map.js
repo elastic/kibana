@@ -10,7 +10,7 @@ export default function ({ getService, getPageObjects }) {
   describe('tile map visualize app', function () {
 
 
-    describe('incomplete config', function describeIndexTests() {
+    describe('incomplete config', function () {
 
 
       before(async function () {
