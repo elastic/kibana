@@ -38,7 +38,7 @@ export class VisualizationChart extends Component {
       tap(() => {
         dispatchRenderStart(this.chartDiv.current);
       }),
-      filter(({ vis, visData, container }) => vis && vis.initialized && container && (!vis.type.requiresSearch || visData)),
+      filter(({ vis, visData, container }) => vis && container && (!vis.type.requiresSearch || visData)),
       debounceTime(100),
       switchMap(async ({ vis, visData, container }) => {
         vis.size = [container.clientWidth, container.clientHeight];
@@ -85,17 +85,17 @@ export class VisualizationChart extends Component {
   };
 
   componentDidMount() {
-    const { vis, listenOnChange } = this.props;
+    const { vis, listenOnChange, onInit } = this.props;
     const Visualization = vis.type.visualization;
 
     this.visualization = new Visualization(this.chartDiv.current, vis);
 
-    if (this.visualization.isLoaded) {
-      this.visualization.isLoaded().then(() => {
-        vis.initialized = true;
-      });
-    } else {
-      vis.initialized = true;
+    if (onInit) {
+      if (this.visualization.isLoaded) {
+        this.visualization.isLoaded().then(onInit);
+      } else {
+        onInit();
+      }
     }
 
     if (listenOnChange) {

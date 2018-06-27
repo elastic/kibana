@@ -55,6 +55,7 @@ uiModules
       },
       link: async function ($scope, $el) {
         let destroyed = false;
+        let loaded = false;
         let forceFetch = false;
         if (!$scope.savedObj) throw(`saved object was not provided to <visualize> directive`);
         if (!$scope.appState) $scope.appState = getAppState();
@@ -75,7 +76,7 @@ uiModules
           // If destroyed == true the scope has already been destroyed, while this method
           // was still waiting for its debounce, in this case we don't want to start
           // fetching new data and rendering.
-          if (!$scope.vis.initialized || !$scope.savedObj || destroyed) return;
+          if (!loaded || !$scope.savedObj || destroyed) return;
 
           $scope.vis.filters = { timeRange: $scope.timeRange };
 
@@ -166,17 +167,16 @@ uiModules
           visualizationLoader.destroy($el[0]);
         });
 
-        $scope.$watch('vis.initialized', () => {
-          $scope.fetch();
-        });
-
         visualizationLoader(
           $el[0],
           $scope.vis,
           $scope.visData,
           $scope.uiState,
           { listenOnChange: false }
-        );
+        ).then(() => {
+          loaded = true;
+          $scope.fetch();
+        });
 
       }
     };
