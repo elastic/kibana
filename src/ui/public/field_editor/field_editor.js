@@ -174,7 +174,7 @@ uiModules
         });
 
         // copy the defined properties of the field to a plain object
-        // which is mutable, and capture the changed seperately.
+        // which is mutable, and capture the changed separately.
         function shadowCopy(field) {
           const changes = {};
           const shadowProps = {
@@ -221,7 +221,7 @@ uiModules
         function initDefaultFormat() {
           const def = Object.create(fieldFormats.getDefaultType(self.field.type));
 
-          // explicitly set to undefined to prevent inheritting the prototypes id
+          // explicitly set to undefined to prevent inheriting the prototypes id
           def.id = undefined;
           def.resolvedTitle = def.title;
           def.title = '- default - ';

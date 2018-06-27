@@ -200,7 +200,7 @@ module.exports = {
 
     /**
      * Files that require Apache 2.0 headers, settings
-     * are overriden below for files that require Elastic
+     * are overridden below for files that require Elastic
      * Licence headers
      */
     {

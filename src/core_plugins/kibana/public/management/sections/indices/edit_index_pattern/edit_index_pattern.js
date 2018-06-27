@@ -312,7 +312,7 @@ uiModules.get('apps/management')
       }
     });
 
-    $scope.$on('$destory', () => {
+    $scope.$on('$destroy', () => {
       destroyIndexedFieldsTable();
       destroyScriptedFieldsTable();
     });

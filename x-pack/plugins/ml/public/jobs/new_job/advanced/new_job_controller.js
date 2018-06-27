@@ -11,6 +11,7 @@ import angular from 'angular';
 import 'ace';
 
 import { parseInterval } from 'ui/utils/parse_interval';
+import { timefilter } from 'ui/timefilter';
 
 import uiRoutes from 'ui/routes';
 import { checkLicense } from 'plugins/ml/license/check_license';
@@ -69,7 +70,6 @@ module.controller('MlNewJob',
     $route,
     $location,
     $modal,
-    timefilter,
     mlDatafeedService,
     mlConfirmModalService) {
 

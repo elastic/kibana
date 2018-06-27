@@ -388,7 +388,7 @@ If you must use a function expression, then use an arrow function:
 ```
 
 If your function body does not include braces and only accepts one argument,
-then omit the argument paranthesis:
+then omit the argument parentheses:
 
 ```js
 // good
@@ -404,7 +404,7 @@ then omit the argument paranthesis:
 ```
 
 If your arrow function is only returning an object literal, then wrap the
-object in paranthesis rather than using an explicit return:
+object in parentheses rather than using an explicit return:
 
 ```js
 // good
@@ -676,13 +676,13 @@ Also, if the chain is long, each method should be on a new line.
 ```js
 // good
 $http.get('/info')
-  .then(({ data }) => this.transfromInfo(data))
+  .then(({ data }) => this.transformInfo(data))
   .then((transformed) => $http.post('/new-info', transformed))
   .then(({ data }) => console.log(data));
 
 // bad
 $http.get('/info')
-.then(({ data }) => this.transfromInfo(data))
+.then(({ data }) => this.transformInfo(data))
 .then((transformed) => $http.post('/new-info', transformed))
 .then(({ data }) => console.log(data));
 ```

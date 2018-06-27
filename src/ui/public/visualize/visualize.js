@@ -34,7 +34,7 @@ import {
 
 uiModules
   .get('kibana/directive', ['ngSanitize'])
-  .directive('visualize', function ($timeout, Notifier, Private, timefilter, getAppState, Promise) {
+  .directive('visualize', function ($timeout, Notifier, Private, getAppState, Promise) {
     const notify = new Notifier({ location: 'Visualize' });
     const requestHandlers = Private(VisRequestHandlersRegistryProvider);
     const responseHandlers = Private(VisResponseHandlersRegistryProvider);
@@ -99,6 +99,7 @@ uiModules
             uiState: $scope.uiState,
             queryFilter: queryFilter,
             searchSource: $scope.savedObj.searchSource,
+            aggs: $scope.vis.getAggConfig(),
             timeRange: $scope.timeRange,
             filters: $scope.filters,
             query: $scope.query,

@@ -141,7 +141,7 @@ export function LooperProvider($timeout, Promise) {
   /**
    * Wraps this._fn so that this._fn can be changed
    * without rescheduling and schedules
-   * the next itteration
+   * the next iteration
    *
    * @private
    * @return {undefined}
@@ -169,7 +169,7 @@ export function LooperProvider($timeout, Promise) {
   };
 
   /**
-   * Schedule the next itteration of the loop
+   * Schedule the next iteration of the loop
    *
    * @private
    * @return {number} - the timer promise
@@ -181,7 +181,7 @@ export function LooperProvider($timeout, Promise) {
   };
 
   /**
-   * Cancel the next itteration of the loop
+   * Cancel the next iteration of the loop
    *
    * @private
    * @return {number} - the timer promise

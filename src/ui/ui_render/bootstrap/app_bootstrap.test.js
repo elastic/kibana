@@ -42,8 +42,8 @@ describe('ui_render/AppBootstrap', () => {
     test('resolves to a string', async () => {
       expect.assertions(1);
 
-      const boostrap = new AppBootstrap(mockConfig());
-      const contents = await boostrap.getJsFile();
+      const bootstrap = new AppBootstrap(mockConfig());
+      const contents = await bootstrap.getJsFile();
 
       expect(typeof contents).toEqual('string');
     });
@@ -51,8 +51,8 @@ describe('ui_render/AppBootstrap', () => {
     test('interpolates templateData into string template', async () => {
       expect.assertions(2);
 
-      const boostrap = new AppBootstrap(mockConfig());
-      const contents = await boostrap.getJsFile();
+      const bootstrap = new AppBootstrap(mockConfig());
+      const contents = await bootstrap.getJsFile();
 
       expect(contents).toContain('123');
       expect(contents).toContain('/foo/bar');
@@ -61,8 +61,8 @@ describe('ui_render/AppBootstrap', () => {
     test('supports i18n', async () => {
       expect.assertions(1);
 
-      const boostrap = new AppBootstrap(mockConfig());
-      const contents = await boostrap.getJsFile();
+      const bootstrap = new AppBootstrap(mockConfig());
+      const contents = await bootstrap.getJsFile();
 
       expect(contents).toContain('translated foo');
     });
@@ -72,8 +72,8 @@ describe('ui_render/AppBootstrap', () => {
     test('resolves to a 40 character string', async () => {
       expect.assertions(2);
 
-      const boostrap = new AppBootstrap(mockConfig());
-      const hash = await boostrap.getJsFileHash();
+      const bootstrap = new AppBootstrap(mockConfig());
+      const hash = await bootstrap.getJsFileHash();
 
       expect(typeof hash).toEqual('string');
       expect(hash).toHaveLength(40);
@@ -82,9 +82,9 @@ describe('ui_render/AppBootstrap', () => {
     test('resolves to the same string for multiple calls with the same config on the same bootstrap object', async () => {
       expect.assertions(1);
 
-      const boostrap = new AppBootstrap(mockConfig());
-      const hash1 = await boostrap.getJsFileHash();
-      const hash2 = await boostrap.getJsFileHash();
+      const bootstrap = new AppBootstrap(mockConfig());
+      const hash1 = await bootstrap.getJsFileHash();
+      const hash2 = await bootstrap.getJsFileHash();
 
       expect(hash2).toEqual(hash1);
     });
@@ -92,8 +92,8 @@ describe('ui_render/AppBootstrap', () => {
     test('resolves to the same string for multiple calls with the same config on different bootstrap objects', async () => {
       expect.assertions(1);
 
-      const boostrap1 = new AppBootstrap(mockConfig());
-      const hash1 = await boostrap1.getJsFileHash();
+      const bootstrap1 = new AppBootstrap(mockConfig());
+      const hash1 = await bootstrap1.getJsFileHash();
 
       const bootstrap2 = new AppBootstrap(mockConfig());
       const hash2 = await bootstrap2.getJsFileHash();
@@ -104,8 +104,8 @@ describe('ui_render/AppBootstrap', () => {
     test('resolves to different 40 character string with different templateData', async () => {
       expect.assertions(3);
 
-      const boostrap1 = new AppBootstrap(mockConfig());
-      const hash1 = await boostrap1.getJsFileHash();
+      const bootstrap1 = new AppBootstrap(mockConfig());
+      const hash1 = await bootstrap1.getJsFileHash();
 
       const config2 = {
         ...mockConfig(),
@@ -125,8 +125,8 @@ describe('ui_render/AppBootstrap', () => {
     test('resolves to different 40 character string with different translations', async () => {
       expect.assertions(3);
 
-      const boostrap1 = new AppBootstrap(mockConfig());
-      const hash1 = await boostrap1.getJsFileHash();
+      const bootstrap1 = new AppBootstrap(mockConfig());
+      const hash1 = await bootstrap1.getJsFileHash();
 
       const config2 = {
         ...mockConfig(),

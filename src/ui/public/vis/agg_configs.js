@@ -208,5 +208,18 @@ AggConfigs.prototype.getResponseAggById = function (id) {
   if (!reqAgg) return;
   return _.find(reqAgg.getResponseAggs(), { id: id });
 };
+/**
+ *  Hook for pre-flight logic, see AggType#onSearchRequestStart()
+ *  @param {Courier.SearchSource} searchSource
+ *  @param {Courier.SearchRequest} searchRequest
+ *  @return {Promise<undefined>}
+ */
+AggConfigs.prototype.onSearchRequestStart = function (searchSource, searchRequest) {
+  return Promise.all(
+    this.getRequestAggs().map(agg =>
+      agg.onSearchRequestStart(searchSource, searchRequest)
+    )
+  );
+};
 
 export { AggConfigs };

@@ -23,8 +23,7 @@ import moment from 'moment';
 import { requestQueue } from '../../_request_queue';
 
 export function SearchRequestProvider(Promise) {
-
-  return class SearchRequest {
+  class SearchRequest {
     constructor({ source, defer, errorHandler }) {
       if (!errorHandler) {
         throw new Error('errorHandler is required');
@@ -149,8 +148,11 @@ export function SearchRequestProvider(Promise) {
       return Promise.race([ this.defer.promise, this.abortedDefer.promise ]);
     }
 
-    clone() {
-      return new this.constructor(this.source, this.defer);
-    }
-  };
+    clone = () => {
+      const { source, defer, errorHandler } = this;
+      return new SearchRequest({ source, defer, errorHandler });
+    };
+  }
+
+  return SearchRequest;
 }
