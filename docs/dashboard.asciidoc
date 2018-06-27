@@ -90,7 +90,7 @@ image:images/Dashboard_visualization_data.png[Example of visualization data]
 To export the visualization data as a comma separated values
 (CSV) file, click *Raw* or *Formatted* at the bottom of the data
 table. *Raw* exports the response data as provided. *Formatted*
-exports the reponse data using applicable Kibana <<managing-fields,field
+exports the response data using applicable Kibana <<managing-fields,field
 formatters>>.
 
 To return to the visualization, click the *Collapse* button in the lower left

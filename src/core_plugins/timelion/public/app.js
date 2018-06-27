@@ -25,6 +25,7 @@ import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_regis
 import { notify, fatalError, toastNotifications } from 'ui/notify';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { recentlyAccessed } from 'ui/persisted_log';
+import { timefilter } from 'ui/timefilter';
 
 // import the uiExports that we want to "use"
 import 'uiExports/fieldFormats';
@@ -93,7 +94,6 @@ app.controller('timelion', function (
   kbnUrl,
   Notifier,
   Private,
-  timefilter
 ) {
 
   // Keeping this at app scope allows us to keep the current page when the user
@@ -213,8 +213,9 @@ app.controller('timelion', function (
   };
 
   let refresher;
-  $scope.$watchCollection('timefilter.refreshInterval', function (interval) {
+  $scope.$listen(timefilter, 'refreshIntervalUpdate', function () {
     if (refresher) $timeout.cancel(refresher);
+    const interval = timefilter.getRefreshInterval();
     if (interval.value > 0 && !interval.pause) {
       function startRefresh() {
         refresher = $timeout(function () {
@@ -254,7 +255,7 @@ app.controller('timelion', function (
 
     const httpResult = $http.post('../api/timelion/run', {
       sheet: $scope.state.sheet,
-      time: _.extend(timefilter.time, {
+      time: _.extend(timefilter.getTime(), {
         interval: $scope.state.interval,
         timezone: timezone
       }),

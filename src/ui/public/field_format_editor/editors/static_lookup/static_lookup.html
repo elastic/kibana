@@ -1,0 +1,70 @@
+<div class="form-group kuiVerticalRhythm editor--staticLookup">
+  <div
+    ng-repeat="lookupEntry in editor.formatParams.lookupEntries"
+    class="kuiFlexGroup kuiFlexGroup--gutterLarge"
+  >
+    <label
+      for="scriptFieldLookupEntryKey"
+      class="kuiFlexItem"
+    >
+      Key
+    </label>
+    <input
+      type="text"
+      id="scriptFieldLookupEntryKey"
+      ng-model="lookupEntry.key"
+      class="form-control kuiFlexItem"
+    />
+
+    <label
+      for="scriptFieldLookupEntryValue"
+      class="kuiFlexItem"
+    >
+      Value
+    </label>
+    <input
+      type="text"
+      id="scriptFieldLookupEntryValue"
+      ng-model="lookupEntry.value"
+      class="form-control kuiFlexItem"
+    />
+
+    <button
+      ng-if="editor.formatParams.lookupEntries.length > 1"
+      aria-label="Remove Entry"
+      ng-click="staticLookupController.removeEntry($index)"
+      tooltip="Remove Entry"
+      tooltip-append-to-body="true"
+      type="button"
+      class="kuiButton kuiButton--danger kuiButton--small kuiFlexItem"
+    >
+      <span aria-hidden="true" class="kuiIcon fa-times"></span>
+    </button>
+  </div>
+
+  <button
+    aria-label="Add Entry"
+    ng-click="staticLookupController.addEntry()"
+    tooltip="Add Entry"
+    tooltip-append-to-body="true"
+    type="button"
+    class="kuiButton kuiButton--primary kuiButton--small kuiButton--iconText editor--staticLookup"
+  >
+      <span
+        aria-hidden="true"
+        class="kuiButton__icon kuiIcon fa-plus"
+      ></span>
+      <span>Add Entry</span>
+  </button>
+</div>
+
+<div class="form-group kuiVerticalRhythm">
+  <label for="unknownKeyValue">Value for unknown key</label>
+  <input
+    type="text"
+    placeholder="Leave blank to keep value as-is"
+    id="unknownKeyValue"
+    ng-model="editor.formatParams.unknownKeyValue"
+    class="form-control"
+  />
+</div>

@@ -111,7 +111,7 @@ export default function ({ getService, getPageObjects }) {
         log.debug('clicked on Gauge');
       });
 
-      it('should verfiy gauge label and count display', async function () {
+      it('should verify gauge label and count display', async function () {
         const labelString = await PageObjects.visualBuilder.getGaugeLabel();
         expect(labelString).to.be('Count');
         const gaugeCount = await PageObjects.visualBuilder.getGaugeCount();
@@ -127,7 +127,7 @@ export default function ({ getService, getPageObjects }) {
         log.debug('clicked on TopN');
       });
 
-      it('should verfiy topN label and count display', async function () {
+      it('should verify topN label and count display', async function () {
         const labelString = await PageObjects.visualBuilder.getTopNLabel();
         expect(labelString).to.be('Count');
         const gaugeCount = await PageObjects.visualBuilder.getTopNCount();

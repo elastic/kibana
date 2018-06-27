@@ -43,7 +43,7 @@ describe('ui/courier/fetch search request', () => {
     expect(caughtError).to.be(true);
   }));
 
-  describe('#start()', () => {
+  describe('start', () => {
     it('calls this.source.requestIsStarting(request)', ngMock.inject((Private) => {
       const SearchReq = Private(SearchRequestProvider);
 
@@ -55,5 +55,24 @@ describe('ui/courier/fetch search request', () => {
       sinon.assert.calledOnce(spy);
       sinon.assert.calledWithExactly(spy, req);
     }));
+  });
+
+  describe('clone', () => {
+    it('returns a search request with identical constructor arguments', ngMock.inject((Private) => {
+      const SearchRequest = Private(SearchRequestProvider);
+
+      const source = {};
+      const errorHandler = () => {};
+      const defer = {};
+
+      const originalRequest = new SearchRequest({ source, errorHandler, defer });
+      const clonedRequest = originalRequest.clone();
+
+      expect(clonedRequest).not.to.be(originalRequest);
+      expect(clonedRequest.source).to.be(source);
+      expect(clonedRequest.errorHandler).to.be(errorHandler);
+      expect(clonedRequest.defer).to.be(defer);
+    }));
+
   });
 });

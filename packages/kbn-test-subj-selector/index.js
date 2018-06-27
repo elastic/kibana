@@ -17,7 +17,7 @@
  * under the License.
  */
 
-function seletorToTerms(selector) {
+function selectorToTerms(selector) {
   return selector
     .replace(/\s*&\s*/g, '&') // remove all whitespace around joins
     .split(/\s+/);
@@ -29,7 +29,7 @@ function termToCssSelector(term) {
 
 module.exports = function testSubjSelector(selector) {
   const cssSelectors = [];
-  const terms = seletorToTerms(selector);
+  const terms = selectorToTerms(selector);
 
   while (terms.length) {
     const term = terms.shift();

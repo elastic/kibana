@@ -136,7 +136,7 @@ export function findPluginSpecs(settings, configToMutate) {
           for (const [id, specs] of groupSpecsById(allSpecs)) {
             if (specs.length > 1) {
               throw new Error(
-                `Multple plugins found with the id "${id}":\n${
+                `Multiple plugins found with the id "${id}":\n${
                   specs.map(spec => `  - ${id} at ${spec.getPath()}`).join('\n')
                 }`
               );

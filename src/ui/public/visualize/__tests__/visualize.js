@@ -141,7 +141,7 @@ describe('visualize directive', function () {
      * Since we use an old lodash version we cannot use fake timers here.
      */
     function waitForFetch() {
-      return new Promise(resolve => { setTimeout(resolve, 150); });
+      return new Promise(resolve => { setTimeout(resolve, 500); });
     }
 
     beforeEach(() => {

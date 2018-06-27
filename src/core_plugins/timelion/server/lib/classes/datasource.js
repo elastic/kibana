@@ -40,7 +40,8 @@ export default class Datasource extends TimelionFunction {
     config.args.push({
       name: 'offset',
       types: ['string', 'null'],
-      help: 'Offset the series retrieval by a date expression. Eg -1M to make events from one month ago appear as if they are happening now'
+      help: 'Offset the series retrieval by a date expression, ' +
+            'e.g., -1M to make events from one month ago appear as if they are happening now'
     });
 
     config.args.push({

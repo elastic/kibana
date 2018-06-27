@@ -26,6 +26,7 @@ const settings = require('./settings');
 
 let perIndexTypes = {};
 let perAliasIndexes = [];
+let templates = [];
 
 const mappingObj = {};
 
@@ -57,6 +58,9 @@ function expandAliases(indicesOrAliases) {
   return ret.length > 1 ? ret : ret[0];
 }
 
+function getTemplates() {
+  return [ ...templates ];
+}
 function getFields(indices, types) {
   // get fields for indices and types. Both can be a list, a string or null (meaning all).
   let ret = [];
@@ -204,6 +208,10 @@ function getFieldNamesFromTypeMapping(typeMapping) {
   });
 }
 
+function loadTemplates(templatesObject) {
+  templates = Object.keys(templatesObject);
+}
+
 function loadMappings(mappings) {
   perIndexTypes = {};
   $.each(mappings, function (index, indexMapping) {
@@ -223,7 +231,7 @@ function loadMappings(mappings) {
 function loadAliases(aliases) {
   perAliasIndexes = {};
   $.each(aliases || {}, function (index, omdexAliases) {
-    // verify we have an index defined. usefull when mapping loading is disabled
+    // verify we have an index defined. useful when mapping loading is disabled
     perIndexTypes[index] = perIndexTypes[index] || {};
 
     $.each(omdexAliases.aliases || {}, function (alias) {
@@ -245,12 +253,14 @@ function loadAliases(aliases) {
 function clear() {
   perIndexTypes = {};
   perAliasIndexes = {};
+  templates = [];
 }
 
 function retrieveAutocompleteInfoFromServer() {
   const autocompleteSettings = settings.getAutocomplete();
   let mappingPromise;
   let aliasesPromise;
+  let templatesPromise;
   if (autocompleteSettings.fields) {
     mappingPromise = es.send('GET', '_mapping', null, null, true);
   }
@@ -265,9 +275,15 @@ function retrieveAutocompleteInfoFromServer() {
     aliasesPromise = new $.Deferred();
     aliasesPromise.resolve();
   }
+  if (autocompleteSettings.templates) {
+    templatesPromise = es.send('GET', '_template', null, null, true);
+  } else {
+    templatesPromise = new $.Deferred();
+    templatesPromise.resolve();
+  }
 
-  $.when(mappingPromise, aliasesPromise)
-    .done(function (mappings, aliases) {
+  $.when(mappingPromise, aliasesPromise, templatesPromise)
+    .done(function (mappings, aliases, templates) {
       if (!mappings) {
         mappings = {};
       }
@@ -285,7 +301,12 @@ function retrieveAutocompleteInfoFromServer() {
         aliases = [{}];
         loadAliases({});
       }
-      // Trigger an update event with the mappings and aliases
+      if (templates) {
+        loadTemplates(JSON.parse(templates[0]));
+      } else {
+        templates = [];
+      }
+      // Trigger an update event with the mappings, aliases
       $(mappingObj).trigger('update', [mappings[0], aliases[0]]);
     }
     )
@@ -301,6 +322,7 @@ function autocompleteRetriever() {
 
 export default _.assign(mappingObj, {
   getFields: getFields,
+  getTemplates: getTemplates,
   getIndices: getIndices,
   getTypes: getTypes,
   loadMappings: loadMappings,
