@@ -98,7 +98,15 @@ export class SecureSavedObjectsClient {
     const hasPrivilegesResult = await this._hasSavedObjectPrivileges(Array.from(typesToPrivilegesMap.values()));
 
     // if they don't have any application privileges, we fallback to searching as the authenticated user
-    if (hasPrivilegesResult.useLegacyFallback) {
+    if (!hasPrivilegesResult.success && hasPrivilegesResult.useLegacyFallback) {
+      this._auditLogger.savedObjectsAuthorizationFailure(
+        hasPrivilegesResult.username,
+        action,
+        types,
+        hasPrivilegesResult.missing,
+        true,
+        { options }
+      );
       return await this._callWithRequestRepository.find(options);
     }
 
@@ -112,10 +120,12 @@ export class SecureSavedObjectsClient {
         action,
         types,
         hasPrivilegesResult.missing,
+        false,
         { options }
       );
       throw this.errors.decorateForbiddenError(new Error(`Not authorized to find saved_object`));
     }
+
     this._auditLogger.savedObjectsAuthorizationSuccess(hasPrivilegesResult.username, action, authorizedTypes, { options });
 
     return await this._internalRepository.find({
