@@ -8493,9 +8493,9 @@ makeerror@1.0.x:
   dependencies:
     tmpl "1.0.x"
 
-makelogs@^4.0.5:
-  version "4.0.5"
-  resolved "https://registry.yarnpkg.com/makelogs/-/makelogs-4.0.5.tgz#d0c3c6405305d68c69eb937b49d25d379be2dad7"
+makelogs@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/makelogs/-/makelogs-4.1.0.tgz#9bb74ede29844648196f47b405bbd1383e5dca3a"
   dependencies:
     async "^1.4.2"
     bluebird "^2.10.0"
