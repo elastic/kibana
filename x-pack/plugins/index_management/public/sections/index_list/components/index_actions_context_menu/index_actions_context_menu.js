@@ -16,6 +16,7 @@ import {
   EuiFormRow,
   EuiIcon,
   EuiPopover,
+  EuiSpacer,
   EuiConfirmModal,
   EuiOverlayMask
 } from '@elastic/eui';
@@ -245,7 +246,7 @@ export class IndexActionsContextMenu extends Component {
                 if it is not run properly (run against non-read-only indices) or run during peak hours.
               </p>
             </EuiCallOut>
-
+            <EuiSpacer size="m" />
             <EuiForm
               isInvalid={this.forcemergeSegmentsError()}
               error={this.forcemergeSegmentsError()}
