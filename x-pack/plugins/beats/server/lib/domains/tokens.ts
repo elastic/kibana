@@ -7,6 +7,7 @@
 import { timingSafeEqual } from 'crypto';
 import { sign as signToken, verify as verifyToken } from 'jsonwebtoken';
 import moment from 'moment';
+import uuid from 'uuid';
 import { CMTokensAdapter, FrameworkRequest } from '../lib';
 import { BackendFrameworkAdapter } from '../lib';
 
@@ -84,6 +85,7 @@ export class CMTokensDomain {
 
     const tokenData = {
       created: moment().toJSON(),
+      randomHash: uuid.v4().replace(/-/g, ''),
     };
 
     return signToken(tokenData, enrollmentTokenSecret);
@@ -101,7 +103,6 @@ export class CMTokensDomain {
     const enrollmentTokenSecret = this.framework.getSetting(
       'xpack.beats.encryptionKey'
     );
-
     const enrollmentTokenExpiration = moment()
       .add(enrollmentTokensTtlInSeconds, 'seconds')
       .toJSON();
@@ -113,9 +114,16 @@ export class CMTokensDomain {
     while (tokens.length < numTokens) {
       tokens.push({
         expires_on: enrollmentTokenExpiration,
-        token: signToken(tokenData, enrollmentTokenSecret, {
-          expiresIn: enrollmentTokensTtlInSeconds,
-        }),
+        token: signToken(
+          {
+            ...tokenData,
+            randomHash: uuid.v4().replace(/-/g, ''),
+          },
+          enrollmentTokenSecret,
+          {
+            expiresIn: enrollmentTokensTtlInSeconds,
+          }
+        ),
       });
     }
 
