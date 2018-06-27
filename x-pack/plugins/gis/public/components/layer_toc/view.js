@@ -53,7 +53,7 @@ export class LayerTOC extends React.Component {
   render() {
     const layerEntries = this._renderLayers();
     return (
-      <div className="layerTOC">
+      <div className="layerTOC" ref={node => this._domContainer = node}>
         {layerEntries}
       </div>
     );
