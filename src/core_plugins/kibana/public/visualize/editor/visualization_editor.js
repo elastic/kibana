@@ -23,7 +23,7 @@ import { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
 
 uiModules
   .get('kibana/directive', ['ngSanitize'])
-  .directive('visualizationEditor', function (Private, $timeout) {
+  .directive('visualizationEditor', function (Private, $timeout, getAppState) {
     const editorTypes = Private(VisEditorTypesRegistryProvider);
 
     return {
@@ -44,7 +44,8 @@ uiModules
           if (!vis) return;
           editor.render($scope.savedObj, {
             uiState: $scope.uiState,
-            timeRange: $scope.timeRange
+            timeRange: $scope.timeRange,
+            appState: getAppState(),
           });
         };
 

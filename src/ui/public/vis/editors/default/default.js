@@ -49,7 +49,7 @@ const defaultEditor = function ($rootScope, $compile) {
 
     render(savedObj, params) {
       let $scope;
-      const { uiState, timeRange } = params;
+      const { uiState, timeRange, appState } = params;
 
       const updateScope = () => {
         $scope.vis = this.vis;
@@ -143,7 +143,8 @@ const defaultEditor = function ($rootScope, $compile) {
           this._loader.embedVisualizationWithSavedObject(visualizationEl, savedObj, {
             uiState: uiState,
             listenOnChange: false,
-            timeRange: timeRange
+            timeRange: timeRange,
+            appState: appState,
           });
         });
 
