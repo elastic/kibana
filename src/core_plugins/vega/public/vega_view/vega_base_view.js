@@ -411,7 +411,8 @@ export class VegaBaseView {
         if (!Array.isArray(addFilters)) {
           addFilters = [addFilters];
         }
-        addFilters = addFilters.map(query => buildQueryFilter(query, this._indexPatterns[0].id));
+        const indexId = await this._findIndex();
+        addFilters = addFilters.map(query => buildQueryFilter(query, indexId));
         appData.filters = [...(appData.filters || []), ...addFilters];
       }
 
