@@ -17,6 +17,7 @@ const unitMagnitude = {
 };
 const byteSort = (fieldName) => (item) => {
   const rawValue = item[fieldName];
+  // raw value can be missing if index is closed
   if (!rawValue) {
     return 0;
   }
