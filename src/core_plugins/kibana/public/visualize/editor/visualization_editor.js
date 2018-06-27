@@ -20,7 +20,6 @@
 import { uiModules } from 'ui/modules';
 import 'angular-sanitize';
 import { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
-import { getUpdateStatus } from 'ui/vis/update_status';
 
 uiModules
   .get('kibana/directive', ['ngSanitize'])
@@ -44,7 +43,6 @@ uiModules
         $scope.renderFunction = () => {
           if (!vis) return;
           editor.render($scope.savedObj, {
-            updateStatus: getUpdateStatus(Editor.requiresUpdateStatus, $scope, $scope),
             uiState: $scope.uiState,
             timeRange: $scope.timeRange
           });
@@ -59,7 +57,8 @@ uiModules
           editor.destroy();
         });
 
-        $scope.renderFunction();
+        $scope.$watch('timeRange', $scope.renderFunction);
+
       }
     };
   });
