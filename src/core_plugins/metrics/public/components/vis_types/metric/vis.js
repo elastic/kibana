@@ -33,9 +33,9 @@ function getColors(props) {
   let background;
   if (model.background_color_rules) {
     model.background_color_rules.forEach((rule) => {
-      if (rule.opperator && rule.value != null) {
+      if (rule.operator && rule.value != null) {
         const value = series[0] && getLastValue(series[0].data) || 0;
-        if (_[rule.opperator](value, rule.value)) {
+        if (_[rule.operator](value, rule.value)) {
           background = rule.background_color;
           color = rule.color;
         }

@@ -37,7 +37,7 @@ describe('ML - validateJob', () => {
     const payload = { job: {} };
 
     validateJob(callWithRequest, payload).then(
-      () => done(new Error('Promise should not resolve for this test with job.analisys_config not being an object.')),
+      () => done(new Error('Promise should not resolve for this test with job.analysis_config not being an object.')),
       () => done()
     );
   });

@@ -75,7 +75,7 @@ const CourierRequestHandlerProvider = function () {
     handler: function (vis, { searchSource, aggs, timeRange, query, filters, forceFetch }) {
 
       // Create a new search source that inherits the original search source
-      // but has the propriate timeRange applied via a filter.
+      // but has the appropriate timeRange applied via a filter.
       // This is a temporary solution until we properly pass down all required
       // information for the request to the request handler (https://github.com/elastic/kibana/issues/16641).
       // Using callParentStartHandlers: true we make sure, that the parent searchSource

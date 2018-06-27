@@ -50,7 +50,7 @@ module.factory('SavedSheet', function (courier, config) {
       }
     });
 
-    this.showInRecenltyAccessed = true;
+    this.showInRecentlyAccessed = true;
   }
 
   // save these objects with the 'sheet' type

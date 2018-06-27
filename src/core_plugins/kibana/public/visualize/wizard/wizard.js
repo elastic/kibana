@@ -80,7 +80,7 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, Priv
       return;
     }
 
-    // If the specified category doesn't have a valu ein our display names
+    // If the specified category doesn't have a value in our display names
     // mapping (most likely because the vis specified a random category, not using
     // CATEGORY values), just move it to the OTHER category.
     if (!CATEGORY_DISPLAY_NAMES[categoryName]) {

@@ -43,7 +43,7 @@ export async function RemoteProvider({ getService }) {
   log.info('Remote initialized');
 
   lifecycle.on('beforeTests', async () => {
-    // hard coded default, can be overriden per suite using `remote.setWindowSize()`
+    // hard coded default, can be overridden per suite using `remote.setWindowSize()`
     // and will be automatically reverted after each suite
     await command.setWindowSize(1600, 1000);
   });

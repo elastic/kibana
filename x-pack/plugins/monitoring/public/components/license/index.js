@@ -19,7 +19,7 @@ const LicenseUpdateInfoForPrimary = ({ isPrimaryCluster, uploadLicensePath }) =>
     return null;
   }
 
-  // viewed license is for the cluster directly connnected to Kibana
+  // viewed license is for the cluster directly connected to Kibana
   return <AddLicense uploadPath={uploadLicensePath} />;
 };
 

@@ -82,7 +82,7 @@ describe(filename, function () {
         ];
 
         // This returns 1, 5, 9 instead of the expected 2, 6, 10 because the average function does not consider "future"
-        // values, rather just the next upcoming value from the end of the previously predicted bucket. Eg, When
+        // values, rather just the next upcoming value from the end of the previously predicted bucket. E.g., When
         // interpolating a weekly series into daily, in which the buckets fall on sundays, this coming Sunday's bucket
         // will be distributed Mon-Sun instead of say Thur-Wed.
         // Essentially the algorithm is left aligned instead of centered
