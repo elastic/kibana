@@ -30,7 +30,7 @@ import { keyCodes } from '@elastic/eui';
 import { DefaultEditorSize } from '../../editor_size';
 
 import { VisEditorTypesRegistryProvider } from '../../../registry/vis_editor_types';
-import { visualizationLoader } from '../../../visualize/loader/visualization_loader';
+import { getVisualizeLoader } from '../../../visualize/loader/visualize_loader';
 
 const defaultEditor = function ($rootScope, $compile) {
   return class DefaultEditor {
@@ -47,15 +47,14 @@ const defaultEditor = function ($rootScope, $compile) {
       }
     }
 
-    render(visData, searchSource, updateStatus, uiState) {
+    render(savedObj, params) {
       let $scope;
+      const { uiState, timeRange } = params;
 
       const updateScope = () => {
         $scope.vis = this.vis;
-        $scope.visData = visData;
         $scope.uiState = uiState;
-        $scope.searchSource = searchSource;
-        $scope.$apply();
+        //$scope.$apply();
       };
 
       return new Promise(resolve => {
@@ -139,7 +138,15 @@ const defaultEditor = function ($rootScope, $compile) {
         }
 
         const visualizationEl = this.el.find('.vis-editor-canvas')[0];
-        visualizationLoader(visualizationEl, this.vis, visData, uiState, { listenOnChange: false });
+        getVisualizeLoader().then(loader => {
+          this._loader = loader;
+          this._loader.embedVisualizationWithSavedObject(visualizationEl, savedObj, {
+            uiState: uiState,
+            listenOnChange: false,
+            timeRange: timeRange
+          });
+        });
+
       });
     }
 

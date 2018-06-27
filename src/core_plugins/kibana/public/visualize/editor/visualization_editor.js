@@ -17,12 +17,10 @@
  * under the License.
  */
 
-import './visualize.less';
-import './visualize_legend';
-import { uiModules } from '../modules';
+import { uiModules } from 'ui/modules';
 import 'angular-sanitize';
-import { VisEditorTypesRegistryProvider } from '../registry/vis_editor_types';
-import { getUpdateStatus } from '../vis/update_status';
+import { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
+import { getUpdateStatus } from 'ui/vis/update_status';
 
 uiModules
   .get('kibana/directive', ['ngSanitize'])
@@ -32,21 +30,24 @@ uiModules
     return {
       restrict: 'E',
       scope: {
-        vis: '=',
-        visData: '=',
+        savedObj: '=',
         uiState: '=?',
-        searchSource: '='
+        timeRange: '='
       },
       link: function ($scope, element) {
       // Clone the _vis instance.
-        const vis = $scope.vis;
+        const vis = $scope.savedObj.vis;
         const Editor = typeof vis.type.editor === 'function' ? vis.type.editor :
           editorTypes.find(editor => editor.key === vis.type.editor);
         const editor = new Editor(element[0], vis);
 
         $scope.renderFunction = () => {
-          if (!$scope.vis) return;
-          editor.render($scope.visData, $scope.searchSource, getUpdateStatus(Editor.requiresUpdateStatus, $scope, $scope), $scope.uiState);
+          if (!vis) return;
+          editor.render($scope.savedObj, {
+            updateStatus: getUpdateStatus(Editor.requiresUpdateStatus, $scope, $scope),
+            uiState: $scope.uiState,
+            timeRange: $scope.timeRange
+          });
         };
 
         $scope.$on('render', (event) => {
@@ -58,9 +59,7 @@ uiModules
           editor.destroy();
         });
 
-        if (!vis.initialized) {
-          $timeout(() => { $scope.renderFunction(); });
-        }
+        $scope.renderFunction();
       }
     };
   });

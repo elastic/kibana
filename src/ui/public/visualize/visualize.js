@@ -19,14 +19,11 @@
 
 import _ from 'lodash';
 import { uiModules } from '../modules';
-import visualizeTemplate from './visualize.html';
 import { VisRequestHandlersRegistryProvider } from '../registry/vis_request_handlers';
 import { VisResponseHandlersRegistryProvider } from '../registry/vis_response_handlers';
 import 'angular-sanitize';
 import './visualization';
-import './visualization_editor';
 import { FilterBarQueryFilterProvider } from '../filter_bar/query_filter';
-import { ResizeChecker } from '../resize_checker';
 import { visualizationLoader } from './loader/visualization_loader';
 
 import {
@@ -49,7 +46,6 @@ uiModules
     return {
       restrict: 'E',
       scope: {
-        editorMode: '=?',
         savedObj: '=?',
         appState: '=?',
         uiState: '=?',
@@ -57,20 +53,11 @@ uiModules
         filters: '=?',
         query: '=?',
       },
-      template: visualizeTemplate,
       link: async function ($scope, $el) {
         let destroyed = false;
         let forceFetch = false;
         if (!$scope.savedObj) throw(`saved object was not provided to <visualize> directive`);
         if (!$scope.appState) $scope.appState = getAppState();
-
-        const resizeChecker = new ResizeChecker($el, { disabled: true });
-        $timeout(() => {
-          // We give the visualize one digest cycle time to actually render before
-          // we start tracking its size. If we don't do that, we cause a double
-          // initial rendering in editor mode.
-          resizeChecker.enable();
-        });
 
         $scope.vis = $scope.savedObj.vis;
         $scope.vis.searchSource = $scope.savedObj.searchSource;
@@ -80,9 +67,6 @@ uiModules
         else $scope.vis._setUiState($scope.uiState);
 
         $scope.vis.description = $scope.savedObj.description;
-
-        $scope.editorMode = $scope.editorMode || false;
-        $scope.vis.editorMode = $scope.editorMode;
 
         const requestHandler = getHandler(requestHandlers, $scope.vis.type.requestHandler);
         const responseHandler = getHandler(responseHandlers, $scope.vis.type.responseHandler);
@@ -138,12 +122,8 @@ uiModules
             })
             .then(resp => {
               $scope.visData = resp;
-              $scope.$apply();
-              $scope.$broadcast('render');
 
-              if (!$scope.editorMode) {
-                visualizationLoader($el[0], $scope.vis, $scope.visData, $scope.uiState, { listenOnChange: false });
-              }
+              visualizationLoader($el[0], $scope.vis, $scope.visData, $scope.uiState, { listenOnChange: false });
 
               return resp;
             });
@@ -178,14 +158,11 @@ uiModules
         // cached data otherwise.
         $scope.uiState.on('change', $scope.fetch);
 
-        resizeChecker.on('resize', $scope.fetch);
-
         $scope.$on('$destroy', () => {
           destroyed = true;
           $scope.vis.removeListener('reload', reload);
           $scope.vis.removeListener('update', handleVisUpdate);
           $scope.uiState.off('change', $scope.fetch);
-          resizeChecker.destroy();
           visualizationLoader.destroy($el[0]);
         });
 
@@ -193,14 +170,14 @@ uiModules
           $scope.fetch();
         });
 
-        if (!$scope.editorMode) {
-          visualizationLoader(
-            $el[0],
-            $scope.vis,
-            $scope.visData,
-            $scope.uiState,
-            { listenOnChange: false }
-          );
-        }      }
+        visualizationLoader(
+          $el[0],
+          $scope.vis,
+          $scope.visData,
+          $scope.uiState,
+          { listenOnChange: false }
+        );
+
+      }
     };
   });
