@@ -153,7 +153,7 @@ describe('Tooltip Positioning', function () {
     it('identifies an overflow with a positive value in that direction', function () {
       const size = positionTooltip.getTtSize($tooltip.html(), $sizer);
 
-      // position the element based on a mouse that is in the bottom right hand courner of the chart
+      // position the element based on a mouse that is in the bottom right hand corner of the chart
       const pos = positionTooltip.getBasePosition(size, makeEvent(0.99, 0.99));
       const overflow = positionTooltip.getOverflow(size, pos, [$chart, $window]);
 

@@ -45,8 +45,8 @@ export default function ({ getService, getPageObjects }) {
 
     describe('input control visualization', () => {
 
-      it('should not display spy panel toggle button', async function () {
-        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
+      it('should not have inspector enabled', async function () {
+        const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
         expect(spyToggleExists).to.be(false);
       });
 
@@ -183,7 +183,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      describe('nested controls', () => {
+      describe('chained controls', () => {
 
         before(async () => {
           await PageObjects.common.navigateToUrl('visualize', 'new');
@@ -221,7 +221,7 @@ export default function ({ getService, getPageObjects }) {
           expect(childControlMenu.trim().split('\n').join()).to.equal('14.61.182.136,3.174.21.181,6.183.121.70,71.241.97.89,9.69.255.135');
         });
 
-        it('should create a seperate filter pill for parent control and child control', async () => {
+        it('should create a separate filter pill for parent control and child control', async () => {
           await PageObjects.visualize.setComboBox('listControlSelect1', '14.61.182.136');
 
           await testSubjects.click('inputControlSubmitBtn');

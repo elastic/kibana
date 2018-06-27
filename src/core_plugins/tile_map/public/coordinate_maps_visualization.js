@@ -23,6 +23,7 @@ import { BaseMapsVisualizationProvider } from './base_maps_visualization';
 import { AggConfig } from 'ui/vis/agg_config';
 import './styles/_tilemap.less';
 import { TileMapTooltipFormatterProvider } from './editors/_tooltip_formatter';
+import { toastNotifications } from 'ui/notify';
 
 export function CoordinateMapsVisualizationProvider(Notifier, Private) {
   const BaseMapsVisualization = Private(BaseMapsVisualizationProvider);
@@ -184,7 +185,7 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
     async getGeohashBounds() {
       const agg = this._getGeoHashAgg();
       if (agg) {
-        const searchSource = this.vis.API.createInheritedSearchSource(this.vis.searchSource);
+        const searchSource = this.vis.searchSource.makeChild();
         searchSource.size(0);
         searchSource.aggs(function () {
           const geoBoundsAgg = new AggConfig(agg.vis, {
@@ -199,7 +200,16 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
             '1': geoBoundsAgg.toDsl()
           };
         });
-        const esResp = await searchSource.fetch();
+        let esResp;
+        try {
+          esResp = await searchSource.fetch();
+        } catch(error) {
+          toastNotifications.addDanger({
+            title: `Unable to get bounds`,
+            text: `${error.message}`,
+          });
+          return;
+        }
         return _.get(esResp, 'aggregations.1.bounds');
       }
     }

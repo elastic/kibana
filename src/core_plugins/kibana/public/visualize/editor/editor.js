@@ -20,7 +20,6 @@
 import _ from 'lodash';
 import '../saved_visualizations/saved_visualizations';
 import 'ui/vis/editors/default/sidebar';
-import './agg_filter';
 import 'ui/visualize';
 import 'ui/collapsible_sidebar';
 import 'ui/share';
@@ -41,6 +40,7 @@ import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import { recentlyAccessed } from 'ui/persisted_log';
+import { timefilter } from 'ui/timefilter';
 
 uiRoutes
   .when(VisualizeConstants.CREATE_PATH, {
@@ -97,7 +97,7 @@ uiModules
     };
   });
 
-function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise, config, kbnBaseUrl, localStorage) {
+function VisEditor($scope, $route, AppState, $window, kbnUrl, courier, Private, Promise, config, kbnBaseUrl, localStorage) {
   const docTitle = Private(DocTitleProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
 
@@ -130,6 +130,21 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     description: 'Share Visualization',
     template: require('plugins/kibana/visualize/editor/panels/share.html'),
     testId: 'visualizeShareButton',
+  }, {
+    key: 'inspector',
+    description: 'Open Inspector for visualization',
+    testId: 'openInspectorButton',
+    disableButton() {
+      return !vis.hasInspector();
+    },
+    run() {
+      vis.openInspector().bindToAngularScope($scope);
+    },
+    tooltip() {
+      if (!vis.hasInspector()) {
+        return 'This visualization doesn\'t support any inspectors.';
+      }
+    }
   }, {
     key: 'refresh',
     description: 'Refresh',
@@ -207,9 +222,8 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
 
     $scope.isAddToDashMode = () => addToDashMode;
 
-    $scope.timefilter = timefilter;
-    $scope.timeRange = timefilter.time;
-    $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'timefilter', 'isAddToDashMode');
+    $scope.timeRange = timefilter.getTime();
+    $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'isAddToDashMode');
 
     stateMonitor = stateMonitorFactory.create($state, stateDefaults);
     stateMonitor.ignoreProps([ 'vis.listeners' ]).onChange((status) => {
@@ -238,11 +252,11 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     });
 
     const updateTimeRange = () => {
-      $scope.timeRange = timefilter.time;
+      $scope.timeRange = timefilter.getTime();
     };
 
     timefilter.enableAutoRefreshSelector();
-    timefilter.on('update', updateTimeRange);
+    $scope.$listenAndDigestAsync(timefilter, 'timeUpdate', updateTimeRange);
 
     // update the searchSource when filters update
     $scope.$listen(queryFilter, 'update', function () {
@@ -260,7 +274,6 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     $scope.$on('$destroy', function () {
       savedVis.destroy();
       stateMonitor.destroy();
-      timefilter.off('update', updateTimeRange);
     });
   }
 

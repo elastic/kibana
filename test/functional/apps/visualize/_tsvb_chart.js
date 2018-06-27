@@ -65,8 +65,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualBuilder.fillInExpression('params.test + 1');
       });
 
-      it('should not display spy panel toggle button', async function () {
-        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
+      it('should not have inspector enabled', async function () {
+        const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
         expect(spyToggleExists).to.be(false);
       });
 
@@ -87,8 +87,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualBuilder.clickMetric();
       });
 
-      it('should not display spy panel toggle button', async function () {
-        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
+      it('should not have inspector enabled', async function () {
+        const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
         expect(spyToggleExists).to.be(false);
       });
 
@@ -111,7 +111,7 @@ export default function ({ getService, getPageObjects }) {
         log.debug('clicked on Gauge');
       });
 
-      it('should verfiy gauge label and count display', async function () {
+      it('should verify gauge label and count display', async function () {
         const labelString = await PageObjects.visualBuilder.getGaugeLabel();
         expect(labelString).to.be('Count');
         const gaugeCount = await PageObjects.visualBuilder.getGaugeCount();
@@ -127,7 +127,7 @@ export default function ({ getService, getPageObjects }) {
         log.debug('clicked on TopN');
       });
 
-      it('should verfiy topN label and count display', async function () {
+      it('should verify topN label and count display', async function () {
         const labelString = await PageObjects.visualBuilder.getTopNLabel();
         expect(labelString).to.be('Count');
         const gaugeCount = await PageObjects.visualBuilder.getTopNCount();

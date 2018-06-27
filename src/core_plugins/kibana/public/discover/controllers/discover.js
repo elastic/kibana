@@ -31,7 +31,7 @@ import 'ui/filters/moment';
 import 'ui/courier';
 import 'ui/index_patterns';
 import 'ui/state_management/app_state';
-import 'ui/timefilter';
+import { timefilter } from 'ui/timefilter';
 import 'ui/share';
 import 'ui/query_bar';
 import { toastNotifications, getPainlessError } from 'ui/notify';
@@ -49,6 +49,7 @@ import { StateProvider } from 'ui/state_management/state';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import { FilterManagerProvider } from 'ui/filter_manager';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
+import { visualizationLoader } from 'ui/visualize/loader/visualization_loader';
 import { recentlyAccessed } from 'ui/persisted_log';
 import { getDocLink } from 'ui/documentation_links';
 import '../components/fetch_error';
@@ -142,7 +143,6 @@ function discoverController(
   config,
   courier,
   kbnUrl,
-  timefilter,
   localStorage,
 ) {
 
@@ -186,8 +186,6 @@ function discoverController(
     template: require('plugins/kibana/discover/partials/share_search.html'),
     testId: 'discoverShareButton',
   }];
-  $scope.timefilter = timefilter;
-
 
   // the saved savedSearch
   const savedSearch = $route.current.locals.savedSearch;
@@ -204,7 +202,7 @@ function discoverController(
   // searchSource which applies time range
   const timeRangeSearchSource = savedSearch.searchSource.new();
   timeRangeSearchSource.set('filter', () => {
-    return timefilter.get($scope.indexPattern);
+    return timefilter.createFilter($scope.indexPattern);
   });
 
   $scope.searchSource.inherits(timeRangeSearchSource);
@@ -326,7 +324,6 @@ function discoverController(
     timefield: $scope.indexPattern.timeFieldName,
     savedSearch: savedSearch,
     indexPatternList: $route.current.locals.ip.list,
-    timefilter: $scope.timefilter
   };
 
   const init = _.once(function () {
@@ -504,7 +501,7 @@ function discoverController(
     function flushResponseData() {
       $scope.fetchError = undefined;
       $scope.hits = 0;
-      $scope.faliures = [];
+      $scope.failures = [];
       $scope.rows = [];
       $scope.fieldCounts = {};
     }
@@ -569,6 +566,8 @@ function discoverController(
           .resolve(responseHandler($scope.vis, merged))
           .then(resp => {
             $scope.visData = resp;
+            const visEl = $element.find('.visualization-container')[0];
+            visualizationLoader(visEl, $scope.vis, $scope.visData, $scope.uiState, { listenOnChange: true });
           });
       }
 
@@ -633,8 +632,8 @@ function discoverController(
 
   $scope.updateTime = function () {
     $scope.timeRange = {
-      from: dateMath.parse(timefilter.time.from),
-      to: dateMath.parse(timefilter.time.to, { roundUp: true })
+      from: dateMath.parse(timefilter.getTime().from),
+      to: dateMath.parse(timefilter.getTime().to, { roundUp: true })
     };
   };
 
@@ -730,7 +729,7 @@ function discoverController(
       });
 
       $scope.searchSource.onRequestStart((searchSource, searchRequest) => {
-        return $scope.vis.onSearchRequestStart(searchSource, searchRequest);
+        return $scope.vis.getAggConfig().onSearchRequestStart(searchSource, searchRequest);
       });
 
       $scope.searchSource.aggs(function () {
@@ -739,7 +738,7 @@ function discoverController(
     }
 
     $scope.vis.filters = {
-      timeRange: timefilter.time
+      timeRange: timefilter.getTime()
     };
   }
 

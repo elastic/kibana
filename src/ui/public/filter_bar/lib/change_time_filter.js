@@ -19,13 +19,14 @@
 
 import moment from 'moment';
 import _ from 'lodash';
+import { timefilter } from 'ui/timefilter';
 
-export function FilterBarLibChangeTimeFilterProvider(timefilter) {
-  return function (filter) {
-    const key = _.keys(filter.range)[0];
-    const values = filter.range[key];
-    timefilter.time.from = moment(values.gt || values.gte);
-    timefilter.time.to = moment(values.lt || values.lte);
-    timefilter.time.mode = 'absolute';
-  };
+export function changeTimeFilter(filter) {
+  const key = _.keys(filter.range)[0];
+  const values = filter.range[key];
+  timefilter.setTime({
+    from: moment(values.gt || values.gte),
+    to: moment(values.lt || values.lte),
+    mode: 'absolute',
+  });
 }

@@ -25,7 +25,7 @@ import replaceVars from '../../lib/replace_vars';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { sortBy, first, get, gt, gte, lt, lte } from 'lodash';
-const OPPERATORS = { gt, gte, lt, lte };
+const OPERATORS = { gt, gte, lt, lte };
 
 function sortByDirection(data, direction, fn) {
   if (direction === 'desc') {
@@ -60,8 +60,8 @@ function TopNVisualization(props) {
         let color = item.color || seriesConfig.color;
         if (model.bar_color_rules) {
           model.bar_color_rules.forEach(rule => {
-            if (rule.opperator && rule.value != null && rule.bar_color) {
-              if (OPPERATORS[rule.opperator](value, rule.value)) {
+            if (rule.operator && rule.value != null && rule.bar_color) {
+              if (OPERATORS[rule.operator](value, rule.value)) {
                 color = rule.bar_color;
               }
             }

@@ -67,7 +67,7 @@ describe('Resize Checker', () => {
     });
   });
 
-  describe('contruction', () => {
+  describe('construction', () => {
     it('accepts a jQuery wrapped element', () => {
       const { createChecker } = setup();
 

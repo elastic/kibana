@@ -325,7 +325,7 @@ describe('lib/config/config', function () {
         expect(config.get('prefix.myTest.test')).toBe(true);
       });
 
-      it('should NOT allow you to extend the schema if somethign else is there', function () {
+      it('should NOT allow you to extend the schema if something else is there', function () {
         const newSchema = Joi.object({ test: Joi.boolean().default(true) }).default();
         const run = function () {
           config.extendSchema('test', newSchema);

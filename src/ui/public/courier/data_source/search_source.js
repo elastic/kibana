@@ -249,12 +249,11 @@ export function SearchSourceProvider(Promise, Private, config) {
       return new Promise((resolve, reject) => {
         function addRequest() {
           const defer = Promise.defer();
-          const req = new SegmentedRequest(self, defer, initFunction);
-
-          req.setErrorHandler((request, error) => {
+          const errorHandler = (request, error) => {
             reject(error);
             request.abort();
-          });
+          };
+          const req = new SegmentedRequest({ source: self, defer, errorHandler, initFn: initFunction });
 
           // Return promises created by the completion handler so that
           // errors will bubble properly
@@ -278,8 +277,8 @@ export function SearchSourceProvider(Promise, Private, config) {
       return clone;
     }
 
-    makeChild() {
-      return new SearchSource().inherits(this, { callParentStartHandlers: true });
+    makeChild(params) {
+      return new SearchSource().inherits(this, params);
     }
 
     new() {
@@ -380,21 +379,16 @@ export function SearchSourceProvider(Promise, Private, config) {
         const defer = Promise.defer();
         defer.promise.then(resolve, reject);
 
-        const request = self._createRequest(defer);
-
-        request.setErrorHandler((request, error) => {
+        const errorHandler = (request, error) => {
           reject(error);
           request.abort();
-        });
+        };
+        self._createRequest({ defer, errorHandler });
       });
     }
 
     /**
-     * Fetch just this source ASAP
-     *
-     * ONLY USE IF YOU WILL BE USING THE RESULTS
-     * provided by the returned promise, otherwise
-     * call #fetchQueued()
+     * Fetch this source and reject the returned Promise on error
      *
      * @async
      */
@@ -403,33 +397,12 @@ export function SearchSourceProvider(Promise, Private, config) {
       let req = _.first(self._myStartableQueued());
 
       if (!req) {
-        req = self._createRequest();
+        const errorHandler = (request, error) => {
+          request.defer.reject(error);
+          request.abort();
+        };
+        req = self._createRequest({ errorHandler });
       }
-
-      fetchSoon.these([req]);
-
-      return req.getCompletePromise();
-    }
-
-    /**
-     * Fetch this source and reject the returned Promise on error
-     *
-     * Otherwise behaves like #fetch()
-     *
-     * @async
-     */
-    fetchAsRejectablePromise() {
-      const self = this;
-      let req = _.first(self._myStartableQueued());
-
-      if (!req) {
-        req = self._createRequest();
-      }
-
-      req.setErrorHandler((request, error) => {
-        request.defer.reject(error);
-        request.abort();
-      });
 
       fetchSoon.these([req]);
 
@@ -519,15 +492,15 @@ export function SearchSourceProvider(Promise, Private, config) {
 
     /**
      * Create a common search request object, which should
-     * be put into the pending request queye, for this search
+     * be put into the pending request queue, for this search
      * source
      *
      * @param {Deferred} defer - the deferred object that should be resolved
      *                         when the request is complete
      * @return {SearchRequest}
      */
-    _createRequest(defer) {
-      return new SearchRequest(this, defer);
+    _createRequest({ defer, errorHandler }) {
+      return new SearchRequest({ source: this, defer, errorHandler });
     }
 
     /**
@@ -604,7 +577,7 @@ export function SearchSourceProvider(Promise, Private, config) {
 
     /**
      * Walk the inheritance chain of a source and return it's
-     * flat representaion (taking into account merging rules)
+     * flat representation (taking into account merging rules)
      * @returns {Promise}
      * @resolved {Object|null} - the flat state of the SearchSource
      */
@@ -622,7 +595,7 @@ export function SearchSourceProvider(Promise, Private, config) {
 
       // call the ittr and return it's promise
       return (function ittr() {
-        // itterate the _state object (not array) and
+        // iterate the _state object (not array) and
         // pass each key:value pair to source._mergeProp. if _mergeProp
         // returns a promise, then wait for it to complete and call _mergeProp again
         return Promise.all(_.map(current._state, function ittr(value, key) {

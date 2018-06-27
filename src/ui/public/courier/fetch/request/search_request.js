@@ -23,9 +23,12 @@ import moment from 'moment';
 import { requestQueue } from '../../_request_queue';
 
 export function SearchRequestProvider(Promise) {
-
-  return class SearchRequest {
-    constructor(source, defer) {
+  class SearchRequest {
+    constructor({ source, defer, errorHandler }) {
+      if (!errorHandler) {
+        throw new Error('errorHandler is required');
+      }
+      this.errorHandler = errorHandler;
       this.source = source;
       this.defer = defer || Promise.defer();
       this.abortedDefer = Promise.defer();
@@ -145,12 +148,11 @@ export function SearchRequestProvider(Promise) {
       return Promise.race([ this.defer.promise, this.abortedDefer.promise ]);
     }
 
-    clone() {
-      return new this.constructor(this.source, this.defer);
-    }
+    clone = () => {
+      const { source, defer, errorHandler } = this;
+      return new SearchRequest({ source, defer, errorHandler });
+    };
+  }
 
-    setErrorHandler(errorHandler) {
-      this.errorHandler = errorHandler;
-    }
-  };
+  return SearchRequest;
 }

@@ -91,23 +91,31 @@ export default function ({ getService, getPageObjects }) {
           });
       });
 
-      it('should display spy panel toggle button', async function () {
-        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
+      it('should have inspector enabled', async function () {
+        const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
         expect(spyToggleExists).to.be(true);
       });
 
       it('should show correct data, take screenshot', function () {
         const expectedChartData = [
-          '0B', '2,088', '1.953KB', '2,748', '3.906KB', '2,707', '5.859KB', '2,876', '7.813KB',
-          '2,863', '9.766KB', '147', '11.719KB', '148', '13.672KB', '129', '15.625KB', '161', '17.578KB', '137'
+          [ '0B', '2,088' ],
+          [ '1.953KB', '2,748' ],
+          [ '3.906KB', '2,707' ],
+          [ '5.859KB', '2,876' ],
+          [ '7.813KB', '2,863' ],
+          [ '9.766KB', '147' ],
+          [ '11.719KB', '148' ],
+          [ '13.672KB', '129' ],
+          [ '15.625KB', '161' ],
+          [ '17.578KB', '137' ]
         ];
 
-        return retry.try(function () {
-          return PageObjects.visualize.getDataTableData()
-            .then(function showData(data) {
-              log.debug(data.split('\n'));
-              expect(data.split('\n')).to.eql(expectedChartData);
-            });
+        return retry.try(async function () {
+          await PageObjects.visualize.openInspector();
+          const data = await PageObjects.visualize.getInspectorTableData();
+          await PageObjects.visualize.closeInspector();
+          log.debug(data);
+          expect(data).to.eql(expectedChartData);
         });
       });
 
@@ -122,7 +130,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.setInterval('Daily');
         await PageObjects.visualize.clickGo();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        const data = await PageObjects.visualize.getDataTableData();
+        const data = await PageObjects.visualize.getTableVisData();
         expect(data.trim().split('\n')).to.be.eql([
           '2015-09-20', '4,757',
           '2015-09-21', '4,614',
@@ -133,7 +141,7 @@ export default function ({ getService, getPageObjects }) {
       it('should correctly filter for applied time filter on the main timefield', async () => {
         await filterBar.addFilter('@timestamp', 'is between', ['2015-09-19', '2015-09-21']);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        const data = await PageObjects.visualize.getDataTableData();
+        const data = await PageObjects.visualize.getTableVisData();
         expect(data.trim().split('\n')).to.be.eql([
           '2015-09-20', '4,757',
         ]);
