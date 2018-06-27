@@ -5,21 +5,39 @@
  */
 
 import { getSpaceUrlContext } from '../../common/spaces_url_parser';
+import { cloneDeep } from 'lodash';
 
 export function createSpacesService() {
 
   const contextCache = new WeakMap();
+  const spaceChangeHandlers = new Map();
 
   function getUrlContext(request, defaultContext = null) {
     if (!contextCache.has(request)) {
-      populateCache(request, defaultContext);
+      _populateCache(request, defaultContext);
     }
 
     const { urlContext } = contextCache.get(request);
     return urlContext;
   }
 
-  function populateCache(request, defaultContext) {
+  function registerSpaceChangeHandler(id, handler) {
+    if (typeof handler !== 'function') {
+      throw new TypeError('handler must be a function');
+    }
+
+    if (spaceChangeHandlers.has(id)) {
+      throw new Error(`change handler with id ${id} is already registered`);
+    }
+
+    spaceChangeHandlers.set(id, handler);
+  }
+
+  function _onSpaceChange(operation, space, request) {
+    spaceChangeHandlers.forEach(handler => handler(operation, cloneDeep(space), request));
+  }
+
+  function _populateCache(request, defaultContext) {
     const urlContext = getSpaceUrlContext(request.getBasePath(), defaultContext);
 
     contextCache.set(request, {
@@ -29,5 +47,9 @@ export function createSpacesService() {
 
   return {
     getUrlContext,
+    registerSpaceChangeHandler,
+
+    // not designed to be used outside of the Spaces plugin
+    _onSpaceChange,
   };
 }

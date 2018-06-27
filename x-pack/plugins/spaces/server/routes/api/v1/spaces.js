@@ -28,6 +28,8 @@ export function initSpacesApi(server) {
 
   const config = server.config();
 
+  const { spaces: spacesService } = server;
+
   async function checkForDuplicateContext(space) {
     return {};
     const query = createDuplicateContextQuery(config.get('kibana.index'), space);
@@ -103,10 +105,6 @@ export function initSpacesApi(server) {
     async handler(request, reply) {
       const client = request.getSavedObjectsClient();
 
-      const {
-        overwrite = false
-      } = request.query;
-
       const space = omit(request.payload, ['id', '_reserved']);
 
       const { error } = await checkForDuplicateContext(space);
@@ -127,12 +125,14 @@ export function initSpacesApi(server) {
           space.urlContext = existingSpace.urlContext;
         }
 
-        result = await client.create('space', { ...space }, { id, overwrite });
+        result = await client.create('space', { ...space }, { id });
       } catch (e) {
         return reply(wrapError(e));
       }
 
-      return reply(convertSavedObjectToSpace(result));
+      const createdSpace = convertSavedObjectToSpace(result);
+      spacesService._onSpaceChange('create', createdSpace, request);
+      return reply(createdSpace);
     },
     config: {
       validate: {
@@ -168,7 +168,10 @@ export function initSpacesApi(server) {
         return reply(wrapError(e));
       }
 
-      return reply(convertSavedObjectToSpace(result));
+      const updatedSpace = convertSavedObjectToSpace(result);
+      spacesService._onSpaceChange('update', updatedSpace, request);
+
+      return reply(updatedSpace);
     },
     config: {
       validate: {
@@ -188,8 +191,10 @@ export function initSpacesApi(server) {
 
       let result;
 
+      let existingSpace;
+
       try {
-        const existingSpace = await getSpaceById(client, id);
+        existingSpace = await getSpaceById(client, id);
         if (isReservedSpace(existingSpace)) {
           return reply(wrapError(Boom.badRequest('This Space cannot be deleted because it is reserved.')));
         }
@@ -198,6 +203,8 @@ export function initSpacesApi(server) {
       } catch (e) {
         return reply(wrapError(e));
       }
+
+      spacesService._onSpaceChange('delete', existingSpace, request);
 
       return reply(result).code(204);
     },

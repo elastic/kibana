@@ -12,6 +12,7 @@ import { initRolesApi } from './server/routes/api/v1/roles';
 import { initIndicesApi } from './server/routes/api/v1/indices';
 import { initLoginView } from './server/routes/views/login';
 import { initLogoutView } from './server/routes/views/logout';
+import { initSpaceChangeCallbacks } from './server/lib/space_change_callbacks';
 import { validateConfig } from './server/lib/validate_config';
 import { authenticateFactory } from './server/lib/auth_redirect';
 import { checkLicense } from './server/lib/check_license';
@@ -28,7 +29,7 @@ export const security = (kibana) => new kibana.Plugin({
   id: 'security',
   configPrefix: 'xpack.security',
   publicDir: resolve(__dirname, 'public'),
-  require: ['kibana', 'elasticsearch', 'xpack_main'],
+  require: ['kibana', 'elasticsearch', 'xpack_main', 'spaces'],
 
   config(Joi) {
     return Joi.object({
@@ -144,6 +145,8 @@ export const security = (kibana) => new kibana.Plugin({
         savedObjectTypes: savedObjects.types,
       });
     });
+
+    initSpaceChangeCallbacks(server, xpackInfo);
 
     getUserProvider(server);
 

@@ -30,6 +30,7 @@ module.exports = function (kibana) {
     graph(kibana),
     monitoring(kibana),
     reporting(kibana),
+    spaces(kibana),
     security(kibana),
     searchprofiler(kibana),
     ml(kibana),
@@ -43,7 +44,6 @@ module.exports = function (kibana) {
     cloud(kibana),
     indexManagement(kibana),
     consoleExtensions(kibana),
-    spaces(kibana),
     notifications(kibana),
   ];
 };
