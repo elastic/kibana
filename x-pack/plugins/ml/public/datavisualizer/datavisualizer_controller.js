@@ -17,12 +17,10 @@ import rison from 'rison-node';
 import 'plugins/kibana/visualize/styles/main.less';
 import 'plugins/ml/components/form_filter_input';
 
-import 'ui/courier';
 import chrome from 'ui/chrome';
 import uiRoutes from 'ui/routes';
 import { notify } from 'ui/notify';
-import { luceneStringToDsl } from 'ui/courier/data_source/build_query/lucene_string_to_dsl.js';
-import { decorateQuery } from 'ui/courier/data_source/_decorate_query';
+import { decorateQuery, luceneStringToDsl } from 'ui/courier';
 
 import { ML_JOB_FIELD_TYPES, KBN_FIELD_TYPES } from 'plugins/ml/../common/constants/field_types';
 import { kbnTypeToMLJobType } from 'plugins/ml/util/field_types_utils';

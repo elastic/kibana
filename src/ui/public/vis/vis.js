@@ -36,7 +36,7 @@ import { onBrushEvent } from '../utils/brush_event';
 import { FilterBarQueryFilterProvider } from '../filter_bar/query_filter';
 import { FilterBarClickHandlerProvider } from '../filter_bar/filter_bar_click_handler';
 import { updateVisualizationConfig } from './vis_update';
-import { SearchSourceProvider } from '../courier/data_source/search_source';
+import { SearchSourceProvider } from '../courier/search_source';
 import { SavedObjectsClientProvider } from '../saved_objects';
 import { timefilter } from 'ui/timefilter';
 
