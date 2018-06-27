@@ -15,6 +15,7 @@ jest.mock('../../../../../server/lib/get_client_shield', () => ({
 
 const defaultVersion = 'default-version';
 const defaultApplication = 'default-application';
+const defaultKibanaIndex = 'default-index';
 const savedObjectTypes = ['foo-type', 'bar-type'];
 
 const createMockServer = ({ settings = {} } = {}) => {
@@ -27,7 +28,8 @@ const createMockServer = ({ settings = {} } = {}) => {
 
   const defaultSettings = {
     'pkg.version': defaultVersion,
-    'xpack.security.rbac.application': defaultApplication
+    'xpack.security.rbac.application': defaultApplication,
+    'kibana.index': defaultKibanaIndex,
   };
 
   mockServer.config().get.mockImplementation(key => {
@@ -53,6 +55,14 @@ const mockApplicationPrivilegeResponse = ({ hasAllRequested, privileges, applica
   };
 };
 
+const mockKibanaIndexPrivilegesResponse = ({ privileges, index = defaultKibanaIndex }) => {
+  return {
+    index: {
+      [index]: privileges
+    }
+  };
+};
+
 const createMockCallWithRequest = (responses) => {
   const mockCallWithRequest = jest.fn();
   getClient.mockReturnValue({
@@ -64,6 +74,14 @@ const createMockCallWithRequest = (responses) => {
   }
 
   return mockCallWithRequest;
+};
+
+const expectNoDeprecationLogged = (mockServer) => {
+  expect(mockServer.log).not.toHaveBeenCalled();
+};
+
+const expectDeprecationLogged = (mockServer) => {
+  expect(mockServer.log).toHaveBeenCalledWith(['warning', 'deprecated', 'security'], expect.stringContaining('deprecated'));
 };
 
 test(`returns success of true if they have all application privileges`, async () => {
@@ -89,6 +107,7 @@ test(`returns success of true if they have all application privileges`, async ()
   const privileges = [privilege];
   const result = await hasPrivileges(privileges);
 
+  expectNoDeprecationLogged(mockServer);
   expect(mockCallWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
     body: {
       applications: [{
@@ -133,6 +152,7 @@ test(`returns success of false if they have only one application privilege`, asy
   const privileges = [privilege1, privilege2];
   const result = await hasPrivileges(privileges);
 
+  expectNoDeprecationLogged(mockServer);
   expect(mockCallWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
     body: {
       applications: [{
@@ -170,76 +190,126 @@ test(`throws error if missing version privilege and has login privilege`, async 
   const hasPrivileges = hasPrivilegesWithRequest({});
 
   await expect(hasPrivileges([privilege])).rejects.toThrowErrorMatchingSnapshot();
+  expectNoDeprecationLogged(mockServer);
 });
 
-test(`returns useLegacyFallback of false if the user has the login privilege`, async () => {
-  const privilege = `action:saved_objects/${savedObjectTypes[0]}/get`;
-  const username = 'foo-username';
-  const mockServer = createMockServer();
-  const callWithRequest = createMockCallWithRequest([
-    mockApplicationPrivilegeResponse({
-      hasAllRequested: false,
-      privileges: {
-        [getVersionPrivilege(defaultVersion)]: true,
-        [getLoginPrivilege()]: true,
-        [privilege]: false,
-      },
+describe('legacy fallback with no application privileges', () => {
+  test(`returns useLegacyFallback of false if they have no privileges on the kibana index`, async () => {
+    const privilege = `action:saved_objects/${savedObjectTypes[0]}/get`;
+    const username = 'foo-username';
+    const mockServer = createMockServer();
+    const callWithRequest = createMockCallWithRequest([
+      mockApplicationPrivilegeResponse({
+        hasAllRequested: false,
+        privileges: {
+          [getVersionPrivilege(defaultVersion)]: false,
+          [getLoginPrivilege()]: false,
+          [privilege]: false,
+        },
+        username,
+      }),
+      mockKibanaIndexPrivilegesResponse({
+        privileges: {
+          create: false,
+          delete: false,
+          read: false,
+          view_index_metadata: false,
+        },
+      })
+    ]);
+
+    const hasPrivilegesWithRequest = hasPrivilegesWithServer(mockServer);
+    const request = Symbol();
+    const hasPrivileges = hasPrivilegesWithRequest(request);
+    const privileges = [privilege];
+    const result = await hasPrivileges(privileges);
+
+    expectNoDeprecationLogged(mockServer);
+    expect(callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
+      body: {
+        applications: [{
+          application: defaultApplication,
+          resources: [DEFAULT_RESOURCE],
+          privileges: [
+            getVersionPrivilege(defaultVersion), getLoginPrivilege(), ...privileges
+          ]
+        }]
+      }
+    });
+    expect(callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
+      body: {
+        index: [{
+          names: [ defaultKibanaIndex ],
+          privileges: ['create', 'delete', 'read', 'view_index_metadata']
+        }]
+      }
+    });
+    expect(result).toEqual({
+      success: false,
+      missing: [getLoginPrivilege(), ...privileges],
       username,
-    }),
-  ]);
-
-  const hasPrivilegesWithRequest = hasPrivilegesWithServer(mockServer);
-  const request = Symbol();
-  const hasPrivileges = hasPrivilegesWithRequest(request);
-  const privileges = [privilege];
-  const result = await hasPrivileges(privileges);
-
-  expect(callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
-    body: {
-      applications: [{
-        application: defaultApplication,
-        resources: [DEFAULT_RESOURCE],
-        privileges: [
-          getVersionPrivilege(defaultVersion), getLoginPrivilege(), ...privileges
-        ]
-      }]
-    }
+      useLegacyFallback: false,
+    });
   });
-  expect(result).toHaveProperty('useLegacyFallback', false);
-});
 
-test(`returns useLegacyFallback of true if the user has the login privilege`, async () => {
-  const privilege = `action:saved_objects/${savedObjectTypes[0]}/get`;
-  const username = 'foo-username';
-  const mockServer = createMockServer();
-  const callWithRequest = createMockCallWithRequest([
-    mockApplicationPrivilegeResponse({
-      hasAllRequested: false,
-      privileges: {
-        [getVersionPrivilege(defaultVersion)]: false,
-        [getLoginPrivilege()]: false,
-        [privilege]: false,
-      },
-      username,
-    }),
-  ]);
+  ['create', 'delete', 'read', 'view_index_metadata'].forEach(indexPrivilege => {
+    test(`returns useLegacyFallback of true if they have ${indexPrivilege} privilege on the kibana index`, async () => {
+      const privilege = `action:saved_objects/${savedObjectTypes[0]}/get`;
+      const username = 'foo-username';
+      const mockServer = createMockServer();
+      const callWithRequest = createMockCallWithRequest([
+        mockApplicationPrivilegeResponse({
+          hasAllRequested: false,
+          privileges: {
+            [getVersionPrivilege(defaultVersion)]: false,
+            [getLoginPrivilege()]: false,
+            [privilege]: false,
+          },
+          username,
+        }),
+        mockKibanaIndexPrivilegesResponse({
+          privileges: {
+            create: false,
+            delete: false,
+            read: false,
+            view_index_metadata: false,
+            [indexPrivilege]: true
+          },
+        })
+      ]);
 
-  const hasPrivilegesWithRequest = hasPrivilegesWithServer(mockServer);
-  const request = Symbol();
-  const hasPrivileges = hasPrivilegesWithRequest(request);
-  const privileges = [privilege];
-  const result = await hasPrivileges(privileges);
+      const hasPrivilegesWithRequest = hasPrivilegesWithServer(mockServer);
+      const request = Symbol();
+      const hasPrivileges = hasPrivilegesWithRequest(request);
+      const privileges = [privilege];
+      const result = await hasPrivileges(privileges);
 
-  expect(callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
-    body: {
-      applications: [{
-        application: defaultApplication,
-        resources: [DEFAULT_RESOURCE],
-        privileges: [
-          getVersionPrivilege(defaultVersion), getLoginPrivilege(), ...privileges
-        ]
-      }]
-    }
+      expectDeprecationLogged(mockServer);
+      expect(callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
+        body: {
+          applications: [{
+            application: defaultApplication,
+            resources: [DEFAULT_RESOURCE],
+            privileges: [
+              getVersionPrivilege(defaultVersion), getLoginPrivilege(), ...privileges
+            ]
+          }]
+        }
+      });
+      expect(callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
+        body: {
+          index: [{
+            names: [ defaultKibanaIndex ],
+            privileges: ['create', 'delete', 'read', 'view_index_metadata']
+          }]
+        }
+      });
+      expect(result).toEqual({
+        success: false,
+        missing: [getLoginPrivilege(), ...privileges],
+        username,
+        useLegacyFallback: true,
+      });
+    });
   });
-  expect(result).toHaveProperty('useLegacyFallback', true);
 });

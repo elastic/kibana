@@ -122,7 +122,7 @@ export default function ({ getService }) {
       });
     };
 
-    const createExpectActionForbidden = (canLogin, type) => resp => {
+    const createExpectRbacForbidden = (canLogin, type) => resp => {
       expect(resp.body).to.eql({
         statusCode: 403,
         error: 'Forbidden',
@@ -130,12 +130,11 @@ export default function ({ getService }) {
       });
     };
 
-    const createExpectLegacyForbidden = username => resp => {
+    const expectForbiddenCantFindAnyTypes = resp => {
       expect(resp.body).to.eql({
         statusCode: 403,
         error: 'Forbidden',
-        //eslint-disable-next-line max-len
-        message: `action [indices:data/read/search] is unauthorized for user [${username}]: [security_exception] action [indices:data/read/search] is unauthorized for user [${username}]`
+        message: `Not authorized to find saved_object`
       });
     };
 
@@ -203,27 +202,27 @@ export default function ({ getService }) {
         normal: {
           description: 'forbidden login and find visualization message',
           statusCode: 403,
-          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME),
+          response: createExpectRbacForbidden(false, 'visualization'),
         },
         unknownType: {
           description: 'forbidden login and find wigwags message',
           statusCode: 403,
-          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME),
+          response: createExpectRbacForbidden(false, 'wigwags'),
         },
         pageBeyondTotal: {
           description: 'forbidden login and find visualization message',
           statusCode: 403,
-          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME),
+          response: createExpectRbacForbidden(false, 'visualization'),
         },
         unknownSearchField: {
           description: 'forbidden login and find wigwags message',
           statusCode: 403,
-          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME),
+          response: createExpectRbacForbidden(false, 'wigwags'),
         },
         noType: {
           description: `forbidded can't find any types`,
           statusCode: 403,
-          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME),
+          response: expectForbiddenCantFindAnyTypes,
         }
       }
     });
@@ -378,7 +377,7 @@ export default function ({ getService }) {
         unknownType: {
           description: 'forbidden find wigwags message',
           statusCode: 403,
-          response: createExpectActionForbidden(true, 'wigwags'),
+          response: createExpectRbacForbidden(true, 'wigwags'),
         },
         pageBeyondTotal: {
           description: 'empty result',
@@ -388,7 +387,7 @@ export default function ({ getService }) {
         unknownSearchField: {
           description: 'forbidden find wigwags message',
           statusCode: 403,
-          response: createExpectActionForbidden(true, 'wigwags'),
+          response: createExpectRbacForbidden(true, 'wigwags'),
         },
         noType: {
           description: 'all objects',

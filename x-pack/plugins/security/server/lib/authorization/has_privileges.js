@@ -35,12 +35,30 @@ const hasApplicationPrivileges = async (callWithRequest, request, kibanaVersion,
   };
 };
 
+const hasPrivilegesOnKibanaIndex = async (
+  callWithRequest,
+  request,
+  kibanaIndex,
+) => {
+  const privilegeCheck = await callWithRequest(request, 'shield.hasPrivileges', {
+    body: {
+      index: [{
+        names: [kibanaIndex],
+        privileges: ['create', 'delete', 'read', 'view_index_metadata']
+      }]
+    }
+  });
+
+  return Object.values(privilegeCheck.index[kibanaIndex]).includes(true);
+};
+
 export function hasPrivilegesWithServer(server) {
   const callWithRequest = getClient(server).callWithRequest;
 
   const config = server.config();
   const kibanaVersion = config.get('pkg.version');
   const application = config.get('xpack.security.rbac.application');
+  const kibanaIndex = config.get('kibana.index');
 
   return function hasPrivilegesWithRequest(request) {
     return async function hasPrivileges(privileges) {
@@ -56,16 +74,24 @@ export function hasPrivilegesWithServer(server) {
         allPrivileges
       );
 
-      const success = privilegesCheck.hasAllRequested;
+      // If they're missing the login privilege, they have no application privileges so we'll check to see if they
+      // have any privileges on the kibana index itself to determine if we should use a legacy fallback
+      const useLegacyFallback =
+        privilegesCheck.privileges[loginPrivilege] === false &&
+        await hasPrivilegesOnKibanaIndex(callWithRequest, request, kibanaIndex);
+
+      if (useLegacyFallback) {
+        const msg = `Relying on implicit privileges determined from the index privileges is deprecated and will be removed in Kibana 7.0`;
+        server.log(['warning', 'deprecated', 'security'], msg);
+      }
 
       return {
-        success,
+        success: privilegesCheck.hasAllRequested,
         // We don't want to expose the version privilege to consumers, as it's an implementation detail only to detect version mismatch
         missing: Object.keys(privilegesCheck.privileges)
           .filter(key => privilegesCheck.privileges[key] === false)
           .filter(p => p !== versionPrivilege),
-        // If they're missing the login privilege, they have no application privileges so we'll try to use the legacy fallback
-        useLegacyFallback: privilegesCheck.privileges[loginPrivilege] === false,
+        useLegacyFallback,
         username: privilegesCheck.username,
       };
     };

@@ -73,7 +73,7 @@ export default function ({ getService }) {
       tests: {
         default: {
           statusCode: 403,
-          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME),
+          response: createExpectRbacForbidden(false),
         },
       }
     });
