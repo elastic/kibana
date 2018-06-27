@@ -18,8 +18,4 @@ export class BooleanEdge extends Edge {
   get isFalse() {
     return this.when === false;
   }
-
-  get svgClass() {
-    return `${super.svgClass} ${super.svgClass}Boolean ${super.svgClass}Boolean--${this.when}`;
-  }
 }

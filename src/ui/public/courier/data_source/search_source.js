@@ -277,8 +277,8 @@ export function SearchSourceProvider(Promise, Private, config) {
       return clone;
     }
 
-    makeChild() {
-      return new SearchSource().inherits(this, { callParentStartHandlers: true });
+    makeChild(params) {
+      return new SearchSource().inherits(this, params);
     }
 
     new() {

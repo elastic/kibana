@@ -17,18 +17,15 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { areTimePickerValsDifferent } from './diff_time_picker_vals';
-import { timeHistory } from '../time_history';
+import qs from 'querystring';
 
-export function diffTimeFactory(self) {
-  let oldTime = _.clone(self.time);
-  return function () {
-    if (areTimePickerValsDifferent(self.time, oldTime)) {
-      timeHistory.add(self.time);
-      self.emit('update');
-      self.emit('fetch');
-    }
-    oldTime = _.clone(self.time);
-  };
+export function parseQueryString() {
+  // window.location.search is an empty string
+  // get search from href
+  const hrefSplit = window.location.href.split('?');
+  if (hrefSplit.length <= 1) {
+    return {};
+  }
+
+  return qs.parse(hrefSplit[1]);
 }
