@@ -46,7 +46,7 @@ uiRoutes
   .when(VisualizeConstants.CREATE_PATH, {
     template: editorTemplate,
     resolve: {
-      savedVis: function (savedVisualizations, courier, $route, Private) {
+      savedVis: function (savedVisualizations, redirectWhenMissing, $route, Private) {
         const visTypes = Private(VisTypesRegistryProvider);
         const visType = _.find(visTypes, { name: $route.current.params.type });
         const shouldHaveIndex = visType.requiresSearch && visType.options.showIndexSelection;
@@ -56,7 +56,7 @@ uiRoutes
         }
 
         return savedVisualizations.get($route.current.params)
-          .catch(courier.redirectWhenMissing({
+          .catch(redirectWhenMissing({
             '*': '/visualize'
           }));
       }
@@ -65,7 +65,7 @@ uiRoutes
   .when(`${VisualizeConstants.EDIT_PATH}/:id`, {
     template: editorTemplate,
     resolve: {
-      savedVis: function (savedVisualizations, courier, $route) {
+      savedVis: function (savedVisualizations, redirectWhenMissing, $route) {
         return savedVisualizations.get($route.current.params.id)
           .then((savedVis) => {
             recentlyAccessed.add(
@@ -74,7 +74,7 @@ uiRoutes
               savedVis.id);
             return savedVis;
           })
-          .catch(courier.redirectWhenMissing({
+          .catch(redirectWhenMissing({
             'visualization': '/visualize',
             'search': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
             'index-pattern': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
@@ -87,7 +87,7 @@ uiRoutes
 uiModules
   .get('app/visualize', [
     'kibana/notify',
-    'kibana/courier'
+    'kibana/url'
   ])
   .directive('visualizeApp', function () {
     return {
@@ -97,7 +97,19 @@ uiModules
     };
   });
 
-function VisEditor($scope, $route, AppState, $window, kbnUrl, courier, Private, Promise, config, kbnBaseUrl, localStorage) {
+function VisEditor(
+  $scope,
+  $route,
+  AppState,
+  $window,
+  kbnUrl,
+  redirectWhenMissing,
+  Private,
+  Promise,
+  config,
+  kbnBaseUrl,
+  localStorage
+) {
   const docTitle = Private(DocTitleProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
 
@@ -198,7 +210,7 @@ function VisEditor($scope, $route, AppState, $window, kbnUrl, courier, Private, 
       Promise.try(function () {
         vis.setState(appState.vis);
       })
-        .catch(courier.redirectWhenMissing({
+        .catch(redirectWhenMissing({
           'index-pattern-field': '/visualize'
         }));
     }

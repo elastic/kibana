@@ -20,7 +20,7 @@
 
 
 // @ts-ignore
-import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
+import { SearchSourceProvider } from 'ui/courier';
 
 import { reverseSortDirection } from './utils/sorting';
 
@@ -46,7 +46,7 @@ const DAY_MILLIS = 24 * 60 * 60 * 1000;
 // look from 1 day up to 10000 days into the past and future
 const LOOKUP_OFFSETS = [0, 1, 7, 30, 365, 10000].map((days) => days * DAY_MILLIS);
 
-function fetchContextProvider(courier, Private) {
+function fetchContextProvider(indexPatterns, Private) {
   /**
    * @type {{new(): SearchSourceT}}
    */
@@ -159,7 +159,7 @@ function fetchContextProvider(courier, Private) {
    * @returns {Promise<Object>}
    */
   async function createSearchSource(indexPatternId, filters) {
-    const indexPattern = await courier.indexPatterns.get(indexPatternId);
+    const indexPattern = await indexPatterns.get(indexPatternId);
 
     return new SearchSource()
       .inherits(false)

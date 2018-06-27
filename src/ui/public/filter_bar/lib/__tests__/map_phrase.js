@@ -30,7 +30,7 @@ describe('Filter Bar Directive', function () {
       'kibana',
       'kibana/courier',
       function ($provide) {
-        $provide.service('courier', require('fixtures/mock_courier'));
+        $provide.service('indexPatterns', require('fixtures/mock_index_patterns'));
       }
     ));
 
