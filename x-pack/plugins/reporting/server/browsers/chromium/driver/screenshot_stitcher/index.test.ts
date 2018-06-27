@@ -3,10 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { promisify } from 'bluebird';
 import fs from 'fs';
 import path from 'path';
+import { PNG } from 'pngjs';
 
 import { screenshotStitcher } from './index';
 
@@ -29,6 +29,13 @@ const fsp = {
 const readPngFixture = async (filename: string) => {
   const buffer = await fsp.readFile(path.join(__dirname, 'fixtures', filename));
   return buffer.toString('base64');
+};
+
+const toPNG = async (data: string) => {
+  const png = new PNG();
+  const buffer = Buffer.from(data, 'base64');
+  await png.parse(buffer);
+  return png;
 };
 
 const getSingleWhitePixel = () => {
@@ -64,7 +71,7 @@ test(`single screenshot`, async () => {
   };
 
   const fn = jest.fn();
-  fn.mockReturnValueOnce(getSingleWhitePixel());
+  fn.mockReturnValueOnce(toPNG(await getSingleWhitePixel()));
   const data = await screenshotStitcher(clip, 1, 1, fn, loggerMock);
 
   expect(fn.mock.calls.length).toBe(1);
@@ -83,7 +90,7 @@ test(`single screenshot, when zoom creates partial pixel we round up`, async () 
   };
 
   const fn = jest.fn();
-  fn.mockReturnValueOnce(get2x2White());
+  fn.mockReturnValueOnce(toPNG(await get2x2White()));
   const data = await screenshotStitcher(clip, 2, 1, fn, loggerMock);
 
   expect(fn.mock.calls.length).toBe(1);
@@ -102,8 +109,8 @@ test(`two screenshots, no zoom`, async () => {
   };
 
   const fn = jest.fn();
-  fn.mockReturnValueOnce(getSingleWhitePixel());
-  fn.mockReturnValueOnce(getSingleBlackPixel());
+  fn.mockReturnValueOnce(toPNG(await getSingleWhitePixel()));
+  fn.mockReturnValueOnce(toPNG(await getSingleBlackPixel()));
   const data = await screenshotStitcher(clip, 1, 1, fn, loggerMock);
 
   expect(fn.mock.calls.length).toBe(2);
@@ -123,8 +130,8 @@ test(`two screenshots, no zoom`, async () => {
   };
 
   const fn = jest.fn();
-  fn.mockReturnValueOnce(getSingleWhitePixel());
-  fn.mockReturnValueOnce(getSingleBlackPixel());
+  fn.mockReturnValueOnce(toPNG(await getSingleWhitePixel()));
+  fn.mockReturnValueOnce(toPNG(await getSingleBlackPixel()));
   const data = await screenshotStitcher(clip, 1, 1, fn, loggerMock);
 
   expect(fn.mock.calls.length).toBe(2);
@@ -144,10 +151,10 @@ test(`four screenshots, zoom`, async () => {
   };
 
   const fn = jest.fn();
-  fn.mockReturnValueOnce(get2x2White());
-  fn.mockReturnValueOnce(get2x2Black());
-  fn.mockReturnValueOnce(get2x2Black());
-  fn.mockReturnValueOnce(get2x2White());
+  fn.mockReturnValueOnce(toPNG(await get2x2White()));
+  fn.mockReturnValueOnce(toPNG(await get2x2Black()));
+  fn.mockReturnValueOnce(toPNG(await get2x2Black()));
+  fn.mockReturnValueOnce(toPNG(await get2x2White()));
 
   const data = await screenshotStitcher(clip, 2, 1, fn, loggerMock);
 
@@ -170,10 +177,10 @@ test(`four screenshots, zoom and offset`, async () => {
   };
 
   const fn = jest.fn();
-  fn.mockReturnValueOnce(get2x2White());
-  fn.mockReturnValueOnce(get2x2Black());
-  fn.mockReturnValueOnce(get2x2Black());
-  fn.mockReturnValueOnce(get2x2White());
+  fn.mockReturnValueOnce(toPNG(await get2x2White()));
+  fn.mockReturnValueOnce(toPNG(await get2x2Black()));
+  fn.mockReturnValueOnce(toPNG(await get2x2Black()));
+  fn.mockReturnValueOnce(toPNG(await get2x2White()));
 
   const data = await screenshotStitcher(clip, 2, 1, fn, loggerMock);
 
