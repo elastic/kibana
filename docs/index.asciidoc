@@ -26,8 +26,6 @@ include::setup.asciidoc[]
 
 include::setup/installing.asciidoc[]
 
-include::setup/setup-xkb.asciidoc[]
-
 include::monitoring/monitoring-xkib.asciidoc[]
 
 include::security/securing-kibana.asciidoc[]
