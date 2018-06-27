@@ -9,7 +9,7 @@
 import { notify } from 'ui/notify';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
-let _indexPatterns = [];
+let indexPatternCache = [];
 let fullIndexPatterns = [];
 let currentIndexPattern = null;
 let currentSavedSearch = null;
@@ -22,19 +22,19 @@ export function loadIndexPatterns(Private, indexPatterns) {
     fields: ['title'],
     perPage: 10000
   }).then((response) => {
-    _indexPatterns = response.savedObjects;
-    return _indexPatterns;
+    indexPatternCache = response.savedObjects;
+    return indexPatternCache;
   });
 }
 
 export function getIndexPatterns() {
-  return _indexPatterns;
+  return indexPatternCache;
 }
 
 export function getIndexPatternIdFromName(name) {
-  for (let j = 0; j < _indexPatterns.length; j++) {
-    if (_indexPatterns[j].get('title') === name) {
-      return _indexPatterns[j].id;
+  for (let j = 0; j < indexPatternCache.length; j++) {
+    if (indexPatternCache[j].get('title') === name) {
+      return indexPatternCache[j].id;
     }
   }
   return name;
