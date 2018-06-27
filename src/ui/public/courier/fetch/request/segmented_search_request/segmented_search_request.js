@@ -19,10 +19,10 @@
 
 import _ from 'lodash';
 import { timefilter } from 'ui/timefilter';
-import { Notifier } from '../../../../notify';
 import { SearchRequestProvider } from '../search_request';
 import { SegmentedHandleProvider } from './segmented_handle';
-import { pushAll } from '../../../utils/collection';
+import { Notifier } from '../../../../notify';
+import { pushAll } from '../../../../utils/collection';
 
 export function SegmentedSearchRequestProvider(Private, config) {
   const SearchRequest = Private(SearchRequestProvider);
