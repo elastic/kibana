@@ -27,6 +27,7 @@ import './visualization';
 import './visualization_editor';
 import { FilterBarQueryFilterProvider } from '../filter_bar/query_filter';
 import { ResizeChecker } from '../resize_checker';
+import { visualizationLoader } from './loader/visualization_loader';
 
 import {
   isTermSizeZeroError,
@@ -139,6 +140,11 @@ uiModules
               $scope.visData = resp;
               $scope.$apply();
               $scope.$broadcast('render');
+
+              if (!$scope.editorMode) {
+                visualizationLoader($el[0], $scope.vis, $scope.visData, $scope.uiState, { listenOnChange: true });
+              }
+
               return resp;
             });
         }, 100);
@@ -180,11 +186,21 @@ uiModules
           $scope.vis.removeListener('update', handleVisUpdate);
           $scope.uiState.off('change', $scope.fetch);
           resizeChecker.destroy();
+          visualizationLoader.destroy($el[0]);
         });
 
-        $scope.$watch('vis.initialized', $scope.fetch);
+        $scope.$watch('vis.initialized', () => {
+          $scope.fetch();
+        });
 
-        $scope.fetch();
-      }
+        if (!$scope.editorMode) {
+          visualizationLoader(
+            $el[0],
+            $scope.vis,
+            $scope.visData,
+            $scope.uiState,
+            { listenOnChange: true }
+          );
+        }      }
     };
   });

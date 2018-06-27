@@ -28,7 +28,7 @@ import FixturesStubbedSearchSourceProvider from 'fixtures/stubbed_search_source'
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 import { VisProvider } from '../../../vis';
-import { getVisualizeLoader } from '../loader';
+import { getVisualizeLoader } from '../visualize_loader';
 import { EmbeddedVisualizeHandler } from '../embedded_visualize_handler';
 import { Inspector } from '../../../inspector/inspector';
 

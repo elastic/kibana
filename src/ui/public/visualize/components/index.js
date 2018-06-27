@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export * from './visualize_loader';
+export * from './visualization_chart';
+export * from './visualization_noresults';
