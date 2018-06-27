@@ -181,7 +181,6 @@ export class CMBeatsDomain {
     };
     const beats = await this.adapter.getWithIds(req, beatIds);
     const tags = await this.tags.getTagsWithIds(req, tagIds);
-
     // Handle assignments containing non-existing beat IDs or tags
     const nonExistentBeatIds = findNonExistentItems(beats, beatIds);
     const nonExistentTags = findNonExistentItems(tags, tagIds);
