@@ -68,7 +68,7 @@ export function ContextPageProvider({ getService, getPageObjects }) {
 
     async clickPredecessorLoadMoreButton() {
       log.debug('Click Predecessor Load More Button');
-      await retry.try(async() => {
+      await retry.try(async () => {
         const predecessorButton = await this.getPredecessorLoadMoreButton();
         await predecessorButton.click();
       });
@@ -77,7 +77,7 @@ export function ContextPageProvider({ getService, getPageObjects }) {
 
     async clickSuccessorLoadMoreButton() {
       log.debug('Click Successor Load More Button');
-      await retry.try(async() => {
+      await retry.try(async () => {
         const sucessorButton = await this.getSuccessorLoadMoreButton();
         await sucessorButton.click();
       });
@@ -88,8 +88,8 @@ export function ContextPageProvider({ getService, getPageObjects }) {
       return await retry.try(async () => {
         const successorLoadMoreButton = await this.getSuccessorLoadMoreButton();
         const predecessorLoadMoreButton = await this.getPredecessorLoadMoreButton();
-        if (! (successorLoadMoreButton.isEnabled() && successorLoadMoreButton.isDisplayed() &&
-               predecessorLoadMoreButton.isEnabled() && predecessorLoadMoreButton.isDisplayed()) ) {
+        if (!(successorLoadMoreButton.isEnabled() && successorLoadMoreButton.isDisplayed() &&
+              predecessorLoadMoreButton.isEnabled() && predecessorLoadMoreButton.isDisplayed())) {
           throw new Error('loading context rows');
         }
       });

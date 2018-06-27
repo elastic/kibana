@@ -26,7 +26,6 @@ const TEST_DEFAULT_CONTEXT_SIZE = 7;
 const TEST_STEP_SIZE = 3;
 
 export default function ({ getService, getPageObjects }) {
-  const remote = getService('remote');
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const docTable = getService('docTable');
