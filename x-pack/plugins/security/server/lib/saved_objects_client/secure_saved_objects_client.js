@@ -79,7 +79,7 @@ export class SecureSavedObjectsClient {
   }
 
   async _findWithTypes(options) {
-    // when we're finding specific types, we just iensure the user can find the specified types
+    // when we're finding specific types, we just ensure the user can find the specified types
     const authorized = await this._performAuthorizationCheck(options.type, 'find', { options });
 
     if (authorized) {
@@ -175,7 +175,7 @@ export class SecureSavedObjectsClient {
       return true;
     }
 
-    this._auditLogger.savedObjectsAuthorizationFailure(result.username, action, types, result.missing, args);
+    this._auditLogger.savedObjectsAuthorizationFailure(result.username, action, types, result.missing, result.useLegacyFallback, args);
 
     if (result.useLegacyFallback) {
       return false;

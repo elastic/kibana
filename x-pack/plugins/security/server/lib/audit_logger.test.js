@@ -47,12 +47,13 @@ describe(`#savedObjectsAuthorizationFailure`, () => {
     const action = 'foo-action';
     const types = [ 'foo-type-1', 'foo-type-2' ];
     const missing = [`action:saved_objects/${types[0]}/foo-action`, `action:saved_objects/${types[1]}/foo-action`];
+    const useLegacyFallback = true;
     const args = {
       'foo': 'bar',
       'baz': 'quz',
     };
 
-    securityAuditLogger.savedObjectsAuthorizationFailure(username, action, types, missing, args);
+    securityAuditLogger.savedObjectsAuthorizationFailure(username, action, types, missing, useLegacyFallback, args);
 
     expect(auditLogger.log).toHaveBeenCalledWith(
       'saved_objects_authorization_failure',
@@ -62,6 +63,7 @@ describe(`#savedObjectsAuthorizationFailure`, () => {
         action,
         types,
         missing,
+        useLegacyFallback,
         args,
       }
     );
