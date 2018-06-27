@@ -13,7 +13,13 @@ image::images/management-license.png[]
 The 30-day trial enables you to try out the full set of
 https://www.elastic.co/subscriptions[Platinum features],
 including security, machine learning, alerting, graph capabilities,
-and more.
+and more. For example, the following pages are added to the side navigation:
+
+* **Machine Learning**
+* **Graph**
+
+The **Management** page gains options related to configuring security, managing 
+{ls} pipelines, and using {watcher}. 
 
 At the end of the trial period, your license reverts
 to a Basic license. To continue using the Platinum features,
