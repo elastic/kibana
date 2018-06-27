@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { PNG } from 'pngjs';
 import { map, mergeMap, switchMap, toArray } from 'rxjs/operators';
 import { $combine } from './combine';
 import { $getClips } from './get_clips';
@@ -34,7 +34,7 @@ export async function screenshotStitcher(
   outputClip: Rectangle,
   zoom: number,
   maxDimensionPerClip: number,
-  captureScreenshotFn: (rect: Rectangle) => Promise<string>,
+  captureScreenshotFn: (rect: Rectangle) => Promise<PNG>,
   logger: Logger
 ): Promise<string> {
   // We have to divide the max by the zoom because we will be multiplying each clip's dimensions
@@ -43,13 +43,13 @@ export async function screenshotStitcher(
   const screenshotClips$ = $getClips(outputClip, maxDimensionBeforeZoom);
 
   const screenshots$ = screenshotClips$.pipe(
-    mergeMap(clip => captureScreenshotFn(clip), (clip, data) => ({ clip, data }), 1)
+    mergeMap(clip => captureScreenshotFn(clip), (clip, png) => ({ clip, png }), 1)
   );
 
   // when we take the screenshots we don't have to scale the rects
   // but the PNGs don't know about the zoom, so we have to scale them
   const screenshotPngRects$ = screenshots$.pipe(
-    map(({ data, clip }) => {
+    map(({ png, clip }) => {
       // At this point we don't care about the offset - the screenshots have been taken.
       // We need to adjust the x & y values so they all are adjusted for the top-left most
       // clip being at 0, 0.
@@ -66,7 +66,7 @@ export async function screenshotStitcher(
         zoom
       );
       return {
-        data,
+        png,
         rectangle: scaledScreenshotRects,
       };
     })

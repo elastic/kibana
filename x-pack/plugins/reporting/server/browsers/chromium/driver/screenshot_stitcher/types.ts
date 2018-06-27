@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { PNG } from 'pngjs';
 
 export interface Rectangle {
   width: number;
@@ -17,7 +18,7 @@ export interface Size {
 }
 
 export interface Screenshot {
-  data: string;
+  png: PNG;
   rectangle: Rectangle;
 }
 

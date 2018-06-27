@@ -89,6 +89,9 @@ export class HeadlessChromiumDriver {
     }
 
     return await screenshotStitcher(outputClip, this._zoom, this._maxScreenshotDimension, async screenshotClip => {
+      // All of this retry code is due to https://github.com/elastic/kibana/issues/19563 - a bug whose origin was never
+      // discovered. Once the retry was added in, the error failed to manifest. Will continue to leave it in here in
+      // case we run into it again for debugging purposes.
       let tryCount = 0;
       while (tryCount < 3) {
         this._logger.debug(`Try ${tryCount}) Capturing screenshot clip ${JSON.stringify(screenshotClip)}`);
@@ -99,20 +102,20 @@ export class HeadlessChromiumDriver {
           }
         });
 
+        const expectedDataWidth = screenshotClip.width * this._zoom;
+        const expectedDataHeight = screenshotClip.height * this._zoom;
+
         const png = new PNG();
         const buffer = Buffer.from(data, 'base64');
         await png.parse(buffer);
 
         this._logger.debug(`Try ${tryCount}) Captured clip of width: ${png.width} and height: ${png.height}`);
-        if (
-          png.width !== screenshotClip.width * 2 ||
-          png.height !== screenshotClip.height * 2
-        ) {
+        if (png.width !== expectedDataWidth || png.height !== expectedDataHeight) {
           const errorMessage = `Try ${tryCount}) Screenshot captured with width:${
             png.width
           } and height: ${png.height}) is not of expected width: ${
-            screenshotClip.width * 2
-          } and height: ${screenshotClip.height * 2}`;
+            expectedDataWidth
+          } and height: ${expectedDataHeight}`;
 
           if (tryCount < 3) {
             tryCount++;
@@ -120,7 +123,7 @@ export class HeadlessChromiumDriver {
             throw new Error(errorMessage);
           }
         } else {
-          return data;
+          return png;
         }
       }
     }, this._logger);

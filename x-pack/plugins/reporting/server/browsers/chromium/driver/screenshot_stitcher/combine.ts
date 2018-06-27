@@ -9,8 +9,7 @@
 import $streamToObservable from '@samverschueren/stream-to-observable';
 import { PNG } from 'pngjs';
 import * as Rx from 'rxjs';
-import { ObservableInput } from 'rxjs';
-import { map, mergeMap, reduce, switchMap, tap, toArray } from 'rxjs/operators';
+import { map, reduce, switchMap, tap, toArray } from 'rxjs/operators';
 import { Logger, Screenshot, Size } from './types';
 
 // if we're only given one screenshot, and it matches the given size
@@ -52,47 +51,26 @@ export function $combine(
   }
 
   if (canUseFirstScreenshot(screenshots, outputSize)) {
-    return Rx.of(screenshots[0].data);
+    return Rx.of(screenshots[0].png.data.toString('base64'));
   }
 
-  // Turn the screenshot data into actual PNGs
-  const pngs$ = Rx.from(screenshots).pipe(
-    mergeMap(
-      (screenshot: Screenshot): ObservableInput<PNG> => {
-        const png = new PNG();
-        const buffer = Buffer.from(screenshot.data, 'base64');
-        const parseAsObservable = Rx.bindNodeCallback(png.parse.bind(png));
-        return parseAsObservable(buffer);
-      },
-      (screenshot: Screenshot, png: PNG) => {
-        if (
-          png.width !== screenshot.rectangle.width ||
-          png.height !== screenshot.rectangle.height
-        ) {
-          const errorMessage = `Screenshot captured with width:${png.width} and height: ${
-            png.height
-          }) is not of expected width: ${screenshot.rectangle.width} and height: ${
-            screenshot.rectangle.height
-          }`;
-
-          logger.error(errorMessage);
-          throw new Error(errorMessage);
-        }
-        return { screenshot, png };
-      }
-    )
-  );
-
-  const output$ = pngs$.pipe(
-    reduce((output: PNG, input: { screenshot: Screenshot; png: PNG }) => {
-      const { png, screenshot } = input;
+  const output$ = Rx.from(screenshots).pipe(
+    reduce((output: PNG, screenshot: Screenshot) => {
       // Spitting out a lot of output to help debug https://github.com/elastic/kibana/issues/19563. Once that is
       // fixed, this should probably get pared down.
       logger.debug(`Output dimensions is ${JSON.stringify(outputSize)}`);
-      logger.debug(`Input png w: ${png.width} and h: ${png.height}`);
+      logger.debug(`Input png w: ${screenshot.png.width} and h: ${screenshot.png.height}`);
       logger.debug(`Creating output png with ${JSON.stringify(screenshot.rectangle)}`);
       const { rectangle } = screenshot;
-      png.bitblt(output, 0, 0, rectangle.width, rectangle.height, rectangle.x, rectangle.y);
+      screenshot.png.bitblt(
+        output,
+        0,
+        0,
+        rectangle.width,
+        rectangle.height,
+        rectangle.x,
+        rectangle.y
+      );
       return output;
     }, new PNG({ width: outputSize.width, height: outputSize.height }))
   );
