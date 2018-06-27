@@ -23,7 +23,7 @@ export const createTestEntryTemplate = (defaultUiSettings) => (bundle) => `
 /**
  * Test entry file
  *
- * This is programatically created and updated, do not modify
+ * This is programmatically created and updated, do not modify
  *
  * context: ${bundle.getContext()}
  *

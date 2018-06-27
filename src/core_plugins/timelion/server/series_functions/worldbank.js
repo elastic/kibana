@@ -28,7 +28,7 @@ export default new Datasource ('worldbank', {
       name: 'code', // countries/all/indicators/SP.POP.TOTL
       types: ['string', 'null'],
       help: 'Worldbank API path.' +
-        ' This is usually everything after the domain, before the querystring. Eg: ' +
+        ' This is usually everything after the domain, before the querystring. E.g.: ' +
         '/en/countries/ind;chn/indicators/DPANUSSPF.'
     }
   ],

@@ -28,7 +28,7 @@ export class JsonWatch extends BaseWatch {
     return result;
   }
 
-  // To Elasicsearch
+  // To Elasticsearch
   get upstreamJson() {
     const result = super.upstreamJson;
     return result;

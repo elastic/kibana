@@ -45,7 +45,7 @@ module.factory('SavedSearch', function (courier) {
       },
     });
 
-    this.showInRecenltyAccessed = true;
+    this.showInRecentlyAccessed = true;
   }
 
   SavedSearch.type = 'search';

@@ -66,7 +66,7 @@ uiModules
         afterESResp: this._afterEsResp
       });
 
-      this.showInRecenltyAccessed = true;
+      this.showInRecentlyAccessed = true;
     }
 
     SavedVis.type = 'visualization';

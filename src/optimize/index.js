@@ -45,10 +45,10 @@ export default async (kbnServer, server, config) => {
   await uiBundles.writeEntryFiles();
 
   // Not all entry files produce a css asset. Ensuring they exist prevents
-  // an error from occuring when the file is missing.
+  // an error from occurring when the file is missing.
   await uiBundles.ensureStyleFiles();
 
-  // in prod, only bundle when someing is missing or invalid
+  // in prod, only bundle when something is missing or invalid
   const reuseCache = config.get('optimize.useBundleCache')
     ? await uiBundles.areAllBundleCachesValid()
     : false;

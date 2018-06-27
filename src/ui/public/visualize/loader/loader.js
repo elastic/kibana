@@ -32,7 +32,7 @@ import { EmbeddedVisualizeHandler } from './embedded_visualize_handler';
  * The parameters accepted by the embedVisualize calls.
  * @typedef {object} VisualizeLoaderParams
  * @property {AppState} appState The appState this visualization should use.
- *    If you don't spyecify it, the global AppState (that is decoded in the URL)
+ *    If you don't specify it, the global AppState (that is decoded in the URL)
  *    will be used. Usually you don't need to overwrite this, unless you don't
  *    want the visualization to use the global AppState.
  * @property {UiState} uiState The current uiState of the application. If you
@@ -45,7 +45,7 @@ import { EmbeddedVisualizeHandler } from './embedded_visualize_handler';
  * @property {boolean} append If set to true, the visualization will be appended
  *    to the passed element instead of replacing all its content. (default: false)
  * @property {string} cssClass If specified this CSS class (or classes with space separated)
- *    will be set to the root visuzalize element.
+ *    will be set to the root visualize element.
  * @property {object} dataAttrs An object of key-value pairs, that will be set
  *    as data-{key}="{value}" attributes on the visualization element.
  * @property {array} filters Specifies the filters that should be applied to that visualization.
@@ -119,7 +119,7 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
      *    You can alternatively pass a jQuery element instead.
      * @param {Object} savedObj The savedObject as it could be retrieved by the
      *    `savedVisualizations` service.
-     * @param {VisualizeLoaderParams} params A list of paramters that will influence rendering.
+     * @param {VisualizeLoaderParams} params A list of parameters that will influence rendering.
      *
      * @return {EmbeddedVisualizeHandler} The handler to the visualization.
      */

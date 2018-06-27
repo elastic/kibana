@@ -173,7 +173,7 @@ describe('#isCustom', () => {
     expect(config.isCustom('dateFormat')).toBe(false);
   });
 
-  it('returns false for unkown name', () => {
+  it('returns false for unknown name', () => {
     const { config } = setup();
     expect(config.isCustom('foo')).toBe(false);
   });
@@ -223,7 +223,7 @@ describe('#subscribe', () => {
 
 describe('#overrideLocalDefault', () => {
   describe('key has no user value', () => {
-    it('synchonously modifies the default value returned by get()', () => {
+    it('synchronously modifies the default value returned by get()', () => {
       const { config } = setup();
 
       expect(config.get('dateFormat')).toMatchSnapshot('get before override');
@@ -231,7 +231,7 @@ describe('#overrideLocalDefault', () => {
       expect(config.get('dateFormat')).toMatchSnapshot('get after override');
     });
 
-    it('synchonously modifies the value returned by getAll()', () => {
+    it('synchronously modifies the value returned by getAll()', () => {
       const { config } = setup();
 
       expect(config.getAll()).toMatchSnapshot('getAll before override');
