@@ -248,7 +248,7 @@ export class VegaBaseView {
   async addFilterHandler(query, index) {
     const indexId = await this._findIndex(index);
     const filter = buildQueryFilter(query, indexId);
-    this._queryfilter.addFilters(filter);
+    await this._queryfilter.addFilters(filter);
   }
 
   /**
@@ -260,8 +260,15 @@ export class VegaBaseView {
     const filter = buildQueryFilter(query, indexId);
 
     // This is a workaround for the https://github.com/elastic/kibana/issues/18863
-    // Once fixed, replace with a direct call: this._queryfilter.removeFilter(filter)
-    this._$rootScope.$evalAsync(() => this._queryfilter.removeFilter(filter));
+    // Once fixed, replace with a direct call (no await is needed because its not async)
+    //    this._queryfilter.removeFilter(filter);
+    this._$rootScope.$evalAsync(() => {
+      try {
+        this._queryfilter.removeFilter(filter);
+      } catch (err) {
+        this.onError(err);
+      }
+    });
   }
 
   removeAllFiltersHandler() {
