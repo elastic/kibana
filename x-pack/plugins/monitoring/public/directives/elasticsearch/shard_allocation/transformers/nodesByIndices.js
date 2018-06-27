@@ -18,7 +18,7 @@ export function nodesByIndices() {
       return attrs.master === 'true' ? 'master' : 'normal';
     };
 
-    // NOTE: this seems to be used, but has no discrenable effect in the UI
+    // NOTE: this seems to be used, but has no discernible effect in the UI
     function createNode(obj, node, id) {
       node.type = 'node';
       node.children = [];

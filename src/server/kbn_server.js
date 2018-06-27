@@ -97,7 +97,7 @@ export default class KbnServer {
       // initialize the plugins
       Plugins.initializeMixin,
 
-      // notify any deffered setup logic that plugins have intialized
+      // notify any deferred setup logic that plugins have initialized
       Plugins.waitForInitResolveMixin,
 
       () => {

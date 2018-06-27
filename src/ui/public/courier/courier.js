@@ -80,7 +80,7 @@ uiModules.get('kibana/courier')
 
 
       /**
-     * is the currior currently fetching search
+     * is the courier currently fetching search
      * results automatically?
      *
      * @return {boolean}
@@ -92,7 +92,7 @@ uiModules.get('kibana/courier')
 
       /**
      * stop the courier from fetching more search
-     * results, does not stop vaidating docs.
+     * results, does not stop validating docs.
      *
      * @chainable
      */
