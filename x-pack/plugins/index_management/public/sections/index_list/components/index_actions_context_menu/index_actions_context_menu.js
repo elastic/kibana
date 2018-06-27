@@ -9,6 +9,7 @@ import { all } from 'lodash';
 import pluralize from 'pluralize';
 import {
   EuiButton,
+  EuiCallOut,
   EuiContextMenu,
   EuiFieldText,
   EuiForm,
@@ -207,7 +208,7 @@ export class IndexActionsContextMenu extends Component {
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
-          title={`Set number of segments for force merge`}
+          title={`Force merge`}
           onCancel={this.closeForcemergeSegmentsModal}
           onConfirm={() => {
             if (!this.forcemergeSegmentsError()) {
@@ -233,12 +234,24 @@ export class IndexActionsContextMenu extends Component {
                 <li key={indexName}>{indexName}</li>
               ))}
             </ul>
+            <EuiCallOut
+              title="Proceed with caution!"
+              color="warning"
+              iconType="help"
+            >
+              <p>
+                Force merging a large index or an index that is not read-only can
+                potentially cause performance and stability issues in the cluster
+                if it is not run properly (run against non-read-only indices) or run during peak hours.
+              </p>
+            </EuiCallOut>
+
             <EuiForm
               isInvalid={this.forcemergeSegmentsError()}
               error={this.forcemergeSegmentsError()}
             >
               <EuiFormRow
-                label="Maximum number of segments"
+                label="Maximum number of segments per shard"
                 helpText={helpText}
               >
                 <EuiFieldText
@@ -282,10 +295,16 @@ export class IndexActionsContextMenu extends Component {
                 <li key={indexName}>{indexName}</li>
               ))}
             </ul>
-            <p>
-              This operation cannot be undone. Make sure you have appropriate
-              backups.
-            </p>
+            <EuiCallOut
+              title="Proceed with caution!"
+              color="warning"
+              iconType="help"
+            >
+              <p>
+                This operation cannot be undone. Make sure you have appropriate
+                backups.
+              </p>
+            </EuiCallOut>
           </div>
         </EuiConfirmModal>
       </EuiOverlayMask>
