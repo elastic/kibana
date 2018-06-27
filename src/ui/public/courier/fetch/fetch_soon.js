@@ -47,13 +47,13 @@ export function FetchSoonProvider(Private, Promise) {
    * @param {array} requests - the requests to fetch
    * @async
    */
-  this.these = (requests) => {
+  this.fetchSearchRequests = (requests) => {
     requests.forEach(req => req._setFetchRequested());
     debouncedFetchNow();
     return Promise.all(requests.map(req => req.getCompletePromise()));
   };
 
   this.fetchQueued = () => {
-    return this.these(requestQueue.getStartable());
+    return this.fetchSearchRequests(requestQueue.getStartable());
   };
 }

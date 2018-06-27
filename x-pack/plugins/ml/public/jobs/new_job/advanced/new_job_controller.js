@@ -472,7 +472,7 @@ module.controller('MlNewJob',
                     // mappings should be fully set up, but the Kibana mappings then
                     // need to be refreshed to reflect the Elasticsearch mappings for
                     // any new analytical fields that have been configured in the job.
-                    //courier.indexPatterns.get('.ml-anomalies-*')
+                    //indexPatterns.get('.ml-anomalies-*')
                     //.then((indexPattern) => {
                     //  indexPattern.refreshFields()
                     //  .then(() => {
