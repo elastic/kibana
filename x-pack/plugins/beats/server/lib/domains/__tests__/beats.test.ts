@@ -90,7 +90,7 @@ describe('Beats Domain Lib', () => {
       ];
       const framework = new TestingBackendFrameworkAdapter(null, settings);
 
-      const tokensLib = new CMTokensDomain(new MemoryTokensAdapter(), {
+      const tokensLib = new CMTokensDomain(new MemoryTokensAdapter([]), {
         framework,
       });
 

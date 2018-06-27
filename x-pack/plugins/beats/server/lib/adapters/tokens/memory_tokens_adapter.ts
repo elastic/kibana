@@ -6,14 +6,20 @@
 
 import { CMTokensAdapter, EnrollmentToken, FrameworkRequest } from '../../lib';
 
-const tokenDB: EnrollmentToken[] = [];
-
 export class MemoryTokensAdapter implements CMTokensAdapter {
+  private tokenDB: EnrollmentToken[];
+
+  constructor(tokenDB: EnrollmentToken[]) {
+    this.tokenDB = tokenDB;
+  }
+
   public async deleteEnrollmentToken(enrollmentToken: string) {
-    const index = tokenDB.findIndex(token => token.token === enrollmentToken);
+    const index = this.tokenDB.findIndex(
+      token => token.token === enrollmentToken
+    );
 
     if (index > -1) {
-      tokenDB.splice(index, 1);
+      this.tokenDB.splice(index, 1);
     }
   }
 
@@ -21,17 +27,19 @@ export class MemoryTokensAdapter implements CMTokensAdapter {
     tokenString: string
   ): Promise<EnrollmentToken> {
     return new Promise<EnrollmentToken>(resolve => {
-      return resolve(tokenDB.find(token => token.token === tokenString));
+      return resolve(this.tokenDB.find(token => token.token === tokenString));
     });
   }
 
   public async upsertTokens(req: FrameworkRequest, tokens: EnrollmentToken[]) {
     tokens.forEach(token => {
-      const existingIndex = tokenDB.findIndex(t => t.token === token.token);
+      const existingIndex = this.tokenDB.findIndex(
+        t => t.token === token.token
+      );
       if (existingIndex !== -1) {
-        tokenDB[existingIndex] = token;
+        this.tokenDB[existingIndex] = token;
       } else {
-        tokenDB.push(token);
+        this.tokenDB.push(token);
       }
     });
     return tokens;
