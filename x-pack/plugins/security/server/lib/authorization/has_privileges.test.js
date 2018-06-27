@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { hasPrivilegesWithServer } from './has_privileges';
+import { hasPrivilegesWithServer, HAS_PRIVILEGES_RESULT } from './has_privileges';
 import { getClient } from '../../../../../server/lib/get_client_shield';
 import { DEFAULT_RESOURCE } from '../../../common/constants';
 import { getLoginPrivilege, getVersionPrivilege } from '../privileges';
@@ -84,7 +84,7 @@ const expectDeprecationLogged = (mockServer) => {
   expect(mockServer.log).toHaveBeenCalledWith(['warning', 'deprecated', 'security'], expect.stringContaining('deprecated'));
 };
 
-test(`returns success of true if they have all application privileges`, async () => {
+test(`returns authorized if they have all application privileges`, async () => {
   const privilege = `action:saved_objects/${savedObjectTypes[0]}/get`;
   const username = 'foo-username';
   const mockServer = createMockServer();
@@ -120,14 +120,13 @@ test(`returns success of true if they have all application privileges`, async ()
     }
   });
   expect(result).toEqual({
-    success: true,
+    result: HAS_PRIVILEGES_RESULT.AUTHORIZED,
+    username,
     missing: [],
-    useLegacyFallback: false,
-    username
   });
 });
 
-test(`returns success of false if they have only one application privilege`, async () => {
+test(`returns unauthorized they have only one application privilege`, async () => {
   const privilege1 = `action:saved_objects/${savedObjectTypes[0]}/get`;
   const privilege2 = `action:saved_objects/${savedObjectTypes[0]}/create`;
   const username = 'foo-username';
@@ -165,10 +164,9 @@ test(`returns success of false if they have only one application privilege`, asy
     }
   });
   expect(result).toEqual({
-    success: false,
+    result: HAS_PRIVILEGES_RESULT.UNAUTHORIZED,
+    username,
     missing: [privilege2],
-    useLegacyFallback: false,
-    username
   });
 });
 
@@ -194,7 +192,7 @@ test(`throws error if missing version privilege and has login privilege`, async 
 });
 
 describe('legacy fallback with no application privileges', () => {
-  test(`returns useLegacyFallback of false if they have no privileges on the kibana index`, async () => {
+  test(`returns unauthorized if they have no privileges on the kibana index`, async () => {
     const privilege = `action:saved_objects/${savedObjectTypes[0]}/get`;
     const username = 'foo-username';
     const mockServer = createMockServer();
@@ -245,15 +243,14 @@ describe('legacy fallback with no application privileges', () => {
       }
     });
     expect(result).toEqual({
-      success: false,
-      missing: [getLoginPrivilege(), ...privileges],
+      result: HAS_PRIVILEGES_RESULT.UNAUTHORIZED,
       username,
-      useLegacyFallback: false,
+      missing: [getLoginPrivilege(), ...privileges],
     });
   });
 
   ['create', 'delete', 'read', 'view_index_metadata'].forEach(indexPrivilege => {
-    test(`returns useLegacyFallback of true if they have ${indexPrivilege} privilege on the kibana index`, async () => {
+    test(`returns legacy if they have ${indexPrivilege} privilege on the kibana index`, async () => {
       const privilege = `action:saved_objects/${savedObjectTypes[0]}/get`;
       const username = 'foo-username';
       const mockServer = createMockServer();
@@ -305,10 +302,9 @@ describe('legacy fallback with no application privileges', () => {
         }
       });
       expect(result).toEqual({
-        success: false,
-        missing: [getLoginPrivilege(), ...privileges],
+        result: HAS_PRIVILEGES_RESULT.LEGACY,
         username,
-        useLegacyFallback: true,
+        missing: [getLoginPrivilege(), ...privileges],
       });
     });
   });

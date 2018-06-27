@@ -5,6 +5,7 @@
  */
 
 import { get, uniq } from 'lodash';
+import { HAS_PRIVILEGES_RESULT } from '../authorization/has_privileges';
 
 const getPrivilege = (type, action) => {
   return `action:saved_objects/${type}/${action}`;
@@ -95,15 +96,14 @@ export class SecureSavedObjectsClient {
     // we have to filter for only their authorized types
     const types = this._savedObjectTypes;
     const typesToPrivilegesMap = new Map(types.map(type => [type, getPrivilege(type, action)]));
-    const hasPrivilegesResult = await this._hasSavedObjectPrivileges(Array.from(typesToPrivilegesMap.values()));
+    const { result, username, missing } = await this._hasSavedObjectPrivileges(Array.from(typesToPrivilegesMap.values()));
 
-    // if they don't have any application privileges, we fallback to searching as the authenticated user
-    if (!hasPrivilegesResult.success && hasPrivilegesResult.useLegacyFallback) {
+    if (result === HAS_PRIVILEGES_RESULT.LEGACY) {
       this._auditLogger.savedObjectsAuthorizationFailure(
-        hasPrivilegesResult.username,
+        username,
         action,
         types,
-        hasPrivilegesResult.missing,
+        missing,
         true,
         { options }
       );
@@ -111,22 +111,22 @@ export class SecureSavedObjectsClient {
     }
 
     const authorizedTypes = Array.from(typesToPrivilegesMap.entries())
-      .filter(([ , privilege]) => !hasPrivilegesResult.missing.includes(privilege))
+      .filter(([ , privilege]) => !missing.includes(privilege))
       .map(([type]) => type);
 
     if (authorizedTypes.length === 0) {
       this._auditLogger.savedObjectsAuthorizationFailure(
-        hasPrivilegesResult.username,
+        username,
         action,
         types,
-        hasPrivilegesResult.missing,
+        missing,
         false,
         { options }
       );
       throw this.errors.decorateForbiddenError(new Error(`Not authorized to find saved_object`));
     }
 
-    this._auditLogger.savedObjectsAuthorizationSuccess(hasPrivilegesResult.username, action, authorizedTypes, { options });
+    this._auditLogger.savedObjectsAuthorizationSuccess(username, action, authorizedTypes, { options });
 
     return await this._internalRepository.find({
       ...options,
@@ -178,21 +178,22 @@ export class SecureSavedObjectsClient {
   async _performAuthorizationCheck(typeOrTypes, action, args) {
     const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
     const privileges = types.map(type => getPrivilege(type, action));
-    const result = await this._hasSavedObjectPrivileges(privileges);
+    const { result, username, missing } = await this._hasSavedObjectPrivileges(privileges);
 
-    if (result.success) {
-      this._auditLogger.savedObjectsAuthorizationSuccess(result.username, action, types, args);
-      return true;
+    switch (result) {
+      case HAS_PRIVILEGES_RESULT.AUTHORIZED:
+        this._auditLogger.savedObjectsAuthorizationSuccess(username, action, types, args);
+        return true;
+      case HAS_PRIVILEGES_RESULT.LEGACY:
+        this._auditLogger.savedObjectsAuthorizationFailure(username, action, types, missing, true, args);
+        return false;
+      case HAS_PRIVILEGES_RESULT.UNAUTHORIZED:
+        this._auditLogger.savedObjectsAuthorizationFailure(username, action, types, missing, false, args);
+        const msg = `Unable to ${action} ${types.sort().join(',')}, missing ${missing.sort().join(',')}`;
+        throw this.errors.decorateForbiddenError(new Error(msg));
+      default:
+        throw new Error('Unexpected result from hasPrivileges');
     }
-
-    this._auditLogger.savedObjectsAuthorizationFailure(result.username, action, types, result.missing, result.useLegacyFallback, args);
-
-    if (result.useLegacyFallback) {
-      return false;
-    }
-
-    const msg = `Unable to ${action} ${types.sort().join(',')}, missing ${result.missing.sort().join(',')}`;
-    throw this.errors.decorateForbiddenError(new Error(msg));
   }
 
   async _hasSavedObjectPrivileges(privileges) {

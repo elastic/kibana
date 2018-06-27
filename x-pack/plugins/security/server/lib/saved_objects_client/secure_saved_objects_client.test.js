@@ -5,6 +5,7 @@
  */
 
 import { SecureSavedObjectsClient } from './secure_saved_objects_client';
+import { HAS_PRIVILEGES_RESULT } from '../authorization/has_privileges';
 
 const createMockErrors = () => {
   const forbiddenError = new Error('Mock ForbiddenError');
@@ -57,18 +58,16 @@ describe('#create', () => {
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
 
-  test(`throws decorated ForbiddenError when user isn't authorized and no legacy fallback`, async () => {
+  test(`throws decorated ForbiddenError when unauthorized`, async () => {
     const type = 'foo';
     const username = Symbol();
-    const useLegacyFallback = false;
     const mockErrors = createMockErrors();
     const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-      success: false,
+      result: HAS_PRIVILEGES_RESULT.UNAUTHORIZED,
+      username,
       missing: [
         `action:saved_objects/${type}/create`
       ],
-      useLegacyFallback,
-      username
     }));
     const mockAuditLogger = createMockAuditLogger();
     const client = new SecureSavedObjectsClient({
@@ -88,7 +87,7 @@ describe('#create', () => {
       'create',
       [type],
       [`action:saved_objects/${type}/create`],
-      useLegacyFallback,
+      false,
       {
         type,
         attributes,
@@ -98,7 +97,7 @@ describe('#create', () => {
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
 
-  test(`returns result of internalRepository.create when user is authorized`, async () => {
+  test(`returns result of internalRepository.create when authorized`, async () => {
     const type = 'foo';
     const username = Symbol();
     const returnValue = Symbol();
@@ -106,7 +105,7 @@ describe('#create', () => {
       create: jest.fn().mockReturnValue(returnValue)
     };
     const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-      success: true,
+      result: HAS_PRIVILEGES_RESULT.AUTHORIZED,
       username,
     }));
     const mockAuditLogger = createMockAuditLogger();
@@ -130,21 +129,19 @@ describe('#create', () => {
     });
   });
 
-  test(`returns result of callWithRequestRepository.create when user isn't authorized and has legacy fallback`, async () => {
+  test(`returns result of callWithRequestRepository.create when legacy`, async () => {
     const type = 'foo';
     const username = Symbol();
     const returnValue = Symbol();
-    const useLegacyFallback = true;
     const mockRepository = {
       create: jest.fn().mockReturnValue(returnValue)
     };
     const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-      success: false,
+      result: HAS_PRIVILEGES_RESULT.LEGACY,
+      username,
       missing: [
         `action:saved_objects/${type}/create`
       ],
-      username,
-      useLegacyFallback,
     }));
     const mockAuditLogger = createMockAuditLogger();
     const client = new SecureSavedObjectsClient({
@@ -165,7 +162,7 @@ describe('#create', () => {
       'create',
       [type],
       [`action:saved_objects/${type}/create`],
-      useLegacyFallback,
+      true,
       {
         type,
         attributes,
@@ -198,19 +195,17 @@ describe('#bulkCreate', () => {
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
 
-  test(`throws decorated ForbiddenError when user isn't authorized and no legacy fallback`, async () => {
+  test(`throws decorated ForbiddenError when unauthorized`, async () => {
     const type1 = 'foo';
     const type2 = 'bar';
     const username = Symbol();
-    const useLegacyFallback = false;
     const mockErrors = createMockErrors();
     const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-      success: false,
+      result: HAS_PRIVILEGES_RESULT.UNAUTHORIZED,
+      username,
       missing: [
         `action:saved_objects/${type1}/bulk_create`
       ],
-      useLegacyFallback,
-      username,
     }));
     const mockAuditLogger = createMockAuditLogger();
     const client = new SecureSavedObjectsClient({
@@ -237,7 +232,7 @@ describe('#bulkCreate', () => {
       'bulk_create',
       [type2, type1],
       [`action:saved_objects/${type1}/bulk_create`],
-      useLegacyFallback,
+      false,
       {
         objects,
         options,
@@ -245,7 +240,7 @@ describe('#bulkCreate', () => {
     );
   });
 
-  test(`returns result of internalRepository.bulkCreate when user is authorized`, async () => {
+  test(`returns result of internalRepository.bulkCreate when authorized`, async () => {
     const username = Symbol();
     const type1 = 'foo';
     const type2 = 'bar';
@@ -254,7 +249,7 @@ describe('#bulkCreate', () => {
       bulkCreate: jest.fn().mockReturnValue(returnValue)
     };
     const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-      success: true,
+      result: HAS_PRIVILEGES_RESULT.AUTHORIZED,
       username,
     }));
     const mockAuditLogger = createMockAuditLogger();
@@ -280,9 +275,8 @@ describe('#bulkCreate', () => {
     });
   });
 
-  test(`returns result of callWithRequestRepository.bulkCreate when user isn't authorized and has legacy fallback`, async () => {
+  test(`returns result of callWithRequestRepository.bulkCreate when legacy`, async () => {
     const username = Symbol();
-    const useLegacyFallback = true;
     const type1 = 'foo';
     const type2 = 'bar';
     const returnValue = Symbol();
@@ -290,13 +284,12 @@ describe('#bulkCreate', () => {
       bulkCreate: jest.fn().mockReturnValue(returnValue)
     };
     const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-      success: false,
+      result: HAS_PRIVILEGES_RESULT.LEGACY,
+      username,
       missing: [
         `action:saved_objects/${type1}/bulk_create`,
         `action:saved_objects/${type2}/bulk_create`,
       ],
-      useLegacyFallback,
-      username,
     }));
     const mockAuditLogger = createMockAuditLogger();
     const client = new SecureSavedObjectsClient({
@@ -322,7 +315,7 @@ describe('#bulkCreate', () => {
         `action:saved_objects/${type1}/bulk_create`,
         `action:saved_objects/${type2}/bulk_create`,
       ],
-      useLegacyFallback,
+      true,
       {
         objects,
         options,
@@ -354,18 +347,16 @@ describe('#delete', () => {
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
 
-  test(`throws decorated ForbiddenError when user isn't authorized and no legacy fallback`, async () => {
+  test(`throws decorated ForbiddenError when unauthorized`, async () => {
     const type = 'foo';
     const username = Symbol();
-    const useLegacyFallback = false;
     const mockErrors = createMockErrors();
     const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-      success: false,
+      result: HAS_PRIVILEGES_RESULT.UNAUTHORIZED,
+      username,
       missing: [
         `action:saved_objects/${type}/delete`
       ],
-      useLegacyFallback,
-      username,
     }));
     const mockAuditLogger = createMockAuditLogger();
     const client = new SecureSavedObjectsClient({
@@ -384,7 +375,7 @@ describe('#delete', () => {
       'delete',
       [type],
       [`action:saved_objects/${type}/delete`],
-      useLegacyFallback,
+      false,
       {
         type,
         id,
@@ -393,7 +384,7 @@ describe('#delete', () => {
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
 
-  test(`returns result of internalRepository.delete when user is authorized`, async () => {
+  test(`returns result of internalRepository.delete when authorized`, async () => {
     const type = 'foo';
     const username = Symbol();
     const returnValue = Symbol();
@@ -401,7 +392,7 @@ describe('#delete', () => {
       delete: jest.fn().mockReturnValue(returnValue)
     };
     const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-      success: true,
+      result: HAS_PRIVILEGES_RESULT.AUTHORIZED,
       username,
     }));
     const mockAuditLogger = createMockAuditLogger();
@@ -423,21 +414,19 @@ describe('#delete', () => {
     });
   });
 
-  test(`returns result of internalRepository.delete when user isn't authorized and and has legacy fallback`, async () => {
+  test(`returns result of internalRepository.delete when legacy`, async () => {
     const type = 'foo';
     const username = Symbol();
-    const useLegacyFallback = true;
     const returnValue = Symbol();
     const mockRepository = {
       delete: jest.fn().mockReturnValue(returnValue)
     };
     const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-      success: false,
-      useLegacyFallback,
+      result: HAS_PRIVILEGES_RESULT.LEGACY,
+      username,
       missing: [
         `action:saved_objects/${type}/delete`
       ],
-      username,
     }));
     const mockAuditLogger = createMockAuditLogger();
     const client = new SecureSavedObjectsClient({
@@ -456,7 +445,7 @@ describe('#delete', () => {
       'delete',
       [type],
       [`action:saved_objects/${type}/delete`],
-      useLegacyFallback,
+      true,
       {
         type,
         id,
@@ -489,19 +478,17 @@ describe('#find', () => {
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
     });
 
-    test(`throws decorated ForbiddenError when type's sinuglar and user isn't authorized and no legacy fallback`, async () => {
+    test(`throws decorated ForbiddenError when type's singular and unauthorized`, async () => {
       const type = 'foo';
       const username = Symbol();
-      const useLegacyFallback = false;
       const mockRepository = {};
       const mockErrors = createMockErrors();
       const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-        success: false,
+        result: HAS_PRIVILEGES_RESULT.UNAUTHORIZED,
+        username,
         missing: [
           `action:saved_objects/${type}/find`
         ],
-        useLegacyFallback,
-        username,
       }));
       const mockAuditLogger = createMockAuditLogger();
       const client = new SecureSavedObjectsClient({
@@ -521,7 +508,7 @@ describe('#find', () => {
         'find',
         [type],
         [`action:saved_objects/${type}/find`],
-        useLegacyFallback,
+        false,
         {
           options
         }
@@ -529,19 +516,17 @@ describe('#find', () => {
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
     });
 
-    test(`throws decorated ForbiddenError when type's an array and user isn't authorized for one type and no legacy fallback`, async () => {
+    test(`throws decorated ForbiddenError when type's an array and unauthorized`, async () => {
       const type1 = 'foo';
       const type2 = 'bar';
       const username = Symbol();
-      const useLegacyFallback = false;
       const mockErrors = createMockErrors();
       const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-        success: false,
+        result: HAS_PRIVILEGES_RESULT.UNAUTHORIZED,
+        username,
         missing: [
           `action:saved_objects/${type1}/find`
         ],
-        useLegacyFallback,
-        username,
       }));
       const mockAuditLogger = createMockAuditLogger();
       const client = new SecureSavedObjectsClient({
@@ -560,7 +545,7 @@ describe('#find', () => {
         'find',
         [type2, type1],
         [`action:saved_objects/${type1}/find`],
-        useLegacyFallback,
+        false,
         {
           options
         }
@@ -568,21 +553,19 @@ describe('#find', () => {
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
     });
 
-    test(`throws decorated ForbiddenError when type's an array and user isn't authorized for any type and no legacy fallback`, async () => {
+    test(`throws decorated ForbiddenError when type's an array and unauthorized`, async () => {
       const type1 = 'foo';
       const type2 = 'bar';
       const username = Symbol();
-      const useLegacyFallback = false;
       const mockRepository = {};
       const mockErrors = createMockErrors();
       const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-        success: false,
+        result: HAS_PRIVILEGES_RESULT.UNAUTHORIZED,
+        username,
         missing: [
           `action:saved_objects/${type1}/find`,
           `action:saved_objects/${type2}/find`
         ],
-        useLegacyFallback,
-        username,
       }));
       const mockAuditLogger = createMockAuditLogger();
       const client = new SecureSavedObjectsClient({
@@ -602,7 +585,7 @@ describe('#find', () => {
         'find',
         [type2, type1],
         [`action:saved_objects/${type2}/find`, `action:saved_objects/${type1}/find`],
-        useLegacyFallback,
+        false,
         {
           options
         }
@@ -610,7 +593,7 @@ describe('#find', () => {
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
     });
 
-    test(`returns result of internalRepository.find when user is authorized`, async () => {
+    test(`returns result of internalRepository.find when authorized`, async () => {
       const type = 'foo';
       const username = Symbol();
       const returnValue = Symbol();
@@ -618,7 +601,7 @@ describe('#find', () => {
         find: jest.fn().mockReturnValue(returnValue)
       };
       const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-        success: true,
+        result: HAS_PRIVILEGES_RESULT.AUTHORIZED,
         username,
       }));
       const mockAuditLogger = createMockAuditLogger();
@@ -639,21 +622,19 @@ describe('#find', () => {
       });
     });
 
-    test(`returns result of callWithRequestRepository.find when user isn't authorized and has legacy fallback`, async () => {
+    test(`returns result of callWithRequestRepository.find when legacy`, async () => {
       const type = 'foo';
       const username = Symbol();
-      const useLegacyFallback = true;
       const returnValue = Symbol();
       const mockRepository = {
         find: jest.fn().mockReturnValue(returnValue)
       };
       const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-        success: false,
+        result: HAS_PRIVILEGES_RESULT.LEGACY,
+        username,
         missing: [
           `action:saved_objects/${type}/find`
         ],
-        useLegacyFallback,
-        username,
       }));
       const mockAuditLogger = createMockAuditLogger();
       const client = new SecureSavedObjectsClient({
@@ -672,7 +653,7 @@ describe('#find', () => {
         'find',
         [type],
         [`action:saved_objects/${type}/find`],
-        useLegacyFallback,
+        true,
         {
           options
         }
@@ -707,19 +688,17 @@ describe('#find', () => {
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
     });
 
-    test(`throws decorated ForbiddenError when user isn't authorized and no legacy fallback`, async () => {
+    test(`throws decorated ForbiddenError when unauthorized`, async () => {
       const type = 'foo';
       const username = Symbol();
-      const useLegacyFallback = false;
       const mockRepository = {};
       const mockErrors = createMockErrors();
       const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-        success: false,
+        result: HAS_PRIVILEGES_RESULT.UNAUTHORIZED,
+        username,
         missing: [
           `action:saved_objects/${type}/find`
         ],
-        useLegacyFallback,
-        username,
       }));
       const mockAuditLogger = createMockAuditLogger();
       const client = new SecureSavedObjectsClient({
@@ -740,7 +719,7 @@ describe('#find', () => {
         'find',
         [type],
         [`action:saved_objects/${type}/find`],
-        useLegacyFallback,
+        false,
         {
           options
         }
@@ -748,22 +727,20 @@ describe('#find', () => {
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
     });
 
-    test(`returns result of callWithRequestRepository.find when user isn't authorized and has legacy fallback`, async () => {
+    test(`returns result of callWithRequestRepository.find when legacy`, async () => {
       const type = 'foo';
       const username = Symbol();
       const returnValue = Symbol();
-      const useLegacyFallback = true;
       const mockRepository = {
         find: jest.fn().mockReturnValue(returnValue)
       };
       const mockErrors = createMockErrors();
       const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-        success: false,
+        result: HAS_PRIVILEGES_RESULT.LEGACY,
+        username,
         missing: [
           `action:saved_objects/${type}/find`
         ],
-        useLegacyFallback,
-        username,
       }));
       const mockAuditLogger = createMockAuditLogger();
       const client = new SecureSavedObjectsClient({
@@ -785,7 +762,7 @@ describe('#find', () => {
         'find',
         [type],
         [`action:saved_objects/${type}/find`],
-        useLegacyFallback,
+        true,
         {
           options
         }
@@ -801,7 +778,7 @@ describe('#find', () => {
       };
       const mockErrors = createMockErrors();
       const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-        success: false,
+        result: HAS_PRIVILEGES_RESULT.UNAUTHORIZED,
         missing: [
           `action:saved_objects/${type1}/find`
         ]
@@ -831,9 +808,9 @@ describe('#find', () => {
         find: jest.fn().mockReturnValue(returnValue)
       };
       const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-        success: true,
-        missing: [],
+        result: HAS_PRIVILEGES_RESULT.AUTHORIZED,
         username,
+        missing: [],
       }));
       const mockAuditLogger = createMockAuditLogger();
       const client = new SecureSavedObjectsClient({
@@ -857,19 +834,38 @@ describe('#find', () => {
 });
 
 describe('#bulkGet', () => {
-  test(`throws decorated ForbiddenError when user isn't authorized and no legacy fallback`, async () => {
+  test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
+    const type = 'foo';
+    const mockErrors = createMockErrors();
+    const mockHasPrivileges = jest.fn().mockImplementation(async () => {
+      throw new Error();
+    });
+    const mockAuditLogger = createMockAuditLogger();
+    const client = new SecureSavedObjectsClient({
+      errors: mockErrors,
+      hasPrivileges: mockHasPrivileges,
+      auditLogger: mockAuditLogger,
+    });
+
+    await expect(client.bulkGet([{ type }])).rejects.toThrowError(mockErrors.generalError);
+
+    expect(mockHasPrivileges).toHaveBeenCalledWith(['action:saved_objects/foo/bulk_get']);
+    expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
+    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+  });
+
+  test(`throws decorated ForbiddenError when unauthorized`, async () => {
     const type1 = 'foo';
     const type2 = 'bar';
     const username = Symbol();
-    const useLegacyFallback = false;
     const mockErrors = createMockErrors();
     const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-      success: false,
+      result: HAS_PRIVILEGES_RESULT.UNAUTHORIZED,
+      username,
       missing: [
         `action:saved_objects/${type1}/bulk_get`
       ],
-      useLegacyFallback,
-      username,
     }));
     const mockAuditLogger = createMockAuditLogger();
     const client = new SecureSavedObjectsClient({
@@ -892,7 +888,7 @@ describe('#bulkGet', () => {
       'bulk_get',
       [type2, type1],
       [`action:saved_objects/${type1}/bulk_get`],
-      useLegacyFallback,
+      false,
       {
         objects
       }
@@ -900,28 +896,7 @@ describe('#bulkGet', () => {
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
 
-  test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
-    const type = 'foo';
-    const mockErrors = createMockErrors();
-    const mockHasPrivileges = jest.fn().mockImplementation(async () => {
-      throw new Error();
-    });
-    const mockAuditLogger = createMockAuditLogger();
-    const client = new SecureSavedObjectsClient({
-      errors: mockErrors,
-      hasPrivileges: mockHasPrivileges,
-      auditLogger: mockAuditLogger,
-    });
-
-    await expect(client.bulkGet([{ type }])).rejects.toThrowError(mockErrors.generalError);
-
-    expect(mockHasPrivileges).toHaveBeenCalledWith(['action:saved_objects/foo/bulk_get']);
-    expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
-    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-  });
-
-  test(`returns result of internalRepository.bulkGet when user is authorized`, async () => {
+  test(`returns result of internalRepository.bulkGet when authorized`, async () => {
     const type1 = 'foo';
     const type2 = 'bar';
     const username = Symbol();
@@ -930,7 +905,7 @@ describe('#bulkGet', () => {
       bulkGet: jest.fn().mockReturnValue(returnValue)
     };
     const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-      success: true,
+      result: HAS_PRIVILEGES_RESULT.AUTHORIZED,
       username,
     }));
     const mockAuditLogger = createMockAuditLogger();
@@ -954,23 +929,21 @@ describe('#bulkGet', () => {
     });
   });
 
-  test(`returns result of callWithRequestRepository.bulkGet when user isn't authorized and has legacy fallback`, async () => {
+  test(`returns result of callWithRequestRepository.bulkGet when legacy`, async () => {
     const type1 = 'foo';
     const type2 = 'bar';
     const username = Symbol();
-    const useLegacyFallback = true;
     const returnValue = Symbol();
     const mockRepository = {
       bulkGet: jest.fn().mockReturnValue(returnValue)
     };
     const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-      success: false,
+      result: HAS_PRIVILEGES_RESULT.LEGACY,
+      username,
       missing: [
         `action:saved_objects/${type1}/bulk_get`,
         `action:saved_objects/${type2}/bulk_get`
       ],
-      useLegacyFallback,
-      username,
     }));
     const mockAuditLogger = createMockAuditLogger();
     const client = new SecureSavedObjectsClient({
@@ -992,7 +965,7 @@ describe('#bulkGet', () => {
       'bulk_get',
       [type1, type2],
       [`action:saved_objects/${type1}/bulk_get`, `action:saved_objects/${type2}/bulk_get`],
-      useLegacyFallback,
+      true,
       {
         objects
       }
@@ -1023,18 +996,16 @@ describe('#get', () => {
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
 
-  test(`throws decorated ForbiddenError when user isn't authorized and no legacy fallback`, async () => {
+  test(`throws decorated ForbiddenError when unauthorized`, async () => {
     const type = 'foo';
     const username = Symbol();
-    const useLegacyFallback = false;
     const mockErrors = createMockErrors();
     const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-      success: false,
+      result: HAS_PRIVILEGES_RESULT.UNAUTHORIZED,
+      username,
       missing: [
         `action:saved_objects/${type}/get`
       ],
-      useLegacyFallback,
-      username,
     }));
     const mockAuditLogger = createMockAuditLogger();
     const client = new SecureSavedObjectsClient({
@@ -1053,7 +1024,7 @@ describe('#get', () => {
       'get',
       [type],
       [`action:saved_objects/${type}/get`],
-      useLegacyFallback,
+      false,
       {
         type,
         id,
@@ -1062,7 +1033,7 @@ describe('#get', () => {
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
 
-  test(`returns result of internalRepository.get when user is authorized`, async () => {
+  test(`returns result of internalRepository.get when authorized`, async () => {
     const type = 'foo';
     const username = Symbol();
     const returnValue = Symbol();
@@ -1070,7 +1041,7 @@ describe('#get', () => {
       get: jest.fn().mockReturnValue(returnValue)
     };
     const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-      success: true,
+      result: HAS_PRIVILEGES_RESULT.AUTHORIZED,
       username,
     }));
     const mockAuditLogger = createMockAuditLogger();
@@ -1095,18 +1066,16 @@ describe('#get', () => {
   test(`returns result of callWithRequestRepository.get when user isn't authorized and has legacy fallback`, async () => {
     const type = 'foo';
     const username = Symbol();
-    const useLegacyFallback = true;
     const returnValue = Symbol();
     const mockRepository = {
       get: jest.fn().mockReturnValue(returnValue)
     };
     const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-      success: false,
+      result: HAS_PRIVILEGES_RESULT.LEGACY,
+      username,
       missing: [
         `action:saved_objects/${type}/get`
       ],
-      useLegacyFallback,
-      username,
     }));
     const mockAuditLogger = createMockAuditLogger();
     const client = new SecureSavedObjectsClient({
@@ -1125,7 +1094,7 @@ describe('#get', () => {
       'get',
       [type],
       [`action:saved_objects/${type}/get`],
-      useLegacyFallback,
+      true,
       {
         type,
         id,
@@ -1157,18 +1126,16 @@ describe('#update', () => {
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
 
-  test(`throws decorated ForbiddenError when user isn't authorized and no legacy fallback`, async () => {
+  test(`throws decorated ForbiddenError when unauthorized`, async () => {
     const type = 'foo';
     const username = Symbol();
-    const useLegacyFallback = false;
     const mockErrors = createMockErrors();
     const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-      success: false,
+      result: HAS_PRIVILEGES_RESULT.UNAUTHORIZED,
+      username,
       missing: [
         'action:saved_objects/foo/update'
       ],
-      useLegacyFallback,
-      username,
     }));
     const mockAuditLogger = createMockAuditLogger();
     const client = new SecureSavedObjectsClient({
@@ -1189,7 +1156,7 @@ describe('#update', () => {
       'update',
       [type],
       [`action:saved_objects/${type}/update`],
-      useLegacyFallback,
+      false,
       {
         type,
         id,
@@ -1200,7 +1167,7 @@ describe('#update', () => {
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
 
-  test(`returns result of repository.update when user is authorized`, async () => {
+  test(`returns result of repository.update when authorized`, async () => {
     const type = 'foo';
     const username = Symbol();
     const returnValue = Symbol();
@@ -1208,7 +1175,7 @@ describe('#update', () => {
       update: jest.fn().mockReturnValue(returnValue)
     };
     const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-      success: true,
+      result: HAS_PRIVILEGES_RESULT.AUTHORIZED,
       username,
     }));
     const mockAuditLogger = createMockAuditLogger();
@@ -1234,21 +1201,19 @@ describe('#update', () => {
     });
   });
 
-  test(`returns result of repository.update when user isn't authorized and has legacy fallback`, async () => {
+  test(`returns result of repository.update when legacy`, async () => {
     const type = 'foo';
     const username = Symbol();
-    const useLegacyFallback = true;
     const returnValue = Symbol();
     const mockRepository = {
       update: jest.fn().mockReturnValue(returnValue)
     };
     const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-      success: false,
+      result: HAS_PRIVILEGES_RESULT.LEGACY,
+      username,
       missing: [
         'action:saved_objects/foo/update'
       ],
-      useLegacyFallback,
-      username,
     }));
     const mockAuditLogger = createMockAuditLogger();
     const client = new SecureSavedObjectsClient({
@@ -1269,7 +1234,7 @@ describe('#update', () => {
       'update',
       [type],
       [`action:saved_objects/${type}/update`],
-      useLegacyFallback,
+      true,
       {
         type,
         id,
