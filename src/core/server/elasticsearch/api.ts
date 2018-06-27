@@ -53,10 +53,7 @@ export function registerElasticsearchRoutes(
 
       log.info('got scoped [data] cluster, now calling it');
 
-      // TODO: fix this in follow-up. search is on callWithRequest
-      // const response = await cluster.search({});
-      let response: any = cluster;
-      response = { hits: { total: 0 } };
+      const response = cluster.call('search', {});
 
       return res.ok({
         params: req.params,

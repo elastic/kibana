@@ -39,8 +39,7 @@ import { ElasticsearchConfigs } from './elasticsearch_configs';
 import { ScopedDataClient } from './scoped_data_client';
 
 interface Clients {
-  data: Client;
-  admin: Client;
+  [type in ElasticsearchClusterType]: Client;
 }
 
 export class ElasticsearchService implements CoreService {
