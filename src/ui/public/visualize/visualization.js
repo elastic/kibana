@@ -31,6 +31,20 @@ const _showNoResultsMessage = (vis, visData) => {
 };
 
 export class Visualization extends Component {
+  static getDerivedStateFromProps(props, prevState) {
+    const listenOnChangeChanged = props.hasOwnProperty('listenOnChange') && props.listenOnChange !== prevState.listenOnChange;
+    const uiStateChanged = props.uiState && props.uiState !== props.vis.getUiState();
+    if (listenOnChangeChanged || uiStateChanged) {
+      throw new Error('Changing listenOnChange or uiState props is not allowed!');
+    }
+
+    const showNoResultsMessage = _showNoResultsMessage(props.vis, props.visData);
+    if (prevState.showNoResultsMessage !== showNoResultsMessage) {
+      return { showNoResultsMessage };
+    }
+    return null;
+  }
+
   constructor(props) {
     super(props);
 
@@ -66,20 +80,6 @@ export class Visualization extends Component {
   _onChangeListener = () => {
     this.forceUpdate();
   };
-
-  static getDerivedStateFromProps(props, prevState) {
-    const listenOnChangeChanged = props.hasOwnProperty('listenOnChange') && props.listenOnChange !== prevState.listenOnChange;
-    const uiStateChanged = props.uiState && props.uiState !== props.vis.getUiState();
-    if (listenOnChangeChanged || uiStateChanged) {
-      throw new Error('Changing listenOnChange or uiState props is not allowed!');
-    }
-
-    const showNoResultsMessage = _showNoResultsMessage(props.vis, props.visData);
-    if (prevState.showNoResultsMessage !== showNoResultsMessage) {
-      return { showNoResultsMessage };
-    }
-    return null;
-  }
 
   componentWillUnmount() {
     this.props.uiState.off('change', this._onChangeListener);

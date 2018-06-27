@@ -30,7 +30,7 @@ import { keyCodes } from '@elastic/eui';
 import { DefaultEditorSize } from '../../editor_size';
 
 import { VisEditorTypesRegistryProvider } from '../../../registry/vis_editor_types';
-import { visualizationLoader } from '../../../visualize/loader';
+import { visualizationLoader } from '../../../visualize/loader/visualization_loader';
 
 const defaultEditor = function ($rootScope, $compile) {
   return class DefaultEditor {

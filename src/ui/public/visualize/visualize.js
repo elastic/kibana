@@ -27,7 +27,7 @@ import './visualization';
 import './visualization_editor';
 import { FilterBarQueryFilterProvider } from '../filter_bar/query_filter';
 import { ResizeChecker } from '../resize_checker';
-import { visualizationLoader } from './loader';
+import { visualizationLoader } from './loader/visualization_loader';
 
 import {
   isTermSizeZeroError,

@@ -45,15 +45,12 @@ describe('visualization loader', () => {
   }));
   setupAndTeardownInjectorStub();
 
-  describe('', () => {
-
-    it('should render visualization', async () => {
-      const element = document.createElement('div');
-      expect(visualizationLoader).to.be.a('function');
-      visualizationLoader(element, vis);
-      expect($(element).find('.visualization').length).to.be(1);
-    });
-
+  it('should render visualization', async () => {
+    const element = document.createElement('div');
+    expect(visualizationLoader).to.be.a('function');
+    visualizationLoader(element, vis);
+    expect($(element).find('.visualization').length).to.be(1);
   });
+
 
 });
