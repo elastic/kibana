@@ -21,7 +21,7 @@ import _ from 'lodash';
 
 /**
  * Will figure out if an heatmap state was saved before the auto coloring
- * feature of heatmaps was created. If so it will set the ovewriteColor flag
+ * feature of heatmaps was created. If so it will set the overwriteColor flag
  * for the label to true if labels are enabled and a non default color has been used.
  * So that those earlier created heatmaps will still use the manual specified color.
  */

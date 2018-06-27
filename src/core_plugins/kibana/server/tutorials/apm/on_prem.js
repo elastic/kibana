@@ -141,7 +141,7 @@ export function onPremInstructions(server) {
           text:
             'Make sure you application is running, and the agents are sending data',
           btnLabel: 'Check agent status',
-          success: 'Data succesfully received from one or more agents',
+          success: 'Data successfully received from one or more agents',
           error: `No data has been received from agents yet`,
           esHitsCheck: {
             index: apmIndexPattern,

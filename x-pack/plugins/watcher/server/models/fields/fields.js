@@ -12,7 +12,7 @@ function buildFieldList(fields) {
   const result = [];
 
   forEach(fields, (field, name) => {
-    // If the field exists in multiple indexes, the types may be inconsistant.
+    // If the field exists in multiple indexes, the types may be inconsistent.
     // In this case, default to the first type.
     const type = keys(field)[0];
 

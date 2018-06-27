@@ -71,7 +71,7 @@ describe('grokdebugger_request', () => {
         expect(upstreamJson).to.eql(expectedUpstreamJSON);
       });
 
-      it('returns the upstream simulate JSON request when custom patterns are specfied', () => {
+      it('returns the upstream simulate JSON request when custom patterns are specified', () => {
         const expectedUpstreamJSON = {
           pipeline: {
             description: 'this is a grokdebugger simulation',

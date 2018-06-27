@@ -821,7 +821,7 @@
                       }
                     }
                   },
-                  "maanagement": {
+                  "management": {
                     "properties": {
                       "queue": {
                         "type": "integer"
