@@ -36,8 +36,9 @@ export function addVectorLayer(sourceName, layerName) {
     const { map } = getState();
     const vectorSource = map.vectorSources.find(
       source => source.name === sourceName);
-    //TODO: Grab by name
-    const vectorFetch = await fetch(vectorSource.service[0].url);
+    const layerSource = vectorSource.service.find(
+      ({ name }) => name === layerName);
+    const vectorFetch = await fetch(layerSource.url);
     vectorFetch.json().then(resolvedResource => {
       const layer = VectorLayer.create({
         layerName,
@@ -112,5 +113,5 @@ export async function loadMapResources(serviceSettings, dispatch) {
   // Add initial layers
   dispatch(addTileLayer('road_map_source', 'road_map'));
   dispatch(addTileLayer('osm_source', 'osm'));
-  dispatch(addVectorLayer('ems_source', 'world_countries'));
+  dispatch(addVectorLayer('ems_source', 'World Countries'));
 }
