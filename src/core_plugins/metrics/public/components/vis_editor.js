@@ -81,7 +81,7 @@ class VisEditor extends Component {
       this.setState({ dirty: false });
     };
 
-    if (!this.props.vis.isEditorMode()) {
+    if (this.props.visData.type) {
       if (!this.props.vis.params || !this.props.visData) return null;
       const reversed = this.state.reversed;
       return (
@@ -110,7 +110,8 @@ class VisEditor extends Component {
             dirty={this.state.dirty}
             autoApply={this.state.autoApply}
             model={model}
-            visData={this.props.visData}
+            savedObj={this.props.savedObj}
+            timeRange={this.props.timeRange}
             onUiState={this.handleUiState}
             uiState={this.props.vis.getUiState()}
             onBrush={this.onBrush}
