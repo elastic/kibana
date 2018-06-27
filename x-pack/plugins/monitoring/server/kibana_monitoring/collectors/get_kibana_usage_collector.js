@@ -17,7 +17,7 @@ const TYPES = [
 ];
 
 /**
- * Fetches saved object counts by querying the saved object index
+ * Fetches saved object counts by querying the .kibana index
  */
 export function getKibanaUsageCollector(server) {
   const { UsageCollector } = server.usage;
