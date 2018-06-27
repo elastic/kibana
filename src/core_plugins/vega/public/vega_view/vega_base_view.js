@@ -19,6 +19,7 @@
 
 import $ from 'jquery';
 import moment from 'moment';
+import dateMath from '@kbn/datemath';
 import * as vega from 'vega-lib';
 import * as vegaLite from 'vega-lite';
 import { Utils } from '../data_model/utils';
@@ -268,32 +269,47 @@ export class VegaBaseView {
   }
 
   /**
+   * Helper function to update global time filter
+   */
+  setTimeRange(from, to, mode, reverse) {
+    this._timefilter.setTime({
+      from: reverse ? to : from,
+      to: reverse ? from : to,
+      mode,
+    });
+  }
+
+  /**
    * @param {number|string|Date} start
    * @param {number|string|Date} end
-   * @param {string} [mode]
    */
-  setTimeFilterHandler(start, end, mode) {
-    const tf = this._timefilter;
+  setTimeFilterHandler(start, end) {
+    const absStart = moment(start);
+    const absEnd = moment(end);
+    const isValidAbsStart = absStart.isValid();
+    const isValidAbsEnd = absEnd.isValid();
 
-    let from = moment(start);
-    let to = moment(end);
-
-    if (from.isValid() && to.isValid()) {
-      if (from.isAfter(to)) {
-        [from, to] = [to, from];
+    if (isValidAbsStart && isValidAbsEnd) {
+      // Both are valid absolute dates.
+      this.setTimeRange(absStart, absEnd, 'absolute', absStart.isAfter(absEnd));
+    } else {
+      // Try to parse as relative dates too (absolute dates will also be accepted)
+      const startDate = dateMath.parse(start);
+      const endDate = dateMath.parse(end);
+      if (!startDate.isValid() || !endDate.isValid()) {
+        throw new Error(`Error setting time filter: both time values must be either relative or absolute dates. ` +
+          `start=${JSON.stringify(start)}, end=${JSON.stringify(end)}`);
       }
-    } else if (typeof start === 'string' && typeof end === 'string') {
+      const reverseDates = startDate.isAfter(endDate);
 
-      // TODO/FIXME:  should strings be allowed as is, or is there a parser?
-      // Also, should the default mode be changed in this case?
-
-      [from, to] = [start, end];
+      if (isValidAbsStart || isValidAbsEnd) {
+        // Mixing relative and absolute - treat them as absolute
+        this.setTimeRange(startDate, endDate, 'absolute', reverseDates);
+      } else {
+        // Both dates are relative
+        this.setTimeRange(start, end, 'relative', reverseDates);
+      }
     }
-
-    tf.time.from = from;
-    tf.time.to = to;
-    tf.time.mode = mode || 'absolute';
-    tf.update();
   }
 
   /**
