@@ -1,6 +1,7 @@
 /* eslint-disable */
 
-// TODO: Get rid of this file
+// TODO: Get rid of this file once https://github.com/elastic/kibana/pull/20105
+// is merged and use dynamic import for asynchronous loading of specific locale data
 
 import IntlMessageFormat from 'intl-messageformat';
 import IntlRelativeFormat from 'intl-relativeformat';

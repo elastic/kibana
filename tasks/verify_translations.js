@@ -18,6 +18,7 @@
  */
 
 // TODO: Integrate a new tool for translations checking
+// https://github.com/elastic/kibana/pull/19826
 import { i18nLoader } from '@kbn/i18n';
 
 import { toArray } from 'rxjs/operators';

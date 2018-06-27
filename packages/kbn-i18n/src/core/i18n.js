@@ -31,7 +31,6 @@ import { isString, isObject, hasValues, mergeAll } from './helper';
 import { formats as EN_FORMATS } from './formats';
 
 // Add all locale data to `IntlMessageFormat`.
-// TODO: Use dynamic import for asynchronous loading of specific locale data
 import './locales';
 
 const EN_LOCALE = 'en';
