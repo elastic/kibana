@@ -27,7 +27,7 @@ import {
 } from './constants';
 
 
-export function QueryParameterActionsProvider(courier, Private) {
+export function QueryParameterActionsProvider(indexPatterns, Private) {
   const filterManager = Private(FilterManagerProvider);
 
   const setPredecessorCount = (state) => (predecessorCount) => (
@@ -68,7 +68,7 @@ export function QueryParameterActionsProvider(courier, Private) {
   const addFilter = (state) => async (field, values, operation) => {
     const indexPatternId = state.queryParameters.indexPatternId;
     filterManager.add(field, values, operation, indexPatternId);
-    const indexPattern = await courier.indexPatterns.get(indexPatternId);
+    const indexPattern = await indexPatterns.get(indexPatternId);
     indexPattern.popularizeField(field.name, 1);
   };
 

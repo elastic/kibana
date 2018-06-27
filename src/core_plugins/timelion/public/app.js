@@ -61,7 +61,7 @@ require('ui/routes')
     template: require('plugins/timelion/index.html'),
     reloadOnSearch: false,
     resolve: {
-      savedSheet: function (courier, savedSheets, $route) {
+      savedSheet: function (redirectWhenMissing, savedSheets, $route) {
         return savedSheets.get($route.current.params.id)
           .then((savedSheet) => {
             if ($route.current.params.id) {
@@ -72,7 +72,7 @@ require('ui/routes')
             }
             return savedSheet;
           })
-          .catch(courier.redirectWhenMissing({
+          .catch(redirectWhenMissing({
             'search': '/'
           }));
       }
