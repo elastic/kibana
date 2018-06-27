@@ -449,7 +449,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                       >
                         <EuiButton
                           color="primary"
-                          data-test-subj="updateLicenseButton"
+                          data-test-subj="uploadLicenseButton"
                           fill={true}
                           iconSide="left"
                           isLoading={false}
@@ -458,7 +458,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                         >
                           <button
                             className="euiButton euiButton--primary euiButton--fill"
-                            data-test-subj="updateLicenseButton"
+                            data-test-subj="uploadLicenseButton"
                             onClick={[Function]}
                             type="button"
                           >
@@ -761,7 +761,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                       >
                         <EuiButton
                           color="primary"
-                          data-test-subj="updateLicenseButton"
+                          data-test-subj="uploadLicenseButton"
                           fill={true}
                           iconSide="left"
                           isLoading={false}
@@ -770,7 +770,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                         >
                           <button
                             className="euiButton euiButton--primary euiButton--fill"
-                            data-test-subj="updateLicenseButton"
+                            data-test-subj="uploadLicenseButton"
                             onClick={[Function]}
                             type="button"
                           >
@@ -1073,7 +1073,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                       >
                         <EuiButton
                           color="primary"
-                          data-test-subj="updateLicenseButton"
+                          data-test-subj="uploadLicenseButton"
                           fill={true}
                           iconSide="left"
                           isLoading={false}
@@ -1082,7 +1082,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                         >
                           <button
                             className="euiButton euiButton--primary euiButton--fill"
-                            data-test-subj="updateLicenseButton"
+                            data-test-subj="uploadLicenseButton"
                             onClick={[Function]}
                             type="button"
                           >
@@ -1385,7 +1385,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                       >
                         <EuiButton
                           color="primary"
-                          data-test-subj="updateLicenseButton"
+                          data-test-subj="uploadLicenseButton"
                           fill={true}
                           iconSide="left"
                           isLoading={false}
@@ -1394,7 +1394,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                         >
                           <button
                             className="euiButton euiButton--primary euiButton--fill"
-                            data-test-subj="updateLicenseButton"
+                            data-test-subj="uploadLicenseButton"
                             onClick={[Function]}
                             type="button"
                           >
@@ -1697,7 +1697,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                       >
                         <EuiButton
                           color="primary"
-                          data-test-subj="updateLicenseButton"
+                          data-test-subj="uploadLicenseButton"
                           fill={true}
                           iconSide="left"
                           isLoading={false}
@@ -1706,7 +1706,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                         >
                           <button
                             className="euiButton euiButton--primary euiButton--fill"
-                            data-test-subj="updateLicenseButton"
+                            data-test-subj="uploadLicenseButton"
                             onClick={[Function]}
                             type="button"
                           >
