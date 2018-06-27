@@ -9,25 +9,11 @@ node {
   download = true
 }
 
-task generateProtoJs(type: NodeTask, dependsOn: [yarn]) {
-  doFirst {
-    mkdir 'common'
-  }
-
-  script = file('node_modules/.bin/pbjs')
-  args = ['-t', 'static-module', '-w', 'commonjs', '--no-delimited', '--no-encode', '--no-decode', '--es6', '-o', 'common/proto.js', 'proto/*.proto']
-}
-
-task generateProto(type: NodeTask, dependsOn: [yarn, generateProtoJs]) {
-  script = file('node_modules/.bin/pbts')
-  args = ['-o', 'common/proto.d.ts', 'common/proto.js']
-}
-
 task bootstrap(type: YarnTask, dependsOn: [yarn]) {
   args = ['kbn', 'bootstrap']
 }
 
-task startKibana(type: YarnTask, dependsOn: [yarn, generateProto]) {
+task startKibana(type: YarnTask, dependsOn: [yarn]) {
   args = ['start', '--elasticsearch.url', 'http://localhost:9201', '--no-base-path']
 }
 
@@ -59,3 +45,5 @@ task setupKibana(type: Sync, dependsOn: downloadKibana) {
 }
 
 // tasks.bootstrap.dependsOn(setupKibana)
+
+project.evaluationDependsOn(":model")

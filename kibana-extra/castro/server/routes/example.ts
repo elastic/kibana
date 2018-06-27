@@ -1,6 +1,6 @@
 import {TreeEntry} from "nodegit";
 import * as Hapi from 'hapi';
-import {Commit} from '../../common/proto'
+import { Commit, Entry } from '../../../../model/build/swagger-code-tsClient/api';
 
 import {render, computeRanges, tokenizeLines} from '../highlights';
 
@@ -15,18 +15,19 @@ async function getHeadCommit(): Promise<Commit> {
     const repo = await Git.Repository.open(repodir);
     const commit = await repo.getMasterCommit();
 
-    const result = Commit.create({
+    const result: Commit = {
         commit: commit.id().tostrS(),
         committer: commit.committer().toString(),
         message: commit.message(),
-        date: commit.date().toLocaleDateString()
-    });
+        date: commit.date().toLocaleDateString(),
+        entries: []
+    };
     const tree = await commit.getTree();
     const walker = tree.walk(true);
     walker.on("entry", async (entry: TreeEntry) => {
         const blob = await entry.getBlob();
         const isBinary = blob.isBinary() === 1;
-        let e = {
+        let e: Entry = {
             path: entry.path(),
             isBinary: isBinary,
             blob: isBinary ? "binary" : blob.toString()

@@ -11,18 +11,18 @@ import store from './stores';
 
 const app = uiModules.get("apps/castro");
 
-app.config($locationProvider => {
+app.config(($locationProvider: any) => {
   $locationProvider.html5Mode({
     enabled: false,
     requireBase: false,
     rewriteLinks: false,
   });
 });
-app.config(stateManagementConfigProvider =>
+app.config((stateManagementConfigProvider: any) =>
   stateManagementConfigProvider.disable()
 );
 
-function RootController($scope, $element, $http) {
+function RootController($scope: any, $element: any, $http: any) {
   const domNode = $element[0];
 
   // render react to DOM

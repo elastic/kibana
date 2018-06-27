@@ -123,3 +123,34 @@
           type: string
         lastName:
           type: string
+    Entry:
+      type: object
+      properties:
+        path:
+          type: string
+        blob:
+          type: string
+        isBinary:
+          type: boolean
+        html:
+          type: string
+      required:
+        - path
+        - blob
+    Commit:
+      type: object
+      properties:
+        commit:
+          type: string
+        committer:
+          type: string
+        date:
+          type: string
+        message:
+          type: string
+        entries:
+          type: array
+          items:
+            $ref: "#/definitions/Entry"
+      required:
+        - entries

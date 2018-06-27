@@ -14,3 +14,4 @@ kibana/
 data/
 .project
 .classpath
+.vscode/

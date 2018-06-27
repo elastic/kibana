@@ -15,7 +15,7 @@ import {
     EuiSpacer
 } from "@elastic/eui";
 
-import {ICommit, IEntry} from '../../../common/proto'
+import { Commit, Entry } from '../../../../../model/build/swagger-code-tsClient/api';
 
 import Code from './code';
 import Counter from '../counter';
@@ -26,7 +26,7 @@ interface MainProps {
 }
 
 interface MainState {
-    entries: IEntry[],
+    entries: Entry[],
     commitInfo: Array<{title: string, description?: string | null }>
 }
 
@@ -45,8 +45,8 @@ export class Main extends React.Component<MainProps, MainState> {
            manage state and update your UI than this.
         */
         const {httpClient} = this.props;
-        httpClient.get("../api/castro/example").then((resp) => {
-            const data: ICommit = resp.data;
+        httpClient.get("../api/castro/example").then((resp: any) => {
+            const data: Commit = resp.data;
             const commitInfo = [
                 {
                     title: "Commit",

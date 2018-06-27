@@ -39,7 +39,6 @@
   "dependencies": {
     "highlights": "^3.1.1",
     "nodegit": "^0.22.1",
-    "protobufjs": "^6.8.6",
     "react-redux": "^5.0.7",
     "redux": "^4.0.0",
     "redux-actions": "^2.4.0",

@@ -1,5 +1,5 @@
 import * as Hapi from "hapi";
-import { Person } from '../../common/proto';
+import { Person } from '../../../../model/build/swagger-code-tsClient/api';
 
 export default function (server: Hapi.Server) {
     // Create
@@ -8,7 +8,7 @@ export default function (server: Hapi.Server) {
         method: 'POST',
         handler: async function (req: Hapi.Request, reply: any) {
             const id = req.params.id;
-            const person = Person.fromObject(req.payload);
+            const person = <Person>req.payload;
 
             const es = req.server.plugins.elasticsearch.getCluster("data");
             // const client = req.getSavedObjectsClient();
@@ -21,7 +21,7 @@ export default function (server: Hapi.Server) {
                 index,
                 type: 'person',
                 id,
-                body: person.toJSON()
+                body: JSON.stringify(person)
             }).then(function (response: any) {
                 reply(response);
             });
@@ -36,7 +36,9 @@ export default function (server: Hapi.Server) {
 
             const config = req.server.config();
             const index = config.get('castro.index');
-            console.log("## castro config: ");
+
+            // Example to read config items.
+            console.log("castro config: ");
             console.log(config.get('castro.index'));
             console.log(config.get('castro.fromyaml'));
 
@@ -48,7 +50,7 @@ export default function (server: Hapi.Server) {
                 index,
                 type: 'person',
                 id
-            }).then(function (response) {
+            }).then(function (response: any) {
                 reply(response)
             });
         }
@@ -74,7 +76,7 @@ export default function (server: Hapi.Server) {
                 type: 'person',
                 id,
                 body
-            }).then(function (response) {
+            }).then(function (response: any) {
                 reply(response)
             });
 
@@ -98,7 +100,7 @@ export default function (server: Hapi.Server) {
                 index,
                 type: 'person',
                 id
-            }).then(function (response) {
+            }).then(function (response: any) {
                 reply(response)
             });
         }
