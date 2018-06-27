@@ -276,29 +276,33 @@ export class VegaBaseView {
   }
 
   /**
-   * Helper function to update global time filter
-   */
-  setTimeRange(from, to, mode, reverse) {
-    this._timefilter.setTime({
-      from: reverse ? to : from,
-      to: reverse ? from : to,
-      mode,
-    });
-  }
-
-  /**
+   * Update dashboard time filter to the new values
    * @param {number|string|Date} start
    * @param {number|string|Date} end
    */
   setTimeFilterHandler(start, end) {
+    this._timefilter.setTime(VegaBaseView._parseTimeRange(start, end));
+  }
+
+  /**
+   * Parse start and end values, determining the mode, and if order should be reversed
+   * @private
+   */
+  static _parseTimeRange(start, end) {
     const absStart = moment(start);
     const absEnd = moment(end);
     const isValidAbsStart = absStart.isValid();
     const isValidAbsEnd = absEnd.isValid();
+    let mode = 'absolute';
+    let from;
+    let to;
+    let reverse;
 
     if (isValidAbsStart && isValidAbsEnd) {
       // Both are valid absolute dates.
-      this.setTimeRange(absStart, absEnd, 'absolute', absStart.isAfter(absEnd));
+      from = absStart;
+      to = absEnd;
+      reverse = absStart.isAfter(absEnd);
     } else {
       // Try to parse as relative dates too (absolute dates will also be accepted)
       const startDate = dateMath.parse(start);
@@ -307,16 +311,24 @@ export class VegaBaseView {
         throw new Error(`Error setting time filter: both time values must be either relative or absolute dates. ` +
           `start=${JSON.stringify(start)}, end=${JSON.stringify(end)}`);
       }
-      const reverseDates = startDate.isAfter(endDate);
-
+      reverse = startDate.isAfter(endDate);
       if (isValidAbsStart || isValidAbsEnd) {
         // Mixing relative and absolute - treat them as absolute
-        this.setTimeRange(startDate, endDate, 'absolute', reverseDates);
+        from = startDate;
+        to = endDate;
       } else {
         // Both dates are relative
-        this.setTimeRange(start, end, 'relative', reverseDates);
+        mode = 'relative';
+        from = start;
+        to = end;
       }
     }
+
+    if (reverse) {
+      [from, to] = [to, from];
+    }
+
+    return { from, to, mode };
   }
 
   /**
