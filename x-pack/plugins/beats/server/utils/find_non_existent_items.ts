@@ -4,19 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface RandomItem {
-  id: string;
-  [key: string]: any;
-}
-
-export function findNonExistentItems(items: RandomItem[], requestedItems: any) {
+export function findNonExistentItems(items: any, requestedItems: any) {
   return requestedItems.reduce(
-    (nonExistentItems: string[], requestedItem: string, idx: number) => {
-      if (
-        items.findIndex(
-          (item: RandomItem) => item && item.id === requestedItem
-        ) === -1
-      ) {
+    (nonExistentItems: string[], item: string, idx: number) => {
+      if (!items.findIndex((i: string) => i === item)) {
         nonExistentItems.push(requestedItems[idx]);
       }
       return nonExistentItems;

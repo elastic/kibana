@@ -4,41 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { wrapRequest } from '../../../utils/wrap_request';
+import crypto from 'crypto';
 import {
   BackendFrameworkAdapter,
-  FrameworkInternalUser,
+  FrameworkRequest,
   FrameworkRouteOptions,
-  FrameworkWrappableRequest,
-} from './adapter_types';
+  WrappableRequest,
+} from '../../../lib';
+
+import { IStrictReply, Request, Server } from 'hapi';
+import {
+  internalFrameworkRequest,
+  wrapRequest,
+} from '../../../../utils/wrap_request';
 
 export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
-  public readonly internalUser: FrameworkInternalUser = {
-    kind: 'internal',
-  };
   public version: string;
-  private server: any;
-  private cryptoHash: string | null;
 
-  constructor(hapiServer: any) {
+  private server: Server;
+
+  constructor(hapiServer: Server) {
     this.server = hapiServer;
-    if (hapiServer.plugins.kibana) {
-      this.version = hapiServer.plugins.kibana.status.plugin.version;
-    } else {
-      this.version = 'unknown';
-    }
-    this.cryptoHash = null;
+    this.version = hapiServer.plugins.kibana.status.plugin.version;
+
     this.validateConfig();
   }
 
   public getSetting(settingPath: string) {
     // TODO type check server properly
-    if (settingPath === 'xpack.beats.encryptionKey') {
-      // @ts-ignore
-      return this.server.config().get(settingPath) || this.cryptoHash;
-    }
     // @ts-ignore
-    return this.server.config().get(settingPath) || this.cryptoHash;
+    return this.server.config().get(settingPath);
   }
 
   public exposeStaticDir(urlPath: string, dir: string): void {
@@ -53,31 +48,53 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     });
   }
 
-  public registerRoute<
-    RouteRequest extends FrameworkWrappableRequest,
-    RouteResponse
-  >(route: FrameworkRouteOptions<RouteRequest, RouteResponse>) {
-    const wrappedHandler = (request: any, reply: any) =>
+  public registerRoute<RouteRequest extends WrappableRequest, RouteResponse>(
+    route: FrameworkRouteOptions<RouteRequest, RouteResponse>
+  ) {
+    const wrappedHandler = (request: any, reply: IStrictReply<RouteResponse>) =>
       route.handler(wrapRequest(request), reply);
 
     this.server.route({
+      config: route.config,
       handler: wrappedHandler,
       method: route.method,
       path: route.path,
-      config: route.config,
     });
+  }
+
+  public installIndexTemplate(name: string, template: {}) {
+    return this.callWithInternalUser('indices.putTemplate', {
+      body: template,
+      name,
+    });
+  }
+
+  public async callWithInternalUser(esMethod: string, options: {}) {
+    const { elasticsearch } = this.server.plugins;
+    const { callWithInternalUser } = elasticsearch.getCluster('admin');
+    return await callWithInternalUser(esMethod, options);
+  }
+
+  public async callWithRequest(req: FrameworkRequest<Request>, ...rest: any[]) {
+    const internalRequest = req[internalFrameworkRequest];
+    const { elasticsearch } = internalRequest.server.plugins;
+    const { callWithRequest } = elasticsearch.getCluster('data');
+    const fields = await callWithRequest(internalRequest, ...rest);
+    return fields;
   }
 
   private validateConfig() {
     // @ts-ignore
     const config = this.server.config();
     const encryptionKey = config.get('xpack.beats.encryptionKey');
-
-    if (!encryptionKey) {
-      this.server.log(
-        'Using a default encryption key for xpack.beats.encryptionKey. It is recommended that you set xpack.beats.encryptionKey in kibana.yml with a unique token'
+    if (encryptionKey === null || encryptionKey === undefined) {
+      this.server.log(`
+Generating a random key for xpack.beats.encryptionKey. To prevent beats from loosing connection with centeral management on Kibana restart, please set xpack.beats.encryptionKey in kibana.yml
+`);
+      config.set(
+        'xpack.reporting.encryptionKey',
+        crypto.randomBytes(16).toString('hex')
       );
-      this.cryptoHash = 'xpack_beats_default_encryptionKey';
     }
   }
 }

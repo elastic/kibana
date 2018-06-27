@@ -5,8 +5,6 @@
  */
 
 import { omit } from 'lodash';
-import moment from 'moment';
-
 import {
   CMBeat,
   CMBeatsAdapter,
@@ -42,20 +40,20 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
     return this.beatsDB.filter(beat => beatIds.includes(beat.id));
   }
 
+  public async getVerifiedWithIds(req: FrameworkRequest, beatIds: string[]) {
+    return this.beatsDB.filter(
+      beat => beatIds.includes(beat.id) && beat.verified_on
+    );
+  }
+
   public async verifyBeats(req: FrameworkRequest, beatIds: string[]) {
     if (!Array.isArray(beatIds) || beatIds.length === 0) {
       return [];
     }
-
-    const verifiedOn = moment().toJSON();
-
-    this.beatsDB.forEach((beat, i) => {
-      if (beatIds.includes(beat.id)) {
-        this.beatsDB[i].verified_on = verifiedOn;
-      }
-    });
-
-    return this.beatsDB.filter(beat => beatIds.includes(beat.id));
+    return this.beatsDB.filter(beat => beatIds.includes(beat.id)).map(beat => ({
+      ...beat,
+      verified_on: true,
+    }));
   }
 
   public async getAll(req: FrameworkRequest) {
@@ -93,28 +91,20 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
   ): Promise<CMTagAssignment[]> {
     const beatIds = assignments.map(r => r.beatId);
 
-    this.beatsDB.filter(beat => beatIds.includes(beat.id)).map(beat => {
-      // get tags that need to be assigned to this beat
-      const tags = assignments
-        .filter(a => a.beatId === beat.id)
-        .map((t: CMTagAssignment) => t.tag);
-
-      if (tags.length > 0) {
-        if (!beat.tags) {
-          beat.tags = [];
+    const response = this.beatsDB
+      .filter(beat => beatIds.includes(beat.id))
+      .map(beat => {
+        const tagData = assignments.find(a => a.beatId === beat.id);
+        if (tagData) {
+          if (!beat.tags) {
+            beat.tags = [];
+          }
+          beat.tags.push(tagData.tag);
         }
-        const nonExistingTags = tags.filter(
-          (t: string) => beat.tags && !beat.tags.includes(t)
-        );
+        return beat;
+      });
 
-        if (nonExistingTags.length > 0) {
-          beat.tags = beat.tags.concat(nonExistingTags);
-        }
-      }
-      return beat;
-    });
-
-    return assignments.map<any>((item: CMTagAssignment, resultIdx: number) => ({
+    return response.map<any>((item: CMBeat, resultIdx: number) => ({
       idxInRequest: assignments[resultIdx].idxInRequest,
       result: 'updated',
       status: 200,
