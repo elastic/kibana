@@ -64,7 +64,7 @@ module.factory('SavedDashboard', function (courier, config) {
     });
 
 
-    this.showInRecenltyAccessed = true;
+    this.showInRecentlyAccessed = true;
   }
 
   // save these objects with the 'dashboard' type

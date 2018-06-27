@@ -23,7 +23,7 @@ const matchSnapshot = /-SNAPSHOT$/;
 
 /*
  * Persist operational data for machine reading
- * sets the latest guage values
+ * sets the latest gauge values
  * sums the latest accumulative values
  */
 export class MetricsCollector {
@@ -87,7 +87,7 @@ export class MetricsCollector {
     const { process, os, ...metrics } = capturedEvent;
 
     const stats = {
-      // guage values
+      // gauge values
       ...metrics,
       process,
       os,

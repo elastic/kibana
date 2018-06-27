@@ -47,7 +47,7 @@ const paramTypeMap = {
  * @class AggParams
  * @constructor
  * @extends IndexedArray
- * @param {object[]} params - array of params that get new-ed up as AggParam objects as descibed above
+ * @param {object[]} params - array of params that get new-ed up as AggParam objects as described above
  */
 createLegacyClass(AggParams).inherits(IndexedArray);
 function AggParams(params) {

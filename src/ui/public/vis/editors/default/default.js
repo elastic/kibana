@@ -30,6 +30,7 @@ import { keyCodes } from '@elastic/eui';
 import { DefaultEditorSize } from '../../editor_size';
 
 import { VisEditorTypesRegistryProvider } from '../../../registry/vis_editor_types';
+import { visualizationLoader } from '../../../visualize/loader/visualization_loader';
 
 const defaultEditor = function ($rootScope, $compile) {
   return class DefaultEditor {
@@ -137,7 +138,8 @@ const defaultEditor = function ($rootScope, $compile) {
           updateScope();
         }
 
-        $scope.$broadcast('render');
+        const visualizationEl = this.el.find('.vis-editor-canvas')[0];
+        visualizationLoader(visualizationEl, this.vis, visData, uiState, { listenOnChange: false });
       });
     }
 

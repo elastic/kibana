@@ -30,12 +30,12 @@ uiModules.get('kibana/table_vis')
 
         $scope.$watchMulti([
           'vis.params.showPartialRows',
-          'vis.params.showMeticsAtAllLevels'
+          'vis.params.showMetricsAtAllLevels'
         ], function () {
           if (!$scope.vis) return;
 
           const params = $scope.vis.params;
-          if (params.showPartialRows || params.showMeticsAtAllLevels) {
+          if (params.showPartialRows || params.showMetricsAtAllLevels) {
             $scope.metricsAtAllLevels = true;
           } else {
             $scope.metricsAtAllLevels = false;

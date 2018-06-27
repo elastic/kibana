@@ -191,13 +191,12 @@ export class IndexActionsContextMenu extends Component {
     if (!forcemergeSegments || forcemergeSegments.match(/^([1-9][0-9]*)?$/)) {
       return;
     } else {
-      return 'Value for number of segments must be a number greater than zero.';
+      return 'The number of segments must be greater than zero.';
     }
   };
   forcemergeSegmentsModal = () => {
-    const helpText = `The number of segments to merge to.
-      To fully merge the index, set it to 1. Defaults to
-      simply checking if a merge needs to execute, and if so, executes it.`;
+    const helpText = `Merge the segments in an index until the number 
+    is reduced to this or fewer segments. The default is 1.`;
     const oneIndexSelected = this.oneIndexSelected();
     const entity = this.getEntity(oneIndexSelected);
     const { forcemergeIndices, indexNames } = this.props;
@@ -208,7 +207,7 @@ export class IndexActionsContextMenu extends Component {
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
-          title={`Choose max number of segments for forcemerge ${entity}`}
+          title={`Set number of segments for force merge`}
           onCancel={this.closeForcemergeSegmentsModal}
           onConfirm={() => {
             if (!this.forcemergeSegmentsError()) {
@@ -222,11 +221,11 @@ export class IndexActionsContextMenu extends Component {
             }
           }}
           cancelButtonText="Cancel"
-          confirmButtonText="Forcemerge"
+          confirmButtonText="Force merge"
         >
           <div>
             <p>
-              You are about to forcemerge {oneIndexSelected ? 'this' : 'these'}{' '}
+              You are about to force merge {oneIndexSelected ? 'this' : 'these'}{' '}
               {entity}:
             </p>
             <ul>

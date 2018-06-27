@@ -66,7 +66,7 @@ export class HeatmapMarkers extends EventEmitter {
 
   movePointer(type, event) {
     if (type === 'mousemove') {
-      this._deboundsMoveMoveLocation(event);
+      this._debounceMoveMoveLocation(event);
     } else if (type === 'mouseout') {
       this.emit('hideTooltip');
     } else if (type === 'mousedown') {
@@ -101,7 +101,7 @@ export class HeatmapMarkers extends EventEmitter {
       }
     };
 
-    this._deboundsMoveMoveLocation = _.debounce(mouseMoveLocation.bind(this), 15, {
+    this._debounceMoveMoveLocation = _.debounce(mouseMoveLocation.bind(this), 15, {
       'leading': true,
       'trailing': false
     });

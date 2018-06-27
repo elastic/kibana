@@ -198,7 +198,7 @@ module.directive('mlMetricDistributionChart', function (mlChartTooltipService) {
       const axes = chartGroup.append('g')
         .attr('class', 'axes');
 
-      // Use the numTicks util function to aalculate the number of ticks
+      // Use the numTicks util function to calculate the number of ticks
       // for the x axis, according to the width of the chart.
       // Note that d3 doesn't guarantee that the axis will end up with
       // this exact number of ticks.
