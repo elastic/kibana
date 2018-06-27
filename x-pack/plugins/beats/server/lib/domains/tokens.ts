@@ -7,7 +7,6 @@
 import { timingSafeEqual } from 'crypto';
 import { sign as signToken, verify as verifyToken } from 'jsonwebtoken';
 import moment from 'moment';
-import uuid from 'uuid';
 import { CMTokensAdapter, FrameworkRequest } from '../lib';
 import { BackendFrameworkAdapter } from '../lib';
 
@@ -29,53 +28,29 @@ export class CMTokensDomain {
   public async getEnrollmentToken(enrollmentToken: string) {
     const fullToken = await this.adapter.getEnrollmentToken(enrollmentToken);
 
-    if (!fullToken) {
-      return {
-        token: null,
-        expired: true,
-        expires_on: null,
-      };
-    }
-
-    const { verified, expired } = this.verifyToken(
-      enrollmentToken,
-      fullToken.token || '',
-      false
-    );
+    const verified = this.verifyToken(enrollmentToken, fullToken.token || '');
 
     if (!verified) {
       return {
-        expired,
+        expires_on: '0',
         token: null,
-        expires_on: null,
       };
     }
 
-    return { ...fullToken, expired };
+    return fullToken;
   }
 
   public async deleteEnrollmentToken(enrollmentToken: string) {
     return await this.adapter.deleteEnrollmentToken(enrollmentToken);
   }
 
-  public verifyToken(recivedToken: string, token2: string, decode = true) {
-    let tokenDecoded = true;
-    let expired = false;
-
-    if (decode) {
-      const enrollmentTokenSecret = this.framework.getSetting(
-        'xpack.beats.encryptionKey'
-      );
-
-      try {
-        verifyToken(recivedToken, enrollmentTokenSecret);
-        tokenDecoded = true;
-      } catch (err) {
-        if (err.name === 'TokenExpiredError') {
-          expired = true;
-        }
-        tokenDecoded = false;
-      }
+  public verifyToken(recivedToken: string, token2: string) {
+    let tokenDecoded = false;
+    try {
+      verifyToken(recivedToken, 'wrong-secret');
+      tokenDecoded = true;
+    } catch (err) {
+      tokenDecoded = false;
     }
 
     if (
@@ -86,24 +61,20 @@ export class CMTokensDomain {
       // This prevents a more subtle timing attack where we know already the tokens aren't going to
       // match but still we don't return fast. Instead we compare two pre-generated random tokens using
       // the same comparison algorithm that we would use to compare two equal-length tokens.
-      return {
-        expired,
-        verified:
-          timingSafeEqual(
-            Buffer.from(RANDOM_TOKEN_1, 'utf8'),
-            Buffer.from(RANDOM_TOKEN_2, 'utf8')
-          ) && tokenDecoded,
-      };
+      return (
+        timingSafeEqual(
+          Buffer.from(RANDOM_TOKEN_1, 'utf8'),
+          Buffer.from(RANDOM_TOKEN_2, 'utf8')
+        ) && tokenDecoded
+      );
     }
 
-    return {
-      expired,
-      verified:
-        timingSafeEqual(
-          Buffer.from(recivedToken, 'utf8'),
-          Buffer.from(token2, 'utf8')
-        ) && tokenDecoded,
-    };
+    return (
+      timingSafeEqual(
+        Buffer.from(recivedToken, 'utf8'),
+        Buffer.from(token2, 'utf8')
+      ) && tokenDecoded
+    );
   }
 
   public generateAccessToken() {
@@ -113,7 +84,6 @@ export class CMTokensDomain {
 
     const tokenData = {
       created: moment().toJSON(),
-      randomHash: this.createRandomHash(),
     };
 
     return signToken(tokenData, enrollmentTokenSecret);
@@ -128,23 +98,29 @@ export class CMTokensDomain {
       'xpack.beats.enrollmentTokensTtlInSeconds'
     );
 
+    const enrollmentTokenSecret = this.framework.getSetting(
+      'xpack.beats.encryptionKey'
+    );
+
     const enrollmentTokenExpiration = moment()
       .add(enrollmentTokensTtlInSeconds, 'seconds')
       .toJSON();
 
+    const tokenData = {
+      created: moment().toJSON(),
+    };
+
     while (tokens.length < numTokens) {
       tokens.push({
         expires_on: enrollmentTokenExpiration,
-        token: this.createRandomHash(),
+        token: signToken(tokenData, enrollmentTokenSecret, {
+          expiresIn: enrollmentTokensTtlInSeconds,
+        }),
       });
     }
 
     await this.adapter.upsertTokens(req, tokens);
 
     return tokens.map(token => token.token);
-  }
-
-  private createRandomHash() {
-    return uuid.v4().replace(/-/g, '');
   }
 }

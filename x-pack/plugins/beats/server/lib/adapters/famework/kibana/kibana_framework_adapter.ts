@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import crypto from 'crypto';
 import {
   BackendFrameworkAdapter,
   FrameworkRequest,
@@ -19,25 +20,20 @@ import {
 
 export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
   public version: string;
+
   private server: Server;
-  private cryptoHash: string | null;
 
   constructor(hapiServer: Server) {
     this.server = hapiServer;
     this.version = hapiServer.plugins.kibana.status.plugin.version;
-    this.cryptoHash = null;
 
     this.validateConfig();
   }
 
   public getSetting(settingPath: string) {
     // TODO type check server properly
-    if (settingPath === 'xpack.beats.encryptionKey') {
-      // @ts-ignore
-      return this.server.config().get(settingPath) || this.cryptoHash;
-    }
     // @ts-ignore
-    return this.server.config().get(settingPath) || this.cryptoHash;
+    return this.server.config().get(settingPath);
   }
 
   public exposeStaticDir(urlPath: string, dir: string): void {
@@ -91,12 +87,14 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     // @ts-ignore
     const config = this.server.config();
     const encryptionKey = config.get('xpack.beats.encryptionKey');
-
-    if (!encryptionKey) {
-      this.server.log(
-        'Using a default encryption key for xpack.beats.encryptionKey. It is recommended that you set xpack.beats.encryptionKey in kibana.yml with a unique token'
+    if (encryptionKey === null || encryptionKey === undefined) {
+      this.server.log(`
+Generating a random key for xpack.beats.encryptionKey. To prevent beats from loosing connection with centeral management on Kibana restart, please set xpack.beats.encryptionKey in kibana.yml
+`);
+      config.set(
+        'xpack.reporting.encryptionKey',
+        crypto.randomBytes(16).toString('hex')
       );
-      this.cryptoHash = 'xpack_beats_default_encryptionKey';
     }
   }
 }
