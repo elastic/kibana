@@ -10,6 +10,8 @@ import React, {
   Component
 } from 'react';
 
+import { sortBy } from 'lodash';
+
 import { ResultLinks, actionsMenuContent } from '../job_actions';
 import { JobDescription } from './job_description';
 import { JobIcon } from '../job_message_icon';
@@ -31,7 +33,9 @@ export class JobsList extends Component {
       jobsSummaryList: props.jobsSummaryList,
       pageIndex: 0,
       pageSize: PAGE_SIZE,
-      itemIdToExpandedRowMap: {}
+      itemIdToExpandedRowMap: {},
+      sortField: 'id',
+      sortDirection: 'asc',
     };
   }
 
@@ -44,15 +48,22 @@ export class JobsList extends Component {
     };
   }
 
-  onTableChange = ({ page = {} }) => {
+  onTableChange = ({ page = {}, sort = {} }) => {
     const {
       index: pageIndex,
       size: pageSize,
     } = page;
 
+    const {
+      field: sortField,
+      direction: sortDirection,
+    } = sort;
+
     this.setState({
       pageIndex,
       pageSize,
+      sortField,
+      sortDirection,
     });
   };
 
@@ -60,8 +71,11 @@ export class JobsList extends Component {
     this.props.toggleRow(item.id);
   };
 
-  getPageOfJobs(index, size) {
-    const list = this.state.jobsSummaryList;
+  getPageOfJobs(index, size, sortField, sortDirection) {
+    let list = this.state.jobsSummaryList;
+    list = sortBy(this.state.jobsSummaryList, [sortField]);
+    list = (sortDirection === 'asc') ? list : list.reverse();
+
     const pageStart = (index * size);
     return {
       pageOfItems: list.slice(pageStart, (pageStart + size)),
@@ -90,6 +104,7 @@ export class JobsList extends Component {
       }, {
         field: 'id',
         name: 'ID',
+        sortable: true,
         truncateText: false,
 
       }, {
@@ -100,28 +115,35 @@ export class JobsList extends Component {
         )
       }, {
         name: 'Description',
+        sortable: true,
+        // field: 'description',
         render: (item) => (
           <JobDescription job={item} />
         )
       }, {
         field: 'processed_record_count',
         name: 'Processed records',
+        sortable: true,
         truncateText: false,
       }, {
         field: 'memory_status',
         name: 'Memory status',
+        sortable: true,
         truncateText: false,
       }, {
         field: 'jobState',
         name: 'Job state',
+        sortable: true,
         truncateText: false,
       }, {
         field: 'datafeedState',
         name: 'Datafeed state',
+        sortable: true,
         truncateText: false,
       }, {
         name: 'Latest timestamp',
         truncateText: false,
+        sortable: true,
         render: (item) => (
           <span className="euiTableCellContent__text">
             { item.latestTimeStamp.string }
@@ -146,18 +168,27 @@ export class JobsList extends Component {
     const {
       pageIndex,
       pageSize,
+      sortField,
+      sortDirection,
     } = this.state;
 
     const {
       pageOfItems,
       totalItemCount,
-    } = this.getPageOfJobs(pageIndex, pageSize);
+    } = this.getPageOfJobs(pageIndex, pageSize, sortField, sortDirection);
 
     const pagination = {
       pageIndex,
       pageSize,
       totalItemCount,
       pageSizeOptions: PAGE_SIZE_OPTIONS
+    };
+
+    const sorting = {
+      sort: {
+        field: sortField,
+        direction: sortDirection,
+      },
     };
 
     return (
@@ -171,6 +202,7 @@ export class JobsList extends Component {
         selection={selectionControls}
         itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
         isExpandable={true}
+        sorting={sorting}
         hasActions={true}
       />
     );
