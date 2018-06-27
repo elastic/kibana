@@ -5,10 +5,13 @@
  */
 
 export function findNonExistentItems(items: any, requestedItems: any) {
-  return items.reduce((nonExistentItems: any, item: any, idx: any) => {
-    if (!item.found) {
-      nonExistentItems.push(requestedItems[idx]);
-    }
-    return nonExistentItems;
-  }, []);
+  return requestedItems.reduce(
+    (nonExistentItems: string[], item: string, idx: number) => {
+      if (!items.findIndex((i: string) => i === item)) {
+        nonExistentItems.push(requestedItems[idx]);
+      }
+      return nonExistentItems;
+    },
+    []
+  );
 }

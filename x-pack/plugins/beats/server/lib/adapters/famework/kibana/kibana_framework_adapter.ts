@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import crypto from 'crypto';
 import {
   BackendFrameworkAdapter,
   FrameworkRequest,
@@ -25,10 +26,12 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
   constructor(hapiServer: Server) {
     this.server = hapiServer;
     this.version = hapiServer.plugins.kibana.status.plugin.version;
+
+    this.validateConfig();
   }
 
   public getSetting(settingPath: string) {
-    // TODO type check this properly
+    // TODO type check server properly
     // @ts-ignore
     return this.server.config().get(settingPath);
   }
@@ -78,5 +81,20 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     const { callWithRequest } = elasticsearch.getCluster('data');
     const fields = await callWithRequest(internalRequest, ...rest);
     return fields;
+  }
+
+  private validateConfig() {
+    // @ts-ignore
+    const config = this.server.config();
+    const encryptionKey = config.get('xpack.beats.encryptionKey');
+    if (encryptionKey === null || encryptionKey === undefined) {
+      this.server.log(`
+Generating a random key for xpack.beats.encryptionKey. To prevent beats from loosing connection with centeral management on Kibana restart, please set xpack.beats.encryptionKey in kibana.yml
+`);
+      config.set(
+        'xpack.reporting.encryptionKey',
+        crypto.randomBytes(16).toString('hex')
+      );
+    }
   }
 }
