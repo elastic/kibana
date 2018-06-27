@@ -29,7 +29,7 @@ export function SearchLooperProvider(Private, Promise, $timeout, $rootScope) {
 
   class SearchLooper {
     constructor() {
-      this._intervalInMs = 1500;
+      this._intervalInMs = undefined;
       this._timer = null;
       this._started = false;
     }
