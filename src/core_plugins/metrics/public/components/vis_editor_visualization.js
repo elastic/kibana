@@ -66,7 +66,7 @@ class VisEditorVisualization extends Component {
     window.removeEventListener('mouseup', this.handleMouseUp);
   }
 
-  componentDidMount() {
+  _loadVisualization() {
     getVisualizeLoader().then(loader => {
       this._loader = loader;
       this._loader.embedVisualizationWithSavedObject(this._visEl.current, this.props.savedObj, {
@@ -75,6 +75,14 @@ class VisEditorVisualization extends Component {
         timeRange: this.props.timeRange
       });
     });
+  }
+
+  componentDidUpdate() {
+    this._loadVisualization();
+  }
+
+  componentDidMount() {
+    this._loadVisualization();
   }
   /**
    * Resize the chart height when pressing up/down while the drag handle

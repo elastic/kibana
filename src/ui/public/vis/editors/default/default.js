@@ -137,16 +137,22 @@ const defaultEditor = function ($rootScope, $compile) {
           updateScope();
         }
 
-        const visualizationEl = this.el.find('.vis-editor-canvas')[0];
-        getVisualizeLoader().then(loader => {
-          this._loader = loader;
-          this._loader.embedVisualizationWithSavedObject(visualizationEl, savedObj, {
-            uiState: uiState,
-            listenOnChange: false,
-            timeRange: timeRange,
-            appState: appState,
+        if (!this._handler) {
+          const visualizationEl = this.el.find('.vis-editor-canvas')[0];
+          getVisualizeLoader().then(loader => {
+            this._loader = loader;
+            this._handler = this._loader.embedVisualizationWithSavedObject(visualizationEl, savedObj, {
+              uiState: uiState,
+              listenOnChange: false,
+              timeRange: timeRange,
+              appState: appState,
+            });
           });
-        });
+        } else {
+          this._handler.update({
+            timeRange: timeRange
+          });
+        }
 
       });
     }
