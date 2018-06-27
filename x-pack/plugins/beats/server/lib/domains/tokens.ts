@@ -5,8 +5,8 @@
  */
 
 import { timingSafeEqual } from 'crypto';
+import { sign as signToken, verify as verifyToken } from 'jsonwebtoken';
 import moment from 'moment';
-import uuid from 'uuid';
 import { CMTokensAdapter, FrameworkRequest } from '../lib';
 import { BackendFrameworkAdapter } from '../lib';
 
@@ -26,32 +26,67 @@ export class CMTokensDomain {
   }
 
   public async getEnrollmentToken(enrollmentToken: string) {
-    return await this.adapter.getEnrollmentToken(enrollmentToken);
+    const fullToken = await this.adapter.getEnrollmentToken(enrollmentToken);
+
+    const verified = this.verifyToken(enrollmentToken, fullToken.token || '');
+
+    if (!verified) {
+      return {
+        expires_on: '0',
+        token: null,
+      };
+    }
+
+    return fullToken;
   }
 
   public async deleteEnrollmentToken(enrollmentToken: string) {
     return await this.adapter.deleteEnrollmentToken(enrollmentToken);
   }
 
-  public areTokensEqual(token1: string, token2: string) {
+  public verifyToken(recivedToken: string, token2: string) {
+    let tokenDecoded = false;
+    try {
+      verifyToken(recivedToken, 'wrong-secret');
+      tokenDecoded = true;
+    } catch (err) {
+      tokenDecoded = false;
+    }
+
     if (
-      typeof token1 !== 'string' ||
+      typeof recivedToken !== 'string' ||
       typeof token2 !== 'string' ||
-      token1.length !== token2.length
+      recivedToken.length !== token2.length
     ) {
       // This prevents a more subtle timing attack where we know already the tokens aren't going to
       // match but still we don't return fast. Instead we compare two pre-generated random tokens using
       // the same comparison algorithm that we would use to compare two equal-length tokens.
-      return timingSafeEqual(
-        Buffer.from(RANDOM_TOKEN_1, 'utf8'),
-        Buffer.from(RANDOM_TOKEN_2, 'utf8')
+      return (
+        timingSafeEqual(
+          Buffer.from(RANDOM_TOKEN_1, 'utf8'),
+          Buffer.from(RANDOM_TOKEN_2, 'utf8')
+        ) && tokenDecoded
       );
     }
 
-    return timingSafeEqual(
-      Buffer.from(token1, 'utf8'),
-      Buffer.from(token2, 'utf8')
+    return (
+      timingSafeEqual(
+        Buffer.from(recivedToken, 'utf8'),
+        Buffer.from(token2, 'utf8')
+      ) && tokenDecoded
     );
+  }
+
+  public generateAccessToken() {
+    const enrollmentTokenSecret = this.framework.getSetting(
+      'xpack.beats.encryptionKey'
+    );
+
+    const tokenData = {
+      created: moment().toJSON(),
+    };
+
+    return signToken(tokenData, enrollmentTokenSecret);
   }
 
   public async createEnrollmentTokens(
@@ -62,14 +97,25 @@ export class CMTokensDomain {
     const enrollmentTokensTtlInSeconds = this.framework.getSetting(
       'xpack.beats.enrollmentTokensTtlInSeconds'
     );
+
+    const enrollmentTokenSecret = this.framework.getSetting(
+      'xpack.beats.encryptionKey'
+    );
+
     const enrollmentTokenExpiration = moment()
       .add(enrollmentTokensTtlInSeconds, 'seconds')
       .toJSON();
 
+    const tokenData = {
+      created: moment().toJSON(),
+    };
+
     while (tokens.length < numTokens) {
       tokens.push({
         expires_on: enrollmentTokenExpiration,
-        token: uuid.v4().replace(/-/g, ''),
+        token: signToken(tokenData, enrollmentTokenSecret, {
+          expiresIn: enrollmentTokensTtlInSeconds,
+        }),
       });
     }
 

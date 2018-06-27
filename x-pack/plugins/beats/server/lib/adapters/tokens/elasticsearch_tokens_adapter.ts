@@ -79,5 +79,6 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
     };
 
     await this.framework.callWithRequest(req, 'bulk', params);
+    return tokens;
   }
 }
