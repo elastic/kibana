@@ -37,14 +37,10 @@ import {
   GO_CLIENT_INSTRUCTIONS,
 } from './apm_client_instructions';
 
+import { getIndexPatternTitle } from './get_index_pattern_title';
+
 export function onPremInstructions(server) {
-  let apmIndexPattern = 'apm*';
-  try {
-    apmIndexPattern = server.config().get('xpack.apm.indexPattern');
-  } catch (error) {
-    // ignore error when config does not contain 'xpack.apm.indexPattern'.
-    // This is expected when APM plugin is not running.
-  }
+  const apmIndexPattern = getIndexPatternTitle(server.config());
 
   return {
     instructionSets: [

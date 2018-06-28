@@ -17,16 +17,13 @@
  * under the License.
  */
 
-import indexPattern from './index_pattern.json';
-import staticSavedObjects from './saved_objects.json';
-import { getIndexPatternTitle } from '../get_index_pattern_title';
+const TITLE_KEY = 'xpack.apm.indexPattern';
+const DEFAULT_TITLE = 'apm*';
 
-function getIndexPattern(server) {
-  indexPattern.attributes.title = getIndexPatternTitle(server.config());
+export function getIndexPatternTitle(config) {
+  if (config.has(TITLE_KEY)) {
+    return config.get(TITLE_KEY);
+  }
 
-  return indexPattern;
-}
-
-export function getSavedObjects(server) {
-  return [getIndexPattern(server), ...staticSavedObjects];
+  return DEFAULT_TITLE;
 }
