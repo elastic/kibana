@@ -62,10 +62,10 @@ class AggConfig {
     }, 0);
   }
 
-  constructor(vis, opts) {
+  constructor(vis, opts = {}) {
     this.id = String(opts.id || AggConfig.nextId(vis.aggs));
     this.vis = vis;
-    this._opts = opts = (opts || {});
+    this._opts = opts;
     this.enabled = typeof opts.enabled === 'boolean' ? opts.enabled : true;
 
     // start with empty params so that checks in type/schema setters don't freak

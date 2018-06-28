@@ -47,8 +47,8 @@ function parseParentAggs(dslLvlCursor, dsl) {
 }
 
 class AggConfigs extends IndexedArray {
-  constructor(vis, configStates) {
-    configStates = AggConfig.ensureIds(configStates || []);
+  constructor(vis, configStates = []) {
+    configStates = AggConfig.ensureIds(configStates);
     super({
       index: ['id'],
       group: ['schema.group', 'type.name', 'schema.name'],
@@ -120,9 +120,7 @@ class AggConfigs extends IndexedArray {
         .value();
     }
     this.getRequestAggs()
-      .filter(function (config) {
-        return !config.type.hasNoDsl;
-      })
+      .filter(config => !config.type.hasNoDsl)
       .forEach(function nestEachConfig(config, i, list) {
         if (!dslLvlCursor) {
         // start at the top level
@@ -165,9 +163,7 @@ class AggConfigs extends IndexedArray {
       return aggs ? requestValuesAggs.concat(aggs) : requestValuesAggs;
     }, []);
     //move metrics to the end
-    return _.sortBy(aggregations, function (agg) {
-      return agg.schema.group === 'metrics' ? 1 : 0;
-    });
+    return _.sortBy(aggregations, agg => agg.schema.group === 'metrics' ? 1 : 0);
   }
 
   /**
