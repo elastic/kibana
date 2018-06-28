@@ -3,6 +3,7 @@
 exports[`directories should not render directory entry when showOnHomePage is false 1`] = `
 <EuiPage
   className="home"
+  restrictWidth={false}
 >
   <AddData
     apmUiEnabled={true}
@@ -113,6 +114,7 @@ exports[`directories should not render directory entry when showOnHomePage is fa
 exports[`directories should render ADMIN directory entry in "Manage" panel 1`] = `
 <EuiPage
   className="home"
+  restrictWidth={false}
 >
   <AddData
     apmUiEnabled={true}
@@ -190,6 +192,7 @@ exports[`directories should render ADMIN directory entry in "Manage" panel 1`] =
             <Synopsis
               description="Manage the index patterns that help retrieve your data from Elasticsearch."
               iconType="indexPatternApp"
+              isBeta={false}
               title="Index Patterns"
               url="base_path/index_management_landing_page"
             />
@@ -241,6 +244,7 @@ exports[`directories should render ADMIN directory entry in "Manage" panel 1`] =
 exports[`directories should render DATA directory entry in "Explore Data" panel 1`] = `
 <EuiPage
   className="home"
+  restrictWidth={false}
 >
   <AddData
     apmUiEnabled={true}
@@ -293,6 +297,7 @@ exports[`directories should render DATA directory entry in "Explore Data" panel 
             <Synopsis
               description="Display and share a collection of visualizations and saved searches."
               iconType="dashboardApp"
+              isBeta={false}
               title="Dashboard"
               url="base_path/dashboard_landing_page"
             />
@@ -369,6 +374,7 @@ exports[`directories should render DATA directory entry in "Explore Data" panel 
 exports[`should not contain RecentlyAccessed panel when there is no recentlyAccessed history 1`] = `
 <EuiPage
   className="home"
+  restrictWidth={false}
 >
   <AddData
     apmUiEnabled={true}
@@ -479,6 +485,7 @@ exports[`should not contain RecentlyAccessed panel when there is no recentlyAcce
 exports[`should render home component 1`] = `
 <EuiPage
   className="home"
+  restrictWidth={false}
 >
   <React.Fragment>
     <RecentlyAccessed

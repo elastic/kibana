@@ -136,6 +136,9 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('Reserved roles are not editable', async () => {
+          // wait for role tab to finish loading from previous test
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
           const allInputs = await find.allByCssSelector('input');
           for (let i = 0; i < allInputs.length; i++) {
             const input = allInputs[i];

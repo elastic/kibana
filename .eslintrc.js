@@ -31,6 +31,7 @@ module.exports = {
         'packages/kbn-pm/**/*',
         'packages/kbn-es/**/*',
         'packages/kbn-datemath/**/*',
+        'packages/kbn-i18n/**/*',
         'packages/kbn-dev-utils/**/*',
         'packages/kbn-plugin-helpers/**/*',
         'packages/kbn-plugin-generator/**/*',
@@ -199,7 +200,7 @@ module.exports = {
 
     /**
      * Files that require Apache 2.0 headers, settings
-     * are overriden below for files that require Elastic
+     * are overridden below for files that require Elastic
      * Licence headers
      */
     {

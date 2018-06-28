@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 import moment from 'moment';
-import { migrateFilter } from 'ui/courier/data_source/_migrate_filter.js';
+import { migrateFilter } from 'ui/courier';
 import { addItemToRecentlyAccessed } from 'plugins/ml/util/recently_accessed';
 import { mlJobService } from 'plugins/ml/services/job_service';
 

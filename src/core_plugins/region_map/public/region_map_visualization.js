@@ -40,8 +40,8 @@ export function RegionMapsVisualizationProvider(Private, Notifier, config) {
     }
 
 
-    async render(esReponse, status) {
-      await super.render(esReponse, status);
+    async render(esResponse, status) {
+      await super.render(esResponse, status);
       if (this._choroplethLayer) {
         await this._choroplethLayer.whenDataLoaded();
       }
@@ -95,7 +95,7 @@ export function RegionMapsVisualizationProvider(Private, Notifier, config) {
         return;
       }
 
-      this._updateChoroplehLayerForNewProperties(
+      this._updateChoroplethLayerForNewProperties(
         visParams.selectedLayer.url,
         visParams.selectedLayer.attribution,
         this._vis.params.showAllShapes
@@ -114,7 +114,7 @@ export function RegionMapsVisualizationProvider(Private, Notifier, config) {
       return this._recreateChoroplethLayer(url, attribution, showAllData);
     }
 
-    _updateChoroplehLayerForNewProperties(url, attribution, showAllData) {
+    _updateChoroplethLayerForNewProperties(url, attribution, showAllData) {
       if (this._choroplethLayer && this._choroplethLayer.canReuseInstance(url, showAllData)) {
         return;
       }
@@ -153,9 +153,8 @@ export function RegionMapsVisualizationProvider(Private, Notifier, config) {
           return;
         }
 
-        const agg = this._vis.aggs.bySchemaName.segment[0];
-        const filter = agg.createFilter(event);
-        this._vis.API.queryFilter.addFilters(filter);
+        const rowIndex = this._chartData.tables[0].rows.findIndex(row => row[0] === event);
+        this._vis.API.events.addFilter(this._chartData.tables[0], 0, rowIndex);
       });
       this._choroplethLayer.on('styleChanged', (event) => {
         const shouldShowWarning = this._vis.params.isDisplayWarning && config.get('visualization:regionmap:showWarnings');

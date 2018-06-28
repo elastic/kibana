@@ -17,10 +17,14 @@
  * under the License.
  */
 
+// TODO: Integrate a new tool for translations checking
+// https://github.com/elastic/kibana/pull/19826
+import { i18nLoader } from '@kbn/i18n';
+
+import { toArray } from 'rxjs/operators';
 import { fromRoot, formatListAsProse } from '../src/utils';
 import { findPluginSpecs } from '../src/plugin_discovery';
 import { collectUiExports } from '../src/ui';
-import { I18n } from '../src/ui/ui_i18n/i18n';
 
 import * as i18nVerify from './utils/i18n_verify_keys';
 
@@ -36,7 +40,7 @@ export default function (grunt) {
         }
       });
 
-      const specs = await spec$.toArray().toPromise();
+      const specs = await spec$.pipe(toArray()).toPromise();
       const uiExports = collectUiExports(specs);
       await verifyTranslations(uiExports);
 
@@ -64,7 +68,7 @@ async function verifyTranslations(uiExports) {
   }
 
   // get all of the translations from uiExports
-  const translations = await I18n.getAllTranslationsFromPaths(uiExports.translationPaths);
+  const translations = await i18nLoader.getAllTranslationsFromPaths(uiExports.translationPaths);
   const keysWithoutTranslations = Object.entries(
     i18nVerify.getNonTranslatedKeys(keysUsedInViews, translations)
   );

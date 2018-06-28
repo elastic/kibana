@@ -23,13 +23,13 @@ import { ErrorAllowExplicitIndexProvider } from '../../error_allow_explicit_inde
 import { IsRequestProvider } from './is_request';
 import { MergeDuplicatesRequestProvider } from './merge_duplicate_requests';
 import { RequestStatus } from './req_status';
-import { RequestFetchParamsToBodyProvider } from './request/request_fetch_params_to_body_provider';
+import { SerializeFetchParamsProvider } from './request/serialize_fetch_params';
 
 export function CallClientProvider(Private, Promise, es) {
   const errorAllowExplicitIndex = Private(ErrorAllowExplicitIndexProvider);
   const isRequest = Private(IsRequestProvider);
   const mergeDuplicateRequests = Private(MergeDuplicatesRequestProvider);
-  const requestFetchParamsToBody = Private(RequestFetchParamsToBodyProvider);
+  const serializeFetchParams = Private(SerializeFetchParamsProvider);
 
   const ABORTED = RequestStatus.ABORTED;
   const DUPLICATE = RequestStatus.DUPLICATE;
@@ -45,7 +45,8 @@ export function CallClientProvider(Private, Promise, es) {
     if (!execCount) return Promise.resolve([]);
 
     // resolved by respond()
-    let esPromise;
+    let esPromise = undefined;
+    let isRequestAborted = false;
     const defer = Promise.defer();
 
     // for each respond with either the response or ABORTED
@@ -72,7 +73,6 @@ export function CallClientProvider(Private, Promise, es) {
         );
     };
 
-
     // handle a request being aborted while being fetched
     const requestWasAborted = Promise.method(function (req, i) {
       if (statuses[i] === ABORTED) {
@@ -89,11 +89,11 @@ export function CallClientProvider(Private, Promise, es) {
         esPromise.abort();
       }
 
-      esPromise = ABORTED;
+      esPromise = undefined;
+      isRequestAborted = true;
 
       return respond();
     });
-
 
     // attach abort handlers, close over request index
     statuses.forEach(function (req, i) {
@@ -103,63 +103,81 @@ export function CallClientProvider(Private, Promise, es) {
       });
     });
 
-    // Now that all of THAT^^^ is out of the way, lets actually
-    // call out to elasticsearch
-    Promise.map(requestsToFetch, function (request) {
-      return Promise.try(request.getFetchParams, void 0, request)
-        .then(function (fetchParams) {
-          return (request.fetchParams = fetchParams);
-        })
-        .then(value => ({ resolved: value }))
-        .catch(error => ({ rejected: error }));
-    })
-      .then(function (results) {
-        const requestsWithFetchParams = [];
-        // Gather the fetch param responses from all the successful requests.
-        results.forEach((result, index) => {
-          if (result.resolved) {
-            requestsWithFetchParams.push(result.resolved);
-          } else {
-            const request = requestsToFetch[index];
-            request.handleFailure(result.rejected);
-            requestsToFetch[index] = undefined;
-          }
-        });
-        // The index of the request inside requestsToFetch determines which response is mapped to it. If a request
-        // won't generate a response, since it already failed, we need to remove the request
-        // from the requestsToFetch array so the indexes will continue to match up to the responses correctly.
-        requestsToFetch = requestsToFetch.filter(request => request !== undefined);
-        return requestFetchParamsToBody(requestsWithFetchParams);
-      })
-      .then(function (body) {
-      // while the strategy was converting, our request was aborted
-        if (esPromise === ABORTED) {
+    // We're going to create a new async context here, so that the logic within it can execute
+    // asynchronously after we've returned a reference to defer.promise.
+    Promise.resolve().then(async () => {
+      // Flatten the searchSource within each searchRequest to get the fetch params,
+      // e.g. body, filters, index pattern, query.
+      const allFetchParams = await getAllFetchParams(requestsToFetch);
+
+      // Serialize the fetch params into a format suitable for the body of an ES query.
+      const serializedFetchParams = await serializeAllFetchParams(allFetchParams, requestsToFetch);
+
+      // The index of the request inside requestsToFetch determines which response is mapped to it.
+      // If a request won't generate a response, since it already failed, we need to remove the
+      // request from the requestsToFetch array so the indexes will continue to match up to the
+      // responses correctly.
+      requestsToFetch = requestsToFetch.filter(request => request !== undefined);
+
+      try {
+        // The request was aborted while we were doing the above logic.
+        if (isRequestAborted) {
           throw ABORTED;
         }
 
-        return (esPromise = es.msearch({ body }));
-      })
-      .then((clientResponse => respond(clientResponse.responses)))
-      .catch(function (error) {
+        esPromise = es.msearch({ body: serializedFetchParams });
+        const clientResponse = await esPromise;
+        await respond(clientResponse.responses);
+      } catch(error) {
+        if (error === ABORTED) {
+          return await respond();
+        }
+
         if (errorAllowExplicitIndex.test(error)) {
           return errorAllowExplicitIndex.takeover();
         }
 
-        if (error === ABORTED) respond();
-        else defer.reject(error);
-      });
+        defer.reject(error);
+      }
+    });
 
     // return our promise, but catch any errors we create and
     // send them to the requests
     return defer.promise
-      .catch(function (err) {
-        requests.forEach(function (req, i) {
-          if (statuses[i] !== ABORTED) {
+      .catch((err) => {
+        requests.forEach((req, index) => {
+          if (statuses[index] !== ABORTED) {
             req.handleFailure(err);
           }
         });
       });
+  }
 
+  function getAllFetchParams(requests) {
+    return Promise.map(requests, (request) => {
+      return Promise.try(request.getFetchParams, void 0, request)
+        .then((fetchParams) => {
+          return (request.fetchParams = fetchParams);
+        })
+        .then(value => ({ resolved: value }))
+        .catch(error => ({ rejected: error }));
+    });
+  }
+
+  function serializeAllFetchParams(fetchParams, requestsToFetch) {
+    const requestsWithFetchParams = [];
+
+    // Gather the fetch param responses from all the successful requests.
+    fetchParams.forEach((result, index) => {
+      if (result.resolved) {
+        requestsWithFetchParams.push(result.resolved);
+      } else {
+        const request = requestsToFetch[index];
+        request.handleFailure(result.rejected);
+        requestsToFetch[index] = undefined;
+      }
+    });
+    return serializeFetchParams(requestsWithFetchParams);
   }
 
   return callClient;

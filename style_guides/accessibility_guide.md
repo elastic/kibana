@@ -9,7 +9,7 @@ accessibility issues.
 
 Every element on a page will have a name, that is read out to an assistive technology
 like a screen reader. This will for most elements be the content of the element.
-For form elements it will be the content of the assosciated `<label>` (see below).
+For form elements it will be the content of the associated `<label>` (see below).
 
 You can overwrite that name, that is read out, by specifying a new name via the
 `aria-label` attribute. This must e.g. be done, if the element itself has no

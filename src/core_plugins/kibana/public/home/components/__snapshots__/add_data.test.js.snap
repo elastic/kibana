@@ -199,7 +199,7 @@ exports[`apmUiEnabled 1`] = `
             }
           }
         >
-          Fresh Elastic stack installation?
+          Need data?
         </strong>
         <EuiLink
           color="primary"
@@ -211,7 +211,7 @@ exports[`apmUiEnabled 1`] = `
           }
           type="button"
         >
-          Try some sample data sets
+          Load sample data, visualizations, and dashboards
         </EuiLink>
       </EuiText>
     </EuiFlexItem>
@@ -229,7 +229,7 @@ exports[`apmUiEnabled 1`] = `
             }
           }
         >
-          Data already in Elasticsearch?
+          Have data?
         </strong>
         <EuiLink
           color="primary"
@@ -241,7 +241,7 @@ exports[`apmUiEnabled 1`] = `
           }
           type="button"
         >
-          Set up index patterns
+          Connect to your Elasticsearch index
         </EuiLink>
       </EuiText>
     </EuiFlexItem>
@@ -417,7 +417,7 @@ exports[`render 1`] = `
             }
           }
         >
-          Fresh Elastic stack installation?
+          Need data?
         </strong>
         <EuiLink
           color="primary"
@@ -429,7 +429,7 @@ exports[`render 1`] = `
           }
           type="button"
         >
-          Try some sample data sets
+          Load sample data, visualizations, and dashboards
         </EuiLink>
       </EuiText>
     </EuiFlexItem>
@@ -447,7 +447,7 @@ exports[`render 1`] = `
             }
           }
         >
-          Data already in Elasticsearch?
+          Have data?
         </strong>
         <EuiLink
           color="primary"
@@ -459,7 +459,7 @@ exports[`render 1`] = `
           }
           type="button"
         >
-          Set up index patterns
+          Connect to your Elasticsearch index
         </EuiLink>
       </EuiText>
     </EuiFlexItem>

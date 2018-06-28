@@ -134,6 +134,7 @@ exports[`Table should render the boolean template (true) 1`] = `
 <dot
   aria-label="Is searchable"
   className="euiIcon euiIcon--medium euiIcon--secondary"
+  focusable="false"
   height="16"
   style={null}
   viewBox="0 0 16 16"

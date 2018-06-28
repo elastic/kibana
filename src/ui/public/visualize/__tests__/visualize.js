@@ -141,7 +141,7 @@ describe('visualize directive', function () {
      * Since we use an old lodash version we cannot use fake timers here.
      */
     function waitForFetch() {
-      return new Promise(resolve => { setTimeout(resolve, 150); });
+      return new Promise(resolve => { setTimeout(resolve, 500); });
     }
 
     beforeEach(() => {
@@ -162,13 +162,6 @@ describe('visualize directive', function () {
 
       it('should be true if triggered via courier:searchRefresh event', async () => {
         $scope.$emit('courier:searchRefresh');
-        await waitForFetch();
-        sinon.assert.calledOnce(requestHandler);
-        assertParam({ forceFetch: true });
-      });
-
-      it('should be true if triggered via fetch event', async () => {
-        $scope.$emit('fetch');
         await waitForFetch();
         sinon.assert.calledOnce(requestHandler);
         assertParam({ forceFetch: true });
