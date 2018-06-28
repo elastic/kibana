@@ -84,6 +84,11 @@ uiModules
         $scope.remove = function (agg) {
           const aggs = $scope.vis.aggs;
           const index = aggs.indexOf(agg);
+
+          if (index === -1) {
+            return;
+          }
+
           aggs.splice(index, 1);
         };
 
