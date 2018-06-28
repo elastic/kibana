@@ -28,7 +28,7 @@ describe('ui/courier/fetch search request', () => {
   beforeEach(ngMock.module('kibana'));
 
   afterEach(() => {
-    requestQueue.clear();
+    requestQueue.removeAll();
   });
 
   it('throws exception when created without errorHandler', ngMock.inject((Private) => {

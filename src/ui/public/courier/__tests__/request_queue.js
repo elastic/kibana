@@ -25,8 +25,8 @@ import { requestQueue } from '../_request_queue';
 
 describe('Courier Request Queue', function () {
   beforeEach(ngMock.module('kibana'));
-  beforeEach(requestQueue.clear);
-  after(requestQueue.clear);
+  beforeEach(() => requestQueue.removeAll());
+  after(() => requestQueue.removeAll());
 
   class MockReq {
     constructor(startable = true) {
@@ -37,11 +37,8 @@ describe('Courier Request Queue', function () {
 
   describe('#getStartable()', function () {
     it('returns only startable requests', function () {
-      requestQueue.push(
-        new MockReq(false),
-        new MockReq(true)
-      );
-
+      requestQueue.add(new MockReq(false));
+      requestQueue.add(new MockReq(true));
       expect(requestQueue.getStartable()).to.have.length(1);
     });
   });
@@ -51,12 +48,9 @@ describe('Courier Request Queue', function () {
   // that we can clean this up, or remove this.
   describe('#getInactive()', function () {
     it('returns only requests with started = false', function () {
-      requestQueue.push(
-        { started: true },
-        { started: false },
-        { started: true },
-      );
-
+      requestQueue.add({ started: true });
+      requestQueue.add({ started: false });
+      requestQueue.add({ started: true });
       expect(requestQueue.getInactive()).to.have.length(1);
     });
   });

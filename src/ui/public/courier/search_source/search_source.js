@@ -421,7 +421,7 @@ export function SearchSourceProvider(Promise, Private, config) {
      * @return {undefined}
      */
     cancelQueued() {
-      requestQueue
+      requestQueue.getAll()
         .filter(req => req.source === this)
         .forEach(req => req.abort());
     }

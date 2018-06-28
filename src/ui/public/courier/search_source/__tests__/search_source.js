@@ -49,16 +49,16 @@ describe('SearchSource', function () {
     indexPattern2 = new IndexPattern('test2-*', null, []);
     expect(indexPattern).to.not.be(indexPattern2);
   }));
-  beforeEach(requestQueue.clear);
-  after(requestQueue.clear);
+  beforeEach(requestQueue.removeAll);
+  after(requestQueue.removeAll);
 
   describe('#onResults()', function () {
     it('adds a request to the requestQueue', function () {
       const source = new SearchSource();
 
-      expect(requestQueue).to.have.length(0);
+      expect(requestQueue.getCount()).to.be(0);
       source.onResults();
-      expect(requestQueue).to.have.length(1);
+      expect(requestQueue.getCount()).to.be(1);
     });
 
     it('returns a promise that is resolved with the results', function () {
@@ -69,7 +69,8 @@ describe('SearchSource', function () {
         expect(results).to.be(fakeResults);
       });
 
-      requestQueue[0].defer.resolve(fakeResults);
+      const searchRequest = requestQueue.getSearchRequestAt(0);
+      searchRequest.defer.resolve(fakeResults);
       return promise;
     });
   });
@@ -78,17 +79,19 @@ describe('SearchSource', function () {
     it('aborts all startable requests', function () {
       const source = new SearchSource();
       source.onResults();
-      sinon.stub(requestQueue[0], 'canStart').returns(true);
+      const searchRequest = requestQueue.getSearchRequestAt(0);
+      sinon.stub(searchRequest, 'canStart').returns(true);
       source.destroy();
-      expect(requestQueue).to.have.length(0);
+      expect(requestQueue.getCount()).to.be(0);
     });
 
     it('aborts all non-startable requests', function () {
       const source = new SearchSource();
       source.onResults();
-      sinon.stub(requestQueue[0], 'canStart').returns(false);
+      const searchRequest = requestQueue.getSearchRequestAt(0);
+      sinon.stub(searchRequest, 'canStart').returns(false);
       source.destroy();
-      expect(requestQueue).to.have.length(0);
+      expect(requestQueue.getCount()).to.be(0);
     });
   });
 

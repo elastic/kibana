@@ -17,26 +17,54 @@
  * under the License.
  */
 
+class SearchRequestQueue {
+  constructor() {
+    // Queue of pending requests, requests are removed as they are processed by fetch.[sourceType]().
+    this._searchRequests = [];
+  }
 
-/**
- * Queue of pending requests, requests are removed as
- * they are processed by fetch.[sourceType]().
- * @type {Array}
- */
-export const requestQueue = [];
+  getCount = () => {
+    return this._searchRequests.length;
+  };
 
-requestQueue.clear = function () {
-  requestQueue.splice(0, requestQueue.length);
-};
+  add = (searchRequest) => {
+    this._searchRequests.push(searchRequest);
+  };
 
-requestQueue.getInactive = function () {
-  return requestQueue.filter(function (req) {
-    return !req.started;
-  });
-};
+  remove = (searchRequest) => {
+    // Remove all matching search requests.
+    this._searchRequests = this._searchRequests.filter(
+      existingSearchRequest => existingSearchRequest !== searchRequest
+    );
+  }
 
-requestQueue.getStartable = function () {
-  return requestQueue.filter(req => req.canStart());
-};
+  removeAll = () => {
+    this._searchRequests.splice(0, this._searchRequests.length);
+  };
 
+  abortAll = () => {
+    this._searchRequests.forEach(searchRequest => searchRequest.abort());
+  };
 
+  getAll = () => {
+    return this._searchRequests;
+  };
+
+  getSearchRequestAt = (index) => {
+    return this._searchRequests[index];
+  };
+
+  getInactive = () => {
+    return this._searchRequests.filter(searchRequest => !searchRequest.started);
+  };
+
+  getStartable = () => {
+    return this._searchRequests.filter(searchRequest => searchRequest.canStart());
+  };
+
+  getPending = () => {
+    return this._searchRequests.filter(searchRequest => searchRequest.isFetchRequestedAndPending());
+  };
+}
+
+export const requestQueue = new SearchRequestQueue();

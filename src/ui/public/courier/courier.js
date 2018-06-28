@@ -61,9 +61,9 @@ uiModules.get('kibana/courier').service('courier', ($rootScope, Private) => {
         searchPoll.pause();
 
         // And abort all pending requests.
-        _.invoke(requestQueue, 'abort');
+        requestQueue.abortAll();
 
-        if (requestQueue.length) {
+        if (requestQueue.getCount()) {
           throw new Error('Aborting all pending requests failed.');
         }
       });

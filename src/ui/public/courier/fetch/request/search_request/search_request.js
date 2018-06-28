@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import moment from 'moment';
 
 import { requestQueue } from '../../../_request_queue';
@@ -33,7 +32,7 @@ export function SearchRequestProvider(Promise) {
       this.defer = defer || Promise.defer();
       this.abortedDefer = Promise.defer();
       this.type = 'search';
-      requestQueue.push(this);
+      requestQueue.add(this);
     }
 
     /**
@@ -119,7 +118,7 @@ export function SearchRequestProvider(Promise) {
       if (this.stopped) return;
       this.stopped = true;
       this.source.requestIsStopped(this);
-      _.pull(requestQueue, this);
+      requestQueue.remove(this);
     }
 
     abort() {

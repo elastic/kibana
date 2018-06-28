@@ -35,8 +35,7 @@ export function FetchSoonProvider(Private, Promise) {
   const fetchNow = Private(FetchNowProvider);
 
   const debouncedFetchNow = _.debounce(() => {
-    const requests = requestQueue.filter(req => req.isFetchRequestedAndPending());
-    fetchNow(requests);
+    fetchNow(requestQueue.getPending());
   }, {
     wait: 10,
     maxWait: 50
