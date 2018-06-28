@@ -10,7 +10,7 @@ export class SecurityAuditLogger {
     this._auditLogger = auditLogger;
   }
 
-  savedObjectsAuthorizationFailure(username, action, types, missing, useLegacyFallback, args) {
+  savedObjectsAuthorizationFailure(username, action, types, missing, args) {
     if (!this._enabled) {
       return;
     }
@@ -23,7 +23,6 @@ export class SecurityAuditLogger {
         action,
         types,
         missing,
-        useLegacyFallback,
         args
       }
     );

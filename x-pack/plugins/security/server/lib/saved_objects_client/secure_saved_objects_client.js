@@ -113,10 +113,9 @@ export class SecureSavedObjectsClient {
         this._auditLogger.savedObjectsAuthorizationSuccess(username, action, types, args);
         return await fn(this._internalRepository);
       case HAS_PRIVILEGES_RESULT.LEGACY:
-        this._auditLogger.savedObjectsAuthorizationFailure(username, action, types, missing, true, args);
         return await fn(this._callWithRequestRepository);
       case HAS_PRIVILEGES_RESULT.UNAUTHORIZED:
-        this._auditLogger.savedObjectsAuthorizationFailure(username, action, types, missing, false, args);
+        this._auditLogger.savedObjectsAuthorizationFailure(username, action, types, missing, args);
         const msg = `Unable to ${action} ${types.sort().join(',')}, missing ${missing.sort().join(',')}`;
         throw this.errors.decorateForbiddenError(new Error(msg));
       default:
@@ -133,14 +132,6 @@ export class SecureSavedObjectsClient {
     const { result, username, missing } = await this._hasSavedObjectPrivileges(Array.from(typesToPrivilegesMap.values()));
 
     if (result === HAS_PRIVILEGES_RESULT.LEGACY) {
-      this._auditLogger.savedObjectsAuthorizationFailure(
-        username,
-        action,
-        types,
-        missing,
-        true,
-        { options }
-      );
       return await this._callWithRequestRepository.find(options);
     }
 
@@ -154,7 +145,6 @@ export class SecureSavedObjectsClient {
         action,
         types,
         missing,
-        false,
         { options }
       );
       throw this.errors.decorateForbiddenError(new Error(`Not authorized to find saved_object`));

@@ -87,7 +87,6 @@ describe('#create', () => {
       'create',
       [type],
       [`action:saved_objects/${type}/create`],
-      false,
       {
         type,
         attributes,
@@ -157,19 +156,7 @@ describe('#create', () => {
     expect(result).toBe(returnValue);
     expect(mockRepository.create).toHaveBeenCalledWith(type, attributes, options);
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-    expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
-      username,
-      'create',
-      [type],
-      [`action:saved_objects/${type}/create`],
-      true,
-      {
-        type,
-        attributes,
-        options,
-      }
-    );
-    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
   });
 });
 
@@ -232,7 +219,6 @@ describe('#bulkCreate', () => {
       'bulk_create',
       [type2, type1],
       [`action:saved_objects/${type1}/bulk_create`],
-      false,
       {
         objects,
         options,
@@ -307,20 +293,7 @@ describe('#bulkCreate', () => {
 
     expect(result).toBe(returnValue);
     expect(mockRepository.bulkCreate).toHaveBeenCalledWith(objects, options);
-    expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
-      username,
-      'bulk_create',
-      [type1, type2],
-      [
-        `action:saved_objects/${type1}/bulk_create`,
-        `action:saved_objects/${type2}/bulk_create`,
-      ],
-      true,
-      {
-        objects,
-        options,
-      }
-    );
+    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
 });
@@ -375,7 +348,6 @@ describe('#delete', () => {
       'delete',
       [type],
       [`action:saved_objects/${type}/delete`],
-      false,
       {
         type,
         id,
@@ -440,17 +412,7 @@ describe('#delete', () => {
 
     expect(result).toBe(returnValue);
     expect(mockRepository.delete).toHaveBeenCalledWith(type, id);
-    expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
-      username,
-      'delete',
-      [type],
-      [`action:saved_objects/${type}/delete`],
-      true,
-      {
-        type,
-        id,
-      }
-    );
+    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
 });
@@ -508,7 +470,6 @@ describe('#find', () => {
         'find',
         [type],
         [`action:saved_objects/${type}/find`],
-        false,
         {
           options
         }
@@ -545,7 +506,6 @@ describe('#find', () => {
         'find',
         [type2, type1],
         [`action:saved_objects/${type1}/find`],
-        false,
         {
           options
         }
@@ -585,7 +545,6 @@ describe('#find', () => {
         'find',
         [type2, type1],
         [`action:saved_objects/${type2}/find`, `action:saved_objects/${type1}/find`],
-        false,
         {
           options
         }
@@ -648,16 +607,7 @@ describe('#find', () => {
 
       expect(result).toBe(returnValue);
       expect(mockRepository.find).toHaveBeenCalledWith({ type });
-      expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
-        username,
-        'find',
-        [type],
-        [`action:saved_objects/${type}/find`],
-        true,
-        {
-          options
-        }
-      );
+      expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
     });
   });
@@ -719,7 +669,6 @@ describe('#find', () => {
         'find',
         [type],
         [`action:saved_objects/${type}/find`],
-        false,
         {
           options
         }
@@ -757,16 +706,7 @@ describe('#find', () => {
       expect(result).toBe(returnValue);
       expect(mockHasPrivileges).toHaveBeenCalledWith([`action:saved_objects/${type}/find`]);
       expect(mockRepository.find).toHaveBeenCalledWith(options);
-      expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
-        username,
-        'find',
-        [type],
-        [`action:saved_objects/${type}/find`],
-        true,
-        {
-          options
-        }
-      );
+      expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
     });
 
@@ -888,7 +828,6 @@ describe('#bulkGet', () => {
       'bulk_get',
       [type2, type1],
       [`action:saved_objects/${type1}/bulk_get`],
-      false,
       {
         objects
       }
@@ -960,16 +899,7 @@ describe('#bulkGet', () => {
 
     expect(result).toBe(returnValue);
     expect(mockRepository.bulkGet).toHaveBeenCalledWith(objects);
-    expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
-      username,
-      'bulk_get',
-      [type1, type2],
-      [`action:saved_objects/${type1}/bulk_get`, `action:saved_objects/${type2}/bulk_get`],
-      true,
-      {
-        objects
-      }
-    );
+    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
 });
@@ -1024,7 +954,6 @@ describe('#get', () => {
       'get',
       [type],
       [`action:saved_objects/${type}/get`],
-      false,
       {
         type,
         id,
@@ -1089,17 +1018,7 @@ describe('#get', () => {
 
     expect(result).toBe(returnValue);
     expect(mockRepository.get).toHaveBeenCalledWith(type, id);
-    expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
-      username,
-      'get',
-      [type],
-      [`action:saved_objects/${type}/get`],
-      true,
-      {
-        type,
-        id,
-      }
-    );
+    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
 });
@@ -1156,7 +1075,6 @@ describe('#update', () => {
       'update',
       [type],
       [`action:saved_objects/${type}/update`],
-      false,
       {
         type,
         id,
@@ -1229,19 +1147,7 @@ describe('#update', () => {
 
     expect(result).toBe(returnValue);
     expect(mockRepository.update).toHaveBeenCalledWith(type, id, attributes, options);
-    expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
-      username,
-      'update',
-      [type],
-      [`action:saved_objects/${type}/update`],
-      true,
-      {
-        type,
-        id,
-        attributes,
-        options,
-      }
-    );
+    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
 });
