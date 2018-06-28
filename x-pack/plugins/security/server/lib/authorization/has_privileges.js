@@ -72,6 +72,8 @@ export function hasPrivilegesWithServer(server) {
       const privilegesCheck = await hasApplicationPrivileges(allPrivileges);
 
       const username = privilegesCheck.username;
+
+      // We don't want to expose the version privilege to consumers, as it's an implementation detail only to detect version mismatch
       const missing = Object.keys(privilegesCheck.privileges)
         .filter(p => !privilegesCheck.privileges[p])
         .filter(p => p !== versionPrivilege);
@@ -98,7 +100,6 @@ export function hasPrivilegesWithServer(server) {
       return {
         result: HAS_PRIVILEGES_RESULT.UNAUTHORIZED,
         username,
-        // We don't want to expose the version privilege to consumers, as it's an implementation detail only to detect version mismatch
         missing,
       };
     };
