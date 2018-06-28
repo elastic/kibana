@@ -22,18 +22,8 @@ import { getSavedObjects } from './get_saved_objects';
 
 const indexPatternTitle = 'dynamic index pattern title';
 
-const configMock = {
-  get: () => {
-    return indexPatternTitle;
-  }
-};
-
-const serverMock = {
-  config: () => { return configMock; }
-};
-
 test('should dynamically set index title to "xpack.apm.indexPattern" yaml config value', () => {
-  const savedObjects = getSavedObjects(serverMock);
+  const savedObjects = getSavedObjects(indexPatternTitle);
   const indexPattern = savedObjects[0];
   expect(indexPattern.type).to.be('index-pattern');
   // if index pattern id changes, ensure other saved objects point to the new id

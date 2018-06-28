@@ -19,11 +19,9 @@
 
 import indexPattern from './index_pattern.json';
 import staticSavedObjects from './saved_objects.json';
-import { getIndexPatternTitle } from '../get_index_pattern_title';
 
-function getIndexPattern(server) {
-  indexPattern.attributes.title = getIndexPatternTitle(server.config());
-
+function getIndexPattern(apmIndexPattern) {
+  indexPattern.attributes.title = apmIndexPattern;
   return indexPattern;
 }
 

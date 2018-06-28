@@ -37,10 +37,7 @@ import {
   GO_CLIENT_INSTRUCTIONS,
 } from './apm_client_instructions';
 
-import { getIndexPatternTitle } from './get_index_pattern_title';
-
-export function onPremInstructions(server) {
-  const apmIndexPattern = getIndexPatternTitle(server.config());
+export function onPremInstructions(apmIndexPattern) {
 
   return {
     instructionSets: [
