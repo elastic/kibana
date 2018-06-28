@@ -80,25 +80,25 @@ export function PluginStatement({
 
   return (
     <EuiFlexGroup
-      gutterSize="none"
-      justifyContent="spaceBetween"
       alignItems="center"
       className="pipelineViewer__statement"
+      gutterSize="none"
+      justifyContent="spaceBetween"
     >
       <EuiFlexItem grow={false}>
         <EuiFlexGroup
+          alignItems="center"
           gutterSize="xs"
           responsive={false}
-          alignItems="center"
         >
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              size="xs"
-              color="primary"
-              iconType="dot"
-              flush="left"
               className="pipelineViewer__plugin"
+              color="primary"
+              flush="left"
+              iconType="dot"
               onClick={onNameButtonClick}
+              size="xs"
             >
               <span>{name}</span>
             </EuiButtonEmpty>
@@ -131,12 +131,16 @@ export function PluginStatement({
 }
 
 PluginStatement.propTypes = {
+  onShowVertexDetails: PropTypes.func.isRequired,
   statement: PropTypes.shape({
     hasExplicitId: PropTypes.bool.isRequired,
     id: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
     pluginType: PropTypes.string.isRequired,
-    vertex: PropTypes.object.isRequired,
+    vertex: PropTypes.shape({
+      latestEventsPerSecond: PropTypes.number.isRequired,
+      latestMillisPerEvent: PropTypes.number,
+      percentOfTotalProcessorTime: PropTypes.number,
+    }).isRequired,
   }).isRequired,
-  onShowVertexDetails: PropTypes.func.isRequired,
 };
