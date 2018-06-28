@@ -23,7 +23,7 @@ import { resolve } from 'path';
 const mockTemplate = `
 {{appId}}
 {{bundlePath}}
-{{i18n 'foo'}}
+{{i18n 'foo' '{"defaultMessage": "bar"}'}}
 `;
 
 const templatePath = resolve(__dirname, 'template.js.hbs');
@@ -131,6 +131,7 @@ describe('ui_render/AppBootstrap', () => {
       const config2 = {
         ...mockConfig(),
         translations: {
+          locale: 'en',
           foo: 'not translated foo'
         }
       };
@@ -147,6 +148,7 @@ describe('ui_render/AppBootstrap', () => {
 function mockConfig() {
   return {
     translations: {
+      locale: 'en',
       foo: 'translated foo'
     },
     templateData: {
