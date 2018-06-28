@@ -18,16 +18,16 @@ describe('StatementSection component', () => {
       elements: [
         {
           id: 'standardInput',
-          parentId: null
+          parentId: null,
         },
         {
           id: 'fileInput',
-          parentId: null
-        }
+          parentId: null,
+        },
       ],
       headingText: 'Inputs',
       iconType: 'logstashInput',
-      onShowVertexDetails
+      onShowVertexDetails,
     };
   });
 
