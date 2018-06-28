@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { staticLookupEditor } from './static_lookup';
+export { StaticLookupEditor } from './static_lookup';
