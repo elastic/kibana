@@ -169,7 +169,7 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
 
       resetMatches();
 
-      //we need to propagate user's query so we can higlight matches
+      //we need to propagate user's query so we can highlight matches
       scope.query = undefined;
 
       //Declare the timeout promise var outside the function scope so that stacked calls can be cancelled later

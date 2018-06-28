@@ -25,7 +25,7 @@ import * as BucketAggTypeModule from '../../buckets/_bucket_agg_type';
 
 describe('Geohash Agg', () => {
 
-  const intialZoom = 10;
+  const initialZoom = 10;
   const initialMapBounds = {
     top_left: { lat: 1.0, lon: -1.0 },
     bottom_right: { lat: -1.0, lon: 1.0 }
@@ -45,7 +45,7 @@ describe('Geohash Agg', () => {
         return false;
       },
       params: {
-        mapZoom: intialZoom
+        mapZoom: initialZoom
       },
       sessionState: {},
       aggs: []
@@ -90,12 +90,12 @@ describe('Geohash Agg', () => {
   }
 
   function resetMap() {
-    aggMock.vis.params.mapZoom = intialZoom;
+    aggMock.vis.params.mapZoom = initialZoom;
     aggMock.vis.sessionState.mapBounds = initialMapBounds;
     aggMock.vis.sessionState.mapCollar = {
       top_left: { lat: 1.5, lon: -1.5 },
       bottom_right: { lat: -1.5, lon: 1.5 },
-      zoom: intialZoom
+      zoom: initialZoom
     };
   }
 

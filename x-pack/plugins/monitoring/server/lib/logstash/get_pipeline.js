@@ -57,7 +57,7 @@ export function _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationI
 
 /**
  * The UI needs a list of all vertices for the requested pipeline version, with each vertex in the list having its timeseries metrics associated with it. The
- * stateDocument object provides the list of vertices while the statsAggregation object provides timeseries metrics. This function stithces the two together
+ * stateDocument object provides the list of vertices while the statsAggregation object provides timeseries metrics. This function stitches the two together
  * and returns the modified stateDocument object.
  *
  * @param {Object} stateDocument

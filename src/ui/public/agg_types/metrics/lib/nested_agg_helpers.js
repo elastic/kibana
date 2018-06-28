@@ -20,7 +20,7 @@
 /**
  * Forwards modifyAggConfigOnSearchRequestStart calls to a nested AggConfig.
  * This must be used for each parameter, that accepts a nested aggregation, otherwise
- * some paramters of the nested aggregation might not work properly (like auto interval
+ * some parameters of the nested aggregation might not work properly (like auto interval
  * on a nested date histogram).
  * You should assign the return value of this function to the modifyAggConfigOnSearchRequestStart
  * of the parameter that accepts a nested aggregation. Example:
@@ -29,9 +29,9 @@
  *   modifyAggConfigOnSearchRequestStart: forwardModifyAggConfigOnSearchRequestStart('customBucket')
  * }
  *
- * @param {string} paramName - The name of the parameter, that this function should foward
+ * @param {string} paramName - The name of the parameter, that this function should forward
  *      calls to. That should match the name of the parameter the function is called on.
- * @returns {function} A function, that fowards the calls.
+ * @returns {function} A function, that forwards the calls.
  */
 function forwardModifyAggConfigOnSearchRequestStart(paramName) {
   return (aggConfig, ...args) => {

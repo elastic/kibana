@@ -130,7 +130,7 @@ export function getReportingUsageCollector(server) {
 
       let browserType;
       if (enabled) {
-        // Allow this to explictly throw an exception if/when this config is deprecated,
+        // Allow this to explicitly throw an exception if/when this config is deprecated,
         // because we shouldn't collect browserType in that case!
         browserType = config.get('xpack.reporting.capture.browser.type');
       }

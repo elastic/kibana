@@ -746,7 +746,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     // Returns value per pixel
     async getChartYAxisRatio(axis = 'ValueAxis-1') {
-      // 1). get the maximim chart Y-Axis marker value and Y position
+      // 1). get the maximum chart Y-Axis marker value and Y position
       const maxYAxisChartMarker = await retry.try(
         async () => await find.byCssSelector(`div.y-axis-div-wrapper > div > svg > g.${axis} > g:last-of-type.tick`)
       );
@@ -843,7 +843,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async waitForVisualization() {
-      return await find.byCssSelector('visualization');
+      return await find.byCssSelector('.visualization');
     }
 
     async getZoomSelectors(zoomSelector) {

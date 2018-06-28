@@ -34,7 +34,7 @@ import _ from 'lodash';
 import { SavedObjectNotFound } from '../../errors';
 import MappingSetupProvider from '../../utils/mapping_setup';
 
-import { SearchSourceProvider } from '../data_source/search_source';
+import { SearchSourceProvider } from '../search_source';
 import { SavedObjectsClientProvider, findObjectByTitle } from '../../saved_objects';
 import { migrateLegacyQuery } from '../../utils/migrateLegacyQuery.js';
 import { recentlyAccessed } from '../../persisted_log';
@@ -379,7 +379,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
           this.id = resp.id;
         })
         .then(() => {
-          if (this.showInRecenltyAccessed && this.getFullPath) {
+          if (this.showInRecentlyAccessed && this.getFullPath) {
             recentlyAccessed.add(this.getFullPath(), this.title, this.id);
           }
           this.isSaving = false;

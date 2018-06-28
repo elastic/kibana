@@ -24,7 +24,7 @@ import { join as joinPath } from 'path';
 // Logic from elasticsearch/core/src/main/java/org/elasticsearch/monitor/os/OsProbe.java
 
 const CONTROL_GROUP_RE = new RegExp('\\d+:([^:]+):(/.*)');
-const CONTROLLER_SEPERATOR_RE = ',';
+const CONTROLLER_SEPARATOR_RE = ',';
 
 const PROC_SELF_CGROUP_FILE = '/proc/self/cgroup';
 const PROC_CGROUP_CPU_DIR = '/sys/fs/cgroup/cpu';
@@ -52,7 +52,7 @@ export function readControlGroups() {
           return;
         }
 
-        const controllers = matches[1].split(CONTROLLER_SEPERATOR_RE);
+        const controllers = matches[1].split(CONTROLLER_SEPARATOR_RE);
         controllers.forEach(controller => {
           response[controller] = matches[2];
         });

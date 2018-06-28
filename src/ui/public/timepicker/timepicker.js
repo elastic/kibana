@@ -109,7 +109,7 @@ module.directive('kbnTimepicker', function (refreshIntervals) {
         _.set($scope, 'browserAbsolute.to', new Date(newDate.year(), newDate.month(), newDate.date()));
       });
 
-      // The datepicker directive uses native Javascript Dates, ignoring moment's default timezone. This causes
+      // The datepicker directive uses native JavaScript Dates, ignoring moment's default timezone. This causes
       // the datepicker and the text input above it to get out of sync if the user changed the `dateFormat:tz` config
       // in advanced settings. The text input will show the date in the user selected timezone, the datepicker will
       // show the date in the local browser timezone. Since we really just want a day, month, year from the datepicker
@@ -165,7 +165,7 @@ module.directive('kbnTimepicker', function (refreshIntervals) {
       };
 
       $scope.setQuick = function (from, to) {
-        $scope.onFilterSelect({ from, to });
+        $scope.onFilterSelect({ from, to, mode: TIME_MODES.QUICK });
       };
 
       $scope.setToNow = function (key) {
@@ -203,7 +203,8 @@ module.directive('kbnTimepicker', function (refreshIntervals) {
       $scope.applyRelative = function () {
         $scope.onFilterSelect({
           from: getRelativeString('from'),
-          to: getRelativeString('to')
+          to: getRelativeString('to'),
+          mode: TIME_MODES.RELATIVE,
         });
       };
 
@@ -224,7 +225,8 @@ module.directive('kbnTimepicker', function (refreshIntervals) {
       $scope.applyAbsolute = function () {
         $scope.onFilterSelect({
           from: moment($scope.absolute.from),
-          to: moment($scope.absolute.to)
+          to: moment($scope.absolute.to),
+          mode: TIME_MODES.ABSOLUTE,
         });
       };
 

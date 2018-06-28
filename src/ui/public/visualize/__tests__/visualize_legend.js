@@ -81,7 +81,7 @@ describe('visualize_legend directive', function () {
     return vis;
   }
 
-  it('calls hightlight handler when hightlight function is called', () => {
+  it('calls highlight handler when highlight function is called', () => {
     const requiresSearch = false;
     const vis = new CreateVis(null, requiresSearch);
     init(vis, fixtures.oneRangeBucket);

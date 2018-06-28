@@ -19,12 +19,12 @@
 
 import _ from 'lodash';
 
-// Downsampling of cummulative metrics
+// Downsampling of cumulative metrics
 // Good: count, sum
 // Bad: avg, min, max
 
 
-// For upsampling cummulative metrics (eg sum from 1M to 1d), could rename this scale.
+// For upsampling cumulative metrics (eg sum from 1M to 1d), could rename this scale.
 // Really only the 0s that screws this up, need to distribute contents of spikes to empty buckets
 // Empty is currently 0, which is not right
 
@@ -65,7 +65,7 @@ export default function scale(dataTuples, targetTuples) {
       step = nextRealNumber;
       // Backfill null buckets
       if (spreadCount > 0) {
-        // Naively distibute the nextRealNumber amoungst the buckets
+        // Naively distribute the nextRealNumber amongst the buckets
         // Without considering where it is headed next
         // We do spreadCount + 1 so that we include nextRealNumber when we smooth things out,
         // since we'll overwrite it anyway.

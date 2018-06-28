@@ -28,10 +28,10 @@ uiModules
   .get('kibana')
   .filter('commaList', function () {
   /**
-   * Angular filter that accepts either an array or a comma-seperated string
-   * and outputs a comma-seperated string for presentation.
+   * Angular filter that accepts either an array or a comma-separated string
+   * and outputs a comma-separated string for presentation.
    *
-   * @param {String|Array} input - The comma-seperated list or array
+   * @param {String|Array} input - The comma-separated list or array
    * @param {Boolean} inclusive - Should the list be joined with an "and"?
    * @return {String}
    */
