@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { SearchLooperProvider } from './search_looper';
+export { SearchPollProvider } from './search_poll';
