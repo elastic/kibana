@@ -33,15 +33,9 @@ export function SearchPollProvider(Private, Promise, $rootScope) {
       this._intervalInMs = undefined;
       this._timerId = null;
       this._searchPromise = null;
-      this._redoSearchPromise = null;
+      this._isIntervalFasterThanSearch = false;
     }
 
-    /**
-     * Set the number of milliseconds between
-     * each loop
-     *
-     * @param  {integer} intervalInMs
-     */
     setIntervalInMs = intervalInMs => {
       this._intervalInMs = _.parseInt(intervalInMs);
     };
@@ -56,10 +50,8 @@ export function SearchPollProvider(Private, Promise, $rootScope) {
       this.clearTimer();
     };
 
-    /**
-     * Schedule the next iteration of the loop
-     */
     resetTimer = () => {
+      // Cancel the pending search and schedule a new one.
       this.clearTimer();
 
       if (this._isPolling) {
@@ -67,10 +59,8 @@ export function SearchPollProvider(Private, Promise, $rootScope) {
       }
     };
 
-    /**
-     * Cancel the next iteration of the loop
-     */
     clearTimer = () => {
+      // Cancel the pending search, if there is one.
       if (this._timerId) {
         clearTimeout(this._timerId);
         this._timerId = null;
@@ -78,11 +68,15 @@ export function SearchPollProvider(Private, Promise, $rootScope) {
     };
 
     _search = () => {
-      // If we're waiting on the results of a previous search, then cancel and redo it.
+      // If our interval is faster than the rate at which searches return results, then trigger
+      // a new search as soon as the results come back.
       if (this._searchPromise) {
-        this._redoSearch();
+        this._isIntervalFasterThanSearch = true;
         return;
       }
+
+      // Schedule another search.
+      this.resetTimer();
 
       // We use resolve() here instead of try() because the latter won't trigger a $digest
       // when the promise resolves.
@@ -100,31 +94,18 @@ export function SearchPollProvider(Private, Promise, $rootScope) {
         );
       })
         .then(() => {
-          this.resetTimer();
+          this._searchPromise = null;
+
+          // Kick off another search immediately if results aren't coming back fast enough to keep
+          // up with the interval.
+          if (this._isIntervalFasterThanSearch) {
+            this._isIntervalFasterThanSearch = false;
+            this._search();
+          }
         })
         .catch(err => {
           // If there was a problem, then kill Kibana.
           fatalError(err);
-        })
-        .finally(() => {
-          this._searchPromise = null;
-        });
-    };
-
-    _redoSearch = () => {
-      // If we're already redoing the search, don't redo it again. This prevents us from
-      // endlessly redoing searches and never getting any results back.
-      if (this._redoSearchPromise) {
-        return;
-      }
-
-      // Resolve the original searchPromise so that finally() is called and it gets set to null.
-      this._redoSearchPromise = Promise.resolve(this._searchPromise)
-        .then(() => {
-          return this._search();
-        })
-        .finally(() => {
-          this._redoSearchPromise = null;
         });
     };
   }
