@@ -55,65 +55,65 @@ export class ControlsTab extends Component {
   }
 
   setVisParam(paramName, paramValue) {
-    const params = _.cloneDeep(this.props.scope.vis.params);
+    const params = _.cloneDeep(this.props.scope.editorState.params);
     params[paramName] = paramValue;
     this.props.stageEditorParams(params);
   }
 
   handleLabelChange = (controlIndex, evt) => {
-    const updatedControl = this.props.scope.vis.params.controls[controlIndex];
+    const updatedControl = this.props.scope.editorState.params.controls[controlIndex];
     updatedControl.label = evt.target.value;
-    this.setVisParam('controls', setControl(this.props.scope.vis.params.controls, controlIndex, updatedControl));
+    this.setVisParam('controls', setControl(this.props.scope.editorState.params.controls, controlIndex, updatedControl));
   }
 
   handleIndexPatternChange = (controlIndex, indexPatternId) => {
-    const updatedControl = this.props.scope.vis.params.controls[controlIndex];
+    const updatedControl = this.props.scope.editorState.params.controls[controlIndex];
     updatedControl.indexPattern = indexPatternId;
     updatedControl.fieldName = '';
-    this.setVisParam('controls', setControl(this.props.scope.vis.params.controls, controlIndex, updatedControl));
+    this.setVisParam('controls', setControl(this.props.scope.editorState.params.controls, controlIndex, updatedControl));
   }
 
   handleFieldNameChange = (controlIndex, fieldName) => {
-    const updatedControl = this.props.scope.vis.params.controls[controlIndex];
+    const updatedControl = this.props.scope.editorState.params.controls[controlIndex];
     updatedControl.fieldName = fieldName;
-    this.setVisParam('controls', setControl(this.props.scope.vis.params.controls, controlIndex, updatedControl));
+    this.setVisParam('controls', setControl(this.props.scope.editorState.params.controls, controlIndex, updatedControl));
   }
 
   handleCheckboxOptionChange = (controlIndex, optionName, evt) => {
-    const updatedControl = this.props.scope.vis.params.controls[controlIndex];
+    const updatedControl = this.props.scope.editorState.params.controls[controlIndex];
     updatedControl.options[optionName] = evt.target.checked;
-    this.setVisParam('controls', setControl(this.props.scope.vis.params.controls, controlIndex, updatedControl));
+    this.setVisParam('controls', setControl(this.props.scope.editorState.params.controls, controlIndex, updatedControl));
   }
 
   handleNumberOptionChange = (controlIndex, optionName, evt) => {
-    const updatedControl = this.props.scope.vis.params.controls[controlIndex];
+    const updatedControl = this.props.scope.editorState.params.controls[controlIndex];
     updatedControl.options[optionName] = parseFloat(evt.target.value);
-    this.setVisParam('controls', setControl(this.props.scope.vis.params.controls, controlIndex, updatedControl));
+    this.setVisParam('controls', setControl(this.props.scope.editorState.params.controls, controlIndex, updatedControl));
   }
 
   handleRemoveControl = (controlIndex) => {
-    this.setVisParam('controls', removeControl(this.props.scope.vis.params.controls, controlIndex));
+    this.setVisParam('controls', removeControl(this.props.scope.editorState.params.controls, controlIndex));
   }
 
   moveControl = (controlIndex, direction) => {
-    this.setVisParam('controls', moveControl(this.props.scope.vis.params.controls, controlIndex, direction));
+    this.setVisParam('controls', moveControl(this.props.scope.editorState.params.controls, controlIndex, direction));
   }
 
   handleAddControl = () => {
-    this.setVisParam('controls', addControl(this.props.scope.vis.params.controls, newControl(this.state.type)));
+    this.setVisParam('controls', addControl(this.props.scope.editorState.params.controls, newControl(this.state.type)));
   }
 
   handleParentChange = (controlIndex, evt) => {
-    const updatedControl = this.props.scope.vis.params.controls[controlIndex];
+    const updatedControl = this.props.scope.editorState.params.controls[controlIndex];
     updatedControl.parent = evt.target.value;
-    this.setVisParam('controls', setControl(this.props.scope.vis.params.controls, controlIndex, updatedControl));
+    this.setVisParam('controls', setControl(this.props.scope.editorState.params.controls, controlIndex, updatedControl));
   }
 
   renderControls() {
-    const lineageMap = getLineageMap(this.props.scope.vis.params.controls);
-    return this.props.scope.vis.params.controls.map((controlParams, controlIndex) => {
+    const lineageMap = getLineageMap(this.props.scope.editorState.params.controls);
+    return this.props.scope.editorState.params.controls.map((controlParams, controlIndex) => {
       const parentCandidates = getParentCandidates(
-        this.props.scope.vis.params.controls,
+        this.props.scope.editorState.params.controls,
         controlParams.id,
         lineageMap);
       return (

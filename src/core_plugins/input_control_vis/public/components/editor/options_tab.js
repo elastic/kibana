@@ -30,7 +30,7 @@ import {
 export class OptionsTab extends Component {
 
   setVisParam = (paramName, paramValue) => {
-    const params = _.cloneDeep(this.props.scope.vis.params);
+    const params = _.cloneDeep(this.props.scope.editorState.params);
     params[paramName] = paramValue;
     this.props.stageEditorParams(params);
   }
@@ -55,7 +55,7 @@ export class OptionsTab extends Component {
         >
           <EuiSwitch
             label="Update Kibana filters on each change"
-            checked={this.props.scope.vis.params.updateFiltersOnChange}
+            checked={this.props.scope.editorState.params.updateFiltersOnChange}
             onChange={this.handleUpdateFiltersChange}
             data-test-subj="inputControlEditorUpdateFiltersOnChangeCheckbox"
           />
@@ -66,7 +66,7 @@ export class OptionsTab extends Component {
         >
           <EuiSwitch
             label="Use time filter"
-            checked={this.props.scope.vis.params.useTimeFilter}
+            checked={this.props.scope.editorState.params.useTimeFilter}
             onChange={this.handleUseTimeFilter}
             data-test-subj="inputControlEditorUseTimeFilterCheckbox"
           />
@@ -77,7 +77,7 @@ export class OptionsTab extends Component {
         >
           <EuiSwitch
             label="Pin filters to global state"
-            checked={this.props.scope.vis.params.pinFilters}
+            checked={this.props.scope.editorState.params.pinFilters}
             onChange={this.handlePinFilters}
             data-test-subj="inputControlEditorPinFiltersCheckbox"
           />

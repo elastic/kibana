@@ -41,7 +41,7 @@ uiModules
           });
           aggConfig.brandNew = true;
 
-          $scope.vis.aggs.push(aggConfig);
+          $scope.state.aggs.push(aggConfig);
         };
       }
     };

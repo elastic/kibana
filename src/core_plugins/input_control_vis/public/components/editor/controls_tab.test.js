@@ -49,6 +49,8 @@ const scopeMock = {
       savedObjectsClient: savedObjectsClientMock,
       indexPatterns: indexPatternsMock
     },
+  },
+  editorState: {
     params: {
       'controls': [
         {
@@ -104,7 +106,7 @@ test('add control btn', () => {
       return false;
     }
     return true;
-  }, 'control not added to vis.params'));
+  }, 'control not added to editorState.params'));
 });
 
 test('remove control btn', () => {

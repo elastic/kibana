@@ -217,6 +217,12 @@ export function VisProvider(Private, indexPatterns, getAppState) {
       };
     }
 
+    copyCurrentState(includeDisabled) {
+      const cloned = _.cloneDeep(this.getCurrentState(includeDisabled));
+      cloned.aggs = new AggConfigs(this, cloned.aggs);
+      return cloned;
+    }
+
     getStateInternal(includeDisabled) {
       return {
         title: this._state.title,

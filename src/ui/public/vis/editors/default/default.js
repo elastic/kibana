@@ -50,6 +50,18 @@ const defaultEditor = function ($rootScope, $compile) {
     render(visData, searchSource, updateStatus, uiState) {
       let $scope;
 
+      const getSerializableState = (state) => {
+        return {
+          title: state.title,
+          type: state.type.name || state.type,
+          params: state.params,
+          aggs: state.aggs
+            .map(agg => agg.toJSON())
+            .filter(agg => agg.enabled)
+            .filter(Boolean)
+        };
+      };
+
       const updateScope = () => {
         $scope.vis = this.vis;
         $scope.visData = visData;
@@ -64,19 +76,24 @@ const defaultEditor = function ($rootScope, $compile) {
 
           updateScope();
 
+          $scope.state = $scope.vis.copyCurrentState();
+          $scope.oldState = getSerializableState($scope.vis.copyCurrentState());
+
           $scope.toggleSidebar = () => {
             $scope.$broadcast('render');
           };
 
           this.el.one('renderComplete', resolve);
-
           // track state of editable vis vs. "actual" vis
           $scope.stageEditableVis = () => {
+            $scope.vis.setCurrentState($scope.state);
+            $scope.oldState = getSerializableState($scope.vis.copyCurrentState());
             $scope.vis.updateState();
             $scope.vis.dirty = false;
           };
           $scope.resetEditableVis = () => {
-            $scope.vis.resetState();
+            $scope.state = $scope.vis.copyCurrentState();
+            $scope.oldState = getSerializableState($scope.vis.copyCurrentState());
             $scope.vis.dirty = false;
           };
 
@@ -110,10 +127,15 @@ const defaultEditor = function ($rootScope, $compile) {
             }
           };
 
-          $scope.$watch(function () {
-            return $scope.vis.getCurrentState(false);
+          let lockDirty = false;
+          $scope.$watch(() => {
+            return getSerializableState($scope.state);
           }, function (newState) {
-            $scope.vis.dirty = !angular.equals(newState, $scope.vis.getEnabledState());
+            if (lockDirty) {
+              lockDirty = false;
+            } else {
+              $scope.vis.dirty = !angular.equals(newState, $scope.oldState);
+            }
 
             $scope.responseValueAggs = null;
             try {
@@ -125,6 +147,27 @@ const defaultEditor = function ($rootScope, $compile) {
             // params have not been set yet. watcher will trigger again
             // when the params update
             catch (e) {} // eslint-disable-line no-empty
+          }, true);
+
+          $scope.$watch(() => {
+            return $scope.vis.getCurrentState(false);
+          }, (newState) => {
+            // figure out what changed and copy into editor state
+            const recursiveCopyChanged = (src, org, dst) => {
+              for (const prop in src) {
+                if (typeof src[prop] === 'object') {
+                  recursiveCopyChanged(src[prop], org[prop], dst[prop]);
+                } else {
+                  if (src[prop] !== org[prop]) {
+                    org[prop] = src[prop];
+                    dst[prop] = src[prop];
+                    lockDirty = true;
+                  }
+                }
+              }
+            };
+
+            recursiveCopyChanged(newState, $scope.oldState, $scope.state);
           }, true);
 
           // Load the default editor template, attach it to the DOM and compile it.

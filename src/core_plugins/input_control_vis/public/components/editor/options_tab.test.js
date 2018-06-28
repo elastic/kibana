@@ -26,7 +26,7 @@ import {
 } from './options_tab';
 
 const scopeMock = {
-  vis: {
+  editorState: {
     params: {
       updateFiltersOnChange: false,
       useTimeFilter: false

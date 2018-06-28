@@ -40,7 +40,8 @@ uiModules
         visData: '=',
         uiState: '=',
         editor: '=',
-        visualizeEditor: '='
+        visualizeEditor: '=',
+        editorState: '=',
       },
       link: function ($scope, $el) {
         const $optionContainer = $el.find('[data-visualization-options]');

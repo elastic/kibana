@@ -42,11 +42,11 @@ module.directive('vislibSeries', function () {
             id: id,
             label: label
           },
-          valueAxis: last ? last.valueAxis : $scope.vis.params.valueAxes[0].id
+          valueAxis: last ? last.valueAxis : $scope.editorState.params.valueAxes[0].id
         };
       }
 
-      $scope.series = $scope.vis.params.seriesParams;
+      $scope.series = $scope.editorState.params.seriesParams;
       $scope.$watch(() => {
         return $scope.vis.aggs.map(agg => {
           return agg.makeLabel();
@@ -60,8 +60,8 @@ module.directive('vislibSeries', function () {
         });
 
         // update labels for existing params or create new one
-        $scope.vis.params.seriesParams = metrics.map(agg => {
-          const params = $scope.vis.params.seriesParams.find(param => param.data.id === agg.id);
+        $scope.editorState.params.seriesParams = metrics.map(agg => {
+          const params = $scope.editorState.params.seriesParams.find(param => param.data.id === agg.id);
           if (params) {
             params.data.label = agg.makeLabel();
             return params;
@@ -73,22 +73,22 @@ module.directive('vislibSeries', function () {
       });
 
       $scope.$watch(() => {
-        return $scope.vis.params.seriesParams.map(series => series.type).join();
+        return $scope.editorState.params.seriesParams.map(series => series.type).join();
       }, () => {
-        const types = _.uniq(_.map($scope.vis.params.seriesParams, 'type'));
+        const types = _.uniq(_.map($scope.editorState.params.seriesParams, 'type'));
         $scope.vis.type.type = types.length === 1 ? types[0] : 'histogram';
       });
 
-      $scope.$watch('vis.params.valueAxes.length', () => {
-        $scope.vis.params.seriesParams.forEach(series => {
-          if (!$scope.vis.params.valueAxes.find(axis => axis.id === series.valueAxis)) {
-            series.valueAxis = $scope.vis.params.valueAxes[0].id;
+      $scope.$watch('editorState.params.valueAxes.length', () => {
+        $scope.editorState.params.seriesParams.forEach(series => {
+          if (!$scope.editorState.params.valueAxes.find(axis => axis.id === series.valueAxis)) {
+            series.valueAxis = $scope.editorState.params.valueAxes[0].id;
           }
         });
       });
 
       $scope.changeValueAxis = (index) => {
-        const series = $scope.vis.params.seriesParams[index];
+        const series = $scope.editorState.params.seriesParams[index];
         if (series.valueAxis === 'new') {
           const axis = $scope.addValueAxis();
           series.valueAxis = axis.id;
