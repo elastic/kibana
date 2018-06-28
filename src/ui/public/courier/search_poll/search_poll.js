@@ -29,7 +29,7 @@ export function SearchPollProvider(Private, Promise, $rootScope) {
 
   class SearchPoll {
     constructor() {
-      this._isIntervalPaused = true;
+      this._isPolling = false;
       this._intervalInMs = undefined;
       this._timerId = null;
       this._searchPromise = null;
@@ -46,14 +46,14 @@ export function SearchPollProvider(Private, Promise, $rootScope) {
       this._intervalInMs = _.parseInt(intervalInMs);
     };
 
-    setIsIntervalPaused = (isPaused) => {
-      this._isIntervalPaused = isPaused;
+    resume = () => {
+      this._isPolling = true;
+      this.resetTimer();
+    };
 
-      if (this._isIntervalPaused) {
-        this.clearTimer();
-      } else {
-        this.resetTimer();
-      }
+    pause = () => {
+      this._isPolling = false;
+      this.clearTimer();
     };
 
     _search = () => {
@@ -111,7 +111,7 @@ export function SearchPollProvider(Private, Promise, $rootScope) {
     resetTimer = () => {
       this.clearTimer();
 
-      if (!this._isIntervalPaused) {
+      if (this._isPolling) {
         this._timerId = setTimeout(this._search, this._intervalInMs);
       }
     };

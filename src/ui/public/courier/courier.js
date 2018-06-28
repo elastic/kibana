@@ -46,7 +46,12 @@ uiModules.get('kibana/courier').service('courier', ($rootScope, Private) => {
 
         // Update the time between automatic search requests.
         searchPoll.setIntervalInMs(refreshIntervalMs);
-        searchPoll.setIsIntervalPaused(isRefreshPaused);
+
+        if (isRefreshPaused) {
+          searchPoll.pause();
+        } else {
+          searchPoll.resume();
+        }
       });
 
       const closeOnFatal = _.once(() => {
