@@ -21,8 +21,8 @@ import { schema } from '../..';
 
 test('required by default', () => {
   const type = schema.conditional(
-    schema.context_ref('context_value_1'),
-    schema.context_ref('context_value_2'),
+    schema.contextRef('context_value_1'),
+    schema.contextRef('context_value_2'),
     schema.string(),
     schema.string()
   );
@@ -37,8 +37,8 @@ test('required by default', () => {
 
 test('returns default', () => {
   const type = schema.conditional(
-    schema.context_ref('context_value_1'),
-    schema.context_ref('context_value_2'),
+    schema.contextRef('context_value_1'),
+    schema.contextRef('context_value_2'),
     schema.string(),
     schema.string(),
     {
@@ -56,8 +56,8 @@ test('returns default', () => {
 
 test('properly handles nested types with defaults', () => {
   const type = schema.conditional(
-    schema.context_ref('context_value_1'),
-    schema.context_ref('context_value_2'),
+    schema.contextRef('context_value_1'),
+    schema.contextRef('context_value_2'),
     schema.string({ defaultValue: 'equal' }),
     schema.string({ defaultValue: 'not equal' })
   );
@@ -79,8 +79,8 @@ test('properly handles nested types with defaults', () => {
 
 test('properly validates types according chosen schema', () => {
   const type = schema.conditional(
-    schema.context_ref('context_value_1'),
-    schema.context_ref('context_value_2'),
+    schema.contextRef('context_value_1'),
+    schema.contextRef('context_value_2'),
     schema.string({ minLength: 2 }),
     schema.string({ maxLength: 1 })
   );
@@ -116,8 +116,8 @@ test('properly validates types according chosen schema', () => {
 
 test('properly handles schemas with incompatible types', () => {
   const type = schema.conditional(
-    schema.context_ref('context_value_1'),
-    schema.context_ref('context_value_2'),
+    schema.contextRef('context_value_1'),
+    schema.contextRef('context_value_2'),
     schema.string(),
     schema.boolean()
   );
@@ -155,7 +155,7 @@ test('properly handles conditionals within objects', () => {
   const type = schema.object({
     key: schema.string(),
     value: schema.conditional(
-      schema.sibling_ref('key'),
+      schema.siblingRef('key'),
       'number',
       schema.number(),
       schema.string()
@@ -186,7 +186,7 @@ test('properly handled within `maybe`', () => {
     key: schema.string(),
     value: schema.maybe(
       schema.conditional(
-        schema.sibling_ref('key'),
+        schema.siblingRef('key'),
         'number',
         schema.number(),
         schema.string()
@@ -208,8 +208,8 @@ test('works with both context and sibling references', () => {
   const type = schema.object({
     key: schema.string(),
     value: schema.conditional(
-      schema.sibling_ref('key'),
-      schema.context_ref('context_key'),
+      schema.siblingRef('key'),
+      schema.contextRef('context_key'),
       schema.number(),
       schema.string()
     ),
@@ -242,7 +242,7 @@ test('includes namespace into failures', () => {
   const type = schema.object({
     key: schema.string(),
     value: schema.conditional(
-      schema.sibling_ref('key'),
+      schema.siblingRef('key'),
       'number',
       schema.number(),
       schema.string()
@@ -261,7 +261,7 @@ test('includes namespace into failures', () => {
 test('correctly handles missing references', () => {
   const type = schema.object({
     value: schema.conditional(
-      schema.sibling_ref('missing-key'),
+      schema.siblingRef('missing-key'),
       'number',
       schema.number(),
       schema.string()
@@ -276,13 +276,13 @@ test('correctly handles missing references', () => {
 test('works within `oneOf`', () => {
   const type = schema.oneOf([
     schema.conditional(
-      schema.context_ref('type'),
+      schema.contextRef('type'),
       'number',
       schema.number(),
       schema.string()
     ),
     schema.conditional(
-      schema.context_ref('type'),
+      schema.contextRef('type'),
       'boolean',
       schema.boolean(),
       schema.arrayOf(schema.string())
@@ -310,7 +310,7 @@ describe('#validate', () => {
       {
         key: schema.string(),
         value: schema.conditional(
-          schema.sibling_ref('key'),
+          schema.siblingRef('key'),
           'number',
           schema.number({ defaultValue: 100 }),
           schema.string({ defaultValue: 'some-string' })

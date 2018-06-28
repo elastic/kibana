@@ -38,7 +38,7 @@ const createHttpSchema = schema.object(
       })
     ),
     cors: schema.conditional(
-      schema.context_ref('dev'),
+      schema.contextRef('dev'),
       true,
       schema.object(
         {

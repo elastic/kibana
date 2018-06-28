@@ -73,7 +73,7 @@ describe('#defaultValue', () => {
   test('returns value from context when context reference is specified', () => {
     expect(
       schema
-        .string({ defaultValue: schema.context_ref('some_value') })
+        .string({ defaultValue: schema.contextRef('some_value') })
         .validate(undefined, {
           some_value: 'some',
         })

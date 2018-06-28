@@ -174,11 +174,11 @@ function oneOf<RTS extends AnyType[]>(
   return new UnionType(types, options);
 }
 
-function context_ref<T>(key: string): ContextReference<T> {
+function contextRef<T>(key: string): ContextReference<T> {
   return new ContextReference(key);
 }
 
-function sibling_ref<T>(key: string): SiblingReference<T> {
+function siblingRef<T>(key: string): SiblingReference<T> {
   return new SiblingReference(key);
 }
 
@@ -203,7 +203,7 @@ export const schema = {
   boolean,
   byteSize,
   conditional,
-  context_ref,
+  contextRef,
   duration,
   literal,
   mapOf,
@@ -211,7 +211,7 @@ export const schema = {
   number,
   object,
   oneOf,
-  sibling_ref,
+  siblingRef,
   string,
 };
 

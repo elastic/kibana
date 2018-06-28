@@ -143,10 +143,10 @@ test('handles oneOf', () => {
 test('handles references', () => {
   const type = schema.object({
     context: schema.string({
-      defaultValue: schema.context_ref('context_value'),
+      defaultValue: schema.contextRef('context_value'),
     }),
     key: schema.string(),
-    value: schema.string({ defaultValue: schema.sibling_ref('key') }),
+    value: schema.string({ defaultValue: schema.siblingRef('key') }),
   });
 
   expect(
@@ -166,7 +166,7 @@ test('handles conditionals', () => {
   const type = schema.object({
     key: schema.string(),
     value: schema.conditional(
-      schema.sibling_ref('key'),
+      schema.siblingRef('key'),
       'some-key',
       schema.string({ defaultValue: 'some-value' }),
       schema.string({ defaultValue: 'unknown-value' })

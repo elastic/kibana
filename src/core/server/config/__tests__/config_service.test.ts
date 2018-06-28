@@ -214,18 +214,18 @@ test('correctly passes context', async () => {
     createClassWithSchema(
       schema.object({
         branchRef: schema.string({
-          defaultValue: schema.context_ref('branch'),
+          defaultValue: schema.contextRef('branch'),
         }),
         buildNumRef: schema.number({
-          defaultValue: schema.context_ref('buildNum'),
+          defaultValue: schema.contextRef('buildNum'),
         }),
         buildShaRef: schema.string({
-          defaultValue: schema.context_ref('buildSha'),
+          defaultValue: schema.contextRef('buildSha'),
         }),
-        devRef: schema.boolean({ defaultValue: schema.context_ref('dev') }),
-        prodRef: schema.boolean({ defaultValue: schema.context_ref('prod') }),
+        devRef: schema.boolean({ defaultValue: schema.contextRef('dev') }),
+        prodRef: schema.boolean({ defaultValue: schema.contextRef('prod') }),
         versionRef: schema.string({
-          defaultValue: schema.context_ref('version'),
+          defaultValue: schema.contextRef('version'),
         }),
       })
     )
