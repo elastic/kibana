@@ -22,8 +22,8 @@ The **Management** page gains options related to configuring security, managing
 {ls} pipelines, and using {watcher}. 
 
 At the end of the trial period, the Platinum features operate in a 
-{stack-ov}/license-expiration.html[degraded mode]. You can purchase a 
-subscription, revert to a Basic license, or extend the trial.
+{stack-ov}/license-expiration.html[degraded mode]. You can revert to a Basic 
+license, extend the trial, or purchase a subscription. 
 
 For a comparison of the Elastic license levels,
 see https://www.elastic.co/subscriptions[the subscription page].
