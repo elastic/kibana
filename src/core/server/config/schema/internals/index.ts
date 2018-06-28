@@ -68,9 +68,12 @@ const anyCustomRule: Rules = {
 export const internals = Joi.extend([
   {
     name: 'any',
+
     rules: [anyCustomRule],
   },
   {
+    name: 'boolean',
+
     base: Joi.boolean(),
     coerce(value: any, state: State, options: ValidationOptions) {
       // If value isn't defined, let Joi to handle default value if it's defined.
@@ -80,15 +83,17 @@ export const internals = Joi.extend([
 
       return value;
     },
-    name: 'boolean',
     rules: [anyCustomRule],
   },
   {
-    base: Joi.string(),
     name: 'string',
+
+    base: Joi.string(),
     rules: [anyCustomRule],
   },
   {
+    name: 'bytes',
+
     coerce(value: any, state: State, options: ValidationOptions) {
       try {
         if (typeof value === 'string') {
@@ -109,7 +114,6 @@ export const internals = Joi.extend([
 
       return value;
     },
-    name: 'bytes',
     pre(value: any, state: State, options: ValidationOptions) {
       // If value isn't defined, let Joi to handle default value if it's defined.
       if (value instanceof ByteSizeValue) {
@@ -161,6 +165,8 @@ export const internals = Joi.extend([
     ],
   },
   {
+    name: 'duration',
+
     coerce(value: any, state: State, options: ValidationOptions) {
       try {
         if (typeof value === 'string' || typeof value === 'number') {
@@ -177,7 +183,6 @@ export const internals = Joi.extend([
 
       return value;
     },
-    name: 'duration',
     pre(value: any, state: State, options: ValidationOptions) {
       if (!isDuration(value)) {
         return this.createError('duration.base', { value }, state, options);
@@ -188,6 +193,8 @@ export const internals = Joi.extend([
     rules: [anyCustomRule],
   },
   {
+    name: 'number',
+
     base: Joi.number(),
     coerce(value: any, state: State, options: ValidationOptions) {
       // If value isn't defined, let Joi to handle default value if it's defined.
@@ -209,10 +216,11 @@ export const internals = Joi.extend([
 
       return value;
     },
-    name: 'number',
     rules: [anyCustomRule],
   },
   {
+    name: 'object',
+
     base: Joi.object(),
     coerce(value: any, state: State, options: ValidationOptions) {
       // If value isn't defined, let Joi to handle default value if it's defined.
@@ -222,10 +230,11 @@ export const internals = Joi.extend([
 
       return value;
     },
-    name: 'object',
     rules: [anyCustomRule],
   },
   {
+    name: 'map',
+
     coerce(value: any, state: State, options: ValidationOptions) {
       if (isPlainObject(value)) {
         return new Map(Object.entries(value));
@@ -233,7 +242,6 @@ export const internals = Joi.extend([
 
       return value;
     },
-    name: 'map',
     pre(value: any, state: State, options: ValidationOptions) {
       if (!isMap(value)) {
         return this.createError('map.base', { value }, state, options);
@@ -289,6 +297,8 @@ export const internals = Joi.extend([
     ],
   },
   {
+    name: 'array',
+
     base: Joi.array(),
     coerce(value: any, state: State, options: ValidationOptions) {
       // If value isn't defined, let Joi to handle default value if it's defined.
@@ -298,7 +308,6 @@ export const internals = Joi.extend([
 
       return value;
     },
-    name: 'array',
     rules: [anyCustomRule],
   },
 ]) as JoiRoot;
