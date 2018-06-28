@@ -72,7 +72,7 @@ export function HomePageProvider({ getService }) {
       await remote.moveMouseTo(loadBtn);
       await testSubjects.click('loadSavedObjects');
       await retry.try(async () => {
-        const successMsgExists = await await testSubjects.exists('loadSavedObjects_success');
+        const successMsgExists = await testSubjects.exists('loadSavedObjects_success');
         expect(successMsgExists).to.be(true);
       });
     }
