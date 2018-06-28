@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }) {
         log.debug('x=' + x + ' expectedChartData[x].split(\' \')[1] = ' +
           (expectedChartData[x].split(' ')[1]).replace(',', '') + '  data[x]=' + data[x] +
           ' diff=' + Math.abs(expectedChartData[x].split(' ')[1].replace(',', '') - data[x]));
-            expect(Math.abs(expectedChartData[x].split(' ')[1].replace(',', '') - data[x]) < tolerance).to.be.ok();
+        expect(Math.abs(expectedChartData[x].split(' ')[1].replace(',', '') - data[x]) < tolerance).to.be.ok();
       }
       log.debug('Done');
     });
@@ -66,7 +66,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.selectOrderBy('_term');
       await PageObjects.visualize.clickGo();
       await retry.try(async function () {
-        const data = await PageObjects.visualize.getLineChartData()
+        const data = await PageObjects.visualize.getLineChartData();
         log.debug('data=' + data);
         const tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
         for (let x = 0; x < data.length; x++) {
@@ -79,7 +79,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('should show correct data, ordered by Term', function () {
+    it('should show correct data, ordered by Term', async function () {
       const expectedChartData = ['png', '1,373', 'php', '445', 'jpg', '9,109', 'gif', '918', 'css', '2,159'];
 
       await PageObjects.visualize.toggleSpyPanel();
@@ -89,7 +89,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should be able to save and load', async function () {
-      await PageObjects.visualize.saveVisualization(vizName1)
+      await PageObjects.visualize.saveVisualization(vizName1);
       const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
       log.debug(`Save viz page title is ${pageTitle}`);
       expect(pageTitle).to.contain(vizName1);
