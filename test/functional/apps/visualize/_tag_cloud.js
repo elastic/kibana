@@ -94,7 +94,7 @@ export default function ({ getService, getPageObjects }) {
       expect(results).to.eql(['72px', '63px', '25px', '32px',  '18px' ]);
     });
 
-      it('should show correct data', function () {
+      it('should show correct data', async function () {
         const expectedTableData =  [ '32,212,254,720', '737',
           '21,474,836,480', '728',
           '20,401,094,656', '687',
