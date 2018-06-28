@@ -29,9 +29,11 @@ export function SearchLooperProvider(Private, Promise, $timeout, $rootScope) {
 
   class SearchLooper {
     constructor() {
+      this._isIntervalPaused = true;
       this._intervalInMs = undefined;
       this._timer = null;
-      this._started = false;
+      this._searchPromise = null;
+      this._redoSearchPromise = null;
     }
 
     /**
@@ -41,144 +43,84 @@ export function SearchLooperProvider(Private, Promise, $timeout, $rootScope) {
      * @param  {integer} intervalInMs
      */
     setIntervalInMs = intervalInMs => {
-      this._intervalInMs = _.parseInt(intervalInMs) || 0;
+      this._intervalInMs = _.parseInt(intervalInMs);
+    };
 
-      if (!this._started) {
+    setIsIntervalPaused = (isPaused) => {
+      this._isIntervalPaused = isPaused;
+
+      if (this._isIntervalPaused) {
+        this._clearTimer();
+      } else {
+        this.resetTimer();
+      }
+    };
+
+    _search = () => {
+      // If we're waiting on the results of a previous search, then cancel and redo it.
+      if (this._searchPromise) {
+        this._redoSearch();
         return;
       }
 
-      if (this._intervalInMs) {
-        this.start(false);
-      } else {
-        this._unscheduleLoop();
-      }
-    };
+      this._searchPromise = Promise.try(() => {
+        $rootScope.$broadcast('courier:searchRefresh');
+        const requests = requestQueue.getInactive();
 
-    start = loopOver => {
-      if (loopOver == null) {
-        loopOver = true;
-      }
+        // promise returned from fetch.fetchSearchRequests() only resolves when
+        // the requests complete, but we want to continue even if
+        // the requests abort so we make our own
+        fetchSoon.fetchSearchRequests(requests);
 
-      if (!this._started) {
-        this._started = true;
-      } else {
-        this._unscheduleLoop();
-      }
-
-      if (loopOver) {
-        this._executeLoop();
-      } else {
-        this._scheduleLoop();
-      }
-    };
-
-    stop = () => {
-      this._unscheduleLoop();
-      this._started = false;
-    };
-
-    /**
-     * Restart the looper only if it is already started.
-     * Called automatically when ms is changed
-     */
-    restart = () => {
-      this.start(false);
-    };
-
-    /**
-     * Is the looper currently started/running/scheduled/going to execute
-     *
-     * @return {boolean}
-     */
-    started = () => {
-      return !!this._started;
-    };
-
-    /**
-     * Called when the loop is executed before the previous
-     * run has completed.
-     *
-     * @override
-     * @return {undefined}
-     */
-    _onHastyLoop = () => {
-      if (this.afterHastyQueued) {
-        return;
-      }
-
-      this.afterHastyQueued = Promise.resolve(this.active)
+        return Promise.all(
+          requests.map(request => request.getCompleteOrAbortedPromise())
+        );
+      })
         .then(() => {
-          return this._executeLoop();
-        })
-        .finally(() => {
-          this.afterHastyQueued = null;
-        });
-    };
-
-    /**
-     * Wraps this._fn so that this._fn can be changed
-     * without rescheduling and schedules
-     * the next iteration
-     *
-     * @private
-     * @return {undefined}
-     */
-    _executeLoop = () => {
-      if (this.active) {
-        this._onHastyLoop();
-        return;
-      }
-
-      this.active = Promise.try(this._executeLoopAction)
-        .then(() => {
-          this._scheduleLoop();
+          this.resetTimer();
         })
         .catch(err => {
-          this.stop();
+          // If there was a problem, then stop future searches and kill Kibana.
+          this._clearTimer();
           fatalError(err);
         })
         .finally(() => {
-          this.active = null;
+          this._searchPromise = null;
         });
     };
 
-    _executeLoopAction = () => {
-      $rootScope.$broadcast('courier:searchRefresh');
-      const requests = requestQueue.getInactive();
+    _redoSearch = () => {
+      // If we're already redoing the search, don't redo it again. This prevents us from
+      // endlessly redoing searches and never getting any results back.
+      if (this._redoSearchPromise) {
+        return;
+      }
 
-      // promise returned from fetch.fetchSearchRequests() only resolves when
-      // the requests complete, but we want to continue even if
-      // the requests abort so we make our own
-      fetchSoon.fetchSearchRequests(requests);
-
-      return Promise.all(
-        requests.map(request => request.getCompleteOrAbortedPromise())
-      );
+      // Resolve the original searchPromise so that finally() is called and it gets set to null.
+      this._redoSearchPromise = Promise.resolve(this._searchPromise)
+        .then(() => {
+          return this._search();
+        })
+        .finally(() => {
+          this._redoSearchPromise = null;
+        });
     };
 
     /**
      * Schedule the next iteration of the loop
-     *
-     * @private
-     * @return {number} - the timer promise
      */
-    _scheduleLoop = () => {
-      this._unscheduleLoop();
+    resetTimer = () => {
+      this._clearTimer();
 
-      this._timer = this._intervalInMs
-        ? $timeout(this._executeLoop, this._intervalInMs)
-        : null;
-
-      return this._timer;
+      if (!this._isIntervalPaused) {
+        this._timer = $timeout(this._search, this._intervalInMs);
+      }
     };
 
     /**
      * Cancel the next iteration of the loop
-     *
-     * @private
-     * @return {number} - the timer promise
      */
-    _unscheduleLoop = () => {
+    _clearTimer = () => {
       if (this._timer) {
         $timeout.cancel(this._timer);
         this._timer = null;

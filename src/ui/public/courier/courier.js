@@ -41,21 +41,16 @@ uiModules.get('kibana/courier').service('courier', ($rootScope, Private) => {
     constructor() {
       // Listen for refreshInterval changes
       $rootScope.$listen(timefilter, 'refreshIntervalUpdate', function () {
-        const refreshValue = _.get(timefilter.getRefreshInterval(), 'value');
-        const refreshPause = _.get(timefilter.getRefreshInterval(), 'pause');
+        const refreshIntervalMs = _.get(timefilter.getRefreshInterval(), 'value');
+        const isRefreshPaused = _.get(timefilter.getRefreshInterval(), 'pause');
 
         // Update the time between automatic search requests.
-        if (_.isNumber(refreshValue) && !refreshPause) {
-          searchLooper.setIntervalInMs(refreshValue);
-        } else {
-          searchLooper.setIntervalInMs(0);
-        }
+        searchLooper.setIntervalInMs(refreshIntervalMs);
+        searchLooper.setIsIntervalPaused(isRefreshPaused);
       });
 
       // Abort all pending requests if there's a fatal error.
       const closeOnFatal = _.once(() => {
-        searchLooper.stop();
-
         _.invoke(requestQueue, 'abort');
 
         if (requestQueue.length) {
@@ -67,13 +62,12 @@ uiModules.get('kibana/courier').service('courier', ($rootScope, Private) => {
     }
 
     /**
-     * Process the pending request queue right now, returns
-     * a promise that resembles the success of the fetch completing,
-     * individual errors are routed to their respective requests.
+     * Fetch the pending requests.
      */
     fetch = () => {
       fetchSoon.fetchQueued().then(() => {
-        searchLooper.restart();
+        // Reset the timer using the time that we get this response as the starting point.
+        searchLooper.resetTimer();
       });
     };
   }
