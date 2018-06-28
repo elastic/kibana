@@ -45,9 +45,11 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
 
       const geohashAgg = this._getGeoHashAgg();
 
-      geohashAgg.params.mapBounds = this._kibanaMap.getBounds();
-      geohashAgg.params.mapZoom = options.zoom;
-      geohashAgg.params.mapCenter = options.center;
+      if (geohashAgg) {
+        geohashAgg.params.mapBounds = this._kibanaMap.getBounds();
+        geohashAgg.params.mapZoom = options.zoom;
+        geohashAgg.params.mapCenter = options.center;
+      }
 
       let previousPrecision = this._kibanaMap.getGeohashPrecision();
       let precisionChange = false;
