@@ -21,7 +21,7 @@ import Breadcrumbs from './components/app/Main/Breadcrumbs';
 
 import { initTimepicker } from './utils/timepicker';
 import configureStore from './store/config/configureStore';
-import GlobalProgess from './components/app/Main/GlobalProgess';
+import GlobalProgress from './components/app/Main/GlobalProgress';
 import LicenseChecker from './components/app/Main/LicenseChecker';
 
 import { history } from './utils/url';
@@ -41,7 +41,7 @@ initTimepicker(history, store.dispatch, () => {
   ReactDOM.render(
     <Provider store={store}>
       <Fragment>
-        <GlobalProgess />
+        <GlobalProgress />
         <LicenseChecker />
         <Router history={history}>
           <Main />

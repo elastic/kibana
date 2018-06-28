@@ -9,10 +9,10 @@ to you """
 String only 2
 -------------------------------------
 """ 
-startning with new lines and ending as well
+starting with new lines and ending as well
  """
 -------------------------------------
-"startning with new lines and ending as well"
+"starting with new lines and ending as well"
 ==========
 Strings in requests
 -------------------------------------

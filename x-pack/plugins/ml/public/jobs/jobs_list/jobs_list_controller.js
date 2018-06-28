@@ -18,6 +18,7 @@ import { isTimeSeriesViewJob } from 'plugins/ml/../common/util/job_utils';
 import { toLocaleString, mlEscape } from 'plugins/ml/util/string_utils';
 import { copyTextToClipboard } from 'plugins/ml/util/clipboard_utils';
 
+import { timefilter } from 'ui/timefilter';
 import uiRoutes from 'ui/routes';
 import { checkLicense } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege, checkPermission, createPermissionFailureMessage } from 'plugins/ml/privilege/check_privilege';
@@ -60,7 +61,6 @@ module.controller('MlJobsList',
     $timeout,
     $compile,
     $modal,
-    timefilter,
     kbnUrl,
     Private,
     mlDatafeedService) {

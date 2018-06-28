@@ -22,48 +22,29 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
 
-
-  describe('visualize app', function describeIndexTests() {
-
+  describe('vector map', function () {
     const fromTime = '2015-09-19 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';
 
     const log = getService('log');
     const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
 
-    before(function () {
+    before(async function () {
 
       log.debug('navigateToApp visualize');
-      return PageObjects.common.navigateToUrl('visualize', 'new')
-        .then(function () {
-          log.debug('clickRegionMap');
-          return PageObjects.visualize.clickRegionMap();
-        })
-        .then(function () {
-          return PageObjects.visualize.clickNewSearch();
-        })
-        .then(function () {
-          log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-          return PageObjects.header.setAbsoluteRange(fromTime, toTime);
-        })
-        .then(function clickBucket() {
-          log.debug('Bucket = shape field');
-          return PageObjects.visualize.clickBucket('shape field');
-        })
-        .then(function selectAggregation() {
-          log.debug('Aggregation = Terms');
-          return PageObjects.visualize.selectAggregation('Terms');
-        })
-        .then(function selectField() {
-          log.debug('Field = geo.src');
-          return PageObjects.visualize.selectField('geo.src');
-        })
-        .then(function () {
-          return PageObjects.visualize.clickGo();
-        })
-        .then(function () {
-          return PageObjects.header.waitUntilLoadingHasFinished();
-        });
+      await PageObjects.common.navigateToUrl('visualize', 'new');
+      log.debug('clickRegionMap');
+      await PageObjects.visualize.clickRegionMap();
+      await PageObjects.visualize.clickNewSearch();
+      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      log.debug('Bucket = shape field');
+      await PageObjects.visualize.clickBucket('shape field');
+      log.debug('Aggregation = Terms');
+      await PageObjects.visualize.selectAggregation('Terms');
+      log.debug('Field = geo.src');
+      await PageObjects.visualize.selectField('geo.src');
+      await PageObjects.visualize.clickGo();
     });
 
     describe('vector map', function indexPatternCreation() {

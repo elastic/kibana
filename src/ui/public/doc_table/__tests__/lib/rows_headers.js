@@ -389,7 +389,7 @@ describe('Doc Table', function () {
         .attr({
           'kbn-table-row': 'row',
           'columns': 'columns',
-          'sorting': 'sortin',
+          'sorting': 'sorting',
           'filtering': 'filtering',
           'index-pattern': 'indexPattern',
         });

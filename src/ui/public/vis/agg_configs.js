@@ -204,6 +204,14 @@ class AggConfigs extends IndexedArray {
     if (!reqAgg) return;
     return _.find(reqAgg.getResponseAggs(), { id: id });
   }
+
+  onSearchRequestStart(searchSource, searchRequest) {
+    return Promise.all(
+      this.getRequestAggs().map(agg =>
+        agg.onSearchRequestStart(searchSource, searchRequest)
+      )
+    );
+  }
 }
 
 export { AggConfigs };

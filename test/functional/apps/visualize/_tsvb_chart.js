@@ -72,11 +72,10 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show correct data', async function () {
         const expectedMetricValue =  '157';
-        return PageObjects.visualBuilder.getMetricValue()
-          .then(function (value) {
-            log.debug(`metric value: ${value}`);
-            expect(value).to.eql(expectedMetricValue);
-          });
+        const value = await PageObjects.visualBuilder.getMetricValue();
+        log.debug(`metric value: ${JSON.stringify(value)}`);
+        log.debug(`metric value: ${value}`);
+        expect(value).to.eql(expectedMetricValue);
       });
 
     });
@@ -94,11 +93,9 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show correct data', async function () {
         const expectedMetricValue =  '156';
-        return PageObjects.visualBuilder.getMetricValue()
-          .then(function (value) {
-            log.debug(`metric value: ${value}`);
-            expect(value).to.eql(expectedMetricValue);
-          });
+        const value = await PageObjects.visualBuilder.getMetricValue();
+        log.debug(`metric value: ${value}`);
+        expect(value).to.eql(expectedMetricValue);
       });
 
     });
@@ -111,7 +108,7 @@ export default function ({ getService, getPageObjects }) {
         log.debug('clicked on Gauge');
       });
 
-      it('should verfiy gauge label and count display', async function () {
+      it('should verify gauge label and count display', async function () {
         const labelString = await PageObjects.visualBuilder.getGaugeLabel();
         expect(labelString).to.be('Count');
         const gaugeCount = await PageObjects.visualBuilder.getGaugeCount();
@@ -127,7 +124,7 @@ export default function ({ getService, getPageObjects }) {
         log.debug('clicked on TopN');
       });
 
-      it('should verfiy topN label and count display', async function () {
+      it('should verify topN label and count display', async function () {
         const labelString = await PageObjects.visualBuilder.getTopNLabel();
         expect(labelString).to.be('Count');
         const gaugeCount = await PageObjects.visualBuilder.getTopNCount();

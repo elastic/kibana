@@ -167,9 +167,7 @@ describe('DetailDrawer component', () => {
       const vertex = {
         title: 'if',
         typeString: 'if',
-        subtitle: {
-          complete: '[type] == "apache_log"'
-        }
+        subtitle: '[type] == "apache_log"'
       };
 
       const component = (
