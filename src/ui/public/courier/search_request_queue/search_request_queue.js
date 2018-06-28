@@ -67,4 +67,4 @@ class SearchRequestQueue {
   };
 }
 
-export const requestQueue = new SearchRequestQueue();
+export const searchRequestQueue = new SearchRequestQueue();

@@ -21,7 +21,7 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import sinon from 'sinon';
 
-import { requestQueue } from '../../_request_queue';
+import { searchRequestQueue } from '../../search_request_queue';
 import { SearchSourceProvider } from '../search_source';
 import StubIndexPatternProv from 'test_utils/stub_index_pattern';
 
@@ -49,16 +49,16 @@ describe('SearchSource', function () {
     indexPattern2 = new IndexPattern('test2-*', null, []);
     expect(indexPattern).to.not.be(indexPattern2);
   }));
-  beforeEach(requestQueue.removeAll);
-  after(requestQueue.removeAll);
+  beforeEach(searchRequestQueue.removeAll);
+  after(searchRequestQueue.removeAll);
 
   describe('#onResults()', function () {
-    it('adds a request to the requestQueue', function () {
+    it('adds a request to the searchRequestQueue', function () {
       const source = new SearchSource();
 
-      expect(requestQueue.getCount()).to.be(0);
+      expect(searchRequestQueue.getCount()).to.be(0);
       source.onResults();
-      expect(requestQueue.getCount()).to.be(1);
+      expect(searchRequestQueue.getCount()).to.be(1);
     });
 
     it('returns a promise that is resolved with the results', function () {
@@ -69,7 +69,7 @@ describe('SearchSource', function () {
         expect(results).to.be(fakeResults);
       });
 
-      const searchRequest = requestQueue.getSearchRequestAt(0);
+      const searchRequest = searchRequestQueue.getSearchRequestAt(0);
       searchRequest.defer.resolve(fakeResults);
       return promise;
     });
@@ -79,19 +79,19 @@ describe('SearchSource', function () {
     it('aborts all startable requests', function () {
       const source = new SearchSource();
       source.onResults();
-      const searchRequest = requestQueue.getSearchRequestAt(0);
+      const searchRequest = searchRequestQueue.getSearchRequestAt(0);
       sinon.stub(searchRequest, 'canStart').returns(true);
       source.destroy();
-      expect(requestQueue.getCount()).to.be(0);
+      expect(searchRequestQueue.getCount()).to.be(0);
     });
 
     it('aborts all non-startable requests', function () {
       const source = new SearchSource();
       source.onResults();
-      const searchRequest = requestQueue.getSearchRequestAt(0);
+      const searchRequest = searchRequestQueue.getSearchRequestAt(0);
       sinon.stub(searchRequest, 'canStart').returns(false);
       source.destroy();
-      expect(requestQueue.getCount()).to.be(0);
+      expect(searchRequestQueue.getCount()).to.be(0);
     });
   });
 
