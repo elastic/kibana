@@ -203,7 +203,7 @@ server_url: ''`.split('\n'),
 
 export const JS_CLIENT_INSTRUCTIONS = [
   {
-    title: 'Enable experimental frontend support in the APM server',
+    title: 'Enable frontend support in the APM server',
     textPre:
       'Please refer to [the documentation]({config.docs.base_url}guide/en/apm/server/{config.docs.version}/frontend.html).',
   },
@@ -230,8 +230,7 @@ var apm = initApm({curlyOpen}
 {curlyClose})`.split('\n'),
     textPost:
       'See the [documentation]' +
-      '({config.docs.base_url}guide/en/apm/agent/js-base/0.x/index.html)  for advanced usage.\n\n' +
-      '**Warning: The JS agent is currently in Beta and not meant for production use.**',
+      '({config.docs.base_url}guide/en/apm/agent/js-base/current/index.html) for advanced usage.',
   },
 ];
 
