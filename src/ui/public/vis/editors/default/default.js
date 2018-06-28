@@ -166,6 +166,9 @@ const defaultEditor = function ($rootScope, $compile) {
         this.$scope.$destroy();
         this.$scope = null;
       }
+      if (this._handler) {
+        this._handler.destroy();
+      }
     }
   };
 };
