@@ -13,7 +13,7 @@ import {
 } from '@elastic/eui';
 import classNames from 'classnames';
 
-export function Metric({ className, value, warning }) {
+export function Metric({ className, warning, value }) {
 
   const classes = classNames(
     'pipelineViewer__metric',
@@ -49,4 +49,5 @@ export function Metric({ className, value, warning }) {
 Metric.propTypes = {
   className: PropTypes.string.isRequired,
   value: PropTypes.string.isRequired,
+  warning: PropTypes.bool,
 };
