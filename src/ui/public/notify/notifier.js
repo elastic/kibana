@@ -39,8 +39,6 @@ const {
   buildNum,
 } = metadata;
 
-const log = _.bindKey(console, 'log');
-
 function closeNotif(notif, cb = _.noop, key) {
   return function () {
     // this === notif
@@ -466,13 +464,3 @@ Notifier.prototype.directive = function (directive, config, cb) {
   customConfig.directive = localDirective;
   return add(customConfig, cb);
 };
-
-if (log === _.noop) {
-  Notifier.prototype.log = _.noop;
-} else {
-  Notifier.prototype.log = function () {
-    const args = [].slice.apply(arguments);
-    if (this.from) args.unshift(this.from + ':');
-    log.apply(null, args);
-  };
-}
