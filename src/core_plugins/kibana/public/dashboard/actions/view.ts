@@ -21,7 +21,7 @@ import { createAction } from 'redux-actions';
 import { Filters, Query, TimeRange } from 'ui/embeddable';
 import { KibanaAction } from '../../selectors/types';
 import { DashboardViewMode } from '../dashboard_view_mode';
-import { PanelId } from '../selectors';
+import { PanelId } from '../types';
 
 export enum ViewActionTypeKeys {
   UPDATE_VIEW_MODE = 'UPDATE_VIEW_MODE',
@@ -40,7 +40,7 @@ export interface UpdateViewModeAction
   extends KibanaAction<ViewActionTypeKeys.UPDATE_VIEW_MODE, DashboardViewMode> {}
 
 export interface SetVisibleContextMenuPanelIdAction
-  extends KibanaAction<ViewActionTypeKeys.SET_VISIBLE_CONTEXT_MENU_PANEL_ID, PanelId> {}
+  extends KibanaAction<ViewActionTypeKeys.SET_VISIBLE_CONTEXT_MENU_PANEL_ID, PanelId | undefined> {}
 
 export interface MaximizePanelAction
   extends KibanaAction<ViewActionTypeKeys.MAXIMIZE_PANEl, PanelId> {}
@@ -78,7 +78,7 @@ export type ViewActions =
   | UpdateQueryAction;
 
 export const updateViewMode = createAction<string>(ViewActionTypeKeys.UPDATE_VIEW_MODE);
-export const setVisibleContextMenuPanelId = createAction<PanelId>(
+export const setVisibleContextMenuPanelId = createAction<PanelId | undefined>(
   ViewActionTypeKeys.SET_VISIBLE_CONTEXT_MENU_PANEL_ID
 );
 export const maximizePanel = createAction<PanelId>(ViewActionTypeKeys.MAXIMIZE_PANEl);

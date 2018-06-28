@@ -20,11 +20,10 @@
 import { Filters, Query, TimeRange } from 'ui/embeddable';
 import { DashboardViewMode } from '../dashboard/dashboard_view_mode';
 import * as DashboardSelectors from '../dashboard/selectors';
-import { PanelId } from '../dashboard/selectors/types';
+import { DashboardState, PanelId } from '../dashboard/types';
 import { CoreKibanaState } from './types';
 
-export const getDashboard = (state: CoreKibanaState): DashboardSelectors.DashboardState =>
-  state.dashboard;
+export const getDashboard = (state: CoreKibanaState): DashboardState => state.dashboard;
 
 export const getPanels = (state: CoreKibanaState) =>
   DashboardSelectors.getPanels(getDashboard(state));

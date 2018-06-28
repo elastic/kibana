@@ -17,41 +17,54 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import { PanelState } from '../types';
+import { createPanelState } from './panel_state';
 
-import { createPanelState } from '../panel_state';
-
-function createPanelWithDimensions(x, y, w, h) {
+function createPanelWithDimensions(
+  x: number,
+  y: number,
+  w: number,
+  h: number
+): PanelState {
   return {
+    embeddableConfig: {},
     gridData: {
-      x, y, w, h
-    }
+      h,
+      i: '1',
+      w,
+      x,
+      y,
+    },
+    id: '123',
+    panelIndex: '1',
+    type: 'viz',
+    version: '123',
   };
 }
 
-describe('Panel state', function () {
-  it('finds a spot on the right', function () {
+describe('Panel state', () => {
+  it('finds a spot on the right', () => {
     // Default setup after a single panel, of default size, is on the grid
     const panels = [createPanelWithDimensions(0, 0, 24, 30)];
 
-    const panel = createPanelState('1', 'a type', '1', panels);
-    expect(panel.gridData.x).to.equal(24);
-    expect(panel.gridData.y).to.equal(0);
+    const panel = createPanelState('1', 'a type', panels);
+    expect(panel.gridData.x).toBe(24);
+    expect(panel.gridData.y).toBe(0);
   });
 
-  it('finds a spot on the right when the panel is taller than any other panel on the grid', function () {
+  it('finds a spot on the right when the panel is taller than any other panel on the grid', () => {
     // Should be a little empty spot on the right.
     const panels = [
       createPanelWithDimensions(0, 0, 24, 45),
       createPanelWithDimensions(24, 0, 24, 30),
     ];
 
-    const panel = createPanelState('1', 'a type', '1', panels);
-    expect(panel.gridData.x).to.equal(24);
-    expect(panel.gridData.y).to.equal(30);
+    const panel = createPanelState('1', 'a type', panels);
+    expect(panel.gridData.x).toBe(24);
+    expect(panel.gridData.y).toBe(30);
   });
 
-  it('finds an empty spot in the middle of the grid', function () {
+  it('finds an empty spot in the middle of the grid', () => {
     const panels = [
       createPanelWithDimensions(0, 0, 48, 5),
       createPanelWithDimensions(0, 5, 4, 30),
@@ -59,8 +72,8 @@ describe('Panel state', function () {
       createPanelWithDimensions(0, 55, 48, 5),
     ];
 
-    const panel = createPanelState('1', 'a type', '1', panels);
-    expect(panel.gridData.x).to.equal(4);
-    expect(panel.gridData.y).to.equal(5);
+    const panel = createPanelState('1', 'a type', panels);
+    expect(panel.gridData.x).toBe(4);
+    expect(panel.gridData.y).toBe(5);
   });
 });

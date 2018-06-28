@@ -17,13 +17,20 @@
  * under the License.
  */
 
-jest.mock('ui/chrome',
+jest.mock(
+  'ui/chrome',
   () => ({
     getKibanaVersion: () => '6.3.0',
-  }), { virtual: true });
+  }),
+  { virtual: true }
+);
 
+import {
+  DEFAULT_PANEL_HEIGHT,
+  DEFAULT_PANEL_WIDTH,
+} from '../dashboard_constants';
+import { PanelState, PanelStatePre61 } from '../types';
 import { PanelUtils } from './panel_utils';
-import { DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from '../dashboard_constants';
 
 test('parseVersion', () => {
   const { major, minor } = PanelUtils.parseVersion('6.2.0');
@@ -32,29 +39,46 @@ test('parseVersion', () => {
 });
 
 test('convertPanelDataPre_6_1 gives supplies width and height when missing', () => {
-  const panelData = [
+  const panelData: PanelStatePre61[] = [
     { col: 3, id: 'foo1', row: 1, type: 'visualization', panelIndex: 1 },
-    { col: 3, id: 'foo2', row: 1, size_x: 3, size_y: 2, type: 'visualization', panelIndex: 2 }
+    {
+      col: 3,
+      id: 'foo2',
+      panelIndex: 2,
+      row: 1,
+      size_x: 3,
+      size_y: 2,
+      type: 'visualization',
+    },
   ];
-  panelData.forEach(oldPanel => PanelUtils.convertPanelDataPre_6_1(oldPanel));
-  expect(panelData[0].gridData.w).toBe(DEFAULT_PANEL_WIDTH);
-  expect(panelData[0].gridData.h).toBe(DEFAULT_PANEL_HEIGHT);
-  expect(panelData[0].version).toBe('6.3.0');
+  const newPanels: PanelState[] = [];
+  panelData.forEach(oldPanel => {
+    newPanels.push(PanelUtils.convertPanelDataPre_6_1(oldPanel));
+  });
 
-  expect(panelData[1].gridData.w).toBe(3);
-  expect(panelData[1].gridData.h).toBe(2);
-  expect(panelData[1].version).toBe('6.3.0');
+  expect(newPanels[0].gridData.w).toBe(DEFAULT_PANEL_WIDTH);
+  expect(newPanels[0].gridData.h).toBe(DEFAULT_PANEL_HEIGHT);
+  expect(newPanels[0].version).toBe('6.3.0');
+
+  expect(newPanels[1].gridData.w).toBe(3);
+  expect(newPanels[1].gridData.h).toBe(2);
+  expect(newPanels[1].version).toBe('6.3.0');
 });
 
 test('convertPanelDataPre_6_3 scales panel dimensions', () => {
   const oldPanel = {
+    embeddableConfig: {},
     gridData: {
       h: 3,
+      i: '1',
       w: 7,
       x: 2,
       y: 5,
     },
-    version: '6.2.0'
+    id: '123',
+    panelIndex: '1',
+    type: 'vis',
+    version: '6.2.0',
   };
   const updatedPanel = PanelUtils.convertPanelDataPre_6_3(oldPanel);
   expect(updatedPanel.gridData.w).toBe(28);

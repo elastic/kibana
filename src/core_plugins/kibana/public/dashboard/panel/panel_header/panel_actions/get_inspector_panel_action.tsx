@@ -19,12 +19,10 @@
 
 import React from 'react';
 
-import {
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 
-import { Inspector } from 'ui/inspector';
 import { DashboardPanelAction } from 'ui/dashboard_panel_actions';
+import { Inspector } from 'ui/inspector';
 
 /**
  * Returns the dashboard panel action for opening an inspector for a specific panel.
@@ -33,7 +31,10 @@ import { DashboardPanelAction } from 'ui/dashboard_panel_actions';
  * could be shown for those adapters - the inspector icon will be visible.
  * @return {DashboardPanelAction}
  */
-export function getInspectorPanelAction({ closeContextMenu, panelTitle }) {
+export function getInspectorPanelAction(
+  closeContextMenu: () => void,
+  panelTitle?: string
+) {
   return new DashboardPanelAction(
     {
       id: 'openInspector',
@@ -42,27 +43,30 @@ export function getInspectorPanelAction({ closeContextMenu, panelTitle }) {
     },
     {
       icon: <EuiIcon type="inspect" />,
+      isVisible: ({ embeddable }) =>
+        embeddable && Inspector.isAvailable(embeddable.getInspectorAdapters()),
       onClick: ({ embeddable }) => {
         closeContextMenu();
-        const session = Inspector.open(embeddable.getInspectorAdapters(), {
-          title: panelTitle,
-        });
-        // Overwrite the embeddables.destroy() function to close the inspector
-        // before calling the original destroy method
-        const originalDestroy = embeddable.destroy;
-        embeddable.destroy = () => {
-          session.close();
-          if (originalDestroy) {
-            originalDestroy.call(embeddable);
-          }
-        };
-        // In case the inspector gets closed (otherwise), restore the original destroy function
-        session.on('closed', () => {
-          embeddable.destroy = originalDestroy;
-        });
+        const adapters = embeddable.getInspectorAdapters();
+        if (adapters) {
+          const session = Inspector.open(adapters, {
+            title: panelTitle,
+          });
+          // Overwrite the embeddables.destroy() function to close the inspector
+          // before calling the original destroy method
+          const originalDestroy = embeddable.destroy;
+          embeddable.destroy = () => {
+            session.close();
+            if (originalDestroy) {
+              originalDestroy.call(embeddable);
+            }
+          };
+          // In case the inspector gets closed (otherwise), restore the original destroy function
+          session.on('closed', () => {
+            embeddable.destroy = originalDestroy;
+          });
+        }
       },
-      isVisible: ({ embeddable }) => (
-        embeddable && Inspector.isAvailable(embeddable.getInspectorAdapters())
-      ),
-    });
+    }
+  );
 }

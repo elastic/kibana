@@ -24,7 +24,7 @@ import { ViewActions, ViewActionTypeKeys } from '../actions';
 import { Filters, Query, TimeRange } from 'ui/embeddable';
 import { QueryLanguageType } from 'ui/embeddable/types';
 import { DashboardViewMode } from '../dashboard_view_mode';
-import { PanelId, ViewState } from '../selectors';
+import { PanelId, ViewState } from '../types';
 
 const setVisibleContextMenuPanelId = (view: ViewState, panelId: PanelId) => ({
   ...view,

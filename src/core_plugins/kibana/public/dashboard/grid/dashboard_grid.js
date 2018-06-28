@@ -25,7 +25,7 @@ import classNames from 'classnames';
 
 import { PanelUtils } from '../panel/panel_utils';
 import { DashboardViewMode } from '../dashboard_view_mode';
-import { DashboardPanel } from '../panel';
+import { DashboardPanelContainer } from '../panel';
 import { toastNotifications } from 'ui/notify';
 import {
   DashboardConstants,
@@ -222,7 +222,7 @@ export class DashboardGrid extends React.Component {
           key={panel.panelIndex}
           ref={reactGridItem => { this.gridItems[panel.panelIndex] = reactGridItem; }}
         >
-          <DashboardPanel
+          <DashboardPanelContainer
             panelId={panel.panelIndex}
             embeddableFactory={this.embeddableFactoryMap[panel.type]}
             onPanelFocused={this.onPanelFocused}

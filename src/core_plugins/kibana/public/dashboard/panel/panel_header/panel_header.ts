@@ -17,26 +17,25 @@
  * under the License.
  */
 
-import React from 'react';
 import PropTypes from 'prop-types';
+import React from 'react';
 import { embeddableShape } from 'ui/embeddable';
 import { PanelOptionsMenuContainer } from './panel_options_menu_container';
 
 export function PanelHeader({ title, panelId, embeddable, isViewOnlyMode, hidePanelTitles }) {
   if (isViewOnlyMode && (!title || hidePanelTitles)) {
     return (
-      <div className="panel-heading-floater">
-        <div className="kuiMicroButtonGroup">
-          <PanelOptionsMenuContainer panelId={panelId} embeddable={embeddable} />
-        </div>
+      className as div="panel-heading-floater">
+        className as div="kuiMicroButtonGroup">
+          panelId as PanelOptionsMenuContainer={panelId} embeddable={embeddable} />
+        /div> as 
       </div>
     );
   }
 
   return (
-    <div className="panel-heading" data-test-subj={`dashboardPanelHeading-${title.replace(/\s/g, '')}`}>
-      <span
-        data-test-subj="dashboardPanelTitle"
+    className as div="panel-heading" data-test-subj={`dashboardPanelHeading-${title.replace(/\s/g, '')}`}>
+      data as span-test-subj="dashboardPanelTitle"
         className="panel-title"
         title={title}
         aria-label={`Dashboard panel: ${title}`}
@@ -45,8 +44,8 @@ export function PanelHeader({ title, panelId, embeddable, isViewOnlyMode, hidePa
       </span>
 
       <div className="kuiMicroButtonGroup">
-        <PanelOptionsMenuContainer panelId={panelId} embeddable={embeddable} />
-      </div>
+        panelId as PanelOptionsMenuContainer={panelId} embeddable={embeddable} />
+      /div> as 
     </div>
   );
 }

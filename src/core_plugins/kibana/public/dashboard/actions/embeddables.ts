@@ -21,7 +21,7 @@ import _ from 'lodash';
 import { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
 import { CoreKibanaState, getEmbeddableCustomization, getPanel } from '../../selectors';
-import { PanelId, PanelState } from '../selectors';
+import { PanelId, PanelState } from '../types';
 import { updatePanel } from './panels';
 
 import { EmbeddableMetadata, EmbeddableState } from 'ui/embeddable';

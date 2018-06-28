@@ -27,7 +27,7 @@ import {
   PanelActionTypeKeys,
   SetStagedFilterActionPayload,
 } from '../actions';
-import { EmbeddableReduxState, EmbeddablesMap, PanelId } from '../selectors/types';
+import { EmbeddableReduxState, EmbeddablesMap, PanelId } from '../types';
 
 const embeddableIsInitializing = (
   embeddables: EmbeddablesMap,
