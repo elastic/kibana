@@ -41,16 +41,19 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
 
     async _makeKibanaMap() {
 
-      await super._makeKibanaMap();
+      const options = await super._makeKibanaMap();
 
-      this.vis.sessionState.mapBounds = this._kibanaMap.getBounds();
+      const geohashAgg = this._getGeoHashAgg();
+
+      geohashAgg.params.mapBounds = this._kibanaMap.getBounds();
+      geohashAgg.params.mapZoom = options.zoom;
+      geohashAgg.params.mapCenter = options.center;
 
       let previousPrecision = this._kibanaMap.getGeohashPrecision();
       let precisionChange = false;
       this._kibanaMap.on('zoomchange', () => {
         precisionChange = (previousPrecision !== this._kibanaMap.getGeohashPrecision());
         previousPrecision = this._kibanaMap.getGeohashPrecision();
-        const geohashAgg = this._getGeoHashAgg();
         if (!geohashAgg) {
           return;
         }
@@ -60,7 +63,6 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
         }
       });
       this._kibanaMap.on('zoomend', () => {
-        const geohashAgg = this._getGeoHashAgg();
         if (!geohashAgg) {
           return;
         }
@@ -78,12 +80,10 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
 
       this._kibanaMap.addDrawControl();
       this._kibanaMap.on('drawCreated:rectangle', event => {
-        const geoAgg = this._getGeoHashAgg();
-        this.addSpatialFilter(geoAgg, 'geo_bounding_box', event.bounds);
+        this.addSpatialFilter(geohashAgg, 'geo_bounding_box', event.bounds);
       });
       this._kibanaMap.on('drawCreated:polygon', event => {
-        const geoAgg = this._getGeoHashAgg();
-        this.addSpatialFilter(geoAgg, 'geo_polygon', { points: event.points });
+        this.addSpatialFilter(geohashAgg, 'geo_polygon', { points: event.points });
       });
     }
 
