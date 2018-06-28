@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { UrlEditor } from './url';
+export { UrlFormatEditor } from './url';

@@ -5,7 +5,7 @@ exports[`ScriptingHelpFlyout should render normally 1`] = `
   hideCloseButton={false}
   onClose={[Function]}
   ownFocus={false}
-  size="m"
+  size="s"
 >
   <EuiFlyoutBody>
     <EuiText

@@ -79,5 +79,3 @@ export class StringFormatEditor extends DefaultFormatEditor {
     );
   }
 }
-
-export const StringEditor = () => StringFormatEditor;

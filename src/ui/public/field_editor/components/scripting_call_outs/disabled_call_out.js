@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 
 import {
   EuiCallOut,
@@ -28,7 +28,7 @@ export const ScriptingDisabledCallOut = ({
   isVisible = false,
 }) => {
   return isVisible ? (
-    <div>
+    <Fragment>
       <EuiCallOut
         title="Scripting disabled"
         color="danger"
@@ -40,7 +40,7 @@ export const ScriptingDisabledCallOut = ({
         </p>
       </EuiCallOut>
       <EuiSpacer size="m" />
-    </div>
+    </Fragment>
   ) : null;
 };
 

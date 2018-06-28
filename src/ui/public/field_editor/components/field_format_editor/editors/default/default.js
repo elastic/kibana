@@ -44,11 +44,14 @@ export class DefaultFormatEditor extends PureComponent {
   }
 
   static getDerivedStateFromProps(nextProps, state) {
-    const converter = nextProps.format.getConverterFor(state.sampleConverterType);
-    const type = typeof state.sampleInputsByType === 'object' && nextProps.formatParams.type;
-    const inputs = type ? state.sampleInputsByType[nextProps.formatParams.type] || [] : state.sampleInputs;
+    const { format, formatParams, onError } = nextProps;
+    const { sampleInputsByType, sampleInputs, sampleConverterType } = state;
+
+    const converter = format.getConverterFor(sampleConverterType);
+    const type = typeof sampleInputsByType === 'object' && formatParams.type;
+    const inputs = type ? sampleInputsByType[formatParams.type] || [] : sampleInputs;
     const output = convertSampleInput(converter, inputs);
-    nextProps.onError(output.error);
+    onError(output.error);
     return output;
   }
 

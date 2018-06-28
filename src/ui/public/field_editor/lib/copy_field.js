@@ -19,11 +19,23 @@
 
 import { has } from 'lodash';
 
+/**
+ * Fully clones a Field object, so that modifications can be performed on
+ * the copy without affecting original field. Field objects contain
+ * enumerable and non-eumerable properties that may or may not be writable.
+ * The function copies all properties as property descriptors into
+ * `newFieldProps`, overrides getter and setter, and returns a new object
+ * created from that.
+ *
+ * @param {object} field - Field object to copy
+ * @param {object} indexPattern - index pattern object the field belongs to
+ * @param {object} Field - Field object type
+ * @return {object} the cloned object
+ */
 export const copyField = (field, indexPattern, Field) => {
   const changes = {};
-  const shadowProps = {
+  const newFieldProps = {
     toActualField: {
-      // bring the shadow copy out of the shadows
       value: () => {
         return new Field(indexPattern, {
           ...field.$$spec,
@@ -35,7 +47,8 @@ export const copyField = (field, indexPattern, Field) => {
 
   Object.getOwnPropertyNames(field).forEach(function (prop) {
     const desc = Object.getOwnPropertyDescriptor(field, prop);
-    shadowProps[prop] = {
+
+    newFieldProps[prop] = {
       enumerable: desc.enumerable,
       get: function () {
         return has(changes, prop) ? changes[prop] : field[prop];
@@ -46,5 +59,5 @@ export const copyField = (field, indexPattern, Field) => {
     };
   });
 
-  return Object.create(null, shadowProps);
+  return Object.create(null, newFieldProps);
 };

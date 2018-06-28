@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { DateEditor } from './date';
+export { DateFormatEditor } from './date';

@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { DurationEditor } from './duration';
+export { DurationFormatEditor } from './duration';

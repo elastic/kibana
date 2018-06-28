@@ -82,5 +82,3 @@ export class NumberFormatEditor extends DefaultFormatEditor {
     );
   }
 }
-
-export const NumberEditor = () => NumberFormatEditor;

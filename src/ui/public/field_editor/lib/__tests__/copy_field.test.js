@@ -31,8 +31,18 @@ describe('copyField', () => {
     const copiedField = copyField(field, {}, {});
     copiedField.name = 'test_name_change';
 
-    expect(field.toActualField).toEqual(undefined);
-    expect(copiedField).not.toEqual(field);
+    // Check that copied field has `toActualField()` method
     expect(typeof copiedField.toActualField).toEqual('function');
+
+    // Check that we did not modify the original field object when
+    // modifying copied field
+    expect(field.toActualField).toEqual(undefined);
+    expect(field.name).toEqual('test_field');
+
+    expect(copiedField).not.toEqual(field);
+    expect(copiedField.name).toEqual('test_name_change');
+    expect(copiedField.scripted).toEqual(field.scripted);
+    expect(copiedField.type).toEqual(field.type);
+    expect(copiedField.lang).toEqual(field.lang);
   });
 });

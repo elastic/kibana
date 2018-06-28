@@ -197,5 +197,3 @@ export class ColorFormatEditor extends DefaultFormatEditor {
     );
   }
 }
-
-export const ColorEditor = () => ColorFormatEditor;

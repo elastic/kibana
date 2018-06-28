@@ -34,7 +34,7 @@ export const ScriptingHelpFlyout = ({
   onClose = () => {},
 }) => {
   return isVisible ? (
-    <EuiFlyout onClose={onClose}>
+    <EuiFlyout onClose={onClose} size="s">
       <EuiFlyoutBody>
         <EuiText>
           <h3>Scripting help</h3>

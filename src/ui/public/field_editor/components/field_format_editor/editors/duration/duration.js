@@ -131,5 +131,3 @@ export class DurationFormatEditor extends DefaultFormatEditor {
     );
   }
 }
-
-export const DurationEditor = () => DurationFormatEditor;

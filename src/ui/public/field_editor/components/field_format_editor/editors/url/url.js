@@ -154,8 +154,8 @@ export class UrlFormatEditor extends DefaultFormatEditor {
         ) : null}
 
         <EuiFormRow
-          label="Url template"
-          helpText={(<EuiLink onClick={this.showUrlTemplateHelp}>Url template help</EuiLink>)}
+          label="URL template"
+          helpText={(<EuiLink onClick={this.showUrlTemplateHelp}>URL template help</EuiLink>)}
           isInvalid={!!error}
           error={error}
         >
@@ -190,5 +190,3 @@ export class UrlFormatEditor extends DefaultFormatEditor {
     );
   }
 }
-
-export const UrlEditor = () => UrlFormatEditor;

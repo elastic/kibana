@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { BytesEditor } from './bytes';
+export { BytesFormatEditor } from './bytes';

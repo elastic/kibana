@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { NumberFormatEditor } from '../number/number';
+import { NumberFormatEditor } from '../number';
 
 export class PercentFormatEditor extends NumberFormatEditor {
   static formatId = 'percent';
@@ -31,5 +31,3 @@ export class PercentFormatEditor extends NumberFormatEditor {
     };
   }
 }
-
-export const PercentEditor = () => PercentFormatEditor;

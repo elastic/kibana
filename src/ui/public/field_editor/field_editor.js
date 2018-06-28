@@ -88,6 +88,13 @@ export class FieldEditor extends PureComponent {
 
   constructor(props) {
     super(props);
+
+    const {
+      field,
+      indexPattern,
+      helpers: { Field },
+    } = props;
+
     this.state = {
       isReady: false,
       isCreating: false,
@@ -95,8 +102,8 @@ export class FieldEditor extends PureComponent {
       scriptingLangs: [],
       fieldTypes: [],
       fieldTypeFormats: [],
-      existingFieldNames: props.indexPattern.fields.map(field => field.name),
-      field: copyField(props.field, props.indexPattern, props.helpers.Field),
+      existingFieldNames: indexPattern.fields.map(f => f.name),
+      field: copyField(field, indexPattern, Field),
       fieldFormatId: undefined,
       fieldFormatParams: {},
       showScriptingHelp: false,
@@ -414,7 +421,7 @@ export class FieldEditor extends PureComponent {
             isDisabled={this.isSavingDisabled()}
             data-test-subj="fieldSaveButton"
           >
-            {isCreating ? 'Create field' : 'Edit field'}
+            {isCreating ? 'Create field' : 'Save field'}
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

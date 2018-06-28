@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ScriptingDisabledCallOut should render normally 1`] = `
-<div>
+<React.Fragment>
   <EuiCallOut
     color="danger"
     iconType="alert"
@@ -15,7 +15,7 @@ exports[`ScriptingDisabledCallOut should render normally 1`] = `
   <EuiSpacer
     size="m"
   />
-</div>
+</React.Fragment>
 `;
 
 exports[`ScriptingDisabledCallOut should render nothing if not visible 1`] = `""`;

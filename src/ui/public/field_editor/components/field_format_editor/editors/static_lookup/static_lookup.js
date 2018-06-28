@@ -157,5 +157,3 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor {
     );
   }
 }
-
-export const StaticLookupEditor = () => StaticLookupFormatEditor;

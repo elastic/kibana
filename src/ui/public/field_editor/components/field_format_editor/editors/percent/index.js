@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { PercentEditor } from './percent';
+export { PercentFormatEditor } from './percent';

@@ -330,7 +330,7 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
           isDisabled={false}
           onClick={[Function]}
         >
-          Edit field
+          Save field
         </eui-button>
       </eui-flex-item>
       <eui-flex-item
@@ -764,7 +764,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
           isDisabled={false}
           onClick={[Function]}
         >
-          Edit field
+          Save field
         </eui-button>
       </eui-flex-item>
       <eui-flex-item

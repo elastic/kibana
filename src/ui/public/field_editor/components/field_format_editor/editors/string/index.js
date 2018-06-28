@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { StringEditor } from './string';
+export { StringFormatEditor } from './string';

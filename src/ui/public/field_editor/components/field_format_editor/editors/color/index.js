@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { ColorEditor } from './color';
+export { ColorFormatEditor } from './color';

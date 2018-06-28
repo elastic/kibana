@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { NumberFormatEditor } from '../number/number';
+import { NumberFormatEditor } from '../number';
 
 export class BytesFormatEditor extends NumberFormatEditor {
   static formatId = 'bytes';
@@ -31,5 +31,3 @@ export class BytesFormatEditor extends NumberFormatEditor {
     };
   }
 }
-
-export const BytesEditor = () => BytesFormatEditor;

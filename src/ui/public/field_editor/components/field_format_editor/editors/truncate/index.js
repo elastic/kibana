@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { TruncateEditor } from './truncate';
+export { TruncateFormatEditor } from './truncate';

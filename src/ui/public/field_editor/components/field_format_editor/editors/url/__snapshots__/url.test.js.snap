@@ -52,11 +52,11 @@ exports[`UrlFormatEditor should render label template help 1`] = `
         onClick={[Function]}
         type="button"
       >
-        Url template help
+        URL template help
       </EuiLink>
     }
     isInvalid={false}
-    label="Url template"
+    label="URL template"
   >
     <EuiFieldText
       compressed={false}
@@ -151,11 +151,11 @@ exports[`UrlFormatEditor should render normally 1`] = `
         onClick={[Function]}
         type="button"
       >
-        Url template help
+        URL template help
       </EuiLink>
     }
     isInvalid={false}
-    label="Url template"
+    label="URL template"
   >
     <EuiFieldText
       compressed={false}
@@ -250,11 +250,11 @@ exports[`UrlFormatEditor should render url template help 1`] = `
         onClick={[Function]}
         type="button"
       >
-        Url template help
+        URL template help
       </EuiLink>
     }
     isInvalid={false}
-    label="Url template"
+    label="URL template"
   >
     <EuiFieldText
       compressed={false}

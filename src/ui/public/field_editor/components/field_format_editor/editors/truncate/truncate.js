@@ -70,5 +70,3 @@ export class TruncateFormatEditor extends DefaultFormatEditor {
     );
   }
 }
-
-export const TruncateEditor = () => TruncateFormatEditor;

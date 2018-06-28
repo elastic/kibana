@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import { getDocLink } from 'ui/documentation_links';
 
 import {
@@ -31,7 +31,7 @@ export const ScriptingWarningCallOut = ({
   isVisible = false,
 }) => {
   return isVisible ? (
-    <div>
+    <Fragment>
       <EuiCallOut
         title="Proceed with caution"
         color="warning"
@@ -62,7 +62,7 @@ export const ScriptingWarningCallOut = ({
         </p>
       </EuiCallOut>
       <EuiSpacer size="m" />
-    </div>
+    </Fragment>
   ) : null;
 };
 

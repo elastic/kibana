@@ -88,5 +88,3 @@ export class DateFormatEditor extends DefaultFormatEditor {
     );
   }
 }
-
-export const DateEditor = () => DateFormatEditor;
