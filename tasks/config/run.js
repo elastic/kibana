@@ -188,7 +188,6 @@ module.exports = function (grunt) {
       args: [
         'scripts/functional_tests_server',
         '--config', 'test/functional/config.js',
-        '--esFrom', 'source',
         '--debug',
         '--',
         '--server.maxPayloadBytes=1648576',
