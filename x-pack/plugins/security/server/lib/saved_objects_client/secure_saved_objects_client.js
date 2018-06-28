@@ -31,44 +31,31 @@ export class SecureSavedObjectsClient {
   }
 
   async create(type, attributes = {}, options = {}) {
-    const authorized = await this._performAuthorizationCheck(type, 'create', {
+    return await this._execute(
       type,
-      attributes,
-      options,
-    });
-
-    if (authorized) {
-      return await this._internalRepository.create(type, attributes, options);
-    }
-
-    return await this._callWithRequestRepository.create(type, attributes, options);
+      'create',
+      { type, attributes, options },
+      repository => repository.create(type, attributes, options),
+    );
   }
 
   async bulkCreate(objects, options = {}) {
     const types = uniq(objects.map(o => o.type));
-    const authorized = await this._performAuthorizationCheck(types, 'bulk_create', {
-      objects,
-      options,
-    });
-
-    if (authorized) {
-      return await this._internalRepository.bulkCreate(objects, options);
-    }
-
-    return await this._callWithRequestRepository.bulkCreate(objects, options);
+    return await this._execute(
+      types,
+      'bulk_create',
+      { objects, options },
+      repository => repository.bulkCreate(objects, options),
+    );
   }
 
   async delete(type, id) {
-    const authorized = await this._performAuthorizationCheck(type, 'delete', {
+    return await this._execute(
       type,
-      id,
-    });
-
-    if (authorized) {
-      return await this._internalRepository.delete(type, id);
-    }
-
-    return await this._callWithRequestRepository.delete(type, id);
+      'delete',
+      { type, id },
+      repository => repository.delete(type, id),
+    );
   }
 
   async find(options = {}) {
@@ -80,14 +67,61 @@ export class SecureSavedObjectsClient {
   }
 
   async _findWithTypes(options) {
-    // when we're finding specific types, we just ensure the user can find the specified types
-    const authorized = await this._performAuthorizationCheck(options.type, 'find', { options });
+    return await this._execute(
+      options.type,
+      'find',
+      { options },
+      repository => repository.find(options)
+    );
+  }
 
-    if (authorized) {
-      return await this._internalRepository.find(options);
+  async bulkGet(objects = []) {
+    const types = uniq(objects.map(o => o.type));
+    return await this._execute(
+      types,
+      'bulk_get',
+      { objects },
+      repository => repository.bulkGet(objects)
+    );
+  }
+
+  async get(type, id) {
+    return await this._execute(
+      type,
+      'get',
+      { type, id },
+      repository => repository.get(type, id)
+    );
+  }
+
+  async update(type, id, attributes, options = {}) {
+    return await this._execute(
+      type,
+      'update',
+      { type, id, attributes, options },
+      repository => repository.update(type, id, attributes, options)
+    );
+  }
+
+  async _execute(typeOrTypes, action, args, fn) {
+    const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
+    const privileges = types.map(type => getPrivilege(type, action));
+    const { result, username, missing } = await this._hasSavedObjectPrivileges(privileges);
+
+    switch (result) {
+      case HAS_PRIVILEGES_RESULT.AUTHORIZED:
+        this._auditLogger.savedObjectsAuthorizationSuccess(username, action, types, args);
+        return await fn(this._internalRepository);
+      case HAS_PRIVILEGES_RESULT.LEGACY:
+        this._auditLogger.savedObjectsAuthorizationFailure(username, action, types, missing, true, args);
+        return await fn(this._callWithRequestRepository);
+      case HAS_PRIVILEGES_RESULT.UNAUTHORIZED:
+        this._auditLogger.savedObjectsAuthorizationFailure(username, action, types, missing, false, args);
+        const msg = `Unable to ${action} ${types.sort().join(',')}, missing ${missing.sort().join(',')}`;
+        throw this.errors.decorateForbiddenError(new Error(msg));
+      default:
+        throw new Error('Unexpected result from hasPrivileges');
     }
-
-    return await this._callWithRequestRepository.find(options);
   }
 
   async _findAcrossAllTypes(options) {
@@ -132,68 +166,6 @@ export class SecureSavedObjectsClient {
       ...options,
       type: authorizedTypes
     });
-  }
-
-  async bulkGet(objects = []) {
-    const types = uniq(objects.map(o => o.type));
-    const authorized = await this._performAuthorizationCheck(types, 'bulk_get', {
-      objects,
-    });
-
-    if (authorized) {
-      return await this._internalRepository.bulkGet(objects);
-    }
-
-    return await this._callWithRequestRepository.bulkGet(objects);
-  }
-
-  async get(type, id) {
-    const authorized = await this._performAuthorizationCheck(type, 'get', {
-      type,
-      id,
-    });
-
-    if (authorized) {
-      return await this._internalRepository.get(type, id);
-    }
-
-    return await this._callWithRequestRepository.get(type, id);
-  }
-
-  async update(type, id, attributes, options = {}) {
-    const authorized = await this._performAuthorizationCheck(type, 'update', {
-      type,
-      id,
-      attributes,
-      options,
-    });
-
-    if (authorized) {
-      return await this._internalRepository.update(type, id, attributes, options);
-    }
-
-    return await this._callWithRequestRepository.update(type, id, attributes, options);
-  }
-
-  async _performAuthorizationCheck(typeOrTypes, action, args) {
-    const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
-    const privileges = types.map(type => getPrivilege(type, action));
-    const { result, username, missing } = await this._hasSavedObjectPrivileges(privileges);
-
-    switch (result) {
-      case HAS_PRIVILEGES_RESULT.AUTHORIZED:
-        this._auditLogger.savedObjectsAuthorizationSuccess(username, action, types, args);
-        return true;
-      case HAS_PRIVILEGES_RESULT.LEGACY:
-        this._auditLogger.savedObjectsAuthorizationFailure(username, action, types, missing, true, args);
-        return false;
-      case HAS_PRIVILEGES_RESULT.UNAUTHORIZED:
-        this._auditLogger.savedObjectsAuthorizationFailure(username, action, types, missing, false, args);
-        const msg = `Unable to ${action} ${types.sort().join(',')}, missing ${missing.sort().join(',')}`;
-        throw this.errors.decorateForbiddenError(new Error(msg));
-      default:
-        throw new Error('Unexpected result from hasPrivileges');
-    }
   }
 
   async _hasSavedObjectPrivileges(privileges) {
