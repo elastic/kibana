@@ -4,7 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as Rx from 'rxjs';
-import { map, switchMap, tap } from 'rxjs/operators';
+import { catchError, mergeMap, map, retryWhen, switchMap, tap } from 'rxjs/operators';
+
+export const retryStrategy = ({
+  maxAttempts,
+  scalingDuration,
+}) => (errors) => {
+  return errors.pipe(
+    mergeMap((error, i) => {
+      const attempt = i + 1;
+
+      if (attempt >= maxAttempts) {
+        return Rx.throwError(error);
+      }
+
+      return Rx.timer(attempt * scalingDuration);
+    })
+  );
+};
 
 export function watchStatusAndLicenseToInitialize(xpackMainPlugin, downstreamPlugin, initialize) {
   const xpackInfo = xpackMainPlugin.info;
@@ -39,15 +56,18 @@ export function watchStatusAndLicenseToInitialize(xpackMainPlugin, downstreamPlu
           return Rx.of({ state: status.state, message: status.message });
         }
 
-        return initialize(license)
-          .then(() => ({
-            state: 'green',
-            message: 'Ready',
-          }))
-          .catch((err) => ({
-            state: 'red',
-            message: err.message
-          }));
+        return Rx.defer(() => initialize(license))
+          .pipe(
+            retryWhen(retryStrategy({ maxAttempts: 20, scalingDuration: 100 })),
+            map(() => ({
+              state: 'green',
+              message: 'Ready',
+            })),
+            catchError(err => Rx.of({
+              state: 'red',
+              message: err.message
+            }))
+          );
       }),
       tap(({ state, message }) => {
         downstreamPlugin.status[state](message);

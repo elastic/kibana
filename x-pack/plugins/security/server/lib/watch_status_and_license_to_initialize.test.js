@@ -115,7 +115,9 @@ test(`sets downstream plugin's status to green when initialize resolves`, (done)
   });
 });
 
-test(`sets downstream plugin's status to red when initialize rejects`, (done) => {
+test(`sets downstream plugin's status to red when initialize rejects 20 times`, (done) => {
+  jest.useFakeTimers();
+
   const pluginId = 'foo-plugin';
   const errorMessage = 'the error message';
   const { mockXpackMainPlugin, mockFeature } = createMockXpackMainPluginAndFeature(pluginId);
@@ -123,14 +125,67 @@ test(`sets downstream plugin's status to red when initialize rejects`, (done) =>
   const licenseCheckResults = Symbol();
   mockFeature.mock.setLicenseCheckResults(licenseCheckResults);
   const downstreamPlugin = createMockDownstreamPlugin(pluginId);
-  const initializeMock = jest.fn().mockImplementation(() => Promise.reject(new Error(errorMessage)));
+
+  let initializeCount = 0;
+  const initializeMock = jest.fn().mockImplementation(() => {
+    ++initializeCount;
+
+    // everytime this is called, we have to wait for a new promise to be resolved
+    // allowing the Promise the we return below to run, and then advance the timers
+    setImmediate(async () => {
+      await Promise.resolve();
+      jest.advanceTimersByTime(initializeCount * 100);
+    });
+    return Promise.reject(new Error(errorMessage));
+  });
 
   watchStatusAndLicenseToInitialize(mockXpackMainPlugin, downstreamPlugin, initializeMock);
 
   expect(initializeMock).toHaveBeenCalledTimes(1);
   expect(initializeMock).toHaveBeenCalledWith(licenseCheckResults);
   downstreamPlugin.status.red.mockImplementation(message => {
+    expect(initializeCount).toBe(20);
     expect(message).toBe(errorMessage);
+    done();
+  });
+});
+
+test(`sets downstream plugin's status to green when initialize resolves after rejecting 10 times`, (done) => {
+  jest.useFakeTimers();
+
+  const pluginId = 'foo-plugin';
+  const errorMessage = 'the error message';
+  const { mockXpackMainPlugin, mockFeature } = createMockXpackMainPluginAndFeature(pluginId);
+  mockXpackMainPlugin.mock.setStatus('green');
+  const licenseCheckResults = Symbol();
+  mockFeature.mock.setLicenseCheckResults(licenseCheckResults);
+  const downstreamPlugin = createMockDownstreamPlugin(pluginId);
+
+  let initializeCount = 0;
+  const initializeMock = jest.fn().mockImplementation(() => {
+    ++initializeCount;
+
+    // everytime this is called, we have to wait for a new promise to be resolved
+    // allowing the Promise the we return below to run, and then advance the timers
+    setImmediate(async () => {
+      await Promise.resolve();
+      jest.advanceTimersByTime(initializeCount * 100);
+    });
+
+    if (initializeCount >= 10) {
+      return Promise.resolve();
+    }
+
+    return Promise.reject(new Error(errorMessage));
+  });
+
+  watchStatusAndLicenseToInitialize(mockXpackMainPlugin, downstreamPlugin, initializeMock);
+
+  expect(initializeMock).toHaveBeenCalledTimes(1);
+  expect(initializeMock).toHaveBeenCalledWith(licenseCheckResults);
+  downstreamPlugin.status.green.mockImplementation(message => {
+    expect(initializeCount).toBe(10);
+    expect(message).toBe('Ready');
     done();
   });
 });
