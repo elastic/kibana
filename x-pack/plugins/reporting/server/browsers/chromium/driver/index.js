@@ -9,7 +9,7 @@ import path from 'path';
 import moment from 'moment';
 import { promisify, delay } from 'bluebird';
 import { transformFn } from './transform_fn';
-import { IgnoreSSLErrorsBehavior } from './behaviors';
+import { ignoreSSLErrorsBehavior } from './ignore_ssl_errors';
 import { screenshotStitcher } from './screenshot_stitcher';
 
 export class HeadlessChromiumDriver {
@@ -19,9 +19,6 @@ export class HeadlessChromiumDriver {
     this._waitForDelayMs = 100;
     this._zoom = 1;
     this._logger = logger;
-    this._behaviors = [
-      new IgnoreSSLErrorsBehavior(client),
-    ];
   }
 
   async destroy() {
@@ -46,7 +43,7 @@ export class HeadlessChromiumDriver {
       Page.enable(),
     ]);
 
-    await Promise.all(this._behaviors.map(behavior => behavior.initialize()));
+    await ignoreSSLErrorsBehavior(this._client.Security);
     await Network.setExtraHTTPHeaders({ headers });
     await Page.navigate({ url });
     await Page.loadEventFired();
