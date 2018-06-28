@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { uniq } from 'lodash';
+
 const hasPrivilege = (application, privilegeName) => application.privileges
   && application.privileges.length > 0
   && application.privileges[0] === privilegeName;
@@ -31,17 +33,26 @@ export function removePrivilegeFromRole(privilegeName, role, application) {
 }
 
 /**
- * Constructs a role privilege from the provided application privilege.
- * @param {*} appPrivilege
+ * Constructs a role privilege from the provided privilege name.
+ * @param {*} privilegeName
  * @param {*} application
  * @param {*} resources
  */
-export function createRolePrivilege(appPrivilege, application, resources) {
+export function createRolePrivilege(privilegeName, application, resources) {
   return {
     application,
     resources,
-    privileges: [appPrivilege.name]
+    privileges: [privilegeName]
   };
+}
+
+export function addPrivilegeToRole(privilegeName, role, application, resources) {
+  const existingPrivilege = getRolePrivilege(privilegeName, role, application);
+  if (existingPrivilege) {
+    existingPrivilege.resources = uniq([...existingPrivilege.resources, ...resources]);
+  } else {
+    setRolePrivilege(createRolePrivilege(privilegeName, application, resources), role, application);
+  }
 }
 
 /**

@@ -15,7 +15,7 @@ const spaceToOption = (s) => ({ id: s.id, label: s.name });
 
 const spaceIdToOption = (spaces) => (s) => spaceToOption(spaces.find(space => space.id === s));
 
-export class PrivilegeSpaceSelector extends Component {
+export class SpaceSelector extends Component {
   static propTypes = {
     spaces: PropTypes.array.isRequired,
     selectedSpaceIds: PropTypes.array.isRequired,
@@ -30,7 +30,7 @@ export class PrivilegeSpaceSelector extends Component {
   render() {
     return (
       <EuiComboBox
-        placeholder={`choose space(s) for privilege`}
+        placeholder={`choose space(s)`}
         options={this.props.spaces.map(spaceToOption)}
         selectedOptions={this.props.selectedSpaceIds.map(spaceIdToOption(this.props.spaces))}
         disabled={this.props.disabled}
