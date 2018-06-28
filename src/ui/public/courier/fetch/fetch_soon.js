@@ -53,6 +53,10 @@ export function FetchSoonProvider(Private, Promise) {
     return Promise.all(requests.map(req => req.getCompletePromise()));
   };
 
+  /**
+   * Return a promise that resembles the success of the fetch completing so we can execute
+   * logic based on this state change. Individual errors are routed to their respective requests.
+   */
   this.fetchQueued = () => {
     return this.fetchSearchRequests(requestQueue.getStartable());
   };
