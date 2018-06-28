@@ -55,8 +55,10 @@ uiModules.get('kibana/courier').service('courier', ($rootScope, Private) => {
       });
 
       const closeOnFatal = _.once(() => {
-        // If there was a fatal error, then stop future searches.
-        searchPoll.clearTimer();
+        // If there was a fatal error, then stop future searches. We want to use pause instead of
+        // clearTimer because if the search results come back after the fatal error then we'll
+        // resume polling.
+        searchPoll.pause();
 
         // And abort all pending requests.
         _.invoke(requestQueue, 'abort');

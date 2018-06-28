@@ -56,6 +56,27 @@ export function SearchPollProvider(Private, Promise, $rootScope) {
       this.clearTimer();
     };
 
+    /**
+     * Schedule the next iteration of the loop
+     */
+    resetTimer = () => {
+      this.clearTimer();
+
+      if (this._isPolling) {
+        this._timerId = setTimeout(this._search, this._intervalInMs);
+      }
+    };
+
+    /**
+     * Cancel the next iteration of the loop
+     */
+    clearTimer = () => {
+      if (this._timerId) {
+        clearTimeout(this._timerId);
+        this._timerId = null;
+      }
+    };
+
     _search = () => {
       // If we're waiting on the results of a previous search, then cancel and redo it.
       if (this._searchPromise) {
@@ -103,27 +124,6 @@ export function SearchPollProvider(Private, Promise, $rootScope) {
         .finally(() => {
           this._redoSearchPromise = null;
         });
-    };
-
-    /**
-     * Schedule the next iteration of the loop
-     */
-    resetTimer = () => {
-      this.clearTimer();
-
-      if (this._isPolling) {
-        this._timerId = setTimeout(this._search, this._intervalInMs);
-      }
-    };
-
-    /**
-     * Cancel the next iteration of the loop
-     */
-    clearTimer = () => {
-      if (this._timerId) {
-        clearTimeout(this._timerId);
-        this._timerId = null;
-      }
     };
   }
 
