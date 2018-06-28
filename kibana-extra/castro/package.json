@@ -45,6 +45,8 @@
     "popper.js": "^1.14.3",
     "react-dom": "^16.4.1",
     "react-redux": "^5.0.7",
+    "react-router": "^4.3.1",
+    "react-router-dom": "^4.3.1",
     "redux": "^4.0.0",
     "redux-actions": "^2.4.0",
     "redux-saga": "^0.16.0"

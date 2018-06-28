@@ -6,7 +6,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 
 import 'ui/autoload/styles';
 import './less/main.less';
-import { Main } from './components/main';
+import App from './components/App';
 import store from './stores';
 
 const app = uiModules.get("apps/castro");
@@ -28,7 +28,7 @@ function RootController($scope: any, $element: any, $http: any) {
   // render react to DOM
   render(
     <Provider store={store}>
-      <Main title="castro" httpClient={$http} />
+      <App title="castro" httpClient={$http} />
     </Provider>,
     domNode
   );

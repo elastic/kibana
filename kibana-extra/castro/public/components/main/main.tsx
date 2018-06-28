@@ -12,8 +12,11 @@ import {
     EuiAccordion,
     EuiCodeBlock,
     EuiCode,
-    EuiSpacer
+    EuiSpacer,
+    EuiButton
 } from "@elastic/eui";
+
+import { Link } from 'react-router-dom';
 
 import { Commit, Entry } from '../../../../../model/build/swagger-code-tsClient/api';
 import FileCode from './FileCode';
@@ -58,6 +61,7 @@ export class Main extends React.Component<MainProps, MainState> {
                     <EuiTitle size="l">
                         <h1>Hello {title}!</h1>
                     </EuiTitle>
+                  <EuiButton><Link to="/codebrowsing">browsing code</Link></EuiButton>
                 </EuiPageHeader>
                 <EuiPageBody>
                     <EuiPageContent>
