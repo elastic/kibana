@@ -17,9 +17,12 @@
  * under the License.
  */
 
+import expect from 'expect.js';
 
 export function HomePageProvider({ getService }) {
   const testSubjects = getService('testSubjects');
+  const remote = getService('remote');
+  const retry = getService('retry');
 
   class HomePage {
 
@@ -61,6 +64,17 @@ export function HomePageProvider({ getService }) {
 
     async launchSampleDataSet(id) {
       await testSubjects.click(`launchSampleDataSet${id}`);
+    }
+
+    async loadSavedObjects() {
+      // Button at bottom of page, move into view before clicking
+      const loadBtn = await testSubjects.find('loadSavedObjects');
+      await remote.moveMouseTo(loadBtn);
+      await testSubjects.click('loadSavedObjects');
+      await retry.try(async () => {
+        const successMsgExists = await await testSubjects.exists('loadSavedObjects_success');
+        expect(successMsgExists).to.be(true);
+      });
     }
 
   }

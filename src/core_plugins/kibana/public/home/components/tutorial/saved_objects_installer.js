@@ -79,6 +79,7 @@ export class SavedObjectsInstaller extends React.Component {
       <EuiCallOut
         title={this.state.installStatusMsg}
         color={this.state.isInstalled ? 'success' : 'warning'}
+        data-test-subj={this.state.isInstalled ? 'loadSavedObjects_success' : 'loadSavedObjects_failed'}
       />
     );
   }
@@ -102,6 +103,7 @@ export class SavedObjectsInstaller extends React.Component {
             <EuiButton
               onClick={this.installSavedObjects}
               isLoading={this.state.isInstalling}
+              data-test-subj="loadSavedObjects"
             >
               Load/Import Kibana objects
             </EuiButton>
