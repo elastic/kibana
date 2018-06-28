@@ -78,7 +78,7 @@ describe('ui/i18n module', function () {
       it('should return translations for highest priority locale where best case match is chosen from registered locales', function () {
         const languageTags = ['es', 'de'];
         const expectedTranslations = {
-          'test_plugin_1-NO_SSL': 'Dont run the es-ES dev server using HTTPS! I am regsitered afterwards!'
+          'test_plugin_1-NO_SSL': 'Dont run the es-ES dev server using HTTPS! I am registered afterwards!'
         };
         i18nObj.registerTranslations(join(FIXTURES, 'translations', 'test_plugin_1', 'es-ES.json'));
         return checkTranslations(expectedTranslations, languageTags, i18nObj);
@@ -132,7 +132,7 @@ describe('ui/i18n module', function () {
             'test_plugin_1-HOME': 'Run along home now!'
           },
           'es-ES': {
-            'test_plugin_1-NO_SSL': 'Dont run the es-ES dev server using HTTPS! I am regsitered afterwards!'
+            'test_plugin_1-NO_SSL': 'Dont run the es-ES dev server using HTTPS! I am registered afterwards!'
           }
         };
         return checkAllTranslations(expectedTranslations, i18nObj);
@@ -189,7 +189,7 @@ describe('ui/i18n module', function () {
         i18nObj.registerTranslations(join(FIXTURES, 'translations', 'test_plugin_2', 'de.json'));
         const languageTag = ['de'];
         const expectedTranslationJson = {
-          'test_plugin_1-NO_SSL': 'Dont run the DE dev server using HTTPS! I am regsitered afterwards!',
+          'test_plugin_1-NO_SSL': 'Dont run the DE dev server using HTTPS! I am registered afterwards!',
           'test_plugin_1-DEV': 'Run the DE server with development mode defaults'
         };
         return checkTranslations(expectedTranslationJson, languageTag, i18nObj);

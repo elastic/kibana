@@ -21,7 +21,7 @@ import { format } from 'util';
 
 import Mocha from 'mocha';
 
-import { setupJunitReportGeneration } from '../../../../dev';
+import { setupJUnitReportGeneration } from '../../../../dev';
 import * as colors from './colors';
 import * as symbols from './symbols';
 import { ms } from './ms';
@@ -47,7 +47,7 @@ export function MochaReporterProvider({ getService }) {
       runner.on('end', this.onEnd);
 
       if (config.get('junit.enabled') && config.get('junit.reportName')) {
-        setupJunitReportGeneration(runner, {
+        setupJUnitReportGeneration(runner, {
           reportName: config.get('junit.reportName'),
           rootDirectory: config.get('junit.rootDirectory')
         });

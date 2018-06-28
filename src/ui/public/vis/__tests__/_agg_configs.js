@@ -84,7 +84,7 @@ describe('AggConfigs', function () {
       expect(ac).to.have.length(3);
     });
 
-    it('attemps to ensure that all states have an id', function () {
+    it('attempts to ensure that all states have an id', function () {
       const vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: []

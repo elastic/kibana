@@ -45,6 +45,6 @@ export const dataSetSchema = {
   preserveDayOfWeekTimeOfDay: Joi.boolean().default(false),
 
   // Kibana saved objects (index patter, visualizations, dashboard, ...)
-  // Should provide a nice demo of Kibana's functionallity with the sample data set
+  // Should provide a nice demo of Kibana's functionality with the sample data set
   savedObjects: Joi.array().items(Joi.object()).required(),
 };

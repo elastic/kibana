@@ -153,7 +153,7 @@ export function createProc(name, { cmd, args, cwd, env, stdin, log }) {
         },
         STOP_TIMEOUT,
         async () => {
-          throw new Error(`Proc "${name}" was stopped but never emiited either the "exit" or "error" event after ${STOP_TIMEOUT} ms`);
+          throw new Error(`Proc "${name}" was stopped but never emitted either the "exit" or "error" event after ${STOP_TIMEOUT} ms`);
         }
       );
     }

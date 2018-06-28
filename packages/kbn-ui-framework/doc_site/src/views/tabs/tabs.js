@@ -38,7 +38,7 @@ class KuiTabsExample extends React.Component {
       id: 'helium_3',
       name: 'Helium-3',
     }, {
-      id: 'monosodium_glutammate',
+      id: 'monosodium_glutamate',
       name: 'Monosodium Glutamate',
     }];
 

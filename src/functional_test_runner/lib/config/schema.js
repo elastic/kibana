@@ -33,7 +33,7 @@ const urlPartsSchema = () => Joi.object().keys({
   protocol: Joi.string().valid('http', 'https').default('http'),
   hostname: Joi.string().hostname().default('localhost'),
   port: Joi.number(),
-  auth: Joi.string().regex(/^[^:]+:.+$/, 'username and password seperated by a colon'),
+  auth: Joi.string().regex(/^[^:]+:.+$/, 'username and password separated by a colon'),
   username: Joi.string(),
   password: Joi.string(),
   pathname: Joi.string().regex(/^\//, 'start with a /'),
@@ -126,6 +126,11 @@ export const schema = Joi.object().keys({
   chromedriver: Joi.object().keys({
     url: Joi.string().uri({ scheme: /https?/ }).default('http://localhost:9515')
   }).default(),
+
+  firefoxdriver: Joi.object().keys({
+    url: Joi.string().uri({ scheme: /https?/ }).default('http://localhost:2828')
+  }).default(),
+
 
   // definition of apps that work with `common.navigateToApp()`
   apps: Joi.object().pattern(
