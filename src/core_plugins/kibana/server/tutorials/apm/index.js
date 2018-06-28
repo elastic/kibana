@@ -66,5 +66,7 @@ export function apmSpecProvider(server) {
     elasticCloud: ELASTIC_CLOUD_INSTRUCTIONS,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/apm/apm.png',
     savedObjects: getSavedObjects(server),
+    savedObjectsInstallMsg: 'Imports index pattern, visualizations and pre-defined dashboards.' +
+      ' Index pattern is required for some features in the APM UI.',
   };
 }

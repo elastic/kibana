@@ -36,12 +36,24 @@ export class SavedObjectsInstaller extends React.Component {
     isInstalled: false,
   };
 
+  componentDidMount() {
+    this._isMounted = true;
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
   installSavedObjects = async () => {
     this.setState({
       isInstalling: true,
     });
 
     const resp = await this.props.bulkCreate(this.props.savedObjects, { overwrite: true });
+    if (!this._isMounted) {
+      return;
+    }
+
     const errors = resp.savedObjects.filter(savedObjectCreateResult => {
       return savedObjectCreateResult.hasOwnProperty('error');
     });
@@ -72,15 +84,15 @@ export class SavedObjectsInstaller extends React.Component {
   }
 
   renderInstallStep = () => {
+    const installMsg = this.props.installMsg
+      ? this.props.installMsg
+      : 'Imports index pattern, visualizations and pre-defined dashboards.';
     const installStep = (
       <Fragment>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem>
             <EuiText>
-              <p>
-                Imports index pattern, visualizations and pre-defined dashboards.
-                Index pattern is required for some features in the APM UI.
-              </p>
+              <p>{installMsg}</p>
             </EuiText>
           </EuiFlexItem>
 
@@ -128,4 +140,5 @@ const savedObjectShape = PropTypes.shape({
 SavedObjectsInstaller.propTypes = {
   bulkCreate: PropTypes.func.isRequired,
   savedObjects: PropTypes.arrayOf(savedObjectShape).isRequired,
+  installMsg: PropTypes.string,
 };

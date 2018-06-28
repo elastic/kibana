@@ -245,6 +245,7 @@ export class Tutorial extends React.Component {
       <SavedObjectsInstaller
         bulkCreate={this.props.bulkCreate}
         savedObjects={this.state.tutorial.savedObjects}
+        installMsg={this.state.tutorial.savedObjectsInstallMsg}
       />
     );
 

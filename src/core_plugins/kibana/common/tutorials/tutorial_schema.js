@@ -112,4 +112,5 @@ export const tutorialSchema = {
 
   // saved objects used by data module.
   savedObjects: Joi.array().items(),
+  savedObjectsInstallMsg: Joi.string(),
 };
