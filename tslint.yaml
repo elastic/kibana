@@ -9,6 +9,8 @@ rulesDirectory:
 rules:
   prettier: true
   no-unused-variable: true
+  object-literal-sort-keys: false
+  interface-name: false
   require-license-header:
     - true
     - |-
