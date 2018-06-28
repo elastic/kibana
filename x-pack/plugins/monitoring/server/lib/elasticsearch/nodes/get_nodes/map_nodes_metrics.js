@@ -82,7 +82,7 @@ function reduceMetric(metricName, metricBuckets, { min: startTime, max: endTime,
   const minVal = min(pluck(mappedData, 'y'));
   const maxVal = max(pluck(mappedData, 'y'));
   const lastVal = last(pluck(mappedData, 'y'));
-  const slope = calcSlope(mappedData) > 0 ? 1 : -1; // no need for the entire precison, it's just an up/down arrow
+  const slope = calcSlope(mappedData) > 0 ? 1 : -1; // no need for the entire precision, it's just an up/down arrow
 
   return {
     metric: metric.serialize(),

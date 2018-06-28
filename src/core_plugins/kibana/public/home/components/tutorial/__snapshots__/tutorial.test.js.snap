@@ -26,6 +26,7 @@ exports[`isCloudEnabled is false should not render instruction toggle when ON_PR
   <div>
     <Introduction
       description="tutorial used to drive jest tests"
+      isBeta={false}
       title="jest test tutorial"
     />
     <EuiSpacer
@@ -96,6 +97,7 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
     <Introduction
       description="tutorial used to drive jest tests"
       iconType="logoApache"
+      isBeta={false}
       title="jest test tutorial"
     />
     <EuiSpacer
@@ -184,6 +186,7 @@ exports[`should render ELASTIC_CLOUD instructions when isCloudEnabled is true 1`
     <Introduction
       description="tutorial used to drive jest tests"
       iconType="logoApache"
+      isBeta={false}
       title="jest test tutorial"
     />
     <EuiSpacer

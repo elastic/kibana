@@ -24,6 +24,7 @@ import 'ui/index_patterns';
 import html from '../index.html';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
+import { timefilter } from 'ui/timefilter';
 
 
 const app = uiModules.get('apps/doc', [
@@ -34,8 +35,8 @@ const app = uiModules.get('apps/doc', [
 
 
 const resolveIndexPattern = {
-  indexPattern: function (courier, savedSearches, $route) {
-    return courier.indexPatterns.get($route.current.params.indexPattern);
+  indexPattern: function (indexPatterns, savedSearches, $route) {
+    return indexPatterns.get($route.current.params.indexPattern);
   }
 };
 
@@ -49,7 +50,7 @@ uiRoutes
     resolve: resolveIndexPattern
   });
 
-app.controller('doc', function ($scope, $route, es, timefilter) {
+app.controller('doc', function ($scope, $route, es) {
 
   timefilter.disableAutoRefreshSelector();
   timefilter.disableTimeRangeSelector();

@@ -40,8 +40,8 @@ export function RegionMapsVisualizationProvider(Private, Notifier, config) {
     }
 
 
-    async render(esReponse, status) {
-      await super.render(esReponse, status);
+    async render(esResponse, status) {
+      await super.render(esResponse, status);
       if (this._choroplethLayer) {
         await this._choroplethLayer.whenDataLoaded();
       }
@@ -95,7 +95,7 @@ export function RegionMapsVisualizationProvider(Private, Notifier, config) {
         return;
       }
 
-      this._updateChoroplehLayerForNewProperties(
+      this._updateChoroplethLayerForNewProperties(
         visParams.selectedLayer.url,
         visParams.selectedLayer.attribution,
         this._vis.params.showAllShapes
@@ -114,7 +114,7 @@ export function RegionMapsVisualizationProvider(Private, Notifier, config) {
       return this._recreateChoroplethLayer(url, attribution, showAllData);
     }
 
-    _updateChoroplehLayerForNewProperties(url, attribution, showAllData) {
+    _updateChoroplethLayerForNewProperties(url, attribution, showAllData) {
       if (this._choroplethLayer && this._choroplethLayer.canReuseInstance(url, showAllData)) {
         return;
       }

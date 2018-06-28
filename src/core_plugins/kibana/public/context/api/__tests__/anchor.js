@@ -21,8 +21,8 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import sinon from 'sinon';
 
-import { createCourierStub } from './_stubs';
-import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
+import { createIndexPatternsStub } from './_stubs';
+import { SearchSourceProvider } from 'ui/courier';
 
 import { fetchAnchorProvider } from '../anchor';
 
@@ -35,7 +35,7 @@ describe('context app', function () {
     let SearchSourceStub;
 
     beforeEach(ngMock.module(function createServiceStubs($provide) {
-      $provide.value('courier', createCourierStub());
+      $provide.value('indexPatterns', createIndexPatternsStub());
     }));
 
     beforeEach(ngMock.inject(function createPrivateStubs(Private) {
@@ -47,12 +47,12 @@ describe('context app', function () {
       fetchAnchor = Private(fetchAnchorProvider);
     }));
 
-    it('should use the `fetchAsRejectablePromise` method of the SearchSource', function () {
+    it('should use the `fetch` method of the SearchSource', function () {
       const searchSourceStub = new SearchSourceStub();
 
       return fetchAnchor('INDEX_PATTERN_ID', 'doc', 'id', [{ '@timestamp': 'desc' }, { '_doc': 'asc' }])
         .then(() => {
-          expect(searchSourceStub.fetchAsRejectablePromise.calledOnce).to.be(true);
+          expect(searchSourceStub.fetch.calledOnce).to.be(true);
         });
     });
 
@@ -176,7 +176,7 @@ function createSearchSourceStubProvider(hits) {
   searchSourceStub.filter = sinon.stub().returns(searchSourceStub);
   searchSourceStub.inherits = sinon.stub().returns(searchSourceStub);
   searchSourceStub.set = sinon.stub().returns(searchSourceStub);
-  searchSourceStub.fetchAsRejectablePromise = sinon.spy(() => Promise.resolve({
+  searchSourceStub.fetch = sinon.spy(() => Promise.resolve({
     hits: {
       hits: searchSourceStub._stubHits,
       total: searchSourceStub._stubHits.length,

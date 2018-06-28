@@ -84,7 +84,7 @@ uiModules.get('kibana')
 
       let isAutoCompleterOpen;
 
-      // We have to capture this event on the 'capture' phase, otherewise Ace will have already
+      // We have to capture this event on the 'capture' phase, otherwise Ace will have already
       // dismissed the autocompleter when the user hits ESC.
       document.addEventListener('keydown', () => {
         const autoCompleter = document.querySelector('.ace_autocomplete');

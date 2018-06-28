@@ -19,9 +19,9 @@
 
 import _ from 'lodash';
 
-import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
+import { SearchSourceProvider } from 'ui/courier';
 
-export function fetchAnchorProvider(courier, Private) {
+export function fetchAnchorProvider(indexPatterns, Private) {
   const SearchSource = Private(SearchSourceProvider);
 
   return async function fetchAnchor(
@@ -30,8 +30,7 @@ export function fetchAnchorProvider(courier, Private) {
     anchorId,
     sort
   ) {
-    const indexPattern = await courier.indexPatterns.get(indexPatternId);
-
+    const indexPattern = await indexPatterns.get(indexPatternId);
     const searchSource = new SearchSource()
       .inherits(false)
       .set('index', indexPattern)
@@ -52,7 +51,7 @@ export function fetchAnchorProvider(courier, Private) {
       })
       .set('sort', sort);
 
-    const response = await searchSource.fetchAsRejectablePromise();
+    const response = await searchSource.fetch();
 
     if (_.get(response, ['hits', 'total'], 0) < 1) {
       throw new Error('Failed to load anchor document.');

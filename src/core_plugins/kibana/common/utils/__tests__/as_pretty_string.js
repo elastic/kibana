@@ -22,7 +22,7 @@ import { asPrettyString } from '../as_pretty_string';
 
 describe('asPrettyString', () => {
 
-  it('Converts null and undefined values into a string signifing no value', () => {
+  it('Converts null and undefined values into a string signifying no value', () => {
     expect(asPrettyString(null)).to.equal(' - ');
     expect(asPrettyString(undefined)).to.equal(' - ');
   });

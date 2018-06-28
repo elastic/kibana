@@ -68,9 +68,8 @@ describe('visualization_editor directive', function () {
     $rootScope.visData = aggResponse.tabify(vis.getAggConfig().getResponseAggs(), esResponse, {
       isHierarchical: vis.isHierarchical()
     });
-    $rootScope.uiState = require('fixtures/mock_ui_state');
     $rootScope.searchSource = searchSource;
-    $el = $('<visualization-editor vis="vis" vis-data="visData" ui-state="uiState" search-source="searchSource">');
+    $el = $('<visualization-editor vis="vis" vis-data="visData" search-source="searchSource">');
     $compile($el)($rootScope);
     $rootScope.$apply();
 

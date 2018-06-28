@@ -18,23 +18,23 @@
  */
 
 import _ from 'lodash';
-import { SearchSourceProvider } from '../../courier/data_source/search_source';
+
 import { VisRequestHandlersRegistryProvider } from '../../registry/vis_request_handlers';
 import { calculateObjectHash } from '../lib/calculate_object_hash';
 import { getRequestInspectorStats, getResponseInspectorStats } from '../../courier/utils/courier_inspector_utils';
 import { tabifyAggResponse } from '../../agg_response/tabify/tabify';
 
 import { FormattedData } from '../../inspector/adapters';
+import { getTime } from '../../timefilter/get_time';
 
-const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
-  const SearchSource = Private(SearchSourceProvider);
+const CourierRequestHandlerProvider = function () {
 
   /**
    * This function builds tabular data from the response and attaches it to the
    * inspector. It will only be called when the data view in the inspector is opened.
    */
-  async function buildTabularInspectorData(vis, searchSource) {
-    const table = tabifyAggResponse(vis.getAggConfig().getResponseAggs(), searchSource.finalResponse, {
+  async function buildTabularInspectorData(vis, searchSource, responseAggs) {
+    const table = tabifyAggResponse(responseAggs, searchSource.finalResponse, {
       canSplit: false,
       asAggConfigResults: false,
       partialRows: true,
@@ -73,17 +73,17 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
 
   return {
     name: 'courier',
-    handler: function (vis, { searchSource, timeRange, query, filters, forceFetch }) {
+    handler: function (vis, { searchSource, aggs, timeRange, query, filters, forceFetch }) {
 
       // Create a new search source that inherits the original search source
-      // but has the propriate timeRange applied via a filter.
+      // but has the appropriate timeRange applied via a filter.
       // This is a temporary solution until we properly pass down all required
       // information for the request to the request handler (https://github.com/elastic/kibana/issues/16641).
       // Using callParentStartHandlers: true we make sure, that the parent searchSource
       // onSearchRequestStart will be called properly even though we use an inherited
       // search source.
-      const timeFilterSearchSource = searchSource.makeChild();
-      const requestSearchSource = timeFilterSearchSource.makeChild();
+      const timeFilterSearchSource = searchSource.makeChild({ callParentStartHandlers: true });
+      const requestSearchSource = timeFilterSearchSource.makeChild({ callParentStartHandlers: true });
 
       // For now we need to mirror the history of the passed search source, since
       // the spy panel wouldn't work otherwise.
@@ -97,15 +97,15 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
       });
 
       requestSearchSource.aggs(function () {
-        return vis.getAggConfig().toDsl();
+        return aggs.toDsl();
       });
 
       requestSearchSource.onRequestStart((searchSource, searchRequest) => {
-        return vis.onSearchRequestStart(searchSource, searchRequest);
+        return aggs.onSearchRequestStart(searchSource, searchRequest);
       });
 
       timeFilterSearchSource.set('filter', () => {
-        return timefilter.get(searchSource.get('index'), timeRange);
+        return getTime(searchSource.get('index'), timeRange);
       });
 
       requestSearchSource.set('filter', filters);
@@ -121,13 +121,14 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
         return requestSearchSource.getSearchRequestBody().then(q => {
           const queryHash = calculateObjectHash(q);
           if (shouldQuery(queryHash)) {
+            const lastResponseAggs = vis.getAggConfig().getResponseAggs();
             vis.API.inspectorAdapters.requests.reset();
             const request = vis.API.inspectorAdapters.requests.start('Data', {
               description: `This request queries Elasticsearch to fetch the data for the visualization.`,
             });
             request.stats(getRequestInspectorStats(requestSearchSource));
 
-            requestSearchSource.onResults().then(resp => {
+            requestSearchSource.fetch().then(resp => {
               searchSource.lastQuery = queryHash;
 
               request
@@ -137,17 +138,17 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
               searchSource.rawResponse = resp;
               return _.cloneDeep(resp);
             }).then(async resp => {
-              for (const agg of vis.getAggConfig()) {
+              for (const agg of aggs) {
                 if (_.has(agg, 'type.postFlightRequest')) {
-                  const nestedSearchSource = new SearchSource().inherits(requestSearchSource);
-                  resp = await agg.type.postFlightRequest(resp, vis.aggs, agg, nestedSearchSource);
+                  const nestedSearchSource = requestSearchSource.makeChild();
+                  resp = await agg.type.postFlightRequest(resp, aggs, agg, nestedSearchSource);
                 }
               }
 
               searchSource.finalResponse = resp;
 
               vis.API.inspectorAdapters.data.setTabularLoader(
-                () => buildTabularInspectorData(vis, searchSource),
+                () => buildTabularInspectorData(vis, searchSource, lastResponseAggs),
                 { returnsFormattedValues: true }
               );
 
@@ -158,7 +159,6 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
               request.json(req);
             });
 
-            courier.fetch();
           } else {
             resolve(searchSource.finalResponse);
           }

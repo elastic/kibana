@@ -19,15 +19,13 @@
 
 import sinon from 'sinon';
 
-export function createCourierStub() {
+export function createIndexPatternsStub() {
   return {
-    indexPatterns: {
-      get: sinon.spy(indexPatternId =>
-        Promise.resolve({
-          id: indexPatternId,
-        })
-      ),
-    },
+    get: sinon.spy(indexPatternId =>
+      Promise.resolve({
+        id: indexPatternId,
+      })
+    ),
   };
 }
 
@@ -48,7 +46,7 @@ export function createSearchSourceStubProvider(hits, timeField) {
     const previousSetCall = searchSourceStub.set.withArgs(key).lastCall;
     return previousSetCall ? previousSetCall.args[1] : null;
   });
-  searchSourceStub.fetchAsRejectablePromise = sinon.spy(() => {
+  searchSourceStub.fetch = sinon.spy(() => {
     const timeField = searchSourceStub._stubTimeField;
     const lastQuery = searchSourceStub.set.withArgs('query').lastCall.args[1];
     const timeRange = lastQuery.query.constant_score.filter.range[timeField];
