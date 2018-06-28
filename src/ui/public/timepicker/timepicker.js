@@ -109,7 +109,7 @@ module.directive('kbnTimepicker', function (refreshIntervals) {
         _.set($scope, 'browserAbsolute.to', new Date(newDate.year(), newDate.month(), newDate.date()));
       });
 
-      // The datepicker directive uses native Javascript Dates, ignoring moment's default timezone. This causes
+      // The datepicker directive uses native JavaScript Dates, ignoring moment's default timezone. This causes
       // the datepicker and the text input above it to get out of sync if the user changed the `dateFormat:tz` config
       // in advanced settings. The text input will show the date in the user selected timezone, the datepicker will
       // show the date in the local browser timezone. Since we really just want a day, month, year from the datepicker

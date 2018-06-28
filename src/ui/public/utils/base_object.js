@@ -27,7 +27,7 @@ export function BaseObject(attributes) {
 }
 
 /**
- * Returns the attirbutes for the objct
+ * Returns the attributes for the object
  * @returns {object}
  */
 BaseObject.prototype.toObject = function () {

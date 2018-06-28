@@ -63,7 +63,7 @@ class ColorRules extends Component {
     };
     const htmlId = htmlIdGenerator(model.id);
     const selectedOperatorOption = operatorOptions.find(option => {
-      return model.opperator === option.value;
+      return model.operator === option.value;
     });
 
     let secondary;
@@ -96,7 +96,7 @@ class ColorRules extends Component {
             id={htmlId('ifMetricIs')}
             options={operatorOptions}
             selectedOptions={selectedOperatorOption ? [selectedOperatorOption] : []}
-            onChange={this.handleChange(model, 'opperator')}
+            onChange={this.handleChange(model, 'operator')}
             singleSelection={true}
           />
         </div>

@@ -31,7 +31,7 @@ export default new Chainable('condition', {
     {
       name: 'operator', // <, <=, >, >=, ==, !=
       types: ['string'],
-      help: 'comparision operator to use for comparison, valid operators are eq (equal), ne (not equal), lt (less than), lte ' +
+      help: 'comparison operator to use for comparison, valid operators are eq (equal), ne (not equal), lt (less than), lte ' +
         '(less than equal), gt (greater than), gte (greater than equal)',
       suggestions: [
         {

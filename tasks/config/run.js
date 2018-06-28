@@ -178,7 +178,7 @@ module.exports = function (grunt) {
     }),
 
     // used by the test:coverage task
-    //    runs the kibana server to serve the intrumented version of the browser test bundle
+    //    runs the kibana server to serve the instrumented version of the browser test bundle
     browserTestCoverageServer: createKbnServerTask({
       flags: [
         ...browserTestServerFlags,

@@ -213,7 +213,7 @@ describe('paginated table', function () {
       expect(tableRows.eq(0).find('td').eq(2).text()).to.be('zzzz');
     });
 
-    it('should set the sort direction to asc when it\'s not explicity set', function () {
+    it('should set the sort direction to asc when it\'s not explicitly set', function () {
       paginatedTable.sortColumn(1);
       $scope.$digest();
 

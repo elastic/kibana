@@ -422,7 +422,7 @@ module.directive('mlExplorerSwimlane', function ($compile, Private, mlExplorerDa
       $('.sl-cell-inner', '.ml-explorer-swimlane').removeClass('sl-cell-inner-masked');
       $('.sl-cell-inner.sl-cell-inner-selected', '.ml-explorer-swimlane').removeClass('sl-cell-inner-selected');
       $('.sl-cell-inner-dragselect.sl-cell-inner-selected', '.ml-explorer-swimlane').removeClass('sl-cell-inner-selected');
-      $('.ds-selected', '.ml-exlporer-swimlane').removeClass('ds-selected');
+      $('.ds-selected', '.ml-explorer-swimlane').removeClass('ds-selected');
 
       delete scope.appState.mlExplorerSwimlane.selectedType;
       delete scope.appState.mlExplorerSwimlane.selectedLanes;
