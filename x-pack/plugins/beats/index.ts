@@ -15,6 +15,7 @@ export function beats(kibana: any) {
     config: () =>
       Joi.object({
         enabled: Joi.boolean().default(true),
+        encryptionKey: Joi.string(),
         enrollmentTokensTtlInSeconds: Joi.number()
           .integer()
           .min(1)

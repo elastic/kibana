@@ -11,7 +11,6 @@
  */
 
 import { uniq } from 'lodash';
-import uuid from 'uuid';
 import { findNonExistentItems } from '../../utils/find_non_existent_items';
 
 import {
@@ -50,7 +49,7 @@ export class CMBeatsDomain {
       return 'beat-not-found';
     }
 
-    const isAccessTokenValid = this.tokens.areTokensEqual(
+    const isAccessTokenValid = this.tokens.verifyToken(
       beat.access_token,
       accessToken
     );
@@ -75,7 +74,7 @@ export class CMBeatsDomain {
     beat: Partial<CMBeat>
   ) {
     // TODO move this to the token lib
-    const accessToken = uuid.v4().replace(/-/g, '');
+    const accessToken = this.tokens.generateAccessToken();
     await this.adapter.insert({
       ...beat,
       access_token: accessToken,
@@ -182,7 +181,6 @@ export class CMBeatsDomain {
     };
     const beats = await this.adapter.getWithIds(req, beatIds);
     const tags = await this.tags.getTagsWithIds(req, tagIds);
-
     // Handle assignments containing non-existing beat IDs or tags
     const nonExistentBeatIds = findNonExistentItems(beats, beatIds);
     const nonExistentTags = findNonExistentItems(tags, tagIds);
