@@ -24,10 +24,10 @@ import '../../promises';
 import { requestQueue } from '../_request_queue';
 import { FetchSoonProvider } from '../fetch';
 
-export function SearchLooperProvider(Private, Promise, $timeout, $rootScope) {
+export function SearchPollProvider(Private, Promise, $timeout, $rootScope) {
   const fetchSoon = Private(FetchSoonProvider);
 
-  class SearchLooper {
+  class SearchPoll {
     constructor() {
       this._isIntervalPaused = true;
       this._intervalInMs = undefined;
@@ -128,5 +128,5 @@ export function SearchLooperProvider(Private, Promise, $timeout, $rootScope) {
     };
   }
 
-  return new SearchLooper();
+  return new SearchPoll();
 }

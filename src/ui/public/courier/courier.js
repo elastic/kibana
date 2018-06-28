@@ -29,13 +29,13 @@ import '../promises';
 
 import { requestQueue } from './_request_queue';
 import { FetchSoonProvider } from './fetch';
-import { SearchLooperProvider } from './search_looper';
+import { SearchPollProvider } from './search_poll';
 
 uiModules.get('kibana/courier').service('courier', ($rootScope, Private) => {
   const fetchSoon = Private(FetchSoonProvider);
 
   // This manages the doc fetch interval.
-  const searchLooper = Private(SearchLooperProvider);
+  const searchPoll = Private(SearchPollProvider);
 
   class Courier {
     constructor() {
@@ -45,8 +45,8 @@ uiModules.get('kibana/courier').service('courier', ($rootScope, Private) => {
         const isRefreshPaused = _.get(timefilter.getRefreshInterval(), 'pause');
 
         // Update the time between automatic search requests.
-        searchLooper.setIntervalInMs(refreshIntervalMs);
-        searchLooper.setIsIntervalPaused(isRefreshPaused);
+        searchPoll.setIntervalInMs(refreshIntervalMs);
+        searchPoll.setIsIntervalPaused(isRefreshPaused);
       });
 
       // Abort all pending requests if there's a fatal error.
@@ -67,7 +67,7 @@ uiModules.get('kibana/courier').service('courier', ($rootScope, Private) => {
     fetch = () => {
       fetchSoon.fetchQueued().then(() => {
         // Reset the timer using the time that we get this response as the starting point.
-        searchLooper.resetTimer();
+        searchPoll.resetTimer();
       });
     };
   }
