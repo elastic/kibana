@@ -76,7 +76,7 @@ export const internals = Joi.extend([
 
     base: Joi.boolean(),
     coerce(value: any, state: State, options: ValidationOptions) {
-      // If value isn't defined, let Joi to handle default value if it's defined.
+      // If value isn't defined, let Joi handle default value if it's defined.
       if (value !== undefined && typeof value !== 'boolean') {
         return this.createError('boolean.base', { value }, state, options);
       }
@@ -115,7 +115,7 @@ export const internals = Joi.extend([
       return value;
     },
     pre(value: any, state: State, options: ValidationOptions) {
-      // If value isn't defined, let Joi to handle default value if it's defined.
+      // If value isn't defined, let Joi handle default value if it's defined.
       if (value instanceof ByteSizeValue) {
         return value as any;
       }
@@ -197,7 +197,7 @@ export const internals = Joi.extend([
 
     base: Joi.number(),
     coerce(value: any, state: State, options: ValidationOptions) {
-      // If value isn't defined, let Joi to handle default value if it's defined.
+      // If value isn't defined, let Joi handle default value if it's defined.
       if (value === undefined) {
         return value;
       }
@@ -223,7 +223,7 @@ export const internals = Joi.extend([
 
     base: Joi.object(),
     coerce(value: any, state: State, options: ValidationOptions) {
-      // If value isn't defined, let Joi to handle default value if it's defined.
+      // If value isn't defined, let Joi handle default value if it's defined.
       if (value !== undefined && !isPlainObject(value)) {
         return this.createError('object.base', { value }, state, options);
       }
@@ -301,7 +301,7 @@ export const internals = Joi.extend([
 
     base: Joi.array(),
     coerce(value: any, state: State, options: ValidationOptions) {
-      // If value isn't defined, let Joi to handle default value if it's defined.
+      // If value isn't defined, let Joi handle default value if it's defined.
       if (value !== undefined && !Array.isArray(value)) {
         return this.createError('array.base', { value }, state, options);
       }

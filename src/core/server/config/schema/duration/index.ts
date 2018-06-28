@@ -17,7 +17,12 @@
  * under the License.
  */
 
-import { Duration, duration as momentDuration, isDuration } from 'moment';
+import {
+  Duration,
+  duration as momentDuration,
+  DurationInputArg2,
+  isDuration,
+} from 'moment';
 export { Duration, isDuration };
 
 const timeFormatRegex = /^(0|[1-9][0-9]*)(ms|s|m|h|d|w|M|Y)$/;
@@ -32,7 +37,7 @@ function stringToDuration(text: string) {
   }
 
   const count = parseInt(result[1], 0);
-  const unit = result[2] as any;
+  const unit = result[2] as DurationInputArg2;
 
   return momentDuration(count, unit);
 }
