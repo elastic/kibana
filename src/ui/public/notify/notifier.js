@@ -199,8 +199,6 @@ export function Notifier(opts) {
 
   const notificationLevels = [
     'event',
-    'lifecycle',
-    'timed',
     'error',
     'warning',
   ];
@@ -261,40 +259,6 @@ Notifier.prototype._notifs = notifs;
 Notifier.prototype.event = createGroupLogger('event', {
   open: true
 });
-
-/**
- * Log a major, important, event in the lifecycle of the application
- * @param {string} name - The name of the lifecycle event
- * @param {boolean} success - Simple flag stating whether the lifecycle event succeeded
- */
-Notifier.prototype.lifecycle = createGroupLogger('lifecycle', {
-  open: true
-});
-
-/**
- * Wrap a function so that it's execution time gets logged.
- *
- * @param {function} fn - the function to wrap, it's .name property is
- *                      read so make sure to set it
- * @return {function} - the wrapped function
- */
-Notifier.prototype.timed = function (name, fn) {
-  const self = this;
-
-  if (typeof name === 'function') {
-    fn = name;
-    name = fn.name;
-  }
-
-  return function WrappedNotifierFunction() {
-    const cntx = this;
-    const args = arguments;
-
-    return self.event(name, function () {
-      return fn.apply(cntx, args);
-    });
-  };
-};
 
 const overridableOptions = ['lifetime', 'icon'];
 

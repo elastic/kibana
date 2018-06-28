@@ -549,14 +549,14 @@ function discoverController(
       flushResponseData();
     });
 
-    segmented.on('segment', notify.timed('handle each segment', function (resp) {
+    segmented.on('segment', (resp) => {
       if (resp._shards.failed > 0) {
         $scope.failures = _.union($scope.failures, resp._shards.failures);
         $scope.failures = _.uniq($scope.failures, false, function (failure) {
           return failure.index + failure.shard + failure.reason;
         });
       }
-    }));
+    });
 
     segmented.on('mergedSegment', function (merged) {
       $scope.mergedEsResp = merged;

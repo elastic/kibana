@@ -349,7 +349,5 @@ export function SegmentedSearchRequestProvider(Private, config) {
     }
   }
 
-  SegmentedSearchRequest.prototype.mergedSegment = notify.timed('merge response segment', SegmentedSearchRequest.prototype.mergedSegment);
-
   return SegmentedSearchRequest;
 }
