@@ -109,30 +109,6 @@ export default function ({ getService, getPageObjects }) {
         expect(roundedValues).to.eql(expected);
       }
 
-      describe('Only request data around extent of map option', async () => {
-        before(async () => await PageObjects.visualize.openInspector());
-
-        it('when checked adds filters to aggregation', async () => {
-          const tableHeaders = await PageObjects.visualize.getInspectorTableHeaders();
-          expect(tableHeaders).to.eql(['filter', 'geohash_grid', 'Count', 'Geo Centroid']);
-        });
-
-        it('when not checked does not add filters to aggregation', async () => {
-          await PageObjects.visualize.toggleIsFilteredByCollarCheckbox();
-          await PageObjects.visualize.clickGo();
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          const tableHeaders = await PageObjects.visualize.getInspectorTableHeaders();
-          expect(tableHeaders).to.eql(['geohash_grid', 'Count', 'Geo Centroid']);
-        });
-
-        after(async () => {
-          await PageObjects.visualize.closeInspector();
-          await PageObjects.visualize.toggleIsFilteredByCollarCheckbox();
-          await PageObjects.visualize.clickGo();
-          await PageObjects.header.waitUntilLoadingHasFinished();
-        });
-      });
-
       describe('tile map chart', function indexPatternCreation() {
         it('should have inspector enabled', async function () {
           const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
@@ -195,12 +171,13 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.visualize.clickMapZoomIn();
 
           const mapBounds = await PageObjects.visualize.getMapBounds();
-
           await PageObjects.visualize.closeInspector();
+
           await PageObjects.visualize.saveVisualization(vizName1);
 
           const afterSaveMapBounds = await PageObjects.visualize.getMapBounds();
 
+          await PageObjects.visualize.closeInspector();
           // For some reason the values are slightly different, so we can't check that they are equal. But we did
           // have a bug where after the save, there were _no_ map bounds. So this checks for the later case, but
           // until we figure out how to make sure the map center is always the exact same, we can't comparison check.
@@ -208,6 +185,35 @@ export default function ({ getService, getPageObjects }) {
           expect(afterSaveMapBounds).to.not.be(undefined);
         });
 
+      });
+
+      describe('Only request data around extent of map option', async () => {
+
+        it('when checked adds filters to aggregation', async () => {
+          const vizName1 = 'Visualization TileMap';
+          await PageObjects.visualize.loadSavedVisualization(vizName1);
+          await PageObjects.visualize.openInspector();
+          const tableHeaders = await PageObjects.visualize.getInspectorTableHeaders();
+          await PageObjects.visualize.closeInspector();
+          expect(tableHeaders).to.eql(['filter', 'geohash_grid', 'Count', 'Geo Centroid']);
+        });
+
+        it('when not checked does not add filters to aggregation', async () => {
+          await PageObjects.visualize.toggleOpenEditor(2);
+          await PageObjects.visualize.toggleIsFilteredByCollarCheckbox();
+          await PageObjects.visualize.clickGo();
+          await PageObjects.header.waitUntilLoadingHasFinished();
+          await PageObjects.visualize.openInspector();
+          const tableHeaders = await PageObjects.visualize.getInspectorTableHeaders();
+          await PageObjects.visualize.closeInspector();
+          expect(tableHeaders).to.eql(['geohash_grid', 'Count', 'Geo Centroid']);
+        });
+
+        after(async () => {
+          await PageObjects.visualize.toggleIsFilteredByCollarCheckbox();
+          await PageObjects.visualize.clickGo();
+          await PageObjects.header.waitUntilLoadingHasFinished();
+        });
       });
     });
   });

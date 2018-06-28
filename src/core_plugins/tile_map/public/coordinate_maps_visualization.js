@@ -41,19 +41,29 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
 
     async _makeKibanaMap() {
 
-      const options = await super._makeKibanaMap();
+      await super._makeKibanaMap();
 
-      const geohashAgg = this._getGeoHashAgg();
-
-      if (geohashAgg) {
+      const updateGeohashAgg = () => {
+        const geohashAgg = this._getGeoHashAgg();
+        if (!geohashAgg) return;
         geohashAgg.params.mapBounds = this._kibanaMap.getBounds();
-        geohashAgg.params.mapZoom = options.zoom;
-        geohashAgg.params.mapCenter = options.center;
-      }
+        geohashAgg.params.mapZoom = this._kibanaMap.getZoomLevel();
+        geohashAgg.params.mapCenter = this._kibanaMap.getCenter();
+      };
+
+      updateGeohashAgg();
+
+      const uiState = this.vis.getUiState();
+      uiState.on('change', (prop) => {
+        if (prop === 'mapZoom' || prop === 'mapCenter') {
+          updateGeohashAgg();
+        }
+      });
 
       let previousPrecision = this._kibanaMap.getGeohashPrecision();
       let precisionChange = false;
       this._kibanaMap.on('zoomchange', () => {
+        const geohashAgg = this._getGeoHashAgg();
         precisionChange = (previousPrecision !== this._kibanaMap.getGeohashPrecision());
         previousPrecision = this._kibanaMap.getGeohashPrecision();
         if (!geohashAgg) {
@@ -65,6 +75,7 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
         }
       });
       this._kibanaMap.on('zoomend', () => {
+        const geohashAgg = this._getGeoHashAgg();
         if (!geohashAgg) {
           return;
         }
@@ -82,9 +93,11 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
 
       this._kibanaMap.addDrawControl();
       this._kibanaMap.on('drawCreated:rectangle', event => {
+        const geohashAgg = this._getGeoHashAgg();
         this.addSpatialFilter(geohashAgg, 'geo_bounding_box', event.bounds);
       });
       this._kibanaMap.on('drawCreated:polygon', event => {
+        const geohashAgg = this._getGeoHashAgg();
         this.addSpatialFilter(geohashAgg, 'geo_polygon', { points: event.points });
       });
     }

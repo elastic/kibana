@@ -240,8 +240,7 @@ describe('Geohash Agg', () => {
       it('should change geo_bounding_box filter aggregation and vis session state when map zoom level changes', () => {
         zoomMap(-1);
 
-        //const newRequestAggs = geoHashBucketAgg.getRequestAggs(aggMock);
-        //expect(JSON.stringify(origRequestAggs[0].params, null, '')).not.to.equal(JSON.stringify(newRequestAggs[0].params, null, ''));
+        geoHashBucketAgg.getRequestAggs(aggMock);
 
         const newMapCollar = JSON.stringify(aggMock.lastMapCollar, null, '');
         expect(origMapCollar).not.to.equal(newMapCollar);

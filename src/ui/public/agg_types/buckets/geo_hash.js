@@ -92,10 +92,12 @@ export const geoHashBucketAgg = new BucketAggType({
     },
     {
       name: 'mapZoom',
+      default: 2,
       write: _.noop
     },
     {
       name: 'mapCenter',
+      default: [0, 0],
       write: _.noop
     },
     {
