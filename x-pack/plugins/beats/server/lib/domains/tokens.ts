@@ -29,6 +29,13 @@ export class CMTokensDomain {
   public async getEnrollmentToken(enrollmentToken: string) {
     const fullToken = await this.adapter.getEnrollmentToken(enrollmentToken);
 
+    if (!fullToken) {
+      return {
+        expires_on: '0',
+        token: null,
+      };
+    }
+
     const verified = this.verifyToken(enrollmentToken, fullToken.token || '');
 
     if (!verified) {
@@ -47,8 +54,11 @@ export class CMTokensDomain {
 
   public verifyToken(recivedToken: string, token2: string) {
     let tokenDecoded = false;
+    const enrollmentTokenSecret = this.framework.getSetting(
+      'xpack.beats.encryptionKey'
+    );
     try {
-      verifyToken(recivedToken, 'wrong-secret');
+      verifyToken(recivedToken, enrollmentTokenSecret);
       tokenDecoded = true;
     } catch (err) {
       tokenDecoded = false;
