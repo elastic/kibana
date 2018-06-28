@@ -481,14 +481,6 @@ export function SearchSourceProvider(Promise, Private, config) {
     }
 
     /**
-     * Gets the type of the DataSource
-     * @return {string}
-     */
-    _getType() {
-      return 'search';
-    }
-
-    /**
      * Create a common search request object, which should
      * be put into the pending request queue, for this search
      * source
@@ -580,8 +572,6 @@ export function SearchSourceProvider(Promise, Private, config) {
      * @resolved {Object|null} - the flat state of the SearchSource
      */
     _flatten() {
-      const type = this._getType();
-
       // the merged state of this dataSource and it's ancestors
       const flatState = {};
 
@@ -617,80 +607,78 @@ export function SearchSourceProvider(Promise, Private, config) {
           });
       }())
         .then(function () {
-          if (type === 'search') {
-            // This is down here to prevent the circular dependency
-            flatState.body = flatState.body || {};
+          // This is down here to prevent the circular dependency
+          flatState.body = flatState.body || {};
 
-            const computedFields = flatState.index.getComputedFields();
-            flatState.body.stored_fields = computedFields.storedFields;
-            flatState.body.script_fields = flatState.body.script_fields || {};
-            flatState.body.docvalue_fields = flatState.body.docvalue_fields || [];
+          const computedFields = flatState.index.getComputedFields();
+          flatState.body.stored_fields = computedFields.storedFields;
+          flatState.body.script_fields = flatState.body.script_fields || {};
+          flatState.body.docvalue_fields = flatState.body.docvalue_fields || [];
 
-            _.extend(flatState.body.script_fields, computedFields.scriptFields);
-            flatState.body.docvalue_fields = _.union(flatState.body.docvalue_fields, computedFields.docvalueFields);
+          _.extend(flatState.body.script_fields, computedFields.scriptFields);
+          flatState.body.docvalue_fields = _.union(flatState.body.docvalue_fields, computedFields.docvalueFields);
 
-            if (flatState.body._source) {
-              // exclude source fields for this index pattern specified by the user
-              const filter = fieldWildcardFilter(flatState.body._source.excludes);
-              flatState.body.docvalue_fields = flatState.body.docvalue_fields.filter(filter);
-            }
-
-            // if we only want to search for certain fields
-            const fields = flatState.fields;
-            if (fields) {
-              // filter out the docvalue_fields, and script_fields to only include those that we are concerned with
-              flatState.body.docvalue_fields = _.intersection(flatState.body.docvalue_fields, fields);
-              flatState.body.script_fields = _.pick(flatState.body.script_fields, fields);
-
-              // request the remaining fields from both stored_fields and _source
-              const remainingFields = _.difference(fields, _.keys(flatState.body.script_fields));
-              flatState.body.stored_fields = remainingFields;
-              _.set(flatState.body, '_source.includes', remainingFields);
-            }
-
-            flatState.body.query = buildESQuery(flatState.index, flatState.query, flatState.filters);
-
-            if (flatState.highlightAll != null) {
-              if (flatState.highlightAll && flatState.body.query) {
-                flatState.body.highlight = getHighlightRequest(flatState.body.query, getConfig);
-              }
-              delete flatState.highlightAll;
-            }
-
-            /**
-             * Translate a filter into a query to support es 3+
-             * @param  {Object} filter - The filter to translate
-             * @return {Object} the query version of that filter
-             */
-            const translateToQuery = function (filter) {
-              if (!filter) return;
-
-              if (filter.query) {
-                return filter.query;
-              }
-
-              return filter;
-            };
-
-            // re-write filters within filter aggregations
-            (function recurse(aggBranch) {
-              if (!aggBranch) return;
-              Object.keys(aggBranch).forEach(function (id) {
-                const agg = aggBranch[id];
-
-                if (agg.filters) {
-                  // translate filters aggregations
-                  const filters = agg.filters.filters;
-
-                  Object.keys(filters).forEach(function (filterId) {
-                    filters[filterId] = translateToQuery(filters[filterId]);
-                  });
-                }
-
-                recurse(agg.aggs || agg.aggregations);
-              });
-            }(flatState.body.aggs || flatState.body.aggregations));
+          if (flatState.body._source) {
+            // exclude source fields for this index pattern specified by the user
+            const filter = fieldWildcardFilter(flatState.body._source.excludes);
+            flatState.body.docvalue_fields = flatState.body.docvalue_fields.filter(filter);
           }
+
+          // if we only want to search for certain fields
+          const fields = flatState.fields;
+          if (fields) {
+            // filter out the docvalue_fields, and script_fields to only include those that we are concerned with
+            flatState.body.docvalue_fields = _.intersection(flatState.body.docvalue_fields, fields);
+            flatState.body.script_fields = _.pick(flatState.body.script_fields, fields);
+
+            // request the remaining fields from both stored_fields and _source
+            const remainingFields = _.difference(fields, _.keys(flatState.body.script_fields));
+            flatState.body.stored_fields = remainingFields;
+            _.set(flatState.body, '_source.includes', remainingFields);
+          }
+
+          flatState.body.query = buildESQuery(flatState.index, flatState.query, flatState.filters);
+
+          if (flatState.highlightAll != null) {
+            if (flatState.highlightAll && flatState.body.query) {
+              flatState.body.highlight = getHighlightRequest(flatState.body.query, getConfig);
+            }
+            delete flatState.highlightAll;
+          }
+
+          /**
+           * Translate a filter into a query to support es 3+
+           * @param  {Object} filter - The filter to translate
+           * @return {Object} the query version of that filter
+           */
+          const translateToQuery = function (filter) {
+            if (!filter) return;
+
+            if (filter.query) {
+              return filter.query;
+            }
+
+            return filter;
+          };
+
+          // re-write filters within filter aggregations
+          (function recurse(aggBranch) {
+            if (!aggBranch) return;
+            Object.keys(aggBranch).forEach(function (id) {
+              const agg = aggBranch[id];
+
+              if (agg.filters) {
+                // translate filters aggregations
+                const filters = agg.filters.filters;
+
+                Object.keys(filters).forEach(function (filterId) {
+                  filters[filterId] = translateToQuery(filters[filterId]);
+                });
+              }
+
+              recurse(agg.aggs || agg.aggregations);
+            });
+          }(flatState.body.aggs || flatState.body.aggregations));
 
           return flatState;
         });
