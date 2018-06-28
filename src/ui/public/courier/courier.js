@@ -49,8 +49,11 @@ uiModules.get('kibana/courier').service('courier', ($rootScope, Private) => {
         searchPoll.setIsIntervalPaused(isRefreshPaused);
       });
 
-      // Abort all pending requests if there's a fatal error.
       const closeOnFatal = _.once(() => {
+        // If there was a fatal error, then stop future searches.
+        searchPoll.clearTimer();
+
+        // And abort all pending requests.
         _.invoke(requestQueue, 'abort');
 
         if (requestQueue.length) {

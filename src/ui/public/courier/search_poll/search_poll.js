@@ -50,7 +50,7 @@ export function SearchPollProvider(Private, Promise, $rootScope) {
       this._isIntervalPaused = isPaused;
 
       if (this._isIntervalPaused) {
-        this._clearTimer();
+        this.clearTimer();
       } else {
         this.resetTimer();
       }
@@ -80,8 +80,7 @@ export function SearchPollProvider(Private, Promise, $rootScope) {
           this.resetTimer();
         })
         .catch(err => {
-          // If there was a problem, then stop future searches and kill Kibana.
-          this._clearTimer();
+          // If there was a problem, then kill Kibana.
           fatalError(err);
         })
         .finally(() => {
@@ -110,7 +109,7 @@ export function SearchPollProvider(Private, Promise, $rootScope) {
      * Schedule the next iteration of the loop
      */
     resetTimer = () => {
-      this._clearTimer();
+      this.clearTimer();
 
       if (!this._isIntervalPaused) {
         this._timerId = setTimeout(this._search, this._intervalInMs);
@@ -120,7 +119,7 @@ export function SearchPollProvider(Private, Promise, $rootScope) {
     /**
      * Cancel the next iteration of the loop
      */
-    _clearTimer = () => {
+    clearTimer = () => {
       if (this._timerId) {
         clearTimeout(this._timerId);
         this._timerId = null;
