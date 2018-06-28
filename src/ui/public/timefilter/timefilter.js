@@ -34,6 +34,24 @@ class Timefilter extends SimpleEmitter {
     this.isAutoRefreshSelectorEnabled = false;
     this._time = chrome.getUiSettingsClient().get('timepicker:timeDefaults');
     this._refreshInterval = chrome.getUiSettingsClient().get('timepicker:refreshIntervalDefaults');
+    this._pausedByVisibilityChange = false;
+    document.addEventListener('visibilitychange', this._onVisibilityChange);
+  }
+
+  _onVisibilityChange = () => {
+    if (document.hidden && !this.getRefreshInterval().pause) {
+      // pause refresh when tab is hidden
+      this._pausedByVisibilityChange = true;
+      this.setRefreshInterval({ pause: true });
+      return;
+    }
+
+    if (!document.hidden && this._pausedByVisibilityChange) {
+      // unpause refresh when tab is visible
+      this._pausedByVisibilityChange = false;
+      this.setRefreshInterval({ pause: false });
+      return;
+    }
   }
 
   getTime = () => {
