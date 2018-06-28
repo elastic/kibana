@@ -467,8 +467,6 @@ Notifier.prototype.directive = function (directive, config, cb) {
   return add(customConfig, cb);
 };
 
-Notifier.prototype.describeError = formatMsg.describeError;
-
 if (log === _.noop) {
   Notifier.prototype.log = _.noop;
 } else {
