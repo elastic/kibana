@@ -19,15 +19,13 @@
 
 import sinon from 'sinon';
 
-export function createCourierStub() {
+export function createIndexPatternsStub() {
   return {
-    indexPatterns: {
-      get: sinon.spy(indexPatternId =>
-        Promise.resolve({
-          id: indexPatternId,
-        })
-      ),
-    },
+    get: sinon.spy(indexPatternId =>
+      Promise.resolve({
+        id: indexPatternId,
+      })
+    ),
   };
 }
 
