@@ -24,14 +24,14 @@ import '../../promises';
 import { requestQueue } from '../_request_queue';
 import { FetchSoonProvider } from '../fetch';
 
-export function SearchPollProvider(Private, Promise, $timeout, $rootScope) {
+export function SearchPollProvider(Private, Promise, $rootScope) {
   const fetchSoon = Private(FetchSoonProvider);
 
   class SearchPoll {
     constructor() {
       this._isIntervalPaused = true;
       this._intervalInMs = undefined;
-      this._timer = null;
+      this._timerId = null;
       this._searchPromise = null;
       this._redoSearchPromise = null;
     }
@@ -113,7 +113,7 @@ export function SearchPollProvider(Private, Promise, $timeout, $rootScope) {
       this._clearTimer();
 
       if (!this._isIntervalPaused) {
-        this._timer = $timeout(this._search, this._intervalInMs);
+        this._timerId = setTimeout(this._search, this._intervalInMs);
       }
     };
 
@@ -121,9 +121,9 @@ export function SearchPollProvider(Private, Promise, $timeout, $rootScope) {
      * Cancel the next iteration of the loop
      */
     _clearTimer = () => {
-      if (this._timer) {
-        $timeout.cancel(this._timer);
-        this._timer = null;
+      if (this._timerId) {
+        clearTimeout(this._timerId);
+        this._timerId = null;
       }
     };
   }
