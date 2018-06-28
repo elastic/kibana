@@ -84,7 +84,9 @@ export function SearchPollProvider(Private, Promise, $rootScope) {
         return;
       }
 
-      this._searchPromise = Promise.try(() => {
+      // We use resolve() here instead of try() because the latter won't trigger a $digest
+      // when the promise resolves.
+      this._searchPromise = Promise.resolve().then(() => {
         $rootScope.$broadcast('courier:searchRefresh');
         const requests = requestQueue.getInactive();
 
