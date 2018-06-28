@@ -1,7 +1,7 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
 import { elasticLogo } from '../../common/functions/image/elastic_logo';
-import { isValid } from '../../common/lib/dataurl';
+import { isValid } from '../../common/lib/url';
 
 export const image = () => ({
   name: 'image',

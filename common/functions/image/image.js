@@ -6,7 +6,7 @@ export const image = () => ({
   name: 'image',
   aliases: [],
   type: 'image',
-  help: 'Create a base64 encoded image',
+  help: 'Display an image',
   context: {
     types: ['null'],
   },
@@ -14,7 +14,7 @@ export const image = () => ({
     dataurl: {
       // This was accepting dataurl, but there was no facility in fn for checking type and handling a dataurl type.
       types: ['string', 'null'],
-      help: 'Base64 encoded image',
+      help: 'The HTTP(S) URL or base64 data of an image.',
       aliases: ['_', 'url'],
       default: elasticLogo,
     },

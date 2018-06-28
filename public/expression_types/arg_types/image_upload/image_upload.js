@@ -1,9 +1,19 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { EuiFlexGroup, EuiFlexItem, EuiImage } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiImage,
+  EuiPanel,
+  EuiSpacer,
+  EuiSelect,
+  EuiButton,
+  EuiFieldText,
+} from '@elastic/eui';
 import { Loading } from '../../../components/loading';
 import { FileUpload } from '../../../components/file_upload';
-import { encode, isValid } from '../../../../common/lib/dataurl';
+import { isValid as isValidHttpUrl } from '../../../../common/lib/httpurl';
+import { encode, isValid as isValidDataUrl } from '../../../../common/lib/dataurl';
 import { templateFromReactComponent } from '../../../lib/template_from_react_component';
 
 class ImageUpload extends React.Component {
@@ -14,9 +24,20 @@ class ImageUpload extends React.Component {
     resolvedArgValue: PropTypes.string,
   };
 
-  state = {
-    loading: false,
-  };
+  constructor(props) {
+    super(props);
+
+    const url = this.props.resolvedArgValue || null;
+    const urlType = isValidHttpUrl(url) ? 'src' : 'inline'; // if not a valid base64 string, will show as missing asset icon
+
+    this.inputRefs = {};
+
+    this.state = {
+      loading: false,
+      url, // what to show in preview / paste url text input
+      urlType, // what panel to show, fileupload or paste url
+    };
+  }
 
   componentWillUnmount() {
     this._isMounted = false;
@@ -51,37 +72,90 @@ class ImageUpload extends React.Component {
       });
   };
 
-  render() {
-    const { resolvedArgValue } = this.props;
-    const isLoading = this.state.loading;
-    const isDataUrl = resolvedArgValue && isValid(resolvedArgValue);
+  changeUrlType = ({ target = {} }) => {
+    this.setState({ urlType: target.value });
+  };
 
-    const previewImage = isDataUrl && (
-      <EuiImage
-        size="s"
-        hasShadow
-        allowFullScreen
-        alt="Image Preview"
-        url={resolvedArgValue}
-        className="canvas__checkered"
-      />
+  setSrcUrl = () => {
+    const { value: srcUrl } = this.inputRefs.srcUrlText;
+    this.setState({ url: srcUrl });
+
+    const { onValueChange } = this.props;
+    onValueChange(srcUrl);
+  };
+
+  urlTypeOptions = [
+    { value: 'inline', text: 'Upload Image' },
+    { value: 'src', text: 'Paste Image URL' },
+  ];
+
+  render() {
+    const { loading, url, urlType } = this.state;
+    const urlTypeInline = urlType === 'inline';
+    const urlTypeSrc = urlType === 'src';
+
+    const selectUrlType = (
+      <EuiSelect options={this.urlTypeOptions} value={urlType} onChange={this.changeUrlType} />
     );
 
-    return (
-      <EuiFlexGroup alignItems="center" gutterSize="s" className="canvas__argtype--image">
-        <EuiFlexItem grow={8}>
-          {isLoading ? (
-            <Loading animated text="Image uploading" />
-          ) : (
-            <FileUpload onUpload={this.handleUpload} />
-          )}
-        </EuiFlexItem>
-        {previewImage && (
-          <EuiFlexItem grow={3} className="canvas__argtype--image--preview">
-            {previewImage}
+    let uploadImage = null;
+    if (urlTypeInline) {
+      uploadImage = loading ? (
+        <Loading animated text="Image uploading" />
+      ) : (
+        <FileUpload onUpload={this.handleUpload} />
+      );
+    }
+
+    const pasteImageUrl = urlTypeSrc ? (
+      <Fragment>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={10}>
+            <EuiFieldText
+              defaultValue={this.state.url}
+              inputRef={ref => (this.inputRefs.srcUrlText = ref)}
+              placeholder="Image URL"
+              aria-label="Image URL"
+            />
           </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+        </EuiFlexGroup>
+        <EuiSpacer size="xs" />
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiButton size="s" onClick={this.setSrcUrl}>
+              Set
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </Fragment>
+    ) : null;
+
+    const shouldPreview =
+      (urlTypeSrc && isValidHttpUrl(url)) || (urlTypeInline && isValidDataUrl(url));
+
+    return (
+      <EuiPanel paddingSize="s">
+        {selectUrlType}
+        <EuiSpacer size="s" />
+        <EuiFlexGroup alignItems="center" gutterSize="s" className="canvas__argtype--image">
+          <EuiFlexItem grow={8}>
+            {uploadImage}
+            {pasteImageUrl}
+          </EuiFlexItem>
+          {shouldPreview ? (
+            <EuiFlexItem grow={3} className="canvas__argtype--image--preview">
+              <EuiImage
+                size="s"
+                hasShadow
+                allowFullScreen
+                alt="Image Preview"
+                url={this.state.url}
+                className="canvas__checkered"
+              />
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+      </EuiPanel>
     );
   }
 }

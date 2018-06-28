@@ -1,4 +1,4 @@
-import { isValid as isValidDataURL } from '../lib/dataurl';
+import { isValid } from '../../common/lib/url';
 
 export const containerStyle = () => ({
   name: 'containerStyle',
@@ -47,8 +47,6 @@ export const containerStyle = () => ({
     },
   },
   fn: (context, args) => {
-    const isURL = url => url.startsWith('http://') || url.startsWith('https://');
-
     const { backgroundImage, backgroundSize, backgroundRepeat, ...remainingArgs } = args;
     const style = {
       type: 'containerStyle',
@@ -56,7 +54,7 @@ export const containerStyle = () => ({
     };
 
     if (backgroundImage) {
-      if (!isValidDataURL(backgroundImage) && !isURL(backgroundImage))
+      if (!isValid(backgroundImage))
         throw new Error('Invalid backgroundImage. Please provide an asset or a URL.');
       style.backgroundImage = `url(${backgroundImage})`;
       style.backgroundSize = backgroundSize;

@@ -1,5 +1,5 @@
 import { elasticOutline } from '../../../common/functions/revealImage/elastic_outline';
-import { isValid } from '../../../common/lib/dataurl';
+import { isValid } from '../../../common/lib/url';
 
 export const revealImage = () => ({
   name: 'revealImage',

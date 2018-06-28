@@ -1,5 +1,5 @@
 import { get } from 'lodash';
-import { isValid } from '../../common/lib/dataurl';
+import { isValid } from '../../common/lib/url';
 import { missingImage } from '../../common/lib/missing_asset';
 
 /*
