@@ -84,9 +84,8 @@ export function SearchPollProvider(Private, Promise, $rootScope) {
         $rootScope.$broadcast('courier:searchRefresh');
         const requests = requestQueue.getInactive();
 
-        // promise returned from fetch.fetchSearchRequests() only resolves when
-        // the requests complete, but we want to continue even if
-        // the requests abort so we make our own
+        // The promise returned from fetchSearchRequests() only resolves when the requests complete.
+        // We want to continue even if the requests abort so we return a different promise.
         fetchSoon.fetchSearchRequests(requests);
 
         return Promise.all(
@@ -96,8 +95,10 @@ export function SearchPollProvider(Private, Promise, $rootScope) {
         .then(() => {
           this._searchPromise = null;
 
-          // Kick off another search immediately if results aren't coming back fast enough to keep
-          // up with the interval.
+          // If the search response comes back before the interval fires, then we'll wait
+          // for the interval and let it kick off the next search. But if the interval fires before
+          // the search returns results, then we'll need to wait for the search to return results
+          // and then kick off another search again. A new search will also reset the interval.
           if (this._isIntervalFasterThanSearch) {
             this._isIntervalFasterThanSearch = false;
             this._search();
