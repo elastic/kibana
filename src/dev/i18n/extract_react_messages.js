@@ -19,53 +19,70 @@
 
 import {
   isJSXAttribute,
-  isJSXExpressionContainer,
   isJSXIdentifier,
   isObjectExpression,
   isStringLiteral,
-  isTemplateLiteral,
 } from '@babel/types';
 
 import { isPropertyWithKey, escapeLineBreak } from './utils';
-import { DEFAULT_MESSAGE_KEY } from './constants';
+import { DEFAULT_MESSAGE_KEY, CONTEXT_KEY } from './constants';
+
+function extractMessageId(value) {
+  if (!isStringLiteral(value)) {
+    throw new Error('Message id should be a string literal.');
+  }
+
+  return escapeLineBreak(value.value);
+}
+
+function extractMessageValue(value, id) {
+  if (!isStringLiteral(value)) {
+    throw new Error(
+      `defaultMessage value should be a string literal for id: ${id}.`
+    );
+  }
+
+  return escapeLineBreak(value.value);
+}
+
+function extractContextValue(value, id) {
+  if (!isStringLiteral(value)) {
+    throw new Error(`context value should be a string literal for id: ${id}.`);
+  }
+
+  return escapeLineBreak(value.value);
+}
 
 /**
- * Extract default messages from ReactJS Intl.formatMessage(...) AST
+ * Extract default messages from ReactJS intl.formatMessage(...) AST
  * @param node Babel parser AST node
  * @returns {[string, string][]} Array of id-message tuples
  */
 export function extractIntlMessages(node) {
   const options = node.arguments[0];
 
-  let messageId = '';
-  let message = '';
+  let messageId;
+  let message;
   let context;
 
-  if (isObjectExpression(options)) {
-    for (const property of options.properties) {
-      if (isPropertyWithKey(property, 'id')) {
-        if (!isStringLiteral(property.value)) {
-          throw new Error('Message id should be a string literal.');
-        }
+  if (!isObjectExpression(options)) {
+    throw new Error(
+      'Object with defaultMessage property is not passed to intl.formatMessage().'
+    );
+  }
 
-        messageId = property.value.value;
-      } else if (isPropertyWithKey(property, DEFAULT_MESSAGE_KEY)) {
-        if (isStringLiteral(property.value)) {
-          message = escapeLineBreak(property.value.value);
-        } else if (isTemplateLiteral(property.value)) {
-          message = escapeLineBreak(property.value.quasis[0].value.raw);
-        }
-      } else if (
-        isPropertyWithKey(property, 'context') &&
-        isStringLiteral(property.value)
-      ) {
-        context = property.value.value;
-      }
+  for (const property of options.properties) {
+    if (isPropertyWithKey(property, 'id')) {
+      messageId = extractMessageId(property.value);
+    } else if (isPropertyWithKey(property, DEFAULT_MESSAGE_KEY)) {
+      message = extractMessageValue(property.value, messageId);
+    } else if (isPropertyWithKey(property, CONTEXT_KEY)) {
+      context = extractContextValue(property.value, messageId);
     }
   }
 
   if (!messageId) {
-    throw new Error('Empty "id" value in Intl.formatMessage() is not allowed.');
+    throw new Error('Empty "id" value in intl.formatMessage() is not allowed.');
   }
 
   if (!message) {
@@ -81,8 +98,8 @@ export function extractIntlMessages(node) {
  * @returns {[string, string][]} Array of id-message tuples
  */
 export function extractFormattedMessages(node) {
-  let messageId = '';
-  let message = '';
+  let messageId;
+  let message;
   let context;
 
   for (const attribute of node.attributes) {
@@ -91,40 +108,11 @@ export function extractFormattedMessages(node) {
     }
 
     if (isJSXIdentifier(attribute.name, { name: 'id' })) {
-      if (!isStringLiteral(attribute.value)) {
-        throw new Error('Message id should be a string literal.');
-      }
-
-      messageId = attribute.value.value;
-    } else if (
-      isJSXIdentifier(attribute.name, {
-        name: DEFAULT_MESSAGE_KEY,
-      })
-    ) {
-      if (isJSXExpressionContainer(attribute.value)) {
-        // Example: {`Multiline message without
-        //escaping line break`}
-        message = escapeLineBreak(
-          attribute.value.expression.quasis[0].value.raw
-        );
-      } else if (isStringLiteral(attribute.value)) {
-        // Example: 'Single- or multiline message with \
-        //escaping line break'
-        message = escapeLineBreak(attribute.value.value);
-      }
-    } else if (
-      isJSXAttribute(attribute) &&
-      isJSXIdentifier(attribute.name, {
-        name: 'context',
-      })
-    ) {
-      if (isJSXExpressionContainer(attribute.value)) {
-        context = escapeLineBreak(
-          attribute.value.expression.quasis[0].value.raw
-        );
-      } else if (isStringLiteral(attribute.value)) {
-        context = escapeLineBreak(attribute.value.value);
-      }
+      messageId = extractMessageId(attribute.value);
+    } else if (isJSXIdentifier(attribute.name, { name: DEFAULT_MESSAGE_KEY })) {
+      message = extractMessageValue(attribute.value, messageId);
+    } else if (isJSXIdentifier(attribute.name, { name: CONTEXT_KEY })) {
+      context = extractContextValue(attribute.value, messageId);
     }
   }
 

@@ -18,3 +18,4 @@
  */
 
 export const DEFAULT_MESSAGE_KEY = 'defaultMessage';
+export const CONTEXT_KEY = 'context';

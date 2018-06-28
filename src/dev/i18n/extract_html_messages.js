@@ -24,16 +24,17 @@ import {
   isDirectiveLiteral,
   isObjectExpression,
   isStringLiteral,
-  isTemplateLiteral,
 } from '@babel/types';
 
 import { isPropertyWithKey, escapeLineBreak } from './utils';
-import { DEFAULT_MESSAGE_KEY } from './constants';
+import { DEFAULT_MESSAGE_KEY, CONTEXT_KEY } from './constants';
 
 /**
  * Find all substrings of "{{ any text }}" pattern
  */
 const ANGULAR_EXPRESSION_REGEX = /\{\{+([\s\S]*?)\}\}+/g;
+
+const I18N_FILTER_MARKER = '| i18n: ';
 
 /**
  * Extract default message from an angular filter expression argument
@@ -51,23 +52,23 @@ function parseFilterObjectExpression(expression) {
     enter(path) {
       if (isObjectExpression(path.node)) {
         for (const property of path.node.properties) {
-          if (
-            isPropertyWithKey(property, DEFAULT_MESSAGE_KEY) &&
-            isStringLiteral(property.value)
-          ) {
+          if (isPropertyWithKey(property, DEFAULT_MESSAGE_KEY)) {
+            if (!isStringLiteral(property.value)) {
+              throw new Error(
+                'defaultMessage value should be a string literal.'
+              );
+            }
+
             message = escapeLineBreak(property.value.value);
-          } else if (
-            isPropertyWithKey(property, DEFAULT_MESSAGE_KEY) &&
-            isTemplateLiteral(property.value)
-          ) {
-            message = escapeLineBreak(property.value.quasis[0].value.raw);
-          } else if (
-            isPropertyWithKey(property, 'context') &&
-            isStringLiteral(property.value)
-          ) {
+          } else if (isPropertyWithKey(property, CONTEXT_KEY)) {
+            if (!isStringLiteral(property.value)) {
+              throw new Error('context value should be a string literal.');
+            }
+
             context = property.value.value;
           }
         }
+
         path.stop();
       }
     },
@@ -97,13 +98,15 @@ function trimCurlyBraces(string) {
 
 function* getFilterMessages(htmlContent) {
   const expressions = (htmlContent.match(ANGULAR_EXPRESSION_REGEX) || [])
-    .filter(expression => expression.includes('| i18n: {'))
+    .filter(expression => expression.includes(I18N_FILTER_MARKER))
     .map(trimCurlyBraces);
 
   for (const expression of expressions) {
-    const filterStart = expression.indexOf('| i18n: {');
+    const filterStart = expression.indexOf(I18N_FILTER_MARKER);
     const idExpression = expression.slice(0, filterStart).trim();
-    const filterObjectExpression = expression.slice(filterStart + 8).trim();
+    const filterObjectExpression = expression
+      .slice(filterStart + I18N_FILTER_MARKER.length)
+      .trim();
 
     if (!filterObjectExpression || !idExpression) {
       throw new Error(
@@ -112,11 +115,18 @@ function* getFilterMessages(htmlContent) {
     }
 
     const messageId = parseIdExpression(idExpression);
-    const { message, context } = parseFilterObjectExpression(
-      filterObjectExpression
-    );
 
-    yield [messageId, { message, context }];
+    try {
+      const { message, context } = parseFilterObjectExpression(
+        filterObjectExpression
+      );
+
+      yield [messageId, { message, context }];
+    } catch (error) {
+      throw new Error(
+        `Cannot parse message with id: ${messageId}.\n${error.message || error}`
+      );
+    }
   }
 }
 
@@ -142,6 +152,7 @@ function* getDirectiveMessages(htmlContent) {
 }
 
 export function* extractHtmlMessages(buffer) {
-  yield* getDirectiveMessages(buffer.toString());
-  yield* getFilterMessages(buffer.toString());
+  const content = buffer.toString();
+  yield* getDirectiveMessages(content);
+  yield* getFilterMessages(content);
 }

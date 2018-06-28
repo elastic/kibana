@@ -100,7 +100,11 @@ export async function extractDefaultTranslations(inputPath) {
 
   let jsonBuffer = Buffer.from('{\n');
 
-  for (const [mapKey, mapValue] of [...defaultMessagesMap.entries()].sort()) {
+  const defaultMessages = [...defaultMessagesMap].sort(([key1], [key2]) => {
+    return key1 < key2 ? -1 : 1;
+  });
+
+  for (const [mapKey, mapValue] of defaultMessages) {
     const key = mapKey.replace(ESCAPE_CHARACTERS_REGEX, '\\$1$2');
     const value = mapValue.message
       .replace(ESCAPE_CHARACTERS_REGEX, '\\$1$2')
@@ -122,7 +126,7 @@ export async function extractDefaultTranslations(inputPath) {
   }
 
   await writeFileAsync(
-    resolve(inputPath, 'translations', 'defaultMessages.json'),
+    resolve(inputPath, 'translations', 'en.json'),
     jsonBuffer
   );
 }

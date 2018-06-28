@@ -17,14 +17,10 @@
  * under the License.
  */
 
-import {
-  isObjectExpression,
-  isStringLiteral,
-  isTemplateLiteral,
-} from '@babel/types';
+import { isObjectExpression, isStringLiteral } from '@babel/types';
 
 import { isPropertyWithKey, escapeLineBreak } from './utils';
-import { DEFAULT_MESSAGE_KEY } from './constants';
+import { DEFAULT_MESSAGE_KEY, CONTEXT_KEY } from './constants';
 
 /**
  * Extract messages from `funcName('id', { defaultMessage: 'Message text' })` call expression AST
@@ -37,33 +33,38 @@ export function extractI18nCallMessages(node) {
   }
 
   const messageId = idSubTree.value;
+  let message;
+  let context = '';
 
-  if (isObjectExpression(optionsSubTree)) {
-    const defaultMessageProperty = optionsSubTree.properties.find(
-      prop =>
-        isPropertyWithKey(prop, DEFAULT_MESSAGE_KEY) &&
-        (isStringLiteral(prop.value) || isTemplateLiteral(prop.value))
-    );
-
-    if (!defaultMessageProperty) {
-      throw new Error(`Default message is required for ${messageId} id.`);
+  try {
+    if (!isObjectExpression(optionsSubTree)) {
+      throw 'Object with defaultMessage property is not provided.';
     }
 
-    const contextProperty = optionsSubTree.properties.find(
-      prop => isPropertyWithKey(prop, 'context') && isStringLiteral(prop.value)
-    );
+    for (const prop of optionsSubTree.properties) {
+      if (isPropertyWithKey(prop, DEFAULT_MESSAGE_KEY)) {
+        if (!isStringLiteral(prop.value)) {
+          throw 'defaultMessage value should be a string literal.';
+        }
 
-    const message = escapeLineBreak(
-      isStringLiteral(defaultMessageProperty.value)
-        ? defaultMessageProperty.value.value
-        : defaultMessageProperty.value.quasis[0].value.raw
-    );
-    const context = contextProperty ? contextProperty.value.value : '';
+        message = escapeLineBreak(prop.value.value);
+      } else if (isPropertyWithKey(prop, CONTEXT_KEY)) {
+        if (!isStringLiteral(prop.value)) {
+          throw 'context value should be a string literal.';
+        }
 
-    return [messageId, { message, context }];
+        context = escapeLineBreak(prop.value.value);
+      }
+    }
+
+    if (!message) {
+      throw 'defaultMessage is required';
+    }
+  } catch (errorMessage) {
+    throw new Error(
+      `Cannot parse message with id: ${messageId}.\n${errorMessage}`
+    );
   }
 
-  throw new Error(
-    `Object with defaultMessage property is not provided for ${messageId} id.`
-  );
+  return [messageId, { message, context }];
 }
