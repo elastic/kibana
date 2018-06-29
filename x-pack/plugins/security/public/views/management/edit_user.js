@@ -14,6 +14,16 @@ import 'plugins/security/services/shield_user';
 import 'plugins/security/services/shield_role';
 import { checkLicenseError } from 'plugins/security/lib/check_license_error';
 import { EDIT_USERS_PATH, USERS_PATH } from './management_urls';
+import { EditUser } from '../../components/management/users';
+import React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
+
+const renderReact = (elem, httpClient, username) => {
+  render(
+    <EditUser httpClient={httpClient} username={username} />,
+    elem
+  );
+};
 
 routes.when(`${EDIT_USERS_PATH}/:username?`, {
   template,
@@ -48,7 +58,12 @@ routes.when(`${EDIT_USERS_PATH}/:username?`, {
     }
   },
   controllerAs: 'editUser',
-  controller($scope, $route, kbnUrl, Notifier, confirmModal) {
+  controller($scope, $route, kbnUrl, Notifier, confirmModal, $http) {
+    $scope.$$postDigest(() => {
+      const elem = document.getElementById('editUserReactRoot');
+      const username = $route.current.params.username;
+      renderReact(elem, $http, username);
+    });
     $scope.me = $route.current.locals.me;
     $scope.user = $route.current.locals.user;
     $scope.availableRoles = $route.current.locals.roles;

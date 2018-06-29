@@ -5,6 +5,8 @@
  */
 
 import _ from 'lodash';
+import React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
 import routes from 'ui/routes';
 import { toastNotifications } from 'ui/notify';
 import { toggle, toggleSort } from 'plugins/security/lib/util';
@@ -12,10 +14,17 @@ import template from 'plugins/security/views/management/users.html';
 import 'plugins/security/services/shield_user';
 import { checkLicenseError } from 'plugins/security/lib/check_license_error';
 import { SECURITY_PATH, USERS_PATH, EDIT_USERS_PATH, EDIT_ROLES_PATH } from './management_urls';
-
+import { Users } from '../../components/management/users';
 routes.when(SECURITY_PATH, {
   redirectTo: USERS_PATH
 });
+
+const renderReact = (elem, httpClient) => {
+  render(
+    <Users httpClient={httpClient} />,
+    elem
+  );
+};
 
 routes.when(USERS_PATH, {
   template,
@@ -27,8 +36,11 @@ routes.when(USERS_PATH, {
         .catch(_.identity); // Return the error if there is one
     }
   },
-
-  controller($scope, $route, $q, confirmModal) {
+  controller($scope, $route, $q, confirmModal, $http) {
+    $scope.$$postDigest(() => {
+      const elem = document.getElementById('usersReactRoot');
+      renderReact(elem, $http);
+    });
     $scope.users = $route.current.locals.users;
     $scope.forbidden = !_.isArray($scope.users);
     $scope.selectedUsers = [];
