@@ -77,7 +77,12 @@ class TransactionOverview extends Component {
         <OverviewChartsRequest
           urlParams={urlParams}
           render={({ data }) => (
-            <Charts charts={data} urlParams={urlParams} location={location} />
+            <Charts
+              charts={data}
+              urlParams={urlParams}
+              location={location}
+              hasDynamicBaseline={hasDynamicBaseline}
+            />
           )}
         />
 

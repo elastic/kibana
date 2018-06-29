@@ -100,26 +100,30 @@ export class Charts extends Component {
     const { noHits, responseTimeSeries, tpmSeries } = this.props.charts;
     const { serviceName, transactionType } = this.props.urlParams;
 
+    const MLTip = this.props.hasDynamicBaseline ? (
+      <MLTipContainer>
+        <EuiIconTip content="The stream around the average response time shows the expected bounds. An annotation is shown for anomaly scores &gt;= 75." />
+        <MLText>
+          Machine Learning:{' '}
+          <a
+            href={getMlJobUrl(
+              serviceName,
+              transactionType,
+              this.props.location
+            )}
+          >
+            View Job
+          </a>
+        </MLText>
+      </MLTipContainer>
+    ) : null;
+
     return (
       <ChartsWrapper>
         <Chart>
           <ChartHeader>
             <ChartTitle>{responseTimeLabel(transactionType)}</ChartTitle>
-            <MLTipContainer>
-              <EuiIconTip content="The stream around the average response time shows the expected bounds. An annotation is shown for anomaly scores &gt;= 75." />
-              <MLText>
-                Machine Learning:{' '}
-                <a
-                  href={getMlJobUrl(
-                    serviceName,
-                    transactionType,
-                    this.props.location
-                  )}
-                >
-                  View Job
-                </a>
-              </MLText>
-            </MLTipContainer>
+            {MLTip}
           </ChartHeader>
           <CustomPlot
             noHits={noHits}
@@ -171,8 +175,13 @@ function responseTimeLabel(type) {
 
 Charts.propTypes = {
   charts: PropTypes.object.isRequired,
+  hasDynamicBaseline: PropTypes.bool,
   locations: PropTypes.object.isRequired,
   urlParams: PropTypes.object.isRequired
+};
+
+Charts.defaultProps = {
+  hasDynamicBaseline: false
 };
 
 export default Charts;
