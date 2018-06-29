@@ -102,10 +102,18 @@ module.directive('kbnTimepicker', function (refreshIntervals) {
       // If we always return a new object from the getters below (pickFromDate and pickToDate) we'll create an
       // infinite digest loop, so we maintain these copies to return instead.
       $scope.$watch('absolute.from', function (newDate) {
+        if (!newDate) {
+          return;
+        }
+
         _.set($scope, 'browserAbsolute.from', new Date(newDate.year(), newDate.month(), newDate.date()));
       });
 
       $scope.$watch('absolute.to', function (newDate) {
+        if (!newDate) {
+          return;
+        }
+
         _.set($scope, 'browserAbsolute.to', new Date(newDate.year(), newDate.month(), newDate.date()));
       });
 
