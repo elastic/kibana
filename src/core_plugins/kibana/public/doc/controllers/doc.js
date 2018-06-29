@@ -35,8 +35,8 @@ const app = uiModules.get('apps/doc', [
 
 
 const resolveIndexPattern = {
-  indexPattern: function (courier, savedSearches, $route) {
-    return courier.indexPatterns.get($route.current.params.indexPattern);
+  indexPattern: function (indexPatterns, savedSearches, $route) {
+    return indexPatterns.get($route.current.params.indexPattern);
   }
 };
 

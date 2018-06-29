@@ -19,115 +19,68 @@
 
 import _ from 'lodash';
 
+import { timefilter } from 'ui/timefilter';
+
 import '../es';
-import '../promises';
 import '../index_patterns';
 import { uiModules } from '../modules';
 import { addFatalErrorCallback } from '../notify';
+import '../promises';
 
-import { SearchSourceProvider } from './data_source/search_source';
 import { requestQueue } from './_request_queue';
 import { FetchSoonProvider } from './fetch';
-import { SearchLooperProvider } from './looper/search';
-import { SavedObjectProvider } from './saved_object';
-import { RedirectWhenMissingProvider } from './_redirect_when_missing';
-import { timefilter } from 'ui/timefilter';
+import { SearchPollProvider } from './search_poll';
 
+uiModules.get('kibana/courier').service('courier', ($rootScope, Private) => {
+  const fetchSoon = Private(FetchSoonProvider);
 
-uiModules.get('kibana/courier')
-  .service('courier', function ($rootScope, Private, indexPatterns) {
-    function Courier() {
-      const self = this;
-      const SearchSource = Private(SearchSourceProvider);
-      const fetchSoon = Private(FetchSoonProvider);
-      const searchLooper = self.searchLooper = Private(SearchLooperProvider);
+  // This manages the doc fetch interval.
+  const searchPoll = Private(SearchPollProvider);
 
-      self.SavedObject = Private(SavedObjectProvider);
-      self.indexPatterns = indexPatterns;
-      self.redirectWhenMissing = Private(RedirectWhenMissingProvider);
+  class Courier {
+    constructor() {
+      // Listen for refreshInterval changes
+      $rootScope.$listen(timefilter, 'refreshIntervalUpdate', function () {
+        const refreshIntervalMs = _.get(timefilter.getRefreshInterval(), 'value');
+        const isRefreshPaused = _.get(timefilter.getRefreshInterval(), 'pause');
 
-      self.SearchSource = SearchSource;
+        // Update the time between automatic search requests.
+        searchPoll.setIntervalInMs(refreshIntervalMs);
 
-      /**
-     * update the time between automatic search requests
-     *
-     * @chainable
-     */
-      self.fetchInterval = function (ms) {
-        searchLooper.ms(ms);
-        return this;
-      };
+        if (isRefreshPaused) {
+          searchPoll.pause();
+        } else {
+          searchPoll.resume();
+        }
+      });
 
-      /**
-     * Start fetching search requests on an interval
-     * @chainable
-     */
-      self.start = function () {
-        searchLooper.start();
-        return this;
-      };
+      const closeOnFatal = _.once(() => {
+        // If there was a fatal error, then stop future searches. We want to use pause instead of
+        // clearTimer because if the search results come back after the fatal error then we'll
+        // resume polling.
+        searchPoll.pause();
 
-      /**
-     * Process the pending request queue right now, returns
-     * a promise that resembles the success of the fetch completing,
-     * individual errors are routed to their respective requests.
-     */
-      self.fetch = function () {
-        fetchSoon.fetchQueued().then(function () {
-          searchLooper.restart();
-        });
-      };
-
-
-      /**
-     * is the courier currently fetching search
-     * results automatically?
-     *
-     * @return {boolean}
-     */
-      self.started = function () {
-        return searchLooper.started();
-      };
-
-
-      /**
-     * stop the courier from fetching more search
-     * results, does not stop validating docs.
-     *
-     * @chainable
-     */
-      self.stop = function () {
-        searchLooper.stop();
-        return this;
-      };
-
-      /**
-     * Abort all pending requests
-     * @return {[type]} [description]
-     */
-      self.close = function () {
-        searchLooper.stop();
-
+        // And abort all pending requests.
         _.invoke(requestQueue, 'abort');
 
         if (requestQueue.length) {
           throw new Error('Aborting all pending requests failed.');
         }
-      };
-
-      $rootScope.$listen(timefilter, 'refreshIntervalUpdate', function () {
-        const refreshValue = _.get(timefilter.getRefreshInterval(), 'value');
-        const refreshPause = _.get(timefilter.getRefreshInterval(), 'pause');
-        if (_.isNumber(refreshValue) && !refreshPause) {
-          self.fetchInterval(refreshValue);
-        } else {
-          self.fetchInterval(0);
-        }
       });
 
-      const closeOnFatal = _.once(self.close);
       addFatalErrorCallback(closeOnFatal);
     }
 
-    return new Courier();
-  });
+    /**
+     * Fetch the pending requests.
+     */
+    fetch = () => {
+      fetchSoon.fetchQueued().then(() => {
+        // Reset the timer using the time that we get this response as the starting point.
+        searchPoll.resetTimer();
+      });
+    };
+  }
+
+  return new Courier();
+});
