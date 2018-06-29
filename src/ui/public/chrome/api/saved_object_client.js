@@ -17,24 +17,12 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { SavedObjectsClient } from '../../saved_objects';
 
-import uiRoutes from '../routes';
+export function initSavedObjectClient(chrome) {
+  const savedObjectClient = new SavedObjectsClient();
 
-import './error_auto_create_index.less';
-import template from './error_auto_create_index.html';
-
-uiRoutes
-  .when('/error/action.auto_create_index', { template });
-
-export function isAutoCreateIndexError(error) {
-  return (
-    error.statusCode === 503 &&
-    get(error, 'body.code') === 'ES_AUTO_CREATE_INDEX_ERROR'
-  );
-}
-
-export function showAutoCreateIndexErrorPage() {
-  window.location.hash = '/error/action.auto_create_index';
-  //return Promise.halt(); TODO vanilla javascript way to replace Promise.halt
+  chrome.getSavedObjectsClient = function () {
+    return savedObjectClient;
+  };
 }

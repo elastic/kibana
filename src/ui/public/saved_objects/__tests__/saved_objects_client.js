@@ -23,7 +23,6 @@ import { SavedObjectsClient } from '../saved_objects_client';
 import { SavedObject } from '../saved_object';
 
 describe('SavedObjectsClient', () => {
-  const basePath = Math.random().toString(36).substring(7);
   const sandbox = sinon.createSandbox();
   const doc = {
     id: 'AVwSwFxtcMV38qjDZoQg',
@@ -33,51 +32,42 @@ describe('SavedObjectsClient', () => {
   };
 
   let savedObjectsClient;
-  let $http;
 
-  beforeEach(() => {
-    $http = sandbox.stub();
-    savedObjectsClient = new SavedObjectsClient({
-      $http,
-      basePath
-    });
-  });
-
-  afterEach(() => {
-    sandbox.restore();
+  beforeAll(() => {
+    savedObjectsClient = new SavedObjectsClient();
   });
 
   describe('#_getUrl', () => {
-    it('returns without arguments', () => {
+    test('returns without arguments', () => {
       const url = savedObjectsClient._getUrl();
-      const expected = `${basePath}/api/saved_objects/`;
+      const expected = `/api/saved_objects/`;
 
       expect(url).to.be(expected);
     });
 
-    it('appends path', () => {
+    test('appends path', () => {
       const url = savedObjectsClient._getUrl(['some', 'path']);
-      const expected = `${basePath}/api/saved_objects/some/path`;
+      const expected = `/api/saved_objects/some/path`;
 
       expect(url).to.be(expected);
     });
 
-    it('appends query', () => {
+    test('appends query', () => {
       const url = savedObjectsClient._getUrl(['some', 'path'], { foo: 'Foo', bar: 'Bar' });
-      const expected = `${basePath}/api/saved_objects/some/path?foo=Foo&bar=Bar`;
+      const expected = `/api/saved_objects/some/path?foo=Foo&bar=Bar`;
 
       expect(url).to.be(expected);
     });
   });
 
   describe('#_request', () => {
-    const params = { foo: 'Foo', bar: 'Bar' };
+    const body = { foo: 'Foo', bar: 'Bar' };
 
     it('passes options to $http', () => {
       $http.withArgs({
         method: 'POST',
         url: '/api/path',
-        data: params
+        data: body
       }).returns(Promise.resolve({ data: '' }));
 
       savedObjectsClient._request('POST', '/api/path', params);
@@ -87,7 +77,7 @@ describe('SavedObjectsClient', () => {
 
     it('throws error when body is provided for GET', async () => {
       try {
-        await savedObjectsClient._request('GET', '/api/path', params);
+        await savedObjectsClient._request('GET', '/api/path', body);
         expect().fail('should have error');
       } catch (e) {
         expect(e.message).to.eql('body not permitted for GET requests');
