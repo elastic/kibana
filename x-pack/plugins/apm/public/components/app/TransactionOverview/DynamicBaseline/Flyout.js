@@ -18,7 +18,7 @@ import {
   EuiGlobalToastList,
   EuiText,
   EuiTitle,
-  EuiSpacer,
+  EuiSpacer
 } from '@elastic/eui';
 import { getMlJobUrl } from '../../../../utils/url';
 
@@ -132,22 +132,19 @@ export default class DynamicBaselineFlyout extends Component {
           {hasDynamicBaseline && (
             <div>
               <EuiCallOut
-                title={
-                  <span>
-                    Job already exists. {' '}
-                  </span>
-                }
+                title={<span>Job already exists. </span>}
                 color="success"
-                iconType="check">
+                iconType="check"
+              >
                 <p>
-                  Machine Learning is currently running a job on {serviceName} ({transactionType}).{' '}
-                  <a
-                      href={getMlJobUrl(serviceName, transactionType, location)}
-                  >
+                  Machine Learning is currently running a job on {serviceName} ({
+                    transactionType
+                  }).{' '}
+                  <a href={getMlJobUrl(serviceName, transactionType, location)}>
                     View existing job
                   </a>
                 </p>
-                </EuiCallOut> 
+              </EuiCallOut>
               <EuiSpacer size="m" />
             </div>
           )}
@@ -157,7 +154,8 @@ export default class DynamicBaselineFlyout extends Component {
               <EuiCallOut
                 title={
                   <span>
-                    There is no APM index pattern available. To create a job, please import the APM index pattern via the{' '}
+                    There is no APM index pattern available. To create a job,
+                    please import the APM index pattern via the{' '}
                     <a href="/app/kibana#/home/tutorial/apm">
                       APM Setup Instructions
                     </a>
@@ -176,7 +174,7 @@ export default class DynamicBaselineFlyout extends Component {
               predefined to calculate anomaly scores on response times on APM
               transactions. Once enabled, the APM response time graph will show
               the expected bounds from the Machine Learning job and annotate the
-              graph once the anomaly score is >=75.
+              graph once the anomaly score is &gt;=75.
             </p>
             <img
               src="/plugins/apm/images/dynamic_baseline.png"
