@@ -18,7 +18,8 @@ import {
   EuiGlobalToastList,
   EuiText,
   EuiTitle,
-  EuiSpacer
+  EuiSpacer,
+  EuiTextColor
 } from '@elastic/eui';
 import { getMlJobUrl } from '../../../../utils/url';
 
@@ -123,10 +124,11 @@ export default class DynamicBaselineFlyout extends Component {
           <EuiTitle>
             <h2>Enable anomaly detection on response times</h2>
           </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText color="subdued">
-            <h6>This feature is currently in beta</h6>
-          </EuiText>
+          <EuiTitle size="xxxs" textTransform="uppercase">
+            <EuiTextColor color="subdued">
+              <span>This feature is currently in beta</span>
+            </EuiTextColor>
+          </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           {hasDynamicBaseline && (
