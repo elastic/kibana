@@ -77,7 +77,7 @@ export default function ({ getService, getPageObjects }) {
       ];
 
       await PageObjects.visualize.toggleSpyPanel();
-      const data = PageObjects.visualize.getDataTableData();
+      const data = await PageObjects.visualize.getDataTableData();
       log.debug(data.split('\n'));
       expect(data.trim().split('\n')).to.eql(expectedChartData);
     });

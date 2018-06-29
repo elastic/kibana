@@ -68,7 +68,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.setInterval('Daily');
       await PageObjects.visualize.clickGo();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      const data = await PageObjects.visualize.getTableVisData();
+      const data = await PageObjects.visualize.getDataTableData();
       log.debug(data.split('\n'));
       expect(data.trim().split('\n')).to.be.eql([
         '2015-09-20', '4,757',
