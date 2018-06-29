@@ -201,7 +201,10 @@ export function SearchSourceProvider(Promise, Private, config) {
     getValue = name => {
       let self = this;
       while (self) {
-        if (self._state[name] !== void 0) return self._state[name];
+        if (self._state[name] !== void 0) {
+          return self._state[name];
+        }
+
         self = self.getParent();
       }
     };
