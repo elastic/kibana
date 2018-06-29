@@ -19,37 +19,33 @@
 
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
+import { Reference } from '../references';
 import { Type, TypeOptions } from './type';
 
-export type StringOptions = TypeOptions<string> & {
-  minLength?: number;
-  maxLength?: number;
-};
-
-export class StringType extends Type<string> {
-  constructor(options: StringOptions = {}) {
-    let schema = internals.string().allow('');
-
-    if (options.minLength !== undefined) {
-      schema = schema.min(options.minLength);
-    }
-
-    if (options.maxLength !== undefined) {
-      schema = schema.max(options.maxLength);
-    }
+export class ConditionalType<A, B, C> extends Type<B | C> {
+  constructor(
+    leftOperand: Reference<A>,
+    rightOperand: Reference<A> | A,
+    equalType: Type<B>,
+    notEqualType: Type<C>,
+    options?: TypeOptions<B | C>
+  ) {
+    const schema = internals.when(leftOperand.getSchema(), {
+      is: Reference.isReference(rightOperand)
+        ? rightOperand.getSchema()
+        : rightOperand,
+      otherwise: notEqualType.getSchema(),
+      then: equalType.getSchema(),
+    });
 
     super(schema, options);
   }
 
-  protected handleError(type: string, { limit, value }: Record<string, any>) {
-    switch (type) {
-      case 'any.required':
-      case 'string.base':
-        return `expected value of type [string] but got [${typeDetect(value)}]`;
-      case 'string.min':
-        return `value is [${value}] but it must have a minimum length of [${limit}].`;
-      case 'string.max':
-        return `value is [${value}] but it must have a maximum length of [${limit}].`;
+  protected handleError(type: string, { value }: Record<string, any>) {
+    if (type === 'any.required') {
+      return `expected at least one defined value but got [${typeDetect(
+        value
+      )}]`;
     }
   }
 }

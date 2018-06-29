@@ -17,15 +17,37 @@
  * under the License.
  */
 
-import { Type } from './type';
+// Test helpers to simplify mocking environment options.
 
-export class MaybeType<V> extends Type<V | undefined> {
-  constructor(type: Type<V>) {
-    super(
-      type
-        .getSchema()
-        .optional()
-        .default()
-    );
-  }
+import { EnvOptions } from '../../env';
+
+interface MockEnvOptions {
+  config?: string;
+  kbnServer?: any;
+  mode?: EnvOptions['mode']['name'];
+  packageInfo?: Partial<EnvOptions['packageInfo']>;
+}
+
+export function getEnvOptions({
+  config,
+  kbnServer,
+  mode = 'development',
+  packageInfo = {},
+}: MockEnvOptions = {}): EnvOptions {
+  return {
+    config,
+    kbnServer,
+    mode: {
+      dev: mode === 'development',
+      name: mode,
+      prod: mode === 'production',
+    },
+    packageInfo: {
+      branch: 'some-branch',
+      buildNum: 1,
+      buildSha: 'some-sha-256',
+      version: 'some-version',
+      ...packageInfo,
+    },
+  };
 }

@@ -136,7 +136,7 @@ export class ConfigService {
     rawConfig: {},
     ConfigClass: ConfigWithSchema<Schema, Config>
   ) {
-    const context = Array.isArray(path) ? path.join('.') : path;
+    const namespace = Array.isArray(path) ? path.join('.') : path;
 
     const configSchema = ConfigClass.schema;
 
@@ -151,7 +151,16 @@ export class ConfigService {
       );
     }
 
-    const config = ConfigClass.schema.validate(rawConfig, context);
+    const environmentMode = this.env.getMode();
+    const config = ConfigClass.schema.validate(
+      rawConfig,
+      {
+        dev: environmentMode.dev,
+        prod: environmentMode.prod,
+        ...this.env.getPackageInfo(),
+      },
+      namespace
+    );
     return new ConfigClass(config, this.env);
   }
 

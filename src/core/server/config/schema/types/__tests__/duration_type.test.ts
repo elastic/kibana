@@ -30,9 +30,9 @@ test('is required by default', () => {
   expect(() => duration().validate(undefined)).toThrowErrorMatchingSnapshot();
 });
 
-test('includes context in failure', () => {
+test('includes namespace in failure', () => {
   expect(() =>
-    duration().validate(undefined, 'foo-context')
+    duration().validate(undefined, {}, 'foo-namespace')
   ).toThrowErrorMatchingSnapshot();
 });
 

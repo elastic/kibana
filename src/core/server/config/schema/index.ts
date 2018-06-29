@@ -20,6 +20,7 @@
 import { Duration } from 'moment';
 
 import { ByteSizeValue } from './byte_size_value';
+import { ContextReference, Reference, SiblingReference } from './references';
 import {
   AnyType,
   ArrayOptions,
@@ -27,6 +28,7 @@ import {
   BooleanType,
   ByteSizeOptions,
   ByteSizeType,
+  ConditionalType,
   DurationOptions,
   DurationType,
   LiteralType,
@@ -172,10 +174,36 @@ function oneOf<RTS extends AnyType[]>(
   return new UnionType(types, options);
 }
 
+function contextRef<T>(key: string): ContextReference<T> {
+  return new ContextReference(key);
+}
+
+function siblingRef<T>(key: string): SiblingReference<T> {
+  return new SiblingReference(key);
+}
+
+function conditional<A, B, C>(
+  leftOperand: Reference<A>,
+  rightOperand: Reference<A> | A,
+  equalType: Type<B>,
+  notEqualType: Type<C>,
+  options?: TypeOptions<B | C>
+) {
+  return new ConditionalType(
+    leftOperand,
+    rightOperand,
+    equalType,
+    notEqualType,
+    options
+  );
+}
+
 export const schema = {
   arrayOf,
   boolean,
   byteSize,
+  conditional,
+  contextRef,
   duration,
   literal,
   mapOf,
@@ -183,6 +211,7 @@ export const schema = {
   number,
   object,
   oneOf,
+  siblingRef,
   string,
 };
 

@@ -17,57 +17,52 @@
  * under the License.
  */
 
-import { isPlainObject } from 'lodash';
 import typeDetect from 'type-detect';
 import { SchemaTypeError } from '../errors';
-import { toContext } from './index';
+import { internals } from '../internals';
 import { Type, TypeOptions } from './type';
-
-function isMap<K, V>(o: any): o is Map<K, V> {
-  return o instanceof Map;
-}
 
 export type MapOfOptions<K, V> = TypeOptions<Map<K, V>>;
 
 export class MapOfType<K, V> extends Type<Map<K, V>> {
   constructor(
-    private readonly keyType: Type<K>,
-    private readonly valueType: Type<V>,
+    keyType: Type<K>,
+    valueType: Type<V>,
     options: MapOfOptions<K, V> = {}
   ) {
-    super(options);
-  }
+    const defaultValue = options.defaultValue;
+    const schema = internals
+      .map()
+      .entries(keyType.getSchema(), valueType.getSchema());
 
-  public process(obj: any, context?: string): Map<K, V> {
-    if (isPlainObject(obj)) {
-      const entries = Object.keys(obj).map(key => [key, obj[key]]);
-      return this.processEntries(entries, context);
-    }
-
-    if (isMap(obj)) {
-      return this.processEntries([...obj], context);
-    }
-
-    throw new SchemaTypeError(
-      `expected value of type [Map] or [object] but got [${typeDetect(obj)}]`,
-      context
-    );
-  }
-
-  public processEntries(entries: any[][], context?: string) {
-    const res = entries.map(([key, value]) => {
-      const validatedKey = this.keyType.validate(
-        key,
-        toContext(context, String(key))
-      );
-      const validatedValue = this.valueType.validate(
-        value,
-        toContext(context, String(key))
-      );
-
-      return [validatedKey, validatedValue] as [K, V];
+    super(schema, {
+      ...options,
+      // Joi clones default values with `Hoek.clone`, and there is bug in cloning
+      // of Map/Set/Promise/Error: https://github.com/hapijs/hoek/issues/228.
+      // The only way to avoid cloning and hence the bug is to use function for
+      // default value instead.
+      defaultValue:
+        defaultValue instanceof Map ? () => defaultValue : defaultValue,
     });
+  }
 
-    return new Map(res);
+  protected handleError(
+    type: string,
+    { entryKey, reason, value }: Record<string, any>,
+    path: string[]
+  ) {
+    switch (type) {
+      case 'any.required':
+      case 'map.base':
+        return `expected value of type [Map] or [object] but got [${typeDetect(
+          value
+        )}]`;
+      case 'map.key':
+      case 'map.value':
+        const childPathWithIndex = reason.path.slice();
+        childPathWithIndex.splice(path.length, 0, entryKey.toString());
+
+        return new SchemaTypeError(reason.message, childPathWithIndex);
+    }
   }
 }

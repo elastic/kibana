@@ -41,9 +41,9 @@ test('is required by default', () => {
   ).toThrowErrorMatchingSnapshot();
 });
 
-test('includes context in failure', () => {
+test('includes namespace in failure', () => {
   expect(() =>
-    schema.number().validate(undefined, 'foo-context')
+    schema.number().validate(undefined, {}, 'foo-namespace')
   ).toThrowErrorMatchingSnapshot();
 });
 

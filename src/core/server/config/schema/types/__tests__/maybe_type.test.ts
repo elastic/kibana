@@ -39,18 +39,10 @@ test('returns undefined even if contained type has a default value', () => {
   expect(type.validate(undefined)).toEqual(undefined);
 });
 
-test('calls validate on contained type', () => {
-  const spy = jest.fn();
+test('validates contained type', () => {
+  const type = schema.maybe(schema.string({ maxLength: 1 }));
 
-  const type = schema.maybe(
-    schema.string({
-      validate: spy,
-    })
-  );
-
-  type.validate('foo');
-
-  expect(spy).toHaveBeenCalledWith('foo');
+  expect(() => type.validate('foo')).toThrowErrorMatchingSnapshot();
 });
 
 test('fails if null', () => {
@@ -58,9 +50,9 @@ test('fails if null', () => {
   expect(() => type.validate(null)).toThrowErrorMatchingSnapshot();
 });
 
-test('includes context in failure', () => {
+test('includes namespace in failure', () => {
   const type = schema.maybe(schema.string());
   expect(() =>
-    type.validate(null, 'foo-context')
+    type.validate(null, {}, 'foo-namespace')
   ).toThrowErrorMatchingSnapshot();
 });

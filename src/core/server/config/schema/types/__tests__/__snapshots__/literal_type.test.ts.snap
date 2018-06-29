@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`includes context in failure 1`] = `"[foo-context]: expected value to equal [test] but got [foo]"`;
+exports[`includes namespace in failure 1`] = `"[foo-namespace]: expected value to equal [test] but got [foo]"`;
 
 exports[`returns error when not correct 1`] = `"expected value to equal [test] but got [foo]"`;
 

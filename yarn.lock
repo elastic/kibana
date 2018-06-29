@@ -369,6 +369,10 @@
   version "13.3.0"
   resolved "https://registry.yarnpkg.com/@types/joi/-/joi-13.3.0.tgz#bdfa2e49d8d258ba79f23304228d0c4d5cfc848c"
 
+"@types/joi@^10.4.4":
+  version "10.6.2"
+  resolved "https://registry.yarnpkg.com/@types/joi/-/joi-10.6.2.tgz#0e7d632fe918c337784e87b16c7cc0098876179a"
+
 "@types/js-yaml@^3.11.1":
   version "3.11.1"
   resolved "https://registry.yarnpkg.com/@types/js-yaml/-/js-yaml-3.11.1.tgz#ac5bab26be5f9c6f74b6b23420f2cfa5a7a6ba40"
