@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getSpacesQueryParams } from './query_params';
+import { getSpacesQueryFilters } from './query_params';
 
 test('returns no parameters when no types are provided', () => {
-  expect(getSpacesQueryParams('space_1', [])).toEqual({});
+  expect(getSpacesQueryFilters('space_1', [])).toEqual([]);
 });
 
 test('creates a query that filters on type, but not on space, for types that are not space-aware', () => {
@@ -23,12 +23,12 @@ test('creates a query that filters on type, but not on space, for types that are
       }]
     }
   };
-  expect(getSpacesQueryParams(spaceId, [type])).toEqual({
+  expect(getSpacesQueryFilters(spaceId, [type])).toEqual([{
     bool: {
       should: [expectedTypeClause],
       minimum_should_match: 1
     }
-  });
+  }]);
 });
 
 test('creates a query that restricts a space-aware type to the provided space (space_1)', () => {
@@ -49,12 +49,12 @@ test('creates a query that restricts a space-aware type to the provided space (s
     }
   };
 
-  expect(getSpacesQueryParams(spaceId, [type])).toEqual({
+  expect(getSpacesQueryFilters(spaceId, [type])).toEqual([{
     bool: {
       should: [expectedTypeClause],
       minimum_should_match: 1
     }
-  });
+  }]);
 });
 
 test('creates a query that restricts a space-aware type to the provided space (default)', () => {
@@ -78,12 +78,12 @@ test('creates a query that restricts a space-aware type to the provided space (d
     }
   };
 
-  expect(getSpacesQueryParams(spaceId, [type])).toEqual({
+  expect(getSpacesQueryFilters(spaceId, [type])).toEqual([{
     bool: {
       should: [expectedTypeClause],
       minimum_should_match: 1
     }
-  });
+  }]);
 });
 
 test('creates a query supporting a find operation on multiple types', () => {
@@ -126,10 +126,10 @@ test('creates a query supporting a find operation on multiple types', () => {
     }
   }];
 
-  expect(getSpacesQueryParams(spaceId, types)).toEqual({
+  expect(getSpacesQueryFilters(spaceId, types)).toEqual([{
     bool: {
       should: expectedTypeClauses,
       minimum_should_match: 1
     }
-  });
+  }]);
 });

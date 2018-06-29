@@ -46,17 +46,19 @@ function getClauseForType(spaceId, type) {
   };
 }
 
-export function getSpacesQueryParams(spaceId, types = []) {
+export function getSpacesQueryFilters(spaceId, types = []) {
+  const filters = [];
+
   const typeClauses = types.map((type) => getClauseForType(spaceId, type));
 
   if (typeClauses.length > 0) {
-    return {
+    filters.push({
       bool: {
         should: typeClauses,
         minimum_should_match: 1
       }
-    };
+    });
   }
 
-  return {};
+  return filters;
 }

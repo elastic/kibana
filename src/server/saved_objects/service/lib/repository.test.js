@@ -439,14 +439,25 @@ describe('SavedObjectsRepository', () => {
       }
     });
 
-    it('passes mappings, search, searchFields, type, sortField, extraQueryParams, and sortOrder to getSearchDsl', async () => {
+    it('requires filters to be an array if defined', async () => {
+      try {
+        await savedObjectsRepository.find({ filters: 'string' });
+        throw new Error('expected find() to reject');
+      } catch (error) {
+        sinon.assert.notCalled(callAdminCluster);
+        sinon.assert.notCalled(onBeforeWrite);
+        expect(error.message).toMatch('must be an array');
+      }
+    });
+
+    it('passes mappings, search, searchFields, type, sortField, filters, and sortOrder to getSearchDsl', async () => {
       const relevantOpts = {
         search: 'foo*',
         searchFields: ['foo'],
         type: 'bar',
         sortField: 'name',
         sortOrder: 'desc',
-        extraQueryParams: { bool: {} },
+        filters: [{ bool: {} }],
       };
 
       await savedObjectsRepository.find(relevantOpts);

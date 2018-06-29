@@ -6,7 +6,7 @@
 
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { isTypeSpaceAware } from './lib/is_type_space_aware';
-import { getSpacesQueryParams } from './lib/query_params';
+import { getSpacesQueryFilters } from './lib/query_params';
 
 export class SpacesSavedObjectsClient {
   constructor(options) {
@@ -77,7 +77,7 @@ export class SpacesSavedObjectsClient {
 
     const spaceId = await this._getSpaceId();
 
-    spaceOptions.extraQueryParams = getSpacesQueryParams(spaceId, types);
+    spaceOptions.filters = getSpacesQueryFilters(spaceId, types);
 
     return await this._client.find({ ...options, ...spaceOptions });
   }
@@ -91,7 +91,7 @@ export class SpacesSavedObjectsClient {
     });
 
     result.saved_objects = result.saved_objects.map(savedObject => {
-      const { id, type, spaceId } = savedObject;
+      const { id, type, spaceId = DEFAULT_SPACE_ID } = savedObject;
 
       if (isTypeSpaceAware(type)) {
         if (spaceId !== thisSpaceId) {
