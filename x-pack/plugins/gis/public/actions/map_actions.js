@@ -12,8 +12,11 @@ import { TileLayer } from "../components/map/layers/tile_layer";
 
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 export const UPDATE_LAYER_ORDER = 'UPDATE_LAYER_ORDER';
-export const ADD_VECTOR_LAYER = 'ADD_VECTOR_LAYER';
-export const ADD_TILE_LAYER = 'ADD_TILE_LAYER';
+export const ADD_LAYER = 'ADD_LAYER';
+export const LAYER_LOADING = 'LAYER_LOADING';
+export const REMOVE_LAYER = 'REMOVE_LAYER';
+export const PROMOTE_TEMPORARY_LAYERS = 'PROMOTE_TEMPORARY_LAYERS';
+export const CLEAR_TEMPORARY_LAYERS = 'CLEAR_TEMPORARY_LAYERS';
 export const ADD_VECTOR_SOURCE = 'ADD_VECTOR_SOURCE';
 export const ADD_TMS_SOURCE = 'ADD_TMS_SOURCE';
 
@@ -31,41 +34,72 @@ export function updateLayerOrder(newLayerOrder) {
   };
 }
 
-export function addVectorLayer(sourceName, layerName) {
+export function addLayer(layer) {
+  return dispatch => {
+    dispatch({
+      type: ADD_LAYER,
+      layer
+    });
+    dispatch(layerLoading(false));
+  };
+}
+
+export function layerLoading(loadingBool) {
+  return {
+    type: LAYER_LOADING,
+    loadingBool
+  };
+}
+
+export function promoteTemporaryLayers() {
+  return {
+    type: PROMOTE_TEMPORARY_LAYERS
+  };
+}
+
+export function clearTemporaryLayers() {
+  return {
+    type: CLEAR_TEMPORARY_LAYERS
+  };
+}
+
+export function addVectorLayer(sourceName, layerName, options = {}) {
   return async (dispatch, getState) => {
+    dispatch(layerLoading(true));
     const { map } = getState();
-    const vectorSource = map.vectorSources.find(
-      source => source.name === sourceName);
-    const layerSource = vectorSource.service.find(
-      ({ name }) => name === layerName);
+    const vectorSource = map.sources.find(({ name }) => name === sourceName);
+    const layerSource = vectorSource.service.find(({ name }) => name === layerName);
     const vectorFetch = await fetch(layerSource.url);
     vectorFetch.json().then(resolvedResource => {
       const layer = VectorLayer.create({
         layerName,
-        source: resolvedResource
+        source: resolvedResource,
+        ...options
       });
-      dispatch({
-        type: ADD_VECTOR_LAYER,
-        layer
-      });
+      dispatch(addLayer(layer));
     });
   };
 }
 
-export function addTileLayer(sourceName, layerName) {
+export function addTileLayer(sourceName, layerName, options = {}) {
   return (dispatch, getState) => {
+    dispatch(layerLoading(true));
     const { map } = getState();
-    const tmsSource = map.tmsSources.find(
-      source => source.name === sourceName);
+    const tmsSource = map.sources.find(({ name }) => name === sourceName);
+    const service = tmsSource.service.find(({ id }) => id === layerName);
     const layer = TileLayer.create({
       layerName,
-      //TODO: Grab by name
-      source: tmsSource.service[0].url
+      source: service.url,
+      ...options
     });
-    dispatch({
-      type: ADD_TILE_LAYER,
-      layer
-    });
+    dispatch(addLayer(layer));
+  };
+}
+
+export function removeLayer(layerName) {
+  return {
+    type: REMOVE_LAYER,
+    layerName
   };
 }
 
