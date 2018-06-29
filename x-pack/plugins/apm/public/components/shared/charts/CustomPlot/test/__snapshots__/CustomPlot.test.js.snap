@@ -47,7 +47,6 @@ Array [
   color: #666666;
   cursor: pointer;
   opacity: 1;
-  margin-left: 16px;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
@@ -91,6 +90,14 @@ Array [
   -webkit-justify-content: flex-end;
   -ms-flex-pack: end;
   justify-content: flex-end;
+}
+
+.c0 div {
+  margin-right: 16px;
+}
+
+.c0 div:last-child {
+  margin-right: 0;
 }
 
 .c3 {
@@ -1125,7 +1132,6 @@ Array [
   color: #666666;
   cursor: pointer;
   opacity: 1;
-  margin-left: 16px;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
@@ -1169,6 +1175,14 @@ Array [
   -webkit-justify-content: flex-end;
   -ms-flex-pack: end;
   justify-content: flex-end;
+}
+
+.c0 div {
+  margin-right: 16px;
+}
+
+.c0 div:last-child {
+  margin-right: 0;
 }
 
 .c3 {
@@ -1259,7 +1273,6 @@ Array [
   color: #666666;
   cursor: pointer;
   opacity: 1;
-  margin-left: 16px;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;

@@ -9,6 +9,7 @@ import React from 'react';
 import styled from 'styled-components';
 import Legend from '../Legend';
 import {
+  unit,
   units,
   fontSizes,
   px,
@@ -20,6 +21,13 @@ const Container = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-end;
+
+  div {
+    margin-right: ${px(unit)};
+    &:last-child {
+      margin-right: 0;
+    }
+  }
 `;
 
 const LegendContent = styled.span`
