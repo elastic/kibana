@@ -140,9 +140,9 @@ export async function loadMapResources(serviceSettings, dispatch) {
   dispatch(addTMSSource(DATA_ORIGIN.EMS, tmsSource, 'road_map_source'));
   // Sample TMS OSM Source
   dispatch(addTMSSource(DATA_ORIGIN.TMS,
-    [{ url: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png' }], 'osm_source'));
+    [{ id: 'osm', url: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png' }], 'osm_source'));
   // EMS Vector Source
-  dispatch(addVectorSource(DATA_ORIGIN.CONFIG, emsSource, 'ems_source'));
+  dispatch(addVectorSource(DATA_ORIGIN.EMS, emsSource, 'ems_source'));
 
   // Add initial layers
   dispatch(addTileLayer('road_map_source', 'road_map'));
