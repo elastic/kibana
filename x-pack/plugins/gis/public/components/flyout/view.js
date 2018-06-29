@@ -10,6 +10,7 @@ import {
   EuiText,
   EuiSelect,
   EuiSpacer,
+  EuiButton,
   EuiFlyout,
   EuiFlyoutBody,
   EuiButtonEmpty,
@@ -44,10 +45,26 @@ export class FlyOut extends React.Component {
     );
   };
 
+  _addToMapBtn() {
+    const { layerLoading, temporaryLayers, addAction } = this.props;
+    console.log(layerLoading, temporaryLayers);
+    const addToMapBtnText = 'Add to map';
+    return (
+      <EuiButton
+        style={{ width: '10rem' }}
+        disabled={!temporaryLayers || layerLoading}
+        isLoading={layerLoading}
+        iconType={temporaryLayers && !layerLoading ? 'check' : undefined}
+        onClick={() => addAction()}
+        fill
+      >
+        {addToMapBtnText}
+      </EuiButton>
+    );
+  }
+
   _renderFlyout() {
-    const options = this.props.emsLayerOptions &&
-      this.props.emsLayerOptions.map(service => ({ value: service.name, text: service.name }));
-    const { selectAction } = this.props;
+    const { emsVectorOptions, emsSourceName, selectAction, closeFlyout } = this.props;
 
     return (
       <EuiFlyout onClose={this.props.onClose} style={{ maxWidth: 768 }}>
@@ -84,14 +101,14 @@ export class FlyOut extends React.Component {
           <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                onClick={this.props.closeFlyout}
+                onClick={closeFlyout}
                 flush="left"
               >
                 Cancel
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {/*{addToMapBtn}*/}
+              {this._addToMapBtn()}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutFooter>
