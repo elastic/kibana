@@ -30,9 +30,24 @@ export function map(state = INITIAL_STATE, action) {
       return { ...state, layerList: action.newLayerOrder.map(
         layerNumber => state.layerList[layerNumber]
       ) };
-    case ADD_VECTOR_LAYER:
-    case ADD_TILE_LAYER:
+    case ADD_LAYER:
       return { ...state, ...{ layerList: [ ...state.layerList, action.layer ] } };
+    case REMOVE_LAYER:
+      return { ...state, ...{ layerList: [ ...state.layerList.filter(
+        ({ name }) => name !== action.layerName) ] } };
+    //TODO: Handle more than one
+    case PROMOTE_TEMPORARY_LAYERS:
+      console.log('le temps');
+      const tempLayerIdx = state.layerList.findIndex(({ temporary }) => temporary);
+      const newLayer = { ...state.layerList[tempLayerIdx], temporary: false };
+      const newLayerList = [...state.layerList.slice(0, tempLayerIdx), newLayer,
+        ...state.layerList.slice(tempLayerIdx + 1) ];
+      return { ...state, ...{ layerList: newLayerList } };
+    case CLEAR_TEMPORARY_LAYERS:
+      return { ...state, ...{ layerList: [ ...state.layerList.filter(
+        ({ temporary }) => !temporary) ] } };
+    case LAYER_LOADING:
+      return { ...state, layerLoading: action.loadingBool };
     default:
       return state;
   }
