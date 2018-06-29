@@ -53,9 +53,9 @@ function MoreSeries({ hiddenSeriesCount }) {
 }
 
 export default function Legends({
-  noHits,
   clickLegend,
   hiddenSeriesCount,
+  noHits,
   series,
   seriesEnabledState,
   truncateLegends
@@ -98,7 +98,6 @@ export default function Legends({
 }
 
 Legends.propTypes = {
-  chartTitle: PropTypes.string,
   clickLegend: PropTypes.func.isRequired,
   hiddenSeriesCount: PropTypes.number.isRequired,
   noHits: PropTypes.bool.isRequired,

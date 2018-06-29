@@ -19,25 +19,7 @@ import {
   EuiText,
   EuiTitle
 } from '@elastic/eui';
-import {
-  decodeKibanaSearchParams,
-  encodeKibanaSearchParams
-} from '../../../../utils/url';
-
-function getJobUrl(serviceName, transactionType, location) {
-  const { _g, _a } = decodeKibanaSearchParams(location.search);
-  const nextSearch = encodeKibanaSearchParams({
-    _g: {
-      ..._g,
-      ml: {
-        jobIds: [`${serviceName}-${transactionType}-high_mean_response_time`]
-      }
-    },
-    _a
-  });
-
-  return `/app/ml#/timeseriesexplorer/?${nextSearch}`;
-}
+import { getMlJobUrl } from '../../../../utils/url';
 
 export default class DynamicBaselineFlyout extends Component {
   state = {
@@ -85,7 +67,7 @@ export default class DynamicBaselineFlyout extends Component {
             <p>
               There&apos;s already a baseline job running on {serviceName} for{' '}
               {transactionType}.{' '}
-              <a href={getJobUrl(serviceName, transactionType, location)}>
+              <a href={getMlJobUrl(serviceName, transactionType, location)}>
                 View existing job.
               </a>
             </p>
@@ -107,7 +89,7 @@ export default class DynamicBaselineFlyout extends Component {
             <p>
               The analysis is now running on {serviceName} and you will start
               seeing results show up on the response times graph.{' '}
-              <a href={getJobUrl(serviceName, transactionType, location)}>
+              <a href={getMlJobUrl(serviceName, transactionType, location)}>
                 View job.
               </a>
             </p>
@@ -147,7 +129,7 @@ export default class DynamicBaselineFlyout extends Component {
               title={
                 <span>
                   A dynamic baseline has already been created.{' '}
-                  <a href={getJobUrl(serviceName, transactionType, location)}>
+                  <a href={getMlJobUrl(serviceName, transactionType, location)}>
                     View it here
                   </a>
                 </span>

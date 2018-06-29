@@ -76,7 +76,9 @@ class TransactionOverview extends Component {
 
         <OverviewChartsRequest
           urlParams={urlParams}
-          render={({ data }) => <Charts charts={data} urlParams={urlParams} />}
+          render={({ data }) => (
+            <Charts charts={data} urlParams={urlParams} location={location} />
+          )}
         />
 
         <HeaderMedium>{transactionTypeLabel(transactionType)}</HeaderMedium>

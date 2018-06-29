@@ -16,6 +16,21 @@ import { EuiLink } from '@elastic/eui';
 import createHistory from 'history/createHashHistory';
 import chrome from 'ui/chrome';
 
+export function getMlJobUrl(serviceName, transactionType, location) {
+  const { _g, _a } = decodeKibanaSearchParams(location.search);
+  const nextSearch = encodeKibanaSearchParams({
+    _g: {
+      ..._g,
+      ml: {
+        jobIds: [`${serviceName}-${transactionType}-high_mean_response_time`]
+      }
+    },
+    _a
+  });
+
+  return `/app/ml#/timeseriesexplorer/?${nextSearch}`;
+}
+
 export function toQuery(search) {
   return qs.parse(search.slice(1));
 }

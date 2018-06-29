@@ -8,7 +8,6 @@ import _ from 'lodash';
 import { makeWidthFlexible } from 'react-vis';
 import PropTypes from 'prop-types';
 import React, { PureComponent, Fragment } from 'react';
-import styled from 'styled-components';
 
 import Legends from './Legends';
 import StaticPlot from './StaticPlot';
@@ -16,12 +15,6 @@ import InteractivePlot from './InteractivePlot';
 import VoronoiPlot from './VoronoiPlot';
 import { createSelector } from 'reselect';
 import { getPlotValues } from './plotUtils';
-import { fontSizes, units, px } from '../../../../style/variables';
-
-const Title = styled.div`
-  font-size: ${fontSizes.large};
-  margin-bottom: ${px(units.half)};
-`;
 
 const VISIBLE_LEGEND_COUNT = 4;
 
@@ -108,7 +101,7 @@ export class InnerCustomPlot extends PureComponent {
   };
 
   render() {
-    const { chartTitle, series, truncateLegends, noHits, width } = this.props;
+    const { series, truncateLegends, noHits, width } = this.props;
 
     if (_.isEmpty(series) || !width) {
       return null;
@@ -135,11 +128,8 @@ export class InnerCustomPlot extends PureComponent {
 
     return (
       <Fragment>
-        <Title>{chartTitle}</Title>
-
         <Legends
           noHits={noHits}
-          chartTitle={chartTitle}
           truncateLegends={truncateLegends}
           series={visibleSeries}
           hiddenSeriesCount={hiddenSeriesCount}

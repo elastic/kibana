@@ -21,7 +21,7 @@ const Container = styled.div`
   color: ${colors.gray2};
   cursor: ${props => (props.clickable ? 'pointer' : 'initial')};
   opacity: ${props => (props.disabled ? 0.4 : 1)};
-  margin-right: ${px(unit)};
+  margin-left: ${px(unit)};
   user-select: none;
 `;
 

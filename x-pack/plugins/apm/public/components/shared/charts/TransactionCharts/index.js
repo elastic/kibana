@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiIconTip } from '@elastic/eui';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import CustomPlot from '../CustomPlot';
 import { asMillis, tpmUnit, asInteger } from '../../../../utils/formatters';
+import { getMlJobUrl } from '../../../../utils/url';
 import styled from 'styled-components';
-import { units, unit, px } from '../../../../style/variables';
+import { units, unit, px, fontSizes } from '../../../../style/variables';
 import { timefilter } from 'ui/timefilter';
 import moment from 'moment';
 
@@ -33,6 +35,27 @@ const Chart = styled.div`
       margin-left: ${px(units.half)};
     }
   }
+`;
+
+const ChartHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: ${px(units.half)};
+`;
+
+const ChartTitle = styled.div`
+  font-weight: 600;
+  font-size: ${fontSizes.large};
+`;
+
+const MLTipContainer = styled.div`
+  display: flex;
+  align-items: center;
+  font-size: ${fontSizes.small};
+`;
+
+const MLText = styled.div`
+  margin-left: ${px(units.half)};
 `;
 
 export class Charts extends Component {
@@ -74,15 +97,32 @@ export class Charts extends Component {
   };
 
   render() {
-    const { charts, urlParams } = this.props;
-    const { noHits, responseTimeSeries, tpmSeries } = charts;
+    const { noHits, responseTimeSeries, tpmSeries } = this.props.charts;
+    const { serviceName, transactionType } = this.props.urlParams;
 
     return (
       <ChartsWrapper>
         <Chart>
+          <ChartHeader>
+            <ChartTitle>{responseTimeLabel(transactionType)}</ChartTitle>
+            <MLTipContainer>
+              <EuiIconTip content="The dynamic baseline will show min/max value stream for the avg. response time. When anomalies that score 75 or above, a background highlight is shown in the graph." />
+              <MLText>
+                Machine Learning:{' '}
+                <a
+                  href={getMlJobUrl(
+                    serviceName,
+                    transactionType,
+                    this.props.location
+                  )}
+                >
+                  Manage Job
+                </a>
+              </MLText>
+            </MLTipContainer>
+          </ChartHeader>
           <CustomPlot
             noHits={noHits}
-            chartTitle={responseTimeLabel(urlParams.transactionType)}
             series={responseTimeSeries}
             onHover={this.onHover}
             onMouseLeave={this.onMouseLeave}
@@ -94,9 +134,11 @@ export class Charts extends Component {
         </Chart>
 
         <Chart>
+          <ChartHeader>
+            <ChartTitle>{tpmLabel(transactionType)}</ChartTitle>
+          </ChartHeader>
           <CustomPlot
             noHits={noHits}
-            chartTitle={tpmLabel(urlParams.transactionType)}
             series={tpmSeries}
             onHover={this.onHover}
             onMouseLeave={this.onMouseLeave}
@@ -128,8 +170,9 @@ function responseTimeLabel(type) {
 }
 
 Charts.propTypes = {
-  urlParams: PropTypes.object.isRequired,
-  charts: PropTypes.object.isRequired
+  charts: PropTypes.object.isRequired,
+  locations: PropTypes.object.isRequired,
+  urlParams: PropTypes.object.isRequired
 };
 
 export default Charts;
