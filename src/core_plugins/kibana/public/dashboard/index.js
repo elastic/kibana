@@ -66,7 +66,7 @@ uiRoutes
       $scope.initialFilter = ($location.search()).filter || EMPTY_FILTER;
     },
     resolve: {
-      dash: function ($route, Private, courier, kbnUrl) {
+      dash: function ($route, Private, redirectWhenMissing, kbnUrl) {
         const savedObjectsClient = Private(SavedObjectsClientProvider);
         const title = $route.current.params.title;
         if (title) {
@@ -84,7 +84,7 @@ uiRoutes
               kbnUrl.redirect(`${DashboardConstants.LANDING_PAGE_PATH}?filter="${title}"`);
             }
             throw uiRoutes.WAIT_FOR_URL_CHANGE_TOKEN;
-          }).catch(courier.redirectWhenMissing({
+          }).catch(redirectWhenMissing({
             'dashboard': DashboardConstants.LANDING_PAGE_PATH
           }));
         }
@@ -94,9 +94,9 @@ uiRoutes
   .when(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {
     template: dashboardTemplate,
     resolve: {
-      dash: function (savedDashboards, courier) {
+      dash: function (savedDashboards, redirectWhenMissing) {
         return savedDashboards.get()
-          .catch(courier.redirectWhenMissing({
+          .catch(redirectWhenMissing({
             'dashboard': DashboardConstants.LANDING_PAGE_PATH
           }));
       }
@@ -105,7 +105,7 @@ uiRoutes
   .when(createDashboardEditUrl(':id'), {
     template: dashboardTemplate,
     resolve: {
-      dash: function (savedDashboards, Notifier, $route, $location, courier, kbnUrl, AppState) {
+      dash: function (savedDashboards, Notifier, $route, $location, redirectWhenMissing, kbnUrl, AppState) {
         const id = $route.current.params.id;
 
         return savedDashboards.get(id)
@@ -124,7 +124,7 @@ uiRoutes
               throw error;
             }
           })
-          .catch(courier.redirectWhenMissing({
+          .catch(redirectWhenMissing({
             'dashboard': DashboardConstants.LANDING_PAGE_PATH
           }));
       }
