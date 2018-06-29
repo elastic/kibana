@@ -5,6 +5,10 @@
  */
 
 import { isEmpty, flatten } from 'lodash';
+import {
+  SavedObjectsClient,
+  SavedObjectsRepositoryProvider,
+} from '../../../../../src/server/saved_objects';
 import { callClusterFactory } from '../../../xpack_main';
 import {
   getCollectorLogger,
@@ -46,8 +50,15 @@ export class BulkUploader {
       plugins: [monitoringBulk],
     });
 
-    this._callClusterWithInternalUser = callClusterFactory(server).getCallClusterInternal();
+    const callClusterInternal = callClusterFactory(server).getCallClusterInternal();
+    this._callClusterInternal = callClusterInternal;
 
+    const repositoryProvider = new SavedObjectsRepositoryProvider({
+      index: server.config().get('kibana.index'),
+      mappings: server.getKibanaIndexMappingsDsl(),
+    });
+    const repository = repositoryProvider.getRepository(callClusterInternal);
+    this._savedObjectsClient = new SavedObjectsClient(repository);
   }
 
   /*
@@ -89,7 +100,7 @@ export class BulkUploader {
    */
   async _fetchAndUpload(collectorSet) {
     const data = await collectorSet.bulkFetch({
-      callCluster: this._callClusterWithInternalUser,
+      callCluster: this._callClusterInternal,
       savedObjectsClient: this._savedObjectsClient,
     });
     const payload = data

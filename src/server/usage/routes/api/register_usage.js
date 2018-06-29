@@ -41,6 +41,7 @@ export function registerUsageApi(server) {
       const { server } = req;
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
       const callCluster = (...args) => callWithRequest(req, ...args); // All queries from HTTP API must use authentication headers from the request
+      const savedObjectsClient = req.getSavedObjectsClient();
 
       try {
         const [ clusterUuid, usage ] = await Promise.all([

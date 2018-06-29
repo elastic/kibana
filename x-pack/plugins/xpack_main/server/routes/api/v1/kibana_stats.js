@@ -18,8 +18,10 @@ export function kibanaStatsRoute(server) {
     method: 'GET',
     handler: async (req, reply) => {
       const server = req.server;
-      // require that http authentication headers from req are used to read ES data
+
+      // clients for gathering usage stats
       const callCluster = callClusterFactory(server).getCallClusterWithReq(req);
+      const savedObjectsClient = req.getSavedObjectsClient();
 
       try {
         const kibanaUsageCollector = getKibanaUsageCollector(server);
