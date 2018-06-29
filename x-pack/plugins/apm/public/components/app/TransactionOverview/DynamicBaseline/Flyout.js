@@ -17,7 +17,8 @@ import {
   EuiFlyoutHeader,
   EuiGlobalToastList,
   EuiText,
-  EuiTitle
+  EuiTitle,
+  EuiSpacer,
 } from '@elastic/eui';
 import { getMlJobUrl } from '../../../../utils/url';
 
@@ -120,59 +121,78 @@ export default class DynamicBaselineFlyout extends Component {
       <EuiFlyout onClose={onClose} size="s">
         <EuiFlyoutHeader>
           <EuiTitle>
-            <h2>Create dynamic baseline</h2>
+            <h2>Enable anomaly detection on response times</h2>
           </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText color="subdued">
+            <h6>This feature is currently in beta</h6>
+          </EuiText>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           {hasDynamicBaseline && (
-            <EuiCallOut
-              title={
-                <span>
-                  A dynamic baseline has already been created.{' '}
-                  <a href={getMlJobUrl(serviceName, transactionType, location)}>
-                    View it here
+            <div>
+              <EuiCallOut
+                title={
+                  <span>
+                    Job already exists. {' '}
+                  </span>
+                }
+                color="success"
+                iconType="check">
+                <p>
+                  Machine Learning is currently running a job on {serviceName} ({transactionType}).{' '}
+                  <a
+                      href={getMlJobUrl(serviceName, transactionType, location)}
+                  >
+                    View existing job
                   </a>
-                </span>
-              }
-              color="success"
-              iconType="check"
-            />
+                </p>
+                </EuiCallOut> 
+              <EuiSpacer size="m" />
+            </div>
           )}
 
           {!hasIndexPattern && (
-            <EuiCallOut
-              title={
-                <span>
-                  There is no APM index pattern available. To create a dynamic
-                  baseline, please import the APM index pattern via the{' '}
-                  <a href="/app/kibana#/home/tutorial/apm">
-                    APM Setup Instructions
-                  </a>
-                </span>
-              }
-              color="warning"
-              iconType="alert"
-            />
+            <div>
+              <EuiCallOut
+                title={
+                  <span>
+                    There is no APM index pattern available. To create a job, please import the APM index pattern via the{' '}
+                    <a href="/app/kibana#/home/tutorial/apm">
+                      APM Setup Instructions
+                    </a>
+                  </span>
+                }
+                color="warning"
+                iconType="alert"
+              />
+              <EuiSpacer size="m" />
+            </div>
           )}
 
           <EuiText>
             <p>
-              You can create a dynamic baseline with Machine Learning by the
-              click of a button. This allows you to catch anomalies and unusual
-              behaviour far quicker than before. The baseline is derived from
-              the 95th percentile response time, which is great to catching
-              performance issues that might be on the rise.
+              This integration will start a new Machine Learning job that is
+              predefined to calculate anomaly scores on response times on APM
+              transactions. Once enabled, the APM response time graph will show
+              the expected bounds from the Machine Learning job and annotate the
+              graph once the anomaly score is >=75.
             </p>
             <img
               src="/plugins/apm/images/dynamic_baseline.png"
               alt="Machine Learning in APM"
             />
             <p>
-              Once the job has been created, you will immediately see a baseline
-              on the Response times graph. You can always stop or remove your
-              baseline by{' '}
-              <a href="/app/ml">viewing your Machine Learning jobs</a> and edit
-              it from there.
+              The jobs can be created per transaction type and based on the
+              average response time. Once the job is created, you can manage it
+              and see more details in the{' '}
+              <a href="/app/ml">Machine Learning jobs management page</a>. It
+              can take some time for the job to calculate the results. Please
+              refresh the graph a few minutes after enabling the job.
+            </p>
+            <p>
+              <a href="#">Learn more</a> about the Machine Learning integration
+              in APM.
             </p>
           </EuiText>
         </EuiFlyoutBody>
@@ -187,7 +207,7 @@ export default class DynamicBaselineFlyout extends Component {
             fill
             disabled={isLoading || hasDynamicBaseline || !hasIndexPattern}
           >
-            Create dynamic baseline
+            Create new job
           </EuiButton>
         </EuiFlyoutFooter>
       </EuiFlyout>
