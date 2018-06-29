@@ -208,7 +208,6 @@ function discoverController(
 
   $scope.searchSource.inherits(timeRangeSearchSource);
 
-
   const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
   docTitle.change(`Discover${pageTitleSuffix}`);
 

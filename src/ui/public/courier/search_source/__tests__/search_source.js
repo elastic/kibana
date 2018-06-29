@@ -95,7 +95,33 @@ describe('SearchSource', function () {
     });
   });
 
-  describe('#index()', function () {
+  describe('#setValue()', function () {
+    it('sets the value for the property', function () {
+      const searchSource = new SearchSource();
+      searchSource.setValue('aggs', 5);
+      expect(searchSource.getValue('aggs')).to.be(5);
+    });
+
+    it('throws an error if the property is not accepted', function () {
+      const searchSource = new SearchSource();
+      expect(() => searchSource.setValue('index', 5)).to.throwError();
+    });
+  });
+
+  describe('#getValue()', function () {
+    it('gets the value for the property', function () {
+      const searchSource = new SearchSource();
+      searchSource.setValue('aggs', 5);
+      expect(searchSource.getValue('aggs')).to.be(5);
+    });
+
+    it('throws an error if the property is not accepted', function () {
+      const searchSource = new SearchSource();
+      expect(() => searchSource.getValue('unacceptablePropName')).to.throwError();
+    });
+  });
+
+  describe('#setIndexPattern()', function () {
     describe('auto-sourceFiltering', function () {
       describe('new index pattern assigned', function () {
         it('generates a searchSource filter', function () {

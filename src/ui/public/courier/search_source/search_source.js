@@ -84,6 +84,27 @@ import { FieldWildcardProvider } from '../../field_wildcard';
 import { getHighlightRequest } from '../../../../core_plugins/kibana/common/highlight';
 import { BuildESQueryProvider } from './build_query';
 
+const SETTABLE_PROPS = [
+  'type',
+  'query',
+  'filter',
+  'sort',
+  'highlight',
+  'highlightAll',
+  'aggs',
+  'from',
+  'searchAfter',
+  'size',
+  'source',
+  'version',
+  'fields',
+];
+
+const GETTABLE_PROPS = [
+  ...SETTABLE_PROPS,
+  'index', // This is settable via `setIndexPattern`
+];
+
 function parseInitialState(initialState) {
   if (!initialState) {
     return {};
@@ -155,6 +176,10 @@ export function SearchSourceProvider(Promise, Private, config) {
     };
 
     setValue = (prop, value) => {
+      if (!SETTABLE_PROPS.includes(prop)) {
+        throw new Error(`Can't set prop '${prop}' on SearchSource. Acceptable props are: ${SETTABLE_PROPS.join(', ')}.`);
+      }
+
       if (value == null) {
         delete this._state[prop];
       } else {
@@ -195,28 +220,35 @@ export function SearchSourceProvider(Promise, Private, config) {
 
     /**
      * Get values from the state
-     * @param {string} name - The name of the property desired
-     * @return {any} - the value found
      */
-    getValue = name => {
-      let self = this;
-      while (self) {
-        if (self._state[name] !== void 0) {
-          return self._state[name];
+    getValue = prop => {
+      if (!GETTABLE_PROPS.includes(prop)) {
+        throw new Error(`Can't get prop '${prop}' from SearchSource. Acceptable props are: ${GETTABLE_PROPS.join(', ')}.`);
+      }
+
+      let searchSource = this;
+
+      while (searchSource) {
+        const value = searchSource._state[prop];
+        if (value !== void 0) {
+          return value;
         }
 
-        self = self.getParent();
+        searchSource = searchSource.getParent();
       }
     };
 
     /**
      * Get the value from our own state, don't traverse up the chain
-     * @param {string} name - The name of the property desired
-     * @return {any} - the value found
      */
     getOwnValue = prop => {
-      if (this._state[prop] !== void 0) {
-        return this._state[prop];
+      if (!GETTABLE_PROPS.includes(prop)) {
+        throw new Error(`Can't get prop '${prop}' from SearchSource. Acceptable props are: ${GETTABLE_PROPS.join(', ')}.`);
+      }
+
+      const value = this._state[prop];
+      if (value !== void 0) {
+        return value;
       }
     };
 
