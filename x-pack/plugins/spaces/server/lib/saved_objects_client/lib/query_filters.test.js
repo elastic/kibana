@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getSpacesQueryFilters } from './query_params';
+import { getSpacesQueryFilters } from './query_filters';
 
 test('returns no parameters when no types are provided', () => {
   expect(getSpacesQueryFilters('space_1', [])).toEqual([]);

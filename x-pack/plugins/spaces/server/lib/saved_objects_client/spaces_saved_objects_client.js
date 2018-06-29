@@ -6,7 +6,7 @@
 
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { isTypeSpaceAware } from './lib/is_type_space_aware';
-import { getSpacesQueryFilters } from './lib/query_params';
+import { getSpacesQueryFilters } from './lib/query_filters';
 
 export class SpacesSavedObjectsClient {
   constructor(options) {
