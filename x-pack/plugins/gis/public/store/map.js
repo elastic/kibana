@@ -6,23 +6,23 @@
 
 import {
   SET_SELECTED_LAYER, UPDATE_LAYER_ORDER, ADD_TMS_SOURCE,
-  ADD_VECTOR_SOURCE, ADD_VECTOR_LAYER, ADD_TILE_LAYER
+  ADD_VECTOR_SOURCE, ADD_LAYER, REMOVE_LAYER, PROMOTE_TEMPORARY_LAYERS,
+  CLEAR_TEMPORARY_LAYERS, LAYER_LOADING
 } from "../actions/map_actions";
 
 const INITIAL_STATE = {
   selectedLayer: null,
   layerList: [],
-  vectorSources: [],
-  tmsSources: []
+  sources: [],
+  layerLoading: false
 };
 
-// Reducer
 export function map(state = INITIAL_STATE, action) {
   switch (action.type) {
     case ADD_TMS_SOURCE:
-      return { ...state, tmsSources: [...state.tmsSources, action.tms ] };
+      return { ...state, sources: [...state.sources, action.tms ] };
     case ADD_VECTOR_SOURCE:
-      return { ...state, vectorSources: [...state.vectorSources, action.vectorSource ] };
+      return { ...state, sources: [...state.sources, action.vectorSource ] };
     case SET_SELECTED_LAYER:
       return { ...state, selectedLayer: state.layerList.find(
         layer => layer.id === action.selectedLayer) };
