@@ -6,7 +6,7 @@
 
 import { createAction } from "redux-actions";
 import { openIndices as request } from "../../services";
-import { reloadIndices } from "../actions";
+import { clearRowStatus, reloadIndices } from "../actions";
 import { toastNotifications } from 'ui/notify';
 
 export const openIndicesStart = createAction(
@@ -18,7 +18,8 @@ export const openIndices = ({ indexNames }) => async (dispatch) => {
   try {
     await request(indexNames);
   } catch (error) {
-    return toastNotifications.addDanger(error.data.message);
+    toastNotifications.addDanger(error.data.message);
+    return dispatch(clearRowStatus({ indexNames }));
   }
   dispatch(reloadIndices(indexNames));
   toastNotifications.addSuccess(`Successfully opened: [${indexNames.join(", ")}]`);
