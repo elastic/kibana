@@ -11,15 +11,31 @@ export const getSelectedLayer = ({ map }) => map && map.selectedLayer;
 
 export const getLayerList = ({ map }) => map && map.layerList;
 
-export const getVectorLayerOptions = ({ map }) => map && map.vectorSources;
+export const getLayerOptions = ({ map }) => map && map.sources;
 
-export function getVectorLayerOptionsByName(state) {
+export const getLayerLoading = ({ map }) => map && map.layerLoading;
+
+export const getTemporaryLayers = ({ map }) => map &&
+  map.layerList.filter(({ temporary }) => temporary);
+
+function getLayerOptionsByOrigin(state) {
   return createSelector(
-    getVectorLayerOptions,
-    vectorLayerOptions => {
-      return _.isEmpty(vectorLayerOptions) ? []
-        : _.groupBy(vectorLayerOptions, ({ name }) => name);
+    getLayerOptions,
+    layerOptions => {
+      return _.isEmpty(layerOptions) ? {}
+        : _.groupBy(layerOptions, ({ dataOrigin }) => dataOrigin);
     }
   )(state);
 }
 
+export function getLayerOptionsByOriginAndType(state) {
+  return createSelector(
+    getLayerOptionsByOrigin,
+    layerOptions => {
+      return _.reduce(layerOptions, (accu, services, origin) => {
+        accu[origin] = _.groupBy(services, ({ type }) => type);
+        return accu;
+      }, {});
+    }
+  )(state);
+}
