@@ -78,7 +78,7 @@ import { NormalizeSortRequestProvider } from './_normalize_sort_request';
 import { SearchRequestProvider } from '../fetch/request';
 import { SegmentedSearchRequestProvider } from '../fetch/request/segmented_search_request';
 
-import { requestQueue } from '../_request_queue';
+import { searchRequestQueue } from '../search_request_queue';
 import { FetchSoonProvider } from '../fetch';
 import { FieldWildcardProvider } from '../../field_wildcard';
 import { getHighlightRequest } from '../../../../core_plugins/kibana/common/highlight';
@@ -421,7 +421,7 @@ export function SearchSourceProvider(Promise, Private, config) {
      * @return {undefined}
      */
     cancelQueued() {
-      requestQueue
+      searchRequestQueue.getAll()
         .filter(req => req.source === this)
         .forEach(req => req.abort());
     }
@@ -475,7 +475,7 @@ export function SearchSourceProvider(Promise, Private, config) {
      ******/
 
     _myStartableQueued() {
-      return requestQueue
+      return searchRequestQueue
         .getStartable()
         .filter(req => req.source === this);
     }
