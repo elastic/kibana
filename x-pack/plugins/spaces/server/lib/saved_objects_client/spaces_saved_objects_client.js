@@ -134,10 +134,13 @@ export class SpacesSavedObjectsClient {
     if (isTypeSpaceAware(type)) {
       await this.get(type, id);
 
-      options.extraBodyProperties = {
-        ...options.extraBodyProperties,
-        spaceId: await this._getSpaceId()
-      };
+      const spaceId = await this._getSpaceId();
+      if (spaceId !== DEFAULT_SPACE_ID) {
+        options.extraBodyProperties = {
+          ...options.extraBodyProperties,
+          spaceId
+        };
+      }
     }
 
     return await this._client.update(type, id, attributes, options);
