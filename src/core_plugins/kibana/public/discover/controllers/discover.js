@@ -549,14 +549,14 @@ function discoverController(
       flushResponseData();
     });
 
-    segmented.on('segment', notify.timed('handle each segment', function (resp) {
+    segmented.on('segment', (resp) => {
       if (resp._shards.failed > 0) {
         $scope.failures = _.union($scope.failures, resp._shards.failures);
         $scope.failures = _.uniq($scope.failures, false, function (failure) {
           return failure.index + failure.shard + failure.reason;
         });
       }
-    }));
+    });
 
     segmented.on('mergedSegment', function (merged) {
       $scope.mergedEsResp = merged;
@@ -579,28 +579,26 @@ function discoverController(
       // the merge rows, use a new array to help watchers
       $scope.rows = merged.hits.hits.slice();
 
-      notify.event('flatten hit and count fields', function () {
-        let counts = $scope.fieldCounts;
+      let counts = $scope.fieldCounts;
 
-        // if we haven't counted yet, or need a fresh count because we are sorting, reset the counts
-        if (!counts || sortFn) counts = $scope.fieldCounts = {};
+      // if we haven't counted yet, or need a fresh count because we are sorting, reset the counts
+      if (!counts || sortFn) counts = $scope.fieldCounts = {};
 
-        $scope.rows.forEach(function (hit) {
-          // skip this work if we have already done it
-          if (hit.$$_counted) return;
+      $scope.rows.forEach(function (hit) {
+        // skip this work if we have already done it
+        if (hit.$$_counted) return;
 
-          // when we are sorting results, we need to redo the counts each time because the
-          // "top 500" may change with each response, so don't mark this as counted
-          if (!sortFn) hit.$$_counted = true;
+        // when we are sorting results, we need to redo the counts each time because the
+        // "top 500" may change with each response, so don't mark this as counted
+        if (!sortFn) hit.$$_counted = true;
 
-          const fields = _.keys(indexPattern.flattenHit(hit));
-          let n = fields.length;
-          let field;
-          while (field = fields[--n]) {
-            if (counts[field]) counts[field] += 1;
-            else counts[field] = 1;
-          }
-        });
+        const fields = _.keys(indexPattern.flattenHit(hit));
+        let n = fields.length;
+        let field;
+        while (field = fields[--n]) {
+          if (counts[field]) counts[field] += 1;
+          else counts[field] = 1;
+        }
       });
     });
 
