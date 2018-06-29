@@ -120,12 +120,12 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
         state = {};
       }
 
-      const oldState = this.searchSource.toJSON();
-      const fnProps = _.transform(oldState, function (dynamic, val, name) {
+      const searchSourceData = this.searchSource.getData();
+      const fnProps = _.transform(searchSourceData, function (dynamic, val, name) {
         if (_.isFunction(val)) dynamic[name] = val;
       }, {});
 
-      this.searchSource.overwrite(_.defaults(state, fnProps));
+      this.searchSource.setData(_.defaults(state, fnProps));
 
       if (!_.isUndefined(this.searchSource.getOwnValue('query'))) {
         this.searchSource.setValue('query', migrateLegacyQuery(this.searchSource.getOwnValue('query')));
@@ -260,8 +260,9 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
       });
 
       if (this.searchSource) {
+        const searchSourceData = _.omit(this.searchSource.getData(), ['sort', 'size']);
         body.kibanaSavedObjectMeta = {
-          searchSourceJSON: angular.toJson(_.omit(this.searchSource.toJSON(), ['sort', 'size']))
+          searchSourceJSON: angular.toJson(searchSourceData)
         };
       }
 

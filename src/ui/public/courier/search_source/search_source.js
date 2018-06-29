@@ -105,14 +105,14 @@ const GETTABLE_PROPS = [
   'index', // This is settable via `setIndexPattern`
 ];
 
-function parseInitialState(initialState) {
-  if (!initialState) {
+function parseInitialData(initialData) {
+  if (!initialData) {
     return {};
   }
 
-  return typeof initialState === 'string' ?
-    JSON.parse(initialState)
-    : _.cloneDeep(initialState);
+  return typeof initialData === 'string' ?
+    JSON.parse(initialData)
+    : _.cloneDeep(initialData);
 }
 
 function isIndexPattern(val) {
@@ -131,10 +131,10 @@ export function SearchSourceProvider(Promise, Private, config) {
   const forIp = Symbol('for which index pattern?');
 
   class SearchSource {
-    constructor(initialState) {
+    constructor(initialData) {
       this._instanceid = _.uniqueId('data_source');
 
-      this._state = parseInitialState(initialState);
+      this._data = parseInitialData(initialData);
 
       this.history = [];
       this._requestStartHandlers = [];
@@ -149,13 +149,13 @@ export function SearchSourceProvider(Promise, Private, config) {
           const disabled = _.get(filter, 'meta.disabled');
           return disabled === undefined || disabled === false;
         },
-        (filter, state) => {
+        (filter, data) => {
           if (!config.get('courier:ignoreFilterIfFieldNotInIndex')) {
             return true;
           }
 
-          if ('meta' in filter && 'index' in state) {
-            const field = state.index.fields.byName[filter.meta.key];
+          if ('meta' in filter && 'index' in data) {
+            const field = data.index.fields.byName[filter.meta.key];
             if (!field) return false;
           }
           return true;
@@ -168,10 +168,10 @@ export function SearchSourceProvider(Promise, Private, config) {
      *****/
 
     /**
-     * Change the entire state of a SearchSource
+     * Change the entire data of a SearchSource
      */
-    overwrite = state => {
-      this._state = state;
+    setData = newData => {
+      this._data = newData;
       return this;
     };
 
@@ -181,45 +181,53 @@ export function SearchSourceProvider(Promise, Private, config) {
       }
 
       if (value == null) {
-        delete this._state[prop];
+        delete this._data[prop];
       } else {
-        this._state[prop] = value;
+        this._data[prop] = value;
       }
 
       return this;
     };
 
     setIndexPattern = (indexPattern) => {
-      const state = this._state;
+      const data = this._data;
 
-      const hasSource = state.source;
-      const sourceCameFromIp = hasSource && state.source.hasOwnProperty(forIp);
-      const sourceIsForOurIp = sourceCameFromIp && state.source[forIp] === state.index;
+      const hasSource = data.source;
+      const sourceCameFromIp = hasSource && data.source.hasOwnProperty(forIp);
+      const sourceIsForOurIp = sourceCameFromIp && data.source[forIp] === data.index;
       if (sourceIsForOurIp) {
-        delete state.source;
+        delete data.source;
       }
 
-      if (indexPattern === undefined) return state.index;
-      if (indexPattern === null) return delete state.index;
+      if (indexPattern === undefined) return data.index;
+      if (indexPattern === null) return delete data.index;
       if (!isIndexPattern(indexPattern)) {
         throw new TypeError('expected indexPattern to be an IndexPattern duck.');
       }
 
-      state.index = indexPattern;
-      if (!state.source) {
+      data.index = indexPattern;
+      if (!data.source) {
         // imply source filtering based on the index pattern, but allow overriding
         // it by simply setting another value for "source". When index is changed
-        state.source = function () {
+        data.source = function () {
           return indexPattern.getSourceFiltering();
         };
-        state.source[forIp] = indexPattern;
+        data.source[forIp] = indexPattern;
       }
 
       return this;
     };
 
     /**
-     * Get values from the state
+     * return a simple, encodable object representing the data of the SearchSource
+     * @return {[type]} [description]
+     */
+    getData = () => {
+      return _.clone(this._data);
+    };
+
+    /**
+     * Get values from the data
      */
     getValue = prop => {
       if (!GETTABLE_PROPS.includes(prop)) {
@@ -229,7 +237,7 @@ export function SearchSourceProvider(Promise, Private, config) {
       let searchSource = this;
 
       while (searchSource) {
-        const value = searchSource._state[prop];
+        const value = searchSource._data[prop];
         if (value !== void 0) {
           return value;
         }
@@ -239,14 +247,14 @@ export function SearchSourceProvider(Promise, Private, config) {
     };
 
     /**
-     * Get the value from our own state, don't traverse up the chain
+     * Get the value from our own data, don't traverse up the chain
      */
     getOwnValue = prop => {
       if (!GETTABLE_PROPS.includes(prop)) {
         throw new Error(`Can't get prop '${prop}' from SearchSource. Acceptable props are: ${GETTABLE_PROPS.join(', ')}.`);
       }
 
-      const value = this._state[prop];
+      const value = this._data[prop];
       if (value !== void 0) {
         return value;
       }
@@ -267,42 +275,27 @@ export function SearchSourceProvider(Promise, Private, config) {
      * Get the parent of this SearchSource
      * @return {undefined|searchSource}
      */
-    getParent() {
+    getParent = () => {
       return this._parent || undefined;
-    }
+    };
 
-    create() {
+    create = () => {
       return new SearchSource();
-    }
+    };
 
-    createCopy() {
-      const newSearchSource = new SearchSource(this.toString());
-      // when serializing the internal state with .toString() we lose the internal classes used in the index
+    createCopy = () => {
+      const json = angular.toJson(this._data);
+      const newSearchSource = new SearchSource(json);
+      // when serializing the internal data we lose the internal classes used in the index
       // pattern, so we have to set it again to workaround this behavior
       newSearchSource.setIndexPattern(this.getValue('index'));
       newSearchSource.inherits(this.getParent());
       return newSearchSource;
-    }
-
-    createChild(params) {
-      return new SearchSource().inherits(this, params);
-    }
-
-    /**
-     * return a simple, encodable object representing the state of the SearchSource
-     * @return {[type]} [description]
-     */
-    toJSON = function () {
-      return _.clone(this._state);
     };
 
-    /**
-     * Create a string representation of the object
-     * @return {[type]} [description]
-     */
-    toString() {
-      return angular.toJson(this.toJSON());
-    }
+    createChild = params => {
+      return new SearchSource().inherits(this, params);
+    };
 
     /**
      * Fetch this source and reject the returned Promise on error
@@ -464,20 +457,20 @@ export function SearchSourceProvider(Promise, Private, config) {
     }
 
     /**
-     * Used to merge properties into the state within ._flatten().
-     * The state is passed in and modified by the function
+     * Used to merge properties into the data within ._flatten().
+     * The data is passed in and modified by the function
      *
-     * @param  {object} state - the current merged state
+     * @param  {object} data - the current merged data
      * @param  {*} val - the value at `key`
      * @param  {*} key - The key of `val`
      * @return {undefined}
      */
-    _mergeProp(state, val, key) {
+    _mergeProp(data, val, key) {
       if (typeof val === 'function') {
         const source = this;
         return Promise.cast(val(this))
           .then(function (newVal) {
-            return source._mergeProp(state, newVal, key);
+            return source._mergeProp(data, newVal, key);
           });
       }
 
@@ -488,17 +481,17 @@ export function SearchSourceProvider(Promise, Private, config) {
           let filters = Array.isArray(val) ? val : [val];
 
           filters = filters.filter(filter => {
-            return this._filterPredicates.every(predicate => predicate(filter, state));
+            return this._filterPredicates.every(predicate => predicate(filter, data));
           });
 
-          state.filters = [...(state.filters || []), ...filters];
+          data.filters = [...(data.filters || []), ...filters];
           return;
         case 'index':
         case 'type':
         case 'id':
         case 'highlightAll':
-          if (key && state[key] == null) {
-            state[key] = val;
+          if (key && data[key] == null) {
+            data[key] = val;
           }
           return;
         case 'searchAfter':
@@ -514,10 +507,10 @@ export function SearchSourceProvider(Promise, Private, config) {
           addToBody();
           break;
         case 'query':
-          state.query = (state.query || []).concat(val);
+          data.query = (data.query || []).concat(val);
           break;
         case 'fields':
-          state[key] = _.uniq([...(state[key] || []), ...val]);
+          data[key] = _.uniq([...(data[key] || []), ...val]);
           break;
         default:
           addToBody();
@@ -527,10 +520,10 @@ export function SearchSourceProvider(Promise, Private, config) {
        * Add the key and val to the body of the request
        */
       function addToBody() {
-        state.body = state.body || {};
+        data.body = data.body || {};
         // ignore if we already have a value
-        if (state.body[key] == null) {
-          state.body[key] = val;
+        if (data.body[key] == null) {
+          data.body[key] = val;
         }
       }
     }
@@ -539,13 +532,13 @@ export function SearchSourceProvider(Promise, Private, config) {
      * Walk the inheritance chain of a source and return it's
      * flat representation (taking into account merging rules)
      * @returns {Promise}
-     * @resolved {Object|null} - the flat state of the SearchSource
+     * @resolved {Object|null} - the flat data of the SearchSource
      */
     _flatten() {
-      // the merged state of this dataSource and it's ancestors
-      const flatState = {};
+      // the merged data of this dataSource and it's ancestors
+      const flatData = {};
 
-      // function used to write each property from each state object in the chain to flat state
+      // function used to write each property from each data object in the chain to flat data
       const root = this;
 
       // start the chain at this source
@@ -553,17 +546,17 @@ export function SearchSourceProvider(Promise, Private, config) {
 
       // call the ittr and return it's promise
       return (function ittr() {
-        // iterate the _state object (not array) and
+        // iterate the _data object (not array) and
         // pass each key:value pair to source._mergeProp. if _mergeProp
         // returns a promise, then wait for it to complete and call _mergeProp again
-        return Promise.all(_.map(current._state, function ittr(value, key) {
+        return Promise.all(_.map(current._data, function ittr(value, key) {
           if (Promise.is(value)) {
             return value.then(function (value) {
               return ittr(value, key);
             });
           }
 
-          const prom = root._mergeProp(flatState, value, key);
+          const prom = root._mergeProp(flatData, value, key);
           return Promise.is(prom) ? prom : null;
         }))
           .then(function () {
@@ -578,42 +571,42 @@ export function SearchSourceProvider(Promise, Private, config) {
       }())
         .then(function () {
           // This is down here to prevent the circular dependency
-          flatState.body = flatState.body || {};
+          flatData.body = flatData.body || {};
 
-          const computedFields = flatState.index.getComputedFields();
-          flatState.body.stored_fields = computedFields.storedFields;
-          flatState.body.script_fields = flatState.body.script_fields || {};
-          flatState.body.docvalue_fields = flatState.body.docvalue_fields || [];
+          const computedFields = flatData.index.getComputedFields();
+          flatData.body.stored_fields = computedFields.storedFields;
+          flatData.body.script_fields = flatData.body.script_fields || {};
+          flatData.body.docvalue_fields = flatData.body.docvalue_fields || [];
 
-          _.extend(flatState.body.script_fields, computedFields.scriptFields);
-          flatState.body.docvalue_fields = _.union(flatState.body.docvalue_fields, computedFields.docvalueFields);
+          _.extend(flatData.body.script_fields, computedFields.scriptFields);
+          flatData.body.docvalue_fields = _.union(flatData.body.docvalue_fields, computedFields.docvalueFields);
 
-          if (flatState.body._source) {
+          if (flatData.body._source) {
             // exclude source fields for this index pattern specified by the user
-            const filter = fieldWildcardFilter(flatState.body._source.excludes);
-            flatState.body.docvalue_fields = flatState.body.docvalue_fields.filter(filter);
+            const filter = fieldWildcardFilter(flatData.body._source.excludes);
+            flatData.body.docvalue_fields = flatData.body.docvalue_fields.filter(filter);
           }
 
           // if we only want to search for certain fields
-          const fields = flatState.fields;
+          const fields = flatData.fields;
           if (fields) {
             // filter out the docvalue_fields, and script_fields to only include those that we are concerned with
-            flatState.body.docvalue_fields = _.intersection(flatState.body.docvalue_fields, fields);
-            flatState.body.script_fields = _.pick(flatState.body.script_fields, fields);
+            flatData.body.docvalue_fields = _.intersection(flatData.body.docvalue_fields, fields);
+            flatData.body.script_fields = _.pick(flatData.body.script_fields, fields);
 
             // request the remaining fields from both stored_fields and _source
-            const remainingFields = _.difference(fields, _.keys(flatState.body.script_fields));
-            flatState.body.stored_fields = remainingFields;
-            _.set(flatState.body, '_source.includes', remainingFields);
+            const remainingFields = _.difference(fields, _.keys(flatData.body.script_fields));
+            flatData.body.stored_fields = remainingFields;
+            _.set(flatData.body, '_source.includes', remainingFields);
           }
 
-          flatState.body.query = buildESQuery(flatState.index, flatState.query, flatState.filters);
+          flatData.body.query = buildESQuery(flatData.index, flatData.query, flatData.filters);
 
-          if (flatState.highlightAll != null) {
-            if (flatState.highlightAll && flatState.body.query) {
-              flatState.body.highlight = getHighlightRequest(flatState.body.query, getConfig);
+          if (flatData.highlightAll != null) {
+            if (flatData.highlightAll && flatData.body.query) {
+              flatData.body.highlight = getHighlightRequest(flatData.body.query, getConfig);
             }
-            delete flatState.highlightAll;
+            delete flatData.highlightAll;
           }
 
           /**
@@ -648,9 +641,9 @@ export function SearchSourceProvider(Promise, Private, config) {
 
               recurse(agg.aggs || agg.aggregations);
             });
-          }(flatState.body.aggs || flatState.body.aggregations));
+          }(flatData.body.aggs || flatData.body.aggregations));
 
-          return flatState;
+          return flatData;
         });
     }
   }
