@@ -20,13 +20,11 @@ ship with the default distribution of {kib}.  When you install {kib}, it
 generates a Basic license with no expiration date.
 
 You can view the status of your license, update your license, or start a 30-day 
-trial of https://www.elastic.co/subscriptions[Platinum features] in *Management 
-> License Management*. The trial enables you to try out features such as security, 
-machine learning, alerting, graph capabilities, and more.
+trial of https://www.elastic.co/subscriptions[Platinum features] in 
+*Management > License Management*. The trial enables you to try out features 
+such as security, machine learning, alerting, graph capabilities, and more.
 
-At the end of the trial period, your license reverts to a Basic license. To 
-continue using the Platinum features, you can purchase a
-https://www.elastic.co/subscriptions[subscription] and update your license.
+For more information, see <<managing-licenses>>. 
 
 [role="screenshot"]
 image::images/management_basic_license.png[]
