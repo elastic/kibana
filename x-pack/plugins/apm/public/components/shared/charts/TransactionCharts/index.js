@@ -106,7 +106,7 @@ export class Charts extends Component {
           <ChartHeader>
             <ChartTitle>{responseTimeLabel(transactionType)}</ChartTitle>
             <MLTipContainer>
-              <EuiIconTip content="The dynamic baseline will show min/max value stream for the avg. response time. When anomalies that score 75 or above, a background highlight is shown in the graph." />
+              <EuiIconTip content="The stream around the average response time shows the expected bounds. An annotation is shown for anomaly scores &gt;= 75." />
               <MLText>
                 Machine Learning:{' '}
                 <a
@@ -116,7 +116,7 @@ export class Charts extends Component {
                     this.props.location
                   )}
                 >
-                  Manage Job
+                  View Job
                 </a>
               </MLText>
             </MLTipContainer>
