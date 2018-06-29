@@ -7,24 +7,38 @@
 import { connect } from 'react-redux';
 import { FlyOut } from './view';
 import { getFlyoutDisplay, updateFlyout, FLYOUT_STATE } from '../../store/ui';
-import { getVectorLayerOptionsByName } from "../../selectors/map_selectors";
-import { addVectorLayer } from "../../actions/map_actions";
+import { getLayerOptionsByOriginAndType, getLayerLoading, getTemporaryLayers }
+  from "../../selectors/map_selectors";
+import { addVectorLayer, removeLayer, clearTemporaryLayers, promoteTemporaryLayers }
+  from "../../actions/map_actions";
 import _ from 'lodash';
 
 function mapStateToProps(state = {}) {
-  const namedVectorLayers = getVectorLayerOptionsByName(state);
-  const emsVectorLayers = _.isEmpty(namedVectorLayers) ? null
-    : namedVectorLayers.ems_source[0].service;
+
+  const layerOptions = getLayerOptionsByOriginAndType(state);
+  const emsSourceName = _.get(layerOptions, 'EMS.VECTOR[0].name');
+  const emsVectorOptions = _.get(layerOptions, 'EMS.VECTOR[0].service');
+
   return {
     flyoutVisible: getFlyoutDisplay(state) !== FLYOUT_STATE.NONE,
-    emsLayerOptions: emsVectorLayers
+    emsVectorOptions: emsVectorOptions
+      && emsVectorOptions.map(({ name }) => ({ value: name, text: name })),
+    emsSourceName,
+    layerLoading: getLayerLoading(state),
+    temporaryLayers: !_.isEmpty(getTemporaryLayers(state))
   };
 }
 
-const mapDispatchToProps = {
-  closeFlyout: () => updateFlyout(FLYOUT_STATE.NONE),
-  selectAction: layerName => addVectorLayer('ems_source', layerName)
-};
+function mapDispatchToProps(dispatch) {
+  return {
+    closeFlyout: () => dispatch(updateFlyout(FLYOUT_STATE.NONE))
+      && dispatch(clearTemporaryLayers()),
+    selectAction: (sourceName, layerName) =>
+      dispatch(addVectorLayer(sourceName, layerName, { temporary: true })),
+    removeAction: layerName => dispatch(removeLayer(layerName)),
+    addAction: () => dispatch(promoteTemporaryLayers())
+  };
+}
 
 const connectedFlyOut = connect(mapStateToProps, mapDispatchToProps, null, { withRef: true })(FlyOut);
 export { connectedFlyOut as FlyOut };
