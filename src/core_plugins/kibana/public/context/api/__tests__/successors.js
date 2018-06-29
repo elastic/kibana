@@ -21,8 +21,8 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import * as _ from 'lodash';
 
-import { createCourierStub, createSearchSourceStubProvider } from './_stubs';
-import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
+import { createIndexPatternsStub, createSearchSourceStubProvider } from './_stubs';
+import { SearchSourceProvider } from 'ui/courier';
 
 import { fetchContextProvider } from '../context';
 
@@ -36,7 +36,7 @@ describe('context app', function () {
     let getSearchSourceStub;
 
     beforeEach(ngMock.module(function createServiceStubs($provide) {
-      $provide.value('courier', createCourierStub());
+      $provide.value('indexPatterns', createIndexPatternsStub());
     }));
 
     beforeEach(ngMock.inject(function createPrivateStubs(Private) {

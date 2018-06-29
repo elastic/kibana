@@ -142,7 +142,7 @@ uiModules
               $scope.$broadcast('render');
 
               if (!$scope.editorMode) {
-                visualizationLoader($el[0], $scope.vis, $scope.visData, $scope.uiState, { listenOnChange: true });
+                visualizationLoader($el[0], $scope.vis, $scope.visData, $scope.uiState, { listenOnChange: false });
               }
 
               return resp;
@@ -199,7 +199,7 @@ uiModules
             $scope.vis,
             $scope.visData,
             $scope.uiState,
-            { listenOnChange: true }
+            { listenOnChange: false }
           );
         }      }
     };

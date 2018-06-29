@@ -47,13 +47,17 @@ export function FetchSoonProvider(Private, Promise) {
    * @param {array} requests - the requests to fetch
    * @async
    */
-  this.these = (requests) => {
+  this.fetchSearchRequests = (requests) => {
     requests.forEach(req => req._setFetchRequested());
     debouncedFetchNow();
     return Promise.all(requests.map(req => req.getCompletePromise()));
   };
 
+  /**
+   * Return a promise that resembles the success of the fetch completing so we can execute
+   * logic based on this state change. Individual errors are routed to their respective requests.
+   */
   this.fetchQueued = () => {
-    return this.these(requestQueue.getStartable());
+    return this.fetchSearchRequests(requestQueue.getStartable());
   };
 }

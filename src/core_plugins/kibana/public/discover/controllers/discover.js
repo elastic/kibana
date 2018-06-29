@@ -57,6 +57,7 @@ import '../components/fetch_error';
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
   'kibana/courier',
+  'kibana/url',
   'kibana/index_patterns'
 ]);
 
@@ -68,7 +69,7 @@ uiRoutes
     template: indexTemplate,
     reloadOnSearch: false,
     resolve: {
-      ip: function (Promise, courier, config, $location, Private) {
+      ip: function (Promise, indexPatterns, config, $location, Private) {
         const State = Private(StateProvider);
         const savedObjectsClient = Private(SavedObjectsClientProvider);
 
@@ -96,13 +97,13 @@ uiRoutes
 
             return Promise.props({
               list: savedObjects,
-              loaded: courier.indexPatterns.get(id),
+              loaded: indexPatterns.get(id),
               stateVal: state.index,
               stateValFound: specified && exists
             });
           });
       },
-      savedSearch: function (courier, savedSearches, $route) {
+      savedSearch: function (redirectWhenMissing, savedSearches, $route) {
         const savedSearchId = $route.current.params.id;
         return savedSearches.get(savedSearchId)
           .then((savedSearch) => {
@@ -114,7 +115,7 @@ uiRoutes
             }
             return savedSearch;
           })
-          .catch(courier.redirectWhenMissing({
+          .catch(redirectWhenMissing({
             'search': '/discover',
             'index-pattern': '/management/kibana/objects/savedSearches/' + $route.current.params.id
           }));

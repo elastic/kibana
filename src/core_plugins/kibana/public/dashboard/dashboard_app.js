@@ -160,9 +160,9 @@ app.directive('dashboardApp', function ($injector) {
 
       updateState();
 
-      $scope.refresh = (...args) => {
+      $scope.refresh = () => {
         $rootScope.$broadcast('fetch');
-        courier.fetch(...args);
+        courier.fetch();
       };
       dashboardStateManager.handleTimeChange(timefilter.getTime());
 
