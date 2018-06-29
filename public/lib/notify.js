@@ -1,4 +1,13 @@
-import { notify as kbnNotify } from 'ui/notify';
+import { Notifier } from 'ui/notify';
+
+/*
+ * TODO Make this use a toast error instead of a banner.
+ * Toast should be able to give context about where the error originated,
+ * not just show you the error data
+ */
+const kbnNotify = new Notifier({
+  location: 'Canvas',
+});
 
 export const notify = {
   /*

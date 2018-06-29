@@ -1,7 +1,7 @@
 import { withState, lifecycle, compose } from 'recompose';
 import Markdown from 'markdown-it';
 import { get } from 'lodash';
-import fetch from 'axios';
+import { fetch } from '../../../common/lib/fetch';
 import pkg from '../../../package.json';
 import { UpdateModal as Component } from './update_modal';
 

@@ -31,14 +31,12 @@ export const WorkpadLoader = compose(
 
     // Workpad search
     findWorkpads: ({ setWorkpads }) => async text => {
-      // TODO: handle search failures
       const workpads = await workpadService.find(text);
       setWorkpads(workpads);
     },
 
     // Workpad import/export methods
     downloadWorkpad: () => async workpadId => {
-      // TODO: handle the failed loading state
       const workpad = await workpadService.get(workpadId);
       const jsonBlob = new Blob([JSON.stringify(workpad)], { type: 'application/json' });
       fileSaver.saveAs(jsonBlob, `canvas-workpad-${workpad.name}-${workpad.id}.json`);
@@ -48,7 +46,6 @@ export const WorkpadLoader = compose(
     removeWorkpad: props => async workpadId => {
       const { setWorkpads, workpads, workpadId: loadedWorkpad } = props;
 
-      // TODO: handle the failed removal condition
       await workpadService.remove(workpadId);
 
       const remainingWorkpads = workpads.workpads.filter(w => w.id !== workpadId);

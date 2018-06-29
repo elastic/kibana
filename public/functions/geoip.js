@@ -1,4 +1,4 @@
-import fetch from 'axios';
+import { fetch } from '../../common/lib/fetch';
 
 // TODO: We should implement our own Elastic GeoIP service instead of using freegeoip.net
 export const geoip = () => ({

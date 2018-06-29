@@ -1,5 +1,4 @@
 import * as workpadService from '../../lib/workpad_service';
-import { notify } from '../../lib/notify';
 import { getDefaultWorkpad } from '../../state/defaults';
 import { setWorkpad } from '../../state/actions/workpad';
 import { setAssets, resetAssets } from '../../state/actions/assets';
@@ -15,7 +14,6 @@ export const routes = [
         name: 'createWorkpad',
         path: '/create',
         action: dispatch => async ({ router }) => {
-          // TODO: handle the failed creation state
           const newWorkpad = getDefaultWorkpad();
           await workpadService.create(newWorkpad);
           dispatch(setWorkpad(newWorkpad));
@@ -33,13 +31,15 @@ export const routes = [
           // load workpad if given a new id via url param
           const currentWorkpad = getWorkpad(getState());
           if (params.id !== currentWorkpad.id) {
-            try {
-              const { assets, ...workpad } = await workpadService.get(params.id);
-              dispatch(setWorkpad(workpad));
-              dispatch(setAssets(assets));
-            } catch (fetchErr) {
-              notify.error(fetchErr);
+            const fetchedWorkpad = await workpadService.get(params.id);
+
+            if (fetchedWorkpad == null) {
+              return router.redirectTo('home');
             }
+
+            const { assets, ...workpad } = fetchedWorkpad;
+            dispatch(setWorkpad(workpad));
+            dispatch(setAssets(assets));
           }
 
           // fetch the workpad again, to get changes

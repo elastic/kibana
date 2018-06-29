@@ -1,5 +1,5 @@
-import fetch from 'axios';
 import { flatten } from 'lodash';
+import { fetch } from '../../common/lib/fetch';
 import { buildBoolArray } from './esdocs/lib/build_bool_array';
 
 export const timelion = () => ({
