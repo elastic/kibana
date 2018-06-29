@@ -8,7 +8,6 @@ export function getUrlPrefix(urlContext) {
   return urlContext ? `/s/${urlContext}` : ``;
 }
 
-// Spaces do not actually prefix the ID, but this simplifies testing positive and negative flows.
 export function getIdPrefix(spaceId) {
   return spaceId === 'default' ? '' : `${spaceId}-`;
 }
