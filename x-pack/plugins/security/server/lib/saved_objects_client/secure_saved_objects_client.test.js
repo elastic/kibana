@@ -5,6 +5,7 @@
  */
 
 import { SecureSavedObjectsClient } from './secure_saved_objects_client';
+import { HAS_PRIVILEGES_RESULT } from '../authorization/has_privileges';
 
 const createMockErrors = () => {
   const forbiddenError = new Error('Mock ForbiddenError');
@@ -36,16 +37,37 @@ describe('#errors', () => {
 });
 
 describe('#create', () => {
-  test(`throws decorated ForbiddenError when user doesn't have privileges`, async () => {
+  test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
+    const type = 'foo';
+    const mockErrors = createMockErrors();
+    const mockHasPrivileges = jest.fn().mockImplementation(async () => {
+      throw new Error();
+    });
+    const mockAuditLogger = createMockAuditLogger();
+    const client = new SecureSavedObjectsClient({
+      errors: mockErrors,
+      hasPrivileges: mockHasPrivileges,
+      auditLogger: mockAuditLogger,
+    });
+
+    await expect(client.create(type)).rejects.toThrowError(mockErrors.generalError);
+
+    expect(mockHasPrivileges).toHaveBeenCalledWith([`action:saved_objects/${type}/create`]);
+    expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
+    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+  });
+
+  test(`throws decorated ForbiddenError when unauthorized`, async () => {
     const type = 'foo';
     const username = Symbol();
     const mockErrors = createMockErrors();
     const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-      success: false,
+      result: HAS_PRIVILEGES_RESULT.UNAUTHORIZED,
+      username,
       missing: [
         `action:saved_objects/${type}/create`
       ],
-      username
     }));
     const mockAuditLogger = createMockAuditLogger();
     const client = new SecureSavedObjectsClient({
@@ -74,28 +96,7 @@ describe('#create', () => {
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
 
-  test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
-    const type = 'foo';
-    const mockErrors = createMockErrors();
-    const mockHasPrivileges = jest.fn().mockImplementation(async () => {
-      throw new Error();
-    });
-    const mockAuditLogger = createMockAuditLogger();
-    const client = new SecureSavedObjectsClient({
-      errors: mockErrors,
-      hasPrivileges: mockHasPrivileges,
-      auditLogger: mockAuditLogger,
-    });
-
-    await expect(client.create(type)).rejects.toThrowError(mockErrors.generalError);
-
-    expect(mockHasPrivileges).toHaveBeenCalledWith([`action:saved_objects/${type}/create`]);
-    expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
-    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-  });
-
-  test(`calls and returns result of repository.create`, async () => {
+  test(`returns result of internalRepository.create when authorized`, async () => {
     const type = 'foo';
     const username = Symbol();
     const returnValue = Symbol();
@@ -103,12 +104,12 @@ describe('#create', () => {
       create: jest.fn().mockReturnValue(returnValue)
     };
     const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-      success: true,
+      result: HAS_PRIVILEGES_RESULT.AUTHORIZED,
       username,
     }));
     const mockAuditLogger = createMockAuditLogger();
     const client = new SecureSavedObjectsClient({
-      repository: mockRepository,
+      internalRepository: mockRepository,
       hasPrivileges: mockHasPrivileges,
       auditLogger: mockAuditLogger,
     });
@@ -126,20 +127,72 @@ describe('#create', () => {
       options,
     });
   });
+
+  test(`returns result of callWithRequestRepository.create when legacy`, async () => {
+    const type = 'foo';
+    const username = Symbol();
+    const returnValue = Symbol();
+    const mockRepository = {
+      create: jest.fn().mockReturnValue(returnValue)
+    };
+    const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
+      result: HAS_PRIVILEGES_RESULT.LEGACY,
+      username,
+      missing: [
+        `action:saved_objects/${type}/create`
+      ],
+    }));
+    const mockAuditLogger = createMockAuditLogger();
+    const client = new SecureSavedObjectsClient({
+      callWithRequestRepository: mockRepository,
+      hasPrivileges: mockHasPrivileges,
+      auditLogger: mockAuditLogger,
+    });
+    const attributes = Symbol();
+    const options = Symbol();
+
+    const result = await client.create(type, attributes, options);
+
+    expect(result).toBe(returnValue);
+    expect(mockRepository.create).toHaveBeenCalledWith(type, attributes, options);
+    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+  });
 });
 
 describe('#bulkCreate', () => {
-  test(`throws decorated ForbiddenError when user doesn't have privileges`, async () => {
+  test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
+    const type = 'foo';
+    const mockErrors = createMockErrors();
+    const mockHasPrivileges = jest.fn().mockImplementation(async () => {
+      throw new Error();
+    });
+    const mockAuditLogger = createMockAuditLogger();
+    const client = new SecureSavedObjectsClient({
+      errors: mockErrors,
+      hasPrivileges: mockHasPrivileges,
+      auditLogger: mockAuditLogger,
+    });
+
+    await expect(client.bulkCreate([{ type }])).rejects.toThrowError(mockErrors.generalError);
+
+    expect(mockHasPrivileges).toHaveBeenCalledWith([`action:saved_objects/${type}/bulk_create`]);
+    expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
+    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+  });
+
+  test(`throws decorated ForbiddenError when unauthorized`, async () => {
     const type1 = 'foo';
     const type2 = 'bar';
     const username = Symbol();
     const mockErrors = createMockErrors();
     const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-      success: false,
+      result: HAS_PRIVILEGES_RESULT.UNAUTHORIZED,
+      username,
       missing: [
         `action:saved_objects/${type1}/bulk_create`
       ],
-      username,
     }));
     const mockAuditLogger = createMockAuditLogger();
     const client = new SecureSavedObjectsClient({
@@ -173,28 +226,7 @@ describe('#bulkCreate', () => {
     );
   });
 
-  test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
-    const type = 'foo';
-    const mockErrors = createMockErrors();
-    const mockHasPrivileges = jest.fn().mockImplementation(async () => {
-      throw new Error();
-    });
-    const mockAuditLogger = createMockAuditLogger();
-    const client = new SecureSavedObjectsClient({
-      errors: mockErrors,
-      hasPrivileges: mockHasPrivileges,
-      auditLogger: mockAuditLogger,
-    });
-
-    await expect(client.bulkCreate([{ type }])).rejects.toThrowError(mockErrors.generalError);
-
-    expect(mockHasPrivileges).toHaveBeenCalledWith([`action:saved_objects/${type}/bulk_create`]);
-    expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
-    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-  });
-
-  test(`calls and returns result of repository.bulkCreate`, async () => {
+  test(`returns result of internalRepository.bulkCreate when authorized`, async () => {
     const username = Symbol();
     const type1 = 'foo';
     const type2 = 'bar';
@@ -203,12 +235,12 @@ describe('#bulkCreate', () => {
       bulkCreate: jest.fn().mockReturnValue(returnValue)
     };
     const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-      success: true,
+      result: HAS_PRIVILEGES_RESULT.AUTHORIZED,
       username,
     }));
     const mockAuditLogger = createMockAuditLogger();
     const client = new SecureSavedObjectsClient({
-      repository: mockRepository,
+      internalRepository: mockRepository,
       hasPrivileges: mockHasPrivileges,
       auditLogger: mockAuditLogger,
     });
@@ -228,19 +260,76 @@ describe('#bulkCreate', () => {
       options,
     });
   });
+
+  test(`returns result of callWithRequestRepository.bulkCreate when legacy`, async () => {
+    const username = Symbol();
+    const type1 = 'foo';
+    const type2 = 'bar';
+    const returnValue = Symbol();
+    const mockRepository = {
+      bulkCreate: jest.fn().mockReturnValue(returnValue)
+    };
+    const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
+      result: HAS_PRIVILEGES_RESULT.LEGACY,
+      username,
+      missing: [
+        `action:saved_objects/${type1}/bulk_create`,
+        `action:saved_objects/${type2}/bulk_create`,
+      ],
+    }));
+    const mockAuditLogger = createMockAuditLogger();
+    const client = new SecureSavedObjectsClient({
+      callWithRequestRepository: mockRepository,
+      hasPrivileges: mockHasPrivileges,
+      auditLogger: mockAuditLogger,
+    });
+    const objects = [
+      { type: type1, otherThing: 'sup' },
+      { type: type2, otherThing: 'everyone' },
+    ];
+    const options = Symbol();
+
+    const result = await client.bulkCreate(objects, options);
+
+    expect(result).toBe(returnValue);
+    expect(mockRepository.bulkCreate).toHaveBeenCalledWith(objects, options);
+    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+  });
 });
 
 describe('#delete', () => {
-  test(`throws decorated ForbiddenError when user doesn't have privileges`, async () => {
+  test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
+    const type = 'foo';
+    const mockErrors = createMockErrors();
+    const mockHasPrivileges = jest.fn().mockImplementation(async () => {
+      throw new Error();
+    });
+    const mockAuditLogger = createMockAuditLogger();
+    const client = new SecureSavedObjectsClient({
+      errors: mockErrors,
+      hasPrivileges: mockHasPrivileges,
+      auditLogger: mockAuditLogger,
+    });
+
+    await expect(client.delete(type)).rejects.toThrowError(mockErrors.generalError);
+
+    expect(mockHasPrivileges).toHaveBeenCalledWith([`action:saved_objects/${type}/delete`]);
+    expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
+    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+  });
+
+  test(`throws decorated ForbiddenError when unauthorized`, async () => {
     const type = 'foo';
     const username = Symbol();
     const mockErrors = createMockErrors();
     const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-      success: false,
+      result: HAS_PRIVILEGES_RESULT.UNAUTHORIZED,
+      username,
       missing: [
         `action:saved_objects/${type}/delete`
       ],
-      username,
     }));
     const mockAuditLogger = createMockAuditLogger();
     const client = new SecureSavedObjectsClient({
@@ -267,28 +356,7 @@ describe('#delete', () => {
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
 
-  test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
-    const type = 'foo';
-    const mockErrors = createMockErrors();
-    const mockHasPrivileges = jest.fn().mockImplementation(async () => {
-      throw new Error();
-    });
-    const mockAuditLogger = createMockAuditLogger();
-    const client = new SecureSavedObjectsClient({
-      errors: mockErrors,
-      hasPrivileges: mockHasPrivileges,
-      auditLogger: mockAuditLogger,
-    });
-
-    await expect(client.delete(type)).rejects.toThrowError(mockErrors.generalError);
-
-    expect(mockHasPrivileges).toHaveBeenCalledWith([`action:saved_objects/${type}/delete`]);
-    expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
-    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-  });
-
-  test(`calls and returns result of repository.delete`, async () => {
+  test(`returns result of internalRepository.delete when authorized`, async () => {
     const type = 'foo';
     const username = Symbol();
     const returnValue = Symbol();
@@ -296,12 +364,12 @@ describe('#delete', () => {
       delete: jest.fn().mockReturnValue(returnValue)
     };
     const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-      success: true,
+      result: HAS_PRIVILEGES_RESULT.AUTHORIZED,
       username,
     }));
     const mockAuditLogger = createMockAuditLogger();
     const client = new SecureSavedObjectsClient({
-      repository: mockRepository,
+      internalRepository: mockRepository,
       hasPrivileges: mockHasPrivileges,
       auditLogger: mockAuditLogger,
     });
@@ -317,26 +385,77 @@ describe('#delete', () => {
       id,
     });
   });
+
+  test(`returns result of internalRepository.delete when legacy`, async () => {
+    const type = 'foo';
+    const username = Symbol();
+    const returnValue = Symbol();
+    const mockRepository = {
+      delete: jest.fn().mockReturnValue(returnValue)
+    };
+    const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
+      result: HAS_PRIVILEGES_RESULT.LEGACY,
+      username,
+      missing: [
+        `action:saved_objects/${type}/delete`
+      ],
+    }));
+    const mockAuditLogger = createMockAuditLogger();
+    const client = new SecureSavedObjectsClient({
+      callWithRequestRepository: mockRepository,
+      hasPrivileges: mockHasPrivileges,
+      auditLogger: mockAuditLogger,
+    });
+    const id = Symbol();
+
+    const result = await client.delete(type, id);
+
+    expect(result).toBe(returnValue);
+    expect(mockRepository.delete).toHaveBeenCalledWith(type, id);
+    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+  });
 });
 
 describe('#find', () => {
   describe('type', () => {
-    test(`throws decorated ForbiddenError when type is sinuglar and user isn't authorized`, async () => {
+    test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
+      const type = 'foo';
+      const mockErrors = createMockErrors();
+      const mockHasPrivileges = jest.fn().mockImplementation(async () => {
+        throw new Error();
+      });
+      const mockAuditLogger = createMockAuditLogger();
+      const client = new SecureSavedObjectsClient({
+        errors: mockErrors,
+        hasPrivileges: mockHasPrivileges,
+        auditLogger: mockAuditLogger,
+      });
+
+      await expect(client.find({ type })).rejects.toThrowError(mockErrors.generalError);
+
+      expect(mockHasPrivileges).toHaveBeenCalledWith([`action:saved_objects/${type}/find`]);
+      expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
+      expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+    });
+
+    test(`throws decorated ForbiddenError when type's singular and unauthorized`, async () => {
       const type = 'foo';
       const username = Symbol();
       const mockRepository = {};
       const mockErrors = createMockErrors();
       const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-        success: false,
+        result: HAS_PRIVILEGES_RESULT.UNAUTHORIZED,
+        username,
         missing: [
           `action:saved_objects/${type}/find`
         ],
-        username,
       }));
       const mockAuditLogger = createMockAuditLogger();
       const client = new SecureSavedObjectsClient({
         errors: mockErrors,
-        repository: mockRepository,
+        internalRepository: mockRepository,
         hasPrivileges: mockHasPrivileges,
         auditLogger: mockAuditLogger,
       });
@@ -358,23 +477,21 @@ describe('#find', () => {
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
     });
 
-    test(`throws decorated ForbiddenError when type is an array and user isn't authorized for one type`, async () => {
+    test(`throws decorated ForbiddenError when type's an array and unauthorized`, async () => {
       const type1 = 'foo';
       const type2 = 'bar';
       const username = Symbol();
-      const mockRepository = {};
       const mockErrors = createMockErrors();
       const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-        success: false,
+        result: HAS_PRIVILEGES_RESULT.UNAUTHORIZED,
+        username,
         missing: [
           `action:saved_objects/${type1}/find`
         ],
-        username,
       }));
       const mockAuditLogger = createMockAuditLogger();
       const client = new SecureSavedObjectsClient({
         errors: mockErrors,
-        repository: mockRepository,
         hasPrivileges: mockHasPrivileges,
         auditLogger: mockAuditLogger,
       });
@@ -396,19 +513,19 @@ describe('#find', () => {
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
     });
 
-    test(`throws decorated ForbiddenError when type is an array and user isn't authorized for either type`, async () => {
+    test(`throws decorated ForbiddenError when type's an array and unauthorized`, async () => {
       const type1 = 'foo';
       const type2 = 'bar';
       const username = Symbol();
       const mockRepository = {};
       const mockErrors = createMockErrors();
       const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-        success: false,
+        result: HAS_PRIVILEGES_RESULT.UNAUTHORIZED,
+        username,
         missing: [
           `action:saved_objects/${type1}/find`,
           `action:saved_objects/${type2}/find`
         ],
-        username,
       }));
       const mockAuditLogger = createMockAuditLogger();
       const client = new SecureSavedObjectsClient({
@@ -435,28 +552,7 @@ describe('#find', () => {
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
     });
 
-    test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
-      const type = 'foo';
-      const mockErrors = createMockErrors();
-      const mockHasPrivileges = jest.fn().mockImplementation(async () => {
-        throw new Error();
-      });
-      const mockAuditLogger = createMockAuditLogger();
-      const client = new SecureSavedObjectsClient({
-        errors: mockErrors,
-        hasPrivileges: mockHasPrivileges,
-        auditLogger: mockAuditLogger,
-      });
-
-      await expect(client.find({ type })).rejects.toThrowError(mockErrors.generalError);
-
-      expect(mockHasPrivileges).toHaveBeenCalledWith([`action:saved_objects/${type}/find`]);
-      expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
-      expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-    });
-
-    test(`calls and returns result of repository.find`, async () => {
+    test(`returns result of internalRepository.find when authorized`, async () => {
       const type = 'foo';
       const username = Symbol();
       const returnValue = Symbol();
@@ -464,12 +560,12 @@ describe('#find', () => {
         find: jest.fn().mockReturnValue(returnValue)
       };
       const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-        success: true,
+        result: HAS_PRIVILEGES_RESULT.AUTHORIZED,
         username,
       }));
       const mockAuditLogger = createMockAuditLogger();
       const client = new SecureSavedObjectsClient({
-        repository: mockRepository,
+        internalRepository: mockRepository,
         hasPrivileges: mockHasPrivileges,
         auditLogger: mockAuditLogger,
       });
@@ -484,20 +580,75 @@ describe('#find', () => {
         options,
       });
     });
+
+    test(`returns result of callWithRequestRepository.find when legacy`, async () => {
+      const type = 'foo';
+      const username = Symbol();
+      const returnValue = Symbol();
+      const mockRepository = {
+        find: jest.fn().mockReturnValue(returnValue)
+      };
+      const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
+        result: HAS_PRIVILEGES_RESULT.LEGACY,
+        username,
+        missing: [
+          `action:saved_objects/${type}/find`
+        ],
+      }));
+      const mockAuditLogger = createMockAuditLogger();
+      const client = new SecureSavedObjectsClient({
+        callWithRequestRepository: mockRepository,
+        hasPrivileges: mockHasPrivileges,
+        auditLogger: mockAuditLogger,
+      });
+      const options = { type };
+
+      const result = await client.find(options);
+
+      expect(result).toBe(returnValue);
+      expect(mockRepository.find).toHaveBeenCalledWith({ type });
+      expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+    });
   });
 
   describe('no type', () => {
-    test(`throws decorated ForbiddenError when user has no authorized types`, async () => {
+    test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
+      const type1 = 'foo';
+      const type2 = 'bar';
+      const mockRepository = {};
+      const mockErrors = createMockErrors();
+      const mockHasPrivileges = jest.fn().mockImplementation(async () => {
+        throw new Error();
+      });
+      const mockAuditLogger = createMockAuditLogger();
+      const client = new SecureSavedObjectsClient({
+        errors: mockErrors,
+        repository: mockRepository,
+        hasPrivileges: mockHasPrivileges,
+        auditLogger: mockAuditLogger,
+        savedObjectTypes: [type1, type2]
+      });
+
+      await expect(client.find()).rejects.toThrowError(mockErrors.generalError);
+
+      expect(mockHasPrivileges).toHaveBeenCalledWith([`action:saved_objects/${type1}/find`, `action:saved_objects/${type2}/find`]);
+      expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
+      expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+    });
+
+    test(`throws decorated ForbiddenError when unauthorized`, async () => {
       const type = 'foo';
       const username = Symbol();
       const mockRepository = {};
       const mockErrors = createMockErrors();
       const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-        success: false,
+        result: HAS_PRIVILEGES_RESULT.UNAUTHORIZED,
+        username,
         missing: [
           `action:saved_objects/${type}/find`
         ],
-        username,
       }));
       const mockAuditLogger = createMockAuditLogger();
       const client = new SecureSavedObjectsClient({
@@ -525,27 +676,36 @@ describe('#find', () => {
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
     });
 
-    test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
-      const type1 = 'foo';
-      const type2 = 'bar';
-      const mockRepository = {};
+    test(`returns result of callWithRequestRepository.find when legacy`, async () => {
+      const type = 'foo';
+      const username = Symbol();
+      const returnValue = Symbol();
+      const mockRepository = {
+        find: jest.fn().mockReturnValue(returnValue)
+      };
       const mockErrors = createMockErrors();
-      const mockHasPrivileges = jest.fn().mockImplementation(async () => {
-        throw new Error();
-      });
+      const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
+        result: HAS_PRIVILEGES_RESULT.LEGACY,
+        username,
+        missing: [
+          `action:saved_objects/${type}/find`
+        ],
+      }));
       const mockAuditLogger = createMockAuditLogger();
       const client = new SecureSavedObjectsClient({
         errors: mockErrors,
-        repository: mockRepository,
+        callWithRequestRepository: mockRepository,
         hasPrivileges: mockHasPrivileges,
         auditLogger: mockAuditLogger,
-        savedObjectTypes: [type1, type2]
+        savedObjectTypes: [type]
       });
+      const options = Symbol();
 
-      await expect(client.find()).rejects.toThrowError(mockErrors.generalError);
+      const result = await client.find(options);
 
-      expect(mockHasPrivileges).toHaveBeenCalledWith([`action:saved_objects/${type1}/find`, `action:saved_objects/${type2}/find`]);
-      expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
+      expect(result).toBe(returnValue);
+      expect(mockHasPrivileges).toHaveBeenCalledWith([`action:saved_objects/${type}/find`]);
+      expect(mockRepository.find).toHaveBeenCalledWith(options);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
     });
@@ -558,7 +718,7 @@ describe('#find', () => {
       };
       const mockErrors = createMockErrors();
       const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-        success: false,
+        result: HAS_PRIVILEGES_RESULT.UNAUTHORIZED,
         missing: [
           `action:saved_objects/${type1}/find`
         ]
@@ -566,7 +726,7 @@ describe('#find', () => {
       const mockAuditLogger = createMockAuditLogger();
       const client = new SecureSavedObjectsClient({
         errors: mockErrors,
-        repository: mockRepository,
+        internalRepository: mockRepository,
         hasPrivileges: mockHasPrivileges,
         auditLogger: mockAuditLogger,
         savedObjectTypes: [type1, type2]
@@ -580,7 +740,7 @@ describe('#find', () => {
       }));
     });
 
-    test(`calls and returns result of repository.find`, async () => {
+    test(`returns result of repository.find`, async () => {
       const type = 'foo';
       const username = Symbol();
       const returnValue = Symbol();
@@ -588,13 +748,13 @@ describe('#find', () => {
         find: jest.fn().mockReturnValue(returnValue)
       };
       const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-        success: true,
-        missing: [],
+        result: HAS_PRIVILEGES_RESULT.AUTHORIZED,
         username,
+        missing: [],
       }));
       const mockAuditLogger = createMockAuditLogger();
       const client = new SecureSavedObjectsClient({
-        repository: mockRepository,
+        internalRepository: mockRepository,
         hasPrivileges: mockHasPrivileges,
         auditLogger: mockAuditLogger,
         savedObjectTypes: [type]
@@ -614,17 +774,38 @@ describe('#find', () => {
 });
 
 describe('#bulkGet', () => {
-  test(`throws decorated ForbiddenError when user doesn't have privileges`, async () => {
+  test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
+    const type = 'foo';
+    const mockErrors = createMockErrors();
+    const mockHasPrivileges = jest.fn().mockImplementation(async () => {
+      throw new Error();
+    });
+    const mockAuditLogger = createMockAuditLogger();
+    const client = new SecureSavedObjectsClient({
+      errors: mockErrors,
+      hasPrivileges: mockHasPrivileges,
+      auditLogger: mockAuditLogger,
+    });
+
+    await expect(client.bulkGet([{ type }])).rejects.toThrowError(mockErrors.generalError);
+
+    expect(mockHasPrivileges).toHaveBeenCalledWith(['action:saved_objects/foo/bulk_get']);
+    expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
+    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+  });
+
+  test(`throws decorated ForbiddenError when unauthorized`, async () => {
     const type1 = 'foo';
     const type2 = 'bar';
     const username = Symbol();
     const mockErrors = createMockErrors();
     const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-      success: false,
+      result: HAS_PRIVILEGES_RESULT.UNAUTHORIZED,
+      username,
       missing: [
         `action:saved_objects/${type1}/bulk_get`
       ],
-      username,
     }));
     const mockAuditLogger = createMockAuditLogger();
     const client = new SecureSavedObjectsClient({
@@ -654,28 +835,7 @@ describe('#bulkGet', () => {
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
 
-  test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
-    const type = 'foo';
-    const mockErrors = createMockErrors();
-    const mockHasPrivileges = jest.fn().mockImplementation(async () => {
-      throw new Error();
-    });
-    const mockAuditLogger = createMockAuditLogger();
-    const client = new SecureSavedObjectsClient({
-      errors: mockErrors,
-      hasPrivileges: mockHasPrivileges,
-      auditLogger: mockAuditLogger,
-    });
-
-    await expect(client.bulkGet([{ type }])).rejects.toThrowError(mockErrors.generalError);
-
-    expect(mockHasPrivileges).toHaveBeenCalledWith(['action:saved_objects/foo/bulk_get']);
-    expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
-    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-  });
-
-  test(`calls and returns result of repository.bulkGet`, async () => {
+  test(`returns result of internalRepository.bulkGet when authorized`, async () => {
     const type1 = 'foo';
     const type2 = 'bar';
     const username = Symbol();
@@ -684,12 +844,12 @@ describe('#bulkGet', () => {
       bulkGet: jest.fn().mockReturnValue(returnValue)
     };
     const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-      success: true,
+      result: HAS_PRIVILEGES_RESULT.AUTHORIZED,
       username,
     }));
     const mockAuditLogger = createMockAuditLogger();
     const client = new SecureSavedObjectsClient({
-      repository: mockRepository,
+      internalRepository: mockRepository,
       hasPrivileges: mockHasPrivileges,
       auditLogger: mockAuditLogger,
     });
@@ -707,19 +867,75 @@ describe('#bulkGet', () => {
       objects,
     });
   });
+
+  test(`returns result of callWithRequestRepository.bulkGet when legacy`, async () => {
+    const type1 = 'foo';
+    const type2 = 'bar';
+    const username = Symbol();
+    const returnValue = Symbol();
+    const mockRepository = {
+      bulkGet: jest.fn().mockReturnValue(returnValue)
+    };
+    const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
+      result: HAS_PRIVILEGES_RESULT.LEGACY,
+      username,
+      missing: [
+        `action:saved_objects/${type1}/bulk_get`,
+        `action:saved_objects/${type2}/bulk_get`
+      ],
+    }));
+    const mockAuditLogger = createMockAuditLogger();
+    const client = new SecureSavedObjectsClient({
+      callWithRequestRepository: mockRepository,
+      hasPrivileges: mockHasPrivileges,
+      auditLogger: mockAuditLogger,
+    });
+    const objects = [
+      { type: type1, id: 'foo-id' },
+      { type: type2, id: 'bar-id' },
+    ];
+
+    const result = await client.bulkGet(objects);
+
+    expect(result).toBe(returnValue);
+    expect(mockRepository.bulkGet).toHaveBeenCalledWith(objects);
+    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+  });
 });
 
 describe('#get', () => {
-  test(`throws decorated ForbiddenError when user doesn't have privileges`, async () => {
+  test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
+    const type = 'foo';
+    const mockErrors = createMockErrors();
+    const mockHasPrivileges = jest.fn().mockImplementation(async () => {
+      throw new Error();
+    });
+    const mockAuditLogger = createMockAuditLogger();
+    const client = new SecureSavedObjectsClient({
+      errors: mockErrors,
+      hasPrivileges: mockHasPrivileges,
+      auditLogger: mockAuditLogger,
+    });
+
+    await expect(client.get(type)).rejects.toThrowError(mockErrors.generalError);
+
+    expect(mockHasPrivileges).toHaveBeenCalledWith([`action:saved_objects/${type}/get`]);
+    expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
+    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+  });
+
+  test(`throws decorated ForbiddenError when unauthorized`, async () => {
     const type = 'foo';
     const username = Symbol();
     const mockErrors = createMockErrors();
     const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-      success: false,
+      result: HAS_PRIVILEGES_RESULT.UNAUTHORIZED,
+      username,
       missing: [
         `action:saved_objects/${type}/get`
       ],
-      username,
     }));
     const mockAuditLogger = createMockAuditLogger();
     const client = new SecureSavedObjectsClient({
@@ -746,28 +962,7 @@ describe('#get', () => {
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
 
-  test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
-    const type = 'foo';
-    const mockErrors = createMockErrors();
-    const mockHasPrivileges = jest.fn().mockImplementation(async () => {
-      throw new Error();
-    });
-    const mockAuditLogger = createMockAuditLogger();
-    const client = new SecureSavedObjectsClient({
-      errors: mockErrors,
-      hasPrivileges: mockHasPrivileges,
-      auditLogger: mockAuditLogger,
-    });
-
-    await expect(client.get(type)).rejects.toThrowError(mockErrors.generalError);
-
-    expect(mockHasPrivileges).toHaveBeenCalledWith([`action:saved_objects/${type}/get`]);
-    expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
-    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-  });
-
-  test(`calls and returns result of repository.get`, async () => {
+  test(`returns result of internalRepository.get when authorized`, async () => {
     const type = 'foo';
     const username = Symbol();
     const returnValue = Symbol();
@@ -775,12 +970,12 @@ describe('#get', () => {
       get: jest.fn().mockReturnValue(returnValue)
     };
     const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-      success: true,
+      result: HAS_PRIVILEGES_RESULT.AUTHORIZED,
       username,
     }));
     const mockAuditLogger = createMockAuditLogger();
     const client = new SecureSavedObjectsClient({
-      repository: mockRepository,
+      internalRepository: mockRepository,
       hasPrivileges: mockHasPrivileges,
       auditLogger: mockAuditLogger,
     });
@@ -796,19 +991,70 @@ describe('#get', () => {
       id,
     });
   });
+
+  test(`returns result of callWithRequestRepository.get when user isn't authorized and has legacy fallback`, async () => {
+    const type = 'foo';
+    const username = Symbol();
+    const returnValue = Symbol();
+    const mockRepository = {
+      get: jest.fn().mockReturnValue(returnValue)
+    };
+    const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
+      result: HAS_PRIVILEGES_RESULT.LEGACY,
+      username,
+      missing: [
+        `action:saved_objects/${type}/get`
+      ],
+    }));
+    const mockAuditLogger = createMockAuditLogger();
+    const client = new SecureSavedObjectsClient({
+      callWithRequestRepository: mockRepository,
+      hasPrivileges: mockHasPrivileges,
+      auditLogger: mockAuditLogger,
+    });
+    const id = Symbol();
+
+    const result = await client.get(type, id);
+
+    expect(result).toBe(returnValue);
+    expect(mockRepository.get).toHaveBeenCalledWith(type, id);
+    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+  });
 });
 
 describe('#update', () => {
-  test(`throws decorated ForbiddenError when user doesn't have privileges`, async () => {
+  test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
+    const type = 'foo';
+    const mockErrors = createMockErrors();
+    const mockHasPrivileges = jest.fn().mockImplementation(async () => {
+      throw new Error();
+    });
+    const mockAuditLogger = createMockAuditLogger();
+    const client = new SecureSavedObjectsClient({
+      errors: mockErrors,
+      hasPrivileges: mockHasPrivileges,
+      auditLogger: mockAuditLogger,
+    });
+
+    await expect(client.update(type)).rejects.toThrowError(mockErrors.generalError);
+
+    expect(mockHasPrivileges).toHaveBeenCalledWith([`action:saved_objects/${type}/update`]);
+    expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
+    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+  });
+
+  test(`throws decorated ForbiddenError when unauthorized`, async () => {
     const type = 'foo';
     const username = Symbol();
     const mockErrors = createMockErrors();
     const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-      success: false,
+      result: HAS_PRIVILEGES_RESULT.UNAUTHORIZED,
+      username,
       missing: [
         'action:saved_objects/foo/update'
       ],
-      username,
     }));
     const mockAuditLogger = createMockAuditLogger();
     const client = new SecureSavedObjectsClient({
@@ -839,28 +1085,7 @@ describe('#update', () => {
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
 
-  test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
-    const type = 'foo';
-    const mockErrors = createMockErrors();
-    const mockHasPrivileges = jest.fn().mockImplementation(async () => {
-      throw new Error();
-    });
-    const mockAuditLogger = createMockAuditLogger();
-    const client = new SecureSavedObjectsClient({
-      errors: mockErrors,
-      hasPrivileges: mockHasPrivileges,
-      auditLogger: mockAuditLogger,
-    });
-
-    await expect(client.update(type)).rejects.toThrowError(mockErrors.generalError);
-
-    expect(mockHasPrivileges).toHaveBeenCalledWith([`action:saved_objects/${type}/update`]);
-    expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
-    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-  });
-
-  test(`calls and returns result of repository.update`, async () => {
+  test(`returns result of repository.update when authorized`, async () => {
     const type = 'foo';
     const username = Symbol();
     const returnValue = Symbol();
@@ -868,12 +1093,12 @@ describe('#update', () => {
       update: jest.fn().mockReturnValue(returnValue)
     };
     const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
-      success: true,
+      result: HAS_PRIVILEGES_RESULT.AUTHORIZED,
       username,
     }));
     const mockAuditLogger = createMockAuditLogger();
     const client = new SecureSavedObjectsClient({
-      repository: mockRepository,
+      internalRepository: mockRepository,
       hasPrivileges: mockHasPrivileges,
       auditLogger: mockAuditLogger,
     });
@@ -892,5 +1117,37 @@ describe('#update', () => {
       attributes,
       options,
     });
+  });
+
+  test(`returns result of repository.update when legacy`, async () => {
+    const type = 'foo';
+    const username = Symbol();
+    const returnValue = Symbol();
+    const mockRepository = {
+      update: jest.fn().mockReturnValue(returnValue)
+    };
+    const mockHasPrivileges = jest.fn().mockImplementation(async () => ({
+      result: HAS_PRIVILEGES_RESULT.LEGACY,
+      username,
+      missing: [
+        'action:saved_objects/foo/update'
+      ],
+    }));
+    const mockAuditLogger = createMockAuditLogger();
+    const client = new SecureSavedObjectsClient({
+      callWithRequestRepository: mockRepository,
+      hasPrivileges: mockHasPrivileges,
+      auditLogger: mockAuditLogger,
+    });
+    const id = Symbol();
+    const attributes = Symbol();
+    const options = Symbol();
+
+    const result = await client.update(type, id, attributes, options);
+
+    expect(result).toBe(returnValue);
+    expect(mockRepository.update).toHaveBeenCalledWith(type, id, attributes, options);
+    expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+    expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
 });
