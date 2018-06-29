@@ -42,39 +42,47 @@ in another terminal session by running this command from this directory:
 
 /**
  * Run servers and tests for each config
- * @param {string[]} configPaths         Array of paths to configs
- * @param {object}   options             Optional
- * @param {Log}      options.log         Optional logger
- * @param {string}   options.installDir  Optional installation dir
- *                                       from which to run Kibana
- * @param {boolean}  options.bail  Whether to exit test run at the first failure
+ * @param {object} options                   Optional
+ * @property {string[]} configPaths          Array of paths to configs
+ * @property {function} options.createLogger Optional logger creation function
+ * @property {string} options.installDir     Optional installation dir from which to run Kibana
+ * @property {boolean} options.bail          Whether to exit test run at the first failure
+ * @property {string} options.esFrom         Optionally run from source instead of snapshot
  */
-export async function runTests(configPaths, options) {
-  for (const configPath of configPaths) {
+export async function runTests(options) {
+  for (const configPath of options.configs) {
     await runSingleConfig(resolve(process.cwd(), configPath), options);
   }
 }
 
 /**
  * Start only servers using single config
- * @param {string}  configPath          Path to a config file
- * @param {object}  options             Optional
- * @param {Log}     options.log         Optional logger
- * @param {string}  options.installDir  Optional installation dir
- *                                      from which to run Kibana
+ * @param {object} options                   Optional
+ * @property {string} options.configPath     Path to a config file
+ * @property {function} options.createLogger Optional logger creation function
+ * @property {string} options.installDir     Optional installation dir from which to run Kibana
+ * @property {string} options.esFrom         Optionally run from source instead of snapshot
  */
-export async function startServers(configPath, options) {
-  const { log } = options;
-  configPath = resolve(process.cwd(), configPath);
+export async function startServers(options) {
+  const { config: configOption, createLogger } = options;
+  const configPath = resolve(process.cwd(), configOption);
+  const log = createLogger();
+  const opts = {
+    ...options,
+    log,
+  };
 
   await withProcRunner(log, async procs => {
     const config = await readConfigFile(log, configPath);
 
-    const es = await runElasticsearch({ config, log });
+    const es = await runElasticsearch({ config, options: opts });
     await runKibanaServer({
       procs,
       config,
-      options: { ...options, devMode: true },
+      options: {
+        ...opts,
+        extraKbnOpts: [...options.extraKbnOpts, '--dev'],
+      },
     });
 
     // wait for 5 seconds of silence before logging the
@@ -97,22 +105,25 @@ async function silence(milliseconds, { log }) {
  * Start servers and run tests for single config
  */
 async function runSingleConfig(configPath, options) {
-  const { bail, log } = options;
+  const log = options.createLogger();
+  const opts = {
+    ...options,
+    log,
+  };
 
   await withProcRunner(log, async procs => {
     const config = await readConfigFile(log, configPath);
 
-    const es = await runElasticsearch({ config, log });
-    await runKibanaServer({ procs, config, options });
+    const es = await runElasticsearch({ config, options: opts });
+    await runKibanaServer({ procs, config, options: opts });
 
     // Note: When solving how to incorporate functional_test_runner
     // clean this up
     await runFtr({
       procs,
       configPath,
-      bail,
-      log,
       cwd: process.cwd(),
+      options: opts,
     });
 
     await procs.stop('kibana');
