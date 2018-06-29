@@ -31,7 +31,7 @@ export default new Chainable('scale_interval', {
     {
       name: 'interval',
       types: ['string'],
-      help: 'The new interval in date math notation, eg 1s for 1 second. 1m, 5m, 1M, 1w, 1y, etc.'
+      help: 'The new interval in date math notation, e.g., 1s for 1 second. 1m, 5m, 1M, 1w, 1y, etc.'
     }
   ],
   help: 'Changes scales a value (usually a sum or a count) to a new interval. For example, as a per-second rate',

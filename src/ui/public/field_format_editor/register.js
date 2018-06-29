@@ -27,6 +27,7 @@ import { percentEditor } from './editors/numeral/percent';
 import { stringEditor } from './editors/string/string';
 import { truncateEditor } from './editors/truncate/truncate';
 import { urlEditor } from './editors/url/url';
+import { staticLookupEditor } from './editors/static_lookup/static_lookup';
 
 RegistryFieldFormatEditorsProvider.register(bytesEditor);
 RegistryFieldFormatEditorsProvider.register(colorEditor);
@@ -37,3 +38,4 @@ RegistryFieldFormatEditorsProvider.register(percentEditor);
 RegistryFieldFormatEditorsProvider.register(stringEditor);
 RegistryFieldFormatEditorsProvider.register(truncateEditor);
 RegistryFieldFormatEditorsProvider.register(urlEditor);
+RegistryFieldFormatEditorsProvider.register(staticLookupEditor);

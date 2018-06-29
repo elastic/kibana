@@ -58,7 +58,7 @@ class TableSeriesConfig extends Component {
       { label: 'Overall Max', value: 'overall_max' },
       { label: 'Overall Min', value: 'overall_min' },
       { label: 'Overall Avg', value: 'overall_avg' },
-      { label: 'Cumlative Sum', value: 'cumlative_sum' },
+      { label: 'Cumulative Sum', value: 'cumulative_sum' },
     ];
     const selectedAggFuncOption = functionOptions.find(option => {
       return model.aggregate_function === option.value;
