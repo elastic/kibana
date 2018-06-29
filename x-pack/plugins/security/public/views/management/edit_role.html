@@ -104,6 +104,7 @@
                 ng-checked="includes(role.cluster, privilege)"
                 ng-click="toggle(role.cluster, privilege)"
                 ng-disabled="role.metadata._reserved || !isRoleEnabled(role)"
+                data-test-subj="clusterPrivileges-{{privilege}}"
               />
               <span class="kuiOptionLabel">{{privilege}}</span>
             </label>
@@ -123,6 +124,7 @@
                 type="checkbox"
                 ng-model="kibanaPrivileges[key]"
                 ng-disabled="role.metadata._reserved || !isRoleEnabled(role)"
+                data-test-subj="kibanaPrivileges-{{key}}"
               />
               <span class="kuiOptionLabel">{{key}}</span>
             </label>

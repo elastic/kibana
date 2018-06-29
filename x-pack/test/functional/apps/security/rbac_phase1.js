@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }) {
 
 
 
-  describe('@security', function () {
+  describe('rbac', function () {
     before(async () => {
       await remote.setWindowSize(1600, 1000);
       log.debug('users');
@@ -27,60 +27,79 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.navigateTo();
     });
 
-    it('should add new role logstash_reader', async function () {
+    it('should add new role with all role', async function () {
       await PageObjects.security.clickElasticsearchRoles();
-      await PageObjects.security.addRole('logstash_reader', {
+      await PageObjects.security.addRole('rbac_all', {
+        "applications": [
+          {
+            "application": "kibana",
+            "resources": ["default"],
+            "privileges": ["all"]
+          }
+        ],
         "indices": [{
           "names": [ "logstash-*" ],
-          "privileges": [ "read", "view_index_metadata" ]
+          "privileges": [ "all" ]
         }]
       });
     });
 
-    it('should add new user', async function () {
+    it('should add new role with read role', async function () {
+      await PageObjects.security.clickElasticsearchRoles();
+      await PageObjects.security.addRole('rbac_read', {
+        "applications": [
+          {
+            "application": "kibana",
+            "resources": ["default"],
+            "privileges": ["read"]
+          }
+        ],
+        "indices": [{
+          "names": [ "logstash-*" ],
+          "privileges": [ "read" ]
+        }]
+      });
+    });
+
+    it('should add new user with kibana privilege all role', async function () {
       await PageObjects.security.clickElasticsearchUsers();
       log.debug('After Add user new: , userObj.userName');
       await PageObjects.security.addUser({ username: 'Rashmi', password: 'changeme',
         confirmPassword: 'changeme', fullname: 'RashmiFirst RashmiLast',
         email: 'rashmi@myEmail.com', save: true,
-        roles: ['logstash_reader', 'kibana_user'] });
+        roles: ['rbac_all'] });
       log.debug('After Add user: , userObj.userName');
       const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.debug('actualUsers = %j', users);
       log.debug('roles: ', users.Rashmi.roles);
-      expect(users.Rashmi.roles).to.eql(['logstash_reader', 'kibana_user']);
+      expect(users.Rashmi.roles).to.eql(['rbac_all']);
       expect(users.Rashmi.fullname).to.eql('RashmiFirst RashmiLast');
       expect(users.Rashmi.reserved).to.be(false);
       await PageObjects.security.logout();
       await PageObjects.security.login('Rashmi', 'changeme');
     });
 
-    //Verify the Access Denied message is displayed
-    it('Kibana User navigating to Monitoring gets Access Denied', async function () {
-      const expectedMessage = 'Access Denied';
-      await PageObjects.monitoring.navigateTo();
-      const actualMessage = await PageObjects.monitoring.getAccessDeniedMessage();
-      expect(actualMessage).to.be(expectedMessage);
-    });
+    // it('should add new user with kibana privilege read role', async function () {
+    //   await PageObjects.security.clickElasticsearchUsers();
+    //   log.debug('After Add user new: , userObj.userName');
+    //   await PageObjects.security.addUser({ username: 'Rashmiread', password: 'changeme',
+    //     confirmPassword: 'changeme', fullname: 'RashmireadFirst RashmireadLast',
+    //     email: 'rashmi@myEmail.com', save: true,
+    //     roles: ['rbac_read'] });
+    //   log.debug('After Add user: , userObj.userName');
+    //   const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
+    //   log.debug('actualUsers = %j', users);
+    //   log.debug('roles: ', users.Rashmiread.roles);
+    //   expect(users.Rashmi.readroles).to.eql(['rbac_all']);
+    //   expect(users.Rashmiread.fullname).to.eql('RashmireadFirst RashmireadLast');
+    //   expect(users.Rashmiread.reserved).to.be(false);
+    //   await PageObjects.security.logout();
+    //   await PageObjects.security.login('Rashmiread', 'changeme');
+    // });
 
 
-    it('Kibana User navigating to Management gets - You do not have permission to manage users', async function () {
-      const expectedMessage = 'You do not have permission to manage users.';
-      await PageObjects.settings.navigateTo();
-      await PageObjects.security.clickElasticsearchUsers();
-      const actualMessage = await PageObjects.security.getPermissionDeniedMessage();
-      expect(actualMessage).to.be(expectedMessage);
-    });
 
-    it('Kibana User navigating to Discover and trying to generate CSV gets - Authorization Error ', async function () {
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.loadSavedSearch('A Saved Search');
-      log.debug('click Reporting button');
-      await PageObjects.reporting.openReportingPanel();
-      await PageObjects.reporting.clickGenerateReportButton();
-      const queueReportError = await PageObjects.reporting.getQueueReportError();
-      expect(queueReportError).to.be(true);
-    });
+
 
     after(async function () {
       await PageObjects.security.logout();
