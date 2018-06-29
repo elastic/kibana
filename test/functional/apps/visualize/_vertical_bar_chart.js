@@ -10,7 +10,7 @@ export default function ({ getService, getPageObjects }) {
     const toTime = '2015-09-23 18:31:44.000';
     const vizName1 = 'Visualization VerticalBarChart';
 
-    before(function () {
+    before(async function () {
       log.debug('navigateToApp visualize');
       await PageObjects.common.navigateToUrl('visualize', 'new');
       log.debug('clickVerticalBarChart');
@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickGo();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.visualize.waitForVisualization();
-    };
+    });
 
     it('should save and load', async function () {
       await PageObjects.visualize.saveVisualization(vizName1);

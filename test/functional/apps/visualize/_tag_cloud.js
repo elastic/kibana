@@ -94,20 +94,20 @@ export default function ({ getService, getPageObjects }) {
       expect(results).to.eql(['72px', '63px', '25px', '32px',  '18px' ]);
     });
 
-      it('should show correct data', async function () {
-        const expectedTableData =  [ '32,212,254,720', '737',
-          '21,474,836,480', '728',
-          '20,401,094,656', '687',
-          '19,327,352,832', '695',
-          '18,253,611,008', '679'
-        ];
+    it('should show correct data', async function () {
+      const expectedTableData =  [ '32,212,254,720', '737',
+        '21,474,836,480', '728',
+        '20,401,094,656', '687',
+        '19,327,352,832', '695',
+        '18,253,611,008', '679'
+      ];
 
-        await PageObjects.visualize.toggleSpyPanel();
-        await PageObjects.visualize.setSpyPanelPageSize('All');
-        const data = await PageObjects.visualize.getDataTableData();
-        log.debug(data.split('\n'));
-        expect(data.trim().split('\n')).to.eql(expectedTableData);
-      });
+      await PageObjects.visualize.toggleSpyPanel();
+      await PageObjects.visualize.setSpyPanelPageSize('All');
+      const data = await PageObjects.visualize.getDataTableData();
+      log.debug(data.split('\n'));
+      expect(data.trim().split('\n')).to.eql(expectedTableData);
+    });
 
     describe('formatted field', function () {
       before(async function () {

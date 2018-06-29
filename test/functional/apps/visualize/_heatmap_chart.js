@@ -2,6 +2,7 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
+  const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
   describe('heatmap chart', function () {
@@ -45,9 +46,9 @@ export default function ({ getService, getPageObjects }) {
 
     it('should show correct chart, take screenshot', async function () {
       const expectedChartValues = ['0 - 400', '0 - 400', '400 - 800', '1,200 - 1,600',
-      '1,200 - 1,600', '400 - 800', '0 - 400', '0 - 400', '0 - 400', '0 - 400', '400 - 800',
-      '1,200 - 1,600', '1,200 - 1,600', '400 - 800', '0 - 400', '0 - 400', '0 - 400', '0 - 400',
-      '400 - 800', '1,200 - 1,600', '1,200 - 1,600', '400 - 800', '0 - 400', '0 - 400' ];
+        '1,200 - 1,600', '400 - 800', '0 - 400', '0 - 400', '0 - 400', '0 - 400', '400 - 800',
+        '1,200 - 1,600', '1,200 - 1,600', '400 - 800', '0 - 400', '0 - 400', '0 - 400', '0 - 400',
+        '400 - 800', '1,200 - 1,600', '1,200 - 1,600', '400 - 800', '0 - 400', '0 - 400' ];
 
       await retry.try(async () => {
         const data = await PageObjects.visualize.getHeatmapData();
@@ -57,25 +58,25 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-   it('should show correct data', async function () {
-     // this is only the first page of the tabular data.
-     const expectedChartData =  [ '2015-09-20 00:00', '37',
-       '2015-09-20 03:00', '202',
-       '2015-09-20 06:00', '740',
-       '2015-09-20 09:00', '1,437',
-       '2015-09-20 12:00', '1,371',
-       '2015-09-20 15:00', '751',
-       '2015-09-20 18:00', '188',
-       '2015-09-20 21:00', '31',
-       '2015-09-21 00:00', '42',
-       '2015-09-21 03:00', '202'
-     ];
+    it('should show correct data', async function () {
+    // this is only the first page of the tabular data.
+      const expectedChartData =  [ '2015-09-20 00:00', '37',
+        '2015-09-20 03:00', '202',
+        '2015-09-20 06:00', '740',
+        '2015-09-20 09:00', '1,437',
+        '2015-09-20 12:00', '1,371',
+        '2015-09-20 15:00', '751',
+        '2015-09-20 18:00', '188',
+        '2015-09-20 21:00', '31',
+        '2015-09-21 00:00', '42',
+        '2015-09-21 03:00', '202'
+      ];
 
-     await PageObjects.visualize.toggleSpyPanel();
-     const data = await PageObjects.visualize.getDataTableData();
-     log.debug(data.split('\n'));
-     expect(data.trim().split('\n')).to.eql(expectedChartData);
-   });
+      await PageObjects.visualize.toggleSpyPanel();
+      const data = await PageObjects.visualize.getDataTableData();
+      log.debug(data.split('\n'));
+      expect(data.trim().split('\n')).to.eql(expectedChartData);
+    });
 
- });
+  });
 }
