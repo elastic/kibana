@@ -95,10 +95,6 @@ fields.byName = {
   },
 };
 
-const indexPattern = {
-  fields,
-};
-
 class Format {
   static id = 'test_format'; static title = 'Test format';
   params() {}
@@ -120,6 +116,14 @@ const helpers = {
 };
 
 describe('FieldEditor', () => {
+  let indexPattern;
+
+  beforeEach(() => {
+    indexPattern = {
+      fields,
+    };
+  });
+
   it('should render create new scripted field correctly', async () => {
     const component = shallow(
       <FieldEditor

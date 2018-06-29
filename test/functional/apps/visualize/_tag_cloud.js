@@ -140,7 +140,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.clickKibanaIndices();
         await PageObjects.settings.filterField(termsField);
         await PageObjects.settings.openControlsByName(termsField);
-        await PageObjects.settings.setFieldFormat('Bytes');
+        await PageObjects.settings.setFieldFormat('bytes');
         await PageObjects.settings.controlChangeSave();
         await PageObjects.common.navigateToUrl('visualize', 'new');
         await PageObjects.visualize.loadSavedVisualization(vizName1);
@@ -155,7 +155,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.clickKibanaIndices();
         await PageObjects.settings.filterField(termsField);
         await PageObjects.settings.openControlsByName(termsField);
-        await PageObjects.settings.setFieldFormat('- default - ');
+        await PageObjects.settings.setFieldFormat('');
         await PageObjects.settings.controlChangeSave();
       });
 
