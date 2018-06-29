@@ -1,21 +1,22 @@
-/*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
+<details>
+<summary>[license header]</summary>
+ Licensed to Elasticsearch B.V. under one or more contributor
+ license agreements. See the NOTICE file distributed with
+ this work for additional information regarding copyright
+ ownership. Elasticsearch B.V. licenses this file to you under
+ the Apache License, Version 2.0 (the "License"); you may
+ not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+</details>
 
 Saved Objects Service
 =========
@@ -23,6 +24,9 @@ Alternative to request scoped services https://github.com/elastic/kibana/pull/14
 (outdated) Saved object service https://github.com/elastic/kibana/pull/15739
 
 For https://github.com/elastic/kibana/issues/18842
+
+<details>
+<summary>History and Rationale</summary>
 
 History:
 ---------
@@ -45,6 +49,10 @@ Why now?
  - Stop the abstractions leaking into the rest of Kibana
      - When we create tags/ols/etc, let's do it through the new abstractions
      - We solve the problem of new features not clobbering one another
+</details>
+
+<details>
+<summary>Problems to wrangle:</summary>
 
 OSS Kibana
 ---------
@@ -52,7 +60,11 @@ The saved objects service and all its exposed APIs exist in open source Kibana, 
 
 X-Pack Security
 ---------
-When Security uses the `find` method in the current saved objects client, it filters the objects returned from Elasticsearch by what objects the user can access. Security can also access Elasticsearch data directly, authenticating as the end user, but for things unrelated to Kibana Saved Objects.
+Security needs to control authorization for a client request to read or write saved objects. In the legacy platform, Security currently checks whether the logged in user has privileges to execute the saved object request before every action possible for a saved object. The way that Security does this check is by replacing the client with a whole different one that contains these checks.
+
+OLS (object level security) is the concept that describes this security feature.
+
+What if the saved objects service API could provide a way to register a before-hook that the Security plugin could leverage for its privilege checks? Would this be flexible enough for Security's needs? Would it be making too much of an assumption about users of the Saved Objects Service? And, somewhat more dire, would it allow competitors of Kibana to readily integrate their own Security solution, and would that be strategically more unsound than an approach where any changes to the client require completely replacing it with a fully functional solution?
 
 X-Pack Spaces
 ---------
@@ -72,10 +84,41 @@ Spaces is going to be available in X-Pack Basic, and therefore there needs to be
 
 With just Spaces enabled but Security disabled, the saved objects client needs to accept a new `space_id` context. This can be as simple as an optional parameter. It doesn't seem like a whole new saved object client needs to be created just to scope its requests to a Space.
 
-With both Spaces and Security enabled, we'll need a saved object client that performs the extra authentication (`has privileges`) checks for all read/write access, but it cannot clobber the existing context that Spaces has required. Here, it does seem like a whole new saved object client _might_ be needed, or else some flexible way to extend some or all methods of the saved object client to perform the extra checks.
+With both Spaces and Security enabled, we'll need a saved object client that performs the extra authentication (`has privileges`) checks for all read/write access, but it cannot clobber the existing context that Spaces has required. There may need to be a way to apply changes to the saved objects client in an _ordered_ way. Here, it does seem like a whole new saved object client _might_ be needed, or else some flexible way to extend some or all methods of the saved object client to perform the extra checks that doesn't open the door for unexpected behavior.
 
-- [] X-Pack Migrations
-- [] Tags
+- [ ] X-Pack Migrations
+- [ ] Tags
+</details>
+
+Phase 1
+-------
+Let's release the first iteration of the saved objects system as a core Kibana service that:
+* exposes a Saved Objects Client as it works today
+* allows a plugin to replace the Saved Objects Client
+  * probably via a register-new-Client-factory method
+  * supports Spaces
+
+Since this looks a lot like the existing functionality in the legacy platform, what are the benefits of doing this work at all?
+* **API Clarity.** In the new platform, we'll have better support for changes to the saved objects client.
+* **Core Service Responsibility.** A great benefit of this work is the need to explore interactions between the Elasticsearch Service, Http Service, and Saved Object Service. By tackling this problem in the nascent stages of the new platform effort, we can set the stage for clearer boundaries and responsibilities for these core services.
+
+Possible future phases:
+----------
+- re-evaluate the client abstraction
+- create a mapping abstraction
+- further functionality for plugins that need to modify the client
+
+<details>
+<summary>More considerations</summary>
+
+Saved Objects Client
+-----------
+
+Some needs:
+* a way to register new types specified by other systems
+* type-checking for all operations
+* integration with a background tasks service that needs saved object access
+* validation for arguments to the client crud methods
 
 Kibana, Plugins, Saved Objects System startup
 ---------
@@ -296,3 +339,4 @@ Nesting problem
 ---------
 Dashboard shouldn't create a dependency between its dashboard object and visualize object. So we use DI to resolve that. The visualize plugin exposes on its contract the schemas that dashboards can use. It's possible the user could get all visualizations by going through a "dashboard" plugin, without specifying a dependency on the visualize plugin. It would be really nice to somehow prevent this. But at least in our implementation we should define the dependency so that it's not normally possible. What visualizations come back via the dashboard plugin should be from methods exposed by the visualize plugin.
 
+</details>
