@@ -291,8 +291,12 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
         name: name,
         scripted: true
       });
-      this.fields.splice(fieldIndex, 1);
-      this.save();
+
+      if(fieldIndex > -1) {
+        this.fields.splice(fieldIndex, 1);
+        delete this.fieldFormatMap[name];
+        return this.save();
+      }
     }
 
     popularizeField(fieldName, unit = 1) {
