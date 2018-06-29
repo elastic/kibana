@@ -37,7 +37,6 @@ export function map(state = INITIAL_STATE, action) {
         ({ name }) => name !== action.layerName) ] } };
     //TODO: Handle more than one
     case PROMOTE_TEMPORARY_LAYERS:
-      console.log('le temps');
       const tempLayerIdx = state.layerList.findIndex(({ temporary }) => temporary);
       const newLayer = { ...state.layerList[tempLayerIdx], temporary: false };
       const newLayerList = [...state.layerList.slice(0, tempLayerIdx), newLayer,

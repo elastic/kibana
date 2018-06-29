@@ -35,9 +35,7 @@ export class KibanaMap extends React.Component {
   }
 
   _addLayers = (layers) => {
-    // TODO: Use layer changes to filter what, if any, layers are removed
     layers.forEach(layer=> {
-      this._olMap.removeLayer(layer);
       this._olMap.addLayer(layer.olLayer);
     });
   };

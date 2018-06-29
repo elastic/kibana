@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DATA_ORIGIN } from "../components/map/layers/sources/source";
-import { VectorSource } from "../components/map/layers/sources/vector_source";
-import { TMSSource } from "../components/map/layers/sources/tms_source";
-import { VectorLayer } from "../components/map/layers/vector_layer";
-import { TileLayer } from "../components/map/layers/tile_layer";
+import { DATA_ORIGIN } from "../shared/layers/sources/source";
+import { VectorSource } from "../shared/layers/sources/vector_source";
+import { TMSSource } from "../shared/layers/sources/tms_source";
+import { VectorLayer } from "../shared/layers/vector_layer";
+import { TileLayer } from "../shared/layers/tile_layer";
 
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 export const UPDATE_LAYER_ORDER = 'UPDATE_LAYER_ORDER';

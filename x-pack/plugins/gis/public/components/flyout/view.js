@@ -47,7 +47,6 @@ export class FlyOut extends React.Component {
 
   _addToMapBtn() {
     const { layerLoading, temporaryLayers, addAction } = this.props;
-    console.log(layerLoading, temporaryLayers);
     const addToMapBtnText = 'Add to map';
     return (
       <EuiButton
