@@ -41,16 +41,17 @@ export function createSearchSourceStubProvider(hits, timeField) {
 
   searchSourceStub.filter = sinon.stub().returns(searchSourceStub);
   searchSourceStub.inherits = sinon.stub().returns(searchSourceStub);
-  searchSourceStub.set = sinon.stub().returns(searchSourceStub);
-  searchSourceStub.get = sinon.spy(key => {
-    const previousSetCall = searchSourceStub.set.withArgs(key).lastCall;
+  searchSourceStub.setValue = sinon.stub().returns(searchSourceStub);
+  searchSourceStub.setIndexPattern = sinon.stub().returns(searchSourceStub);
+  searchSourceStub.getValue = sinon.spy(key => {
+    const previousSetCall = searchSourceStub.setValue.withArgs(key).lastCall;
     return previousSetCall ? previousSetCall.args[1] : null;
   });
   searchSourceStub.fetch = sinon.spy(() => {
     const timeField = searchSourceStub._stubTimeField;
-    const lastQuery = searchSourceStub.set.withArgs('query').lastCall.args[1];
+    const lastQuery = searchSourceStub.setValue.withArgs('query').lastCall.args[1];
     const timeRange = lastQuery.query.constant_score.filter.range[timeField];
-    const lastSort = searchSourceStub.set.withArgs('sort').lastCall.args[1];
+    const lastSort = searchSourceStub.setValue.withArgs('sort').lastCall.args[1];
     const sortDirection = lastSort[0][timeField];
     const sortFunction =
       sortDirection === 'asc'

@@ -432,11 +432,11 @@ describe('Saved Object', function () {
         });
 
         const savedObject = new SavedObject(config);
-        expect(!!savedObject.searchSource.get('index')).to.be(false);
+        expect(!!savedObject.searchSource.getValue('index')).to.be(false);
 
         return savedObject.init().then(() => {
           expect(afterESRespCallback.called).to.be(true);
-          const index = savedObject.searchSource.get('index');
+          const index = savedObject.searchSource.getValue('index');
           expect(index instanceof IndexPattern).to.be(true);
           expect(index.id).to.equal(indexPatternId);
         });

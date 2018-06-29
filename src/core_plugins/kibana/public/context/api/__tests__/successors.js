@@ -95,7 +95,7 @@ describe('context app', function () {
         []
       )
         .then((hits) => {
-          const intervals = searchSourceStub.set.args
+          const intervals = searchSourceStub.setValue.args
             .filter(([property]) => property === 'query')
             .map(([, { query }]) => _.get(query, ['constant_score', 'filter', 'range', '@timestamp']));
 
@@ -133,7 +133,7 @@ describe('context app', function () {
         []
       )
         .then((hits) => {
-          const intervals = searchSourceStub.set.args
+          const intervals = searchSourceStub.setValue.args
             .filter(([property]) => property === 'query')
             .map(([, { query }]) => _.get(query, ['constant_score', 'filter', 'range', '@timestamp']));
 

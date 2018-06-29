@@ -115,41 +115,6 @@ export function SearchSourceProvider(Promise, Private, config) {
 
       this._state = parseInitialState(initialState);
 
-      /**
-       * List of the editable state properties that turn into a
-       * chainable API
-       *
-       * @type {Array}
-       */
-      this._methods = [
-        'type',
-        'query',
-        'filter',
-        'sort',
-        'highlight',
-        'highlightAll',
-        'aggs',
-        'from',
-        'searchAfter',
-        'size',
-        'source',
-        'version',
-        'fields'
-      ];
-
-      // set internal state values
-      this._methods.forEach(name => {
-        this[name] = val => {
-          if (val == null) {
-            delete this._state[name];
-          } else {
-            this._state[name] = val;
-          }
-
-          return this;
-        };
-      });
-
       this.history = [];
       this._requestStartHandlers = [];
       this._inheritOptions = {};
@@ -181,8 +146,25 @@ export function SearchSourceProvider(Promise, Private, config) {
      * PUBLIC API
      *****/
 
+    /**
+     * Change the entire state of a SearchSource
+     */
+    overwrite = state => {
+      this._state = state;
+      return this;
+    };
 
-    index(indexPattern) {
+    setValue = (prop, value) => {
+      if (value == null) {
+        delete this._state[prop];
+      } else {
+        this._state[prop] = value;
+      }
+
+      return this;
+    };
+
+    setIndexPattern = (indexPattern) => {
       const state = this._state;
 
       const hasSource = state.source;
@@ -209,18 +191,42 @@ export function SearchSourceProvider(Promise, Private, config) {
       }
 
       return this;
-    }
+    };
+
+    /**
+     * Get values from the state
+     * @param {string} name - The name of the property desired
+     * @return {any} - the value found
+     */
+    getValue = name => {
+      let self = this;
+      while (self) {
+        if (self._state[name] !== void 0) return self._state[name];
+        self = self.getParent();
+      }
+    };
+
+    /**
+     * Get the value from our own state, don't traverse up the chain
+     * @param {string} name - The name of the property desired
+     * @return {any} - the value found
+     */
+    getOwnValue = prop => {
+      if (this._state[prop] !== void 0) {
+        return this._state[prop];
+      }
+    };
 
     /**
      * Set a searchSource that this source should inherit from
      * @param  {SearchSource} searchSource - the parent searchSource
      * @return {this} - chainable
      */
-    inherits(parent, options = {}) {
+    inherits = (parent, options = {}) => {
       this._parent = parent;
       this._inheritOptions = options;
       return this;
-    }
+    };
 
     /**
      * Get the parent of this SearchSource
@@ -272,7 +278,7 @@ export function SearchSourceProvider(Promise, Private, config) {
       const clone = new SearchSource(this.toString());
       // when serializing the internal state with .toString() we lose the internal classes used in the index
       // pattern, so we have to set it again to workaround this behavior
-      clone.set('index', this.get('index'));
+      clone.setIndexPattern(this.getValue('index'));
       clone.inherits(this.getParent());
       return clone;
     }
@@ -297,49 +303,6 @@ export function SearchSourceProvider(Promise, Private, config) {
      */
     requestIsStopped() {
       this.activeFetchCount -= 1;
-    }
-
-    /**
-     * Get values from the state
-     * @param {string} name - The name of the property desired
-     * @return {any} - the value found
-     */
-    get(name) {
-      let self = this;
-      while (self) {
-        if (self._state[name] !== void 0) return self._state[name];
-        self = self.getParent();
-      }
-    }
-
-    /**
-     * Get the value from our own state, don't traverse up the chain
-     * @param {string} name - The name of the property desired
-     * @return {any} - the value found
-     */
-    getOwn(name) {
-      if (this._state[name] !== void 0) return this._state[name];
-    }
-
-    /**
-     * Change the entire state of a SearchSource
-     * @param {object|string} state - The SearchSource's new state, or a
-     *   string of the state value to set
-     */
-    set(state, val) {
-      const self = this;
-
-      if (typeof state === 'string') {
-        // the getter and setter methods check for undefined explicitly
-        // to identify getters and null to identify deletion
-        if (val === undefined) {
-          val = null;
-        }
-        self[state](val);
-      } else {
-        self._state = state;
-      }
-      return self;
     }
 
     /**
@@ -540,7 +503,7 @@ export function SearchSourceProvider(Promise, Private, config) {
           addToBody();
           break;
         case 'sort':
-          val = normalizeSortRequest(val, this.get('index'));
+          val = normalizeSortRequest(val, this.getValue('index'));
           addToBody();
           break;
         case 'query':

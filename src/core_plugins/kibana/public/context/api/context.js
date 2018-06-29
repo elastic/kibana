@@ -163,8 +163,8 @@ function fetchContextProvider(indexPatterns, Private) {
 
     return new SearchSource()
       .inherits(false)
-      .set('index', indexPattern)
-      .set('filter', filters);
+      .setIndexPattern(indexPattern)
+      .setValue('filter', filters);
   }
 
   /**
@@ -209,8 +209,8 @@ function fetchContextProvider(indexPatterns, Private) {
     };
 
     const response = await searchSource
-      .set('size', maxCount)
-      .set('query', {
+      .setValue('size', maxCount)
+      .setValue('query', {
         query: {
           constant_score: {
             filter: {
@@ -225,15 +225,15 @@ function fetchContextProvider(indexPatterns, Private) {
         },
         language: 'lucene'
       })
-      .set('searchAfter', [
+      .setValue('searchAfter', [
         afterTimeValue !== null ? afterTimeValue : startTimeValue,
         tieBreakerValue,
       ])
-      .set('sort', [
+      .setValue('sort', [
         { [timeField]: timeSortDirection },
         { [tieBreakerField]: tieBreakerSortDirection },
       ])
-      .set('version', true)
+      .setValue('version', true)
       .fetch();
 
     return response.hits ? response.hits.hits : [];

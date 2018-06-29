@@ -96,7 +96,7 @@ const CourierRequestHandlerProvider = function () {
         }
       });
 
-      requestSearchSource.aggs(function () {
+      requestSearchSource.setValue('aggs', function () {
         return aggs.toDsl();
       });
 
@@ -104,12 +104,12 @@ const CourierRequestHandlerProvider = function () {
         return aggs.onSearchRequestStart(searchSource, searchRequest);
       });
 
-      timeFilterSearchSource.set('filter', () => {
-        return getTime(searchSource.get('index'), timeRange);
+      timeFilterSearchSource.setValue('filter', () => {
+        return getTime(searchSource.getValue('index'), timeRange);
       });
 
-      requestSearchSource.set('filter', filters);
-      requestSearchSource.set('query', query);
+      requestSearchSource.setValue('filter', filters);
+      requestSearchSource.setValue('query', query);
 
       const shouldQuery = (requestBodyHash) => {
         if (!searchSource.lastQuery || forceFetch) return true;

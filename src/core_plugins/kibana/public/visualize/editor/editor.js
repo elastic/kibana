@@ -191,11 +191,11 @@ function VisEditor(
   const stateDefaults = {
     uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : {},
     linked: !!savedVis.savedSearchId,
-    query: searchSource.getOwn('query') || {
+    query: searchSource.getOwnValue('query') || {
       query: '',
       language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
     },
-    filters: searchSource.getOwn('filter') || [],
+    filters: searchSource.getOwnValue('filter') || [],
     vis: savedVisState
   };
 
@@ -252,7 +252,7 @@ function VisEditor(
     };
 
     $scope.$watchMulti([
-      'searchSource.get("index")',
+      'searchSource.getValue("index")',
       'vis.type.options.showTimePicker',
     ], function ([index, requiresTimePicker]) {
       const showTimeFilter = Boolean((!index || index.timeFieldName) && requiresTimePicker);
@@ -279,8 +279,8 @@ function VisEditor(
     // update the searchSource when query updates
     $scope.fetch = function () {
       $state.save();
-      savedVis.searchSource.set('query', $state.query);
-      savedVis.searchSource.set('filter', $state.filters);
+      savedVis.searchSource.setValue('query', $state.query);
+      savedVis.searchSource.setValue('filter', $state.filters);
       $scope.vis.forceReload();
     };
 
@@ -352,18 +352,18 @@ function VisEditor(
     const parentsParent = parent.getParent(true);
 
     delete savedVis.savedSearchId;
-    parent.set('filter', _.union(searchSource.getOwn('filter'), parent.getOwn('filter')));
+    parent.setValue('filter', _.union(searchSource.getOwnValue('filter'), parent.getOwnValue('filter')));
 
     // copy over all state except "aggs", "query" and "filter"
     _(parent.toJSON())
       .omit(['aggs', 'filter', 'query'])
       .forOwn(function (val, key) {
-        searchSource.set(key, val);
+        searchSource.setValue(key, val);
       })
       .commit();
 
-    $state.query = searchSource.get('query');
-    $state.filters = searchSource.get('filter');
+    $state.query = searchSource.getValue('query');
+    $state.filters = searchSource.getValue('filter');
     searchSource.inherits(parentsParent);
 
     $scope.fetch();

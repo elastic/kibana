@@ -50,8 +50,8 @@ describe('SegmentedSearchRequest index selection', function () {
   }));
 
   it('queries with size until all 500 docs returned', async function () {
-    const search = new MockSource();
-    const indexPattern = search.get('index');
+    const searchSource = new MockSource();
+    const indexPattern = searchSource.getValue('index');
     sinon.stub(indexPattern, 'toDetailedIndexList').returns(Promise.resolve([
       { index: 'one', min: 0, max: 1 },
       { index: 'two', min: 0, max: 1 },
@@ -60,7 +60,7 @@ describe('SegmentedSearchRequest index selection', function () {
       { index: 'five', min: 0, max: 1 },
     ]));
 
-    const req = new SegmentedSearchRequest({ source: search, errorHandler: () => {} });
+    const req = new SegmentedSearchRequest({ source: searchSource, errorHandler: () => {} });
     req._handle.setDirection('desc');
     req._handle.setSortFn(new HitSortFn('desc'));
     req._handle.setSize(500);
@@ -96,8 +96,8 @@ describe('SegmentedSearchRequest index selection', function () {
   });
 
   it(`sets size 0 for indices that couldn't preclude hits`, async function () {
-    const search = new MockSource();
-    const indexPattern = search.get('index');
+    const searchSource = new MockSource();
+    const indexPattern = searchSource.getValue('index');
 
     // the segreq is looking for 10 documents, and we will give it ten docs with time:5 in the first response.
     // on the second index it should still request 10 documents because it could produce documents with time:5.
@@ -111,7 +111,7 @@ describe('SegmentedSearchRequest index selection', function () {
       { index: 'five', min: 5, max: 50 },
     ]));
 
-    const req = new SegmentedSearchRequest({ source: search, errorHandler: () => {} });
+    const req = new SegmentedSearchRequest({ source: searchSource, errorHandler: () => {} });
     req._handle.setDirection('desc');
     req._handle.setSortFn(new HitSortFn('desc'));
     req._handle.setSize(10);

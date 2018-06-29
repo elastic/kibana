@@ -125,10 +125,10 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
         if (_.isFunction(val)) dynamic[name] = val;
       }, {});
 
-      this.searchSource.set(_.defaults(state, fnProps));
+      this.searchSource.overwrite(_.defaults(state, fnProps));
 
-      if (!_.isUndefined(this.searchSource.getOwn('query'))) {
-        this.searchSource.set('query', migrateLegacyQuery(this.searchSource.getOwn('query')));
+      if (!_.isUndefined(this.searchSource.getOwnValue('query'))) {
+        this.searchSource.setValue('query', migrateLegacyQuery(this.searchSource.getOwnValue('query')));
       }
     };
 
@@ -144,11 +144,11 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
       }
 
       if (config.clearSavedIndexPattern) {
-        this.searchSource.set('index', undefined);
+        this.searchSource.setIndexPattern(undefined);
         return Promise.resolve(null);
       }
 
-      let index = id || config.indexPattern || this.searchSource.getOwn('index');
+      let index = id || config.indexPattern || this.searchSource.getOwnValue('index');
 
       if (!index) {
         return Promise.resolve(null);
@@ -162,7 +162,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
       // At this point index will either be an IndexPattern, if cached, or a promise that
       // will return an IndexPattern, if not cached.
       return Promise.resolve(index).then(indexPattern => {
-        this.searchSource.set('index', indexPattern);
+        this.searchSource.setIndexPattern(indexPattern);
       });
     };
 

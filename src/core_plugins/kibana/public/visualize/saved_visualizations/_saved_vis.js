@@ -95,7 +95,7 @@ uiModules
 
       return self._getLinkedSavedSearch()
         .then(function () {
-          self.searchSource.size(0);
+          self.searchSource.setValue('size', 0);
 
           return self.vis ? self._updateVis() : self._createVis();
         });
@@ -137,7 +137,7 @@ uiModules
         self.visState.title = self.title;
       }
       self.vis = new Vis(
-        self.searchSource.get('index'),
+        self.searchSource.getValue('index'),
         self.visState
       );
 
@@ -147,7 +147,7 @@ uiModules
     SavedVis.prototype._updateVis = function () {
       const self = this;
 
-      self.vis.indexPattern = self.searchSource.get('index');
+      self.vis.indexPattern = self.searchSource.getValue('index');
       self.visState.title = self.title;
       self.vis.setState(self.visState);
     };

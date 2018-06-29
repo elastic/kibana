@@ -56,12 +56,12 @@ export function createSearchItems($route) {
 
   if (indexPattern.id === undefined &&
     savedSearch.id !== undefined) {
-    indexPattern = searchSource.get('index');
+    indexPattern = searchSource.getValue('index');
 
     // Extract the query from the searchSource
     // Might be as a String in q.query, or
     // nested inside q.query.query_string
-    const q = searchSource.get('query');
+    const q = searchSource.getValue('query');
     if (q !== undefined && q.language === 'lucene' && q.query !== undefined) {
       if (typeof q.query === 'string' && q.query !== '') {
         query.query_string.query = q.query;
@@ -71,7 +71,7 @@ export function createSearchItems($route) {
       }
     }
 
-    const fs = searchSource.get('filter');
+    const fs = searchSource.getValue('filter');
     if (fs.length) {
       filters = fs;
     }

@@ -238,7 +238,7 @@ describe('resolveSavedObjects', () => {
         {
           obj: {
             searchSource: {
-              getOwn: () => '1',
+              getOwnValue: () => '1',
             },
             hydrateIndexPattern,
             save,
@@ -247,7 +247,7 @@ describe('resolveSavedObjects', () => {
         {
           obj: {
             searchSource: {
-              getOwn: () => '3',
+              getOwnValue: () => '3',
             },
             hydrateIndexPattern,
             save,

@@ -26,6 +26,26 @@ import { SearchSourceProvider } from 'ui/courier';
 
 import { fetchAnchorProvider } from '../anchor';
 
+function createSearchSourceStubProvider(hits) {
+  const searchSourceStub = {
+    _stubHits: hits,
+  };
+
+  searchSourceStub.filter = sinon.stub().returns(searchSourceStub);
+  searchSourceStub.inherits = sinon.stub().returns(searchSourceStub);
+  searchSourceStub.setValue = sinon.stub().returns(searchSourceStub);
+  searchSourceStub.setIndexPattern = sinon.stub().returns(searchSourceStub);
+  searchSourceStub.fetch = sinon.spy(() => Promise.resolve({
+    hits: {
+      hits: searchSourceStub._stubHits,
+      total: searchSourceStub._stubHits.length,
+    },
+  }));
+
+  return function SearchSourceStubProvider() {
+    return searchSourceStub;
+  };
+}
 
 describe('context app', function () {
   beforeEach(ngMock.module('kibana'));
@@ -72,9 +92,9 @@ describe('context app', function () {
 
       return fetchAnchor('INDEX_PATTERN_ID', 'doc', 'id', [{ '@timestamp': 'desc' }, { '_doc': 'asc' }])
         .then(() => {
-          const setIndexSpy = searchSourceStub.set.withArgs('index');
+          const setIndexSpy = searchSourceStub.setIndexPattern;
           expect(setIndexSpy.calledOnce).to.be(true);
-          expect(setIndexSpy.firstCall.args[1]).to.eql({ id: 'INDEX_PATTERN_ID' });
+          expect(setIndexSpy.firstCall.args[0]).to.eql({ id: 'INDEX_PATTERN_ID' });
         });
     });
 
@@ -83,7 +103,7 @@ describe('context app', function () {
 
       return fetchAnchor('INDEX_PATTERN_ID', 'doc', 'id', [{ '@timestamp': 'desc' }, { '_doc': 'asc' }])
         .then(() => {
-          const setVersionSpy = searchSourceStub.set.withArgs('version');
+          const setVersionSpy = searchSourceStub.setValue.withArgs('version');
           expect(setVersionSpy.calledOnce).to.be(true);
           expect(setVersionSpy.firstCall.args[1]).to.eql(true);
         });
@@ -94,7 +114,7 @@ describe('context app', function () {
 
       return fetchAnchor('INDEX_PATTERN_ID', 'doc', 'id', [{ '@timestamp': 'desc' }, { '_doc': 'asc' }])
         .then(() => {
-          const setSizeSpy = searchSourceStub.set.withArgs('size');
+          const setSizeSpy = searchSourceStub.setValue.withArgs('size');
           expect(setSizeSpy.calledOnce).to.be(true);
           expect(setSizeSpy.firstCall.args[1]).to.eql(1);
         });
@@ -105,7 +125,7 @@ describe('context app', function () {
 
       return fetchAnchor('INDEX_PATTERN_ID', 'doc', 'id', [{ '@timestamp': 'desc' }, { '_doc': 'asc' }])
         .then(() => {
-          const setQuerySpy = searchSourceStub.set.withArgs('query');
+          const setQuerySpy = searchSourceStub.setValue.withArgs('query');
           expect(setQuerySpy.calledOnce).to.be(true);
           expect(setQuerySpy.firstCall.args[1]).to.eql({
             query: {
@@ -128,7 +148,7 @@ describe('context app', function () {
 
       return fetchAnchor('INDEX_PATTERN_ID', 'doc', 'id', [{ '@timestamp': 'desc' }, { '_doc': 'asc' }])
         .then(() => {
-          const setSortSpy = searchSourceStub.set.withArgs('sort');
+          const setSortSpy = searchSourceStub.setValue.withArgs('sort');
           expect(setSortSpy.calledOnce).to.be(true);
           expect(setSortSpy.firstCall.args[1]).to.eql([
             { '@timestamp': 'desc' },
@@ -167,23 +187,3 @@ describe('context app', function () {
     });
   });
 });
-
-function createSearchSourceStubProvider(hits) {
-  const searchSourceStub = {
-    _stubHits: hits,
-  };
-
-  searchSourceStub.filter = sinon.stub().returns(searchSourceStub);
-  searchSourceStub.inherits = sinon.stub().returns(searchSourceStub);
-  searchSourceStub.set = sinon.stub().returns(searchSourceStub);
-  searchSourceStub.fetch = sinon.spy(() => Promise.resolve({
-    hits: {
-      hits: searchSourceStub._stubHits,
-      total: searchSourceStub._stubHits.length,
-    },
-  }));
-
-  return function SearchSourceStubProvider() {
-    return searchSourceStub;
-  };
-}

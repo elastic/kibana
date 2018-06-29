@@ -24,7 +24,7 @@ export function getSavedDashboardMock(config) {
     title: 'my dashboard',
     panelsJSON: '[]',
     searchSource: {
-      getOwn: (param) => param
+      getOwnValue: (param) => param
     }
   };
   return Object.assign(defaults, config);
