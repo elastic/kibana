@@ -14,6 +14,7 @@ export class VectorSource extends ASource {
 
   static create(options) {
     const vectorDescriptor = super.create(options);
+    vectorDescriptor.type = 'VECTOR';
     return vectorDescriptor;
   }
 }

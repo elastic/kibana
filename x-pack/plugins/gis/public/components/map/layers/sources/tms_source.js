@@ -14,6 +14,7 @@ export class TMSSource extends ASource {
 
   static create(options) {
     const tmsDescriptor = super.create(options);
+    tmsDescriptor.type = 'TMS';
     return tmsDescriptor;
   }
 }
