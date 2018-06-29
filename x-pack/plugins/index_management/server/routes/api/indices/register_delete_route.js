@@ -15,8 +15,6 @@ function getIndexArrayFromPayload(payload) {
 
 async function deleteIndices(callWithRequest, indices) {
   const params = {
-    ignore_unavailable: true,
-    allow_no_indices: false,
     expand_wildcards: 'none',
     format: 'json',
     index: indices
