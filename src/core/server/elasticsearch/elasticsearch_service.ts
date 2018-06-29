@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { Client } from 'elasticsearch';
 import {
   $combineLatest,
   filter,
@@ -28,9 +29,7 @@ import {
   Subscription,
   switchMap,
   toPromise,
-} from '@kbn/observable';
-import { Client } from 'elasticsearch';
-
+} from '../../lib/kbn_observable';
 import { LoggerFactory } from '../../logging';
 import { CoreService } from '../../types/core_service';
 import { Headers } from '../http/router/headers';
