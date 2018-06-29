@@ -9,7 +9,7 @@ it.
 === Archive packages (`.tar.gz`)
 
 If you installed {kib} on Linux or Darwin with a `.tar.gz` package, you can 
-stop and start {kib} from the command line.  
+start and stop {kib} from the command line.  
 
 [float]
 include::install/targz-running.asciidoc[]
