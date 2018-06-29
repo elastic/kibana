@@ -88,7 +88,10 @@ export class BulkUploader {
    * @return {Promise} - resolves to undefined
    */
   async _fetchAndUpload(collectorSet) {
-    const data = await collectorSet.bulkFetch(this._callClusterWithInternalUser);
+    const data = await collectorSet.bulkFetch({
+      callCluster: this._callClusterWithInternalUser,
+      savedObjectsClient: this._savedObjectsClient,
+    });
     const payload = data
       .filter(d => Boolean(d) && !isEmpty(d.result))
       .map(({ result, type }) => [{ index: { _type: type } }, result]);

@@ -26,8 +26,9 @@ export function kibanaStatsRoute(server) {
         const reportingUsageCollector = getReportingUsageCollector(server);
 
         const [ kibana, reporting ] = await Promise.all([
-          kibanaUsageCollector.fetch(callCluster),
-          reportingUsageCollector.fetch(callCluster),
+          // allow collectors to use either callCluster or savedObjectsClient
+          kibanaUsageCollector.fetch({ callCluster, savedObjectsClient }),
+          reportingUsageCollector.fetch({ callCluster, savedObjectsClient }),
         ]);
 
         reply({

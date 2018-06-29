@@ -40,12 +40,4 @@ export class Collector {
 
     this.log = getCollectorLogger(server);
   }
-
-  // TODO use the saved object client here
-  fetchInternal(callCluster) {
-    if (typeof callCluster !== 'function') {
-      throw new Error('A `callCluster` function must be passed to the fetch methods of collectors');
-    }
-    return this.fetch(callCluster);
-  }
 }

@@ -23,7 +23,7 @@ export function getKibanaUsageCollector(server) {
   const { UsageCollector } = server.usage;
   return new UsageCollector(server, {
     type: KIBANA_USAGE_TYPE,
-    async fetch(callCluster) { // TODO use the saved object client here
+    async fetch({ callCluster }) { // TODO use the saved object client here
       const index = server.config().get('kibana.index');
       const savedObjectCountSearchParams = {
         index,

@@ -25,11 +25,12 @@ const getClusterUuid = async callCluster => {
 };
 
 /*
+ * @param {Object} clients: clients.callCluster and clients.savedObjectsClient
  * @return {Object} data from usage stats collectors registered with CollectorSet
  */
-const getUsage = (callCluster, server) => {
+const getUsage = (clients, server) => {
   const { collectorSet } = server.usage;
-  return collectorSet.bulkFetchUsage(callCluster);
+  return collectorSet.bulkFetchUsage(clients);
 };
 
 export function registerUsageApi(server) {
@@ -44,7 +45,7 @@ export function registerUsageApi(server) {
       try {
         const [ clusterUuid, usage ] = await Promise.all([
           getClusterUuid(callCluster),
-          getUsage(callCluster, server),
+          getUsage({ callCluster, savedObjectsClient }, server),
         ]);
 
         reply({
