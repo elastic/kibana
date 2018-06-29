@@ -49,8 +49,8 @@ describe('SearchSource', function () {
     indexPattern2 = new IndexPattern('test2-*', null, []);
     expect(indexPattern).to.not.be(indexPattern2);
   }));
-  beforeEach(searchRequestQueue.removeAll);
-  after(searchRequestQueue.removeAll);
+  beforeEach(() => searchRequestQueue.removeAll());
+  after(() => searchRequestQueue.removeAll());
 
   describe('#onResults()', function () {
     it('adds a request to the searchRequestQueue', function () {

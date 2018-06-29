@@ -23,48 +23,48 @@ class SearchRequestQueue {
     this._searchRequests = [];
   }
 
-  getCount = () => {
+  getCount() {
     return this._searchRequests.length;
-  };
+  }
 
-  add = (searchRequest) => {
+  add(searchRequest) {
     this._searchRequests.push(searchRequest);
-  };
+  }
 
-  remove = (searchRequest) => {
+  remove(searchRequest) {
     // Remove all matching search requests.
     this._searchRequests = this._searchRequests.filter(
       existingSearchRequest => existingSearchRequest !== searchRequest
     );
   }
 
-  removeAll = () => {
-    this._searchRequests.splice(0, this._searchRequests.length);
-  };
+  removeAll() {
+    this._searchRequests.length = 0;
+  }
 
-  abortAll = () => {
+  abortAll() {
     this._searchRequests.forEach(searchRequest => searchRequest.abort());
-  };
+  }
 
-  getAll = () => {
+  getAll() {
     return this._searchRequests;
-  };
+  }
 
-  getSearchRequestAt = (index) => {
+  getSearchRequestAt(index) {
     return this._searchRequests[index];
-  };
+  }
 
-  getInactive = () => {
+  getInactive() {
     return this._searchRequests.filter(searchRequest => !searchRequest.started);
-  };
+  }
 
-  getStartable = () => {
+  getStartable() {
     return this._searchRequests.filter(searchRequest => searchRequest.canStart());
-  };
+  }
 
-  getPending = () => {
+  getPending() {
     return this._searchRequests.filter(searchRequest => searchRequest.isFetchRequestedAndPending());
-  };
+  }
 }
 
 export const searchRequestQueue = new SearchRequestQueue();
