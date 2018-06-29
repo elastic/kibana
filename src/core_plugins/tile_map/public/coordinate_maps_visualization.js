@@ -185,7 +185,7 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
     async getGeohashBounds() {
       const agg = this._getGeoHashAgg();
       if (agg) {
-        const searchSource = this.vis.searchSource.makeChild();
+        const searchSource = this.vis.searchSource.createChild();
         searchSource.setValue('size', 0);
         searchSource.setValue('aggs', function () {
           const geoBoundsAgg = new AggConfig(agg.vis, {

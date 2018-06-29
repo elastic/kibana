@@ -201,7 +201,7 @@ function discoverController(
     .setValue('version', true);
 
   // searchSource which applies time range
-  const timeRangeSearchSource = savedSearch.searchSource.new();
+  const timeRangeSearchSource = savedSearch.searchSource.create();
   timeRangeSearchSource.setValue('filter', () => {
     return timefilter.createFilter($scope.indexPattern);
   });
@@ -257,7 +257,7 @@ function discoverController(
   };
 
   this.getSharingData = async () => {
-    const searchSource = $scope.searchSource.clone();
+    const searchSource = $scope.searchSource.createCopy();
 
     const { searchFields, selectFields } = await getSharingDataFields();
     searchSource.setValue('fields', searchFields);

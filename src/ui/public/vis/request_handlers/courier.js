@@ -82,8 +82,8 @@ const CourierRequestHandlerProvider = function () {
       // Using callParentStartHandlers: true we make sure, that the parent searchSource
       // onSearchRequestStart will be called properly even though we use an inherited
       // search source.
-      const timeFilterSearchSource = searchSource.makeChild({ callParentStartHandlers: true });
-      const requestSearchSource = timeFilterSearchSource.makeChild({ callParentStartHandlers: true });
+      const timeFilterSearchSource = searchSource.createChild({ callParentStartHandlers: true });
+      const requestSearchSource = timeFilterSearchSource.createChild({ callParentStartHandlers: true });
 
       // For now we need to mirror the history of the passed search source, since
       // the spy panel wouldn't work otherwise.

@@ -355,16 +355,6 @@ describe('SearchSource', function () {
           expect(state.filters).to.eql([ filter ]);
         });
       });
-
-      it('uses custom filter predicate', function () {
-        searchSource.addFilterPredicate(() => {
-          return false;
-        });
-
-        const filter = {};
-        searchSource._mergeProp(state, filter, 'filter');
-        expect(state.filters).to.be.empty();
-      });
     });
   });
 });

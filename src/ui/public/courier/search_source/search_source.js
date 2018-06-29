@@ -271,82 +271,21 @@ export function SearchSourceProvider(Promise, Private, config) {
       return this._parent || undefined;
     }
 
-    /**
-     * Temporarily prevent this Search from being fetched... not a fan but it's easy
-     */
-    disable() {
-      this._fetchDisabled = true;
-    }
-
-    /**
-     * Reverse of SearchSource#disable(), only need to call this if source was previously disabled
-     */
-    enable() {
-      this._fetchDisabled = false;
-    }
-
-    onBeginSegmentedFetch(initFunction) {
-      const self = this;
-      return new Promise((resolve, reject) => {
-        function addRequest() {
-          const defer = Promise.defer();
-          const errorHandler = (request, error) => {
-            reject(error);
-            request.abort();
-          };
-          const req = new SegmentedSearchRequest({ source: self, defer, errorHandler, initFn: initFunction });
-
-          // Return promises created by the completion handler so that
-          // errors will bubble properly
-          return req.getCompletePromise().then(addRequest);
-        }
-
-        addRequest();
-      });
-    }
-
-    addFilterPredicate(predicate) {
-      this._filterPredicates.push(predicate);
-    }
-
-    clone() {
-      const clone = new SearchSource(this.toString());
-      // when serializing the internal state with .toString() we lose the internal classes used in the index
-      // pattern, so we have to set it again to workaround this behavior
-      clone.setIndexPattern(this.getValue('index'));
-      clone.inherits(this.getParent());
-      return clone;
-    }
-
-    makeChild(params) {
-      return new SearchSource().inherits(this, params);
-    }
-
-    new() {
+    create() {
       return new SearchSource();
     }
 
-    async getSearchRequestBody() {
-      const searchRequest = await this._flatten();
-      return searchRequest.body;
+    createCopy() {
+      const newSearchSource = new SearchSource(this.toString());
+      // when serializing the internal state with .toString() we lose the internal classes used in the index
+      // pattern, so we have to set it again to workaround this behavior
+      newSearchSource.setIndexPattern(this.getValue('index'));
+      newSearchSource.inherits(this.getParent());
+      return newSearchSource;
     }
 
-    /**
-     *  Called by requests of this search source when they are done
-     *  @param  {Courier.Request} request
-     *  @return {undefined}
-     */
-    requestIsStopped() {
-      this.activeFetchCount -= 1;
-    }
-
-    /**
-     * Create a new dataSource object of the same type
-     * as this, which inherits this dataSource's properties
-     * @return {SearchSource}
-     */
-    extend() {
-      return new SearchSource().inherits(this);
+    createChild(params) {
+      return new SearchSource().inherits(this, params);
     }
 
     /**
@@ -363,26 +302,6 @@ export function SearchSourceProvider(Promise, Private, config) {
      */
     toString() {
       return angular.toJson(this.toJSON());
-    }
-
-    /**
-     * Put a request in to the courier that this Source should
-     * be fetched on the next run of the courier
-     * @return {Promise}
-     */
-    onResults() {
-      const self = this;
-
-      return new Promise(function (resolve, reject) {
-        const defer = Promise.defer();
-        defer.promise.then(resolve, reject);
-
-        const errorHandler = (request, error) => {
-          reject(error);
-          request.abort();
-        };
-        self._createRequest({ defer, errorHandler });
-      });
     }
 
     /**
@@ -425,15 +344,6 @@ export function SearchSourceProvider(Promise, Private, config) {
     }
 
     /**
-     * Completely destroy the SearchSource.
-     * @return {undefined}
-     */
-    destroy() {
-      this.cancelQueued();
-      this._requestStartHandlers.length = 0;
-    }
-
-    /**
      *  Add a handler that will be notified whenever requests start
      *  @param  {Function} handler
      *  @return {undefined}
@@ -467,6 +377,68 @@ export function SearchSourceProvider(Promise, Private, config) {
         .then(_.noop);
     }
 
+    /**
+     * Put a request in to the courier that this Source should
+     * be fetched on the next run of the courier
+     * @return {Promise}
+     */
+    onResults() {
+      const self = this;
+
+      return new Promise(function (resolve, reject) {
+        const defer = Promise.defer();
+        defer.promise.then(resolve, reject);
+
+        const errorHandler = (request, error) => {
+          reject(error);
+          request.abort();
+        };
+        self._createRequest({ defer, errorHandler });
+      });
+    }
+
+    onBeginSegmentedFetch(initFunction) {
+      const self = this;
+      return new Promise((resolve, reject) => {
+        function addRequest() {
+          const defer = Promise.defer();
+          const errorHandler = (request, error) => {
+            reject(error);
+            request.abort();
+          };
+          const req = new SegmentedSearchRequest({ source: self, defer, errorHandler, initFn: initFunction });
+
+          // Return promises created by the completion handler so that
+          // errors will bubble properly
+          return req.getCompletePromise().then(addRequest);
+        }
+
+        addRequest();
+      });
+    }
+
+    async getSearchRequestBody() {
+      const searchRequest = await this._flatten();
+      return searchRequest.body;
+    }
+
+    /**
+     *  Called by requests of this search source when they are done
+     *  @param  {Courier.Request} request
+     *  @return {undefined}
+     */
+    requestIsStopped() {
+      this.activeFetchCount -= 1;
+    }
+
+    /**
+     * Completely destroy the SearchSource.
+     * @return {undefined}
+     */
+    destroy() {
+      this.cancelQueued();
+      this._requestStartHandlers.length = 0;
+    }
 
     /******
      * PRIVATE APIS

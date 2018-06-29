@@ -348,14 +348,14 @@ function VisEditor(
     toastNotifications.addSuccess(`Unlinked from saved search '${savedVis.savedSearch.title}'`);
 
     $state.linked = false;
-    const parent = searchSource.getParent(true);
-    const parentsParent = parent.getParent(true);
+    const searchSourceParent = searchSource.getParent(true);
+    const searchSourceGrandparent = searchSourceParent.getParent(true);
 
     delete savedVis.savedSearchId;
-    parent.setValue('filter', _.union(searchSource.getOwnValue('filter'), parent.getOwnValue('filter')));
+    searchSourceParent.setValue('filter', _.union(searchSource.getOwnValue('filter'), searchSourceParent.getOwnValue('filter')));
 
     // copy over all state except "aggs", "query" and "filter"
-    _(parent.toJSON())
+    _(searchSourceParent.toJSON())
       .omit(['aggs', 'filter', 'query'])
       .forOwn(function (val, key) {
         searchSource.setValue(key, val);
@@ -364,7 +364,7 @@ function VisEditor(
 
     $state.query = searchSource.getValue('query');
     $state.filters = searchSource.getValue('filter');
-    searchSource.inherits(parentsParent);
+    searchSource.inherits(searchSourceGrandparent);
 
     $scope.fetch();
   };
