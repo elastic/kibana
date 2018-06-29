@@ -58,6 +58,7 @@ export function isI18nTranslateFunction(node) {
     isCallExpression(node) &&
     (isIdentifier(node.callee, { name: 'i18n' }) ||
       (isMemberExpression(node.callee) &&
+        isIdentifier(node.callee.object, { name: 'i18n' }) &&
         isIdentifier(node.callee.property, { name: 'translate' })))
   );
 }
