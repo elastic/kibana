@@ -75,27 +75,21 @@ This section summarizes the changes in each release.
 
 [[release-notes-6.3.1]]
 == {kib} 6.3.1
-
-[float]
-[[breaking-6.3.]]
-=== Breaking Changes
-
-See <<breaking-6.3.0, Breaking Changes in 6.3.0>>.
+coming[6.3.1]
 
 [float]
 [[enhancement-6.3.1]]
 === Enhancements
 Management::
 * [Fixes #19475] Replaces the `watch-type-select` directive in Watcher 
-with buttons
-{pull}19782[#19782]
+with buttons {pull}19782[#19782]
 +
 [role="screenshot"]
 image::images/management-watcher-2-buttons.png[]
 
 Monitoring::
 * Improves the experience of enabling monitoring collection when the page is set 
-to an absolute time range. {pull}19451[#19451]
+to an absolute time range {pull}19451[#19451]
 
 Operations::
 * Bumps node to version 8.11.3 {pull}19861[#19861]
@@ -118,7 +112,7 @@ to panels to aid screen reader accessibility {pull}19777[#19777]
 * [Fixes #19482] Adds `aria-label` to Indices Management search input {pull}19778[#19778]
 * [Fixes #19474] Adds `described-by` attribute to `duration-selection` directive
 to make children inputs accessible to screen readers {pull}19779[#19779]
-* [Fixes #] Guards against calling `fieldWildcardMatcher` or `fieldWildcardFilter` 
+* [Fixes #19814] Guards against calling `fieldWildcardMatcher` or `fieldWildcardFilter` 
 with undefined {pull}19865[#19865]
 
 
