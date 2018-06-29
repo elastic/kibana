@@ -35,6 +35,9 @@ import { has } from 'lodash';
 export const copyField = (field, indexPattern, Field) => {
   const changes = {};
   const newFieldProps = {
+    // When we are ready to save the copied field back into the index pattern,
+    // we use `toActualField()` to retrieve an actual `Field` type object, using
+    // its original properties with our "changes" applied.
     toActualField: {
       value: () => {
         return new Field(indexPattern, {
@@ -45,6 +48,22 @@ export const copyField = (field, indexPattern, Field) => {
     }
   };
 
+  // Index pattern `Field` objects are created with custom property
+  // descriptors using `ObjDefine`.
+  //
+  // Each property of a `Field` type object could be enumerable/non-enumerable,
+  // writable/not writable, configurable/not configurable, and have custom
+  // getter and setter. We can't use the original `field` object directly for
+  // creating a new field or editing a new field, since we need all the
+  // properties to be editable.
+  //
+  // A normal copy of `field` (i.e. `const newField = { ...field }`) will only
+  // copy enumerable properties and copy each property's descriptors (not
+  // writable, etc).
+  //
+  // So we copy `field`'s **property descriptors** into `newFieldProps`
+  // and modify them so that they are "writable" with a getter/setter that
+  // stores and retrieves changes into/from another object (`changes`).
   Object.getOwnPropertyNames(field).forEach(function (prop) {
     const desc = Object.getOwnPropertyDescriptor(field, prop);
 
