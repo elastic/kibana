@@ -17,5 +17,28 @@
  * under the License.
  */
 
-export { runTestsCli } from './run_tests/cli';
-export { startServersCli } from './start_servers/cli';
+import chalk from 'chalk';
+import getopts from 'getopts';
+import { startServers } from '../../tasks';
+import { processOptions, displayHelp } from './args';
+
+/**
+ * Start servers
+ * @param {string} defaultConfigPath Optional path to config
+ *                                   if no config option is passed
+ */
+export async function startServersCli(defaultConfigPath) {
+  try {
+    const userOptions = getopts(process.argv.slice(2)) || {};
+    if (userOptions.help) {
+      console.log(displayHelp());
+      return undefined;
+    }
+
+    const options = processOptions(userOptions, defaultConfigPath);
+    await startServers(options);
+  } catch (err) {
+    console.log(chalk.red(err));
+    process.exit(1);
+  }
+}

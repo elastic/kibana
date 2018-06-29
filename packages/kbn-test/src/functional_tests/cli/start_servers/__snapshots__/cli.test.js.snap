@@ -1,0 +1,57 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`start servers CLI options accepts boolean value for updateBaselines 1`] = `
+Array [
+  Array [
+    "[31mError: functional_tests_server: invalid option [updateBaselines][39m",
+  ],
+]
+`;
+
+exports[`start servers CLI options rejects bail 1`] = `
+Array [
+  Array [
+    "[31mError: functional_tests_server: invalid option [bail][39m",
+  ],
+]
+`;
+
+exports[`start servers CLI options rejects boolean config value 1`] = `
+Array [
+  Array [
+    "[31mError: functional_tests_server: invalid argument [true] to option [config][39m",
+  ],
+]
+`;
+
+exports[`start servers CLI options rejects boolean value for kibana-install-dir 1`] = `
+Array [
+  Array [
+    "[31mError: functional_tests_server: invalid argument [true] to option [kibana-install-dir][39m",
+  ],
+]
+`;
+
+exports[`start servers CLI options rejects empty config value if no default passed 1`] = `
+Array [
+  Array [
+    "[31mError: functional_tests_server: config is required[39m",
+  ],
+]
+`;
+
+exports[`start servers CLI options rejects invalid options even if valid options exist 1`] = `
+Array [
+  Array [
+    "[31mError: functional_tests_server: invalid option [grep][39m",
+  ],
+]
+`;
+
+exports[`start servers CLI options rejects non-enum value for esFrom 1`] = `
+Array [
+  Array [
+    "[31mError: functional_tests_server: invalid argument [butter] to option [esFrom][39m",
+  ],
+]
+`;
