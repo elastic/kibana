@@ -89,6 +89,7 @@ beforeEach(() => {
 test('renders ControlsTab', () => {
   const component = shallow(<ControlsTab
     scope={scopeMock}
+    editorState={scopeMock.editorState}
     stageEditorParams={stageEditorParams}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
@@ -97,6 +98,7 @@ test('renders ControlsTab', () => {
 test('add control btn', () => {
   const component = mount(<ControlsTab
     scope={scopeMock}
+    editorState={scopeMock.editorState}
     stageEditorParams={stageEditorParams}
   />);
   findTestSubject(component, 'inputControlEditorAddBtn').simulate('click');
@@ -112,6 +114,7 @@ test('add control btn', () => {
 test('remove control btn', () => {
   const component = mount(<ControlsTab
     scope={scopeMock}
+    editorState={scopeMock.editorState}
     stageEditorParams={stageEditorParams}
   />);
   findTestSubject(component, 'inputControlEditorRemoveControl0').simulate('click');
@@ -136,6 +139,7 @@ test('remove control btn', () => {
 test('move down control btn', () => {
   const component = mount(<ControlsTab
     scope={scopeMock}
+    editorState={scopeMock.editorState}
     stageEditorParams={stageEditorParams}
   />);
   findTestSubject(component, 'inputControlEditorMoveDownControl0').simulate('click');
@@ -172,6 +176,7 @@ test('move down control btn', () => {
 test('move up control btn', () => {
   const component = mount(<ControlsTab
     scope={scopeMock}
+    editorState={scopeMock.editorState}
     stageEditorParams={stageEditorParams}
   />);
   findTestSubject(component, 'inputControlEditorMoveUpControl1').simulate('click');

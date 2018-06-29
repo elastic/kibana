@@ -206,11 +206,15 @@ export function VisProvider(Private, indexPatterns, getAppState) {
     }
 
     getCurrentState(includeDisabled) {
+      return this.getSerializableState(this, includeDisabled);
+    }
+
+    getSerializableState(state, includeDisabled) {
       return {
-        title: this.title,
-        type: this.type.name,
-        params: this.params,
-        aggs: this.aggs
+        title: state.title,
+        type: state.type.name || state.type,
+        params: _.cloneDeep(state.params),
+        aggs: state.aggs
           .map(agg => agg.toJSON())
           .filter(agg => includeDisabled || agg.enabled)
           .filter(Boolean)
@@ -218,9 +222,9 @@ export function VisProvider(Private, indexPatterns, getAppState) {
     }
 
     copyCurrentState(includeDisabled) {
-      const cloned = _.cloneDeep(this.getCurrentState(includeDisabled));
-      cloned.aggs = new AggConfigs(this, cloned.aggs);
-      return cloned;
+      const state = this.getCurrentState(includeDisabled);
+      state.aggs = new AggConfigs(this, state.aggs);
+      return state;
     }
 
     getStateInternal(includeDisabled) {

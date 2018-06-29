@@ -48,12 +48,12 @@ uiModules
 
         const reactOptionsComponent = typeof $scope.editor !== 'string';
         const stageEditorParams = (params) => {
-          $scope.vis.params = _.cloneDeep(params);
+          $scope.editorState.params = _.cloneDeep(params);
           $scope.$apply();
         };
         const renderReactComponent = () => {
           const Component = $scope.editor;
-          render(<Component scope={$scope} stageEditorParams={stageEditorParams} />, $el[0]);
+          render(<Component scope={$scope} editorState={$scope.editorState} stageEditorParams={stageEditorParams} />, $el[0]);
         };
         // Bind the `editor` template with the scope.
         if (reactOptionsComponent) {
@@ -63,7 +63,7 @@ uiModules
           $optionContainer.append($editor);
         }
 
-        $scope.$watchGroup(['visData', 'visualizeEditor', 'vis.params'], () => {
+        $scope.$watchGroup(['visData', 'visualizeEditor', 'editorState.params'], () => {
           if (reactOptionsComponent) {
             renderReactComponent();
           }

@@ -50,18 +50,6 @@ const defaultEditor = function ($rootScope, $compile) {
     render(visData, searchSource, updateStatus, uiState) {
       let $scope;
 
-      const getSerializableState = (state) => {
-        return {
-          title: state.title,
-          type: state.type.name || state.type,
-          params: state.params,
-          aggs: state.aggs
-            .map(agg => agg.toJSON())
-            .filter(agg => agg.enabled)
-            .filter(Boolean)
-        };
-      };
-
       const updateScope = () => {
         $scope.vis = this.vis;
         $scope.visData = visData;
@@ -77,7 +65,7 @@ const defaultEditor = function ($rootScope, $compile) {
           updateScope();
 
           $scope.state = $scope.vis.copyCurrentState();
-          $scope.oldState = getSerializableState($scope.vis.copyCurrentState());
+          $scope.oldState = $scope.vis.getSerializableState($scope.state);
 
           $scope.toggleSidebar = () => {
             $scope.$broadcast('render');
@@ -87,13 +75,13 @@ const defaultEditor = function ($rootScope, $compile) {
           // track state of editable vis vs. "actual" vis
           $scope.stageEditableVis = () => {
             $scope.vis.setCurrentState($scope.state);
-            $scope.oldState = getSerializableState($scope.vis.copyCurrentState());
+            $scope.oldState = $scope.vis.getSerializableState($scope.state);
             $scope.vis.updateState();
             $scope.vis.dirty = false;
           };
           $scope.resetEditableVis = () => {
             $scope.state = $scope.vis.copyCurrentState();
-            $scope.oldState = getSerializableState($scope.vis.copyCurrentState());
+            $scope.oldState = $scope.vis.getSerializableState($scope.state);
             $scope.vis.dirty = false;
           };
 
@@ -129,7 +117,7 @@ const defaultEditor = function ($rootScope, $compile) {
 
           let lockDirty = false;
           $scope.$watch(() => {
-            return getSerializableState($scope.state);
+            return $scope.vis.getSerializableState($scope.state);
           }, function (newState) {
             if (lockDirty) {
               lockDirty = false;
@@ -156,7 +144,12 @@ const defaultEditor = function ($rootScope, $compile) {
             const recursiveCopyChanged = (src, org, dst) => {
               for (const prop in src) {
                 if (typeof src[prop] === 'object') {
-                  recursiveCopyChanged(src[prop], org[prop], dst[prop]);
+                  if (!dst[prop]) {
+                    dst[prop] = _.cloneDeep(src[prop]);
+                    org[prop] = _.cloneDeep(src[prop]);
+                  } else {
+                    recursiveCopyChanged(src[prop], org[prop], dst[prop]);
+                  }
                 } else {
                   if (src[prop] !== org[prop]) {
                     org[prop] = src[prop];

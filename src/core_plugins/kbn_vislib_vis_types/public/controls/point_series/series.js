@@ -48,13 +48,13 @@ module.directive('vislibSeries', function () {
 
       $scope.series = $scope.editorState.params.seriesParams;
       $scope.$watch(() => {
-        return $scope.vis.aggs.map(agg => {
+        return $scope.editorState.aggs.map(agg => {
           return agg.makeLabel();
         }).join();
       }, () => {
         const schemaTitle = $scope.vis.type.schemas.metrics[0].title;
 
-        const metrics = $scope.vis.aggs.filter(agg => {
+        const metrics = $scope.editorState.aggs.filter(agg => {
           const isMetric = agg.type && agg.type.type === 'metrics';
           return isMetric && agg.schema.title === schemaTitle;
         });
