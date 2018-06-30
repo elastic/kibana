@@ -47,7 +47,7 @@ export function getRoutes() {
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 
-export function IndexPatternProvider(Private, config, Promise, confirmModalPromise, kbnUrl) {
+export function IndexPatternProvider(Private, config, Promise, confirmModalPromise, kbnUrl, i18n) {
   const getConfig = (...args) => config.get(...args);
   const getIds = Private(IndexPatternsGetProvider)('id');
   const fieldsFetcher = Private(FieldsFetcherProvider);
@@ -120,12 +120,10 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
 
     if (indexPattern.isUnsupportedTimePattern()) {
       if (!isUserAwareOfUnsupportedTimePattern(indexPattern)) {
-        const warning = (
-          'Support for time-intervals has been removed. ' +
-          `View the ["${indexPattern.title}" index pattern in management](` +
-          kbnUrl.getRouteHref(indexPattern, 'edit') +
-          ') for more information.'
-        );
+        const warning = i18n('common.ui.indexPattern.create.warning.label',
+          { values: { title: indexPattern.title, link: kbnUrl.getRouteHref(indexPattern, 'edit') },
+            //eslint-disable-next-line max-len
+            defaultMessage: 'Support for time-intervals has been removed. View the ["{title}" index pattern in management]({link}) for more information.' });
         notify.warning(warning, { lifetime: Infinity });
       }
     }
@@ -415,7 +413,8 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
 
       // We found a duplicate but we aren't allowing override, show the warn modal
       if (!allowOverride) {
-        const confirmMessage = `An index pattern with the title '${this.title}' already exists.`;
+        const confirmMessage = i18n('common.ui.indexPattern.create.titleExists.label', { values: { title: this.title },
+          defaultMessage: 'An index pattern with the title \'{title}\' already exists.' });
         try {
           await confirmModalPromise(confirmMessage, { confirmButtonText: 'Go to existing pattern' });
           return kbnUrl.redirect('/management/kibana/indices/{{id}}', { id: potentialDuplicateByTitle.id });
@@ -431,7 +430,11 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
 
       // We can override and we want to prompt for confirmation
       try {
-        await confirmModalPromise(`Are you sure you want to overwrite ${this.title}?`, { confirmButtonText: 'Overwrite' });
+        await confirmModalPromise(
+          i18n('common.ui.indexPattern.create.confirmOverwrite.label', { values: { title: this.title },
+            defaultMessage: 'Are you sure you want to overwrite \'{title}\'?' }),
+          { confirmButtonText: i18n('common.ui.indexPattern.create.confirmOverwrite.button', { defaultMessage: 'Overwrite' })
+          });
       } catch (err) {
         // They changed their mind
         return false;
@@ -477,7 +480,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
                 }
 
                 if (unresolvedCollision) {
-                  toastNotifications.addDanger('Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.'); // eslint-disable-line max-len
+                  toastNotifications.addDanger(i18n('common.ui.indexPattern.create.unableWrite.label', { defaultMessage: 'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.' })); // eslint-disable-line max-len
                   throw err;
                 }
 

@@ -31,6 +31,9 @@ import {
 import { Table } from './components/table';
 import { Header } from './components/header';
 import { AddFilter } from './components/add_filter';
+import { ReactI18n } from '@kbn/i18n';
+
+const { I18nProvider, I18nContext } = ReactI18n;
 
 export class SourceFiltersTable extends Component {
   static propTypes = {
@@ -151,7 +154,7 @@ export class SourceFiltersTable extends Component {
     this.setState({ isSaving: false });
   };
 
-  renderDeleteConfirmationModal() {
+  renderDeleteConfirmationModal(intl) {
     const { filterToDelete } = this.state;
 
     if (!filterToDelete) {
@@ -161,11 +164,15 @@ export class SourceFiltersTable extends Component {
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
-          title={`Delete source filter '${filterToDelete.value}'?`}
+          title={intl.formatMessage(
+            { id: 'kbn.management.indexPattern.edit.source.deleteSourceFilter.label', defaultMessage: 'Delete source filter \'{value}\'?' },
+            { value: filterToDelete.value })}
           onCancel={this.hideDeleteConfirmationModal}
           onConfirm={this.deleteFilter}
-          cancelButtonText="Cancel"
-          confirmButtonText="Delete"
+          cancelButtonText={intl.formatMessage({
+            id: 'kbn.management.indexPattern.edit.source.deleteFilter.cancel.button', defaultMessage: 'Cancel' })}
+          confirmButtonText={intl.formatMessage({
+            id: 'kbn.management.indexPattern.edit.source.deleteFilter.delete.button', defaultMessage: 'Delete' })}
           defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
         />
       </EuiOverlayMask>
@@ -180,21 +187,25 @@ export class SourceFiltersTable extends Component {
     const filteredFilters = this.getFilteredFilters(this.state, this.props);
 
     return (
-      <div>
-        <Header />
-        <AddFilter onAddFilter={this.onAddFilter} />
-        <EuiSpacer size="l" />
-        <Table
-          isSaving={isSaving}
-          indexPattern={indexPattern}
-          items={filteredFilters}
-          fieldWildcardMatcher={fieldWildcardMatcher}
-          deleteFilter={this.startDeleteFilter}
-          saveFilter={this.saveFilter}
-        />
+      <I18nProvider>
+        <div>
+          <Header />
+          <AddFilter onAddFilter={this.onAddFilter} />
+          <EuiSpacer size="l" />
+          <Table
+            isSaving={isSaving}
+            indexPattern={indexPattern}
+            items={filteredFilters}
+            fieldWildcardMatcher={fieldWildcardMatcher}
+            deleteFilter={this.startDeleteFilter}
+            saveFilter={this.saveFilter}
+          />
 
-        {this.renderDeleteConfirmationModal()}
-      </div>
+          <I18nContext>
+            {intl => (this.renderDeleteConfirmationModal(intl))}
+          </I18nContext>
+        </div>
+      </I18nProvider>
     );
   }
 }

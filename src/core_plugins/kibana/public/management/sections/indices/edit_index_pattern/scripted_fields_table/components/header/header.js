@@ -28,16 +28,25 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { ReactI18n } from '@kbn/i18n';
+
+const { FormattedMessage } = ReactI18n;
+
 export const Header = ({ addScriptedFieldUrl }) => (
   <EuiFlexGroup alignItems="center">
     <EuiFlexItem>
       <EuiTitle size="s">
-        <h3>Scripted fields</h3>
+        <h3>
+          <FormattedMessage id="kbn.management.indexPattern.edit.scripted.header" defaultMessage="Scripted fields"/>
+        </h3>
       </EuiTitle>
       <EuiText>
         <p>
-          You can use scripted fields in visualizations and display them in your documents.
-          However, you cannot search scripted fields.
+          <FormattedMessage
+            id="kbn.management.indexPattern.edit.scripted.label"
+            //eslint-disable-next-line max-len
+            defaultMessage="You can use scripted fields in visualizations and display them in your documents. However, you cannot search scripted fields."
+          />
         </p>
       </EuiText>
     </EuiFlexItem>
@@ -47,7 +56,7 @@ export const Header = ({ addScriptedFieldUrl }) => (
         data-test-subj="addScriptedFieldLink"
         href={addScriptedFieldUrl}
       >
-        Add scripted field
+        <FormattedMessage id="kbn.management.indexPattern.edit.scripted.addField.button" defaultMessage="Add scripted field"/>
       </EuiButton>
     </EuiFlexItem>
   </EuiFlexGroup>

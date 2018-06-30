@@ -35,6 +35,10 @@ import {
   CallOuts,
 } from './components';
 
+import { ReactI18n } from '@kbn/i18n';
+
+const { I18nProvider, I18nContext } = ReactI18n;
+
 export class ScriptedFieldsTable extends Component {
   static propTypes = {
     indexPattern: PropTypes.object.isRequired,
@@ -142,16 +146,25 @@ export class ScriptedFieldsTable extends Component {
     }
 
     return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={`Delete scripted field '${fieldToDelete.name}'?`}
-          onCancel={this.hideDeleteConfirmationModal}
-          onConfirm={this.deleteField}
-          cancelButtonText="Cancel"
-          confirmButtonText="Delete"
-          defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
-        />
-      </EuiOverlayMask>
+      <I18nContext>
+        {intl => (
+          <EuiOverlayMask>
+            <EuiConfirmModal
+              title={intl.formatMessage(
+                { id: 'kbn.management.indexPattern.edit.scripted.deleteField.label',
+                  defaultMessage: 'Delete scripted field \'{fieldName}\'?' },
+                { fieldName: fieldToDelete.name })}
+              onCancel={this.hideDeleteConfirmationModal}
+              onConfirm={this.deleteField}
+              cancelButtonText={intl.formatMessage({
+                id: 'kbn.management.indexPattern.edit.scripted.deleteField.cancel.button', defaultMessage: 'Cancel' })}
+              confirmButtonText={intl.formatMessage({
+                id: 'kbn.management.indexPattern.edit.scripted.deleteField.delete.button', defaultMessage: 'Delete' })}
+              defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+            />
+          </EuiOverlayMask>
+        )}
+      </I18nContext>
     );
   }
 
@@ -164,22 +177,24 @@ export class ScriptedFieldsTable extends Component {
     const items = this.getFilteredItems();
 
     return (
-      <div>
-        <Header addScriptedFieldUrl={helpers.getRouteHref(indexPattern, 'addField')} />
+      <I18nProvider>
+        <div>
+          <Header addScriptedFieldUrl={helpers.getRouteHref(indexPattern, 'addField')} />
 
-        {this.renderCallOuts()}
+          {this.renderCallOuts()}
 
-        <EuiSpacer size="l" />
+          <EuiSpacer size="l" />
 
-        <Table
-          indexPattern={indexPattern}
-          items={items}
-          editField={field => this.props.helpers.redirectToRoute(field, 'edit')}
-          deleteField={this.startDeleteField}
-        />
+          <Table
+            indexPattern={indexPattern}
+            items={items}
+            editField={field => this.props.helpers.redirectToRoute(field, 'edit')}
+            deleteField={this.startDeleteField}
+          />
 
-        {this.renderDeleteConfirmationModal()}
-      </div>
+          {this.renderDeleteConfirmationModal()}
+        </div>
+      </I18nProvider>
     );
   }
 }

@@ -31,7 +31,7 @@ import { clearTimeout } from 'timers';
 let bannerId;
 let timeoutId;
 
-function displayBanner() {
+function displayBanner(i18n) {
   clearTimeout(timeoutId);
 
   // Avoid being hostile to new users who don't have an index pattern setup yet
@@ -43,8 +43,9 @@ function displayBanner() {
         color="warning"
         iconType="iInCircle"
         title={
-          `In order to visualize and explore data in Kibana,
-          you'll need to create an index pattern to retrieve data from Elasticsearch.`
+          i18n('common.ui.indexPattern.create.banner.label',
+            //eslint-disable-next-line max-len
+            { defaultMessage: 'In order to visualize and explore data in Kibana, you\'ll need to create an index pattern to retrieve data from Elasticsearch.' })
         }
       />
     )
@@ -58,7 +59,7 @@ function displayBanner() {
 }
 
 // eslint-disable-next-line @elastic/kibana-custom/no-default-export
-export default function (opts) {
+export default function (opts, i18n) {
   opts = opts || {};
   const whenMissingRedirectTo = opts.whenMissingRedirectTo || null;
 
@@ -100,7 +101,7 @@ export default function (opts) {
 
         kbnUrl.change(whenMissingRedirectTo);
 
-        displayBanner();
+        displayBanner(i18n);
       }
     );
 }

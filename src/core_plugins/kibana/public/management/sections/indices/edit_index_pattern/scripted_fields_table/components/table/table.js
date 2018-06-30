@@ -24,6 +24,10 @@ import {
   EuiInMemoryTable,
 } from '@elastic/eui';
 
+import { ReactI18n } from '@kbn/i18n';
+
+const { I18nContext } = ReactI18n;
+
 export class Table extends PureComponent {
   static propTypes = {
     indexPattern: PropTypes.object.isRequired,
@@ -51,48 +55,55 @@ export class Table extends PureComponent {
       deleteField,
     } = this.props;
 
-    const columns = [{
+    const getColumns = intl => ([{
       field: 'displayName',
-      name: 'Name',
-      description: `Name of the field`,
+      name: intl.formatMessage({ id: 'kbn.management.indexPattern.edit.scripted.table.name.header', defaultMessage: 'Name' }),
+      description: intl.formatMessage({
+        id: 'kbn.management.indexPattern.edit.scripted.table.name.description', defaultMessage: 'Name of the field' }),
       dataType: 'string',
       sortable: true,
       width: '38%',
     }, {
       field: 'lang',
-      name: 'Lang',
-      description: `Language used for the field`,
+      name: intl.formatMessage({ id: 'kbn.management.indexPattern.edit.scripted.table.lang.header', defaultMessage: 'Lang' }),
+      description: intl.formatMessage({
+        id: 'kbn.management.indexPattern.edit.scripted.table.lang.description',
+        defaultMessage: 'Language used for the field' }),
       dataType: 'string',
       sortable: true,
       'data-test-subj': 'scriptedFieldLang',
     }, {
       field: 'script',
-      name: 'Script',
-      description: `Script for the field`,
+      name: intl.formatMessage({ id: 'kbn.management.indexPattern.edit.scripted.table.script.header', defaultMessage: 'Script' }),
+      description: intl.formatMessage({
+        id: 'kbn.management.indexPattern.edit.scripted.table.script.description', defaultMessage: 'Script for the field' }),
       dataType: 'string',
       sortable: true,
     }, {
       field: 'name',
-      name: 'Format',
-      description: `Format used for the field`,
+      name: intl.formatMessage({ id: 'kbn.management.indexPattern.edit.scripted.table.format.header', defaultMessage: 'Format' }),
+      description: intl.formatMessage({
+        id: 'kbn.management.indexPattern.edit.scripted.table.format.description', defaultMessage: 'Format used for the field' }),
       render: this.renderFormatCell,
       sortable: false,
     }, {
       name: '',
       actions: [{
-        name: 'Edit',
-        description: 'Edit this field',
+        name: intl.formatMessage({ id: 'kbn.management.indexPattern.edit.scripted.table.edit.header', defaultMessage: 'Edit' }),
+        description: intl.formatMessage({
+          id: 'kbn.management.indexPattern.edit.scripted.table.edit.description', defaultMessage: 'Edit this field' }),
         icon: 'pencil',
         onClick: editField,
       }, {
-        name: 'Delete',
-        description: 'Delete this field',
+        name: intl.formatMessage({ id: 'kbn.management.indexPattern.edit.scripted.table.delete.header', defaultMessage: 'Delete' }),
+        description: intl.formatMessage({
+          id: 'kbn.management.indexPattern.edit.scripted.table.delete.description', defaultMessage: 'Delete this field' }),
         icon: 'trash',
         color: 'danger',
         onClick: deleteField,
       }],
       width: '40px',
-    }];
+    }]);
 
     const pagination = {
       initialPageSize: 10,
@@ -100,12 +111,18 @@ export class Table extends PureComponent {
     };
 
     return (
-      <EuiInMemoryTable
-        items={items}
-        columns={columns}
-        pagination={pagination}
-        sorting={true}
-      />
+      <I18nContext>
+        {intl => {
+          const columns = getColumns(intl);
+
+          return (<EuiInMemoryTable
+            items={items}
+            columns={columns}
+            pagination={pagination}
+            sorting={true}
+          />);
+        }}
+      </I18nContext>
     );
   }
 }

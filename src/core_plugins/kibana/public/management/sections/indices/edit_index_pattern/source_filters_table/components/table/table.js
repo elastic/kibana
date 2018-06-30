@@ -28,6 +28,10 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 
+import { ReactI18n } from '@kbn/i18n';
+
+const { I18nContext, FormattedMessage } = ReactI18n;
+
 export class Table extends Component {
   static propTypes = {
     indexPattern: PropTypes.object.isRequired,
@@ -65,7 +69,7 @@ export class Table extends Component {
     }
   };
 
-  getColumns() {
+  getColumns(intl) {
     const {
       deleteFilter,
       fieldWildcardMatcher,
@@ -76,8 +80,9 @@ export class Table extends Component {
     return [
       {
         field: 'value',
-        name: 'Filter',
-        description: `Filter name`,
+        name: intl.formatMessage({ id: 'kbn.management.indexPattern.edit.source.table.filter.header', defaultMessage: 'Filter' }),
+        description: intl.formatMessage({
+          id: 'kbn.management.indexPattern.edit.source.table.filter.description', defaultMessage: 'Filter name' }),
         dataType: 'string',
         sortable: true,
         render: (value, filter) => {
@@ -97,8 +102,11 @@ export class Table extends Component {
       },
       {
         field: 'value',
-        name: 'Matches',
-        description: `Language used for the field`,
+        name: intl.formatMessage({
+          id: 'kbn.management.indexPattern.edit.source.table.matches.header', defaultMessage: 'Matches' }),
+        description: intl.formatMessage({
+          id: 'kbn.management.indexPattern.edit.source.table.matches.description',
+          defaultMessage: 'Language used for the field' }),
         dataType: 'string',
         sortable: true,
         render: (value, filter) => {
@@ -117,7 +125,12 @@ export class Table extends Component {
           }
 
           return (
-            <em>The source filter doesn&apos;t match any known fields.</em>
+            <em>
+              <FormattedMessage
+                id="kbn.management.indexPattern.edit.source.table.notMatched.label"
+                defaultMessage="The source filter doesn't match any known fields."
+              />
+            </em>
           );
         },
       },
@@ -139,7 +152,8 @@ export class Table extends Component {
                     this.stopEditingFilter();
                   }}
                   iconType="checkInCircleFilled"
-                  aria-label="Save"
+                  aria-label={intl.formatMessage({
+                    id: 'kbn.management.indexPattern.edit.source.table.save.aria', defaultMessage: 'Save' })}
                 />
                 <EuiButtonIcon
                   size="s"
@@ -147,7 +161,8 @@ export class Table extends Component {
                     this.stopEditingFilter();
                   }}
                   iconType="cross"
-                  aria-label="Cancel"
+                  aria-label={intl.formatMessage({
+                    id: 'kbn.management.indexPattern.edit.source.table.cancel.aria', defaultMessage: 'Cancel' })}
                 />
               </Fragment>
             );
@@ -160,7 +175,8 @@ export class Table extends Component {
                 color="danger"
                 onClick={() => deleteFilter(filter)}
                 iconType="trash"
-                aria-label="Delete"
+                aria-label={intl.formatMessage({
+                  id: 'kbn.management.indexPattern.edit.source.table.delete.aria', defaultMessage: 'Delete' })}
               />
               <EuiButtonIcon
                 size="s"
@@ -168,7 +184,8 @@ export class Table extends Component {
                   this.startEditingFilter(filter.clientId, filter.value)
                 }
                 iconType="pencil"
-                aria-label="Edit"
+                aria-label={intl.formatMessage({
+                  id: 'kbn.management.indexPattern.edit.source.table.edit.aria', defaultMessage: 'Edit' })}
               />
             </Fragment>
           );
@@ -179,20 +196,25 @@ export class Table extends Component {
 
   render() {
     const { items, isSaving } = this.props;
-    const columns = this.getColumns();
     const pagination = {
       initialPageSize: 10,
       pageSizeOptions: [5, 10, 25, 50],
     };
 
     return (
-      <EuiInMemoryTable
-        loading={isSaving}
-        items={items}
-        columns={columns}
-        pagination={pagination}
-        sorting={true}
-      />
+      <I18nContext>
+        {intl => {
+          const columns = this.getColumns(intl);
+
+          return (<EuiInMemoryTable
+            loading={isSaving}
+            items={items}
+            columns={columns}
+            pagination={pagination}
+            sorting={true}
+          />);
+        }}
+      </I18nContext>
     );
   }
 }
