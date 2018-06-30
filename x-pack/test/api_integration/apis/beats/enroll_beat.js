@@ -20,8 +20,10 @@ export default function ({ getService }) {
     let beat;
 
     beforeEach(async () => {
-      validEnrollmentToken = chance.word();
-
+      validEnrollmentToken =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' +
+        'eyJjcmVhdGVkIjoiMjAxOC0wNi0zMFQwMzo0MjoxNS4yMzBaIiwiaWF0IjoxNTMwMzMwMTM1fQ.' +
+        'SSsX2Byyo1B1bGxV8C3G4QldhE5iH87EY_1r21-bwbI';
       beatId = chance.word();
       const version =
         chance.integer({ min: 1, max: 10 }) +

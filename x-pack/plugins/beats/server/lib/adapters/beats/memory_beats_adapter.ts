@@ -5,6 +5,8 @@
  */
 
 import { omit } from 'lodash';
+import moment from 'moment';
+
 import {
   CMBeat,
   CMBeatsAdapter,
@@ -40,20 +42,20 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
     return this.beatsDB.filter(beat => beatIds.includes(beat.id));
   }
 
-  public async getVerifiedWithIds(req: FrameworkRequest, beatIds: string[]) {
-    return this.beatsDB.filter(
-      beat => beatIds.includes(beat.id) && beat.verified_on
-    );
-  }
-
   public async verifyBeats(req: FrameworkRequest, beatIds: string[]) {
     if (!Array.isArray(beatIds) || beatIds.length === 0) {
       return [];
     }
-    return this.beatsDB.filter(beat => beatIds.includes(beat.id)).map(beat => ({
-      ...beat,
-      verified_on: true,
-    }));
+
+    const verifiedOn = moment().toJSON();
+
+    this.beatsDB.forEach((beat, i) => {
+      if (beatIds.includes(beat.id)) {
+        this.beatsDB[i].verified_on = verifiedOn;
+      }
+    });
+
+    return this.beatsDB.filter(beat => beatIds.includes(beat.id));
   }
 
   public async getAll(req: FrameworkRequest) {
