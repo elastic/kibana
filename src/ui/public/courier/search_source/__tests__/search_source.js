@@ -53,7 +53,7 @@ describe('SearchSource', function () {
   after(() => searchRequestQueue.removeAll());
 
   describe('#onResults()', function () {
-    it('adds a request to the requestQueue', function () {
+    it('adds a request to the searchRequestQueue', function () {
       const searchSource = new SearchSource();
 
       expect(searchRequestQueue.getCount()).to.be(0);
@@ -82,7 +82,7 @@ describe('SearchSource', function () {
       const searchRequest = searchRequestQueue.getSearchRequestAt(0);
       sinon.stub(searchRequest, 'canStart').returns(true);
       searchSource.destroy();
-      expect(requestQueue).to.have.length(0);
+      expect(searchRequestQueue.getCount()).to.be(0);
     });
 
     it('aborts all non-startable requests', function () {
@@ -91,7 +91,7 @@ describe('SearchSource', function () {
       const searchRequest = searchRequestQueue.getSearchRequestAt(0);
       sinon.stub(searchRequest, 'canStart').returns(false);
       searchSource.destroy();
-      expect(requestQueue).to.have.length(0);
+      expect(searchRequestQueue.getCount()).to.be(0);
     });
   });
 

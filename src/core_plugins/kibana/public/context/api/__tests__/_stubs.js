@@ -39,7 +39,6 @@ export function createSearchSourceStubProvider(hits, timeField) {
     }),
   };
 
-  searchSourceStub.filter = sinon.stub().returns(searchSourceStub);
   searchSourceStub.inherits = sinon.stub().returns(searchSourceStub);
   searchSourceStub.setValue = sinon.stub().returns(searchSourceStub);
   searchSourceStub.setIndexPattern = sinon.stub().returns(searchSourceStub);
