@@ -44,15 +44,16 @@ export class CMBeatsDomain {
   ) {
     const beat = await this.adapter.get(beatId);
 
+    const { verified: isAccessTokenValid } = this.tokens.verifyToken(
+      beat ? beat.access_token : '',
+      accessToken
+    );
+
     // TODO make return type enum
     if (beat === null) {
       return 'beat-not-found';
     }
 
-    const isAccessTokenValid = this.tokens.verifyToken(
-      beat.access_token,
-      accessToken
-    );
     if (!isAccessTokenValid) {
       return 'invalid-access-token';
     }
@@ -135,37 +136,28 @@ export class CMBeatsDomain {
 
   // TODO cleanup return value, should return a status enum
   public async verifyBeats(req: FrameworkRequest, beatIds: string[]) {
-    const beatsFromEs = await this.adapter.getVerifiedWithIds(req, beatIds);
+    const beatsFromEs = await this.adapter.getWithIds(req, beatIds);
 
-    const nonExistentBeatIds = beatsFromEs.reduce(
-      (nonExistentIds: any, beatFromEs: any, idx: any) => {
-        if (!beatFromEs.found) {
-          nonExistentIds.push(beatIds[idx]);
-        }
-        return nonExistentIds;
-      },
-      []
-    );
+    const nonExistentBeatIds = findNonExistentItems(beatsFromEs, beatIds);
 
     const alreadyVerifiedBeatIds = beatsFromEs
-      .filter((beat: any) => beat.found)
-      .filter((beat: any) => beat._source.beat.hasOwnProperty('verified_on'))
-      .map((beat: any) => beat._source.beat.id);
+      .filter((beat: any) => beat.hasOwnProperty('verified_on'))
+      .map((beat: any) => beat.id);
 
     const toBeVerifiedBeatIds = beatsFromEs
-      .filter((beat: any) => beat.found)
-      .filter((beat: any) => !beat._source.beat.hasOwnProperty('verified_on'))
-      .map((beat: any) => beat._source.beat.id);
+      .filter((beat: any) => !beat.hasOwnProperty('verified_on'))
+      .map((beat: any) => beat.id);
 
     const verifications = await this.adapter.verifyBeats(
       req,
       toBeVerifiedBeatIds
     );
+
     return {
       alreadyVerifiedBeatIds,
       nonExistentBeatIds,
       toBeVerifiedBeatIds,
-      verifications,
+      verifiedBeatIds: verifications.map((v: any) => v.id),
     };
   }
 
