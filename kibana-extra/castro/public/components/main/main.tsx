@@ -16,7 +16,7 @@ import {
 } from "@elastic/eui";
 
 import { Commit, Entry } from '../../../../../model/build/swagger-code-tsClient/api';
-
+import FileCode from './FileCode';
 import Code from './code';
 import Counter from '../counter';
 
@@ -26,15 +26,15 @@ interface MainProps {
 }
 
 interface MainState {
+    workspace: string,
     entries: Entry[],
-    commitInfo: Array<{title: string, description?: string | null }>
 }
 
 export class Main extends React.Component<MainProps, MainState> {
     constructor(props: MainProps) {
         super(props);
         this.state = {
-            commitInfo: [],
+            workspace: "",
             entries: []
         };
     }
@@ -46,28 +46,7 @@ export class Main extends React.Component<MainProps, MainState> {
         */
         const {httpClient} = this.props;
         httpClient.get("../api/castro/example").then((resp: any) => {
-            const data: Commit = resp.data;
-            const commitInfo = [
-                {
-                    title: "Commit",
-                    description: data.commit
-                },
-                {
-                    title: "Date",
-                    description: data.date
-                },
-                {
-                    title: "Committer",
-                    description: data.committer
-                },
-                {
-                    title: "Message",
-                    description: data.message
-                }
-            ];
-            let entries = data.entries || [];
-
-            this.setState({commitInfo, entries: entries});
+            this.setState({...resp.data});
         });
     }
 
@@ -84,22 +63,16 @@ export class Main extends React.Component<MainProps, MainState> {
                     <EuiPageContent>
                         <EuiPageContentHeader>
                             <EuiTitle>
-                                <h2>Current Commit</h2>
+                                <h2>{this.state.workspace}</h2>
                             </EuiTitle>
                         </EuiPageContentHeader>
                         <EuiPageContentBody>
                             <Counter />
-
-                            <EuiDescriptionList
-                                type="column"
-                                listItems={this.state.commitInfo}
-                                style={{maxWidth: '800px'}}
-                            />
                             <EuiSpacer size="xl"/>
                             <Code httpClient={this.props.httpClient}/>
                             <EuiSpacer size="xl"/>
                             <EuiTitle>
-                                <h2>Changed files</h2>
+                                <h2>Files</h2>
                             </EuiTitle>
                             <EuiSpacer size="xs"/>
                             {
@@ -107,11 +80,10 @@ export class Main extends React.Component<MainProps, MainState> {
                                     <EuiAccordion
                                         id={"fid" + idx}
                                         key={"fid" + idx}
-                                        buttonContent={entry.path}
-                                    >
+                                        buttonContent={entry.path}>
                                         {
                                             entry.html &&
-                                            <EuiCode dangerouslySetInnerHTML={{ __html: entry.html }} />
+                                            <FileCode html={entry.html} file={`${this.state.workspace}/${entry.path}`} />
                                         }
                                     </EuiAccordion>
                                 )

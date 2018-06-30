@@ -1,7 +1,6 @@
 const Highlights = require('highlights');
 const highlighter = new Highlights();
 const Selector = require('first-mate-select-grammar');
-import {DocumentSymbolParams, SymbolInformation} from "vscode-languageserver";
 
 highlighter.loadGrammarsSync();
 
@@ -22,6 +21,10 @@ interface Range {
     pos?: number  // position in file
 }
 
+interface Node {
+    token: Token
+    children: Token[]
+}
 
 export function tokenizeLines(filePath: string, fileContents: string): CodeLine[] {
     const grammar = selector.selectGrammar(highlighter.registry, filePath, fileContents);
@@ -33,10 +36,11 @@ export function tokenizeLines(filePath: string, fileContents: string): CodeLine[
 }
 
 export function computeRanges(lines: CodeLine[]) {
+
     let pos = 0;
     for (let line of lines) {
-        let start = 0;
 
+        let start = 0;
         for (let token of line) {
             let len = token.value.length;
             token.range = {
@@ -51,30 +55,19 @@ export function computeRanges(lines: CodeLine[]) {
     }
 }
 
-export function mergeSymbols(codeLines: CodeLine[], symbols: SymbolInformation[]) {
-    for (const symbol of symbols) {
-        const {start, end} = symbol.location.range;
-        const codeLine = codeLines[start.line];
-        if (codeLine) {
-            for (const token of codeLine) {
-                if (token.range.start == start.character && token.range.end == end.character) {
-                    token.scopes.push('symbol')
-                }
-            }
-        }
-    }
-}
-
 export function render(lines: CodeLine[]) : string{
     let output = "<pre class='code'>";
+    let lineNum = 0;
     for(let line of lines) {
+
         output += "<div class='code-line'>";
         for(let token of line){
             let lastScope = token.scopes[token.scopes.length - 1];
             const clazz = lastScope.replace(/\./g, " ");
-            output += `<span class="${clazz}">${highlighter.escapeString(token.value)}</span>`
+            output += `<span data-line="${lineNum}" data-range="${token.range.start},${token.range.end}" class="${clazz}">${highlighter.escapeString(token.value)}</span>`
         }
         output += "\n</div>";
+        lineNum ++;
     }
 
     return output + "</pre>"

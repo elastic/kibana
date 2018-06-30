@@ -14,13 +14,13 @@ import {
     EuiCode,
     EuiCodeBlock,
 } from '@elastic/eui';
-
+import FileCode from './FileCode';
 import "./code.css"
 
 interface State {
     path: string
     content: string,
-    html? : string
+    html?: string
 }
 
 export default class Code extends React.Component<any, State> {
@@ -81,8 +81,8 @@ export default class Code extends React.Component<any, State> {
                 </EuiForm>
                 <EuiSpacer size="xl"/>
                 <EuiPanel paddingSize="l" hasShadow>
-                    { this.state.html &&
-                        <EuiCode dangerouslySetInnerHTML={{ __html: this.state.html }} />
+                    {this.state.html &&
+                    <FileCode html={this.state.html} file={this.state.path}/>
                     }
                 </EuiPanel>
                 <EuiPanel paddingSize="l" hasShadow>

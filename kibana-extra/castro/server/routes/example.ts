@@ -1,70 +1,52 @@
-import {TreeEntry} from "nodegit";
 import * as Hapi from 'hapi';
-import {Commit, Entry} from '../../../../model/build/swagger-code-tsClient/api';
+import {Entry} from '../../../../model/build/swagger-code-tsClient/api';
 
-import {computeRanges, mergeSymbols, render, tokenizeLines} from '../highlights';
-import {LspProxyClient, TextDocumentMethods} from "../lsp/LspClient";
+import {computeRanges,  render, tokenizeLines} from '../highlights';
 
-import {proxy} from './lsp'
-
-const Git = require("nodegit");
 const Path = require("path");
+const fs = require('fs');
 
-const repodir = Path.join(__dirname, "../../../../");
+const repodir = Path.join(__dirname, "../../");
 
-const lspClient = new LspProxyClient(proxy);
-const documentMethods = new TextDocumentMethods(lspClient);
-
-
-async function getHeadCommit(): Promise<Commit> {
-
-    const repo = await Git.Repository.open(repodir);
-    const commit = await repo.getHeadCommit();
-
-    const result: Commit = {
-        commit: commit.id().tostrS(),
-        committer: commit.committer().toString(),
-        message: commit.message(),
-        date: commit.date().toLocaleDateString(),
-        entries: []
-    };
-    const tree = await commit.getTree();
-    const walker = tree.walk(true);
-    walker.on("entry", async (entry: TreeEntry) => {
-        const blob = await entry.getBlob();
-        const isBinary = blob.isBinary() === 1;
-        let e: Entry = {
-            path: entry.path(),
-            isBinary: isBinary,
-            blob: isBinary ? "binary" : blob.toString()
-        };
-        if (!isBinary) {
-            const lines = tokenizeLines(e.path, e.blob);
-            computeRanges(lines);
-            const result = render(lines);
-            e.html = result;
-            if (e.path.startsWith("kibana-extra/castro") && (e.path.endsWith(".ts") ||e.path.endsWith(".tsx") || e.path.endsWith(".js"))) {
-                try {
-                    const symbols = await documentMethods.documentSymbol.send({
-                        textDocument: {
-                            uri: `file://${repodir}/${e.path}`
-                        }
-                    });
-                    mergeSymbols(lines, symbols)
-                } catch (e) {
-                    console.error(e)
-
+async function getFiles() {
+    const files = [];
+    try {
+        const walk = function (dir: string, callback: (file: string) => void) {
+            let list = fs.readdirSync(dir);
+            list.forEach(function (file) {
+                let path = Path.join(dir, file);
+                const stat = fs.statSync(path);
+                if (stat && stat.isDirectory()) {
+                    /* Recurse into a subdirectory */
+                    walk(path, callback);
+                } else {
+                    /* Is a file */
+                    callback(path)
                 }
+            });
+        };
+        walk(repodir, path => {
+            if (!path.includes("node_modules") && (path.endsWith(".ts") || path.endsWith(".js") || path.endsWith(".tsx"))) {
+                console.log(path);
+                const blob = fs.readFileSync(path, "utf8");
+                const lines = tokenizeLines(path, blob);
+                computeRanges(lines);
+                let e: Entry = {
+                    path: Path.relative(repodir, path),
+                    isBinary: false,
+                    blob,
+                    html: render(lines)
+                };
+                files.push(e);
             }
-        }
-        result.entries.push(e)
-    });
-    walker.start();
-    return await (new Promise<Commit>(function (resolve, reject) {
-        walker.on("end", () => {
-            resolve(result)
-        })
-    }));
+        });
+    } catch (e) {
+        console.log(e)
+    }
+    return {
+        workspace: repodir,
+        entries: files
+    };
 }
 
 export default function (server: Hapi.Server) {
@@ -72,7 +54,7 @@ export default function (server: Hapi.Server) {
         path: '/api/castro/example',
         method: 'GET',
         handler(req: Hapi.Request, reply: any) {
-            getHeadCommit().then((result: Commit) => reply(result))
+            getFiles().then((result) => reply(result), err => reply(err).code(500))
         }
     });
     server.route({

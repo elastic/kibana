@@ -6,32 +6,36 @@
 
 
 
-.string {
+.code .string {
   color: #DD0A73;
 }
 
-.numeric,
-.variable {
+.code .numeric,
+.code .variable {
   color: #00A69B;
 }
-.keyword,
-.primitive,
-.modifier {
+.code .keyword,
+.code .primitive,
+.code .modifier {
   color: #333;
   font-weight: bold;
 }
 
-.type,
-.class  {
+.code .type,
+.code .class  {
   color: #0079a5;
   font-weight: bold;
 }
 
-.symbol {
+.code .symbol {
   text-decoration: underline;
 }
 
+.code .annotation {
+  position: relative;
+  display: inline;
+}
 
-.parameter {
+.code .parameter {
   color: inherit;
 }

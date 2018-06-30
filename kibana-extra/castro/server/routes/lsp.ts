@@ -1,12 +1,14 @@
 import * as Hapi from "hapi";
 import {serve} from "javascript-typescript-langserver/lib/server";
 
+import {ResponseMessage} from "vscode-jsonrpc/lib/messages";
 import {LanguageServerProxy} from "lsp-proxy";
+
 const Path = require("path");
 
 const lspPort = 20000;
 
-export const proxy = new LanguageServerProxy(lspPort,"127.0.0.1" , console);
+export const proxy = new LanguageServerProxy(lspPort, "127.0.0.1", console);
 
 export default async function (server: Hapi.Server) {
 
@@ -51,4 +53,18 @@ export default async function (server: Hapi.Server) {
             }
         }
     })
+}
+
+
+// a lsp client used in server
+export class LspProxyClient {
+    private proxy: LanguageServerProxy;
+
+    constructor(proxy: LanguageServerProxy) {
+        this.proxy = proxy;
+    }
+
+    sendRequest(method: string, params: any): Promise<ResponseMessage> {
+        return this.proxy.receiveRequest(method, params) as Promise<ResponseMessage>
+    }
 }
