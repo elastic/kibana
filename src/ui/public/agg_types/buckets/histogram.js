@@ -70,7 +70,7 @@ export const histogramBucketAgg = new BucketAggType({
           : { field: field.name };
 
         return searchSource
-          .extend()
+          .createChild()
           .setValue('size', 0)
           .setValue('aggs', {
             maxAgg: {

@@ -260,6 +260,24 @@ export function SearchSourceProvider(Promise, Private, config) {
       }
     };
 
+    create = () => {
+      return new SearchSource();
+    };
+
+    createCopy = () => {
+      const json = angular.toJson(this._data);
+      const newSearchSource = new SearchSource(json);
+      // when serializing the internal data we lose the internal classes used in the index
+      // pattern, so we have to set it again to workaround this behavior
+      newSearchSource.setIndexPattern(this.getValue('index'));
+      newSearchSource.inherits(this.getParent());
+      return newSearchSource;
+    };
+
+    createChild = (options = {}) => {
+      return new SearchSource().inherits(this, options);
+    };
+
     /**
      * Set a searchSource that this source should inherit from
      * @param  {SearchSource} searchSource - the parent searchSource
@@ -277,24 +295,6 @@ export function SearchSourceProvider(Promise, Private, config) {
      */
     getParent = () => {
       return this._parent || undefined;
-    };
-
-    create = () => {
-      return new SearchSource();
-    };
-
-    createCopy = () => {
-      const json = angular.toJson(this._data);
-      const newSearchSource = new SearchSource(json);
-      // when serializing the internal data we lose the internal classes used in the index
-      // pattern, so we have to set it again to workaround this behavior
-      newSearchSource.setIndexPattern(this.getValue('index'));
-      newSearchSource.inherits(this.getParent());
-      return newSearchSource;
-    };
-
-    createChild = params => {
-      return new SearchSource().inherits(this, params);
     };
 
     /**
