@@ -23,7 +23,7 @@ import { IndexedArray } from '../indexed_array';
 import { isNumeric } from '../utils/numeric';
 import { timefilter } from 'ui/timefilter';
 
-export function IndexPatternsIntervalsProvider() {
+export function IndexPatternsIntervalsProvider(i18n) {
 
   const intervals = new IndexedArray({
     index: ['name'],
@@ -31,27 +31,27 @@ export function IndexPatternsIntervalsProvider() {
       {
         name: 'hours',
         startOf: 'hour',
-        display: 'Hourly'
+        display: i18n('common.ui.indexPattern.create.intervals.hourly.header', { defaultMessage: 'Hourly' })
       },
       {
         name: 'days',
         startOf: 'day',
-        display: 'Daily'
+        display: i18n('common.ui.indexPattern.create.intervals.daily.header', { defaultMessage: 'Daily' })
       },
       {
         name: 'weeks',
         startOf: 'isoWeek',
-        display: 'Weekly'
+        display: i18n('common.ui.indexPattern.create.intervals.weekly.header', { defaultMessage: 'Weekly' })
       },
       {
         name: 'months',
         startOf: 'month',
-        display: 'Monthly'
+        display: i18n('common.ui.indexPattern.create.intervals.monthly.monthly', { defaultMessage: 'Monthly' })
       },
       {
         name: 'years',
         startOf: 'year',
-        display: 'Yearly'
+        display: i18n('common.ui.indexPattern.create.intervals.yearly.header', { defaultMessage: 'Yearly' })
       }
     ]
   });
@@ -83,7 +83,13 @@ export function IndexPatternsIntervalsProvider() {
 
     if (typeof interval === 'string') {
       interval = _.find(intervals, { name: interval });
-      if (!interval) throw new Error('Interval must be one of ' + _.pluck(intervals, 'name'));
+      if (!interval) {
+        throw new Error(i18n('common.ui.indexPattern.create.intervals.errorMessage',
+          {
+            values: { intervals: _.pluck(intervals, 'name') },
+            defaultMessage: 'Interval must be one of {intervals}'
+          }));
+      }
     }
 
     const indexList = [];

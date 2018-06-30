@@ -89,7 +89,7 @@ uiRoutes
       }
     },
     controllerAs: 'fieldSettings',
-    controller: function FieldEditorPageController($scope, $route, $timeout, $http, Private, docTitle, config) {
+    controller: function FieldEditorPageController($scope, $route, $timeout, $http, Private, docTitle, config, i18n) {
       const Field = Private(IndexPatternsFieldProvider);
       const getConfig = (...args) => config.get(...args);
       const fieldFormatEditors = Private(RegistryFieldFormatEditorsProvider);
@@ -104,7 +104,9 @@ uiRoutes
         this.field = this.indexPattern.fields.byName[fieldName];
 
         if (!this.field) {
-          toastNotifications.add(`'${this.indexPattern.title}' index pattern doesn't have a scripted field called '${fieldName}'`);
+          toastNotifications.add(i18n('kbn.management.indexPattern.edit.scripted.noField.label',
+            { defaultMessage: '\'{indexPatternTitle}\' index pattern doesn\'t have a scripted field called \'{fieldName}\'',
+              values: { indexPatternTitle: this.indexPattern.title, fieldName } }));
 
           kbnUrl.redirectToRoute(this.indexPattern, 'edit');
           return;
@@ -118,10 +120,14 @@ uiRoutes
         });
       }
       else {
-        throw new Error('unknown fieldSettings mode ' + this.mode);
+        throw new Error(i18n('kbn.management.indexPattern.edit.scripted.unknownMode.errorMessage',
+          { defaultMessage: 'unknown fieldSettings mode {mode}',
+            values: { mode: this.mode } }));
       }
 
-      docTitle.change([this.field.name || 'New Scripted Field', this.indexPattern.title]);
+      const defaultFieldName = i18n('kbn.management.indexPattern.edit.scripted.newField.placeholder',
+        { defaultMessage: 'New Scripted Field' });
+      docTitle.change([this.field.name || defaultFieldName, this.indexPattern.title]);
 
       renderFieldEditor($scope, this.indexPattern, this.field, {
         Field,

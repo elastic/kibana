@@ -32,6 +32,10 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 
+import { ReactI18n } from '@kbn/i18n';
+
+const { I18nContext, FormattedMessage } = ReactI18n;
+
 export const TimeField = ({
   isVisible,
   fetchTimeFields,
@@ -46,7 +50,12 @@ export const TimeField = ({
         label={
           <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
-              <span>Time Filter field name</span>
+              <span>
+                <FormattedMessage
+                  id="kbn.management.indexPattern.create.stepTime.field.header"
+                  defaultMessage="Time Filter field name"
+                />
+              </span>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               { isLoading ? (
@@ -57,7 +66,10 @@ export const TimeField = ({
                     className="timeFieldRefreshButton"
                     onClick={fetchTimeFields}
                   >
-                    Refresh
+                    <FormattedMessage
+                      id="kbn.management.indexPattern.create.stepTime.refresh.button"
+                      defaultMessage="Refresh"
+                    />
                   </EuiLink>
                 )
               }
@@ -66,20 +78,35 @@ export const TimeField = ({
         }
         helpText={
           <div>
-            <p>The Time Filter will use this field to filter your data by time.</p>
-            <p>You can choose not to have a time field, but you will not be able to narrow down your data by a time range.</p>
+            <p>
+              <FormattedMessage
+                id="kbn.management.indexPattern.create.stepTime.field.label"
+                //eslint-disable-next-line max-len
+                defaultMessage="The Time Filter will use this field to filter your data by time.{newLine}You can choose not to have a time field, but you will not be able to narrow down your data by a time range."
+                values={{ newLine: <br/> }}
+              />
+            </p>
           </div>
         }
       >
         { isLoading ? (
-          <EuiSelect
-            name="timeField"
-            data-test-subj="createIndexPatternTimeFieldSelect"
-            options={[
-              { text: 'Loading...', value: '' }
-            ]}
-            disabled={true}
-          />
+          <I18nContext>
+            {intl => (
+              <EuiSelect
+                name="timeField"
+                data-test-subj="createIndexPatternTimeFieldSelect"
+                options={[
+                  {
+                    text: intl.formatMessage({
+                      id: 'kbn.management.indexPattern.create.stepTime.field.loading.dropDown',
+                      defaultMessage: 'Loading...' }),
+                    value: ''
+                  }
+                ]}
+                disabled={true}
+              />
+            )}
+          </I18nContext>
         ) : (
           <EuiSelect
             name="timeField"
@@ -94,7 +121,12 @@ export const TimeField = ({
       </EuiFormRow>
       :
       <EuiText>
-        <p>The indices which match this index pattern don&apos;t contain any time fields.</p>
+        <p>
+          <FormattedMessage
+            id="kbn.management.indexPattern.create.stepTime.field.noTimeFields.label"
+            defaultMessage="The indices which match this index pattern don't contain any time fields."
+          />
+        </p>
       </EuiText>
     }
   </EuiForm>

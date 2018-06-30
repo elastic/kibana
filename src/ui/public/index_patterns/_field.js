@@ -26,7 +26,7 @@ export function IndexPatternsFieldProvider(Private, shortDotsFilter, $rootScope,
   const notify = new Notifier({ location: 'IndexPattern Field' });
 
 
-  function Field(indexPattern, spec) {
+  function Field(indexPattern, spec, i18n) {
     // unwrap old instances of Field
     if (spec instanceof Field) spec = spec.$$spec;
 
@@ -43,9 +43,9 @@ export function IndexPatternsFieldProvider(Private, shortDotsFilter, $rootScope,
     let type = getKbnFieldType(spec.type);
     if (spec.type && !type) {
       notify.error(
-        'Unknown field type "' + spec.type + '"' +
-        ' for field "' + spec.name + '"' +
-        ' in indexPattern "' + indexPattern.title + '"'
+        i18n('common.ui.indexPattern.create.unknownField.errorMessage',
+          { values: { type: spec.type, name: spec.name, title: indexPattern.title },
+            defaultMessage: 'Unknown field type "{type}" for field "{name}" in indexPattern "{title}"' })
       );
     }
 

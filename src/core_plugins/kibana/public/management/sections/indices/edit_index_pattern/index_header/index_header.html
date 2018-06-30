@@ -18,8 +18,8 @@
     <button
       ng-if="setDefault"
       ng-click="setDefault()"
-      aria-label="Set as default index"
-      tooltip="Set as default index"
+      aria-label="{{'kbn.management.indexPattern.edit.setDefault.aria' | i18n: { defaultMessage: 'Set as default index' } }}"
+      tooltip="{{'kbn.management.indexPattern.edit.setDefault.tooltip' | i18n: { defaultMessage: 'Set as default index' } }}"
       class="kuiButton kuiButton--basic"
       data-test-subj="setDefaultIndexPatternButton"
     >
@@ -32,8 +32,8 @@
     <button
       ng-if="refreshFields"
       ng-click="refreshFields()"
-      aria-label="Reload field list"
-      tooltip="Refresh field list"
+      aria-label="{{'kbn.management.indexPattern.edit.refresh.aria' | i18n: { defaultMessage: 'Reload field list' } }}"
+      tooltip="{{'kbn.management.indexPattern.edit.refresh.tooltip' | i18n: { defaultMessage: 'Refresh field list' } }}"
       class="kuiButton kuiButton--basic"
     >
       <span
@@ -45,8 +45,8 @@
     <button
       ng-if="delete"
       ng-click="delete()"
-      aria-label="Remove index pattern"
-      tooltip="Remove index pattern"
+      aria-label="{{'kbn.management.indexPattern.edit.remove.aria' | i18n: { defaultMessage: 'Remove index pattern' } }}"
+      tooltip="{{'kbn.management.indexPattern.edit.remove.tooltip' | i18n: { defaultMessage: 'Remove index pattern' } }}"
       class="kuiButton kuiButton--danger"
       data-test-subj="deleteIndexPatternButton"
     >

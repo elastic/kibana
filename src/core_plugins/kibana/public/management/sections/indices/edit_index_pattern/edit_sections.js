@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 
-export function IndicesEditSectionsProvider() {
+export function IndicesEditSectionsProvider(i18n) {
 
   return function (indexPattern) {
     const fieldCount = _.countBy(indexPattern.fields, function (field) {
@@ -34,17 +34,17 @@ export function IndicesEditSectionsProvider() {
 
     return [
       {
-        title: 'Fields',
+        title: i18n('kbn.management.indexPattern.edit.tabs.fields.header', { defaultMessage: 'Fields' }),
         index: 'indexedFields',
         count: fieldCount.indexed
       },
       {
-        title: 'Scripted fields',
+        title: i18n('kbn.management.indexPattern.edit.tabs.scripted.header', { defaultMessage: 'Scripted fields' }),
         index: 'scriptedFields',
         count: fieldCount.scripted
       },
       {
-        title: 'Source filters',
+        title: i18n('kbn.management.indexPattern.edit.tabs.source.header', { defaultMessage: 'Source filters' }),
         index: 'sourceFilters',
         count: fieldCount.sourceFilters
       }

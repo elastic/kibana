@@ -38,6 +38,10 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
+import { ReactI18n } from '@kbn/i18n';
+
+const { I18nContext, FormattedMessage } = ReactI18n;
+
 export class StepIndexPattern extends Component {
   static propTypes = {
     allIndices: PropTypes.array.isRequired,
@@ -205,16 +209,24 @@ export class StepIndexPattern extends Component {
 
     return (
       <EuiCallOut
-        title="Whoops!"
+        title={<FormattedMessage
+          id="kbn.management.indexPattern.create.step.warning.header"
+          defaultMessage="Whoops!"
+        />}
         iconType="help"
         color="warning"
       >
-        <p>There&apos;s already an index pattern called `{query}`</p>
+        <p><FormattedMessage
+          id="kbn.management.indexPattern.create.step.warning.label"
+          defaultMessage="There's already an index pattern called `{query}`"
+          values={{ query }}
+        />
+        </p>
       </EuiCallOut>
     );
   }
 
-  renderHeader({ exactMatchedIndices: indices }) {
+  renderHeader({ exactMatchedIndices: indices }, intl) {
     const { goToNextStep } = this.props;
     const { query, showingIndexPatternQueryErrors, indexPatternExists } = this.state;
 
@@ -227,7 +239,10 @@ export class StepIndexPattern extends Component {
       containsErrors = true;
     }
     else if (!containsInvalidCharacters(query, ILLEGAL_CHARACTERS)) {
-      errors.push(`An index pattern cannot contain spaces or the characters: ${characterList}`);
+      errors.push(intl.formatMessage({
+        id: 'kbn.management.indexPattern.create.step.invalidCharacters.errorMessage',
+        defaultMessage: 'An index pattern cannot contain spaces or the characters: {characterList}'
+      }, { characterList }));
       containsErrors = true;
     }
 
@@ -262,7 +277,9 @@ export class StepIndexPattern extends Component {
 
     return (
       <EuiPanel paddingSize="l">
-        {this.renderHeader(matchedIndices)}
+        <I18nContext>
+          {intl => this.renderHeader(matchedIndices, intl)}
+        </I18nContext>
         <EuiSpacer size="s"/>
         {this.renderLoadingState(matchedIndices)}
         {this.renderIndexPatternExists()}

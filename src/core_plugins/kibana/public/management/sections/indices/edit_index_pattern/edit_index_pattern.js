@@ -173,7 +173,7 @@ uiRoutes
 
 uiModules.get('apps/management')
   .controller('managementIndicesEdit', function (
-    $scope, $location, $route, config, indexPatterns, Notifier, Private, AppState, docTitle, confirmModal) {
+    $scope, $location, $route, config, indexPatterns, Notifier, Private, AppState, docTitle, confirmModal, i18n) {
     const notify = new Notifier();
     const $state = $scope.state = new AppState();
     const { fieldWildcardMatcher } = Private(FieldWildcardProvider);
@@ -234,15 +234,16 @@ uiModules.get('apps/management')
 
     $scope.refreshFields = function () {
       const confirmModalOptions = {
-        confirmButtonText: 'Refresh',
+        confirmButtonText: i18n('kbn.management.indexPattern.edit.refresh.button', { defaultMessage: 'Refresh' }),
         onConfirm: async () => {
           await $scope.indexPattern.init(true);
           $scope.fields = $scope.indexPattern.getNonScriptedFields();
         },
-        title: 'Refresh field list?'
+        title: i18n('kbn.management.indexPattern.edit.refresh.header', { defaultMessage: 'Refresh field list?' })
       };
       confirmModal(
-        'This action resets the popularity counter of each field.',
+        i18n('kbn.management.indexPattern.edit.refresh.label', {
+          defaultMessage: 'This action resets the popularity counter of each field.' }),
         confirmModalOptions
       );
     };
@@ -265,9 +266,9 @@ uiModules.get('apps/management')
       }
 
       const confirmModalOptions = {
-        confirmButtonText: 'Delete',
+        confirmButtonText: i18n('kbn.management.indexPattern.edit.delete.button', { defaultMessage: 'Delete' }),
         onConfirm: doRemove,
-        title: 'Delete index pattern?'
+        title: i18n('kbn.management.indexPattern.edit.delete.header', { defaultMessage: 'Delete index pattern?' })
       };
       confirmModal('', confirmModalOptions);
     };
@@ -278,7 +279,8 @@ uiModules.get('apps/management')
 
     $scope.setIndexPatternsTimeField = function (field) {
       if (field.type !== 'date') {
-        notify.error('That field is a ' + field.type + ' not a date.');
+        notify.error(i18n('kbn.management.indexPattern.edit.notDate.errorMessage', {
+          defaultMessage: 'That field is a {fieldType} not a date.', values: { fieldType: field.type } }));
         return;
       }
       $scope.indexPattern.timeFieldName = field.name;

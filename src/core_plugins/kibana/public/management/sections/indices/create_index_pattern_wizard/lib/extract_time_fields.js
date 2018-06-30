@@ -17,12 +17,14 @@
  * under the License.
  */
 
+import { timeFieldsTypes } from './time_fields_types';
+
 export function extractTimeFields(fields) {
   const dateFields = fields.filter(field => field.type === 'date');
 
   if (dateFields.length === 0) {
     return [{
-      display: `The indices which match this index pattern don't contain any time fields.`,
+      display: timeFieldsTypes.NO_TIME_FIELDS,
     }];
   }
 
@@ -32,7 +34,7 @@ export function extractTimeFields(fields) {
     fieldName: '',
   };
   const noTimeFieldOption = {
-    display: `I don't want to use the Time Filter`,
+    display: timeFieldsTypes.NO_TIME_FIELD,
     fieldName: undefined,
   };
 
