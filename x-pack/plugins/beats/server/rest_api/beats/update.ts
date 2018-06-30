@@ -15,7 +15,7 @@ export const createBeatUpdateRoute = (libs: CMServerLibs) => ({
     auth: false,
     validate: {
       headers: Joi.object({
-        'kbn-beats-access-token': Joi.string().required(),
+        'kbn-beats-access-token': Joi.string(),
       }).options({
         allowUnknown: true,
       }),

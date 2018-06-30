@@ -25,7 +25,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
 
     // TODO abstract to kibana adapter as the more generic getDocs
     const params = {
-      _source: false,
+      _sourceInclude: ['tag.configuration_blocks'],
       body: {
         ids,
       },
@@ -33,7 +33,13 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
       type: '_doc',
     };
     const response = await this.framework.callWithRequest(req, 'mget', params);
-    return get(response, 'docs', []);
+
+    return get(response, 'docs', [])
+      .filter((b: any) => b.found)
+      .map((b: any) => ({
+        ...b._source.tag,
+        id: b._id.replace('tag:', ''),
+      }));
   }
 
   public async upsertTag(req: FrameworkRequest, tag: BeatTag) {

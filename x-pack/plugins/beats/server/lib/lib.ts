@@ -87,7 +87,6 @@ export interface CMBeatsAdapter {
   get(id: string): any;
   getAll(req: FrameworkRequest): any;
   getWithIds(req: FrameworkRequest, beatIds: string[]): any;
-  getVerifiedWithIds(req: FrameworkRequest, beatIds: string[]): any;
   verifyBeats(req: FrameworkRequest, beatIds: string[]): any;
   removeTagsFromBeats(
     req: FrameworkRequest,

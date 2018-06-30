@@ -31,21 +31,24 @@ export class CMTokensDomain {
 
     if (!fullToken) {
       return {
-        expires_on: '0',
         token: null,
+        expired: true,
       };
     }
 
-    const verified = this.verifyToken(enrollmentToken, fullToken.token || '');
+    const { verified, expired } = this.verifyToken(
+      enrollmentToken,
+      fullToken.token || ''
+    );
 
     if (!verified) {
       return {
-        expires_on: '0',
+        expired,
         token: null,
       };
     }
 
-    return fullToken;
+    return { ...fullToken, expired };
   }
 
   public async deleteEnrollmentToken(enrollmentToken: string) {
@@ -54,13 +57,18 @@ export class CMTokensDomain {
 
   public verifyToken(recivedToken: string, token2: string) {
     let tokenDecoded = false;
+    let expired = false;
     const enrollmentTokenSecret = this.framework.getSetting(
       'xpack.beats.encryptionKey'
     );
+
     try {
       verifyToken(recivedToken, enrollmentTokenSecret);
       tokenDecoded = true;
     } catch (err) {
+      if (err.name === 'TokenExpiredError') {
+        expired = true;
+      }
       tokenDecoded = false;
     }
 
@@ -72,20 +80,24 @@ export class CMTokensDomain {
       // This prevents a more subtle timing attack where we know already the tokens aren't going to
       // match but still we don't return fast. Instead we compare two pre-generated random tokens using
       // the same comparison algorithm that we would use to compare two equal-length tokens.
-      return (
-        timingSafeEqual(
-          Buffer.from(RANDOM_TOKEN_1, 'utf8'),
-          Buffer.from(RANDOM_TOKEN_2, 'utf8')
-        ) && tokenDecoded
-      );
+      return {
+        expired,
+        verified:
+          timingSafeEqual(
+            Buffer.from(RANDOM_TOKEN_1, 'utf8'),
+            Buffer.from(RANDOM_TOKEN_2, 'utf8')
+          ) && tokenDecoded,
+      };
     }
 
-    return (
-      timingSafeEqual(
-        Buffer.from(recivedToken, 'utf8'),
-        Buffer.from(token2, 'utf8')
-      ) && tokenDecoded
-    );
+    return {
+      expired,
+      verified:
+        timingSafeEqual(
+          Buffer.from(recivedToken, 'utf8'),
+          Buffer.from(token2, 'utf8')
+        ) && tokenDecoded,
+    };
   }
 
   public generateAccessToken() {
