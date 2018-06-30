@@ -132,9 +132,10 @@ export function SearchSourceProvider(Promise, Private, config) {
 
   class SearchSource {
     constructor(initialData) {
-      this._instanceid = _.uniqueId('data_source');
+      this._id = _.uniqueId('data_source');
 
       this._data = parseInitialData(initialData);
+      this._parent = undefined;
 
       this.history = [];
       this._requestStartHandlers = [];
@@ -167,9 +168,6 @@ export function SearchSourceProvider(Promise, Private, config) {
      * PUBLIC API
      *****/
 
-    /**
-     * Change the entire data of a SearchSource
-     */
     setData = newData => {
       this._data = newData;
       return this;
@@ -218,10 +216,10 @@ export function SearchSourceProvider(Promise, Private, config) {
       return this;
     };
 
-    /**
-     * return a simple, encodable object representing the data of the SearchSource
-     * @return {[type]} [description]
-     */
+    getId = () => {
+      return this._id;
+    };
+
     getData = () => {
       return _.clone(this._data);
     };
@@ -270,12 +268,14 @@ export function SearchSourceProvider(Promise, Private, config) {
       // when serializing the internal data we lose the internal classes used in the index
       // pattern, so we have to set it again to workaround this behavior
       newSearchSource.setIndexPattern(this.getValue('index'));
-      newSearchSource.inherits(this.getParent());
+      newSearchSource.setParent(this.getParent());
       return newSearchSource;
     };
 
     createChild = (options = {}) => {
-      return new SearchSource().inherits(this, options);
+      const childSearchSource = new SearchSource();
+      childSearchSource.setParent(this, options);
+      return childSearchSource;
     };
 
     /**
@@ -283,7 +283,7 @@ export function SearchSourceProvider(Promise, Private, config) {
      * @param  {SearchSource} searchSource - the parent searchSource
      * @return {this} - chainable
      */
-    inherits = (parent, options = {}) => {
+    setParent = (parent, options = {}) => {
       this._parent = parent;
       this._inheritOptions = options;
       return this;

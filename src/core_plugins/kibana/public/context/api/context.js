@@ -33,8 +33,8 @@ import { reverseSortDirection } from './utils/sorting';
 /**
  * @typedef {Object} SearchSourceT
  * @prop {function(): Promise<SearchResult>} fetch
- * @prop {function(string, any): SearchSourceT} set
- * @prop {function(any): SearchSourceT} inherits
+ * @prop {function(string, any): SearchSourceT} setValue
+ * @prop {function(any): SearchSourceT} setParent
  */
 
 /**
@@ -162,7 +162,7 @@ function fetchContextProvider(indexPatterns, Private) {
     const indexPattern = await indexPatterns.get(indexPatternId);
 
     return new SearchSource()
-      .inherits(false)
+      .setParent(false)
       .setIndexPattern(indexPattern)
       .setValue('filter', filters);
   }

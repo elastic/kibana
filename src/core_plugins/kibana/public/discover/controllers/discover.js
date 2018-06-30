@@ -206,7 +206,7 @@ function discoverController(
     return timefilter.createFilter($scope.indexPattern);
   });
 
-  $scope.searchSource.inherits(timeRangeSearchSource);
+  $scope.searchSource.setParent(timeRangeSearchSource);
 
   const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
   docTitle.change(`Discover${pageTitleSuffix}`);

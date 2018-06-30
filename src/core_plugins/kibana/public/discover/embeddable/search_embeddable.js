@@ -91,9 +91,9 @@ export class SearchEmbeddable extends Embeddable {
     });
 
     this.filtersSearchSource = this.searchScope.searchSource.create();
-    this.filtersSearchSource.inherits(timeRangeSearchSource);
+    this.filtersSearchSource.setParent(timeRangeSearchSource);
 
-    this.searchScope.searchSource.inherits(this.filtersSearchSource);
+    this.searchScope.searchSource.setParent(this.filtersSearchSource);
 
     this.pushContainerStateParamsToScope();
 

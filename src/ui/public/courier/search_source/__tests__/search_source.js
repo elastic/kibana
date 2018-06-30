@@ -221,7 +221,7 @@ describe('SearchSource', function () {
 
     it('should not be called on parent searchSource', async () => {
       const parent = new SearchSource();
-      const searchSource = new SearchSource().inherits(parent);
+      const searchSource = new SearchSource().setParent(parent);
 
       const fn = sinon.spy();
       searchSource.onRequestStart(fn);
@@ -236,7 +236,7 @@ describe('SearchSource', function () {
 
     it('should be called on parent searchSource if callParentStartHandlers is true', async () => {
       const parent = new SearchSource();
-      const searchSource = new SearchSource().inherits(parent, { callParentStartHandlers: true });
+      const searchSource = new SearchSource().setParent(parent, { callParentStartHandlers: true });
 
       const fn = sinon.spy();
       searchSource.onRequestStart(fn);

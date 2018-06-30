@@ -111,7 +111,7 @@ uiModules
       }
 
       if (self.savedSearch) {
-        self.searchSource.inherits(self.savedSearch.searchSource.getParent());
+        self.searchSource.setParent(self.savedSearch.searchSource.getParent());
         self.savedSearch.destroy();
         self.savedSearch = null;
       }
@@ -120,7 +120,7 @@ uiModules
         return savedSearches.get(self.savedSearchId)
           .then(function (savedSearch) {
             self.savedSearch = savedSearch;
-            self.searchSource.inherits(self.savedSearch.searchSource);
+            self.searchSource.setParent(self.savedSearch.searchSource);
           });
       }
     });

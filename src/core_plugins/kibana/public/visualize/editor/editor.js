@@ -364,7 +364,7 @@ function VisEditor(
 
     $state.query = searchSource.getValue('query');
     $state.filters = searchSource.getValue('filter');
-    searchSource.inherits(searchSourceGrandparent);
+    searchSource.setParent(searchSourceGrandparent);
 
     $scope.fetch();
   };
