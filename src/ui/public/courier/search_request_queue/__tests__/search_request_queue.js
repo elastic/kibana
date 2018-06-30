@@ -21,12 +21,12 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import sinon from 'sinon';
 
-import { requestQueue } from '../_request_queue';
+import { searchRequestQueue } from '../search_request_queue';
 
 describe('Courier Request Queue', function () {
   beforeEach(ngMock.module('kibana'));
-  beforeEach(requestQueue.clear);
-  after(requestQueue.clear);
+  beforeEach(() => searchRequestQueue.removeAll());
+  after(() => searchRequestQueue.removeAll());
 
   class MockReq {
     constructor(startable = true) {
@@ -37,12 +37,9 @@ describe('Courier Request Queue', function () {
 
   describe('#getStartable()', function () {
     it('returns only startable requests', function () {
-      requestQueue.push(
-        new MockReq(false),
-        new MockReq(true)
-      );
-
-      expect(requestQueue.getStartable()).to.have.length(1);
+      searchRequestQueue.add(new MockReq(false));
+      searchRequestQueue.add(new MockReq(true));
+      expect(searchRequestQueue.getStartable()).to.have.length(1);
     });
   });
 
@@ -51,13 +48,10 @@ describe('Courier Request Queue', function () {
   // that we can clean this up, or remove this.
   describe('#getInactive()', function () {
     it('returns only requests with started = false', function () {
-      requestQueue.push(
-        { started: true },
-        { started: false },
-        { started: true },
-      );
-
-      expect(requestQueue.getInactive()).to.have.length(1);
+      searchRequestQueue.add({ started: true });
+      searchRequestQueue.add({ started: false });
+      searchRequestQueue.add({ started: true });
+      expect(searchRequestQueue.getInactive()).to.have.length(1);
     });
   });
 });
