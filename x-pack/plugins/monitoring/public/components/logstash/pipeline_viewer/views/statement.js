@@ -53,12 +53,12 @@ function renderIfStatement({ condition }, onVertexSelected) {
   ];
 }
 
-function getStatementBody({
+function getStatementBody(
   isIf,
   statement,
-  statement: { vertex },
+  vertex,
   onShowVertexDetails
-}) {
+) {
   const showVertexDetailsClicked = () => { onShowVertexDetails(vertex); };
 
   return isIf
@@ -80,6 +80,7 @@ function renderStatement({
   element: {
     id,
     statement,
+    statement: { vertex }
   },
   expand,
   isCollapsed,
@@ -94,11 +95,12 @@ function renderStatement({
     );
   }
 
-  const statementBody = getStatementBody({
-    isIf: element instanceof IfElement,
+  const statementBody = getStatementBody(
+    element instanceof IfElement,
     statement,
+    vertex,
     onShowVertexDetails
-  });
+  );
 
   return (
     <CollapsibleStatement
