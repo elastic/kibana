@@ -13,44 +13,26 @@ export default function ({ getService, getPageObjects }) {
     const toTime = '2015-09-23 18:31:44.000';
     const termsField = 'machine.ram';
 
-    before(function () {
+    before(async function () {
 
       log.debug('navigateToApp visualize');
-      return PageObjects.common.navigateToUrl('visualize', 'new')
-        .then(function () {
-          log.debug('clickTagCloud');
-          return PageObjects.visualize.clickTagCloud();
-        })
-        .then(function () {
-          return PageObjects.visualize.clickNewSearch();
-        })
-        .then(function () {
-          log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-          return PageObjects.header.setAbsoluteRange(fromTime, toTime);
-        })
-        .then(function () {
-          log.debug('select Tags');
-          return PageObjects.visualize.clickBucket('Tags');
-        })
-        .then(function () {
-          log.debug('Click aggregation Terms');
-          return PageObjects.visualize.selectAggregation('Terms');
-        })
-        .then(function () {
-          log.debug('Click field machine.ram');
-          return retry.try(function tryingForTime() {
-            return PageObjects.visualize.selectField(termsField);
-          });
-        })
-        .then(function () {
-          return PageObjects.visualize.selectOrderBy('_term');
-        })
-        .then(function () {
-          return PageObjects.visualize.clickGo();
-        })
-        .then(function () {
-          return PageObjects.header.waitUntilLoadingHasFinished();
-        });
+      await PageObjects.common.navigateToUrl('visualize', 'new');
+      log.debug('clickTagCloud');
+      await PageObjects.visualize.clickTagCloud();
+      await PageObjects.visualize.clickNewSearch();
+      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      log.debug('select Tags');
+      await  PageObjects.visualize.clickBucket('Tags');
+      log.debug('Click aggregation Terms');
+      await await  PageObjects.visualize.selectAggregation('Terms');
+      log.debug('Click field machine.ram');
+      await retry.try(async function tryingForTime() {
+        await  PageObjects.visualize.selectField(termsField);
+      });
+      await  PageObjects.visualize.selectOrderBy('_term');
+      await  PageObjects.visualize.clickGo();
+      await  PageObjects.header.waitUntilLoadingHasFinished();
     });
 
     describe('tag cloud chart', function () {
@@ -61,7 +43,7 @@ export default function ({ getService, getPageObjects }) {
         expect(spyToggleExists).to.be(true);
       });
 
-      it.skip('should show correct tag cloud data', async function () {
+      it('should show correct tag cloud data', async function () {
         const data = await PageObjects.visualize.getTextTag();
         log.debug(data);
         expect(data).to.eql([ '32,212,254,720', '21,474,836,480', '20,401,094,656', '19,327,352,832', '18,253,611,008' ]);
@@ -98,40 +80,26 @@ export default function ({ getService, getPageObjects }) {
         expect(data).to.eql([ '32,212,254,720', '21,474,836,480', '20,401,094,656', '19,327,352,832', '18,253,611,008' ]);
       });
 
-      it('should save and load', function () {
-        return PageObjects.visualize.saveVisualization(vizName1)
-          .then(() => {
-            return PageObjects.common.getBreadcrumbPageTitle();
-          })
-          .then(pageTitle => {
-            log.debug(`Save viz page title is ${pageTitle}`);
-            expect(pageTitle).to.contain(vizName1);
-          })
-          .then(function testVisualizeWaitForToastMessageGone() {
-            return PageObjects.header.waitForToastMessageGone();
-          })
-          .then(function () {
-            return PageObjects.visualize.loadSavedVisualization(vizName1);
-          })
-          .then(function () {
-            return PageObjects.header.waitUntilLoadingHasFinished();
-          })
-          .then(function waitForVisualization() {
-            return PageObjects.visualize.waitForVisualization();
-          });
+      it('should save and load', async function () {
+        await PageObjects.visualize.saveVisualization(vizName1);
+        const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
+        log.debug(`Save viz page title is ${pageTitle}`);
+        expect(pageTitle).to.contain(vizName1);
+        await PageObjects.header.waitForToastMessageGone();
+        await PageObjects.visualize.loadSavedVisualization(vizName1);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.visualize.waitForVisualization();
       });
 
 
-      it('should show the tags and relative size', function () {
-        return PageObjects.visualize.getTextSizes()
-          .then(function (results) {
-            log.debug('results here ' + results);
-            expect(results).to.eql(['72px', '63px', '25px', '32px',  '18px' ]);
-          });
+      it('should show the tags and relative size', async function () {
+        const results = await PageObjects.visualize.getTextSizes();
+        log.debug('results here ' + results);
+        expect(results).to.eql(['72px', '63px', '25px', '32px',  '18px' ]);
       });
 
 
-      it('should show correct data', function () {
+      it('should show correct data', async function () {
         const expectedTableData =  [ '32,212,254,720', '737',
           '21,474,836,480', '728',
           '20,401,094,656', '687',
@@ -139,17 +107,11 @@ export default function ({ getService, getPageObjects }) {
           '18,253,611,008', '679'
         ];
 
-        return PageObjects.visualize.toggleSpyPanel()
-          .then(function () {
-            return PageObjects.visualize.setSpyPanelPageSize('All');
-          })
-          .then(function getDataTableData() {
-            return PageObjects.visualize.getDataTableData();
-          })
-          .then(function showData(data) {
-            log.debug(data.split('\n'));
-            expect(data.trim().split('\n')).to.eql(expectedTableData);
-          });
+        await PageObjects.visualize.toggleSpyPanel();
+        await PageObjects.visualize.setSpyPanelPageSize('All');
+        const data = await PageObjects.visualize.getDataTableData();
+        log.debug(data.split('\n'));
+        expect(data.trim().split('\n')).to.eql(expectedTableData);
       });
 
       describe('formatted field', function () {
