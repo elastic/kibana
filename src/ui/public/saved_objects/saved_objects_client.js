@@ -214,15 +214,6 @@ export class SavedObjectsClient {
       return Promise.reject(new Error('body not permitted for GET requests'));
     }
 
-    return kfetch({ method, pathname: path, query, body: JSON.stringify(body) })
-      .catch(async resp => {
-        const respBody = await resp.res.json();
-        const err = new Error(respBody.message || respBody.error || `${respBody.status} Response`);
-
-        err.statusCode = respBody.statusCode || resp.status;
-        err.body = respBody;
-
-        throw err;
-      });
+    return kfetch({ method, pathname: path, query, body: JSON.stringify(body) });
   }
 }

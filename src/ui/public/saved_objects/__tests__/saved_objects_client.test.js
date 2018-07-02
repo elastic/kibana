@@ -17,13 +17,29 @@
  * under the License.
  */
 
+jest.mock('ui/kfetch',
+  () => ({
+    kfetch: async (...args) => {
+      const response = await global.kfetchStub(...args);
+      return response;
+    }
+  }), { virtual: true });
+
 import sinon from 'sinon';
 import expect from 'expect.js';
 import { SavedObjectsClient } from '../saved_objects_client';
 import { SavedObject } from '../saved_object';
 
+function stubKfetch() {
+  global.kfetchStub = sinon.stub();
+  return global.kfetchStub;
+}
+
+function deleteKfetchStub() {
+  delete global.kfetchStub;
+}
+
 describe('SavedObjectsClient', () => {
-  const sandbox = sinon.createSandbox();
   const doc = {
     id: 'AVwSwFxtcMV38qjDZoQg',
     type: 'config',
@@ -31,97 +47,74 @@ describe('SavedObjectsClient', () => {
     version: 2
   };
 
+  let kfetchStub;
   let savedObjectsClient;
-
-  beforeAll(() => {
+  beforeEach(() => {
+    kfetchStub = stubKfetch();
     savedObjectsClient = new SavedObjectsClient();
   });
 
-  describe('#_getUrl', () => {
+  afterAll(() => {
+    deleteKfetchStub();
+  });
+
+  describe('#_getPath', () => {
     test('returns without arguments', () => {
-      const url = savedObjectsClient._getUrl();
+      const path = savedObjectsClient._getPath();
       const expected = `/api/saved_objects/`;
 
-      expect(url).to.be(expected);
+      expect(path).to.be(expected);
     });
 
     test('appends path', () => {
-      const url = savedObjectsClient._getUrl(['some', 'path']);
+      const path = savedObjectsClient._getPath(['some', 'path']);
       const expected = `/api/saved_objects/some/path`;
 
-      expect(url).to.be(expected);
-    });
-
-    test('appends query', () => {
-      const url = savedObjectsClient._getUrl(['some', 'path'], { foo: 'Foo', bar: 'Bar' });
-      const expected = `/api/saved_objects/some/path?foo=Foo&bar=Bar`;
-
-      expect(url).to.be(expected);
+      expect(path).to.be(expected);
     });
   });
 
   describe('#_request', () => {
     const body = { foo: 'Foo', bar: 'Bar' };
 
-    it('passes options to $http', () => {
-      $http.withArgs({
+    test('passes options to kfetch', () => {
+      kfetchStub.withArgs({
         method: 'POST',
-        url: '/api/path',
-        data: body
-      }).returns(Promise.resolve({ data: '' }));
+        pathname: '/api/path',
+        query: undefined,
+        body: JSON.stringify(body)
+      }).returns(Promise.resolve({}));
 
-      savedObjectsClient._request('POST', '/api/path', params);
+      savedObjectsClient._request({ method: 'POST', path: '/api/path', body });
 
-      sinon.assert.calledOnce($http);
+      sinon.assert.calledOnce(kfetchStub);
     });
 
-    it('throws error when body is provided for GET', async () => {
+    test('throws error when body is provided for GET', async () => {
       try {
-        await savedObjectsClient._request('GET', '/api/path', body);
+        await savedObjectsClient._request({ method: 'GET', path: '/api/path', body });
         expect().fail('should have error');
       } catch (e) {
         expect(e.message).to.eql('body not permitted for GET requests');
-      }
-    });
-
-    it('catches API error', async () => {
-      const message = 'Request failed';
-      $http.returns(Promise.reject({ data: { error: message } }));
-
-      try {
-        await savedObjectsClient._request('POST', '/api/path', params);
-        expect().fail('should have error');
-      } catch (e) {
-        expect(e.message).to.eql(message);
-      }
-    });
-
-    it('catches API error status', async () => {
-      $http.returns(Promise.reject({ status: 404 }));
-
-      try {
-        await savedObjectsClient._request('POST', '/api/path', params);
-        expect().fail('should have error');
-      } catch (e) {
-        expect(e.message).to.eql('404 Response');
       }
     });
   });
 
   describe('#get', () => {
     beforeEach(() => {
-      $http.withArgs({
+      kfetchStub.withArgs({
         method: 'POST',
-        url: `${basePath}/api/saved_objects/_bulk_get`,
-        data: sinon.match.any
-      }).returns(Promise.resolve({ data: { saved_objects: [doc] } }));
+        pathname: `/api/saved_objects/_bulk_get`,
+        query: undefined,
+        body: sinon.match.any
+      }).returns(Promise.resolve({ saved_objects: [doc] }));
     });
 
-    it('returns a promise', () => {
+    test('returns a promise', () => {
       expect(savedObjectsClient.get('index-pattern', 'logstash-*')).to.be.a(Promise);
     });
 
-    it('requires type', async () => {
+    test('requires type', async () => {
       try {
         await savedObjectsClient.get();
         expect().fail('should have error');
@@ -130,7 +123,7 @@ describe('SavedObjectsClient', () => {
       }
     });
 
-    it('requires id', async () => {
+    test('requires id', async () => {
       try {
         await savedObjectsClient.get('index-pattern');
         expect().throw('should have error');
@@ -139,7 +132,7 @@ describe('SavedObjectsClient', () => {
       }
     });
 
-    it('resolves with instantiated SavedObject', async () => {
+    test('resolves with instantiated SavedObject', async () => {
       const response = await savedObjectsClient.get(doc.type, doc.id);
       expect(response).to.be.a(SavedObject);
       expect(response.type).to.eql('config');
@@ -147,26 +140,27 @@ describe('SavedObjectsClient', () => {
       expect(response._client).to.be.a(SavedObjectsClient);
     });
 
-    it('makes HTTP call', async () => {
+    test('makes HTTP call', async () => {
       await savedObjectsClient.get(doc.type, doc.id);
-      sinon.assert.calledOnce($http);
+      sinon.assert.calledOnce(kfetchStub);
     });
   });
 
   describe('#delete', () => {
     beforeEach(() => {
-      $http.withArgs({
+      kfetchStub.withArgs({
         method: 'DELETE',
-        url: `${basePath}/api/saved_objects/index-pattern/logstash-*`,
-        data: undefined
-      }).returns(Promise.resolve({ data: 'api-response' }));
+        pathname: `/api/saved_objects/index-pattern/logstash-*`,
+        query: undefined,
+        body: undefined,
+      }).returns(Promise.resolve({}));
     });
 
-    it('returns a promise', () => {
+    test('returns a promise', () => {
       expect(savedObjectsClient.delete('index-pattern', 'logstash-*')).to.be.a(Promise);
     });
 
-    it('requires type', async () => {
+    test('requires type', async () => {
       try {
         await savedObjectsClient.delete();
         expect().throw('should have error');
@@ -175,7 +169,7 @@ describe('SavedObjectsClient', () => {
       }
     });
 
-    it('requires id', async () => {
+    test('requires id', async () => {
       try {
         await savedObjectsClient.delete('index-pattern');
         expect().throw('should have error');
@@ -184,9 +178,9 @@ describe('SavedObjectsClient', () => {
       }
     });
 
-    it('makes HTTP call', () => {
+    test('makes HTTP call', () => {
       savedObjectsClient.delete('index-pattern', 'logstash-*');
-      sinon.assert.calledOnce($http);
+      sinon.assert.calledOnce(kfetchStub);
     });
   });
 
@@ -194,18 +188,19 @@ describe('SavedObjectsClient', () => {
     const requireMessage = 'requires type, id and attributes';
 
     beforeEach(() => {
-      $http.withArgs({
+      kfetchStub.withArgs({
         method: 'PUT',
-        url: `${basePath}/api/saved_objects/index-pattern/logstash-*`,
-        data: sinon.match.any
+        pathname: `/api/saved_objects/index-pattern/logstash-*`,
+        query: undefined,
+        body: sinon.match.any
       }).returns(Promise.resolve({ data: 'api-response' }));
     });
 
-    it('returns a promise', () => {
+    test('returns a promise', () => {
       expect(savedObjectsClient.update('index-pattern', 'logstash-*', {})).to.be.a(Promise);
     });
 
-    it('requires type', async () => {
+    test('requires type', async () => {
       try {
         await savedObjectsClient.update();
         expect().throw('should have error');
@@ -214,7 +209,7 @@ describe('SavedObjectsClient', () => {
       }
     });
 
-    it('requires id', async () => {
+    test('requires id', async () => {
       try {
         await savedObjectsClient.update('index-pattern');
         expect().throw('should have error');
@@ -223,7 +218,7 @@ describe('SavedObjectsClient', () => {
       }
     });
 
-    it('requires attributes', async () => {
+    test('requires attributes', async () => {
       try {
         await savedObjectsClient.update('index-pattern', 'logstash-*');
         expect().throw('should have error');
@@ -232,15 +227,15 @@ describe('SavedObjectsClient', () => {
       }
     });
 
-    it('makes HTTP call', () => {
+    test('makes HTTP call', () => {
       const attributes = { foo: 'Foo', bar: 'Bar' };
       const body = { attributes, version: 2 };
       const options = { version: 2 };
 
       savedObjectsClient.update('index-pattern', 'logstash-*', attributes, options);
-      sinon.assert.calledOnce($http);
-      sinon.assert.calledWithExactly($http, sinon.match({
-        data: body
+      sinon.assert.calledOnce(kfetchStub);
+      sinon.assert.calledWithExactly(kfetchStub, sinon.match({
+        body: JSON.stringify(body)
       }));
     });
   });
@@ -249,18 +244,19 @@ describe('SavedObjectsClient', () => {
     const requireMessage = 'requires type and attributes';
 
     beforeEach(() => {
-      $http.withArgs({
+      kfetchStub.withArgs({
         method: 'POST',
-        url: `${basePath}/api/saved_objects/index-pattern`,
-        data: sinon.match.any
-      }).returns(Promise.resolve({ data: 'api-response' }));
+        pathname: `/api/saved_objects/index-pattern`,
+        query: undefined,
+        body: sinon.match.any
+      }).returns(Promise.resolve({}));
     });
 
-    it('returns a promise', () => {
+    test('returns a promise', () => {
       expect(savedObjectsClient.create('index-pattern', {})).to.be.a(Promise);
     });
 
-    it('requires type', async () => {
+    test('requires type', async () => {
       try {
         await savedObjectsClient.create();
         expect().throw('should have error');
@@ -269,33 +265,32 @@ describe('SavedObjectsClient', () => {
       }
     });
 
-    it('allows for id to be provided', () => {
+    test('allows for id to be provided', () => {
       const attributes = { foo: 'Foo', bar: 'Bar' };
-      const url = `${basePath}/api/saved_objects/index-pattern/myId`;
-      $http.withArgs({
+      const path = `/api/saved_objects/index-pattern/myId`;
+      kfetchStub.withArgs({
         method: 'POST',
-        url,
-        data: sinon.match.any
-      }).returns(Promise.resolve({ data: 'api-response' }));
+        pathname: path,
+        query: undefined,
+        body: sinon.match.any
+      }).returns(Promise.resolve({}));
 
       savedObjectsClient.create('index-pattern', attributes, { id: 'myId' });
 
-      sinon.assert.calledOnce($http);
-      sinon.assert.calledWithExactly($http, sinon.match({
-        url
+      sinon.assert.calledOnce(kfetchStub);
+      sinon.assert.calledWithExactly(kfetchStub, sinon.match({
+        pathname: path
       }));
     });
 
-    it('makes HTTP call', () => {
+    test('makes HTTP call', () => {
       const attributes = { foo: 'Foo', bar: 'Bar' };
       savedObjectsClient.create('index-pattern', attributes);
 
-      sinon.assert.calledOnce($http);
-      sinon.assert.calledWithExactly($http, sinon.match({
-        url: sinon.match.string,
-        data: {
-          attributes
-        }
+      sinon.assert.calledOnce(kfetchStub);
+      sinon.assert.calledWithExactly(kfetchStub, sinon.match({
+        pathname: sinon.match.string,
+        body: JSON.stringify({ attributes }),
       }));
     });
   });
@@ -304,40 +299,43 @@ describe('SavedObjectsClient', () => {
     const object = { id: 'logstash-*', type: 'index-pattern', title: 'Test' };
 
     beforeEach(() => {
-      $http.returns(Promise.resolve({ data: { saved_objects: [object] } }));
+      kfetchStub.returns(Promise.resolve({ saved_objects: [object] }));
     });
 
-    it('returns a promise', () => {
+    test('returns a promise', () => {
       expect(savedObjectsClient.find()).to.be.a(Promise);
     });
 
-    it('accepts type', () => {
+    test('accepts type', () => {
       const body = { type: 'index-pattern', invalid: true };
 
       savedObjectsClient.find(body);
-      sinon.assert.calledOnce($http);
-      sinon.assert.calledWithExactly($http, sinon.match({
-        url: `${basePath}/api/saved_objects/_find?type=index-pattern&invalid=true`
+      sinon.assert.calledOnce(kfetchStub);
+      sinon.assert.calledWithExactly(kfetchStub, sinon.match({
+        pathname: `/api/saved_objects/_find`,
+        query: { type: 'index-pattern', invalid: true }
       }));
     });
 
-    it('accepts fields', () => {
+    test('accepts fields', () => {
       const body = { fields: ['title', 'description'] };
 
       savedObjectsClient.find(body);
-      sinon.assert.calledOnce($http);
-      sinon.assert.calledWithExactly($http, sinon.match({
-        url: `${basePath}/api/saved_objects/_find?fields=title&fields=description`
+      sinon.assert.calledOnce(kfetchStub);
+      sinon.assert.calledWithExactly(kfetchStub, sinon.match({
+        pathname: `/api/saved_objects/_find`,
+        query: { fields: [ 'title', 'description' ] }
       }));
     });
 
-    it('accepts from/size', () => {
+    test('accepts from/size', () => {
       const body = { from: 50, size: 10 };
 
       savedObjectsClient.find(body);
-      sinon.assert.calledOnce($http);
-      sinon.assert.alwaysCalledWith($http, sinon.match({
-        url: `${basePath}/api/saved_objects/_find?from=50&size=10`
+      sinon.assert.calledOnce(kfetchStub);
+      sinon.assert.alwaysCalledWith(kfetchStub, sinon.match({
+        pathname: `/api/saved_objects/_find`,
+        query: { from: 50, size: 10 }
       }));
     });
   });
