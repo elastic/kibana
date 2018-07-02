@@ -34,14 +34,13 @@ uiModules
         timeRange: '='
       },
       link: function ($scope, element) {
-      // Clone the _vis instance.
-        const vis = $scope.savedObj.vis;
-        const Editor = typeof vis.type.editor === 'function' ? vis.type.editor :
-          editorTypes.find(editor => editor.key === vis.type.editor);
-        const editor = new Editor(element[0], vis);
+        const editorType = $scope.savedObj.vis.type.editor;
+        const Editor = typeof editorType === 'function' ? editorType :
+          editorTypes.find(editor => editor.key === editorType);
+        const editor = new Editor(element[0], $scope.savedObj);
 
         $scope.renderFunction = () => {
-          editor.render($scope.savedObj, {
+          editor.render({
             uiState: $scope.uiState,
             timeRange: $scope.timeRange,
             appState: getAppState(),

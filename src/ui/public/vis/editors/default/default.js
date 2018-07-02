@@ -36,9 +36,10 @@ const defaultEditor = function ($rootScope, $compile) {
   return class DefaultEditor {
     static key = 'default';
 
-    constructor(el, vis) {
+    constructor(el, savedObj) {
       this.el = $(el);
-      this.vis = vis;
+      this.savedObj = savedObj;
+      this.vis = savedObj.vis;
 
       if (!this.vis.type.editorConfig.optionTabs && this.vis.type.editorConfig.optionsTemplate) {
         this.vis.type.editorConfig.optionTabs = [
@@ -47,7 +48,7 @@ const defaultEditor = function ($rootScope, $compile) {
       }
     }
 
-    render(savedObj, { uiState, timeRange, appState }) {
+    render({ uiState, timeRange, appState }) {
       let $scope;
 
       const updateScope = () => {
@@ -140,7 +141,7 @@ const defaultEditor = function ($rootScope, $compile) {
           const visualizationEl = this.el.find('.vis-editor-canvas')[0];
           getVisualizeLoader().then(loader => {
             this._loader = loader;
-            this._handler = this._loader.embedVisualizationWithSavedObject(visualizationEl, savedObj, {
+            this._handler = this._loader.embedVisualizationWithSavedObject(visualizationEl, this.savedObj, {
               uiState: uiState,
               listenOnChange: false,
               timeRange: timeRange,

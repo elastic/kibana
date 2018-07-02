@@ -81,7 +81,7 @@ class VisEditor extends Component {
       this.setState({ dirty: false });
     };
 
-    if (this.props.visData.type) {
+    if (!this.props.isEditorMode) {
       if (!this.props.vis.params || !this.props.visData) return null;
       const reversed = this.state.reversed;
       return (
@@ -156,7 +156,8 @@ VisEditor.propTypes = {
   visData: PropTypes.object,
   appState: PropTypes.object,
   renderComplete: PropTypes.func,
-  config: PropTypes.object
+  config: PropTypes.object,
+  isEditorMode: PropTypes.bool,
 };
 
 export default VisEditor;

@@ -64,6 +64,9 @@ class VisEditorVisualization extends Component {
   componentWillUnmount() {
     window.removeEventListener('mousemove', this.handleMouseMove);
     window.removeEventListener('mouseup', this.handleMouseUp);
+    if (this._handler) {
+      this._handler.destroy();
+    }
   }
 
   _loadVisualization() {
@@ -73,7 +76,7 @@ class VisEditorVisualization extends Component {
       }
 
       this._loader = loader;
-      this._loader.embedVisualizationWithSavedObject(this._visEl.current, this.props.savedObj, {
+      this._handler = this._loader.embedVisualizationWithSavedObject(this._visEl.current, this.props.savedObj, {
         uiState: this.props.uiState,
         listenOnChange: false,
         timeRange: this.props.timeRange
@@ -82,7 +85,9 @@ class VisEditorVisualization extends Component {
   }
 
   componentDidUpdate() {
-    this._loadVisualization();
+    this._handler.update({
+      timeRange: this.props.timeRange
+    });
   }
 
   componentDidMount() {

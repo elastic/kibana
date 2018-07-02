@@ -21,7 +21,6 @@ import $ from 'jquery';
 import moment from 'moment';
 import dateMath from '@kbn/datemath';
 import * as vega from 'vega-lib';
-import * as vegaLite from 'vega-lite';
 import { Utils } from '../data_model/utils';
 import { VISUALIZATION_COLORS } from '@elastic/eui';
 import { TooltipHandler } from './vega_tooltip';
@@ -328,36 +327,6 @@ export class VegaBaseView {
     }
 
     return { from, to, mode };
-  }
-
-  /**
-   * Set global debug variable to simplify vega debugging in console. Show info message first time
-   */
-  setDebugValues(view, spec, vlspec) {
-    // VEGA_DEBUG was removed due to editorMode property not being available anymore
-    return;
-
-    if (window) {
-      if (window.VEGA_DEBUG === undefined && console) {
-        console.log('%cWelcome to Kibana Vega Plugin!', 'font-size: 16px; font-weight: bold;');
-        console.log('You can access the Vega view with VEGA_DEBUG. ' +
-          'Learn more at https://vega.github.io/vega/docs/api/debugging/.');
-      }
-      const debugObj = {};
-      window.VEGA_DEBUG = debugObj;
-      window.VEGA_DEBUG.VEGA_VERSION = vega.version;
-      window.VEGA_DEBUG.VEGA_LITE_VERSION = vegaLite.version;
-      window.VEGA_DEBUG.view = view;
-      window.VEGA_DEBUG.vega_spec = spec;
-      window.VEGA_DEBUG.vegalite_spec = vlspec;
-
-      // On dispose, clean up, but don't use undefined to prevent repeated debug statements
-      this._addDestroyHandler(() => {
-        if (debugObj === window.VEGA_DEBUG) {
-          window.VEGA_DEBUG = null;
-        }
-      });
-    }
   }
 
   destroy() {
