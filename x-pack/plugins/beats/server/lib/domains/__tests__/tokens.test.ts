@@ -5,7 +5,6 @@
  */
 
 import expect from 'expect.js';
-import { verify as verifyToken } from 'jsonwebtoken';
 import { wrapRequest } from '../../../utils/wrap_request';
 import { TestingBackendFrameworkAdapter } from '../../adapters/famework/kibana/testing_framework_adapter';
 import { MemoryTokensAdapter } from '../../adapters/tokens/memory_tokens_adapter';
@@ -50,14 +49,6 @@ describe('Token Domain Lib', () => {
     expect(tokens.length).to.be(1);
 
     expect(typeof tokens[0]).to.be('string');
-
-    expect(() => {
-      verifyToken(tokens[0], settings.encryptionKey);
-    }).to.not.throwException();
-
-    expect(() => {
-      verifyToken(tokens[0], 'this_should_error');
-    }).to.throwException();
   });
 
   it('should create the specified number of tokens', async () => {

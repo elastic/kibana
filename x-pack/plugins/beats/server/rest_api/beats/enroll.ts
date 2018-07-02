@@ -6,6 +6,7 @@
 
 import Joi from 'joi';
 import { omit } from 'lodash';
+import moment from 'moment';
 import { CMServerLibs } from '../../lib/lib';
 import { wrapEsError } from '../../utils/error_wrappers';
 
@@ -32,11 +33,11 @@ export const createBeatEnrollmentRoute = (libs: CMServerLibs) => ({
     const enrollmentToken = request.headers['kbn-beats-enrollment-token'];
 
     try {
-      const { token, expired } = await libs.tokens.getEnrollmentToken(
+      const { token, expires_on } = await libs.tokens.getEnrollmentToken(
         enrollmentToken
       );
 
-      if (expired) {
+      if (expires_on && moment(expires_on).isBefore(moment())) {
         return reply({ message: 'Expired enrollment token' }).code(400);
       }
       if (!token) {
