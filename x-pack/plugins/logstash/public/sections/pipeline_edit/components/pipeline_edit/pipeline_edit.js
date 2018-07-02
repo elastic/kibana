@@ -4,6 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
+//import { render } from 'react-dom';
+import { EuiPage } from '@elastic/eui';
+
+
+export class PipelineEditor extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      pipeline: { }
+    };
+  }
+
+  render() {
+    return (
+      <EuiPage
+        data-test-subj="pipelineEdit pipelineEdit-{{pipelineEdit.pipeline.id}}"
+      >
+        Edit some pipelines!
+      </EuiPage>
+    );
+  }
+  // onPipelineSave(username) {
+
+  // }
+}
+
 import { isEmpty } from 'lodash';
 import { uiModules } from 'ui/modules';
 import { InitAfterBindingsWorkaround } from 'ui/compat';
@@ -27,6 +55,9 @@ app.directive('pipelineEdit', function ($injector) {
 
   return {
     restrict: 'E',
+    // link: (scope, el) => {
+    //   render(<PipelineEditor />, el[0]);
+    // }
     template: template,
     scope: {
       pipeline: '=',
