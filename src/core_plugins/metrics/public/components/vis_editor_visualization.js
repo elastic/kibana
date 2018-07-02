@@ -72,6 +72,7 @@ class VisEditorVisualization extends Component {
   _loadVisualization() {
     getVisualizeLoader().then(loader => {
       if (!this._visEl.current) {
+        // In case the visualize loader isn't done before the component is unmounted.
         return;
       }
 
@@ -79,7 +80,8 @@ class VisEditorVisualization extends Component {
       this._handler = this._loader.embedVisualizationWithSavedObject(this._visEl.current, this.props.savedObj, {
         uiState: this.props.uiState,
         listenOnChange: false,
-        timeRange: this.props.timeRange
+        timeRange: this.props.timeRange,
+        appState: this.props.appState,
       });
     });
   }
@@ -196,7 +198,8 @@ VisEditorVisualization.propTypes = {
   timeRange: PropTypes.object,
   dirty: PropTypes.bool,
   autoApply: PropTypes.bool,
-  dateFormat: PropTypes.string
+  dateFormat: PropTypes.string,
+  appState: PropTypes.object,
 };
 
 export default VisEditorVisualization;

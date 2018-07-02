@@ -110,6 +110,7 @@ class VisEditor extends Component {
             dirty={this.state.dirty}
             autoApply={this.state.autoApply}
             model={model}
+            appState={this.props.appState}
             savedObj={this.props.savedObj}
             timeRange={this.props.timeRange}
             onUiState={this.handleUiState}
@@ -158,6 +159,8 @@ VisEditor.propTypes = {
   renderComplete: PropTypes.func,
   config: PropTypes.object,
   isEditorMode: PropTypes.bool,
+  savedObj: PropTypes.object,
+  timeRange: PropTypes.object,
 };
 
 export default VisEditor;

@@ -55,6 +55,7 @@ function ReactEditorControllerProvider(Private, config) {
               timeRange={params.timeRange}
               renderComplete={resolve}
               isEditorMode={true}
+              appState={params.appState}
             />, this.el);
           });
         });

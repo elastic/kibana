@@ -91,11 +91,8 @@ export class VisualizationChart extends Component {
     this.visualization = new Visualization(this.chartDiv.current, vis);
 
     if (onInit) {
-      if (this.visualization.isLoaded) {
-        this.visualization.isLoaded().then(onInit);
-      } else {
-        onInit();
-      }
+      const visLoaded = this.visualization.isLoaded ? this.visualization.isLoaded() : true;
+      Promise.resolve(visLoaded).then(onInit);
     }
 
     this.resizeChecker = new ResizeChecker(this.containerDiv.current);
