@@ -74,7 +74,6 @@ export class CMBeatsDomain {
     remoteAddress: string,
     beat: Partial<CMBeat>
   ) {
-    // TODO move this to the token lib
     const accessToken = this.tokens.generateAccessToken();
     await this.adapter.insert({
       ...beat,
