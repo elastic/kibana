@@ -66,15 +66,6 @@ export class SecureSavedObjectsClient {
     return await this._findAcrossAllTypes(options);
   }
 
-  async _findWithTypes(options) {
-    return await this._execute(
-      options.type,
-      'find',
-      { options },
-      repository => repository.find(options)
-    );
-  }
-
   async bulkGet(objects = []) {
     const types = uniq(objects.map(o => o.type));
     return await this._execute(
@@ -101,6 +92,15 @@ export class SecureSavedObjectsClient {
       { type, id, attributes, options },
       repository => repository.update(type, id, attributes, options)
     );
+  }
+
+  async _checkSavedObjectPrivileges(privileges) {
+    try {
+      return await this._checkPrivileges(privileges);
+    } catch(error) {
+      const { reason } = get(error, 'body.error', {});
+      throw this.errors.decorateGeneralError(error, reason);
+    }
   }
 
   async _execute(typeOrTypes, action, args, fn) {
@@ -158,12 +158,12 @@ export class SecureSavedObjectsClient {
     });
   }
 
-  async _checkSavedObjectPrivileges(privileges) {
-    try {
-      return await this._checkPrivileges(privileges);
-    } catch(error) {
-      const { reason } = get(error, 'body.error', {});
-      throw this.errors.decorateGeneralError(error, reason);
-    }
+  async _findWithTypes(options) {
+    return await this._execute(
+      options.type,
+      'find',
+      { options },
+      repository => repository.find(options)
+    );
   }
 }
