@@ -33,18 +33,21 @@ export class CMTokensDomain {
       return {
         token: null,
         expired: true,
+        expires_on: null,
       };
     }
 
     const { verified, expired } = this.verifyToken(
       enrollmentToken,
-      fullToken.token || ''
+      fullToken.token || '',
+      false
     );
 
     if (!verified) {
       return {
         expired,
         token: null,
+        expires_on: null,
       };
     }
 
@@ -55,21 +58,24 @@ export class CMTokensDomain {
     return await this.adapter.deleteEnrollmentToken(enrollmentToken);
   }
 
-  public verifyToken(recivedToken: string, token2: string) {
-    let tokenDecoded = false;
+  public verifyToken(recivedToken: string, token2: string, decode = true) {
+    let tokenDecoded = true;
     let expired = false;
-    const enrollmentTokenSecret = this.framework.getSetting(
-      'xpack.beats.encryptionKey'
-    );
 
-    try {
-      verifyToken(recivedToken, enrollmentTokenSecret);
-      tokenDecoded = true;
-    } catch (err) {
-      if (err.name === 'TokenExpiredError') {
-        expired = true;
+    if (decode) {
+      const enrollmentTokenSecret = this.framework.getSetting(
+        'xpack.beats.encryptionKey'
+      );
+
+      try {
+        verifyToken(recivedToken, enrollmentTokenSecret);
+        tokenDecoded = true;
+      } catch (err) {
+        if (err.name === 'TokenExpiredError') {
+          expired = true;
+        }
+        tokenDecoded = false;
       }
-      tokenDecoded = false;
     }
 
     if (
@@ -122,30 +128,14 @@ export class CMTokensDomain {
       'xpack.beats.enrollmentTokensTtlInSeconds'
     );
 
-    const enrollmentTokenSecret = this.framework.getSetting(
-      'xpack.beats.encryptionKey'
-    );
     const enrollmentTokenExpiration = moment()
       .add(enrollmentTokensTtlInSeconds, 'seconds')
       .toJSON();
 
-    const tokenData = {
-      created: moment().toJSON(),
-    };
-
     while (tokens.length < numTokens) {
       tokens.push({
         expires_on: enrollmentTokenExpiration,
-        token: signToken(
-          {
-            ...tokenData,
-            randomHash: uuid.v4().replace(/-/g, ''),
-          },
-          enrollmentTokenSecret,
-          {
-            expiresIn: enrollmentTokensTtlInSeconds,
-          }
-        ),
+        token: uuid.v4().replace(/-/g, ''),
       });
     }
 
