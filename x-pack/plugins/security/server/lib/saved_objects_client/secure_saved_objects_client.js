@@ -5,7 +5,7 @@
  */
 
 import { get, uniq } from 'lodash';
-import { HAS_PRIVILEGES_RESULT } from '../authorization/has_privileges';
+import { CHECK_PRIVILEGES_RESULT } from '../authorization/check_privileges';
 
 const getPrivilege = (type, action) => {
   return `action:saved_objects/${type}/${action}`;
@@ -17,7 +17,7 @@ export class SecureSavedObjectsClient {
       errors,
       internalRepository,
       callWithRequestRepository,
-      hasPrivileges,
+      checkPrivileges,
       auditLogger,
       savedObjectTypes,
     } = options;
@@ -25,7 +25,7 @@ export class SecureSavedObjectsClient {
     this.errors = errors;
     this._internalRepository = internalRepository;
     this._callWithRequestRepository = callWithRequestRepository;
-    this._hasPrivileges = hasPrivileges;
+    this._checkPrivileges = checkPrivileges;
     this._auditLogger = auditLogger;
     this._savedObjectTypes = savedObjectTypes;
   }
@@ -106,15 +106,15 @@ export class SecureSavedObjectsClient {
   async _execute(typeOrTypes, action, args, fn) {
     const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
     const privileges = types.map(type => getPrivilege(type, action));
-    const { result, username, missing } = await this._hasSavedObjectPrivileges(privileges);
+    const { result, username, missing } = await this._checkSavedObjectPrivileges(privileges);
 
     switch (result) {
-      case HAS_PRIVILEGES_RESULT.AUTHORIZED:
+      case CHECK_PRIVILEGES_RESULT.AUTHORIZED:
         this._auditLogger.savedObjectsAuthorizationSuccess(username, action, types, args);
         return await fn(this._internalRepository);
-      case HAS_PRIVILEGES_RESULT.LEGACY:
+      case CHECK_PRIVILEGES_RESULT.LEGACY:
         return await fn(this._callWithRequestRepository);
-      case HAS_PRIVILEGES_RESULT.UNAUTHORIZED:
+      case CHECK_PRIVILEGES_RESULT.UNAUTHORIZED:
         this._auditLogger.savedObjectsAuthorizationFailure(username, action, types, missing, args);
         const msg = `Unable to ${action} ${types.sort().join(',')}, missing ${missing.sort().join(',')}`;
         throw this.errors.decorateForbiddenError(new Error(msg));
@@ -129,9 +129,9 @@ export class SecureSavedObjectsClient {
     // we have to filter for only their authorized types
     const types = this._savedObjectTypes;
     const typesToPrivilegesMap = new Map(types.map(type => [type, getPrivilege(type, action)]));
-    const { result, username, missing } = await this._hasSavedObjectPrivileges(Array.from(typesToPrivilegesMap.values()));
+    const { result, username, missing } = await this._checkSavedObjectPrivileges(Array.from(typesToPrivilegesMap.values()));
 
-    if (result === HAS_PRIVILEGES_RESULT.LEGACY) {
+    if (result === CHECK_PRIVILEGES_RESULT.LEGACY) {
       return await this._callWithRequestRepository.find(options);
     }
 
@@ -158,9 +158,9 @@ export class SecureSavedObjectsClient {
     });
   }
 
-  async _hasSavedObjectPrivileges(privileges) {
+  async _checkSavedObjectPrivileges(privileges) {
     try {
-      return await this._hasPrivileges(privileges);
+      return await this._checkPrivileges(privileges);
     } catch(error) {
       const { reason } = get(error, 'body.error', {});
       throw this.errors.decorateGeneralError(error, reason);

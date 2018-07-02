@@ -17,7 +17,7 @@ import { authenticateFactory } from './server/lib/auth_redirect';
 import { checkLicense } from './server/lib/check_license';
 import { initAuthenticator } from './server/lib/authentication/authenticator';
 import { initPrivilegesApi } from './server/routes/api/v1/privileges';
-import { hasPrivilegesWithServer } from './server/lib/authorization/has_privileges';
+import { checkPrivilegesWithRequestFactory } from './server/lib/authorization/check_privileges';
 import { SecurityAuditLogger } from './server/lib/audit_logger';
 import { AuditLogger } from '../../server/lib/audit_logger';
 import { SecureSavedObjectsClient } from './server/lib/saved_objects_client/secure_saved_objects_client';
@@ -114,7 +114,7 @@ export const security = (kibana) => new kibana.Plugin({
     server.auth.strategy('session', 'login', 'required');
 
     const auditLogger = new SecurityAuditLogger(server.config(), new AuditLogger(server, 'security'));
-    const hasPrivilegesWithRequest = hasPrivilegesWithServer(server);
+    const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(server);
     const { savedObjects } = server;
 
     savedObjects.setScopedSavedObjectsClientFactory(({
@@ -130,14 +130,14 @@ export const security = (kibana) => new kibana.Plugin({
         return new savedObjects.SavedObjectsClient(callWithRequestRepository);
       }
 
-      const hasPrivileges = hasPrivilegesWithRequest(request);
+      const checkPrivileges = checkPrivilegesWithRequest(request);
       const internalRepository = savedObjects.getSavedObjectsRepository(callWithInternalUser);
 
       return new SecureSavedObjectsClient({
         internalRepository,
         callWithRequestRepository,
         errors: savedObjects.SavedObjectsClient.errors,
-        hasPrivileges,
+        checkPrivileges,
         auditLogger,
         savedObjectTypes: savedObjects.types,
       });

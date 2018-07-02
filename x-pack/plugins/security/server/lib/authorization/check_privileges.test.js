@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { hasPrivilegesWithServer, HAS_PRIVILEGES_RESULT } from './has_privileges';
+import { checkPrivilegesWithRequestFactory, CHECK_PRIVILEGES_RESULT } from './check_privileges';
 import { getClient } from '../../../../../server/lib/get_client_shield';
 import { DEFAULT_RESOURCE } from '../../../common/constants';
 import { getLoginAction, getVersionAction } from '../privileges';
@@ -76,12 +76,12 @@ const createMockCallWithRequest = (responses) => {
   return mockCallWithRequest;
 };
 
+const deprecationMessage = 'Relying on index privileges is deprecated and will be removed in Kibana 7.0';
 const expectNoDeprecationLogged = (mockServer) => {
-  expect(mockServer.log).not.toHaveBeenCalled();
+  expect(mockServer.log).not.toHaveBeenCalledWith(['warning', 'deprecated', 'security'], deprecationMessage);
 };
-
 const expectDeprecationLogged = (mockServer) => {
-  expect(mockServer.log).toHaveBeenCalledWith(['warning', 'deprecated', 'security'], expect.stringContaining('deprecated'));
+  expect(mockServer.log).toHaveBeenCalledWith(['warning', 'deprecated', 'security'], deprecationMessage);
 };
 
 test(`returns authorized if they have all application privileges`, async () => {
@@ -101,11 +101,11 @@ test(`returns authorized if they have all application privileges`, async () => {
     })
   ]);
 
-  const hasPrivilegesWithRequest = hasPrivilegesWithServer(mockServer);
+  const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(mockServer);
   const request = Symbol();
-  const hasPrivileges = hasPrivilegesWithRequest(request);
+  const checkPrivileges = checkPrivilegesWithRequest(request);
   const privileges = [privilege];
-  const result = await hasPrivileges(privileges);
+  const result = await checkPrivileges(privileges);
 
   expectNoDeprecationLogged(mockServer);
   expect(mockCallWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
@@ -120,7 +120,7 @@ test(`returns authorized if they have all application privileges`, async () => {
     }
   });
   expect(result).toEqual({
-    result: HAS_PRIVILEGES_RESULT.AUTHORIZED,
+    result: CHECK_PRIVILEGES_RESULT.AUTHORIZED,
     username,
     missing: [],
   });
@@ -145,11 +145,11 @@ test(`returns unauthorized they have only one application privilege`, async () =
     })
   ]);
 
-  const hasPrivilegesWithRequest = hasPrivilegesWithServer(mockServer);
+  const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(mockServer);
   const request = Symbol();
-  const hasPrivileges = hasPrivilegesWithRequest(request);
+  const checkPrivileges = checkPrivilegesWithRequest(request);
   const privileges = [privilege1, privilege2];
-  const result = await hasPrivileges(privileges);
+  const result = await checkPrivileges(privileges);
 
   expectNoDeprecationLogged(mockServer);
   expect(mockCallWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
@@ -164,7 +164,7 @@ test(`returns unauthorized they have only one application privilege`, async () =
     }
   });
   expect(result).toEqual({
-    result: HAS_PRIVILEGES_RESULT.UNAUTHORIZED,
+    result: CHECK_PRIVILEGES_RESULT.UNAUTHORIZED,
     username,
     missing: [privilege2],
   });
@@ -184,10 +184,10 @@ test(`throws error if missing version privilege and has login privilege`, async 
     })
   ]);
 
-  const hasPrivilegesWithRequest = hasPrivilegesWithServer(mockServer);
-  const hasPrivileges = hasPrivilegesWithRequest({});
+  const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(mockServer);
+  const checkPrivileges = checkPrivilegesWithRequest({});
 
-  await expect(hasPrivileges([privilege])).rejects.toThrowErrorMatchingSnapshot();
+  await expect(checkPrivileges([privilege])).rejects.toThrowErrorMatchingSnapshot();
   expectNoDeprecationLogged(mockServer);
 });
 
@@ -216,11 +216,11 @@ describe('legacy fallback with no application privileges', () => {
       })
     ]);
 
-    const hasPrivilegesWithRequest = hasPrivilegesWithServer(mockServer);
+    const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(mockServer);
     const request = Symbol();
-    const hasPrivileges = hasPrivilegesWithRequest(request);
+    const checkPrivileges = checkPrivilegesWithRequest(request);
     const privileges = [privilege];
-    const result = await hasPrivileges(privileges);
+    const result = await checkPrivileges(privileges);
 
     expectNoDeprecationLogged(mockServer);
     expect(callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
@@ -243,7 +243,7 @@ describe('legacy fallback with no application privileges', () => {
       }
     });
     expect(result).toEqual({
-      result: HAS_PRIVILEGES_RESULT.UNAUTHORIZED,
+      result: CHECK_PRIVILEGES_RESULT.UNAUTHORIZED,
       username,
       missing: [getLoginAction(), ...privileges],
     });
@@ -275,11 +275,11 @@ describe('legacy fallback with no application privileges', () => {
         })
       ]);
 
-      const hasPrivilegesWithRequest = hasPrivilegesWithServer(mockServer);
+      const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(mockServer);
       const request = Symbol();
-      const hasPrivileges = hasPrivilegesWithRequest(request);
+      const checkPrivileges = checkPrivilegesWithRequest(request);
       const privileges = [privilege];
-      const result = await hasPrivileges(privileges);
+      const result = await checkPrivileges(privileges);
 
       expectDeprecationLogged(mockServer);
       expect(callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
@@ -302,7 +302,7 @@ describe('legacy fallback with no application privileges', () => {
         }
       });
       expect(result).toEqual({
-        result: HAS_PRIVILEGES_RESULT.LEGACY,
+        result: CHECK_PRIVILEGES_RESULT.LEGACY,
         username,
         missing: [getLoginAction(), ...privileges],
       });

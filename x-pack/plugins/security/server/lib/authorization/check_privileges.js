@@ -8,13 +8,13 @@ import { getClient } from '../../../../../server/lib/get_client_shield';
 import { DEFAULT_RESOURCE } from '../../../common/constants';
 import { getVersionAction, getLoginAction } from '../privileges';
 
-export const HAS_PRIVILEGES_RESULT = {
+export const CHECK_PRIVILEGES_RESULT = {
   UNAUTHORIZED: Symbol(),
   AUTHORIZED: Symbol(),
   LEGACY: Symbol(),
 };
 
-export function hasPrivilegesWithServer(server) {
+export function checkPrivilegesWithRequestFactory(server) {
   const callWithRequest = getClient(server).callWithRequest;
 
   const config = server.config();
@@ -25,9 +25,9 @@ export function hasPrivilegesWithServer(server) {
   const loginAction = getLoginAction();
   const versionAction = getVersionAction(kibanaVersion);
 
-  return function hasPrivilegesWithRequest(request) {
+  return function checkPrivilegesWithRequest(request) {
 
-    const hasApplicationPrivileges = async (privileges) => {
+    const checkApplicationPrivileges = async (privileges) => {
       const privilegeCheck = await callWithRequest(request, 'shield.hasPrivileges', {
         body: {
           applications: [{
@@ -67,38 +67,38 @@ export function hasPrivilegesWithServer(server) {
       return Object.values(privilegeCheck.index[kibanaIndex]).includes(true);
     };
 
-    return async function hasPrivileges(privileges) {
+    return async function checkPrivileges(privileges) {
       const allPrivileges = [versionAction, loginAction, ...privileges];
-      const privilegesCheck = await hasApplicationPrivileges(allPrivileges);
+      const applicationPrivilegesCheck = await checkApplicationPrivileges(allPrivileges);
 
-      const username = privilegesCheck.username;
+      const username = applicationPrivilegesCheck.username;
 
       // We don't want to expose the version privilege to consumers, as it's an implementation detail only to detect version mismatch
-      const missing = Object.keys(privilegesCheck.privileges)
-        .filter(p => !privilegesCheck.privileges[p])
+      const missing = Object.keys(applicationPrivilegesCheck.privileges)
+        .filter(p => !applicationPrivilegesCheck.privileges[p])
         .filter(p => p !== versionAction);
 
-      if (privilegesCheck.hasAllRequested) {
+      if (applicationPrivilegesCheck.hasAllRequested) {
         return {
-          result: HAS_PRIVILEGES_RESULT.AUTHORIZED,
+          result: CHECK_PRIVILEGES_RESULT.AUTHORIZED,
           username,
           missing,
         };
       }
 
-      if (!privilegesCheck.privileges[loginAction] && await hasPrivilegesOnKibanaIndex()) {
-        const msg = `Relying on implicit privileges determined from the index privileges is deprecated and will be removed in Kibana 7.0`;
+      if (!applicationPrivilegesCheck.privileges[loginAction] && await hasPrivilegesOnKibanaIndex()) {
+        const msg = 'Relying on index privileges is deprecated and will be removed in Kibana 7.0';
         server.log(['warning', 'deprecated', 'security'], msg);
 
         return {
-          result: HAS_PRIVILEGES_RESULT.LEGACY,
+          result: CHECK_PRIVILEGES_RESULT.LEGACY,
           username,
           missing,
         };
       }
 
       return {
-        result: HAS_PRIVILEGES_RESULT.UNAUTHORIZED,
+        result: CHECK_PRIVILEGES_RESULT.UNAUTHORIZED,
         username,
         missing,
       };
