@@ -418,7 +418,7 @@ export default class WatcherFlyout extends Component {
       <EuiFlyout onClose={this.props.onClose} size="s">
         <EuiFlyoutHeader>
           <EuiTitle>
-            <h2>Create new watch assistant</h2>
+            <h2>Enable error reports</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>{flyoutBody}</EuiFlyoutBody>
