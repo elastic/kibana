@@ -39,14 +39,23 @@ export class StartDatafeedModal extends Component {
       initialSpecifiedStartTime: moment()
     };
 
-    if (typeof this.props.showFunction === 'function') {
-      this.props.showFunction(this.showModal);
+    this.initialSpecifiedStartTime = moment();
+    this.refreshJobs = this.props.refreshJobs;
+  }
+
+  componentDidMount() {
+    if (typeof this.props.setShowFunction === 'function') {
+      this.props.setShowFunction(this.showModal);
     }
     if (typeof this.props.saveFunction === 'function') {
       this.externalSave = this.props.saveFunction;
     }
-    this.initialSpecifiedStartTime = moment();
-    this.refreshJobs = this.props.refreshJobs;
+  }
+
+  componentWillUnmount() {
+    if (typeof this.props.unsetShowFunction === 'function') {
+      this.props.unsetShowFunction();
+    }
   }
 
   setStartTime = (time) => {
@@ -133,7 +142,8 @@ export class StartDatafeedModal extends Component {
   }
 }
 StartDatafeedModal.propTypes = {
-  showFunction: PropTypes.func.isRequired,
+  setShowFunction: PropTypes.func.isRequired,
+  unsetShowFunction: PropTypes.func.isRequired,
   refreshJobs: PropTypes.func.isRequired,
 };
 

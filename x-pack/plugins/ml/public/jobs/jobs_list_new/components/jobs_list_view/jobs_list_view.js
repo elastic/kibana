@@ -112,11 +112,22 @@ export class JobsListView extends Component {
   setShowEditJobFlyoutFunction = (func) => {
     this.showEditJobFlyout = func;
   }
+  unsetShowEditJobFlyoutFunction = () => {
+    this.showEditJobFlyout = () => {};
+  }
+
   setShowDeleteJobModalFunction = (func) => {
     this.showDeleteJobModal = func;
   }
+  unsetShowDeleteJobModalFunction = () => {
+    this.showDeleteJobModal = () => {};
+  }
+
   setShowStartDatafeedModalFunction = (func) => {
     this.showStartDatafeedModal = func;
+  }
+  unsetShowStartDatafeedModalFunction = () => {
+    this.showStartDatafeedModal = () => {};
   }
 
   selectJobChange = (selectedJobs) => {
@@ -176,9 +187,21 @@ export class JobsListView extends Component {
           showStartDatafeedModal={this.showStartDatafeedModal}
           refreshJobs={() => this.refreshJobSummaryList(false)}
         />
-        <EditJobFlyout showFunction={this.setShowEditJobFlyoutFunction} refreshJobs={() => this.refreshJobSummaryList(false)} />
-        <DeleteJobModal showFunction={this.setShowDeleteJobModalFunction} refreshJobs={() => this.refreshJobSummaryList(false)} />
-        <StartDatafeedModal showFunction={this.setShowStartDatafeedModalFunction} refreshJobs={() => this.refreshJobSummaryList(false)} />
+        <EditJobFlyout
+          setShowFunction={this.setShowEditJobFlyoutFunction}
+          unsetShowFunction={this.unsetShowEditJobFlyoutFunction}
+          refreshJobs={() => this.refreshJobSummaryList(false)}
+        />
+        <DeleteJobModal
+          setShowFunction={this.setShowDeleteJobModalFunction}
+          unsetShowFunction={this.unsetShowDeleteJobModalFunction}
+          refreshJobs={() => this.refreshJobSummaryList(false)}
+        />
+        <StartDatafeedModal
+          setShowFunction={this.setShowStartDatafeedModalFunction}
+          unsetShowFunction={this.unsetShowDeleteJobModalFunction}
+          refreshJobs={() => this.refreshJobSummaryList(false)}
+        />
       </div>
     );
   }

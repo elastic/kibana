@@ -48,11 +48,19 @@ export class EditJobFlyout extends Component {
       datafeedScrollSize: '',
     };
 
-    if (typeof this.props.showFunction === 'function') {
-      this.props.showFunction(this.showFlyout);
-    }
-
     this.refreshJobs = this.props.refreshJobs;
+  }
+
+  componentDidMount() {
+    if (typeof this.props.setShowFunction === 'function') {
+      this.props.setShowFunction(this.showFlyout);
+    }
+  }
+
+  componentWillUnmount() {
+    if (typeof this.props.unsetShowFunction === 'function') {
+      this.props.unsetShowFunction();
+    }
   }
 
   closeFlyout = () => {
@@ -270,6 +278,7 @@ export class EditJobFlyout extends Component {
 }
 
 EditJobFlyout.propTypes = {
-  showFunction: PropTypes.func.isRequired,
+  setShowFunction: PropTypes.func.isRequired,
+  unsetShowFunction: PropTypes.func.isRequired,
   refreshJobs: PropTypes.func.isRequired,
 };

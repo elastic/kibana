@@ -29,11 +29,20 @@ export class DeleteJobModal extends Component {
       isModalVisible: false,
       deleting: false,
     };
-    if (typeof this.props.showFunction === 'function') {
-      this.props.showFunction(this.showModal);
-    }
 
     this.refreshJobs = this.props.refreshJobs;
+  }
+
+  componentDidMount() {
+    if (typeof this.props.setShowFunction === 'function') {
+      this.props.setShowFunction(this.showModal);
+    }
+  }
+
+  componentWillUnmount() {
+    if (typeof this.props.unsetShowFunction === 'function') {
+      this.props.unsetShowFunction();
+    }
   }
 
   closeModal = () => {
@@ -121,6 +130,7 @@ export class DeleteJobModal extends Component {
 }
 
 DeleteJobModal.propTypes = {
-  showFunction: PropTypes.func.isRequired,
+  setShowFunction: PropTypes.func.isRequired,
+  unsetShowFunction: PropTypes.func.isRequired,
   refreshJobs: PropTypes.func.isRequired,
 };
