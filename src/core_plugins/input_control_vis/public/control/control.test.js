@@ -36,15 +36,17 @@ const mockFilterManager = {
   createFilter: (value) => {
     return `mockKbnFilter:${value}`;
   },
+  getField: () => { return { type: 'string' }; },
   getIndexPattern: () => { return 'mockIndexPattern'; }
 };
-const mockKbnApi = {};
+const mockUiState = { set: () => {}, setSilent: () => {} };
+const controlData = { data: {}, enable: true };
 
 describe('hasChanged', () => {
   let control;
 
   beforeEach(() => {
-    control = new Control(createControlParams(3, 'control'), mockFilterManager, mockKbnApi);
+    control = new Control(createControlParams(3, 'control'), controlData, mockFilterManager, mockUiState);
   });
 
   afterEach(() => {
@@ -74,9 +76,9 @@ describe('ancestors', () => {
   let parentControl;
   let childControl;
   beforeEach(() => {
-    grandParentControl = new Control(createControlParams(1, 'grandparent control'), mockFilterManager, mockKbnApi);
-    parentControl = new Control(createControlParams(2, 'parent control'), mockFilterManager, mockKbnApi);
-    childControl = new Control(createControlParams(3, 'child control'), mockFilterManager, mockKbnApi);
+    grandParentControl = new Control(createControlParams(1, 'grandparent control'), controlData, mockFilterManager, mockUiState);
+    parentControl = new Control(createControlParams(2, 'parent control'), controlData, mockFilterManager, mockUiState);
+    childControl = new Control(createControlParams(3, 'child control'), controlData, mockFilterManager, mockUiState);
   });
 
   describe('hasUnsetAncestor', () => {

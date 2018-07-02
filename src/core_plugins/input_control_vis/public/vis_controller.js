@@ -31,17 +31,23 @@ class VisController {
     this.vis = vis;
     this.controls = [];
 
+    this.vis.getUiState().clearAll();
     this.queryBarUpdateHandler = this.updateControlsFromKbn.bind(this);
     this.vis.API.queryFilter.on('update', this.queryBarUpdateHandler);
   }
 
   async render(visData, status) {
-    if (status.params || (this.vis.params.useTimeFilter && status.time)) {
+    if (status.params) {
       this.controls = [];
-      this.controls = await this.initControls();
+      this.controls = await this.initControls(visData);
       this.drawVis();
       return;
     }
+    this.controls.forEach((control, i) => {
+      control.controlData = visData[i];
+      control.fetch();
+    });
+    this.drawVis();
     return;
   }
 
@@ -68,15 +74,15 @@ class VisController {
       this.el);
   }
 
-  async initControls() {
+  async initControls(visData) {
     const controlParamsList = this.vis.params.controls.filter((controlParams) => {
       // ignore controls that do not have indexPattern or field
       return controlParams.indexPattern && controlParams.fieldName;
     });
 
-    const controlFactoryPromises = controlParamsList.map((controlParams) => {
+    const controlFactoryPromises = controlParamsList.map((controlParams, i) => {
       const factory = controlFactory(controlParams);
-      return factory(controlParams, this.vis.API, this.vis.params.useTimeFilter);
+      return factory(controlParams, visData[i], this.vis.API, this.vis.getUiState());
     });
     const controls = await Promise.all(controlFactoryPromises);
 
@@ -105,6 +111,7 @@ class VisController {
 
   stageFilter = async (controlIndex, newValue) => {
     this.controls[controlIndex].set(newValue);
+
     if (this.vis.params.updateFiltersOnChange) {
       // submit filters on each control change
       this.submitFilters();
@@ -190,8 +197,7 @@ class VisController {
   }
 
   refreshControl = async (controlIndex, query) => {
-    await this.controls[controlIndex].fetch(query);
-    this.drawVis();
+    this.controls[controlIndex].noideahowtonamethis(query);
   }
 }
 

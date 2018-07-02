@@ -100,6 +100,15 @@ export class PersistedState {
     });
   }
 
+  clearAll() {
+    Object.getOwnPropertyNames(this._mergedState).forEach(key => {
+      delete this._mergedState[key];
+    });
+    Object.getOwnPropertyNames(this._changedState).forEach(key => {
+      delete this._changedState[key];
+    });
+  }
+
   reset(path) {
     const keyPath = this._getIndex(path);
     const origValue = _.get(this._defaultState, keyPath);

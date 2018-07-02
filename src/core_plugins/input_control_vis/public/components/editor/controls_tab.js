@@ -41,7 +41,7 @@ class ControlsTabUi extends Component {
   }
 
   getIndexPatterns = async (search) => {
-    const resp = await this.props.scope.vis.API.savedObjectsClient.find({
+    const resp = await this.props.scope.savedObjectsClient.find({
       type: 'index-pattern',
       fields: ['title'],
       search: `${search}*`,

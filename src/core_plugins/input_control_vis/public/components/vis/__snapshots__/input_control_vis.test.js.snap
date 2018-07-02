@@ -444,11 +444,16 @@ exports[`Renders range control 1`] = `
       <InjectIntl(RangeControlUi)
         control={
           Object {
+            "controlData": Object {
+              "data": Object {
+                "max": 100,
+                "min": 0,
+              },
+              "enable": true,
+            },
             "id": "mock-range-control",
             "isEnabled": [Function],
             "label": "range control",
-            "max": 100,
-            "min": 0,
             "options": Object {
               "decimalPlaces": 0,
               "step": 1,
@@ -458,6 +463,15 @@ exports[`Renders range control 1`] = `
               "max": 0,
               "min": 0,
             },
+          }
+        }
+        controlData={
+          Object {
+            "data": Object {
+              "max": 100,
+              "min": 0,
+            },
+            "enable": true,
           }
         }
         controlIndex={0}

@@ -38,15 +38,20 @@ export function noIndexPatternMsg(indexPatternId) {
 }
 
 export class Control {
-  constructor(controlParams, filterManager, kbnApi, useTimeFilter) {
+  constructor(controlParams, controlData, filterManager, uiState) {
     this.id = controlParams.id;
     this.controlParams = controlParams;
     this.options = controlParams.options;
     this.type = controlParams.type;
     this.label = controlParams.label ? controlParams.label : controlParams.fieldName;
-    this.useTimeFilter = useTimeFilter;
     this.filterManager = filterManager;
-    this.kbnApi = kbnApi;
+    this.uiState = uiState;
+    this.controlData = controlData;
+
+    const field = this.filterManager.getField();
+    if (this.options.dynamicOptions && field.type !== 'string') {
+      this.options.dynamicOptions = false;
+    }
 
     // restore state from kibana filter context
     this.reset();
@@ -56,8 +61,12 @@ export class Control {
     }));
   }
 
-  async fetch() {
-    throw new Error('fetch method not defined, subclass are required to implement');
+  fetch() {
+    if (!this.controlData.enable) {
+      return this.disable(this.controlData.disableReason);
+    }
+    this.enable = true;
+    return this.controlData.data;
   }
 
   format(value) {
@@ -110,11 +119,18 @@ export class Control {
 
   set(newValue) {
     this.value = newValue;
+    this.uiState.setSilent(`query-${this.controlParams.id}`, '');
+    this.uiState.set(`value-${this.controlParams.id}`, this.value);
     if (this.hasValue()) {
       this._kbnFilter = this.filterManager.createFilter(this.value);
     } else {
       this._kbnFilter = null;
     }
+  }
+
+  noideahowtonamethis(value) {
+    this.somevalue = value;
+    this.uiState.set(`query-${this.controlParams.id}`, value);
   }
 
   /*
@@ -123,6 +139,7 @@ export class Control {
   reset() {
     this._kbnFilter = null;
     this.value = this.filterManager.getValueFromFilterBar();
+    this.uiState.set(`value-${this.controlParams.id}`, this.value);
   }
 
   /*

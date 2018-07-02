@@ -42,10 +42,19 @@ const control = {
   }
 };
 
+const data = {
+  data: {
+    min: 0,
+    max: 100,
+  },
+  enable: true
+};
+
 test('renders RangeControl', () => {
   const component = shallowWithIntl(<RangeControl.WrappedComponent
     control={control}
     controlIndex={0}
+    controlData={data}
     stageFilter={() => {}}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
@@ -78,6 +87,7 @@ describe('min and max input values', () => {
   const component = mountWithIntl(<RangeControl.WrappedComponent
     control={control}
     controlIndex={0}
+    controlData={data}
     stageFilter={() => {}}
   />);
 

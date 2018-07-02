@@ -61,7 +61,7 @@ export class InputControlVis extends Component {
             <ListControl
               id={control.id}
               label={control.label}
-              options={control.selectOptions}
+              options={control.controlData.data}
               selectedOptions={control.value}
               disableMsg={control.isEnabled() ? null : control.disabledReason}
               multiselect={control.options.multiselect}
@@ -76,6 +76,7 @@ export class InputControlVis extends Component {
           controlComponent = (
             <RangeControl
               control={control}
+              controlData={control.controlData}
               controlIndex={index}
               stageFilter={this.props.stageFilter}
             />

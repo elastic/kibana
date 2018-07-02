@@ -22,37 +22,43 @@ import { FilterManager } from './filter_manager.js';
 import { buildPhraseFilter } from 'ui/filter_manager/lib/phrase';
 import { buildPhrasesFilter } from 'ui/filter_manager/lib/phrases';
 
+/**
+ * Convert phrases into filter
+ *
+ * @param {array}
+ * @return {object} query filter
+ *   single phrase: match query
+ *   multiple phrases: bool query with should containing list of match_phrase queries
+ */
+export function createPhraseFilter(selectedOptions, indexPattern, fieldName, controlId) {
+  const phrases = selectedOptions.map(phrase => {
+    return phrase.value;
+  });
+  let newFilter;
+  if (phrases.length === 1) {
+    newFilter = buildPhraseFilter(
+      indexPattern.fields.byName[fieldName],
+      phrases[0],
+      indexPattern);
+  } else {
+    newFilter = buildPhrasesFilter(
+      indexPattern.fields.byName[fieldName],
+      phrases,
+      indexPattern);
+  }
+  if (controlId) {
+    newFilter.meta.controlledBy = controlId;
+  }
+  return newFilter;
+}
+
 export class PhraseFilterManager extends FilterManager {
   constructor(controlId, fieldName, indexPattern, queryFilter) {
     super(controlId, fieldName, indexPattern, queryFilter);
   }
 
-  /**
-   * Convert phrases into filter
-   *
-   * @param {array}
-   * @return {object} query filter
-   *   single phrase: match query
-   *   multiple phrases: bool query with should containing list of match_phrase queries
-   */
   createFilter(selectedOptions) {
-    const phrases = selectedOptions.map(phrase => {
-      return phrase.value;
-    });
-    let newFilter;
-    if (phrases.length === 1) {
-      newFilter = buildPhraseFilter(
-        this.indexPattern.fields.byName[this.fieldName],
-        phrases[0],
-        this.indexPattern);
-    } else {
-      newFilter = buildPhrasesFilter(
-        this.indexPattern.fields.byName[this.fieldName],
-        phrases,
-        this.indexPattern);
-    }
-    newFilter.meta.controlledBy = this.controlId;
-    return newFilter;
+    return createPhraseFilter(selectedOptions, this.indexPattern, this.fieldName, this.controlId);
   }
 
   getValueFromFilterBar() {

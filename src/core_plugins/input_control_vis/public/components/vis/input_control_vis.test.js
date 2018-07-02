@@ -37,10 +37,13 @@ const mockListControl = {
   type: 'list',
   label: 'list control',
   value: [],
-  selectOptions: [
-    { label: 'choice1', value: 'choice1' },
-    { label: 'choice2', value: 'choice2' }
-  ]
+  controlData: {
+    data: [
+      { label: 'choice1', value: 'choice1' },
+      { label: 'choice2', value: 'choice2' }
+    ],
+    enable: true,
+  }
 };
 const mockRangeControl = {
   id: 'mock-range-control',
@@ -52,8 +55,13 @@ const mockRangeControl = {
   type: 'range',
   label: 'range control',
   value: { min: 0, max: 0 },
-  min: 0,
-  max: 100
+  controlData: {
+    data: {
+      min: 0,
+      max: 100
+    },
+    enable: true,
+  }
 };
 const updateFiltersOnChange = false;
 

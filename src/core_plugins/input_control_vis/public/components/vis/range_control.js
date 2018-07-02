@@ -153,15 +153,15 @@ class RangeControlUi extends Component {
               data-test-subj="rangeControlMinInputValue"
               className="euiFieldNumber"
               value={this.state.minValue}
-              min={this.props.control.min}
-              max={this.props.control.max}
+              min={this.props.controlData.data.min}
+              max={this.props.controlData.data.max}
               onChange={this.handleMinChange}
             />
           </EuiFlexItem>
           <EuiFlexItem className="inputRangeContainer">
             <InputRange
-              maxValue={this.props.control.max}
-              minValue={this.props.control.min}
+              minValue={this.props.controlData.data.min}
+              maxValue={this.props.controlData.data.max}
               step={this.props.control.options.step}
               value={this.state.sliderValue}
               onChange={this.handleOnChange}
@@ -179,8 +179,8 @@ class RangeControlUi extends Component {
               className="euiFieldNumber"
               data-test-subj="rangeControlMaxInputValue"
               value={this.state.maxValue}
-              min={this.props.control.min}
-              max={this.props.control.max}
+              min={this.props.controlData.data.min}
+              max={this.props.controlData.data.max}
               onChange={this.handleMaxChange}
             />
           </EuiFlexItem>
@@ -206,7 +206,8 @@ class RangeControlUi extends Component {
 RangeControlUi.propTypes = {
   control: PropTypes.object.isRequired,
   controlIndex: PropTypes.number.isRequired,
-  stageFilter: PropTypes.func.isRequired
+  stageFilter: PropTypes.func.isRequired,
+  controlData: PropTypes.object
 };
 
 export const RangeControl = injectI18n(RangeControlUi);

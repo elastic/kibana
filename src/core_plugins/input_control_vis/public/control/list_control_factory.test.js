@@ -50,17 +50,19 @@ const mockKbnApi = {
   }
 };
 
+const mockUiState = { set: () => {}, setSilent: () => {} };
+const controlData = { data: {}, enable: true };
+
 describe('hasValue', () => {
   const controlParams = {
     id: '1',
     fieldName: 'myField',
     options: {}
   };
-  const useTimeFilter = false;
 
   let listControl;
   beforeEach(async () => {
-    listControl = await listControlFactory(controlParams, mockKbnApi, useTimeFilter);
+    listControl = await listControlFactory(controlParams, controlData, mockKbnApi, mockUiState);
   });
 
   test('should be false when control has no value', () => {

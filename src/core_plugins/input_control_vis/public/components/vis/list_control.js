@@ -34,6 +34,10 @@ class ListControlUi extends Component {
     isLoading: false
   }
 
+  static getDerivedStateFromProps() {
+    return { isLoading: false };
+  }
+
   componentDidMount = () => {
     this._isMounted = true;
   }
@@ -47,13 +51,7 @@ class ListControlUi extends Component {
   }
 
   debouncedFetch = _.debounce(async (searchValue) => {
-    await this.props.fetchOptions(searchValue);
-
-    if (this._isMounted) {
-      this.setState({
-        isLoading: false,
-      });
-    }
+    this.props.fetchOptions(searchValue);
   }, 300);
 
   onSearchChange = (searchValue) => {

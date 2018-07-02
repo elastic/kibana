@@ -23,6 +23,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from '../../../modules';
 import visOptionsTemplate from './vis_options.html';
 import { I18nProvider } from '@kbn/i18n/react';
+import { SavedObjectsClientProvider } from '../../../saved_objects';
 
 /**
  * This directive sort of "transcludes" in whatever template you pass in via the `editor` attribute.
@@ -72,6 +73,8 @@ uiModules
             renderReactComponent();
           }
         });
+
+        $scope.savedObjectsClient = Private(SavedObjectsClientProvider);
 
         $scope.$watch('vis.type.schemas.all.length', function (len) {
           $scope.alwaysShowOptions = len === 0;

@@ -28,6 +28,7 @@ import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
 import image from './images/icon-input-control.svg';
 import { Status } from 'ui/vis/update_status';
 import { i18n } from '@kbn/i18n';
+import { inputControlRequestHandler } from './input_control_request_handler';
 
 function InputControlVisProvider(Private) {
   const VisFactory = Private(VisFactoryProvider);
@@ -44,7 +45,7 @@ function InputControlVisProvider(Private) {
     }),
     category: CATEGORY.OTHER,
     stage: 'lab',
-    requiresUpdateStatus: [Status.PARAMS, Status.TIME],
+    requiresUpdateStatus: [Status.PARAMS, Status.DATA],
     feedbackMessage: defaultFeedbackMessage,
     visualization: VisController,
     visConfig: {
@@ -74,8 +75,12 @@ function InputControlVisProvider(Private) {
         }
       ]
     },
-    requestHandler: 'none',
+    requestHandler: inputControlRequestHandler,
     responseHandler: 'none',
+    options: {
+      showIndexSelection: false,
+      showQueryBar: false,
+    },
   });
 }
 

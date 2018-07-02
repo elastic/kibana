@@ -17,86 +17,21 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import {
-  Control,
-  noValuesDisableMsg,
-  noIndexPatternMsg,
-} from './control';
+import { Control } from './control';
 import { RangeFilterManager } from './filter_manager/range_filter_manager';
-import { createSearchSource } from './create_search_source';
-import { i18n } from '@kbn/i18n';
 
-const minMaxAgg = (field) => {
-  const aggBody = {};
-  if (field.scripted) {
-    aggBody.script = {
-      inline: field.script,
-      lang: field.lang
-    };
-  } else {
-    aggBody.field = field.name;
-  }
-  return {
-    maxAgg: {
-      max: aggBody
-    },
-    minAgg: {
-      min: aggBody
-    }
-  };
-};
-
-class RangeControl extends Control {
-
-  async fetch() {
-    const indexPattern = this.filterManager.getIndexPattern();
-    if (!indexPattern) {
-      this.disable(noIndexPatternMsg(this.controlParams.indexPattern));
-      return;
-    }
-
-    const fieldName = this.filterManager.fieldName;
-
-    const aggs = minMaxAgg(indexPattern.fields.byName[fieldName]);
-    const searchSource = createSearchSource(this.kbnApi, null, indexPattern, aggs, this.useTimeFilter);
-
-    let resp;
-    try {
-      resp = await searchSource.fetch();
-    } catch(error) {
-      this.disable(i18n.translate('inputControl.rangeControl.unableToFetchTootip', {
-        defaultMessage: 'Unable to fetch range min and max, error: {errorMessage}',
-        values: { errorMessage: error.message }
-      }));
-      return;
-    }
-
-    const min = _.get(resp, 'aggregations.minAgg.value', null);
-    const max = _.get(resp, 'aggregations.maxAgg.value', null);
-
-    if (min === null || max === null) {
-      this.disable(noValuesDisableMsg(fieldName, indexPattern.title));
-      return;
-    }
-
-    this.min = min;
-    this.max = max;
-    this.enable = true;
-  }
-}
-
-export async function rangeControlFactory(controlParams, kbnApi, useTimeFilter) {
+export async function rangeControlFactory(controlParams, controlData, kbnApi, uiState) {
   let indexPattern;
   try {
     indexPattern = await kbnApi.indexPatterns.get(controlParams.indexPattern);
   } catch (err) {
     // ignore not found error and return control so it can be displayed in disabled state.
   }
-  return new RangeControl(
+  const unsetValue = controlData.data.unsetValue || { min: 0, max: 1 };
+  return new Control(
     controlParams,
-    new RangeFilterManager(controlParams.id, controlParams.fieldName, indexPattern, kbnApi.queryFilter),
-    kbnApi,
-    useTimeFilter
+    controlData,
+    new RangeFilterManager(controlParams.id, controlParams.fieldName, indexPattern, kbnApi.queryFilter, unsetValue),
+    uiState
   );
 }
