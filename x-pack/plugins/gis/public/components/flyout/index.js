@@ -22,8 +22,8 @@ function mapStateToProps(state = {}) {
   return {
     flyoutVisible: getFlyoutDisplay(state) !== FLYOUT_STATE.NONE,
     emsVectorOptions: emsVectorOptions
-      && emsVectorOptions.map(({ name }) => ({ value: name, text: name })),
-    emsSourceName,
+      && emsVectorOptions.map(({ name, id }) =>
+        ({ value: `${emsSourceName}:${id}`, text: name })),
     layerLoading: getLayerLoading(state),
     temporaryLayers: !_.isEmpty(getTemporaryLayers(state))
   };
@@ -33,8 +33,8 @@ function mapDispatchToProps(dispatch) {
   return {
     closeFlyout: () => dispatch(updateFlyout(FLYOUT_STATE.NONE))
       && dispatch(clearTemporaryLayers()),
-    selectAction: (sourceName, layerName) =>
-      dispatch(addVectorLayer(sourceName, layerName, { temporary: true })),
+    selectAction: (sourceName, layerId) =>
+      dispatch(addVectorLayer(sourceName, layerId, { temporary: true })),
     removeAction: layerName => dispatch(removeLayer(layerName)),
     addAction: () => dispatch(promoteTemporaryLayers())
   };

@@ -62,16 +62,15 @@ export function clearTemporaryLayers() {
   };
 }
 
-export function addVectorLayer(sourceName, layerName, options = {}) {
+export function addVectorLayer(sourceName, layerId, options = {}) {
   return async (dispatch, getState) => {
     dispatch(layerLoading(true));
     const { map } = getState();
     const vectorSource = map.sources.find(({ name }) => name === sourceName);
-    const layerSource = vectorSource.service.find(({ name }) => name === layerName);
+    const layerSource = vectorSource.service.find(({ id }) => id === layerId);
     const vectorFetch = await fetch(layerSource.url);
     vectorFetch.json().then(resolvedResource => {
       const layer = VectorLayer.create({
-        layerName,
         source: resolvedResource,
         ...options
       });
@@ -80,14 +79,13 @@ export function addVectorLayer(sourceName, layerName, options = {}) {
   };
 }
 
-export function addTileLayer(sourceName, layerName, options = {}) {
+export function addTileLayer(sourceName, layerId, options = {}) {
   return (dispatch, getState) => {
     dispatch(layerLoading(true));
     const { map } = getState();
     const tmsSource = map.sources.find(({ name }) => name === sourceName);
-    const service = tmsSource.service.find(({ id }) => id === layerName);
+    const service = tmsSource.service.find(({ id }) => id === layerId);
     const layer = TileLayer.create({
-      layerName,
       source: service.url,
       ...options
     });
@@ -146,5 +144,5 @@ export async function loadMapResources(serviceSettings, dispatch) {
   // Add initial layers
   dispatch(addTileLayer('road_map_source', 'road_map'));
   dispatch(addTileLayer('osm_source', 'osm'));
-  dispatch(addVectorLayer('ems_source', 'World Countries'));
+  dispatch(addVectorLayer('ems_source', 5715999101812736)); // World countries
 }

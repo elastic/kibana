@@ -30,8 +30,11 @@ export class FlyOut extends React.Component {
     super();
   }
 
-  _renderFlexibleSelect = (source, options, selectAction) => {
-    const onChange = ({ target }) => selectAction(source, target.value);
+  _renderFlexibleSelect = (options, selectAction) => {
+    const onChange = ({ target }) => {
+      const [ source, id ] = target.value.split(':');
+      selectAction(source, +id);
+    };
 
     return (
       <Fragment>
@@ -63,7 +66,7 @@ export class FlyOut extends React.Component {
   }
 
   _renderFlyout() {
-    const { emsVectorOptions, emsSourceName, selectAction, closeFlyout } = this.props;
+    const { emsVectorOptions, selectAction, closeFlyout } = this.props;
 
     return (
       <EuiFlyout onClose={this.props.onClose} style={{ maxWidth: 768 }}>
@@ -90,7 +93,7 @@ export class FlyOut extends React.Component {
               paddingSize="l"
             >
               <EuiText>
-                { this._renderFlexibleSelect(emsSourceName, emsVectorOptions, selectAction) }
+                { this._renderFlexibleSelect(emsVectorOptions, selectAction) }
               </EuiText>
             </EuiAccordion>
           </div>
