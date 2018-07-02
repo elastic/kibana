@@ -50,6 +50,7 @@ function convertTermAggregation(visState) {
 }
 
 function convertPropertyNames(visState) {
+  // 'showMeticsAtAllLevels' is a legacy typo we'll fix by changing it to 'showMetricsAtAllLevels'.
   if (typeof _.get(visState, 'params.showMeticsAtAllLevels') === 'boolean') {
     visState.params.showMetricsAtAllLevels = visState.params.showMeticsAtAllLevels;
     delete visState.params.showMeticsAtAllLevels;
