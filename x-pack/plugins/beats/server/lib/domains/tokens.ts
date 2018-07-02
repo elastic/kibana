@@ -113,7 +113,7 @@ export class CMTokensDomain {
 
     const tokenData = {
       created: moment().toJSON(),
-      randomHash: uuid.v4().replace(/-/g, ''),
+      randomHash: this.createRandomHash(),
     };
 
     return signToken(tokenData, enrollmentTokenSecret);
@@ -135,12 +135,16 @@ export class CMTokensDomain {
     while (tokens.length < numTokens) {
       tokens.push({
         expires_on: enrollmentTokenExpiration,
-        token: uuid.v4().replace(/-/g, ''),
+        token: this.createRandomHash(),
       });
     }
 
     await this.adapter.upsertTokens(req, tokens);
 
     return tokens.map(token => token.token);
+  }
+
+  private createRandomHash() {
+    return uuid.v4().replace(/-/g, '');
   }
 }
