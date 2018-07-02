@@ -63,14 +63,14 @@ export default class DynamicBaselineFlyout extends Component {
       toasts: [
         {
           id: 2,
-          title: 'Baseline job already exists',
+          title: 'Job already exists',
           color: 'warning',
           text: (
             <p>
-              There&apos;s already a baseline job running on {serviceName} for{' '}
-              {transactionType}.{' '}
+              There&apos;s already a job running for anomaly detection on{' '}
+              {serviceName} ({transactionType}).{' '}
               <a href={getMlJobUrl(serviceName, transactionType, location)}>
-                View existing job.
+                View existing job
               </a>
             </p>
           )
@@ -85,14 +85,15 @@ export default class DynamicBaselineFlyout extends Component {
       toasts: [
         {
           id: 1,
-          title: 'Baseline job created',
+          title: 'Job successfully created',
           color: 'success',
           text: (
             <p>
-              The analysis is now running on {serviceName} and you will start
-              seeing results show up on the response times graph.{' '}
+              The analysis is now running for {serviceName} ({transactionType}).
+              It might take a while before results are added to the response
+              times graph.{' '}
               <a href={getMlJobUrl(serviceName, transactionType, location)}>
-                View job.
+                View job
               </a>
             </p>
           )
