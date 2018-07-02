@@ -5,7 +5,7 @@ import { EuiSelect } from '@elastic/eui';
 export const ESIndexSelect = ({ value = '_all', loading, indices, onChange, onFocus, onBlur }) => {
   const options = [{ value: '_all', text: '_all' }];
 
-  indices.forEach(index => options.push({ value: index, name: index }));
+  indices.forEach(index => options.push({ value: index, text: index }));
 
   return (
     <EuiSelect
