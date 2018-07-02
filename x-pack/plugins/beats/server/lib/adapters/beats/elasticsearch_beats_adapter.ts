@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flatten, get, omit } from 'lodash';
+import { flatten, get as _get, omit } from 'lodash';
 import moment from 'moment';
 import { INDEX_NAMES } from '../../../../common/constants';
 import {
@@ -35,7 +35,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       return null;
     }
 
-    return get(response, '_source.beat');
+    return _get(response, '_source.beat');
   }
 
   public async insert(beat: CMBeat) {
@@ -111,9 +111,9 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
 
     const response = await this.framework.callWithRequest(req, 'bulk', params);
 
-    return get(response, 'items', []).map(b => ({
-      ...get(b, 'update.get._source.beat', {}),
-      updateStatus: get(b, 'update.result', 'unknown error'),
+    return _get(response, 'items', []).map(b => ({
+      ..._get(b, 'update.get._source.beat', {}),
+      updateStatus: _get(b, 'update.result', 'unknown error'),
     }));
   }
 
