@@ -10,7 +10,10 @@ import { loadLicense } from '../../services/rest/apm';
 
 const ID = 'license';
 const INITIAL_DATA = {
-  features: { watcher: { isAvailable: false } },
+  features: {
+    watcher: { isAvailable: false },
+    ml: { isAvailable: false }
+  },
   license: { isActive: false }
 };
 

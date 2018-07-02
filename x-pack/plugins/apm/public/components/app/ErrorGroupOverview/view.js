@@ -59,7 +59,9 @@ class ErrorGroupOverview extends Component {
 }
 
 ErrorGroupOverview.propTypes = {
-  location: PropTypes.object.isRequired
+  license: PropTypes.object.isRequired,
+  location: PropTypes.object.isRequired,
+  urlParams: PropTypes.object.isRequired
 };
 
 export default ErrorGroupOverview;

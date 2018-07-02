@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import chrome from 'ui/chrome';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { HeaderContainer, HeaderMedium } from '../../shared/UIComponents';
@@ -50,17 +51,23 @@ class TransactionOverview extends Component {
     const {
       changeTransactionSorting,
       hasDynamicBaseline,
+      license,
       location,
       transactionSorting,
       urlParams
     } = this.props;
+
     const { serviceName, transactionType } = urlParams;
+    const mlEnabled = chrome.getInjected('mlEnabled');
 
     return (
       <div>
         <HeaderContainer>
           <h1>{serviceName}</h1>
-          <DynamicBaselineButton onOpenFlyout={this.onOpenFlyout} />
+          {license.data.features.ml.isAvailable &&
+            mlEnabled && (
+              <DynamicBaselineButton onOpenFlyout={this.onOpenFlyout} />
+            )}
         </HeaderContainer>
 
         <DynamicBaselineFlyout
@@ -109,6 +116,11 @@ class TransactionOverview extends Component {
 }
 
 TransactionOverview.propTypes = {
+  changeTransactionSorting: PropTypes.func.isRequired,
+  hasDynamicBaseline: PropTypes.bool.isRequired,
+  license: PropTypes.object.isRequired,
+  location: PropTypes.object.isRequired,
+  transactionSorting: PropTypes.object.isRequired,
   urlParams: PropTypes.object.isRequired
 };
 

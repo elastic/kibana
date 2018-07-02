@@ -176,7 +176,7 @@ function responseTimeLabel(type) {
 Charts.propTypes = {
   charts: PropTypes.object.isRequired,
   hasDynamicBaseline: PropTypes.bool,
-  locations: PropTypes.object.isRequired,
+  location: PropTypes.object.isRequired,
   urlParams: PropTypes.object.isRequired
 };
 

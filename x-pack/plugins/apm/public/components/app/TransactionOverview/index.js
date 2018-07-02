@@ -9,13 +9,15 @@ import TransactionOverview from './view';
 import { getUrlParams } from '../../../store/urlParams';
 import sorting, { changeTransactionSorting } from '../../../store/sorting';
 import { hasDynamicBaseline } from '../../../store/reactReduxRequest/overviewCharts';
+import { getLicense } from '../../../store/reactReduxRequest/license';
 
 function mapStateToProps(state = {}) {
   return {
     urlParams: getUrlParams(state),
     hasDynamicBaseline: hasDynamicBaseline(state),
     location: state.location,
-    transactionSorting: sorting(state, 'transaction').sorting.transaction
+    transactionSorting: sorting(state, 'transaction').sorting.transaction,
+    license: getLicense(state)
   };
 }
 
