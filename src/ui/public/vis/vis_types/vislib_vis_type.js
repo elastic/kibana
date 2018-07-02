@@ -24,13 +24,12 @@ import 'plugins/kbn_vislib_vis_types/controls/heatmap_options';
 import 'plugins/kbn_vislib_vis_types/controls/gauge_options';
 import 'plugins/kbn_vislib_vis_types/controls/point_series';
 import '../../visualize/visualize_legend';
-import { VisTypeProvider } from './base_vis_type';
+import { VisType } from './base_vis_type';
 import { AggResponsePointSeriesProvider } from '../../agg_response/point_series/point_series';
 import VislibProvider from '../../vislib';
 import $ from 'jquery';
 
 export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
-  const VisType = Private(VisTypeProvider);
   const pointSeries = Private(AggResponsePointSeriesProvider);
   const vislib = Private(VislibProvider);
 

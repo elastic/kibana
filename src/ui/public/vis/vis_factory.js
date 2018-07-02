@@ -17,12 +17,10 @@
  * under the License.
  */
 
-import { VisTypeProvider, AngularVisTypeProvider, ReactVisTypeProvider, VislibVisTypeProvider } from './vis_types';
+import { VisType, AngularVisTypeProvider, ReactVisType, VislibVisTypeProvider } from './vis_types';
 
 export const VisFactoryProvider = (Private) => {
-  const VisType = Private(VisTypeProvider);
   const AngularVisType = Private(AngularVisTypeProvider);
-  const ReactVisType = Private(ReactVisTypeProvider);
   const VislibVisType = Private(VislibVisTypeProvider);
 
   return {
