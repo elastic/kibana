@@ -17,8 +17,7 @@ export const LAYER_LOADING = 'LAYER_LOADING';
 export const REMOVE_LAYER = 'REMOVE_LAYER';
 export const PROMOTE_TEMPORARY_LAYERS = 'PROMOTE_TEMPORARY_LAYERS';
 export const CLEAR_TEMPORARY_LAYERS = 'CLEAR_TEMPORARY_LAYERS';
-export const ADD_VECTOR_SOURCE = 'ADD_VECTOR_SOURCE';
-export const ADD_TMS_SOURCE = 'ADD_TMS_SOURCE';
+export const ADD_SOURCE = 'ADD_SOURCE';
 
 export function setSelectedLayer(layerId) {
   return {
@@ -105,28 +104,28 @@ export function removeLayer(layerName) {
 
 export function addTMSSource(dataOrigin, service, sourceName) {
   return dispatch => {
-    const tms = TMSSource.create({
+    const source = TMSSource.create({
       dataOrigin,
       service,
       name: sourceName
     });
     dispatch({
-      type: ADD_TMS_SOURCE,
-      tms
+      type: ADD_SOURCE,
+      source
     });
   };
 }
 
 export function addVectorSource(dataOrigin, service, sourceName) {
   return dispatch => {
-    const vectorSource = VectorSource.create({
+    const source = VectorSource.create({
       dataOrigin,
       service,
       name: sourceName
     });
     dispatch({
-      type: ADD_VECTOR_SOURCE,
-      vectorSource
+      type: ADD_SOURCE,
+      source
     });
   };
 }

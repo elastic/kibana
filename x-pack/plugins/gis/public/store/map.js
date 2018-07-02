@@ -5,8 +5,8 @@
  */
 
 import {
-  SET_SELECTED_LAYER, UPDATE_LAYER_ORDER, ADD_TMS_SOURCE,
-  ADD_VECTOR_SOURCE, ADD_LAYER, REMOVE_LAYER, PROMOTE_TEMPORARY_LAYERS,
+  SET_SELECTED_LAYER, UPDATE_LAYER_ORDER, ADD_SOURCE,
+  ADD_LAYER, REMOVE_LAYER, PROMOTE_TEMPORARY_LAYERS,
   CLEAR_TEMPORARY_LAYERS, LAYER_LOADING
 } from "../actions/map_actions";
 
@@ -19,10 +19,8 @@ const INITIAL_STATE = {
 
 export function map(state = INITIAL_STATE, action) {
   switch (action.type) {
-    case ADD_TMS_SOURCE:
-      return { ...state, sources: [...state.sources, action.tms ] };
-    case ADD_VECTOR_SOURCE:
-      return { ...state, sources: [...state.sources, action.vectorSource ] };
+    case ADD_SOURCE:
+      return { ...state, sources: [...state.sources, action.source ] };
     case SET_SELECTED_LAYER:
       return { ...state, selectedLayer: state.layerList.find(
         layer => layer.id === action.selectedLayer) };
