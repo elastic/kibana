@@ -101,7 +101,7 @@ export class EditJobFlyout extends Component {
       job,
       hasDatafeed,
       jobDescription: job.description,
-      jobGroups: job.groups,
+      jobGroups: (job.groups !== undefined) ?  job.jobGroups : [],
       jobModelMemoryLimit: mml,
       jobDetectors: detectors,
       jobDetectorDescriptions: detectors.map(d => d.detector_description),

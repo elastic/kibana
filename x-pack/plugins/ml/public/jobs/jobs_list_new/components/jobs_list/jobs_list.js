@@ -73,7 +73,7 @@ export class JobsList extends Component {
 
   getPageOfJobs(index, size, sortField, sortDirection) {
     let list = this.state.jobsSummaryList;
-    list = sortBy(this.state.jobsSummaryList, [sortField]);
+    list = sortBy(this.state.jobsSummaryList, (item) => item[sortField]);
     list = (sortDirection === 'asc') ? list : list.reverse();
 
     const pageStart = (index * size);
@@ -116,8 +116,8 @@ export class JobsList extends Component {
       }, {
         name: 'Description',
         sortable: true,
-        // field: 'description',
-        render: (item) => (
+        field: 'description',
+        render: (description, item) => (
           <JobDescription job={item} />
         )
       }, {
@@ -143,12 +143,13 @@ export class JobsList extends Component {
       }, {
         name: 'Latest timestamp',
         truncateText: false,
+        field: 'latestTimeStampUnix',
         sortable: true,
-        render: (item) => (
+        render: (time, item) => (
           <span className="euiTableCellContent__text">
             { item.latestTimeStamp.string }
           </span>
-        ),
+        )
       }, {
         name: 'Actions',
         render: (item) => (

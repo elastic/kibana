@@ -145,6 +145,7 @@ export class JobsListView extends Component {
               fullJobsList[job.id] = job.fullJob;
               delete job.fullJob;
             }
+            job.latestTimeStampUnix = job.latestTimeStamp.unix;
             return job;
           });
           this.setState({ jobsSummaryList, fullJobsList });
