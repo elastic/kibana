@@ -41,7 +41,6 @@ uiModules
         const editor = new Editor(element[0], vis);
 
         $scope.renderFunction = () => {
-          if (!vis) return;
           editor.render($scope.savedObj, {
             uiState: $scope.uiState,
             timeRange: $scope.timeRange,

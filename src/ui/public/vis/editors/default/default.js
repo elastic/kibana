@@ -47,9 +47,8 @@ const defaultEditor = function ($rootScope, $compile) {
       }
     }
 
-    render(savedObj, params) {
+    render(savedObj, { uiState, timeRange, appState }) {
       let $scope;
-      const { uiState, timeRange, appState } = params;
 
       const updateScope = () => {
         $scope.vis = this.vis;

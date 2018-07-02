@@ -161,10 +161,6 @@ export function VisProvider(Private, indexPatterns, getAppState) {
       return adapters;
     }
 
-    isEditorMode() {
-      return this.editorMode || false;
-    }
-
     setCurrentState(state) {
       this.title = state.title || '';
       const type = state.type || this.type;

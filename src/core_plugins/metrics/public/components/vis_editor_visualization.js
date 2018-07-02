@@ -68,6 +68,10 @@ class VisEditorVisualization extends Component {
 
   _loadVisualization() {
     getVisualizeLoader().then(loader => {
+      if (!this._visEl.current) {
+        return;
+      }
+
       this._loader = loader;
       this._loader.embedVisualizationWithSavedObject(this._visEl.current, this.props.savedObj, {
         uiState: this.props.uiState,

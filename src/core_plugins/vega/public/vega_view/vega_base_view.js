@@ -63,7 +63,6 @@ export class VegaBaseView {
     // $rootScope is a temp workaround, see usage below
     this._$rootScope = opts.$rootScope;
     this._vegaConfig = opts.vegaConfig;
-    this._editorMode = opts.editorMode;
     this._$parentEl = $(opts.parentEl);
     this._parser = opts.vegaParser;
     this._serviceSettings = opts.serviceSettings;
@@ -335,10 +334,8 @@ export class VegaBaseView {
    * Set global debug variable to simplify vega debugging in console. Show info message first time
    */
   setDebugValues(view, spec, vlspec) {
-    if (!this._editorMode) {
-      // VEGA_DEBUG should only be enabled in the editor mode
-      return;
-    }
+    // VEGA_DEBUG was removed due to editorMode property not being available anymore
+    return;
 
     if (window) {
       if (window.VEGA_DEBUG === undefined && console) {
