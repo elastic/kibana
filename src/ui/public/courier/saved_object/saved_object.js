@@ -31,7 +31,7 @@
 import angular from 'angular';
 import _ from 'lodash';
 
-import { SavedObjectNotFound } from '../../errors';
+import { InvalidJSONProperty, SavedObjectNotFound } from '../../errors';
 import MappingSetupProvider from '../../utils/mapping_setup';
 
 import { SearchSourceProvider } from '../data_source/search_source';
@@ -118,6 +118,14 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
         state = JSON.parse(searchSourceJson);
       } catch (e) {
         state = {};
+      }
+
+      // This detects a scenario where documents with invalid JSON properties have been imported into the saved object index.
+      // (This happened in issue #20308)
+      if (typeof state !== 'object') {
+        throw new InvalidJSONProperty(
+          `Invalid JSON in ${esType} "${this.id}". Expected searchSourceJSON to be a JSON object, but got ${typeof state}.`
+        );
       }
 
       const oldState = this.searchSource.toJSON();

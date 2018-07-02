@@ -27,6 +27,7 @@ import { IndexPatternProvider } from '../../index_patterns/_index_pattern';
 import { SavedObjectsClientProvider } from '../../saved_objects';
 
 import { StubIndexPatternsApiClientModule } from '../../index_patterns/__tests__/stub_index_patterns_api_client';
+import { InvalidJSONProperty } from '../../errors';
 
 describe('Saved Object', function () {
   require('test_utils/no_digest_promises').activateForSuite();
@@ -292,6 +293,26 @@ describe('Saved Object', function () {
           expect(true).to.be(false);
         } catch (err) {
           expect(!!err).to.be(true);
+        }
+      });
+    });
+
+    it('throws error invalid JSON is detected', function () {
+      return createInitializedSavedObject({ type: 'dashboard' }).then(savedObject => {
+        const response = {
+          found: true,
+          _source: {
+            kibanaSavedObjectMeta: {
+              searchSourceJSON: '\"{\\n  \\\"filter\\\": []\\n}\"'
+            }
+          }
+        };
+
+        try {
+          savedObject.applyESResp(response);
+          expect(true).to.be(false);
+        } catch (err) {
+          expect(err instanceof InvalidJSONProperty).to.be(true);
         }
       });
     });
