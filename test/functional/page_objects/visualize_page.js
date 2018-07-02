@@ -532,7 +532,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async selectOrderBy(fieldValue) {
       await find.clickByCssSelector(`select[name="orderBy"] > option[value="${fieldValue}"]`);
     }
- 
+
     async getInterval() {
       const select = await find.byCssSelector('select[ng-model="agg.params.interval"]');
       const selectedIndex = await select.getProperty('selectedIndex');
