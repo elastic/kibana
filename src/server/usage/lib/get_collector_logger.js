@@ -17,6 +17,15 @@
  * under the License.
  */
 
-export { SavedObjectsRepositoryProvider } from './service/lib/';
-export { savedObjectsMixin } from './saved_objects_mixin';
-export { SavedObjectsClient } from './service';
+const LOGGING_TAGS = ['stats-collection'];
+/*
+ * @param {Object} server
+ * @return {Object} helpful logger object
+ */
+export function getCollectorLogger(server) {
+  return {
+    debug: message => server.log(['debug', ...LOGGING_TAGS], message),
+    info: message => server.log(['info', ...LOGGING_TAGS], message),
+    warn: message => server.log(['warning', ...LOGGING_TAGS], message)
+  };
+}

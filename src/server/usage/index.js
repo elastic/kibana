@@ -17,6 +17,18 @@
  * under the License.
  */
 
-export { SavedObjectsRepositoryProvider } from './service/lib/';
-export { savedObjectsMixin } from './saved_objects_mixin';
-export { SavedObjectsClient } from './service';
+import { registerUsageApi } from './routes';
+import { CollectorSet, Collector, UsageCollector } from './classes';
+
+export function usageMixin(kbnServer, server) {
+  const collectorSet = new CollectorSet(server);
+
+  // expose the collector set object on the server. other plugins will (Hapi plugin model)
+  server.decorate('server', 'usage', {
+    collectorSet,   // consumer code calls collectorSet.register(collector) to define their own collector objects
+    Collector,      // helper class for consumer code implementing ops/stats collection
+    UsageCollector, // helper class for consumer codea implementing usage collection
+  });
+
+  registerUsageApi(server, collectorSet);
+}

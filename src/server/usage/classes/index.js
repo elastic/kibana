@@ -17,6 +17,6 @@
  * under the License.
  */
 
-export { SavedObjectsRepositoryProvider } from './service/lib/';
-export { savedObjectsMixin } from './saved_objects_mixin';
-export { SavedObjectsClient } from './service';
+export { CollectorSet } from './collector_set';
+export { Collector } from './collector';
+export { UsageCollector } from './usage_collector';

@@ -8,7 +8,6 @@ import { uniq } from 'lodash';
 import { getExportTypesHandler } from './get_export_type_handler';
 import { getReportCountsByParameter } from './get_reporting_type_counts';
 import { KIBANA_REPORTING_TYPE } from '../../common/constants';
-import { UsageCollector } from '../../../monitoring/server/kibana_monitoring/classes';
 
 /**
  * @typedef {Object} ReportingUsageStats  Almost all of these stats are optional.
@@ -115,9 +114,10 @@ async function getReportingUsageWithinRange(callCluster, server, reportingAvaila
  * @return {Object} kibana usage stats type collection object
  */
 export function getReportingUsageCollector(server) {
+  const { UsageCollector } = server.usage;
   return new UsageCollector(server, {
     type: KIBANA_REPORTING_TYPE,
-    fetch: async callCluster => {
+    fetch: async ({ callCluster }) => {
       const xpackInfo = server.plugins.xpack_main.info;
       const config = server.config();
       const available = xpackInfo && xpackInfo.isAvailable(); // some form of reporting (csv at least) is available for all valid licenses
