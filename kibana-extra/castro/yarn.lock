@@ -3773,7 +3773,7 @@ pluralize@^7.0.0:
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/pluralize/-/pluralize-7.0.0.tgz#298b89df8b93b0221dbf421ad2b1b1ea23fc6777"
 
-popper.js@^1.14.1, popper.js@^1.14.3:
+popper.js@^1.0.2, popper.js@^1.14.1, popper.js@^1.14.3:
   version "1.14.3"
   resolved "http://registry.npm.taobao.org/popper.js/download/popper.js-1.14.3.tgz#1438f98d046acf7b4d78cd502bf418ac64d4f095"
 
@@ -4790,6 +4790,12 @@ to-through@^2.0.0:
   resolved "https://registry.yarnpkg.com/to-through/-/to-through-2.0.0.tgz#fc92adaba072647bc0b67d6b03664aa195093af6"
   dependencies:
     through2 "^2.0.3"
+
+tooltip.js@^1.2.0:
+  version "1.2.0"
+  resolved "http://registry.npm.taobao.org/tooltip.js/download/tooltip.js-1.2.0.tgz#8b16482f04397f4f9d7387843dccf186890c8860"
+  dependencies:
+    popper.js "^1.0.2"
 
 topo@2.x.x:
   version "2.0.2"

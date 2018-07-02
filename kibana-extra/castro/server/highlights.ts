@@ -60,11 +60,11 @@ export function render(lines: CodeLine[]) : string{
     let lineNum = 0;
     for(let line of lines) {
 
-        output += "<div class='code-line'>";
+        output += `<div class='code-line' data-line="${lineNum}">`;
         for(let token of line){
             let lastScope = token.scopes[token.scopes.length - 1];
             const clazz = lastScope.replace(/\./g, " ");
-            output += `<span data-line="${lineNum}" data-range="${token.range.start},${token.range.end}" class="${clazz}">${highlighter.escapeString(token.value)}</span>`
+            output += `<span data-range="${token.range.start},${token.range.end}" class="${clazz}">${highlighter.escapeString(token.value)}</span>`
         }
         output += "\n</div>";
         lineNum ++;
