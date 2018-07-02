@@ -20,11 +20,13 @@ export class ElementShareContainer extends React.PureComponent {
 
     // check that the done event is called within a certain time
     if (isDevelopment) {
-      const timeout = 15000; // 15 seconds
+      const timeout = 15; // timeout, in seconds
       t = setTimeout(() => {
         // TODO: show this message in a proper notification
-        console.warn(`done handler never called in render function: ${functionName}`);
-      }, timeout);
+        console.warn(
+          `done handler not called in render function after ${timeout} seconds: ${functionName}`
+        );
+      }, timeout * 1000);
     }
 
     // dispatches a custom DOM event on the container when the element is complete

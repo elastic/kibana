@@ -10,7 +10,7 @@ import {
 } from '../../state/selectors/workpad';
 import { getState, getValue, getError } from '../../lib/resolved_arg';
 import { ElementWrapper as Component } from './element_wrapper';
-import { createHandlers } from './lib/handlers';
+import { createHandlers as createHandlersWithDispatch } from './lib/handlers';
 
 const mapStateToProps = (state, { element }) => ({
   isFullscreen: getFullscreen(state),
@@ -24,23 +24,25 @@ const mapDispatchToProps = (dispatch, { element }) => ({
   selectElement: isInteractable => () => isInteractable && dispatch(selectElement(element.id)),
   removeElement: pageId => () => dispatch(removeElement(element.id, pageId)),
   setPosition: pageId => position => dispatch(setPosition(element.id, pageId, position)),
-  handlers: pageId => createHandlers(element, pageId, dispatch),
+  createHandlers: pageId => () => createHandlersWithDispatch(element, pageId, dispatch),
 });
 
-const mergeProps = (stateProps, dispatchProps, { element }) => {
+const mergeProps = (stateProps, dispatchProps, ownProps) => {
   const { resolvedArg, selectedPage, isSelected, isFullscreen, isEditing } = stateProps;
   const renderable = getValue(resolvedArg);
+  const { element } = ownProps;
 
   return {
     position: element.position,
     setPosition: dispatchProps.setPosition(selectedPage),
     selectElement: dispatchProps.selectElement(!isFullscreen && isEditing),
     removeElement: dispatchProps.removeElement(selectedPage),
-    handlers: dispatchProps.handlers(selectedPage),
+    createHandlers: dispatchProps.createHandlers(selectedPage),
     isSelected: isSelected,
     state: getState(resolvedArg),
     error: getError(resolvedArg),
     renderable,
+    ...ownProps,
   };
 };
 
@@ -49,5 +51,6 @@ export const ElementWrapper = connect(mapStateToProps, mapDispatchToProps, merge
 ElementWrapper.propTypes = {
   element: PropTypes.shape({
     id: PropTypes.string.isRequired,
+    position: PropTypes.object.isRequired,
   }).isRequired,
 };
