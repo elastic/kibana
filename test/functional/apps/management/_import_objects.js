@@ -22,6 +22,7 @@ import path from 'path';
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
+  const log = getService('log');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'settings', 'header']);
 
@@ -109,9 +110,16 @@ export default function ({ getService, getPageObjects }) {
     it('should handle saved searches and objects with saved searches properly', async function () {
       // First, import the saved search
       await PageObjects.settings.clickKibanaSavedObjects();
+
+      const objectsBeforeSavedSearch = await PageObjects.settings.getSavedObjectsInTable();
+      log.debug('objects in table before loading _import_objects_saved_search.json',
+        JSON.stringify(objectsBeforeSavedSearch, null, ' '));
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_saved_search.json'));
       // Wait for all the saves to happen
       await PageObjects.header.waitUntilLoadingHasFinished();
+      const objectsAfterSavedSearch = await PageObjects.settings.getSavedObjectsInTable();
+      log.debug('objects in table after loading _import_objects_saved_search.json',
+        JSON.stringify(objectsAfterSavedSearch, null, ' '));
 
       // Second, we need to delete the index pattern
       await PageObjects.settings.navigateTo();
@@ -123,6 +131,9 @@ export default function ({ getService, getPageObjects }) {
       // This should NOT show the conflicts
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaSavedObjects();
+      const objectsBeforeConnectedSavedSearch = await PageObjects.settings.getSavedObjectsInTable();
+      log.debug('objects in table before loading _import_objects_connected_to_saved_search.json',
+        JSON.stringify(objectsBeforeConnectedSavedSearch, null, ' '));
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.json'));
       // Wait for all the saves to happen
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -130,6 +141,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
       const objects = await PageObjects.settings.getSavedObjectsInTable();
+      log.debug('objects in table after loading _import_objects_connected_to_saved_search.json (expecting there to be 2)',
+        JSON.stringify(objects, null, ' '));
       expect(objects.length).to.be(2);
     });
 
