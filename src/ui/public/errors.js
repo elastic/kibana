@@ -62,7 +62,7 @@ export class SearchTimeout extends KbnError {
 }
 
 /**
- * Request Failure - When an entire mutli request fails
+ * Request Failure - When an entire multi request fails
  * @param {Error} err - the Error that came back
  * @param {Object} resp - optional HTTP response
  */
@@ -146,7 +146,7 @@ export class RestrictedMapping extends KbnError {
 }
 
 /**
- * a non-critical cache write to elasticseach failed
+ * a non-critical cache write to elasticsearch failed
  */
 export class CacheWriteFailure extends KbnError {
   constructor() {

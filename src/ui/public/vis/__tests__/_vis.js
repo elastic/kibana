@@ -87,7 +87,7 @@ describe('Vis Class', function () {
   });
 
   describe('setState()', function () {
-    it('should set the state to defualts', function () {
+    it('should set the state to defaults', function () {
       const vis = new Vis(indexPattern);
       expect(vis).to.have.property('type');
       expect(vis.type).to.eql(visTypes.byName.histogram);

@@ -32,7 +32,7 @@ module.exports = {
     filename: 'bundle.js'
   },
 
-  // These are necessasry for using Enzyme with Webpack (https://github.com/airbnb/enzyme/blob/master/docs/guides/webpack.md).
+  // These are necessary for using Enzyme with Webpack (https://github.com/airbnb/enzyme/blob/master/docs/guides/webpack.md).
   externals: {
     'react/lib/ExecutionEnvironment': true,
     'react/lib/ReactContext': true,

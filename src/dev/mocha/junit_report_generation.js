@@ -24,7 +24,7 @@ import { inspect } from 'util';
 import mkdirp from 'mkdirp';
 import xmlBuilder from 'xmlbuilder';
 
-export function setupJunitReportGeneration(runner, options = {}) {
+export function setupJUnitReportGeneration(runner, options = {}) {
   const {
     reportName = 'Unnamed Mocha Tests',
     rootDirectory = dirname(require.resolve('../../../package.json')),

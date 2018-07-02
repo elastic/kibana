@@ -17,4 +17,4 @@
  * under the License.
  */
 
-import './timefilter';
+export { timefilter, registerTimefilterWithGlobalState } from './timefilter';

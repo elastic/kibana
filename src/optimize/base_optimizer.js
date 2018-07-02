@@ -337,6 +337,19 @@ export default class BaseOptimizer {
       }
     };
 
+    const watchingConfig = {
+      plugins: [
+        new webpack.WatchIgnorePlugin([
+          // When our bundle entry files are fresh they cause webpack
+          // to think they might have changed since the watcher was
+          // initialized, which triggers a second compilation on startup.
+          // Since we can't reliably update these files anyway, we can
+          // just ignore them in the watcher and prevent the extra compilation
+          /bundles[\/\\].+\.entry\.js/,
+        ])
+      ]
+    };
+
     // in production we set the process.env.NODE_ENV and uglify our bundles
     const productionConfig = {
       plugins: [
@@ -361,7 +374,7 @@ export default class BaseOptimizer {
         ? {}
         : transpileTsConfig,
       this.uiBundles.isDevMode()
-        ? supportEnzymeConfig
+        ? webpackMerge(watchingConfig, supportEnzymeConfig)
         : productionConfig
     );
   }

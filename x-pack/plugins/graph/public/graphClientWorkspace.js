@@ -1277,7 +1277,7 @@ module.exports = (function () {
         });
 
         buckets.forEach(function (bucket) {
-          // We callibrate line thickness based on % of max weight of
+          // We calibrate line thickness based on % of max weight of
           // all edges (including the edges we may already have in the workspace)
           const ids = bucket.key.split("|");
           if(ids.length === 2) {

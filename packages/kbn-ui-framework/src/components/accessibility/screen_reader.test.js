@@ -28,7 +28,7 @@ describe('KuiScreenReaderOnly', () => {
       const $paragraph = render(
         <KuiScreenReaderOnly>
           <p>
-            This paragraph is not visibile to sighted users but will be read by
+            This paragraph is not visible to sighted users but will be read by
             screenreaders.
           </p>
         </KuiScreenReaderOnly>
@@ -41,7 +41,7 @@ describe('KuiScreenReaderOnly', () => {
       const $paragraph = render(
         <KuiScreenReaderOnly>
           <p className="foo bar">
-            This paragraph is not visibile to sighted users but will be read by
+            This paragraph is not visible to sighted users but will be read by
             screenreaders.
           </p>
         </KuiScreenReaderOnly>

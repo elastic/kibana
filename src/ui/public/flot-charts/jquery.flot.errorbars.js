@@ -37,14 +37,14 @@ Each data point array is expected to be of the type:
 	"xy" [ x, y, xerr, yerr ]
 
 Where xerr becomes xerr_lower,xerr_upper for the asymmetric error case, and
-equivalently for yerr. Eg., a datapoint for the "xy" case with symmetric
+equivalently for yerr. E.g., a datapoint for the "xy" case with symmetric
 error-bars on X and asymmetric on Y would be:
 
 	[ x, y, xerr, yerr_lower, yerr_upper ]
 
 By default no end caps are drawn. Setting upperCap and/or lowerCap to "-" will
 draw a small cap perpendicular to the error bar. They can also be set to a
-user-defined drawing function, with (ctx, x, y, radius) as parameters, as eg.
+user-defined drawing function, with (ctx, x, y, radius) as parameters, as e.g.:
 
 	function drawSemiCircle( ctx, x, y, radius ) {
 		ctx.beginPath();

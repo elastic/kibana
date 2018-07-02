@@ -527,6 +527,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       if (sliceValue) {
         await testSubjects.click(`pieSlice-${sliceValue}`);
       } else {
+        // If no pie slice has been provided, find the first one available.
         await retry.try(async () => {
           const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice');
           log.debug('Slices found:' + slices.length);

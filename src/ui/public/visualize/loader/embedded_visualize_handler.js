@@ -100,7 +100,7 @@ export class EmbeddedVisualizeHandler {
 
   /**
    * Returns a promise, that will resolve (without a value) once the first rendering of
-   * the visualization has finished. If you want to listen to concecutive rendering
+   * the visualization has finished. If you want to listen to consecutive rendering
    * events, look into the `addRenderCompleteListener` method.
    *
    * @returns {Promise} Promise, that resolves as soon as the visualization is done rendering
