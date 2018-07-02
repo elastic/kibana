@@ -21,7 +21,7 @@ export default class WatcherButton extends Component {
       title: 'Watcher',
       items: [
         {
-          name: 'Create new watch',
+          name: 'Enable error reports',
           icon: <EuiIcon type="plusInCircle" size="m" />,
           onClick: () => {
             this.closePopover();
@@ -46,7 +46,7 @@ export default class WatcherButton extends Component {
       iconSide="right"
       onClick={this.onButtonClick}
     >
-      Watcher
+      Integrations
     </EuiButton>
   );
 
