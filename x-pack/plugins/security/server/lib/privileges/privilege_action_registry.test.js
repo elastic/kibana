@@ -170,7 +170,7 @@ registerPrivilegesWithClusterTest(`passes saved object types, application and ki
   },
 });
 
-registerPrivilegesWithClusterTest(`updates privileges when simple top-level privileges don't match`, {
+registerPrivilegesWithClusterTest(`updates privileges when simple top-level privileges values don't match`, {
   expectedPrivileges: {
     expected: true
   },
@@ -182,10 +182,38 @@ registerPrivilegesWithClusterTest(`updates privileges when simple top-level priv
   }
 });
 
-registerPrivilegesWithClusterTest(`updates privileges when nested privileges don't match`, {
+registerPrivilegesWithClusterTest(`updates privileges when we have two different simple top-level privileges`, {
+  expectedPrivileges: {
+    notExpected: true
+  },
+  existingPrivileges: {
+    expected: true
+  },
+  assert: ({ expectUpdatedPrivileges }) => {
+    expectUpdatedPrivileges();
+  }
+});
+
+registerPrivilegesWithClusterTest(`updates privileges when nested privileges values don't match`, {
   expectedPrivileges: {
     kibana: {
       expected: true
+    }
+  },
+  existingPrivileges: {
+    kibana: {
+      expected: false
+    }
+  },
+  assert: ({ expectUpdatedPrivileges }) => {
+    expectUpdatedPrivileges();
+  }
+});
+
+registerPrivilegesWithClusterTest(`updates privileges when we have two different nested privileges`, {
+  expectedPrivileges: {
+    kibana: {
+      notExpected: true
     }
   },
   existingPrivileges: {
