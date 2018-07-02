@@ -24,8 +24,8 @@ import { checkLicenseError } from 'plugins/security/lib/check_license_error';
 import { EDIT_ROLES_PATH, ROLES_PATH } from './management_urls';
 import { DEFAULT_RESOURCE } from '../../../common/constants';
 
-const getKibanaPrivileges = (kibanaApplicationPrivileges, roleApplications, application) => {
-  const kibanaPrivileges = kibanaApplicationPrivileges.reduce((acc, p) => {
+const getKibanaPrivileges = (applicationPrivileges, roleApplications, application) => {
+  const kibanaPrivileges = applicationPrivileges.reduce((acc, p) => {
     acc[p.name] = false;
     return acc;
   }, {});
@@ -104,7 +104,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
         applications: []
       });
     },
-    kibanaApplicationPrivileges(ApplicationPrivileges, kbnUrl, Promise, Private) {
+    applicationPrivileges(ApplicationPrivileges, kbnUrl, Promise, Private) {
       return ApplicationPrivileges.query().$promise
         .catch(checkLicenseError(kbnUrl, Promise, Private));
     },
@@ -135,9 +135,9 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     $scope.indexPatterns = $route.current.locals.indexPatterns;
     $scope.privileges = shieldPrivileges;
 
-    const kibanaApplicationPrivileges = $route.current.locals.kibanaApplicationPrivileges;
+    const applicationPrivileges = $route.current.locals.applicationPrivileges;
     const role = $route.current.locals.role;
-    $scope.kibanaPrivileges = getKibanaPrivileges(kibanaApplicationPrivileges, role.applications, rbacApplication);
+    $scope.kibanaPrivileges = getKibanaPrivileges(applicationPrivileges, role.applications, rbacApplication);
     $scope.otherApplications = getOtherApplications(role.applications, rbacApplication);
 
     $scope.rolesHref = `#${ROLES_PATH}`;
