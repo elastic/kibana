@@ -30,9 +30,9 @@ export function preserveLayoutFactory(server, { dimensions: { height, width }, z
       return zoom;
     },
 
-    getViewport() {
+    getViewport(itemsCount) {
       return {
-        height: scaledHeight,
+        height: scaledHeight * itemsCount,
         width: scaledWidth,
         zoom
       };
