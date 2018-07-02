@@ -20,8 +20,7 @@
 jest.mock('ui/kfetch',
   () => ({
     kfetch: async (...args) => {
-      const response = await global.kfetchStub(...args);
-      return response;
+      return global.kfetchStub(...args);
     }
   }), { virtual: true });
 

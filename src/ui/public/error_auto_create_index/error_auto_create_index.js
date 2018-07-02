@@ -36,5 +36,4 @@ export function isAutoCreateIndexError(error) {
 
 export function showAutoCreateIndexErrorPage() {
   window.location.hash = '/error/action.auto_create_index';
-  //return Promise.halt(); TODO vanilla javascript way to replace Promise.halt
 }

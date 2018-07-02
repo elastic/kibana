@@ -18,15 +18,15 @@
  */
 
 import React from 'react';
+import chrome from 'ui/chrome';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { FetchFieldsProvider } from '../lib/fetch_fields';
 import { extractIndexPatterns } from '../lib/extract_index_patterns';
 const AUTO_APPLY_KEY = 'metrics_autoApply';
 
 function ReactEditorControllerProvider(Private, localStorage, config) {
   const fetchFields = Private(FetchFieldsProvider);
-  const savedObjectsClient = Private(SavedObjectsClientProvider);
+  const savedObjectsClient = chrome.getSavedObjectsClient();
 
   class ReactEditorController {
     constructor(el, vis) {
