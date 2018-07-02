@@ -25,7 +25,7 @@ export class StatementList extends React.PureComponent {
 
     this.state = {
       collapsedIds: new Set(),
-      collapsedChildIds: new Set()
+      collapsedChildIds: new Set(),
     };
   }
 
@@ -33,13 +33,13 @@ export class StatementList extends React.PureComponent {
     const collapsedIds = new Set(this.state.collapsedIds);
     collapsedIds.delete(elementId);
     this.updateCollapsedElement(collapsedIds);
-  }
+  };
 
   collapse = elementId => {
     const collapsedIds = new Set(this.state.collapsedIds);
     collapsedIds.add(elementId);
     this.updateCollapsedElement(collapsedIds);
-  }
+  };
 
   updateCollapsedElement = collapsedIds => {
     const { elements } = this.props;
@@ -47,9 +47,9 @@ export class StatementList extends React.PureComponent {
 
     this.setState({
       collapsedIds,
-      collapsedChildIds
+      collapsedChildIds,
     });
-  }
+  };
 
   elementIsCollapsed = elementId => this.state.collapsedIds.has(elementId);
 
@@ -57,9 +57,8 @@ export class StatementList extends React.PureComponent {
     const { id, parentId } = element;
     const { onShowVertexDetails } = this.props;
 
-    return this.state.collapsedIds.has(parentId) || this.state.collapsedChildIds.has(parentId)
-      ? null
-      : (
+    return this.state.collapsedIds.has(parentId) ||
+      this.state.collapsedChildIds.has(parentId) ? null : (
         <Statement
           key={id}
           element={element}
@@ -69,16 +68,14 @@ export class StatementList extends React.PureComponent {
           onShowVertexDetails={onShowVertexDetails}
         />
       );
-  }
+  };
 
   render() {
     const { elements } = this.props;
 
     return (
       <ul className="pipelineViewer__list">
-        {
-          elements.map(this.renderStatement)
-        }
+        {elements.map(this.renderStatement)}
       </ul>
     );
   }
@@ -89,7 +86,7 @@ StatementList.propTypes = {
     PropTypes.shape({
       id: PropTypes.string.isRequired,
       // top-level elements have null parentId
-      parentId: PropTypes.string
+      parentId: PropTypes.string,
     })
   ).isRequired,
   onShowVertexDetails: PropTypes.func.isRequired,

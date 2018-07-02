@@ -16,13 +16,13 @@ import { formatMetric } from '../../../../lib/format_number';
 import { Metric } from './metric';
 
 function getInputStatementMetrics({ latestEventsPerSecond }) {
-  return [(
+  return [
     <Metric
       key="eventsEmitted"
       className="pipelineViewer__metric--eventsEmitted"
       value={formatMetric(latestEventsPerSecond, '0.[00]a', 'e/s emitted')}
-    />
-  )];
+    />,
+  ];
 }
 
 function getProcessorStatementMetrics(processorVertex) {
@@ -33,29 +33,28 @@ function getProcessorStatementMetrics(processorVertex) {
   } = processorVertex;
 
   return [
-    (
-      <Metric
-        key="cpuMetric"
-        className="pipelineViewer__metric--cpuTime"
-        warning={processorVertex.isTimeConsuming()}
-        value={formatMetric(Math.round(percentOfTotalProcessorTime || 0), '0', '%', { prependSpace: false })}
-      />
-    ),
-    (
-      <Metric
-        key="eventMillis"
-        className="pipelineViewer__metric--eventMillis"
-        warning={processorVertex.isSlow()}
-        value={formatMetric(latestMillisPerEvent, '0.[00]a', 'ms/e')}
-      />
-    ),
-    (
-      <Metric
-        key="eventsReceived"
-        className="pipelineViewer__metric--events"
-        value={formatMetric(latestEventsPerSecond, '0.[00]a', 'e/s received')}
-      />
-    )
+    <Metric
+      key="cpuMetric"
+      className="pipelineViewer__metric--cpuTime"
+      warning={processorVertex.isTimeConsuming()}
+      value={formatMetric(
+        Math.round(percentOfTotalProcessorTime || 0),
+        '0',
+        '%',
+        { prependSpace: false }
+      )}
+    />,
+    <Metric
+      key="eventMillis"
+      className="pipelineViewer__metric--eventMillis"
+      warning={processorVertex.isSlow()}
+      value={formatMetric(latestMillisPerEvent, '0.[00]a', 'ms/e')}
+    />,
+    <Metric
+      key="eventsReceived"
+      className="pipelineViewer__metric--events"
+      value={formatMetric(latestEventsPerSecond, '0.[00]a', 'e/s received')}
+    />,
   ];
 }
 
@@ -66,17 +65,13 @@ function renderPluginStatementMetrics(pluginType, vertex) {
 }
 
 export function PluginStatement({
-  statement: {
-    hasExplicitId,
-    id,
-    name,
-    pluginType,
-    vertex
-  },
-  onShowVertexDetails
+  statement: { hasExplicitId, id, name, pluginType, vertex },
+  onShowVertexDetails,
 }) {
   const statementMetrics = renderPluginStatementMetrics(pluginType, vertex);
-  const onNameButtonClick = () => { onShowVertexDetails(vertex); };
+  const onNameButtonClick = () => {
+    onShowVertexDetails(vertex);
+  };
 
   return (
     <EuiFlexGroup
@@ -86,11 +81,7 @@ export function PluginStatement({
       justifyContent="spaceBetween"
     >
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup
-          alignItems="center"
-          gutterSize="xs"
-          responsive={false}
-        >
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               className="pipelineViewer__plugin"
@@ -103,8 +94,7 @@ export function PluginStatement({
               <span>{name}</span>
             </EuiButtonEmpty>
           </EuiFlexItem>
-          {
-            hasExplicitId &&
+          {hasExplicitId && (
             <EuiFlexItem grow={false}>
               <EuiBadge
                 onClick={onNameButtonClick}
@@ -113,19 +103,14 @@ export function PluginStatement({
                 {id}
               </EuiBadge>
             </EuiFlexItem>
-          }
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      {
-        statementMetrics &&
+      {statementMetrics && (
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup
-            gutterSize="s"
-          >
-            {statementMetrics}
-          </EuiFlexGroup>
+          <EuiFlexGroup gutterSize="s">{statementMetrics}</EuiFlexGroup>
         </EuiFlexItem>
-      }
+      )}
     </EuiFlexGroup>
   );
 }

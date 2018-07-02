@@ -14,16 +14,15 @@ export function StatementSection({
   iconType,
   headingText,
   elements,
-  onShowVertexDetails
+  onShowVertexDetails,
 }) {
-  if (!elements.length) { return null; }
+  if (!elements.length) {
+    return null;
+  }
 
   return (
     <div>
-      <StatementListHeading
-        iconType={iconType}
-        title={headingText}
-      />
+      <StatementListHeading iconType={iconType} title={headingText} />
       <EuiSpacer size="s" />
       <StatementList
         elements={elements}
@@ -38,7 +37,7 @@ StatementSection.propTypes = {
     PropTypes.shape({
       id: PropTypes.string.isRequired,
       // top-level elements have null parentId
-      parentId: PropTypes.string
+      parentId: PropTypes.string,
     })
   ).isRequired,
   headingText: PropTypes.string.isRequired,

@@ -29,18 +29,14 @@ describe('CollapsibleStatement component', () => {
     const child = <div>child element</div>;
 
     const wrapper = shallow(
-      <CollapsibleStatement {...props}>
-        {child}
-      </CollapsibleStatement>
+      <CollapsibleStatement {...props}>{child}</CollapsibleStatement>
     );
 
     expect(wrapper).toMatchSnapshot();
   });
 
   it('calls collapse if component is expanded', () => {
-    const wrapper = shallow(
-      <CollapsibleStatement {...props} />
-    );
+    const wrapper = shallow(<CollapsibleStatement {...props} />);
 
     wrapper.find(EuiButtonIcon).simulate('click');
     expect(collapse).toHaveBeenCalledTimes(1);
@@ -49,9 +45,7 @@ describe('CollapsibleStatement component', () => {
 
   it('calls expand if component is collapsed', () => {
     props.isCollapsed = true;
-    const wrapper = shallow(
-      <CollapsibleStatement {...props} />
-    );
+    const wrapper = shallow(<CollapsibleStatement {...props} />);
 
     wrapper.find(EuiButtonIcon).simulate('click');
     expect(expand).toHaveBeenCalledTimes(1);

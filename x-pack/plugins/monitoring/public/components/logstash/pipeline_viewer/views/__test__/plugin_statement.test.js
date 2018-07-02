@@ -8,10 +8,7 @@ import React from 'react';
 import { PluginStatement } from '../plugin_statement';
 import { shallow } from 'enzyme';
 
-import {
-  EuiButtonEmpty,
-  EuiBadge,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiBadge } from '@elastic/eui';
 
 describe('PluginStatement component', () => {
   let props;
@@ -48,7 +45,7 @@ describe('PluginStatement component', () => {
         percentOfTotalProcessorTime: 25,
         isSlow,
         isTimeConsuming,
-      }
+      },
     };
   });
 
@@ -73,7 +70,9 @@ describe('PluginStatement component', () => {
 
   it('adds warning highlight for cpu time', () => {
     props.statement = processorStatement;
-    props.statement.vertex.isTimeConsuming = jest.fn().mockImplementation(() => true);
+    props.statement.vertex.isTimeConsuming = jest
+      .fn()
+      .mockImplementation(() => true);
     expect(render(props)).toMatchSnapshot();
   });
 

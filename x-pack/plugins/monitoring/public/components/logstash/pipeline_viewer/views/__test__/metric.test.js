@@ -15,29 +15,20 @@ describe('Metric component', () => {
     metric = {
       className: 'metricClass',
       warning: true,
-      value: '220'
+      value: '220',
     };
   });
 
   it('renders warning badge', () => {
-    const wrapper = shallow(
-      <Metric
-        {...metric}
-      />
-    );
+    const wrapper = shallow(<Metric {...metric} />);
 
     expect(wrapper).toMatchSnapshot();
   });
 
   it('does not render warning badge when no warning present', () => {
     metric.warning = false;
-    const wrapper = shallow(
-      <Metric
-        {...metric}
-      />
-    );
+    const wrapper = shallow(<Metric {...metric} />);
 
     expect(wrapper).toMatchSnapshot();
   });
-
 });
