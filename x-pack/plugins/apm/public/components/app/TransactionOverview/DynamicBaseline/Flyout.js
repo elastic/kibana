@@ -134,12 +134,12 @@ export default class DynamicBaselineFlyout extends Component {
           {hasDynamicBaseline && (
             <div>
               <EuiCallOut
-                title={<span>Job already exists. </span>}
+                title={<span>Job already exists</span>}
                 color="success"
                 iconType="check"
               >
                 <p>
-                  Machine Learning is currently running a job on {serviceName} ({
+                  There is currently a job running for {serviceName} ({
                     transactionType
                   }).{' '}
                   <a href={getMlJobUrl(serviceName, transactionType, location)}>
@@ -156,10 +156,10 @@ export default class DynamicBaselineFlyout extends Component {
               <EuiCallOut
                 title={
                   <span>
-                    There is no APM index pattern available. To create a job,
-                    please import the APM index pattern via the{' '}
+                    No APM index pattern available. To create a job, please
+                    import the APM index pattern via the{' '}
                     <a href="/app/kibana#/home/tutorial/apm">
-                      APM Setup Instructions
+                      Setup Instructions
                     </a>
                   </span>
                 }
@@ -174,8 +174,8 @@ export default class DynamicBaselineFlyout extends Component {
             <p>
               This integration will start a new Machine Learning job that is
               predefined to calculate anomaly scores on response times on APM
-              transactions. Once enabled, the APM response time graph will show
-              the expected bounds from the Machine Learning job and annotate the
+              transactions. Once enabled, the response time graph will show the
+              expected bounds from the Machine Learning job and annotate the
               graph once the anomaly score is &gt;=75.
             </p>
             <img
@@ -183,16 +183,15 @@ export default class DynamicBaselineFlyout extends Component {
               alt="Machine Learning in APM"
             />
             <p>
-              The jobs can be created per transaction type and based on the
-              average response time. Once the job is created, you can manage it
-              and see more details in the{' '}
+              Jobs can be created per transaction type and based on the average
+              response time. Once a job is created, you can manage it and see
+              more details in the{' '}
               <a href="/app/ml">Machine Learning jobs management page</a>. It
-              can take some time for the job to calculate the results. Please
-              refresh the graph a few minutes after enabling the job.
+              might take some time for the job to calculate the results. Please
+              refresh the graph a few minutes after creating the job.
             </p>
             <p>
-              <a href="#">Learn more</a> about the Machine Learning integration
-              in APM.
+              <a href="#">Learn more</a> about the Machine Learning integration.
             </p>
           </EuiText>
         </EuiFlyoutBody>
