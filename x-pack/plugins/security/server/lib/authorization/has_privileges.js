@@ -6,7 +6,7 @@
 
 import { getClient } from '../../../../../server/lib/get_client_shield';
 import { DEFAULT_RESOURCE } from '../../../common/constants';
-import { getVersionPrivilege, getLoginPrivilege } from '../privileges';
+import { getVersionAction, getLoginAction } from '../privileges';
 
 export const HAS_PRIVILEGES_RESULT = {
   UNAUTHORIZED: Symbol(),
@@ -22,8 +22,8 @@ export function hasPrivilegesWithServer(server) {
   const application = config.get('xpack.security.rbac.application');
   const kibanaIndex = config.get('kibana.index');
 
-  const loginPrivilege = getLoginPrivilege();
-  const versionPrivilege = getVersionPrivilege(kibanaVersion);
+  const loginAction = getLoginAction();
+  const versionAction = getVersionAction(kibanaVersion);
 
   return function hasPrivilegesWithRequest(request) {
 
@@ -43,7 +43,7 @@ export function hasPrivilegesWithServer(server) {
       // We include the login action in all privileges, so the existence of it and not the version privilege
       // lets us know that we're running in an incorrect configuration. Without the login privilege check, we wouldn't
       // know whether the user just wasn't authorized for this instance of Kibana in general
-      if (!hasPrivileges[getVersionPrivilege(kibanaVersion)] && hasPrivileges[getLoginPrivilege()]) {
+      if (!hasPrivileges[getVersionAction(kibanaVersion)] && hasPrivileges[getLoginAction()]) {
         throw new Error('Multiple versions of Kibana are running against the same Elasticsearch cluster, unable to authorize user.');
       }
 
@@ -68,7 +68,7 @@ export function hasPrivilegesWithServer(server) {
     };
 
     return async function hasPrivileges(privileges) {
-      const allPrivileges = [versionPrivilege, loginPrivilege, ...privileges];
+      const allPrivileges = [versionAction, loginAction, ...privileges];
       const privilegesCheck = await hasApplicationPrivileges(allPrivileges);
 
       const username = privilegesCheck.username;
@@ -76,7 +76,7 @@ export function hasPrivilegesWithServer(server) {
       // We don't want to expose the version privilege to consumers, as it's an implementation detail only to detect version mismatch
       const missing = Object.keys(privilegesCheck.privileges)
         .filter(p => !privilegesCheck.privileges[p])
-        .filter(p => p !== versionPrivilege);
+        .filter(p => p !== versionAction);
 
       if (privilegesCheck.hasAllRequested) {
         return {
@@ -86,7 +86,7 @@ export function hasPrivilegesWithServer(server) {
         };
       }
 
-      if (!privilegesCheck.privileges[loginPrivilege] && await hasPrivilegesOnKibanaIndex()) {
+      if (!privilegesCheck.privileges[loginAction] && await hasPrivilegesOnKibanaIndex()) {
         const msg = `Relying on implicit privileges determined from the index privileges is deprecated and will be removed in Kibana 7.0`;
         server.log(['warning', 'deprecated', 'security'], msg);
 

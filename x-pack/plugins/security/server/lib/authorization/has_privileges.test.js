@@ -7,7 +7,7 @@
 import { hasPrivilegesWithServer, HAS_PRIVILEGES_RESULT } from './has_privileges';
 import { getClient } from '../../../../../server/lib/get_client_shield';
 import { DEFAULT_RESOURCE } from '../../../common/constants';
-import { getLoginPrivilege, getVersionPrivilege } from '../privileges';
+import { getLoginAction, getVersionAction } from '../privileges';
 
 jest.mock('../../../../../server/lib/get_client_shield', () => ({
   getClient: jest.fn()
@@ -92,8 +92,8 @@ test(`returns authorized if they have all application privileges`, async () => {
     mockApplicationPrivilegeResponse({
       hasAllRequested: true,
       privileges: {
-        [getVersionPrivilege(defaultVersion)]: true,
-        [getLoginPrivilege()]: true,
+        [getVersionAction(defaultVersion)]: true,
+        [getLoginAction()]: true,
         [privilege]: true,
       },
       application: defaultApplication,
@@ -114,7 +114,7 @@ test(`returns authorized if they have all application privileges`, async () => {
         application: defaultApplication,
         resources: [DEFAULT_RESOURCE],
         privileges: [
-          getVersionPrivilege(defaultVersion), getLoginPrivilege(), ...privileges
+          getVersionAction(defaultVersion), getLoginAction(), ...privileges
         ]
       }]
     }
@@ -135,8 +135,8 @@ test(`returns unauthorized they have only one application privilege`, async () =
     mockApplicationPrivilegeResponse({
       hasAllRequested: false,
       privileges: {
-        [getVersionPrivilege(defaultVersion)]: true,
-        [getLoginPrivilege()]: true,
+        [getVersionAction(defaultVersion)]: true,
+        [getLoginAction()]: true,
         [privilege1]: true,
         [privilege2]: false,
       },
@@ -158,7 +158,7 @@ test(`returns unauthorized they have only one application privilege`, async () =
         application: defaultApplication,
         resources: [DEFAULT_RESOURCE],
         privileges: [
-          getVersionPrivilege(defaultVersion), getLoginPrivilege(), ...privileges
+          getVersionAction(defaultVersion), getLoginAction(), ...privileges
         ]
       }]
     }
@@ -177,8 +177,8 @@ test(`throws error if missing version privilege and has login privilege`, async 
     mockApplicationPrivilegeResponse({
       hasAllRequested: false,
       privileges: {
-        [getVersionPrivilege(defaultVersion)]: false,
-        [getLoginPrivilege()]: true,
+        [getVersionAction(defaultVersion)]: false,
+        [getLoginAction()]: true,
         [privilege]: true,
       }
     })
@@ -200,8 +200,8 @@ describe('legacy fallback with no application privileges', () => {
       mockApplicationPrivilegeResponse({
         hasAllRequested: false,
         privileges: {
-          [getVersionPrivilege(defaultVersion)]: false,
-          [getLoginPrivilege()]: false,
+          [getVersionAction(defaultVersion)]: false,
+          [getLoginAction()]: false,
           [privilege]: false,
         },
         username,
@@ -229,7 +229,7 @@ describe('legacy fallback with no application privileges', () => {
           application: defaultApplication,
           resources: [DEFAULT_RESOURCE],
           privileges: [
-            getVersionPrivilege(defaultVersion), getLoginPrivilege(), ...privileges
+            getVersionAction(defaultVersion), getLoginAction(), ...privileges
           ]
         }]
       }
@@ -245,7 +245,7 @@ describe('legacy fallback with no application privileges', () => {
     expect(result).toEqual({
       result: HAS_PRIVILEGES_RESULT.UNAUTHORIZED,
       username,
-      missing: [getLoginPrivilege(), ...privileges],
+      missing: [getLoginAction(), ...privileges],
     });
   });
 
@@ -258,8 +258,8 @@ describe('legacy fallback with no application privileges', () => {
         mockApplicationPrivilegeResponse({
           hasAllRequested: false,
           privileges: {
-            [getVersionPrivilege(defaultVersion)]: false,
-            [getLoginPrivilege()]: false,
+            [getVersionAction(defaultVersion)]: false,
+            [getLoginAction()]: false,
             [privilege]: false,
           },
           username,
@@ -288,7 +288,7 @@ describe('legacy fallback with no application privileges', () => {
             application: defaultApplication,
             resources: [DEFAULT_RESOURCE],
             privileges: [
-              getVersionPrivilege(defaultVersion), getLoginPrivilege(), ...privileges
+              getVersionAction(defaultVersion), getLoginAction(), ...privileges
             ]
           }]
         }
@@ -304,7 +304,7 @@ describe('legacy fallback with no application privileges', () => {
       expect(result).toEqual({
         result: HAS_PRIVILEGES_RESULT.LEGACY,
         username,
-        missing: [getLoginPrivilege(), ...privileges],
+        missing: [getLoginAction(), ...privileges],
       });
     });
   });
