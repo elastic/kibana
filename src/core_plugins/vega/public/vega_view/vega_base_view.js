@@ -235,7 +235,7 @@ export class VegaBaseView {
         // in case functions don't match the list above
         throw new Error(`${funcName}() is not defined for this graph`);
       }
-      await this[handlerFunc].apply(this, args);
+      await this[handlerFunc](...args);
     } catch (err) {
       this.onError(err);
     }
@@ -307,7 +307,7 @@ export class VegaBaseView {
       // Try to parse as relative dates too (absolute dates will also be accepted)
       const startDate = dateMath.parse(start);
       const endDate = dateMath.parse(end);
-      if (!startDate.isValid() || !endDate.isValid()) {
+      if (!startDate || !endDate || !startDate.isValid() || !endDate.isValid()) {
         throw new Error(`Error setting time filter: both time values must be either relative or absolute dates. ` +
           `start=${JSON.stringify(start)}, end=${JSON.stringify(end)}`);
       }
