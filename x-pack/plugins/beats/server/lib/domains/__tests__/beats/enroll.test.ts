@@ -42,7 +42,7 @@ describe('Beats Domain Lib', () => {
 
   describe('enroll_beat', () => {
     beforeEach(async () => {
-      validEnrollmentToken = signToken({}, settings.encryptionKey);
+      validEnrollmentToken = chance.word();
       beatId = chance.word();
 
       beatsDB = [];
