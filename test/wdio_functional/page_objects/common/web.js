@@ -17,48 +17,63 @@
  * under the License.
  */
 
-import { Client, CssProperty, Element, RawResult } from 'webdriverio';
+import { createToolingLog } from '@kbn/dev-utils';
 
 export default class Web {
-  protected driver: Client<void>;
 
-  constructor(driver: any) {
+  constructor(driver) {
     this.driver = driver;
+    this.logger = createToolingLog('info');
+    this.logger.pipe(process.stdout);
   }
 
-  protected getElementText(selector: string): string {
+  getElementText(selector) {
     this.findElement(selector);
+    this.logger.debug(`\nFound : ${selector}\n`);
     return this.driver.getText(selector).toString();
   }
 
-  protected getCssPropertyValue(
-    selector: string,
-    property: string
-  ): CssProperty {
+  getCssPropertyValue(selector, property) {
     const cssValues = this.driver.getCssProperty(selector, property);
     return cssValues;
   }
 
-  protected click(selector: string): void {
+  click(selector) {
     this.findElement(selector);
+    this.logger.debug(`\nClicking on: ${selector}\n`);
     this.driver.click(selector);
+    this.logger.debug(`\nClicked successfully`);
   }
 
-  protected clear(selector: string): void {
+  clear(selector) {
     this.findElement(selector);
+    this.logger.debug(`\nClearing values from: ${selector}\n`);
     this.driver.clearElement(selector);
+    this.logger.debug(`\nCleared successfully`);
   }
 
-  protected findElement(selector: string): RawResult<Element> {
+  findElement(selector) {
+    this.logger.debug(
+      `\nChecking existance of element with selector: ${selector}\n`
+    );
     this.driver.waitForExist(selector);
+    this.logger.debug(`\nIt exists.\n`);
+    this.logger.debug(
+      `\nEnsuring visibility of element with selector: ${selector}\n`
+    );
     this.driver.waitForVisible(selector);
+    this.logger.debug(`\nIt's visible\n`);
     return this.driver.element(selector);
   }
-  protected findElements(selector: string): RawResult<Element[]> {
+  findElements(selector) {
+    this.logger.debug(
+      `\nChecking existance of all elements that match: ${selector}\n`
+    );
     this.driver.waitForExist(selector);
+    this.logger.debug(`\nAt least one exists.\n`);
     return this.driver.elements(selector);
   }
-  protected type(selector: string, value: string, clear = true): void {
+  type(selector, value, clear = true) {
     if (clear) {
       this.clear(selector);
     }

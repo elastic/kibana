@@ -16,22 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { Client } from 'webdriverio';
-import { Navigation } from './navigation_menu';
-import Web from './web';
-
-export default class BasePage extends Web {
-  public nav: Navigation;
-  protected driver: Client<void>;
-
-  constructor(driver: any) {
-    super(driver);
-    this.driver = driver;
-    this.nav = new Navigation(this.driver);
-  }
-
-  public title(): string {
-    return this.driver.getTitle().toString();
-  }
-}
+describe('Index Pattern', () => {
+  it('should show the default request', () => {});
+});

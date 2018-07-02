@@ -17,18 +17,4 @@
  * under the License.
  */
 
-export function stripRequest(requestString: string): string {
-  return requestString
-    .trim()
-    .replace(/\n|\r/g, '')
-    .replace(/\s+/g, '');
-}
-
-export function testSubjectifySelector(
-  selector: string,
-  strategy: string
-): string {
-  return strategy === 'xpath'
-    ? `[@data-test-subj="${selector}"]`
-    : `[data-test-subj="${selector}"]`;
-}
+import './console.spec';

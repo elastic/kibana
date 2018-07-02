@@ -16,28 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Client } from 'webdriverio';
-import { testSubjectifySelector } from '../../helpers/helpers';
-import Web from './web';
 
-export class Navigation extends Web {
-  protected driver: Client<void>;
-  private baseNavLinkSelector: string;
-  private consoleNavLinkSelector: string;
+export default class ManagementPage {
+  constructor() {
 
-  constructor(driver: Client<void>) {
-    super(driver);
-    this.driver = driver;
-    this.baseNavLinkSelector =
-      '//a' + testSubjectifySelector('appLink', 'xpath');
-    this.consoleNavLinkSelector =
-      this.baseNavLinkSelector + '[@aria-label="Dev Tools"]';
-  }
-  public navigateToConsole(): void {
-    this.driver.click(this.consoleNavLinkSelector);
-  }
-
-  public navigateToHome(): void {
-    this.driver.url('/');
   }
 }

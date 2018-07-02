@@ -16,16 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 const ci = process.env.CI && process.env.CI === 'true';
+Error.stackTraceLimit = Infinity;
 
 //#TODO: Find out why this resolution fails in FF, { width: 1200, height: 1024 }],
-
 exports.config = {
   // #TODO see: https://github.com/webdriverio/webdriverio/issues/2262
   seleniumInstallArgs: { version: '3.4.0' },
   seleniumArgs: { version: '3.4.0' },
-  specs: ['./test/wdio_functional/spec/**/*spec.ts'],
+  specs: ['./test/wdio_functional/spec/**/*suite.js'],
   maxInstances: 1,
   sync: true,
   port: '4444',
@@ -39,7 +38,7 @@ exports.config = {
   mochaOpts: {
     ui: 'bdd',
     timeout: 300000,
-    compilers: ['ts:ts-node/register']
+    compilers: ['js:babel-register']
   },
   reporters: ['dot', 'spec'],
   services: [ci ? 'sauce' : 'selenium-standalone', 'chromedriver'],
@@ -54,7 +53,7 @@ exports.config = {
       platform: 'macOS 10.12',
     },
     {
-      maxInstances: 2,
+      maxInstances: 1,
       browserName: 'firefox',
       version: ci ? '56' : null,
     },
@@ -71,8 +70,11 @@ exports.config = {
     }
   },
   before: function () {
+    require('babel-register');
     global.expect = require('expect');
-
     global.fetch = require('node-fetch');
+    const ProviderCollection = require('../../src/functional_test_runner/lib/providers/provider_collection');
+    const getService = new ProviderCollection().getService;
+    console.log(getService);
   },
 };

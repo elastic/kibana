@@ -16,24 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Client } from 'webdriverio';
+import expect from 'expect';
 import { testSubjectifySelector } from '../../helpers/helpers';
 import BasePage from '../common/base_page';
 
 export default class ConsolePage extends BasePage {
-  public DEFAULT_REQUEST: string;
-  private breadCrumbSelector: string;
-  private requestEditorSelector: string;
-  private editorContentSelector: string;
-  private requestEditorTextSelector: string;
-  private playButtonSelector: string;
-  private responseEditorSelector: string;
-  private responseEditorTextSelector: string;
-  private consoleSettingsButtonSelector: string;
-  private fontSizeInputSelector: string;
-  private saveSettingsButton: string;
 
-  constructor(driver: Client<void>) {
+  constructor(driver) {
     super(driver);
     this.breadCrumbSelector = 'div.kuiLocalBreadcrumb';
     this.requestEditorSelector = testSubjectifySelector(
@@ -73,7 +62,7 @@ GET _search
     this.init();
   }
 
-  public changeFontSize(size: number): void {
+  changeFontSize(size) {
     this.openSettings();
     this.type(this.fontSizeInputSelector, String(size), true);
     this.click(this.saveSettingsButton);
@@ -81,7 +70,7 @@ GET _search
     this.driver.waitUntil(() => {
       const fontValues = this.getCssPropertyValue(
         this.requestEditorTextSelector +
-          ':nth-child(1)  .ace_line:nth-child(1)',
+        ':nth-child(1)  .ace_line:nth-child(1)',
         'font-size'
       );
       const fontSize = Array.isArray(fontValues)
@@ -91,21 +80,21 @@ GET _search
     });
   }
 
-  public openSettings(): void {
+  openSettings() {
     this.driver.waitUntil(() => {
       this.click(this.consoleSettingsButtonSelector);
       return this.driver.isVisible(this.fontSizeInputSelector);
     });
   }
 
-  public get request() {
+  get request() {
     return this.getElementText(this.requestEditorTextSelector);
   }
 
   // TODO: Add set request
   // public set request(requestString) { }
 
-  public get response(): string {
+  get response() {
     this.driver.waitUntil(() => {
       return (
         this.getElementText(this.responseEditorTextSelector)
@@ -116,7 +105,7 @@ GET _search
     return this.getElementText(this.responseEditorTextSelector);
   }
 
-  public get requestFontSize(): string {
+  get requestFontSize() {
     const cssValues = this.getCssPropertyValue(
       this.requestEditorTextSelector + ':nth-child(1)  .ace_line:nth-child(1)',
       'font-size'
@@ -127,15 +116,17 @@ GET _search
     return value;
   }
 
-  public clickPlay(): void {
+  clickPlay() {
     this.click(this.playButtonSelector);
   }
 
-  private init(): void {
+  init() {
+    // logger.debug('Wait for Dev Tools Breadcrumb to exist. ');
     this.driver.waitForExist(this.breadCrumbSelector);
     expect('Dev Tools').toBe(this.getElementText(this.breadCrumbSelector));
+    // logger.debug('Waiting for title to be Console - Kibana');
     this.driver.waitUntil(() => {
-      return this.title() === 'Console - Kibana';
+      return this.title === 'Console - Kibana';
     });
   }
 
