@@ -1,4 +1,7 @@
 import { fetch } from '../../common/lib/fetch';
+import { notifyError } from '../lib/notify_error';
+
+const API = `https://freegeoip.net/json/`;
 
 // TODO: We should implement our own Elastic GeoIP service instead of using freegeoip.net
 export const geoip = () => ({
@@ -19,14 +22,16 @@ export const geoip = () => ({
     },
   },
   fn: (context, args) => {
-    return fetch(`https://freegeoip.net/json/${args._}`, {
+    return fetch(API + args._, {
       method: 'GET',
-    }).then(res => {
-      return {
-        type: 'location',
-        latitude: res.data.latitude,
-        longitude: res.data.longitude,
-      };
-    });
+    })
+      .then(res => {
+        return {
+          type: 'location',
+          latitude: res.data.latitude,
+          longitude: res.data.longitude,
+        };
+      })
+      .catch(notifyError(`Could not perform an IP lookup using ${API}`));
   },
 });

@@ -1,22 +1,10 @@
 import chrome from 'ui/chrome';
 import { API_ROUTE_WORKPAD } from '../../common/lib/constants';
-import { notify } from '../lib/notify';
 import { fetch } from '../../common/lib/fetch';
+import { notifyError } from './notify_error';
 
 const basePath = chrome.getBasePath();
 const apiPath = `${basePath}${API_ROUTE_WORKPAD}`;
-
-/*
- * The error data will be in `err.response` if the error comes from the server (example: 404)
- * The error object will be error data if it comes directly from the fetch library, (example: network error)
- */
-const notifyError = source => {
-  return err => {
-    const errData = err.response || err;
-    notify.error(source);
-    notify.error(errData);
-  };
-};
 
 export function create(workpad) {
   return fetch
@@ -27,8 +15,8 @@ export function create(workpad) {
 export function get(workpadId) {
   return fetch
     .get(`${apiPath}/${workpadId}`)
-    .then(res => res.data)
-    .catch(notifyError('Could not get workpad'));
+    .then(({ data: workpad }) => workpad)
+    .catch(notifyError(`Could not get workpad by ID: ${workpadId}`));
 }
 
 export function update(id, workpad) {
@@ -44,6 +32,6 @@ export function find(searchTerm) {
 
   return fetch
     .get(`${apiPath}/find?name=${validSearchTerm ? searchTerm : ''}`)
-    .then(resp => resp.data)
+    .then(({ data: workpads }) => workpads)
     .catch(notifyError('Could not find workpads'));
 }
