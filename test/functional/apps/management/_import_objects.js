@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }) {
       expect(objects.length).to.be(3);
     });
 
-    it('should import conflicts using a confirm modal', async function () {
+    it('should provide dialog to allow the importing of saved objects with index pattern conflicts', async function () {
       await PageObjects.settings.clickKibanaSavedObjects();
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects-conflicts.json'));
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -60,7 +60,10 @@ export default function ({ getService, getPageObjects }) {
       expect(objects.length).to.be(3);
     });
 
-    it('should allow for overrides', async function () {
+    // Test should be testing that user is warned when saved object will override another because of an id collision
+    // This is not the case. Instead the test just loads a saved object with an index pattern conflict
+    // Disabling until the issue is resolved since the test does not test the intended behavior
+    it.skip('should allow for overrides', async function () {
       await PageObjects.settings.clickKibanaSavedObjects();
 
       // Put in data which already exists
@@ -83,7 +86,10 @@ export default function ({ getService, getPageObjects }) {
       expect(objects.length).to.be(2);
     });
 
-    it('should allow for cancelling overrides', async function () {
+    // Test should be testing that user is warned when saved object will overrides another because of an id collision
+    // This is not the case. Instead the test just loads a saved object with an index pattern conflict
+    // Disabling until the issue is resolved since the test does not test the intended behavior
+    it.skip('should allow for cancelling overrides', async function () {
       await PageObjects.settings.clickKibanaSavedObjects();
 
       // Put in data which already exists
@@ -106,7 +112,14 @@ export default function ({ getService, getPageObjects }) {
       expect(objects.length).to.be(2);
     });
 
-    it('should handle saved searches and objects with saved searches properly', async function () {
+    // Test should be testing that a visualization linked to saved search can be loaded if the
+    // index pattern linked to the saved search is deleted. This is not the case, and the
+    // visualization linked to the saved search does not get loaded.
+    // The assert should check for 3 svaed objects
+    // 1) the test harness loads the visualization 'Shared-Item Visualization AreaChart',
+    // 2) this tests loads 'PHP saved search' from _import_objects_saved_search.json
+    // 3) and this test loads 'PHP Viz' from _import_objects_connected_to_saved_search.json
+    it.skip('should handle saved searches and objects with saved searches properly', async function () {
       // First, import the saved search
       await PageObjects.settings.clickKibanaSavedObjects();
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_saved_search.json'));
