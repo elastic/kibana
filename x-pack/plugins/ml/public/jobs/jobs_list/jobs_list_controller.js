@@ -40,7 +40,7 @@ import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar
 import { initPromise } from 'plugins/ml/util/promise';
 
 uiRoutes
-  .when('/jobs/?', {
+  .when('/jobs_old/?', {
     template,
     resolve: {
       CheckLicense: checkLicense,
