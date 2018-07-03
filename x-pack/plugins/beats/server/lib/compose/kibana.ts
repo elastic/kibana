@@ -8,7 +8,7 @@ import { ElasticsearchBeatsAdapter } from '../adapters/beats/elasticsearch_beats
 import { ElasticsearchTagsAdapter } from '../adapters/tags/elasticsearch_tags_adapter';
 import { ElasticsearchTokensAdapter } from '../adapters/tokens/elasticsearch_tokens_adapter';
 
-import { KibanaBackendFrameworkAdapter } from '../adapters/famework/kibana/kibana_framework_adapter';
+import { KibanaBackendFrameworkAdapter } from '../adapters/famework/kibana_framework_adapter';
 
 import { CMBeatsDomain } from '../domains/beats';
 import { CMTagsDomain } from '../domains/tags';

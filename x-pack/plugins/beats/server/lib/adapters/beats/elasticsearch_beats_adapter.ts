@@ -83,7 +83,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     };
     const response = await this.framework.callWithRequest(req, 'mget', params);
 
-    return get(response, 'docs', [])
+    return _get(response, 'docs', [])
       .filter((b: any) => b.found)
       .map((b: any) => b._source.beat);
   }
@@ -129,7 +129,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       params
     );
 
-    const beats = get<any>(response, 'hits.hits', []);
+    const beats = _get<any>(response, 'hits.hits', []);
     return beats.map((beat: any) => omit(beat._source.beat, ['access_token']));
   }
 
@@ -161,7 +161,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     };
 
     const response = await this.framework.callWithRequest(req, 'bulk', params);
-    return get<any>(response, 'items', []).map(
+    return _get<any>(response, 'items', []).map(
       (item: any, resultIdx: number) => ({
         idxInRequest: removals[resultIdx].idxInRequest,
         result: item.update.result,
@@ -201,10 +201,12 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     };
 
     const response = await this.framework.callWithRequest(req, 'bulk', params);
-    return get<any>(response, 'items', []).map((item: any, resultIdx: any) => ({
-      idxInRequest: assignments[resultIdx].idxInRequest,
-      result: item.update.result,
-      status: item.update.status,
-    }));
+    return _get<any>(response, 'items', []).map(
+      (item: any, resultIdx: any) => ({
+        idxInRequest: assignments[resultIdx].idxInRequest,
+        result: item.update.result,
+        status: item.update.status,
+      })
+    );
   }
 }

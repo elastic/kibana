@@ -9,13 +9,13 @@ import {
   FrameworkRequest,
   FrameworkRouteOptions,
   WrappableRequest,
-} from '../../../lib';
+} from '../../lib';
 
 import { IStrictReply, Request, Server } from 'hapi';
 import {
   internalFrameworkRequest,
   wrapRequest,
-} from '../../../../utils/wrap_request';
+} from '../../../utils/wrap_request';
 
 export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
   public version: string;
@@ -24,7 +24,11 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
 
   constructor(hapiServer: Server) {
     this.server = hapiServer;
-    this.version = hapiServer.plugins.kibana.status.plugin.version;
+    if (hapiServer.plugins.kibana) {
+      this.version = hapiServer.plugins.kibana.status.plugin.version;
+    } else {
+      this.version = 'unknown';
+    }
     this.cryptoHash = null;
 
     this.validateConfig();
@@ -66,8 +70,8 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     });
   }
 
-  public installIndexTemplate(name: string, template: {}) {
-    return this.callWithInternalUser('indices.putTemplate', {
+  public async installIndexTemplate(name: string, template: {}) {
+    return await this.callWithInternalUser('indices.putTemplate', {
       body: template,
       name,
     });

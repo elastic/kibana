@@ -12,7 +12,7 @@ import {
   FrameworkRequest,
   FrameworkRouteOptions,
   WrappableRequest,
-} from '../../../lib';
+} from '../../lib';
 
 interface TestSettings {
   enrollmentTokensTtlInSeconds: number;
@@ -53,12 +53,7 @@ export class TestingBackendFrameworkAdapter implements BackendFrameworkAdapter {
   }
 
   public installIndexTemplate(name: string, template: {}) {
-    if (this.client) {
-      return this.client.indices.putTemplate({
-        body: template,
-        name,
-      });
-    }
+    return;
   }
 
   public async callWithInternalUser(esMethod: string, options: {}) {

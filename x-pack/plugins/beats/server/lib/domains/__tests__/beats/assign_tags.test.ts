@@ -7,7 +7,7 @@
 import expect from 'expect.js';
 import { wrapRequest } from '../../../../utils/wrap_request';
 import { MemoryBeatsAdapter } from '../../../adapters/beats/memory_beats_adapter';
-import { TestingBackendFrameworkAdapter } from '../../../adapters/famework/kibana/testing_framework_adapter';
+import { TestingBackendFrameworkAdapter } from '../../../adapters/famework/testing_framework_adapter';
 import { MemoryTagsAdapter } from '../../../adapters/tags/memory_tags_adapter';
 import { MemoryTokensAdapter } from '../../../adapters/tokens/memory_tokens_adapter';
 
