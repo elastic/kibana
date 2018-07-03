@@ -174,11 +174,6 @@ export function SearchSourceProvider(Promise, Private, config) {
         throw new Error(`Can't set field '${field}' on SearchSource. Acceptable fields are: ${FIELDS.join(', ')}.`);
       }
 
-      if (value == null) {
-        delete this._fields[field];
-        return this;
-      }
-
       if (field === 'index') {
         const fields = this._fields;
 
@@ -198,7 +193,7 @@ export function SearchSourceProvider(Promise, Private, config) {
           throw new TypeError('expected indexPattern to be an IndexPattern duck.');
         }
 
-        fields.index = value;
+        fields[field] = value;
         if (!fields.source) {
           // imply source filtering based on the index pattern, but allow overriding
           // it by simply setting another field for "source". When index is changed
@@ -208,6 +203,11 @@ export function SearchSourceProvider(Promise, Private, config) {
           fields.source[forIp] = value;
         }
 
+        return this;
+      }
+
+      if (value == null) {
+        delete this._fields[field];
         return this;
       }
 

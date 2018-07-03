@@ -121,7 +121,7 @@ describe('SearchSource', function () {
     });
   });
 
-  describe('#setField()', function () {
+  describe(`#setField('index')`, function () {
     describe('auto-sourceFiltering', function () {
       describe('new index pattern assigned', function () {
         it('generates a searchSource filter', function () {
