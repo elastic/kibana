@@ -92,7 +92,8 @@ export const termsBucketAgg = new BucketAggType({
     };
   },
   createFilter: createFilterTerms,
-  postFlightRequest: async (resp, aggConfigs, aggConfig, nestedSearchSource) => {
+  postFlightRequest: async (resp, aggConfigs, aggConfig, searchSource) => {
+    const nestedSearchSource = searchSource.makeChild();
     if (aggConfig.params.otherBucket) {
       const filterAgg = buildOtherBucketAgg(aggConfigs, aggConfig, resp);
       nestedSearchSource.set('aggs', filterAgg);
