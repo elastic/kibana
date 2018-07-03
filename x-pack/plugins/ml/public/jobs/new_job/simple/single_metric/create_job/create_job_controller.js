@@ -33,7 +33,6 @@ import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes'
 import { loadNewJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
 import {
   createSearchItems,
-  createResultsUrl,
   addNewJobToRecentlyAccessed,
   moveToAdvancedJobCreationProvider } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { mlJobService } from 'plugins/ml/services/job_service';
@@ -43,6 +42,8 @@ import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar
 import { initPromise } from 'plugins/ml/util/promise';
 
 import template from './create_job.html';
+
+import { timefilter } from 'ui/timefilter';
 
 uiRoutes
   .when('/jobs/new_job/simple/single_metric', {
@@ -66,7 +67,6 @@ module
     $scope,
     $route,
     $filter,
-    timefilter,
     Private,
     AppState) {
 
@@ -245,8 +245,8 @@ module
 
     function setTime() {
       $scope.ui.bucketSpanValid = true;
-      $scope.formConfig.start = dateMath.parse(timefilter.time.from).valueOf();
-      $scope.formConfig.end = dateMath.parse(timefilter.time.to).valueOf();
+      $scope.formConfig.start = dateMath.parse(timefilter.getTime().from).valueOf();
+      $scope.formConfig.end = dateMath.parse(timefilter.getTime().to).valueOf();
       $scope.formConfig.format = 'epoch_millis';
 
       const bucketSpanInterval = parseInterval($scope.formConfig.bucketSpan);
@@ -395,7 +395,7 @@ module
                     $scope.formConfig.resultsIntervalSeconds = bucketSpanSeconds;
                   }
 
-                  $scope.resultsUrl = createResultsUrl(
+                  $scope.resultsUrl = mlJobService.createResultsUrl(
                     [$scope.formConfig.jobId],
                     $scope.formConfig.start,
                     $scope.formConfig.end,
@@ -566,7 +566,7 @@ module
       mlFullTimeRangeSelectorService.setFullTimeRange($scope.ui.indexPattern, $scope.formConfig.combinedQuery);
     };
 
-    $scope.$listen(timefilter, 'fetch', $scope.loadVis);
+    $scope.$listenAndDigestAsync(timefilter, 'fetch', $scope.loadVis);
 
     $scope.$on('$destroy', () => {
       globalForceStop = true;

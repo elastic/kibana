@@ -51,7 +51,7 @@ function ErrorComponent(props) {
 
   return (
     <div className="metrics_error">
-      <div className="merics_error__title">{title || 'The request for this panel failed.'}</div>
+      <div className="metrics_error__title">{title || 'The request for this panel failed.'}</div>
       {additionalInfo}
     </div>
   );

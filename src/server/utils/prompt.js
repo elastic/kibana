@@ -34,11 +34,11 @@ export function confirm(question, options = {}) {
   });
 
   return new Promise(resolve => {
-    const defautValue = options.default ? true : false;
-    const defaultPrompt = defautValue ? 'Y/n' : 'y/N';
+    const defaultValue = options.default ? true : false;
+    const defaultPrompt = defaultValue ? 'Y/n' : 'y/N';
 
     rl.question(`${question} [${defaultPrompt}] `, input => {
-      let value = defautValue;
+      let value = defaultValue;
 
       if (input != null && input !== '') {
         value = /^y(es)?/i.test(input);

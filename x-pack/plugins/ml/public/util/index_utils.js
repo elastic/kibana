@@ -9,39 +9,39 @@
 import { notify } from 'ui/notify';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
-let indexPatterns = [];
+let indexPatternCache = [];
 let fullIndexPatterns = [];
 let currentIndexPattern = null;
 let currentSavedSearch = null;
 
-export function loadIndexPatterns(Private, courier) {
-  fullIndexPatterns = courier.indexPatterns;
+export function loadIndexPatterns(Private, indexPatterns) {
+  fullIndexPatterns = indexPatterns;
   const savedObjectsClient = Private(SavedObjectsClientProvider);
   return savedObjectsClient.find({
     type: 'index-pattern',
     fields: ['title'],
     perPage: 10000
   }).then((response) => {
-    indexPatterns = response.savedObjects;
-    return indexPatterns;
+    indexPatternCache = response.savedObjects;
+    return indexPatternCache;
   });
 }
 
 export function getIndexPatterns() {
-  return indexPatterns;
+  return indexPatternCache;
 }
 
 export function getIndexPatternIdFromName(name) {
-  for (let j = 0; j < indexPatterns.length; j++) {
-    if (indexPatterns[j].get('title') === name) {
-      return indexPatterns[j].id;
+  for (let j = 0; j < indexPatternCache.length; j++) {
+    if (indexPatternCache[j].get('title') === name) {
+      return indexPatternCache[j].id;
     }
   }
   return name;
 }
 
-export function loadCurrentIndexPattern(courier, $route) {
-  fullIndexPatterns = courier.indexPatterns;
+export function loadCurrentIndexPattern(indexPatterns, $route) {
+  fullIndexPatterns = indexPatterns;
   currentIndexPattern = fullIndexPatterns.get($route.current.params.index);
   return currentIndexPattern;
 }
@@ -50,7 +50,7 @@ export function getIndexPatternById(id) {
   return fullIndexPatterns.get(id);
 }
 
-export function loadCurrentSavedSearch(courier, $route, savedSearches) {
+export function loadCurrentSavedSearch($route, savedSearches) {
   currentSavedSearch = savedSearches.get($route.current.params.savedSearchId);
   return currentSavedSearch;
 }

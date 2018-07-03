@@ -69,7 +69,7 @@ exports.installSnapshot = async function installSnapshot({
  * @param {String} url
  * @param {String} dest
  * @param {ToolingLog} log
- * @returns {Promose}
+ * @returns {Promise}
  */
 function downloadFile(url, dest, log) {
   const downloadPath = `${dest}.tmp`;

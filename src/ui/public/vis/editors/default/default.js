@@ -30,14 +30,16 @@ import { keyCodes } from '@elastic/eui';
 import { DefaultEditorSize } from '../../editor_size';
 
 import { VisEditorTypesRegistryProvider } from '../../../registry/vis_editor_types';
+import { getVisualizeLoader } from '../../../visualize/loader/visualize_loader';
 
 const defaultEditor = function ($rootScope, $compile) {
   return class DefaultEditor {
     static key = 'default';
 
-    constructor(el, vis) {
+    constructor(el, savedObj) {
       this.el = $(el);
-      this.vis = vis;
+      this.savedObj = savedObj;
+      this.vis = savedObj.vis;
 
       if (!this.vis.type.editorConfig.optionTabs && this.vis.type.editorConfig.optionsTemplate) {
         this.vis.type.editorConfig.optionTabs = [
@@ -46,15 +48,13 @@ const defaultEditor = function ($rootScope, $compile) {
       }
     }
 
-    render(visData, searchSource, updateStatus, uiState) {
+    render({ uiState, timeRange, appState }) {
       let $scope;
 
       const updateScope = () => {
         $scope.vis = this.vis;
-        $scope.visData = visData;
         $scope.uiState = uiState;
-        $scope.searchSource = searchSource;
-        $scope.$apply();
+        //$scope.$apply();
       };
 
       return new Promise(resolve => {
@@ -137,7 +137,26 @@ const defaultEditor = function ($rootScope, $compile) {
           updateScope();
         }
 
-        $scope.$broadcast('render');
+        if (!this._handler) {
+          const visualizationEl = this.el.find('.vis-editor-canvas')[0];
+          getVisualizeLoader().then(loader => {
+            if (!visualizationEl) {
+              return;
+            }
+            this._loader = loader;
+            this._handler = this._loader.embedVisualizationWithSavedObject(visualizationEl, this.savedObj, {
+              uiState: uiState,
+              listenOnChange: false,
+              timeRange: timeRange,
+              appState: appState,
+            });
+          });
+        } else {
+          this._handler.update({
+            timeRange: timeRange
+          });
+        }
+
       });
     }
 
@@ -149,6 +168,9 @@ const defaultEditor = function ($rootScope, $compile) {
       if (this.$scope) {
         this.$scope.$destroy();
         this.$scope = null;
+      }
+      if (this._handler) {
+        this._handler.destroy();
       }
     }
   };

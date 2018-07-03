@@ -24,7 +24,6 @@ import sinon from 'sinon';
 import { VisProvider } from '../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import FixturesStubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
-import MockState from 'fixtures/mock_state';
 import { PersistedState } from '../../persisted_state';
 
 describe('visualize directive', function () {
@@ -36,7 +35,7 @@ describe('visualize directive', function () {
   let indexPattern;
   let fixtures;
   let searchSource;
-  let appState;
+  let updateState;
   let uiState;
 
   beforeEach(ngMock.module('kibana', 'kibana/table_vis'));
@@ -45,8 +44,6 @@ describe('visualize directive', function () {
     $compile = $injector.get('$compile');
     fixtures = require('fixtures/fake_hierarchical_data');
     Vis = Private(VisProvider);
-    appState = new MockState({ filters: [] });
-    appState.toJSON = () => { return {}; };
     uiState = new PersistedState({});
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     searchSource = Private(FixturesStubbedSearchSourceProvider);
@@ -65,14 +62,14 @@ describe('visualize directive', function () {
     $rootScope.vis = vis;
     $rootScope.esResponse = esResponse;
     $rootScope.uiState = uiState;
-    $rootScope.appState = appState;
-    $rootScope.appState.vis = vis.getState();
     $rootScope.searchSource = searchSource;
     $rootScope.savedObject = {
       vis: vis,
       searchSource: searchSource
     };
-    $el = $('<visualize saved-obj="savedObject" ui-state="uiState" app-state="appState">');
+    $rootScope.updateState = updateState;
+
+    $el = $('<visualize saved-obj="savedObject" ui-state="uiState" update-state="updateState">');
     $compile($el)($rootScope);
     $rootScope.$apply();
 
@@ -118,11 +115,13 @@ describe('visualize directive', function () {
     expect(counter).to.equal(1);
   });
 
-  it('updates the appState in editor mode on update event', () => {
-    $scope.editorMode = true;
-    $scope.appState.vis = {};
+  it('calls the updateState on update event', () => {
+    let visState = {};
+    updateState = (state) => {
+      visState = state.vis;
+    };
     $scope.vis.emit('update');
-    expect($scope.appState.vis).to.not.equal({});
+    expect(visState).to.not.equal({});
   });
 
   describe('request handler', () => {
@@ -141,7 +140,7 @@ describe('visualize directive', function () {
      * Since we use an old lodash version we cannot use fake timers here.
      */
     function waitForFetch() {
-      return new Promise(resolve => { setTimeout(resolve, 150); });
+      return new Promise(resolve => { setTimeout(resolve, 500); });
     }
 
     beforeEach(() => {

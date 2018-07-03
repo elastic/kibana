@@ -201,6 +201,7 @@ export class IndexTable extends Component {
   };
 
   render() {
+
     const {
       filterChanged,
       filter,
@@ -208,7 +209,6 @@ export class IndexTable extends Component {
       showSystemIndicesChanged,
       indices
     } = this.props;
-
     const { selectedIndicesMap } = this.state;
     const atLeastOneItemSelected = Object.keys(selectedIndicesMap).length > 0;
 

@@ -42,7 +42,7 @@ test('parses multiple lines', () => {
   expect(lines[1].message).toMatchSnapshot();
 });
 
-test('parses data containing execption', () => {
+test('parses data containing exception', () => {
   const data = dedent(`
     [2018-02-23T10:13:45,646][INFO ][o.e.n.Node               ] [qEfPPg8] starting ...
     [2018-02-23T10:13:53,992][WARN ][o.e.b.ElasticsearchUncaughtExceptionHandler] [] uncaught exception in thread [main]

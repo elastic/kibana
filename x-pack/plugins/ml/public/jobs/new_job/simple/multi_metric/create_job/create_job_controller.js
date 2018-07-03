@@ -33,7 +33,6 @@ import { loadNewJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaul
 import { mlEscape } from 'plugins/ml/util/string_utils';
 import {
   createSearchItems,
-  createResultsUrl,
   addNewJobToRecentlyAccessed,
   moveToAdvancedJobCreationProvider } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { mlJobService } from 'plugins/ml/services/job_service';
@@ -43,6 +42,7 @@ import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar
 import { initPromise } from 'plugins/ml/util/promise';
 import { ml } from 'plugins/ml/services/ml_api_service';
 import template from './create_job.html';
+import { timefilter } from 'ui/timefilter';
 
 uiRoutes
   .when('/jobs/new_job/simple/multi_metric', {
@@ -65,7 +65,6 @@ module
   .controller('MlCreateMultiMetricJob', function (
     $scope,
     $route,
-    timefilter,
     Private,
     AppState) {
 
@@ -250,8 +249,8 @@ module
 
     function setTime() {
       $scope.ui.bucketSpanValid = true;
-      $scope.formConfig.start = dateMath.parse(timefilter.time.from).valueOf();
-      $scope.formConfig.end = dateMath.parse(timefilter.time.to).valueOf();
+      $scope.formConfig.start = dateMath.parse(timefilter.getTime().from).valueOf();
+      $scope.formConfig.end = dateMath.parse(timefilter.getTime().to).valueOf();
       $scope.formConfig.format = 'epoch_millis';
 
       const bucketSpanInterval = parseInterval($scope.formConfig.bucketSpan);
@@ -502,7 +501,7 @@ module
                     $scope.formConfig.resultsIntervalSeconds = bucketSpanSeconds;
                   }
 
-                  $scope.resultsUrl = createResultsUrl(
+                  $scope.resultsUrl = mlJobService.createResultsUrl(
                     [$scope.formConfig.jobId],
                     $scope.formConfig.start,
                     $scope.formConfig.end,
@@ -688,7 +687,7 @@ module
       populateAppStateSettings(appState, $scope);
     });
 
-    $scope.$listen(timefilter, 'fetch', () => {
+    $scope.$listenAndDigestAsync(timefilter, 'fetch', () => {
       $scope.loadVis();
       if ($scope.formConfig.splitField !== undefined) {
         $scope.setModelMemoryLimit();

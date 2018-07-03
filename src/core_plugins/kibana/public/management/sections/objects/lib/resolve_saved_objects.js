@@ -160,7 +160,7 @@ export async function resolveSavedObjects(
   );
 
   // We want to do the same for saved searches, but we want to keep them separate because they need
-  // to be applied _first_ because other saved objects can be depedent on those saved searches existing
+  // to be applied _first_ because other saved objects can be dependent on those saved searches existing
   const conflictedSearchDocs = [];
   // Keep a record of the index patterns assigned to our imported saved objects that do not
   // exist. We will provide a way for the user to manually select a new index pattern for those
