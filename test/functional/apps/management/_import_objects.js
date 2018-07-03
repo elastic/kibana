@@ -44,7 +44,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.clickImportDone();
       await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
       const objects = await PageObjects.settings.getSavedObjectsInTable();
-      expect(objects.length).to.be(3);
+      const savedObjectImported = objects.includes('Log Agents');
+      expect(savedObjectImported).to.be(true);
     });
 
     it('should provide dialog to allow the importing of saved objects with index pattern conflicts', async function () {
@@ -57,7 +58,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.clickImportDone();
       await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
       const objects = await PageObjects.settings.getSavedObjectsInTable();
-      expect(objects.length).to.be(3);
+      const savedObjectImported = objects.includes('saved object with index pattern conflict');
+      expect(savedObjectImported).to.be(true);
     });
 
     // Test should be testing that user is warned when saved object will override another because of an id collision
@@ -112,14 +114,26 @@ export default function ({ getService, getPageObjects }) {
       expect(objects.length).to.be(2);
     });
 
-    // Test should be testing that a visualization linked to saved search can be loaded if the
-    // index pattern linked to the saved search is deleted. This is not the case, and the
-    // visualization linked to the saved search does not get loaded.
-    // The assert should check for 3 svaed objects
-    // 1) the test harness loads the visualization 'Shared-Item Visualization AreaChart',
-    // 2) this tests loads 'PHP saved search' from _import_objects_saved_search.json
-    // 3) and this test loads 'PHP Viz' from _import_objects_connected_to_saved_search.json
-    it.skip('should handle saved searches and objects with saved searches properly', async function () {
+    it('should import saved objects linked to saved searches', async function () {
+      await PageObjects.settings.clickKibanaSavedObjects();
+      await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_saved_search.json'));
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      // Last, import a saved object connected to the saved search
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickKibanaSavedObjects();
+      await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.json'));
+      // Wait for all the saves to happen
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.settings.clickImportDone();
+      await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
+
+      const objects = await PageObjects.settings.getSavedObjectsInTable();
+      const savedObjectImported = objects.includes('saved object connected to saved search');
+      expect(savedObjectImported).to.be(true);
+    });
+
+    it('should not import saved objects linked to saved searches when saved search index pattern has been deleted', async function () {
       // First, import the saved search
       await PageObjects.settings.clickKibanaSavedObjects();
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_saved_search.json'));
@@ -143,10 +157,11 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
       const objects = await PageObjects.settings.getSavedObjectsInTable();
-      expect(objects.length).to.be(2);
+      const savedObjectImported = objects.includes('saved object connected to saved search');
+      expect(savedObjectImported).to.be(false);
     });
 
-    it('should work with index patterns', async () => {
+    it('should import saved objects with index patterns when index patterns already exists', async () => {
       // First, import the objects
       await PageObjects.settings.clickKibanaSavedObjects();
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_with_index_patterns.json'));
@@ -156,10 +171,11 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
       const objects = await PageObjects.settings.getSavedObjectsInTable();
-      expect(objects.length).to.be(2);
+      const savedObjectImported = objects.includes('saved object imported with index pattern');
+      expect(savedObjectImported).to.be(true);
     });
 
-    it('should work when the index pattern does not exist', async () => {
+    it('should import saved objects with index patterns when index patterns does not exists', async () => {
       // First, we need to delete the index pattern
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndices();
@@ -178,7 +194,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
       const objects = await PageObjects.settings.getSavedObjectsInTable();
-      expect(objects.length).to.be(2);
+      const savedObjectImported = objects.includes('saved object imported with index pattern');
+      expect(savedObjectImported).to.be(true);
     });
   });
 }
