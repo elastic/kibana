@@ -11,6 +11,7 @@ module.exports = function (wallaby) {
     debug: true,
     files: [
       './tsconfig.json',
+      '../../../src/test_utils/kbn_server',
       //'plugins/beats/public/**/*.+(js|jsx|ts|tsx|json|snap|css|less|sass|scss|jpg|jpeg|gif|png|svg)',
       'server/**/*.+(js|jsx|ts|tsx|json|snap|css|less|sass|scss|jpg|jpeg|gif|png|svg)',
       'common/**/*.+(js|jsx|ts|tsx|json|snap|css|less|sass|scss|jpg|jpeg|gif|png|svg)',

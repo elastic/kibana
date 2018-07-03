@@ -7,9 +7,8 @@
 import { ElasticsearchBeatsAdapter } from '../adapters/beats/elasticsearch_beats_adapter';
 import { ElasticsearchTagsAdapter } from '../adapters/tags/elasticsearch_tags_adapter';
 import { ElasticsearchTokensAdapter } from '../adapters/tokens/elasticsearch_tokens_adapter';
-import { KibanaDatabaseAdapter } from './../adapters/database/kibana_database_adapter';
 
-import { KibanaBackendFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
+import { KibanaBackendFrameworkAdapter } from '../adapters/famework/kibana_framework_adapter';
 
 import { CMBeatsDomain } from '../domains/beats';
 import { CMTagsDomain } from '../domains/tags';
@@ -17,24 +16,19 @@ import { CMTokensDomain } from '../domains/tokens';
 
 import { CMDomainLibs, CMServerLibs } from '../lib';
 
-export function compose(server: any): CMServerLibs {
-  const framework = new KibanaBackendFrameworkAdapter(server);
-  const database = new KibanaDatabaseAdapter(server.plugins.elasticsearch);
+import { Server } from 'hapi';
 
-  const tags = new CMTagsDomain(new ElasticsearchTagsAdapter(database));
-  const tokens = new CMTokensDomain(
-    new ElasticsearchTokensAdapter(database, framework),
-    {
-      framework,
-    }
-  );
-  const beats = new CMBeatsDomain(
-    new ElasticsearchBeatsAdapter(database, framework),
-    {
-      tags,
-      tokens,
-    }
-  );
+export function compose(server: Server): CMServerLibs {
+  const framework = new KibanaBackendFrameworkAdapter(server);
+
+  const tags = new CMTagsDomain(new ElasticsearchTagsAdapter(framework));
+  const tokens = new CMTokensDomain(new ElasticsearchTokensAdapter(framework), {
+    framework,
+  });
+  const beats = new CMBeatsDomain(new ElasticsearchBeatsAdapter(framework), {
+    tags,
+    tokens,
+  });
 
   const domainLibs: CMDomainLibs = {
     beats,
@@ -44,7 +38,6 @@ export function compose(server: any): CMServerLibs {
 
   const libs: CMServerLibs = {
     framework,
-    database,
     ...domainLibs,
   };
 
