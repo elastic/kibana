@@ -154,6 +154,7 @@ export async function getTimeseriesData({
   const avgResponseTimesAnomalies = await getAvgResponseTimeAnomalies({
     serviceName,
     transactionType,
+    transactionName,
     setup
   });
 

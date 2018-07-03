@@ -12,10 +12,16 @@ import { getBucketWithInitialAnomalyBounds } from './get_buckets_with_initial_an
 export async function getAvgResponseTimeAnomalies({
   serviceName,
   transactionType,
+  transactionName,
   setup
 }) {
   const { start, end, client } = setup;
   const { intervalString, bucketSize } = getBucketSize(start, end, 'auto');
+
+  // don't fetch anomalies for transaction details page
+  if (transactionName) {
+    return [];
+  }
 
   const aggs = await getAnomalyAggs({
     serviceName,
