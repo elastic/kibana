@@ -140,8 +140,7 @@ const CourierRequestHandlerProvider = function () {
             }).then(async resp => {
               for (const agg of aggs) {
                 if (_.has(agg, 'type.postFlightRequest')) {
-                  const nestedSearchSource = requestSearchSource.makeChild();
-                  resp = await agg.type.postFlightRequest(resp, aggs, agg, nestedSearchSource);
+                  resp = await agg.type.postFlightRequest(resp, aggs, agg, requestSearchSource);
                 }
               }
 

@@ -27,7 +27,6 @@ import { relativeOptions } from './relative_options';
 import { parseRelativeParts } from './parse_relative_parts';
 import dateMath from '@kbn/datemath';
 import moment from 'moment';
-import { Notifier } from '../notify';
 import './timepicker.less';
 import '../directives/input_datetime';
 import '../directives/inequality';
@@ -38,9 +37,6 @@ import { TIME_MODES } from './modes';
 import { timeUnits } from './time_units';
 import { prettyInterval } from './pretty_interval';
 const module = uiModules.get('ui/timepicker');
-const notify = new Notifier({
-  location: 'timepicker',
-});
 
 module.directive('kbnTimepicker', function (refreshIntervals) {
   return {
@@ -103,10 +99,18 @@ module.directive('kbnTimepicker', function (refreshIntervals) {
       // If we always return a new object from the getters below (pickFromDate and pickToDate) we'll create an
       // infinite digest loop, so we maintain these copies to return instead.
       $scope.$watch('absolute.from', function (newDate) {
+        if (!newDate) {
+          return;
+        }
+
         _.set($scope, 'browserAbsolute.from', new Date(newDate.year(), newDate.month(), newDate.date()));
       });
 
       $scope.$watch('absolute.to', function (newDate) {
+        if (!newDate) {
+          return;
+        }
+
         _.set($scope, 'browserAbsolute.to', new Date(newDate.year(), newDate.month(), newDate.date()));
       });
 
@@ -237,10 +241,7 @@ module.directive('kbnTimepicker', function (refreshIntervals) {
 
       $scope.setRefreshInterval = function (interval) {
         interval = _.clone(interval || {});
-        notify.log('before: ' + interval.pause);
         interval.pause = (interval.pause == null || interval.pause === false) ? false : true;
-
-        notify.log('after: ' + interval.pause);
 
         $scope.onIntervalSelect({
           interval: {

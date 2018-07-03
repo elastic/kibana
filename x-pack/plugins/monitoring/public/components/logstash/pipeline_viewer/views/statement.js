@@ -6,10 +6,65 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import {
+  EuiButtonEmpty,
+  EuiCodeBlock,
+  EuiFlexItem } from '@elastic/eui';
 import { PluginStatement as PluginStatementModel } from '../models/pipeline/plugin_statement';
 import { CollapsibleStatement } from './collapsible_statement';
 import { IfElement } from '../models/list/if_element';
 import { PluginStatement } from './plugin_statement';
+
+function renderStatementName(name, onVertexSelected) {
+  return (
+    <EuiFlexItem
+      grow={false}
+      key="statementName"
+    >
+      <EuiButtonEmpty
+        color="text"
+        size="xs"
+        onClick={onVertexSelected}
+        flush="left"
+      >
+        <span className="pipelineViewer__conditional">{name}</span>
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+  );
+}
+
+function renderIfStatement({ condition }, onVertexSelected) {
+  return [
+    renderStatementName('if', onVertexSelected),
+    (
+      <EuiFlexItem
+        key="ifContent"
+        grow={false}
+      >
+        <EuiCodeBlock
+          fontSize="s"
+          paddingSize="none"
+          transparentBackground={true}
+        >
+          {condition}
+        </EuiCodeBlock>
+      </EuiFlexItem>
+    )
+  ];
+}
+
+function getStatementBody(
+  isIf,
+  statement,
+  vertex,
+  onShowVertexDetails
+) {
+  const showVertexDetailsClicked = () => { onShowVertexDetails(vertex); };
+
+  return isIf
+    ? renderIfStatement(statement, showVertexDetailsClicked)
+    : renderStatementName('else', showVertexDetailsClicked);
+}
 
 function renderNestingSpacers(depth) {
   const spacers = [];
@@ -25,6 +80,7 @@ function renderStatement({
   element: {
     id,
     statement,
+    statement: { vertex }
   },
   expand,
   isCollapsed,
@@ -39,16 +95,22 @@ function renderStatement({
     );
   }
 
+  const statementBody = getStatementBody(
+    element instanceof IfElement,
+    statement,
+    vertex,
+    onShowVertexDetails
+  );
+
   return (
     <CollapsibleStatement
       expand={expand}
       collapse={collapse}
-      statement={statement}
-      isIf={element instanceof IfElement}
       isCollapsed={isCollapsed}
       id={id}
-      onShowVertexDetails={onShowVertexDetails}
-    />
+    >
+      {statementBody}
+    </CollapsibleStatement>
   );
 }
 

@@ -38,12 +38,14 @@ export default function ({ getService, getPageObjects }) {
       it('should show the correct count in the legend with 2h offset', async function () {
         await PageObjects.visualBuilder.clickSeriesOption();
         await PageObjects.visualBuilder.enterOffsetSeries('2h');
+        await PageObjects.header.waitUntilLoadingHasFinished();
         const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
         expect(actualCount).to.be('293');
       });
 
       it('should show the correct count in the legend with -2h offset', async function () {
         await PageObjects.visualBuilder.enterOffsetSeries('-2h');
+        await PageObjects.header.waitUntilLoadingHasFinished();
         const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
         expect(actualCount).to.be('53');
       });
@@ -163,6 +165,7 @@ export default function ({ getService, getPageObjects }) {
 
         it('allow positive time offsets', async () => {
           await PageObjects.visualBuilder.enterOffsetSeries('2h');
+          await PageObjects.header.waitUntilLoadingHasFinished();
           const text = await PageObjects.visualBuilder.getMarkdownText();
           const [timestamp, value] = text.split('#');
           expect(timestamp).to.be('1442901600000');
@@ -171,6 +174,7 @@ export default function ({ getService, getPageObjects }) {
 
         it('allow negative time offsets', async () => {
           await PageObjects.visualBuilder.enterOffsetSeries('-2h');
+          await PageObjects.header.waitUntilLoadingHasFinished();
           const text = await PageObjects.visualBuilder.getMarkdownText();
           const [timestamp, value] = text.split('#');
           expect(timestamp).to.be('1442901600000');
