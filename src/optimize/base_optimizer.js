@@ -20,10 +20,11 @@
 import { writeFile } from 'fs';
 
 import Boom from 'boom';
-import ExtractTextPlugin from 'extract-text-webpack-plugin';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import webpack from 'webpack';
 import Stats from 'webpack/lib/Stats';
 import webpackMerge from 'webpack-merge';
+import HardSourceWebpackPlugin from 'hard-source-webpack-plugin';
 
 import { defaults } from 'lodash';
 
@@ -36,6 +37,7 @@ const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
 const BABEL_EXCLUDE_RE = [
   /[\/\\](webpackShims|node_modules|bower_components)[\/\\]/,
 ];
+const STATS_WARNINGS_FILTER = /export .* was not found in/;
 
 export default class BaseOptimizer {
   constructor(opts) {
@@ -70,14 +72,62 @@ export default class BaseOptimizer {
     const compilerConfig = this.getConfig();
     this.compiler = webpack(compilerConfig);
 
-    this.compiler.plugin('done', stats => {
-      if (!this.profile) return;
+    this.compiler.hooks.done.tap({
+      name: 'kibana-writeStatsJson',
+      fn: stats => {
+        if (!this.profile) {
+          return;
+        }
 
-      const path = this.uiBundles.resolvePath('stats.json');
-      const content = JSON.stringify(stats.toJson());
-      writeFile(path, content, function (err) {
-        if (err) throw err;
-      });
+        const path = this.uiBundles.resolvePath('stats.json');
+        const content = JSON.stringify(stats.toJson());
+        writeFile(path, content, function (err) {
+          if (err) throw err;
+        });
+      }
+    });
+
+    this.compiler.hooks.done.tap({
+      name: 'kibana-flushNonHardSourceCache',
+      fn: (stats) => {
+        // after a compilation we look through the compilation cache and eject
+        // items that were not loaded from the hard-source cache but will be
+        // the next time they are compiled. This causes subsequent compilations
+        // to read from the hard-source cache which is much faster
+        const { compilation } = stats;
+        for (const [key, module] of Object.entries(compilation.cache)) {
+          if (!module) {
+            continue;
+          }
+
+          if (module.cacheItem) {
+            // item was restored by hard-source-weback-plugin
+            // so don't flush it from the cache
+            continue;
+          }
+
+          // try to identify if this module is eligible for hard-source caching
+          const probablyCachedByHardSource = (
+            // only things webpack considers cacheable
+            (module.buildInfo ? module.buildInfo.cacheable : module.cacheable)
+
+            // ignored modules are cachable, but hard-source ignores them too
+            && !key.startsWith('mignored ')
+
+            // modules from mini-css-extract are ignored by hard-source because
+            // of how they are integrated with webpack
+            && !(
+              key.startsWith('mcss ')
+              || key.startsWith('mini-css-extract-plugin.')
+              || key.match(/mini-css-extract-plugin[\\/]dist[\\/]loader.js/)
+            )
+          );
+
+          if (probablyCachedByHardSource) {
+            compilation.cache[key] = null;
+          }
+        }
+      }
     });
 
     return this.compiler;
@@ -85,57 +135,29 @@ export default class BaseOptimizer {
 
   getConfig() {
     function getStyleLoaders(preProcessors = [], postProcessors = []) {
-      return ExtractTextPlugin.extract({
-        fallback: {
-          loader: 'style-loader'
-        },
-        use: [
-          ...postProcessors,
-          {
-            loader: 'css-loader',
-            options: {
-              // importLoaders needs to know the number of loaders that follow this one,
-              // so we add 1 (for the postcss-loader) to the length of the preProcessors
-              // array that we merge into this array
-              importLoaders: 1 + preProcessors.length,
-            },
-          },
-          {
-            loader: 'postcss-loader',
-            options: {
-              config: {
-                path: POSTCSS_CONFIG_PATH,
-              },
-            },
-          },
-          ...preProcessors,
-        ],
-      });
-    }
-
-    const nodeModulesPath = fromRoot('node_modules');
-
-    /**
-     * Adds a cache loader if we're running in dev mode. The reason we're not adding
-     * the cache-loader when running in production mode is that it creates cache
-     * files in optimize/.cache that are not necessary for distributable versions
-     * of Kibana and just make compressing and extracting it more difficult.
-     */
-    const maybeAddCacheLoader = (cacheName, loaders) => {
-      if (IS_KIBANA_DISTRIBUTABLE) {
-        return loaders;
-      }
-
       return [
+        MiniCssExtractPlugin.loader,
+        ...postProcessors,
         {
-          loader: 'cache-loader',
+          loader: 'css-loader',
           options: {
-            cacheDirectory: this.uiBundles.getCacheDirectory(cacheName)
-          }
+            // importLoaders needs to know the number of loaders that follow this one,
+            // so we add 1 (for the postcss-loader) to the length of the preProcessors
+            // array that we merge into this array
+            importLoaders: 1 + preProcessors.length,
+          },
         },
-        ...loaders
+        {
+          loader: 'postcss-loader',
+          options: {
+            config: {
+              path: POSTCSS_CONFIG_PATH,
+            },
+          },
+        },
+        ...preProcessors,
       ];
-    };
+    }
 
     /**
      * Creates the selection rules for a loader that will only pass for
@@ -156,6 +178,8 @@ export default class BaseOptimizer {
     };
 
     const commonConfig = {
+      mode: 'none',
+
       node: { fs: 'empty' },
       context: fromRoot('.'),
       entry: this.uiBundles.toWebpackEntries(),
@@ -171,22 +195,40 @@ export default class BaseOptimizer {
         devtoolModuleFilenameTemplate: '[absolute-resource-path]'
       },
 
+      optimization: {
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            vendors: {
+              name: 'vendors',
+              test: /[\\/]node_modules[\\/]/,
+              priority: -10,
+              minSize: 0,
+              minChunks: 1,
+              maxInitialRequests: Infinity,
+              maxAsyncRequests: Infinity,
+            },
+            commons: {
+              name: 'commons',
+              priority: -20,
+              minChunks: 2,
+              reuseExistingChunk: true,
+            }
+          }
+        }
+      },
+
       plugins: [
-        new ExtractTextPlugin('[name].style.css', {
-          allChunks: true
+        new HardSourceWebpackPlugin({
+          cacheDirectory: this.uiBundles.resolvePath('../.cache/hard-source/[confighash]'),
+          info: {
+            mode: 'none',
+            level: 'warn',
+          },
         }),
 
-        new webpack.optimize.CommonsChunkPlugin({
-          name: 'commons',
-          filename: 'commons.bundle.js',
-          minChunks: 2,
-        }),
-
-        new webpack.optimize.CommonsChunkPlugin({
-          name: 'vendors',
-          filename: 'vendors.bundle.js',
-          // only combine node_modules from Kibana
-          minChunks: module => module.context && module.context.indexOf(nodeModulesPath) !== -1
+        new MiniCssExtractPlugin({
+          filename: '[name].style.css',
         }),
 
         new webpack.NoEmitOnErrorsPlugin(),
@@ -223,10 +265,7 @@ export default class BaseOptimizer {
         rules: [
           {
             test: /\.less$/,
-            use: getStyleLoaders(
-              ['less-loader'],
-              maybeAddCacheLoader('less', [])
-            ),
+            use: getStyleLoaders(['less-loader']),
           },
           {
             test: /\.css$/,
@@ -251,7 +290,7 @@ export default class BaseOptimizer {
           },
           {
             resource: createSourceFileResourceSelector(/\.js$/),
-            use: maybeAddCacheLoader('babel', [
+            use: [
               {
                 loader: 'babel-loader',
                 options: {
@@ -261,7 +300,7 @@ export default class BaseOptimizer {
                   ],
                 },
               }
-            ]),
+            ]
           },
           ...this.uiBundles.getPostLoaders().map(loader => ({
             enforce: 'post',
@@ -292,7 +331,7 @@ export default class BaseOptimizer {
         rules: [
           {
             resource: createSourceFileResourceSelector(/\.tsx?$/),
-            use: maybeAddCacheLoader('typescript', [
+            use: [
               {
                 loader: 'ts-loader',
                 options: {
@@ -306,21 +345,10 @@ export default class BaseOptimizer {
                   }
                 }
               }
-            ]),
+            ],
           }
         ]
       },
-
-      stats: {
-        // when typescript doesn't do a full type check, as we have the ts-loader
-        // configured here, it does not have enough information to determine
-        // whether an imported name is a type or not, so when the name is then
-        // exported, typescript has no choice but to emit the export. Fortunately,
-        // the extraneous export should not be harmful, so we just suppress these warnings
-        // https://github.com/TypeStrong/ts-loader#transpileonly-boolean-defaultfalse
-        warningsFilter: /export .* was not found in/
-      },
-
       resolve: {
         extensions: ['.ts', '.tsx'],
       },
@@ -352,18 +380,14 @@ export default class BaseOptimizer {
 
     // in production we set the process.env.NODE_ENV and uglify our bundles
     const productionConfig = {
+      optimization: {
+        minimize: true
+      },
       plugins: [
         new webpack.DefinePlugin({
           'process.env': {
             'NODE_ENV': '"production"'
           }
-        }),
-        new webpack.optimize.UglifyJsPlugin({
-          compress: {
-            warnings: false
-          },
-          sourceMap: false,
-          mangle: false
         }),
       ]
     };
@@ -379,16 +403,37 @@ export default class BaseOptimizer {
     );
   }
 
+  isFailure(stats) {
+    if (stats.hasErrors()) {
+      return true;
+    }
+
+    const { warnings } = stats.toJson({ all: false, warnings: true });
+
+    // when typescript doesn't do a full type check, as we have the ts-loader
+    // configured here, it does not have enough information to determine
+    // whether an imported name is a type or not, so when the name is then
+    // exported, typescript has no choice but to emit the export. Fortunately,
+    // the extraneous export should not be harmful, so we just suppress these warnings
+    // https://github.com/TypeStrong/ts-loader#transpileonly-boolean-defaultfalse
+    const filteredWarnings = Stats.filterWarnings(warnings, STATS_WARNINGS_FILTER);
+
+    return filteredWarnings.length > 0;
+  }
+
   failedStatsToError(stats) {
     const details = stats.toString(defaults(
-      { colors: true },
+      { colors: true, warningsFilter: STATS_WARNINGS_FILTER },
       Stats.presetToOptions('minimal')
     ));
 
     return Boom.create(
       500,
       `Optimizations failure.\n${details.split('\n').join('\n    ')}\n`,
-      stats.toJson(Stats.presetToOptions('detailed'))
+      stats.toJson(defaults({
+        warningsFilter: STATS_WARNINGS_FILTER,
+        ...Stats.presetToOptions('detailed')
+      }))
     );
   }
 }
