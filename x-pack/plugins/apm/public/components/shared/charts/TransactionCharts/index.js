@@ -145,7 +145,7 @@ function responseTimeLabel(type) {
 
 Charts.propTypes = {
   charts: PropTypes.object.isRequired,
-  ChartHeaderContent: PropTypes.bool,
+  ChartHeaderContent: PropTypes.object,
   location: PropTypes.object.isRequired,
   urlParams: PropTypes.object.isRequired
 };

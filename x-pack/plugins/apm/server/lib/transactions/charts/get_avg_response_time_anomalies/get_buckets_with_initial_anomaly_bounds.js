@@ -40,7 +40,7 @@ export async function getBucketWithInitialAnomalyBounds({
 
   return mainBuckets.map((bucket, i) => {
     // replace first item
-    if (i === 0) {
+    if (i === 0 && firstBucketWithBounds) {
       return {
         ...bucket,
         upper: { value: firstBucketWithBounds.upper.value },
