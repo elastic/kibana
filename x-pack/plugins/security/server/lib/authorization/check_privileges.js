@@ -7,7 +7,7 @@
 import { uniq } from 'lodash';
 import { getClient } from '../../../../../server/lib/get_client_shield';
 import { DEFAULT_RESOURCE } from '../../../common/constants';
-import { getVersionAction, getLoginAction } from '../privileges';
+import { getVersionAction, getLoginAction } from './privileges';
 
 export const CHECK_PRIVILEGES_RESULT = {
   UNAUTHORIZED: Symbol(),

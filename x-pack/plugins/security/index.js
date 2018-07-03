@@ -17,11 +17,10 @@ import { authenticateFactory } from './server/lib/auth_redirect';
 import { checkLicense } from './server/lib/check_license';
 import { initAuthenticator } from './server/lib/authentication/authenticator';
 import { initPrivilegesApi } from './server/routes/api/v1/privileges';
-import { checkPrivilegesWithRequestFactory } from './server/lib/authorization/check_privileges';
 import { SecurityAuditLogger } from './server/lib/audit_logger';
 import { AuditLogger } from '../../server/lib/audit_logger';
 import { SecureSavedObjectsClient } from './server/lib/saved_objects_client/secure_saved_objects_client';
-import { registerPrivilegesWithCluster } from './server/lib/privileges';
+import { checkPrivilegesWithRequestFactory, registerPrivilegesWithCluster } from './server/lib/authorization';
 import { watchStatusAndLicenseToInitialize } from './server/lib/watch_status_and_license_to_initialize';
 
 export const security = (kibana) => new kibana.Plugin({

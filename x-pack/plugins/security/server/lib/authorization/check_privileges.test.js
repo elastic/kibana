@@ -7,7 +7,7 @@
 import { checkPrivilegesWithRequestFactory, CHECK_PRIVILEGES_RESULT } from './check_privileges';
 import { getClient } from '../../../../../server/lib/get_client_shield';
 import { DEFAULT_RESOURCE } from '../../../common/constants';
-import { getLoginAction, getVersionAction } from '../privileges';
+import { getLoginAction, getVersionAction } from './privileges';
 
 jest.mock('../../../../../server/lib/get_client_shield', () => ({
   getClient: jest.fn()

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerPrivilegesWithCluster } from './privilege_action_registry';
+import { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
 import { getClient } from '../../../../../server/lib/get_client_shield';
 import { buildPrivilegeMap } from './privileges';
 jest.mock('../../../../../server/lib/get_client_shield', () => ({

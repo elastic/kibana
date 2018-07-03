@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { buildPrivilegeMap } from '../../../lib/privileges/privileges';
+import { buildPrivilegeMap } from '../../../lib/authorization';
 
 export function initPrivilegesApi(server) {
   const config = server.config();

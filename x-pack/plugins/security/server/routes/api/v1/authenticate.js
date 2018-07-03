@@ -9,8 +9,7 @@ import Joi from 'joi';
 import { wrapError } from '../../../lib/errors';
 import { BasicCredentials } from '../../../../server/lib/authentication/providers/basic';
 import { canRedirectRequest } from '../../../lib/can_redirect_request';
-import { checkPrivilegesWithRequestFactory, CHECK_PRIVILEGES_RESULT } from '../../../../server/lib/authorization/check_privileges';
-import { getLoginAction } from '../../../../server/lib/privileges';
+import { checkPrivilegesWithRequestFactory, CHECK_PRIVILEGES_RESULT, getLoginAction } from '../../../../server/lib/authorization';
 
 export function initAuthenticateApi(server) {
 
