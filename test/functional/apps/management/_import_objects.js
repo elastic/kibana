@@ -44,8 +44,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.clickImportDone();
       await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
       const objects = await PageObjects.settings.getSavedObjectsInTable();
-      const savedObjectImported = objects.includes('Log Agents');
-      expect(savedObjectImported).to.be(true);
+      const isSavedObjectImported = objects.includes('Log Agents');
+      expect(isSavedObjectImported).to.be(true);
     });
 
     it('should provide dialog to allow the importing of saved objects with index pattern conflicts', async function () {
@@ -58,8 +58,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.clickImportDone();
       await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
       const objects = await PageObjects.settings.getSavedObjectsInTable();
-      const savedObjectImported = objects.includes('saved object with index pattern conflict');
-      expect(savedObjectImported).to.be(true);
+      const isSavedObjectImported = objects.includes('saved object with index pattern conflict');
+      expect(isSavedObjectImported).to.be(true);
     });
 
     // Test should be testing that user is warned when saved object will override another because of an id collision
@@ -129,8 +129,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
       const objects = await PageObjects.settings.getSavedObjectsInTable();
-      const savedObjectImported = objects.includes('saved object connected to saved search');
-      expect(savedObjectImported).to.be(true);
+      const isSavedObjectImported = objects.includes('saved object connected to saved search');
+      expect(isSavedObjectImported).to.be(true);
     });
 
     it('should not import saved objects linked to saved searches when saved search index pattern has been deleted', async function () {
@@ -157,8 +157,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
       const objects = await PageObjects.settings.getSavedObjectsInTable();
-      const savedObjectImported = objects.includes('saved object connected to saved search');
-      expect(savedObjectImported).to.be(false);
+      const isSavedObjectImported = objects.includes('saved object connected to saved search');
+      expect(isSavedObjectImported).to.be(false);
     });
 
     it('should import saved objects with index patterns when index patterns already exists', async () => {
@@ -171,8 +171,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
       const objects = await PageObjects.settings.getSavedObjectsInTable();
-      const savedObjectImported = objects.includes('saved object imported with index pattern');
-      expect(savedObjectImported).to.be(true);
+      const isSavedObjectImported = objects.includes('saved object imported with index pattern');
+      expect(isSavedObjectImported).to.be(true);
     });
 
     it('should import saved objects with index patterns when index patterns does not exists', async () => {
@@ -194,8 +194,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
       const objects = await PageObjects.settings.getSavedObjectsInTable();
-      const savedObjectImported = objects.includes('saved object imported with index pattern');
-      expect(savedObjectImported).to.be(true);
+      const isSavedObjectImported = objects.includes('saved object imported with index pattern');
+      expect(isSavedObjectImported).to.be(true);
     });
   });
 }
