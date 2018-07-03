@@ -94,7 +94,7 @@ uiModules.get('kibana')
         $scope.$watch('searchSource', function () {
           if (!$scope.searchSource) return;
 
-          $scope.indexPattern = $scope.searchSource.getValue('index');
+          $scope.indexPattern = $scope.searchSource.getField('index');
 
           $scope.searchSource.setField('size', config.get('discover:sampleSize'));
           $scope.searchSource.setField('sort', getSort($scope.sorting, $scope.indexPattern));
