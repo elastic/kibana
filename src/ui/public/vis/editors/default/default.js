@@ -54,7 +54,6 @@ const defaultEditor = function ($rootScope, $compile) {
       const updateScope = () => {
         $scope.vis = this.vis;
         $scope.uiState = uiState;
-        //$scope.$apply();
       };
 
       return new Promise(resolve => {

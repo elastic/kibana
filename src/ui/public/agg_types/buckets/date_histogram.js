@@ -29,6 +29,8 @@ import { createFilterDateHistogram } from './create_filter/date_histogram';
 import { intervalOptions } from './_interval_options';
 import intervalTemplate from '../controls/time_interval.html';
 
+const timeBucketCache = new WeakMap();
+
 const config = chrome.getUiSettingsClient();
 const detectedTimezone = tzDetect.determine().name();
 const tzOffset = moment().format('Z');
@@ -48,12 +50,22 @@ function getBounds(vis) {
 }
 
 function setBounds(agg, force) {
-  if (agg.buckets._alreadySet && !force) return;
-  agg.buckets._alreadySet = true;
-  const bounds = getBounds(agg.vis);
-  agg.buckets.setBounds(agg.fieldIsTimeField() && bounds);
+  const timeBuckets = getTimeBuckets(agg);
+  if (timeBuckets._alreadySet && !force) return;
+  timeBuckets._alreadySet = true;
+  timeBuckets.setBounds(agg.fieldIsTimeField() && getBounds(agg.vis));
 }
 
+function getTimeBuckets(aggConfig) {
+  if (timeBucketCache.has(aggConfig)) {
+    return timeBucketCache.get(aggConfig);
+  }
+  const buckets = new TimeBuckets();
+  timeBucketCache.set(aggConfig, buckets);
+  buckets.setInterval(getInterval(aggConfig));
+  setBounds(aggConfig);
+  return buckets;
+}
 
 export const dateHistogramBucketAgg = new BucketAggType({
   name: 'date_histogram',
@@ -67,25 +79,8 @@ export const dateHistogramBucketAgg = new BucketAggType({
     return field + ' per ' + (output.metricScaleText || output.bucketInterval.description);
   },
   createFilter: createFilterDateHistogram,
-  decorateAggConfig: function () {
-    let buckets;
-    return {
-      buckets: {
-        configurable: true,
-        get: function () {
-          if (buckets) return buckets;
-
-          buckets = new TimeBuckets();
-          buckets.setInterval(getInterval(this));
-          setBounds(this);
-
-          return buckets;
-        }
-      }
-    };
-  },
   getFormat: function (agg) {
-    return agg.buckets.getScaledDateFormatter();
+    return getTimeBuckets(agg).getScaledDateFormatter();
   },
   params: [
     {
@@ -122,9 +117,10 @@ export const dateHistogramBucketAgg = new BucketAggType({
       },
       write: function (agg, output) {
         setBounds(agg);
-        agg.buckets.setInterval(getInterval(agg));
+        const timeBuckets = getTimeBuckets(agg);
+        timeBuckets.setInterval(getInterval(agg));
 
-        const interval = agg.buckets.getInterval();
+        const interval = timeBuckets.getInterval();
         output.bucketInterval = interval;
         output.params.interval = interval.expression;
 
