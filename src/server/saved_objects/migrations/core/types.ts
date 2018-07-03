@@ -26,7 +26,9 @@ export type LogFn = (path: string[], message: string) => void;
 export interface CallCluster {
   (path: 'bulk', opts: { body: object[] }): Promise<BulkResult>;
   (path: 'clearScroll', opts: { scrollId: string }): Promise<any>;
-  (path: 'indices.create', opts: IndexCreationOpts): Promise<any>;
+  (path: 'indices.create' | 'indices.delete', opts: IndexCreationOpts): Promise<
+    any
+  >;
   (path: 'indices.exists', opts: IndexOpts): Promise<boolean>;
   (path: 'indices.get', opts: IndexOpts & Ignorable): Promise<
     IndicesInfo | NotFound
