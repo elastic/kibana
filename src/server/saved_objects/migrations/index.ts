@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { getActiveMappings } from './core';
+export { buildActiveMappings } from './core';
 export { getMigrationPlugins, patchKibanaIndexMappings } from './kibana_index';
