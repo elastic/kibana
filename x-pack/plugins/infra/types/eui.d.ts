@@ -10,7 +10,15 @@
  */
 
 declare module '@elastic/eui' {
-  import { SFC } from 'react';
+  import { Moment } from 'moment';
+  import {
+    ChangeEventHandler,
+    MouseEventHandler,
+    ReactType,
+    Ref,
+    SFC,
+  } from 'react';
+  import { ReactDatePickerProps } from 'react-datepicker';
 
   export interface EuiBreadcrumbDefinition {
     text: React.ReactNode;
@@ -35,4 +43,50 @@ declare module '@elastic/eui' {
 
   type EuiHeaderBreadcrumbsProps = EuiBreadcrumbsProps;
   export const EuiHeaderBreadcrumbs: React.SFC<EuiHeaderBreadcrumbsProps>;
+
+  type EuiDatePickerProps = CommonProps &
+    Pick<
+      ReactDatePickerProps,
+      Exclude<
+        keyof ReactDatePickerProps,
+        | 'monthsShown'
+        | 'showWeekNumbers'
+        | 'fixedHeight'
+        | 'dropdownMode'
+        | 'useShortMonthInDropdown'
+        | 'todayButton'
+        | 'timeCaption'
+        | 'disabledKeyboardNavigation'
+        | 'isClearable'
+        | 'withPortal'
+        | 'ref'
+        | 'placeholderText'
+      >
+    > & {
+      fullWidth?: boolean;
+      inputRef?: Ref<Element | ReactType>;
+      injectTimes?: Moment[];
+      isInvalid?: boolean;
+      isLoading?: boolean;
+      placeholder?: string;
+      shadow?: boolean;
+    };
+  export const EuiDatePicker: React.SFC<EuiDatePickerProps>;
+
+  type EuiFilterGroupProps = CommonProps;
+  export const EuiFilterGroup: React.SFC<EuiFilterGroupProps>;
+
+  type EuiFilterButtonProps = CommonProps & {
+    color?: ButtonColor;
+    href?: string;
+    iconSide?: ButtonIconSide;
+    iconType?: IconType;
+    isDisabled?: boolean;
+    isSelected?: boolean;
+    onClick: MouseEventHandler<HTMLElement>;
+    rel?: string;
+    target?: string;
+    type?: string;
+  };
+  export const EuiFilterButton: React.SFC<EuiFilterButtonProps>;
 }

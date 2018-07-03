@@ -19,8 +19,6 @@ import { AutoSizer } from '../../components/auto_sizer';
 import { Toolbar } from '../../components/eui';
 import { Header } from '../../components/header';
 import { LogCustomizationMenu } from '../../components/logging/log_customization_menu';
-import { LogJumpMenu } from '../../components/logging/log_jump_menu';
-import { LogLiveStreamControls } from '../../components/logging/log_live_stream_controls';
 import { LogMinimap } from '../../components/logging/log_minimap';
 import { LogMinimapScaleControls } from '../../components/logging/log_minimap_scale_controls';
 import { LogPositionText } from '../../components/logging/log_position_text';
@@ -29,30 +27,35 @@ import { LogStatusbar, LogStatusbarItem } from '../../components/logging/log_sta
 import { LogTextScaleControls } from '../../components/logging/log_text_scale_controls';
 import { ScrollableLogTextStreamView } from '../../components/logging/log_text_stream';
 import { LogTextWrapControls } from '../../components/logging/log_text_wrap_controls';
+import { LogTimeControls } from '../../components/logging/log_time_controls';
 
 import { withLibs } from '../../containers/libs';
 import { State, targetActions } from '../../containers/logging_legacy/state';
-import { withJumpMenuProps } from '../../containers/logging_legacy/with_jump_menu_props';
-import { withLiveStreamControlsProps } from '../../containers/logging_legacy/with_live_stream_controls_props';
 import { withLogSearchControlsProps } from '../../containers/logging_legacy/with_log_search_controls_props';
 import { withMinimapProps } from '../../containers/logging_legacy/with_minimap_props';
 import { withMinimapScaleControlsProps } from '../../containers/logging_legacy/with_minimap_scale_controls_props';
 import { withStreamItems } from '../../containers/logging_legacy/with_stream_items';
 import { withTextScaleControlsProps } from '../../containers/logging_legacy/with_text_scale_controls_props';
 import { withTextWrapControlsProps } from '../../containers/logging_legacy/with_text_wrap_controls_props';
+import { withTimeControlsProps } from '../../containers/logging_legacy/with_time_controls_props';
 import { withVisibleLogEntries } from '../../containers/logging_legacy/with_visible_log_entries';
 
-// TODO: split out containers
-
-const ConnectedLogJumpMenu = withJumpMenuProps(LogJumpMenu);
-const ConnectedLogLiveStreamControls = withLiveStreamControlsProps(LogLiveStreamControls);
 const ConnectedLogMinimap = withMinimapProps(LogMinimap);
 const ConnectedLogMinimapScaleControls = withMinimapScaleControlsProps(LogMinimapScaleControls);
 const ConnectedLogPositionText = withVisibleLogEntries(LogPositionText);
-const ConnectedLogSearchControls = withLogSearchControlsProps(LogSearchControls);
-const ConnectedLogTextScaleControls = withTextScaleControlsProps(LogTextScaleControls);
-const ConnectedLogTextWrapControls = withTextWrapControlsProps(LogTextWrapControls);
-const ConnectedScrollableLogTextStreamView = withStreamItems(ScrollableLogTextStreamView);
+const ConnectedLogSearchControls = withLogSearchControlsProps(
+  LogSearchControls
+);
+const ConnectedLogTextScaleControls = withTextScaleControlsProps(
+  LogTextScaleControls
+);
+const ConnectedLogTextWrapControls = withTextWrapControlsProps(
+  LogTextWrapControls
+);
+const ConnectedTimeControls = withTimeControlsProps(LogTimeControls);
+const ConnectedScrollableLogTextStreamView = withStreamItems(
+  ScrollableLogTextStreamView
+);
 
 interface LogsPageProps {
   libs: InfraFrontendLibs;
@@ -102,9 +105,6 @@ export const LogsPage = withLibs(
                   <ConnectedLogPositionText />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <ConnectedLogJumpMenu />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
                   <LogCustomizationMenu>
                     <ConnectedLogMinimapScaleControls />
                     <ConnectedLogTextWrapControls />
@@ -112,7 +112,7 @@ export const LogsPage = withLibs(
                   </LogCustomizationMenu>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <ConnectedLogLiveStreamControls />
+                  <ConnectedTimeControls />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </Toolbar>
