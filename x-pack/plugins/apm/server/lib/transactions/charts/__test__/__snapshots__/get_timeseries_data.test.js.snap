@@ -333,7 +333,7 @@ Object {
       52360.30017052116,
     ],
     "avg_anomalies": Object {
-      "bucketSpanInSeconds": 10800,
+      "bucketSpanAsMillis": 10800000,
       "buckets": Array [
         Object {
           "anomaly_score": 0,

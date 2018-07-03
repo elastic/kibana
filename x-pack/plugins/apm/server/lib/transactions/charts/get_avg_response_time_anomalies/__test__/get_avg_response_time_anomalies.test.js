@@ -29,7 +29,7 @@ describe('get_avg_response_time_anomalies', () => {
     });
 
     expect(avgAnomalies).toEqual({
-      bucketSpanInSeconds: 10800,
+      bucketSpanAsMillis: 10800000,
       buckets: [
         {
           anomaly_score: null,

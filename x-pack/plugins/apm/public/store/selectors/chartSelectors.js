@@ -5,7 +5,7 @@
  */
 
 import d3 from 'd3';
-import { zipObject, difference, memoize, get, isEmpty } from 'lodash';
+import { last, zipObject, difference, memoize, get, isEmpty } from 'lodash';
 import { colors } from '../../style/variables';
 import {
   asMillisWithDefault,
@@ -84,7 +84,11 @@ export function getResponseTimeSeries(chartsData) {
       title: 'Anomaly Boundaries',
       hideLegend: true,
       hideTooltipValue: true,
-      data: getAnomalyBoundaryValues(dates, avgAnomalies.buckets),
+      data: getAnomalyBoundaryValues(
+        dates,
+        avgAnomalies.buckets,
+        avgAnomalies.bucketSpanAsMillis
+      ),
       type: 'area',
       color: 'none',
       areaColor: 'rgba(49, 133, 252, 0.1)' // apmBlue
@@ -97,7 +101,7 @@ export function getResponseTimeSeries(chartsData) {
       data: getAnomalyScoreValues(
         dates,
         avgAnomalies.buckets,
-        avgAnomalies.bucketSpanInSeconds
+        avgAnomalies.bucketSpanAsMillis
       ),
       type: 'areaMaxHeight',
       color: 'none',
@@ -162,10 +166,10 @@ function getChartValues(dates = [], buckets = []) {
 export function getAnomalyScoreValues(
   dates = [],
   buckets = [],
-  bucketSpanInSeconds
+  bucketSpanAsMillis
 ) {
   const ANOMALY_THRESHOLD = 75;
-  const getX = (currentX, i) => currentX + bucketSpanInSeconds * 1000 * i;
+  const getX = (currentX, i) => currentX + bucketSpanAsMillis * i;
 
   return dates
     .map((x, i) => {
@@ -196,12 +200,29 @@ export function getAnomalyScoreValues(
     }, []);
 }
 
-function getAnomalyBoundaryValues(dates = [], buckets = []) {
+export function getAnomalyBoundaryValues(
+  dates = [],
+  buckets = [],
+  bucketSpanAsMillis
+) {
+  const lastX = last(dates);
   return dates
     .map((x, i) => ({
       x,
       y0: get(buckets[i], 'lower'),
       y: get(buckets[i], 'upper')
     }))
-    .filter(point => point.y != null);
+    .filter(point => point.y != null)
+    .reduce((acc, p, i, points) => {
+      const isLast = last(points) === p;
+      acc.push(p);
+
+      if (isLast) {
+        acc.push({
+          ...p,
+          x: Math.min(p.x + bucketSpanAsMillis, lastX) // avoid going beyond the last date
+        });
+      }
+      return acc;
+    }, []);
 }

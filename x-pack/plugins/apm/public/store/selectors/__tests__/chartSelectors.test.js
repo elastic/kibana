@@ -7,8 +7,11 @@
 import {
   getAnomalyScoreValues,
   getResponseTimeSeries,
-  getTpmSeries
+  getTpmSeries,
+  getAnomalyBoundaryValues
 } from '../chartSelectors';
+
+import anomalyData from './mockData/anomalyData.json';
 
 describe('chartSelectors', () => {
   describe('getAnomalyScoreValues', () => {
@@ -38,7 +41,7 @@ describe('chartSelectors', () => {
         }
       ];
 
-      expect(getAnomalyScoreValues(dates, buckets, 1)).toEqual([
+      expect(getAnomalyScoreValues(dates, buckets, 1000)).toEqual([
         { x: 1000, y: 1 },
         { x: 2000, y: 1 },
         { x: 3000 },
@@ -96,6 +99,39 @@ describe('chartSelectors', () => {
 
     it('should match snapshot', () => {
       expect(getTpmSeries(chartsData, transactionType)).toMatchSnapshot();
+    });
+  });
+
+  describe('getAnomalyBoundaryValues', () => {
+    const { dates, buckets } = anomalyData;
+    const bucketSpan = 240000;
+
+    it('should return correct buckets', () => {
+      expect(getAnomalyBoundaryValues(dates, buckets, bucketSpan)).toEqual([
+        { x: 1530614880000, y: 54799, y0: 15669 },
+        { x: 1530615060000, y: 49874, y0: 17808 },
+        { x: 1530615300000, y: 49421, y0: 18012 },
+        { x: 1530615540000, y: 49654, y0: 17889 },
+        { x: 1530615780000, y: 50026, y0: 17713 },
+        { x: 1530616020000, y: 49371, y0: 18044 },
+        { x: 1530616260000, y: 50110, y0: 17713 },
+        { x: 1530616500000, y: 50419, y0: 17582 },
+        { x: 1530616620000, y: 50419, y0: 17582 }
+      ]);
+    });
+
+    it('should extend the last bucket with a size of bucketSpan', () => {
+      const [lastBucket, secondLastBuckets] = getAnomalyBoundaryValues(
+        dates,
+        buckets,
+        bucketSpan
+      ).reverse();
+
+      expect(secondLastBuckets.y).toBe(lastBucket.y);
+      expect(secondLastBuckets.y0).toBe(lastBucket.y0);
+      expect(lastBucket.x - secondLastBuckets.x).toBeLessThanOrEqual(
+        bucketSpan
+      );
     });
   });
 });

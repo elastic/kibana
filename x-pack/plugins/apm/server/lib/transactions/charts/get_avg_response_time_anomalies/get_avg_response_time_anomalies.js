@@ -62,7 +62,7 @@ export async function getAvgResponseTimeAnomalies({
   });
 
   return {
-    bucketSpanInSeconds: Math.max(bucketSize, anomalyBucketSpan),
+    bucketSpanAsMillis: Math.max(bucketSize, anomalyBucketSpan) * 1000,
     buckets
   };
 }
