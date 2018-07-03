@@ -180,8 +180,8 @@ export default class DynamicBaselineFlyout extends Component {
               graph once the anomaly score is &gt;=75.
             </p>
             <img
-              src="/plugins/apm/images/dynamic_baseline.png"
-              alt="Machine Learning in APM"
+              src="/plugins/apm/images/apm-ml-anomaly-detection-example.png"
+              alt="Anomaly detection on response times in APM"
             />
             <p>
               Jobs can be created per transaction type and based on the average
