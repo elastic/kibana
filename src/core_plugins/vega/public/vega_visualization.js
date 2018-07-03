@@ -87,7 +87,6 @@ export function VegaVisualizationProvider(Private, vegaConfig, serviceSettings, 
 
         const vegaViewParams = {
           vegaConfig,
-          editorMode: this._vis.editorMode,
           parentEl: this._el,
           vegaParser,
           serviceSettings,

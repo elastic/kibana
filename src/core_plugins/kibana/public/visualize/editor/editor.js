@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 import '../saved_visualizations/saved_visualizations';
+import './visualization_editor';
 import 'ui/vis/editors/default/sidebar';
 import 'ui/visualize';
 import 'ui/collapsible_sidebar';

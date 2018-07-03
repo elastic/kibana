@@ -24,8 +24,16 @@ import { Visualization } from 'ui/visualize/visualization';
 
 
 export const visualizationLoader = (element, vis, visData, uiState, params) => {
-  const listenOnChange = _.get(params, 'listenOnChange', false);
-  render(<Visualization vis={vis} visData={visData} uiState={uiState} listenOnChange={listenOnChange} />, element);
+  return new Promise(resolve => {
+    const listenOnChange = _.get(params, 'listenOnChange', false);
+    render(<Visualization
+      vis={vis}
+      visData={visData}
+      uiState={uiState}
+      listenOnChange={listenOnChange}
+      onInit={resolve}
+    />, element);
+  });
 };
 
 visualizationLoader.destroy = (element) => {

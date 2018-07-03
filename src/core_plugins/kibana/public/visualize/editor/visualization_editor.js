@@ -17,36 +17,34 @@
  * under the License.
  */
 
-import './visualize.less';
-import './visualize_legend';
-import { uiModules } from '../modules';
+import { uiModules } from 'ui/modules';
 import 'angular-sanitize';
-import { VisEditorTypesRegistryProvider } from '../registry/vis_editor_types';
-import { getUpdateStatus } from '../vis/update_status';
+import { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
 
 uiModules
   .get('kibana/directive', ['ngSanitize'])
-  .directive('visualizationEditor', function (Private, $timeout) {
+  .directive('visualizationEditor', function (Private, $timeout, getAppState) {
     const editorTypes = Private(VisEditorTypesRegistryProvider);
 
     return {
       restrict: 'E',
       scope: {
-        vis: '=',
-        visData: '=',
+        savedObj: '=',
         uiState: '=?',
-        searchSource: '='
+        timeRange: '='
       },
       link: function ($scope, element) {
-      // Clone the _vis instance.
-        const vis = $scope.vis;
-        const Editor = typeof vis.type.editor === 'function' ? vis.type.editor :
-          editorTypes.find(editor => editor.key === vis.type.editor);
-        const editor = new Editor(element[0], vis);
+        const editorType = $scope.savedObj.vis.type.editor;
+        const Editor = typeof editorType === 'function' ? editorType :
+          editorTypes.find(editor => editor.key === editorType);
+        const editor = new Editor(element[0], $scope.savedObj);
 
         $scope.renderFunction = () => {
-          if (!$scope.vis) return;
-          editor.render($scope.visData, $scope.searchSource, getUpdateStatus(Editor.requiresUpdateStatus, $scope, $scope), $scope.uiState);
+          editor.render({
+            uiState: $scope.uiState,
+            timeRange: $scope.timeRange,
+            appState: getAppState(),
+          });
         };
 
         $scope.$on('render', (event) => {
@@ -58,9 +56,8 @@ uiModules
           editor.destroy();
         });
 
-        if (!vis.initialized) {
-          $timeout(() => { $scope.renderFunction(); });
-        }
+        $scope.$watch('timeRange', $scope.renderFunction);
+
       }
     };
   });
