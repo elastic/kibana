@@ -22,20 +22,20 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
-const filterFields = [ 'node.name', 'status', 'type', 'transport_address' ];
+const filterFields = [ 'name' ];
 const getColumns = showCgroupMetricsElasticsearch => {
   const cols = [];
   cols.push({ title: 'Name', sortKey: 'node.name', sortOrder: SORT_ASCENDING });
   cols.push({ title: 'Status', sortKey: 'online' });
   if (showCgroupMetricsElasticsearch) {
-    cols.push({ title: 'CPU Usage', sortKey: 'node_cgroup_quota.lastVal' });
-    cols.push({ title: 'CPU Throttling', sortKey: 'node_cgroup_throttled.lastVal' });
+    cols.push({ title: 'CPU Usage', sortKey: 'node_cgroup_quota.summary.lastVal' });
+    cols.push({ title: 'CPU Throttling', sortKey: 'node_cgroup_throttled.summary.lastVal' });
   } else {
-    cols.push({ title: 'CPU Usage', sortKey: 'node_cpu_utilization.lastVal' });
-    cols.push({ title: 'Load Average', sortKey: 'node_load_average.lastVal' });
+    cols.push({ title: 'CPU Usage', sortKey: 'node_cpu_utilization.summary.lastVal' });
+    cols.push({ title: 'Load Average', sortKey: 'node_load_average.summary.lastVal' });
   }
-  cols.push({ title: 'JVM Memory', sortKey: 'node_jvm_mem_percent.lastVal' });
-  cols.push({ title: 'Disk Free Space', sortKey: 'node_free_space.lastVal' });
+  cols.push({ title: 'JVM Memory', sortKey: 'node_jvm_mem_percent.summary.lastVal' });
+  cols.push({ title: 'Disk Free Space', sortKey: 'node_free_space.summary.lastVal' });
   cols.push({ title: 'Shards', sortKey: 'shardCount' });
   return cols;
 };
