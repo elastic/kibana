@@ -119,6 +119,8 @@ const defaultEditor = function ($rootScope, $compile) {
           $scope.$watch(() => {
             return $scope.vis.getSerializableState($scope.state);
           }, function (newState) {
+            // when visualization updates its `vis.params` we need to update the editor, but we should
+            // not set the dirty flag (as this change came from vis itself and is already applied)
             if (lockDirty) {
               lockDirty = false;
             } else {
@@ -137,30 +139,40 @@ const defaultEditor = function ($rootScope, $compile) {
             catch (e) {} // eslint-disable-line no-empty
           }, true);
 
+          // fires when visualization state changes, and we need to copy changes to editorState
           $scope.$watch(() => {
             return $scope.vis.getCurrentState(false);
           }, (newState) => {
-            // figure out what changed and copy into editor state
-            const recursiveCopyChanged = (src, org, dst) => {
-              for (const prop in src) {
-                if (typeof src[prop] === 'object') {
-                  if (!dst[prop]) {
-                    dst[prop] = _.cloneDeep(src[prop]);
-                    org[prop] = _.cloneDeep(src[prop]);
-                  } else {
-                    recursiveCopyChanged(src[prop], org[prop], dst[prop]);
+            const updateEditorStateWithChanges = (newState, oldState, editorState) => {
+              for (const prop in newState) {
+                if (newState.hasOwnProperty(prop)) {
+                  const newStateValue = newState[prop];
+                  const oldStateValue = oldState[prop];
+                  const editorStateValue = editorState[prop];
+
+                  if (typeof newStateValue === 'object') {
+                    if (editorStateValue) {
+                      // Keep traversing.
+                      return updateEditorStateWithChanges(newStateValue, oldStateValue, editorStateValue);
+                    }
+
+                    const newStateValueCopy = _.cloneDeep(newStateValue);
+                    editorState[prop] = newStateValueCopy;
+                    oldState[prop] = newStateValueCopy;
+                    lockDirty = true;
+                    return;
                   }
-                } else {
-                  if (src[prop] !== org[prop]) {
-                    org[prop] = src[prop];
-                    dst[prop] = src[prop];
+
+                  if (newStateValue !== oldStateValue) {
+                    oldState[prop] = newStateValue;
+                    editorState[prop] = newStateValue;
                     lockDirty = true;
                   }
                 }
               }
             };
 
-            recursiveCopyChanged(newState, $scope.oldState, $scope.state);
+            updateEditorStateWithChanges(newState, $scope.oldState, $scope.state);
           }, true);
 
           // Load the default editor template, attach it to the DOM and compile it.
