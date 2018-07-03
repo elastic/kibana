@@ -96,7 +96,7 @@ const CourierRequestHandlerProvider = function () {
         }
       });
 
-      requestSearchSource.setValue('aggs', function () {
+      requestSearchSource.setField('aggs', function () {
         return aggs.toDsl();
       });
 
@@ -104,12 +104,12 @@ const CourierRequestHandlerProvider = function () {
         return aggs.onSearchRequestStart(searchSource, searchRequest);
       });
 
-      timeFilterSearchSource.setValue('filter', () => {
-        return getTime(searchSource.getValue('index'), timeRange);
+      timeFilterSearchSource.setField('filter', () => {
+        return getTime(searchSource.getField('index'), timeRange);
       });
 
-      requestSearchSource.setValue('filter', filters);
-      requestSearchSource.setValue('query', query);
+      requestSearchSource.setField('filter', filters);
+      requestSearchSource.setField('query', query);
 
       const shouldQuery = (requestBodyHash) => {
         if (!searchSource.lastQuery || forceFetch) return true;

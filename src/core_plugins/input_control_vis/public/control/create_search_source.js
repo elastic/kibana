@@ -22,15 +22,15 @@ export function createSearchSource(kbnApi, initialState, indexPattern, aggs, use
   const searchSource = new kbnApi.SearchSource(initialState);
   // Do not not inherit from rootSearchSource to avoid picking up time and globals
   searchSource.setParent(false);
-  searchSource.setValue('filter', () => {
+  searchSource.setField('filter', () => {
     const activeFilters = [...filters];
     if (useTimeFilter) {
       activeFilters.push(kbnApi.timeFilter.createFilter(indexPattern));
     }
     return activeFilters;
   });
-  searchSource.setValue('size', 0);
+  searchSource.setField('size', 0);
   searchSource.setIndexPattern(indexPattern);
-  searchSource.setValue('aggs', aggs);
+  searchSource.setField('aggs', aggs);
   return searchSource;
 }

@@ -32,7 +32,7 @@ function createSearchSourceStubProvider(hits) {
   };
 
   searchSourceStub.setParent = sinon.stub().returns(searchSourceStub);
-  searchSourceStub.setValue = sinon.stub().returns(searchSourceStub);
+  searchSourceStub.setField = sinon.stub().returns(searchSourceStub);
   searchSourceStub.setIndexPattern = sinon.stub().returns(searchSourceStub);
   searchSourceStub.fetch = sinon.spy(() => Promise.resolve({
     hits: {
@@ -102,7 +102,7 @@ describe('context app', function () {
 
       return fetchAnchor('INDEX_PATTERN_ID', 'doc', 'id', [{ '@timestamp': 'desc' }, { '_doc': 'asc' }])
         .then(() => {
-          const setVersionSpy = searchSourceStub.setValue.withArgs('version');
+          const setVersionSpy = searchSourceStub.setField.withArgs('version');
           expect(setVersionSpy.calledOnce).to.be(true);
           expect(setVersionSpy.firstCall.args[1]).to.eql(true);
         });
@@ -113,7 +113,7 @@ describe('context app', function () {
 
       return fetchAnchor('INDEX_PATTERN_ID', 'doc', 'id', [{ '@timestamp': 'desc' }, { '_doc': 'asc' }])
         .then(() => {
-          const setSizeSpy = searchSourceStub.setValue.withArgs('size');
+          const setSizeSpy = searchSourceStub.setField.withArgs('size');
           expect(setSizeSpy.calledOnce).to.be(true);
           expect(setSizeSpy.firstCall.args[1]).to.eql(1);
         });
@@ -124,7 +124,7 @@ describe('context app', function () {
 
       return fetchAnchor('INDEX_PATTERN_ID', 'doc', 'id', [{ '@timestamp': 'desc' }, { '_doc': 'asc' }])
         .then(() => {
-          const setQuerySpy = searchSourceStub.setValue.withArgs('query');
+          const setQuerySpy = searchSourceStub.setField.withArgs('query');
           expect(setQuerySpy.calledOnce).to.be(true);
           expect(setQuerySpy.firstCall.args[1]).to.eql({
             query: {
@@ -147,7 +147,7 @@ describe('context app', function () {
 
       return fetchAnchor('INDEX_PATTERN_ID', 'doc', 'id', [{ '@timestamp': 'desc' }, { '_doc': 'asc' }])
         .then(() => {
-          const setSortSpy = searchSourceStub.setValue.withArgs('sort');
+          const setSortSpy = searchSourceStub.setField.withArgs('sort');
           expect(setSortSpy.calledOnce).to.be(true);
           expect(setSortSpy.firstCall.args[1]).to.eql([
             { '@timestamp': 'desc' },

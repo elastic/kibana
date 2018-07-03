@@ -27,10 +27,10 @@ export default function stubSearchSource(Private, $q, Promise) {
 
   let onResultsCount = 0;
   return {
-    setValue: sinon.spy(),
+    setField: sinon.spy(),
     fetch: sinon.spy(),
     destroy: sinon.spy(),
-    getValue: function (param) {
+    getField: function (param) {
       switch (param) {
         case 'index':
           return indexPattern;

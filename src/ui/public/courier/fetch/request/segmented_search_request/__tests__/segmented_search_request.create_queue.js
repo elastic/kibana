@@ -55,20 +55,20 @@ describe('SegmentedSearchRequest _createQueue', () => {
   });
 
   it('relies on indexPattern.toDetailedIndexList to generate queue', async function () {
-    const source = new MockSource();
-    const indexPattern = source.getValue('index');
+    const searchSource = new MockSource();
+    const indexPattern = searchSource.getField('index');
     const indices = [1, 2, 3];
     sinon.stub(indexPattern, 'toDetailedIndexList').returns(Promise.resolve(indices));
 
-    const req = new SegmentedSearchRequest({ source, errorHandler: () => {} });
+    const req = new SegmentedSearchRequest({ source: searchSource, errorHandler: () => {} });
     const output = await req._createQueue();
     expect(output).to.equal(indices);
   });
 
   it('tells the index pattern its direction', async function () {
-    const source = new MockSource();
-    const indexPattern = source.getValue('index');
-    const req = new SegmentedSearchRequest({ source, errorHandler: () => {} });
+    const searchSource = new MockSource();
+    const indexPattern = searchSource.getField('index');
+    const req = new SegmentedSearchRequest({ source: searchSource, errorHandler: () => {} });
     sinon.stub(indexPattern, 'toDetailedIndexList').returns(Promise.resolve([1, 2, 3]));
 
     req.setDirection('asc');

@@ -84,7 +84,7 @@ import { FieldWildcardProvider } from '../../field_wildcard';
 import { getHighlightRequest } from '../../../../core_plugins/kibana/common/highlight';
 import { BuildESQueryProvider } from './build_query';
 
-const SETTABLE_PROPS = [
+const SETTABLE_FIELDS = [
   'type',
   'query',
   'filter',
@@ -100,19 +100,19 @@ const SETTABLE_PROPS = [
   'fields',
 ];
 
-const GETTABLE_PROPS = [
-  ...SETTABLE_PROPS,
+const GETTABLE_FIELDS = [
+  ...SETTABLE_FIELDS,
   'index', // This is settable via `setIndexPattern`
 ];
 
-function parseInitialData(initialData) {
-  if (!initialData) {
+function parseInitialFields(initialFields) {
+  if (!initialFields) {
     return {};
   }
 
-  return typeof initialData === 'string' ?
-    JSON.parse(initialData)
-    : _.cloneDeep(initialData);
+  return typeof initialFields === 'string' ?
+    JSON.parse(initialFields)
+    : _.cloneDeep(initialFields);
 }
 
 function isIndexPattern(val) {
@@ -131,10 +131,10 @@ export function SearchSourceProvider(Promise, Private, config) {
   const forIp = Symbol('for which index pattern?');
 
   class SearchSource {
-    constructor(initialData) {
+    constructor(initialFields) {
       this._id = _.uniqueId('data_source');
 
-      this._data = parseInitialData(initialData);
+      this._fields = parseInitialFields(initialFields);
       this._parent = undefined;
 
       this.history = [];
@@ -168,49 +168,49 @@ export function SearchSourceProvider(Promise, Private, config) {
      * PUBLIC API
      *****/
 
-    setData = newData => {
-      this._data = newData;
+    setFields = newFields => {
+      this._fields = newFields;
       return this;
     };
 
-    setValue = (prop, value) => {
-      if (!SETTABLE_PROPS.includes(prop)) {
-        throw new Error(`Can't set prop '${prop}' on SearchSource. Acceptable props are: ${SETTABLE_PROPS.join(', ')}.`);
+    setField = (field, value) => {
+      if (!SETTABLE_FIELDS.includes(field)) {
+        throw new Error(`Can't set field '${field}' on SearchSource. Acceptable fields are: ${SETTABLE_FIELDS.join(', ')}.`);
       }
 
       if (value == null) {
-        delete this._data[prop];
+        delete this._fields[field];
       } else {
-        this._data[prop] = value;
+        this._fields[field] = value;
       }
 
       return this;
     };
 
     setIndexPattern = (indexPattern) => {
-      const data = this._data;
+      const fields = this._fields;
 
-      const hasSource = data.source;
-      const sourceCameFromIp = hasSource && data.source.hasOwnProperty(forIp);
-      const sourceIsForOurIp = sourceCameFromIp && data.source[forIp] === data.index;
+      const hasSource = fields.source;
+      const sourceCameFromIp = hasSource && fields.source.hasOwnProperty(forIp);
+      const sourceIsForOurIp = sourceCameFromIp && fields.source[forIp] === fields.index;
       if (sourceIsForOurIp) {
-        delete data.source;
+        delete fields.source;
       }
 
-      if (indexPattern === undefined) return data.index;
-      if (indexPattern === null) return delete data.index;
+      if (indexPattern === undefined) return fields.index;
+      if (indexPattern === null) return delete fields.index;
       if (!isIndexPattern(indexPattern)) {
         throw new TypeError('expected indexPattern to be an IndexPattern duck.');
       }
 
-      data.index = indexPattern;
-      if (!data.source) {
+      fields.index = indexPattern;
+      if (!fields.source) {
         // imply source filtering based on the index pattern, but allow overriding
-        // it by simply setting another value for "source". When index is changed
-        data.source = function () {
+        // it by simply setting another field for "source". When index is changed
+        fields.source = function () {
           return indexPattern.getSourceFiltering();
         };
-        data.source[forIp] = indexPattern;
+        fields.source[forIp] = indexPattern;
       }
 
       return this;
@@ -220,22 +220,22 @@ export function SearchSourceProvider(Promise, Private, config) {
       return this._id;
     };
 
-    getData = () => {
-      return _.clone(this._data);
+    getFields = () => {
+      return _.clone(this._fields);
     };
 
     /**
-     * Get values from the data
+     * Get fields from the fields
      */
-    getValue = prop => {
-      if (!GETTABLE_PROPS.includes(prop)) {
-        throw new Error(`Can't get prop '${prop}' from SearchSource. Acceptable props are: ${GETTABLE_PROPS.join(', ')}.`);
+    getField = field => {
+      if (!GETTABLE_FIELDS.includes(field)) {
+        throw new Error(`Can't get field '${field}' from SearchSource. Acceptable fields are: ${GETTABLE_FIELDS.join(', ')}.`);
       }
 
       let searchSource = this;
 
       while (searchSource) {
-        const value = searchSource._data[prop];
+        const value = searchSource._fields[field];
         if (value !== void 0) {
           return value;
         }
@@ -245,14 +245,14 @@ export function SearchSourceProvider(Promise, Private, config) {
     };
 
     /**
-     * Get the value from our own data, don't traverse up the chain
+     * Get the field from our own fields, don't traverse up the chain
      */
-    getOwnValue = prop => {
-      if (!GETTABLE_PROPS.includes(prop)) {
-        throw new Error(`Can't get prop '${prop}' from SearchSource. Acceptable props are: ${GETTABLE_PROPS.join(', ')}.`);
+    getOwnField = field => {
+      if (!GETTABLE_FIELDS.includes(field)) {
+        throw new Error(`Can't get field '${field}' from SearchSource. Acceptable fields are: ${GETTABLE_FIELDS.join(', ')}.`);
       }
 
-      const value = this._data[prop];
+      const value = this._fields[field];
       if (value !== void 0) {
         return value;
       }
@@ -263,11 +263,11 @@ export function SearchSourceProvider(Promise, Private, config) {
     };
 
     createCopy = () => {
-      const json = angular.toJson(this._data);
+      const json = angular.toJson(this._fields);
       const newSearchSource = new SearchSource(json);
-      // when serializing the internal data we lose the internal classes used in the index
+      // when serializing the internal fields we lose the internal classes used in the index
       // pattern, so we have to set it again to workaround this behavior
-      newSearchSource.setIndexPattern(this.getValue('index'));
+      newSearchSource.setIndexPattern(this.getField('index'));
       newSearchSource.setParent(this.getParent());
       return newSearchSource;
     };
@@ -327,7 +327,7 @@ export function SearchSourceProvider(Promise, Private, config) {
     }
 
     /**
-     * Cancel all pending requests for this dataSource
+     * Cancel all pending requests for this searchSource
      * @return {undefined}
      */
     cancelQueued() {
@@ -503,7 +503,7 @@ export function SearchSourceProvider(Promise, Private, config) {
           addToBody();
           break;
         case 'sort':
-          val = normalizeSortRequest(val, this.getValue('index'));
+          val = normalizeSortRequest(val, this.getField('index'));
           addToBody();
           break;
         case 'query':
@@ -546,10 +546,10 @@ export function SearchSourceProvider(Promise, Private, config) {
 
       // call the ittr and return it's promise
       return (function ittr() {
-        // iterate the _data object (not array) and
+        // iterate the _fields object (not array) and
         // pass each key:value pair to source._mergeProp. if _mergeProp
         // returns a promise, then wait for it to complete and call _mergeProp again
-        return Promise.all(_.map(current._data, function ittr(value, key) {
+        return Promise.all(_.map(current._fields, function ittr(value, key) {
           if (Promise.is(value)) {
             return value.then(function (value) {
               return ittr(value, key);

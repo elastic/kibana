@@ -95,29 +95,29 @@ describe('SearchSource', function () {
     });
   });
 
-  describe('#setValue()', function () {
+  describe('#setField()', function () {
     it('sets the value for the property', function () {
       const searchSource = new SearchSource();
-      searchSource.setValue('aggs', 5);
-      expect(searchSource.getValue('aggs')).to.be(5);
+      searchSource.setField('aggs', 5);
+      expect(searchSource.getField('aggs')).to.be(5);
     });
 
     it('throws an error if the property is not accepted', function () {
       const searchSource = new SearchSource();
-      expect(() => searchSource.setValue('index', 5)).to.throwError();
+      expect(() => searchSource.setField('index', 5)).to.throwError();
     });
   });
 
-  describe('#getValue()', function () {
+  describe('#getField()', function () {
     it('gets the value for the property', function () {
       const searchSource = new SearchSource();
-      searchSource.setValue('aggs', 5);
-      expect(searchSource.getValue('aggs')).to.be(5);
+      searchSource.setField('aggs', 5);
+      expect(searchSource.getField('aggs')).to.be(5);
     });
 
     it('throws an error if the property is not accepted', function () {
       const searchSource = new SearchSource();
-      expect(() => searchSource.getValue('unacceptablePropName')).to.throwError();
+      expect(() => searchSource.getField('unacceptablePropName')).to.throwError();
     });
   });
 
@@ -126,19 +126,19 @@ describe('SearchSource', function () {
       describe('new index pattern assigned', function () {
         it('generates a searchSource filter', function () {
           const searchSource = new SearchSource();
-          expect(searchSource.getValue('index')).to.be(undefined);
-          expect(searchSource.getValue('source')).to.be(undefined);
+          expect(searchSource.getField('index')).to.be(undefined);
+          expect(searchSource.getField('source')).to.be(undefined);
           searchSource.setIndexPattern(indexPattern);
-          expect(searchSource.getValue('index')).to.be(indexPattern);
-          expect(searchSource.getValue('source')).to.be.a('function');
+          expect(searchSource.getField('index')).to.be(indexPattern);
+          expect(searchSource.getField('source')).to.be.a('function');
         });
 
         it('removes created searchSource filter on removal', function () {
           const searchSource = new SearchSource();
           searchSource.setIndexPattern(indexPattern);
           searchSource.setIndexPattern(null);
-          expect(searchSource.getValue('index')).to.be(undefined);
-          expect(searchSource.getValue('source')).to.be(undefined);
+          expect(searchSource.getField('index')).to.be(undefined);
+          expect(searchSource.getField('source')).to.be(undefined);
         });
       });
 
@@ -146,11 +146,11 @@ describe('SearchSource', function () {
         it('replaces searchSource filter with new', function () {
           const searchSource = new SearchSource();
           searchSource.setIndexPattern(indexPattern);
-          const searchSourceFilter1 = searchSource.getValue('source');
+          const searchSourceFilter1 = searchSource.getField('source');
           searchSource.setIndexPattern(indexPattern2);
-          expect(searchSource.getValue('index')).to.be(indexPattern2);
-          expect(searchSource.getValue('source')).to.be.a('function');
-          expect(searchSource.getValue('source')).to.not.be(searchSourceFilter1);
+          expect(searchSource.getField('index')).to.be(indexPattern2);
+          expect(searchSource.getField('source')).to.be.a('function');
+          expect(searchSource.getField('source')).to.not.be(searchSourceFilter1);
         });
 
         it('removes created searchSource filter on removal', function () {
@@ -158,8 +158,8 @@ describe('SearchSource', function () {
           searchSource.setIndexPattern(indexPattern);
           searchSource.setIndexPattern(indexPattern2);
           searchSource.setIndexPattern(null);
-          expect(searchSource.getValue('index')).to.be(undefined);
-          expect(searchSource.getValue('source')).to.be(undefined);
+          expect(searchSource.getField('index')).to.be(undefined);
+          expect(searchSource.getField('source')).to.be(undefined);
         });
       });
 
@@ -168,20 +168,20 @@ describe('SearchSource', function () {
           const searchSource = new SearchSource();
           const football = {};
           searchSource.setIndexPattern(indexPattern);
-          expect(searchSource.getValue('source')).to.be.a('function');
-          searchSource.setValue('source', football);
-          expect(searchSource.getValue('index')).to.be(indexPattern);
-          expect(searchSource.getValue('source')).to.be(football);
+          expect(searchSource.getField('source')).to.be.a('function');
+          searchSource.setField('source', football);
+          expect(searchSource.getField('index')).to.be(indexPattern);
+          expect(searchSource.getField('source')).to.be(football);
         });
 
         it('custom searchSource stays after removal', function () {
           const searchSource = new SearchSource();
           const football = {};
           searchSource.setIndexPattern(indexPattern);
-          searchSource.setValue('source', football);
+          searchSource.setField('source', football);
           searchSource.setIndexPattern(null);
-          expect(searchSource.getValue('index')).to.be(undefined);
-          expect(searchSource.getValue('source')).to.be(football);
+          expect(searchSource.getField('index')).to.be(undefined);
+          expect(searchSource.getField('source')).to.be(football);
         });
       });
 
@@ -189,20 +189,20 @@ describe('SearchSource', function () {
         it('leaves the custom filter in place', function () {
           const searchSource = new SearchSource();
           const football = {};
-          searchSource.setValue('source', football);
+          searchSource.setField('source', football);
           searchSource.setIndexPattern(indexPattern);
-          expect(searchSource.getValue('index')).to.be(indexPattern);
-          expect(searchSource.getValue('source')).to.be(football);
+          expect(searchSource.getField('index')).to.be(indexPattern);
+          expect(searchSource.getField('source')).to.be(football);
         });
 
         it('custom searchSource stays after removal', function () {
           const searchSource = new SearchSource();
           const football = {};
-          searchSource.setValue('source', football);
+          searchSource.setField('source', football);
           searchSource.setIndexPattern(indexPattern);
           searchSource.setIndexPattern(null);
-          expect(searchSource.getValue('index')).to.be(undefined);
-          expect(searchSource.getValue('source')).to.be(football);
+          expect(searchSource.getField('index')).to.be(undefined);
+          expect(searchSource.getField('source')).to.be(football);
         });
       });
     });

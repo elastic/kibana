@@ -25,7 +25,7 @@
  */
 function getRequestInspectorStats(searchSource) {
   const stats = {};
-  const index = searchSource.getValue('index');
+  const index = searchSource.getField('index');
 
   if (index) {
     stats['Index pattern'] = {

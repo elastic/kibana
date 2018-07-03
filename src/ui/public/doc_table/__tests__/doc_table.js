@@ -89,12 +89,12 @@ describe('docTable', function () {
   });
 
   it('should set the indexPattern to that of the searchSource', function () {
-    expect($scope.indexPattern).to.be(searchSource.getValue('index'));
+    expect($scope.indexPattern).to.be(searchSource.getField('index'));
   });
 
   it('should set size and sort on the searchSource', function () {
-    expect($scope.searchSource.setValue.getCall(0).args[0]).to.be('size');
-    expect($scope.searchSource.setValue.getCall(1).args[0]).to.be('sort');
+    expect($scope.searchSource.setField.getCall(0).args[0]).to.be('size');
+    expect($scope.searchSource.setField.getCall(1).args[0]).to.be('sort');
   });
 
   it('should have an addRows function that increases the row count', function () {

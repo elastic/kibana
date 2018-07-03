@@ -191,11 +191,11 @@ function VisEditor(
   const stateDefaults = {
     uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : {},
     linked: !!savedVis.savedSearchId,
-    query: searchSource.getOwnValue('query') || {
+    query: searchSource.getOwnField('query') || {
       query: '',
       language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
     },
-    filters: searchSource.getOwnValue('filter') || [],
+    filters: searchSource.getOwnField('filter') || [],
     vis: savedVisState
   };
 
@@ -252,7 +252,7 @@ function VisEditor(
     };
 
     $scope.$watchMulti([
-      'searchSource.getValue("index")',
+      'searchSource.getField("index")',
       'vis.type.options.showTimePicker',
     ], function ([index, requiresTimePicker]) {
       const showTimeFilter = Boolean((!index || index.timeFieldName) && requiresTimePicker);
@@ -279,8 +279,8 @@ function VisEditor(
     // update the searchSource when query updates
     $scope.fetch = function () {
       $state.save();
-      savedVis.searchSource.setValue('query', $state.query);
-      savedVis.searchSource.setValue('filter', $state.filters);
+      savedVis.searchSource.setField('query', $state.query);
+      savedVis.searchSource.setField('filter', $state.filters);
       $scope.vis.forceReload();
     };
 
@@ -352,18 +352,18 @@ function VisEditor(
     const searchSourceGrandparent = searchSourceParent.getParent(true);
 
     delete savedVis.savedSearchId;
-    searchSourceParent.setValue('filter', _.union(searchSource.getOwnValue('filter'), searchSourceParent.getOwnValue('filter')));
+    searchSourceParent.setField('filter', _.union(searchSource.getOwnField('filter'), searchSourceParent.getOwnField('filter')));
 
     // copy over all state except "aggs", "query" and "filter"
     _(searchSourceParent.toJSON())
       .omit(['aggs', 'filter', 'query'])
       .forOwn(function (val, key) {
-        searchSource.setValue(key, val);
+        searchSource.setField(key, val);
       })
       .commit();
 
-    $state.query = searchSource.getValue('query');
-    $state.filters = searchSource.getValue('filter');
+    $state.query = searchSource.getField('query');
+    $state.filters = searchSource.getField('filter');
     searchSource.setParent(searchSourceGrandparent);
 
     $scope.fetch();

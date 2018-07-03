@@ -96,14 +96,14 @@ uiModules.get('kibana')
 
           $scope.indexPattern = $scope.searchSource.getValue('index');
 
-          $scope.searchSource.setValue('size', config.get('discover:sampleSize'));
-          $scope.searchSource.setValue('sort', getSort($scope.sorting, $scope.indexPattern));
+          $scope.searchSource.setField('size', config.get('discover:sampleSize'));
+          $scope.searchSource.setField('sort', getSort($scope.sorting, $scope.indexPattern));
 
           // Set the watcher after initialization
           $scope.$watchCollection('sorting', function (newSort, oldSort) {
           // Don't react if sort values didn't really change
             if (newSort === oldSort) return;
-            $scope.searchSource.setValue('sort', getSort(newSort, $scope.indexPattern));
+            $scope.searchSource.setField('sort', getSort(newSort, $scope.indexPattern));
             $scope.searchSource.fetchQueued();
           });
 

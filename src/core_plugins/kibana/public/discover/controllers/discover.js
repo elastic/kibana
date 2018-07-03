@@ -197,12 +197,12 @@ function discoverController(
   $scope.indexPattern = resolveIndexPatternLoading();
   $scope.searchSource
     .setIndexPattern($scope.indexPattern)
-    .setValue('highlightAll', true)
-    .setValue('version', true);
+    .setField('highlightAll', true)
+    .setField('version', true);
 
   // searchSource which applies time range
   const timeRangeSearchSource = savedSearch.searchSource.create();
-  timeRangeSearchSource.setValue('filter', () => {
+  timeRangeSearchSource.setField('filter', () => {
     return timefilter.createFilter($scope.indexPattern);
   });
 
@@ -260,23 +260,23 @@ function discoverController(
     const searchSource = $scope.searchSource.createCopy();
 
     const { searchFields, selectFields } = await getSharingDataFields();
-    searchSource.setValue('fields', searchFields);
-    searchSource.setValue('sort', getSort($state.sort, $scope.indexPattern));
-    searchSource.setValue('highlight', null);
-    searchSource.setValue('highlightAll', null);
-    searchSource.setValue('aggs', null);
-    searchSource.setValue('size', null);
+    searchSource.setField('fields', searchFields);
+    searchSource.setField('sort', getSort($state.sort, $scope.indexPattern));
+    searchSource.setField('highlight', null);
+    searchSource.setField('highlightAll', null);
+    searchSource.setField('aggs', null);
+    searchSource.setField('size', null);
 
     const body = await searchSource.getSearchRequestBody();
     return {
       searchRequest: {
-        index: searchSource.getValue('index').title,
+        index: searchSource.getField('index').title,
         body
       },
       fields: selectFields,
       metaFields: $scope.indexPattern.metaFields,
       conflictedTypesFields: $scope.indexPattern.fields.filter(f => f.type === 'conflict').map(f => f.name),
-      indexPatternId: searchSource.getValue('index').id
+      indexPatternId: searchSource.getField('index').id
     };
   };
 
@@ -292,7 +292,7 @@ function discoverController(
 
   function getStateDefaults() {
     return {
-      query: $scope.searchSource.getValue('query') || {
+      query: $scope.searchSource.getField('query') || {
         query: '',
         language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
       },
@@ -300,7 +300,7 @@ function discoverController(
       columns: savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns').slice(),
       index: $scope.indexPattern.id,
       interval: 'auto',
-      filters: _.cloneDeep($scope.searchSource.getOwnValue('filter'))
+      filters: _.cloneDeep($scope.searchSource.getOwnField('filter'))
     };
   }
 
@@ -343,7 +343,7 @@ function discoverController(
           if (!sort) return;
 
           // get the current sort from {key: val} to ["key", "val"];
-          const currentSort = _.pairs($scope.searchSource.getValue('sort')).pop();
+          const currentSort = _.pairs($scope.searchSource.getField('sort')).pop();
 
           // if the searchSource doesn't know, tell it so
           if (!angular.equals(sort, currentSort)) $scope.fetch();
@@ -577,7 +577,7 @@ function discoverController(
 
       $scope.hits = merged.hits.total;
 
-      const indexPattern = $scope.searchSource.getValue('index');
+      const indexPattern = $scope.searchSource.getField('index');
 
       // the merge rows, use a new array to help watchers
       $scope.rows = merged.hits.hits.slice();
@@ -649,10 +649,10 @@ function discoverController(
 
   $scope.updateDataSource = Promise.method(function updateDataSource() {
     $scope.searchSource
-      .setValue('size', $scope.opts.sampleSize)
-      .setValue('sort', getSort($state.sort, $scope.indexPattern))
-      .setValue('query', !$state.query ? null : $state.query)
-      .setValue('filter', queryFilter.getFilters());
+      .setField('size', $scope.opts.sampleSize)
+      .setField('sort', getSort($state.sort, $scope.indexPattern))
+      .setField('query', !$state.query ? null : $state.query)
+      .setField('filter', queryFilter.getFilters());
   });
 
   $scope.setSortOrder = function setSortOrder(columnName, direction) {
@@ -734,7 +734,7 @@ function discoverController(
         return $scope.vis.getAggConfig().onSearchRequestStart(searchSource, searchRequest);
       });
 
-      $scope.searchSource.setValue('aggs', function () {
+      $scope.searchSource.setField('aggs', function () {
         return $scope.vis.getAggConfig().toDsl();
       });
     }
@@ -750,7 +750,7 @@ function discoverController(
     const stateVal = props.stateVal;
     const stateValFound = props.stateValFound;
 
-    const own = $scope.searchSource.getOwnValue('index');
+    const own = $scope.searchSource.getOwnField('index');
 
     if (own && !stateVal) return own;
     if (stateVal && !stateValFound) {

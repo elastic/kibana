@@ -33,7 +33,7 @@ import { reverseSortDirection } from './utils/sorting';
 /**
  * @typedef {Object} SearchSourceT
  * @prop {function(): Promise<SearchResult>} fetch
- * @prop {function(string, any): SearchSourceT} setValue
+ * @prop {function(string, any): SearchSourceT} setField
  * @prop {function(any): SearchSourceT} setParent
  */
 
@@ -164,7 +164,7 @@ function fetchContextProvider(indexPatterns, Private) {
     return new SearchSource()
       .setParent(false)
       .setIndexPattern(indexPattern)
-      .setValue('filter', filters);
+      .setField('filter', filters);
   }
 
   /**
@@ -209,8 +209,8 @@ function fetchContextProvider(indexPatterns, Private) {
     };
 
     const response = await searchSource
-      .setValue('size', maxCount)
-      .setValue('query', {
+      .setField('size', maxCount)
+      .setField('query', {
         query: {
           constant_score: {
             filter: {
@@ -225,15 +225,15 @@ function fetchContextProvider(indexPatterns, Private) {
         },
         language: 'lucene'
       })
-      .setValue('searchAfter', [
+      .setField('searchAfter', [
         afterTimeValue !== null ? afterTimeValue : startTimeValue,
         tieBreakerValue,
       ])
-      .setValue('sort', [
+      .setField('sort', [
         { [timeField]: timeSortDirection },
         { [tieBreakerField]: tieBreakerSortDirection },
       ])
-      .setValue('version', true)
+      .setField('version', true)
       .fetch();
 
     return response.hits ? response.hits.hits : [];

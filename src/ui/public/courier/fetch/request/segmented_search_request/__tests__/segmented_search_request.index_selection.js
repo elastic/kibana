@@ -51,7 +51,7 @@ describe('SegmentedSearchRequest index selection', function () {
 
   it('queries with size until all 500 docs returned', async function () {
     const searchSource = new MockSource();
-    const indexPattern = searchSource.getValue('index');
+    const indexPattern = searchSource.getField('index');
     sinon.stub(indexPattern, 'toDetailedIndexList').returns(Promise.resolve([
       { index: 'one', min: 0, max: 1 },
       { index: 'two', min: 0, max: 1 },
@@ -97,7 +97,7 @@ describe('SegmentedSearchRequest index selection', function () {
 
   it(`sets size 0 for indices that couldn't preclude hits`, async function () {
     const searchSource = new MockSource();
-    const indexPattern = searchSource.getValue('index');
+    const indexPattern = searchSource.getField('index');
 
     // the segreq is looking for 10 documents, and we will give it ten docs with time:5 in the first response.
     // on the second index it should still request 10 documents because it could produce documents with time:5.

@@ -34,9 +34,9 @@ export function fetchAnchorProvider(indexPatterns, Private) {
     const searchSource = new SearchSource()
       .setParent(false)
       .setIndexPattern(indexPattern)
-      .setValue('version', true)
-      .setValue('size', 1)
-      .setValue('query', {
+      .setField('version', true)
+      .setField('size', 1)
+      .setField('query', {
         query: {
           constant_score: {
             filter: {
@@ -49,7 +49,7 @@ export function fetchAnchorProvider(indexPatterns, Private) {
         },
         language: 'lucene',
       })
-      .setValue('sort', sort);
+      .setField('sort', sort);
 
     const response = await searchSource.fetch();
 

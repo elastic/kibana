@@ -44,7 +44,7 @@ export class FilterUtils {
    * both query filters and filter bar filters.
    */
   static getDashboardFilters(dashboard) {
-    return dashboard.searchSource.getOwnValue('filter');
+    return dashboard.searchSource.getOwnField('filter');
   }
 
   /**
@@ -53,8 +53,8 @@ export class FilterUtils {
    * @returns {QueryFilter}
    */
   static getQueryFilterForDashboard(dashboard) {
-    if (dashboard.searchSource.getOwnValue('query')) {
-      return dashboard.searchSource.getOwnValue('query');
+    if (dashboard.searchSource.getOwnField('query')) {
+      return dashboard.searchSource.getOwnField('query');
     }
 
     const dashboardFilters = this.getDashboardFilters(dashboard);

@@ -96,7 +96,7 @@ export const termsBucketAgg = new BucketAggType({
     const nestedSearchSource = searchSource.makeChild();
     if (aggConfig.params.otherBucket) {
       const filterAgg = buildOtherBucketAgg(aggConfigs, aggConfig, resp);
-      nestedSearchSource.setValue('aggs', filterAgg);
+      nestedSearchSource.setField('aggs', filterAgg);
 
       const request = aggConfigs.vis.API.inspectorAdapters.requests.start('Other bucket', {
         description: `This request counts the number of documents that fall

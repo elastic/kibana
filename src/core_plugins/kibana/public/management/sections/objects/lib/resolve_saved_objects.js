@@ -81,7 +81,7 @@ export async function resolveIndexPatternConflicts(
 ) {
   let importCount = 0;
   await awaitEachItemInParallel(conflictedIndexPatterns, async ({ obj }) => {
-    let oldIndexId = obj.searchSource.getOwnValue('index');
+    let oldIndexId = obj.searchSource.getOwnField('index');
     // Depending on the object, this can either be the raw id or the actual index pattern object
     if (typeof oldIndexId !== 'string') {
       oldIndexId = oldIndexId.id;

@@ -112,23 +112,23 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
     const parseSearchSource = (searchSourceJson) => {
       if (!this.searchSource) return;
 
-      // if we have a searchSource, set its state based on the searchSourceJSON field
-      let state;
+      // if we have a searchSource, set its values based on the searchSourceJson field
+      let searchSourceValues;
       try {
-        state = JSON.parse(searchSourceJson);
+        searchSourceValues = JSON.parse(searchSourceJson);
       } catch (e) {
-        state = {};
+        searchSourceValues = {};
       }
 
-      const searchSourceData = this.searchSource.getData();
+      const searchSourceData = this.searchSource.getFields();
       const fnProps = _.transform(searchSourceData, function (dynamic, val, name) {
         if (_.isFunction(val)) dynamic[name] = val;
       }, {});
 
-      this.searchSource.setData(_.defaults(state, fnProps));
+      this.searchSource.setFields(_.defaults(searchSourceValues, fnProps));
 
-      if (!_.isUndefined(this.searchSource.getOwnValue('query'))) {
-        this.searchSource.setValue('query', migrateLegacyQuery(this.searchSource.getOwnValue('query')));
+      if (!_.isUndefined(this.searchSource.getOwnField('query'))) {
+        this.searchSource.setField('query', migrateLegacyQuery(this.searchSource.getOwnField('query')));
       }
     };
 
@@ -148,7 +148,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
         return Promise.resolve(null);
       }
 
-      let index = id || config.indexPattern || this.searchSource.getOwnValue('index');
+      let index = id || config.indexPattern || this.searchSource.getOwnField('index');
 
       if (!index) {
         return Promise.resolve(null);
@@ -260,7 +260,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
       });
 
       if (this.searchSource) {
-        const searchSourceData = _.omit(this.searchSource.getData(), ['sort', 'size']);
+        const searchSourceData = _.omit(this.searchSource.getFields(), ['sort', 'size']);
         body.kibanaSavedObjectMeta = {
           searchSourceJSON: angular.toJson(searchSourceData)
         };

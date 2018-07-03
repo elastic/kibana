@@ -71,8 +71,8 @@ export const histogramBucketAgg = new BucketAggType({
 
         return searchSource
           .createChild()
-          .setValue('size', 0)
-          .setValue('aggs', {
+          .setField('size', 0)
+          .setField('aggs', {
             maxAgg: {
               max: aggBody
             },
