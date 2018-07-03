@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import { BatchArrayReader } from './batch_array_reader';
 
-describe('batchArrayReader', () => {
+describe('BatchArrayReader', () => {
   test('returns docs in batches', async () => {
     const docs = [
       {

@@ -20,7 +20,7 @@
 import sinon from 'sinon';
 import { BatchIndexReader } from './batch_index_reader';
 
-describe('createBatchIndexReader', () => {
+describe('BatchIndexReader', () => {
   test('returns docs in batches', async () => {
     const index = '.myalias';
     const callCluster = sinon.stub();

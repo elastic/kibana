@@ -187,12 +187,16 @@ export interface SavedObjectDoc {
   attributes: any;
   id: string;
   type: string;
-  migrationVersion?: string;
+  migrationVersion?: MigrationVersion;
 }
 
 ///////////////////////////////////////////////////////////////////
 // Migration plugin and dependent types
 ///////////////////////////////////////////////////////////////////
+
+export interface MigrationVersion {
+  [type: string]: string;
+}
 
 export interface MigrationPlugin {
   id: string;
@@ -206,7 +210,6 @@ export interface MappingDefinition {
 
 export interface DocMapping {
   dynamic: string;
-  _meta?: { migrationVersion: string[] };
   properties: MappingDefinition;
 }
 
@@ -227,4 +230,8 @@ export interface MigrationDefinition {
 export interface BatchReader {
   read: () => Promise<SavedObjectDoc[]>;
   close: () => Promise<void>;
+}
+
+export interface BatchWriter {
+  write: (docs: SavedObjectDoc[]) => Promise<void>;
 }
