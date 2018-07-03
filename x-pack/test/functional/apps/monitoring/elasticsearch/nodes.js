@@ -12,7 +12,7 @@ export default function ({ getService, getPageObjects }) {
   const nodesList = getService('monitoringElasticsearchNodes');
   const esClusterSummaryStatus = getService('monitoringElasticsearchSummaryStatus');
 
-  describe.skip('Elasticsearch nodes listing', () => {
+  describe('Elasticsearch nodes listing', () => {
     describe('with offline node', () => {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
