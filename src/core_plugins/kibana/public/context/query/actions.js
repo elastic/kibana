@@ -18,14 +18,16 @@
  */
 
 import _ from 'lodash';
+import React from 'react';
+import Markdown from 'markdown-to-jsx';
+import { toastNotifications } from 'ui/notify';
 
 import { fetchAnchorProvider } from '../api/anchor';
 import { fetchContextProvider } from '../api/context';
 import { QueryParameterActionsProvider } from '../query_parameters';
 import { FAILURE_REASONS, LOADING_STATUS } from './constants';
 
-
-export function QueryActionsProvider(courier, Notifier, Private, Promise) {
+export function QueryActionsProvider(courier, Private, Promise) {
   const fetchAnchor = Private(fetchAnchorProvider);
   const { fetchPredecessors, fetchSuccessors } = Private(fetchContextProvider);
   const {
@@ -35,10 +37,6 @@ export function QueryActionsProvider(courier, Notifier, Private, Promise) {
     setQueryParameters,
     setSuccessorCount,
   } = Private(QueryParameterActionsProvider);
-
-  const notifier = new Notifier({
-    location: 'Context',
-  });
 
   const setFailedStatus = (state) => (subject, details = {}) => (
     state.loadingStatus[subject] = {
@@ -82,7 +80,10 @@ export function QueryActionsProvider(courier, Notifier, Private, Promise) {
         },
         (error) => {
           setFailedStatus(state)('anchor', { error });
-          notifier.error(error);
+          toastNotifications.addDanger({
+            title: 'Unable to load the anchor document',
+            text: <Markdown>{error.message}</Markdown>,
+          });
           throw error;
         }
       );
@@ -123,7 +124,10 @@ export function QueryActionsProvider(courier, Notifier, Private, Promise) {
         },
         (error) => {
           setFailedStatus(state)('predecessors', { error });
-          notifier.error(error);
+          toastNotifications.addDanger({
+            title: 'Unable to load documents',
+            text: <Markdown>{error.message}</Markdown>,
+          });
           throw error;
         },
       );
@@ -164,7 +168,10 @@ export function QueryActionsProvider(courier, Notifier, Private, Promise) {
         },
         (error) => {
           setFailedStatus(state)('successors', { error });
-          notifier.error(error);
+          toastNotifications.addDanger({
+            title: 'Unable to load documents',
+            text: <Markdown>{error.message}</Markdown>,
+          });
           throw error;
         },
       );

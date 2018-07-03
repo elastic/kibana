@@ -154,6 +154,7 @@
     "lodash": "3.10.1",
     "lru-cache": "4.1.1",
     "markdown-it": "^8.4.1",
+    "markdown-to-jsx": "^6.6.8",
     "minimatch": "2.0.10",
     "mkdirp": "0.5.1",
     "moment": "^2.20.1",
