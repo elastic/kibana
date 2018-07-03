@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { VisType } from './base_vis_type';
+import { BaseVisType } from './base_vis_type';
 import { AngularVisTypeProvider } from './angular_vis_type';
 import { VislibVisTypeProvider } from './vislib_vis_type';
 import { ReactVisType } from './react_vis_type';
 
-export { VisType, AngularVisTypeProvider, VislibVisTypeProvider, ReactVisType };
+export { BaseVisType, AngularVisTypeProvider, VislibVisTypeProvider, ReactVisType };

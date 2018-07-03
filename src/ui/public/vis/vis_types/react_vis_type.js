@@ -20,11 +20,11 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import chrome from '../../chrome';
-import { VisType } from './base_vis_type';
+import { BaseVisType } from './base_vis_type';
 
 class ReactVisController {
-  constructor(el, vis) {
-    this.el = el;
+  constructor(element, vis) {
+    this.el = element;
     this.vis = vis;
   }
 
@@ -49,11 +49,12 @@ class ReactVisController {
   }
 }
 
-export class ReactVisType extends VisType {
+export class ReactVisType extends BaseVisType {
   constructor(opts) {
-    opts.visualization = ReactVisController;
-
-    super(opts);
+    super({
+      ...opts,
+      visualization: ReactVisController
+    });
 
     if (!this.visConfig.component) {
       throw new Error('Missing component for ReactVisType');

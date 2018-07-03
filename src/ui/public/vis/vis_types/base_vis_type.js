@@ -20,15 +20,24 @@
 import { CATEGORY } from '../vis_category';
 import _ from 'lodash';
 
-export class VisType {
-  constructor(opts) {
-    opts = opts || {};
+export class BaseVisType {
+  constructor(opts = {}) {
 
-    if (!opts.name) throw('vis_type must define its name');
-    if (!opts.title) throw('vis_type must define its title');
-    if (!opts.description) throw('vis_type must define its description');
-    if (!opts.icon && !opts.image) throw('vis_type must define its icon or image');
-    if (!opts.visualization) throw('vis_type must define visualization controller');
+    if (!opts.name) {
+      throw('vis_type must define its name');
+    }
+    if (!opts.title) {
+      throw('vis_type must define its title');
+    }
+    if (!opts.description) {
+      throw('vis_type must define its description');
+    }
+    if (!opts.icon && !opts.image) {
+      throw('vis_type must define its icon or image');
+    }
+    if (!opts.visualization) {
+      throw('vis_type must define visualization controller');
+    }
 
     const _defaults = {
       // name, title, description, icon, image
@@ -56,7 +65,7 @@ export class VisType {
 
     _.defaultsDeep(this, opts, _defaults);
 
-    this.requiresSearch = !(this.requestHandler === 'none');
+    this.requiresSearch = this.requestHandler !== 'none';
   }
 
   shouldMarkAsExperimentalInUI() {
@@ -64,14 +73,11 @@ export class VisType {
     //we just want to indicate it is special. the current flask icon is sufficient for that.
     return this.stage === 'experimental' || this.stage === 'lab';
   }
-}
 
-Object.defineProperty(VisType.prototype, 'schemas', {
-  get() {
+  get schemas() {
     if (this.editorConfig && this.editorConfig.schemas) {
       return this.editorConfig.schemas;
     }
-
-    return []; //throw `Can't get schemas from a visualization without using the default editor`;
+    return [];
   }
-});
+}
