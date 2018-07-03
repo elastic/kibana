@@ -11,6 +11,7 @@ import chrome from 'ui/chrome';
 
 import { http } from 'plugins/ml/services/http_service';
 
+import { filters } from './filters';
 import { results } from './results';
 import { jobs } from './jobs';
 
@@ -407,6 +408,7 @@ export const ml = {
     });
   },
 
+  filters,
   results,
   jobs,
 };
