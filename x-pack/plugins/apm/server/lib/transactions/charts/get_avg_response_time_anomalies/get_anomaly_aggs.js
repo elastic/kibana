@@ -4,17 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
-import { getBucketSize } from '../../helpers/get_bucket_size';
-
-export async function getAvgResponseTimeAnomalies({
+export async function getAnomalyAggs({
   serviceName,
   transactionType,
-  setup
+  intervalString,
+  client,
+  start,
+  end
 }) {
-  const { start, end, client } = setup;
-  const { intervalString, bucketSize } = getBucketSize(start, end, 'auto');
-
   const params = {
     index: `.ml-anomalies-${serviceName}-${transactionType}-high_mean_response_time`.toLowerCase(),
     body: {
@@ -62,35 +59,13 @@ export async function getAvgResponseTimeAnomalies({
     }
   };
 
-  let resp;
   try {
-    resp = await client('search', params);
+    const resp = await client('search', params);
+    return resp.aggregations;
   } catch (e) {
     if (e.statusCode === 404) {
-      return {
-        message: 'ml index does not exist'
-      };
+      return null;
     }
     throw e;
   }
-
-  const buckets = get(resp, 'aggregations.ml_avg_response_times.buckets', [])
-    .slice(1, -1)
-    .map(bucket => {
-      return {
-        anomaly_score: bucket.anomaly_score.value,
-        lower: bucket.lower.value,
-        upper: bucket.upper.value
-      };
-    });
-
-  const anomalyBucketSpan = get(
-    resp,
-    'aggregations.top_hits.hits.hits[0]._source.bucket_span'
-  );
-
-  return {
-    bucketSpanInSeconds: Math.max(bucketSize, anomalyBucketSpan),
-    buckets
-  };
 }
