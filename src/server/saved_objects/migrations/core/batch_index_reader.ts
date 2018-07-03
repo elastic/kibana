@@ -111,10 +111,12 @@ export class BatchIndexReader implements BatchReader {
 function rawToSavedObject({ _id, _source }: RawDoc): SavedObjectDoc {
   const { type } = _source;
   const id = _id.slice(type.length + 1);
-  return {
+  const doc = {
+    ..._source,
     attributes: _source[type],
     id,
-    migrationVersion: _source.migrationVersion,
-    type,
   };
+
+  delete doc[type];
+  return doc;
 }

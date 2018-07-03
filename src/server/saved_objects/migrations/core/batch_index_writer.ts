@@ -105,18 +105,18 @@ function assertSuccess(result: BulkResult) {
  * Converts a saved object document from saved object format to the raw underlying shape
  * expected by calls to the elasticsearch API.
  */
-function savedObjectToRaw({
-  id,
-  type,
-  attributes,
-  migrationVersion,
-}: SavedObjectDoc): RawDoc {
+function savedObjectToRaw(savedObj: SavedObjectDoc): RawDoc {
+  const { id, type, attributes } = savedObj;
+  const source = {
+    ...savedObj,
+    [type]: attributes,
+  };
+
+  delete source.id;
+  delete source.attributes;
+
   return {
     _id: `${type}:${id}`,
-    _source: {
-      migrationVersion,
-      type,
-      [type]: attributes,
-    },
+    _source: source,
   };
 }

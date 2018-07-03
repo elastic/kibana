@@ -97,4 +97,43 @@ describe('BatchIndexReader', () => {
       ['clearScroll', { scrollId: 'z' }],
     ]);
   });
+
+  test('returns all root-level properties', async () => {
+    const index = '.myalias';
+    const callCluster = sinon.stub();
+    const batch = [
+      {
+        _id: 'such:1',
+        _source: {
+          acls: '3230a',
+          foos: { is: 'fun' },
+          such: { num: 1 },
+          type: 'such',
+        },
+      },
+    ];
+
+    callCluster
+      .onCall(0)
+      .returns(Promise.resolve({ _scroll_id: 'x', hits: { hits: batch } }))
+      .onCall(1)
+      .returns(Promise.resolve({ _scroll_id: 'z', hits: { hits: [] } }));
+
+    const reader = new BatchIndexReader({
+      batchSize: 100,
+      callCluster,
+      index,
+      scrollDuration: '5m',
+    });
+
+    expect(await reader.read()).toEqual([
+      {
+        acls: '3230a',
+        attributes: { num: 1 },
+        foos: { is: 'fun' },
+        id: '1',
+        type: 'such',
+      },
+    ]);
+  });
 });

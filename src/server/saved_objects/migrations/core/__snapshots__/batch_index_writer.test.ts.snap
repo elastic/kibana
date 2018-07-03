@@ -13,10 +13,12 @@ Array [
         },
       },
       Object {
-        "migrationVersion": undefined,
         "niceguy": Object {
           "aka": "Mr Rogers",
         },
+        "quotes": Array [
+          "The greatest gift you ever give is your honest self.",
+        ],
         "type": "niceguy",
       },
       Object {

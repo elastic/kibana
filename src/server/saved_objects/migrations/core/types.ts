@@ -188,6 +188,12 @@ export interface SavedObjectDoc {
   id: string;
   type: string;
   migrationVersion?: MigrationVersion;
+
+  // We're going to allow for miscellaneous root-level properties
+  // in saved objects, which amount to meta-information that various
+  // plugins can put on any saved object. Things like security ACLs
+  // might fall into this category.
+  [rootProp: string]: any;
 }
 
 ///////////////////////////////////////////////////////////////////

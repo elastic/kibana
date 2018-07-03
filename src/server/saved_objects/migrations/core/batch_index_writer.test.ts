@@ -31,6 +31,7 @@ describe('BatchIndexWriter', () => {
         },
         type: 'niceguy',
         id: 'fredrogers',
+        quotes: ['The greatest gift you ever give is your honest self.'],
       },
       {
         attributes: {
