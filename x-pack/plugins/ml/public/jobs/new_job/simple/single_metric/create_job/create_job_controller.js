@@ -33,7 +33,6 @@ import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes'
 import { loadNewJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
 import {
   createSearchItems,
-  createResultsUrl,
   addNewJobToRecentlyAccessed,
   moveToAdvancedJobCreationProvider } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { mlJobService } from 'plugins/ml/services/job_service';
@@ -396,7 +395,7 @@ module
                     $scope.formConfig.resultsIntervalSeconds = bucketSpanSeconds;
                   }
 
-                  $scope.resultsUrl = createResultsUrl(
+                  $scope.resultsUrl = mlJobService.createResultsUrl(
                     [$scope.formConfig.jobId],
                     $scope.formConfig.start,
                     $scope.formConfig.end,

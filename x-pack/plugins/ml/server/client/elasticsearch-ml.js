@@ -254,6 +254,14 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
             type: 'string'
           }
         }
+      },
+      {
+        fmt: '/_xpack/ml/datafeeds/<%=datafeedId%>/_start',
+        req: {
+          datafeedId: {
+            type: 'string'
+          }
+        }
       }
     ],
     method: 'POST'
