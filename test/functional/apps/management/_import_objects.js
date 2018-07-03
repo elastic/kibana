@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.unload('management');
     });
 
-    it('should import saved objects normally', async function () {
+    it('should import saved objects', async function () {
       await PageObjects.settings.clickKibanaSavedObjects();
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects.json'));
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -119,11 +119,9 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_saved_search.json'));
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      // Last, import a saved object connected to the saved search
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaSavedObjects();
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.json'));
-      // Wait for all the saves to happen
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.settings.clickImportDone();
       await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
@@ -133,7 +131,20 @@ export default function ({ getService, getPageObjects }) {
       expect(isSavedObjectImported).to.be(true);
     });
 
-    it('should not import saved objects linked to saved searches when saved search index pattern has been deleted', async function () {
+    it('should not import saved objects linked to saved searches when saved search does not exist', async function () {
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickKibanaSavedObjects();
+      await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.json'));
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.settings.clickImportDone();
+      await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
+
+      const objects = await PageObjects.settings.getSavedObjectsInTable();
+      const isSavedObjectImported = objects.includes('saved object connected to saved search');
+      expect(isSavedObjectImported).to.be(false);
+    });
+
+    it('should not import saved objects linked to saved searches when saved search index pattern does not exist', async function () {
       // First, import the saved search
       await PageObjects.settings.clickKibanaSavedObjects();
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_saved_search.json'));
@@ -181,9 +192,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.clickKibanaIndices();
       await PageObjects.settings.clickOnOnlyIndexPattern();
       await PageObjects.settings.removeIndexPattern();
-
-      // Second, create it
-      await PageObjects.settings.createIndexPattern('logstash-', '@timestamp');
 
       // Then, import the objects
       await PageObjects.settings.clickKibanaSavedObjects();
