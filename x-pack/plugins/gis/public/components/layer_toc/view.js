@@ -13,6 +13,14 @@ export class LayerTOC extends React.Component {
   constructor(props) {
     super(props);
     this._domContainer = null;
+    this.state = {
+      layerList: []
+    };
+  }
+
+  static getDerivedStateFromProps(props) {
+    const { layerList } = props;
+    return { layerList };
   }
 
   componentDidMount() {
@@ -36,14 +44,13 @@ export class LayerTOC extends React.Component {
   }
 
   _renderLayers() {
-    const { layerList } = this.props;
-    return layerList.map((layer, i) => {
+    return this.state.layerList.map((layer) => {
       return (
         <TOCEntry
-          key={i}
+          key={layer.id}
           layerId={layer.id}
           visible={true}
-          layerName={`Layer #${i}`}
+          layerName={layer.name}
           // onButtonClick={alert('clicked!')}
         />
       );
