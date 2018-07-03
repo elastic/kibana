@@ -120,8 +120,8 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
         searchSourceValues = {};
       }
 
-      const searchSourceData = this.searchSource.getFields();
-      const fnProps = _.transform(searchSourceData, function (dynamic, val, name) {
+      const searchSourceFields = this.searchSource.getFields();
+      const fnProps = _.transform(searchSourceFields, function (dynamic, val, name) {
         if (_.isFunction(val)) dynamic[name] = val;
       }, {});
 
@@ -144,7 +144,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
       }
 
       if (config.clearSavedIndexPattern) {
-        this.searchSource.setField('index', undefined);
+        this.searchSource.setField('index', null);
         return Promise.resolve(null);
       }
 
@@ -260,9 +260,9 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
       });
 
       if (this.searchSource) {
-        const searchSourceData = _.omit(this.searchSource.getFields(), ['sort', 'size']);
+        const searchSourceFields = _.omit(this.searchSource.getFields(), ['sort', 'size']);
         body.kibanaSavedObjectMeta = {
-          searchSourceJSON: angular.toJson(searchSourceData)
+          searchSourceJSON: angular.toJson(searchSourceFields)
         };
       }
 
