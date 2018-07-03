@@ -9,41 +9,74 @@ import {
     EuiHeaderLogo,
     EuiIcon,
     EuiSideNav,
+    EuiPage,
     EuiFlexGroup,
     EuiFlexItem
 } from '@elastic/eui';
 
 import DirectoryTree from './DirectoryTree';
 import CodeBlock from './CodeBlock';
+import FileCode from '../main/FileCode';
+interface State {
+    children: Array<any>
+    node: any,
+    workspace? : string
+}
 
-export default class Layout extends React.Component {
+export default class Layout extends React.Component<any, State> {
+
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            children: [],
+            node: null,
+            workspace: ''
+        }
+    }
+
+    componentDidMount() {
+        fetch("../api/castro/tree").then(resp => resp.json()).then((json: any) => {
+            this.setState({
+                workspace: json.workspace,
+                children: json.root.children});
+        });
+    }
+
+    onClick = (node) => {
+        this.setState({node})
+    };
+
     public render() {
-        return <div><EuiHeader>
-            <EuiHeaderSection>
-                <EuiHeaderSectionItem border="right">
-                    <EuiHeaderLogo>Code Browsing</EuiHeaderLogo>
-                </EuiHeaderSectionItem>
+        return <EuiPage>
+            <EuiHeader>
+                <EuiHeaderSection>
+                    <EuiHeaderSectionItem border="right">
+                        <EuiHeaderLogo>Code Browsing</EuiHeaderLogo>
+                    </EuiHeaderSectionItem>
 
-            </EuiHeaderSection>
+                </EuiHeaderSection>
 
-            <EuiHeaderSection side="right">
-                <EuiHeaderSectionItemButton aria-label="Search">
-                    <EuiIcon
-                        type="search"
-                        size="m"
-                    />
-                </EuiHeaderSectionItemButton>
-            </EuiHeaderSection>
-        </EuiHeader>
+                <EuiHeaderSection side="right">
+                    <EuiHeaderSectionItemButton aria-label="Search">
+                        <EuiIcon
+                            type="search"
+                            size="m"
+                        />
+                    </EuiHeaderSectionItemButton>
+                </EuiHeaderSection>
+            </EuiHeader>
             <EuiFlexGroup>
-                <EuiFlexItem style={{ maxWidth: 300 }}>
-                    <DirectoryTree />
+                <EuiFlexItem style={{maxWidth: 300}}>
+                    <DirectoryTree items={this.state.children} onClick={this.onClick}/>
                 </EuiFlexItem>
 
                 <EuiFlexItem>
-                    <CodeBlock />
+                    { this.state.node &&
+                        <FileCode file={this.state.workspace +'/'+ this.state.node.path} html={this.state.node.html}/>
+                    }
                 </EuiFlexItem>
             </EuiFlexGroup>
-        </div>
+        </EuiPage>
     }
 }

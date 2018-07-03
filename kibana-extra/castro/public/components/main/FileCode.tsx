@@ -1,6 +1,6 @@
 import React, {DOMElement} from "react";
 import ReactDOM from 'react-dom';
-
+import * as hljs from 'highlight.js'
 import {
     EuiCode,
     EuiGlobalToastList
@@ -26,8 +26,8 @@ interface State {
 export default class FileCode extends React.Component<Props, State> {
 
     private lspMethods: TextDocumentMethods;
-    private currentEl : Element
-    private currentTooltip : Tooltip
+    private currentEl: Element;
+    private parent: Element
 
     constructor(props: Props, context: any) {
         super(props, context);
@@ -41,7 +41,7 @@ export default class FileCode extends React.Component<Props, State> {
         const target = e.target as Element;
         this.currentEl = target;
         const tooltip = target.getAttribute("aria-describedby");
-        if(tooltip) {
+        if (tooltip) {
             return;
         }
         const lineEl = target.closest('.code-line');
@@ -70,20 +70,37 @@ export default class FileCode extends React.Component<Props, State> {
     addTooltip(target: Element, hover: Hover) {
         const tooltip = new Tooltip(target, {
             delay: 100,
-            html: false,
+            html: true,
+            container: this.parent,
+            offset: 25,
             title: () => {
-                return hover.contents[0].value;
+                let {language, value} = hover.contents[0];
+                value = hljs.highlight(language, value).value;
+                let result = `<div class="euiPanel euiPanel--paddingSmall">
+<span class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline">
+    <code class="euiCodeBlock__code">${value}</code>
+  </span>`;
+                if (hover.contents.length > 0) {
+                    result += `
+                        <div class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginXSmall"></div>
+                        <div class="euiText">
+                        <h5>${hover.contents[1].replace(/\*\*/g, "")}</h5>
+                        </div>`
+                }
+
+                return result + `</div>`
+
             }
         });
-        if(this.currentEl === target) {
+        if (this.currentEl === target) {
             tooltip.show();
         }
     }
 
 
     componentDidMount(): void {
-        const el = ReactDOM.findDOMNode(this) as Element;
-        el.querySelectorAll(".code-line span").forEach(el => {
+        this.parent = ReactDOM.findDOMNode(this) as Element;
+        this.parent.querySelectorAll(".code-line span").forEach(el => {
             el.addEventListener('mouseover', this.mouseOver);
             el.addEventListener('mouseout', (event) => {
                 this.currentEl = null
@@ -94,7 +111,6 @@ export default class FileCode extends React.Component<Props, State> {
     render() {
         return <div>
             <EuiCode dangerouslySetInnerHTML={{__html: this.props.html}}/>
-
         </div>
     }
 

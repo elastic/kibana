@@ -34,8 +34,10 @@
 .code .annotation {
   position: relative;
   display: inline;
+  z-index: inherit;
 }
 
 .code .parameter {
   color: inherit;
 }
+
