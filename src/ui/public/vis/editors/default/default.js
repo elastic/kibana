@@ -64,7 +64,7 @@ const defaultEditor = function ($rootScope, $compile) {
 
           updateScope();
 
-          $scope.state = $scope.vis.copyCurrentState();
+          $scope.state = $scope.vis.copyCurrentState(true);
           $scope.oldState = $scope.vis.getSerializableState($scope.state);
 
           $scope.toggleSidebar = () => {
@@ -74,14 +74,13 @@ const defaultEditor = function ($rootScope, $compile) {
           this.el.one('renderComplete', resolve);
           // track state of editable vis vs. "actual" vis
           $scope.stageEditableVis = () => {
-            $scope.vis.setCurrentState($scope.state);
             $scope.oldState = $scope.vis.getSerializableState($scope.state);
+            $scope.vis.setCurrentState($scope.state);
             $scope.vis.updateState();
             $scope.vis.dirty = false;
           };
           $scope.resetEditableVis = () => {
-            $scope.state = $scope.vis.copyCurrentState();
-            $scope.oldState = $scope.vis.getSerializableState($scope.state);
+            $scope.state = $scope.vis.copyCurrentState(true);
             $scope.vis.dirty = false;
           };
 
