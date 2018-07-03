@@ -78,8 +78,7 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
           text: 'top right',
         }],
         colorSchemas: Object.keys(truncatedColorMaps),
-        vectorLayers: vectorLayers,
-        baseLayers: []
+        vectorLayers: vectorLayers
       },
       schemas: new Schemas([
         {

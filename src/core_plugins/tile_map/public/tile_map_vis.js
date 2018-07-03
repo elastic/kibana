@@ -80,7 +80,6 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
           'Shaded Geohash Grid',
           'Heatmap'
         ],
-        baseLayers: [],
         tmsLayers: [],
       },
       optionsTemplate: '<tile-map-vis-params></tile-map-vis-params>',
