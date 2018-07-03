@@ -3,36 +3,6 @@
 exports[`DetailView should render empty state 1`] = `""`;
 
 exports[`DetailView should render with data 1`] = `
-.c0 {
-  position: relative;
-  border: 1px solid #d9d9d9;
-  border-radius: 5px;
-  margin-top: 24px;
-}
-
-.c1 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-  -webkit-align-items: flex-start;
-  -webkit-box-align: flex-start;
-  -ms-flex-align: flex-start;
-  align-items: flex-start;
-  padding: 24px 24px 0;
-  margin-bottom: 16px;
-}
-
-.c2 {
-  margin: 24px 0;
-  font-size: 20px;
-  margin: 0;
-}
-
 .c3 {
   display: -webkit-box;
   display: -webkit-flex;
@@ -54,6 +24,12 @@ exports[`DetailView should render with data 1`] = `
   margin-bottom: 16px;
 }
 
+.c8 {
+  width: 33%;
+  margin-bottom: 16px;
+  width: 66%;
+}
+
 .c5 {
   margin-bottom: 8px;
   font-size: 12px;
@@ -73,12 +49,6 @@ exports[`DetailView should render with data 1`] = `
   color: #999999;
 }
 
-.c8 {
-  width: 33%;
-  margin-bottom: 16px;
-  width: 66%;
-}
-
 .c9 {
   display: inline-block;
   max-width: 100%;
@@ -88,9 +58,10 @@ exports[`DetailView should render with data 1`] = `
   line-height: 16px;
 }
 
-.c10 {
-  padding: 0 24px;
-  border-bottom: 1px solid #d9d9d9;
+.c2 {
+  margin: 24px 0;
+  font-size: 20px;
+  margin: 0;
 }
 
 .c11 {
@@ -116,34 +87,6 @@ exports[`DetailView should render with data 1`] = `
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-}
-
-.c13 {
-  padding: 24px 24px 0;
-}
-
-.c14 {
-  margin: 0 0 24px 0;
-  position: relative;
-  font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
-  border: 1px solid #d9d9d9;
-  border-radius: 5px;
-  background: #f5f5f5;
-}
-
-.c14 .c16 {
-  color: #000000;
-}
-
-.c15 {
-  color: #999999;
-  padding: 8px;
-  border-bottom: 1px solid #d9d9d9;
-  border-radius: 5px 5px 0 0;
-}
-
-.c17 {
-  font-weight: bold;
 }
 
 .c18 {
@@ -229,12 +172,69 @@ exports[`DetailView should render with data 1`] = `
   z-index: 2;
 }
 
+.c15 {
+  color: #999999;
+  padding: 8px;
+  border-bottom: 1px solid #d9d9d9;
+  border-radius: 5px 5px 0 0;
+}
+
+.c17 {
+  font-weight: bold;
+}
+
+.c14 {
+  margin: 0 0 24px 0;
+  position: relative;
+  font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
+  border: 1px solid #d9d9d9;
+  border-radius: 5px;
+  background: #f5f5f5;
+}
+
+.c14 .c16 {
+  color: #000000;
+}
+
 .c26 {
   margin: 0 0 24px 0;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+}
+
+.c0 {
+  position: relative;
+  border: 1px solid #d9d9d9;
+  border-radius: 5px;
+  margin-top: 24px;
+}
+
+.c1 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+  -webkit-align-items: flex-start;
+  -webkit-box-align: flex-start;
+  -ms-flex-align: flex-start;
+  align-items: flex-start;
+  padding: 24px 24px 0;
+  margin-bottom: 16px;
+}
+
+.c10 {
+  padding: 0 24px;
+  border-bottom: 1px solid #d9d9d9;
+}
+
+.c13 {
+  padding: 24px 24px 0;
 }
 
 <div
