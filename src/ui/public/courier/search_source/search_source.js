@@ -78,8 +78,7 @@ import { NormalizeSortRequestProvider } from './_normalize_sort_request';
 import { SearchRequestProvider } from '../fetch/request';
 import { SegmentedSearchRequestProvider } from '../fetch/request/segmented_search_request';
 
-import { searchRequestQueue } from '../search_request_queue';
-import { FetchSoonProvider } from '../fetch';
+import { CallClientProvider } from '../fetch/call_client';
 import { FieldWildcardProvider } from '../../field_wildcard';
 import { getHighlightRequest } from '../../../../core_plugins/kibana/common/highlight';
 import { BuildESQueryProvider } from './build_query';
@@ -119,7 +118,7 @@ export function SearchSourceProvider(Promise, Private, config) {
   const SearchRequest = Private(SearchRequestProvider);
   const SegmentedSearchRequest = Private(SegmentedSearchRequestProvider);
   const normalizeSortRequest = Private(NormalizeSortRequestProvider);
-  const fetchSoon = Private(FetchSoonProvider);
+  const callClient = Private(CallClientProvider);
   const buildESQuery = Private(BuildESQueryProvider);
   const { fieldWildcardFilter } = Private(FieldWildcardProvider);
   const getConfig = (...args) => config.get(...args);
@@ -303,36 +302,12 @@ export function SearchSourceProvider(Promise, Private, config) {
      */
     fetch() {
       const self = this;
-      let req = _.first(self._myStartableQueued());
-
-      if (!req) {
-        const errorHandler = (request, error) => {
-          request.defer.reject(error);
-          request.abort();
-        };
-        req = self._createRequest({ errorHandler });
-      }
-
-      fetchSoon.fetchSearchRequests([req]);
-      return req.getCompletePromise();
-    }
-
-    /**
-     * Fetch all pending requests for this source ASAP
-     * @async
-     */
-    fetchQueued() {
-      return fetchSoon.fetchSearchRequests(this._myStartableQueued());
-    }
-
-    /**
-     * Cancel all pending requests for this searchSource
-     * @return {undefined}
-     */
-    cancelQueued() {
-      searchRequestQueue.getAll()
-        .filter(req => req.source === this)
-        .forEach(req => req.abort());
+      const errorHandler = (request, error) => {
+        request.defer.reject(error);
+        request.abort();
+      };
+      const req = self._createRequest({ errorHandler });
+      return callClient(req);
     }
 
     /**
@@ -428,18 +403,7 @@ export function SearchSourceProvider(Promise, Private, config) {
      * @return {undefined}
      */
     destroy() {
-      this.cancelQueued();
       this._requestStartHandlers.length = 0;
-    }
-
-    /******
-     * PRIVATE APIS
-     ******/
-
-    _myStartableQueued() {
-      return searchRequestQueue
-        .getStartable()
-        .filter(req => req.source === this);
     }
 
     /**

@@ -31,7 +31,7 @@ import { uiModules } from '../modules';
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
 
 uiModules.get('kibana')
-  .directive('docTable', function (config, Notifier, getAppState, pagerFactory, $filter, courier) {
+  .directive('docTable', function (config, Notifier, getAppState, pagerFactory, $filter) {
     return {
       restrict: 'E',
       template: html,
@@ -104,7 +104,9 @@ uiModules.get('kibana')
           // Don't react if sort values didn't really change
             if (newSort === oldSort) return;
             $scope.searchSource.setField('sort', getSort(newSort, $scope.indexPattern));
-            $scope.searchSource.fetchQueued();
+
+            // TODO: Use regular fetch()
+            // $scope.searchSource.fetchQueued();
           });
 
           $scope.$on('$destroy', function () {
@@ -140,7 +142,9 @@ uiModules.get('kibana')
               });
           }
           startSearching();
-          courier.fetch();
+
+          // TODO: Call searchSource.fetch() directly.
+          // courier.fetch();
         });
 
         $scope.pageOfItems = [];

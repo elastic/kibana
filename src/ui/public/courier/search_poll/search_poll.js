@@ -21,14 +21,11 @@ import _ from 'lodash';
 
 import { fatalError } from '../../notify';
 import '../../promises';
-import { searchRequestQueue } from '../search_request_queue';
-import { FetchSoonProvider } from '../fetch';
 
-export function SearchPollProvider(Private, Promise, $rootScope) {
-  const fetchSoon = Private(FetchSoonProvider);
-
+export function SearchPollProvider(Private, Promise) {
   class SearchPoll {
     constructor() {
+      this._clearSearchCallback = undefined;
       this._isPolling = false;
       this._intervalInMs = undefined;
       this._timerId = null;
@@ -67,7 +64,19 @@ export function SearchPollProvider(Private, Promise, $rootScope) {
       }
     };
 
+    setSearchCallback = searchCallback => {
+      this._searchCallback = searchCallback;
+    };
+
+    clearSearchCallback = () => {
+      this._searchCallback = undefined;
+    }
+
     _search = () => {
+      if (!this._searchCallback) {
+        return;
+      }
+
       // If our interval is faster than the rate at which searches return results, then trigger
       // a new search as soon as the results come back.
       if (this._searchPromise) {
@@ -81,16 +90,7 @@ export function SearchPollProvider(Private, Promise, $rootScope) {
       // We use resolve() here instead of try() because the latter won't trigger a $digest
       // when the promise resolves.
       this._searchPromise = Promise.resolve().then(() => {
-        $rootScope.$broadcast('courier:searchRefresh');
-        const requests = searchRequestQueue.getInactive();
-
-        // The promise returned from fetchSearchRequests() only resolves when the requests complete.
-        // We want to continue even if the requests abort so we return a different promise.
-        fetchSoon.fetchSearchRequests(requests);
-
-        return Promise.all(
-          requests.map(request => request.getCompleteOrAbortedPromise())
-        );
+        return this._searchCallback();
       })
         .then(() => {
           this._searchPromise = null;

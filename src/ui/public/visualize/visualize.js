@@ -32,7 +32,7 @@ import {
 
 uiModules
   .get('kibana/directive', ['ngSanitize'])
-  .directive('visualize', function ($timeout, Notifier, Private, Promise) {
+  .directive('visualize', function ($timeout, Notifier, Private, Promise, courier) {
     const notify = new Notifier({ location: 'Visualize' });
     const requestHandlers = Private(VisRequestHandlersRegistryProvider);
     const responseHandlers = Private(VisResponseHandlersRegistryProvider);
@@ -71,7 +71,7 @@ uiModules
         const requestHandler = getHandler(requestHandlers, $scope.vis.type.requestHandler);
         const responseHandler = getHandler(responseHandlers, $scope.vis.type.responseHandler);
 
-        $scope.fetch = _.debounce(function () {
+        const fetch = () => {
           // If destroyed == true the scope has already been destroyed, while this method
           // was still waiting for its debounce, in this case we don't want to start
           // fetching new data and rendering.
@@ -94,7 +94,7 @@ uiModules
           forceFetch = false;
 
           // searchSource is only there for courier request handler
-          requestHandler($scope.vis, handlerParams)
+          return requestHandler($scope.vis, handlerParams)
             .then(requestHandlerResponse => {
 
               //No need to call the response handler when there have been no data nor has been there changes
@@ -126,7 +126,10 @@ uiModules
 
               return resp;
             });
-        }, 100);
+        };
+
+        $scope.fetch = _.debounce(fetch, 100);
+        courier.setSearchCallback(fetch);
 
         const handleVisUpdate = () => {
           if ($scope.updateState) {
@@ -137,14 +140,11 @@ uiModules
         };
         $scope.vis.on('update', handleVisUpdate);
 
-
         const reload = () => {
           forceFetch = true;
           $scope.fetch();
         };
         $scope.vis.on('reload', reload);
-        // auto reload will trigger this event
-        $scope.$on('courier:searchRefresh', reload);
 
         $scope.$watch('filters', $scope.fetch, true);
         $scope.$watch('query', $scope.fetch, true);
@@ -163,6 +163,7 @@ uiModules
           $scope.vis.removeListener('update', handleVisUpdate);
           $scope.uiState.off('change', $scope.fetch);
           visualizationLoader.destroy($el[0]);
+          courier.clearSearchCallback();
         });
 
         visualizationLoader(

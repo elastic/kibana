@@ -67,7 +67,6 @@ app.directive('dashboardViewportProvider', function (reactDirective) {
 });
 
 app.directive('dashboardApp', function ($injector) {
-  const courier = $injector.get('courier');
   const AppState = $injector.get('AppState');
   const kbnUrl = $injector.get('kbnUrl');
   const confirmModal = $injector.get('confirmModal');
@@ -162,7 +161,8 @@ app.directive('dashboardApp', function ($injector) {
 
       $scope.refresh = () => {
         $rootScope.$broadcast('fetch');
-        courier.fetch();
+        // TODO: Tell embeddables to do their own fetch.
+        // courier.fetch();
       };
       dashboardStateManager.handleTimeChange(timefilter.getTime());
 

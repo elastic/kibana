@@ -19,8 +19,6 @@
 
 import moment from 'moment';
 
-import { searchRequestQueue } from '../../../search_request_queue';
-
 export function SearchRequestProvider(Promise) {
   class SearchRequest {
     constructor({ source, defer, errorHandler }) {
@@ -32,7 +30,6 @@ export function SearchRequestProvider(Promise) {
       this.defer = defer || Promise.defer();
       this.abortedDefer = Promise.defer();
       this.type = 'search';
-      searchRequestQueue.add(this);
     }
 
     /**
@@ -118,7 +115,6 @@ export function SearchRequestProvider(Promise) {
       if (this.stopped) return;
       this.stopped = true;
       this.source.requestIsStopped(this);
-      searchRequestQueue.remove(this);
     }
 
     abort() {

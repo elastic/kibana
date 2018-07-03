@@ -486,7 +486,8 @@ function discoverController(
       .then(setupVisualization)
       .then(function () {
         $state.save();
-        return courier.fetch();
+        // TODO: Call searchSource.fetch() directly.
+        // return courier.fetch();
       })
       .catch(notify.error);
   };

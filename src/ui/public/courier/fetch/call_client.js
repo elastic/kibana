@@ -20,30 +20,16 @@
 import _ from 'lodash';
 
 import { ErrorAllowExplicitIndexProvider } from '../../error_allow_explicit_index';
-import { IsRequestProvider } from './is_request';
-import { MergeDuplicatesRequestProvider } from './merge_duplicate_requests';
 import { RequestStatus } from './req_status';
 import { SerializeFetchParamsProvider } from './request/serialize_fetch_params';
 
 export function CallClientProvider(Private, Promise, es) {
   const errorAllowExplicitIndex = Private(ErrorAllowExplicitIndexProvider);
-  const isRequest = Private(IsRequestProvider);
-  const mergeDuplicateRequests = Private(MergeDuplicatesRequestProvider);
   const serializeFetchParams = Private(SerializeFetchParamsProvider);
 
   const ABORTED = RequestStatus.ABORTED;
-  const DUPLICATE = RequestStatus.DUPLICATE;
 
-  function callClient(requests) {
-    // merging docs can change status to DUPLICATE, capture new statuses
-    const statuses = mergeDuplicateRequests(requests);
-
-    // get the actual list of requests that we will be fetching
-    let requestsToFetch = statuses.filter(isRequest);
-    let execCount = requestsToFetch.length;
-
-    if (!execCount) return Promise.resolve([]);
-
+  function callClient(request) {
     // resolved by respond()
     let esPromise = undefined;
     let isRequestAborted = false;
@@ -52,39 +38,11 @@ export function CallClientProvider(Private, Promise, es) {
     // for each respond with either the response or ABORTED
     const respond = function (responses) {
       responses = responses || [];
-      return Promise.map(requests, function (request, i) {
-        switch (statuses[i]) {
-          case ABORTED:
-            return ABORTED;
-          case DUPLICATE:
-            return request._uniq.resp;
-          default:
-            const index = _.findIndex(requestsToFetch, request);
-            if (index < 0) {
-              // This means the request failed.
-              return ABORTED;
-            }
-            return responses[index];
-        }
-      })
-        .then(
-          (res) => defer.resolve(res),
-          (err) => defer.reject(err)
-        );
+      defer.resolve(responses[0]);
     };
 
     // handle a request being aborted while being fetched
-    const requestWasAborted = Promise.method(function (req, i) {
-      if (statuses[i] === ABORTED) {
-        defer.reject(new Error('Request was aborted twice?'));
-      }
-
-      execCount -= 1;
-      if (execCount > 0) {
-        // the multi-request still contains other requests
-        return;
-      }
-
+    const requestWasAborted = Promise.method(function () {
       if (esPromise && _.isFunction(esPromise.abort)) {
         esPromise.abort();
       }
@@ -95,12 +53,8 @@ export function CallClientProvider(Private, Promise, es) {
       return respond();
     });
 
-    // attach abort handlers, close over request index
-    statuses.forEach(function (req, i) {
-      if (!isRequest(req)) return;
-      req.whenAborted(function () {
-        requestWasAborted(req, i).catch(defer.reject);
-      });
+    request.whenAborted(function () {
+      requestWasAborted(request).catch(defer.reject);
     });
 
     // We're going to create a new async context here, so that the logic within it can execute
@@ -108,16 +62,10 @@ export function CallClientProvider(Private, Promise, es) {
     Promise.resolve().then(async () => {
       // Flatten the searchSource within each searchRequest to get the fetch params,
       // e.g. body, filters, index pattern, query.
-      const allFetchParams = await getAllFetchParams(requestsToFetch);
+      const allFetchParams = await getAllFetchParams([request]);
 
       // Serialize the fetch params into a format suitable for the body of an ES query.
-      const serializedFetchParams = await serializeAllFetchParams(allFetchParams, requestsToFetch);
-
-      // The index of the request inside requestsToFetch determines which response is mapped to it.
-      // If a request won't generate a response, since it already failed, we need to remove the
-      // request from the requestsToFetch array so the indexes will continue to match up to the
-      // responses correctly.
-      requestsToFetch = requestsToFetch.filter(request => request !== undefined);
+      const serializedFetchParams = await serializeAllFetchParams(allFetchParams, [request]);
 
       try {
         // The request was aborted while we were doing the above logic.
@@ -145,11 +93,7 @@ export function CallClientProvider(Private, Promise, es) {
     // send them to the requests
     return defer.promise
       .catch((err) => {
-        requests.forEach((req, index) => {
-          if (statuses[index] !== ABORTED) {
-            req.handleFailure(err);
-          }
-        });
+        request.handleFailure(err);
       });
   }
 
