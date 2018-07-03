@@ -22,7 +22,6 @@ import path from 'path';
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
-  const screenshotsServer = getService('screenshots');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'settings', 'header']);
 
@@ -119,9 +118,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.clickKibanaSavedObjects();
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_saved_search.json'));
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await screenshotsServer.take('saved_search_imported');
       await PageObjects.settings.clickImportDone();
-      await screenshotsServer.take('saved_search_imported_object_table');
 
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaSavedObjects();
