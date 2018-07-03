@@ -17,32 +17,29 @@
  * under the License.
  */
 
-import { uiModules } from '../modules';
-import { prettyDuration } from '../timepicker/pretty_duration';
-const module = uiModules.get('kibana');
+import expect from 'expect.js';
+import { prettyInterval } from './pretty_interval';
 
-module.directive('prettyDuration', function (config) {
-  return {
-    restrict: 'E',
-    scope: {
-      from: '=',
-      to: '='
-    },
-    link: function ($scope, $elem) {
-      const getConfig = (...args) => config.get(...args);
+test('Off', () => {
+  expect(prettyInterval(0)).to.be('Off');
+});
 
-      function setText(text) {
-        $elem.text(text);
-        $elem.attr('aria-label', `Current time range is ${text}`);
-      }
+test('seconds', () => {
+  expect(prettyInterval(1000)).to.be('1 second');
+  expect(prettyInterval(15000)).to.be('15 seconds');
+});
 
-      function stringify() {
-        setText(prettyDuration($scope.from, $scope.to, getConfig));
-      }
+test('minutes', () => {
+  expect(prettyInterval(60000)).to.be('1 minute');
+  expect(prettyInterval(1800000)).to.be('30 minutes');
+});
 
-      $scope.$watch('from', stringify);
-      $scope.$watch('to', stringify);
+test('hours', () => {
+  expect(prettyInterval(3600000)).to.be('1 hour');
+  expect(prettyInterval(43200000)).to.be('12 hours');
+});
 
-    }
-  };
+test('days', () => {
+  expect(prettyInterval(86400000)).to.be('1 day');
+  expect(prettyInterval(86400000 * 2)).to.be('2 days');
 });
