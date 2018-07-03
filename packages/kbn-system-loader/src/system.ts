@@ -18,11 +18,11 @@
  */
 
 import {
-  IKibanaSystemClassStatic,
-  ISystemMetadata,
-  ISystemsType,
   KibanaSystem,
+  KibanaSystemClassStatic,
+  SystemMetadata,
   SystemName,
+  SystemsType,
 } from './system_types';
 
 function isPromise(obj: any) {
@@ -31,12 +31,12 @@ function isPromise(obj: any) {
   );
 }
 
-export class System<C, M extends ISystemMetadata, D extends ISystemsType, E> {
+export class System<C, M extends SystemMetadata, D extends SystemsType, E> {
   public readonly name: SystemName;
   public readonly dependencies: SystemName[];
   public readonly metadata?: M;
 
-  private readonly systemClass: IKibanaSystemClassStatic<C, D, E>;
+  private readonly systemClass: KibanaSystemClassStatic<C, D, E>;
   private systemInstance?: KibanaSystem<C, D, E>;
   private exposedValues?: E;
 
@@ -45,7 +45,7 @@ export class System<C, M extends ISystemMetadata, D extends ISystemsType, E> {
     config: {
       metadata?: M;
       dependencies?: SystemName[];
-      implementation: IKibanaSystemClassStatic<C, D, E>;
+      implementation: KibanaSystemClassStatic<C, D, E>;
     }
   ) {
     this.name = name;
