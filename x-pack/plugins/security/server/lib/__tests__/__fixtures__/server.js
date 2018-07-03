@@ -35,7 +35,10 @@ export function serverFixture() {
       security: {
         getUser: stub(),
         authenticate: stub(),
-        deauthenticate: stub()
+        deauthenticate: stub(),
+        authorization: {
+          checkPrivilegesWithRequest: stub()
+        }
       },
 
       xpack_main: {

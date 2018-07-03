@@ -114,6 +114,10 @@ export const security = (kibana) => new kibana.Plugin({
 
     const auditLogger = new SecurityAuditLogger(server.config(), new AuditLogger(server, 'security'));
     const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(server);
+    server.expose('authorization', {
+      checkPrivilegesWithRequest,
+    });
+
     const { savedObjects } = server;
 
     savedObjects.setScopedSavedObjectsClientFactory(({
