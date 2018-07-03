@@ -30,6 +30,7 @@ export const INSTRUCTION_VARIANT = {
   RACK: 'rack',
   JS: 'js',
   GO: 'go',
+  JAVA: 'java',
 };
 
 const DISPLAY_MAP = {
@@ -45,6 +46,7 @@ const DISPLAY_MAP = {
   [INSTRUCTION_VARIANT.RACK]: 'Rack',
   [INSTRUCTION_VARIANT.JS]: 'JS',
   [INSTRUCTION_VARIANT.GO]: 'Go',
+  [INSTRUCTION_VARIANT.JAVA]: 'Java',
 };
 
 /**
