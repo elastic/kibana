@@ -44,7 +44,12 @@ uiModules
 
         const aggTypeSubscription = aggTypeFilters
           .filter$(aggTypes.byType[$scope.groupName], $scope.indexPattern, $scope.agg)
-          .subscribe(aggTypes => $scope.aggTypeOptions = aggTypes);
+          .subscribe(aggTypes => {
+            if(!aggTypes.includes($scope.agg.type) && aggTypes && aggTypes.length) {
+              $scope.agg.type = aggTypes[0];
+            }
+            $scope.aggTypeOptions = aggTypes;
+          });
 
         $scope.$on('$destroy', () => {
           aggTypeSubscription.unsubscribe();
