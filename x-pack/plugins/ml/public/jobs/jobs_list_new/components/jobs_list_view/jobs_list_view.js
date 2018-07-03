@@ -137,9 +137,24 @@ export class JobsListView extends Component {
     this.setState({ selectedJobs });
   }
 
+  refreshSelectedJobs() {
+    const selectedJobsIds = this.state.selectedJobs.map(j => j.id);
+    const filteredJobIds = this.state.filteredJobsSummaryList.map(j => j.id);
+
+    // refresh the jobs stored as selected
+    // only select those which are also in the filtered list
+    const selectedJobs = this.state.jobsSummaryList
+      .filter(j => selectedJobsIds.find(id => id === j.id))
+      .filter(j => filteredJobIds.find(id => id === j.id));
+
+    this.setState({ selectedJobs });
+  }
+
   setFilters = (filterClauses) => {
     const filteredJobsSummaryList = filterJobs(this.state.jobsSummaryList, filterClauses);
-    this.setState({ filteredJobsSummaryList, filterClauses });
+    this.setState({ filteredJobsSummaryList, filterClauses }, () => {
+      this.refreshSelectedJobs();
+    });
   }
 
   refreshJobSummaryList(autoRefresh = true) {
@@ -157,7 +172,9 @@ export class JobsListView extends Component {
             return job;
           });
           const filteredJobsSummaryList = filterJobs(jobsSummaryList, this.state.filterClauses);
-          this.setState({ jobsSummaryList, filteredJobsSummaryList, fullJobsList });
+          this.setState({ jobsSummaryList, filteredJobsSummaryList, fullJobsList }, () => {
+            this.refreshSelectedJobs();
+          });
 
           Object.keys(this.updateFunctions).forEach((j) => {
             this.updateFunctions[j].setState({ job: fullJobsList[j] });
