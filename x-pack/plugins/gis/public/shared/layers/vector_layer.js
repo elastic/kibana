@@ -15,8 +15,6 @@ export class VectorLayer extends ALayer {
   static create(options) {
     const vectorLayerDescriptor = super.create(options);
     vectorLayerDescriptor.type = LAYER_TYPE.VECTOR;
-    vectorLayerDescriptor.name = options.layerName ||
-      `${vectorLayerDescriptor.type} Layer - ID: ${vectorLayerDescriptor.id}`;
     return vectorLayerDescriptor;
   }
 

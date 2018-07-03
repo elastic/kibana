@@ -18,6 +18,7 @@ export class ALayer {
     layerDescriptor.temporary = options.temporary || false;
     layerDescriptor.style = options.style || {};
     layerDescriptor.id = Math.random().toString(36).substr(2, 5);
+    layerDescriptor.name = options.name || `Layer ${layerDescriptor.id}`;
     return layerDescriptor;
   }
 }
