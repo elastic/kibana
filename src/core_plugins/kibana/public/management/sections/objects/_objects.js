@@ -22,6 +22,7 @@ import objectIndexHTML from './_objects.html';
 import uiRoutes from 'ui/routes';
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { uiModules } from 'ui/modules';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -31,11 +32,13 @@ import { getInAppUrl } from './lib/get_in_app_url';
 const REACT_OBJECTS_TABLE_DOM_ELEMENT_ID = 'reactSavedObjectsTable';
 
 function updateObjectsTable($scope, $injector) {
+  const Private = $injector.get('Private');
   const indexPatterns = $injector.get('indexPatterns');
   const $http = $injector.get('$http');
   const kbnUrl = $injector.get('kbnUrl');
   const config = $injector.get('config');
 
+  const savedObjectsClient = Private(SavedObjectsClientProvider);
   const services = savedObjectManagementRegistry.all().map(obj => $injector.get(obj.service));
   const allServices = savedObjectManagementRegistry.all();
   const typeToServiceName = type => allServices.reduce((serviceName, service) => {
@@ -50,7 +53,7 @@ function updateObjectsTable($scope, $injector) {
 
     render(
       <ObjectsTable
-        savedObjectsClient={chrome.getSavedObjectsClient()}
+        savedObjectsClient={savedObjectsClient}
         services={services}
         indexPatterns={indexPatterns}
         $http={$http}
