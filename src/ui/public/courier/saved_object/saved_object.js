@@ -144,7 +144,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
       }
 
       if (config.clearSavedIndexPattern) {
-        this.searchSource.setIndexPattern(undefined);
+        this.searchSource.setField('index', undefined);
         return Promise.resolve(null);
       }
 
@@ -162,7 +162,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
       // At this point index will either be an IndexPattern, if cached, or a promise that
       // will return an IndexPattern, if not cached.
       return Promise.resolve(index).then(indexPattern => {
-        this.searchSource.setIndexPattern(indexPattern);
+        this.searchSource.setField('index', indexPattern);
       });
     };
 

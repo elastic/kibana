@@ -30,7 +30,7 @@ export function createSearchSource(kbnApi, initialState, indexPattern, aggs, use
     return activeFilters;
   });
   searchSource.setField('size', 0);
-  searchSource.setIndexPattern(indexPattern);
+  searchSource.setField('index', indexPattern);
   searchSource.setField('aggs', aggs);
   return searchSource;
 }

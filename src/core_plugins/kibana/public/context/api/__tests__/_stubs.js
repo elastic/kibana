@@ -41,7 +41,6 @@ export function createSearchSourceStubProvider(hits, timeField) {
 
   searchSourceStub.setParent = sinon.stub().returns(searchSourceStub);
   searchSourceStub.setField = sinon.stub().returns(searchSourceStub);
-  searchSourceStub.setIndexPattern = sinon.stub().returns(searchSourceStub);
   searchSourceStub.getField = sinon.spy(key => {
     const previousSetCall = searchSourceStub.setField.withArgs(key).lastCall;
     return previousSetCall ? previousSetCall.args[1] : null;

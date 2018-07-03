@@ -33,7 +33,6 @@ function createSearchSourceStubProvider(hits) {
 
   searchSourceStub.setParent = sinon.stub().returns(searchSourceStub);
   searchSourceStub.setField = sinon.stub().returns(searchSourceStub);
-  searchSourceStub.setIndexPattern = sinon.stub().returns(searchSourceStub);
   searchSourceStub.fetch = sinon.spy(() => Promise.resolve({
     hits: {
       hits: searchSourceStub._stubHits,
@@ -91,9 +90,8 @@ describe('context app', function () {
 
       return fetchAnchor('INDEX_PATTERN_ID', 'doc', 'id', [{ '@timestamp': 'desc' }, { '_doc': 'asc' }])
         .then(() => {
-          const setIndexSpy = searchSourceStub.setIndexPattern;
-          expect(setIndexSpy.calledOnce).to.be(true);
-          expect(setIndexSpy.firstCall.args[0]).to.eql({ id: 'INDEX_PATTERN_ID' });
+          const setFieldSpy = searchSourceStub.setField;
+          expect(setFieldSpy.firstCall.args[1]).to.eql({ id: 'INDEX_PATTERN_ID' });
         });
     });
 

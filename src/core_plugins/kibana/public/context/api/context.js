@@ -163,7 +163,7 @@ function fetchContextProvider(indexPatterns, Private) {
 
     return new SearchSource()
       .setParent(false)
-      .setIndexPattern(indexPattern)
+      .setField('index', indexPattern)
       .setField('filter', filters);
   }
 

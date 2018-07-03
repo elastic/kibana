@@ -196,7 +196,7 @@ function discoverController(
   $scope.searchSource = savedSearch.searchSource;
   $scope.indexPattern = resolveIndexPatternLoading();
   $scope.searchSource
-    .setIndexPattern($scope.indexPattern)
+    .setField('index', $scope.indexPattern)
     .setField('highlightAll', true)
     .setField('version', true);
 

@@ -84,7 +84,7 @@ import { FieldWildcardProvider } from '../../field_wildcard';
 import { getHighlightRequest } from '../../../../core_plugins/kibana/common/highlight';
 import { BuildESQueryProvider } from './build_query';
 
-const SETTABLE_FIELDS = [
+const FIELDS = [
   'type',
   'query',
   'filter',
@@ -98,11 +98,7 @@ const SETTABLE_FIELDS = [
   'source',
   'version',
   'fields',
-];
-
-const GETTABLE_FIELDS = [
-  ...SETTABLE_FIELDS,
-  'index', // This is settable via `setIndexPattern`
+  'index',
 ];
 
 function parseInitialFields(initialFields) {
@@ -174,45 +170,48 @@ export function SearchSourceProvider(Promise, Private, config) {
     };
 
     setField = (field, value) => {
-      if (!SETTABLE_FIELDS.includes(field)) {
-        throw new Error(`Can't set field '${field}' on SearchSource. Acceptable fields are: ${SETTABLE_FIELDS.join(', ')}.`);
+      if (!FIELDS.includes(field)) {
+        throw new Error(`Can't set field '${field}' on SearchSource. Acceptable fields are: ${FIELDS.join(', ')}.`);
       }
 
       if (value == null) {
         delete this._fields[field];
-      } else {
-        this._fields[field] = value;
+        return this;
       }
 
-      return this;
-    };
+      if (field === 'index') {
+        const fields = this._fields;
 
-    setIndexPattern = (indexPattern) => {
-      const fields = this._fields;
+        const hasSource = fields.source;
+        const sourceCameFromIp = hasSource && fields.source.hasOwnProperty(forIp);
+        const sourceIsForOurIp = sourceCameFromIp && fields.source[forIp] === fields.index;
+        if (sourceIsForOurIp) {
+          delete fields.source;
+        }
 
-      const hasSource = fields.source;
-      const sourceCameFromIp = hasSource && fields.source.hasOwnProperty(forIp);
-      const sourceIsForOurIp = sourceCameFromIp && fields.source[forIp] === fields.index;
-      if (sourceIsForOurIp) {
-        delete fields.source;
+        if (value === null) {
+          delete fields.index;
+          return this;
+        }
+
+        if (!isIndexPattern(value)) {
+          throw new TypeError('expected indexPattern to be an IndexPattern duck.');
+        }
+
+        fields.index = value;
+        if (!fields.source) {
+          // imply source filtering based on the index pattern, but allow overriding
+          // it by simply setting another field for "source". When index is changed
+          fields.source = function () {
+            return value.getSourceFiltering();
+          };
+          fields.source[forIp] = value;
+        }
+
+        return this;
       }
 
-      if (indexPattern === undefined) return fields.index;
-      if (indexPattern === null) return delete fields.index;
-      if (!isIndexPattern(indexPattern)) {
-        throw new TypeError('expected indexPattern to be an IndexPattern duck.');
-      }
-
-      fields.index = indexPattern;
-      if (!fields.source) {
-        // imply source filtering based on the index pattern, but allow overriding
-        // it by simply setting another field for "source". When index is changed
-        fields.source = function () {
-          return indexPattern.getSourceFiltering();
-        };
-        fields.source[forIp] = indexPattern;
-      }
-
+      this._fields[field] = value;
       return this;
     };
 
@@ -228,8 +227,8 @@ export function SearchSourceProvider(Promise, Private, config) {
      * Get fields from the fields
      */
     getField = field => {
-      if (!GETTABLE_FIELDS.includes(field)) {
-        throw new Error(`Can't get field '${field}' from SearchSource. Acceptable fields are: ${GETTABLE_FIELDS.join(', ')}.`);
+      if (!FIELDS.includes(field)) {
+        throw new Error(`Can't get field '${field}' from SearchSource. Acceptable fields are: ${FIELDS.join(', ')}.`);
       }
 
       let searchSource = this;
@@ -248,8 +247,8 @@ export function SearchSourceProvider(Promise, Private, config) {
      * Get the field from our own fields, don't traverse up the chain
      */
     getOwnField = field => {
-      if (!GETTABLE_FIELDS.includes(field)) {
-        throw new Error(`Can't get field '${field}' from SearchSource. Acceptable fields are: ${GETTABLE_FIELDS.join(', ')}.`);
+      if (!FIELDS.includes(field)) {
+        throw new Error(`Can't get field '${field}' from SearchSource. Acceptable fields are: ${FIELDS.join(', ')}.`);
       }
 
       const value = this._fields[field];
@@ -267,7 +266,7 @@ export function SearchSourceProvider(Promise, Private, config) {
       const newSearchSource = new SearchSource(json);
       // when serializing the internal fields we lose the internal classes used in the index
       // pattern, so we have to set it again to workaround this behavior
-      newSearchSource.setIndexPattern(this.getField('index'));
+      newSearchSource.setField('index', this.getField('index'));
       newSearchSource.setParent(this.getParent());
       return newSearchSource;
     };
