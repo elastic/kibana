@@ -20,7 +20,7 @@ import { initPrivilegesApi } from './server/routes/api/v1/privileges';
 import { SecurityAuditLogger } from './server/lib/audit_logger';
 import { AuditLogger } from '../../server/lib/audit_logger';
 import { SecureSavedObjectsClient } from './server/lib/saved_objects_client/secure_saved_objects_client';
-import { checkPrivilegesWithRequestFactory, registerPrivilegesWithCluster } from './server/lib/authorization';
+import { initAuthorization, registerPrivilegesWithCluster } from './server/lib/authorization';
 import { watchStatusAndLicenseToInitialize } from './server/lib/watch_status_and_license_to_initialize';
 
 export const security = (kibana) => new kibana.Plugin({
@@ -113,13 +113,8 @@ export const security = (kibana) => new kibana.Plugin({
     server.auth.strategy('session', 'login', 'required');
 
     const auditLogger = new SecurityAuditLogger(server.config(), new AuditLogger(server, 'security'));
-    const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(server);
-    server.expose('authorization', {
-      checkPrivilegesWithRequest,
-    });
-
+    initAuthorization(server);
     const { savedObjects } = server;
-
     savedObjects.setScopedSavedObjectsClientFactory(({
       request,
     }) => {
@@ -133,7 +128,7 @@ export const security = (kibana) => new kibana.Plugin({
         return new savedObjects.SavedObjectsClient(callWithRequestRepository);
       }
 
-      const checkPrivileges = checkPrivilegesWithRequest(request);
+      const checkPrivileges = server.plugins.security.authorization.checkPrivilegesWithRequest(request);
       const internalRepository = savedObjects.getSavedObjectsRepository(callWithInternalUser);
 
       return new SecureSavedObjectsClient({
