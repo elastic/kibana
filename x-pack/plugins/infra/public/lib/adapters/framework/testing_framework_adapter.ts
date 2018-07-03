@@ -23,9 +23,6 @@ export class InfraTestingFrameworkAdapter implements InfraFrameworkAdapter {
   public renderBreadcrumbs() {
     return;
   }
-  public setTimeFilter() {
-    return;
-  }
   public setUISettings() {
     return;
   }

@@ -13,8 +13,6 @@ import {
   InfraFrameworkAdapter,
   InfraKibanaAdapterServiceRefs,
   InfraKibanaUIConfig,
-  InfraTimefilter,
-  InfraTimefilterMode,
   InfraTimezoneProvider,
   InfraUiKibanaAdapterScope,
 } from '../../lib';
@@ -44,20 +42,6 @@ export class InfraKibanaFrameworkAdapter implements InfraFrameworkAdapter {
   public setUISettings = (key: string, value: any) => {
     this.adapterService.callOrBuffer(({ config }) => {
       config.set(key, value);
-    });
-  };
-
-  public setTimeFilter = (
-    from: string,
-    to: string,
-    mode: InfraTimefilterMode
-  ) => {
-    this.adapterService.callOrBuffer(({ timefilter }) => {
-      Object.assign(timefilter.time, {
-        from,
-        mode,
-        to,
-      });
     });
   };
 
@@ -146,14 +130,9 @@ export class InfraKibanaFrameworkAdapter implements InfraFrameworkAdapter {
       config: InfraKibanaUIConfig,
       kbnVersion: string,
       Private: <Provider>(provider: Provider) => Provider,
-      timefilter: InfraTimefilter,
       // @ts-ignore: inject kibanaAdapter to force eager instatiation
       kibanaAdapter: any
     ) => {
-      timefilter.enableTimeRangeSelector();
-      timefilter.enableAutoRefreshSelector();
-      timefilter.init();
-
       this.timezone = Private(this.timezoneProvider)();
       this.kbnVersion = kbnVersion;
       this.dateFormat = config.get('dateFormat');
@@ -173,16 +152,10 @@ class KibanaAdapterServiceProvider {
     InfraBufferedKibanaServiceCall<InfraKibanaAdapterServiceRefs>
   > = [];
 
-  public $get(
-    $rootScope: IScope,
-    config: InfraKibanaUIConfig,
-    timefilter: InfraTimefilter
-  ) {
-    timefilter.init();
+  public $get($rootScope: IScope, config: InfraKibanaUIConfig) {
     this.serviceRefs = {
       config,
       rootScope: $rootScope,
-      timefilter,
     };
 
     this.applyBufferedCalls(this.bufferedCalls);

@@ -21,8 +21,6 @@ export interface InfraFrontendLibs {
   observableApi: InfraObservableApi;
 }
 
-export type InfraTimefilterMode = 'quick' | 'relative' | 'absolute';
-
 export type InfraTimezoneProvider = () => string;
 
 export interface InfraFrameworkAdapter {
@@ -35,7 +33,6 @@ export interface InfraFrameworkAdapter {
 
   // Methods
   setUISettings(key: string, value: any): void;
-  setTimeFilter(from: string, to: string, mode: InfraTimefilterMode): void;
   render(component: React.ReactElement<any>): void;
   renderBreadcrumbs(component: React.ReactElement<any>): void;
 }
@@ -83,17 +80,6 @@ export interface InfraObservableApi {
   ): InfraObservableApiResponse<ResponseBody>;
 }
 
-export interface InfraTimefilter {
-  time: {
-    from: string;
-    to: string;
-    mode: InfraTimefilterMode;
-  };
-  enableAutoRefreshSelector(): void;
-  enableTimeRangeSelector(): void;
-  init(): void;
-}
-
 export interface InfraUiKibanaAdapterScope extends IScope {
   breadcrumbs: any[];
   topNavMenu: any[];
@@ -107,7 +93,6 @@ export interface InfraKibanaUIConfig {
 export interface InfraKibanaAdapterServiceRefs {
   config: InfraKibanaUIConfig;
   rootScope: IScope;
-  timefilter: InfraTimefilter;
 }
 
 export type InfraBufferedKibanaServiceCall<ServiceRefs> = (
