@@ -164,10 +164,10 @@ export function SearchSourceProvider(Promise, Private, config) {
      * PUBLIC API
      *****/
 
-    setFields = newFields => {
+    setFields(newFields) {
       this._fields = newFields;
       return this;
-    };
+    }
 
     setField = (field, value) => {
       if (!FIELDS.includes(field)) {
@@ -215,13 +215,13 @@ export function SearchSourceProvider(Promise, Private, config) {
       return this;
     };
 
-    getId = () => {
+    getId() {
       return this._id;
-    };
+    }
 
-    getFields = () => {
+    getFields() {
       return _.clone(this._fields);
-    };
+    }
 
     /**
      * Get fields from the fields
@@ -246,7 +246,7 @@ export function SearchSourceProvider(Promise, Private, config) {
     /**
      * Get the field from our own fields, don't traverse up the chain
      */
-    getOwnField = field => {
+    getOwnField(field) {
       if (!FIELDS.includes(field)) {
         throw new Error(`Can't get field '${field}' from SearchSource. Acceptable fields are: ${FIELDS.join(', ')}.`);
       }
@@ -255,13 +255,13 @@ export function SearchSourceProvider(Promise, Private, config) {
       if (value !== void 0) {
         return value;
       }
-    };
+    }
 
-    create = () => {
+    create() {
       return new SearchSource();
-    };
+    }
 
-    createCopy = () => {
+    createCopy() {
       const json = angular.toJson(this._fields);
       const newSearchSource = new SearchSource(json);
       // when serializing the internal fields we lose the internal classes used in the index
@@ -269,32 +269,32 @@ export function SearchSourceProvider(Promise, Private, config) {
       newSearchSource.setField('index', this.getField('index'));
       newSearchSource.setParent(this.getParent());
       return newSearchSource;
-    };
+    }
 
-    createChild = (options = {}) => {
+    createChild(options = {}) {
       const childSearchSource = new SearchSource();
       childSearchSource.setParent(this, options);
       return childSearchSource;
-    };
+    }
 
     /**
      * Set a searchSource that this source should inherit from
      * @param  {SearchSource} searchSource - the parent searchSource
      * @return {this} - chainable
      */
-    setParent = (parent, options = {}) => {
+    setParent(parent, options = {}) {
       this._parent = parent;
       this._inheritOptions = options;
       return this;
-    };
+    }
 
     /**
      * Get the parent of this SearchSource
      * @return {undefined|searchSource}
      */
-    getParent = () => {
+    getParent() {
       return this._parent || undefined;
-    };
+    }
 
     /**
      * Fetch this source and reject the returned Promise on error
