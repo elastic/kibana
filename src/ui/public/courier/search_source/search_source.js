@@ -184,7 +184,7 @@ export function SearchSourceProvider(Promise, Private, config) {
           delete fields.source;
         }
 
-        if (value === null) {
+        if (value === null || value === undefined) {
           delete fields.index;
           return this;
         }
