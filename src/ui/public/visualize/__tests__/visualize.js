@@ -69,8 +69,8 @@ describe('visualize directive', function () {
     $rootScope.appState.vis = vis.getState();
     $rootScope.searchSource = searchSource;
     $rootScope.savedObject = {
-      vis: vis,
-      searchSource: searchSource
+      vis,
+      searchSource,
     };
     $el = $('<visualize saved-obj="savedObject" ui-state="uiState" app-state="appState">');
     $compile($el)($rootScope);
