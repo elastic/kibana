@@ -140,6 +140,9 @@ const defaultEditor = function ($rootScope, $compile) {
         if (!this._handler) {
           const visualizationEl = this.el.find('.vis-editor-canvas')[0];
           getVisualizeLoader().then(loader => {
+            if (!visualizationEl) {
+              return;
+            }
             this._loader = loader;
             this._handler = this._loader.embedVisualizationWithSavedObject(visualizationEl, this.savedObj, {
               uiState: uiState,
