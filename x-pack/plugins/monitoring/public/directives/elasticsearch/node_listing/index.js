@@ -25,7 +25,7 @@ import {
 const filterFields = [ 'name' ];
 const getColumns = showCgroupMetricsElasticsearch => {
   const cols = [];
-  cols.push({ title: 'Name', sortKey: 'node.name', sortOrder: SORT_ASCENDING });
+  cols.push({ title: 'Name', sortKey: 'name', sortOrder: SORT_ASCENDING });
   cols.push({ title: 'Status', sortKey: 'online' });
   if (showCgroupMetricsElasticsearch) {
     cols.push({ title: 'CPU Usage', sortKey: 'node_cgroup_quota.summary.lastVal' });
@@ -57,20 +57,44 @@ const nodeRowFactory = (scope, kbnUrl, showCgroupMetricsElasticsearch) => {
       const isOnline = this.isOnline();
       if (showCgroupMetricsElasticsearch) {
         return [
-          <MetricCell key="cpuCol1" isOnline={isOnline} metric={get(this.props, 'node_cgroup_quota')} isPercent={true} />,
-          <MetricCell key="cpuCol2" isOnline={isOnline} metric={get(this.props, 'node_cgroup_throttled')} isPercent={false} />,
+          <MetricCell
+            key="cpuCol1"
+            isOnline={isOnline}
+            metric={get(this.props, 'node_cgroup_quota')}
+            isPercent={true}
+            data-test-subj="cpuQuota"
+          />,
+          <MetricCell
+            key="cpuCol2"
+            isOnline={isOnline}
+            metric={get(this.props, 'node_cgroup_throttled')}
+            isPercent={false}
+            data-test-subj="cpuThrottled"
+          />,
         ];
       }
       return [
-        <MetricCell key="cpuCol1" isOnline={isOnline} metric={get(this.props, 'node_cpu_utilization')} isPercent={true} />,
-        <MetricCell key="cpuCol2" isOnline={isOnline} metric={get(this.props, 'node_load_average')} isPercent={false} />,
+        <MetricCell
+          key="cpuCol1"
+          isOnline={isOnline}
+          metric={get(this.props, 'node_cpu_utilization')}
+          isPercent={true}
+          data-test-subj="cpuUsage"
+        />,
+        <MetricCell
+          key="cpuCol2"
+          isOnline={isOnline}
+          metric={get(this.props, 'node_load_average')}
+          isPercent={false}
+          data-test-subj="loadAverage"
+        />,
       ];
     }
     getShardCount() {
       if (this.isOnline()) {
         return (
           <KuiTableRowCell>
-            <div className="monitoringTableCell__number">
+            <div className="monitoringTableCell__number"  data-test-subj="shards">
               {get(this.props, 'shardCount')}
             </div>
           </KuiTableRowCell>
@@ -88,12 +112,14 @@ const nodeRowFactory = (scope, kbnUrl, showCgroupMetricsElasticsearch) => {
                 <span className={`fa ${this.props.nodeTypeClass}`} />
               </Tooltip>
               &nbsp;
-              <EuiLink
-                onClick={this.goToNode}
-                data-test-subj={`nodeLink-${this.props.resolver}`}
-              >
-                {this.props.name}
-              </EuiLink>
+              <span data-test-subj="name">
+                <EuiLink
+                  onClick={this.goToNode}
+                  data-test-subj={`nodeLink-${this.props.resolver}`}
+                >
+                  {this.props.name}
+                </EuiLink>
+              </span>
             </div>
             <div className="monitoringTableCell__transportAddress">{extractIp(this.props.transport_address)}</div>
           </KuiTableRowCell>
@@ -104,8 +130,18 @@ const nodeRowFactory = (scope, kbnUrl, showCgroupMetricsElasticsearch) => {
             </div>
           </KuiTableRowCell>
           {this.getCpuComponents()}
-          <MetricCell isOnline={isOnline} metric={get(this.props, 'node_jvm_mem_percent')} isPercent={true} />
-          <MetricCell isOnline={isOnline} metric={get(this.props, 'node_free_space')} isPercent={false} />
+          <MetricCell
+            isOnline={isOnline}
+            metric={get(this.props, 'node_jvm_mem_percent')}
+            isPercent={true}
+            data-test-subj="jvmMemory"
+          />
+          <MetricCell
+            isOnline={isOnline}
+            metric={get(this.props, 'node_free_space')}
+            isPercent={false}
+            data-test-subj="diskFreeSpace"
+          />,
           {this.getShardCount()}
         </KuiTableRow>
       );
