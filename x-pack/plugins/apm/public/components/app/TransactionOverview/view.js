@@ -4,13 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiIconTip } from '@elastic/eui';
+import styled from 'styled-components';
 import chrome from 'ui/chrome';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { HeaderContainer, HeaderMedium } from '../../shared/UIComponents';
 import TabNavigation from '../../shared/TabNavigation';
 import Charts from '../../shared/charts/TransactionCharts';
+import { getMlJobUrl } from '../../../utils/url';
 import List from './List';
+import { units, px, fontSizes } from '../../../style/variables';
 import { OverviewChartsRequest } from '../../../store/reactReduxRequest/overviewCharts';
 import { TransactionListRequest } from '../../../store/reactReduxRequest/transactionList';
 import { ServiceDetailsRequest } from '../../../store/reactReduxRequest/serviceDetails';
@@ -39,6 +43,16 @@ function ServiceDetailsAndTransactionList({ urlParams, render }) {
   );
 }
 
+const MLTipContainer = styled.div`
+  display: flex;
+  align-items: center;
+  font-size: ${fontSizes.small};
+`;
+
+const MLText = styled.div`
+  margin-left: ${px(units.half)};
+`;
+
 class TransactionOverview extends Component {
   state = {
     isFlyoutOpen: false
@@ -59,6 +73,25 @@ class TransactionOverview extends Component {
 
     const { serviceName, transactionType } = urlParams;
     const mlEnabled = chrome.getInjected('mlEnabled');
+
+    const ChartHeaderContent =
+      hasDynamicBaseline && license.data.features.ml.isAvailable ? (
+        <MLTipContainer>
+          <EuiIconTip content="The stream around the average response time shows the expected bounds. An annotation is shown for anomaly scores &gt;= 75." />
+          <MLText>
+            Machine Learning:{' '}
+            <a
+              href={getMlJobUrl(
+                serviceName,
+                transactionType,
+                this.props.location
+              )}
+            >
+              View Job
+            </a>
+          </MLText>
+        </MLTipContainer>
+      ) : null;
 
     return (
       <div>
@@ -88,7 +121,7 @@ class TransactionOverview extends Component {
               charts={data}
               urlParams={urlParams}
               location={location}
-              hasDynamicBaseline={hasDynamicBaseline}
+              ChartHeaderContent={ChartHeaderContent}
             />
           )}
         />

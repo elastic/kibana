@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiIconTip } from '@elastic/eui';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import CustomPlot from '../CustomPlot';
 import { asMillis, tpmUnit, asInteger } from '../../../../utils/formatters';
-import { getMlJobUrl } from '../../../../utils/url';
 import styled from 'styled-components';
 import { units, unit, px, fontSizes } from '../../../../style/variables';
 import { timefilter } from 'ui/timefilter';
@@ -46,16 +44,6 @@ const ChartHeader = styled.div`
 const ChartTitle = styled.div`
   font-weight: 600;
   font-size: ${fontSizes.large};
-`;
-
-const MLTipContainer = styled.div`
-  display: flex;
-  align-items: center;
-  font-size: ${fontSizes.small};
-`;
-
-const MLText = styled.div`
-  margin-left: ${px(units.half)};
 `;
 
 export class Charts extends Component {
@@ -98,32 +86,14 @@ export class Charts extends Component {
 
   render() {
     const { noHits, responseTimeSeries, tpmSeries } = this.props.charts;
-    const { serviceName, transactionType } = this.props.urlParams;
-
-    const MLTip = this.props.hasDynamicBaseline ? (
-      <MLTipContainer>
-        <EuiIconTip content="The stream around the average response time shows the expected bounds. An annotation is shown for anomaly scores &gt;= 75." />
-        <MLText>
-          Machine Learning:{' '}
-          <a
-            href={getMlJobUrl(
-              serviceName,
-              transactionType,
-              this.props.location
-            )}
-          >
-            View Job
-          </a>
-        </MLText>
-      </MLTipContainer>
-    ) : null;
+    const { transactionType } = this.props.urlParams;
 
     return (
       <ChartsWrapper>
         <Chart>
           <ChartHeader>
             <ChartTitle>{responseTimeLabel(transactionType)}</ChartTitle>
-            {MLTip}
+            {this.props.ChartHeaderContent}
           </ChartHeader>
           <CustomPlot
             noHits={noHits}
@@ -175,13 +145,13 @@ function responseTimeLabel(type) {
 
 Charts.propTypes = {
   charts: PropTypes.object.isRequired,
-  hasDynamicBaseline: PropTypes.bool,
+  ChartHeaderContent: PropTypes.bool,
   location: PropTypes.object.isRequired,
   urlParams: PropTypes.object.isRequired
 };
 
 Charts.defaultProps = {
-  hasDynamicBaseline: false
+  ChartHeaderContent: null
 };
 
 export default Charts;
