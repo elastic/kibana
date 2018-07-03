@@ -21,7 +21,7 @@ describe('get_timeseries_data', () => {
     res = await getTimeseriesData({
       serviceName: 'myServiceName',
       transactionType: 'myTransactionType',
-      transactionName: 'myTransactionName',
+      transactionName: null,
       setup: {
         start: 1528113600000,
         end: 1528977600000,

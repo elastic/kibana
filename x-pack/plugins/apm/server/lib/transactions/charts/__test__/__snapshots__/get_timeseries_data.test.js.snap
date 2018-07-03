@@ -82,13 +82,6 @@ Array [
                 },
               },
             ],
-            "must": Array [
-              Object {
-                "term": Object {
-                  "transaction.name.keyword": "myTransactionName",
-                },
-              },
-            ],
           },
         },
         "size": 0,
