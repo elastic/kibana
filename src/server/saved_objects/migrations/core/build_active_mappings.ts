@@ -17,12 +17,12 @@
  * under the License.
  */
 
+/*
+ * This file contains logic to extract the index mapping information from a list of plugins.
+*/
+
 import _ from 'lodash';
 import { IndexMapping, MappingDefinition, MigrationPlugin } from './types';
-
-export interface GetActiveMappingsOpts {
-  plugins: MigrationPlugin[];
-}
 
 /**
  * getActiveMappings merges all of the mappings defined by the specified plugins
@@ -33,9 +33,11 @@ export interface GetActiveMappingsOpts {
  *    to build the result.
  * @returns {IndexMapping}
  */
-export function getActiveMappings({
+export function buildActiveMappings({
   plugins,
-}: GetActiveMappingsOpts): IndexMapping {
+}: {
+  plugins: MigrationPlugin[];
+}): IndexMapping {
   const mapping = defaultMapping();
   return {
     doc: {
@@ -45,6 +47,7 @@ export function getActiveMappings({
   };
 }
 
+// These mappings are required for any saved object index.
 function defaultMapping(): IndexMapping {
   return _.cloneDeep({
     doc: {
@@ -58,6 +61,9 @@ function defaultMapping(): IndexMapping {
             },
           },
         },
+        migrationVersion: {
+          type: 'object',
+        },
         type: {
           type: 'keyword',
         },
@@ -69,6 +75,8 @@ function defaultMapping(): IndexMapping {
   });
 }
 
+// Merges a plugin's mappings into a dictionary of mappings, failing if a mapping is
+// being redefined or if a mapping has an invalid type.
 function validateAndMerge(
   definedMappings: MappingDefinition,
   { id, mappings }: MigrationPlugin
@@ -76,9 +84,10 @@ function validateAndMerge(
   if (!mappings) {
     return definedMappings;
   }
+
   return Object.entries(mappings).reduce((acc, [type, definition]) => {
     assertUnique(id, acc, type);
-    assertValidPTypeName(id, type);
+    assertValidPropertyTypeName(id, type);
     return _.set(acc, type, definition);
   }, definedMappings);
 }
@@ -95,7 +104,7 @@ function assertUnique(
   }
 }
 
-function assertValidPTypeName(pluginId: string, propertyName: string) {
+function assertValidPropertyTypeName(pluginId: string, propertyName: string) {
   if (propertyName.startsWith('_')) {
     throw new Error(
       `Invalid mapping "${propertyName}" in plugin "${pluginId}". Mappings cannot start with _.`

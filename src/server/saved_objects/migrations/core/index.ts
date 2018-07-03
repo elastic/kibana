@@ -18,6 +18,6 @@
  */
 
 export { patchIndexMappings } from './patch_index_mappings';
-export { getActiveMappings } from './get_active_mappings';
+export { buildActiveMappings } from './build_active_mappings';
 export { fetchMapping } from './fetch_mapping';
 export * from './types';

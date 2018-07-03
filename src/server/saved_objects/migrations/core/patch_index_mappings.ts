@@ -18,8 +18,8 @@
  */
 
 import _ from 'lodash';
+import { buildActiveMappings } from './build_active_mappings';
 import { fetchMapping } from './fetch_mapping';
-import { getActiveMappings } from './get_active_mappings';
 import {
   CallCluster,
   IndexMapping,
@@ -100,7 +100,7 @@ async function loadFullMappings(
   opts: InitializeOpts
 ): Promise<MigrationMappings> {
   const { callCluster, index } = opts;
-  const activeMappings = getActiveMappings(opts);
+  const activeMappings = buildActiveMappings(opts);
   const indexMappings = await fetchMapping(callCluster, index);
   if (indexMappings) {
     assertNonDestructiveChanges(

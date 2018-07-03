@@ -18,7 +18,7 @@
  */
 import _ from 'lodash';
 import sinon from 'sinon';
-import { getActiveMappings } from './get_active_mappings';
+import { buildActiveMappings } from './build_active_mappings';
 import { patchIndexMappings } from './patch_index_mappings';
 import { IndexMapping, MappingDefinition, MigrationPlugin } from './types';
 
@@ -33,7 +33,7 @@ describe('initializeIndex', async () => {
       },
     ];
     await expectInitializeIndex({
-      expectedMappings: getActiveMappings({ plugins }),
+      expectedMappings: buildActiveMappings({ plugins }),
       originalPlugins,
       plugins,
     });
@@ -221,7 +221,7 @@ async function expectInitializeIndex(opts: ExpectInitializeOpts) {
   const index = randomName();
   const { originalPlugins, plugins, expectedMappings } = opts;
   const callCluster = createCallCluster(
-    createIndex(index, getActiveMappings({ plugins: originalPlugins }))
+    createIndex(index, buildActiveMappings({ plugins: originalPlugins }))
   );
 
   if (opts.throws) {

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`getActiveMappings combines all mappings and includes core mappings 1`] = `
+exports[`buildActiveMappings combines all mappings and includes core mappings 1`] = `
 Object {
   "doc": Object {
     "dynamic": "strict",
@@ -18,6 +18,9 @@ Object {
             "type": "keyword",
           },
         },
+      },
+      "migrationVersion": Object {
+        "type": "object",
       },
       "type": Object {
         "type": "keyword",
