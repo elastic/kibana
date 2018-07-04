@@ -18,8 +18,17 @@ export class ALayer {
     layerDescriptor.temporary = options.temporary || false;
     layerDescriptor.style = options.style || {};
     layerDescriptor.id = Math.random().toString(36).substr(2, 5);
-    layerDescriptor.name = options.name || `Layer ${layerDescriptor.id}`;
+    layerDescriptor.name = this._setName(options, layerDescriptor.id);
     return layerDescriptor;
+  }
+
+  static _setName({ nameList, name }, id) {
+    const layerName = name || `Layer ${id}`;
+    const duplicateCount = nameList
+      .filter((listName) => listName === layerName
+        || listName.match(new RegExp(`${layerName} \\d`)))
+      .length;
+    return duplicateCount ? `${layerName} ${duplicateCount}` : layerName;
   }
 }
 

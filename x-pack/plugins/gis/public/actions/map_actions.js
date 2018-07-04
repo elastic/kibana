@@ -73,6 +73,7 @@ export function addVectorLayer(sourceName, layerId, options = {}) {
       const layer = VectorLayer.create({
         source: resolvedResource,
         name: service.name || service.id,
+        nameList: map.layerList.map(({ name }) => name),
         ...options
       });
       dispatch(addLayer(layer));
@@ -89,6 +90,7 @@ export function addTileLayer(sourceName, layerId, options = {}) {
     const layer = TileLayer.create({
       source: service.url,
       name: service.name || service.id,
+      nameList: map.layerList.map(({ name }) => name),
       ...options
     });
     dispatch(addLayer(layer));
