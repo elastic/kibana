@@ -19,7 +19,7 @@ import {
   EuiSearchBar,
 } from '@elastic/eui';
 
-const loadGroups = () => {
+function loadGroups() {
   return ml.jobs.groups()
     .then((groups) => {
       return groups.map(g => ({
@@ -35,7 +35,7 @@ const loadGroups = () => {
       console.log(error);
       return [];
     });
-};
+}
 
 export class JobFilterBar extends Component {
   constructor(props) {

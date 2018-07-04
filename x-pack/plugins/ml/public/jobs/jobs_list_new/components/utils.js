@@ -144,7 +144,7 @@ export function filterJobs(jobs, clauses) {
   }
 
   // keep count of the number of matches we make as we're looping over the clauses
-  // we only want to return jobs with match all clauses, i.e. each search term is ANDed
+  // we only want to return jobs which match all clauses, i.e. each search term is ANDed
   const matches = jobs.reduce((p, c) => {
     p[c.id] = {
       job: c,
