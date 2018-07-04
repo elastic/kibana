@@ -62,7 +62,7 @@ export class Visualization extends Component {
   }
 
   render() {
-    const { vis, visData, listenOnChange } = this.props;
+    const { vis, visData, onInit } = this.props;
 
     return (
       <div className="visualization">
@@ -70,7 +70,7 @@ export class Visualization extends Component {
           (<VisualizationChart
             vis={vis}
             visData={visData}
-            listenOnChange={listenOnChange}
+            onInit={onInit}
           />)
         }
       </div>

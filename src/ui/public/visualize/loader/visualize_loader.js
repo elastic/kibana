@@ -57,11 +57,16 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
     const scope = $rootScope.$new();
     params = params || {};
     scope.savedObj = savedObj;
-    scope.appState = params.appState;
     scope.uiState = params.uiState;
     scope.timeRange = params.timeRange;
     scope.filters = params.filters;
     scope.query = params.query;
+    scope.updateState = (visState) => {
+      if (params.appState) {
+        params.appState.vis = visState;
+        params.appState.save();
+      }
+    };
 
     const container = angular.element(el);
 

@@ -107,7 +107,6 @@ export class VegaMapView extends VegaBaseView {
     });
 
     const vegaView = vegaMapLayer.getVegaView();
-    this.setDebugValues(vegaView, vegaMapLayer.getVegaSpec());
     await this.setView(vegaView);
   }
 
