@@ -9,6 +9,7 @@ import React from 'react';
 import styled from 'styled-components';
 import Legend from '../Legend';
 import {
+  unit,
   units,
   fontSizes,
   px,
@@ -20,6 +21,13 @@ const Container = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-end;
+
+  div {
+    margin-right: ${px(unit)};
+    &:last-child {
+      margin-right: 0;
+    }
+  }
 `;
 
 const LegendContent = styled.span`
@@ -53,9 +61,9 @@ function MoreSeries({ hiddenSeriesCount }) {
 }
 
 export default function Legends({
-  noHits,
   clickLegend,
   hiddenSeriesCount,
+  noHits,
   series,
   seriesEnabledState,
   truncateLegends
@@ -67,6 +75,9 @@ export default function Legends({
   return (
     <Container>
       {series.map((serie, i) => {
+        if (serie.hideLegend) {
+          return null;
+        }
         const text = (
           <LegendContent>
             {truncateLegends ? (
@@ -95,7 +106,6 @@ export default function Legends({
 }
 
 Legends.propTypes = {
-  chartTitle: PropTypes.string,
   clickLegend: PropTypes.func.isRequired,
   hiddenSeriesCount: PropTypes.number.isRequired,
   noHits: PropTypes.bool.isRequired,
