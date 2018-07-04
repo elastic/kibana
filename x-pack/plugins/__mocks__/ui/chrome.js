@@ -20,7 +20,7 @@ function getUiSettingsClient() {
 }
 
 function addBasePath(path) {
-  return '/mockBasePath' + path;
+  return path;
 }
 
 function getInjected(key) {
