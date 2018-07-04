@@ -9,7 +9,7 @@
 import expect from 'expect.js';
 import {
   elasticsearchJsPlugin
-} from '../elasticsearch-ml';
+} from '../elasticsearch_ml';
 
 describe('ML - Endpoints', () => {
 
