@@ -47,6 +47,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await find.clickByCssSelector('[group-name="metrics"] [data-test-subj="visualizeEditorAddAggregationButton"]');
     }
 
+    async clickAddBucket() {
+      await find.clickByCssSelector('[group-name="buckets"] [data-test-subj="visualizeEditorAddAggregationButton"]');
+    }
+
     async clickMetric() {
       await find.clickByPartialLinkText('Metric');
       await PageObjects.header.waitUntilLoadingHasFinished();
