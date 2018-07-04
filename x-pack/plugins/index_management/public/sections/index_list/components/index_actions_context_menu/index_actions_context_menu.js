@@ -9,12 +9,14 @@ import { all } from 'lodash';
 import pluralize from 'pluralize';
 import {
   EuiButton,
+  EuiCallOut,
   EuiContextMenu,
   EuiFieldText,
   EuiForm,
   EuiFormRow,
   EuiIcon,
   EuiPopover,
+  EuiSpacer,
   EuiConfirmModal,
   EuiOverlayMask
 } from '@elastic/eui';
@@ -191,13 +193,12 @@ export class IndexActionsContextMenu extends Component {
     if (!forcemergeSegments || forcemergeSegments.match(/^([1-9][0-9]*)?$/)) {
       return;
     } else {
-      return 'Value for number of segments must be a number greater than zero.';
+      return 'The number of segments must be greater than zero.';
     }
   };
   forcemergeSegmentsModal = () => {
-    const helpText = `The number of segments to merge to.
-      To fully merge the index, set it to 1. Defaults to
-      simply checking if a merge needs to execute, and if so, executes it.`;
+    const helpText = `Merge the segments in an index until the number 
+    is reduced to this or fewer segments. The default is 1.`;
     const oneIndexSelected = this.oneIndexSelected();
     const entity = this.getEntity(oneIndexSelected);
     const { forcemergeIndices, indexNames } = this.props;
@@ -208,7 +209,7 @@ export class IndexActionsContextMenu extends Component {
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
-          title={`Choose max number of segments for forcemerge ${entity}`}
+          title={`Force merge`}
           onCancel={this.closeForcemergeSegmentsModal}
           onConfirm={() => {
             if (!this.forcemergeSegmentsError()) {
@@ -222,11 +223,11 @@ export class IndexActionsContextMenu extends Component {
             }
           }}
           cancelButtonText="Cancel"
-          confirmButtonText="Forcemerge"
+          confirmButtonText="Force merge"
         >
           <div>
             <p>
-              You are about to forcemerge {oneIndexSelected ? 'this' : 'these'}{' '}
+              You are about to force merge {oneIndexSelected ? 'this' : 'these'}{' '}
               {entity}:
             </p>
             <ul>
@@ -234,12 +235,24 @@ export class IndexActionsContextMenu extends Component {
                 <li key={indexName}>{indexName}</li>
               ))}
             </ul>
+            <EuiCallOut
+              title="Proceed with caution!"
+              color="warning"
+              iconType="help"
+            >
+              <p>
+                Force merging a large index or an index that is not read-only can
+                potentially cause performance and stability issues in the cluster
+                if it is not run properly (run against non-read-only indices) or run during peak hours.
+              </p>
+            </EuiCallOut>
+            <EuiSpacer size="m" />
             <EuiForm
               isInvalid={this.forcemergeSegmentsError()}
               error={this.forcemergeSegmentsError()}
             >
               <EuiFormRow
-                label="Maximum number of segments"
+                label="Maximum number of segments per shard"
                 helpText={helpText}
               >
                 <EuiFieldText
@@ -283,10 +296,16 @@ export class IndexActionsContextMenu extends Component {
                 <li key={indexName}>{indexName}</li>
               ))}
             </ul>
-            <p>
-              This operation cannot be undone. Make sure you have appropriate
-              backups.
-            </p>
+            <EuiCallOut
+              title="Proceed with caution!"
+              color="warning"
+              iconType="help"
+            >
+              <p>
+                This operation cannot be undone. Make sure you have appropriate
+                backups.
+              </p>
+            </EuiCallOut>
           </div>
         </EuiConfirmModal>
       </EuiOverlayMask>

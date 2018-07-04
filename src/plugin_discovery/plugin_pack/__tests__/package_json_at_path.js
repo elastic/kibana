@@ -18,6 +18,7 @@
  */
 
 import { resolve } from 'path';
+import { toArray } from 'rxjs/operators';
 
 import expect from 'expect.js';
 
@@ -36,7 +37,7 @@ describe('plugin discovery/plugin_pack', () => {
         .to.have.property('subscribe').a('function');
     });
     it('gets the default provider from prebuilt babel modules', async () => {
-      const results = await createPackageJsonAtPath$(resolve(PLUGINS_DIR, 'prebuilt')).toArray().toPromise();
+      const results = await createPackageJsonAtPath$(resolve(PLUGINS_DIR, 'prebuilt')).pipe(toArray()).toPromise();
       expect(results).to.have.length(1);
       expect(results[0]).to.only.have.keys(['packageJson']);
       expect(results[0].packageJson).to.be.an(Object);
@@ -45,7 +46,7 @@ describe('plugin discovery/plugin_pack', () => {
     });
     describe('errors emitted as { error } results', () => {
       async function checkError(path, check) {
-        const results = await createPackageJsonAtPath$(path).toArray().toPromise();
+        const results = await createPackageJsonAtPath$(path).pipe(toArray()).toPromise();
         expect(results).to.have.length(1);
         expect(results[0]).to.only.have.keys(['error']);
         const { error } = results[0];

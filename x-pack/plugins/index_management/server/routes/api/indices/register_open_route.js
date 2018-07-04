@@ -15,8 +15,6 @@ function getIndexArrayFromPayload(payload) {
 
 async function openIndices(callWithRequest, indices) {
   const params = {
-    ignoreUnavailable: true,
-    allowNoIndices: false,
     expandWildcards: 'none',
     format: 'json',
     index: indices

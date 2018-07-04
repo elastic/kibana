@@ -28,7 +28,7 @@ export default function (chrome, internals) {
    *     Set the background for the logo and small logo in the navbar.
    *     When the app is in the "small" category, a modified version of the
    *     logo is displayed that is 45px wide.
-   *     eg. 'url(/plugins/app/logo.png) center no-repeat'
+   *     e.g., 'url(/plugins/app/logo.png) center no-repeat'
    *
    *   Brand
    *     Similar to a logo, but is just text with styles to make it stick out.

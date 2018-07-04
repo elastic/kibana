@@ -69,7 +69,7 @@ describe('initYAxis', function () {
     });
   });
 
-  describe('with mutliple y aspects', function () {
+  describe('with multiple y aspects', function () {
     it('sets the yAxisFormatter the the field formats convert fn for the first y aspect', function () {
       const chart = _.cloneDeep(baseChart);
       initYAxis(chart);

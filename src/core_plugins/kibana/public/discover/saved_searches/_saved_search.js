@@ -20,16 +20,18 @@
 import 'ui/notify';
 import { uiModules } from 'ui/modules';
 import { createLegacyClass } from 'ui/utils/legacy_class';
+import { SavedObjectProvider } from 'ui/courier';
 
 const module = uiModules.get('discover/saved_searches', [
   'kibana/notify',
   'kibana/courier'
 ]);
 
-module.factory('SavedSearch', function (courier) {
-  createLegacyClass(SavedSearch).inherits(courier.SavedObject);
+module.factory('SavedSearch', function (Private) {
+  const SavedObject = Private(SavedObjectProvider);
+  createLegacyClass(SavedSearch).inherits(SavedObject);
   function SavedSearch(id) {
-    courier.SavedObject.call(this, {
+    SavedObject.call(this, {
       type: SavedSearch.type,
       mapping: SavedSearch.mapping,
       searchSource: SavedSearch.searchSource,
@@ -42,10 +44,10 @@ module.factory('SavedSearch', function (courier) {
         hits: 0,
         sort: [],
         version: 1
-      }
+      },
     });
 
-    this.showInRecenltyAccessed = true;
+    this.showInRecentlyAccessed = true;
   }
 
   SavedSearch.type = 'search';

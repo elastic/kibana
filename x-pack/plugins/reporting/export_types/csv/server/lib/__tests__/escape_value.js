@@ -18,7 +18,7 @@ describe('escapeValue', function () {
       expect(escapeValue('baz qux')).to.be('"baz qux"');
     });
 
-    it('should escape values with hypens', function () {
+    it('should escape values with hyphens', function () {
       expect(escapeValue('baz-qux')).to.be('"baz-qux"');
     });
 

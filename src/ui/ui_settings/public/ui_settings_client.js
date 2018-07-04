@@ -186,8 +186,6 @@ You can use \`config.get("${key}", defaultValue)\`, which will just return
   }
 
   _broadcastUpdate(key, newValue, oldValue) {
-    this._notify.log(`config change: ${key}: ${oldValue} -> ${newValue}`);
-
     for (const observer of this._updateObservers) {
       observer({ key, newValue, oldValue });
     }

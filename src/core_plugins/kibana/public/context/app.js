@@ -36,6 +36,7 @@ import {
   LOADING_STATUS,
   QueryActionsProvider,
 } from './query';
+import { timefilter } from 'ui/timefilter';
 
 const module = uiModules.get('apps/context', [
   'elasticsearch',
@@ -52,7 +53,8 @@ module.directive('contextApp', function ContextApp() {
     controllerAs: 'contextApp',
     restrict: 'E',
     scope: {
-      anchorUid: '=',
+      anchorType: '=',
+      anchorId: '=',
       columns: '=',
       indexPattern: '=',
       filters: '=',
@@ -65,7 +67,7 @@ module.directive('contextApp', function ContextApp() {
   };
 });
 
-function ContextAppController($scope, config, Private, timefilter) {
+function ContextAppController($scope, config, Private) {
   const queryParameterActions = Private(QueryParameterActionsProvider);
   const queryActions = Private(QueryActionsProvider);
 
@@ -106,7 +108,8 @@ function ContextAppController($scope, config, Private, timefilter) {
       const { queryParameters } = this.state;
       if (
         (newQueryParameters.indexPatternId !== queryParameters.indexPatternId)
-        || (newQueryParameters.anchorUid !== queryParameters.anchorUid)
+        || (newQueryParameters.anchorType !== queryParameters.anchorType)
+        || (newQueryParameters.anchorId !== queryParameters.anchorId)
         || (!_.isEqual(newQueryParameters.sort, queryParameters.sort))
       ) {
         this.actions.fetchAllRowsWithNewQueryParameters(_.cloneDeep(newQueryParameters));

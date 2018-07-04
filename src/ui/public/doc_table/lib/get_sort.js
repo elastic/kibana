@@ -35,7 +35,7 @@ export function getSort(sort, indexPattern, defaultSortOrder = 'desc') {
   }
 
   if (Array.isArray(sort) && sort.length === 2 && isSortable(sort[0])) {
-    // At some point we need to refact the sorting logic, this array sucks.
+    // At some point we need to refactor the sorting logic, this array sucks.
     field = sort[0];
     direction = sort[1];
   } else if (indexPattern.timeFieldName && isSortable(indexPattern.timeFieldName)) {
