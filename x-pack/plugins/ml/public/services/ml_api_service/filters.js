@@ -14,16 +14,10 @@ import { http } from 'plugins/ml/services/http_service';
 const basePath = chrome.addBasePath('/api/ml');
 
 export const filters = {
-  getFilters() {
+  filters(obj) {
+    const filterId = (obj && obj.filterId) ? `/${obj.filterId}` : '';
     return http({
-      url: `${basePath}/filters`,
-      method: 'GET'
-    });
-  },
-
-  getFilter(filterId) {
-    return http({
-      url: `${basePath}/filters/${filterId}`,
+      url: `${basePath}/filters${filterId}`,
       method: 'GET'
     });
   },
