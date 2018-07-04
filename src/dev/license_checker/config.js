@@ -83,6 +83,6 @@ export const LICENSE_OVERRIDES = {
   // TODO can be removed once we upgrade past or equal pdf-image@2.0.1
   'pdf-image@1.1.0': ['MIT'],
 
-  // TODO can be removed once twig upgrade past or equal to v2.3.14
+  // TODO can be removed once twig upgrade the use of walk dependency past or equal to v2.3.14
   'walk@2.3.9': ['MIT']
 };
