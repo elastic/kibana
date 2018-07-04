@@ -502,6 +502,63 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     method: 'DELETE'
   });
 
+  ml.filters = ca({
+    urls: [
+      {
+        fmt: '/_xpack/ml/filters/<%=filterId%>',
+        req: {
+          filterId: {
+            type: 'string'
+          }
+        }
+      },
+      {
+        fmt: '/_xpack/ml/filters/',
+      }
+    ],
+    method: 'GET'
+  });
+
+  ml.addFilter = ca({
+    url: {
+      fmt: '/_xpack/ml/filters/<%=filterId%>',
+      req: {
+        filterId: {
+          type: 'string'
+        }
+      }
+    },
+    needBody: true,
+    method: 'PUT'
+  });
+
+  ml.updateFilter = ca({
+    urls: [
+      {
+        fmt: '/_xpack/ml/filters/<%=filterId%>/_update',
+        req: {
+          jobId: {
+            type: 'string'
+          }
+        }
+      }
+    ],
+    needBody: true,
+    method: 'POST'
+  });
+
+  ml.deleteFilter = ca({
+    url: {
+      fmt: '/_xpack/ml/filters/<%=filterId%>',
+      req: {
+        filterId: {
+          type: 'string'
+        }
+      }
+    },
+    method: 'DELETE'
+  });
+
   ml.info = ca({
     url: {
       fmt: '/_xpack/ml/info'
