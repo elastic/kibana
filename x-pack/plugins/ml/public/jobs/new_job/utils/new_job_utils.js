@@ -7,7 +7,6 @@
 
 
 import _ from 'lodash';
-import moment from 'moment';
 import { migrateFilter } from 'ui/courier';
 import { addItemToRecentlyAccessed } from 'plugins/ml/util/recently_accessed';
 import { mlJobService } from 'plugins/ml/services/job_service';
@@ -87,21 +86,6 @@ export function createSearchItems($route) {
     query,
     combinedQuery
   };
-}
-
-export function createResultsUrl(jobIds, start, end, resultsPage) {
-  const idString = jobIds.map(j => `'${j}'`).join(',');
-  const from = moment(start).toISOString();
-  const to = moment(end).toISOString();
-  let path = '';
-  path += 'ml#/';
-  path += resultsPage;
-  path += `?_g=(ml:(jobIds:!(${idString}))`;
-  path += `,refreshInterval:(display:Off,pause:!f,value:0),time:(from:'${from}'`;
-  path += `,mode:absolute,to:'${to}'`;
-  path += '))&_a=(filters:!(),query:(query_string:(analyze_wildcard:!t,query:\'*\')))';
-
-  return path;
 }
 
 export function createJobForSaving(job) {
