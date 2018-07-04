@@ -7,6 +7,7 @@
 
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { populateAppStateSettings } from 'plugins/ml/jobs/new_job/simple/components/utils/app_state_settings';
+import { WIZARD_TYPE } from 'plugins/ml/jobs/new_job/simple/components/constants/general';
 
 
 export function preLoadJob($scope, appState) {
@@ -39,7 +40,7 @@ export function jobSettingsFromJob(job, aggTypeOptions) {
 
   const dtrs = job.analysis_config.detectors;
 
-  if (job.custom_settings.created_by === 'single-metric-wizard') {
+  if (job.custom_settings.created_by === WIZARD_TYPE.SINGLE_METRIC) {
     // single metric
     const d = dtrs[0];
     const field = { agg: getKibanaAggName(d.function, aggTypeOptions) };
@@ -48,7 +49,7 @@ export function jobSettingsFromJob(job, aggTypeOptions) {
     }
 
     jobSettings.fields = [field];
-  } else if (job.custom_settings.created_by === 'multi-metric-wizard') {
+  } else if (job.custom_settings.created_by === WIZARD_TYPE.MULTI_METRIC) {
     // multi metric
     let splitField = '';
 
@@ -68,7 +69,7 @@ export function jobSettingsFromJob(job, aggTypeOptions) {
       jobSettings.split = splitField;
     }
 
-  } else if (job.custom_settings.created_by === 'population-wizard') {
+  } else if (job.custom_settings.created_by === WIZARD_TYPE.POPULATION) {
     let overField = '';
     const splitFields = {};
 
@@ -105,9 +106,6 @@ export function jobSettingsFromJob(job, aggTypeOptions) {
             jobSettings.fields[i] = f;
           }
         }
-        // jobSettings.fields.forEach((f) => {
-        //   f.split =
-        // });
       } else {
         jobSettings.split = Object.keys(splitFields)[0];
       }

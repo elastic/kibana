@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 
-import { EVENT_RATE_COUNT_FIELD } from 'plugins/ml/jobs/new_job/simple/components/constants/general';
+import { EVENT_RATE_COUNT_FIELD, WIZARD_TYPE } from 'plugins/ml/jobs/new_job/simple/components/constants/general';
 import { ML_MEDIAN_PERCENTS } from 'plugins/ml/../common/util/job_utils';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { mlJobService } from 'plugins/ml/services/job_service';
@@ -236,7 +236,7 @@ export function MultiMetricJobServiceProvider() {
       }
 
       job.custom_settings = {
-        created_by: 'multi-metric-wizard'
+        created_by: WIZARD_TYPE.MULTI_METRIC
       };
 
       return job;
