@@ -90,6 +90,10 @@ stop() {
   fi
 }
 
+restart() {
+  stop && start
+}
+
 status() {
   if [ -f "$pidfile" ] ; then
     pid=$(cat "$pidfile")
@@ -117,7 +121,7 @@ force_stop() {
 
 
 case "$1" in
-  force-start|start|stop|force-stop|restart)
+  force-start|start|stop|force-stop|condrestart|try-restart|restart)
     trace "Attempting '$1' on kibana"
     ;;
 esac
@@ -150,9 +154,15 @@ case "$1" in
     fi
     exit $code
     ;;
+  condrestart|try-restart)
+    status
+    code=$?
+    if [ $code -eq 0 ] ; then
+      restart
+    fi
+    ;;
   restart)
-
-    stop && start
+    restart
     ;;
   *)
     echo "Usage: $SCRIPTNAME {start|force-start|stop|force-start|force-stop|status|restart}" >&2
