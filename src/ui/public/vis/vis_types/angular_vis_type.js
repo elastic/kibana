@@ -48,6 +48,7 @@ export function AngularVisTypeProvider($compile, $rootScope) {
           this.$scope.uiState = this.vis.getUiState();
           updateScope();
           this.el.html($compile(this.vis.type.visConfig.template)(this.$scope));
+          this.$scope.$apply();
         } else {
           updateScope();
         }
