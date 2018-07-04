@@ -34,7 +34,7 @@ export function extractI18nCallMessages(node) {
 
   const messageId = idSubTree.value;
   let message;
-  let context = '';
+  let context;
 
   try {
     if (!isObjectExpression(optionsSubTree)) {

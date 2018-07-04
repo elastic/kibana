@@ -22,6 +22,7 @@ import {
   isIdentifier,
   isObjectProperty,
   isMemberExpression,
+  isNode,
 } from '@babel/types';
 import fs from 'fs';
 import glob from 'glob';
@@ -65,4 +66,38 @@ export function isI18nTranslateFunction(node) {
 
 export function escapeLineBreak(string) {
   return string.replace(ESCAPE_LINE_BREAK_REGEX, '');
+}
+
+export function* traverseNodes(nodes, extractMessagesFromNode) {
+  for (const node of nodes) {
+    let stop = false;
+    let message;
+
+    if (isNode(node)) {
+      message = extractMessagesFromNode({
+        node,
+        stop() {
+          stop = true;
+        },
+      });
+    }
+
+    if (message) {
+      yield message;
+    }
+
+    if (stop) {
+      break;
+    }
+
+    if (node && typeof node === 'object') {
+      const values = Object.values(node).filter(
+        value => value && typeof value === 'object'
+      );
+
+      if (values.length > 0) {
+        yield* traverseNodes(values, extractMessagesFromNode);
+      }
+    }
+  }
 }

@@ -18,7 +18,6 @@
  */
 
 import { parse } from '@babel/parser';
-import traverse from '@babel/traverse';
 import {
   isCallExpression,
   isIdentifier,
@@ -28,7 +27,7 @@ import {
 } from '@babel/types';
 
 import { extractI18nCallMessages } from './extract_i18n_call_messages';
-import { isI18nTranslateFunction } from './utils';
+import { isI18nTranslateFunction, traverseNodes } from './utils';
 import {
   extractIntlMessages,
   extractFormattedMessages,
@@ -60,7 +59,7 @@ function isFormattedMessageElement(node) {
   );
 }
 
-export function extractCodeMessages(buffer) {
+export function* extractCodeMessages(buffer) {
   const content = parse(buffer.toString(), {
     sourceType: 'module',
     plugins: [
@@ -72,18 +71,13 @@ export function extractCodeMessages(buffer) {
     ],
   });
 
-  const messagesPairs = [];
-  traverse(content, {
-    enter(path) {
-      if (isI18nTranslateFunction(path.node)) {
-        messagesPairs.push(extractI18nCallMessages(path.node));
-      } else if (isIntlFormatMessageFunction(path.node)) {
-        messagesPairs.push(extractIntlMessages(path.node));
-      } else if (isFormattedMessageElement(path.node)) {
-        messagesPairs.push(extractFormattedMessages(path.node));
-      }
-    },
+  yield* traverseNodes(content.program.body, ({ node }) => {
+    if (isI18nTranslateFunction(node)) {
+      return extractI18nCallMessages(node);
+    } else if (isIntlFormatMessageFunction(node)) {
+      return extractIntlMessages(node);
+    } else if (isFormattedMessageElement(node)) {
+      return extractFormattedMessages(node);
+    }
   });
-
-  return messagesPairs;
 }

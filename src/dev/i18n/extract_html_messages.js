@@ -18,7 +18,6 @@
  */
 
 import { jsdom } from 'jsdom';
-import traverse from '@babel/traverse';
 import { parse } from '@babel/parser';
 import {
   isDirectiveLiteral,
@@ -26,7 +25,7 @@ import {
   isStringLiteral,
 } from '@babel/types';
 
-import { isPropertyWithKey, escapeLineBreak } from './utils';
+import { isPropertyWithKey, escapeLineBreak, traverseNodes } from './utils';
 import { DEFAULT_MESSAGE_KEY, CONTEXT_KEY } from './constants';
 
 /**
@@ -42,54 +41,48 @@ const I18N_FILTER_MARKER = '| i18n: ';
  * @returns {string} Default message
  */
 function parseFilterObjectExpression(expression) {
-  let message = '';
-  let context;
-
   // parse an object expression instead of block statement
-  const filterObjectAST = parse(`+${expression}`);
+  const nodes = parse(`+${expression}`).program.body;
 
-  traverse(filterObjectAST, {
-    enter(path) {
-      if (isObjectExpression(path.node)) {
-        for (const property of path.node.properties) {
-          if (isPropertyWithKey(property, DEFAULT_MESSAGE_KEY)) {
-            if (!isStringLiteral(property.value)) {
-              throw new Error(
-                'defaultMessage value should be a string literal.'
-              );
-            }
+  return traverseNodes(nodes, ({ node, stop }) => {
+    if (!isObjectExpression(node)) {
+      return;
+    }
 
-            message = escapeLineBreak(property.value.value);
-          } else if (isPropertyWithKey(property, CONTEXT_KEY)) {
-            if (!isStringLiteral(property.value)) {
-              throw new Error('context value should be a string literal.');
-            }
+    let message;
+    let context;
 
-            context = property.value.value;
-          }
+    for (const property of node.properties) {
+      if (isPropertyWithKey(property, DEFAULT_MESSAGE_KEY)) {
+        if (!isStringLiteral(property.value)) {
+          throw new Error('defaultMessage value should be a string literal.');
         }
 
-        path.stop();
-      }
-    },
-  });
+        message = escapeLineBreak(property.value.value);
+      } else if (isPropertyWithKey(property, CONTEXT_KEY)) {
+        if (!isStringLiteral(property.value)) {
+          throw new Error('context value should be a string literal.');
+        }
 
-  return { message, context };
+        context = property.value.value;
+      }
+    }
+
+    stop();
+    return { message, context };
+  }).next().value;
 }
 
 function parseIdExpression(expression) {
-  let id = '';
-
-  traverse(parse(expression), {
-    enter(path) {
-      if (isDirectiveLiteral(path.node)) {
-        id = path.node.value;
-        path.stop();
+  return traverseNodes(
+    parse(expression).program.directives,
+    ({ node, stop }) => {
+      if (isDirectiveLiteral(node)) {
+        stop();
+        return node.value;
       }
-    },
-  });
-
-  return id;
+    }
+  ).next().value;
 }
 
 function trimCurlyBraces(string) {
@@ -116,10 +109,20 @@ function* getFilterMessages(htmlContent) {
 
     const messageId = parseIdExpression(idExpression);
 
+    if (!messageId) {
+      throw new Error(
+        'Empty "id" value in angular filter expression is not allowed.'
+      );
+    }
+
     try {
       const { message, context } = parseFilterObjectExpression(
         filterObjectExpression
       );
+
+      if (!message) {
+        throw new Error(`Default message is required for id: ${messageId}.`);
+      }
 
       yield [messageId, { message, context }];
     } catch (error) {

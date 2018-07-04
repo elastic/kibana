@@ -18,10 +18,9 @@
  */
 
 import { parse } from '@babel/parser';
-import traverse from '@babel/traverse';
 
 import { extractI18nCallMessages } from './extract_i18n_call_messages';
-import { isI18nTranslateFunction } from './utils';
+import { isI18nTranslateFunction, traverseNodes } from './utils';
 
 /**
  * Matches `i18n(...)` in `#{i18n('id', { defaultMessage: 'Message text' })}`
@@ -35,21 +34,11 @@ export function* extractJadeMessages(buffer) {
   const expressions = buffer.toString().match(JADE_I18N_REGEX) || [];
 
   for (const expression of expressions) {
-    let messageId;
-    let message;
-    let context;
-
-    traverse(parse(expression), {
-      enter(path) {
-        if (isI18nTranslateFunction(path.node)) {
-          [messageId, { message, context }] = extractI18nCallMessages(
-            path.node
-          );
-          path.stop();
-        }
-      },
+    yield* traverseNodes(parse(expression).program.body, ({ node, stop }) => {
+      if (isI18nTranslateFunction(node)) {
+        stop();
+        return extractI18nCallMessages(node);
+      }
     });
-
-    yield [messageId, { message, context }];
   }
 }

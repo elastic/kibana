@@ -61,15 +61,15 @@ function extractContextValue(value, id) {
 export function extractIntlMessages(node) {
   const options = node.arguments[0];
 
-  let messageId;
-  let message;
-  let context;
-
   if (!isObjectExpression(options)) {
     throw new Error(
       'Object with defaultMessage property is not passed to intl.formatMessage().'
     );
   }
+
+  let messageId;
+  let message;
+  let context;
 
   for (const property of options.properties) {
     if (isPropertyWithKey(property, 'id')) {
