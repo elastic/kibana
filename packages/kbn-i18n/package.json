@@ -1,15 +1,16 @@
 {
   "name": "@kbn/i18n",
-  "browser": "./target/web/browser.js",
-  "main": "./target/node/index.js",
+  "browser": "./target/web/core",
+  "main": "./target/node/core",
   "module": "./src/index.js",
   "version": "1.0.0",
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
-    "build": "yarn build:web && yarn build:node",
+    "build": "yarn build:web && yarn build:node && yarn build:aliases",
     "build:web": "cross-env BABEL_ENV=web babel src --out-dir target/web",
     "build:node": "cross-env BABEL_ENV=node babel src --out-dir target/node",
+    "build:aliases": "cross-env BABEL_ENV=web babel aliases --out-dir .",
     "kbn:bootstrap": "yarn build",
     "kbn:watch": "yarn build --watch"
   },
