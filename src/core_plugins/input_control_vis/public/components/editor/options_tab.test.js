@@ -26,7 +26,7 @@ import {
 } from './options_tab';
 
 const scopeMock = {
-  vis: {
+  editorState: {
     params: {
       updateFiltersOnChange: false,
       useTimeFilter: false
@@ -42,6 +42,7 @@ beforeEach(() => {
 test('renders OptionsTab', () => {
   const component = shallow(<OptionsTab
     scope={scopeMock}
+    editorState={scopeMock.editorState}
     stageEditorParams={stageEditorParams}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
@@ -50,6 +51,7 @@ test('renders OptionsTab', () => {
 test('updateFiltersOnChange', () => {
   const component = mount(<OptionsTab
     scope={scopeMock}
+    editorState={scopeMock.editorState}
     stageEditorParams={stageEditorParams}
   />);
   const checkbox = component.find('[data-test-subj="inputControlEditorUpdateFiltersOnChangeCheckbox"] input[type="checkbox"]');
@@ -64,6 +66,7 @@ test('updateFiltersOnChange', () => {
 test('useTimeFilter', () => {
   const component = mount(<OptionsTab
     scope={scopeMock}
+    editorState={scopeMock.editorState}
     stageEditorParams={stageEditorParams}
   />);
   const checkbox = component.find('[data-test-subj="inputControlEditorUseTimeFilterCheckbox"] input[type="checkbox"]');
@@ -78,6 +81,7 @@ test('useTimeFilter', () => {
 test('pinFilters', () => {
   const component = mount(<OptionsTab
     scope={scopeMock}
+    editorState={scopeMock.editorState}
     stageEditorParams={stageEditorParams}
   />);
   const checkbox = component.find('[data-test-subj="inputControlEditorPinFiltersCheckbox"] input[type="checkbox"]');
