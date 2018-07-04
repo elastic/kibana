@@ -97,7 +97,6 @@ export class JobFilterBar extends Component {
     return (
       <EuiSearchBar
         box={{
-          placeholder: 'e.g. datafeed_state:started',
           incremental: true,
         }}
         filters={filters}
