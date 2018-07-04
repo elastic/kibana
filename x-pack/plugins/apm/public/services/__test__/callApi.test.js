@@ -6,9 +6,9 @@
 
 import * as kfetchModule from 'ui/kfetch';
 import { SessionStorageMock } from './SessionStorageMock';
-import { callApi } from '../rest';
+import { callApi } from '../rest/callApi';
 
-describe('rest', () => {
+describe('callApi', () => {
   let kfetchSpy;
 
   beforeEach(() => {

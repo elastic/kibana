@@ -5,15 +5,16 @@
  */
 
 import React from 'react';
-import { withInitialData } from './helpers';
+import { createInitialDataSelector } from './helpers';
 import { Request } from 'react-redux-request';
-import { loadTransactionDistribution } from '../../services/rest';
+import { loadTransactionDistribution } from '../../services/rest/apm';
 
 const ID = 'transactionDistribution';
 const INITIAL_DATA = { buckets: [], totalHits: 0 };
+const withInitialData = createInitialDataSelector(INITIAL_DATA);
 
 export function getTransactionDistribution(state) {
-  return withInitialData(state.reactReduxRequest[ID], INITIAL_DATA);
+  return withInitialData(state.reactReduxRequest[ID]);
 }
 
 export function getDefaultTransactionId(state) {

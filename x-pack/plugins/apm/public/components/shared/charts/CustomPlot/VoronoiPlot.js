@@ -11,12 +11,18 @@ import React, { PureComponent } from 'react';
 
 import { SharedPlot } from './plotUtils';
 
+function getXValuesCombined(series) {
+  return _.union(...series.map(serie => serie.data.map(p => p.x))).map(x => ({
+    x
+  }));
+}
+
 class VoronoiPlot extends PureComponent {
   render() {
     const { series, plotValues, noHits } = this.props;
     const { XY_MARGIN, XY_HEIGHT, XY_WIDTH, x } = plotValues;
-    const defaultSerieData = _.get(series, '[0].data');
-    if (!defaultSerieData || noHits) {
+    const xValuesCombined = getXValuesCombined(series);
+    if (!xValuesCombined || noHits) {
       return null;
     }
 
@@ -27,7 +33,7 @@ class VoronoiPlot extends PureComponent {
       >
         <Voronoi
           extent={[[XY_MARGIN.left, XY_MARGIN.top], [XY_WIDTH, XY_HEIGHT]]}
-          nodes={defaultSerieData}
+          nodes={xValuesCombined}
           onHover={this.props.onHover}
           onMouseDown={this.props.onMouseDown}
           onMouseUp={this.props.onMouseUp}
