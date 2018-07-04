@@ -10,7 +10,7 @@
       Show Tooltips
     </label>
     <div class="kuiSideBarFormRow__control">
-      <input class="kuiCheckBox" id="addTooltip" type="checkbox" ng-model="vis.params.addTooltip">
+      <input class="kuiCheckBox" id="addTooltip" type="checkbox" ng-model="editorState.params.addTooltip">
     </div>
   </div>
 
@@ -19,11 +19,11 @@
       Highlight
     </label>
     <div class="kuiSideBarFormRow__control">
-      <input class="kuiCheckBox" id="enableHover" type="checkbox" ng-model="vis.params.enableHover">
+      <input class="kuiCheckBox" id="enableHover" type="checkbox" ng-model="editorState.params.enableHover">
     </div>
   </div>
 
-  <div class="kuiSideBarFormRow" ng-show="vis.params.addLegend">
+  <div class="kuiSideBarFormRow" ng-show="editorState.params.addLegend">
     <label class="kuiSideBarFormRow__label" for="legendPosition">
       Legend Position
     </label>
@@ -31,7 +31,7 @@
       <select
         id="legendPosition"
         class="kuiSelect kuiSideBarSelect"
-        ng-model="vis.params.legendPosition"
+        ng-model="editorState.params.legendPosition"
         ng-options="position.value as position.text for position in vis.type.editorConfig.collections.legendPositions"
       ></select>
     </div>
@@ -47,5 +47,5 @@
   </div>
 
   <heatmap-options></heatmap-options>
-  
+
 </div>
