@@ -17,12 +17,11 @@
  * under the License.
  */
 
-import { VisTypeProvider } from './';
+import { BaseVisType } from './base_vis_type';
 import $ from 'jquery';
 
 
-export function AngularVisTypeProvider(Private, $compile, $rootScope) {
-  const VisType = Private(VisTypeProvider);
+export function AngularVisTypeProvider($compile, $rootScope) {
 
   class AngularVisController {
     constructor(domeElement, vis) {
@@ -63,7 +62,7 @@ export function AngularVisTypeProvider(Private, $compile, $rootScope) {
     }
   }
 
-  class AngularVisType extends VisType {
+  class AngularVisType extends BaseVisType {
     constructor(opts) {
       opts.visualization = AngularVisController;
 
