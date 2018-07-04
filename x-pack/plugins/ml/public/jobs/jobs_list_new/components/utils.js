@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { each } from 'lodash';
 import { toastNotifications } from 'ui/notify';
 
 import { mlJobService } from 'plugins/ml/services/job_service';
@@ -136,3 +137,77 @@ export function deleteJobs(jobs, finish) {
       }
     });
 }
+
+export function filterJobs(jobs, clauses) {
+  if (clauses.length === 0) {
+    return jobs;
+  }
+
+  // keep count of the number of matches we make as we're looping over the clauses
+  // we only want to return jobs which match all clauses, i.e. each search term is ANDed
+  const matches = jobs.reduce((p, c) => {
+    p[c.id] = {
+      job: c,
+      count: 0
+    };
+    return p;
+  }, {});
+
+  clauses.forEach((c) => {
+    // the search term could be negated with a minus, e.g. -bananas
+    const bool = (c.match === 'must');
+    let js = [];
+
+    if (c.type === 'term') {
+      // filter term based clauses, e.g. bananas
+      // match on id, description and memory_status
+      // if the term has been negated, AND the matches
+      if (bool === true) {
+        js = jobs.filter(job => ((
+          (stringMatch(job.id, c.value) === bool) ||
+          (stringMatch(job.description, c.value) === bool) ||
+          (stringMatch(job.memory_status, c.value) === bool)
+        )));
+      } else {
+        js = jobs.filter(job => ((
+          (stringMatch(job.id, c.value) === bool) &&
+          (stringMatch(job.description, c.value) === bool) &&
+          (stringMatch(job.memory_status, c.value) === bool)
+        )));
+      }
+    } else {
+      // filter other clauses, i.e. the toggle group buttons
+      if (Array.isArray(c.value)) {
+        // the groups value is an array of group ids
+        js = jobs.filter(job => (jobProperty(job, c.field).some(g => (c.value.indexOf(g) >= 0))));
+      } else {
+        js = jobs.filter(job => (jobProperty(job, c.field) === c.value));
+      }
+    }
+
+    js.forEach(j => (matches[j.id].count++));
+  });
+
+  // loop through the matches and return only those jobs which have match all the clauses
+  const filteredJobs = [];
+  each(matches, (m) => {
+    if (m.count >= clauses.length) {
+      filteredJobs.push(m.job);
+    }
+  });
+  return filteredJobs;
+}
+
+function stringMatch(str, substr) {
+  return ((str.toLowerCase().match(substr.toLowerCase()) === null) === false);
+}
+
+function jobProperty(job, prop) {
+  const propMap = {
+    job_state: 'jobState',
+    datafeed_state: 'datafeedState',
+    groups: 'groups',
+  };
+  return job[propMap[prop]];
+}
+
