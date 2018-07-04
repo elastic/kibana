@@ -1,0 +1,11 @@
+==== Running Kibana from the command line
+
+Kibana can be started from the command line as follows:
+
+[source,sh]
+--------------------------------------------
+.\bin\kibana.bat
+--------------------------------------------
+
+By default, Kibana runs in the foreground, prints its logs to `STDOUT`,
+and can be stopped by pressing *Ctrl-C*.
