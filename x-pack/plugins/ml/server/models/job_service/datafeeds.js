@@ -43,8 +43,12 @@ export function datafeedsProvider(callWithRequest) {
         results[datafeedId] = await doStart(datafeedId);
       }, START_TIMEOUT);
 
-      if (await openJob(jobId)) {
-        results[datafeedId] = await doStart(datafeedId);
+      try {
+        if (await openJob(jobId)) {
+          results[datafeedId] = await doStart(datafeedId);
+        }
+      } catch (error) {
+        results[datafeedId] = { started: false, error };
       }
     }
 
@@ -59,6 +63,8 @@ export function datafeedsProvider(callWithRequest) {
     } catch (error) {
       if (error.statusCode === 409) {
         opened = true;
+      } else {
+        throw error;
       }
     }
     return opened;
