@@ -148,7 +148,7 @@ module.controller('MlJobsList',
 
     $scope.cloneJob = function (job) {
       mlJobService.currentJob = job;
-      $location.path('jobs/new_job/advanced');
+      $location.path('jobs/new_job');
     };
 
     $scope.closeJob = function (job) {

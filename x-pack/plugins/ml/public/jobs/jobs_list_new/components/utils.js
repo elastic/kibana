@@ -110,10 +110,10 @@ function showResults(resp, action) {
 }
 
 export function cloneJob(jobId) {
-  mlJobService.refreshJob(jobId)
-  	.then(() => {
-      mlJobService.currentJob =  mlJobService.getJob(jobId);
-      window.location.href = `#/jobs/new_job/advanced`;
+  loadFullJob(jobId)
+    .then((job) => {
+      mlJobService.currentJob = job;
+      window.location.href = `#/jobs/new_job`;
     })
     .catch(() => {
       toastNotifications.addDanger(`Could not clone ${jobId}. Job could not be found`);
