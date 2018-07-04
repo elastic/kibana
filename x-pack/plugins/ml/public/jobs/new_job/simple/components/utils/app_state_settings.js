@@ -64,7 +64,6 @@ function populateSingleMetricSettings(jobSettings, scope) {
       (scope.formConfig.agg.type.name === 'count' && scope.formConfig.field === undefined)) {
 
       populateCommonSettings(jobSettings, scope);
-      // scope.loadVis();
       resolve();
     } else {
       reject();
@@ -101,7 +100,6 @@ function populateMultiMetricSettings(jobSettings, scope) {
 
     if (scope.formConfig.fields !== undefined && (Object.keys(scope.formConfig.fields).length > 0)) {
       populateCommonSettings(jobSettings, scope);
-      // scope.loadVis();
       resolve();
     } else {
       reject();
