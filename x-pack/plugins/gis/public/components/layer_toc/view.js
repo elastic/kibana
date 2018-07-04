@@ -28,33 +28,40 @@ export class LayerTOC extends React.Component {
   }
 
   _attachSortHandler({ updateLayerOrder }) {
-    $(this._domContainer).sortable({
+    const tocEntries = this._domContainer;
+    let length;
+    $(tocEntries).sortable({
       start: (evt, { item }) => {
-        $(this).attr('data-previndex', item.index());
+        length = tocEntries.children.length;
+        $(this).attr('data-previndex', length - item.index() - 2);
       },
       update: (evt, { item }) => {
-        const newIndex = item.index();
-        const oldIndex = +$(this).attr('data-previndex');
-        const newOrder = Array.from(this._domContainer.children).map((el, idx) => idx);
-        newOrder.splice(oldIndex, 1);
-        newOrder.splice(newIndex, 0, oldIndex);
+        const prevIndex = +$(this).attr('data-previndex');
+        length = tocEntries.children.length;
+        const newIndex = length - item.index() - 1;
+        const newOrder = Array.from(tocEntries.children)
+          .map((el, idx) => idx);
+        newOrder.splice(prevIndex, 1);
+        newOrder.splice(newIndex, 0, prevIndex);
         updateLayerOrder(newOrder);
       }
     });
   }
 
   _renderLayers() {
-    return this.state.layerList.map((layer) => {
-      return (
-        <TOCEntry
-          key={layer.id}
-          layerId={layer.id}
-          visible={true}
-          layerName={layer.name}
-          // onButtonClick={alert('clicked!')}
-        />
-      );
-    });
+    return [ ...this.state.layerList ]
+      .reverse()
+      .map((layer) => {
+        return (
+          <TOCEntry
+            key={layer.id}
+            layerId={layer.id}
+            visible={true}
+            layerName={layer.name}
+            // onButtonClick={alert('clicked!')}
+          />
+        );
+      });
   }
 
   render() {
