@@ -77,12 +77,12 @@ export const LICENSE_OVERRIDES = {
   // TODO can be removed if the ISSUE#239 is accepted on the source
   'xmldom@0.1.19': ['MIT'],
 
-  // TODO can be removed once we upgrade past or equal pdf-image@2.0.1
-  'pdf-image@1.1.0': ['MIT'],
-
   // TODO can be removed if the PR#9 is accepted on the source
   'pause-stream@0.0.11': ['MIT'],
 
-  // TODO can be removed if the request change is made on the source
+  // TODO can be removed once we upgrade past or equal pdf-image@2.0.1
+  'pdf-image@1.1.0': ['MIT'],
+
+  // TODO can be removed once twig upgrade past or equal to v2.3.14
   'walk@2.3.9': ['MIT']
 };
