@@ -31,7 +31,6 @@ export function cephMetricsSpecProvider() {
     shortDescription: 'Fetch internal metrics from the Ceph server.',
     longDescription: 'The `ceph` Metricbeat module fetches internal metrics from Ceph.' +
                      ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-ceph.html).',
-    euiIconType: 'logoCeph',
     artifacts: {
       dashboards: [
         {
