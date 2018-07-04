@@ -22,7 +22,28 @@ createHangUpError (_http_client.js)
 "
 `;
 
-exports[`createErrorGroupWatch should format entire template correctly 1`] = `
+exports[`createErrorGroupWatch should format slack message correctly 1`] = `
+"Your service \\"opbeans-node\\" has error groups which exceeds 10 occurrences within \\"24h\\"
+
+>*this is a string*
+>N/A
+>7761 occurrences
+
+>*foo*
+>\`<anonymous> (server/coffee.js)\`
+>7752 occurrences
+
+>*socket hang up*
+>\`createHangUpError (_http_client.js)\`
+>3887 occurrences
+
+>*this will not get captured by express*
+>\`<anonymous> (server/coffee.js)\`
+>3886 occurrences
+"
+`;
+
+exports[`createErrorGroupWatch should format template correctly 1`] = `
 Object {
   "actions": Object {
     "email": Object {
@@ -41,7 +62,7 @@ Object {
     },
     "slack_webhook": Object {
       "webhook": Object {
-        "body": "{\\"text\\":\\"Your service \\\\\\"opbeans-node\\\\\\" has error groups which exceeds 10 occurrences within \\\\\\"24h\\\\\\"\\\\n\\\\n>*this is a string*\\\\n>N/A\\\\n>7761 occurrences\\\\n\\\\n>*foo*\\\\n>\`<anonymous> (server/coffee.js)\`\\\\n>7752 occurrences\\\\n\\\\n>*socket hang up*\\\\n>\`createHangUpError (_http_client.js)\`\\\\n>3887 occurrences\\\\n\\\\n>*this will not get captured by express*\\\\n>\`<anonymous> (server/coffee.js)\`\\\\n>3886 occurrences\\\\n\\"}",
+        "body": "__json__::{\\"text\\":\\"Your service \\\\\\"opbeans-node\\\\\\" has error groups which exceeds 10 occurrences within \\\\\\"24h\\\\\\"\\\\n\\\\n>*this is a string*\\\\n>N/A\\\\n>7761 occurrences\\\\n\\\\n>*foo*\\\\n>\`<anonymous> (server/coffee.js)\`\\\\n>7752 occurrences\\\\n\\\\n>*socket hang up*\\\\n>\`createHangUpError (_http_client.js)\`\\\\n>3887 occurrences\\\\n\\\\n>*this will not get captured by express*\\\\n>\`<anonymous> (server/coffee.js)\`\\\\n>3886 occurrences\\\\n\\"}",
         "headers": Object {
           "Content-Type": "application/json",
         },
@@ -145,25 +166,4 @@ Object {
     },
   },
 }
-`;
-
-exports[`createErrorGroupWatch should format slack message correctly 1`] = `
-"Your service \\"opbeans-node\\" has error groups which exceeds 10 occurrences within \\"24h\\"
-
->*this is a string*
->N/A
->7761 occurrences
-
->*foo*
->\`<anonymous> (server/coffee.js)\`
->7752 occurrences
-
->*socket hang up*
->\`createHangUpError (_http_client.js)\`
->3887 occurrences
-
->*this will not get captured by express*
->\`<anonymous> (server/coffee.js)\`
->3886 occurrences
-"
 `;

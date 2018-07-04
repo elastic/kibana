@@ -77,7 +77,7 @@ export async function installSampleDataSet(id, name, defaultIndex, getConfig, se
   clearIndexPatternsCache();
 
   toastNotifications.addSuccess({
-    title: `${name} sample data set successfully installed`,
+    title: `${name} installed`,
     ['data-test-subj']: 'sampleDataSetInstallToast'
   });
 }
@@ -109,7 +109,7 @@ export async function uninstallSampleDataSet(id, name, defaultIndex, getConfig, 
   clearIndexPatternsCache();
 
   toastNotifications.addSuccess({
-    title: `${name} sample data set successfully uninstalled`,
+    title: `${name} uninstalled`,
     ['data-test-subj']: 'sampleDataSetUninstallToast'
   });
 }

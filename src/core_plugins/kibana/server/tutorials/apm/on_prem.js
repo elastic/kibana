@@ -34,6 +34,8 @@ import {
   RAILS_CLIENT_INSTRUCTIONS,
   RACK_CLIENT_INSTRUCTIONS,
   JS_CLIENT_INSTRUCTIONS,
+  GO_CLIENT_INSTRUCTIONS,
+  JAVA_CLIENT_INSTRUCTIONS,
 } from './apm_client_instructions';
 
 export function onPremInstructions(server) {
@@ -130,13 +132,21 @@ export function onPremInstructions(server) {
             id: INSTRUCTION_VARIANT.JS,
             instructions: JS_CLIENT_INSTRUCTIONS,
           },
+          {
+            id: INSTRUCTION_VARIANT.GO,
+            instructions: GO_CLIENT_INSTRUCTIONS,
+          },
+          {
+            id: INSTRUCTION_VARIANT.JAVA,
+            instructions: JAVA_CLIENT_INSTRUCTIONS,
+          },
         ],
         statusCheck: {
           title: 'Agent status',
           text:
             'Make sure you application is running, and the agents are sending data',
           btnLabel: 'Check agent status',
-          success: 'Data succesfully received from one or more agents',
+          success: 'Data successfully received from one or more agents',
           error: `No data has been received from agents yet`,
           esHitsCheck: {
             index: apmIndexPattern,

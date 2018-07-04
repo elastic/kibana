@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import './index_header';
-import './scripted_field_editor';
+import './create_edit_field';
 import { KbnUrlProvider } from 'ui/url';
 import { IndicesEditSectionsProvider } from './edit_sections';
 import { fatalError } from 'ui/notify';
@@ -147,10 +147,10 @@ uiRoutes
   .when('/management/kibana/indices/:indexPatternId', {
     template,
     resolve: {
-      indexPattern: function ($route, courier) {
-        return courier.indexPatterns
+      indexPattern: function ($route, redirectWhenMissing, indexPatterns) {
+        return indexPatterns
           .get($route.current.params.indexPatternId)
-          .catch(courier.redirectWhenMissing('/management/kibana/index'));
+          .catch(redirectWhenMissing('/management/kibana/index'));
       }
     }
   });
@@ -173,7 +173,7 @@ uiRoutes
 
 uiModules.get('apps/management')
   .controller('managementIndicesEdit', function (
-    $scope, $location, $route, config, courier, Notifier, Private, AppState, docTitle, confirmModal) {
+    $scope, $location, $route, config, indexPatterns, Notifier, Private, AppState, docTitle, confirmModal) {
     const notify = new Notifier();
     const $state = $scope.state = new AppState();
     const { fieldWildcardMatcher } = Private(FieldWildcardProvider);
@@ -257,7 +257,7 @@ uiModules.get('apps/management')
           }
         }
 
-        courier.indexPatterns.delete($scope.indexPattern)
+        indexPatterns.delete($scope.indexPattern)
           .then(function () {
             $location.url('/management/kibana/index');
           })
@@ -312,7 +312,7 @@ uiModules.get('apps/management')
       }
     });
 
-    $scope.$on('$destory', () => {
+    $scope.$on('$destroy', () => {
       destroyIndexedFieldsTable();
       destroyScriptedFieldsTable();
     });

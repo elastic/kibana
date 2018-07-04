@@ -39,7 +39,7 @@ export default new Chainable('yaxis', {
     {
       name: 'yaxis',
       types: ['number', 'null'],
-      help: 'The numbered y-axis to plot this series on, eg .yaxis(2) for a 2nd y-axis.'
+      help: 'The numbered y-axis to plot this series on, e.g., .yaxis(2) for a 2nd y-axis.'
     },
     {
       name: 'min',
@@ -126,7 +126,7 @@ export default new Chainable('yaxis', {
 
         if (unitType === 'percent') {
           // jquery.flot uses axis.tickDecimals to generate tick values
-          // need 2 extra decimal places to perserve percision when percent shifts value to left
+          // need 2 extra decimal places to preserve precision when percent shifts value to left
           myAxis.units.tickDecimalsShift = 2;
           if (tickDecimals) {
             myAxis.tickDecimals += myAxis.units.tickDecimalsShift;

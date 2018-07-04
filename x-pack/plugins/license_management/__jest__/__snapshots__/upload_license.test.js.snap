@@ -132,6 +132,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                               <cross
                                 aria-hidden="true"
                                 className="euiIcon euiIcon--medium euiButtonIcon__icon"
+                                focusable="false"
                                 height="16"
                                 style={
                                   Object {
@@ -146,6 +147,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                 <svg
                                   aria-hidden="true"
                                   className="euiIcon euiIcon--medium euiButtonIcon__icon"
+                                  focusable="false"
                                   height="16"
                                   style={
                                     Object {
@@ -367,6 +369,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                               <importAction
                                 aria-hidden="true"
                                 className="euiIcon euiIcon--large euiFilePicker__icon"
+                                focusable="false"
                                 height="16"
                                 style={
                                   Object {
@@ -380,6 +383,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                 <svg
                                   aria-hidden="true"
                                   className="euiIcon euiIcon--large euiFilePicker__icon"
+                                  focusable="false"
                                   height="16"
                                   style={
                                     Object {
@@ -463,6 +467,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                       >
                         <EuiButton
                           color="primary"
+                          data-test-subj="uploadLicenseButton"
                           fill={true}
                           iconSide="left"
                           isLoading={false}
@@ -471,6 +476,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                         >
                           <button
                             className="euiButton euiButton--primary euiButton--fill"
+                            data-test-subj="uploadLicenseButton"
                             onClick={[Function]}
                             type="button"
                           >
@@ -687,6 +693,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                               <importAction
                                 aria-hidden="true"
                                 className="euiIcon euiIcon--large euiFilePicker__icon"
+                                focusable="false"
                                 height="16"
                                 style={
                                   Object {
@@ -700,6 +707,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                                 <svg
                                   aria-hidden="true"
                                   className="euiIcon euiIcon--large euiFilePicker__icon"
+                                  focusable="false"
                                   height="16"
                                   style={
                                     Object {
@@ -783,6 +791,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                       >
                         <EuiButton
                           color="primary"
+                          data-test-subj="uploadLicenseButton"
                           fill={true}
                           iconSide="left"
                           isLoading={false}
@@ -791,6 +800,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                         >
                           <button
                             className="euiButton euiButton--primary euiButton--fill"
+                            data-test-subj="uploadLicenseButton"
                             onClick={[Function]}
                             type="button"
                           >
@@ -1007,6 +1017,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                               <importAction
                                 aria-hidden="true"
                                 className="euiIcon euiIcon--large euiFilePicker__icon"
+                                focusable="false"
                                 height="16"
                                 style={
                                   Object {
@@ -1020,6 +1031,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                                 <svg
                                   aria-hidden="true"
                                   className="euiIcon euiIcon--large euiFilePicker__icon"
+                                  focusable="false"
                                   height="16"
                                   style={
                                     Object {
@@ -1103,6 +1115,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                       >
                         <EuiButton
                           color="primary"
+                          data-test-subj="uploadLicenseButton"
                           fill={true}
                           iconSide="left"
                           isLoading={false}
@@ -1111,6 +1124,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                         >
                           <button
                             className="euiButton euiButton--primary euiButton--fill"
+                            data-test-subj="uploadLicenseButton"
                             onClick={[Function]}
                             type="button"
                           >
@@ -1327,6 +1341,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                               <importAction
                                 aria-hidden="true"
                                 className="euiIcon euiIcon--large euiFilePicker__icon"
+                                focusable="false"
                                 height="16"
                                 style={
                                   Object {
@@ -1340,6 +1355,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                                 <svg
                                   aria-hidden="true"
                                   className="euiIcon euiIcon--large euiFilePicker__icon"
+                                  focusable="false"
                                   height="16"
                                   style={
                                     Object {
@@ -1423,6 +1439,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                       >
                         <EuiButton
                           color="primary"
+                          data-test-subj="uploadLicenseButton"
                           fill={true}
                           iconSide="left"
                           isLoading={false}
@@ -1431,6 +1448,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                         >
                           <button
                             className="euiButton euiButton--primary euiButton--fill"
+                            data-test-subj="uploadLicenseButton"
                             onClick={[Function]}
                             type="button"
                           >
@@ -1647,6 +1665,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                               <importAction
                                 aria-hidden="true"
                                 className="euiIcon euiIcon--large euiFilePicker__icon"
+                                focusable="false"
                                 height="16"
                                 style={
                                   Object {
@@ -1660,6 +1679,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                                 <svg
                                   aria-hidden="true"
                                   className="euiIcon euiIcon--large euiFilePicker__icon"
+                                  focusable="false"
                                   height="16"
                                   style={
                                     Object {
@@ -1743,6 +1763,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                       >
                         <EuiButton
                           color="primary"
+                          data-test-subj="uploadLicenseButton"
                           fill={true}
                           iconSide="left"
                           isLoading={false}
@@ -1751,6 +1772,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                         >
                           <button
                             className="euiButton euiButton--primary euiButton--fill"
+                            data-test-subj="uploadLicenseButton"
                             onClick={[Function]}
                             type="button"
                           >

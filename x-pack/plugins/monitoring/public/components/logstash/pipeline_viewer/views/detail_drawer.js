@@ -7,31 +7,29 @@
 import React from 'react';
 import { last } from 'lodash';
 import {
-  EuiTitle,
-  EuiText,
+  EuiBadge,
+  EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
-  EuiFlyoutHeader,
   EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiIcon,
+  EuiSpacer,
   EuiTable,
   EuiTableBody,
   EuiTableRow,
   EuiTableRowCell,
-  EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonIcon,
-  EuiSpacer
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { Sparkline } from '../../../sparkline';
 import { formatMetric } from '../../../../lib/format_number';
-import { LOGSTASH } from '../../../../../common/constants';
 
 function renderIcon(vertex) {
   return (
-    <img
-      src={vertex.icon}
-      width={LOGSTASH.PIPELINE_VIEWER.ICON.WIDTH_PX}
-      height={LOGSTASH.PIPELINE_VIEWER.ICON.HEIGHT_PX}
+    <EuiIcon
+      type={vertex.iconType}
       className="lspvDetailDrawerIcon"
     />
   );
@@ -189,7 +187,7 @@ function renderBasicStats(vertex, timeseriesTooltipXValueFormatter) {
 function renderPluginBasicInfo(vertex) {
   if (vertex.hasExplicitId) {
     return (
-      <p>This {vertex.typeString}&#39;s ID is <strong>{ vertex.id }</strong>.</p>
+      <p>This {vertex.typeString}&#39;s ID is <EuiBadge>{ vertex.id }</EuiBadge>.</p>
     );
   }
 
@@ -210,7 +208,7 @@ function renderPluginBasicInfo(vertex) {
 }
 
 function renderIfBasicInfo(vertex) {
-  const ifCode = `if (${vertex.subtitle.complete}) {
+  const ifCode = `if (${vertex.subtitle}) {
   ...
 }`;
 
@@ -268,19 +266,16 @@ export function DetailDrawer({ vertex, onHide, timeseriesTooltipXValueFormatter 
     >
       <EuiFlyoutHeader>
         <EuiFlexGroup
-          alignItems="center"
+          alignItems="baseline"
+          gutterSize="s"
         >
+          <EuiFlexItem grow={false}>
+            { renderIcon(vertex) }
+          </EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle>
-              <h2>{ renderIcon(vertex) }{ renderTitle(vertex) }</h2>
+              <h2>{ renderTitle(vertex) }</h2>
             </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              onClick={onHide}
-              iconType="cross"
-              aria-label="Close"
-            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
