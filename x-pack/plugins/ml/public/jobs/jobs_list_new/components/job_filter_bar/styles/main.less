@@ -2,28 +2,21 @@
   max-width: 500px;
 
   .euiPopover .euiPanel {
-    .euiFlexItem {
-      flex-grow: 0;
-      white-space: nowrap;
-    }
-    .euiFilterSelectItem {
+    .group-item {
       padding: 6px 12px;
-
-      .euiFlexItem{
-        display: inline;
-      }
-
-      .inline-group {
-        border: 1px solid #FFFFFF;
-        border-radius: 3px;
-      }
     }
+
+    .inline-group {
+      border: 1px solid #FFFFFF;
+      border-radius: 3px;
+    }
+
     .euiFilterSelectItem:hover, .euiFilterSelectItem:focus {
+      text-decoration: none;
       .inline-group {
         border: 1px solid #555555;
         box-shadow: 0px 1px 2px #999;
       }
-      text-decoration: none;
     }
   }
 }

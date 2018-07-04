@@ -25,9 +25,10 @@ const loadGroups = () => {
       return groups.map(g => ({
         value: g.id,
         view: (
-          <React.Fragment>
+          <div className="group-item">
             <JobGroup name={g.id} /> <span>({g.jobIds.length} job{(g.jobIds.length === 1) ? '' : 's'})</span>
-          </React.Fragment>)
+          </div>
+        )
       }));
     })
     .catch((error) => {
