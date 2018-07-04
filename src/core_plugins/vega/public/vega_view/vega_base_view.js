@@ -21,6 +21,7 @@ import $ from 'jquery';
 import moment from 'moment';
 import dateMath from '@kbn/datemath';
 import * as vega from 'vega-lib';
+import * as vegaLite from 'vega-lite';
 import { Utils } from '../data_model/utils';
 import { VISUALIZATION_COLORS } from '@elastic/eui';
 import { TooltipHandler } from './vega_tooltip';
@@ -327,6 +328,43 @@ export class VegaBaseView {
     }
 
     return { from, to, mode };
+  }
+
+  /**
+   * Set global debug variable to simplify vega debugging in console. Show info message first time
+   */
+  setDebugValues(view, spec, vlspec) {
+    if (!window) {
+      return;
+    }
+
+    if (window.VEGA_DEBUG === undefined && console) {
+      console.log('%cWelcome to Kibana Vega Plugin!', 'font-size: 16px; font-weight: bold;');
+      console.log('You can enable debugging by putting `%debug%: chooseAnyIdHere` into the top level of our spec.');
+      console.log('You can then access the Vega view for this chart with VEGA_DEBUG.chooseAnyIdHere' +
+        'Learn more at https://vega.github.io/vega/docs/api/debugging/.');
+      window.VEGA_DEBUG = {
+        VEGA_VERSION: vega.version,
+        VEGA_LITE_VERSION: vegaLite.version,
+      };
+    }
+    const debugId = vlspec ? vlspec['%debug%'] : spec['%debug%'];
+
+    if (debugId) {
+      const debugObj = {
+        view,
+        vega_spec: spec,
+        vegalite_spec: vlspec,
+      };
+      window.VEGA_DEBUG[debugId] = debugObj;
+
+      // On dispose, clean up this chart from VEGA_DEBUG
+      this._addDestroyHandler(() => {
+        if (debugObj === window.VEGA_DEBUG[debugId]) {
+          delete window.VEGA_DEBUG[debugId];
+        }
+      });
+    }
   }
 
   destroy() {
