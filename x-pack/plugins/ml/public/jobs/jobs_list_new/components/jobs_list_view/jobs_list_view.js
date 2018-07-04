@@ -8,9 +8,10 @@
 import './styles/main.less';
 
 import { ml } from 'plugins/ml/services/ml_api_service';
-import { loadFullJob } from '../utils';
+import { loadFullJob, filterJobs } from '../utils';
 import { JobsList } from '../jobs_list';
 import { JobDetails } from '../job_details';
+import { JobFilterBar } from '../job_filter_bar';
 import { EditJobFlyout } from '../edit_job_flyout';
 import { DeleteJobModal } from '../delete_job_modal';
 import { StartDatafeedModal } from '../start_datafeed_modal';
@@ -26,9 +27,11 @@ export class JobsListView extends Component {
 
     this.state = {
       jobsSummaryList: [],
+      filteredJobsSummaryList: [],
       fullJobsList: {},
       selectedJobs: [],
-      itemIdToExpandedRowMap: {}
+      itemIdToExpandedRowMap: {},
+      filterClauses: []
     };
 
     this.updateFunctions = {};
@@ -134,6 +137,26 @@ export class JobsListView extends Component {
     this.setState({ selectedJobs });
   }
 
+  refreshSelectedJobs() {
+    const selectedJobsIds = this.state.selectedJobs.map(j => j.id);
+    const filteredJobIds = this.state.filteredJobsSummaryList.map(j => j.id);
+
+    // refresh the jobs stored as selected
+    // only select those which are also in the filtered list
+    const selectedJobs = this.state.jobsSummaryList
+      .filter(j => selectedJobsIds.find(id => id === j.id))
+      .filter(j => filteredJobIds.find(id => id === j.id));
+
+    this.setState({ selectedJobs });
+  }
+
+  setFilters = (filterClauses) => {
+    const filteredJobsSummaryList = filterJobs(this.state.jobsSummaryList, filterClauses);
+    this.setState({ filteredJobsSummaryList, filterClauses }, () => {
+      this.refreshSelectedJobs();
+    });
+  }
+
   refreshJobSummaryList(autoRefresh = true) {
     if (this.blockAutoRefresh === false) {
       const expandedJobsIds = Object.keys(this.state.itemIdToExpandedRowMap);
@@ -148,7 +171,10 @@ export class JobsListView extends Component {
             job.latestTimeStampUnix = job.latestTimeStamp.unix;
             return job;
           });
-          this.setState({ jobsSummaryList, fullJobsList });
+          const filteredJobsSummaryList = filterJobs(jobsSummaryList, this.state.filterClauses);
+          this.setState({ jobsSummaryList, filteredJobsSummaryList, fullJobsList }, () => {
+            this.refreshSelectedJobs();
+          });
 
           Object.keys(this.updateFunctions).forEach((j) => {
             this.updateFunctions[j].setState({ job: fullJobsList[j] });
@@ -176,9 +202,10 @@ export class JobsListView extends Component {
             showDeleteJobModal={this.showDeleteJobModal}
             refreshJobs={() => this.refreshJobSummaryList(false)}
           />
+          <JobFilterBar setFilters={this.setFilters} />
         </div>
         <JobsList
-          jobsSummaryList={this.state.jobsSummaryList}
+          jobsSummaryList={this.state.filteredJobsSummaryList}
           fullJobsList={this.state.fullJobsList}
           itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
           toggleRow={this.toggleRow}
