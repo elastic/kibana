@@ -156,12 +156,12 @@ export function filterJobs(jobs, clauses) {
   clauses.forEach((c) => {
     // the search term could be negated with a minus, e.g. -bananas
     const bool = (c.match === 'must');
+    let js = [];
+
     if (c.type === 'term') {
       // filter term based clauses, e.g. bananas
       // match on id, description and memory_status
       // if the term has been negated, AND the matches
-      let js = [];
-
       if (bool === true) {
         js = jobs.filter(job => ((
           (stringMatch(job.id, c.value) === bool) ||
@@ -175,19 +175,17 @@ export function filterJobs(jobs, clauses) {
           (stringMatch(job.memory_status, c.value) === bool)
         )));
       }
-      js.forEach(j => (matches[j.id].count++));
     } else {
       // filter other clauses, i.e. the toggle group buttons
-      // the groups value is an array of group ids
-      let js = [];
       if (Array.isArray(c.value)) {
-        js = jobs.filter(job => (jobProperty(job, c.field).some((g) => (c.value.indexOf(g) >= 0))));
+        // the groups value is an array of group ids
+        js = jobs.filter(job => (jobProperty(job, c.field).some(g => (c.value.indexOf(g) >= 0))));
       } else {
         js = jobs.filter(job => (jobProperty(job, c.field) === c.value));
       }
-
-      js.forEach(j => (matches[j.id].count++));
     }
+
+    js.forEach(j => (matches[j.id].count++));
   });
 
   // loop through the matches and return only those jobs which have match all the clauses
