@@ -4,35 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock(
-  'ui/chrome',
-  () => ({
-    getUiSettingsClient: () => {
-      return {
-        get: key => {
-          switch (key) {
-            case 'timepicker:timeDefaults':
-              return { from: 'now-15m', to: 'now', mode: 'quick' };
-            case 'timepicker:refreshIntervalDefaults':
-              return { display: 'Off', pause: false, value: 0 };
-            default:
-              throw new Error(`Unexpected config key: ${key}`);
-          }
-        }
-      };
-    }
-  }),
-  { virtual: true }
-);
-
 import React from 'react';
 import { shallow } from 'enzyme';
 import TransactionOverview from '../view';
 import { toJson } from '../../../../utils/testHelpers';
-jest.mock('../../../../utils/timepicker', () => {});
 
 const setup = () => {
   const props = {
+    changeTransactionSorting: () => {},
+    license: {
+      data: {
+        features: {
+          ml: { isAvailable: true }
+        }
+      }
+    },
+    transactionSorting: {},
+    hasDynamicBaseline: false,
+    location: {},
     urlParams: { transactionType: 'request', serviceName: 'MyServiceName' }
   };
 

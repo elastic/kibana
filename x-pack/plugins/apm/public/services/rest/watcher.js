@@ -4,6 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default  {
-  addBasePath: (path) => path
-};
+import { callApi } from './callApi';
+
+export async function createWatch(id, watch) {
+  return callApi({
+    method: 'PUT',
+    pathname: `/api/watcher/watch/${id}`,
+    body: JSON.stringify({ type: 'json', id, watch })
+  });
+}
