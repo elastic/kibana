@@ -6,7 +6,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { uniqueId } from 'lodash';
+import { uniqueId, startsWith } from 'lodash';
 import {
   history,
   fromQuery,
@@ -45,12 +45,12 @@ class KueryBarView extends Component {
 
     const boolFilter = getBoolFilter(urlParams);
     try {
-      const suggestions = await getSuggestions(
+      const suggestions = (await getSuggestions(
         inputValue,
         selectionStart,
         indexPattern,
         boolFilter
-      );
+      )).filter(suggestion => !startsWith(suggestion.text, 'span.'));
 
       if (currentRequest !== this.currentRequest) {
         return;
