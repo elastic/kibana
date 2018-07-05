@@ -28,12 +28,13 @@ function NodeAvailableWarning() {
     return (
       <React.Fragment>
         <EuiCallOut
-          title="No ML Nodes available"
+          title="No ML nodes available"
           color="warning"
           iconType="alert"
         >
           <p>
-            There are no ML nodes available.
+            There are no ML nodes available.<br />
+            You will not be able to create or run jobs.
             {isCloud &&
               <span ng-if="isCloud">
                 &nbsp;This can be configured in Cloud <EuiLink href="#">here</EuiLink>.
@@ -41,7 +42,7 @@ function NodeAvailableWarning() {
             }
           </p>
         </EuiCallOut>
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
       </React.Fragment>
     );
   }
