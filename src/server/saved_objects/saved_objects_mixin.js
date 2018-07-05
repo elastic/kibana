@@ -18,7 +18,7 @@
  */
 import _ from 'lodash';
 import { createSavedObjectsService } from './service';
-import { buildActiveMappings, getMigrationPlugins } from './migrations';
+import { buildKibanaMappings } from './migrations';
 import {
   createBulkGetRoute,
   createCreateRoute,
@@ -29,14 +29,19 @@ import {
 } from './routes';
 
 export function savedObjectsMixin(kbnServer, server) {
-  const mappings = buildActiveMappings({ plugins: getMigrationPlugins(kbnServer) });
+  const mappings = buildKibanaMappings({ kbnServer });
 
-  server.decorate('server', 'getKibanaIndexMappingsDsl', () => _.cloneDeep(mappings));
+  server.decorate('server', 'getKibanaIndexMappingsDsl', () =>
+    _.cloneDeep(mappings)
+  );
 
   // we use kibana.index which is technically defined in the kibana plugin, so if
   // we don't have the plugin (mainly tests) we can't initialize the saved objects
   if (!kbnServer.pluginSpecs.some(p => p.getId() === 'kibana')) {
-    server.log(['warning', 'saved-objects'], `Saved Objects uninitialized because the Kibana plugin is disabled.`);
+    server.log(
+      ['warning', 'saved-objects'],
+      `Saved Objects uninitialized because the Kibana plugin is disabled.`
+    );
     return;
   }
 
@@ -66,7 +71,9 @@ export function savedObjectsMixin(kbnServer, server) {
       return savedObjectsClientCache.get(request);
     }
 
-    const savedObjectsClient = server.savedObjects.getScopedSavedObjectsClient(request);
+    const savedObjectsClient = server.savedObjects.getScopedSavedObjectsClient(
+      request
+    );
 
     savedObjectsClientCache.set(request, savedObjectsClient);
     return savedObjectsClient;
