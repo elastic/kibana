@@ -107,13 +107,15 @@ const registerPrivilegesWithClusterTest = (description, {
   };
 
   const createExpectErrorThrown = (mockServer, actualError) => {
-    return (expectedError) => {
-      expect(actualError).toBe(expectedError);
+    return (expectedErrorMessage) => {
+      expect(actualError).toBeDefined();
+      expect(actualError).toBeInstanceOf(Error);
+      expect(actualError.message).toEqual(expectedErrorMessage);
 
       const application = settings['xpack.security.rbac.application'] || defaultApplication;
       expect(mockServer.log).toHaveBeenCalledWith(
         ['security', 'error'],
-        `Error registering Kibana Privileges with Elasticsearch for ${application}: ${expectedError.message}`
+        `Error registering Kibana Privileges with Elasticsearch for ${application}: ${expectedErrorMessage}`
       );
     };
   };
@@ -182,12 +184,25 @@ registerPrivilegesWithClusterTest(`updates privileges when simple top-level priv
   }
 });
 
-registerPrivilegesWithClusterTest(`updates privileges when we have two different simple top-level privileges`, {
+registerPrivilegesWithClusterTest(`throws error when we have two different top-level privileges`, {
   expectedPrivileges: {
     notExpected: true
   },
   existingPrivileges: {
     expected: true
+  },
+  assert: ({ expectErrorThrown }) => {
+    expectErrorThrown(`Privileges are missing and can't be removed, currently.`);
+  }
+});
+
+registerPrivilegesWithClusterTest(`updates privileges when we want to add a top-level privilege`, {
+  expectedPrivileges: {
+    expected: true,
+    new: false,
+  },
+  existingPrivileges: {
+    expected: true,
   },
   assert: ({ expectUpdatedPrivileges }) => {
     expectUpdatedPrivileges();
@@ -288,15 +303,13 @@ registerPrivilegesWithClusterTest(`doesn't update privileges when nested propert
   }
 });
 
-const gettingPrivilegesError = new Error('Error getting privileges');
 registerPrivilegesWithClusterTest(`throws and logs error when errors getting privileges`, {
-  throwErrorWhenGettingPrivileges: gettingPrivilegesError,
+  throwErrorWhenGettingPrivileges: new Error('Error getting privileges'),
   assert: ({ expectErrorThrown }) => {
-    expectErrorThrown(gettingPrivilegesError);
+    expectErrorThrown('Error getting privileges');
   }
 });
 
-const puttingPrivilegesError = new Error('Error putting privileges');
 registerPrivilegesWithClusterTest(`throws and logs error when errors putting privileges`, {
   expectedPrivileges: {
     kibana: {
@@ -310,9 +323,8 @@ registerPrivilegesWithClusterTest(`throws and logs error when errors putting pri
       bar: true
     }
   },
-  throwErrorWhenPuttingPrivileges: puttingPrivilegesError,
+  throwErrorWhenPuttingPrivileges: new Error('Error putting privileges'),
   assert: ({ expectErrorThrown }) => {
-    expectErrorThrown(puttingPrivilegesError);
+    expectErrorThrown('Error putting privileges');
   }
 });
-
