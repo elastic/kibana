@@ -5,6 +5,7 @@
  */
 
 import {
+  EsSupertestWithoutAuthProvider,
   SupertestWithoutAuthProvider,
   UsageAPIProvider,
 } from './services';
@@ -22,6 +23,7 @@ export default async function ({ readConfigFile }) {
       supertest: kibanaAPITestsConfig.get('services.supertest'),
       esSupertest: kibanaAPITestsConfig.get('services.esSupertest'),
       supertestWithoutAuth: SupertestWithoutAuthProvider,
+      esSupertestWithoutAuth: EsSupertestWithoutAuthProvider,
       es: kibanaCommonConfig.get('services.es'),
       esArchiver: kibanaCommonConfig.get('services.esArchiver'),
       usageAPI: UsageAPIProvider,
