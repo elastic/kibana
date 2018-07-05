@@ -76,7 +76,18 @@ export class JobsList extends Component {
     list = sortBy(this.state.jobsSummaryList, (item) => item[sortField]);
     list = (sortDirection === 'asc') ? list : list.reverse();
 
-    const pageStart = (index * size);
+    let pageStart = (index * size);
+    if (pageStart >= list.length) {
+      // if the page start is larger than the number of items
+      // due to filters being applied, calculate a new page start
+      pageStart = Math.floor(list.length / size) * size;
+      // set the state out of the render cycle
+      setTimeout(() => {
+        this.setState({
+          pageIndex: (pageStart / size)
+        });
+      }, 0);
+    }
     return {
       pageOfItems: list.slice(pageStart, (pageStart + size)),
       totalItemCount: list.length,

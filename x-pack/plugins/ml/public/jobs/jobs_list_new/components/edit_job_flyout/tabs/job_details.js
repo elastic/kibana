@@ -27,6 +27,7 @@ export class JobDetails extends Component {
 
     this.state = {
       description: '',
+      groups: [],
       selectedGroups: [],
       mml: '',
     };

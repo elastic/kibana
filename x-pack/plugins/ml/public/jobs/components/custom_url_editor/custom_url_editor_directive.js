@@ -185,9 +185,9 @@ module.directive('mlCustomUrlEditor', function (Private) {
 
             const searchSourceJSON = response.get('kibanaSavedObjectMeta.searchSourceJSON');
             if (searchSourceJSON !== undefined) {
-              const searchSource = JSON.parse(searchSourceJSON);
-              filters = _.get(searchSource, 'filter', []);
-              query = searchSource.query;
+              const searchSourceData = JSON.parse(searchSourceJSON);
+              filters = _.get(searchSourceData, 'filter', []);
+              query = searchSourceData.query;
             }
 
             // Add time settings to the global state URL parameter with $earliest$ and
