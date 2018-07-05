@@ -10,6 +10,13 @@ objects.
 
 `POST /api/saved_objects/_bulk_create`
 
+
+==== Query Parameters
+
+`overwrite` (optional)::
+  (boolean) If true, will overwrite the document with the same ID.
+
+
 ==== Request Body
 
 The request body must be a JSON array containing objects, each of which
@@ -18,11 +25,15 @@ contains the following properties:
 `type` (required)::
   (string) Valid options, include: `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`
 
-`id` (required)::
-  (string) ID of object to retrieve
+`id` (optional)::
+  (string) Enables specifying an ID to use, as opposed to one being randomly generated
 
 `attributes` (required)::
   (object) The data to persist
+
+`version` (optional)::
+  (number) Enables specifying a version
+
 
 ==== Response body
 
@@ -33,6 +44,7 @@ the objects in the request.
 
 For any saved object that could not be persisted, an error object will exist in its
 place.
+
 
 ==== Examples
 
