@@ -208,7 +208,37 @@ describe('SavedObjectsRepository', () => {
 
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
-        id: sinon.match(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+        body: {
+          [`index-pattern`]: { title: 'Logstash' },
+          myExtraProp: 'myExtraValue',
+          myOtherExtraProp: true,
+          type: 'index-pattern',
+          updated_at: '2017-08-14T15:49:14.886Z'
+        }
+      }));
+
+      sinon.assert.calledOnce(onBeforeWrite);
+    });
+
+    it('does not allow extraBodyProperties to overwrite existing properties', async () => {
+      await savedObjectsRepository.create('index-pattern',
+        {
+          title: 'Logstash'
+        },
+        {
+          extraBodyProperties: {
+            myExtraProp: 'myExtraValue',
+            myOtherExtraProp: true,
+            updated_at: 'should_not_be_used',
+            'index-pattern': {
+              title: 'should_not_be_used'
+            }
+          }
+        }
+      );
+
+      sinon.assert.calledOnce(callAdminCluster);
+      sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
         body: {
           [`index-pattern`]: { title: 'Logstash' },
           myExtraProp: 'myExtraValue',
@@ -376,6 +406,42 @@ describe('SavedObjectsRepository', () => {
 
       sinon.assert.calledOnce(onBeforeWrite);
     });
+
+    it('does not allow extraBodyProperties to overwrite existing properties', async () => {
+
+      callAdminCluster.returns({ items: [] });
+
+      const extraBodyProperties = {
+        extraProp: 'extraVal',
+        updated_at: 'should_not_be_used',
+      };
+      const configExtraBodyProperties = {
+        ...extraBodyProperties,
+        'config': { newIgnoredProp: 'should_not_be_used' }
+      };
+      const indexPatternExtraBodyProperties = {
+        ...extraBodyProperties,
+        'index-pattern': { title: 'should_not_be_used', newIgnoredProp: 'should_not_be_used' }
+      };
+
+      await savedObjectsRepository.bulkCreate(
+        [
+          { type: 'config', id: 'one', attributes: { title: 'Test One' }, extraBodyProperties: configExtraBodyProperties },
+          { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' }, extraBodyProperties: indexPatternExtraBodyProperties }
+        ]);
+
+      sinon.assert.calledOnce(callAdminCluster);
+      sinon.assert.calledWithExactly(callAdminCluster, 'bulk', sinon.match({
+        body: [
+          { create: { _type: 'doc', _id: 'config:one' } },
+          { type: 'config', ...mockTimestampFields, config: { title: 'Test One' }, extraProp: 'extraVal' },
+          { create: { _type: 'doc', _id: 'index-pattern:two' } },
+          { type: 'index-pattern', ...mockTimestampFields, 'index-pattern': { title: 'Test Two' }, extraProp: 'extraVal' }
+        ]
+      }));
+
+      sinon.assert.calledOnce(onBeforeWrite);
+    });
   });
 
   describe('#delete', () => {
@@ -531,6 +597,7 @@ describe('SavedObjectsRepository', () => {
         _version: 2,
         _source: {
           type: 'index-pattern',
+          specialProperty: 'specialValue',
           ...mockTimestampFields,
           'index-pattern': {
             title: 'Testing'
@@ -562,6 +629,24 @@ describe('SavedObjectsRepository', () => {
         id: 'index-pattern:logstash-*',
         type: 'doc'
       }));
+    });
+
+    it('includes the requested extraSourceProperties in the response for the requested object', async () => {
+      const response = await savedObjectsRepository.get('index-pattern', 'logstash-*', {
+        extraSourceProperties: ['specialProperty', 'undefinedProperty']
+      });
+
+      expect(response).toEqual({
+        id: 'logstash-*',
+        type: 'index-pattern',
+        updated_at: mockTimestamp,
+        version: 2,
+        specialProperty: 'specialValue',
+        undefinedProperty: undefined,
+        attributes: {
+          title: 'Testing'
+        }
+      });
     });
   });
 
@@ -633,6 +718,80 @@ describe('SavedObjectsRepository', () => {
         error: { statusCode: 404, message: 'Not found' }
       });
     });
+
+    it('includes the requested extraSourceProperties in the response for each requested object', async () => {
+      callAdminCluster.returns(Promise.resolve({
+        docs: [{
+          _type: 'doc',
+          _id: 'config:good',
+          found: true,
+          _version: 2,
+          _source: {
+            ...mockTimestampFields,
+            type: 'config',
+            specialProperty: 'specialValue',
+            config: { title: 'Test' }
+          }
+        }, {
+          _type: 'doc',
+          _id: 'config:bad',
+          found: false
+        }, {
+          _id: 'index-pattern:logstash-*',
+          _type: 'doc',
+          found: true,
+          _version: 2,
+          _source: {
+            type: 'index-pattern',
+            specialProperty: 'anotherSpecialValue',
+            ...mockTimestampFields,
+            'index-pattern': {
+              title: 'Testing'
+            }
+          }
+        }]
+      }));
+
+      const { saved_objects: savedObjects } = await savedObjectsRepository.bulkGet(
+        [
+          { id: 'good', type: 'config' },
+          { id: 'bad', type: 'config' },
+          { id: 'logstash-*', type: 'index-pattern' }
+        ], {
+          extraSourceProperties: ['specialProperty', 'undefinedProperty']
+        }
+      );
+
+      expect(savedObjects).toHaveLength(3);
+
+      expect(savedObjects[0]).toEqual({
+        id: 'good',
+        type: 'config',
+        ...mockTimestampFields,
+        version: 2,
+        specialProperty: 'specialValue',
+        undefinedProperty: undefined,
+        attributes: { title: 'Test' }
+      });
+
+      expect(savedObjects[1]).toEqual({
+        id: 'bad',
+        type: 'config',
+        error: { statusCode: 404, message: 'Not found' }
+      });
+
+      expect(savedObjects[2]).toEqual({
+        id: 'logstash-*',
+        type: 'index-pattern',
+        ...mockTimestampFields,
+        version: 2,
+        specialProperty: 'anotherSpecialValue',
+        undefinedProperty: undefined,
+        attributes: {
+          title: 'Testing'
+        }
+      });
+    });
   });
 
   describe('#update', () => {
@@ -685,6 +844,60 @@ describe('SavedObjectsRepository', () => {
         version: undefined,
         body: {
           doc: { updated_at: mockTimestamp, 'index-pattern': { title: 'Testing' } }
+        },
+        ignore: [404],
+        refresh: 'wait_for',
+        index: '.kibana-test'
+      });
+
+      sinon.assert.calledOnce(onBeforeWrite);
+    });
+
+    it('updates the document including all provided extraBodyProperties', async () => {
+      await savedObjectsRepository.update(
+        'index-pattern',
+        'logstash-*',
+        { title: 'Testing' },
+        { extraBodyProperties: { extraProp: 'extraVal' } }
+      );
+
+      sinon.assert.calledOnce(callAdminCluster);
+      sinon.assert.calledWithExactly(callAdminCluster, 'update', {
+        type: 'doc',
+        id: 'index-pattern:logstash-*',
+        version: undefined,
+        body: {
+          doc: { updated_at: mockTimestamp, extraProp: 'extraVal', 'index-pattern': { title: 'Testing' } }
+        },
+        ignore: [404],
+        refresh: 'wait_for',
+        index: '.kibana-test'
+      });
+
+      sinon.assert.calledOnce(onBeforeWrite);
+    });
+
+    it('does not allow extraBodyProperties to overwrite existing properties', async () => {
+      await savedObjectsRepository.update(
+        'index-pattern',
+        'logstash-*',
+        { title: 'Testing' },
+        {
+          extraBodyProperties: {
+            extraProp: 'extraVal',
+            updated_at: 'should_not_be_used',
+            'index-pattern': { title: 'should_not_be_used', newIgnoredProp: 'should_not_be_used' }
+          }
+        }
+      );
+
+      sinon.assert.calledOnce(callAdminCluster);
+      sinon.assert.calledWithExactly(callAdminCluster, 'update', {
+        type: 'doc',
+        id: 'index-pattern:logstash-*',
+        version: undefined,
+        body: {
+          doc: { updated_at: mockTimestamp, extraProp: 'extraVal', 'index-pattern': { title: 'Testing' } }
         },
         ignore: [404],
         refresh: 'wait_for',

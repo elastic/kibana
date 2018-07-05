@@ -697,11 +697,12 @@ describe('#bulkGet', () => {
       { type: type1, id: 'foo-id' },
       { type: type2, id: 'bar-id' },
     ];
+    const options = Symbol();
 
-    const result = await client.bulkGet(objects);
+    const result = await client.bulkGet(objects, options);
 
     expect(result).toBe(returnValue);
-    expect(mockRepository.bulkGet).toHaveBeenCalledWith(objects, {});
+    expect(mockRepository.bulkGet).toHaveBeenCalledWith(objects, options);
     expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'bulk_get', [type1, type2], {
       objects,
@@ -785,11 +786,12 @@ describe('#get', () => {
       auditLogger: mockAuditLogger,
     });
     const id = Symbol();
+    const options = Symbol();
 
-    const result = await client.get(type, id);
+    const result = await client.get(type, id, options);
 
     expect(result).toBe(returnValue);
-    expect(mockRepository.get).toHaveBeenCalledWith(type, id, {});
+    expect(mockRepository.get).toHaveBeenCalledWith(type, id, options);
     expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'get', [type], {
       type,

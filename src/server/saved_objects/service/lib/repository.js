@@ -406,7 +406,7 @@ export class SavedObjectsRepository {
    * @param {string} id
    * @param {object} [options={}]
    * @property {integer} options.version - ensures version matches that of persisted object
-   * @param {array} [options.extraBodyProperties = []] - an array of extra properties to write into the underlying document
+   * @param {array} [options.extraBodyProperties = {}] - an object of extra properties to write into the underlying document
    * @returns {promise}
    */
   async update(type, id, attributes, options = {}) {
