@@ -43,35 +43,77 @@ export class JobsListView extends Component {
     this.showDeleteJobModal = () => {};
     this.showStartDatafeedModal = () => {};
 
-    this.blockAutoRefresh = false;
-    this.refreshIntervalMS = 5000;
+    this.blockRefresh = false;
+    this.refreshIntervalMS = DEFAULT_REFRESH_INTERVAL_VALUE_MS;
+    this.refreshInterval = null;
   }
 
   componentDidMount() {
     timefilter.enableAutoRefreshSelector();
 
-    this.initAutoRefresh();
+    // this.refreshJobSummaryList();
 
-    this.refreshJobSummaryList();
+    this.initAutoRefresh();
+    this.initAutoRefreshUpdate();
+
   }
 
   componentWillUnmount() {
-    this.blockAutoRefresh = true;
+    this.blockRefresh = true;
   }
 
   initAutoRefresh() {
-    // if the auto refresher isn't set, set it to the default (5 secs)
-    const refreshInterval = timefilter.getRefreshInterval();
-    if ((refreshInterval.pause === false && refreshInterval.value === 0)) {
+    const { value, pause } = timefilter.getRefreshInterval();
+    if ((pause === false && value === 0)) {
+      // if the auto refresher isn't set, set it to the default (5 secs)
       timefilter.setRefreshInterval({
         pause: false,
         value: DEFAULT_REFRESH_INTERVAL_VALUE_MS
       });
     }
 
+    this.setAutoRefresh();
+  }
+
+  initAutoRefreshUpdate() {
     // update the interval if it changes
     timefilter.on('refreshIntervalUpdate', () => {
-      this.refreshIntervalMS = timefilter.getRefreshInterval().value;
+      this.setAutoRefresh();
+    });
+  }
+
+  setAutoRefresh() {
+    const { value, pause } = timefilter.getRefreshInterval();
+    if (pause) {
+      this.clearRefreshInterval();
+    } else if (value === 0) {
+      // if unpaused but interval is 0, force pause
+      this.setRefreshInterval(value);
+      this.clearRefreshInterval();
+      this.forcePauseTimefilter();
+    } else {
+      this.setRefreshInterval(value);
+    }
+    this.refreshJobSummaryList(true);
+  }
+
+  setRefreshInterval(interval) {
+    clearInterval(this.refreshInterval);
+    this.refreshIntervalMS = interval;
+    this.blockRefresh = false;
+    this.refreshInterval = setInterval(() => (this.refreshJobSummaryList()), this.refreshIntervalMS);
+  }
+
+  clearRefreshInterval() {
+    this.blockRefresh = true;
+    clearInterval(this.refreshInterval);
+  }
+
+  forcePauseTimefilter() {
+    // if refreshIntervalMS = 0, the auto refresh component has been switched off
+    timefilter.setRefreshInterval({
+      pause: true,
+      value: this.refreshIntervalMS
     });
   }
 
@@ -183,8 +225,8 @@ export class JobsListView extends Component {
     });
   }
 
-  refreshJobSummaryList(autoRefresh = true) {
-    if (this.blockAutoRefresh === false) {
+  refreshJobSummaryList(forceRefresh = false) {
+    if (forceRefresh === true || this.blockRefresh === false) {
       const expandedJobsIds = Object.keys(this.state.itemIdToExpandedRowMap);
       ml.jobs.jobsSummary(expandedJobsIds)
         .then((jobs) => {
@@ -205,12 +247,6 @@ export class JobsListView extends Component {
           Object.keys(this.updateFunctions).forEach((j) => {
             this.updateFunctions[j].setState({ job: fullJobsList[j] });
           });
-
-          if (autoRefresh === true) {
-            setTimeout(() => {
-              this.refreshJobSummaryList();
-            }, this.refreshIntervalMS);
-          }
         })
         .catch((error) => {
           console.error(error);
@@ -226,7 +262,7 @@ export class JobsListView extends Component {
             selectedJobs={this.state.selectedJobs}
             showStartDatafeedModal={this.showStartDatafeedModal}
             showDeleteJobModal={this.showDeleteJobModal}
-            refreshJobs={() => this.refreshJobSummaryList(false)}
+            refreshJobs={() => this.refreshJobSummaryList(true)}
           />
           <JobFilterBar setFilters={this.setFilters} />
         </div>
@@ -239,22 +275,22 @@ export class JobsListView extends Component {
           showEditJobFlyout={this.showEditJobFlyout}
           showDeleteJobModal={this.showDeleteJobModal}
           showStartDatafeedModal={this.showStartDatafeedModal}
-          refreshJobs={() => this.refreshJobSummaryList(false)}
+          refreshJobs={() => this.refreshJobSummaryList(true)}
         />
         <EditJobFlyout
           setShowFunction={this.setShowEditJobFlyoutFunction}
           unsetShowFunction={this.unsetShowEditJobFlyoutFunction}
-          refreshJobs={() => this.refreshJobSummaryList(false)}
+          refreshJobs={() => this.refreshJobSummaryList(true)}
         />
         <DeleteJobModal
           setShowFunction={this.setShowDeleteJobModalFunction}
           unsetShowFunction={this.unsetShowDeleteJobModalFunction}
-          refreshJobs={() => this.refreshJobSummaryList(false)}
+          refreshJobs={() => this.refreshJobSummaryList(true)}
         />
         <StartDatafeedModal
           setShowFunction={this.setShowStartDatafeedModalFunction}
           unsetShowFunction={this.unsetShowDeleteJobModalFunction}
-          refreshJobs={() => this.refreshJobSummaryList(false)}
+          refreshJobs={() => this.refreshJobSummaryList(true)}
         />
       </div>
     );
