@@ -271,7 +271,7 @@ describe('SavedObjectsRepository', () => {
         { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
       ]);
 
-      expect(response).toEqual([
+      expect(response.saved_objects).toEqual([
         {
           id: 'one',
           type: 'config',
@@ -309,7 +309,7 @@ describe('SavedObjectsRepository', () => {
         { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
       ]);
 
-      expect(response).toEqual([
+      expect(response.saved_objects).toEqual([
         {
           id: 'one',
           type: 'config',
