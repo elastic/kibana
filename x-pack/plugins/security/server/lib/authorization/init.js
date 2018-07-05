@@ -6,6 +6,7 @@
 
 import { actionsFactory } from './actions';
 import { checkPrivilegesWithRequestFactory } from './check_privileges';
+import { deepFreeze } from './deep_freeze';
 import { getClient } from '../../../../../server/lib/get_client_shield';
 
 export function initAuthorizationService(server) {
@@ -14,8 +15,8 @@ export function initAuthorizationService(server) {
 
   const actions = actionsFactory(config);
 
-  server.expose('authorization', {
+  server.expose('authorization', deepFreeze({
     checkPrivilegesWithRequest: checkPrivilegesWithRequestFactory(shieldClient, config, actions),
     actions
-  });
+  }));
 }

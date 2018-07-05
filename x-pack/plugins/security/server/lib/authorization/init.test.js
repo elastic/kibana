@@ -44,3 +44,21 @@ test(`calls server.expose with exposed services`, () => {
     actions: mockActions,
   });
 });
+
+test(`deep freezes exposed service`, () => {
+  const mockConfig = Symbol();
+  const mockServer = {
+    expose: jest.fn(),
+    config: jest.fn().mockReturnValue(mockConfig)
+  };
+  actionsFactory.mockReturnValue({
+    login: 'login',
+  });
+
+  initAuthorizationService(mockServer);
+
+  const exposed = mockServer.expose.mock.calls[0][1];
+  expect(() => delete exposed.checkPrivilegesWithRequest).toThrowErrorMatchingSnapshot();
+  expect(() => exposed.foo = 'bar').toThrowErrorMatchingSnapshot();
+  expect(() => exposed.actions.login = 'not-login').toThrowErrorMatchingSnapshot();
+});
