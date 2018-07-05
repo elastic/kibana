@@ -57,10 +57,6 @@ export class CollectorSet {
     }
   }
 
-  findCollector(type) {
-    return this._collectors.find(collector => collector.type === type);
-  }
-
   /*
    * Call a bunch of fetch methods and then do them in bulk
    * @param {Array} collectors - an array of collectors, default to all registered collectors
