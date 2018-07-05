@@ -37,8 +37,11 @@ export function serverFixture() {
         authenticate: stub(),
         deauthenticate: stub(),
         authorization: {
-          checkPrivilegesWithRequest: stub()
-        }
+          checkPrivilegesWithRequest: stub(),
+          actions: {
+            login: 'stub-login-action',
+          },
+        },
       },
 
       xpack_main: {

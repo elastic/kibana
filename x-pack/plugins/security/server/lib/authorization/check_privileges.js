@@ -5,9 +5,7 @@
  */
 
 import { uniq } from 'lodash';
-import { getClient } from '../../../../../server/lib/get_client_shield';
 import { DEFAULT_RESOURCE } from '../../../common/constants';
-import { getVersionAction, getLoginAction } from './privileges';
 
 export const CHECK_PRIVILEGES_RESULT = {
   UNAUTHORIZED: Symbol(),
@@ -15,16 +13,11 @@ export const CHECK_PRIVILEGES_RESULT = {
   LEGACY: Symbol(),
 };
 
-export function checkPrivilegesWithRequestFactory(server) {
-  const callWithRequest = getClient(server).callWithRequest;
+export function checkPrivilegesWithRequestFactory(shieldClient, config, actions) {
+  const { callWithRequest } = shieldClient;
 
-  const config = server.config();
-  const kibanaVersion = config.get('pkg.version');
   const application = config.get('xpack.security.rbac.application');
   const kibanaIndex = config.get('kibana.index');
-
-  const loginAction = getLoginAction();
-  const versionAction = getVersionAction(kibanaVersion);
 
   return function checkPrivilegesWithRequest(request) {
 
@@ -44,7 +37,7 @@ export function checkPrivilegesWithRequestFactory(server) {
       // We include the login action in all privileges, so the existence of it and not the version privilege
       // lets us know that we're running in an incorrect configuration. Without the login privilege check, we wouldn't
       // know whether the user just wasn't authorized for this instance of Kibana in general
-      if (!privilegeCheckPrivileges[versionAction] && privilegeCheckPrivileges[loginAction]) {
+      if (!privilegeCheckPrivileges[actions.version] && privilegeCheckPrivileges[actions.login]) {
         throw new Error('Multiple versions of Kibana are running against the same Elasticsearch cluster, unable to authorize user.');
       }
 
@@ -69,7 +62,7 @@ export function checkPrivilegesWithRequestFactory(server) {
     };
 
     return async function checkPrivileges(privileges) {
-      const allPrivileges = uniq([versionAction, loginAction, ...privileges]);
+      const allPrivileges = uniq([actions.version, actions.login, ...privileges]);
       const applicationPrivilegesCheck = await checkApplicationPrivileges(allPrivileges);
 
       const username = applicationPrivilegesCheck.username;
@@ -87,7 +80,7 @@ export function checkPrivilegesWithRequestFactory(server) {
         };
       }
 
-      if (!applicationPrivilegesCheck.privileges[loginAction] && await hasPrivilegesOnKibanaIndex()) {
+      if (!applicationPrivilegesCheck.privileges[actions.login] && await hasPrivilegesOnKibanaIndex()) {
         return {
           result: CHECK_PRIVILEGES_RESULT.LEGACY,
           username,

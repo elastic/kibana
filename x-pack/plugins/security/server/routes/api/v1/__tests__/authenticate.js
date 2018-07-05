@@ -15,7 +15,7 @@ import { AuthenticationResult } from '../../../../../server/lib/authentication/a
 import { BasicCredentials } from '../../../../../server/lib/authentication/providers/basic';
 import { initAuthenticateApi } from '../authenticate';
 import { DeauthenticationResult } from '../../../../lib/authentication/deauthentication_result';
-import { CHECK_PRIVILEGES_RESULT, getLoginAction } from '../../../../lib/authorization';
+import { CHECK_PRIVILEGES_RESULT } from '../../../../lib/authorization';
 
 describe('Authentication routes', () => {
   let serverStub;
@@ -142,7 +142,7 @@ describe('Authentication routes', () => {
         await loginRoute.handler(request, replyStub);
 
         sinon.assert.calledWithExactly(checkPrivilegesWithRequestStub, request);
-        sinon.assert.calledWithExactly(checkPrivilegesStub, [getLoginAction()]);
+        sinon.assert.calledWithExactly(checkPrivilegesStub, [serverStub.plugins.security.authorization.actions.login]);
         sinon.assert.neverCalledWith(serverStub.log, ['warning', 'deprecated', 'security'], getDeprecationMessage(user.username));
         sinon.assert.notCalled(replyStub);
         sinon.assert.calledOnce(replyStub.continue);
@@ -160,7 +160,7 @@ describe('Authentication routes', () => {
         await loginRoute.handler(request, replyStub);
 
         sinon.assert.calledWithExactly(checkPrivilegesWithRequestStub, request);
-        sinon.assert.calledWithExactly(checkPrivilegesStub, [getLoginAction()]);
+        sinon.assert.calledWithExactly(checkPrivilegesStub, [serverStub.plugins.security.authorization.actions.login]);
         sinon.assert.calledWith(serverStub.log, ['warning', 'deprecated', 'security'], getDeprecationMessage(user.username));
         sinon.assert.notCalled(replyStub);
         sinon.assert.calledOnce(replyStub.continue);
@@ -178,7 +178,7 @@ describe('Authentication routes', () => {
         await loginRoute.handler(request, replyStub);
 
         sinon.assert.calledWithExactly(checkPrivilegesWithRequestStub, request);
-        sinon.assert.calledWithExactly(checkPrivilegesStub, [getLoginAction()]);
+        sinon.assert.calledWithExactly(checkPrivilegesStub, [serverStub.plugins.security.authorization.actions.login]);
         sinon.assert.neverCalledWith(serverStub.log, ['warning', 'deprecated', 'security'], getDeprecationMessage(user.username));
         sinon.assert.notCalled(replyStub);
         sinon.assert.calledOnce(replyStub.continue);

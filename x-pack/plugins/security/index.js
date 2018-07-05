@@ -113,7 +113,10 @@ export const security = (kibana) => new kibana.Plugin({
     server.auth.strategy('session', 'login', 'required');
 
     const auditLogger = new SecurityAuditLogger(server.config(), new AuditLogger(server, 'security'));
+
+    // exposes server.plugins.security.authorization
     initAuthorization(server);
+
     const { savedObjects } = server;
     savedObjects.setScopedSavedObjectsClientFactory(({
       request,
@@ -128,7 +131,8 @@ export const security = (kibana) => new kibana.Plugin({
         return new savedObjects.SavedObjectsClient(callWithRequestRepository);
       }
 
-      const checkPrivileges = server.plugins.security.authorization.checkPrivilegesWithRequest(request);
+      const { authorization } = server.plugins.security;
+      const checkPrivileges = authorization.checkPrivilegesWithRequest(request);
       const internalRepository = savedObjects.getSavedObjectsRepository(callWithInternalUser);
 
       return new SecureSavedObjectsClient({
@@ -138,6 +142,7 @@ export const security = (kibana) => new kibana.Plugin({
         checkPrivileges,
         auditLogger,
         savedObjectTypes: savedObjects.types,
+        actions: authorization.actions,
       });
     });
 

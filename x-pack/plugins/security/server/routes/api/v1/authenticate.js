@@ -9,7 +9,7 @@ import Joi from 'joi';
 import { wrapError } from '../../../lib/errors';
 import { BasicCredentials } from '../../../../server/lib/authentication/providers/basic';
 import { canRedirectRequest } from '../../../lib/can_redirect_request';
-import { CHECK_PRIVILEGES_RESULT, getLoginAction } from '../../../../server/lib/authorization';
+import { CHECK_PRIVILEGES_RESULT } from '../../../../server/lib/authorization';
 
 export function initAuthenticateApi(server) {
 
@@ -37,8 +37,9 @@ export function initAuthenticateApi(server) {
           return reply(Boom.unauthorized(authenticationResult.error));
         }
 
-        const checkPrivileges = server.plugins.security.authorization.checkPrivilegesWithRequest(request);
-        const privilegeCheck = await checkPrivileges([getLoginAction()]);
+        const { authorization } = server.plugins.security;
+        const checkPrivileges = authorization.checkPrivilegesWithRequest(request);
+        const privilegeCheck = await checkPrivileges([authorization.actions.login]);
         if (privilegeCheck.result === CHECK_PRIVILEGES_RESULT.LEGACY) {
           const msg = `${username} relies on index privileges on the Kibana index. This is deprecated and will be removed in Kibana 7.0`;
           server.log(['warning', 'deprecated', 'security'], msg);

@@ -7,16 +7,21 @@
 import { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
 import { getClient } from '../../../../../server/lib/get_client_shield';
 import { buildPrivilegeMap } from './privileges';
+import { actionsFactory } from './actions';
 jest.mock('../../../../../server/lib/get_client_shield', () => ({
   getClient: jest.fn(),
 }));
 jest.mock('./privileges', () => ({
   buildPrivilegeMap: jest.fn(),
 }));
+jest.mock('./actions', () => ({
+  actionsFactory: jest.fn(),
+}));
 
 const registerPrivilegesWithClusterTest = (description, {
   settings = {},
   savedObjectTypes,
+  actions,
   expectedPrivileges,
   existingPrivileges,
   throwErrorWhenGettingPrivileges,
@@ -136,6 +141,7 @@ const registerPrivilegesWithClusterTest = (description, {
         }
       });
 
+    actionsFactory.mockReturnValue(actions);
     buildPrivilegeMap.mockReturnValue(expectedPrivileges);
 
     let error;
@@ -156,7 +162,7 @@ const registerPrivilegesWithClusterTest = (description, {
   });
 };
 
-registerPrivilegesWithClusterTest(`passes saved object types, application and kibanaVersion to buildPrivilegeMap`, {
+registerPrivilegesWithClusterTest(`passes saved object types, application and actions to buildPrivilegeMap`, {
   settings: {
     'pkg.version': 'foo-version',
     'xpack.security.rbac.application': 'foo-application',
@@ -165,8 +171,15 @@ registerPrivilegesWithClusterTest(`passes saved object types, application and ki
     'foo-type',
     'bar-type',
   ],
+  actions: {
+    login: 'mock-action:login',
+    version: 'mock-action:version',
+  },
   assert: ({ mocks }) => {
-    expect(mocks.buildPrivilegeMap).toHaveBeenCalledWith(['foo-type', 'bar-type'], 'foo-application', 'foo-version');
+    expect(mocks.buildPrivilegeMap).toHaveBeenCalledWith(['foo-type', 'bar-type'], 'foo-application', {
+      login: 'mock-action:login',
+      version: 'mock-action:version',
+    });
   },
 });
 
