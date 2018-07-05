@@ -6,6 +6,7 @@
 
 
 import './styles/main.less';
+import { timefilter } from 'ui/timefilter';
 
 import { ml } from 'plugins/ml/services/ml_api_service';
 import { loadFullJob, filterJobs } from '../utils';
@@ -20,6 +21,8 @@ import { MultiJobActions } from '../multi_job_actions';
 import React, {
   Component
 } from 'react';
+
+const DEFAULT_REFRESH_INTERVAL_VALUE_MS = 5000;
 
 export class JobsListView extends Component {
   constructor(props) {
@@ -41,12 +44,35 @@ export class JobsListView extends Component {
     this.showStartDatafeedModal = () => {};
 
     this.blockAutoRefresh = false;
+    this.refreshIntervalMS = 5000;
+  }
+
+  componentDidMount() {
+    timefilter.enableAutoRefreshSelector();
+
+    this.initAutoRefresh();
 
     this.refreshJobSummaryList();
   }
 
   componentWillUnmount() {
     this.blockAutoRefresh = true;
+  }
+
+  initAutoRefresh() {
+    // if the auto refresher isn't set, set it to the default (5 secs)
+    const refreshInterval = timefilter.getRefreshInterval();
+    if ((refreshInterval.pause === false && refreshInterval.value === 0)) {
+      timefilter.setRefreshInterval({
+        pause: false,
+        value: DEFAULT_REFRESH_INTERVAL_VALUE_MS
+      });
+    }
+
+    // update the interval if it changes
+    timefilter.on('refreshIntervalUpdate', () => {
+      this.refreshIntervalMS = timefilter.getRefreshInterval().value;
+    });
   }
 
   toggleRow = (jobId) => {
@@ -183,7 +209,7 @@ export class JobsListView extends Component {
           if (autoRefresh === true) {
             setTimeout(() => {
               this.refreshJobSummaryList();
-            }, 10000);
+            }, this.refreshIntervalMS);
           }
         })
         .catch((error) => {
