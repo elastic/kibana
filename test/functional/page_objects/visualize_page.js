@@ -363,7 +363,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async setInspectorTablePageSize(size) {
       const panel = await testSubjects.find('inspectorPanel');
-      await find.clickByButtonText('Rows per page: 10', panel);
+      await find.clickByButtonText('Rows per page: 20', panel);
       await find.clickByButtonText(`${size} rows`, panel);
     }
 
