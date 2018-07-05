@@ -50,7 +50,7 @@ describe('visualize_legend directive', function () {
     $rootScope.vis = vis;
     $rootScope.visData = esResponse;
     $rootScope.uiState = require('fixtures/mock_ui_state');
-    $el = $('<visualize-legend>');
+    $el = $('<vislib-legend>');
     $compile($el)($rootScope);
     $rootScope.$apply();
   }
