@@ -30,12 +30,13 @@ import { LogTextWrapControls } from '../../components/logging/log_text_wrap_cont
 import { LogTimeControls } from '../../components/logging/log_time_controls';
 
 import { withLibs } from '../../containers/libs';
-import { State, targetActions } from '../../containers/logging_legacy/state';
+import { State } from '../../containers/logging_legacy/state';
 import { withLogSearchControlsProps } from '../../containers/logging_legacy/with_log_search_controls_props';
 import { withMinimapProps } from '../../containers/logging_legacy/with_minimap_props';
 import { withMinimapScaleControlsProps } from '../../containers/logging_legacy/with_minimap_scale_controls_props';
 import { withStreamItems } from '../../containers/logging_legacy/with_stream_items';
 import { withTextScaleControlsProps } from '../../containers/logging_legacy/with_text_scale_controls_props';
+import { withTextStreamScrollState } from '../../containers/logging_legacy/with_text_stream_scroll_state';
 import { withTextWrapControlsProps } from '../../containers/logging_legacy/with_text_wrap_controls_props';
 import { withTimeControlsProps } from '../../containers/logging_legacy/with_time_controls_props';
 import { withVisibleLogEntries } from '../../containers/logging_legacy/with_visible_log_entries';
@@ -54,7 +55,7 @@ const ConnectedLogTextWrapControls = withTextWrapControlsProps(
 );
 const ConnectedTimeControls = withTimeControlsProps(LogTimeControls);
 const ConnectedScrollableLogTextStreamView = withStreamItems(
-  ScrollableLogTextStreamView
+  withTextStreamScrollState(ScrollableLogTextStreamView)
 );
 
 interface LogsPageProps {
@@ -82,10 +83,6 @@ export const LogsPage = withLibs(
         libs,
         store,
       };
-    }
-
-    public componentDidMount() {
-      this.state.store.dispatch(targetActions.jumpToTime(Date.now()));
     }
 
     public componentDidUpdate(prevProps: LogsPageProps) {
