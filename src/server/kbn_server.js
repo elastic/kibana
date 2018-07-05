@@ -39,6 +39,7 @@ import { sampleDataMixin } from './sample_data';
 import { kibanaIndexMappingsMixin } from './mappings';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
+import { sassMixin } from './sass';
 
 const rootDir = fromRoot('.');
 
@@ -90,10 +91,13 @@ export default class KbnServer {
       // watch bundle server is running
       optimizeMixin,
 
+      // transpiles SCSS into CSS
+      sassMixin,
+
       // initialize the plugins
       Plugins.initializeMixin,
 
-      // notify any deffered setup logic that plugins have intialized
+      // notify any deferred setup logic that plugins have initialized
       Plugins.waitForInitResolveMixin,
 
       () => {

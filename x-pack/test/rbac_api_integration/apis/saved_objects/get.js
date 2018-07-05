@@ -34,12 +34,12 @@ export default function ({ getService }) {
     const expectNotFound = (resp) => {
       expect(resp.body).to.eql({
         error: 'Not Found',
-        message: 'Not Found',
+        message: 'Saved object [visualization/foobar] not found',
         statusCode: 404,
       });
     };
 
-    const expectForbidden = resp => {
+    const expectRbacForbidden = resp => {
       expect(resp.body).to.eql({
         statusCode: 403,
         error: 'Forbidden',
@@ -80,11 +80,11 @@ export default function ({ getService }) {
       tests: {
         exists: {
           statusCode: 403,
-          response: expectForbidden,
+          response: expectRbacForbidden,
         },
         doesntExist: {
           statusCode: 403,
-          response: expectForbidden,
+          response: expectRbacForbidden,
         },
       }
     });

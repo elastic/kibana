@@ -5,11 +5,11 @@
  */
 
 /*
- * TODO: deprecate this API in 7.0
+ * TODO: remove this API in 7.0
  */
 import { wrap } from 'boom';
 import { callClusterFactory } from '../../../lib/call_cluster_factory';
-import { getKibanaUsageCollector } from '../../../../../monitoring/server/kibana_monitoring';
+import { getKibanaUsageCollector } from '../../../../../monitoring/server/kibana_monitoring/collectors';
 import { getReportingUsageCollector } from '../../../../../reporting/server/usage';
 
 export function kibanaStatsRoute(server) {

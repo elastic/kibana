@@ -70,7 +70,7 @@ describe('MonitoringViewBaseTableController', function () {
     expect(ctrl.sortOrder).to.be(-1);
   });
 
-  it('creates functions for event handling and fetchiing data', () => {
+  it('creates functions for event handling and fetching data', () => {
     expect(ctrl.onNewState).to.be.a('function');
     expect(ctrl.updateData).to.be.a('function');
   });

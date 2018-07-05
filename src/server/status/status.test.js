@@ -115,7 +115,7 @@ describe('Status class', function () {
       expect(status).toHaveProperty('message', message);
     });
 
-    it(`should trigger the "change" listner when #${color}() is called`, function (done) {
+    it(`should trigger the "change" listener when #${color}() is called`, function (done) {
       const status = serverStatus.createForPlugin(plugin);
       const message = 'testing ' + color;
       status.on('change', function (prev, prevMsg) {
@@ -129,7 +129,7 @@ describe('Status class', function () {
       status[color](message);
     });
 
-    it(`should trigger the "${color}" listner when #${color}() is called`, function (done) {
+    it(`should trigger the "${color}" listener when #${color}() is called`, function (done) {
       const status = serverStatus.createForPlugin(plugin);
       const message = 'testing ' + color;
       status.on(color, function () {

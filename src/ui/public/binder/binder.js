@@ -40,7 +40,7 @@ export class Binder extends BinderBase {
 
   fakeD3Bind(el, event, handler) {
     this.jqOn(el, event, (e) => {
-      // mimick https://github.com/mbostock/d3/blob/3abb00113662463e5c19eb87cd33f6d0ddc23bc0/src/selection/on.js#L87-L94
+      // mimic https://github.com/mbostock/d3/blob/3abb00113662463e5c19eb87cd33f6d0ddc23bc0/src/selection/on.js#L87-L94
       const o = d3.event; // Events can be reentrant (e.g., focus).
       d3.event = e;
       try {

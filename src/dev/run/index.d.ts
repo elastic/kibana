@@ -16,4 +16,5 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 export function createFailError(msg: string, exitCode: number): Error;

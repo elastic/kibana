@@ -19,15 +19,18 @@
 
 import _ from 'lodash';
 
-import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
+import { SearchSourceProvider } from 'ui/courier';
 
-
-function fetchAnchorProvider(courier, Private) {
+export function fetchAnchorProvider(indexPatterns, Private) {
   const SearchSource = Private(SearchSourceProvider);
 
-  return async function fetchAnchor(indexPatternId, uid, sort) {
-    const indexPattern = await courier.indexPatterns.get(indexPatternId);
-
+  return async function fetchAnchor(
+    indexPatternId,
+    anchorType,
+    anchorId,
+    sort
+  ) {
+    const indexPattern = await indexPatterns.get(indexPatternId);
     const searchSource = new SearchSource()
       .inherits(false)
       .set('index', indexPattern)
@@ -35,15 +38,20 @@ function fetchAnchorProvider(courier, Private) {
       .set('size', 1)
       .set('query', {
         query: {
-          terms: {
-            _uid: [uid],
-          }
+          constant_score: {
+            filter: {
+              ids: {
+                type: anchorType,
+                values: [anchorId],
+              },
+            },
+          },
         },
-        language: 'lucene'
+        language: 'lucene',
       })
       .set('sort', sort);
 
-    const response = await searchSource.fetchAsRejectablePromise();
+    const response = await searchSource.fetch();
 
     if (_.get(response, ['hits', 'total'], 0) < 1) {
       throw new Error('Failed to load anchor document.');
@@ -55,8 +63,3 @@ function fetchAnchorProvider(courier, Private) {
     };
   };
 }
-
-
-export {
-  fetchAnchorProvider,
-};

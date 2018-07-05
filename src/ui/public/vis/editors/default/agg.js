@@ -41,7 +41,7 @@ uiModules
 
         $scope.$watch('editorOpen', function (open) {
         // make sure that all of the form inputs are "touched"
-        // so that their errors propogate
+        // so that their errors propagate
           if (!open) kbnForm.$setTouched();
         });
 

@@ -197,7 +197,7 @@ export class SavedObjectsRepository {
     const indexNotFound = response.error && response.error.type === 'index_not_found_exception';
     if (docNotFound || indexNotFound) {
       // see "404s from missing index" above
-      throw errors.createGenericNotFoundError();
+      throw errors.createGenericNotFoundError(type, id);
     }
 
     throw new Error(
@@ -378,7 +378,7 @@ export class SavedObjectsRepository {
     const indexNotFound = response.status === 404;
     if (docNotFound || indexNotFound) {
       // see "404s from missing index" above
-      throw errors.createGenericNotFoundError();
+      throw errors.createGenericNotFoundError(type, id);
     }
 
     const { extraSourceProperties = [] } = options;
@@ -429,7 +429,7 @@ export class SavedObjectsRepository {
 
     if (response.status === 404) {
       // see "404s from missing index" above
-      throw errors.createGenericNotFoundError();
+      throw errors.createGenericNotFoundError(type, id);
     }
 
     return {

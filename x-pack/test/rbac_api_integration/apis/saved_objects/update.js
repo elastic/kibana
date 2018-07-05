@@ -34,15 +34,24 @@ export default function ({ getService }) {
       expect(resp.body).eql({
         statusCode: 404,
         error: 'Not Found',
-        message: 'Not Found'
+        message: 'Saved object [visualization/not an id] not found'
       });
     };
 
-    const createExpectForbidden = canLogin => resp => {
+    const createExpectRbacForbidden = canLogin => resp => {
       expect(resp.body).to.eql({
         statusCode: 403,
         error: 'Forbidden',
         message: `Unable to update visualization, missing ${canLogin ? '' : 'action:login,'}action:saved_objects/visualization/update`
+      });
+    };
+
+    const createExpectLegacyForbidden = username => resp => {
+      expect(resp.body).to.eql({
+        statusCode: 403,
+        error: 'Forbidden',
+        //eslint-disable-next-line max-len
+        message: `action [indices:data/write/update] is unauthorized for user [${username}]: [security_exception] action [indices:data/write/update] is unauthorized for user [${username}]`
       });
     };
 
@@ -88,11 +97,11 @@ export default function ({ getService }) {
       tests: {
         exists: {
           statusCode: 403,
-          response: createExpectForbidden(false),
+          response: createExpectRbacForbidden(false),
         },
         doesntExist: {
           statusCode: 403,
-          response: createExpectForbidden(false),
+          response: createExpectRbacForbidden(false),
         },
       }
     });
@@ -139,11 +148,11 @@ export default function ({ getService }) {
       tests: {
         exists: {
           statusCode: 403,
-          response: createExpectForbidden(true),
+          response: createExpectLegacyForbidden(AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.USERNAME),
         },
         doesntExist: {
           statusCode: 403,
-          response: createExpectForbidden(true),
+          response: createExpectLegacyForbidden(AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.USERNAME),
         },
       }
     });
@@ -173,11 +182,11 @@ export default function ({ getService }) {
       tests: {
         exists: {
           statusCode: 403,
-          response: createExpectForbidden(true),
+          response: createExpectRbacForbidden(true),
         },
         doesntExist: {
           statusCode: 403,
-          response: createExpectForbidden(true),
+          response: createExpectRbacForbidden(true),
         },
       }
     });

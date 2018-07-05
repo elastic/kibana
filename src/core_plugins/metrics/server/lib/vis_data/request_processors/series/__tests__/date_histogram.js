@@ -111,7 +111,7 @@ describe('dateHistogram(req, panel, series)', () => {
     });
   });
 
-  it('returns valid date histogram with overriden index pattern', () => {
+  it('returns valid date histogram with overridden index pattern', () => {
     series.override_index_pattern = 1;
     series.series_index_pattern = '*';
     series.series_time_field = 'timestamp';

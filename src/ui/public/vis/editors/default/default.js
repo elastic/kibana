@@ -20,6 +20,7 @@
 import './sidebar';
 import './vis_options';
 import './vis_editor_resizer';
+import './vis_type_agg_filter';
 import $ from 'jquery';
 
 import _ from 'lodash';
@@ -29,15 +30,15 @@ import { keyCodes } from '@elastic/eui';
 import { DefaultEditorSize } from '../../editor_size';
 
 import { VisEditorTypesRegistryProvider } from '../../../registry/vis_editor_types';
+import { visualizationLoader } from '../../../visualize/loader/visualization_loader';
 
 const defaultEditor = function ($rootScope, $compile) {
   return class DefaultEditor {
     static key = 'default';
 
-    constructor(el, vis, showSpyPanel) {
+    constructor(el, vis) {
       this.el = $(el);
       this.vis = vis;
-      this.showSpyPanel = showSpyPanel;
 
       if (!this.vis.type.editorConfig.optionTabs && this.vis.type.editorConfig.optionsTemplate) {
         this.vis.type.editorConfig.optionTabs = [
@@ -50,7 +51,6 @@ const defaultEditor = function ($rootScope, $compile) {
       let $scope;
 
       const updateScope = () => {
-        $scope.showSpyPanel = this.showSpyPanel;
         $scope.vis = this.vis;
         $scope.visData = visData;
         $scope.uiState = uiState;
@@ -138,7 +138,8 @@ const defaultEditor = function ($rootScope, $compile) {
           updateScope();
         }
 
-        $scope.$broadcast('render');
+        const visualizationEl = this.el.find('.vis-editor-canvas')[0];
+        visualizationLoader(visualizationEl, this.vis, visData, uiState, { listenOnChange: false });
       });
     }
 

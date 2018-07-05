@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { callClusterFactory } from '../../../../xpack_main';
-import { flatten, isEmpty } from 'lodash';
 import Promise from 'bluebird';
 import { getCollectorLogger } from '../lib';
 import { Collector } from './collector';
@@ -24,26 +22,9 @@ export class CollectorSet {
    * @param {Function} options.combineTypes
    * @param {Function} options.onPayload
    */
-  constructor(server, { interval, combineTypes, onPayload }) {
-    this._collectors = [];
-    this._timer = null;
-
-    if (typeof interval !== 'number') {
-      throw new Error('interval number of milliseconds is required');
-    }
-    if (typeof combineTypes !== 'function') {
-      throw new Error('combineTypes function is required');
-    }
-    if (typeof onPayload !== 'function') {
-      throw new Error('onPayload function is required');
-    }
-
+  constructor(server) {
     this._log = getCollectorLogger(server);
-
-    this._interval = interval;
-    this._combineTypes = combineTypes;
-    this._onPayload = onPayload;
-    this._callClusterInternal = callClusterFactory(server).getCallClusterInternal();
+    this._collectors = [];
   }
 
   /*
@@ -54,70 +35,24 @@ export class CollectorSet {
     if (!(collector instanceof Collector)) {
       throw new Error('CollectorSet can only have Collector instances registered');
     }
+
     this._collectors.push(collector);
-  }
 
-  /*
-   * Call all the init methods
-   * if fetchAfterInit is true, fetch and collect immediately
-   */
-  start() {
-    const initialCollectors = [];
-    this._log.info(`Starting all stats collectors`);
-
-    this._collectors.forEach(collector => {
-      if (collector.init) {
-        this._log.debug(`Initializing ${collector.type} collector`);
-        collector.init();
-      }
-
-      this._log.debug(`Setting logger for ${collector.type} collector`);
-
-      if (collector.fetchAfterInit) {
-        initialCollectors.push(collector);
-      }
-    });
-
-    // do some fetches and bulk collect
-    if (initialCollectors.length > 0) {
-      this._fetchAndUpload(this._callClusterInternal, initialCollectors);
-    }
-
-    this._timer = setInterval(() => {
-      this._fetchAndUpload(this._callClusterInternal, this._collectors);
-    }, this._interval);
-  }
-
-  async _fetchAndUpload(callCluster, collectors) {
-    const data = await this._bulkFetch(callCluster, collectors);
-    const usableData = data.filter(d => Boolean(d) && !isEmpty(d.result));
-    const payload = usableData.map(({ result, type }) => {
-      if (!isEmpty(result)) {
-        return [
-          { index: { _type: type } },
-          result
-        ];
-      }
-    });
-
-    if (payload.length > 0) {
-      try {
-        const combinedData = this._combineTypes(payload); // use the collector types combiner
-        this._log.debug(`Uploading bulk stats payload to the local cluster`);
-        this._onPayload(flatten(combinedData));
-      } catch(err) {
-        this._log.warn(err);
-        this._log.warn(`Unable to bulk upload the stats payload to the local cluster`);
-      }
-    } else {
-      this._log.debug(`Skipping bulk uploading of an empty stats payload`);
+    if (collector.init) {
+      this._log.debug(`Initializing ${collector.type} collector`);
+      collector.init();
     }
   }
 
   /*
    * Call a bunch of fetch methods and then do them in bulk
+   * @param {Array} collectors - an array of collectors, default to all registered collectors
    */
-  _bulkFetch(callCluster, collectors) {
+  bulkFetch(callCluster, collectors = this._collectors) {
+    if (!Array.isArray(collectors)) {
+      throw new Error(`bulkFetch method given bad collectors parameter: ` + typeof collectors);
+    }
+
     return Promise.map(collectors, collector => {
       const collectorType = collector.type;
       this._log.debug(`Fetching data from ${collectorType} collector`);
@@ -134,7 +69,7 @@ export class CollectorSet {
 
   async bulkFetchUsage(callCluster) {
     const usageCollectors = this._collectors.filter(c => c instanceof UsageCollector);
-    const bulk = await this._bulkFetch(callCluster, usageCollectors);
+    const bulk = await this.bulkFetch(callCluster, usageCollectors);
 
     // summarize each type of stat
     return bulk.reduce((accumulatedStats, currentStat) => {
@@ -148,19 +83,5 @@ export class CollectorSet {
         [statType]: currentStat.result,
       };
     }, {});
-  }
-
-  cleanup() {
-    this._log.info(`Stopping all stats collectors`);
-
-    // stop fetching
-    clearInterval(this._timer);
-
-    this._collectors.forEach(collector => {
-      if (collector.cleanup) {
-        this._log.debug(`Running ${collector.type} cleanup`);
-        collector.cleanup();
-      }
-    });
   }
 }
