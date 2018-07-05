@@ -30,7 +30,7 @@ describe('Filter Bar Directive', function () {
       'kibana',
       'kibana/courier',
       function ($provide) {
-        $provide.service('courier', require('fixtures/mock_courier'));
+        $provide.service('indexPatterns', require('fixtures/mock_index_patterns'));
       }
     ));
 
@@ -39,7 +39,7 @@ describe('Filter Bar Directive', function () {
       $rootScope = _$rootScope_;
     }));
 
-    it('should return the matching filter for the defualt time field', function (done) {
+    it('should return the matching filter for the default time field', function (done) {
       const filters = [
         { meta: { index: 'logstash-*' }, query: { match: { _type: { query: 'apache', type: 'phrase' } } } },
         { meta: { index: 'logstash-*' }, range: { 'time': { gt: 1388559600000, lt: 1388646000000 } } }
@@ -51,7 +51,7 @@ describe('Filter Bar Directive', function () {
       $rootScope.$apply();
     });
 
-    it('should not return the non-matching filter for the defualt time field', function (done) {
+    it('should not return the non-matching filter for the default time field', function (done) {
       const filters = [
         { meta: { index: 'logstash-*' }, query: { match: { _type: { query: 'apache', type: 'phrase' } } } },
         { meta: { index: 'logstash-*' }, range: { '@timestamp': { gt: 1388559600000, lt: 1388646000000 } } }

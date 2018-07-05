@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }) {
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.be(27);
 
-      // Not neccessary but helpful for local debugging.
+      // Not necessary but helpful for local debugging.
       await PageObjects.dashboard.saveDashboard('embeddable rendering test');
     });
 
@@ -75,7 +75,7 @@ export default function ({ getService, getPageObjects }) {
       await dashboardExpect.savedSearchRowCount(50);
     });
 
-    it('goal and guage render', async () => {
+    it('goal and gauge render', async () => {
       await dashboardExpect.goalAndGuageLabelsExist(['63%', '56%', '11.915 GB']);
     });
 
@@ -103,7 +103,7 @@ export default function ({ getService, getPageObjects }) {
       await dashboardExpect.timelionLegendCount(0);
     });
 
-    it('tsvb guage renders', async () => {
+    it('tsvb gauge renders', async () => {
       const tsvbGuageExists = await find.existsByCssSelector('.thorHalfGauge');
       expect(tsvbGuageExists).to.be(true);
     });

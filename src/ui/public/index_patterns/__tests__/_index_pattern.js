@@ -238,7 +238,7 @@ describe('index pattern', function () {
   });
 
   describe('popularizeField', function () {
-    it('should increment the poplarity count by default', function () {
+    it('should increment the popularity count by default', function () {
       const saveSpy = sinon.stub(indexPattern, 'save');
       indexPattern.fields.forEach(function (field, i) {
         const oldCount = field.count;
@@ -250,7 +250,7 @@ describe('index pattern', function () {
       });
     });
 
-    it('should increment the poplarity count', function () {
+    it('should increment the popularity count', function () {
       const saveSpy = sinon.stub(indexPattern, 'save');
       indexPattern.fields.forEach(function (field, i) {
         const oldCount = field.count;
@@ -263,7 +263,7 @@ describe('index pattern', function () {
       });
     });
 
-    it('should decrement the poplarity count', function () {
+    it('should decrement the popularity count', function () {
       indexPattern.fields.forEach(function (field) {
         const oldCount = field.count;
         const incrementAmount = 4;

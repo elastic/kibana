@@ -35,7 +35,7 @@ export function BuildHierarchicalDataProvider(Private, Notifier) {
   });
 
   return function (vis, resp) {
-    // Create a refrenece to the buckets
+    // Create a reference to the buckets
     let buckets = vis.getAggConfig().bySchemaGroup.buckets;
 
     // Find the metric so it's easier to reference.

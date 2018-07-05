@@ -193,7 +193,7 @@ describe('Config service', () => {
         setTimeout(function () {
           const off = $rootScope.$on('change:config.foobar', stub);
           config.set('foobar', 'baz');
-          // we unlisten to make sure that stub is not called before our assetions below
+          // we unlisten to make sure that stub is not called before our assertions below
           off();
           resolve();
         }, 0);

@@ -30,7 +30,7 @@ export function IndexPatternsFieldProvider(Private, shortDotsFilter, $rootScope,
     // unwrap old instances of Field
     if (spec instanceof Field) spec = spec.$$spec;
 
-    // constuct this object using ObjDefine class, which
+    // construct this object using ObjDefine class, which
     // extends the Field.prototype but gets it's properties
     // defined using the logic below
     const obj = new ObjDefine(spec, Field.prototype);

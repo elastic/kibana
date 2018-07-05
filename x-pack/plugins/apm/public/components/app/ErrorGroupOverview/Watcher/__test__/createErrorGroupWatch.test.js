@@ -85,7 +85,7 @@ describe('createErrorGroupWatch', () => {
   });
 });
 
-// Recusively iterate a nested structure and render strings as mustache templates
+// Recursively iterate a nested structure and render strings as mustache templates
 function renderMustache(input, ctx) {
   if (isString(input)) {
     return mustache.render(input, {

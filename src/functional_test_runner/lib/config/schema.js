@@ -33,7 +33,7 @@ const urlPartsSchema = () => Joi.object().keys({
   protocol: Joi.string().valid('http', 'https').default('http'),
   hostname: Joi.string().hostname().default('localhost'),
   port: Joi.number(),
-  auth: Joi.string().regex(/^[^:]+:.+$/, 'username and password seperated by a colon'),
+  auth: Joi.string().regex(/^[^:]+:.+$/, 'username and password separated by a colon'),
   username: Joi.string(),
   password: Joi.string(),
   pathname: Joi.string().regex(/^\//, 'start with a /'),

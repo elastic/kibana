@@ -34,7 +34,7 @@ const getYScale = (yMin, yMax) => {
     .nice();
 };
 
-function getFlattenedCoordiantes(visibleSeries, enabledSeries) {
+function getFlattenedCoordinates(visibleSeries, enabledSeries) {
   const enabledCoordinates = _.flatten(enabledSeries.map(serie => serie.data));
   if (!_.isEmpty(enabledCoordinates)) {
     return enabledCoordinates;
@@ -44,7 +44,7 @@ function getFlattenedCoordiantes(visibleSeries, enabledSeries) {
 }
 
 export function getPlotValues(visibleSeries, enabledSeries, width) {
-  const flattenedCoordinates = getFlattenedCoordiantes(
+  const flattenedCoordinates = getFlattenedCoordinates(
     visibleSeries,
     enabledSeries
   );

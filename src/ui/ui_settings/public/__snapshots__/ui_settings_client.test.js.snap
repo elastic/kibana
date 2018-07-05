@@ -32,11 +32,11 @@ Array [
 ]
 `;
 
-exports[`#overrideLocalDefault key has no user value synchonously modifies the default value returned by get(): get after override 1`] = `"bar"`;
+exports[`#overrideLocalDefault key has no user value synchronously modifies the default value returned by get(): get after override 1`] = `"bar"`;
 
-exports[`#overrideLocalDefault key has no user value synchonously modifies the default value returned by get(): get before override 1`] = `"Browser"`;
+exports[`#overrideLocalDefault key has no user value synchronously modifies the default value returned by get(): get before override 1`] = `"Browser"`;
 
-exports[`#overrideLocalDefault key has no user value synchonously modifies the value returned by getAll(): getAll after override 1`] = `
+exports[`#overrideLocalDefault key has no user value synchronously modifies the value returned by getAll(): getAll after override 1`] = `
 Object {
   "dateFormat": Object {
     "value": "bar",
@@ -44,7 +44,7 @@ Object {
 }
 `;
 
-exports[`#overrideLocalDefault key has no user value synchonously modifies the value returned by getAll(): getAll before override 1`] = `
+exports[`#overrideLocalDefault key has no user value synchronously modifies the value returned by getAll(): getAll before override 1`] = `
 Object {
   "dateFormat": Object {
     "value": "Browser",

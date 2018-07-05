@@ -35,7 +35,7 @@ export default function HitSortFnFactory() {
    *       _id: i,
    *       _source: {},
    *       sort: [
-   *         // all values used to sort, in the order of precidance
+   *         // all values used to sort, in the order of precedence
    *       ]
    *     }
    *   ]
@@ -55,7 +55,7 @@ export default function HitSortFnFactory() {
       const aSorts = hitA.sort || [];
       const bSorts = hitB.sort || [];
 
-      // walk each sort value, and compair until one is different
+      // walk each sort value, and compare until one is different
       for (let i = 0; i < bSorts.length; i++) {
         const a = aSorts[i];
         const b = bSorts[i];

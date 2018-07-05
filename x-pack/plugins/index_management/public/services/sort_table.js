@@ -17,7 +17,15 @@ const unitMagnitude = {
 };
 const byteSort = (fieldName) => (item) => {
   const rawValue = item[fieldName];
-  const [ , number, unit] = rawValue.match(/(.*)([kmgtp]b)/);
+  // raw value can be missing if index is closed
+  if (!rawValue) {
+    return 0;
+  }
+  const matchResult = rawValue.match(/(.*)([kmgtp]b)/);
+  if (!matchResult) {
+    return 0;
+  }
+  const [ , number, unit] = matchResult;
   return +number * Math.pow(1024, unitMagnitude[unit]);
 };
 
