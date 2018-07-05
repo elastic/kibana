@@ -109,7 +109,7 @@ describe('behavior', () => {
     delete global.MutationObserver;
   });
 
-  test('add control btn', () => {
+  test('add control button', () => {
     const component = mount(<ControlsTab
       scope={scopeMock}
       editorState={scopeMock.editorState}
@@ -125,7 +125,7 @@ describe('behavior', () => {
     }, 'control not added to editorState.params'));
   });
 
-  test('remove control btn', () => {
+  test('remove control button', () => {
     const component = mount(<ControlsTab
       scope={scopeMock}
       editorState={scopeMock.editorState}
@@ -150,7 +150,7 @@ describe('behavior', () => {
   });
 
 
-  test('move down control btn', () => {
+  test('move down control button', () => {
     const component = mount(<ControlsTab
       scope={scopeMock}
       editorState={scopeMock.editorState}
@@ -187,7 +187,7 @@ describe('behavior', () => {
     sinon.assert.calledWith(stageEditorParams, sinon.match(expectedParams));
   });
 
-  test('move up control btn', () => {
+  test('move up control button', () => {
     const component = mount(<ControlsTab
       scope={scopeMock}
       editorState={scopeMock.editorState}
