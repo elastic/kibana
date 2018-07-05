@@ -5,6 +5,7 @@
  */
 
 
+import { difference } from 'lodash';
 import { newJobLimits } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
 import { mlJobService } from 'plugins/ml/services/job_service';
 
@@ -17,10 +18,16 @@ export function saveJob(job, newJobData, finish) {
       ...extractGroups(job, newJobData),
       ...extractMML(job, newJobData),
       ...extractDetectorDescriptions(job, newJobData),
+      ...extractCustomSettings(job, newJobData),
     };
     const datafeedData = {
       ...extractDatafeed(job, newJobData),
     };
+
+    if (jobData.custom_settings !== undefined) {
+      // remove the created_by setting if too much of the job has changed
+      jobData.custom_settings =  processCustomSettings(jobData, datafeedData);
+    }
 
     const saveDatafeedWrapper = () => {
       saveDatafeed(datafeedData, job, finish)
@@ -77,7 +84,8 @@ function extractDescription(job, newJobData) {
 function extractGroups(job, newJobData) {
   const groups = newJobData.groups;
   if (newJobData.groups !== undefined) {
-    return { groups };
+    const diffCount = difference(job.groups, groups).length + difference(groups, job.groups).length;
+    return (diffCount === 0) ? {} : { groups };
   }
   return {};
 }
@@ -118,6 +126,14 @@ function extractDetectorDescriptions(job, newJobData) {
   return (detectors.length) ? { detectors } : {};
 }
 
+function extractCustomSettings(job, newJobData) {
+  const settingsData = {};
+  if (job.custom_settings && newJobData) {
+    settingsData.custom_settings = job.custom_settings;
+  }
+  return settingsData;
+}
+
 function extractDatafeed(job, newDatafeedData) {
   const datafeedData = {};
   if (job.datafeed_config !== undefined) {
@@ -144,4 +160,19 @@ function extractDatafeed(job, newDatafeedData) {
   }
 
   return datafeedData;
+}
+
+function processCustomSettings(jobData, datafeedData) {
+  let customSettings = {};
+  if (jobData.custom_settings !== undefined) {
+    customSettings = { ...jobData.custom_settings };
+
+    if (jobData.custom_settings.created_by !== undefined) {
+      if (jobData.detectors !== undefined || Object.keys(datafeedData).length) {
+        delete customSettings.created_by;
+      }
+    }
+  }
+
+  return customSettings;
 }
