@@ -24,7 +24,7 @@ exports[`DashboardPanel matches snapshot 1`] = `
         class="kuiMicroButtonGroup"
       >
         <div
-          class="euiPopover euiPopover--anchorDownRight dashboardPanelPopOver euiPopover--withTitle"
+          class="euiPopover euiPopover--anchorDownRight euiPopover--withTitle dashboardPanelPopOver"
           id="dashboardPanelContextMenu"
         >
           <div
