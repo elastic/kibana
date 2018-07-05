@@ -58,11 +58,16 @@ export async function kfetch(fetchOptions, kibanaOptions) {
   });
 
   const res = await fetch(fullUrl, combinedFetchOptions);
-  const body = await res.json();
 
   if (!res.ok) {
+    let body;
+    try {
+      body = await res.json();
+    } catch (err) {
+      // ignore error, may not be able to get body for response that is not ok
+    }
     throw new FetchError(res, body);
   }
 
-  return body;
+  return res.json();
 }
