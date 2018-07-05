@@ -13,11 +13,8 @@ import {
   legacyEncodeURIComponent
 } from '../../../utils/url';
 import { debounce } from 'lodash';
-
 import { EuiFieldSearch } from '@elastic/eui';
-
-import { getAPMIndexPattern } from '../../../services/rest';
-
+import { getAPMIndexPattern } from '../../../services/rest/savedObjects';
 import { convertKueryToEsQuery, getSuggestions } from '../../../services/kuery';
 import styled from 'styled-components';
 

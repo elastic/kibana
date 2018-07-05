@@ -4,6 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default  {
-  addBasePath: (path) => path
-};
+
+export { JobGroup } from './job_group';

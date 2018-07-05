@@ -13,14 +13,16 @@ import Charts from '../../shared/charts/TransactionCharts';
 import { TransactionDistributionRequest } from '../../../store/reactReduxRequest/transactionDistribution';
 import { TransactionDetailsRequest } from '../../../store/reactReduxRequest/transactionDetails';
 
-function TransactionDetails({ urlParams }) {
+function TransactionDetails({ urlParams, location }) {
   return (
     <div>
       <HeaderLarge>{urlParams.transactionName}</HeaderLarge>
 
       <DetailsChartsRequest
         urlParams={urlParams}
-        render={({ data }) => <Charts charts={data} urlParams={urlParams} />}
+        render={({ data }) => (
+          <Charts charts={data} urlParams={urlParams} location={location} />
+        )}
       />
 
       <TransactionDistributionRequest
