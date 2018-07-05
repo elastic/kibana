@@ -15,7 +15,6 @@ import React, {
 } from 'react';
 
 import {
-  EuiHorizontalRule,
   EuiCallOut,
   EuiLink,
   EuiSpacer,
@@ -67,7 +66,7 @@ export class JobsPage extends Component {
 
         <div className="clear" />
 
-        <EuiHorizontalRule margin="m" />
+        <EuiSpacer size="s" />
 
         <JobsListView />
       </div>
