@@ -56,7 +56,8 @@ POST api/saved_objects/_bulk_create
     "id": "my-dashboard",
     "attributes": {
       "title": "Look at my dashboard"
-    }
+    },
+    "version": 2
   }
 ]
 --------------------------------------------------
@@ -82,7 +83,7 @@ containing a JSON structure similar to the following example:
       "type": "dashboard",
       "error": {
         "statusCode": 409,
-        "message": ""
+        "message": "version conflict, document already exists"
       }
     }
   ]

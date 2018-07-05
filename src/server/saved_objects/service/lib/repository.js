@@ -150,6 +150,13 @@ export class SavedObjectsRepository {
         } = objects[i];
 
         if (error) {
+          if (error.type === 'version_conflict_engine_exception') {
+            return {
+              id,
+              type,
+              error: { statusCode: 409, message: 'version conflict, document already exists' }
+            };
+          }
           return {
             id,
             type,
