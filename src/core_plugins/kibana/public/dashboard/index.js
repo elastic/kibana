@@ -116,7 +116,7 @@ uiRoutes
           .catch((error) => {
             // A corrupt dashboard was detected (e.g. with invalid JSON properties)
             if (error instanceof InvalidJSONProperty) {
-              new Notifier().warning(error);
+              toastNotifications.addDanger(error.message);
               kbnUrl.redirect(DashboardConstants.LANDING_PAGE_PATH);
               return;
             }
