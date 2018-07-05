@@ -8,13 +8,14 @@
     "templateVersion": "1.0.0"
   },
   "scripts": {
-    "preinstall": "node ../../kibana/preinstall_check",
+    "_preinstall": "node ../../kibana/preinstall_check",
     "kbn": "node ../../kibana/scripts/kbn",
     "lint": "eslint **/*.js",
-    "start": "plugin-helpers start --elasticsearch.url http://localhost:9201 --no-base-path",
+    "start": "plugin-helpers start --config ../config/kibana/kibana.yml",
     "test:server": "plugin-helpers test:server",
     "test:browser": "plugin-helpers test:browser",
-    "build": "plugin-helpers build"
+    "build": "plugin-helpers build",
+    "start-deps": "node ../../kibana/scripts/es.js snapshot -E path.data=../../data"
   },
   "devDependencies": {
     "@elastic/eslint-config-kibana": "link:../../kibana/packages/eslint-config-kibana",

@@ -1,6 +1,16 @@
+buildscript {
+  repositories {
+    jcenter()
+  }
+
+  dependencies {
+    classpath 'com.palominolabs.gradle.task:gradle-git-clone-task:0.0.2'
+  }
+}
+
 plugins {
   id "com.moowork.node" version "1.2.0"
-  id "de.undercouch.download" version "3.4.3"
+  id 'org.ajoberstar.grgit' version '3.0.0-beta.1'
 }
 
 node {
@@ -9,7 +19,13 @@ node {
   download = true
 }
 
-task bootstrap(type: YarnTask, dependsOn: [yarn]) {
+task setupKibana(type: com.palominolabs.gradle.task.git.clone.GitCloneTask) {
+  dir = file("$rootDir/kibana")
+  uri = 'https://github.com/elastic/kibana'
+  treeish = kibanaVersion
+}
+
+task bootstrap(type: YarnTask, dependsOn: [yarn, setupKibana]) {
   args = ['kbn', 'bootstrap']
 }
 
@@ -17,33 +33,12 @@ task startKibana(type: YarnTask, dependsOn: [yarn]) {
   args = ['start']
 }
 
-task downloadKibana(type: Download) {
-  src "https://github.com/elastic/kibana/archive/${kibanaVersion}.zip" // change the commit id to advance revision
-  dest buildDir
-  overwrite false
+task startDeps(type: YarnTask, dependsOn: [yarn]) {
+  args = ['start-deps']
 }
 
 task clean(type: Delete) {
   delete "build", "node_modules", "common"
 }
 
-// TODO: wait https://github.com/gradle/gradle/issues/1108 to simplify the code
-task setupKibana(type: Sync, dependsOn: downloadKibana) {
-  from zipTree("$buildDir/${kibanaVersion}.zip")
-  into "../../kibana"
-
-  eachFile { FileCopyDetails fcp ->
-    if (fcp.relativePath.pathString.startsWith("kibana-${kibanaVersion}/")) {
-      def segments = fcp.relativePath.segments
-      def pathsegments = segments[1..-1] as String[]
-      fcp.relativePath = new RelativePath(!fcp.file.isDirectory(), pathsegments)
-    } else {
-      fcp.exclude()
-    }
-  }
-  includeEmptyDirs = false
-}
-
-// tasks.bootstrap.dependsOn(setupKibana)
-
-project.evaluationDependsOn(":model")
+//project.evaluationDependsOn(":model")

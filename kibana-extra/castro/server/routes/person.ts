@@ -28,6 +28,8 @@ export default function (server: Hapi.Server) {
         }
     });
 
+    // console.log("");
+
     // Read
     server.route({
         path: '/api/castro/person/{id}',

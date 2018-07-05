@@ -3,20 +3,23 @@
 # see: https://github.com/tmux-python/tmuxp
 session_name: castro-dev
 windows:
-- window_name: elk
-  layout: even-horizontal
+- window_name: kibana
   panes:
     - shell_command:
         - ./gradlew startKibana
-    - shell_command:
-        - ./gradlew startDeps
-- window_name: backend
+- window_name: deps
   layout: even-horizontal
   panes:
     - shell_command:
-        - ./gradlew bootRun
-    - shell_command:
-        - ./gradlew -t :backend:build
+        - ./gradlew startDeps
+
+#- window_name: backend
+#  layout: even-horizontal
+#  panes:
+#    - shell_command:
+#        - ./gradlew bootRun
+#    - shell_command:
+#        - ./gradlew -t :backend:build
 - window_name: others
   layout: even-horizontal
   panes:

@@ -42,7 +42,6 @@ dependencies {
 
   compile "net.logstash.logback:logstash-logback-encoder:4.11"
 
-  compile "com.google.protobuf:protobuf-java-util:$protocVersion"
   compile "org.eclipse.jgit:org.eclipse.jgit:$jgitVersion"
 
   dev("org.springframework.boot:spring-boot-devtools")

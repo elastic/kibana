@@ -11,6 +11,8 @@ import store from './stores';
 
 const app = uiModules.get("apps/castro");
 
+console.log("");
+
 app.config(($locationProvider: any) => {
   $locationProvider.html5Mode({
     enabled: false,

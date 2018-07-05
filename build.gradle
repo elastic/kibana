@@ -23,13 +23,13 @@ buildScan {
   }
 }
 
-task startDeps(type: Exec) {
-  commandLine "docker-compose", "up", "-d"
-}
-
-task stopDeps(type: Exec) {
-  commandLine "docker-compose", "down"
-}
+//task startDeps(type: Exec) {
+//  commandLine "docker-compose", "up", "-d"
+//}
+//
+//task stopDeps(type: Exec) {
+//  commandLine "docker-compose", "down"
+//}
 
 idea {
   module {
@@ -38,5 +38,5 @@ idea {
 }
 
 task wrapper(type: Wrapper) {
-  distributionUrl = "https://services.gradle.org/distributions/gradle-4.8-all.zip"
+  distributionUrl = "https://services.gradle.org/distributions/gradle-4.8.1-all.zip"
 }
