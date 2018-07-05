@@ -9,32 +9,17 @@ Use the following directory structure to run Canvas:
 ```bash
 $ ls $PATH_TO_REPOS
  ├── kibana
- └── kibana-extra/x-pack-kibana
  └── kibana-extra/kibana-canvas
- └── elasticsearch (optional)
- └── elasticsearch-extra/x-pack-elasticsearch (optional)
 ```
 
 Setup `kibana` and `elasticsearch`. See instructions [here](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#setting-up-your-development-environment).
 
-Setup `x-pack-kibana`. See instructions [here](https://github.com/elastic/x-pack-kibana#setup).
-
 Fork, then clone the [Canvas](https://github.com/elastic/kibana-canvas) repo into `kibana-extra/` and change directory into it.
 
 ```bash
-# in kibana-extra/
+# cd kibana-extra/
 git clone https://github.com/[YOUR_USERNAME]/kibana-canvas.git
 cd kibana-canvas
-```
-
-Create a `.kibana-plugin-helpers.dev.json` file in the Canvas root directory and insert the following:
-
-```JSON
-{
-  "includePlugins": [
-    "../x-pack-kibana"
-  ]
-}
 ```
 
 Install dependencies
