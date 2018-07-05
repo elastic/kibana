@@ -17,9 +17,9 @@
  * under the License.
  */
 import sinon from 'sinon';
-import { patchKibanaIndexMappings } from './patch_kibana_index_mappings';
+import { fetchKibanaMigrationOpts } from './fetch_kibana_migration_opts';
 
-describe('patchKibanaIndexMappings', () => {
+describe('fetchKibanaMigrationOpts', () => {
   test('fails if there are multiple root doc types', async () => {
     const { kbnServer } = mockKbnServer({
       mappings: {
@@ -27,7 +27,7 @@ describe('patchKibanaIndexMappings', () => {
         spock: {},
       },
     });
-    await expect(patchKibanaIndexMappings(kbnServer)).rejects.toThrow(
+    await expect(fetchKibanaMigrationOpts({ kbnServer })).rejects.toThrow(
       /Your Kibana index is out of date, reset it or use the X-Pack upgrade assistant/
     );
   });
@@ -38,12 +38,12 @@ describe('patchKibanaIndexMappings', () => {
         spock: {},
       },
     });
-    await expect(patchKibanaIndexMappings(kbnServer)).rejects.toThrow(
+    await expect(fetchKibanaMigrationOpts({ kbnServer })).rejects.toThrow(
       /Your Kibana index is out of date, reset it or use the X-Pack upgrade assistant/
     );
   });
 
-  test('patches existing v6 indices', async () => {
+  test('returns valid migration options', async () => {
     const { kbnServer, callCluster } = mockKbnServer({
       mappings: {
         doc: {
@@ -53,61 +53,46 @@ describe('patchKibanaIndexMappings', () => {
     });
     const index = kbnServer.server.config().get('kibana.index');
 
+    kbnServer.pluginSpecs = [
+      {
+        getId: () => 'aaa',
+        getExportSpecs: () => ({
+          mappings: { aaa: { type: 'text' } },
+          migrations: { prop: { '3.2.3': (doc: any) => doc } },
+        }),
+      },
+      {
+        getId: () => 'bbb',
+        getExportSpecs: () => ({
+          mappings: { bbb: { type: 'keyword' } },
+          migrations: { bbb: { '1.2.3': (doc: any) => doc } },
+        }),
+      },
+    ];
+
     callCluster
       .withArgs('indices.exists', { index })
       .returns(Promise.resolve(true));
-    await patchKibanaIndexMappings(kbnServer);
+    const opts = await fetchKibanaMigrationOpts({ kbnServer });
     sinon.assert.calledOnce(
       kbnServer.server.plugins.elasticsearch.waitUntilReady
     );
 
-    const expectedMappings = {
-      dynamic: 'strict',
-      properties: {
-        config: {
-          dynamic: 'true',
-          properties: { buildNum: { type: 'keyword' } },
-        },
-        type: { type: 'keyword' },
-        updated_at: { type: 'date' },
-      },
-    };
-
-    sinon.assert.calledWith(
-      callCluster,
-      'indices.putMapping',
-      sinon.match({
-        body: expectedMappings,
-        index: '.my-index',
-        type: 'doc',
-      })
-    );
-    sinon.assert.calledWith(
-      callCluster,
-      'indices.putTemplate',
-      sinon.match({
-        body: {
-          mappings: {
-            doc: expectedMappings,
-          },
-          settings: { auto_expand_replicas: '0-1', number_of_shards: 1 },
-          template: '.my-index',
-        },
-        name: 'kibana_index_template:.my-index',
-      })
-    );
-  });
-
-  test('passes if there is no index', async () => {
-    const { kbnServer } = mockKbnServer();
-    await patchKibanaIndexMappings(kbnServer);
+    expect(opts.index).toEqual(index);
+    expect(opts.callCluster).toEqual(callCluster);
+    expect(opts.mappings).toEqual({
+      aaa: { type: 'text' },
+      bbb: { type: 'keyword' },
+    });
+    expect(typeof opts.migrations.prop['3.2.3']).toBe('function');
+    expect(typeof opts.migrations.bbb['1.2.3']).toBe('function');
   });
 });
 
 function mockKbnServer({ mappings }: { mappings?: object } = {}) {
   const callCluster = sinon.stub();
   const kbnServer = {
-    pluginSpecs: [],
+    pluginSpecs: [] as any,
     server: {
       config: () => ({
         get: (name: string) => {

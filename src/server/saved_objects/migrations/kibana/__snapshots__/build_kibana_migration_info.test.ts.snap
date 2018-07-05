@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildKibanaMigrationInfo returns full index mappings w/ core properties 1`] = `
+Object {
+  "amap": Object {
+    "type": "text",
+  },
+  "bmap": Object {
+    "type": "text",
+  },
+}
+`;

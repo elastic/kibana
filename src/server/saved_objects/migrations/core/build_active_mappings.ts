@@ -18,36 +18,39 @@
  */
 
 /*
- * This file contains logic to extract the index mapping information from a list of plugins.
+ * This file contains logic to build the index mappings for a migration.
 */
 
 import _ from 'lodash';
-import { IndexMapping, MappingDefinition, MigrationPlugin } from './types';
+import { IndexMapping, MappingProperties } from './types';
+
+interface Opts {
+  properties: MappingProperties;
+}
 
 /**
- * getActiveMappings merges all of the mappings defined by the specified plugins
- * and returns an index mapping.
+ * Creates an index mapping with the core properties required by saved object
+ * indices, as well as the specified additional properties.
  *
- * @param {GetActiveMappingsOpts} opts
- * @prop {MigrationPlugin[]} plugins - An array of plugins whose mappings are used
- *    to build the result.
+ * @param {Opts} opts
+ * @prop {MappingDefinition} properties - The mapping's properties
  * @returns {IndexMapping}
  */
-export function buildActiveMappings({
-  plugins,
-}: {
-  plugins: MigrationPlugin[];
-}): IndexMapping {
+export function buildActiveMappings({ properties }: Opts): IndexMapping {
   const mapping = defaultMapping();
   return {
     doc: {
       ...mapping.doc,
-      properties: plugins.reduce(validateAndMerge, mapping.doc.properties),
+      properties: validateAndMerge(mapping.doc.properties, properties),
     },
   };
 }
 
-// These mappings are required for any saved object index.
+/**
+ * These mappings are required for any saved object index.
+ *
+ * @returns {IndexMapping}
+ */
 function defaultMapping(): IndexMapping {
   return _.cloneDeep({
     doc: {
@@ -75,39 +78,28 @@ function defaultMapping(): IndexMapping {
   });
 }
 
-// Merges a plugin's mappings into a dictionary of mappings, failing if a mapping is
-// being redefined or if a mapping has an invalid type.
-function validateAndMerge(
-  definedMappings: MappingDefinition,
-  { id, mappings }: MigrationPlugin
-) {
-  if (!mappings) {
-    return definedMappings;
-  }
+function validateAndMerge(dest: MappingProperties, source: MappingProperties) {
+  assertUniqueProperties(dest, source);
+  assertValidPropertyNames(source);
 
-  return Object.entries(mappings).reduce((acc, [type, definition]) => {
-    assertUnique(id, acc, type);
-    assertValidPropertyTypeName(id, type);
-    return _.set(acc, type, definition);
-  }, definedMappings);
+  return Object.assign(dest, source);
 }
 
-function assertUnique(
-  pluginId: string,
-  mappings: MappingDefinition,
-  propertyName: string
+function assertUniqueProperties(
+  dest: MappingProperties,
+  source: MappingProperties
 ) {
-  if (mappings.hasOwnProperty(propertyName)) {
-    throw new Error(
-      `Plugin "${pluginId}" is attempting to redefine mapping "${propertyName}".`
-    );
+  const duplicate = Object.keys(source).find(prop => !!dest[prop]);
+  if (duplicate) {
+    throw new Error(`Cannot redefine core mapping "${duplicate}".`);
   }
 }
 
-function assertValidPropertyTypeName(pluginId: string, propertyName: string) {
-  if (propertyName.startsWith('_')) {
+function assertValidPropertyNames(source: MappingProperties) {
+  const invalidProp = Object.keys(source).find(k => k.startsWith('_'));
+  if (invalidProp) {
     throw new Error(
-      `Invalid mapping "${propertyName}" in plugin "${pluginId}". Mappings cannot start with _.`
+      `Invalid mapping "${invalidProp}". Mappings cannot start with _.`
     );
   }
 }

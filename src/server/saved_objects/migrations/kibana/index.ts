@@ -17,37 +17,22 @@
  * under the License.
  */
 
-import { getMigrationPlugins } from './get_migration_plugins';
+import { buildActiveMappings } from '../core';
+import {
+  buildKibanaMigrationInfo,
+  KbnServer,
+} from './build_kibana_migration_info';
 
-describe('getMigrationPlugins', () => {
-  test('converts Kibana plugins to migration plugins', async () => {
-    const pluginSpecs = [
-      {
-        getExportSpecs: () => ({
-          mappings: {
-            hoi: { type: 'text' },
-          },
-        }),
-        getId: () => 'hello',
-      },
-      {
-        getExportSpecs: () => undefined,
-        getId: () => 'nuthin',
-      },
-      {
-        getExportSpecs: () => ({
-          mappings: {
-            fud: {
-              properties: {
-                name: { type: 'text' },
-              },
-            },
-          },
-        }),
-        getId: () => 'sumthin',
-      },
-    ];
-    const plugins = getMigrationPlugins({ pluginSpecs });
-    expect(plugins).toMatchSnapshot();
+/**
+ * Builds the Kibana index mappings that are defined by Kibana's plugins.
+ *
+ * @export
+ * @param opts
+ * @prop {KbnServer} kbnServer - An instance of the Kibana server whose plugins are used to build index mappings.
+ * @returns
+ */
+export function buildKibanaMappings({ kbnServer }: { kbnServer: KbnServer }) {
+  return buildActiveMappings({
+    properties: buildKibanaMigrationInfo({ kbnServer }).mappings,
   });
-});
+}

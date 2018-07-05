@@ -17,5 +17,14 @@
  * under the License.
  */
 
-export { getMigrationPlugins } from './get_migration_plugins';
-export { patchKibanaIndexMappings } from './patch_kibana_index_mappings';
+import { MappingProperties, MigrationDefinition } from '../core';
+
+export interface KibanaPluginSpec {
+  mappings?: MappingProperties;
+  migrations?: MigrationDefinition;
+}
+
+export interface KibanaPlugin {
+  getId: (() => string);
+  getExportSpecs: (() => KibanaPluginSpec | undefined);
+}

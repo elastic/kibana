@@ -204,19 +204,13 @@ export interface MigrationVersion {
   [type: string]: string;
 }
 
-export interface MigrationPlugin {
-  id: string;
-  mappings?: MappingDefinition;
-  migrations?: MigrationDefinition;
-}
-
-export interface MappingDefinition {
+export interface MappingProperties {
   [type: string]: any;
 }
 
 export interface DocMapping {
   dynamic: string;
-  properties: MappingDefinition;
+  properties: MappingProperties;
 }
 
 export interface IndexMapping {

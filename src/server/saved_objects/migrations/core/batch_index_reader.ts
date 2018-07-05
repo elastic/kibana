@@ -21,6 +21,7 @@
  * This provides a batch reader interface for reading batches of docs out of an index.
 */
 
+import { rawToSavedObject } from './saved_object';
 import { BatchReader, CallCluster, RawDoc, SavedObjectDoc } from './types';
 
 interface Opts {
@@ -105,18 +106,4 @@ export class BatchIndexReader implements BatchReader {
       scroll: scrollDuration,
     });
   }
-}
-
-// Converts a document from the format that is stored in elasticsearch to a saved object client format.
-function rawToSavedObject({ _id, _source }: RawDoc): SavedObjectDoc {
-  const { type } = _source;
-  const id = _id.slice(type.length + 1);
-  const doc = {
-    ..._source,
-    attributes: _source[type],
-    id,
-  };
-
-  delete doc[type];
-  return doc;
 }

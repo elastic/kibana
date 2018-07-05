@@ -17,38 +17,66 @@
  * under the License.
  */
 
-import { fetchMapping, patchIndexMappings } from '../core';
-import { getMigrationPlugins } from './get_migration_plugins';
-import { KibanaPlugin, Server } from './types';
+/*
+ * This file creates the migration options for migrating the Kibana index.
+ * The object built here can be passed to the core migration functions in
+ * order to migrate the Kibana index.
+*/
+
+import { CallCluster, fetchMapping } from '../core';
+import { buildKibanaMigrationInfo } from './build_kibana_migration_info';
+import { KibanaPlugin } from './types';
 
 // Require rather than import gets us around the lack of TypeScript definitions
 // for "getTypes"
 // tslint:disable-next-line:no-var-requires
 const { getTypes } = require('../../../mappings');
 
-export interface KbnServer {
+interface ElasticsearchPlugin {
+  getCluster: ((name: 'admin') => { callWithInternalUser: CallCluster });
+  waitUntilReady: () => Promise<any>;
+}
+
+interface Server {
+  config: () => { get: (path: 'kibana.index') => string };
+  plugins: { elasticsearch: ElasticsearchPlugin | undefined };
+}
+
+interface KbnServer {
   pluginSpecs: KibanaPlugin[];
   server: Server;
 }
 
-/**
- * patchKibanaIndexMappings applies changes to the Kibana index, including
- * patching the index mappings, and setting up an index template.
- *
- * @param {KbnServer} kbnServer - The root Kibana server instance
- * @returns {Promise<void>}
- */
-export async function patchKibanaIndexMappings(kbnServer: KbnServer) {
-  const { server } = kbnServer;
-  const callCluster = await waitForElasticsearch(kbnServer);
-  await assertNotV5Index(kbnServer);
-  return patchIndexMappings({
-    callCluster,
-    index: server.config().get('kibana.index'),
-    plugins: getMigrationPlugins(kbnServer),
-  });
+interface Opts {
+  kbnServer: KbnServer;
 }
 
+/**
+ * Builds the migration options for migrating the Kibana index.
+ *
+ * @export
+ * @param {Opts}
+ * @prop {KbnServer} kbnServer
+ * @returns {MigrationOptions}
+ */
+export async function fetchKibanaMigrationOpts({ kbnServer }: Opts) {
+  const { server } = kbnServer;
+  const callCluster = await waitForElasticsearch(kbnServer);
+  const index = server.config().get('kibana.index');
+
+  await assertNotV5Index(callCluster, index);
+
+  return {
+    ...buildKibanaMigrationInfo({ kbnServer }),
+    callCluster,
+    index,
+  };
+}
+
+/**
+ * Wait until the elasticsearch plugin says it's ready, then return the
+ * elasticsearch connection that will be used to run migrations.
+ */
 async function waitForElasticsearch({ server }: KbnServer) {
   if (!server.plugins.elasticsearch) {
     throw new Error(
@@ -59,10 +87,11 @@ async function waitForElasticsearch({ server }: KbnServer) {
   return server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
 }
 
-async function assertNotV5Index({ server }: KbnServer) {
-  const callCluster = server.plugins.elasticsearch!.getCluster('admin')
-    .callWithInternalUser;
-  const index = server.config().get('kibana.index');
+/**
+ * We need to fail if we're attempting to build migration options for a pre 6.x
+ * index, as this is not supported.
+ */
+async function assertNotV5Index(callCluster: CallCluster, index: string) {
   const mappings = await fetchMapping(callCluster, index);
   if (!mappings) {
     return;

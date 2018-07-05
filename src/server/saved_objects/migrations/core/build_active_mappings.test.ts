@@ -21,54 +21,27 @@ import { buildActiveMappings } from './build_active_mappings';
 
 describe('buildActiveMappings', () => {
   test('combines all mappings and includes core mappings', () => {
-    const plugins = [
-      {
-        id: 'pluginA',
-        mappings: {
-          aaa: { type: 'text' },
-        },
-      },
-      {
-        id: 'pluginB',
-        mappings: {
-          bbb: { type: 'long' },
-        },
-      },
-    ];
+    const properties = {
+      aaa: { type: 'text' },
+      bbb: { type: 'long' },
+    };
 
-    expect(buildActiveMappings({ plugins })).toMatchSnapshot();
+    expect(buildActiveMappings({ properties })).toMatchSnapshot();
   });
 
   test('disallows duplicate mappings', () => {
-    const plugins = [
-      {
-        id: 'hello',
-        mappings: { stuff: 'goes here' },
-      },
-      {
-        id: 'cartoons',
-        mappings: {
-          bugs: { type: 'bunny' },
-          stuff: { type: 'shazm' },
-        },
-      },
-    ];
+    const properties = { type: { type: 'long' } };
 
-    expect(() => buildActiveMappings({ plugins })).toThrow(
-      /Plugin \"(hello|cartoons)\" is attempting to redefine mapping \"stuff\"/
+    expect(() => buildActiveMappings({ properties })).toThrow(
+      /Cannot redefine core mapping \"type\"/
     );
   });
 
   test('disallows mappings with leading underscore', () => {
-    const plugins = [
-      {
-        id: 'nadachance',
-        mappings: { _hm: 'You shall not pass!' },
-      },
-    ];
+    const properties = { _hm: 'You shall not pass!' };
 
-    expect(() => buildActiveMappings({ plugins })).toThrow(
-      /Invalid mapping \"_hm\" in plugin \"nadachance\"\. Mappings cannot start with _/
+    expect(() => buildActiveMappings({ properties })).toThrow(
+      /Invalid mapping \"_hm\"\. Mappings cannot start with _/
     );
   });
 });

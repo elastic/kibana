@@ -22,13 +22,8 @@
 */
 
 import _ from 'lodash';
-import {
-  BatchWriter,
-  BulkResult,
-  CallCluster,
-  RawDoc,
-  SavedObjectDoc,
-} from './types';
+import { savedObjectToRaw } from './saved_object';
+import { BatchWriter, BulkResult, CallCluster, SavedObjectDoc } from './types';
 
 interface Opts {
   callCluster: CallCluster;
@@ -99,24 +94,4 @@ function assertSuccess(result: BulkResult) {
   const exception: any = new Error(err.index.error!.reason);
   exception.detail = err;
   throw exception;
-}
-
-/**
- * Converts a saved object document from saved object format to the raw underlying shape
- * expected by calls to the elasticsearch API.
- */
-function savedObjectToRaw(savedObj: SavedObjectDoc): RawDoc {
-  const { id, type, attributes } = savedObj;
-  const source = {
-    ...savedObj,
-    [type]: attributes,
-  };
-
-  delete source.id;
-  delete source.attributes;
-
-  return {
-    _id: `${type}:${id}`,
-    _source: source,
-  };
 }
