@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 import '../saved_visualizations/saved_visualizations';
+import './visualization_editor';
 import 'ui/vis/editors/default/sidebar';
 import 'ui/visualize';
 import 'ui/collapsible_sidebar';
@@ -143,7 +144,7 @@ function VisEditor(
     template: require('plugins/kibana/visualize/editor/panels/share.html'),
     testId: 'visualizeShareButton',
   }, {
-    key: 'inspector',
+    key: 'inspect',
     description: 'Open Inspector for visualization',
     testId: 'openInspectorButton',
     disableButton() {
@@ -190,11 +191,11 @@ function VisEditor(
   const stateDefaults = {
     uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : {},
     linked: !!savedVis.savedSearchId,
-    query: searchSource.getOwn('query') || {
+    query: searchSource.getOwnField('query') || {
       query: '',
       language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
     },
-    filters: searchSource.getOwn('filter') || [],
+    filters: searchSource.getOwnField('filter') || [],
     vis: savedVisState
   };
 
@@ -251,7 +252,7 @@ function VisEditor(
     };
 
     $scope.$watchMulti([
-      'searchSource.get("index")',
+      'searchSource.getField("index")',
       'vis.type.options.showTimePicker',
     ], function ([index, requiresTimePicker]) {
       const showTimeFilter = Boolean((!index || index.timeFieldName) && requiresTimePicker);
@@ -278,8 +279,8 @@ function VisEditor(
     // update the searchSource when query updates
     $scope.fetch = function () {
       $state.save();
-      savedVis.searchSource.set('query', $state.query);
-      savedVis.searchSource.set('filter', $state.filters);
+      savedVis.searchSource.setField('query', $state.query);
+      savedVis.searchSource.setField('filter', $state.filters);
       $scope.vis.forceReload();
     };
 
@@ -347,23 +348,23 @@ function VisEditor(
     toastNotifications.addSuccess(`Unlinked from saved search '${savedVis.savedSearch.title}'`);
 
     $state.linked = false;
-    const parent = searchSource.getParent(true);
-    const parentsParent = parent.getParent(true);
+    const searchSourceParent = searchSource.getParent(true);
+    const searchSourceGrandparent = searchSourceParent.getParent(true);
 
     delete savedVis.savedSearchId;
-    parent.set('filter', _.union(searchSource.getOwn('filter'), parent.getOwn('filter')));
+    searchSourceParent.setField('filter', _.union(searchSource.getOwnField('filter'), searchSourceParent.getOwnField('filter')));
 
     // copy over all state except "aggs", "query" and "filter"
-    _(parent.toJSON())
+    _(searchSourceParent.toJSON())
       .omit(['aggs', 'filter', 'query'])
       .forOwn(function (val, key) {
-        searchSource.set(key, val);
+        searchSource.setField(key, val);
       })
       .commit();
 
-    $state.query = searchSource.get('query');
-    $state.filters = searchSource.get('filter');
-    searchSource.inherits(parentsParent);
+    $state.query = searchSource.getField('query');
+    $state.filters = searchSource.getField('filter');
+    searchSource.setParent(searchSourceGrandparent);
 
     $scope.fetch();
   };

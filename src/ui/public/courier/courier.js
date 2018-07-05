@@ -27,38 +27,43 @@ import { uiModules } from '../modules';
 import { addFatalErrorCallback } from '../notify';
 import '../promises';
 
-import { requestQueue } from './_request_queue';
+import { searchRequestQueue } from './search_request_queue';
 import { FetchSoonProvider } from './fetch';
-import { SearchLooperProvider } from './search_looper';
+import { SearchPollProvider } from './search_poll';
 
 uiModules.get('kibana/courier').service('courier', ($rootScope, Private) => {
   const fetchSoon = Private(FetchSoonProvider);
 
   // This manages the doc fetch interval.
-  const searchLooper = Private(SearchLooperProvider);
+  const searchPoll = Private(SearchPollProvider);
 
   class Courier {
     constructor() {
       // Listen for refreshInterval changes
       $rootScope.$listen(timefilter, 'refreshIntervalUpdate', function () {
-        const refreshValue = _.get(timefilter.getRefreshInterval(), 'value');
-        const refreshPause = _.get(timefilter.getRefreshInterval(), 'pause');
+        const refreshIntervalMs = _.get(timefilter.getRefreshInterval(), 'value');
+        const isRefreshPaused = _.get(timefilter.getRefreshInterval(), 'pause');
 
         // Update the time between automatic search requests.
-        if (_.isNumber(refreshValue) && !refreshPause) {
-          searchLooper.setIntervalInMs(refreshValue);
+        searchPoll.setIntervalInMs(refreshIntervalMs);
+
+        if (isRefreshPaused) {
+          searchPoll.pause();
         } else {
-          searchLooper.setIntervalInMs(0);
+          searchPoll.resume();
         }
       });
 
-      // Abort all pending requests if there's a fatal error.
       const closeOnFatal = _.once(() => {
-        searchLooper.stop();
+        // If there was a fatal error, then stop future searches. We want to use pause instead of
+        // clearTimer because if the search results come back after the fatal error then we'll
+        // resume polling.
+        searchPoll.pause();
 
-        _.invoke(requestQueue, 'abort');
+        // And abort all pending requests.
+        searchRequestQueue.abortAll();
 
-        if (requestQueue.length) {
+        if (searchRequestQueue.getCount()) {
           throw new Error('Aborting all pending requests failed.');
         }
       });
@@ -67,13 +72,12 @@ uiModules.get('kibana/courier').service('courier', ($rootScope, Private) => {
     }
 
     /**
-     * Process the pending request queue right now, returns
-     * a promise that resembles the success of the fetch completing,
-     * individual errors are routed to their respective requests.
+     * Fetch the pending requests.
      */
     fetch = () => {
       fetchSoon.fetchQueued().then(() => {
-        searchLooper.restart();
+        // Reset the timer using the time that we get this response as the starting point.
+        searchPoll.resetTimer();
       });
     };
   }

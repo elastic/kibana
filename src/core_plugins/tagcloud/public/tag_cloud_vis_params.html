@@ -2,11 +2,11 @@
   <div class="form-group">
     <div class="form-group">
       <label>Text Scale</label>
-      <select class="form-control" ng-model="vis.params.scale" ng-options="mode for mode in config.collections.scales"></select>
+      <select class="form-control" ng-model="editorState.params.scale" ng-options="mode for mode in config.collections.scales"></select>
     </div>
     <div class="form-group">
       <label>Orientations</label>
-      <select class="form-control" ng-model="vis.params.orientation" ng-options="mode for mode in config.collections.orientations"></select>
+      <select class="form-control" ng-model="editorState.params.orientation" ng-options="mode for mode in config.collections.orientations"></select>
     </div>
     <div class="form-group">
       <label>Font Size</label>
@@ -16,9 +16,9 @@
           <input
             type="number"
             min="1"
-            max="{{vis.params.maxFontSize}}"
+            max="{{editorState.params.maxFontSize}}"
             class="kuiTextInput tag-cloud-fontsize-slider__input"
-            ng-model="vis.params.minFontSize"
+            ng-model="editorState.params.minFontSize"
             aria-label="Minimum tag font size"
             aria-describedby="tagCloudFontSliderMinUnit"
           >
@@ -27,10 +27,10 @@
         <div class="kuiBarSection">
           <input
             type="number"
-            min="{{vis.params.minFontSize}}"
+            min="{{editorState.params.minFontSize}}"
             max="100"
             class="kuiTextInput tag-cloud-fontsize-slider__input"
-            ng-model="vis.params.maxFontSize"
+            ng-model="editorState.params.maxFontSize"
             aria-label="Maximum tag font size"
             aria-describedby="tagCloudFontSliderMaxUnit"
           >
@@ -40,8 +40,8 @@
     </div>
     <div>
       <label>
-        <input type="checkbox" value="{{hideLabel}}" ng-model="vis.params.showLabel" name="showLabel"
-               ng-checked="vis.params.showLabel">
+        <input type="checkbox" value="{{hideLabel}}" ng-model="editorState.params.showLabel" name="showLabel"
+               ng-checked="editorState.params.showLabel">
         Show Label
       </label>
     </div>

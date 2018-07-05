@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import * as rest from '../../../services/rest';
+import * as rest from '../../../services/rest/apm';
 import { getServiceList, ServiceListRequest } from '../serviceList';
 import { mountWithStore } from '../../../utils/testHelpers';
 

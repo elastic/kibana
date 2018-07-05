@@ -161,10 +161,6 @@ export function VisProvider(Private, indexPatterns, getAppState) {
       return adapters;
     }
 
-    isEditorMode() {
-      return this.editorMode || false;
-    }
-
     setCurrentState(state) {
       this.title = state.title || '';
       const type = state.type || this.type;
@@ -189,16 +185,14 @@ export function VisProvider(Private, indexPatterns, getAppState) {
 
     setState(state, updateCurrentState = true) {
       this._state = _.cloneDeep(state);
-      if (updateCurrentState) this.resetState();
+      if (updateCurrentState) {
+        this.setCurrentState(this._state);
+      }
     }
 
     updateState() {
       this.setState(this.getCurrentState(true));
       this.emit('update');
-    }
-
-    resetState() {
-      this.setCurrentState(this._state);
     }
 
     forceReload() {
@@ -209,12 +203,30 @@ export function VisProvider(Private, indexPatterns, getAppState) {
       return {
         title: this.title,
         type: this.type.name,
-        params: this.params,
+        params: _.cloneDeep(this.params),
         aggs: this.aggs
           .map(agg => agg.toJSON())
           .filter(agg => includeDisabled || agg.enabled)
           .filter(Boolean)
       };
+    }
+
+    getSerializableState(state) {
+      return {
+        title: state.title,
+        type: state.type,
+        params: _.cloneDeep(state.params),
+        aggs: state.aggs
+          .map(agg => agg.toJSON())
+          .filter(agg => agg.enabled)
+          .filter(Boolean)
+      };
+    }
+
+    copyCurrentState(includeDisabled = false) {
+      const state = this.getCurrentState(includeDisabled);
+      state.aggs = new AggConfigs(this, state.aggs);
+      return state;
     }
 
     getStateInternal(includeDisabled) {

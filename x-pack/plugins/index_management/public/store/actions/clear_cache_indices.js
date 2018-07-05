@@ -7,7 +7,7 @@
 import { createAction } from "redux-actions";
 import { toastNotifications } from 'ui/notify';
 import { clearCacheIndices as request } from "../../services";
-import { reloadIndices } from "../actions";
+import { clearRowStatus, reloadIndices } from "../actions";
 
 export const clearCacheIndicesStart = createAction(
   "INDEX_MANAGEMENT_CLEAR_CACHE_INDICES_START"
@@ -17,7 +17,8 @@ export const clearCacheIndices = ({ indexNames }) => async (dispatch) => {
   try {
     await request(indexNames);
   } catch (error) {
-    return toastNotifications.addDanger(error.data.message);
+    toastNotifications.addDanger(error.data.message);
+    return dispatch(clearRowStatus({ indexNames }));
   }
   dispatch(reloadIndices(indexNames));
   toastNotifications.addSuccess(`Successfully cleared cache: [${indexNames.join(", ")}]`);

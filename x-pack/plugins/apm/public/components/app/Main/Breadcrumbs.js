@@ -30,8 +30,8 @@ class Breadcrumbs extends React.Component {
               {isLast ? (
                 <span
                   ref={node => {
-                    if (node && document.title !== node.innerText) {
-                      document.title = capitalize(node.innerText);
+                    if (node && document.title !== node.textContent) {
+                      document.title = capitalize(node.textContent);
                     }
                   }}
                 >

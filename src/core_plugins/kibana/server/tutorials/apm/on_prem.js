@@ -35,6 +35,7 @@ import {
   RACK_CLIENT_INSTRUCTIONS,
   JS_CLIENT_INSTRUCTIONS,
   GO_CLIENT_INSTRUCTIONS,
+  JAVA_CLIENT_INSTRUCTIONS,
 } from './apm_client_instructions';
 
 export function onPremInstructions(apmIndexPattern) {
@@ -127,6 +128,10 @@ export function onPremInstructions(apmIndexPattern) {
           {
             id: INSTRUCTION_VARIANT.GO,
             instructions: GO_CLIENT_INSTRUCTIONS,
+          },
+          {
+            id: INSTRUCTION_VARIANT.JAVA,
+            instructions: JAVA_CLIENT_INSTRUCTIONS,
           },
         ],
         statusCheck: {
