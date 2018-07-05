@@ -26,9 +26,10 @@ const RENDER_COMPLETE_EVENT = 'render_complete';
  * with the visualization.
  */
 export class EmbeddedVisualizeHandler {
-  constructor(element, scope) {
+  constructor(element, scope, savedObject) {
     this._element = element;
     this._scope = scope;
+    this._savedObject = savedObject;
     this._listeners = new EventEmitter();
     // Listen to the first RENDER_COMPLETE_EVENT to resolve this promise
     this._firstRenderComplete = new Promise(resolve => {
@@ -89,8 +90,17 @@ export class EmbeddedVisualizeHandler {
   }
 
   /**
+   * Opens the inspector for the embedded visualization. This will return an
+   * handler to the inspector to close and interact with it.
+   * @return {InspectorSession} An inspector session to interact with the opened inspector.
+   */
+  openInspector() {
+    return this._savedObject.vis.openInspector();
+  }
+
+  /**
    * Returns a promise, that will resolve (without a value) once the first rendering of
-   * the visualization has finished. If you want to listen to concecutive rendering
+   * the visualization has finished. If you want to listen to consecutive rendering
    * events, look into the `addRenderCompleteListener` method.
    *
    * @returns {Promise} Promise, that resolves as soon as the visualization is done rendering

@@ -68,7 +68,7 @@ export default function ({ getService }) {
       });
     };
 
-    const expectForbidden = resp => {
+    const expectRbacForbidden = resp => {
       //eslint-disable-next-line max-len
       const missingActions = `action:login,action:saved_objects/config/bulk_get,action:saved_objects/dashboard/bulk_get,action:saved_objects/visualization/bulk_get`;
       expect(resp.body).to.eql({
@@ -102,7 +102,7 @@ export default function ({ getService }) {
       tests: {
         default: {
           statusCode: 403,
-          response: expectForbidden,
+          response: expectRbacForbidden,
         }
       }
     });

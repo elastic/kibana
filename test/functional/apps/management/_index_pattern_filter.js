@@ -25,30 +25,26 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['settings']);
 
   describe('index pattern filter', function describeIndexTests() {
-    before(function () {
+    before(async function () {
       // delete .kibana index and then wait for Kibana to re-create it
-      return kibanaServer.uiSettings.replace({})
-        .then(function () {
-          return PageObjects.settings.navigateTo();
-        })
-        .then(function () {
-          return PageObjects.settings.clickKibanaIndices();
-        });
+      await kibanaServer.uiSettings.replace({});
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickKibanaIndices();
     });
 
-    beforeEach(function () {
-      return PageObjects.settings.createIndexPattern();
+
+    beforeEach(async function () {
+      await PageObjects.settings.createIndexPattern();
     });
 
-    afterEach(function () {
-      return PageObjects.settings.removeIndexPattern();
+    afterEach(async function () {
+      await PageObjects.settings.removeIndexPattern();
     });
 
     it('should filter indexed fields', async function () {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndices();
       await PageObjects.settings.getFieldTypes();
-
       await PageObjects.settings.setFieldTypeFilter('string');
 
       await retry.try(async function () {

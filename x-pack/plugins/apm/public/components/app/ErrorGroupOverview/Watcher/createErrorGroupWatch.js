@@ -150,9 +150,9 @@ export async function createErrorGroupWatch({
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
+        body: `__json__::${JSON.stringify({
           text: slackTemplate
-        })
+        })}`
       }
     };
   }

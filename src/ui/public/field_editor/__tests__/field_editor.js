@@ -204,9 +204,9 @@ describe('FieldEditor directive', function () {
         expect(editor.fieldTypes).to.contain('string');
         expect(editor.fieldTypes).to.contain('geo_point');
         expect(editor.fieldTypes).to.contain('ip');
+        expect(editor.fieldTypes).to.contain('attachment');
         expect(editor.fieldTypes).to.not.contain('text');
         expect(editor.fieldTypes).to.not.contain('keyword');
-        expect(editor.fieldTypes).to.not.contain('attachement');
       });
 
       it('updates formatter options based on field type', function () {

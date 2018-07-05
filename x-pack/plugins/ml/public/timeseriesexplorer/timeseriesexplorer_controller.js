@@ -20,7 +20,7 @@ import 'plugins/ml/components/controls';
 
 import { notify } from 'ui/notify';
 import uiRoutes from 'ui/routes';
-import 'ui/timefilter';
+import { timefilter } from 'ui/timefilter';
 import { parseInterval } from 'ui/utils/parse_interval';
 import { checkLicense } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege, checkPermission } from 'plugins/ml/privilege/check_privilege';
@@ -70,7 +70,6 @@ module.controller('MlTimeSeriesExplorerController', function (
   $route,
   $timeout,
   Private,
-  timefilter,
   AppState,
   mlSelectIntervalService,
   mlSelectSeverityService) {
@@ -505,8 +504,8 @@ module.controller('MlTimeSeriesExplorerController', function (
       forecastId
     ).then((resp) => {
       const bounds = timefilter.getActiveBounds();
-      const earliest = moment(resp.earliest || timefilter.time.from);
-      const latest = moment(resp.latest || timefilter.time.to);
+      const earliest = moment(resp.earliest || timefilter.getTime().from);
+      const latest = moment(resp.latest || timefilter.getTime().to);
 
       // Store forecast ID in the appState.
       $scope.appState.mlTimeSeriesExplorer.forecastId = forecastId;
@@ -529,8 +528,10 @@ module.controller('MlTimeSeriesExplorerController', function (
       if (earliest.isBefore(bounds.min) || latest.isAfter(bounds.max)) {
         const earliestMs = Math.min(earliest.valueOf(), bounds.min.valueOf());
         const latestMs = Math.max(latest.valueOf(), bounds.max.valueOf());
-        timefilter.time.from = moment(earliestMs).toISOString();
-        timefilter.time.to = moment(latestMs).toISOString();
+        timefilter.setTime({
+          from: moment(earliestMs).toISOString(),
+          to: moment(latestMs).toISOString()
+        });
       } else {
         // Refresh to show the requested forecast data.
         $scope.refresh();
@@ -559,7 +560,7 @@ module.controller('MlTimeSeriesExplorerController', function (
   };
 
   // Refresh the data when the time range is altered.
-  $scope.$listen(timefilter, 'fetch', $scope.refresh);
+  $scope.$listenAndDigestAsync(timefilter, 'fetch', $scope.refresh);
 
   // Add a watcher for auto-refresh of the time filter to refresh all the data.
   const refreshWatcher = Private(refreshIntervalWatcher);
@@ -794,20 +795,20 @@ module.controller('MlTimeSeriesExplorerController', function (
       // Calculate the 'auto' zoom duration which shows data at bucket span granularity.
       $scope.autoZoomDuration = getAutoZoomDuration();
 
+      // Check that the zoom times are valid.
+      // zoomFrom must be at or after dashboard earliest,
+      // zoomTo must be at or before dashboard latest plus context chart agg interval.
       const zoomFrom = moment(zoomState.from, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true);
       const zoomTo = moment(zoomState.to, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true);
-
-      // Get the time span of data in the context chart.
-      // Valid zoomTo is the time of the last bucket plus the aggregation interval.
-      const combinedData = $scope.contextForecastData === undefined ?
-        $scope.contextChartData : $scope.contextChartData.concat($scope.contextForecastData);
-      const earliestDataDate = _.first(combinedData).date;
-      const latestDataDate = new Date(_.last(combinedData).date.valueOf() +
-        $scope.contextAggregationInterval.asMilliseconds());
+      const aggIntervalMs = $scope.contextAggregationInterval.asMilliseconds();
+      const bounds = timefilter.getActiveBounds();
+      const earliest = bounds.min;
+      const latest = moment(bounds.max).add(aggIntervalMs, 'ms');
 
       if (zoomFrom.isValid() && zoomTo.isValid &&
-        zoomFrom.isBetween(earliestDataDate, latestDataDate, null, '[]') &&
-        zoomTo.isBetween(earliestDataDate, latestDataDate, null, '[]')) {
+        zoomTo.isAfter(zoomFrom) &&
+        zoomFrom.isBetween(earliest, latest, null, '[]') &&
+        zoomTo.isBetween(earliest, latest, null, '[]')) {
         return [zoomFrom.toDate(), zoomTo.toDate()];
       }
     }

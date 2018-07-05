@@ -17,17 +17,17 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import Handlebars from 'handlebars';
 import { createHash } from 'crypto';
 import { readFile } from 'fs';
 import { resolve } from 'path';
+import { i18n } from '@kbn/i18n';
 
 export class AppBootstrap {
   constructor({ templateData, translations }) {
     this.templateData = templateData;
-    this.translations = translations;
     this._rawTemplate = undefined;
+    i18n.init(translations);
   }
 
   async getJsFile() {
@@ -35,7 +35,7 @@ export class AppBootstrap {
       this._rawTemplate = await loadRawTemplate();
     }
 
-    Handlebars.registerHelper('i18n', key => _.get(this.translations, key, ''));
+    Handlebars.registerHelper('i18n', (id, options) => i18n.translate(id, JSON.parse(options)));
     const template = Handlebars.compile(this._rawTemplate, {
       knownHelpers: { i18n: true },
       knownHelpersOnly: true,

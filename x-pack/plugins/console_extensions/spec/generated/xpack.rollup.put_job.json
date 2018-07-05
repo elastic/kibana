@@ -1,0 +1,10 @@
+{
+  "xpack.rollup.put_job": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_xpack/rollup/job/{id}"
+    ]
+  }
+}

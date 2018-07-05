@@ -4,43 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function getVersionPrivilege(kibanaVersion) {
-  // TODO: Remove the .toLowerCase() once the capitalization with app privileges is fixed
-  return `version:${kibanaVersion.toLowerCase()}`;
+export function getVersionAction(kibanaVersion) {
+  return `version:${kibanaVersion}`;
 }
 
-export function getLoginPrivilege() {
+export function getLoginAction() {
   return `action:login`;
 }
 
 export function buildPrivilegeMap(savedObjectTypes, application, kibanaVersion) {
-  const readSavedObjectsPrivileges = buildSavedObjectsReadPrivileges(savedObjectTypes);
+  const readSavedObjectsActions = buildSavedObjectsReadActions(savedObjectTypes);
 
-  const privilegeActions = {};
-
-  privilegeActions.all = {
-    application,
-    name: 'all',
-    actions: [getVersionPrivilege(kibanaVersion), 'action:*'],
-    metadata: {}
+  return {
+    all: {
+      application,
+      name: 'all',
+      actions: [getVersionAction(kibanaVersion), 'action:*'],
+      metadata: {}
+    },
+    read: {
+      application,
+      name: 'read',
+      actions: [getVersionAction(kibanaVersion), getLoginAction(), ...readSavedObjectsActions],
+      metadata: {}
+    }
   };
-
-  privilegeActions.read = {
-    application,
-    name: 'read',
-    actions: [getVersionPrivilege(kibanaVersion), getLoginPrivilege(), ...readSavedObjectsPrivileges],
-    metadata: {}
-  };
-
-  return privilegeActions;
 }
 
-function buildSavedObjectsReadPrivileges(savedObjectTypes) {
+function buildSavedObjectsReadActions(savedObjectTypes) {
   const readActions = ['get', 'bulk_get', 'find'];
-  return buildSavedObjectsPrivileges(savedObjectTypes, readActions);
+  return buildSavedObjectsActions(savedObjectTypes, readActions);
 }
 
-function buildSavedObjectsPrivileges(savedObjectTypes, actions) {
+function buildSavedObjectsActions(savedObjectTypes, actions) {
   return savedObjectTypes
     .map(type => actions.map(action => `action:saved_objects/${type}/${action}`))
     .reduce((acc, types) => [...acc, ...types], []);

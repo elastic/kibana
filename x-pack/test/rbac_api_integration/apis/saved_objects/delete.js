@@ -21,15 +21,24 @@ export default function ({ getService }) {
       expect(resp.body).to.eql({
         statusCode: 404,
         error: 'Not Found',
-        message: 'Not Found'
+        message: 'Saved object [dashboard/not-a-real-id] not found'
       });
     };
 
-    const createExpectForbidden = canLogin => resp => {
+    const createExpectRbacForbidden = canLogin => resp => {
       expect(resp.body).to.eql({
         statusCode: 403,
         error: 'Forbidden',
         message: `Unable to delete dashboard, missing ${canLogin ? '' : 'action:login,'}action:saved_objects/dashboard/delete`
+      });
+    };
+
+    const createExpectLegacyForbidden = username => resp => {
+      expect(resp.body).to.eql({
+        statusCode: 403,
+        error: 'Forbidden',
+        //eslint-disable-next-line max-len
+        message: `action [indices:data/write/delete] is unauthorized for user [${username}]: [security_exception] action [indices:data/write/delete] is unauthorized for user [${username}]`
       });
     };
 
@@ -64,11 +73,11 @@ export default function ({ getService }) {
       tests: {
         actualId: {
           statusCode: 403,
-          response: createExpectForbidden(false),
+          response: createExpectRbacForbidden(false),
         },
         invalidId: {
           statusCode: 403,
-          response: createExpectForbidden(false),
+          response: createExpectRbacForbidden(false),
         }
       }
     });
@@ -115,11 +124,11 @@ export default function ({ getService }) {
       tests: {
         actualId: {
           statusCode: 403,
-          response: createExpectForbidden(true),
+          response: createExpectLegacyForbidden(AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.USERNAME),
         },
         invalidId: {
           statusCode: 403,
-          response: createExpectForbidden(true),
+          response: createExpectLegacyForbidden(AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.USERNAME),
         }
       }
     });
@@ -149,11 +158,11 @@ export default function ({ getService }) {
       tests: {
         actualId: {
           statusCode: 403,
-          response: createExpectForbidden(true),
+          response: createExpectRbacForbidden(true),
         },
         invalidId: {
           statusCode: 403,
-          response: createExpectForbidden(true),
+          response: createExpectRbacForbidden(true),
         }
       }
     });

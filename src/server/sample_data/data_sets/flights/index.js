@@ -17,17 +17,18 @@
  * under the License.
  */
 
+import path from 'path';
 import { savedObjects } from './saved_objects';
 
 export function flightsSpecProvider() {
   return {
     id: 'flights',
     name: 'Sample flight data',
-    description: 'Installs fictional flight tracking data, visualizations and dashboards to monitor plane routes.',
+    description: 'Sample data, visualizations, and dashboards for monitoring flight routes.',
     previewImagePath: '/plugins/kibana/home/sample_data_resources/flights/dashboard.png',
     overviewDashboard: '7adfa750-4c81-11e8-b3d7-01146121b73d',
     defaultIndex: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
-    dataPath: './src/server/sample_data/data_sets/flights/flights.json.gz',
+    dataPath: path.join(__dirname, './flights.json.gz'),
     fields: {
       timestamp: {
         type: 'date'
@@ -112,7 +113,7 @@ export function flightsSpecProvider() {
       }
     },
     timeFields: ['timestamp'],
-    currentTimeMarker: '2018-01-02T00:00:00Z',
+    currentTimeMarker: '2018-01-02T00:00:00',
     preserveDayOfWeekTimeOfDay: true,
     savedObjects: savedObjects,
   };
