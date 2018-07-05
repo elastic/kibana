@@ -296,24 +296,23 @@ describe('Saved Object', function () {
       });
     });
 
-    it('throws error invalid JSON is detected', function () {
-      return createInitializedSavedObject({ type: 'dashboard' }).then(savedObject => {
-        const response = {
-          found: true,
-          _source: {
-            kibanaSavedObjectMeta: {
-              searchSourceJSON: '\"{\\n  \\\"filter\\\": []\\n}\"'
-            }
+    it('throws error invalid JSON is detected', async function () {
+      const savedObject = await createInitializedSavedObject({ type: 'dashboard' });
+      const response = {
+        found: true,
+        _source: {
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: '\"{\\n  \\\"filter\\\": []\\n}\"'
           }
-        };
-
-        try {
-          savedObject.applyESResp(response);
-          expect(true).to.be(false);
-        } catch (err) {
-          expect(err instanceof InvalidJSONProperty).to.be(true);
         }
-      });
+      };
+
+      try {
+        await savedObject.applyESResp(response);
+        throw new Error('applyESResp should have failed, but did not.');
+      } catch (err) {
+        expect(err instanceof InvalidJSONProperty).to.be(true);
+      }
     });
 
     it('preserves original defaults if not overridden', function () {
