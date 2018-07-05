@@ -7,4 +7,4 @@
 export { CHECK_PRIVILEGES_RESULT } from './check_privileges';
 export { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
 export { buildPrivilegeMap } from './privileges';
-export { initAuthorization } from './init';
+export { initAuthorizationService } from './init';

@@ -8,7 +8,7 @@ import { actionsFactory } from './actions';
 import { checkPrivilegesWithRequestFactory } from './check_privileges';
 import { getClient } from '../../../../../server/lib/get_client_shield';
 
-export function initAuthorization(server) {
+export function initAuthorizationService(server) {
   const shieldClient = getClient(server);
   const config = server.config();
 

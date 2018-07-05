@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { initAuthorization } from './init';
+import { initAuthorizationService } from './init';
 import { actionsFactory } from './actions';
 import { checkPrivilegesWithRequestFactory } from './check_privileges';
 import { getClient } from '../../../../../server/lib/get_client_shield';
@@ -34,7 +34,7 @@ test(`calls server.expose with exposed services`, () => {
   const mockActions = Symbol();
   actionsFactory.mockReturnValue(mockActions);
 
-  initAuthorization(mockServer);
+  initAuthorizationService(mockServer);
 
   expect(getClient).toHaveBeenCalledWith(mockServer);
   expect(actionsFactory).toHaveBeenCalledWith(mockConfig);
