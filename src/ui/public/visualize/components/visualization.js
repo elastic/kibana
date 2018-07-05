@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import './visualize.less';
+import '../visualize.less';
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { VisualizationNoResults, VisualizationChart } from './components';
+import { VisualizationNoResults, VisualizationChart } from './';
 
 const _showNoResultsMessage = (vis, visData) => {
   const requiresSearch = _.get(vis, 'type.requiresSearch');

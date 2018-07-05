@@ -17,4 +17,4 @@
  * under the License.
  */
 
-import './visualize';
+import './loader';

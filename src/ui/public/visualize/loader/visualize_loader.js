@@ -22,11 +22,10 @@
  * the docs (docs/development/visualize/development-create-visualization.asciidoc)
  * are up to date.
  */
-import angular from 'angular';
 import chrome from '../../chrome';
 import '..';
-import visTemplate from './loader_template.html';
 import { EmbeddedVisualizeHandler } from './embedded_visualize_handler';
+import { FilterBarQueryFilterProvider } from '../../filter_bar/query_filter';
 
 /**
  * The parameters accepted by the embedVisualize calls.
@@ -52,46 +51,44 @@ import { EmbeddedVisualizeHandler } from './embedded_visualize_handler';
  * @property {object} query The query that should apply to that visualization.
  */
 
-const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
-  const renderVis = (el, savedObj, params) => {
-    const scope = $rootScope.$new();
-    params = params || {};
-    scope.savedObj = savedObj;
-    scope.uiState = params.uiState;
-    scope.timeRange = params.timeRange;
-    scope.filters = params.filters;
-    scope.query = params.query;
-    scope.updateState = (visState) => {
-      if (params.appState) {
-        params.appState.vis = visState;
-        params.appState.save();
-      }
-    };
+const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations, Private) => {
+  const renderVis = (container, savedObj, params) => {
 
-    const container = angular.element(el);
+    const { vis, description } = savedObj;
+    // TODO: where is this even set, and could it not be set directly on the vis object ?
+    // are we saving this ?
+    vis.description = description;
+    vis.searchSource = savedObj.searchSource;
 
-    const visHtml = $compile(visTemplate)(scope);
+    // lets add query filter angular service to the params
+    params.queryFilter = Private(FilterBarQueryFilterProvider);
+
+    // lets add Private to the params, we'll need to pass it to visualize later
+    params.Private = Private;
+
+    if (!params.append) {
+      container.innerHTML = '';
+    }
+
+    const element = document.createElement('div');
+    element.className = 'visualize';
+    container.appendChild(element);
 
     // If params specified cssClass, we will set this to the element.
     if (params.cssClass) {
-      visHtml.addClass(params.cssClass);
+      params.cssClass.split(' ').forEach(cssClass => {
+        element.classList.add(cssClass);
+      });
     }
 
     // Apply data- attributes to the element if specified
     if (params.dataAttrs) {
       Object.keys(params.dataAttrs).forEach(key => {
-        visHtml.attr(`data-${key}`, params.dataAttrs[key]);
+        element.setAttribute(`data-${key}`, params.dataAttrs[key]);
       });
     }
 
-    // If params.append was true append instead of replace content
-    if (params.append) {
-      container.append(visHtml);
-    } else {
-      container.html(visHtml);
-    }
-
-    return new EmbeddedVisualizeHandler(visHtml, scope, savedObj);
+    return new EmbeddedVisualizeHandler(element, savedObj, params);
   };
 
   return {
