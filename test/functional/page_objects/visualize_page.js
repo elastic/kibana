@@ -20,54 +20,70 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clickAreaChart() {
       await find.clickByPartialLinkText('Area');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickDataTable() {
       await find.clickByPartialLinkText('Data Table');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickLineChart() {
       await find.clickByPartialLinkText('Line');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickRegionMap() {
       await find.clickByPartialLinkText('Region Map');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickMarkdownWidget() {
       await find.clickByPartialLinkText('Markdown');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickAddMetric() {
       await find.clickByCssSelector('[group-name="metrics"] [data-test-subj="visualizeEditorAddAggregationButton"]');
     }
 
+    async clickAddBucket() {
+      await find.clickByCssSelector('[group-name="buckets"] [data-test-subj="visualizeEditorAddAggregationButton"]');
+    }
+
     async clickMetric() {
       await find.clickByPartialLinkText('Metric');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickGauge() {
       await find.clickByPartialLinkText('Gauge');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickPieChart() {
       await find.clickByPartialLinkText('Pie');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickTileMap() {
       await find.clickByPartialLinkText('Coordinate Map');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickTagCloud() {
       await find.clickByPartialLinkText('Tag Cloud');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickVega() {
       await find.clickByPartialLinkText('Vega');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickVisualBuilder() {
       await find.clickByPartialLinkText('Visual Builder');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickEditorSidebarCollapse() {
@@ -94,14 +110,17 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clickVerticalBarChart() {
       await find.clickByPartialLinkText('Vertical Bar');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickHeatmapChart() {
       await find.clickByPartialLinkText('Heat Map');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickInputControlVis() {
       await find.clickByPartialLinkText('Controls');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async getChartTypeCount() {
@@ -199,9 +218,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await input.clearValue();
       await input.type(value);
       await find.clickByCssSelector('.Select-option');
+      await PageObjects.header.waitUntilLoadingHasFinished();
       const stillOpen = await find.existsByCssSelector('.Select-menu-outer', 0);
       if (stillOpen) {
         await find.clickByCssSelector(className + ' * .Select-arrow-zone');
+        await PageObjects.header.waitUntilLoadingHasFinished();
       }
     }
 
@@ -265,10 +286,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         throw new Error(`Unable to find option '${optionText}' in select ${selectId}. Available options: ${optionsText.join(',')}`);
       }
       await options[optionIndex].click();
-    }
-
-    async clickGoButton() {
-      await testSubjects.click('timepickerGoButton');
     }
 
     async getSpyToggleExists() {
@@ -505,6 +522,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await input.type(newValue);
     }
 
+    async toggleDisabledAgg(agg) {
+      await testSubjects.click(`aggregationEditor${agg} disableAggregationBtn`);
+    }
+
     async toggleOtherBucket() {
       return await find.clickByCssSelector('input[name="showOther"]');
     }
@@ -529,6 +550,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clickOptions() {
       await find.clickByPartialLinkText('Options');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickMetricsAndAxes() {
@@ -585,6 +607,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       // or extended character sets
       // https://github.com/elastic/kibana/issues/6300
       await input.type(vizName.replace('-', ' '));
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickVisualizationByName(vizName) {
@@ -607,6 +630,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async openSavedVisualization(vizName) {
       await this.clickVisualizationByName(vizName);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async getXAxisLabels() {
