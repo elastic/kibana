@@ -30,13 +30,14 @@ import { uiModules } from 'ui/modules';
 import { updateOldState } from 'ui/vis/vis_update_state';
 import { VisualizeConstants } from '../visualize_constants';
 import { createLegacyClass } from 'ui/utils/legacy_class';
+import { SavedObjectProvider } from 'ui/courier';
 
 uiModules
   .get('app/visualize')
-  .factory('SavedVis', function (config, $injector, courier, Promise, savedSearches, Private) {
+  .factory('SavedVis', function (config, $injector, Promise, savedSearches, Private) {
     const Vis = Private(VisProvider);
-
-    createLegacyClass(SavedVis).inherits(courier.SavedObject);
+    const SavedObject = Private(SavedObjectProvider);
+    createLegacyClass(SavedVis).inherits(SavedObject);
     function SavedVis(opts) {
       const self = this;
       opts = opts || {};
@@ -66,7 +67,7 @@ uiModules
         afterESResp: this._afterEsResp
       });
 
-      this.showInRecenltyAccessed = true;
+      this.showInRecentlyAccessed = true;
     }
 
     SavedVis.type = 'visualization';

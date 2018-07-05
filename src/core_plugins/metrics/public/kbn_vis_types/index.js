@@ -57,7 +57,7 @@ export default function MetricsVisProvider(Private) {
                 id: '61ca57f2-469d-11e7-af02-69e470af7417',
                 type: 'count'
               }],
-            seperate_axis: 0,
+            separate_axis: 0,
             axis_position: 'right',
             formatter: 'number',
             chart_type: 'line',

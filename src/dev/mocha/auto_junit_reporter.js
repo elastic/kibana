@@ -18,19 +18,19 @@
  */
 
 import mocha from 'mocha';
-import { setupJunitReportGeneration } from './junit_report_generation';
+import { setupJUnitReportGeneration } from './junit_report_generation';
 
 const MochaSpecReporter = mocha.reporters.spec;
 
-export function createAutoJunitReporter(junitReportOptions) {
-  return class AutoJunitReporter {
+export function createAutoJUnitReporter(junitReportOptions) {
+  return class AutoJUnitReporter {
     constructor(runner, options) {
       // setup a spec reporter for console output
       new MochaSpecReporter(runner, options);
 
-      // in CI we also setup the Junit reporter
+      // in CI we also setup the JUnit reporter
       if (process.env.CI) {
-        setupJunitReportGeneration(runner, junitReportOptions);
+        setupJUnitReportGeneration(runner, junitReportOptions);
       }
     }
   };

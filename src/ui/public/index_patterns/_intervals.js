@@ -21,8 +21,9 @@ import _ from 'lodash';
 import moment from 'moment';
 import { IndexedArray } from '../indexed_array';
 import { isNumeric } from '../utils/numeric';
+import { timefilter } from 'ui/timefilter';
 
-export function IndexPatternsIntervalsProvider(timefilter) {
+export function IndexPatternsIntervalsProvider() {
 
   const intervals = new IndexedArray({
     index: ['name'],

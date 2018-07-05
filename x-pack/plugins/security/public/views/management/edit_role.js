@@ -22,59 +22,60 @@ import { IndexPatternsProvider } from 'ui/index_patterns/index_patterns';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import { checkLicenseError } from 'plugins/security/lib/check_license_error';
 import { EDIT_ROLES_PATH, ROLES_PATH } from './management_urls';
-import { DEFAULT_RESOURCE } from '../../../common/constants';
+import { ALL_RESOURCE } from '../../../common/constants';
 
-const getKibanaPrivileges = (kibanaApplicationPrivilege, role, application) => {
-  const kibanaPrivileges = kibanaApplicationPrivilege.reduce((acc, p) => {
+const getKibanaPrivileges = (applicationPrivileges, roleApplications, application) => {
+  const kibanaPrivileges = applicationPrivileges.reduce((acc, p) => {
     acc[p.name] = false;
     return acc;
   }, {});
 
-  if (!role.applications || role.applications.length === 0) {
+  if (!roleApplications || roleApplications.length === 0) {
     return kibanaPrivileges;
   }
 
-  // we're filtering out privileges for non-default resources as well incase
-  // the roles were created in a future version
-  const applications = role.applications
-    .filter(x => x.application === application && x.resources.every(r => r === DEFAULT_RESOURCE));
+  // we're filtering out privileges for non-all resources incase the roles were created in a future version
+  const applications = roleApplications
+    .filter(roleApplication => roleApplication.application === application)
+    .filter(roleApplication => !roleApplication.resources.some(resource => resource !== ALL_RESOURCE));
 
   const assigned = _.uniq(_.flatten(_.pluck(applications, 'privileges')));
   assigned.forEach(a => {
-    kibanaPrivileges[a] = true;
+    // we don't want to display privileges that aren't in our expected list of privileges
+    if (a in kibanaPrivileges) {
+      kibanaPrivileges[a] = true;
+    }
   });
 
   return kibanaPrivileges;
 };
 
-const setApplicationPrivileges = (kibanaPrivileges, role, application) => {
-  if (!role.applications) {
-    role.applications = [];
-  }
-
-  // we first remove the matching application entries
-  role.applications = role.applications.filter(x => {
-    return x.application !== application;
+const getRoleApplications = (kibanaPrivileges, currentRoleApplications = [], application) => {
+  // we keep any other applications
+  const newRoleApplications = currentRoleApplications.filter(roleApplication => {
+    return roleApplication.application !== application;
   });
 
-  const privileges = Object.keys(kibanaPrivileges).filter(key => kibanaPrivileges[key]);
+  const selectedPrivileges = Object.keys(kibanaPrivileges).filter(key => kibanaPrivileges[key]);
 
-  // if we still have them, put the application entry back
-  if (privileges.length > 0) {
-    role.applications = [...role.applications, {
+  // if we have any selected privileges, add a single application entry
+  if (selectedPrivileges.length > 0) {
+    newRoleApplications.push({
       application,
-      privileges,
-      resources: [DEFAULT_RESOURCE]
-    }];
+      privileges: selectedPrivileges,
+      resources: [ALL_RESOURCE]
+    });
   }
+
+  return newRoleApplications;
 };
 
-const getOtherApplications = (kibanaPrivileges, role, application) => {
-  if (!role.applications || role.applications.length === 0) {
+const getOtherApplications = (roleApplications, application) => {
+  if (!roleApplications || roleApplications.length === 0) {
     return [];
   }
 
-  return role.applications.map(x => x.application).filter(x => x !== application);
+  return roleApplications.map(roleApplication => roleApplication.application).filter(app =>app !== application);
 };
 
 routes.when(`${EDIT_ROLES_PATH}/:name?`, {
@@ -103,8 +104,8 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
         applications: []
       });
     },
-    kibanaApplicationPrivilege(ApplicationPrivilege, kbnUrl, Promise, Private) {
-      return ApplicationPrivilege.query().$promise
+    applicationPrivileges(ApplicationPrivileges, kbnUrl, Promise, Private) {
+      return ApplicationPrivileges.query().$promise
         .catch(checkLicenseError(kbnUrl, Promise, Private));
     },
     users(ShieldUser, kbnUrl, Promise, Private) {
@@ -134,10 +135,10 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     $scope.indexPatterns = $route.current.locals.indexPatterns;
     $scope.privileges = shieldPrivileges;
 
-    const kibanaApplicationPrivilege = $route.current.locals.kibanaApplicationPrivilege;
+    const applicationPrivileges = $route.current.locals.applicationPrivileges;
     const role = $route.current.locals.role;
-    $scope.kibanaPrivileges = getKibanaPrivileges(kibanaApplicationPrivilege, role, rbacApplication);
-    $scope.otherApplications = getOtherApplications(kibanaApplicationPrivilege, role, rbacApplication);
+    $scope.kibanaPrivileges = getKibanaPrivileges(applicationPrivileges, role.applications, rbacApplication);
+    $scope.otherApplications = getOtherApplications(role.applications, rbacApplication);
 
     $scope.rolesHref = `#${ROLES_PATH}`;
 
@@ -164,7 +165,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
       role.indices = role.indices.filter((index) => index.names.length);
       role.indices.forEach((index) => index.query || delete index.query);
 
-      setApplicationPrivileges($scope.kibanaPrivileges, role, rbacApplication);
+      role.applications = getRoleApplications($scope.kibanaPrivileges, role.applications, rbacApplication);
 
       return role.$save()
         .then(() => toastNotifications.addSuccess('Updated role'))

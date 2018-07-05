@@ -40,12 +40,13 @@ import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import { recentlyAccessed } from 'ui/persisted_log';
+import { timefilter } from 'ui/timefilter';
 
 uiRoutes
   .when(VisualizeConstants.CREATE_PATH, {
     template: editorTemplate,
     resolve: {
-      savedVis: function (savedVisualizations, courier, $route, Private) {
+      savedVis: function (savedVisualizations, redirectWhenMissing, $route, Private) {
         const visTypes = Private(VisTypesRegistryProvider);
         const visType = _.find(visTypes, { name: $route.current.params.type });
         const shouldHaveIndex = visType.requiresSearch && visType.options.showIndexSelection;
@@ -55,7 +56,7 @@ uiRoutes
         }
 
         return savedVisualizations.get($route.current.params)
-          .catch(courier.redirectWhenMissing({
+          .catch(redirectWhenMissing({
             '*': '/visualize'
           }));
       }
@@ -64,7 +65,7 @@ uiRoutes
   .when(`${VisualizeConstants.EDIT_PATH}/:id`, {
     template: editorTemplate,
     resolve: {
-      savedVis: function (savedVisualizations, courier, $route) {
+      savedVis: function (savedVisualizations, redirectWhenMissing, $route) {
         return savedVisualizations.get($route.current.params.id)
           .then((savedVis) => {
             recentlyAccessed.add(
@@ -73,7 +74,7 @@ uiRoutes
               savedVis.id);
             return savedVis;
           })
-          .catch(courier.redirectWhenMissing({
+          .catch(redirectWhenMissing({
             'visualization': '/visualize',
             'search': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
             'index-pattern': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
@@ -86,7 +87,7 @@ uiRoutes
 uiModules
   .get('app/visualize', [
     'kibana/notify',
-    'kibana/courier'
+    'kibana/url'
   ])
   .directive('visualizeApp', function () {
     return {
@@ -96,7 +97,19 @@ uiModules
     };
   });
 
-function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise, config, kbnBaseUrl, localStorage) {
+function VisEditor(
+  $scope,
+  $route,
+  AppState,
+  $window,
+  kbnUrl,
+  redirectWhenMissing,
+  Private,
+  Promise,
+  config,
+  kbnBaseUrl,
+  localStorage
+) {
   const docTitle = Private(DocTitleProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
 
@@ -197,7 +210,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
       Promise.try(function () {
         vis.setState(appState.vis);
       })
-        .catch(courier.redirectWhenMissing({
+        .catch(redirectWhenMissing({
           'index-pattern-field': '/visualize'
         }));
     }
@@ -221,9 +234,8 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
 
     $scope.isAddToDashMode = () => addToDashMode;
 
-    $scope.timefilter = timefilter;
-    $scope.timeRange = timefilter.time;
-    $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'timefilter', 'isAddToDashMode');
+    $scope.timeRange = timefilter.getTime();
+    $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'isAddToDashMode');
 
     stateMonitor = stateMonitorFactory.create($state, stateDefaults);
     stateMonitor.ignoreProps([ 'vis.listeners' ]).onChange((status) => {
@@ -252,11 +264,11 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     });
 
     const updateTimeRange = () => {
-      $scope.timeRange = timefilter.time;
+      $scope.timeRange = timefilter.getTime();
     };
 
     timefilter.enableAutoRefreshSelector();
-    timefilter.on('update', updateTimeRange);
+    $scope.$listenAndDigestAsync(timefilter, 'timeUpdate', updateTimeRange);
 
     // update the searchSource when filters update
     $scope.$listen(queryFilter, 'update', function () {
@@ -274,7 +286,6 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     $scope.$on('$destroy', function () {
       savedVis.destroy();
       stateMonitor.destroy();
-      timefilter.off('update', updateTimeRange);
     });
   }
 

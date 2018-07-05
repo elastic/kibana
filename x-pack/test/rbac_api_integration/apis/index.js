@@ -6,6 +6,8 @@
 
 export default function ({ loadTestFile }) {
   describe('apis RBAC', () => {
+    loadTestFile(require.resolve('./es'));
+    loadTestFile(require.resolve('./privileges'));
     loadTestFile(require.resolve('./saved_objects'));
   });
 }

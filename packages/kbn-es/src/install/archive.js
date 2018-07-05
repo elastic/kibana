@@ -67,7 +67,7 @@ exports.installArchive = async function installArchive(archive, options = {}) {
 };
 
 /**
- * Recurive deletion for a directory
+ * Recursive deletion for a directory
  *
  * @param {String} path
  */

@@ -19,6 +19,8 @@ const registerPrivilegesWithClusterTest = (description, {
   savedObjectTypes,
   expectedPrivileges,
   existingPrivileges,
+  throwErrorWhenGettingPrivileges,
+  throwErrorWhenPuttingPrivileges,
   assert
 }) => {
   const registerMockCallWithInternalUser = () => {
@@ -56,8 +58,9 @@ const registerPrivilegesWithClusterTest = (description, {
     return mockServer;
   };
 
-  const createExpectUpdatedPrivileges = (mockServer, mockCallWithInternalUser, privileges) => {
+  const createExpectUpdatedPrivileges = (mockServer, mockCallWithInternalUser, privileges, error) => {
     return () => {
+      expect(error).toBeUndefined();
       expect(mockCallWithInternalUser).toHaveBeenCalledTimes(2);
       expect(mockCallWithInternalUser).toHaveBeenCalledWith('shield.getPrivilege', {
         privilege: defaultKibanaIndex,
@@ -83,8 +86,9 @@ const registerPrivilegesWithClusterTest = (description, {
     };
   };
 
-  const createExpectDidntUpdatePrivileges = (mockServer, mockCallWithInternalUser) => {
+  const createExpectDidntUpdatePrivileges = (mockServer, mockCallWithInternalUser, error) => {
     return () => {
+      expect(error).toBeUndefined();
       expect(mockCallWithInternalUser).toHaveBeenCalledTimes(1);
       expect(mockCallWithInternalUser).toHaveBeenLastCalledWith('shield.getPrivilege', {
         privilege: defaultKibanaIndex
@@ -102,17 +106,51 @@ const registerPrivilegesWithClusterTest = (description, {
     };
   };
 
+  const createExpectErrorThrown = (mockServer, actualError) => {
+    return (expectedErrorMessage) => {
+      expect(actualError).toBeDefined();
+      expect(actualError).toBeInstanceOf(Error);
+      expect(actualError.message).toEqual(expectedErrorMessage);
+
+      const application = settings['kibana.index'] || defaultKibanaIndex;
+      expect(mockServer.log).toHaveBeenCalledWith(
+        ['security', 'error'],
+        `Error registering Kibana Privileges with Elasticsearch for ${application}: ${expectedErrorMessage}`
+      );
+    };
+  };
+
   test(description, async () => {
     const mockServer = createMockServer();
-    const mockCallWithInternalUser = registerMockCallWithInternalUser();
-    mockCallWithInternalUser.mockImplementationOnce(async () => ({ [defaultKibanaIndex]: existingPrivileges }));
+    const mockCallWithInternalUser = registerMockCallWithInternalUser()
+      .mockImplementationOnce(async () => {
+        if (throwErrorWhenGettingPrivileges) {
+          throw throwErrorWhenGettingPrivileges;
+        }
+
+        return {
+          [defaultKibanaIndex]: existingPrivileges
+        };
+      })
+      .mockImplementationOnce(async () => {
+        if (throwErrorWhenPuttingPrivileges) {
+          throw throwErrorWhenPuttingPrivileges;
+        }
+      });
+
     buildPrivilegeMap.mockReturnValue(expectedPrivileges);
 
-    await registerPrivilegesWithCluster(mockServer);
+    let error;
+    try {
+      await registerPrivilegesWithCluster(mockServer);
+    } catch (err) {
+      error = err;
+    }
 
     assert({
-      expectUpdatedPrivileges: createExpectUpdatedPrivileges(mockServer, mockCallWithInternalUser, expectedPrivileges),
-      expectDidntUpdatePrivileges: createExpectDidntUpdatePrivileges(mockServer, mockCallWithInternalUser),
+      expectUpdatedPrivileges: createExpectUpdatedPrivileges(mockServer, mockCallWithInternalUser, expectedPrivileges, error),
+      expectDidntUpdatePrivileges: createExpectDidntUpdatePrivileges(mockServer, mockCallWithInternalUser, error),
+      expectErrorThrown: createExpectErrorThrown(mockServer, error),
       mocks: {
         buildPrivilegeMap
       }
@@ -134,7 +172,7 @@ registerPrivilegesWithClusterTest(`passes saved object types, application and ki
   },
 });
 
-registerPrivilegesWithClusterTest(`updates privileges when simple top-level privileges don't match`, {
+registerPrivilegesWithClusterTest(`updates privileges when simple top-level privileges values don't match`, {
   expectedPrivileges: {
     expected: true
   },
@@ -146,10 +184,51 @@ registerPrivilegesWithClusterTest(`updates privileges when simple top-level priv
   }
 });
 
-registerPrivilegesWithClusterTest(`updates privileges when nested privileges don't match`, {
+registerPrivilegesWithClusterTest(`throws error when we have two different top-level privileges`, {
+  expectedPrivileges: {
+    notExpected: true
+  },
+  existingPrivileges: {
+    expected: true
+  },
+  assert: ({ expectErrorThrown }) => {
+    expectErrorThrown(`Privileges are missing and can't be removed, currently.`);
+  }
+});
+
+registerPrivilegesWithClusterTest(`updates privileges when we want to add a top-level privilege`, {
+  expectedPrivileges: {
+    expected: true,
+    new: false,
+  },
+  existingPrivileges: {
+    expected: true,
+  },
+  assert: ({ expectUpdatedPrivileges }) => {
+    expectUpdatedPrivileges();
+  }
+});
+
+registerPrivilegesWithClusterTest(`updates privileges when nested privileges values don't match`, {
   expectedPrivileges: {
     kibana: {
       expected: true
+    }
+  },
+  existingPrivileges: {
+    kibana: {
+      expected: false
+    }
+  },
+  assert: ({ expectUpdatedPrivileges }) => {
+    expectUpdatedPrivileges();
+  }
+});
+
+registerPrivilegesWithClusterTest(`updates privileges when we have two different nested privileges`, {
+  expectedPrivileges: {
+    kibana: {
+      notExpected: true
     }
   },
   existingPrivileges: {
@@ -221,5 +300,31 @@ registerPrivilegesWithClusterTest(`doesn't update privileges when nested propert
   },
   assert: ({ expectDidntUpdatePrivileges }) => {
     expectDidntUpdatePrivileges();
+  }
+});
+
+registerPrivilegesWithClusterTest(`throws and logs error when errors getting privileges`, {
+  throwErrorWhenGettingPrivileges: new Error('Error getting privileges'),
+  assert: ({ expectErrorThrown }) => {
+    expectErrorThrown('Error getting privileges');
+  }
+});
+
+registerPrivilegesWithClusterTest(`throws and logs error when errors putting privileges`, {
+  expectedPrivileges: {
+    kibana: {
+      foo: false,
+      bar: false
+    }
+  },
+  existingPrivileges: {
+    kibana: {
+      foo: true,
+      bar: true
+    }
+  },
+  throwErrorWhenPuttingPrivileges: new Error('Error putting privileges'),
+  assert: ({ expectErrorThrown }) => {
+    expectErrorThrown('Error putting privileges');
   }
 });

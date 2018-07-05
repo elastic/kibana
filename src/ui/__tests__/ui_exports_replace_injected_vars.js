@@ -132,7 +132,7 @@ describe('UiExports', function () {
       expect(injectedVars).to.eql({ name: 'sam' });
     });
 
-    it('propogates errors thrown in replacers', async () => {
+    it('propagates errors thrown in replacers', async () => {
       injectReplacer(kbnServer, async () => {
         await delay(100);
         throw new Error('replacer failed');

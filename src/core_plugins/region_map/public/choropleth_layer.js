@@ -42,14 +42,14 @@ export default class ChoroplethLayer extends KibanaMapLayer {
     for (let i = 0; i < sortedGeojsonFeatures.length; i++) {
       const property = sortedGeojsonFeatures[i].properties[joinField];
       sortedGeojsonFeatures[i].__kbnJoinedMetric = null;
-      const position = sortedMetrics.length ? compareLexographically(property, sortedMetrics[j].term) : -1;
+      const position = sortedMetrics.length ? compareLexicographically(property, sortedMetrics[j].term) : -1;
       if (position === -1) {//just need to cycle on
       } else if (position === 0) {
         sortedGeojsonFeatures[i].__kbnJoinedMetric = sortedMetrics[j];
       } else if (position === 1) {//needs to catch up
         while (j < sortedMetrics.length) {
           const newTerm = sortedMetrics[j].term;
-          const newPosition = compareLexographically(newTerm, property);
+          const newPosition = compareLexicographically(newTerm, property);
           if (newPosition === -1) {//not far enough
           } else if (newPosition === 0) {
             sortedGeojsonFeatures[i].__kbnJoinedMetric = sortedMetrics[j];
@@ -92,8 +92,8 @@ export default class ChoroplethLayer extends KibanaMapLayer {
           mouseover: () => {
             const tooltipContents = this._tooltipFormatter(feature);
             if (!location) {
-              const leafletGeojon = L.geoJson(feature);
-              location = leafletGeojon.getBounds().getCenter();
+              const leafletGeojson = L.geoJson(feature);
+              location = leafletGeojson.getBounds().getCenter();
             }
             this.emit('showTooltip', {
               content: tooltipContents,
@@ -219,7 +219,7 @@ CORS configuration of the server permits requests from the Kibana application on
         return '';
       }
       const match = this._metrics.find((bucket) => {
-        return compareLexographically(bucket.term, geojsonFeature.properties[this._joinField]) === 0;
+        return compareLexicographically(bucket.term, geojsonFeature.properties[this._joinField]) === 0;
       });
       return tooltipFormatter(metricsAgg, match, fieldName);
     };
@@ -251,7 +251,7 @@ CORS configuration of the server permits requests from the Kibana application on
       this._sortedFeatures.sort((a, b) => {
         const termA = a.properties[this._joinField];
         const termB = b.properties[this._joinField];
-        return compareLexographically(termA, termB);
+        return compareLexicographically(termA, termB);
       });
       this._invalidateJoin();
     }
@@ -267,7 +267,7 @@ CORS configuration of the server permits requests from the Kibana application on
     this._metricsAgg = metricsAgg;
     this._valueFormatter = this._metricsAgg.fieldFormatter();
 
-    this._metrics.sort((a, b) => compareLexographically(a.term, b.term));
+    this._metrics.sort((a, b) => compareLexicographically(a.term, b.term));
     this._invalidateJoin();
     this._setStyle();
   }
@@ -417,8 +417,8 @@ CORS configuration of the server permits requests from the Kibana application on
 
 }
 
-//lexographic compare
-function compareLexographically(termA, termB) {
+//lexicographic compare
+function compareLexicographically(termA, termB) {
   termA = typeof termA === 'string' ? termA : termA.toString();
   termB = typeof termB === 'string' ? termB : termB.toString();
   return termA.localeCompare(termB);

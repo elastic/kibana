@@ -45,7 +45,7 @@ describe('exportDashboards(req)', () => {
 
     collectDashboardsStub = sinon.stub(deps, 'collectDashboards');
     collectDashboardsStub.returns(Promise.resolve([
-      { id: 'dasboard-01' },
+      { id: 'dashboard-01' },
       { id: 'logstash-*' },
       { id: 'panel-01' }
     ]));
@@ -65,7 +65,7 @@ describe('exportDashboards(req)', () => {
     return exportDashboards(req).then((resp) => {
       expect(resp).to.have.property('objects');
       expect(resp.objects).to.eql([
-        { id: 'dasboard-01' },
+        { id: 'dashboard-01' },
         { id: 'logstash-*' },
         { id: 'panel-01' }
       ]);
