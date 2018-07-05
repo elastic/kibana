@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export function i18nDirective(i18n) {
+export function i18nDirective($compile, i18n) {
   return {
     restrict: 'A',
     scope: {
@@ -37,6 +37,8 @@ export function i18nDirective(i18n) {
             defaultMessage,
           })
         );
+
+        $compile($element.contents())($scope.$parent);
       });
     },
   };
