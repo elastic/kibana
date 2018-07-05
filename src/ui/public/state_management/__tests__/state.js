@@ -268,7 +268,14 @@ describe('State Management', () => {
 
       describe('error handling', () => {
         it('notifies the user when a hash value does not map to a stored value', () => {
-          toastNotifications.remove(toastNotifications.list[0]);
+          // Ideally, state.js shouldn't be tightly coupled to toastNotifications. Instead, it
+          // should notify its consumer of this error state and the consumer should be responsible
+          // for notifying the user of the error. This test verifies the side effect of the error
+          // until we can remove this coupling.
+
+          // Clear existing toasts.
+          toastNotifications.list.splice(0);
+
           const { state } = setup({ storeInHash: true });
           const search = $location.search();
           const badHash = createStateHash('{"a": "b"}', () => null);
