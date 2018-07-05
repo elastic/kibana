@@ -48,4 +48,22 @@ describe('#getSavedObjectAction()', () => {
 
     expect(result).toEqual(`action:saved_objects/${type}/${action}`);
   });
+
+  [null, undefined, '', 1, true, {}].forEach(type => {
+    test(`type of ${JSON.stringify(type)} throws error`, () => {
+      const mockConfig = createMockConfig();
+      const actions = actionsFactory(mockConfig);
+
+      expect(() => actions.getSavedObjectAction(type, 'saved-object-action')).toThrowErrorMatchingSnapshot();
+    });
+  });
+
+  [null, undefined, '', 1, true, {}].forEach(action => {
+    test(`action of ${JSON.stringify(action)} throws error`, () => {
+      const mockConfig = createMockConfig();
+      const actions = actionsFactory(mockConfig);
+
+      expect(() => actions.getSavedObjectAction('saved-object-type', action)).toThrowErrorMatchingSnapshot();
+    });
+  });
 });
