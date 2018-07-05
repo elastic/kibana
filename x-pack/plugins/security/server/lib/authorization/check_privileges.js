@@ -5,7 +5,7 @@
  */
 
 import { uniq } from 'lodash';
-import { DEFAULT_RESOURCE } from '../../../common/constants';
+import { ALL_RESOURCE } from '../../../common/constants';
 
 export const CHECK_PRIVILEGES_RESULT = {
   UNAUTHORIZED: Symbol(),
@@ -26,13 +26,13 @@ export function checkPrivilegesWithRequestFactory(shieldClient, config, actions)
         body: {
           applications: [{
             application,
-            resources: [DEFAULT_RESOURCE],
+            resources: [ALL_RESOURCE],
             privileges
           }]
         }
       });
 
-      const privilegeCheckPrivileges = privilegeCheck.application[application][DEFAULT_RESOURCE];
+      const privilegeCheckPrivileges = privilegeCheck.application[application][ALL_RESOURCE];
 
       // We include the login action in all privileges, so the existence of it and not the version privilege
       // lets us know that we're running in an incorrect configuration. Without the login privilege check, we wouldn't

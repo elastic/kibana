@@ -5,7 +5,8 @@
  */
 
 import { checkPrivilegesWithRequestFactory, CHECK_PRIVILEGES_RESULT } from './check_privileges';
-import { DEFAULT_RESOURCE } from '../../../common/constants';
+
+import { ALL_RESOURCE } from '../../../common/constants';
 
 const defaultVersion = 'default-version';
 const defaultApplication = 'default-application';
@@ -44,7 +45,7 @@ const mockApplicationPrivilegeResponse = ({ hasAllRequested, privileges, applica
     has_all_requested: hasAllRequested,
     application: {
       [application]: {
-        [DEFAULT_RESOURCE]: privileges
+        [ALL_RESOURCE]: privileges
       }
     }
   };
@@ -98,7 +99,7 @@ test(`returns authorized if they have all application privileges`, async () => {
     body: {
       applications: [{
         application: defaultApplication,
-        resources: [DEFAULT_RESOURCE],
+        resources: [ALL_RESOURCE],
         privileges: [
           mockActions.version, mockActions.login, ...privileges
         ]
@@ -142,7 +143,7 @@ test(`returns unauthorized if they have only one application action`, async () =
     body: {
       applications: [{
         application: defaultApplication,
-        resources: [DEFAULT_RESOURCE],
+        resources: [ALL_RESOURCE],
         privileges: [
           mockActions.version, mockActions.login, ...privileges
         ]
@@ -214,7 +215,7 @@ describe('legacy fallback with no application privileges', () => {
         body: {
           applications: [{
             application: defaultApplication,
-            resources: [DEFAULT_RESOURCE],
+            resources: [ALL_RESOURCE],
             privileges: [
               mockActions.version, mockActions.login, ...privileges
             ]
@@ -268,7 +269,7 @@ describe('legacy fallback with no application privileges', () => {
         body: {
           applications: [{
             application: defaultApplication,
-            resources: [DEFAULT_RESOURCE],
+            resources: [ALL_RESOURCE],
             privileges: [
               mockActions.version, mockActions.login
             ]
@@ -323,7 +324,7 @@ describe('legacy fallback with no application privileges', () => {
         body: {
           applications: [{
             application: defaultApplication,
-            resources: [DEFAULT_RESOURCE],
+            resources: [ALL_RESOURCE],
             privileges: [
               mockActions.version, mockActions.login
             ]
@@ -383,7 +384,7 @@ describe('legacy fallback with no application privileges', () => {
         body: {
           applications: [{
             application: defaultApplication,
-            resources: [DEFAULT_RESOURCE],
+            resources: [ALL_RESOURCE],
             privileges: [
               mockActions.version, mockActions.login, ...privileges
             ]

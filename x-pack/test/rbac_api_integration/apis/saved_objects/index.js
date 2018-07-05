@@ -44,7 +44,7 @@ export default function ({ loadTestFile, getService }) {
             {
               application: 'kibana',
               privileges: [ 'all' ],
-              resources: [ 'default' ]
+              resources: [ '*' ]
             }
           ]
         }
@@ -59,7 +59,7 @@ export default function ({ loadTestFile, getService }) {
             {
               application: 'kibana',
               privileges: [ 'read' ],
-              resources: [ 'default' ]
+              resources: [ '*' ]
             }
           ]
         }

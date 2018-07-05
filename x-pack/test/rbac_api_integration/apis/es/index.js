@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash';
-
-export function equivalentPrivileges(p1, p2) {
-  return isEqual(p1, p2);
+export default function ({ loadTestFile }) {
+  describe('rbac es', () => {
+    loadTestFile(require.resolve('./has_privileges'));
+    loadTestFile(require.resolve('./post_privileges'));
+  });
 }
