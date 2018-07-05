@@ -33,3 +33,5 @@ export function dispatchRenderComplete(el) {
 export function dispatchRenderStart(el) {
   dispatchCustomEvent(el, 'renderStart');
 }
+
+export * from './render_complete_helper';
