@@ -10,17 +10,17 @@ export function createSpacesService() {
 
   const contextCache = new WeakMap();
 
-  function getUrlContext(request, defaultContext = null) {
+  function getUrlContext(request) {
     if (!contextCache.has(request)) {
-      populateCache(request, defaultContext);
+      populateCache(request);
     }
 
     const { urlContext } = contextCache.get(request);
     return urlContext;
   }
 
-  function populateCache(request, defaultContext) {
-    const urlContext = getSpaceUrlContext(request.getBasePath(), defaultContext);
+  function populateCache(request) {
+    const urlContext = getSpaceUrlContext(request.getBasePath());
 
     contextCache.set(request, {
       urlContext

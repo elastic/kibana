@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { defaultsDeep } from 'lodash';
 import { getRootPropertiesObjects } from '../../../../mappings';
 
 /**
@@ -66,23 +65,21 @@ function getFieldsForTypes(searchFields, types) {
  *  @param  {(string|Array<string>)} type
  *  @param  {String} search
  *  @param  {Array<string>} searchFields
- *  @param {Object} extraQueryParams query parameters to merge into the result
+ *  @param {Array<object>} filters additional query filters
  *  @return {Object}
  */
-export function getQueryParams(mappings, type, search, searchFields, extraQueryParams = {}) {
-  if (!type && !search) {
-    return {};
-  }
+export function getQueryParams(mappings, type, search, searchFields, filters = []) {
 
-  const bool = {};
+  const bool = {
+    filter: [...filters],
+  };
 
   if (type) {
-    bool.filter = [{ [Array.isArray(type) ? 'terms' : 'term']: { type } }];
+    bool.filter.push({ [Array.isArray(type) ? 'terms' : 'term']: { type } });
   }
 
   if (search) {
     bool.must = [
-      ...bool.must || [],
       {
         simple_query_string: {
           query: search,
@@ -95,35 +92,12 @@ export function getQueryParams(mappings, type, search, searchFields, extraQueryP
     ];
   }
 
-  // a list of fields to manually merge together
-  const fieldsToMerge = ['filter', 'must'];
-
-  const extraParams = {
-    ...extraQueryParams.bool
-  };
-
-  // Remove the manual merge fields from the collection of properties we will automatically combine.
-  fieldsToMerge.forEach(field => delete extraParams[field]);
-
-  let query = {
-    bool: defaultsDeep(bool, extraParams)
-  };
-
-  if (extraQueryParams.bool) {
-
-    const extraBoolParams = extraQueryParams.bool;
-
-    query = fieldsToMerge.reduce((queryAcc, field) => {
-      const prop = queryAcc.bool[field];
-      const extraProp = extraBoolParams[field];
-      if (Array.isArray(prop) && Array.isArray(extraProp)) {
-        queryAcc.bool[field] = [...prop, ...extraProp];
-      }
-      return queryAcc;
-    }, query);
+  // Don't construct a query if there is nothing to search on.
+  if (bool.filter.length === 0 && !search) {
+    return {};
   }
 
-  return { query };
+  return { query: { bool } };
 }
 
 

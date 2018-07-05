@@ -6,7 +6,8 @@
 
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { isTypeSpaceAware } from './lib/is_type_space_aware';
-import { getSpacesQueryParams } from './lib/query_params';
+import { getSpacesQueryFilters } from './lib/query_filters';
+import uniq from 'lodash';
 import uuid from 'uuid';
 
 export class SpacesSavedObjectsClient {
@@ -24,22 +25,26 @@ export class SpacesSavedObjectsClient {
     this._request = request;
     this._types = types;
 
-    this._spaceUrlContext = spacesService.getUrlContext(this._request, '');
+    this._spaceUrlContext = spacesService.getUrlContext(this._request);
   }
 
   async create(type, attributes = {}, options = {}) {
 
     const spaceId = await this._getSpaceId();
 
+    const createOptions = {
+      ...options
+    };
+
     if (this._shouldAssignSpaceId(type, spaceId)) {
-      options.id = this._generateDocumentId(spaceId, options.id);
-      options.extraBodyProperties = {
+      createOptions.id = this._generateDocumentId(spaceId, options.id);
+      createOptions.extraBodyProperties = {
         ...options.extraBodyProperties,
         spaceId
       };
     }
 
-    const result = await this._client.create(type, attributes, options);
+    const result = await this._client.create(type, attributes, createOptions);
     return this._trimSpaceId(spaceId, result);
   }
 
@@ -88,7 +93,7 @@ export class SpacesSavedObjectsClient {
 
     const spaceId = await this._getSpaceId();
 
-    spaceOptions.extraQueryParams = getSpacesQueryParams(spaceId, types);
+    spaceOptions.filters = getSpacesQueryFilters(spaceId, types);
 
     const result = await this._client.find({ ...options, ...spaceOptions });
     result.saved_objects.map(object => this._trimSpaceId(spaceId, object));
@@ -96,7 +101,7 @@ export class SpacesSavedObjectsClient {
     return result;
   }
 
-  async bulkGet(objects = []) {
+  async bulkGet(objects = [], options = {}) {
     // ES 'mget' does not support queries, so we have to filter results after the fact.
     const thisSpaceId = await this._getSpaceId();
 
@@ -105,8 +110,10 @@ export class SpacesSavedObjectsClient {
       id: this._generateDocumentId(thisSpaceId, o.id)
     }));
 
+    const extraSourceProperties = this._collectExtraSourceProperties(['spaceId', 'type'], options.extraSourceProperties);
+
     const result = await this._client.bulkGet(objectsToQuery, {
-      extraSourceProperties: ['spaceId', 'type']
+      extraSourceProperties
     });
 
     result.saved_objects = result.saved_objects.map(savedObject => {
@@ -128,7 +135,7 @@ export class SpacesSavedObjectsClient {
     return result;
   }
 
-  async get(type, id) {
+  async get(type, id, options = {}) {
     // ES 'get' does not support queries, so we have to filter results after the fact.
 
     let documentId = id;
@@ -138,8 +145,10 @@ export class SpacesSavedObjectsClient {
       documentId = this._generateDocumentId(spaceId, id);
     }
 
+    const extraSourceProperties = this._collectExtraSourceProperties(['spaceId'], options.extraSourceProperties);
+
     const response = await this._client.get(type, documentId, {
-      extraSourceProperties: ['spaceId']
+      extraSourceProperties
     });
 
     const { spaceId: objectSpaceId = DEFAULT_SPACE_ID } = response;
@@ -160,20 +169,24 @@ export class SpacesSavedObjectsClient {
     let documentId = id;
     const spaceId = await this._getSpaceId();
 
+    const updateOptions = {
+      ...options
+    };
+
     if (isTypeSpaceAware(type)) {
       await this.get(type, id);
 
       documentId = this._generateDocumentId(spaceId, id);
 
       if (this._shouldAssignSpaceId(type, spaceId)) {
-        options.extraBodyProperties = {
+        updateOptions.extraBodyProperties = {
           ...options.extraBodyProperties,
           spaceId
         };
       }
     }
 
-    const result = await this._client.update(type, documentId, attributes, options);
+    const result = await this._client.update(type, documentId, attributes, updateOptions);
     return this._trimSpaceId(spaceId, result);
   }
 
@@ -224,5 +237,9 @@ export class SpacesSavedObjectsClient {
     }
 
     return savedObject;
+  }
+
+  _collectExtraSourceProperties(thisClientProperties, optionalProperties = []) {
+    return uniq([...thisClientProperties, ...optionalProperties]).value();
   }
 }

@@ -206,7 +206,7 @@ export function initSpacesApi(server) {
   });
 
   server.route({
-    method: 'PUT',
+    method: 'POST',
     path: '/api/spaces/v1/space/{id}/select',
     async handler(request, reply) {
       const client = request.getSavedObjectsClient();
