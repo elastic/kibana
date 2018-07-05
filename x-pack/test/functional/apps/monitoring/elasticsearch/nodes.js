@@ -211,7 +211,6 @@ export default function ({ getService, getPageObjects }) {
         await nodesList.clearFilter();
       });
     });
-
   });
 
 }
