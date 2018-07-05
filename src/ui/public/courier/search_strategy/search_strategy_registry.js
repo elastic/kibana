@@ -34,7 +34,7 @@ const addSearchStrategy = searchStrategy => {
  *     searchRequests: []<SearchRequest>,
  *   }]
  *
- * We use an array of objects to preserve the order of the search requests, which use to
+ * We use an array of objects to preserve the order of the search requests, which we use to
  * deterministically associate each response with the originating request.
  */
 const assignSearchRequestsToSearchStrategies = searchRequests => {
