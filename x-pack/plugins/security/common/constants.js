@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const DEFAULT_RESOURCE = 'default';
+export const ALL_RESOURCE = '*';

@@ -5,7 +5,7 @@
  */
 
 import { getClient } from '../../../../../server/lib/get_client_shield';
-import { DEFAULT_RESOURCE } from '../../../common/constants';
+import { ALL_RESOURCE } from '../../../common/constants';
 import { getVersionAction, getLoginAction } from '../privileges';
 
 export const CHECK_PRIVILEGES_RESULT = {
@@ -32,13 +32,13 @@ export function checkPrivilegesWithRequestFactory(server) {
         body: {
           applications: [{
             application,
-            resources: [DEFAULT_RESOURCE],
+            resources: [ALL_RESOURCE],
             privileges
           }]
         }
       });
 
-      const hasPrivileges = privilegeCheck.application[application][DEFAULT_RESOURCE];
+      const hasPrivileges = privilegeCheck.application[application][ALL_RESOURCE];
 
       // We include the login action in all privileges, so the existence of it and not the version privilege
       // lets us know that we're running in an incorrect configuration. Without the login privilege check, we wouldn't
