@@ -29,17 +29,18 @@ const matchSnapshot = /-SNAPSHOT$/;
 export class MetricsCollector {
   constructor(server, config) {
 
-    // NOTE we need access to config every time this is used because uuid is managed by the kibana core_plugin, which is initialized AFTER kbn_server
-    this._getBaseStats = () => ({
-      name: config.get('server.name'),
-      uuid: config.get('server.uuid'),
-      version: {
-        number: config.get('pkg.version').replace(matchSnapshot, ''),
-        build_hash: config.get('pkg.buildSha'),
-        build_number: config.get('pkg.buildNum'),
-        build_snapshot: matchSnapshot.test(config.get('pkg.version'))
-      }
-    });
+    // NOTE we need access to config every time this is used because uuid is
+    // managed by the kibana core_plugin, which is initialized AFTER kbn_server
+    this._getKibanaStats = () => {
+      return {
+        name: config.get('server.name'),
+        host: config.get('server.host'),
+        uuid: config.get('server.uuid'),
+        transport_address: `${config.get('server.host')}:${config.get('server.port')}`,
+        version: config.get('pkg.version'),
+        snapshot: matchSnapshot.test(config.get('pkg.version')),
+      };
+    };
 
     this._stats = Metrics.getStubMetrics();
     this._metrics = new Metrics(config, server); // TODO: deprecate status API that uses Metrics class, move it this module, fix the order of its constructor params
@@ -104,9 +105,13 @@ export class MetricsCollector {
     return stats;
   }
 
-  getStats() {
+  getStats(kbnServer) {
+    const status = kbnServer.status.toJSON();
     return {
-      ...this._getBaseStats(),
+      kibana: {
+        ...this._getKibanaStats(),
+        status: status.overall.state
+      },
       ...this._stats
     };
   }

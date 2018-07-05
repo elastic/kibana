@@ -19,10 +19,35 @@
 
 import Joi from 'joi';
 import { wrapAuthConfig } from '../../wrap_auth_config';
+import { setApiFieldNames } from '../../lib';
+
+async function getExtended(req, server) {
+  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin'); // admin cluster, get info on internal system
+  const callCluster = (...args) => callWithRequest(req, ...args);
+
+  let clusterUuid;
+  try {
+    const { cluster_uuid: uuid } = await callCluster('info', { filterPath: 'cluster_uuid', });
+    clusterUuid = uuid;
+  } catch (err) {
+    clusterUuid = undefined; // fallback from anonymous access or auth failure, redundant for explicitness
+  }
+
+  let usage;
+  try {
+    const { collectorSet } = server.usage;
+    const usageRaw = await collectorSet.bulkFetchUsage(callCluster);
+    usage = collectorSet.summarizeStats(usageRaw);
+  } catch (err) {
+    usage = undefined;
+  }
+
+  return { clusterUuid, usage };
+}
 
 /*
  * API for Kibana meta info and accumulated operations stats
- * Including ?extended in the query string fetches Elasticsearch cluster_uuid
+ * Including ?extended in the query string fetches Elasticsearch cluster_uuid and server.usage.collectorSet data
  * - Requests to set isExtended = true
  *      GET /api/stats?extended=true
  *      GET /api/stats?extended
@@ -48,22 +73,16 @@ export function registerStatsApi(kbnServer, server, config, collector) {
         const isExtended = extended !== undefined && extended !== 'false';
 
         let clusterUuid;
+        let usage;
         if (isExtended) {
-          try {
-            const { callWithRequest, } = server.plugins.elasticsearch.getCluster('data');
-            const { cluster_uuid: uuid } = await callWithRequest(req, 'info', { filterPath: 'cluster_uuid', });
-            clusterUuid = uuid;
-          } catch (err) {
-            clusterUuid = undefined; // fallback from anonymous access or auth failure, redundant for explicitness
-          }
+          ({ clusterUuid, usage } = await getExtended(req, server));
         }
 
-        const stats = {
-          cluster_uuid: clusterUuid, // serialization makes an undefined get stripped out, as undefined isn't a JSON type
-          status: kbnServer.status.toJSON(),
-          ...collector.getStats(),
-        };
-
+        const stats = setApiFieldNames({
+          ...collector.getStats(kbnServer),
+          cluster_uuid: clusterUuid,
+          usage,
+        });
         reply(stats);
       },
     })

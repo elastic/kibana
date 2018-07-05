@@ -32,11 +32,8 @@ export function statusMixin(kbnServer, server, config) {
     const metrics = new Metrics(config, server);
 
     evenBetter.monitor.on('ops', event => {
-      // for status API (to deprecate in next major)
-      metrics.capture(event).then(data => { kbnServer.metrics = data; });
-
-      // for metrics API (replacement API)
-      collector.collect(event); // collect() is async, but here we aren't depending on the return value
+      metrics.capture(event).then(data => { kbnServer.metrics = data; }); // for status API (to deprecate in next major)
+      collector.collect(event); // for metrics API (replacement API)
     });
   }
 

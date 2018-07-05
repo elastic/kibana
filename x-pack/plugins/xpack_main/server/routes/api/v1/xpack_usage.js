@@ -15,9 +15,10 @@ const getClusterUuid = async callCluster => {
  * @return {Object} data from usage stats collectors registered with Monitoring CollectorSet
  * @throws {Error} if the Monitoring CollectorSet is not ready
  */
-const getUsage = (callCluster, server) => {
+const getUsage = async (callCluster, server) => {
   const { collectorSet } = server.usage;
-  return collectorSet.bulkFetchUsage(callCluster);
+  const usage = await collectorSet.bulkFetchUsage(callCluster);
+  return collectorSet.summarizeStats(usage);
 };
 
 export function xpackUsageRoute(server) {

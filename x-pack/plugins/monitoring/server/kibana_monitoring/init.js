@@ -10,7 +10,7 @@ import { getCollectorTypesCombiner } from './lib';
 /**
  * Initialize different types of Kibana Monitoring
  * TODO: remove this in 7.0
- * - Ops Events - essentially Kibana's /api/status
+ * - Ops Events - essentially Kibana's /api/status (non-rolled up)
  * - Usage Stats - essentially Kibana's /api/stats
  * - Kibana Settings - select uiSettings
  * @param {Object} kbnServer manager of Kibana services - see `src/server/kbn_server` in Kibana core
@@ -25,4 +25,3 @@ export function initBulkUploader(kbnServer, server) {
     combineTypes: getCollectorTypesCombiner(kbnServer, config)
   });
 }
-

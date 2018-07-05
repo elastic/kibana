@@ -89,14 +89,16 @@ export class CollectorSet {
 
   async bulkFetchUsage(callCluster) {
     const usageCollectors = this._collectors.filter(c => c instanceof UsageCollector);
-    const bulk = await this.bulkFetch(callCluster, usageCollectors);
+    return this.bulkFetch(callCluster, usageCollectors);
 
-    // summarize each type of stat
-    return bulk.reduce((accumulatedStats, currentStat) => {
-      /* Suffix removal is a temporary hack: some types have `_stats` suffix
-       * because of how monitoring bulk upload needed to combine types. It can
-       * be removed when bulk upload goes away
-       */
+  }
+
+  /*
+   * Summarize the data returned by bulk fetching into a simpler format
+   */
+  summarizeStats(statsData) {
+    return statsData.reduce((accumulatedStats, currentStat) => {
+      // `_stats` Suffix removal
       const statType = currentStat.type.replace('_stats', '');
       return {
         ...accumulatedStats,

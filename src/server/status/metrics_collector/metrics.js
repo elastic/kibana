@@ -56,8 +56,7 @@ export class Metrics {
 
     const metrics = {
       last_updated: timestamp,
-      collection_interval_in_millis: this.config.get('ops.interval'),
-      uptime_in_millis: event.process.uptime_ms, // TODO: deprecate this field, data should only have process.uptime_ms
+      collection_interval_in_millis: this.config.get('ops.interval')
     };
 
     return merge(metrics, event, cgroup);
@@ -92,10 +91,10 @@ export class Metrics {
         mem: {
           free_in_bytes: os.freemem(),
           total_in_bytes: os.totalmem()
-        }
+        },
+        uptime_ms: os.uptime() * 1000
       },
       response_times: {
-        // TODO: rename to use `_ms` suffix per beats naming conventions
         avg_in_millis: isNaN(avgInMillis) ? undefined : avgInMillis, // convert NaN to undefined
         max_in_millis: maxInMillis
       },

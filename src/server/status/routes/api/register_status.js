@@ -41,7 +41,10 @@ export function registerStatusApi(kbnServer, server, config) {
           build_snapshot: matchSnapshot.test(config.get('pkg.version'))
         },
         status: kbnServer.status.toJSON(),
-        metrics: kbnServer.metrics
+        metrics: {
+          ...kbnServer.metrics,
+          uptime_in_millis: process.uptime() * 1000
+        }
       };
 
       return reply(status);
