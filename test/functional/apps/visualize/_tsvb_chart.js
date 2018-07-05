@@ -195,6 +195,7 @@ export default function ({ getService, getPageObjects }) {
       it('should be able to set values for group by field and column name', async () => {
         await PageObjects.visualBuilder.selectGroupByField('machine.os.raw');
         await PageObjects.visualBuilder.setLabelValue('OS');
+        await PageObjects.header.waitUntilLoadingHasFinished();
         log.debug('finished setting field and column name');
       });
 
