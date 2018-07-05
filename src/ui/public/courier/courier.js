@@ -30,6 +30,9 @@ import '../promises';
 import { searchRequestQueue } from './search_request_queue';
 import { FetchSoonProvider } from './fetch';
 import { SearchPollProvider } from './search_poll';
+import { addSearchStrategy, defaultSearchStrategy } from './search_strategy';
+
+addSearchStrategy(defaultSearchStrategy);
 
 uiModules.get('kibana/courier').service('courier', ($rootScope, Private) => {
   const fetchSoon = Private(FetchSoonProvider);
@@ -74,12 +77,12 @@ uiModules.get('kibana/courier').service('courier', ($rootScope, Private) => {
     /**
      * Fetch the pending requests.
      */
-    fetch = () => {
+    fetch() {
       fetchSoon.fetchQueued().then(() => {
         // Reset the timer using the time that we get this response as the starting point.
         searchPoll.resetTimer();
       });
-    };
+    }
   }
 
   return new Courier();

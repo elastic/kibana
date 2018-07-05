@@ -20,6 +20,7 @@
 import _ from 'lodash';
 
 import { ErrorAllowExplicitIndexProvider } from '../../error_allow_explicit_index';
+import { assignSearchRequestsToSearchStrategies } from '../search_strategy';
 import { IsRequestProvider } from './is_request';
 import { MergeDuplicatesRequestProvider } from './merge_duplicate_requests';
 import { RequestStatus } from './req_status';
@@ -39,10 +40,14 @@ export function CallClientProvider(Private, Promise, es) {
     const statuses = mergeDuplicateRequests(requests);
 
     // get the actual list of requests that we will be fetching
-    let requestsToFetch = statuses.filter(isRequest);
+    const requestsToFetch = statuses.filter(isRequest);
     let execCount = requestsToFetch.length;
 
-    if (!execCount) return Promise.resolve([]);
+    if (!execCount) {
+      return Promise.resolve([]);
+    }
+
+    const searchStrategiesWithRequests = assignSearchRequestsToSearchStrategies(requestsToFetch);
 
     // resolved by respond()
     let esPromise = undefined;
@@ -52,14 +57,24 @@ export function CallClientProvider(Private, Promise, es) {
     // for each respond with either the response or ABORTED
     const respond = function (responses) {
       responses = responses || [];
-      return Promise.map(requests, function (request, i) {
+      const activeSearchRequests = searchStrategiesWithRequests.reduce((allSearchRequests, { searchRequests }) => {
+        return allSearchRequests.concat(searchRequests);
+      }, [])
+        .filter(request => {
+          // We'll use the index of the request to map it to its response. If a request has already
+          // failed then it won't generate a response. In this case we need to remove the request
+          // to maintain parity between the list of requests and the list of correspoding responses.
+          return request !== undefined;
+        });
+
+      return Promise.map(activeSearchRequests, function (request, i) {
         switch (statuses[i]) {
           case ABORTED:
             return ABORTED;
           case DUPLICATE:
             return request._uniq.resp;
           default:
-            const index = _.findIndex(requestsToFetch, request);
+            const index = _.findIndex(activeSearchRequests, request);
             if (index < 0) {
               // This means the request failed.
               return ABORTED;
@@ -106,18 +121,19 @@ export function CallClientProvider(Private, Promise, es) {
     // We're going to create a new async context here, so that the logic within it can execute
     // asynchronously after we've returned a reference to defer.promise.
     Promise.resolve().then(async () => {
-      // Flatten the searchSource within each searchRequest to get the fetch params,
-      // e.g. body, filters, index pattern, query.
-      const allFetchParams = await getAllFetchParams(requestsToFetch);
+      // Execute each request using its search strategy.
+      const esPromises = searchStrategiesWithRequests.map(async searchStrategyWithSearchRequests => {
+        const { searchStrategy, searchRequests: searchStrategyRequests } = searchStrategyWithSearchRequests;
 
-      // Serialize the fetch params into a format suitable for the body of an ES query.
-      const serializedFetchParams = await serializeAllFetchParams(allFetchParams, requestsToFetch);
+        // Flatten the searchSource within each searchRequest to get the fetch params,
+        // e.g. body, filters, index pattern, query.
+        const allFetchParams = await getAllFetchParams(searchStrategyRequests);
 
-      // The index of the request inside requestsToFetch determines which response is mapped to it.
-      // If a request won't generate a response, since it already failed, we need to remove the
-      // request from the requestsToFetch array so the indexes will continue to match up to the
-      // responses correctly.
-      requestsToFetch = requestsToFetch.filter(request => request !== undefined);
+        // Serialize the fetch params into a format suitable for the body of an ES query.
+        const serializedFetchParams = await serializeAllFetchParams(allFetchParams, searchStrategyRequests);
+
+        return searchStrategy.search({ body: serializedFetchParams, es });
+      });
 
       try {
         // The request was aborted while we were doing the above logic.
@@ -125,9 +141,15 @@ export function CallClientProvider(Private, Promise, es) {
           throw ABORTED;
         }
 
-        esPromise = es.msearch({ body: serializedFetchParams });
-        const clientResponse = await esPromise;
-        await respond(clientResponse.responses);
+        esPromise = Promise.all(esPromises);
+        const segregatedResponses = await esPromise;
+
+        // Aggregate the responses returned by all of the search strategies.
+        const aggregatedResponses = segregatedResponses.reduce((aggregation, responses) => {
+          return aggregation.concat(responses.responses);
+        }, []);
+
+        await respond(aggregatedResponses);
       } catch(error) {
         if (error === ABORTED) {
           return await respond();
