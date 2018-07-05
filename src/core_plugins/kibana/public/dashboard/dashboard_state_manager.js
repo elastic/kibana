@@ -204,7 +204,7 @@ export class DashboardStateManager {
       FilterUtils.cleanFiltersForComparison(this.appState.filters),
       FilterUtils.cleanFiltersForComparison(getFilters(state))
     )) {
-      store.dispatch(updateFilters(_.cloneDeep(this.appState.filters)));
+      store.dispatch(updateFilters(this.appState.filters));
     }
 
     if (getQuery(state) !== this.getQuery()) {
