@@ -17,26 +17,12 @@
  * under the License.
  */
 
-jest.mock('ui/kfetch',
-  () => ({
-    kfetch: async (...args) => {
-      return global.kfetchStub(...args);
-    }
-  }), { virtual: true });
+jest.mock('ui/kfetch', () => ({}));
 
 import sinon from 'sinon';
 import expect from 'expect.js';
 import { SavedObjectsClient } from '../saved_objects_client';
 import { SavedObject } from '../saved_object';
-
-function stubKfetch() {
-  global.kfetchStub = sinon.stub();
-  return global.kfetchStub;
-}
-
-function deleteKfetchStub() {
-  delete global.kfetchStub;
-}
 
 describe('SavedObjectsClient', () => {
   const doc = {
@@ -49,12 +35,11 @@ describe('SavedObjectsClient', () => {
   let kfetchStub;
   let savedObjectsClient;
   beforeEach(() => {
-    kfetchStub = stubKfetch();
+    kfetchStub = sinon.stub();
+    require('ui/kfetch').kfetch = async (...args) => {
+      return kfetchStub(...args);
+    };
     savedObjectsClient = new SavedObjectsClient();
-  });
-
-  afterAll(() => {
-    deleteKfetchStub();
   });
 
   describe('#_getPath', () => {

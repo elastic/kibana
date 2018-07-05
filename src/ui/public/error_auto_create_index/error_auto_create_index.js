@@ -29,7 +29,7 @@ uiRoutes
 
 export function isAutoCreateIndexError(error) {
   return (
-    error.statusCode === 503 &&
+    get(error, 'res.status') === 503 &&
     get(error, 'body.code') === 'ES_AUTO_CREATE_INDEX_ERROR'
   );
 }

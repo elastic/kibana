@@ -24,9 +24,10 @@ import { metadata } from '../metadata';
 import { merge } from 'lodash';
 
 class FetchError extends Error {
-  constructor(res) {
+  constructor(res, body) {
     super(res.statusText);
     this.res = res;
+    this.body = body;
     Error.captureStackTrace(this, FetchError);
   }
 }
@@ -57,10 +58,11 @@ export async function kfetch(fetchOptions, kibanaOptions) {
   });
 
   const res = await fetch(fullUrl, combinedFetchOptions);
+  const body = await res.json();
 
   if (!res.ok) {
-    throw new FetchError(res);
+    throw new FetchError(res, body);
   }
 
-  return res.json();
+  return body;
 }
