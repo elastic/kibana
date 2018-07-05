@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 
 function NodeAvailableWarning() {
-  const isCloud = false;
+  const isCloud = false; // placeholder for future specific cloud functionality
   if ((mlNodesAvailable() === true) || (permissionToViewMlNodeCount() === false)) {
     return (<span />);
   } else {
