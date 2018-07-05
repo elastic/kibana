@@ -76,10 +76,41 @@ describe('#get', () => {
 
     const type = 'foo';
     const id = 'object_1';
+    const options = {};
 
-    const result = await client.get(type, id);
+    const result = await client.get(type, id, options);
 
     expect(result).toBe(SAVED_OBJECTS[id]);
+  });
+
+  test(`merges options.extraSourceProperties`, async () => {
+    const currentSpace = {
+      id: 'space_1',
+      urlContext: 'space-1'
+    };
+
+    const request = createMockRequest(currentSpace);
+    const baseClient = createMockClient(currentSpace);
+    const spacesService = createSpacesService();
+
+    const client = new SpacesSavedObjectsClient({
+      request,
+      baseClient,
+      spacesService,
+      types: [],
+    });
+
+    const type = 'foo';
+    const id = 'object_1';
+    const options = {
+      extraSourceProperties: ['otherSourceProp']
+    };
+
+    await client.get(type, id, options);
+
+    expect(baseClient.get).toHaveBeenCalledWith(type, id, {
+      extraSourceProperties: ['spaceId', 'otherSourceProp']
+    });
   });
 
   test(`returns error when the object belongs to a different space`, async () => {
@@ -101,8 +132,9 @@ describe('#get', () => {
 
     const type = 'foo';
     const id = 'object_2';
+    const options = {};
 
-    await expect(client.get(type, id)).rejects.toThrowErrorMatchingSnapshot();
+    await expect(client.get(type, id, options)).rejects.toThrowErrorMatchingSnapshot();
   });
 });
 
@@ -125,6 +157,7 @@ describe('#bulk_get', () => {
     });
 
     const type = 'foo';
+    const options = {};
 
     const result = await client.bulkGet([{
       type,
@@ -132,7 +165,7 @@ describe('#bulk_get', () => {
     }, {
       type,
       id: 'object_2'
-    }]);
+    }], options);
 
     expect(result).toEqual({
       saved_objects: [{
@@ -147,6 +180,44 @@ describe('#bulk_get', () => {
           statusCode: 404
         }
       }]
+    });
+  });
+
+  test(`merges options.extraSourceProperties`, async () => {
+    const currentSpace = {
+      id: 'space_1',
+      urlContext: 'space-1'
+    };
+
+    const request = createMockRequest(currentSpace);
+    const baseClient = createMockClient(currentSpace);
+    const spacesService = createSpacesService();
+
+    const client = new SpacesSavedObjectsClient({
+      request,
+      baseClient,
+      spacesService,
+      types: [],
+    });
+
+    const type = 'foo';
+
+    const objects = [{
+      type,
+      id: 'object_1'
+    }, {
+      type,
+      id: 'object_2'
+    }];
+
+    const options = {
+      extraSourceProperties: ['otherSourceProp']
+    };
+
+    await client.bulkGet(objects, options);
+
+    expect(baseClient.bulkGet).toHaveBeenCalledWith(objects, {
+      extraSourceProperties: ['spaceId', 'type', 'otherSourceProp']
     });
   });
 });
