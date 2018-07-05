@@ -167,7 +167,7 @@ describe('Authentication routes', () => {
         sinon.assert.calledWithExactly(replyStub.continue, { credentials: user });
       });
 
-      it(`returns user data and doesn't log drepcation warning if checkPrivileges result is unauthorized.`, async () => {
+      it(`returns user data and doesn't log deprecation warning if checkPrivileges result is unauthorized.`, async () => {
         const user = { username: 'user' };
         authenticateStub.returns(
           Promise.resolve(AuthenticationResult.succeeded(user))
