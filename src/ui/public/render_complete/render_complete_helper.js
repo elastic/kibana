@@ -48,6 +48,6 @@ export class RenderCompleteHelper {
 
   disable = () => {
     this._element.setAttribute(attributeName, 'disabled');
-    this.teardown();
+    this.destroy();
   };
 }
