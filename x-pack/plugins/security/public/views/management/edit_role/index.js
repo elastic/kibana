@@ -60,8 +60,8 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
 
       return role.then(res => res.toJSON());
     },
-    kibanaApplicationPrivilege(ApplicationPrivilege, kbnUrl, Promise, Private) {
-      return ApplicationPrivilege.query().$promise
+    kibanaApplicationPrivilege(ApplicationPrivileges, kbnUrl, Promise, Private) {
+      return ApplicationPrivileges.query().$promise
         .then(privileges => privileges.map(p => p.toJSON()))
         .catch(checkLicenseError(kbnUrl, Promise, Private));
     },
