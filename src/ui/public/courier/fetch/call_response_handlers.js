@@ -32,14 +32,14 @@ export function CallResponseHandlersProvider(Private, Promise) {
         return ABORTED;
       }
 
-      const resp = responses[index];
+      const response = responses[index];
 
-      if (resp.timed_out) {
+      if (response.timed_out) {
         courierNotifier.warning(new SearchTimeout());
       }
 
-      if (resp._shards && resp._shards.failed) {
-        courierNotifier.warning(new ShardFailure(resp));
+      if (response._shards && response._shards.failed) {
+        courierNotifier.warning(new ShardFailure(response));
       }
 
       function progress() {
@@ -48,18 +48,18 @@ export function CallResponseHandlersProvider(Private, Promise) {
         }
 
         searchRequest.complete();
-        return resp;
+        return response;
       }
 
-      if (resp.error) {
-        if (searchRequest.filterError(resp)) {
+      if (response.error) {
+        if (searchRequest.filterError(response)) {
           return progress();
         } else {
-          return searchRequest.handleFailure(new RequestFailure(null, resp));
+          return searchRequest.handleFailure(new RequestFailure(null, response));
         }
       }
 
-      return Promise.try(() => searchRequest.handleResponse(resp)).then(progress);
+      return Promise.try(() => searchRequest.handleResponse(response)).then(progress);
     });
   }
 
