@@ -64,7 +64,7 @@ export class JobsListView extends Component {
 
   initAutoRefresh() {
     const { value, pause } = timefilter.getRefreshInterval();
-    if ((pause === false && value === 0)) {
+    if (pause === false && value === 0) {
       // if the auto refresher isn't set, set it to the default (5 secs)
       timefilter.setRefreshInterval({
         pause: false,
