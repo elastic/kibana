@@ -14,7 +14,7 @@
         <select
           id="regionMap"
           class="kuiSelect kuiSideBarSelect"
-          ng-model="vis.params.selectedLayer"
+          ng-model="editorState.params.selectedLayer"
           ng-options="layer.name for layer in collections.vectorLayers track by layer.layerId"
           ng-change="onLayerChange()"
         ></select>
@@ -28,8 +28,8 @@
       <div class="kuiSideBarFormRow__control">
         <select id="joinField"
           class="kuiSelect kuiSideBarSelect"
-          ng-model="vis.params.selectedJoinField"
-          ng-options="field.description for field in vis.params.selectedLayer.fields track by field.name"
+          ng-model="editorState.params.selectedJoinField"
+          ng-options="field.description for field in editorState.params.selectedLayer.fields track by field.name"
         >
           <option value=''>Select</option></select>
       </div>
@@ -40,7 +40,7 @@
       </label>
 
       <div class="kuiSideBarFormRow__control">
-        <input id="displayWarnings" type="checkbox" ng-model="vis.params.isDisplayWarning">
+        <input id="displayWarnings" type="checkbox" ng-model="editorState.params.isDisplayWarning">
         &nbsp;
         <icon-tip
           content="'Turns on/off warnings. When turned on, warning will be shown for each term that cannot be matched to a shape in the vector layer based on the join field. When turned off, these warnings will be turned off.'"
@@ -53,7 +53,7 @@
         Show all shapes
       </label>
       <div class="kuiSideBarFormRow__control">
-        <input id="onlyShowMatchingShapes" type="checkbox" ng-model="vis.params.showAllShapes">
+        <input id="onlyShowMatchingShapes" type="checkbox" ng-model="editorState.params.showAllShapes">
         &nbsp;
         <icon-tip
           content="'Turning this off only shows the shapes that were matched with a corresponding term'"
@@ -77,7 +77,7 @@
       <select
         id="colorSchema"
         class="kuiSelect kuiSideBarSelect"
-        ng-model="vis.params.colorSchema"
+        ng-model="editorState.params.colorSchema"
         ng-options="mode for mode in collections.colorSchemas"
       ></select>
     </div>
@@ -91,10 +91,10 @@
         id="outlineWeight"
         class="kuiInput kuiSideBarInput"
         type="number"
-        ng-model="vis.params.outlineWeight"
+        ng-model="editorState.params.outlineWeight"
       >
     </div>
   </div>
 </div>
 
-<wms-options options="vis.params.wms"></wms-options>
+<wms-options options="editorState.params.wms"></wms-options>

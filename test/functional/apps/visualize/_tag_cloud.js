@@ -51,6 +51,7 @@ export default function ({ getService, getPageObjects }) {
       });
       await PageObjects.visualize.selectOrderBy('_key');
       await PageObjects.visualize.clickGo();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
 
@@ -167,7 +168,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should apply filter with unformatted value', async function () {
         await PageObjects.visualize.selectTagCloudTag('30GB');
-        await PageObjects.common.sleep(500);
+        await PageObjects.header.waitUntilLoadingHasFinished();
         const data = await PageObjects.visualize.getTextTag();
         expect(data).to.eql([ '30GB' ]);
       });
