@@ -15,7 +15,7 @@ import { getActiveSpace } from './server/lib/get_active_space';
 import { wrapError } from './server/lib/errors';
 import mappings from './mappings.json';
 import { spacesSavedObjectsClientWrapperFactory } from './server/lib/saved_objects_client/saved_objects_client_wrapper_factory';
-import { mirrorStatusAndInitialize } from './server/lib/mirror_status_and_initialize';
+import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
 
 export const spaces = (kibana) => new kibana.Plugin({
   id: 'spaces',
@@ -68,7 +68,7 @@ export const spaces = (kibana) => new kibana.Plugin({
     const thisPlugin = this;
     const xpackMainPlugin = server.plugins.xpack_main;
 
-    mirrorStatusAndInitialize(xpackMainPlugin.status, thisPlugin.status, async () => {
+    watchStatusAndLicenseToInitialize(xpackMainPlugin, thisPlugin, async () => {
       await createDefaultSpace(server);
     });
 
