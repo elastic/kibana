@@ -11,6 +11,8 @@ export function buildPrivilegeMap(savedObjectTypes, application, actions) {
       .reduce((acc, types) => [...acc, ...types], []);
   };
 
+  // the following list of privileges should only be added to, you can safely remove actions, but not privileges as
+  // it's a backwards compatibility issue and we'll have to at least adjust registerPrivilegesWithCluster to support it
   return {
     all: {
       application,
