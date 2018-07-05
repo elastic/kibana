@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { difference, isEqual } from 'lodash';
+import { difference, isEmpty, isEqual } from 'lodash';
 import { buildPrivilegeMap } from './privileges';
 import { getClient } from '../../../../../server/lib/get_client_shield';
 import { actionsFactory } from './actions';
+
+
 
 export async function registerPrivilegesWithCluster(server) {
   const config = server.config();
@@ -15,6 +17,14 @@ export async function registerPrivilegesWithCluster(server) {
   const actions = actionsFactory(config);
   const application = config.get('xpack.security.rbac.application');
   const savedObjectTypes = server.savedObjects.types;
+
+  const shouldRemovePrivileges = (existingPrivileges, expectedPrivileges) => {
+    if (isEmpty(existingPrivileges)) {
+      return false;
+    }
+
+    return difference(Object.keys(existingPrivileges[application]), Object.keys(expectedPrivileges[application])).length > 0;
+  };
 
   const expectedPrivileges = {
     [application]: buildPrivilegeMap(savedObjectTypes, application, actions)
@@ -37,7 +47,7 @@ export async function registerPrivilegesWithCluster(server) {
     // remove unspecified privileges. We don't currently have a need to remove privileges, as this would be a
     // backwards compatibility issue, and we'd have to figure out how to migrate roles, so we're throwing an Error if we
     // unintentionally get ourselves in this position.
-    if (difference(Object.keys(existingPrivileges[application]), Object.keys(expectedPrivileges[application])).length > 0) {
+    if (shouldRemovePrivileges(existingPrivileges, expectedPrivileges)) {
       throw new Error(`Privileges are missing and can't be removed, currently.`);
     }
 

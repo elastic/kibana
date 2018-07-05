@@ -133,6 +133,11 @@ const registerPrivilegesWithClusterTest = (description, {
           throw throwErrorWhenGettingPrivileges;
         }
 
+        // ES returns an empty object if we don't have any privileges
+        if (!existingPrivileges) {
+          return {};
+        }
+
         return {
           [defaultApplication]: existingPrivileges
         };
@@ -183,6 +188,16 @@ registerPrivilegesWithClusterTest(`passes saved object types, application and ac
       version: 'mock-action:version',
     });
   },
+});
+
+registerPrivilegesWithClusterTest(`inserts privileges when we don't have any existing privileges`, {
+  expectedPrivileges: {
+    expected: true
+  },
+  existingPrivileges: null,
+  assert: ({ expectUpdatedPrivileges }) => {
+    expectUpdatedPrivileges();
+  }
 });
 
 registerPrivilegesWithClusterTest(`updates privileges when simple top-level privileges values don't match`, {
