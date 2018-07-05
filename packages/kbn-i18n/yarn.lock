@@ -622,6 +622,16 @@
     lodash "^4.17.10"
     to-fast-properties "^2.0.0"
 
+"@types/angular-sanitize@^1.3.7":
+  version "1.3.7"
+  resolved "https://registry.yarnpkg.com/@types/angular-sanitize/-/angular-sanitize-1.3.7.tgz#1c4fcf5f517adccc731f3c977704c0543eb19cf9"
+  dependencies:
+    "@types/angular" "*"
+
+"@types/angular@*":
+  version "1.6.51"
+  resolved "https://registry.yarnpkg.com/@types/angular/-/angular-1.6.51.tgz#a67515b0ba6a2ff68894a39405c1343cbf9c36d4"
+
 "@types/intl-relativeformat@^2.1.0":
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/@types/intl-relativeformat/-/intl-relativeformat-2.1.0.tgz#3a2b0043380388f39c666665ec517e11412f1358"

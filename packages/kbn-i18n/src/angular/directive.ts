@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IDirective, IRootElementService, IScope } from 'angular';
+import { IDirective, IRootElementService, IScope, ICompileService, sanitize } from 'angular';
 
 import { I18nServiceType } from './provider';
 
@@ -29,16 +29,25 @@ export function i18nDirective(i18n: I18nServiceType): IDirective {
       defaultMessage: '@i18nDefaultMessage',
       values: '=i18nValues',
     },
-    link($scope: IScope, $element: IRootElementService) {
+    link(
+      $scope: IScope,
+      $element: IRootElementService,
+      $compile: ICompileService,
+      $sanitize: sanitize.ISanitizeService
+    ) {
       $scope.$watchGroup(
         ['id', 'defaultMessage', 'values'],
         ([id, defaultMessage = '', values = {}]) => {
           $element.html(
-            i18n(id, {
-              values,
-              defaultMessage,
-            })
+            $sanitize(
+              i18n(id, {
+                values,
+                defaultMessage,
+              })
+            )
           );
+
+          $compile($element.contents())($scope.$parent);
         }
       );
     },
