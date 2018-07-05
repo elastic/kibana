@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import React from 'react';
-import Markdown from 'markdown-to-jsx';
+import { MarkdownSimple } from 'ui/markdown';
 import { toastNotifications } from 'ui/notify';
 
 import { fetchAnchorProvider } from '../api/anchor';
@@ -82,7 +82,7 @@ export function QueryActionsProvider(courier, Private, Promise) {
           setFailedStatus(state)('anchor', { error });
           toastNotifications.addDanger({
             title: 'Unable to load the anchor document',
-            text: <Markdown>{error.message}</Markdown>,
+            text: <MarkdownSimple>{error.message}</MarkdownSimple>,
           });
           throw error;
         }
@@ -126,7 +126,7 @@ export function QueryActionsProvider(courier, Private, Promise) {
           setFailedStatus(state)('predecessors', { error });
           toastNotifications.addDanger({
             title: 'Unable to load documents',
-            text: <Markdown>{error.message}</Markdown>,
+            text: <MarkdownSimple>{error.message}</MarkdownSimple>,
           });
           throw error;
         },
@@ -170,7 +170,7 @@ export function QueryActionsProvider(courier, Private, Promise) {
           setFailedStatus(state)('successors', { error });
           toastNotifications.addDanger({
             title: 'Unable to load documents',
-            text: <Markdown>{error.message}</Markdown>,
+            text: <MarkdownSimple>{error.message}</MarkdownSimple>,
           });
           throw error;
         },

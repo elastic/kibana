@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { toastNotifications } from 'ui/notify';
-import Markdown from 'markdown-to-jsx';
+import { MarkdownSimple } from 'ui/markdown';
 import { PLUGIN } from '../../../common/constants';
 
 export class LogstashLicenseService {
@@ -34,7 +34,7 @@ export class LogstashLicenseService {
 
   notifyAndRedirect() {
     toastNotifications.addDanger({
-      title: <Markdown>{this.xpackInfoService.get(`features.${PLUGIN.ID}.message`)}</Markdown>,
+      title: <MarkdownSimple>{this.xpackInfoService.get(`features.${PLUGIN.ID}.message`)}</MarkdownSimple>,
     });
     this.kbnUrlService.redirect('/management');
   }
