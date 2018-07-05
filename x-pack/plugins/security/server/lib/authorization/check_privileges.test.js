@@ -6,7 +6,7 @@
 
 import { checkPrivilegesWithRequestFactory, CHECK_PRIVILEGES_RESULT } from './check_privileges';
 import { getClient } from '../../../../../server/lib/get_client_shield';
-import { DEFAULT_RESOURCE } from '../../../common/constants';
+import { ALL_RESOURCE } from '../../../common/constants';
 import { getLoginAction, getVersionAction } from '../privileges';
 
 jest.mock('../../../../../server/lib/get_client_shield', () => ({
@@ -49,7 +49,7 @@ const mockApplicationPrivilegeResponse = ({ hasAllRequested, privileges, applica
     has_all_requested: hasAllRequested,
     application: {
       [application]: {
-        [DEFAULT_RESOURCE]: privileges
+        [ALL_RESOURCE]: privileges
       }
     }
   };
@@ -112,7 +112,7 @@ test(`returns authorized if they have all application privileges`, async () => {
     body: {
       applications: [{
         application: defaultApplication,
-        resources: [DEFAULT_RESOURCE],
+        resources: [ALL_RESOURCE],
         privileges: [
           getVersionAction(defaultVersion), getLoginAction(), ...privileges
         ]
@@ -156,7 +156,7 @@ test(`returns unauthorized they have only one application privilege`, async () =
     body: {
       applications: [{
         application: defaultApplication,
-        resources: [DEFAULT_RESOURCE],
+        resources: [ALL_RESOURCE],
         privileges: [
           getVersionAction(defaultVersion), getLoginAction(), ...privileges
         ]
@@ -227,7 +227,7 @@ describe('legacy fallback with no application privileges', () => {
       body: {
         applications: [{
           application: defaultApplication,
-          resources: [DEFAULT_RESOURCE],
+          resources: [ALL_RESOURCE],
           privileges: [
             getVersionAction(defaultVersion), getLoginAction(), ...privileges
           ]
@@ -286,7 +286,7 @@ describe('legacy fallback with no application privileges', () => {
         body: {
           applications: [{
             application: defaultApplication,
-            resources: [DEFAULT_RESOURCE],
+            resources: [ALL_RESOURCE],
             privileges: [
               getVersionAction(defaultVersion), getLoginAction(), ...privileges
             ]
