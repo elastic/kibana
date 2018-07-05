@@ -23,7 +23,7 @@ export class SpacesSavedObjectsClient {
     this._request = request;
     this._types = types;
 
-    this._spaceUrlContext = spacesService.getUrlContext(this._request, '');
+    this._spaceUrlContext = spacesService.getUrlContext(this._request);
   }
 
   async create(type, attributes = {}, options = {}) {

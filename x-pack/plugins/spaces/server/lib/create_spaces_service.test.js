@@ -10,14 +10,9 @@ const createRequest = (urlContext) => ({
   getBasePath: () => urlContext ? `/s/${urlContext}` : ''
 });
 
-test('returns null for the default space', () => {
+test('returns empty string for the default space', () => {
   const service = createSpacesService();
-  expect(service.getUrlContext(createRequest())).toEqual(null);
-});
-
-test('uses the provided default context when supplied for the default space', () => {
-  const service = createSpacesService();
-  expect(service.getUrlContext(createRequest(), 'default-context')).toEqual('default-context');
+  expect(service.getUrlContext(createRequest())).toEqual('');
 });
 
 test('returns the urlContext for the current space', () => {
