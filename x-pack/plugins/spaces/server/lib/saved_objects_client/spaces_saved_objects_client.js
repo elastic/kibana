@@ -31,14 +31,18 @@ export class SpacesSavedObjectsClient {
     const spaceId = await this._getSpaceId();
     const shouldAssignSpaceId = spaceId !== DEFAULT_SPACE_ID && isTypeSpaceAware(type);
 
+    const createOptions = {
+      ...options
+    };
+
     if (shouldAssignSpaceId) {
-      options.extraBodyProperties = {
+      createOptions.extraBodyProperties = {
         ...options.extraBodyProperties,
-        spaceId: await this._getSpaceId()
+        spaceId
       };
     }
 
-    return await this._client.create(type, attributes, options);
+    return await this._client.create(type, attributes, createOptions);
   }
 
   async bulkCreate(objects, options = {}) {
