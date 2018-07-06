@@ -29,21 +29,10 @@ export const createBeatVerificationRoute = (libs: CMServerLibs) => ({
 
     try {
       const {
-        verifications,
+        verifiedBeatIds,
         alreadyVerifiedBeatIds,
-        toBeVerifiedBeatIds,
         nonExistentBeatIds,
       } = await libs.beats.verifyBeats(request, beatIds);
-
-      const verifiedBeatIds = verifications.reduce(
-        (verifiedBeatList: any, verification: any, idx: any) => {
-          if (verification.update.status === 200) {
-            verifiedBeatList.push(toBeVerifiedBeatIds[idx]);
-          }
-          return verifiedBeatList;
-        },
-        []
-      );
 
       // TODO calculation of status should be done in-lib, w/switch statement here
       beats.forEach(beat => {
