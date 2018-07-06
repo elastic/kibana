@@ -63,7 +63,8 @@ export function CallClientProvider(Private, Promise, es) {
         .filter(request => {
           // We'll use the index of the request to map it to its response. If a request has already
           // failed then it won't generate a response. In this case we need to remove the request
-          // to maintain parity between the list of requests and the list of correspoding responses.
+          // to maintain cardinality between the list of requests and the list of corresponding
+          // responses.
           return request !== undefined;
         });
 
