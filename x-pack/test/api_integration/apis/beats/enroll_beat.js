@@ -6,10 +6,8 @@
 
 import expect from 'expect.js';
 import moment from 'moment';
-import {
-  ES_INDEX_NAME,
-  ES_TYPE_NAME
-} from './constants';
+
+import { ES_INDEX_NAME, ES_TYPE_NAME } from './constants';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -23,17 +21,19 @@ export default function ({ getService }) {
 
     beforeEach(async () => {
       validEnrollmentToken = chance.word();
+
       beatId = chance.word();
-      const version = chance.integer({ min: 1, max: 10 })
-        + '.'
-        + chance.integer({ min: 1, max: 10 })
-        + '.'
-        + chance.integer({ min: 1, max: 10 });
+      const version =
+        chance.integer({ min: 1, max: 10 }) +
+        '.' +
+        chance.integer({ min: 1, max: 10 }) +
+        '.' +
+        chance.integer({ min: 1, max: 10 });
 
       beat = {
         type: 'filebeat',
         host_name: 'foo.bar.com',
-        version
+        version,
       };
 
       await es.index({
@@ -44,17 +44,17 @@ export default function ({ getService }) {
           type: 'enrollment_token',
           enrollment_token: {
             token: validEnrollmentToken,
-            expires_on: moment().add(4, 'hours').toJSON()
-          }
-        }
+            expires_on: moment()
+              .add(4, 'hours')
+              .toJSON(),
+          },
+        },
       });
     });
 
     it('should enroll beat in an unverified state', async () => {
       await supertest
-        .post(
-          `/api/beats/agent/${beatId}`
-        )
+        .post(`/api/beats/agent/${beatId}`)
         .set('kbn-xsrf', 'xxx')
         .set('kbn-beats-enrollment-token', validEnrollmentToken)
         .send(beat)
@@ -63,7 +63,7 @@ export default function ({ getService }) {
       const esResponse = await es.get({
         index: ES_INDEX_NAME,
         type: ES_TYPE_NAME,
-        id: `beat:${beatId}`
+        id: `beat:${beatId}`,
       });
 
       expect(esResponse._source.beat).to.not.have.property('verified_on');
@@ -72,9 +72,7 @@ export default function ({ getService }) {
 
     it('should contain an access token in the response', async () => {
       const { body: apiResponse } = await supertest
-        .post(
-          `/api/beats/agent/${beatId}`
-        )
+        .post(`/api/beats/agent/${beatId}`)
         .set('kbn-xsrf', 'xxx')
         .set('kbn-beats-enrollment-token', validEnrollmentToken)
         .send(beat)
@@ -85,7 +83,7 @@ export default function ({ getService }) {
       const esResponse = await es.get({
         index: ES_INDEX_NAME,
         type: ES_TYPE_NAME,
-        id: `beat:${beatId}`
+        id: `beat:${beatId}`,
       });
 
       const accessTokenInEs = esResponse._source.beat.access_token;
@@ -96,9 +94,7 @@ export default function ({ getService }) {
 
     it('should reject an invalid enrollment token', async () => {
       const { body: apiResponse } = await supertest
-        .post(
-          `/api/beats/agent/${beatId}`
-        )
+        .post(`/api/beats/agent/${beatId}`)
         .set('kbn-xsrf', 'xxx')
         .set('kbn-beats-enrollment-token', chance.word())
         .send(beat)
@@ -108,7 +104,10 @@ export default function ({ getService }) {
     });
 
     it('should reject an expired enrollment token', async () => {
-      const expiredEnrollmentToken = chance.word();
+      const expiredEnrollmentToken =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' +
+        'eyJjcmVhdGVkIjoiMjAxOC0wNi0zMFQwMzo0MjoxNS4yMzBaIiwiaWF0IjoxNTMwMzMwMTM1LCJleHAiOjE1MzAzMzAxMzV9.' +
+        'Azf4czAwWZEflR7Pf8pi-DUTcve9xyxWyViNYeUSGog';
 
       await es.index({
         index: ES_INDEX_NAME,
@@ -118,15 +117,15 @@ export default function ({ getService }) {
           type: 'enrollment_token',
           enrollment_token: {
             token: expiredEnrollmentToken,
-            expires_on: moment().subtract(1, 'minute').toJSON()
-          }
-        }
+            expires_on: moment()
+              .subtract(1, 'minute')
+              .toJSON(),
+          },
+        },
       });
 
       const { body: apiResponse } = await supertest
-        .post(
-          `/api/beats/agent/${beatId}`
-        )
+        .post(`/api/beats/agent/${beatId}`)
         .set('kbn-xsrf', 'xxx')
         .set('kbn-beats-enrollment-token', expiredEnrollmentToken)
         .send(beat)
@@ -137,9 +136,7 @@ export default function ({ getService }) {
 
     it('should delete the given enrollment token so it may not be reused', async () => {
       await supertest
-        .post(
-          `/api/beats/agent/${beatId}`
-        )
+        .post(`/api/beats/agent/${beatId}`)
         .set('kbn-xsrf', 'xxx')
         .set('kbn-beats-enrollment-token', validEnrollmentToken)
         .send(beat)
@@ -149,7 +146,7 @@ export default function ({ getService }) {
         index: ES_INDEX_NAME,
         type: ES_TYPE_NAME,
         id: `enrollment_token:${validEnrollmentToken}`,
-        ignore: [ 404 ]
+        ignore: [404],
       });
 
       expect(esResponse.found).to.be(false);
@@ -157,9 +154,7 @@ export default function ({ getService }) {
 
     it('should fail if the beat with the same ID is enrolled twice', async () => {
       await supertest
-        .post(
-          `/api/beats/agent/${beatId}`
-        )
+        .post(`/api/beats/agent/${beatId}`)
         .set('kbn-xsrf', 'xxx')
         .set('kbn-beats-enrollment-token', validEnrollmentToken)
         .send(beat)
@@ -173,15 +168,15 @@ export default function ({ getService }) {
           type: 'enrollment_token',
           enrollment_token: {
             token: validEnrollmentToken,
-            expires_on: moment().add(4, 'hours').toJSON()
-          }
-        }
+            expires_on: moment()
+              .add(4, 'hours')
+              .toJSON(),
+          },
+        },
       });
 
       await supertest
-        .post(
-          `/api/beats/agent/${beatId}`
-        )
+        .post(`/api/beats/agent/${beatId}`)
         .set('kbn-xsrf', 'xxx')
         .set('kbn-beats-enrollment-token', validEnrollmentToken)
         .send(beat)
