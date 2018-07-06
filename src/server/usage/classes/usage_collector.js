@@ -19,8 +19,4 @@
 
 import { Collector } from './collector';
 
-export class UsageCollector extends Collector {
-  constructor(server, properties) {
-    super(server, properties);
-  }
-}
+export class UsageCollector extends Collector {}
