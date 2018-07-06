@@ -42,7 +42,7 @@
  *
  *    NOTE: `$onInit()` is not dependency injected, if you need controller specific
  *      dependencies like `$scope` then you're probably using watchers and should
- *      take a look at the new one-way data flow facitilies available to
+ *      take a look at the new one-way data flow facilities available to
  *      directives/components:
  *
  *      https://docs.angularjs.org/guide/component#component-based-application-architecture

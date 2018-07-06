@@ -410,7 +410,7 @@ export function VislibLibDataProvider(Private) {
 
     /**
      * Return an array of unique labels
-     * Curently, only used for vertical bar and line charts,
+     * Currently, only used for vertical bar and line charts,
      * or any data object with series values
      *
      * @method getLabels

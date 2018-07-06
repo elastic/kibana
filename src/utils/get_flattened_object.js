@@ -24,7 +24,7 @@ function shouldReadKeys(value) {
 
 /**
  *  Flattens a deeply nested object to a map of dot-separated
- *  paths pointing to all primative values **and arrays**
+ *  paths pointing to all primitive values **and arrays**
  *  from `rootValue`.
  *
  *  example:

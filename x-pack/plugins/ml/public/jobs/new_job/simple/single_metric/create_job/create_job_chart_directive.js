@@ -14,7 +14,6 @@ import $ from 'jquery';
 import d3 from 'd3';
 import angular from 'angular';
 import moment from 'moment';
-import 'ui/timefilter';
 
 import { TimeBuckets } from 'ui/time_buckets';
 import { drawLineChartDots, numTicksForDateFormat } from 'plugins/ml/util/chart_utils';

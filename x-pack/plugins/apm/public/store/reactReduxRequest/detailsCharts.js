@@ -9,8 +9,8 @@ import { createSelector } from 'reselect';
 import { getCharts } from '../selectors/chartSelectors';
 import { getUrlParams } from '../urlParams';
 import { Request } from 'react-redux-request';
-import { loadCharts } from '../../services/rest';
-import { withInitialData } from './helpers';
+import { loadCharts } from '../../services/rest/apm';
+import { createInitialDataSelector } from './helpers';
 
 const ID = 'detailsCharts';
 const INITIAL_DATA = {
@@ -18,12 +18,14 @@ const INITIAL_DATA = {
   dates: [],
   responseTimes: {},
   tpmBuckets: [],
-  weightedAverage: null
+  overallAvgDuration: null
 };
+
+const withInitialData = createInitialDataSelector(INITIAL_DATA);
 
 export const getDetailsCharts = createSelector(
   getUrlParams,
-  state => withInitialData(state.reactReduxRequest[ID], INITIAL_DATA),
+  state => withInitialData(state.reactReduxRequest[ID]),
   (urlParams, detailCharts) => {
     return {
       ...detailCharts,

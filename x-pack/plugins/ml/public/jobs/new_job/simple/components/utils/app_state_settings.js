@@ -29,10 +29,6 @@ export function populateAppStateSettings(appState, scope) {
 
     function finish(success) {
       if (success) {
-        if (scope.bucketSpanEstimatorExportedFunctions.guessBucketSpan &&
-          typeof scope.bucketSpanEstimatorExportedFunctions.guessBucketSpan === 'function') {
-          scope.bucketSpanEstimatorExportedFunctions.guessBucketSpan();
-        }
         $('#job-id-input').focus();
       }
     }
@@ -42,7 +38,7 @@ export function populateAppStateSettings(appState, scope) {
 // single metric page
 function populateSingleMetricSettings(jobSettings, scope) {
   return new Promise((resolve, reject) => {
-    jobSettings.fields.forEach(f => {
+    jobSettings.fields.forEach((f) => {
 
       if (f.agg !== undefined) {
         // find the aggregation object in the aggTypeOptions list which has the same name
@@ -66,7 +62,8 @@ function populateSingleMetricSettings(jobSettings, scope) {
 
     if ((scope.formConfig.agg.type !== undefined && scope.formConfig.field !== undefined) ||
       (scope.formConfig.agg.type.name === 'count' && scope.formConfig.field === undefined)) {
-      scope.loadVis();
+
+      populateCommonSettings(jobSettings, scope);
       resolve();
     } else {
       reject();
@@ -77,19 +74,18 @@ function populateSingleMetricSettings(jobSettings, scope) {
 // multi metric page
 function populateMultiMetricSettings(jobSettings, scope) {
   return new Promise((resolve, reject) => {
-    jobSettings.fields.forEach(f => {
+    jobSettings.fields.forEach((f) => {
 
-      if (f.fieldName !== undefined) {
-        const field = scope.ui.fields.find(o => (o.id === f.fieldName));
-        if (field !== undefined) {
-          scope.formConfig.fields[field.id] = field;
-        }
+      const fieldName = (f.fieldName !== undefined) ? f.fieldName : '__ml_event_rate_count__';
+      const field = scope.ui.fields.find(o => (o.id === fieldName));
+      if (field !== undefined) {
+        scope.formConfig.fields[field.id] = field;
+      }
 
-        if (f.agg !== undefined) {
-          const agg = scope.ui.aggTypeOptions.find(o => (o.name === f.agg));
-          if (agg !== undefined) {
-            scope.formConfig.fields[field.id].agg.type = agg;
-          }
+      if (f.agg !== undefined) {
+        const agg = scope.ui.aggTypeOptions.find(o => (o.name === f.agg));
+        if (agg !== undefined) {
+          scope.formConfig.fields[field.id].agg.type = agg;
         }
       }
     });
@@ -103,7 +99,7 @@ function populateMultiMetricSettings(jobSettings, scope) {
     }
 
     if (scope.formConfig.fields !== undefined && (Object.keys(scope.formConfig.fields).length > 0)) {
-      scope.loadVis();
+      populateCommonSettings(jobSettings, scope);
       resolve();
     } else {
       reject();
@@ -121,21 +117,19 @@ function populatePopulationSettings(jobSettings, scope) {
         scope.overChange();
       }
 
-      jobSettings.fields.forEach(f => {
+      jobSettings.fields.forEach((f) => {
+        const fieldName = (f.fieldName !== undefined) ? f.fieldName : '__ml_event_rate_count__';
+        const tempField = scope.ui.fields.find(o => (o.id === fieldName));
+        const field = { ...tempField };
+        if (field !== undefined) {
 
-        if (f.fieldName !== undefined) {
-          const tempField = scope.ui.fields.find(o => (o.id === f.fieldName));
-          const field = { ...tempField };
-          if (field !== undefined) {
-
-            if (f.agg !== undefined) {
-              const agg = scope.ui.aggTypeOptions.find(o => (o.name === f.agg));
-              if (agg !== undefined) {
-                field.agg = { type: agg };
-              }
+          if (f.agg !== undefined) {
+            const agg = scope.ui.aggTypeOptions.find(o => (o.name === f.agg));
+            if (agg !== undefined) {
+              field.agg = { type: agg };
             }
-            scope.formConfig.fields.push(field);
           }
+          scope.formConfig.fields.push(field);
         }
       });
 
@@ -171,6 +165,7 @@ function populatePopulationSettings(jobSettings, scope) {
 
     }
     if (scope.formConfig.fields !== undefined && (Object.keys(scope.formConfig.fields).length > 0)) {
+      populateCommonSettings(jobSettings, scope);
       resolve();
     } else {
       reject();
@@ -178,4 +173,36 @@ function populatePopulationSettings(jobSettings, scope) {
   });
 }
 
+function populateCommonSettings(jobSettings, scope) {
+  if (typeof jobSettings.modelMemoryLimit === 'string') {
+    scope.formConfig.modelMemoryLimit = jobSettings.modelMemoryLimit;
+  }
+
+  if (typeof jobSettings.bucketSpan === 'string') {
+    scope.formConfig.bucketSpan = jobSettings.bucketSpan;
+  } else {
+    runEstimateBucketSpan(scope);
+  }
+
+  if (typeof jobSettings.description === 'string') {
+    scope.formConfig.description = jobSettings.description;
+  }
+
+  if (Array.isArray(jobSettings.groups)) {
+    scope.formConfig.jobGroups = jobSettings.groups;
+  }
+
+  if (Array.isArray(jobSettings.influencers)) {
+    scope.formConfig.influencerFields = jobSettings.influencers.map((i) => scope.ui.fields.find(f => f.id === i));
+  }
+}
+
+function runEstimateBucketSpan(scope) {
+  setTimeout(() => {
+    if (scope.bucketSpanEstimatorExportedFunctions.guessBucketSpan &&
+      typeof scope.bucketSpanEstimatorExportedFunctions.guessBucketSpan === 'function') {
+      scope.bucketSpanEstimatorExportedFunctions.guessBucketSpan();
+    }
+  }, 0);
+}
 

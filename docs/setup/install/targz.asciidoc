@@ -76,17 +76,7 @@ endif::[]
 
 
 [[targz-running]]
-==== Running Kibana from the command line
-
-Kibana can be started from the command line as follows:
-
-[source,sh]
---------------------------------------------
-./bin/kibana
---------------------------------------------
-
-By default, Kibana runs in the foreground, prints its logs to the
-standard output (`stdout`), and can be stopped by pressing `Ctrl-C`.
+include::targz-running.asciidoc[]
 
 
 [[targz-configuring]]
