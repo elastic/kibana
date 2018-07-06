@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import { CollectorSet, Collector, UsageCollector } from './classes';
+import { CollectorSet } from './classes';
 
 export function usageMixin(kbnServer, server) {
   const collectorSet = new CollectorSet(server);
 
-  // expose the collector set object on the server. other plugins will (Hapi plugin model)
-  server.decorate('server', 'usage', {
-    collectorSet,   // consumer code calls collectorSet.register(collector) to define their own collector objects
-    Collector,      // helper class for consumer code implementing ops/stats collection
-    UsageCollector, // helper class for consumer codea implementing usage collection
-  });
+  /*
+   * expose the collector set object on the server
+   * provides factory methods for feature owners to create their own collector objects
+   * use collectorSet.register(collector) to register your feature's collector object(s)
+   */
+  server.decorate('server', 'usage', { collectorSet });
 }

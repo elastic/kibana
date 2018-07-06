@@ -20,7 +20,8 @@ const TYPES = [
  * Fetches saved object client counts by querying the saved object index
  */
 export function getKibanaUsageCollector(server) {
-  return new server.usage.UsageCollector(server, {
+  const { collectorSet } = server.usage;
+  return collectorSet.makeUsageCollector({
     type: KIBANA_USAGE_TYPE,
     async fetch(callCluster) {
       const index = server.config().get('kibana.index');
