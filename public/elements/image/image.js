@@ -5,5 +5,6 @@ export const image = () => ({
   displayName: 'Image',
   help: 'A static image.',
   image: header,
-  expression: 'image mode="contain" | render',
+  expression: `image mode="contain"
+| render`,
 });

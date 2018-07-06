@@ -5,5 +5,6 @@ export const debug = () => ({
   displayName: 'Debug',
   help: 'Just dumps the configuration of the element',
   image: header,
-  expression: 'demodata | render as=debug',
+  expression: `demodata
+| render as=debug`,
 });

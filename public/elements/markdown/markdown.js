@@ -5,7 +5,9 @@ export const markdown = () => ({
   displayName: 'Markdown',
   help: 'Markup from Markdown',
   image: header,
-  expression: `filters | demodata | markdown "### Welcome to the Markdown Element.
+  expression: `filters
+| demodata
+| markdown "### Welcome to the Markdown Element.
 
 Good news! You're already connected to some demo data!
 

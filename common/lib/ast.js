@@ -1,39 +1,60 @@
 import { getType } from '../lib/get_type';
 import { parse } from './grammar';
 
-function getArgumentString(arg, argKey) {
+function getArgumentString(arg, argKey, level = 0) {
   const type = getType(arg);
 
-  function maybeArgKey(argString) {
+  function maybeArgKey(argKey, argString) {
     return argKey == null || argKey === '_' ? argString : `${argKey}=${argString}`;
   }
 
-  function escapeSpecialCharacters(string) {
-    return string.replace(/[\\"]/g, '\\$&'); // $& means the whole matched string
+  if (type === 'string') {
+    // correctly (re)escape double quotes
+    const escapedArg = arg.replace(/[\\"]/g, '\\$&'); // $& means the whole matched string
+    return maybeArgKey(argKey, `"${escapedArg}"`);
   }
 
-  if (type === 'string') return maybeArgKey(`"${escapeSpecialCharacters(arg)}"`);
-  if (type === 'boolean' || type === 'null' || type === 'number') return maybeArgKey(`${arg}`);
-  if (type === 'expression') return maybeArgKey(`{${getExpression(arg.chain)}}`);
+  if (type === 'boolean' || type === 'null' || type === 'number') {
+    // use values directly
+    return maybeArgKey(argKey, `${arg}`);
+  }
 
+  if (type === 'expression') {
+    // build subexpressions
+    return maybeArgKey(argKey, `{${getExpression(arg.chain, level + 1)}}`);
+  }
+
+  // unknown type, throw with type value
   throw new Error(`Invalid argument type in AST: ${type}`);
 }
 
-function getExpressionArgs(block) {
+function getExpressionArgs(block, level = 0) {
   const args = block.arguments;
+  const hasValidArgs = typeof args === 'object' && args != null && !Array.isArray(args);
 
-  if (!hasValidateArgs(args)) throw new Error('Arguments can only be an object');
+  if (!hasValidArgs) throw new Error('Arguments can only be an object');
 
   const argKeys = Object.keys(args);
-  return argKeys.map(argKey => {
-    const multiArgs = args[argKey];
+  const MAX_LINE_LENGTH = 80; // length before wrapping arguments
+  return argKeys.map(argKey =>
+    args[argKey].reduce((acc, arg) => {
+      const argString = getArgumentString(arg, argKey, level);
+      const lineLength = acc.split('\n').pop().length;
 
-    return multiArgs.reduce((acc, arg) => acc.concat(getArgumentString(arg, argKey)), []).join(' ');
-  });
-}
+      // if arg values are too long, move it to the next line
+      if (level === 0 && lineLength + argString.length > MAX_LINE_LENGTH) {
+        return `${acc}\n  ${argString}`;
+      }
 
-function hasValidateArgs(args) {
-  return typeof args === 'object' && args != null && !Array.isArray(args);
+      // append arg values to existing arg values
+      if (lineLength > 0) {
+        return `${acc} ${argString}`;
+      }
+
+      // start the accumulator with the first arg value
+      return argString;
+    }, '')
+  );
 }
 
 function fnWithArgs(fnName, args) {
@@ -41,8 +62,11 @@ function fnWithArgs(fnName, args) {
   return `${fnName} ${args.join(' ')}`;
 }
 
-function getExpression(chain) {
+function getExpression(chain, level = 0) {
   if (!chain) throw new Error('Expressions must contain a chain');
+
+  // break new functions onto new lines if we're not in a nested/sub-expression
+  const separator = level > 0 ? ' | ' : '\n| ';
 
   return chain
     .map(chainObj => {
@@ -52,12 +76,12 @@ function getExpression(chain) {
         const fn = chainObj.function;
         if (!fn || fn.length === 0) throw new Error('Functions must have a function name');
 
-        const expArgs = getExpressionArgs(chainObj);
+        const expArgs = getExpressionArgs(chainObj, level);
 
         return fnWithArgs(fn, expArgs);
       }
     }, [])
-    .join(' | ');
+    .join(separator);
 }
 
 export function fromExpression(expression, type = 'expression') {

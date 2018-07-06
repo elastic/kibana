@@ -457,10 +457,10 @@ describe('ast toExpression', () => {
 
       const expression = toExpression(astObj);
       const expected = [
-        'csv input="year,make,model,price',
+        'csv \n  input="year,make,model,price',
         '2016,honda,cr-v,23845',
         '2016,honda,fit,15890,',
-        '2016,honda,civic,18640" | line x={distinct f="year"} y={sum f="price"} colors={distinct f="model"}',
+        '2016,honda,civic,18640"\n| line x={distinct f="year"} y={sum f="price"} colors={distinct f="model"}',
       ];
       expect(expression).to.equal(expected.join('\n'));
     });
@@ -551,11 +551,11 @@ describe('ast toExpression', () => {
 
       const expression = toExpression(astObj);
       const expected = [
-        'csv input="year,make,model,price',
+        'csv \n  input="year,make,model,price',
         '2016,honda,cr-v,23845',
         '2016,honda,fit,15890,',
-        '2016,honda,civic,18640" | pointseries x={distinct f="year"} y={sum f="price"} ' +
-          'colors={distinct f="model"} | line pallette={getColorPallette name="elastic"}',
+        '2016,honda,civic,18640"\n| pointseries x={distinct f="year"} y={sum f="price"} ' +
+          'colors={distinct f="model"}\n| line pallette={getColorPallette name="elastic"}',
       ];
       expect(expression).to.equal(expected.join('\n'));
     });

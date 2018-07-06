@@ -7,5 +7,9 @@ export const pie = () => ({
   height: 300,
   help: 'An customizable element for making pie charts from your data',
   image: header,
-  expression: 'filters | demodata | pointseries color="state" size="max(price)" | pie | render',
+  expression: `filters
+| demodata
+| pointseries color="state" size="max(price)"
+| pie
+| render`,
 });

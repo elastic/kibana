@@ -5,5 +5,8 @@ export const table = () => ({
   displayName: 'Data Table',
   help: 'A scrollable grid for displaying data in a tabular format',
   image: header,
-  expression: 'filters | demodata | table | render',
+  expression: `filters
+| demodata
+| table
+| render`,
 });

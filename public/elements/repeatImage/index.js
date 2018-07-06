@@ -5,5 +5,9 @@ export const repeatImage = () => ({
   displayName: 'Image Repeat',
   help: 'Repeats an image N times',
   image: header,
-  expression: 'demodata | pointseries size="mean(cost)" | getCell | repeatImage | render',
+  expression: `demodata
+| pointseries size="mean(cost)"
+| getCell
+| repeatImage
+| render`,
 });
