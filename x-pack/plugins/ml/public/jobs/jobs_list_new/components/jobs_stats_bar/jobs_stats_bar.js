@@ -45,8 +45,8 @@ function createJobStats(jobsSummaryList) {
       jobStats.activeDatafeeds.value++;
     }
 
-    if (job.node !== undefined) {
-      mlNodes[job.node] = {};
+    if (job.nodeName !== undefined) {
+      mlNodes[job.nodeName] = {};
     }
   });
 
