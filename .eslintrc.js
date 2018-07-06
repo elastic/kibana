@@ -134,7 +134,10 @@ module.exports = {
     },
 
     /**
-     * Files that run BEFORE node version check
+     * Files that run BEFORE node version check, so to ensure that
+     * they can get to the version check and tell the user that their
+     * node.js version is outdated we prevent syntax not supported by
+     * "old" node.js versions.
      */
     {
       files: ['scripts/**/*', 'src/setup_node_env/**/*'],
@@ -160,18 +163,22 @@ module.exports = {
           'VariableDeclaration[kind="let"]',
           'VariableDeclarator[id.type="ArrayPattern"]',
           'VariableDeclarator[id.type="ObjectPattern"]',
+          'ExperimentalSpreadProperty',
         ],
       },
     },
 
     /**
-     * Files that run AFTER node version check
-     * and are not also transpiled with babel
+     * Files that run AFTER node version check, so they can
+     * use the latest features of node, but are not transpiled
+     * with babel
      */
     {
       files: [
         '.eslintrc.js',
         '**/webpackShims/**/*',
+        'packages/eslint-config-kibana/**/*',
+        'packages/eslint-plugin-kibana-custom/**/*',
         'packages/kbn-plugin-generator/**/*',
         'packages/kbn-plugin-helpers/**/*',
         'packages/kbn-eslint-import-resolver-kibana/**/*',
@@ -189,6 +196,7 @@ module.exports = {
           'ExportNamedDeclaration',
           'ExportDefaultDeclaration',
           'ExportAllDeclaration',
+          'ExperimentalSpreadProperty',
         ],
       },
     },
@@ -319,6 +327,7 @@ module.exports = {
         'no-else-return': 'error',
       },
     },
+
     {
       files: ['x-pack/plugins/monitoring/public/**/*'],
       env: { browser: true },
