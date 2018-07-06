@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { addSearchStrategy } from './search_strategy_registry';
+
 function getAllFetchParams(searchRequests, Promise) {
   return Promise.map(searchRequests, (searchRequest) => {
     return Promise.try(searchRequest.getFetchParams, void 0, searchRequest)
@@ -65,3 +67,5 @@ export const defaultSearchStrategy = {
     return indexPattern.type == null;
   },
 };
+
+addSearchStrategy(defaultSearchStrategy);

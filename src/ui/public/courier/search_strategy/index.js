@@ -21,7 +21,3 @@ export {
   assignSearchRequestsToSearchStrategies,
   addSearchStrategy,
 } from './search_strategy_registry';
-
-export {
-  defaultSearchStrategy,
-} from './default_search_strategy';
