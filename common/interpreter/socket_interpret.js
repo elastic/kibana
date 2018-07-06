@@ -1,5 +1,5 @@
-import { has } from 'lodash';
 import uuid from 'uuid/v4';
+import { getByAlias } from '../lib/get_by_alias';
 import { serializeProvider } from '../lib/serialize';
 import { interpretProvider } from './interpret';
 
@@ -34,7 +34,7 @@ export function socketInterpreterProvider({
       // Get the list of functions that are known elsewhere
       return Promise.resolve(referableFunctions).then(referableFunctionMap => {
         // Check if the not-found function is in the list of alternatives, if not, throw
-        if (!has(referableFunctionMap, functionName)) {
+        if (!getByAlias(referableFunctionMap, functionName)) {
           throw new Error(`Function not found: ${functionName}`);
         }
 

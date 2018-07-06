@@ -4,7 +4,7 @@ export const switchFn = () => ({
   args: {
     _: {
       types: ['case'],
-      aliases: ['cases'],
+      aliases: ['case'],
       resolve: false,
       multi: true,
       help: 'The list of conditions to check',

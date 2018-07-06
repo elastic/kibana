@@ -1,4 +1,4 @@
-import { each, includes } from 'lodash';
+import { mapValues, includes } from 'lodash';
 import { Arg } from './arg';
 
 export function Fn(config) {
@@ -16,13 +16,7 @@ export function Fn(config) {
 
   // Optional
   this.help = config.help || ''; // A short help text
-  this.args = {};
-  each(config.args, (arg, name) => {
-    this.args[name] = new Arg({ name, ...arg });
-    each(arg.aliases, alias => {
-      this.args[alias] = new Arg({ name, ...arg, isAlias: true });
-    });
-  });
+  this.args = mapValues(config.args || {}, (arg, name) => new Arg({ name, ...arg }));
 
   this.context = config.context || {};
 

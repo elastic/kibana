@@ -2,6 +2,7 @@ import { each, keys, last, mapValues, reduce, zipObject } from 'lodash';
 import clone from 'lodash.clone';
 import { getType } from '../lib/get_type';
 import { fromExpression } from '../lib/ast';
+import { getByAlias } from '../lib/get_by_alias';
 import { typesRegistry } from '../lib/types_registry';
 import { castProvider } from './cast';
 
@@ -45,7 +46,7 @@ export function interpretProvider(config) {
     const chain = clone(chainArr);
     const link = chain.shift(); // Every thing in the chain will always be a function right?
     const { function: fnName, arguments: fnArgs } = link;
-    const fnDef = functions[fnName];
+    const fnDef = getByAlias(functions, fnName);
 
     // if the function is not found, pass the expression chain to the not found handler
     // in this case, it will try to execute the function in another context
@@ -59,7 +60,7 @@ export function interpretProvider(config) {
       // resolveArgs returns an object because the arguments themselves might
       // actually have a 'then' function which would be treated as a promise
       const { resolvedArgs } = await resolveArgs(fnDef, context, fnArgs);
-      const newContext = await invokeFunction(fnName, context, resolvedArgs);
+      const newContext = await invokeFunction(fnDef, context, resolvedArgs);
 
       // if something failed, just return the failure
       if (getType(newContext) === 'error') {
@@ -75,9 +76,8 @@ export function interpretProvider(config) {
     }
   }
 
-  async function invokeFunction(name, context, args) {
+  async function invokeFunction(fnDef, context, args) {
     // Check function input.
-    const fnDef = functions[name];
     const acceptableContext = cast(context, fnDef.context.types);
     const fnOutput = await fnDef.fn(acceptableContext, args, handlers);
 
@@ -87,7 +87,8 @@ export function interpretProvider(config) {
     const expectedType = fnDef.type;
     if (expectedType && returnType !== expectedType) {
       throw new Error(
-        `Function '${name}' should return '${expectedType}',` + ` actually returned '${returnType}'`
+        `Function '${fnDef.name}' should return '${expectedType}',` +
+          ` actually returned '${returnType}'`
       );
     }
 
@@ -97,7 +98,7 @@ export function interpretProvider(config) {
       try {
         type.validate(fnOutput);
       } catch (e) {
-        throw new Error(`Output of '${name}' is not a valid type '${fnDef.type}': ${e}`);
+        throw new Error(`Output of '${fnDef.name}' is not a valid type '${fnDef.type}': ${e}`);
       }
     }
 
@@ -112,12 +113,12 @@ export function interpretProvider(config) {
     const dealiasedArgAsts = reduce(
       argAsts,
       (argAsts, argAst, argName) => {
+        const argDef = getByAlias(argDefs, argName);
         // TODO: Implement a system to allow for undeclared arguments
-        if (!argDefs[argName]) {
+        if (!argDef) {
           throw new Error(`Unknown argument '${argName}' passed to function '${fnDef.name}'`);
         }
-        const { name } = argDefs[argName];
-        argAsts[name] = (argAsts[name] || []).concat(argAst);
+        argAsts[argDef.name] = (argAsts[argDef.name] || []).concat(argAst);
         return argAsts;
       },
       {}

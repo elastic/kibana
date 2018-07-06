@@ -7,7 +7,6 @@ export function Arg(config) {
   this.types = config.types || [];
   this.default = config.default;
   this.aliases = config.aliases || [];
-  this.isAlias = config.isAlias || false;
   this.multi = config.multi == null ? false : config.multi;
   this.resolve = config.resolve == null ? true : config.resolve;
   this.accepts = type => {
