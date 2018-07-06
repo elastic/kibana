@@ -1,3 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`throws error if missing version privilege and has login privilege 1`] = `"Multiple versions of Kibana are running against the same Elasticsearch cluster, unable to authorize user."`;
+exports[`with index privileges throws error if missing version privilege and has login privilege 1`] = `[Error: Multiple versions of Kibana are running against the same Elasticsearch cluster, unable to authorize user.]`;
+
+exports[`with no index privileges throws error if missing version privilege and has login privilege 1`] = `[Error: Multiple versions of Kibana are running against the same Elasticsearch cluster, unable to authorize user.]`;
