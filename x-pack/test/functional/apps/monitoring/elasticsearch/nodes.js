@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }) {
           unassignedShards: '7',
           documentCount: '25,758',
           dataSize: '100.0 MB',
-          health: 'yellow',
+          health: 'Health: yellow',
         });
       });
 
@@ -50,9 +50,9 @@ export default function ({ getService, getPageObjects }) {
 
         const nodesAll = await nodesList.getNodesAll();
         const tableData = [
-          { name: 'whatever-01', status: 'Status: Online', cpu: '0%', load: '3.28', memory: '39%', disk: '173.9 GB', shards: '38', },
-          { name: 'whatever-02', status: 'Status: Online', cpu: '2%', load: '3.28', memory: '25%', disk: '173.9 GB', shards: '38', },
-          { name: 'whatever-03', status: 'Status: Offline' },
+          { name: 'whatever-01', status: 'Health: Online', cpu: '0%', load: '3.28', memory: '39%', disk: '173.9 GB', shards: '38', },
+          { name: 'whatever-02', status: 'Health: Online', cpu: '2%', load: '3.28', memory: '25%', disk: '173.9 GB', shards: '38', },
+          { name: 'whatever-03', status: 'Health: Offline' },
         ];
         nodesAll.forEach((obj, node) => {
           expect(nodesAll[node].name).to.be(tableData[node].name);
@@ -86,9 +86,9 @@ export default function ({ getService, getPageObjects }) {
 
         const nodesAll = await nodesList.getNodesAll();
         const tableData = [
-          { status: 'Status: Online' },
-          { status: 'Status: Online' },
-          { status: 'Status: Offline' },
+          { status: 'Health: Online' },
+          { status: 'Health: Online' },
+          { status: 'Health: Offline' },
         ];
         nodesAll.forEach((obj, node) => {
           expect(nodesAll[node].status).to.be(tableData[node].status);
@@ -100,7 +100,7 @@ export default function ({ getService, getPageObjects }) {
         await nodesList.clickCpuCol();
 
         const nodesAll = await nodesList.getNodesAll();
-        const tableData = [{ cpu: '0%' }, { cpu: '2%' }, { cpu: undefined }];
+        const tableData = [{ cpu: '2%' }, { cpu: '0%' }, { cpu: undefined }];
         nodesAll.forEach((obj, node) => {
           expect(nodesAll[node].cpu).to.be(tableData[node].cpu);
         });
@@ -194,7 +194,7 @@ export default function ({ getService, getPageObjects }) {
           unassignedShards: '5',
           documentCount: '25,927',
           dataSize: '101.6 MB',
-          health: 'yellow',
+          health: 'Health: yellow',
         });
       });
 

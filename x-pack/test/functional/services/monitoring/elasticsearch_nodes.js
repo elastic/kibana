@@ -12,7 +12,7 @@ export function MonitoringElasticsearchNodesProvider({ getService, getPageObject
   const retry = getService('retry');
 
   const SUBJ_LISTING_PAGE = 'elasticsearchNodesListingPage';
-  const SUBJ_TABLE_CONTAINER = 'elasticsearchNodesTableContainer';
+  const SUBJ_TABLE_CONTAINER = 'nodesTableContainer';
   const SUBJ_TABLE_NO_DATA = `${SUBJ_TABLE_CONTAINER} monitoringTableNoData`;
   const SUBJ_SEARCH_BAR = `${SUBJ_TABLE_CONTAINER} monitoringTableToolBar`;
 
