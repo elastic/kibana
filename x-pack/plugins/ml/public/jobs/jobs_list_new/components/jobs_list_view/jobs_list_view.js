@@ -22,7 +22,7 @@ import React, {
   Component
 } from 'react';
 
-const DEFAULT_REFRESH_INTERVAL_VALUE_MS = 30000;
+const DEFAULT_REFRESH_INTERVAL_MS = 30000;
 
 export class JobsListView extends Component {
   constructor(props) {
@@ -44,18 +44,15 @@ export class JobsListView extends Component {
     this.showStartDatafeedModal = () => {};
 
     this.blockRefresh = false;
-    this.refreshIntervalMS = DEFAULT_REFRESH_INTERVAL_VALUE_MS;
+    this.refreshIntervalMS = DEFAULT_REFRESH_INTERVAL_MS;
     this.refreshInterval = null;
   }
 
   componentDidMount() {
     timefilter.enableAutoRefreshSelector();
 
-    // this.refreshJobSummaryList();
-
     this.initAutoRefresh();
     this.initAutoRefreshUpdate();
-
   }
 
   componentWillUnmount() {
@@ -68,7 +65,7 @@ export class JobsListView extends Component {
       // if the auto refresher isn't set, set it to the default (5 secs)
       timefilter.setRefreshInterval({
         pause: false,
-        value: DEFAULT_REFRESH_INTERVAL_VALUE_MS
+        value: DEFAULT_REFRESH_INTERVAL_MS
       });
     }
 
