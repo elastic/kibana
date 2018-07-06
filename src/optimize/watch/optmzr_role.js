@@ -19,6 +19,7 @@
 
 import WatchServer from './watch_server';
 import WatchOptimizer from './watch_optimizer';
+import { CacheState } from './cache_state';
 
 export default async (kbnServer, kibanaHapiServer, config) => {
   const server = new WatchServer(
@@ -32,6 +33,11 @@ export default async (kbnServer, kibanaHapiServer, config) => {
       sourceMaps: config.get('optimize.sourceMaps'),
       prebuild: config.get('optimize.watchPrebuild'),
       unsafeCache: config.get('optimize.unsafeCache'),
+      cacheState: new CacheState({
+        directory: kbnServer.uiBundles.getCacheDirectory(),
+        checkYarnLock: config.get('optimize.cache.checkYarnLock'),
+        checkIncompleteCompile: config.get('optimize.cache.checkIncompleteCompile'),
+      })
     })
   );
 

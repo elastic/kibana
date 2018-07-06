@@ -220,6 +220,10 @@ export default () => Joi.object({
     watchPrebuild: Joi.boolean().default(false),
     watchProxyTimeout: Joi.number().default(5 * 60000),
     useBundleCache: Joi.boolean().default(Joi.ref('$prod')),
+    cache: Joi.object({
+      checkYarnLock: Joi.boolean().default(true),
+      checkIncompleteCompile: Joi.boolean().default(true)
+    }),
     unsafeCache: Joi.when('$prod', {
       is: true,
       then: Joi.boolean().valid(false),
