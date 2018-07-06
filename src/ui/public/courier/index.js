@@ -26,4 +26,4 @@ export {
   buildQueryFromFilters,
   luceneStringToDsl,
 } from './search_source';
-export { addSearchStrategy } from './search_strategy';
+export { addSearchStrategy, defaultSearchStrategy } from './search_strategy';

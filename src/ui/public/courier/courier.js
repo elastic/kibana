@@ -30,9 +30,6 @@ import '../promises';
 import { searchRequestQueue } from './search_request_queue';
 import { FetchSoonProvider } from './fetch';
 import { SearchPollProvider } from './search_poll';
-import { addSearchStrategy, defaultSearchStrategy } from './search_strategy';
-
-addSearchStrategy(defaultSearchStrategy);
 
 uiModules.get('kibana/courier').service('courier', ($rootScope, Private) => {
   const fetchSoon = Private(FetchSoonProvider);
