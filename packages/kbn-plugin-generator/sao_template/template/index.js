@@ -5,21 +5,21 @@ export default function (kibana) {
     require: ['elasticsearch'],
     name: '<%= kebabCase(name) %>',
     uiExports: {
-      <% if (generateApp) { %>
+      <%_ if (generateApp) { %>
       app: {
         title: '<%= startCase(name) %>',
         description: '<%= description %>',
         main: 'plugins/<%= kebabCase(name) %>/app',
-        <% if (generateScss) { %>
+        <%_ if (generateScss) { %>
         styleSheetPath: require('path').resolve(__dirname, 'public/app.scss'),
-        <% } %>
+        <%_ } %>
       },
-      <% } %>
-      <% if (generateHack) { %>
+      <%_ } %>
+      <%_ if (generateHack) { %>
       hacks: [
         'plugins/<%= kebabCase(name) %>/hack'
       ]
-      <% } %>
+      <%_ } %>
     },
 
     config(Joi) {
@@ -28,12 +28,12 @@ export default function (kibana) {
       }).default();
     },
 
-    <% if (generateApi) { %>
-    init(server, options) {
+    <%_ if (generateApi) { %>
+    init(server, options) { // eslint-disable-line no-unused-vars
       // Add server routes and initialize the plugin here
       exampleRoute(server);
     }
-    <% } %>
+    <%_ } %>
 
   });
-};
+}
