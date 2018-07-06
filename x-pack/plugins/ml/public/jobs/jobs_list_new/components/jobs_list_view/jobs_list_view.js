@@ -22,7 +22,7 @@ import React, {
   Component
 } from 'react';
 
-const DEFAULT_REFRESH_INTERVAL_VALUE_MS = 5000;
+const DEFAULT_REFRESH_INTERVAL_VALUE_MS = 30000;
 
 export class JobsListView extends Component {
   constructor(props) {
