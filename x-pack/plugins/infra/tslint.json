@@ -1,0 +1,10 @@
+{
+  "extends": "../../tslint.yaml",
+  "rules": {
+    "prettier": [true, "."],
+    "require-license-header": [
+      true,
+      "/*\n * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n * or more contributor license agreements. Licensed under the Elastic License;\n * you may not use this file except in compliance with the Elastic License.\n */"
+    ]
+  }
+}

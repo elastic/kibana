@@ -1,0 +1,603 @@
+@kuiColorPrimary: #0079a5;
+@kuiColorSecondary: #00a69b;
+@kuiColorAccent: #dd0a73;
+@kuiColorDanger: #a30000;
+@kuiColorWarning: #e5830e;
+@kuiColorEmptyShade: #fff;
+@kuiColorLightestShade: #f5f5f5;
+@kuiColorLightShade: #d9d9d9;
+@kuiColorMediumShade: #999999;
+@kuiColorDarkShade: #666666;
+@kuiColorDarkestShade: #3f3f3f;
+@kuiColorFullShade: #000000;
+
+@black: black;
+@grayDarkest: #222;
+@grayDarker: #333;
+@grayDark: #666;
+@gray: #999;
+@grayLight: #ccc;
+@grayLighter: #ddd;
+@grayLightest: #eee;
+@white: white;
+
+@lineColor: @kuiColorLightShade;
+@textColor: @kuiColorDarkestShade;
+@pageColor: @kuiColorEmptyShade;
+
+@kibanaGray: #95a5a6;
+@esBlue: #0079a5;
+@esRed: #d76051;
+@esYellow: #fbce47;
+@esGreen: #80c383;
+@esPink: #e8488b;
+@esPurple: #9980b2;
+
+@esAltGreen: #8ac336;
+@esCyan: #59c6c5;
+
+.waffle__container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  flex: 1 0 auto;
+}
+
+.waffle__node {
+  position: absolute;
+}
+
+.waffle__node-parent {
+  position: absolute;
+  background-color: #eee;
+}
+
+.waffle__label {
+  position: absolute;
+  width: 100%;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  // margin-bottom: 10px;
+  // margin-top: -28px;
+}
+
+.waffle__label-parent {
+  .waffle__label;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.waffle__note {
+  font-size: 0.85em;
+  margin: 5px 0 10px 0;
+}
+
+.waffle__squares {
+  display: flex;
+  flex-flow: row wrap;
+}
+
+.waffle__square {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.waffle__squareInner {
+  @grid: 1px;
+  position: absolute;
+  top: @grid;
+  left: @grid;
+  bottom: @grid;
+  right: @grid;
+  background-color: #ddd;
+}
+
+.waffle__legend {
+  position: absolute;
+  bottom: 0;
+  left: 1px;
+  right: 1px;
+}
+
+.waffle__legendScale {
+  position: absolute;
+  height: 10px;
+  bottom: 0;
+  right: 0;
+  left: 0;
+}
+
+.waffle__tick {
+  position: absolute;
+  bottom: 0;
+  top: -18px;
+  .waffle__tickLabel {
+    transform: translate(-50%, 0);
+  }
+  &:first-child {
+    .waffle__tickLine {
+      top: 2px;
+    }
+    .waffle__tickLabel {
+      padding-left: 5px;
+      transform: translate(0, 0);
+    }
+  }
+  &:last-child {
+    .waffle__tickLine {
+      top: 2px;
+    }
+    .waffle__tickLabel {
+      padding-right: 5px;
+      transform: translate(-100%, 0);
+    }
+  }
+}
+
+.waffle__tickLabel {
+  position: absolute;
+  font-size: 11px;
+  text-align: center;
+  top: 0;
+  left: 0;
+  white-space: nowrap;
+}
+
+.waffle__tickLine {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.2);
+  width: 1px;
+  left: 0;
+  top: 15px;
+  bottom: 0;
+}
+
+.waffle__tooSmall {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+  justify-content: center;
+  align-content: center;
+  color: #805206;
+  background-color: #fff097;
+  font-size: 16px;
+}
+
+.waffle__editor {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  flex: 1 0 auto;
+}
+
+.waffle__vis {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+}
+
+.waffle__config {
+  position: relative;
+  flex: 0 0 auto;
+  width: 400px;
+  border-left: 1px solid @lineColor;
+}
+
+.waffle__configContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+
+.waffle__controls {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 10px;
+}
+
+.waffle__configs {
+  position: absolute;
+  top: 80px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  background: @pageColor;
+  overflow: auto;
+  & > .kuiInfoPanel {
+    margin-bottom: 10px;
+  }
+}
+
+.waffle__configSection {
+  margin-bottom: 40px;
+}
+
+.waffle__configNote {
+  font-size: 12px;
+  color: @kuiColorMediumShade;
+}
+
+.waffle__configSectionTitle {
+  display: flex;
+  h3 {
+    flex: 1 0 auto;
+    font-size: 16px;
+    font-weight: normal;
+    color: @black;
+    margin: 0 5px 10px 0;
+    display: flex;
+    & > span {
+      flex: 1 0 auto;
+    }
+    & > button {
+      flex: 0 0 auto;
+    }
+  }
+  a {
+    color: @kuiColorDarkShade;
+  }
+  a:hover {
+    color: @kuiColorPrimary;
+  }
+}
+
+.waffle__configRow {
+  position: relative;
+  border-bottom: 1px solid @lineColor;
+  padding: 15px 5px 20px 5px;
+  &:first-child {
+    border-top: 1px solid @lineColor;
+  }
+  display: flex;
+}
+
+.waffle__configRowItems {
+  flex: 1 1 auto;
+  a { font-size: 0.95em; }
+}
+
+.waffle__configItem {
+  margin-top: 5px;
+  &:first-child {
+    margin-top: 0;
+  }
+  .vis_editor__row_item {
+    margin: 0;
+  }
+  code {
+    white-space: nowrap;
+  }
+}
+
+.waffle__tickConfig {
+  .waffle__configItem;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid @lineColor;
+  padding: 5px;
+  label {
+    color: #000;
+    font-size: 0.85em;
+  }
+  &:first-child {
+    border-top: 1px solid @lineColor;
+    input[type='number'] {
+      margin-right: 20px;
+    }
+  }
+  &:last-child {
+    input[type='number'] {
+      margin-right: 20px;
+    }
+  }
+  > * {
+    margin-left: 5px;
+    flex: 1 0 auto;
+  }
+}
+
+.waffle__stepConfig {
+  .waffle__configItem;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid @lineColor;
+  padding: 5px;
+  input[type="number"] {
+    width: 60px;
+    flex: 0 0 auto;
+  }
+  > button {
+    width:  30px;
+    flex: 0 0 auto;
+  }
+  > * {
+    margin-left: 5px;
+    flex: 1 0 auto;
+    &:first-child {
+      flex: 0 0 auto;
+      margin-right: 10px;
+    }
+  }
+  &:first-child {
+    border-top: 1px solid @lineColor;
+    input[type='number'] {
+      width: 60px;
+      flex: 0 0 auto;
+    }
+    input[type="text"] {
+      margin-right: 30px;
+    }
+  }
+
+}
+
+.waffle__configRowBtn {
+  display: none;
+  position: absolute;
+  top: 5px;
+  right: 0;
+  a {
+    color: @kuiColorDarkShade;
+  }
+  a:hover {
+    color: @kuiColorDanger;
+  }
+}
+
+.waffle__configRowCollapse {
+  width: 20px;
+  flex: 0 0 auto;
+  font-size: 0.95em;
+}
+
+.waffle__configRow:hover {
+  .waffle__configRowBtn {
+    display: block;
+  }
+}
+
+.waffle__formLabel {
+  font-weight: normal;
+  color: @kuiColorMediumShade;
+  display: block;
+  font-size: 0.95em;
+  margin-bottom: 5px;
+}
+
+.waffle__controlsNote {
+  margin: 10px 0 20px;
+  color: @kibanaGray;
+  text-align: center;
+  font-size: 12px;
+}
+
+.waffle__variables {
+  padding: 10px;
+  background: @kuiColorLightestShade;
+
+  table {
+    width: 100%;
+  }
+
+  th {
+    padding: 5px;
+    font-size: 12px;
+    border-bottom: 1px solid @kuiColorMediumShade;
+  }
+
+  td {
+    padding: 5px;
+    font-size: 12px;
+    border-top: 1px solid @kuiColorMediumShade;
+    &:first-child {
+      border-right: 1px solid @kuiColorMediumShade;
+    }
+  }
+}
+
+.waffle__invalidMetrics {
+  li {
+    font-size: 0.85em;
+    color: @kuiColorDanger;
+  }
+}
+
+.waffle__matchRulesColor {
+  display: flex;
+  * {
+    flex: 1 0 auto;
+  }
+  *:first-child {
+    flex: 0 0 auto;
+    margin-right: 5px;
+  }
+}
+
+.waffle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.waffle__mapContainer {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
+  align-content: flex-start;
+  padding: 40px;
+}
+
+.waffle__itemContainer {
+  margin: 10px;
+}
+
+.waffle__itemName {
+  position: relative;
+  text-align: center;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  margin-bottom: 5px;
+  a {
+    cursor: pointer;
+    color: @kuiColorDarkShade;
+    &:hover {
+      color: @kuiColorDarkestShade;
+      text-decoration: underline;
+    }
+  }
+}
+
+.waffle__items {
+  display: flex;
+  flex: 0 0 auto;
+  flex-flow: row wrap;
+}
+
+.waffle__square {
+  position: relative;
+}
+
+.waffle__squareInner {
+  @squareBorder: 2px;
+  cursor: pointer;
+  position: absolute;
+  top: @squareBorder;
+  right: @squareBorder;
+  bottom: @squareBorder;
+  left: @squareBorder;
+  background-color: #ddd;
+}
+
+.waffle__inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  line-height: 1.2em;
+  align-items: center;
+  align-content: center;
+  padding: 1em;
+  overflow: hidden;
+  flex-wrap: wrap;
+}
+
+.waffle__innerKey {
+  text-overflow: ellipsis;
+  font-size: 0.7em;
+  margin-bottom: 0.7em;
+  text-align: center;
+  width: 100%;
+  flex: 1 0 auto;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.waffle__innerValue {
+  font-weight: bold;
+  font-size: 1.5em;
+  text-align: center;
+  width: 100%;
+  flex: 1 0 auto;
+  line-height: 1.2em;
+  i {
+    font-size: 2em;
+  }
+  &.iconOnly {
+    font-size: 3em;
+  }
+}
+
+.waffle__parentContainer {
+  margin: 10px;
+  & > .waffle__itemName {
+    font-weight: bold;
+  }
+}
+
+.waffle__parentItems {
+  display: flex;
+  background: #f5f5f5;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 10px;
+  border-radius: 6px;
+}
+
+.waffle__breadcrumbs {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 10px;
+  font-size: 0.8em;
+  color: @kuiColorMediumShade;
+  display: flex;
+  align-items: center;
+  font-size: 1em;
+}
+
+.waffle_breadcrumbSeperator {
+  margin: 0 10px;
+}
+
+.waffle__timeLabel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: auto;
+  padding: 10px;
+  font-size: 0.8em;
+  color: @kuiColorMediumShade;
+}
+
+.theme-dark .waffle__parentItems {
+  background-color: #444444;
+}
+
+.waffle__legendSteps {
+  display: flex;
+  padding: 10px;
+}
+
+.waffle__legendStep {
+  display: flex;
+  margin-right: 20px;
+  align-items: center;
+}
+
+.waffle__legendStepLabel {
+  font-size: 12px;
+  color: @kuiColorMediumShade;
+}
+
+.waffle__legendStepSquare {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  margin-right: 5px;
+  border-radius: 2px;
+}
+
+.waffle__callOut {
+  margin-bottom: 10px;
+}
+
