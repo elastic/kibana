@@ -8,19 +8,49 @@
 import './styles/main.less';
 import { NewJobButton } from './components/new_job_button';
 import { JobsListView } from './components/jobs_list_view';
+import { mlNodesAvailable, permissionToViewMlNodeCount } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 
 import React, {
   Component
 } from 'react';
 
 import {
-  EuiHorizontalRule,
+  EuiCallOut,
+  EuiLink,
+  EuiSpacer,
 } from '@elastic/eui';
+
+function NodeAvailableWarning() {
+  const isCloud = false; // placeholder for future specific cloud functionality
+  if ((mlNodesAvailable() === true) || (permissionToViewMlNodeCount() === false)) {
+    return (<span />);
+  } else {
+    return (
+      <React.Fragment>
+        <EuiCallOut
+          title="No ML nodes available"
+          color="warning"
+          iconType="alert"
+        >
+          <p>
+            There are no ML nodes available.<br />
+            You will not be able to create or run jobs.
+            {isCloud &&
+              <span ng-if="isCloud">
+                &nbsp;This can be configured in Cloud <EuiLink href="#">here</EuiLink>.
+              </span>
+            }
+          </p>
+        </EuiCallOut>
+        <EuiSpacer size="m" />
+      </React.Fragment>
+    );
+  }
+}
 
 export class JobsPage extends Component {
   constructor(props) {
     super(props);
-
     this.state = {
     };
   }
@@ -28,6 +58,7 @@ export class JobsPage extends Component {
   render() {
     return (
       <div className="job-management">
+        <NodeAvailableWarning />
         <header>
           <div className="new-job-button-container">
             <NewJobButton />
@@ -36,7 +67,7 @@ export class JobsPage extends Component {
 
         <div className="clear" />
 
-        <EuiHorizontalRule margin="m" />
+        <EuiSpacer size="s" />
 
         <JobsListView />
       </div>
