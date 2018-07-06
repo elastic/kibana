@@ -141,6 +141,16 @@ export async function listControlFactory(controlParams, kbnApi, useTimeFilter) {
   let indexPattern;
   try {
     indexPattern = await kbnApi.indexPatterns.get(controlParams.indexPattern);
+
+    // dynamic options are only allowed on String fields but the setting defaults to true so it could
+    // be enabled for non-string fields (since UI input is hidden for non-string fields).
+    // If field is not string, then disable dynamic options.
+    const field = indexPattern.fields.find((field) => {
+      return field.name === this.props.controlParams.fieldName;
+    });
+    if (field && field.type !== 'string') {
+      controlParams.options.dynamicOptions = false;
+    }
   } catch (err) {
     // ignore not found error and return control so it can be displayed in disabled state.
   }

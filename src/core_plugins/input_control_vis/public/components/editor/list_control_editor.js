@@ -50,8 +50,8 @@ export class ListControlEditor extends Component {
   }
 
   static getDerivedStateFromProps = (nextProps, prevState) => {
-    if (!prevState.isLoadingFieldType && prevState.prevFieldName &&
-      prevState.prevFieldName !== nextProps.controlParams.fieldName) {
+    const isNewFieldName = prevState.prevFieldName !== nextProps.controlParams.fieldName;
+    if (!prevState.isLoadingFieldType && isNewFieldName) {
       return {
         isLoadingFieldType: true,
       };
@@ -68,10 +68,17 @@ export class ListControlEditor extends Component {
 
   loadIsStringField = async () => {
     if (!this.props.controlParams.indexPattern || !this.props.controlParams.fieldName) {
+      this.setState({ isLoadingFieldType: false });
       return;
     }
 
-    const indexPattern = await this.props.getIndexPattern(this.props.controlParams.indexPattern);
+    let indexPattern;
+    try {
+      indexPattern = await this.props.getIndexPattern(this.props.controlParams.indexPattern);
+    } catch (err) {
+      // index pattern no longer exists
+      return;
+    }
 
     if (!this._isMounted) {
       return;
@@ -90,13 +97,13 @@ export class ListControlEditor extends Component {
   }
 
   renderOptions = () => {
-    if (this.state.isLoadingFieldType) {
+    if (this.state.isLoadingFieldType || !this.props.controlParams.fieldName) {
       return;
     }
 
     const options = [];
     if (this.props.parentCandidates && this.props.parentCandidates.length > 0) {
-      const options = [
+      const parentCandidatesOptions = [
         { value: '', text: '' },
         ...this.props.parentCandidates,
       ];
@@ -108,7 +115,7 @@ export class ListControlEditor extends Component {
           key="parentSelect"
         >
           <EuiSelect
-            options={options}
+            options={parentCandidatesOptions}
             value={this.props.controlParams.parent}
             onChange={(evt) => {
               this.props.handleParentChange(this.props.controlIndex, evt);
@@ -118,61 +125,62 @@ export class ListControlEditor extends Component {
       );
     }
 
-    if (this.props.controlParams.fieldName) {
+    options.push(
+      <EuiFormRow
+        id={`multiselect-${this.props.controlIndex}`}
+        key="multiselect"
+        helpText="Allow multiple selection"
+      >
+        <EuiSwitch
+          label="Multiselect"
+          checked={this.props.controlParams.options.multiselect}
+          onChange={(evt) => {
+            this.props.handleCheckboxOptionChange(this.props.controlIndex, 'multiselect', evt);
+          }}
+          data-test-subj="listControlMultiselectInput"
+        />
+      </EuiFormRow>
+    );
+
+    // Due to Elasticsearch API's, dynamic options are only allowed on String fields
+    if (this.state.isStringField) {
       options.push(
         <EuiFormRow
-          id={`multiselect-${this.props.controlIndex}`}
-          key="multiselect"
+          id={`dynamicOptions-${this.props.controlIndex}`}
+          key="dynamicOptions"
+          helpText="Update options in response to user input"
         >
           <EuiSwitch
-            label="Multiselect"
-            checked={this.props.controlParams.options.multiselect}
+            label="Dynamic Options"
+            checked={this.props.controlParams.options.dynamicOptions}
             onChange={(evt) => {
-              this.props.handleCheckboxOptionChange(this.props.controlIndex, 'multiselect', evt);
+              this.props.handleCheckboxOptionChange(this.props.controlIndex, 'dynamicOptions', evt);
             }}
-            data-test-subj="listControlMultiselectInput"
+            data-test-subj="listControlDynamicOptionsSwitch"
           />
         </EuiFormRow>
       );
+    }
 
-      // Due to Elasticsearch API's, dynamic options are only allowed on String fields
-      if (this.state.isStringField) {
-        options.push(
-          <EuiFormRow
-            id={`dynamicOptions-${this.props.controlIndex}`}
-            key="dynamicOptions"
-          >
-            <EuiSwitch
-              label="Dynamic Options"
-              checked={this.props.controlParams.options.dynamicOptions}
-              onChange={(evt) => {
-                this.props.handleCheckboxOptionChange(this.props.controlIndex, 'dynamicOptions', evt);
-              }}
-              data-test-subj="listControlDynamicOptionsSwitch"
-            />
-          </EuiFormRow>
-        );
-      }
-
-      // size is not used when dynamic options is set
-      if (!this.props.controlParams.options.dynamicOptions) {
-        options.push(
-          <EuiFormRow
-            id={`size-${this.props.controlIndex}`}
-            label="Size"
-            key="size"
-          >
-            <EuiFieldNumber
-              min={1}
-              value={this.props.controlParams.options.size}
-              onChange={(evt) => {
-                this.props.handleNumberOptionChange(this.props.controlIndex, 'size', evt);
-              }}
-              data-test-subj="listControlSizeInput"
-            />
-          </EuiFormRow>
-        );
-      }
+    // size is not used when dynamic options is set
+    if (!this.props.controlParams.options.dynamicOptions || !this.state.isStringField) {
+      options.push(
+        <EuiFormRow
+          id={`size-${this.props.controlIndex}`}
+          label="Size"
+          key="size"
+          helpText="Number of options"
+        >
+          <EuiFieldNumber
+            min={1}
+            value={this.props.controlParams.options.size}
+            onChange={(evt) => {
+              this.props.handleNumberOptionChange(this.props.controlIndex, 'size', evt);
+            }}
+            data-test-subj="listControlSizeInput"
+          />
+        </EuiFormRow>
+      );
     }
 
     return options;
