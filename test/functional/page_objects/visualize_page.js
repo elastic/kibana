@@ -364,7 +364,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async setInspectorTablePageSize(size) {
       const panel = await testSubjects.find('inspectorPanel');
       await find.clickByButtonText('Rows per page: 20', panel);
-      await find.clickByButtonText(`${size} rows`, panel);
+      // The buttons for setting table page size are in a popover element. This popover
+      // element appears as if it's part of the inspectorPanel but it's really attached
+      // to the body element by a portal.
+      const tableSizesPopover = await find.byCssSelector('.euiPanel');
+      await find.clickByButtonText(`${size} rows`, tableSizesPopover);
     }
 
     async getMetric() {
