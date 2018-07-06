@@ -2,7 +2,7 @@
 set -e
 
 if command -v systemctl >/dev/null ; then
-    systemctl reload kibana.service
+    systemctl daemon-reload
     systemctl try-restart kibana.service
 elif [ -x /etc/init.d/kibana ]; then
     if command -v invoke-rc.d >/dev/null; then
