@@ -17,31 +17,16 @@
  * under the License.
  */
 
-import { ManagementSection } from './section';
+import { sectionTypes } from './section_keys';
 
-export { sectionTypes } from './section_keys';
-export { translateSectionName } from './section_translate_helper';
-export const management = new ManagementSection('management', {
-  display: 'Management'
-});
+export function translateSectionName(i18n, typeId) {
+  if (!typeId) {
+    return '';
+  }
 
-// TODO: where should this live?
-management.register('data', {
-  display: 'Connect Data',
-  order: 0
-});
-
-management.register('elasticsearch', {
-  display: 'Elasticsearch',
-  order: 20
-});
-
-management.register('kibana', {
-  display: 'Kibana',
-  order: 30,
-});
-
-management.register('logstash', {
-  display: 'Logstash',
-  order: 30,
-});
+  switch (typeId) {
+    case sectionTypes.INDEX_PATTERNS:
+      return i18n('common.ui.management.section.indexPatterns.header', { defaultMessage: 'Index Patterns' });
+    default: return typeId;
+  }
+}
