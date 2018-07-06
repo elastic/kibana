@@ -116,8 +116,6 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
         this._baseLayerDirty = true;
       });
       await this._updateBaseLayer();
-
-      return options;
     }
 
 

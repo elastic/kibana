@@ -110,10 +110,8 @@ export const geoHashBucketAgg = new BucketAggType({
       write: function (aggConfig, output) {
         const currZoom = aggConfig.params.mapZoom;
         const autoPrecisionVal = zoomPrecision[currZoom];
-        if (autoPrecisionVal) {
-          output.params.precision = aggConfig.params.autoPrecision ?
-            autoPrecisionVal : getPrecision(aggConfig.params.precision);
-        }
+        output.params.precision = aggConfig.params.autoPrecision ?
+          autoPrecisionVal : getPrecision(aggConfig.params.precision);
       }
     }
   ],
