@@ -334,34 +334,24 @@ export class VegaBaseView {
    * Set global debug variable to simplify vega debugging in console. Show info message first time
    */
   setDebugValues(view, spec, vlspec) {
-    if (!window) {
-      return;
-    }
+    if (window) {
+      if (window.VEGA_DEBUG === undefined && console) {
+        console.log('%cWelcome to Kibana Vega Plugin!', 'font-size: 16px; font-weight: bold;');
+        console.log('You can access the Vega view with VEGA_DEBUG. ' +
+          'Learn more at https://vega.github.io/vega/docs/api/debugging/.');
+      }
+      const debugObj = {};
+      window.VEGA_DEBUG = debugObj;
+      window.VEGA_DEBUG.VEGA_VERSION = vega.version;
+      window.VEGA_DEBUG.VEGA_LITE_VERSION = vegaLite.version;
+      window.VEGA_DEBUG.view = view;
+      window.VEGA_DEBUG.vega_spec = spec;
+      window.VEGA_DEBUG.vegalite_spec = vlspec;
 
-    if (window.VEGA_DEBUG === undefined && console) {
-      console.log('%cWelcome to Kibana Vega Plugin!', 'font-size: 16px; font-weight: bold;');
-      console.log('You can enable debugging by putting `%debug%: chooseAnyIdHere` into the top level of our spec.');
-      console.log('You can then access the Vega view for this chart with VEGA_DEBUG.chooseAnyIdHere' +
-        'Learn more at https://vega.github.io/vega/docs/api/debugging/.');
-      window.VEGA_DEBUG = {
-        VEGA_VERSION: vega.version,
-        VEGA_LITE_VERSION: vegaLite.version,
-      };
-    }
-    const debugId = vlspec ? vlspec['%debug%'] : spec['%debug%'];
-
-    if (debugId) {
-      const debugObj = {
-        view,
-        vega_spec: spec,
-        vegalite_spec: vlspec,
-      };
-      window.VEGA_DEBUG[debugId] = debugObj;
-
-      // On dispose, clean up this chart from VEGA_DEBUG
+      // On dispose, clean up, but don't use undefined to prevent repeated debug statements
       this._addDestroyHandler(() => {
-        if (debugObj === window.VEGA_DEBUG[debugId]) {
-          delete window.VEGA_DEBUG[debugId];
+        if (debugObj === window.VEGA_DEBUG) {
+          window.VEGA_DEBUG = null;
         }
       });
     }
