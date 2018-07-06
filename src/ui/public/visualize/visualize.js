@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import { toastNotifications } from '../notify';
 import { uiModules } from '../modules';
 import { VisRequestHandlersRegistryProvider } from '../registry/vis_request_handlers';
 import { VisResponseHandlersRegistryProvider } from '../registry/vis_response_handlers';
@@ -32,8 +33,7 @@ import {
 
 uiModules
   .get('kibana/directive', ['ngSanitize'])
-  .directive('visualize', function ($timeout, Notifier, Private, Promise) {
-    const notify = new Notifier({ location: 'Visualize' });
+  .directive('visualize', function ($timeout, Private, Promise) {
     const requestHandlers = Private(VisRequestHandlersRegistryProvider);
     const responseHandlers = Private(VisResponseHandlersRegistryProvider);
     const queryFilter = Private(FilterBarQueryFilterProvider);
@@ -111,13 +111,17 @@ uiModules
               $scope.savedObj.searchSource.cancelQueued();
               $scope.vis.requestError = e;
               if (isTermSizeZeroError(e)) {
-                return notify.error(
-                  `Your visualization ('${$scope.vis.title}') has an error: it has a term ` +
-                `aggregation with a size of 0. Please set it to a number greater than 0 to resolve ` +
-                `the error.`
-                );
+                return toastNotifications.addDanger({
+                  title: `Visualization '${$scope.vis.title}' has an error`,
+                  text: `It has a term aggregation with a size of 0. Please set it to a number` +
+                    `greater than 0 to fix this.`
+                });
               }
-              notify.error(e);
+
+              toastNotifications.addDanger({
+                title: `Visualization '${$scope.vis.title}' has an error`,
+                text: e.resp.message,
+              });
             })
             .then(resp => {
               $scope.visData = resp;

@@ -24,7 +24,6 @@ export const rollupSearchStrategy = {
       'aggregations': aggs,
     };
 
-    // TODO: Handle errors gracefully and surface them to the user.
     return new Promise((resolve, reject) => {
       fetch('../api/rollup/search', {
         method: 'post',
