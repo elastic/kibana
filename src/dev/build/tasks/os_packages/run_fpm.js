@@ -80,7 +80,7 @@ export async function runFpm(config, log, build, type, pkgSpecificFlags) {
     '--after-install', resolve(__dirname, 'package_scripts/post_install.sh'),
     '--before-remove', resolve(__dirname, 'package_scripts/pre_remove.sh'),
     '--after-remove', resolve(__dirname, 'package_scripts/post_remove.sh'),
-    '--after-upgrade', resolve(__dirname, 'package_scripts/postinst_upgrade.sh'),
+    '--after-upgrade', resolve(__dirname, 'package_scripts/post_upgrade.sh'),
 
     // tell fpm about the config file so that it is called out in the package definition
     '--config-files', `/etc/kibana/kibana.yml`,
