@@ -5,6 +5,8 @@
  */
 
 
+import { checkPermission } from 'plugins/ml/privilege/check_privilege';
+import { mlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import PropTypes from 'prop-types';
 import React, {
   Component,
@@ -29,6 +31,9 @@ export class MultiJobActionsMenu extends Component {
     this.state = {
       isOpen: false,
     };
+
+    this.canDeleteJob = checkPermission('canDeleteJob');
+    this.canStartStopDatafeed = (checkPermission('canStartStopDatafeed') && mlNodesAvailable());
   }
 
   onButtonClick = () => {
@@ -51,6 +56,7 @@ export class MultiJobActionsMenu extends Component {
         iconType="gear"
         aria-label="Next"
         color="text"
+        disabled={(this.canDeleteJob === false && this.canStartStopDatafeed === false)}
       />
     );
 
@@ -60,6 +66,7 @@ export class MultiJobActionsMenu extends Component {
         <EuiContextMenuItem
           key="delete"
           icon="trash"
+          disabled={(this.canDeleteJob === false)}
           onClick={() => { this.props.showDeleteJobModal(this.props.jobs); this.closePopover(); }}
         >
           Delete job{s}
@@ -72,6 +79,7 @@ export class MultiJobActionsMenu extends Component {
         <EuiContextMenuItem
           key="stop datafeed"
           icon="stop"
+          disabled={(this.canStartStopDatafeed === false)}
           onClick={() => { stopDatafeeds(this.props.jobs, this.props.refreshJobs); this.closePopover(); }}
         >
           Stop datafeed{s}
@@ -84,6 +92,7 @@ export class MultiJobActionsMenu extends Component {
         <EuiContextMenuItem
           key="start datafeed"
           icon="play"
+          disabled={(this.canStartStopDatafeed === false)}
           onClick={() => { this.props.showStartDatafeedModal(this.props.jobs); this.closePopover(); }}
         >
           Start datafeed{s}
