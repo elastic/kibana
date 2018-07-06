@@ -56,7 +56,7 @@ export class JobsListView extends Component {
   }
 
   componentWillUnmount() {
-    this.blockRefresh = true;
+    this.clearRefreshInterval();
   }
 
   initAutoRefresh() {
