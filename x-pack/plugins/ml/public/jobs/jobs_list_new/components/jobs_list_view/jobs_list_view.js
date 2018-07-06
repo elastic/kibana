@@ -35,7 +35,8 @@ export class JobsListView extends Component {
       fullJobsList: {},
       selectedJobs: [],
       itemIdToExpandedRowMap: {},
-      filterClauses: []
+      filterClauses: [],
+      updateJobStats: props.updateJobStats,
     };
 
     this.updateFunctions = {};
@@ -57,6 +58,10 @@ export class JobsListView extends Component {
 
   componentWillUnmount() {
     this.clearRefreshInterval();
+  }
+
+  static getDerivedStateFromProps(props) {
+    return { updateJobStats: props.updateJobStats };
   }
 
   initAutoRefresh() {
@@ -227,6 +232,7 @@ export class JobsListView extends Component {
           const filteredJobsSummaryList = filterJobs(jobsSummaryList, this.state.filterClauses);
           this.setState({ jobsSummaryList, filteredJobsSummaryList, fullJobsList }, () => {
             this.refreshSelectedJobs();
+            this.state.updateJobStats(jobsSummaryList);
           });
 
           Object.keys(this.updateFunctions).forEach((j) => {

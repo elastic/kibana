@@ -73,6 +73,7 @@ export function jobsProvider(callWithRequest) {
         datafeedState: (hasDatafeed && job.datafeed_config.state) ? job.datafeed_config.state : '',
         latestTimeStamp,
         earliestTimeStamp,
+        node: (hasDatafeed && job.datafeed_config.node) ? job.datafeed_config.node.name : undefined,
       };
       if (jobIds.find(j => (j === tempJob.id))) {
         tempJob.fullJob = job;
