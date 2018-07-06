@@ -32,7 +32,11 @@ exports[`LoadingState should render normally 1`] = `
               }
             }
           >
-            Checking for Elasticsearch data
+            <FormattedMessage
+              defaultMessage="Checking for Elasticsearch data"
+              id="kbn.management.indexPattern.create.loadingState.checking.label"
+              values={Object {}}
+            />
           </h2>
         </EuiTextColor>
       </EuiTitle>
@@ -65,7 +69,11 @@ exports[`LoadingState should render normally 1`] = `
             grow={true}
             size="s"
           >
-            Reticulating splines...
+            <FormattedMessage
+              defaultMessage="Reticulating splines..."
+              id="kbn.management.indexPattern.create.loadingState.reticulating.label"
+              values={Object {}}
+            />
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>

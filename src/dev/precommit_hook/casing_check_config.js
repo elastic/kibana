@@ -53,7 +53,7 @@ export const IGNORE_FILE_GLOBS = [
  * @type {Array}
  */
 export const KEBAB_CASE_DIRECTORY_GLOBS = [
-  'packages/*',
+  'packages/!(__mocks__)',
   'x-pack',
 ];
 

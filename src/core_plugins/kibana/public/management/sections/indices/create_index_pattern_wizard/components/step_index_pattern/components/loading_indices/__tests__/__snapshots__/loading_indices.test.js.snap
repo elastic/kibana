@@ -28,7 +28,11 @@ exports[`LoadingIndices should render normally 1`] = `
       <EuiTextColor
         color="subdued"
       >
-        Looking for matching indices...
+        <FormattedMessage
+          defaultMessage="Looking for matching indices..."
+          id="kbn.management.indexPattern.create.step.loading.header"
+          values={Object {}}
+        />
       </EuiTextColor>
     </EuiText>
     <EuiText
@@ -43,7 +47,11 @@ exports[`LoadingIndices should render normally 1`] = `
       <EuiTextColor
         color="subdued"
       >
-        Just a sec...
+        <FormattedMessage
+          defaultMessage="Just a sec..."
+          id="kbn.management.indexPattern.create.step.loading.label"
+          values={Object {}}
+        />
       </EuiTextColor>
     </EuiText>
   </EuiFlexItem>

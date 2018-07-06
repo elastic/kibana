@@ -20,6 +20,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { StepIndexPattern } from '../step_index_pattern';
+import { shallowIntl } from 'test_utils/enzyme_helpers';
 
 jest.mock('../../../lib/ensure_minimum_time', () => ({
   ensureMinimumTime: async (promises) => Array.isArray(promises) ? await Promise.all(promises) : await promises
@@ -77,9 +78,18 @@ describe('StepIndexPattern', () => {
   });
 
   it('renders errors when input is invalid', async () => {
-    const component = createComponent();
-    const instance = component.instance();
+    const wrapper = shallow(<StepIndexPattern
+      allIndices={allIndices}
+      isIncludingSystemIndices={false}
+      esService={esService}
+      savedObjectsClient={savedObjectsClient}
+      goToNextStep={goToNextStep}
+    />);
+
+
+    const instance = wrapper.instance();
     instance.onQueryChanged({ target: { value: '?' } });
+    const component = shallowIntl(wrapper.find('I18nContext'));
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));
@@ -110,8 +120,16 @@ describe('StepIndexPattern', () => {
   });
 
   it('disables the next step if the index pattern exists', async () => {
-    const component = createComponent();
-    component.setState({ indexPatternExists: true });
+    const wrapper = shallow(<StepIndexPattern
+      allIndices={allIndices}
+      isIncludingSystemIndices={false}
+      esService={esService}
+      savedObjectsClient={savedObjectsClient}
+      goToNextStep={goToNextStep}
+    />);
+    const component = shallowIntl(wrapper.find('I18nContext'));
+    wrapper.setState({ indexPatternExists: true });
+    component.update();
     expect(component.find('Header').prop('isNextStepDisabled')).toBe(true);
   });
 

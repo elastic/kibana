@@ -17,30 +17,10 @@
  * under the License.
  */
 
-import { extractTimeFields } from '../extract_time_fields';
-import { timeFieldsTypes } from '../time_fields_types';
+const I18nBrowser = require.requireActual('../../kbn-i18n/src/browser');
+const I18nNode = require.requireActual('../../kbn-i18n/src/index');
 
-describe('extractTimeFields', () => {
-  it('should handle no date fields', () => {
-    const fields = [
-      { type: 'text' },
-      { type: 'text' },
-    ];
-
-    expect(extractTimeFields(fields)).toEqual([
-      { display: timeFieldsTypes.NO_TIME_FIELDS }
-    ]);
-  });
-
-  it('should add extra options', () => {
-    const fields = [
-      { type: 'date', name: '@timestamp' },
-    ];
-
-    expect(extractTimeFields(fields)).toEqual([
-      { display: '@timestamp', fieldName: '@timestamp' },
-      { isDisabled: true, display: '───', fieldName: '' },
-      { display: timeFieldsTypes.NO_TIME_FIELD, fieldName: undefined },
-    ]);
-  });
-});
+module.exports = {
+  ...I18nBrowser,
+  ...I18nNode
+};

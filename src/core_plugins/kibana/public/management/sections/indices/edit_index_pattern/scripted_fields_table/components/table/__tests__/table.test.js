@@ -22,6 +22,8 @@ import { shallow } from 'enzyme';
 
 import { Table } from '../table';
 
+import { shallowIntl } from 'test_utils/enzyme_helpers';
+
 const indexPattern = {
   fieldFormatMap: {
     Elastic: {
@@ -36,7 +38,7 @@ const items = [{ id: 1, name: 'Elastic' }];
 
 describe('Table', () => {
   it('should render normally', async () => {
-    const component = shallow(
+    const wrapper = shallow(
       <Table
         indexPattern={indexPattern}
         items={items}
@@ -46,11 +48,12 @@ describe('Table', () => {
       />
     );
 
+    const component = shallowIntl(wrapper.find('I18nContext'));
     expect(component).toMatchSnapshot();
   });
 
   it('should render the format', async () => {
-    const component = shallow(
+    const wrapper = shallow(
       <Table
         indexPattern={indexPattern}
         items={items}
@@ -60,6 +63,7 @@ describe('Table', () => {
       />
     );
 
+    const component = shallowIntl(wrapper.find('I18nContext'));
     const formatTableCell = shallow(component.prop('columns')[3].render('Elastic'));
     expect(formatTableCell).toMatchSnapshot();
   });
@@ -67,7 +71,7 @@ describe('Table', () => {
   it('should allow edits', () => {
     const editField = jest.fn();
 
-    const component = shallow(
+    const wrapper = shallow(
       <Table
         indexPattern={indexPattern}
         items={items}
@@ -77,6 +81,7 @@ describe('Table', () => {
       />
     );
 
+    const component = shallowIntl(wrapper.find('I18nContext'));
     // Click the delete button
     component.prop('columns')[4].actions[0].onClick();
     expect(editField).toBeCalled();
@@ -85,7 +90,7 @@ describe('Table', () => {
   it('should allow deletes', () => {
     const deleteField = jest.fn();
 
-    const component = shallow(
+    const wrapper = shallow(
       <Table
         indexPattern={indexPattern}
         items={items}
@@ -95,6 +100,7 @@ describe('Table', () => {
       />
     );
 
+    const component = shallowIntl(wrapper.find('I18nContext'));
     // Click the delete button
     component.prop('columns')[4].actions[1].onClick();
     expect(deleteField).toBeCalled();

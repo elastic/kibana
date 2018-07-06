@@ -22,6 +22,8 @@ import { shallow } from 'enzyme';
 
 import { StepTimeField } from '../step_time_field';
 
+import { shallowIntl } from 'test_utils/enzyme_helpers';
+
 jest.mock('../components/header', () => ({ Header: 'Header' }));
 jest.mock('../components/time_field', () => ({ TimeField: 'TimeField' }));
 jest.mock('../components/advanced_options', () => ({ AdvancedOptions: 'AdvancedOptions' }));
@@ -39,7 +41,7 @@ const indexPatternsService = {
 
 describe('StepTimeField', () => {
   it('should render normally', () => {
-    const component = shallow(
+    const wrapper = shallow(
       <StepTimeField
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
@@ -47,12 +49,14 @@ describe('StepTimeField', () => {
         createIndexPattern={noop}
       />
     );
+
+    const component = shallowIntl(wrapper);
 
     expect(component).toMatchSnapshot();
   });
 
   it('should render timeFields', () => {
-    const component = shallow(
+    const wrapper = shallow(
       <StepTimeField
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
@@ -61,18 +65,19 @@ describe('StepTimeField', () => {
       />
     );
 
-    component.setState({
+    wrapper.setState({
       timeFields: [
         { display: '@timestamp', fieldName: '@timestamp' },
         { display: 'name', fieldName: 'name' },
       ]
     });
+    const component = shallowIntl(wrapper);
 
     expect(component).toMatchSnapshot();
   });
 
   it('should render a selected timeField', () => {
-    const component = shallow(
+    const wrapper = shallow(
       <StepTimeField
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
@@ -81,7 +86,7 @@ describe('StepTimeField', () => {
       />
     );
 
-    component.setState({
+    wrapper.setState({
       timeFields: [
         { display: '@timestamp', fieldName: '@timestamp' },
         { display: 'name', fieldName: 'name' },
@@ -90,6 +95,7 @@ describe('StepTimeField', () => {
       timeFieldSet: true,
     });
 
+    const component = shallowIntl(wrapper);
     expect(component).toMatchSnapshot();
   });
 
@@ -122,7 +128,7 @@ describe('StepTimeField', () => {
   });
 
   it('should disable the action button if an invalid time field is selected', () => {
-    const component = shallow(
+    const wrapper = shallow(
       <StepTimeField
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
@@ -131,21 +137,22 @@ describe('StepTimeField', () => {
       />
     );
 
-    component.setState({
+    wrapper.setState({
       timeFields: [
         { display: '@timestamp', fieldName: '@timestamp' },
         { display: 'name', fieldName: 'name' },
       ],
     });
 
-    component.instance().onTimeFieldChanged({ target: { value: '' } });
-    component.update();
+    wrapper.instance().onTimeFieldChanged({ target: { value: '' } });
+    wrapper.update();
+    const component = shallowIntl(wrapper);
 
     expect(component.find('ActionButtons')).toMatchSnapshot();
   });
 
   it('should enable the action button if the user decides to not select a time field', () => {
-    const component = shallow(
+    const wrapper = shallow(
       <StepTimeField
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
@@ -153,22 +160,22 @@ describe('StepTimeField', () => {
         createIndexPattern={noop}
       />
     );
-
-    component.setState({
+    const component = shallowIntl(wrapper);
+    wrapper.setState({
       timeFields: [
         { display: '@timestamp', fieldName: '@timestamp' },
         { display: 'name', fieldName: 'name' },
       ],
     });
 
-    component.instance().onTimeFieldChanged({ target: { value: undefined } });
+    wrapper.instance().onTimeFieldChanged({ target: { value: undefined } });
     component.update();
 
     expect(component.find('ActionButtons')).toMatchSnapshot();
   });
 
   it('should render advanced options', () => {
-    const component = shallow(
+    const wrapper = shallow(
       <StepTimeField
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
@@ -177,13 +184,14 @@ describe('StepTimeField', () => {
       />
     );
 
-    component.setState({ showingAdvancedOptions: true });
+    wrapper.setState({ showingAdvancedOptions: true });
+    const component = shallowIntl(wrapper);
 
     expect(component).toMatchSnapshot();
   });
 
   it('should render advanced options with an index pattern id', () => {
-    const component = shallow(
+    const wrapper = shallow(
       <StepTimeField
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
@@ -192,10 +200,11 @@ describe('StepTimeField', () => {
       />
     );
 
-    component.setState({
+    wrapper.setState({
       showingAdvancedOptions: true,
       indexPatternId: 'foobar',
     });
+    const component = shallowIntl(wrapper);
 
     expect(component).toMatchSnapshot();
   });

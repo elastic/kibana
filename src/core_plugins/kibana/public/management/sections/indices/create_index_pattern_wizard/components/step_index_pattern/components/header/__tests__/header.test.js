@@ -20,10 +20,11 @@
 import React from 'react';
 import { Header } from '../header';
 import { shallow } from 'enzyme';
+import { shallowIntl } from 'test_utils/enzyme_helpers';
 
 describe('Header', () => {
   it('should render normally', () => {
-    const component = shallow(
+    const wrapper = shallow(
       <Header
         isInputInvalid={false}
         errors={[]}
@@ -35,11 +36,12 @@ describe('Header', () => {
       />
     );
 
+    const component = shallowIntl(wrapper);
     expect(component).toMatchSnapshot();
   });
 
   it('should mark the input as invalid', () => {
-    const component = shallow(
+    const wrapper = shallow(
       <Header
         isInputInvalid={true}
         errors={['Input is invalid']}
@@ -51,6 +53,7 @@ describe('Header', () => {
       />
     );
 
+    const component = shallowIntl(wrapper);
     expect(component).toMatchSnapshot();
   });
 });
