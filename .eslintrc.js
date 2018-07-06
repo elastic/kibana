@@ -24,31 +24,26 @@ module.exports = {
     /**
      * Prettier
      */
-    {
-      files: [
-        '.eslintrc.js',
-        'packages/eslint-plugin-kibana-custom/**/*',
-        'packages/kbn-pm/**/*',
-        'packages/kbn-es/**/*',
-        'packages/kbn-datemath/**/*',
-        'packages/kbn-i18n/**/*',
-        'packages/kbn-dev-utils/**/*',
-        'packages/kbn-plugin-helpers/**/*',
-        'packages/kbn-plugin-generator/**/*',
-        'packages/kbn-test-subj-selector/**/*',
-        'packages/kbn-test/**/*',
-        'packages/kbn-eslint-import-resolver-kibana/**/*',
-        'x-pack/plugins/apm/**/*',
-      ],
-      plugins: ['prettier'],
-      rules: Object.assign(
-        {
-          'prettier/prettier': ['error'],
-        },
-        require('eslint-config-prettier').rules,
-        require('eslint-config-prettier/react').rules
-      ),
-    },
+    Object.assign(
+      {
+        files: [
+          '.eslintrc.js',
+          'packages/eslint-plugin-kibana-custom/**/*',
+          'packages/kbn-pm/**/*',
+          'packages/kbn-es/**/*',
+          'packages/kbn-datemath/**/*',
+          'packages/kbn-i18n/**/*',
+          'packages/kbn-dev-utils/**/*',
+          'packages/kbn-plugin-helpers/**/*',
+          'packages/kbn-plugin-generator/**/*',
+          'packages/kbn-test-subj-selector/**/*',
+          'packages/kbn-test/**/*',
+          'packages/kbn-eslint-import-resolver-kibana/**/*',
+          'x-pack/plugins/apm/**/*',
+        ],
+      },
+      require('@elastic/eslint-config-kibana/prettier')
+    ),
 
     /**
      * Allow default exports
