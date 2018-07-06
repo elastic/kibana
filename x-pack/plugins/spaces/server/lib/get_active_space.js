@@ -26,7 +26,7 @@ export async function getActiveSpace(savedObjectsClient, basePath) {
     });
 
     spaces = savedObjects || [];
-  } catch(e) {
+  } catch (e) {
     throw wrapError(e);
   }
 
@@ -37,7 +37,7 @@ export async function getActiveSpace(savedObjectsClient, basePath) {
   }
 
   if (spaces.length > 1) {
-    const spaceNames = spaces.map(s => s.attributes.name).join(', ');
+    const spaceNames = spaces.map(space => space.attributes.name).join(', ');
 
     throw Boom.badRequest(
       `Multiple Spaces share this URL Context: (${spaceNames}). Please correct this in the Management Section.`

@@ -48,18 +48,18 @@ export class SpacesSavedObjectsClient {
 
   async bulkCreate(objects, options = {}) {
     const spaceId = await this._getSpaceId();
-    const objectsToCreate = objects.map(o => {
-      const shouldAssignSpaceId = spaceId !== DEFAULT_SPACE_ID && isTypeSpaceAware(o.type);
+    const objectsToCreate = objects.map(object => {
+      const shouldAssignSpaceId = spaceId !== DEFAULT_SPACE_ID && isTypeSpaceAware(object.type);
       if (shouldAssignSpaceId) {
         return {
-          ...o,
+          ...object,
           extraBodyProperties: {
-            ...o.extraBodyProperties,
+            ...object.extraBodyProperties,
             spaceId
           }
         };
       }
-      return o;
+      return object;
     });
 
     return await this._client.bulkCreate(objectsToCreate, options);

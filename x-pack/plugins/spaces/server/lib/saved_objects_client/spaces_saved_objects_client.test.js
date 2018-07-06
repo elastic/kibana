@@ -33,7 +33,7 @@ const createMockClient = (space) => {
     }),
     bulkGet: jest.fn((objects) => {
       return {
-        saved_objects: objects.map(o => SAVED_OBJECTS[o.id])
+        saved_objects: objects.map(object => SAVED_OBJECTS[object.id])
       };
     }),
     find: jest.fn(({ type }) => {
@@ -347,8 +347,8 @@ describe('#bulk_create', () => {
 
     await client.bulkCreate(objects, {});
 
-    const expectedCalledWithObjects = objects.map(o => ({
-      ...o,
+    const expectedCalledWithObjects = objects.map(object => ({
+      ...object,
       extraBodyProperties: {
         spaceId: 'space_1'
       }
