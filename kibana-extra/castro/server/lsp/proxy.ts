@@ -1,4 +1,4 @@
-import * as EventEmitter from 'events';
+import  events from 'events';
 import {AbstractMessageReader, DataCallback, MessageReader} from 'vscode-jsonrpc/lib/messageReader'
 import {AbstractMessageWriter, MessageWriter} from 'vscode-jsonrpc/lib/messageWriter'
 import {Message, RequestMessage, ResponseMessage} from 'vscode-jsonrpc/lib/messages';
@@ -11,9 +11,9 @@ import {
     SocketMessageWriter,
     Logger
 } from 'vscode-jsonrpc';
-import {InitializeParams,InitializedNotification, InitializeResult, ClientCapabilities, WorkspaceFolder} from "vscode-languageserver-protocol";
+import {InitializedNotification, InitializeResult, ClientCapabilities, WorkspaceFolder} from "vscode-languageserver-protocol";
 
-class HttpRequestEmitter extends EventEmitter {
+class HttpRequestEmitter extends events.EventEmitter {
 }
 
 

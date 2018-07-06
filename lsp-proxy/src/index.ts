@@ -1,1 +1,0 @@
-export {LanguageServerProxy} from './lsp'

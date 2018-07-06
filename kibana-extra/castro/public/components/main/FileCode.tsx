@@ -31,7 +31,7 @@ export default class FileCode extends React.Component<Props, State> {
 
     constructor(props: Props, context: any) {
         super(props, context);
-        let lspClient = new LspRestClient("/lsp", {"kbn-xsrf": "1"})
+        let lspClient = new LspRestClient("../api/lsp", {"kbn-xsrf": "1"});
         this.lspMethods = new TextDocumentMethods(lspClient);
         this.mouseOver = this.mouseOver.bind(this);
         this.addTooltip = this.addTooltip.bind(this);

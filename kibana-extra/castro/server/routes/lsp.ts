@@ -2,7 +2,7 @@ import * as Hapi from "hapi";
 import {serve} from "javascript-typescript-langserver/lib/server";
 
 import {ResponseMessage} from "vscode-jsonrpc/lib/messages";
-import {LanguageServerProxy} from "lsp-proxy";
+import {LanguageServerProxy} from "../lsp/proxy";
 
 const Path = require("path");
 
@@ -28,7 +28,7 @@ export default async function (server: Hapi.Server) {
         name: "root"
     }]).then(result => console.log(result));
     server.route({
-        path: "/lsp/textDocument/{method}",
+        path: "/api/lsp/textDocument/{method}",
         async handler(req: Hapi.Request, reply: Hapi.IReply) {
 
             if (typeof(req.payload) == 'object' && req.payload != null) {// is it a json ?
