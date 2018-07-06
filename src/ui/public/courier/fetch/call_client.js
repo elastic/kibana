@@ -122,17 +122,9 @@ export function CallClientProvider(Private, Promise, es) {
     // asynchronously after we've returned a reference to defer.promise.
     Promise.resolve().then(async () => {
       // Execute each request using its search strategy.
-      const esPromises = searchStrategiesWithRequests.map(async searchStrategyWithSearchRequests => {
-        const { searchStrategy, searchRequests: searchStrategyRequests } = searchStrategyWithSearchRequests;
-
-        // Flatten the searchSource within each searchRequest to get the fetch params,
-        // e.g. body, filters, index pattern, query.
-        const allFetchParams = await getAllFetchParams(searchStrategyRequests);
-
-        // Serialize the fetch params into a format suitable for the body of an ES query.
-        const serializedFetchParams = await serializeAllFetchParams(allFetchParams, searchStrategyRequests);
-
-        return searchStrategy.search({ body: serializedFetchParams, es });
+      const esPromises = searchStrategiesWithRequests.map(searchStrategyWithSearchRequests => {
+        const { searchStrategy, searchRequests } = searchStrategyWithSearchRequests;
+        return searchStrategy.search({ searchRequests, es, Promise, serializeFetchParams });
       });
 
       try {
@@ -173,33 +165,6 @@ export function CallClientProvider(Private, Promise, es) {
           }
         });
       });
-  }
-
-  function getAllFetchParams(requests) {
-    return Promise.map(requests, (request) => {
-      return Promise.try(request.getFetchParams, void 0, request)
-        .then((fetchParams) => {
-          return (request.fetchParams = fetchParams);
-        })
-        .then(value => ({ resolved: value }))
-        .catch(error => ({ rejected: error }));
-    });
-  }
-
-  function serializeAllFetchParams(fetchParams, requestsToFetch) {
-    const requestsWithFetchParams = [];
-
-    // Gather the fetch param responses from all the successful requests.
-    fetchParams.forEach((result, index) => {
-      if (result.resolved) {
-        requestsWithFetchParams.push(result.resolved);
-      } else {
-        const request = requestsToFetch[index];
-        request.handleFailure(result.rejected);
-        requestsToFetch[index] = undefined;
-      }
-    });
-    return serializeFetchParams(requestsWithFetchParams);
   }
 
   return callClient;

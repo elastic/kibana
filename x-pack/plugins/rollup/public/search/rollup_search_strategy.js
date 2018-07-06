@@ -7,30 +7,45 @@
 export const rollupSearchStrategy = {
   id: 'rollup',
 
-  search: (/*{ body }*/) => {
-    // TODO: Replace this hardcoded dummy data with dynamically defined data.
-    const index = 'test_rollup_index';
-    const query = {
-      'size': 0,
-      'aggregations': {
-        'max_bytes': {
-          'max': {
-            'field': 'bytes',
-          },
-        },
+  search: async ({ searchRequests, Promise }) => {
+    // TODO: Batch together requests to hit a bulk rollup search endpoint.
+    const searchRequest = searchRequests[0];
+    const {
+      index: { title: indexPattern },
+      body: {
+        size,
+        aggs,
       },
+    } = await searchRequest.getFetchParams();
+
+    const index = indexPattern;
+    const query = {
+      'size': size,
+      'aggregations': aggs,
     };
 
     // TODO: Handle errors gracefully and surface them to the user.
-    return fetch('../api/rollup/search', {
-      method: 'post',
-      body: JSON.stringify({ index, query }),
-      headers: {
-        accept: 'application/json',
-        'content-type': 'application/json',
-        'kbn-xsrf': 'kibana',
-      },
-      credentials: 'same-origin'
+    return new Promise((resolve, reject) => {
+      fetch('../api/rollup/search', {
+        method: 'post',
+        body: JSON.stringify({ index, query }),
+        headers: {
+          accept: 'application/json',
+          'content-type': 'application/json',
+          'kbn-xsrf': 'kibana',
+        },
+        credentials: 'same-origin'
+      }).then(response => {
+        return response.json();
+      }).then(data => {
+        // Munge data into shape expected by consumer.
+        resolve({
+          took: data.took,
+          responses: [ data ],
+        });
+      }).catch(error => {
+        return reject(error);
+      });
     });
   },
 
