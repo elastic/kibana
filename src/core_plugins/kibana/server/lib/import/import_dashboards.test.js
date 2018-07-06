@@ -26,7 +26,7 @@ describe('importDashboards(req)', () => {
   let req;
   let bulkCreateStub;
   beforeEach(() => {
-    bulkCreateStub = sinon.stub().returns(Promise.resolve());
+    bulkCreateStub = sinon.stub().returns(Promise.resolve({ saved_objects: [] }));
     req = {
       query: {},
       payload: {
