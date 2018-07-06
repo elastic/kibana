@@ -33,10 +33,17 @@ export class JobsPage extends Component {
     this.setState({ updateJobStats });
   }
 
+  unsetUpdateJobStats = () => {
+    this.setUpdateJobStats(() => {});
+  }
+
   render() {
     return (
       <React.Fragment>
-        <JobStatsBar setUpdateJobStats={this.setUpdateJobStats} />
+        <JobStatsBar
+          setUpdateJobStats={this.setUpdateJobStats}
+          unsetUpdateJobStats={this.unsetUpdateJobStats}
+        />
         <div className="job-management">
           <NodeAvailableWarning />
           <header>

@@ -97,6 +97,10 @@ export class JobStatsBar extends Component {
     this.props.setUpdateJobStats(this.updateJobStats);
   }
 
+  componentWillUnmount() {
+    this.props.unsetUpdateJobStats();
+  }
+
   render() {
     const { jobStats } = this.state;
     const stats = Object.keys(jobStats).map(k => jobStats[k]);
@@ -112,5 +116,6 @@ export class JobStatsBar extends Component {
 }
 JobStatsBar.propTypes = {
   setUpdateJobStats: PropTypes.func.isRequired,
+  unsetUpdateJobStats: PropTypes.func.isRequired,
 };
 
