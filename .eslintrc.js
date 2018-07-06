@@ -171,7 +171,10 @@ module.exports = {
     /**
      * Files that run AFTER node version check, so they can
      * use the latest features of node, but are not transpiled
-     * with babel
+     * with babel. Since files like this are often run by IDEs
+     * in environments like Electron we also disallow syntax that
+     * is only available in the latest versions of Node like
+     * object spread
      */
     {
       files: [
