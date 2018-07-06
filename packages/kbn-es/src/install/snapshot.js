@@ -83,10 +83,7 @@ function downloadFile(url, dest, log) {
     res =>
       new Promise((resolve, reject) => {
         if (res.status === 304) {
-          log.info(
-            'etags match, using cache from %s',
-            chalk.bold(cacheMeta.ts)
-          );
+          log.info('etags match, using cache from %s', chalk.bold(cacheMeta.ts));
           return resolve();
         }
 
@@ -116,9 +113,7 @@ function downloadFile(url, dest, log) {
 }
 
 function getFilename(license, version) {
-  const basename = `elasticsearch${
-    license === 'oss' ? '-oss-' : '-'
-  }${version}`;
+  const basename = `elasticsearch${license === 'oss' ? '-oss-' : '-'}${version}`;
 
   return `${basename}-SNAPSHOT.tar.gz`;
 }
