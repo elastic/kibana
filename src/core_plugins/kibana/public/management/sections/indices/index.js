@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { management } from 'ui/management';
+import { management, sectionTypes } from 'ui/management';
 import './create_index_pattern_wizard';
 import './edit_index_pattern';
 import uiRoutes from 'ui/routes';
@@ -78,16 +78,17 @@ uiModules.get('apps/management')
   });
 
 management.getSection('kibana').register('indices', {
-  display: 'Index Patterns',
+  display: sectionTypes.INDEX_PATTERNS,
   order: 0,
   url: '#/management/kibana/indices/'
 });
 
-FeatureCatalogueRegistryProvider.register(() => {
+FeatureCatalogueRegistryProvider.register((i18n) => {
   return {
     id: 'index_patterns',
-    title: 'Index Patterns',
-    description: 'Manage the index patterns that help retrieve your data from Elasticsearch.',
+    title: i18n('kbn.management.indexPattern.header', { defaultMessage: 'Index Patterns' }),
+    description: i18n('kbn.management.indexPattern.label',
+      { defaultMessage: 'Manage the index patterns that help retrieve your data from Elasticsearch.' }),
     icon: 'indexPatternApp',
     path: '/app/kibana#/management/kibana/indices',
     showOnHomePage: true,

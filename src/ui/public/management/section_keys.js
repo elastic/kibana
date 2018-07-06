@@ -17,31 +17,6 @@
  * under the License.
  */
 
-import { ManagementSection } from './section';
-
-export { sectionTypes } from './section_keys';
-export { translateSectionName } from './section_translate_helper';
-export const management = new ManagementSection('management', {
-  display: 'Management'
-});
-
-// TODO: where should this live?
-management.register('data', {
-  display: 'Connect Data',
-  order: 0
-});
-
-management.register('elasticsearch', {
-  display: 'Elasticsearch',
-  order: 20
-});
-
-management.register('kibana', {
-  display: 'Kibana',
-  order: 30,
-});
-
-management.register('logstash', {
-  display: 'Logstash',
-  order: 30,
-});
+export const sectionTypes = {
+  INDEX_PATTERNS: 'indexPatterns'
+};

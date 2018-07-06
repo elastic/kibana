@@ -25,7 +25,7 @@ import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import appTemplate from './app.html';
 import landingTemplate from './landing.html';
-import { management } from 'ui/management';
+import { management, translateSectionName } from 'ui/management';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { timefilter } from 'ui/timefilter';
 import 'ui/kbn_top_nav';
@@ -46,7 +46,7 @@ require('ui/index_patterns/route_setup/load_default')({
 
 uiModules
   .get('apps/management')
-  .directive('kbnManagementApp', function (Private, $location) {
+  .directive('kbnManagementApp', function (Private, $location, i18n) {
     return {
       restrict: 'E',
       template: appTemplate,
@@ -66,6 +66,7 @@ uiModules
         if ($scope.section) {
           $scope.section.items.forEach(item => {
             item.active = `#${$location.path()}`.indexOf(item.url) > -1;
+            item.display = translateSectionName(i18n, item.display);
           });
         }
       }
@@ -74,12 +75,20 @@ uiModules
 
 uiModules
   .get('apps/management')
-  .directive('kbnManagementLanding', function (kbnVersion) {
+  .directive('kbnManagementLanding', function (kbnVersion, i18n) {
     return {
       restrict: 'E',
       link: function ($scope) {
         $scope.sections = management.items.inOrder;
         $scope.kbnVersion = kbnVersion;
+
+        if ($scope.sections && $scope.sections.length) {
+          $scope.sections.forEach(section => {
+            section.items.forEach(item => {
+              item.display = translateSectionName(i18n, item.display);
+            });
+          });
+        }
       }
     };
   });
