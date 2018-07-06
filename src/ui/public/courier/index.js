@@ -30,6 +30,8 @@ export {
 } from './search_source';
 
 export {
+  addSearchStrategy,
   hasSearchStategyForIndexPattern,
   isDefaultTypeIndexPattern,
+  SearchError,
 } from './search_strategy';

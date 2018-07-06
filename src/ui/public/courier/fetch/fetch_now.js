@@ -22,7 +22,6 @@ import { CallClientProvider } from './call_client';
 import { CallResponseHandlersProvider } from './call_response_handlers';
 import { ContinueIncompleteProvider } from './continue_incomplete';
 import { RequestStatus } from './req_status';
-import { location } from './notifier';
 
 /**
  * Fetch now provider should be used if you want the results searched and returned immediately.
@@ -53,7 +52,10 @@ export function FetchNowProvider(Private, Promise) {
 
       return searchRequest.retry();
     }))
-      .catch(error => fatalError(error, location));
+      .catch(error => {
+        // If any errors occur after the search requests have resolved, then we kill Kibana.
+        fatalError(error, 'Courier fetch');
+      });
   }
 
   function fetchSearchResults(searchRequests) {
@@ -71,7 +73,11 @@ export function FetchNowProvider(Private, Promise) {
     return startRequests(searchRequests)
       .then(function () {
         replaceAbortedRequests();
-        return callClient(searchRequests);
+        return callClient(searchRequests)
+          .catch(() => {
+            // Silently swallow errors that result from search requests so the consumer can surface
+            // them as notifications instead of courier forcing fatal errors.
+          });
       })
       .then(function (responses) {
         replaceAbortedRequests();

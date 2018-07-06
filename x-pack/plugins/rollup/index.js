@@ -9,7 +9,7 @@ import { PLUGIN } from './common/constants';
 import { registerLicenseChecker } from './server/lib/register_license_checker';
 import { registerIndicesRoute, registerFieldsForWildcardRoute, registerSearchRoute } from './server/routes/api';
 
-export function rollup(kibana)  {
+export function rollup(kibana) {
   return new kibana.Plugin({
     id: PLUGIN.ID,
     publicDir: resolve(__dirname, 'public'),

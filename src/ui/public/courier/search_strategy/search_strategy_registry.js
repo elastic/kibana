@@ -52,7 +52,6 @@ export const assignSearchRequestsToSearchStrategies = searchRequests => {
   const searchStrategyById = {};
 
   searchRequests.forEach(searchRequest => {
-
     const indexPattern = searchRequest.source.getField('index');
     const matchingSearchStrategy = getSearchStrategy(indexPattern);
 
