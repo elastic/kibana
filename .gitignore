@@ -10,7 +10,7 @@ build
 *.iws
 *.iml
 *.ipr
-kibana/
+/kibana/
 data/
 .project
 .classpath

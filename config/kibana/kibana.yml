@@ -1,0 +1,4 @@
+optimize:
+  unsafeCache: true
+  sourceMaps: false
+#  sourceMaps: '#cheap-source-map'
