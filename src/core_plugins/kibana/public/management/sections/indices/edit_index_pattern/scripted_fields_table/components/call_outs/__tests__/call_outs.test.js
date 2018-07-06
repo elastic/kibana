@@ -22,15 +22,18 @@ import { shallow } from 'enzyme';
 
 import { CallOuts } from '../call_outs';
 
+import { shallowIntl } from 'test_utils/enzyme_helpers';
+
 describe('CallOuts', () => {
   it('should render normally', async () => {
-    const component = shallow(
+    const wrapper = shallow(
       <CallOuts
         deprecatedLangsInUse={['php']}
         painlessDocLink="http://www.elastic.co/painlessDocs"
       />
     );
 
+    const component = shallowIntl(wrapper);
     expect(component).toMatchSnapshot();
   });
 

@@ -9,7 +9,11 @@ exports[`Header should render normally 1`] = `
     size="m"
   >
     <h1>
-      Create index pattern
+      <FormattedMessage
+        defaultMessage="Create index pattern"
+        id="kbn.management.indexPattern.create.header"
+        values={Object {}}
+      />
     </h1>
   </EuiTitle>
   <EuiFlexGroup
@@ -32,7 +36,11 @@ exports[`Header should render normally 1`] = `
           <EuiTextColor
             color="subdued"
           >
-            Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations.
+            <FormattedMessage
+              defaultMessage="Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations."
+              id="kbn.management.indexPattern.create.label"
+              values={Object {}}
+            />
           </EuiTextColor>
         </p>
       </EuiText>
@@ -43,7 +51,13 @@ exports[`Header should render normally 1`] = `
     >
       <EuiSwitch
         checked={true}
-        label="Include system indices"
+        label={
+          <FormattedMessage
+            defaultMessage="Include system indices"
+            id="kbn.management.indexPattern.create.includeSystemIndices.toggleSwitch"
+            values={Object {}}
+          />
+        }
         onChange={[Function]}
       />
     </EuiFlexItem>
@@ -63,7 +77,11 @@ exports[`Header should render without including system indices 1`] = `
     size="m"
   >
     <h1>
-      Create index pattern
+      <FormattedMessage
+        defaultMessage="Create index pattern"
+        id="kbn.management.indexPattern.create.header"
+        values={Object {}}
+      />
     </h1>
   </EuiTitle>
   <EuiFlexGroup
@@ -86,7 +104,11 @@ exports[`Header should render without including system indices 1`] = `
           <EuiTextColor
             color="subdued"
           >
-            Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations.
+            <FormattedMessage
+              defaultMessage="Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations."
+              id="kbn.management.indexPattern.create.label"
+              values={Object {}}
+            />
           </EuiTextColor>
         </p>
       </EuiText>
@@ -97,7 +119,13 @@ exports[`Header should render without including system indices 1`] = `
     >
       <EuiSwitch
         checked={false}
-        label="Include system indices"
+        label={
+          <FormattedMessage
+            defaultMessage="Include system indices"
+            id="kbn.management.indexPattern.create.includeSystemIndices.toggleSwitch"
+            values={Object {}}
+          />
+        }
         onChange={[Function]}
       />
     </EuiFlexItem>

@@ -26,9 +26,11 @@ import { keyCodes } from '@elastic/eui';
 const indexPattern = {};
 const items = [{ value: 'tim*' }];
 
+import { shallowIntl } from 'test_utils/enzyme_helpers';
+
 describe('Table', () => {
   it('should render normally', async () => {
-    const component = shallow(
+    const wrapper = shallow(
       <Table
         indexPattern={indexPattern}
         items={items}
@@ -39,11 +41,12 @@ describe('Table', () => {
       />
     );
 
+    const component = shallowIntl(wrapper);
     expect(component).toMatchSnapshot();
   });
 
   it('should render filter matches', async () => {
-    const component = shallow(
+    const wrapper = shallow(
       <Table
         indexPattern={{
           getNonScriptedFields: () => [{ name: 'time' }, { name: 'value' }],
@@ -56,6 +59,7 @@ describe('Table', () => {
       />
     );
 
+    const component = shallowIntl(wrapper);
     const matchesTableCell = shallow(
       component.prop('columns')[1].render('tim', { clientId: 1 })
     );
@@ -66,9 +70,10 @@ describe('Table', () => {
     const saveFilter = jest.fn();
     const clientId = 1;
     let component;
+    let wrapper;
 
     beforeEach(() => {
-      component = shallow(
+      wrapper = shallow(
         <Table
           indexPattern={indexPattern}
           items={items}
@@ -78,6 +83,7 @@ describe('Table', () => {
           isSaving={false}
         />
       );
+      component = shallowIntl(wrapper);
     });
 
     it('should show an input field', () => {
@@ -129,7 +135,7 @@ describe('Table', () => {
     });
 
     it('should update the matches dynamically as input value is changed', () => {
-      const localComponent = shallow(
+      const localWrapper = shallow(
         <Table
           indexPattern={{
             getNonScriptedFields: () => [{ name: 'time' }, { name: 'value' }],
@@ -143,6 +149,8 @@ describe('Table', () => {
           isSaving={false}
         />
       );
+
+      const localComponent = shallowIntl(localWrapper);
       // Start the editing process
       const editingComponent = shallow(
         // Fixes: Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
@@ -158,7 +166,7 @@ describe('Table', () => {
         .simulate('click');
 
       // Update the value
-      localComponent.setState({ editingFilterValue: 'time*' });
+      localWrapper.setState({ editingFilterValue: 'time*' });
 
       // Ensure the state change propagates
       localComponent.update();
@@ -175,7 +183,7 @@ describe('Table', () => {
 
     it('should exit on save', () => {
       // Change the value to something else
-      component.setState({
+      wrapper.setState({
         editingFilterId: clientId,
         editingFilterValue: 'ti*',
       });
@@ -199,14 +207,14 @@ describe('Table', () => {
       });
 
       // Ensure the state is properly reset
-      expect(component.state('editingFilterId')).toBe(null);
+      expect(wrapper.state('editingFilterId')).toBe(null);
     });
   });
 
   it('should allow deletes', () => {
     const deleteFilter = jest.fn();
 
-    const component = shallow(
+    const wrapper = shallow(
       <Table
         indexPattern={indexPattern}
         items={items}
@@ -217,6 +225,7 @@ describe('Table', () => {
       />
     );
 
+    const component = shallowIntl(wrapper);
     // Click the delete button
     const deleteCellComponent = shallow(
       // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
@@ -235,7 +244,7 @@ describe('Table', () => {
     const saveFilter = jest.fn();
     const clientId = 1;
 
-    const component = shallow(
+    const wrapper = shallow(
       <Table
         indexPattern={indexPattern}
         items={items}
@@ -246,6 +255,7 @@ describe('Table', () => {
       />
     );
 
+    const component = shallowIntl(wrapper);
     // Start the editing process
     const editingComponent = shallow(
       // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
@@ -273,14 +283,14 @@ describe('Table', () => {
     expect(saveFilter).toBeCalled();
 
     // It should reset
-    expect(component.state('editingFilterId')).toBe(null);
+    expect(wrapper.state('editingFilterId')).toBe(null);
   });
 
   it('should cancel when in edit mode and the esc key is pressed', () => {
     const saveFilter = jest.fn();
     const clientId = 1;
 
-    const component = shallow(
+    const wrapper = shallow(
       <Table
         indexPattern={indexPattern}
         items={items}
@@ -291,6 +301,7 @@ describe('Table', () => {
       />
     );
 
+    const component = shallowIntl(wrapper);
     // Start the editing process
     const editingComponent = shallow(
       // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
@@ -318,6 +329,6 @@ describe('Table', () => {
     expect(saveFilter).not.toBeCalled();
 
     // It should reset
-    expect(component.state('editingFilterId')).toBe(null);
+    expect(wrapper.state('editingFilterId')).toBe(null);
   });
 });
