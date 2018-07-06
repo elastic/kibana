@@ -17,5 +17,5 @@
  * under the License.
  */
 
-// eslint-disable-next-line import/no-unresolved
-export * from './target/web/angular';
+export { formats } from './formats';
+export * from './i18n';

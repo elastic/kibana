@@ -7,10 +7,9 @@
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
-    "build": "yarn build:web && yarn build:node && yarn build:aliases",
-    "build:web": "cross-env BABEL_ENV=web babel src --out-dir target/web",
-    "build:node": "cross-env BABEL_ENV=node babel src --out-dir target/node",
-    "build:aliases": "cross-env BABEL_ENV=web babel aliases --out-dir .",
+    "build": "yarn build:web && yarn build:node",
+    "build:web": "cross-env BABEL_ENV=web babel src --out-dir target/web --copy-files",
+    "build:node": "cross-env BABEL_ENV=node babel src --out-dir target/node --copy-files",
     "kbn:bootstrap": "yarn build",
     "kbn:watch": "yarn build --watch"
   },
@@ -22,6 +21,7 @@
   },
   "dependencies": {
     "accept-language-parser": "^1.5.0",
+    "intl": "^1.2.5",
     "intl-format-cache": "^2.1.0",
     "intl-messageformat": "^2.2.0",
     "intl-relativeformat": "^2.1.0",

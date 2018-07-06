@@ -17,5 +17,6 @@
  * under the License.
  */
 
-// eslint-disable-next-line import/no-unresolved
-export * from './target/web/react';
+import Intl from 'intl';
+
+global.Intl = Intl;
