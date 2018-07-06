@@ -98,12 +98,6 @@ export const security = (kibana) => new kibana.Plugin({
     // to re-compute the license check results for this plugin
     xpackInfoFeature.registerLicenseCheckResultsGenerator(checkLicense);
 
-    watchStatusAndLicenseToInitialize(xpackMainPlugin, plugin, async (license) => {
-      if (license.allowRbac) {
-        await registerPrivilegesWithCluster(server);
-      }
-    });
-
     validateConfig(config, message => server.log(['security', 'warning'], message));
 
     // Create a Hapi auth scheme that should be applied to each request.
@@ -113,10 +107,16 @@ export const security = (kibana) => new kibana.Plugin({
     // automatically assigned to all routes that don't contain an auth config.
     server.auth.strategy('session', 'login', 'required');
 
-    const auditLogger = new SecurityAuditLogger(server.config(), new AuditLogger(server, 'security'));
-
     // exposes server.plugins.security.authorization
     initAuthorizationService(server);
+
+    watchStatusAndLicenseToInitialize(xpackMainPlugin, plugin, async (license) => {
+      if (license.allowRbac) {
+        await registerPrivilegesWithCluster(server);
+      }
+    });
+
+    const auditLogger = new SecurityAuditLogger(server.config(), new AuditLogger(server, 'security'));
 
     const { savedObjects } = server;
     savedObjects.setScopedSavedObjectsClientFactory(({
