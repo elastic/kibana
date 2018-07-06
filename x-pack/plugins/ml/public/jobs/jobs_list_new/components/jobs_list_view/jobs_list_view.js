@@ -6,6 +6,7 @@
 
 
 import './styles/main.less';
+import { timefilter } from 'ui/timefilter';
 
 import { ml } from 'plugins/ml/services/ml_api_service';
 import { loadFullJob, filterJobs } from '../utils';
@@ -20,6 +21,9 @@ import { MultiJobActions } from '../multi_job_actions';
 import React, {
   Component
 } from 'react';
+
+const DEFAULT_REFRESH_INTERVAL_MS = 30000;
+const MINIMUM_REFRESH_INTERVAL_MS = 5000;
 
 export class JobsListView extends Component {
   constructor(props) {
@@ -40,13 +44,62 @@ export class JobsListView extends Component {
     this.showDeleteJobModal = () => {};
     this.showStartDatafeedModal = () => {};
 
-    this.blockAutoRefresh = false;
+    this.blockRefresh = false;
+    this.refreshInterval = null;
+  }
 
-    this.refreshJobSummaryList();
+  componentDidMount() {
+    timefilter.enableAutoRefreshSelector();
+
+    this.initAutoRefresh();
+    this.initAutoRefreshUpdate();
   }
 
   componentWillUnmount() {
-    this.blockAutoRefresh = true;
+    this.clearRefreshInterval();
+  }
+
+  initAutoRefresh() {
+    const { value, pause } = timefilter.getRefreshInterval();
+    if (pause === false && value === 0) {
+      // if the auto refresher isn't set, set it to the default
+      timefilter.setRefreshInterval({
+        pause: false,
+        value: DEFAULT_REFRESH_INTERVAL_MS
+      });
+    }
+
+    this.setAutoRefresh();
+  }
+
+  initAutoRefreshUpdate() {
+    // update the interval if it changes
+    timefilter.on('refreshIntervalUpdate', () => {
+      this.setAutoRefresh();
+    });
+  }
+
+  setAutoRefresh() {
+    const { value, pause } = timefilter.getRefreshInterval();
+    if (pause) {
+      this.clearRefreshInterval();
+    } else {
+      this.setRefreshInterval(value);
+    }
+    this.refreshJobSummaryList(true);
+  }
+
+  setRefreshInterval(interval) {
+    this.clearRefreshInterval();
+    if (interval >= MINIMUM_REFRESH_INTERVAL_MS) {
+      this.blockRefresh = false;
+      this.refreshInterval = setInterval(() => (this.refreshJobSummaryList()), interval);
+    }
+  }
+
+  clearRefreshInterval() {
+    this.blockRefresh = true;
+    clearInterval(this.refreshInterval);
   }
 
   toggleRow = (jobId) => {
@@ -157,8 +210,8 @@ export class JobsListView extends Component {
     });
   }
 
-  refreshJobSummaryList(autoRefresh = true) {
-    if (this.blockAutoRefresh === false) {
+  refreshJobSummaryList(forceRefresh = false) {
+    if (forceRefresh === true || this.blockRefresh === false) {
       const expandedJobsIds = Object.keys(this.state.itemIdToExpandedRowMap);
       ml.jobs.jobsSummary(expandedJobsIds)
         .then((jobs) => {
@@ -179,12 +232,6 @@ export class JobsListView extends Component {
           Object.keys(this.updateFunctions).forEach((j) => {
             this.updateFunctions[j].setState({ job: fullJobsList[j] });
           });
-
-          if (autoRefresh === true) {
-            setTimeout(() => {
-              this.refreshJobSummaryList();
-            }, 10000);
-          }
         })
         .catch((error) => {
           console.error(error);
@@ -200,7 +247,7 @@ export class JobsListView extends Component {
             selectedJobs={this.state.selectedJobs}
             showStartDatafeedModal={this.showStartDatafeedModal}
             showDeleteJobModal={this.showDeleteJobModal}
-            refreshJobs={() => this.refreshJobSummaryList(false)}
+            refreshJobs={() => this.refreshJobSummaryList(true)}
           />
           <JobFilterBar setFilters={this.setFilters} />
         </div>
@@ -213,22 +260,22 @@ export class JobsListView extends Component {
           showEditJobFlyout={this.showEditJobFlyout}
           showDeleteJobModal={this.showDeleteJobModal}
           showStartDatafeedModal={this.showStartDatafeedModal}
-          refreshJobs={() => this.refreshJobSummaryList(false)}
+          refreshJobs={() => this.refreshJobSummaryList(true)}
         />
         <EditJobFlyout
           setShowFunction={this.setShowEditJobFlyoutFunction}
           unsetShowFunction={this.unsetShowEditJobFlyoutFunction}
-          refreshJobs={() => this.refreshJobSummaryList(false)}
+          refreshJobs={() => this.refreshJobSummaryList(true)}
         />
         <DeleteJobModal
           setShowFunction={this.setShowDeleteJobModalFunction}
           unsetShowFunction={this.unsetShowDeleteJobModalFunction}
-          refreshJobs={() => this.refreshJobSummaryList(false)}
+          refreshJobs={() => this.refreshJobSummaryList(true)}
         />
         <StartDatafeedModal
           setShowFunction={this.setShowStartDatafeedModalFunction}
           unsetShowFunction={this.unsetShowDeleteJobModalFunction}
-          refreshJobs={() => this.refreshJobSummaryList(false)}
+          refreshJobs={() => this.refreshJobSummaryList(true)}
         />
       </div>
     );
