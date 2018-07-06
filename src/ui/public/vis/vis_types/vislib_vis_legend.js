@@ -18,15 +18,15 @@
  */
 
 import _ from 'lodash';
-import html from './visualize_legend.html';
-import { VislibLibDataProvider } from '../vislib/lib/data';
-import { FilterBarClickHandlerProvider } from '../filter_bar/filter_bar_click_handler';
-import { uiModules } from '../modules';
+import html from './vislib_vis_legend.html';
+import { VislibLibDataProvider } from '../../vislib/lib/data';
+import { FilterBarClickHandlerProvider } from '../../filter_bar/filter_bar_click_handler';
+import { uiModules } from '../../modules';
 import { htmlIdGenerator, keyCodes } from '@elastic/eui';
 
 
 uiModules.get('kibana')
-  .directive('visualizeLegend', function (Private, getAppState, $timeout) {
+  .directive('vislibLegend', function (Private, getAppState, $timeout) {
     const Data = Private(VislibLibDataProvider);
     const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
 
