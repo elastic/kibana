@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import * as i18nCore from './i18n';
-import * as loader from './loader';
+import './intl_polyfill';
 
-export const i18n = i18nCore;
-export const i18nLoader = loader;
+export * from './index';
