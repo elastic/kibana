@@ -45,7 +45,11 @@ function getServerMock(customization) {
       }
     }),
     usage: {
-      UsageCollector: MockUsageCollector
+      collectorSet: {
+        makeUsageCollector: options => {
+          return new MockUsageCollector(this, options);
+        }
+      }
     }
   };
   return Object.assign(defaultServerMock, customization);
