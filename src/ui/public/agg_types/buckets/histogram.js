@@ -59,7 +59,14 @@ export const histogramBucketAgg = new BucketAggType({
       name: 'field',
       filterFieldTypes: 'number'
     },
-
+    {
+      /*
+       * This parameter can be set if you want the auto scaled interval to always
+       * be a multiple of a specific base.
+       */
+      name: 'intervalBase',
+      default: null,
+    },
     {
       name: 'interval',
       editor: intervalTemplate,
@@ -108,6 +115,17 @@ export const histogramBucketAgg = new BucketAggType({
               roundInterval += orderOfMagnitude;
             }
             interval = roundInterval;
+          }
+        }
+
+        const base = aggConfig.params.intervalBase;
+        if (base) {
+          if (interval < base) {
+            // In case the specified interval is below the base, just increase it to it's base
+            interval = base;
+          } else if (interval % base !== 0) {
+            // In case the interval is not a multiple of the base round it to the next base
+            interval = Math.round(interval / base) * base;
           }
         }
 
