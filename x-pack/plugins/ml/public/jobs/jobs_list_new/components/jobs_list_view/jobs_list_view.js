@@ -23,6 +23,7 @@ import React, {
 } from 'react';
 
 const DEFAULT_REFRESH_INTERVAL_MS = 30000;
+const MINIMUM_REFRESH_INTERVAL_MS = 5000;
 
 export class JobsListView extends Component {
   constructor(props) {
@@ -44,7 +45,6 @@ export class JobsListView extends Component {
     this.showStartDatafeedModal = () => {};
 
     this.blockRefresh = false;
-    this.refreshIntervalMS = DEFAULT_REFRESH_INTERVAL_MS;
     this.refreshInterval = null;
   }
 
@@ -83,11 +83,6 @@ export class JobsListView extends Component {
     const { value, pause } = timefilter.getRefreshInterval();
     if (pause) {
       this.clearRefreshInterval();
-    } else if (value === 0) {
-      // if unpaused but interval is 0, force pause
-      this.setRefreshInterval(value);
-      this.clearRefreshInterval();
-      this.forcePauseTimefilter();
     } else {
       this.setRefreshInterval(value);
     }
@@ -96,22 +91,15 @@ export class JobsListView extends Component {
 
   setRefreshInterval(interval) {
     clearInterval(this.refreshInterval);
-    this.refreshIntervalMS = interval;
-    this.blockRefresh = false;
-    this.refreshInterval = setInterval(() => (this.refreshJobSummaryList()), this.refreshIntervalMS);
+    if (interval >= MINIMUM_REFRESH_INTERVAL_MS) {
+      this.blockRefresh = false;
+      this.refreshInterval = setInterval(() => (this.refreshJobSummaryList()), interval);
+    }
   }
 
   clearRefreshInterval() {
     this.blockRefresh = true;
     clearInterval(this.refreshInterval);
-  }
-
-  forcePauseTimefilter() {
-    // if refreshIntervalMS = 0, the auto refresh component has been switched off
-    timefilter.setRefreshInterval({
-      pause: true,
-      value: this.refreshIntervalMS
-    });
   }
 
   toggleRow = (jobId) => {
