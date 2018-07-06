@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import expect from 'expect.js';
+import { wrapRequest } from '../../../../utils/wrap_request';
 import { MemoryBeatsAdapter } from '../../../adapters/beats/memory_beats_adapter';
-import { TestingBackendFrameworkAdapter } from '../../../adapters/framework/testing_framework_adapter';
+import { TestingBackendFrameworkAdapter } from '../../../adapters/famework/kibana/testing_framework_adapter';
 import { MemoryTagsAdapter } from '../../../adapters/tags/memory_tags_adapter';
 import { MemoryTokensAdapter } from '../../../adapters/tokens/memory_tokens_adapter';
 
-import { BeatTag, CMBeat } from '../../../../../common/domain_types';
-import { TokenEnrollmentData } from '../../../adapters/tokens/adapter_types';
+import { BeatTag, CMBeat, EnrollmentToken } from './../../../lib';
 
 import { CMBeatsDomain } from '../../beats';
 import { CMTagsDomain } from '../../tags';
@@ -26,13 +27,21 @@ const settings = {
   enrollmentTokensTtlInSeconds: 10 * 60, // 10 minutes
 };
 
+const fakeReq = wrapRequest({
+  headers: {},
+  info: {},
+  params: {},
+  payload: {},
+  query: {},
+});
+
 describe('Beats Domain Lib', () => {
   let beatsLib: CMBeatsDomain;
   let tokensLib: CMTokensDomain;
 
   let beatsDB: CMBeat[] = [];
   let tagsDB: BeatTag[] = [];
-  let tokensDB: TokenEnrollmentData[] = [];
+  let tokensDB: EnrollmentToken[] = [];
 
   describe('verify_beat', () => {
     beforeEach(async () => {
@@ -114,7 +123,7 @@ describe('Beats Domain Lib', () => {
         verifiedBeatIds,
         alreadyVerifiedBeatIds,
         nonExistentBeatIds,
-      } = await beatsLib.verifyBeats({ kind: 'unauthenticated' }, beatIds);
+      } = await beatsLib.verifyBeats(fakeReq, beatIds);
 
       // TODO calculation of status should be done in-lib, w/switch statement here
       beats.forEach(b => {
@@ -134,7 +143,7 @@ describe('Beats Domain Lib', () => {
       });
 
       const response = { beats };
-      expect(response.beats).toEqual([
+      expect(response.beats).to.eql([
         { id: 'bar', status: 200, result: 'verified' },
         { id: nonExistentBeatId, status: 404, result: 'not found' },
       ]);
@@ -154,7 +163,7 @@ describe('Beats Domain Lib', () => {
         verifiedBeatIds,
         alreadyVerifiedBeatIds,
         nonExistentBeatIds,
-      } = await beatsLib.verifyBeats({ kind: 'unauthenticated' }, beatIds);
+      } = await beatsLib.verifyBeats(fakeReq, beatIds);
 
       // TODO calculation of status should be done in-lib, w/switch statement here
       beats.forEach(beat => {
@@ -174,7 +183,7 @@ describe('Beats Domain Lib', () => {
       });
 
       const response = { beats };
-      expect(response.beats).toEqual([
+      expect(response.beats).to.eql([
         { id: 'foo', status: 200, result: 'already verified' },
         { id: 'bar', status: 200, result: 'verified' },
       ]);

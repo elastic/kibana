@@ -7,18 +7,18 @@
 import { flatten, get as _get, omit } from 'lodash';
 import moment from 'moment';
 import { INDEX_NAMES } from '../../../../common/constants';
-import { CMBeat } from '../../../../common/domain_types';
-import { DatabaseAdapter } from '../database/adapter_types';
-import { BackendFrameworkAdapter } from '../framework/adapter_types';
-import { FrameworkUser } from '../framework/adapter_types';
-import { BeatsTagAssignment, CMBeatsAdapter } from './adapter_types';
+import {
+  BackendFrameworkAdapter,
+  CMBeat,
+  CMBeatsAdapter,
+  CMTagAssignment,
+  FrameworkRequest,
+} from '../../lib';
 
 export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
-  private database: DatabaseAdapter;
   private framework: BackendFrameworkAdapter;
 
-  constructor(database: DatabaseAdapter, framework: BackendFrameworkAdapter) {
-    this.database = database;
+  constructor(framework: BackendFrameworkAdapter) {
     this.framework = framework;
   }
 
@@ -30,10 +30,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       type: '_doc',
     };
 
-    const response = await this.database.get(
-      this.framework.internalUser,
-      params
-    );
+    const response = await this.framework.callWithInternalUser('get', params);
     if (!response.found) {
       return null;
     }
@@ -47,13 +44,14 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       type: 'beat',
     };
 
-    await this.database.create(this.framework.internalUser, {
+    const params = {
       body,
       id: `beat:${beat.id}`,
       index: INDEX_NAMES.BEATS,
       refresh: 'wait_for',
       type: '_doc',
-    });
+    };
+    await this.framework.callWithInternalUser('create', params);
   }
 
   public async update(beat: CMBeat) {
@@ -69,10 +67,10 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       refresh: 'wait_for',
       type: '_doc',
     };
-    await this.database.index(this.framework.internalUser, params);
+    return await this.framework.callWithInternalUser('index', params);
   }
 
-  public async getWithIds(user: FrameworkUser, beatIds: string[]) {
+  public async getWithIds(req: FrameworkRequest, beatIds: string[]) {
     const ids = beatIds.map(beatId => `beat:${beatId}`);
 
     const params = {
@@ -83,14 +81,14 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       index: INDEX_NAMES.BEATS,
       type: '_doc',
     };
-    const response = await this.database.mget(user, params);
+    const response = await this.framework.callWithRequest(req, 'mget', params);
 
-    return _get(response, 'docs', [])
+    return get(response, 'docs', [])
       .filter((b: any) => b.found)
       .map((b: any) => b._source.beat);
   }
 
-  public async verifyBeats(user: FrameworkUser, beatIds: string[]) {
+  public async verifyBeats(req: FrameworkRequest, beatIds: string[]) {
     if (!Array.isArray(beatIds) || beatIds.length === 0) {
       return [];
     }
@@ -103,13 +101,15 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       ])
     );
 
-    const response = await this.database.bulk(user, {
+    const params = {
       _sourceInclude: ['beat.id', 'beat.verified_on'],
       body,
       index: INDEX_NAMES.BEATS,
       refresh: 'wait_for',
       type: '_doc',
-    });
+    };
+
+    const response = await this.framework.callWithRequest(req, 'bulk', params);
 
     return _get(response, 'items', []).map(b => ({
       ..._get(b, 'update.get._source.beat', {}),
@@ -117,22 +117,26 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     }));
   }
 
-  public async getAll(user: FrameworkUser) {
+  public async getAll(req: FrameworkRequest) {
     const params = {
       index: INDEX_NAMES.BEATS,
       q: 'type:beat',
       type: '_doc',
     };
-    const response = await this.database.search(user, params);
+    const response = await this.framework.callWithRequest(
+      req,
+      'search',
+      params
+    );
 
-    const beats = _get<any>(response, 'hits.hits', []);
+    const beats = get<any>(response, 'hits.hits', []);
     return beats.map((beat: any) => omit(beat._source.beat, ['access_token']));
   }
 
   public async removeTagsFromBeats(
-    user: FrameworkUser,
-    removals: BeatsTagAssignment[]
-  ): Promise<BeatsTagAssignment[]> {
+    req: FrameworkRequest,
+    removals: CMTagAssignment[]
+  ): Promise<CMTagAssignment[]> {
     const body = flatten(
       removals.map(({ beatId, tag }) => {
         const script =
@@ -149,13 +153,15 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       })
     );
 
-    const response = await this.database.bulk(user, {
+    const params = {
       body,
       index: INDEX_NAMES.BEATS,
       refresh: 'wait_for',
       type: '_doc',
-    });
-    return _get<any>(response, 'items', []).map(
+    };
+
+    const response = await this.framework.callWithRequest(req, 'bulk', params);
+    return get<any>(response, 'items', []).map(
       (item: any, resultIdx: number) => ({
         idxInRequest: removals[resultIdx].idxInRequest,
         result: item.update.result,
@@ -165,9 +171,9 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
   }
 
   public async assignTagsToBeats(
-    user: FrameworkUser,
-    assignments: BeatsTagAssignment[]
-  ): Promise<BeatsTagAssignment[]> {
+    req: FrameworkRequest,
+    assignments: CMTagAssignment[]
+  ): Promise<CMTagAssignment[]> {
     const body = flatten(
       assignments.map(({ beatId, tag }) => {
         const script =
@@ -187,18 +193,18 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       })
     );
 
-    const response = await this.database.bulk(user, {
+    const params = {
       body,
       index: INDEX_NAMES.BEATS,
       refresh: 'wait_for',
       type: '_doc',
-    });
-    return _get<any>(response, 'items', []).map(
-      (item: any, resultIdx: any) => ({
-        idxInRequest: assignments[resultIdx].idxInRequest,
-        result: item.update.result,
-        status: item.update.status,
-      })
-    );
+    };
+
+    const response = await this.framework.callWithRequest(req, 'bulk', params);
+    return get<any>(response, 'items', []).map((item: any, resultIdx: any) => ({
+      idxInRequest: assignments[resultIdx].idxInRequest,
+      result: item.update.result,
+      status: item.update.status,
+    }));
   }
 }

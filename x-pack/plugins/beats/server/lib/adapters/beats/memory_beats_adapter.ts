@@ -7,9 +7,12 @@
 import { omit } from 'lodash';
 import moment from 'moment';
 
-import { CMBeat } from '../../../../common/domain_types';
-import { FrameworkUser } from '../framework/adapter_types';
-import { BeatsTagAssignment, CMBeatsAdapter } from './adapter_types';
+import {
+  CMBeat,
+  CMBeatsAdapter,
+  CMTagAssignment,
+  FrameworkRequest,
+} from '../../lib';
 
 export class MemoryBeatsAdapter implements CMBeatsAdapter {
   private beatsDB: CMBeat[];
@@ -35,11 +38,11 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
     };
   }
 
-  public async getWithIds(user: FrameworkUser, beatIds: string[]) {
+  public async getWithIds(req: FrameworkRequest, beatIds: string[]) {
     return this.beatsDB.filter(beat => beatIds.includes(beat.id));
   }
 
-  public async verifyBeats(user: FrameworkUser, beatIds: string[]) {
+  public async verifyBeats(req: FrameworkRequest, beatIds: string[]) {
     if (!Array.isArray(beatIds) || beatIds.length === 0) {
       return [];
     }
@@ -55,14 +58,14 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
     return this.beatsDB.filter(beat => beatIds.includes(beat.id));
   }
 
-  public async getAll(user: FrameworkUser) {
+  public async getAll(req: FrameworkRequest) {
     return this.beatsDB.map((beat: any) => omit(beat, ['access_token']));
   }
 
   public async removeTagsFromBeats(
-    user: FrameworkUser,
-    removals: BeatsTagAssignment[]
-  ): Promise<BeatsTagAssignment[]> {
+    req: FrameworkRequest,
+    removals: CMTagAssignment[]
+  ): Promise<CMTagAssignment[]> {
     const beatIds = removals.map(r => r.beatId);
 
     const response = this.beatsDB
@@ -85,16 +88,16 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
   }
 
   public async assignTagsToBeats(
-    user: FrameworkUser,
-    assignments: BeatsTagAssignment[]
-  ): Promise<BeatsTagAssignment[]> {
+    req: FrameworkRequest,
+    assignments: CMTagAssignment[]
+  ): Promise<CMTagAssignment[]> {
     const beatIds = assignments.map(r => r.beatId);
 
     this.beatsDB.filter(beat => beatIds.includes(beat.id)).map(beat => {
       // get tags that need to be assigned to this beat
       const tags = assignments
         .filter(a => a.beatId === beat.id)
-        .map((t: BeatsTagAssignment) => t.tag);
+        .map((t: CMTagAssignment) => t.tag);
 
       if (tags.length > 0) {
         if (!beat.tags) {
@@ -111,12 +114,10 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
       return beat;
     });
 
-    return assignments.map<any>(
-      (item: BeatsTagAssignment, resultIdx: number) => ({
-        idxInRequest: assignments[resultIdx].idxInRequest,
-        result: 'updated',
-        status: 200,
-      })
-    );
+    return assignments.map<any>((item: CMTagAssignment, resultIdx: number) => ({
+      idxInRequest: assignments[resultIdx].idxInRequest,
+      result: 'updated',
+      status: 200,
+    }));
   }
 }

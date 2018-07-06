@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FrameworkAuthenticatedUser } from './../framework/adapter_types';
-import { CMTokensAdapter, TokenEnrollmentData } from './adapter_types';
+import { CMTokensAdapter, EnrollmentToken, FrameworkRequest } from '../../lib';
 
 export class MemoryTokensAdapter implements CMTokensAdapter {
-  private tokenDB: TokenEnrollmentData[];
+  private tokenDB: EnrollmentToken[];
 
-  constructor(tokenDB: TokenEnrollmentData[]) {
+  constructor(tokenDB: EnrollmentToken[]) {
     this.tokenDB = tokenDB;
   }
 
@@ -26,16 +25,13 @@ export class MemoryTokensAdapter implements CMTokensAdapter {
 
   public async getEnrollmentToken(
     tokenString: string
-  ): Promise<TokenEnrollmentData> {
-    return new Promise<TokenEnrollmentData>(resolve => {
+  ): Promise<EnrollmentToken> {
+    return new Promise<EnrollmentToken>(resolve => {
       return resolve(this.tokenDB.find(token => token.token === tokenString));
     });
   }
 
-  public async upsertTokens(
-    user: FrameworkAuthenticatedUser,
-    tokens: TokenEnrollmentData[]
-  ) {
+  public async upsertTokens(req: FrameworkRequest, tokens: EnrollmentToken[]) {
     tokens.forEach(token => {
       const existingIndex = this.tokenDB.findIndex(
         t => t.token === token.token

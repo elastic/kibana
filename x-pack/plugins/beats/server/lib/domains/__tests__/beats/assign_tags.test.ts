@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FrameworkInternalUser } from './../../../adapters/framework/adapter_types';
-
+import expect from 'expect.js';
+import { wrapRequest } from '../../../../utils/wrap_request';
 import { MemoryBeatsAdapter } from '../../../adapters/beats/memory_beats_adapter';
-import { TestingBackendFrameworkAdapter } from '../../../adapters/framework/testing_framework_adapter';
+import { TestingBackendFrameworkAdapter } from '../../../adapters/famework/kibana/testing_framework_adapter';
 import { MemoryTagsAdapter } from '../../../adapters/tags/memory_tags_adapter';
 import { MemoryTokensAdapter } from '../../../adapters/tokens/memory_tokens_adapter';
 
-import { BeatTag, CMBeat } from '../../../../../common/domain_types';
+import { BeatTag, CMBeat } from './../../../lib';
 
 import { CMBeatsDomain } from '../../beats';
 import { CMTagsDomain } from '../../tags';
@@ -22,7 +22,13 @@ import Chance from 'chance';
 const seed = Date.now();
 const chance = new Chance(seed);
 
-const internalUser: FrameworkInternalUser = { kind: 'internal' };
+const fakeReq = wrapRequest({
+  headers: {},
+  info: {},
+  params: {},
+  payload: {},
+  query: {},
+});
 
 const settings = {
   encryptionKey: 'something_who_cares',
@@ -97,11 +103,11 @@ describe('Beats Domain Lib', () => {
     });
 
     it('should add a single tag to a single beat', async () => {
-      const apiResponse = await beatsLib.assignTagsToBeats(internalUser, [
+      const apiResponse = await beatsLib.assignTagsToBeats(fakeReq, [
         { beatId: 'bar', tag: 'production' },
       ]);
 
-      expect(apiResponse.assignments).toEqual([
+      expect(apiResponse.assignments).to.eql([
         { status: 200, result: 'updated' },
       ]);
     });
@@ -110,80 +116,80 @@ describe('Beats Domain Lib', () => {
       const tags = ['production'];
 
       let beat = beatsDB.find(b => b.id === 'foo') as any;
-      expect(beat.tags).toEqual([...tags, 'qa']);
+      expect(beat.tags).to.eql([...tags, 'qa']);
 
       // Adding the existing tag
-      const apiResponse = await beatsLib.assignTagsToBeats(internalUser, [
+      const apiResponse = await beatsLib.assignTagsToBeats(fakeReq, [
         { beatId: 'foo', tag: 'production' },
       ]);
 
-      expect(apiResponse.assignments).toEqual([
+      expect(apiResponse.assignments).to.eql([
         { status: 200, result: 'updated' },
       ]);
 
       beat = beatsDB.find(b => b.id === 'foo') as any;
-      expect(beat.tags).toEqual([...tags, 'qa']);
+      expect(beat.tags).to.eql([...tags, 'qa']);
     });
 
     it('should add a single tag to a multiple beats', async () => {
-      const apiResponse = await beatsLib.assignTagsToBeats(internalUser, [
+      const apiResponse = await beatsLib.assignTagsToBeats(fakeReq, [
         { beatId: 'foo', tag: 'development' },
         { beatId: 'bar', tag: 'development' },
       ]);
 
-      expect(apiResponse.assignments).toEqual([
+      expect(apiResponse.assignments).to.eql([
         { status: 200, result: 'updated' },
         { status: 200, result: 'updated' },
       ]);
 
       let beat = beatsDB.find(b => b.id === 'foo') as any;
-      expect(beat.tags).toEqual(['production', 'qa', 'development']); // as beat 'foo' already had 'production' and 'qa' tags attached to it
+      expect(beat.tags).to.eql(['production', 'qa', 'development']); // as beat 'foo' already had 'production' and 'qa' tags attached to it
 
       beat = beatsDB.find(b => b.id === 'bar') as any;
-      expect(beat.tags).toEqual(['development']);
+      expect(beat.tags).to.eql(['development']);
     });
 
     it('should add multiple tags to a single beat', async () => {
-      const apiResponse = await beatsLib.assignTagsToBeats(internalUser, [
+      const apiResponse = await beatsLib.assignTagsToBeats(fakeReq, [
         { beatId: 'bar', tag: 'development' },
         { beatId: 'bar', tag: 'production' },
       ]);
 
-      expect(apiResponse.assignments).toEqual([
+      expect(apiResponse.assignments).to.eql([
         { status: 200, result: 'updated' },
         { status: 200, result: 'updated' },
       ]);
 
       const beat = beatsDB.find(b => b.id === 'bar') as any;
-      expect(beat.tags).toEqual(['development', 'production']);
+      expect(beat.tags).to.eql(['development', 'production']);
     });
 
     it('should add multiple tags to a multiple beats', async () => {
-      const apiResponse = await beatsLib.assignTagsToBeats(internalUser, [
+      const apiResponse = await beatsLib.assignTagsToBeats(fakeReq, [
         { beatId: 'foo', tag: 'development' },
         { beatId: 'bar', tag: 'production' },
       ]);
 
-      expect(apiResponse.assignments).toEqual([
+      expect(apiResponse.assignments).to.eql([
         { status: 200, result: 'updated' },
         { status: 200, result: 'updated' },
       ]);
 
       let beat = beatsDB.find(b => b.id === 'foo') as any;
-      expect(beat.tags).toEqual(['production', 'qa', 'development']); // as beat 'foo' already had 'production' and 'qa' tags attached to it
+      expect(beat.tags).to.eql(['production', 'qa', 'development']); // as beat 'foo' already had 'production' and 'qa' tags attached to it
 
       beat = beatsDB.find(b => b.id === 'bar') as any;
-      expect(beat.tags).toEqual(['production']);
+      expect(beat.tags).to.eql(['production']);
     });
 
     it('should return errors for non-existent beats', async () => {
       const nonExistentBeatId = chance.word();
 
-      const apiResponse = await beatsLib.assignTagsToBeats(internalUser, [
+      const apiResponse = await beatsLib.assignTagsToBeats(fakeReq, [
         { beatId: nonExistentBeatId, tag: 'production' },
       ]);
 
-      expect(apiResponse.assignments).toEqual([
+      expect(apiResponse.assignments).to.eql([
         { status: 404, result: `Beat ${nonExistentBeatId} not found` },
       ]);
     });
@@ -191,27 +197,27 @@ describe('Beats Domain Lib', () => {
     it('should return errors for non-existent tags', async () => {
       const nonExistentTag = chance.word();
 
-      const apiResponse = await beatsLib.assignTagsToBeats(internalUser, [
+      const apiResponse = await beatsLib.assignTagsToBeats(fakeReq, [
         { beatId: 'bar', tag: nonExistentTag },
       ]);
 
-      expect(apiResponse.assignments).toEqual([
+      expect(apiResponse.assignments).to.eql([
         { status: 404, result: `Tag ${nonExistentTag} not found` },
       ]);
 
       const beat = beatsDB.find(b => b.id === 'bar') as any;
-      expect(beat).not.toHaveProperty('tags');
+      expect(beat).to.not.have.property('tags');
     });
 
     it('should return errors for non-existent beats and tags', async () => {
       const nonExistentBeatId = chance.word();
       const nonExistentTag = chance.word();
 
-      const apiResponse = await beatsLib.assignTagsToBeats(internalUser, [
+      const apiResponse = await beatsLib.assignTagsToBeats(fakeReq, [
         { beatId: nonExistentBeatId, tag: nonExistentTag },
       ]);
 
-      expect(apiResponse.assignments).toEqual([
+      expect(apiResponse.assignments).to.eql([
         {
           result: `Beat ${nonExistentBeatId} and tag ${nonExistentTag} not found`,
           status: 404,
@@ -219,7 +225,7 @@ describe('Beats Domain Lib', () => {
       ]);
 
       const beat = beatsDB.find(b => b.id === 'bar') as any;
-      expect(beat).not.toHaveProperty('tags');
+      expect(beat).to.not.have.property('tags');
     });
   });
 });

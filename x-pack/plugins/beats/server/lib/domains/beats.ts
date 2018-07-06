@@ -4,19 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import { uniq } from 'lodash';
 import { findNonExistentItems } from '../../utils/find_non_existent_items';
 
-import { CMBeat } from '../../../common/domain_types';
 import {
-  BeatsTagAssignment,
+  CMAssignmentReturn,
+  CMBeat,
   CMBeatsAdapter,
-} from '../adapters/beats/adapter_types';
-import { FrameworkUser } from '../adapters/framework/adapter_types';
-
-import { CMAssignmentReturn } from '../adapters/beats/adapter_types';
-import { CMDomainLibs } from '../lib';
-import { BeatsRemovalReturn } from './../adapters/beats/adapter_types';
+  CMDomainLibs,
+  CMRemovalReturn,
+  CMTagAssignment,
+  FrameworkRequest,
+} from '../lib';
 
 export class CMBeatsDomain {
   private adapter: CMBeatsAdapter;
@@ -80,9 +85,9 @@ export class CMBeatsDomain {
   }
 
   public async removeTagsFromBeats(
-    user: FrameworkUser,
-    removals: BeatsTagAssignment[]
-  ): Promise<BeatsRemovalReturn> {
+    req: FrameworkRequest,
+    removals: CMTagAssignment[]
+  ): Promise<CMRemovalReturn> {
     const beatIds = uniq(removals.map(removal => removal.beatId));
     const tagIds = uniq(removals.map(removal => removal.tag));
 
@@ -90,8 +95,8 @@ export class CMBeatsDomain {
       removals: removals.map(() => ({ status: null })),
     };
 
-    const beats = await this.adapter.getWithIds(user, beatIds);
-    const tags = await this.tags.getTagsWithIds(user, tagIds);
+    const beats = await this.adapter.getWithIds(req, beatIds);
+    const tags = await this.tags.getTagsWithIds(req, tagIds);
 
     // Handle assignments containing non-existing beat IDs or tags
     const nonExistentBeatIds = findNonExistentItems(beats, beatIds);
@@ -116,7 +121,7 @@ export class CMBeatsDomain {
 
     if (validRemovals.length > 0) {
       const removalResults = await this.adapter.removeTagsFromBeats(
-        user,
+        req,
         validRemovals
       );
       return addToResultsToResponse('removals', response, removalResults);
@@ -124,13 +129,13 @@ export class CMBeatsDomain {
     return response;
   }
 
-  public async getAllBeats(user: FrameworkUser) {
-    return await this.adapter.getAll(user);
+  public async getAllBeats(req: FrameworkRequest) {
+    return await this.adapter.getAll(req);
   }
 
   // TODO cleanup return value, should return a status enum
-  public async verifyBeats(user: FrameworkUser, beatIds: string[]) {
-    const beatsFromEs = await this.adapter.getWithIds(user, beatIds);
+  public async verifyBeats(req: FrameworkRequest, beatIds: string[]) {
+    const beatsFromEs = await this.adapter.getWithIds(req, beatIds);
 
     const nonExistentBeatIds = findNonExistentItems(beatsFromEs, beatIds);
 
@@ -143,7 +148,7 @@ export class CMBeatsDomain {
       .map((beat: any) => beat.id);
 
     const verifications = await this.adapter.verifyBeats(
-      user,
+      req,
       toBeVerifiedBeatIds
     );
 
@@ -156,8 +161,8 @@ export class CMBeatsDomain {
   }
 
   public async assignTagsToBeats(
-    user: FrameworkUser,
-    assignments: BeatsTagAssignment[]
+    req: FrameworkRequest,
+    assignments: CMTagAssignment[]
   ): Promise<CMAssignmentReturn> {
     const beatIds = uniq(assignments.map(assignment => assignment.beatId));
     const tagIds = uniq(assignments.map(assignment => assignment.tag));
@@ -165,8 +170,8 @@ export class CMBeatsDomain {
     const response = {
       assignments: assignments.map(() => ({ status: null })),
     };
-    const beats = await this.adapter.getWithIds(user, beatIds);
-    const tags = await this.tags.getTagsWithIds(user, tagIds);
+    const beats = await this.adapter.getWithIds(req, beatIds);
+    const tags = await this.tags.getTagsWithIds(req, tagIds);
     // Handle assignments containing non-existing beat IDs or tags
     const nonExistentBeatIds = findNonExistentItems(beats, beatIds);
     const nonExistentTags = findNonExistentItems(tags, tagIds);
@@ -192,7 +197,7 @@ export class CMBeatsDomain {
 
     if (validAssignments.length > 0) {
       const assignmentResults = await this.adapter.assignTagsToBeats(
-        user,
+        req,
         validAssignments
       );
 
@@ -211,7 +216,7 @@ function addNonExistentItemToResponse(
   nonExistentTags: any,
   key: string
 ) {
-  assignments.forEach(({ beatId, tag }: BeatsTagAssignment, idx: any) => {
+  assignments.forEach(({ beatId, tag }: CMTagAssignment, idx: any) => {
     const isBeatNonExistent = nonExistentBeatIds.includes(beatId);
     const isTagNonExistent = nonExistentTags.includes(tag);
 
