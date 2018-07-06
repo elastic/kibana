@@ -27,7 +27,7 @@ export class TimeseriesVisualization extends React.Component {
     this.state = {
       values: {},
       seriesToShow: _.keys(values),
-      ignoreVisabilityUpdates: false
+      ignoreVisibilityUpdates: false
     };
   }
 
@@ -42,13 +42,13 @@ export class TimeseriesVisualization extends React.Component {
 
     if (notAllShown && isCurrentlyShown) {
       this.setState({
-        ignoreVisabilityUpdates: false,
+        ignoreVisibilityUpdates: false,
         seriesToShow: Object.keys(this.state.values)
       });
     } else {
       seriesToShow.push(id);
       this.setState({
-        ignoreVisabilityUpdates: true,
+        ignoreVisibilityUpdates: true,
         seriesToShow: [id]
       });
     }
@@ -108,7 +108,7 @@ export class TimeseriesVisualization extends React.Component {
     const diff = _.difference(keys, currentKeys);
     const nextState = { values: values };
 
-    if (diff.length && !this.state.ignoreVisabilityUpdates) {
+    if (diff.length && !this.state.ignoreVisibilityUpdates) {
       nextState.seriesToShow = keys;
     }
 

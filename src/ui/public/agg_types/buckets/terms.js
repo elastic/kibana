@@ -92,10 +92,11 @@ export const termsBucketAgg = new BucketAggType({
     };
   },
   createFilter: createFilterTerms,
-  postFlightRequest: async (resp, aggConfigs, aggConfig, nestedSearchSource) => {
+  postFlightRequest: async (resp, aggConfigs, aggConfig, searchSource) => {
+    const nestedSearchSource = searchSource.createChild();
     if (aggConfig.params.otherBucket) {
       const filterAgg = buildOtherBucketAgg(aggConfigs, aggConfig, resp);
-      nestedSearchSource.set('aggs', filterAgg);
+      nestedSearchSource.setField('aggs', filterAgg);
 
       const request = aggConfigs.vis.API.inspectorAdapters.requests.start('Other bucket', {
         description: `This request counts the number of documents that fall
@@ -106,7 +107,7 @@ export const termsBucketAgg = new BucketAggType({
       });
       request.stats(getRequestInspectorStats(nestedSearchSource));
 
-      const response = await nestedSearchSource.fetchAsRejectablePromise();
+      const response = await nestedSearchSource.fetch();
       request
         .stats(getResponseInspectorStats(nestedSearchSource, response))
         .ok({ json: response });

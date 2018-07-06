@@ -14,6 +14,7 @@ import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
 import { formatTimestampToDuration } from '../../../../common/format_timestamp_to_duration';
 import template from './index.html';
+import { timefilter } from 'ui/timefilter';
 
 function getPageData($injector) {
   const $route = $injector.get('$route');
@@ -67,7 +68,6 @@ uiRoutes.when('/logstash/pipelines/:id/:hash?', {
     const $executor = $injector.get('$executor');
     const globalState = $injector.get('globalState');
     const title = $injector.get('title');
-    const timefilter = $injector.get('timefilter');
 
     timefilter.disableTimeRangeSelector(); // Do not display time picker in UI
     timefilter.enableAutoRefreshSelector();
@@ -86,7 +86,7 @@ uiRoutes.when('/logstash/pipelines/:id/:hash?', {
         $scope.pageData = response;
       }
     });
-    $executor.start();
+    $executor.start($scope);
     $scope.$on('$destroy', $executor.destroy);
   }
 });

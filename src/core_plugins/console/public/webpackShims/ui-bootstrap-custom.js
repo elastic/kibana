@@ -284,7 +284,7 @@ angular.module('sense.ui.bootstrap.typeahead', ['sense.ui.bootstrap.position'])
       scope.position.top += element.prop('offsetHeight');
     }
 
-    //we need to propagate user's query so we can higlight matches
+    //we need to propagate user's query so we can highlight matches
     scope.query = undefined;
 
     //Declare the timeout promise var outside the function scope so that stacked calls can be cancelled later

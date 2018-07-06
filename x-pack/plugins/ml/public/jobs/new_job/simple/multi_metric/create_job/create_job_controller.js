@@ -23,7 +23,6 @@ import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
 import { filterAggTypes } from 'plugins/ml/jobs/new_job/simple/components/utils/filter_agg_types';
 import { validateJob } from 'plugins/ml/jobs/new_job/simple/components/utils/validate_job';
 import { adjustIntervalDisplayed } from 'plugins/ml/jobs/new_job/simple/components/utils/adjust_interval';
-import { populateAppStateSettings } from 'plugins/ml/jobs/new_job/simple/components/utils/app_state_settings';
 import { CHART_STATE, JOB_STATE } from 'plugins/ml/jobs/new_job/simple/components/constants/states';
 import { createFields } from 'plugins/ml/jobs/new_job/simple/components/utils/create_fields';
 import { loadCurrentIndexPattern, loadCurrentSavedSearch, timeBasedIndexCheck } from 'plugins/ml/util/index_utils';
@@ -33,16 +32,17 @@ import { loadNewJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaul
 import { mlEscape } from 'plugins/ml/util/string_utils';
 import {
   createSearchItems,
-  createResultsUrl,
   addNewJobToRecentlyAccessed,
   moveToAdvancedJobCreationProvider } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { mlJobService } from 'plugins/ml/services/job_service';
+import { preLoadJob } from 'plugins/ml/jobs/new_job/simple/components/utils/prepopulate_job_settings';
 import { MultiMetricJobServiceProvider } from './create_job_service';
 import { FullTimeRangeSelectorServiceProvider } from 'plugins/ml/components/full_time_range_selector/full_time_range_selector_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 import { initPromise } from 'plugins/ml/util/promise';
 import { ml } from 'plugins/ml/services/ml_api_service';
 import template from './create_job.html';
+import { timefilter } from 'ui/timefilter';
 
 uiRoutes
   .when('/jobs/new_job/simple/multi_metric', {
@@ -65,7 +65,6 @@ module
   .controller('MlCreateMultiMetricJob', function (
     $scope,
     $route,
-    timefilter,
     Private,
     AppState) {
 
@@ -250,8 +249,8 @@ module
 
     function setTime() {
       $scope.ui.bucketSpanValid = true;
-      $scope.formConfig.start = dateMath.parse(timefilter.time.from).valueOf();
-      $scope.formConfig.end = dateMath.parse(timefilter.time.to).valueOf();
+      $scope.formConfig.start = dateMath.parse(timefilter.getTime().from).valueOf();
+      $scope.formConfig.end = dateMath.parse(timefilter.getTime().to).valueOf();
       $scope.formConfig.format = 'epoch_millis';
 
       const bucketSpanInterval = parseInterval($scope.formConfig.bucketSpan);
@@ -502,7 +501,7 @@ module
                     $scope.formConfig.resultsIntervalSeconds = bucketSpanSeconds;
                   }
 
-                  $scope.resultsUrl = createResultsUrl(
+                  $scope.resultsUrl = mlJobService.createResultsUrl(
                     [$scope.formConfig.jobId],
                     $scope.formConfig.start,
                     $scope.formConfig.end,
@@ -675,7 +674,7 @@ module
     }
 
     $scope.setFullTimeRange = function () {
-      mlFullTimeRangeSelectorService.setFullTimeRange($scope.ui.indexPattern, $scope.formConfig.combinedQuery);
+      return mlFullTimeRangeSelectorService.setFullTimeRange($scope.ui.indexPattern, $scope.formConfig.combinedQuery);
     };
 
     initAgg();
@@ -684,11 +683,10 @@ module
     $scope.loadVis();
 
     $scope.$evalAsync(() => {
-    // populate the fields with any settings from the URL
-      populateAppStateSettings(appState, $scope);
+      preLoadJob($scope, appState);
     });
 
-    $scope.$listen(timefilter, 'fetch', () => {
+    $scope.$listenAndDigestAsync(timefilter, 'fetch', () => {
       $scope.loadVis();
       if ($scope.formConfig.splitField !== undefined) {
         $scope.setModelMemoryLimit();

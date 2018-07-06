@@ -131,7 +131,7 @@ dataArray.forEach(function (data, i) {
         vis.render(data, persistedState);
       });
 
-      it('should get attribue values', function () {
+      it('should get attribute values', function () {
         expect(vis.get('addLegend')).to.be(true);
         expect(vis.get('addTooltip')).to.be(true);
         expect(vis.get('type')).to.be('point_series');

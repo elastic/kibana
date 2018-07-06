@@ -51,48 +51,48 @@ function serializer() {
   };
 }
 
-function getUpdateStatus(requiresUpdateStatus, $scope) {
+function getUpdateStatus(requiresUpdateStatus, obj, param) {
 
   // If the vis type doesn't need update status, skip all calculations
   if (!requiresUpdateStatus) {
     return {};
   }
 
-  if (!$scope._oldStatus) {
-    $scope._oldStatus = {};
+  if (!obj._oldStatus) {
+    obj._oldStatus = {};
   }
 
   const hasChangedUsingGenericHashComparison = (name, value) => {
     const currentValue = JSON.stringify(value, serializer());
-    if (currentValue !== $scope._oldStatus[name]) {
-      $scope._oldStatus[name] = currentValue;
+    if (currentValue !== obj._oldStatus[name]) {
+      obj._oldStatus[name] = currentValue;
       return true;
     }
     return false;
   };
 
-  function hasSizeChanged(currentWidth, currentHeight) {
+  const hasSizeChanged = (currentWidth, currentHeight) => {
 
-    if (!$scope._oldStatus.resize) {
-      $scope._oldStatus.resize = { width: currentWidth, height: currentHeight };
+    if (!obj._oldStatus.resize) {
+      obj._oldStatus.resize = { width: currentWidth, height: currentHeight };
       return true;
     }
 
-    if (currentWidth !== $scope._oldStatus.resize.width || currentHeight !== $scope._oldStatus.resize.height) {
-      $scope._oldStatus.resize = { width: currentWidth, height: currentHeight };
+    if (currentWidth !== obj._oldStatus.resize.width || currentHeight !== obj._oldStatus.resize.height) {
+      obj._oldStatus.resize = { width: currentWidth, height: currentHeight };
       return true;
     }
     return false;
-  }
+  };
 
-  function hasDataChanged(visData) {
+  const hasDataChanged = (visData) => {
     const hash = calculateObjectHash(visData);
-    if (hash !== $scope._oldStatus.data) {
-      $scope._oldStatus.data = hash;
+    if (hash !== obj._oldStatus.data) {
+      obj._oldStatus.data = hash;
       return true;
     }
     return false;
-  }
+  };
 
   const status = {};
 
@@ -100,25 +100,25 @@ function getUpdateStatus(requiresUpdateStatus, $scope) {
     // Calculate all required status updates for this visualization
     switch (requiredStatus) {
       case Status.AGGS:
-        status.aggs = hasChangedUsingGenericHashComparison('aggs', $scope.vis.aggs);
+        status.aggs = hasChangedUsingGenericHashComparison('aggs', param.vis.aggs);
         break;
       case Status.DATA:
-        status.data = hasDataChanged($scope.visData);
+        status.data = hasDataChanged(param.visData);
         break;
       case Status.PARAMS:
-        status.params = hasChangedUsingGenericHashComparison('param', $scope.vis.params);
+        status.params = hasChangedUsingGenericHashComparison('param', param.vis.params);
         break;
       case Status.RESIZE:
-        const width = $scope.vis.size ? $scope.vis.size[0] : 0;
-        const height = $scope.vis.size ? $scope.vis.size[1] : 0;
+        const width = param.vis.size ? param.vis.size[0] : 0;
+        const height = param.vis.size ? param.vis.size[1] : 0;
         status.resize = hasSizeChanged(width, height);
         break;
       case Status.TIME:
-        const time = $scope.vis.params.timeRange ? $scope.vis.params.timeRange : $scope.vis.API.timeFilter.getBounds();
+        const time = param.vis.params.timeRange ? param.vis.params.timeRange : param.vis.API.timeFilter.getBounds();
         status.time = hasChangedUsingGenericHashComparison('time', time);
         break;
       case Status.UI_STATE:
-        status.uiState = hasChangedUsingGenericHashComparison('uiState', $scope.uiState);
+        status.uiState = hasChangedUsingGenericHashComparison('uiState', param.uiState);
         break;
     }
   }

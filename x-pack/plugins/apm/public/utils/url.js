@@ -16,6 +16,21 @@ import { EuiLink } from '@elastic/eui';
 import createHistory from 'history/createHashHistory';
 import chrome from 'ui/chrome';
 
+export function getMlJobUrl(serviceName, transactionType, location) {
+  const { _g, _a } = decodeKibanaSearchParams(location.search);
+  const nextSearch = encodeKibanaSearchParams({
+    _g: {
+      ..._g,
+      ml: {
+        jobIds: [`${serviceName}-${transactionType}-high_mean_response_time`]
+      }
+    },
+    _a
+  });
+
+  return `/app/ml#/timeseriesexplorer/?${nextSearch}`;
+}
+
 export function toQuery(search) {
   return qs.parse(search.slice(1));
 }
@@ -37,6 +52,21 @@ export function encodeQuery(query, exclude = []) {
 function stringifyWithoutEncoding(query) {
   return qs.stringify(query, null, null, {
     encodeURIComponent: v => v
+  });
+}
+
+export function decodeKibanaSearchParams(search) {
+  const query = toQuery(search);
+  return {
+    _g: query._g ? rison.decode(query._g) : null,
+    _a: query._a ? rison.decode(query._a) : null
+  };
+}
+
+export function encodeKibanaSearchParams(query) {
+  return stringifyWithoutEncoding({
+    _g: rison.encode(query._g),
+    _a: rison.encode(query._a)
   });
 }
 
@@ -77,7 +107,7 @@ export function KibanaLinkComponent({
   location,
   pathname,
   hash,
-  query,
+  query = {},
   ...props
 }) {
   const currentQuery = toQuery(location.search);
@@ -85,6 +115,7 @@ export function KibanaLinkComponent({
     _g: query._g ? rison.encode(query._g) : currentQuery._g,
     _a: query._a ? rison.encode(query._a) : ''
   };
+
   const search = stringifyWithoutEncoding(nextQuery);
   const href = url.format({
     pathname: chrome.addBasePath(pathname),

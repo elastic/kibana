@@ -21,11 +21,29 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import sinon from 'sinon';
 
-import { createCourierStub } from './_stubs';
-import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
+import { createIndexPatternsStub } from './_stubs';
+import { SearchSourceProvider } from 'ui/courier';
 
 import { fetchAnchorProvider } from '../anchor';
 
+function createSearchSourceStubProvider(hits) {
+  const searchSourceStub = {
+    _stubHits: hits,
+  };
+
+  searchSourceStub.setParent = sinon.stub().returns(searchSourceStub);
+  searchSourceStub.setField = sinon.stub().returns(searchSourceStub);
+  searchSourceStub.fetch = sinon.spy(() => Promise.resolve({
+    hits: {
+      hits: searchSourceStub._stubHits,
+      total: searchSourceStub._stubHits.length,
+    },
+  }));
+
+  return function SearchSourceStubProvider() {
+    return searchSourceStub;
+  };
+}
 
 describe('context app', function () {
   beforeEach(ngMock.module('kibana'));
@@ -35,7 +53,7 @@ describe('context app', function () {
     let SearchSourceStub;
 
     beforeEach(ngMock.module(function createServiceStubs($provide) {
-      $provide.value('courier', createCourierStub());
+      $provide.value('indexPatterns', createIndexPatternsStub());
     }));
 
     beforeEach(ngMock.inject(function createPrivateStubs(Private) {
@@ -47,12 +65,12 @@ describe('context app', function () {
       fetchAnchor = Private(fetchAnchorProvider);
     }));
 
-    it('should use the `fetchAsRejectablePromise` method of the SearchSource', function () {
+    it('should use the `fetch` method of the SearchSource', function () {
       const searchSourceStub = new SearchSourceStub();
 
       return fetchAnchor('INDEX_PATTERN_ID', 'doc', 'id', [{ '@timestamp': 'desc' }, { '_doc': 'asc' }])
         .then(() => {
-          expect(searchSourceStub.fetchAsRejectablePromise.calledOnce).to.be(true);
+          expect(searchSourceStub.fetch.calledOnce).to.be(true);
         });
     });
 
@@ -61,9 +79,9 @@ describe('context app', function () {
 
       return fetchAnchor('INDEX_PATTERN_ID', 'doc', 'id', [{ '@timestamp': 'desc' }, { '_doc': 'asc' }])
         .then(() => {
-          const inheritsSpy = searchSourceStub.inherits;
-          expect(inheritsSpy.calledOnce).to.be(true);
-          expect(inheritsSpy.firstCall.args[0]).to.eql(false);
+          const setParentSpy = searchSourceStub.setParent;
+          expect(setParentSpy.calledOnce).to.be(true);
+          expect(setParentSpy.firstCall.args[0]).to.eql(false);
         });
     });
 
@@ -72,9 +90,8 @@ describe('context app', function () {
 
       return fetchAnchor('INDEX_PATTERN_ID', 'doc', 'id', [{ '@timestamp': 'desc' }, { '_doc': 'asc' }])
         .then(() => {
-          const setIndexSpy = searchSourceStub.set.withArgs('index');
-          expect(setIndexSpy.calledOnce).to.be(true);
-          expect(setIndexSpy.firstCall.args[1]).to.eql({ id: 'INDEX_PATTERN_ID' });
+          const setFieldSpy = searchSourceStub.setField;
+          expect(setFieldSpy.firstCall.args[1]).to.eql({ id: 'INDEX_PATTERN_ID' });
         });
     });
 
@@ -83,7 +100,7 @@ describe('context app', function () {
 
       return fetchAnchor('INDEX_PATTERN_ID', 'doc', 'id', [{ '@timestamp': 'desc' }, { '_doc': 'asc' }])
         .then(() => {
-          const setVersionSpy = searchSourceStub.set.withArgs('version');
+          const setVersionSpy = searchSourceStub.setField.withArgs('version');
           expect(setVersionSpy.calledOnce).to.be(true);
           expect(setVersionSpy.firstCall.args[1]).to.eql(true);
         });
@@ -94,7 +111,7 @@ describe('context app', function () {
 
       return fetchAnchor('INDEX_PATTERN_ID', 'doc', 'id', [{ '@timestamp': 'desc' }, { '_doc': 'asc' }])
         .then(() => {
-          const setSizeSpy = searchSourceStub.set.withArgs('size');
+          const setSizeSpy = searchSourceStub.setField.withArgs('size');
           expect(setSizeSpy.calledOnce).to.be(true);
           expect(setSizeSpy.firstCall.args[1]).to.eql(1);
         });
@@ -105,7 +122,7 @@ describe('context app', function () {
 
       return fetchAnchor('INDEX_PATTERN_ID', 'doc', 'id', [{ '@timestamp': 'desc' }, { '_doc': 'asc' }])
         .then(() => {
-          const setQuerySpy = searchSourceStub.set.withArgs('query');
+          const setQuerySpy = searchSourceStub.setField.withArgs('query');
           expect(setQuerySpy.calledOnce).to.be(true);
           expect(setQuerySpy.firstCall.args[1]).to.eql({
             query: {
@@ -128,7 +145,7 @@ describe('context app', function () {
 
       return fetchAnchor('INDEX_PATTERN_ID', 'doc', 'id', [{ '@timestamp': 'desc' }, { '_doc': 'asc' }])
         .then(() => {
-          const setSortSpy = searchSourceStub.set.withArgs('sort');
+          const setSortSpy = searchSourceStub.setField.withArgs('sort');
           expect(setSortSpy.calledOnce).to.be(true);
           expect(setSortSpy.firstCall.args[1]).to.eql([
             { '@timestamp': 'desc' },
@@ -167,23 +184,3 @@ describe('context app', function () {
     });
   });
 });
-
-function createSearchSourceStubProvider(hits) {
-  const searchSourceStub = {
-    _stubHits: hits,
-  };
-
-  searchSourceStub.filter = sinon.stub().returns(searchSourceStub);
-  searchSourceStub.inherits = sinon.stub().returns(searchSourceStub);
-  searchSourceStub.set = sinon.stub().returns(searchSourceStub);
-  searchSourceStub.fetchAsRejectablePromise = sinon.spy(() => Promise.resolve({
-    hits: {
-      hits: searchSourceStub._stubHits,
-      total: searchSourceStub._stubHits.length,
-    },
-  }));
-
-  return function SearchSourceStubProvider() {
-    return searchSourceStub;
-  };
-}

@@ -25,120 +25,116 @@ export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
-  describe('visualize app', function describeIndexTests() {
-    const fromTime = '2015-09-19 06:31:44.000';
-    const toTime = '2015-09-23 18:31:44.000';
+  const fromTime = '2015-09-19 06:31:44.000';
+  const toTime = '2015-09-23 18:31:44.000';
 
-    before(function () {
+  describe('data table', function indexPatternCreation() {
+    const vizName1 = 'Visualization DataTable';
+
+    before(async function () {
       log.debug('navigateToApp visualize');
-      return PageObjects.common.navigateToUrl('visualize', 'new')
-        .then(function () {
-          log.debug('clickDataTable');
-          return PageObjects.visualize.clickDataTable();
-        })
-        .then(function clickNewSearch() {
-          log.debug('clickNewSearch');
-          return PageObjects.visualize.clickNewSearch();
-        })
-        .then(function setAbsoluteRange() {
-          log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-          return PageObjects.header.setAbsoluteRange(fromTime, toTime);
-        })
-        .then(function clickBucket() {
-          log.debug('Bucket = Split Rows');
-          return PageObjects.visualize.clickBucket('Split Rows');
-        })
-        .then(function selectAggregation() {
-          log.debug('Aggregation = Histogram');
-          return PageObjects.visualize.selectAggregation('Histogram');
-        })
-        .then(function selectField() {
-          log.debug('Field = bytes');
-          return PageObjects.visualize.selectField('bytes');
-        })
-        .then(function setInterval() {
-          log.debug('Interval = 2000');
-          return PageObjects.visualize.setNumericInterval('2000');
-        })
-        .then(function clickGo() {
-          return PageObjects.visualize.clickGo();
-        })
-        .then(function () {
-          return PageObjects.header.waitUntilLoadingHasFinished();
-        });
+      await PageObjects.common.navigateToUrl('visualize', 'new');
+      log.debug('clickDataTable');
+      await PageObjects.visualize.clickDataTable();
+      log.debug('clickNewSearch');
+      await PageObjects.visualize.clickNewSearch();
+      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      log.debug('Bucket = Split Rows');
+      await PageObjects.visualize.clickBucket('Split Rows');
+      log.debug('Aggregation = Histogram');
+      await PageObjects.visualize.selectAggregation('Histogram');
+      log.debug('Field = bytes');
+      await PageObjects.visualize.selectField('bytes');
+      log.debug('Interval = 2000');
+      await PageObjects.visualize.setNumericInterval('2000');
+      await PageObjects.visualize.clickGo();
     });
 
-    describe('data table', function indexPatternCreation() {
-      const vizName1 = 'Visualization DataTable';
+    it('should be able to save and load', async function () {
+      await PageObjects.visualize.saveVisualization(vizName1);
+      const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
+      log.debug(`Save viz page title is ${pageTitle}`);
+      expect(pageTitle).to.contain(vizName1);
+      await PageObjects.header.waitForToastMessageGone();
+      await PageObjects.visualize.loadSavedVisualization(vizName1);
+      await PageObjects.visualize.waitForVisualization();
+    });
 
-      it('should be able to save and load', function () {
-        return PageObjects.visualize.saveVisualization(vizName1)
-          .then(() => {
-            return PageObjects.common.getBreadcrumbPageTitle();
-          })
-          .then(pageTitle => {
-            log.debug(`Save viz page title is ${pageTitle}`);
-            expect(pageTitle).to.contain(vizName1);
-          })
-          .then(function testVisualizeWaitForToastMessageGone() {
-            return PageObjects.header.waitForToastMessageGone();
-          })
-          .then(function () {
-            return PageObjects.visualize.loadSavedVisualization(vizName1);
-          })
-          .then(function () {
-            return PageObjects.visualize.waitForVisualization();
-          });
+    it('should have inspector enabled', async function () {
+      const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
+      expect(spyToggleExists).to.be(true);
+    });
+
+    it('should show correct data', function () {
+      const expectedChartData = [
+        [ '0B', '2,088' ],
+        [ '1.953KB', '2,748' ],
+        [ '3.906KB', '2,707' ],
+        [ '5.859KB', '2,876' ],
+        [ '7.813KB', '2,863' ],
+        [ '9.766KB', '147' ],
+        [ '11.719KB', '148' ],
+        [ '13.672KB', '129' ],
+        [ '15.625KB', '161' ],
+        [ '17.578KB', '137' ]
+      ];
+
+      return retry.try(async function () {
+        await PageObjects.visualize.openInspector();
+        const data = await PageObjects.visualize.getInspectorTableData();
+        await PageObjects.visualize.closeInspector();
+        log.debug(data);
+        expect(data).to.eql(expectedChartData);
       });
+    });
 
-      it('should have inspector enabled', async function () {
-        const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
-        expect(spyToggleExists).to.be(true);
-      });
+    it('should show correct data for a data table with date histogram', async () => {
+      await PageObjects.common.navigateToUrl('visualize', 'new');
+      await PageObjects.visualize.clickDataTable();
+      await PageObjects.visualize.clickNewSearch();
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.visualize.clickBucket('Split Rows');
+      await PageObjects.visualize.selectAggregation('Date Histogram');
+      await PageObjects.visualize.selectField('@timestamp');
+      await PageObjects.visualize.setInterval('Daily');
+      await PageObjects.visualize.clickGo();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const data = await PageObjects.visualize.getTableVisData();
+      log.debug(data.split('\n'));
+      expect(data.trim().split('\n')).to.be.eql([
+        '2015-09-20', '4,757',
+        '2015-09-21', '4,614',
+        '2015-09-22', '4,633',
+      ]);
+    });
 
-      it('should show correct data, take screenshot', function () {
-        const expectedChartData = [
-          '0B', '2,088', '1.953KB', '2,748', '3.906KB', '2,707', '5.859KB', '2,876', '7.813KB',
-          '2,863', '9.766KB', '147', '11.719KB', '148', '13.672KB', '129', '15.625KB', '161', '17.578KB', '137'
-        ];
+    it('should show correct data for a data table with date histogram', async () => {
+      await PageObjects.common.navigateToUrl('visualize', 'new');
+      await PageObjects.visualize.clickDataTable();
+      await PageObjects.visualize.clickNewSearch();
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.visualize.clickBucket('Split Rows');
+      await PageObjects.visualize.selectAggregation('Date Histogram');
+      await PageObjects.visualize.selectField('@timestamp');
+      await PageObjects.visualize.setInterval('Daily');
+      await PageObjects.visualize.clickGo();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const data = await PageObjects.visualize.getTableVisData();
+      expect(data.trim().split('\n')).to.be.eql([
+        '2015-09-20', '4,757',
+        '2015-09-21', '4,614',
+        '2015-09-22', '4,633',
+      ]);
+    });
 
-        return retry.try(function () {
-          return PageObjects.visualize.getTableVisData()
-            .then(function showData(data) {
-              log.debug(data.split('\n'));
-              expect(data.split('\n')).to.eql(expectedChartData);
-            });
-        });
-      });
-
-      it('should show correct data for a data table with date histogram', async () => {
-        await PageObjects.common.navigateToUrl('visualize', 'new');
-        await PageObjects.visualize.clickDataTable();
-        await PageObjects.visualize.clickNewSearch();
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.visualize.clickBucket('Split Rows');
-        await PageObjects.visualize.selectAggregation('Date Histogram');
-        await PageObjects.visualize.selectField('@timestamp');
-        await PageObjects.visualize.setInterval('Daily');
-        await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        const data = await PageObjects.visualize.getTableVisData();
-        expect(data.trim().split('\n')).to.be.eql([
-          '2015-09-20', '4,757',
-          '2015-09-21', '4,614',
-          '2015-09-22', '4,633',
-        ]);
-      });
-
-      it('should correctly filter for applied time filter on the main timefield', async () => {
-        await filterBar.addFilter('@timestamp', 'is between', ['2015-09-19', '2015-09-21']);
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        const data = await PageObjects.visualize.getTableVisData();
-        expect(data.trim().split('\n')).to.be.eql([
-          '2015-09-20', '4,757',
-        ]);
-      });
-
+    it('should correctly filter for applied time filter on the main timefield', async () => {
+      await filterBar.addFilter('@timestamp', 'is between', ['2015-09-19', '2015-09-21']);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const data = await PageObjects.visualize.getTableVisData();
+      expect(data.trim().split('\n')).to.be.eql([
+        '2015-09-20', '4,757',
+      ]);
     });
   });
 }

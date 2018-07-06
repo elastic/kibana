@@ -7,7 +7,7 @@
 import React, { Component } from 'react';
 import { STATUS } from '../../../constants';
 import { isEmpty } from 'lodash';
-import { loadAgentStatus } from '../../../services/rest';
+import { loadAgentStatus } from '../../../services/rest/apm';
 import { KibanaLink } from '../../../utils/url';
 import { EuiButton } from '@elastic/eui';
 import List from './List';
@@ -75,7 +75,7 @@ class ServiceOverview extends Component {
 
 function SetupInstructionsLink({ buttonFill = false }) {
   return (
-    <KibanaLink pathname={'/app/kibana'} hash={'/home/tutorial/apm'} query={{}}>
+    <KibanaLink pathname={'/app/kibana'} hash={'/home/tutorial/apm'}>
       <EuiButton size="s" color="primary" fill={buttonFill}>
         Setup Instructions
       </EuiButton>

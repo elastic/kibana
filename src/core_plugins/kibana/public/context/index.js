@@ -31,8 +31,8 @@ uiRoutes
     controller: ContextAppRouteController,
     controllerAs: 'contextAppRoute',
     resolve: {
-      indexPattern: function ($route, courier) {
-        return courier.indexPatterns.get($route.current.params.indexPatternId);
+      indexPattern: function ($route, indexPatterns) {
+        return indexPatterns.get($route.current.params.indexPatternId);
       },
     },
     template: contextAppRouteTemplate,
