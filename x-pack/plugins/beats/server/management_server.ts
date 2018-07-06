@@ -17,8 +17,8 @@ import { createTokensRoute } from './rest_api/tokens/create';
 import { beatsIndexTemplate } from './utils/index_templates';
 
 export const initManagementServer = (libs: CMServerLibs) => {
-  libs.database.putTemplate(libs.framework.internalUser, {
-    name: 'beats-template',
+  libs.database.putTemplate(null, {
+    id: 'beats-template',
     body: beatsIndexTemplate,
   });
 

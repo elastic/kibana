@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+// file.skip
+
 // @ts-ignore
 import { createEsTestCluster } from '@kbn/test';
 // @ts-ignore
@@ -21,6 +23,12 @@ contractTests('Kibana  Framework Adapter', {
   before: async () => {
     await es.start();
     await kbnServer.ready();
+
+    const config = kbnServer.server.config();
+    config.extendSchema(beatsPluginConfig, {}, configPrefix);
+
+    config.set('xpack.beats.encryptionKey', 'foo');
+
     return await kbnServer.server.plugins.elasticsearch.waitUntilReady();
   },
   after: async () => {
@@ -28,11 +36,6 @@ contractTests('Kibana  Framework Adapter', {
     return await es.cleanup();
   },
   adapterSetup: () => {
-    const config = kbnServer.server.config();
-
-    config.extendSchema(beatsPluginConfig, {}, configPrefix);
-    config.set('xpack.beats.encryptionKey', 'foo');
-
     return new KibanaBackendFrameworkAdapter(kbnServer.server);
   },
 });

@@ -3,18 +3,20 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import expect from 'expect.js';
 import { beatsIndexTemplate } from '../../../../utils/index_templates';
-import { DatabaseAdapter } from '../adapter_types';
+import { DatabaseAdapter } from '../../../lib';
 
 interface ContractConfig {
+  adapter?: DatabaseAdapter;
   before?(): Promise<void>;
   after?(): Promise<void>;
-  adapterSetup(): DatabaseAdapter;
+  adapterSetup?(): DatabaseAdapter;
 }
 
 export const contractTests = (testName: string, config: ContractConfig) => {
   describe(testName, () => {
-    let database: DatabaseAdapter;
+    let frameworkAdapter: DatabaseAdapter;
     beforeAll(async () => {
       jest.setTimeout(100000); // 1 second
 
@@ -24,38 +26,21 @@ export const contractTests = (testName: string, config: ContractConfig) => {
     });
     afterAll(async () => config.after && (await config.after()));
     beforeEach(async () => {
-      database = config.adapterSetup();
+      // FIXME: one of these always should exist, type ContractConfig as such
+      frameworkAdapter = (config.adapterSetup
+        ? config.adapterSetup()
+        : config.adapter) as DatabaseAdapter;
     });
 
     it('Should inject template into ES', async () => {
       try {
-        await database.putTemplate(
-          { kind: 'internal' },
-          {
-            name: 'beats-template',
-            body: beatsIndexTemplate,
-          }
-        );
+        await frameworkAdapter.putTemplate(null, {
+          id: 'beats-template',
+          body: beatsIndexTemplate,
+        });
       } catch (e) {
-        expect(e).toEqual(null);
+        expect(e).to.eql(null);
       }
-    });
-
-    it('Unauthorized users cant query', async () => {
-      const params = {
-        id: `beat:foo`,
-        ignore: [404],
-        index: '.management-beats',
-        type: '_doc',
-      };
-      let ranWithoutError = false;
-      try {
-        await database.get({ kind: 'unauthenticated' }, params);
-        ranWithoutError = true;
-      } catch (e) {
-        expect(e).not.toEqual(null);
-      }
-      expect(ranWithoutError).toEqual(false);
     });
 
     it('Should query ES', async () => {
@@ -65,11 +50,11 @@ export const contractTests = (testName: string, config: ContractConfig) => {
         index: '.management-beats',
         type: '_doc',
       };
-      const response = await database.get({ kind: 'internal' }, params);
+      const response = await frameworkAdapter.get(null, params);
 
-      expect(response).not.toEqual(undefined);
+      expect(response).to.not.eql(undefined);
       // @ts-ignore
-      expect(response.found).toEqual(undefined);
+      expect(response.found).to.eql(undefined);
     });
   });
 };

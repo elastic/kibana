@@ -7,17 +7,17 @@
 import { flatten, get } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
 import {
-  BackendFrameworkAdapter,
   CMTokensAdapter,
+  DatabaseAdapter,
   EnrollmentToken,
   FrameworkRequest,
 } from '../../lib';
 
 export class ElasticsearchTokensAdapter implements CMTokensAdapter {
-  private framework: BackendFrameworkAdapter;
+  private database: DatabaseAdapter;
 
-  constructor(framework: BackendFrameworkAdapter) {
-    this.framework = framework;
+  constructor(database: DatabaseAdapter) {
+    this.database = database;
   }
 
   public async deleteEnrollmentToken(enrollmentToken: string) {
@@ -27,7 +27,7 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
       type: '_doc',
     };
 
-    return this.framework.callWithInternalUser('delete', params);
+    await this.database.delete(null, params);
   }
 
   public async getEnrollmentToken(
@@ -40,7 +40,7 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
       type: '_doc',
     };
 
-    const response = await this.framework.callWithInternalUser('get', params);
+    const response = await this.database.get(null, params);
     const tokenDetails = get<EnrollmentToken>(
       response,
       '_source.enrollment_token',
@@ -71,14 +71,12 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
       ])
     );
 
-    const params = {
+    await this.database.bulk(req, {
       body,
       index: INDEX_NAMES.BEATS,
       refresh: 'wait_for',
       type: '_doc',
-    };
-
-    await this.framework.callWithRequest(req, 'bulk', params);
+    });
     return tokens;
   }
 }

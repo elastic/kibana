@@ -8,18 +8,18 @@ import { flatten, get as _get, omit } from 'lodash';
 import moment from 'moment';
 import { INDEX_NAMES } from '../../../../common/constants';
 import {
-  BackendFrameworkAdapter,
   CMBeat,
   CMBeatsAdapter,
   CMTagAssignment,
+  DatabaseAdapter,
   FrameworkRequest,
 } from '../../lib';
 
 export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
-  private framework: BackendFrameworkAdapter;
+  private database: DatabaseAdapter;
 
-  constructor(framework: BackendFrameworkAdapter) {
-    this.framework = framework;
+  constructor(database: DatabaseAdapter) {
+    this.database = database;
   }
 
   public async get(id: string) {
@@ -30,7 +30,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       type: '_doc',
     };
 
-    const response = await this.framework.callWithInternalUser('get', params);
+    const response = await this.database.get(null, params);
     if (!response.found) {
       return null;
     }
@@ -44,14 +44,13 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       type: 'beat',
     };
 
-    const params = {
+    await this.database.create(null, {
       body,
       id: `beat:${beat.id}`,
       index: INDEX_NAMES.BEATS,
       refresh: 'wait_for',
       type: '_doc',
-    };
-    await this.framework.callWithInternalUser('create', params);
+    });
   }
 
   public async update(beat: CMBeat) {
@@ -67,7 +66,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       refresh: 'wait_for',
       type: '_doc',
     };
-    return await this.framework.callWithInternalUser('index', params);
+    await this.database.index(null, params);
   }
 
   public async getWithIds(req: FrameworkRequest, beatIds: string[]) {
@@ -81,7 +80,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       index: INDEX_NAMES.BEATS,
       type: '_doc',
     };
-    const response = await this.framework.callWithRequest(req, 'mget', params);
+    const response = await this.database.mget(req, params);
 
     return _get(response, 'docs', [])
       .filter((b: any) => b.found)
@@ -101,15 +100,13 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       ])
     );
 
-    const params = {
+    const response = await this.database.bulk(req, {
       _sourceInclude: ['beat.id', 'beat.verified_on'],
       body,
       index: INDEX_NAMES.BEATS,
       refresh: 'wait_for',
       type: '_doc',
-    };
-
-    const response = await this.framework.callWithRequest(req, 'bulk', params);
+    });
 
     return _get(response, 'items', []).map(b => ({
       ..._get(b, 'update.get._source.beat', {}),
@@ -123,11 +120,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       q: 'type:beat',
       type: '_doc',
     };
-    const response = await this.framework.callWithRequest(
-      req,
-      'search',
-      params
-    );
+    const response = await this.database.search(req, params);
 
     const beats = _get<any>(response, 'hits.hits', []);
     return beats.map((beat: any) => omit(beat._source.beat, ['access_token']));
@@ -153,14 +146,12 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       })
     );
 
-    const params = {
+    const response = await this.database.bulk(req, {
       body,
       index: INDEX_NAMES.BEATS,
       refresh: 'wait_for',
       type: '_doc',
-    };
-
-    const response = await this.framework.callWithRequest(req, 'bulk', params);
+    });
     return _get<any>(response, 'items', []).map(
       (item: any, resultIdx: number) => ({
         idxInRequest: removals[resultIdx].idxInRequest,
@@ -193,14 +184,12 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       })
     );
 
-    const params = {
+    const response = await this.database.bulk(req, {
       body,
       index: INDEX_NAMES.BEATS,
       refresh: 'wait_for',
       type: '_doc',
-    };
-
-    const response = await this.framework.callWithRequest(req, 'bulk', params);
+    });
     return _get<any>(response, 'items', []).map(
       (item: any, resultIdx: any) => ({
         idxInRequest: assignments[resultIdx].idxInRequest,

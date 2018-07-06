@@ -7,6 +7,7 @@
 import { ElasticsearchBeatsAdapter } from '../adapters/beats/elasticsearch_beats_adapter';
 import { ElasticsearchTagsAdapter } from '../adapters/tags/elasticsearch_tags_adapter';
 import { ElasticsearchTokensAdapter } from '../adapters/tokens/elasticsearch_tokens_adapter';
+import { KibanaDatabaseAdapter } from './../adapters/database/kibana_database_adapter';
 
 import { KibanaBackendFrameworkAdapter } from '../adapters/famework/kibana_framework_adapter';
 
@@ -20,12 +21,13 @@ import { Server } from 'hapi';
 
 export function compose(server: Server): CMServerLibs {
   const framework = new KibanaBackendFrameworkAdapter(server);
+  const database = new KibanaDatabaseAdapter(server.plugins.elasticsearch);
 
-  const tags = new CMTagsDomain(new ElasticsearchTagsAdapter(framework));
-  const tokens = new CMTokensDomain(new ElasticsearchTokensAdapter(framework), {
+  const tags = new CMTagsDomain(new ElasticsearchTagsAdapter(database));
+  const tokens = new CMTokensDomain(new ElasticsearchTokensAdapter(database), {
     framework,
   });
-  const beats = new CMBeatsDomain(new ElasticsearchBeatsAdapter(framework), {
+  const beats = new CMBeatsDomain(new ElasticsearchBeatsAdapter(database), {
     tags,
     tokens,
   });
@@ -38,6 +40,7 @@ export function compose(server: Server): CMServerLibs {
 
   const libs: CMServerLibs = {
     framework,
+    database,
     ...domainLibs,
   };
 
