@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flatten, get, omit } from 'lodash';
+import { flatten, get as _get, omit } from 'lodash';
 import moment from 'moment';
 import { INDEX_NAMES } from '../../../../common/constants';
 import {
@@ -35,7 +35,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       return null;
     }
 
-    return get(response, '_source.beat');
+    return _get(response, '_source.beat');
   }
 
   public async insert(beat: CMBeat) {
@@ -74,22 +74,6 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     const ids = beatIds.map(beatId => `beat:${beatId}`);
 
     const params = {
-      _source: false,
-      body: {
-        ids,
-      },
-      index: INDEX_NAMES.BEATS,
-      type: '_doc',
-    };
-    const response = await this.framework.callWithRequest(req, 'mget', params);
-    return get(response, 'docs', []);
-  }
-
-  // TODO merge with getBeatsWithIds
-  public async getVerifiedWithIds(req: FrameworkRequest, beatIds: string[]) {
-    const ids = beatIds.map(beatId => `beat:${beatId}`);
-
-    const params = {
       _sourceInclude: ['beat.id', 'beat.verified_on'],
       body: {
         ids,
@@ -98,7 +82,10 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       type: '_doc',
     };
     const response = await this.framework.callWithRequest(req, 'mget', params);
-    return get(response, 'docs', []);
+
+    return get(response, 'docs', [])
+      .filter((b: any) => b.found)
+      .map((b: any) => b._source.beat);
   }
 
   public async verifyBeats(req: FrameworkRequest, beatIds: string[]) {
@@ -115,6 +102,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     );
 
     const params = {
+      _sourceInclude: ['beat.id', 'beat.verified_on'],
       body,
       index: INDEX_NAMES.BEATS,
       refresh: 'wait_for',
@@ -122,7 +110,11 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     };
 
     const response = await this.framework.callWithRequest(req, 'bulk', params);
-    return get(response, 'items', []);
+
+    return _get(response, 'items', []).map(b => ({
+      ..._get(b, 'update.get._source.beat', {}),
+      updateStatus: _get(b, 'update.result', 'unknown error'),
+    }));
   }
 
   public async getAll(req: FrameworkRequest) {
