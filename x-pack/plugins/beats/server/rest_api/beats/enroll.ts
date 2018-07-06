@@ -33,16 +33,15 @@ export const createBeatEnrollmentRoute = (libs: CMServerLibs) => ({
     const enrollmentToken = request.headers['kbn-beats-enrollment-token'];
 
     try {
-      const {
-        token,
-        expires_on: expiresOn,
-      } = await libs.tokens.getEnrollmentToken(enrollmentToken);
+      const { token, expires_on } = await libs.tokens.getEnrollmentToken(
+        enrollmentToken
+      );
 
+      if (expires_on && moment(expires_on).isBefore(moment())) {
+        return reply({ message: 'Expired enrollment token' }).code(400);
+      }
       if (!token) {
         return reply({ message: 'Invalid enrollment token' }).code(400);
-      }
-      if (moment(expiresOn).isBefore(moment())) {
-        return reply({ message: 'Expired enrollment token' }).code(400);
       }
       const { accessToken } = await libs.beats.enrollBeat(
         beatId,

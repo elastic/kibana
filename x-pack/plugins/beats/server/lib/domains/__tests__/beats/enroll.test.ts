@@ -1,0 +1,136 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import expect from 'expect.js';
+import { MemoryBeatsAdapter } from '../../../adapters/beats/memory_beats_adapter';
+import { TestingBackendFrameworkAdapter } from '../../../adapters/famework/kibana/testing_framework_adapter';
+import { MemoryTagsAdapter } from '../../../adapters/tags/memory_tags_adapter';
+import { MemoryTokensAdapter } from '../../../adapters/tokens/memory_tokens_adapter';
+
+import { BeatTag, CMBeat, EnrollmentToken } from './../../../lib';
+
+import { CMBeatsDomain } from '../../beats';
+import { CMTagsDomain } from '../../tags';
+import { CMTokensDomain } from '../../tokens';
+
+import Chance from 'chance';
+import { sign as signToken } from 'jsonwebtoken';
+import { omit } from 'lodash';
+import moment from 'moment';
+
+const seed = Date.now();
+const chance = new Chance(seed);
+
+const settings = {
+  encryptionKey: 'something_who_cares',
+  enrollmentTokensTtlInSeconds: 10 * 60, // 10 minutes
+};
+
+describe('Beats Domain Lib', () => {
+  let beatsLib: CMBeatsDomain;
+  let tokensLib: CMTokensDomain;
+
+  let beatsDB: CMBeat[] = [];
+  let tagsDB: BeatTag[] = [];
+  let tokensDB: EnrollmentToken[] = [];
+  let validEnrollmentToken: string;
+  let beatId: string;
+  let beat: Partial<CMBeat>;
+
+  describe('enroll_beat', () => {
+    beforeEach(async () => {
+      validEnrollmentToken = chance.word();
+      beatId = chance.word();
+
+      beatsDB = [];
+      tagsDB = [];
+      tokensDB = [
+        {
+          expires_on: moment()
+            .add(4, 'hours')
+            .toJSON(),
+          token: validEnrollmentToken,
+        },
+      ];
+
+      const version =
+        chance.integer({ min: 1, max: 10 }) +
+        '.' +
+        chance.integer({ min: 1, max: 10 }) +
+        '.' +
+        chance.integer({ min: 1, max: 10 });
+
+      beat = {
+        host_name: 'foo.bar.com',
+        type: 'filebeat',
+        version,
+      };
+
+      const framework = new TestingBackendFrameworkAdapter(null, settings);
+
+      tokensLib = new CMTokensDomain(new MemoryTokensAdapter(tokensDB), {
+        framework,
+      });
+
+      const tagsLib = new CMTagsDomain(new MemoryTagsAdapter(tagsDB));
+
+      beatsLib = new CMBeatsDomain(new MemoryBeatsAdapter(beatsDB), {
+        tags: tagsLib,
+        tokens: tokensLib,
+      });
+    });
+
+    it('should enroll beat, returning an access token', async () => {
+      const { token } = await tokensLib.getEnrollmentToken(
+        validEnrollmentToken
+      );
+
+      expect(token).to.equal(validEnrollmentToken);
+      const { accessToken } = await beatsLib.enrollBeat(
+        beatId,
+        '192.168.1.1',
+        omit(beat, 'enrollment_token')
+      );
+
+      expect(beatsDB.length).to.eql(1);
+      expect(beatsDB[0]).to.have.property('host_ip');
+
+      expect(accessToken).to.eql(beatsDB[0].access_token);
+
+      await tokensLib.deleteEnrollmentToken(validEnrollmentToken);
+
+      expect(tokensDB.length).to.eql(0);
+    });
+
+    it('should reject an invalid enrollment token', async () => {
+      const { token } = await tokensLib.getEnrollmentToken(chance.word());
+
+      expect(token).to.eql(null);
+    });
+
+    it('should reject an expired enrollment token', async () => {
+      const { token } = await tokensLib.getEnrollmentToken(
+        signToken({}, settings.encryptionKey, {
+          expiresIn: '-1min',
+        })
+      );
+
+      expect(token).to.eql(null);
+    });
+
+    it('should delete the given enrollment token so it may not be reused', async () => {
+      expect(tokensDB[0].token).to.eql(validEnrollmentToken);
+      await tokensLib.deleteEnrollmentToken(validEnrollmentToken);
+      expect(tokensDB.length).to.eql(0);
+
+      const { token } = await tokensLib.getEnrollmentToken(
+        validEnrollmentToken
+      );
+
+      expect(token).to.eql(null);
+    });
+  });
+});

@@ -43,16 +43,16 @@ export interface ConfigurationBlock {
 export interface CMBeat {
   id: string;
   access_token: string;
-  verified_on: string;
+  verified_on?: string;
   type: string;
-  version: string;
+  version?: string;
   host_ip: string;
   host_name: string;
-  ephemeral_id: string;
-  local_configuration_yml: string;
-  tags: string;
-  central_configuration_yml: string;
-  metadata: {};
+  ephemeral_id?: string;
+  local_configuration_yml?: string;
+  tags?: string[];
+  central_configuration_yml?: string;
+  metadata?: {};
 }
 
 export interface BeatTag {
@@ -68,7 +68,10 @@ export interface EnrollmentToken {
 export interface CMTokensAdapter {
   deleteEnrollmentToken(enrollmentToken: string): Promise<void>;
   getEnrollmentToken(enrollmentToken: string): Promise<EnrollmentToken>;
-  upsertTokens(req: FrameworkRequest, tokens: EnrollmentToken[]): Promise<void>;
+  upsertTokens(
+    req: FrameworkRequest,
+    tokens: EnrollmentToken[]
+  ): Promise<EnrollmentToken[]>;
 }
 
 // FIXME: fix getTagsWithIds return type
@@ -84,7 +87,6 @@ export interface CMBeatsAdapter {
   get(id: string): any;
   getAll(req: FrameworkRequest): any;
   getWithIds(req: FrameworkRequest, beatIds: string[]): any;
-  getVerifiedWithIds(req: FrameworkRequest, beatIds: string[]): any;
   verifyBeats(req: FrameworkRequest, beatIds: string[]): any;
   removeTagsFromBeats(
     req: FrameworkRequest,
@@ -108,7 +110,7 @@ export interface CMTagAssignment {
 
 export interface BackendFrameworkAdapter {
   version: string;
-  getSetting(settingPath: string): string | number;
+  getSetting(settingPath: string): any;
   exposeStaticDir(urlPath: string, dir: string): void;
   installIndexTemplate(name: string, template: {}): void;
   registerRoute<RouteRequest extends WrappableRequest, RouteResponse>(

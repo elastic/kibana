@@ -19,15 +19,10 @@ export default function ({ getService }) {
 
     it('verify the given beats', async () => {
       const { body: apiResponse } = await supertest
-        .post(
-          '/api/beats/agents/verify'
-        )
+        .post('/api/beats/agents/verify')
         .set('kbn-xsrf', 'xxx')
         .send({
-          beats: [
-            { id: 'bar' },
-            { id: 'baz' }
-          ]
+          beats: [{ id: 'bar' }, { id: 'baz' }],
         })
         .expect(200);
 
@@ -39,36 +34,26 @@ export default function ({ getService }) {
 
     it('should not re-verify already-verified beats', async () => {
       const { body: apiResponse } = await supertest
-        .post(
-          '/api/beats/agents/verify'
-        )
+        .post('/api/beats/agents/verify')
         .set('kbn-xsrf', 'xxx')
         .send({
-          beats: [
-            { id: 'foo' },
-            { id: 'bar' }
-          ]
+          beats: [{ id: 'foo' }, { id: 'bar' }],
         })
         .expect(200);
 
       expect(apiResponse.beats).to.eql([
         { id: 'foo', status: 200, result: 'already verified' },
-        { id: 'bar', status: 200, result: 'verified' }
+        { id: 'bar', status: 200, result: 'verified' },
       ]);
     });
 
     it('should return errors for non-existent beats', async () => {
       const nonExistentBeatId = chance.word();
       const { body: apiResponse } = await supertest
-        .post(
-          '/api/beats/agents/verify'
-        )
+        .post('/api/beats/agents/verify')
         .set('kbn-xsrf', 'xxx')
         .send({
-          beats: [
-            { id: 'bar' },
-            { id: nonExistentBeatId }
-          ]
+          beats: [{ id: 'bar' }, { id: nonExistentBeatId }],
         })
         .expect(200);
 
