@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import expect from 'expect.js';
 import { wrapEsError } from './wrap_es_error';
 
 describe('wrap_es_error', () => {
@@ -34,7 +35,7 @@ describe('wrap_es_error', () => {
 
       expect(wrappedError.isBoom).to.be(true);
       expect(wrappedError.message).to.be(
-        'Insufficient user permissions for managing Logstash pipelines'
+        'Insufficient user permissions for managing Beats configuration'
       );
     });
   });
