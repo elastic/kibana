@@ -14,9 +14,11 @@ export function initAuthorizationService(server) {
   const config = server.config();
 
   const actions = actionsFactory(config);
+  const application = `kibana-${config.get('kibana.index')}`;
 
   server.expose('authorization', deepFreeze({
-    checkPrivilegesWithRequest: checkPrivilegesWithRequestFactory(shieldClient, config, actions),
-    actions
+    actions,
+    application,
+    checkPrivilegesWithRequest: checkPrivilegesWithRequestFactory(shieldClient, config, actions, application),
   }));
 }

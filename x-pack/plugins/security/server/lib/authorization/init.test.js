@@ -21,8 +21,21 @@ jest.mock('./actions', () => ({
   actionsFactory: jest.fn(),
 }));
 
+const createMockConfig = (settings = {}) => {
+  const mockConfig = {
+    get: jest.fn()
+  };
+
+  mockConfig.get.mockImplementation(key => settings[key]);
+
+  return mockConfig;
+};
+
 test(`calls server.expose with exposed services`, () => {
-  const mockConfig = Symbol();
+  const kibanaIndex = '.a-kibana-index';
+  const mockConfig = createMockConfig({
+    'kibana.index': kibanaIndex
+  });
   const mockServer = {
     expose: jest.fn(),
     config: jest.fn().mockReturnValue(mockConfig)
@@ -33,20 +46,25 @@ test(`calls server.expose with exposed services`, () => {
   checkPrivilegesWithRequestFactory.mockReturnValue(mockCheckPrivilegesWithRequest);
   const mockActions = Symbol();
   actionsFactory.mockReturnValue(mockActions);
+  mockConfig.get.mock;
 
   initAuthorizationService(mockServer);
 
+  const application = `kibana-${kibanaIndex}`;
   expect(getClient).toHaveBeenCalledWith(mockServer);
   expect(actionsFactory).toHaveBeenCalledWith(mockConfig);
-  expect(checkPrivilegesWithRequestFactory).toHaveBeenCalledWith(mockShieldClient, mockConfig, mockActions);
+  expect(checkPrivilegesWithRequestFactory).toHaveBeenCalledWith(mockShieldClient, mockConfig, mockActions, application);
   expect(mockServer.expose).toHaveBeenCalledWith('authorization', {
-    checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
     actions: mockActions,
+    application,
+    checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
   });
 });
 
 test(`deep freezes exposed service`, () => {
-  const mockConfig = Symbol();
+  const mockConfig = createMockConfig({
+    'kibana.index': ''
+  });
   const mockServer = {
     expose: jest.fn(),
     config: jest.fn().mockReturnValue(mockConfig)
@@ -61,4 +79,5 @@ test(`deep freezes exposed service`, () => {
   expect(() => delete exposed.checkPrivilegesWithRequest).toThrowErrorMatchingSnapshot();
   expect(() => exposed.foo = 'bar').toThrowErrorMatchingSnapshot();
   expect(() => exposed.actions.login = 'not-login').toThrowErrorMatchingSnapshot();
+  expect(() => exposed.application = 'changed').toThrowErrorMatchingSnapshot();
 });

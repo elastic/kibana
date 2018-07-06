@@ -7,21 +7,16 @@
 import { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
 import { getClient } from '../../../../../server/lib/get_client_shield';
 import { buildPrivilegeMap } from './privileges';
-import { actionsFactory } from './actions';
 jest.mock('../../../../../server/lib/get_client_shield', () => ({
   getClient: jest.fn(),
 }));
 jest.mock('./privileges', () => ({
   buildPrivilegeMap: jest.fn(),
 }));
-jest.mock('./actions', () => ({
-  actionsFactory: jest.fn(),
-}));
 
 const registerPrivilegesWithClusterTest = (description, {
   settings = {},
   savedObjectTypes,
-  actions,
   expectedPrivileges,
   existingPrivileges,
   throwErrorWhenGettingPrivileges,
@@ -37,7 +32,7 @@ const registerPrivilegesWithClusterTest = (description, {
   };
 
   const defaultVersion = 'default-version';
-  const defaultApplication = 'default-application';
+  const application = 'default-application';
 
   const createMockServer = () => {
     const mockServer = {
@@ -45,11 +40,18 @@ const registerPrivilegesWithClusterTest = (description, {
         get: jest.fn(),
       }),
       log: jest.fn(),
+      plugins: {
+        security: {
+          authorization: {
+            actions: Symbol(),
+            application
+          }
+        }
+      }
     };
 
     const defaultSettings = {
       'pkg.version': defaultVersion,
-      'xpack.security.rbac.application': defaultApplication,
     };
 
     mockServer.config().get.mockImplementation(key => {
@@ -68,18 +70,17 @@ const registerPrivilegesWithClusterTest = (description, {
       expect(error).toBeUndefined();
       expect(mockCallWithInternalUser).toHaveBeenCalledTimes(2);
       expect(mockCallWithInternalUser).toHaveBeenCalledWith('shield.getPrivilege', {
-        privilege: defaultApplication,
+        privilege: application,
       });
       expect(mockCallWithInternalUser).toHaveBeenCalledWith(
         'shield.postPrivileges',
         {
           body: {
-            [defaultApplication]: privileges
+            [application]: privileges
           },
         }
       );
 
-      const application = settings['xpack.security.rbac.application'] || defaultApplication;
       expect(mockServer.log).toHaveBeenCalledWith(
         ['security', 'debug'],
         `Registering Kibana Privileges with Elasticsearch for ${application}`
@@ -96,10 +97,9 @@ const registerPrivilegesWithClusterTest = (description, {
       expect(error).toBeUndefined();
       expect(mockCallWithInternalUser).toHaveBeenCalledTimes(1);
       expect(mockCallWithInternalUser).toHaveBeenLastCalledWith('shield.getPrivilege', {
-        privilege: defaultApplication
+        privilege: application
       });
 
-      const application = settings['xpack.security.rbac.application'] || defaultApplication;
       expect(mockServer.log).toHaveBeenCalledWith(
         ['security', 'debug'],
         `Registering Kibana Privileges with Elasticsearch for ${application}`
@@ -117,7 +117,6 @@ const registerPrivilegesWithClusterTest = (description, {
       expect(actualError).toBeInstanceOf(Error);
       expect(actualError.message).toEqual(expectedErrorMessage);
 
-      const application = settings['xpack.security.rbac.application'] || defaultApplication;
       expect(mockServer.log).toHaveBeenCalledWith(
         ['security', 'error'],
         `Error registering Kibana Privileges with Elasticsearch for ${application}: ${expectedErrorMessage}`
@@ -139,7 +138,7 @@ const registerPrivilegesWithClusterTest = (description, {
         }
 
         return {
-          [defaultApplication]: existingPrivileges
+          [application]: existingPrivileges
         };
       })
       .mockImplementationOnce(async () => {
@@ -148,7 +147,6 @@ const registerPrivilegesWithClusterTest = (description, {
         }
       });
 
-    actionsFactory.mockReturnValue(actions);
     buildPrivilegeMap.mockReturnValue(expectedPrivileges);
 
     let error;
@@ -163,7 +161,8 @@ const registerPrivilegesWithClusterTest = (description, {
       expectDidntUpdatePrivileges: createExpectDidntUpdatePrivileges(mockServer, mockCallWithInternalUser, error),
       expectErrorThrown: createExpectErrorThrown(mockServer, error),
       mocks: {
-        buildPrivilegeMap
+        buildPrivilegeMap,
+        server: mockServer,
       }
     });
   });
@@ -171,22 +170,18 @@ const registerPrivilegesWithClusterTest = (description, {
 
 registerPrivilegesWithClusterTest(`passes saved object types, application and actions to buildPrivilegeMap`, {
   settings: {
-    'pkg.version': 'foo-version',
-    'xpack.security.rbac.application': 'foo-application',
+    'pkg.version': 'foo-version'
   },
   savedObjectTypes: [
     'foo-type',
     'bar-type',
   ],
-  actions: {
-    login: 'mock-action:login',
-    version: 'mock-action:version',
-  },
   assert: ({ mocks }) => {
-    expect(mocks.buildPrivilegeMap).toHaveBeenCalledWith(['foo-type', 'bar-type'], 'foo-application', {
-      login: 'mock-action:login',
-      version: 'mock-action:version',
-    });
+    expect(mocks.buildPrivilegeMap).toHaveBeenCalledWith(
+      ['foo-type', 'bar-type'],
+      mocks.server.plugins.security.authorization.application,
+      mocks.server.plugins.security.authorization.actions,
+    );
   },
 });
 

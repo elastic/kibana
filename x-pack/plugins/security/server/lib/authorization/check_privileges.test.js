@@ -9,8 +9,8 @@ import { checkPrivilegesWithRequestFactory, CHECK_PRIVILEGES_RESULT } from './ch
 
 import { ALL_RESOURCE } from '../../../common/constants';
 
+const application = 'kibana-our_application';
 const defaultVersion = 'default-version';
-const defaultApplication = 'default-application';
 const defaultKibanaIndex = 'default-index';
 const savedObjectTypes = ['foo-type', 'bar-type'];
 
@@ -26,7 +26,6 @@ const createMockConfig = ({ settings = {} } = {}) => {
 
   const defaultSettings = {
     'pkg.version': defaultVersion,
-    'xpack.security.rbac.application': defaultApplication,
     'kibana.index': defaultKibanaIndex,
   };
 
@@ -63,7 +62,7 @@ const checkPrivilegesTest = (
     const mockShieldClient = createMockShieldClient({
       username,
       application: {
-        [defaultApplication]: {
+        [application]: {
           [ALL_RESOURCE]: applicationPrivilegesResponse
         }
       },
@@ -72,7 +71,7 @@ const checkPrivilegesTest = (
       },
     });
 
-    const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(mockShieldClient, mockConfig, mockActions);
+    const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(mockShieldClient, mockConfig, mockActions, application);
     const request = Symbol();
     const checkPrivileges = checkPrivilegesWithRequest(request);
 
@@ -88,7 +87,7 @@ const checkPrivilegesTest = (
     expect(mockShieldClient.callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
       body: {
         applications: [{
-          application: defaultApplication,
+          application: application,
           resources: [ALL_RESOURCE],
           privileges: uniq([
             mockActions.version, mockActions.login, ...privileges

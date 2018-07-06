@@ -16,13 +16,13 @@ export default function ({ getService }) {
         .then(resp => {
           expect(resp.body).to.eql([
             {
-              application: 'kibana',
+              application: 'kibana-.kibana',
               name: 'all',
               actions: ['version:7.0.0-alpha1', 'action:*'],
               metadata: {},
             },
             {
-              application: 'kibana',
+              application: 'kibana-.kibana',
               name: 'read',
               actions: [
                 'version:7.0.0-alpha1',
