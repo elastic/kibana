@@ -55,8 +55,7 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations, Priv
   const renderVis = (container, savedObj, params) => {
 
     const { vis, description } = savedObj;
-    // TODO: where is this even set, and could it not be set directly on the vis object ?
-    // are we saving this ?
+
     vis.description = description;
     vis.searchSource = savedObj.searchSource;
 
@@ -72,6 +71,7 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations, Priv
 
     const element = document.createElement('div');
     element.className = 'visualize';
+    element.setAttribute('data-test-subj', 'visualizationLoader');
     container.appendChild(element);
 
     // If params specified cssClass, we will set this to the element.

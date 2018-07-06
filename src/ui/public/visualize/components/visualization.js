@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import '../visualize.less';
+import './visualization.less';
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { VisualizationNoResults, VisualizationChart } from './';

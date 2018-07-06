@@ -31,17 +31,22 @@ const RENDER_COMPLETE_EVENT = 'render_complete';
  */
 export class EmbeddedVisualizeHandler {
   constructor(element, savedObject, params) {
+    const { searchSource, vis } = savedObject;
+
+    const {
+      appState,
+      uiState,
+      queryFilter,
+      timeRange,
+      filters,
+      query,
+      Private,
+    } = params;
+
+    const aggs = vis.getAggConfig();
+
     this._element = element;
-    this._savedObject = savedObject;
-    this._params = {
-      uiState: params.uiState,
-      queryFilter: params.queryFilter,
-      searchSource: savedObject.searchSource,
-      aggs: savedObject.vis.getAggConfig(),
-      timeRange: params.timeRange,
-      filters: params.filters,
-      query: params.query,
-    };
+    this._params = { uiState, queryFilter, searchSource, aggs, timeRange, filters, query };
 
     this._listeners = new EventEmitter();
     // Listen to the first RENDER_COMPLETE_EVENT to resolve this promise
@@ -52,38 +57,30 @@ export class EmbeddedVisualizeHandler {
       this._listeners.emit(RENDER_COMPLETE_EVENT);
     });
 
-    this._init(params);
-  }
-
-  _init(params) {
     this._loaded = false;
     this._destroyed = false;
 
-    this._appState = params.appState;
-    this._vis = this._savedObject.vis;
-    this._vis._setUiState(params.uiState);
+    this._appState = appState;
+    this._vis = vis;
+    this._vis._setUiState(uiState);
     this._uiState = this._vis.getUiState();
 
     this._vis.on('update', this._handleVisUpdate);
     this._vis.on('reload', this._reloadVis);
     this._uiState.on('change', this._fetchAndRender);
 
-    this._visualize = new VisualizeDataLoader(this._vis, params.Private);
+    this._visualize = new VisualizeDataLoader(this._vis, Private);
     this._renderCompleteHelper = new RenderCompleteHelper(this._element);
 
     this._render();
   }
 
-  _updateState = (visState) => {
+  _handleVisUpdate = () => {
+    const visState = this._vis.getState();
     if (this._appState) {
       this._appState.vis = visState;
       this._appState.save();
     }
-  };
-
-  _handleVisUpdate = () => {
-    const visState = this._vis.getState();
-    this._updateState(visState);
 
     this._fetchAndRender();
   };
@@ -185,7 +182,7 @@ export class EmbeddedVisualizeHandler {
    * @return {InspectorSession} An inspector session to interact with the opened inspector.
    */
   openInspector() {
-    return this._savedObject.vis.openInspector();
+    return this._vis.openInspector();
   }
 
   /**

@@ -62,7 +62,7 @@ describe('visualize loader', () => {
     const container = newContainer();
     loader.embedVisualizationWithSavedObject(container[0], createSavedObject(), params);
     $rootScope.$digest();
-    return container.find('.visualize');
+    return container.find('[data-test-subj="visualizationLoader"]');
   }
 
   beforeEach(ngMock.module('kibana', 'kibana/directive'));
@@ -140,7 +140,7 @@ describe('visualize loader', () => {
       it('should render the visualize element', () => {
         const container = newContainer();
         loader.embedVisualizationWithSavedObject(container[0], createSavedObject(), { });
-        expect(container.find('.visualize').length).to.be(1);
+        expect(container.find('[data-test-subj="visualizationLoader"]').length).to.be(1);
       });
 
       it('should replace content of container by default', () => {
@@ -203,7 +203,7 @@ describe('visualize loader', () => {
       it('should render a visualize element, if id was found', async () => {
         const container = newContainer();
         await loader.embedVisualizationWithId(container[0], 'exists', {});
-        expect(container.find('.visualize').length).to.be(1);
+        expect(container.find('[data-test-subj="visualizationLoader"]').length).to.be(1);
       });
 
     });
@@ -222,7 +222,7 @@ describe('visualize loader', () => {
       it('should give access to the visualize element', () => {
         const container = newContainer();
         const handler = loader.embedVisualizationWithSavedObject(container[0], createSavedObject(), {});
-        expect(handler.getElement()).to.be(container.find('.visualize')[0]);
+        expect(handler.getElement()).to.be(container.find('[data-test-subj="visualizationLoader"]')[0]);
       });
 
       it('should allow opening the inspector of the visualization and return its session', () => {
@@ -240,7 +240,7 @@ describe('visualize loader', () => {
         const spy = sinon.spy();
         handler.whenFirstRenderComplete().then(spy);
         expect(spy.notCalled).to.be(true);
-        dispatchRenderComplete(container.find('.visualize')[0]);
+        dispatchRenderComplete(container.find('[data-test-subj="visualizationLoader"]')[0]);
         await timeout();
         expect(spy.calledOnce).to.be(true);
       });
@@ -251,7 +251,7 @@ describe('visualize loader', () => {
         const spy = sinon.spy();
         handler.addRenderCompleteListener(spy);
         expect(spy.notCalled).to.be(true);
-        dispatchRenderComplete(container.find('.visualize')[0]);
+        dispatchRenderComplete(container.find('[data-test-subj="visualizationLoader"]')[0]);
         await timeout();
         expect(spy.calledOnce).to.be(true);
       });
@@ -262,9 +262,9 @@ describe('visualize loader', () => {
         const spy = sinon.spy();
         handler.addRenderCompleteListener(spy);
         expect(spy.notCalled).to.be(true);
-        dispatchRenderComplete(container.find('.visualize')[0]);
-        dispatchRenderComplete(container.find('.visualize')[0]);
-        dispatchRenderComplete(container.find('.visualize')[0]);
+        dispatchRenderComplete(container.find('[data-test-subj="visualizationLoader"]')[0]);
+        dispatchRenderComplete(container.find('[data-test-subj="visualizationLoader"]')[0]);
+        dispatchRenderComplete(container.find('[data-test-subj="visualizationLoader"]')[0]);
         expect(spy.callCount).to.be(3);
       });
 
@@ -274,11 +274,11 @@ describe('visualize loader', () => {
         const spy = sinon.spy();
         handler.addRenderCompleteListener(spy);
         expect(spy.notCalled).to.be(true);
-        dispatchRenderComplete(container.find('.visualize')[0]);
+        dispatchRenderComplete(container.find('[data-test-subj="visualizationLoader"]')[0]);
         expect(spy.calledOnce).to.be(true);
         spy.resetHistory();
         handler.removeRenderCompleteListener(spy);
-        dispatchRenderComplete(container.find('.visualize')[0]);
+        dispatchRenderComplete(container.find('[data-test-subj="visualizationLoader"]')[0]);
         expect(spy.notCalled).to.be(true);
       });
 
@@ -290,7 +290,7 @@ describe('visualize loader', () => {
             foo: 42
           }
         });
-        expect(container.find('.visualize').attr('data-foo')).to.be('42');
+        expect(container.find('[data-test-subj="visualizationLoader"]').attr('data-foo')).to.be('42');
         handler.update({
           dataAttrs: {
             foo: null,
@@ -299,8 +299,8 @@ describe('visualize loader', () => {
         });
         // Sync we are relying on $evalAsync we need to trigger a digest loop during tests
         $rootScope.$digest();
-        expect(container.find('.visualize')[0].hasAttribute('data-foo')).to.be(false);
-        expect(container.find('.visualize').attr('data-added')).to.be('value');
+        expect(container.find('[data-test-subj="visualizationLoader"]')[0].hasAttribute('data-foo')).to.be(false);
+        expect(container.find('[data-test-subj="visualizationLoader"]').attr('data-added')).to.be('value');
       });
 
       it('should allow updating the time range of the visualization', () => {
