@@ -90,7 +90,7 @@ export class JobsListView extends Component {
   }
 
   setRefreshInterval(interval) {
-    clearInterval(this.refreshInterval);
+    this.clearRefreshInterval();
     if (interval >= MINIMUM_REFRESH_INTERVAL_MS) {
       this.blockRefresh = false;
       this.refreshInterval = setInterval(() => (this.refreshJobSummaryList()), interval);
