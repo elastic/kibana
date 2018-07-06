@@ -31,16 +31,17 @@ function getEscapedQuery(query = '') {
   return query.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, (match) => `\\${match}`);
 }
 
-const termsAgg = (field, size, direction, query) => {
-  if (size < 1) {
-    size = 1;
-  }
+const termsAgg = ({ field, size, direction, query }) => {
   const terms = {
-    size: size,
     order: {
       _count: direction
     }
   };
+
+  if (size) {
+    terms.size = size < 1 ? 1 : size;
+  }
+
   if (field.scripted) {
     terms.script = {
       inline: field.script,
@@ -93,11 +94,12 @@ class ListControl extends Control {
       timeout: '1s',
       terminate_after: 100000
     };
-    const aggs = termsAgg(
-      indexPattern.fields.byName[fieldName],
-      _.get(this.options, 'size', 5),
-      'desc',
-      query);
+    const aggs = termsAgg({
+      field: indexPattern.fields.byName[fieldName],
+      size: this.options.dynamicOptions ? null : _.get(this.options, 'size', 5),
+      direction: 'desc',
+      query
+    });
     const searchSource = createSearchSource(
       this.kbnApi,
       initialSearchSourceState,
@@ -146,7 +148,7 @@ export async function listControlFactory(controlParams, kbnApi, useTimeFilter) {
     // be enabled for non-string fields (since UI input is hidden for non-string fields).
     // If field is not string, then disable dynamic options.
     const field = indexPattern.fields.find((field) => {
-      return field.name === this.props.controlParams.fieldName;
+      return field.name === controlParams.fieldName;
     });
     if (field && field.type !== 'string') {
       controlParams.options.dynamicOptions = false;

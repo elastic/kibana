@@ -183,7 +183,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('dynamic options', () => {
-      before(async () => {
+      beforeEach(async () => {
         await PageObjects.common.navigateToUrl('visualize', 'new');
         await PageObjects.visualize.clickInputControlVis();
         await PageObjects.visualize.clickVisEditorTab('controls');
@@ -193,21 +193,35 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.common.sleep(1000); // give time for index-pattern to be fetched
         await PageObjects.visualize.setComboBox('fieldSelect-0', 'geo.src');
 
-        await PageObjects.visualize.checkCheckbox('listControlDynamicOptionsSwitch');
-
         await PageObjects.visualize.clickGo();
         await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
-      it('should update options list when filtered', async () => {
+      it('should fetch new options when string field is filtered', async () => {
         const initialOptions = await PageObjects.visualize.getComboBoxOptions('listControlSelect0');
-        expect(initialOptions.trim().split('\n').join()).to.equal('BR,CN,ID,IN,US');
+        expect(initialOptions.trim().split('\n').join()).to.equal('BD,BR,CN,ID,IN,JP,NG,PK,RU,US');
 
         await PageObjects.visualize.filterComboBoxOptions('listControlSelect0', 'R');
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const updatedOptions = await PageObjects.visualize.getComboBoxOptions('listControlSelect0');
         expect(updatedOptions.trim().split('\n').join()).to.equal('RE,RO,RS,RU,RW');
+      });
+
+      it('should not fetch new options when non-string is filtered', async () => {
+        await PageObjects.visualize.setComboBox('fieldSelect-0', 'clientip');
+        await PageObjects.visualize.clickGo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        const initialOptions = await PageObjects.visualize.getComboBoxOptions('listControlSelect0');
+        expect(initialOptions.trim().split('\n').join()).to.equal(
+          '135.206.117.161,177.194.175.66,18.55.141.62,243.158.217.196,32.146.206.24');
+
+        await PageObjects.visualize.filterComboBoxOptions('listControlSelect0', '17');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        const updatedOptions = await PageObjects.visualize.getComboBoxOptions('listControlSelect0');
+        expect(updatedOptions.trim().split('\n').join()).to.equal('135.206.117.161,177.194.175.66,243.158.217.196');
       });
     });
 
@@ -235,7 +249,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should disable child control when parent control is not set', async () => {
         const parentControlMenu = await PageObjects.visualize.getComboBoxOptions('listControlSelect0');
-        expect(parentControlMenu.trim().split('\n').join()).to.equal('BR,CN,ID,IN,US');
+        expect(parentControlMenu.trim().split('\n').join()).to.equal('BD,BR,CN,ID,IN,JP,NG,PK,RU,US');
 
         const childControlInput = await find.byCssSelector('[data-test-subj="inputControl1"] input');
         const isDisabled = await childControlInput.getProperty('disabled');
