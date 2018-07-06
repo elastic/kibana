@@ -35,6 +35,7 @@ import './kbn_global_timepicker';
 import { uiModules } from '../modules';
 import { TIME_MODES } from './modes';
 import { timeUnits } from './time_units';
+import { prettyInterval } from './pretty_interval';
 const module = uiModules.get('ui/timepicker');
 
 module.directive('kbnTimepicker', function (refreshIntervals) {
@@ -234,10 +235,20 @@ module.directive('kbnTimepicker', function (refreshIntervals) {
         });
       };
 
+      $scope.prettyInterval = function (interval) {
+        return prettyInterval(interval.value);
+      };
+
       $scope.setRefreshInterval = function (interval) {
         interval = _.clone(interval || {});
         interval.pause = (interval.pause == null || interval.pause === false) ? false : true;
-        $scope.onIntervalSelect({ interval });
+
+        $scope.onIntervalSelect({
+          interval: {
+            value: interval.value,
+            pause: interval.pause,
+          }
+        });
       };
 
       $scope.setMode($scope.mode);

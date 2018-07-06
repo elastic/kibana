@@ -82,8 +82,8 @@ const CourierRequestHandlerProvider = function () {
       // Using callParentStartHandlers: true we make sure, that the parent searchSource
       // onSearchRequestStart will be called properly even though we use an inherited
       // search source.
-      const timeFilterSearchSource = searchSource.makeChild({ callParentStartHandlers: true });
-      const requestSearchSource = timeFilterSearchSource.makeChild({ callParentStartHandlers: true });
+      const timeFilterSearchSource = searchSource.createChild({ callParentStartHandlers: true });
+      const requestSearchSource = timeFilterSearchSource.createChild({ callParentStartHandlers: true });
 
       // For now we need to mirror the history of the passed search source, since
       // the spy panel wouldn't work otherwise.
@@ -96,7 +96,7 @@ const CourierRequestHandlerProvider = function () {
         }
       });
 
-      requestSearchSource.aggs(function () {
+      requestSearchSource.setField('aggs', function () {
         return aggs.toDsl();
       });
 
@@ -104,12 +104,12 @@ const CourierRequestHandlerProvider = function () {
         return aggs.onSearchRequestStart(searchSource, searchRequest);
       });
 
-      timeFilterSearchSource.set('filter', () => {
-        return getTime(searchSource.get('index'), timeRange);
+      timeFilterSearchSource.setField('filter', () => {
+        return getTime(searchSource.getField('index'), timeRange);
       });
 
-      requestSearchSource.set('filter', filters);
-      requestSearchSource.set('query', query);
+      requestSearchSource.setField('filter', filters);
+      requestSearchSource.setField('query', query);
 
       const shouldQuery = (requestBodyHash) => {
         if (!searchSource.lastQuery || forceFetch) return true;

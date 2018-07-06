@@ -42,8 +42,8 @@ describe('visualize loader', () => {
 
   function createSavedObject() {
     return {
-      vis: vis,
-      searchSource: searchSource
+      vis,
+      searchSource,
     };
   }
 

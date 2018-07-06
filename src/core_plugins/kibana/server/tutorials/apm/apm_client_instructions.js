@@ -287,3 +287,28 @@ func main() {curlyOpen}
       '**Warning: The Go agent is currently in Beta and not meant for production use.**',
   },
 ];
+
+export const JAVA_CLIENT_INSTRUCTIONS = [
+  {
+    title: 'Download the APM agent',
+    textPre: 'Download the agent jar from [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Ca%3Aelastic-apm-agent). ' +
+    'Do **not** add the agent as a dependency to your application.'
+  },
+  {
+    title: 'Start your application with the javaagent flag',
+    textPre: 'Add the `-javaagent` flag and configure the agent with system properties.\n' +
+    '\n' +
+    ' * Set required service name (allowed characters: a-z, A-Z, 0-9, -, _, and space)\n' +
+    ' * Set custom APM Server URL (default: http://localhost:8200)\n' +
+    ' * Set the base package of your application',
+    commands: `java -javaagent:/path/to/elastic-apm-agent-<version>.jar \\
+     -Delastic.apm.service_name=my-application \\
+     -Delastic.apm.server_url=http://localhost:8200 \\ 
+     -Delastic.apm.application_packages=org.example \\ 
+     -jar my-application.jar`.split('\n'),
+    textPost:
+    'See the [documentation]' +
+    '({config.docs.base_url}guide/en/apm/agent/java/current/index.html) for configuration options and advanced usage.\n\n' +
+    '**Warning: The Java agent is currently in Beta and not meant for production use.**',
+  },
+];

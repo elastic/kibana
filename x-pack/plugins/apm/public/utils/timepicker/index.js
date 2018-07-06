@@ -23,47 +23,49 @@ const waitForAngularReady = new Promise(resolve => {
   }, 10);
 });
 
-export function initTimepicker(history, dispatch, callback) {
-  // default the timepicker to the last 24 hours
-  chrome.getUiSettingsClient().overrideLocalDefault(
-    'timepicker:timeDefaults',
-    JSON.stringify({
-      from: 'now-24h',
-      to: 'now',
-      mode: 'quick'
-    })
-  );
+export function initTimepicker(history, dispatch) {
+  return new Promise(resolve => {
+    // default the timepicker to the last 24 hours
+    chrome.getUiSettingsClient().overrideLocalDefault(
+      'timepicker:timeDefaults',
+      JSON.stringify({
+        from: 'now-24h',
+        to: 'now',
+        mode: 'quick'
+      })
+    );
 
-  uiModules
-    .get('app/apm', [])
-    .controller('TimePickerController', ($scope, globalState) => {
-      // Add APM feedback menu
-      // TODO: move this somewhere else
-      $scope.topNavMenu = [];
-      $scope.topNavMenu.push({
-        key: 'APM feedback',
-        description: 'APM feedback',
-        tooltip: 'Provide feedback on APM',
-        template: require('../../templates/feedback_menu.html')
-      });
+    uiModules
+      .get('app/apm', [])
+      .controller('TimePickerController', ($scope, globalState) => {
+        // Add APM feedback menu
+        // TODO: move this somewhere else
+        $scope.topNavMenu = [];
+        $scope.topNavMenu.push({
+          key: 'APM feedback',
+          description: 'APM feedback',
+          tooltip: 'Provide feedback on APM',
+          template: require('../../templates/feedback_menu.html')
+        });
 
-      history.listen(() => {
+        history.listen(() => {
+          updateRefreshRate(dispatch);
+          globalState.fetch();
+        });
+        timefilter.enableTimeRangeSelector();
+        timefilter.enableAutoRefreshSelector();
+
         updateRefreshRate(dispatch);
-        globalState.fetch();
+
+        $scope.$listen(timefilter, 'timeUpdate', () =>
+          dispatch(updateTimePickerAction())
+        );
+
+        registerTimefilterWithGlobalState(globalState);
+
+        Promise.all([waitForAngularReady]).then(resolve);
       });
-      timefilter.enableTimeRangeSelector();
-      timefilter.enableAutoRefreshSelector();
-
-      updateRefreshRate(dispatch);
-
-      $scope.$listen(timefilter, 'timeUpdate', () =>
-        dispatch(updateTimePickerAction())
-      );
-
-      registerTimefilterWithGlobalState(globalState);
-
-      Promise.all([waitForAngularReady]).then(callback);
-    });
+  });
 }
 
 function updateTimePickerAction() {
