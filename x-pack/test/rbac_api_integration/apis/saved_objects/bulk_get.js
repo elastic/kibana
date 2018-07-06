@@ -70,7 +70,7 @@ export default function ({ getService }) {
 
     const expectRbacForbidden = resp => {
       //eslint-disable-next-line max-len
-      const missingActions = `action:login,action:saved_objects/config/bulk_get,action:saved_objects/dashboard/bulk_get,action:saved_objects/visualization/bulk_get`;
+      const missingActions = `action:saved_objects/config/bulk_get,action:saved_objects/dashboard/bulk_get,action:saved_objects/visualization/bulk_get`;
       expect(resp.body).to.eql({
         statusCode: 403,
         error: 'Forbidden',

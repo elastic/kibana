@@ -7,12 +7,14 @@
 import { difference, isEmpty, isEqual } from 'lodash';
 import { buildPrivilegeMap } from './privileges';
 import { getClient } from '../../../../../server/lib/get_client_shield';
+import { actionsFactory } from './actions';
 
 
 
 export async function registerPrivilegesWithCluster(server) {
   const config = server.config();
-  const kibanaVersion = config.get('pkg.version');
+
+  const actions = actionsFactory(config);
   const application = config.get('xpack.security.rbac.application');
   const savedObjectTypes = server.savedObjects.types;
 
@@ -25,7 +27,7 @@ export async function registerPrivilegesWithCluster(server) {
   };
 
   const expectedPrivileges = {
-    [application]: buildPrivilegeMap(savedObjectTypes, application, kibanaVersion)
+    [application]: buildPrivilegeMap(savedObjectTypes, application, actions)
   };
 
   server.log(['security', 'debug'], `Registering Kibana Privileges with Elasticsearch for ${application}`);

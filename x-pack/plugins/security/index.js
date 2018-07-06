@@ -17,11 +17,10 @@ import { authenticateFactory } from './server/lib/auth_redirect';
 import { checkLicense } from './server/lib/check_license';
 import { initAuthenticator } from './server/lib/authentication/authenticator';
 import { initPrivilegesApi } from './server/routes/api/v1/privileges';
-import { checkPrivilegesWithRequestFactory } from './server/lib/authorization/check_privileges';
 import { SecurityAuditLogger } from './server/lib/audit_logger';
 import { AuditLogger } from '../../server/lib/audit_logger';
 import { SecureSavedObjectsClient } from './server/lib/saved_objects_client/secure_saved_objects_client';
-import { registerPrivilegesWithCluster } from './server/lib/privileges';
+import { initAuthorizationService, registerPrivilegesWithCluster } from './server/lib/authorization';
 import { watchStatusAndLicenseToInitialize } from './server/lib/watch_status_and_license_to_initialize';
 
 export const security = (kibana) => new kibana.Plugin({
@@ -114,9 +113,11 @@ export const security = (kibana) => new kibana.Plugin({
     server.auth.strategy('session', 'login', 'required');
 
     const auditLogger = new SecurityAuditLogger(server.config(), new AuditLogger(server, 'security'));
-    const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(server);
-    const { savedObjects } = server;
 
+    // exposes server.plugins.security.authorization
+    initAuthorizationService(server);
+
+    const { savedObjects } = server;
     savedObjects.setScopedSavedObjectsClientFactory(({
       request,
     }) => {
@@ -130,7 +131,8 @@ export const security = (kibana) => new kibana.Plugin({
         return new savedObjects.SavedObjectsClient(callWithRequestRepository);
       }
 
-      const checkPrivileges = checkPrivilegesWithRequest(request);
+      const { authorization } = server.plugins.security;
+      const checkPrivileges = authorization.checkPrivilegesWithRequest(request);
       const internalRepository = savedObjects.getSavedObjectsRepository(callWithInternalUser);
 
       return new SecureSavedObjectsClient({
@@ -140,6 +142,7 @@ export const security = (kibana) => new kibana.Plugin({
         checkPrivileges,
         auditLogger,
         savedObjectTypes: savedObjects.types,
+        actions: authorization.actions,
       });
     });
 
