@@ -17,41 +17,47 @@
  * under the License.
  */
 
+import { EventEmitter } from 'events';
 import $ from 'jquery';
-import ResizeObserver from 'resize-observer-polyfill';
 import { isEqual } from 'lodash';
-import EventEmitter from 'events';
+import ResizeObserver from 'resize-observer-polyfill';
 
-
-function validateElArg(el) {
+function validateElArg(el: HTMLElement) {
   // the ResizeChecker historically accepted jquery elements,
   // so we wrap in jQuery then extract the element
   const $el = $(el);
 
   if ($el.length !== 1) {
-    throw new TypeError('ResizeChecker must be constructed with a single DOM element.');
+    throw new TypeError(
+      'ResizeChecker must be constructed with a single DOM element.'
+    );
   }
 
   return $el.get(0);
 }
 
-function getSize(el) {
-  return [el.clientWidth, el.clientHeight];
+function getSize(el: HTMLElement | null): [number, number] | null {
+  return el === null ? null : [el.clientWidth, el.clientHeight];
 }
 
 /**
  *  ResizeChecker receives an element and emits a "resize" event every time it changes size.
  */
 export class ResizeChecker extends EventEmitter {
-  constructor(el, args = {}) {
+  private destroyed: boolean = false;
+  private el: HTMLElement | null;
+  private observer: ResizeObserver | null;
+  private expectedSize: [number, number] | null = null;
+
+  constructor(el: HTMLElement, args: { disabled?: boolean } = {}) {
     super();
 
-    this._el = validateElArg(el);
+    this.el = validateElArg(el);
 
-    this._observer = new ResizeObserver(() => {
-      if (this._expectedSize) {
-        const sameSize = isEqual(getSize(this._el), this._expectedSize);
-        this._expectedSize = null;
+    this.observer = new ResizeObserver(() => {
+      if (this.expectedSize) {
+        const sameSize = isEqual(getSize(el), this.expectedSize);
+        this.expectedSize = null;
 
         if (sameSize) {
           // don't trigger resize notification if the size is what we expect
@@ -68,49 +74,47 @@ export class ResizeChecker extends EventEmitter {
     }
   }
 
-  enable() {
-    if (this._destroyed) {
+  public enable() {
+    if (this.destroyed) {
       // Don't allow enabling an already destroyed resize checker
       return;
     }
     // the width and height of the element that we expect to see
     // on the next resize notification. If it matches the size at
     // the time of starting observing then it we will be ignored.
-    this._expectedSize = getSize(this._el);
-    this._observer.observe(this._el);
+    // We now that observer and el are not null since we are not yet destroyed.
+    this.expectedSize = getSize(this.el);
+    this.observer!.observe(this.el!);
   }
 
   /**
    *  Run a function and ignore all resizes that occur
    *  while it's running.
-   *
-   *  @return {undefined}
    */
-  modifySizeWithoutTriggeringResize(block) {
+  public modifySizeWithoutTriggeringResize(block: () => void): void {
     try {
       block();
     } finally {
-      this._expectedSize = getSize(this._el);
+      this.expectedSize = getSize(this.el);
     }
   }
 
   /**
-  * Tell the ResizeChecker to shutdown, stop listenings, and never
-  * emit another resize event.
-  *
-  * Cleans up it's listeners and timers.
-  *
-  * @method destroy
-  * @return {void}
-  */
-  destroy() {
-    if (this._destroyed) return;
-    this._destroyed = true;
+   * Tell the ResizeChecker to shutdown, stop listenings, and never
+   * emit another resize event.
+   *
+   * Cleans up it's listeners and timers.
+   */
+  public destroy(): void {
+    if (this.destroyed) {
+      return;
+    }
+    this.destroyed = true;
 
-    this._observer.disconnect();
-    this._observer = null;
-    this._expectedSize = null;
-    this._el = null;
+    this.observer!.disconnect();
+    this.observer = null;
+    this.expectedSize = null;
+    this.el = null;
     this.removeAllListeners();
   }
 }
