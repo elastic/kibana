@@ -62,10 +62,11 @@ class AggConfig {
     }, 0);
   }
 
-  constructor(vis, opts = {}) {
+  constructor(vis, opts = {}, aggs) {
     this.id = String(opts.id || AggConfig.nextId(vis.aggs));
     this.vis = vis;
     this._indexPattern = vis.indexPattern;
+    this._aggs = aggs || vis.aggs;
     this._opts = opts;
     this.enabled = typeof opts.enabled === 'boolean' ? opts.enabled : true;
 
@@ -125,8 +126,8 @@ class AggConfig {
     });
   }
 
-  write() {
-    return this.type.params.write(this);
+  write(aggs) {
+    return this.type.params.write(this, aggs);
   }
 
   isFilterable() {
@@ -176,9 +177,9 @@ class AggConfig {
    * @return {void|Object} - if the config has a dsl representation, it is
    *                         returned, else undefined is returned
    */
-  toDsl() {
+  toDsl(aggs) {
     if (this.type.hasNoDsl) return;
-    const output = this.write();
+    const output = this.write(aggs);
 
     const configDsl = {};
     configDsl[this.type.dslName || this.type.name] = output.params;
@@ -188,14 +189,14 @@ class AggConfig {
     if (output.subAggs) {
       const subDslLvl = configDsl.aggs || (configDsl.aggs = {});
       output.subAggs.forEach(function nestAdhocSubAggs(subAggConfig) {
-        subDslLvl[subAggConfig.id] = subAggConfig.toDsl();
+        subDslLvl[subAggConfig.id] = subAggConfig.toDsl(aggs);
       });
     }
 
     if (output.parentAggs) {
       const subDslLvl = configDsl.parentAggs || (configDsl.parentAggs = {});
       output.parentAggs.forEach(function nestAdhocSubAggs(subAggConfig) {
-        subDslLvl[subAggConfig.id] = subAggConfig.toDsl();
+        subDslLvl[subAggConfig.id] = subAggConfig.toDsl(aggs);
       });
     }
 

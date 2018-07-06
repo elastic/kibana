@@ -17,9 +17,8 @@
  * under the License.
  */
 
-const parentPipelineAggWritter = function (agg, output) {
-  const vis = agg.vis;
-  const selectedMetric = agg.params.customMetric || vis.aggs.getResponseAggById(agg.params.metricAgg);
+const parentPipelineAggWritter = function (agg, output, aggs) {
+  const selectedMetric = agg.params.customMetric || aggs.getResponseAggById(agg.params.metricAgg);
 
   if (agg.params.customMetric && agg.params.customMetric.type.name !== 'count') {
     output.parentAggs = (output.parentAggs || []).concat(selectedMetric);

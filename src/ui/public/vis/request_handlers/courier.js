@@ -33,8 +33,8 @@ const CourierRequestHandlerProvider = function () {
    * This function builds tabular data from the response and attaches it to the
    * inspector. It will only be called when the data view in the inspector is opened.
    */
-  async function buildTabularInspectorData(vis, searchSource, responseAggs) {
-    const table = tabifyAggResponse(responseAggs, searchSource.finalResponse, {
+  async function buildTabularInspectorData(vis, searchSource, aggConfigs) {
+    const table = tabifyAggResponse(aggConfigs, searchSource.finalResponse, {
       canSplit: false,
       asAggConfigResults: false,
       partialRows: true,
@@ -121,7 +121,7 @@ const CourierRequestHandlerProvider = function () {
         return requestSearchSource.getSearchRequestBody().then(q => {
           const queryHash = calculateObjectHash(q);
           if (shouldQuery(queryHash)) {
-            const lastResponseAggs = vis.getAggConfig().getResponseAggs();
+            const lastAggConfig = vis.getAggConfig();
             vis.API.inspectorAdapters.requests.reset();
             const request = vis.API.inspectorAdapters.requests.start('Data', {
               description: `This request queries Elasticsearch to fetch the data for the visualization.`,
@@ -140,14 +140,20 @@ const CourierRequestHandlerProvider = function () {
             }).then(async resp => {
               for (const agg of aggs) {
                 if (_.has(agg, 'type.postFlightRequest')) {
-                  resp = await agg.type.postFlightRequest(resp, aggs, agg, requestSearchSource);
+                  resp = await agg.type.postFlightRequest(
+                    resp,
+                    aggs,
+                    agg,
+                    requestSearchSource,
+                    vis.API.inspectorAdapters
+                  );
                 }
               }
 
               searchSource.finalResponse = resp;
 
               vis.API.inspectorAdapters.data.setTabularLoader(
-                () => buildTabularInspectorData(vis, searchSource, lastResponseAggs),
+                () => buildTabularInspectorData(vis, searchSource, lastAggConfig),
                 { returnsFormattedValues: true }
               );
 
