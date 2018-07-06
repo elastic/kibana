@@ -60,8 +60,8 @@ export class JobsListView extends Component {
     this.clearRefreshInterval();
   }
 
-  static getDerivedStateFromProps(props) {
-    return { updateJobStats: props.updateJobStats };
+  static getDerivedStateFromProps({ updateJobStats }) {
+    return { updateJobStats };
   }
 
   initAutoRefresh() {
