@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 const path = require('path');
-process.env.NODE_PATH = path.join(__dirname, '..', '..', 'node_modules');
+process.env.NODE_PATH +=
+  path.delimiter + path.join(__dirname, '..', '..', '..', 'node_modules');
 
 module.exports = function (wallaby) {
   return {
@@ -14,7 +15,6 @@ module.exports = function (wallaby) {
     debug: true,
     files: [
       './tsconfig.json',
-      '../../../src/test_utils/kbn_server',
       //'plugins/beats/public/**/*.+(js|jsx|ts|tsx|json|snap|css|less|sass|scss|jpg|jpeg|gif|png|svg)',
       'server/**/*.+(js|jsx|ts|tsx|json|snap|css|less|sass|scss|jpg|jpeg|gif|png|svg)',
       'common/**/*.+(js|jsx|ts|tsx|json|snap|css|less|sass|scss|jpg|jpeg|gif|png|svg)',
@@ -43,6 +43,7 @@ module.exports = function (wallaby) {
         '..',
         '..'
       );
+
       wallaby.testFramework.configure({
         rootDir: wallaby.localProjectDir,
         moduleNameMapper: {
@@ -60,7 +61,6 @@ module.exports = function (wallaby) {
         ],
         transform: {
           '^.+\\.js$': `${kibanaDirectory}/src/dev/jest/babel_transform.js`,
-          //"^.+\\.tsx?$": `${kibanaDirectory}/src/dev/jest/ts_transform.js`,
         },
       });
     },

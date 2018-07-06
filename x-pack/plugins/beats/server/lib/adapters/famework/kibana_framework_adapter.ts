@@ -6,16 +6,12 @@
 
 import {
   BackendFrameworkAdapter,
-  FrameworkRequest,
   FrameworkRouteOptions,
   WrappableRequest,
 } from '../../lib';
 
-import { IStrictReply, Request, Server } from 'hapi';
-import {
-  internalFrameworkRequest,
-  wrapRequest,
-} from '../../../utils/wrap_request';
+import { IStrictReply, Server } from 'hapi';
+import { wrapRequest } from '../../../utils/wrap_request';
 
 export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
   public version: string;
@@ -68,27 +64,6 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
       method: route.method,
       path: route.path,
     });
-  }
-
-  public async installIndexTemplate(name: string, template: {}) {
-    return await this.callWithInternalUser('indices.putTemplate', {
-      body: template,
-      name,
-    });
-  }
-
-  public async callWithInternalUser(esMethod: string, options: {}) {
-    const { elasticsearch } = this.server.plugins;
-    const { callWithInternalUser } = elasticsearch.getCluster('admin');
-    return await callWithInternalUser(esMethod, options);
-  }
-
-  public async callWithRequest(req: FrameworkRequest<Request>, ...rest: any[]) {
-    const internalRequest = req[internalFrameworkRequest];
-    const { elasticsearch } = internalRequest.server.plugins;
-    const { callWithRequest } = elasticsearch.getCluster('data');
-    const fields = await callWithRequest(internalRequest, ...rest);
-    return fields;
   }
 
   private validateConfig() {

@@ -9,25 +9,17 @@
 import { createEsTestCluster } from '@kbn/test';
 // @ts-ignore
 import * as kbnTestServer from '../../../../../../../../src/test_utils/kbn_server';
-import {
-  config as beatsPluginConfig,
-  configPrefix,
-} from '../../../../../index';
-import { KibanaBackendFrameworkAdapter } from '../kibana_framework_adapter';
+import { KibanaDatabaseAdapter } from '../kibana_database_adapter';
+import { KbnElasticSearch } from './../../../lib';
 import { contractTests } from './test_contract';
 
 const kbnServer = kbnTestServer.createServerWithCorePlugins();
 const es = createEsTestCluster({});
 
-contractTests('Kibana  Framework Adapter', {
+contractTests('Kibana Database Adapter', {
   before: async () => {
     await es.start();
     await kbnServer.ready();
-
-    const config = kbnServer.server.config();
-    config.extendSchema(beatsPluginConfig, {}, configPrefix);
-
-    config.set('xpack.beats.encryptionKey', 'foo');
 
     return await kbnServer.server.plugins.elasticsearch.waitUntilReady();
   },
@@ -36,6 +28,7 @@ contractTests('Kibana  Framework Adapter', {
     return await es.cleanup();
   },
   adapterSetup: () => {
-    return new KibanaBackendFrameworkAdapter(kbnServer.server);
+    return new KibanaDatabaseAdapter(kbnServer.server.plugins
+      .elasticsearch as KbnElasticSearch);
   },
 });

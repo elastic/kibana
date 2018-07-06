@@ -7,17 +7,17 @@
 import { get } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
 import {
-  BackendFrameworkAdapter,
   BeatTag,
   CMTagsAdapter,
+  DatabaseAdapter,
   FrameworkRequest,
 } from '../../lib';
 
 export class ElasticsearchTagsAdapter implements CMTagsAdapter {
-  private framework: BackendFrameworkAdapter;
+  private database: DatabaseAdapter;
 
-  constructor(framework: BackendFrameworkAdapter) {
-    this.framework = framework;
+  constructor(database: DatabaseAdapter) {
+    this.database = database;
   }
 
   public async getTagsWithIds(req: FrameworkRequest, tagIds: string[]) {
@@ -32,7 +32,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
       index: INDEX_NAMES.BEATS,
       type: '_doc',
     };
-    const response = await this.framework.callWithRequest(req, 'mget', params);
+    const response = await this.database.mget(req, params);
 
     return get(response, 'docs', [])
       .filter((b: any) => b.found)
@@ -55,7 +55,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
       refresh: 'wait_for',
       type: '_doc',
     };
-    const response = await this.framework.callWithRequest(req, 'index', params);
+    const response = await this.database.index(req, params);
 
     // TODO this is not something that works for TS... change this return type
     return get(response, 'result');

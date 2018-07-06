@@ -9,7 +9,7 @@ import { wrapEsError } from './wrap_es_error';
 
 describe('wrap_es_error', () => {
   describe('#wrapEsError', () => {
-    let originalError;
+    let originalError: any;
     beforeEach(() => {
       originalError = new Error('I am an error');
       originalError.statusCode = 404;
