@@ -100,16 +100,27 @@ uiModules
               //No need to call the response handler when there have been no data nor has been there changes
               //in the vis-state (response handler does not depend on uiStat
               const canSkipResponseHandler = (
-                $scope.previousRequestHandlerResponse && $scope.previousRequestHandlerResponse === requestHandlerResponse &&
-              $scope.previousVisState && _.isEqual($scope.previousVisState, $scope.vis.getState())
+                $scope.previousRequestHandlerResponse
+                  && $scope.previousRequestHandlerResponse === requestHandlerResponse
+                  && $scope.previousVisState
+                  && _.isEqual($scope.previousVisState, $scope.vis.getState())
               );
 
               $scope.previousVisState = $scope.vis.getState();
               $scope.previousRequestHandlerResponse = requestHandlerResponse;
+
+              $scope.$evalAsync(() => {
+                $scope.vis.requestError = undefined;
+              });
+
               return canSkipResponseHandler ? $scope.visData : Promise.resolve(responseHandler($scope.vis, requestHandlerResponse));
             }, e => {
               $scope.savedObj.searchSource.cancelQueued();
-              $scope.vis.requestError = e;
+
+              $scope.$evalAsync(() => {
+                $scope.vis.requestError = e;
+              });
+
               if (isTermSizeZeroError(e)) {
                 return toastNotifications.addDanger({
                   title: `Visualization '${$scope.vis.title}' has an error`,
