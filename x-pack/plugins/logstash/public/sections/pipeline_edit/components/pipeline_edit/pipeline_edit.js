@@ -19,25 +19,171 @@ import {
   EuiIconTip,
   EuiPage,
   EuiPageContent,
+  EuiSelect,
 } from '@elastic/eui';
 
+const createOptions = value => ({ text: value, value });
+
+const PIPELINE_ID_REQUIRED_ERR_MSG = 'Pipeline ID is required';
+const PIPELINE_ID_FORMAT_ERR_MSG =
+  'Pipeline ID must begin with a letter or underscore and contain only letters, underscores, dashes, and numbers';
+
+function getFormLabelWithTooltipIcon(labelText, tooltipText) {
+  if (!labelText && !tooltipText) { return null; }
+
+  return (
+    <div>
+      <span>{labelText}</span>
+      &nbsp;
+      <EuiIconTip content={tooltipText} type="questionInCircle" />
+    </div>
+  );
+}
+
+function FlexItemSetting(props) {
+  const {
+    formRowLabelText,
+    formRowTooltipText,
+  } = props;
+
+  const label = getFormLabelWithTooltipIcon(formRowLabelText, formRowTooltipText);
+
+  return (
+    <EuiFlexItem grow={false}>
+      <EuiFormRow
+        label={label}
+        hasEmptyLabelSpace={!label}
+      >
+        {props.children}
+      </EuiFormRow>
+    </EuiFlexItem>
+  );
+}
 
 export class PipelineEditor extends React.Component {
   constructor(props) {
     super(props);
 
+    const {
+      id,
+      description,
+      pipeline,
+      settings,
+    } = this.props.pipeline;
+    this.queueTypes = ['memory', 'persisted'].map(createOptions);
+    this.units = [
+      {
+        text: 'bytes',
+        value: 'b'
+      },
+      {
+        text: 'kilobytes',
+        value: 'kb'
+      },
+      {
+        text: 'megabytes',
+        value: 'mb'
+      },
+      {
+        text: 'gigabytes',
+        value: 'gb'
+      },
+      {
+        text: 'terabytes',
+        value: 'tb'
+      },
+      {
+        text: 'petabytes',
+        value: 'pb'
+      },
+    ];
+    // TODO: clean up this regex pattern
+    this.pipelineIdPattern = /[a-zA-Z_][a-zA-Z0-9_\-]*/;
+
+    const pipelineWorkers = settings['pipeline.workers']
+      ? settings['pipeline.workers']
+      : 1;
+
     this.state = {
-      pipeline: { }
+      pipeline: {
+        id,
+        description,
+        pipeline,
+        settings: {
+          'pipeline.batch.delay': settings['pipeline.batch.delay'],
+          'pipeline.batch.size': settings['pipeline.batch.size'],
+          'pipeline.workers': pipelineWorkers,
+          'queue.checkpoint.writes': settings['queue.checkpoint.writes'],
+          'queue.max_bytes.number': settings['queue.max_bytes.number'],
+          'queue.max_bytes.units': settings['queue.max_bytes.units'],
+          'queue.type': settings['queue.type'],
+        }
+      },
+      pipelineIdErrors: [],
+      showPipelineIdError: false,
     };
   }
 
-  getFormLabelWithTooltipIcon(labelText, tooltipText) {
-    return (
-      <div>
-        <span>{labelText}</span>
-        <EuiIconTip content={tooltipText} type="questionInCircle" />
-      </div>
-    );
+  onPipelineIdChange = ({ target: { value } }) => {
+    const pipelineIdErrors = [];
+    if (!value) {
+      pipelineIdErrors.push(PIPELINE_ID_REQUIRED_ERR_MSG);
+    }
+    if (!value.match(this.pipelineIdPattern)) {
+      pipelineIdErrors.push(PIPELINE_ID_FORMAT_ERR_MSG);
+    }
+
+    this.setState({
+      pipelineIdErrors,
+      showPipelineIdError: !!pipelineIdErrors.length,
+      pipeline: {
+        ...this.state.pipeline,
+        id: value,
+      }
+    });
+  }
+
+  onClose = () => {
+    console.log('hi');
+    const { kbnUrl } = this.props;
+
+    console.log(kbnUrl);
+    kbnUrl.change('/management/logstash/pipelines', {});
+  }
+
+  onPipelineDescriptionChange = ({ target: { value } }) => {
+    this.setState({
+      pipeline: {
+        description: value,
+      }
+    });
+  }
+
+  onPipelineChange = e => {
+    this.setState({
+      pipeline: {
+        ...this.state.pipeline,
+        pipeline: e,
+      }
+    });
+  }
+
+  handleNumberChange = (settingName, value) => {
+    const numberValue = parseInt(value, 10);
+    console.log(`number value: ${numberValue}, value: ${value}`);
+    this.handleSettingChange(settingName, isNaN(numberValue) ? value : numberValue);
+  }
+
+  handleSettingChange = (settingName, value) => {
+    console.log(`setting name: ${settingName}, value: ${value}`);
+    const settings = { ...this.state.pipeline.settings };
+    settings[settingName] = value;
+    this.setState({
+      pipeline: {
+        ...this.state.pipeline,
+        settings,
+      }
+    });
   }
 
   render() {
@@ -61,77 +207,127 @@ export class PipelineEditor extends React.Component {
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton>
+              <EuiButton onClick={this.onClose}>
                 Cancel
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiForm>
+          <EuiForm
+            isInvalid={this.state.showPipelineIdError}
+            error={this.state.pipelineIdErrors}
+          >
             <EuiFormRow
               fullWidth
               label="Pipeline ID"
             >
-              <EuiFieldText fullWidth name="pipelineId" />
+              <EuiFieldText
+                fullWidth
+                name="pipelineId"
+                onBlur={this.onPipelineIdChange}
+                onChange={this.onPipelineIdChange}
+                isInvalid={this.state.showPipelineIdError}
+                value={this.state.pipeline.id}
+              />
             </EuiFormRow>
             <EuiFormRow
               fullWidth
               label="Description"
             >
-              <EuiFieldText fullWidth name="pipelineDescription" />
+              <EuiFieldText
+                fullWidth
+                name="pipelineDescription"
+                onChange={this.onPipelineDescriptionChange}
+                value={this.state.pipeline.description}
+              />
             </EuiFormRow>
             <EuiFormRow
               fullWidth
               label="Pipeline"
             >
               <EuiCodeEditor
+                onChange={this.onPipelineChange}
+                setOptions={{
+                  minLines: 25,
+                  maxLines: Infinity
+                }}
+                value={this.state.pipeline.pipeline}
                 width={'1017'}
               />
             </EuiFormRow>
             <EuiFormRow
               label={
-                this.getFormLabelWithTooltipIcon(
+                getFormLabelWithTooltipIcon(
                   'Pipeline workers',
                   TOOLTIPS.settings['pipeline.workers']
                 )}
             >
-              <EuiFieldNumber compressed />
+              <EuiFieldNumber
+                onChange={e => this.handleNumberChange('pipeline.workers', e.target.value)}
+                value={this.state.pipeline.settings['pipeline.workers']}
+              />
             </EuiFormRow>
             <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <EuiFormRow
-                  label={
-                    this.getFormLabelWithTooltipIcon(
-                      'Pipeline batch size',
-                      TOOLTIPS.settings['pipeline.batch.size']
-                    )}
-                >
-                  <EuiFieldNumber />
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFormRow label={
-                  this.getFormLabelWithTooltipIcon(
-                    'Pipeline batch delay',
-                    TOOLTIPS.settings['pipeline.batch.delay']
-                  )}
-                >
-                  <EuiFieldNumber />
-                </EuiFormRow>
-              </EuiFlexItem>
+              <FlexItemSetting
+                formRowLabelText="Pipeline batch size"
+                formRowTooltipText={TOOLTIPS.settings['pipeline.batch.size']}
+              >
+                <EuiFieldNumber
+                  onChange={e => this.handleNumberChange('pipeline.batch.size', e.target.value)}
+                  value={this.state.pipeline.settings['pipeline.batch.size']}
+                />
+              </FlexItemSetting>
+              <FlexItemSetting
+                formRowLabelText="Pipeline batch delay"
+                formRowTooltipText={TOOLTIPS.settings['pipeline.batch.delay']}
+              >
+                <EuiFieldNumber
+                  onChange={e => this.handleNumberChange('pipeline.batch.delay', e.target.value)}
+                  value={this.state.pipeline.settings['pipeline.batch.delay']}
+                />
+              </FlexItemSetting>
             </EuiFlexGroup>
             <EuiFlexGroup>
-              <EuiFlexItem>
-                TODO: Add additional fields here
-              </EuiFlexItem>
+              <FlexItemSetting
+                formRowLabelText="Queue type"
+                formRowTooltipText={TOOLTIPS.settings['queue.type']}
+              >
+                <EuiSelect
+                  onChange={e => this.handleSettingChange('queue.type', e.target.value)}
+                  options={this.queueTypes}
+                  value={this.state.queueType}
+                />
+              </FlexItemSetting>
+              <FlexItemSetting
+                formRowLabelText="Queue max bytes"
+                formRowTooltipText={TOOLTIPS.settings['queue.max_bytes']}
+              >
+                <EuiFieldNumber
+                  onChange={e => this.handleNumberChange('queue.max_bytes.number', e.target.value)}
+                  value={this.state.pipeline.settings['queue.max_bytes.number']}
+                />
+              </FlexItemSetting>
+              <FlexItemSetting>
+                <EuiSelect
+                  onChange={e => this.handleSettingChange('queue.max_bytes.units', e.target.value)}
+                  options={this.units}
+                  value={this.state.pipeline.settings['queue.max_bytes.units']}
+                />
+              </FlexItemSetting>
+              <FlexItemSetting
+                formRowLabelText="Queue checkpoint writes"
+                formRowTooltipText={TOOLTIPS.settings['queue.checkpoint.writes']}
+              >
+                <EuiFieldNumber
+                  onChange={e => this.handleNumberChange('queue.checkpoint.writes', e.target.value)}
+                  value={this.state.pipeline.settings['queue.checkpoint.writes']}
+                />
+              </FlexItemSetting>
             </EuiFlexGroup>
           </EuiForm>
         </EuiPageContent>
       </EuiPage>
     );
   }
-  // onPipelineSave(username) {
-
-  // }
 }
 
 // import { isEmpty } from 'lodash';
@@ -149,22 +345,27 @@ import 'ace';
 
 const app = uiModules.get('xpack/logstash');
 
-app.directive('pipelineEdit', function () {
+app.directive('pipelineEdit', function ($injector) {
   // const pipelineService = $injector.get('pipelineService');
   // const licenseService = $injector.get('logstashLicenseService');
   // const securityService = $injector.get('logstashSecurityService');
-  // const kbnUrl = $injector.get('kbnUrl');
+  const kbnUrl = $injector.get('kbnUrl');
   // const confirmModal = $injector.get('confirmModal');
 
   return {
     restrict: 'E',
     link: (scope, el) => {
-      render(<PipelineEditor />, el[0]);
+      console.log(kbnUrl);
+      render(
+        <PipelineEditor
+          pipeline={scope.pipeline}
+          kbnUrl={kbnUrl}
+        />, el[0]);
     },
     // template: template,
-    // scope: {
-    //   pipeline: '=',
-    // },
+    scope: {
+      pipeline: '=',
+    },
     // bindToController: true,
     // controllerAs: 'pipelineEdit',
     // controller: class PipelineEditController extends InitAfterBindingsWorkaround {
