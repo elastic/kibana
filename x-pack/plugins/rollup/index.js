@@ -22,6 +22,9 @@ export function rollup(kibana)  {
       visualize: [
         'plugins/rollup/visualize',
       ],
+      search: [
+        'plugins/rollup/search',
+      ],
     },
     init: function (server) {
       registerLicenseChecker(server);
