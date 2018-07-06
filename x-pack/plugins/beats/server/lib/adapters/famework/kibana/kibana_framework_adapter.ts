@@ -19,18 +19,25 @@ import {
 
 export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
   public version: string;
-
   private server: Server;
+  private cryptoHash: string | null;
 
   constructor(hapiServer: Server) {
     this.server = hapiServer;
     this.version = hapiServer.plugins.kibana.status.plugin.version;
+    this.cryptoHash = null;
+
+    this.validateConfig();
   }
 
   public getSetting(settingPath: string) {
-    // TODO type check this properly
+    // TODO type check server properly
+    if (settingPath === 'xpack.beats.encryptionKey') {
+      // @ts-ignore
+      return this.server.config().get(settingPath) || this.cryptoHash;
+    }
     // @ts-ignore
-    return this.server.config().get(settingPath);
+    return this.server.config().get(settingPath) || this.cryptoHash;
   }
 
   public exposeStaticDir(urlPath: string, dir: string): void {
@@ -78,5 +85,18 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     const { callWithRequest } = elasticsearch.getCluster('data');
     const fields = await callWithRequest(internalRequest, ...rest);
     return fields;
+  }
+
+  private validateConfig() {
+    // @ts-ignore
+    const config = this.server.config();
+    const encryptionKey = config.get('xpack.beats.encryptionKey');
+
+    if (!encryptionKey) {
+      this.server.log(
+        'Using a default encryption key for xpack.beats.encryptionKey. It is recommended that you set xpack.beats.encryptionKey in kibana.yml with a unique token'
+      );
+      this.cryptoHash = 'xpack_beats_default_encryptionKey';
+    }
   }
 }
