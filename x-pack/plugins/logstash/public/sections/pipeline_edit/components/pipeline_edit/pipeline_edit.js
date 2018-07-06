@@ -70,6 +70,7 @@ export class PipelineEditor extends React.Component {
       pipeline,
       settings,
     } = this.props.pipeline;
+
     this.queueTypes = ['memory', 'persisted'].map(createOptions);
     this.units = [
       {
@@ -143,12 +144,17 @@ export class PipelineEditor extends React.Component {
     });
   }
 
-  onClose = () => {
-    console.log('hi');
-    const { kbnUrl } = this.props;
+  onClose = async () => {
+    await this.props.close();
+  }
 
-    console.log(kbnUrl);
-    kbnUrl.change('/management/logstash/pipelines', {});
+  onPipelineSave = async () => {
+    const { pipelineService } = this.props;
+    console.log(this.state.pipeline);
+    const res = await pipelineService.savePipeline(this.state.pipeline)
+      .then(stuff => console.log(stuff))
+      .catch(err => console.log(err));
+    console.log(res);
   }
 
   onPipelineDescriptionChange = ({ target: { value } }) => {
@@ -202,7 +208,7 @@ export class PipelineEditor extends React.Component {
             justifyContent="flexEnd"
           >
             <EuiFlexItem grow={false}>
-              <EuiButton fill>
+              <EuiButton fill onClick={this.onPipelineSave}>
                 Create and deploy
               </EuiButton>
             </EuiFlexItem>
@@ -346,20 +352,29 @@ import 'ace';
 const app = uiModules.get('xpack/logstash');
 
 app.directive('pipelineEdit', function ($injector) {
-  // const pipelineService = $injector.get('pipelineService');
+  const pipelineService = $injector.get('pipelineService');
   // const licenseService = $injector.get('logstashLicenseService');
-  // const securityService = $injector.get('logstashSecurityService');
+  const securityService = $injector.get('logstashSecurityService');
   const kbnUrl = $injector.get('kbnUrl');
+  const shieldUser = $injector.get('ShieldUser');
   // const confirmModal = $injector.get('confirmModal');
 
   return {
     restrict: 'E',
-    link: (scope, el) => {
-      console.log(kbnUrl);
+    link: async (scope, el) => {
+      const close = () => scope.$evalAsync(kbnUrl.change('/management/logstash/pipelines', {}));
+
+      const userResource = securityService.isSecurityEnabled
+        ? await shieldUser.getCurrent().$promise
+        : null;
+
       render(
         <PipelineEditor
-          pipeline={scope.pipeline}
           kbnUrl={kbnUrl}
+          close={close}
+          username={userResource.username}
+          pipeline={scope.pipeline}
+          pipelineService={pipelineService}
         />, el[0]);
     },
     // template: template,
