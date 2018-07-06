@@ -21,6 +21,7 @@ export function rollup(kibana)  {
       ],
       visualize: [
         'plugins/rollup/vis_type_agg_filter',
+        'plugins/rollup/search',
       ],
     },
     init: function (server) {
