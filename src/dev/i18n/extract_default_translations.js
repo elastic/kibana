@@ -18,10 +18,13 @@
  */
 
 import { resolve } from 'path';
+import { formats } from '@kbn/i18n';
+import JSON5 from 'json5';
 
 import { extractHtmlMessages } from './extract_html_messages';
 import { extractCodeMessages } from './extract_code_messages';
 import { extractJadeMessages } from './extract_jade_messages';
+import { extractHandlebarsMessages } from './extract_handlebras_messages';
 import {
   globAsync,
   makeDirAsync,
@@ -43,12 +46,12 @@ function addMessageToMap(targetMap, key, value) {
 }
 
 export async function extractDefaultTranslations(inputPath) {
-  const entries = await globAsync('*.{js,jsx,jade,ts,tsx,html}', {
+  const entries = await globAsync('*.{js,jsx,jade,ts,tsx,html,hbs}', {
     cwd: inputPath,
     matchBase: true,
   });
 
-  const { htmlEntries, codeEntries, jadeEntries } = entries.reduce(
+  const { htmlEntries, codeEntries, jadeEntries, hbsEntries } = entries.reduce(
     (paths, entry) => {
       const resolvedPath = resolve(inputPath, entry);
 
@@ -56,13 +59,15 @@ export async function extractDefaultTranslations(inputPath) {
         paths.htmlEntries.push(resolvedPath);
       } else if (resolvedPath.endsWith('.jade')) {
         paths.jadeEntries.push(resolvedPath);
+      } else if (resolvedPath.endsWith('.hbs')) {
+        paths.hbsFiles.push(resolvedPath);
       } else {
         paths.codeEntries.push(resolvedPath);
       }
 
       return paths;
     },
-    { htmlEntries: [], codeEntries: [], jadeEntries: [] }
+    { htmlEntries: [], codeEntries: [], jadeEntries: [], hbsFiles: [] }
   );
 
   const defaultMessagesMap = new Map();
@@ -72,6 +77,7 @@ export async function extractDefaultTranslations(inputPath) {
       [htmlEntries, extractHtmlMessages],
       [codeEntries, extractCodeMessages],
       [jadeEntries, extractJadeMessages],
+      [hbsEntries, extractHandlebarsMessages],
     ].map(async ([entries, extractFunction]) => {
       // If some file contains an error, we cannot handle it until all files are read.
       // TODO: move files reading to "extract*" async generators after async iterators implementation (for-await-of syntax)
@@ -98,7 +104,7 @@ export async function extractDefaultTranslations(inputPath) {
     })
   );
 
-  let jsonBuffer = Buffer.from('{\n');
+  let jsonBuffer = Buffer.from(JSON5.stringify(formats, null, 2).slice(0, -1));
 
   const defaultMessages = [...defaultMessagesMap].sort(([key1], [key2]) => {
     return key1 < key2 ? -1 : 1;
