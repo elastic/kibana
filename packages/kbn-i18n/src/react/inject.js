@@ -17,17 +17,10 @@
  * under the License.
  */
 
-export {
-  intlShape,
-  FormattedDate,
-  FormattedTime,
-  FormattedRelative,
-  FormattedNumber,
-  FormattedPlural,
-  FormattedMessage,
-  FormattedHTMLMessage,
-} from 'react-intl';
+/**
+ * HOC is used for injecting intl prop into wrapped component
+ * and encapsulate direct work with React context.
+ * More docs and examples can be found here https://github.com/yahoo/react-intl/wiki/API#injection-api
+ */
 
-export { I18nProvider } from './provider';
-export { I18nContext } from './context';
-export { injectI18n } from './inject';
+export { injectIntl as injectI18n } from 'react-intl';

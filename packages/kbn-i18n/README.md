@@ -280,6 +280,28 @@ const MyComponent = () => (
 );
 ```
 
+Library provides an API to inject the imperative formatting API into a React component via its props using `injectI18n` HOC. This should be used when your React component needs to format data to a string value where a React element is not suitable; e.g., a `title` or `aria` attribute. In order to use it you should wrap your component into `injectI18n` function. The formatting API will be provided to the wrapped component via `props.intl`.
+
+```js
+import React from 'react';
+import { ReactI18n } from '@kbn/i18n';
+
+const { injectI18n } = ReactI18n;
+
+const MyComponentContent = ({ intl }) => (
+  <input
+    type="text"
+    placeholder={intl.formatMessage({
+      id: 'KIBANA-MANAGEMENT-OBJECTS-SEARCH_PLACEHOLDER',
+      defaultMessage: 'Search',
+    })}
+  />
+);
+
+export const MyComponent = injectI18n(MyComponentContent);
+```
+
+
 ## Angular
 
 Angular wrapper has 4 entities: translation `provider`, `service`, `directive`
