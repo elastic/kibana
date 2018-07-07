@@ -36,8 +36,8 @@ function validateElArg(el: HTMLElement) {
   return $el.get(0);
 }
 
-function getSize(el: HTMLElement | null): [number, number] | null {
-  return el === null ? null : [el.clientWidth, el.clientHeight];
+function getSize(el: HTMLElement): [number, number] {
+  return [el.clientWidth, el.clientHeight];
 }
 
 /**
@@ -82,8 +82,8 @@ export class ResizeChecker extends EventEmitter {
     // the width and height of the element that we expect to see
     // on the next resize notification. If it matches the size at
     // the time of starting observing then it we will be ignored.
-    // We now that observer and el are not null since we are not yet destroyed.
-    this.expectedSize = getSize(this.el);
+    // We know that observer and el are not null since we are not yet destroyed.
+    this.expectedSize = getSize(this.el!);
     this.observer!.observe(this.el!);
   }
 
@@ -95,7 +95,9 @@ export class ResizeChecker extends EventEmitter {
     try {
       block();
     } finally {
-      this.expectedSize = getSize(this.el);
+      if (this.el) {
+        this.expectedSize = getSize(this.el);
+      }
     }
   }
 
