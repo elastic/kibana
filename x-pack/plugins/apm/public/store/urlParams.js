@@ -38,9 +38,8 @@ function urlParams(state = {}, action) {
         detailTab,
         spanId,
         page,
-        sortBy,
-        sortOrder,
-        q,
+        sortDirection,
+        sortField,
         kuery
       } = toQuery(action.location.search);
 
@@ -48,9 +47,8 @@ function urlParams(state = {}, action) {
         ...state,
 
         // query params
-        q,
-        sortBy,
-        sortOrder,
+        sortDirection,
+        sortField,
         page: toNumber(page) || 0,
         transactionId,
         detailTab,

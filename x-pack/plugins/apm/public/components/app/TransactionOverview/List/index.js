@@ -16,7 +16,6 @@ import {
   asDecimal,
   tpmUnit
 } from '../../../../utils/formatters';
-// import ImpactTooltip from './ImpactTooltip';
 
 import { fontFamilyCode, truncate } from '../../../../style/variables';
 import ImpactSparkline from './ImpactSparkLine';
@@ -38,7 +37,7 @@ const TransactionNameLink = styled(RelativeLink)`
   font-family: ${fontFamilyCode};
 `;
 
-export class List extends Component {
+class List extends Component {
   state = {
     page: {
       index: 0,

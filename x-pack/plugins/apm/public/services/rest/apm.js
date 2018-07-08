@@ -165,9 +165,8 @@ export async function loadErrorGroupList({
   end,
   kuery,
   size,
-  q,
-  sortBy,
-  sortOrder
+  sortField,
+  sortDirection
 }) {
   return callApi({
     pathname: `/api/apm/services/${serviceName}/errors`,
@@ -175,9 +174,8 @@ export async function loadErrorGroupList({
       start,
       end,
       size,
-      q,
-      sortBy,
-      sortOrder,
+      sortField,
+      sortDirection,
       esFilterQuery: await getEncodedEsQuery(kuery)
     }
   });
