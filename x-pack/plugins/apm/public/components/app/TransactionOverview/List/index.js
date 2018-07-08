@@ -119,6 +119,7 @@ class List extends Component {
 
     return (
       <EuiBasicTable
+        noItemsMessage="No transactions found"
         items={paginatedItems}
         columns={columns}
         pagination={{

@@ -189,7 +189,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
               <span
                 className="euiTableCellContent__text"
               >
-                No items found
+                No errors found
               </span>
             </div>
           </td>
