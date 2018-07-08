@@ -12,7 +12,6 @@ describe('root reducer', () => {
       location: { hash: '', pathname: '', search: '' },
       reactReduxRequest: {},
       sorting: {
-        service: { descending: false, key: 'serviceName' },
         transaction: { descending: true, key: 'impact' }
       },
       urlParams: {}

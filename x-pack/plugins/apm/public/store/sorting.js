@@ -10,16 +10,11 @@ const INITIAL_STATE = {
   transaction: {
     key: 'impact',
     descending: true
-  },
-  service: {
-    key: 'serviceName',
-    descending: false
   }
 };
 
 const INITIALLY_DESCENDING = {
-  transaction: ['name'],
-  service: ['serviceName']
+  transaction: ['name']
 };
 
 function getSorting(state, action) {
@@ -48,10 +43,4 @@ export const changeTransactionSorting = key => ({
   type: SORTING_CHANGE,
   key,
   section: 'transaction'
-});
-
-export const changeServiceSorting = key => ({
-  type: SORTING_CHANGE,
-  key,
-  section: 'service'
 });
