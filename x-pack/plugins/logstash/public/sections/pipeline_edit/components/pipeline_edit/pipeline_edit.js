@@ -65,11 +65,14 @@ export class PipelineEditor extends React.Component {
     super(props);
 
     const {
-      id,
-      description,
-      pipeline,
-      settings,
-    } = this.props.pipeline;
+      pipeline: {
+        id,
+        description,
+        pipeline,
+        settings,
+      },
+      username,
+    } = this.props;
 
     this.queueTypes = ['memory', 'persisted'].map(createOptions);
     this.units = [
@@ -118,7 +121,8 @@ export class PipelineEditor extends React.Component {
           'queue.max_bytes.number': settings['queue.max_bytes.number'],
           'queue.max_bytes.units': settings['queue.max_bytes.units'],
           'queue.type': settings['queue.type'],
-        }
+        },
+        username
       },
       pipelineIdErrors: [],
       showPipelineIdError: false,
@@ -148,18 +152,25 @@ export class PipelineEditor extends React.Component {
     await this.props.close();
   }
 
-  onPipelineSave = async () => {
+  onPipelineSave = () => {
     const { pipelineService } = this.props;
-    console.log(this.state.pipeline);
-    const res = await pipelineService.savePipeline(this.state.pipeline)
-      .then(stuff => console.log(stuff))
-      .catch(err => console.log(err));
-    console.log(res);
+    return pipelineService.savePipeline({
+      id: this.state.pipeline.id,
+      upstreamJSON: this.state.pipeline
+    })
+      .then(() => {
+        // TODO: Add toast success
+        this.onClose();
+      })
+      .catch(() => {
+        // TODO: check license validity
+      });
   }
 
   onPipelineDescriptionChange = ({ target: { value } }) => {
     this.setState({
       pipeline: {
+        ...this.state.pipeline,
         description: value,
       }
     });
@@ -300,7 +311,7 @@ export class PipelineEditor extends React.Component {
                 <EuiSelect
                   onChange={e => this.handleSettingChange('queue.type', e.target.value)}
                   options={this.queueTypes}
-                  value={this.state.queueType}
+                  value={this.state.pipeline.settings['queue.type']}
                 />
               </FlexItemSetting>
               <FlexItemSetting
