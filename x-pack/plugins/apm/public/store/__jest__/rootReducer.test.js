@@ -11,9 +11,6 @@ describe('root reducer', () => {
     expect(reducer(undefined, {})).toEqual({
       location: { hash: '', pathname: '', search: '' },
       reactReduxRequest: {},
-      sorting: {
-        transaction: { descending: true, key: 'impact' }
-      },
       urlParams: {}
     });
   });

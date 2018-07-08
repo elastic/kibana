@@ -23,6 +23,7 @@ function formatNumber(value) {
   return formatted <= 0.1 ? '< 0.1' : formatted;
 }
 
+// TODO: duplicated
 function paginateItems({ items, pageIndex, pageSize }) {
   return items.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
 }
@@ -101,7 +102,7 @@ class List extends Component {
       this.state.sort.direction
     );
 
-    const items = paginateItems({
+    const paginatedItems = paginateItems({
       items: sortedItems,
       pageIndex: this.state.page.index,
       pageSize: this.state.page.size
@@ -110,7 +111,7 @@ class List extends Component {
     return (
       <EuiBasicTable
         noItemsMessage={this.props.noItemsMessage}
-        items={items}
+        items={paginatedItems}
         columns={columns}
         pagination={{
           pageIndex: this.state.page.index,

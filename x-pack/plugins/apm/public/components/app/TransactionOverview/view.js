@@ -130,9 +130,9 @@ class TransactionOverview extends Component {
             return (
               <List
                 agentName={serviceDetails.agentName}
+                items={transactionList}
                 serviceName={serviceName}
                 type={transactionType}
-                items={transactionList}
               />
             );
           }}
