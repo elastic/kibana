@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BeatTag, CMTagsAdapter, FrameworkRequest } from '../../lib';
+import { BeatTag } from '../../../../common/domain_types';
+import { FrameworkRequest } from '../famework/adapter_types';
+import { CMTagsAdapter } from './adapter_types';
 
 export class MemoryTagsAdapter implements CMTagsAdapter {
   private tagsDB: BeatTag[] = [];

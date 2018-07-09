@@ -4,24 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
-
 import { uniq } from 'lodash';
 import { findNonExistentItems } from '../../utils/find_non_existent_items';
 
+import { CMBeat } from '../../../common/domain_types';
 import {
-  CMAssignmentReturn,
-  CMBeat,
   CMBeatsAdapter,
-  CMDomainLibs,
-  CMRemovalReturn,
   CMTagAssignment,
-  FrameworkRequest,
-} from '../lib';
+} from '../adapters/beats/adapter_types';
+import { FrameworkRequest } from '../adapters/famework/adapter_types';
+
+import { CMAssignmentReturn } from '../adapters/beats/adapter_types';
+import { CMDomainLibs } from '../lib';
+import { CMRemovalReturn } from './../adapters/beats/adapter_types';
 
 export class CMBeatsDomain {
   private adapter: CMBeatsAdapter;

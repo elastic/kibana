@@ -8,7 +8,7 @@ import {
   BackendFrameworkAdapter,
   FrameworkRouteOptions,
   WrappableRequest,
-} from '../../lib';
+} from './adapter_types';
 
 import { IStrictReply, Server } from 'hapi';
 import { wrapRequest } from '../../../utils/wrap_request';

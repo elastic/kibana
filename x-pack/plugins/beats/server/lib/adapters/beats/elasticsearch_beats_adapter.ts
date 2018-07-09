@@ -7,13 +7,10 @@
 import { flatten, get as _get, omit } from 'lodash';
 import moment from 'moment';
 import { INDEX_NAMES } from '../../../../common/constants';
-import {
-  CMBeat,
-  CMBeatsAdapter,
-  CMTagAssignment,
-  DatabaseAdapter,
-  FrameworkRequest,
-} from '../../lib';
+import { CMBeat } from '../../../../common/domain_types';
+import { DatabaseAdapter } from '../database/adapter_types';
+import { FrameworkRequest } from '../famework/adapter_types';
+import { CMBeatsAdapter, CMTagAssignment } from './adapter_types';
 
 export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
   private database: DatabaseAdapter;

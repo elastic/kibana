@@ -7,12 +7,9 @@
 import { omit } from 'lodash';
 import moment from 'moment';
 
-import {
-  CMBeat,
-  CMBeatsAdapter,
-  CMTagAssignment,
-  FrameworkRequest,
-} from '../../lib';
+import { CMBeat } from '../../../../common/domain_types';
+import { FrameworkRequest } from '../famework/adapter_types';
+import { CMBeatsAdapter, CMTagAssignment } from './adapter_types';
 
 export class MemoryBeatsAdapter implements CMBeatsAdapter {
   private beatsDB: CMBeat[];

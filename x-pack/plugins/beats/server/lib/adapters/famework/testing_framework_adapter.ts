@@ -7,12 +7,13 @@
 import { Client } from 'elasticsearch';
 import { Request } from 'hapi';
 import { get } from 'lodash';
+
 import {
   BackendFrameworkAdapter,
   FrameworkRequest,
   FrameworkRouteOptions,
   WrappableRequest,
-} from '../../lib';
+} from './adapter_types';
 
 interface TestSettings {
   enrollmentTokensTtlInSeconds: number;

@@ -8,8 +8,11 @@ import { timingSafeEqual } from 'crypto';
 import { sign as signToken, verify as verifyToken } from 'jsonwebtoken';
 import moment from 'moment';
 import uuid from 'uuid';
-import { CMTokensAdapter, FrameworkRequest } from '../lib';
-import { BackendFrameworkAdapter } from '../lib';
+import {
+  BackendFrameworkAdapter,
+  FrameworkRequest,
+} from '../adapters/famework/adapter_types';
+import { CMTokensAdapter } from '../adapters/tokens/adapter_types';
 
 const RANDOM_TOKEN_1 = 'b48c4bda384a40cb91c6eb9b8849e77f';
 const RANDOM_TOKEN_2 = '80a3819e3cd64f4399f1d4886be7a08b';

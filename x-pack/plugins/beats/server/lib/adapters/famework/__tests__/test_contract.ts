@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from 'expect.js';
-import { BackendFrameworkAdapter } from '../../../lib';
+import { BackendFrameworkAdapter } from '../adapter_types';
 
 interface ContractConfig {
   adapter?: BackendFrameworkAdapter;

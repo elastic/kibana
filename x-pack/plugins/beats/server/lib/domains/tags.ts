@@ -6,7 +6,10 @@
 
 import { intersection, uniq, values } from 'lodash';
 import { UNIQUENESS_ENFORCING_TYPES } from '../../../common/constants';
-import { CMTagsAdapter, ConfigurationBlock, FrameworkRequest } from '../lib';
+import { ConfigurationBlock } from '../../../common/domain_types';
+import { FrameworkRequest } from '../adapters/famework/adapter_types';
+
+import { CMTagsAdapter } from '../adapters/tags/adapter_types';
 import { entries } from './../../utils/polyfills';
 
 export class CMTagsDomain {
