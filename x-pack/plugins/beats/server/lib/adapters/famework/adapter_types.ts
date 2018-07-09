@@ -9,13 +9,13 @@ export interface BackendFrameworkAdapter {
   version: string;
   getSetting(settingPath: string): any;
   exposeStaticDir(urlPath: string, dir: string): void;
-  registerRoute<RouteRequest extends WrappableRequest, RouteResponse>(
+  registerRoute<RouteRequest extends FrameworkWrappableRequest, RouteResponse>(
     route: FrameworkRouteOptions<RouteRequest, RouteResponse>
   ): void;
 }
 
 export interface FrameworkRequest<
-  InternalRequest extends WrappableRequest = WrappableRequest
+  InternalRequest extends FrameworkWrappableRequest = FrameworkWrappableRequest
 > {
   [internalFrameworkRequest]: InternalRequest;
   headers: InternalRequest['headers'];
@@ -26,7 +26,7 @@ export interface FrameworkRequest<
 }
 
 export interface FrameworkRouteOptions<
-  RouteRequest extends WrappableRequest,
+  RouteRequest extends FrameworkWrappableRequest,
   RouteResponse
 > {
   path: string;
@@ -40,14 +40,14 @@ export interface FrameworkRouteOptions<
 }
 
 export type FrameworkRouteHandler<
-  RouteRequest extends WrappableRequest,
+  RouteRequest extends FrameworkWrappableRequest,
   RouteResponse
 > = (
   request: FrameworkRequest<RouteRequest>,
   reply: IStrictReply<RouteResponse>
 ) => void;
 
-export interface WrappableRequest<
+export interface FrameworkWrappableRequest<
   Payload = any,
   Params = any,
   Query = any,

@@ -8,39 +8,39 @@ import { FrameworkRequest } from '../famework/adapter_types';
 export interface DatabaseAdapter {
   putTemplate(
     req: FrameworkRequest | null,
-    params: PutTemplateParams
+    params: DatabasePutTemplateParams
   ): Promise<any>;
   get<Source>(
     req: FrameworkRequest | null,
-    params: GetParams
-  ): Promise<GetDocumentResponse<Source>>;
+    params: DatabaseGetParams
+  ): Promise<DatabaseGetDocumentResponse<Source>>;
   create(
     req: FrameworkRequest | null,
-    params: CreateDocumentParams
-  ): Promise<CreateDocumentResponse>;
+    params: DatabaseCreateDocumentParams
+  ): Promise<DatabaseCreateDocumentResponse>;
   index<T>(
     req: FrameworkRequest | null,
-    params: IndexDocumentParams<T>
-  ): Promise<IndexDocumentResponse>;
+    params: DatabaseIndexDocumentParams<T>
+  ): Promise<DatabaseIndexDocumentResponse>;
   delete(
     req: FrameworkRequest | null,
-    params: DeleteDocumentParams
-  ): Promise<DeleteDocumentResponse>;
+    params: DatabaseDeleteDocumentParams
+  ): Promise<DatabaseDeleteDocumentResponse>;
   mget<T>(
     req: FrameworkRequest | null,
-    params: MGetParams
-  ): Promise<MGetResponse<T>>;
+    params: DatabaseMGetParams
+  ): Promise<DatabaseMGetResponse<T>>;
   bulk(
     req: FrameworkRequest | null,
-    params: BulkIndexDocumentsParams
-  ): Promise<BulkResponse>;
+    params: DatabaseBulkIndexDocumentsParams
+  ): Promise<DatabaseBulkResponse>;
   search<T>(
     req: FrameworkRequest | null,
-    params: SearchParams
-  ): Promise<SearchResponse<T>>;
+    params: DatabaseSearchParams
+  ): Promise<DatabaseSearchResponse<T>>;
 }
 
-export interface KbnElasticSearchCluster {
+export interface DatabaseKbnESCluster {
   callWithInternalUser(esMethod: string, options: {}): Promise<any>;
   callWithRequest(
     req: FrameworkRequest,
@@ -49,19 +49,19 @@ export interface KbnElasticSearchCluster {
   ): Promise<any>;
 }
 
-export interface KbnElasticSearch {
-  getCluster(clusterName: string): KbnElasticSearchCluster;
+export interface DatabaseKbnESPlugin {
+  getCluster(clusterName: string): DatabaseKbnESCluster;
 }
 
-export interface SearchParams extends GenericParams {
+export interface DatabaseSearchParams extends DatabaseGenericParams {
   analyzer?: string;
   analyzeWildcard?: boolean;
   defaultOperator?: DefaultOperator;
   df?: string;
   explain?: boolean;
-  storedFields?: NameList;
-  docvalueFields?: NameList;
-  fielddataFields?: NameList;
+  storedFields?: DatabaseNameList;
+  docvalueFields?: DatabaseNameList;
+  fielddataFields?: DatabaseNameList;
   from?: number;
   ignoreUnavailable?: boolean;
   allowNoIndices?: boolean;
@@ -70,16 +70,16 @@ export interface SearchParams extends GenericParams {
   lowercaseExpandedTerms?: boolean;
   preference?: string;
   q?: string;
-  routing?: NameList;
+  routing?: DatabaseNameList;
   scroll?: string;
   searchType?: 'query_then_fetch' | 'dfs_query_then_fetch';
   size?: number;
-  sort?: NameList;
-  _source?: NameList;
-  _sourceExclude?: NameList;
-  _sourceInclude?: NameList;
+  sort?: DatabaseNameList;
+  _source?: DatabaseNameList;
+  _sourceExclude?: DatabaseNameList;
+  _sourceInclude?: DatabaseNameList;
   terminateAfter?: number;
-  stats?: NameList;
+  stats?: DatabaseNameList;
   suggestField?: string;
   suggestMode?: 'missing' | 'popular' | 'always';
   suggestSize?: number;
@@ -88,15 +88,15 @@ export interface SearchParams extends GenericParams {
   trackScores?: boolean;
   version?: boolean;
   requestCache?: boolean;
-  index?: NameList;
-  type?: NameList;
+  index?: DatabaseNameList;
+  type?: DatabaseNameList;
 }
 
-export interface SearchResponse<T> {
+export interface DatabaseSearchResponse<T> {
   took: number;
   timed_out: boolean;
   _scroll_id?: string;
-  _shards: ShardsResponse;
+  _shards: DatabaseShardsResponse;
   hits: {
     total: number;
     max_score: number;
@@ -107,7 +107,7 @@ export interface SearchResponse<T> {
       _score: number;
       _source: T;
       _version?: number;
-      _explanation?: Explanation;
+      _explanation?: DatabaseExplanation;
       fields?: any;
       highlight?: any;
       inner_hits?: any;
@@ -117,20 +117,20 @@ export interface SearchResponse<T> {
   aggregations?: any;
 }
 
-export interface Explanation {
+export interface DatabaseExplanation {
   value: number;
   description: string;
-  details: Explanation[];
+  details: DatabaseExplanation[];
 }
 
-export interface ShardsResponse {
+export interface DatabaseShardsResponse {
   total: number;
   successful: number;
   failed: number;
   skipped: number;
 }
 
-export interface GetDocumentResponse<Source> {
+export interface DatabaseGetDocumentResponse<Source> {
   _index: string;
   _type: string;
   _id: string;
@@ -139,63 +139,66 @@ export interface GetDocumentResponse<Source> {
   _source: Source;
 }
 
-export interface BulkResponse {
+export interface DatabaseBulkResponse {
   took: number;
   errors: boolean;
   items: Array<
-    DeleteDocumentResponse | IndexDocumentResponse | UpdateDocumentResponse
+    | DatabaseDeleteDocumentResponse
+    | DatabaseIndexDocumentResponse
+    | DatabaseUpdateDocumentResponse
   >;
 }
 
-export interface BulkIndexDocumentsParams extends GenericParams {
+export interface DatabaseBulkIndexDocumentsParams
+  extends DatabaseGenericParams {
   waitForActiveShards?: string;
-  refresh?: Refresh;
+  refresh?: DatabaseRefresh;
   routing?: string;
   timeout?: string;
   type?: string;
-  fields?: NameList;
-  _source?: NameList;
-  _sourceExclude?: NameList;
-  _sourceInclude?: NameList;
+  fields?: DatabaseNameList;
+  _source?: DatabaseNameList;
+  _sourceExclude?: DatabaseNameList;
+  _sourceInclude?: DatabaseNameList;
   pipeline?: string;
   index?: string;
 }
 
-export interface MGetParams extends GenericParams {
-  storedFields?: NameList;
+export interface DatabaseMGetParams extends DatabaseGenericParams {
+  storedFields?: DatabaseNameList;
   preference?: string;
   realtime?: boolean;
   refresh?: boolean;
-  _source?: NameList;
-  _sourceExclude?: NameList;
-  _sourceInclude?: NameList;
+  _source?: DatabaseNameList;
+  _sourceExclude?: DatabaseNameList;
+  _sourceInclude?: DatabaseNameList;
   index: string;
   type?: string;
 }
 
-export interface MGetResponse<T> {
-  docs?: Array<GetResponse<T>>;
+export interface DatabaseMGetResponse<T> {
+  docs?: Array<DatabaseGetResponse<T>>;
 }
 
-export interface PutTemplateParams extends GenericParams {
+export interface DatabasePutTemplateParams extends DatabaseGenericParams {
   id: string;
   body: any;
 }
 
-export interface DeleteDocumentParams extends GenericParams {
+export interface DatabaseDeleteDocumentParams extends DatabaseGenericParams {
   waitForActiveShards?: string;
   parent?: string;
-  refresh?: Refresh;
+  refresh?: DatabaseRefresh;
   routing?: string;
   timeout?: string;
   version?: number;
-  versionType?: VersionType;
+  versionType?: DatabaseVersionType;
   index: string;
   type: string;
   id: string;
 }
 
-export interface IndexDocumentResponse {
+export interface DatabaseIndexDocumentResponse {
   found: boolean;
   _index: string;
   _type: string;
@@ -204,7 +207,7 @@ export interface IndexDocumentResponse {
   result: string;
 }
 
-export interface UpdateDocumentResponse {
+export interface DatabaseUpdateDocumentResponse {
   found: boolean;
   _index: string;
   _type: string;
@@ -213,7 +216,7 @@ export interface UpdateDocumentResponse {
   result: string;
 }
 
-export interface DeleteDocumentResponse {
+export interface DatabaseDeleteDocumentResponse {
   found: boolean;
   _index: string;
   _type: string;
@@ -222,7 +225,7 @@ export interface DeleteDocumentResponse {
   result: string;
 }
 
-export interface IndexDocumentParams<T> extends GenericParams {
+export interface DatabaseIndexDocumentParams<T> extends DatabaseGenericParams {
   waitForActiveShards?: string;
   opType?: 'index' | 'create';
   parent?: string;
@@ -232,7 +235,7 @@ export interface IndexDocumentParams<T> extends GenericParams {
   timestamp?: Date | number;
   ttl?: string;
   version?: number;
-  versionType?: VersionType;
+  versionType?: DatabaseVersionType;
   pipeline?: string;
   id?: string;
   index: string;
@@ -240,69 +243,73 @@ export interface IndexDocumentParams<T> extends GenericParams {
   body: T;
 }
 
-export interface GetResponse<T> {
+export interface DatabaseGetResponse<T> {
   found: boolean;
   _source: T;
 }
-export interface CreateDocumentParams extends GenericParams {
+export interface DatabaseCreateDocumentParams extends DatabaseGenericParams {
   waitForActiveShards?: string;
   parent?: string;
-  refresh?: Refresh;
+  refresh?: DatabaseRefresh;
   routing?: string;
   timeout?: string;
   timestamp?: Date | number;
   ttl?: string;
   version?: number;
-  versionType?: VersionType;
+  versionType?: DatabaseVersionType;
   pipeline?: string;
   id?: string;
   index: string;
   type: string;
 }
 
-export interface CreateDocumentResponse {
+export interface DatabaseCreateDocumentResponse {
   created: boolean;
   result: string;
 }
 
-export interface DeleteDocumentParams extends GenericParams {
+export interface DatabaseDeleteDocumentParams extends DatabaseGenericParams {
   waitForActiveShards?: string;
   parent?: string;
-  refresh?: Refresh;
+  refresh?: DatabaseRefresh;
   routing?: string;
   timeout?: string;
   version?: number;
-  versionType?: VersionType;
+  versionType?: DatabaseVersionType;
   index: string;
   type: string;
   id: string;
 }
 
-export interface GetParams extends GenericParams {
-  storedFields?: NameList;
+export interface DatabaseGetParams extends DatabaseGenericParams {
+  storedFields?: DatabaseNameList;
   parent?: string;
   preference?: string;
   realtime?: boolean;
   refresh?: boolean;
   routing?: string;
-  _source?: NameList;
-  _sourceExclude?: NameList;
-  _sourceInclude?: NameList;
+  _source?: DatabaseNameList;
+  _sourceExclude?: DatabaseNameList;
+  _sourceInclude?: DatabaseNameList;
   version?: number;
-  versionType?: VersionType;
+  versionType?: DatabaseVersionType;
   id: string;
   index: string;
   type: string;
 }
 
-export type NameList = string | string[] | boolean;
-export type Refresh = boolean | 'true' | 'false' | 'wait_for' | '';
-export type VersionType = 'internal' | 'external' | 'external_gte' | 'force';
+export type DatabaseNameList = string | string[] | boolean;
+export type DatabaseRefresh = boolean | 'true' | 'false' | 'wait_for' | '';
+export type DatabaseVersionType =
+  | 'internal'
+  | 'external'
+  | 'external_gte'
+  | 'force';
 export type ExpandWildcards = 'open' | 'closed' | 'none' | 'all';
 export type DefaultOperator = 'AND' | 'OR';
-export type Conflicts = 'abort' | 'proceed';
+export type DatabaseConflicts = 'abort' | 'proceed';
 
-export interface GenericParams {
+export interface DatabaseGenericParams {
   requestTimeout?: number;
   maxRetries?: number;
   method?: string;
@@ -311,7 +318,7 @@ export interface GenericParams {
   filterPath?: string | string[];
 }
 
-export interface DeleteDocumentResponse {
+export interface DatabaseDeleteDocumentResponse {
   found: boolean;
   _index: string;
   _type: string;

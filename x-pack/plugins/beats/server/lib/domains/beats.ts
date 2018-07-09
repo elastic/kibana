@@ -9,14 +9,14 @@ import { findNonExistentItems } from '../../utils/find_non_existent_items';
 
 import { CMBeat } from '../../../common/domain_types';
 import {
+  BeatsTagAssignment,
   CMBeatsAdapter,
-  CMTagAssignment,
 } from '../adapters/beats/adapter_types';
 import { FrameworkRequest } from '../adapters/famework/adapter_types';
 
 import { CMAssignmentReturn } from '../adapters/beats/adapter_types';
 import { CMDomainLibs } from '../lib';
-import { CMRemovalReturn } from './../adapters/beats/adapter_types';
+import { BeatsRemovalReturn } from './../adapters/beats/adapter_types';
 
 export class CMBeatsDomain {
   private adapter: CMBeatsAdapter;
@@ -81,8 +81,8 @@ export class CMBeatsDomain {
 
   public async removeTagsFromBeats(
     req: FrameworkRequest,
-    removals: CMTagAssignment[]
-  ): Promise<CMRemovalReturn> {
+    removals: BeatsTagAssignment[]
+  ): Promise<BeatsRemovalReturn> {
     const beatIds = uniq(removals.map(removal => removal.beatId));
     const tagIds = uniq(removals.map(removal => removal.tag));
 
@@ -157,7 +157,7 @@ export class CMBeatsDomain {
 
   public async assignTagsToBeats(
     req: FrameworkRequest,
-    assignments: CMTagAssignment[]
+    assignments: BeatsTagAssignment[]
   ): Promise<CMAssignmentReturn> {
     const beatIds = uniq(assignments.map(assignment => assignment.beatId));
     const tagIds = uniq(assignments.map(assignment => assignment.tag));
@@ -211,7 +211,7 @@ function addNonExistentItemToResponse(
   nonExistentTags: any,
   key: string
 ) {
-  assignments.forEach(({ beatId, tag }: CMTagAssignment, idx: any) => {
+  assignments.forEach(({ beatId, tag }: BeatsTagAssignment, idx: any) => {
     const isBeatNonExistent = nonExistentBeatIds.includes(beatId);
     const isTagNonExistent = nonExistentTags.includes(tag);
 
