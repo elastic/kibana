@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { debounce } from 'lodash';
 import { EventEmitter } from 'events';
 import { visualizationLoader } from './visualization_loader';
 import { VisualizeDataLoader } from './visualize_data_loader';
@@ -105,7 +105,11 @@ export class EmbeddedVisualizeHandler {
     });
   };
 
-  _fetchAndRender = _.debounce((forceFetch) => {
+  _fetchAndRender = debounce((forceFetch = false) => {
+    if (this._destroyed) {
+      return;
+    }
+
     return this._fetch(forceFetch).then(this._render);
   }, 100);
 
@@ -160,6 +164,7 @@ export class EmbeddedVisualizeHandler {
    */
   destroy() {
     this._destroyed = true;
+    this._fetchAndRender.cancel();
     this._vis.removeListener('reload', this._reloadVis);
     this._vis.removeListener('update', this._handleVisUpdate);
     this._uiState.off('change', this._fetchAndRender);

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import _ from 'lodash';
+import { isEqual } from 'lodash';
 import { VisRequestHandlersRegistryProvider } from '../../registry/vis_request_handlers';
 import { VisResponseHandlersRegistryProvider } from '../../registry/vis_response_handlers';
 
@@ -47,10 +47,7 @@ export class VisualizeDataLoader {
 
     this._vis.filters = { timeRange: props.timeRange };
 
-    const handlerParams = {
-      ...props,
-      forceFetch: forceFetch,
-    };
+    const handlerParams = { ...props, forceFetch };
 
     try {
       // searchSource is only there for courier request handler
@@ -60,16 +57,15 @@ export class VisualizeDataLoader {
       //in the vis-state (response handler does not depend on uiStat
       const canSkipResponseHandler = (
         this._previousRequestHandlerResponse && this._previousRequestHandlerResponse === requestHandlerResponse &&
-        this._previousVisState && _.isEqual(this._previousVisState, this._vis.getState())
+        this._previousVisState && isEqual(this._previousVisState, this._vis.getState())
       );
 
       this._previousVisState = this._vis.getState();
       this._previousRequestHandlerResponse = requestHandlerResponse;
 
-      this._visData = canSkipResponseHandler ?
-        this._visData :
-        await Promise.resolve(this._responseHandler(this._vis, requestHandlerResponse));
-
+      if (!canSkipResponseHandler) {
+        this._visData = await Promise.resolve(this._responseHandler(this._vis, requestHandlerResponse));
+      }
       return this._visData;
     }
     catch (e) {

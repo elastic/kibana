@@ -17,4 +17,4 @@
  * under the License.
  */
 
-import './loader';
+export * from './loader';
