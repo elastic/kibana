@@ -19,13 +19,14 @@
 
 import _ from 'lodash';
 import './table_header.less';
-import '../../filters/short_dots';
 import headerHtml from './table_header.html';
 import { uiModules } from '../../modules';
+import { shortenDottedString } from '../../../../core_plugins/kibana/common/utils/shorten_dotted_string';
+import chrome from 'ui/chrome';
+
 const module = uiModules.get('app/discover');
 
-
-module.directive('kbnTableHeader', function (shortDotsFilter) {
+module.directive('kbnTableHeader', function () {
   return {
     restrict: 'A',
     scope: {
@@ -48,7 +49,7 @@ module.directive('kbnTableHeader', function (shortDotsFilter) {
 
       $scope.tooltip = function (column) {
         if (!$scope.isSortableColumn(column)) return '';
-        return 'Sort by ' + shortDotsFilter(column);
+        return `Sort by ${chrome.getUiSettingsClient().get('shortDots:enable') ? shortenDottedString(column) : column}`;
       };
 
       $scope.canMoveColumnLeft = function canMoveColumn(columnName) {

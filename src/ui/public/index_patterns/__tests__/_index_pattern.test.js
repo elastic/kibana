@@ -63,17 +63,21 @@ jest.mock('../_intervals', () => ({
   IndexPatternsIntervalsProvider: jest.fn(),
 }));
 
-jest.mock('../_field_list', () => ({
-  IndexPatternsFieldListProvider: jest.fn().mockImplementation((pattern) => {
-    return {
-      byName: {
-        id: { value: pattern.id },
-        title: { value: pattern.title },
-      },
-      every: jest.fn(),
-    };
-  })
-}));
+jest.mock('ui/chrome',
+  () => ({
+    getUiSettingsClient: () => {
+      return {
+        get: (key) => {
+          switch(key) {
+            case 'shortDots:enable':
+              return false;
+            default:
+              throw new Error(`Unexpected config key: ${key}`);
+          }
+        }
+      };
+    },
+  }), { virtual: true });
 
 jest.mock('../_flatten_hit', () => ({
   IndexPatternsFlattenHitProvider: jest.fn(),
