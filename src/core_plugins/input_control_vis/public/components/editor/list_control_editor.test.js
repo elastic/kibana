@@ -183,7 +183,7 @@ describe('renders', () => {
       expect(component).toMatchSnapshot();
     });
 
-    test('should not display dynamic options for non-string fields', async () => {
+    test('should display disabled dynamic options with tooltip for non-string fields', async () => {
       const controlParams = {
         id: '1',
         indexPattern: 'mockIndexPattern',

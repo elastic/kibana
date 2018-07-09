@@ -27,6 +27,7 @@ import {
   EuiFieldNumber,
   EuiSwitch,
   EuiSelect,
+  EuiToolTip,
 } from '@elastic/eui';
 
 function filterField(field) {
@@ -159,6 +160,26 @@ export class ListControlEditor extends Component {
             data-test-subj="listControlDynamicOptionsSwitch"
           />
         </EuiFormRow>
+      );
+    } else {
+      options.push(
+        <EuiToolTip
+          key="dynamicOptions"
+          position="top"
+          content="Dynamic options are only available on fields of type 'string'"
+        >
+          <EuiFormRow
+            id={`dynamicOptions-${this.props.controlIndex}`}
+            helpText="Update options in response to user input"
+            disabled
+          >
+            <EuiSwitch
+              label="Dynamic Options"
+              checked={false}
+              onChange={() => {}}
+            />
+          </EuiFormRow>
+        </EuiToolTip>
       );
     }
 

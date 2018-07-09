@@ -53,7 +53,7 @@ const termsAgg = ({ field, size, direction, query }) => {
   }
 
   if (query) {
-    terms.include = `${getEscapedQuery(query)}.*`;
+    terms.include = `.*${getEscapedQuery(query)}.*`;
   }
 
   return {
