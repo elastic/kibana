@@ -5,8 +5,11 @@
  */
 import { toastNotifications } from 'ui/notify';
 
-export class SpacesManager {
+import { EventEmitter } from 'events';
+
+export class SpacesManager extends EventEmitter {
   constructor(httpAgent, chrome) {
+    super();
     this._httpAgent = httpAgent;
     this._baseUrl = chrome.addBasePath(`/api/spaces/v1`);
   }
@@ -48,6 +51,10 @@ export class SpacesManager {
         }
       })
       .catch(() => this._displayError());
+  }
+
+  async requestRefresh() {
+    this.emit('request_refresh');
   }
 
   _displayError() {
