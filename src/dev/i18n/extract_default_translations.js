@@ -46,10 +46,13 @@ function addMessageToMap(targetMap, key, value) {
 }
 
 export async function extractDefaultTranslations(inputPath) {
-  const entries = await globAsync('*.{js,jsx,jade,ts,tsx,html,hbs}', {
-    cwd: inputPath,
-    matchBase: true,
-  });
+  const entries = await globAsync(
+    '*.{js,jsx,jade,ts,tsx,html,hbs,handlebars}',
+    {
+      cwd: inputPath,
+      matchBase: true,
+    }
+  );
 
   const { htmlEntries, codeEntries, jadeEntries, hbsEntries } = entries.reduce(
     (paths, entry) => {
@@ -59,7 +62,10 @@ export async function extractDefaultTranslations(inputPath) {
         paths.htmlEntries.push(resolvedPath);
       } else if (resolvedPath.endsWith('.jade')) {
         paths.jadeEntries.push(resolvedPath);
-      } else if (resolvedPath.endsWith('.hbs')) {
+      } else if (
+        resolvedPath.endsWith('.hbs') ||
+        resolvedPath.endsWith('.handlebars')
+      ) {
         paths.hbsFiles.push(resolvedPath);
       } else {
         paths.codeEntries.push(resolvedPath);
@@ -67,7 +73,7 @@ export async function extractDefaultTranslations(inputPath) {
 
       return paths;
     },
-    { htmlEntries: [], codeEntries: [], jadeEntries: [], hbsFiles: [] }
+    { htmlEntries: [], codeEntries: [], jadeEntries: [], hbsEntries: [] }
   );
 
   const defaultMessagesMap = new Map();
@@ -79,10 +85,6 @@ export async function extractDefaultTranslations(inputPath) {
       [jadeEntries, extractJadeMessages],
       [hbsEntries, extractHandlebarsMessages],
     ].map(async ([entries, extractFunction]) => {
-      // If some file contains an error, we cannot handle it until all files are read.
-      // TODO: move files reading to "extract*" async generators after async iterators implementation (for-await-of syntax)
-      // to get rid of Promise.all().
-
       const files = await Promise.all(
         entries.map(async entry => {
           return {
@@ -104,7 +106,9 @@ export async function extractDefaultTranslations(inputPath) {
     })
   );
 
-  let jsonBuffer = Buffer.from(JSON5.stringify(formats, null, 2).slice(0, -1));
+  let jsonBuffer = Buffer.from(
+    JSON5.stringify({ formats }, { quote: `'`, space: 2 }).slice(0, -1)
+  );
 
   const defaultMessages = [...defaultMessagesMap].sort(([key1], [key2]) => {
     return key1 < key2 ? -1 : 1;
