@@ -20,34 +20,33 @@
 const attributeName = 'data-render-complete';
 
 export class RenderCompleteHelper {
-  constructor(element) {
-    this._element = element;
+  constructor(private readonly element: HTMLElement) {
     this.setup();
   }
 
-  _start = () => {
-    this._element.setAttribute(attributeName, false);
-    return true;
-  };
+  public destroy() {
+    this.element.removeEventListener('renderStart', this.start);
+    this.element.removeEventListener('renderComplete', this.complete);
+  }
 
-  _complete = () => {
-    this._element.setAttribute(attributeName, true);
-    return true;
-  };
+  public setup() {
+    this.element.setAttribute(attributeName, 'false');
+    this.element.addEventListener('renderStart', this.start);
+    this.element.addEventListener('renderComplete', this.complete);
+  }
 
-  destroy = () => {
-    this._element.removeEventListener('renderStart', this._start);
-    this._element.removeEventListener('renderComplete', this._complete);
-  };
-
-  setup = () => {
-    this._element.setAttribute(attributeName, false);
-    this._element.addEventListener('renderStart', this._start);
-    this._element.addEventListener('renderComplete', this._complete);
-  };
-
-  disable = () => {
-    this._element.setAttribute(attributeName, 'disabled');
+  public disable() {
+    this.element.setAttribute(attributeName, 'disabled');
     this.destroy();
+  }
+
+  private start = () => {
+    this.element.setAttribute(attributeName, 'false');
+    return true;
+  };
+
+  private complete = () => {
+    this.element.setAttribute(attributeName, 'true');
+    return true;
   };
 }
