@@ -6,11 +6,16 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
 import Suggestions from './Suggestions';
 import ClickOutside from './ClickOutside';
-import { fontSizes, units, px, colors } from '../../../../style/variables';
-import { EuiProgress, EuiButton } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFieldSearch,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiProgress,
+  EuiIconTip
+} from '@elastic/eui';
 
 const KEY_CODES = {
   LEFT: 37,
@@ -21,16 +26,6 @@ const KEY_CODES = {
   ESC: 27,
   TAB: 9
 };
-
-const Input = styled.input`
-  width: 100%;
-  padding: ${px(units.half)};
-  font-size: ${fontSizes.large};
-  outline: none;
-  border-radius: ${px(units.quarter)};
-  border: 1px solid ${colors.gray4};
-  box-shadow: none !important;
-`;
 
 export class Typeahead extends Component {
   state = {
@@ -110,6 +105,7 @@ export class Typeahead extends Component {
       case KEY_CODES.ESC:
         event.preventDefault();
         this.setState({ isSuggestionsVisible: false });
+        this.props.onSubmit(value);
         break;
       case KEY_CODES.TAB:
         this.setState({ isSuggestionsVisible: false });
@@ -128,7 +124,9 @@ export class Typeahead extends Component {
   };
 
   onClickOutside = () => {
+    const { value } = this.state;
     this.setState({ isSuggestionsVisible: false });
+    this.props.onSubmit(value);
   };
 
   onChangeInputValue = event => {
@@ -144,7 +142,6 @@ export class Typeahead extends Component {
 
   onClickInput = event => {
     const { selectionStart } = event.target;
-    this.setState({ isSuggestionsVisible: true });
     this.props.onChange(this.state.value, selectionStart);
   };
 
@@ -168,18 +165,15 @@ export class Typeahead extends Component {
         onClickOutside={this.onClickOutside}
         style={{ position: 'relative' }}
       >
-        <div style={{ display: 'flex' }}>
-          <div
-            style={{
-              position: 'relative',
-              flexGrow: 1,
-              marginRight: px(units.half)
-            }}
-          >
-            <Input
-              placeholder="Search..."
-              innerRef={node => (this.inputRef = node)}
-              type="text"
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem style={{ position: 'relative' }}>
+            <EuiFieldSearch
+              fullWidth
+              style={{
+                backgroundImage: 'none'
+              }}
+              placeholder="Search transactions or errors… (i.e. transaction.duration.us => 100000)"
+              ref={node => (this.inputRef = node)}
               value={this.state.value}
               onKeyDown={this.onKeyDown}
               onKeyUp={this.onKeyUp}
@@ -200,10 +194,17 @@ export class Typeahead extends Component {
                 }}
               />
             )}
-          </div>
-
-          <EuiButton onClick={this.onSubmit}>Search</EuiButton>
-        </div>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton>Search</EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIconTip
+              content="The Query bar feature is still in beta. Help us report any issues or bugs by using the APM feedback link in the top."
+              position="left"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
         <Suggestions
           show={this.state.isSuggestionsVisible}

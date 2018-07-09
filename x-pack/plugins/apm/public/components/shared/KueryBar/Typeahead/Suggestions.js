@@ -19,7 +19,6 @@ const List = styled.ul`
   position: absolute;
   background: #fff;
   z-index: 10;
-  top: 42px;
   left: 0;
   max-height: ${px(unit * 20)};
   overflow: scroll;
