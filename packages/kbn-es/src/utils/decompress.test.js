@@ -17,32 +17,35 @@
  * under the License.
  */
 
+const { decompress } = require('./decompress');
+const mockFs = require('mock-fs');
 const fs = require('fs');
-const zlib = require('zlib');
 const path = require('path');
-const tarFs = require('tar-fs');
 
-/**
- * @param {String} archive
- * @param {String} dirPath
- */
-exports.extractTarball = function extractTarball(archive, dirPath) {
-  const stripOne = header => {
-    header.name = header.name
-      .split(/\/|\\/)
-      .slice(1)
-      .join(path.sep);
-    return header;
-  };
-
-  return new Promise((resolve, reject) => {
-    fs
-      .createReadStream(archive)
-      .on('error', reject)
-      .pipe(zlib.createGunzip())
-      .on('error', reject)
-      .pipe(tarFs.extract(dirPath, { map: stripOne }))
-      .on('error', reject)
-      .on('finish', resolve);
+beforeEach(() => {
+  mockFs({
+    '/data': {
+      'snapshot.zip': fs.readFileSync(
+        path.resolve(__dirname, '__fixtures__/snapshot.zip')
+      ),
+      'snapshot.tar.gz': fs.readFileSync(
+        path.resolve(__dirname, '__fixtures__/snapshot.tar.gz')
+      ),
+    },
+    '/.es': {},
   });
-};
+});
+
+afterEach(() => {
+  mockFs.restore();
+});
+
+test('zip strips root directory', async () => {
+  await decompress('/data/snapshot.zip', '/.es/foo');
+  expect(fs.readdirSync('/.es/foo/bin')).toContain('elasticsearch.bat');
+});
+
+test('tar strips root directory', async () => {
+  await decompress('/data/snapshot.tar.gz', '/.es/foo');
+  expect(fs.readdirSync('/.es/foo/bin')).toContain('elasticsearch');
+});
