@@ -38,16 +38,16 @@ export function propFilter(prop) {
    * @return {array} - the filtered list
    */
   return function (list, filters = []) {
-    if (filters.length === 0) {
-      return list;
-    }
-
     if (isFunction(filters)) {
       return list.filter((item) => filters(item[prop]));
     }
 
     if (!Array.isArray(filters)) {
       filters = filters.split(',');
+    }
+
+    if (filters.length === 0) {
+      return list;
     }
 
     if (filters.includes('*')) {
