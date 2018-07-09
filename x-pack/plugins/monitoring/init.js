@@ -8,7 +8,6 @@ import { LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG, } from './common/constants'
 import { requireUIRoutes } from './server/routes';
 import { instantiateClient } from './server/es_client/instantiate_client';
 import { initMonitoringXpackInfo } from './server/init_monitoring_xpack_info';
-import { CollectorSet } from './server/kibana_monitoring/classes';
 import { initBulkUploader } from './server/kibana_monitoring';
 import {
   getKibanaUsageCollector,
@@ -28,9 +27,7 @@ import {
  */
 export const init = (monitoringPlugin, server) => {
   const config = server.config();
-
-  const collectorSet = new CollectorSet(server);
-  server.expose('collectorSet', collectorSet); // expose the collectorSet service
+  const { collectorSet } = server.usage;
   /*
    * Register collector objects for stats to show up in the APIs
    */
@@ -77,7 +74,7 @@ export const init = (monitoringPlugin, server) => {
   } else if (!kibanaCollectionEnabled) {
     server.log(
       ['info', LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG],
-      'Internal collection for Kibana monitoring will is disabled per configuration.'
+      'Internal collection for Kibana monitoring is disabled per configuration.'
     );
   }
 

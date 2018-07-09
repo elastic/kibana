@@ -6,11 +6,13 @@
 
 import { isEmpty, flatten } from 'lodash';
 import { callClusterFactory } from '../../../xpack_main';
+import { LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG } from '../../common/constants';
 import {
-  getCollectorLogger,
   sendBulkPayload,
   monitoringBulk,
 } from './lib';
+
+const LOGGING_TAGS = [LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG];
 
 /*
  * Handles internal Kibana stats collection and uploading data to Monitoring
@@ -40,7 +42,11 @@ export class BulkUploader {
     this._timer =  null;
     this._interval = interval;
     this._combineTypes = combineTypes;
-    this._log = getCollectorLogger(server);
+    this._log = {
+      debug: message => server.log(['debug', ...LOGGING_TAGS], message),
+      info: message => server.log(['info', ...LOGGING_TAGS], message),
+      warn: message => server.log(['warning', ...LOGGING_TAGS], message)
+    };
 
     this._client = server.plugins.elasticsearch.getCluster('admin').createClient({
       plugins: [monitoringBulk],
