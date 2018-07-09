@@ -18,6 +18,7 @@ import { DeleteJobModal } from '../delete_job_modal';
 import { StartDatafeedModal } from '../start_datafeed_modal';
 import { MultiJobActions } from '../multi_job_actions';
 
+import PropTypes from 'prop-types';
 import React, {
   Component
 } from 'react';
@@ -35,7 +36,7 @@ export class JobsListView extends Component {
       fullJobsList: {},
       selectedJobs: [],
       itemIdToExpandedRowMap: {},
-      filterClauses: []
+      filterClauses: [],
     };
 
     this.updateFunctions = {};
@@ -227,6 +228,7 @@ export class JobsListView extends Component {
           const filteredJobsSummaryList = filterJobs(jobsSummaryList, this.state.filterClauses);
           this.setState({ jobsSummaryList, filteredJobsSummaryList, fullJobsList }, () => {
             this.refreshSelectedJobs();
+            this.props.updateJobStats(jobsSummaryList);
           });
 
           Object.keys(this.updateFunctions).forEach((j) => {
@@ -281,3 +283,6 @@ export class JobsListView extends Component {
     );
   }
 }
+JobsListView.propTypes = {
+  updateJobStats: PropTypes.func.isRequired,
+};
