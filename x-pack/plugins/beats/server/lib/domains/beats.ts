@@ -5,6 +5,7 @@
  */
 
 import { uniq } from 'lodash';
+import moment from 'moment';
 import { findNonExistentItems } from '../../utils/find_non_existent_items';
 
 import { CMBeat } from '../../../common/domain_types';
@@ -15,7 +16,7 @@ import {
 import { FrameworkUser } from '../adapters/framework/adapter_types';
 
 import { CMAssignmentReturn } from '../adapters/beats/adapter_types';
-import { CMDomainLibs } from '../lib';
+import { BeatEnrollmentStatus, CMDomainLibs } from '../lib';
 import { BeatsRemovalReturn } from './../adapters/beats/adapter_types';
 
 export class CMBeatsDomain {
@@ -65,10 +66,22 @@ export class CMBeatsDomain {
 
   // TODO more strongly type this
   public async enrollBeat(
+    enrollmentToken: string,
     beatId: string,
     remoteAddress: string,
     beat: Partial<CMBeat>
-  ) {
+  ): Promise<{ status: string; accessToken?: string }> {
+    const { token, expires_on } = await this.tokens.getEnrollmentToken(
+      enrollmentToken
+    );
+
+    if (expires_on && moment(expires_on).isBefore(moment())) {
+      return { status: BeatEnrollmentStatus.ExpiredEnrollmentToken };
+    }
+    if (!token) {
+      return { status: BeatEnrollmentStatus.InvalidEnrollmentToken };
+    }
+
     const accessToken = this.tokens.generateAccessToken();
     await this.adapter.insert({
       ...beat,
@@ -76,7 +89,10 @@ export class CMBeatsDomain {
       host_ip: remoteAddress,
       id: beatId,
     } as CMBeat);
-    return { accessToken };
+
+    await this.tokens.deleteEnrollmentToken(enrollmentToken);
+
+    return { status: BeatEnrollmentStatus.Success, accessToken };
   }
 
   public async removeTagsFromBeats(

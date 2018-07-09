@@ -90,6 +90,7 @@ describe('Beats Domain Lib', () => {
 
       expect(token).toEqual(validEnrollmentToken);
       const { accessToken } = await beatsLib.enrollBeat(
+        validEnrollmentToken,
         beatId,
         '192.168.1.1',
         omit(beat, 'enrollment_token')
