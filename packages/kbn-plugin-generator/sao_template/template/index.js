@@ -1,25 +1,27 @@
-<% if (generateApi) { %>import exampleRoute from './server/routes/example';<% } %>
+<% if (generateApi) { -%>
+import exampleRoute from './server/routes/example';
 
+<% } -%>
 export default function (kibana) {
   return new kibana.Plugin({
     require: ['elasticsearch'],
     name: '<%= kebabCase(name) %>',
     uiExports: {
-      <%_ if (generateApp) { %>
+      <%_ if (generateApp) { -%>
       app: {
         title: '<%= startCase(name) %>',
         description: '<%= description %>',
         main: 'plugins/<%= kebabCase(name) %>/app',
-        <%_ if (generateScss) { %>
+        <%_ if (generateScss) { -%>
         styleSheetPath: require('path').resolve(__dirname, 'public/app.scss'),
-        <%_ } %>
+        <%_ } -%>
       },
-      <%_ } %>
-      <%_ if (generateHack) { %>
+      <%_ } -%>
+      <%_ if (generateHack) { -%>
       hacks: [
         'plugins/<%= kebabCase(name) %>/hack'
       ]
-      <%_ } %>
+      <%_ } -%>
     },
 
     config(Joi) {
@@ -27,13 +29,12 @@ export default function (kibana) {
         enabled: Joi.boolean().default(true),
       }).default();
     },
+    <%_ if (generateApi) { -%>
 
-    <%_ if (generateApi) { %>
     init(server, options) { // eslint-disable-line no-unused-vars
       // Add server routes and initialize the plugin here
       exampleRoute(server);
     }
-    <%_ } %>
-
+    <%_ } -%>
   });
 }
