@@ -266,7 +266,6 @@ export class PipelineEditor extends React.Component {
 
     this.hideConfirmDeleteModal();
 
-    // TODO: Add modal here
     return pipelineService.deletePipeline(id)
       .then(() => {
         // TODO: Add toast success
