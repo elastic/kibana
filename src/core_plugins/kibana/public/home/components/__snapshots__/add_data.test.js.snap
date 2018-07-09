@@ -56,6 +56,7 @@ exports[`apmUiEnabled 1`] = `
         description="APM automatically collects in-depth performance metrics and errors from inside your applications."
         footer={
           <EuiButton
+            aria-label="Add Data using an APM server"
             className="addDataButton"
             color="primary"
             fill={false}
@@ -87,6 +88,7 @@ exports[`apmUiEnabled 1`] = `
         description="Ingest logs from popular data sources and easily visualize in preconfigured dashboards."
         footer={
           <EuiButton
+            aria-label="View modules for setting up logging data flows"
             className="addDataButton"
             color="primary"
             fill={false}
@@ -118,6 +120,7 @@ exports[`apmUiEnabled 1`] = `
         description="Collect metrics from the operating system and services running on your servers."
         footer={
           <EuiButton
+            aria-label="View modules for setting up metric data flows"
             className="addDataButton"
             color="primary"
             fill={false}
@@ -149,6 +152,7 @@ exports[`apmUiEnabled 1`] = `
         description="Centralize security events for interactive investigation in ready-to-go visualizations."
         footer={
           <EuiButton
+            aria-label="View modules for setting up security data flows"
             className="addDataButton"
             color="primary"
             fill={false}
@@ -305,6 +309,7 @@ exports[`render 1`] = `
         description="Ingest logs from popular data sources and easily visualize in preconfigured dashboards."
         footer={
           <EuiButton
+            aria-label="View modules for setting up logging data flows"
             className="addDataButton"
             color="primary"
             fill={false}
@@ -336,6 +341,7 @@ exports[`render 1`] = `
         description="Collect metrics from the operating system and services running on your servers."
         footer={
           <EuiButton
+            aria-label="View modules for setting up metric data flows"
             className="addDataButton"
             color="primary"
             fill={false}
@@ -367,6 +373,7 @@ exports[`render 1`] = `
         description="Centralize security events for interactive investigation in ready-to-go visualizations."
         footer={
           <EuiButton
+            aria-label="View modules for setting up security data flows"
             className="addDataButton"
             color="primary"
             fill={false}
