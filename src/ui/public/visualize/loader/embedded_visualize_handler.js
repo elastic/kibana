@@ -53,9 +53,12 @@ export class EmbeddedVisualizeHandler {
     this._firstRenderComplete = new Promise(resolve => {
       this._listeners.once(RENDER_COMPLETE_EVENT, resolve);
     });
-    this._element.addEventListener('renderComplete', () => {
+
+    this._elementListener = () => {
       this._listeners.emit(RENDER_COMPLETE_EVENT);
-    });
+    };
+
+    this._element.addEventListener('renderComplete', this._elementListener);
 
     this._loaded = false;
     this._destroyed = false;
@@ -167,6 +170,7 @@ export class EmbeddedVisualizeHandler {
     this._fetchAndRender.cancel();
     this._vis.removeListener('reload', this._reloadVis);
     this._vis.removeListener('update', this._handleVisUpdate);
+    this._element.removeEventListener('renderComplete', this._elementListener);
     this._uiState.off('change', this._fetchAndRender);
     visualizationLoader.destroy(this._element);
     this._renderCompleteHelper.destroy();
