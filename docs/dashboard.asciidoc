@@ -17,7 +17,7 @@ image:images/Dashboard_example.png[Example dashboard]
 
 If you haven't yet indexed data into {es} or created an index pattern, 
 you'll be prompted to do so as you follow the steps for creating a dashboard.  
-Or, you can use the prebuilt flight data set, available from the 
+Or, you can use one of the prebuilt sample data sets, available from the 
 Kibana home page.
 
 . In the side navigation, click *Dashboard*.
