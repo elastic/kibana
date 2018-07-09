@@ -11,7 +11,7 @@ import {
   InfraFrameworkRouteOptions,
   InfraWrappableRequest,
 } from '../../../infra_types';
-import { graphiqlHapi, graphqlHapi } from './apollo-server-hapi';
+import { graphiqlHapi, graphqlHapi } from './apollo_server_hapi';
 
 import { IStrictReply, Request, Server } from 'hapi';
 import {
