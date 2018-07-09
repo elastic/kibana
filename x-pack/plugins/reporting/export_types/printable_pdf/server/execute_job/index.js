@@ -18,6 +18,7 @@ const KBN_SCREENSHOT_HEADER_BLACKLIST = [
   'content-length',
   'content-type',
   'host',
+  'referer',
 ];
 
 function executeJobFn(server) {
