@@ -35,9 +35,9 @@ export function CallClientProvider(Private, Promise, es) {
   const ABORTED = RequestStatus.ABORTED;
   const DUPLICATE = RequestStatus.DUPLICATE;
 
-  function callClient(requests) {
+  function callClient(searchRequests) {
     // merging docs can change status to DUPLICATE, capture new statuses
-    const statuses = mergeDuplicateRequests(requests);
+    const statuses = mergeDuplicateRequests(searchRequests);
 
     // get the actual list of requests that we will be fetching
     const requestsToFetch = statuses.filter(isRequest);
@@ -47,40 +47,48 @@ export function CallClientProvider(Private, Promise, es) {
       return Promise.resolve([]);
     }
 
-    const searchStrategiesWithRequests = assignSearchRequestsToSearchStrategies(requestsToFetch);
-
-    // resolved by respond()
-    let esPromise = undefined;
-    let isRequestAborted = false;
+    // This is how we'll provide the consumer with search responses.
     const defer = Promise.defer();
 
-    // for each respond with either the response or ABORTED
-    const respond = function (responses = []) {
-      const activeSearchRequests = searchStrategiesWithRequests.reduce((allSearchRequests, { searchRequests }) => {
-        return allSearchRequests.concat(searchRequests);
-      }, [])
-        .filter(request => {
-          // We'll use the index of the request to map it to its response. If a request has already
-          // failed then it won't generate a response. In this case we need to remove the request
-          // to maintain cardinality between the list of requests and the list of corresponding
-          // responses.
-          return request !== undefined;
-        });
+    const searchStrategiesWithRequests = assignSearchRequestsToSearchStrategies(requestsToFetch);
 
-      return Promise.map(activeSearchRequests, function (request, i) {
-        switch (statuses[i]) {
-          case ABORTED:
-            return ABORTED;
-          case DUPLICATE:
-            return request._uniq.resp;
-          default:
-            const index = _.findIndex(activeSearchRequests, request);
-            if (index < 0) {
-              // This means the request failed.
-              return ABORTED;
-            }
-            return responses[index];
+    // resolved by respondToSearchRequests()
+    let esPromise = undefined;
+    let isRequestAborted = false;
+
+    // for each respond with either the response or ABORTED
+    const respondToSearchRequests = (responses = []) => {
+      const aggregatedSearchRequests = searchStrategiesWithRequests.reduce((allSearchRequests, { searchRequests }) => {
+        return allSearchRequests.concat(searchRequests);
+      }, []);
+
+      const activeSearchRequests = aggregatedSearchRequests.filter(request => {
+        // We'll use the index of the request to map it to its response. If a request has already
+        // failed then it won't generate a response. In this case we need to remove the request
+        // to maintain cardinality between the list of requests and the list of corresponding
+        // responses.
+        return request !== undefined;
+      });
+
+      return Promise.map(activeSearchRequests, function (searchRequest, searchRequestIndex) {
+        const status = statuses[searchRequestIndex];
+
+        if (status === ABORTED) {
+          return ABORTED;
         }
+
+        if (status === DUPLICATE) {
+          return searchRequest._uniq.resp;
+        }
+
+        const index = _.findIndex(activeSearchRequests, searchRequest);
+
+        if (index < 0) {
+          // This means the searchRequest failed.
+          return ABORTED;
+        }
+
+        return responses[index];
       })
         .then(
           (res) => defer.resolve(res),
@@ -107,7 +115,7 @@ export function CallClientProvider(Private, Promise, es) {
       esPromise = undefined;
       isRequestAborted = true;
 
-      return respond();
+      return respondToSearchRequests();
     });
 
     // attach abort handlers, close over request index
@@ -130,7 +138,7 @@ export function CallClientProvider(Private, Promise, es) {
       try {
         // The request was aborted while we were doing the above logic.
         if (isRequestAborted) {
-          return await respond();
+          return await respondToSearchRequests();
         }
 
         esPromise = Promise.all(esPromises);
@@ -141,7 +149,7 @@ export function CallClientProvider(Private, Promise, es) {
           return aggregation.concat(responses.responses);
         }, []);
 
-        await respond(aggregatedResponses);
+        await respondToSearchRequests(aggregatedResponses);
       } catch(error) {
         if (errorAllowExplicitIndex.test(error)) {
           return errorAllowExplicitIndex.takeover();
@@ -151,16 +159,17 @@ export function CallClientProvider(Private, Promise, es) {
       }
     });
 
-    // return our promise, but catch any errors we create and
-    // send them to the requests
-    return defer.promise
-      .catch((err) => {
-        requests.forEach((req, index) => {
-          if (statuses[index] !== ABORTED) {
-            req.handleFailure(err);
-          }
-        });
+    // If there are any errors, notify the searchRequests of them.
+    defer.promise.catch((err) => {
+      searchRequests.forEach((searchRequest, index) => {
+        if (statuses[index] !== ABORTED) {
+          searchRequest.handleFailure(err);
+        }
       });
+    });
+
+    // Return the promise which acts as our vehicle for providing search responses to the consumer.
+    return defer.promise;
   }
 
   return callClient;
