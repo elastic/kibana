@@ -19,14 +19,14 @@
 
 import { getSortedSystemNames } from './sorted_systems';
 import { System } from './system';
-import { ISystemMetadata, ISystemsType, SystemName } from './system_types';
+import { SystemMetadata, SystemName, SystemsType } from './system_types';
 
 export type KibanaSystemApiFactory<C, M> = (
   name: SystemName,
   metadata?: M
 ) => C;
 
-export class SystemLoader<C, M extends ISystemMetadata> {
+export class SystemLoader<C, M extends SystemMetadata> {
   private readonly systems = new Map<SystemName, System<C, M, any, any>>();
   private startedSystems: SystemName[] = [];
 
@@ -45,7 +45,7 @@ export class SystemLoader<C, M extends ISystemMetadata> {
     });
   }
 
-  public addSystem<D extends ISystemsType, E = void>(
+  public addSystem<D extends SystemsType, E = void>(
     system: System<C, M, D, E>
   ) {
     if (this.systems.has(system.name)) {
@@ -92,7 +92,7 @@ export class SystemLoader<C, M extends ISystemMetadata> {
     }
   }
 
-  private startSystem<D extends ISystemsType, E = void>(
+  private startSystem<D extends SystemsType, E = void>(
     system: System<C, M, D, E>
   ) {
     const dependenciesValues = {} as D;

@@ -6,19 +6,11 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiFlexItem,
-  EuiBadge,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexItem, EuiBadge, EuiText } from '@elastic/eui';
 import classNames from 'classnames';
 
-export function Metric({ className, value, warning }) {
-
-  const classes = classNames(
-    'pipelineViewer__metric',
-    className,
-  );
+export function Metric({ className, warning, value }) {
+  const classes = classNames('pipelineViewer__metric', className);
 
   let stylizedValue;
   if (warning) {
@@ -30,17 +22,12 @@ export function Metric({ className, value, warning }) {
   } else {
     stylizedValue = (
       <EuiText size="s" color="subdued" className={classes}>
-        <span>
-          {value}
-        </span>
+        <span>{value}</span>
       </EuiText>
     );
   }
   return (
-    <EuiFlexItem
-      className="pipelineViewer__metricFlexItem"
-      grow={false}
-    >
+    <EuiFlexItem className="pipelineViewer__metricFlexItem" grow={false}>
       {stylizedValue}
     </EuiFlexItem>
   );
@@ -49,4 +36,5 @@ export function Metric({ className, value, warning }) {
 Metric.propTypes = {
   className: PropTypes.string.isRequired,
   value: PropTypes.string.isRequired,
+  warning: PropTypes.bool,
 };

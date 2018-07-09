@@ -41,10 +41,6 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
         .findByCssSelector('button[aria-label=\'Search\']');
     }
 
-    async getTimespanText() {
-      return await testSubjects.getVisibleText('globalTimepickerRange');
-    }
-
     getChartTimespan() {
       return getRemote()
         .findByCssSelector('center.small > span:nth-child(1)')

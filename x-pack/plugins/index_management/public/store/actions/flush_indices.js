@@ -6,7 +6,7 @@
 
 import { createAction } from "redux-actions";
 import { flushIndices as request } from "../../services";
-import { reloadIndices } from "../actions";
+import { clearRowStatus, reloadIndices } from "../actions";
 import { toastNotifications } from 'ui/notify';
 
 export const flushIndicesStart = createAction(
@@ -18,7 +18,8 @@ export const flushIndices = ({ indexNames }) => async (dispatch) => {
   try {
     await request(indexNames);
   } catch (error) {
-    return toastNotifications.addDanger(error.data.message);
+    toastNotifications.addDanger(error.data.message);
+    return dispatch(clearRowStatus({ indexNames }));
   }
   dispatch(reloadIndices(indexNames));
   toastNotifications.addSuccess(`Successfully flushed: [${indexNames.join(", ")}]`);

@@ -1,0 +1,298 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`UrlFormatEditor should render label template help 1`] = `
+<React.Fragment>
+  <LabelTemplateFlyout
+    isVisible={true}
+    onClose={[Function]}
+  />
+  <UrlTemplateFlyout
+    isVisible={false}
+    onClose={[Function]}
+  />
+  <EuiFormRow
+    describedByIds={Array []}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    label="Type"
+  >
+    <EuiSelect
+      compressed={false}
+      data-test-subj="urlEditorType"
+      fullWidth={false}
+      hasNoInitialSelection={false}
+      isLoading={false}
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "text": "Link",
+            "value": "a",
+          },
+          Object {
+            "text": "Image",
+            "value": "img",
+          },
+          Object {
+            "text": "Audio",
+            "value": "audio",
+          },
+        ]
+      }
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    error={null}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <EuiLink
+        color="primary"
+        onClick={[Function]}
+        type="button"
+      >
+        URL template help
+      </EuiLink>
+    }
+    isInvalid={false}
+    label="URL template"
+  >
+    <EuiFieldText
+      compressed={false}
+      data-test-subj="urlEditorUrlTemplate"
+      fullWidth={false}
+      isLoading={false}
+      onChange={[Function]}
+      value=""
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    error={null}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <EuiLink
+        color="primary"
+        onClick={[Function]}
+        type="button"
+      >
+        Label template help
+      </EuiLink>
+    }
+    isInvalid={false}
+    label="Label template"
+  >
+    <EuiFieldText
+      compressed={false}
+      data-test-subj="urlEditorLabelTemplate"
+      fullWidth={false}
+      isLoading={false}
+      onChange={[Function]}
+      value=""
+    />
+  </EuiFormRow>
+  <FormatEditorSamples
+    samples={Array []}
+  />
+</React.Fragment>
+`;
+
+exports[`UrlFormatEditor should render normally 1`] = `
+<React.Fragment>
+  <LabelTemplateFlyout
+    isVisible={false}
+    onClose={[Function]}
+  />
+  <UrlTemplateFlyout
+    isVisible={false}
+    onClose={[Function]}
+  />
+  <EuiFormRow
+    describedByIds={Array []}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    label="Type"
+  >
+    <EuiSelect
+      compressed={false}
+      data-test-subj="urlEditorType"
+      fullWidth={false}
+      hasNoInitialSelection={false}
+      isLoading={false}
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "text": "Link",
+            "value": "a",
+          },
+          Object {
+            "text": "Image",
+            "value": "img",
+          },
+          Object {
+            "text": "Audio",
+            "value": "audio",
+          },
+        ]
+      }
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    error={null}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <EuiLink
+        color="primary"
+        onClick={[Function]}
+        type="button"
+      >
+        URL template help
+      </EuiLink>
+    }
+    isInvalid={false}
+    label="URL template"
+  >
+    <EuiFieldText
+      compressed={false}
+      data-test-subj="urlEditorUrlTemplate"
+      fullWidth={false}
+      isLoading={false}
+      onChange={[Function]}
+      value=""
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    error={null}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <EuiLink
+        color="primary"
+        onClick={[Function]}
+        type="button"
+      >
+        Label template help
+      </EuiLink>
+    }
+    isInvalid={false}
+    label="Label template"
+  >
+    <EuiFieldText
+      compressed={false}
+      data-test-subj="urlEditorLabelTemplate"
+      fullWidth={false}
+      isLoading={false}
+      onChange={[Function]}
+      value=""
+    />
+  </EuiFormRow>
+  <FormatEditorSamples
+    samples={Array []}
+  />
+</React.Fragment>
+`;
+
+exports[`UrlFormatEditor should render url template help 1`] = `
+<React.Fragment>
+  <LabelTemplateFlyout
+    isVisible={false}
+    onClose={[Function]}
+  />
+  <UrlTemplateFlyout
+    isVisible={true}
+    onClose={[Function]}
+  />
+  <EuiFormRow
+    describedByIds={Array []}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    label="Type"
+  >
+    <EuiSelect
+      compressed={false}
+      data-test-subj="urlEditorType"
+      fullWidth={false}
+      hasNoInitialSelection={false}
+      isLoading={false}
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "text": "Link",
+            "value": "a",
+          },
+          Object {
+            "text": "Image",
+            "value": "img",
+          },
+          Object {
+            "text": "Audio",
+            "value": "audio",
+          },
+        ]
+      }
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    error={null}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <EuiLink
+        color="primary"
+        onClick={[Function]}
+        type="button"
+      >
+        URL template help
+      </EuiLink>
+    }
+    isInvalid={false}
+    label="URL template"
+  >
+    <EuiFieldText
+      compressed={false}
+      data-test-subj="urlEditorUrlTemplate"
+      fullWidth={false}
+      isLoading={false}
+      onChange={[Function]}
+      value=""
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    error={null}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <EuiLink
+        color="primary"
+        onClick={[Function]}
+        type="button"
+      >
+        Label template help
+      </EuiLink>
+    }
+    isInvalid={false}
+    label="Label template"
+  >
+    <EuiFieldText
+      compressed={false}
+      data-test-subj="urlEditorLabelTemplate"
+      fullWidth={false}
+      isLoading={false}
+      onChange={[Function]}
+      value=""
+    />
+  </EuiFormRow>
+  <FormatEditorSamples
+    samples={Array []}
+  />
+</React.Fragment>
+`;

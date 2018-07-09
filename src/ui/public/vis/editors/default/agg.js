@@ -27,11 +27,7 @@ import { move } from '../../../utils/collection';
 
 uiModules
   .get('app/visualize')
-  .directive('visEditorAgg', function ($compile, $parse, $filter, Private, Notifier) {
-    const notify = new Notifier({
-      location: 'visAggGroup'
-    });
-
+  .directive('visEditorAgg', () => {
     return {
       restrict: 'A',
       template: aggTemplate,
@@ -86,10 +82,12 @@ uiModules
         };
 
         $scope.remove = function (agg) {
-          const aggs = $scope.vis.aggs;
-
+          const aggs = $scope.state.aggs;
           const index = aggs.indexOf(agg);
-          if (index === -1) return notify.log('already removed');
+
+          if (index === -1) {
+            return;
+          }
 
           aggs.splice(index, 1);
         };

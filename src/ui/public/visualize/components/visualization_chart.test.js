@@ -43,7 +43,6 @@ class VisualizationStub {
 
 describe('VisualizationChart', () => {
   const vis = {
-    initialized: true,
     type: {
       title: 'Test Visualization',
       visualization: VisualizationStub
@@ -65,7 +64,7 @@ describe('VisualizationChart', () => {
     domNode.addEventListener('renderStart', renderStart);
     domNode.addEventListener('renderComplete', renderComplete);
 
-    mount(<VisualizationChart vis={vis} listenOnChange={true} />, {
+    mount(<VisualizationChart vis={vis} />, {
       attachTo: domNode
     });
 
@@ -77,7 +76,7 @@ describe('VisualizationChart', () => {
   });
 
   it('should render visualization', async () => {
-    const wrapper = mount(<VisualizationChart vis={vis} listenOnChange={true} />);
+    const wrapper = mount(<VisualizationChart vis={vis} />);
     jest.runAllTimers();
     await renderPromise;
     expect(wrapper.find('.visualize-chart').text()).toMatch(/markdown/);
@@ -85,7 +84,7 @@ describe('VisualizationChart', () => {
 
   it('should re-render on param change', async () => {
     const renderComplete = jest.fn();
-    const wrapper = mount(<VisualizationChart vis={vis} listenOnChange={true} />);
+    const wrapper = mount(<VisualizationChart vis={vis} />);
     const domNode = wrapper.getDOMNode();
     domNode.addEventListener('renderComplete', renderComplete);
     jest.runAllTimers();
