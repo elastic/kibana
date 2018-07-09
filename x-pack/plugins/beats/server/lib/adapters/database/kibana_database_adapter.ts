@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FrameworkRequest } from '../famework/adapter_types';
 import {
   BulkIndexDocumentsParams,
   CreateDocumentParams,
@@ -11,7 +12,6 @@ import {
   DatabaseAdapter,
   DeleteDocumentParams,
   DeleteDocumentResponse,
-  FrameworkRequest,
   GetDocumentResponse,
   GetParams,
   IndexDocumentParams,
@@ -22,7 +22,7 @@ import {
   PutTemplateParams,
   SearchParams,
   SearchResponse,
-} from '../../lib';
+} from './adapter_types';
 
 export class KibanaDatabaseAdapter implements DatabaseAdapter {
   private es: KbnElasticSearchCluster;

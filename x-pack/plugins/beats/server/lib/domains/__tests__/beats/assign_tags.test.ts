@@ -11,7 +11,7 @@ import { TestingBackendFrameworkAdapter } from '../../../adapters/famework/testi
 import { MemoryTagsAdapter } from '../../../adapters/tags/memory_tags_adapter';
 import { MemoryTokensAdapter } from '../../../adapters/tokens/memory_tokens_adapter';
 
-import { BeatTag, CMBeat } from './../../../lib';
+import { BeatTag, CMBeat } from '../../../../../common/domain_types';
 
 import { CMBeatsDomain } from '../../beats';
 import { CMTagsDomain } from '../../tags';

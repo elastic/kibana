@@ -7,8 +7,8 @@
 import expect from 'expect.js';
 import { wrapRequest } from '../../../utils/wrap_request';
 import { TestingBackendFrameworkAdapter } from '../../adapters/famework/testing_framework_adapter';
+import { EnrollmentToken } from '../../adapters/tokens/adapter_types';
 import { MemoryTokensAdapter } from '../../adapters/tokens/memory_tokens_adapter';
-import { EnrollmentToken } from '../../lib';
 import { CMTokensDomain } from '../tokens';
 
 import Chance from 'chance';

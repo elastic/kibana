@@ -5,7 +5,7 @@
  */
 import expect from 'expect.js';
 import { beatsIndexTemplate } from '../../../../utils/index_templates';
-import { DatabaseAdapter } from '../../../lib';
+import { DatabaseAdapter } from '../adapter_types';
 
 interface ContractConfig {
   adapter?: DatabaseAdapter;

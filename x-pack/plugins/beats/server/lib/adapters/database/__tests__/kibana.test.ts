@@ -9,8 +9,8 @@
 import { createEsTestCluster } from '@kbn/test';
 // @ts-ignore
 import * as kbnTestServer from '../../../../../../../../src/test_utils/kbn_server';
+import { KbnElasticSearch } from '../adapter_types';
 import { KibanaDatabaseAdapter } from '../kibana_database_adapter';
-import { KbnElasticSearch } from './../../../lib';
 import { contractTests } from './test_contract';
 
 const kbnServer = kbnTestServer.createServerWithCorePlugins();

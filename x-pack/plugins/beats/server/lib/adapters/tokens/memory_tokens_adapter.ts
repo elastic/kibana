@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CMTokensAdapter, EnrollmentToken, FrameworkRequest } from '../../lib';
+import { FrameworkRequest } from '../famework/adapter_types';
+import { CMTokensAdapter, EnrollmentToken } from './adapter_types';
 
 export class MemoryTokensAdapter implements CMTokensAdapter {
   private tokenDB: EnrollmentToken[];

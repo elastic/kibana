@@ -7,7 +7,7 @@
 import { intersection, uniq, values } from 'lodash';
 import { UNIQUENESS_ENFORCING_TYPES } from '../../../common/constants';
 import { ConfigurationBlock } from '../../../common/domain_types';
-import { FrameworkUser } from '../adapters/framework/adapter_types';
+import { FrameworkRequest } from '../adapters/famework/adapter_types';
 
 import { CMTagsAdapter } from '../adapters/tags/adapter_types';
 import { entries } from './../../utils/polyfills';
@@ -18,12 +18,12 @@ export class CMTagsDomain {
     this.adapter = adapter;
   }
 
-  public async getTagsWithIds(user: FrameworkUser, tagIds: string[]) {
-    return await this.adapter.getTagsWithIds(user, tagIds);
+  public async getTagsWithIds(req: FrameworkRequest, tagIds: string[]) {
+    return await this.adapter.getTagsWithIds(req, tagIds);
   }
 
   public async saveTag(
-    user: FrameworkUser,
+    req: FrameworkRequest,
     tagId: string,
     configs: ConfigurationBlock[]
   ) {
@@ -40,7 +40,7 @@ export class CMTagsDomain {
     };
     return {
       isValid: true,
-      result: await this.adapter.upsertTag(user, tag),
+      result: await this.adapter.upsertTag(req, tag),
     };
   }
 

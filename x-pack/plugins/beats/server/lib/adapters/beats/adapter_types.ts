@@ -5,41 +5,41 @@
  */
 
 import { CMBeat } from '../../../../common/domain_types';
-import { FrameworkUser } from '../framework/adapter_types';
+import { FrameworkRequest } from '../famework/adapter_types';
 
 // FIXME: fix getBeatsWithIds return type
 export interface CMBeatsAdapter {
   insert(beat: CMBeat): Promise<void>;
   update(beat: CMBeat): Promise<void>;
   get(id: string): any;
-  getAll(user: FrameworkUser): any;
-  getWithIds(user: FrameworkUser, beatIds: string[]): any;
-  verifyBeats(user: FrameworkUser, beatIds: string[]): any;
+  getAll(req: FrameworkRequest): any;
+  getWithIds(req: FrameworkRequest, beatIds: string[]): any;
+  verifyBeats(req: FrameworkRequest, beatIds: string[]): any;
   removeTagsFromBeats(
-    user: FrameworkUser,
-    removals: BeatsTagAssignment[]
-  ): Promise<BeatsTagAssignment[]>;
+    req: FrameworkRequest,
+    removals: CMTagAssignment[]
+  ): Promise<CMTagAssignment[]>;
   assignTagsToBeats(
-    user: FrameworkUser,
-    assignments: BeatsTagAssignment[]
-  ): Promise<BeatsTagAssignment[]>;
+    req: FrameworkRequest,
+    assignments: CMTagAssignment[]
+  ): Promise<CMTagAssignment[]>;
 }
 
-export interface BeatsTagAssignment {
+export interface CMTagAssignment {
   beatId: string;
   tag: string;
   idxInRequest?: number;
 }
 
-interface BeatsReturnedTagAssignment {
+interface CMReturnedTagAssignment {
   status: number | null;
   result?: string;
 }
 
 export interface CMAssignmentReturn {
-  assignments: BeatsReturnedTagAssignment[];
+  assignments: CMReturnedTagAssignment[];
 }
 
-export interface BeatsRemovalReturn {
-  removals: BeatsReturnedTagAssignment[];
+export interface CMRemovalReturn {
+  removals: CMReturnedTagAssignment[];
 }

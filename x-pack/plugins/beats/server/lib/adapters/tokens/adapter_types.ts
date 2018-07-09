@@ -3,18 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FrameworkUser } from '../framework/adapter_types';
+import { FrameworkRequest } from '../famework/adapter_types';
 
-export interface TokenEnrollmentData {
+export interface EnrollmentToken {
   token: string | null;
   expires_on: string;
 }
 
 export interface CMTokensAdapter {
   deleteEnrollmentToken(enrollmentToken: string): Promise<void>;
-  getEnrollmentToken(enrollmentToken: string): Promise<TokenEnrollmentData>;
+  getEnrollmentToken(enrollmentToken: string): Promise<EnrollmentToken>;
   upsertTokens(
-    user: FrameworkUser,
-    tokens: TokenEnrollmentData[]
-  ): Promise<TokenEnrollmentData[]>;
+    req: FrameworkRequest,
+    tokens: EnrollmentToken[]
+  ): Promise<EnrollmentToken[]>;
 }
