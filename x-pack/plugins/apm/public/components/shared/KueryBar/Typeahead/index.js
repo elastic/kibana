@@ -200,7 +200,7 @@ export class Typeahead extends Component {
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton>Search</EuiButton>
+            <EuiButton onClick={this.onSubmit}>Search</EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiIconTip
