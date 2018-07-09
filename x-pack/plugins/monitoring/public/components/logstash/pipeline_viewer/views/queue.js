@@ -11,10 +11,7 @@ import { EuiSpacer, EuiText } from '@elastic/eui';
 export function Queue() {
   return (
     <div>
-      <StatementListHeading
-        iconType="logstashQueue"
-        title="Queue"
-      />
+      <StatementListHeading iconType="logstashQueue" title="Queue" />
       <EuiSpacer size="s" />
       <EuiText className="pipelineViewer__queueMessage">
         Queue metrics not available
