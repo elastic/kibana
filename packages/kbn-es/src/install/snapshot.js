@@ -115,9 +115,7 @@ function downloadFile(url, dest, log) {
 
 function getFilename(license, version) {
   const extension = os.platform().startsWith('win') ? 'zip' : 'tar.gz';
-  const basename = `elasticsearch${
-    license === 'oss' ? '-oss-' : '-'
-  }${version}`;
+  const basename = `elasticsearch${license === 'oss' ? '-oss-' : '-'}${version}`;
 
   return `${basename}-SNAPSHOT.${extension}`;
 }
