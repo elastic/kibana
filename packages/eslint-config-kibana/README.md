@@ -29,3 +29,17 @@ the `@elastic/eslint-config-kibana/jest` config can be extended as well to use
   ]
 }
 ```
+
+## Optional prettier config
+
+If the project wants to use [prettier](https://github.com/prettier/prettier), 
+the `@elastic/eslint-config-kibana/prettier` config can be extended used:
+
+```javascript
+{
+  extends: [
+    '@elastic/eslint-config-kibana',
+    '@elastic/eslint-config-kibana/prettier'
+  ]
+}
+```
