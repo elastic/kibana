@@ -12,9 +12,9 @@ export function createSpacesService() {
   const contextCache = new WeakMap();
   const spaceChangeHandlers = new Map();
 
-  function getUrlContext(request, defaultContext = null) {
+  function getUrlContext(request) {
     if (!contextCache.has(request)) {
-      _populateCache(request, defaultContext);
+      _populateCache(request);
     }
 
     const { urlContext } = contextCache.get(request);
@@ -37,8 +37,8 @@ export function createSpacesService() {
     spaceChangeHandlers.forEach(handler => handler(operation, cloneDeep(space), request));
   }
 
-  function _populateCache(request, defaultContext) {
-    const urlContext = getSpaceUrlContext(request.getBasePath(), defaultContext);
+  function _populateCache(request) {
+    const urlContext = getSpaceUrlContext(request.getBasePath());
 
     contextCache.set(request, {
       urlContext

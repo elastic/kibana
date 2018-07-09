@@ -65,7 +65,7 @@ uiModules.get('apps/management')
           updateAdvancedSettings($scope, config, $route.current.params.setting || '');
         }, $scope);
 
-        $scope.$on('$destory', () => {
+        $scope.$on('$destroy', () => {
           destroyAdvancedSettings();
         });
 

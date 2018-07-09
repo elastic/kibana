@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function getSpaceUrlContext(basePath = '/', defaultContext = '') {
+export function getSpaceUrlContext(basePath = '/') {
   // Look for `/s/space-url-context` in the base path
   const matchResult = basePath.match(/\/s\/([a-z0-9\-]+)/);
 
   if (!matchResult || matchResult.length === 0) {
-    return defaultContext;
+    return '';
   }
 
   // Ignoring first result, we only want the capture group result at index 1
-  const [, urlContext = defaultContext] = matchResult;
+  const [, urlContext = ''] = matchResult;
 
   return urlContext;
 }

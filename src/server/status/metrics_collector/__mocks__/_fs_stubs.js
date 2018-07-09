@@ -62,7 +62,7 @@ export function cGroups(hierarchy) {
 
 class FSError extends Error {
   constructor(fileName, code) {
-    super('Stub File Sytem Stub Error: ' + fileName);
+    super('Stub File System Stub Error: ' + fileName);
     this.code = code;
     this.stack = null;
   }

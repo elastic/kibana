@@ -67,8 +67,8 @@ export function initSpacesApi(server) {
         });
 
         spaces = result.saved_objects.map(convertSavedObjectToSpace);
-      } catch (e) {
-        return reply(wrapError(e));
+      } catch (error) {
+        return reply(wrapError(error));
       }
 
       return reply(spaces);
@@ -90,8 +90,8 @@ export function initSpacesApi(server) {
         const response = await client.get('space', spaceId);
 
         return reply(convertSavedObjectToSpace(response));
-      } catch (e) {
-        return reply(wrapError(e));
+      } catch (error) {
+        return reply(wrapError(error));
       }
     },
     config: {
@@ -107,10 +107,10 @@ export function initSpacesApi(server) {
 
       const space = omit(request.payload, ['id', '_reserved']);
 
-      const { error } = await checkForDuplicateContext(space);
+      const { error: contextError } = await checkForDuplicateContext(space);
 
-      if (error) {
-        return reply(wrapError(error));
+      if (contextError) {
+        return reply(wrapError(contextError));
       }
 
       const id = request.params.id;
@@ -164,8 +164,8 @@ export function initSpacesApi(server) {
       let result;
       try {
         result = await client.create('space', { ...space }, { id, overwrite });
-      } catch (e) {
-        return reply(wrapError(e));
+      } catch (error) {
+        return reply(wrapError(error));
       }
 
       const updatedSpace = convertSavedObjectToSpace(result);
@@ -200,8 +200,8 @@ export function initSpacesApi(server) {
         }
 
         result = await client.delete('space', id);
-      } catch (e) {
-        return reply(wrapError(e));
+      } catch (error) {
+        return reply(wrapError(error));
       }
 
       spacesService._onSpaceChange('delete', existingSpace, request);
@@ -214,7 +214,7 @@ export function initSpacesApi(server) {
   });
 
   server.route({
-    method: 'PUT',
+    method: 'POST',
     path: '/api/spaces/v1/space/{id}/select',
     async handler(request, reply) {
       const client = request.getSavedObjectsClient();
@@ -230,8 +230,8 @@ export function initSpacesApi(server) {
           location: addSpaceUrlContext(config.get('server.basePath'), existingSpace.urlContext, config.get('server.defaultRoute'))
         });
 
-      } catch (e) {
-        return reply(wrapError(e));
+      } catch (error) {
+        return reply(wrapError(error));
       }
     }
   });
@@ -243,11 +243,11 @@ export function initSpacesApi(server) {
         id: existingSpace.id,
         ...existingSpace.attributes
       };
-    } catch (e) {
-      if (client.errors.isNotFoundError(e)) {
+    } catch (error) {
+      if (client.errors.isNotFoundError(error)) {
         return null;
       }
-      throw e;
+      throw error;
     }
   }
 }

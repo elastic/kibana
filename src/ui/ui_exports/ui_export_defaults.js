@@ -35,9 +35,7 @@ export const UI_EXPORT_DEFAULTS = {
     'moment-timezone$': resolve(ROOT, 'webpackShims/moment-timezone')
   },
 
-  translationPaths: [
-    resolve(ROOT, 'src/ui/ui_i18n/translations/en.json'),
-  ],
+  translationPaths: [],
 
   appExtensions: {
     fieldFormatEditors: [

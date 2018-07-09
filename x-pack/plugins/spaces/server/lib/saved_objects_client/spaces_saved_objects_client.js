@@ -6,7 +6,8 @@
 
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { isTypeSpaceAware } from './lib/is_type_space_aware';
-import { getSpacesQueryParams } from './lib/query_params';
+import { getSpacesQueryFilters } from './lib/query_filters';
+import uniq from 'lodash';
 
 export class SpacesSavedObjectsClient {
   constructor(options) {
@@ -23,7 +24,7 @@ export class SpacesSavedObjectsClient {
     this._request = request;
     this._types = types;
 
-    this._spaceUrlContext = spacesService.getUrlContext(this._request, '');
+    this._spaceUrlContext = spacesService.getUrlContext(this._request);
   }
 
   async create(type, attributes = {}, options = {}) {
@@ -31,29 +32,34 @@ export class SpacesSavedObjectsClient {
     const spaceId = await this._getSpaceId();
     const shouldAssignSpaceId = spaceId !== DEFAULT_SPACE_ID && isTypeSpaceAware(type);
 
+    const createOptions = {
+      ...options
+    };
+
     if (shouldAssignSpaceId) {
-      options.extraBodyProperties = {
+      createOptions.extraBodyProperties = {
         ...options.extraBodyProperties,
-        spaceId: await this._getSpaceId()
+        spaceId
       };
     }
 
-    return await this._client.create(type, attributes, options);
+    return await this._client.create(type, attributes, createOptions);
   }
 
   async bulkCreate(objects, options = {}) {
     const spaceId = await this._getSpaceId();
-    const objectsToCreate = objects.map(o => {
-      if (isTypeSpaceAware(o.type)) {
+    const objectsToCreate = objects.map(object => {
+      const shouldAssignSpaceId = spaceId !== DEFAULT_SPACE_ID && isTypeSpaceAware(object.type);
+      if (shouldAssignSpaceId) {
         return {
-          ...o,
+          ...object,
           extraBodyProperties: {
-            ...o.extraBodyProperties,
+            ...object.extraBodyProperties,
             spaceId
           }
         };
       }
-      return o;
+      return object;
     });
 
     return await this._client.bulkCreate(objectsToCreate, options);
@@ -77,21 +83,24 @@ export class SpacesSavedObjectsClient {
 
     const spaceId = await this._getSpaceId();
 
-    spaceOptions.extraQueryParams = getSpacesQueryParams(spaceId, types);
+    spaceOptions.filters = getSpacesQueryFilters(spaceId, types);
 
     return await this._client.find({ ...options, ...spaceOptions });
   }
 
-  async bulkGet(objects = []) {
+  async bulkGet(objects = [], options = {}) {
     // ES 'mget' does not support queries, so we have to filter results after the fact.
     const thisSpaceId = await this._getSpaceId();
 
+    const extraSourceProperties = this._collectExtraSourceProperties(['spaceId', 'type'], options.extraSourceProperties);
+
     const result = await this._client.bulkGet(objects, {
-      extraSourceProperties: ['spaceId', 'type']
+      ...options,
+      extraSourceProperties
     });
 
     result.saved_objects = result.saved_objects.map(savedObject => {
-      const { id, type, spaceId } = savedObject;
+      const { id, type, spaceId = DEFAULT_SPACE_ID } = savedObject;
 
       if (isTypeSpaceAware(type)) {
         if (spaceId !== thisSpaceId) {
@@ -109,11 +118,14 @@ export class SpacesSavedObjectsClient {
     return result;
   }
 
-  async get(type, id) {
+  async get(type, id, options = {}) {
     // ES 'get' does not support queries, so we have to filter results after the fact.
 
+    const extraSourceProperties = this._collectExtraSourceProperties(['spaceId'], options.extraSourceProperties);
+
     const response = await this._client.get(type, id, {
-      extraSourceProperties: ['spaceId']
+      ...options,
+      extraSourceProperties
     });
 
     const { spaceId: objectSpaceId = DEFAULT_SPACE_ID } = response;
@@ -134,10 +146,13 @@ export class SpacesSavedObjectsClient {
     if (isTypeSpaceAware(type)) {
       await this.get(type, id);
 
-      options.extraBodyProperties = {
-        ...options.extraBodyProperties,
-        spaceId: await this._getSpaceId()
-      };
+      const spaceId = await this._getSpaceId();
+      if (spaceId !== DEFAULT_SPACE_ID) {
+        options.extraBodyProperties = {
+          ...options.extraBodyProperties,
+          spaceId
+        };
+      }
     }
 
     return await this._client.update(type, id, attributes, options);
@@ -169,5 +184,9 @@ export class SpacesSavedObjectsClient {
     }
 
     return null;
+  }
+
+  _collectExtraSourceProperties(thisClientProperties, optionalProperties = []) {
+    return uniq([...thisClientProperties, ...optionalProperties]).value();
   }
 }

@@ -14,8 +14,8 @@ import { createSpacesService } from './server/lib/create_spaces_service';
 import { getActiveSpace } from './server/lib/get_active_space';
 import { wrapError } from './server/lib/errors';
 import mappings from './mappings.json';
-import { spacesSavedObjectsClientWrapper } from './server/lib/saved_objects_client/saved_objects_client_wrapper';
-import { mirrorStatusAndInitialize } from './server/lib/mirror_status_and_initialize';
+import { spacesSavedObjectsClientWrapperFactory } from './server/lib/saved_objects_client/saved_objects_client_wrapper_factory';
+import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
 
 export const spaces = (kibana) => new kibana.Plugin({
   id: 'spaces',
@@ -68,7 +68,7 @@ export const spaces = (kibana) => new kibana.Plugin({
     const thisPlugin = this;
     const xpackMainPlugin = server.plugins.xpack_main;
 
-    mirrorStatusAndInitialize(xpackMainPlugin.status, thisPlugin.status, async () => {
+    watchStatusAndLicenseToInitialize(xpackMainPlugin, thisPlugin, async () => {
       await createDefaultSpace(server);
     });
 
@@ -83,7 +83,9 @@ export const spaces = (kibana) => new kibana.Plugin({
     server.decorate('server', 'spaces', spacesService);
 
     const { addScopedSavedObjectsClientWrapperFactory, types } = server.savedObjects;
-    addScopedSavedObjectsClientWrapperFactory(spacesSavedObjectsClientWrapper(spacesService, types));
+    addScopedSavedObjectsClientWrapperFactory(
+      spacesSavedObjectsClientWrapperFactory(spacesService, types)
+    );
 
     initSpacesApi(server);
 

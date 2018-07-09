@@ -76,7 +76,7 @@ export class SavedObjectsClient {
    * error messages.
    *
    * From my (Spencer) perspective, a 404 from the SavedObjectsApi is a 404; The
-   * object the request/call was targetting could not be found. This is why #14141
+   * object the request/call was targeting could not be found. This is why #14141
    * takes special care to ensure that 404 errors are generic and don't distinguish
    * between index missing or document missing.
    *
@@ -102,6 +102,7 @@ export class SavedObjectsClient {
    * @param {object} [options={}]
    * @property {string} [options.id] - force id on creation, not recommended
    * @property {boolean} [options.overwrite=false]
+   * @property {object} [options.extraBodyProperties={}] - extra properties to append to the document body, outside of the object's type property
    * @returns {promise} - { id, type, version, attributes }
   */
   async create(type, attributes = {}, options = {}) {
@@ -111,7 +112,7 @@ export class SavedObjectsClient {
   /**
    * Creates multiple documents at once
    *
-   * @param {array} objects - [{ type, id, attributes }]
+   * @param {array} objects - [{ type, id, attributes, extraBodyProperties }]
    * @param {object} [options={}]
    * @property {boolean} [options.overwrite=false] - overwrites existing documents
    * @returns {promise} - [{ id, type, version, attributes, error: { message } }]
@@ -137,6 +138,7 @@ export class SavedObjectsClient {
    * @property {string} [options.search]
    * @property {Array<string>} [options.searchFields] - see Elasticsearch Simple Query String
    *                                        Query field argument for more information
+   * @property {object} [options.filters] - ES Query filters to append
    * @property {integer} [options.page=1]
    * @property {integer} [options.perPage=20]
    * @property {string} [options.sortField]
@@ -152,6 +154,8 @@ export class SavedObjectsClient {
    * Returns an array of objects by id
    *
    * @param {array} objects - an array ids, or an array of objects containing id and optionally type
+   * @param {object} [options = {}]
+   * @param {array} [options.extraSourceProperties = []] - an array of extra properties to return from the underlying document
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }] }
    * @example
    *
@@ -169,6 +173,8 @@ export class SavedObjectsClient {
    *
    * @param {string} type
    * @param {string} id
+   * @param {object} [options = {}]
+   * @param {array} [options.extraSourceProperties = []] - an array of extra properties to return from the underlying document
    * @returns {promise} - { id, type, version, attributes }
    */
   async get(type, id, options = {}) {
@@ -182,6 +188,7 @@ export class SavedObjectsClient {
    * @param {string} id
    * @param {object} [options={}]
    * @property {integer} options.version - ensures version matches that of persisted object
+   * @param {array} [options.extraBodyProperties = {}] - an object of extra properties to write into the underlying document
    * @returns {promise}
    */
   async update(type, id, attributes, options = {}) {

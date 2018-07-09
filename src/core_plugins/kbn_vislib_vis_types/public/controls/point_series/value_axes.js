@@ -39,7 +39,7 @@ module.directive('vislibValueAxes', function () {
         }
       }
 
-      function mapPositionOposite(position) {
+      function mapPositionOpposite(position) {
         switch (position) {
           case 'bottom': return 'top';
           case 'top': return 'bottom';
@@ -96,7 +96,7 @@ module.directive('vislibValueAxes', function () {
           return value;
         }, 1);
 
-        newAxis.position = mapPositionOposite(firstAxis.position);
+        newAxis.position = mapPositionOpposite(firstAxis.position);
         const axisName = _.capitalize(newAxis.position) + 'Axis-';
         newAxis.name = axisName + $scope.vis.params.valueAxes.reduce((value, axis) => {
           if (axis.name.substr(0, axisName.length) === axisName) {

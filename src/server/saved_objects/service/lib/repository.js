@@ -211,7 +211,7 @@ export class SavedObjectsRepository {
    * @property {string} [options.search]
    * @property {Array<string>} [options.searchFields] - see Elasticsearch Simple Query String
    *                                        Query field argument for more information
-   * @property {object} [options.extraQueryParams] - ES Query parameters to merge/append into the generated query
+   * @property {object} [options.filters] - ES Query filters to append
    * @property {integer} [options.page=1]
    * @property {integer} [options.perPage=20]
    * @property {string} [options.sortField]
@@ -229,7 +229,7 @@ export class SavedObjectsRepository {
       sortField,
       sortOrder,
       fields,
-      extraQueryParams,
+      filters,
     } = options;
 
     if (searchFields && !Array.isArray(searchFields)) {
@@ -240,8 +240,8 @@ export class SavedObjectsRepository {
       throw new TypeError('options.searchFields must be an array');
     }
 
-    if (extraQueryParams && typeof extraQueryParams !== 'object') {
-      throw new TypeError('options.extraQueryParams must be an object');
+    if (filters && !Array.isArray(filters)) {
+      throw new TypeError('options.filters must be an array');
     }
 
     const esOptions = {
@@ -258,7 +258,7 @@ export class SavedObjectsRepository {
           type,
           sortField,
           sortOrder,
-          extraQueryParams
+          filters
         })
       }
     };
@@ -406,7 +406,7 @@ export class SavedObjectsRepository {
    * @param {string} id
    * @param {object} [options={}]
    * @property {integer} options.version - ensures version matches that of persisted object
-   * @param {array} [options.extraBodyProperties = []] - an array of extra properties to write into the underlying document
+   * @param {array} [options.extraBodyProperties = {}] - an object of extra properties to write into the underlying document
    * @returns {promise}
    */
   async update(type, id, attributes, options = {}) {

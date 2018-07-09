@@ -296,7 +296,7 @@ Notifier.prototype.timed = function (name, fn) {
   };
 };
 
-const overrideableOptions = ['lifetime', 'icon'];
+const overridableOptions = ['lifetime', 'icon'];
 
 /**
  * Alert the user of an error that occured
@@ -317,7 +317,7 @@ Notifier.prototype.error = function (err, opts, cb) {
     lifetime: Notifier.config.errorLifetime,
     actions: ['report', 'accept'],
     stack: formatStack(err)
-  }, _.pick(opts, overrideableOptions));
+  }, _.pick(opts, overridableOptions));
   return add(config, cb);
 };
 
@@ -339,7 +339,7 @@ Notifier.prototype.warning = function (msg, opts, cb) {
     title: 'Warning',
     lifetime: Notifier.config.warningLifetime,
     actions: ['accept']
-  }, _.pick(opts, overrideableOptions));
+  }, _.pick(opts, overridableOptions));
   return add(config, cb);
 };
 
