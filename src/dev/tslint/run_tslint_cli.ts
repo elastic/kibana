@@ -70,10 +70,12 @@ export function runTslintCli() {
   );
 
   list.run().catch((error: any) => {
+    process.exitCode = 1;
+
     if (!error.errors) {
       log.error('Unhandled execption!');
       log.error(error);
-      process.exit(1);
+      process.exit();
     }
 
     for (const e of error.errors) {
