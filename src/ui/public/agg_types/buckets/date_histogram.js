@@ -92,7 +92,7 @@ export const dateHistogramBucketAgg = new BucketAggType({
       name: 'field',
       filterFieldTypes: 'date',
       default: function (agg) {
-        return agg.vis.indexPattern.timeFieldName;
+        return agg._indexPattern.timeFieldName;
       },
       onChange: function (agg) {
         if (_.get(agg, 'params.interval.val') === 'auto' && !agg.fieldIsTimeField()) {
