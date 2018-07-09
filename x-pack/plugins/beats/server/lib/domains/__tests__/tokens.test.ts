@@ -7,7 +7,7 @@
 import expect from 'expect.js';
 import { wrapRequest } from '../../../utils/wrap_request';
 import { TestingBackendFrameworkAdapter } from '../../adapters/famework/testing_framework_adapter';
-import { EnrollmentToken } from '../../adapters/tokens/adapter_types';
+import { TokenEnrollmentData } from '../../adapters/tokens/adapter_types';
 import { MemoryTokensAdapter } from '../../adapters/tokens/memory_tokens_adapter';
 import { CMTokensDomain } from '../tokens';
 
@@ -32,7 +32,7 @@ const settings = {
 
 describe('Token Domain Lib', () => {
   let tokensLib: CMTokensDomain;
-  let tokensDB: EnrollmentToken[] = [];
+  let tokensDB: TokenEnrollmentData[] = [];
 
   beforeEach(async () => {
     tokensDB = [];
@@ -59,7 +59,9 @@ describe('Token Domain Lib', () => {
     );
 
     expect(tokensFromApi.length).to.eql(numTokens);
-    expect(tokensFromApi).to.eql(tokensDB.map((t: EnrollmentToken) => t.token));
+    expect(tokensFromApi).to.eql(
+      tokensDB.map((t: TokenEnrollmentData) => t.token)
+    );
   });
 
   it('should set token expiration to 10 minutes from now by default', async () => {

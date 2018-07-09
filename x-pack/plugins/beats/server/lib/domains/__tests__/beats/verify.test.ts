@@ -12,7 +12,7 @@ import { MemoryTagsAdapter } from '../../../adapters/tags/memory_tags_adapter';
 import { MemoryTokensAdapter } from '../../../adapters/tokens/memory_tokens_adapter';
 
 import { BeatTag, CMBeat } from '../../../../../common/domain_types';
-import { EnrollmentToken } from '../../../adapters/tokens/adapter_types';
+import { TokenEnrollmentData } from '../../../adapters/tokens/adapter_types';
 
 import { CMBeatsDomain } from '../../beats';
 import { CMTagsDomain } from '../../tags';
@@ -42,7 +42,7 @@ describe('Beats Domain Lib', () => {
 
   let beatsDB: CMBeat[] = [];
   let tagsDB: BeatTag[] = [];
-  let tokensDB: EnrollmentToken[] = [];
+  let tokensDB: TokenEnrollmentData[] = [];
 
   describe('verify_beat', () => {
     beforeEach(async () => {

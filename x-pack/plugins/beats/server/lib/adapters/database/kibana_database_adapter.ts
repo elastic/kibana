@@ -6,33 +6,33 @@
 
 import { FrameworkRequest } from '../famework/adapter_types';
 import {
-  BulkIndexDocumentsParams,
-  CreateDocumentParams,
-  CreateDocumentResponse,
   DatabaseAdapter,
-  DeleteDocumentParams,
-  DeleteDocumentResponse,
-  GetDocumentResponse,
-  GetParams,
-  IndexDocumentParams,
-  KbnElasticSearch,
-  KbnElasticSearchCluster,
-  MGetParams,
-  MGetResponse,
-  PutTemplateParams,
-  SearchParams,
-  SearchResponse,
+  DatabaseBulkIndexDocumentsParams,
+  DatabaseCreateDocumentParams,
+  DatabaseCreateDocumentResponse,
+  DatabaseDeleteDocumentParams,
+  DatabaseDeleteDocumentResponse,
+  DatabaseGetDocumentResponse,
+  DatabaseGetParams,
+  DatabaseIndexDocumentParams,
+  DatabaseKbnESCluster,
+  DatabaseKbnESPlugin,
+  DatabaseMGetParams,
+  DatabaseMGetResponse,
+  DatabasePutTemplateParams,
+  DatabaseSearchParams,
+  DatabaseSearchResponse,
 } from './adapter_types';
 
 export class KibanaDatabaseAdapter implements DatabaseAdapter {
-  private es: KbnElasticSearchCluster;
+  private es: DatabaseKbnESCluster;
 
-  constructor(kbnElasticSearch: KbnElasticSearch) {
+  constructor(kbnElasticSearch: DatabaseKbnESPlugin) {
     this.es = kbnElasticSearch.getCluster('admin');
   }
   public async putTemplate(
     req: FrameworkRequest | null,
-    params: PutTemplateParams
+    params: DatabasePutTemplateParams
   ): Promise<any> {
     const callES = this.getCallType(req);
     const result = await callES('indices.putTemplate', params);
@@ -41,8 +41,8 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
 
   public async get<Source>(
     req: FrameworkRequest | null,
-    params: GetParams
-  ): Promise<GetDocumentResponse<Source>> {
+    params: DatabaseGetParams
+  ): Promise<DatabaseGetDocumentResponse<Source>> {
     const callES = this.getCallType(req);
     const result = await callES('get', params);
     return result;
@@ -51,8 +51,8 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
 
   public async mget<T>(
     req: FrameworkRequest | null,
-    params: MGetParams
-  ): Promise<MGetResponse<T>> {
+    params: DatabaseMGetParams
+  ): Promise<DatabaseMGetResponse<T>> {
     const callES = this.getCallType(req);
     const result = await callES('mget', params);
     return result;
@@ -61,7 +61,7 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
 
   public async bulk(
     req: FrameworkRequest | null,
-    params: BulkIndexDocumentsParams
+    params: DatabaseBulkIndexDocumentsParams
   ): Promise<any> {
     const callES = this.getCallType(req);
     const result = await callES('bulk', params);
@@ -70,15 +70,15 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
 
   public async create(
     req: FrameworkRequest | null,
-    params: CreateDocumentParams
-  ): Promise<CreateDocumentResponse> {
+    params: DatabaseCreateDocumentParams
+  ): Promise<DatabaseCreateDocumentResponse> {
     const callES = this.getCallType(req);
     const result = await callES('create', params);
     return result;
   }
   public async index<T>(
     req: FrameworkRequest | null,
-    params: IndexDocumentParams<T>
+    params: DatabaseIndexDocumentParams<T>
   ): Promise<any> {
     const callES = this.getCallType(req);
     const result = await callES('index', params);
@@ -86,8 +86,8 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
   }
   public async delete(
     req: FrameworkRequest | null,
-    params: DeleteDocumentParams
-  ): Promise<DeleteDocumentResponse> {
+    params: DatabaseDeleteDocumentParams
+  ): Promise<DatabaseDeleteDocumentResponse> {
     const callES = this.getCallType(req);
     const result = await callES('delete', params);
     return result;
@@ -95,8 +95,8 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
 
   public async search<Source>(
     req: FrameworkRequest | null,
-    params: SearchParams
-  ): Promise<SearchResponse<Source>> {
+    params: DatabaseSearchParams
+  ): Promise<DatabaseSearchResponse<Source>> {
     const callES = this.getCallType(req);
     const result = await callES('search', params);
     return result;

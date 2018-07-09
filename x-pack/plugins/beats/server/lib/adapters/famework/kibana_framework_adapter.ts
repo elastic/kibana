@@ -7,7 +7,7 @@
 import {
   BackendFrameworkAdapter,
   FrameworkRouteOptions,
-  WrappableRequest,
+  FrameworkWrappableRequest,
 } from './adapter_types';
 
 import { IStrictReply, Server } from 'hapi';
@@ -52,9 +52,10 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     });
   }
 
-  public registerRoute<RouteRequest extends WrappableRequest, RouteResponse>(
-    route: FrameworkRouteOptions<RouteRequest, RouteResponse>
-  ) {
+  public registerRoute<
+    RouteRequest extends FrameworkWrappableRequest,
+    RouteResponse
+  >(route: FrameworkRouteOptions<RouteRequest, RouteResponse>) {
     const wrappedHandler = (request: any, reply: IStrictReply<RouteResponse>) =>
       route.handler(wrapRequest(request), reply);
 
