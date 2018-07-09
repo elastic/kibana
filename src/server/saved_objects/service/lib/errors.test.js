@@ -65,7 +65,7 @@ describe('savedObjectsClient/errorTypes', () => {
       });
 
       describe('error.output', () => {
-        it('defaults to message of erorr', () => {
+        it('defaults to message of error', () => {
           const error = decorateBadRequestError(new Error('foobar'));
           expect(error.output.payload).toHaveProperty('message', 'foobar');
         });
@@ -107,7 +107,7 @@ describe('savedObjectsClient/errorTypes', () => {
       });
 
       describe('error.output', () => {
-        it('defaults to message of erorr', () => {
+        it('defaults to message of error', () => {
           const error = decorateNotAuthorizedError(new Error('foobar'));
           expect(error.output.payload).toHaveProperty('message', 'foobar');
         });
@@ -149,7 +149,7 @@ describe('savedObjectsClient/errorTypes', () => {
       });
 
       describe('error.output', () => {
-        it('defaults to message of erorr', () => {
+        it('defaults to message of error', () => {
           const error = decorateForbiddenError(new Error('foobar'));
           expect(error.output.payload).toHaveProperty('message', 'foobar');
         });
@@ -217,7 +217,7 @@ describe('savedObjectsClient/errorTypes', () => {
       });
 
       describe('error.output', () => {
-        it('defaults to message of erorr', () => {
+        it('defaults to message of error', () => {
           const error = decorateConflictError(new Error('foobar'));
           expect(error.output.payload).toHaveProperty('message', 'foobar');
         });
@@ -259,7 +259,7 @@ describe('savedObjectsClient/errorTypes', () => {
       });
 
       describe('error.output', () => {
-        it('defaults to message of erorr', () => {
+        it('defaults to message of error', () => {
           const error = decorateEsUnavailableError(new Error('foobar'));
           expect(error.output.payload).toHaveProperty('message', 'foobar');
         });

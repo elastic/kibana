@@ -49,7 +49,7 @@ export default new Chainable('lines', {
     {
       name: 'steps',
       types: ['number', 'boolean', 'null'],
-      help: 'Show line as step, eg, do not interpolate between points'
+      help: 'Show line as step, e.g., do not interpolate between points'
     }
   ],
   help: 'Show the seriesList as lines',

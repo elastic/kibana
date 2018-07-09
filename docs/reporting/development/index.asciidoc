@@ -1,7 +1,7 @@
 [role="xpack"]
 [[reporting-integration]]
 == Reporting Integration
-Intergrating a Kibana application with {reporting} requires a minimum amount of code, and the goal is to not have to
+Integrating a Kibana application with {reporting} requires a minimum amount of code, and the goal is to not have to
 modify the Reporting code as we add additional applications. Instead, applications abide by a contract that Reporting
 uses to determine the information that is required to export CSVs and PDFs.
 

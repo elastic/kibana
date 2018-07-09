@@ -19,49 +19,45 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { VisTypeProvider } from './';
+import chrome from '../../chrome';
+import { BaseVisType } from './base_vis_type';
 
-export function ReactVisTypeProvider(Private, getAppState, config) {
-  const VisType = Private(VisTypeProvider);
-
-  class ReactVisController {
-    constructor(el, vis) {
-      this.el = el;
-      this.vis = vis;
-    }
-
-    render(visData, updateStatus) {
-      this.visData = visData;
-
-      return new Promise((resolve) => {
-        const Component = this.vis.type.visConfig.component;
-        render(<Component
-          config={config}
-          vis={this.vis}
-          appState={getAppState()}
-          visData={visData}
-          renderComplete={resolve}
-          updateStatus={updateStatus}
-        />, this.el);
-      });
-    }
-
-    destroy() {
-      unmountComponentAtNode(this.el);
-    }
+class ReactVisController {
+  constructor(element, vis) {
+    this.el = element;
+    this.vis = vis;
   }
 
-  class ReactVisType extends VisType {
-    constructor(opts) {
-      opts.visualization = ReactVisController;
+  render(visData, updateStatus) {
+    this.visData = visData;
 
-      super(opts);
-
-      if (!this.visConfig.component) {
-        throw new Error('Missing component for ReactVisType');
-      }
-    }
+    return new Promise((resolve) => {
+      const Component = this.vis.type.visConfig.component;
+      const config = chrome.getUiSettingsClient();
+      render(<Component
+        config={config}
+        vis={this.vis}
+        visData={visData}
+        renderComplete={resolve}
+        updateStatus={updateStatus}
+      />, this.el);
+    });
   }
 
-  return ReactVisType;
+  destroy() {
+    unmountComponentAtNode(this.el);
+  }
+}
+
+export class ReactVisType extends BaseVisType {
+  constructor(opts) {
+    super({
+      ...opts,
+      visualization: ReactVisController
+    });
+
+    if (!this.visConfig.component) {
+      throw new Error('Missing component for ReactVisType');
+    }
+  }
 }

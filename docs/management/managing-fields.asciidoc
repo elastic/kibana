@@ -77,7 +77,7 @@ options are {ref}/modules-scripting-expression.html[Lucene expressions] and {ref
 While you can use other scripting languages if you enable dynamic scripting for them in Elasticsearch, this is not recommended
 because they cannot be sufficiently {ref}/modules-scripting-security.html[sandboxed].
 
-WARNING: Use of Groovy, Javascript, and Python scripting is deprecated starting in Elasticsearch 5.0, and support for those
+WARNING: Use of Groovy, JavaScript, and Python scripting is deprecated starting in Elasticsearch 5.0, and support for those
 scripting languages will be removed in the future.
 
 You can reference any single value numeric field in your expressions, for example:

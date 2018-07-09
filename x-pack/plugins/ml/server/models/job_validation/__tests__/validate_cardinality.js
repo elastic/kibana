@@ -82,7 +82,7 @@ describe('ML - validateCardinality', () => {
     );
   });
 
-  it('minimum job configuraton to pass cardinality check code', () => {
+  it('minimum job configuration to pass cardinality check code', () => {
     const job = {
       analysis_config: { detectors: [], influencers: [] },
       data_description: { time_field: '@timestamp' },

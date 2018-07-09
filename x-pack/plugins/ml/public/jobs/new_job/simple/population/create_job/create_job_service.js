@@ -8,15 +8,16 @@
 
 import _ from 'lodash';
 
-import { EVENT_RATE_COUNT_FIELD } from 'plugins/ml/jobs/new_job/simple/components/constants/general';
+import { EVENT_RATE_COUNT_FIELD, WIZARD_TYPE } from 'plugins/ml/jobs/new_job/simple/components/constants/general';
 import { ML_MEDIAN_PERCENTS } from 'plugins/ml/../common/util/job_utils';
 import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { createJobForSaving } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { ml } from 'plugins/ml/services/ml_api_service';
+import { timefilter } from 'ui/timefilter';
 
-export function PopulationJobServiceProvider(timefilter, Private) {
+export function PopulationJobServiceProvider(Private) {
 
   const TimeBuckets = Private(IntervalHelperProvider);
   const OVER_FIELD_EXAMPLES_COUNT = 40;
@@ -267,6 +268,10 @@ export function PopulationJobServiceProvider(timefilter, Private) {
         job.results_index_name = job.job_id;
       }
 
+      job.custom_settings = {
+        created_by: WIZARD_TYPE.POPULATION
+      };
+
       return job;
     }
 
@@ -358,7 +363,7 @@ export function PopulationJobServiceProvider(timefilter, Private) {
       const aggs = {};
       formConfig.fields.forEach((field, i) => {
         if (field.id === EVENT_RATE_COUNT_FIELD) {
-          if (field.splitField !== undefined) {
+          if (field.splitField !== undefined && field.firstSplitFieldName !== undefined) {
             // the event rate chart is draw using doc_values, so no need to specify a field.
             // however. if the event rate field is split, add a filter to just match the
             // fields which match the first split value (the front chart)
@@ -371,7 +376,7 @@ export function PopulationJobServiceProvider(timefilter, Private) {
             };
           }
         } else {
-          if (field.splitField !== undefined) {
+          if (field.splitField !== undefined && field.firstSplitFieldName !== undefined) {
             // if the field is split, add a filter to the aggregation to just select the
             // fields which match the first split value (the front chart)
             aggs[i] = {

@@ -30,13 +30,14 @@ import { uiModules } from 'ui/modules';
 import { updateOldState } from 'ui/vis/vis_update_state';
 import { VisualizeConstants } from '../visualize_constants';
 import { createLegacyClass } from 'ui/utils/legacy_class';
+import { SavedObjectProvider } from 'ui/courier';
 
 uiModules
   .get('app/visualize')
-  .factory('SavedVis', function (config, $injector, courier, Promise, savedSearches, Private) {
+  .factory('SavedVis', function (config, $injector, Promise, savedSearches, Private) {
     const Vis = Private(VisProvider);
-
-    createLegacyClass(SavedVis).inherits(courier.SavedObject);
+    const SavedObject = Private(SavedObjectProvider);
+    createLegacyClass(SavedVis).inherits(SavedObject);
     function SavedVis(opts) {
       const self = this;
       opts = opts || {};
@@ -66,7 +67,7 @@ uiModules
         afterESResp: this._afterEsResp
       });
 
-      this.showInRecenltyAccessed = true;
+      this.showInRecentlyAccessed = true;
     }
 
     SavedVis.type = 'visualization';
@@ -94,7 +95,7 @@ uiModules
 
       return self._getLinkedSavedSearch()
         .then(function () {
-          self.searchSource.size(0);
+          self.searchSource.setField('size', 0);
 
           return self.vis ? self._updateVis() : self._createVis();
         });
@@ -110,7 +111,7 @@ uiModules
       }
 
       if (self.savedSearch) {
-        self.searchSource.inherits(self.savedSearch.searchSource.getParent());
+        self.searchSource.setParent(self.savedSearch.searchSource.getParent());
         self.savedSearch.destroy();
         self.savedSearch = null;
       }
@@ -119,7 +120,7 @@ uiModules
         return savedSearches.get(self.savedSearchId)
           .then(function (savedSearch) {
             self.savedSearch = savedSearch;
-            self.searchSource.inherits(self.savedSearch.searchSource);
+            self.searchSource.setParent(self.savedSearch.searchSource);
           });
       }
     });
@@ -136,7 +137,7 @@ uiModules
         self.visState.title = self.title;
       }
       self.vis = new Vis(
-        self.searchSource.get('index'),
+        self.searchSource.getField('index'),
         self.visState
       );
 
@@ -146,7 +147,7 @@ uiModules
     SavedVis.prototype._updateVis = function () {
       const self = this;
 
-      self.vis.indexPattern = self.searchSource.get('index');
+      self.vis.indexPattern = self.searchSource.getField('index');
       self.visState.title = self.title;
       self.vis.setState(self.visState);
     };

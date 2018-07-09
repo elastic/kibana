@@ -98,7 +98,7 @@ export default async function ({ readConfigFile }) {
 
     // define the name and providers for services that should be
     // available to your tests. If you don't specify anything here
-    // only the built-in services will be avaliable
+    // only the built-in services will be available
     services: {
       ...kibanaFunctionalConfig.get('services'),
       esSupertest: kibanaAPITestsConfig.get('services.esSupertest'),

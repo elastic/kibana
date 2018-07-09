@@ -14,7 +14,7 @@ import { ClusterStatus } from '../cluster_status';
 import { MonitoringTable } from '../../';
 import { EuiLink } from '@elastic/eui';
 import { KuiTableRowCell, KuiTableRow } from '@kbn/ui-framework/components';
-import { SytemIndicesCheckbox } from './system_indices_checkbox';
+import { SystemIndicesCheckbox } from './system_indices_checkbox';
 
 const filterFields = ['name', 'status'];
 const columns = [
@@ -83,7 +83,7 @@ const getNoDataMessage = filterText => {
 };
 
 const renderToolBarSection = ({ showSystemIndices, toggleShowSystemIndices, ...props }) => (
-  <SytemIndicesCheckbox
+  <SystemIndicesCheckbox
     showSystemIndices={showSystemIndices}
     toggleShowSystemIndices={toggleShowSystemIndices}
     {...props}

@@ -37,7 +37,10 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
-    describe('adding a filter that excludes all data', async () => {
+    // Disabling flaky test
+    // Failing in PageObjects.dashboard.waitForRenderComplete() with the error
+    // "tryForTime timeout: Error: Still waiting on more visualizations to finish rendering, expecting: 17, received: 16"
+    describe.skip('adding a filter that excludes all data', async () => {
       before(async () => {
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.dashboard.setTimepickerInDataRange();
@@ -101,8 +104,8 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-
-    describe('disabling a filter unfilters the data on', async () => {
+    // Skipped because it depends on filter applied by disabled test
+    describe.skip('disabling a filter unfilters the data on', async () => {
       before(async () => {
         await testSubjects.click('disableFilter-bytes');
         await PageObjects.header.waitUntilLoadingHasFinished();

@@ -291,8 +291,12 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
         name: name,
         scripted: true
       });
-      this.fields.splice(fieldIndex, 1);
-      this.save();
+
+      if(fieldIndex > -1) {
+        this.fields.splice(fieldIndex, 1);
+        delete this.fieldFormatMap[name];
+        return this.save();
+      }
     }
 
     popularizeField(fieldName, unit = 1) {
@@ -404,7 +408,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
       };
 
       const potentialDuplicateByTitle = await findObjectByTitle(savedObjectsClient, type, this.title);
-      // If there is potentialy duplicate title, just create it
+      // If there is potentially duplicate title, just create it
       if (!potentialDuplicateByTitle) {
         return await _create();
       }
