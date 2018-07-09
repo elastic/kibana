@@ -55,8 +55,7 @@ export function CallClientProvider(Private, Promise, es) {
     const defer = Promise.defer();
 
     // for each respond with either the response or ABORTED
-    const respond = function (responses) {
-      responses = responses || [];
+    const respond = function (responses = []) {
       const activeSearchRequests = searchStrategiesWithRequests.reduce((allSearchRequests, { searchRequests }) => {
         return allSearchRequests.concat(searchRequests);
       }, [])
@@ -131,7 +130,7 @@ export function CallClientProvider(Private, Promise, es) {
       try {
         // The request was aborted while we were doing the above logic.
         if (isRequestAborted) {
-          throw ABORTED;
+          return await respond();
         }
 
         esPromise = Promise.all(esPromises);
@@ -144,10 +143,6 @@ export function CallClientProvider(Private, Promise, es) {
 
         await respond(aggregatedResponses);
       } catch(error) {
-        if (error === ABORTED) {
-          return await respond();
-        }
-
         if (errorAllowExplicitIndex.test(error)) {
           return errorAllowExplicitIndex.takeover();
         }
