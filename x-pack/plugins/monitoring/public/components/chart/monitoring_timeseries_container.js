@@ -22,7 +22,8 @@ export function MonitoringTimeseriesContainer({ series, onBrush }) {
 
   return (
     <div className="monitoring-chart__container">
-      <h2 className="euiTitle">
+      <h2 className="euiTitle" tabIndex="0">
+        <span className="kuiScreenReaderOnly">This chart is not accessible yet</span>
         { getTitle(series) }{ units ? ` (${units})` : '' }
         <OverlayTrigger
           placement="left"
