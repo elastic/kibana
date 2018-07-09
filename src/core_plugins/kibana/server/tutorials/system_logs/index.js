@@ -18,11 +18,13 @@
  */
 
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { ON_PREM_INSTRUCTIONS } from './on_prem';
-import { ELASTIC_CLOUD_INSTRUCTIONS } from './elastic_cloud';
-import { ON_PREM_ELASTIC_CLOUD_INSTRUCTIONS } from './on_prem_elastic_cloud';
+import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
 
 export function systemLogsSpecProvider() {
+  const moduleName = 'system';
+  const geoipRequired = true;
+  const uaRequired = false;
+  const platforms = ['OSX', 'DEB', 'RPM'];
   return {
     id: 'systemLogs',
     name: 'System logs',
@@ -45,8 +47,8 @@ export function systemLogsSpecProvider() {
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/system_logs/screenshot.png',
-    onPrem: ON_PREM_INSTRUCTIONS,
-    elasticCloud: ELASTIC_CLOUD_INSTRUCTIONS,
-    onPremElasticCloud: ON_PREM_ELASTIC_CLOUD_INSTRUCTIONS
+    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired),
+    elasticCloud: cloudInstructions(moduleName, platforms),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
   };
 }
