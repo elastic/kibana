@@ -49,6 +49,7 @@ export function AddData({ apmUiEnabled }) {
             <EuiButton
               className="addDataButton"
               href="#/home/tutorial/apm"
+              aria-label="Add Data using an APM server"
             >
               Add APM
             </EuiButton>
@@ -72,6 +73,7 @@ export function AddData({ apmUiEnabled }) {
               <EuiButton
                 className="addDataButton"
                 href="#/home/tutorial_directory/logging"
+                aria-label="View modules for setting up logging data flows"
               >
                 Add log data
               </EuiButton>
@@ -89,6 +91,7 @@ export function AddData({ apmUiEnabled }) {
               <EuiButton
                 className="addDataButton"
                 href="#/home/tutorial_directory/metrics"
+                aria-label="View modules for setting up metric data flows"
               >
                 Add metric data
               </EuiButton>
@@ -106,6 +109,7 @@ export function AddData({ apmUiEnabled }) {
               <EuiButton
                 className="addDataButton"
                 href="#/home/tutorial_directory/security"
+                aria-label="View modules for setting up security data flows"
               >
                 Add security events
               </EuiButton>
