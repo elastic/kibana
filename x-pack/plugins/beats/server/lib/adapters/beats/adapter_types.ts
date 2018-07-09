@@ -17,29 +17,29 @@ export interface CMBeatsAdapter {
   verifyBeats(req: FrameworkRequest, beatIds: string[]): any;
   removeTagsFromBeats(
     req: FrameworkRequest,
-    removals: CMTagAssignment[]
-  ): Promise<CMTagAssignment[]>;
+    removals: BeatsTagAssignment[]
+  ): Promise<BeatsTagAssignment[]>;
   assignTagsToBeats(
     req: FrameworkRequest,
-    assignments: CMTagAssignment[]
-  ): Promise<CMTagAssignment[]>;
+    assignments: BeatsTagAssignment[]
+  ): Promise<BeatsTagAssignment[]>;
 }
 
-export interface CMTagAssignment {
+export interface BeatsTagAssignment {
   beatId: string;
   tag: string;
   idxInRequest?: number;
 }
 
-interface CMReturnedTagAssignment {
+interface BeatsReturnedTagAssignment {
   status: number | null;
   result?: string;
 }
 
 export interface CMAssignmentReturn {
-  assignments: CMReturnedTagAssignment[];
+  assignments: BeatsReturnedTagAssignment[];
 }
 
-export interface CMRemovalReturn {
-  removals: CMReturnedTagAssignment[];
+export interface BeatsRemovalReturn {
+  removals: BeatsReturnedTagAssignment[];
 }

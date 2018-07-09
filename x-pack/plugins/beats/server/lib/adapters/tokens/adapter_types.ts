@@ -5,16 +5,16 @@
  */
 import { FrameworkRequest } from '../famework/adapter_types';
 
-export interface EnrollmentToken {
+export interface TokenEnrollmentData {
   token: string | null;
   expires_on: string;
 }
 
 export interface CMTokensAdapter {
   deleteEnrollmentToken(enrollmentToken: string): Promise<void>;
-  getEnrollmentToken(enrollmentToken: string): Promise<EnrollmentToken>;
+  getEnrollmentToken(enrollmentToken: string): Promise<TokenEnrollmentData>;
   upsertTokens(
     req: FrameworkRequest,
-    tokens: EnrollmentToken[]
-  ): Promise<EnrollmentToken[]>;
+    tokens: TokenEnrollmentData[]
+  ): Promise<TokenEnrollmentData[]>;
 }

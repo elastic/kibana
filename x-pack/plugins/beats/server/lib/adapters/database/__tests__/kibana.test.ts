@@ -9,7 +9,7 @@
 import { createEsTestCluster } from '@kbn/test';
 // @ts-ignore
 import * as kbnTestServer from '../../../../../../../../src/test_utils/kbn_server';
-import { KbnElasticSearch } from '../adapter_types';
+import { DatabaseKbnESPlugin } from '../adapter_types';
 import { KibanaDatabaseAdapter } from '../kibana_database_adapter';
 import { contractTests } from './test_contract';
 
@@ -29,6 +29,6 @@ contractTests('Kibana Database Adapter', {
   },
   adapterSetup: () => {
     return new KibanaDatabaseAdapter(kbnServer.server.plugins
-      .elasticsearch as KbnElasticSearch);
+      .elasticsearch as DatabaseKbnESPlugin);
   },
 });
