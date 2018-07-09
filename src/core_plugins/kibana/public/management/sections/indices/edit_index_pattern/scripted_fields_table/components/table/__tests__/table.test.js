@@ -22,7 +22,7 @@ import { shallow } from 'enzyme';
 
 import { Table } from '../table';
 
-import { shallowIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 const indexPattern = {
   fieldFormatMap: {
@@ -48,7 +48,7 @@ describe('Table', () => {
       />
     );
 
-    const component = shallowIntl(wrapper.find('I18nContext'));
+    const component = shallowWithIntl(wrapper.find('I18nContext'));
     expect(component).toMatchSnapshot();
   });
 
@@ -63,7 +63,7 @@ describe('Table', () => {
       />
     );
 
-    const component = shallowIntl(wrapper.find('I18nContext'));
+    const component = shallowWithIntl(wrapper.find('I18nContext'));
     const formatTableCell = shallow(component.prop('columns')[3].render('Elastic'));
     expect(formatTableCell).toMatchSnapshot();
   });
@@ -81,7 +81,7 @@ describe('Table', () => {
       />
     );
 
-    const component = shallowIntl(wrapper.find('I18nContext'));
+    const component = shallowWithIntl(wrapper.find('I18nContext'));
     // Click the delete button
     component.prop('columns')[4].actions[0].onClick();
     expect(editField).toBeCalled();
@@ -100,7 +100,7 @@ describe('Table', () => {
       />
     );
 
-    const component = shallowIntl(wrapper.find('I18nContext'));
+    const component = shallowWithIntl(wrapper.find('I18nContext'));
     // Click the delete button
     component.prop('columns')[4].actions[1].onClick();
     expect(deleteField).toBeCalled();

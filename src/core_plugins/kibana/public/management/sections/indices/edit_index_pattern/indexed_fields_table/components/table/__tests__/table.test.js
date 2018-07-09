@@ -22,7 +22,7 @@ import { shallow } from 'enzyme';
 
 import { Table } from '../table';
 
-import { shallowIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 const indexPattern = {
   timeFieldName: 'timestamp'
@@ -44,7 +44,7 @@ describe('Table', () => {
       />
     );
 
-    const component = shallowIntl(wrapper);
+    const component = shallowWithIntl(wrapper);
     expect(component).toMatchSnapshot();
   });
 
@@ -57,7 +57,7 @@ describe('Table', () => {
       />
     );
 
-    const component = shallowIntl(wrapper);
+    const component = shallowWithIntl(wrapper);
     const tableCell = shallow(component.prop('columns')[0].render('Elastic'));
     expect(tableCell).toMatchSnapshot();
   });
@@ -71,7 +71,7 @@ describe('Table', () => {
       />
     );
 
-    const component = shallowIntl(wrapper);
+    const component = shallowWithIntl(wrapper);
     const tableCell = shallow(component.prop('columns')[0].render('timestamp', true));
     expect(tableCell).toMatchSnapshot();
   });
@@ -85,7 +85,7 @@ describe('Table', () => {
       />
     );
 
-    const component = shallowIntl(wrapper);
+    const component = shallowWithIntl(wrapper);
     const tableCell = shallow(component.prop('columns')[3].render(true));
     expect(tableCell).toMatchSnapshot();
   });
@@ -99,7 +99,7 @@ describe('Table', () => {
       />
     );
 
-    const component = shallowIntl(wrapper);
+    const component = shallowWithIntl(wrapper);
     const tableCell = shallow(component.prop('columns')[3].render(false));
     expect(tableCell).toMatchSnapshot();
   });
@@ -113,7 +113,7 @@ describe('Table', () => {
       />
     );
 
-    const component = shallowIntl(wrapper);
+    const component = shallowWithIntl(wrapper);
     const tableCell = shallow(component.prop('columns')[1].render('string'));
     expect(tableCell).toMatchSnapshot();
   });
@@ -127,7 +127,7 @@ describe('Table', () => {
       />
     );
 
-    const component = shallowIntl(wrapper);
+    const component = shallowWithIntl(wrapper);
     const tableCell = shallow(component.prop('columns')[1].render('conflict', true));
     expect(tableCell).toMatchSnapshot();
   });
@@ -143,7 +143,7 @@ describe('Table', () => {
       />
     );
 
-    const component = shallowIntl(wrapper);
+    const component = shallowWithIntl(wrapper);
     // Click the edit button
     component.prop('columns')[6].actions[0].onClick();
     expect(editField).toBeCalled();

@@ -20,10 +20,6 @@
 import { sectionTypes } from './section_keys';
 
 export function translateSectionName(i18n, typeId) {
-  if (!typeId) {
-    return '';
-  }
-
   switch (typeId) {
     case sectionTypes.INDEX_PATTERNS:
       return i18n('common.ui.management.section.indexPatterns.header', { defaultMessage: 'Index Patterns' });

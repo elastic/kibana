@@ -16,28 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+/* global jest */
 
-import PropTypes from 'prop-types';
-import React from 'react';
-import { shallow } from 'enzyme';
-import { intl } from './mocks/intl';
-
-export function shallowWithIntl(node, { context, childContextTypes, ...props } = {}) {
-  const options = {
-    context: {
-      ...context,
-      intl,
-    },
-    childContextTypes: {
-      ...childContextTypes,
-      intl: PropTypes.any,
-    },
-    ...props,
-  };
-
-  if (React.isValidElement(node)) {
-    return shallow(node, options);
-  } else {
-    return node.shallow(options);
-  }
-}
+export const intl = {
+  formatMessage: jest.fn().mockImplementation(({ defaultMessage }) => defaultMessage),
+  formatDate: jest.fn().mockImplementation(value => value),
+  formatTime: jest.fn().mockImplementation(value => value),
+  formatRelative: jest.fn().mockImplementation(value => value),
+  formatNumber: jest.fn().mockImplementation(value => value),
+  formatPlural: jest.fn().mockImplementation(value => value),
+  formatHTMLMessage: jest.fn().mockImplementation(({ defaultMessage }) => defaultMessage),
+  now: jest.fn().mockImplementation(() => new Date()),
+};
