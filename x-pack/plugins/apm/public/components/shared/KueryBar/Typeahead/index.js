@@ -173,7 +173,11 @@ export class Typeahead extends Component {
                 backgroundImage: 'none'
               }}
               placeholder="Search transactions or errors… (i.e. transaction.duration.us => 100000)"
-              ref={node => (this.inputRef = node)}
+              inputRef={node => {
+                if (node) {
+                  this.inputRef = node;
+                }
+              }}
               value={this.state.value}
               onKeyDown={this.onKeyDown}
               onKeyUp={this.onKeyUp}
