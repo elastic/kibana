@@ -167,6 +167,22 @@ export class PipelineEditor extends React.Component {
       });
   }
 
+  onPipelineDelete = () => {
+    const {
+      pipeline: { id },
+      pipelineService
+    } = this.props;
+    // TODO: Add modal here
+    return pipelineService.deletePipeline(id)
+      .then(() => {
+        // TODO: Add toast success
+        this.onClose();
+      })
+      .catch(() => {
+        // TODO: check validity and notify of error
+      });
+  }
+
   onPipelineDescriptionChange = ({ target: { value } }) => {
     this.setState({
       pipeline: {
@@ -203,6 +219,21 @@ export class PipelineEditor extends React.Component {
     });
   }
 
+  renderDeletePipelineButton = () => (
+    this.props.isNewPipeline
+      ? null
+      : (
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            color="danger"
+            onClick={this.onPipelineDelete}
+          >
+            Delete pipeline
+          </EuiButton>
+        </EuiFlexItem>
+      )
+  )
+
   render() {
     return (
       <EuiPage
@@ -228,6 +259,7 @@ export class PipelineEditor extends React.Component {
                 Cancel
               </EuiButton>
             </EuiFlexItem>
+            {this.renderDeletePipelineButton()}
           </EuiFlexGroup>
           <EuiForm
             isInvalid={this.state.showPipelineIdError}
@@ -347,7 +379,7 @@ export class PipelineEditor extends React.Component {
   }
 }
 
-// import { isEmpty } from 'lodash';
+import { isEmpty } from 'lodash';
 import { uiModules } from 'ui/modules';
 // import { InitAfterBindingsWorkaround } from 'ui/compat';
 // import { Notifier, toastNotifications } from 'ui/notify';
@@ -379,10 +411,14 @@ app.directive('pipelineEdit', function ($injector) {
         ? await shieldUser.getCurrent().$promise
         : null;
 
+      console.log(scope.pipeline.id);
+      console.log(isEmpty(scope.pipeline.id));
+
       render(
         <PipelineEditor
           kbnUrl={kbnUrl}
           close={close}
+          isNewPipeline={isEmpty(scope.pipeline.id)}
           username={userResource.username}
           pipeline={scope.pipeline}
           pipelineService={pipelineService}
