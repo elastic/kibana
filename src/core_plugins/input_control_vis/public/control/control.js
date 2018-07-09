@@ -119,7 +119,7 @@ export class Control {
    * Clear any filter on the field by setting the control value to undefined.
    */
   clear() {
-    this.set();
+    this.value = undefined;
   }
 
   hasChanged() {

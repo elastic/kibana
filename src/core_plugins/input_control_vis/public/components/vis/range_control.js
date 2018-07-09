@@ -30,26 +30,21 @@ import {
 } from '@elastic/eui';
 
 const toState = ({ control }) => {
-  let sliderValue = control.value;
-  if (!control.hasValue()) {
+  const sliderValue = control.hasValue() ?
+    control.value :
     // InputRange component does not have an "empty state"
     // Faking an empty state by setting the slider value range to length of zero anchored at the range minimum
-    sliderValue = {
+    {
       min: control.min,
       max: control.min
     };
-  }
   const state = {
-    sliderValue: sliderValue,
-    minValue: '',
-    maxValue: '',
+    sliderValue,
+    minValue: control.hasValue() ? control.value.min : '',
+    maxValue: control.hasValue() ? control.value.max : '',
     isRangeValid: true,
     errorMessage: '',
   };
-  if (control.hasValue()) {
-    state.minValue = control.value.min;
-    state.maxValue = control.value.max;
-  }
   return state;
 };
 

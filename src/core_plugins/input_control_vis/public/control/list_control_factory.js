@@ -119,7 +119,7 @@ class ListControl extends Control {
   }
 
   hasValue() {
-    return this.value && this.value.length > 0;
+    return typeof this.value !== 'undefined' && this.value.length > 0;
   }
 }
 
