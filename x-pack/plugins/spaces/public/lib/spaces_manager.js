@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export class SpacesManager {
+import { EventEmitter } from 'events';
+
+export class SpacesManager extends EventEmitter {
   constructor(httpAgent, chrome) {
+    super();
     this._httpAgent = httpAgent;
     this._baseUrl = chrome.addBasePath(`/api/spaces/v1`);
   }
@@ -34,5 +37,9 @@ export class SpacesManager {
   async deleteSpace(space) {
     return await this._httpAgent
       .delete(`${this._baseUrl}/space/${space.id}`);
+  }
+
+  async requestRefresh() {
+    this.emit('request_refresh');
   }
 }

@@ -4,15 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import {
+  EuiCallOut,
+  EuiText,
   EuiModal,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiModalBody,
   EuiOverlayMask,
   EuiAvatar,
+  EuiSpacer,
 } from '@elastic/eui';
 import { SpaceCards, SpaceAvatar } from '../components';
 import { Notifier } from 'ui/notify';
@@ -21,6 +24,7 @@ export class NavControlModal extends Component {
   state = {
     isOpen: false,
     loading: false,
+    activeSpaceExists: true,
     spaces: []
   };
 
@@ -28,7 +32,8 @@ export class NavControlModal extends Component {
 
   async loadSpaces() {
     const {
-      spacesManager
+      spacesManager,
+      activeSpace,
     } = this.props;
 
     this.setState({
@@ -36,8 +41,16 @@ export class NavControlModal extends Component {
     });
 
     const spaces = await spacesManager.getSpaces();
+
+    let activeSpaceExists = this.state.activeSpaceExists;
+    if (activeSpace.valid) {
+      activeSpaceExists = !!spaces.find(space => space.id === this.props.activeSpace.space.id);
+    }
+
     this.setState({
       spaces,
+      activeSpaceExists,
+      isOpen: this.state.isOpen || !activeSpaceExists,
       loading: false
     });
   }
@@ -53,6 +66,14 @@ export class NavControlModal extends Component {
         this.notifier.error(error.message);
       }
     }
+
+    this.loadSpaces();
+
+    if (this.props.spacesManager) {
+      this.props.spacesManager.on('request_refresh', () => {
+        this.loadSpaces();
+      });
+    }
   }
 
   render() {
@@ -60,14 +81,7 @@ export class NavControlModal extends Component {
     if (this.state.isOpen) {
       modal = (
         <EuiOverlayMask>
-          <EuiModal onClose={this.closePortal} className={'selectSpaceModal'}>
-            <EuiModalHeader>
-              <EuiModalHeaderTitle>Select a space</EuiModalHeaderTitle>
-            </EuiModalHeader>
-            <EuiModalBody>
-              <SpaceCards spaces={this.state.spaces} />
-            </EuiModalBody>
-          </EuiModal>
+          {this.getActivePortal()}
         </EuiOverlayMask>
       );
     }
@@ -83,6 +97,11 @@ export class NavControlModal extends Component {
     } = this.props;
 
     if (!activeSpace) {
+      return null;
+    }
+
+    // 0 or 1 spaces are available. Either either way, there is no need to render a space selection button
+    if (this.state.spaces.length < 2) {
       return null;
     }
 
@@ -111,6 +130,36 @@ export class NavControlModal extends Component {
       </div>
     );
   };
+
+  getActivePortal = () => {
+    let callout;
+
+    if (!this.state.activeSpaceExists) {
+      callout = (
+        <Fragment>
+          <EuiCallOut title={'Your space is no longer available'}>
+            <EuiText>
+              Please choose a new Space to continue using Kibana
+            </EuiText>
+          </EuiCallOut>
+          <EuiSpacer />
+        </Fragment>
+      );
+
+    }
+
+    return (
+      <EuiModal onClose={this.closePortal} className={'selectSpaceModal'}>
+        <EuiModalHeader>
+          <EuiModalHeaderTitle>Select a space</EuiModalHeaderTitle>
+        </EuiModalHeader>
+        <EuiModalBody>
+          {callout}
+          <SpaceCards spaces={this.state.spaces} />
+        </EuiModalBody>
+      </EuiModal>
+    );
+  }
 
   togglePortal = () => {
     const isOpening = !this.state.isOpen;
