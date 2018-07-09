@@ -55,5 +55,3 @@ The returned `EmbeddedVisualizeHandler` itself has the following methods and pro
 
 You can find the detailed `EmbeddedVisualizeHandler` documentation in its
 {repo}blob/{branch}/src/ui/public/visualize/loader/embedded_visualize_handler.js[source code].
-
-We recommend *not* to use the internal `<visualize>` Angular directive directly.
