@@ -84,4 +84,10 @@ describe('prop filter', function () {
     const line = (value) => value === 'line';
     expect(nameFilter(objects, line)).to.eql(getObjects('line'));
   });
+
+  it('gracefully handles a filter function with zero arity', function () {
+    const objects = getObjects('table', 'line', 'pie');
+    const rejectEverything = () => false;
+    expect(nameFilter(objects, rejectEverything)).to.eql([]);
+  });
 });
