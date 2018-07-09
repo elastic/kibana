@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { AggType } from '../../../agg_types';
+import { isFunction } from 'lodash';
 import { FieldParamType } from '../../../agg_types/param_types';
 import { aggTypeFieldFilters } from '../../../agg_types/param_types/filter';
 import { IndexPattern } from '../../../index_patterns';
@@ -27,32 +27,33 @@ import { propFilter } from '../../../filters/_prop_filter';
 const filterByType = propFilter('type');
 
 /**
- * This filter checks the defined aggFilter in the schemas of that visualization
- * and limits available aggregations based on that.
+ * This filter uses the {@link FieldParamType|fieldParamType} information
+ * and limits available fields based on that.
  */
 aggTypeFieldFilters.addFilter(
   (
     field: any,
-    aggType: AggType,
     fieldParamType: FieldParamType,
     indexPattern: IndexPattern,
     aggConfig: AggConfig
   ) => {
+    const { onlyAggregatable, scriptable, filterFieldTypes } = fieldParamType;
+
+    const filters = isFunction(filterFieldTypes)
+      ? filterFieldTypes.bind(this, aggConfig.vis)
+      : filterFieldTypes;
+
     if (
-      (fieldParamType.onlyAggregatable && !field.aggregatable) ||
-      (!fieldParamType.scriptable && field.scripted)
+      (onlyAggregatable && !field.aggregatable) ||
+      (!scriptable && field.scripted)
     ) {
       return false;
     }
 
-    if (fieldParamType.filterFieldTypes) {
-      let filters = fieldParamType.filterFieldTypes;
-      if (_.isFunction(fieldParamType.filterFieldTypes)) {
-        filters = fieldParamType.filterFieldTypes.bind(this, aggConfig.vis);
-      }
-      return filterByType([field], filters).length !== 0;
+    if (!filters) {
+      return true;
     }
 
-    return true;
+    return filterByType([field], filters).length !== 0;
   }
 );

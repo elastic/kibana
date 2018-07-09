@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
-
+import { sortBy } from 'lodash';
 import { SavedObjectNotFound } from '../../errors';
 import editorHtml from '../controls/field.html';
 import { BaseParamType } from './base';
@@ -61,7 +60,7 @@ FieldParamType.prototype.getFieldOptions = function (aggConfig) {
   return new IndexedArray({
     index: ['name'],
     group: ['type'],
-    initialSet: _.sortBy(fields, ['type', 'name']),
+    initialSet: sortBy(fields, ['type', 'name']),
   });
 };
 

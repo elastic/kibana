@@ -17,13 +17,11 @@
  * under the License.
  */
 import { FieldParamType } from '../';
-import { AggType } from '../..';
 import { IndexPattern } from '../../../index_patterns';
 import { AggConfig } from '../../../vis';
 
 type AggTypeFieldFilter = (
-  fields: any[],
-  aggType: AggType,
+  field: any,
   fieldParamType: FieldParamType,
   indexPattern: IndexPattern,
   aggConfig: AggConfig
@@ -50,7 +48,6 @@ class AggTypeFieldFilters {
    * Returns the {@link any|fields} filtered by all registered filters.
    *
    * @param fields A list of fields that will be filtered down by this registry.
-   * @param aggType aggType for which the returning list will be used.
    * @param fieldParamType The fieldParamType for which the returning list will be used.
    * @param indexPattern The indexPattern for which the returning list will be used.
    * @param aggConfig The aggConfig for which the returning list will be used.
@@ -58,7 +55,6 @@ class AggTypeFieldFilters {
    */
   public filter(
     fields: any[],
-    aggType: AggType,
     fieldParamType: FieldParamType,
     indexPattern: IndexPattern,
     aggConfig: AggConfig
@@ -66,7 +62,7 @@ class AggTypeFieldFilters {
     const allFilters = Array.from(this.filters);
     const allowedAggTypeFields = fields.filter(field => {
       const isAggTypeFieldAllowed = allFilters.every(filter =>
-        filter(field, aggType, fieldParamType, indexPattern, aggConfig)
+        filter(field, fieldParamType, indexPattern, aggConfig)
       );
       return isAggTypeFieldAllowed;
     });
