@@ -33,16 +33,8 @@ const ESCAPE_LINE_BREAK_REGEX = /(?<!\\)\\\n/g;
 export const readFileAsync = promisify(fs.readFile);
 export const writeFileAsync = promisify(fs.writeFile);
 export const globAsync = promisify(glob);
-const mkdirAsync = promisify(fs.mkdir);
-const accessAsync = promisify(fs.access);
-
-export function makeDirAsync(path) {
-  return mkdirAsync(path, fs.constants.S_IWUSR);
-}
-
-export function pathExists(path) {
-  return accessAsync(path, fs.constants.W_OK);
-}
+export const makeDirAsync = promisify(fs.mkdir);
+export const accessAsync = promisify(fs.access);
 
 export function isPropertyWithKey(property, identifierName) {
   return (

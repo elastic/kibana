@@ -28,7 +28,7 @@ import { extractHandlebarsMessages } from './extract_handlebras_messages';
 import {
   globAsync,
   makeDirAsync,
-  pathExists,
+  accessAsync,
   readFileAsync,
   writeFileAsync,
 } from './utils';
@@ -130,7 +130,7 @@ export async function extractDefaultTranslations(inputPath) {
   jsonBuffer = Buffer.concat([jsonBuffer, Buffer.from('}\n')]);
 
   try {
-    await pathExists(resolve(inputPath, 'translations'));
+    await accessAsync(resolve(inputPath, 'translations'));
   } catch (_) {
     await makeDirAsync(resolve(inputPath, 'translations'));
   }
