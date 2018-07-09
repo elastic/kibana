@@ -11,6 +11,7 @@ import { BeatTag } from '../../../../common/domain_types';
 import { DatabaseAdapter } from '../database/adapter_types';
 import { FrameworkRequest } from '../famework/adapter_types';
 import { CMTagsAdapter } from './adapter_types';
+
 export class ElasticsearchTagsAdapter implements CMTagsAdapter {
   private database: DatabaseAdapter;
 

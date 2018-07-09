@@ -8,7 +8,7 @@ import { flatten, get } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { DatabaseAdapter } from '../database/adapter_types';
 import { FrameworkRequest } from '../famework/adapter_types';
-import { CMTokensAdapter, EnrollmentToken } from './adapter_types';
+import { CMTokensAdapter, TokenEnrollmentData } from './adapter_types';
 
 export class ElasticsearchTokensAdapter implements CMTokensAdapter {
   private database: DatabaseAdapter;
@@ -29,7 +29,7 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
 
   public async getEnrollmentToken(
     tokenString: string
-  ): Promise<EnrollmentToken> {
+  ): Promise<TokenEnrollmentData> {
     const params = {
       id: `enrollment_token:${tokenString}`,
       ignore: [404],
@@ -38,7 +38,7 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
     };
 
     const response = await this.database.get(null, params);
-    const tokenDetails = get<EnrollmentToken>(
+    const tokenDetails = get<TokenEnrollmentData>(
       response,
       '_source.enrollment_token',
       {
@@ -52,12 +52,15 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
     // out whether a token is valid or not. So we introduce a random delay in returning from
     // this function to obscure the actual time it took for Elasticsearch to find the token.
     const randomDelayInMs = 25 + Math.round(Math.random() * 200); // between 25 and 225 ms
-    return new Promise<EnrollmentToken>(resolve =>
+    return new Promise<TokenEnrollmentData>(resolve =>
       setTimeout(() => resolve(tokenDetails), randomDelayInMs)
     );
   }
 
-  public async upsertTokens(req: FrameworkRequest, tokens: EnrollmentToken[]) {
+  public async upsertTokens(
+    req: FrameworkRequest,
+    tokens: TokenEnrollmentData[]
+  ) {
     const body = flatten(
       tokens.map(token => [
         { index: { _id: `enrollment_token:${token.token}` } },

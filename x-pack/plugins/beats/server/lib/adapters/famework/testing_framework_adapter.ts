@@ -12,7 +12,7 @@ import {
   BackendFrameworkAdapter,
   FrameworkRequest,
   FrameworkRouteOptions,
-  WrappableRequest,
+  FrameworkWrappableRequest,
 } from './adapter_types';
 
 interface TestSettings {
@@ -47,9 +47,10 @@ export class TestingBackendFrameworkAdapter implements BackendFrameworkAdapter {
     // not yet testable
   }
 
-  public registerRoute<RouteRequest extends WrappableRequest, RouteResponse>(
-    route: FrameworkRouteOptions<RouteRequest, RouteResponse>
-  ) {
+  public registerRoute<
+    RouteRequest extends FrameworkWrappableRequest,
+    RouteResponse
+  >(route: FrameworkRouteOptions<RouteRequest, RouteResponse>) {
     // not yet testable
   }
 
