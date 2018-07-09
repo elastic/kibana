@@ -29,6 +29,31 @@ enum Status {
   UI_STATE = 'uiState',
 }
 
+/**
+ * Checks whether the hash of a specific key in the given oldStatus has changed
+ * compared to the new valueHash passed.
+ */
+function hasHashChanged<T extends string>(
+  oldStatus: { [key in T]?: string },
+  name: T,
+  valueHash: string
+): boolean {
+  const oldHash = oldStatus[name];
+  return oldHash !== valueHash;
+}
+
+interface Size {
+  width: number;
+  height: number;
+}
+
+function hasSizeChanged(size: Size, oldSize?: Size): boolean {
+  if (!oldSize) {
+    return true;
+  }
+  return oldSize.width !== size.width || oldSize.height !== size.height;
+}
+
 function getUpdateStatus<T extends Status>(
   requiresUpdateStatus: T[] = [],
   obj: any,
@@ -45,51 +70,42 @@ function getUpdateStatus<T extends Status>(
     obj._oldStatus = {};
   }
 
-  const hasChangedUsingGenericHashComparison = (name: string, value: any) => {
-    const hash = calculateObjectHash(value);
-    if (hash !== obj._oldStatus[name]) {
-      obj._oldStatus[name] = hash;
-      return true;
-    }
-    return false;
-  };
-
-  const hasSizeChanged = (currentWidth: number, currentHeight: number) => {
-    if (!obj._oldStatus.resize) {
-      obj._oldStatus.resize = { width: currentWidth, height: currentHeight };
-      return true;
-    }
-
-    if (currentWidth !== obj._oldStatus.resize.width || currentHeight !== obj._oldStatus.resize.height) {
-      obj._oldStatus.resize = { width: currentWidth, height: currentHeight };
-      return true;
-    }
-    return false;
-  };
-
   for (const requiredStatus of requiresUpdateStatus) {
+    let hash;
     // Calculate all required status updates for this visualization
     switch (requiredStatus) {
       case Status.AGGS:
-        status.aggs = hasChangedUsingGenericHashComparison('aggs', param.vis.aggs);
+        hash = calculateObjectHash(param.vis.aggs);
+        status.aggs = hasHashChanged(obj._oldStatus, 'aggs', hash);
+        obj._oldStatus.aggs = hash;
         break;
       case Status.DATA:
-        status.data = hasChangedUsingGenericHashComparison('data', param.visData);
+        hash = calculateObjectHash(param.visData);
+        status.data = hasHashChanged(obj._oldStatus, 'data', hash);
+        obj._oldStatus.data = hash;
         break;
       case Status.PARAMS:
-        status.params = hasChangedUsingGenericHashComparison('param', param.vis.params);
+        hash = calculateObjectHash(param.vis.params);
+        status.params = hasHashChanged(obj._oldStatus, 'param', hash);
+        obj._oldStatus.param = hash;
         break;
       case Status.RESIZE:
-        const width = param.vis.size ? param.vis.size[0] : 0;
-        const height = param.vis.size ? param.vis.size[1] : 0;
-        status.resize = hasSizeChanged(width, height);
+        const width: number = param.vis.size ? param.vis.size[0] : 0;
+        const height: number = param.vis.size ? param.vis.size[1] : 0;
+        const size = { width, height };
+        status.resize = hasSizeChanged(size, obj._oldStatus.resize);
+        obj._oldStatus.resize = size;
         break;
       case Status.TIME:
         const timeRange = param.vis.filters && param.vis.filters.timeRange;
-        status.time = hasChangedUsingGenericHashComparison('time', timeRange);
+        hash = calculateObjectHash(timeRange);
+        status.time = hasHashChanged(obj._oldStatus, 'time', hash);
+        obj._oldStatus.time = hash;
         break;
       case Status.UI_STATE:
-        status.uiState = hasChangedUsingGenericHashComparison('uiState', param.uiState);
+        hash = calculateObjectHash(param.uiState);
+        status.uiState = hasHashChanged(obj._oldStatus, 'uiState', hash);
+        obj._oldStatus.uiState = hash;
         break;
     }
   }
