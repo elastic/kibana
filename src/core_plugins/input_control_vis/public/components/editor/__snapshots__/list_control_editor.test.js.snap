@@ -32,26 +32,22 @@ exports[`renders dynamic options should display disabled dynamic options with to
       onChange={[Function]}
     />
   </EuiFormRow>
-  <EuiToolTip
-    content="Dynamic options are only available on fields of type 'string'"
+  <EuiFormRow
+    describedByIds={Array []}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    helpText="Only available for \\"string\\" fields"
+    id="dynamicOptions-0"
     key="dynamicOptions"
-    position="top"
   >
-    <EuiFormRow
-      describedByIds={Array []}
+    <EuiSwitch
+      checked={true}
+      data-test-subj="listControlDynamicOptionsSwitch"
       disabled={true}
-      fullWidth={false}
-      hasEmptyLabelSpace={false}
-      helpText="Update options in response to user input"
-      id="dynamicOptions-0"
-    >
-      <EuiSwitch
-        checked={false}
-        label="Dynamic Options"
-        onChange={[Function]}
-      />
-    </EuiFormRow>
-  </EuiToolTip>
+      label="Dynamic Options"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
     fullWidth={false}
@@ -117,6 +113,7 @@ exports[`renders dynamic options should display dynamic options for string field
     <EuiSwitch
       checked={true}
       data-test-subj="listControlDynamicOptionsSwitch"
+      disabled={false}
       label="Dynamic Options"
       onChange={[Function]}
     />
@@ -167,6 +164,7 @@ exports[`renders dynamic options should display size field when dynamic options 
     <EuiSwitch
       checked={false}
       data-test-subj="listControlDynamicOptionsSwitch"
+      disabled={false}
       label="Dynamic Options"
       onChange={[Function]}
     />
@@ -269,6 +267,7 @@ exports[`renders should display chaining input when parents are provided 1`] = `
     <EuiSwitch
       checked={false}
       data-test-subj="listControlDynamicOptionsSwitch"
+      disabled={false}
       label="Dynamic Options"
       onChange={[Function]}
     />

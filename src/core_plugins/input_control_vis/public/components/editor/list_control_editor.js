@@ -27,7 +27,6 @@ import {
   EuiFieldNumber,
   EuiSwitch,
   EuiSelect,
-  EuiToolTip,
 } from '@elastic/eui';
 
 function filterField(field) {
@@ -143,45 +142,26 @@ export class ListControlEditor extends Component {
       </EuiFormRow>
     );
 
-    // Due to Elasticsearch API's, dynamic options are only allowed on String fields
-    if (this.state.isStringField) {
-      options.push(
-        <EuiFormRow
-          id={`dynamicOptions-${this.props.controlIndex}`}
-          key="dynamicOptions"
-          helpText="Update options in response to user input"
-        >
-          <EuiSwitch
-            label="Dynamic Options"
-            checked={this.props.controlParams.options.dynamicOptions}
-            onChange={(evt) => {
-              this.props.handleCheckboxOptionChange(this.props.controlIndex, 'dynamicOptions', evt);
-            }}
-            data-test-subj="listControlDynamicOptionsSwitch"
-          />
-        </EuiFormRow>
-      );
-    } else {
-      options.push(
-        <EuiToolTip
-          key="dynamicOptions"
-          position="top"
-          content="Dynamic options are only available on fields of type 'string'"
-        >
-          <EuiFormRow
-            id={`dynamicOptions-${this.props.controlIndex}`}
-            helpText="Update options in response to user input"
-            disabled
-          >
-            <EuiSwitch
-              label="Dynamic Options"
-              checked={false}
-              onChange={() => {}}
-            />
-          </EuiFormRow>
-        </EuiToolTip>
-      );
-    }
+    const dynamicOptionsHelpText = this.state.isStringField
+      ? 'Update options in response to user input'
+      : 'Only available for "string" fields';
+    options.push(
+      <EuiFormRow
+        id={`dynamicOptions-${this.props.controlIndex}`}
+        key="dynamicOptions"
+        helpText={dynamicOptionsHelpText}
+      >
+        <EuiSwitch
+          label="Dynamic Options"
+          checked={this.props.controlParams.options.dynamicOptions}
+          onChange={(evt) => {
+            this.props.handleCheckboxOptionChange(this.props.controlIndex, 'dynamicOptions', evt);
+          }}
+          disabled={this.state.isStringField ? false : true}
+          data-test-subj="listControlDynamicOptionsSwitch"
+        />
+      </EuiFormRow>
+    );
 
     // size is not used when dynamic options is set
     if (!this.props.controlParams.options.dynamicOptions || !this.state.isStringField) {
