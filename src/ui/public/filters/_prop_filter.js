@@ -37,8 +37,8 @@ export function propFilter(prop) {
    *   - Can be also an array, a single value as a string, or a comma-separated list of items
    * @return {array} - the filtered list
    */
-  return function (list, filters) {
-    if (!filters) {
+  return function (list, filters = []) {
+    if (filters.length === 0) {
       return list;
     }
 
