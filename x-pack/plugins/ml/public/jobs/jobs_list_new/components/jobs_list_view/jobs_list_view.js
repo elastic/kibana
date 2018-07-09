@@ -18,6 +18,7 @@ import { DeleteJobModal } from '../delete_job_modal';
 import { StartDatafeedModal } from '../start_datafeed_modal';
 import { MultiJobActions } from '../multi_job_actions';
 
+import PropTypes from 'prop-types';
 import React, {
   Component
 } from 'react';
@@ -282,3 +283,6 @@ export class JobsListView extends Component {
     );
   }
 }
+JobsListView.propTypes = {
+  updateJobStats: PropTypes.func.isRequired,
+};
