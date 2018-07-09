@@ -40,6 +40,7 @@ export class SpaceSelector extends Component {
   }
 
   onChange = (selectedSpaces) => {
+    console.log(selectedSpaces);
     this.props.onChange(selectedSpaces.map(s => s.id));
   }
 }

@@ -32,6 +32,23 @@ export function removePrivilegeFromRole(privilegeName, role, application) {
   role.applications = applications.filter(a => !(a.application === application && hasPrivilege(a, privilegeName)));
 }
 
+export function removePrivilegeFromRoleResources(privilegeName, role, application, resources) {
+  const {
+    applications = []
+  } = role;
+
+  applications.forEach(appPrivilege => {
+    if (appPrivilege.application === application) {
+      appPrivilege.resources = appPrivilege.resources.filter(privResource => resources.indexOf(privResource) === -1);
+    }
+  });
+
+  // Remove any entries that are now empty as a result of this operation
+  role.applications = applications.filter(appPrivilege => {
+    return !(appPrivilege.application === application && appPrivilege.resources.length === 0);
+  });
+}
+
 /**
  * Constructs a role privilege from the provided privilege name.
  * @param {*} privilegeName

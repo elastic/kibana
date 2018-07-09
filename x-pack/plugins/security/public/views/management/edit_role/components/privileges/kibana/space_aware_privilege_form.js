@@ -14,17 +14,21 @@ import { NO_PRIVILEGE_VALUE } from '../../../lib/constants';
 import {
   EuiDescribedFormGroup,
   EuiFormRow,
-  EuiInMemoryTable,
   EuiSpacer,
   EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { isReservedRole } from '../../../../../../lib/role';
-import { addPrivilegeToRole, setRolePrivilege, removePrivilegeFromRole } from '../../../lib/role_privilege';
-import { SpaceAvatar } from '../../../../../../../../spaces/public/views/components/space_avatar';
+import {
+  addPrivilegeToRole,
+  setRolePrivilege,
+  removePrivilegeFromRole,
+  removePrivilegeFromRoleResources
+} from '../../../lib/role_privilege';
 import { copyRole } from '../../../lib/copy_role';
+import { getAvailablePermissions } from '../../../lib/get_available_permissions';
+import { PrivilegeSpaceTable } from './privilege_space_table';
 
 export class SpaceAwarePrivilegeForm extends Component {
   static propTypes = {
@@ -74,13 +78,6 @@ export class SpaceAwarePrivilegeForm extends Component {
       basePrivilege = NO_PRIVILEGE_VALUE
     } = denormalizePrivileges(role, rbacApplication);
 
-    const tableItems = Object.keys(spacePrivileges).map(spaceId => {
-      return {
-        space: spaces.find(s => s.id === spaceId),
-        privilege: spacePrivileges[spaceId][0]
-      };
-    }).filter(item => !!item.space);
-
     return (
       <Fragment>
         <EuiDescribedFormGroup
@@ -92,73 +89,42 @@ export class SpaceAwarePrivilegeForm extends Component {
               kibanaPrivileges={kibanaPrivileges}
               value={basePrivilege}
               disabled={isReservedRole(role)}
+              allowNone={true}
               onChange={this.onKibanaBasePrivilegeChange}
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
-        <EuiDescribedFormGroup
-          title={<p>Space privileges</p>}
-          description={
-            <p>
-              Customize permission levels on a per space basis.
-              If a space is not listed, its permissions will default to the minimum privilege specified above.
-            </p>
-          }
-        >
-          <EuiFormRow>
-            <div>
-              <EuiInMemoryTable
-                columns={[{
-                  field: 'space',
-                  name: 'Space',
-                  width: '60%',
-                  render: (space) => (
-                    <EuiFlexGroup responsive={false} alignItems={'center'}>
-                      <EuiFlexItem grow={false}><SpaceAvatar space={space} /></EuiFlexItem>
-                      <EuiFlexItem><EuiText>{space.name}</EuiText></EuiFlexItem>
-                    </EuiFlexGroup>
-                  )
-                }, {
-                  field: 'privilege',
-                  name: 'Privilege',
-                  render: (privilege) => {
-                    return (
-                      <PrivilegeSelector
-                        kibanaPrivileges={kibanaPrivileges}
-                        value={privilege}
-                        disabled={isReservedRole(role)}
-                        onChange={this.onEditSpacePermissionsClick}
-                      />
-                    );
-                  }
-                }, {
-                  name: 'Actions',
-                  actions: [{
-                    name: 'Edit',
-                    description: 'Edit permissions for this space',
-                    icon: 'pencil',
-                    onClick: this.onEditSpacePermissionsClick
-                  }, {
-                    name: 'Delete',
-                    description: 'Remove custom permissions for this space',
-                    icon: 'trash',
-                    onClick: this.onDeleteSpacePermissionsClick
-                  }]
-                }]}
-                items={tableItems}
-              />
-              {this.props.editable && (
-                <Fragment>
-                  <EuiSpacer />
-                  {this.state.privilegeForms.map((form, index) => this.getSpaceForm(form, index, kibanaPrivileges))}
-                  {availableSpaces.length > 0 &&
+
+        <EuiSpacer />
+        <EuiTitle size={'xs'}><h3>Space privileges</h3></EuiTitle>
+        <EuiSpacer size={'s'} />
+        <EuiText size={'s'} color={'subdued'}>
+          <p>
+            Customize permission levels on a per space basis.
+            If a space is not listed, its permissions will default to the minimum privilege specified above.
+          </p>
+        </EuiText>
+
+        <EuiFormRow fullWidth>
+          <div>
+            <PrivilegeSpaceTable role={role} spaces={spaces} kibanaPrivileges={kibanaPrivileges} spacePrivileges={spacePrivileges} />
+
+            {this.props.editable && (
+              <Fragment>
+                <EuiSpacer />
+                {this.state.privilegeForms.map((form, index) => this.getSpaceForm(form, index, basePrivilege, kibanaPrivileges))}
+                {availableSpaces.length > 0 &&
+                  <Fragment>
+                    <EuiSpacer />
                     <EuiButton size={'s'} iconType={'plusInCircle'} onClick={this.addSpacePrivilege}>Add space privilege</EuiButton>
-                  }
-                </Fragment>
-              )}
-            </div>
-          </EuiFormRow>
-        </EuiDescribedFormGroup>
+                  </Fragment>
+                }
+              </Fragment>
+            )}
+          </div>
+
+        </EuiFormRow>
+
       </Fragment>
     );
   }
@@ -195,19 +161,24 @@ export class SpaceAwarePrivilegeForm extends Component {
     });
   }
 
-  getSpaceForm = ({ spaces: selectedSpaceIds, privilege }, index, kibanaPrivileges) => {
+  getSpaceForm = (form, index, basePrivilege, kibanaPrivileges) => {
 
-    const availableSpaces = this.getAvailableSpaces();
+    const {
+      spaces: selectedSpaceIds,
+      privilege,
+    } = form;
+
+    const availableSpaces = this.getAvailableSpaces(index);
 
     return (
       <PrivilegeSpaceForm
         key={index}
         availableSpaces={availableSpaces}
         selectedSpaceIds={selectedSpaceIds}
-        kibanaPrivileges={kibanaPrivileges}
+        kibanaPrivileges={getAvailablePermissions(basePrivilege, kibanaPrivileges)}
         selectedPrivilege={privilege}
         onChange={this.onPrivilegeSpacePermissionChange(index)}
-        onRemove={() => { }}
+        onDelete={this.onPrivilegeSpacePermissionDelete(index)}
       />
     );
   }
@@ -227,6 +198,7 @@ export class SpaceAwarePrivilegeForm extends Component {
       rbacApplication
     } = this.props;
 
+    console.log('form change', { selectedSpaceIds, selectedPrivilege });
 
     const role = copyRole(this.props.role);
 
@@ -235,6 +207,26 @@ export class SpaceAwarePrivilegeForm extends Component {
     }
 
     addPrivilegeToRole(selectedPrivilege, role, rbacApplication, selectedSpaceIds);
+
+    this.props.onChange(role);
+  }
+
+  onPrivilegeSpacePermissionDelete = (index) => () => {
+    const updatedPrivileges = [...this.state.privilegeForms];
+    const removedPrivilege = updatedPrivileges.splice(index, 1)[0];
+
+    this.setState({
+      privilegeForms: updatedPrivileges
+    });
+
+    const {
+      rbacApplication
+    } = this.props;
+
+
+    const role = copyRole(this.props.role);
+
+    removePrivilegeFromRoleResources(removedPrivilege.privilege, role, rbacApplication, removedPrivilege.spaces);
 
     this.props.onChange(role);
   }

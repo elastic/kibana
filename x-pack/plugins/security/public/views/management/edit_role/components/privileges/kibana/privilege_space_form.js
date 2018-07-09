@@ -9,6 +9,8 @@ import PropTypes from 'prop-types';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { PrivilegeSelector } from './privilege_selector';
 import { SpaceSelector } from './space_selector';
@@ -20,7 +22,7 @@ export class PrivilegeSpaceForm extends Component {
     kibanaPrivileges: PropTypes.object.isRequired,
     selectedPrivilege: PropTypes.string,
     onChange: PropTypes.func.isRequired,
-    onRemove: PropTypes.func.isRequired,
+    onDelete: PropTypes.func.isRequired,
   }
 
   render() {
@@ -34,10 +36,19 @@ export class PrivilegeSpaceForm extends Component {
     return (
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem>
-          <SpaceSelector spaces={availableSpaces} selectedSpaceIds={selectedSpaceIds} onChange={this.onSelectedSpacesChange} />
+          <EuiFormRow label={"Space(s)"}>
+            <SpaceSelector spaces={availableSpaces} selectedSpaceIds={selectedSpaceIds} onChange={this.onSelectedSpacesChange} />
+          </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <PrivilegeSelector kibanaPrivileges={kibanaPrivileges} value={selectedPrivilege} onChange={this.onPrivilegeChange} />
+          <EuiFormRow label={"Privilege"}>
+            <PrivilegeSelector kibanaPrivileges={kibanaPrivileges} value={selectedPrivilege} onChange={this.onPrivilegeChange} />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow hasEmptyLabelSpace>
+            <EuiButtonIcon aria-label={'Delete space privilege'} color={'danger'} onClick={this.props.onDelete} iconType={'trash'} />
+          </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     );

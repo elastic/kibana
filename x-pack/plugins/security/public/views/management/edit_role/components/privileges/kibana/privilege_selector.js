@@ -17,6 +17,7 @@ export class PrivilegeSelector extends Component {
     kibanaPrivileges: PropTypes.object.isRequired,
     onChange: PropTypes.func.isRequired,
     value: PropTypes.string,
+    allowNone: PropTypes.bool,
     disabled: PropTypes.bool,
   };
 
@@ -25,21 +26,25 @@ export class PrivilegeSelector extends Component {
   render() {
     const {
       kibanaPrivileges,
-      value = NO_PRIVILEGE_VALUE,
-      disabled
+      value,
+      disabled,
+      allowNone,
     } = this.props;
 
-    const options = [
-      { value: NO_PRIVILEGE_VALUE, text: 'none' },
-      ...Object.keys(kibanaPrivileges).map(p => ({
-        value: p,
-        text: p
-      }))
-    ];
+    const options = [];
+    if (allowNone) {
+      options.push({ value: NO_PRIVILEGE_VALUE, text: 'none' });
+    }
+
+    options.push(...Object.keys(kibanaPrivileges).map(p => ({
+      value: p,
+      text: p
+    })));
 
     return (
       <EuiSelect
         options={options}
+        hasNoInitialSelection={!allowNone}
         value={value}
         onChange={this.onChange}
         disabled={disabled}
