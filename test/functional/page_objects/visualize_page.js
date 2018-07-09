@@ -385,7 +385,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getGaugeValue() {
-      const elements = await find.allByCssSelector('visualize .chart svg');
+      const elements = await find.allByCssSelector('[data-test-subj="visualizationLoader"] .chart svg');
       return await Promise.all(elements.map(async element => await element.getVisibleText()));
     }
 
