@@ -21,10 +21,10 @@ import { calculateTextWidth } from 'plugins/ml/util/string_utils';
 import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
 
 import { uiModules } from 'ui/modules';
+import { timefilter } from 'ui/timefilter';
 const module = uiModules.get('apps/ml');
 
 module.directive('mlDocumentCountChart', function (
-  timefilter,
   Private,
   mlChartTooltipService) {
 

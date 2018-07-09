@@ -39,7 +39,7 @@ module.directive('vislibValueAxes', function () {
         }
       }
 
-      function mapPositionOposite(position) {
+      function mapPositionOpposite(position) {
         switch (position) {
           case 'bottom': return 'top';
           case 'top': return 'bottom';
@@ -54,9 +54,9 @@ module.directive('vislibValueAxes', function () {
         { name: 'angled', value: 75 },
       ];
 
-      $scope.$watch('vis.params.categoryAxes[0].position', position => {
+      $scope.$watch('editorState.params.categoryAxes[0].position', position => {
         isCategoryAxisHorizontal = ['top', 'bottom'].includes(position);
-        $scope.vis.params.valueAxes.forEach(axis => {
+        $scope.editorState.params.valueAxes.forEach(axis => {
           const axisIsHorizontal = ['top', 'bottom'].includes(axis.position);
           if (axisIsHorizontal === isCategoryAxisHorizontal) {
             axis.position = mapPosition(axis.position);
@@ -66,8 +66,8 @@ module.directive('vislibValueAxes', function () {
       });
 
       $scope.getSeries = function (axis) {
-        const isFirst = $scope.vis.params.valueAxes[0] === axis;
-        const series = $scope.vis.params.seriesParams.filter(series =>
+        const isFirst = $scope.editorState.params.valueAxes[0] === axis;
+        const series = $scope.editorState.params.seriesParams.filter(series =>
           (series.valueAxis === axis.id || (isFirst && !series.valueAxis))
         );
         return series.map(series => series.data.label).join(', ');
@@ -86,9 +86,9 @@ module.directive('vislibValueAxes', function () {
       };
 
       $scope.addValueAxis = function () {
-        const firstAxis = $scope.vis.params.valueAxes[0];
+        const firstAxis = $scope.editorState.params.valueAxes[0];
         const newAxis = _.cloneDeep(firstAxis);
-        newAxis.id = 'ValueAxis-' + $scope.vis.params.valueAxes.reduce((value, axis) => {
+        newAxis.id = 'ValueAxis-' + $scope.editorState.params.valueAxes.reduce((value, axis) => {
           if (axis.id.substr(0, 10) === 'ValueAxis-') {
             const num = parseInt(axis.id.substr(10));
             if (num >= value) value = num + 1;
@@ -96,9 +96,9 @@ module.directive('vislibValueAxes', function () {
           return value;
         }, 1);
 
-        newAxis.position = mapPositionOposite(firstAxis.position);
+        newAxis.position = mapPositionOpposite(firstAxis.position);
         const axisName = _.capitalize(newAxis.position) + 'Axis-';
-        newAxis.name = axisName + $scope.vis.params.valueAxes.reduce((value, axis) => {
+        newAxis.name = axisName + $scope.editorState.params.valueAxes.reduce((value, axis) => {
           if (axis.name.substr(0, axisName.length) === axisName) {
             const num = parseInt(axis.name.substr(axisName.length));
             if (num >= value) value = num + 1;
@@ -106,13 +106,13 @@ module.directive('vislibValueAxes', function () {
           return value;
         }, 1);
 
-        $scope.vis.params.valueAxes.push(newAxis);
+        $scope.editorState.params.valueAxes.push(newAxis);
         return newAxis;
       };
 
       $scope.removeValueAxis = function (axis) {
-        if ($scope.vis.params.valueAxes.length > 1) {
-          _.remove($scope.vis.params.valueAxes, function (valAxis) {
+        if ($scope.editorState.params.valueAxes.length > 1) {
+          _.remove($scope.editorState.params.valueAxes, function (valAxis) {
             return valAxis.id === axis.id;
           });
         }
@@ -127,7 +127,7 @@ module.directive('vislibValueAxes', function () {
 
       $scope.updateAxisName = function (axis) {
         const axisName = _.capitalize(axis.position) + 'Axis-';
-        axis.name = axisName + $scope.vis.params.valueAxes.reduce((value, axis) => {
+        axis.name = axisName + $scope.editorState.params.valueAxes.reduce((value, axis) => {
           if (axis.name.substr(0, axisName.length) === axisName) {
             const num = parseInt(axis.name.substr(axisName.length));
             if (num >= value) value = num + 1;
@@ -138,15 +138,15 @@ module.directive('vislibValueAxes', function () {
 
       const lastAxisTitles = {};
       $scope.updateAxisTitle = function () {
-        $scope.vis.params.valueAxes.forEach((axis, axisNumber) => {
+        $scope.editorState.params.valueAxes.forEach((axis, axisNumber) => {
           let label = '';
           const isFirst = axisNumber === 0;
           const matchingSeries = [];
-          $scope.vis.params.seriesParams.forEach((series, i) => {
+          $scope.editorState.params.seriesParams.forEach((series, i) => {
             const isMatchingSeries = (isFirst && !series.valueAxis) || (series.valueAxis === axis.id);
             if (isMatchingSeries) {
               let seriesNumber = 0;
-              $scope.vis.getAggConfig().forEach(agg => {
+              $scope.editorState.aggs.forEach(agg => {
                 if (agg.schema.name === 'metric') {
                   if (seriesNumber === i) matchingSeries.push(agg);
                   seriesNumber++;
@@ -165,7 +165,7 @@ module.directive('vislibValueAxes', function () {
       };
 
       $scope.$watch(() => {
-        return $scope.vis.getAggConfig().map(agg => {
+        return $scope.editorState.aggs.map(agg => {
           return agg.makeLabel();
         }).join();
       }, () => {

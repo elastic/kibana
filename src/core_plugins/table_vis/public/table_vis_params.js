@@ -29,13 +29,13 @@ uiModules.get('kibana/table_vis')
         $scope.totalAggregations = ['sum', 'avg', 'min', 'max', 'count'];
 
         $scope.$watchMulti([
-          'vis.params.showPartialRows',
-          'vis.params.showMeticsAtAllLevels'
+          'editorState.params.showPartialRows',
+          'editorState.params.showMetricsAtAllLevels'
         ], function () {
           if (!$scope.vis) return;
 
-          const params = $scope.vis.params;
-          if (params.showPartialRows || params.showMeticsAtAllLevels) {
+          const params = $scope.editorState.params;
+          if (params.showPartialRows || params.showMetricsAtAllLevels) {
             $scope.metricsAtAllLevels = true;
           } else {
             $scope.metricsAtAllLevels = false;

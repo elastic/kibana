@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Timline should render with data 1`] = `
+exports[`Timeline should render with data 1`] = `
 <div
   onScroll={[Function]}
   onTouchEnd={[Function]}

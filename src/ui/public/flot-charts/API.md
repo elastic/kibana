@@ -531,10 +531,10 @@ calendars don't follow a simple base 10 system. For many cases, Flot
 abstracts most of this away, but it can still be a bit difficult to
 get the data into Flot. So we'll first discuss the data format.
 
-The time series support in Flot is based on Javascript timestamps,
-i.e. everywhere a time value is expected or handed over, a Javascript
+The time series support in Flot is based on JavaScript timestamps,
+i.e. everywhere a time value is expected or handed over, a JavaScript
 timestamp number is used. This is a number, not a Date object. A
-Javascript timestamp is the number of milliseconds since January 1,
+JavaScript timestamp is the number of milliseconds since January 1,
 1970 00:00:00 UTC. This is almost the same as Unix timestamps, except it's
 in milliseconds, so remember to multiply by 1000!
 
@@ -553,7 +553,7 @@ both. Optionally you can include a third-party library to get
 additional timezone support.
 
 Default behavior is that Flot always displays timestamps according to
-UTC. The reason being that the core Javascript Date object does not
+UTC. The reason being that the core JavaScript Date object does not
 support other fixed time zones. Often your data is at another time
 zone, so it may take a little bit of tweaking to work around this
 limitation.
@@ -591,7 +591,7 @@ ActiveSupport::TimeZone.new('Asia/Shanghai').now.to_i * 1000
 In .NET you can get it with something like:
 
 ```aspx
-public static int GetJavascriptTimestamp(System.DateTime input)
+public static int GetJavaScriptTimestamp(System.DateTime input)
 {
     System.TimeSpan span = new System.TimeSpan(System.DateTime.Parse("1/1/1970").Ticks);
     System.DateTime time = input.Subtract(span);
@@ -599,7 +599,7 @@ public static int GetJavascriptTimestamp(System.DateTime input)
 }
 ```
 
-Javascript also has some support for parsing date strings, so it is
+JavaScript also has some support for parsing date strings, so it is
 possible to generate the timestamps manually client-side.
 
 If you've already got the real UTC timestamp, it's too late to use the
@@ -610,7 +610,7 @@ programming environments have some means of getting the timezone
 offset for a specific date (note that you need to get the offset for
 each individual timestamp to account for daylight savings).
 
-The alternative with core Javascript is to interpret the timestamps
+The alternative with core JavaScript is to interpret the timestamps
 according to the time zone that the visitor is in, which means that
 the ticks will shift with the time zone and daylight savings of each
 visitor. This behavior is enabled by setting the axis option
@@ -1473,12 +1473,12 @@ hooks in the plugins bundled with Flot.
 ## Plugins ##
 
 Plugins extend the functionality of Flot. To use a plugin, simply
-include its Javascript file after Flot in the HTML page.
+include its JavaScript file after Flot in the HTML page.
 
 If you're worried about download size/latency, you can concatenate all
 the plugins you use, and Flot itself for that matter, into one big file
 (make sure you get the order right), then optionally run it through a
-Javascript minifier such as YUI Compressor.
+JavaScript minifier such as YUI Compressor.
 
 Here's a brief explanation of how the plugin plumbings work:
 

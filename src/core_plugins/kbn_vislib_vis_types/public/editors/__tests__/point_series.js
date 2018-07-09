@@ -54,6 +54,10 @@ describe('point series editor', function () {
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     $parentScope = $rootScope;
     $parentScope.vis = new Vis(indexPattern, makeConfig());
+    $parentScope.editorState = {
+      params: $parentScope.vis.params,
+      aggs: $parentScope.vis.aggs,
+    };
     $parentScope.savedVis = {};
 
     // share the scope
@@ -78,15 +82,15 @@ describe('point series editor', function () {
   });
 
   it('should show correct series', function () {
-    expect($parentScope.vis.params.seriesParams.length).to.be(1);
-    expect($parentScope.vis.params.seriesParams[0].data.label).to.be('Count');
+    expect($parentScope.editorState.params.seriesParams.length).to.be(1);
+    expect($parentScope.editorState.params.seriesParams[0].data.label).to.be('Count');
   });
 
   it('should update series when new agg is added', function () {
     const aggConfig = new AggConfig($parentScope.vis, { type: 'avg', schema: 'metric', params: { field: 'bytes' } });
     $parentScope.vis.aggs.push(aggConfig);
     $parentScope.$digest();
-    expect($parentScope.vis.params.seriesParams.length).to.be(2);
+    expect($parentScope.editorState.params.seriesParams.length).to.be(2);
   });
 
   it('should only allow left and right value axis position when category axis is horizontal', function () {
@@ -97,9 +101,9 @@ describe('point series editor', function () {
   });
 
   it('should only allow top and bottom value axis position when category axis is vertical', function () {
-    $parentScope.vis.params.categoryAxes[0].position = 'left';
+    $parentScope.editorState.params.categoryAxes[0].position = 'left';
     $parentScope.$digest();
-    expect($parentScope.vis.params.valueAxes[0].position).to.be('bottom');
+    expect($parentScope.editorState.params.valueAxes[0].position).to.be('bottom');
     expect($parentScope.isPositionDisabled('top')).to.be(false);
     expect($parentScope.isPositionDisabled('bottom')).to.be(false);
     expect($parentScope.isPositionDisabled('left')).to.be(true);
@@ -108,28 +112,28 @@ describe('point series editor', function () {
 
   it('should add value axis', function () {
     $parentScope.addValueAxis();
-    expect($parentScope.vis.params.valueAxes.length).to.be(2);
+    expect($parentScope.editorState.params.valueAxes.length).to.be(2);
   });
 
   it('should remove value axis', function () {
     $parentScope.addValueAxis();
     $parentScope.removeValueAxis({ id: 'ValueAxis-2' });
-    expect($parentScope.vis.params.valueAxes.length).to.be(1);
+    expect($parentScope.editorState.params.valueAxes.length).to.be(1);
   });
 
   it('should not allow to remove the last value axis', function () {
     $parentScope.removeValueAxis({ id: 'ValueAxis-1' });
-    expect($parentScope.vis.params.valueAxes.length).to.be(1);
+    expect($parentScope.editorState.params.valueAxes.length).to.be(1);
   });
 
   it('should set the value axis title if its not set', function () {
     $parentScope.updateAxisTitle();
-    expect($parentScope.vis.params.valueAxes[0].title.text).to.equal('Count');
+    expect($parentScope.editorState.params.valueAxes[0].title.text).to.equal('Count');
   });
 
   it('should not update the value axis title if custom title was set', function () {
-    $parentScope.vis.params.valueAxes[0].title.text = 'Custom Title';
+    $parentScope.editorState.params.valueAxes[0].title.text = 'Custom Title';
     $parentScope.updateAxisTitle();
-    expect($parentScope.vis.params.valueAxes[0].title.text).to.equal('Custom Title');
+    expect($parentScope.editorState.params.valueAxes[0].title.text).to.equal('Custom Title');
   });
 });

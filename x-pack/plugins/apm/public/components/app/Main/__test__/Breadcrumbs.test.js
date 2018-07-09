@@ -7,7 +7,6 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { MemoryRouter } from 'react-router-dom';
-jest.mock('../../../../utils/timepicker', () => {});
 
 import Breadcrumbs from '../Breadcrumbs';
 import { toJson } from '../../../../utils/testHelpers';

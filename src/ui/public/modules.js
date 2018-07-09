@@ -61,7 +61,7 @@ import _ from 'lodash';
  * calling `modules.get(name)` with different names, and then before bootstrapping
  * the application kibana uses `modules.link()` to set the dependencies of the "kibana"
  * module to include every defined module. This guarantees that kibana can always find
- * any angular dependecy defined in the kibana code base. This **also** means that
+ * any angular dependency defined in the kibana code base. This **also** means that
  * Private modules are able to find any dependency, since they are injected using the
  * "kibana" module's injector.
  *

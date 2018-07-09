@@ -89,7 +89,7 @@ describe('Worker class', function () {
       expect(init).to.throwException(/opts\.interval.+number/i);
     });
 
-    it('should throw with an invalid opts.intervalErrorMultipler', function () {
+    it('should throw with an invalid opts.intervalErrorMultiplier', function () {
       const init = () => new Worker(mockQueue, 'test', noop, { interval: 1 });
       expect(init).to.throwException(/opts\.intervalErrorMultiplier.+number/i);
     });
@@ -577,7 +577,7 @@ describe('Worker class', function () {
         .then((res) => expect(res).to.equal(true));
     });
 
-    it('should return false on other docuemnt update errors', function () {
+    it('should return false on other document update errors', function () {
       mockQueue.client.update.restore();
       sinon.stub(mockQueue.client, 'update').returns(Promise.reject({ statusCode: 401 }));
       return worker._failJob(job)
@@ -613,7 +613,7 @@ describe('Worker class', function () {
       return worker._failJob(job);
     });
 
-    it('should emit on other docuemnt update errors', function (done) {
+    it('should emit on other document update errors', function (done) {
       mockQueue.client.update.restore();
       sinon.stub(mockQueue.client, 'update').returns(Promise.reject({ statusCode: 401 }));
 

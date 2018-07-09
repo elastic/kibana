@@ -21,7 +21,7 @@ import _ from 'lodash';
 import { AggConfig } from '../../vis/agg_config';
 import { buildExistsFilter } from '../../filter_manager/lib/exists';
 import { buildPhrasesFilter } from '../../filter_manager/lib/phrases';
-import { buildQueryFromFilters } from '../../courier/data_source/build_query/from_filters';
+import { buildQueryFromFilters } from '../../courier';
 
 /**
  * walks the aggregation DSL and returns DSL starting at aggregation with id of startFromAggId

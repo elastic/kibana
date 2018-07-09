@@ -17,7 +17,7 @@ const XY_HEIGHT = unit * 16;
 const XY_MARGIN = {
   top: unit,
   left: unit * 5,
-  right: unit,
+  right: 0,
   bottom: unit * 2
 };
 
@@ -34,7 +34,7 @@ const getYScale = (yMin, yMax) => {
     .nice();
 };
 
-function getFlattenedCoordiantes(visibleSeries, enabledSeries) {
+function getFlattenedCoordinates(visibleSeries, enabledSeries) {
   const enabledCoordinates = _.flatten(enabledSeries.map(serie => serie.data));
   if (!_.isEmpty(enabledCoordinates)) {
     return enabledCoordinates;
@@ -44,7 +44,7 @@ function getFlattenedCoordiantes(visibleSeries, enabledSeries) {
 }
 
 export function getPlotValues(visibleSeries, enabledSeries, width) {
-  const flattenedCoordinates = getFlattenedCoordiantes(
+  const flattenedCoordinates = getFlattenedCoordinates(
     visibleSeries,
     enabledSeries
   );
