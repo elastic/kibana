@@ -44,6 +44,11 @@ describe('prop filter', function () {
     return objects;
   }
 
+  it('returns list when no filters are provided', function () {
+    const objects = getObjects('table', 'table', 'pie');
+    expect(nameFilter(objects)).to.eql(objects);
+  });
+
   it('should keep only the tables', function () {
     const objects = getObjects('table', 'table', 'pie');
     expect(nameFilter(objects, 'table')).to.eql(getObjects('table', 'table'));

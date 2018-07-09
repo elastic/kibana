@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { isFunction } from 'lodash';
 
 /**
  * Filters out a list by a given filter. This is currently used to implement:
@@ -38,14 +38,21 @@ export function propFilter(prop) {
    * @return {array} - the filtered list
    */
   return function (list, filters) {
-    if (!filters) return filters;
+    if (!filters) {
+      return list;
+    }
 
-    if (_.isFunction(filters)) {
+    if (isFunction(filters)) {
       return list.filter((item) => filters(item[prop]));
     }
 
-    if (!Array.isArray(filters)) filters = filters.split(',');
-    if (_.contains(filters, '*')) return list;
+    if (!Array.isArray(filters)) {
+      filters = filters.split(',');
+    }
+
+    if (filters.includes('*')) {
+      return list;
+    }
 
     const options = filters.reduce(function (options, filter) {
       let type = 'include';
@@ -64,11 +71,15 @@ export function propFilter(prop) {
     return list.filter(function (item) {
       const value = item[prop];
 
-      const excluded = options.exclude && _.contains(options.exclude, value);
-      if (excluded) return false;
+      const excluded = options.exclude && options.exclude.includes(value);
+      if (excluded) {
+        return false;
+      }
 
-      const included = !options.include || _.contains(options.include, value);
-      if (included) return true;
+      const included = !options.include || options.include.includes(value);
+      if (included) {
+        return true;
+      }
 
       return false;
     });
