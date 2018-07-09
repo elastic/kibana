@@ -20,30 +20,30 @@
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
-export function dockerMetricsSpecProvider() {
-  const moduleName = 'docker';
+export function phpfpmMetricsSpecProvider() {
+  const moduleName = 'php_fpm';
   return {
-    id: 'dockerMetrics',
-    name: 'Docker metrics',
+    id: 'phpfpmMetrics',
+    name: 'PHP-FPM metrics',
     category: TUTORIAL_CATEGORY.METRICS,
-    shortDescription: 'Fetch metrics about your Docker containers.',
-    longDescription: 'The `docker` Metricbeat module fetches metrics from the Docker server.' +
-                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-docker.html).',
-    euiIconType: 'logoDocker',
+    shortDescription: 'Fetch internal metrics from PHP-FPM.',
+    longDescription: 'The `php_fpm` Metricbeat module fetches internal metrics from the PHP-FPM server.' +
+                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-php_fpm.html).',
+    //euiIconType: 'logoPHPFPM',
     artifacts: {
       dashboards: [
-        {
-          id: 'AV4REOpp5NkDleZmzKkE',
-          linkLabel: 'Docker metrics dashboard',
+        /*{
+          id: 'TODO',
+          linkLabel: 'PHP-FPM metrics dashboard',
           isOverview: true
-        }
+        }*/
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-docker.html'
+        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-php_fpm.html'
       }
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/docker_metrics/screenshot.png',
+    //previewImagePath: '/plugins/kibana/home/tutorial_resources/php_fpm_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName)

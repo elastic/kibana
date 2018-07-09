@@ -20,33 +20,33 @@
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
 
-export function apacheLogsSpecProvider() {
-  const moduleName = 'apache2';
-  const geoipRequired = true;
-  const uaRequired = true;
+export function kafkaLogsSpecProvider() {
+  const moduleName = 'kafka';
+  const geoipRequired = false;
+  const uaRequired = false;
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
   return {
-    id: 'apacheLogs',
-    name: 'Apache logs',
+    id: 'kafkaLogs',
+    name: 'Kafka logs',
     category: TUTORIAL_CATEGORY.LOGGING,
-    shortDescription: 'Collect and parse access and error logs created by the Apache HTTP server.',
-    longDescription: 'The apache2 Filebeat module parses access and error logs created by the Apache 2 HTTP server.' +
-                     ' [Learn more]({config.docs.beats.filebeat}/filebeat-module-apache2.html).',
-    euiIconType: 'logoApache',
+    shortDescription: 'Collect and parse logs created by Kafka.',
+    longDescription: 'The `kafka` Filebeat module parses logs created by Kafka.' +
+                     ' [Learn more]({config.docs.beats.filebeat}/filebeat-module-kafka.html).',
+    //euiIconType: 'logoKafka',
     artifacts: {
       dashboards: [
         {
-          id: 'Filebeat-Apache2-Dashboard',
-          linkLabel: 'Apache2 logs dashboard',
+          id: '943caca0-87ee-11e7-ad9c-db80de0bf8d3',
+          linkLabel: 'Kafka logs dashboard',
           isOverview: true
         }
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-apache2.html'
+        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-kafka.html'
       }
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/apache_logs/screenshot.png',
+    previewImagePath: '/plugins/kibana/home/tutorial_resources/kafka_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
