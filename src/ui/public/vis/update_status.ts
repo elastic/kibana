@@ -85,7 +85,8 @@ function getUpdateStatus<T extends Status>(
         status.resize = hasSizeChanged(width, height);
         break;
       case Status.TIME:
-        status.time = hasChangedUsingGenericHashComparison('time', param.vis.filters.timeRange);
+        const timeRange = param.vis.filters && param.vis.filters.timeRange;
+        status.time = hasChangedUsingGenericHashComparison('time', timeRange);
         break;
       case Status.UI_STATE:
         status.uiState = hasChangedUsingGenericHashComparison('uiState', param.uiState);
