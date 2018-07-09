@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraGroup, InfraGroupBy } from '../../../../../common/types';
+import { InfraGroup, InfraGroupBy } from '../../../../../common/graphql/types';
 
 import { get } from 'lodash';
 import { getFilterLabel } from './get_filter_label';

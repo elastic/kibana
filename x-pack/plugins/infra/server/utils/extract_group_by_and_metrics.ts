@@ -6,7 +6,7 @@
 
 import { get, set } from 'lodash';
 import * as uuid from 'uuid';
-import { InfraGroupBy, InfraGroupByFilter } from '../../common/types';
+import { InfraGroupBy, InfraGroupByFilter } from '../../common/graphql/types';
 import { InfraNodesKey, InfraNodeType } from '../lib/infra_types';
 
 interface NodeTypeMapping {

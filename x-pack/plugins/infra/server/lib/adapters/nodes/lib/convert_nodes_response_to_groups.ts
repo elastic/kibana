@@ -11,7 +11,7 @@ import { findOrCreateGroupWithNodes, findOrCreateGroupWithSubGroups } from './fi
 import { InfraBucket, InfraNodeRequestOptions } from '../../../infra_types';
 
 import { set } from 'lodash';
-import { InfraGroup, InfraGroupBy } from '../../../../../common/types';
+import { InfraGroup, InfraGroupBy } from '../../../../../common/graphql/types';
 
 export function convertNodesResponseToGroups(
   options: InfraNodeRequestOptions,

@@ -5,7 +5,7 @@
  */
 
 import { set } from 'lodash';
-import { InfraResponse } from '../../../../../common/types';
+import { InfraResponse } from '../../../../../common/graphql/types';
 import {
   InfraBucket,
   InfraNode,

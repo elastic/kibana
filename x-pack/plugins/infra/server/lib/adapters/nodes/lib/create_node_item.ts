@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraContainer, InfraHost, InfraHostMetrics, InfraPod } from '../../../../../common/types';
+import {
+  InfraContainer,
+  InfraHost,
+  InfraHostMetrics,
+  InfraPod,
+} from '../../../../../common/graphql/types';
 import {
   InfraBucket,
   InfraNode,

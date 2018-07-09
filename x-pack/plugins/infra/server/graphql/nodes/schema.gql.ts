@@ -6,7 +6,47 @@
 
 import gql from 'graphql-tag';
 
-export const inputSchema = gql`
+export const nodesSchema: any = gql`
+  type InfraHostMetrics {
+    count: Int
+  }
+
+  type InfraHost {
+    name: String
+    type: String
+    metrics: InfraHostMetrics
+  }
+
+  type InfraPodMetrics {
+    count: Int
+  }
+
+  type InfraPod {
+    name: String
+    type: String
+    metrics: InfraPodMetrics
+  }
+
+  type InfraContainerMetrics {
+    count: Int
+  }
+
+  type InfraContainer {
+    name: String
+    type: String
+    metrics: InfraContainerMetrics
+  }
+
+  type InfraServiceMetrics {
+    count: Int
+  }
+
+  type InfraService {
+    name: String
+    type: String
+    metrics: InfraServiceMetrics
+  }
+
   input InfraIndexPattern {
     "The index pattern to use, defaults to '*'"
     pattern: String!
@@ -83,5 +123,30 @@ export const inputSchema = gql`
     value: String!
     "The field name for a match query"
     field: String
+  }
+
+  type InfraGroup {
+    name: String!
+    groups(type: InfraGroupByType!, field: String, filters: [InfraGroupByFilter]): [InfraGroup!]
+    hosts: [InfraHost!]
+    pods: [InfraPod!]
+    containers: [InfraContainer!]
+    services: [InfraService!]
+  }
+
+  type InfraResponse {
+    groups(type: InfraGroupByType!, field: String, filters: [InfraGroupByFilter]): [InfraGroup!]
+    hosts: [InfraHost!]
+    pods: [InfraPod!]
+    containers: [InfraContainer!]
+    services: [InfraService!]
+  }
+
+  extend type Query {
+    map(
+      indexPattern: InfraIndexPattern!
+      timerange: InfraTimerange!
+      filters: [InfraFilter!]
+    ): InfraResponse
   }
 `;

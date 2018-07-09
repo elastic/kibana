@@ -8,10 +8,10 @@ const { join, resolve } = require('path');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const { generate } = require('graphql-code-generator');
 
-const GRAPHQL_GLOB = join('public', '**', '*.ts{,x}');
+const GRAPHQL_GLOB = join('public', 'containers', '**', '*.ts{,x}');
 const CONFIG_PATH = resolve(__dirname, 'gql_gen.json');
-const OUTPUT_PATH = resolve('common', 'domains', 'types.ts');
-const SCHEMA_PATH = resolve('common', 'domains', 'all.gql_schema.ts');
+const OUTPUT_PATH = resolve('common', 'graphql', 'types.ts');
+const SCHEMA_PATH = resolve(__dirname, 'combined_schema.ts');
 
 async function main() {
   await generate(

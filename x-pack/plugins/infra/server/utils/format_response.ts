@@ -5,7 +5,7 @@
  */
 
 import { flow, set } from 'lodash/fp';
-import { InfraResponse } from '../../common/types';
+import { InfraResponse } from '../../common/graphql/types';
 import { InfraNodeRequestOptions } from '../lib/infra_types';
 
 const formatGroupBy = (options: InfraNodeRequestOptions) => (response: InfraResponse) => {

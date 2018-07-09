@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraGroupBy, InfraGroupByType } from './types';
+import { InfraGroupBy, InfraGroupByType } from '../../../../../common/graphql/types';
 
-import { InfraGroupByFilters, InfraGroupByTerms } from '../server/lib/infra_types';
+import { InfraGroupByFilters, InfraGroupByTerms } from '../../../infra_types';
 
 export function isGroupByFilters(value: InfraGroupBy): value is InfraGroupByFilters {
   return value.type === InfraGroupByType.filters;

@@ -6,7 +6,7 @@
 
 import { createNodeItem } from './create_node_item';
 
-import { InfraGroupBy } from '../../../../../common/types';
+import { InfraGroupBy } from '../../../../../common/graphql/types';
 import { InfraBucket, InfraNode, InfraNodeRequestOptions } from '../../../infra_types';
 export interface InfraPathItem {
   path: string[];

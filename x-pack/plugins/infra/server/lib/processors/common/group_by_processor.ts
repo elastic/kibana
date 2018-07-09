@@ -5,7 +5,7 @@
  */
 
 import { cloneDeep, set } from 'lodash';
-import { InfraGroupBy, InfraGroupByFilter } from '../../../../common/types';
+import { InfraGroupBy, InfraGroupByFilter } from '../../../../common/graphql/types';
 import {
   InfraESQueryStringQuery,
   InfraESSearchBody,
@@ -15,7 +15,7 @@ import {
   InfraProcessorTransformer,
 } from '../../infra_types';
 
-import { isGroupByFilters, isGroupByTerms } from '../../../../common/type_guards';
+import { isGroupByFilters, isGroupByTerms } from '../../adapters/nodes/lib/type_guards';
 
 export const groupByProcessor: InfraProcessor<InfraProcesorRequestOptions, InfraESSearchBody> = (
   options: InfraProcesorRequestOptions

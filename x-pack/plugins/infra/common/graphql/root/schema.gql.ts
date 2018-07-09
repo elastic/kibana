@@ -4,4 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './input.gql_schema';
+import gql from 'graphql-tag';
+
+export const rootSchema = gql`
+  schema {
+    query: Query
+    #mutation: Mutation
+  }
+
+  type Query
+
+  #type Mutation
+`;

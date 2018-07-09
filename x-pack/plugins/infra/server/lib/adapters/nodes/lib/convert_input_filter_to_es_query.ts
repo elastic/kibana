@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraFilter, InfraFilterType } from '../../../../../common/types';
+import { InfraFilter, InfraFilterType } from '../../../../../common/graphql/types';
 import { InfraESQuery } from '../../../infra_types';
 
 export function convertInputFilterToESQuery(filter: InfraFilter): InfraESQuery {
