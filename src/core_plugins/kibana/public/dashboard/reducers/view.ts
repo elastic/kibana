@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { cloneDeep } from 'lodash';
 import { Reducer } from 'redux';
 import { ViewActions, ViewActionTypeKeys } from '../actions';
 
@@ -61,7 +61,7 @@ const updateTimeRange = (view: ViewState, timeRange: TimeRange) => ({
 
 const updateFilters = (view: ViewState, filters: Filters) => ({
   ...view,
-  filters: _.cloneDeep(filters),
+  filters: cloneDeep(filters),
 });
 
 const updateQuery = (view: ViewState, query: Query) => ({
