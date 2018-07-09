@@ -20,12 +20,50 @@
 import fs from 'fs';
 import glob from 'glob';
 import { promisify } from 'util';
+import { isNode } from '@babel/types';
 
 export const readFileAsync = promisify(fs.readFile);
 export const globAsync = promisify(glob);
 
 export function arraysDiff(left = [], right = []) {
-  const leftDiff = left.filter(value => right.includes(value));
-  const rightDiff = right.filter(value => left.includes(value));
+  const leftDiff = left.filter(value => !right.includes(value));
+  const rightDiff = right.filter(value => !left.includes(value));
   return [leftDiff, rightDiff];
+}
+
+/**
+ * Workaround of @babel/traverse typescript bug: https://github.com/babel/babel/issues/8262
+ */
+export function* traverseNodes(nodes, extractMessagesFromNode) {
+  for (const node of nodes) {
+    let stop = false;
+    let message;
+
+    if (isNode(node)) {
+      message = extractMessagesFromNode({
+        node,
+        stop() {
+          stop = true;
+        },
+      });
+    }
+
+    if (message) {
+      yield message;
+    }
+
+    if (stop) {
+      break;
+    }
+
+    if (node && typeof node === 'object') {
+      const values = Object.values(node).filter(
+        value => value && typeof value === 'object'
+      );
+
+      if (values.length > 0) {
+        yield* traverseNodes(values, extractMessagesFromNode);
+      }
+    }
+  }
 }

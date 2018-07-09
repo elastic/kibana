@@ -18,79 +18,46 @@
  */
 
 import { parse } from '@babel/parser';
-import traverse from '@babel/traverse';
-import {
-  isIdentifier,
-  isObjectExpression,
-  isStringLiteral,
-} from '@babel/types';
+import { isObjectExpression } from '@babel/types';
 
-function readKeySubTree(node) {
-  if (isStringLiteral(node)) {
-    return node.value;
-  }
-  if (isIdentifier(node)) {
-    return node.name;
-  }
-}
+import { traverseNodes } from './utils';
 
-function getDuplicates(node, parentPath) {
-  const keys = [];
-  const duplicates = [];
-
-  for (const property of node.properties) {
-    const key = readKeySubTree(property.key);
-    const nodePath = `${parentPath}.${key}`;
-
-    if (!duplicates.includes(nodePath)) {
-      if (!keys.includes(nodePath)) {
-        keys.push(nodePath);
-      } else {
-        duplicates.push(nodePath);
-      }
-    }
-
-    if (isObjectExpression(property.value)) {
-      duplicates.push(...getDuplicates(property.value, `${parentPath}.${key}`));
-    }
-  }
-
-  return duplicates;
-}
-
-export function verifyJSON(json, fileName) {
+export function verifyJSON(json) {
   const jsonAST = parse(`+${json}`);
   let namespace = '';
 
-  traverse(jsonAST, {
-    enter(path) {
-      if (isObjectExpression(path.node)) {
-        if (path.node.properties.length !== 1) {
-          throw new Error(
-            `Locale file ${fileName} should be a JSON with a single-key object`
-          );
-        }
-        if (!isObjectExpression(path.node.properties[0].value)) {
-          throw new Error(`Invalid locale file: ${fileName}`);
-        }
+  traverseNodes(jsonAST.program.body, ({ node, stop }) => {
+    if (!isObjectExpression(node)) {
+      return;
+    }
 
-        namespace = readKeySubTree(path.node.properties[0].key);
-        const duplicates = getDuplicates(
-          path.node.properties[0].value,
-          namespace
-        );
+    if (!node.properties.some(prop => prop.key.name === 'formats')) {
+      throw 'Locale file should contain formats object.';
+    }
 
-        if (duplicates.length !== 0) {
-          throw new Error(
-            `There are translation id duplicates in locale file ${fileName}:
-${duplicates.join(', ')}`
-          );
+    for (const property of node.properties) {
+      if (property.key.name !== 'formats') {
+        const messageNamespace = property.key.value.split('.')[0];
+        if (!namespace) {
+          namespace = messageNamespace;
         }
 
-        path.stop();
+        if (namespace !== messageNamespace) {
+          throw 'All messages should start with the same namespace.';
+        }
       }
-    },
-  });
+    }
+
+    const idsSet = new Set();
+    for (const id of node.properties.map(prop => prop.key.value)) {
+      if (idsSet.has(id)) {
+        throw `Ids duplicate: ${id}`;
+      }
+      idsSet.add(id);
+    }
+
+    stop();
+  }).next();
 
   return namespace;
 }

@@ -27,15 +27,20 @@ async function checkFile(localePath) {
   let errorMessage = '';
 
   const defaultMessagesBuffer = await readFileAsync(
-    path.resolve(path.dirname(localePath), 'defaultMessages.json')
+    path.resolve(path.dirname(localePath), 'en.json')
   );
   const defaultMessagesIds = Object.keys(
-    JSON.parse(defaultMessagesBuffer.toString())
+    JSON5.parse(defaultMessagesBuffer.toString())
   );
 
   const localeBuffer = await readFileAsync(localePath);
 
-  const namespace = verifyJSON(localeBuffer.toString(), localePath);
+  let namespace;
+  try {
+    namespace = verifyJSON(localeBuffer.toString(), localePath);
+  } catch (error) {
+    throw new Error(`Error in ${localePath}\n${error.message || error}`);
+  }
 
   const translations = JSON5.parse(localeBuffer.toString());
   const translationsIds = Object.keys(translations);
@@ -46,12 +51,12 @@ async function checkFile(localePath) {
   );
 
   if (unusedTranslations.length > 0) {
-    errorMessage += `\nThere are unused translations in locale file ${localePath}:
+    errorMessage += `\nUnused translations in locale file ${localePath}:
 ${unusedTranslations.join(', ')}`;
   }
 
   if (missingTranslations.length > 0) {
-    errorMessage += `\nThere are missing translations in locale file ${localePath}:
+    errorMessage += `\nMissing translations in locale file ${localePath}:
 ${missingTranslations.join(', ')}`;
   }
 
@@ -67,10 +72,7 @@ export async function checkLocaleFiles(pluginsPaths) {
 
   for (const pluginPath of pluginsPaths) {
     const globOptions = {
-      ignore: [
-        './translations/defaultMessages.json',
-        './translations/messagesCache.json',
-      ],
+      ignore: ['./translations/en.json', './translations/messagesCache.json'],
       cwd: path.resolve(pluginPath),
     };
 
