@@ -74,7 +74,6 @@ export default async function (kbnServer, server, config) {
     const customHeaders = {
       ...config.get('server.customResponseHeaders'),
       'kbn-name': kbnServer.name,
-      'kbn-version': kbnServer.version,
     };
 
     if (response.isBoom) {
