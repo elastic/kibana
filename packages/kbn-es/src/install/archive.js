@@ -21,7 +21,7 @@ const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
 const execa = require('execa');
-const { log: defaultLog, extractTarball } = require('../utils');
+const { log: defaultLog, decompress } = require('../utils');
 const { BASE_PATH, ES_CONFIG, ES_KEYSTORE_BIN } = require('../paths');
 
 /**
@@ -49,7 +49,7 @@ exports.installArchive = async function installArchive(archive, options = {}) {
   }
 
   log.info('extracting %s', chalk.bold(archive));
-  await extractTarball(archive, installPath);
+  await decompress(archive, installPath);
   log.info('extracted to %s', chalk.bold(installPath));
 
   if (license !== 'oss') {

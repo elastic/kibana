@@ -66,9 +66,15 @@
       opacity: 1;
     }
 
-    .euiContextMenuPanel .euiContextMenuItem {
-      white-space: nowrap;
+    .euiContextMenuPanel {
+       .euiContextMenuItem {
+         white-space: nowrap;
+       }
+       .euiContextMenuItem:last-child:not(.euiContextMenuItem-isDisabled) {
+        color: #A30000
+      }
     }
+
 
     .euiTableCellContent .euiLink {
       margin-right: 10px;
@@ -90,17 +96,6 @@
 
   .job-description {
     display: inline-block;
-  }
-
-  .inline-group {
-    font-size: 12px;
-    background-color: #D9D9D9;
-    padding: 2px 5px;
-    border-radius: 2px;
-    display: inline-block;
-    margin: 0px 3px;
-    color: #FFFFFF;
-    vertical-align: text-top;
   }
 
   .job-loading-spinner {

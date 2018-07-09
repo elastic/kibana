@@ -6,7 +6,7 @@
   </div>
 
   <div
-    ng-repeat="chart in vis.params.seriesParams track by $index"
+    ng-repeat="chart in editorState.params.seriesParams track by $index"
     class="kuiSideBarSection"
   >
     <div class="kuiSideBarCollapsibleTitle">
@@ -73,7 +73,7 @@
               ng-model="chart.valueAxis"
               ng-change="changeValueAxis($index)"
             >
-              <option ng-repeat="axis in vis.params.valueAxes track by axis.id" value="{{axis.id}}">{{axis.name}}</option>
+              <option ng-repeat="axis in editorState.params.valueAxes track by axis.id" value="{{axis.id}}">{{axis.name}}</option>
               <option value="new">New Axis ...</option>
             </select>
           </div>

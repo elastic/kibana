@@ -4,31 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock(
-  'ui/chrome',
-  () => ({
-    getUiSettingsClient: () => {
-      return {
-        get: key => {
-          switch (key) {
-            case 'timepicker:timeDefaults':
-              return { from: 'now-15m', to: 'now', mode: 'quick' };
-            case 'timepicker:refreshIntervalDefaults':
-              return { display: 'Off', pause: false, value: 0 };
-            default:
-              throw new Error(`Unexpected config key: ${key}`);
-          }
-        }
-      };
-    }
-  }),
-  { virtual: true }
-);
-
 import React from 'react';
 import { mount } from 'enzyme';
 import { MemoryRouter } from 'react-router-dom';
-jest.mock('../../../../utils/timepicker', () => {});
 
 import Breadcrumbs from '../Breadcrumbs';
 import { toJson } from '../../../../utils/testHelpers';

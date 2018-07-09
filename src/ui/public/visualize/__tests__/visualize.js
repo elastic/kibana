@@ -64,8 +64,8 @@ describe('visualize directive', function () {
     $rootScope.uiState = uiState;
     $rootScope.searchSource = searchSource;
     $rootScope.savedObject = {
-      vis: vis,
-      searchSource: searchSource
+      vis,
+      searchSource,
     };
     $rootScope.updateState = updateState;
 

@@ -28,5 +28,5 @@ export function createFilterDateHistogram(agg, key) {
     gte: start.valueOf(),
     lt: start.add(interval).valueOf(),
     format: 'epoch_millis'
-  }, agg.vis.indexPattern);
+  }, agg._indexPattern);
 }

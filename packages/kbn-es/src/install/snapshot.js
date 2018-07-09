@@ -19,6 +19,7 @@
 
 const fetch = require('node-fetch');
 const fs = require('fs');
+const os = require('os');
 const mkdirp = require('mkdirp');
 const chalk = require('chalk');
 const path = require('path');
@@ -116,9 +117,10 @@ function downloadFile(url, dest, log) {
 }
 
 function getFilename(license, version) {
+  const extension = os.platform().startsWith('win') ? 'zip' : 'tar.gz';
   const basename = `elasticsearch${
     license === 'oss' ? '-oss-' : '-'
   }${version}`;
 
-  return `${basename}-SNAPSHOT.tar.gz`;
+  return `${basename}-SNAPSHOT.${extension}`;
 }

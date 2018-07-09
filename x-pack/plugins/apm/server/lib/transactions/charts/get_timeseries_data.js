@@ -14,6 +14,7 @@ import {
 import { get, sortBy, round } from 'lodash';
 import mean from 'lodash.mean';
 import { getBucketSize } from '../../helpers/get_bucket_size';
+import { getAvgResponseTimeAnomalies } from './get_avg_response_time_anomalies/get_avg_response_time_anomalies';
 
 export async function getTimeseriesData({
   serviceName,
@@ -150,15 +151,23 @@ export async function getTimeseriesData({
     bucket => bucket.key.replace(/^HTTP (\d)xx$/, '00$1') // ensure that HTTP 3xx are sorted at the top
   );
 
+  const avgResponseTimesAnomalies = await getAvgResponseTimeAnomalies({
+    serviceName,
+    transactionType,
+    transactionName,
+    setup
+  });
+
   return {
     total_hits: resp.hits.total,
     dates: dates,
     response_times: {
       avg: responseTime.avg,
       p95: responseTime.p95,
-      p99: responseTime.p99
+      p99: responseTime.p99,
+      avg_anomalies: avgResponseTimesAnomalies
     },
     tpm_buckets: tpmBuckets,
-    weighted_average: overallAvgDuration || 0
+    overall_avg_duration: overallAvgDuration || 0
   };
 }

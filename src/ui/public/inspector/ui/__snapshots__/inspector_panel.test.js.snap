@@ -229,48 +229,37 @@ exports[`InspectorPanel should render as expected 1`] = `
                               <div
                                 className="euiPopover euiPopover--anchorDownRight"
                                 id="inspectorViewChooser"
+                                onClick={[Function]}
                                 onKeyDown={[Function]}
                               >
-                                <EuiButtonEmpty
-                                  color="primary"
-                                  data-test-subj="inspectorViewChooser"
-                                  iconSide="right"
-                                  iconType="arrowDown"
-                                  onClick={[Function]}
-                                  size="s"
-                                  type="button"
+                                <div
+                                  className="euiPopover__anchor"
                                 >
-                                  <button
-                                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--iconRight"
+                                  <EuiButtonEmpty
+                                    color="primary"
                                     data-test-subj="inspectorViewChooser"
+                                    iconSide="right"
+                                    iconType="arrowDown"
                                     onClick={[Function]}
+                                    size="s"
                                     type="button"
                                   >
-                                    <span
-                                      className="euiButtonEmpty__content"
+                                    <button
+                                      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--iconRight"
+                                      data-test-subj="inspectorViewChooser"
+                                      onClick={[Function]}
+                                      type="button"
                                     >
-                                      <EuiIcon
-                                        aria-hidden="true"
-                                        className="euiButtonEmpty__icon"
-                                        size="m"
-                                        type="arrowDown"
+                                      <span
+                                        className="euiButtonEmpty__content"
                                       >
-                                        <arrowDown
+                                        <EuiIcon
                                           aria-hidden="true"
-                                          className="euiIcon euiIcon--medium euiButtonEmpty__icon"
-                                          focusable="false"
-                                          height="16"
-                                          style={
-                                            Object {
-                                              "fill": undefined,
-                                            }
-                                          }
-                                          viewBox="0 0 16 16"
-                                          width="16"
-                                          xmlns="http://www.w3.org/2000/svg"
-                                          xmlnsXlink="http://www.w3.org/1999/xlink"
+                                          className="euiButtonEmpty__icon"
+                                          size="m"
+                                          type="arrowDown"
                                         >
-                                          <svg
+                                          <arrowDown
                                             aria-hidden="true"
                                             className="euiIcon euiIcon--medium euiButtonEmpty__icon"
                                             focusable="false"
@@ -285,26 +274,42 @@ exports[`InspectorPanel should render as expected 1`] = `
                                             xmlns="http://www.w3.org/2000/svg"
                                             xmlnsXlink="http://www.w3.org/1999/xlink"
                                           >
-                                            <defs>
-                                              <path
-                                                d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
-                                                id="arrow_down-a"
+                                            <svg
+                                              aria-hidden="true"
+                                              className="euiIcon euiIcon--medium euiButtonEmpty__icon"
+                                              focusable="false"
+                                              height="16"
+                                              style={
+                                                Object {
+                                                  "fill": undefined,
+                                                }
+                                              }
+                                              viewBox="0 0 16 16"
+                                              width="16"
+                                              xmlns="http://www.w3.org/2000/svg"
+                                              xmlnsXlink="http://www.w3.org/1999/xlink"
+                                            >
+                                              <defs>
+                                                <path
+                                                  d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
+                                                  id="arrow_down-a"
+                                                />
+                                              </defs>
+                                              <use
+                                                fillRule="nonzero"
+                                                xlinkHref="#arrow_down-a"
                                               />
-                                            </defs>
-                                            <use
-                                              fillRule="nonzero"
-                                              xlinkHref="#arrow_down-a"
-                                            />
-                                          </svg>
-                                        </arrowDown>
-                                      </EuiIcon>
-                                      <span>
-                                        View: 
-                                        View 1
+                                            </svg>
+                                          </arrowDown>
+                                        </EuiIcon>
+                                        <span>
+                                          View: 
+                                          View 1
+                                        </span>
                                       </span>
-                                    </span>
-                                  </button>
-                                </EuiButtonEmpty>
+                                    </button>
+                                  </EuiButtonEmpty>
+                                </div>
                               </div>
                             </EuiOutsideClickDetector>
                           </EuiPopover>
