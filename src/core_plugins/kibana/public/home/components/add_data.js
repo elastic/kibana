@@ -32,7 +32,7 @@ export function AddData({ addBasePath, apmUiEnabled }) {
     const getApmCard = () =>  (
       <KuiCard style={cardStyle}>
         <KuiCardDescription>
-          <KuiCardDescriptionTitle>
+          <KuiCardDescriptionTitle aria-level="4">
             <img
               src={addBasePath('/plugins/kibana/assets/app_apm.svg')}
               alt="APM application icon"
@@ -65,7 +65,7 @@ export function AddData({ addBasePath, apmUiEnabled }) {
 
           <KuiCard style={cardStyle}>
             <KuiCardDescription>
-              <KuiCardDescriptionTitle>
+              <KuiCardDescriptionTitle aria-level="4">
                 <img
                   src={addBasePath('/plugins/kibana/assets/app_logging.svg')}
                   alt="Logging icon"
@@ -91,7 +91,7 @@ export function AddData({ addBasePath, apmUiEnabled }) {
 
           <KuiCard style={cardStyle}>
             <KuiCardDescription>
-              <KuiCardDescriptionTitle>
+              <KuiCardDescriptionTitle aria-level="4">
                 <img
                   src={addBasePath('/plugins/kibana/assets/app_monitoring.svg')}
                   alt="Monitoring icon"
@@ -117,7 +117,7 @@ export function AddData({ addBasePath, apmUiEnabled }) {
 
           <KuiCard style={cardStyle}>
             <KuiCardDescription>
-              <KuiCardDescriptionTitle>
+              <KuiCardDescriptionTitle aria-level="4">
                 <img
                   src={addBasePath('/plugins/kibana/assets/app_security.svg')}
                   alt="Security icon"
