@@ -10,6 +10,7 @@ import { TOOLTIPS } from '../../../../../common/constants/tooltips';
 import {
   EuiButton,
   EuiCodeEditor,
+  EuiConfirmModal,
   EuiFlexGroup,
   EuiFieldNumber,
   EuiFlexItem,
@@ -17,6 +18,8 @@ import {
   EuiForm,
   EuiFormRow,
   EuiIconTip,
+  EUI_MODAL_CANCEL_BUTTON,
+  EuiOverlayMask,
   EuiPage,
   EuiPageContent,
   EuiSelect,
@@ -57,6 +60,28 @@ function FlexItemSetting(props) {
         {props.children}
       </EuiFormRow>
     </EuiFlexItem>
+  );
+}
+
+function ConfirmDeletePipelineModal({
+  id,
+  cancelDeleteModal,
+  confirmDeletePipeline,
+}) {
+  return (
+    <EuiOverlayMask>
+      <EuiConfirmModal
+        buttonColor="danger"
+        cancelButtonText="Cancel"
+        confirmButtonText="Delete pipeline"
+        defaultFocusedButton={EUI_MODAL_CANCEL_BUTTON}
+        onCancel={cancelDeleteModal}
+        onConfirm={confirmDeletePipeline}
+        title={`Delete pipeline ${id}`}
+      >
+        <p>You cannot recover a deleted pipeline.</p>
+      </EuiConfirmModal>
+    </EuiOverlayMask>
   );
 }
 
@@ -125,8 +150,23 @@ export class PipelineEditor extends React.Component {
         username
       },
       pipelineIdErrors: [],
+      showConfirmDeleteModal: false,
       showPipelineIdError: false,
     };
+  }
+
+  hideConfirmDeleteModal = () => {
+    this.setState({
+      ...this.state,
+      showConfirmDeleteModal: false,
+    });
+  }
+
+  showConfirmDeleteModal = () => {
+    this.setState({
+      ...this.state,
+      showConfirmDeleteModal: true,
+    });
   }
 
   onPipelineIdChange = ({ target: { value } }) => {
@@ -164,22 +204,6 @@ export class PipelineEditor extends React.Component {
       })
       .catch(() => {
         // TODO: check license validity
-      });
-  }
-
-  onPipelineDelete = () => {
-    const {
-      pipeline: { id },
-      pipelineService
-    } = this.props;
-    // TODO: Add modal here
-    return pipelineService.deletePipeline(id)
-      .then(() => {
-        // TODO: Add toast success
-        this.onClose();
-      })
-      .catch(() => {
-        // TODO: check validity and notify of error
       });
   }
 
@@ -226,13 +250,32 @@ export class PipelineEditor extends React.Component {
         <EuiFlexItem grow={false}>
           <EuiButton
             color="danger"
-            onClick={this.onPipelineDelete}
+            onClick={this.showConfirmDeleteModal}
           >
             Delete pipeline
           </EuiButton>
         </EuiFlexItem>
       )
   )
+
+  deletePipeline = () => {
+    const {
+      pipeline: { id },
+      pipelineService
+    } = this.props;
+
+    this.hideConfirmDeleteModal();
+
+    // TODO: Add modal here
+    return pipelineService.deletePipeline(id)
+      .then(() => {
+        // TODO: Add toast success
+        this.onClose();
+      })
+      .catch(() => {
+        // TODO: check validity and notify of error
+      });
+  }
 
   render() {
     return (
@@ -374,6 +417,14 @@ export class PipelineEditor extends React.Component {
             </EuiFlexGroup>
           </EuiForm>
         </EuiPageContent>
+        {
+          this.state.showConfirmDeleteModal &&
+          <ConfirmDeletePipelineModal
+            id={this.props.pipeline.id}
+            cancelDeleteModal={this.hideConfirmDeleteModal}
+            confirmDeletePipeline={this.deletePipeline}
+          />
+        }
       </EuiPage>
     );
   }
@@ -410,9 +461,6 @@ app.directive('pipelineEdit', function ($injector) {
       const userResource = securityService.isSecurityEnabled
         ? await shieldUser.getCurrent().$promise
         : null;
-
-      console.log(scope.pipeline.id);
-      console.log(isEmpty(scope.pipeline.id));
 
       render(
         <PipelineEditor
