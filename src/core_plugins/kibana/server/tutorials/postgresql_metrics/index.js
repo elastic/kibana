@@ -20,30 +20,32 @@
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
-export function dockerMetricsSpecProvider() {
-  const moduleName = 'docker';
+export function postgresqlMetricsSpecProvider() {
+  const moduleName = 'postgresql';
   return {
-    id: 'dockerMetrics',
-    name: 'Docker metrics',
+    id: 'postgresqlMetrics',
+    name: 'PostgreSQL metrics',
     category: TUTORIAL_CATEGORY.METRICS,
-    shortDescription: 'Fetch metrics about your Docker containers.',
-    longDescription: 'The `docker` Metricbeat module fetches metrics from the Docker server.' +
-                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-docker.html).',
-    euiIconType: 'logoDocker',
+    shortDescription: 'Fetch internal metrics from PostgreSQL.',
+    longDescription: 'The `postgresql` Metricbeat module fetches internal metrics from the PostgreSQL server.' +
+                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-postgresql.html).',
+    //euiIconType: 'logoPostgreSQL',
     artifacts: {
       dashboards: [
+      /*
         {
-          id: 'AV4REOpp5NkDleZmzKkE',
-          linkLabel: 'Docker metrics dashboard',
+          id: 'TODO',
+          linkLabel: 'PostgreSQL metrics dashboard',
           isOverview: true
         }
+      */
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-docker.html'
+        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-postgresql.html'
       }
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/docker_metrics/screenshot.png',
+    //previewImagePath: '/plugins/kibana/home/tutorial_resources/postgresql_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName)

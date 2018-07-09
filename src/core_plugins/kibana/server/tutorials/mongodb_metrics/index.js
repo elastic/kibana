@@ -20,30 +20,30 @@
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
-export function dockerMetricsSpecProvider() {
-  const moduleName = 'docker';
+export function mongodbMetricsSpecProvider() {
+  const moduleName = 'mongodb';
   return {
-    id: 'dockerMetrics',
-    name: 'Docker metrics',
+    id: 'mongodbMetrics',
+    name: 'MongoDB metrics',
     category: TUTORIAL_CATEGORY.METRICS,
-    shortDescription: 'Fetch metrics about your Docker containers.',
-    longDescription: 'The `docker` Metricbeat module fetches metrics from the Docker server.' +
-                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-docker.html).',
-    euiIconType: 'logoDocker',
+    shortDescription: 'Fetch internal metrics from MongoDB.',
+    longDescription: 'The `mongodb` Metricbeat module fetches internal metrics from the MongoDB server.' +
+                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-mongodb.html).',
+    //euiIconType: 'logoMongoDB',
     artifacts: {
       dashboards: [
         {
-          id: 'AV4REOpp5NkDleZmzKkE',
-          linkLabel: 'Docker metrics dashboard',
+          id: 'Metricbeat-MongoDB',
+          linkLabel: 'MongoDB metrics dashboard',
           isOverview: true
         }
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-docker.html'
+        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-mongodb.html'
       }
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/docker_metrics/screenshot.png',
+    previewImagePath: '/plugins/kibana/home/tutorial_resources/mongodb_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName)
