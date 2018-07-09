@@ -205,7 +205,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const updatedOptions = await PageObjects.visualize.getComboBoxOptions('listControlSelect0');
-        expect(updatedOptions.trim().split('\n').join()).to.equal('RE,RO,RS,RU,RW');
+        expect(updatedOptions.trim().split('\n').join()).to.equal('AR,BR,FR,GR,IR,KR,RO,RU,RW,TR');
       });
 
       it('should not fetch new options when non-string is filtered', async () => {
