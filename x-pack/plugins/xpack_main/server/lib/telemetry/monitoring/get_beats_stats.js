@@ -37,15 +37,22 @@ export async function fetchBeatsStats(
       'hits.hits._source.beats_stats.beat.host',
       'hits.hits._source.beats_stats.stats.libbeat.pipeline.events.published',
       'hits.hits._source.beats_stats.stats.libbeat.output.type',
+      'hits.hits._source.beats_state.state.module.count',
+      'hits.hits._source.beats_state.state.module.names',
     ],
     body: {
       query: createQuery({
         start,
         end,
-        type: 'beats_stats',
         filters: [
           { terms: { cluster_uuid: clusterUuids } },
           { bool: { must_not: { term: { 'beats_stats.beat.type': 'apm-server' } } } },
+          { bool: {
+            should: [
+              { term: { 'type': 'beats_stats' } },
+              { term: { 'type': 'beats_state' } }
+            ]
+          } }
         ],
       }),
       collapse: { field: 'beats_stats.beat.uuid' },
@@ -83,6 +90,10 @@ const getBaseStats = () => ({
   types: {},
   outputs: {},
   eventsPublished: 0,
+  module: {
+    count: 0,
+    names: []
+  },
   hosts: 0,
 });
 
@@ -133,6 +144,12 @@ export function processResults(results = [], clusters, clusterHostMaps) {
       const hostsMap = clusterHostMaps[clusterUuid];
       hostsMap.set(thisHost, thisHost); // values don't matter, as this data structure is not part of the output
       clusters[clusterUuid].hosts = hostsMap.size;
+    }
+
+    const thisModules = get(hit, '_source.beats_state.state.module');
+    if (thisModules !== undefined) {
+      clusters[clusterUuid].module.count += thisModules.count;
+      clusters[clusterUuid].module.names = clusters[clusterUuid].module.names.concat(thisModules.names);
     }
   });
 }
