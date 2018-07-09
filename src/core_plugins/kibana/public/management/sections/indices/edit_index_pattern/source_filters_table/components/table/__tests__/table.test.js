@@ -26,7 +26,7 @@ import { keyCodes } from '@elastic/eui';
 const indexPattern = {};
 const items = [{ value: 'tim*' }];
 
-import { shallowIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 describe('Table', () => {
   it('should render normally', async () => {
@@ -41,7 +41,7 @@ describe('Table', () => {
       />
     );
 
-    const component = shallowIntl(wrapper);
+    const component = shallowWithIntl(wrapper);
     expect(component).toMatchSnapshot();
   });
 
@@ -59,7 +59,7 @@ describe('Table', () => {
       />
     );
 
-    const component = shallowIntl(wrapper);
+    const component = shallowWithIntl(wrapper);
     const matchesTableCell = shallow(
       component.prop('columns')[1].render('tim', { clientId: 1 })
     );
@@ -83,7 +83,7 @@ describe('Table', () => {
           isSaving={false}
         />
       );
-      component = shallowIntl(wrapper);
+      component = shallowWithIntl(wrapper);
     });
 
     it('should show an input field', () => {
@@ -150,7 +150,7 @@ describe('Table', () => {
         />
       );
 
-      const localComponent = shallowIntl(localWrapper);
+      const localComponent = shallowWithIntl(localWrapper);
       // Start the editing process
       const editingComponent = shallow(
         // Fixes: Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
@@ -225,7 +225,7 @@ describe('Table', () => {
       />
     );
 
-    const component = shallowIntl(wrapper);
+    const component = shallowWithIntl(wrapper);
     // Click the delete button
     const deleteCellComponent = shallow(
       // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
@@ -255,7 +255,7 @@ describe('Table', () => {
       />
     );
 
-    const component = shallowIntl(wrapper);
+    const component = shallowWithIntl(wrapper);
     // Start the editing process
     const editingComponent = shallow(
       // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
@@ -301,7 +301,7 @@ describe('Table', () => {
       />
     );
 
-    const component = shallowIntl(wrapper);
+    const component = shallowWithIntl(wrapper);
     // Start the editing process
     const editingComponent = shallow(
       // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.

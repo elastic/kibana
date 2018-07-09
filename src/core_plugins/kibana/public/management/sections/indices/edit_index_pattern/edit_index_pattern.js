@@ -32,6 +32,9 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { SourceFiltersTable } from './source_filters_table';
 import { IndexedFieldsTable } from './indexed_fields_table';
 import { ScriptedFieldsTable } from './scripted_fields_table';
+import { ReactI18n } from '@kbn/i18n';
+
+const { I18nProvider } = ReactI18n;
 
 const REACT_SOURCE_FILTERS_DOM_ELEMENT_ID = 'reactSourceFiltersTable';
 const REACT_INDEXED_FIELDS_DOM_ELEMENT_ID = 'reactIndexedFieldsTable';
@@ -117,19 +120,21 @@ function updateIndexedFieldsTable($scope, $state) {
       }
 
       render(
-        <IndexedFieldsTable
-          fields={$scope.fields}
-          indexPattern={$scope.indexPattern}
-          fieldFilter={$scope.fieldFilter}
-          fieldWildcardMatcher={$scope.fieldWildcardMatcher}
-          indexedFieldTypeFilter={$scope.indexedFieldTypeFilter}
-          helpers={{
-            redirectToRoute: (obj, route) => {
-              $scope.kbnUrl.redirectToRoute(obj, route);
-              $scope.$apply();
-            },
-          }}
-        />,
+        <I18nProvider>
+          <IndexedFieldsTable
+            fields={$scope.fields}
+            indexPattern={$scope.indexPattern}
+            fieldFilter={$scope.fieldFilter}
+            fieldWildcardMatcher={$scope.fieldWildcardMatcher}
+            indexedFieldTypeFilter={$scope.indexedFieldTypeFilter}
+            helpers={{
+              redirectToRoute: (obj, route) => {
+                $scope.kbnUrl.redirectToRoute(obj, route);
+                $scope.$apply();
+              },
+            }}
+          />
+        </I18nProvider>,
         node,
       );
     });

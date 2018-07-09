@@ -22,7 +22,7 @@ import { shallow } from 'enzyme';
 
 import { CallOuts } from '../call_outs';
 
-import { shallowIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 describe('CallOuts', () => {
   it('should render normally', async () => {
@@ -33,7 +33,7 @@ describe('CallOuts', () => {
       />
     );
 
-    const component = shallowIntl(wrapper);
+    const component = shallowWithIntl(wrapper);
     expect(component).toMatchSnapshot();
   });
 

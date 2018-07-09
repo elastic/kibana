@@ -33,7 +33,7 @@ import { Header } from './components/header';
 import { AddFilter } from './components/add_filter';
 import { ReactI18n } from '@kbn/i18n';
 
-const { I18nProvider, I18nContext } = ReactI18n;
+const { I18nContext } = ReactI18n;
 
 export class SourceFiltersTable extends Component {
   static propTypes = {
@@ -187,25 +187,23 @@ export class SourceFiltersTable extends Component {
     const filteredFilters = this.getFilteredFilters(this.state, this.props);
 
     return (
-      <I18nProvider>
-        <div>
-          <Header />
-          <AddFilter onAddFilter={this.onAddFilter} />
-          <EuiSpacer size="l" />
-          <Table
-            isSaving={isSaving}
-            indexPattern={indexPattern}
-            items={filteredFilters}
-            fieldWildcardMatcher={fieldWildcardMatcher}
-            deleteFilter={this.startDeleteFilter}
-            saveFilter={this.saveFilter}
-          />
+      <div>
+        <Header />
+        <AddFilter onAddFilter={this.onAddFilter} />
+        <EuiSpacer size="l" />
+        <Table
+          isSaving={isSaving}
+          indexPattern={indexPattern}
+          items={filteredFilters}
+          fieldWildcardMatcher={fieldWildcardMatcher}
+          deleteFilter={this.startDeleteFilter}
+          saveFilter={this.saveFilter}
+        />
 
-          <I18nContext>
-            {intl => (this.renderDeleteConfirmationModal(intl))}
-          </I18nContext>
-        </div>
-      </I18nProvider>
+        <I18nContext>
+          {intl => (this.renderDeleteConfirmationModal(intl))}
+        </I18nContext>
+      </div>
     );
   }
 }

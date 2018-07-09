@@ -22,7 +22,7 @@ import { shallow } from 'enzyme';
 
 import { AddFilter } from '../add_filter';
 
-import { shallowIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 describe('AddFilter', () => {
   it('should render normally', async () => {
@@ -30,7 +30,7 @@ describe('AddFilter', () => {
       <AddFilter onAddFilter={() => {}}/>
     );
 
-    const component = shallowIntl(wrapper.find('I18nContext'));
+    const component = shallowWithIntl(wrapper.find('I18nContext'));
     expect(component).toMatchSnapshot();
   });
 
@@ -42,7 +42,7 @@ describe('AddFilter', () => {
 
     // Set a value in the input field
     wrapper.setState({ filter: 'tim*' });
-    const component = shallowIntl(wrapper.find('I18nContext'));
+    const component = shallowWithIntl(wrapper.find('I18nContext'));
     // Click the button
     component.find('EuiButton').simulate('click');
     component.update();
@@ -56,7 +56,7 @@ describe('AddFilter', () => {
       <AddFilter onAddFilter={() => {}}/>
     );
 
-    const component = shallowIntl(wrapper.find('I18nContext'));
+    const component = shallowWithIntl(wrapper.find('I18nContext'));
     // Set a value in the input field
     component.find('EuiFieldText').simulate('keypress', ' ');
     component.update();

@@ -22,7 +22,7 @@ import { shallow } from 'enzyme';
 
 import { StepTimeField } from '../step_time_field';
 
-import { shallowIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 jest.mock('../components/header', () => ({ Header: 'Header' }));
 jest.mock('../components/time_field', () => ({ TimeField: 'TimeField' }));
@@ -50,7 +50,7 @@ describe('StepTimeField', () => {
       />
     );
 
-    const component = shallowIntl(wrapper);
+    const component = shallowWithIntl(wrapper);
 
     expect(component).toMatchSnapshot();
   });
@@ -71,7 +71,7 @@ describe('StepTimeField', () => {
         { display: 'name', fieldName: 'name' },
       ]
     });
-    const component = shallowIntl(wrapper);
+    const component = shallowWithIntl(wrapper);
 
     expect(component).toMatchSnapshot();
   });
@@ -95,7 +95,7 @@ describe('StepTimeField', () => {
       timeFieldSet: true,
     });
 
-    const component = shallowIntl(wrapper);
+    const component = shallowWithIntl(wrapper);
     expect(component).toMatchSnapshot();
   });
 
@@ -146,7 +146,7 @@ describe('StepTimeField', () => {
 
     wrapper.instance().onTimeFieldChanged({ target: { value: '' } });
     wrapper.update();
-    const component = shallowIntl(wrapper);
+    const component = shallowWithIntl(wrapper);
 
     expect(component.find('ActionButtons')).toMatchSnapshot();
   });
@@ -160,7 +160,7 @@ describe('StepTimeField', () => {
         createIndexPattern={noop}
       />
     );
-    const component = shallowIntl(wrapper);
+    const component = shallowWithIntl(wrapper);
     wrapper.setState({
       timeFields: [
         { display: '@timestamp', fieldName: '@timestamp' },
@@ -185,7 +185,7 @@ describe('StepTimeField', () => {
     );
 
     wrapper.setState({ showingAdvancedOptions: true });
-    const component = shallowIntl(wrapper);
+    const component = shallowWithIntl(wrapper);
 
     expect(component).toMatchSnapshot();
   });
@@ -204,7 +204,7 @@ describe('StepTimeField', () => {
       showingAdvancedOptions: true,
       indexPatternId: 'foobar',
     });
-    const component = shallowIntl(wrapper);
+    const component = shallowWithIntl(wrapper);
 
     expect(component).toMatchSnapshot();
   });

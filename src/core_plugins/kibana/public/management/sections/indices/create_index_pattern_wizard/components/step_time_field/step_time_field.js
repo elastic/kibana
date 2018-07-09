@@ -143,10 +143,6 @@ export class StepTimeField extends Component {
     } = this.props;
 
     const getText = (intl, key) => {
-      if (!key) {
-        return '';
-      }
-
       switch (key) {
         case timeFieldsTypes.NO_TIME_FIELDS: return intl.formatMessage({
           id: 'kbn.management.indexPattern.create.stepTime.noTimeFields.label',

@@ -20,7 +20,7 @@
 import React from 'react';
 import { Header } from '../header';
 import { shallow } from 'enzyme';
-import { shallowIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 describe('Header', () => {
   it('should render normally', () => {
@@ -36,7 +36,7 @@ describe('Header', () => {
       />
     );
 
-    const component = shallowIntl(wrapper);
+    const component = shallowWithIntl(wrapper);
     expect(component).toMatchSnapshot();
   });
 
@@ -53,7 +53,7 @@ describe('Header', () => {
       />
     );
 
-    const component = shallowIntl(wrapper);
+    const component = shallowWithIntl(wrapper);
     expect(component).toMatchSnapshot();
   });
 });

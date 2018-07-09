@@ -1,319 +1,305 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`SourceFiltersTable should add a filter 1`] = `
-<I18nProvider>
-  <div>
-    <header />
-    <AddFilter
-      onAddFilter={[Function]}
-    />
-    <eui-spacer
-      size="l"
-    />
-    <Table
-      deleteFilter={[Function]}
-      fieldWildcardMatcher={[Function]}
-      indexPattern={
-        Object {
-          "save": [MockFunction] {
-            "calls": Array [
-              Array [],
-            ],
-          },
-          "sourceFilters": Array [
-            Object {
-              "value": "tim*",
-            },
-            Object {
-              "value": "na*",
-            },
+<div>
+  <header />
+  <AddFilter
+    onAddFilter={[Function]}
+  />
+  <eui-spacer
+    size="l"
+  />
+  <Table
+    deleteFilter={[Function]}
+    fieldWildcardMatcher={[Function]}
+    indexPattern={
+      Object {
+        "save": [MockFunction] {
+          "calls": Array [
+            Array [],
           ],
-        }
-      }
-      isSaving={false}
-      items={
-        Array [
+        },
+        "sourceFilters": Array [
           Object {
-            "clientId": 2,
             "value": "tim*",
           },
           Object {
-            "clientId": 3,
             "value": "na*",
           },
-        ]
+        ],
       }
-      saveFilter={[Function]}
-    />
-    <I18nContext />
-  </div>
-</I18nProvider>
+    }
+    isSaving={false}
+    items={
+      Array [
+        Object {
+          "clientId": 2,
+          "value": "tim*",
+        },
+        Object {
+          "clientId": 3,
+          "value": "na*",
+        },
+      ]
+    }
+    saveFilter={[Function]}
+  />
+  <I18nContext />
+</div>
 `;
 
 exports[`SourceFiltersTable should filter based on the query bar 1`] = `
-<I18nProvider>
-  <div>
-    <header />
-    <AddFilter
-      onAddFilter={[Function]}
-    />
-    <eui-spacer
-      size="l"
-    />
-    <Table
-      deleteFilter={[Function]}
-      fieldWildcardMatcher={[Function]}
-      indexPattern={
-        Object {
-          "sourceFilters": Array [
-            Object {
-              "value": "time*",
-            },
-            Object {
-              "value": "nam*",
-            },
-            Object {
-              "value": "age*",
-            },
-          ],
-        }
-      }
-      isSaving={false}
-      items={
-        Array [
+<div>
+  <header />
+  <AddFilter
+    onAddFilter={[Function]}
+  />
+  <eui-spacer
+    size="l"
+  />
+  <Table
+    deleteFilter={[Function]}
+    fieldWildcardMatcher={[Function]}
+    indexPattern={
+      Object {
+        "sourceFilters": Array [
           Object {
-            "clientId": 1,
-            "value": "time*",
-          },
-        ]
-      }
-      saveFilter={[Function]}
-    />
-    <I18nContext />
-  </div>
-</I18nProvider>
-`;
-
-exports[`SourceFiltersTable should remove a filter 1`] = `
-<I18nProvider>
-  <div>
-    <header />
-    <AddFilter
-      onAddFilter={[Function]}
-    />
-    <eui-spacer
-      size="l"
-    />
-    <Table
-      deleteFilter={[Function]}
-      fieldWildcardMatcher={[Function]}
-      indexPattern={
-        Object {
-          "save": [MockFunction] {
-            "calls": Array [
-              Array [],
-            ],
-          },
-          "sourceFilters": Array [
-            Object {
-              "clientId": 1,
-              "value": "tim*",
-            },
-            Object {
-              "clientId": 2,
-              "value": "na*",
-            },
-          ],
-        }
-      }
-      isSaving={false}
-      items={
-        Array [
-          Object {
-            "clientId": 3,
-            "value": "tim*",
-          },
-          Object {
-            "clientId": 4,
-            "value": "na*",
-          },
-        ]
-      }
-      saveFilter={[Function]}
-    />
-    <I18nContext />
-  </div>
-</I18nProvider>
-`;
-
-exports[`SourceFiltersTable should render normally 1`] = `
-<I18nProvider>
-  <div>
-    <header />
-    <AddFilter
-      onAddFilter={[Function]}
-    />
-    <eui-spacer
-      size="l"
-    />
-    <Table
-      deleteFilter={[Function]}
-      fieldWildcardMatcher={[Function]}
-      indexPattern={
-        Object {
-          "sourceFilters": Array [
-            Object {
-              "value": "time*",
-            },
-            Object {
-              "value": "nam*",
-            },
-            Object {
-              "value": "age*",
-            },
-          ],
-        }
-      }
-      isSaving={false}
-      items={
-        Array [
-          Object {
-            "clientId": 1,
             "value": "time*",
           },
           Object {
-            "clientId": 2,
             "value": "nam*",
           },
           Object {
-            "clientId": 3,
             "value": "age*",
           },
-        ]
+        ],
       }
-      saveFilter={[Function]}
-    />
-    <I18nContext />
-  </div>
-</I18nProvider>
+    }
+    isSaving={false}
+    items={
+      Array [
+        Object {
+          "clientId": 1,
+          "value": "time*",
+        },
+      ]
+    }
+    saveFilter={[Function]}
+  />
+  <I18nContext />
+</div>
+`;
+
+exports[`SourceFiltersTable should remove a filter 1`] = `
+<div>
+  <header />
+  <AddFilter
+    onAddFilter={[Function]}
+  />
+  <eui-spacer
+    size="l"
+  />
+  <Table
+    deleteFilter={[Function]}
+    fieldWildcardMatcher={[Function]}
+    indexPattern={
+      Object {
+        "save": [MockFunction] {
+          "calls": Array [
+            Array [],
+          ],
+        },
+        "sourceFilters": Array [
+          Object {
+            "clientId": 1,
+            "value": "tim*",
+          },
+          Object {
+            "clientId": 2,
+            "value": "na*",
+          },
+        ],
+      }
+    }
+    isSaving={false}
+    items={
+      Array [
+        Object {
+          "clientId": 3,
+          "value": "tim*",
+        },
+        Object {
+          "clientId": 4,
+          "value": "na*",
+        },
+      ]
+    }
+    saveFilter={[Function]}
+  />
+  <I18nContext />
+</div>
+`;
+
+exports[`SourceFiltersTable should render normally 1`] = `
+<div>
+  <header />
+  <AddFilter
+    onAddFilter={[Function]}
+  />
+  <eui-spacer
+    size="l"
+  />
+  <Table
+    deleteFilter={[Function]}
+    fieldWildcardMatcher={[Function]}
+    indexPattern={
+      Object {
+        "sourceFilters": Array [
+          Object {
+            "value": "time*",
+          },
+          Object {
+            "value": "nam*",
+          },
+          Object {
+            "value": "age*",
+          },
+        ],
+      }
+    }
+    isSaving={false}
+    items={
+      Array [
+        Object {
+          "clientId": 1,
+          "value": "time*",
+        },
+        Object {
+          "clientId": 2,
+          "value": "nam*",
+        },
+        Object {
+          "clientId": 3,
+          "value": "age*",
+        },
+      ]
+    }
+    saveFilter={[Function]}
+  />
+  <I18nContext />
+</div>
 `;
 
 exports[`SourceFiltersTable should should a loading indicator when saving 1`] = `
-<I18nProvider>
-  <div>
-    <header />
-    <AddFilter
-      onAddFilter={[Function]}
-    />
-    <eui-spacer
-      size="l"
-    />
-    <Table
-      deleteFilter={[Function]}
-      fieldWildcardMatcher={[Function]}
-      indexPattern={
-        Object {
-          "sourceFilters": Array [
-            Object {
-              "value": "tim*",
-            },
-          ],
-        }
-      }
-      isSaving={true}
-      items={
-        Array [
+<div>
+  <header />
+  <AddFilter
+    onAddFilter={[Function]}
+  />
+  <eui-spacer
+    size="l"
+  />
+  <Table
+    deleteFilter={[Function]}
+    fieldWildcardMatcher={[Function]}
+    indexPattern={
+      Object {
+        "sourceFilters": Array [
           Object {
-            "clientId": 1,
             "value": "tim*",
           },
-        ]
+        ],
       }
-      saveFilter={[Function]}
-    />
-    <I18nContext />
-  </div>
-</I18nProvider>
+    }
+    isSaving={true}
+    items={
+      Array [
+        Object {
+          "clientId": 1,
+          "value": "tim*",
+        },
+      ]
+    }
+    saveFilter={[Function]}
+  />
+  <I18nContext />
+</div>
 `;
 
 exports[`SourceFiltersTable should show a delete modal 1`] = `
-<I18nProvider>
-  <div>
-    <header />
-    <AddFilter
-      onAddFilter={[Function]}
-    />
-    <eui-spacer
-      size="l"
-    />
-    <Table
-      deleteFilter={[Function]}
-      fieldWildcardMatcher={[Function]}
-      indexPattern={
-        Object {
-          "sourceFilters": Array [
-            Object {
-              "value": "tim*",
-            },
-          ],
-        }
+<div>
+  <header />
+  <AddFilter
+    onAddFilter={[Function]}
+  />
+  <eui-spacer
+    size="l"
+  />
+  <Table
+    deleteFilter={[Function]}
+    fieldWildcardMatcher={[Function]}
+    indexPattern={
+      Object {
+        "sourceFilters": Array [
+          Object {
+            "value": "tim*",
+          },
+        ],
       }
-      isSaving={false}
-      items={
-        Array [
+    }
+    isSaving={false}
+    items={
+      Array [
+        Object {
+          "clientId": 1,
+          "value": "tim*",
+        },
+      ]
+    }
+    saveFilter={[Function]}
+  />
+  <I18nContext />
+</div>
+`;
+
+exports[`SourceFiltersTable should update a filter 1`] = `
+<div>
+  <header />
+  <AddFilter
+    onAddFilter={[Function]}
+  />
+  <eui-spacer
+    size="l"
+  />
+  <Table
+    deleteFilter={[Function]}
+    fieldWildcardMatcher={[Function]}
+    indexPattern={
+      Object {
+        "save": [MockFunction] {
+          "calls": Array [
+            Array [],
+          ],
+        },
+        "sourceFilters": Array [
           Object {
             "clientId": 1,
             "value": "tim*",
           },
-        ]
+        ],
       }
-      saveFilter={[Function]}
-    />
-    <I18nContext />
-  </div>
-</I18nProvider>
-`;
-
-exports[`SourceFiltersTable should update a filter 1`] = `
-<I18nProvider>
-  <div>
-    <header />
-    <AddFilter
-      onAddFilter={[Function]}
-    />
-    <eui-spacer
-      size="l"
-    />
-    <Table
-      deleteFilter={[Function]}
-      fieldWildcardMatcher={[Function]}
-      indexPattern={
+    }
+    isSaving={false}
+    items={
+      Array [
         Object {
-          "save": [MockFunction] {
-            "calls": Array [
-              Array [],
-            ],
-          },
-          "sourceFilters": Array [
-            Object {
-              "clientId": 1,
-              "value": "tim*",
-            },
-          ],
-        }
-      }
-      isSaving={false}
-      items={
-        Array [
-          Object {
-            "clientId": 2,
-            "value": "tim*",
-          },
-        ]
-      }
-      saveFilter={[Function]}
-    />
-    <I18nContext />
-  </div>
-</I18nProvider>
+          "clientId": 2,
+          "value": "tim*",
+        },
+      ]
+    }
+    saveFilter={[Function]}
+  />
+  <I18nContext />
+</div>
 `;
