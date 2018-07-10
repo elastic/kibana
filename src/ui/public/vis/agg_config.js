@@ -173,7 +173,7 @@ class AggConfig {
    *
    * Adds params and adhoc subaggs to a pojo, then returns it
    *
-   * @param  {aggConfigs} aggConfigs - the config object to convert
+   * @param  {AggConfigs} aggConfigs - the config object to convert
    * @return {void|Object} - if the config has a dsl representation, it is
    *                         returned, else undefined is returned
    */
