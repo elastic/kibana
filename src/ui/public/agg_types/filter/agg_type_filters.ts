@@ -16,8 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { BehaviorSubject } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { AggType } from '..';
 import { IndexPattern } from '../../index_patterns';
 import { AggConfig } from '../../vis';
@@ -34,47 +32,31 @@ type AggTypeFilter = (
  */
 class AggTypeFilters {
   private filters = new Set<AggTypeFilter>();
-  private subject = new BehaviorSubject<Set<AggTypeFilter>>(this.filters);
 
   /**
    * Register a new {@link AggTypeFilter} with this registry.
-   * This will emit a new set of filtered aggTypes on every Observer returned
-   * by the {@link #filter$|filter method}.
    *
    * @param filter The filter to register.
    */
   public addFilter(filter: AggTypeFilter): void {
     this.filters.add(filter);
-    this.subject.next(this.filters);
   }
 
   /**
-   * Returns an Observable that will emit a filtered list of the passed {@link AggType|aggTypes}.
-   * A new filtered list will always be emitted when the {@link AggTypeFilter}
-   * registered with this registry will change.
+   * Returns the {@link AggType|aggTypes} filtered by all registered filters.
    *
    * @param aggTypes A list of aggTypes that will be filtered down by this registry.
    * @param indexPattern The indexPattern for which this list should be filtered down.
    * @param aggConfig The aggConfig for which the returning list will be used.
    * @return A filtered list of the passed aggTypes.
    */
-  public filter$(
-    aggTypes: AggType[],
-    indexPattern: IndexPattern,
-    aggConfig: AggConfig
-  ) {
-    return this.subject.pipe(
-      map(filters => {
-        const allFilters = Array.from(filters);
-        const allowedAggTypes = aggTypes.filter(aggType => {
-          const isAggTypeAllowed = allFilters.every(filter =>
-            filter(aggType, indexPattern, aggConfig)
-          );
-          return isAggTypeAllowed;
-        });
-        return allowedAggTypes;
-      })
-    );
+  public filter(aggTypes: AggType[], indexPattern: IndexPattern, aggConfig: AggConfig) {
+    const allFilters = Array.from(this.filters);
+    const allowedAggTypes = aggTypes.filter(aggType => {
+      const isAggTypeAllowed = allFilters.every(filter => filter(aggType, indexPattern, aggConfig));
+      return isAggTypeAllowed;
+    });
+    return allowedAggTypes;
   }
 }
 

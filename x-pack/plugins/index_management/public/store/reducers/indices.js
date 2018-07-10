@@ -27,7 +27,6 @@ const byId = handleActions({
   },
   [loadIndicesSuccess](state, action) {
     const { indices } = action.payload;
-
     const newState = {};
     indices.forEach(index => {
       newState[index.name] = index;

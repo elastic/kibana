@@ -35,9 +35,7 @@ function toSortable(systems: Map<SystemName, System<any, any, any, any>>) {
 /**
  * Sorts systems in topological order based on dependencies
  */
-export function getSortedSystemNames(
-  systems: Map<SystemName, System<any, any, any, any>>
-) {
+export function getSortedSystemNames(systems: Map<SystemName, System<any, any, any, any>>) {
   const sorted = topologicalSort(toSortable(systems));
   return [...sorted];
 }

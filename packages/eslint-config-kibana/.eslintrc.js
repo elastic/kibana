@@ -92,7 +92,7 @@ module.exports = {
     'wrap-iife': [ 'error', 'outside' ],
     yoda: 'off',
 
-    'object-curly-spacing': 'off', // overriden with babel/object-curly-spacing
+    'object-curly-spacing': 'off', // overridden with babel/object-curly-spacing
     'babel/object-curly-spacing': [ 'error', 'always' ],
 
     'jsx-quotes': ['error', 'prefer-double'],

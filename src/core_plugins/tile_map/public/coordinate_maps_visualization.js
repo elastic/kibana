@@ -43,14 +43,29 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
 
       await super._makeKibanaMap();
 
-      this.vis.sessionState.mapBounds = this._kibanaMap.getBounds();
+      const updateGeohashAgg = () => {
+        const geohashAgg = this._getGeoHashAgg();
+        if (!geohashAgg) return;
+        geohashAgg.params.mapBounds = this._kibanaMap.getBounds();
+        geohashAgg.params.mapZoom = this._kibanaMap.getZoomLevel();
+        geohashAgg.params.mapCenter = this._kibanaMap.getCenter();
+      };
+
+      updateGeohashAgg();
+
+      const uiState = this.vis.getUiState();
+      uiState.on('change', (prop) => {
+        if (prop === 'mapZoom' || prop === 'mapCenter') {
+          updateGeohashAgg();
+        }
+      });
 
       let previousPrecision = this._kibanaMap.getGeohashPrecision();
       let precisionChange = false;
       this._kibanaMap.on('zoomchange', () => {
+        const geohashAgg = this._getGeoHashAgg();
         precisionChange = (previousPrecision !== this._kibanaMap.getGeohashPrecision());
         previousPrecision = this._kibanaMap.getGeohashPrecision();
-        const geohashAgg = this._getGeoHashAgg();
         if (!geohashAgg) {
           return;
         }
@@ -78,12 +93,12 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
 
       this._kibanaMap.addDrawControl();
       this._kibanaMap.on('drawCreated:rectangle', event => {
-        const geoAgg = this._getGeoHashAgg();
-        this.addSpatialFilter(geoAgg, 'geo_bounding_box', event.bounds);
+        const geohashAgg = this._getGeoHashAgg();
+        this.addSpatialFilter(geohashAgg, 'geo_bounding_box', event.bounds);
       });
       this._kibanaMap.on('drawCreated:polygon', event => {
-        const geoAgg = this._getGeoHashAgg();
-        this.addSpatialFilter(geoAgg, 'geo_polygon', { points: event.points });
+        const geohashAgg = this._getGeoHashAgg();
+        this.addSpatialFilter(geohashAgg, 'geo_polygon', { points: event.points });
       });
     }
 
@@ -171,7 +186,7 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
         return;
       }
 
-      const indexPatternName = agg.vis.indexPattern.id;
+      const indexPatternName = agg._indexPattern.id;
       const field = agg.fieldName();
       const filter = { meta: { negate: false, index: indexPatternName } };
       filter[filterName] = { ignore_unmapped: true };
@@ -185,9 +200,9 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
     async getGeohashBounds() {
       const agg = this._getGeoHashAgg();
       if (agg) {
-        const searchSource = this.vis.API.createInheritedSearchSource(this.vis.searchSource);
-        searchSource.size(0);
-        searchSource.aggs(function () {
+        const searchSource = this.vis.searchSource.createChild();
+        searchSource.setField('size', 0);
+        searchSource.setField('aggs', function () {
           const geoBoundsAgg = new AggConfig(agg.vis, {
             type: 'geo_bounds',
             enabled: true,

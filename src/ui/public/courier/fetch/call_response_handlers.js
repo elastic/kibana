@@ -26,40 +26,40 @@ export function CallResponseHandlersProvider(Private, Promise) {
   const ABORTED = RequestStatus.ABORTED;
   const INCOMPLETE = RequestStatus.INCOMPLETE;
 
-  function callResponseHandlers(requests, responses) {
-    return Promise.map(requests, function (req, i) {
-      if (req === ABORTED || req.aborted) {
+  function callResponseHandlers(searchRequests, responses) {
+    return Promise.map(searchRequests, function (searchRequest, index) {
+      if (searchRequest === ABORTED || searchRequest.aborted) {
         return ABORTED;
       }
 
-      const resp = responses[i];
+      const response = responses[index];
 
-      if (resp.timed_out) {
+      if (response.timed_out) {
         courierNotifier.warning(new SearchTimeout());
       }
 
-      if (resp._shards && resp._shards.failed) {
-        courierNotifier.warning(new ShardFailure(resp));
+      if (response._shards && response._shards.failed) {
+        courierNotifier.warning(new ShardFailure(response));
       }
 
       function progress() {
-        if (req.isIncomplete()) {
+        if (searchRequest.isIncomplete()) {
           return INCOMPLETE;
         }
 
-        req.complete();
-        return resp;
+        searchRequest.complete();
+        return response;
       }
 
-      if (resp.error) {
-        if (req.filterError(resp)) {
+      if (response.error) {
+        if (searchRequest.filterError(response)) {
           return progress();
         } else {
-          return req.handleFailure(new RequestFailure(null, resp));
+          return searchRequest.handleFailure(new RequestFailure(null, response));
         }
       }
 
-      return Promise.try(() => req.handleResponse(resp)).then(progress);
+      return Promise.try(() => searchRequest.handleResponse(response)).then(progress);
     });
   }
 

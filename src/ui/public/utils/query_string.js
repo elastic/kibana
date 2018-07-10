@@ -22,7 +22,7 @@ import { encodeQueryComponent } from '../../../utils';
 export const QueryString = {};
 
 /*****
-/*** orignally copied from angular, modified our purposes
+/*** originally copied from angular, modified our purposes
 /*****/
 
 function tryDecodeURIComponent(value) {

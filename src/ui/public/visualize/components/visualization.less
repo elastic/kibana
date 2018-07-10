@@ -1,0 +1,71 @@
+@import (reference) "~ui/styles/variables";
+
+.visualize {
+  display: flex;
+  flex: 1 1 100%;
+  overflow-x: hidden;
+}
+
+.visualization {
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  width: 100%;
+  overflow: auto;
+  position: relative;
+  padding: 8px 8px 8px 8px;
+  flex: 1 1 100%;
+
+  .k4tip {
+    white-space: pre-line;
+  }
+
+  /**
+   * 1. Expand to fill the container but accept being squeezed smaller by the spy, even so small
+   *    that it disappears entirely.
+   */
+  .vis-container {
+    flex: 1 1 0; /* 1 */
+    display: flex;
+    flex-direction: row;
+    overflow: auto;
+    -webkit-transition: opacity 0.01s;
+    transition: opacity 0.01s;
+
+    // IE11 Hack
+    //
+    // Normally we would just set flex: 1 1 0%, which works as expected in IE11.
+    // Unfortunately, a recent bug in Firefox causes this rule to be ignored, so we
+    // have to use an IE-specific hack instead.
+    _:-ms-fullscreen, :root  & {
+      flex: 1 0;
+    }
+
+  }
+
+  .loading {
+    opacity: @loading-opacity;
+  }
+
+  .spinner {
+    position: absolute;
+    top: 40%;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    opacity: @loading-opacity;
+  }
+}
+
+/**
+ * 1. Expand to fill the container and accept being squeezed smaller by the spy.
+ */
+.visualize-error {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  .top { align-self: flext-start; }
+  .item { }
+  .bottom { align-self: flext-end; }
+}
