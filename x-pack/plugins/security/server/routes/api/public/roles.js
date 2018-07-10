@@ -21,7 +21,8 @@ export function initRolesApi(server) {
   const transformRoleApplicationsFromEs = (roleApplications) => {
     return roleApplications
       .filter(roleApplication => roleApplication.application === application)
-      .filter(roleApplication => !roleApplication.resources.some(resource => resource !== ALL_RESOURCE))
+      .filter(roleApplication => roleApplication.resources.length > 0)
+      .filter(roleApplication => roleApplication.resources.every(resource => resource === ALL_RESOURCE))
       .map(roleApplication => ({ privileges: roleApplication.privileges }));
   };
 

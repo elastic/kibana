@@ -221,6 +221,60 @@ describe('GET', () => {
       }
     });
 
+    getTest(`excludes resources other than * from kibana privileges`, {
+      callWithRequestImpl: async () => ({
+        first_role: {
+          cluster: [],
+          indices: [],
+          applications: [
+            {
+              application: 'kibana-.kibana',
+              privileges: ['read'],
+              // Elasticsearch should prevent this from happening
+              resources: [],
+            },
+            {
+              application: 'kibana-.kibana',
+              privileges: ['read'],
+              resources: ['default', '*'],
+            },
+            {
+              application: 'kibana-.kibana',
+              privileges: ['read'],
+              resources: ['some-other-space'],
+            },
+          ],
+          run_as: [],
+          metadata: {
+            _reserved: true,
+          },
+          transient_metadata: {
+            enabled: true,
+          },
+        },
+      }),
+      asserts: {
+        statusCode: 200,
+        result: [
+          {
+            name: 'first_role',
+            metadata: {
+              _reserved: true,
+            },
+            transient_metadata: {
+              enabled: true,
+            },
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: [],
+          },
+        ]
+      }
+    });
+
     getTest(`excludes other application from kibana privileges`, {
       callWithRequestImpl: async () => ({
         first_role: {
