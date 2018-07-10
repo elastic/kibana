@@ -17,6 +17,6 @@
  * under the License.
  */
 
-import './intl_polyfill';
+import Intl from 'intl';
 
-export * from './browser';
+global.Intl = Intl;
