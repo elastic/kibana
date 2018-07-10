@@ -20,4 +20,6 @@
 export {
   assignSearchRequestsToSearchStrategies,
   addSearchStrategy,
+  hasSearchStategyForIndexPattern,
+  isRollupIndexPattern,
 } from './search_strategy_registry';

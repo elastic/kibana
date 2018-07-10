@@ -28,12 +28,12 @@ import 'ui/visualize';
 import 'ui/fixed_scroll';
 import 'ui/directives/validate_json';
 import 'ui/filters/moment';
-import 'ui/courier';
 import 'ui/index_patterns';
 import 'ui/state_management/app_state';
 import { timefilter } from 'ui/timefilter';
 import 'ui/share';
 import 'ui/query_bar';
+import { hasSearchStategyForIndexPattern, isRollupIndexPattern } from 'ui/courier';
 import { toastNotifications, getPainlessError } from 'ui/notify';
 import { VisProvider } from 'ui/vis';
 import { BasicResponseHandlerProvider } from 'ui/vis/response_handlers/basic';
@@ -195,6 +195,7 @@ function discoverController(
   // the actual courier.SearchSource
   $scope.searchSource = savedSearch.searchSource;
   $scope.indexPattern = resolveIndexPatternLoading();
+
   $scope.searchSource
     .setField('index', $scope.indexPattern)
     .setField('highlightAll', true)
@@ -236,7 +237,6 @@ function discoverController(
       });
     });
   };
-
 
   const getSharingDataFields = async () => {
     const selectedFields = $state.columns;
@@ -752,17 +752,31 @@ function discoverController(
 
     const own = $scope.searchSource.getOwnField('index');
 
-    if (own && !stateVal) return own;
+    if (own && !stateVal) {
+      return own;
+    }
+
     if (stateVal && !stateValFound) {
-      const err = '"' + stateVal + '" is not a configured pattern ID. ';
       if (own) {
-        notify.warning(`${err} Using the saved index pattern: "${own.title}" (${own.id})`);
+        notify.warning(`"${stateVal}" is not a configured pattern ID. Using the saved index pattern: "${own.title}" (${own.id})`);
         return own;
       }
 
-      notify.warning(`${err} Using the default index pattern: "${loaded.title}" (${loaded.id})`);
+      notify.warning(`"${stateVal}" is not a configured pattern ID. Using the default index pattern: "${loaded.title}" (${loaded.id})`);
     }
+
     return loaded;
+  }
+
+  // Block the UI from loading if the user has loaded a rollup index pattern but it isn't
+  // supported.
+  $scope.isUnsupportedRollup = (
+    isRollupIndexPattern($route.current.locals.ip.loaded)
+    && !hasSearchStategyForIndexPattern($route.current.locals.ip.loaded)
+  );
+
+  if ($scope.isUnsupportedRollup) {
+    return;
   }
 
   init();

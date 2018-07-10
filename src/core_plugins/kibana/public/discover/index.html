@@ -60,6 +60,13 @@
 
       <div class="discover-wrapper col-md-10">
         <div class="discover-content">
+          <call-out
+            ng-if="isUnsupportedRollup"
+            icon="'alert'"
+            color="'danger'"
+            title="'OSS Kibana doesn\'t support rollup index patterns. Please use X-Pack to search this index pattern.'"
+          ></call-out>
+
           <discover-no-results
             ng-show="resultState === 'none'"
             top-nav-toggle="kbnTopNav.toggle"

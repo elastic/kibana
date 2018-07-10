@@ -33,10 +33,10 @@ const getSearchStrategy = (...rest) => {
  * Build a structure like this:
  *
  *   [{
- *     searchStrategy: <rollupSearchStrategy>,
+ *     searchStrategy: rollupSearchStrategy,
  *     searchRequests: []<SearchRequest>,
  *   }, {
- *     searchStrategy: <defaultSearchStrategy>,
+ *     searchStrategy: defaultSearchStrategy,
  *     searchRequests: []<SearchRequest>,
  *   }]
  *
@@ -74,8 +74,13 @@ const hasSearchStategyForIndexPattern = indexPattern => {
   return Boolean(getSearchStrategy({ indexPattern }));
 };
 
+const isRollupIndexPattern = indexPattern => {
+  return indexPattern.type === 'rollup';
+};
+
 export {
   assignSearchRequestsToSearchStrategies,
   addSearchStrategy,
   hasSearchStategyForIndexPattern,
+  isRollupIndexPattern,
 };
