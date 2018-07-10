@@ -50,100 +50,78 @@ const mockRoutePreCheckLicense = impl => {
 };
 
 describe('GET', () => {
-  test(`returns result of routePreCheckLicense`, async () => {
-    const message = 'test forbidden message';
-    const mockServer = createMockServer();
-    const pre = mockRoutePreCheckLicense((request, reply) =>
-      reply(Boom.forbidden(message))
-    );
-    registerMockCallWithRequest();
-    initRolesApi(mockServer);
+  const getTest = (description, {
+    preCheckLicenseImpl = (request, reply) => reply(),
+    callWithRequestImpl,
+    asserts
+  }) => {
+    test(description, async () => {
+      const mockServer = createMockServer();
+      const pre = mockRoutePreCheckLicense(preCheckLicenseImpl);
+      const mockCallWithRequest = registerMockCallWithRequest();
+      if (callWithRequestImpl) {
+        mockCallWithRequest.mockImplementation(callWithRequestImpl);
+      }
+      initRolesApi(mockServer);
+      const headers = {
+        'authorization': 'foo'
+      };
 
-    const request = {
-      method: 'GET',
-      url: '/api/security/roles',
-    };
-    const { result, statusCode } = await mockServer.inject(request);
+      const request = {
+        method: 'GET',
+        url: '/api/security/roles',
+        headers
+      };
+      const { result, statusCode } = await mockServer.inject(request);
 
-    expect(pre).toHaveBeenCalled();
-    expect(statusCode).toBe(403);
-    expect(result).toEqual({ error: 'Forbidden', statusCode: 403, message });
-  });
-
-  test(`returns error from callWithRequest`, async () => {
-    const message = 'test not acceptable message';
-    const mockServer = createMockServer();
-    const pre = mockRoutePreCheckLicense((request, reply) => reply());
-    const mockCallWithRequest = registerMockCallWithRequest();
-    mockCallWithRequest.mockImplementation(async () => {
-      throw Boom.notAcceptable(message);
+      expect(pre).toHaveBeenCalled();
+      if (callWithRequestImpl) {
+        expect(mockCallWithRequest).toHaveBeenCalledWith(expect.objectContaining({
+          headers: expect.objectContaining({
+            'authorization': headers.authorization
+          })
+        }), 'shield.getRole');
+      } else {
+        expect(mockCallWithRequest).not.toHaveBeenCalled();
+      }
+      expect(statusCode).toBe(asserts.statusCode);
+      expect(result).toEqual(asserts.result);
     });
-    initRolesApi(mockServer);
+  };
 
-    const request = {
-      method: 'GET',
-      url: '/api/security/roles',
-    };
-    const { result, statusCode } = await mockServer.inject(request);
-
-    expect(pre).toHaveBeenCalled();
-    expect(statusCode).toBe(406);
-    expect(result).toEqual({
-      error: 'Not Acceptable',
-      statusCode: 406,
-      message,
+  describe('failure', () => {
+    getTest(`returns result of routePreCheckLicense`, {
+      preCheckLicenseImpl: (request, reply) => reply(Boom.forbidden('test forbidden message')),
+      asserts: {
+        statusCode: 403,
+        result: {
+          error: 'Forbidden',
+          statusCode: 403,
+          message: 'test forbidden message'
+        }
+      }
     });
-  });
 
-  test(`transforms response from callWithRequest`, async () => {
-    const mockServer = createMockServer();
-    const pre = mockRoutePreCheckLicense((request, reply) => reply());
-    const mockCallWithRequest = registerMockCallWithRequest();
-    mockCallWithRequest.mockImplementation(async () => ({
-      first_role: {
-        cluster: ['manage_watcher'],
-        indices: [
-          {
-            names: ['.kibana*'],
-            privileges: ['read', 'view_index_metadata'],
-          },
-        ],
-        applications: [
-          {
-            application: 'kibana-.kibana',
-            privileges: ['read'],
-            resources: ['*'],
-          },
-        ],
-        run_as: ['other_user'],
-        metadata: {
-          _reserved: true,
-        },
-        transient_metadata: {
-          enabled: true,
-        },
+    getTest(`returns error from callWithRequest`, {
+      callWithRequestImpl: async () => {
+        throw Boom.notAcceptable('test not acceptable message');
       },
-    }));
-    initRolesApi(mockServer);
+      asserts: {
+        statusCode: 406,
+        result: {
+          error: 'Not Acceptable',
+          statusCode: 406,
+          message: 'test not acceptable message',
+        }
+      }
+    });
+  });
 
-    const request = {
-      method: 'GET',
-      url: '/api/security/roles',
-    };
-    const { result, statusCode } = await mockServer.inject(request);
+  describe('success', () => {
 
-    expect(pre).toHaveBeenCalled();
-    expect(statusCode).toBe(200);
-    expect(result).toEqual([
-      {
-        name: 'first_role',
-        metadata: {
-          _reserved: true,
-        },
-        transient_metadata: {
-          enabled: true,
-        },
-        elasticsearch: {
+    getTest(`transforms elasticsearch privileges`, {
+      callWithRequestImpl: async () => ({
+        first_role: {
           cluster: ['manage_watcher'],
           indices: [
             {
@@ -151,14 +129,139 @@ describe('GET', () => {
               privileges: ['read', 'view_index_metadata'],
             },
           ],
+          applications: [],
           run_as: ['other_user'],
+          metadata: {
+            _reserved: true,
+          },
+          transient_metadata: {
+            enabled: true,
+          },
         },
-        kibana: [
+      }),
+      asserts: {
+        statusCode: 200,
+        result: [
           {
-            privileges: ['read'],
-          }
-        ],
-      },
-    ]);
+            name: 'first_role',
+            metadata: {
+              _reserved: true,
+            },
+            transient_metadata: {
+              enabled: true,
+            },
+            elasticsearch: {
+              cluster: ['manage_watcher'],
+              indices: [
+                {
+                  names: ['.kibana*'],
+                  privileges: ['read', 'view_index_metadata'],
+                },
+              ],
+              run_as: ['other_user'],
+            },
+            kibana: [],
+          },
+        ]
+      }
+    });
+
+    getTest(`transforms matching applications to kibana privileges`, {
+      callWithRequestImpl: async () => ({
+        first_role: {
+          cluster: [],
+          indices: [],
+          applications: [
+            {
+              application: 'kibana-.kibana',
+              privileges: ['read'],
+              resources: ['*'],
+            },
+            {
+              application: 'kibana-.kibana',
+              privileges: ['all'],
+              resources: ['*'],
+            },
+          ],
+          run_as: [],
+          metadata: {
+            _reserved: true,
+          },
+          transient_metadata: {
+            enabled: true,
+          },
+        },
+      }),
+      asserts: {
+        statusCode: 200,
+        result: [
+          {
+            name: 'first_role',
+            metadata: {
+              _reserved: true,
+            },
+            transient_metadata: {
+              enabled: true,
+            },
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: [
+              {
+                privileges: ['read'],
+              },
+              {
+                privileges: ['all'],
+              }
+            ],
+          },
+        ]
+      }
+    });
+
+    getTest(`excludes other application from kibana privileges`, {
+      callWithRequestImpl: async () => ({
+        first_role: {
+          cluster: [],
+          indices: [],
+          applications: [
+            {
+              application: 'kibana-.another-kibana',
+              privileges: ['read'],
+              resources: ['*'],
+            },
+          ],
+          run_as: [],
+          metadata: {
+            _reserved: true,
+          },
+          transient_metadata: {
+            enabled: true,
+          },
+        },
+      }),
+      asserts: {
+        statusCode: 200,
+        result: [
+          {
+            name: 'first_role',
+            metadata: {
+              _reserved: true,
+            },
+            transient_metadata: {
+              enabled: true,
+            },
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: [],
+          },
+        ]
+      }
+    });
   });
 });
