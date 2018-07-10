@@ -70,8 +70,8 @@ describe('callClient', () => {
   beforeEach(ngMock.module(function stubEs($provide) {
     $provide.service('es', (Promise) => {
       fakeSearch = sinon.spy(() => {
-        return Promise.map(searchRequests, searchRequest => {
-          return { searchRequest };
+        return Promise.resolve({
+          responses: searchRequests,
         });
       });
 
@@ -103,5 +103,18 @@ describe('callClient', () => {
         done();
       });
     });
+
+    it(`resolves the promise with the 'responses' property of the es.msearch() result`, done => {
+      searchRequests = [ mockRequest() ];
+      const callingClient = callClient(searchRequests);
+
+      callingClient.then(results => {
+        // Our es service stub will set the 'responses' property of the result to equal all of
+        // the searchRequests we provided to callClient.
+        expect(results).to.eql(searchRequests);
+        done();
+      });
+    });
+
   });
 });
