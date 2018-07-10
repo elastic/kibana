@@ -492,7 +492,11 @@ app.directive('pipelineEdit', function ($injector) {
           close={close}
           open={open}
           isNewPipeline={isEmpty(scope.pipeline.id)}
-          username={userResource.username}
+          username={
+            userResource
+              ? userResource.username
+              : null
+          }
           pipeline={scope.pipeline}
           pipelineService={pipelineService}
           toastNotifications={toastNotifications}
