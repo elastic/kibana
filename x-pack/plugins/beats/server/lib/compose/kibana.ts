@@ -5,9 +5,9 @@
  */
 
 import { ElasticsearchBeatsAdapter } from '../adapters/beats/elasticsearch_beats_adapter';
+import { KibanaDatabaseAdapter } from '../adapters/database/kibana_database_adapter';
 import { ElasticsearchTagsAdapter } from '../adapters/tags/elasticsearch_tags_adapter';
 import { ElasticsearchTokensAdapter } from '../adapters/tokens/elasticsearch_tokens_adapter';
-import { KibanaDatabaseAdapter } from './../adapters/database/kibana_database_adapter';
 
 import { KibanaBackendFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
 

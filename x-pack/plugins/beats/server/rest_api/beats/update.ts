@@ -49,8 +49,6 @@ export const createBeatUpdateRoute = (libs: CMServerLibs) => ({
           return reply({ message: 'Beat not found' }).code(404);
         case 'invalid-access-token':
           return reply({ message: 'Invalid access token' }).code(401);
-        case 'beat-not-verified':
-          return reply({ message: 'Beat has not been verified' }).code(400);
       }
 
       reply().code(204);
