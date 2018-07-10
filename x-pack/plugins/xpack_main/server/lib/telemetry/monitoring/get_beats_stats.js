@@ -32,7 +32,8 @@ const getBaseStats = () => ({
  * @param {Date} end - End time to limit the stats
  * @param {Number} options.page - selection of hits to fetch from ES
  * @param {Object} options.clusters - Beats stats in an object keyed by the cluster UUIDs
- * @param {Object} options.clusterHostMaps - the object keyed by cluster UUIDs to count the unique hosts
+ * @param {Object} options.clusterHostSets - the object keyed by cluster UUIDs to count the unique hosts
+ * @param {Object} options.clusterModuleSets - the object keyed by cluster UUIDs to list the unique modules
  * @param {Object} options.collapse - field on which to collapse on in the query
  * @return {Promise}
  */
@@ -78,7 +79,7 @@ export async function fetchBeatsStats(server, callCluster, clusterUuids, start, 
   const hitsLength = get(results, 'hits.hits.length', 0);
   if (hitsLength > 0) {
     // further augment the clusters object with more stats
-    processResults(results, options.clusters, options.clusterHostMaps, options.clusterModuleSets);
+    processResults(results, options);
 
     if (hitsLength === HITS_SIZE) {
       // call recursively
@@ -99,16 +100,16 @@ export async function fetchBeatsStats(server, callCluster, clusterUuids, start, 
  * Update a clusters object with processed beat stats
  * @param {Array} results - array of Beats docs from ES
  * @param {Object} clusters - Beats stats in an object keyed by the cluster UUIDs
- * @param {Object} clusterHostMaps - the object keyed by cluster UUIDs to count the unique hosts
+ * @param {Object} clusterHostSets - the object keyed by cluster UUIDs to count the unique hosts
  * @param {Object} clusterModuleSets - the object keyed by cluster UUIDs to count the unique modules
  */
-export function processResults(results = [], clusters, clusterHostMaps, clusterModuleSets) {
+export function processResults(results = [], { clusters, clusterHostSets, clusterModuleSets }) {
   const currHits = get(results, 'hits.hits', []);
   currHits.forEach(hit => {
     const clusterUuid = get(hit, '_source.cluster_uuid');
     if (clusters[clusterUuid] === undefined) {
       clusters[clusterUuid] = getBaseStats();
-      clusterHostMaps[clusterUuid] = new Map();
+      clusterHostSets[clusterUuid] = new Set();
       clusterModuleSets[clusterUuid] = new Set();
     }
 
@@ -143,8 +144,8 @@ export function processResults(results = [], clusters, clusterHostMaps, clusterM
 
     const thisHost = get(hit, '_source.beats_stats.beat.host');
     if (thisHost !== undefined) {
-      const hostsMap = clusterHostMaps[clusterUuid];
-      hostsMap.set(thisHost, thisHost); // values don't matter, as this data structure is not part of the output
+      const hostsMap = clusterHostSets[clusterUuid];
+      hostsMap.add(thisHost);
       clusters[clusterUuid].hosts = hostsMap.size;
     }
 
@@ -164,7 +165,7 @@ export function processResults(results = [], clusters, clusterHostMaps, clusterM
 export async function getBeatsStats(server, callCluster, clusterUuids, start, end) {
   const options = {
     clusters: {},
-    clusterHostMaps: {},
+    clusterHostSets: {},
     clusterModuleSets: {}
   };
 
