@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }) {
 
   describe('input control visualization', () => {
 
-    before(async () => {
+    /*before(async () => {
       await PageObjects.common.navigateToUrl('visualize', 'new');
       await PageObjects.visualize.clickInputControlVis();
       // set time range to time with no documents - input controls do not use time filter be default
@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.setComboBox('fieldSelect-0', FIELD_NAME);
       await PageObjects.visualize.clickGo();
       await PageObjects.header.waitUntilLoadingHasFinished();
-    });
+    });*/
 
 
     it('should not have inspector enabled', async function () {
