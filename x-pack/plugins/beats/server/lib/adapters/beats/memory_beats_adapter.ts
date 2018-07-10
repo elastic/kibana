@@ -19,7 +19,7 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
   }
 
   public async get(id: string) {
-    return this.beatsDB.find(beat => beat.id === id);
+    return this.beatsDB.find(beat => beat.id === id) || null;
   }
 
   public async insert(beat: CMBeat) {
