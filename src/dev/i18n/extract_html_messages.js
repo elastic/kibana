@@ -44,9 +44,9 @@ function parseFilterObjectExpression(expression) {
   // parse an object expression instead of block statement
   const nodes = parse(`+${expression}`).program.body;
 
-  return traverseNodes(nodes, ({ node, stop }) => {
+  for (const node of traverseNodes(nodes)) {
     if (!isObjectExpression(node)) {
-      return;
+      continue;
     }
 
     let message;
@@ -68,21 +68,16 @@ function parseFilterObjectExpression(expression) {
       }
     }
 
-    stop();
     return { message, context };
-  }).next().value;
+  }
 }
 
 function parseIdExpression(expression) {
-  return traverseNodes(
-    parse(expression).program.directives,
-    ({ node, stop }) => {
-      if (isDirectiveLiteral(node)) {
-        stop();
-        return node.value;
-      }
+  for (const node of traverseNodes(parse(expression).program.directives)) {
+    if (isDirectiveLiteral(node)) {
+      return node.value;
     }
-  ).next().value;
+  }
 }
 
 function trimCurlyBraces(string) {

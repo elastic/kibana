@@ -67,36 +67,16 @@ export function escapeLineBreak(string) {
 /**
  * Workaround of @babel/traverse typescript bug: https://github.com/babel/babel/issues/8262
  */
-export function* traverseNodes(nodes, extractMessagesFromNode) {
+export function* traverseNodes(nodes) {
   for (const node of nodes) {
-    let stop = false;
-    let message;
-
     if (isNode(node)) {
-      message = extractMessagesFromNode({
-        node,
-        stop() {
-          stop = true;
-        },
-      });
-    }
-
-    if (message) {
-      yield message;
-    }
-
-    if (stop) {
-      break;
+      yield node;
     }
 
     if (node && typeof node === 'object') {
-      const values = Object.values(node).filter(
-        value => value && typeof value === 'object'
+      yield* traverseNodes(
+        Object.values(node).filter(value => value && typeof value === 'object')
       );
-
-      if (values.length > 0) {
-        yield* traverseNodes(values, extractMessagesFromNode);
-      }
     }
   }
 }

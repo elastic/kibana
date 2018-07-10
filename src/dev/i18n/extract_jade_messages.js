@@ -34,11 +34,11 @@ export function* extractJadeMessages(buffer) {
   const expressions = buffer.toString().match(JADE_I18N_REGEX) || [];
 
   for (const expression of expressions) {
-    yield* traverseNodes(parse(expression).program.body, ({ node, stop }) => {
+    for (const node of traverseNodes(parse(expression).program.body)) {
       if (isI18nTranslateFunction(node)) {
-        stop();
-        return extractI18nCallMessages(node);
+        yield extractI18nCallMessages(node);
+        break;
       }
-    });
+    }
   }
 }

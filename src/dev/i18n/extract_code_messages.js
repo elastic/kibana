@@ -71,13 +71,13 @@ export function* extractCodeMessages(buffer) {
     ],
   });
 
-  yield* traverseNodes(content.program.body, ({ node }) => {
+  for (const node of traverseNodes(content.program.body)) {
     if (isI18nTranslateFunction(node)) {
-      return extractI18nCallMessages(node);
+      yield extractI18nCallMessages(node);
     } else if (isIntlFormatMessageFunction(node)) {
-      return extractIntlMessages(node);
+      yield extractIntlMessages(node);
     } else if (isFormattedMessageElement(node)) {
-      return extractFormattedMessages(node);
+      yield extractFormattedMessages(node);
     }
-  });
+  }
 }
