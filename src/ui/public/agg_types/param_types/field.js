@@ -55,7 +55,7 @@ FieldParamType.prototype.serialize = function (field) {
 FieldParamType.prototype.getFieldOptions = function (aggConfig) {
   const indexPattern = aggConfig.getIndexPattern();
   const fields = aggTypeFieldFilters
-    .filter(indexPattern.fields.raw, aggConfig.type, indexPattern, aggConfig);
+    .filter(indexPattern.fields.raw, this, indexPattern, aggConfig);
 
   return new IndexedArray({
     index: ['name'],

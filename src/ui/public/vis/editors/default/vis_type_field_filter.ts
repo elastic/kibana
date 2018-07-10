@@ -40,13 +40,10 @@ aggTypeFieldFilters.addFilter(
     const { onlyAggregatable, scriptable, filterFieldTypes } = fieldParamType;
 
     const filters = isFunction(filterFieldTypes)
-      ? filterFieldTypes.bind(this, aggConfig.vis)
+      ? filterFieldTypes.bind(fieldParamType, aggConfig.vis)
       : filterFieldTypes;
 
-    if (
-      (onlyAggregatable && !field.aggregatable) ||
-      (!scriptable && field.scripted)
-    ) {
+    if ((onlyAggregatable && !field.aggregatable) || (!scriptable && field.scripted)) {
       return false;
     }
 
