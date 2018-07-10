@@ -63,22 +63,6 @@ jest.mock('../_intervals', () => ({
   IndexPatternsIntervalsProvider: jest.fn(),
 }));
 
-jest.mock('ui/chrome',
-  () => ({
-    getUiSettingsClient: () => {
-      return {
-        get: (key) => {
-          switch(key) {
-            case 'shortDots:enable':
-              return false;
-            default:
-              throw new Error(`Unexpected config key: ${key}`);
-          }
-        }
-      };
-    },
-  }), { virtual: true });
-
 jest.mock('../_flatten_hit', () => ({
   IndexPatternsFlattenHitProvider: jest.fn(),
 }));
