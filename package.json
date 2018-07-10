@@ -77,7 +77,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "dependencies": {
-    "@elastic/eui": "0.0.55",
+    "@elastic/eui": "1.1.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/numeral": "2.3.2",
     "@elastic/ui-ace": "0.2.3",
@@ -237,6 +237,7 @@
     "@types/getopts": "^2.0.0",
     "@types/glob": "^5.0.35",
     "@types/jest": "^22.2.3",
+    "@types/jquery": "3.3.1",
     "@types/listr": "^0.13.0",
     "@types/lodash": "^3.10.1",
     "@types/minimatch": "^2.0.29",

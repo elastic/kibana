@@ -65,6 +65,7 @@ class AggConfig {
   constructor(vis, opts = {}) {
     this.id = String(opts.id || AggConfig.nextId(vis.aggs));
     this.vis = vis;
+    this._indexPattern = vis.indexPattern;
     this._opts = opts;
     this.enabled = typeof opts.enabled === 'boolean' ? opts.enabled : true;
 

@@ -70,9 +70,7 @@ function normalizeLocale(locale) {
  */
 export function addMessages(newMessages = {}, locale = newMessages.locale) {
   if (!locale || !isString(locale)) {
-    throw new Error(
-      '[I18n] A `locale` must be a non-empty string to add messages.'
-    );
+    throw new Error('[I18n] A `locale` must be a non-empty string to add messages.');
   }
 
   const normalizedLocale = normalizeLocale(locale);
@@ -178,17 +176,13 @@ export function getRegisteredLocales() {
  */
 export function translate(id, { values = {}, defaultMessage = '' } = {}) {
   if (!id || !isString(id)) {
-    throw new Error(
-      '[I18n] An `id` must be a non-empty string to translate a message.'
-    );
+    throw new Error('[I18n] An `id` must be a non-empty string to translate a message.');
   }
 
   const message = getMessageById(id);
 
   if (!message && !defaultMessage) {
-    throw new Error(
-      `[I18n] Cannot format message: "${id}". Default message must be provided.`
-    );
+    throw new Error(`[I18n] Cannot format message: "${id}". Default message must be provided.`);
   }
 
   if (!hasValues(values)) {
@@ -208,17 +202,11 @@ export function translate(id, { values = {}, defaultMessage = '' } = {}) {
   }
 
   try {
-    const msg = getMessageFormat(
-      defaultMessage,
-      getDefaultLocale(),
-      getFormats()
-    );
+    const msg = getMessageFormat(defaultMessage, getDefaultLocale(), getFormats());
 
     return msg.format(values);
   } catch (e) {
-    throw new Error(
-      `[I18n] Error formatting the default message for: "${id}".\n${e}`
-    );
+    throw new Error(`[I18n] Error formatting the default message for: "${id}".\n${e}`);
   }
 }
 
