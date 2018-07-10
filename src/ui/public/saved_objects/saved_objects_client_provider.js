@@ -29,6 +29,9 @@ export function SavedObjectsClientProvider(Promise) {
     create: (...args) => {
       return Promise.resolve(savedObjectsClient.create(...args));
     },
+    bulkCreate: (...args) => {
+      return Promise.resolve(savedObjectsClient.bulkCreate(...args));
+    },
     delete: (...args) => {
       return Promise.resolve(savedObjectsClient.delete(...args));
     },
