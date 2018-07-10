@@ -1,4 +1,4 @@
 {
-  "browser": "./index.js",
-  "main": "./node.js"
+  "browser": "./browser.js",
+  "main": "./index.js"
 }
