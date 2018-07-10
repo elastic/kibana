@@ -99,13 +99,7 @@ describe('creating the build', () => {
     it('produces CSS', async () => {
       expect(PLUGIN.styleSheetToCompile).toBe(sassPath);
 
-      await createBuild(
-        PLUGIN,
-        buildTarget,
-        buildVersion,
-        kibanaVersion,
-        buildFiles
-      );
+      await createBuild(PLUGIN, buildTarget, buildVersion, kibanaVersion, buildFiles);
 
       expect(existsSync(cssPath)).toBe(true);
     });

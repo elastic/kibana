@@ -21,14 +21,7 @@ import execa from 'execa';
 import { statSync } from 'fs';
 
 import * as Rx from 'rxjs';
-import {
-  tap,
-  share,
-  take,
-  mergeMap,
-  map,
-  ignoreElements,
-} from 'rxjs/operators';
+import { tap, share, take, mergeMap, map, ignoreElements } from 'rxjs/operators';
 import { gray } from 'chalk';
 
 import treeKill from 'tree-kill';
@@ -91,10 +84,7 @@ export function createProc(name, { cmd, args, cwd, env, stdin, log }) {
   return new class Proc {
     name = name;
 
-    lines$ = Rx.merge(
-      observeLines(childProcess.stdout),
-      observeLines(childProcess.stderr)
-    ).pipe(
+    lines$ = Rx.merge(observeLines(childProcess.stdout), observeLines(childProcess.stderr)).pipe(
       tap(line => log.write(` ${gray('proc')}  [${gray(name)}] ${line}`)),
       share()
     );
@@ -122,10 +112,7 @@ export function createProc(name, { cmd, args, cwd, env, stdin, log }) {
       return Rx.race(exit$, error$);
     }).pipe(share());
 
-    _outcomePromise = Rx.merge(
-      this.lines$.pipe(ignoreElements()),
-      this.outcome$
-    ).toPromise();
+    _outcomePromise = Rx.merge(this.lines$.pipe(ignoreElements()), this.outcome$).toPromise();
 
     getOutcomePromise() {
       return this._outcomePromise;

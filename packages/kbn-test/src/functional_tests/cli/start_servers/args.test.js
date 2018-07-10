@@ -29,9 +29,7 @@ describe('process options for start servers CLI', () => {
   it('rejects boolean config value', () => {
     expect(() => {
       processOptions({ config: true });
-    }).toThrow(
-      'functional_tests_server: invalid argument [true] to option [config]'
-    );
+    }).toThrow('functional_tests_server: invalid argument [true] to option [config]');
   });
 
   it('rejects empty config value if no default passed', () => {
@@ -59,9 +57,7 @@ describe('process options for start servers CLI', () => {
   it('rejects boolean value for kibana-install-dir', () => {
     expect(() => {
       processOptions({ 'kibana-install-dir': true }, ['foo']);
-    }).toThrow(
-      'functional_tests_server: invalid argument [true] to option [kibana-install-dir]'
-    );
+    }).toThrow('functional_tests_server: invalid argument [true] to option [kibana-install-dir]');
   });
 
   it('accepts source value for esFrom', () => {
@@ -72,9 +68,7 @@ describe('process options for start servers CLI', () => {
   it('rejects non-enum value for esFrom', () => {
     expect(() => {
       processOptions({ esFrom: 'butter' }, ['foo']);
-    }).toThrow(
-      'functional_tests_server: invalid argument [butter] to option [esFrom]'
-    );
+    }).toThrow('functional_tests_server: invalid argument [butter] to option [esFrom]');
   });
 
   it('accepts debug option', () => {
