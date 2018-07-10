@@ -34,9 +34,9 @@ enum Status {
  * compared to the new valueHash passed.
  */
 function hasHashChanged<T extends string>(
+  valueHash: string,
   oldStatus: { [key in T]?: string },
-  name: T,
-  valueHash: string
+  name: T
 ): boolean {
   const oldHash = oldStatus[name];
   return oldHash !== valueHash;
@@ -76,17 +76,17 @@ function getUpdateStatus<T extends Status>(
     switch (requiredStatus) {
       case Status.AGGS:
         hash = calculateObjectHash(param.vis.aggs);
-        status.aggs = hasHashChanged(obj._oldStatus, 'aggs', hash);
+        status.aggs = hasHashChanged(hash, obj._oldStatus, 'aggs');
         obj._oldStatus.aggs = hash;
         break;
       case Status.DATA:
         hash = calculateObjectHash(param.visData);
-        status.data = hasHashChanged(obj._oldStatus, 'data', hash);
+        status.data = hasHashChanged(hash, obj._oldStatus, 'data');
         obj._oldStatus.data = hash;
         break;
       case Status.PARAMS:
         hash = calculateObjectHash(param.vis.params);
-        status.params = hasHashChanged(obj._oldStatus, 'param', hash);
+        status.params = hasHashChanged(hash, obj._oldStatus, 'param');
         obj._oldStatus.param = hash;
         break;
       case Status.RESIZE:
@@ -99,12 +99,12 @@ function getUpdateStatus<T extends Status>(
       case Status.TIME:
         const timeRange = param.vis.filters && param.vis.filters.timeRange;
         hash = calculateObjectHash(timeRange);
-        status.time = hasHashChanged(obj._oldStatus, 'time', hash);
+        status.time = hasHashChanged(hash, obj._oldStatus, 'time');
         obj._oldStatus.time = hash;
         break;
       case Status.UI_STATE:
         hash = calculateObjectHash(param.uiState);
-        status.uiState = hasHashChanged(obj._oldStatus, 'uiState', hash);
+        status.uiState = hasHashChanged(hash, obj._oldStatus, 'uiState');
         obj._oldStatus.uiState = hash;
         break;
     }
