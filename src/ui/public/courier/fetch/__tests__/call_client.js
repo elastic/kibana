@@ -70,7 +70,7 @@ describe('callClient', () => {
 
     $provide.service('es', (Promise) => {
       fakeSearch = sinon.spy(() => {
-        return new Promise((resolve, reject) => {
+        const esPromise = new Promise((resolve, reject) => {
           if (esShouldError) {
             return reject('fake es error');
           }
@@ -81,6 +81,8 @@ describe('callClient', () => {
             });
           }, esRequestDelay);
         });
+
+        return esPromise;
       });
 
       return {
@@ -188,25 +190,25 @@ describe('callClient', () => {
       }, 20);
 
       callingClient.then(results => {
-        expect(results).to.eql([ undefined ]);
+        expect(results).to.eql([ ABORTED ]);
         done();
       }).catch(error => done(error));
     });
 
-    it('while the search is outstanding resolves with an undefined response', done => {
+    it('while the search is in flight resolves with an undefined response', done => {
       esRequestDelay = 100;
 
       const searchRequest = createSearchRequest();
       searchRequests = [ searchRequest ];
       const callingClient = callClient(searchRequests);
 
-      // Abort the request while the search is outstanding.
+      // Abort the request while the search is in flight..
       setTimeout(() => {
         searchRequest.abort();
       }, 80);
 
       callingClient.then(results => {
-        expect(results).to.eql([ undefined ]);
+        expect(results).to.eql([ ABORTED ]);
         done();
       }).catch(error => done(error));
     });
@@ -218,11 +220,12 @@ describe('callClient', () => {
       const searchRequest2 = createSearchRequest();
       searchRequests = [ searchRequest1, searchRequest2 ];
       const callingClient = callClient(searchRequests);
+
       searchRequest1.abort();
       searchRequest2.abort();
 
       callingClient.then(results => {
-        expect(results).to.eql([undefined, undefined]);
+        expect(results).to.eql([ABORTED, ABORTED]);
         done();
       }).catch(error => done(error));
     });
@@ -235,7 +238,7 @@ describe('callClient', () => {
       searchRequest2.abort();
 
       callingClient.then(results => {
-        expect(results).to.eql([ 1, 2 ]);
+        expect(results).to.eql([ 1, ABORTED ]);
         done();
       }).catch(error => done(error));
     });
