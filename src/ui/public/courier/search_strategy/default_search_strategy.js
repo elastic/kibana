@@ -61,10 +61,16 @@ export const defaultSearchStrategy = {
     return es.msearch({ body: serializedFetchParams });
   },
 
-  isValidForSearchRequest: searchRequest => {
+  // Accept multiple criteria for determining viability to be as flexible as possible.
+  isViable: ({ indexPattern, searchRequest }) => {
+    if (!indexPattern && !searchRequest) {
+      return false;
+    }
+
+    const derivedIndexPattern = indexPattern || searchRequest.source.getField('index');
+
     // Basic index patterns don't have `type` defined.
-    const indexPattern = searchRequest.source.getField('index');
-    return indexPattern.type == null;
+    return derivedIndexPattern.type == null;
   },
 };
 

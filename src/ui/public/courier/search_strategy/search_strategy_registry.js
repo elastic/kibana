@@ -23,6 +23,12 @@ const addSearchStrategy = searchStrategy => {
   searchStrategies.push(searchStrategy);
 };
 
+const getSearchStrategy = (...rest) => {
+  return searchStrategies.find(searchStrategy => {
+    return searchStrategy.isViable(...rest);
+  });
+};
+
 /**
  * Build a structure like this:
  *
@@ -42,7 +48,8 @@ const assignSearchRequestsToSearchStrategies = searchRequests => {
   const searchStrategyById = {};
 
   searchRequests.forEach(searchRequest => {
-    const matchingSearchStrategy = searchStrategies.find(searchStrategy => searchStrategy.isValidForSearchRequest(searchRequest));
+    const matchingSearchStrategy = getSearchStrategy({ searchRequest });
+
     const { id } = matchingSearchStrategy;
     let searchStrategyWithRequest = searchStrategyById[id];
 
@@ -63,7 +70,12 @@ const assignSearchRequestsToSearchStrategies = searchRequests => {
   return searchStrategiesWithRequests;
 };
 
+const hasSearchStategyForIndexPattern = indexPattern => {
+  return Boolean(getSearchStrategy({ indexPattern }));
+};
+
 export {
   assignSearchRequestsToSearchStrategies,
   addSearchStrategy,
+  hasSearchStategyForIndexPattern,
 };

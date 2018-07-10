@@ -27,7 +27,7 @@ describe('SearchStrategyRegistry', () => {
     test('associates search requests with valid search strategies', () => {
       const searchStrategyA = {
         id: 'a',
-        isValidForSearchRequest: searchRequest => {
+        isViable: ({ searchRequest }) => {
           return searchRequest.type === 'a';
         },
       };
@@ -36,7 +36,7 @@ describe('SearchStrategyRegistry', () => {
 
       const searchStrategyB = {
         id: 'b',
-        isValidForSearchRequest: searchRequest => {
+        isViable: ({ searchRequest }) => {
           return searchRequest.type === 'b';
         },
       };
