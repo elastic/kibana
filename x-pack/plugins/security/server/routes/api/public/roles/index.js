@@ -1,0 +1,22 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { getClient } from '../../../../../../../server/lib/get_client_shield';
+import { routePreCheckLicense } from '../../../../lib/route_pre_check_license';
+import { initGetRolesApi } from './get';
+import { initDeleteRolesApi } from './delete';
+import { initPostRolesApi } from './post';
+
+export function initRolesApi(server) {
+  const callWithRequest = getClient(server).callWithRequest;
+  const routePreCheckLicenseFn = routePreCheckLicense(server);
+
+  const { application } = server.plugins.security.authorization;
+
+  initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn, application);
+  initPostRolesApi(server, callWithRequest, routePreCheckLicenseFn, application);
+  initDeleteRolesApi(server, callWithRequest, routePreCheckLicenseFn);
+}
