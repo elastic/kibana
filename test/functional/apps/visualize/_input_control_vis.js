@@ -286,7 +286,7 @@ export default function ({ getService, getPageObjects }) {
         await testSubjects.click('inputControlCancelBtn');
       });
 
-      it.skip('should clear child control dropdown when parent control filter pill removed', async () => {
+      it('should clear child control dropdown when parent control filter pill removed', async () => {
         await filterBar.removeFilter('geo.src');
         await PageObjects.common.sleep(500); // give time for filter to be removed and event handlers to fire
 
