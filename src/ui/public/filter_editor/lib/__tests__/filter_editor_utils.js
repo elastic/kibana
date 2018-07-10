@@ -40,7 +40,8 @@ import {
   getOperatorOptions,
   isFilterValid,
   buildFilter,
-  areIndexPatternsProvided
+  areIndexPatternsProvided,
+  isFilterPinned
 } from '../filter_editor_utils';
 
 describe('FilterEditorUtils', function () {
@@ -370,6 +371,26 @@ describe('FilterEditorUtils', function () {
     it('should return true when index patterns are provided', function () {
       const indexPatternMock = {};
       expect(areIndexPatternsProvided([indexPatternMock])).to.be(true);
+    });
+  });
+
+  describe('isFilterPinned', function () {
+    it('should return false when the store is appState', function () {
+      const filter = { $state: { store: 'appState' } };
+      expect(isFilterPinned(filter, false)).to.be(false);
+      expect(isFilterPinned(filter, true)).to.be(false);
+    });
+
+    it('should return true when the store is globalState', function () {
+      const filter = { $state: { store: 'globalState' } };
+      expect(isFilterPinned(filter, false)).to.be(true);
+      expect(isFilterPinned(filter, true)).to.be(true);
+    });
+
+    it('should return the default when the store does not exist', function () {
+      const filter = {};
+      expect(isFilterPinned(filter, false)).to.be(false);
+      expect(isFilterPinned(filter, true)).to.be(true);
     });
   });
 });
