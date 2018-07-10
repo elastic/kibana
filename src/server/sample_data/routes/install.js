@@ -112,7 +112,7 @@ export const createInstallRoute = () => ({
         }
 
         const createResults = await request.getSavedObjectsClient().bulkCreate(sampleDataset.savedObjects, { overwrite: true });
-        const errors = createResults.filter(savedObjectCreateResult => {
+        const errors = createResults.saved_objects.filter(savedObjectCreateResult => {
           return savedObjectCreateResult.hasOwnProperty('error');
         });
         if (errors.length > 0) {
