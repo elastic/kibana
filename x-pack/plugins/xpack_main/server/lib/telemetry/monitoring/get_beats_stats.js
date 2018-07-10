@@ -65,13 +65,13 @@ export function processResults(results = [], { clusters, clusterHostSets, cluste
       types[thisType] = thisTypeAccum + 1;
     }
 
-    const thisOutput = get(hit, '_source.beats_stats.stats.libbeat.output.type');
+    const thisOutput = get(hit, '_source.beats_stats.metrics.libbeat.output.type');
     if (thisOutput !== undefined) {
       const thisOutputAccum = outputs[thisOutput] || 0;
       outputs[thisOutput] = thisOutputAccum + 1;
     }
 
-    const thisEvents = get(hit, '_source.beats_stats.stats.libbeat.pipeline.events.published');
+    const thisEvents = get(hit, '_source.beats_stats.metrics.libbeat.pipeline.events.published');
     if (thisEvents !== undefined) {
       clusters[clusterUuid].eventsPublished += thisEvents;
     }
@@ -114,7 +114,7 @@ export function processResults(results = [], { clusters, clusterHostSets, cluste
  * @param {String} type - beats_stats or beats_state
  * @return {Promise}
  */
-export async function fetchBeatsByType(server, callCluster, clusterUuids, start, end, { page = 0, ...options } = {}, type) {
+async function fetchBeatsByType(server, callCluster, clusterUuids, start, end, { page = 0, ...options } = {}, type) {
   const config = server.config();
 
   const params = {
@@ -126,8 +126,8 @@ export async function fetchBeatsByType(server, callCluster, clusterUuids, start,
       'hits.hits._source.beats_stats.beat.version',
       'hits.hits._source.beats_stats.beat.type',
       'hits.hits._source.beats_stats.beat.host',
-      'hits.hits._source.beats_stats.stats.libbeat.pipeline.events.published',
-      'hits.hits._source.beats_stats.stats.libbeat.output.type',
+      'hits.hits._source.beats_stats.metrics.libbeat.pipeline.events.published',
+      'hits.hits._source.beats_stats.metrics.libbeat.output.type',
       'hits.hits._source.beats_state.state.input',
       'hits.hits._source.beats_state.state.module',
     ],
