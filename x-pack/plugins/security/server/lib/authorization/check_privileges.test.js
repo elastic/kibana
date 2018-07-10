@@ -87,7 +87,7 @@ const checkPrivilegesTest = (
     expect(mockShieldClient.callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
       body: {
         applications: [{
-          application: application,
+          application,
           resources: [ALL_RESOURCE],
           privileges: uniq([
             mockActions.version, mockActions.login, ...privileges
