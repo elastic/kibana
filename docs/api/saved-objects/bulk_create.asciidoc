@@ -68,8 +68,7 @@ POST api/saved_objects/_bulk_create
     "id": "my-dashboard",
     "attributes": {
       "title": "Look at my dashboard"
-    },
-    "version": 2
+    }
   }
 ]
 --------------------------------------------------
