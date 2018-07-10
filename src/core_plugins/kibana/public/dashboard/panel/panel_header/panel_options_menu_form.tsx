@@ -17,22 +17,28 @@
  * under the License.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
+import React, { ChangeEvent, KeyboardEvent } from 'react';
 
-import {
-  keyCodes,
-  EuiButtonEmpty,
-  EuiFormRow,
-  EuiFieldText,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFieldText, EuiFormRow, keyCodes } from '@elastic/eui';
 
-export function PanelOptionsMenuForm({ title, onReset, onUpdatePanelTitle, onClose }) {
-  function onInputChange(event) {
+export interface PanelOptionsMenuFormProps {
+  title?: string;
+  onReset: () => void;
+  onUpdatePanelTitle: (newPanelTitle?: string) => void;
+  onClose: () => void;
+}
+
+export function PanelOptionsMenuForm({
+  title,
+  onReset,
+  onUpdatePanelTitle,
+  onClose,
+}: PanelOptionsMenuFormProps) {
+  function onInputChange(event: ChangeEvent<HTMLInputElement>) {
     onUpdatePanelTitle(event.target.value);
   }
 
-  function onKeyDown(event) {
+  function onKeyDown(event: KeyboardEvent<HTMLInputElement>) {
     if (event.keyCode === keyCodes.ENTER) {
       onClose();
     }
@@ -43,9 +49,7 @@ export function PanelOptionsMenuForm({ title, onReset, onUpdatePanelTitle, onClo
       className="dashboardPanelMenuOptionsForm"
       data-test-subj="dashboardPanelTitleInputMenuItem"
     >
-      <EuiFormRow
-        label="Panel title"
-      >
+      <EuiFormRow label="Panel title">
         <EuiFieldText
           id="panelTitleInput"
           data-test-subj="customDashboardPanelTitleInput"
@@ -58,19 +62,9 @@ export function PanelOptionsMenuForm({ title, onReset, onUpdatePanelTitle, onClo
         />
       </EuiFormRow>
 
-      <EuiButtonEmpty
-        data-test-subj="resetCustomDashboardPanelTitle"
-        onClick={onReset}
-      >
+      <EuiButtonEmpty data-test-subj="resetCustomDashboardPanelTitle" onClick={onReset}>
         Reset title
       </EuiButtonEmpty>
     </div>
   );
 }
-
-PanelOptionsMenuForm.propTypes = {
-  title: PropTypes.string,
-  onUpdatePanelTitle: PropTypes.func.isRequired,
-  onReset: PropTypes.func.isRequired,
-  onClose: PropTypes.func.isRequired,
-};

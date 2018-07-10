@@ -17,29 +17,29 @@
  * under the License.
  */
 
+import { EuiIcon } from '@elastic/eui';
 import React from 'react';
-import {
-  EuiIcon,
-} from '@elastic/eui';
 
 import { DashboardPanelAction } from 'ui/dashboard_panel_actions';
+import { DashboardViewMode } from '../../../dashboard_view_mode';
 
 /**
- * Returns an action that toggles the panel into maximized or minimized state.
- * @param {boolean} isExpanded
- * @param {function} toggleExpandedPanel
+ *
+ * @param {function} onDeletePanel
  * @return {DashboardPanelAction}
  */
-export function getToggleExpandPanelAction({ isExpanded, toggleExpandedPanel }) {
+export function getRemovePanelAction(onDeletePanel: () => void) {
   return new DashboardPanelAction(
     {
-      displayName: isExpanded ? 'Minimize' : 'Full screen',
-      id: 'togglePanel',
+      displayName: 'Delete from dashboard',
+      id: 'deletePanel',
       parentPanelId: 'mainMenu',
     },
     {
-      // TODO: Update to minimize icon when https://github.com/elastic/eui/issues/837 is complete.
-      icon: <EuiIcon type={isExpanded ? 'expand' : 'expand'} />,
-      onClick: toggleExpandedPanel,
-    });
+      icon: <EuiIcon type="trash" />,
+      isVisible: ({ containerState }) =>
+        containerState.viewMode === DashboardViewMode.EDIT && !containerState.isPanelExpanded,
+      onClick: onDeletePanel,
+    }
+  );
 }
