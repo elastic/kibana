@@ -51,7 +51,8 @@ export function $combine(
   }
 
   if (canUseFirstScreenshot(screenshots, outputSize)) {
-    return Rx.of(screenshots[0].png.data.toString('base64'));
+    const data = PNG.sync.write(screenshots[0].png);
+    return Rx.of(data.toString('base64'));
   }
 
   const output$ = Rx.from(screenshots).pipe(

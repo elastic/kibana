@@ -35,10 +35,7 @@ export class HeadlessChromiumDriver {
   async open(url, { headers, waitForSelector }) {
     this._logger.debug(`HeadlessChromiumDriver:opening url ${url}`);
     const { Network, Page } = this._client;
-    await Promise.all([
-      Network.enable(),
-      Page.enable(),
-    ]);
+    await Promise.all([Network.enable(), Page.enable()]);
 
     await ignoreSSLErrorsBehavior(this._client.Security);
     await Network.setExtraHTTPHeaders({ headers });
@@ -59,7 +56,15 @@ export class HeadlessChromiumDriver {
     await Page.startScreencast();
 
     Page.screencastFrame(async ({ data, sessionId }) => {
-      await this._writeData(path.join(recordPath, `${moment().utc().format('HH_mm_ss_SSS')}.png`), data);
+      await this._writeData(
+        path.join(
+          recordPath,
+          `${moment()
+            .utc()
+            .format('HH_mm_ss_SSS')}.png`
+        ),
+        data
+      );
       await Page.screencastFrameAck({ sessionId });
     });
   }
@@ -85,21 +90,21 @@ export class HeadlessChromiumDriver {
         height: boundingClientRect.height,
         width: boundingClientRect.width,
       };
-      this._logger.debug(`elementPosition is not null, boundingClientRect is ${JSON.stringify(boundingClientRect)}`);
+      this._logger.debug(
+        `elementPosition is not null, boundingClientRect is ${JSON.stringify(boundingClientRect)}`
+      );
     }
 
-    return await screenshotStitcher(outputClip, this._zoom, this._maxScreenshotDimension, async screenshotClip => {
-      // All of this retry code is due to https://github.com/elastic/kibana/issues/19563 - a bug whose origin was never
-      // discovered. Once the retry was added in, the error failed to manifest. Will continue to leave it in here in
-      // case we run into it again for debugging purposes.
-      let tryCount = 0;
-      while (tryCount < 3) {
-        this._logger.debug(`Try ${tryCount}) Capturing screenshot clip ${JSON.stringify(screenshotClip)}`);
+    return await screenshotStitcher(
+      outputClip,
+      this._zoom,
+      this._maxScreenshotDimension,
+      async screenshotClip => {
         const { data } = await Page.captureScreenshot({
           clip: {
             ...screenshotClip,
-            scale: 1
-          }
+            scale: 1,
+          },
         });
 
         const expectedDataWidth = screenshotClip.width * this._zoom;
@@ -107,26 +112,27 @@ export class HeadlessChromiumDriver {
 
         const png = new PNG();
         const buffer = Buffer.from(data, 'base64');
-        await png.parse(buffer);
 
-        this._logger.debug(`Try ${tryCount}) Captured clip of width: ${png.width} and height: ${png.height}`);
-        if (png.width !== expectedDataWidth || png.height !== expectedDataHeight) {
-          const errorMessage = `Try ${tryCount}) Screenshot captured with width:${
-            png.width
-          } and height: ${png.height}) is not of expected width: ${
-            expectedDataWidth
-          } and height: ${expectedDataHeight}`;
+        return await new Promise((resolve, reject) => {
+          png.parse(buffer, (error, png) => {
+            if (error) {
+              reject(error);
+            }
 
-          if (tryCount < 3) {
-            tryCount++;
-          } else {
-            throw new Error(errorMessage);
-          }
-        } else {
-          return png;
-        }
-      }
-    }, this._logger);
+            if (png.width !== expectedDataWidth || png.height !== expectedDataHeight) {
+              const errorMessage = `Screenshot captured with width:${png.width} and height: ${
+                png.height
+              }) is not of expected width: ${expectedDataWidth} and height: ${expectedDataHeight}`;
+
+              reject(errorMessage);
+            }
+
+            resolve(png);
+          });
+        });
+      },
+      this._logger
+    );
   }
 
   async _writeData(writePath, base64EncodedData) {
@@ -156,7 +162,10 @@ export class HeadlessChromiumDriver {
 
   async waitForSelector(selector) {
     while (true) {
-      const { nodeId } = await this._client.DOM.querySelector({ nodeId: this.documentNode.root.nodeId, selector });
+      const { nodeId } = await this._client.DOM.querySelector({
+        nodeId: this.documentNode.root.nodeId,
+        selector,
+      });
       if (nodeId) {
         break;
       }
