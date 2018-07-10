@@ -105,7 +105,6 @@ export class Typeahead extends Component {
       case KEY_CODES.ESC:
         event.preventDefault();
         this.setState({ isSuggestionsVisible: false });
-        this.props.onSubmit(value);
         break;
       case KEY_CODES.TAB:
         this.setState({ isSuggestionsVisible: false });
@@ -124,9 +123,7 @@ export class Typeahead extends Component {
   };
 
   onClickOutside = () => {
-    const { value } = this.state;
     this.setState({ isSuggestionsVisible: false });
-    this.props.onSubmit(value);
   };
 
   onChangeInputValue = event => {
@@ -183,6 +180,7 @@ export class Typeahead extends Component {
                   this.inputRef = node;
                 }
               }}
+              disabled={this.props.disabled}
               value={this.state.value}
               onKeyDown={this.onKeyDown}
               onKeyUp={this.onKeyUp}
@@ -205,7 +203,9 @@ export class Typeahead extends Component {
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={this.onSubmit}>Search</EuiButton>
+            <EuiButton onClick={this.onSubmit} disabled={this.props.disabled}>
+              Search
+            </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiIconTip
@@ -230,6 +230,7 @@ export class Typeahead extends Component {
 Typeahead.propTypes = {
   initialValue: PropTypes.string,
   isLoading: PropTypes.bool,
+  disabled: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
   suggestions: PropTypes.array.isRequired
@@ -237,5 +238,6 @@ Typeahead.propTypes = {
 
 Typeahead.defaultProps = {
   isLoading: false,
+  disabled: false,
   suggestions: []
 };

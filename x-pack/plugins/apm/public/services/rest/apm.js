@@ -33,6 +33,11 @@ export async function getEncodedEsQuery(kuery) {
   }
 
   const indexPattern = await getAPMIndexPattern();
+
+  if (!indexPattern) {
+    return;
+  }
+
   const esFilterQuery = convertKueryToEsQuery(kuery, indexPattern);
   return encodeURIComponent(JSON.stringify(esFilterQuery));
 }

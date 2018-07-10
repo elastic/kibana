@@ -7,6 +7,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { uniqueId, startsWith } from 'lodash';
+import { EuiCallOut } from '@elastic/eui';
 import {
   history,
   fromQuery,
@@ -17,6 +18,7 @@ import { Typeahead } from './Typeahead';
 import { getAPMIndexPattern } from '../../../services/rest/savedObjects';
 import { convertKueryToEsQuery, getSuggestions } from '../../../services/kuery';
 import styled from 'styled-components';
+
 import { getBoolFilter } from './get_bool_filter';
 
 const Container = styled.div`
@@ -27,18 +29,19 @@ class KueryBarView extends Component {
   state = {
     indexPattern: null,
     suggestions: [],
-    isLoading: false
+    isLoadingIndexPattern: true,
+    isLoadingSuggestions: false
   };
 
   async componentDidMount() {
     const indexPattern = await getAPMIndexPattern();
-    this.setState({ indexPattern });
+    this.setState({ indexPattern, isLoadingIndexPattern: false });
   }
 
   onChange = async (inputValue, selectionStart) => {
     const { indexPattern } = this.state;
     const { urlParams } = this.props;
-    this.setState({ suggestions: [], isLoading: true });
+    this.setState({ suggestions: [], isLoadingSuggestions: true });
 
     const currentRequest = uniqueId();
     this.currentRequest = currentRequest;
@@ -56,7 +59,7 @@ class KueryBarView extends Component {
         return;
       }
 
-      this.setState({ suggestions, isLoading: false });
+      this.setState({ suggestions, isLoadingSuggestions: false });
     } catch (e) {
       console.error('Error while fetching suggestions', e);
     }
@@ -64,10 +67,6 @@ class KueryBarView extends Component {
 
   onSubmit = inputValue => {
     const { indexPattern } = this.state;
-    if (!indexPattern) {
-      return;
-    }
-
     const { location } = this.props;
     try {
       const res = convertKueryToEsQuery(inputValue, indexPattern);
@@ -88,19 +87,35 @@ class KueryBarView extends Component {
   };
 
   render() {
-    if (!this.state.indexPattern) {
-      return null;
-    }
+    const indexPatternMissing =
+      !this.state.isLoadingIndexPattern && !this.state.indexPattern;
 
     return (
       <Container>
         <Typeahead
-          isLoading={this.state.isLoading}
+          disabled={indexPatternMissing}
+          isLoading={this.state.isLoadingSuggestions}
           initialValue={this.props.urlParams.kuery}
           onChange={this.onChange}
           onSubmit={this.onSubmit}
           suggestions={this.state.suggestions}
         />
+
+        {indexPatternMissing && (
+          <EuiCallOut
+            style={{ display: 'inline-block', marginTop: '10px' }}
+            title={
+              <div>
+                There&#39;s no APM index pattern available. To use the Query
+                bar, please choose to import the APM index pattern in the{' '}
+                <a href="/app/kibana#/home/tutorial/apm">Setup Instructions.</a>
+              </div>
+            }
+            color="warning"
+            iconType="alert"
+            size="s"
+          />
+        )}
       </Container>
     );
   }
