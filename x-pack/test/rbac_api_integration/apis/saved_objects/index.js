@@ -6,6 +6,7 @@
 
 import { AUTHENTICATION } from "./lib/authentication";
 
+const application = 'kibana-.kibana';
 export default function ({ loadTestFile, getService }) {
   const es = getService('es');
 
@@ -42,7 +43,7 @@ export default function ({ loadTestFile, getService }) {
           index: [],
           applications: [
             {
-              application: 'kibana',
+              application,
               privileges: [ 'all' ],
               resources: [ '*' ]
             }
@@ -57,7 +58,7 @@ export default function ({ loadTestFile, getService }) {
           index: [],
           applications: [
             {
-              application: 'kibana',
+              application,
               privileges: [ 'read' ],
               resources: [ '*' ]
             }

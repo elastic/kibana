@@ -13,10 +13,9 @@ export const CHECK_PRIVILEGES_RESULT = {
   LEGACY: Symbol('Legacy'),
 };
 
-export function checkPrivilegesWithRequestFactory(shieldClient, config, actions) {
+export function checkPrivilegesWithRequestFactory(shieldClient, config, actions, application) {
   const { callWithRequest } = shieldClient;
 
-  const application = config.get('xpack.security.rbac.application');
   const kibanaIndex = config.get('kibana.index');
 
   const hasIncompatibileVersion = (applicationPrivilegesResponse) => {
