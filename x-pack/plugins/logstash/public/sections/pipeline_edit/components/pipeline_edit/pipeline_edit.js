@@ -17,9 +17,7 @@ import {
   EuiFieldText,
   EuiForm,
   EuiFormRow,
-  EuiGlobalToastList,
   EuiIconTip,
-  EuiLink,
   EUI_MODAL_CANCEL_BUTTON,
   EuiOverlayMask,
   EuiPage,
@@ -32,7 +30,6 @@ const createOptions = value => ({ text: value, value });
 const PIPELINE_ID_REQUIRED_ERR_MSG = 'Pipeline ID is required';
 const PIPELINE_ID_FORMAT_ERR_MSG =
   'Pipeline ID must begin with a letter or underscore and contain only letters, underscores, dashes, and numbers';
-const TOAST_LIFETIME = 5000;
 
 function getFormLabelWithTooltipIcon(labelText, tooltipText) {
   if (!labelText && !tooltipText) { return null; }
@@ -155,7 +152,6 @@ export class PipelineEditor extends React.Component {
       pipelineIdErrors: [],
       showConfirmDeleteModal: false,
       showPipelineIdError: false,
-      toasts: [],
     };
   }
 
@@ -201,29 +197,15 @@ export class PipelineEditor extends React.Component {
     }
   }
 
-  // TODO: get toast working even after redirect
-  addSaveSuccessToast = id => {
-    this.setState({
-      toasts: [{
-        id: 1,
-        title: (<span>Saved <EuiLink onClick={this.open}>{id}</EuiLink></span>),
-        color: 'success',
-        text: null,
-        onClose: this.onClose,
-      }],
-    });
-  }
-
   onPipelineSave = () => {
-    const { pipelineService } = this.props;
+    const { pipelineService, toastNotifications } = this.props;
     const { id } = this.state.pipeline;
     return pipelineService.savePipeline({
       id,
       upstreamJSON: this.state.pipeline
     })
       .then(() => {
-        // TODO: get toast to display after redirect
-        this.addSaveSuccessToast(id);
+        toastNotifications.addSuccess(`Saved "${id}"`);
         this.onClose();
       })
       .catch(() => {
@@ -282,43 +264,18 @@ export class PipelineEditor extends React.Component {
       )
   )
 
-  removeToasts = () => {
-    this.setState({
-      toasts: []
-    });
-  }
-
-  renderToastList = () => (
-    <EuiGlobalToastList
-      toasts={this.state.toasts}
-      dismissToast={this.removeToasts}
-      toastLifeTimeMs={TOAST_LIFETIME}
-    />
-  )
-
-  addDeleteSuccessToast = id => {
-    this.setState({
-      toasts: [{
-        id: 2,
-        title: `Deleted "${id}"`,
-        color: 'success',
-        text: null,
-      }]
-    });
-  }
-
   deletePipeline = () => {
     const {
       pipeline: { id },
-      pipelineService
+      pipelineService,
+      toastNotifications,
     } = this.props;
 
     this.hideConfirmDeleteModal();
 
     return pipelineService.deletePipeline(id)
       .then(() => {
-        // TODO: get toasts to continue displaying after path navigation
-        this.addDeleteSuccessToast(id);
+        toastNotifications.addSuccess(`Deleted "${id}"`);
         this.onClose();
       })
       .catch(() => {
@@ -474,9 +431,6 @@ export class PipelineEditor extends React.Component {
             confirmDeletePipeline={this.deletePipeline}
           />
         }
-        {
-          this.renderToastList()
-        }
       </EuiPage>
     );
   }
@@ -486,6 +440,7 @@ import { isEmpty } from 'lodash';
 import { uiModules } from 'ui/modules';
 // import { InitAfterBindingsWorkaround } from 'ui/compat';
 // import { Notifier, toastNotifications } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 // import template from './pipeline_edit.html';
 import 'plugins/logstash/services/license';
 import 'plugins/logstash/services/security';
@@ -524,6 +479,7 @@ app.directive('pipelineEdit', function ($injector) {
           username={userResource.username}
           pipeline={scope.pipeline}
           pipelineService={pipelineService}
+          toastNotifications={toastNotifications}
         />, el[0]);
     },
     // template: template,
