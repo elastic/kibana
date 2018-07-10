@@ -20,46 +20,36 @@
 import path from 'path';
 import JSON5 from 'json5';
 
-import { arraysDiff, readFileAsync, pathExists, writeFileAsync } from './utils';
+import { arraysDiff, readFileAsync, writeFileAsync, accessAsync } from './utils';
 
 export async function checkUpdates(pluginPath, log) {
   const defaultMessagesBuffer = await readFileAsync(
-    path.resolve(pluginPath, 'translations', 'defaultMessages.json')
+    path.resolve(pluginPath, 'translations', 'en.json')
   );
   let messagesCacheBuffer;
 
   try {
-    const resolvedPath = path.resolve(
-      pluginPath,
-      'translations',
-      'messagesCache.json'
-    );
-    await pathExists(resolvedPath);
+    const resolvedPath = path.resolve(pluginPath, 'translations', 'messagesCache.json');
+    await accessAsync(resolvedPath);
     messagesCacheBuffer = await readFileAsync(resolvedPath);
   } catch (_) {
     messagesCacheBuffer = new Buffer('[]');
   }
 
-  const defaultMessagesIds = Object.keys(
-    JSON5.parse(defaultMessagesBuffer.toString())
-  );
+  const defaultMessagesObject = JSON5.parse(defaultMessagesBuffer.toString());
+  delete defaultMessagesObject.formats;
+
+  const defaultMessagesIds = Object.keys(defaultMessagesObject);
   const cachedMessagesIds = JSON5.parse(messagesCacheBuffer.toString());
 
-  const [addedMessages, removedMessages] = arraysDiff(
-    defaultMessagesIds,
-    cachedMessagesIds
-  );
+  const [addedMessages, removedMessages] = arraysDiff(defaultMessagesIds, cachedMessagesIds);
 
   if (addedMessages.length > 0) {
-    log.success(
-      `New messages ids in ${pluginPath}:\n${addedMessages.join(', ')}`
-    );
+    log.success(`New messages ids in ${pluginPath}:\n${addedMessages.join(', ')}`);
   }
 
   if (removedMessages.length > 0) {
-    log.success(
-      `Removed messages ids in ${pluginPath}:\n${removedMessages.join(', ')}`
-    );
+    log.success(`Removed messages ids from ${pluginPath}:\n${removedMessages.join(', ')}`);
   }
 
   await writeFileAsync(

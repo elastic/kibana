@@ -22,12 +22,7 @@ import { promisify } from 'util';
 
 export const readFileAsync = promisify(fs.readFile);
 export const writeFileAsync = promisify(fs.writeFile);
-
-const accessAsync = promisify(fs.access);
-
-export function pathExists(path) {
-  return accessAsync(path, fs.constants.F_OK);
-}
+export const accessAsync = promisify(fs.access);
 
 export function arraysDiff(left = [], right = []) {
   const leftDiff = left.filter(value => !right.includes(value));
