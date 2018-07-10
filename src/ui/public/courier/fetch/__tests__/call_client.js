@@ -169,6 +169,24 @@ describe('callClient', () => {
       }).catch(error => done(error));
     });
 
+    it('while the search is outstanding resolves with an undefined response', done => {
+      searchRequestDelay = 100;
+
+      const searchRequest = createSearchRequest();
+      searchRequests = [ searchRequest ];
+      const callingClient = callClient(searchRequests);
+
+      // Abort the request while the search is outstanding.
+      setTimeout(() => {
+        searchRequest.abort();
+      }, 80);
+
+      callingClient.then(results => {
+        expect(results).to.eql([ undefined ]);
+        done();
+      }).catch(error => done(error));
+    });
+
     it(`all searchRequests resolves with undefined responses`, done => {
       const searchRequest1 = createSearchRequest();
       const searchRequest2 = createSearchRequest();
