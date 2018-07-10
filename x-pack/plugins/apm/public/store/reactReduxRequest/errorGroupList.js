@@ -18,7 +18,14 @@ export function getErrorGroupList(state) {
 }
 
 export function ErrorGroupDetailsRequest({ urlParams, render }) {
-  const { serviceName, start, end, q, sortBy, sortOrder, kuery } = urlParams;
+  const {
+    serviceName,
+    start,
+    end,
+    sortField,
+    sortDirection,
+    kuery
+  } = urlParams;
 
   if (!(serviceName && start && end)) {
     return null;
@@ -28,7 +35,7 @@ export function ErrorGroupDetailsRequest({ urlParams, render }) {
     <Request
       id={ID}
       fn={loadErrorGroupList}
-      args={[{ serviceName, start, end, q, sortBy, sortOrder, kuery }]}
+      args={[{ serviceName, start, end, sortField, sortDirection, kuery }]}
       selector={getErrorGroupList}
       render={render}
     />
