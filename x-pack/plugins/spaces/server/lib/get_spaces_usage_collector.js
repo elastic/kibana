@@ -10,7 +10,7 @@ import { KIBANA_SPACES_MONITORING_TYPE } from '../../common/constants';
  *
  * @param callCluster
  * @param server
- * @param {boolean} reportingAvailable - if true, we track some of the counts as 0 instead of undefined.
+ * @param {boolean} spacesAvailable
  * @param withinDayRange
  * @return {ReportingUsageStats}
  */
