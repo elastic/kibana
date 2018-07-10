@@ -56,7 +56,9 @@ class AggConfigs extends IndexedArray {
     });
 
     this.push.apply(this, configStates.map(aggConfigState => {
-      if (aggConfigState instanceof AggConfig) return aggConfigState;
+      if (aggConfigState instanceof AggConfig) {
+        return aggConfigState;
+      }
       return new AggConfig(vis, aggConfigState, this);
     }));
 

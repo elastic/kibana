@@ -173,13 +173,13 @@ class AggConfig {
    *
    * Adds params and adhoc subaggs to a pojo, then returns it
    *
-   * @param  {AggConfig} aggConfig - the config object to convert
+   * @param  {aggConfigs} aggConfigs - the config object to convert
    * @return {void|Object} - if the config has a dsl representation, it is
    *                         returned, else undefined is returned
    */
-  toDsl(aggs) {
+  toDsl(aggConfigs) {
     if (this.type.hasNoDsl) return;
-    const output = this.write(aggs);
+    const output = this.write(aggConfigs);
 
     const configDsl = {};
     configDsl[this.type.dslName || this.type.name] = output.params;
@@ -189,14 +189,14 @@ class AggConfig {
     if (output.subAggs) {
       const subDslLvl = configDsl.aggs || (configDsl.aggs = {});
       output.subAggs.forEach(function nestAdhocSubAggs(subAggConfig) {
-        subDslLvl[subAggConfig.id] = subAggConfig.toDsl(aggs);
+        subDslLvl[subAggConfig.id] = subAggConfig.toDsl(aggConfigs);
       });
     }
 
     if (output.parentAggs) {
       const subDslLvl = configDsl.parentAggs || (configDsl.parentAggs = {});
       output.parentAggs.forEach(function nestAdhocSubAggs(subAggConfig) {
-        subDslLvl[subAggConfig.id] = subAggConfig.toDsl(aggs);
+        subDslLvl[subAggConfig.id] = subAggConfig.toDsl(aggConfigs);
       });
     }
 
