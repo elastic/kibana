@@ -123,7 +123,7 @@ describe('callClient', () => {
     });
   });
 
-  describe('aborting', () => {
+  describe('aborting at different points in the request lifecycle:', () => {
     it(`when searchSource's _flatten method throws an error resolves with an ABORTED response`, done => {
       const searchRequest = createSearchRequest(1, {
         source: {
@@ -186,8 +186,10 @@ describe('callClient', () => {
         done();
       }).catch(error => done(error));
     });
+  });
 
-    it(`all searchRequests resolves with undefined responses`, done => {
+  describe('aborting number of requests:', () => {
+    it(`aborting all searchRequests resolves with undefined responses`, done => {
       const searchRequest1 = createSearchRequest();
       const searchRequest2 = createSearchRequest();
       searchRequests = [ searchRequest1, searchRequest2 ];
@@ -201,7 +203,7 @@ describe('callClient', () => {
       }).catch(error => done(error));
     });
 
-    it('some searchRequests but not all of them resolves with full responses', done => {
+    it('aborting some searchRequests resolves with full responses', done => {
       const searchRequest1 = createSearchRequest(1);
       const searchRequest2 = createSearchRequest(2);
       searchRequests = [ searchRequest1, searchRequest2 ];
