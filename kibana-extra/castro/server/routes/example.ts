@@ -1,5 +1,4 @@
 import * as Hapi from 'hapi';
-import {Entry} from '../../../../model/build/swagger-code-tsClient/api';
 
 import {computeRanges, render, tokenizeLines} from '../highlights';
 
@@ -7,6 +6,13 @@ const Path = require("path");
 const fs = require('fs');
 
 const repodir = Path.join(__dirname, "../../");
+
+export interface Entry {
+    path: string;
+    blob: string;
+    isBinary?: boolean;
+    html?: string;
+}
 
 async function getTree() {
     const root = {name: 'root', path: repodir, children: []};

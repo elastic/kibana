@@ -1,9 +1,4 @@
 include 'util'
 //include 'elasticsearch'
 
-include 'backend'
-include 'model'
 include 'kibana-extra:castro'
-
-include 'analyzer'
-include 'analyzer:common', 'analyzer:java'

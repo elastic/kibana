@@ -1,5 +1,9 @@
 import * as Hapi from "hapi";
-import { Person } from '../../../../model/build/swagger-code-tsClient/api';
+
+interface Person {
+    firstName?: string;
+    lastName?: string;
+}
 
 export default function (server: Hapi.Server) {
     // Create

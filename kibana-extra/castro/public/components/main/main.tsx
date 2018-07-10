@@ -18,10 +18,10 @@ import {
 
 import { Link } from 'react-router-dom';
 
-import { Commit, Entry } from '../../../../../model/build/swagger-code-tsClient/api';
 import FileCode from './FileCode';
 import Code from './code';
 import Counter from '../counter';
+import { Entry } from '../../../server/routes/example';
 
 interface MainProps {
     title: String,

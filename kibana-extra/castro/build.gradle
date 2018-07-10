@@ -40,5 +40,3 @@ task startDeps(type: YarnTask, dependsOn: [yarn]) {
 task clean(type: Delete) {
   delete "build", "node_modules", "common"
 }
-
-//project.evaluationDependsOn(":model")

@@ -1,6 +1,0 @@
-**/.gitignore
-**/README.md
-**/git_push.sh
-**/pom.xml
-
-**/*ApiController.java
