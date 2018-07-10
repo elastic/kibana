@@ -339,19 +339,22 @@ export class PipelineEditor extends React.Component {
             isInvalid={this.state.showPipelineIdError}
             error={this.state.pipelineIdErrors}
           >
-            <EuiFormRow
-              fullWidth
-              label="Pipeline ID"
-            >
-              <EuiFieldText
+            {
+              this.props.isNewPipeline &&
+              <EuiFormRow
                 fullWidth
-                name="pipelineId"
-                onBlur={this.onPipelineIdChange}
-                onChange={this.onPipelineIdChange}
-                isInvalid={this.state.showPipelineIdError}
-                value={this.state.pipeline.id}
-              />
-            </EuiFormRow>
+                label="Pipeline ID"
+              >
+                <EuiFieldText
+                  fullWidth
+                  name="pipelineId"
+                  onBlur={this.onPipelineIdChange}
+                  onChange={this.onPipelineIdChange}
+                  isInvalid={this.state.showPipelineIdError}
+                  value={this.state.pipeline.id}
+                />
+              </EuiFormRow>
+            }
             <EuiFormRow
               fullWidth
               label="Description"
