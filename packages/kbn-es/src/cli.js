@@ -65,9 +65,7 @@ exports.run = async (defaults = {}) => {
     const command = commands[commandName];
 
     if (command === undefined) {
-      log.error(
-        chalk.red(`[${commandName}] is not a valid command, see 'es --help'`)
-      );
+      log.error(chalk.red(`[${commandName}] is not a valid command, see 'es --help'`));
       process.exitCode = 1;
       return;
     }

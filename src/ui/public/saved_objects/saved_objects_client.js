@@ -43,15 +43,15 @@ export class SavedObjectsClient {
   }
 
   /**
-  * Persists an object
-  *
-  * @param {string} type
-  * @param {object} [attributes={}]
-  * @param {object} [options={}]
-  * @property {string} [options.id] - force id on creation, not recommended
-  * @property {boolean} [options.overwrite=false]
-  * @returns {promise} - SavedObject({ id, type, version, attributes })
-  */
+   * Persists an object
+   *
+   * @param {string} type
+   * @param {object} [attributes={}]
+   * @param {object} [options={}]
+   * @property {string} [options.id] - force id on creation, not recommended
+   * @property {boolean} [options.overwrite=false]
+   * @returns {promise} - SavedObject({ id, type, version, attributes })
+   */
   create(type, attributes = {}, options = {}) {
     if (!type || !attributes) {
       return Promise.reject(new Error('requires type and attributes'));
@@ -69,6 +69,23 @@ export class SavedObjectsClient {
         throw error;
       })
       .then(resp => this.createSavedObject(resp));
+  }
+
+  /**
+   * Creates multiple documents at once
+   *
+   * @param {array} objects - [{ type, id, attributes }]
+   * @param {object} [options={}]
+   * @property {boolean} [options.overwrite=false]
+   * @returns {promise} - { savedObjects: [{ id, type, version, attributes, error: { message } }]}
+   */
+  bulkCreate = (objects = [], options = {}) => {
+    const url = this._getUrl(['_bulk_create'], _.pick(options, ['overwrite']));
+
+    return this._request('POST', url, objects).then(resp => {
+      resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
+      return keysToCamelCaseShallow(resp);
+    });
   }
 
   /**

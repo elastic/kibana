@@ -246,6 +246,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await this.closeComboBoxOptionsList(element);
     }
 
+    async filterComboBoxOptions(comboBoxSelector, value) {
+      const comboBox = await testSubjects.find(comboBoxSelector);
+      const input = await comboBox.findByTagName('input');
+      await input.clearValue();
+      await input.type(value);
+      await this.closeComboBoxOptionsList(comboBox);
+    }
+
     async getComboBoxOptions(comboBoxSelector) {
       await testSubjects.click(comboBoxSelector);
       const menu = await retry.try(
@@ -363,8 +371,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async setInspectorTablePageSize(size) {
       const panel = await testSubjects.find('inspectorPanel');
-      await find.clickByButtonText('Rows per page: 10', panel);
-      await find.clickByButtonText(`${size} rows`, panel);
+      await find.clickByButtonText('Rows per page: 20', panel);
+      // The buttons for setting table page size are in a popover element. This popover
+      // element appears as if it's part of the inspectorPanel but it's really attached
+      // to the body element by a portal.
+      const tableSizesPopover = await find.byCssSelector('.euiPanel');
+      await find.clickByButtonText(`${size} rows`, tableSizesPopover);
     }
 
     async getMetric() {
@@ -373,7 +385,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getGaugeValue() {
-      const elements = await find.allByCssSelector('visualize .chart svg');
+      const elements = await find.allByCssSelector('[data-test-subj="visualizationLoader"] .chart svg');
       return await Promise.all(elements.map(async element => await element.getVisibleText()));
     }
 

@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import chrome from 'ui/chrome';
 import { BucketAggType } from './_bucket_agg_type';
 import { AggConfig } from '../../vis/agg_config';
 import { Schemas } from '../../vis/editors/default/schemas';
@@ -85,18 +86,23 @@ export const termsBucketAgg = new BucketAggType({
           if (val === '__missing__') {
             return bucket.params.missingBucketLabel;
           }
+          const parsedUrl = {
+            origin: window.location.origin,
+            pathname: window.location.pathname,
+            basePath: chrome.getBasePath(),
+          };
           const converter = bucket.params.field.format.getConverterFor(type);
-          return converter(val);
+          return converter(val, undefined, undefined, parsedUrl);
         };
       }
     };
   },
   createFilter: createFilterTerms,
   postFlightRequest: async (resp, aggConfigs, aggConfig, searchSource) => {
-    const nestedSearchSource = searchSource.makeChild();
+    const nestedSearchSource = searchSource.createChild();
     if (aggConfig.params.otherBucket) {
       const filterAgg = buildOtherBucketAgg(aggConfigs, aggConfig, resp);
-      nestedSearchSource.set('aggs', filterAgg);
+      nestedSearchSource.setField('aggs', filterAgg);
 
       const request = aggConfigs.vis.API.inspectorAdapters.requests.start('Other bucket', {
         description: `This request counts the number of documents that fall

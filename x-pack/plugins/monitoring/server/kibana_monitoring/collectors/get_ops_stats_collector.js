@@ -6,7 +6,6 @@
 
 import { KIBANA_STATS_TYPE } from '../../../common/constants';
 import { opsBuffer } from './ops_buffer';
-import { Collector } from '../classes';
 
 /*
  * Initialize a collector for Kibana Ops Stats
@@ -43,7 +42,8 @@ export function getOpsStatsCollector(server) {
     }, 5 * 1000); // wait 5 seconds to avoid race condition with reloading logging configuration
   });
 
-  return new Collector(server, {
+  const { collectorSet } = server.usage;
+  return collectorSet.makeStatsCollector({
     type: KIBANA_STATS_TYPE,
     init: start,
     fetch: buffer.flush

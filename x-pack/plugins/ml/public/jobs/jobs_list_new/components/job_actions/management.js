@@ -4,103 +4,73 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-import React from 'react';
-
-import {
-  EuiText,
-  EuiIcon,
-} from '@elastic/eui';
+import { checkPermission } from 'plugins/ml/privilege/check_privilege';
+import { mlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 
 import {
   stopDatafeeds,
-  cloneJob } from '../utils';
+  cloneJob,
+  isStartable,
+  isStoppable,
+} from '../utils';
 
 export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showStartDatafeedModal, refreshJobs) {
-  return [{
-    render: (item) => {
-      return (
-        getStartStop(item, showStartDatafeedModal, refreshJobs)
-      );
-    }
-  }, {
-    render: (item) => {
-      return (
-        <MLText onClick={() => cloneJob(item.id)}>
-          <EuiIcon type="copy" />
-          Clone job
-        </MLText>
-      );
-    }
-  }, {
-    render: (item) => {
-      return (
-        <MLText onClick={() => {
-          showEditJobFlyout(item);
-          closeMenu();
-        }}
-        >
-          <EuiIcon type="copy" />
-          Edit job
-        </MLText>
-      );
-    }
-  }, {
-    render: (item) => {
-      return (
-        <MLText
-          color="danger"
-          onClick={() => {
-            showDeleteJobModal([item]);
-            closeMenu();
-          }}
-        >
-          <EuiIcon type="trash" />
-          Delete job
-        </MLText>
-      );
-    }
-  }];
-}
+  const canCreateJob = (checkPermission('canCreateJob') && mlNodesAvailable());
+  const canUpdateJob = checkPermission('canUpdateJob');
+  const canDeleteJob = checkPermission('canDeleteJob');
+  const canUpdateDatafeed = checkPermission('canUpdateDatafeed');
+  const canStartStopDatafeed = (checkPermission('canStartStopDatafeed') && mlNodesAvailable());
 
-
-function getStartStop(item, showStartDatafeedModal, refreshJobs) {
-  if (item.datafeedState === 'stopped') {
-    return (
-      <MLText onClick={() => {
+  return [
+    {
+      name: 'Start datafeed',
+      description: 'Start datafeed',
+      icon: 'play',
+      enabled: () => (canStartStopDatafeed),
+      available: (item) => (isStartable([item])),
+      onClick: (item) => {
         showStartDatafeedModal([item]);
         closeMenu();
-      }}
-      >
-        <EuiIcon type="play" />
-        Start datafeed
-      </MLText>
-    );
-  }
-
-  if (item.datafeedState === 'started') {
-    return (
-      <MLText onClick={() => {
+      }
+    }, {
+      name: 'Stop datafeed',
+      description: 'Stop datafeed',
+      icon: 'stop',
+      enabled: () => (canStartStopDatafeed),
+      available: (item) => (isStoppable([item])),
+      onClick: (item) => {
         stopDatafeeds([item], refreshJobs);
         closeMenu(true);
-      }}
-      >
-        <EuiIcon type="stop" />
-        Stop datafeed
-      </MLText>
-    );
-  }
-}
-
-// EuiText wrapper to stop event propagation so the menu items don't fire twice.
-// this appears to be an issue with the EuiBasicTable actions col when specifying
-// a custom render function which contains its own onClick
-function MLText({ onClick, ...rest }) {
-  const click = (e) => {
-    e.stopPropagation();
-    onClick();
-  };
-  return <EuiText onClick={click} {...rest} />;
+      }
+    }, {
+      name: 'Clone job',
+      description: 'Clone job',
+      icon: 'copy',
+      enabled: () => (canCreateJob),
+      onClick: (item) => {
+        cloneJob(item.id);
+      }
+    }, {
+      name: 'Edit job',
+      description: 'Edit job',
+      icon: 'copy',
+      enabled: () => (canUpdateJob && canUpdateDatafeed),
+      onClick: (item) => {
+        showEditJobFlyout(item);
+        closeMenu();
+      }
+    }, {
+      name: 'Delete job',
+      description: 'Delete job',
+      icon: 'trash',
+      color: 'danger',
+      enabled: () => (canDeleteJob),
+      onClick: (item) => {
+        showDeleteJobModal([item]);
+        closeMenu();
+      }
+    }
+  ];
 }
 
 function closeMenu(now = false) {

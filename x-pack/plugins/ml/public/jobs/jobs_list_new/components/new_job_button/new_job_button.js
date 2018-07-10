@@ -6,6 +6,9 @@
 
 
 
+import { checkPermission } from 'plugins/ml/privilege/check_privilege';
+import { mlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
+
 import React from 'react';
 import './styles/main.less';
 
@@ -18,10 +21,12 @@ function newJob() {
 }
 
 export function NewJobButton() {
+  const buttonEnabled = (checkPermission('canCreateJob') && mlNodesAvailable());
   return (
     <EuiButton
       onClick={newJob}
       size="s"
+      disabled={(buttonEnabled === false)}
       fill
     >
       <i className="new-job-button fa fa-plus" />

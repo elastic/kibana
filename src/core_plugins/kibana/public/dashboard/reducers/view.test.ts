@@ -18,18 +18,9 @@
  */
 
 import { store } from '../../store';
-import {
-  maximizePanel,
-  minimizePanel,
-  updateIsFullScreenMode,
-  updateViewMode,
-} from '../actions';
+import { maximizePanel, minimizePanel, updateIsFullScreenMode, updateViewMode } from '../actions';
 
-import {
-  getFullScreenMode,
-  getMaximizedPanelId,
-  getViewMode,
-} from '../../selectors';
+import { getFullScreenMode, getMaximizedPanelId, getViewMode } from '../../selectors';
 
 import { DashboardViewMode } from '../dashboard_view_mode';
 

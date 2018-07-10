@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
+import { toastNotifications } from 'ui/notify';
+import { MarkdownSimple } from 'ui/markdown';
 import { PLUGIN } from '../../../common/constants';
-import { Notifier } from 'ui/notify';
 
 export class LogstashLicenseService {
   constructor(xpackInfoService, kbnUrlService, $timeout) {
     this.xpackInfoService = xpackInfoService;
     this.kbnUrlService = kbnUrlService;
     this.$timeout = $timeout;
-
-    this.notifier = new Notifier({ location: 'Logstash' });
   }
 
   get enableLinks() {
@@ -33,7 +33,9 @@ export class LogstashLicenseService {
   }
 
   notifyAndRedirect() {
-    this.notifier.error(this.xpackInfoService.get(`features.${PLUGIN.ID}.message`));
+    toastNotifications.addDanger({
+      title: <MarkdownSimple>{this.xpackInfoService.get(`features.${PLUGIN.ID}.message`)}</MarkdownSimple>,
+    });
     this.kbnUrlService.redirect('/management');
   }
 
