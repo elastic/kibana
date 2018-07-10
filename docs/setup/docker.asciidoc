@@ -41,7 +41,6 @@ Docker images can be retrieved with the following commands:
 ["source","txt",subs="attributes"]
 --------------------------------------------
 docker pull {docker-repo}:{version}
-docker pull {docker-repo}-oss:{version}
 --------------------------------------------
 
 endif::[]
