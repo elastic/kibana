@@ -26,10 +26,7 @@ import {
 } from '../actions';
 import { DashboardMetadata } from '../selectors';
 
-const updateTitle = (
-  metadata: DashboardMetadata,
-  title: UpdateTitleActionPayload
-) => ({
+const updateTitle = (metadata: DashboardMetadata, title: UpdateTitleActionPayload) => ({
   ...metadata,
   title,
 });

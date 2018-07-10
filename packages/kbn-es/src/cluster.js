@@ -186,9 +186,7 @@ exports.Cluster = class Cluster {
       lines.forEach(line => this._log.info(line.formattedMessage));
     });
 
-    this._process.stderr.on('data', data =>
-      this._log.error(chalk.red(data.toString()))
-    );
+    this._process.stderr.on('data', data => this._log.error(chalk.red(data.toString())));
 
     this._outcome = new Promise((resolve, reject) => {
       this._process.once('exit', code => {

@@ -27,15 +27,9 @@ const simpleGit = require('simple-git/promise');
 const { installArchive } = require('./archive');
 const { createCliError } = require('../errors');
 const { findMostRecentlyChanged, log: defaultLog, cache } = require('../utils');
-const {
-  GRADLE_BIN,
-  ES_ARCHIVE_PATTERN,
-  ES_OSS_ARCHIVE_PATTERN,
-  BASE_PATH,
-} = require('../paths');
+const { GRADLE_BIN, ES_ARCHIVE_PATTERN, ES_OSS_ARCHIVE_PATTERN, BASE_PATH } = require('../paths');
 
-const onceEvent = (emitter, event) =>
-  new Promise(resolve => emitter.once(event, resolve));
+const onceEvent = (emitter, event) => new Promise(resolve => emitter.once(event, resolve));
 
 /**
  * Installs ES from source
@@ -65,15 +59,10 @@ exports.installSource = async function installSource({
 
   const cacheMeta = cache.readMeta(dest);
   const isCached = cacheMeta.exists && cacheMeta.etag === metadata.etag;
-  const archive = isCached
-    ? dest
-    : await createSnapshot({ sourcePath, log, license });
+  const archive = isCached ? dest : await createSnapshot({ sourcePath, log, license });
 
   if (isCached) {
-    log.info(
-      'source path unchanged since %s, using cache',
-      chalk.bold(cacheMeta.ts)
-    );
+    log.info('source path unchanged since %s, using cache', chalk.bold(cacheMeta.ts));
   } else {
     cache.writeMeta(dest, metadata);
     fs.copyFileSync(archive, dest);
@@ -168,11 +157,8 @@ async function createSnapshot({ license, sourcePath, log = defaultLog }) {
     throw createCliError('unable to build ES');
   }
 
-  const archivePattern =
-    license === 'oss' ? ES_OSS_ARCHIVE_PATTERN : ES_ARCHIVE_PATTERN;
-  const esTarballPath = findMostRecentlyChanged(
-    path.resolve(sourcePath, archivePattern)
-  );
+  const archivePattern = license === 'oss' ? ES_OSS_ARCHIVE_PATTERN : ES_ARCHIVE_PATTERN;
+  const esTarballPath = findMostRecentlyChanged(path.resolve(sourcePath, archivePattern));
 
   if (!esTarballPath) {
     throw createCliError('could not locate ES distribution');
