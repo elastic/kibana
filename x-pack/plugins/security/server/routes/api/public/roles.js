@@ -67,7 +67,7 @@ export function initRolesApi(server) {
       const name = request.params.name;
       return callWithRequest(request, 'shield.getRole', { name }).then(
         (response) => {
-          if (response[name]) return reply(_.assign(response[name], { name }));
+          if (response[name]) return reply(transformRoleFromEs(response[name], name));
           return reply(Boom.notFound());
         },
         _.flow(wrapError, reply));
