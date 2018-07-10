@@ -38,6 +38,7 @@ describe('callClient', () => {
   let searchRequests;
   let esRequestDelay;
   let esShouldError;
+  let esPromiseAbortSpy;
 
   const createSearchRequest = (id, overrides = {}) => {
     const source = {
@@ -82,6 +83,7 @@ describe('callClient', () => {
           }, esRequestDelay);
         });
 
+        esPromise.abort = esPromiseAbortSpy = sinon.spy();
         return esPromise;
       });
 
@@ -226,6 +228,28 @@ describe('callClient', () => {
 
       callingClient.then(results => {
         expect(results).to.eql([ABORTED, ABORTED]);
+        done();
+      }).catch(error => done(error));
+    });
+
+    it(`aborting all searchRequests calls abort() on the promise returned by es.msearch()`, done => {
+      esRequestDelay = 100;
+
+      const searchRequest1 = createSearchRequest();
+      const searchRequest2 = createSearchRequest();
+      searchRequests = [ searchRequest1, searchRequest2 ];
+
+      const callingClient = callClient(searchRequests);
+
+      setTimeout(() => {
+        // At this point we expect the request to be in flight.
+        expect(esPromiseAbortSpy.callCount).to.be(0);
+        searchRequest1.abort();
+        searchRequest2.abort();
+      }, 70);
+
+      callingClient.then(() => {
+        expect(esPromiseAbortSpy.callCount).to.be(1);
         done();
       }).catch(error => done(error));
     });
