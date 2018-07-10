@@ -17,32 +17,15 @@
  * under the License.
  */
 
-const fs = require('fs');
-const zlib = require('zlib');
-const path = require('path');
-const tarFs = require('tar-fs');
-
-/**
- * @param {String} archive
- * @param {String} dirPath
+const LOGGING_TAGS = ['stats-collection'];
+/*
+ * @param {Object} server
+ * @return {Object} helpful logger object
  */
-exports.extractTarball = function extractTarball(archive, dirPath) {
-  const stripOne = header => {
-    header.name = header.name
-      .split(/\/|\\/)
-      .slice(1)
-      .join(path.sep);
-    return header;
+export function getCollectorLogger(server) {
+  return {
+    debug: message => server.log(['debug', ...LOGGING_TAGS], message),
+    info: message => server.log(['info', ...LOGGING_TAGS], message),
+    warn: message => server.log(['warning', ...LOGGING_TAGS], message)
   };
-
-  return new Promise((resolve, reject) => {
-    fs
-      .createReadStream(archive)
-      .on('error', reject)
-      .pipe(zlib.createGunzip())
-      .on('error', reject)
-      .pipe(tarFs.extract(dirPath, { map: stripOne }))
-      .on('error', reject)
-      .on('finish', resolve);
-  });
-};
+}

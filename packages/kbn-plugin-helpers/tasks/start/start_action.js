@@ -28,12 +28,7 @@ module.exports = function(plugin, run, options) {
   const script = join('scripts', 'kibana.js');
   const nodeOptions = split(process.env.NODE_OPTIONS || '');
 
-  let args = nodeOptions.concat([
-    script,
-    '--dev',
-    '--plugin-path',
-    plugin.root,
-  ]);
+  let args = nodeOptions.concat([script, '--dev', '--plugin-path', plugin.root]);
 
   if (Array.isArray(plugin.includePlugins)) {
     plugin.includePlugins.forEach(path => {

@@ -46,10 +46,7 @@ const maximizePanel = (view: ViewState, panelId: PanelId) => ({
   maximizedPanelId: panelId,
 });
 
-const updateIsFullScreenMode = (
-  view: ViewState,
-  isFullScreenMode: boolean
-) => ({
+const updateIsFullScreenMode = (view: ViewState, isFullScreenMode: boolean) => ({
   ...view,
   isFullScreenMode,
 });
