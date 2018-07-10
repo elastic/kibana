@@ -219,9 +219,7 @@ export class PipelineEditor extends React.Component {
         toastNotifications.addSuccess(`Saved "${id}"`);
         this.onClose();
       })
-      .catch(() => {
-        // TODO: check license validity
-      });
+      .catch(this.notifyOnError);
   }
 
   onPipelineDescriptionChange = ({ target: { value } }) => {
@@ -275,6 +273,14 @@ export class PipelineEditor extends React.Component {
       )
   )
 
+  notifyOnError = err => {
+    const { notifier, licenseService } = this.props;
+
+    return licenseService
+      .checkValidity()
+      .then(() => notifier.error(err));
+  }
+
   deletePipeline = () => {
     const {
       pipeline: { id },
@@ -289,9 +295,7 @@ export class PipelineEditor extends React.Component {
         toastNotifications.addSuccess(`Deleted "${id}"`);
         this.onClose();
       })
-      .catch(() => {
-        // TODO: check validity and notify of error
-      });
+      .catch(this.notifyOnError);
   }
 
   render() {
@@ -452,7 +456,7 @@ import { isEmpty } from 'lodash';
 import { uiModules } from 'ui/modules';
 // import { InitAfterBindingsWorkaround } from 'ui/compat';
 // import { Notifier, toastNotifications } from 'ui/notify';
-import { toastNotifications } from 'ui/notify';
+import { Notifier, toastNotifications } from 'ui/notify';
 // import template from './pipeline_edit.html';
 import 'plugins/logstash/services/license';
 import 'plugins/logstash/services/security';
@@ -475,9 +479,6 @@ app.directive('pipelineEdit', function ($injector) {
   return {
     restrict: 'E',
     link: async (scope, el) => {
-      console.log(licenseService);
-      console.log(licenseService.isReadOnly);
-      console.log(licenseService.message);
       const close = () => scope.$evalAsync(kbnUrl.change('/management/logstash/pipelines', {}));
       const open = id => scope.$evalAsync(kbnUrl.change(`/management/logstash/pipelines/${id}/edit`));
 
@@ -497,6 +498,8 @@ app.directive('pipelineEdit', function ($injector) {
           toastNotifications={toastNotifications}
           isReadOnly={licenseService.isReadOnly}
           licenseMessage={licenseService.message}
+          licenseService={licenseService}
+          notifier={new Notifier({ location: 'Logstash' })}
         />, el[0]);
     },
     // template: template,
