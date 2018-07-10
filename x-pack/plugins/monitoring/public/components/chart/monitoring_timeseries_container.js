@@ -14,6 +14,10 @@ import { getUnits } from './get_units';
 import { MonitoringTimeseries } from './monitoring_timeseries';
 import { InfoTooltip } from './info_tooltip';
 
+import {
+  EuiScreenReaderOnly
+} from '@elastic/eui';
+
 export function MonitoringTimeseriesContainer({ series, onBrush }) {
   if (series === undefined) {
     return null; // still loading
@@ -30,7 +34,7 @@ export function MonitoringTimeseriesContainer({ series, onBrush }) {
   return (
     <div className="monitoring-chart__container">
       <h2 className="euiTitle" tabIndex="0">
-        <span className="kuiScreenReaderOnly">This chart is not accessible yet</span>
+        <EuiScreenReaderOnly><span>This chart is not accessible yet</span></EuiScreenReaderOnly>
         { title }{ units ? ` (${units})` : '' }
         <OverlayTrigger
           placement="left"
