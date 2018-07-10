@@ -118,7 +118,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
         searchSourceValues = JSON.parse(searchSourceJson);
       } catch (e) {
         throw new InvalidJSONProperty(
-          `Invalid JSON in ${esType} "${this.id}". ${e.message}`
+          `Invalid JSON in ${esType} "${this.id}". ${e.message} JSON: ${searchSourceJson}`
         );
       }
 
@@ -126,7 +126,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
       // (This happened in issue #20308)
       if (typeof searchSourceValues !== 'object') {
         throw new InvalidJSONProperty(
-          `Invalid JSON in ${esType} "${this.id}". Expected searchSourceJSON to be a JSON object, but got a ${typeof state}.`
+          `Invalid JSON in ${esType} "${this.id}". Expected searchSourceJSON to be a JSON object, but got a ${typeof searchSourceValues}.`
         );
       }
 
