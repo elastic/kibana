@@ -5,52 +5,18 @@
  */
 import Hapi from 'hapi';
 import Boom from 'boom';
-import { initRolesApi } from './roles';
-import { getClient } from '../../../../../../server/lib/get_client_shield';
-import { routePreCheckLicense } from '../../../lib/route_pre_check_license';
-jest.mock('../../../../../../server/lib/get_client_shield', () => ({
-  getClient: jest.fn(),
-}));
-jest.mock('../../../lib/route_pre_check_license', () => ({
-  routePreCheckLicense: jest.fn(),
-}));
+import { initGetRolesApi } from './get';
 
-beforeEach(() => {
-  getClient.mockReset();
-  routePreCheckLicense.mockReset();
-});
-
-const registerMockCallWithRequest = () => {
-  const callWithRequest = jest.fn();
-  getClient.mockReturnValue({
-    callWithRequest,
-  });
-  return callWithRequest;
-};
+const application = 'kibana-.kibana';
 
 const createMockServer = () => {
-  const mockConfig = { get: jest.fn() };
   const mockServer = new Hapi.Server({ debug: false });
-  mockServer.config = () => mockConfig;
   mockServer.connection({ port: 8080 });
-  mockServer.plugins = {
-    security: {
-      authorization: {
-        application: 'kibana-.kibana',
-      },
-    },
-  };
   return mockServer;
 };
 
-const mockRoutePreCheckLicense = impl => {
-  const routePreCheckLicenseImpl = jest.fn().mockImplementation(impl);
-  routePreCheckLicense.mockReturnValue(routePreCheckLicenseImpl);
-  return routePreCheckLicenseImpl;
-};
-
 describe('GET roles', () => {
-  const getTest = (
+  const getRolesTest = (
     description,
     {
       preCheckLicenseImpl = (request, reply) => reply(),
@@ -60,12 +26,12 @@ describe('GET roles', () => {
   ) => {
     test(description, async () => {
       const mockServer = createMockServer();
-      const pre = mockRoutePreCheckLicense(preCheckLicenseImpl);
-      const mockCallWithRequest = registerMockCallWithRequest();
+      const pre = jest.fn().mockImplementation(preCheckLicenseImpl);
+      const mockCallWithRequest = jest.fn();
       if (callWithRequestImpl) {
         mockCallWithRequest.mockImplementation(callWithRequestImpl);
       }
-      initRolesApi(mockServer);
+      initGetRolesApi(mockServer, mockCallWithRequest, pre, application);
       const headers = {
         authorization: 'foo',
       };
@@ -96,7 +62,7 @@ describe('GET roles', () => {
   };
 
   describe('failure', () => {
-    getTest(`returns result of routePreCheckLicense`, {
+    getRolesTest(`returns result of routePreCheckLicense`, {
       preCheckLicenseImpl: (request, reply) =>
         reply(Boom.forbidden('test forbidden message')),
       asserts: {
@@ -109,7 +75,7 @@ describe('GET roles', () => {
       },
     });
 
-    getTest(`returns error from callWithRequest`, {
+    getRolesTest(`returns error from callWithRequest`, {
       callWithRequestImpl: async () => {
         throw Boom.notAcceptable('test not acceptable message');
       },
@@ -125,7 +91,7 @@ describe('GET roles', () => {
   });
 
   describe('success', () => {
-    getTest(`transforms elasticsearch privileges`, {
+    getRolesTest(`transforms elasticsearch privileges`, {
       callWithRequestImpl: async () => ({
         first_role: {
           cluster: ['manage_watcher'],
@@ -172,19 +138,19 @@ describe('GET roles', () => {
       },
     });
 
-    getTest(`transforms matching applications to kibana privileges`, {
+    getRolesTest(`transforms matching applications to kibana privileges`, {
       callWithRequestImpl: async () => ({
         first_role: {
           cluster: [],
           indices: [],
           applications: [
             {
-              application: 'kibana-.kibana',
+              application,
               privileges: ['read'],
               resources: ['*'],
             },
             {
-              application: 'kibana-.kibana',
+              application,
               privileges: ['all'],
               resources: ['*'],
             },
@@ -227,25 +193,25 @@ describe('GET roles', () => {
       },
     });
 
-    getTest(`excludes resources other than * from kibana privileges`, {
+    getRolesTest(`excludes resources other than * from kibana privileges`, {
       callWithRequestImpl: async () => ({
         first_role: {
           cluster: [],
           indices: [],
           applications: [
             {
-              application: 'kibana-.kibana',
+              application,
               privileges: ['read'],
               // Elasticsearch should prevent this from happening
               resources: [],
             },
             {
-              application: 'kibana-.kibana',
+              application,
               privileges: ['read'],
               resources: ['default', '*'],
             },
             {
-              application: 'kibana-.kibana',
+              application,
               privileges: ['read'],
               resources: ['some-other-space'],
             },
@@ -281,7 +247,7 @@ describe('GET roles', () => {
       },
     });
 
-    getTest(`excludes other application from kibana privileges`, {
+    getRolesTest(`excludes other application from kibana privileges`, {
       callWithRequestImpl: async () => ({
         first_role: {
           cluster: [],
@@ -327,7 +293,7 @@ describe('GET roles', () => {
 });
 
 describe('GET role', () => {
-  const getTest = (
+  const getRoleTest = (
     description,
     {
       name,
@@ -338,12 +304,12 @@ describe('GET role', () => {
   ) => {
     test(description, async () => {
       const mockServer = createMockServer();
-      const pre = mockRoutePreCheckLicense(preCheckLicenseImpl);
-      const mockCallWithRequest = registerMockCallWithRequest();
+      const pre = jest.fn().mockImplementation(preCheckLicenseImpl);
+      const mockCallWithRequest = jest.fn();
       if (callWithRequestImpl) {
         mockCallWithRequest.mockImplementation(callWithRequestImpl);
       }
-      initRolesApi(mockServer);
+      initGetRolesApi(mockServer, mockCallWithRequest, pre, 'kibana-.kibana');
       const headers = {
         authorization: 'foo',
       };
@@ -375,7 +341,7 @@ describe('GET role', () => {
   };
 
   describe('failure', () => {
-    getTest(`returns result of routePreCheckLicense`, {
+    getRoleTest(`returns result of routePreCheckLicense`, {
       preCheckLicenseImpl: (request, reply) =>
         reply(Boom.forbidden('test forbidden message')),
       asserts: {
@@ -388,7 +354,7 @@ describe('GET role', () => {
       },
     });
 
-    getTest(`returns error from callWithRequest`, {
+    getRoleTest(`returns error from callWithRequest`, {
       name: 'foo-role',
       callWithRequestImpl: async () => {
         throw Boom.notAcceptable('test not acceptable message');
@@ -405,7 +371,7 @@ describe('GET role', () => {
   });
 
   describe('success', () => {
-    getTest(`transforms elasticsearch privileges`, {
+    getRoleTest(`transforms elasticsearch privileges`, {
       name: 'first_role',
       callWithRequestImpl: async () => ({
         first_role: {
@@ -451,7 +417,7 @@ describe('GET role', () => {
       },
     });
 
-    getTest(`transforms matching applications to kibana privileges`, {
+    getRoleTest(`transforms matching applications to kibana privileges`, {
       name: 'first_role',
       callWithRequestImpl: async () => ({
         first_role: {
@@ -459,12 +425,12 @@ describe('GET role', () => {
           indices: [],
           applications: [
             {
-              application: 'kibana-.kibana',
+              application,
               privileges: ['read'],
               resources: ['*'],
             },
             {
-              application: 'kibana-.kibana',
+              application,
               privileges: ['all'],
               resources: ['*'],
             },
@@ -505,7 +471,7 @@ describe('GET role', () => {
       },
     });
 
-    getTest(`excludes resources other than * from kibana privileges`, {
+    getRoleTest(`excludes resources other than * from kibana privileges`, {
       name: 'first_role',
       callWithRequestImpl: async () => ({
         first_role: {
@@ -513,18 +479,18 @@ describe('GET role', () => {
           indices: [],
           applications: [
             {
-              application: 'kibana-.kibana',
+              application,
               privileges: ['read'],
               // Elasticsearch should prevent this from happening
               resources: [],
             },
             {
-              application: 'kibana-.kibana',
+              application,
               privileges: ['read'],
               resources: ['default', '*'],
             },
             {
-              application: 'kibana-.kibana',
+              application,
               privileges: ['read'],
               resources: ['some-other-space'],
             },
@@ -558,7 +524,7 @@ describe('GET role', () => {
       },
     });
 
-    getTest(`excludes other application from kibana privileges`, {
+    getRoleTest(`excludes other application from kibana privileges`, {
       name: 'first_role',
       callWithRequestImpl: async () => ({
         first_role: {
