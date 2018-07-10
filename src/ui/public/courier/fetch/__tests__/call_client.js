@@ -20,8 +20,11 @@
 import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
+import NoDigestPromises from 'test_utils/no_digest_promises';
 
 import { CallClientProvider } from '../call_client';
+import { IsRequestProvider } from '../is_request';
+import { MergeDuplicatesRequestProvider } from '../merge_duplicate_requests';
 
 function mockRequest() {
   return {
@@ -31,25 +34,74 @@ function mockRequest() {
     handleFailure: sinon.spy(),
     retry: sinon.spy(function () { return this; }),
     continue: sinon.spy(function () { return this; }),
-    start: sinon.spy(function () { return this; })
+    start: sinon.spy(function () { return this; }),
+    getFetchParams: () => ({}),
+    source: {},
+    erroHandler: () => {},
+    whenAborted: () => {}, // TODO: Test this
   };
 }
 
 describe('callClient', () => {
+  NoDigestPromises.activateForSuite();
+
   let callClient;
-  let request;
-  let requests;
+  let fakeSearch;
+  let searchRequests;
 
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.module('kibana', PrivateProvider => {
+    function FakeIsRequestProvider() {
+      return function isRequest() {
+        return true;
+      };
+    }
 
-  beforeEach(ngMock.inject((Private) => {
-    callClient = Private(CallClientProvider);
-    request = mockRequest();
-    requests = [ request ];
+    PrivateProvider.swap(IsRequestProvider, FakeIsRequestProvider);
+
+    function FakeMergeDuplicatesRequestProvider() {
+      return function mergeDuplicateRequests(searchRequests) {
+        return searchRequests;
+      };
+    }
+
+    PrivateProvider.swap(MergeDuplicatesRequestProvider, FakeMergeDuplicatesRequestProvider);
   }));
 
-  it('returns a promise', () => {
-    const callingClient = callClient(requests);
-    expect(callingClient.then).to.be.a('function');
+  beforeEach(ngMock.module(function stubEs($provide) {
+    $provide.service('es', (Promise) => {
+      fakeSearch = sinon.spy(() => {
+        return Promise.map(searchRequests, searchRequest => {
+          return { searchRequest };
+        });
+      });
+
+      return {
+        msearch: fakeSearch,
+      };
+    });
+  }));
+
+  beforeEach(ngMock.inject(Private => {
+    callClient = Private(CallClientProvider);
+  }));
+
+  describe('basic contract', () => {
+    it('returns a promise', () => {
+      searchRequests = [ mockRequest() ];
+      const callingClient = callClient(searchRequests);
+      expect(callingClient.then).to.be.a('function');
+    });
+
+    it('calls es.msearch() once, regardless of a large number of searchRequests', done => {
+      expect(fakeSearch.callCount).to.be(0);
+
+      searchRequests = [ mockRequest(), mockRequest(), mockRequest(), mockRequest() ];
+      const callingClient = callClient(searchRequests);
+
+      callingClient.then(() => {
+        expect(fakeSearch.callCount).to.be(1);
+        done();
+      });
+    });
   });
 });
