@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { importDashboards } from '../import_dashboards';
+import { importDashboards } from './import_dashboards';
 import sinon from 'sinon';
 import { expect } from 'chai';
 
@@ -26,7 +26,7 @@ describe('importDashboards(req)', () => {
   let req;
   let bulkCreateStub;
   beforeEach(() => {
-    bulkCreateStub = sinon.stub().returns(Promise.resolve());
+    bulkCreateStub = sinon.stub().returns(Promise.resolve({ saved_objects: [] }));
     req = {
       query: {},
       payload: {
@@ -45,7 +45,7 @@ describe('importDashboards(req)', () => {
 
   });
 
-  it('should call bulkCreate with each asset', () => {
+  test('should call bulkCreate with each asset', () => {
     return importDashboards(req).then(() => {
       expect(bulkCreateStub.calledOnce).to.equal(true);
       expect(bulkCreateStub.args[0][0]).to.eql([
@@ -55,7 +55,7 @@ describe('importDashboards(req)', () => {
     });
   });
 
-  it('should call bulkCreate with overwrite true if force is truthy', () => {
+  test('should call bulkCreate with overwrite true if force is truthy', () => {
     req.query = { force: 'true' };
     return importDashboards(req).then(() => {
       expect(bulkCreateStub.calledOnce).to.equal(true);
@@ -63,7 +63,7 @@ describe('importDashboards(req)', () => {
     });
   });
 
-  it('should exclude types based on exclude argument', () => {
+  test('should exclude types based on exclude argument', () => {
     req.query = { exclude: 'visualization' };
     return importDashboards(req).then(() => {
       expect(bulkCreateStub.calledOnce).to.equal(true);
