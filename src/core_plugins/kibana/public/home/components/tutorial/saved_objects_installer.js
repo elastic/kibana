@@ -30,10 +30,14 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
+const DEFAULT_BUTTON_LABEL = 'Load/Import Kibana objects';
+
 export class SavedObjectsInstaller extends React.Component {
   state = {
     isInstalling: false,
     isInstalled: false,
+    overwrite: false,
+    buttonLabel: DEFAULT_BUTTON_LABEL,
   };
 
   componentDidMount() {
@@ -49,24 +53,41 @@ export class SavedObjectsInstaller extends React.Component {
       isInstalling: true,
     });
 
-    const resp = await this.props.bulkCreate(this.props.savedObjects, { overwrite: true });
+    const resp = await this.props.bulkCreate(this.props.savedObjects, { overwrite: this.state.overwrite });
     if (!this._isMounted) {
       return;
     }
 
-    const errors = resp.savedObjects.filter(savedObjectCreateResult => {
-      return savedObjectCreateResult.hasOwnProperty('error');
+    const errors = resp.savedObjects.filter(savedObject => {
+      return savedObject.hasOwnProperty('error');
     });
+
+    const overwriteErrors = errors.filter(savedObject => {
+      return savedObject.error.statusCode === 409;
+    });
+    if (overwriteErrors.length > 0) {
+      this.setState({
+        isInstalling: false,
+        installStatusMsg: `${overwriteErrors.length} of ${this.props.savedObjects.length} objects already exist. ` +
+          `Click 'Confirm overwrite' to import and overwrite existing objects. ` +
+          `Any changes to the objects will be lost.`,
+        isInstalled: false,
+        overwrite: true,
+        buttonLabel: 'Confirm overwrite'
+      });
+      return;
+    }
+
     const hasErrors = errors.length > 0;
-
     const statusMsg = hasErrors
-      ? `Unable to load kibana saved objects, Error: ${errors[0]}`
+      ? `Unable to add ${errors.length} of ${this.props.savedObjects.length} kibana objects, Error: ${errors[0].error.message}`
       : `${this.props.savedObjects.length} saved objects successfully added`;
-
     this.setState({
       isInstalling: false,
       installStatusMsg: statusMsg,
       isInstalled: !hasErrors,
+      overwrite: false,
+      buttonLabel: DEFAULT_BUTTON_LABEL,
     });
   }
 
@@ -105,7 +126,7 @@ export class SavedObjectsInstaller extends React.Component {
               isLoading={this.state.isInstalling}
               data-test-subj="loadSavedObjects"
             >
-              Load/Import Kibana objects
+              {this.state.buttonLabel}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
