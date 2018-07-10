@@ -39,9 +39,9 @@
     esutils "^2.0.2"
     js-tokens "^3.0.0"
 
-"@babel/parser@^7.0.0-beta.51":
-  version "7.0.0-beta.51"
-  resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.0.0-beta.51.tgz#27cec2df409df60af58270ed8f6aa55409ea86f6"
+"@babel/parser@7.0.0-beta.52":
+  version "7.0.0-beta.52"
+  resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.0.0-beta.52.tgz#4e935b62cd9bf872bd37bcf1f63d82fe7b0237a2"
 
 "@babel/template@7.0.0-beta.31":
   version "7.0.0-beta.31"
@@ -71,14 +71,6 @@
   dependencies:
     esutils "^2.0.2"
     lodash "^4.2.0"
-    to-fast-properties "^2.0.0"
-
-"@babel/types@^7.0.0-beta.51":
-  version "7.0.0-beta.51"
-  resolved "https://registry.yarnpkg.com/@babel/types/-/types-7.0.0-beta.51.tgz#d802b7b543b5836c778aa691797abf00f3d97ea9"
-  dependencies:
-    esutils "^2.0.2"
-    lodash "^4.17.5"
     to-fast-properties "^2.0.0"
 
 "@elastic/eslint-config-kibana@link:packages/eslint-config-kibana":
