@@ -9,6 +9,20 @@ import { createQuery } from './create_query';
 
 const HITS_SIZE = 10000; // maximum hits to receive from ES with each search
 
+const getBaseStats = () => ({
+  // stats
+  versions: {},
+  types: {},
+  outputs: {},
+  count: 0,
+  eventsPublished: 0,
+  hosts: 0,
+  // state
+  module: {
+    names: []
+  },
+});
+
 /*
  * Create a set of result objects where each is the result of searching hits from Elasticsearch with a size of HITS_SIZE each time.
  * @param {Object} server - The server instance
@@ -16,15 +30,13 @@ const HITS_SIZE = 10000; // maximum hits to receive from ES with each search
  * @param {Array} clusterUuids - The string Cluster UUIDs to fetch details for
  * @param {Date} start - Start time to limit the stats
  * @param {Date} end - End time to limit the stats
- * @param {Number} page - selection of hits to fetch from ES
- * @param {Object} clusters - Beats stats in an object keyed by the cluster UUIDs
- * @param {Object} clusterHostMaps - the object keyed by cluster UUIDs to count the unique hosts
+ * @param {Number} options.page - selection of hits to fetch from ES
+ * @param {Object} options.clusters - Beats stats in an object keyed by the cluster UUIDs
+ * @param {Object} options.clusterHostMaps - the object keyed by cluster UUIDs to count the unique hosts
+ * @param {Object} options.collapse - field on which to collapse on in the query
  * @return {Promise}
  */
-export async function fetchBeatsStats(
-  server, callCluster, clusterUuids, start, end,
-  { page = 0, clusters, clusterHostMaps } = {}
-) {
+export async function fetchBeatsStats(server, callCluster, clusterUuids, start, end, { page = 0, ...options } = {}) {
   const config = server.config();
 
   const params = {
@@ -32,13 +44,13 @@ export async function fetchBeatsStats(
     ignoreUnavailable: true,
     filterPath: [
       'hits.hits._source.cluster_uuid',
+      'hits.hits._source.type',
       'hits.hits._source.beats_stats.beat.version',
       'hits.hits._source.beats_stats.beat.type',
       'hits.hits._source.beats_stats.beat.host',
       'hits.hits._source.beats_stats.stats.libbeat.pipeline.events.published',
       'hits.hits._source.beats_stats.stats.libbeat.output.type',
-      'hits.hits._source.beats_state.state.module.count',
-      'hits.hits._source.beats_state.state.module.names',
+      'hits.hits._source.beats_state.state.module',
     ],
     body: {
       query: createQuery({
@@ -55,9 +67,9 @@ export async function fetchBeatsStats(
           } }
         ],
       }),
-      collapse: { field: 'beats_stats.beat.uuid' },
-      sort: [{ 'beats_stats.timestamp': 'desc' }],
       from: page * HITS_SIZE,
+      collapse: { field: options.collapse },
+      sort: [{ 'beats_stats.timestamp': 'desc' }],
       size: HITS_SIZE,
     },
   };
@@ -66,14 +78,13 @@ export async function fetchBeatsStats(
   const hitsLength = get(results, 'hits.hits.length', 0);
   if (hitsLength > 0) {
     // further augment the clusters object with more stats
-    processResults(results, clusters, clusterHostMaps);
+    processResults(results, options.clusters, options.clusterHostMaps, options.clusterModuleSets);
 
     if (hitsLength === HITS_SIZE) {
       // call recursively
       const nextOptions = {
-        clusters,
-        clusterHostMaps,
         page: page + 1,
+        ...options,
       };
 
       // returns a promise and keeps the caller blocked from returning until the entire clusters object is built
@@ -84,37 +95,28 @@ export async function fetchBeatsStats(
   return Promise.resolve();
 }
 
-const getBaseStats = () => ({
-  count: 0,
-  versions: {},
-  types: {},
-  outputs: {},
-  eventsPublished: 0,
-  module: {
-    count: 0,
-    names: []
-  },
-  hosts: 0,
-});
-
 /*
  * Update a clusters object with processed beat stats
  * @param {Array} results - array of Beats docs from ES
  * @param {Object} clusters - Beats stats in an object keyed by the cluster UUIDs
  * @param {Object} clusterHostMaps - the object keyed by cluster UUIDs to count the unique hosts
+ * @param {Object} clusterModuleSets - the object keyed by cluster UUIDs to count the unique modules
  */
-export function processResults(results = [], clusters, clusterHostMaps) {
+export function processResults(results = [], clusters, clusterHostMaps, clusterModuleSets) {
   const currHits = get(results, 'hits.hits', []);
   currHits.forEach(hit => {
     const clusterUuid = get(hit, '_source.cluster_uuid');
     if (clusters[clusterUuid] === undefined) {
       clusters[clusterUuid] = getBaseStats();
       clusterHostMaps[clusterUuid] = new Map();
+      clusterModuleSets[clusterUuid] = new Set();
     }
 
-    clusters[clusterUuid].count += 1;
-
     const { versions, types, outputs } = clusters[clusterUuid];
+
+    if (get(hit, '_source.type') === 'beats_stats') {
+      clusters[clusterUuid].count += 1;
+    }
 
     const thisVersion = get(hit, '_source.beats_stats.beat.version');
     if (thisVersion !== undefined) {
@@ -146,10 +148,11 @@ export function processResults(results = [], clusters, clusterHostMaps) {
       clusters[clusterUuid].hosts = hostsMap.size;
     }
 
-    const thisModules = get(hit, '_source.beats_state.state.module');
-    if (thisModules !== undefined) {
-      clusters[clusterUuid].module.count += thisModules.count;
-      clusters[clusterUuid].module.names = clusters[clusterUuid].module.names.concat(thisModules.names);
+    const stateModule = get(hit, '_source.beats_state.state.module');
+    if (stateModule !== undefined) {
+      const moduleSet = clusterModuleSets[clusterUuid];
+      stateModule.names.forEach(name => moduleSet.add(name));
+      clusters[clusterUuid].module.names = Array.from(moduleSet);
     }
   });
 }
@@ -159,8 +162,16 @@ export function processResults(results = [], clusters, clusterHostMaps) {
  * @return {Object} - Beats stats in an object keyed by the cluster UUIDs
  */
 export async function getBeatsStats(server, callCluster, clusterUuids, start, end) {
-  const clusters = {};
-  const clusterHostMaps = {};
-  await fetchBeatsStats(server, callCluster, clusterUuids, start, end, { clusters, clusterHostMaps });
-  return clusters;
+  const options = {
+    clusters: {},
+    clusterHostMaps: {},
+    clusterModuleSets: {}
+  };
+
+  await Promise.all([
+    fetchBeatsStats(server, callCluster, clusterUuids, start, end, { ...options, collapse: 'beats_stats.beat.uuid' }),
+    fetchBeatsStats(server, callCluster, clusterUuids, start, end, { ...options, collapse: 'type' })
+  ]);
+
+  return options.clusters;
 }
