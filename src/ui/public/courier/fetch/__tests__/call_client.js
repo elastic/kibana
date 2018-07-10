@@ -36,8 +36,9 @@ describe('callClient', () => {
   let callClient;
   let fakeSearch;
   let searchRequests;
+  let searchRequestDelay;
 
-  const createSearchRequest = (overrides = {}) => {
+  const createSearchRequest = (id, overrides = {}) => {
     // TODO: Spy on handleFailure, whenAborted
     const source = {
       _flatten: () => ({}),
@@ -46,7 +47,9 @@ describe('callClient', () => {
 
     const errorHandler = () => {};
 
-    return new SearchRequest({ source, errorHandler, ...overrides });
+    const searchRequest = new SearchRequest({ source, errorHandler, ...overrides });
+    searchRequest.__testId__ = id;
+    return searchRequest;
   };
 
   beforeEach(ngMock.module('kibana', PrivateProvider => {
@@ -62,10 +65,16 @@ describe('callClient', () => {
   }));
 
   beforeEach(ngMock.module(function stubEs($provide) {
+    searchRequestDelay = 0;
+
     $provide.service('es', (Promise) => {
       fakeSearch = sinon.spy(() => {
-        return Promise.resolve({
-          responses: searchRequests,
+        return new Promise(resolve => {
+          setTimeout(() => {
+            resolve({
+              responses: searchRequests.map(searchRequest => searchRequest.__testId__),
+            });
+          }, searchRequestDelay);
         });
       });
 
@@ -88,13 +97,13 @@ describe('callClient', () => {
     });
 
     it(`resolves the promise with the 'responses' property of the es.msearch() result`, done => {
-      searchRequests = [ createSearchRequest() ];
+      searchRequests = [ createSearchRequest(1) ];
       const callingClient = callClient(searchRequests);
 
       callingClient.then(results => {
         // Our es service stub will set the 'responses' property of the result to equal all of
         // the searchRequests we provided to callClient.
-        expect(results).to.eql(searchRequests);
+        expect(results).to.eql([1]);
         done();
       }).catch(error => done(error));
     });
@@ -116,7 +125,7 @@ describe('callClient', () => {
 
   describe('aborting', () => {
     it(`when searchSource's _flatten method throws an error resolves with an ABORTED response`, done => {
-      const searchRequest = createSearchRequest({
+      const searchRequest = createSearchRequest(1, {
         source: {
           _flatten: () => { throw new Error(); },
         },
@@ -132,8 +141,8 @@ describe('callClient', () => {
       }).catch(error => done(error));
     });
 
-    it('while search params are being fetched resolves with an undefined response', done => {
-      const searchRequest = createSearchRequest({
+    it('while the search body is being formed resolves with an undefined response', done => {
+      const searchRequest = createSearchRequest(1, {
         source: {
           _flatten: () => {
             return new Promise(resolve => {
@@ -149,6 +158,7 @@ describe('callClient', () => {
       searchRequests = [ searchRequest ];
       const callingClient = callClient(searchRequests);
 
+      // Abort the request while the search body is being formed.
       setTimeout(() => {
         searchRequest.abort();
       }, 20);
@@ -173,15 +183,15 @@ describe('callClient', () => {
       }).catch(error => done(error));
     });
 
-    it('one searchRequest but not all of them resolves with full responses', done => {
-      const searchRequest1 = createSearchRequest();
-      const searchRequest2 = createSearchRequest();
+    it('some searchRequests but not all of them resolves with full responses', done => {
+      const searchRequest1 = createSearchRequest(1);
+      const searchRequest2 = createSearchRequest(2);
       searchRequests = [ searchRequest1, searchRequest2 ];
       const callingClient = callClient(searchRequests);
       searchRequest2.abort();
 
       callingClient.then(results => {
-        expect(results).to.eql([ searchRequest1, searchRequest2 ]);
+        expect(results).to.eql([ 1, 2 ]);
         done();
       }).catch(error => done(error));
     });
