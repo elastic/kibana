@@ -29,6 +29,6 @@ export async function importDashboards(req) {
   const docs = payload.objects
     .filter(item => !exclude.includes(item.type));
 
-  const objects = await savedObjectsClient.bulkCreate(docs, { overwrite });
-  return { objects };
+  const results = await savedObjectsClient.bulkCreate(docs, { overwrite });
+  return { objects: results.saved_objects };
 }
