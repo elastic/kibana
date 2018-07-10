@@ -36,10 +36,10 @@ describe('callClient', () => {
   let callClient;
   let fakeSearch;
   let searchRequests;
-  let searchRequestDelay;
+  let esRequestDelay;
+  let esShouldError;
 
   const createSearchRequest = (id, overrides = {}) => {
-    // TODO: Spy on handleFailure, whenAborted
     const source = {
       _flatten: () => ({}),
       requestIsStopped: () => {},
@@ -65,16 +65,21 @@ describe('callClient', () => {
   }));
 
   beforeEach(ngMock.module(function stubEs($provide) {
-    searchRequestDelay = 0;
+    esRequestDelay = 0;
+    esShouldError = false;
 
     $provide.service('es', (Promise) => {
       fakeSearch = sinon.spy(() => {
-        return new Promise(resolve => {
+        return new Promise((resolve, reject) => {
+          if (esShouldError) {
+            return reject('fake es error');
+          }
+
           setTimeout(() => {
             resolve({
               responses: searchRequests.map(searchRequest => searchRequest.__testId__),
             });
-          }, searchRequestDelay);
+          }, esRequestDelay);
         });
       });
 
@@ -101,8 +106,6 @@ describe('callClient', () => {
       const callingClient = callClient(searchRequests);
 
       callingClient.then(results => {
-        // Our es service stub will set the 'responses' property of the result to equal all of
-        // the searchRequests we provided to callClient.
         expect(results).to.eql([1]);
         done();
       }).catch(error => done(error));
@@ -120,6 +123,27 @@ describe('callClient', () => {
         expect(fakeSearch.callCount).to.be(1);
         done();
       }).catch(error => done(error));
+    });
+
+    it('calls searchRequest.whenAborted() as part of setup', async () => {
+      const whenAbortedSpy = sinon.spy();
+      const searchRequest = createSearchRequest();
+      searchRequest.whenAborted = whenAbortedSpy;
+      searchRequests = [ searchRequest ];
+      await callClient(searchRequests);
+      expect(whenAbortedSpy.callCount).to.be(1);
+    });
+
+    it(`calls searchRequest.handleFailure() with the ES error that's thrown`, async () => {
+      esShouldError = true;
+      const searchRequest = createSearchRequest(1);
+
+      const handleFailureSpy = sinon.spy();
+      searchRequest.handleFailure = handleFailureSpy;
+
+      searchRequests = [ searchRequest ];
+      await callClient(searchRequests);
+      sinon.assert.calledWith(handleFailureSpy, 'fake es error');
     });
   });
 
@@ -170,7 +194,7 @@ describe('callClient', () => {
     });
 
     it('while the search is outstanding resolves with an undefined response', done => {
-      searchRequestDelay = 100;
+      esRequestDelay = 100;
 
       const searchRequest = createSearchRequest();
       searchRequests = [ searchRequest ];
