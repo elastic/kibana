@@ -19,8 +19,8 @@ PUT _xpack/watcher/watch/error_report
           "error_report.pdf" : {
             "reporting" : {
               "url": "http://0.0.0.0:5601/api/reporting/generate/dashboard/Error-Monitoring?_g=(time:(from:now-1d%2Fd,mode:quick,to:now))", <2>
-              "retries":6, <3>
-              "interval":"1s", <4>
+              "retries":40, <3>
+              "interval":"15s", <4>
               "auth":{ <5>
                 "basic":{
                   "username":"elastic",
