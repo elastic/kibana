@@ -279,6 +279,33 @@ describe('SavedObjectsClient', () => {
     });
   });
 
+  describe('#bulk_create', () => {
+    beforeEach(() => {
+      kfetchStub.withArgs({
+        method: 'POST',
+        pathname: `/api/saved_objects/_bulk_create`,
+        query: sinon.match.any,
+        body: sinon.match.any
+      }).returns(Promise.resolve({ saved_objects: [doc] }));
+    });
+
+    test('returns a promise', () => {
+      expect(savedObjectsClient.bulkCreate([doc], {})).to.be.a(Promise);
+    });
+
+    test('resolves with instantiated SavedObjects', async () => {
+      const response = await savedObjectsClient.bulkCreate([doc], {});
+      expect(response).to.have.property('savedObjects');
+      expect(response.savedObjects.length).to.eql(1);
+      expect(response.savedObjects[0]).to.be.a(SavedObject);
+    });
+
+    test('makes HTTP call', async () => {
+      await savedObjectsClient.bulkCreate([doc], {});
+      sinon.assert.calledOnce(kfetchStub);
+    });
+  });
+
   describe('#find', () => {
     const object = { id: 'logstash-*', type: 'index-pattern', title: 'Test' };
 
