@@ -23,6 +23,7 @@ import {
   EuiPage,
   EuiPageContent,
   EuiSelect,
+  EuiSpacer,
 } from '@elastic/eui';
 
 const createOptions = value => ({ text: value, value });
@@ -197,6 +198,10 @@ export class PipelineEditor extends React.Component {
     });
   }
 
+  isSaveDisabled = () => {
+    return this.state.showPipelineIdError;
+  }
+
   onClose = async () => {
     await this.props.close();
   }
@@ -314,7 +319,11 @@ export class PipelineEditor extends React.Component {
             justifyContent="flexEnd"
           >
             <EuiFlexItem grow={false}>
-              <EuiButton fill onClick={this.onPipelineSave}>
+              <EuiButton
+                fill
+                isDisabled={this.isSaveDisabled()}
+                onClick={this.onPipelineSave}
+              >
                 Create and deploy
               </EuiButton>
             </EuiFlexItem>
@@ -325,6 +334,7 @@ export class PipelineEditor extends React.Component {
             </EuiFlexItem>
             {this.renderDeletePipelineButton()}
           </EuiFlexGroup>
+          <EuiSpacer size="s" />
           <EuiForm
             isInvalid={this.state.showPipelineIdError}
             error={this.state.pipelineIdErrors}
