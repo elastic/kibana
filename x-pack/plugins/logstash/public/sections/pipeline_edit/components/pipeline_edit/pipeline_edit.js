@@ -17,7 +17,9 @@ import {
   EuiFieldText,
   EuiForm,
   EuiFormRow,
+  EuiGlobalToastList,
   EuiIconTip,
+  EuiLink,
   EUI_MODAL_CANCEL_BUTTON,
   EuiOverlayMask,
   EuiPage,
@@ -30,6 +32,7 @@ const createOptions = value => ({ text: value, value });
 const PIPELINE_ID_REQUIRED_ERR_MSG = 'Pipeline ID is required';
 const PIPELINE_ID_FORMAT_ERR_MSG =
   'Pipeline ID must begin with a letter or underscore and contain only letters, underscores, dashes, and numbers';
+const TOAST_LIFETIME = 5000;
 
 function getFormLabelWithTooltipIcon(labelText, tooltipText) {
   if (!labelText && !tooltipText) { return null; }
@@ -152,19 +155,18 @@ export class PipelineEditor extends React.Component {
       pipelineIdErrors: [],
       showConfirmDeleteModal: false,
       showPipelineIdError: false,
+      toasts: [],
     };
   }
 
   hideConfirmDeleteModal = () => {
     this.setState({
-      ...this.state,
       showConfirmDeleteModal: false,
     });
   }
 
   showConfirmDeleteModal = () => {
     this.setState({
-      ...this.state,
       showConfirmDeleteModal: true,
     });
   }
@@ -192,14 +194,36 @@ export class PipelineEditor extends React.Component {
     await this.props.close();
   }
 
+  open = async () => {
+    const { id } = this.state.pipeline;
+    if (id) {
+      await this.props.open(id);
+    }
+  }
+
+  // TODO: get toast working even after redirect
+  addSaveSuccessToast = id => {
+    this.setState({
+      toasts: [{
+        id: 1,
+        title: (<span>Saved <EuiLink onClick={this.open}>{id}</EuiLink></span>),
+        color: 'success',
+        text: null,
+        onClose: this.onClose,
+      }],
+    });
+  }
+
   onPipelineSave = () => {
     const { pipelineService } = this.props;
+    const { id } = this.state.pipeline;
     return pipelineService.savePipeline({
-      id: this.state.pipeline.id,
+      id,
       upstreamJSON: this.state.pipeline
     })
       .then(() => {
-        // TODO: Add toast success
+        // TODO: get toast to display after redirect
+        this.addSaveSuccessToast(id);
         this.onClose();
       })
       .catch(() => {
@@ -258,6 +282,31 @@ export class PipelineEditor extends React.Component {
       )
   )
 
+  removeToasts = () => {
+    this.setState({
+      toasts: []
+    });
+  }
+
+  renderToastList = () => (
+    <EuiGlobalToastList
+      toasts={this.state.toasts}
+      dismissToast={this.removeToasts}
+      toastLifeTimeMs={TOAST_LIFETIME}
+    />
+  )
+
+  addDeleteSuccessToast = id => {
+    this.setState({
+      toasts: [{
+        id: 2,
+        title: `Deleted "${id}"`,
+        color: 'success',
+        text: null,
+      }]
+    });
+  }
+
   deletePipeline = () => {
     const {
       pipeline: { id },
@@ -268,7 +317,8 @@ export class PipelineEditor extends React.Component {
 
     return pipelineService.deletePipeline(id)
       .then(() => {
-        // TODO: Add toast success
+        // TODO: get toasts to continue displaying after path navigation
+        this.addDeleteSuccessToast(id);
         this.onClose();
       })
       .catch(() => {
@@ -424,6 +474,9 @@ export class PipelineEditor extends React.Component {
             confirmDeletePipeline={this.deletePipeline}
           />
         }
+        {
+          this.renderToastList()
+        }
       </EuiPage>
     );
   }
@@ -456,6 +509,7 @@ app.directive('pipelineEdit', function ($injector) {
     restrict: 'E',
     link: async (scope, el) => {
       const close = () => scope.$evalAsync(kbnUrl.change('/management/logstash/pipelines', {}));
+      const open = id => scope.$evalAsync(kbnUrl.change(`/management/logstash/pipelines/${id}/edit`));
 
       const userResource = securityService.isSecurityEnabled
         ? await shieldUser.getCurrent().$promise
@@ -465,6 +519,7 @@ app.directive('pipelineEdit', function ($injector) {
         <PipelineEditor
           kbnUrl={kbnUrl}
           close={close}
+          open={open}
           isNewPipeline={isEmpty(scope.pipeline.id)}
           username={userResource.username}
           pipeline={scope.pipeline}
