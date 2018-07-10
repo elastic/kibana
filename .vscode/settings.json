@@ -1,0 +1,5 @@
+{
+    "git.ignoreLimitWarning": true,
+    "editor.tabSize": 2,
+    "editor.rulers": [110]
+}

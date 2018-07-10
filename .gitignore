@@ -1,5 +1,5 @@
-gen
-bin
+gen/
+bin/
 .DS_Store
 .gradle/
 .idea/
@@ -11,7 +11,6 @@ build
 *.iml
 *.ipr
 /kibana/
-data/
+/data/
 .project
 .classpath
-.vscode/
