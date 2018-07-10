@@ -17,6 +17,5 @@
  * under the License.
  */
 
-import './intl_polyfill';
-
-export * from './index';
+export { formats } from './formats';
+export * from './i18n';

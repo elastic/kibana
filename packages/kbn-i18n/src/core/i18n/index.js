@@ -17,5 +17,6 @@
  * under the License.
  */
 
-export { formats } from './formats';
-export * from './i18n';
+import './intl_polyfill';
+
+export * from './browser';
