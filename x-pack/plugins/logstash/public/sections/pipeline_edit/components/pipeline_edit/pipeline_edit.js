@@ -155,6 +155,17 @@ export class PipelineEditor extends React.Component {
     };
   }
 
+  componentDidMount = () => {
+    const {
+      isReadOnly,
+      licenseMessage,
+      toastNotifications,
+    } = this.props;
+    if (isReadOnly) {
+      toastNotifications.addWarning(licenseMessage);
+    }
+  }
+
   hideConfirmDeleteModal = () => {
     this.setState({
       showConfirmDeleteModal: false,
@@ -346,7 +357,8 @@ export class PipelineEditor extends React.Component {
                 onChange={this.onPipelineChange}
                 setOptions={{
                   minLines: 25,
-                  maxLines: Infinity
+                  maxLines: Infinity,
+                  readOnly: this.props.isReadOnly,
                 }}
                 value={this.state.pipeline.pipeline}
                 width={'1017'}
@@ -454,7 +466,7 @@ const app = uiModules.get('xpack/logstash');
 
 app.directive('pipelineEdit', function ($injector) {
   const pipelineService = $injector.get('pipelineService');
-  // const licenseService = $injector.get('logstashLicenseService');
+  const licenseService = $injector.get('logstashLicenseService');
   const securityService = $injector.get('logstashSecurityService');
   const kbnUrl = $injector.get('kbnUrl');
   const shieldUser = $injector.get('ShieldUser');
@@ -463,6 +475,9 @@ app.directive('pipelineEdit', function ($injector) {
   return {
     restrict: 'E',
     link: async (scope, el) => {
+      console.log(licenseService);
+      console.log(licenseService.isReadOnly);
+      console.log(licenseService.message);
       const close = () => scope.$evalAsync(kbnUrl.change('/management/logstash/pipelines', {}));
       const open = id => scope.$evalAsync(kbnUrl.change(`/management/logstash/pipelines/${id}/edit`));
 
@@ -480,6 +495,8 @@ app.directive('pipelineEdit', function ($injector) {
           pipeline={scope.pipeline}
           pipelineService={pipelineService}
           toastNotifications={toastNotifications}
+          isReadOnly={licenseService.isReadOnly}
+          licenseMessage={licenseService.message}
         />, el[0]);
     },
     // template: template,
