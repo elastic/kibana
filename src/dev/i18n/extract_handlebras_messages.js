@@ -44,10 +44,7 @@ export function* extractHandlebarsMessages(buffer) {
     const messageId = idString.slice(1, -1);
 
     try {
-      if (
-        !propertiesString.startsWith(`'`) ||
-        !propertiesString.endsWith(`'`)
-      ) {
+      if (!propertiesString.startsWith(`'`) || !propertiesString.endsWith(`'`)) {
         throw 'Properties string should be a string literal.';
       }
 
@@ -66,9 +63,7 @@ export function* extractHandlebarsMessages(buffer) {
 
       yield [messageId, { message, context }];
     } catch (errorMessage) {
-      throw new Error(
-        `Cannot parse message with id: ${messageId}.\n${errorMessage}`
-      );
+      throw new Error(`Cannot parse message with id: ${messageId}.\n${errorMessage}`);
     }
   }
 }

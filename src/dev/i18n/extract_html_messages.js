@@ -19,11 +19,7 @@
 
 import { jsdom } from 'jsdom';
 import { parse } from '@babel/parser';
-import {
-  isDirectiveLiteral,
-  isObjectExpression,
-  isStringLiteral,
-} from '@babel/types';
+import { isDirectiveLiteral, isObjectExpression, isStringLiteral } from '@babel/types';
 
 import { isPropertyWithKey, escapeLineBreak, traverseNodes } from './utils';
 import { DEFAULT_MESSAGE_KEY, CONTEXT_KEY } from './constants';
@@ -92,28 +88,20 @@ function* getFilterMessages(htmlContent) {
   for (const expression of expressions) {
     const filterStart = expression.indexOf(I18N_FILTER_MARKER);
     const idExpression = expression.slice(0, filterStart).trim();
-    const filterObjectExpression = expression
-      .slice(filterStart + I18N_FILTER_MARKER.length)
-      .trim();
+    const filterObjectExpression = expression.slice(filterStart + I18N_FILTER_MARKER.length).trim();
 
     if (!filterObjectExpression || !idExpression) {
-      throw new Error(
-        `Cannot parse i18n filter expression: {{ ${expression} }}`
-      );
+      throw new Error(`Cannot parse i18n filter expression: {{ ${expression} }}`);
     }
 
     const messageId = parseIdExpression(idExpression);
 
     if (!messageId) {
-      throw new Error(
-        'Empty "id" value in angular filter expression is not allowed.'
-      );
+      throw new Error('Empty "id" value in angular filter expression is not allowed.');
     }
 
     try {
-      const { message, context } = parseFilterObjectExpression(
-        filterObjectExpression
-      );
+      const { message, context } = parseFilterObjectExpression(filterObjectExpression);
 
       if (!message) {
         throw new Error(`Default message is required for id: ${messageId}.`);
@@ -121,9 +109,7 @@ function* getFilterMessages(htmlContent) {
 
       yield [messageId, { message, context }];
     } catch (error) {
-      throw new Error(
-        `Cannot parse message with id: ${messageId}.\n${error.message || error}`
-      );
+      throw new Error(`Cannot parse message with id: ${messageId}.\n${error.message || error}`);
     }
   }
 }

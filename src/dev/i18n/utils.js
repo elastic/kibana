@@ -37,10 +37,7 @@ export const makeDirAsync = promisify(fs.mkdir);
 export const accessAsync = promisify(fs.access);
 
 export function isPropertyWithKey(property, identifierName) {
-  return (
-    isObjectProperty(property) &&
-    isIdentifier(property.key, { name: identifierName })
-  );
+  return isObjectProperty(property) && isIdentifier(property.key, { name: identifierName });
 }
 
 /**
@@ -73,10 +70,9 @@ export function* traverseNodes(nodes) {
       yield node;
     }
 
+    // if node is an object / array, traverse all of its object values
     if (node && typeof node === 'object') {
-      yield* traverseNodes(
-        Object.values(node).filter(value => value && typeof value === 'object')
-      );
+      yield* traverseNodes(Object.values(node).filter(value => value && typeof value === 'object'));
     }
   }
 }

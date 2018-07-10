@@ -25,13 +25,7 @@ import { extractHtmlMessages } from './extract_html_messages';
 import { extractCodeMessages } from './extract_code_messages';
 import { extractJadeMessages } from './extract_jade_messages';
 import { extractHandlebarsMessages } from './extract_handlebras_messages';
-import {
-  globAsync,
-  makeDirAsync,
-  accessAsync,
-  readFileAsync,
-  writeFileAsync,
-} from './utils';
+import { globAsync, makeDirAsync, accessAsync, readFileAsync, writeFileAsync } from './utils';
 
 const ESCAPE_CHARACTERS_REGEX = /\\([\s\S])|(')/g;
 
@@ -46,13 +40,10 @@ function addMessageToMap(targetMap, key, value) {
 }
 
 export async function extractDefaultTranslations(inputPath) {
-  const entries = await globAsync(
-    '*.{js,jsx,jade,ts,tsx,html,hbs,handlebars}',
-    {
-      cwd: inputPath,
-      matchBase: true,
-    }
-  );
+  const entries = await globAsync('*.{js,jsx,jade,ts,tsx,html,hbs,handlebars}', {
+    cwd: inputPath,
+    matchBase: true,
+  });
 
   const { htmlEntries, codeEntries, jadeEntries, hbsEntries } = entries.reduce(
     (paths, entry) => {
@@ -62,10 +53,7 @@ export async function extractDefaultTranslations(inputPath) {
         paths.htmlEntries.push(resolvedPath);
       } else if (resolvedPath.endsWith('.jade')) {
         paths.jadeEntries.push(resolvedPath);
-      } else if (
-        resolvedPath.endsWith('.hbs') ||
-        resolvedPath.endsWith('.handlebars')
-      ) {
+      } else if (resolvedPath.endsWith('.hbs') || resolvedPath.endsWith('.handlebars')) {
         paths.hbsFiles.push(resolvedPath);
       } else {
         paths.codeEntries.push(resolvedPath);
@@ -106,9 +94,7 @@ export async function extractDefaultTranslations(inputPath) {
     })
   );
 
-  let jsonBuffer = Buffer.from(
-    JSON5.stringify({ formats }, { quote: `'`, space: 2 }).slice(0, -1)
-  );
+  let jsonBuffer = Buffer.from(JSON5.stringify({ formats }, { quote: `'`, space: 2 }).slice(0, -1));
 
   const defaultMessages = [...defaultMessagesMap].sort(([key1], [key2]) => {
     return key1 < key2 ? -1 : 1;
@@ -116,9 +102,7 @@ export async function extractDefaultTranslations(inputPath) {
 
   for (const [mapKey, mapValue] of defaultMessages) {
     const key = mapKey.replace(ESCAPE_CHARACTERS_REGEX, '\\$1$2');
-    const value = mapValue.message
-      .replace(ESCAPE_CHARACTERS_REGEX, '\\$1$2')
-      .replace('\n', '\\n');
+    const value = mapValue.message.replace(ESCAPE_CHARACTERS_REGEX, '\\$1$2').replace('\n', '\\n');
 
     jsonBuffer = Buffer.concat([
       jsonBuffer,
@@ -135,8 +119,5 @@ export async function extractDefaultTranslations(inputPath) {
     await makeDirAsync(resolve(inputPath, 'translations'));
   }
 
-  await writeFileAsync(
-    resolve(inputPath, 'translations', 'en.json'),
-    jsonBuffer
-  );
+  await writeFileAsync(resolve(inputPath, 'translations', 'en.json'), jsonBuffer);
 }

@@ -28,10 +28,7 @@ import {
 
 import { extractI18nCallMessages } from './extract_i18n_call_messages';
 import { isI18nTranslateFunction, traverseNodes } from './utils';
-import {
-  extractIntlMessages,
-  extractFormattedMessages,
-} from './extract_react_messages';
+import { extractIntlMessages, extractFormattedMessages } from './extract_react_messages';
 
 /**
  * Detect Intl.formatMessage() function call (React).
@@ -53,22 +50,13 @@ function isIntlFormatMessageFunction(node) {
  * Example: `<FormattedMessage id="message-id" defaultMessage="Message text"/>`
  */
 function isFormattedMessageElement(node) {
-  return (
-    isJSXOpeningElement(node) &&
-    isJSXIdentifier(node.name, { name: 'FormattedMessage' })
-  );
+  return isJSXOpeningElement(node) && isJSXIdentifier(node.name, { name: 'FormattedMessage' });
 }
 
 export function* extractCodeMessages(buffer) {
   const content = parse(buffer.toString(), {
     sourceType: 'module',
-    plugins: [
-      'jsx',
-      'typescript',
-      'objectRestSpread',
-      'classProperties',
-      'asyncGenerators',
-    ],
+    plugins: ['jsx', 'typescript', 'objectRestSpread', 'classProperties', 'asyncGenerators'],
   });
 
   for (const node of traverseNodes(content.program.body)) {

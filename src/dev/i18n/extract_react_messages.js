@@ -17,12 +17,7 @@
  * under the License.
 */
 
-import {
-  isJSXAttribute,
-  isJSXIdentifier,
-  isObjectExpression,
-  isStringLiteral,
-} from '@babel/types';
+import { isJSXAttribute, isJSXIdentifier, isObjectExpression, isStringLiteral } from '@babel/types';
 
 import { isPropertyWithKey, escapeLineBreak } from './utils';
 import { DEFAULT_MESSAGE_KEY, CONTEXT_KEY } from './constants';
@@ -37,9 +32,7 @@ function extractMessageId(value) {
 
 function extractMessageValue(value, id) {
   if (!isStringLiteral(value)) {
-    throw new Error(
-      `defaultMessage value should be a string literal for id: ${id}.`
-    );
+    throw new Error(`defaultMessage value should be a string literal for id: ${id}.`);
   }
 
   return escapeLineBreak(value.value);
@@ -62,9 +55,7 @@ export function extractIntlMessages(node) {
   const options = node.arguments[0];
 
   if (!isObjectExpression(options)) {
-    throw new Error(
-      'Object with defaultMessage property is not passed to intl.formatMessage().'
-    );
+    throw new Error('Object with defaultMessage property is not passed to intl.formatMessage().');
   }
 
   let messageId;

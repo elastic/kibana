@@ -61,9 +61,7 @@ export function extractI18nCallMessages(node) {
       throw 'defaultMessage is required';
     }
   } catch (errorMessage) {
-    throw new Error(
-      `Cannot parse message with id: ${messageId}.\n${errorMessage}`
-    );
+    throw new Error(`Cannot parse message with id: ${messageId}.\n${errorMessage}`);
   }
 
   return [messageId, { message, context }];
