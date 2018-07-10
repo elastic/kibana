@@ -9,7 +9,7 @@ import { BeatTag, ConfigurationBlock } from '../../../common/domain_types';
 import { CMServerLibs } from '../../lib/lib';
 import { wrapEsError } from '../../utils/error_wrappers';
 
-export const createGetBeatRoute = (libs: CMServerLibs) => ({
+export const createGetBeatConfigurationRoute = (libs: CMServerLibs) => ({
   method: 'GET',
   path: '/api/beats/agent/{beatId}/configuration',
   config: {
