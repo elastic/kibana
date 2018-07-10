@@ -22,12 +22,7 @@ import * as Rx from 'rxjs';
 import { startWith, switchMap, take } from 'rxjs/operators';
 import { withProcRunner } from '@kbn/dev-utils';
 
-import {
-  runElasticsearch,
-  runKibanaServer,
-  runFtr,
-  KIBANA_FTR_SCRIPT,
-} from './lib';
+import { runElasticsearch, runKibanaServer, runFtr, KIBANA_FTR_SCRIPT } from './lib';
 
 import { readConfigFile } from '../../../../src/functional_test_runner/lib';
 

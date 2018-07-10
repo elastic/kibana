@@ -17,18 +17,16 @@
  * under the License.
  */
 
-import { SavedObjectNotFound } from '../../errors';
 import _ from 'lodash';
+
+import { SavedObjectNotFound } from '../../errors';
 import editorHtml from '../controls/field.html';
 import { BaseParamType } from './base';
 import '../../filters/field_type';
 import { IndexedArray } from '../../indexed_array';
-import { Notifier } from '../../notify';
+import { toastNotifications } from '../../notify';
 import { propFilter } from '../../filters/_prop_filter';
 import { createLegacyClass } from '../../utils/legacy_class';
-
-const notifier = new Notifier();
-
 
 export function FieldParamType(config) {
   FieldParamType.Super.call(this, config);
@@ -100,7 +98,7 @@ FieldParamType.prototype.deserialize = function (fieldName, aggConfig) {
 
   const validField = this.getFieldOptions(aggConfig).byName[fieldName];
   if (!validField) {
-    notifier.error(`Saved "field" parameter is now invalid. Please select a new field.`);
+    toastNotifications.addDanger(`Saved "field" parameter is now invalid. Please select a new field.`);
   }
 
   return validField;

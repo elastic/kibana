@@ -1,6 +1,197 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`parentCandidates 1`] = `
+exports[`renders dynamic options should display disabled dynamic options with tooltip for non-string fields 1`] = `
+<div>
+  <IndexPatternSelect
+    controlIndex={0}
+    getIndexPattern={[Function]}
+    getIndexPatterns={[Function]}
+    indexPatternId="mockIndexPattern"
+    onChange={[Function]}
+  />
+  <FieldSelect
+    controlIndex={0}
+    fieldName="numberField"
+    filterField={[Function]}
+    getIndexPattern={[Function]}
+    indexPatternId="mockIndexPattern"
+    onChange={[Function]}
+  />
+  <EuiFormRow
+    describedByIds={Array []}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    helpText="Allow multiple selection"
+    id="multiselect-0"
+    key="multiselect"
+  >
+    <EuiSwitch
+      checked={true}
+      data-test-subj="listControlMultiselectInput"
+      label="Multiselect"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    helpText="Only available for \\"string\\" fields"
+    id="dynamicOptions-0"
+    key="dynamicOptions"
+  >
+    <EuiSwitch
+      checked={true}
+      data-test-subj="listControlDynamicOptionsSwitch"
+      disabled={true}
+      label="Dynamic Options"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    helpText="Number of options"
+    id="size-0"
+    key="size"
+    label="Size"
+  >
+    <EuiFieldNumber
+      compressed={false}
+      data-test-subj="listControlSizeInput"
+      fullWidth={false}
+      isLoading={false}
+      min={1}
+      onChange={[Function]}
+      value={5}
+    />
+  </EuiFormRow>
+</div>
+`;
+
+exports[`renders dynamic options should display dynamic options for string fields 1`] = `
+<div>
+  <IndexPatternSelect
+    controlIndex={0}
+    getIndexPattern={[Function]}
+    getIndexPatterns={[Function]}
+    indexPatternId="mockIndexPattern"
+    onChange={[Function]}
+  />
+  <FieldSelect
+    controlIndex={0}
+    fieldName="keywordField"
+    filterField={[Function]}
+    getIndexPattern={[Function]}
+    indexPatternId="mockIndexPattern"
+    onChange={[Function]}
+  />
+  <EuiFormRow
+    describedByIds={Array []}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    helpText="Allow multiple selection"
+    id="multiselect-0"
+    key="multiselect"
+  >
+    <EuiSwitch
+      checked={true}
+      data-test-subj="listControlMultiselectInput"
+      label="Multiselect"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    helpText="Update options in response to user input"
+    id="dynamicOptions-0"
+    key="dynamicOptions"
+  >
+    <EuiSwitch
+      checked={true}
+      data-test-subj="listControlDynamicOptionsSwitch"
+      disabled={false}
+      label="Dynamic Options"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+</div>
+`;
+
+exports[`renders dynamic options should display size field when dynamic options is disabled 1`] = `
+<div>
+  <IndexPatternSelect
+    controlIndex={0}
+    getIndexPattern={[Function]}
+    getIndexPatterns={[Function]}
+    indexPatternId="mockIndexPattern"
+    onChange={[Function]}
+  />
+  <FieldSelect
+    controlIndex={0}
+    fieldName="keywordField"
+    filterField={[Function]}
+    getIndexPattern={[Function]}
+    indexPatternId="mockIndexPattern"
+    onChange={[Function]}
+  />
+  <EuiFormRow
+    describedByIds={Array []}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    helpText="Allow multiple selection"
+    id="multiselect-0"
+    key="multiselect"
+  >
+    <EuiSwitch
+      checked={true}
+      data-test-subj="listControlMultiselectInput"
+      label="Multiselect"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    helpText="Update options in response to user input"
+    id="dynamicOptions-0"
+    key="dynamicOptions"
+  >
+    <EuiSwitch
+      checked={false}
+      data-test-subj="listControlDynamicOptionsSwitch"
+      disabled={false}
+      label="Dynamic Options"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    helpText="Number of options"
+    id="size-0"
+    key="size"
+    label="Size"
+  >
+    <EuiFieldNumber
+      compressed={false}
+      data-test-subj="listControlSizeInput"
+      fullWidth={false}
+      isLoading={false}
+      min={1}
+      onChange={[Function]}
+      value={5}
+    />
+  </EuiFormRow>
+</div>
+`;
+
+exports[`renders should display chaining input when parents are provided 1`] = `
 <div>
   <IndexPatternSelect
     controlIndex={0}
@@ -23,6 +214,7 @@ exports[`parentCandidates 1`] = `
     hasEmptyLabelSpace={false}
     helpText="Options are based on the value of parent control. Disabled if parent is not set."
     id="parentSelect-0"
+    key="parentSelect"
     label="Parent control"
   >
     <EuiSelect
@@ -53,7 +245,9 @@ exports[`parentCandidates 1`] = `
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
+    helpText="Allow multiple selection"
     id="multiselect-0"
+    key="multiselect"
   >
     <EuiSwitch
       checked={true}
@@ -66,7 +260,25 @@ exports[`parentCandidates 1`] = `
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
+    helpText="Update options in response to user input"
+    id="dynamicOptions-0"
+    key="dynamicOptions"
+  >
+    <EuiSwitch
+      checked={false}
+      data-test-subj="listControlDynamicOptionsSwitch"
+      disabled={false}
+      label="Dynamic Options"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    helpText="Number of options"
     id="size-0"
+    key="size"
     label="Size"
   >
     <EuiFieldNumber
@@ -82,52 +294,22 @@ exports[`parentCandidates 1`] = `
 </div>
 `;
 
-exports[`renders ListControlEditor 1`] = `
+exports[`renders should not display any options until field is selected 1`] = `
 <div>
   <IndexPatternSelect
     controlIndex={0}
     getIndexPattern={[Function]}
     getIndexPatterns={[Function]}
-    indexPatternId="indexPattern1"
+    indexPatternId="mockIndexPattern"
     onChange={[Function]}
   />
   <FieldSelect
     controlIndex={0}
-    fieldName="keywordField"
+    fieldName=""
     filterField={[Function]}
     getIndexPattern={[Function]}
-    indexPatternId="indexPattern1"
+    indexPatternId="mockIndexPattern"
     onChange={[Function]}
   />
-  <EuiFormRow
-    describedByIds={Array []}
-    fullWidth={false}
-    hasEmptyLabelSpace={false}
-    id="multiselect-0"
-  >
-    <EuiSwitch
-      checked={true}
-      data-test-subj="listControlMultiselectInput"
-      label="Multiselect"
-      onChange={[Function]}
-    />
-  </EuiFormRow>
-  <EuiFormRow
-    describedByIds={Array []}
-    fullWidth={false}
-    hasEmptyLabelSpace={false}
-    id="size-0"
-    label="Size"
-  >
-    <EuiFieldNumber
-      compressed={false}
-      data-test-subj="listControlSizeInput"
-      fullWidth={false}
-      isLoading={false}
-      min={1}
-      onChange={[Function]}
-      value={10}
-    />
-  </EuiFormRow>
 </div>
 `;

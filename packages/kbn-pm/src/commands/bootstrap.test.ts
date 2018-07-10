@@ -22,10 +22,7 @@ jest.mock('../utils/link_project_executables');
 
 import { resolve } from 'path';
 
-import {
-  absolutePathSnapshotSerializer,
-  stripAnsiSnapshotSerializer,
-} from '../test_helpers';
+import { absolutePathSnapshotSerializer, stripAnsiSnapshotSerializer } from '../test_helpers';
 import { linkProjectExecutables } from '../utils/link_project_executables';
 import { IPackageJson } from '../utils/package_json';
 import { Project } from '../utils/project';
@@ -88,12 +85,7 @@ test('handles dependencies of dependencies', async () => {
     },
     'packages/baz'
   );
-  const projects = new Map([
-    ['kibana', kibana],
-    ['foo', foo],
-    ['bar', bar],
-    ['baz', baz],
-  ]);
+  const projects = new Map([['kibana', kibana], ['foo', foo], ['bar', bar], ['baz', baz]]);
   const projectGraph = buildProjectGraph(projects);
 
   const logMock = jest.spyOn(console, 'log').mockImplementation(noop);
