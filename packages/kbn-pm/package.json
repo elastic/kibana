@@ -36,7 +36,7 @@
     "babel-loader": "^7.1.2",
     "babel-preset-env": "^1.6.1",
     "babel-preset-stage-3": "^6.24.1",
-    "chalk": "^2.3.1",
+    "chalk": "^2.4.1",
     "cmd-shim": "^2.0.2",
     "cpy": "^6.0.0",
     "dedent": "^0.7.0",

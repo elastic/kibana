@@ -37,7 +37,7 @@
     "babel-loader": "7.1.2",
     "babel-polyfill": "6.20.0",
     "brace": "0.10.0",
-    "chalk": "2.3.0",
+    "chalk": "^2.4.1",
     "chokidar": "1.6.0",
     "css-loader": "0.28.7",
     "expose-loader": "0.7.3",
