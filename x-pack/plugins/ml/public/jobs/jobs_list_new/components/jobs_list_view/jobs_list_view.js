@@ -50,6 +50,7 @@ export class JobsListView extends Component {
   }
 
   componentDidMount() {
+    timefilter.disableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
 
     this.initAutoRefresh();
