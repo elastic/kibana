@@ -100,19 +100,12 @@ export async function loadTransactionDistribution({
   });
 }
 
-export async function loadSpans({
-  serviceName,
-  start,
-  end,
-  transactionId,
-  kuery
-}) {
+export async function loadSpans({ serviceName, start, end, transactionId }) {
   return callApi({
     pathname: `/api/apm/services/${serviceName}/transactions/${transactionId}/spans`,
     query: {
       start,
-      end,
-      esFilterQuery: await getEncodedEsQuery(kuery)
+      end
     }
   });
 }
