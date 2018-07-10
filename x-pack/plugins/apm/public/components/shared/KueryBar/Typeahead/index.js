@@ -131,12 +131,17 @@ export class Typeahead extends Component {
 
   onChangeInputValue = event => {
     const { value, selectionStart } = event.target;
+    const hasValue = Boolean(value.trim());
     this.setState({
       value,
       inputIsPristine: false,
-      isSuggestionsVisible: true,
+      isSuggestionsVisible: hasValue,
       index: null
     });
+
+    if (!hasValue) {
+      this.props.onSubmit(value);
+    }
     this.props.onChange(value, selectionStart);
   };
 
