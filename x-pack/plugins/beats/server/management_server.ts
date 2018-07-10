@@ -5,8 +5,8 @@
  */
 
 import { CMServerLibs } from './lib/lib';
+import { createGetBeatConfigurationRoute } from './rest_api/beats/configuration';
 import { createBeatEnrollmentRoute } from './rest_api/beats/enroll';
-import { createGetBeatRoute } from './rest_api/beats/get';
 import { createListAgentsRoute } from './rest_api/beats/list';
 import { createTagAssignmentsRoute } from './rest_api/beats/tag_assignment';
 import { createTagRemovalsRoute } from './rest_api/beats/tag_removal';
@@ -21,7 +21,7 @@ export const initManagementServer = (libs: CMServerLibs) => {
     body: beatsIndexTemplate,
   });
 
-  libs.framework.registerRoute(createGetBeatRoute(libs));
+  libs.framework.registerRoute(createGetBeatConfigurationRoute(libs));
   libs.framework.registerRoute(createTagAssignmentsRoute(libs));
   libs.framework.registerRoute(createListAgentsRoute(libs));
   libs.framework.registerRoute(createTagRemovalsRoute(libs));

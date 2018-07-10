@@ -11,7 +11,7 @@ import { wrapEsError } from '../../utils/error_wrappers';
 
 export const createGetBeatRoute = (libs: CMServerLibs) => ({
   method: 'GET',
-  path: '/api/beats/agent/{beatId}',
+  path: '/api/beats/agent/{beatId}/configuration',
   config: {
     validate: {
       headers: Joi.object({

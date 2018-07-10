@@ -18,7 +18,7 @@ export default function ({ getService }) {
 
     it('should return merged configuration for the beat', async () => {
       const { body: apiResponse } = await supertest
-        .get('/api/beats/agent/foo')
+        .get('/api/beats/agent/foo/configuration')
         .set(
           'kbn-beats-access-token',
           'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' +
