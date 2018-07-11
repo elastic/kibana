@@ -54,12 +54,14 @@ export class LicenseViewController {
         expiryDate = formatDateTimeLocal(license.expiry_date);
       }
 
+      const capitalizedType = license.type[0].toUpperCase() + license.type.slice(1);
+
       // Mount the React component to the template
       render(
         <License
           isPrimaryCluster={isPrimaryCluster}
           status={license.status}
-          type={license.type}
+          type={capitalizedType}
           isExpired={isExpired}
           expiryDate={expiryDate}
           uploadLicensePath={uploadLicensePath}
