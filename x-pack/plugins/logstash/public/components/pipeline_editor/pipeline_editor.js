@@ -311,8 +311,8 @@ export class PipelineEditor extends React.Component {
           style={{
             width: 1100
           }}
-          verticalPosition={"center"}
-          horizontalPosition={"center"}
+          verticalPosition="center"
+          horizontalPosition="center"
         >
           <EuiFlexGroup
             justifyContent="flexEnd"

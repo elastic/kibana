@@ -9,10 +9,10 @@ import { render } from 'react-dom';
 import { isEmpty } from 'lodash';
 import { uiModules } from 'ui/modules';
 import { Notifier, toastNotifications } from 'ui/notify';
+import { PipelineEditor } from '../../../../components/pipeline_editor';
 import 'plugins/logstash/services/license';
 import 'plugins/logstash/services/security';
 import './pipeline_edit.less';
-import { PipelineEditor } from '../../../../components/pipeline_editor';
 import '../../../../components/tooltip';
 import 'ace';
 
