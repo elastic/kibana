@@ -38,6 +38,7 @@ import { rowCount } from './rowCount';
 import { repeatImage } from './repeatImage';
 import { revealImage } from './revealImage';
 import { seriesStyle } from './seriesStyle';
+import { shape } from './shape';
 import { sort } from './sort';
 import { staticColumn } from './staticColumn';
 import { string } from './string';
@@ -90,6 +91,7 @@ export const commonFunctions = [
   rounddate,
   rowCount,
   seriesStyle,
+  shape,
   sort,
   staticColumn,
   string,

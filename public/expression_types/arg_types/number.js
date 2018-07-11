@@ -56,4 +56,5 @@ export const number = () => ({
   displayName: 'number',
   help: 'Input a number',
   simpleTemplate: templateFromReactComponent(EnhancedNumberArgInput),
+  default: '0',
 });

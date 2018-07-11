@@ -8,6 +8,7 @@ import { nullType } from './null';
 import { number } from './number';
 import { pointseries } from './pointseries';
 import { render } from './render';
+import { shape } from './shape';
 import { string } from './string';
 import { style } from './style';
 
@@ -22,6 +23,7 @@ export const typeSpecs = [
   nullType,
   pointseries,
   render,
+  shape,
   string,
   style,
 ];

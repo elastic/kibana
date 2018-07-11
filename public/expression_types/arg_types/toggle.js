@@ -20,4 +20,5 @@ export const toggle = () => ({
   displayName: 'Toggle',
   help: 'A true/false toggle switch',
   simpleTemplate: templateFromReactComponent(ToggleArgInput),
+  default: 'false',
 });

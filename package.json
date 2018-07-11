@@ -62,6 +62,7 @@
     "moment": "^2.20.1",
     "object-path-immutable": "^0.5.3",
     "prop-types": "^15.6.1",
+    "raw-loader": "0.5.1",
     "react": "^16.2.0",
     "react-bootstrap": "^0.32.1",
     "react-datetime": "^2.14.0",

@@ -8,6 +8,7 @@ import { revealImage } from './reveal_image';
 import { markdown } from './markdown';
 import { pie } from './pie';
 import { plot } from './plot';
+import { shape } from './shape';
 import { table } from './table';
 import { timeFilter } from './time_filter';
 import { text } from './text';
@@ -23,6 +24,7 @@ export const renderFunctions = [
   markdown,
   pie,
   plot,
+  shape,
   table,
   timeFilter,
   text,

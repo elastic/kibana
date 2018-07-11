@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { Popover as BootstrapPopover, Overlay } from 'react-bootstrap';
+import uuid from 'uuid/v4';
 
 // mapping for EUI popover positions to bootstrap placements
 const anchorPositions = {
@@ -59,7 +60,7 @@ export class Popover extends PureComponent {
     // TODO: replace bootstrap popover with EuiPopover https://github.com/elastic/kibana-canvas/issues/612
     // Pending https://github.com/elastic/eui/issues/873
     const popover = (
-      <BootstrapPopover id={id} className={panelClassName} title={title}>
+      <BootstrapPopover id={id || `popover-${uuid()}`} className={panelClassName} title={title}>
         {children({ closePopover: this.closePopover })}
       </BootstrapPopover>
     );

@@ -6,6 +6,7 @@ import { plot } from './plot';
 import { repeatImage } from './repeatImage';
 import { revealImage } from './revealImage';
 import { render } from './render';
+import { shape } from './shape';
 import { table } from './table';
 import { timefilterControl } from './timefilterControl';
 
@@ -18,6 +19,7 @@ export const viewSpecs = [
   repeatImage,
   revealImage,
   render,
+  shape,
   table,
   timefilterControl,
 ];
