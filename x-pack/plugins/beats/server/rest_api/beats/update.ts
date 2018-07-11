@@ -5,6 +5,7 @@
  */
 
 import Joi from 'joi';
+import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/lib';
 import { wrapEsError } from '../../utils/error_wrappers';
 
@@ -32,7 +33,7 @@ export const createBeatUpdateRoute = (libs: CMServerLibs) => ({
       }).required(),
     },
   },
-  handler: async (request: any, reply: any) => {
+  handler: async (request: FrameworkRequest, reply: any) => {
     const { beatId } = request.params;
     const accessToken = request.headers['kbn-beats-access-token'];
     const remoteAddress = request.info.remoteAddress;

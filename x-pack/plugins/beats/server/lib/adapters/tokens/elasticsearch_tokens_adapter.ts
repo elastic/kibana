@@ -7,14 +7,19 @@
 import { flatten, get } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { DatabaseAdapter } from '../database/adapter_types';
-import { FrameworkRequest } from '../framework/adapter_types';
+import {
+  BackendFrameworkAdapter,
+  FrameworkUser,
+} from '../framework/adapter_types';
 import { CMTokensAdapter, TokenEnrollmentData } from './adapter_types';
 
 export class ElasticsearchTokensAdapter implements CMTokensAdapter {
   private database: DatabaseAdapter;
+  private framework: BackendFrameworkAdapter;
 
-  constructor(database: DatabaseAdapter) {
+  constructor(database: DatabaseAdapter, framework: BackendFrameworkAdapter) {
     this.database = database;
+    this.framework = framework;
   }
 
   public async deleteEnrollmentToken(enrollmentToken: string) {
@@ -24,7 +29,7 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
       type: '_doc',
     };
 
-    await this.database.delete(this.database.InternalRequest, params);
+    await this.database.delete(this.framework.internalUser, params);
   }
 
   public async getEnrollmentToken(
@@ -38,7 +43,7 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
     };
 
     const response = await this.database.get(
-      this.database.InternalRequest,
+      this.framework.internalUser,
       params
     );
     const tokenDetails = get<TokenEnrollmentData>(
@@ -61,7 +66,7 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
   }
 
   public async upsertTokens(
-    req: FrameworkRequest,
+    user: FrameworkUser,
     tokens: TokenEnrollmentData[]
   ) {
     const body = flatten(
@@ -74,7 +79,7 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
       ])
     );
 
-    await this.database.bulk(req, {
+    await this.database.bulk(user, {
       body,
       index: INDEX_NAMES.BEATS,
       refresh: 'wait_for',

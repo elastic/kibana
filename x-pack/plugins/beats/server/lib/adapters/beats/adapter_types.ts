@@ -5,22 +5,22 @@
  */
 
 import { CMBeat } from '../../../../common/domain_types';
-import { FrameworkRequest } from '../framework/adapter_types';
+import { FrameworkUser } from '../framework/adapter_types';
 
 // FIXME: fix getBeatsWithIds return type
 export interface CMBeatsAdapter {
   insert(beat: CMBeat): Promise<void>;
   update(beat: CMBeat): Promise<void>;
   get(id: string): any;
-  getAll(req: FrameworkRequest): any;
-  getWithIds(req: FrameworkRequest, beatIds: string[]): any;
-  verifyBeats(req: FrameworkRequest, beatIds: string[]): any;
+  getAll(user: FrameworkUser): any;
+  getWithIds(user: FrameworkUser, beatIds: string[]): any;
+  verifyBeats(user: FrameworkUser, beatIds: string[]): any;
   removeTagsFromBeats(
-    req: FrameworkRequest,
+    user: FrameworkUser,
     removals: BeatsTagAssignment[]
   ): Promise<BeatsTagAssignment[]>;
   assignTagsToBeats(
-    req: FrameworkRequest,
+    user: FrameworkUser,
     assignments: BeatsTagAssignment[]
   ): Promise<BeatsTagAssignment[]>;
 }

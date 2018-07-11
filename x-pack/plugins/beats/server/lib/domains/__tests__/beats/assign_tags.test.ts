@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { wrapRequest } from '../../../../utils/wrap_request';
+import { FrameworkInternalUser } from './../../../adapters/framework/adapter_types';
+
 import { MemoryBeatsAdapter } from '../../../adapters/beats/memory_beats_adapter';
 import { TestingBackendFrameworkAdapter } from '../../../adapters/framework/testing_framework_adapter';
 import { MemoryTagsAdapter } from '../../../adapters/tags/memory_tags_adapter';
@@ -21,13 +22,7 @@ import Chance from 'chance';
 const seed = Date.now();
 const chance = new Chance(seed);
 
-const fakeReq = wrapRequest({
-  headers: {},
-  info: {},
-  params: {},
-  payload: {},
-  query: {},
-});
+const internalUser: FrameworkInternalUser = { kind: 'internal' };
 
 const settings = {
   encryptionKey: 'something_who_cares',
@@ -102,7 +97,7 @@ describe('Beats Domain Lib', () => {
     });
 
     it('should add a single tag to a single beat', async () => {
-      const apiResponse = await beatsLib.assignTagsToBeats(fakeReq, [
+      const apiResponse = await beatsLib.assignTagsToBeats(internalUser, [
         { beatId: 'bar', tag: 'production' },
       ]);
 
@@ -118,7 +113,7 @@ describe('Beats Domain Lib', () => {
       expect(beat.tags).toEqual([...tags, 'qa']);
 
       // Adding the existing tag
-      const apiResponse = await beatsLib.assignTagsToBeats(fakeReq, [
+      const apiResponse = await beatsLib.assignTagsToBeats(internalUser, [
         { beatId: 'foo', tag: 'production' },
       ]);
 
@@ -131,7 +126,7 @@ describe('Beats Domain Lib', () => {
     });
 
     it('should add a single tag to a multiple beats', async () => {
-      const apiResponse = await beatsLib.assignTagsToBeats(fakeReq, [
+      const apiResponse = await beatsLib.assignTagsToBeats(internalUser, [
         { beatId: 'foo', tag: 'development' },
         { beatId: 'bar', tag: 'development' },
       ]);
@@ -149,7 +144,7 @@ describe('Beats Domain Lib', () => {
     });
 
     it('should add multiple tags to a single beat', async () => {
-      const apiResponse = await beatsLib.assignTagsToBeats(fakeReq, [
+      const apiResponse = await beatsLib.assignTagsToBeats(internalUser, [
         { beatId: 'bar', tag: 'development' },
         { beatId: 'bar', tag: 'production' },
       ]);
@@ -164,7 +159,7 @@ describe('Beats Domain Lib', () => {
     });
 
     it('should add multiple tags to a multiple beats', async () => {
-      const apiResponse = await beatsLib.assignTagsToBeats(fakeReq, [
+      const apiResponse = await beatsLib.assignTagsToBeats(internalUser, [
         { beatId: 'foo', tag: 'development' },
         { beatId: 'bar', tag: 'production' },
       ]);
@@ -184,7 +179,7 @@ describe('Beats Domain Lib', () => {
     it('should return errors for non-existent beats', async () => {
       const nonExistentBeatId = chance.word();
 
-      const apiResponse = await beatsLib.assignTagsToBeats(fakeReq, [
+      const apiResponse = await beatsLib.assignTagsToBeats(internalUser, [
         { beatId: nonExistentBeatId, tag: 'production' },
       ]);
 
@@ -196,7 +191,7 @@ describe('Beats Domain Lib', () => {
     it('should return errors for non-existent tags', async () => {
       const nonExistentTag = chance.word();
 
-      const apiResponse = await beatsLib.assignTagsToBeats(fakeReq, [
+      const apiResponse = await beatsLib.assignTagsToBeats(internalUser, [
         { beatId: 'bar', tag: nonExistentTag },
       ]);
 
@@ -212,7 +207,7 @@ describe('Beats Domain Lib', () => {
       const nonExistentBeatId = chance.word();
       const nonExistentTag = chance.word();
 
-      const apiResponse = await beatsLib.assignTagsToBeats(fakeReq, [
+      const apiResponse = await beatsLib.assignTagsToBeats(internalUser, [
         { beatId: nonExistentBeatId, tag: nonExistentTag },
       ]);
 

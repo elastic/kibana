@@ -3,16 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { timingSafeEqual } from 'crypto';
 import { sign as signToken, verify as verifyToken } from 'jsonwebtoken';
 import moment from 'moment';
 import uuid from 'uuid';
-import {
-  BackendFrameworkAdapter,
-  FrameworkRequest,
-} from '../adapters/framework/adapter_types';
+import { BackendFrameworkAdapter } from '../adapters/framework/adapter_types';
 import { CMTokensAdapter } from '../adapters/tokens/adapter_types';
+import { FrameworkUser } from './../adapters/framework/adapter_types';
 
 const RANDOM_TOKEN_1 = 'b48c4bda384a40cb91c6eb9b8849e77f';
 const RANDOM_TOKEN_2 = '80a3819e3cd64f4399f1d4886be7a08b';
@@ -123,7 +120,7 @@ export class CMTokensDomain {
   }
 
   public async createEnrollmentTokens(
-    req: FrameworkRequest,
+    user: FrameworkUser,
     numTokens: number = 1
   ): Promise<string[]> {
     const tokens = [];
@@ -142,7 +139,7 @@ export class CMTokensDomain {
       });
     }
 
-    await this.adapter.upsertTokens(req, tokens);
+    await this.adapter.upsertTokens(user, tokens);
 
     return tokens.map(token => token.token);
   }

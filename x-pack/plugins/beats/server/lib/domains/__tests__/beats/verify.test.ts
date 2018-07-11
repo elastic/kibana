@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { wrapRequest } from '../../../../utils/wrap_request';
 import { MemoryBeatsAdapter } from '../../../adapters/beats/memory_beats_adapter';
 import { TestingBackendFrameworkAdapter } from '../../../adapters/framework/testing_framework_adapter';
 import { MemoryTagsAdapter } from '../../../adapters/tags/memory_tags_adapter';
@@ -26,14 +25,6 @@ const settings = {
   encryptionKey: 'something_who_cares',
   enrollmentTokensTtlInSeconds: 10 * 60, // 10 minutes
 };
-
-const fakeReq = wrapRequest({
-  headers: {},
-  info: {},
-  params: {},
-  payload: {},
-  query: {},
-});
 
 describe('Beats Domain Lib', () => {
   let beatsLib: CMBeatsDomain;
@@ -123,7 +114,7 @@ describe('Beats Domain Lib', () => {
         verifiedBeatIds,
         alreadyVerifiedBeatIds,
         nonExistentBeatIds,
-      } = await beatsLib.verifyBeats(fakeReq, beatIds);
+      } = await beatsLib.verifyBeats({ kind: 'unauthenticated' }, beatIds);
 
       // TODO calculation of status should be done in-lib, w/switch statement here
       beats.forEach(b => {
@@ -163,7 +154,7 @@ describe('Beats Domain Lib', () => {
         verifiedBeatIds,
         alreadyVerifiedBeatIds,
         nonExistentBeatIds,
-      } = await beatsLib.verifyBeats(fakeReq, beatIds);
+      } = await beatsLib.verifyBeats({ kind: 'unauthenticated' }, beatIds);
 
       // TODO calculation of status should be done in-lib, w/switch statement here
       beats.forEach(beat => {

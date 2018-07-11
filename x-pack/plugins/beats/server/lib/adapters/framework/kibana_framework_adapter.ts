@@ -4,21 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { wrapRequest } from '../../../utils/wrap_request';
 import {
   BackendFrameworkAdapter,
+  FrameworkInternalUser,
   FrameworkRouteOptions,
   FrameworkWrappableRequest,
 } from './adapter_types';
 
-import { IStrictReply, Server } from 'hapi';
-import { wrapRequest } from '../../../utils/wrap_request';
-
 export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
+  public readonly internalUser: FrameworkInternalUser = {
+    kind: 'internal',
+  };
   public version: string;
-  private server: Server;
+  private server: any;
   private cryptoHash: string | null;
 
-  constructor(hapiServer: Server) {
+  constructor(hapiServer: any) {
     this.server = hapiServer;
     if (hapiServer.plugins.kibana) {
       this.version = hapiServer.plugins.kibana.status.plugin.version;
@@ -26,7 +28,6 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
       this.version = 'unknown';
     }
     this.cryptoHash = null;
-
     this.validateConfig();
   }
 
@@ -56,14 +57,14 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     RouteRequest extends FrameworkWrappableRequest,
     RouteResponse
   >(route: FrameworkRouteOptions<RouteRequest, RouteResponse>) {
-    const wrappedHandler = (request: any, reply: IStrictReply<RouteResponse>) =>
+    const wrappedHandler = (request: any, reply: any) =>
       route.handler(wrapRequest(request), reply);
 
     this.server.route({
-      config: route.config,
       handler: wrappedHandler,
       method: route.method,
       path: route.path,
+      config: route.config,
     });
   }
 

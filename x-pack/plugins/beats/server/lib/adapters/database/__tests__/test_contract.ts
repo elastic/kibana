@@ -29,10 +29,13 @@ export const contractTests = (testName: string, config: ContractConfig) => {
 
     it('Should inject template into ES', async () => {
       try {
-        await database.putTemplate(database.InternalRequest, {
-          name: 'beats-template',
-          body: beatsIndexTemplate,
-        });
+        await database.putTemplate(
+          { kind: 'unauthenticated' },
+          {
+            name: 'beats-template',
+            body: beatsIndexTemplate,
+          }
+        );
       } catch (e) {
         expect(e).toEqual(null);
       }
@@ -45,7 +48,7 @@ export const contractTests = (testName: string, config: ContractConfig) => {
         index: '.management-beats',
         type: '_doc',
       };
-      const response = await database.get(database.InternalRequest, params);
+      const response = await database.get({ kind: 'unauthenticated' }, params);
 
       expect(response).not.toEqual(undefined);
       // @ts-ignore

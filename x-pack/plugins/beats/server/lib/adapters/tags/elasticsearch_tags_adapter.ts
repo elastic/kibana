@@ -6,10 +6,10 @@
 
 import { get } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
+import { FrameworkUser } from './../framework/adapter_types';
 
 import { BeatTag } from '../../../../common/domain_types';
 import { DatabaseAdapter } from '../database/adapter_types';
-import { FrameworkRequest } from '../framework/adapter_types';
 import { CMTagsAdapter } from './adapter_types';
 
 export class ElasticsearchTagsAdapter implements CMTagsAdapter {
@@ -19,7 +19,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
     this.database = database;
   }
 
-  public async getTagsWithIds(req: FrameworkRequest, tagIds: string[]) {
+  public async getTagsWithIds(user: FrameworkUser, tagIds: string[]) {
     const ids = tagIds.map(tag => `tag:${tag}`);
 
     // TODO abstract to kibana adapter as the more generic getDocs
@@ -31,7 +31,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
       index: INDEX_NAMES.BEATS,
       type: '_doc',
     };
-    const response = await this.database.mget(req, params);
+    const response = await this.database.mget(user, params);
 
     return get(response, 'docs', [])
       .filter((b: any) => b.found)
@@ -41,7 +41,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
       }));
   }
 
-  public async upsertTag(req: FrameworkRequest, tag: BeatTag) {
+  public async upsertTag(user: FrameworkUser, tag: BeatTag) {
     const body = {
       tag,
       type: 'tag',
@@ -54,7 +54,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
       refresh: 'wait_for',
       type: '_doc',
     };
-    const response = await this.database.index(req, params);
+    const response = await this.database.index(user, params);
 
     // TODO this is not something that works for TS... change this return type
     return get(response, 'result');
