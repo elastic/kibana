@@ -55,7 +55,7 @@ class AggConfigs extends IndexedArray {
       group: ['schema.group', 'type.name', 'schema.name'],
     });
 
-    this.push.apply(this, configStates.map(aggConfigState => {
+    this.push(...configStates.map(aggConfigState => {
       if (aggConfigState instanceof AggConfig) {
         return aggConfigState;
       }
