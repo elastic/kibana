@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import expect from 'expect.js';
 import { beatsIndexTemplate } from '../../../../utils/index_templates';
 import { DatabaseAdapter } from '../adapter_types';
 
@@ -35,7 +34,7 @@ export const contractTests = (testName: string, config: ContractConfig) => {
           body: beatsIndexTemplate,
         });
       } catch (e) {
-        expect(e).to.eql(null);
+        expect(e).toEqual(null);
       }
     });
 
@@ -48,9 +47,9 @@ export const contractTests = (testName: string, config: ContractConfig) => {
       };
       const response = await database.get(database.InternalRequest, params);
 
-      expect(response).to.not.eql(undefined);
+      expect(response).not.toEqual(undefined);
       // @ts-ignore
-      expect(response.found).to.eql(undefined);
+      expect(response.found).toEqual(undefined);
     });
   });
 };
