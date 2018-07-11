@@ -327,17 +327,17 @@ export class MonitoringTable extends React.Component {
    * @param {Number} numAvailableRows - number of rows total on all the pages
    */
   getFooter(numVisibleRows, numAvailableRows, alwaysShowPageControls) {
-    const showPaginationControls = this.isPaginationRequired(numAvailableRows);
-    const firstRow = this.calculateFirstRow();
+    if (!this.isPaginationRequired(numAvailableRows)) {
+      return null;
+    }
 
+    const firstRow = this.calculateFirstRow();
     return (
       <MonitoringTableFooter
         pageIndexFirstRow={numVisibleRows ? firstRow + 1 : 0}
         pageIndexLastRow={numVisibleRows ? numVisibleRows + firstRow : 0}
         rowsFiltered={numAvailableRows}
         paginationControls={this.getPaginationControls(numAvailableRows, alwaysShowPageControls)}
-        rows={this.state.rows}
-        showPaginationControls={showPaginationControls}
       />
     );
   }
