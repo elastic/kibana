@@ -28,3 +28,7 @@ export function buildPrivilegeMap(savedObjectTypes, application, actions) {
     }
   };
 }
+
+export function buildLegacyIndexPrivileges() {
+  return ['create', 'delete', 'read', 'view_index_metadata'];
+}

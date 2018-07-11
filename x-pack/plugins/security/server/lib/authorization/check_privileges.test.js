@@ -61,6 +61,7 @@ const checkPrivilegesTest = (
     const mockConfig = createMockConfig();
     const mockShieldClient = createMockShieldClient({
       username,
+      has_all_requested: true,
       application: {
         [application]: {
           [ALL_RESOURCE]: applicationPrivilegesResponse
@@ -94,7 +95,7 @@ const checkPrivilegesTest = (
           ])
         }],
         index: [{
-          names: [ defaultKibanaIndex ],
+          names: [defaultKibanaIndex],
           privileges: ['create', 'delete', 'read', 'view_index_metadata']
         }],
       }
