@@ -9524,10 +9524,6 @@ object-copy@^0.1.0:
     define-property "^0.2.5"
     kind-of "^3.0.3"
 
-object-hash@1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/object-hash/-/object-hash-1.2.0.tgz#e96af0e96981996a1d47f88ead8f74f1ebc4422b"
-
 object-inspect@~1.4.0:
   version "1.4.1"
   resolved "https://registry.yarnpkg.com/object-inspect/-/object-inspect-1.4.1.tgz#37ffb10e71adaf3748d05f713b4c9452f402cbc4"
