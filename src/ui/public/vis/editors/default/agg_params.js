@@ -28,6 +28,29 @@ import { uiModules } from '../../../modules';
 import { documentationLinks } from '../../../documentation_links/documentation_links';
 import aggParamsTemplate from './agg_params.html';
 import { aggTypeFilters } from '../../../agg_types/filter';
+import { editorConfigProviders } from '../config/editor_config_providers';
+
+// TODO: This is just an example how to use this, and will be removed later.
+// editorConfigProviders.register((aggType, indexPattern, aggConfig) => {
+//   if (aggConfig.params.field && aggConfig.params.field.name === 'bytes') {
+//     return {
+//       'intervalBase': {
+//         fixedValue: 50
+//       },
+//       'interval': {
+//         base: 50
+//       }
+//     };
+//   }
+//   if (aggConfig.type && aggConfig.type.name === 'date_histogram') {
+//     return {
+//       'time_zone': {
+//         fixedValue: 'UTC'
+//       }
+//     };
+//   }
+//   return {};
+// });
 
 uiModules
   .get('app/visualize')
@@ -50,6 +73,28 @@ uiModules
         // We set up this watch prior to adding the controls below, because when the controls are added,
         // there is a possibility that the agg type can be automatically selected (if there is only one)
         $scope.$watch('agg.type', updateAggParamEditor);
+
+        function updateEditorConfig() {
+          $scope.editorConfig = editorConfigProviders.getConfigForAgg(
+            aggTypes.byType[$scope.groupName],
+            $scope.indexPattern,
+            $scope.agg
+          );
+
+          Object.keys($scope.editorConfig).forEach(param => {
+            const config = $scope.editorConfig[param];
+            // If the parameter has a fixed value in the config, set this value.
+            // Also for all supported configs we should freeze the editor for this param.
+            if (config.hasOwnProperty('fixedValue')) {
+              $scope.agg.params[param] = config.fixedValue;
+            }
+            // TODO: process more editor config?
+          });
+        }
+
+        $scope.$watchCollection('agg.params', updateEditorConfig);
+
+        updateEditorConfig();
 
         // this will contain the controls for the schema (rows or columns?), which are unrelated to
         // controls for the agg, which is why they are first
@@ -77,6 +122,7 @@ uiModules
         let $aggParamEditorsScope;
 
         function updateAggParamEditor() {
+          updateEditorConfig();
           $scope.aggHelpLink = null;
           if (_.has($scope, 'agg.type.name')) {
             $scope.aggHelpLink = _.get(documentationLinks, ['aggs', $scope.agg.type.name]);

@@ -14,7 +14,8 @@
     type="number"
     class="form-control"
     name="interval"
-    min="0"
+    min="{{editorConfig.interval.base || 0}}"
+    step="{{editorConfig.interval.base}}"
     input-number
     >
 </div>
