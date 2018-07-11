@@ -24,8 +24,10 @@ import { resolve } from 'path';
 
 import { fromRoot } from '../../utils';
 import { getConfig } from '../../server/path';
+import { Config } from '../../server/config/config';
 import { readYamlConfig } from './read_yaml_config';
 import { readKeystore } from './read_keystore';
+import { transformDeprecations } from '../../server/config/transform_deprecations';
 
 import { DEV_SSL_CERT_PATH, DEV_SSL_KEY_PATH } from '../dev_ssl';
 
@@ -236,10 +238,17 @@ export default function (program) {
       }
 
       process.on('SIGHUP', async function reloadConfig() {
-        const settings = getCurrentSettings();
+        const settings = transformDeprecations(getCurrentSettings());
+        const config = new Config(kbnServer.config.getSchema(), settings);
+
         kbnServer.server.log(['info', 'config'], 'Reloading logging configuration due to SIGHUP.');
-        await kbnServer.applyLoggingConfiguration(settings);
+        await kbnServer.applyLoggingConfiguration(config);
         kbnServer.server.log(['info', 'config'], 'Reloaded logging configuration due to SIGHUP.');
+
+        // If new platform config subscription is active, let's notify it with the updated config.
+        if (kbnServer.newPlatform) {
+          kbnServer.newPlatform.updateConfig(config);
+        }
       });
 
       return kbnServer;

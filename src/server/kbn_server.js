@@ -21,7 +21,6 @@ import { constant, once, compact, flatten } from 'lodash';
 import { fromNode } from 'bluebird';
 import { isWorker } from 'cluster';
 import { fromRoot, pkg } from '../utils';
-import { Config } from './config';
 import loggingConfiguration from './logging/configuration';
 import configSetupMixin from './config/setup';
 import httpMixin from './http';
@@ -40,6 +39,7 @@ import { kibanaIndexMappingsMixin } from './mappings';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
 import { sassMixin } from './sass';
+import { injectIntoKbnServer as newPlatformMixin } from '../core';
 
 const rootDir = fromRoot('.');
 
@@ -56,8 +56,12 @@ export default class KbnServer {
 
       // sets this.config, reads this.settings
       configSetupMixin,
+
+      newPlatformMixin,
+
       // sets this.server
       httpMixin,
+
       // adds methods for extending this.server
       serverExtensionsMixin,
       loggingMixin,
@@ -167,8 +171,7 @@ export default class KbnServer {
     return await this.server.inject(opts);
   }
 
-  async applyLoggingConfiguration(settings) {
-    const config = await Config.withDefaultSchema(settings);
+  async applyLoggingConfiguration(config) {
     const loggingOptions = loggingConfiguration(config);
     const subset = {
       ops: config.get('ops'),

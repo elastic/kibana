@@ -27,20 +27,38 @@ import { setupVersionCheck } from './version_check';
 import { handleShortUrlError } from './short_url_error';
 import { shortUrlAssertValid } from './short_url_assert_valid';
 import { shortUrlLookupProvider } from './short_url_lookup';
-import { setupConnection } from './setup_connection';
-import { setupRedirectServer } from './setup_redirect_server';
 import { registerHapiPlugins } from './register_hapi_plugins';
-import { setupBasePathRewrite } from './setup_base_path_rewrite';
 import { setupXsrf } from './xsrf';
 
 export default async function (kbnServer, server, config) {
-  server = kbnServer.server = new Hapi.Server();
+  kbnServer.server = new Hapi.Server();
+  server = kbnServer.server;
 
   const shortUrlLookup = shortUrlLookupProvider(server);
 
-  setupConnection(server, config);
-  setupBasePathRewrite(server, config);
-  await setupRedirectServer(config);
+  // Note that all connection options configured here should be exactly the same
+  // as in `getServerOptions()` in the new platform (see `src/core/server/http/http_tools`).
+  // Any change SHOULD BE applied in both places.
+  server.connection({
+    host: config.get('server.host'),
+    port: config.get('server.port'),
+    listener: kbnServer.newPlatform.proxyListener,
+    state: {
+      strictHeader: false,
+    },
+    routes: {
+      cors: config.get('server.cors'),
+      payload: {
+        maxBytes: config.get('server.maxPayloadBytes'),
+      },
+      validate: {
+        options: {
+          abortEarly: false,
+        },
+      },
+    },
+  });
+
   registerHapiPlugins(server);
 
   // provide a simple way to expose static directories
