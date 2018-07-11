@@ -66,6 +66,7 @@ export const histogramBucketAgg = new BucketAggType({
        */
       name: 'intervalBase',
       default: null,
+      write: () => {},
     },
     {
       name: 'interval',
