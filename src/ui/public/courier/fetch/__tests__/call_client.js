@@ -169,7 +169,7 @@ describe('callClient', () => {
       }).catch(error => done(error));
     });
 
-    it('while the search body is being formed resolves with an undefined response', done => {
+    it('while the search body is being formed resolves with an ABORTED response', done => {
       const searchRequest = createSearchRequest(1, {
         source: {
           _flatten: () => {
@@ -197,7 +197,7 @@ describe('callClient', () => {
       }).catch(error => done(error));
     });
 
-    it('while the search is in flight resolves with an undefined response', done => {
+    it('while the search is in flight resolves with an ABORTED response', done => {
       esRequestDelay = 100;
 
       const searchRequest = createSearchRequest();
@@ -217,7 +217,7 @@ describe('callClient', () => {
   });
 
   describe('aborting number of requests:', () => {
-    it(`aborting all searchRequests resolves with undefined responses`, done => {
+    it(`aborting all searchRequests resolves with ABORTED responses`, done => {
       const searchRequest1 = createSearchRequest();
       const searchRequest2 = createSearchRequest();
       searchRequests = [ searchRequest1, searchRequest2 ];
@@ -254,7 +254,7 @@ describe('callClient', () => {
       }).catch(error => done(error));
     });
 
-    it('aborting some searchRequests resolves with full responses', done => {
+    it('aborting some searchRequests resolves those with ABORTED responses', done => {
       const searchRequest1 = createSearchRequest(1);
       const searchRequest2 = createSearchRequest(2);
       searchRequests = [ searchRequest1, searchRequest2 ];
