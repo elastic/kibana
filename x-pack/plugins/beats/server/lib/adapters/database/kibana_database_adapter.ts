@@ -26,6 +26,8 @@ import {
 
 const InternalRequest: unique symbol = Symbol('InternalRequest');
 
+type RequestOrInternal = FrameworkRequest | typeof InternalRequest;
+
 export class KibanaDatabaseAdapter implements DatabaseAdapter {
   public readonly InternalRequest = InternalRequest;
 
@@ -35,7 +37,7 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
     this.es = kbnElasticSearch.getCluster('admin');
   }
   public async putTemplate(
-    req: FrameworkRequest | typeof InternalRequest,
+    req: RequestOrInternal,
     params: DatabasePutTemplateParams
   ): Promise<any> {
     const callES = this.getCallType(req);
@@ -44,7 +46,7 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
   }
 
   public async get<Source>(
-    req: FrameworkRequest | typeof InternalRequest,
+    req: RequestOrInternal,
     params: DatabaseGetParams
   ): Promise<DatabaseGetDocumentResponse<Source>> {
     const callES = this.getCallType(req);
@@ -54,7 +56,7 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
   }
 
   public async mget<T>(
-    req: FrameworkRequest | typeof InternalRequest,
+    req: RequestOrInternal,
     params: DatabaseMGetParams
   ): Promise<DatabaseMGetResponse<T>> {
     const callES = this.getCallType(req);
@@ -64,7 +66,7 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
   }
 
   public async bulk(
-    req: FrameworkRequest | typeof InternalRequest,
+    req: RequestOrInternal,
     params: DatabaseBulkIndexDocumentsParams
   ): Promise<any> {
     const callES = this.getCallType(req);
@@ -73,7 +75,7 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
   }
 
   public async create(
-    req: FrameworkRequest | typeof InternalRequest,
+    req: RequestOrInternal,
     params: DatabaseCreateDocumentParams
   ): Promise<DatabaseCreateDocumentResponse> {
     const callES = this.getCallType(req);
@@ -81,7 +83,7 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
     return result;
   }
   public async index<T>(
-    req: FrameworkRequest | typeof InternalRequest,
+    req: RequestOrInternal,
     params: DatabaseIndexDocumentParams<T>
   ): Promise<any> {
     const callES = this.getCallType(req);
@@ -89,7 +91,7 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
     return result;
   }
   public async delete(
-    req: FrameworkRequest | typeof InternalRequest,
+    req: RequestOrInternal,
     params: DatabaseDeleteDocumentParams
   ): Promise<DatabaseDeleteDocumentResponse> {
     const callES = this.getCallType(req);
@@ -98,7 +100,7 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
   }
 
   public async search<Source>(
-    req: FrameworkRequest | typeof InternalRequest,
+    req: RequestOrInternal,
     params: DatabaseSearchParams
   ): Promise<DatabaseSearchResponse<Source>> {
     const callES = this.getCallType(req);
@@ -106,7 +108,7 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
     return result;
   }
 
-  private getCallType(req: FrameworkRequest | typeof InternalRequest): any {
+  private getCallType(req: RequestOrInternal): any {
     if (req !== InternalRequest) {
       return this.es.callWithRequest.bind(null, req);
     } else {
