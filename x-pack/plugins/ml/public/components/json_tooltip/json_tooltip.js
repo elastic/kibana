@@ -26,7 +26,7 @@ const JsonTooltip = ({ id, position, text }) => (
       content={text}
       position={position}
     />
-    <span id={'ml_aria_description_' + id} className="ml-info-tooltip-text">{text}</span>
+    <span id={`ml_aria_description_${id}`} className="ml-info-tooltip-text">{text}</span>
   </span>
 );
 JsonTooltip.propTypes = {
