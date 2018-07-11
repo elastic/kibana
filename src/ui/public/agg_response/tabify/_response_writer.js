@@ -63,7 +63,8 @@ function TabbedAggResponseWriter(aggs, opts) {
   // to their aggConfig and enable the filterbar and tooltip formatters
   this.asAggConfigResults = !!this.opts.asAggConfigResults;
 
-  this.columns = tabifyGetColumns(aggs, this.minimalColumns);
+  this.aggs = aggs;
+  this.columns = tabifyGetColumns(aggs.getResponseAggs(), this.minimalColumns);
   this.aggStack = _.pluck(this.columns, 'aggConfig');
 
   this.root = new TabifyTableGroup();

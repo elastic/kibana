@@ -49,14 +49,18 @@ function parseParentAggs(dslLvlCursor, dsl) {
 class AggConfigs extends IndexedArray {
   constructor(vis, configStates = []) {
     configStates = AggConfig.ensureIds(configStates);
+
     super({
       index: ['id'],
       group: ['schema.group', 'type.name', 'schema.name'],
-      initialSet: configStates.map(function (aggConfigState) {
-        if (aggConfigState instanceof AggConfig) return aggConfigState;
-        return new AggConfig(vis, aggConfigState);
-      })
     });
+
+    this.push(...configStates.map(aggConfigState => {
+      if (aggConfigState instanceof AggConfig) {
+        return aggConfigState;
+      }
+      return new AggConfig(vis, aggConfigState, this);
+    }));
 
     this.vis = vis;
 
@@ -75,7 +79,7 @@ class AggConfigs extends IndexedArray {
             const defaults = schema.defaults.slice(0, schema.max);
             _.each(defaults, defaultState => {
               const state = _.defaults({ id: AggConfig.nextId(this) }, defaultState);
-              this.push(new AggConfig(vis, state));
+              this.push(new AggConfig(vis, state, this));
             });
           }
         })
@@ -111,17 +115,17 @@ class AggConfigs extends IndexedArray {
         .filter(function (agg) {
           return agg.type.name !== 'count';
         })
-        .map(function (agg) {
+        .map(agg => {
           return {
             config: agg,
-            dsl: agg.toDsl()
+            dsl: agg.toDsl(this)
           };
         })
         .value();
     }
     this.getRequestAggs()
       .filter(config => !config.type.hasNoDsl)
-      .forEach(function nestEachConfig(config, i, list) {
+      .forEach((config, i, list) => {
         if (!dslLvlCursor) {
         // start at the top level
           dslLvlCursor = dslTopLvl;
@@ -135,7 +139,7 @@ class AggConfigs extends IndexedArray {
           dslLvlCursor = prevDsl.aggs || dslLvlCursor;
         }
 
-        const dsl = dslLvlCursor[config.id] = config.toDsl();
+        const dsl = dslLvlCursor[config.id] = config.toDsl(this);
         let subAggs;
 
         parseParentAggs(dslLvlCursor, dsl);
@@ -146,7 +150,7 @@ class AggConfigs extends IndexedArray {
         }
 
         if (subAggs && nestedMetrics) {
-          nestedMetrics.forEach(function (agg) {
+          nestedMetrics.forEach(agg => {
             subAggs[agg.config.id] = agg.dsl;
           });
         }
