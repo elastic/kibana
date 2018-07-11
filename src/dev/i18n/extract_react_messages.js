@@ -17,7 +17,7 @@
  * under the License.
 */
 
-import { isJSXAttribute, isJSXIdentifier, isObjectExpression, isStringLiteral } from '@babel/types';
+import { isJSXIdentifier, isObjectExpression, isStringLiteral } from '@babel/types';
 
 import { isPropertyWithKey, escapeLineBreak } from './utils';
 import { DEFAULT_MESSAGE_KEY, CONTEXT_KEY } from './constants';
@@ -58,27 +58,23 @@ export function extractIntlMessages(node) {
     throw new Error('Object with defaultMessage property is not passed to intl.formatMessage().');
   }
 
-  let messageId;
-  let message;
-  let context;
+  const [messageIdProperty, messageProperty, contextProperty] = [
+    'id',
+    DEFAULT_MESSAGE_KEY,
+    CONTEXT_KEY,
+  ].map(key => options.properties.find(property => isPropertyWithKey(property, key)));
 
-  for (const property of options.properties) {
-    if (isPropertyWithKey(property, 'id')) {
-      messageId = extractMessageId(property.value);
-    } else if (isPropertyWithKey(property, DEFAULT_MESSAGE_KEY)) {
-      message = extractMessageValue(property.value, messageId);
-    } else if (isPropertyWithKey(property, CONTEXT_KEY)) {
-      context = extractContextValue(property.value, messageId);
-    }
-  }
-
+  const messageId = messageIdProperty ? extractMessageId(messageIdProperty.value) : null;
   if (!messageId) {
     throw new Error('Empty "id" value in intl.formatMessage() is not allowed.');
   }
 
+  const message = messageProperty ? extractMessageValue(messageProperty.value, messageId) : null;
   if (!message) {
     throw new Error(`Default message is required for id: ${messageId}.`);
   }
+
+  const context = contextProperty ? extractContextValue(contextProperty.value, messageId) : null;
 
   return [messageId, { message, context }];
 }
@@ -89,31 +85,23 @@ export function extractIntlMessages(node) {
  * @returns {[string, string][]} Array of id-message tuples
  */
 export function extractFormattedMessages(node) {
-  let messageId;
-  let message;
-  let context;
+  const [messageIdProperty, messageProperty, contextProperty] = [
+    'id',
+    DEFAULT_MESSAGE_KEY,
+    CONTEXT_KEY,
+  ].map(key => node.attributes.find(attribute => isJSXIdentifier(attribute.name, { name: key })));
 
-  for (const attribute of node.attributes) {
-    if (!isJSXAttribute(attribute)) {
-      continue;
-    }
-
-    if (isJSXIdentifier(attribute.name, { name: 'id' })) {
-      messageId = extractMessageId(attribute.value);
-    } else if (isJSXIdentifier(attribute.name, { name: DEFAULT_MESSAGE_KEY })) {
-      message = extractMessageValue(attribute.value, messageId);
-    } else if (isJSXIdentifier(attribute.name, { name: CONTEXT_KEY })) {
-      context = extractContextValue(attribute.value, messageId);
-    }
-  }
-
+  const messageId = messageIdProperty ? extractMessageId(messageIdProperty.value) : null;
   if (!messageId) {
     throw new Error('Empty "id" value in <FormattedMessage> is not allowed.');
   }
 
+  const message = messageProperty ? extractMessageValue(messageProperty.value, messageId) : null;
   if (!message) {
     throw new Error(`Default message is required for id: ${messageId}.`);
   }
+
+  const context = contextProperty ? extractContextValue(contextProperty.value, messageId) : null;
 
   return [messageId, { message, context }];
 }

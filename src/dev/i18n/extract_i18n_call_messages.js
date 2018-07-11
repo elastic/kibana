@@ -36,32 +36,34 @@ export function extractI18nCallMessages(node) {
   let message;
   let context;
 
-  try {
-    if (!isObjectExpression(optionsSubTree)) {
-      throw 'Object with defaultMessage property is not provided.';
-    }
+  if (!isObjectExpression(optionsSubTree)) {
+    throw new Error(
+      `Cannot parse "${messageId}" message: object with defaultMessage property is not provided.`
+    );
+  }
 
-    for (const prop of optionsSubTree.properties) {
-      if (isPropertyWithKey(prop, DEFAULT_MESSAGE_KEY)) {
-        if (!isStringLiteral(prop.value)) {
-          throw 'defaultMessage value should be a string literal.';
-        }
-
-        message = escapeLineBreak(prop.value.value);
-      } else if (isPropertyWithKey(prop, CONTEXT_KEY)) {
-        if (!isStringLiteral(prop.value)) {
-          throw 'context value should be a string literal.';
-        }
-
-        context = escapeLineBreak(prop.value.value);
+  for (const prop of optionsSubTree.properties) {
+    if (isPropertyWithKey(prop, DEFAULT_MESSAGE_KEY)) {
+      if (!isStringLiteral(prop.value)) {
+        throw new Error(
+          `Cannot parse "${messageId}" message: defaultMessage value should be a string literal.`
+        );
       }
-    }
 
-    if (!message) {
-      throw 'defaultMessage is required';
+      message = escapeLineBreak(prop.value.value);
+    } else if (isPropertyWithKey(prop, CONTEXT_KEY)) {
+      if (!isStringLiteral(prop.value)) {
+        throw new Error(
+          `Cannot parse "${messageId}" message: context value should be a string literal.`
+        );
+      }
+
+      context = escapeLineBreak(prop.value.value);
     }
-  } catch (errorMessage) {
-    throw new Error(`Cannot parse message with id: ${messageId}.\n${errorMessage}`);
+  }
+
+  if (!message) {
+    throw new Error(`Cannot parse "${messageId}" message: defaultMessage is required`);
   }
 
   return [messageId, { message, context }];

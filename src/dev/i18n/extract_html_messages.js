@@ -66,6 +66,8 @@ function parseFilterObjectExpression(expression) {
 
     return { message, context };
   }
+
+  return null;
 }
 
 function parseIdExpression(expression) {
@@ -74,6 +76,8 @@ function parseIdExpression(expression) {
       return node.value;
     }
   }
+
+  return null;
 }
 
 function trimCurlyBraces(string) {
@@ -100,17 +104,13 @@ function* getFilterMessages(htmlContent) {
       throw new Error('Empty "id" value in angular filter expression is not allowed.');
     }
 
-    try {
-      const { message, context } = parseFilterObjectExpression(filterObjectExpression);
+    const { message, context } = parseFilterObjectExpression(filterObjectExpression) || {};
 
-      if (!message) {
-        throw new Error(`Default message is required for id: ${messageId}.`);
-      }
-
-      yield [messageId, { message, context }];
-    } catch (error) {
-      throw new Error(`Cannot parse message with id: ${messageId}.\n${error.message || error}`);
+    if (!message) {
+      throw new Error(`Cannot parse "${messageId}" message: default message is required`);
     }
+
+    yield [messageId, { message, context }];
   }
 }
 
@@ -127,7 +127,7 @@ function* getDirectiveMessages(htmlContent) {
 
     const message = element.getAttribute('i18n-default-message');
     if (!message) {
-      throw new Error(`Default message is required for id: ${messageId}.`);
+      throw new Error(`Cannot parse "${messageId}" message: default message is required.`);
     }
 
     const context = element.getAttribute('i18n-context');

@@ -62,7 +62,12 @@ export function escapeLineBreak(string) {
 }
 
 /**
- * Workaround of @babel/traverse typescript bug: https://github.com/babel/babel/issues/8262
+ * Traverse an array of nodes using default depth-first traversal algorithm.
+ * We don't use `@babel/traverse` because of its bug: https://github.com/babel/babel/issues/8262
+ *
+ * @generator
+ * @param {object[]} nodes array of nodes or objects with Node values
+ * @yields {Node} each node
  */
 export function* traverseNodes(nodes) {
   for (const node of nodes) {

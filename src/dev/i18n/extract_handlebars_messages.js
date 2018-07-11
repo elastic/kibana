@@ -43,27 +43,27 @@ export function* extractHandlebarsMessages(buffer) {
 
     const messageId = idString.slice(1, -1);
 
-    try {
-      if (!propertiesString.startsWith(`'`) || !propertiesString.endsWith(`'`)) {
-        throw 'Properties string should be a string literal.';
-      }
-
-      const properties = JSON.parse(propertiesString.slice(1, -1));
-      const message = properties.defaultMessage;
-
-      if (typeof message !== 'string') {
-        throw 'defaultMessage value should be a string.';
-      }
-
-      const context = properties.context;
-
-      if (context != null && typeof context !== 'string') {
-        throw 'context value should be a string.';
-      }
-
-      yield [messageId, { message, context }];
-    } catch (errorMessage) {
-      throw new Error(`Cannot parse message with id: ${messageId}.\n${errorMessage}`);
+    if (!propertiesString.startsWith(`'`) || !propertiesString.endsWith(`'`)) {
+      throw new Error(
+        `Cannot parse "${messageId}" message: properties string should be a string literal.`
+      );
     }
+
+    const properties = JSON.parse(propertiesString.slice(1, -1));
+    const message = properties.defaultMessage;
+
+    if (typeof message !== 'string') {
+      throw new Error(
+        `Cannot parse "${messageId}" message: defaultMessage value should be a string.`
+      );
+    }
+
+    const context = properties.context;
+
+    if (context != null && typeof context !== 'string') {
+      throw new Error(`Cannot parse "${messageId}" message: context value should be a string.`);
+    }
+
+    yield [messageId, { message, context }];
   }
 }
