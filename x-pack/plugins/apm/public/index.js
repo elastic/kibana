@@ -27,10 +27,9 @@ import LicenseChecker from './components/app/Main/LicenseChecker';
 import { history } from './utils/url';
 
 chrome.setRootTemplate(template);
-
 const store = configureStore();
 
-initTimepicker(history, store.dispatch, () => {
+initTimepicker(history, store.dispatch).then(() => {
   ReactDOM.render(
     <Router history={history}>
       <Breadcrumbs />

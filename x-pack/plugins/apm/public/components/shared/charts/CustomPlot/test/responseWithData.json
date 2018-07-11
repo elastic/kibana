@@ -131,7 +131,8 @@
       2547299.079999993,
       4586742.89999998,
       0
-    ]
+    ],
+    "avgAnomalies": {}
   },
   "tpmBuckets": [
     {
@@ -283,6 +284,6 @@
       ]
     }
   ],
-  "weightedAverage": 467582.45401459857,
+  "overallAvgDuration": 467582.45401459857,
   "totalHits": 999
 }
