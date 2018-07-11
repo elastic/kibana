@@ -30,7 +30,7 @@ export const contractTests = (testName: string, config: ContractConfig) => {
     it('Should inject template into ES', async () => {
       try {
         await database.putTemplate(database.InternalRequest, {
-          id: 'beats-template',
+          name: 'beats-template',
           body: beatsIndexTemplate,
         });
       } catch (e) {

@@ -17,23 +17,18 @@ import { KibanaBackendFrameworkAdapter } from '../kibana_framework_adapter';
 import { contractTests } from './test_contract';
 
 const kbnServer = kbnTestServer.createServerWithCorePlugins();
-const es = createEsTestCluster({});
 
 contractTests('Kibana  Framework Adapter', {
   before: async () => {
-    await es.start();
     await kbnServer.ready();
 
     const config = kbnServer.server.config();
     config.extendSchema(beatsPluginConfig, {}, configPrefix);
 
     config.set('xpack.beats.encryptionKey', 'foo');
-
-    return await kbnServer.server.plugins.elasticsearch.waitUntilReady();
   },
   after: async () => {
     await kbnServer.close();
-    return await es.cleanup();
   },
   adapterSetup: () => {
     return new KibanaBackendFrameworkAdapter(kbnServer.server);
