@@ -114,4 +114,13 @@ describe('kfetch', () => {
       });
     });
   });
+
+  describe('isAbortable', () => {
+    it('should return an object with a fetching promise and an abort callback', () => {
+      const { fetching, abort } = kfetch({ pathname: 'my/path' }, {}, true);
+      expect(typeof fetching.then).toBe('function');
+      expect(typeof fetching.catch).toBe('function');
+      expect(typeof abort).toBe('function');
+    });
+  });
 });

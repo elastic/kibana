@@ -31,7 +31,16 @@ class FetchError extends Error {
   }
 }
 
-export async function kfetch(fetchOptions, kibanaOptions) {
+export function kfetch(fetchOptions, kibanaOptions, isAbortable = false) {
+  let signal;
+  let abort;
+
+  if (isAbortable) {
+    const abortController = new AbortController();
+    signal = abortController.signal;
+    abort = abortController.abort.bind(abortController);
+  }
+
   // fetch specific options with defaults
   const { pathname, query, ...combinedFetchOptions } = merge(
     {
@@ -41,8 +50,9 @@ export async function kfetch(fetchOptions, kibanaOptions) {
         'Content-Type': 'application/json',
         'kbn-version': metadata.version,
       },
+      signal,
     },
-    fetchOptions
+    fetchOptions,
   );
 
   // kibana specific options with defaults
@@ -56,11 +66,22 @@ export async function kfetch(fetchOptions, kibanaOptions) {
     query,
   });
 
-  const res = await fetch(fullUrl, combinedFetchOptions);
+  const fetching = new Promise(async (resolve, reject) => {
+    const res = await fetch(fullUrl, combinedFetchOptions);
 
-  if (!res.ok) {
-    throw new FetchError(res);
+    if (!res.ok) {
+      reject(new FetchError(res));
+    }
+
+    resolve(res.json());
+  });
+
+  if (isAbortable) {
+    return {
+      fetching,
+      abort,
+    };
   }
 
-  return res.json();
+  return fetching;
 }
