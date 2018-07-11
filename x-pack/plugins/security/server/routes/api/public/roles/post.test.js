@@ -20,7 +20,7 @@ const defaultPreCheckLicenseImpl = (request, reply) => reply();
 
 const postRoleTest = (
   description,
-  { name, payload, preCheckLicenseImpl, asserts }
+  { name, payload, preCheckLicenseImpl, callWithRequestImpls = [], asserts }
 ) => {
   test(description, async () => {
     const mockServer = createMockServer();
@@ -28,6 +28,9 @@ const postRoleTest = (
       .fn()
       .mockImplementation(preCheckLicenseImpl);
     const mockCallWithRequest = jest.fn();
+    for (const impl of callWithRequestImpls) {
+      mockCallWithRequest.mockImplementationOnce(impl);
+    }
     initPostRolesApi(
       mockServer,
       mockCallWithRequest,
@@ -46,14 +49,27 @@ const postRoleTest = (
     };
     const { result, statusCode } = await mockServer.inject(request);
 
+    expect(result).toEqual(asserts.result);
+    expect(statusCode).toBe(asserts.statusCode);
     if (preCheckLicenseImpl) {
       expect(mockPreCheckLicense).toHaveBeenCalled();
     } else {
       expect(mockPreCheckLicense).not.toHaveBeenCalled();
     }
-    expect(mockCallWithRequest).not.toHaveBeenCalled();
-    expect(statusCode).toBe(asserts.statusCode);
-    expect(result).toEqual(asserts.result);
+    if (asserts.callWithRequests) {
+      for (const args of asserts.callWithRequests) {
+        expect(mockCallWithRequest).toHaveBeenCalledWith(
+          expect.objectContaining({
+            headers: expect.objectContaining({
+              authorization: headers.authorization,
+            }),
+          }),
+          ...args
+        );
+      }
+    } else {
+      expect(mockCallWithRequest).not.toHaveBeenCalled();
+    }
   });
 };
 
@@ -81,9 +97,9 @@ describe('POST role', () => {
           message: `child "name" fails because ["name" length must be less than or equal to 1024 characters long]`,
           statusCode: 400,
           validation: {
-            keys: ["name"],
-            source: 'params'
-          }
+            keys: ['name'],
+            source: 'params',
+          },
         },
       },
     });
@@ -100,6 +116,110 @@ describe('POST role', () => {
           statusCode: 403,
           message: 'test forbidden message',
         },
+      },
+    });
+  });
+
+  describe('success', () => {
+    postRoleTest(`creates empty role`, {
+      name: 'foo-role',
+      payload: {},
+      preCheckLicenseImpl: defaultPreCheckLicenseImpl,
+      callWithRequestImpls: [async () => ({}), async () => {}],
+      asserts: {
+        callWithRequests: [
+          ['shield.getRole', { name: 'foo-role', ignore: [404] }],
+          [
+            'shield.putRole',
+            {
+              name: 'foo-role',
+              body: {
+                cluster: [],
+                indices: [],
+                run_as: [],
+                applications: [],
+              },
+            },
+          ],
+        ],
+        statusCode: 200,
+        result: null,
+      },
+    });
+
+    postRoleTest(`creates role with everything`, {
+      name: 'foo-role',
+      payload: {
+        metadata: {
+          foo: 'test-metadata',
+        },
+        transient_metadata: {
+          quz: true,
+        },
+        elasticsearch: {
+          cluster: ['test-cluster-privilege'],
+          indices: [
+            {
+              names: ['test-index-name-1', 'test-index-name-2'],
+              privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
+            },
+          ],
+          run_as: ['test-run-as-1', 'test-run-as-2'],
+        },
+        kibana: [
+          {
+            privileges: ['test-kibana-privilege-1', 'test-kibana-privilege-2'],
+          },
+          {
+            privileges: ['test-kibana-privilege-3'],
+          },
+        ],
+      },
+      preCheckLicenseImpl: defaultPreCheckLicenseImpl,
+      callWithRequestImpls: [async () => ({}), async () => {}],
+      asserts: {
+        callWithRequests: [
+          ['shield.getRole', { name: 'foo-role', ignore: [404] }],
+          [
+            'shield.putRole',
+            {
+              name: 'foo-role',
+              body: {
+                applications: [
+                  {
+                    application,
+                    privileges: [
+                      'test-kibana-privilege-1',
+                      'test-kibana-privilege-2',
+                    ],
+                    resources: ['*'],
+                  },
+                  {
+                    application,
+                    privileges: ['test-kibana-privilege-3'],
+                    resources: ['*'],
+                  },
+                ],
+                cluster: ['test-cluster-privilege'],
+                indices: [
+                  {
+                    names: ['test-index-name-1', 'test-index-name-2'],
+                    privileges: [
+                      'test-index-privilege-1',
+                      'test-index-privilege-2',
+                    ],
+                  },
+                ],
+                metadata: { foo: 'test-metadata' },
+                run_as: ['test-run-as-1', 'test-run-as-2'],
+                transient_metadata: { quz: true },
+              },
+              name: 'foo-role',
+            },
+          ],
+        ],
+        statusCode: 200,
+        result: null,
       },
     });
   });

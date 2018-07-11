@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
-import { wrapError } from '../../../../lib/errors';
+import { pick, identity } from 'lodash';
 import Joi from 'joi';
+import { ALL_RESOURCE } from '../../../../../common/constants';
+import { wrapError } from '../../../../lib/errors';
 
 export const schema = Joi.object().keys({
   metadata: Joi.object().optional(),
@@ -17,10 +18,10 @@ export const schema = Joi.object().keys({
       names: Joi.array().items(Joi.string()),
       field_security: Joi.object().keys({
         grant: Joi.array().items(Joi.string()),
-        except: Joi.array().items(Joi.string())
+        except: Joi.array().items(Joi.string()),
       }),
       privileges: Joi.array().items(Joi.string()),
-      query: Joi.string().allow('')
+      query: Joi.string().allow(''),
     }),
     run_as: Joi.array().items(Joi.string()),
   }),
@@ -29,29 +30,81 @@ export const schema = Joi.object().keys({
   }),
 });
 
-const transformRolesToEs = (payload) => {
-  return payload;
+const transformKibanaPrivilegeToEs = (application, kibanaPrivilege) => {
+  return {
+    privileges: kibanaPrivilege.privileges,
+    application,
+    resources: [ALL_RESOURCE],
+  };
 };
 
-export function initPostRolesApi(server, callWithRequest, routePreCheckLicenseFn, application) {
+const transformRolesToEs = (
+  application,
+  payload,
+  existingApplications = []
+) => {
+  const { elasticsearch = {}, kibana = [] } = payload;
+  const otherApplications = existingApplications.filter(
+    roleApplication => roleApplication.application !== application
+  );
+
+  return pick({
+    metadata: payload.metadata,
+    transient_metadata: payload.transient_metadata,
+    cluster: elasticsearch.cluster || [],
+    indices: elasticsearch.indices || [],
+    run_as: elasticsearch.run_as || [],
+    applications: [
+      ...otherApplications,
+      ...kibana.map(kibanaPrivilege =>
+        transformKibanaPrivilegeToEs(application, kibanaPrivilege)
+      ),
+    ],
+  }, identity);
+};
+
+export function initPostRolesApi(
+  server,
+  callWithRequest,
+  routePreCheckLicenseFn,
+  application
+) {
   server.route({
     method: 'POST',
     path: '/api/security/roles/{name}',
-    handler(request, reply) {
+    async handler(request, reply) {
       const name = request.params.name;
-      const body = transformRolesToEs(request.payload);
-      return callWithRequest(request, 'shield.putRole', { name, body }).then(
-        () => reply(request.payload),
-        _.flow(wrapError, reply));
+      try {
+        const role = await callWithRequest(request, 'shield.getRole', {
+          name,
+          ignore: [404],
+        });
+
+        const body = transformRolesToEs(
+          application,
+          request.payload,
+          role.application
+        );
+
+        await callWithRequest(request, 'shield.putRole', { name, body });
+        reply();
+      } catch (err) {
+        reply(wrapError(err));
+      }
     },
     config: {
       validate: {
-        params: Joi.object().keys({
-          name: Joi.string().required().min(1).max(1024),
-        }).required(),
+        params: Joi.object()
+          .keys({
+            name: Joi.string()
+              .required()
+              .min(1)
+              .max(1024),
+          })
+          .required(),
         payload: schema,
       },
-      pre: [routePreCheckLicenseFn]
-    }
+      pre: [routePreCheckLicenseFn],
+    },
   });
 }
