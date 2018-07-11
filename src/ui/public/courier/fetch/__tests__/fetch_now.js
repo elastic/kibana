@@ -26,6 +26,18 @@ import { CallResponseHandlersProvider } from '../call_response_handlers';
 import { ContinueIncompleteProvider } from '../continue_incomplete';
 import { FetchNowProvider } from '../fetch_now';
 
+function mockRequest() {
+  return {
+    strategy: 'mock',
+    started: true,
+    aborted: false,
+    handleFailure: sinon.spy(),
+    retry: sinon.spy(function () { return this; }),
+    continue: sinon.spy(function () { return this; }),
+    start: sinon.spy(function () { return this; })
+  };
+}
+
 describe('FetchNowProvider', () => {
 
   let Promise;
@@ -107,16 +119,4 @@ describe('FetchNowProvider', () => {
       sinon.assert.calledWith(request.handleFailure, 'some error');
     });
   });
-
-  function mockRequest() {
-    return {
-      strategy: 'mock',
-      started: true,
-      aborted: false,
-      handleFailure: sinon.spy(),
-      retry: sinon.spy(function () { return this; }),
-      continue: sinon.spy(function () { return this; }),
-      start: sinon.spy(function () { return this; })
-    };
-  }
 });
