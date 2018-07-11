@@ -11,16 +11,30 @@ import {
   KuiToolBarText
 } from '@kbn/ui-framework/components';
 
-export function MonitoringTableFooter({ pageIndexFirstRow, pageIndexLastRow, rowsFiltered, paginationControls }) {
+export function MonitoringTableFooter({
+  pageIndexFirstRow,
+  pageIndexLastRow,
+  rowsFiltered,
+  paginationControls,
+  rows,
+  showPaginationControls
+}) {
+  const paginationSection = showPaginationControls ? (
+    <KuiToolBarFooterSection>
+      <KuiToolBarText>
+        { pageIndexFirstRow } &ndash; { pageIndexLastRow } of { rowsFiltered }
+      </KuiToolBarText>
+      { paginationControls }
+    </KuiToolBarFooterSection>
+  ) : null;
+
   return (
     <KuiToolBarFooter>
-      <KuiToolBarFooterSection>
-        <KuiToolBarText>
-          { pageIndexFirstRow } &ndash; { pageIndexLastRow } of { rowsFiltered }
-        </KuiToolBarText>
+      <p tabIndex="0">
+        Showing {rows.length} {rows.length === 1 ? 'item' : 'items'}
+      </p>
 
-        { paginationControls }
-      </KuiToolBarFooterSection>
+      { paginationSection }
     </KuiToolBarFooter>
   );
 }
