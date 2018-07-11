@@ -8,9 +8,8 @@ import _ from 'lodash';
 import { wrapError } from '../../../../lib/errors';
 import Joi from 'joi';
 
-export const schema = {
-  name: Joi.string().required(),
-  metadata: Joi.object(),
+export const schema = Joi.object().keys({
+  metadata: Joi.object().optional(),
   transient_metadata: Joi.object(),
   elasticsearch: Joi.object().keys({
     cluster: Joi.array().items(Joi.string()),
@@ -25,9 +24,13 @@ export const schema = {
     }),
     run_as: Joi.array().items(Joi.string()),
   }),
-  kibana: Joi.array.items({
+  kibana: Joi.array().items({
     privileges: Joi.array().items(Joi.string()),
   }),
+});
+
+const transformRolesToEs = (payload) => {
+  return payload;
 };
 
 export function initPostRolesApi(server, callWithRequest, routePreCheckLicenseFn, application) {
@@ -36,13 +39,16 @@ export function initPostRolesApi(server, callWithRequest, routePreCheckLicenseFn
     path: '/api/security/roles/{name}',
     handler(request, reply) {
       const name = request.params.name;
-      const body = _.omit(request.payload, 'name');
+      const body = transformRolesToEs(request.payload);
       return callWithRequest(request, 'shield.putRole', { name, body }).then(
         () => reply(request.payload),
         _.flow(wrapError, reply));
     },
     config: {
       validate: {
+        params: Joi.object().keys({
+          name: Joi.string().required().min(1).max(1024),
+        }).required(),
         payload: schema,
       },
       pre: [routePreCheckLicenseFn]
