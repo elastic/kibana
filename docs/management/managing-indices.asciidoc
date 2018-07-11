@@ -8,8 +8,10 @@ and closing or deleting indices. The UI provides a convenient way to
 perform bulk operations on multiple indices.
 
 To open the UI, select *Management > Index Management*. To view the data,
-you must have the privileges necessary to monitor the {es} cluster and {kib} indices.  
-For more information, see <<using-kibana-with-security>>.
+you must have the `view_index_metadata` and `manage` index privileges and
+the `monitor` cluster privilege.  See 
+{xpack-ref}/security-privileges.html[Security Privileges] for more
+information.
 
 [role="screenshot"]
 image::images/management-index-management.png[Index Management UI]
