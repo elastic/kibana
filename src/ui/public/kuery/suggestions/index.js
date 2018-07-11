@@ -17,39 +17,16 @@
  * under the License.
  */
 
-import { flatten, mapValues, uniq } from 'lodash';
-import { fromKueryExpression } from '../ast';
-import { getSuggestionsProvider as field } from './field';
-import { getSuggestionsProvider as value } from './value';
-import { getSuggestionsProvider as operator } from './operator';
-import { getSuggestionsProvider as conjunction } from './conjunction';
+let suggestionsProvider = () => returnEmptyList;
 
-const cursorSymbol = '@kuery-cursor@';
-
-export function getSuggestionsProvider({ config, indexPatterns, boolFilter }) {
-  const getSuggestionsByType = mapValues({ field, value, operator, conjunction }, provider => {
-    return provider({ config, indexPatterns, boolFilter });
-  });
-
-  return function getSuggestions({ query, selectionStart, selectionEnd }) {
-    const cursoredQuery = `${query.substr(0, selectionStart)}${cursorSymbol}${query.substr(selectionEnd)}`;
-
-    let cursorNode;
-    try {
-      cursorNode = fromKueryExpression(cursoredQuery, { cursorSymbol, parseCursor: true });
-    } catch (e) {
-      cursorNode = {};
-    }
-
-    const { suggestionTypes = [] } = cursorNode;
-    const suggestionsByType = suggestionTypes.map(type => {
-      return getSuggestionsByType[type](cursorNode);
-    });
-    return Promise.all(suggestionsByType)
-      .then(suggestionsByType => dedup(flatten(suggestionsByType)));
-  };
+function returnEmptyList() {
+  return [];
 }
 
-function dedup(suggestions) {
-  return uniq(suggestions, ({ type, text, start, end }) => [type, text, start, end].join('|'));
+export function setProvider(provider) {
+  suggestionsProvider = provider;
+}
+
+export function getSuggestionsProvider(...args) {
+  return suggestionsProvider(...args);
 }
