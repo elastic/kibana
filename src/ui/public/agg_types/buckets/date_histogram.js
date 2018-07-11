@@ -121,7 +121,7 @@ export const dateHistogramBucketAgg = new BucketAggType({
         setBounds(agg, true);
       },
       write: function (agg, output) {
-        setBounds(agg);
+        setBounds(agg, true);
         agg.buckets.setInterval(getInterval(agg));
 
         const interval = agg.buckets.getInterval();
