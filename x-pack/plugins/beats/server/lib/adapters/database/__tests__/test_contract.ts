@@ -15,7 +15,7 @@ interface ContractConfig {
 
 export const contractTests = (testName: string, config: ContractConfig) => {
   describe(testName, () => {
-    let frameworkAdapter: DatabaseAdapter;
+    let database: DatabaseAdapter;
     beforeAll(async () => {
       jest.setTimeout(100000); // 1 second
 
@@ -25,12 +25,12 @@ export const contractTests = (testName: string, config: ContractConfig) => {
     });
     afterAll(async () => config.after && (await config.after()));
     beforeEach(async () => {
-      frameworkAdapter = config.adapterSetup();
+      database = config.adapterSetup();
     });
 
     it('Should inject template into ES', async () => {
       try {
-        await frameworkAdapter.putTemplate(null, {
+        await database.putTemplate(database.InternalRequest, {
           id: 'beats-template',
           body: beatsIndexTemplate,
         });
@@ -46,7 +46,7 @@ export const contractTests = (testName: string, config: ContractConfig) => {
         index: '.management-beats',
         type: '_doc',
       };
-      const response = await frameworkAdapter.get(null, params);
+      const response = await database.get(database.InternalRequest, params);
 
       expect(response).to.not.eql(undefined);
       // @ts-ignore

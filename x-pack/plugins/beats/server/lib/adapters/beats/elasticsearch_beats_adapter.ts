@@ -27,7 +27,10 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       type: '_doc',
     };
 
-    const response = await this.database.get(null, params);
+    const response = await this.database.get(
+      this.database.InternalRequest,
+      params
+    );
     if (!response.found) {
       return null;
     }
@@ -41,7 +44,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       type: 'beat',
     };
 
-    await this.database.create(null, {
+    await this.database.create(this.database.InternalRequest, {
       body,
       id: `beat:${beat.id}`,
       index: INDEX_NAMES.BEATS,
@@ -63,7 +66,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       refresh: 'wait_for',
       type: '_doc',
     };
-    await this.database.index(null, params);
+    await this.database.index(this.database.InternalRequest, params);
   }
 
   public async getWithIds(req: FrameworkRequest, beatIds: string[]) {
