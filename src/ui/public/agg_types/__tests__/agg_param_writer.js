@@ -124,7 +124,7 @@ export default function AggParamWriterHelper(Private) {
       return aggConfig.type === self.aggType;
     });
 
-    return aggConfig.type.params.write(aggConfig);
+    return aggConfig.type.params.write(aggConfig, self.vis.aggs);
   };
 
   return AggParamWriter;
