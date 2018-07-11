@@ -5,7 +5,7 @@
  */
 
 import { CMBeat } from '../../../../common/domain_types';
-import { FrameworkRequest } from '../famework/adapter_types';
+import { FrameworkRequest } from '../framework/adapter_types';
 
 // FIXME: fix getBeatsWithIds return type
 export interface CMBeatsAdapter {

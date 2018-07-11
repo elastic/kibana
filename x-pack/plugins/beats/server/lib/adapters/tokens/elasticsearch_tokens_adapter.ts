@@ -7,7 +7,7 @@
 import { flatten, get } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { DatabaseAdapter } from '../database/adapter_types';
-import { FrameworkRequest } from '../famework/adapter_types';
+import { FrameworkRequest } from '../framework/adapter_types';
 import { CMTokensAdapter, TokenEnrollmentData } from './adapter_types';
 
 export class ElasticsearchTokensAdapter implements CMTokensAdapter {

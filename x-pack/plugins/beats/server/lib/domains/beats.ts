@@ -12,7 +12,7 @@ import {
   BeatsTagAssignment,
   CMBeatsAdapter,
 } from '../adapters/beats/adapter_types';
-import { FrameworkRequest } from '../adapters/famework/adapter_types';
+import { FrameworkRequest } from '../adapters/framework/adapter_types';
 
 import { CMAssignmentReturn } from '../adapters/beats/adapter_types';
 import { CMDomainLibs } from '../lib';
