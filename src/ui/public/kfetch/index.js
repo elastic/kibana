@@ -24,9 +24,10 @@ import { metadata } from '../metadata';
 import { merge } from 'lodash';
 
 class FetchError extends Error {
-  constructor(res) {
+  constructor(res, body) {
     super(res.statusText);
     this.res = res;
+    this.body = body;
     Error.captureStackTrace(this, FetchError);
   }
 }
@@ -70,7 +71,13 @@ export function kfetch(fetchOptions, kibanaOptions, isAbortable = false) {
     const res = await fetch(fullUrl, combinedFetchOptions);
 
     if (!res.ok) {
-      reject(new FetchError(res));
+      let body;
+      try {
+        body = await res.json();
+      } catch (err) {
+        // ignore error, may not be able to get body for response that is not ok
+      }
+      reject(new FetchError(res, body));
     }
 
     resolve(res.json());
