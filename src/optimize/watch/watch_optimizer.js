@@ -36,6 +36,7 @@ export default class WatchOptimizer extends BaseOptimizer {
     super(opts);
     this.log = opts.log || (() => null);
     this.prebuild = opts.prebuild || false;
+    this.cacheState = opts.cacheState;
     this.status$ = new Rx.ReplaySubject(1);
   }
 
@@ -46,6 +47,7 @@ export default class WatchOptimizer extends BaseOptimizer {
     // log status changes
     this.status$.subscribe(this.onStatusChangeHandler);
 
+    await this.cacheState.maybeResetCache();
     await this.uiBundles.writeEntryFiles();
     await this.uiBundles.ensureStyleFiles();
 
@@ -138,6 +140,7 @@ export default class WatchOptimizer extends BaseOptimizer {
   onStatusChangeHandler = ({ type, seconds, error }) => {
     switch (type) {
       case STATUS.RUNNING:
+        this.cacheState.markInUse();
         if (!this.initialBuildComplete) {
           this.log(['info', 'optimize'], {
             tmpl: 'Optimization started',
@@ -147,6 +150,7 @@ export default class WatchOptimizer extends BaseOptimizer {
         break;
 
       case STATUS.SUCCESS:
+        this.cacheState.markNotInUse();
         this.log(['info', 'optimize'], {
           tmpl: 'Optimization <%= status %> in <%= seconds %> seconds',
           bundles: this.uiBundles.getIds(),
@@ -156,6 +160,7 @@ export default class WatchOptimizer extends BaseOptimizer {
         break;
 
       case STATUS.FAILURE:
+        this.cacheState.markNotInUse();
         // errors during initialization to the server, unlike the rest of the
         // errors produced here. Lets not muddy the console with extra errors
         if (!this.initializing) {
@@ -170,6 +175,7 @@ export default class WatchOptimizer extends BaseOptimizer {
         break;
 
       case STATUS.FATAL:
+        this.cacheState.markNotInUse();
         this.log('fatal', error);
         process.exit(1);
         break;
