@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-try-restart() {
+try_restart() {
   if command -v systemctl >/dev/null ; then
       systemctl daemon-reload
       systemctl try-restart kibana.service
@@ -29,8 +29,8 @@ case $1 in
     fi
 
     # upgrade
-    if [ -n "$2" ]
-      try-restart
+    if [ -n "$2" ]; then
+      try_restart
     fi
   ;;
   abort-deconfigure|abort-upgrade|abort-remove)
@@ -48,8 +48,8 @@ case $1 in
     fi
 
     # upgrade
-    if [ "$1" = "2"]
-      try-restart
+    if [ "$1" = "2"]; then
+      try_restart
     fi
   ;;
 
