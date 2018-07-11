@@ -34,7 +34,7 @@ export function MonitoringTimeseriesContainer({ series, onBrush }) {
   return (
     <div className="monitoring-chart__container">
       <h2 className="euiTitle" tabIndex="0">
-        <EuiScreenReaderOnly><span>This chart is not accessible yet</span></EuiScreenReaderOnly>
+        <EuiScreenReaderOnly><span>This chart is not screen reader accessible</span></EuiScreenReaderOnly>
         { title }{ units ? ` (${units})` : '' }
         <OverlayTrigger
           placement="left"
