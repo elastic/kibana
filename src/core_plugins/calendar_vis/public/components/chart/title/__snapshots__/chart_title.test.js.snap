@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ChartTitle - default should render a full year overview chart grid 1`] = `
+<svg
+  class="calendar-title"
+  height="25"
+  id="title_2018"
+  width="100%"
+>
+  <text
+    x="20"
+    y="20"
+  >
+    2018: @timestamp per year
+  </text>
+</svg>
+`;

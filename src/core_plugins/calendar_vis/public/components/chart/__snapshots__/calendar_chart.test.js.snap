@@ -1,0 +1,363 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CalendarChart should render a chart with two category axes, one grid and a title 1`] = `
+<svg
+  height="100%"
+  width="100%"
+>
+  <CalendarAxis
+    axisConfig={
+      Object {
+        "id": "CategoryAxis-1",
+        "position": "top",
+        "scale": Object {
+          "type": "MONTHS",
+        },
+        "type": "category",
+      }
+    }
+    gridConfig={
+      Object {
+        "cellSize": 15,
+        "style": "rect",
+        "xOffset": 20,
+        "yOffset": 20,
+      }
+    }
+    key="0"
+    type="heatmap_year"
+    vislibData={
+      Object {
+        "indexPattern": "c85d40c0-837f-11e8-aa0a-c1e0f6dce300",
+        "label": "2018: @timestamp per year",
+        "ordered": Object {
+          "date": true,
+          "interval": "P1D",
+          "max": "2018-07-09T14:14:22.521Z",
+          "min": "2018-07-08T05:00:00.000Z",
+        },
+        "series": Array [
+          Object {
+            "aggId": "1",
+            "aggLabel": "Count",
+            "count": 0,
+            "label": "Count",
+            "values": Array [
+              Object {
+                "aggConfig": Object {
+                  "enabled": true,
+                  "id": "1",
+                  "params": Object {},
+                  "schema": "metric",
+                  "type": "count",
+                },
+                "aggConfigResult": Object {
+                  "$parent": Object {
+                    "$parent": Object {
+                      "aggConfig": Object {
+                        "enabled": true,
+                        "id": "3",
+                        "params": Object {
+                          "customInterval": "2h",
+                          "extended_bounds": Object {},
+                          "field": "@timestamp",
+                          "interval": "y",
+                          "min_doc_count": 1,
+                          "row": true,
+                        },
+                        "schema": "split",
+                        "type": "date_histogram",
+                      },
+                      "key": 1514786400000,
+                      "type": "bucket",
+                      "value": 1514786400000,
+                    },
+                    "aggConfig": Object {
+                      "enabled": true,
+                      "id": "2",
+                      "params": Object {
+                        "customInterval": "2h",
+                        "extended_bounds": Object {},
+                        "field": "@timestamp",
+                        "interval": "d",
+                        "min_doc_count": 1,
+                      },
+                      "schema": "segment",
+                      "type": "date_histogram",
+                    },
+                    "key": 1531026000000,
+                    "type": "bucket",
+                    "value": 1531026000000,
+                  },
+                  "aggConfig": Object {
+                    "enabled": true,
+                    "id": "1",
+                    "params": Object {},
+                    "schema": "metric",
+                    "type": "count",
+                  },
+                  "key": 14,
+                  "type": "metric",
+                  "value": 14,
+                },
+                "extraMetrics": Array [],
+                "series": "Count",
+                "x": 1531026000000,
+                "y": 14,
+              },
+            ],
+          },
+        ],
+        "xAxisField": Object {
+          "$$hashKey": "object:208",
+          "aggregatable": true,
+          "count": 0,
+          "name": "@timestamp",
+          "readFromDocValues": true,
+          "scripted": false,
+          "searchable": true,
+          "type": "date",
+        },
+        "xAxisLabel": "@timestamp per day",
+        "yAxisLabel": "Count",
+      }
+    }
+  />
+  <CalendarAxis
+    axisConfig={
+      Object {
+        "id": "CategoryAxis-2",
+        "position": "left",
+        "scale": Object {
+          "type": "WEEKS",
+        },
+        "type": "category",
+      }
+    }
+    gridConfig={
+      Object {
+        "cellSize": 15,
+        "style": "rect",
+        "xOffset": 20,
+        "yOffset": 20,
+      }
+    }
+    key="1"
+    type="heatmap_year"
+    vislibData={
+      Object {
+        "indexPattern": "c85d40c0-837f-11e8-aa0a-c1e0f6dce300",
+        "label": "2018: @timestamp per year",
+        "ordered": Object {
+          "date": true,
+          "interval": "P1D",
+          "max": "2018-07-09T14:14:22.521Z",
+          "min": "2018-07-08T05:00:00.000Z",
+        },
+        "series": Array [
+          Object {
+            "aggId": "1",
+            "aggLabel": "Count",
+            "count": 0,
+            "label": "Count",
+            "values": Array [
+              Object {
+                "aggConfig": Object {
+                  "enabled": true,
+                  "id": "1",
+                  "params": Object {},
+                  "schema": "metric",
+                  "type": "count",
+                },
+                "aggConfigResult": Object {
+                  "$parent": Object {
+                    "$parent": Object {
+                      "aggConfig": Object {
+                        "enabled": true,
+                        "id": "3",
+                        "params": Object {
+                          "customInterval": "2h",
+                          "extended_bounds": Object {},
+                          "field": "@timestamp",
+                          "interval": "y",
+                          "min_doc_count": 1,
+                          "row": true,
+                        },
+                        "schema": "split",
+                        "type": "date_histogram",
+                      },
+                      "key": 1514786400000,
+                      "type": "bucket",
+                      "value": 1514786400000,
+                    },
+                    "aggConfig": Object {
+                      "enabled": true,
+                      "id": "2",
+                      "params": Object {
+                        "customInterval": "2h",
+                        "extended_bounds": Object {},
+                        "field": "@timestamp",
+                        "interval": "d",
+                        "min_doc_count": 1,
+                      },
+                      "schema": "segment",
+                      "type": "date_histogram",
+                    },
+                    "key": 1531026000000,
+                    "type": "bucket",
+                    "value": 1531026000000,
+                  },
+                  "aggConfig": Object {
+                    "enabled": true,
+                    "id": "1",
+                    "params": Object {},
+                    "schema": "metric",
+                    "type": "count",
+                  },
+                  "key": 14,
+                  "type": "metric",
+                  "value": 14,
+                },
+                "extraMetrics": Array [],
+                "series": "Count",
+                "x": 1531026000000,
+                "y": 14,
+              },
+            ],
+          },
+        ],
+        "xAxisField": Object {
+          "$$hashKey": "object:208",
+          "aggregatable": true,
+          "count": 0,
+          "name": "@timestamp",
+          "readFromDocValues": true,
+          "scripted": false,
+          "searchable": true,
+          "type": "date",
+        },
+        "xAxisLabel": "@timestamp per day",
+        "yAxisLabel": "Count",
+      }
+    }
+  />
+  <ChartGrid
+    gridConfig={
+      Object {
+        "cellSize": 15,
+        "style": "rect",
+        "xOffset": 20,
+        "yOffset": 20,
+      }
+    }
+    type="heatmap_year"
+    vislibData={
+      Object {
+        "indexPattern": "c85d40c0-837f-11e8-aa0a-c1e0f6dce300",
+        "label": "2018: @timestamp per year",
+        "ordered": Object {
+          "date": true,
+          "interval": "P1D",
+          "max": "2018-07-09T14:14:22.521Z",
+          "min": "2018-07-08T05:00:00.000Z",
+        },
+        "series": Array [
+          Object {
+            "aggId": "1",
+            "aggLabel": "Count",
+            "count": 0,
+            "label": "Count",
+            "values": Array [
+              Object {
+                "aggConfig": Object {
+                  "enabled": true,
+                  "id": "1",
+                  "params": Object {},
+                  "schema": "metric",
+                  "type": "count",
+                },
+                "aggConfigResult": Object {
+                  "$parent": Object {
+                    "$parent": Object {
+                      "aggConfig": Object {
+                        "enabled": true,
+                        "id": "3",
+                        "params": Object {
+                          "customInterval": "2h",
+                          "extended_bounds": Object {},
+                          "field": "@timestamp",
+                          "interval": "y",
+                          "min_doc_count": 1,
+                          "row": true,
+                        },
+                        "schema": "split",
+                        "type": "date_histogram",
+                      },
+                      "key": 1514786400000,
+                      "type": "bucket",
+                      "value": 1514786400000,
+                    },
+                    "aggConfig": Object {
+                      "enabled": true,
+                      "id": "2",
+                      "params": Object {
+                        "customInterval": "2h",
+                        "extended_bounds": Object {},
+                        "field": "@timestamp",
+                        "interval": "d",
+                        "min_doc_count": 1,
+                      },
+                      "schema": "segment",
+                      "type": "date_histogram",
+                    },
+                    "key": 1531026000000,
+                    "type": "bucket",
+                    "value": 1531026000000,
+                  },
+                  "aggConfig": Object {
+                    "enabled": true,
+                    "id": "1",
+                    "params": Object {},
+                    "schema": "metric",
+                    "type": "count",
+                  },
+                  "key": 14,
+                  "type": "metric",
+                  "value": 14,
+                },
+                "extraMetrics": Array [],
+                "series": "Count",
+                "x": 1531026000000,
+                "y": 14,
+              },
+            ],
+          },
+        ],
+        "xAxisField": Object {
+          "$$hashKey": "object:208",
+          "aggregatable": true,
+          "count": 0,
+          "name": "@timestamp",
+          "readFromDocValues": true,
+          "scripted": false,
+          "searchable": true,
+          "type": "date",
+        },
+        "xAxisLabel": "@timestamp per day",
+        "yAxisLabel": "Count",
+      }
+    }
+  />
+  <ChartTitle
+    gridConfig={
+      Object {
+        "cellSize": 15,
+        "style": "rect",
+        "xOffset": 20,
+        "yOffset": 20,
+      }
+    }
+    label="2018: @timestamp per year"
+  />
+</svg>
+`;

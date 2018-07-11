@@ -101,6 +101,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
+    async clickCalendarChart() {
+      await find.clickByPartialLinkText('Calendar');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
     async clickVisualBuilder() {
       await find.clickByPartialLinkText('Visual Builder');
       await PageObjects.header.waitUntilLoadingHasFinished();
