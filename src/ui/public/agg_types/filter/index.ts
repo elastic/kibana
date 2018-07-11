@@ -18,3 +18,4 @@
  */
 
 export { aggTypeFilters } from './agg_type_filters';
+export { aggParamFilters } from './agg_param_filters';
