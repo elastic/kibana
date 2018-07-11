@@ -8,10 +8,9 @@ import { beatsIndexTemplate } from '../../../../utils/index_templates';
 import { DatabaseAdapter } from '../adapter_types';
 
 interface ContractConfig {
-  adapter?: DatabaseAdapter;
   before?(): Promise<void>;
   after?(): Promise<void>;
-  adapterSetup?(): DatabaseAdapter;
+  adapterSetup(): DatabaseAdapter;
 }
 
 export const contractTests = (testName: string, config: ContractConfig) => {
@@ -26,10 +25,7 @@ export const contractTests = (testName: string, config: ContractConfig) => {
     });
     afterAll(async () => config.after && (await config.after()));
     beforeEach(async () => {
-      // FIXME: one of these always should exist, type ContractConfig as such
-      frameworkAdapter = (config.adapterSetup
-        ? config.adapterSetup()
-        : config.adapter) as DatabaseAdapter;
+      frameworkAdapter = config.adapterSetup();
     });
 
     it('Should inject template into ES', async () => {

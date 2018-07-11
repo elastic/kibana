@@ -7,10 +7,9 @@ import expect from 'expect.js';
 import { BackendFrameworkAdapter } from '../adapter_types';
 
 interface ContractConfig {
-  adapter?: BackendFrameworkAdapter;
   before?(): Promise<void>;
   after?(): Promise<void>;
-  adapterSetup?(): BackendFrameworkAdapter;
+  adapterSetup(): BackendFrameworkAdapter;
 }
 
 export const contractTests = (testName: string, config: ContractConfig) => {
