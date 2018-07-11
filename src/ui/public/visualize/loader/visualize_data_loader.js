@@ -69,7 +69,7 @@ export class VisualizeDataLoader {
       return this._visData;
     }
     catch (e) {
-      this.props.searchSource.cancelQueued();
+      this._vis.searchSource.cancelQueued();
       this._vis.requestError = e;
       if (isTermSizeZeroError(e)) {
         return toastNotifications.addDanger(
