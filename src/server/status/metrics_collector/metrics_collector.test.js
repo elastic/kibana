@@ -19,7 +19,8 @@
 
 jest.mock('os', () => ({
   freemem: jest.fn(),
-  totalmem: jest.fn()
+  totalmem: jest.fn(),
+  uptime: jest.fn()
 }));
 
 const mockProcessUptime = jest.fn().mockImplementation(() => 6666);
@@ -38,11 +39,19 @@ const mockConfig = {
 mockConfig.get.returns('test-123');
 mockConfig.get.withArgs('server.port').returns(3000);
 
+const mockKbnServer = {
+  status: {
+    toJSON: jest.fn().mockImplementation(() => ({
+      overall: { state: 'green' }
+    }))
+  }
+};
+
 describe('Metrics Collector', () => {
   describe('initialize', () => {
     it('should return stub metrics', () => {
       const collector = new MetricsCollector(mockServer, mockConfig);
-      expect(collector.getStats()).toMatchSnapshot();
+      expect(collector.getStats(mockKbnServer)).toMatchSnapshot();
     });
   });
 
@@ -88,7 +97,7 @@ describe('Metrics Collector', () => {
         psdelay: 0.33843398094177246,
         host: 'spicy.local',
       });
-      expect(collector.getStats()).toMatchSnapshot();
+      expect(collector.getStats(mockKbnServer)).toMatchSnapshot();
     });
 
     it('should accumulate counter metrics', async () => {
@@ -114,7 +123,7 @@ describe('Metrics Collector', () => {
         psdelay: 0.3764979839324951,
         host: 'spicy.local',
       });
-      expect(collector.getStats()).toMatchSnapshot();
+      expect(collector.getStats(mockKbnServer)).toMatchSnapshot();
 
       await collector.collect({
         requests: {
@@ -136,7 +145,7 @@ describe('Metrics Collector', () => {
         psdelay: 0.3764979839324951,
         host: 'spicy.local',
       });
-      expect(collector.getStats()).toMatchSnapshot();
+      expect(collector.getStats(mockKbnServer)).toMatchSnapshot();
 
       await collector.collect({
         requests: {
@@ -158,7 +167,7 @@ describe('Metrics Collector', () => {
         psdelay: 0.3764979839324951,
         host: 'spicy.local',
       });
-      expect(collector.getStats()).toMatchSnapshot();
+      expect(collector.getStats(mockKbnServer)).toMatchSnapshot();
     });
   });
 });

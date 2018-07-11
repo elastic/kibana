@@ -23,10 +23,13 @@ jest.mock('fs', () => ({
 
 jest.mock('os', () => ({
   freemem: jest.fn(),
-  totalmem: jest.fn()
+  totalmem: jest.fn(),
+  uptime: jest.fn()
 }));
 
-jest.mock('process');
+jest.mock('process', () => ({
+  uptime: jest.fn()
+}));
 
 import fs from 'fs';
 import os from 'os';
@@ -69,17 +72,13 @@ describe('Metrics', function () {
       sinon.stub(Date.prototype, 'toISOString').returns('2017-04-14T18:35:41.534Z');
 
       const capturedMetrics = await metrics.capture();
-      expect(capturedMetrics).toEqual({
-        last_updated: '2017-04-14T18:35:41.534Z',
-        collection_interval_in_millis: 5000,
-        uptime_in_millis: 1980,
-        a: [ { b: 2, c: 3 }, { d: 4, e: 5 } ], process: { uptime_ms: 1980 }
-      });
+      expect(capturedMetrics).toMatchSnapshot();
     });
   });
 
   describe('captureEvent', () => {
     it('parses the hapi event', () => {
+      sinon.stub(os, 'uptime').returns(12000);
       sinon.stub(process, 'uptime').returns(5000);
 
       os.freemem.mockImplementation(() => 12);
@@ -106,52 +105,7 @@ describe('Metrics', function () {
         'host': 'blahblah.local'
       };
 
-      expect(metrics.captureEvent(hapiEvent)).toEqual({
-        'concurrent_connections': 0,
-        'event_loop_delay': 1.6091690063476562,
-        'os': {
-          'cpu': {
-            'load_average': {
-              '15m': 1.89794921875,
-              '1m': 2.20751953125,
-              '5m': 2.02294921875
-            }
-          },
-          'mem': {
-            'free_in_bytes': 12,
-            'total_in_bytes': 24,
-          },
-        },
-        'process': {
-          'mem': {
-            'external_in_bytes': 1779619,
-            'heap_max_in_bytes': 168194048,
-            'heap_used_in_bytes': 130553400,
-            'resident_set_size_in_bytes': 193716224,
-          },
-          'pid': 8675309,
-          'uptime_ms': 5000000
-        },
-        'requests': {
-          'disconnects': 0,
-          'status_codes': {
-            '200': 22
-          },
-          'total': 22
-        },
-        'response_times': {
-          'avg_in_millis': 1.8636363636363635,
-          'max_in_millis': 4
-        },
-        'sockets': {
-          'http': {
-            'total': 0
-          },
-          'https': {
-            'total': 0
-          }
-        }
-      });
+      expect(metrics.captureEvent(hapiEvent)).toMatchSnapshot();
     });
 
     it('parses event with missing fields / NaN for responseTimes.avg', () => {
@@ -163,15 +117,7 @@ describe('Metrics', function () {
         host: 'blahblah.local',
       };
 
-      expect(metrics.captureEvent(hapiEvent)).toEqual({
-        process: { mem: {}, pid: 8675309, uptime_ms: 5000000 },
-        os: {
-          cpu: { load_average: {} },
-          mem: { free_in_bytes: 12, total_in_bytes: 24 },
-        },
-        response_times: { max_in_millis: 4 },
-        requests: { total: 22, disconnects: 0, status_codes: { '200': 22 } },
-      });
+      expect(metrics.captureEvent(hapiEvent)).toMatchSnapshot();
     });
   });
 

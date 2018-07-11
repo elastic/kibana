@@ -5,8 +5,16 @@ Object {
   "collection_interval_in_millis": "test-123",
   "concurrent_connections": 0,
   "event_loop_delay": 0.3764979839324951,
+  "kibana": Object {
+    "host": "test-123",
+    "name": "test-123",
+    "snapshot": false,
+    "status": "green",
+    "transport_address": "test-123:3000",
+    "uuid": "test-123",
+    "version": "test-123",
+  },
   "last_updated": "2018-04-19T21:50:54.366Z",
-  "name": "test-123",
   "os": Object {
     "cpu": Object {
       "load_average": Object {
@@ -19,6 +27,7 @@ Object {
       "free_in_bytes": 12,
       "total_in_bytes": 24,
     },
+    "uptime_ms": NaN,
   },
   "process": Object {
     "mem": Object {
@@ -49,14 +58,6 @@ Object {
       "total": 0,
     },
   },
-  "uptime_in_millis": 6666000,
-  "uuid": "test-123",
-  "version": Object {
-    "build_hash": "test-123",
-    "build_number": "test-123",
-    "build_snapshot": false,
-    "number": "test-123",
-  },
 }
 `;
 
@@ -65,8 +66,16 @@ Object {
   "collection_interval_in_millis": "test-123",
   "concurrent_connections": 0,
   "event_loop_delay": 0.7529959678649902,
+  "kibana": Object {
+    "host": "test-123",
+    "name": "test-123",
+    "snapshot": false,
+    "status": "green",
+    "transport_address": "test-123:3000",
+    "uuid": "test-123",
+    "version": "test-123",
+  },
   "last_updated": "2018-04-19T21:50:54.366Z",
-  "name": "test-123",
   "os": Object {
     "cpu": Object {
       "load_average": Object {
@@ -79,6 +88,7 @@ Object {
       "free_in_bytes": 12,
       "total_in_bytes": 24,
     },
+    "uptime_ms": NaN,
   },
   "process": Object {
     "mem": Object {
@@ -109,14 +119,6 @@ Object {
       "total": 0,
     },
   },
-  "uptime_in_millis": 6666000,
-  "uuid": "test-123",
-  "version": Object {
-    "build_hash": "test-123",
-    "build_number": "test-123",
-    "build_snapshot": false,
-    "number": "test-123",
-  },
 }
 `;
 
@@ -125,8 +127,16 @@ Object {
   "collection_interval_in_millis": "test-123",
   "concurrent_connections": 0,
   "event_loop_delay": 1.1294939517974854,
+  "kibana": Object {
+    "host": "test-123",
+    "name": "test-123",
+    "snapshot": false,
+    "status": "green",
+    "transport_address": "test-123:3000",
+    "uuid": "test-123",
+    "version": "test-123",
+  },
   "last_updated": "2018-04-19T21:50:54.366Z",
-  "name": "test-123",
   "os": Object {
     "cpu": Object {
       "load_average": Object {
@@ -139,6 +149,7 @@ Object {
       "free_in_bytes": 12,
       "total_in_bytes": 24,
     },
+    "uptime_ms": NaN,
   },
   "process": Object {
     "mem": Object {
@@ -169,14 +180,6 @@ Object {
       "total": 0,
     },
   },
-  "uptime_in_millis": 6666000,
-  "uuid": "test-123",
-  "version": Object {
-    "build_hash": "test-123",
-    "build_number": "test-123",
-    "build_snapshot": false,
-    "number": "test-123",
-  },
 }
 `;
 
@@ -185,8 +188,16 @@ Object {
   "collection_interval_in_millis": "test-123",
   "concurrent_connections": 0,
   "event_loop_delay": 0.33843398094177246,
+  "kibana": Object {
+    "host": "test-123",
+    "name": "test-123",
+    "snapshot": false,
+    "status": "green",
+    "transport_address": "test-123:3000",
+    "uuid": "test-123",
+    "version": "test-123",
+  },
   "last_updated": "2018-04-19T21:50:54.366Z",
-  "name": "test-123",
   "os": Object {
     "cpu": Object {
       "load_average": Object {
@@ -199,6 +210,7 @@ Object {
       "free_in_bytes": 12,
       "total_in_bytes": 24,
     },
+    "uptime_ms": NaN,
   },
   "process": Object {
     "mem": Object {
@@ -229,20 +241,20 @@ Object {
       "total": 0,
     },
   },
-  "uptime_in_millis": 6666000,
-  "uuid": "test-123",
-  "version": Object {
-    "build_hash": "test-123",
-    "build_number": "test-123",
-    "build_snapshot": false,
-    "number": "test-123",
-  },
 }
 `;
 
 exports[`Metrics Collector initialize should return stub metrics 1`] = `
 Object {
-  "name": "test-123",
+  "kibana": Object {
+    "host": "test-123",
+    "name": "test-123",
+    "snapshot": false,
+    "status": "green",
+    "transport_address": "test-123:3000",
+    "uuid": "test-123",
+    "version": "test-123",
+  },
   "os": Object {
     "cpu": Object {},
     "mem": Object {},
@@ -257,13 +269,6 @@ Object {
   "sockets": Object {
     "http": Object {},
     "https": Object {},
-  },
-  "uuid": "test-123",
-  "version": Object {
-    "build_hash": "test-123",
-    "build_number": "test-123",
-    "build_snapshot": false,
-    "number": "test-123",
   },
 }
 `;
