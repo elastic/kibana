@@ -20,17 +20,17 @@
 import { deepFreeze } from './deep_freeze';
 import { readInjectedMetadataFromDom } from './read_injected_metadata_from_dom';
 
-export interface InjectedState {
+export interface InjectedMetadata {
   legacyMetadata: {
     [key: string]: any;
   };
 }
 
-export class InjectedStateService {
-  private state: InjectedState;
+export class InjectedMetadataService {
+  private state: InjectedMetadata;
 
-  constructor(injectedStateForTesting?: InjectedState) {
-    this.state = deepFreeze(injectedStateForTesting || readInjectedMetadataFromDom());
+  constructor(injectedMetadataForTesting?: InjectedMetadata) {
+    this.state = deepFreeze(injectedMetadataForTesting || readInjectedMetadataFromDom());
   }
 
   public getLegacyMetadata() {
