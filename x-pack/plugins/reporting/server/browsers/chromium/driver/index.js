@@ -6,6 +6,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import { PNG } from 'pngjs';
 
 import moment from 'moment';
 import { promisify, delay } from 'bluebird';
@@ -106,31 +107,30 @@ export class HeadlessChromiumDriver {
           },
         });
 
-        // For some reason the existance of this side affect free code eliminates the bug.
-        // Sanity check that when it's commented out, it shows up again.
-        // const expectedDataWidth = screenshotClip.width * this._zoom;
-        // const expectedDataHeight = screenshotClip.height * this._zoom;
+        // For some reason the existance of this side affect free code seems to eliminate the bug.
+        const expectedDataWidth = screenshotClip.width * this._zoom;
+        const expectedDataHeight = screenshotClip.height * this._zoom;
 
-        // const png = new PNG();
-        // const buffer = Buffer.from(data, 'base64');
+        const png = new PNG();
+        const buffer = Buffer.from(data, 'base64');
 
-        // await new Promise((resolve, reject) => {
-        //   png.parse(buffer, (error, png) => {
-        //     if (error) {
-        //       reject(error);
-        //     }
+        await new Promise((resolve, reject) => {
+          png.parse(buffer, (error, png) => {
+            if (error) {
+              reject(error);
+            }
 
-        //     if (png.width !== expectedDataWidth || png.height !== expectedDataHeight) {
-        //       const errorMessage = `Screenshot captured with width:${png.width} and height: ${
-        //         png.height
-        //       }) is not of expected width: ${expectedDataWidth} and height: ${expectedDataHeight}`;
+            if (png.width !== expectedDataWidth || png.height !== expectedDataHeight) {
+              const errorMessage = `Screenshot captured with width:${png.width} and height: ${
+                png.height
+              }) is not of expected width: ${expectedDataWidth} and height: ${expectedDataHeight}`;
 
-        //       reject(errorMessage);
-        //     }
+              reject(errorMessage);
+            }
 
-        //     resolve(png);
-        //   });
-        // });
+            resolve(png);
+          });
+        });
 
         return data;
       },
