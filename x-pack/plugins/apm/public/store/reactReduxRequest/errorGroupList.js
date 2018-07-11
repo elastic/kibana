@@ -5,19 +5,27 @@
  */
 
 import React from 'react';
-import { withInitialData } from './helpers';
+import { createInitialDataSelector } from './helpers';
 import { Request } from 'react-redux-request';
-import { loadErrorGroupList } from '../../services/rest';
+import { loadErrorGroupList } from '../../services/rest/apm';
 
 const ID = 'errorGroupList';
 const INITIAL_DATA = [];
+const withInitialData = createInitialDataSelector(INITIAL_DATA);
 
 export function getErrorGroupList(state) {
-  return withInitialData(state.reactReduxRequest[ID], INITIAL_DATA);
+  return withInitialData(state.reactReduxRequest[ID]);
 }
 
 export function ErrorGroupDetailsRequest({ urlParams, render }) {
-  const { serviceName, start, end, q, sortBy, sortOrder, kuery } = urlParams;
+  const {
+    serviceName,
+    start,
+    end,
+    sortField,
+    sortDirection,
+    kuery
+  } = urlParams;
 
   if (!(serviceName && start && end)) {
     return null;
@@ -27,7 +35,7 @@ export function ErrorGroupDetailsRequest({ urlParams, render }) {
     <Request
       id={ID}
       fn={loadErrorGroupList}
-      args={[{ serviceName, start, end, q, sortBy, sortOrder, kuery }]}
+      args={[{ serviceName, start, end, sortField, sortDirection, kuery }]}
       selector={getErrorGroupList}
       render={render}
     />

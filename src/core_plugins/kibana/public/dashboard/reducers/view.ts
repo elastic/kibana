@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { cloneDeep } from 'lodash';
 import { Reducer } from 'redux';
 import { ViewActions, ViewActionTypeKeys } from '../actions';
 
@@ -45,10 +46,7 @@ const maximizePanel = (view: ViewState, panelId: PanelId) => ({
   maximizedPanelId: panelId,
 });
 
-const updateIsFullScreenMode = (
-  view: ViewState,
-  isFullScreenMode: boolean
-) => ({
+const updateIsFullScreenMode = (view: ViewState, isFullScreenMode: boolean) => ({
   ...view,
   isFullScreenMode,
 });
@@ -60,7 +58,7 @@ const updateTimeRange = (view: ViewState, timeRange: TimeRange) => ({
 
 const updateFilters = (view: ViewState, filters: Filters) => ({
   ...view,
-  filters,
+  filters: cloneDeep(filters),
 });
 
 const updateQuery = (view: ViewState, query: Query) => ({

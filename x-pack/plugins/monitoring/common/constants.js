@@ -116,17 +116,6 @@ export const CLOUD_METADATA_SERVICES = {
  * Constants used by Logstash monitoring code
  */
 export const LOGSTASH = {
-
-  /**
-   * Constants used by Logstash Pipeline Viewer code
-   */
-  PIPELINE_VIEWER: {
-    ICON: {
-      HEIGHT_PX: 18,
-      WIDTH_PX: 18
-    }
-  },
-
   MAJOR_VER_REQD_FOR_PIPELINES: 6,
 
   /*

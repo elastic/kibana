@@ -51,6 +51,7 @@ export default function ({ getService, getPageObjects }) {
       });
       await PageObjects.visualize.selectOrderBy('_key');
       await PageObjects.visualize.clickGo();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
 
@@ -140,7 +141,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.clickKibanaIndices();
         await PageObjects.settings.filterField(termsField);
         await PageObjects.settings.openControlsByName(termsField);
-        await PageObjects.settings.setFieldFormat('Bytes');
+        await PageObjects.settings.setFieldFormat('bytes');
         await PageObjects.settings.controlChangeSave();
         await PageObjects.common.navigateToUrl('visualize', 'new');
         await PageObjects.visualize.loadSavedVisualization(vizName1);
@@ -155,7 +156,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.clickKibanaIndices();
         await PageObjects.settings.filterField(termsField);
         await PageObjects.settings.openControlsByName(termsField);
-        await PageObjects.settings.setFieldFormat('- default - ');
+        await PageObjects.settings.setFieldFormat('');
         await PageObjects.settings.controlChangeSave();
       });
 
@@ -167,7 +168,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should apply filter with unformatted value', async function () {
         await PageObjects.visualize.selectTagCloudTag('30GB');
-        await PageObjects.common.sleep(500);
+        await PageObjects.header.waitUntilLoadingHasFinished();
         const data = await PageObjects.visualize.getTextTag();
         expect(data).to.eql([ '30GB' ]);
       });
