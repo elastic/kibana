@@ -21,6 +21,7 @@ import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import NoDigestPromises from 'test_utils/no_digest_promises';
+import { delay } from 'bluebird';
 
 import { CallClientProvider } from '../call_client';
 import { RequestStatus } from '../req_status';
@@ -105,28 +106,26 @@ describe('callClient', () => {
       expect(callingClient.then).to.be.a('function');
     });
 
-    it(`resolves the promise with the 'responses' property of the es.msearch() result`, done => {
+    it(`resolves the promise with the 'responses' property of the es.msearch() result`, () => {
       searchRequests = [ createSearchRequest(1) ];
       const callingClient = callClient(searchRequests);
 
-      callingClient.then(results => {
+      return callingClient.then(results => {
         expect(results).to.eql([1]);
-        done();
-      }).catch(error => done(error));
+      });
     });
   });
 
   describe('implementation', () => {
-    it('calls es.msearch() once, regardless of number of searchRequests', done => {
+    it('calls es.msearch() once, regardless of number of searchRequests', () => {
       expect(fakeSearch.callCount).to.be(0);
 
       searchRequests = [ createSearchRequest(), createSearchRequest(), createSearchRequest() ];
       const callingClient = callClient(searchRequests);
 
-      callingClient.then(() => {
+      return callingClient.then(() => {
         expect(fakeSearch.callCount).to.be(1);
-        done();
-      }).catch(error => done(error));
+      });
     });
 
     it('calls searchRequest.whenAborted() as part of setup', async () => {
@@ -152,7 +151,7 @@ describe('callClient', () => {
   });
 
   describe('aborting at different points in the request lifecycle:', () => {
-    it(`when searchSource's _flatten method throws an error resolves with an ABORTED response`, done => {
+    it(`when searchSource's _flatten method throws an error resolves with an ABORTED response`, () => {
       const searchRequest = createSearchRequest(1, {
         source: {
           _flatten: () => { throw new Error(); },
@@ -162,14 +161,13 @@ describe('callClient', () => {
       searchRequests = [ searchRequest ];
       const callingClient = callClient(searchRequests);
 
-      callingClient.then(results => {
+      return callingClient.then(results => {
         // The result is ABORTED because it was never included in the body sent to es.msearch().
         expect(results).to.eql([ ABORTED ]);
-        done();
-      }).catch(error => done(error));
+      });
     });
 
-    it('while the search body is being formed resolves with an ABORTED response', done => {
+    it('while the search body is being formed resolves with an ABORTED response', () => {
       const searchRequest = createSearchRequest(1, {
         source: {
           _flatten: () => {
@@ -191,13 +189,12 @@ describe('callClient', () => {
         searchRequest.abort();
       }, 20);
 
-      callingClient.then(results => {
+      return callingClient.then(results => {
         expect(results).to.eql([ ABORTED ]);
-        done();
-      }).catch(error => done(error));
+      });
     });
 
-    it('while the search is in flight resolves with an ABORTED response', done => {
+    it('while the search is in flight resolves with an ABORTED response', () => {
       esRequestDelay = 100;
 
       const searchRequest = createSearchRequest();
@@ -209,15 +206,14 @@ describe('callClient', () => {
         searchRequest.abort();
       }, 80);
 
-      callingClient.then(results => {
+      return callingClient.then(results => {
         expect(results).to.eql([ ABORTED ]);
-        done();
-      }).catch(error => done(error));
+      });
     });
   });
 
   describe('aborting number of requests:', () => {
-    it(`aborting all searchRequests resolves with ABORTED responses`, done => {
+    it(`aborting all searchRequests resolves with ABORTED responses`, () => {
       const searchRequest1 = createSearchRequest();
       const searchRequest2 = createSearchRequest();
       searchRequests = [ searchRequest1, searchRequest2 ];
@@ -226,13 +222,12 @@ describe('callClient', () => {
       searchRequest1.abort();
       searchRequest2.abort();
 
-      callingClient.then(results => {
+      return callingClient.then(results => {
         expect(results).to.eql([ABORTED, ABORTED]);
-        done();
-      }).catch(error => done(error));
+      });
     });
 
-    it(`aborting all searchRequests calls abort() on the promise returned by es.msearch()`, done => {
+    it(`aborting all searchRequests calls abort() on the promise returned by es.msearch()`, () => {
       esRequestDelay = 100;
 
       const searchRequest1 = createSearchRequest();
@@ -241,30 +236,29 @@ describe('callClient', () => {
 
       const callingClient = callClient(searchRequests);
 
-      setTimeout(() => {
-        // At this point we expect the request to be in flight.
-        expect(esPromiseAbortSpy.callCount).to.be(0);
-        searchRequest1.abort();
-        searchRequest2.abort();
-      }, 70);
-
-      callingClient.then(() => {
-        expect(esPromiseAbortSpy.callCount).to.be(1);
-        done();
-      }).catch(error => done(error));
+      return Promise.all([
+        delay(70).then(() => {
+          // At this point we expect the request to be in flight.
+          expect(esPromiseAbortSpy.callCount).to.be(0);
+          searchRequest1.abort();
+          searchRequest2.abort();
+        }),
+        callingClient.then(() => {
+          expect(esPromiseAbortSpy.callCount).to.be(1);
+        }),
+      ]);
     });
 
-    it('aborting some searchRequests resolves those with ABORTED responses', done => {
+    it('aborting some searchRequests resolves those with ABORTED responses', () => {
       const searchRequest1 = createSearchRequest(1);
       const searchRequest2 = createSearchRequest(2);
       searchRequests = [ searchRequest1, searchRequest2 ];
       const callingClient = callClient(searchRequests);
       searchRequest2.abort();
 
-      callingClient.then(results => {
+      return callingClient.then(results => {
         expect(results).to.eql([ 1, ABORTED ]);
-        done();
-      }).catch(error => done(error));
+      });
     });
   });
 });
