@@ -7,7 +7,7 @@
 import { capitalize } from 'lodash';
 import React, { Fragment } from 'react';
 import { render } from 'react-dom';
-import { EuiIcon, EuiHealth } from '@elastic/eui';
+import { EuiIcon, EuiHealth, EuiText, EuiSpacer } from '@elastic/eui';
 import { uiModules } from 'ui/modules';
 import { KuiTableRowCell, KuiTableRow } from '@kbn/ui-framework/components';
 import { MonitoringTable } from 'plugins/monitoring/components/table';
@@ -97,7 +97,8 @@ uiModule.directive('monitoringClusterAlertsListing', kbnUrl => {
       scope.$watch('alerts', (alerts = []) => {
         const alertsTable = (
           <Fragment>
-            <p className="kuiText kuiVerticalRhythm" tabIndex="0">Showing {alerts.length} alert(s)</p>
+            <EuiText><p tabIndex="0">Showing {alerts.length} alert(s)</p></EuiText>
+            <EuiSpacer size="s"/>
             <div className="kuiVerticalRhythm">
               <MonitoringTable
                 className="alertsTable"
