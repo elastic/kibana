@@ -181,7 +181,7 @@ export interface DatabaseMGetResponse<T> {
 }
 
 export interface DatabasePutTemplateParams extends DatabaseGenericParams {
-  id: string;
+  name: string;
   body: any;
 }
 
