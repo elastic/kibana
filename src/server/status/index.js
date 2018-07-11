@@ -18,12 +18,10 @@
  */
 
 import ServerStatus from './server_status';
-import { MetricsCollector } from './metrics_collector';
-import { Metrics } from './metrics_collector/metrics';
+import { Metrics } from './lib/metrics';
 import { registerStatusPage, registerStatusApi, registerStatsApi } from './routes';
 
 export function statusMixin(kbnServer, server, config) {
-  const collector = new MetricsCollector(server, config);
   kbnServer.status = new ServerStatus(kbnServer.server);
 
   const { ['even-better']: evenBetter } = server.plugins;
@@ -33,12 +31,11 @@ export function statusMixin(kbnServer, server, config) {
 
     evenBetter.monitor.on('ops', event => {
       metrics.capture(event).then(data => { kbnServer.metrics = data; }); // for status API (to deprecate in next major)
-      collector.collect(event); // for metrics API (replacement API)
     });
   }
 
   // init routes
   registerStatusPage(kbnServer, server, config);
   registerStatusApi(kbnServer, server, config);
-  registerStatsApi(kbnServer, server, config, collector);
+  registerStatsApi(kbnServer, server, config);
 }
