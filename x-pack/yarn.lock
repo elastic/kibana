@@ -154,6 +154,12 @@
   dependencies:
     "@types/node" "*"
 
+"@types/hapi@13.0.38":
+  version "13.0.38"
+  resolved "https://registry.yarnpkg.com/@types/hapi/-/hapi-13.0.38.tgz#3671ab29fd465d61e394718ce546b7d5ef21a331"
+  dependencies:
+    "@types/node" "*"
+
 "@types/is-stream@^1.1.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@types/is-stream/-/is-stream-1.1.0.tgz#b84d7bb207a210f2af9bed431dc0fbe9c4143be1"

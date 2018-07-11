@@ -3,39 +3,38 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FrameworkRequest } from '../framework/adapter_types';
+import { FrameworkRequest, FrameworkUser } from '../framework/adapter_types';
 export interface DatabaseAdapter {
-  readonly InternalRequest: symbol;
   putTemplate(
-    req: FrameworkRequest | symbol,
+    user: FrameworkUser,
     params: DatabasePutTemplateParams
   ): Promise<any>;
   get<Source>(
-    req: FrameworkRequest | symbol,
+    user: FrameworkUser,
     params: DatabaseGetParams
   ): Promise<DatabaseGetDocumentResponse<Source>>;
   create(
-    req: FrameworkRequest | symbol,
+    user: FrameworkUser,
     params: DatabaseCreateDocumentParams
   ): Promise<DatabaseCreateDocumentResponse>;
   index<T>(
-    req: FrameworkRequest | symbol,
+    user: FrameworkUser,
     params: DatabaseIndexDocumentParams<T>
   ): Promise<DatabaseIndexDocumentResponse>;
   delete(
-    req: FrameworkRequest | symbol,
+    user: FrameworkUser,
     params: DatabaseDeleteDocumentParams
   ): Promise<DatabaseDeleteDocumentResponse>;
   mget<T>(
-    req: FrameworkRequest | symbol,
+    user: FrameworkUser,
     params: DatabaseMGetParams
   ): Promise<DatabaseMGetResponse<T>>;
   bulk(
-    req: FrameworkRequest | symbol,
+    user: FrameworkUser,
     params: DatabaseBulkIndexDocumentsParams
   ): Promise<DatabaseBulkResponse>;
   search<T>(
-    req: FrameworkRequest | symbol,
+    user: FrameworkUser,
     params: DatabaseSearchParams
   ): Promise<DatabaseSearchResponse<T>>;
 }

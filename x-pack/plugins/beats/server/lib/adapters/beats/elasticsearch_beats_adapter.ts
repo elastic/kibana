@@ -9,14 +9,17 @@ import moment from 'moment';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { CMBeat } from '../../../../common/domain_types';
 import { DatabaseAdapter } from '../database/adapter_types';
-import { FrameworkRequest } from '../framework/adapter_types';
+import { BackendFrameworkAdapter } from '../framework/adapter_types';
+import { FrameworkUser } from '../framework/adapter_types';
 import { BeatsTagAssignment, CMBeatsAdapter } from './adapter_types';
 
 export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
   private database: DatabaseAdapter;
+  private framework: BackendFrameworkAdapter;
 
-  constructor(database: DatabaseAdapter) {
+  constructor(database: DatabaseAdapter, framework: BackendFrameworkAdapter) {
     this.database = database;
+    this.framework = framework;
   }
 
   public async get(id: string) {
@@ -28,7 +31,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     };
 
     const response = await this.database.get(
-      this.database.InternalRequest,
+      this.framework.internalUser,
       params
     );
     if (!response.found) {
@@ -44,7 +47,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       type: 'beat',
     };
 
-    await this.database.create(this.database.InternalRequest, {
+    await this.database.create(this.framework.internalUser, {
       body,
       id: `beat:${beat.id}`,
       index: INDEX_NAMES.BEATS,
@@ -66,10 +69,10 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       refresh: 'wait_for',
       type: '_doc',
     };
-    await this.database.index(this.database.InternalRequest, params);
+    await this.database.index(this.framework.internalUser, params);
   }
 
-  public async getWithIds(req: FrameworkRequest, beatIds: string[]) {
+  public async getWithIds(user: FrameworkUser, beatIds: string[]) {
     const ids = beatIds.map(beatId => `beat:${beatId}`);
 
     const params = {
@@ -80,14 +83,14 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       index: INDEX_NAMES.BEATS,
       type: '_doc',
     };
-    const response = await this.database.mget(req, params);
+    const response = await this.database.mget(user, params);
 
     return _get(response, 'docs', [])
       .filter((b: any) => b.found)
       .map((b: any) => b._source.beat);
   }
 
-  public async verifyBeats(req: FrameworkRequest, beatIds: string[]) {
+  public async verifyBeats(user: FrameworkUser, beatIds: string[]) {
     if (!Array.isArray(beatIds) || beatIds.length === 0) {
       return [];
     }
@@ -100,7 +103,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       ])
     );
 
-    const response = await this.database.bulk(req, {
+    const response = await this.database.bulk(user, {
       _sourceInclude: ['beat.id', 'beat.verified_on'],
       body,
       index: INDEX_NAMES.BEATS,
@@ -114,20 +117,20 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     }));
   }
 
-  public async getAll(req: FrameworkRequest) {
+  public async getAll(user: FrameworkUser) {
     const params = {
       index: INDEX_NAMES.BEATS,
       q: 'type:beat',
       type: '_doc',
     };
-    const response = await this.database.search(req, params);
+    const response = await this.database.search(user, params);
 
     const beats = _get<any>(response, 'hits.hits', []);
     return beats.map((beat: any) => omit(beat._source.beat, ['access_token']));
   }
 
   public async removeTagsFromBeats(
-    req: FrameworkRequest,
+    user: FrameworkUser,
     removals: BeatsTagAssignment[]
   ): Promise<BeatsTagAssignment[]> {
     const body = flatten(
@@ -146,7 +149,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       })
     );
 
-    const response = await this.database.bulk(req, {
+    const response = await this.database.bulk(user, {
       body,
       index: INDEX_NAMES.BEATS,
       refresh: 'wait_for',
@@ -162,7 +165,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
   }
 
   public async assignTagsToBeats(
-    req: FrameworkRequest,
+    user: FrameworkUser,
     assignments: BeatsTagAssignment[]
   ): Promise<BeatsTagAssignment[]> {
     const body = flatten(
@@ -184,7 +187,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       })
     );
 
-    const response = await this.database.bulk(req, {
+    const response = await this.database.bulk(user, {
       body,
       index: INDEX_NAMES.BEATS,
       refresh: 'wait_for',

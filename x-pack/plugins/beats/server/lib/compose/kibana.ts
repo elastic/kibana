@@ -17,20 +17,24 @@ import { CMTokensDomain } from '../domains/tokens';
 
 import { CMDomainLibs, CMServerLibs } from '../lib';
 
-import { Server } from 'hapi';
-
-export function compose(server: Server): CMServerLibs {
+export function compose(server: any): CMServerLibs {
   const framework = new KibanaBackendFrameworkAdapter(server);
   const database = new KibanaDatabaseAdapter(server.plugins.elasticsearch);
 
   const tags = new CMTagsDomain(new ElasticsearchTagsAdapter(database));
-  const tokens = new CMTokensDomain(new ElasticsearchTokensAdapter(database), {
-    framework,
-  });
-  const beats = new CMBeatsDomain(new ElasticsearchBeatsAdapter(database), {
-    tags,
-    tokens,
-  });
+  const tokens = new CMTokensDomain(
+    new ElasticsearchTokensAdapter(database, framework),
+    {
+      framework,
+    }
+  );
+  const beats = new CMBeatsDomain(
+    new ElasticsearchBeatsAdapter(database, framework),
+    {
+      tags,
+      tokens,
+    }
+  );
 
   const domainLibs: CMDomainLibs = {
     beats,

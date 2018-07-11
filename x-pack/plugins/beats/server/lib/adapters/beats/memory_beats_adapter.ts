@@ -8,7 +8,7 @@ import { omit } from 'lodash';
 import moment from 'moment';
 
 import { CMBeat } from '../../../../common/domain_types';
-import { FrameworkRequest } from '../framework/adapter_types';
+import { FrameworkUser } from '../framework/adapter_types';
 import { BeatsTagAssignment, CMBeatsAdapter } from './adapter_types';
 
 export class MemoryBeatsAdapter implements CMBeatsAdapter {
@@ -35,11 +35,11 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
     };
   }
 
-  public async getWithIds(req: FrameworkRequest, beatIds: string[]) {
+  public async getWithIds(user: FrameworkUser, beatIds: string[]) {
     return this.beatsDB.filter(beat => beatIds.includes(beat.id));
   }
 
-  public async verifyBeats(req: FrameworkRequest, beatIds: string[]) {
+  public async verifyBeats(user: FrameworkUser, beatIds: string[]) {
     if (!Array.isArray(beatIds) || beatIds.length === 0) {
       return [];
     }
@@ -55,12 +55,12 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
     return this.beatsDB.filter(beat => beatIds.includes(beat.id));
   }
 
-  public async getAll(req: FrameworkRequest) {
+  public async getAll(user: FrameworkUser) {
     return this.beatsDB.map((beat: any) => omit(beat, ['access_token']));
   }
 
   public async removeTagsFromBeats(
-    req: FrameworkRequest,
+    user: FrameworkUser,
     removals: BeatsTagAssignment[]
   ): Promise<BeatsTagAssignment[]> {
     const beatIds = removals.map(r => r.beatId);
@@ -85,7 +85,7 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
   }
 
   public async assignTagsToBeats(
-    req: FrameworkRequest,
+    user: FrameworkUser,
     assignments: BeatsTagAssignment[]
   ): Promise<BeatsTagAssignment[]> {
     const beatIds = assignments.map(r => r.beatId);
