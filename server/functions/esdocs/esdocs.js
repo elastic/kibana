@@ -18,9 +18,9 @@ export const esdocs = () => ({
       default: '_all',
       help: 'Specify an index pattern. Eg "logstash-*"',
     },
-    q: {
+    query: {
       types: ['string'],
-      aliases: ['query'],
+      aliases: ['q'],
       help: 'A Lucene query string',
       default: '-_index:.kibana',
     },
@@ -45,9 +45,9 @@ export const esdocs = () => ({
   fn: (context, args, handlers) => {
     context.and = context.and.concat([
       {
-        // q
+        // query
         type: 'luceneQueryString',
-        query: args.q,
+        query: args.query,
       },
     ]);
 
