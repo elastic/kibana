@@ -6,7 +6,7 @@
 
 import expect from 'expect.js';
 import { MemoryBeatsAdapter } from '../../../adapters/beats/memory_beats_adapter';
-import { TestingBackendFrameworkAdapter } from '../../../adapters/famework/testing_framework_adapter';
+import { TestingBackendFrameworkAdapter } from '../../../adapters/framework/testing_framework_adapter';
 import { MemoryTagsAdapter } from '../../../adapters/tags/memory_tags_adapter';
 import { MemoryTokensAdapter } from '../../../adapters/tokens/memory_tokens_adapter';
 

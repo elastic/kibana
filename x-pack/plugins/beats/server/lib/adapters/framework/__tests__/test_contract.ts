@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import expect from 'expect.js';
 import { BackendFrameworkAdapter } from '../adapter_types';
 
 interface ContractConfig {
@@ -30,7 +31,7 @@ export const contractTests = (testName: string, config: ContractConfig) => {
     });
 
     it('Should have tests here', () => {
-      expect(true).toEqual(true);
+      expect(true).to.eql(true);
     });
   });
 };

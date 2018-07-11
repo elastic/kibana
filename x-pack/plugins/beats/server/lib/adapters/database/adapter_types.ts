@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FrameworkRequest } from '../famework/adapter_types';
+import { FrameworkRequest } from '../framework/adapter_types';
 export interface DatabaseAdapter {
   readonly InternalRequest: symbol;
   putTemplate(

@@ -9,7 +9,7 @@ import { ElasticsearchTagsAdapter } from '../adapters/tags/elasticsearch_tags_ad
 import { ElasticsearchTokensAdapter } from '../adapters/tokens/elasticsearch_tokens_adapter';
 import { KibanaDatabaseAdapter } from './../adapters/database/kibana_database_adapter';
 
-import { KibanaBackendFrameworkAdapter } from '../adapters/famework/kibana_framework_adapter';
+import { KibanaBackendFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
 
 import { CMBeatsDomain } from '../domains/beats';
 import { CMTagsDomain } from '../domains/tags';

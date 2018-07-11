@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { internalAuthData } from '../../../utils/wrap_request';
+import { IRouteAdditionalConfigurationOptions, IStrictReply } from 'hapi';
+import { internalFrameworkRequest } from '../../../utils/wrap_request';
 export interface BackendFrameworkAdapter {
-  internalUser: FrameworkInternalUser;
   version: string;
   getSetting(settingPath: string): any;
   exposeStaticDir(urlPath: string, dir: string): void;
@@ -14,28 +14,10 @@ export interface BackendFrameworkAdapter {
   ): void;
 }
 
-export interface FrameworkAuthenticatedUser<AuthDataType = any> {
-  kind: 'authenticated';
-  [internalAuthData]: AuthDataType;
-}
-
-export interface FrameworkUnAuthenticatedUser {
-  kind: 'unauthenticated';
-}
-
-export interface FrameworkInternalUser {
-  kind: 'internal';
-}
-
-export type FrameworkUser<AuthDataType = any> =
-  | FrameworkAuthenticatedUser<AuthDataType>
-  | FrameworkUnAuthenticatedUser
-  | FrameworkInternalUser;
-
 export interface FrameworkRequest<
   InternalRequest extends FrameworkWrappableRequest = FrameworkWrappableRequest
 > {
-  user: FrameworkUser<InternalRequest['headers']>;
+  [internalFrameworkRequest]: InternalRequest;
   headers: InternalRequest['headers'];
   info: InternalRequest['info'];
   payload: InternalRequest['payload'];
@@ -51,13 +33,19 @@ export interface FrameworkRouteOptions<
   method: string | string[];
   vhost?: string;
   handler: FrameworkRouteHandler<RouteRequest, RouteResponse>;
-  config?: {};
+  config?: Pick<
+    IRouteAdditionalConfigurationOptions,
+    Exclude<keyof IRouteAdditionalConfigurationOptions, 'handler'>
+  >;
 }
 
 export type FrameworkRouteHandler<
   RouteRequest extends FrameworkWrappableRequest,
   RouteResponse
-> = (request: FrameworkRequest<RouteRequest>, reply: any) => void;
+> = (
+  request: FrameworkRequest<RouteRequest>,
+  reply: IStrictReply<RouteResponse>
+) => void;
 
 export interface FrameworkWrappableRequest<
   Payload = any,

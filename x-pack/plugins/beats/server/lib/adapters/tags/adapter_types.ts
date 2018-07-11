@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { BeatTag } from '../../../../common/domain_types';
-import { FrameworkRequest } from '../famework/adapter_types';
+import { FrameworkRequest } from '../framework/adapter_types';
 
 export interface CMTagsAdapter {
   getTagsWithIds(req: FrameworkRequest, tagIds: string[]): any;
