@@ -83,8 +83,7 @@ export const createInstallRoute = () => ({
         return reply(errMsg).code(err.status);
       }
 
-      const { now: nowTimestamp } = request.query;
-      const now = nowTimestamp ? new Date(nowTimestamp) : new Date();
+      const now = request.query.now ? request.query.now : new Date();
       const currentTimeMarker = new Date(Date.parse(sampleDataset.currentTimeMarker));
       function updateTimestamps(doc) {
         sampleDataset.timeFields.forEach(timeFieldName => {
