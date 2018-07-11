@@ -17,20 +17,22 @@
  * under the License.
  */
 
-const parentPipelineAggWritter = function (agg, output) {
-  const vis = agg.vis;
-  const selectedMetric = agg.params.customMetric || vis.aggs.getResponseAggById(agg.params.metricAgg);
+const siblingPipelineAggWriter = function (agg, output) {
+  if (!agg.params.customMetric) return;
 
-  if (agg.params.customMetric && agg.params.customMetric.type.name !== 'count') {
-    output.parentAggs = (output.parentAggs || []).concat(selectedMetric);
-  }
+  const metricAgg = agg.params.customMetric;
+  const bucketAgg = agg.params.customBucket;
 
-  output.params = {};
-  if (selectedMetric.type.name === 'count') {
-    output.params.buckets_path = '_count';
+  // if a bucket is selected, we must add this agg as a sibling to it, and add a metric to that bucket (or select one of its)
+  if (metricAgg.type.name !== 'count') {
+    bucketAgg.subAggs = (output.subAggs || []).concat(metricAgg);
+    output.params.buckets_path = `${bucketAgg.id}>${metricAgg.id}`;
   } else {
-    output.params.buckets_path = selectedMetric.id;
+    output.params.buckets_path = bucketAgg.id + '>_count';
   }
+
+  output.parentAggs = (output.parentAggs || []).concat(bucketAgg);
+
 };
 
-export { parentPipelineAggWritter };
+export { siblingPipelineAggWriter };
