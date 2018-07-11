@@ -4,38 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { FrameworkRequest } from '../famework/adapter_types';
-
 export interface DatabaseAdapter {
+  readonly InternalRequest: symbol;
   putTemplate(
-    req: FrameworkRequest | null,
+    req: FrameworkRequest | symbol,
     params: DatabasePutTemplateParams
   ): Promise<any>;
   get<Source>(
-    req: FrameworkRequest | null,
+    req: FrameworkRequest | symbol,
     params: DatabaseGetParams
   ): Promise<DatabaseGetDocumentResponse<Source>>;
   create(
-    req: FrameworkRequest | null,
+    req: FrameworkRequest | symbol,
     params: DatabaseCreateDocumentParams
   ): Promise<DatabaseCreateDocumentResponse>;
   index<T>(
-    req: FrameworkRequest | null,
+    req: FrameworkRequest | symbol,
     params: DatabaseIndexDocumentParams<T>
   ): Promise<DatabaseIndexDocumentResponse>;
   delete(
-    req: FrameworkRequest | null,
+    req: FrameworkRequest | symbol,
     params: DatabaseDeleteDocumentParams
   ): Promise<DatabaseDeleteDocumentResponse>;
   mget<T>(
-    req: FrameworkRequest | null,
+    req: FrameworkRequest | symbol,
     params: DatabaseMGetParams
   ): Promise<DatabaseMGetResponse<T>>;
   bulk(
-    req: FrameworkRequest | null,
+    req: FrameworkRequest | symbol,
     params: DatabaseBulkIndexDocumentsParams
   ): Promise<DatabaseBulkResponse>;
   search<T>(
-    req: FrameworkRequest | null,
+    req: FrameworkRequest | symbol,
     params: DatabaseSearchParams
   ): Promise<DatabaseSearchResponse<T>>;
 }

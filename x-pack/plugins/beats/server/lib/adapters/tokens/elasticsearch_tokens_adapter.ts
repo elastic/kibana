@@ -24,7 +24,7 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
       type: '_doc',
     };
 
-    await this.database.delete(null, params);
+    await this.database.delete(this.database.InternalRequest, params);
   }
 
   public async getEnrollmentToken(
@@ -37,7 +37,10 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
       type: '_doc',
     };
 
-    const response = await this.database.get(null, params);
+    const response = await this.database.get(
+      this.database.InternalRequest,
+      params
+    );
     const tokenDetails = get<TokenEnrollmentData>(
       response,
       '_source.enrollment_token',
