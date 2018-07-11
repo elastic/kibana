@@ -7,7 +7,7 @@
 import pluralize from 'pluralize';
 import { uiModules } from 'ui/modules';
 import { InitAfterBindingsWorkaround } from 'ui/compat';
-import { Notifier, toastNotifications } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 import template from './watch_list.html';
 import '../watch_table';
 import { PAGINATION, REFRESH_INTERVALS, WATCH_TYPES } from 'plugins/watcher/../common/constants';
@@ -58,7 +58,6 @@ app.directive('watchList', function ($injector) {
         this.sortField = 'id';
         this.sortReverse = false;
 
-        this.notifier = new Notifier({ location: 'Watcher' });
         this.pager = pagerFactory.create(this.watches.length, PAGINATION.PAGE_SIZE, 1);
 
         // Reload watches periodically
@@ -95,7 +94,7 @@ app.directive('watchList', function ($injector) {
                 if (err.status === 403) {
                   this.forbidden = true;
                 } else {
-                  this.notifier.error(err);
+                  toastNotifications.addDanger(err.data.message);
                 }
               });
           });
@@ -176,7 +175,7 @@ app.directive('watchList', function ($injector) {
           })
           .catch(err => {
             return licenseService.checkValidity()
-              .then(() => this.notifier.error(err));
+              .then(() => toastNotifications.addDanger(err.data.message));
           });
       }
 

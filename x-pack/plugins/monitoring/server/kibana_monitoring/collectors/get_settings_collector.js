@@ -7,7 +7,6 @@
 import { get } from 'lodash';
 import { XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING } from '../../../../../server/lib/constants';
 import { KIBANA_SETTINGS_TYPE } from '../../../common/constants';
-import { Collector } from '../classes/collector';
 
 /*
  * Check if Cluster Alert email notifications is enabled in config
@@ -57,7 +56,8 @@ export async function checkForEmailValue(
 export function getSettingsCollector(server) {
   const config = server.config();
 
-  return new Collector(server, {
+  const { collectorSet } = server.usage;
+  return collectorSet.makeStatsCollector({
     type: KIBANA_SETTINGS_TYPE,
     async fetch(callCluster) {
       let kibanaSettingsData;

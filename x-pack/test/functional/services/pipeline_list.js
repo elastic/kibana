@@ -61,7 +61,7 @@ export function PipelineListProvider({ getService }) {
     }
 
     /**
-     *  Read the rows from the table, maping the cell values to key names
+     *  Read the rows from the table, mapping the cell values to key names
      *  in an array of objects
      *  @return {Promise<Array<Object>>}
      */

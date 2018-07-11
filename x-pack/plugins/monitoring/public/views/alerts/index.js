@@ -10,10 +10,10 @@ import template from './index.html';
 import { MonitoringViewBaseController } from 'plugins/monitoring/views';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
+import { timefilter } from 'ui/timefilter';
 
 function getPageData($injector) {
   const globalState = $injector.get('globalState');
-  const timefilter = $injector.get('timefilter');
   const $http = $injector.get('$http');
   const Private = $injector.get('Private');
   const url = `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/alerts`;

@@ -142,12 +142,11 @@ export class DashboardStateManager {
    * @param {String} newTimeFilter.mode
    */
   handleTimeChange(newTimeFilter) {
-    const timeFilter = {
+    store.dispatch(updateTimeRange({
       from: FilterUtils.convertTimeToUTCString(newTimeFilter.from),
       to: FilterUtils.convertTimeToUTCString(newTimeFilter.to),
       mode: newTimeFilter.mode,
-    };
-    store.dispatch(updateTimeRange(timeFilter));
+    }));
   }
 
   /**
@@ -433,8 +432,8 @@ export class DashboardStateManager {
    */
   getTimeChanged(timeFilter) {
     return (
-      !FilterUtils.areTimesEqual(this.lastSavedDashboardFilters.timeFrom, timeFilter.time.from) ||
-      !FilterUtils.areTimesEqual(this.lastSavedDashboardFilters.timeTo, timeFilter.time.to)
+      !FilterUtils.areTimesEqual(this.lastSavedDashboardFilters.timeFrom, timeFilter.getTime().from) ||
+      !FilterUtils.areTimesEqual(this.lastSavedDashboardFilters.timeTo, timeFilter.getTime().to)
     );
   }
 
@@ -536,7 +535,8 @@ export class DashboardStateManager {
   /**
    * Updates timeFilter to match the time saved with the dashboard.
    * @param {Object} timeFilter
-   * @param {Object} timeFilter.time
+   * @param {func} timeFilter.setTime
+   * @param {func} timeFilter.setRefreshInterval
    * @param quickTimeRanges
    */
   syncTimefilterWithDashboard(timeFilter, quickTimeRanges) {
@@ -544,20 +544,25 @@ export class DashboardStateManager {
       throw new Error('The time is not saved with this dashboard so should not be synced.');
     }
 
-    timeFilter.time.to = this.savedDashboard.timeTo;
-    timeFilter.time.from = this.savedDashboard.timeFrom;
+    let mode;
     const isMoment = moment(this.savedDashboard.timeTo).isValid();
     if (isMoment) {
-      timeFilter.time.mode = 'absolute';
+      mode = 'absolute';
     } else {
       const quickTime = _.find(
         quickTimeRanges,
         (timeRange) => timeRange.from === this.savedDashboard.timeFrom && timeRange.to === this.savedDashboard.timeTo);
 
-      timeFilter.time.mode = quickTime ? 'quick' : 'relative';
+      mode = quickTime ? 'quick' : 'relative';
     }
+    timeFilter.setTime({
+      from: this.savedDashboard.timeFrom,
+      to: this.savedDashboard.timeTo,
+      mode
+    });
+
     if (this.savedDashboard.refreshInterval) {
-      timeFilter.refreshInterval = this.savedDashboard.refreshInterval;
+      timeFilter.setRefreshInterval(this.savedDashboard.refreshInterval);
     }
   }
 
@@ -574,8 +579,8 @@ export class DashboardStateManager {
    */
   applyFilters(query, filters) {
     this.appState.query = query;
-    this.savedDashboard.searchSource.set('query', query);
-    this.savedDashboard.searchSource.set('filter', filters);
+    this.savedDashboard.searchSource.setField('query', query);
+    this.savedDashboard.searchSource.setField('filter', filters);
     this.saveState();
   }
 

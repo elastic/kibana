@@ -67,13 +67,18 @@
   </div>
 
   <visualize
+    ng-if="!chrome.getVisible()"
     saved-obj="savedVis"
     ui-state="uiState"
     time-range="timeRange"
-    editor-mode="chrome.getVisible()"
-    show-spy-panel="chrome.getVisible()"
-    >
+  />
 
-  </visualize>
+  <visualization-editor
+    ng-if="chrome.getVisible()"
+    saved-obj="savedVis"
+    ui-state="uiState"
+    time-range="timeRange"
+    class="vis-editor-content"
+  />
 
 </visualize-app>

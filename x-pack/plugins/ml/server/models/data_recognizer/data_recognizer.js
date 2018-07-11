@@ -366,7 +366,7 @@ export class DataRecognizer {
     if (filteredSavedObjects.length) {
       results = await this.savedObjectsClient.bulkCreate(filteredSavedObjects);
     }
-    return results;
+    return results.saved_objects;
   }
 
   // save the jobs.

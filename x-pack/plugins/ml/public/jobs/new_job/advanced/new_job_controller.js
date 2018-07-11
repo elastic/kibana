@@ -11,6 +11,7 @@ import angular from 'angular';
 import 'ace';
 
 import { parseInterval } from 'ui/utils/parse_interval';
+import { timefilter } from 'ui/timefilter';
 
 import uiRoutes from 'ui/routes';
 import { checkLicense } from 'plugins/ml/license/check_license';
@@ -69,7 +70,6 @@ module.controller('MlNewJob',
     $route,
     $location,
     $modal,
-    timefilter,
     mlDatafeedService,
     mlConfirmModalService) {
 
@@ -472,7 +472,7 @@ module.controller('MlNewJob',
                     // mappings should be fully set up, but the Kibana mappings then
                     // need to be refreshed to reflect the Elasticsearch mappings for
                     // any new analytical fields that have been configured in the job.
-                    //courier.indexPatterns.get('.ml-anomalies-*')
+                    //indexPatterns.get('.ml-anomalies-*')
                     //.then((indexPattern) => {
                     //  indexPattern.refreshFields()
                     //  .then(() => {

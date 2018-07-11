@@ -19,8 +19,8 @@
 
 import _ from 'lodash';
 import '../saved_visualizations/saved_visualizations';
+import './visualization_editor';
 import 'ui/vis/editors/default/sidebar';
-import './agg_filter';
 import 'ui/visualize';
 import 'ui/collapsible_sidebar';
 import 'ui/share';
@@ -41,12 +41,13 @@ import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import { recentlyAccessed } from 'ui/persisted_log';
+import { timefilter } from 'ui/timefilter';
 
 uiRoutes
   .when(VisualizeConstants.CREATE_PATH, {
     template: editorTemplate,
     resolve: {
-      savedVis: function (savedVisualizations, courier, $route, Private) {
+      savedVis: function (savedVisualizations, redirectWhenMissing, $route, Private) {
         const visTypes = Private(VisTypesRegistryProvider);
         const visType = _.find(visTypes, { name: $route.current.params.type });
         const shouldHaveIndex = visType.requiresSearch && visType.options.showIndexSelection;
@@ -56,7 +57,7 @@ uiRoutes
         }
 
         return savedVisualizations.get($route.current.params)
-          .catch(courier.redirectWhenMissing({
+          .catch(redirectWhenMissing({
             '*': '/visualize'
           }));
       }
@@ -65,7 +66,7 @@ uiRoutes
   .when(`${VisualizeConstants.EDIT_PATH}/:id`, {
     template: editorTemplate,
     resolve: {
-      savedVis: function (savedVisualizations, courier, $route) {
+      savedVis: function (savedVisualizations, redirectWhenMissing, $route) {
         return savedVisualizations.get($route.current.params.id)
           .then((savedVis) => {
             recentlyAccessed.add(
@@ -74,7 +75,7 @@ uiRoutes
               savedVis.id);
             return savedVis;
           })
-          .catch(courier.redirectWhenMissing({
+          .catch(redirectWhenMissing({
             'visualization': '/visualize',
             'search': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
             'index-pattern': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
@@ -87,7 +88,7 @@ uiRoutes
 uiModules
   .get('app/visualize', [
     'kibana/notify',
-    'kibana/courier'
+    'kibana/url'
   ])
   .directive('visualizeApp', function () {
     return {
@@ -97,7 +98,19 @@ uiModules
     };
   });
 
-function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise, config, kbnBaseUrl, localStorage) {
+function VisEditor(
+  $scope,
+  $route,
+  AppState,
+  $window,
+  kbnUrl,
+  redirectWhenMissing,
+  Private,
+  Promise,
+  config,
+  kbnBaseUrl,
+  localStorage
+) {
   const docTitle = Private(DocTitleProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
 
@@ -131,6 +144,21 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     template: require('plugins/kibana/visualize/editor/panels/share.html'),
     testId: 'visualizeShareButton',
   }, {
+    key: 'inspect',
+    description: 'Open Inspector for visualization',
+    testId: 'openInspectorButton',
+    disableButton() {
+      return !vis.hasInspector();
+    },
+    run() {
+      vis.openInspector().bindToAngularScope($scope);
+    },
+    tooltip() {
+      if (!vis.hasInspector()) {
+        return 'This visualization doesn\'t support any inspectors.';
+      }
+    }
+  }, {
     key: 'refresh',
     description: 'Refresh',
     run: function () {
@@ -163,11 +191,11 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
   const stateDefaults = {
     uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : {},
     linked: !!savedVis.savedSearchId,
-    query: searchSource.getOwn('query') || {
+    query: searchSource.getOwnField('query') || {
       query: '',
       language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
     },
-    filters: searchSource.getOwn('filter') || [],
+    filters: searchSource.getOwnField('filter') || [],
     vis: savedVisState
   };
 
@@ -183,7 +211,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
       Promise.try(function () {
         vis.setState(appState.vis);
       })
-        .catch(courier.redirectWhenMissing({
+        .catch(redirectWhenMissing({
           'index-pattern-field': '/visualize'
         }));
     }
@@ -207,9 +235,8 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
 
     $scope.isAddToDashMode = () => addToDashMode;
 
-    $scope.timefilter = timefilter;
-    $scope.timeRange = timefilter.time;
-    $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'timefilter', 'isAddToDashMode');
+    $scope.timeRange = timefilter.getTime();
+    $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'isAddToDashMode');
 
     stateMonitor = stateMonitorFactory.create($state, stateDefaults);
     stateMonitor.ignoreProps([ 'vis.listeners' ]).onChange((status) => {
@@ -225,7 +252,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     };
 
     $scope.$watchMulti([
-      'searchSource.get("index")',
+      'searchSource.getField("index")',
       'vis.type.options.showTimePicker',
     ], function ([index, requiresTimePicker]) {
       const showTimeFilter = Boolean((!index || index.timeFieldName) && requiresTimePicker);
@@ -238,11 +265,11 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     });
 
     const updateTimeRange = () => {
-      $scope.timeRange = timefilter.time;
+      $scope.timeRange = timefilter.getTime();
     };
 
     timefilter.enableAutoRefreshSelector();
-    timefilter.on('update', updateTimeRange);
+    $scope.$listenAndDigestAsync(timefilter, 'timeUpdate', updateTimeRange);
 
     // update the searchSource when filters update
     $scope.$listen(queryFilter, 'update', function () {
@@ -252,15 +279,14 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     // update the searchSource when query updates
     $scope.fetch = function () {
       $state.save();
-      savedVis.searchSource.set('query', $state.query);
-      savedVis.searchSource.set('filter', $state.filters);
+      savedVis.searchSource.setField('query', $state.query);
+      savedVis.searchSource.setField('filter', $state.filters);
       $scope.vis.forceReload();
     };
 
     $scope.$on('$destroy', function () {
       savedVis.destroy();
       stateMonitor.destroy();
-      timefilter.off('update', updateTimeRange);
     });
   }
 
@@ -322,23 +348,23 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     toastNotifications.addSuccess(`Unlinked from saved search '${savedVis.savedSearch.title}'`);
 
     $state.linked = false;
-    const parent = searchSource.getParent(true);
-    const parentsParent = parent.getParent(true);
+    const searchSourceParent = searchSource.getParent(true);
+    const searchSourceGrandparent = searchSourceParent.getParent(true);
 
     delete savedVis.savedSearchId;
-    parent.set('filter', _.union(searchSource.getOwn('filter'), parent.getOwn('filter')));
+    searchSourceParent.setField('filter', _.union(searchSource.getOwnField('filter'), searchSourceParent.getOwnField('filter')));
 
     // copy over all state except "aggs", "query" and "filter"
-    _(parent.toJSON())
+    _(searchSourceParent.toJSON())
       .omit(['aggs', 'filter', 'query'])
       .forOwn(function (val, key) {
-        searchSource.set(key, val);
+        searchSource.setField(key, val);
       })
       .commit();
 
-    $state.query = searchSource.get('query');
-    $state.filters = searchSource.get('filter');
-    searchSource.inherits(parentsParent);
+    $state.query = searchSource.getField('query');
+    $state.filters = searchSource.getField('filter');
+    searchSource.setParent(searchSourceGrandparent);
 
     $scope.fetch();
   };

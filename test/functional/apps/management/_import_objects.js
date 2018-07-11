@@ -37,17 +37,18 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.unload('management');
     });
 
-    it('should import saved objects normally', async function () {
+    it('should import saved objects', async function () {
       await PageObjects.settings.clickKibanaSavedObjects();
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects.json'));
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.settings.clickImportDone();
       await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
       const objects = await PageObjects.settings.getSavedObjectsInTable();
-      expect(objects.length).to.be(3);
+      const isSavedObjectImported = objects.includes('Log Agents');
+      expect(isSavedObjectImported).to.be(true);
     });
 
-    it('should import conflicts using a confirm modal', async function () {
+    it('should provide dialog to allow the importing of saved objects with index pattern conflicts', async function () {
       await PageObjects.settings.clickKibanaSavedObjects();
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects-conflicts.json'));
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -57,10 +58,14 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.clickImportDone();
       await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
       const objects = await PageObjects.settings.getSavedObjectsInTable();
-      expect(objects.length).to.be(3);
+      const isSavedObjectImported = objects.includes('saved object with index pattern conflict');
+      expect(isSavedObjectImported).to.be(true);
     });
 
-    it('should allow for overrides', async function () {
+    // Test should be testing that user is warned when saved object will override another because of an id collision
+    // This is not the case. Instead the test just loads a saved object with an index pattern conflict
+    // Disabling until the issue is resolved since the test does not test the intended behavior
+    it.skip('should allow for overrides', async function () {
       await PageObjects.settings.clickKibanaSavedObjects();
 
       // Put in data which already exists
@@ -83,7 +88,10 @@ export default function ({ getService, getPageObjects }) {
       expect(objects.length).to.be(2);
     });
 
-    it('should allow for cancelling overrides', async function () {
+    // Test should be testing that user is warned when saved object will overrides another because of an id collision
+    // This is not the case. Instead the test just loads a saved object with an index pattern conflict
+    // Disabling until the issue is resolved since the test does not test the intended behavior
+    it.skip('should allow for cancelling overrides', async function () {
       await PageObjects.settings.clickKibanaSavedObjects();
 
       // Put in data which already exists
@@ -106,7 +114,37 @@ export default function ({ getService, getPageObjects }) {
       expect(objects.length).to.be(2);
     });
 
-    it('should handle saved searches and objects with saved searches properly', async function () {
+    it('should import saved objects linked to saved searches', async function () {
+      await PageObjects.settings.clickKibanaSavedObjects();
+      await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_saved_search.json'));
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickKibanaSavedObjects();
+      await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.json'));
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.settings.clickImportDone();
+      await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
+
+      const objects = await PageObjects.settings.getSavedObjectsInTable();
+      const isSavedObjectImported = objects.includes('saved object connected to saved search');
+      expect(isSavedObjectImported).to.be(true);
+    });
+
+    it('should not import saved objects linked to saved searches when saved search does not exist', async function () {
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickKibanaSavedObjects();
+      await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.json'));
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.settings.clickImportDone();
+      await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
+
+      const objects = await PageObjects.settings.getSavedObjectsInTable();
+      const isSavedObjectImported = objects.includes('saved object connected to saved search');
+      expect(isSavedObjectImported).to.be(false);
+    });
+
+    it('should not import saved objects linked to saved searches when saved search index pattern does not exist', async function () {
       // First, import the saved search
       await PageObjects.settings.clickKibanaSavedObjects();
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_saved_search.json'));
@@ -130,10 +168,11 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
       const objects = await PageObjects.settings.getSavedObjectsInTable();
-      expect(objects.length).to.be(2);
+      const isSavedObjectImported = objects.includes('saved object connected to saved search');
+      expect(isSavedObjectImported).to.be(false);
     });
 
-    it('should work with index patterns', async () => {
+    it('should import saved objects with index patterns when index patterns already exists', async () => {
       // First, import the objects
       await PageObjects.settings.clickKibanaSavedObjects();
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_with_index_patterns.json'));
@@ -143,18 +182,16 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
       const objects = await PageObjects.settings.getSavedObjectsInTable();
-      expect(objects.length).to.be(2);
+      const isSavedObjectImported = objects.includes('saved object imported with index pattern');
+      expect(isSavedObjectImported).to.be(true);
     });
 
-    it('should work when the index pattern does not exist', async () => {
+    it('should import saved objects with index patterns when index patterns does not exists', async () => {
       // First, we need to delete the index pattern
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndices();
       await PageObjects.settings.clickOnOnlyIndexPattern();
       await PageObjects.settings.removeIndexPattern();
-
-      // Second, create it
-      await PageObjects.settings.createIndexPattern('logstash-', '@timestamp');
 
       // Then, import the objects
       await PageObjects.settings.clickKibanaSavedObjects();
@@ -165,7 +202,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
       const objects = await PageObjects.settings.getSavedObjectsInTable();
-      expect(objects.length).to.be(2);
+      const isSavedObjectImported = objects.includes('saved object imported with index pattern');
+      expect(isSavedObjectImported).to.be(true);
     });
   });
 }

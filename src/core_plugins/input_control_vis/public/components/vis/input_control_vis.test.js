@@ -49,7 +49,7 @@ const mockRangeControl = {
     step: 1
   },
   type: 'range',
-  label: 'ragne control',
+  label: 'range control',
   value: { min: 0, max: 0 },
   min: 0,
   max: 100
@@ -78,6 +78,7 @@ test('Renders list control', () => {
     updateFiltersOnChange={updateFiltersOnChange}
     hasChanges={() => { return false; }}
     hasValues={() => { return false; }}
+    refreshControl={() => {}}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
@@ -92,6 +93,7 @@ test('Renders range control', () => {
     updateFiltersOnChange={updateFiltersOnChange}
     hasChanges={() => { return false; }}
     hasValues={() => { return false; }}
+    refreshControl={() => {}}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
@@ -106,6 +108,7 @@ test('Apply and Cancel change btns enabled when there are changes', () => {
     updateFiltersOnChange={updateFiltersOnChange}
     hasChanges={() => { return true; }}
     hasValues={() => { return false; }}
+    refreshControl={() => {}}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
@@ -120,6 +123,7 @@ test('Clear btns enabled when there are values', () => {
     updateFiltersOnChange={updateFiltersOnChange}
     hasChanges={() => { return false; }}
     hasValues={() => { return true; }}
+    refreshControl={() => {}}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
@@ -134,6 +138,7 @@ test('clearControls', () => {
     updateFiltersOnChange={updateFiltersOnChange}
     hasChanges={() => { return true; }}
     hasValues={() => { return true; }}
+    refreshControl={() => {}}
   />);
   findTestSubject(component, 'inputControlClearBtn').simulate('click');
   sinon.assert.calledOnce(clearControls);
@@ -152,6 +157,7 @@ test('submitFilters', () => {
     updateFiltersOnChange={updateFiltersOnChange}
     hasChanges={() => { return true; }}
     hasValues={() => { return true; }}
+    refreshControl={() => {}}
   />);
   findTestSubject(component, 'inputControlSubmitBtn').simulate('click');
   sinon.assert.calledOnce(submitFilters);
@@ -170,6 +176,7 @@ test('resetControls', () => {
     updateFiltersOnChange={updateFiltersOnChange}
     hasChanges={() => { return true; }}
     hasValues={() => { return true; }}
+    refreshControl={() => {}}
   />);
   findTestSubject(component, 'inputControlCancelBtn').simulate('click');
   sinon.assert.calledOnce(resetControls);

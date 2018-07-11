@@ -58,10 +58,7 @@ describe('utils: createToolingLog(logLevel, output)', () => {
     log.info('Baz');
     log.end();
 
-    const output = await createPromiseFromStreams([
-      log,
-      createConcatStream(''),
-    ]);
+    const output = await createPromiseFromStreams([log, createConcatStream('')]);
 
     expect(output).to.contain('Foo');
     expect(output).to.contain('Bar');
@@ -91,7 +88,7 @@ describe('utils: createToolingLog(logLevel, output)', () => {
     });
     describe('invalid logLevel', () => {
       it('throw error', () => {
-        // avoid the impossiblity that a valid level is generated
+        // avoid the impossibility that a valid level is generated
         // by specifying a long length
         const level = chance.word({ length: 10 });
 

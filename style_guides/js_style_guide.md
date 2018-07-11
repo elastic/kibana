@@ -41,9 +41,9 @@ cheap syntactic pleasures.
 [the opposition]: http://blog.izs.me/post/2353458699/an-open-letter-to-javascript-leaders-regarding
 [hnsemicolons]: http://news.ycombinator.com/item?id=1547647
 
-## 120 characters per line
+## 100 characters per line
 
-Try to limit your lines to 80 characters. If it feels right, you can go up to 120 characters.
+You should limit your lines to 100 chars. Prettier will check for that line width where enabled.
 
 ## Use `const` for variables
 
@@ -388,7 +388,7 @@ If you must use a function expression, then use an arrow function:
 ```
 
 If your function body does not include braces and only accepts one argument,
-then omit the argument paranthesis:
+then omit the argument parentheses:
 
 ```js
 // good
@@ -404,7 +404,7 @@ then omit the argument paranthesis:
 ```
 
 If your arrow function is only returning an object literal, then wrap the
-object in paranthesis rather than using an explicit return:
+object in parentheses rather than using an explicit return:
 
 ```js
 // good
@@ -676,13 +676,13 @@ Also, if the chain is long, each method should be on a new line.
 ```js
 // good
 $http.get('/info')
-  .then(({ data }) => this.transfromInfo(data))
+  .then(({ data }) => this.transformInfo(data))
   .then((transformed) => $http.post('/new-info', transformed))
   .then(({ data }) => console.log(data));
 
 // bad
 $http.get('/info')
-.then(({ data }) => this.transfromInfo(data))
+.then(({ data }) => this.transformInfo(data))
 .then((transformed) => $http.post('/new-info', transformed))
 .then(({ data }) => console.log(data));
 ```
