@@ -17,17 +17,20 @@
  * under the License.
  */
 
-export const appEntryTemplate = (bundle) => `
-/**
- * Test entry file
- *
- * This is programmatically created and updated, do not modify
- *
- * context: ${bundle.getContext()}
- */
+type Freezable = { [k: string]: any } | ArrayLike<any>;
 
-require('ui/chrome');
-${bundle.getRequires().join('\n')}
-require('ui/chrome').bootstrap(/* xoxo */);
+type RecursiveReadOnly<T> = T extends Freezable
+  ? Readonly<{ [K in keyof T]: RecursiveReadOnly<T[K]> }>
+  : T;
 
-`;
+export function deepFreeze<T extends Freezable>(object: T) {
+  // for any properties that reference an object, makes sure that object is
+  // recursively frozen as well
+  for (const value of Object.values(object)) {
+    if (value !== null && typeof value === 'object') {
+      deepFreeze(value);
+    }
+  }
+
+  return Object.freeze(object) as RecursiveReadOnly<T>;
+}

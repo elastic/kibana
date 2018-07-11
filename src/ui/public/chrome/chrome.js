@@ -21,9 +21,6 @@ import _ from 'lodash';
 import angular from 'angular';
 
 import { metadata } from '../metadata';
-import 'babel-polyfill';
-import 'whatwg-fetch';
-import 'custom-event-polyfill';
 import '../state_management/global_state';
 import '../config';
 import '../notify';

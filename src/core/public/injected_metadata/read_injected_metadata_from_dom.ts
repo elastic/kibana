@@ -17,12 +17,17 @@
  * under the License.
  */
 
-export let metadata = null;
+export function readInjectedMetadataFromDom() {
+  const el = document.querySelector('kbn-injected-metadata');
 
-export function __newPlatformInit__(legacyMetadata) {
-  if (metadata === null) {
-    metadata = legacyMetadata;
-  } else {
-    throw new Error('ui/metadata can only be initialized once');
+  if (!el) {
+    throw new Error('unable to find <kbn-injected-metadata> element');
   }
+
+  const json = el.getAttribute('data');
+  if (!json) {
+    throw new Error('<kbn-injected-metadata> does not have a data atttibute');
+  }
+
+  return JSON.parse(json);
 }

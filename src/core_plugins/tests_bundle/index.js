@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { union } from 'lodash';
-
 import { fromRoot } from '../../utils';
 
 import findSourceFiles from './find_source_files';
@@ -36,7 +34,7 @@ export default (kibana) => {
 
     uiExports: {
       async __bundleProvider__(kbnServer) {
-        let modules = [];
+        const modules = [];
 
         const {
           config,
@@ -66,8 +64,8 @@ export default (kibana) => {
 
             // add the modules from all of this plugins apps
             for (const app of uiApps) {
-              if (app.getPluginId() === pluginId) {
-                modules = union(modules, app.getModules());
+              if (app.getPluginId() === pluginId && !modules.includes(app.getMainModuleId())) {
+                modules.push(app.getMainModuleId());
               }
             }
 
@@ -76,7 +74,9 @@ export default (kibana) => {
         } else {
           // add the modules from all of the apps
           for (const app of uiApps) {
-            modules = union(modules, app.getModules());
+            if (!modules.includes(app.getMainModuleId())) {
+              modules.push(app.getMainModuleId());
+            }
           }
 
           for (const plugin of plugins) {

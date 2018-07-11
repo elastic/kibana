@@ -17,12 +17,20 @@
  * under the License.
  */
 
-export let metadata = null;
+export const newPlatformEntryTemplate = (bundle) => `
+/**
+ * Kibana entry file
+ *
+ * This is programmatically created and updated, do not modify
+ *
+ * context: ${bundle.getContext()}
+ */
 
-export function __newPlatformInit__(legacyMetadata) {
-  if (metadata === null) {
-    metadata = legacyMetadata;
-  } else {
-    throw new Error('ui/metadata can only be initialized once');
-  }
-}
+import { CoreSystem } from '__kibanaCore__'
+
+new CoreSystem().initLegacyPlatform(() => {
+  require('ui/chrome')
+  ${bundle.getRequires().join('\n  ')}
+  require('ui/chrome').bootstrap();
+})
+`;

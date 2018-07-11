@@ -17,12 +17,23 @@
  * under the License.
  */
 
-export let metadata = null;
+import { deepFreeze } from './deep_freeze';
+import { readInjectedMetadataFromDom } from './read_injected_metadata_from_dom';
 
-export function __newPlatformInit__(legacyMetadata) {
-  if (metadata === null) {
-    metadata = legacyMetadata;
-  } else {
-    throw new Error('ui/metadata can only be initialized once');
+export interface InjectedState {
+  legacyMetadata: {
+    [key: string]: any;
+  };
+}
+
+export class InjectedStateService {
+  private state: InjectedState;
+
+  constructor(injectedStateForTesting?: InjectedState) {
+    this.state = deepFreeze(injectedStateForTesting || readInjectedMetadataFromDom());
+  }
+
+  public getLegacyMetadata() {
+    return this.state.legacyMetadata;
   }
 }

@@ -29,7 +29,9 @@ export const createTestEntryTemplate = (defaultUiSettings) => (bundle) => `
  *
  */
 
-window.__KBN__ = {
+import { CoreSystem } from '__kibanaCore__'
+
+const legacyMetadata = {
   version: '1.2.3',
   buildNum: 1234,
   vars: {
@@ -64,7 +66,13 @@ window.__KBN__ = {
   }
 };
 
-require('ui/test_harness');
-${bundle.getRequires().join('\n')}
-require('ui/test_harness').bootstrap(/* go! */);
+new CoreSystem({
+  injectedMetadataForTesting: {
+    legacyMetadata
+  }
+}).initLegacyPlatform(() => {
+  require('ui/test_harness');
+  ${bundle.getRequires().join('\n  ')}
+  require('ui/test_harness').bootstrap();
+})
 `;
