@@ -5,21 +5,27 @@ import { templateFromReactComponent } from '../../lib/template_from_react_compon
 
 const SelectArgInput = ({ typeInstance, onValueChange, argValue, argId }) => {
   const choices = typeInstance.options.choices.map(({ value, name }) => ({ value, text: name }));
-  const handleChange = ev => onValueChange(ev.target.value);
+  const handleChange = ev => {
+    // Get the value from the choices passed in since it could be a number or
+    // boolean, but ev.target.value is always a string
+    const { value } = choices[ev.target.selectedIndex];
+    return onValueChange(value);
+  };
 
   return <EuiSelect id={argId} defaultValue={argValue} options={choices} onChange={handleChange} />;
 };
 
 SelectArgInput.propTypes = {
   onValueChange: PropTypes.func.isRequired,
-  argValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  argValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.bool]).isRequired,
   typeInstance: PropTypes.shape({
     name: PropTypes.string.isRequired,
     options: PropTypes.shape({
       choices: PropTypes.arrayOf(
         PropTypes.shape({
           name: PropTypes.string.isRequired,
-          value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+          value: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.bool])
+            .isRequired,
         })
       ).isRequired,
     }),

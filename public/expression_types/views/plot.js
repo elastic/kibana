@@ -1,5 +1,6 @@
 import { map, uniq } from 'lodash';
 import { getState, getValue } from '../../lib/resolved_arg';
+import { legendOptions } from '../../lib/legend_options';
 
 const styleProps = ['lines', 'bars', 'points', 'fill', 'stack'];
 
@@ -15,10 +16,13 @@ export const plot = () => ({
     },
     {
       name: 'legend',
-      displayName: 'Legend Visibility',
-      help: 'Enable or disable the legend',
-      argType: 'toggle',
-      default: 'true',
+      displayName: 'Legend Position',
+      help: 'Disable or position the legend',
+      argType: 'select',
+      default: 'ne',
+      options: {
+        choices: legendOptions,
+      },
     },
     {
       name: 'xaxis',

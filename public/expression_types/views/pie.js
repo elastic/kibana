@@ -1,5 +1,6 @@
 import { map, uniq } from 'lodash';
 import { getState, getValue } from '../../lib/resolved_arg';
+import { legendOptions } from '../../lib/legend_options';
 
 export const pie = () => ({
   name: 'pie',
@@ -27,10 +28,13 @@ export const pie = () => ({
     },
     {
       name: 'legend',
-      displayName: 'Legend Visibility',
-      help: 'Enable or disable the legend',
-      argType: 'toggle',
-      default: 'false',
+      displayName: 'Legend Position',
+      help: 'Disable or position the legend',
+      argType: 'select',
+      default: 'ne',
+      options: {
+        choices: legendOptions,
+      },
     },
   ],
   resolve({ context }) {
