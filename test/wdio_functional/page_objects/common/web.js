@@ -17,14 +17,12 @@
  * under the License.
  */
 
-import { createToolingLog } from '@kbn/dev-utils';
 
 export default class Web {
 
   constructor(driver) {
     this.driver = driver;
-    this.logger = createToolingLog('info');
-    this.logger.pipe(process.stdout);
+    this.logger = global.getService('log');
   }
 
   getElementText(selector) {

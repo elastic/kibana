@@ -38,12 +38,14 @@ export default class BasePage extends Web {
       }
       navigateToConsole() {
         self.driver.click(this.consoleNavLinkSelector);
-        const ConsolePage = require('../console/console_page').default;
+        const ConsolePage = require('../console/console_page');
         return new ConsolePage(self.driver);
       }
 
       navigateToHome() {
         self.driver.url('/');
+        const HomePage = require('../home/home_page');
+        return new HomePage(this.driver);
       }
     };
   }

@@ -17,4 +17,9 @@
  * under the License.
  */
 
-import './console.spec';
+
+describe('Console App', function () {
+  describe('Console Tests', function () {
+    require('./console.spec');
+  });
+});

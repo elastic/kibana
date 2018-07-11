@@ -16,6 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-describe('Index Pattern', () => {
-  it('should show the default request', () => {});
-});
+
+it('Should just run and finish', function () { });
+

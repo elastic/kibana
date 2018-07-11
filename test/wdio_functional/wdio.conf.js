@@ -16,8 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 const ci = process.env.CI && process.env.CI === 'true';
-Error.stackTraceLimit = Infinity;
+const logger = require('@kbn/dev-utils').createToolingLog('info');
+logger.pipe(process.stdout);
 
 //#TODO: Find out why this resolution fails in FF, { width: 1200, height: 1024 }],
 exports.config = {
@@ -40,7 +42,12 @@ exports.config = {
     timeout: 300000,
     compilers: ['js:babel-register']
   },
-  reporters: ['dot', 'spec'],
+  reporters: ['spec', 'dot', 'junit'],
+  reporterOptions: {
+    junit: {
+      outputDir: './test/wdio_functional'
+    }
+  },
   services: [ci ? 'sauce' : 'selenium-standalone', 'chromedriver'],
   user: process.env.SAUCE_USERNAME,
   key: process.env.SAUCE_ACCESS_KEY,
@@ -70,11 +77,18 @@ exports.config = {
     }
   },
   before: function () {
-    require('babel-register');
     global.expect = require('expect');
     global.fetch = require('node-fetch');
-    const ProviderCollection = require('../../src/functional_test_runner/lib/providers/provider_collection');
-    const getService = new ProviderCollection().getService;
-    console.log(getService);
+    logger.debug('Setting up node environment for tests.');
+    require('../../src/setup_node_env');
+    require('./setup_wdio').setupWebdriverio().then(function (providers) {
+      global.getService = providers.getService;
+      providers.loadAll();
+    }).catch(function (e) {
+      logger.error('Setup of environment failed.');
+      logger.error(e);
+      process.exit(1);
+    });
+    logger.debug('Configuration successful. Starting tests.');
   },
 };

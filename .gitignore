@@ -15,11 +15,13 @@ target
 .idea
 *.iml
 *.log
+/test/failure-screenshots
 /test/*/failure_debug
 /test/*/screenshots/diff
 /test/*/screenshots/failure
 /test/*/screenshots/session
 /test/*/screenshots/visual_regression_gallery.html
+/test/wdio_functional/**/*.xunit*.xml
 /html_docs
 .eslintcache
 /plugins/
