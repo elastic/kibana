@@ -149,9 +149,7 @@ test('handles references', () => {
     value: schema.string({ defaultValue: schema.siblingRef('key') }),
   });
 
-  expect(
-    type.validate({ key: 'key#1' }, { context_value: 'context#1' })
-  ).toEqual({
+  expect(type.validate({ key: 'key#1' }, { context_value: 'context#1' })).toEqual({
     context: 'context#1',
     key: 'key#1',
     value: 'key#1',
@@ -188,9 +186,7 @@ test('includes namespace in failure when wrong top-level type', () => {
     foo: schema.string(),
   });
 
-  expect(() =>
-    type.validate([], {}, 'foo-namespace')
-  ).toThrowErrorMatchingSnapshot();
+  expect(() => type.validate([], {}, 'foo-namespace')).toThrowErrorMatchingSnapshot();
 });
 
 test('includes namespace in failure when wrong value type', () => {
@@ -201,7 +197,5 @@ test('includes namespace in failure when wrong value type', () => {
     foo: 123,
   };
 
-  expect(() =>
-    type.validate(value, {}, 'foo-namespace')
-  ).toThrowErrorMatchingSnapshot();
+  expect(() => type.validate(value, {}, 'foo-namespace')).toThrowErrorMatchingSnapshot();
 });

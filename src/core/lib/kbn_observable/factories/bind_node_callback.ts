@@ -29,21 +29,10 @@ export function $bindNodeCallback<T, T2, R>(
   callbackFunc: (v1: T, v2: T2, callback: (err: any, result: R) => any) => any
 ): (v1: T, v2: T2) => Observable<R>;
 export function $bindNodeCallback<T, T2, T3, R>(
-  callbackFunc: (
-    v1: T,
-    v2: T2,
-    v3: T3,
-    callback: (err: any, result: R) => any
-  ) => any
+  callbackFunc: (v1: T, v2: T2, v3: T3, callback: (err: any, result: R) => any) => any
 ): (v1: T, v2: T2, v3: T3) => Observable<R>;
 export function $bindNodeCallback<T, T2, T3, T4, R>(
-  callbackFunc: (
-    v1: T,
-    v2: T2,
-    v3: T3,
-    v4: T4,
-    callback: (err: any, result: R) => any
-  ) => any
+  callbackFunc: (v1: T, v2: T2, v3: T3, v4: T4, callback: (err: any, result: R) => any) => any
 ): (v1: T, v2: T2, v3: T3, v4: T4) => Observable<R>;
 export function $bindNodeCallback<T, T2, T3, T4, T5, R>(
   callbackFunc: (

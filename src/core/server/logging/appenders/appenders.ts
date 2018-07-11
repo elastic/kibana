@@ -65,10 +65,7 @@ export class Appenders {
    * @param env Current environment that is required by some appenders.
    * @returns Fully constructed `Appender` instance.
    */
-  public static create(
-    config: AppenderConfigType,
-    env: Env
-  ): DisposableAppender {
+  public static create(config: AppenderConfigType, env: Env): DisposableAppender {
     switch (config.kind) {
       case 'console':
         return new ConsoleAppender(Layouts.create(config.layout));

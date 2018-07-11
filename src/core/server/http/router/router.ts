@@ -27,10 +27,7 @@ import { RouteConfig, RouteMethod, RouteSchemas } from './route';
 export interface RouterRoute {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE';
   path: string;
-  handler: (
-    req: Request,
-    responseToolkit: ResponseToolkit
-  ) => Promise<ResponseObject>;
+  handler: (req: Request, responseToolkit: ResponseToolkit) => Promise<ResponseObject>;
 }
 
 export class Router {
@@ -89,11 +86,10 @@ export class Router {
   /**
    * Register a `DELETE` request with the router
    */
-  public delete<
-    P extends ObjectType,
-    Q extends ObjectType,
-    B extends ObjectType
-  >(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) {
+  public delete<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
+    route: RouteConfig<P, Q, B>,
+    handler: RequestHandler<P, Q, B>
+  ) {
     const routeSchemas = this.routeSchemasFromRouteConfig(route, 'DELETE');
     this.routes.push({
       handler: async (req, responseToolkit) =>
@@ -135,11 +131,7 @@ export class Router {
     return route.validate ? route.validate(schema) : undefined;
   }
 
-  private async handle<
-    P extends ObjectType,
-    Q extends ObjectType,
-    B extends ObjectType
-  >(
+  private async handle<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
     routeSchemas: RouteSchemas<P, Q, B> | undefined,
     request: Request,
     responseToolkit: ResponseToolkit,
@@ -175,11 +167,7 @@ export class Router {
   }
 }
 
-export type RequestHandler<
-  P extends ObjectType,
-  Q extends ObjectType,
-  B extends ObjectType
-> = (
+export type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends ObjectType> = (
   req: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>,
   createResponse: ResponseFactory
 ) => Promise<KibanaResponse<any>>;

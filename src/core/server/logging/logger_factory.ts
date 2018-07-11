@@ -53,10 +53,7 @@ export class MutableLoggerFactory implements LoggerFactory {
       return this.loggers.get(context)!;
     }
 
-    this.loggers.set(
-      context,
-      new LoggerAdapter(this.createLogger(context, this.config))
-    );
+    this.loggers.set(context, new LoggerAdapter(this.createLogger(context, this.config)));
 
     return this.loggers.get(context)!;
   }
@@ -79,10 +76,7 @@ export class MutableLoggerFactory implements LoggerFactory {
     this.appenders.clear();
 
     for (const [appenderKey, appenderConfig] of config.appenders.entries()) {
-      this.appenders.set(
-        appenderKey,
-        Appenders.create(appenderConfig, this.env)
-      );
+      this.appenders.set(appenderKey, Appenders.create(appenderConfig, this.env));
     }
 
     for (const [loggerKey, loggerAdapter] of this.loggers.entries()) {
@@ -122,17 +116,12 @@ export class MutableLoggerFactory implements LoggerFactory {
 
     const { level, appenders } = this.getLoggerConfigByContext(config, context);
     const loggerLevel = LogLevel.fromId(level);
-    const loggerAppenders = appenders.map(
-      appenderKey => this.appenders.get(appenderKey)!
-    );
+    const loggerAppenders = appenders.map(appenderKey => this.appenders.get(appenderKey)!);
 
     return new BaseLogger(context, loggerLevel, loggerAppenders);
   }
 
-  private getLoggerConfigByContext(
-    config: LoggingConfig,
-    context: string
-  ): LoggerConfigType {
+  private getLoggerConfigByContext(config: LoggingConfig, context: string): LoggerConfigType {
     const loggerConfig = config.loggers.get(context);
     if (loggerConfig !== undefined) {
       return loggerConfig;
@@ -141,9 +130,6 @@ export class MutableLoggerFactory implements LoggerFactory {
     // If we don't have configuration for the specified context and it's the "nested" one (eg. `foo.bar.baz`),
     // let's move up to the parent context (eg. `foo.bar`) and check if it has config we can rely on. Otherwise
     // we fallback to the `root` context that should always be defined (enforced by configuration schema).
-    return this.getLoggerConfigByContext(
-      config,
-      LoggingConfig.getParentLoggerContext(context)
-    );
+    return this.getLoggerConfigByContext(config, LoggingConfig.getParentLoggerContext(context));
   }
 }

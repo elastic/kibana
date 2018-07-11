@@ -70,9 +70,7 @@ export class Env {
 
   public getConfigFile() {
     const defaultConfigFile = this.getDefaultConfigFile();
-    return this.options.config === undefined
-      ? defaultConfigFile
-      : this.options.config;
+    return this.options.config === undefined ? defaultConfigFile : this.options.config;
   }
 
   /**

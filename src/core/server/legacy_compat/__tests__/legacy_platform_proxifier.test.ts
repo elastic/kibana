@@ -25,9 +25,7 @@ class MockNetServer extends EventEmitter {
     return { port: 1234, family: 'test-family', address: 'test-address' };
   }
 
-  public getConnections(
-    callback: (error: Error | null, count: number) => void
-  ) {
+  public getConnections(callback: (error: Error | null, count: number) => void) {
     callback(null, 100500);
   }
 }
@@ -67,10 +65,7 @@ test('correctly binds to the server.', () => {
 
   expect(server.addListener).toHaveBeenCalledTimes(4);
   for (const eventName of ['listening', 'error', 'clientError', 'connection']) {
-    expect(server.addListener).toHaveBeenCalledWith(
-      eventName,
-      expect.any(Function)
-    );
+    expect(server.addListener).toHaveBeenCalledWith(eventName, expect.any(Function));
   }
 });
 

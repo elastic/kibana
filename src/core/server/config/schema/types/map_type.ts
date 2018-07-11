@@ -25,15 +25,9 @@ import { Type, TypeOptions } from './type';
 export type MapOfOptions<K, V> = TypeOptions<Map<K, V>>;
 
 export class MapOfType<K, V> extends Type<Map<K, V>> {
-  constructor(
-    keyType: Type<K>,
-    valueType: Type<V>,
-    options: MapOfOptions<K, V> = {}
-  ) {
+  constructor(keyType: Type<K>, valueType: Type<V>, options: MapOfOptions<K, V> = {}) {
     const defaultValue = options.defaultValue;
-    const schema = internals
-      .map()
-      .entries(keyType.getSchema(), valueType.getSchema());
+    const schema = internals.map().entries(keyType.getSchema(), valueType.getSchema());
 
     super(schema, {
       ...options,
@@ -41,8 +35,7 @@ export class MapOfType<K, V> extends Type<Map<K, V>> {
       // of Map/Set/Promise/Error: https://github.com/hapijs/hoek/issues/228.
       // The only way to avoid cloning and hence the bug is to use function for
       // default value instead.
-      defaultValue:
-        defaultValue instanceof Map ? () => defaultValue : defaultValue,
+      defaultValue: defaultValue instanceof Map ? () => defaultValue : defaultValue,
     });
   }
 
@@ -54,9 +47,7 @@ export class MapOfType<K, V> extends Type<Map<K, V>> {
     switch (type) {
       case 'any.required':
       case 'map.base':
-        return `expected value of type [Map] or [object] but got [${typeDetect(
-          value
-        )}]`;
+        return `expected value of type [Map] or [object] but got [${typeDetect(value)}]`;
       case 'map.key':
       case 'map.value':
         const childPathWithIndex = reason.path.slice();

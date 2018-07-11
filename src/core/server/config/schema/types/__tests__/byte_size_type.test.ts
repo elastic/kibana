@@ -31,9 +31,7 @@ test('is required by default', () => {
 });
 
 test('includes namespace in failure', () => {
-  expect(() =>
-    byteSize().validate(undefined, {}, 'foo-namespace')
-  ).toThrowErrorMatchingSnapshot();
+  expect(() => byteSize().validate(undefined, {}, 'foo-namespace')).toThrowErrorMatchingSnapshot();
 });
 
 describe('#defaultValue', () => {
@@ -86,9 +84,7 @@ describe('#max', () => {
   });
 
   test('returns error when larger', () => {
-    expect(() =>
-      byteSize({ max: '1kb' }).validate('1mb')
-    ).toThrowErrorMatchingSnapshot();
+    expect(() => byteSize({ max: '1kb' }).validate('1mb')).toThrowErrorMatchingSnapshot();
   });
 });
 
@@ -99,9 +95,7 @@ test('returns error when not string or positive safe integer', () => {
 
   expect(() => byteSize().validate(Infinity)).toThrowErrorMatchingSnapshot();
 
-  expect(() =>
-    byteSize().validate(Math.pow(2, 53))
-  ).toThrowErrorMatchingSnapshot();
+  expect(() => byteSize().validate(Math.pow(2, 53))).toThrowErrorMatchingSnapshot();
 
   expect(() => byteSize().validate([1, 2, 3])).toThrowErrorMatchingSnapshot();
 

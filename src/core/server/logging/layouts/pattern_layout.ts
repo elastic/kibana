@@ -39,9 +39,7 @@ const Parameters = Object.freeze({
  * with the actual data.
  */
 const PATTERN_REGEX = new RegExp(
-  `${Parameters.Timestamp}|${Parameters.Level}|${Parameters.Context}|${
-    Parameters.Message
-  }`,
+  `${Parameters.Timestamp}|${Parameters.Level}|${Parameters.Context}|${Parameters.Message}`,
   'gi'
 );
 
@@ -60,9 +58,9 @@ const LEVEL_COLORS = new Map([
 /**
  * Default pattern used by PatternLayout if it's not overridden in the configuration.
  */
-const DEFAULT_PATTERN = `[${Parameters.Timestamp}][${Parameters.Level}][${
-  Parameters.Context
-}] ${Parameters.Message}`;
+const DEFAULT_PATTERN = `[${Parameters.Timestamp}][${Parameters.Level}][${Parameters.Context}] ${
+  Parameters.Message
+}`;
 
 const patternLayoutSchema = schema.object({
   highlight: schema.maybe(schema.boolean()),
@@ -81,16 +79,10 @@ export type PatternLayoutConfigType = TypeOf<typeof patternLayoutSchema>;
 export class PatternLayout implements Layout {
   public static configSchema = patternLayoutSchema;
 
-  private static highlightRecord(
-    record: LogRecord,
-    formattedRecord: Map<string, string>
-  ) {
+  private static highlightRecord(record: LogRecord, formattedRecord: Map<string, string>) {
     if (LEVEL_COLORS.has(record.level)) {
       const color = LEVEL_COLORS.get(record.level)!;
-      formattedRecord.set(
-        Parameters.Level,
-        color(formattedRecord.get(Parameters.Level)!)
-      );
+      formattedRecord.set(Parameters.Level, color(formattedRecord.get(Parameters.Level)!));
     }
 
     formattedRecord.set(
@@ -99,10 +91,7 @@ export class PatternLayout implements Layout {
     );
   }
 
-  constructor(
-    private readonly pattern = DEFAULT_PATTERN,
-    private readonly highlight = false
-  ) {}
+  constructor(private readonly pattern = DEFAULT_PATTERN, private readonly highlight = false) {}
 
   /**
    * Formats `LogRecord` into a string based on the specified `pattern` and `highlighting` options.
@@ -122,9 +111,6 @@ export class PatternLayout implements Layout {
       PatternLayout.highlightRecord(record, formattedRecord);
     }
 
-    return this.pattern.replace(
-      PATTERN_REGEX,
-      match => formattedRecord.get(match)!
-    );
+    return this.pattern.replace(PATTERN_REGEX, match => formattedRecord.get(match)!);
   }
 }

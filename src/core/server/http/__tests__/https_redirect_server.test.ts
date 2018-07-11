@@ -80,11 +80,9 @@ test('throws if [redirectHttpFromPort] is not specified', async () => {
 });
 
 test('throws if [redirectHttpFromPort] is in use', async () => {
-  const mockListen = jest
-    .spyOn(Server.prototype, 'listen')
-    .mockImplementation(() => {
-      throw { code: 'EADDRINUSE' };
-    });
+  const mockListen = jest.spyOn(Server.prototype, 'listen').mockImplementation(() => {
+    throw { code: 'EADDRINUSE' };
+  });
 
   await expect(
     server.start({
@@ -104,8 +102,6 @@ test('forwards http requests to https', async () => {
     .get('/')
     .expect(302)
     .then(res => {
-      expect(res.header.location).toEqual(
-        `https://${config.host}:${config.port}/`
-      );
+      expect(res.header.location).toEqual(`https://${config.host}:${config.port}/`);
     });
 });

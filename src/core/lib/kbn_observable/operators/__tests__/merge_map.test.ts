@@ -97,8 +97,7 @@ test('should mergeMap many outer to many inner, and inner throws', async () => {
   const source = Observable.from([1, 2, 3, 4]);
   const error = new Error('fail');
 
-  const project = (value: number, index: number) =>
-    index > 1 ? $error(error) : $of(value);
+  const project = (value: number, index: number) => (index > 1 ? $error(error) : $of(value));
 
   const observable = k$(source)(mergeMap(project));
   const res = collect(observable);

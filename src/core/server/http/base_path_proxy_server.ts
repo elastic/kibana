@@ -47,10 +47,7 @@ export class BasePathProxyServer {
     return this.options.devConfig.basePathProxyTargetPort;
   }
 
-  constructor(
-    private readonly log: Logger,
-    private readonly options: BasePathProxyServerOptions
-  ) {
+  constructor(private readonly log: Logger, private readonly options: BasePathProxyServerOptions) {
     const ONE_GIGABYTE = 1024 * 1024 * 1024;
     options.httpConfig.maxPayload = new ByteSizeValue(ONE_GIGABYTE);
 
@@ -83,9 +80,7 @@ export class BasePathProxyServer {
     this.setupRoutes();
 
     this.log.info(
-      `starting basepath proxy server at ${this.server.info.uri}${
-        httpConfig.basePath
-      }`
+      `starting basepath proxy server at ${this.server.info.uri}${httpConfig.basePath}`
     );
 
     await this.server.start();
@@ -107,17 +102,10 @@ export class BasePathProxyServer {
 
   private setupRoutes() {
     if (this.server === undefined) {
-      throw new Error(
-        `Routes cannot be set up since server is not initialized.`
-      );
+      throw new Error(`Routes cannot be set up since server is not initialized.`);
     }
 
-    const {
-      httpConfig,
-      devConfig,
-      blockUntil,
-      shouldRedirectFromOldBasePath,
-    } = this.options;
+    const { httpConfig, devConfig, blockUntil, shouldRedirectFromOldBasePath } = this.options;
 
     // Always redirect from root URL to the URL with basepath.
     this.server.route({

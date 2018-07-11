@@ -90,9 +90,7 @@ export class SslConfig {
     this.redirectHttpFromPort = config.redirectHttpFromPort;
     this.key = config.key;
     this.certificate = config.certificate;
-    this.certificateAuthorities = this.initCertificateAuthorities(
-      config.certificateAuthorities
-    );
+    this.certificateAuthorities = this.initCertificateAuthorities(config.certificateAuthorities);
     this.keyPassphrase = config.keyPassphrase;
     this.cipherSuites = config.cipherSuites;
     this.supportedProtocols = config.supportedProtocols;
@@ -102,34 +100,23 @@ export class SslConfig {
    * Options that affect the OpenSSL protocol behavior via numeric bitmask of the SSL_OP_* options from OpenSSL Options.
    */
   public getSecureOptions() {
-    if (
-      this.supportedProtocols === undefined ||
-      this.supportedProtocols.length === 0
-    ) {
+    if (this.supportedProtocols === undefined || this.supportedProtocols.length === 0) {
       return 0;
     }
 
     const supportedProtocols = this.supportedProtocols;
-    return Array.from(protocolMap).reduce(
-      (secureOptions, [protocolAlias, secureOption]) => {
-        // `secureOption` is the option that turns *off* support for a particular protocol,
-        // so if protocol is supported, we should not enable this option.
-        // tslint:disable no-bitwise
-        return supportedProtocols.includes(protocolAlias)
-          ? secureOptions
-          : secureOptions | secureOption;
-      },
-      0
-    );
+    return Array.from(protocolMap).reduce((secureOptions, [protocolAlias, secureOption]) => {
+      // `secureOption` is the option that turns *off* support for a particular protocol,
+      // so if protocol is supported, we should not enable this option.
+      // tslint:disable no-bitwise
+      return supportedProtocols.includes(protocolAlias)
+        ? secureOptions
+        : secureOptions | secureOption;
+    }, 0);
   }
 
-  private initCertificateAuthorities(
-    certificateAuthorities?: string[] | string
-  ) {
-    if (
-      certificateAuthorities === undefined ||
-      Array.isArray(certificateAuthorities)
-    ) {
+  private initCertificateAuthorities(certificateAuthorities?: string[] | string) {
+    if (certificateAuthorities === undefined || Array.isArray(certificateAuthorities)) {
       return certificateAuthorities;
     }
 

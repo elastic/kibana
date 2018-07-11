@@ -38,10 +38,7 @@ export interface Layout {
 
 /** @internal */
 export class Layouts {
-  public static configSchema = oneOf([
-    JsonLayout.configSchema,
-    PatternLayout.configSchema,
-  ]);
+  public static configSchema = oneOf([JsonLayout.configSchema, PatternLayout.configSchema]);
 
   /**
    * Factory method that creates specific `Layout` instances based on the passed `config` parameter.

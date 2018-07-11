@@ -21,8 +21,7 @@ import { SchemaError, SchemaTypeError, SchemaTypesError } from '.';
 
 export class ValidationError extends SchemaError {
   public static extractMessage(error: SchemaTypeError, namespace?: string) {
-    const path =
-      typeof namespace === 'string' ? [namespace, ...error.path] : error.path;
+    const path = typeof namespace === 'string' ? [namespace, ...error.path] : error.path;
 
     let message = error.message;
     if (error instanceof SchemaTypesError) {

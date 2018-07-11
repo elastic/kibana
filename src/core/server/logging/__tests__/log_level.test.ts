@@ -48,9 +48,7 @@ test('`LogLevel.Trace` supports `Trace, Debug, Info, Warn, Error, Fatal, Off`.',
   ];
 
   for (const level of allLogLevels) {
-    expect(LogLevel.Trace.supports(level)).toBe(
-      supportedLevels.includes(level)
-    );
+    expect(LogLevel.Trace.supports(level)).toBe(supportedLevels.includes(level));
   }
 });
 
@@ -65,9 +63,7 @@ test('`LogLevel.Debug` supports `Debug, Info, Warn, Error, Fatal, Off`.', () => 
   ];
 
   for (const level of allLogLevels) {
-    expect(LogLevel.Debug.supports(level)).toBe(
-      supportedLevels.includes(level)
-    );
+    expect(LogLevel.Debug.supports(level)).toBe(supportedLevels.includes(level));
   }
 });
 
@@ -86,12 +82,7 @@ test('`LogLevel.Info` supports `Info, Warn, Error, Fatal, Off`.', () => {
 });
 
 test('`LogLevel.Warn` supports `Warn, Error, Fatal, Off`.', () => {
-  const supportedLevels = [
-    LogLevel.Off,
-    LogLevel.Fatal,
-    LogLevel.Error,
-    LogLevel.Warn,
-  ];
+  const supportedLevels = [LogLevel.Off, LogLevel.Fatal, LogLevel.Error, LogLevel.Warn];
 
   for (const level of allLogLevels) {
     expect(LogLevel.Warn.supports(level)).toBe(supportedLevels.includes(level));
@@ -102,9 +93,7 @@ test('`LogLevel.Error` supports `Error, Fatal, Off`.', () => {
   const supportedLevels = [LogLevel.Off, LogLevel.Fatal, LogLevel.Error];
 
   for (const level of allLogLevels) {
-    expect(LogLevel.Error.supports(level)).toBe(
-      supportedLevels.includes(level)
-    );
+    expect(LogLevel.Error.supports(level)).toBe(supportedLevels.includes(level));
   }
 });
 
@@ -112,9 +101,7 @@ test('`LogLevel.Fatal` supports `Fatal, Off`.', () => {
   const supportedLevels = [LogLevel.Off, LogLevel.Fatal];
 
   for (const level of allLogLevels) {
-    expect(LogLevel.Fatal.supports(level)).toBe(
-      supportedLevels.includes(level)
-    );
+    expect(LogLevel.Fatal.supports(level)).toBe(supportedLevels.includes(level));
   }
 });
 

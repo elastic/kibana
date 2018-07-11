@@ -25,10 +25,7 @@ import { ObjectToRawConfigAdapter, RawConfig } from '..';
  * @param config `RawConfig` instance to update config values for.
  * @param argv Argv object with key/value pairs.
  */
-export function overrideConfigWithArgv(
-  config: RawConfig,
-  argv: { [key: string]: any }
-) {
+export function overrideConfigWithArgv(config: RawConfig, argv: { [key: string]: any }) {
   if (argv.port != null) {
     config.set(['server', 'port'], argv.port);
   }

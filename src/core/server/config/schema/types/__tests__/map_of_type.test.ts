@@ -49,9 +49,7 @@ test('fails when not receiving expected key type', () => {
 
 test('includes namespace in failure when wrong top-level type', () => {
   const type = schema.mapOf(schema.string(), schema.string());
-  expect(() =>
-    type.validate([], {}, 'foo-namespace')
-  ).toThrowErrorMatchingSnapshot();
+  expect(() => type.validate([], {}, 'foo-namespace')).toThrowErrorMatchingSnapshot();
 });
 
 test('includes namespace in failure when wrong value type', () => {
@@ -60,9 +58,7 @@ test('includes namespace in failure when wrong value type', () => {
     name: 123,
   };
 
-  expect(() =>
-    type.validate(value, {}, 'foo-namespace')
-  ).toThrowErrorMatchingSnapshot();
+  expect(() => type.validate(value, {}, 'foo-namespace')).toThrowErrorMatchingSnapshot();
 });
 
 test('includes namespace in failure when wrong key type', () => {
@@ -71,9 +67,7 @@ test('includes namespace in failure when wrong key type', () => {
     name: 'foo',
   };
 
-  expect(() =>
-    type.validate(value, {}, 'foo-namespace')
-  ).toThrowErrorMatchingSnapshot();
+  expect(() => type.validate(value, {}, 'foo-namespace')).toThrowErrorMatchingSnapshot();
 });
 
 test('returns default value if undefined', () => {
@@ -87,10 +81,7 @@ test('returns default value if undefined', () => {
 });
 
 test('mapOf within mapOf', () => {
-  const type = schema.mapOf(
-    schema.string(),
-    schema.mapOf(schema.string(), schema.number())
-  );
+  const type = schema.mapOf(schema.string(), schema.mapOf(schema.string(), schema.number()));
   const value = {
     foo: {
       bar: 123,

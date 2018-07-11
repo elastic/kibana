@@ -37,17 +37,11 @@ export class DurationType extends Type<Duration> {
     });
   }
 
-  protected handleError(
-    type: string,
-    { message, value }: Record<string, any>,
-    path: string[]
-  ) {
+  protected handleError(type: string, { message, value }: Record<string, any>, path: string[]) {
     switch (type) {
       case 'any.required':
       case 'duration.base':
-        return `expected value of type [moment.Duration] but got [${typeDetect(
-          value
-        )}]`;
+        return `expected value of type [moment.Duration] but got [${typeDetect(value)}]`;
       case 'duration.parse':
         return new SchemaTypeError(message, path);
     }

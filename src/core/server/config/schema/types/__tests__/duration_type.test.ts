@@ -31,9 +31,7 @@ test('is required by default', () => {
 });
 
 test('includes namespace in failure', () => {
-  expect(() =>
-    duration().validate(undefined, {}, 'foo-namespace')
-  ).toThrowErrorMatchingSnapshot();
+  expect(() => duration().validate(undefined, {}, 'foo-namespace')).toThrowErrorMatchingSnapshot();
 });
 
 describe('#defaultValue', () => {
@@ -69,9 +67,7 @@ test('returns error when not string or non-safe positive integer', () => {
 
   expect(() => duration().validate(Infinity)).toThrowErrorMatchingSnapshot();
 
-  expect(() =>
-    duration().validate(Math.pow(2, 53))
-  ).toThrowErrorMatchingSnapshot();
+  expect(() => duration().validate(Math.pow(2, 53))).toThrowErrorMatchingSnapshot();
 
   expect(() => duration().validate([1, 2, 3])).toThrowErrorMatchingSnapshot();
 

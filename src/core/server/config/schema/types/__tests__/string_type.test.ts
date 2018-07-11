@@ -24,9 +24,7 @@ test('returns value is string and defined', () => {
 });
 
 test('is required by default', () => {
-  expect(() =>
-    schema.string().validate(undefined)
-  ).toThrowErrorMatchingSnapshot();
+  expect(() => schema.string().validate(undefined)).toThrowErrorMatchingSnapshot();
 });
 
 test('includes namespace in failure', () => {
@@ -41,9 +39,7 @@ describe('#minLength', () => {
   });
 
   test('returns error when shorter string', () => {
-    expect(() =>
-      schema.string({ minLength: 4 }).validate('foo')
-    ).toThrowErrorMatchingSnapshot();
+    expect(() => schema.string({ minLength: 4 }).validate('foo')).toThrowErrorMatchingSnapshot();
   });
 });
 
@@ -53,17 +49,13 @@ describe('#maxLength', () => {
   });
 
   test('returns error when longer string', () => {
-    expect(() =>
-      schema.string({ maxLength: 2 }).validate('foo')
-    ).toThrowErrorMatchingSnapshot();
+    expect(() => schema.string({ maxLength: 2 }).validate('foo')).toThrowErrorMatchingSnapshot();
   });
 });
 
 describe('#defaultValue', () => {
   test('returns default when string is undefined', () => {
-    expect(schema.string({ defaultValue: 'foo' }).validate(undefined)).toBe(
-      'foo'
-    );
+    expect(schema.string({ defaultValue: 'foo' }).validate(undefined)).toBe('foo');
   });
 
   test('returns value when specified', () => {
@@ -72,11 +64,9 @@ describe('#defaultValue', () => {
 
   test('returns value from context when context reference is specified', () => {
     expect(
-      schema
-        .string({ defaultValue: schema.contextRef('some_value') })
-        .validate(undefined, {
-          some_value: 'some',
-        })
+      schema.string({ defaultValue: schema.contextRef('some_value') }).validate(undefined, {
+        some_value: 'some',
+      })
     ).toBe('some');
   });
 });
@@ -105,18 +95,14 @@ describe('#validate', () => {
   test('throws when returns string', () => {
     const validate = () => 'validator failure';
 
-    expect(() =>
-      schema.string({ validate }).validate('foo')
-    ).toThrowErrorMatchingSnapshot();
+    expect(() => schema.string({ validate }).validate('foo')).toThrowErrorMatchingSnapshot();
   });
 });
 
 test('returns error when not string', () => {
   expect(() => schema.string().validate(123)).toThrowErrorMatchingSnapshot();
 
-  expect(() =>
-    schema.string().validate([1, 2, 3])
-  ).toThrowErrorMatchingSnapshot();
+  expect(() => schema.string().validate([1, 2, 3])).toThrowErrorMatchingSnapshot();
 
   expect(() => schema.string().validate(/abc/)).toThrowErrorMatchingSnapshot();
 });

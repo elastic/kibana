@@ -68,16 +68,11 @@ export abstract class Type<V> {
     this.internalSchema = schema;
   }
 
-  public validate(
-    value: any,
-    context: Record<string, any> = {},
-    namespace?: string
-  ): V {
-    const { value: validatedValue, error } = internals.validate(
-      value,
-      this.internalSchema,
-      { context, presence: 'required' }
-    );
+  public validate(value: any, context: Record<string, any> = {}, namespace?: string): V {
+    const { value: validatedValue, error } = internals.validate(value, this.internalSchema, {
+      context,
+      presence: 'required',
+    });
 
     if (error) {
       throw new ValidationError(error as any, namespace);
@@ -98,9 +93,7 @@ export abstract class Type<V> {
     return undefined;
   }
 
-  private onError(
-    error: SchemaTypeError | ValidationErrorItem
-  ): SchemaTypeError {
+  private onError(error: SchemaTypeError | ValidationErrorItem): SchemaTypeError {
     if (error instanceof SchemaTypeError) {
       return error;
     }

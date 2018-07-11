@@ -67,11 +67,9 @@ import { RawConfig } from '../../config/raw_config';
 const env = new Env('.', getEnvOptions());
 const config$ = new BehaviorSubject({} as RawConfig);
 
-const mockProcessExit = jest
-  .spyOn(global.process, 'exit')
-  .mockImplementation(() => {
-    // noop
-  });
+const mockProcessExit = jest.spyOn(global.process, 'exit').mockImplementation(() => {
+  // noop
+});
 afterEach(() => {
   mockProcessExit.mockReset();
 });

@@ -36,9 +36,7 @@ test('fails if number is `NaN`', () => {
 });
 
 test('is required by default', () => {
-  expect(() =>
-    schema.number().validate(undefined)
-  ).toThrowErrorMatchingSnapshot();
+  expect(() => schema.number().validate(undefined)).toThrowErrorMatchingSnapshot();
 });
 
 test('includes namespace in failure', () => {
@@ -53,9 +51,7 @@ describe('#min', () => {
   });
 
   test('returns error when smaller number', () => {
-    expect(() =>
-      schema.number({ min: 4 }).validate(3)
-    ).toThrowErrorMatchingSnapshot();
+    expect(() => schema.number({ min: 4 }).validate(3)).toThrowErrorMatchingSnapshot();
   });
 });
 
@@ -65,9 +61,7 @@ describe('#max', () => {
   });
 
   test('returns error when larger number', () => {
-    expect(() =>
-      schema.number({ max: 2 }).validate(3)
-    ).toThrowErrorMatchingSnapshot();
+    expect(() => schema.number({ max: 2 }).validate(3)).toThrowErrorMatchingSnapshot();
   });
 });
 
@@ -84,9 +78,7 @@ describe('#defaultValue', () => {
 test('returns error when not number or numeric string', () => {
   expect(() => schema.number().validate('test')).toThrowErrorMatchingSnapshot();
 
-  expect(() =>
-    schema.number().validate([1, 2, 3])
-  ).toThrowErrorMatchingSnapshot();
+  expect(() => schema.number().validate([1, 2, 3])).toThrowErrorMatchingSnapshot();
 
   expect(() => schema.number().validate(/abc/)).toThrowErrorMatchingSnapshot();
 });

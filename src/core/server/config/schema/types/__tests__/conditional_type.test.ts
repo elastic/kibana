@@ -154,26 +154,17 @@ test('properly handles schemas with incompatible types', () => {
 test('properly handles conditionals within objects', () => {
   const type = schema.object({
     key: schema.string(),
-    value: schema.conditional(
-      schema.siblingRef('key'),
-      'number',
-      schema.number(),
-      schema.string()
-    ),
+    value: schema.conditional(schema.siblingRef('key'), 'number', schema.number(), schema.string()),
   });
 
-  expect(() =>
-    type.validate({ key: 'string', value: 1 })
-  ).toThrowErrorMatchingSnapshot();
+  expect(() => type.validate({ key: 'string', value: 1 })).toThrowErrorMatchingSnapshot();
 
   expect(type.validate({ key: 'string', value: 'a' })).toEqual({
     key: 'string',
     value: 'a',
   });
 
-  expect(() =>
-    type.validate({ key: 'number', value: 'a' })
-  ).toThrowErrorMatchingSnapshot();
+  expect(() => type.validate({ key: 'number', value: 'a' })).toThrowErrorMatchingSnapshot();
 
   expect(type.validate({ key: 'number', value: 1 })).toEqual({
     key: 'number',
@@ -185,12 +176,7 @@ test('properly handled within `maybe`', () => {
   const type = schema.object({
     key: schema.string(),
     value: schema.maybe(
-      schema.conditional(
-        schema.siblingRef('key'),
-        'number',
-        schema.number(),
-        schema.string()
-      )
+      schema.conditional(schema.siblingRef('key'), 'number', schema.number(), schema.string())
     ),
   });
 
@@ -219,9 +205,7 @@ test('works with both context and sibling references', () => {
     type.validate({ key: 'string', value: 1 }, { context_key: 'number' })
   ).toThrowErrorMatchingSnapshot();
 
-  expect(
-    type.validate({ key: 'string', value: 'a' }, { context_key: 'number' })
-  ).toEqual({
+  expect(type.validate({ key: 'string', value: 'a' }, { context_key: 'number' })).toEqual({
     key: 'string',
     value: 'a',
   });
@@ -230,9 +214,7 @@ test('works with both context and sibling references', () => {
     type.validate({ key: 'number', value: 'a' }, { context_key: 'number' })
   ).toThrowErrorMatchingSnapshot();
 
-  expect(
-    type.validate({ key: 'number', value: 1 }, { context_key: 'number' })
-  ).toEqual({
+  expect(type.validate({ key: 'number', value: 1 }, { context_key: 'number' })).toEqual({
     key: 'number',
     value: 1,
   });
@@ -241,12 +223,7 @@ test('works with both context and sibling references', () => {
 test('includes namespace into failures', () => {
   const type = schema.object({
     key: schema.string(),
-    value: schema.conditional(
-      schema.siblingRef('key'),
-      'number',
-      schema.number(),
-      schema.string()
-    ),
+    value: schema.conditional(schema.siblingRef('key'), 'number', schema.number(), schema.string()),
   });
 
   expect(() =>
@@ -275,12 +252,7 @@ test('correctly handles missing references', () => {
 
 test('works within `oneOf`', () => {
   const type = schema.oneOf([
-    schema.conditional(
-      schema.contextRef('type'),
-      'number',
-      schema.number(),
-      schema.string()
-    ),
+    schema.conditional(schema.contextRef('type'), 'number', schema.number(), schema.string()),
     schema.conditional(
       schema.contextRef('type'),
       'boolean',
@@ -294,12 +266,8 @@ test('works within `oneOf`', () => {
   expect(type.validate(true, { type: 'boolean' })).toEqual(true);
   expect(type.validate(['a', 'b'], { type: 'array' })).toEqual(['a', 'b']);
 
-  expect(() =>
-    type.validate(1, { type: 'string' })
-  ).toThrowErrorMatchingSnapshot();
-  expect(() =>
-    type.validate(true, { type: 'string' })
-  ).toThrowErrorMatchingSnapshot();
+  expect(() => type.validate(1, { type: 'string' })).toThrowErrorMatchingSnapshot();
+  expect(() => type.validate(true, { type: 'string' })).toThrowErrorMatchingSnapshot();
 });
 
 describe('#validate', () => {

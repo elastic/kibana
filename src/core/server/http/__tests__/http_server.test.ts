@@ -430,9 +430,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
     } as HttpConfig;
 
     const router = new Router('/');
-    router.get({ path: '/', validate: false }, async (req, res) =>
-      res.ok({ key: 'value:/' })
-    );
+    router.get({ path: '/', validate: false }, async (req, res) => res.ok({ key: 'value:/' }));
     router.get({ path: '/foo', validate: false }, async (req, res) =>
       res.ok({ key: 'value:/foo' })
     );
@@ -490,9 +488,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
     } as HttpConfig;
 
     const router = new Router('/');
-    router.get({ path: '/', validate: false }, async (req, res) =>
-      res.ok({ key: 'value:/' })
-    );
+    router.get({ path: '/', validate: false }, async (req, res) => res.ok({ key: 'value:/' }));
     router.get({ path: '/foo', validate: false }, async (req, res) =>
       res.ok({ key: 'value:/foo' })
     );
@@ -559,9 +555,7 @@ describe('with defined `redirectHttpFromPort`', () => {
     } as HttpConfig;
 
     const router = new Router('/');
-    router.get({ path: '/', validate: false }, async (req, res) =>
-      res.ok({ key: 'value:/' })
-    );
+    router.get({ path: '/', validate: false }, async (req, res) => res.ok({ key: 'value:/' }));
 
     server.registerRouter(router);
 
@@ -610,9 +604,7 @@ describe('when run within legacy platform', () => {
     expect(newPlatformProxyListenerMock.bind).toHaveBeenCalledWith(
       expect.any((http as any).Server)
     );
-    expect(newPlatformProxyListenerMock.bind.mock.calls[0][0]).toBe(
-      getServerListener(server)
-    );
+    expect(newPlatformProxyListenerMock.bind.mock.calls[0][0]).toBe(getServerListener(server));
   });
 
   test('forwards request to legacy platform if new one cannot handle it', async () => {

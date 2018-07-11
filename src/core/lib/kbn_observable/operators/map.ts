@@ -30,9 +30,7 @@ import { Observable } from '../observable';
  * @return An Observable that emits the values from the source Observable
  * transformed by the given `fn` function.
  */
-export function map<T, R>(
-  fn: (value: T, index: number) => R
-): OperatorFunction<T, R> {
+export function map<T, R>(fn: (value: T, index: number) => R): OperatorFunction<T, R> {
   return function mapOperation(source) {
     return new Observable(observer => {
       let i = 0;

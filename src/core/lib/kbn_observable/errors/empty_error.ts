@@ -21,9 +21,7 @@ export class EmptyError extends Error {
   public code = 'K$_EMPTY_ERROR';
 
   constructor(producer: string) {
-    super(
-      `EmptyError: ${producer} requires source stream to emit at least one value.`
-    );
+    super(`EmptyError: ${producer} requires source stream to emit at least one value.`);
 
     // We're forching this to `any` as `captureStackTrace` is not a standard
     // property, but a v8 specific one. There are node typings that we might

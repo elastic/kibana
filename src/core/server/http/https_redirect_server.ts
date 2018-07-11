@@ -38,9 +38,7 @@ export class HttpsRedirectServer {
     }
 
     this.log.info(
-      `starting HTTP --> HTTPS redirect server [${config.host}:${
-        config.ssl.redirectHttpFromPort
-      }]`
+      `starting HTTP --> HTTPS redirect server [${config.host}:${config.ssl.redirectHttpFromPort}]`
     );
 
     // Redirect server is configured in the same way as any other HTTP server
@@ -51,22 +49,19 @@ export class HttpsRedirectServer {
       port: config.ssl.redirectHttpFromPort,
     });
 
-    this.server.ext(
-      'onRequest',
-      (request: Request, responseToolkit: ResponseToolkit) => {
-        return responseToolkit
-          .redirect(
-            formatUrl({
-              hostname: config.host,
-              pathname: request.url.pathname,
-              port: config.port,
-              protocol: 'https',
-              search: request.url.search,
-            })
-          )
-          .takeover();
-      }
-    );
+    this.server.ext('onRequest', (request: Request, responseToolkit: ResponseToolkit) => {
+      return responseToolkit
+        .redirect(
+          formatUrl({
+            hostname: config.host,
+            pathname: request.url.pathname,
+            port: config.port,
+            protocol: 'https',
+            search: request.url.search,
+          })
+        )
+        .takeover();
+    });
 
     try {
       await this.server.start();
@@ -74,9 +69,7 @@ export class HttpsRedirectServer {
       if (err.code === 'EADDRINUSE') {
         throw new Error(
           'The redirect server failed to start up because port ' +
-            `${
-              config.ssl.redirectHttpFromPort
-            } is already in use. Ensure the port specified ` +
+            `${config.ssl.redirectHttpFromPort} is already in use. Ensure the port specified ` +
             'in `server.ssl.redirectHttpFromPort` is available.'
         );
       } else {

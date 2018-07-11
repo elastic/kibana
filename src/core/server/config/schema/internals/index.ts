@@ -104,12 +104,7 @@ export const internals = Joi.extend([
           return new ByteSizeValue(value);
         }
       } catch (e) {
-        return this.createError(
-          'bytes.parse',
-          { value, message: e.message },
-          state,
-          options
-        );
+        return this.createError('bytes.parse', { value, message: e.message }, state, options);
       }
 
       return value;
@@ -132,12 +127,7 @@ export const internals = Joi.extend([
         validate(params, value, state, options) {
           const limit = ensureByteSizeValue(params.limit);
           if (value.isLessThan(limit)) {
-            return this.createError(
-              'bytes.min',
-              { value, limit },
-              state,
-              options
-            );
+            return this.createError('bytes.min', { value, limit }, state, options);
           }
 
           return value;
@@ -151,12 +141,7 @@ export const internals = Joi.extend([
         validate(params, value, state, options) {
           const limit = ensureByteSizeValue(params.limit);
           if (value.isGreaterThan(limit)) {
-            return this.createError(
-              'bytes.max',
-              { value, limit },
-              state,
-              options
-            );
+            return this.createError('bytes.max', { value, limit }, state, options);
           }
 
           return value;
@@ -173,12 +158,7 @@ export const internals = Joi.extend([
           return ensureDuration(value);
         }
       } catch (e) {
-        return this.createError(
-          'duration.parse',
-          { value, message: e.message },
-          state,
-          options
-        );
+        return this.createError('duration.parse', { value, message: e.message }, state, options);
       }
 
       return value;
@@ -208,8 +188,7 @@ export const internals = Joi.extend([
       // From Joi docs on `Joi.number`:
       // > Generates a schema object that matches a number data type (as well as
       // > strings that can be converted to numbers)
-      const coercedValue: any =
-        typeof value === 'string' ? Number(value) : value;
+      const coercedValue: any = typeof value === 'string' ? Number(value) : value;
       if (typeof coercedValue !== 'number' || isNaN(coercedValue)) {
         return this.createError('number.base', { value }, state, options);
       }
@@ -266,18 +245,13 @@ export const internals = Joi.extend([
             );
 
             if (keyError) {
-              return this.createError(
-                'map.key',
-                { entryKey, reason: keyError },
-                state,
-                options
-              );
+              return this.createError('map.key', { entryKey, reason: keyError }, state, options);
             }
 
-            const {
-              value: validatedEntryValue,
-              error: valueError,
-            } = Joi.validate(entryValue, params.value);
+            const { value: validatedEntryValue, error: valueError } = Joi.validate(
+              entryValue,
+              params.value
+            );
 
             if (valueError) {
               return this.createError(

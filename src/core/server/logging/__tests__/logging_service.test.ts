@@ -33,9 +33,7 @@ const createConfig = () => {
   });
 };
 
-const getLastMockCallArgs = (
-  mockFunction: jest.Mock<(config: LoggingConfig) => void>
-) => {
+const getLastMockCallArgs = (mockFunction: jest.Mock<(config: LoggingConfig) => void>) => {
   expect(mockFunction).toHaveBeenCalled();
   return mockFunction.mock.calls[mockFunction.mock.calls.length - 1];
 };
@@ -46,11 +44,9 @@ let updateConfigMock: jest.Mock<(config: LoggingConfig) => void>;
 
 beforeEach(() => {
   factory = new MutableLoggerFactory({} as any);
-  updateConfigMock = jest
-    .spyOn(factory, 'updateConfig')
-    .mockImplementation(() => {
-      // noop
-    });
+  updateConfigMock = jest.spyOn(factory, 'updateConfig').mockImplementation(() => {
+    // noop
+  });
   jest.spyOn(factory, 'close').mockImplementation(() => {
     // noop
   });

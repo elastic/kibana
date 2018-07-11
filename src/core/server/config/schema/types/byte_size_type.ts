@@ -57,9 +57,7 @@ export class ByteSizeType extends Type<ByteSizeValue> {
     switch (type) {
       case 'any.required':
       case 'bytes.base':
-        return `expected value of type [ByteSize] but got [${typeDetect(
-          value
-        )}]`;
+        return `expected value of type [ByteSize] but got [${typeDetect(value)}]`;
       case 'bytes.parse':
         return new SchemaTypeError(message, path);
       case 'bytes.min':

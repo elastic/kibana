@@ -17,13 +17,7 @@
  * under the License.
  */
 
-import {
-  first,
-  k$,
-  Observable,
-  Subscription,
-  toPromise,
-} from '../../lib/kbn_observable';
+import { first, k$, Observable, Subscription, toPromise } from '../../lib/kbn_observable';
 
 import { CoreService } from '../../types/core_service';
 import { Env } from '../config';
@@ -40,17 +34,11 @@ export class HttpService implements CoreService {
 
   private readonly log: Logger;
 
-  constructor(
-    private readonly config$: Observable<HttpConfig>,
-    logger: LoggerFactory,
-    env: Env
-  ) {
+  constructor(private readonly config$: Observable<HttpConfig>, logger: LoggerFactory, env: Env) {
     this.log = logger.get('http');
 
     this.httpServer = new HttpServer(logger.get('http', 'server'), env);
-    this.httpsRedirectServer = new HttpsRedirectServer(
-      logger.get('http', 'redirect', 'server')
-    );
+    this.httpsRedirectServer = new HttpsRedirectServer(logger.get('http', 'redirect', 'server'));
   }
 
   public async start() {
@@ -59,8 +47,7 @@ export class HttpService implements CoreService {
         // If the server is already running we can't make any config changes
         // to it, so we warn and don't allow the config to pass through.
         this.log.warn(
-          'Received new HTTP config after server was started. ' +
-            'Config will **not** be applied.'
+          'Received new HTTP config after server was started. ' + 'Config will **not** be applied.'
         );
       }
     });

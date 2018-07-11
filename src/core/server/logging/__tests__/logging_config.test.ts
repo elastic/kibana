@@ -174,7 +174,5 @@ test('fails if loggers use unknown appenders.', () => {
     ],
   });
 
-  expect(
-    () => new LoggingConfig(validateConfig)
-  ).toThrowErrorMatchingSnapshot();
+  expect(() => new LoggingConfig(validateConfig)).toThrowErrorMatchingSnapshot();
 });

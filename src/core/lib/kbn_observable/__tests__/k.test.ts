@@ -17,11 +17,7 @@
  * under the License.
  */
 
-import {
-  MonoTypeOperatorFunction,
-  OperatorFunction,
-  UnaryFunction,
-} from '../interfaces';
+import { MonoTypeOperatorFunction, OperatorFunction, UnaryFunction } from '../interfaces';
 import { k$ } from '../k';
 import { Observable } from '../observable';
 

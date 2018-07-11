@@ -24,10 +24,7 @@ import { Observable, ObservableInput } from './observable';
 
 export function k$<T, R>(source: ObservableInput<T>) {
   function kOperations<A>(op1: UnaryFunction<Observable<T>, A>): A;
-  function kOperations<A, B>(
-    op1: UnaryFunction<Observable<T>, A>,
-    op2: UnaryFunction<A, B>
-  ): B;
+  function kOperations<A, B>(op1: UnaryFunction<Observable<T>, A>, op2: UnaryFunction<A, B>): B;
   function kOperations<A, B, C>(
     op1: UnaryFunction<Observable<T>, A>,
     op2: UnaryFunction<A, B>,

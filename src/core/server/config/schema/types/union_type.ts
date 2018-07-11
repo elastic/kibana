@@ -30,16 +30,10 @@ export class UnionType<RTS extends AnyType[], T> extends Type<T> {
     super(schema, options);
   }
 
-  protected handleError(
-    type: string,
-    { reason, value }: Record<string, any>,
-    path: string[]
-  ) {
+  protected handleError(type: string, { reason, value }: Record<string, any>, path: string[]) {
     switch (type) {
       case 'any.required':
-        return `expected at least one defined value but got [${typeDetect(
-          value
-        )}]`;
+        return `expected at least one defined value but got [${typeDetect(value)}]`;
       case 'alternatives.child':
         return new SchemaTypesError(
           'types that failed validation:',

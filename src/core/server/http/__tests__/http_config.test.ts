@@ -130,10 +130,7 @@ describe('with TLS', () => {
     };
 
     const config = httpSchema.validate(obj);
-    expect(config.ssl.certificateAuthorities).toEqual([
-      '/authority/1',
-      '/authority/2',
-    ]);
+    expect(config.ssl.certificateAuthorities).toEqual(['/authority/1', '/authority/2']);
   });
 
   test('accepts known protocols`', () => {
@@ -160,11 +157,7 @@ describe('with TLS', () => {
     expect(singleKnownProtocolConfig.ssl.supportedProtocols).toEqual(['TLSv1']);
 
     const allKnownProtocolsConfig = httpSchema.validate(allKnownProtocols);
-    expect(allKnownProtocolsConfig.ssl.supportedProtocols).toEqual([
-      'TLSv1',
-      'TLSv1.1',
-      'TLSv1.2',
-    ]);
+    expect(allKnownProtocolsConfig.ssl.supportedProtocols).toEqual(['TLSv1', 'TLSv1.1', 'TLSv1.2']);
   });
 
   test('should accept known protocols`', () => {
@@ -188,9 +181,7 @@ describe('with TLS', () => {
       },
     };
 
-    expect(() =>
-      httpSchema.validate(singleUnknownProtocol)
-    ).toThrowErrorMatchingSnapshot();
+    expect(() => httpSchema.validate(singleUnknownProtocol)).toThrowErrorMatchingSnapshot();
     expect(() =>
       httpSchema.validate(allKnownWithOneUnknownProtocols)
     ).toThrowErrorMatchingSnapshot();

@@ -17,7 +17,4 @@
  * under the License.
  */
 
-export {
-  injectIntoKbnServer,
-  createBasePathProxy,
-} from './server/legacy_compat';
+export { injectIntoKbnServer, createBasePathProxy } from './server/legacy_compat';

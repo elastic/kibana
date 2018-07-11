@@ -83,18 +83,12 @@ test('forwards all method calls to new internal logger if it is updated.', () =>
 
   adapter.trace('trace-message');
   expect(oldInternalLogger.trace).toHaveBeenCalledTimes(1);
-  expect(oldInternalLogger.trace).toHaveBeenCalledWith(
-    'trace-message',
-    undefined
-  );
+  expect(oldInternalLogger.trace).toHaveBeenCalledWith('trace-message', undefined);
   (oldInternalLogger.trace as jest.Mock<() => void>).mockReset();
 
   adapter.updateLogger(newInternalLogger);
   adapter.trace('trace-message');
   expect(oldInternalLogger.trace).not.toHaveBeenCalled();
   expect(newInternalLogger.trace).toHaveBeenCalledTimes(1);
-  expect(newInternalLogger.trace).toHaveBeenCalledWith(
-    'trace-message',
-    undefined
-  );
+  expect(newInternalLogger.trace).toHaveBeenCalledWith('trace-message', undefined);
 });

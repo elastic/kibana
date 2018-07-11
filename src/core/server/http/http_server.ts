@@ -38,9 +38,7 @@ export class HttpServer {
 
   public registerRouter(router: Router) {
     if (this.isListening()) {
-      throw new Error(
-        'Routers can be registered only when HTTP server is stopped.'
-      );
+      throw new Error('Routers can be registered only when HTTP server is stopped.');
     }
 
     this.registeredRouters.add(router);
@@ -107,10 +105,7 @@ export class HttpServer {
     const basePath = config.basePath;
     server.ext('onRequest', (request, responseToolkit) => {
       const newURL = modifyUrl(request.url.href!, urlParts => {
-        if (
-          urlParts.pathname != null &&
-          urlParts.pathname.startsWith(basePath)
-        ) {
+        if (urlParts.pathname != null && urlParts.pathname.startsWith(basePath)) {
           urlParts.pathname = urlParts.pathname.replace(basePath, '') || '/';
         } else {
           return {};
@@ -136,8 +131,7 @@ export class HttpServer {
   private getRouteFullPath(routerPath: string, routePath: string) {
     // If router's path ends with slash and route's path starts with slash,
     // we should omit one of them to have a valid concatenated path.
-    const routePathStartIndex =
-      routerPath.endsWith('/') && routePath.startsWith('/') ? 1 : 0;
+    const routePathStartIndex = routerPath.endsWith('/') && routePath.startsWith('/') ? 1 : 0;
     return `${routerPath}${routePath.slice(routePathStartIndex)}`;
   }
 }

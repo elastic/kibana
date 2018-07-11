@@ -27,12 +27,7 @@ import { Root } from '../root';
 /**
  * List of the server events to be forwarded to the legacy platform.
  */
-const ServerEventsToForward = [
-  'listening',
-  'error',
-  'clientError',
-  'connection',
-];
+const ServerEventsToForward = ['listening', 'error', 'clientError', 'connection'];
 
 /**
  * Represents "proxy" between legacy and current platform.
@@ -73,11 +68,7 @@ export class LegacyPlatformProxifier extends EventEmitter {
   /**
    * Neither new nor legacy platform should use this method directly.
    */
-  public async listen(
-    port: number,
-    host: string,
-    callback?: (error?: Error) => void
-  ) {
+  public async listen(port: number, host: string, callback?: (error?: Error) => void) {
     this.log.debug(`"listen" has been called (${host}:${port}).`);
 
     let error: Error | undefined;
@@ -115,9 +106,7 @@ export class LegacyPlatformProxifier extends EventEmitter {
   /**
    * Neither new nor legacy platform should use this method directly.
    */
-  public getConnections(
-    callback: (error: Error | null, count?: number) => void
-  ) {
+  public getConnections(callback: (error: Error | null, count?: number) => void) {
     // This method is used by `even-better` (before we start platform).
     // It seems that the latest version of parent `good` doesn't use this anymore.
     if (this.server) {
@@ -151,9 +140,7 @@ export class LegacyPlatformProxifier extends EventEmitter {
    * @param response Native Node response object instance.
    */
   public proxy(request: IncomingMessage, response: ServerResponse) {
-    this.log.debug(
-      `Request will be handled by proxy ${request.method}:${request.url}.`
-    );
+    this.log.debug(`Request will be handled by proxy ${request.method}:${request.url}.`);
     this.emit('request', request, response);
   }
 }

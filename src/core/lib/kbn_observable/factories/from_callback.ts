@@ -32,9 +32,7 @@ import { Observable } from '../observable';
  * @param {Function}
  * @returns {Observable}
  */
-export function $fromCallback<T>(
-  factory: () => T | Observable<T>
-): Observable<T> {
+export function $fromCallback<T>(factory: () => T | Observable<T>): Observable<T> {
   return new Observable(observer => {
     const result = factory();
 

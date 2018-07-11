@@ -49,14 +49,7 @@ test('emits once for each combination of items', async () => {
   bar$.complete();
   foo$.complete();
 
-  expect(await res).toEqual([
-    [1, 'a'],
-    [1, 'b'],
-    [2, 'b'],
-    [2, 'c'],
-    [3, 'c'],
-    'C',
-  ]);
+  expect(await res).toEqual([[1, 'a'], [1, 'b'], [2, 'b'], [2, 'c'], [3, 'c'], 'C']);
 });
 
 test('only emits if every stream emits at least once', async () => {

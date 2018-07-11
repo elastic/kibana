@@ -26,9 +26,7 @@ import { SchemaError } from '..';
 export const cleanStack = (stack: string) =>
   stack
     .split('\n')
-    .filter(
-      line => !line.includes('node_modules/') && !line.includes('internal/')
-    )
+    .filter(line => !line.includes('node_modules/') && !line.includes('internal/'))
     .map(line => {
       const parts = /.*\((.*)\).?/.exec(line) || [];
 

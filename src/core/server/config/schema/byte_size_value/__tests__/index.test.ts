@@ -38,15 +38,11 @@ describe('parsing units', () => {
   });
 
   test('throws an error when no unit specified', () => {
-    expect(() => ByteSizeValue.parse('123')).toThrowError(
-      'could not parse byte size value'
-    );
+    expect(() => ByteSizeValue.parse('123')).toThrowError('could not parse byte size value');
   });
 
   test('throws an error when unsupported unit specified', () => {
-    expect(() => ByteSizeValue.parse('1tb')).toThrowError(
-      'could not parse byte size value'
-    );
+    expect(() => ByteSizeValue.parse('1tb')).toThrowError('could not parse byte size value');
   });
 });
 
@@ -58,9 +54,7 @@ describe('#constructor', () => {
   test('throws if number of bytes is not safe', () => {
     expect(() => new ByteSizeValue(NaN)).toThrowErrorMatchingSnapshot();
     expect(() => new ByteSizeValue(Infinity)).toThrowErrorMatchingSnapshot();
-    expect(
-      () => new ByteSizeValue(Math.pow(2, 53))
-    ).toThrowErrorMatchingSnapshot();
+    expect(() => new ByteSizeValue(Math.pow(2, 53))).toThrowErrorMatchingSnapshot();
   });
 
   test('accepts 0', () => {

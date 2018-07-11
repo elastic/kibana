@@ -31,16 +31,12 @@ test('fails if wrong input type', () => {
 
 test('includes namespace in failure when wrong top-level type', () => {
   const type = schema.arrayOf(schema.string());
-  expect(() =>
-    type.validate('test', {}, 'foo-namespace')
-  ).toThrowErrorMatchingSnapshot();
+  expect(() => type.validate('test', {}, 'foo-namespace')).toThrowErrorMatchingSnapshot();
 });
 
 test('includes namespace in failure when wrong item type', () => {
   const type = schema.arrayOf(schema.string());
-  expect(() =>
-    type.validate([123], {}, 'foo-namespace')
-  ).toThrowErrorMatchingSnapshot();
+  expect(() => type.validate([123], {}, 'foo-namespace')).toThrowErrorMatchingSnapshot();
 });
 
 test('fails if wrong type of content in array', () => {
@@ -50,9 +46,7 @@ test('fails if wrong type of content in array', () => {
 
 test('fails if mixed types of content in array', () => {
   const type = schema.arrayOf(schema.string());
-  expect(() =>
-    type.validate(['foo', 'bar', true, {}])
-  ).toThrowErrorMatchingSnapshot();
+  expect(() => type.validate(['foo', 'bar', true, {}])).toThrowErrorMatchingSnapshot();
 });
 
 test('returns empty array if input is empty but type has default value', () => {
@@ -119,9 +113,7 @@ test('object within array with required', () => {
 
 describe('#minSize', () => {
   test('returns value when more items', () => {
-    expect(
-      schema.arrayOf(schema.string(), { minSize: 1 }).validate(['foo'])
-    ).toEqual(['foo']);
+    expect(schema.arrayOf(schema.string(), { minSize: 1 }).validate(['foo'])).toEqual(['foo']);
   });
 
   test('returns error when fewer items', () => {
@@ -133,9 +125,7 @@ describe('#minSize', () => {
 
 describe('#maxSize', () => {
   test('returns value when fewer items', () => {
-    expect(
-      schema.arrayOf(schema.string(), { maxSize: 2 }).validate(['foo'])
-    ).toEqual(['foo']);
+    expect(schema.arrayOf(schema.string(), { maxSize: 2 }).validate(['foo'])).toEqual(['foo']);
   });
 
   test('returns error when more items', () => {

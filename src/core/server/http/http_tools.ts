@@ -25,10 +25,7 @@ import { HttpConfig } from './http_config';
 /**
  * Converts Kibana `HttpConfig` into `ServerOptions` that are accepted by the Hapi server.
  */
-export function getServerOptions(
-  config: HttpConfig,
-  { configureTLS = true } = {}
-) {
+export function getServerOptions(config: HttpConfig, { configureTLS = true } = {}) {
   // Note that all connection options configured here should be exactly the same
   // as in the legacy platform server (see `src/server/http/index`). Any change
   // SHOULD BE applied in both places. The only exception is TLS-specific options,
@@ -60,9 +57,7 @@ export function getServerOptions(
     const tlsOptions: TLSOptions = {
       ca:
         config.ssl.certificateAuthorities &&
-        config.ssl.certificateAuthorities.map(caFilePath =>
-          readFileSync(caFilePath)
-        ),
+        config.ssl.certificateAuthorities.map(caFilePath => readFileSync(caFilePath)),
       cert: readFileSync(ssl.certificate!),
       ciphers: config.ssl.cipherSuites.join(':'),
       // We use the server's cipher order rather than the client's to prevent the BEAST attack.

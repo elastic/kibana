@@ -82,9 +82,7 @@ export function pipe<T, A, B, C, D, E, F, G, H, I>(
   op9: UnaryFunction<H, I>
 ): UnaryFunction<T, I>;
 
-export function pipe<T, R>(
-  ...fns: Array<UnaryFunction<T, R>>
-): UnaryFunction<T, R> {
+export function pipe<T, R>(...fns: Array<UnaryFunction<T, R>>): UnaryFunction<T, R> {
   return pipeFromArray(fns);
 }
 
@@ -93,9 +91,7 @@ const noop: () => any = () => {
 };
 
 /* @internal */
-export function pipeFromArray<T, R>(
-  fns: Array<UnaryFunction<T, R>>
-): UnaryFunction<T, R> {
+export function pipeFromArray<T, R>(fns: Array<UnaryFunction<T, R>>): UnaryFunction<T, R> {
   if (fns.length === 0) {
     return noop as UnaryFunction<T, R>;
   }

@@ -63,10 +63,7 @@ test('returns config at path as observable', async () => {
 
   configService.loadConfig();
 
-  const exampleConfig = await k$(configService.getConfig$())(
-    first(),
-    toPromise()
-  );
+  const exampleConfig = await k$(configService.getConfig$())(first(), toPromise());
 
   expect(exampleConfig.get('key')).toEqual('value');
   expect(exampleConfig.getFlattenedPaths()).toEqual(['key']);

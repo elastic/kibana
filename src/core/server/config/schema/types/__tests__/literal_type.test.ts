@@ -38,15 +38,11 @@ test('returns error when not correct', () => {
 
   expect(() => literal(true).validate(false)).toThrowErrorMatchingSnapshot();
 
-  expect(() =>
-    literal('test').validate([1, 2, 3])
-  ).toThrowErrorMatchingSnapshot();
+  expect(() => literal('test').validate([1, 2, 3])).toThrowErrorMatchingSnapshot();
 
   expect(() => literal(123).validate('abc')).toThrowErrorMatchingSnapshot();
 });
 
 test('includes namespace in failure', () => {
-  expect(() =>
-    literal('test').validate('foo', {}, 'foo-namespace')
-  ).toThrowErrorMatchingSnapshot();
+  expect(() => literal('test').validate('foo', {}, 'foo-namespace')).toThrowErrorMatchingSnapshot();
 });

@@ -138,19 +138,14 @@ test('`append()` correctly formats records and pushes them to the file.', () => 
 
   for (const record of records) {
     appender.append(record);
-    expect(mockStreamWrite).toHaveBeenCalledWith(
-      `mock-${JSON.stringify(record)}\n`
-    );
+    expect(mockStreamWrite).toHaveBeenCalledWith(`mock-${JSON.stringify(record)}\n`);
   }
 
   expect(mockStreamWrite).toHaveBeenCalledTimes(records.length);
 });
 
 test('`dispose()` succeeds even if stream is not created.', async () => {
-  const appender = new FileAppender(
-    { format: () => '' },
-    'mock://path/file.log'
-  );
+  const appender = new FileAppender({ format: () => '' }, 'mock://path/file.log');
 
   await appender.dispose();
 });
@@ -171,10 +166,7 @@ test('`dispose()` closes stream.', async () => {
     },
   });
 
-  const appender = new FileAppender(
-    { format: () => '' },
-    'mock://path/file.log'
-  );
+  const appender = new FileAppender({ format: () => '' }, 'mock://path/file.log');
   appender.append({
     context: 'context-1',
     level: LogLevel.All,
@@ -185,11 +177,7 @@ test('`dispose()` closes stream.', async () => {
   await appender.dispose();
 
   expect(mockStreamEnd).toHaveBeenCalledTimes(1);
-  expect(mockStreamEnd).toHaveBeenCalledWith(
-    undefined,
-    undefined,
-    expect.any(Function)
-  );
+  expect(mockStreamEnd).toHaveBeenCalledWith(undefined, undefined, expect.any(Function));
   expect(mockStreamEndFinished).toHaveBeenCalled();
 
   // Consequent `dispose` calls should not fail even if stream has been disposed.

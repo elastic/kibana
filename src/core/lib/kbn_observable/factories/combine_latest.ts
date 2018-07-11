@@ -52,9 +52,7 @@ export function $combineLatest<T, T2, T3, T4, T5, T6>(
   v5: ObservableInput<T5>,
   v6: ObservableInput<T6>
 ): Observable<[T, T2, T3, T4, T5, T6]>;
-export function $combineLatest<T>(
-  ...observables: Array<ObservableInput<T>>
-): Observable<T[]>;
+export function $combineLatest<T>(...observables: Array<ObservableInput<T>>): Observable<T[]>;
 
 /**
  * Creates an observable that combines the values by subscribing to all
@@ -65,9 +63,7 @@ export function $combineLatest<T>(
  * @param {Observable...}
  * @return {Observable}
  */
-export function $combineLatest<T>(
-  ...observables: Array<ObservableInput<T>>
-): Observable<T[]> {
+export function $combineLatest<T>(...observables: Array<ObservableInput<T>>): Observable<T[]> {
   return new Observable(observer => {
     // create an array that will receive values as observables
     // update and initialize it with `pending` symbols so that

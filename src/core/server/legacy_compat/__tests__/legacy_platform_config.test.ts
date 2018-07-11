@@ -23,21 +23,15 @@ import { LegacyConfigMock } from '../__mocks__/legacy_config_mock';
 let legacyConfigMock: LegacyConfigMock;
 let configAdapter: LegacyConfigToRawConfigAdapter;
 beforeEach(() => {
-  legacyConfigMock = new LegacyConfigMock(
-    new Map<string, any>([['__newPlatform', null]])
-  );
+  legacyConfigMock = new LegacyConfigMock(new Map<string, any>([['__newPlatform', null]]));
   configAdapter = new LegacyConfigToRawConfigAdapter(legacyConfigMock);
 });
 
 describe('#get', () => {
   test('correctly handles paths that do not exist in legacy config.', () => {
     expect(() => configAdapter.get('one')).toThrowErrorMatchingSnapshot();
-    expect(() =>
-      configAdapter.get(['one', 'two'])
-    ).toThrowErrorMatchingSnapshot();
-    expect(() =>
-      configAdapter.get(['one.three'])
-    ).toThrowErrorMatchingSnapshot();
+    expect(() => configAdapter.get(['one', 'two'])).toThrowErrorMatchingSnapshot();
+    expect(() => configAdapter.get(['one.three'])).toThrowErrorMatchingSnapshot();
   });
 
   test('returns undefined for new platform config values, even if they do not exist', () => {
@@ -47,9 +41,7 @@ describe('#get', () => {
   test('returns new platform config values if they exist', () => {
     configAdapter = new LegacyConfigToRawConfigAdapter(
       new LegacyConfigMock(
-        new Map<string, any>([
-          ['__newPlatform', { plugins: { scanDirs: ['foo'] } }],
-        ])
+        new Map<string, any>([['__newPlatform', { plugins: { scanDirs: ['foo'] } }]])
       )
     );
     expect(configAdapter.get(['__newPlatform', 'plugins'])).toEqual({
@@ -100,25 +92,17 @@ describe('#get', () => {
 
 describe('#set', () => {
   test('tries to set values for paths that do not exist in legacy config.', () => {
-    expect(() =>
-      configAdapter.set('unknown', 'value')
-    ).toThrowErrorMatchingSnapshot();
+    expect(() => configAdapter.set('unknown', 'value')).toThrowErrorMatchingSnapshot();
 
     expect(() =>
       configAdapter.set(['unknown', 'sub1'], 'sub-value-1')
     ).toThrowErrorMatchingSnapshot();
 
-    expect(() =>
-      configAdapter.set('unknown.sub2', 'sub-value-2')
-    ).toThrowErrorMatchingSnapshot();
+    expect(() => configAdapter.set('unknown.sub2', 'sub-value-2')).toThrowErrorMatchingSnapshot();
   });
 
   test('correctly sets values for existing paths.', () => {
-    legacyConfigMock.rawData = new Map([
-      ['known', ''],
-      ['known.sub1', ''],
-      ['known.sub2', ''],
-    ]);
+    legacyConfigMock.rawData = new Map([['known', ''], ['known.sub1', ''], ['known.sub2', '']]);
 
     configAdapter.set('known', 'value');
     configAdapter.set(['known', 'sub1'], 'sub-value-1');

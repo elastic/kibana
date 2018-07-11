@@ -17,11 +17,7 @@
  * under the License.
  */
 
-import {
-  NEW_PLATFORM_CONFIG_ROOT,
-  ObjectToRawConfigAdapter,
-  RawConfig,
-} from '../config';
+import { NEW_PLATFORM_CONFIG_ROOT, ObjectToRawConfigAdapter, RawConfig } from '../config';
 import { ConfigPath } from '../config/config_service';
 
 /**
@@ -101,8 +97,7 @@ export class LegacyConfigToRawConfigAdapter implements RawConfig {
 
   constructor(private readonly legacyConfig: LegacyConfig) {
     this.newPlatformConfig = new ObjectToRawConfigAdapter({
-      [NEW_PLATFORM_CONFIG_ROOT]:
-        legacyConfig.get(NEW_PLATFORM_CONFIG_ROOT) || {},
+      [NEW_PLATFORM_CONFIG_ROOT]: legacyConfig.get(NEW_PLATFORM_CONFIG_ROOT) || {},
     });
   }
 
@@ -111,9 +106,7 @@ export class LegacyConfigToRawConfigAdapter implements RawConfig {
       return this.newPlatformConfig.has(configPath);
     }
 
-    return this.legacyConfig.has(
-      LegacyConfigToRawConfigAdapter.flattenConfigPath(configPath)
-    );
+    return this.legacyConfig.has(LegacyConfigToRawConfigAdapter.flattenConfigPath(configPath));
   }
 
   public get(configPath: ConfigPath) {
@@ -140,10 +133,7 @@ export class LegacyConfigToRawConfigAdapter implements RawConfig {
       return this.newPlatformConfig.set(configPath, value);
     }
 
-    this.legacyConfig.set(
-      LegacyConfigToRawConfigAdapter.flattenConfigPath(configPath),
-      value
-    );
+    this.legacyConfig.set(LegacyConfigToRawConfigAdapter.flattenConfigPath(configPath), value);
   }
 
   public getFlattenedPaths() {

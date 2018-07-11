@@ -51,8 +51,7 @@ test('does not treat `null` as error', async () => {
 });
 
 test('multiple args', async () => {
-  const read = (arg1: string, arg2: number, cb: NodeCallback) =>
-    cb(undefined, `${arg1}/${arg2}`);
+  const read = (arg1: string, arg2: number, cb: NodeCallback) => cb(undefined, `${arg1}/${arg2}`);
 
   const read$ = $bindNodeCallback(read);
   const res = collect(read$('foo', 123));

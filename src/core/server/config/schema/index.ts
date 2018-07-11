@@ -101,45 +101,15 @@ function mapOf<K, V>(
 }
 
 function oneOf<A, B, C, D, E, F, G, H, I, J>(
-  types: [
-    Type<A>,
-    Type<B>,
-    Type<C>,
-    Type<D>,
-    Type<E>,
-    Type<F>,
-    Type<G>,
-    Type<H>,
-    Type<I>,
-    Type<J>
-  ],
+  types: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>, Type<F>, Type<G>, Type<H>, Type<I>, Type<J>],
   options?: TypeOptions<A | B | C | D | E | F | G | H | I | J>
 ): Type<A | B | C | D | E | F | G | H | I | J>;
 function oneOf<A, B, C, D, E, F, G, H, I>(
-  types: [
-    Type<A>,
-    Type<B>,
-    Type<C>,
-    Type<D>,
-    Type<E>,
-    Type<F>,
-    Type<G>,
-    Type<H>,
-    Type<I>
-  ],
+  types: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>, Type<F>, Type<G>, Type<H>, Type<I>],
   options?: TypeOptions<A | B | C | D | E | F | G | H | I>
 ): Type<A | B | C | D | E | F | G | H | I>;
 function oneOf<A, B, C, D, E, F, G, H>(
-  types: [
-    Type<A>,
-    Type<B>,
-    Type<C>,
-    Type<D>,
-    Type<E>,
-    Type<F>,
-    Type<G>,
-    Type<H>
-  ],
+  types: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>, Type<F>, Type<G>, Type<H>],
   options?: TypeOptions<A | B | C | D | E | F | G | H>
 ): Type<A | B | C | D | E | F | G | H>;
 function oneOf<A, B, C, D, E, F, G>(
@@ -162,15 +132,9 @@ function oneOf<A, B, C>(
   types: [Type<A>, Type<B>, Type<C>],
   options?: TypeOptions<A | B | C>
 ): Type<A | B | C>;
-function oneOf<A, B>(
-  types: [Type<A>, Type<B>],
-  options?: TypeOptions<A | B>
-): Type<A | B>;
+function oneOf<A, B>(types: [Type<A>, Type<B>], options?: TypeOptions<A | B>): Type<A | B>;
 function oneOf<A>(types: [Type<A>], options?: TypeOptions<A>): Type<A>;
-function oneOf<RTS extends AnyType[]>(
-  types: RTS,
-  options?: TypeOptions<any>
-): Type<any> {
+function oneOf<RTS extends AnyType[]>(types: RTS, options?: TypeOptions<any>): Type<any> {
   return new UnionType(types, options);
 }
 
@@ -189,13 +153,7 @@ function conditional<A, B, C>(
   notEqualType: Type<C>,
   options?: TypeOptions<B | C>
 ) {
-  return new ConditionalType(
-    leftOperand,
-    rightOperand,
-    equalType,
-    notEqualType,
-    options
-  );
+  return new ConditionalType(leftOperand, rightOperand, equalType, notEqualType, options);
 }
 
 export const schema = {

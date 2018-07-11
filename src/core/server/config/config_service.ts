@@ -18,14 +18,7 @@
  */
 
 import { isEqual } from 'lodash';
-import {
-  first,
-  k$,
-  map,
-  Observable,
-  skipRepeats,
-  toPromise,
-} from '../../lib/kbn_observable';
+import { first, k$, map, Observable, skipRepeats, toPromise } from '../../lib/kbn_observable';
 
 import { Logger, LoggerFactory } from '../logging';
 import { ConfigWithSchema } from './config_with_schema';
@@ -90,9 +83,7 @@ export class ConfigService {
     return k$(this.getDistinctRawConfig(path))(
       map(
         rawConfig =>
-          rawConfig === undefined
-            ? undefined
-            : this.createConfig(path, rawConfig, ConfigClass)
+          rawConfig === undefined ? undefined : this.createConfig(path, rawConfig, ConfigClass)
       )
     );
   }
@@ -126,9 +117,7 @@ export class ConfigService {
     const config = await k$(this.config$)(first(), toPromise());
     const handledPaths = this.handledPaths.map(pathToString);
 
-    return config
-      .getFlattenedPaths()
-      .filter(path => !isPathHandled(path, handledPaths));
+    return config.getFlattenedPaths().filter(path => !isPathHandled(path, handledPaths));
   }
 
   private createConfig<Schema extends AnyType, Config>(
@@ -140,10 +129,7 @@ export class ConfigService {
 
     const configSchema = ConfigClass.schema;
 
-    if (
-      configSchema === undefined ||
-      typeof configSchema.validate !== 'function'
-    ) {
+    if (configSchema === undefined || typeof configSchema.validate !== 'function') {
       throw new Error(
         `The config class [${
           ConfigClass.name
@@ -167,10 +153,7 @@ export class ConfigService {
   private getDistinctRawConfig(path: ConfigPath) {
     this.markAsHandled(path);
 
-    return k$(this.config$)(
-      map(config => config.get(path)),
-      skipRepeats(isEqual)
-    );
+    return k$(this.config$)(map(config => config.get(path)), skipRepeats(isEqual));
   }
 
   private markAsHandled(path: ConfigPath) {
@@ -186,8 +169,7 @@ const createPluginEnabledPath = (configPath: string | string[]) => {
   return `${configPath}.enabled`;
 };
 
-const pathToString = (path: ConfigPath) =>
-  Array.isArray(path) ? path.join('.') : path;
+const pathToString = (path: ConfigPath) => (Array.isArray(path) ? path.join('.') : path);
 
 /**
  * A path is considered 'handled' if it is a subset of any of the already

@@ -44,24 +44,18 @@ export function get<
   B extends keyof CFG[A],
   C extends keyof CFG[A][B]
 >(obj: CFG, path: [A, B, C]): CFG[A][B][C];
-export function get<
-  CFG extends { [k: string]: any },
-  A extends keyof CFG,
-  B extends keyof CFG[A]
->(obj: CFG, path: [A, B]): CFG[A][B];
+export function get<CFG extends { [k: string]: any }, A extends keyof CFG, B extends keyof CFG[A]>(
+  obj: CFG,
+  path: [A, B]
+): CFG[A][B];
 export function get<CFG extends { [k: string]: any }, A extends keyof CFG>(
   obj: CFG,
   path: [A] | A
 ): CFG[A];
-export function get<CFG extends { [k: string]: any }>(
-  obj: CFG,
-  path: string[] | string
-): any {
+export function get<CFG extends { [k: string]: any }>(obj: CFG, path: string[] | string): any {
   if (typeof path === 'string') {
     if (path.includes('.')) {
-      throw new Error(
-        'Using dots in `get` with a string is not allowed, use array instead'
-      );
+      throw new Error('Using dots in `get` with a string is not allowed, use array instead');
     }
 
     return obj[path];

@@ -23,9 +23,7 @@ describe('modifyUrl()', () => {
   test('throws an error with invalid input', () => {
     expect(() => modifyUrl(1 as any, () => ({}))).toThrowError();
     expect(() => modifyUrl(undefined as any, () => ({}))).toThrowError();
-    expect(() =>
-      modifyUrl('http://localhost', undefined as any)
-    ).toThrowError();
+    expect(() => modifyUrl('http://localhost', undefined as any)).toThrowError();
   });
 
   test('supports returning a new url spec', () => {

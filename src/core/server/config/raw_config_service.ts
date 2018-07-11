@@ -46,9 +46,7 @@ export class RawConfigService {
    * As we have a notion of a _current_ config we rely on a BehaviorSubject so
    * every new subscription will immediately receive the current config.
    */
-  private readonly rawConfigFromFile$: BehaviorSubject<
-    any
-  > = new BehaviorSubject(notRead);
+  private readonly rawConfigFromFile$: BehaviorSubject<any> = new BehaviorSubject(notRead);
 
   private readonly config$: Observable<RawConfig>;
 
@@ -67,9 +65,7 @@ export class RawConfigService {
           return new ObjectToRawConfigAdapter(rawConfig);
         }
 
-        throw new Error(
-          `the raw config must be an object, got [${typeDetect(rawConfig)}]`
-        );
+        throw new Error(`the raw config must be an object, got [${typeDetect(rawConfig)}]`);
       }),
       // We only want to update the config if there are changes to it
       skipRepeats(isEqual)

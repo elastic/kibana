@@ -23,15 +23,7 @@ import { assertNever } from '../../utils';
  * Possible log level string values.
  * @internal
  */
-export type LogLevelId =
-  | 'all'
-  | 'fatal'
-  | 'error'
-  | 'warn'
-  | 'info'
-  | 'debug'
-  | 'trace'
-  | 'off';
+export type LogLevelId = 'all' | 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace' | 'off';
 
 /**
  * Represents the log level, manages string -> `LogLevel` conversion and comparison of log level

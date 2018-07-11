@@ -20,9 +20,7 @@
 import { internals, Reference as InternalReference } from '../internals';
 
 export class Reference<T> {
-  public static isReference<V>(
-    value: V | Reference<V> | undefined
-  ): value is Reference<V> {
+  public static isReference<V>(value: V | Reference<V> | undefined): value is Reference<V> {
     return (
       value !== undefined &&
       typeof (value as Reference<V>).getSchema === 'function' &&

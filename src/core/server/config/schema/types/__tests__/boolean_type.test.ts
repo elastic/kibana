@@ -24,9 +24,7 @@ test('returns value by default', () => {
 });
 
 test('is required by default', () => {
-  expect(() =>
-    schema.boolean().validate(undefined)
-  ).toThrowErrorMatchingSnapshot();
+  expect(() => schema.boolean().validate(undefined)).toThrowErrorMatchingSnapshot();
 });
 
 test('includes namespace in failure', () => {
@@ -37,9 +35,7 @@ test('includes namespace in failure', () => {
 
 describe('#defaultValue', () => {
   test('returns default when undefined', () => {
-    expect(schema.boolean({ defaultValue: true }).validate(undefined)).toBe(
-      true
-    );
+    expect(schema.boolean({ defaultValue: true }).validate(undefined)).toBe(true);
   });
 
   test('returns value when specified', () => {
@@ -50,9 +46,7 @@ describe('#defaultValue', () => {
 test('returns error when not boolean', () => {
   expect(() => schema.boolean().validate(123)).toThrowErrorMatchingSnapshot();
 
-  expect(() =>
-    schema.boolean().validate([1, 2, 3])
-  ).toThrowErrorMatchingSnapshot();
+  expect(() => schema.boolean().validate([1, 2, 3])).toThrowErrorMatchingSnapshot();
 
   expect(() => schema.boolean().validate('abc')).toThrowErrorMatchingSnapshot();
 });

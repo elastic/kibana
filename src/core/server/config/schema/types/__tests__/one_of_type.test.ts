@@ -81,9 +81,7 @@ test('handles object with wrong type', () => {
 test('includes namespace in failure', () => {
   const type = schema.oneOf([schema.object({ age: schema.number() })]);
 
-  expect(() =>
-    type.validate({ age: 'foo' }, {}, 'foo-namespace')
-  ).toThrowErrorMatchingSnapshot();
+  expect(() => type.validate({ age: 'foo' }, {}, 'foo-namespace')).toThrowErrorMatchingSnapshot();
 });
 
 test('handles multiple objects with same key', () => {

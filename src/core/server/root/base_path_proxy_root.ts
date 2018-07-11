@@ -22,10 +22,7 @@ import { first, k$, toPromise } from '../../lib/kbn_observable';
 import { Root } from '.';
 import { DevConfig } from '../dev';
 import { HttpConfig } from '../http';
-import {
-  BasePathProxyServer,
-  BasePathProxyServerOptions,
-} from '../http/base_path_proxy_server';
+import { BasePathProxyServer, BasePathProxyServerOptions } from '../http/base_path_proxy_server';
 
 /**
  * Top-level entry point to start BasePathProxy server.
@@ -36,10 +33,7 @@ export class BasePathProxyRoot extends Root {
   public async configure({
     blockUntil,
     shouldRedirectFromOldBasePath,
-  }: Pick<
-    BasePathProxyServerOptions,
-    'blockUntil' | 'shouldRedirectFromOldBasePath'
-  >) {
+  }: Pick<BasePathProxyServerOptions, 'blockUntil' | 'shouldRedirectFromOldBasePath'>) {
     const [devConfig, httpConfig] = await Promise.all([
       k$(this.configService.atPath('dev', DevConfig))(first(), toPromise()),
       k$(this.configService.atPath('server', HttpConfig))(first(), toPromise()),

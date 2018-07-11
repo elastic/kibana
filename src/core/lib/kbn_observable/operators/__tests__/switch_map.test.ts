@@ -29,9 +29,7 @@ const number$ = $of(1, 2, 3);
 test('returns the modified value', async () => {
   const expected = ['a1', 'b1', 'c1', 'a2', 'b2', 'c2', 'a3', 'b3', 'c3', 'C'];
 
-  const observable = k$(number$)(
-    switchMap(x => $of('a' + x, 'b' + x, 'c' + x))
-  );
+  const observable = k$(number$)(switchMap(x => $of('a' + x, 'b' + x, 'c' + x)));
   const res = collect(observable);
 
   expect(await res).toEqual(expected);

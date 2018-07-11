@@ -27,9 +27,7 @@ test('correctly returns `newPlatformProxyListener`.', () => {
   };
 
   const legacyKbnServer = new LegacyKbnServer(rawKbnServer);
-  expect(legacyKbnServer.newPlatformProxyListener).toBe(
-    rawKbnServer.newPlatform.proxyListener
-  );
+  expect(legacyKbnServer.newPlatformProxyListener).toBe(rawKbnServer.newPlatform.proxyListener);
 });
 
 test('correctly forwards log record.', () => {

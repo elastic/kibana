@@ -62,9 +62,7 @@ export interface URLMeaningfulParts {
  */
 export function modifyUrl(
   url: string,
-  urlModifier: (
-    urlParts: URLMeaningfulParts
-  ) => Partial<URLMeaningfulParts> | undefined
+  urlModifier: (urlParts: URLMeaningfulParts) => Partial<URLMeaningfulParts> | undefined
 ) {
   const parsed = parseUrl(url, true) as URLMeaningfulParts;
 

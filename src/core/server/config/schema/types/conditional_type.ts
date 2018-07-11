@@ -31,9 +31,7 @@ export class ConditionalType<A, B, C> extends Type<B | C> {
     options?: TypeOptions<B | C>
   ) {
     const schema = internals.when(leftOperand.getSchema(), {
-      is: Reference.isReference(rightOperand)
-        ? rightOperand.getSchema()
-        : rightOperand,
+      is: Reference.isReference(rightOperand) ? rightOperand.getSchema() : rightOperand,
       otherwise: notEqualType.getSchema(),
       then: equalType.getSchema(),
     });
@@ -43,9 +41,7 @@ export class ConditionalType<A, B, C> extends Type<B | C> {
 
   protected handleError(type: string, { value }: Record<string, any>) {
     if (type === 'any.required') {
-      return `expected at least one defined value but got [${typeDetect(
-        value
-      )}]`;
+      return `expected at least one defined value but got [${typeDetect(value)}]`;
     }
   }
 }

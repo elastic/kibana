@@ -23,8 +23,7 @@ import { k$ } from '../../k';
 import { Observable } from '../../observable';
 
 const number$ = $from([1, 2, 3]);
-const collect = <T>(source: Observable<T>) =>
-  k$(source)(toArray(), toPromise());
+const collect = <T>(source: Observable<T>) => k$(source)(toArray(), toPromise());
 
 test('returns the modified value', async () => {
   const numbers = await collect(k$(number$)(map(n => n * 1000)));

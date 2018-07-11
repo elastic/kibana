@@ -31,10 +31,7 @@ const createHttpSchema = schema.object(
   {
     basePath: schema.maybe(
       schema.string({
-        validate: match(
-          validBasePathRegex,
-          "must start with a slash, don't end with one"
-        ),
+        validate: match(validBasePathRegex, "must start with a slash, don't end with one"),
       })
     ),
     cors: schema.conditional(
