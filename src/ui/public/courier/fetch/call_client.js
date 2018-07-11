@@ -41,9 +41,9 @@ export function CallClientProvider(Private, Promise, es) {
 
     // get the actual list of requests that we will be fetching
     const requestsToFetch = statuses.filter(isRequest);
-    let execCount = requestsToFetch.length;
+    let requestsToFetchCount = requestsToFetch.length;
 
-    if (!execCount) {
+    if (requestsToFetchCount === 0) {
       return Promise.resolve([]);
     }
 
@@ -53,7 +53,7 @@ export function CallClientProvider(Private, Promise, es) {
     const searchStrategiesWithRequests = assignSearchRequestsToSearchStrategies(requestsToFetch);
 
     // resolved by respondToSearchRequests()
-    let esPromise = undefined;
+    let searchRequestPromises = undefined;
     let isRequestAborted = false;
 
     // for each respond with either the response or ABORTED
@@ -97,22 +97,23 @@ export function CallClientProvider(Private, Promise, es) {
     };
 
     // handle a request being aborted while being fetched
-    const requestWasAborted = Promise.method(function (req, i) {
-      if (statuses[i] === ABORTED) {
+    const requestWasAborted = Promise.method(function (searchRequest, index) {
+      if (statuses[index] === ABORTED) {
         defer.reject(new Error('Request was aborted twice?'));
       }
 
-      execCount -= 1;
-      if (execCount > 0) {
-        // the multi-request still contains other requests
+      requestsToFetchCount--;
+
+      if (requestsToFetchCount !== 0) {
+        // We can't resolve early unless all searchRequests have been aborted.
         return;
       }
 
-      if (esPromise && _.isFunction(esPromise.abort)) {
-        esPromise.abort();
+      if (searchRequestPromises) {
+        searchRequestPromises.forEach(searchRequestPromise => searchRequestPromise.abort());
       }
 
-      esPromise = undefined;
+      searchRequestPromises = undefined;
       isRequestAborted = true;
 
       return respondToSearchRequests();
@@ -130,7 +131,7 @@ export function CallClientProvider(Private, Promise, es) {
     // asynchronously after we've returned a reference to defer.promise.
     Promise.resolve().then(async () => {
       // Execute each request using its search strategy.
-      const esPromises = searchStrategiesWithRequests.map(searchStrategyWithSearchRequests => {
+      searchRequestPromises = searchStrategiesWithRequests.map(searchStrategyWithSearchRequests => {
         const { searchStrategy, searchRequests } = searchStrategyWithSearchRequests;
         return searchStrategy.search({ searchRequests, es, Promise, serializeFetchParams });
       });
@@ -141,12 +142,11 @@ export function CallClientProvider(Private, Promise, es) {
           return await respondToSearchRequests();
         }
 
-        esPromise = Promise.all(esPromises);
-        const segregatedResponses = await esPromise;
+        const segregatedResponses = await Promise.all(searchRequestPromises);
 
         // Aggregate the responses returned by all of the search strategies.
-        const aggregatedResponses = segregatedResponses.reduce((aggregation, responses) => {
-          return aggregation.concat(responses.responses);
+        const aggregatedResponses = segregatedResponses.reduce((allResponses, responses) => {
+          return allResponses.concat(responses.responses);
         }, []);
 
         await respondToSearchRequests(aggregatedResponses);
