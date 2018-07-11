@@ -28,6 +28,9 @@ export const createInstallRoute = () => ({
   method: 'POST',
   config: {
     validate: {
+      query: Joi.object().keys({
+        now: Joi.date().iso()
+      }),
       params: Joi.object().keys({
         id: Joi.string().required(),
       }).required()
@@ -80,7 +83,8 @@ export const createInstallRoute = () => ({
         return reply(errMsg).code(err.status);
       }
 
-      const now = new Date();
+      const { now: nowTimestamp } = request.query;
+      const now = nowTimestamp ? new Date(nowTimestamp) : new Date();
       const currentTimeMarker = new Date(Date.parse(sampleDataset.currentTimeMarker));
       function updateTimestamps(doc) {
         sampleDataset.timeFields.forEach(timeFieldName => {
