@@ -90,3 +90,8 @@ export function truncate(width) {
       text-overflow: ellipsis;
     `;
 }
+
+// height of specific elements
+export const elements = {
+  topNav: '29px'
+};

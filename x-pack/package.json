@@ -132,6 +132,7 @@
     "pivotal-ui": "13.0.1",
     "pluralize": "3.1.0",
     "pngjs": "3.3.1",
+    "polished": "^1.9.2",
     "prop-types": "^15.6.0",
     "puid": "1.0.5",
     "react": "^16.3.0",

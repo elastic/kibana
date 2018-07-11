@@ -176,10 +176,10 @@ function getPrimaryType(type) {
 }
 
 Spans.propTypes = {
-  location: PropTypes.object.isRequired,
   agentName: PropTypes.string.isRequired,
-  urlParams: PropTypes.object.isRequired,
-  droppedSpans: PropTypes.number.isRequired
+  droppedSpans: PropTypes.number.isRequired,
+  location: PropTypes.object.isRequired,
+  urlParams: PropTypes.object.isRequired
 };
 
 export default Spans;
