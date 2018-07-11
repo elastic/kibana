@@ -44,9 +44,11 @@ export function MonitoringTimeseriesContainer({ series, onBrush }) {
           <span className="monitoring-chart-tooltip__trigger overlay-trigger">
             <Fragment>
               <KuiInfoButton aria-labelledby={`monitoringChart${titleForAriaIds}`} />
-              <span id={`monitoringChart${titleForAriaIds}`} className="kuiScreenReaderOnly">
-                {seriesScreenReaderTextList.join('.')}
-              </span>
+              <EuiScreenReaderOnly>
+                <span id={`monitoringChart${titleForAriaIds}`}>
+                  {seriesScreenReaderTextList.join('.')}
+                </span>
+              </EuiScreenReaderOnly>
             </Fragment>
           </span>
         </OverlayTrigger>
