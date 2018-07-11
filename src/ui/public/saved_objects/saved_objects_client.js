@@ -68,7 +68,7 @@ export class SavedObjectsClient {
 
         throw error;
       })
-      .then(resp => this.createSavedObject(resp));
+      .then(resp => this._createSavedObject(resp));
   }
 
   /**
@@ -84,7 +84,7 @@ export class SavedObjectsClient {
     const query = _.pick(options, ['overwrite']);
 
     return this._request({ method: 'POST', path, query, body: objects }).then(resp => {
-      resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
+      resp.saved_objects = resp.saved_objects.map(d => this._createSavedObject(d));
       return keysToCamelCaseShallow(resp);
     });
   }
@@ -122,7 +122,7 @@ export class SavedObjectsClient {
     const query = keysToSnakeCaseShallow(options);
 
     return this._request({ method: 'GET', path, query }).then(resp => {
-      resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
+      resp.saved_objects = resp.saved_objects.map(d => this._createSavedObject(d));
       return keysToCamelCaseShallow(resp);
     });
   }
@@ -141,7 +141,7 @@ export class SavedObjectsClient {
 
     return new Promise((resolve, reject) => {
       this.batchQueue.push({ type, id, resolve, reject });
-      this.processBatchQueue();
+      this._processBatchQueue();
     });
   }
 
@@ -162,7 +162,7 @@ export class SavedObjectsClient {
     const filteredObjects = objects.map(obj => _.pick(obj, ['id', 'type']));
 
     return this._request({ method: 'POST', path, body: filteredObjects }).then(resp => {
-      resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
+      resp.saved_objects = resp.saved_objects.map(d => this._createSavedObject(d));
       return keysToCamelCaseShallow(resp);
     });
   }
@@ -188,14 +188,14 @@ export class SavedObjectsClient {
     };
 
     return this._request({ method: 'PUT', path, body }).then(resp => {
-      return this.createSavedObject(resp);
+      return this._createSavedObject(resp);
     });
   }
 
   /**
    * Throttled processing of get requests into bulk requests at 100ms interval
    */
-  processBatchQueue = _.throttle(() => {
+  _processBatchQueue = _.throttle(() => {
     const queue = _.cloneDeep(this.batchQueue);
     this.batchQueue = [];
 
@@ -206,7 +206,7 @@ export class SavedObjectsClient {
         });
 
         if (!foundObject) {
-          return queueItem.resolve(this.createSavedObject(_.pick(queueItem, ['id', 'type'])));
+          return queueItem.resolve(this._createSavedObject(_.pick(queueItem, ['id', 'type'])));
         }
 
         queueItem.resolve(foundObject);
@@ -215,7 +215,7 @@ export class SavedObjectsClient {
 
   }, BATCH_INTERVAL, { leading: false });
 
-  createSavedObject(options) {
+  _createSavedObject(options) {
     return new SavedObject(this, options);
   }
 
