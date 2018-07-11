@@ -21,7 +21,7 @@ import Joi from 'joi';
 import { wrapAuthConfig } from '../../wrap_auth_config';
 import { setApiFieldNames } from '../../lib';
 
-async function getExtended(req, server) {
+async function getExtended(req, server, collectorSet) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin'); // admin cluster, get info on internal system
   const callCluster = (...args) => callWithRequest(req, ...args);
 
@@ -35,7 +35,6 @@ async function getExtended(req, server) {
 
   let usage;
   try {
-    const { collectorSet } = server.usage;
     const usageRaw = await collectorSet.bulkFetchUsage(callCluster);
     usage = collectorSet.summarizeStats(usageRaw);
   } catch (err) {
@@ -54,8 +53,11 @@ async function getExtended(req, server) {
  * - No value or 'false' is isExtended = false
  * - Any other value causes a statusCode 400 response (Bad Request)
  */
-export function registerStatsApi(kbnServer, server, config, collector) {
+export function registerStatsApi(kbnServer, server, config) {
   const wrapAuth = wrapAuthConfig(config.get('status.allowAnonymous'));
+
+  const { collectorSet } = server.usage;
+
   server.route(
     wrapAuth({
       method: 'GET',
@@ -75,11 +77,12 @@ export function registerStatsApi(kbnServer, server, config, collector) {
         let clusterUuid;
         let usage;
         if (isExtended) {
-          ({ clusterUuid, usage } = await getExtended(req, server));
+          ({ clusterUuid, usage } = await getExtended(req, server, collectorSet));
         }
 
+        const kibanaCollector = collectorSet.getCollectorByType('kibana_stats');
         const stats = setApiFieldNames({
-          ...collector.getStats(kbnServer),
+          ...kibanaCollector.fetch(),
           cluster_uuid: clusterUuid,
           usage,
         });

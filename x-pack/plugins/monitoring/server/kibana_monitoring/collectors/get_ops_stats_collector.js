@@ -6,11 +6,12 @@
 
 import { KIBANA_STATS_TYPE } from '../../../common/constants';
 import { opsBuffer } from './ops_buffer';
+import { sourceKibana } from '../lib';
 
 /*
  * Initialize a collector for Kibana Ops Stats
  */
-export function getOpsStatsCollector(server) {
+export function getOpsStatsCollector(server, kbnServer) {
   let monitor;
   const buffer = opsBuffer(server);
   const onOps = event => buffer.push(event);
@@ -46,6 +47,11 @@ export function getOpsStatsCollector(server) {
   return collectorSet.makeStatsCollector({
     type: KIBANA_STATS_TYPE,
     init: start,
-    fetch: buffer.flush
+    fetch: () => {
+      return {
+        kibana: sourceKibana(server, kbnServer),
+        ...buffer.flush()
+      };
+    }
   });
 }

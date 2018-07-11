@@ -101,7 +101,7 @@ export class BulkUploader {
 
     if (payload.length > 0) {
       try {
-        const combinedData = this._combineTypes(payload); // use the collector types combiner
+        const combinedData = this._combineTypes(payload); // use the collector types combiner to combine the data into a single bulk upload object
         this._log.debug(`Uploading bulk stats payload to the local cluster`);
         this._onPayload(flatten(combinedData));
       } catch (err) {
