@@ -2,3 +2,8 @@ optimize:
   unsafeCache: true
   sourceMaps: false
 #  sourceMaps: '#cheap-source-map'
+
+castro:
+  enabled: true
+  index: '.castro'
+  dataPath: 'castro/data/repos'  # the path relative to your HOME folder

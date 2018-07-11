@@ -1,6 +1,6 @@
 import exampleRoute from './server/routes/example';
-import personRoute from './server/routes/person';
 import lspRoute from './server/routes/lsp';
+import repositoryRoute from './server/routes/repository';
 
 import mappings from './mappings';
 
@@ -27,18 +27,20 @@ export default function (kibana) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         index: Joi.string().default('.castro'),
-        fromyaml: Joi.string().default('empty')
+        dataPath: Joi.string().default('/tmp')
       }).default();
     },
 
-    
     init(server, options) {
+      // TODO:Prepare elasticsearch index for castro if necessary.
+      // const es = server.plugins.elasticsearch.getCluster("data");
+      // const index = server.config().get('castro.index');
+
       // Add server routes and initialize the plugin here
       exampleRoute(server);
-      personRoute(server);
-      lspRoute(server)
-    }
-    
+      lspRoute(server);
+      repositoryRoute(server);
+    },
 
   });
 };

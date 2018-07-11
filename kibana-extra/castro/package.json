@@ -22,6 +22,7 @@
     "@elastic/eslint-import-resolver-kibana": "^0.9.0",
     "@elastic/eui": "^0.0.51",
     "@kbn/plugin-helpers": "link:../../kibana/packages/kbn-plugin-helpers",
+    "@types/elasticsearch": "^5.0.24",
     "@types/hapi": "^15.0.0",
     "@types/nodegit": "^0.18.8",
     "@types/react": "^16.3.16",
@@ -40,9 +41,10 @@
     "mocha": "^5.2.0"
   },
   "dependencies": {
+    "git-url-parse": "^9.0.1",
     "highlights": "^3.1.1",
     "javascript-typescript-langserver": "^2.10.0",
-    "vscode-languageserver": "^4.2.1",
+    "nodegit": "^0.22.1",
     "popper.js": "^1.14.3",
     "react-dom": "^16.4.1",
     "react-redux": "^5.0.7",
@@ -51,6 +53,8 @@
     "redux": "^4.0.0",
     "redux-actions": "^2.4.0",
     "redux-saga": "^0.16.0",
-    "tooltip.js": "^1.2.0"
+    "rimraf": "^2.6.2",
+    "tooltip.js": "^1.2.0",
+    "vscode-languageserver": "^4.2.1"
   }
 }
