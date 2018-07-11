@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
 import { wrapRequest } from '../../../../utils/wrap_request';
 import { MemoryBeatsAdapter } from '../../../adapters/beats/memory_beats_adapter';
 import { TestingBackendFrameworkAdapter } from '../../../adapters/framework/testing_framework_adapter';
@@ -144,7 +143,7 @@ describe('Beats Domain Lib', () => {
       });
 
       const response = { beats };
-      expect(response.beats).to.eql([
+      expect(response.beats).toEqual([
         { id: 'bar', status: 200, result: 'verified' },
         { id: nonExistentBeatId, status: 404, result: 'not found' },
       ]);
@@ -184,7 +183,7 @@ describe('Beats Domain Lib', () => {
       });
 
       const response = { beats };
-      expect(response.beats).to.eql([
+      expect(response.beats).toEqual([
         { id: 'foo', status: 200, result: 'already verified' },
         { id: 'bar', status: 200, result: 'verified' },
       ]);

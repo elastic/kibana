@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
 import { wrapRequest } from '../../../utils/wrap_request';
 import { TestingBackendFrameworkAdapter } from '../../adapters/framework/testing_framework_adapter';
 import { TokenEnrollmentData } from '../../adapters/tokens/adapter_types';
@@ -46,9 +45,9 @@ describe('Token Domain Lib', () => {
   it('should generate webtokens with a qty of 1', async () => {
     const tokens = await tokensLib.createEnrollmentTokens(fakeReq, 1);
 
-    expect(tokens.length).to.be(1);
+    expect(tokens.length).toBe(1);
 
-    expect(typeof tokens[0]).to.be('string');
+    expect(typeof tokens[0]).toBe('string');
   });
 
   it('should create the specified number of tokens', async () => {
@@ -58,8 +57,8 @@ describe('Token Domain Lib', () => {
       numTokens
     );
 
-    expect(tokensFromApi.length).to.eql(numTokens);
-    expect(tokensFromApi).to.eql(
+    expect(tokensFromApi.length).toEqual(numTokens);
+    expect(tokensFromApi).toEqual(
       tokensDB.map((t: TokenEnrollmentData) => t.token)
     );
   });
@@ -83,7 +82,7 @@ describe('Token Domain Lib', () => {
     const almostTenMinutesFromNow = moment(tenMinutesFromNow)
       .subtract('2', 'seconds')
       .valueOf();
-    expect(tokenExpiresOn).to.be.lessThan(tenMinutesFromNow);
-    expect(tokenExpiresOn).to.be.greaterThan(almostTenMinutesFromNow);
+    expect(tokenExpiresOn).toBeLessThan(tenMinutesFromNow);
+    expect(tokenExpiresOn).toBeGreaterThan(almostTenMinutesFromNow);
   });
 });
