@@ -4,13 +4,12 @@ buildscript {
   }
 
   dependencies {
-    classpath 'com.palominolabs.gradle.task:gradle-git-clone-task:0.0.2'
+    classpath 'com.palominolabs.gradle.task:gradle-git-clone-task:0.0.3'
   }
 }
 
 plugins {
   id "com.moowork.node" version "1.2.0"
-  id 'org.ajoberstar.grgit' version '3.0.0-beta.1'
 }
 
 node {
@@ -23,6 +22,7 @@ task setupKibana(type: com.palominolabs.gradle.task.git.clone.GitCloneTask) {
   dir = file("$rootDir/kibana")
   uri = 'https://github.com/elastic/kibana'
   treeish = kibanaVersion
+  forceFetch = true
 }
 
 task bootstrap(type: YarnTask, dependsOn: [yarn, setupKibana]) {

@@ -1,5 +1,6 @@
 {
     "git.ignoreLimitWarning": true,
     "editor.tabSize": 2,
-    "editor.rulers": [110]
+    "editor.rulers": [110],
+    "files.trimTrailingWhitespace": true
 }

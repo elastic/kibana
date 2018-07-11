@@ -1,3 +1,5 @@
+import { CodeLine } from "model";
+
 const Highlights = require('highlights');
 const highlighter = new Highlights();
 const Selector = require('first-mate-select-grammar');
@@ -5,26 +7,6 @@ const Selector = require('first-mate-select-grammar');
 highlighter.loadGrammarsSync();
 
 const selector = Selector();
-
-interface CodeLine extends Array<Token> {
-}
-
-interface Token {
-    value: string
-    scopes: string[]
-    range?: Range
-}
-
-interface Range {
-    start: number // start pos in line
-    end: number
-    pos?: number  // position in file
-}
-
-interface Node {
-    token: Token
-    children: Token[]
-}
 
 export function tokenizeLines(filePath: string, fileContents: string): CodeLine[] {
     const grammar = selector.selectGrammar(highlighter.registry, filePath, fileContents);
