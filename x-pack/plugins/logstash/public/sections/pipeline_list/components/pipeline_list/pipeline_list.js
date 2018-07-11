@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { render } from 'react-dom';
+import { isEmpty } from 'lodash';
 // import pluralize from 'pluralize';
 import { uiModules } from 'ui/modules';
 import { toastNotifications } from 'ui/notify';
@@ -163,12 +164,47 @@ class PipelineList extends React.Component {
       : null;
   }
 
-  render() {
+  renderPipelinesTable = () => {
     const selection = {
       selectable: () => true,
       selectableMessage: () => 'the message',
       onSelectionChange: selection => this.setState({ selection }),
     };
+
+    const search = {
+      box: { incremental: true },
+      filters: [
+        {
+          type: 'field_value_selection',
+          field: 'id',
+          name: 'Id',
+          multiSelect: false,
+          options: this.state.pipelines.map(({ id }) => {
+            return {
+              value: id,
+              name: id,
+              view: id,
+            };
+          }),
+        },
+      ],
+    };
+
+    return (
+      <EuiInMemoryTable
+        columns={this.columns}
+        itemId="id"
+        items={this.state.pipelines}
+        search={search}
+        sorting={true}
+        isSelectable={true}
+        selection={selection}
+        message={this.state.message}
+      />
+    );
+  }
+
+  render() {
     return (
       <EuiPage>
         <EuiPageContent
@@ -179,15 +215,11 @@ class PipelineList extends React.Component {
             this.renderNoPermissionCallOut()
           }
           <div>
-            <EuiInMemoryTable
-              columns={this.columns}
-              itemId="id"
-              items={this.state.pipelines}
-              sorting={true}
-              isSelectable={true}
-              selection={selection}
-              message={this.state.message}
-            />
+            {
+              isEmpty(this.state.pipelines)
+                ? null
+                : this.renderPipelinesTable()
+            }
           </div>
         </EuiPageContent>
       </EuiPage>
