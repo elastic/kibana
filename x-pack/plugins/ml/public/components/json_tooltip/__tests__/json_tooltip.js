@@ -32,7 +32,6 @@ describe('ML - <ml-info-icon>', () => {
     const scope = $element.isolateScope();
 
     expect(scope.id).to.be.an('undefined');
-    expect(scope.text).to.be('');
   });
 
   it('Initialization with a non-existing tooltip attribute doesn\'t throw an error', () => {
@@ -42,7 +41,6 @@ describe('ML - <ml-info-icon>', () => {
     scope.$digest();
 
     expect(scope.id).to.be(id);
-    expect(scope.text).to.be('');
   });
 
   it('Initialize with existing tooltip attribute', () => {
@@ -53,7 +51,6 @@ describe('ML - <ml-info-icon>', () => {
 
     // test scope values
     expect(scope.id).to.be(id);
-    expect(scope.text).to.be(tooltips[id].text);
 
     // test the rendered span element which should be referenced by aria-describedby
     const span = $element.find('span.ml-info-tooltip-text');

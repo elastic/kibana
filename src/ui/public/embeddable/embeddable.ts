@@ -85,10 +85,7 @@ export abstract class Embeddable {
   /**
    * Embeddable should render itself at the given domNode.
    */
-  public abstract render(
-    domNode: HTMLElement,
-    containerState: ContainerState
-  ): void;
+  public abstract render(domNode: HTMLElement, containerState: ContainerState): void;
 
   /**
    * An embeddable can return inspector adapters if it want the inspector to be
