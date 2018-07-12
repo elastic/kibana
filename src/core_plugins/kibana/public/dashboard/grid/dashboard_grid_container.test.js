@@ -8,7 +8,7 @@ import { getContainerApiMock } from '../__tests__/get_container_api_mock';
 import { getEmbeddableFactoryMock } from '../__tests__/get_embeddable_factories_mock';
 import { store } from '../../store';
 import { DashboardGridContainer } from './dashboard_grid_container';
-import { updatePanels } from '../actions';
+import { updatePanels, updateUseMargins } from '../actions';
 
 jest.mock('ui/chrome', () => ({ getKibanaVersion: () => '6.3.0' }), { virtual: true });
 
@@ -74,6 +74,7 @@ test('loads old panel data in the right order', () => {
   ];
 
   store.dispatch(updatePanels(panelData));
+  store.dispatch(updateUseMargins(false));
 
   const grid = mount(<Provider store={store}><DashboardGridContainer {...getProps()} /></Provider>);
 
