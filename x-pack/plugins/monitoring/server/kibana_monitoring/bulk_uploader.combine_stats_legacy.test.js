@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getCollectorTypesCombiner } from '../get_collector_types_combiner';
-import expect from 'expect.js';
+import { KIBANA_REPORTING_TYPE } from '../../../reporting/common/constants';
+import { BulkUploader } from './bulk_uploader';
 
 const getInitial = () => {
   return [
@@ -47,7 +47,7 @@ const getInitial = () => {
       }
     ],
     [
-      { 'index': { '_type': 'reporting_stats' } },
+      { 'index': { '_type': KIBANA_REPORTING_TYPE } },
       {
         'available': true,
         'enabled': false,
@@ -69,11 +69,13 @@ const getInitial = () => {
   ];
 };
 
+// TODO use jest snapshotting
 const getResult = () => {
   return [
     [
       { 'index': { '_type': 'kibana_stats' } },
       {
+        'host': 'tsullivan.local',
         'concurrent_connections': 0,
         'os': {
           'load': { '1m': 2.28857421875, '5m': 2.45068359375, '15m': 2.29248046875 },
@@ -95,16 +97,6 @@ const getResult = () => {
         },
         'response_times': { 'average': 47, 'max': 47 },
         'timestamp': '2017-07-26T00:14:20.771Z',
-        'kibana': {
-          'uuid': '5b2de169-2785-441b-ae8c-186a1936b17d',
-          'name': 'tsullivan.local',
-          'index': '.kibana',
-          'host': 'tsullivan.local',
-          'transport_address': 'tsullivan.local:5601',
-          'version': '6.0.0-beta1',
-          'snapshot': false,
-          'status': 'green'
-        },
         'usage': {
           'dashboard': { 'total': 0 },
           'visualization': { 'total': 0 },
@@ -133,42 +125,18 @@ const getResult = () => {
       { 'index': { '_type': 'kibana_settings' } },
       {
         'xpack': { 'defaultAdminEmail': 'tim@elastic.co' },
-        'kibana': {
-          'uuid': '5b2de169-2785-441b-ae8c-186a1936b17d',
-          'name': 'tsullivan.local',
-          'index': '.kibana',
-          'host': 'tsullivan.local',
-          'transport_address': 'tsullivan.local:5601',
-          'version': '6.0.0-beta1',
-          'snapshot': false,
-          'status': 'green'
-        }
       }
     ]
   ];
 };
-
-const kbnServerMock = {};
-const configMock = {};
-const sourceKibanaMock = () => ({
-  uuid: '5b2de169-2785-441b-ae8c-186a1936b17d',
-  name: 'tsullivan.local',
-  index: '.kibana',
-  host: 'tsullivan.local',
-  transport_address: 'tsullivan.local:5601',
-  version: '6.0.0-beta1',
-  snapshot: false,
-  status: 'green'
-});
 
 describe('Collector Types Combiner', () => {
   describe('with all the data types present', () => {
     it('provides settings, and combined stats/usage data', () => {
       // default gives all the data types
       const initial = getInitial();
-      const combiner = getCollectorTypesCombiner(kbnServerMock, configMock, sourceKibanaMock);
-      const result = combiner(initial);
-      expect(result).to.eql(getResult());
+      const result = BulkUploader.combineStatsLegacy(initial);
+      expect(result).toEqual(getResult());
     });
   });
   describe('with settings data missing', () => {
@@ -176,11 +144,10 @@ describe('Collector Types Combiner', () => {
       // default gives all the data types
       const initial = getInitial();
       const trimmedInitial = [ initial[0], initial[1], initial[2] ]; // just stats, usage and reporting, no settings
-      const combiner = getCollectorTypesCombiner(kbnServerMock, configMock, sourceKibanaMock);
-      const result = combiner(trimmedInitial);
+      const result = BulkUploader.combineStatsLegacy(trimmedInitial);
       const expectedResult = getResult();
       const trimmedExpectedResult = [ expectedResult[0] ]; // single combined item
-      expect(result).to.eql(trimmedExpectedResult);
+      expect(result).toEqual(trimmedExpectedResult);
     });
   });
   describe('with usage data missing', () => {
@@ -188,12 +155,11 @@ describe('Collector Types Combiner', () => {
       // default gives all the data types
       const initial = getInitial();
       const trimmedInitial = [ initial[0], initial[3] ]; // just stats and settings, no usage or reporting
-      const combiner = getCollectorTypesCombiner(kbnServerMock, configMock, sourceKibanaMock);
-      const result = combiner(trimmedInitial);
+      const result = BulkUploader.combineStatsLegacy(trimmedInitial);
       const expectedResult = getResult();
       delete expectedResult[0][1].usage; // usage stats should not be present in the result
       const trimmedExpectedResult = [ expectedResult[0], expectedResult[1] ];
-      expect(result).to.eql(trimmedExpectedResult);
+      expect(result).toEqual(trimmedExpectedResult);
     });
   });
   describe('with stats data missing', () => {
@@ -201,11 +167,10 @@ describe('Collector Types Combiner', () => {
       // default gives all the data types
       const initial = getInitial();
       const trimmedInitial = [ initial[3] ]; // just settings
-      const combiner = getCollectorTypesCombiner(kbnServerMock, configMock, sourceKibanaMock);
-      const result = combiner(trimmedInitial);
+      const result = BulkUploader.combineStatsLegacy(trimmedInitial);
       const expectedResult = getResult();
       const trimmedExpectedResult = [ expectedResult[1] ]; // just settings
-      expect(result).to.eql(trimmedExpectedResult);
+      expect(result).toEqual(trimmedExpectedResult);
     });
   });
 });

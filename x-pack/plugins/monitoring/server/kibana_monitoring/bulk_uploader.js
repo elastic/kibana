@@ -102,7 +102,7 @@ export class BulkUploader {
    */
   async _fetchAndUpload(collectorSet) {
     const data = await collectorSet.bulkFetch(this._callClusterWithInternalUser);
-    const uploadData = this.toBulkUploadFormat(data);
+    const uploadData = BulkUploader.toBulkUploadFormat(data);
 
     if (uploadData) {
       try {
@@ -121,17 +121,17 @@ export class BulkUploader {
    * Bulk stats are transformed into a bulk upload format
    * Non-legacy transformation is done in CollectorSet.toApiStats
    */
-  toBulkUploadFormat(uploadData) {
+  static toBulkUploadFormat(uploadData) {
     const payload = uploadData
       .filter(d => Boolean(d) && !isEmpty(d.result))
       .map(({ result, type }) => [{ index: { _type: type } }, result]);
     if (payload.length > 0) {
-      const combinedData = this.combineStatsLegacy(payload); // arrange the usage data into the stats
+      const combinedData = BulkUploader.combineStatsLegacy(payload); // arrange the usage data into the stats
       return flatten(combinedData);
     }
   }
 
-  combineStatsLegacy(payload) {
+  static combineStatsLegacy(payload) {
     // default the item to [] to allow destructuring
     const findItem = type => payload.find(item => get(item, '[0].index._type') === type) || [];
 
