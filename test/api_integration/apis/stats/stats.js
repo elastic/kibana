@@ -21,24 +21,24 @@ import expect from 'expect.js';
 
 const assertStatsAndMetrics = body => {
   expect(body.kibana.name).to.be.a('string');
-  expect(body.kibana.host).to.be.a('string');
   expect(body.kibana.uuid).to.be.a('string');
+  expect(body.kibana.host).to.be.a('string');
   expect(body.kibana.transport_address).to.be.a('string');
   expect(body.kibana.version).to.be.a('string');
   expect(body.kibana.snapshot).to.be.a('boolean');
   expect(body.kibana.status).to.be('green');
 
-  expect(body.process.mem.external_bytes).to.be.a('number');
   expect(body.process.mem.heap_max_bytes).to.be.a('number');
   expect(body.process.mem.heap_used_bytes).to.be.a('number');
   expect(body.process.mem.resident_set_size_bytes).to.be.a('number');
   expect(body.process.pid).to.be.a('number');
   expect(body.process.uptime_ms).to.be.a('number');
 
-  expect(body.os.cpu.load_average['1m']).to.be.a('number');
   expect(body.os.mem.free_bytes).to.be.a('number');
   expect(body.os.mem.total_bytes).to.be.a('number');
   expect(body.os.uptime_ms).to.be.a('number');
+
+  expect(body.os.cpu.load_average['1m']).to.be.a('number');
 
   expect(body.response_times.avg_ms).not.to.be(null); // ok if is undefined
   expect(body.response_times.max_ms).not.to.be(null); // ok if is undefined
