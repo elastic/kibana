@@ -50,18 +50,18 @@ export function initTimepicker(history, dispatch) {
 
         history.listen(() => {
           updateRefreshRate(dispatch);
-          globalState.fetch();
+          dispatch(updateTimePickerAction());
+          globalState.fetch(); // ensure global state is updated when url changes
         });
+
+        // ensure that timepicker updates when global state changes
+        registerTimefilterWithGlobalState(globalState);
+
         timefilter.enableTimeRangeSelector();
         timefilter.enableAutoRefreshSelector();
 
+        dispatch(updateTimePickerAction());
         updateRefreshRate(dispatch);
-
-        $scope.$listen(timefilter, 'timeUpdate', () =>
-          dispatch(updateTimePickerAction())
-        );
-
-        registerTimefilterWithGlobalState(globalState);
 
         Promise.all([waitForAngularReady]).then(resolve);
       });
