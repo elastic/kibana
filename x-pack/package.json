@@ -33,7 +33,7 @@
     "aws-sdk": "2.2.33",
     "axios": "^0.18.0",
     "babel-jest": "^22.4.3",
-    "chalk": "^2.3.2",
+    "chalk": "^2.4.1",
     "chance": "1.0.10",
     "checksum": "0.1.1",
     "commander": "2.12.2",
