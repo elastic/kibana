@@ -18,19 +18,21 @@
  */
 
 import _ from 'lodash';
-import { documentTransformer } from './document_transformer';
+import { DocumentMigrator } from './document_migrator';
 import { SavedObjectDoc } from './types';
 
-describe('documentTransformer', () => {
-  it('transforms type and attributes', () => {
+describe('DocumentMigrator', () => {
+  it('migrates type and attributes', () => {
     const kibanaVersion = '8.9.1';
-    const migrations = {
-      user: {
-        '1.2.3': setAttr('attributes.name', 'Chris'),
+    const migrator = new DocumentMigrator({
+      kibanaVersion,
+      migrations: {
+        user: {
+          '1.2.3': setAttr('attributes.name', 'Chris'),
+        },
       },
-    };
-    const transform = documentTransformer({ kibanaVersion, migrations });
-    const actual = transform({
+    });
+    const actual = migrator.migrate({
       id: 'me',
       type: 'user',
       attributes: { name: 'Christopher' },
@@ -43,15 +45,17 @@ describe('documentTransformer', () => {
     });
   });
 
-  it('transforms meta properties', () => {
+  it('migrates meta properties', () => {
     const kibanaVersion = '8.9.1';
-    const migrations = {
-      acl: {
-        '2.3.5': setAttr('acl', 'admins-only,sucka!'),
+    const migrator = new DocumentMigrator({
+      kibanaVersion,
+      migrations: {
+        acl: {
+          '2.3.5': setAttr('acl', 'admins-only,sucka!'),
+        },
       },
-    };
-    const transform = documentTransformer({ kibanaVersion, migrations });
-    const actual = transform({
+    });
+    const actual = migrator.migrate({
       id: 'me',
       type: 'user',
       attributes: { name: 'Tyler' },
@@ -66,15 +70,17 @@ describe('documentTransformer', () => {
     });
   });
 
-  it('does not apply transforms to unrelated docs', () => {
+  it('does not apply migrations to unrelated docs', () => {
     const kibanaVersion = '8.9.1';
-    const migrations = {
-      aaa: { '1.0.0': setAttr('aaa', 'A') },
-      bbb: { '1.0.0': setAttr('bbb', 'B') },
-      ccc: { '1.0.0': setAttr('ccc', 'C') },
-    };
-    const transform = documentTransformer({ kibanaVersion, migrations });
-    const actual = transform({
+    const migrator = new DocumentMigrator({
+      kibanaVersion,
+      migrations: {
+        aaa: { '1.0.0': setAttr('aaa', 'A') },
+        bbb: { '1.0.0': setAttr('bbb', 'B') },
+        ccc: { '1.0.0': setAttr('ccc', 'C') },
+      },
+    });
+    const actual = migrator.migrate({
       id: 'me',
       type: 'user',
       attributes: { name: 'Tyler' },
@@ -88,15 +94,17 @@ describe('documentTransformer', () => {
 
   it('only applies migrations that are more recent than the doc', () => {
     const kibanaVersion = '8.9.1';
-    const migrations = {
-      dog: {
-        '1.2.3': setAttr('attributes.a', 'A'),
-        '1.2.4': setAttr('attributes.b', 'B'),
-        '2.0.1': setAttr('attributes.c', 'C'),
+    const migrator = new DocumentMigrator({
+      kibanaVersion,
+      migrations: {
+        dog: {
+          '1.2.3': setAttr('attributes.a', 'A'),
+          '1.2.4': setAttr('attributes.b', 'B'),
+          '2.0.1': setAttr('attributes.c', 'C'),
+        },
       },
-    };
-    const transform = documentTransformer({ kibanaVersion, migrations });
-    const actual = transform({
+    });
+    const actual = migrator.migrate({
       id: 'smelly',
       type: 'dog',
       attributes: { name: 'Callie' },
@@ -113,9 +121,9 @@ describe('documentTransformer', () => {
   it('rejects docs that belong to a newer Kibana instance', () => {
     const kibanaVersion = '8.9.1';
     const migrations = {};
-    const transform = documentTransformer({ kibanaVersion, migrations });
+    const migrator = new DocumentMigrator({ kibanaVersion, migrations });
     expect(() =>
-      transform({
+      migrator.migrate({
         id: 'smelly',
         type: 'dog',
         attributes: { name: 'Callie' },
@@ -127,15 +135,17 @@ describe('documentTransformer', () => {
   it('applies migrations in order', () => {
     const kibanaVersion = '18.9.1';
     let count = 0;
-    const migrations = {
-      dog: {
-        '2.2.4': setAttr('attributes.b', () => ++count),
-        '10.0.1': setAttr('attributes.c', () => ++count),
-        '1.2.3': setAttr('attributes.a', () => ++count),
+    const migrator = new DocumentMigrator({
+      kibanaVersion,
+      migrations: {
+        dog: {
+          '2.2.4': setAttr('attributes.b', () => ++count),
+          '10.0.1': setAttr('attributes.c', () => ++count),
+          '1.2.3': setAttr('attributes.a', () => ++count),
+        },
       },
-    };
-    const transform = documentTransformer({ kibanaVersion, migrations });
-    const actual = transform({
+    });
+    const actual = migrator.migrate({
       id: 'smelly',
       type: 'dog',
       attributes: { name: 'Callie' },
@@ -151,16 +161,18 @@ describe('documentTransformer', () => {
 
   it('allows props to be added', () => {
     const kibanaVersion = '18.9.1';
-    const migrations = {
-      animal: {
-        '1.0.0': setAttr('animal', (name: string) => `Animal: ${name}`),
+    const migrator = new DocumentMigrator({
+      kibanaVersion,
+      migrations: {
+        animal: {
+          '1.0.0': setAttr('animal', (name: string) => `Animal: ${name}`),
+        },
+        dog: {
+          '2.2.4': setAttr('animal', 'Doggie'),
+        },
       },
-      dog: {
-        '2.2.4': setAttr('animal', 'Doggie'),
-      },
-    };
-    const transform = documentTransformer({ kibanaVersion, migrations });
-    const actual = transform({
+    });
+    const actual = migrator.migrate({
       id: 'smelly',
       type: 'dog',
       attributes: { name: 'Callie' },
@@ -177,18 +189,20 @@ describe('documentTransformer', () => {
 
   it('allows props to be renamed', () => {
     const kibanaVersion = '18.9.1';
-    const migrations = {
-      animal: {
-        '1.0.0': setAttr('animal', (name: string) => `Animal: ${name}`),
-        '3.2.1': renameAttr('animal', 'dawg'),
+    const migrator = new DocumentMigrator({
+      kibanaVersion,
+      migrations: {
+        animal: {
+          '1.0.0': setAttr('animal', (name: string) => `Animal: ${name}`),
+          '3.2.1': renameAttr('animal', 'dawg'),
+        },
+        dawg: {
+          '2.2.4': renameAttr('dawg', 'animal'),
+          '3.2.0': setAttr('dawg', (name: string) => `Dawg3.x: ${name}`),
+        },
       },
-      dawg: {
-        '2.2.4': renameAttr('dawg', 'animal'),
-        '3.2.0': setAttr('dawg', (name: string) => `Dawg3.x: ${name}`),
-      },
-    };
-    const transform = documentTransformer({ kibanaVersion, migrations });
-    const actual = transform({
+    });
+    const actual = migrator.migrate({
       id: 'smelly',
       type: 'foo',
       attributes: { name: 'Callie' },
@@ -205,16 +219,21 @@ describe('documentTransformer', () => {
 
   it('allows changing type', () => {
     const kibanaVersion = '18.9.1';
-    const migrations = {
-      cat: {
-        '1.0.0': setAttr('attributes.name', (name: string) => `Kitty ${name}`),
+    const migrator = new DocumentMigrator({
+      kibanaVersion,
+      migrations: {
+        cat: {
+          '1.0.0': setAttr(
+            'attributes.name',
+            (name: string) => `Kitty ${name}`
+          ),
+        },
+        dog: {
+          '2.2.4': setAttr('type', 'cat'),
+        },
       },
-      dog: {
-        '2.2.4': setAttr('type', 'cat'),
-      },
-    };
-    const transform = documentTransformer({ kibanaVersion, migrations });
-    const actual = transform({
+    });
+    const actual = migrator.migrate({
       id: 'smelly',
       type: 'dog',
       attributes: { name: 'Callie' },
@@ -229,16 +248,18 @@ describe('documentTransformer', () => {
 
   it('decorates transform errors with details about what doc and transform failed', () => {
     const kibanaVersion = '8.9.1';
-    const migrations = {
-      dog: {
-        '1.2.3': () => {
-          throw new Error('Dang diggity!');
+    const migrator = new DocumentMigrator({
+      kibanaVersion,
+      migrations: {
+        dog: {
+          '1.2.3': () => {
+            throw new Error('Dang diggity!');
+          },
         },
       },
-    };
-    const transform = documentTransformer({ kibanaVersion, migrations });
+    });
     try {
-      transform({
+      migrator.migrate({
         id: 'smelly',
         type: 'dog',
         attributes: {},
@@ -251,6 +272,29 @@ describe('documentTransformer', () => {
         failedTransform: 'dog:1.2.3',
       });
     }
+  });
+
+  test('extracts the latest migration version info', () => {
+    const kibanaVersion = '9.3.1';
+    const { migrationVersion } = new DocumentMigrator({
+      kibanaVersion,
+      migrations: {
+        aaa: {
+          '1.2.3': (doc: SavedObjectDoc) => doc,
+          '10.4.0': (doc: SavedObjectDoc) => doc,
+          '2.2.1': (doc: SavedObjectDoc) => doc,
+        },
+        bbb: {
+          '3.2.3': (doc: SavedObjectDoc) => doc,
+          '2.0.0': (doc: SavedObjectDoc) => doc,
+        },
+      },
+    });
+
+    expect(migrationVersion).toEqual({
+      aaa: '10.4.0',
+      bbb: '3.2.3',
+    });
   });
 });
 

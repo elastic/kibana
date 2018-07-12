@@ -39,6 +39,7 @@ import { sampleDataMixin } from './sample_data';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
 import { sassMixin } from './sass';
+import { KibanaMigrator } from './saved_objects/migrations';
 
 const rootDir = fromRoot('.');
 
@@ -50,59 +51,61 @@ export default class KbnServer {
     this.rootDir = rootDir;
     this.settings = settings || {};
 
-    this.ready = constant(this.mixin(
-      Plugins.waitForInitSetupMixin,
+    this.ready = constant(
+      this.mixin(
+        Plugins.waitForInitSetupMixin,
 
-      // sets this.config, reads this.settings
-      configSetupMixin,
-      // sets this.server
-      httpMixin,
-      // adds methods for extending this.server
-      serverExtensionsMixin,
-      loggingMixin,
-      configDeprecationWarningsMixin,
-      warningsMixin,
-      statusMixin,
+        // sets this.config, reads this.settings
+        configSetupMixin,
+        // sets this.server
+        httpMixin,
+        // adds methods for extending this.server
+        serverExtensionsMixin,
+        loggingMixin,
+        configDeprecationWarningsMixin,
+        warningsMixin,
+        statusMixin,
 
-      // writes pid file
-      pidMixin,
+        // writes pid file
+        pidMixin,
 
-      // find plugins and set this.plugins and this.pluginSpecs
-      Plugins.scanMixin,
+        // find plugins and set this.plugins and this.pluginSpecs
+        Plugins.scanMixin,
 
-      // tell the config we are done loading plugins
-      configCompleteMixin,
+        // tell the config we are done loading plugins
+        configCompleteMixin,
 
-      // setup this.uiExports and this.uiBundles
-      uiMixin,
-      indexPatternsMixin,
+        // setup this.uiExports and this.uiBundles
+        uiMixin,
+        indexPatternsMixin,
 
-      // setup saved object routes
-      savedObjectsMixin,
+        // setup saved object routes
+        savedObjectsMixin,
 
-      // setup routes for installing/uninstalling sample data sets
-      sampleDataMixin,
+        // setup routes for installing/uninstalling sample data sets
+        sampleDataMixin,
 
-      // ensure that all bundles are built, or that the
-      // watch bundle server is running
-      optimizeMixin,
+        // ensure that all bundles are built, or that the
+        // watch bundle server is running
+        optimizeMixin,
 
-      // transpiles SCSS into CSS
-      sassMixin,
+        // transpiles SCSS into CSS
+        sassMixin,
 
-      // initialize the plugins
-      Plugins.initializeMixin,
+        // initialize the plugins
+        Plugins.initializeMixin,
 
-      // notify any deferred setup logic that plugins have initialized
-      Plugins.waitForInitResolveMixin,
+        // notify any deferred setup logic that plugins have initialized
+        Plugins.waitForInitResolveMixin,
 
-      () => {
-        if (this.config.get('server.autoListen')) {
-          this.ready = constant(Promise.resolve());
-          return this.listen();
+        () => {
+          if (this.config.get('server.autoListen')) {
+            this.ready = constant(Promise.resolve());
+            return this.listen();
+          }
         }
-      }
-    ));
+      )
+    );
 
     this.listen = once(this.listen);
   }
@@ -130,12 +133,12 @@ export default class KbnServer {
    * @return undefined
    */
   async listen() {
-    const {
-      server,
-      config,
-    } = this;
+    const { server, config } = this;
 
     await this.ready();
+
+    await new KibanaMigrator({ kbnServer: this }).migrateIndex();
+
     await fromNode(cb => server.start(cb));
 
     if (isWorker) {
@@ -143,11 +146,14 @@ export default class KbnServer {
       process.send(['WORKER_LISTENING']);
     }
 
-    server.log(['listening', 'info'], `Server running at ${server.info.uri}${
-      config.get('server.rewriteBasePath')
-        ? config.get('server.basePath')
-        : ''
-    }`);
+    server.log(
+      ['listening', 'info'],
+      `Server running at ${server.info.uri}${
+        config.get('server.rewriteBasePath')
+          ? config.get('server.basePath')
+          : ''
+      }`
+    );
     return server;
   }
 
@@ -168,7 +174,7 @@ export default class KbnServer {
     const loggingOptions = loggingConfiguration(config);
     const subset = {
       ops: config.get('ops'),
-      logging: config.get('logging')
+      logging: config.get('logging'),
     };
     const plain = JSON.stringify(subset, null, 2);
     this.server.log(['info', 'config'], 'New logging configuration:\n' + plain);

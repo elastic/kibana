@@ -18,7 +18,7 @@
  */
 import _ from 'lodash';
 import { createSavedObjectsService } from './service';
-import { buildKibanaMappings } from './migrations';
+import { KibanaMigrator } from './migrations';
 import {
   createBulkGetRoute,
   createCreateRoute,
@@ -29,11 +29,9 @@ import {
 } from './routes';
 
 export function savedObjectsMixin(kbnServer, server) {
-  const mappings = buildKibanaMappings({ kbnServer });
+  const migrator = new KibanaMigrator({ kbnServer });
 
-  server.decorate('server', 'getKibanaIndexMappingsDsl', () =>
-    _.cloneDeep(mappings)
-  );
+  server.decorate('server', 'getKibanaIndexMappingsDsl', () => migrator.getActiveMappings());
 
   // we use kibana.index which is technically defined in the kibana plugin, so if
   // we don't have the plugin (mainly tests) we can't initialize the saved objects

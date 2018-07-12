@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { buildKibanaMappings } from './kibana';
+export { KibanaMigrator } from './kibana';

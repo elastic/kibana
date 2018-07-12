@@ -17,24 +17,22 @@
  * under the License.
  */
 
-import { fetchOrDefault } from './fetch_or_default';
+import { LogFn } from './types';
 
-describe('fetchOrDefault', () => {
-  test('returns default if not found', () => {
-    expect(
-      fetchOrDefault(Promise.reject({ status: 404 }), 'hoi')
-    ).resolves.toEqual('hoi');
-  });
+export interface Logger {
+  debug: (msg: string) => void;
+  info: (msg: string) => void;
+  warning: (msg: string) => void;
+}
 
-  test('errors if rejected w/ non status 404', () => {
-    expect(
-      fetchOrDefault(Promise.reject({ status: 500 }), 'hoi')
-    ).rejects.toThrow();
-  });
+export class MigrationLogger implements Logger {
+  private log: LogFn;
 
-  test('returns resolved value if found', () => {
-    expect(
-      fetchOrDefault(Promise.resolve({ hello: 'world' }), { hello: 'you' })
-    ).resolves.toEqual({ hello: 'world' });
-  });
-});
+  constructor(log: LogFn) {
+    this.log = log;
+  }
+
+  public info = (msg: string) => this.log(['info', 'migrations'], msg);
+  public debug = (msg: string) => this.log(['debug', 'migrations'], msg);
+  public warning = (msg: string) => this.log(['warning', 'migrations'], msg);
+}

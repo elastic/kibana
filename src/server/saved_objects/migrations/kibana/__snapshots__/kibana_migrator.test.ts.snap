@@ -1,15 +1,15 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`buildActiveMappings combines all mappings and includes core mappings 1`] = `
+exports[`KibanaMigrator migratorOptsFromKbnServer returns full index mappings w/ core properties 1`] = `
 Object {
   "doc": Object {
     "dynamic": "strict",
     "properties": Object {
-      "aaa": Object {
+      "amap": Object {
         "type": "text",
       },
-      "bbb": Object {
-        "type": "long",
+      "bmap": Object {
+        "type": "text",
       },
       "config": Object {
         "dynamic": "true",

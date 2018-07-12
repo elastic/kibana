@@ -47,45 +47,76 @@
 
 import _ from 'lodash';
 import Semver from 'semver';
-import { MigrationDefinition, SavedObjectDoc, TransformFn } from './types';
+import {
+  MigrationDefinition,
+  MigrationVersion,
+  SavedObjectDoc,
+  TransformFn,
+} from './types';
+
+export interface IDocumentMigrator {
+  migrationVersion: MigrationVersion;
+  migrate: TransformFn;
+}
+
+export interface DocumentMigratorOpts {
+  kibanaVersion: string;
+  migrations: MigrationDefinition;
+}
 
 interface Transform {
   version: string;
   transform: TransformFn;
 }
 
-interface SortedMigrations {
+interface ActiveMigrations {
   [type: string]: { latestVersion: string; transforms: Transform[] };
 }
 
-interface Opts {
-  kibanaVersion: string;
-  migrations: MigrationDefinition;
-}
-
 /**
- * Creates a function which migrates any document that is passed to it.
- *
- * @export
- * @param {Opts} opts
- * @prop {string} kibanaVersion - The current version of Kibana. Docs with greater versions will be rejected.
- * @prop {MigrationDictionary} migrations - A dictionary of type -> version -> transformFunction used to migrate saved object documents
- * @returns {TransformFn}
+ * Manages migration of individual documents.
  */
-export function documentTransformer(opts: Opts): TransformFn {
-  const sortedMigrations = sortMigrations(opts.migrations);
+export class DocumentMigrator implements IDocumentMigrator {
+  private migrations: ActiveMigrations;
+  private transformDoc: TransformFn;
 
-  return function transformDoc(doc: SavedObjectDoc): SavedObjectDoc {
-    assertCanTransform(doc, opts.kibanaVersion);
+  /**
+   * Creates an instance of DocumentMigrator.
+   *
+   * @param {DocumentMigratorOpts} opts
+   * @prop {string} kibanaVersion - The current version of Kibana
+   * @prop {MigrationDefinition} migrations - The migrations that will be used to migrate documents
+   * @memberof DocumentMigrator
+   */
+  constructor(opts: DocumentMigratorOpts) {
+    this.migrations = buildActiveMigrations(opts.migrations);
+    this.transformDoc = buildDocumentTransform({
+      kibanaVersion: opts.kibanaVersion,
+      migrations: this.migrations,
+    });
+  }
 
-    while (true) {
-      const prop = nextUnmigratedProp(doc, sortedMigrations);
-      if (!prop) {
-        return doc;
-      }
-      doc = migrateProp(doc, prop, sortedMigrations);
-    }
-  };
+  /**
+   * Gets the latest version of each migratable property.
+   *
+   * @readonly
+   * @type {MigrationVersion}
+   * @memberof DocumentMigrator
+   */
+  public get migrationVersion(): MigrationVersion {
+    return _.mapValues(this.migrations, ({ latestVersion }) => latestVersion);
+  }
+
+  /**
+   * Migrates a document to the latest version.
+   *
+   * @param {SavedObjectDoc} doc
+   * @returns {SavedObjectDoc}
+   * @memberof DocumentMigrator
+   */
+  public migrate(doc: SavedObjectDoc): SavedObjectDoc {
+    return this.transformDoc(doc);
+  }
 }
 
 /**
@@ -97,7 +128,9 @@ export function documentTransformer(opts: Opts): TransformFn {
  * @param {MigrationDefinition} migrations
  * @returns {SortedMigrations}
  */
-function sortMigrations(migrations: MigrationDefinition): SortedMigrations {
+function buildActiveMigrations(
+  migrations: MigrationDefinition
+): ActiveMigrations {
   return _.mapValues(migrations, (versions, prop) => {
     const transforms = Object.entries(versions)
       .map(([version, transform]) => ({
@@ -111,6 +144,58 @@ function sortMigrations(migrations: MigrationDefinition): SortedMigrations {
       transforms,
     };
   });
+}
+
+/**
+ * Creates a function which migrates any document that is passed to it.
+ *
+ * @param opts
+ * @prop {string} kibanaVersion - The current version of Kibana. Docs with greater versions will be rejected.
+ * @prop {MigrationDictionary} migrations - A dictionary of type -> version -> transformFunction used to migrate saved object documents
+ * @returns {TransformFn}
+ */
+function buildDocumentTransform({
+  kibanaVersion,
+  migrations,
+}: {
+  kibanaVersion: string;
+  migrations: ActiveMigrations;
+}): TransformFn {
+  return function transformDoc(doc: SavedObjectDoc): SavedObjectDoc {
+    assertCanTransform(doc, kibanaVersion);
+
+    while (true) {
+      const prop = nextUnmigratedProp(doc, migrations);
+      if (!prop) {
+        return doc;
+      }
+      doc = migrateProp(doc, prop, migrations);
+    }
+  };
+}
+
+/**
+ * If a specific transform function fails, this tacks on a bit of information
+ * about the document and transform that caused the failure.
+ *
+ * @param {string} version
+ * @param {string} prop
+ * @param {TransformFn} transform
+ * @returns
+ */
+function wrapWithTry(version: string, prop: string, transform: TransformFn) {
+  return function tryTransformDoc(doc: SavedObjectDoc) {
+    try {
+      return transform(doc);
+    } catch (error) {
+      error.detail = {
+        failedDoc: `${doc.type}:${doc.id}`,
+        failedTransform: `${prop}:${version}`,
+      };
+
+      throw error;
+    }
+  };
 }
 
 /**
@@ -143,10 +228,10 @@ function assertCanTransform(doc: SavedObjectDoc, kibanaVersion: string) {
  * and the type / attributes property is treated specifically.
  *
  * @param {SavedObjectDoc} doc
- * @param {SortedMigrations} migrations
+ * @param {ActiveMigrations} migrations
  * @returns
  */
-function nextUnmigratedProp(doc: SavedObjectDoc, migrations: SortedMigrations) {
+function nextUnmigratedProp(doc: SavedObjectDoc, migrations: ActiveMigrations) {
   const isOutdatedProp = (prop: string) => {
     const latestVersion = migrations[prop] && migrations[prop].latestVersion;
     return !!latestVersion && latestVersion !== propVersion(doc, prop);
@@ -166,15 +251,15 @@ function propVersion(doc: SavedObjectDoc, prop: string) {
  *
  * @param {SavedObjectDoc} doc
  * @param {string} prop
- * @param {SortedMigrations} sortedMigrations
+ * @param {ActiveMigrations} migrations
  * @returns {SavedObjectDoc}
  */
 function migrateProp(
   doc: SavedObjectDoc,
   prop: string,
-  sortedMigrations: SortedMigrations
+  migrations: ActiveMigrations
 ): SavedObjectDoc {
-  const { transforms } = sortedMigrations[prop];
+  const { transforms } = migrations[prop];
   const minVersion = propVersion(doc, prop);
   const originalType = doc.type;
   let { migrationVersion = {} } = doc;
@@ -199,28 +284,4 @@ function migrateProp(
   }
 
   return doc;
-}
-
-/**
- * If a specific transform function fails, this tacks on a bit of information
- * about the document and transform that caused the failure.
- *
- * @param {string} version
- * @param {string} prop
- * @param {TransformFn} transform
- * @returns
- */
-function wrapWithTry(version: string, prop: string, transform: TransformFn) {
-  return function tryTransformDoc(doc: SavedObjectDoc) {
-    try {
-      return transform(doc);
-    } catch (error) {
-      error.detail = {
-        failedDoc: `${doc.type}:${doc.id}`,
-        failedTransform: `${prop}:${version}`,
-      };
-
-      throw error;
-    }
-  };
 }

@@ -40,8 +40,7 @@ export function rawToSavedObject({ _id, _source }: RawDoc): SavedObjectDoc {
 }
 
 /**
- * Converts a saved object document from saved object format to the raw underlying shape
- * expected by calls to the elasticsearch API.
+ * Converts a document from the saved object client format to the format that is stored in elasticsearch.
  *
  * @export
  * @param {SavedObjectDoc} savedObj

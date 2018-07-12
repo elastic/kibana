@@ -22,59 +22,12 @@ import sinon from 'sinon';
 import { MigrationCoordinator } from './migration_coordinator';
 
 describe('MigrationCoordinator', () => {
-  test('warns once if there is an existing lock', async () => {
+  test('warns if the lock index exists', async () => {
     const index = '.foo';
     const callCluster = sinon.stub();
-    const log = sinon.spy();
+    const log = logStub();
     const pollInterval = 1;
     const run = sinon.stub().returns(Promise.resolve());
-
-    callCluster
-      .withArgs('indices.exists', sinon.match.any)
-      .onCall(0)
-      .returns(Promise.resolve(true))
-      .onCall(1)
-      .returns(Promise.resolve(true))
-      .onCall(2)
-      .returns(Promise.resolve(false));
-
-    const coordinator = new MigrationCoordinator({
-      callCluster,
-      index,
-      log,
-      pollInterval,
-      run,
-    });
-
-    await coordinator.waitForCompletion();
-
-    sinon.assert.calledOnce(run);
-    sinon.assert.calledOnce(log);
-    expect(log.args[0][1]).toMatch(
-      /you can delete the lock index "\.foo_migration_lock"/
-    );
-
-    // We actually called index exists
-    expect(
-      callCluster.args.filter(a => _.first(a) === 'indices.exists').length
-    ).toEqual(3);
-  });
-
-  test('handles index exists exception', async () => {
-    const index = '.foo';
-    const callCluster = sinon.stub();
-    const log = sinon.spy();
-    const pollInterval = 1;
-    const run = sinon.spy(() => {
-      sinon.assert.calledWith(callCluster, 'indices.create', {
-        index: '.foo_migration_lock',
-      });
-      return Promise.resolve();
-    });
-
-    callCluster
-      .withArgs('indices.exists', sinon.match.any)
-      .returns(Promise.resolve(false));
 
     callCluster
       .withArgs('indices.create', sinon.match.any)
@@ -83,6 +36,10 @@ describe('MigrationCoordinator', () => {
         body: { error: { type: 'resource_already_exists_exception' } },
       })
       .onCall(1)
+      .throws({
+        body: { error: { type: 'resource_already_exists_exception' } },
+      })
+      .onCall(2)
       .returns(Promise.resolve());
 
     const coordinator = new MigrationCoordinator({
@@ -90,22 +47,22 @@ describe('MigrationCoordinator', () => {
       index,
       log,
       pollInterval,
-      run,
     });
 
-    await coordinator.waitForCompletion();
+    await coordinator.run(run);
 
     sinon.assert.calledOnce(run);
-    sinon.assert.calledOnce(log);
-    expect(log.args[0][1]).toMatch(
-      /you can delete the lock index "\.foo_migration_lock"/
-    );
+    expect(
+      log.warning.args.filter((msg: any) =>
+        /you can delete the lock index "\.foo_migration_lock"/.test(msg)
+      ).length
+    ).toEqual(1);
   });
 
   test('deletes the lock after run completes', async () => {
     const index = '.foo';
     const callCluster = sinon.stub();
-    const log = sinon.spy();
+    const log = logStub();
     const pollInterval = 1;
     const deleteAction = 'indices.delete';
     const run = sinon.spy(() => {
@@ -128,10 +85,9 @@ describe('MigrationCoordinator', () => {
       index,
       log,
       pollInterval,
-      run,
     });
 
-    await coordinator.waitForCompletion();
+    await coordinator.run(run);
 
     sinon.assert.calledOnce(run);
     sinon.assert.calledWith(callCluster, deleteAction, {
@@ -142,7 +98,7 @@ describe('MigrationCoordinator', () => {
   test('does not swallow exceptions', async () => {
     const index = '.foo';
     const callCluster = sinon.stub();
-    const log = sinon.spy();
+    const log = logStub();
     const pollInterval = 1;
     const run = sinon.spy();
 
@@ -159,11 +115,16 @@ describe('MigrationCoordinator', () => {
       index,
       log,
       pollInterval,
-      run,
     });
 
-    expect(coordinator.waitForCompletion()).rejects.toThrow(/Whoopsie!/);
+    expect(coordinator.run(run)).rejects.toThrow(/Whoopsie!/);
     sinon.assert.notCalled(run);
-    sinon.assert.notCalled(log);
   });
 });
+
+function logStub(): any {
+  return sinon.stub({
+    debug: _.noop,
+    warning: _.noop,
+  });
+}

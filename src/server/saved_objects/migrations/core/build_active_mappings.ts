@@ -24,10 +24,6 @@
 import _ from 'lodash';
 import { IndexMapping, MappingProperties } from './types';
 
-interface Opts {
-  properties: MappingProperties;
-}
-
 /**
  * Creates an index mapping with the core properties required by saved object
  * indices, as well as the specified additional properties.
@@ -36,14 +32,18 @@ interface Opts {
  * @prop {MappingDefinition} properties - The mapping's properties
  * @returns {IndexMapping}
  */
-export function buildActiveMappings({ properties }: Opts): IndexMapping {
+export function buildActiveMappings({
+  properties,
+}: {
+  properties: MappingProperties;
+}): IndexMapping {
   const mapping = defaultMapping();
-  return {
+  return _.cloneDeep({
     doc: {
       ...mapping.doc,
       properties: validateAndMerge(mapping.doc.properties, properties),
     },
-  };
+  });
 }
 
 /**
@@ -52,7 +52,7 @@ export function buildActiveMappings({ properties }: Opts): IndexMapping {
  * @returns {IndexMapping}
  */
 function defaultMapping(): IndexMapping {
-  return _.cloneDeep({
+  return {
     doc: {
       dynamic: 'strict',
       properties: {
@@ -65,6 +65,7 @@ function defaultMapping(): IndexMapping {
           },
         },
         migrationVersion: {
+          dynamic: 'true',
           type: 'object',
         },
         type: {
@@ -75,7 +76,7 @@ function defaultMapping(): IndexMapping {
         },
       },
     },
-  });
+  };
 }
 
 function validateAndMerge(dest: MappingProperties, source: MappingProperties) {

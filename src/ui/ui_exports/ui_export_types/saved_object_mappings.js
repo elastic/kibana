@@ -17,15 +17,18 @@
  * under the License.
  */
 
-import { flatConcatAtType } from './reduce';
-import { alias, mapSpec, wrap } from './modify_reduce';
+import { flatConcatAtType, mergeAtType } from './reduce';
+import { alias, mapSpec, wrap, uniqueKeys } from './modify_reduce';
 
 // mapping types
 export const mappings = wrap(
   alias('savedObjectMappings'),
   mapSpec((spec, type, pluginSpec) => ({
     pluginId: pluginSpec.getId(),
-    properties: spec
+    properties: spec,
   })),
   flatConcatAtType
 );
+
+// migration types
+export const migrations = wrap(uniqueKeys(), mergeAtType);

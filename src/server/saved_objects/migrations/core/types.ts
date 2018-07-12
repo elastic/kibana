@@ -17,6 +17,10 @@
  * under the License.
  */
 
+///////////////////////////////////////////////////////////////////
+// The core, public interface for migrations
+///////////////////////////////////////////////////////////////////
+
 export type LogFn = (path: string[], message: string) => void;
 
 ///////////////////////////////////////////////////////////////////
@@ -25,15 +29,19 @@ export type LogFn = (path: string[], message: string) => void;
 
 export interface CallCluster {
   (path: 'bulk', opts: { body: object[] }): Promise<BulkResult>;
+  (path: 'count', opts: CountOpts): Promise<{ count: number }>;
   (path: 'clearScroll', opts: { scrollId: string }): Promise<any>;
   (path: 'indices.create' | 'indices.delete', opts: IndexCreationOpts): Promise<
     any
   >;
   (path: 'indices.exists', opts: IndexOpts): Promise<boolean>;
+  (path: 'indices.existsAlias', opts: { name: string }): Promise<boolean>;
   (path: 'indices.get', opts: IndexOpts & Ignorable): Promise<
     IndicesInfo | NotFound
   >;
-  (path: 'indices.getAlias', opts: { name: string }): Promise<AliasResult>;
+  (path: 'indices.getAlias', opts: { name: string } & Ignorable): Promise<
+    AliasResult | NotFound
+  >;
   (path: 'indices.getMapping', opts: IndexOpts): Promise<MappingResult>;
   (path: 'indices.getSettings', opts: IndexOpts): Promise<IndexSettingsResult>;
   (path: 'indices.putMapping', opts: PutMappingOpts): Promise<any>;
@@ -51,6 +59,14 @@ export interface CallCluster {
 
 export interface Ignorable {
   ignore: number[];
+}
+
+export interface CountOpts {
+  body: {
+    query: object;
+  };
+  index: string;
+  type: 'doc';
 }
 
 export interface PutMappingOpts {

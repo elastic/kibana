@@ -17,6 +17,13 @@
  * under the License.
  */
 
+export { DocumentMigrator } from './document_migrator';
+export { IndexMigrator } from './index_migrator';
 export { buildActiveMappings } from './build_active_mappings';
-export { fetchMapping } from './fetch_mapping';
-export * from './types';
+export {
+  CallCluster,
+  LogFn,
+  MappingProperties,
+  MigrationDefinition,
+  SavedObjectDoc,
+} from './types';

@@ -22,7 +22,7 @@
 */
 
 import { rawToSavedObject } from './saved_object';
-import { BatchReader, CallCluster, RawDoc, SavedObjectDoc } from './types';
+import { BatchReader, CallCluster } from './types';
 
 interface Opts {
   batchSize: number;
@@ -93,7 +93,7 @@ export class BatchIndexReader implements BatchReader {
   private nextBatch() {
     const { batchSize, callCluster, index, scrollDuration, scrollId } = this;
 
-    if (scrollId) {
+    if (scrollId !== undefined) {
       return callCluster('scroll', {
         scroll: scrollDuration,
         scrollId,

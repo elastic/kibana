@@ -35,65 +35,54 @@
 */
 
 import _ from 'lodash';
-import { CallCluster, LogFn } from './types';
+import { ElasticIndex } from './elastic_index';
+import { Logger } from './migration_logger';
+import { CallCluster } from './types';
 
-type CoordinatedFn = () => Promise<any>;
+const DEFAULT_POLL_INTERVAL = 15000;
 
 interface Opts {
   callCluster: CallCluster;
   index: string;
-  log: LogFn;
-  pollInterval: number;
-  run: CoordinatedFn;
+  log: Logger;
+  pollInterval?: number;
 }
 
 /**
- * Coordinates the running of `opts.run` such that it will only run in once Kibana
+ * Coordinates the running of a function such that it will only run in one Kibana
  * instance at a time.
  *
  * @export
  * @class MigrationCoordinator
  */
 export class MigrationCoordinator {
-  private callCluster: CallCluster;
+  private lockIndex: ElasticIndex;
   private index: string;
-  private log: LogFn;
+  private log: Logger;
   private pollInterval: number;
-  private run: CoordinatedFn;
-  private tmpIndex: string;
 
   // If the lock is already held by someone else, we want to make sure to log this,
   // as it could indicate a previous migration exited ungracefully and needs to be
   // cleaned up. But we only want to log it once, so we don't spam the logs while polling.
   private warnLockExists = _.once((error?: object) => {
-    const { index, log, tmpIndex } = this;
+    const { index, lockIndex, log } = this;
 
-    log(
-      ['warn', 'migrations'],
+    log.warning(
       `Migration of index "${index}" appears to be underway. ` +
-        `If migrations are not underway, you can delete the lock index "${tmpIndex}".` +
-        `and restart Kibana. ${error ? JSON.stringify(error) : ''}`
+        `If migrations are not underway, you can delete the lock index "${lockIndex}" ` +
+        `and restart Kibana. ` +
+        `${error ? JSON.stringify(error) : ''}`
     );
   });
 
-  /**
-   * Creates an instance of MigrationCoordinator.
-   *
-   * @param {Opts} opts
-   * @prop {CallCluster} callCluster - The elasticsearch connection
-   * @prop {string} index - The index being migrated
-   * @prop {function} log - The logger
-   * @prop {number} pollInterval - How often, in ms, we attempt to get a lock on the migration
-   * @prop {function} run - The function to be run one Kibana instance at a time
-   * @memberof MigrationCoordinator
-   */
   constructor(opts: Opts) {
-    this.callCluster = opts.callCluster;
+    this.lockIndex = new ElasticIndex({
+      callCluster: opts.callCluster,
+      index: `${opts.index}_migration_lock`,
+    });
     this.index = opts.index;
     this.log = opts.log;
-    this.pollInterval = opts.pollInterval;
-    this.run = opts.run;
-    this.tmpIndex = `${opts.index}_migration_lock`;
+    this.pollInterval = opts.pollInterval || DEFAULT_POLL_INTERVAL;
   }
 
   /**
@@ -103,12 +92,12 @@ export class MigrationCoordinator {
    * @returns {Promise<void>}
    * @memberof MigrationCoordinator
    */
-  public async waitForCompletion() {
+  public async run(fn: () => Promise<any>) {
     while (true) {
       const lock = await this.acquireLock();
 
       if (lock) {
-        return this.run().then(lock.release);
+        return fn().then(lock.release);
       }
 
       await sleep(this.pollInterval);
@@ -119,37 +108,19 @@ export class MigrationCoordinator {
    * Attempt to create the lock index, and fail gracfully if it already exists.
    */
   private async acquireLock() {
-    const { callCluster, tmpIndex } = this;
+    const { lockIndex, log } = this;
+    const lockAcquired = await lockIndex.create();
 
-    // Someone else owns the lock
-    if (await callCluster('indices.exists', { index: tmpIndex })) {
+    if (!lockAcquired) {
       return this.warnLockExists();
     }
 
-    // Attempt to create the lock, handling the case where the lock already exists
-    try {
-      await callCluster('indices.create', { index: tmpIndex });
-      return {
-        release: () => callCluster('indices.delete', { index: tmpIndex }),
-      };
-    } catch (error) {
-      // Someone else owns the lock
-      if (lockAlreadyExists(error)) {
-        return this.warnLockExists(error);
-      }
-
-      // Who knows what just happened? We better not swallow errors
-      throw error;
-    }
+    return {
+      release: () => lockIndex.deleteIndex(),
+    };
   }
 }
 
 function sleep(ms: number) {
   return new Promise(r => setTimeout(r, ms));
-}
-
-function lockAlreadyExists(error: any) {
-  return (
-    _.get(error, 'body.error.type') === 'resource_already_exists_exception'
-  );
 }

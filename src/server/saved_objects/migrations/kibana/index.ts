@@ -17,22 +17,4 @@
  * under the License.
  */
 
-import { buildActiveMappings } from '../core';
-import {
-  buildKibanaMigrationInfo,
-  KbnServer,
-} from './build_kibana_migration_info';
-
-/**
- * Builds the Kibana index mappings that are defined by Kibana's plugins.
- *
- * @export
- * @param opts
- * @prop {KbnServer} kbnServer - An instance of the Kibana server whose plugins are used to build index mappings.
- * @returns
- */
-export function buildKibanaMappings({ kbnServer }: { kbnServer: KbnServer }) {
-  return buildActiveMappings({
-    properties: buildKibanaMigrationInfo({ kbnServer }).mappings,
-  });
-}
+export { KibanaMigrator } from './kibana_migrator';
