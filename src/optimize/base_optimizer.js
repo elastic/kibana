@@ -240,6 +240,7 @@ export default class BaseOptimizer {
       node: { fs: 'empty' },
       context: fromRoot('.'),
       parallelism: os.cpus().length - 1,
+      cache: !!this.unsafeCache,
       entry: this.uiBundles.toWebpackEntries(),
 
       devtool: this.sourceMaps,
@@ -377,7 +378,8 @@ export default class BaseOptimizer {
           fromRoot('node_modules'),
         ],
         alias: this.uiBundles.getAliases(),
-        unsafeCache: this.unsafeCache,
+        // unsafeCache: this.unsafeCache,
+        // cacheWithContext: !!this.unsafeCache
       },
     };
 
