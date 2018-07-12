@@ -17,28 +17,28 @@
  * under the License.
  */
 
-import BaseOptimizer from './base_optimizer';
-import { fromNode } from 'bluebird';
+import configModel from './config_model';
+import runWebpack from '../run_webpack';
 
-export default class FsOptimizer extends BaseOptimizer {
-  async init() {
-    await super.init();
+export class Compiler {
+  constructor({ dllBundles, options }) {
+    this.dllBundlesConfigs = this.createDllBundlesConfigs(dllBundles, options);
+  }
+
+  createDllBundlesConfigs(dllBundles, options) {
+    return dllBundles.map((dllBundle) => this.dllConfigGenerator({
+      dllBundle,
+      ...options
+    }));
+  }
+
+  dllConfigGenerator(dllConfig) {
+    return configModel.bind(this, dllConfig);
   }
 
   async run() {
-    if (!this.areCompilersReady()) await this.init();
-
-    await fromNode(cb => {
-      return super.run((err, stats) => {
-        if (err || !stats) return cb(err);
-
-        if (stats.hasErrors() || stats.hasWarnings()) {
-          return cb(this.failedStatsToError(stats));
-        }
-        else {
-          cb(null, stats);
-        }
-      });
-    });
+    for (const dllBundleConfig of this.dllBundlesConfigs) {
+      await runWebpack(dllBundleConfig());
+    }
   }
 }

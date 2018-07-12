@@ -49,7 +49,7 @@ export default class WatchOptimizer extends BaseOptimizer {
     await this.uiBundles.writeEntryFiles();
     await this.uiBundles.ensureStyleFiles();
 
-    await this.initCompiler();
+    await super.init();
 
     this.compiler.plugin('watch-run', this.compilerRunStartHandler);
     this.compiler.plugin('done', this.compilerDoneHandler);
@@ -100,11 +100,12 @@ export default class WatchOptimizer extends BaseOptimizer {
     }
   }
 
-  compilerRunStartHandler = (watchingCompiler, cb) => {
+  compilerRunStartHandler = async (watchingCompiler, cb) => {
     this.status$.next({
       type: STATUS.RUNNING
     });
 
+    // await this.dllCompiler.run();
     cb();
   }
 

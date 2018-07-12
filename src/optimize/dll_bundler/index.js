@@ -17,28 +17,4 @@
  * under the License.
  */
 
-import BaseOptimizer from './base_optimizer';
-import { fromNode } from 'bluebird';
-
-export default class FsOptimizer extends BaseOptimizer {
-  async init() {
-    await super.init();
-  }
-
-  async run() {
-    if (!this.areCompilersReady()) await this.init();
-
-    await fromNode(cb => {
-      return super.run((err, stats) => {
-        if (err || !stats) return cb(err);
-
-        if (stats.hasErrors() || stats.hasWarnings()) {
-          return cb(this.failedStatsToError(stats));
-        }
-        else {
-          cb(null, stats);
-        }
-      });
-    });
-  }
-}
+export { Compiler } from './compiler';

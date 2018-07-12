@@ -24,10 +24,11 @@ import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import webpack from 'webpack';
 import Stats from 'webpack/lib/Stats';
 import webpackMerge from 'webpack-merge';
+import { Compiler as DLLCompiler } from './dll_bundler';
 
 import { defaults } from 'lodash';
 
-import { IS_KIBANA_DISTRIBUTABLE, fromRoot } from '../utils';
+import { IS_KIBANA_DISTRIBUTABLE, fromRoot, pkg } from '../utils';
 
 import { PUBLIC_PATH_PLACEHOLDER } from './public_path_placeholder';
 
@@ -64,8 +65,15 @@ export default class BaseOptimizer {
     }
   }
 
-  async initCompiler() {
-    if (this.compiler) return this.compiler;
+  areCompilersReady() {
+    return this.compiler && this.dllCompiler;
+  }
+
+  async init() {
+    if (this.areCompilersReady()) return this;
+
+    const dllCompilerConfig = this.getDLLConfig();
+    this.dllCompiler = new DLLCompiler(dllCompilerConfig);
 
     const compilerConfig = this.getConfig();
     this.compiler = webpack(compilerConfig);
@@ -81,6 +89,76 @@ export default class BaseOptimizer {
     });
 
     return this.compiler;
+  }
+
+  getDLLConfig() {
+    const dependencies = Object.keys(pkg.dependencies);
+
+    const dllBundles = [
+      {
+        dllEntries: [
+          {
+            name: 'vendor',
+            include: dependencies,
+            exclude: [
+              'JSONStream',
+              'tinygradient',
+              'extract-text-webpack-plugin',
+              'x-pack',
+              'vega-lib',
+              'webpack',
+              '@kbn/pm',
+              '@kbn/babel-preset',
+              '@kbn/ui-framework',
+              '@kbn/datemath',
+              'font-awesome',
+              'handlebars',
+              '@kbn/babel-preset',
+              'babel-loader',
+              'babel-core',
+              'babel-polyfill',
+              'babel-register',
+              'body-parser',
+              'vision',
+              'uglifyjs-webpack-plugin',
+              'postcss-loader',
+              'even-better',
+              'jade',
+              'jade-loader',
+              '@kbn/es',
+              'prop-types',
+              'node-fetch',
+              'fetch-mock',
+              'autoprefixer',
+              'css-loader',
+              'less',
+              'less-loader',
+              '@elastic/eui',
+              '@elastic/filesaver',
+              '@elastic/numeral',
+              '@elastic/ui-ace',
+              '@kbn/babel-preset',
+              '@kbn/i18n',
+              '@kbn/test-subj-selector',
+              'bunyan',
+            ]
+          },
+        ]
+      }
+    ];
+
+    return {
+      dllBundles,
+      options: {
+        context: fromRoot('.'),
+        isProduction: IS_KIBANA_DISTRIBUTABLE,
+        outputPath: this.uiBundles.getWorkingDir(),
+        publicPath: PUBLIC_PATH_PLACEHOLDER,
+        mergeConfig: {
+          node: { fs: 'empty', child_process: 'empty', dns: 'empty', net: 'empty', tls: 'empty' }
+        }
+      }
+    };
   }
 
   getConfig() {
@@ -111,9 +189,61 @@ export default class BaseOptimizer {
           ...preProcessors,
         ],
       });
+      // TODO: refactor this
+      /*if (IS_KIBANA_DISTRIBUTABLE) {
+        return ExtractTextPlugin.extract({
+          fallback: {
+            loader: 'style-loader'
+          },
+          use: [
+            ...postProcessors,
+            {
+              loader: 'css-loader',
+              options: {
+                // importLoaders needs to know the number of loaders that follow this one,
+                // so we add 1 (for the postcss-loader) to the length of the preProcessors
+                // array that we merge into this array
+                importLoaders: 1 + preProcessors.length,
+              },
+            },
+            {
+              loader: 'postcss-loader',
+              options: {
+                config: {
+                  path: POSTCSS_CONFIG_PATH,
+                },
+              },
+            },
+            ...preProcessors,
+          ],
+        });
+      } else {
+        return [
+          'style-loader',
+          ...postProcessors,
+          {
+            loader: 'css-loader',
+            options: {
+              // importLoaders needs to know the number of loaders that follow this one,
+              // so we add 1 (for the postcss-loader) to the length of the preProcessors
+              // array that we merge into this array
+              importLoaders: 1 + preProcessors.length,
+            },
+          },
+          {
+            loader: 'postcss-loader',
+            options: {
+              config: {
+                path: POSTCSS_CONFIG_PATH,
+              },
+            },
+          },
+          ...preProcessors,
+        ];
+      }*/
     }
 
-    const nodeModulesPath = fromRoot('node_modules');
+    // const nodeModulesPath = fromRoot('node_modules');
 
     /**
      * Adds a cache loader if we're running in dev mode. The reason we're not adding
@@ -176,7 +306,12 @@ export default class BaseOptimizer {
           allChunks: true
         }),
 
-        new webpack.optimize.CommonsChunkPlugin({
+        new webpack.DllReferencePlugin({
+          context: fromRoot('.'),
+          manifest: require(`${this.uiBundles.getWorkingDir()}/dlls/vendor.json`)
+        }),
+
+        /*new webpack.optimize.CommonsChunkPlugin({
           name: 'commons',
           filename: 'commons.bundle.js',
           minChunks: 2,
@@ -187,7 +322,7 @@ export default class BaseOptimizer {
           filename: 'vendors.bundle.js',
           // only combine node_modules from Kibana
           minChunks: module => module.context && module.context.indexOf(nodeModulesPath) !== -1
-        }),
+        }),*/
 
         new webpack.NoEmitOnErrorsPlugin(),
 
@@ -390,5 +525,10 @@ export default class BaseOptimizer {
       `Optimizations failure.\n${details.split('\n').join('\n    ')}\n`,
       stats.toJson(Stats.presetToOptions('detailed'))
     );
+  }
+
+  async run(...args) {
+    await this.dllCompiler.run();
+    await this.compiler.run(args);
   }
 }

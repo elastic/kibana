@@ -17,28 +17,28 @@
  * under the License.
  */
 
-import BaseOptimizer from './base_optimizer';
-import { fromNode } from 'bluebird';
+import webpack from 'webpack';
+import supportsColor from 'supports-color';
 
-export default class FsOptimizer extends BaseOptimizer {
-  async init() {
-    await super.init();
-  }
-
-  async run() {
-    if (!this.areCompilersReady()) await this.init();
-
-    await fromNode(cb => {
-      return super.run((err, stats) => {
-        if (err || !stats) return cb(err);
-
-        if (stats.hasErrors() || stats.hasWarnings()) {
-          return cb(this.failedStatsToError(stats));
+export default async function (config) {
+  return new Promise((resolve) => {
+    webpack(config, (err, stats) => {
+      if (err) {
+        console.error(err.stack || err);
+        if (err.details) {
+          console.error(err.details);
         }
-        else {
-          cb(null, stats);
-        }
+        return;
+      }
+
+      const statsColors = process.stdout.isTTY === true ? supportsColor.stdout : false;
+      const statsString = stats.toString({
+        colors: statsColors
       });
+
+      process.stdout.write(`${statsString}\n`);
+
+      resolve();
     });
-  }
+  });
 }
