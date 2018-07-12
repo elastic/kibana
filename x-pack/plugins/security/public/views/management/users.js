@@ -15,13 +15,14 @@ import 'plugins/security/services/shield_user';
 import { checkLicenseError } from 'plugins/security/lib/check_license_error';
 import { SECURITY_PATH, USERS_PATH, EDIT_USERS_PATH, EDIT_ROLES_PATH } from './management_urls';
 import { Users } from '../../components/management/users';
+import { createApiClient } from '../../lib/api';
 routes.when(SECURITY_PATH, {
   redirectTo: USERS_PATH
 });
 
 const renderReact = (elem, httpClient) => {
   render(
-    <Users httpClient={httpClient} />,
+    <Users apiClient={createApiClient(httpClient)} />,
     elem
   );
 };
@@ -37,6 +38,10 @@ routes.when(USERS_PATH, {
     }
   },
   controller($scope, $route, $q, confirmModal, $http) {
+    $scope.$on('$destroy', () => {
+      const elem = document.getElementById('usersReactRoot');
+      if (elem) unmountComponentAtNode(elem);
+    });
     $scope.$$postDigest(() => {
       const elem = document.getElementById('usersReactRoot');
       renderReact(elem, $http);

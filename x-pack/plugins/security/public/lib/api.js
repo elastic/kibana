@@ -12,8 +12,8 @@
 
 import chrome from 'ui/chrome';
 
-const usersUrl = chrome.addBasePath('/api/security/v1/users/');
-const rolesUrl = chrome.addBasePath('/api/security/v1/roles/');
+const usersUrl = chrome.addBasePath('/api/security/v1/users');
+const rolesUrl = chrome.addBasePath('/api/security/v1/roles');
 
 export const createApiClient = (httpClient) => {
   return {
@@ -23,24 +23,40 @@ export const createApiClient = (httpClient) => {
       return data;
     },
     async getUsers() {
-      const url = chrome.addBasePath(usersUrl);
-      const { data } = await httpClient.get(url);
+      const { data } = await httpClient.get(usersUrl);
       return data;
     },
     async getUser(username) {
-      const url = chrome.addBasePath(`${usersUrl}${username}`);
+      const url = `${usersUrl}/${username}`;
       const { data } = await httpClient.get(url);
       return data;
     },
+    async deleteUser(username) {
+      const url = `${usersUrl}/${username}`;
+      await httpClient.delete(url);
+    },
+    async saveUser(user) {
+      const url = `${usersUrl}/${user.username}`;
+      await httpClient.post(url, user);
+    },
     async getRoles() {
-      const url = chrome.addBasePath(rolesUrl);
-      const { data } = await httpClient.get(url);
+      const { data } = await httpClient.get(rolesUrl);
       return data;
     },
     async getRole(name) {
-      const url = chrome.addBasePath(`${rolesUrl}${name}`);
+      const url = `${rolesUrl}/${name}`;
       const { data } = await httpClient.get(url);
       return data;
+    },
+    async changePassword(username, password, currentPassword) {
+      const data = {
+        newPassword: password,
+      };
+      if (currentPassword) {
+        data.password = currentPassword;
+      }
+      await httpClient
+        .post(`${usersUrl}/${username}/password`, data);
     }
   };
 };

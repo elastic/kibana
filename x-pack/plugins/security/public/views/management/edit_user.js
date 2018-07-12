@@ -17,10 +17,15 @@ import { EDIT_USERS_PATH, USERS_PATH } from './management_urls';
 import { EditUser } from '../../components/management/users';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { createApiClient } from '../../lib/api';
 
-const renderReact = (elem, httpClient, username) => {
+const renderReact = (elem, httpClient, changeUrl, username) => {
   render(
-    <EditUser httpClient={httpClient} username={username} />,
+    <EditUser
+      changeUrl={changeUrl}
+      apiClient={createApiClient(httpClient)}
+      username={username}
+    />,
     elem
   );
 };
@@ -35,34 +40,43 @@ routes.when(`${EDIT_USERS_PATH}/:username?`, {
     user($route, ShieldUser, kbnUrl, Promise, Notifier) {
       const username = $route.current.params.username;
       if (username != null) {
-        return ShieldUser.get({ username }).$promise
-          .catch((response) => {
-            if (response.status !== 404) {
-              return fatalError(response);
-            }
+        return ShieldUser.get({ username }).$promise.catch(response => {
+          if (response.status !== 404) {
+            return fatalError(response);
+          }
 
-            const notifier = new Notifier();
-            notifier.error(`No "${username}" user found.`);
-            kbnUrl.redirect(USERS_PATH);
-            return Promise.halt();
-          });
+          const notifier = new Notifier();
+          notifier.error(`No "${username}" user found.`);
+          kbnUrl.redirect(USERS_PATH);
+          return Promise.halt();
+        });
       }
       return new ShieldUser({ roles: [] });
     },
 
     roles(ShieldRole, kbnUrl, Promise, Private) {
       // $promise is used here because the result is an ngResource, not a promise itself
-      return ShieldRole.query().$promise
-        .then((roles) => _.map(roles, 'name'))
+      return ShieldRole.query()
+        .$promise.then(roles => _.map(roles, 'name'))
         .catch(checkLicenseError(kbnUrl, Promise, Private));
-    }
+    },
   },
   controllerAs: 'editUser',
   controller($scope, $route, kbnUrl, Notifier, confirmModal, $http) {
+    $scope.$on('$destroy', () => {
+      const elem = document.getElementById('editUserReactRoot');
+      if (elem) {
+        unmountComponentAtNode(elem);
+      }
+    });
     $scope.$$postDigest(() => {
       const elem = document.getElementById('editUserReactRoot');
       const username = $route.current.params.username;
-      renderReact(elem, $http, username);
+      const changeUrl = (url) => {
+        kbnUrl.change(url);
+        $scope.$apply();
+      };
+      renderReact(elem, $http, changeUrl, username);
     });
     $scope.me = $route.current.locals.me;
     $scope.user = $route.current.locals.user;
@@ -73,24 +87,29 @@ routes.when(`${EDIT_USERS_PATH}/:username?`, {
 
     const notifier = new Notifier();
 
-    $scope.deleteUser = (user) => {
+    $scope.deleteUser = user => {
       const doDelete = () => {
-        user.$delete()
+        user
+          .$delete()
           .then(() => toastNotifications.addSuccess('Deleted user'))
           .then($scope.goToUserList)
           .catch(error => notifier.error(_.get(error, 'data.message')));
       };
       const confirmModalOptions = {
         confirmButtonText: 'Delete user',
-        onConfirm: doDelete
+        onConfirm: doDelete,
       };
-      confirmModal('Are you sure you want to delete this user? This action is irreversible!', confirmModalOptions);
+      confirmModal(
+        'Are you sure you want to delete this user? This action is irreversible!',
+        confirmModalOptions
+      );
     };
 
-    $scope.saveUser = (user) => {
+    $scope.saveUser = user => {
       // newPassword is unexepcted by the API.
       delete user.newPassword;
-      user.$save()
+      user
+        .$save()
         .then(() => toastNotifications.addSuccess('User updated'))
         .then($scope.goToUserList)
         .catch(error => notifier.error(_.get(error, 'data.message')));
@@ -100,22 +119,27 @@ routes.when(`${EDIT_USERS_PATH}/:username?`, {
       kbnUrl.redirect(USERS_PATH);
     };
 
-    $scope.saveNewPassword = (newPassword, currentPassword, onSuccess, onIncorrectPassword) => {
+    $scope.saveNewPassword = (
+      newPassword,
+      currentPassword,
+      onSuccess,
+      onIncorrectPassword
+    ) => {
       $scope.user.newPassword = newPassword;
       if (currentPassword) {
         // If the currentPassword is null, we shouldn't send it.
         $scope.user.password = currentPassword;
       }
 
-      $scope.user.$changePassword()
+      $scope.user
+        .$changePassword()
         .then(() => toastNotifications.addSuccess('Password updated'))
         .then(onSuccess)
         .catch(error => {
           if (error.status === 401) {
             onIncorrectPassword();
-          }
-          else notifier.error(_.get(error, 'data.message'));
+          } else notifier.error(_.get(error, 'data.message'));
         });
     };
-  }
+  },
 });
