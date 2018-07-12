@@ -24,7 +24,6 @@ import {
   EuiFlexItem,
   EuiFlyoutHeader,
   EuiTitle,
-  EuiFlyoutBody
 } from '@elastic/eui';
 
 import { InspectorViewChooser } from './inspector_view_chooser';
@@ -83,7 +82,7 @@ class InspectorPanel extends Component {
     const { selectedView } = this.state;
 
     return (
-      <EuiFlyoutBody>
+      <React.Fragment>
         <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup
             justifyContent="spaceBetween"
@@ -104,7 +103,7 @@ class InspectorPanel extends Component {
           </EuiFlexGroup>
         </EuiFlyoutHeader>
         { this.renderSelectedPanel() }
-      </EuiFlyoutBody>
+      </React.Fragment>
     );
   }
 }

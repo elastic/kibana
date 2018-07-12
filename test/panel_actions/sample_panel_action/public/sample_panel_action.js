@@ -35,17 +35,19 @@ class SamplePanelAction extends DashboardPanelAction {
   }
   onClick({ embeddable }) {
     openFlyout(
-      {
-        'data-test-subj': 'samplePanelActionFlyout',
-      },
-      <EuiFlyoutBody>
+      <React.Fragment>
         <EuiFlyoutHeader>
           <EuiTitle size="s" data-test-subj="samplePanelActionTitle">
             <h1>{embeddable.metadata.title}</h1>
           </EuiTitle>
         </EuiFlyoutHeader>
-        <h1 data-test-subj="samplePanelActionBody">This is a sample action</h1>
-      </EuiFlyoutBody>
+        <EuiFlyoutBody>
+          <h1 data-test-subj="samplePanelActionBody">This is a sample action</h1>
+        </EuiFlyoutBody>
+      </React.Fragment>,
+      {
+        'data-test-subj': 'samplePanelActionFlyout',
+      },
     );
   }
 }

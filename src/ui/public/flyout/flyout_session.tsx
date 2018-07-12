@@ -89,11 +89,11 @@ class FlyoutSession extends EventEmitter {
  * @return {FlyoutSession} The session instance for the opened flyout panel.
  */
 export function openFlyout(
+  flyoutChildren: React.ReactNode,
   flyoutProps: {
     onClose?: () => void;
     'data-test-subj'?: string;
-  },
-  flyoutChildren: JSX.Element
+  } = {}
 ): FlyoutSession {
   // If there is an active inspector session close it before opening a new one.
   if (activeSession) {

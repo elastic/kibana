@@ -44,18 +44,20 @@ interface InspectorOptions {
   title?: string;
 }
 
+export type InspectorSession = FlyoutSession;
+
 /**
  * Opens the inspector panel for the given adapters and close any previously opened
  * inspector panel. The previously panel will be closed also if no new panel will be
  * opened (e.g. because of the passed adapters no view is available). You can use
- * {@link FlyoutSession#close} on the return value to close that opened panel again.
+ * {@link InspectorSession#close} on the return value to close that opened panel again.
  *
  * @param {object} adapters - An object of adapters for which you want to show
  *    the inspector panel.
  * @param {InspectorOptions} options - Options that configure the inspector. See InspectorOptions type.
- * @return {FlyoutSession} The session instance for the opened inspector.
+ * @return {InspectorSession} The session instance for the opened inspector.
  */
-function open(adapters: Adapters, options: InspectorOptions = {}): FlyoutSession {
+function open(adapters: Adapters, options: InspectorOptions = {}): InspectorSession {
   const views = viewRegistry.getVisible(adapters);
 
   // Don't open inspector if there are no views available for the passed adapters
@@ -65,12 +67,9 @@ function open(adapters: Adapters, options: InspectorOptions = {}): FlyoutSession
       if an inspector can be shown.`);
   }
 
-  return openFlyout(
-    {
-      'data-test-subj': 'inspectorPanel',
-    },
-    <InspectorPanel views={views} adapters={adapters} title={options.title} />
-  );
+  return openFlyout(<InspectorPanel views={views} adapters={adapters} title={options.title} />, {
+    'data-test-subj': 'inspectorPanel',
+  });
 }
 
 const Inspector = {
