@@ -162,7 +162,15 @@ function SpanDetails({ span, spanTypeLabel, spanTypeColor, totalDuration }) {
         </DetailsElement>
       </DetailsWrapper>
 
+      <SectionHeader>
+        <span>DB Statement</span>
+      </SectionHeader>
+
       <DatabaseContext dbContext={dbContext} />
+
+      <SectionHeader>
+        <span>Stacktrace</span>
+      </SectionHeader>
 
       <StackTraceContainer>
         <Stacktrace stackframes={stackframes} codeLanguage={codeLanguage} />
