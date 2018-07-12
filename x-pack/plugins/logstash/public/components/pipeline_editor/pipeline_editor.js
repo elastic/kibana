@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { isEmpty } from 'lodash';
 import { TOOLTIPS } from '../../../common/constants/tooltips';
 import {
   EuiButton,
@@ -198,7 +199,7 @@ export class PipelineEditor extends React.Component {
   }
 
   isSaveDisabled = () => {
-    return this.state.showPipelineIdError;
+    return this.state.showPipelineIdError || isEmpty(this.state.pipeline.id);
   }
 
   onClose = async () => {
