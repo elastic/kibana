@@ -24,16 +24,40 @@ interface Deps {
 }
 
 export class LegacyPlatformService {
-  constructor(private bootstrapLegacyPlatform: () => void) {}
+  constructor(
+    private rootDomElement: HTMLElement,
+    private requireLegacyFiles: () => void,
+    private useLegacyTestHarness: boolean = false
+  ) {}
 
   public start({ injectedMetadata }: Deps) {
-    /**
-     * Injects parts of the new platform into parts of the legacy platform
-     * so that legacy APIs/modules can mimic their new platform counterparts
-     */
+    // Inject parts of the new platform into parts of the legacy platform
+    // so that legacy APIs/modules can mimic their new platform counterparts
     require('ui/metadata').__newPlatformInit__(injectedMetadata.getLegacyMetadata());
 
-    // call the legacy platform bootstrap function (bootstraps ui/chrome in apps and ui/test_harness in browser tests)
-    this.bootstrapLegacyPlatform();
+    // Load the bootstrap module before loading the legacy platform files so that
+    // the bootstrap module can modify the environment a bit first
+    const bootstrapModule = this.loadBootstrapModule();
+
+    // require the files that will tie into the legacy platform
+    this.requireLegacyFiles();
+
+    bootstrapModule.bootstrap(this.rootDomElement);
+  }
+
+  private loadBootstrapModule(): {
+    bootstrap: (rootDomElement: HTMLElement) => void;
+  } {
+    if (this.useLegacyTestHarness) {
+      // wrapped in NODE_ENV check so the `ui/test_harness` module
+      // is not included in the distributable
+      if (process.env.NODE_ENV !== 'production') {
+        return require('ui/test_harness');
+      }
+
+      throw new Error('tests bundle is not available in the distributable');
+    }
+
+    return require('ui/chrome');
   }
 }

@@ -29,6 +29,11 @@ export const createTestEntryTemplate = (defaultUiSettings) => (bundle) => `
  *
  */
 
+// import global polyfills before everything else
+import 'babel-polyfill';
+import 'custom-event-polyfill';
+import 'whatwg-fetch';
+
 import { CoreSystem } from '__kibanaCore__'
 
 const legacyMetadata = {
@@ -67,13 +72,13 @@ const legacyMetadata = {
 };
 
 new CoreSystem({
-  injectedMetadataForTesting: {
+  injectedMetadata: {
     legacyMetadata
   },
-  bootstrapLegacyPlatform: () => {
-    require('ui/test_harness');
+  rootDomElement: document.body,
+  useLegacyTestHarness: true,
+  requireLegacyFiles: () => {
     ${bundle.getRequires().join('\n  ')}
-    require('ui/test_harness').bootstrap();
   }
 }).start()
 `;

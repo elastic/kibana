@@ -72,7 +72,7 @@ themeApi(chrome, internals);
 translationsApi(chrome, internals);
 
 const waitForBootstrap = new Promise(resolve => {
-  chrome.bootstrap = function () {
+  chrome.bootstrap = function (targetDomElement) {
     // import chrome nav controls and hacks now so that they are executed after
     // everything else, can safely import the chrome, and interact with services
     // and such setup by all other modules
@@ -80,8 +80,10 @@ const waitForBootstrap = new Promise(resolve => {
     require('uiExports/hacks');
 
     chrome.setupAngular();
-    angular.bootstrap(document.body, ['kibana']);
-    resolve();
+    targetDomElement.setAttribute('id', 'kibana-body');
+    targetDomElement.setAttribute('kbn-chrome', 'true');
+    angular.bootstrap(targetDomElement, ['kibana']);
+    resolve(targetDomElement);
   };
 });
 
@@ -100,10 +102,10 @@ const waitForBootstrap = new Promise(resolve => {
  * tests. Look into 'src/test_utils/public/stub_get_active_injector' for more information.
  */
 chrome.dangerouslyGetActiveInjector = () => {
-  return waitForBootstrap.then(() => {
-    const $injector = angular.element(document.body).injector();
+  return waitForBootstrap.then((targetDomElement) => {
+    const $injector = angular.element(targetDomElement).injector();
     if (!$injector) {
-      return Promise.reject('document.body had no angular context after bootstrapping');
+      return Promise.reject('targetDomElement had no angular context after bootstrapping');
     }
     return $injector;
   });

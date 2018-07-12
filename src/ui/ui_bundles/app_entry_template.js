@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export const newPlatformEntryTemplate = (bundle) => `
+export const appEntryTemplate = (bundle) => `
 /**
  * Kibana entry file
  *
@@ -26,13 +26,18 @@ export const newPlatformEntryTemplate = (bundle) => `
  * context: ${bundle.getContext()}
  */
 
+// import global polyfills before everything else
+import 'babel-polyfill';
+import 'custom-event-polyfill';
+import 'whatwg-fetch';
+
 import { CoreSystem } from '__kibanaCore__'
 
 new CoreSystem({
-  bootstrapLegacyPlatform: () => {
-    require('ui/chrome')
+  injectedMetadata: JSON.parse(document.querySelector('kbn-injected-metadata').getAttribute('data')),
+  rootDomElement: document.body,
+  requireLegacyFiles: () => {
     ${bundle.getRequires().join('\n  ')}
-    require('ui/chrome').bootstrap();
   }
 }).start()
 `;

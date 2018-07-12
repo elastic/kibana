@@ -17,28 +17,29 @@
  * under the License.
  */
 
-// import global polyfills before everything else
-import 'babel-polyfill';
-import 'custom-event-polyfill';
-import 'whatwg-fetch';
-
 import { InjectedMetadata, InjectedMetadataService } from './injected_metadata';
 import { LegacyPlatformService } from './legacy_platform';
 
-interface CoreSystemParams {
-  injectedMetadataForTesting?: InjectedMetadata;
-  bootstrapLegacyPlatform: () => void;
+interface Params {
+  rootDomElement: HTMLElement;
+  injectedMetadata: InjectedMetadata;
+  requireLegacyFiles: () => void;
+  useLegacyTestHarness?: boolean;
 }
 
 export class CoreSystem {
   private injectedMetadata: InjectedMetadataService;
   private legacyPlatform: LegacyPlatformService;
 
-  constructor(params: CoreSystemParams) {
-    const { injectedMetadataForTesting, bootstrapLegacyPlatform } = params;
+  constructor(params: Params) {
+    const { rootDomElement, injectedMetadata, requireLegacyFiles, useLegacyTestHarness } = params;
 
-    this.injectedMetadata = new InjectedMetadataService(injectedMetadataForTesting);
-    this.legacyPlatform = new LegacyPlatformService(bootstrapLegacyPlatform);
+    this.injectedMetadata = new InjectedMetadataService(injectedMetadata);
+    this.legacyPlatform = new LegacyPlatformService(
+      rootDomElement,
+      requireLegacyFiles,
+      useLegacyTestHarness
+    );
   }
 
   public start() {
