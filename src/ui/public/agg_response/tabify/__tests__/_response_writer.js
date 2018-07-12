@@ -106,7 +106,7 @@ describe('TabbedAggResponseWriter class', function () {
           lte: 100
         };
 
-        const writer = new TabbedAggResponseWriter(vis.getAggConfig().getResponseAggs(), {
+        const writer = new TabbedAggResponseWriter(vis.getAggConfig(), {
           timeRange: {
             '@timestamp': range
           }
@@ -120,7 +120,7 @@ describe('TabbedAggResponseWriter class', function () {
       it('to undefined if no nested object', function () {
         const vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
 
-        const writer = new TabbedAggResponseWriter(vis.getAggConfig().getResponseAggs(), {
+        const writer = new TabbedAggResponseWriter(vis.getAggConfig(), {
           timeRange: {}
         });
         expect(writer).to.have.property('timeRange', undefined);
