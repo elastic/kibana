@@ -7,16 +7,20 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { isEmpty } from 'lodash';
-// import pluralize from 'pluralize';
+import pluralize from 'pluralize';
 import { uiModules } from 'ui/modules';
 import { toastNotifications } from 'ui/notify';
 // import template from './pipeline_list.html';
 import '../pipeline_table';
 // import { PAGINATION } from 'plugins/logstash/../common/constants';
 import {
+  EuiButton,
   EuiCallOut,
+  EuiConfirmModal,
   EuiInMemoryTable,
   EuiLink,
+  EUI_MODAL_CANCEL_BUTTON,
+  EuiOverlayMask,
   EuiPage,
   EuiPageContent,
 } from '@elastic/eui';
@@ -36,6 +40,8 @@ class PipelineList extends React.Component {
     this.state = {
       isForbidden: false,
       isLoading: true,
+      showConfirmDeleteModal: false,
+      selection: [ ],
     };
   }
 
@@ -164,12 +170,137 @@ class PipelineList extends React.Component {
       : null;
   }
 
+  hideDeletePipelinesModal = () => {
+    this.setState({
+      showConfirmDeleteModal: false,
+    });
+  }
+
+  showDeletePipelinesModal = () => {
+    this.setState({
+      showConfirmDeleteModal: true,
+    });
+  }
+
+  cancelDeletePipelines = () => {
+    this.hideDeletePipelinesModal();
+  }
+
+  renderConfirmDeletedPipelinesModal = () => {
+    if (!this.state.showConfirmDeleteModal) {
+      return null;
+    }
+    const { selection } = this.state;
+    const numPipelinesSelected = selection.length;
+
+    const confirmText = numPipelinesSelected === 1
+      ? {
+        message: 'You cannot recover a deleted pipeline',
+        button: `Delete pipeline`,
+        title: `Delete pipeline "${selection[0].id}"`,
+      }
+      : {
+        message: `Delete ${numPipelinesSelected} pipelines? You cannot recover deleted pipelines.`,
+        button: `Delete ${numPipelinesSelected} pipelines`,
+        title: `Delete ${numPipelinesSelected} pipelines`,
+      };
+
+    return (
+      <EuiOverlayMask>
+        <EuiConfirmModal
+          buttonColor="danger"
+          cancelButtonText="Cancel"
+          confirmButtonText={confirmText.button}
+          defaultFocusedButton={EUI_MODAL_CANCEL_BUTTON}
+          onCancel={this.cancelDeletePipelines}
+          onConfirm={this.deleteSelectedPipelines}
+          title={confirmText.title}
+        >
+          <p>{confirmText.message}</p>
+        </EuiConfirmModal>
+      </EuiOverlayMask>
+    );
+  }
+
+  deleteSelectedPipelines = () => {
+    this.hideDeletePipelinesModal();
+    const {
+      licenseService,
+      pipelinesService,
+      toastNotifications,
+    } = this.props;
+    const { selection } = this.state;
+    const numPipelinesSelected = selection.length;
+    const totalPluralized = pluralize('Pipeline', numPipelinesSelected);
+
+    const pipelineIds = selection.map(({ id }) => id);
+    return pipelinesService.deletePipelines(pipelineIds)
+      .then(results => {
+        const {
+          numSuccesses,
+          numErrors,
+        } = results;
+        const errorPluralized = pluralize('Pipeline', numErrors);
+
+        if (numSuccesses === 1 && numErrors === 0) {
+          toastNotifications.addSuccess(`Deleted "${selection[0].id}"`);
+        } else if (numSuccesses) {
+          let text;
+          if (numErrors) {
+            text = `But ${numErrors} ${errorPluralized} couldn't be deleted.`;
+          }
+
+          toastNotifications.addSuccess({
+            title: `Deleted ${numSuccesses} out of ${numPipelinesSelected} ${totalPluralized}`,
+            text,
+          });
+        } else if (numErrors) {
+          toastNotifications.addError(`Failed to delete ${numErrors} ${errorPluralized}`);
+        }
+
+        this.loadPipelines();
+      })
+      .catch(err => {
+        return licenseService.checkValidity()
+          .then(() => toastNotifications.addDanger(err));
+      });
+  }
+
+  onDeleteSelectedPipelines = () => {
+    this.showDeletePipelinesModal();
+  }
+
   renderPipelinesTable = () => {
-    const selection = {
+    const {
+      createPipeline,
+      isReadOnly,
+    } = this.props;
+    const { selection } = this.state;
+
+    const selectionOptions = {
       selectable: () => true,
       selectableMessage: () => 'the message',
       onSelectionChange: selection => this.setState({ selection }),
     };
+
+    const toolsRight = [
+      <EuiButton
+        isDisabled={isReadOnly}
+        key="btnCreatePipeline"
+        fill
+        onClick={createPipeline}
+      >
+        Create pipeline
+      </EuiButton>,
+      <EuiButton
+        isDisabled={!selection.length || isReadOnly}
+        key="btnDeletePipelines"
+        color="danger"
+        onClick={this.onDeleteSelectedPipelines}
+      >
+        Delete
+      </EuiButton>
+    ];
 
     const search = {
       box: { incremental: true },
@@ -188,6 +319,7 @@ class PipelineList extends React.Component {
           }),
         },
       ],
+      toolsRight,
     };
 
     return (
@@ -198,7 +330,7 @@ class PipelineList extends React.Component {
         search={search}
         sorting={true}
         isSelectable={true}
-        selection={selection}
+        selection={selectionOptions}
         message={this.state.message}
       />
     );
@@ -222,6 +354,7 @@ class PipelineList extends React.Component {
             }
           </div>
         </EuiPageContent>
+        { this.renderConfirmDeletedPipelinesModal() }
       </EuiPage>
     );
   }
@@ -248,6 +381,7 @@ app.directive('pipelineList', function ($injector) {
     // template: template,
     link: (scope, el) => {
       const openPipeline = id => scope.$evalAsync(kbnUrl.change(`/management/logstash/pipelines/${id}/edit`));
+      const createPipeline = () => scope.$evalAsync(kbnUrl.change('/management/logstash/pipelines/new-pipeline'));
       render(
         <PipelineList
           clusterService={clusterService}
@@ -257,6 +391,7 @@ app.directive('pipelineList', function ($injector) {
           licenseService={licenseService}
           monitoringService={monitoringService}
           openPipeline={openPipeline}
+          createPipeline={createPipeline}
           pipelinesService={pipelinesService}
           toastNotifications={toastNotifications}
         />, el[0]);
