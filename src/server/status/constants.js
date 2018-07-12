@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export { setApiFieldNames } from './set_api_field_names';
-export { sourceKibana } from './source_kibana';
+export const KIBANA_STATS_TYPE = 'kibana_stats';

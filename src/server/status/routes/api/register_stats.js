@@ -19,6 +19,7 @@
 
 import Joi from 'joi';
 import { wrapAuthConfig } from '../../wrap_auth_config';
+import { KIBANA_STATS_TYPE } from '../../constants';
 import { setApiFieldNames } from '../../lib';
 
 async function getExtended(req, server, collectorSet) {
@@ -36,6 +37,7 @@ async function getExtended(req, server, collectorSet) {
   let usage;
   try {
     const usageRaw = await collectorSet.bulkFetchUsage(callCluster);
+    // TODO put raw through composable functions
     usage = collectorSet.summarizeStats(usageRaw);
   } catch (err) {
     usage = undefined;
@@ -80,8 +82,9 @@ export function registerStatsApi(kbnServer, server, config) {
           ({ clusterUuid, usage } = await getExtended(req, server, collectorSet));
         }
 
-        const kibanaCollector = collectorSet.getCollectorByType('kibana_stats');
+        const kibanaCollector = collectorSet.getCollectorByType(KIBANA_STATS_TYPE);
         const stats = setApiFieldNames({
+          // TODO put raw through composable functions
           ...kibanaCollector.fetch(),
           cluster_uuid: clusterUuid,
           usage,

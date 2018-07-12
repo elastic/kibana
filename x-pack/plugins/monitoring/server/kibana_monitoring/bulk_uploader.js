@@ -95,6 +95,7 @@ export class BulkUploader {
    */
   async _fetchAndUpload(collectorSet) {
     const data = await collectorSet.bulkFetch(this._callClusterWithInternalUser);
+    // TODO put the data through composable functions provided by collectorSet, with some overrides
     const payload = data
       .filter(d => Boolean(d) && !isEmpty(d.result))
       .map(({ result, type }) => [{ index: { _type: type } }, result]);

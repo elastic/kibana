@@ -20,9 +20,15 @@
 import ServerStatus from './server_status';
 import { Metrics } from './lib/metrics';
 import { registerStatusPage, registerStatusApi, registerStatsApi } from './routes';
+import { getOpsStatsCollector } from './collectors';
 
 export function statusMixin(kbnServer, server, config) {
   kbnServer.status = new ServerStatus(kbnServer.server);
+
+  const statsCollector = getOpsStatsCollector(server, kbnServer);
+
+  const { collectorSet } = server.usage;
+  collectorSet.register(statsCollector);
 
   const { ['even-better']: evenBetter } = server.plugins;
 
@@ -30,7 +36,9 @@ export function statusMixin(kbnServer, server, config) {
     const metrics = new Metrics(config, server);
 
     evenBetter.monitor.on('ops', event => {
-      metrics.capture(event).then(data => { kbnServer.metrics = data; }); // for status API (to deprecate in next major)
+      metrics.capture(event).then(data => {
+        kbnServer.metrics = data;
+      });
     });
   }
 

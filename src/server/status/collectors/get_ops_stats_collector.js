@@ -17,5 +17,22 @@
  * under the License.
  */
 
-export { setApiFieldNames } from './set_api_field_names';
-export { sourceKibana } from './source_kibana';
+
+import { KIBANA_STATS_TYPE } from '../constants';
+import { sourceKibana } from '../lib';
+
+/*
+ * Initialize a collector for Kibana Ops Stats
+ */
+export function getOpsStatsCollector(server, kbnServer) {
+  const { collectorSet } = server.usage;
+  return collectorSet.makeStatsCollector({
+    type: KIBANA_STATS_TYPE,
+    fetch: () => {
+      return {
+        kibana: sourceKibana(server, kbnServer),
+        ...kbnServer.metrics
+      };
+    }
+  });
+}

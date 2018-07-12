@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export { setApiFieldNames } from './set_api_field_names';
-export { sourceKibana } from './source_kibana';
+export { getOpsStatsCollector } from './get_ops_stats_collector';
