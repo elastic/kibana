@@ -47,6 +47,12 @@ export const HeaderSmall = styled.h3`
   ${props => props.css};
 `;
 
+export const HeaderXSmall = styled.h4`
+  margin: ${px(units.plus)} 0;
+  font-size: ${fontSize};
+  ${props => props.css};
+`;
+
 export const Tab = styled.div`
   display: inline-block;
   font-size: ${fontSizes.large};
