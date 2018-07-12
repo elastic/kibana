@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export const KIBANA_STATS_TYPE = 'kibana_stats';
+export const KIBANA_STATS_TYPE = 'kibana';
