@@ -6,21 +6,20 @@
 
 import { get } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
-import {
-  BackendFrameworkAdapter,
-  BeatTag,
-  CMTagsAdapter,
-  FrameworkRequest,
-} from '../../lib';
+import { FrameworkUser } from './../framework/adapter_types';
+
+import { BeatTag } from '../../../../common/domain_types';
+import { DatabaseAdapter } from '../database/adapter_types';
+import { CMTagsAdapter } from './adapter_types';
 
 export class ElasticsearchTagsAdapter implements CMTagsAdapter {
-  private framework: BackendFrameworkAdapter;
+  private database: DatabaseAdapter;
 
-  constructor(framework: BackendFrameworkAdapter) {
-    this.framework = framework;
+  constructor(database: DatabaseAdapter) {
+    this.database = database;
   }
 
-  public async getTagsWithIds(req: FrameworkRequest, tagIds: string[]) {
+  public async getTagsWithIds(user: FrameworkUser, tagIds: string[]) {
     const ids = tagIds.map(tag => `tag:${tag}`);
 
     // TODO abstract to kibana adapter as the more generic getDocs
@@ -32,7 +31,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
       index: INDEX_NAMES.BEATS,
       type: '_doc',
     };
-    const response = await this.framework.callWithRequest(req, 'mget', params);
+    const response = await this.database.mget(user, params);
 
     return get(response, 'docs', [])
       .filter((b: any) => b.found)
@@ -42,7 +41,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
       }));
   }
 
-  public async upsertTag(req: FrameworkRequest, tag: BeatTag) {
+  public async upsertTag(user: FrameworkUser, tag: BeatTag) {
     const body = {
       tag,
       type: 'tag',
@@ -55,7 +54,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
       refresh: 'wait_for',
       type: '_doc',
     };
-    const response = await this.framework.callWithRequest(req, 'index', params);
+    const response = await this.database.index(user, params);
 
     // TODO this is not something that works for TS... change this return type
     return get(response, 'result');

@@ -5,6 +5,7 @@
  */
 
 import Joi from 'joi';
+import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/lib';
 import { wrapEsError } from '../../utils/error_wrappers';
 
@@ -23,7 +24,7 @@ export const createTagAssignmentsRoute = (libs: CMServerLibs) => ({
       }).required(),
     },
   },
-  handler: async (request: any, reply: any) => {
+  handler: async (request: FrameworkRequest, reply: any) => {
     const { assignments } = request.payload;
 
     // TODO abstract or change API to keep beatId consistent
@@ -34,7 +35,7 @@ export const createTagAssignmentsRoute = (libs: CMServerLibs) => ({
 
     try {
       const response = await libs.beats.assignTagsToBeats(
-        request,
+        request.user,
         tweakedAssignments
       );
       reply(response);

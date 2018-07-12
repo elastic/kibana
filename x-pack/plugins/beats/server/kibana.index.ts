@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
 import { compose } from './lib/compose/kibana';
 import { initManagementServer } from './management_server';
 
-export const initServerWithKibana = (hapiServer: Server) => {
+export const initServerWithKibana = (hapiServer: any) => {
   const libs = compose(hapiServer);
   initManagementServer(libs);
 };

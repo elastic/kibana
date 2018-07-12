@@ -6,17 +6,19 @@
 
 import { flatten, get } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
+import { DatabaseAdapter } from '../database/adapter_types';
 import {
   BackendFrameworkAdapter,
-  CMTokensAdapter,
-  EnrollmentToken,
-  FrameworkRequest,
-} from '../../lib';
+  FrameworkUser,
+} from '../framework/adapter_types';
+import { CMTokensAdapter, TokenEnrollmentData } from './adapter_types';
 
 export class ElasticsearchTokensAdapter implements CMTokensAdapter {
+  private database: DatabaseAdapter;
   private framework: BackendFrameworkAdapter;
 
-  constructor(framework: BackendFrameworkAdapter) {
+  constructor(database: DatabaseAdapter, framework: BackendFrameworkAdapter) {
+    this.database = database;
     this.framework = framework;
   }
 
@@ -27,12 +29,12 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
       type: '_doc',
     };
 
-    return this.framework.callWithInternalUser('delete', params);
+    await this.database.delete(this.framework.internalUser, params);
   }
 
   public async getEnrollmentToken(
     tokenString: string
-  ): Promise<EnrollmentToken> {
+  ): Promise<TokenEnrollmentData> {
     const params = {
       id: `enrollment_token:${tokenString}`,
       ignore: [404],
@@ -40,8 +42,11 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
       type: '_doc',
     };
 
-    const response = await this.framework.callWithInternalUser('get', params);
-    const tokenDetails = get<EnrollmentToken>(
+    const response = await this.database.get(
+      this.framework.internalUser,
+      params
+    );
+    const tokenDetails = get<TokenEnrollmentData>(
       response,
       '_source.enrollment_token',
       {
@@ -55,12 +60,15 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
     // out whether a token is valid or not. So we introduce a random delay in returning from
     // this function to obscure the actual time it took for Elasticsearch to find the token.
     const randomDelayInMs = 25 + Math.round(Math.random() * 200); // between 25 and 225 ms
-    return new Promise<EnrollmentToken>(resolve =>
+    return new Promise<TokenEnrollmentData>(resolve =>
       setTimeout(() => resolve(tokenDetails), randomDelayInMs)
     );
   }
 
-  public async upsertTokens(req: FrameworkRequest, tokens: EnrollmentToken[]) {
+  public async upsertTokens(
+    user: FrameworkUser,
+    tokens: TokenEnrollmentData[]
+  ) {
     const body = flatten(
       tokens.map(token => [
         { index: { _id: `enrollment_token:${token.token}` } },
@@ -71,14 +79,12 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
       ])
     );
 
-    const params = {
+    await this.database.bulk(user, {
       body,
       index: INDEX_NAMES.BEATS,
       refresh: 'wait_for',
       type: '_doc',
-    };
-
-    await this.framework.callWithRequest(req, 'bulk', params);
+    });
     return tokens;
   }
 }

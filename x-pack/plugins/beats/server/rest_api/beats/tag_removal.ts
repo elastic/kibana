@@ -5,6 +5,7 @@
  */
 
 import Joi from 'joi';
+import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/lib';
 import { wrapEsError } from '../../utils/error_wrappers';
 
@@ -23,7 +24,7 @@ export const createTagRemovalsRoute = (libs: CMServerLibs) => ({
       }).required(),
     },
   },
-  handler: async (request: any, reply: any) => {
+  handler: async (request: FrameworkRequest, reply: any) => {
     const { removals } = request.payload;
 
     // TODO abstract or change API to keep beatId consistent
@@ -34,7 +35,7 @@ export const createTagRemovalsRoute = (libs: CMServerLibs) => ({
 
     try {
       const response = await libs.beats.removeTagsFromBeats(
-        request,
+        request.user,
         tweakedRemovals
       );
       reply(response);

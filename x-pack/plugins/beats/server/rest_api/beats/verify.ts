@@ -5,6 +5,7 @@
  */
 
 import Joi from 'joi';
+import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/lib';
 import { wrapEsError } from '../../utils/error_wrappers';
 
@@ -23,7 +24,7 @@ export const createBeatVerificationRoute = (libs: CMServerLibs) => ({
       }).required(),
     },
   },
-  handler: async (request: any, reply: any) => {
+  handler: async (request: FrameworkRequest, reply: any) => {
     const beats = [...request.payload.beats];
     const beatIds = beats.map(beat => beat.id);
 
@@ -32,7 +33,7 @@ export const createBeatVerificationRoute = (libs: CMServerLibs) => ({
         verifiedBeatIds,
         alreadyVerifiedBeatIds,
         nonExistentBeatIds,
-      } = await libs.beats.verifyBeats(request, beatIds);
+      } = await libs.beats.verifyBeats(request.user, beatIds);
 
       // TODO calculation of status should be done in-lib, w/switch statement here
       beats.forEach(beat => {

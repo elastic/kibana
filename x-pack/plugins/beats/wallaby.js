@@ -4,10 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 const path = require('path');
-process.env.NODE_PATH = path.join(__dirname, '..', '..', 'node_modules');
+process.env.NODE_PATH +=
+  path.delimiter + path.join(__dirname, '..', '..', '..', 'node_modules');
 
 module.exports = function (wallaby) {
   return {
+    hints: {
+      commentAutoLog: 'testOutputWith:',
+    },
     debug: true,
     files: [
       './tsconfig.json',
@@ -39,6 +43,7 @@ module.exports = function (wallaby) {
         '..',
         '..'
       );
+
       wallaby.testFramework.configure({
         rootDir: wallaby.localProjectDir,
         moduleNameMapper: {
@@ -56,7 +61,6 @@ module.exports = function (wallaby) {
         ],
         transform: {
           '^.+\\.js$': `${kibanaDirectory}/src/dev/jest/babel_transform.js`,
-          //"^.+\\.tsx?$": `${kibanaDirectory}/src/dev/jest/ts_transform.js`,
         },
       });
     },

@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
 import { MemoryBeatsAdapter } from '../../../adapters/beats/memory_beats_adapter';
-import { TestingBackendFrameworkAdapter } from '../../../adapters/famework/kibana/testing_framework_adapter';
+import { TestingBackendFrameworkAdapter } from '../../../adapters/framework/testing_framework_adapter';
 import { MemoryTagsAdapter } from '../../../adapters/tags/memory_tags_adapter';
 import { MemoryTokensAdapter } from '../../../adapters/tokens/memory_tokens_adapter';
 
-import { BeatTag, CMBeat, EnrollmentToken } from './../../../lib';
+import { BeatTag, CMBeat } from '../../../../../common/domain_types';
+import { TokenEnrollmentData } from '../../../adapters/tokens/adapter_types';
 
 import { CMBeatsDomain } from '../../beats';
 import { CMTagsDomain } from '../../tags';
@@ -35,7 +35,7 @@ describe('Beats Domain Lib', () => {
 
   let beatsDB: CMBeat[] = [];
   let tagsDB: BeatTag[] = [];
-  let tokensDB: EnrollmentToken[] = [];
+  let tokensDB: TokenEnrollmentData[] = [];
   let validEnrollmentToken: string;
   let beatId: string;
   let beat: Partial<CMBeat>;
@@ -88,27 +88,27 @@ describe('Beats Domain Lib', () => {
         validEnrollmentToken
       );
 
-      expect(token).to.equal(validEnrollmentToken);
+      expect(token).toEqual(validEnrollmentToken);
       const { accessToken } = await beatsLib.enrollBeat(
         beatId,
         '192.168.1.1',
         omit(beat, 'enrollment_token')
       );
 
-      expect(beatsDB.length).to.eql(1);
-      expect(beatsDB[0]).to.have.property('host_ip');
+      expect(beatsDB.length).toEqual(1);
+      expect(beatsDB[0]).toHaveProperty('host_ip');
 
-      expect(accessToken).to.eql(beatsDB[0].access_token);
+      expect(accessToken).toEqual(beatsDB[0].access_token);
 
       await tokensLib.deleteEnrollmentToken(validEnrollmentToken);
 
-      expect(tokensDB.length).to.eql(0);
+      expect(tokensDB.length).toEqual(0);
     });
 
     it('should reject an invalid enrollment token', async () => {
       const { token } = await tokensLib.getEnrollmentToken(chance.word());
 
-      expect(token).to.eql(null);
+      expect(token).toEqual(null);
     });
 
     it('should reject an expired enrollment token', async () => {
@@ -118,19 +118,19 @@ describe('Beats Domain Lib', () => {
         })
       );
 
-      expect(token).to.eql(null);
+      expect(token).toEqual(null);
     });
 
     it('should delete the given enrollment token so it may not be reused', async () => {
-      expect(tokensDB[0].token).to.eql(validEnrollmentToken);
+      expect(tokensDB[0].token).toEqual(validEnrollmentToken);
       await tokensLib.deleteEnrollmentToken(validEnrollmentToken);
-      expect(tokensDB.length).to.eql(0);
+      expect(tokensDB.length).toEqual(0);
 
       const { token } = await tokensLib.getEnrollmentToken(
         validEnrollmentToken
       );
 
-      expect(token).to.eql(null);
+      expect(token).toEqual(null);
     });
   });
 });

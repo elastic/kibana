@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BeatTag, CMTagsAdapter, FrameworkRequest } from '../../lib';
+import { BeatTag } from '../../../../common/domain_types';
+import { FrameworkUser } from './../framework/adapter_types';
+import { CMTagsAdapter } from './adapter_types';
 
 export class MemoryTagsAdapter implements CMTagsAdapter {
   private tagsDB: BeatTag[] = [];
@@ -13,11 +15,11 @@ export class MemoryTagsAdapter implements CMTagsAdapter {
     this.tagsDB = tagsDB;
   }
 
-  public async getTagsWithIds(req: FrameworkRequest, tagIds: string[]) {
+  public async getTagsWithIds(user: FrameworkUser, tagIds: string[]) {
     return this.tagsDB.filter(tag => tagIds.includes(tag.id));
   }
 
-  public async upsertTag(req: FrameworkRequest, tag: BeatTag) {
+  public async upsertTag(user: FrameworkUser, tag: BeatTag) {
     const existingTagIndex = this.tagsDB.findIndex(t => t.id === tag.id);
     if (existingTagIndex !== -1) {
       this.tagsDB[existingTagIndex] = tag;
