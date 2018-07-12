@@ -1,4 +1,3 @@
-<!-- make aria-expanded dynamic -->
 <!-- ids will need some unique prefix passed in in case there are multiple typeaheads on the page -->
 <div
   class="typeahead"
@@ -7,7 +6,7 @@
   role="combobox"
   aria-haspopup="true"
   aria-owns="query-bar-typeahead-items"
-  aria-expanded="true"
+  aria-expanded="{{typeahead.isVisible() ? true : false}}"
 >
   <ng-transclude></ng-transclude>
   <div
