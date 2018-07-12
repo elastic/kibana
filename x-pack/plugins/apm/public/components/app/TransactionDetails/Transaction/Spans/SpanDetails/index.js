@@ -26,7 +26,6 @@ import {
   borderRadius,
   fontFamilyCode,
   fontSizes,
-  fontSize,
   truncate
 } from '../../../../../../style/variables';
 import TooltipOverlay, {
@@ -39,6 +38,7 @@ import SyntaxHighlighter, {
 import { xcode } from 'react-syntax-highlighter/dist/styles';
 
 import sql from 'react-syntax-highlighter/dist/languages/sql';
+import { HeaderXSmall } from '../../../../../shared/UIComponents';
 
 registerLanguage('sql', sql);
 
@@ -76,12 +76,6 @@ const SpanName = styled.div`
 
 const LegendIndicator = styled(Indicator)`
   display: inline-block;
-`;
-
-const SectionHeader = styled.div`
-  margin-top: ${px(unit)};
-  font-size: ${fontSize};
-  color: ${colors.gray1};
 `;
 
 const StackTraceContainer = styled.div`
@@ -162,15 +156,7 @@ function SpanDetails({ span, spanTypeLabel, spanTypeColor, totalDuration }) {
         </DetailsElement>
       </DetailsWrapper>
 
-      <SectionHeader>
-        <span>DB Statement</span>
-      </SectionHeader>
-
       <DatabaseContext dbContext={dbContext} />
-
-      <SectionHeader>
-        <span>Stacktraces</span>
-      </SectionHeader>
 
       <StackTraceContainer>
         <Stacktrace stackframes={stackframes} codeLanguage={codeLanguage} />
@@ -189,22 +175,25 @@ function DatabaseContext({ dbContext }) {
   }
 
   return (
-    <DatabaseStatement>
-      <SyntaxHighlighter
-        language={'sql'}
-        style={xcode}
-        customStyle={{
-          color: null,
-          background: null,
-          padding: null,
-          lineHeight: px(unit * 1.5),
-          whiteSpace: 'pre-wrap',
-          overflowX: 'scroll'
-        }}
-      >
-        {dbContext.statement}
-      </SyntaxHighlighter>
-    </DatabaseStatement>
+    <div>
+      <HeaderXSmall>DB Statement</HeaderXSmall>
+      <DatabaseStatement>
+        <SyntaxHighlighter
+          language={'sql'}
+          style={xcode}
+          customStyle={{
+            color: null,
+            background: null,
+            padding: null,
+            lineHeight: px(unit * 1.5),
+            whiteSpace: 'pre-wrap',
+            overflowX: 'scroll'
+          }}
+        >
+          {dbContext.statement}
+        </SyntaxHighlighter>
+      </DatabaseStatement>
+    </div>
   );
 }
 
