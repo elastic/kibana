@@ -191,12 +191,16 @@ export function VislibVisualizationsHeatmapChartProvider(Private) {
             val = Math.min(colorsNumber - 1, Math.floor(val * colorsNumber));
           }
         }
+        if (d.y == null) {
+          return -1;
+        }
         return !isNaN(val) ? val : -1;
       }
 
       function label(d) {
         const colorBucket = getColorBucket(d);
-        if (colorBucket === -1) d.hide = true;
+        // colorBucket id should always GTE 0
+        if (colorBucket < 0) d.hide = true;
         return labels[colorBucket];
       }
 
