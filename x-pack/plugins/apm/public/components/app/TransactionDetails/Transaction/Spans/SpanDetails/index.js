@@ -78,6 +78,12 @@ const LegendIndicator = styled(Indicator)`
   display: inline-block;
 `;
 
+const SectionHeader = styled.div`
+  margin-top: ${px(unit)};
+  font-size: ${fontSize};
+  color: ${colors.gray1};
+`;
+
 const StackTraceContainer = styled.div`
   margin-top: ${px(unit)};
 `;
