@@ -5,6 +5,7 @@
  */
 
 import _ from 'lodash';
+import Joi from 'joi';
 import { wrapError } from '../../../../lib/errors';
 
 export function initDeleteRolesApi(server, callWithRequest, routePreCheckLicenseFn) {
@@ -18,6 +19,14 @@ export function initDeleteRolesApi(server, callWithRequest, routePreCheckLicense
         _.flow(wrapError, reply));
     },
     config: {
+      validate: {
+        params: Joi.object()
+          .keys({
+            name: Joi.string()
+              .required(),
+          })
+          .required(),
+      },
       pre: [routePreCheckLicenseFn]
     }
   });
