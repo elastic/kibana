@@ -21,12 +21,7 @@ interface LogTimeControlsProps {
 
 export class LogTimeControls extends React.PureComponent<LogTimeControlsProps> {
   public render() {
-    const {
-      currentTime,
-      disableLiveStreaming,
-      enableLiveStreaming,
-      isLiveStreaming,
-    } = this.props;
+    const { currentTime, disableLiveStreaming, enableLiveStreaming, isLiveStreaming } = this.props;
 
     const currentMoment = moment(currentTime);
 
@@ -61,11 +56,7 @@ export class LogTimeControls extends React.PureComponent<LogTimeControlsProps> {
               injectTimes={[currentMoment]}
             />
           </InlineWrapper>
-          <EuiFilterButton
-            iconType="play"
-            iconSide="left"
-            onClick={enableLiveStreaming}
-          >
+          <EuiFilterButton iconType="play" iconSide="left" onClick={enableLiveStreaming}>
             Stream live
           </EuiFilterButton>
         </EuiFilterGroup>

@@ -6,10 +6,7 @@
 
 import { Location } from 'history';
 import omit from 'lodash/fp/omit';
-import {
-  parse as parseQueryString,
-  stringify as stringifyQueryString,
-} from 'querystring';
+import { parse as parseQueryString, stringify as stringifyQueryString } from 'querystring';
 import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { decode_object, encode_object } from 'rison-node';
@@ -49,10 +46,7 @@ export const withStateFromLocation = <StateInLocation extends {}>({
 
       public render() {
         const { location } = this.props;
-        const otherProps = omit(
-          ['location', 'history', 'match', 'staticContext'],
-          this.props
-        );
+        const otherProps = omit(['location', 'history', 'match', 'staticContext'], this.props);
 
         const stateFromLocation = mapLocationToState(location);
 
@@ -93,10 +87,7 @@ const decodeRisonAppState = (queryValues: { _a?: string }): AnyObject => {
   try {
     return queryValues && queryValues._a ? decode_object(queryValues._a) : {};
   } catch (error) {
-    if (
-      error instanceof Error &&
-      error.message.startsWith('rison decoder error')
-    ) {
+    if (error instanceof Error && error.message.startsWith('rison decoder error')) {
       return {};
     }
     throw error;
@@ -108,8 +99,7 @@ const encodeRisonAppState = (state: AnyObject) => ({
 });
 
 export const mapRisonAppLocationToState = <State extends {}>(
-  mapState: (risonAppState: AnyObject) => State = (state: AnyObject) =>
-    state as State
+  mapState: (risonAppState: AnyObject) => State = (state: AnyObject) => state as State
 ) => (location: Location): State => {
   const queryValues = parseQueryString(location.search.substring(1));
   const decodedState = decodeRisonAppState(queryValues);

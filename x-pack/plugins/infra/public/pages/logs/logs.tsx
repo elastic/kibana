@@ -44,15 +44,9 @@ import { withVisibleLogEntries } from '../../containers/logging_legacy/with_visi
 const ConnectedLogMinimap = withMinimapProps(LogMinimap);
 const ConnectedLogMinimapScaleControls = withMinimapScaleControlsProps(LogMinimapScaleControls);
 const ConnectedLogPositionText = withVisibleLogEntries(LogPositionText);
-const ConnectedLogSearchControls = withLogSearchControlsProps(
-  LogSearchControls
-);
-const ConnectedLogTextScaleControls = withTextScaleControlsProps(
-  LogTextScaleControls
-);
-const ConnectedLogTextWrapControls = withTextWrapControlsProps(
-  LogTextWrapControls
-);
+const ConnectedLogSearchControls = withLogSearchControlsProps(LogSearchControls);
+const ConnectedLogTextScaleControls = withTextScaleControlsProps(LogTextScaleControls);
+const ConnectedLogTextWrapControls = withTextWrapControlsProps(LogTextWrapControls);
 const ConnectedTimeControls = withTimeControlsProps(LogTimeControls);
 const ConnectedScrollableLogTextStreamView = withStreamItems(
   withTextStreamScrollState(ScrollableLogTextStreamView)

@@ -17,9 +17,7 @@ interface TextStreamScrollState {
   target: TimeKey;
 }
 
-const withTargetStateFromLocation = withStateFromLocation<
-  TextStreamScrollState
->({
+const withTargetStateFromLocation = withStateFromLocation<TextStreamScrollState>({
   mapLocationToState: mapRisonAppLocationToState(locationState => ({
     target: isTimeKey(locationState.target)
       ? {
@@ -52,8 +50,7 @@ interface InjectedTextStreamScrollStateProps extends TextStreamScrollState {
   ) => any;
 }
 
-interface TextStreamScrollStateProps
-  extends InjectedTextStreamScrollStateProps {
+interface TextStreamScrollStateProps extends InjectedTextStreamScrollStateProps {
   pushStateInLocation: (state: TextStreamScrollState) => void;
   replaceStateInLocation: (state: TextStreamScrollState) => void;
 }
@@ -82,17 +79,11 @@ export const withTextStreamScrollState = <
       // }
 
       public render() {
-        const {
-          pushStateInLocation,
-          replaceStateInLocation,
-          ...otherProps
-        } = this.props as TextStreamScrollStateProps;
+        const { pushStateInLocation, replaceStateInLocation, ...otherProps } = this
+          .props as TextStreamScrollStateProps;
 
         return (
-          <WrappedComponent
-            {...otherProps}
-            reportVisibleInterval={this.reportVisibleInterval}
-          />
+          <WrappedComponent {...otherProps} reportVisibleInterval={this.reportVisibleInterval} />
         );
       }
 

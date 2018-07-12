@@ -8,13 +8,7 @@ import { connect } from 'react-redux';
 
 import { isIntervalLoadingPolicy } from '../../utils/loading_state';
 import { bindPlainActionCreators } from '../../utils/typed_redux';
-import {
-  entriesActions,
-  entriesSelectors,
-  sharedSelectors,
-  State,
-  targetActions,
-} from './state';
+import { entriesActions, entriesSelectors, sharedSelectors, State, targetActions } from './state';
 
 export const withTimeControlsProps = connect(
   (state: State) => ({
