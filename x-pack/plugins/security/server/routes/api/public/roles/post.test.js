@@ -161,8 +161,13 @@ describe('POST role', () => {
           cluster: ['test-cluster-privilege'],
           indices: [
             {
+              field_security: {
+                grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
+                except: [ 'test-field-security-except-1', 'test-field-security-except-2' ]
+              },
               names: ['test-index-name-1', 'test-index-name-2'],
               privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
+              query: `{ "match": { "title": "foo" } }`,
             },
           ],
           run_as: ['test-run-as-1', 'test-run-as-2'],
@@ -204,11 +209,16 @@ describe('POST role', () => {
                 cluster: ['test-cluster-privilege'],
                 indices: [
                   {
+                    field_security: {
+                      grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
+                      except: [ 'test-field-security-except-1', 'test-field-security-except-2' ]
+                    },
                     names: ['test-index-name-1', 'test-index-name-2'],
                     privileges: [
                       'test-index-privilege-1',
                       'test-index-privilege-2',
                     ],
+                    query: `{ "match": { "title": "foo" } }`,
                   },
                 ],
                 metadata: { foo: 'test-metadata' },
@@ -236,8 +246,13 @@ describe('POST role', () => {
           cluster: ['test-cluster-privilege'],
           indices: [
             {
+              field_security: {
+                grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
+                except: [ 'test-field-security-except-1', 'test-field-security-except-2' ]
+              },
               names: ['test-index-name-1', 'test-index-name-2'],
               privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
+              query: `{ "match": { "title": "foo" } }`,
             },
           ],
           run_as: ['test-run-as-1', 'test-run-as-2'],
@@ -264,8 +279,13 @@ describe('POST role', () => {
             cluster: ['old-cluster-privilege'],
             indices: [
               {
+                field_security: {
+                  grant: ['old-field-security-grant-1', 'old-field-security-grant-2'],
+                  except: [ 'old-field-security-except-1', 'old-field-security-except-2' ]
+                },
                 names: ['old-index-name'],
                 privileges: ['old-privilege'],
+                query: `{ "match": { "old-title": "foo" } }`,
               },
             ],
             run_as: ['old-run-as'],
@@ -306,11 +326,16 @@ describe('POST role', () => {
                 cluster: ['test-cluster-privilege'],
                 indices: [
                   {
+                    field_security: {
+                      grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
+                      except: [ 'test-field-security-except-1', 'test-field-security-except-2' ]
+                    },
                     names: ['test-index-name-1', 'test-index-name-2'],
                     privileges: [
                       'test-index-privilege-1',
                       'test-index-privilege-2',
                     ],
+                    query: `{ "match": { "title": "foo" } }`,
                   },
                 ],
                 metadata: { foo: 'test-metadata' },
