@@ -162,22 +162,5 @@ export const dateHistogramBucketAgg = new BucketAggType({
       name: 'min_doc_count',
       default: 1
     },
-
-    {
-      name: 'extended_bounds',
-      default: {},
-      write: function (agg, output) {
-        const val = agg.params.extended_bounds;
-
-        if (val.min != null || val.max != null) {
-          output.params.extended_bounds = {
-            min: moment(val.min).valueOf(),
-            max: moment(val.max).valueOf()
-          };
-
-          return;
-        }
-      }
-    }
   ]
 });
