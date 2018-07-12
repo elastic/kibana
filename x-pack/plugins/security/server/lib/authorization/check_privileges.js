@@ -6,6 +6,8 @@
 
 import { uniq } from 'lodash';
 import { ALL_RESOURCE } from '../../../common/constants';
+import { buildLegacyIndexPrivileges } from './privileges';
+import { validateEsPrivilegeResponse } from './validate_es_response';
 
 export const CHECK_PRIVILEGES_RESULT = {
   UNAUTHORIZED: Symbol('Unauthorized'),
@@ -59,13 +61,15 @@ export function checkPrivilegesWithRequestFactory(shieldClient, config, actions,
           }],
           index: [{
             names: [kibanaIndex],
-            privileges: ['create', 'delete', 'read', 'view_index_metadata']
+            privileges: buildLegacyIndexPrivileges()
           }],
         }
       });
 
+      validateEsPrivilegeResponse(hasPrivilegesResponse, application, allApplicationPrivileges, [ALL_RESOURCE], kibanaIndex);
+
       const applicationPrivilegesResponse = hasPrivilegesResponse.application[application][ALL_RESOURCE];
-      const indexPrivilegesResponse =  hasPrivilegesResponse.index[kibanaIndex];
+      const indexPrivilegesResponse = hasPrivilegesResponse.index[kibanaIndex];
 
       if (hasIncompatibileVersion(applicationPrivilegesResponse)) {
         throw new Error('Multiple versions of Kibana are running against the same Elasticsearch cluster, unable to authorize user.');
