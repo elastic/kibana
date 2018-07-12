@@ -3,6 +3,7 @@ import { image } from './image';
 import { markdown } from './markdown';
 import { pie } from './pie';
 import { plot } from './plot';
+import { getCell } from './getCell';
 import { repeatImage } from './repeatImage';
 import { revealImage } from './revealImage';
 import { render } from './render';
@@ -15,6 +16,7 @@ export const viewSpecs = [
   image,
   markdown,
   plot,
+  getCell,
   pie,
   repeatImage,
   revealImage,

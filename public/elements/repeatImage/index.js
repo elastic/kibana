@@ -8,6 +8,6 @@ export const repeatImage = () => ({
   expression: `demodata
 | pointseries size="mean(cost)"
 | getCell
-| repeatImage
+| repeatImage image=null
 | render`,
 });

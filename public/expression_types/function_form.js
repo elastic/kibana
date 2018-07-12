@@ -95,6 +95,8 @@ export class FunctionForm extends BaseForm {
       const argumentForms = compact(resolvedDataArgs.map(d => this.renderArg(props, d)));
       const addableArgs = compact(resolvedDataArgs.map(d => this.getAddableArg(props, d)));
 
+      if (!addableArgs.length && !argumentForms.length) return null;
+
       return (
         <SidebarSection>
           <SidebarSectionTitle title={argTypeDef.displayName} tip={argTypeDef.help}>

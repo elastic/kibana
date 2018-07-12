@@ -8,6 +8,6 @@ export const revealImage = () => ({
   expression: `demodata
 | pointseries size="sum(min(cost) / max(cost))"
 | getCell
-| revealImage origin=bottom
+| revealImage origin=bottom image=null
 | render`,
 });
