@@ -18,11 +18,12 @@
  */
 
 import fetchMock from 'fetch-mock';
-import { kfetch } from './index';
+import { kfetch } from './kfetch';
 
 jest.mock('../chrome', () => ({
   addBasePath: path => `myBase/${path}`,
 }));
+
 jest.mock('../metadata', () => ({
   metadata: {
     version: 'my-version',
@@ -112,15 +113,6 @@ describe('kfetch', () => {
         expect(e.res.status).toBe(404);
         expect(e.res.url).toBe('myBase/my/path?a=b');
       });
-    });
-  });
-
-  describe('isAbortable', () => {
-    it('should return an object with a fetching promise and an abort callback', () => {
-      const { fetching, abort } = kfetch({ pathname: 'my/path' }, {}, true);
-      expect(typeof fetching.then).toBe('function');
-      expect(typeof fetching.catch).toBe('function');
-      expect(typeof abort).toBe('function');
     });
   });
 });
