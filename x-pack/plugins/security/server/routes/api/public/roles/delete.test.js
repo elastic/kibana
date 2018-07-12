@@ -98,14 +98,14 @@ describe('DELETE role', () => {
       name: 'foo-role',
       preCheckLicenseImpl: defaultPreCheckLicenseImpl,
       callWithRequestImpl: async () => {
-        throw Boom.notAcceptable('test not acceptable message');
+        throw Boom.notFound('test not found message');
       },
       asserts: {
-        statusCode: 406,
+        statusCode: 404,
         result: {
-          error: 'Not Acceptable',
-          statusCode: 406,
-          message: 'test not acceptable message',
+          error: 'Not Found',
+          statusCode: 404,
+          message: 'test not found message',
         },
       },
     });
