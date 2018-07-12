@@ -157,10 +157,5 @@ export const dateHistogramBucketAgg = new BucketAggType({
     {
       name: 'format'
     },
-
-    {
-      name: 'min_doc_count',
-      default: 1
-    },
   ]
 });
