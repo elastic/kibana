@@ -63,8 +63,10 @@ export class InputControlVis extends Component {
               selectedOptions={control.value}
               disableMsg={control.isEnabled() ? null : control.disabledReason}
               multiselect={control.options.multiselect}
+              dynamicOptions={control.options.dynamicOptions}
               controlIndex={index}
               stageFilter={this.props.stageFilter}
+              fetchOptions={query => { this.props.refreshControl(index, query); }}
             />
           );
           break;
@@ -158,5 +160,6 @@ InputControlVis.propTypes = {
   controls: PropTypes.array.isRequired,
   updateFiltersOnChange: PropTypes.bool,
   hasChanges: PropTypes.func.isRequired,
-  hasValues: PropTypes.func.isRequired
+  hasValues: PropTypes.func.isRequired,
+  refreshControl: PropTypes.func.isRequired,
 };

@@ -45,32 +45,41 @@ export function FetchNowProvider(Private, Promise) {
   const DUPLICATE = RequestStatus.DUPLICATE;
   const INCOMPLETE = RequestStatus.INCOMPLETE;
 
-  function fetchNow(requests) {
-    return fetchSearchResults(requests.map(function (req) {
-      if (!req.started) return req;
-      return req.retry();
+  function fetchNow(searchRequests) {
+    return fetchSearchResults(searchRequests.map(function (searchRequest) {
+      if (!searchRequest.started) {
+        return searchRequest;
+      }
+
+      return searchRequest.retry();
     }))
       .catch(error => fatalError(error, location));
   }
 
-  function fetchSearchResults(requests) {
+  function fetchSearchResults(searchRequests) {
     function replaceAbortedRequests() {
-      requests = requests.map(r => r.aborted ? ABORTED : r);
+      searchRequests = searchRequests.map(searchRequest => {
+        if (searchRequest.aborted) {
+          return ABORTED;
+        }
+
+        return searchRequest;
+      });
     }
 
     replaceAbortedRequests();
-    return startRequests(requests)
+    return startRequests(searchRequests)
       .then(function () {
         replaceAbortedRequests();
-        return callClient(requests);
+        return callClient(searchRequests);
       })
       .then(function (responses) {
         replaceAbortedRequests();
-        return callResponseHandlers(requests, responses);
+        return callResponseHandlers(searchRequests, responses);
       })
       .then(function (responses) {
         replaceAbortedRequests();
-        return continueIncomplete(requests, responses, fetchSearchResults);
+        return continueIncomplete(searchRequests, responses, fetchSearchResults);
       })
       .then(function (responses) {
         replaceAbortedRequests();
@@ -88,17 +97,17 @@ export function FetchNowProvider(Private, Promise) {
       });
   }
 
-  function startRequests(requests) {
-    return Promise.map(requests, function (req) {
-      if (req === ABORTED) {
-        return req;
+  function startRequests(searchRequests) {
+    return Promise.map(searchRequests, function (searchRequest) {
+      if (searchRequest === ABORTED) {
+        return searchRequest;
       }
 
       return new Promise(function (resolve) {
-        const action = req.started ? req.continue : req.start;
-        resolve(action.call(req));
+        const action = searchRequest.started ? searchRequest.continue : searchRequest.start;
+        resolve(action.call(searchRequest));
       })
-        .catch(err => req.handleFailure(err));
+        .catch(err => searchRequest.handleFailure(err));
     });
   }
 

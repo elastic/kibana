@@ -20,6 +20,7 @@ import _ from 'lodash';
 import { createSavedObjectsService } from './service';
 import { KibanaMigrator } from './migrations';
 import {
+  createBulkCreateRoute,
   createBulkGetRoute,
   createCreateRoute,
   createDeleteRoute,
@@ -52,6 +53,7 @@ export function savedObjectsMixin(kbnServer, server) {
     },
   };
 
+  server.route(createBulkCreateRoute(prereqs));
   server.route(createBulkGetRoute(prereqs));
   server.route(createCreateRoute(prereqs));
   server.route(createDeleteRoute(prereqs));
