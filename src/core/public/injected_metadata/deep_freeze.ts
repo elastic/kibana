@@ -17,7 +17,7 @@
  * under the License.
  */
 
-type Freezable = { [k: string]: any } | ArrayLike<any>;
+type Freezable = { [k: string]: any } | any[];
 
 type RecursiveReadOnly<T> = T extends Freezable
   ? Readonly<{ [K in keyof T]: RecursiveReadOnly<T[K]> }>
