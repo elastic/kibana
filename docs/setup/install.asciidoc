@@ -1,6 +1,10 @@
 [[install]]
 == Installing Kibana
 
+If you are running our hosted Elasticsearch Service on https://www.elastic.co/cloud[Elastic Cloud],
+then Kibana can be enabled with the https://www.elastic.co/guide/en/cloud/current/ec-enable-kibana.html[flick of a switch].
+
+
 NOTE: Starting with version 6.0.0, Kibana only supports 64 bit operating systems.
 
 Kibana is provided in the following package formats:
@@ -34,13 +38,13 @@ Elastic website or from our RPM repository.
 `docker`::
 
 Images are available for running Kibana as a Docker container. They may be
-downloaded from the Elastic Docker Registry. 
+downloaded from the Elastic Docker Registry.
 +
 <<docker,Running Kibana on Docker>>
 
-IMPORTANT: If your Elasticsearch installation is protected by 
-{xpack-ref}/xpack-security.html[{security}] see 
-{kibana-ref}/using-kibana-with-security.html[Configuring Security in Kibana] for 
+IMPORTANT: If your Elasticsearch installation is protected by
+{xpack-ref}/xpack-security.html[{security}] see
+{kibana-ref}/using-kibana-with-security.html[Configuring Security in Kibana] for
 additional setup instructions.
 
 
