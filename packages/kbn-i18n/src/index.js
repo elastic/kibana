@@ -17,5 +17,8 @@
  * under the License.
  */
 
-export { formats } from './formats';
-export * from './i18n';
+import * as i18nCore from './core';
+import * as loader from './loader';
+
+export const i18n = i18nCore;
+export const i18nLoader = loader;

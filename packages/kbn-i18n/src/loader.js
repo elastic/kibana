@@ -29,7 +29,7 @@ import { readFile } from 'fs';
 import { promisify } from 'util';
 import { pick } from 'accept-language-parser';
 import JSON5 from 'json5';
-import { unique } from './i18n/helper';
+import { unique } from './core/helper';
 
 const asyncReadFile = promisify(readFile);
 
