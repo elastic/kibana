@@ -1,4 +1,3 @@
-<!--TODO add arias to both inputs -->
 <form
   role="form"
   name="queryBarForm"
@@ -32,6 +31,9 @@
           class="kuiLocalSearchInput"
           ng-class="{'kuiLocalSearchInput-isInvalid': queryBarForm.$invalid}"
           data-test-subj="queryInput"
+          aria-autocomplete="list"
+          aria-controls="query-bar-typeahead-items"
+          aria-activedescendant="{{queryBar.focusedTypeaheadItemID}}"
         >
 
         <!-- kuery input -->

@@ -140,7 +140,7 @@ typeahead.directive('kbnTypeahead', function () {
       };
 
       $scope.$watch('typeahead.selectedIndex', (newIndex) => {
-        this.onFocusChange({ $focusedItemID: `typeahead-item-${newIndex}` });
+        this.onFocusChange({ $focusedItemID: newIndex !== null ? `typeahead-item-${newIndex}` : '' });
       });
     }
   };
