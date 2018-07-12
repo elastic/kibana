@@ -16,7 +16,7 @@ export default function ({ getService }) {
         await supertest.post('/api/security/roles/empty_role')
           .set('kbn-xsrf', 'xxx')
           .send({})
-          .expect(200);
+          .expect(204);
       });
 
       it('should create a role with kibana and elasticsearch privileges', async () => {
@@ -50,7 +50,7 @@ export default function ({ getService }) {
               },
             ],
           })
-          .expect(200);
+          .expect(204);
 
         const role = await es.shield.getRole({ name: 'role_with_privileges' });
         expect(role).to.eql({
@@ -157,7 +157,7 @@ export default function ({ getService }) {
               },
             ],
           })
-          .expect(200);
+          .expect(204);
 
         const role = await es.shield.getRole({ name: 'role_to_update' });
         expect(role).to.eql({

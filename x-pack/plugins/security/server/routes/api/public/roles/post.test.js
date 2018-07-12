@@ -143,7 +143,7 @@ describe('POST role', () => {
             },
           ],
         ],
-        statusCode: 200,
+        statusCode: 204,
         result: null,
       },
     });
@@ -224,7 +224,7 @@ describe('POST role', () => {
             },
           ],
         ],
-        statusCode: 200,
+        statusCode: 204,
         result: null,
       },
     });
@@ -337,7 +337,7 @@ describe('POST role', () => {
             },
           ],
         ],
-        statusCode: 200,
+        statusCode: 204,
         result: null,
       },
     });
@@ -463,7 +463,7 @@ describe('POST role', () => {
               },
             ],
           ],
-          statusCode: 200,
+          statusCode: 204,
           result: null,
         },
       }

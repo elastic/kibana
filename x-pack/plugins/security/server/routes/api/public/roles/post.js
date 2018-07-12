@@ -86,7 +86,7 @@ export function initPostRolesApi(
         );
 
         await callWithRequest(request, 'shield.putRole', { name, body });
-        reply();
+        reply().code(204);
       } catch (err) {
         reply(wrapError(err));
       }
