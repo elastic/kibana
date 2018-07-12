@@ -22,7 +22,8 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { encode as encodeRison } from 'rison-node';
 import '../../private';
-import { fatalErrorInternals, toastNotifications } from '../../notify';
+import { toastNotifications } from '../../notify';
+import * as FatalErrorNS from '../../notify/fatal_error';
 import { StateProvider } from '../state';
 import {
   unhashQueryString,
@@ -36,6 +37,9 @@ import StubBrowserStorage from 'test_utils/stub_browser_storage';
 import { EventsProvider } from '../../events';
 
 describe('State Management', () => {
+  const sandbox = sinon.createSandbox();
+  afterEach(() => sandbox.restore());
+
   describe('Enabled', () => {
     let $rootScope;
     let $location;
@@ -291,7 +295,7 @@ describe('State Management', () => {
 
         it('throws error linking to github when setting item fails', () => {
           const { state, hashedItemStore } = setup({ storeInHash: true });
-          sinon.stub(fatalErrorInternals, 'show');
+          sandbox.stub(FatalErrorNS, 'fatalError');
           sinon.stub(hashedItemStore, 'setItem').returns(false);
           expect(() => {
             state.toQueryParam();

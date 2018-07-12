@@ -21,6 +21,7 @@ export default {
   rootDir: '../../..',
   roots: [
     '<rootDir>/src/ui',
+    '<rootDir>/src/core',
     '<rootDir>/src/core_plugins',
     '<rootDir>/src/server',
     '<rootDir>/src/cli',

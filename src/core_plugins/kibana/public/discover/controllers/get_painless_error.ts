@@ -17,7 +17,28 @@
  * under the License.
  */
 
-export { formatESMsg, getPainlessError } from './format_es_msg';
-export { formatMsg } from './format_msg';
-export { formatStack } from './format_stack';
-export { isAngularHttpError, formatAngularHttpError } from './format_angular_http_error';
+import { get } from 'lodash';
+
+export function getPainlessError(error: Error) {
+  const rootCause: Array<{ lang: string; script: string }> | undefined = get(
+    error,
+    'resp.error.root_cause'
+  );
+
+  if (!rootCause) {
+    return;
+  }
+
+  const { lang, script } = rootCause[0];
+
+  if (lang !== 'painless') {
+    return;
+  }
+
+  return {
+    lang,
+    script,
+    message: `Error with Painless scripted field '${script}'`,
+    error: error.message,
+  };
+}

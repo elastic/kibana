@@ -17,10 +17,12 @@
  * under the License.
  */
 
+import { FatalErrorsStartContract } from '../fatal_errors';
 import { InjectedMetadataStartContract } from '../injected_metadata';
 
 interface Deps {
   injectedMetadata: InjectedMetadataStartContract;
+  fatalErrors: FatalErrorsStartContract;
 }
 
 export interface LegacyPlatformParams {
@@ -39,10 +41,11 @@ export interface LegacyPlatformParams {
 export class LegacyPlatformService {
   constructor(private readonly params: LegacyPlatformParams) {}
 
-  public start({ injectedMetadata }: Deps) {
+  public start({ injectedMetadata, fatalErrors }: Deps) {
     // Inject parts of the new platform into parts of the legacy platform
     // so that legacy APIs/modules can mimic their new platform counterparts
     require('ui/metadata').__newPlatformInit__(injectedMetadata.getLegacyMetadata());
+    require('ui/notify/fatal_error').__newPlatformInit__(fatalErrors);
 
     // Load the bootstrap module before loading the legacy platform files so that
     // the bootstrap module can modify the environment a bit first
@@ -52,6 +55,19 @@ export class LegacyPlatformService {
     this.params.requireLegacyFiles();
 
     bootstrapModule.bootstrap(this.params.rootDomElement);
+  }
+
+  public stop() {
+    const angular = require('angular');
+
+    const angularRoot = angular.element(this.params.rootDomElement);
+    const injector$ = angularRoot.injector();
+
+    // destroy the root angular scope
+    injector$.get('$rootScope').$destroy();
+
+    // clear the inner html of the root angular element
+    angularRoot.html('');
   }
 
   private loadBootstrapModule(): {
