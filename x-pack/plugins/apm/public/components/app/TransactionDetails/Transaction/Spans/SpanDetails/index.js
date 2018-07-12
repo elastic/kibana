@@ -169,7 +169,7 @@ function SpanDetails({ span, spanTypeLabel, spanTypeColor, totalDuration }) {
       <DatabaseContext dbContext={dbContext} />
 
       <SectionHeader>
-        <span>Stacktrace</span>
+        <span>Stacktraces</span>
       </SectionHeader>
 
       <StackTraceContainer>
