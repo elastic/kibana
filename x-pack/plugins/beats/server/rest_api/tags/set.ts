@@ -7,6 +7,7 @@
 import Joi from 'joi';
 import { get, values } from 'lodash';
 import { ConfigurationBlockTypes } from '../../../common/constants';
+import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/lib';
 import { wrapEsError } from '../../utils/error_wrappers';
 
@@ -30,7 +31,7 @@ export const createSetTagRoute = (libs: CMServerLibs) => ({
       }).allow(null),
     },
   },
-  handler: async (request: any, reply: any) => {
+  handler: async (request: FrameworkRequest, reply: any) => {
     const configurationBlocks = get(
       request,
       'payload.configuration_blocks',
@@ -38,7 +39,7 @@ export const createSetTagRoute = (libs: CMServerLibs) => ({
     );
     try {
       const { isValid, result } = await libs.tags.saveTag(
-        request,
+        request.user,
         request.params.tag,
         configurationBlocks
       );

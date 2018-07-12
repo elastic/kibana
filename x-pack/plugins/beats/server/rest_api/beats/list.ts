@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/lib';
 import { wrapEsError } from '../../utils/error_wrappers';
 
 // TODO: add license check pre-hook
 export const createListAgentsRoute = (libs: CMServerLibs) => ({
-  handler: async (request: any, reply: any) => {
+  handler: async (request: FrameworkRequest, reply: any) => {
     try {
-      const beats = await libs.beats.getAllBeats(request);
+      const beats = await libs.beats.getAllBeats(request.user);
       reply({ beats });
     } catch (err) {
       // TODO move this to kibana route thing in adapter
