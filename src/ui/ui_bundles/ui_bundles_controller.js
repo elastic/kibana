@@ -27,7 +27,7 @@ import { makeRe } from 'minimatch';
 import mkdirp from 'mkdirp';
 
 import { UiBundle } from './ui_bundle';
-import { newPlatformEntryTemplate } from './new_platform_entry_template';
+import { appEntryTemplate } from './app_entry_template';
 
 const mkdirpAsync = promisify(mkdirp);
 
@@ -84,7 +84,7 @@ export class UiBundlesController {
       this.add({
         id: uiApp.getId(),
         modules: [uiApp.getMainModuleId()],
-        template: newPlatformEntryTemplate,
+        template: appEntryTemplate,
       });
     }
   }
