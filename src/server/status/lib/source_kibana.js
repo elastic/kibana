@@ -22,10 +22,7 @@ import { get } from 'lodash';
 const snapshotRegex = /-snapshot/i;
 
 /**
- * This provides a common structure to apply to all Kibana monitoring documents so that they can be commonly
- * searched, field-collapsed, and aggregated against.
- *
- * 'sourceKibana' is akin to the `source_node` details in Elasticsearch nodes.
+ * This provides a meta data attribute along with Kibana stats.
  *
  * @param {Object} kbnServer manager of Kibana services - see `src/server/kbn_server` in Kibana core
  * @param {Object} config Server config
