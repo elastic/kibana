@@ -33,6 +33,8 @@ import 'plugins/logstash/services/license';
 import 'plugins/logstash/services/cluster';
 import 'plugins/logstash/services/monitoring';
 
+const INITIAL_PAGE_SIZE = 5;
+
 class PipelineList extends React.Component {
   constructor(props) {
     super(props);
@@ -40,6 +42,8 @@ class PipelineList extends React.Component {
     this.state = {
       isForbidden: false,
       isLoading: true,
+      pageIndex: 0,
+      pageSize: INITIAL_PAGE_SIZE,
       showConfirmDeleteModal: false,
       selection: [ ],
     };
@@ -200,7 +204,7 @@ class PipelineList extends React.Component {
         title: `Delete pipeline "${selection[0].id}"`,
       }
       : {
-        message: `Delete ${numPipelinesSelected} pipelines? You cannot recover deleted pipelines.`,
+        message: `You cannot recover deleted pipelines.`,
         button: `Delete ${numPipelinesSelected} pipelines`,
         title: `Delete ${numPipelinesSelected} pipelines`,
       };
@@ -275,7 +279,20 @@ class PipelineList extends React.Component {
       createPipeline,
       isReadOnly,
     } = this.props;
-    const { selection } = this.state;
+    const {
+      // TODO: add pagination once EuiInMemoryTable bug fixed: https://github.com/elastic/eui/issues/1007
+      // pageIndex,
+      // pageSize,
+      // pipelines,
+      selection
+    } = this.state;
+
+    // const pagination = {
+    //   pageIndex,
+    //   pageSize,
+    //   totalItemCount: pipelines.length,
+    //   pageSizeOptions: [2, 3, 5, 8]
+    // };
 
     const selectionOptions = {
       selectable: () => true,
@@ -327,14 +344,29 @@ class PipelineList extends React.Component {
         columns={this.columns}
         itemId="id"
         items={this.state.pipelines}
+        message={this.state.message}
         search={search}
         sorting={true}
         isSelectable={true}
         selection={selectionOptions}
-        message={this.state.message}
       />
     );
   }
+
+  // TODO: add pagination once EuiInMemoryTable bug fixed: https://github.com/elastic/eui/issues/1007
+  // onTableChange = (props) => {
+  //   const {
+  //     page: {
+  //       index,
+  //       size,
+  //     }
+  //   } = props;
+
+  //   this.setState({
+  //     pageIndex: index,
+  //     pageSize: size,
+  //   });
+  // };
 
   render() {
     return (
