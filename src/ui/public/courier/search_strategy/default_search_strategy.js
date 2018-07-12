@@ -31,20 +31,26 @@ function getAllFetchParams(searchRequests, Promise) {
 }
 
 function serializeAllFetchParams(fetchParams, searchRequests, serializeFetchParams) {
-  const requestsWithFetchParams = [];
+  const searcRequestsWithFetchParams = [];
+  const failedSearchRequests = [];
 
   // Gather the fetch param responses from all the successful requests.
   fetchParams.forEach((result, index) => {
     if (result.resolved) {
-      requestsWithFetchParams.push(result.resolved);
+      searcRequestsWithFetchParams.push(result.resolved);
     } else {
-      const request = searchRequests[index];
-      request.handleFailure(result.rejected);
-      searchRequests[index] = undefined;
+      const searchRequest = searchRequests[index];
+
+      // TODO: All strategies will need to implement this.
+      searchRequest.handleFailure(result.rejected);
+      failedSearchRequests.push(searchRequest);
     }
   });
 
-  return serializeFetchParams(requestsWithFetchParams);
+  return {
+    serializeAllFetchParams: serializeFetchParams(searcRequestsWithFetchParams),
+    failedSearchRequests,
+  };
 }
 
 export const defaultSearchStrategy = {
@@ -56,9 +62,15 @@ export const defaultSearchStrategy = {
     const allFetchParams = await getAllFetchParams(searchRequests, Promise);
 
     // Serialize the fetch params into a format suitable for the body of an ES query.
-    const serializedFetchParams = await serializeAllFetchParams(allFetchParams, searchRequests, serializeFetchParams);
+    const {
+      serializedFetchParams,
+      failedSearchRequests,
+    } = await serializeAllFetchParams(allFetchParams, searchRequests, serializeFetchParams);
 
-    return es.msearch({ body: serializedFetchParams });
+    return {
+      searching: es.msearch({ body: serializedFetchParams }),
+      failedSearchRequests,
+    };
   },
 
   // Accept multiple criteria for determining viability to be as flexible as possible.

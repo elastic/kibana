@@ -42,14 +42,18 @@ describe('callClient', () => {
   let esPromiseAbortSpy;
 
   const createSearchRequest = (id, overrides = {}) => {
+    const { source: overrideSource, ...rest } = overrides;
+
     const source = {
       _flatten: () => ({}),
       requestIsStopped: () => {},
+      getField: () => 'indexPattern',
+      ...overrideSource
     };
 
     const errorHandler = () => {};
 
-    const searchRequest = new SearchRequest({ source, errorHandler, ...overrides });
+    const searchRequest = new SearchRequest({ source, errorHandler, ...rest });
     searchRequest.__testId__ = id;
     return searchRequest;
   };
@@ -145,8 +149,11 @@ describe('callClient', () => {
       searchRequest.handleFailure = handleFailureSpy;
 
       searchRequests = [ searchRequest ];
-      await callClient(searchRequests);
-      sinon.assert.calledWith(handleFailureSpy, 'fake es error');
+      try {
+        await callClient(searchRequests);
+      } catch(e) {
+        sinon.assert.calledWith(handleFailureSpy, 'fake es error');
+      }
     });
   });
 
@@ -227,7 +234,7 @@ describe('callClient', () => {
       });
     });
 
-    it(`aborting all searchRequests calls abort() on the promise returned by es.msearch()`, () => {
+    it(`aborting all searchRequests calls abort() on the promise returned by searchStrategy.search()`, () => {
       esRequestDelay = 100;
 
       const searchRequest1 = createSearchRequest();

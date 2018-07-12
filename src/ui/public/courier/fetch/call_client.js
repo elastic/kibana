@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import _ from 'lodash';
-
 import { ErrorAllowExplicitIndexProvider } from '../../error_allow_explicit_index';
 import { assignSearchRequestsToSearchStrategies } from '../search_strategy';
 import { IsRequestProvider } from './is_request';
@@ -53,8 +51,12 @@ export function CallClientProvider(Private, Promise, es) {
     const searchStrategiesWithRequests = assignSearchRequestsToSearchStrategies(requestsToFetch);
 
     // resolved by respondToSearchRequests()
-    let searchRequestPromises = undefined;
-    let isRequestAborted = false;
+    const searchRequestPromises = [];
+    let areAllSearchRequestsAborted = false;
+
+    // When we traverse our search requests and send out searches, some of them may fail. We'll
+    // store those that don't fail here.
+    const activeSearchRequests = [];
 
     // for each respond with either the response or ABORTED
     const respondToSearchRequests = (responses = []) => {
@@ -62,15 +64,7 @@ export function CallClientProvider(Private, Promise, es) {
         return allSearchRequests.concat(searchRequests);
       }, []);
 
-      const activeSearchRequests = aggregatedSearchRequests.filter(request => {
-        // We'll use the index of the request to map it to its response. If a request has already
-        // failed then it won't generate a response. In this case we need to remove the request
-        // to maintain cardinality between the list of requests and the list of corresponding
-        // responses.
-        return request !== undefined;
-      });
-
-      return Promise.map(activeSearchRequests, function (searchRequest, searchRequestIndex) {
+      return Promise.map(aggregatedSearchRequests, function (searchRequest, searchRequestIndex) {
         if (searchRequest.aborted) {
           return ABORTED;
         }
@@ -85,14 +79,14 @@ export function CallClientProvider(Private, Promise, es) {
           return searchRequest._uniq.resp;
         }
 
-        const index = _.findIndex(activeSearchRequests, searchRequest);
+        const activeSearchRequestIndex = activeSearchRequests.indexOf(searchRequest);
+        const isFailedSearchRequest = activeSearchRequestIndex === -1;
 
-        if (index < 0) {
-          // This means the searchRequest failed.
+        if (isFailedSearchRequest) {
           return ABORTED;
         }
 
-        return responses[index];
+        return responses[activeSearchRequestIndex];
       })
         .then(
           (res) => defer.resolve(res),
@@ -114,11 +108,12 @@ export function CallClientProvider(Private, Promise, es) {
       }
 
       if (searchRequestPromises) {
-        searchRequestPromises.forEach(searchRequestPromise => searchRequestPromise.abort());
+        searchRequestPromises.forEach(searchRequestPromise => {
+          searchRequestPromise.abort();
+        });
       }
 
-      searchRequestPromises = undefined;
-      isRequestAborted = true;
+      areAllSearchRequestsAborted = true;
 
       return respondToSearchRequests();
     });
@@ -135,14 +130,28 @@ export function CallClientProvider(Private, Promise, es) {
     // asynchronously after we've returned a reference to defer.promise.
     Promise.resolve().then(async () => {
       // Execute each request using its search strategy.
-      searchRequestPromises = searchStrategiesWithRequests.map(searchStrategyWithSearchRequests => {
+      for (let i = 0; i < searchStrategiesWithRequests.length; i++) {
+        const searchStrategyWithSearchRequests = searchStrategiesWithRequests[i];
         const { searchStrategy, searchRequests } = searchStrategyWithSearchRequests;
-        return searchStrategy.search({ searchRequests, es, Promise, serializeFetchParams });
-      });
+        const {
+          searching,
+          failedSearchRequests,
+        } = await searchStrategy.search({ searchRequests, es, Promise, serializeFetchParams });
+
+        searchRequests.forEach(searchRequest => {
+          if (failedSearchRequests.includes(searchRequest)) {
+            return;
+          }
+
+          activeSearchRequests.push(searchRequest);
+        });
+
+        searchRequestPromises.push(searching);
+      }
 
       try {
         // The request was aborted while we were doing the above logic.
-        if (isRequestAborted) {
+        if (areAllSearchRequestsAborted) {
           return await respondToSearchRequests();
         }
 
