@@ -18,7 +18,7 @@
  */
 
 import { writeFile } from 'fs';
-
+import os from 'os';
 import Boom from 'boom';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import webpack from 'webpack';
@@ -237,10 +237,13 @@ export default class BaseOptimizer {
       ];
     };
 
+    console.log(os.cpus().length);
+
     const commonConfig = {
       mode: 'development',
       node: { fs: 'empty' },
       context: fromRoot('.'),
+      parallelism: os.cpus().length - 1,
       entry: this.uiBundles.toWebpackEntries(),
 
       devtool: this.sourceMaps,
