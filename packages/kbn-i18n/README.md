@@ -253,7 +253,7 @@ and added as a comment next to translation message at `defaultMessages.json`
 
 #### Attributes translation in React
 
-React wrapper provides an ability to inject the imperative formatting API into a React component via its props using `injectI18n` HOC. This should be used when your React component needs to format data to a string value where a React element is not suitable; e.g., a `title` or `aria` attribute. In order to use it you should wrap your component into `injectI18n` function. The formatting API will be provided to the wrapped component via `props.intl`.
+React wrapper provides an ability to inject the imperative formatting API into a React component via its props using `injectI18n` Higher-Order Component. This should be used when your React component needs to format data to a string value where a React element is not suitable; e.g., a `title` or `aria` attribute. In order to use it you should wrap your component with `injectI18n` Higher-Order Component. The formatting API will be provided to the wrapped component via `props.intl`.
 
 React component as a pure function:
 
