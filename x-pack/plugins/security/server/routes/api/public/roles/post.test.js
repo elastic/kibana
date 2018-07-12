@@ -154,9 +154,6 @@ describe('POST role', () => {
         metadata: {
           foo: 'test-metadata',
         },
-        transient_metadata: {
-          quz: true,
-        },
         elasticsearch: {
           cluster: ['test-cluster-privilege'],
           indices: [
@@ -223,7 +220,6 @@ describe('POST role', () => {
                 ],
                 metadata: { foo: 'test-metadata' },
                 run_as: ['test-run-as-1', 'test-run-as-2'],
-                transient_metadata: { quz: true },
               },
             },
           ],
@@ -238,9 +234,6 @@ describe('POST role', () => {
       payload: {
         metadata: {
           foo: 'test-metadata',
-        },
-        transient_metadata: {
-          quz: true,
         },
         elasticsearch: {
           cluster: ['test-cluster-privilege'],
@@ -274,7 +267,7 @@ describe('POST role', () => {
               bar: 'old-metadata',
             },
             transient_metadata: {
-              foo: 'old-metadata',
+              enabled: true,
             },
             cluster: ['old-cluster-privilege'],
             indices: [
@@ -340,7 +333,6 @@ describe('POST role', () => {
                 ],
                 metadata: { foo: 'test-metadata' },
                 run_as: ['test-run-as-1', 'test-run-as-2'],
-                transient_metadata: { quz: true },
               },
             },
           ],
@@ -357,9 +349,6 @@ describe('POST role', () => {
         payload: {
           metadata: {
             foo: 'test-metadata',
-          },
-          transient_metadata: {
-            quz: true,
           },
           elasticsearch: {
             cluster: ['test-cluster-privilege'],
@@ -394,7 +383,7 @@ describe('POST role', () => {
                 bar: 'old-metadata',
               },
               transient_metadata: {
-                foo: 'old-metadata',
+                enabled: true,
               },
               cluster: ['old-cluster-privilege'],
               indices: [
@@ -470,7 +459,6 @@ describe('POST role', () => {
                   ],
                   metadata: { foo: 'test-metadata' },
                   run_as: ['test-run-as-1', 'test-run-as-2'],
-                  transient_metadata: { quz: true },
                 },
               },
             ],

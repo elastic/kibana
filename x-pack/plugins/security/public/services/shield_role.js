@@ -17,7 +17,7 @@ module.service('ShieldRole', ($resource, chrome) => {
     save: {
       method: 'POST',
       transformRequest(data) {
-        return angular.toJson(omit(data, 'name', '_unrecognized_applications'));
+        return angular.toJson(omit(data, 'name', 'transient_metadata', '_unrecognized_applications'));
       }
     }
   });

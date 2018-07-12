@@ -11,7 +11,6 @@ import { wrapError } from '../../../../lib/errors';
 
 export const schema = Joi.object().keys({
   metadata: Joi.object().optional(),
-  transient_metadata: Joi.object(),
   elasticsearch: Joi.object().keys({
     cluster: Joi.array().items(Joi.string()),
     indices: Joi.array().items({
