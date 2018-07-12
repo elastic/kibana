@@ -36,9 +36,7 @@ export function statusMixin(kbnServer, server, config) {
     const metrics = new Metrics(config, server);
 
     evenBetter.monitor.on('ops', event => {
-      metrics.capture(event).then(data => {
-        kbnServer.metrics = data;
-      });
+      metrics.capture(event).then(data => { kbnServer.metrics = data; });
     });
   }
 

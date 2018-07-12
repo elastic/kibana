@@ -56,6 +56,7 @@ export class Metrics {
 
     const metrics = {
       last_updated: timestamp,
+      uptime_in_millis: event.process.uptime_ms, // TODO: deprecate this field, data should only have process.uptime_ms
       collection_interval_in_millis: this.config.get('ops.interval')
     };
 
