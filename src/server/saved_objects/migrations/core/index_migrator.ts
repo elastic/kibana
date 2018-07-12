@@ -87,6 +87,8 @@ export class IndexMigrator {
    * @returns {Promise<MigrationResult>}
    */
   public async migrate(): Promise<MigrationResult> {
+    this.log.info(`Checking ${this.sourceIndex} migration status`);
+
     if (await this.isMigrated()) {
       return this.patchSourceMappings();
     }
@@ -103,9 +105,7 @@ export class IndexMigrator {
   }
 
   private isMigrated() {
-    return this.sourceIndex.hasMigrations(
-      this.documentMigrator.migrationVersion
-    );
+    return this.sourceIndex.hasMigrations(this.documentMigrator.migrationVersion);
   }
 
   /**
@@ -248,8 +248,7 @@ export class IndexMigrator {
  * There are downsides to this, but it seemed like a simple enough approach.
  */
 function nextIndexName(rootName: string, indexName?: string) {
-  const indexNum =
-    parseInt(_.first((indexName || rootName).match(/[0-9]+$/) || []), 10) || 0;
+  const indexNum = parseInt(_.first((indexName || rootName).match(/[0-9]+$/) || []), 10) || 0;
 
   return `${rootName}_${indexNum + 1}`;
 }

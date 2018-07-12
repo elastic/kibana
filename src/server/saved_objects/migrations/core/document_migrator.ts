@@ -47,12 +47,7 @@
 
 import _ from 'lodash';
 import Semver from 'semver';
-import {
-  MigrationDefinition,
-  MigrationVersion,
-  SavedObjectDoc,
-  TransformFn,
-} from './types';
+import { MigrationDefinition, MigrationVersion, SavedObjectDoc, TransformFn } from './types';
 
 export interface IDocumentMigrator {
   migrationVersion: MigrationVersion;
@@ -114,9 +109,9 @@ export class DocumentMigrator implements IDocumentMigrator {
    * @returns {SavedObjectDoc}
    * @memberof DocumentMigrator
    */
-  public migrate(doc: SavedObjectDoc): SavedObjectDoc {
+  public migrate = (doc: SavedObjectDoc): SavedObjectDoc => {
     return this.transformDoc(doc);
-  }
+  };
 }
 
 /**
@@ -128,9 +123,7 @@ export class DocumentMigrator implements IDocumentMigrator {
  * @param {MigrationDefinition} migrations
  * @returns {SortedMigrations}
  */
-function buildActiveMigrations(
-  migrations: MigrationDefinition
-): ActiveMigrations {
+function buildActiveMigrations(migrations: MigrationDefinition): ActiveMigrations {
   return _.mapValues(migrations, (versions, prop) => {
     const transforms = Object.entries(versions)
       .map(([version, transform]) => ({
@@ -208,9 +201,7 @@ function assertCanTransform(doc: SavedObjectDoc, kibanaVersion: string) {
   const { migrationVersion } = doc;
   const invalidProp =
     migrationVersion &&
-    Object.keys(migrationVersion).find(prop =>
-      Semver.gt(migrationVersion[prop], kibanaVersion)
-    );
+    Object.keys(migrationVersion).find(prop => Semver.gt(migrationVersion[prop], kibanaVersion));
 
   if (invalidProp) {
     throw new Error(
@@ -237,9 +228,7 @@ function nextUnmigratedProp(doc: SavedObjectDoc, migrations: ActiveMigrations) {
     return !!latestVersion && latestVersion !== propVersion(doc, prop);
   };
 
-  return isOutdatedProp(doc.type)
-    ? doc.type
-    : Object.keys(doc).find(isOutdatedProp);
+  return isOutdatedProp(doc.type) ? doc.type : Object.keys(doc).find(isOutdatedProp);
 }
 
 function propVersion(doc: SavedObjectDoc, prop: string) {
