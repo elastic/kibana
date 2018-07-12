@@ -76,11 +76,9 @@ export const security = (kibana) => new kibana.Plugin({
     injectDefaultVars: function (server) {
       const config = server.config();
 
-      const { authorization } = server.plugins.security;
       return {
         secureCookies: config.get('xpack.security.secureCookies'),
         sessionTimeout: config.get('xpack.security.sessionTimeout'),
-        rbacApplication: authorization.application,
       };
     }
   },
