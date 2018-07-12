@@ -18,7 +18,8 @@ const getClusterUuid = async callCluster => {
 const getUsage = async (callCluster, server) => {
   const { collectorSet } = server.usage;
   const usage = await collectorSet.bulkFetchUsage(callCluster);
-  return collectorSet.summarizeStats(usage);
+  const usageObject = collectorSet.toObject(usage);
+  return collectorSet.toApiFieldNames(usageObject);
 };
 
 export function xpackUsageRoute(server) {
