@@ -18,17 +18,16 @@
  */
 
 import { Context } from '../types/context';
-import { Client } from './saved_objects_client';
+import { BaseClient } from './base_client';
 
 export class ScopedClient {
   constructor(
-    private readonly client: Client,
+    private readonly client: BaseClient,
     private readonly context: Context
   ) {}
 
   /**
-   * Forward calls to the internal saved objects client
-   * which is bound to the admin cluster of the elasticsearch API.
+   * Forward calls to the internal base client.
    *
    * @param action     CRUD action of the saved objects client
    */

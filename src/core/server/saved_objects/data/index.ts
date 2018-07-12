@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export { BaseClient } from './base_client';
-export { ScopedClient } from './scoped_client';
+export { AccessFacade } from './access_facade';

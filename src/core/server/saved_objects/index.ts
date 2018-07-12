@@ -22,22 +22,20 @@ import { Env } from '../config';
 import { HttpService } from '../http';
 import { LoggerFactory } from '../logging';
 
-import { SavedObjectsConfig } from './saved_objects_config';
 import { SavedObjectsService } from './saved_objects_service';
 
-export { SavedObjectsConfig, SavedObjectsService };
+export { SavedObjectsService };
 
 export class SavedObjectsModule {
   public readonly service: SavedObjectsService;
 
   constructor(
-    readonly config$: Observable<SavedObjectsConfig>,
     readonly http: HttpService,
     // elasticsearch service here too?
     logger: LoggerFactory,
     env: Env
   ) {
     // pass in elasticsearch service here too?
-    this.service = new SavedObjectsService(this.config$, http, logger, env);
+    this.service = new SavedObjectsService(http, logger, env);
   }
 }

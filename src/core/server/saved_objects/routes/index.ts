@@ -19,7 +19,7 @@
 
 import { Router } from '../../http';
 
-export function createSavedObjectRoutes() {
+export function createRoutes() {
   const router = new Router('api/saved_objects');
 
   router.routes.push(createBulkGetRoute(prereqs));

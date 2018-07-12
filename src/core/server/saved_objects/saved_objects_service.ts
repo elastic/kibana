@@ -22,19 +22,17 @@ import { first, k$, map, toPromise } from '../../lib/kbn_observable';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { CoreService } from '../../types/core_service';
 import { Env } from '../config';
-// import { HttpService, Router } from '../http';
-// import { Logger, LoggerFactory } from '../logging';
+import { HttpService, Router } from '../http';
+import { Logger, LoggerFactory } from '../logging';
 // do we need elasticsearch service here?
 // import { ElasticsearchService } from '../elasticsearch';
-import { Client, ScopedClient } from './client';
+import { BaseClient, ScopedClient } from './client';
 import { Context } from './types/context';
 
 export class SavedObjectsService implements CoreService {
-  private client$: BehaviorSubject<Client>;
+  private client$: BehaviorSubject<BaseClient>;
 
-  // TODO: unused values
-  // private readonly log: Logger;
-  // private readonly http: HttpService;
+  private readonly log: Logger;
 
   private clientFactorySubscription?: Subscription;
   private clientSubscription?: Subscription;
@@ -50,21 +48,20 @@ export class SavedObjectsService implements CoreService {
   };
 
   constructor(
-    httpService: HttpService,
+    private readonly http: HttpService,
     // receive elasticsearch service here too?
-    logger: LoggerFactory,
-    env: Env,
-    clientFactory?: () => Promise<ScopedClient>
+    private readonly logger: LoggerFactory,
+    private readonly env: Env,
+    private clientFactory?: () => Promise<ScopedClient>
   ) {
     this.log = logger.get('savedObjects');
-    this.http = httpService;
 
-    // internal client is always the raw Client
+    // internal client is always the BaseClient
     // this is only an observable to keep track of the sole client
     // that should exist. currently nothing updates this, but we
     // could design it so that it recreates with some config
     // on SIGHUPs
-    this.client$ = new BehaviorSubject(new Client(this.options));
+    this.client$ = new BehaviorSubject(new BaseClient(this.options));
 
     // the current value of the client factory
     // we want this to be Observable because it can be updated by plugins

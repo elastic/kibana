@@ -18,19 +18,21 @@
  */
 
 import uuid from 'uuid';
-import Boom from 'boom';
 
-import { getRootType } from '../../mappings';
+import { getRootType } from '../../../mappings';
+import { getSearchDsl } from './search_dsl';
+import { trimIdPrefix } from './trim_id_prefix';
+import { includedFields } from './included_fields';
+import { decorateEsError } from './decorate_es_error';
+import * as errors from './errors';
 
-import {
-  getSearchDsl,
-  trimIdPrefix,
-  includedFields,
-  decorateEsError,
-  errors,
-} from './lib';
+export class AccessFacade {
+  private readonly index: string;
+  private readonly mappings: { [key: string]: any };
+  private readonly type: string;
+  private readonly onBeforeWrite: () => {};
+  nonsense;
 
-export class Client {
   constructor(options) {
     const { index, mappings, callCluster, onBeforeWrite = () => {} } = options;
 
@@ -42,66 +44,7 @@ export class Client {
   }
 
   /**
-   * ## SavedObjectsClient errors
-   *
-   * Since the SavedObjectsClient has its hands in everything we
-   * are a little paranoid about the way we present errors back to
-   * to application code. Ideally, all errors will be either:
-   *
-   *   1. Caused by bad implementation (ie. undefined is not a function) and
-   *      as such unpredictable
-   *   2. An error that has been classified and decorated appropriately
-   *      by the decorators in `./lib/errors`
-   *
-   * Type 1 errors are inevitable, but since all expected/handle-able errors
-   * should be Type 2 the `isXYZError()` helpers exposed at
-   * `savedObjectsClient.errors` should be used to understand and manage error
-   * responses from the `SavedObjectsClient`.
-   *
-   * Type 2 errors are decorated versions of the source error, so if
-   * the elasticsearch client threw an error it will be decorated based
-   * on its type. That means that rather than looking for `error.body.error.type` or
-   * doing substring checks on `error.body.error.reason`, just use the helpers to
-   * understand the meaning of the error:
-   *
-   *   ```js
-   *   if (savedObjectsClient.errors.isNotFoundError(error)) {
-   *      // handle 404
-   *   }
-   *
-   *   if (savedObjectsClient.errors.isNotAuthorizedError(error)) {
-   *      // 401 handling should be automatic, but in case you wanted to know
-   *   }
-   *
-   *   // always rethrow the error unless you handle it
-   *   throw error;
-   *   ```
-   *
-   * ### 404s from missing index
-   *
-   * From the perspective of application code and APIs the SavedObjectsClient is
-   * a black box that persists objects. One of the internal details that users have
-   * no control over is that we use an elasticsearch index for persistance and that
-   * index might be missing.
-   *
-   * At the time of writing we are in the process of transitioning away from the
-   * operating assumption that the SavedObjects index is always available. Part of
-   * this transition is handling errors resulting from an index missing. These used
-   * to trigger a 500 error in most cases, and in others cause 404s with different
-   * error messages.
-   *
-   * From my (Spencer) perspective, a 404 from the SavedObjectsApi is a 404; The
-   * object the request/call was targetting could not be found. This is why #14141
-   * takes special care to ensure that 404 errors are generic and don't distinguish
-   * between index missing or document missing.
-   *
-   * @type {ErrorHelpers} see ./lib/errors
-   */
-  static errors = errors;
-  errors = errors;
-
-  /**
-   * Persists an object
+   * Persist an object
    *
    * @param {string} type
    * @param {object} attributes
@@ -110,7 +53,9 @@ export class Client {
    * @property {boolean} [options.overwrite=false]
    * @returns {promise} - { id, type, version, attributes }
    */
-  async create(type, attributes = {}, options = {}) {
+  async create(type: string, attributes = {}, options = {}) {
+    // TODO: check for empty type?
+
     const { id, overwrite = false } = options;
 
     const method = id && !overwrite ? 'create' : 'index';
@@ -137,12 +82,9 @@ export class Client {
         attributes,
       };
     } catch (error) {
-      // if we get a 404 because the index is missing we should respond
-      // with a 503 instead, 404 on saved object create doesn't really
-      // make sense when we are trying not to leak the implementation
-      // details of the SavedObjects index
       if (errors.isNotFoundError(error)) {
-        throw errors.decorateEsUnavailableError(Boom.serverUnavailable());
+        // See "503s from missing index" above
+        throw errors.createEsAutoCreateIndexError();
       }
 
       throw error;
@@ -240,7 +182,7 @@ export class Client {
       response.error && response.error.type === 'index_not_found_exception';
     if (docNotFound || indexNotFound) {
       // see "404s from missing index" above
-      throw errors.createGenericNotFoundError();
+      throw errors.createGenericNotFoundError(type, id);
     }
 
     throw new Error(
@@ -254,7 +196,7 @@ export class Client {
 
   /**
    * @param {object} [options={}]
-   * @property {string} [options.type]
+   * @property {(string|Array<string>)} [options.type]
    * @property {string} [options.search]
    * @property {Array<string>} [options.searchFields] - see Elasticsearch Simple Query String
    *                                        Query field argument for more information
@@ -403,7 +345,7 @@ export class Client {
     const indexNotFound = response.status === 404;
     if (docNotFound || indexNotFound) {
       // see "404s from missing index" above
-      throw errors.createGenericNotFoundError();
+      throw errors.createGenericNotFoundError(type, id);
     }
 
     const { updated_at: updatedAt } = response._source;
@@ -418,7 +360,7 @@ export class Client {
   }
 
   /**
-   * Updates an object
+   * Update an object
    *
    * @param {string} type
    * @param {string} id
@@ -445,7 +387,7 @@ export class Client {
 
     if (response.status === 404) {
       // see "404s from missing index" above
-      throw errors.createGenericNotFoundError();
+      throw errors.createGenericNotFoundError(type, id);
     }
 
     return {
