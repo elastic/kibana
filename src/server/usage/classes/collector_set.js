@@ -96,24 +96,23 @@ export class CollectorSet {
     return this.bulkFetch(callCluster, usageCollectors);
   }
 
-  // convert the array of stats into key/object
-  static toApiStats(statsData) {
-    const summary = statsData.reduce((accumulatedStats, { type, result }) => {
+  // convert an array of fetched stats results into key/object
+  toObject(statsData) {
+    return statsData.reduce((accumulatedStats, { type, result }) => {
       return {
         ...accumulatedStats,
         [type]: result,
       };
     }, {});
-    return CollectorSet.setApiFieldNames(summary);
   }
 
   // rename fields to use api conventions
-  static setApiFieldNames(apiData) {
+  toApiFieldNames(apiData) {
     const getValueOrRecurse = value => {
       if (value == null || typeof value !== 'object') {
         return value;
       } else {
-        return CollectorSet.setApiFieldNames(value); // recurse
+        return this.toApiFieldNames(value); // recurse
       }
     };
 

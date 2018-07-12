@@ -20,7 +20,6 @@
 import Joi from 'joi';
 import { wrapAuthConfig } from '../../wrap_auth_config';
 import { KIBANA_STATS_TYPE } from '../../constants';
-import { CollectorSet } from '../../../usage/classes';
 
 /*
  * API for Kibana meta info and accumulated operations stats
@@ -42,7 +41,8 @@ export function registerStatsApi(kbnServer, server, config) {
 
   const getUsage = async callCluster => {
     const usage = await collectorSet.bulkFetchUsage(callCluster);
-    return CollectorSet.toApiStats(usage);
+    const usageObject = collectorSet.toObject(usage);
+    return collectorSet.toApiFieldNames(usageObject);
   };
 
   server.route(
@@ -71,9 +71,13 @@ export function registerStatsApi(kbnServer, server, config) {
           extended = { usage, clusterUuid };
         }
 
-        const kibanaStatsCollector = collectorSet.getCollectorByType(KIBANA_STATS_TYPE); // kibana stats get singled out
+        /* kibana_stats gets singled out from the collector set as it is used
+         * for health-checking Kibana and fetch does not rely on fetching data
+         * from ES
+         */
+        const kibanaStatsCollector = collectorSet.getCollectorByType(KIBANA_STATS_TYPE);
         let kibanaStats = await kibanaStatsCollector.fetch();
-        kibanaStats = CollectorSet.setApiFieldNames(kibanaStats);
+        kibanaStats = collectorSet.toApiFieldNames(kibanaStats);
 
         reply({
           ...kibanaStats,
