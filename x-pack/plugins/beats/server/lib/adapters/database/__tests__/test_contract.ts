@@ -30,7 +30,7 @@ export const contractTests = (testName: string, config: ContractConfig) => {
     it('Should inject template into ES', async () => {
       try {
         await database.putTemplate(
-          { kind: 'unauthenticated' },
+          { kind: 'internal' },
           {
             name: 'beats-template',
             body: beatsIndexTemplate,
@@ -41,6 +41,23 @@ export const contractTests = (testName: string, config: ContractConfig) => {
       }
     });
 
+    it('Unauthorized users cant query', async () => {
+      const params = {
+        id: `beat:foo`,
+        ignore: [404],
+        index: '.management-beats',
+        type: '_doc',
+      };
+      let ranWithoutError = false;
+      try {
+        await database.get({ kind: 'unauthenticated' }, params);
+        ranWithoutError = true;
+      } catch (e) {
+        expect(e).not.toEqual(null);
+      }
+      expect(ranWithoutError).toEqual(false);
+    });
+
     it('Should query ES', async () => {
       const params = {
         id: `beat:foo`,
@@ -48,7 +65,7 @@ export const contractTests = (testName: string, config: ContractConfig) => {
         index: '.management-beats',
         type: '_doc',
       };
-      const response = await database.get({ kind: 'unauthenticated' }, params);
+      const response = await database.get({ kind: 'internal' }, params);
 
       expect(response).not.toEqual(undefined);
       // @ts-ignore
