@@ -59,7 +59,7 @@ export default function ({ getService }) {
 
   describe('kibana stats api', () => {
     describe('basic', () => {
-      it('should return the stats and metric fields without cluster_uuid when extended param is not present', () => {
+      it('should return the stats without cluster_uuid with no query string params', () => {
         return supertest
           .get('/api/stats')
           .expect('Content-Type', /json/)
@@ -69,7 +69,7 @@ export default function ({ getService }) {
             assertStatsAndMetrics(body);
           });
       });
-      it('should return the stats and metric fields without cluster_uuid when extended param is given as false', () => {
+      it(`should return the stats without cluster_uuid with 'extended' query string param = false`, () => {
         return supertest
           .get('/api/stats?extended=false')
           .expect('Content-Type', /json/)
@@ -81,8 +81,9 @@ export default function ({ getService }) {
       });
     });
 
+    // TODO load an es archive and verify the counts in saved object usage info
     describe('extended', () => {
-      it('should return the stats and metric fields with cluster_uuid when extended param is present', () => {
+      it(`should return the stats, cluster_uuid, and usage with 'extended' query string param present`, () => {
         return supertest
           .get('/api/stats?extended')
           .expect('Content-Type', /json/)
@@ -94,7 +95,7 @@ export default function ({ getService }) {
           });
       });
 
-      it('should return the stats and metric fields with cluster_uuid when extended param is given as true', () => {
+      it(`should return the stats, cluster_uuid, and usage with 'extended' query string param = true`, () => {
         return supertest
           .get('/api/stats?extended=true')
           .expect('Content-Type', /json/)
