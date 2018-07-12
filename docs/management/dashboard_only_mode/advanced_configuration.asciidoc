@@ -2,8 +2,8 @@
 [[advanced-dashboard-mode-configuration]]
 === Advanced Configuration for Dashboard Only Mode
 
-Kibana comes preconfigured with a reserved role called `kibana_dashboard_only_user` 
-that grants read only access to the `.kibana` index. This role is sufficient
+If {security} is enabled, Kibana has a built-in `kibana_dashboard_only_user` 
+role that grants read only access to the `.kibana` index. This role is sufficient
 for most use cases.  However, if your setup requires a custom {kib} index, you can create
 your own roles and tag them as *Dashboard only mode*.
 
@@ -14,11 +14,12 @@ Here you can add as many roles as you like.
 [role="screenshot"]
 image:management/dashboard_only_mode/images/advanced_dashboard_mode_role_setup.png["Advanced dashboard mode role setup"]
 
-It's not necessary for *Dashboard only mode* to have additional privileges, 
-but it's a convenient place to add access rules to a custom {kib} index.
+By default, a *dashboard only mode* user doesn't have access to any data indices.
 To grant read only access to your custom {kib}
 index, you must assign `view_index_metadata` and `read` privileges.
 These privileges are available under *Management > Security > Roles*.
+
+For more information on roles and privileges, see {xpack-ref}/authorization.html[User Authorization].
 
 [role="screenshot"]
 image:management/dashboard_only_mode/images/custom_dashboard_mode_role.png["Custom dashboard mode role with read permissions on a custom kibana index"]
