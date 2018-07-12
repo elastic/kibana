@@ -210,9 +210,14 @@ export default class BaseOptimizer {
   }
 
   getConfig() {
+    function getStyleLoaderExtractor() {
+      return [
+        MiniCssExtractPlugin.loader
+      ];
+    }
+
     function getStyleLoaders(preProcessors = [], postProcessors = []) {
       return [
-        MiniCssExtractPlugin.loader,
         ...postProcessors,
         {
           loader: 'css-loader',
@@ -359,14 +364,17 @@ export default class BaseOptimizer {
         rules: [
           {
             test: /\.less$/,
-            use: getStyleLoaders(
-              ['less-loader'],
-              maybeAddCacheLoader('less', [])
-            ),
+            use: [
+              ...getStyleLoaderExtractor(),
+              ...getStyleLoaders(['less-loader'], maybeAddCacheLoader('less', []))
+            ],
           },
           {
             test: /\.css$/,
-            use: getStyleLoaders(),
+            use: [
+              ...getStyleLoaderExtractor(),
+              ...getStyleLoaders([], maybeAddCacheLoader('css', []))
+            ],
           },
           {
             // TODO: this doesn't seem to be used, remove?
