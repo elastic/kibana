@@ -39,6 +39,8 @@ import {
   toastNotifications
 } from 'ui/notify';
 
+import { ScriptEditor } from './script_editor';
+
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -56,7 +58,6 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiText,
-  EuiTextArea,
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
@@ -341,22 +342,16 @@ export class FieldEditor extends PureComponent {
 
   renderScript() {
     const { field } = this.state;
-    const isInvalid = !field.script || !field.script.trim();
 
     return field.scripted ? (
-      <EuiFormRow
-        label="Script"
-        helpText={(<EuiLink onClick={this.showScriptingHelp}>Scripting help</EuiLink>)}
-        isInvalid={isInvalid}
-        error={isInvalid ? 'Script is required' : null}
-      >
-        <EuiTextArea
-          value={field.script}
-          data-test-subj="editorFieldScript"
-          onChange={(e) => { this.onFieldChange('script', e.target.value); }}
-          isInvalid={isInvalid}
-        />
-      </EuiFormRow>
+      <ScriptEditor
+        indexPattern={this.props.indexPattern}
+        lang={field.lang}
+        name={field.name}
+        script={field.script}
+        onScriptChange={(e) => { this.onFieldChange('script', e.target.value); }}
+        showScriptingHelp={this.showScriptingHelp}
+      />
     ) : null;
   }
 
