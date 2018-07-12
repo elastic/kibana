@@ -75,7 +75,6 @@ export class Metrics {
           heap_max_in_bytes: get(hapiEvent, 'psmem.heapTotal'),
           heap_used_in_bytes: get(hapiEvent, 'psmem.heapUsed'),
           resident_set_size_in_bytes: get(hapiEvent, 'psmem.rss'),
-          external_in_bytes: get(hapiEvent, 'psmem.external')
         },
         pid: process.pid,
         uptime_ms: process.uptime() * 1000
