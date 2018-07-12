@@ -16,15 +16,10 @@ import { createQuery } from '../../adapters/nodes/lib/create_query';
 
 import { cloneDeep, set } from 'lodash';
 
-export const queryProcessor: InfraProcessor<
-  InfraProcesorRequestOptions,
-  InfraESSearchBody
-> = (
+export const queryProcessor: InfraProcessor<InfraProcesorRequestOptions, InfraESSearchBody> = (
   options: InfraProcesorRequestOptions
 ): InfraProcessorChainFn<InfraESSearchBody> => {
-  return (next: InfraProcessorTransformer<InfraESSearchBody>) => (
-    doc: InfraESSearchBody
-  ) => {
+  return (next: InfraProcessorTransformer<InfraESSearchBody>) => (doc: InfraESSearchBody) => {
     const result = cloneDeep(doc);
     set(result, 'size', 0);
     set(result, 'query', createQuery(options.nodeOptions));

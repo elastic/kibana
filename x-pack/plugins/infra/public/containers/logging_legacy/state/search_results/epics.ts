@@ -48,8 +48,7 @@ export const createSearchResultsEpic = <State>(): Epic<
   const newQuery$ = action$.pipe(
     filter(
       action =>
-        searchActions.search.match(action) ||
-        entriesActions.replaceEntries.done.match(action)
+        searchActions.search.match(action) || entriesActions.replaceEntries.done.match(action)
     ),
     concatMap(() => {
       const state = state$.value;
@@ -109,10 +108,7 @@ export const createSearchResultsEpic = <State>(): Epic<
     })
   );
 
-  const cancelSearch$ = merge(
-    action$.pipe(filter(searchActions.clearSearch.match)),
-    newQuery$
-  );
+  const cancelSearch$ = merge(action$.pipe(filter(searchActions.clearSearch.match)), newQuery$);
 
   return merge(
     newQuery$.pipe(
@@ -123,31 +119,10 @@ export const createSearchResultsEpic = <State>(): Epic<
         const fields = selectSourceCoreFields(state);
 
         return concat(
-          replaceWithContainedSearchResults$(
-            postToApi,
-            indices,
-            fields,
-            start,
-            end,
-            query
-          ),
+          replaceWithContainedSearchResults$(postToApi, indices, fields, start, end, query),
           merge(
-            replaceWithOlderSearchResultsBefore$(
-              postToApi,
-              indices,
-              fields,
-              start,
-              1,
-              query
-            ),
-            replaceWithNewerSearchResultsAfter$(
-              postToApi,
-              indices,
-              fields,
-              end,
-              1,
-              query
-            )
+            replaceWithOlderSearchResultsBefore$(postToApi, indices, fields, start, 1, query),
+            replaceWithNewerSearchResultsAfter$(postToApi, indices, fields, end, 1, query)
           )
         ).pipe(takeUntil(cancelSearch$));
       })
@@ -160,22 +135,8 @@ export const createSearchResultsEpic = <State>(): Epic<
         const fields = selectSourceCoreFields(state);
 
         return concat(
-          replaceWithContainedSearchResultsBefore$(
-            postToApi,
-            indices,
-            fields,
-            start,
-            end,
-            query
-          ),
-          replaceWithOlderSearchResultsBefore$(
-            postToApi,
-            indices,
-            fields,
-            start,
-            1,
-            query
-          )
+          replaceWithContainedSearchResultsBefore$(postToApi, indices, fields, start, end, query),
+          replaceWithOlderSearchResultsBefore$(postToApi, indices, fields, start, 1, query)
         ).pipe(takeUntil(cancelSearch$));
       })
     ),
@@ -187,22 +148,8 @@ export const createSearchResultsEpic = <State>(): Epic<
         const fields = selectSourceCoreFields(state);
 
         return concat(
-          replaceWithContainedSearchResultsAfter$(
-            postToApi,
-            indices,
-            fields,
-            start,
-            end,
-            query
-          ),
-          replaceWithNewerSearchResultsAfter$(
-            postToApi,
-            indices,
-            fields,
-            end,
-            1,
-            query
-          )
+          replaceWithContainedSearchResultsAfter$(postToApi, indices, fields, start, end, query),
+          replaceWithNewerSearchResultsAfter$(postToApi, indices, fields, end, 1, query)
         ).pipe(takeUntil(cancelSearch$));
       })
     )

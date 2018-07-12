@@ -23,10 +23,7 @@ export class InfraFieldsDomain {
       timeFieldName: '@timestamp',
     }
   ): Promise<InfraField[]> {
-    const fieldCaps: any = await this.adapter.getFieldCaps(
-      req,
-      indexPattern.pattern
-    );
+    const fieldCaps: any = await this.adapter.getFieldCaps(req, indexPattern.pattern);
 
     const fields: any = get(fieldCaps, 'fields');
     const results: any = fields

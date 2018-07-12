@@ -19,13 +19,7 @@ export class InfraKibanaObservableApiAdapter implements InfraObservableApi {
     [headerName: string]: string;
   };
 
-  constructor({
-    basePath,
-    xsrfToken,
-  }: {
-    basePath: string;
-    xsrfToken: string;
-  }) {
+  constructor({ basePath, xsrfToken }: { basePath: string; xsrfToken: string }) {
     this.basePath = basePath;
     this.defaultHeaders = {
       'kbn-version': xsrfToken,
@@ -35,9 +29,7 @@ export class InfraKibanaObservableApiAdapter implements InfraObservableApi {
   public post = <RequestBody extends {} = {}, ResponseBody extends {} = {}>({
     url,
     body,
-  }: InfraObservableApiPostParams<RequestBody>): InfraObservableApiResponse<
-    ResponseBody
-  > =>
+  }: InfraObservableApiPostParams<RequestBody>): InfraObservableApiResponse<ResponseBody> =>
     ajax({
       body: body ? JSON.stringify(body) : undefined,
       headers: {

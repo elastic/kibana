@@ -50,9 +50,7 @@ export class InfraKibanaFrameworkAdapter implements InfraFrameworkAdapter {
   };
 
   public renderBreadcrumbs = (component: React.ReactElement<any>) => {
-    this.adapterService.callOrBuffer(
-      () => (this.breadcrumbsComponent = component)
-    );
+    this.adapterService.callOrBuffer(() => (this.breadcrumbsComponent = component));
   };
 
   private register = (adapterModule: IModule) => {
@@ -61,12 +59,8 @@ export class InfraKibanaFrameworkAdapter implements InfraFrameworkAdapter {
     adapterModule.directive('infraUiKibanaAdapter', () => ({
       controller: ($scope: InfraUiKibanaAdapterScope, $element: JQLite) => ({
         $onDestroy: () => {
-          const targetRootElement = $element[0].querySelector(
-            `#${ROOT_ELEMENT_ID}`
-          );
-          const targetBreadcrumbsElement = $element[0].querySelector(
-            `#${ROOT_ELEMENT_ID}`
-          );
+          const targetRootElement = $element[0].querySelector(`#${ROOT_ELEMENT_ID}`);
+          const targetBreadcrumbsElement = $element[0].querySelector(`#${ROOT_ELEMENT_ID}`);
 
           if (targetRootElement) {
             ReactDOM.unmountComponentAtNode(targetRootElement);
@@ -98,10 +92,7 @@ export class InfraKibanaFrameworkAdapter implements InfraFrameworkAdapter {
             }
           );
           $scope.$watchGroup(
-            [
-              () => this.rootComponent,
-              () => $element[0].querySelector(`#${ROOT_ELEMENT_ID}`),
-            ],
+            [() => this.rootComponent, () => $element[0].querySelector(`#${ROOT_ELEMENT_ID}`)],
             ([rootComponent, targetElement]) => {
               if (!targetElement) {
                 return;
@@ -148,9 +139,7 @@ export class InfraKibanaFrameworkAdapter implements InfraFrameworkAdapter {
 // tslint:disable-next-line: max-classes-per-file
 class KibanaAdapterServiceProvider {
   public serviceRefs: InfraKibanaAdapterServiceRefs | null = null;
-  public bufferedCalls: Array<
-    InfraBufferedKibanaServiceCall<InfraKibanaAdapterServiceRefs>
-  > = [];
+  public bufferedCalls: Array<InfraBufferedKibanaServiceCall<InfraKibanaAdapterServiceRefs>> = [];
 
   public $get($rootScope: IScope, config: InfraKibanaUIConfig) {
     this.serviceRefs = {
@@ -163,9 +152,7 @@ class KibanaAdapterServiceProvider {
     return this;
   }
 
-  public callOrBuffer(
-    serviceCall: (serviceRefs: InfraKibanaAdapterServiceRefs) => void
-  ) {
+  public callOrBuffer(serviceCall: (serviceRefs: InfraKibanaAdapterServiceRefs) => void) {
     if (this.serviceRefs !== null) {
       this.applyBufferedCalls([serviceCall]);
     } else {
@@ -174,9 +161,7 @@ class KibanaAdapterServiceProvider {
   }
 
   public applyBufferedCalls(
-    bufferedCalls: Array<
-      InfraBufferedKibanaServiceCall<InfraKibanaAdapterServiceRefs>
-    >
+    bufferedCalls: Array<InfraBufferedKibanaServiceCall<InfraKibanaAdapterServiceRefs>>
   ) {
     if (!this.serviceRefs) {
       return;

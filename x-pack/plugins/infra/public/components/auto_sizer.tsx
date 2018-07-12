@@ -32,10 +32,7 @@ interface AutoSizerState {
   contentMeasurement: Measurement;
 }
 
-export class AutoSizer extends React.PureComponent<
-  AutoSizerProps,
-  AutoSizerState
-> {
+export class AutoSizer extends React.PureComponent<AutoSizerProps, AutoSizerState> {
   public element: HTMLElement | null = null;
   public resizeObserver: ResizeObserver | null = null;
 

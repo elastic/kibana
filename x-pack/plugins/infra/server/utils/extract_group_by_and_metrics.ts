@@ -51,9 +51,7 @@ interface InfraGroupByAndMetricOptions {
   nodesKey: InfraNodesKey;
 }
 
-export function extractGroupByAndMetrics(
-  info: GraphQLResolveInfo
-): InfraGroupByAndMetricOptions {
+export function extractGroupByAndMetrics(info: GraphQLResolveInfo): InfraGroupByAndMetricOptions {
   const {
     groupBy,
     metrics,
@@ -73,19 +71,11 @@ function isFieldNode(subject: any): subject is FieldNode {
 }
 
 function isGroupsSelection(subject: SelectionNode): subject is FieldNode {
-  return (
-    isFieldNode(subject) &&
-    subject.name.value === 'groups' &&
-    subject.arguments != null
-  );
+  return isFieldNode(subject) && subject.name.value === 'groups' && subject.arguments != null;
 }
 
 function isMetricSelection(subject: SelectionNode): subject is FieldNode {
-  return (
-    isFieldNode(subject) &&
-    subject.name.value === 'metrics' &&
-    subject.selectionSet != null
-  );
+  return isFieldNode(subject) && subject.name.value === 'metrics' && subject.selectionSet != null;
 }
 
 function isNodeSelection(subject: any): subject is FieldNode {

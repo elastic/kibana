@@ -16,9 +16,12 @@ import { groupByProcessor } from '../common/group_by_processor';
 import { nodesProcessor } from '../common/nodes_processor';
 import { queryProcessor } from '../common/query_procssor';
 
-const chain: Array<
-  InfraProcessor<InfraProcesorRequestOptions, InfraESSearchBody>
-> = [fieldsFilterProcessor, nodesProcessor, queryProcessor, groupByProcessor];
+const chain: Array<InfraProcessor<InfraProcesorRequestOptions, InfraESSearchBody>> = [
+  fieldsFilterProcessor,
+  nodesProcessor,
+  queryProcessor,
+  groupByProcessor,
+];
 
 export const createLastNProcessor = (
   options: InfraProcesorRequestOptions

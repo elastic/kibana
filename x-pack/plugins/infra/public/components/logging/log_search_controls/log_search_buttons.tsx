@@ -17,13 +17,8 @@ interface LogSearchButtonsProps {
   nextSearchResult: LogEntryTime | null;
 }
 
-export class LogSearchButtons extends React.PureComponent<
-  LogSearchButtonsProps,
-  {}
-> {
-  public handleJumpToPreviousSearchResult: React.MouseEventHandler<
-    HTMLButtonElement
-  > = () => {
+export class LogSearchButtons extends React.PureComponent<LogSearchButtonsProps, {}> {
+  public handleJumpToPreviousSearchResult: React.MouseEventHandler<HTMLButtonElement> = () => {
     const { jumpToTarget, previousSearchResult } = this.props;
 
     if (previousSearchResult) {
@@ -31,9 +26,7 @@ export class LogSearchButtons extends React.PureComponent<
     }
   };
 
-  public handleJumpToNextSearchResult: React.MouseEventHandler<
-    HTMLButtonElement
-  > = () => {
+  public handleJumpToNextSearchResult: React.MouseEventHandler<HTMLButtonElement> = () => {
     const { jumpToTarget, nextSearchResult } = this.props;
 
     if (nextSearchResult) {

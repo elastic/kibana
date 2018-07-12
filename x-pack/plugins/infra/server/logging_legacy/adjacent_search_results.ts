@@ -22,18 +22,12 @@ import {
 import { convertHitToSearchResult } from './converters';
 import { isHighlightedHit, SortedHit } from './elasticsearch';
 import { fetchLatestTime } from './latest_log_entries';
-import {
-  indicesSchema,
-  logEntryFieldsMappingSchema,
-  logEntryTimeSchema,
-} from './schemas';
+import { indicesSchema, logEntryFieldsMappingSchema, logEntryTimeSchema } from './schemas';
 
 const INITIAL_HORIZON_OFFSET = 1000 * 60 * 60 * 24;
 const MAX_HORIZON = 9999999999999;
 
-export const initAdjacentSearchResultsRoutes = (
-  framework: InfraBackendFrameworkAdapter
-) => {
+export const initAdjacentSearchResultsRoutes = (framework: InfraBackendFrameworkAdapter) => {
   const callWithRequest = framework.callWithRequest;
 
   framework.registerRoute<
@@ -115,9 +109,7 @@ export const initAdjacentSearchResultsRoutes = (
 };
 
 export async function fetchSearchResults(
-  search: <Hit>(
-    params: SearchParams
-  ) => Promise<InfraDatabaseSearchResponse<Hit>>,
+  search: <Hit>(params: SearchParams) => Promise<InfraDatabaseSearchResponse<Hit>>,
   indices: string[],
   fields: LogEntryFieldsMapping,
   target: LogEntryTime,

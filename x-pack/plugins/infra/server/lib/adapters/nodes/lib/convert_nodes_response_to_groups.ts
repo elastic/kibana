@@ -6,10 +6,7 @@
 
 import { extractGroupPaths, InfraPathItem } from './extract_group_paths';
 
-import {
-  findOrCreateGroupWithNodes,
-  findOrCreateGroupWithSubGroups,
-} from './find_or_create_group';
+import { findOrCreateGroupWithNodes, findOrCreateGroupWithSubGroups } from './find_or_create_group';
 
 import { InfraBucket, InfraNodeRequestOptions } from '../../../infra_types';
 
@@ -39,11 +36,7 @@ export function convertNodesResponseToGroups(
         const { path, nodeItem } = pathItem;
         const [firstPart] = path;
 
-        const group: InfraGroup = findOrCreateGroupWithNodes(
-          groups,
-          firstPart,
-          firstGroupDef
-        );
+        const group: InfraGroup = findOrCreateGroupWithNodes(groups, firstPart, firstGroupDef);
         const newNodes = (group[options.nodesKey] || []).concat([nodeItem]);
         if (!groups.includes(group)) {
           groups.push(group);
@@ -62,11 +55,7 @@ export function convertNodesResponseToGroups(
         const { path, nodeItem } = pathItem;
         const [firstPart, secondPart] = path;
 
-        const group: InfraGroup = findOrCreateGroupWithSubGroups(
-          groups,
-          firstPart,
-          firstGroupDef
-        );
+        const group: InfraGroup = findOrCreateGroupWithSubGroups(groups, firstPart, firstGroupDef);
         if (!groups.includes(group)) {
           groups.push(group);
         }
@@ -76,9 +65,7 @@ export function convertNodesResponseToGroups(
             secondPart,
             secondGroupDef
           );
-          const newNodes = (secondGroup[options.nodesKey] || []).concat([
-            nodeItem,
-          ]);
+          const newNodes = (secondGroup[options.nodesKey] || []).concat([nodeItem]);
           set(secondGroup, options.nodesKey, newNodes);
           if (!group.groups.includes(secondGroup)) {
             group.groups.push(secondGroup);

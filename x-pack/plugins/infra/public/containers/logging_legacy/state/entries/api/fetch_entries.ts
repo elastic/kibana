@@ -13,11 +13,7 @@ import {
   LatestLogEntriesApiPostPayload,
   LatestLogEntriesApiPostResponse,
 } from '../../../../../../common/http_api';
-import {
-  LogEntry,
-  LogEntryFieldsMapping,
-  LogEntryTime,
-} from '../../../../../../common/log_entry';
+import { LogEntry, LogEntryFieldsMapping, LogEntryTime } from '../../../../../../common/log_entry';
 import { InfraObservableApi } from '../../../../../lib/lib';
 
 export interface CommonFetchEntriesDependencies<State> {
@@ -39,10 +35,7 @@ export const fetchAdjacentEntries = (
   indices: string[],
   target: LogEntryTime
 ): FetchAdjacentEntriesResult =>
-  postToApi<
-    AdjacentLogEntriesApiPostPayload,
-    AdjacentLogEntriesApiPostResponse
-  >({
+  postToApi<AdjacentLogEntriesApiPostPayload, AdjacentLogEntriesApiPostResponse>({
     body: {
       after,
       before,

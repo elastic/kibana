@@ -20,9 +20,7 @@ export function createPartitionBodies(
 ): InfraESMSearchBody[] {
   const { indexPattern }: InfraNodeRequestOptions = nodeOptions;
   const bodies: InfraESMSearchBody[] = [];
-  const numberOfPartitions: number = Math.ceil(
-    totalNodes / NODE_REQUEST_PARTITION_SIZE
-  );
+  const numberOfPartitions: number = Math.ceil(totalNodes / NODE_REQUEST_PARTITION_SIZE);
   times(numberOfPartitions, (partitionId: number): void => {
     const processorOptions: InfraProcesorRequestOptions = {
       nodeField,

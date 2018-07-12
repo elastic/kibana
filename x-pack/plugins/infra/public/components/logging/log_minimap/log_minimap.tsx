@@ -41,10 +41,7 @@ interface LogMinimapState {
   currentTarget: number;
 }
 
-export class LogMinimap extends React.Component<
-  LogMinimapProps,
-  LogMinimapState
-> {
+export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState> {
   public readonly state = {
     currentTarget: this.props.target,
   };
@@ -75,10 +72,7 @@ export class LogMinimap extends React.Component<
     const visibleDuration = getMillisOfScale(scale);
 
     return scaleLinear()
-      .domain([
-        currentTarget - visibleDuration / 2,
-        currentTarget + visibleDuration / 2,
-      ])
+      .domain([currentTarget - visibleDuration / 2, currentTarget + visibleDuration / 2])
       .range([0, height]);
   };
 
@@ -100,10 +94,7 @@ export class LogMinimap extends React.Component<
     });
   };
 
-  public componentDidUpdate(
-    prevProps: LogMinimapProps,
-    prevState: LogMinimapState
-  ) {
+  public componentDidUpdate(prevProps: LogMinimapProps, prevState: LogMinimapState) {
     if (prevState.currentTarget !== this.state.currentTarget) {
       this.updateVisibleInterval();
     }
@@ -132,12 +123,7 @@ export class LogMinimap extends React.Component<
         width={width}
         onClick={this.handleClick}
       >
-        <MinimapBackground
-          x={width / 2}
-          y="0"
-          width={width / 2}
-          height={height}
-        />
+        <MinimapBackground x={width / 2} y="0" width={width / 2} height={height} />
         <DensityChart
           buckets={summaryBuckets}
           start={minTime}
@@ -146,13 +132,7 @@ export class LogMinimap extends React.Component<
           height={height}
         />
         <MinimapBorder x1={width / 2} y1={0} x2={width / 2} y2={height} />
-        <TimeRuler
-          start={minTime}
-          end={maxTime}
-          width={width}
-          height={height}
-          tickCount={12}
-        />
+        <TimeRuler start={minTime} end={maxTime} width={width} height={height} tickCount={12} />
         {/*loadedInterval.start !== null && loadedInterval.end !== null ? (
           <HighlightedInterval
             className="minimapHighlightedInterval--light"
@@ -162,8 +142,7 @@ export class LogMinimap extends React.Component<
             width={0}
           />
         ) : null*/}
-        {highlightedInterval.start !== null &&
-        highlightedInterval.end !== null ? (
+        {highlightedInterval.start !== null && highlightedInterval.end !== null ? (
           <HighlightedInterval
             end={highlightedInterval.end}
             getPositionOfTime={this.getPositionOfTime}

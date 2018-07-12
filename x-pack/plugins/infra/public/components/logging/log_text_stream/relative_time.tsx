@@ -6,11 +6,7 @@
 
 import * as React from 'react';
 
-import {
-  decomposeIntoUnits,
-  getLabelOfScale,
-  TimeUnit,
-} from '../../../../common/time';
+import { decomposeIntoUnits, getLabelOfScale, TimeUnit } from '../../../../common/time';
 
 interface RelativeTimeProps {
   time: number;
@@ -22,10 +18,7 @@ interface RelativeTimeState {
   timeoutId: number | null;
 }
 
-export class RelativeTime extends React.Component<
-  RelativeTimeProps,
-  RelativeTimeState
-> {
+export class RelativeTime extends React.Component<RelativeTimeProps, RelativeTimeState> {
   public readonly state = {
     currentTime: Date.now(),
     timeoutId: null,
@@ -81,9 +74,4 @@ export class RelativeTime extends React.Component<
   }
 }
 
-const unitThresholds = [
-  TimeUnit.Day,
-  TimeUnit.Hour,
-  TimeUnit.Minute,
-  TimeUnit.Second,
-];
+const unitThresholds = [TimeUnit.Day, TimeUnit.Hour, TimeUnit.Minute, TimeUnit.Second];

@@ -106,9 +106,7 @@ const searchResultsEndLastResultReducer = reducerWithInitialState(
     createFailureResultReducer()
   );
 
-const searchResultsEndPolicyReducer = reducerWithInitialState(
-  initialSearchResultsState.end.policy
-);
+const searchResultsEndPolicyReducer = reducerWithInitialState(initialSearchResultsState.end.policy);
 
 const searchResultsEndReducer = combineReducers<SearchResultsState['end']>({
   current: searchResultsEndCurrentProgressReducer,
@@ -116,9 +114,7 @@ const searchResultsEndReducer = combineReducers<SearchResultsState['end']>({
   policy: searchResultsEndPolicyReducer,
 });
 
-const searchResultsResultsReducer = reducerWithInitialState(
-  initialSearchResultsState.results
-)
+const searchResultsResultsReducer = reducerWithInitialState(initialSearchResultsState.results)
   .case(searchActions.clearSearch, state => (state.length > 0 ? [] : state))
   .case(replaceSearchResults.done, (state, { result: { results } }) => results)
   .case(replaceOlderSearchResults.done, (state, { result: { results } }) => {

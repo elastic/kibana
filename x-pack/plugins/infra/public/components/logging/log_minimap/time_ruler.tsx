@@ -16,13 +16,7 @@ interface TimeRulerProps {
   width: number;
 }
 
-export const TimeRuler: React.SFC<TimeRulerProps> = ({
-  end,
-  height,
-  start,
-  tickCount,
-  width,
-}) => {
+export const TimeRuler: React.SFC<TimeRulerProps> = ({ end, height, start, tickCount, width }) => {
   const yScale = scaleTime()
     .domain([start, end])
     .range([0, height]);

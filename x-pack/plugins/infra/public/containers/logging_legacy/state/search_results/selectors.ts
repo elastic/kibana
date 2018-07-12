@@ -12,9 +12,8 @@ import { SearchResultsState } from './reducer';
 
 export const selectSearchResults = (state: SearchResultsState) => state.results;
 
-export const selectSearchResultsById = createSelector(
-  selectSearchResults,
-  searchResults => keyBy('gid', searchResults)
+export const selectSearchResultsById = createSelector(selectSearchResults, searchResults =>
+  keyBy('gid', searchResults)
 );
 
 export const selectFirstSearchResult = createSelector(
@@ -24,8 +23,7 @@ export const selectFirstSearchResult = createSelector(
 
 export const selectLastSearchResult = createSelector(
   selectSearchResults,
-  searchResults =>
-    searchResults.length > 0 ? searchResults[searchResults.length - 1] : null
+  searchResults => (searchResults.length > 0 ? searchResults[searchResults.length - 1] : null)
 );
 
 export const selectIsLoadingSearchResults = createSelector(

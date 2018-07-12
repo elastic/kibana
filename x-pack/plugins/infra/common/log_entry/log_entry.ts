@@ -48,22 +48,16 @@ export function isEqual(time1: LogEntryTime, time2: LogEntryTime) {
 
 export function isLess(time1: LogEntryTime, time2: LogEntryTime) {
   return (
-    time1.time < time2.time ||
-    (time1.time === time2.time && time1.tiebreaker < time2.tiebreaker)
+    time1.time < time2.time || (time1.time === time2.time && time1.tiebreaker < time2.tiebreaker)
   );
 }
 
 export function isLessOrEqual(time1: LogEntryTime, time2: LogEntryTime) {
   return (
-    time1.time < time2.time ||
-    (time1.time === time2.time && time1.tiebreaker <= time2.tiebreaker)
+    time1.time < time2.time || (time1.time === time2.time && time1.tiebreaker <= time2.tiebreaker)
   );
 }
 
-export function isBetween(
-  min: LogEntryTime,
-  max: LogEntryTime,
-  operand: LogEntryTime
-) {
+export function isBetween(min: LogEntryTime, max: LogEntryTime, operand: LogEntryTime) {
   return isLessOrEqual(min, operand) && isLessOrEqual(operand, max);
 }

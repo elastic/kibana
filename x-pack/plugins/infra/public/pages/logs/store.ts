@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  Action,
-  applyMiddleware,
-  compose,
-  createStore as createBasicStore,
-} from 'redux';
+import { Action, applyMiddleware, compose, createStore as createBasicStore } from 'redux';
 import { createEpicMiddleware } from 'redux-observable';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -38,14 +33,12 @@ export interface StoreDependencies {
 }
 
 export function createStore({ observableApi }: StoreDependencies) {
-  const composeEnhancers =
-    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+  const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
   const middlewareDependencies = {
     postToApi$: observableApi.pipe(map(({ post }) => post)),
     selectEntriesEndLoadingState: entriesSelectors.selectEntriesEndLoadingState,
-    selectEntriesStartLoadingState:
-      entriesSelectors.selectEntriesStartLoadingState,
+    selectEntriesStartLoadingState: entriesSelectors.selectEntriesStartLoadingState,
     selectFirstEntry: entriesSelectors.selectFirstEntry,
     selectFirstSummaryBucket: summarySelectors.selectFirstSummaryBucket,
     selectLastEntry: entriesSelectors.selectLastEntry,
@@ -54,19 +47,15 @@ export function createStore({ observableApi }: StoreDependencies) {
     selectSourceCoreFields: sourceSelectors.selectSourceCoreFields,
     selectSourceIndices: sourceSelectors.selectSourceIndices,
     selectSummaryBucketSize: summarySelectors.selectSummaryBucketSize,
-    selectSummaryBucketsPerBuffer:
-      summarySelectors.selectSummaryBucketsPerBuffer,
+    selectSummaryBucketsPerBuffer: summarySelectors.selectSummaryBucketsPerBuffer,
     selectTarget: targetSelectors.selectTarget,
   };
 
-  const epicMiddleware = createEpicMiddleware<
-    Action,
-    Action,
-    State,
-    typeof middlewareDependencies
-  >({
-    dependencies: middlewareDependencies,
-  });
+  const epicMiddleware = createEpicMiddleware<Action, Action, State, typeof middlewareDependencies>(
+    {
+      dependencies: middlewareDependencies,
+    }
+  );
 
   const store = createBasicStore(
     reducer,

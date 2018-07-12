@@ -8,20 +8,14 @@ import { Action } from 'redux';
 import { Observable } from 'rxjs';
 import { catchError, map, startWith } from 'rxjs/operators';
 
-import {
-  LogEntryFieldsMapping,
-  LogEntryTime,
-} from '../../../../../../common/log_entry';
+import { LogEntryFieldsMapping, LogEntryTime } from '../../../../../../common/log_entry';
 import { InfraObservableApi } from '../../../../../lib/lib';
 import {
   replaceNewerSearchResults,
   replaceOlderSearchResults,
   replaceSearchResults,
 } from '../actions';
-import {
-  fetchAdjacentSearchResults$,
-  fetchContainedSearchResults$,
-} from './fetch_search_results';
+import { fetchAdjacentSearchResults$, fetchContainedSearchResults$ } from './fetch_search_results';
 
 export const replaceWithContainedSearchResults$ = (
   postToApi: InfraObservableApi['post'],
@@ -34,14 +28,7 @@ export const replaceWithContainedSearchResults$ = (
   const params = {
     query,
   };
-  return fetchContainedSearchResults$(
-    postToApi,
-    indices,
-    fields,
-    start,
-    end,
-    query
-  ).pipe(
+  return fetchContainedSearchResults$(postToApi, indices, fields, start, end, query).pipe(
     map(results =>
       replaceSearchResults.done({
         params,
@@ -64,14 +51,7 @@ export const replaceWithContainedSearchResultsBefore$ = (
   const params = {
     query,
   };
-  return fetchContainedSearchResults$(
-    postToApi,
-    indices,
-    fields,
-    start,
-    end,
-    query
-  ).pipe(
+  return fetchContainedSearchResults$(postToApi, indices, fields, start, end, query).pipe(
     map(results =>
       replaceOlderSearchResults.done({
         params,
@@ -94,14 +74,7 @@ export const replaceWithContainedSearchResultsAfter$ = (
   const params = {
     query,
   };
-  return fetchContainedSearchResults$(
-    postToApi,
-    indices,
-    fields,
-    start,
-    end,
-    query
-  ).pipe(
+  return fetchContainedSearchResults$(postToApi, indices, fields, start, end, query).pipe(
     map(results =>
       replaceNewerSearchResults.done({
         params,
@@ -124,15 +97,7 @@ export const replaceWithOlderSearchResultsBefore$ = (
   const params = {
     query,
   };
-  return fetchAdjacentSearchResults$(
-    postToApi,
-    indices,
-    fields,
-    target,
-    count,
-    0,
-    query
-  ).pipe(
+  return fetchAdjacentSearchResults$(postToApi, indices, fields, target, count, 0, query).pipe(
     map(({ before }) =>
       replaceOlderSearchResults.done({
         params,
@@ -155,15 +120,7 @@ export const replaceWithNewerSearchResultsAfter$ = (
   const params = {
     query,
   };
-  return fetchAdjacentSearchResults$(
-    postToApi,
-    indices,
-    fields,
-    target,
-    0,
-    count,
-    query
-  ).pipe(
+  return fetchAdjacentSearchResults$(postToApi, indices, fields, target, 0, count, query).pipe(
     map(({ after }) =>
       replaceNewerSearchResults.done({
         params,

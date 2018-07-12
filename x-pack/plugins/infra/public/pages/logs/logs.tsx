@@ -25,10 +25,7 @@ import { LogMinimap } from '../../components/logging/log_minimap';
 import { LogMinimapScaleControls } from '../../components/logging/log_minimap_scale_controls';
 import { LogPositionText } from '../../components/logging/log_position_text';
 import { LogSearchControls } from '../../components/logging/log_search_controls';
-import {
-  LogStatusbar,
-  LogStatusbarItem,
-} from '../../components/logging/log_statusbar';
+import { LogStatusbar, LogStatusbarItem } from '../../components/logging/log_statusbar';
 import { LogTextScaleControls } from '../../components/logging/log_text_scale_controls';
 import { ScrollableLogTextStreamView } from '../../components/logging/log_text_stream';
 import { LogTextWrapControls } from '../../components/logging/log_text_wrap_controls';
@@ -48,26 +45,14 @@ import { withVisibleLogEntries } from '../../containers/logging_legacy/with_visi
 // TODO: split out containers
 
 const ConnectedLogJumpMenu = withJumpMenuProps(LogJumpMenu);
-const ConnectedLogLiveStreamControls = withLiveStreamControlsProps(
-  LogLiveStreamControls
-);
+const ConnectedLogLiveStreamControls = withLiveStreamControlsProps(LogLiveStreamControls);
 const ConnectedLogMinimap = withMinimapProps(LogMinimap);
-const ConnectedLogMinimapScaleControls = withMinimapScaleControlsProps(
-  LogMinimapScaleControls
-);
+const ConnectedLogMinimapScaleControls = withMinimapScaleControlsProps(LogMinimapScaleControls);
 const ConnectedLogPositionText = withVisibleLogEntries(LogPositionText);
-const ConnectedLogSearchControls = withLogSearchControlsProps(
-  LogSearchControls
-);
-const ConnectedLogTextScaleControls = withTextScaleControlsProps(
-  LogTextScaleControls
-);
-const ConnectedLogTextWrapControls = withTextWrapControlsProps(
-  LogTextWrapControls
-);
-const ConnectedScrollableLogTextStreamView = withStreamItems(
-  ScrollableLogTextStreamView
-);
+const ConnectedLogSearchControls = withLogSearchControlsProps(LogSearchControls);
+const ConnectedLogTextScaleControls = withTextScaleControlsProps(LogTextScaleControls);
+const ConnectedLogTextWrapControls = withTextWrapControlsProps(LogTextWrapControls);
+const ConnectedScrollableLogTextStreamView = withStreamItems(ScrollableLogTextStreamView);
 
 interface LogsPageProps {
   libs: InfraFrontendLibs;
@@ -112,11 +97,7 @@ export const LogsPage = withLibs(
           <ColumnarPage>
             <Header breadcrumbs={[{ text: 'Logs' }]} />
             <Toolbar>
-              <EuiFlexGroup
-                alignItems="center"
-                justifyContent="spaceBetween"
-                gutterSize="none"
-              >
+              <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="none">
                 <EuiFlexItem>
                   <ConnectedLogPositionText />
                 </EuiFlexItem>
@@ -139,10 +120,7 @@ export const LogsPage = withLibs(
               <AutoSizer content>
                 {({ measureRef, content: { width = 0, height = 0 } }) => (
                   <LogPageEventStreamColumn innerRef={measureRef as any}>
-                    <ConnectedScrollableLogTextStreamView
-                      height={height}
-                      width={width}
-                    />
+                    <ConnectedScrollableLogTextStreamView height={height} width={width} />
                   </LogPageEventStreamColumn>
                 )}
               </AutoSizer>

@@ -30,8 +30,7 @@ export const globalizeSelector = <
 >(
   globalizer: Selector<GlobalState, LocalState>,
   selector: LocalSelector
-): Selector<GlobalState, Value> => (globalState: GlobalState) =>
-  selector(globalizer(globalState));
+): Selector<GlobalState, Value> => (globalState: GlobalState) => selector(globalizer(globalState));
 
 export const globalizeSelectors = <
   GlobalState,
@@ -63,13 +62,9 @@ type PlainActionCreator<WrappedActionCreator> = WrappedActionCreator extends (
   ? (payload: A) => R
   : never;
 
-export const bindPlainActionCreators = <
-  WrappedActionCreators extends ActionCreators
->(
+export const bindPlainActionCreators = <WrappedActionCreators extends ActionCreators>(
   actionCreators: WrappedActionCreators
 ) => (dispatch: Dispatch) =>
   bindActionCreators(actionCreators, dispatch) as {
-    [P in keyof WrappedActionCreators]: PlainActionCreator<
-      WrappedActionCreators[P]
-    >
+    [P in keyof WrappedActionCreators]: PlainActionCreator<WrappedActionCreators[P]>
   };

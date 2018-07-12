@@ -7,10 +7,7 @@
 import { EuiLoadingChart, EuiPanel, EuiText } from '@elastic/eui';
 import * as React from 'react';
 
-import {
-  LogTextStreamStaticContentPanel,
-  LogTextStreamStaticPanel,
-} from './static_panel';
+import { LogTextStreamStaticContentPanel, LogTextStreamStaticPanel } from './static_panel';
 
 interface LogTextStreamLoadingViewProps {
   height: number;

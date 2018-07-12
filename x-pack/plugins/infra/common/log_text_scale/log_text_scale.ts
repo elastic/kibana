@@ -10,8 +10,6 @@ export function getLabelOfTextScale(textScale: TextScale) {
   return textScale.charAt(0).toUpperCase() + textScale.slice(1);
 }
 
-export function isTextScale(
-  maybeTextScale: string
-): maybeTextScale is TextScale {
+export function isTextScale(maybeTextScale: string): maybeTextScale is TextScale {
   return ['small', 'medium', 'large'].includes(maybeTextScale);
 }

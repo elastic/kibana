@@ -23,9 +23,7 @@ import {
 
 export const withLogSearchControlsProps = connect(
   (state: State) => ({
-    isLoadingSearchResults: searchResultsSelectors.selectIsLoadingSearchResults(
-      state
-    ),
+    isLoadingSearchResults: searchResultsSelectors.selectIsLoadingSearchResults(state),
     nextSearchResult: sharedSelectors.selectNextSearchResultKey(state),
     previousSearchResult: sharedSelectors.selectPreviousSearchResultKey(state),
   }),

@@ -14,18 +14,13 @@ interface LogEntryStreamItemViewProps {
   item: LogEntry;
 }
 
-export class LogEntryStreamItemView extends React.PureComponent<
-  LogEntryStreamItemViewProps,
-  {}
-> {
+export class LogEntryStreamItemView extends React.PureComponent<LogEntryStreamItemViewProps, {}> {
   public render() {
     const { boundingBoxRef, item } = this.props;
 
     return (
       // @ts-ignore: silence error until styled-components supports React.RefObject<T>
-      <LogEntryDiv innerRef={boundingBoxRef}>
-        {JSON.stringify(item)}
-      </LogEntryDiv>
+      <LogEntryDiv innerRef={boundingBoxRef}>{JSON.stringify(item)}</LogEntryDiv>
     );
   }
 }

@@ -20,9 +20,7 @@ import { bindPlainActionCreators } from '../../utils/typed_redux';
 
 export const withMinimapProps = connect(
   (state: State) => ({
-    highlightedInterval: entriesSelectors.selectVisibleEntriesTimeInterval(
-      state
-    ),
+    highlightedInterval: entriesSelectors.selectVisibleEntriesTimeInterval(state),
     loadedInterval: entriesSelectors.selectLoadedEntriesTimeInterval(state),
     scale: minimapSelectors.selectMinimapScale(state),
     searchSummaryBuckets: searchSummarySelectors.selectBuckets(state),

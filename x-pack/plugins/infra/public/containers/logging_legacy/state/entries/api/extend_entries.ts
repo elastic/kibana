@@ -8,10 +8,7 @@ import { Action } from 'redux';
 import { Observable } from 'rxjs';
 import { catchError, map, startWith } from 'rxjs/operators';
 
-import {
-  LogEntryFieldsMapping,
-  LogEntryTime,
-} from '../../../../../../common/log_entry';
+import { LogEntryFieldsMapping, LogEntryTime } from '../../../../../../common/log_entry';
 import { InfraObservableApi } from '../../../../../lib/lib';
 import { extendEntriesEnd, extendEntriesStart } from '../actions';
 import { fetchAdjacentEntries } from './fetch_entries';
@@ -27,14 +24,7 @@ export const extendEntriesStart$ = (
     count,
     target,
   };
-  return fetchAdjacentEntries(
-    postToApi,
-    0,
-    count,
-    fields,
-    indices,
-    target
-  ).pipe(
+  return fetchAdjacentEntries(postToApi, 0, count, fields, indices, target).pipe(
     map(({ before }) =>
       extendEntriesStart.done({
         params,
@@ -64,14 +54,7 @@ export const extendEntriesEnd$ = (
     count,
     target,
   };
-  return fetchAdjacentEntries(
-    postToApi,
-    count,
-    0,
-    fields,
-    indices,
-    target
-  ).pipe(
+  return fetchAdjacentEntries(postToApi, count, 0, fields, indices, target).pipe(
     map(({ after }) =>
       extendEntriesEnd.done({
         params,

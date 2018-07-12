@@ -22,10 +22,7 @@ export function compareTimeKeys(
   const timeComparison = compareValues(firstKey.time, secondKey.time);
 
   if (timeComparison === 0) {
-    const tiebreakerComparison = compareValues(
-      firstKey.tiebreaker,
-      secondKey.tiebreaker
-    );
+    const tiebreakerComparison = compareValues(firstKey.tiebreaker, secondKey.tiebreaker);
 
     if (
       tiebreakerComparison === 0 &&
@@ -44,8 +41,7 @@ export function compareTimeKeys(
 export const compareToTimeKey = <Value>(
   keyAccessor: (value: Value) => TimeKey,
   compareValues?: Comparator
-) => (value: Value, key: TimeKey) =>
-  compareTimeKeys(keyAccessor(value), key, compareValues);
+) => (value: Value, key: TimeKey) => compareTimeKeys(keyAccessor(value), key, compareValues);
 
 export const getAtTimeKey = <Value>(
   keyAccessor: (value: Value) => TimeKey,

@@ -8,10 +8,7 @@ import get from 'lodash/fp/get';
 import getOr from 'lodash/fp/getOr';
 import { parseToHsl, shade, tint } from 'polished';
 
-type PropReader = <Prop, Default = any>(
-  props: object,
-  defaultValue?: Default
-) => Prop;
+type PropReader = <Prop, Default = any>(props: object, defaultValue?: Default) => Prop;
 
 const asPropReader = (reader: string | string[] | PropReader) =>
   typeof reader === 'function'
@@ -22,17 +19,14 @@ const asPropReader = (reader: string | string[] | PropReader) =>
       ) => getOr(defaultValue, reader as Prop, props);
 
 export const switchProp = Object.assign(
-  (
-    propName: string | string[] | PropReader,
-    options: Map<any, any> | object
-  ) => (props: object) => {
+  (propName: string | string[] | PropReader, options: Map<any, any> | object) => (
+    props: object
+  ) => {
     const propValue = asPropReader(propName)(props, switchProp.default);
     if (typeof propValue === 'undefined') {
       return;
     }
-    return options instanceof Map
-      ? options.get(propValue)
-      : get(propValue, options);
+    return options instanceof Map ? options.get(propValue) : get(propValue, options);
   },
   {
     default: Symbol('default'),
@@ -45,12 +39,6 @@ export const ifProp = <Pass, Fail>(
   fail: Fail
 ) => (props: object) => (asPropReader(propName)(props) ? pass : fail);
 
-export const tintOrShade = (
-  textColor: 'string',
-  color: 'string',
-  fraction: number
-) => {
-  return parseToHsl(textColor).lightness > 0.5
-    ? shade(fraction, color)
-    : tint(fraction, color);
+export const tintOrShade = (textColor: 'string', color: 'string', fraction: number) => {
+  return parseToHsl(textColor).lightness > 0.5 ? shade(fraction, color) : tint(fraction, color);
 };

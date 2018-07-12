@@ -4,14 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  InfraFrameworkRequest,
-  InfraWrappableRequest,
-} from '../lib/infra_types';
+import { InfraFrameworkRequest, InfraWrappableRequest } from '../lib/infra_types';
 
-export const internalInfraFrameworkRequest = Symbol(
-  'internalInfraFrameworkRequest'
-);
+export const internalInfraFrameworkRequest = Symbol('internalInfraFrameworkRequest');
 
 export function wrapRequest<InternalRequest extends InfraWrappableRequest>(
   req: InternalRequest

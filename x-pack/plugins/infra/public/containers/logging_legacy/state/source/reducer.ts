@@ -24,6 +24,4 @@ export interface SourceState {
   indices: string[];
 }
 
-export const sourceReducer = (
-  state: SourceState = initialSourceState
-): SourceState => state;
+export const sourceReducer = (state: SourceState = initialSourceState): SourceState => state;

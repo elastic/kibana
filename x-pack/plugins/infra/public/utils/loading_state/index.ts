@@ -6,10 +6,7 @@
 
 export { initialLoadingState, LoadingState } from './loading_state';
 
-export {
-  isManualLoadingPolicy,
-  isIntervalLoadingPolicy,
-} from './loading_policy';
+export { isManualLoadingPolicy, isIntervalLoadingPolicy } from './loading_policy';
 
 export {
   createRunningProgressReducer,

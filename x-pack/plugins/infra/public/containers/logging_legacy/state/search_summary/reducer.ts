@@ -19,9 +19,7 @@ export const initialSearchSummaryState: SearchSummaryState = {
   buckets: [],
 };
 
-const searchSummaryBucketsReducer = reducerWithInitialState(
-  initialSearchSummaryState.buckets
-)
+const searchSummaryBucketsReducer = reducerWithInitialState(initialSearchSummaryState.buckets)
   .case(searchActions.clearSearch, state => (state.length > 0 ? [] : state))
   .case(replaceSearchSummary.done, (state, { result: { buckets } }) => buckets);
 

@@ -6,8 +6,6 @@
 
 import { ConfigurationState } from '.';
 
-export const selectHttpBasePath = (state: ConfigurationState) =>
-  state.server.httpBasePath;
+export const selectHttpBasePath = (state: ConfigurationState) => state.server.httpBasePath;
 
-export const selectHttpHeaders = (state: ConfigurationState) =>
-  state.server.httpHeaders;
+export const selectHttpHeaders = (state: ConfigurationState) => state.server.httpHeaders;

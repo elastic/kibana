@@ -6,13 +6,7 @@
 
 import { Action } from 'redux';
 import { Epic } from 'redux-observable';
-import {
-  concatMap,
-  filter,
-  switchMap,
-  takeUntil,
-  withLatestFrom,
-} from 'rxjs/operators';
+import { concatMap, filter, switchMap, takeUntil, withLatestFrom } from 'rxjs/operators';
 
 import { LogSummaryBucket } from '../../../../../common/log_summary';
 import { TimeScale } from '../../../../../common/time';

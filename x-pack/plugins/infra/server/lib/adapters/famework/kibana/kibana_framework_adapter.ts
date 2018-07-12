@@ -14,13 +14,9 @@ import {
 import { graphiqlHapi, graphqlHapi } from './apollo_server_hapi';
 
 import { IStrictReply, Request, Server } from 'hapi';
-import {
-  internalInfraFrameworkRequest,
-  wrapRequest,
-} from '../../../../utils/wrap_request';
+import { internalInfraFrameworkRequest, wrapRequest } from '../../../../utils/wrap_request';
 
-export class InfraKibanaBackendFrameworkAdapter
-  implements InfraBackendFrameworkAdapter {
+export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFrameworkAdapter {
   public version: string;
   private server: Server;
 
@@ -41,10 +37,7 @@ export class InfraKibanaBackendFrameworkAdapter
     });
   }
 
-  public registerGraphQLEndpoint(
-    routePath: string,
-    schema: GraphQLSchema
-  ): void {
+  public registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void {
     this.server.register({
       options: {
         graphqlOptions: (req: Request) => ({
@@ -72,10 +65,9 @@ export class InfraKibanaBackendFrameworkAdapter
     });
   }
 
-  public registerRoute<
-    RouteRequest extends InfraWrappableRequest,
-    RouteResponse
-  >(route: InfraFrameworkRouteOptions<RouteRequest, RouteResponse>) {
+  public registerRoute<RouteRequest extends InfraWrappableRequest, RouteResponse>(
+    route: InfraFrameworkRouteOptions<RouteRequest, RouteResponse>
+  ) {
     const wrappedHandler = (request: any, reply: IStrictReply<RouteResponse>) =>
       route.handler(wrapRequest(request), reply);
 
@@ -86,10 +78,7 @@ export class InfraKibanaBackendFrameworkAdapter
     });
   }
 
-  public async callWithRequest(
-    req: InfraFrameworkRequest<Request>,
-    ...rest: any[]
-  ) {
+  public async callWithRequest(req: InfraFrameworkRequest<Request>, ...rest: any[]) {
     const internalRequest = req[internalInfraFrameworkRequest];
     const { elasticsearch } = internalRequest.server.plugins;
     const { callWithRequest } = elasticsearch.getCluster('data');

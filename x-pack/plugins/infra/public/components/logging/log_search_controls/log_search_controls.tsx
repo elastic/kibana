@@ -22,10 +22,7 @@ interface LogSearchControlsProps {
   search: (query: string) => any;
 }
 
-export class LogSearchControls extends React.PureComponent<
-  LogSearchControlsProps,
-  {}
-> {
+export class LogSearchControls extends React.PureComponent<LogSearchControlsProps, {}> {
   public render() {
     const {
       className,

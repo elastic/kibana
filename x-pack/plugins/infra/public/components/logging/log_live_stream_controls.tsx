@@ -14,10 +14,7 @@ interface LogLiveStreamControlsProps {
   disableLiveStreaming: () => any;
 }
 
-export class LogLiveStreamControls extends React.Component<
-  LogLiveStreamControlsProps,
-  {}
-> {
+export class LogLiveStreamControls extends React.Component<LogLiveStreamControlsProps, {}> {
   public startStreaming = () => {
     this.props.enableLiveStreaming();
   };

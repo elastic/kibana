@@ -59,11 +59,7 @@ export const nodesSchema: any = gql`
 
   type InfraGroup {
     name: String!
-    groups(
-      type: InfraGroupByType!
-      field: String
-      filters: [InfraGroupByFilter]
-    ): [InfraGroup!]
+    groups(type: InfraGroupByType!, field: String, filters: [InfraGroupByFilter]): [InfraGroup!]
     hosts: [InfraHost!]
     pods: [InfraPod!]
     containers: [InfraContainer!]
@@ -71,11 +67,7 @@ export const nodesSchema: any = gql`
   }
 
   type InfraResponse {
-    groups(
-      type: InfraGroupByType!
-      field: String
-      filters: [InfraGroupByFilter]
-    ): [InfraGroup!]
+    groups(type: InfraGroupByType!, field: String, filters: [InfraGroupByFilter]): [InfraGroup!]
     hosts: [InfraHost!]
     pods: [InfraPod!]
     containers: [InfraContainer!]
@@ -98,9 +90,7 @@ export const createNodeResolvers = (libs: InfraBackendLibs) => {
     ctx: any,
     info: GraphQLResolveInfo
   ): Promise<InfraResponse> => {
-    const { groupBy, metrics, nodeType, nodesKey } = extractGroupByAndMetrics(
-      info
-    );
+    const { groupBy, metrics, nodeType, nodesKey } = extractGroupByAndMetrics(info);
 
     const options: InfraNodeRequestOptions = {
       filters: args.filters || [],

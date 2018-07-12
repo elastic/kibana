@@ -16,10 +16,7 @@ interface LogJumpMenuState {
   isShown: boolean;
 }
 
-export class LogJumpMenu extends React.Component<
-  LogJumpMenuProps,
-  LogJumpMenuState
-> {
+export class LogJumpMenu extends React.Component<LogJumpMenuProps, LogJumpMenuState> {
   public readonly state = {
     isShown: false,
   };
@@ -93,12 +90,7 @@ export class LogJumpMenu extends React.Component<
     const { isShown } = this.state;
 
     const menuButton = (
-      <EuiButtonEmpty
-        color="text"
-        iconType="calendar"
-        onClick={this.toggleVisibility}
-        size="xs"
-      >
+      <EuiButtonEmpty color="text" iconType="calendar" onClick={this.toggleVisibility} size="xs">
         Jump to time
       </EuiButtonEmpty>
     );
@@ -114,10 +106,7 @@ export class LogJumpMenu extends React.Component<
         withTitle
         panelPaddingSize="none"
       >
-        <EuiContextMenu
-          initialPanelId="jumpToPredefinedTargets"
-          panels={this.getPanels()}
-        />
+        <EuiContextMenu initialPanelId="jumpToPredefinedTargets" panels={this.getPanels()} />
       </EuiPopover>
     );
   }

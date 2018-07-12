@@ -14,8 +14,7 @@ interface CommonSearchResultsPostPayload {
   query: string;
 }
 
-export interface AdjacentSearchResultsApiPostPayload
-  extends CommonSearchResultsPostPayload {
+export interface AdjacentSearchResultsApiPostPayload extends CommonSearchResultsPostPayload {
   target: LogEntryTime;
   before: number;
   after: number;
@@ -28,13 +27,11 @@ export interface AdjacentSearchResultsApiPostResponse extends TimedApiResponse {
   };
 }
 
-export interface ContainedSearchResultsApiPostPayload
-  extends CommonSearchResultsPostPayload {
+export interface ContainedSearchResultsApiPostPayload extends CommonSearchResultsPostPayload {
   start: LogEntryTime;
   end: LogEntryTime;
 }
 
-export interface ContainedSearchResultsApiPostResponse
-  extends TimedApiResponse {
+export interface ContainedSearchResultsApiPostResponse extends TimedApiResponse {
   results: SearchResult[];
 }

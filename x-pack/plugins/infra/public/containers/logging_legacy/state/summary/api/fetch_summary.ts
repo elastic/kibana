@@ -12,10 +12,7 @@ import {
   LogSummaryApiPostResponse,
 } from '../../../../../../common/http_api';
 import { LogSummaryBucket } from '../../../../../../common/log_summary';
-import {
-  getElasticSearchTimeUnit,
-  TimeScale,
-} from '../../../../../../common/time';
+import { getElasticSearchTimeUnit, TimeScale } from '../../../../../../common/time';
 import { InfraObservableApi } from '../../../../../lib/lib';
 
 export interface CommonFetchSummaryDependencies<State> {

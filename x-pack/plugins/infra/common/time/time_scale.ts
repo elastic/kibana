@@ -13,14 +13,12 @@ export interface TimeScale {
 
 export const getMillisOfScale = (scale: TimeScale) => scale.unit * scale.value;
 
-export const getLabelOfScale = (scale: TimeScale) =>
-  `${scale.value}${timeUnitLabels[scale.unit]}`;
+export const getLabelOfScale = (scale: TimeScale) => `${scale.value}${timeUnitLabels[scale.unit]}`;
 
 export const decomposeIntoUnits = (time: number, units: TimeUnit[]) =>
   units.reduce<TimeScale[]>((result, unitMillis) => {
     const offset = result.reduce(
-      (accumulatedOffset, timeScale) =>
-        accumulatedOffset + getMillisOfScale(timeScale),
+      (accumulatedOffset, timeScale) => accumulatedOffset + getMillisOfScale(timeScale),
       0
     );
     const value = Math.floor((time - offset) / unitMillis);

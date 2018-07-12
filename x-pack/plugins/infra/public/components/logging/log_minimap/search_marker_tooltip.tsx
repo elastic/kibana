@@ -13,10 +13,7 @@ interface SearchMarkerTooltipProps {
   markerPosition: ClientRect;
 }
 
-export class SearchMarkerTooltip extends React.PureComponent<
-  SearchMarkerTooltipProps,
-  {}
-> {
+export class SearchMarkerTooltip extends React.PureComponent<SearchMarkerTooltipProps, {}> {
   public render() {
     const { children, markerPosition } = this.props;
 
@@ -27,13 +24,9 @@ export class SearchMarkerTooltip extends React.PureComponent<
             {({ measureRef, bounds: { width, height } }) => {
               const { top, left } =
                 width && height
-                  ? calculatePopoverPosition(
-                      markerPosition,
-                      { width, height },
+                  ? calculatePopoverPosition(markerPosition, { width, height }, 'left', 16, [
                       'left',
-                      16,
-                      ['left']
-                    )
+                    ])
                   : {
                       left: -9999, // render off-screen before the first measurement
                       top: 0,

@@ -6,11 +6,7 @@
 
 import gql from 'graphql-tag';
 import { InfraField } from '../../common/types';
-import {
-  InfraBackendLibs,
-  InfraContext,
-  InfraResolverFn,
-} from '../lib/infra_types';
+import { InfraBackendLibs, InfraContext, InfraResolverFn } from '../lib/infra_types';
 
 export const fieldsSchema: any = gql`
   interface InfraField {

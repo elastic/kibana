@@ -15,20 +15,12 @@ import {
   InfraProcessorTransformer,
 } from '../../infra_types';
 
-import {
-  isGroupByFilters,
-  isGroupByTerms,
-} from '../../../../common/type_guards';
+import { isGroupByFilters, isGroupByTerms } from '../../../../common/type_guards';
 
-export const groupByProcessor: InfraProcessor<
-  InfraProcesorRequestOptions,
-  InfraESSearchBody
-> = (
+export const groupByProcessor: InfraProcessor<InfraProcesorRequestOptions, InfraESSearchBody> = (
   options: InfraProcesorRequestOptions
 ): InfraProcessorChainFn<InfraESSearchBody> => {
-  return (next: InfraProcessorTransformer<InfraESSearchBody>) => (
-    doc: InfraESSearchBody
-  ) => {
+  return (next: InfraProcessorTransformer<InfraESSearchBody>) => (doc: InfraESSearchBody) => {
     const result = cloneDeep(doc);
     const { groupBy } = options.nodeOptions;
     let aggs = {};

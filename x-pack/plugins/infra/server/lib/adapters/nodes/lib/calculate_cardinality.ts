@@ -24,9 +24,7 @@ interface CardinalityAggregation {
 }
 
 export async function calculateCardinalityOfNodeField(
-  search: <Aggregation>(
-    options: object
-  ) => Promise<InfraDatabaseSearchResponse<{}, Aggregation>>,
+  search: <Aggregation>(options: object) => Promise<InfraDatabaseSearchResponse<{}, Aggregation>>,
   nodeField: string,
   options: InfraNodeRequestOptions
 ): Promise<number> {

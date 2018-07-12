@@ -19,10 +19,7 @@ interface MeasureableProps {
   registrationKey: any;
 }
 
-export class MeasurableItemView extends React.PureComponent<
-  MeasureableProps,
-  {}
-> {
+export class MeasurableItemView extends React.PureComponent<MeasureableProps, {}> {
   public childRef = React.createRef<HTMLElement>();
 
   public getOffsetRect = (): Rect | null => {

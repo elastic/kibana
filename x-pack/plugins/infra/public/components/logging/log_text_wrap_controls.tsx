@@ -12,9 +12,7 @@ interface LogTextWrapControlsProps {
   setTextWrap: (scale: boolean) => any;
 }
 
-export class LogTextWrapControls extends React.PureComponent<
-  LogTextWrapControlsProps
-> {
+export class LogTextWrapControls extends React.PureComponent<LogTextWrapControlsProps> {
   public toggleWrap = () => {
     this.props.setTextWrap(!this.props.wrap);
   };
@@ -24,11 +22,7 @@ export class LogTextWrapControls extends React.PureComponent<
 
     return (
       <EuiFormRow label="Line Wrapping">
-        <EuiSwitch
-          label="Wrap long lines"
-          checked={wrap}
-          onChange={this.toggleWrap}
-        />
+        <EuiSwitch label="Wrap long lines" checked={wrap} onChange={this.toggleWrap} />
       </EuiFormRow>
     );
   }

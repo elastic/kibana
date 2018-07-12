@@ -24,10 +24,9 @@ export interface ReplaceEntriesResult {
   logEntriesAfter: LogEntry[];
 }
 
-export const replaceEntries = actionCreator.async<
-  ReplaceEntriesPayload,
-  ReplaceEntriesResult
->('REPLACE_ENTRIES');
+export const replaceEntries = actionCreator.async<ReplaceEntriesPayload, ReplaceEntriesResult>(
+  'REPLACE_ENTRIES'
+);
 
 /**
  * EXTEND_ENTRIES
@@ -42,15 +41,13 @@ export interface ExtendEntriesResult {
   logEntries: LogEntry[];
 }
 
-export const extendEntriesStart = actionCreator.async<
-  ExtendEntriesPayload,
-  ExtendEntriesResult
->('EXTEND_ENTRIES_START');
+export const extendEntriesStart = actionCreator.async<ExtendEntriesPayload, ExtendEntriesResult>(
+  'EXTEND_ENTRIES_START'
+);
 
-export const extendEntriesEnd = actionCreator.async<
-  ExtendEntriesPayload,
-  ExtendEntriesResult
->('EXTEND_ENTRIES_END');
+export const extendEntriesEnd = actionCreator.async<ExtendEntriesPayload, ExtendEntriesResult>(
+  'EXTEND_ENTRIES_END'
+);
 
 /**
  * CONSOLIDATE_ENTRIES
@@ -62,9 +59,7 @@ export interface ConsolidateEntriesPayload {
   target: LogEntryTime;
 }
 
-export const consolidateEntries = actionCreator<ConsolidateEntriesPayload>(
-  'CONSOLIDATE_ENTRIES'
-);
+export const consolidateEntries = actionCreator<ConsolidateEntriesPayload>('CONSOLIDATE_ENTRIES');
 
 /**
  * REPORT_VISIBLE_ENTRIES

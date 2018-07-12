@@ -171,9 +171,7 @@ export const createSummaryEpic = <State>(): Epic<
           (start - firstSummaryBucket.start) / summaryBucketSizeMillis
         );
 
-        const missingBuckets = Math.ceil(
-          summaryBucketsPerBuffer - currentBucketsInBuffer
-        );
+        const missingBuckets = Math.ceil(summaryBucketsPerBuffer - currentBucketsInBuffer);
 
         if (missingBuckets <= 0) {
           return [];
@@ -234,9 +232,7 @@ export const createSummaryEpic = <State>(): Epic<
           (lastSummaryBucket.end - end) / summaryBucketSizeMillis
         );
 
-        const missingBuckets = Math.ceil(
-          summaryBucketsPerBuffer - currentBucketsInBuffer
-        );
+        const missingBuckets = Math.ceil(summaryBucketsPerBuffer - currentBucketsInBuffer);
 
         if (missingBuckets <= 0) {
           return [];
@@ -281,9 +277,7 @@ export const createSummaryEpic = <State>(): Epic<
     )
   );
 
-const handleReplaceSummary = (params: ReplaceSummaryPayload) => (
-  request$: FetchSummaryResult
-) =>
+const handleReplaceSummary = (params: ReplaceSummaryPayload) => (request$: FetchSummaryResult) =>
   request$.pipe(
     map(buckets =>
       replaceSummary.done({

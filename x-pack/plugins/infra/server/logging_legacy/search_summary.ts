@@ -8,10 +8,7 @@ import * as Boom from 'boom';
 import { SearchParams } from 'elasticsearch';
 import * as Joi from 'joi';
 
-import {
-  SearchSummaryApiPostPayload,
-  SearchSummaryApiPostResponse,
-} from '../../common/http_api';
+import { SearchSummaryApiPostPayload, SearchSummaryApiPostResponse } from '../../common/http_api';
 import { LogEntryFieldsMapping } from '../../common/log_entry';
 import { SearchSummaryBucket } from '../../common/log_search_summary';
 import { SummaryBucketSize } from '../../common/log_summary';
@@ -29,9 +26,7 @@ import {
   timestampSchema,
 } from './schemas';
 
-export const initSearchSummaryRoutes = (
-  framework: InfraBackendFrameworkAdapter
-) => {
+export const initSearchSummaryRoutes = (framework: InfraBackendFrameworkAdapter) => {
   const callWithRequest = framework.callWithRequest;
 
   framework.registerRoute<
@@ -98,63 +93,58 @@ async function fetchSummaryBuckets(
   },
   query: string
 ): Promise<SearchSummaryBucket[]> {
-  const response = await search<any, { count_by_date?: DateHistogramResponse }>(
-    {
-      allowNoIndices: true,
-      body: {
-        aggregations: {
-          count_by_date: {
-            aggregations: {
-              top_entries: {
-                top_hits: {
-                  _source: [fields.message],
-                  size: 1,
-                  sort: [
-                    { [fields.time]: 'desc' },
-                    { [fields.tiebreaker]: 'desc' },
-                  ],
-                },
+  const response = await search<any, { count_by_date?: DateHistogramResponse }>({
+    allowNoIndices: true,
+    body: {
+      aggregations: {
+        count_by_date: {
+          aggregations: {
+            top_entries: {
+              top_hits: {
+                _source: [fields.message],
+                size: 1,
+                sort: [{ [fields.time]: 'desc' }, { [fields.tiebreaker]: 'desc' }],
               },
             },
-            date_histogram: {
-              extended_bounds: {
-                max: end,
-                min: start,
-              },
-              field: fields.time,
-              interval: `${bucketSize.value}${bucketSize.unit}`,
-              min_doc_count: 0,
+          },
+          date_histogram: {
+            extended_bounds: {
+              max: end,
+              min: start,
             },
+            field: fields.time,
+            interval: `${bucketSize.value}${bucketSize.unit}`,
+            min_doc_count: 0,
           },
         },
-        query: {
-          bool: {
-            filter: [
-              {
-                query_string: {
-                  default_field: fields.message,
-                  default_operator: 'AND',
-                  query,
-                },
-              },
-              {
-                range: {
-                  [fields.time]: {
-                    format: 'epoch_millis',
-                    gte: start,
-                    lt: end,
-                  },
-                },
-              },
-            ],
-          },
-        },
-        size: 0,
       },
-      ignoreUnavailable: true,
-      index: indices,
-    }
-  );
+      query: {
+        bool: {
+          filter: [
+            {
+              query_string: {
+                default_field: fields.message,
+                default_operator: 'AND',
+                query,
+              },
+            },
+            {
+              range: {
+                [fields.time]: {
+                  format: 'epoch_millis',
+                  gte: start,
+                  lt: end,
+                },
+              },
+            },
+          ],
+        },
+      },
+      size: 0,
+    },
+    ignoreUnavailable: true,
+    index: indices,
+  });
 
   if (response.aggregations && response.aggregations.count_by_date) {
     return convertDateHistogramToSearchSummaryBuckets(fields, end)(

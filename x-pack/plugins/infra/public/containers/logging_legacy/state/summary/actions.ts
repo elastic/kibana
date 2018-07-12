@@ -26,10 +26,9 @@ export interface ReplaceSummaryResult {
   buckets: LogSummaryBucket[];
 }
 
-export const replaceSummary = actionCreator.async<
-  ReplaceSummaryPayload,
-  ReplaceSummaryResult
->('REPLACE_SUMMARY');
+export const replaceSummary = actionCreator.async<ReplaceSummaryPayload, ReplaceSummaryResult>(
+  'REPLACE_SUMMARY'
+);
 
 /**
  * EXTEND_SUMMARY
@@ -45,15 +44,13 @@ export interface ExtendSummaryResult {
   buckets: LogSummaryBucket[];
 }
 
-export const extendSummaryStart = actionCreator.async<
-  ExtendSummaryPayload,
-  ExtendSummaryResult
->('EXTEND_SUMMARY_START');
+export const extendSummaryStart = actionCreator.async<ExtendSummaryPayload, ExtendSummaryResult>(
+  'EXTEND_SUMMARY_START'
+);
 
-export const extendSummaryEnd = actionCreator.async<
-  ExtendSummaryPayload,
-  ExtendSummaryResult
->('EXTEND_SUMMARY_END');
+export const extendSummaryEnd = actionCreator.async<ExtendSummaryPayload, ExtendSummaryResult>(
+  'EXTEND_SUMMARY_END'
+);
 
 /**
  * CONSOLIDATE_SUMMARY
@@ -65,9 +62,7 @@ export interface ConsolidateSummaryPayload {
   target: number;
 }
 
-export const consolidateSummary = actionCreator<ConsolidateSummaryPayload>(
-  'CONSOLIDATE_SUMMARY'
-);
+export const consolidateSummary = actionCreator<ConsolidateSummaryPayload>('CONSOLIDATE_SUMMARY');
 
 /**
  * REPORT_VISIBLE_SUMMARY
@@ -91,6 +86,4 @@ export interface ConfigureSummaryPayload {
   bufferSize: TimeScale;
 }
 
-export const configureSummary = actionCreator<ConfigureSummaryPayload>(
-  'CONFIGURE_SUMMARY'
-);
+export const configureSummary = actionCreator<ConfigureSummaryPayload>('CONFIGURE_SUMMARY');

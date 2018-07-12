@@ -18,19 +18,11 @@ import {
   InfraNodeRequestOptions,
 } from '../../../infra_types';
 
-import {
-  isGroupByFilters,
-  isGroupByTerms,
-} from '../../../../../common/type_guards';
+import { isGroupByFilters, isGroupByTerms } from '../../../../../common/type_guards';
 import { convertInputFilterToESQuery } from '../lib/convert_input_filter_to_es_query';
 
 export function createQuery(options: InfraNodeRequestOptions): InfraESQuery {
-  const {
-    timerange,
-    indexPattern,
-    groupBy,
-    filters,
-  }: InfraNodeRequestOptions = options;
+  const { timerange, indexPattern, groupBy, filters }: InfraNodeRequestOptions = options;
   const mustClause: InfraESQuery[] = [];
   const shouldClause: InfraESQuery[] = [];
   const filterClause: InfraESQuery[] = [];
@@ -56,17 +48,15 @@ export function createQuery(options: InfraNodeRequestOptions): InfraESQuery {
         mustClause.push(convertInputFilterToESQuery(inputFilter));
       }
       if (isGroupByFilters(group) && group.filters) {
-        group.filters!.forEach(
-          (groupFilter: InfraGroupByFilter | null): void => {
-            if (groupFilter != null && groupFilter.query) {
-              const inputFilter: InfraFilter = {
-                type: InfraFilterType.query_string,
-                value: groupFilter.query,
-              };
-              shouldClause.push(convertInputFilterToESQuery(inputFilter));
-            }
+        group.filters!.forEach((groupFilter: InfraGroupByFilter | null): void => {
+          if (groupFilter != null && groupFilter.query) {
+            const inputFilter: InfraFilter = {
+              type: InfraFilterType.query_string,
+              value: groupFilter.query,
+            };
+            shouldClause.push(convertInputFilterToESQuery(inputFilter));
           }
-        );
+        });
       }
     });
   }

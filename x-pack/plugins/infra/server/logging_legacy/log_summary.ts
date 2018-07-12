@@ -21,15 +21,9 @@ import {
 } from '../lib/infra_types';
 import { convertDateHistogramToSummaryBuckets } from './converters';
 import { DateHistogramResponse } from './elasticsearch';
-import {
-  indicesSchema,
-  summaryBucketSizeSchema,
-  timestampSchema,
-} from './schemas';
+import { indicesSchema, summaryBucketSizeSchema, timestampSchema } from './schemas';
 
-export const initLogSummaryRoutes = (
-  framework: InfraBackendFrameworkAdapter
-) => {
+export const initLogSummaryRoutes = (framework: InfraBackendFrameworkAdapter) => {
   const callWithRequest = framework.callWithRequest;
 
   framework.registerRoute<
@@ -108,12 +102,10 @@ async function fetchSummaryBuckets(
     value: number;
   }
 ): Promise<LogSummaryBucket[]> {
-  const minDate = `${target}||-${before * bucketSize.value}${bucketSize.unit}/${
+  const minDate = `${target}||-${before * bucketSize.value}${bucketSize.unit}/${bucketSize.unit}`;
+  const maxDate = `${target}||+${after * bucketSize.value + 1}${bucketSize.unit}/${
     bucketSize.unit
   }`;
-  const maxDate = `${target}||+${after * bucketSize.value + 1}${
-    bucketSize.unit
-  }/${bucketSize.unit}`;
   const response = await search<{
     count_by_date?: DateHistogramResponse;
   }>({
@@ -148,9 +140,7 @@ async function fetchSummaryBuckets(
   });
 
   if (response.aggregations && response.aggregations.count_by_date) {
-    return convertDateHistogramToSummaryBuckets()(
-      response.aggregations.count_by_date.buckets
-    );
+    return convertDateHistogramToSummaryBuckets()(response.aggregations.count_by_date.buckets);
   } else {
     return [];
   }

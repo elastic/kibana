@@ -54,10 +54,7 @@ export class InfraAxiosApiAdapter implements InfraApiAdapter {
     return globalAPI;
   }
 
-  public async get<T>(
-    url: string,
-    config?: InfraRequestConfig | undefined
-  ): Promise<T> {
+  public async get<T>(url: string, config?: InfraRequestConfig | undefined): Promise<T> {
     return await this._api.get(url, config).then(resp => resp.data);
   }
 
@@ -69,10 +66,7 @@ export class InfraAxiosApiAdapter implements InfraApiAdapter {
     return await this._api.post(url, data, config).then(resp => resp.data);
   }
 
-  public async delete(
-    url: string,
-    config?: InfraRequestConfig | undefined
-  ): Promise<object> {
+  public async delete(url: string, config?: InfraRequestConfig | undefined): Promise<object> {
     return await this._api.delete(url, config).then(resp => resp.data);
   }
 

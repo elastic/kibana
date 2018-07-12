@@ -20,10 +20,7 @@ interface LogSearchInputState {
   query: string;
 }
 
-export class LogSearchInput extends React.PureComponent<
-  LogSearchInputProps,
-  LogSearchInputState
-> {
+export class LogSearchInput extends React.PureComponent<LogSearchInputProps, LogSearchInputState> {
   public readonly state = {
     query: '',
   };
@@ -40,9 +37,7 @@ export class LogSearchInput extends React.PureComponent<
     }
   };
 
-  public handleChangeQuery: React.ChangeEventHandler<
-    HTMLInputElement
-  > = evt => {
+  public handleChangeQuery: React.ChangeEventHandler<HTMLInputElement> = evt => {
     this.setState({
       query: evt.target.value,
     });

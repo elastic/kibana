@@ -37,6 +37,5 @@ export const elasticSearchTimeUnits: {
   [TimeUnit.Year]: 'y',
 };
 
-export const getElasticSearchTimeUnit = (
-  scale: TimeUnit
-): ElasticsearchTimeUnit => elasticSearchTimeUnits[scale];
+export const getElasticSearchTimeUnit = (scale: TimeUnit): ElasticsearchTimeUnit =>
+  elasticSearchTimeUnits[scale];

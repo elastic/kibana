@@ -31,9 +31,7 @@ export class Header extends React.PureComponent<HeaderProps> {
     return (
       <HeaderWrapper>
         <EuiHeaderSection>
-          <EuiHeaderBreadcrumbs
-            breadcrumbs={[...this.staticBreadcrumbs, ...breadcrumbs]}
-          />
+          <EuiHeaderBreadcrumbs breadcrumbs={[...this.staticBreadcrumbs, ...breadcrumbs]} />
         </EuiHeaderSection>
       </HeaderWrapper>
     );

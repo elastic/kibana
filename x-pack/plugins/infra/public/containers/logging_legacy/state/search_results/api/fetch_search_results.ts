@@ -13,10 +13,7 @@ import {
   ContainedSearchResultsApiPostPayload,
   ContainedSearchResultsApiPostResponse,
 } from '../../../../../../common/http_api';
-import {
-  LogEntryFieldsMapping,
-  LogEntryTime,
-} from '../../../../../../common/log_entry';
+import { LogEntryFieldsMapping, LogEntryTime } from '../../../../../../common/log_entry';
 import { SearchResult } from '../../../../../../common/log_search_result';
 import { InfraObservableApi } from '../../../../../lib/lib';
 
@@ -40,10 +37,7 @@ export const fetchAdjacentSearchResults$ = (
   after: number,
   query: string
 ): FetchAdjacentSearchResultsResult =>
-  postToApi<
-    AdjacentSearchResultsApiPostPayload,
-    AdjacentSearchResultsApiPostResponse
-  >({
+  postToApi<AdjacentSearchResultsApiPostPayload, AdjacentSearchResultsApiPostResponse>({
     body: {
       after,
       before,
@@ -68,10 +62,7 @@ export const fetchContainedSearchResults$ = (
   end: LogEntryTime,
   query: string
 ): FetchContainedSearchResultsResult =>
-  postToApi<
-    ContainedSearchResultsApiPostPayload,
-    ContainedSearchResultsApiPostResponse
-  >({
+  postToApi<ContainedSearchResultsApiPostPayload, ContainedSearchResultsApiPostResponse>({
     body: {
       end: {
         tiebreaker: end.tiebreaker,

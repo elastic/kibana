@@ -8,21 +8,14 @@ import { flow, set } from 'lodash/fp';
 import { InfraResponse } from '../../common/types';
 import { InfraNodeRequestOptions } from '../lib/infra_types';
 
-const formatGroupBy = (options: InfraNodeRequestOptions) => (
-  response: InfraResponse
-) => {
-  if (
-    options.groupBy.length > 0 &&
-    (response.groups == null || response.groups.length === 0)
-  ) {
+const formatGroupBy = (options: InfraNodeRequestOptions) => (response: InfraResponse) => {
+  if (options.groupBy.length > 0 && (response.groups == null || response.groups.length === 0)) {
     return set('groups', [], response);
   }
   return response;
 };
 
-const formatNodesKey = (options: InfraNodeRequestOptions) => (
-  response: InfraResponse
-) => {
+const formatNodesKey = (options: InfraNodeRequestOptions) => (response: InfraResponse) => {
   if (response[options.nodesKey] == null) {
     return set(options.nodesKey, [], response);
   }

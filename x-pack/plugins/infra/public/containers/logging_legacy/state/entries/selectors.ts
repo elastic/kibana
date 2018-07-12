@@ -6,11 +6,7 @@
 
 import { createSelector } from 'reselect';
 
-import {
-  getIndexOfLogEntry,
-  LogEntry,
-  LogEntryTime,
-} from '../../../../../common/log_entry';
+import { getIndexOfLogEntry, LogEntry, LogEntryTime } from '../../../../../common/log_entry';
 import { EntriesState } from './reducer';
 
 const getEntry = (entries: LogEntry[], entryKey: LogEntryTime) => {
@@ -21,8 +17,7 @@ const getEntry = (entries: LogEntry[], entryKey: LogEntryTime) => {
 
 export const selectEntries = (state: EntriesState) => state.entries;
 
-export const selectEntriesStartLoadingState = (state: EntriesState) =>
-  state.start;
+export const selectEntriesStartLoadingState = (state: EntriesState) => state.start;
 
 export const selectEntriesEndLoadingState = (state: EntriesState) => state.end;
 

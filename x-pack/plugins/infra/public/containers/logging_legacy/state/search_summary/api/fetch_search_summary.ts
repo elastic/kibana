@@ -13,10 +13,7 @@ import {
 } from '../../../../../../common/http_api';
 import { LogEntryFieldsMapping } from '../../../../../../common/log_entry';
 import { SearchSummaryBucket } from '../../../../../../common/log_search_summary';
-import {
-  getElasticSearchTimeUnit,
-  TimeScale,
-} from '../../../../../../common/time';
+import { getElasticSearchTimeUnit, TimeScale } from '../../../../../../common/time';
 import { InfraObservableApi } from '../../../../../lib/lib';
 
 export interface CommonFetchSearchSummaryDependencies<State> {

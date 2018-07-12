@@ -24,15 +24,7 @@ interface SearchMarkersProps {
 
 export class SearchMarkers extends React.PureComponent<SearchMarkersProps, {}> {
   public render() {
-    const {
-      buckets,
-      start,
-      end,
-      width,
-      height,
-      jumpToTarget,
-      className,
-    } = this.props;
+    const { buckets, start, end, width, height, jumpToTarget, className } = this.props;
     const classes = classNames('minimapSearchMarkers', className);
 
     if (start >= end || height <= 0 || Object.keys(buckets).length <= 0) {
@@ -46,10 +38,7 @@ export class SearchMarkers extends React.PureComponent<SearchMarkersProps, {}> {
     return (
       <g className={classes}>
         {buckets.map(bucket => (
-          <g
-            key={bucket.representative.gid}
-            transform={`translate(0, ${yScale(bucket.start)})`}
-          >
+          <g key={bucket.representative.gid} transform={`translate(0, ${yScale(bucket.start)})`}>
             <SearchMarker
               bucket={bucket}
               height={yScale(bucket.end) - yScale(bucket.start)}

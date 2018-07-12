@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  MSearchParams,
-  MSearchResponse,
-  SearchParams,
-  SearchResponse,
-} from 'elasticsearch';
+import { MSearchParams, MSearchResponse, SearchParams, SearchResponse } from 'elasticsearch';
 
 export interface ESCluster {
   callWithRequest(
@@ -47,8 +42,7 @@ export interface HighlightedHit extends SortedHit {
   };
 }
 
-export const isHighlightedHit = (hit: Hit): hit is HighlightedHit =>
-  !!hit.highlight;
+export const isHighlightedHit = (hit: Hit): hit is HighlightedHit => !!hit.highlight;
 
 export interface DateHistogramBucket {
   key: number;
@@ -72,8 +66,7 @@ export type WithSubAggregation<
   SubAggregationType,
   SubAggregationName extends string,
   BucketType
-> = BucketType &
-  { [subAggregationName in SubAggregationName]: SubAggregationType };
+> = BucketType & { [subAggregationName in SubAggregationName]: SubAggregationType };
 
 export const isBucketWithAggregation = <
   SubAggregationType extends object,
@@ -82,8 +75,5 @@ export const isBucketWithAggregation = <
 >(
   bucket: BucketType,
   aggregationName: SubAggregationName
-): bucket is WithSubAggregation<
-  SubAggregationType,
-  SubAggregationName,
-  BucketType
-> => aggregationName in bucket;
+): bucket is WithSubAggregation<SubAggregationType, SubAggregationName, BucketType> =>
+  aggregationName in bucket;

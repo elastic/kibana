@@ -29,18 +29,15 @@ export type LoadingResult<Parameters> =
 
 export const isUninitializedLoadingResult = <P>(
   loadingResult: LoadingResult<P>
-): loadingResult is UninitializedLoadingResult =>
-  loadingResult.result === 'uninitialized';
+): loadingResult is UninitializedLoadingResult => loadingResult.result === 'uninitialized';
 
 export const isSuccessLoadingResult = <P>(
   loadingResult: LoadingResult<P>
-): loadingResult is SuccessLoadingResult<P> =>
-  loadingResult.result === 'success';
+): loadingResult is SuccessLoadingResult<P> => loadingResult.result === 'success';
 
 export const isFailureLoadingResult = <P>(
   loadingResult: LoadingResult<P>
-): loadingResult is FailureLoadingResult<P> =>
-  loadingResult.result === 'failure';
+): loadingResult is FailureLoadingResult<P> => loadingResult.result === 'failure';
 
 export const isExhaustedLoadingResult = <P>(loadingResult: LoadingResult<P>) =>
   isSuccessLoadingResult(loadingResult) && loadingResult.isExhausted;
@@ -54,10 +51,7 @@ interface GetTimeOrDefaultT {
 export const getTimeOrDefault: GetTimeOrDefaultT = <P, T>(
   loadingResult: LoadingResult<P>,
   defaultValue?: T
-) =>
-  isUninitializedLoadingResult(loadingResult)
-    ? defaultValue || null
-    : loadingResult.time;
+) => (isUninitializedLoadingResult(loadingResult) ? defaultValue || null : loadingResult.time);
 
 export const createSuccessResultReducer = <Parameters, Payload>(
   isExhausted: (params: Parameters, result: Payload) => boolean

@@ -18,21 +18,16 @@ export const selectFirstSummaryBucket = createSelector(
 
 export const selectLastSummaryBucket = createSelector(
   selectSummaryBuckets,
-  summaryBuckets =>
-    summaryBuckets.length > 0 ? summaryBuckets[summaryBuckets.length - 1] : null
+  summaryBuckets => (summaryBuckets.length > 0 ? summaryBuckets[summaryBuckets.length - 1] : null)
 );
 
-export const selectSummaryStartLoadingCount = (state: SummaryState) =>
-  state.start.loading;
+export const selectSummaryStartLoadingCount = (state: SummaryState) => state.start.loading;
 
-export const selectSummaryEndLoadingCount = (state: SummaryState) =>
-  state.end.loading;
+export const selectSummaryEndLoadingCount = (state: SummaryState) => state.end.loading;
 
-export const selectSummaryBucketSize = (state: SummaryState) =>
-  state.bucketSize;
+export const selectSummaryBucketSize = (state: SummaryState) => state.bucketSize;
 
-export const selectSummaryBufferSize = (state: SummaryState) =>
-  state.bufferSize;
+export const selectSummaryBufferSize = (state: SummaryState) => state.bufferSize;
 
 export const selectSummaryBucketsPerBuffer = createSelector(
   selectSummaryBufferSize,

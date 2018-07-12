@@ -15,11 +15,7 @@ import {
 
 export type LogEntryList = LogEntry[];
 
-export function getIndexNearLogEntry(
-  logEntries: LogEntryList,
-  key: LogEntryTime,
-  highest = false
-) {
+export function getIndexNearLogEntry(logEntries: LogEntryList, key: LogEntryTime, highest = false) {
   let minIndex = 0;
   let maxIndex = logEntries.length;
   let currentIndex: number;

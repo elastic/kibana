@@ -22,10 +22,7 @@ export class MainLayout extends React.PureComponent<MainLayoutProps> {
       <Page>
         <Header breadcrumbs={this.props.breadcrumbs} />
         <Toolbar>
-          <EuiButton
-            onClick={() => window.alert('Button clicked')}
-            iconType="logstashFilter"
-          >
+          <EuiButton onClick={() => window.alert('Button clicked')} iconType="logstashFilter">
             Filter
           </EuiButton>
         </Toolbar>

@@ -40,11 +40,7 @@ export class LogTextStreamItemDateField extends React.PureComponent<
 
 const highlightedFieldStyle = css`
   background-color: ${props =>
-    tintOrShade(
-      props.theme.eui.euiTextColor,
-      props.theme.eui.euiColorSecondary,
-      0.15
-    )};
+    tintOrShade(props.theme.eui.euiTextColor, props.theme.eui.euiColorSecondary, 0.15)};
   border-color: ${props => props.theme.eui.euiColorSecondary};
 `;
 

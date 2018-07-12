@@ -18,17 +18,11 @@ import {
   InfraWrappableRequest,
 } from '../lib/infra_types';
 import { fetchAdjacentEntries } from './adjacent_log_entries';
-import {
-  indicesSchema,
-  logEntryFieldsMappingSchema,
-  timestampSchema,
-} from './schemas';
+import { indicesSchema, logEntryFieldsMappingSchema, timestampSchema } from './schemas';
 
 const INITIAL_HORIZON_OFFSET = 1000 * 60 * 60;
 
-export const initLatestLogEntriesRoutes = (
-  framework: InfraBackendFrameworkAdapter
-) => {
+export const initLatestLogEntriesRoutes = (framework: InfraBackendFrameworkAdapter) => {
   const callWithRequest = framework.callWithRequest;
 
   framework.registerRoute<

@@ -31,10 +31,7 @@ export function compose(): InfraFrontendLibs {
     basePath: chrome.getBasePath(),
     xsrfToken: chrome.getXsrfToken(),
   });
-  const framework = new InfraKibanaFrameworkAdapter(
-    infraModule,
-    timezoneProvider
-  );
+  const framework = new InfraKibanaFrameworkAdapter(infraModule, timezoneProvider);
   const typeDefs = `
   Query {}
 `;

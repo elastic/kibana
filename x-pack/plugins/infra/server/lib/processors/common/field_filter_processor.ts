@@ -17,12 +17,8 @@ import { cloneDeep, set } from 'lodash';
 export const fieldsFilterProcessor: InfraProcessor<
   InfraProcesorRequestOptions,
   InfraESSearchBody
-> = (
-  options: InfraProcesorRequestOptions
-): InfraProcessorChainFn<InfraESSearchBody> => {
-  return (next: InfraProcessorTransformer<InfraESSearchBody>) => (
-    doc: InfraESSearchBody
-  ) => {
+> = (options: InfraProcesorRequestOptions): InfraProcessorChainFn<InfraESSearchBody> => {
+  return (next: InfraProcessorTransformer<InfraESSearchBody>) => (doc: InfraESSearchBody) => {
     const result = cloneDeep(doc);
     /*
      TODO: Need to add the filter logic to find all the fields the user is requesting

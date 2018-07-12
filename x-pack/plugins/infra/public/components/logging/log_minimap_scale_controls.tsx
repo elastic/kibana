@@ -20,23 +20,13 @@ interface LogMinimapScaleControlsProps {
   availableMinimapScales: ScaleDescriptor[];
   minimapScale: TimeScale;
   setMinimapScale: (params: { scale: TimeScale }) => any;
-  configureSummary: (
-    params: { bucketSize: TimeScale; bufferSize: TimeScale }
-  ) => any;
+  configureSummary: (params: { bucketSize: TimeScale; bufferSize: TimeScale }) => any;
 }
 
-export class LogMinimapScaleControls extends React.PureComponent<
-  LogMinimapScaleControlsProps
-> {
+export class LogMinimapScaleControls extends React.PureComponent<LogMinimapScaleControlsProps> {
   public handleScaleChange = (scaleKey: string) => {
-    const {
-      availableMinimapScales,
-      configureSummary,
-      setMinimapScale,
-    } = this.props;
-    const [scaleDescriptor] = availableMinimapScales.filter(
-      scaleKeyEquals(scaleKey)
-    );
+    const { availableMinimapScales, configureSummary, setMinimapScale } = this.props;
+    const [scaleDescriptor] = availableMinimapScales.filter(scaleKeyEquals(scaleKey));
 
     if (scaleDescriptor) {
       configureSummary({
@@ -51,9 +41,7 @@ export class LogMinimapScaleControls extends React.PureComponent<
 
   public render() {
     const { availableMinimapScales, minimapScale } = this.props;
-    const [scaleDescriptor] = availableMinimapScales.filter(
-      scaleValueEquals(minimapScale)
-    );
+    const [scaleDescriptor] = availableMinimapScales.filter(scaleValueEquals(minimapScale));
 
     return (
       <EuiFormRow label="Minimap Scale">
@@ -70,10 +58,8 @@ export class LogMinimapScaleControls extends React.PureComponent<
   }
 }
 
-const scaleKeyEquals = (key: ScaleDescriptor['key']) => (
-  scaleDescriptor: ScaleDescriptor
-) => scaleDescriptor.key === key;
+const scaleKeyEquals = (key: ScaleDescriptor['key']) => (scaleDescriptor: ScaleDescriptor) =>
+  scaleDescriptor.key === key;
 
-const scaleValueEquals = (value: ScaleDescriptor['scale']) => (
-  scaleDescriptor: ScaleDescriptor
-) => getMillisOfScale(value) === getMillisOfScale(scaleDescriptor.scale);
+const scaleValueEquals = (value: ScaleDescriptor['scale']) => (scaleDescriptor: ScaleDescriptor) =>
+  getMillisOfScale(value) === getMillisOfScale(scaleDescriptor.scale);

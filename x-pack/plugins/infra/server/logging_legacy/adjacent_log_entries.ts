@@ -12,11 +12,7 @@ import {
   AdjacentLogEntriesApiPostPayload,
   AdjacentLogEntriesApiPostResponse,
 } from '../../common/http_api';
-import {
-  LogEntry,
-  LogEntryFieldsMapping,
-  LogEntryTime,
-} from '../../common/log_entry';
+import { LogEntry, LogEntryFieldsMapping, LogEntryTime } from '../../common/log_entry';
 import {
   InfraBackendFrameworkAdapter,
   InfraDatabaseSearchResponse,
@@ -34,9 +30,7 @@ import {
 const INITIAL_HORIZON_OFFSET = 1000 * 60 * 60 * 24;
 const MAX_HORIZON = 9999999999999;
 
-export const initAdjacentLogEntriesRoutes = (
-  framework: InfraBackendFrameworkAdapter
-) => {
+export const initAdjacentLogEntriesRoutes = (framework: InfraBackendFrameworkAdapter) => {
   const callWithRequest = framework.callWithRequest;
 
   framework.registerRoute<
@@ -104,9 +98,7 @@ export const initAdjacentLogEntriesRoutes = (
 };
 
 export async function fetchAdjacentEntries(
-  search: <Hit>(
-    params: SearchParams
-  ) => Promise<InfraDatabaseSearchResponse<Hit, any>>,
+  search: <Hit>(params: SearchParams) => Promise<InfraDatabaseSearchResponse<Hit, any>>,
   indices: string[],
   fields: LogEntryFieldsMapping,
   target: LogEntryTime,
@@ -142,12 +134,7 @@ export async function fetchAdjacentEntries(
   const hits = response.hits.hits;
   const nextHorizon = horizon + (horizon - target.time);
 
-  if (
-    !widenHorizon ||
-    hits.length >= size ||
-    nextHorizon < 0 ||
-    nextHorizon > MAX_HORIZON
-  ) {
+  if (!widenHorizon || hits.length >= size || nextHorizon < 0 || nextHorizon > MAX_HORIZON) {
     return hits.map(convertHitToLogEntry(fields));
   } else {
     return fetchAdjacentEntries(

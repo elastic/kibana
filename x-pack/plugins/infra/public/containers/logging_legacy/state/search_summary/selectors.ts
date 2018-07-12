@@ -11,7 +11,6 @@ import { SearchSummaryState } from './reducer';
 
 export const selectBuckets = (state: SearchSummaryState) => state.buckets;
 
-export const selectBucketsByStart = createSelector(
-  selectBuckets,
-  summaryBuckets => keyBy('start', summaryBuckets)
+export const selectBucketsByStart = createSelector(selectBuckets, summaryBuckets =>
+  keyBy('start', summaryBuckets)
 );

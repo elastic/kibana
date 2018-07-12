@@ -20,13 +20,15 @@ export const initialTextviewState: TextviewState = {
   wrap: true,
 };
 
-const textviewScaleReducer = reducerWithInitialState(
-  initialTextviewState.scale
-).case(setTextviewScale, (state, scale) => scale);
+const textviewScaleReducer = reducerWithInitialState(initialTextviewState.scale).case(
+  setTextviewScale,
+  (state, scale) => scale
+);
 
-const textviewWrapReducer = reducerWithInitialState(
-  initialTextviewState.wrap
-).case(setTextviewWrap, (state, wrap) => wrap);
+const textviewWrapReducer = reducerWithInitialState(initialTextviewState.wrap).case(
+  setTextviewWrap,
+  (state, wrap) => wrap
+);
 
 export const textviewReducer = combineReducers<TextviewState>({
   scale: textviewScaleReducer,

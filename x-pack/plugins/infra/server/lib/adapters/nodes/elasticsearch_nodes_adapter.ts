@@ -30,17 +30,9 @@ export class ElasticsearchNodesAdapter implements InfraNodesAdapter {
     options: InfraNodeRequestOptions
   ): Promise<InfraResponse> {
     const search = <Aggregation>(searchOptions: object) =>
-      this.framework.callWithRequest<{}, Aggregation>(
-        req,
-        'search',
-        searchOptions
-      );
+      this.framework.callWithRequest<{}, Aggregation>(req, 'search', searchOptions);
     const msearch = <Aggregation>(msearchOptions: object) =>
-      this.framework.callWithRequest<{}, Aggregation>(
-        req,
-        'msearch',
-        msearchOptions
-      );
+      this.framework.callWithRequest<{}, Aggregation>(req, 'msearch', msearchOptions);
 
     const infraResponse: InfraResponse = {};
 
@@ -54,11 +46,7 @@ export class ElasticsearchNodesAdapter implements InfraNodesAdapter {
       return infraResponse;
     }
 
-    const body = createPartitionBodies(
-      totalNodes,
-      DOMAIN_TO_FIELD[options.nodeType],
-      options
-    );
+    const body = createPartitionBodies(totalNodes, DOMAIN_TO_FIELD[options.nodeType], options);
 
     const response = await msearch<InfraNodesAggregations>({
       body,

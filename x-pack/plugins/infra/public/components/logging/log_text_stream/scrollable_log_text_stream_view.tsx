@@ -15,12 +15,7 @@ import {
   LoadingState,
 } from '../../../utils/loading_state';
 import { LogTextStreamEmptyView } from './empty_view';
-import {
-  getStreamItemBeforeTimeKey,
-  getStreamItemId,
-  parseStreamItemId,
-  StreamItem,
-} from './item';
+import { getStreamItemBeforeTimeKey, getStreamItemId, parseStreamItemId, StreamItem } from './item';
 import { LogTextStreamItemView } from './item_view';
 import { LogTextStreamLoadingItemView } from './loading_item_view';
 import { LogTextStreamLoadingView } from './loading_view';
@@ -61,12 +56,9 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
     nextProps: ScrollableLogTextStreamViewProps,
     prevState: ScrollableLogTextStreamViewState
   ): Partial<ScrollableLogTextStreamViewState> | null {
-    const hasNewTarget =
-      nextProps.target && nextProps.target !== prevState.target;
+    const hasNewTarget = nextProps.target && nextProps.target !== prevState.target;
     const hasItems = nextProps.items.length > 0;
-    const isEndStreaming = isIntervalLoadingPolicy(
-      nextProps.endLoadingState.policy
-    );
+    const isEndStreaming = isIntervalLoadingPolicy(nextProps.endLoadingState.policy);
 
     if (isEndStreaming && hasItems) {
       return {
@@ -76,9 +68,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
     } else if (hasNewTarget && hasItems) {
       return {
         target: nextProps.target,
-        targetId: getStreamItemId(
-          getStreamItemBeforeTimeKey(nextProps.items, nextProps.target)
-        ),
+        targetId: getStreamItemId(getStreamItemBeforeTimeKey(nextProps.items, nextProps.target)),
       };
     } else if (!nextProps.target || !hasItems) {
       return {
@@ -96,15 +86,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
   };
 
   public render() {
-    const {
-      items,
-      height,
-      width,
-      scale,
-      wrap,
-      startLoadingState,
-      endLoadingState,
-    } = this.props;
+    const { items, height, width, scale, wrap, startLoadingState, endLoadingState } = this.props;
     const { targetId } = this.state;
 
     const hasItems = items.length > 0;
@@ -115,13 +97,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
     if (isLoading && !hasItems) {
       return <LogTextStreamLoadingView height={height} width={width} />;
     } else if (!hasItems) {
-      return (
-        <LogTextStreamEmptyView
-          height={height}
-          width={width}
-          reload={this.handleReload}
-        />
-      );
+      return <LogTextStreamEmptyView height={height} width={width} reload={this.handleReload} />;
     } else {
       return (
         <VerticalScrollPanel
@@ -133,10 +109,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
         >
           {registerChild => (
             <>
-              <LogTextStreamLoadingItemView
-                alignment="bottom"
-                loadingState={startLoadingState}
-              />
+              <LogTextStreamLoadingItemView alignment="bottom" loadingState={startLoadingState} />
               {items.map(item => (
                 <MeasurableItemView
                   register={registerChild}
@@ -144,19 +117,11 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                   key={getStreamItemId(item)}
                 >
                   {measureRef => (
-                    <LogTextStreamItemView
-                      ref={measureRef}
-                      item={item}
-                      scale={scale}
-                      wrap={wrap}
-                    />
+                    <LogTextStreamItemView ref={measureRef} item={item} scale={scale} wrap={wrap} />
                   )}
                 </MeasurableItemView>
               ))}
-              <LogTextStreamLoadingItemView
-                alignment="top"
-                loadingState={endLoadingState}
-              />
+              <LogTextStreamLoadingItemView alignment="top" loadingState={endLoadingState} />
             </>
           )}
         </VerticalScrollPanel>

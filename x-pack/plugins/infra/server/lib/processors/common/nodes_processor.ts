@@ -17,15 +17,10 @@ import {
   InfraProcessorTransformer,
 } from '../../infra_types';
 
-export const nodesProcessor: InfraProcessor<
-  InfraProcesorRequestOptions,
-  InfraESSearchBody
-> = (
+export const nodesProcessor: InfraProcessor<InfraProcesorRequestOptions, InfraESSearchBody> = (
   options: InfraProcesorRequestOptions
 ): InfraProcessorChainFn<InfraESSearchBody> => {
-  return (next: InfraProcessorTransformer<InfraESSearchBody>) => (
-    doc: InfraESSearchBody
-  ) => {
+  return (next: InfraProcessorTransformer<InfraESSearchBody>) => (doc: InfraESSearchBody) => {
     const result = cloneDeep(doc);
     set(result, 'aggs.waffle.aggs.nodes.terms', {
       field: options.nodeField,

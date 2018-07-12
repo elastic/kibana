@@ -17,10 +17,7 @@ interface LogPositionTextProps {
   lastVisibleLogEntry: LogEntry | null;
 }
 
-export class LogPositionText extends React.PureComponent<
-  LogPositionTextProps,
-  {}
-> {
+export class LogPositionText extends React.PureComponent<LogPositionTextProps, {}> {
   public render() {
     const { className, firstVisibleLogEntry, lastVisibleLogEntry } = this.props;
 
@@ -30,15 +27,11 @@ export class LogPositionText extends React.PureComponent<
       <div className={classes}>
         <span>Showing </span>
         <strong>
-          {firstVisibleLogEntry
-            ? formatTime(firstVisibleLogEntry.fields.time)
-            : 'unknown'}
+          {firstVisibleLogEntry ? formatTime(firstVisibleLogEntry.fields.time) : 'unknown'}
         </strong>{' '}
         <EuiIcon type="sortRight" />{' '}
         <strong>
-          {lastVisibleLogEntry
-            ? formatTime(lastVisibleLogEntry.fields.time)
-            : 'unknown'}
+          {lastVisibleLogEntry ? formatTime(lastVisibleLogEntry.fields.time) : 'unknown'}
         </strong>
       </div>
     );

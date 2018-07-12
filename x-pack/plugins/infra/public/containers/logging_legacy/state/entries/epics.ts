@@ -18,11 +18,7 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import {
-  getLogEntryKey,
-  isBetween,
-  LogEntry,
-} from '../../../../../common/log_entry';
+import { getLogEntryKey, isBetween, LogEntry } from '../../../../../common/log_entry';
 import {
   isExhaustedLoadingResult,
   isFailureLoadingResult,
@@ -39,20 +35,15 @@ import {
 } from './actions';
 import { extendEntriesEnd$, extendEntriesStart$ } from './api/extend_entries';
 import { CommonFetchEntriesDependencies } from './api/fetch_entries';
-import {
-  replaceEntries$,
-  replaceEntriesWithLatest$,
-} from './api/replace_entries';
+import { replaceEntries$, replaceEntriesWithLatest$ } from './api/replace_entries';
 
 const ASSUMED_ENTRIES_PER_PAGE = 100;
 const DESIRED_BUFFER_PAGES = 2;
-const DEFAULT_INTERVAL_ENTRIES =
-  (2 * DESIRED_BUFFER_PAGES + 1) * ASSUMED_ENTRIES_PER_PAGE;
+const DEFAULT_INTERVAL_ENTRIES = (2 * DESIRED_BUFFER_PAGES + 1) * ASSUMED_ENTRIES_PER_PAGE;
 const MIN_CHUNK_SIZE = 25;
 const VISIBLE_INTERVAL_SETTLE_TIMEOUT = 2000;
 
-interface ManageStreamIntervalDependencies<State>
-  extends CommonFetchEntriesDependencies<State> {
+interface ManageStreamIntervalDependencies<State> extends CommonFetchEntriesDependencies<State> {
   selectFirstEntry: (state: State) => LogEntry | null;
   selectLastEntry: (state: State) => LogEntry | null;
   selectEntriesStartLoadingState: (state: State) => LoadingState<any>;
@@ -92,9 +83,7 @@ export const createSummaryEpic = <State>(): Epic<
   const missingStartEntriesAfterScroll$ = action$.pipe(
     filter(reportVisibleEntries.match),
     map(({ payload: { pagesBeforeStart } }) =>
-      Math.ceil(
-        ASSUMED_ENTRIES_PER_PAGE * (DESIRED_BUFFER_PAGES - pagesBeforeStart)
-      )
+      Math.ceil(ASSUMED_ENTRIES_PER_PAGE * (DESIRED_BUFFER_PAGES - pagesBeforeStart))
     ),
     filter(missingEntries => missingEntries > 0)
   );
@@ -102,9 +91,7 @@ export const createSummaryEpic = <State>(): Epic<
   const missingEndEntriesAfterScroll$ = action$.pipe(
     filter(reportVisibleEntries.match),
     map(({ payload: { pagesAfterEnd } }) =>
-      Math.ceil(
-        ASSUMED_ENTRIES_PER_PAGE * (DESIRED_BUFFER_PAGES - pagesAfterEnd)
-      )
+      Math.ceil(ASSUMED_ENTRIES_PER_PAGE * (DESIRED_BUFFER_PAGES - pagesAfterEnd))
     ),
     filter(missingEntries => missingEntries > 0)
   );
@@ -120,10 +107,7 @@ export const createSummaryEpic = <State>(): Epic<
         )
       )
     ),
-    action$.pipe(
-      filter(() => false /* TODO: filter jumpToEnd */),
-      map(() => ({ isJump: true }))
-    )
+    action$.pipe(filter(() => false /* TODO: filter jumpToEnd */), map(() => ({ isJump: true })))
   ).pipe(
     map(({ isJump }) => ({
       isJump,
@@ -160,9 +144,7 @@ export const createSummaryEpic = <State>(): Epic<
           isBetween(firstLogEntry.fields, lastLogEntry.fields, target);
 
         // the interval is displayed symmetrically before and after the target
-        const desiredEntriesPerEndpoint = Math.ceil(
-          DEFAULT_INTERVAL_ENTRIES / 2
-        );
+        const desiredEntriesPerEndpoint = Math.ceil(DEFAULT_INTERVAL_ENTRIES / 2);
 
         if (isLocalJump) {
           return [

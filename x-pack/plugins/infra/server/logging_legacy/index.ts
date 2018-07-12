@@ -12,9 +12,7 @@ import { initLatestLogEntriesRoutes } from './latest_log_entries';
 import { initLogSummaryRoutes } from './log_summary';
 import { initSearchSummaryRoutes } from './search_summary';
 
-export const initLegacyLoggingRoutes = (
-  framework: InfraBackendFrameworkAdapter
-) => {
+export const initLegacyLoggingRoutes = (framework: InfraBackendFrameworkAdapter) => {
   initAdjacentLogEntriesRoutes(framework);
   initLatestLogEntriesRoutes(framework);
   initLogSummaryRoutes(framework);

@@ -21,5 +21,4 @@ export const isManualLoadingPolicy = (
 
 export const isIntervalLoadingPolicy = (
   loadingPolicy: LoadingPolicy
-): loadingPolicy is IntervalLoadingPolicy =>
-  loadingPolicy.policy === 'interval';
+): loadingPolicy is IntervalLoadingPolicy => loadingPolicy.policy === 'interval';

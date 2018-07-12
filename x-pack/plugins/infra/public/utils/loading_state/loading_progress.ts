@@ -14,19 +14,15 @@ interface RunningLoadingProgress<Parameters> {
   parameters: Parameters;
 }
 
-export type LoadingProgress<Parameters> =
-  | IdleLoadingProgress
-  | RunningLoadingProgress<Parameters>;
+export type LoadingProgress<Parameters> = IdleLoadingProgress | RunningLoadingProgress<Parameters>;
 
 export const isUninitializedLoadingProgress = <P>(
   loadingProgress: LoadingProgress<P>
-): loadingProgress is IdleLoadingProgress =>
-  loadingProgress.progress === 'idle';
+): loadingProgress is IdleLoadingProgress => loadingProgress.progress === 'idle';
 
 export const isRunningLoadingProgress = <P>(
   loadingProgress: LoadingProgress<P>
-): loadingProgress is RunningLoadingProgress<P> =>
-  loadingProgress.progress === 'running';
+): loadingProgress is RunningLoadingProgress<P> => loadingProgress.progress === 'running';
 
 export const createIdleProgressReducer = <Parameters>() => (
   state: LoadingProgress<Parameters>

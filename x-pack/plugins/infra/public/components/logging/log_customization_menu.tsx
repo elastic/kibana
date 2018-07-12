@@ -12,10 +12,7 @@ interface LogCustomizationMenuState {
   isShown: boolean;
 }
 
-export class LogCustomizationMenu extends React.Component<
-  {},
-  LogCustomizationMenuState
-> {
+export class LogCustomizationMenu extends React.Component<{}, LogCustomizationMenuState> {
   public readonly state = {
     isShown: false,
   };
@@ -43,12 +40,7 @@ export class LogCustomizationMenu extends React.Component<
     const { isShown } = this.state;
 
     const menuButton = (
-      <EuiButtonEmpty
-        color="text"
-        iconType="gear"
-        onClick={this.toggleVisibility}
-        size="xs"
-      >
+      <EuiButtonEmpty color="text" iconType="gear" onClick={this.toggleVisibility} size="xs">
         Customize
       </EuiButtonEmpty>
     );

@@ -28,9 +28,7 @@ export class LogTextStreamItemMessageField extends React.PureComponent<
     const { children, highlights, isHovered, isWrapped, scale } = this.props;
 
     const hasHighlights = highlights.length > 0;
-    const content = hasHighlights
-      ? renderHighlightFragments(children, highlights)
-      : children;
+    const content = hasHighlights ? renderHighlightFragments(children, highlights) : children;
     return (
       <LogTextStreamItemMessageFieldWrapper
         hasHighlights={hasHighlights}
@@ -44,10 +42,7 @@ export class LogTextStreamItemMessageField extends React.PureComponent<
   }
 }
 
-const renderHighlightFragments = (
-  text: string,
-  highlights: string[]
-): React.ReactNode[] => {
+const renderHighlightFragments = (text: string, highlights: string[]): React.ReactNode[] => {
   const renderedHighlights = highlights.reduce(
     ({ lastFragmentEnd, renderedFragments }, highlight) => {
       const fragmentStart = text.indexOf(highlight, lastFragmentEnd);
@@ -69,19 +64,12 @@ const renderHighlightFragments = (
     }
   );
 
-  return [
-    ...renderedHighlights.renderedFragments,
-    text.slice(renderedHighlights.lastFragmentEnd),
-  ];
+  return [...renderedHighlights.renderedFragments, text.slice(renderedHighlights.lastFragmentEnd)];
 };
 
 const highlightedFieldStyle = css`
   background-color: ${props =>
-    tintOrShade(
-      props.theme.eui.euiTextColor,
-      props.theme.eui.euiColorSecondary,
-      0.15
-    )};
+    tintOrShade(props.theme.eui.euiTextColor, props.theme.eui.euiColorSecondary, 0.15)};
 `;
 
 const hoveredFieldStyle = css`

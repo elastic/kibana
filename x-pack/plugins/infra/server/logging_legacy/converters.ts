@@ -73,10 +73,8 @@ export const convertDateHistogramToSearchSummaryBuckets = (
   buckets.reduceRight(
     ({ previousStart, aggregatedBuckets }, bucket) => {
       const representative =
-        isBucketWithAggregation<HitsBucket, 'top_entries'>(
-          bucket,
-          'top_entries'
-        ) && bucket.top_entries.hits.hits.length > 0
+        isBucketWithAggregation<HitsBucket, 'top_entries'>(bucket, 'top_entries') &&
+        bucket.top_entries.hits.hits.length > 0
           ? convertHitToSearchResult(fields)(bucket.top_entries.hits.hits[0])
           : null;
       return {

@@ -18,9 +18,7 @@ export interface IRegister {
   };
 }
 
-export type HapiOptionsFunction = (
-  req?: Request
-) => GraphQLOptions | Promise<GraphQLOptions>;
+export type HapiOptionsFunction = (req?: Request) => GraphQLOptions | Promise<GraphQLOptions>;
 
 export interface HapiPluginOptions {
   path: string;

@@ -17,9 +17,7 @@ export class InfraFieldsDomain {
 
   public async getFields(): Promise<InfraField[]> {
     const dateFormat = this.framework.dateFormat;
-    const fields = await this.api.get<InfraField[]>(
-      `/fields?dateFormat=${dateFormat}`
-    );
+    const fields = await this.api.get<InfraField[]>(`/fields?dateFormat=${dateFormat}`);
     return fields;
   }
 }

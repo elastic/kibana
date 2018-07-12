@@ -43,13 +43,5 @@ export function parseStreamItemId(id: string) {
 
 const streamItemTimeBisector = bisector(compareToTimeKey(getStreamItemTimeKey));
 
-export const getStreamItemBeforeTimeKey = (
-  streamItems: StreamItem[],
-  key: TimeKey
-) =>
-  streamItems[
-    Math.min(
-      streamItemTimeBisector.left(streamItems, key),
-      streamItems.length - 1
-    )
-  ];
+export const getStreamItemBeforeTimeKey = (streamItems: StreamItem[], key: TimeKey) =>
+  streamItems[Math.min(streamItemTimeBisector.left(streamItems, key), streamItems.length - 1)];

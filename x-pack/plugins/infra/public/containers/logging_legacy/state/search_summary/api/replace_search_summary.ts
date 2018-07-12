@@ -26,15 +26,7 @@ export const replaceSearchSummary$ = (
   const params = {
     query,
   };
-  return fetchSearchSummary$(
-    postToApi,
-    indices,
-    fields,
-    start,
-    end,
-    bucketSize,
-    query
-  ).pipe(
+  return fetchSearchSummary$(postToApi, indices, fields, start, end, bucketSize, query).pipe(
     map(buckets =>
       replaceSearchSummary.done({
         params,

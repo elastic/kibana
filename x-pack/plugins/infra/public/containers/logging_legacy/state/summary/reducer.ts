@@ -58,12 +58,9 @@ const summaryStartReducer = reducerWithInitialState(initialSummaryState.start)
   .case(extendSummaryStart.started, (state, { count }) => ({
     loading: state.loading + count,
   }))
-  .cases(
-    [extendSummaryStart.done, extendSummaryStart.failed],
-    (state, { params: { count } }) => ({
-      loading: state.loading - count,
-    })
-  )
+  .cases([extendSummaryStart.done, extendSummaryStart.failed], (state, { params: { count } }) => ({
+    loading: state.loading - count,
+  }))
   .build();
 
 const summaryEndReducer = reducerWithInitialState(initialSummaryState.end)
@@ -73,26 +70,15 @@ const summaryEndReducer = reducerWithInitialState(initialSummaryState.end)
   .case(replaceSummary.done, (state, { params: { after } }) => ({
     loading: state.loading - after,
   }))
-  .cases(
-    [extendSummaryEnd.done, extendSummaryEnd.failed],
-    (state, { params: { count } }) => ({
-      loading: state.loading - count,
-    })
-  )
+  .cases([extendSummaryEnd.done, extendSummaryEnd.failed], (state, { params: { count } }) => ({
+    loading: state.loading - count,
+  }))
   .build();
 
-const summaryBucketsReducer = reducerWithInitialState(
-  initialSummaryState.buckets
-)
+const summaryBucketsReducer = reducerWithInitialState(initialSummaryState.buckets)
   .case(replaceSummary.done, (state, { result: { buckets } }) => buckets)
-  .case(extendSummaryStart.done, (state, { result: { buckets } }) => [
-    ...buckets,
-    ...state,
-  ])
-  .case(extendSummaryEnd.done, (state, { result: { buckets } }) => [
-    ...state,
-    ...buckets,
-  ])
+  .case(extendSummaryStart.done, (state, { result: { buckets } }) => [...buckets, ...state])
+  .case(extendSummaryEnd.done, (state, { result: { buckets } }) => [...state, ...buckets])
   .case(consolidateSummary, (state, { after, before, target }) => {
     const targetIndex = sortedIndexBy('start', { start: target }, state);
 
@@ -108,13 +94,15 @@ const summaryBucketsReducer = reducerWithInitialState(
   })
   .build();
 
-const summaryBucketSizeReducer = reducerWithInitialState(
-  initialSummaryState.bucketSize
-).case(configureSummary, (state, { bucketSize }) => bucketSize);
+const summaryBucketSizeReducer = reducerWithInitialState(initialSummaryState.bucketSize).case(
+  configureSummary,
+  (state, { bucketSize }) => bucketSize
+);
 
-const summaryBufferSizeReducer = reducerWithInitialState(
-  initialSummaryState.bufferSize
-).case(configureSummary, (state, { bufferSize }) => bufferSize);
+const summaryBufferSizeReducer = reducerWithInitialState(initialSummaryState.bufferSize).case(
+  configureSummary,
+  (state, { bufferSize }) => bufferSize
+);
 
 export const summaryReducer = combineReducers<SummaryState>({
   bucketSize: summaryBucketSizeReducer,

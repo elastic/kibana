@@ -101,11 +101,7 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
       },
     } = this;
 
-    return getVisibleChildren(
-      Array.from(childDimensions.entries()),
-      scrollViewHeight,
-      scrollTop
-    );
+    return getVisibleChildren(Array.from(childDimensions.entries()), scrollViewHeight, scrollTop);
   };
 
   public getScrollPosition = () => {
@@ -122,8 +118,7 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
 
     return {
       pagesAbove: scrollTop / scrollViewHeight,
-      pagesBelow:
-        (scrollHeight - scrollTop - scrollViewHeight) / scrollViewHeight,
+      pagesBelow: (scrollHeight - scrollTop - scrollViewHeight) / scrollViewHeight,
     };
   };
 
@@ -132,11 +127,7 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
     const visibleChildren = this.getVisibleChildren();
     const scrollPosition = this.getScrollPosition();
 
-    if (
-      !visibleChildren ||
-      !scrollPosition ||
-      typeof onVisibleChildrenChange !== 'function'
-    ) {
+    if (!visibleChildren || !scrollPosition || typeof onVisibleChildrenChange !== 'function') {
       return;
     }
 
@@ -162,17 +153,12 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
     const targetDimensions = childDimensions.get(target);
 
     if (targetDimensions) {
-      const targetOffset =
-        typeof offset === 'undefined' ? targetDimensions.height / 2 : offset;
-      scrollRef.current.scrollTop =
-        targetDimensions.top + targetOffset - scrollViewHeight / 2;
+      const targetOffset = typeof offset === 'undefined' ? targetDimensions.height / 2 : offset;
+      scrollRef.current.scrollTop = targetDimensions.top + targetOffset - scrollViewHeight / 2;
     }
   };
 
-  public handleUpdatedChildren = (
-    target: Child | undefined,
-    offset: number | undefined
-  ) => {
+  public handleUpdatedChildren = (target: Child | undefined, offset: number | undefined) => {
     this.updateChildDimensions();
     if (!!target) {
       this.centerTarget(target, offset);
@@ -268,23 +254,15 @@ const getVisibleChildren = <Child extends {}>(
   );
 
   const bottomChildIndex = Math.min(
-    getChildIndexBefore(
-      childDimensions,
-      scrollTop + scrollViewHeight,
-      middleChildIndex
-    ),
+    getChildIndexBefore(childDimensions, scrollTop + scrollViewHeight, middleChildIndex),
     childDimensions.length - 1
   );
 
   return {
     bottomChild: childDimensions[bottomChildIndex][0],
-    bottomChildOffset:
-      childDimensions[bottomChildIndex][1].top - scrollTop - scrollViewHeight,
+    bottomChildOffset: childDimensions[bottomChildIndex][1].top - scrollTop - scrollViewHeight,
     middleChild: childDimensions[middleChildIndex][0],
-    middleChildOffset:
-      scrollTop +
-      scrollViewHeight / 2 -
-      childDimensions[middleChildIndex][1].top,
+    middleChildOffset: scrollTop + scrollViewHeight / 2 - childDimensions[middleChildIndex][1].top,
     topChild: childDimensions[topChildIndex][0],
     topChildOffset: childDimensions[topChildIndex][1].top - scrollTop,
   };
@@ -292,6 +270,5 @@ const getVisibleChildren = <Child extends {}>(
 
 const sortDimensionsByTop = sortBy<[any, Rect]>('1.top');
 
-const getChildIndexBefore = bisector<[any, Rect], number>(
-  ([key, rect]) => rect.top + rect.height
-).left;
+const getChildIndexBefore = bisector<[any, Rect], number>(([key, rect]) => rect.top + rect.height)
+  .left;

@@ -42,11 +42,7 @@ export interface InfraFrameworkRequest<
   query: InternalRequest['query'];
 }
 
-export interface InfraWrappableRequest<
-  Payload = any,
-  Params = any,
-  Query = any
-> {
+export interface InfraWrappableRequest<Payload = any, Params = any, Query = any> {
   payload: Payload;
   params: Params;
   query: Query;
@@ -57,10 +53,8 @@ export interface InfraDatabaseResponse {
   timeout: boolean;
 }
 
-export interface InfraDatabaseSearchResponse<
-  Hit = {},
-  Aggregations = undefined
-> extends InfraDatabaseResponse {
+export interface InfraDatabaseSearchResponse<Hit = {}, Aggregations = undefined>
+  extends InfraDatabaseResponse {
   aggregations?: Aggregations;
   hits: {
     total: number;
@@ -68,8 +62,7 @@ export interface InfraDatabaseSearchResponse<
   };
 }
 
-export interface InfraDatabaseMultiResponse<Hit, Aggregation>
-  extends InfraDatabaseResponse {
+export interface InfraDatabaseMultiResponse<Hit, Aggregation> extends InfraDatabaseResponse {
   responses: Array<InfraDatabaseSearchResponse<Hit, Aggregation>>;
 }
 
@@ -128,10 +121,7 @@ export interface InfraFrameworkRouteOptions<
 export type InfraFrameworkRouteHandler<
   RouteRequest extends InfraWrappableRequest,
   RouteResponse
-> = (
-  request: InfraFrameworkRequest<RouteRequest>,
-  reply: IStrictReply<RouteResponse>
-) => void;
+> = (request: InfraFrameworkRequest<RouteRequest>, reply: IStrictReply<RouteResponse>) => void;
 
 export interface InfraFieldDetails {
   searchable: boolean;
@@ -187,10 +177,7 @@ export interface InfraHostsFieldsObject {
 }
 
 export interface InfraNodesAdapter {
-  getNodes(
-    req: InfraFrameworkRequest,
-    options: InfraNodeRequestOptions
-  ): Promise<InfraResponse>;
+  getNodes(req: InfraFrameworkRequest, options: InfraNodeRequestOptions): Promise<InfraResponse>;
 }
 
 export type InfraESQuery =

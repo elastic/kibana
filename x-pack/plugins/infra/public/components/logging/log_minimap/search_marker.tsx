@@ -22,10 +22,7 @@ interface SearchMarkerState {
   hoveredPosition: ClientRect | null;
 }
 
-export class SearchMarker extends React.PureComponent<
-  SearchMarkerProps,
-  SearchMarkerState
-> {
+export class SearchMarker extends React.PureComponent<SearchMarkerProps, SearchMarkerState> {
   public readonly state = {
     hoveredPosition: null,
   };
@@ -54,14 +51,7 @@ export class SearchMarker extends React.PureComponent<
 
     const bulge =
       bucket.count > 1 ? (
-        <SearchMarkerForegroundRect
-          x="-2"
-          y="-2"
-          width="4"
-          height={height + 2}
-          rx="2"
-          ry="2"
-        />
+        <SearchMarkerForegroundRect x="-2" y="-2" width="4" height={height + 2} rx="2" ry="2" />
       ) : (
         <>
           <SearchMarkerForegroundRect x="-1" y="0" width="2" height={height} />
@@ -80,8 +70,7 @@ export class SearchMarker extends React.PureComponent<
       <>
         {hoveredPosition ? (
           <SearchMarkerTooltip markerPosition={hoveredPosition}>
-            {bucket.count}{' '}
-            {bucket.count === 1 ? 'search result' : 'search results'}
+            {bucket.count} {bucket.count === 1 ? 'search result' : 'search results'}
           </SearchMarkerTooltip>
         ) : null}
         <SearchMarkerGroup
@@ -89,12 +78,7 @@ export class SearchMarker extends React.PureComponent<
           onMouseEnter={this.handleMouseEnter}
           onMouseLeave={this.handleMouseLeave}
         >
-          <SearchMarkerBackgroundRect
-            x="0"
-            y="0"
-            width={width}
-            height={height}
-          />
+          <SearchMarkerBackgroundRect x="0" y="0" width={width} height={height} />
           {bulge}
         </SearchMarkerGroup>
       </>
@@ -112,8 +96,7 @@ const fadeInAnimation = keyframes`
 `;
 
 const SearchMarkerGroup = styled.g`
-  animation: ${fadeInAnimation}
-    ${props => props.theme.eui.euiAnimSpeedExtraSlow} ease-in both;
+  animation: ${fadeInAnimation} ${props => props.theme.eui.euiAnimSpeedExtraSlow} ease-in both;
 `;
 
 const SearchMarkerBackgroundRect = styled.rect`

@@ -27,11 +27,7 @@ import {
 import { initialSourceState, sourceReducer, SourceState } from './source';
 import { initialSummaryState, summaryReducer, SummaryState } from './summary';
 import { initialTargetState, targetReducer, TargetState } from './target';
-import {
-  initialTextviewState,
-  textviewReducer,
-  TextviewState,
-} from './textview';
+import { initialTextviewState, textviewReducer, TextviewState } from './textview';
 
 export interface State {
   configuration: ConfigurationState;

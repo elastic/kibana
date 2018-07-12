@@ -37,19 +37,12 @@ export class LogTextStreamLoadingItemView extends React.PureComponent<
 
     if (isStreaming) {
       return (
-        <ProgressEntry
-          alignment={alignment}
-          className={className}
-          color="primary"
-          isLoading={true}
-        >
+        <ProgressEntry alignment={alignment} className={className} color="primary" isLoading={true}>
           <EuiText color="subdued">
             Streaming new entries
             {lastLoadedTime ? (
               <>
-                : last updated{' '}
-                <RelativeTime time={lastLoadedTime} refreshInterval={1000} />{' '}
-                ago
+                : last updated <RelativeTime time={lastLoadedTime} refreshInterval={1000} /> ago
               </>
             ) : null}
           </EuiText>
@@ -57,12 +50,7 @@ export class LogTextStreamLoadingItemView extends React.PureComponent<
       );
     } else if (isLoading) {
       return (
-        <ProgressEntry
-          alignment={alignment}
-          className={className}
-          color="subdued"
-          isLoading={true}
-        >
+        <ProgressEntry alignment={alignment} className={className} color="subdued" isLoading={true}>
           Loading additional entries
         </ProgressEntry>
       );

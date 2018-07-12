@@ -45,10 +45,7 @@ const selectItems = createSelector(
     )
 );
 
-const createLogEntryStreamItem = (
-  logEntry: LogEntry,
-  searchResult?: SearchResult
-) => ({
+const createLogEntryStreamItem = (logEntry: LogEntry, searchResult?: SearchResult) => ({
   kind: 'logEntry' as 'logEntry',
   logEntry,
   searchResult,

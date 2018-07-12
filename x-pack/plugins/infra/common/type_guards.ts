@@ -6,19 +6,12 @@
 
 import { InfraGroupBy, InfraGroupByType } from './types';
 
-import {
-  InfraGroupByFilters,
-  InfraGroupByTerms,
-} from '../server/lib/infra_types';
+import { InfraGroupByFilters, InfraGroupByTerms } from '../server/lib/infra_types';
 
-export function isGroupByFilters(
-  value: InfraGroupBy
-): value is InfraGroupByFilters {
+export function isGroupByFilters(value: InfraGroupBy): value is InfraGroupByFilters {
   return value.type === InfraGroupByType.filters;
 }
 
-export function isGroupByTerms(
-  value: InfraGroupBy
-): value is InfraGroupByTerms {
+export function isGroupByTerms(value: InfraGroupBy): value is InfraGroupByTerms {
   return value.type === InfraGroupByType.terms;
 }

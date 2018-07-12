@@ -19,11 +19,7 @@ export class WaffleMap extends React.PureComponent<WaffleMapPlaceholderProps> {
       <AutoSizer bounds>
         {({ measureRef, bounds: { height = 0, width = 0 } }) => (
           <WaffleMapWrapper innerRef={measureRef as any}>
-            <svg
-              height={height}
-              width={width}
-              viewBox={`0 0 ${width} ${height}`}
-            >
+            <svg height={height} width={width} viewBox={`0 0 ${width} ${height}`}>
               <g
                 transform={`
             translate(${width / 2} ${height / 2})

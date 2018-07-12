@@ -7,10 +7,7 @@
 import { EuiButton, EuiSpacer } from '@elastic/eui';
 import * as React from 'react';
 
-import {
-  LogTextStreamStaticContentPanel,
-  LogTextStreamStaticPanel,
-} from './static_panel';
+import { LogTextStreamStaticContentPanel, LogTextStreamStaticPanel } from './static_panel';
 
 interface LogTextStreamEmptyViewProps {
   height: number;
@@ -18,9 +15,7 @@ interface LogTextStreamEmptyViewProps {
   reload: () => void;
 }
 
-export class LogTextStreamEmptyView extends React.PureComponent<
-  LogTextStreamEmptyViewProps
-> {
+export class LogTextStreamEmptyView extends React.PureComponent<LogTextStreamEmptyViewProps> {
   public render() {
     const { height, width, reload } = this.props;
 

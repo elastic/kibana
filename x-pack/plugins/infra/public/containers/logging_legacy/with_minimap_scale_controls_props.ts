@@ -15,12 +15,7 @@ import { connect } from 'react-redux';
 import { TimeUnit } from '../../../common/time';
 import { bindPlainActionCreators } from '../../utils/typed_redux';
 
-import {
-  minimapActions,
-  minimapSelectors,
-  State,
-  summaryActions,
-} from './state';
+import { minimapActions, minimapSelectors, State, summaryActions } from './state';
 
 export const withMinimapScaleControlsProps = connect(
   (state: State) => ({

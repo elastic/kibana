@@ -13,7 +13,5 @@ export const LibsContext = React.createContext<Partial<InfraFrontendLibs>>({});
 export const withLibs = <P extends {}>(
   Component: React.ReactType<P & { libs: Partial<InfraFrontendLibs> }>
 ) => (props: P) => (
-  <LibsContext.Consumer>
-    {libs => <Component {...props} libs={libs} />}
-  </LibsContext.Consumer>
+  <LibsContext.Consumer>{libs => <Component {...props} libs={libs} />}</LibsContext.Consumer>
 );

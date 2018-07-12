@@ -12,11 +12,7 @@ import {
   ContainedSearchResultsApiPostPayload,
   ContainedSearchResultsApiPostResponse,
 } from '../../common/http_api';
-import {
-  isLessOrEqual,
-  LogEntryFieldsMapping,
-  LogEntryTime,
-} from '../../common/log_entry';
+import { isLessOrEqual, LogEntryFieldsMapping, LogEntryTime } from '../../common/log_entry';
 import { SearchResult } from '../../common/log_search_result';
 import {
   InfraBackendFrameworkAdapter,
@@ -25,15 +21,9 @@ import {
 } from '../lib/infra_types';
 import { convertHitToSearchResult } from './converters';
 import { isHighlightedHit, SortedHit } from './elasticsearch';
-import {
-  indicesSchema,
-  logEntryFieldsMappingSchema,
-  logEntryTimeSchema,
-} from './schemas';
+import { indicesSchema, logEntryFieldsMappingSchema, logEntryTimeSchema } from './schemas';
 
-export const initContainedSearchResultsRoutes = (
-  framework: InfraBackendFrameworkAdapter
-) => {
+export const initContainedSearchResultsRoutes = (framework: InfraBackendFrameworkAdapter) => {
   const callWithRequest = framework.callWithRequest;
 
   framework.registerRoute<
@@ -86,9 +76,7 @@ export const initContainedSearchResultsRoutes = (
 };
 
 export async function fetchSearchResultsBetween(
-  search: <Hit>(
-    params: SearchParams
-  ) => Promise<InfraDatabaseSearchResponse<Hit, any>>,
+  search: <Hit>(params: SearchParams) => Promise<InfraDatabaseSearchResponse<Hit, any>>,
   indices: string[],
   fields: LogEntryFieldsMapping,
   start: LogEntryTime,
@@ -141,9 +129,7 @@ export async function fetchSearchResultsBetween(
 
   const hits = response.hits.hits as SortedHit[];
   const filteredHits = hits
-    .filter(hit =>
-      isLessOrEqual({ time: hit.sort[0], tiebreaker: hit.sort[1] }, end)
-    )
+    .filter(hit => isLessOrEqual({ time: hit.sort[0], tiebreaker: hit.sort[1] }, end))
     .filter(isHighlightedHit);
   return filteredHits.map(convertHitToSearchResult(fields));
 }

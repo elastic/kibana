@@ -7,11 +7,7 @@
 import { createNodeItem } from './create_node_item';
 
 import { InfraGroupBy } from '../../../../../common/types';
-import {
-  InfraBucket,
-  InfraNode,
-  InfraNodeRequestOptions,
-} from '../../../infra_types';
+import { InfraBucket, InfraNode, InfraNodeRequestOptions } from '../../../infra_types';
 export interface InfraPathItem {
   path: string[];
   nodeItem: InfraNode;
@@ -25,21 +21,15 @@ export function extractGroupPaths(
   const firstGroup: InfraGroupBy = groupBy[0];
   const secondGroup: InfraGroupBy = groupBy[1];
   const paths: InfraPathItem[] = node[firstGroup!.id].buckets.reduce(
-    (
-      acc: InfraPathItem[],
-      bucket: InfraBucket,
-      index: number
-    ): InfraPathItem[] => {
+    (acc: InfraPathItem[], bucket: InfraBucket, index: number): InfraPathItem[] => {
       if (secondGroup) {
         return acc.concat(
-          bucket[secondGroup!.id].buckets.map(
-            (b: InfraBucket): InfraPathItem => {
-              return {
-                nodeItem: createNodeItem(options, node, bucket),
-                path: [bucket.key, b.key],
-              };
-            }
-          )
+          bucket[secondGroup!.id].buckets.map((b: InfraBucket): InfraPathItem => {
+            return {
+              nodeItem: createNodeItem(options, node, bucket),
+              path: [bucket.key, b.key],
+            };
+          })
         );
       }
       const key: string = String(bucket.key || index);

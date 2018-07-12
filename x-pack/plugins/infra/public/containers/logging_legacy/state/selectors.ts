@@ -105,10 +105,7 @@ export const sharedSelectors = {
       }
 
       const nextResultIndex =
-        getSearchResultIndexBeforeTime(
-          searchResults,
-          getLogEntryKey(middleVisibleEntry)
-        ) - 1;
+        getSearchResultIndexBeforeTime(searchResults, getLogEntryKey(middleVisibleEntry)) - 1;
 
       if (nextResultIndex < 0 || nextResultIndex >= searchResults.length) {
         return null;
@@ -123,9 +120,7 @@ export const sharedSelectors = {
     targetSelectors.selectTarget,
     (firstVisibleEntry, lastVisibleLEntry, target) => {
       if (firstVisibleEntry && lastVisibleLEntry) {
-        return (
-          (firstVisibleEntry.fields.time + lastVisibleLEntry.fields.time) / 2
-        );
+        return (firstVisibleEntry.fields.time + lastVisibleLEntry.fields.time) / 2;
       } else if (firstVisibleEntry) {
         return firstVisibleEntry.fields.time;
       } else if (lastVisibleLEntry) {

@@ -7,11 +7,7 @@
 import { EuiFormRow, EuiRadioGroup } from '@elastic/eui';
 import * as React from 'react';
 
-import {
-  getLabelOfTextScale,
-  isTextScale,
-  TextScale,
-} from '../../../common/log_text_scale';
+import { getLabelOfTextScale, isTextScale, TextScale } from '../../../common/log_text_scale';
 
 interface LogTextScaleControlsProps {
   availableTextScales: TextScale[];
@@ -19,9 +15,7 @@ interface LogTextScaleControlsProps {
   setTextScale: (scale: TextScale) => any;
 }
 
-export class LogTextScaleControls extends React.PureComponent<
-  LogTextScaleControlsProps
-> {
+export class LogTextScaleControls extends React.PureComponent<LogTextScaleControlsProps> {
   public setTextScale = (textScale: string) => {
     if (isTextScale(textScale)) {
       this.props.setTextScale(textScale);

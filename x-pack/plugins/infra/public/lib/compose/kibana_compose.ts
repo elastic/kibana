@@ -63,10 +63,7 @@ export function compose(): InfraFrontendLibs {
 
   const infraModule = uiModules.get('app/infa');
 
-  const framework = new InfraKibanaFrameworkAdapter(
-    infraModule,
-    timezoneProvider
-  );
+  const framework = new InfraKibanaFrameworkAdapter(infraModule, timezoneProvider);
 
   const libs: InfraFrontendLibs = {
     api,

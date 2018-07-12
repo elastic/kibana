@@ -8,10 +8,7 @@ import { Action } from 'redux';
 import { Observable } from 'rxjs';
 import { catchError, map, startWith } from 'rxjs/operators';
 
-import {
-  LogEntryFieldsMapping,
-  LogEntryTime,
-} from '../../../../../../common/log_entry';
+import { LogEntryFieldsMapping, LogEntryTime } from '../../../../../../common/log_entry';
 import { InfraObservableApi } from '../../../../../lib/lib';
 import { replaceEntries } from '../actions';
 import { fetchAdjacentEntries, fetchLatestEntries } from './fetch_entries';
@@ -27,14 +24,7 @@ export const replaceEntries$ = (
     clearEagerly: true,
     count,
   };
-  return fetchAdjacentEntries(
-    postToApi,
-    count,
-    count,
-    fields,
-    indices,
-    target
-  ).pipe(
+  return fetchAdjacentEntries(postToApi, count, count, fields, indices, target).pipe(
     map(({ before, after }) =>
       replaceEntries.done({
         params,

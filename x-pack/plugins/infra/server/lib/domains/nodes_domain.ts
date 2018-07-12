@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  InfraFrameworkRequest,
-  InfraNodeRequestOptions,
-  InfraNodesAdapter,
-} from '../infra_types';
+import { InfraFrameworkRequest, InfraNodeRequestOptions, InfraNodesAdapter } from '../infra_types';
 
 import { InfraResponse } from '../../../common/types';
 
