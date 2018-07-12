@@ -195,8 +195,6 @@ export default class BaseOptimizer {
       ];
     }
 
-    // const nodeModulesPath = fromRoot('node_modules');
-
     /**
      * Adds a cache loader if we're running in dev mode. The reason we're not adding
      * the cache-loader when running in production mode is that it creates cache
@@ -236,8 +234,6 @@ export default class BaseOptimizer {
         }
       ];
     };
-
-    console.log(os.cpus().length);
 
     const commonConfig = {
       mode: 'development',
