@@ -34,6 +34,7 @@ export const ConfirmModal = props => {
         onConfirm={confirm}
         confirmButtonText={confirmButtonText}
         cancelButtonText={cancelButtonText}
+        defaultFocusedButton="confirm"
         buttonColor="danger"
       >
         {message}
