@@ -9,7 +9,7 @@ import { BulkUploader } from './bulk_uploader';
 /**
  * Initialize different types of Kibana Monitoring
  * TODO: remove this in 7.0
- * - Ops Events - essentially Kibana's /api/status (non-rolled up)
+ * - Ops Events - essentially Kibana's /api/status
  * - Usage Stats - essentially Kibana's /api/stats
  * - Kibana Settings - select uiSettings
  * @param {Object} kbnServer manager of Kibana services - see `src/server/kbn_server` in Kibana core

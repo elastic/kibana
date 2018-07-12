@@ -32,9 +32,9 @@ export const init = (monitoringPlugin, server) => {
   /*
    * Register collector objects for stats to show up in the APIs
    */
-  collectorSet.register(getOpsStatsCollector(server, kbnServer)); // TODO move to OSS probably
-  collectorSet.register(getSettingsCollector(server, kbnServer));
+  collectorSet.register(getOpsStatsCollector(server, kbnServer));
   collectorSet.register(getKibanaUsageCollector(server));
+  collectorSet.register(getSettingsCollector(server, kbnServer));
 
   /*
    * Instantiate and start the internal background task that calls collector

@@ -25,7 +25,7 @@ const LOGGING_TAGS = [LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG];
  * Handles internal Kibana stats collection and uploading data to Monitoring
  * bulk endpoint.
  *
- * TODO: remove this in 7.0
+ * NOTE: internal collection will be removed in 7.0
  *
  * Depends on
  *   - 'xpack.monitoring.kibana.collection.enabled' config
@@ -92,22 +92,18 @@ export class BulkUploader {
     this.stop('Connection issue detected');
   }
 
-  _onPayload(payload) {
-    return sendBulkPayload(this._client, this._interval, payload); // why is interval here?
-  }
-
   /*
    * @param {CollectorSet} collectorSet
    * @return {Promise} - resolves to undefined
    */
   async _fetchAndUpload(collectorSet) {
     const data = await collectorSet.bulkFetch(this._callClusterWithInternalUser);
-    const uploadData = BulkUploader.toBulkUploadFormat(data);
+    const payload = BulkUploader.toBulkUploadFormat(data);
 
-    if (uploadData) {
+    if (payload) {
       try {
         this._log.debug(`Uploading bulk stats payload to the local cluster`);
-        this._onPayload(uploadData);
+        this._onPayload(payload);
       } catch (err) {
         this._log.warn(err.stack);
         this._log.warn(`Unable to bulk upload the stats payload to the local cluster`);
@@ -115,6 +111,10 @@ export class BulkUploader {
     } else {
       this._log.debug(`Skipping bulk uploading of an empty stats payload`);
     }
+  }
+
+  _onPayload(payload) {
+    return sendBulkPayload(this._client, this._interval, payload);
   }
 
   /*
