@@ -26,6 +26,7 @@ import Stats from 'webpack/lib/Stats';
 import webpackMerge from 'webpack-merge';
 import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
 import { Compiler as DLLCompiler } from './dll_bundler';
+import HardSourceWebpackPlugin from 'hard-source-webpack-plugin';
 
 import { defaults } from 'lodash';
 
@@ -318,6 +319,25 @@ export default class BaseOptimizer {
       },
 
       plugins: [
+        new HardSourceWebpackPlugin({
+          cacheDirectory: this.uiBundles.resolvePath('../.cache/hard-source/[confighash]'),
+          info: {
+            mode: 'none',
+            level: 'warn',
+          },
+        }),
+
+        new HardSourceWebpackPlugin.ExcludeModulePlugin([
+          {
+            // HardSource works with mini-css-extract-plugin but due to how
+            // mini-css emits assets, assets are not emitted on repeated builds with
+            // mini-css and hard-source together. Ignoring the mini-css loader
+            // modules, but not the other css loader modules, excludes the modules
+            // that mini-css needs rebuilt to output assets every time.
+            test: /mini-css-extract-plugin[\\/]dist[\\/]loader/,
+          }
+        ]),
+
         new MiniCssExtractPlugin({
           filename: '[name].style.css',
         }),
@@ -448,16 +468,6 @@ export default class BaseOptimizer {
         ]
       },
 
-      stats: {
-        // when typescript doesn't do a full type check, as we have the ts-loader
-        // configured here, it does not have enough information to determine
-        // whether an imported name is a type or not, so when the name is then
-        // exported, typescript has no choice but to emit the export. Fortunately,
-        // the extraneous export should not be harmful, so we just suppress these warnings
-        // https://github.com/TypeStrong/ts-loader#transpileonly-boolean-defaultfalse
-        warningsFilter: /export .* was not found in/
-      },
-
       resolve: {
         extensions: ['.ts', '.tsx'],
       },
@@ -538,14 +548,17 @@ export default class BaseOptimizer {
 
   failedStatsToError(stats) {
     const details = stats.toString(defaults(
-      { colors: true },
+      { colors: true, warningsFilter: STATS_WARNINGS_FILTER },
       Stats.presetToOptions('minimal')
     ));
 
     return Boom.create(
       500,
       `Optimizations failure.\n${details.split('\n').join('\n    ')}\n`,
-      stats.toJson(Stats.presetToOptions('detailed'))
+      stats.toJson(defaults({
+        warningsFilter: STATS_WARNINGS_FILTER,
+        ...Stats.presetToOptions('detailed')
+      }))
     );
   }
 

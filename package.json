@@ -133,6 +133,7 @@
     "handlebars": "4.0.5",
     "hapi": "14.2.0",
     "hapi-latest": "npm:hapi@17.5.0",
+    "hard-source-webpack-plugin": "^0.11.0",
     "hjson": "3.1.0",
     "http-proxy-agent": "^2.1.0",
     "https-proxy-agent": "^2.2.1",
