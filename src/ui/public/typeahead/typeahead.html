@@ -1,7 +1,13 @@
+<!-- make aria-expanded dynamic -->
+<!-- ids will need some unique prefix passed in in case there are multiple typeaheads on the page -->
 <div
   class="typeahead"
   ng-keydown="typeahead.onKeyDown($event)"
   ng-keypress="typeahead.onKeyPress($event)"
+  role="combobox"
+  aria-haspopup="true"
+  aria-owns="query-bar-typeahead-items"
+  aria-expanded="true"
 >
   <ng-transclude></ng-transclude>
   <div
@@ -13,6 +19,8 @@
     <div
       class="typeahead-items"
       kbn-scroll-bottom="typeahead.increaseLimit()"
+      role="listbox"
+      id="query-bar-typeahead-items"
     >
       <div
         class="typeahead-item"
@@ -20,6 +28,8 @@
         ng-class="{active: $index === typeahead.selectedIndex}"
         ng-click="typeahead.onItemClick()"
         ng-mouseenter="typeahead.selectedIndex = $index"
+        role="option"
+        id="typeahead-item-{{$index}}"
       >
         <kbn-typeahead-item
           item="item"

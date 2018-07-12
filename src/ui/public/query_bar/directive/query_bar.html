@@ -1,3 +1,4 @@
+<!--TODO add arias to both inputs -->
 <form
   role="form"
   name="queryBarForm"
@@ -7,6 +8,7 @@
     items="queryBar.suggestions"
     item-template="queryBar.suggestionTemplate"
     on-select="queryBar.onSuggestionSelect(item)"
+    on-focus-change="queryBar.focusedTypeaheadItemID = $focusedItemID"
     class="suggestionTypeahead"
   >
     <div
@@ -51,6 +53,9 @@
           class="kuiLocalSearchInput"
           ng-class="{'kuiLocalSearchInput-isInvalid': queryBarForm.$invalid}"
           data-test-subj="queryInput"
+          aria-autocomplete="list"
+          aria-controls="query-bar-typeahead-items"
+          aria-activedescendant="{{queryBar.focusedTypeaheadItemID}}"
         />
         <div class="kuiLocalSearchAssistedInput__assistance">
             <query-popover

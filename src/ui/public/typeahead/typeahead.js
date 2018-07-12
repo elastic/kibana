@@ -36,7 +36,8 @@ typeahead.directive('kbnTypeahead', function () {
     scope: {
       items: '=',
       itemTemplate: '=',
-      onSelect: '&'
+      onSelect: '&',
+      onFocusChange: '&'
     },
     bindToController: true,
     controllerAs: 'typeahead',
@@ -137,6 +138,10 @@ typeahead.directive('kbnTypeahead', function () {
       this.onMouseLeave = () => {
         this.isMousedOver = false;
       };
+
+      $scope.$watch('typeahead.selectedIndex', (newIndex) => {
+        this.onFocusChange({ $focusedItemID: `typeahead-item-${newIndex}` });
+      });
     }
   };
 });
