@@ -252,41 +252,16 @@ and added as a comment next to translation message at `defaultMessages.json`
 
 
 #### Attributes translation in React
-React wrapper provides an API to inject the imperative formatting API into a React
-component by using render callback pattern. This should be used when your React
-component needs to format data to a string value where a React element is not
-suitable; e.g., a `title` or `aria` attribute. In order to use it, you should
-wrap your components into `I18nContext` component. The child of this component
-should be a function that takes `intl` object into parameters:
+
+React wrapper provides an ability to inject the imperative formatting API into a React component via its props using `injectI18n` HOC. This should be used when your React component needs to format data to a string value where a React element is not suitable; e.g., a `title` or `aria` attribute. In order to use it you should wrap your component into `injectI18n` function. The formatting API will be provided to the wrapped component via `props.intl`.
+
+React component as a pure function:
 
 ```js
 import React from 'react';
 import { ReactI18n } from '@kbn/i18n';
 
-const { I18nContext } = ReactI18n;
-
-const MyComponent = () => (
-  <I18nContext>
-    {intl => (
-      <input
-        type="text"
-        placeholder={intl.formatMessage({
-          id: 'KIBANA-MANAGEMENT-OBJECTS-SEARCH_PLACEHOLDER',
-          defaultMessage: 'Search',
-        })}
-      />
-    )}
-  </I18nContext>
-);
-```
-
-Library provides an API to inject the imperative formatting API into a React component via its props using `injectI18n` HOC. This should be used when your React component needs to format data to a string value where a React element is not suitable; e.g., a `title` or `aria` attribute. In order to use it you should wrap your component into `injectI18n` function. The formatting API will be provided to the wrapped component via `props.intl`.
-
-```js
-import React from 'react';
-import { ReactI18n } from '@kbn/i18n';
-
-const { injectI18n } = ReactI18n;
+const { injectI18n, intlShape } = ReactI18n;
 
 const MyComponentContent = ({ intl }) => (
   <input
@@ -298,9 +273,44 @@ const MyComponentContent = ({ intl }) => (
   />
 );
 
+MyComponentContent.propTypes = {
+  intl: intlShape.isRequired,
+};
+
 export const MyComponent = injectI18n(MyComponentContent);
 ```
 
+React component as a class:
+
+```js
+import React from 'react';
+import PropTypes from 'prop-types';
+import { ReactI18n } from '@kbn/i18n';
+
+const { injectI18n, intlShape } = ReactI18n;
+
+class MyComponentContent extends React.Component {
+  static propTypes = {
+    intl: intlShape.isRequired,
+  };
+
+  render() {
+    const { intl } = this.props;
+
+    return (
+      <input
+        type="text"
+        placeholder={intl.formatMessage({
+          id: 'KIBANA-MANAGEMENT-OBJECTS-SEARCH_PLACEHOLDER',
+          defaultMessage: 'Search',
+        })}
+      />
+    );
+  }
+}
+
+export const MyComponent = injectI18n(MyComponentContent);
+```
 
 ## Angular
 
