@@ -27,7 +27,7 @@ export default function AggConfigResult(aggConfig, parent, value, key, filters) 
   this.filters = filters;
   this.$parent = parent;
 
-  if (aggConfig.schema.group === 'buckets') {
+  if (aggConfig.type.type === 'buckets') {
     this.type = 'bucket';
   } else {
     this.type = 'metric';
