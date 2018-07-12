@@ -132,5 +132,6 @@ ListControl.defaultProps = {
 };
 
 ListControl.defaultProps = {
+  selectedOptions: [],
   options: [],
 };
