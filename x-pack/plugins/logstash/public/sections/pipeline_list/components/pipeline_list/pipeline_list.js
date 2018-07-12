@@ -15,6 +15,7 @@ import '../pipeline_table';
 // import { PAGINATION } from 'plugins/logstash/../common/constants';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiConfirmModal,
   EuiIconTip,
@@ -79,7 +80,8 @@ class PipelineList extends React.Component {
             </span>
           )
       )
-    }, {
+    },
+    {
       field: 'description',
       name: 'Description',
       sortable: true,
@@ -94,6 +96,26 @@ class PipelineList extends React.Component {
       field: 'username',
       name: 'Modified By',
       sortable: true,
+    },
+    {
+      field: 'id',
+      name: '',
+      render: (id, { isCentrallyManaged }) => {
+        const { clonePipeline } = this.props;
+        const cloneClicked = () => { clonePipeline(id); };
+        return isCentrallyManaged
+          ? (
+            <EuiButtonEmpty
+              iconType="copy"
+              onClick={cloneClicked}
+              size="xs"
+            >
+              Clone
+            </EuiButtonEmpty>
+          )
+          : null;
+      },
+      sortable: false,
     },
   ]
 
@@ -427,8 +449,10 @@ app.directive('pipelineList', function ($injector) {
     link: (scope, el) => {
       const openPipeline = id => scope.$evalAsync(kbnUrl.change(`/management/logstash/pipelines/${id}/edit`));
       const createPipeline = () => scope.$evalAsync(kbnUrl.change('/management/logstash/pipelines/new-pipeline'));
+      const clonePipeline = id => scope.$evalAsync(kbnUrl.change(`management/logstash/pipelines/pipeline/${id}/edit?clone`));
       render(
         <PipelineList
+          clonePipeline={clonePipeline}
           clusterService={clusterService}
           isReadOnly={licenseService.isReadOnly}
           isForbidden={true}
