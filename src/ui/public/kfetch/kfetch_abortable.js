@@ -17,5 +17,24 @@
  * under the License.
  */
 
-export { kfetch } from './kfetch';
-export { kfetchAbortable } from './kfetch_abortable';
+import { kfetch } from './kfetch';
+
+function createAbortable() {
+  const abortController = new AbortController();
+  const { signal, abort } = abortController;
+
+  return {
+    signal,
+    abort: abort.bind(abortController),
+  };
+}
+
+export function kfetchAbortable(fetchOptions, kibanaOptions) {
+  const { signal, abort } = createAbortable();
+  const fetching = kfetch({ ...fetchOptions, signal }, kibanaOptions);
+
+  return {
+    fetching,
+    abort,
+  };
+}
