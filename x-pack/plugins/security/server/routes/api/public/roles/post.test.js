@@ -7,6 +7,7 @@
 import Hapi from 'hapi';
 import Boom from 'boom';
 import { initPostRolesApi } from './post';
+import { ALL_RESOURCE } from '../../../../../common/constants';
 
 const application = 'kibana-.kibana';
 
@@ -192,12 +193,12 @@ describe('POST role', () => {
                       'test-kibana-privilege-1',
                       'test-kibana-privilege-2',
                     ],
-                    resources: ['*'],
+                    resources: [ALL_RESOURCE],
                   },
                   {
                     application,
                     privileges: ['test-kibana-privilege-3'],
-                    resources: ['*'],
+                    resources: [ALL_RESOURCE],
                   },
                 ],
                 cluster: ['test-cluster-privilege'],
@@ -214,7 +215,6 @@ describe('POST role', () => {
                 run_as: ['test-run-as-1', 'test-run-as-2'],
                 transient_metadata: { quz: true },
               },
-              name: 'foo-role',
             },
           ],
         ],
@@ -222,5 +222,234 @@ describe('POST role', () => {
         result: null,
       },
     });
+
+    postRoleTest(`updates role which has existing kibana privileges`, {
+      name: 'foo-role',
+      payload: {
+        metadata: {
+          foo: 'test-metadata',
+        },
+        transient_metadata: {
+          quz: true,
+        },
+        elasticsearch: {
+          cluster: ['test-cluster-privilege'],
+          indices: [
+            {
+              names: ['test-index-name-1', 'test-index-name-2'],
+              privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
+            },
+          ],
+          run_as: ['test-run-as-1', 'test-run-as-2'],
+        },
+        kibana: [
+          {
+            privileges: ['test-kibana-privilege-1', 'test-kibana-privilege-2'],
+          },
+          {
+            privileges: ['test-kibana-privilege-3'],
+          },
+        ],
+      },
+      preCheckLicenseImpl: defaultPreCheckLicenseImpl,
+      callWithRequestImpls: [
+        async () => ({
+          metadata: {
+            bar: 'old-metadata',
+          },
+          transient_metadata: {
+            foo: 'old-metadata',
+          },
+          cluster: ['old-cluster-privilege'],
+          indices: [
+            {
+              names: ['old-index-name'],
+              privileges: ['old-privilege'],
+            },
+          ],
+          run_as: ['old-run-as'],
+          applications: [
+            {
+              application,
+              privileges: ['old-kibana-privilege'],
+              resources: ['old-resource'],
+            },
+          ],
+        }),
+        async () => {},
+      ],
+      asserts: {
+        callWithRequests: [
+          ['shield.getRole', { name: 'foo-role', ignore: [404] }],
+          [
+            'shield.putRole',
+            {
+              name: 'foo-role',
+              body: {
+                applications: [
+                  {
+                    application,
+                    privileges: [
+                      'test-kibana-privilege-1',
+                      'test-kibana-privilege-2',
+                    ],
+                    resources: [ALL_RESOURCE],
+                  },
+                  {
+                    application,
+                    privileges: ['test-kibana-privilege-3'],
+                    resources: [ALL_RESOURCE],
+                  },
+                ],
+                cluster: ['test-cluster-privilege'],
+                indices: [
+                  {
+                    names: ['test-index-name-1', 'test-index-name-2'],
+                    privileges: [
+                      'test-index-privilege-1',
+                      'test-index-privilege-2',
+                    ],
+                  },
+                ],
+                metadata: { foo: 'test-metadata' },
+                run_as: ['test-run-as-1', 'test-run-as-2'],
+                transient_metadata: { quz: true },
+              },
+            },
+          ],
+        ],
+        statusCode: 200,
+        result: null,
+      },
+    });
+
+    postRoleTest(
+      `updates role which has existing other application privileges`,
+      {
+        name: 'foo-role',
+        payload: {
+          metadata: {
+            foo: 'test-metadata',
+          },
+          transient_metadata: {
+            quz: true,
+          },
+          elasticsearch: {
+            cluster: ['test-cluster-privilege'],
+            indices: [
+              {
+                names: ['test-index-name-1', 'test-index-name-2'],
+                privileges: [
+                  'test-index-privilege-1',
+                  'test-index-privilege-2',
+                ],
+              },
+            ],
+            run_as: ['test-run-as-1', 'test-run-as-2'],
+          },
+          kibana: [
+            {
+              privileges: [
+                'test-kibana-privilege-1',
+                'test-kibana-privilege-2',
+              ],
+            },
+            {
+              privileges: ['test-kibana-privilege-3'],
+            },
+          ],
+        },
+        preCheckLicenseImpl: defaultPreCheckLicenseImpl,
+        callWithRequestImpls: [
+          async () => ({
+            metadata: {
+              bar: 'old-metadata',
+            },
+            transient_metadata: {
+              foo: 'old-metadata',
+            },
+            cluster: ['old-cluster-privilege'],
+            indices: [
+              {
+                names: ['old-index-name'],
+                privileges: ['old-privilege'],
+              },
+            ],
+            run_as: ['old-run-as'],
+            applications: [
+              {
+                application,
+                privileges: ['old-kibana-privilege'],
+                resources: ['old-resource'],
+              },
+              {
+                application: 'logstash-foo',
+                privileges: ['logstash-privilege'],
+                resources: ['logstash-resource'],
+              },
+              {
+                application: 'beats-foo',
+                privileges: ['beats-privilege'],
+                resources: ['beats-resource'],
+              },
+            ],
+          }),
+          async () => {},
+        ],
+        asserts: {
+          callWithRequests: [
+            ['shield.getRole', { name: 'foo-role', ignore: [404] }],
+            [
+              'shield.putRole',
+              {
+                name: 'foo-role',
+                body: {
+                  applications: [
+                    {
+                      application,
+                      privileges: [
+                        'test-kibana-privilege-1',
+                        'test-kibana-privilege-2',
+                      ],
+                      resources: [ALL_RESOURCE],
+                    },
+                    {
+                      application,
+                      privileges: ['test-kibana-privilege-3'],
+                      resources: [ALL_RESOURCE],
+                    },
+                    {
+                      application: 'logstash-foo',
+                      privileges: ['logstash-privilege'],
+                      resources: ['logstash-resource'],
+                    },
+                    {
+                      application: 'beats-foo',
+                      privileges: ['beats-privilege'],
+                      resources: ['beats-resource'],
+                    },
+                  ],
+                  cluster: ['test-cluster-privilege'],
+                  indices: [
+                    {
+                      names: ['test-index-name-1', 'test-index-name-2'],
+                      privileges: [
+                        'test-index-privilege-1',
+                        'test-index-privilege-2',
+                      ],
+                    },
+                  ],
+                  metadata: { foo: 'test-metadata' },
+                  run_as: ['test-run-as-1', 'test-run-as-2'],
+                  transient_metadata: { quz: true },
+                },
+              },
+            ],
+          ],
+          statusCode: 200,
+          result: null,
+        },
+      }
+    );
   });
 });

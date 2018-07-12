@@ -55,10 +55,10 @@ const transformRolesToEs = (
     indices: elasticsearch.indices || [],
     run_as: elasticsearch.run_as || [],
     applications: [
-      ...otherApplications,
       ...kibana.map(kibanaPrivilege =>
         transformKibanaPrivilegeToEs(application, kibanaPrivilege)
       ),
+      ...otherApplications,
     ],
   }, identity);
 };
@@ -83,7 +83,7 @@ export function initPostRolesApi(
         const body = transformRolesToEs(
           application,
           request.payload,
-          role.application
+          role.applications
         );
 
         await callWithRequest(request, 'shield.putRole', { name, body });
