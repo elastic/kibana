@@ -3,7 +3,7 @@
 exports[`Breadcrumbs /:serviceName 1`] = `
 Array [
   <a
-    href="#/?_g="
+    href="#/?_g=myG&kuery=myKuery"
   >
     APM
   </a>,
@@ -16,12 +16,12 @@ Array [
 exports[`Breadcrumbs /:serviceName/errors 1`] = `
 Array [
   <a
-    href="#/?_g="
+    href="#/?_g=myG&kuery=myKuery"
   >
     APM
   </a>,
   <a
-    href="#/opbeans-node?_g="
+    href="#/opbeans-node?_g=myG&kuery=myKuery"
   >
     opbeans-node
   </a>,
@@ -34,17 +34,17 @@ Array [
 exports[`Breadcrumbs /:serviceName/errors/:groupId 1`] = `
 Array [
   <a
-    href="#/?_g="
+    href="#/?_g=myG&kuery=myKuery"
   >
     APM
   </a>,
   <a
-    href="#/opbeans-node?_g="
+    href="#/opbeans-node?_g=myG&kuery=myKuery"
   >
     opbeans-node
   </a>,
   <a
-    href="#/opbeans-node/errors?_g="
+    href="#/opbeans-node/errors?_g=myG&kuery=myKuery"
   >
     Errors
   </a>,
@@ -57,12 +57,12 @@ Array [
 exports[`Breadcrumbs /:serviceName/transactions 1`] = `
 Array [
   <a
-    href="#/?_g="
+    href="#/?_g=myG&kuery=myKuery"
   >
     APM
   </a>,
   <a
-    href="#/opbeans-node?_g="
+    href="#/opbeans-node?_g=myG&kuery=myKuery"
   >
     opbeans-node
   </a>,
@@ -75,17 +75,17 @@ Array [
 exports[`Breadcrumbs /:serviceName/transactions/:transactionType 1`] = `
 Array [
   <a
-    href="#/?_g="
+    href="#/?_g=myG&kuery=myKuery"
   >
     APM
   </a>,
   <a
-    href="#/opbeans-node?_g="
+    href="#/opbeans-node?_g=myG&kuery=myKuery"
   >
     opbeans-node
   </a>,
   <a
-    href="#/opbeans-node/transactions?_g="
+    href="#/opbeans-node/transactions?_g=myG&kuery=myKuery"
   >
     Transactions
   </a>,
@@ -98,22 +98,22 @@ Array [
 exports[`Breadcrumbs /:serviceName/transactions/:transactionType/:transactionName 1`] = `
 Array [
   <a
-    href="#/?_g="
+    href="#/?_g=myG&kuery=myKuery"
   >
     APM
   </a>,
   <a
-    href="#/:serviceName?_g="
+    href="#/:serviceName?_g=myG&kuery=myKuery"
   >
     :serviceName
   </a>,
   <a
-    href="#/:serviceName/transactions?_g="
+    href="#/:serviceName/transactions?_g=myG&kuery=myKuery"
   >
     Transactions
   </a>,
   <a
-    href="#/:serviceName/transactions/request?_g="
+    href="#/:serviceName/transactions/request?_g=myG&kuery=myKuery"
   >
     request
   </a>,

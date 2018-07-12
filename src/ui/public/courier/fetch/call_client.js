@@ -71,6 +71,10 @@ export function CallClientProvider(Private, Promise, es) {
       });
 
       return Promise.map(activeSearchRequests, function (searchRequest, searchRequestIndex) {
+        if (searchRequest.aborted) {
+          return ABORTED;
+        }
+
         const status = statuses[searchRequestIndex];
 
         if (status === ABORTED) {

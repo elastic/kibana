@@ -66,9 +66,15 @@
       opacity: 1;
     }
 
-    .euiContextMenuPanel .euiContextMenuItem {
-      white-space: nowrap;
+    .euiContextMenuPanel {
+       .euiContextMenuItem {
+         white-space: nowrap;
+       }
+       .euiContextMenuItem:last-child:not(.euiContextMenuItem-isDisabled) {
+        color: #A30000
+      }
     }
+
 
     .euiTableCellContent .euiLink {
       margin-right: 10px;

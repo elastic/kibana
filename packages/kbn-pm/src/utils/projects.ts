@@ -49,21 +49,17 @@ export async function getProjects(
       const project = await Project.fromPath(projectDir);
 
       const excludeProject =
-        exclude.includes(project.name) ||
-        (include.length > 0 && !include.includes(project.name));
+        exclude.includes(project.name) || (include.length > 0 && !include.includes(project.name));
 
       if (excludeProject) {
         continue;
       }
 
       if (projects.has(project.name)) {
-        throw new CliError(
-          `There are multiple projects with the same name [${project.name}]`,
-          {
-            name: project.name,
-            paths: [project.path, projects.get(project.name)!.path],
-          }
-        );
+        throw new CliError(`There are multiple projects with the same name [${project.name}]`, {
+          name: project.name,
+          paths: [project.path, projects.get(project.name)!.path],
+        });
       }
 
       projects.set(project.name, project);
@@ -73,13 +69,7 @@ export async function getProjects(
   return projects;
 }
 
-function packagesFromGlobPattern({
-  pattern,
-  rootPath,
-}: {
-  pattern: string;
-  rootPath: string;
-}) {
+function packagesFromGlobPattern({ pattern, rootPath }: { pattern: string; rootPath: string }) {
   const globOptions = {
     cwd: rootPath,
 
@@ -141,9 +131,7 @@ export function topologicallyBatchProjects(
     const batch = [];
     for (const projectName of projectToBatchNames) {
       const projectDeps = projectGraph.get(projectName)!;
-      const hasNotBatchedDependencies = projectDeps.some(dep =>
-        projectToBatchNames.has(dep.name)
-      );
+      const hasNotBatchedDependencies = projectDeps.some(dep => projectToBatchNames.has(dep.name));
 
       if (!hasNotBatchedDependencies) {
         batch.push(projectsToBatch.get(projectName)!);
