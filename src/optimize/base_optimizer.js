@@ -106,13 +106,48 @@ export default class BaseOptimizer {
         dllEntries: [
           {
             name: 'vendor',
+            /*include: [
+              'x-pack',
+              'angular',
+              'angular-elastic',
+              'd3',
+              'd3-cloud',
+              'elasticsearch-browser',
+              'jquery',
+              'moment',
+              'moment-timezone',
+              'ngreact',
+              'react',
+              'react-addons-shallow-compare',
+              'react-anything-sortable',
+              'react-color',
+              'react-dom',
+              'react-grid-layout',
+              'react-input-range',
+              'react-markdown',
+              'react-redux',
+              'react-router-dom',
+              'react-sizeme',
+              'react-toggle',
+              'reactcss',
+              'redux',
+              'redux-actions',
+              'redux-thunk',
+              'rxjs',
+              'uuid',
+              'vega-lib',
+              'vega-lite',
+              'vega-schema-url-parser',
+              'vega-tooltip',
+              'yauzl'
+            ],
+            exclude: [],*/
             include: dependencies,
             exclude: [
               'JSONStream',
               'tinygradient',
               'mini-css-extract-plugin',
               'x-pack',
-              'vega-lib',
               'webpack',
               '@kbn/pm',
               '@kbn/babel-preset',
@@ -163,7 +198,12 @@ export default class BaseOptimizer {
         outputPath: this.uiBundles.getWorkingDir(),
         publicPath: PUBLIC_PATH_PLACEHOLDER,
         mergeConfig: {
-          node: { fs: 'empty', child_process: 'empty', dns: 'empty', net: 'empty', tls: 'empty' }
+          node: { fs: 'empty', child_process: 'empty', dns: 'empty', net: 'empty', tls: 'empty' },
+          resolve: {
+            extensions: ['.js', '.json'],
+            mainFields: ['browser', 'browserify', 'main'],
+            alias: this.uiBundles.getAliases(),
+          }
         }
       }
     };
