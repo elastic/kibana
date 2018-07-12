@@ -37,7 +37,10 @@ export const createGetBeatConfigurationRoute = (libs: CMServerLibs) => ({
         return reply({ message: 'Invalid access token' }).code(401);
       }
 
-      tags = await libs.tags.getTagsWithIds(null, beat.tags || []);
+      tags = await libs.tags.getTagsWithIds(
+        libs.framework.internalUser,
+        beat.tags || []
+      );
     } catch (err) {
       return reply(wrapEsError(err));
     }

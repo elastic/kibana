@@ -33,6 +33,10 @@ export class CMBeatsDomain {
     this.tokens = libs.tokens;
   }
 
+  public async getById(beatId: string) {
+    return await this.adapter.get(beatId);
+  }
+
   public async update(
     beatId: string,
     accessToken: string,
@@ -83,8 +87,11 @@ export class CMBeatsDomain {
     }
 
     const accessToken = this.tokens.generateAccessToken();
+    const verifiedOn = moment().toJSON();
+
     await this.adapter.insert({
       ...beat,
+      verified_on: verifiedOn,
       access_token: accessToken,
       host_ip: remoteAddress,
       id: beatId,
