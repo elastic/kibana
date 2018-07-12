@@ -17,22 +17,23 @@
  * under the License.
  */
 
-export const newPlatformEntryTemplate = (bundle) => `
-/**
- * Kibana entry file
- *
- * This is programmatically created and updated, do not modify
- *
- * context: ${bundle.getContext()}
- */
+import { InjectedMetadataService } from '../injected_metadata';
 
-import { CoreSystem } from '__kibanaCore__'
+interface Deps {
+  injectedMetadata: ReturnType<InjectedMetadataService['start']>;
+}
 
-new CoreSystem({
-  bootstrapLegacyPlatform: () => {
-    require('ui/chrome')
-    ${bundle.getRequires().join('\n  ')}
-    require('ui/chrome').bootstrap();
+export class LegacyPlatformService {
+  constructor(private bootstrapLegacyPlatform: () => void) {}
+
+  public start({ injectedMetadata }: Deps) {
+    /**
+     * Injects parts of the new platform into parts of the legacy platform
+     * so that legacy APIs/modules can mimic their new platform counterparts
+     */
+    require('ui/metadata').__newPlatformInit__(injectedMetadata.getLegacyMetadata());
+
+    // call the legacy platform bootstrap function (bootstraps ui/chrome in apps and ui/test_harness in browser tests)
+    this.bootstrapLegacyPlatform();
   }
-}).start()
-`;
+}

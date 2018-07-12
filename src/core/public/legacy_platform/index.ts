@@ -17,22 +17,4 @@
  * under the License.
  */
 
-export const newPlatformEntryTemplate = (bundle) => `
-/**
- * Kibana entry file
- *
- * This is programmatically created and updated, do not modify
- *
- * context: ${bundle.getContext()}
- */
-
-import { CoreSystem } from '__kibanaCore__'
-
-new CoreSystem({
-  bootstrapLegacyPlatform: () => {
-    require('ui/chrome')
-    ${bundle.getRequires().join('\n  ')}
-    require('ui/chrome').bootstrap();
-  }
-}).start()
-`;
+export { LegacyPlatformService } from './legacy_platform_service';

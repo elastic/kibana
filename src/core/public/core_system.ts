@@ -23,28 +23,27 @@ import 'custom-event-polyfill';
 import 'whatwg-fetch';
 
 import { InjectedMetadata, InjectedMetadataService } from './injected_metadata';
+import { LegacyPlatformService } from './legacy_platform';
 
 interface CoreSystemParams {
   injectedMetadataForTesting?: InjectedMetadata;
+  bootstrapLegacyPlatform: () => void;
 }
 
 export class CoreSystem {
   private injectedMetadata: InjectedMetadataService;
+  private legacyPlatform: LegacyPlatformService;
 
-  constructor(params: CoreSystemParams = {}) {
-    const { injectedMetadataForTesting } = params;
+  constructor(params: CoreSystemParams) {
+    const { injectedMetadataForTesting, bootstrapLegacyPlatform } = params;
 
     this.injectedMetadata = new InjectedMetadataService(injectedMetadataForTesting);
+    this.legacyPlatform = new LegacyPlatformService(bootstrapLegacyPlatform);
   }
 
-  public initLegacyPlatform(bootstrapFn: () => void) {
-    /**
-     * Injects parts of the new platform into parts of the legacy platform
-     * so that legacy APIs/modules can mimic their new platform counterparts
-     */
-    require('ui/metadata').__newPlatformInit__(this.injectedMetadata.getLegacyMetadata());
-
-    // call the legacy platform bootstrap function (bootstraps ui/chrome in apps and ui/test_harness in browser tests)
-    bootstrapFn();
+  public start() {
+    this.legacyPlatform.start({
+      injectedMetadata: this.injectedMetadata.start(),
+    });
   }
 }

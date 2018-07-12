@@ -69,10 +69,11 @@ const legacyMetadata = {
 new CoreSystem({
   injectedMetadataForTesting: {
     legacyMetadata
+  },
+  bootstrapLegacyPlatform: () => {
+    require('ui/test_harness');
+    ${bundle.getRequires().join('\n  ')}
+    require('ui/test_harness').bootstrap();
   }
-}).initLegacyPlatform(() => {
-  require('ui/test_harness');
-  ${bundle.getRequires().join('\n  ')}
-  require('ui/test_harness').bootstrap();
-})
+}).start()
 `;

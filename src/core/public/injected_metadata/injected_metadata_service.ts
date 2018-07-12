@@ -27,13 +27,17 @@ export interface InjectedMetadata {
 }
 
 export class InjectedMetadataService {
-  private state: InjectedMetadata;
+  constructor(private injectedMetadataForTesting?: InjectedMetadata) {}
 
-  constructor(injectedMetadataForTesting?: InjectedMetadata) {
-    this.state = deepFreeze(injectedMetadataForTesting || readInjectedMetadataFromDom());
-  }
+  public start() {
+    const state = deepFreeze(
+      this.injectedMetadataForTesting || (readInjectedMetadataFromDom() as InjectedMetadata)
+    );
 
-  public getLegacyMetadata() {
-    return this.state.legacyMetadata;
+    return {
+      getLegacyMetadata() {
+        return state.legacyMetadata;
+      },
+    };
   }
 }
