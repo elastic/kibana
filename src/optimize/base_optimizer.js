@@ -20,10 +20,11 @@
 import { writeFile } from 'fs';
 
 import Boom from 'boom';
-import ExtractTextPlugin from 'extract-text-webpack-plugin';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import webpack from 'webpack';
 import Stats from 'webpack/lib/Stats';
 import webpackMerge from 'webpack-merge';
+import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
 import { Compiler as DLLCompiler } from './dll_bundler';
 
 import { defaults } from 'lodash';
@@ -37,6 +38,7 @@ const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
 const BABEL_EXCLUDE_RE = [
   /[\/\\](webpackShims|node_modules|bower_components)[\/\\]/,
 ];
+const STATS_WARNINGS_FILTER = /export .* was not found in/;
 
 export default class BaseOptimizer {
   constructor(opts) {
@@ -78,17 +80,22 @@ export default class BaseOptimizer {
     const compilerConfig = this.getConfig();
     this.compiler = webpack(compilerConfig);
 
-    this.compiler.plugin('done', stats => {
-      if (!this.profile) return;
+    this.compiler.hooks.done.tap({
+      name: 'kibana-writeStatsJson',
+      fn: stats => {
+        if (!this.profile) {
+          return;
+        }
 
-      const path = this.uiBundles.resolvePath('stats.json');
-      const content = JSON.stringify(stats.toJson());
-      writeFile(path, content, function (err) {
-        if (err) throw err;
-      });
+        const path = this.uiBundles.resolvePath('stats.json');
+        const content = JSON.stringify(stats.toJson());
+        writeFile(path, content, function (err) {
+          if (err) throw err;
+        });
+      }
     });
 
-    return this.compiler;
+    return this;
   }
 
   getDLLConfig() {
@@ -103,7 +110,7 @@ export default class BaseOptimizer {
             exclude: [
               'JSONStream',
               'tinygradient',
-              'extract-text-webpack-plugin',
+              'mini-css-extract-plugin',
               'x-pack',
               'vega-lib',
               'webpack',
@@ -141,6 +148,7 @@ export default class BaseOptimizer {
               '@kbn/i18n',
               '@kbn/test-subj-selector',
               'bunyan',
+              'url-loader'
             ]
           },
         ]
@@ -163,32 +171,28 @@ export default class BaseOptimizer {
 
   getConfig() {
     function getStyleLoaders(preProcessors = [], postProcessors = []) {
-      return ExtractTextPlugin.extract({
-        fallback: {
-          loader: 'style-loader'
+      return [
+        MiniCssExtractPlugin.loader,
+        ...postProcessors,
+        {
+          loader: 'css-loader',
+          options: {
+            // importLoaders needs to know the number of loaders that follow this one,
+            // so we add 1 (for the postcss-loader) to the length of the preProcessors
+            // array that we merge into this array
+            importLoaders: 1 + preProcessors.length,
+          },
         },
-        use: [
-          ...postProcessors,
-          {
-            loader: 'css-loader',
-            options: {
-              // importLoaders needs to know the number of loaders that follow this one,
-              // so we add 1 (for the postcss-loader) to the length of the preProcessors
-              // array that we merge into this array
-              importLoaders: 1 + preProcessors.length,
+        {
+          loader: 'postcss-loader',
+          options: {
+            config: {
+              path: POSTCSS_CONFIG_PATH,
             },
           },
-          {
-            loader: 'postcss-loader',
-            options: {
-              config: {
-                path: POSTCSS_CONFIG_PATH,
-              },
-            },
-          },
-          ...preProcessors,
-        ],
-      });
+        },
+        ...preProcessors,
+      ];
       // TODO: refactor this
       /*if (IS_KIBANA_DISTRIBUTABLE) {
         return ExtractTextPlugin.extract({
@@ -286,6 +290,7 @@ export default class BaseOptimizer {
     };
 
     const commonConfig = {
+      mode: 'development',
       node: { fs: 'empty' },
       context: fromRoot('.'),
       entry: this.uiBundles.toWebpackEntries(),
@@ -301,30 +306,38 @@ export default class BaseOptimizer {
         devtoolModuleFilenameTemplate: '[absolute-resource-path]'
       },
 
+      optimization: {
+        splitChunks: {
+          cacheGroups: {
+            /*vendors: {
+              name: 'vendors',
+              test: /[\\/]node_modules[\\/]/,
+              priority: -10,
+              minSize: 0,
+              minChunks: 1,
+              maxInitialRequests: Infinity,
+              maxAsyncRequests: Infinity,
+            },*/
+            commons: {
+              name: 'commons',
+              chunks: 'initial',
+              minChunks: 2,
+              reuseExistingChunk: true,
+            }
+          }
+        },
+        noEmitOnErrors: true
+      },
+
       plugins: [
-        new ExtractTextPlugin('[name].style.css', {
-          allChunks: true
+        new MiniCssExtractPlugin({
+          filename: '[name].style.css',
         }),
 
         new webpack.DllReferencePlugin({
           context: fromRoot('.'),
           manifest: require(`${this.uiBundles.getWorkingDir()}/dlls/vendor.json`)
         }),
-
-        /*new webpack.optimize.CommonsChunkPlugin({
-          name: 'commons',
-          filename: 'commons.bundle.js',
-          minChunks: 2,
-        }),
-
-        new webpack.optimize.CommonsChunkPlugin({
-          name: 'vendors',
-          filename: 'vendors.bundle.js',
-          // only combine node_modules from Kibana
-          minChunks: module => module.context && module.context.indexOf(nodeModulesPath) !== -1
-        }),*/
-
-        new webpack.NoEmitOnErrorsPlugin(),
 
         // replace imports for `uiExports/*` modules with a synthetic module
         // created by create_ui_exports_module.js
@@ -487,20 +500,22 @@ export default class BaseOptimizer {
 
     // in production we set the process.env.NODE_ENV and uglify our bundles
     const productionConfig = {
-      plugins: [
-        new webpack.DefinePlugin({
-          'process.env': {
-            'NODE_ENV': '"production"'
-          }
-        }),
-        new webpack.optimize.UglifyJsPlugin({
-          compress: {
-            warnings: false
-          },
-          sourceMap: false,
-          mangle: false
-        }),
-      ]
+      mode: 'production',
+      optimization: {
+        minimize: true,
+        minimizer: [
+          new UglifyJsPlugin({
+            uglifyOptions: {
+              compress: {
+                warnings: false
+              },
+              sourceMap: false,
+              mangle: false
+            },
+            parallel: true
+          })
+        ]
+      }
     };
 
     return webpackMerge(
@@ -512,6 +527,24 @@ export default class BaseOptimizer {
         ? webpackMerge(watchingConfig, supportEnzymeConfig)
         : productionConfig
     );
+  }
+
+  isFailure(stats) {
+    if (stats.hasErrors()) {
+      return true;
+    }
+
+    const { warnings } = stats.toJson({ all: false, warnings: true });
+
+    // when typescript doesn't do a full type check, as we have the ts-loader
+    // configured here, it does not have enough information to determine
+    // whether an imported name is a type or not, so when the name is then
+    // exported, typescript has no choice but to emit the export. Fortunately,
+    // the extraneous export should not be harmful, so we just suppress these warnings
+    // https://github.com/TypeStrong/ts-loader#transpileonly-boolean-defaultfalse
+    const filteredWarnings = Stats.filterWarnings(warnings, STATS_WARNINGS_FILTER);
+
+    return filteredWarnings.length > 0;
   }
 
   failedStatsToError(stats) {

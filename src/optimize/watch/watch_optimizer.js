@@ -51,8 +51,8 @@ export default class WatchOptimizer extends BaseOptimizer {
 
     await super.init();
 
-    this.compiler.plugin('watch-run', this.compilerRunStartHandler);
-    this.compiler.plugin('done', this.compilerDoneHandler);
+    this.compiler.hooks.watchRun.tapAsync(this.compilerWatchRunTap);
+    this.compiler.hooks.done.tap(this.compilerDoneTap);
     this.compiler.watch({ aggregateTimeout: 200 }, this.compilerWatchErrorHandler);
 
     if (this.prebuild) {
@@ -100,13 +100,37 @@ export default class WatchOptimizer extends BaseOptimizer {
     }
   }
 
-  compilerRunStartHandler = async (watchingCompiler, cb) => {
-    this.status$.next({
-      type: STATUS.RUNNING
-    });
+  compilerWatchRunTap = {
+    name: 'kibana-compilerWatchRunTap',
+    fn: async (arg, cb) => {
+      this.status$.next({
+        type: STATUS.RUNNING
+      });
 
-    // await this.dllCompiler.run();
-    cb();
+      // await this.dllCompiler.run();
+      cb();
+    }
+  }
+
+  compilerDoneTap = {
+    name: 'kibana-compilerDoneTap',
+    fn: (stats) => {
+      this.initialBuildComplete = true;
+      const seconds = parseFloat((stats.endTime - stats.startTime) / 1000).toFixed(2);
+
+      if (this.isFailure(stats)) {
+        this.status$.next({
+          type: STATUS.FAILURE,
+          seconds,
+          error: this.failedStatsToError(stats)
+        });
+      } else {
+        this.status$.next({
+          type: STATUS.SUCCESS,
+          seconds,
+        });
+      }
+    }
   }
 
   compilerWatchErrorHandler = (error) => {
@@ -114,24 +138,6 @@ export default class WatchOptimizer extends BaseOptimizer {
       this.status$.next({
         type: STATUS.FATAL,
         error
-      });
-    }
-  }
-
-  compilerDoneHandler = (stats) => {
-    this.initialBuildComplete = true;
-    const seconds = parseFloat((stats.endTime - stats.startTime) / 1000).toFixed(2);
-
-    if (stats.hasErrors() || stats.hasWarnings()) {
-      this.status$.next({
-        type: STATUS.FAILURE,
-        seconds,
-        error: this.failedStatsToError(stats)
-      });
-    } else {
-      this.status$.next({
-        type: STATUS.SUCCESS,
-        seconds,
       });
     }
   }

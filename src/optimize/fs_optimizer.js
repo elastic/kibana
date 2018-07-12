@@ -32,7 +32,7 @@ export default class FsOptimizer extends BaseOptimizer {
       return super.run((err, stats) => {
         if (err || !stats) return cb(err);
 
-        if (stats.hasErrors() || stats.hasWarnings()) {
+        if (this.isFailure(stats)) {
           return cb(this.failedStatsToError(stats));
         }
         else {

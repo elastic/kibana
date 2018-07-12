@@ -50,7 +50,7 @@ function generateDLLS({ context, entries, output }) {
 function optimized(options) {
   return webpackMerge(
     {
-      // mode: 'production'
+      mode: 'production'
     },
     generateDLLS({
       context: options.context,
@@ -68,7 +68,7 @@ function optimized(options) {
 function unoptimized(options) {
   return webpackMerge(
     {
-      // mode: 'development'
+      mode: 'development'
     },
     generateDLLS({
       context: options.context,
