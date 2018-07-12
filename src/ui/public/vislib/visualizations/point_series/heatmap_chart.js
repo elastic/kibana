@@ -90,8 +90,14 @@ export function VislibVisualizationsHeatmapChartProvider(Private) {
           } else {
             val = val * (max - min) + min;
             nextVal = nextVal * (max - min) + min;
-            if (max > 1) {
-              val = Math.ceil(val);
+            if (max - min > 10) {
+              let valInt = Math.ceil(val);
+              if (i === 0) {
+                val = (valInt === val ? val : valInt -1);
+              }
+              else{
+                val = valInt;
+              }
               nextVal = Math.ceil(nextVal);
             }
             if (isFinite(val)) val = zAxisFormatter(val);
