@@ -10,7 +10,6 @@ import { isEmpty } from 'lodash';
 import pluralize from 'pluralize';
 import { uiModules } from 'ui/modules';
 import { toastNotifications } from 'ui/notify';
-import '../pipeline_table';
 import {
   EuiButton,
   EuiButtonEmpty,

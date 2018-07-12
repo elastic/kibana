@@ -13,7 +13,6 @@ import { PipelineEditor } from '../../../../components/pipeline_editor';
 import 'plugins/logstash/services/license';
 import 'plugins/logstash/services/security';
 import './pipeline_edit.less';
-import '../../../../components/tooltip';
 import 'ace';
 
 const app = uiModules.get('xpack/logstash');
