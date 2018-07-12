@@ -133,6 +133,7 @@ describe('GET roles', () => {
               run_as: ['other_user'],
             },
             kibana: [],
+            _unrecognized_applications: [],
           },
         ],
       },
@@ -188,6 +189,7 @@ describe('GET roles', () => {
                 privileges: ['all'],
               },
             ],
+            _unrecognized_applications: [],
           },
         ],
       },
@@ -242,12 +244,13 @@ describe('GET roles', () => {
               run_as: [],
             },
             kibana: [],
+            _unrecognized_applications: [],
           },
         ],
       },
     });
 
-    getRolesTest(`excludes other application from kibana privileges`, {
+    getRolesTest(`transforms unrecognized applications`, {
       callWithRequestImpl: async () => ({
         first_role: {
           cluster: [],
@@ -285,6 +288,7 @@ describe('GET roles', () => {
               run_as: [],
             },
             kibana: [],
+            _unrecognized_applications: ['kibana-.another-kibana']
           },
         ],
       },
@@ -413,6 +417,7 @@ describe('GET role', () => {
             run_as: ['other_user'],
           },
           kibana: [],
+          _unrecognized_applications: [],
         },
       },
     });
@@ -467,6 +472,7 @@ describe('GET role', () => {
               privileges: ['all'],
             },
           ],
+          _unrecognized_applications: [],
         },
       },
     });
@@ -520,11 +526,12 @@ describe('GET role', () => {
             run_as: [],
           },
           kibana: [],
+          _unrecognized_applications: [],
         },
       },
     });
 
-    getRoleTest(`excludes other application from kibana privileges`, {
+    getRoleTest(`transforms unrecognized applications`, {
       name: 'first_role',
       callWithRequestImpl: async () => ({
         first_role: {
@@ -562,6 +569,7 @@ describe('GET role', () => {
             run_as: [],
           },
           kibana: [],
+          _unrecognized_applications: ['kibana-.another-kibana'],
         },
       },
     });

@@ -10,12 +10,18 @@ import { wrapError } from '../../../../lib/errors';
 
 export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn, application) {
 
-  const transformRoleApplicationsFromEs = (roleApplications) => {
+  const transformKibanaApplicationsFromEs = (roleApplications) => {
     return roleApplications
       .filter(roleApplication => roleApplication.application === application)
       .filter(roleApplication => roleApplication.resources.length > 0)
       .filter(roleApplication => roleApplication.resources.every(resource => resource === ALL_RESOURCE))
       .map(roleApplication => ({ privileges: roleApplication.privileges }));
+  };
+
+  const transformUnrecognizedApplicationsFromEs = (roleApplications) => {
+    return _.uniq(roleApplications
+      .filter(roleApplication => roleApplication.application !== application)
+      .map(roleApplication => roleApplication.application));
   };
 
   const transformRoleFromEs = (role, name) => {
@@ -28,7 +34,8 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
         indices: role.indices,
         run_as: role.run_as,
       },
-      kibana: transformRoleApplicationsFromEs(role.applications)
+      kibana: transformKibanaApplicationsFromEs(role.applications),
+      _unrecognized_applications: transformUnrecognizedApplicationsFromEs(role.applications),
     };
   };
 

@@ -254,27 +254,29 @@ describe('POST role', () => {
       preCheckLicenseImpl: defaultPreCheckLicenseImpl,
       callWithRequestImpls: [
         async () => ({
-          metadata: {
-            bar: 'old-metadata',
-          },
-          transient_metadata: {
-            foo: 'old-metadata',
-          },
-          cluster: ['old-cluster-privilege'],
-          indices: [
-            {
-              names: ['old-index-name'],
-              privileges: ['old-privilege'],
+          'foo-role': {
+            metadata: {
+              bar: 'old-metadata',
             },
-          ],
-          run_as: ['old-run-as'],
-          applications: [
-            {
-              application,
-              privileges: ['old-kibana-privilege'],
-              resources: ['old-resource'],
+            transient_metadata: {
+              foo: 'old-metadata',
             },
-          ],
+            cluster: ['old-cluster-privilege'],
+            indices: [
+              {
+                names: ['old-index-name'],
+                privileges: ['old-privilege'],
+              },
+            ],
+            run_as: ['old-run-as'],
+            applications: [
+              {
+                application,
+                privileges: ['old-kibana-privilege'],
+                resources: ['old-resource'],
+              },
+            ],
+          },
         }),
         async () => {},
       ],
@@ -362,37 +364,39 @@ describe('POST role', () => {
         preCheckLicenseImpl: defaultPreCheckLicenseImpl,
         callWithRequestImpls: [
           async () => ({
-            metadata: {
-              bar: 'old-metadata',
+            'foo-role': {
+              metadata: {
+                bar: 'old-metadata',
+              },
+              transient_metadata: {
+                foo: 'old-metadata',
+              },
+              cluster: ['old-cluster-privilege'],
+              indices: [
+                {
+                  names: ['old-index-name'],
+                  privileges: ['old-privilege'],
+                },
+              ],
+              run_as: ['old-run-as'],
+              applications: [
+                {
+                  application,
+                  privileges: ['old-kibana-privilege'],
+                  resources: ['old-resource'],
+                },
+                {
+                  application: 'logstash-foo',
+                  privileges: ['logstash-privilege'],
+                  resources: ['logstash-resource'],
+                },
+                {
+                  application: 'beats-foo',
+                  privileges: ['beats-privilege'],
+                  resources: ['beats-resource'],
+                },
+              ],
             },
-            transient_metadata: {
-              foo: 'old-metadata',
-            },
-            cluster: ['old-cluster-privilege'],
-            indices: [
-              {
-                names: ['old-index-name'],
-                privileges: ['old-privilege'],
-              },
-            ],
-            run_as: ['old-run-as'],
-            applications: [
-              {
-                application,
-                privileges: ['old-kibana-privilege'],
-                resources: ['old-resource'],
-              },
-              {
-                application: 'logstash-foo',
-                privileges: ['logstash-privilege'],
-                resources: ['logstash-resource'],
-              },
-              {
-                application: 'beats-foo',
-                privileges: ['beats-privilege'],
-                resources: ['beats-resource'],
-              },
-            ],
           }),
           async () => {},
         ],

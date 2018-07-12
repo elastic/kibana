@@ -5,7 +5,6 @@
  */
 
 import _ from 'lodash';
-import chrome from 'ui/chrome';
 import routes from 'ui/routes';
 import { fatalError, toastNotifications } from 'ui/notify';
 import { toggle } from 'plugins/security/lib/util';
@@ -22,60 +21,41 @@ import { IndexPatternsProvider } from 'ui/index_patterns/index_patterns';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import { checkLicenseError } from 'plugins/security/lib/check_license_error';
 import { EDIT_ROLES_PATH, ROLES_PATH } from './management_urls';
-import { ALL_RESOURCE } from '../../../common/constants';
 
-const getKibanaPrivileges = (applicationPrivileges, roleApplications, application) => {
-  const kibanaPrivileges = applicationPrivileges.reduce((acc, p) => {
+const getKibanaPrivilegesViewModel = (applicationPrivileges, roleKibanaPrivileges) => {
+  const viewModel = applicationPrivileges.reduce((acc, p) => {
     acc[p.name] = false;
     return acc;
   }, {});
 
-  if (!roleApplications || roleApplications.length === 0) {
-    return kibanaPrivileges;
+  if (!roleKibanaPrivileges || roleKibanaPrivileges.length === 0) {
+    return viewModel;
   }
 
-  // we're filtering out privileges for non-all resources incase the roles were created in a future version
-  const applications = roleApplications
-    .filter(roleApplication => roleApplication.application === application)
-    .filter(roleApplication => !roleApplication.resources.some(resource => resource !== ALL_RESOURCE));
-
-  const assigned = _.uniq(_.flatten(_.pluck(applications, 'privileges')));
+  const assigned = _.uniq(_.flatten(_.pluck(roleKibanaPrivileges, 'privileges')));
   assigned.forEach(a => {
     // we don't want to display privileges that aren't in our expected list of privileges
-    if (a in kibanaPrivileges) {
-      kibanaPrivileges[a] = true;
+    if (a in viewModel) {
+      viewModel[a] = true;
     }
   });
 
-  return kibanaPrivileges;
+  return viewModel;
 };
 
-const getRoleApplications = (kibanaPrivileges, currentRoleApplications = [], application) => {
-  // we keep any other applications
-  const newRoleApplications = currentRoleApplications.filter(roleApplication => {
-    return roleApplication.application !== application;
-  });
-
-  const selectedPrivileges = Object.keys(kibanaPrivileges).filter(key => kibanaPrivileges[key]);
+const getKibanaPrivileges = (kibanaPrivilegesViewModel) => {
+  const selectedPrivileges = Object.keys(kibanaPrivilegesViewModel).filter(key => kibanaPrivilegesViewModel[key]);
 
   // if we have any selected privileges, add a single application entry
   if (selectedPrivileges.length > 0) {
-    newRoleApplications.push({
-      application,
-      privileges: selectedPrivileges,
-      resources: [ALL_RESOURCE]
-    });
+    return [
+      {
+        privileges: selectedPrivileges
+      }
+    ];
   }
 
-  return newRoleApplications;
-};
-
-const getOtherApplications = (roleApplications, application) => {
-  if (!roleApplications || roleApplications.length === 0) {
-    return [];
-  }
-
-  return roleApplications.map(roleApplication => roleApplication.application).filter(app =>app !== application);
+  return [];
 };
 
 routes.when(`${EDIT_ROLES_PATH}/:name?`, {
@@ -98,10 +78,13 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
           });
       }
       return new ShieldRole({
-        cluster: [],
-        indices: [],
-        run_as: [],
-        applications: []
+        elasticsearch: {
+          cluster: [],
+          indices: [],
+          run_as: [],
+        },
+        kibana: [],
+        _unrecognized_applications: []
       });
     },
     applicationPrivileges(ApplicationPrivileges, kbnUrl, Promise, Private) {
@@ -128,7 +111,6 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     const Private = $injector.get('Private');
     const confirmModal = $injector.get('confirmModal');
     const shieldIndices = $injector.get('shieldIndices');
-    const rbacApplication = chrome.getInjected('rbacApplication');
 
     $scope.role = $route.current.locals.role;
     $scope.users = $route.current.locals.users;
@@ -137,8 +119,8 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
 
     const applicationPrivileges = $route.current.locals.applicationPrivileges;
     const role = $route.current.locals.role;
-    $scope.kibanaPrivileges = getKibanaPrivileges(applicationPrivileges, role.applications, rbacApplication);
-    $scope.otherApplications = getOtherApplications(role.applications, rbacApplication);
+    $scope.kibanaPrivilegesViewModel = getKibanaPrivilegesViewModel(applicationPrivileges, role.kibana);
+    $scope.otherApplications = role._unrecognized_applications;
 
     $scope.rolesHref = `#${ROLES_PATH}`;
 
@@ -162,10 +144,10 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     };
 
     $scope.saveRole = (role) => {
-      role.indices = role.indices.filter((index) => index.names.length);
-      role.indices.forEach((index) => index.query || delete index.query);
+      role.elasticsearch.indices = role.elasticsearch.indices.filter((index) => index.names.length);
+      role.elasticsearch.indices.forEach((index) => index.query || delete index.query);
 
-      role.applications = getRoleApplications($scope.kibanaPrivileges, role.applications, rbacApplication);
+      role.kibana = getKibanaPrivileges($scope.kibanaPrivilegesViewModel);
 
       return role.$save()
         .then(() => toastNotifications.addSuccess('Updated role'))
@@ -203,7 +185,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     $scope.allowDocumentLevelSecurity = xpackInfo.get('features.security.allowRoleDocumentLevelSecurity');
     $scope.allowFieldLevelSecurity = xpackInfo.get('features.security.allowRoleFieldLevelSecurity');
 
-    $scope.$watch('role.indices', (indices) => {
+    $scope.$watch('role.elasticsearch.indices', (indices) => {
       if (!indices.length) $scope.addIndex(indices);
       else indices.forEach($scope.fetchFieldOptions);
     }, true);

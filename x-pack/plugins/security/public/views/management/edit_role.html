@@ -101,8 +101,8 @@
               <input
                 class="kuiCheckBox"
                 type="checkbox"
-                ng-checked="includes(role.cluster, privilege)"
-                ng-click="toggle(role.cluster, privilege)"
+                ng-checked="includes(role.elasticsearch.cluster, privilege)"
+                ng-click="toggle(role.elasticsearch.cluster, privilege)"
                 ng-disabled="role.metadata._reserved || !isRoleEnabled(role)"
               />
               <span class="kuiOptionLabel">{{privilege}}</span>
@@ -116,12 +116,12 @@
             Kibana Privileges
           </label>
 
-          <div ng-repeat="(key, value) in kibanaPrivileges">
+          <div ng-repeat="(key, value) in kibanaPrivilegesViewModel">
             <label>
               <input
                 class="kuiCheckBox"
                 type="checkbox"
-                ng-model="kibanaPrivileges[key]"
+                ng-model="kibanaPrivilegesViewModel[key]"
                 ng-disabled="role.metadata._reserved || !isRoleEnabled(role)"
               />
               <span class="kuiOptionLabel">{{key}}</span>
@@ -136,7 +136,7 @@
           </label>
           <ui-select
             multiple
-            ng-model="role.run_as"
+            ng-model="role.elasticsearch.run_as"
             ng-disabled="role.metadata._reserved || !isRoleEnabled(role)"
           >
             <ui-select-match placeholder="Add a user...">
@@ -152,7 +152,7 @@
         <div class="kuiFormSection">
           <kbn-index-privileges-form
             is-new-role="editRole.isNewRole"
-            indices="role.indices"
+            indices="role.elasticsearch.indices"
             index-patterns="indexPatterns"
             privileges="privileges"
             field-options="editRole.fieldOptions"
@@ -173,7 +173,7 @@
             class="kuiButton kuiButton--primary"
             ng-click="saveRole(role)"
             ng-if="!role.metadata._reserved && isRoleEnabled(role)"
-            ng-disabled="form.$invalid || !areIndicesValid(role.indices)"
+            ng-disabled="form.$invalid || !areIndicesValid(role.elasticsearch.indices)"
             data-test-subj="roleFormSaveButton"
           >
             Save

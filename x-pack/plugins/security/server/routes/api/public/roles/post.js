@@ -43,6 +43,7 @@ const transformRolesToEs = (
   payload,
   existingApplications = []
 ) => {
+  debugger; //eslint-disable-line
   const { elasticsearch = {}, kibana = [] } = payload;
   const otherApplications = existingApplications.filter(
     roleApplication => roleApplication.application !== application
@@ -75,7 +76,7 @@ export function initPostRolesApi(
     async handler(request, reply) {
       const name = request.params.name;
       try {
-        const role = await callWithRequest(request, 'shield.getRole', {
+        const existingRoleResponse = await callWithRequest(request, 'shield.getRole', {
           name,
           ignore: [404],
         });
@@ -83,7 +84,7 @@ export function initPostRolesApi(
         const body = transformRolesToEs(
           application,
           request.payload,
-          role.applications
+          existingRoleResponse[name] ? existingRoleResponse[name].applications : []
         );
 
         await callWithRequest(request, 'shield.putRole', { name, body });
