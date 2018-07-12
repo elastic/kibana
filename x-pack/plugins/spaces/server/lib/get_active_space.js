@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 import { wrapError } from './errors';
-import { getSpaceUrlContext } from '../../common/spaces_url_parser';
+import { getSpaceUrlContext } from './spaces_url_parser';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 
 export async function getActiveSpace(savedObjectsClient, basePath) {

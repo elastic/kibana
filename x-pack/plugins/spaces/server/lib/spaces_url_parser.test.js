@@ -7,8 +7,13 @@ import { getSpaceUrlContext, addSpaceUrlContext } from './spaces_url_parser';
 
 describe('getSpaceUrlContext', () => {
   test('it identifies the space url context', () => {
-    const basePath = `/this/is/a/crazy/path/s/my-awesome-space-lives-here`;
+    const basePath = `/s/my-awesome-space-lives-here`;
     expect(getSpaceUrlContext(basePath)).toEqual('my-awesome-space-lives-here');
+  });
+
+  test('ignores space identifiers in the middle of the path', () => {
+    const basePath = `/this/is/a/crazy/path/s/my-awesome-space-lives-here`;
+    expect(getSpaceUrlContext(basePath)).toEqual('');
   });
 
   test('it handles base url without a space url context', () => {

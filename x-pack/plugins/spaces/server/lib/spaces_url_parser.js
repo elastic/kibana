@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function getSpaceUrlContext(basePath = '/') {
+export function getSpaceUrlContext(requestBasePath = '/') {
   // Look for `/s/space-url-context` in the base path
-  const matchResult = basePath.match(/\/s\/([a-z0-9\-]+)/);
+  const matchResult = requestBasePath.match(/^\/s\/([a-z0-9\-]+)/);
 
   if (!matchResult || matchResult.length === 0) {
     return '';

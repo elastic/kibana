@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getSpaceUrlContext } from '../../common/spaces_url_parser';
+import { getSpaceUrlContext } from './spaces_url_parser';
 
 export function createSpacesService() {
 

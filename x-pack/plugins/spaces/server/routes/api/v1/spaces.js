@@ -12,7 +12,7 @@ import { spaceSchema } from '../../../lib/space_schema';
 import { wrapError } from '../../../lib/errors';
 import { isReservedSpace } from '../../../../common/is_reserved_space';
 import { createDuplicateContextQuery } from '../../../lib/check_duplicate_context';
-import { addSpaceUrlContext } from '../../../../common/spaces_url_parser';
+import { addSpaceUrlContext } from '../../../lib/spaces_url_parser';
 
 export function initSpacesApi(server) {
   const routePreCheckLicenseFn = routePreCheckLicense(server);
