@@ -20,6 +20,7 @@
 interface EditorParamConfig {
   fixedValue?: any;
   hidden?: boolean;
+  base?: number;
 }
 
 export interface EditorConfig {

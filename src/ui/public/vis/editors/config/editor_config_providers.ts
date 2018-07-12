@@ -28,6 +28,14 @@ type EditorConfigProvider = (
   aggConfig: AggConfig
 ) => EditorConfig;
 
+function greatestCommonDivisor(a: number, b: number): number {
+  return a === 0 ? b : greatestCommonDivisor(b % a, a);
+}
+
+function leastCommonMultiple(a: number, b: number) {
+  return a * b / greatestCommonDivisor(a, b);
+}
+
 class EditorConfigProviderRegistry {
   private providers: Set<EditorConfigProvider> = new Set();
 
@@ -43,8 +51,37 @@ class EditorConfigProviderRegistry {
     const configs = Array.from(this.providers).map(provider =>
       provider(aggType, indexPattern, aggConfig)
     );
-    // TODO: merge configs in a reasonable way
-    return configs[0];
+    return this.mergeConfigs(configs);
+  }
+
+  private mergeConfigs(configs: EditorConfig[]): EditorConfig {
+    return configs.reduce((output, conf) => {
+      Object.entries(conf).forEach(([paramName, paramConfig]) => {
+        if (!output[paramName]) {
+          // No other config had anything configured for that param, just
+          // use the whole config for that param as it is.
+          output[paramName] = paramConfig;
+        } else {
+          // Another config already had already configured something, so let's merge that
+          // If one config set it to hidden, we'll hide the param.
+          output[paramName].hidden = output[paramName].hidden || paramConfig.hidden;
+
+          // In case a base is defined either set it (if no previous base)
+          // has been configured for that param or otherwise find the least common multiple
+          if (paramConfig.base) {
+            const previousBase = output[paramName].base;
+            output[paramName].base =
+              previousBase !== undefined
+                ? leastCommonMultiple(previousBase, paramConfig.base)
+                : output[paramName].base;
+          }
+
+          // TODO: What to do for multiple fixedValues
+          output[paramName].fixedValue = paramConfig.fixedValue;
+        }
+      });
+      return output;
+    }, {});
   }
 }
 
