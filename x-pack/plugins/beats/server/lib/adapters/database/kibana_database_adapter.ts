@@ -104,7 +104,9 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
 
   private getCallType(user: FrameworkUser): any {
     if (user.kind === 'authenticated') {
-      return this.es.callWithRequest.bind(null, user[internalAuthData]);
+      return this.es.callWithRequest.bind(null, {
+        headers: user[internalAuthData],
+      });
     } else if (user.kind === 'internal') {
       return this.es.callWithInternalUser;
     } else {
