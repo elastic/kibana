@@ -18,7 +18,7 @@ const commonResponse = {
 
 describe('validateEsPrivilegeResponse', () => {
   const legacyIndexResponse = {
-    '.kibana': {
+    [kibanaIndex]: {
       'create': true,
       'delete': true,
       'read': true,
@@ -144,10 +144,60 @@ describe('validateEsPrivilegeResponse', () => {
     ).toThrowErrorMatchingSnapshot();
   });
 
-  it('fails validation then the "application" property is missing from the response', () => {
+  it('fails validation when the "application" property is missing from the response', () => {
     const response = {
       ...commonResponse,
       index: {}
+    };
+
+    expect(() =>
+      validateEsPrivilegeResponse(response, application, ['action1', 'action2', 'action3'], [resource], kibanaIndex)
+    ).toThrowErrorMatchingSnapshot();
+  });
+
+  it('fails validation when the expected resource property is missing from the response', () => {
+    const response = {
+      ...commonResponse,
+      application: {
+        [application]: {}
+      },
+      index: legacyIndexResponse
+    };
+
+    expect(() =>
+      validateEsPrivilegeResponse(response, application, ['action1', 'action2', 'action3'], [resource], kibanaIndex)
+    ).toThrowErrorMatchingSnapshot();
+  });
+
+  it('fails validation when an unexpected resource property is present in the response', () => {
+    const response = {
+      ...commonResponse,
+      application: {
+        [application]: {
+          'other-resource': {
+            action1: true,
+            action2: true,
+            action3: true,
+          }
+        }
+      },
+      index: legacyIndexResponse
+    };
+
+    expect(() =>
+      validateEsPrivilegeResponse(response, application, ['action1', 'action2', 'action3'], [resource], kibanaIndex)
+    ).toThrowErrorMatchingSnapshot();
+  });
+
+  it('fails validation when the resource propertry is malformed in the response', () => {
+    const response = {
+      ...commonResponse,
+      application: {
+        [application]: {
+          [resource]: 'not-an-object'
+        }
+      },
+      index: legacyIndexResponse
     };
 
     expect(() =>

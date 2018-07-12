@@ -61,7 +61,6 @@ const checkPrivilegesTest = (
     const mockConfig = createMockConfig();
     const mockShieldClient = createMockShieldClient({
       username,
-      has_all_requested: true,
       application: {
         [application]: {
           [ALL_RESOURCE]: applicationPrivilegesResponse
@@ -327,5 +326,77 @@ describe('with no application privileges', () => {
         missing: [`action:saved_objects/${savedObjectTypes[0]}/get`],
       }
     });
+  });
+});
+
+describe('with a malformed Elasticsearch response', () => {
+  const indexPrivilegesResponse = {
+    create: true,
+    delete: true,
+    read: true,
+    view_index_metadata: true,
+  };
+
+  checkPrivilegesTest('throws a validation error when an extra privilege is present in the response', {
+    username: 'foo-username',
+    privileges: [
+      `action:saved_objects/${savedObjectTypes[0]}/get`,
+    ],
+    applicationPrivilegesResponse: {
+      [mockActions.version]: true,
+      [mockActions.login]: true,
+      [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
+      ['oops-an-unexpected-privilege']: true,
+    },
+    indexPrivilegesResponse,
+    expectErrorThrown: true,
+  });
+
+  checkPrivilegesTest('throws a validation error when privileges are missing in the response', {
+    username: 'foo-username',
+    privileges: [
+      `action:saved_objects/${savedObjectTypes[0]}/get`,
+    ],
+    applicationPrivilegesResponse: {
+      [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
+    },
+    indexPrivilegesResponse,
+    expectErrorThrown: true,
+  });
+
+  checkPrivilegesTest('throws a validation error when an extra index privilege is present in the response', {
+    username: 'foo-username',
+    privileges: [
+      `action:saved_objects/${savedObjectTypes[0]}/get`,
+    ],
+    applicationPrivilegesResponse: {
+      [mockActions.version]: true,
+      [mockActions.login]: true,
+      [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
+    },
+    indexPrivilegesResponse: {
+      ...indexPrivilegesResponse,
+      oopsAnExtraPrivilege: true,
+    },
+    expectErrorThrown: true,
+  });
+
+  const missingIndexPrivileges = {
+    ...indexPrivilegesResponse
+  };
+  delete missingIndexPrivileges.read;
+
+  checkPrivilegesTest('throws a validation error when index privileges are missing in the response', {
+    username: 'foo-username',
+    privileges: [
+      `action:saved_objects/${savedObjectTypes[0]}/get`,
+    ],
+    applicationPrivilegesResponse: {
+      [mockActions.version]: true,
+      [mockActions.login]: true,
+      [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
+    },
+    indexPrivilegesResponse: missingIndexPrivileges,
+    expectErrorThrown: true,
   });
 });

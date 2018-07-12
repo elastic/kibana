@@ -27,7 +27,7 @@ export function validateEsPrivilegeResponse(response, application, actions, reso
   return value;
 }
 
-function buildResourceValidationSchema(actions) {
+function buildActionsValidationSchema(actions) {
   return Joi.object({
     ...actions.reduce((acc, action) => {
       return {
@@ -40,13 +40,13 @@ function buildResourceValidationSchema(actions) {
 
 function buildValidationSchema(application, actions, resources, kibanaIndex) {
 
-  const resourceValidationSchema = buildResourceValidationSchema(actions);
+  const actionValidationSchema = buildActionsValidationSchema(actions);
 
-  const appValidationSchema = Joi.object({
+  const resourceValidationSchema = Joi.object({
     ...resources.reduce((acc, resource) => {
       return {
         ...acc,
-        [resource]: resourceValidationSchema
+        [resource]: actionValidationSchema
       };
     }, {})
   }).required();
@@ -56,7 +56,7 @@ function buildValidationSchema(application, actions, resources, kibanaIndex) {
     has_all_requested: Joi.bool(),
     cluster: Joi.object(),
     application: Joi.object({
-      [application]: appValidationSchema,
+      [application]: resourceValidationSchema,
     }).required(),
     index: Joi.object({
       [kibanaIndex]: legacyIndexPrivilegesSchema
