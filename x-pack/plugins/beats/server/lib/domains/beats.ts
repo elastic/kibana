@@ -57,10 +57,6 @@ export class CMBeatsDomain {
     if (!isAccessTokenValid) {
       return 'invalid-access-token';
     }
-    const isBeatVerified = beat.hasOwnProperty('verified_on');
-    if (!isBeatVerified) {
-      return 'beat-not-verified';
-    }
 
     await this.adapter.update({
       ...beat,
@@ -149,33 +145,6 @@ export class CMBeatsDomain {
 
   public async getAllBeats(user: FrameworkUser) {
     return await this.adapter.getAll(user);
-  }
-
-  // TODO cleanup return value, should return a status enum
-  public async verifyBeats(user: FrameworkUser, beatIds: string[]) {
-    const beatsFromEs = await this.adapter.getWithIds(user, beatIds);
-
-    const nonExistentBeatIds = findNonExistentItems(beatsFromEs, beatIds);
-
-    const alreadyVerifiedBeatIds = beatsFromEs
-      .filter((beat: any) => beat.hasOwnProperty('verified_on'))
-      .map((beat: any) => beat.id);
-
-    const toBeVerifiedBeatIds = beatsFromEs
-      .filter((beat: any) => !beat.hasOwnProperty('verified_on'))
-      .map((beat: any) => beat.id);
-
-    const verifications = await this.adapter.verifyBeats(
-      user,
-      toBeVerifiedBeatIds
-    );
-
-    return {
-      alreadyVerifiedBeatIds,
-      nonExistentBeatIds,
-      toBeVerifiedBeatIds,
-      verifiedBeatIds: verifications.map((v: any) => v.id),
-    };
   }
 
   public async assignTagsToBeats(
