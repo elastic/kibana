@@ -8,7 +8,7 @@ import { getClient } from '../../../../../../../server/lib/get_client_shield';
 import { routePreCheckLicense } from '../../../../lib/route_pre_check_license';
 import { initGetRolesApi } from './get';
 import { initDeleteRolesApi } from './delete';
-import { initPostRolesApi } from './post';
+import { initPutRolesApi } from './put';
 
 export function initPublicRolesApi(server) {
   const callWithRequest = getClient(server).callWithRequest;
@@ -17,6 +17,6 @@ export function initPublicRolesApi(server) {
   const { application } = server.plugins.security.authorization;
 
   initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn, application);
-  initPostRolesApi(server, callWithRequest, routePreCheckLicenseFn, application);
+  initPutRolesApi(server, callWithRequest, routePreCheckLicenseFn, application);
   initDeleteRolesApi(server, callWithRequest, routePreCheckLicenseFn);
 }

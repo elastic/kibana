@@ -13,14 +13,14 @@ export default function ({ getService }) {
   describe('Roles', () => {
     describe('Create Role', () => {
       it('should allow us to create an empty role', async () => {
-        await supertest.post('/api/security/roles/empty_role')
+        await supertest.put('/api/security/role/empty_role')
           .set('kbn-xsrf', 'xxx')
           .send({})
           .expect(204);
       });
 
       it('should create a role with kibana and elasticsearch privileges', async () => {
-        await supertest.post('/api/security/roles/role_with_privileges')
+        await supertest.put('/api/security/role/role_with_privileges')
           .set('kbn-xsrf', 'xxx')
           .send({
             metadata: {
@@ -127,7 +127,7 @@ export default function ({ getService }) {
           }
         });
 
-        await supertest.post('/api/security/roles/role_to_update')
+        await supertest.put('/api/security/role/role_to_update')
           .set('kbn-xsrf', 'xxx')
           .send({
             metadata: {
@@ -205,9 +205,9 @@ export default function ({ getService }) {
 
     describe('Delete Role', () => {
       it('should delete the three roles we created', async () => {
-        await supertest.delete('/api/security/roles/empty_role').set('kbn-xsrf', 'xxx').expect(204);
-        await supertest.delete('/api/security/roles/role_with_privileges').set('kbn-xsrf', 'xxx').expect(204);
-        await supertest.delete('/api/security/roles/role_to_update').set('kbn-xsrf', 'xxx').expect(204);
+        await supertest.delete('/api/security/role/empty_role').set('kbn-xsrf', 'xxx').expect(204);
+        await supertest.delete('/api/security/role/role_with_privileges').set('kbn-xsrf', 'xxx').expect(204);
+        await supertest.delete('/api/security/role/role_to_update').set('kbn-xsrf', 'xxx').expect(204);
 
         const emptyRole = await es.shield.getRole({ name: 'empty_role', ignore: [404] });
         expect(emptyRole).to.eql({});

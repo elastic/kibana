@@ -62,15 +62,15 @@ const transformRolesToEs = (
   }, identity);
 };
 
-export function initPostRolesApi(
+export function initPutRolesApi(
   server,
   callWithRequest,
   routePreCheckLicenseFn,
   application
 ) {
   server.route({
-    method: 'POST',
-    path: '/api/security/roles/{name}',
+    method: 'PUT',
+    path: '/api/security/role/{name}',
     async handler(request, reply) {
       const name = request.params.name;
       try {

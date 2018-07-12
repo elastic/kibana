@@ -45,7 +45,7 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
 
   server.route({
     method: 'GET',
-    path: '/api/security/roles',
+    path: '/api/security/role',
     handler(request, reply) {
       return callWithRequest(request, 'shield.getRole').then(
         (response) => {
@@ -61,7 +61,7 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
 
   server.route({
     method: 'GET',
-    path: '/api/security/roles/{name}',
+    path: '/api/security/role/{name}',
     handler(request, reply) {
       const name = request.params.name;
       return callWithRequest(request, 'shield.getRole', { name }).then(

@@ -38,7 +38,7 @@ describe('GET roles', () => {
 
       const request = {
         method: 'GET',
-        url: '/api/security/roles',
+        url: '/api/security/role',
         headers,
       };
       const { result, statusCode } = await mockServer.inject(request);
@@ -320,7 +320,7 @@ describe('GET role', () => {
 
       const request = {
         method: 'GET',
-        url: `/api/security/roles/${name}`,
+        url: `/api/security/role/${name}`,
         headers,
       };
       const { result, statusCode } = await mockServer.inject(request);

@@ -6,7 +6,7 @@
 
 import Hapi from 'hapi';
 import Boom from 'boom';
-import { initPostRolesApi } from './post';
+import { initPutRolesApi } from './put';
 import { ALL_RESOURCE } from '../../../../../common/constants';
 
 const application = 'kibana-.kibana';
@@ -19,7 +19,7 @@ const createMockServer = () => {
 
 const defaultPreCheckLicenseImpl = (request, reply) => reply();
 
-const postRoleTest = (
+const putRoleTest = (
   description,
   { name, payload, preCheckLicenseImpl, callWithRequestImpls = [], asserts }
 ) => {
@@ -32,7 +32,7 @@ const postRoleTest = (
     for (const impl of callWithRequestImpls) {
       mockCallWithRequest.mockImplementationOnce(impl);
     }
-    initPostRolesApi(
+    initPutRolesApi(
       mockServer,
       mockCallWithRequest,
       mockPreCheckLicense,
@@ -43,8 +43,8 @@ const postRoleTest = (
     };
 
     const request = {
-      method: 'POST',
-      url: `/api/security/roles/${name}`,
+      method: 'PUT',
+      url: `/api/security/role/${name}`,
       headers,
       payload,
     };
@@ -74,9 +74,9 @@ const postRoleTest = (
   });
 };
 
-describe('POST role', () => {
+describe('PUT role', () => {
   describe('failure', () => {
-    postRoleTest(`requires name in params`, {
+    putRoleTest(`requires name in params`, {
       name: '',
       payload: {},
       asserts: {
@@ -88,7 +88,7 @@ describe('POST role', () => {
       },
     });
 
-    postRoleTest(`requires name in params to not exceed 1024 characters`, {
+    putRoleTest(`requires name in params to not exceed 1024 characters`, {
       name: 'a'.repeat(1025),
       payload: {},
       asserts: {
@@ -105,7 +105,7 @@ describe('POST role', () => {
       },
     });
 
-    postRoleTest(`returns result of routePreCheckLicense`, {
+    putRoleTest(`returns result of routePreCheckLicense`, {
       name: 'foo-role',
       payload: {},
       preCheckLicenseImpl: (request, reply) =>
@@ -122,7 +122,7 @@ describe('POST role', () => {
   });
 
   describe('success', () => {
-    postRoleTest(`creates empty role`, {
+    putRoleTest(`creates empty role`, {
       name: 'foo-role',
       payload: {},
       preCheckLicenseImpl: defaultPreCheckLicenseImpl,
@@ -148,7 +148,7 @@ describe('POST role', () => {
       },
     });
 
-    postRoleTest(`creates role with everything`, {
+    putRoleTest(`creates role with everything`, {
       name: 'foo-role',
       payload: {
         metadata: {
@@ -229,7 +229,7 @@ describe('POST role', () => {
       },
     });
 
-    postRoleTest(`updates role which has existing kibana privileges`, {
+    putRoleTest(`updates role which has existing kibana privileges`, {
       name: 'foo-role',
       payload: {
         metadata: {
@@ -342,7 +342,7 @@ describe('POST role', () => {
       },
     });
 
-    postRoleTest(
+    putRoleTest(
       `updates role which has existing other application privileges`,
       {
         name: 'foo-role',

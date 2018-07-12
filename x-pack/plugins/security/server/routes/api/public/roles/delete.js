@@ -10,7 +10,7 @@ import { wrapError } from '../../../../lib/errors';
 export function initDeleteRolesApi(server, callWithRequest, routePreCheckLicenseFn) {
   server.route({
     method: 'DELETE',
-    path: '/api/security/roles/{name}',
+    path: '/api/security/role/{name}',
     handler(request, reply) {
       const name = request.params.name;
       return callWithRequest(request, 'shield.deleteRole', { name }).then(

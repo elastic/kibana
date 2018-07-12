@@ -12,7 +12,7 @@ export default function ({ loadTestFile, getService }) {
 
   describe('saved_objects', () => {
     before(async () => {
-      await supertest.post('/api/security/roles/kibana_legacy_user')
+      await supertest.put('/api/security/role/kibana_legacy_user')
         .send({
           elasticsearch: {
             indices: [{
@@ -22,7 +22,7 @@ export default function ({ loadTestFile, getService }) {
           }
         });
 
-      await supertest.post('/api/security/roles/kibana_legacy_dashboard_only_user')
+      await supertest.put('/api/security/role/kibana_legacy_dashboard_only_user')
         .send({
           elasticsearch: {
             indices: [{
@@ -32,7 +32,7 @@ export default function ({ loadTestFile, getService }) {
           }
         });
 
-      await supertest.post('/api/security/roles/kibana_rbac_user')
+      await supertest.put('/api/security/role/kibana_rbac_user')
         .send({
           kibana: [
             {
@@ -41,7 +41,7 @@ export default function ({ loadTestFile, getService }) {
           ]
         });
 
-      await supertest.post('/api/security/roles/kibana_rbac_dashboard_only_user')
+      await supertest.put('/api/security/role/kibana_rbac_dashboard_only_user')
         .send({
           kibana: [
             {

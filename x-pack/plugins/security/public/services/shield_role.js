@@ -11,7 +11,7 @@ import { uiModules } from 'ui/modules';
 
 const module = uiModules.get('security', ['ngResource']);
 module.service('ShieldRole', ($resource, chrome) => {
-  return $resource(chrome.addBasePath('/api/security/roles/:name'), {
+  return $resource(chrome.addBasePath('/api/security/role/:name'), {
     name: '@name'
   }, {
     save: {
