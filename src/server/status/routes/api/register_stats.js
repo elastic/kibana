@@ -20,31 +20,7 @@
 import Joi from 'joi';
 import { wrapAuthConfig } from '../../wrap_auth_config';
 import { KIBANA_STATS_TYPE } from '../../constants';
-import { setApiFieldNames } from '../../lib';
-
-async function getExtended(req, server, collectorSet) {
-  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin'); // admin cluster, get info on internal system
-  const callCluster = (...args) => callWithRequest(req, ...args);
-
-  let clusterUuid;
-  try {
-    const { cluster_uuid: uuid } = await callCluster('info', { filterPath: 'cluster_uuid', });
-    clusterUuid = uuid;
-  } catch (err) {
-    clusterUuid = undefined; // fallback from anonymous access or auth failure, redundant for explicitness
-  }
-
-  let usage;
-  try {
-    const usageRaw = await collectorSet.bulkFetchUsage(callCluster);
-    // TODO put raw through composable functions
-    usage = collectorSet.summarizeStats(usageRaw);
-  } catch (err) {
-    usage = undefined;
-  }
-
-  return { clusterUuid, usage };
-}
+import { CollectorSet } from '../../../usage/classes';
 
 /*
  * API for Kibana meta info and accumulated operations stats
@@ -57,8 +33,17 @@ async function getExtended(req, server, collectorSet) {
  */
 export function registerStatsApi(kbnServer, server, config) {
   const wrapAuth = wrapAuthConfig(config.get('status.allowAnonymous'));
-
   const { collectorSet } = server.usage;
+
+  const getClusterUuid = async callCluster => {
+    const { cluster_uuid: uuid } = await callCluster('info', { filterPath: 'cluster_uuid', });
+    return uuid;
+  };
+
+  const getUsage = async callCluster => {
+    const usage = await collectorSet.bulkFetchUsage(callCluster);
+    return CollectorSet.toApiStats(usage);
+  };
 
   server.route(
     wrapAuth({
@@ -73,23 +58,27 @@ export function registerStatsApi(kbnServer, server, config) {
         tags: ['api'],
       },
       async handler(req, reply) {
-        const { extended } = req.query;
-        const isExtended = extended !== undefined && extended !== 'false';
+        const isExtended = req.query.extended !== undefined && req.query.extended !== 'false';
 
-        let clusterUuid;
-        let usage;
+        let extended;
         if (isExtended) {
-          ({ clusterUuid, usage } = await getExtended(req, server, collectorSet));
+          const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
+          const callCluster = (...args) => callWithRequest(req, ...args);
+          const [ usage, clusterUuid ] = await Promise.all([
+            getUsage(callCluster),
+            getClusterUuid(callCluster),
+          ]);
+          extended = { usage, clusterUuid };
         }
 
-        const kibanaCollector = collectorSet.getCollectorByType(KIBANA_STATS_TYPE);
-        const stats = setApiFieldNames({
-          // TODO put raw through composable functions
-          ...kibanaCollector.fetch(),
-          cluster_uuid: clusterUuid,
-          usage,
+        const kibanaStatsCollector = collectorSet.getCollectorByType(KIBANA_STATS_TYPE); // kibana stats get singled out
+        let kibanaStats = await kibanaStatsCollector.fetch();
+        kibanaStats = CollectorSet.setApiFieldNames(kibanaStats);
+
+        reply({
+          ...kibanaStats,
+          ...extended,
         });
-        reply(stats);
       },
     })
   );

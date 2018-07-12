@@ -4,9 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty, flatten } from 'lodash';
+import { get, set, isEmpty, flatten } from 'lodash';
 import { callClusterFactory } from '../../../xpack_main';
-import { LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG } from '../../common/constants';
+import {
+  LOGGING_TAG,
+  KIBANA_MONITORING_LOGGING_TAG,
+  KIBANA_STATS_TYPE,
+  KIBANA_SETTINGS_TYPE,
+  KIBANA_USAGE_TYPE,
+} from '../../common/constants';
+import { KIBANA_REPORTING_TYPE } from '../../../reporting/common/constants';
 import {
   sendBulkPayload,
   monitoringBulk,
@@ -18,7 +25,7 @@ const LOGGING_TAGS = [LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG];
  * Handles internal Kibana stats collection and uploading data to Monitoring
  * bulk endpoint.
  *
- * NOTE: internal collection will be removed in 7.0
+ * TODO: remove this in 7.0
  *
  * Depends on
  *   - 'xpack.monitoring.kibana.collection.enabled' config
@@ -31,17 +38,13 @@ const LOGGING_TAGS = [LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG];
  * @param {Object} xpackInfo server.plugins.xpack_main.info object
  */
 export class BulkUploader {
-  constructor(server, { interval, combineTypes }) {
+  constructor(server, { interval }) {
     if (typeof interval !== 'number') {
       throw new Error('interval number of milliseconds is required');
-    }
-    if (typeof combineTypes !== 'function') {
-      throw new Error('combineTypes function is required');
     }
 
     this._timer =  null;
     this._interval = interval;
-    this._combineTypes = combineTypes;
     this._log = {
       debug: message => server.log(['debug', ...LOGGING_TAGS], message),
       info: message => server.log(['info', ...LOGGING_TAGS], message),
@@ -89,22 +92,22 @@ export class BulkUploader {
     this.stop('Connection issue detected');
   }
 
+  _onPayload(payload) {
+    return sendBulkPayload(this._client, this._interval, payload); // why is interval here?
+  }
+
   /*
    * @param {CollectorSet} collectorSet
    * @return {Promise} - resolves to undefined
    */
   async _fetchAndUpload(collectorSet) {
     const data = await collectorSet.bulkFetch(this._callClusterWithInternalUser);
-    // TODO put the data through composable functions provided by collectorSet, with some overrides
-    const payload = data
-      .filter(d => Boolean(d) && !isEmpty(d.result))
-      .map(({ result, type }) => [{ index: { _type: type } }, result]);
+    const uploadData = BulkUploader.legacyToUploadStats(data);
 
-    if (payload.length > 0) {
+    if (uploadData) {
       try {
-        const combinedData = this._combineTypes(payload); // use the collector types combiner to combine the data into a single bulk upload object
         this._log.debug(`Uploading bulk stats payload to the local cluster`);
-        this._onPayload(flatten(combinedData));
+        this._onPayload(uploadData);
       } catch (err) {
         this._log.warn(err.stack);
         this._log.warn(`Unable to bulk upload the stats payload to the local cluster`);
@@ -114,7 +117,61 @@ export class BulkUploader {
     }
   }
 
-  _onPayload(payload) {
-    return sendBulkPayload(this._client, this._interval, payload);
+  /*
+   * Bulk stats are transformed into a bulk upload format
+   * Non-legacy transformation is done in CollectorSet.toApiStats
+   */
+  static legacyToUploadStats(uploadData) {
+    const payload = uploadData
+      .filter(d => Boolean(d) && !isEmpty(d.result))
+      .map(({ result, type }) => [{ index: { _type: type } }, result]);
+    if (payload.length > 0) {
+      const combinedData = BulkUploader.legacyCombineTypes(payload); // arrange the usage data into the stats
+      return flatten(combinedData);
+    }
+  }
+
+  static legacyCombineTypes(payload) {
+    // default the item to [] to allow destructuring
+    const findItem = type => payload.find(item => get(item, '[0].index._type') === type) || [];
+
+    // kibana usage and stats
+    let statsResult;
+    const [ statsHeader, statsPayload ] = findItem(KIBANA_STATS_TYPE);
+    const [ reportingHeader, reportingPayload ] = findItem(KIBANA_REPORTING_TYPE);
+
+    if (statsHeader && statsPayload) {
+      const [ usageHeader, usagePayload ] = findItem(KIBANA_USAGE_TYPE);
+      const kibanaUsage = (usageHeader && usagePayload) ? usagePayload : null;
+      const reportingUsage = (reportingHeader && reportingPayload) ? reportingPayload : null;
+      statsResult = [
+        statsHeader,
+        statsPayload
+      ];
+      if (kibanaUsage) {
+        set(statsResult, '[1].usage', kibanaUsage);
+      }
+      if (reportingUsage) {
+        set(statsResult, '[1].usage.xpack.reporting', reportingUsage);
+      }
+    }
+
+    // kibana settings
+    let settingsResult;
+    const [ settingsHeader, settingsPayload ] = findItem(KIBANA_SETTINGS_TYPE);
+    if (settingsHeader && settingsPayload) {
+      settingsResult = [
+        settingsHeader,
+        settingsPayload,
+      ];
+    }
+
+    // return new payload with the combined data
+    // adds usage data to stats data
+    // strips usage out as a top-level type
+    const result = [ statsResult, settingsResult ];
+
+    // remove result items that are undefined
+    return result.filter(Boolean);
   }
 }

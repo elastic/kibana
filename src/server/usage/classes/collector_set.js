@@ -94,19 +94,39 @@ export class CollectorSet {
   async bulkFetchUsage(callCluster) {
     const usageCollectors = this._collectors.filter(c => c instanceof UsageCollector);
     return this.bulkFetch(callCluster, usageCollectors);
-
   }
 
-  /*
-   * Summarize the data returned by bulk fetching into a simpler format
-   */
-  summarizeStats(statsData) {
-    return statsData.reduce((accumulatedStats, currentStat) => {
-      // `_stats` Suffix removal
-      const statType = currentStat.type.replace('_stats', '');
+  // convert the array of stats into key/object
+  static toApiStats(statsData) {
+    const summary = statsData.reduce((accumulatedStats, { type, result }) => {
       return {
         ...accumulatedStats,
-        [statType]: currentStat.result,
+        [type]: result,
+      };
+    }, {});
+    return CollectorSet.setApiFieldNames(summary);
+  }
+
+  // rename fields to use api conventions
+  static setApiFieldNames(apiData) {
+    const getValueOrRecurse = value => {
+      if (value == null || typeof value !== 'object') {
+        return value;
+      } else {
+        return CollectorSet.setApiFieldNames(value); // recurse
+      }
+    };
+
+    return Object.keys(apiData).reduce((accum, currName) => {
+      const value = apiData[currName];
+
+      let newName = currName;
+      newName = newName.replace('_in_bytes', '_bytes');
+      newName = newName.replace('_in_millis', '_ms');
+
+      return {
+        ...accum,
+        [newName]: getValueOrRecurse(value),
       };
     }, {});
   }
