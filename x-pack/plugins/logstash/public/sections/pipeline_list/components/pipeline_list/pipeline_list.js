@@ -17,6 +17,7 @@ import {
   EuiButton,
   EuiCallOut,
   EuiConfirmModal,
+  EuiIconTip,
   EuiInMemoryTable,
   EuiLink,
   EUI_MODAL_CANCEL_BUTTON,
@@ -34,6 +35,8 @@ import 'plugins/logstash/services/cluster';
 import 'plugins/logstash/services/monitoring';
 
 const INITIAL_PAGE_SIZE = 5;
+const PIPELINE_NOT_CENTRALLY_MANAGED_TOOLTIP_TEXT
+  = `This pipeline wasn't created using Centralized Configuration Management. It can't be managed or edited here.`;
 
 class PipelineList extends React.Component {
   constructor(props) {
@@ -63,8 +66,18 @@ class PipelineList extends React.Component {
       field: 'id',
       name: 'Id',
       sortable: true,
-      render: id => (
-        <EuiLink onClick={this.openPipeline}>{id}</EuiLink>
+      render: (id, { isCentrallyManaged }) => (
+        isCentrallyManaged
+          ? <EuiLink onClick={this.openPipeline}>{id}</EuiLink>
+          : (
+            <span>
+              {id} &nbsp;
+              <EuiIconTip
+                content={PIPELINE_NOT_CENTRALLY_MANAGED_TOOLTIP_TEXT}
+                type="questionInCircle"
+              />
+            </span>
+          )
       )
     }, {
       field: 'description',
@@ -295,7 +308,7 @@ class PipelineList extends React.Component {
     // };
 
     const selectionOptions = {
-      selectable: () => true,
+      selectable: ({ isCentrallyManaged }) => isCentrallyManaged,
       selectableMessage: () => 'the message',
       onSelectionChange: selection => this.setState({ selection }),
     };
