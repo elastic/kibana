@@ -27,68 +27,93 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { ReactI18n } from '@kbn/i18n';
+
+const { I18nContext, FormattedMessage } = ReactI18n;
+
 export const UrlTemplateFlyout = ({
   isVisible = false,
   onClose = () => {},
 }) => {
   return isVisible ? (
-    <EuiFlyout
-      onClose={onClose}
-    >
-      <EuiFlyoutBody>
-        <EuiText>
-          <h3>Url Template</h3>
-          <p>
-            If a field only contains part of a URL then a <strong>Url Template</strong> can be used to format the value
-            as a complete URL. The format is a string which uses double curly brace notation <EuiCode>{('{{ }}')}</EuiCode>
-            to inject values. The following values can be accessed:
-          </p>
-          <ul>
-            <li>
-              <EuiCode>value</EuiCode> &mdash; The URI-escaped value
-            </li>
-            <li>
-              <EuiCode>rawValue</EuiCode> &mdash; The unescaped value
-            </li>
-          </ul>
-          <h4>Examples</h4>
-          <EuiBasicTable
-            items={[
-              {
-                input: 1234,
-                template: 'http://company.net/profiles?user_id={{value}}',
-                output: 'http://company.net/profiles?user_id=1234',
-              },
-              {
-                input: 'users/admin',
-                template: 'http://company.net/groups?id={{value}',
-                output: 'http://company.net/groups?id=users%2Fadmin',
-              },
-              {
-                input: '/images/favicon.ico',
-                template: 'http://www.site.com{{rawValue}}',
-                output: 'http://www.site.com/images/favicon.ico',
-              },
-            ]}
-            columns={[
-              {
-                field: 'input',
-                name: 'Input',
-                width: '160px',
-              },
-              {
-                field: 'template',
-                name: 'Template',
-              },
-              {
-                field: 'output',
-                name: 'Output',
-              },
-            ]}
-          />
-        </EuiText>
-      </EuiFlyoutBody>
-    </EuiFlyout>
+    <I18nContext>
+      {intl => (
+        <EuiFlyout
+          onClose={onClose}
+        >
+          <EuiFlyoutBody>
+            <EuiText>
+              <h3>
+                <FormattedMessage id="common.ui.fieldEditor.urlTemplate.header" defaultMessage="Url Template" />
+              </h3>
+              <p>
+                <FormattedMessage
+                  id="common.ui.fieldEditor.urlTemplate.label.detail"
+                  // eslint-disable-next-line max-len
+                  defaultMessage="If a field only contains part of a URL then a {strongUrlTemplate} can be used to format the value as a complete URL. The format is a string which uses double curly brace notation {doubleCurlyBraces} to inject values. The following values can be accessed:"
+                  values={{
+                    doubleCurlyBraces: <EuiCode>{('{{ }}')}</EuiCode>,
+                    strongUrlTemplate: (
+                      <strong>
+                        <FormattedMessage
+                          id="common.ui.fieldEditor.urlTemplate.label.strongUrlTemplate"
+                          defaultMessage="Url Template"
+                        />
+                      </strong>) }}
+                />
+              </p>
+              <ul>
+                <li>
+                  <EuiCode>value</EuiCode> &mdash;&nbsp;
+                  <FormattedMessage id="common.ui.fieldEditor.urlTemplate.value.label" defaultMessage="The URI-escaped value" />
+                </li>
+                <li>
+                  <EuiCode>rawValue</EuiCode> &mdash;&nbsp;
+                  <FormattedMessage id="common.ui.fieldEditor.urlTemplate.rawValue.label" defaultMessage="The unescaped value" />
+                </li>
+              </ul>
+              <h4>
+                <FormattedMessage id="common.ui.fieldEditor.urlTemplate.examples.header" defaultMessage="Examples" />
+              </h4>
+              <EuiBasicTable
+                items={[
+                  {
+                    input: 1234,
+                    template: 'http://company.net/profiles?user_id={{value}}',
+                    output: 'http://company.net/profiles?user_id=1234',
+                  },
+                  {
+                    input: 'users/admin',
+                    template: 'http://company.net/groups?id={{value}',
+                    output: 'http://company.net/groups?id=users%2Fadmin',
+                  },
+                  {
+                    input: '/images/favicon.ico',
+                    template: 'http://www.site.com{{rawValue}}',
+                    output: 'http://www.site.com/images/favicon.ico',
+                  },
+                ]}
+                columns={[
+                  {
+                    field: 'input',
+                    name: intl.formatMessage({ id: 'common.ui.fieldEditor.urlTemplate.input.header', defaultMessage: 'Input' }),
+                    width: '160px',
+                  },
+                  {
+                    field: 'template',
+                    name: intl.formatMessage({ id: 'common.ui.fieldEditor.urlTemplate.template.header', defaultMessage: 'Template' }),
+                  },
+                  {
+                    field: 'output',
+                    name: intl.formatMessage({ id: 'common.ui.fieldEditor.urlTemplate.output.header', defaultMessage: 'Output' }),
+                  },
+                ]}
+              />
+            </EuiText>
+          </EuiFlyoutBody>
+        </EuiFlyout>
+      )}
+    </I18nContext>
   ) : null;
 };
 

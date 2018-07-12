@@ -29,6 +29,10 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { ReactI18n } from '@kbn/i18n';
+
+const { FormattedMessage } = ReactI18n;
+
 export const ScriptingHelpFlyout = ({
   isVisible = false,
   onClose = () => {},
@@ -37,72 +41,157 @@ export const ScriptingHelpFlyout = ({
     <EuiFlyout onClose={onClose} size="s">
       <EuiFlyoutBody>
         <EuiText>
-          <h3>Scripting help</h3>
+          <h3>
+            <FormattedMessage id="common.ui.fieldEditor.help.header" defaultMessage="Scripting help"/>
+          </h3>
           <p>
-            By default, Kibana scripted fields use {(
-              <EuiLink
-                target="_window"
-                href={getDocLink('scriptedFields.painless')}
-              >
-                Painless <EuiIcon type="link"/>
-              </EuiLink>
-            )}, a simple and secure scripting language designed specifically for use with Elasticsearch,
-            to access values in the document use the following format:
+            <FormattedMessage
+              id="common.ui.fieldEditor.help.default.label.detail"
+              // eslint-disable-next-line max-len
+              defaultMessage="By default, Kibana scripted fields use {painless}, a simple and secure scripting language designed specifically for use with Elasticsearch, to access values in the document use the following format:"
+              values={{
+                painless: (
+                  <EuiLink
+                    target="_window"
+                    href={getDocLink('scriptedFields.painless')}
+                  >
+                    <FormattedMessage id="common.ui.fieldEditor.help.default.label.painless" defaultMessage="Painless" />&nbsp;
+                    <EuiIcon type="link" />
+                  </EuiLink>
+                )
+              }}
+            />
           </p>
           <p>
-            <EuiCode>doc[&apos;some_field&apos;].value</EuiCode>
+            <EuiCode>
+              <FormattedMessage id="common.ui.fieldEditor.help.default.format.label" defaultMessage="doc['some_field'].value"/>
+            </EuiCode>
           </p>
           <p>
-            Painless is powerful but easy to use. It provides access to many {(
-              <EuiLink
-                target="_window"
-                href={getDocLink('scriptedFields.painlessApi')}
-              >
-                native Java APIs <EuiIcon type="link"/>
-              </EuiLink>
-            )}. Read up on its {(
-              <EuiLink
-                target="_window"
-                href={getDocLink('scriptedFields.painlessSyntax')}
-              >
-              syntax <EuiIcon type="link"/>
-              </EuiLink>
-            )} and you&apos;ll be up to speed in no time!
+            <FormattedMessage
+              id="common.ui.fieldEditor.help.painless.label.detail"
+              // eslint-disable-next-line max-len
+              defaultMessage="Painless is powerful but easy to use. It provides access to many {javaAPIs}. Read up on its {syntax} and you'll be up to speed in no time!"
+              values={{
+                javaAPIs: (
+                  <EuiLink
+                    target="_window"
+                    href={getDocLink('scriptedFields.painlessApi')}
+                  >
+                    <FormattedMessage id="common.ui.fieldEditor.help.painless.label.javaAPIs" defaultMessage="native Java APIs" />&nbsp;
+                    <EuiIcon type="link" />
+                  </EuiLink>
+                ),
+                syntax: (
+                  <EuiLink
+                    target="_window"
+                    href={getDocLink('scriptedFields.painlessSyntax')}
+                  >
+                    <FormattedMessage id="common.ui.fieldEditor.help.painless.label.syntax" defaultMessage="syntax" />&nbsp;
+                    <EuiIcon type="link" />
+                  </EuiLink>
+                )
+              }}
+            />
           </p>
           <p>
-            Kibana currently imposes one special limitation on the painless scripts you write. They cannot contain named functions.
+            <FormattedMessage
+              id="common.ui.fieldEditor.help.kibana.label"
+              // eslint-disable-next-line max-len
+              defaultMessage="Kibana currently imposes one special limitation on the painless scripts you write. They cannot contain named functions."
+            />
           </p>
           <p>
-            Coming from an older version of Kibana? The {(
-              <EuiLink
-                target="_window"
-                href={getDocLink('scriptedFields.luceneExpressions')}
-              >
-                Lucene Expressions <EuiIcon type="link"/>
-              </EuiLink>
-            )} you know and love are still available. Lucene expressions are a lot like JavaScript,
-              but limited to basic arithmetic, bitwise and comparison operations.
+            <FormattedMessage
+              id="common.ui.fieldEditor.help.lucene.common.label.detail"
+              // eslint-disable-next-line max-len
+              defaultMessage="Coming from an older version of Kibana? The {lucene} you know and love are still available. Lucene expressions are a lot like JavaScript, but limited to basic arithmetic, bitwise and comparison operations."
+              values={{
+                lucene: (
+                  <EuiLink
+                    target="_window"
+                    href={getDocLink('scriptedFields.luceneExpressions')}
+                  >
+                    <FormattedMessage id="common.ui.fieldEditor.help.lucene.common.label.lucene" defaultMessage="Lucene Expressions" />
+                    &nbsp;<EuiIcon type="link" />
+                  </EuiLink>
+                )
+              }}
+            />
           </p>
           <p>
-            There are a few limitations when using Lucene Expressions:
+            <FormattedMessage
+              id="common.ui.fieldEditor.help.lucene.limits.label"
+              defaultMessage="There are a few limitations when using Lucene Expressions:"
+            />
           </p>
           <ul>
-            <li> Only numeric, boolean, date, and geo_point fields may be accessed</li>
-            <li> Stored fields are not available</li>
-            <li> If a field is sparse (only some documents contain a value), documents missing the field will have a value of 0</li>
+            <li>
+              <FormattedMessage
+                id="common.ui.fieldEditor.help.lucene.limits.types.label"
+                defaultMessage="Only numeric, boolean, date, and geo_point fields may be accessed"
+              />
+
+            </li>
+            <li> <FormattedMessage
+              id="common.ui.fieldEditor.help.lucene.limits.fields.label"
+              defaultMessage="Stored fields are not available"
+            />
+            </li>
+            <li> <FormattedMessage
+              id="common.ui.fieldEditor.help.lucene.limits.sparse.label"
+              // eslint-disable-next-line max-len
+              defaultMessage="If a field is sparse (only some documents contain a value), documents missing the field will have a value of 0"
+            />
+            </li>
           </ul>
           <p>
-            Here are all the operations available to lucene expressions:
+            <FormattedMessage
+              id="common.ui.fieldEditor.help.lucene.operations.label"
+              defaultMessage="Here are all the operations available to lucene expressions:"
+            />
           </p>
           <ul>
-            <li> Arithmetic operators: + - * / %</li>
-            <li> Bitwise operators: | & ^ ~ &#x3C;&#x3C; &#x3E;&#x3E; &#x3E;&#x3E;&#x3E;</li>
-            <li> Boolean operators (including the ternary operator): && || ! ?:</li>
-            <li> Comparison operators: &#x3C; &#x3C;= == &#x3E;= &#x3E;</li>
-            <li> Common mathematic functions: abs ceil exp floor ln log10 logn max min sqrt pow</li>
-            <li> Trigonometric library functions: acosh acos asinh asin atanh atan atan2 cosh cos sinh sin tanh tan</li>
-            <li> Distance functions: haversin</li>
-            <li> Miscellaneous functions: min, max</li>
+            <li><FormattedMessage
+              id="common.ui.fieldEditor.help.lucene.operations.arithmetic.label"
+              defaultMessage="Arithmetic operators: + - * / %"
+            />
+            </li>
+            <li><FormattedMessage
+              id="common.ui.fieldEditor.help.lucene.operations.bitwise.label"
+              defaultMessage="Bitwise operators: | & ^ ~ &#x3C;&#x3C; &#x3E;&#x3E; &#x3E;&#x3E;&#x3E;"
+            />
+            </li>
+            <li><FormattedMessage
+              id="common.ui.fieldEditor.help.lucene.operations.boolean.label"
+              defaultMessage="Boolean operators (including the ternary operator): && || ! ?:"
+            />
+            </li>
+            <li><FormattedMessage
+              id="common.ui.fieldEditor.help.lucene.operations.comparison.label"
+              defaultMessage="Comparison operators: &#x3C; &#x3C;= == &#x3E;= &#x3E;"
+            />
+            </li>
+            <li><FormattedMessage
+              id="common.ui.fieldEditor.help.lucene.operations.math.label"
+              defaultMessage="Common mathematic functions: abs ceil exp floor ln log10 logn max min sqrt pow"
+            />
+            </li>
+            <li><FormattedMessage
+              id="common.ui.fieldEditor.help.lucene.operations.trig.label"
+              defaultMessage="Trigonometric library functions: acosh acos asinh asin atanh atan atan2 cosh cos sinh sin tanh tan"
+            />
+            </li>
+            <li><FormattedMessage
+              id="common.ui.fieldEditor.help.lucene.operations.distance.label"
+              defaultMessage="Distance functions: haversin"
+            />
+            </li>
+            <li><FormattedMessage
+              id="common.ui.fieldEditor.help.lucene.operations.miscellaneous.label"
+              defaultMessage="Miscellaneous functions: min, max"
+            />
+            </li>
           </ul>
         </EuiText>
       </EuiFlyoutBody>

@@ -27,6 +27,9 @@ import template from './create_edit_field.html';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { FieldEditor } from 'ui/field_editor';
+import { ReactI18n } from '@kbn/i18n';
+
+const { I18nProvider } = ReactI18n;
 
 const REACT_FIELD_EDITOR_ID = 'reactFieldEditor';
 const renderFieldEditor = ($scope, indexPattern, field, {
@@ -43,17 +46,19 @@ const renderFieldEditor = ($scope, indexPattern, field, {
     }
 
     render(
-      <FieldEditor
-        indexPattern={indexPattern}
-        field={field}
-        helpers={{
-          Field,
-          getConfig,
-          $http,
-          fieldFormatEditors,
-          redirectAway,
-        }}
-      />,
+      <I18nProvider>
+        <FieldEditor
+          indexPattern={indexPattern}
+          field={field}
+          helpers={{
+            Field,
+            getConfig,
+            $http,
+            fieldFormatEditors,
+            redirectAway,
+          }}
+        />
+      </I18nProvider>,
       node,
     );
   });
@@ -105,8 +110,10 @@ uiRoutes
 
         if (!this.field) {
           toastNotifications.add(i18n('kbn.management.indexPattern.edit.scripted.noField.label',
-            { defaultMessage: '\'{indexPatternTitle}\' index pattern doesn\'t have a scripted field called \'{fieldName}\'',
-              values: { indexPatternTitle: this.indexPattern.title, fieldName } }));
+            {
+              defaultMessage: '\'{indexPatternTitle}\' index pattern doesn\'t have a scripted field called \'{fieldName}\'',
+              values: { indexPatternTitle: this.indexPattern.title, fieldName }
+            }));
 
           kbnUrl.redirectToRoute(this.indexPattern, 'edit');
           return;
@@ -121,8 +128,10 @@ uiRoutes
       }
       else {
         throw new Error(i18n('kbn.management.indexPattern.edit.scripted.unknownMode.errorMessage',
-          { defaultMessage: 'unknown fieldSettings mode {mode}',
-            values: { mode: this.mode } }));
+          {
+            defaultMessage: 'unknown fieldSettings mode {mode}',
+            values: { mode: this.mode }
+          }));
       }
 
       const defaultFieldName = i18n('kbn.management.indexPattern.edit.scripted.newField.placeholder',

@@ -27,42 +27,58 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { ReactI18n } from '@kbn/i18n';
+
+const { I18nContext, FormattedMessage } = ReactI18n;
+
 export const ScriptingWarningCallOut = ({
   isVisible = false,
 }) => {
   return isVisible ? (
-    <Fragment>
-      <EuiCallOut
-        title="Proceed with caution"
-        color="warning"
-        iconType="alert"
-      >
-        <p>
-          Please familiarize yourself with {(
-            <EuiLink
-              target="_window"
-              href={getDocLink('scriptedFields.scriptFields')}
-            >
-              script fields <EuiIcon type="link"/>
-            </EuiLink>
-          )} and with {(
-            <EuiLink
-              target="_window"
-              href={getDocLink('scriptedFields.scriptAggs')}
-            >
-              scripts in aggregations <EuiIcon type="link"/>
-            </EuiLink>
-          )} before using scripted fields.
-        </p>
-        <p>
-          Scripted fields can be used to display and aggregate calculated values. As such,
-          they can be very slow, and if done incorrectly, can cause Kibana to be unusable.
-          There&apos;s no safety net here. If you make a typo, unexpected exceptions will
-          be thrown all over the place!
-        </p>
-      </EuiCallOut>
-      <EuiSpacer size="m" />
-    </Fragment>
+    <I18nContext>
+      {intl => (
+        <Fragment>
+          <EuiCallOut
+            title={intl.formatMessage({ id: 'common.ui.fieldEditor.warningCallOut.header', defaultMessage: 'Proceed with caution' })}
+            color="warning"
+            iconType="alert"
+          >
+            <p>
+              <FormattedMessage
+                id="common.ui.fieldEditor.disabledCallOut.label.detail"
+                // eslint-disable-next-line max-len
+                defaultMessage="Please familiarize yourself with {scripFields} and with {scriptsInAggregation} before using scripted fields."
+                values={{
+                  scripFields: (
+                    <EuiLink target="_window" href={getDocLink('scriptedFields.scriptFields')}>
+                      <FormattedMessage id="common.ui.fieldEditor.disabledCallOut.label.scripFields" defaultMessage="script fields" />&nbsp;
+                      <EuiIcon type="link" />
+                    </EuiLink>
+                  ),
+                  scriptsInAggregation: (
+                    <EuiLink target="_window" href={getDocLink('scriptedFields.scriptAggs')}>
+                      <FormattedMessage
+                        id="common.ui.fieldEditor.disabledCallOut.label.scriptsInAggregation"
+                        defaultMessage="scripts in aggregations"
+                      />&nbsp;
+                      <EuiIcon type="link" />
+                    </EuiLink>
+                  )
+                }}
+              />
+            </p>
+            <p>
+              <FormattedMessage
+                id="common.ui.fieldEditor.disabledCallOut.description.label"
+                // eslint-disable-next-line max-len
+                defaultMessage="Scripted fields can be used to display and aggregate calculated values. As such, they can be very slow, and if done incorrectly, can cause Kibana to be unusable. There's no safety net here. If you make a typo, unexpected exceptions will be thrown all over the place!"
+              />
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </Fragment>
+      )}
+    </I18nContext>
   ) : null;
 };
 
