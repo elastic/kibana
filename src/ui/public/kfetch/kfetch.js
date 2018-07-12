@@ -67,7 +67,7 @@ export function kfetch(fetchOptions, kibanaOptions) {
       } catch (err) {
         // ignore error, may not be able to get body for response that is not ok
       }
-      reject(new FetchError(res, body));
+      return reject(new FetchError(res, body));
     }
 
     resolve(res.json());
