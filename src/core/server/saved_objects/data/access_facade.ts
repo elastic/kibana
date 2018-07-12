@@ -19,28 +19,35 @@
 
 import uuid from 'uuid';
 
-import { getRootType } from '../../../mappings';
-import { getSearchDsl } from './search_dsl';
-import { trimIdPrefix } from './trim_id_prefix';
-import { includedFields } from './included_fields';
-import { decorateEsError } from './decorate_es_error';
-import * as errors from './errors';
+import { getRootType } from '../../../../server/mappings';
+import { getSearchDsl } from '../../../../server/saved_objects/service/lib/search_dsl';
+import { trimIdPrefix } from '../../../../server/saved_objects/service/lib';
+import { includedFields } from '../../../../server/saved_objects/service/lib';
+import { decorateEsError } from '../../../../server/saved_objects/service/lib';
+import * as errors from '../../../../server/saved_objects/service/lib';
+
+export interface AccessFacadeOptions {
+  index: string;
+  mappings: { [key: string]: any };
+  callCluster: () => any;
+  onBeforeWrite?: () => void;
+}
 
 export class AccessFacade {
   private readonly index: string;
   private readonly mappings: { [key: string]: any };
+  private readonly onBeforeWrite: () => void;
   private readonly type: string;
-  private readonly onBeforeWrite: () => {};
-  nonsense;
+  private readonly unwrappedCallCluster: () => any;
 
-  constructor(options) {
+  constructor(options: AccessFacadeOptions) {
     const { index, mappings, callCluster, onBeforeWrite = () => {} } = options;
 
-    this._index = index;
-    this._mappings = mappings;
-    this._type = getRootType(this._mappings);
-    this._onBeforeWrite = onBeforeWrite;
-    this._unwrappedCallCluster = callCluster;
+    this.index = index;
+    this.mappings = mappings;
+    this.onBeforeWrite = onBeforeWrite;
+    this.type = getRootType(mappings);
+    this.unwrappedCallCluster = callCluster;
   }
 
   /**
