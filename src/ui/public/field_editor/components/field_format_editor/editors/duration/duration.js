@@ -33,6 +33,10 @@ import {
   FormatEditorSamples
 } from '../../samples';
 
+import { ReactI18n } from '@kbn/i18n';
+
+const { FormattedMessage } = ReactI18n;
+
 export class DurationFormatEditor extends DefaultFormatEditor {
   static formatId = 'duration';
 
@@ -69,7 +73,7 @@ export class DurationFormatEditor extends DefaultFormatEditor {
     return (
       <Fragment>
         <EuiFormRow
-          label="Input format"
+          label={<FormattedMessage id="common.ui.fieldEditor.duraction.inputFormat.label" defaultMessage="Input format"/>}
           isInvalid={!!error}
           error={hasDecimalError ? null : error}
         >
@@ -88,7 +92,7 @@ export class DurationFormatEditor extends DefaultFormatEditor {
           />
         </EuiFormRow>
         <EuiFormRow
-          label="Output format"
+          label={<FormattedMessage id="common.ui.fieldEditor.duraction.outputFormat.label" defaultMessage="Output format"/>}
           isInvalid={!!error}
         >
           <EuiSelect
@@ -108,7 +112,7 @@ export class DurationFormatEditor extends DefaultFormatEditor {
         {
           !format.isHuman() ? (
             <EuiFormRow
-              label="Decimal places"
+              label={<FormattedMessage id="common.ui.fieldEditor.duraction.decimalPlaces.label" defaultMessage="Decimal places"/>}
               isInvalid={!!error}
               error={hasDecimalError ? error : null}
             >

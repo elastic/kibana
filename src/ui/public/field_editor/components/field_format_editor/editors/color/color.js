@@ -33,6 +33,10 @@ import {
 
 import { DEFAULT_COLOR } from '../../../../../../../core_plugins/kibana/common/field_formats/types/color_default';
 
+import { ReactI18n } from '@kbn/i18n';
+
+const { I18nContext, FormattedMessage } = ReactI18n;
+
 export class ColorFormatEditor extends DefaultFormatEditor {
   static formatId = 'color';
 
@@ -82,10 +86,10 @@ export class ColorFormatEditor extends DefaultFormatEditor {
       };
     }) || [];
 
-    const columns = [
+    const getColumns = (intl) => ([
       fieldType === 'string' ? {
         field: 'regex',
-        name: 'Pattern (regular expression)',
+        name: intl.formatMessage({ id: 'common.ui.fieldEditor.color.pattern.label', defaultMessage: 'Pattern (regular expression)' }),
         render: (value, item) => {
           return (
             <EuiFieldText
@@ -100,7 +104,7 @@ export class ColorFormatEditor extends DefaultFormatEditor {
         }
       } : {
         field: 'range',
-        name: 'Range (min:max)',
+        name: intl.formatMessage({ id: 'common.ui.fieldEditor.color.range.label', defaultMessage: 'Range (min:max)' }),
         render: (value, item) => {
           return (
             <EuiFieldText
@@ -116,7 +120,7 @@ export class ColorFormatEditor extends DefaultFormatEditor {
       },
       {
         field: 'text',
-        name: 'Text color',
+        name: intl.formatMessage({ id: 'common.ui.fieldEditor.color.text.label', defaultMessage: 'Text color' }),
         render: (color, item) => {
           return (
             <EuiColorPicker
@@ -132,7 +136,7 @@ export class ColorFormatEditor extends DefaultFormatEditor {
       },
       {
         field: 'background',
-        name: 'Background color',
+        name: intl.formatMessage({ id: 'common.ui.fieldEditor.color.background.label', defaultMessage: 'Background color' }),
         render: (color, item) => {
           return (
             <EuiColorPicker
@@ -147,7 +151,7 @@ export class ColorFormatEditor extends DefaultFormatEditor {
         }
       },
       {
-        name: 'Example',
+        name: intl.formatMessage({ id: 'common.ui.fieldEditor.color.example.label', defaultMessage: 'Example' }),
         render: (item) => {
           return (
             <div
@@ -164,8 +168,8 @@ export class ColorFormatEditor extends DefaultFormatEditor {
       {
         actions: [
           {
-            name: 'Delete',
-            description: 'Delete color format',
+            name: intl.formatMessage({ id: 'common.ui.fieldEditor.color.delete.aria', defaultMessage: 'Delete' }),
+            description: intl.formatMessage({ id: 'common.ui.fieldEditor.color.delete.title', defaultMessage: 'Delete color format' }),
             onClick: (item) => {
               this.removeColor(item.index);
             },
@@ -176,24 +180,28 @@ export class ColorFormatEditor extends DefaultFormatEditor {
           }
         ],
       }
-    ];
+    ]);
 
     return (
-      <Fragment>
-        <EuiBasicTable
-          items={items}
-          columns={columns}
-        />
-        <EuiSpacer size="m" />
-        <EuiButton
-          iconType="plusInCircle"
-          size="s"
-          onClick={this.addColor}
-        >
-          Add color
-        </EuiButton>
-        <EuiSpacer size="l" />
-      </Fragment>
+      <I18nContext>
+        {intl => (
+          <Fragment>
+            <EuiBasicTable
+              items={items}
+              columns={getColumns(intl)}
+            />
+            <EuiSpacer size="m" />
+            <EuiButton
+              iconType="plusInCircle"
+              size="s"
+              onClick={this.addColor}
+            >
+              <FormattedMessage id="common.ui.fieldEditor.color.addColor.button" defaultMessage="Add color"/>
+            </EuiButton>
+            <EuiSpacer size="l" />
+          </Fragment>
+        )}
+      </I18nContext>
     );
   }
 }

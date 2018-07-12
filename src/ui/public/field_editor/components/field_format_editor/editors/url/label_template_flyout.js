@@ -27,81 +27,101 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { ReactI18n } from '@kbn/i18n';
+
+const { I18nContext, FormattedMessage } = ReactI18n;
+
 export const LabelTemplateFlyout = ({
   isVisible = false,
   onClose = () => {},
 }) => {
   return isVisible ? (
-    <EuiFlyout
-      onClose={onClose}
-    >
-      <EuiFlyoutBody>
-        <EuiText>
-          <h3>Label Template</h3>
-          <p>
-            If the URL in this field is large, it might be useful to provide an alternate template for the text
-            version of the URL. This will be displayed instead of the url, but will still link to the URL. The
-            format is a string which uses double curly brace notation <EuiCode>{('{{ }}')}</EuiCode>
-            to inject values. The following values can be accessed:
-          </p>
-          <ul>
-            <li>
-              <EuiCode>value</EuiCode> &mdash; The fields value
-            </li>
-            <li>
-              <EuiCode>url</EuiCode> &mdash; The formatted URL
-            </li>
-          </ul>
-          <h4>Examples</h4>
-          <EuiBasicTable
-            items={[
-              {
-                input: 1234,
-                urlTemplate: 'http://company.net/profiles?user_id={{value}}',
-                labelTemplate: 'User #{{value}}',
-                output: '<a href="http://company.net/profiles?user_id=1234">User #1234</a>',
-              },
-              {
-                input: '/assets/main.css',
-                urlTemplate: 'http://site.com{{rawValue}}',
-                labelTemplate: 'View Asset',
-                output: '<a href="http://site.com/assets/main.css">View Asset</a>',
-              },
-            ]}
-            columns={[
-              {
-                field: 'input',
-                name: 'Input',
-                width: '160px',
-              },
-              {
-                field: 'urlTemplate',
-                name: 'URL Template',
-              },
-              {
-                field: 'labelTemplate',
-                name: 'Label Template',
-              },
-              {
-                field: 'output',
-                name: 'Output',
-                render: (value) => {
-                  return (
-                    <span
-                      /*
-                       * Justification for dangerouslySetInnerHTML:
-                       * Example output produces anchor link.
-                       */
-                      dangerouslySetInnerHTML={{ __html: value }} //eslint-disable-line react/no-danger
-                    />
-                  );
-                }
-              },
-            ]}
-          />
-        </EuiText>
-      </EuiFlyoutBody>
-    </EuiFlyout>
+    <I18nContext>
+      {intl => (
+        <EuiFlyout
+          onClose={onClose}
+        >
+          <EuiFlyoutBody>
+            <EuiText>
+              <h3>
+                <FormattedMessage id="common.ui.fieldEditor.labelTemplate.header" defaultMessage="Label Template" />
+              </h3>
+              <p>
+                <FormattedMessage
+                  id="common.ui.fieldEditor.labelTemplate.label"
+                  // eslint-disable-next-line max-len
+                  defaultMessage="If the URL in this field is large, it might be useful to provide an alternate template for the text version of the URL. This will be displayed instead of the url, but will still link to the URL. The format is a string which uses double curly brace notation {doubleCurlyBraces} to inject values. The following values can be accessed:"
+                  values={{ doubleCurlyBraces: <EuiCode>{('{{ }}')}</EuiCode> }}
+                />
+              </p>
+              <ul>
+                <li>
+                  <EuiCode>value</EuiCode> &mdash;&nbsp;
+                  <FormattedMessage id="common.ui.fieldEditor.labelTemplate.value.label" defaultMessage="The fields value" />
+                </li>
+                <li>
+                  <EuiCode>url</EuiCode> &mdash;&nbsp;
+                  <FormattedMessage id="common.ui.fieldEditor.labelTemplate.url.label" defaultMessage="The formatted URL" />
+                </li>
+              </ul>
+              <h4>
+                <FormattedMessage id="common.ui.fieldEditor.labelTemplate.examples.header" defaultMessage="Examples" />
+              </h4>
+              <EuiBasicTable
+                items={[
+                  {
+                    input: 1234,
+                    urlTemplate: 'http://company.net/profiles?user_id={{value}}',
+                    labelTemplate: intl.formatMessage(
+                      { id: 'common.ui.fieldEditor.labelTemplate.example.id.label', defaultMessage: 'User #{value}' },
+                      { value: '{{value}}' }),
+                    output: '<a href="http://company.net/profiles?user_id=1234">' + intl.formatMessage({ id: 'common.ui.fieldEditor.labelTemplate.example.output.id.label', defaultMessage: 'User' }) + ' #1234</a>',
+                  },
+                  {
+                    input: '/assets/main.css',
+                    urlTemplate: 'http://site.com{{rawValue}}',
+                    labelTemplate: intl.formatMessage(
+                      { id: 'common.ui.fieldEditor.labelTemplate.example.path.label', defaultMessage: 'View Asset' }),
+                    output: '<a href="http://site.com/assets/main.css">' + intl.formatMessage({ id: 'common.ui.fieldEditor.labelTemplate.example.output.path.label', defaultMessage: 'View Asset' }) + '</a>',
+                  },
+                ]}
+                columns={[
+                  {
+                    field: 'input',
+                    name: intl.formatMessage({ id: 'common.ui.fieldEditor.labelTemplate.input.header', defaultMessage: 'Input' }),
+                    width: '160px',
+                  },
+                  {
+                    field: 'urlTemplate',
+                    name: intl.formatMessage({ id: 'common.ui.fieldEditor.labelTemplate.url.header', defaultMessage: 'URL Template' }),
+                  },
+                  {
+                    field: 'labelTemplate',
+                    name: intl.formatMessage(
+                      { id: 'common.ui.fieldEditor.labelTemplate.label.header', defaultMessage: 'Label Template' }),
+                  },
+                  {
+                    field: 'output',
+                    name: intl.formatMessage({ id: 'common.ui.fieldEditor.labelTemplate.output.header', defaultMessage: 'Output' }),
+                    render: (value) => {
+                      return (
+                        <span
+                          /*
+                           * Justification for dangerouslySetInnerHTML:
+                           * Example output produces anchor link.
+                           */
+                          dangerouslySetInnerHTML={{ __html: value }} //eslint-disable-line react/no-danger
+                        />
+                      );
+                    }
+                  },
+                ]}
+              />
+            </EuiText>
+          </EuiFlyoutBody>
+        </EuiFlyout>
+      )}
+    </I18nContext>
   ) : null;
 };
 

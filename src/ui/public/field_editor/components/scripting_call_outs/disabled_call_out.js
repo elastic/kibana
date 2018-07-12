@@ -24,23 +24,34 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { ReactI18n } from '@kbn/i18n';
+
+const { I18nContext, FormattedMessage } = ReactI18n;
+
 export const ScriptingDisabledCallOut = ({
   isVisible = false,
 }) => {
   return isVisible ? (
-    <Fragment>
-      <EuiCallOut
-        title="Scripting disabled"
-        color="danger"
-        iconType="alert"
-      >
-        <p>
-          All inline scripting has been disabled in Elasticsearch. You must enable inline
-          scripting for at least one language in order to use scripted fields in Kibana.
-        </p>
-      </EuiCallOut>
-      <EuiSpacer size="m" />
-    </Fragment>
+    <I18nContext>
+      {intl => (
+        <Fragment>
+          <EuiCallOut
+            title={intl.formatMessage({ id: 'common.ui.fieldEditor.disabledCallOut.header', defaultMessage: 'Scripting disabled' })}
+            color="danger"
+            iconType="alert"
+          >
+            <p>
+              <FormattedMessage
+                id="common.ui.fieldEditor.disabledCallOut.label"
+                // eslint-disable-next-line max-len
+                defaultMessage="All inline scripting has been disabled in Elasticsearch. You must enable inline scripting for at least one language in order to use scripted fields in Kibana."
+              />
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </Fragment>
+      )}
+    </I18nContext>
   ) : null;
 };
 

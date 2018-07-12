@@ -46,6 +46,10 @@ import {
 import chrome from 'ui/chrome';
 import './icons';
 
+import { ReactI18n } from '@kbn/i18n';
+
+const { FormattedMessage } = ReactI18n;
+
 export class UrlFormatEditor extends DefaultFormatEditor {
   static formatId = 'url';
 
@@ -125,7 +129,7 @@ export class UrlFormatEditor extends DefaultFormatEditor {
           isVisible={this.state.showUrlTemplateHelp}
           onClose={this.hideUrlTemplateHelp}
         />
-        <EuiFormRow label="Type">
+        <EuiFormRow label={<FormattedMessage id="common.ui.fieldEditor.url.type.label" defaultMessage="Type"/>}>
           <EuiSelect
             data-test-subj="urlEditorType"
             value={formatParams.type}
@@ -142,9 +146,11 @@ export class UrlFormatEditor extends DefaultFormatEditor {
         </EuiFormRow>
 
         {formatParams.type === 'a' ? (
-          <EuiFormRow label="Open in a new tab">
+          <EuiFormRow label={<FormattedMessage id="common.ui.fieldEditor.url.openTab.label" defaultMessage="Open in a new tab"/>}>
             <EuiSwitch
-              label={formatParams.openLinkInCurrentTab ? 'Off' : 'On'}
+              label={formatParams.openLinkInCurrentTab
+                ? <FormattedMessage id="common.ui.fieldEditor.url.off.label" defaultMessage="Off"/>
+                : <FormattedMessage id="common.ui.fieldEditor.url.on.label" defaultMessage="On"/>}
               checked={!formatParams.openLinkInCurrentTab}
               onChange={(e) => {
                 this.onChange({ openLinkInCurrentTab: !e.target.checked });
@@ -154,8 +160,11 @@ export class UrlFormatEditor extends DefaultFormatEditor {
         ) : null}
 
         <EuiFormRow
-          label="URL template"
-          helpText={(<EuiLink onClick={this.showUrlTemplateHelp}>URL template help</EuiLink>)}
+          label={<FormattedMessage id="common.ui.fieldEditor.url.urlTemplate.label" defaultMessage="URL template"/>}
+          helpText={(
+            <EuiLink onClick={this.showUrlTemplateHelp}>
+              <FormattedMessage id="common.ui.fieldEditor.url.template.help.button" defaultMessage="URL template help" />
+            </EuiLink>)}
           isInvalid={!!error}
           error={error}
         >
@@ -169,7 +178,7 @@ export class UrlFormatEditor extends DefaultFormatEditor {
         </EuiFormRow>
 
         <EuiFormRow
-          label="Label template"
+          label={<FormattedMessage id="common.ui.fieldEditor.url.labelTemplate.label" defaultMessage="Label template"/>}
           helpText={(<EuiLink onClick={this.showLabelTemplateHelp}>Label template help</EuiLink>)}
           isInvalid={!!error}
           error={error}

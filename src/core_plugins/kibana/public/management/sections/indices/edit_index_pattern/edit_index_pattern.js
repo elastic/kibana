@@ -49,16 +49,18 @@ function updateSourceFiltersTable($scope, $state) {
       }
 
       render(
-        <SourceFiltersTable
-          indexPattern={$scope.indexPattern}
-          filterFilter={$scope.fieldFilter}
-          fieldWildcardMatcher={$scope.fieldWildcardMatcher}
-          onAddOrRemoveFilter={() => {
-            $scope.editSections = $scope.editSectionsProvider($scope.indexPattern);
-            $scope.refreshFilters();
-            $scope.$apply();
-          }}
-        />,
+        <I18nProvider>
+          <SourceFiltersTable
+            indexPattern={$scope.indexPattern}
+            filterFilter={$scope.fieldFilter}
+            fieldWildcardMatcher={$scope.fieldWildcardMatcher}
+            onAddOrRemoveFilter={() => {
+              $scope.editSections = $scope.editSectionsProvider($scope.indexPattern);
+              $scope.refreshFilters();
+              $scope.$apply();
+            }}
+          />
+        </I18nProvider>,
         node,
       );
     });
@@ -82,22 +84,24 @@ function updateScriptedFieldsTable($scope, $state) {
       }
 
       render(
-        <ScriptedFieldsTable
-          indexPattern={$scope.indexPattern}
-          fieldFilter={$scope.fieldFilter}
-          scriptedFieldLanguageFilter={$scope.scriptedFieldLanguageFilter}
-          helpers={{
-            redirectToRoute: (obj, route) => {
-              $scope.kbnUrl.redirectToRoute(obj, route);
-              $scope.$apply();
-            },
-            getRouteHref: (obj, route) => $scope.kbnUrl.getRouteHref(obj, route),
-          }}
-          onRemoveField={() => {
-            $scope.editSections = $scope.editSectionsProvider($scope.indexPattern);
-            $scope.refreshFilters();
-          }}
-        />,
+        <I18nProvider>
+          <ScriptedFieldsTable
+            indexPattern={$scope.indexPattern}
+            fieldFilter={$scope.fieldFilter}
+            scriptedFieldLanguageFilter={$scope.scriptedFieldLanguageFilter}
+            helpers={{
+              redirectToRoute: (obj, route) => {
+                $scope.kbnUrl.redirectToRoute(obj, route);
+                $scope.$apply();
+              },
+              getRouteHref: (obj, route) => $scope.kbnUrl.getRouteHref(obj, route),
+            }}
+            onRemoveField={() => {
+              $scope.editSections = $scope.editSectionsProvider($scope.indexPattern);
+              $scope.refreshFilters();
+            }}
+          />
+        </I18nProvider>,
         node,
       );
     });
@@ -248,7 +252,8 @@ uiModules.get('apps/management')
       };
       confirmModal(
         i18n('kbn.management.indexPattern.edit.refresh.label', {
-          defaultMessage: 'This action resets the popularity counter of each field.' }),
+          defaultMessage: 'This action resets the popularity counter of each field.'
+        }),
         confirmModalOptions
       );
     };
@@ -285,7 +290,8 @@ uiModules.get('apps/management')
     $scope.setIndexPatternsTimeField = function (field) {
       if (field.type !== 'date') {
         notify.error(i18n('kbn.management.indexPattern.edit.notDate.errorMessage', {
-          defaultMessage: 'That field is a {fieldType} not a date.', values: { fieldType: field.type } }));
+          defaultMessage: 'That field is a {fieldType} not a date.', values: { fieldType: field.type }
+        }));
         return;
       }
       $scope.indexPattern.timeFieldName = field.name;
