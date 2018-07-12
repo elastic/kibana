@@ -9,30 +9,36 @@ import { LatestActive } from './latest_active';
 import { LatestVersions } from './latest_versions';
 import { LatestTypes } from './latest_types';
 import { Stats } from '../';
-import { MonitoringTimeseriesContainer } from 'plugins/monitoring/components';
-import { EuiCallOut } from '@elastic/eui';
+import { MonitoringTimeseriesContainer } from '../../';
+import {
+  EuiCallOut,
+  EuiTitle,
+  EuiSpacer,
+  EuiPage,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 
 function renderLatestActive(latestActive, latestTypes, latestVersions) {
   if (latestTypes && latestTypes.length > 0) {
     return (
-      <div className="page-row">
-        <div className="row">
-          <div className="col-md-4">
-            <h2 className="euiTitle">Active Beats in Last Day</h2>
-            <LatestActive latestActive={latestActive} />
-          </div>
-
-          <div className="col-md-4">
-            <h2 className="euiTitle">Top 5 Beat Types in Last Day</h2>
-            <LatestTypes latestTypes={latestTypes} />
-          </div>
-
-          <div className="col-md-4">
-            <h2 className="euiTitle">Top 5 Versions in Last Day</h2>
-            <LatestVersions latestVersions={latestVersions} />
-          </div>
-        </div>
-      </div>
+      <EuiFlexGroup wrap>
+        <EuiFlexItem>
+          <EuiTitle size="s"><h3>Active Beats in Last Day</h3></EuiTitle>
+          <EuiSpacer size="s"/>
+          <LatestActive latestActive={latestActive} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle size="s"><h3>Top 5 Beat Types in Last Day</h3></EuiTitle>
+          <EuiSpacer size="s"/>
+          <LatestTypes latestTypes={latestTypes} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle size="s"><h3>Top 5 Versions in Last Day</h3></EuiTitle>
+          <EuiSpacer size="s"/>
+          <LatestVersions latestVersions={latestVersions} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
@@ -56,41 +62,35 @@ export function BeatsOverview({
   metrics,
   ...props
 }) {
+  const seriesToShow = [
+    metrics.beat_event_rates,
+    metrics.beat_fail_rates,
+    metrics.beat_throughput_rates,
+    metrics.beat_output_errors,
+  ];
+
+  const charts = seriesToShow.map((data, index) => (
+    <EuiFlexItem style={{ minWidth: '45%' }} key={index}>
+      <MonitoringTimeseriesContainer
+        series={data}
+        {...props}
+      />
+    </EuiFlexItem>
+  ));
+
   return (
-    <div>
+    <EuiPage>
       {renderLatestActive(latestActive, latestTypes, latestVersions)}
+
+      <EuiSpacer size="s"/>
 
       <Stats stats={stats} />
 
-      <div className="page-row">
-        <div className="row">
-          <div className="col-md-6">
-            <MonitoringTimeseriesContainer
-              series={metrics.beat_event_rates}
-              {...props}
-            />
-          </div>
-          <div className="col-md-6">
-            <MonitoringTimeseriesContainer
-              series={metrics.beat_fail_rates}
-              {...props}
-            />
-          </div>
-          <div className="col-md-6">
-            <MonitoringTimeseriesContainer
-              series={metrics.beat_throughput_rates}
-              {...props}
-            />
-          </div>
-          <div className="col-md-6">
-            <MonitoringTimeseriesContainer
-              series={metrics.beat_output_errors}
-              {...props}
-            />
-          </div>
-        </div>
-      </div>
-    </div>
+      <EuiSpacer size="xs"/>
+
+      <EuiFlexGroup wrap>
+        {charts}
+      </EuiFlexGroup>
+    </EuiPage>
   );
 }
-
