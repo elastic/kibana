@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  fromKueryExpression,
-  toElasticsearchQuery,
-  getSuggestionsProvider
-} from 'ui/kuery';
+import { fromKueryExpression, toElasticsearchQuery } from 'ui/kuery';
+import { getAutocompleteProvider } from 'ui/autocomplete_providers';
 
 export function convertKueryToEsQuery(kuery, indexPattern) {
   const ast = fromKueryExpression(kuery);
@@ -21,6 +18,8 @@ export async function getSuggestions(
   apmIndexPattern,
   boolFilter
 ) {
+  const getSuggestionsProvider = getAutocompleteProvider('kuery');
+  if (!getSuggestionsProvider) return [];
   const config = {
     get: () => true
   };

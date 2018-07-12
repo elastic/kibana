@@ -17,16 +17,12 @@
  * under the License.
  */
 
-let suggestionsProvider = () => returnEmptyList;
+const autocompleteProviders = new Map();
 
-function returnEmptyList() {
-  return [];
+export function setAutocompleteProvider(language, provider) {
+  autocompleteProviders.set(language, provider);
 }
 
-export function setProvider(provider) {
-  suggestionsProvider = provider;
-}
-
-export function getSuggestionsProvider(...args) {
-  return suggestionsProvider(...args);
+export function getAutocompleteProvider(language) {
+  return autocompleteProviders.get(language);
 }

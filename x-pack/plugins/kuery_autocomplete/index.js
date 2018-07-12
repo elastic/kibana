@@ -10,11 +10,12 @@ import { resolve } from 'path';
 export const kueryAutocomplete = (kibana) => new kibana.Plugin({
   id: 'kuery_autocomplete',
   publicDir: resolve(__dirname, 'public'),
-  require: ['kibana'],
+  require: ['kibana', 'xpack_main'],
   config: (Joi) => Joi.object({
     enabled: Joi.boolean().default(true)
   }).default(),
   uiExports: {
     hacks: ['plugins/kuery_autocomplete/hacks'],
   },
+  init: () => {}
 });
