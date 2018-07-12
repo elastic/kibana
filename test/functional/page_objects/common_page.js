@@ -28,7 +28,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
      * @param {string} appName As defined in the apps config
      * @param {string} subUrl The route after the hash (#)
      */
-    navigateToUrl(appName, subUrl) {
+    async navigateToUrl(appName, subUrl) {
       const appConfig = {
         ...config.get(['apps', appName]),
         // Overwrite the default hash with the URL we really want.
@@ -36,8 +36,31 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       };
 
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), appConfig);
-      return remote.get(appUrl);
+      await remote.get(appUrl);
+      await this.loginIfPrompted(appUrl);
     }
+
+
+    async loginIfPrompted(appUrl) {
+      let currentUrl = await remote.getCurrentUrl();
+      log.debug(`currentUrl = ${currentUrl}\n    appUrl = ${appUrl}`);
+      await remote.setFindTimeout(defaultTryTimeout * 2).findByCssSelector('[data-test-subj="kibanaChrome"]');
+      const loginPage = currentUrl.includes('/login');
+      const wantedLoginPage = appUrl.includes('/login') || appUrl.includes('/logout');
+
+      if (loginPage && !wantedLoginPage) {
+        log.debug(`Found login page.  Logging in with username = ${config.get('servers.kibana.username')}`);
+        await PageObjects.shield.login(
+          config.get('servers.kibana.username'),
+          config.get('servers.kibana.password')
+        );
+        await remote.setFindTimeout(20000).findByCssSelector('[data-test-subj="kibanaChrome"] nav:not(.ng-hide)');
+        currentUrl = await remote.getCurrentUrl();
+        log.debug(`Finished login process currentUrl = ${currentUrl}`);
+      }
+      return currentUrl;
+    }
+
 
     navigateToApp(appName) {
       const self = this;
@@ -58,7 +81,8 @@ export function CommonPageProvider({ getService, getPageObjects }) {
                   log.debug(' >>>>>>>> Setting defaultIndex to "logstash-*""');
                   return kibanaServer.uiSettings.update({
                     'dateFormat:tz': 'UTC',
-                    'defaultIndex': 'logstash-*'
+                    'defaultIndex': 'logstash-*',
+                    'telemetry:optIn': false
                   });
                 }
               }
@@ -75,17 +99,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
               return remote.refresh();
             })
             .then(async function () {
-              const currentUrl = await remote.getCurrentUrl();
-              const loginPage = currentUrl.includes('/login');
-              const wantedLoginPage = appUrl.includes('/login') || appUrl.includes('/logout');
-
-              if (loginPage && !wantedLoginPage) {
-                log.debug(`Found loginPage username = ${config.get('servers.kibana.username')}`);
-                await PageObjects.shield.login(
-                  config.get('servers.kibana.username'),
-                  config.get('servers.kibana.password')
-                );
-              }
+              const currentUrl = await self.loginIfPrompted(appUrl);
 
               if (currentUrl.includes('app/kibana')) {
                 await testSubjects.find('kibanaChrome');
