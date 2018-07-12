@@ -26,6 +26,7 @@ import {
   borderRadius,
   fontFamilyCode,
   fontSizes,
+  fontSize,
   truncate
 } from '../../../../../../style/variables';
 import TooltipOverlay, {
