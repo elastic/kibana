@@ -6,6 +6,7 @@
   <kbn-typeahead
     items="queryBar.suggestions"
     item-template="queryBar.suggestionTemplate"
+    id="query-bar-suggestions"
     on-select="queryBar.onSuggestionSelect(item)"
     on-focus-change="queryBar.focusedTypeaheadItemID = $focusedItemID"
     class="suggestionTypeahead"
@@ -32,7 +33,7 @@
           ng-class="{'kuiLocalSearchInput-isInvalid': queryBarForm.$invalid}"
           data-test-subj="queryInput"
           aria-autocomplete="list"
-          aria-controls="query-bar-typeahead-items"
+          aria-controls="query-bar-suggestions-typeahead-items"
           aria-activedescendant="{{queryBar.focusedTypeaheadItemID}}"
         >
 
@@ -56,7 +57,7 @@
           ng-class="{'kuiLocalSearchInput-isInvalid': queryBarForm.$invalid}"
           data-test-subj="queryInput"
           aria-autocomplete="list"
-          aria-controls="query-bar-typeahead-items"
+          aria-controls="query-bar-suggestions-typeahead-items"
           aria-activedescendant="{{queryBar.focusedTypeaheadItemID}}"
         />
         <div class="kuiLocalSearchAssistedInput__assistance">

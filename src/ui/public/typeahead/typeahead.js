@@ -44,6 +44,7 @@ typeahead.directive('kbnTypeahead', function () {
     controller: function ($scope, $element) {
       this.isHidden = true;
       this.selectedIndex = null;
+      this.elementID = $element.attr('id');
 
       this.submit = () => {
         const item = this.items[this.selectedIndex];
@@ -140,7 +141,7 @@ typeahead.directive('kbnTypeahead', function () {
       };
 
       $scope.$watch('typeahead.selectedIndex', (newIndex) => {
-        this.onFocusChange({ $focusedItemID: newIndex !== null ? `typeahead-item-${newIndex}` : '' });
+        this.onFocusChange({ $focusedItemID: newIndex !== null ? `${this.elementID}-typeahead-item-${newIndex}` : '' });
       });
     }
   };
