@@ -5,7 +5,14 @@
  */
 
 import styled from 'styled-components';
-import { unit, units, px, fontSizes, colors } from '../../style/variables';
+import {
+  unit,
+  units,
+  px,
+  fontSizes,
+  colors,
+  fontSize
+} from '../../style/variables';
 import { RelativeLink } from '../../utils/url';
 
 export const HeaderContainer = styled.div`
