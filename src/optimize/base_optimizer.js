@@ -193,58 +193,6 @@ export default class BaseOptimizer {
         },
         ...preProcessors,
       ];
-      // TODO: refactor this
-      /*if (IS_KIBANA_DISTRIBUTABLE) {
-        return ExtractTextPlugin.extract({
-          fallback: {
-            loader: 'style-loader'
-          },
-          use: [
-            ...postProcessors,
-            {
-              loader: 'css-loader',
-              options: {
-                // importLoaders needs to know the number of loaders that follow this one,
-                // so we add 1 (for the postcss-loader) to the length of the preProcessors
-                // array that we merge into this array
-                importLoaders: 1 + preProcessors.length,
-              },
-            },
-            {
-              loader: 'postcss-loader',
-              options: {
-                config: {
-                  path: POSTCSS_CONFIG_PATH,
-                },
-              },
-            },
-            ...preProcessors,
-          ],
-        });
-      } else {
-        return [
-          'style-loader',
-          ...postProcessors,
-          {
-            loader: 'css-loader',
-            options: {
-              // importLoaders needs to know the number of loaders that follow this one,
-              // so we add 1 (for the postcss-loader) to the length of the preProcessors
-              // array that we merge into this array
-              importLoaders: 1 + preProcessors.length,
-            },
-          },
-          {
-            loader: 'postcss-loader',
-            options: {
-              config: {
-                path: POSTCSS_CONFIG_PATH,
-              },
-            },
-          },
-          ...preProcessors,
-        ];
-      }*/
     }
 
     // const nodeModulesPath = fromRoot('node_modules');
