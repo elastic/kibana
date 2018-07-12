@@ -53,23 +53,16 @@ class PipelineList extends React.Component {
     };
   }
 
-  openPipeline = () => {
-    const {
-      id,
-      openPipeline,
-    } = this.props;
-
-    openPipeline(id);
-  }
-
   columns = [
     {
       field: 'id',
       name: 'Id',
       sortable: true,
-      render: (id, { isCentrallyManaged }) => (
-        isCentrallyManaged
-          ? <EuiLink onClick={this.openPipeline}>{id}</EuiLink>
+      render: (id, { isCentrallyManaged }) => {
+        const { openPipeline } = this.props;
+        const openPipelineClicked = () => openPipeline(id);
+        return isCentrallyManaged
+          ? <EuiLink onClick={openPipelineClicked}>{id}</EuiLink>
           : (
             <span>
               {id} &nbsp;
@@ -78,8 +71,8 @@ class PipelineList extends React.Component {
                 type="questionInCircle"
               />
             </span>
-          )
-      )
+          );
+      }
     },
     {
       field: 'description',
@@ -405,7 +398,7 @@ class PipelineList extends React.Component {
 
   render() {
     return (
-      <EuiPage>
+      <EuiPage style={{ minHeight: '100vh' }}>
         <EuiPageContent
           verticalPosition="center"
           horizontalPosition="center"
@@ -447,8 +440,8 @@ app.directive('pipelineList', function ($injector) {
     restrict: 'E',
     // template: template,
     link: (scope, el) => {
-      const openPipeline = id => scope.$evalAsync(kbnUrl.change(`/management/logstash/pipelines/${id}/edit`));
-      const createPipeline = () => scope.$evalAsync(kbnUrl.change('/management/logstash/pipelines/new-pipeline'));
+      const openPipeline = id => scope.$evalAsync(kbnUrl.change(`management/logstash/pipelines/pipeline/${id}/edit`));
+      const createPipeline = () => scope.$evalAsync(kbnUrl.change('management/logstash/pipelines/new-pipeline'));
       const clonePipeline = id => scope.$evalAsync(kbnUrl.change(`management/logstash/pipelines/pipeline/${id}/edit?clone`));
       render(
         <PipelineList
