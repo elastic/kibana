@@ -42,7 +42,6 @@ const transformRolesToEs = (
   payload,
   existingApplications = []
 ) => {
-  debugger; //eslint-disable-line
   const { elasticsearch = {}, kibana = [] } = payload;
   const otherApplications = existingApplications.filter(
     roleApplication => roleApplication.application !== application
