@@ -44,10 +44,10 @@ export function tabifyAggResponse(aggs, esResponse, respOpts = {}) {
  */
 function collectBucket(write, bucket, key, aggScale) {
   const agg = write.aggStack.shift();
-  const aggInfo = agg.write();
+  const aggInfo = agg.write(write.aggs);
   aggScale *= aggInfo.metricScale || 1;
 
-  switch (agg.schema.group) {
+  switch (agg.type.type) {
     case 'buckets':
       const buckets = new TabifyBuckets(bucket[agg.id], agg.params);
       if (buckets.length) {
@@ -103,7 +103,7 @@ function collectBucket(write, bucket, key, aggScale) {
 function passEmptyBuckets(write, bucket, key, aggScale) {
   const agg = write.aggStack.shift();
 
-  switch (agg.schema.group) {
+  switch (agg.type.type) {
     case 'metrics':
       // pass control back to collectBucket()
       write.aggStack.unshift(agg);
