@@ -19,6 +19,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { FieldEditor } from './field_editor';
 
@@ -125,7 +126,7 @@ describe('FieldEditor', () => {
   });
 
   it('should render create new scripted field correctly', async () => {
-    const component = shallow(
+    const wrapper = shallow(
       <FieldEditor
         indexPattern={indexPattern}
         field={field}
@@ -134,7 +135,8 @@ describe('FieldEditor', () => {
     );
 
     await new Promise(resolve => process.nextTick(resolve));
-    component.update();
+    wrapper.update();
+    const component = shallowWithIntl(wrapper);
     expect(component).toMatchSnapshot();
   });
 
@@ -147,7 +149,7 @@ describe('FieldEditor', () => {
     indexPattern.fields.push(testField);
     indexPattern.fields.byName[testField.name] = testField;
 
-    const component = shallow(
+    const wrapper = shallow(
       <FieldEditor
         indexPattern={indexPattern}
         field={testField}
@@ -156,7 +158,8 @@ describe('FieldEditor', () => {
     );
 
     await new Promise(resolve => process.nextTick(resolve));
-    component.update();
+    wrapper.update();
+    const component = shallowWithIntl(wrapper);
     expect(component).toMatchSnapshot();
   });
 
@@ -170,7 +173,7 @@ describe('FieldEditor', () => {
     indexPattern.fields.push(testField);
     indexPattern.fields.byName[testField.name] = testField;
 
-    const component = shallow(
+    const wrapper = shallow(
       <FieldEditor
         indexPattern={indexPattern}
         field={testField}
@@ -179,13 +182,14 @@ describe('FieldEditor', () => {
     );
 
     await new Promise(resolve => process.nextTick(resolve));
-    component.update();
+    wrapper.update();
+    const component = shallowWithIntl(wrapper);
     expect(component).toMatchSnapshot();
   });
 
   it('should show conflict field warning', async () => {
     const testField = { ...field };
-    const component = shallow(
+    const wrapper = shallow(
       <FieldEditor
         indexPattern={indexPattern}
         field={testField}
@@ -194,8 +198,9 @@ describe('FieldEditor', () => {
     );
 
     await new Promise(resolve => process.nextTick(resolve));
-    component.instance().onFieldChange('name', 'foobar');
-    component.update();
+    wrapper.instance().onFieldChange('name', 'foobar');
+    wrapper.update();
+    const component = shallowWithIntl(wrapper);
     expect(component).toMatchSnapshot();
   });
 });

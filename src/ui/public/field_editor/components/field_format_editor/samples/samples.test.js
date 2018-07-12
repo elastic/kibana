@@ -19,12 +19,13 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { FormatEditorSamples } from './samples';
 
 describe('FormatEditorSamples', () => {
   it('should render normally', async () => {
-    const component = shallow(
+    const wrapper = shallow(
       <FormatEditorSamples
         samples={[
           { input: 'test', output: 'TEST' },
@@ -34,6 +35,7 @@ describe('FormatEditorSamples', () => {
       />
     );
 
+    const component = shallowWithIntl(wrapper);
     expect(component).toMatchSnapshot();
   });
 

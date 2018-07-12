@@ -19,17 +19,19 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { ScriptingDisabledCallOut } from './disabled_call_out';
 
 describe('ScriptingDisabledCallOut', () => {
   it('should render normally', async () => {
-    const component = shallow(
+    const wrapper = shallow(
       <ScriptingDisabledCallOut
         isVisible={true}
       />
     );
 
+    const component = shallowWithIntl(wrapper);
     expect(component).toMatchSnapshot();
   });
 

@@ -19,6 +19,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { ScriptingWarningCallOut } from './warning_call_out';
 
@@ -28,12 +29,13 @@ jest.mock('ui/documentation_links', () => ({
 
 describe('ScriptingWarningCallOut', () => {
   it('should render normally', async () => {
-    const component = shallow(
+    const wrapper = shallow(
       <ScriptingWarningCallOut
         isVisible={true}
       />
     );
 
+    const component = shallowWithIntl(wrapper);
     expect(component).toMatchSnapshot();
   });
 
