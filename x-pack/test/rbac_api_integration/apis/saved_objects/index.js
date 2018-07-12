@@ -6,65 +6,49 @@
 
 import { AUTHENTICATION } from "./lib/authentication";
 
-const application = 'kibana-.kibana';
 export default function ({ loadTestFile, getService }) {
   const es = getService('es');
+  const supertest = getService('supertest');
 
   describe('saved_objects', () => {
     before(async () => {
-      await es.shield.putRole({
-        name: 'kibana_legacy_user',
-        body: {
-          cluster: [],
-          index: [{
-            names: ['.kibana'],
-            privileges: ['manage', 'read', 'index', 'delete']
-          }],
-          applications: []
-        }
-      });
+      await supertest.post('/api/security/roles/kibana_legacy_user')
+        .send({
+          elasticsearch: {
+            indices: [{
+              names: ['.kibana'],
+              privileges: ['manage', 'read', 'index', 'delete']
+            }]
+          }
+        });
 
-      await es.shield.putRole({
-        name: 'kibana_legacy_dashboard_only_user',
-        body: {
-          cluster: [],
-          index: [{
-            names: ['.kibana'],
-            privileges: ['read', 'view_index_metadata']
-          }],
-          applications: []
-        }
-      });
+      await supertest.post('/api/security/roles/kibana_legacy_dashboard_only_user')
+        .send({
+          elasticsearch: {
+            indices: [{
+              names: ['.kibana'],
+              privileges: ['read', 'view_index_metadata']
+            }]
+          }
+        });
 
-      await es.shield.putRole({
-        name: 'kibana_rbac_user',
-        body: {
-          cluster: [],
-          index: [],
-          applications: [
+      await supertest.post('/api/security/roles/kibana_rbac_user')
+        .send({
+          kibana: [
             {
-              application,
-              privileges: [ 'all' ],
-              resources: [ '*' ]
+              privileges: ['all']
             }
           ]
-        }
-      });
+        });
 
-      await es.shield.putRole({
-        name: 'kibana_rbac_dashboard_only_user',
-        body: {
-          cluster: [],
-          index: [],
-          applications: [
+      await supertest.post('/api/security/roles/kibana_rbac_dashboard_only_user')
+        .send({
+          kibana: [
             {
-              application,
-              privileges: [ 'read' ],
-              resources: [ '*' ]
+              privileges: ['read']
             }
           ]
-        }
-      });
+        });
 
       await es.shield.putUser({
         username: AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME,
