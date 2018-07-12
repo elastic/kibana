@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { isAutoCreateIndexError, showAutoCreateIndexErrorPage } from './error_auto_create_index';
+export function calculateObjectHash(obj: object): string;

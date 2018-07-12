@@ -17,4 +17,12 @@
  * under the License.
  */
 
-export { isAutoCreateIndexError, showAutoCreateIndexErrorPage } from './error_auto_create_index';
+import { SavedObjectsClient } from '../../saved_objects';
+
+export function initSavedObjectClient(chrome) {
+  const savedObjectClient = new SavedObjectsClient();
+
+  chrome.getSavedObjectsClient = function () {
+    return savedObjectClient;
+  };
+}
