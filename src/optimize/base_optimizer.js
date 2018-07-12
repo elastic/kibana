@@ -26,7 +26,6 @@ import Stats from 'webpack/lib/Stats';
 import webpackMerge from 'webpack-merge';
 import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
 import { Compiler as DLLCompiler } from './dll_bundler';
-import HardSourceWebpackPlugin from 'hard-source-webpack-plugin';
 
 import { defaults } from 'lodash';
 
@@ -319,25 +318,6 @@ export default class BaseOptimizer {
       },
 
       plugins: [
-        new HardSourceWebpackPlugin({
-          cacheDirectory: this.uiBundles.resolvePath('../.cache/hard-source/[confighash]'),
-          info: {
-            mode: 'none',
-            level: 'warn',
-          },
-        }),
-
-        new HardSourceWebpackPlugin.ExcludeModulePlugin([
-          {
-            // HardSource works with mini-css-extract-plugin but due to how
-            // mini-css emits assets, assets are not emitted on repeated builds with
-            // mini-css and hard-source together. Ignoring the mini-css loader
-            // modules, but not the other css loader modules, excludes the modules
-            // that mini-css needs rebuilt to output assets every time.
-            test: /mini-css-extract-plugin[\\/]dist[\\/]loader/,
-          }
-        ]),
-
         new MiniCssExtractPlugin({
           filename: '[name].style.css',
         }),
