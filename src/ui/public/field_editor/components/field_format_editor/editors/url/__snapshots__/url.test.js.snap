@@ -14,7 +14,13 @@ exports[`UrlFormatEditor should render label template help 1`] = `
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
-    label="Type"
+    label={
+      <FormattedMessage
+        defaultMessage="Type"
+        id="common.ui.fieldEditor.url.type.label"
+        values={Object {}}
+      />
+    }
   >
     <EuiSelect
       compressed={false}
@@ -52,11 +58,21 @@ exports[`UrlFormatEditor should render label template help 1`] = `
         onClick={[Function]}
         type="button"
       >
-        URL template help
+        <FormattedMessage
+          defaultMessage="URL template help"
+          id="common.ui.fieldEditor.url.template.help.button"
+          values={Object {}}
+        />
       </EuiLink>
     }
     isInvalid={false}
-    label="URL template"
+    label={
+      <FormattedMessage
+        defaultMessage="URL template"
+        id="common.ui.fieldEditor.url.urlTemplate.label"
+        values={Object {}}
+      />
+    }
   >
     <EuiFieldText
       compressed={false}
@@ -82,7 +98,13 @@ exports[`UrlFormatEditor should render label template help 1`] = `
       </EuiLink>
     }
     isInvalid={false}
-    label="Label template"
+    label={
+      <FormattedMessage
+        defaultMessage="Label template"
+        id="common.ui.fieldEditor.url.labelTemplate.label"
+        values={Object {}}
+      />
+    }
   >
     <EuiFieldText
       compressed={false}
@@ -113,7 +135,13 @@ exports[`UrlFormatEditor should render normally 1`] = `
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
-    label="Type"
+    label={
+      <FormattedMessage
+        defaultMessage="Type"
+        id="common.ui.fieldEditor.url.type.label"
+        values={Object {}}
+      />
+    }
   >
     <EuiSelect
       compressed={false}
@@ -151,11 +179,21 @@ exports[`UrlFormatEditor should render normally 1`] = `
         onClick={[Function]}
         type="button"
       >
-        URL template help
+        <FormattedMessage
+          defaultMessage="URL template help"
+          id="common.ui.fieldEditor.url.template.help.button"
+          values={Object {}}
+        />
       </EuiLink>
     }
     isInvalid={false}
-    label="URL template"
+    label={
+      <FormattedMessage
+        defaultMessage="URL template"
+        id="common.ui.fieldEditor.url.urlTemplate.label"
+        values={Object {}}
+      />
+    }
   >
     <EuiFieldText
       compressed={false}
@@ -181,7 +219,13 @@ exports[`UrlFormatEditor should render normally 1`] = `
       </EuiLink>
     }
     isInvalid={false}
-    label="Label template"
+    label={
+      <FormattedMessage
+        defaultMessage="Label template"
+        id="common.ui.fieldEditor.url.labelTemplate.label"
+        values={Object {}}
+      />
+    }
   >
     <EuiFieldText
       compressed={false}
@@ -212,7 +256,13 @@ exports[`UrlFormatEditor should render url template help 1`] = `
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
-    label="Type"
+    label={
+      <FormattedMessage
+        defaultMessage="Type"
+        id="common.ui.fieldEditor.url.type.label"
+        values={Object {}}
+      />
+    }
   >
     <EuiSelect
       compressed={false}
@@ -250,11 +300,21 @@ exports[`UrlFormatEditor should render url template help 1`] = `
         onClick={[Function]}
         type="button"
       >
-        URL template help
+        <FormattedMessage
+          defaultMessage="URL template help"
+          id="common.ui.fieldEditor.url.template.help.button"
+          values={Object {}}
+        />
       </EuiLink>
     }
     isInvalid={false}
-    label="URL template"
+    label={
+      <FormattedMessage
+        defaultMessage="URL template"
+        id="common.ui.fieldEditor.url.urlTemplate.label"
+        values={Object {}}
+      />
+    }
   >
     <EuiFieldText
       compressed={false}
@@ -280,7 +340,13 @@ exports[`UrlFormatEditor should render url template help 1`] = `
       </EuiLink>
     }
     isInvalid={false}
-    label="Label template"
+    label={
+      <FormattedMessage
+        defaultMessage="Label template"
+        id="common.ui.fieldEditor.url.labelTemplate.label"
+        values={Object {}}
+      />
+    }
   >
     <EuiFieldText
       compressed={false}

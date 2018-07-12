@@ -14,31 +14,55 @@ exports[`LabelTemplateFlyout should render normally 1`] = `
       grow={true}
     >
       <h3>
-        Label Template
+        <FormattedMessage
+          defaultMessage="Label Template"
+          id="common.ui.fieldEditor.labelTemplate.header"
+          values={Object {}}
+        />
       </h3>
       <p>
-        If the URL in this field is large, it might be useful to provide an alternate template for the text version of the URL. This will be displayed instead of the url, but will still link to the URL. The format is a string which uses double curly brace notation 
-        <EuiCode>
-          {{ }}
-        </EuiCode>
-        to inject values. The following values can be accessed:
+        <FormattedMessage
+          defaultMessage="If the URL in this field is large, it might be useful to provide an alternate template for the text version of the URL. This will be displayed instead of the url, but will still link to the URL. The format is a string which uses double curly brace notation {doubleCurlyBraces} to inject values. The following values can be accessed:"
+          id="common.ui.fieldEditor.labelTemplate.label"
+          values={
+            Object {
+              "doubleCurlyBraces": <EuiCode>
+                {{ }}
+              </EuiCode>,
+            }
+          }
+        />
       </p>
       <ul>
         <li>
           <EuiCode>
             value
           </EuiCode>
-           — The fields value
+           — 
+          <FormattedMessage
+            defaultMessage="The fields value"
+            id="common.ui.fieldEditor.labelTemplate.value.label"
+            values={Object {}}
+          />
         </li>
         <li>
           <EuiCode>
             url
           </EuiCode>
-           — The formatted URL
+           — 
+          <FormattedMessage
+            defaultMessage="The formatted URL"
+            id="common.ui.fieldEditor.labelTemplate.url.label"
+            values={Object {}}
+          />
         </li>
       </ul>
       <h4>
-        Examples
+        <FormattedMessage
+          defaultMessage="Examples"
+          id="common.ui.fieldEditor.labelTemplate.examples.header"
+          values={Object {}}
+        />
       </h4>
       <EuiBasicTable
         columns={
@@ -67,7 +91,7 @@ exports[`LabelTemplateFlyout should render normally 1`] = `
           Array [
             Object {
               "input": 1234,
-              "labelTemplate": "User #{{value}}",
+              "labelTemplate": "User #{value}",
               "output": "<a href=\\"http://company.net/profiles?user_id=1234\\">User #1234</a>",
               "urlTemplate": "http://company.net/profiles?user_id={{value}}",
             },

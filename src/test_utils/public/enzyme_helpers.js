@@ -23,6 +23,10 @@ import { shallow } from 'enzyme';
 import { intl } from './mocks/intl';
 
 export function shallowWithIntl(node, { context, childContextTypes, ...props } = {}) {
+  if (!node) {
+    return node;
+  }
+
   const options = {
     context: {
       ...context,
