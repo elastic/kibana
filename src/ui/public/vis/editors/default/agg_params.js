@@ -27,7 +27,7 @@ import { aggTypes } from '../../../agg_types';
 import { uiModules } from '../../../modules';
 import { documentationLinks } from '../../../documentation_links/documentation_links';
 import aggParamsTemplate from './agg_params.html';
-import { aggTypeFilters } from '../../../agg_types/filter';
+import { aggTypeFilters, aggParamFilters } from '../../../agg_types/filter';
 
 uiModules
   .get('app/visualize')
@@ -44,6 +44,11 @@ uiModules
 
         $scope.aggTypeOptions = aggTypeFilters
           .filter(aggTypes.byType[$scope.groupName], $scope.indexPattern, $scope.agg);
+
+        // If current agg type is not part of allowed agg types, set to first element of allowed agg types
+        if(!$scope.aggTypeOptions.includes($scope.agg.type)) {
+          $scope.agg.type = $scope.aggTypeOptions[0];
+        }
 
         $scope.advancedToggled = false;
 
@@ -105,8 +110,12 @@ uiModules
             advanced: []
           };
 
+          // filter agg params
+          $scope.aggTypeParams = aggParamFilters
+            .filter($scope.agg.type.params, $scope.indexPattern, $scope.agg);
+
           // build collection of agg params html
-          $scope.agg.type.params.forEach(function (param, i) {
+          $scope.aggTypeParams.forEach(function (param, i) {
             let aggParam;
             let fields;
             if ($scope.agg.schema.hideCustomLabel && param.name === 'customLabel') {
@@ -127,14 +136,12 @@ uiModules
               }
             }
 
-
             let type = 'basic';
             if (param.advanced) type = 'advanced';
 
             if (aggParam = getAggParamHTML(param, i)) {
               aggParamHTML[type].push(aggParam);
             }
-
           });
 
           // compile the paramEditors html elements
@@ -157,7 +164,7 @@ uiModules
           }
 
           const attrs = {
-            'agg-param': 'agg.type.params[' + idx + ']'
+            'agg-param': 'aggTypeParams[' + idx + ']'
           };
 
           if (param.advanced) {

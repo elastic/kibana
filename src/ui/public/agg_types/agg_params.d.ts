@@ -17,5 +17,6 @@
  * under the License.
  */
 
-export { aggTypeFilters } from './agg_type_filters';
-export { aggParamFilters } from './agg_param_filters';
+export class AggParams {
+  constructor(params: any[]);
+}
