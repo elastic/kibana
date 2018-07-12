@@ -4,17 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FrameworkRequest, WrappableRequest } from '../lib/lib';
+import {
+  FrameworkRequest,
+  FrameworkWrappableRequest,
+} from '../lib/adapters/framework/adapter_types';
 
-export const internalFrameworkRequest = Symbol('internalFrameworkRequest');
+export const internalAuthData = Symbol('internalAuthData');
 
-export function wrapRequest<InternalRequest extends WrappableRequest>(
+export function wrapRequest<InternalRequest extends FrameworkWrappableRequest>(
   req: InternalRequest
 ): FrameworkRequest<InternalRequest> {
   const { params, payload, query, headers, info } = req;
 
+  const isAuthenticated = headers.authorization != null;
+
   return {
-    [internalFrameworkRequest]: req,
+    user: isAuthenticated
+      ? {
+          kind: 'authenticated',
+          [internalAuthData]: headers,
+        }
+      : {
+          kind: 'unauthenticated',
+        },
     headers,
     info,
     params,

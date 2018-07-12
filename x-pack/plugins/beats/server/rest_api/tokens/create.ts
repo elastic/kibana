@@ -6,9 +6,9 @@
 
 import Joi from 'joi';
 import { get } from 'lodash';
+import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/lib';
 import { wrapEsError } from '../../utils/error_wrappers';
-
 // TODO: add license check pre-hook
 // TODO: write to Kibana audit log file
 const DEFAULT_NUM_TOKENS = 1;
@@ -23,12 +23,12 @@ export const createTokensRoute = (libs: CMServerLibs) => ({
       }).allow(null),
     },
   },
-  handler: async (request: any, reply: any) => {
+  handler: async (request: FrameworkRequest, reply: any) => {
     const numTokens = get(request, 'payload.num_tokens', DEFAULT_NUM_TOKENS);
 
     try {
       const tokens = await libs.tokens.createEnrollmentTokens(
-        request,
+        request.user,
         numTokens
       );
       reply({ tokens });
