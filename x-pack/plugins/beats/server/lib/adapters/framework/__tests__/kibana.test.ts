@@ -7,9 +7,9 @@
 
 // @ts-ignore
 import { createEsTestCluster } from '@kbn/test';
-import { config as beatsPluginConfig, configPrefix } from '../../../../..';
 // @ts-ignore
 import * as kbnTestServer from '../../../../../../../../src/test_utils/kbn_server';
+import { config as beatsPluginConfig, configPrefix } from '../../../../../index';
 import { KibanaBackendFrameworkAdapter } from '../kibana_framework_adapter';
 import { contractTests } from './test_contract';
 
