@@ -19,7 +19,7 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
   }
 
   public async get(id: string) {
-    return this.beatsDB.find(beat => beat.id === id);
+    return this.beatsDB.find(beat => beat.id === id) || null;
   }
 
   public async insert(beat: CMBeat) {
@@ -65,17 +65,15 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
   ): Promise<BeatsTagAssignment[]> {
     const beatIds = removals.map(r => r.beatId);
 
-    const response = this.beatsDB
-      .filter(beat => beatIds.includes(beat.id))
-      .map(beat => {
-        const tagData = removals.find(r => r.beatId === beat.id);
-        if (tagData) {
-          if (beat.tags) {
-            beat.tags = beat.tags.filter(tag => tag !== tagData.tag);
-          }
+    const response = this.beatsDB.filter(beat => beatIds.includes(beat.id)).map(beat => {
+      const tagData = removals.find(r => r.beatId === beat.id);
+      if (tagData) {
+        if (beat.tags) {
+          beat.tags = beat.tags.filter(tag => tag !== tagData.tag);
         }
-        return beat;
-      });
+      }
+      return beat;
+    });
 
     return response.map<any>((item: CMBeat, resultIdx: number) => ({
       idxInRequest: removals[resultIdx].idxInRequest,
@@ -100,9 +98,7 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
         if (!beat.tags) {
           beat.tags = [];
         }
-        const nonExistingTags = tags.filter(
-          (t: string) => beat.tags && !beat.tags.includes(t)
-        );
+        const nonExistingTags = tags.filter((t: string) => beat.tags && !beat.tags.includes(t));
 
         if (nonExistingTags.length > 0) {
           beat.tags = beat.tags.concat(nonExistingTags);
@@ -111,12 +107,10 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
       return beat;
     });
 
-    return assignments.map<any>(
-      (item: BeatsTagAssignment, resultIdx: number) => ({
-        idxInRequest: assignments[resultIdx].idxInRequest,
-        result: 'updated',
-        status: 200,
-      })
-    );
+    return assignments.map<any>((item: BeatsTagAssignment, resultIdx: number) => ({
+      idxInRequest: assignments[resultIdx].idxInRequest,
+      result: 'updated',
+      status: 200,
+    }));
   }
 }

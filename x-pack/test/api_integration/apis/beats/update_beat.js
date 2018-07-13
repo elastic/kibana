@@ -103,36 +103,6 @@ export default function ({ getService }) {
       expect(beatInEs._source.beat.ephemeral_id).to.not.be(beat.ephemeral_id);
     });
 
-    it('should return an error for an existing but unverified beat', async () => {
-      const beatId = 'bar';
-
-      const { body } = await supertest
-        .put(`/api/beats/agent/${beatId}`)
-        .set('kbn-xsrf', 'xxx')
-        .set(
-          'kbn-beats-access-token',
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' +
-            'eyJjcmVhdGVkIjoiMjAxOC0wNi0zMFQwMzo0MjoxNS4yMzBaIiwiaWF0IjoxNTMwMzMwMTM1fQ.' +
-            'SSsX2Byyo1B1bGxV8C3G4QldhE5iH87EY_1r21-bwbI'
-        )
-        .send(beat)
-        .expect(400);
-
-      expect(body.message).to.be('Beat has not been verified');
-
-      const beatInEs = await es.get({
-        index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
-        id: `beat:${beatId}`,
-      });
-
-      expect(beatInEs._source.beat.id).to.be(beatId);
-      expect(beatInEs._source.beat.type).to.not.be(beat.type);
-      expect(beatInEs._source.beat.host_name).to.not.be(beat.host_name);
-      expect(beatInEs._source.beat.version).to.not.be(beat.version);
-      expect(beatInEs._source.beat.ephemeral_id).to.not.be(beat.ephemeral_id);
-    });
-
     it('should return an error for a non-existent beat', async () => {
       const beatId = chance.word();
       const { body } = await supertest

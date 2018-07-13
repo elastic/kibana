@@ -66,7 +66,7 @@ export default function ({ getService }) {
         id: `beat:${beatId}`,
       });
 
-      expect(esResponse._source.beat).to.not.have.property('verified_on');
+      expect(esResponse._source.beat).to.have.property('verified_on');
       expect(esResponse._source.beat).to.have.property('host_ip');
     });
 

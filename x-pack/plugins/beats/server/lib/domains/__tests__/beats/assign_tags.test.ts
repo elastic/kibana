@@ -101,9 +101,7 @@ describe('Beats Domain Lib', () => {
         { beatId: 'bar', tag: 'production' },
       ]);
 
-      expect(apiResponse.assignments).toEqual([
-        { status: 200, result: 'updated' },
-      ]);
+      expect(apiResponse.assignments).toEqual([{ status: 200, result: 'updated' }]);
     });
 
     it('should not re-add an existing tag to a beat', async () => {
@@ -117,9 +115,7 @@ describe('Beats Domain Lib', () => {
         { beatId: 'foo', tag: 'production' },
       ]);
 
-      expect(apiResponse.assignments).toEqual([
-        { status: 200, result: 'updated' },
-      ]);
+      expect(apiResponse.assignments).toEqual([{ status: 200, result: 'updated' }]);
 
       beat = beatsDB.find(b => b.id === 'foo') as any;
       expect(beat.tags).toEqual([...tags, 'qa']);
