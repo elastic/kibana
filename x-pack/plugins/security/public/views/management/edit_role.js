@@ -23,8 +23,8 @@ import { checkLicenseError } from 'plugins/security/lib/check_license_error';
 import { EDIT_ROLES_PATH, ROLES_PATH } from './management_urls';
 
 const getKibanaPrivilegesViewModel = (applicationPrivileges, roleKibanaPrivileges) => {
-  const viewModel = applicationPrivileges.reduce((acc, p) => {
-    acc[p.name] = false;
+  const viewModel = applicationPrivileges.reduce((acc, applicationPrivilege) => {
+    acc[applicationPrivilege.name] = false;
     return acc;
   }, {});
 
@@ -32,11 +32,11 @@ const getKibanaPrivilegesViewModel = (applicationPrivileges, roleKibanaPrivilege
     return viewModel;
   }
 
-  const assigned = _.uniq(_.flatten(_.pluck(roleKibanaPrivileges, 'privileges')));
-  assigned.forEach(a => {
+  const assignedPrivileges = _.uniq(_.flatten(_.pluck(roleKibanaPrivileges, 'privileges')));
+  assignedPrivileges.forEach(assignedPrivilege => {
     // we don't want to display privileges that aren't in our expected list of privileges
-    if (a in viewModel) {
-      viewModel[a] = true;
+    if (assignedPrivilege in viewModel) {
+      viewModel[assignedPrivilege] = true;
     }
   });
 
