@@ -6,16 +6,9 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-
 import { uiModules } from 'ui/modules';
 import { toastNotifications } from 'ui/notify';
-
 import { PipelineList } from '../../../../components/pipeline_list';
-
-import 'ui/pager_control';
-import 'ui/pager';
-import 'ui/react_components';
-import 'ui/table_info';
 import 'plugins/logstash/services/pipelines';
 import 'plugins/logstash/services/license';
 import 'plugins/logstash/services/cluster';
