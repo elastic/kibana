@@ -24,7 +24,6 @@ export default async function ({ readConfigFile }) {
         // Jenkins agents take about 30 seconds to spin up chromium on a first run because of some fontconfig cache
         // generation.
         `--xpack.reporting.queue.timeout=60000`,
-        `--logging.verbose=true`,
       ],
     },
   };
