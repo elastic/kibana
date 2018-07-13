@@ -17,28 +17,23 @@
  * under the License.
  */
 
-export const appEntryTemplate = (bundle) => `
-/**
- * Kibana entry file
- *
- * This is programmatically created and updated, do not modify
- *
- * context: ${bundle.getContext()}
- */
+import { kfetchAbortable } from './kfetch_abortable';
 
-// import global polyfills before everything else
-import 'babel-polyfill';
-import 'custom-event-polyfill';
-import 'whatwg-fetch';
-import 'abortcontroller-polyfill';
+jest.mock('../chrome', () => ({
+  addBasePath: path => `myBase/${path}`,
+}));
 
-import { CoreSystem } from '__kibanaCore__'
+jest.mock('../metadata', () => ({
+  metadata: {
+    version: 'my-version',
+  },
+}));
 
-new CoreSystem({
-  injectedMetadata: JSON.parse(document.querySelector('kbn-injected-metadata').getAttribute('data')),
-  rootDomElement: document.body,
-  requireLegacyFiles: () => {
-    ${bundle.getRequires().join('\n  ')}
-  }
-}).start()
-`;
+describe('kfetchAbortable', () => {
+  it('should return an object with a fetching promise and an abort callback', () => {
+    const { fetching, abort } = kfetchAbortable({ pathname: 'my/path' });
+    expect(typeof fetching.then).toBe('function');
+    expect(typeof fetching.catch).toBe('function');
+    expect(typeof abort).toBe('function');
+  });
+});

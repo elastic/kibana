@@ -17,28 +17,24 @@
  * under the License.
  */
 
-export const appEntryTemplate = (bundle) => `
-/**
- * Kibana entry file
- *
- * This is programmatically created and updated, do not modify
- *
- * context: ${bundle.getContext()}
- */
+import { kfetch } from './kfetch';
 
-// import global polyfills before everything else
-import 'babel-polyfill';
-import 'custom-event-polyfill';
-import 'whatwg-fetch';
-import 'abortcontroller-polyfill';
+function createAbortable() {
+  const abortController = new AbortController();
+  const { signal, abort } = abortController;
 
-import { CoreSystem } from '__kibanaCore__'
+  return {
+    signal,
+    abort: abort.bind(abortController),
+  };
+}
 
-new CoreSystem({
-  injectedMetadata: JSON.parse(document.querySelector('kbn-injected-metadata').getAttribute('data')),
-  rootDomElement: document.body,
-  requireLegacyFiles: () => {
-    ${bundle.getRequires().join('\n  ')}
-  }
-}).start()
-`;
+export function kfetchAbortable(fetchOptions, kibanaOptions) {
+  const { signal, abort } = createAbortable();
+  const fetching = kfetch({ ...fetchOptions, signal }, kibanaOptions);
+
+  return {
+    fetching,
+    abort,
+  };
+}
