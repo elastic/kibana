@@ -30,14 +30,13 @@ export default function ({ getService, getPageObjects }) {
   describe('input control visualization', () => {
 
     before(async () => {
-      await PageObjects.common.navigateToUrl('visualize', 'new');
+      await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickInputControlVis();
       // set time range to time with no documents - input controls do not use time filter be default
       await PageObjects.header.setAbsoluteRange('2017-01-01', '2017-01-02');
       await PageObjects.visualize.clickVisEditorTab('controls');
       await PageObjects.visualize.addInputControl();
       await PageObjects.visualize.setComboBox('indexPatternSelect-0', 'logstash');
-      await PageObjects.common.sleep(1000); // give time for index-pattern to be fetched
       await PageObjects.visualize.setComboBox('fieldSelect-0', FIELD_NAME);
       await PageObjects.visualize.clickGo();
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -76,7 +75,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should add filter pill when submit button is clicked', async () => {
-        await testSubjects.click('inputControlSubmitBtn');
+        await PageObjects.visualize.inputControlSubmit();
 
         const hasFilter = await filterBar.hasFilter(FIELD_NAME, 'ios');
         expect(hasFilter).to.equal(true);
@@ -85,7 +84,8 @@ export default function ({ getService, getPageObjects }) {
       it('should replace existing filter pill(s) when new item is selected', async () => {
         await PageObjects.visualize.clearComboBox('listControlSelect0');
         await PageObjects.visualize.setComboBox('listControlSelect0', 'osx');
-        await testSubjects.click('inputControlSubmitBtn');
+        await PageObjects.visualize.inputControlSubmit();
+        await PageObjects.common.sleep(1000);
 
         const hasOldFilter = await filterBar.hasFilter(FIELD_NAME, 'ios');
         const hasNewFilter = await filterBar.hasFilter(FIELD_NAME, 'osx');
@@ -103,11 +103,11 @@ export default function ({ getService, getPageObjects }) {
 
       it('should clear form when Clear button is clicked but not remove filter pill', async () => {
         await PageObjects.visualize.setComboBox('listControlSelect0', 'ios');
-        await testSubjects.click('inputControlSubmitBtn');
+        await PageObjects.visualize.inputControlSubmit();
         const hasFilterBeforeClearBtnClicked = await filterBar.hasFilter(FIELD_NAME, 'ios');
         expect(hasFilterBeforeClearBtnClicked).to.equal(true);
 
-        await testSubjects.click('inputControlClearBtn');
+        await PageObjects.visualize.inputControlClear();
         const hasValue = await PageObjects.visualize.doesComboBoxHaveSelectedOptions('listControlSelect0');
         expect(hasValue).to.equal(false);
 
@@ -116,7 +116,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should remove filter pill when cleared form is submitted', async () => {
-        await testSubjects.click('inputControlSubmitBtn');
+        await PageObjects.visualize.inputControlSubmit();
         const hasFilter = await filterBar.hasFilter(FIELD_NAME, 'ios');
         expect(hasFilter).to.equal(false);
       });
@@ -184,13 +184,12 @@ export default function ({ getService, getPageObjects }) {
 
     describe('dynamic options', () => {
       beforeEach(async () => {
-        await PageObjects.common.navigateToUrl('visualize', 'new');
+        await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.clickInputControlVis();
         await PageObjects.visualize.clickVisEditorTab('controls');
 
         await PageObjects.visualize.addInputControl();
         await PageObjects.visualize.setComboBox('indexPatternSelect-0', 'logstash');
-        await PageObjects.common.sleep(1000); // give time for index-pattern to be fetched
         await PageObjects.visualize.setComboBox('fieldSelect-0', 'geo.src');
 
         await PageObjects.visualize.clickGo();
@@ -228,18 +227,16 @@ export default function ({ getService, getPageObjects }) {
     describe('chained controls', () => {
 
       before(async () => {
-        await PageObjects.common.navigateToUrl('visualize', 'new');
+        await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.clickInputControlVis();
         await PageObjects.visualize.clickVisEditorTab('controls');
 
         await PageObjects.visualize.addInputControl();
         await PageObjects.visualize.setComboBox('indexPatternSelect-0', 'logstash');
-        await PageObjects.common.sleep(1000); // give time for index-pattern to be fetched
         await PageObjects.visualize.setComboBox('fieldSelect-0', 'geo.src');
 
         await PageObjects.visualize.addInputControl();
         await PageObjects.visualize.setComboBox('indexPatternSelect-1', 'logstash');
-        await PageObjects.common.sleep(1000); // give time for index-pattern to be fetched
         await PageObjects.visualize.setComboBox('fieldSelect-1', 'clientip');
         await PageObjects.visualize.setSelectByOptionText('parentSelect-1', 'geo.src');
 
@@ -266,7 +263,7 @@ export default function ({ getService, getPageObjects }) {
       it('should create a seperate filter pill for parent control and child control', async () => {
         await PageObjects.visualize.setComboBox('listControlSelect1', '14.61.182.136');
 
-        await testSubjects.click('inputControlSubmitBtn');
+        await PageObjects.visualize.inputControlSubmit();
 
         const hasParentControlFilter = await filterBar.hasFilter('geo.src', 'BR');
         expect(hasParentControlFilter).to.equal(true);
