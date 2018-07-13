@@ -18,7 +18,7 @@ export interface CMDomainLibs {
 
 export interface CMServerLibs extends CMDomainLibs {
   framework: BackendFrameworkAdapter;
-  database: DatabaseAdapter;
+  database?: DatabaseAdapter;
 }
 
 export enum BeatEnrollmentStatus {
