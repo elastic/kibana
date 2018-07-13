@@ -26,6 +26,13 @@ function convertLookupEntriesToMap(lookupEntries) {
 
 export function createStaticLookupFormat(FieldFormat) {
   return class StaticLookupFormat extends FieldFormat {
+    getParamDefaults() {
+      return {
+        lookupEntries: [{}],
+        unknownKeyValue: null,
+      };
+    }
+
     _convert(val) {
       const lookupEntries = this.param('lookupEntries');
       const unknownKeyValue = this.param('unknownKeyValue');

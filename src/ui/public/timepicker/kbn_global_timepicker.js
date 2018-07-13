@@ -22,10 +22,14 @@ import { uiModules } from '../modules';
 import toggleHtml from './kbn_global_timepicker.html';
 import { timeNavigation } from './time_navigation';
 import { timefilter } from 'ui/timefilter';
+import { prettyDuration } from './pretty_duration';
+import { prettyInterval } from './pretty_interval';
 
 uiModules
   .get('kibana')
-  .directive('kbnGlobalTimepicker', (globalState) => {
+  .directive('kbnGlobalTimepicker', (globalState, config) => {
+    const getConfig = (...args) => config.get(...args);
+
     const listenForUpdates = ($scope) => {
       $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', () => {
         globalState.refreshInterval = timefilter.getRefreshInterval();
@@ -45,9 +49,15 @@ uiModules
     };
 
     function setTimefilterValues($scope) {
+      const time = timefilter.getTime();
+      const refreshInterval = timefilter.getRefreshInterval();
       $scope.timefilterValues = {
-        refreshInterval: timefilter.getRefreshInterval(),
-        time: timefilter.getTime(),
+        refreshInterval: refreshInterval,
+        time: time,
+        display: {
+          time: prettyDuration(time.from, time.to, getConfig),
+          refreshInterval: prettyInterval(refreshInterval.value),
+        },
         isAutoRefreshSelectorEnabled: timefilter.isAutoRefreshSelectorEnabled,
         isTimeRangeSelectorEnabled: timefilter.isTimeRangeSelectorEnabled,
       };

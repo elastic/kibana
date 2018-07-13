@@ -1,0 +1,62 @@
+.time-range-selector {
+  .time-range-section-container {
+    display: flex;
+  }
+  .time-range-section-title {
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  .time-range-section {
+    flex: 50%;
+    padding: 0px 10px;
+    border-right: 1px solid #D9D9D9;
+  }
+
+  .tab-stack {
+    margin-bottom: 0;
+    padding-left: 0;
+    list-style: none;
+
+    & > li {
+      float: none;
+      position: relative;
+      display: block;
+      margin-bottom: 4px;
+
+      & > a {
+        position: relative;
+        display: block;
+        padding: 10px 15px;
+        border-radius: 4px;
+      }
+      & > a:hover {
+        background-color: #D9D9D9;
+      }
+      .body {
+        display: none;
+      }
+    }
+    & > li.active {
+      & > a {
+        color: #FFF;
+        background-color: #0079a5;
+
+      }
+      .body {
+        display: block;
+      }
+    }
+    & > li.has-body.active  {
+      & > a {
+        border-radius: 4px 4px 0px 0px;
+      }
+      .react-datepicker {
+        border-radius: 0px 0px 4px 4px;
+        border-top: none;
+      }
+    }
+  }
+  .time-range-section:last-child {
+    border-right: none;
+  }
+}

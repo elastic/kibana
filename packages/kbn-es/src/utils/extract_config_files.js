@@ -29,11 +29,7 @@ const mkdirp = require('mkdirp');
  * @param {Array} config
  * @param {String} dest
  */
-exports.extractConfigFiles = function extractConfigFiles(
-  config,
-  dest,
-  options = {}
-) {
+exports.extractConfigFiles = function extractConfigFiles(config, dest, options = {}) {
   const originalConfig = typeof config === 'string' ? [config] : config;
   const localConfig = [];
 

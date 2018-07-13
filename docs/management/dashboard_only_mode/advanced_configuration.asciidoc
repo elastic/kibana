@@ -1,19 +1,25 @@
 [role="xpack"]
 [[advanced-dashboard-mode-configuration]]
-=== Advanced configuration for Dashboard Only mode
+=== Advanced Configuration for Dashboard Only Mode
 
-Kibana comes preconfigured with a reserved role called `kibana_dashboard_only_user` which will be sufficient
-for most use cases.  However, if your setup requires a custom Kibana index, you can manually create
-Dashboard Mode roles.
+If {security} is enabled, Kibana has a built-in `kibana_dashboard_only_user` 
+role that grants read only access to the `.kibana` index. This role is sufficient
+for most use cases.  However, if your setup requires a custom {kib} index, you can create
+your own roles and tag them as *Dashboard only mode*.
 
-To do so, go into *Management > Advanced Settings* and search for `xpackDashboardMode:roles`. Then assign whatever
-role names you wish to use to flag a user for Dashboard Only mode.
+Go to *Management > Kibana > Advanced Settings* and search for *Dashboard*. By default 
+`xpackDashboardMode:roles` is set to `kibana_dashboard_only_user`. 
+Here you can add as many roles as you like.
 
+[role="screenshot"]
 image:management/dashboard_only_mode/images/advanced_dashboard_mode_role_setup.png["Advanced dashboard mode role setup"]
 
-It isn't necessary for Dashboard Only mode roles to have any additional permissions, but it's a convenient location
-to also place access rules to the custom Kibana index. If you wish to grant read only access to your custom Kibana
-index, it must have `view_index_metadata` permissions as well as `read` permissions.  These role settings are available
-under *Management > Security > Roles*.
+By default, a *dashboard only mode* user doesn't have access to any data indices.
+To grant read only access to your custom {kib}
+index, you must assign `view_index_metadata` and `read` privileges.
+These privileges are available under *Management > Security > Roles*.
 
+For more information on roles and privileges, see {xpack-ref}/authorization.html[User Authorization].
+
+[role="screenshot"]
 image:management/dashboard_only_mode/images/custom_dashboard_mode_role.png["Custom dashboard mode role with read permissions on a custom kibana index"]
