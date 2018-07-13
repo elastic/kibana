@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { InjectedMetadataService } from '../injected_metadata';
+import { InjectedMetadataStartContract } from '../injected_metadata';
 
 interface Deps {
-  injectedMetadata: ReturnType<InjectedMetadataService['start']>;
+  injectedMetadata: InjectedMetadataStartContract;
 }
 
 export class LegacyPlatformService {

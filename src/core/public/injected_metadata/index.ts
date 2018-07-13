@@ -17,4 +17,8 @@
  * under the License.
  */
 
-export { InjectedMetadata, InjectedMetadataService } from './injected_metadata_service';
+export {
+  InjectedMetadata,
+  InjectedMetadataService,
+  InjectedMetadataStartContract,
+} from './injected_metadata_service';
