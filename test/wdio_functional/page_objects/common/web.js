@@ -25,17 +25,32 @@ export default class Web {
     this.logger = global.getService('log');
   }
 
+  /**
+   * @function getElementText
+   * @param  {string} selector CSS or XPath Selector of Element.
+   * @returns {string} The visible text of the element.
+   */
   getElementText(selector) {
     this.findElement(selector);
     this.logger.debug(`\nFound : ${selector}\n`);
     return this.driver.getText(selector).toString();
   }
 
+  /**
+   * @function getCssPropertyValue
+   * @param  {string} selector CSS or XPath Selector of Element.
+   * @param  {string} CSS property to retrieve the value of.
+   * @returns {string} Value of given CSS property (i.e. white for color).
+   */
   getCssPropertyValue(selector, property) {
     const cssValues = this.driver.getCssProperty(selector, property);
     return cssValues;
   }
 
+  /**
+   * @function click
+   * @param  {string} selector CSS or XPath Selector of Element.
+   */
   click(selector) {
     this.findElement(selector);
     this.logger.debug(`\nClicking on: ${selector}\n`);
@@ -43,6 +58,10 @@ export default class Web {
     this.logger.debug(`\nClicked successfully`);
   }
 
+  /**
+   * @function clear
+   * @param  {string} selector CSS or XPath Selector of Element.
+   */
   clear(selector) {
     this.findElement(selector);
     this.logger.debug(`\nClearing values from: ${selector}\n`);
@@ -50,6 +69,12 @@ export default class Web {
     this.logger.debug(`\nCleared successfully`);
   }
 
+  /**
+   * @function findElement
+   * @param  {string} selector CSS or XPath Selector of Element.
+   * @returns {Object} A WebElement JSON object for element matching selector.
+   * @throws ElementNotFound
+   */
   findElement(selector) {
     this.logger.debug(
       `\nChecking existance of element with selector: ${selector}\n`
@@ -63,6 +88,12 @@ export default class Web {
     this.logger.debug(`\nIt's visible\n`);
     return this.driver.element(selector);
   }
+  /**
+   * @function findElements
+   * @param  {string} selector CSS or XPath Selector of Elements.
+   * @returns {[Object]}       Array of WebElement JSON objects for all elements matching selector.
+   * @throws ElementNotFound
+   */
   findElements(selector) {
     this.logger.debug(
       `\nChecking existance of all elements that match: ${selector}\n`
@@ -71,6 +102,12 @@ export default class Web {
     this.logger.debug(`\nAt least one exists.\n`);
     return this.driver.elements(selector);
   }
+  /**
+   * @function type
+   * @param {string}  selector CSS or XPath Selector of Element to type into.
+   * @param {string}  value    The value to be typed into element.
+   * @param {boolean} clear    Whether to clear current value first.
+   */
   type(selector, value, clear = true) {
     if (clear) {
       this.clear(selector);

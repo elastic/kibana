@@ -44,10 +44,15 @@ describe('Management App', function () {
   });
 
   after(async function () {
-    this.logger.info('Unloading makelogs data');
-    await this.esArchiver.unload('makelogs');
-    this.logger.debug('Loading empty kibana');
-    await this.esArchiver.unload('empty_kibana');
+    try{
+      this.logger.info('Unloading makelogs data');
+      await this.esArchiver.unload('makelogs');
+      this.logger.debug('Loading empty kibana');
+      await this.esArchiver.unload('empty_kibana');
+    } catch (e) {
+      this.logger.error('Data unload failed.');
+      this.logger.error(e);
+    }
   });
 
 });

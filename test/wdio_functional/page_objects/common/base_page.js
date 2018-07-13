@@ -35,9 +35,11 @@ export default class BasePage extends Web {
           '//a' + testSubjectifySelector('appLink', 'xpath');
         this.consoleNavLinkSelector =
           this.baseNavLinkSelector + '[@aria-label="Dev Tools"]';
+        this.managementNavLinkSelector =
+          this.baseNavLinkSelector + '[@aria-label="Management"]';
       }
       navigateToConsole() {
-        self.driver.click(this.consoleNavLinkSelector);
+
         const ConsolePage = require('../console/console_page');
         return new ConsolePage(self.driver);
       }
@@ -46,6 +48,12 @@ export default class BasePage extends Web {
         self.driver.url('/');
         const HomePage = require('../home/home_page');
         return new HomePage(this.driver);
+      }
+
+      navigateToManagement() {
+        self.driver.click(this.managementNavLinkSelector);
+        const ManagementPage = require('../management/management_page');
+        return new ManagementPage(this.driver);
       }
     };
   }

@@ -16,6 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import HomePage from '../../page_objects/home/home_page';
 
-it('Should just run and finish', function () { });
+before(async function () {
+  // delete .kibana index and then wait for Kibana to re-create it
+  this.kibanaServer = global.getService('kibanaServer');
+  await this.kibanaServer.uiSettings.replace({});
+});
+
+beforeEach(function () {
+  this.logger = global.getService('log');
+  this.driver = browser;
+  this.driver.url('/');
+  this.homePage = new HomePage(this.driver);
+  this.managementPage = this.home.nav.navigateToManagement();
+});
+
+it('Create New Index Pattern Wizard', function () {
+});
 

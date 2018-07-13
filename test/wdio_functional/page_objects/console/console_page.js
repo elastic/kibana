@@ -61,7 +61,9 @@ GET _search
 `;
     this.init();
   }
-
+  /**
+   * @param  {integer} Size of font to change to.
+   */
   changeFontSize(size) {
     this.openSettings();
     this.type(this.fontSizeInputSelector, String(size), true);
@@ -104,7 +106,9 @@ GET _search
     });
     return this.getElementText(this.responseEditorTextSelector);
   }
-
+  /**
+   * @returns {string} Value of font size in pixels. (i.e 24px)
+   */
   get requestFontSize() {
     const cssValues = this.getCssPropertyValue(
       this.requestEditorTextSelector + ':nth-child(1)  .ace_line:nth-child(1)',
