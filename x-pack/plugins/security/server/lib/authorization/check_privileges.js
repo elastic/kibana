@@ -32,6 +32,10 @@ export function checkPrivilegesWithRequestFactory(shieldClient, config, actions,
     return Object.values(applicationPrivilegesResponse).every(val => val === false);
   };
 
+  const isLegacyFallbackEnabled = () => {
+    return config.get('xpack.security.authorization.legacyFallback.enabled');
+  };
+
   const hasLegacyPrivileges = (indexPrivilegesResponse) => {
     return Object.values(indexPrivilegesResponse).includes(true);
   };
@@ -41,7 +45,11 @@ export function checkPrivilegesWithRequestFactory(shieldClient, config, actions,
       return CHECK_PRIVILEGES_RESULT.AUTHORIZED;
     }
 
-    if (hasNoApplicationPrivileges(applicationPrivilegesResponse) && hasLegacyPrivileges(indexPrivilegesResponse)) {
+    if (
+      isLegacyFallbackEnabled() &&
+      hasNoApplicationPrivileges(applicationPrivilegesResponse) &&
+      hasLegacyPrivileges(indexPrivilegesResponse)
+    ) {
       return CHECK_PRIVILEGES_RESULT.LEGACY;
     }
 
