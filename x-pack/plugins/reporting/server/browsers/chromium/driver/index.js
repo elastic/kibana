@@ -84,16 +84,32 @@ export class HeadlessChromiumDriver {
       };
     }
 
-    return await screenshotStitcher(outputClip, this._zoom, this._maxScreenshotDimension, async screenshotClip => {
-      const { data } = await Page.captureScreenshot({
-        clip: {
-          ...screenshotClip,
-          scale: 1
+    // Wrapping screenshotStitcher function call in a retry because of this bug:
+    // https://github.com/elastic/kibana/issues/19563. The reason was never found - it only appeared on ci and
+    // debug logic right after Page.captureScreenshot to ensure the correct size made the bug disappear.
+    let retryCount = 0;
+    const MAX_RETRIES = 3;
+    while (true) {
+      try {
+        return await screenshotStitcher(outputClip, this._zoom, this._maxScreenshotDimension, async screenshotClip => {
+          const { data } = await Page.captureScreenshot({
+            clip: {
+              ...screenshotClip,
+              scale: 1
+            }
+          });
+          this._logger.debug(`Captured screenshot clip ${JSON.stringify(screenshotClip)}`);
+          return data;
+        }, this._logger);
+      } catch (error) {
+        this._logger.error(`[Try ${retryCount}] Caught error generating screenshots: ${error.message}`);
+        if (retryCount === MAX_RETRIES) {
+          throw error;
+        } else {
+          retryCount++;
         }
-      });
-      this._logger.debug(`Captured screenshot clip ${JSON.stringify(screenshotClip)}`);
-      return data;
-    }, this._logger);
+      }
+    }
   }
 
   async _writeData(writePath, base64EncodedData) {
