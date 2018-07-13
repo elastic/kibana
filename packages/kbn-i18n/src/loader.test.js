@@ -163,9 +163,7 @@ describe('I18n loader', () => {
   describe('getTranslationsByLanguageHeader', () => {
     test('should return empty object if there are no registered locales', async () => {
       expect(
-        await i18nLoader.getTranslationsByLanguageHeader(
-          'en-GB,en-US;q=0.9,fr-CA;q=0.7,en;q=0.8'
-        )
+        await i18nLoader.getTranslationsByLanguageHeader('en-GB,en-US;q=0.9,fr-CA;q=0.7,en;q=0.8')
       ).toEqual({});
     });
 
@@ -175,9 +173,7 @@ describe('I18n loader', () => {
       );
 
       expect(
-        await i18nLoader.getTranslationsByLanguageHeader(
-          'en-GB,en-US;q=0.9,fr-CA;q=0.7,en;q=0.8'
-        )
+        await i18nLoader.getTranslationsByLanguageHeader('en-GB,en-US;q=0.9,fr-CA;q=0.7,en;q=0.8')
       ).toEqual({});
     });
 
@@ -187,9 +183,7 @@ describe('I18n loader', () => {
       );
 
       expect(
-        await i18nLoader.getTranslationsByLanguageHeader(
-          'en-GB,en-US;q=0.9,fr-CA;q=0.7,en;q=0.8'
-        )
+        await i18nLoader.getTranslationsByLanguageHeader('en-GB,en-US;q=0.9,fr-CA;q=0.7,en;q=0.8')
       ).toEqual({
         locale: 'en',
         ['a.b.c']: 'foo',
@@ -204,9 +198,7 @@ describe('I18n loader', () => {
       ]);
 
       expect(
-        await i18nLoader.getTranslationsByLanguageHeader(
-          'en-GB,en-US;q=0.9,fr-CA;q=0.7,en;q=0.8'
-        )
+        await i18nLoader.getTranslationsByLanguageHeader('en-GB,en-US;q=0.9,fr-CA;q=0.7,en;q=0.8')
       ).toEqual({
         locale: 'en-US',
         ['a.b.c']: 'bar',
@@ -254,10 +246,7 @@ describe('I18n loader', () => {
       expect(
         await i18nLoader.getAllTranslationsFromPaths([
           join(__dirname, './__fixtures__/test_plugin_1/translations/en.json'),
-          join(
-            __dirname,
-            './__fixtures__/test_plugin_1/translations/en-US.json'
-          ),
+          join(__dirname, './__fixtures__/test_plugin_1/translations/en-US.json'),
           join(__dirname, './__fixtures__/test_plugin_2/translations/en.json'),
           join(__dirname, './__fixtures__/test_plugin_2/translations/ru.json'),
         ])
