@@ -17,17 +17,10 @@
  * under the License.
  */
 
-import { IndexedArray } from '../indexed_array';
-import { Field } from './_field';
+/**
+ * Higher-Order Component is used for injecting intl prop into wrapped
+ * component and encapsulate direct work with React context.
+ * More docs and examples can be found here https://github.com/yahoo/react-intl/wiki/API#injection-api
+ */
 
-export class FieldList extends IndexedArray {
-  constructor(indexPattern, specs) {
-    super({
-      index: ['name'],
-      group: ['type'],
-      initialSet: specs.map(function (field) {
-        return new Field(indexPattern, field);
-      })
-    });
-  }
-}
+export { injectIntl as injectI18n } from 'react-intl';

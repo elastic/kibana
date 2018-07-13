@@ -10,12 +10,7 @@ import { cryptoFactory } from '../../../../server/lib/crypto';
 import { executeJobFactory } from './index';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
 
-jest.mock('../lib/generate_pdf', () => {
-  const generatePdfObservable = jest.fn();
-  return {
-    generatePdfObservableFactory: jest.fn().mockReturnValue(generatePdfObservable)
-  };
-});
+jest.mock('../lib/generate_pdf', () => ({ generatePdfObservableFactory: jest.fn() }));
 
 const cancellationToken = {
   on: jest.fn()
@@ -50,7 +45,11 @@ beforeEach(() => {
       'server.basePath': ''
     }[key];
   });
+
+  generatePdfObservableFactory.mockReturnValue(jest.fn());
 });
+
+afterEach(() => generatePdfObservableFactory.mockReset());
 
 const encryptHeaders = async (headers) => {
   const crypto = cryptoFactory(mockServer);
@@ -90,6 +89,7 @@ test(`omits blacklisted headers`, async () => {
     'content-length': '',
     'content-type': '',
     'host': '',
+    'transfer-encoding': '',
   };
 
   const encryptedHeaders = await encryptHeaders({

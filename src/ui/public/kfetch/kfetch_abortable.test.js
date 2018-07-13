@@ -17,34 +17,23 @@
  * under the License.
  */
 
-import { PureComponent } from 'react';
-import PropTypes from 'prop-types';
-import { intlShape } from 'react-intl';
+import { kfetchAbortable } from './kfetch_abortable';
 
-/**
- * Provides intl context to a child component using React render callback pattern
- * @example
- * <I18nContext>
- *   {intl => (
- *     <input
- *       placeholder={intl.formatMessage({
-           id: 'my-id',
-           defaultMessage: 'my default message',
-         })}
- *     />
- *   )}
- * </I18nContext>
- */
-export class I18nContext extends PureComponent {
-  static propTypes = {
-    children: PropTypes.func.isRequired,
-  };
+jest.mock('../chrome', () => ({
+  addBasePath: path => `myBase/${path}`,
+}));
 
-  static contextTypes = {
-    intl: intlShape,
-  };
+jest.mock('../metadata', () => ({
+  metadata: {
+    version: 'my-version',
+  },
+}));
 
-  render() {
-    return this.props.children(this.context.intl);
-  }
-}
+describe('kfetchAbortable', () => {
+  it('should return an object with a fetching promise and an abort callback', () => {
+    const { fetching, abort } = kfetchAbortable({ pathname: 'my/path' });
+    expect(typeof fetching.then).toBe('function');
+    expect(typeof fetching.catch).toBe('function');
+    expect(typeof abort).toBe('function');
+  });
+});
