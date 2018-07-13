@@ -44,73 +44,6 @@ export class PipelineList extends React.Component {
     };
   }
 
-  getColumns = () => [
-    {
-      field: 'id',
-      name: 'Id',
-      sortable: true,
-      render: (id, { isCentrallyManaged }) => {
-        const { openPipeline } = this.props;
-        const openPipelineClicked = () => openPipeline(id);
-        return isCentrallyManaged
-          ? <EuiLink onClick={openPipelineClicked}>{id}</EuiLink>
-          : (
-            <span>
-              {id} &nbsp;
-              <EuiIconTip
-                content={PIPELINE_NOT_CENTRALLY_MANAGED_TOOLTIP_TEXT}
-                type="questionInCircle"
-              />
-            </span>
-          );
-      }
-    },
-    {
-      field: 'description',
-      name: 'Description',
-      sortable: true,
-      truncateText: true,
-    },
-    {
-      field: 'lastModifiedHumanized',
-      name: 'Last Modified',
-      sortable: true,
-    },
-    {
-      field: 'username',
-      name: 'Modified By',
-      sortable: true,
-    },
-    {
-      field: 'id',
-      name: '',
-      render: (id, { isCentrallyManaged }) => {
-        const { clonePipeline } = this.props;
-        const cloneClicked = () => { clonePipeline(id); };
-        return isCentrallyManaged
-          ? (
-            <EuiButtonEmpty
-              iconType="copy"
-              onClick={cloneClicked}
-              size="xs"
-            >
-              Clone
-            </EuiButtonEmpty>
-          )
-          : null;
-      },
-      sortable: false,
-    },
-  ]
-
-  getEmptyPrompt = () => (
-    <EuiEmptyPrompt
-      title={<h2>No pipelines</h2>}
-      titleSize="xs"
-      body="There are no pipelines defined."
-    />
-  )
-
   componentDidMount = () => {
     const {
       isReadOnly,
@@ -127,6 +60,14 @@ export class PipelineList extends React.Component {
 
     this.checkMonitoringAccess();
   }
+
+  getEmptyPrompt = () => (
+    <EuiEmptyPrompt
+      title={<h2>No pipelines</h2>}
+      titleSize="xs"
+      body="There are no pipelines defined."
+    />
+  )
 
   loadPipelines = () => {
     const {
@@ -313,6 +254,65 @@ export class PipelineList extends React.Component {
   onDeleteSelectedPipelines = () => {
     this.showDeletePipelinesModal();
   }
+
+  getColumns = () => [
+    {
+      field: 'id',
+      name: 'Id',
+      sortable: true,
+      render: (id, { isCentrallyManaged }) => {
+        const { openPipeline } = this.props;
+        const openPipelineClicked = () => openPipeline(id);
+        return isCentrallyManaged
+          ? <EuiLink onClick={openPipelineClicked}>{id}</EuiLink>
+          : (
+            <span>
+              {id} &nbsp;
+              <EuiIconTip
+                content={PIPELINE_NOT_CENTRALLY_MANAGED_TOOLTIP_TEXT}
+                type="questionInCircle"
+              />
+            </span>
+          );
+      }
+    },
+    {
+      field: 'description',
+      name: 'Description',
+      sortable: true,
+      truncateText: true,
+    },
+    {
+      field: 'lastModifiedHumanized',
+      name: 'Last Modified',
+      sortable: true,
+    },
+    {
+      field: 'username',
+      name: 'Modified By',
+      sortable: true,
+    },
+    {
+      field: 'id',
+      name: '',
+      render: (id, { isCentrallyManaged }) => {
+        const { clonePipeline } = this.props;
+        const cloneClicked = () => { clonePipeline(id); };
+        return isCentrallyManaged
+          ? (
+            <EuiButtonEmpty
+              iconType="copy"
+              onClick={cloneClicked}
+              size="xs"
+            >
+              Clone
+            </EuiButtonEmpty>
+          )
+          : null;
+      },
+      sortable: false,
+    },
+  ]
 
   renderPipelinesTable = () => {
     const {
