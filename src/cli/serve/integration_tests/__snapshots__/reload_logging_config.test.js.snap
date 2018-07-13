@@ -15,16 +15,6 @@ Object {
     },
     Object {
       "@timestamp": "## @timestamp ##",
-      "message": "starting server :tada:",
-      "pid": "## PID ##",
-      "tags": Array [
-        "info",
-        "server",
-      ],
-      "type": "log",
-    },
-    Object {
-      "@timestamp": "## @timestamp ##",
       "message": "Server running at http://localhost:8274",
       "pid": "## PID ##",
       "tags": Array [
