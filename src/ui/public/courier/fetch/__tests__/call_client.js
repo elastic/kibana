@@ -334,7 +334,7 @@ describe('callClient', () => {
       });
     });
 
-    it('if once is aborted', () => {
+    it('if one is aborted after being provided', () => {
       // Add requests in an order which will be reordered by the strategies.
       searchRequests = [ searchRequestA, searchRequestB, searchRequestA2 ];
       const callingClient = callClient(searchRequests);
@@ -345,7 +345,7 @@ describe('callClient', () => {
       });
     });
 
-    it('if one is already aborted', () => {
+    it(`if one is already aborted when it's provided`, () => {
       searchRequests = [ searchRequestA, searchRequestB, ABORTED, searchRequestA2 ];
       const callingClient = callClient(searchRequests);
 
