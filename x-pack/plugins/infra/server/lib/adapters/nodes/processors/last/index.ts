@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createProcessorFunction } from '../../adapters/nodes/lib/create_processor_function';
 import {
   InfraESSearchBody,
   InfraProcesorRequestOptions,
   InfraProcessor,
   InfraProcessorTransformer,
-} from '../../infra_types';
+} from '../../adapter_types';
+import { createProcessorFunction } from '../../lib/create_processor_function';
 import { fieldsFilterProcessor } from '../common/field_filter_processor';
 import { groupByProcessor } from '../common/group_by_processor';
 import { nodesProcessor } from '../common/nodes_processor';

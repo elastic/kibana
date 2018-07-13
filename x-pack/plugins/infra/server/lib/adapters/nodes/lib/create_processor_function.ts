@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraProcessor, InfraProcessorTransformer } from '../../../infra_types';
+import { InfraProcessor, InfraProcessorTransformer } from '../adapter_types';
 
 export function createProcessorFunction<Options, Document>(
   chain: Array<InfraProcessor<Options, Document>>,

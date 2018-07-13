@@ -5,9 +5,10 @@
  */
 
 import { Server } from 'hapi';
+import JoiNamespace from 'joi';
 import { resolve } from 'path';
 
-import { initServerWithKibana } from './server/kibana.index';
+import { getConfigSchema, initServerWithKibana } from './server/kibana.index';
 
 export function infra(kibana: any) {
   return new kibana.Plugin({
@@ -22,12 +23,8 @@ export function infra(kibana: any) {
         title: 'Infra',
       },
     },
-    config(Joi: any) {
-      return Joi.object({
-        enabled: Joi.boolean().default(true),
-        partitionSize: Joi.number().default(30),
-        partitionSizeFactor: Joi.number().default(1.2),
-      }).default();
+    config(Joi: typeof JoiNamespace) {
+      return getConfigSchema(Joi);
     },
     init(plugin: Server) {
       initServerWithKibana(plugin);

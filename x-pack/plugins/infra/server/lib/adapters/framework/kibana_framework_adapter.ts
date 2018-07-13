@@ -5,16 +5,16 @@
  */
 
 import { GraphQLSchema } from 'graphql';
+import { IStrictReply, Request, Server } from 'hapi';
+
 import {
   InfraBackendFrameworkAdapter,
   InfraFrameworkRequest,
   InfraFrameworkRouteOptions,
   InfraWrappableRequest,
-} from '../../../infra_types';
+  internalInfraFrameworkRequest,
+} from './adapter_types';
 import { graphiqlHapi, graphqlHapi } from './apollo_server_hapi';
-
-import { IStrictReply, Request, Server } from 'hapi';
-import { internalInfraFrameworkRequest, wrapRequest } from '../../../../utils/wrap_request';
 
 export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFrameworkAdapter {
   public version: string;
@@ -41,10 +41,6 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
     this.server.register({
       options: {
         graphqlOptions: (req: Request) => ({
-          /**
-           * We wrapReq because the request object has to be passed around due to kibana API
-           * This provides a more protected boundry between safe and unsafe usage of this data between boundries
-           */
           context: { req: wrapRequest(req) },
           schema,
         }),
@@ -85,4 +81,17 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
     const fields = await callWithRequest(internalRequest, ...rest);
     return fields;
   }
+}
+
+export function wrapRequest<InternalRequest extends InfraWrappableRequest>(
+  req: InternalRequest
+): InfraFrameworkRequest<InternalRequest> {
+  const { params, payload, query } = req;
+
+  return {
+    [internalInfraFrameworkRequest]: req,
+    params,
+    payload,
+    query,
+  };
 }

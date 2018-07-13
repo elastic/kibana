@@ -5,12 +5,9 @@
  */
 
 import { set } from 'lodash';
+
 import { InfraResponse } from '../../../../../common/graphql/types';
-import {
-  InfraBucket,
-  InfraNode,
-  InfraNodeRequestOptions,
-} from '../../../../../server/lib/infra_types';
+import { InfraBucket, InfraNode, InfraNodeRequestOptions } from '../adapter_types';
 import { convertNodesResponseToGroups } from './convert_nodes_response_to_groups';
 import { createNodeItem } from './create_node_item';
 

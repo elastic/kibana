@@ -16,7 +16,7 @@ import {
   InfraBackendFrameworkAdapter,
   InfraDatabaseSearchResponse,
   InfraWrappableRequest,
-} from '../lib/infra_types';
+} from '../lib/adapters/framework';
 import { convertDateHistogramToSearchSummaryBuckets } from './converters';
 import { DateHistogramResponse } from './elasticsearch';
 import {

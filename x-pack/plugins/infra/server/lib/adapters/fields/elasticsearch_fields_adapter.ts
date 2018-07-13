@@ -4,12 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  FieldCapsResponse,
-  FieldsAdapter,
-  InfraBackendFrameworkAdapter,
-  InfraFrameworkRequest,
-} from '../../infra_types';
+import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from '../framework';
+import { FieldCapsResponse, FieldsAdapter } from './adapter_types';
 
 export class ElasticsearchFieldsAdapter implements FieldsAdapter {
   private framework: InfraBackendFrameworkAdapter;

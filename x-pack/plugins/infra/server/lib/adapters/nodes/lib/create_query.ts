@@ -16,7 +16,7 @@ import {
   InfraESQuery,
   InfraESRangeQuery,
   InfraNodeRequestOptions,
-} from '../../../infra_types';
+} from '../adapter_types';
 
 import { convertInputFilterToESQuery } from '../lib/convert_input_filter_to_es_query';
 import { isGroupByFilters, isGroupByTerms } from './type_guards';

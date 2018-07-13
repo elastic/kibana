@@ -5,7 +5,7 @@
  */
 
 import { InfraFilter, InfraFilterType } from '../../../../../common/graphql/types';
-import { InfraESQuery } from '../../../infra_types';
+import { InfraESQuery } from '../adapter_types';
 
 export function convertInputFilterToESQuery(filter: InfraFilter): InfraESQuery {
   if (filter.type === InfraFilterType.exists) {

@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { cloneDeep, set } from 'lodash';
+
 import {
   InfraESSearchBody,
   InfraProcesorRequestOptions,
   InfraProcessor,
   InfraProcessorChainFn,
   InfraProcessorTransformer,
-} from '../../infra_types';
-
-import { cloneDeep, set } from 'lodash';
+} from '../../adapter_types';
 
 export const fieldsFilterProcessor: InfraProcessor<
   InfraProcesorRequestOptions,

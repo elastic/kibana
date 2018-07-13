@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraKibanaBackendFrameworkAdapter } from '../adapters/famework/kibana/kibana_framework_adapter';
 import { ElasticsearchFieldsAdapter } from '../adapters/fields/elasticsearch_fields_adapter';
+import { InfraKibanaBackendFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
 import { InfraBackendLibs, InfraDomainLibs } from '../infra_types';
 import { ElasticsearchNodesAdapter } from './../adapters/nodes/elasticsearch_nodes_adapter';
 

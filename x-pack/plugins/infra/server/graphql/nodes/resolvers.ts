@@ -5,14 +5,10 @@
  */
 
 import { InfraResponse, QueryResolvers } from '../../../common/graphql/types';
-import {
-  InfraBackendLibs,
-  InfraContext,
-  InfraNodeRequestOptions,
-  InfraNodeType,
-} from '../../lib/infra_types';
-import { extractGroupByAndMetrics } from '../../utils/extract_group_by_and_metrics';
-import { formatResponse } from '../../utils/format_response';
+import { InfraNodeRequestOptions, InfraNodeType } from '../../lib/adapters/nodes';
+import { extractGroupByAndMetrics } from '../../lib/adapters/nodes/extract_group_by_and_metrics';
+import { formatResponse } from '../../lib/adapters/nodes/format_response';
+import { InfraBackendLibs, InfraContext } from '../../lib/infra_types';
 
 export const createNodeResolvers = (libs: InfraBackendLibs) => {
   const resolverFn: QueryResolvers.MapResolver = async (

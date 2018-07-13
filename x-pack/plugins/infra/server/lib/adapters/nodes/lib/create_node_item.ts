@@ -10,12 +10,7 @@ import {
   InfraHostMetrics,
   InfraPod,
 } from '../../../../../common/graphql/types';
-import {
-  InfraBucket,
-  InfraNode,
-  InfraNodeRequestOptions,
-  InfraNodeType,
-} from '../../../infra_types';
+import { InfraBucket, InfraNode, InfraNodeRequestOptions, InfraNodeType } from '../adapter_types';
 
 // TODO: Break these function into seperate files and expand beyond just documnet count
 // In the code below it looks like overkill to split these three functions out

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraNodeType } from '../server/lib/infra_types';
+import { InfraNodeType } from './adapter_types';
+
 export const DOMAIN_TO_FIELD = {
   [InfraNodeType.host]: 'beat.hostname',
   [InfraNodeType.pod]: 'kubernetes.pod.name',
