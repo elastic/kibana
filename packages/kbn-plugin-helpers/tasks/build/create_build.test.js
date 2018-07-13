@@ -94,6 +94,7 @@ describe('creating the build', () => {
     });
 
     afterEach(() => {
+      PLUGIN.skipInstallDependencies = false;
       PLUGIN.styleSheetToCompile = undefined;
       unlink(cssPath);
     });
