@@ -18,10 +18,7 @@ export class CMTokensDomain {
   private adapter: CMTokensAdapter;
   private framework: BackendFrameworkAdapter;
 
-  constructor(
-    adapter: CMTokensAdapter,
-    libs: { framework: BackendFrameworkAdapter }
-  ) {
+  constructor(adapter: CMTokensAdapter, libs: { framework: BackendFrameworkAdapter }) {
     this.adapter = adapter;
     this.framework = libs.framework;
   }
@@ -37,11 +34,7 @@ export class CMTokensDomain {
       };
     }
 
-    const { verified, expired } = this.verifyToken(
-      enrollmentToken,
-      fullToken.token || '',
-      false
-    );
+    const { verified, expired } = this.verifyToken(enrollmentToken, fullToken.token || '', false);
 
     if (!verified) {
       return {
@@ -63,9 +56,7 @@ export class CMTokensDomain {
     let expired = false;
 
     if (decode) {
-      const enrollmentTokenSecret = this.framework.getSetting(
-        'xpack.beats.encryptionKey'
-      );
+      const enrollmentTokenSecret = this.framework.getSetting('xpack.beats.encryptionKey');
 
       try {
         verifyToken(recivedToken, enrollmentTokenSecret);
@@ -99,17 +90,13 @@ export class CMTokensDomain {
     return {
       expired,
       verified:
-        timingSafeEqual(
-          Buffer.from(recivedToken, 'utf8'),
-          Buffer.from(token2, 'utf8')
-        ) && tokenDecoded,
+        timingSafeEqual(Buffer.from(recivedToken, 'utf8'), Buffer.from(token2, 'utf8')) &&
+        tokenDecoded,
     };
   }
 
   public generateAccessToken() {
-    const enrollmentTokenSecret = this.framework.getSetting(
-      'xpack.beats.encryptionKey'
-    );
+    const enrollmentTokenSecret = this.framework.getSetting('xpack.beats.encryptionKey');
 
     const tokenData = {
       created: moment().toJSON(),

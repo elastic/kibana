@@ -85,9 +85,7 @@ describe('Beats Domain Lib', () => {
     });
 
     it('should enroll beat, returning an access token', async () => {
-      const { token } = await tokensLib.getEnrollmentToken(
-        validEnrollmentToken
-      );
+      const { token } = await tokensLib.getEnrollmentToken(validEnrollmentToken);
 
       expect(token).toEqual(validEnrollmentToken);
       const { accessToken, status } = await beatsLib.enrollBeat(
@@ -129,9 +127,7 @@ describe('Beats Domain Lib', () => {
       await tokensLib.deleteEnrollmentToken(validEnrollmentToken);
       expect(tokensDB.length).toEqual(0);
 
-      const { token } = await tokensLib.getEnrollmentToken(
-        validEnrollmentToken
-      );
+      const { token } = await tokensLib.getEnrollmentToken(validEnrollmentToken);
 
       expect(token).toEqual(null);
     });

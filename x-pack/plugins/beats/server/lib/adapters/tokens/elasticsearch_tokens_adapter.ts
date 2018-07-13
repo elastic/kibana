@@ -7,10 +7,7 @@
 import { flatten, get } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { DatabaseAdapter } from '../database/adapter_types';
-import {
-  BackendFrameworkAdapter,
-  FrameworkUser,
-} from '../framework/adapter_types';
+import { BackendFrameworkAdapter, FrameworkUser } from '../framework/adapter_types';
 import { CMTokensAdapter, TokenEnrollmentData } from './adapter_types';
 
 export class ElasticsearchTokensAdapter implements CMTokensAdapter {
@@ -32,9 +29,7 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
     await this.database.delete(this.framework.internalUser, params);
   }
 
-  public async getEnrollmentToken(
-    tokenString: string
-  ): Promise<TokenEnrollmentData> {
+  public async getEnrollmentToken(tokenString: string): Promise<TokenEnrollmentData> {
     const params = {
       id: `enrollment_token:${tokenString}`,
       ignore: [404],
@@ -42,18 +37,11 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
       type: '_doc',
     };
 
-    const response = await this.database.get(
-      this.framework.internalUser,
-      params
-    );
-    const tokenDetails = get<TokenEnrollmentData>(
-      response,
-      '_source.enrollment_token',
-      {
-        expires_on: '0',
-        token: null,
-      }
-    );
+    const response = await this.database.get(this.framework.internalUser, params);
+    const tokenDetails = get<TokenEnrollmentData>(response, '_source.enrollment_token', {
+      expires_on: '0',
+      token: null,
+    });
 
     // Elasticsearch might return fast if the token is not found. OR it might return fast
     // if the token *is* found. Either way, an attacker could using a timing attack to figure
@@ -65,10 +53,7 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
     );
   }
 
-  public async upsertTokens(
-    user: FrameworkUser,
-    tokens: TokenEnrollmentData[]
-  ) {
+  public async upsertTokens(user: FrameworkUser, tokens: TokenEnrollmentData[]) {
     const body = flatten(
       tokens.map(token => [
         { index: { _id: `enrollment_token:${token.token}` } },

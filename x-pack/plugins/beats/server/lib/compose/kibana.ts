@@ -22,19 +22,13 @@ export function compose(server: any): CMServerLibs {
   const database = new KibanaDatabaseAdapter(server.plugins.elasticsearch);
 
   const tags = new CMTagsDomain(new ElasticsearchTagsAdapter(database));
-  const tokens = new CMTokensDomain(
-    new ElasticsearchTokensAdapter(database, framework),
-    {
-      framework,
-    }
-  );
-  const beats = new CMBeatsDomain(
-    new ElasticsearchBeatsAdapter(database, framework),
-    {
-      tags,
-      tokens,
-    }
-  );
+  const tokens = new CMTokensDomain(new ElasticsearchTokensAdapter(database, framework), {
+    framework,
+  });
+  const beats = new CMBeatsDomain(new ElasticsearchBeatsAdapter(database, framework), {
+    tags,
+    tokens,
+  });
 
   const domainLibs: CMDomainLibs = {
     beats,

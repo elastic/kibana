@@ -24,9 +24,7 @@ describe('wrap_es_error', () => {
       const wrappedError = wrapEsError(originalError);
 
       expect(wrappedError.output.statusCode).toEqual(originalError.statusCode);
-      expect(wrappedError.output.payload.message).toEqual(
-        originalError.message
-      );
+      expect(wrappedError.output.payload.message).toEqual(originalError.message);
     });
 
     it('should return invalid permissions message for 403 errors', () => {

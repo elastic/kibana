@@ -12,10 +12,7 @@ import {
 } from '../../../lib';
 
 import { IStrictReply, Request, Server } from 'hapi';
-import {
-  internalFrameworkRequest,
-  wrapRequest,
-} from '../../../../utils/wrap_request';
+import { internalFrameworkRequest, wrapRequest } from '../../../../utils/wrap_request';
 
 export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
   public version: string;

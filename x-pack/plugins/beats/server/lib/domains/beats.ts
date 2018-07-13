@@ -9,10 +9,7 @@ import moment from 'moment';
 import { findNonExistentItems } from '../../utils/find_non_existent_items';
 
 import { CMBeat } from '../../../common/domain_types';
-import {
-  BeatsTagAssignment,
-  CMBeatsAdapter,
-} from '../adapters/beats/adapter_types';
+import { BeatsTagAssignment, CMBeatsAdapter } from '../adapters/beats/adapter_types';
 import { FrameworkUser } from '../adapters/framework/adapter_types';
 
 import { CMAssignmentReturn } from '../adapters/beats/adapter_types';
@@ -37,11 +34,7 @@ export class CMBeatsDomain {
     return await this.adapter.get(beatId);
   }
 
-  public async update(
-    beatId: string,
-    accessToken: string,
-    beatData: Partial<CMBeat>
-  ) {
+  public async update(beatId: string, accessToken: string, beatData: Partial<CMBeat>) {
     const beat = await this.adapter.get(beatId);
 
     const { verified: isAccessTokenValid } = this.tokens.verifyToken(
@@ -71,9 +64,7 @@ export class CMBeatsDomain {
     remoteAddress: string,
     beat: Partial<CMBeat>
   ): Promise<{ status: string; accessToken?: string }> {
-    const { token, expires_on } = await this.tokens.getEnrollmentToken(
-      enrollmentToken
-    );
+    const { token, expires_on } = await this.tokens.getEnrollmentToken(enrollmentToken);
 
     if (expires_on && moment(expires_on).isBefore(moment())) {
       return { status: BeatEnrollmentStatus.ExpiredEnrollmentToken };
@@ -134,10 +125,7 @@ export class CMBeatsDomain {
       .filter((removal, idx) => response.removals[idx].status === null);
 
     if (validRemovals.length > 0) {
-      const removalResults = await this.adapter.removeTagsFromBeats(
-        user,
-        validRemovals
-      );
+      const removalResults = await this.adapter.removeTagsFromBeats(user, validRemovals);
       return addToResultsToResponse('removals', response, removalResults);
     }
     return response;
@@ -183,10 +171,7 @@ export class CMBeatsDomain {
       .filter((assignment, idx) => response.assignments[idx].status === null);
 
     if (validAssignments.length > 0) {
-      const assignmentResults = await this.adapter.assignTagsToBeats(
-        user,
-        validAssignments
-      );
+      const assignmentResults = await this.adapter.assignTagsToBeats(user, validAssignments);
 
       // TODO This should prob not mutate
       return addToResultsToResponse('assignments', response, assignmentResults);
@@ -221,11 +206,7 @@ function addNonExistentItemToResponse(
 }
 
 // TODO dont mutate response
-function addToResultsToResponse(
-  key: string,
-  response: any,
-  assignmentResults: any
-) {
+function addToResultsToResponse(key: string, response: any, assignmentResults: any) {
   assignmentResults.forEach((assignmentResult: any) => {
     const { idxInRequest, status, result } = assignmentResult;
     response[key][idxInRequest].status = status;

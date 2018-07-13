@@ -49,10 +49,9 @@ export class TestingBackendFrameworkAdapter implements BackendFrameworkAdapter {
     // not yet testable
   }
 
-  public registerRoute<
-    RouteRequest extends FrameworkWrappableRequest,
-    RouteResponse
-  >(route: FrameworkRouteOptions<RouteRequest, RouteResponse>) {
+  public registerRoute<RouteRequest extends FrameworkWrappableRequest, RouteResponse>(
+    route: FrameworkRouteOptions<RouteRequest, RouteResponse>
+  ) {
     // not yet testable
   }
 
@@ -68,11 +67,7 @@ export class TestingBackendFrameworkAdapter implements BackendFrameworkAdapter {
     return await api(options);
   }
 
-  public async callWithRequest(
-    req: FrameworkRequest,
-    esMethod: string,
-    options: {}
-  ) {
+  public async callWithRequest(req: FrameworkRequest, esMethod: string, options: {}) {
     const api = get<any>(this.client, esMethod);
 
     api(options);

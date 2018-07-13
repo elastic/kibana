@@ -69,11 +69,7 @@ export class TestingBackendFrameworkAdapter implements BackendFrameworkAdapter {
     return await api(options);
   }
 
-  public async callWithRequest(
-    req: FrameworkRequest<Request>,
-    esMethod: string,
-    options: {}
-  ) {
+  public async callWithRequest(req: FrameworkRequest<Request>, esMethod: string, options: {}) {
     const api = get<any>(this.client, esMethod);
 
     api(options);

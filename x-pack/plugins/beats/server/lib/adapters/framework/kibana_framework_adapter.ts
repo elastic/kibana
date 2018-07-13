@@ -53,12 +53,10 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     });
   }
 
-  public registerRoute<
-    RouteRequest extends FrameworkWrappableRequest,
-    RouteResponse
-  >(route: FrameworkRouteOptions<RouteRequest, RouteResponse>) {
-    const wrappedHandler = (request: any, reply: any) =>
-      route.handler(wrapRequest(request), reply);
+  public registerRoute<RouteRequest extends FrameworkWrappableRequest, RouteResponse>(
+    route: FrameworkRouteOptions<RouteRequest, RouteResponse>
+  ) {
+    const wrappedHandler = (request: any, reply: any) => route.handler(wrapRequest(request), reply);
 
     this.server.route({
       handler: wrappedHandler,
