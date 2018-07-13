@@ -31,6 +31,10 @@ export function cephMetricsSpecProvider() {
     longDescription: 'The `ceph` Metricbeat module fetches internal metrics from Ceph.' +
                      ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-ceph.html).',
     artifacts: {
+      application: {
+        label: 'Discover',
+        path: '/app/kibana#/discover'
+      },
       dashboards: [],
       exportedFields: {
         documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-ceph.html'
