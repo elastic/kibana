@@ -33,7 +33,6 @@ function extendJestConfig(jestConfig: JestConfig, filePath: string) {
     globals: {
       ...(jestConfig.globals || {}),
       'ts-jest': {
-        skipBabel: true,
         tsConfigFile: getTsProjectForAbsolutePath(filePath).tsConfigPath,
       },
     },
