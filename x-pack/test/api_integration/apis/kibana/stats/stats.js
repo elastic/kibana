@@ -27,7 +27,8 @@ export default function ({ getService }) {
             .get('/api/stats')
             .expect(200);
           expect(body.kibana.uuid).to.eql('5b2de169-2785-441b-ae8c-186a1936b17d');
-          expect(body.uptime_ms).to.be.greaterThan(0);
+          expect(body.process.uptime_ms).to.be.greaterThan(0);
+          expect(body.os.uptime_ms).to.be.greaterThan(0);
           expect(body.usage).to.be(undefined);
         });
 
@@ -44,7 +45,8 @@ export default function ({ getService }) {
             .get('/api/stats')
             .expect(200);
           expect(body.kibana.uuid).to.eql('5b2de169-2785-441b-ae8c-186a1936b17d');
-          expect(body.uptime_ms).to.be.greaterThan(0);
+          expect(body.process.uptime_ms).to.be.greaterThan(0);
+          expect(body.os.uptime_ms).to.be.greaterThan(0);
         });
 
         it('should return 200 for extended', async () => {
@@ -52,7 +54,8 @@ export default function ({ getService }) {
             .get('/api/stats?extended')
             .expect(200);
           expect(body.kibana.uuid).to.eql('5b2de169-2785-441b-ae8c-186a1936b17d');
-          expect(body.uptime_ms).to.be.greaterThan(0);
+          expect(body.process.uptime_ms).to.be.greaterThan(0);
+          expect(body.os.uptime_ms).to.be.greaterThan(0);
           expect(body.usage.kibana.index).to.be('.kibana');
           expect(body.usage.kibana.dashboard.total).to.be(0);
         });
