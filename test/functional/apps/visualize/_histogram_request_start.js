@@ -30,7 +30,8 @@ export default function ({ getService, getPageObjects }) {
         log.debug(`Interval = ${providedInterval}`);
         await PageObjects.visualize.setNumericInterval(providedInterval);
         await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.common.sleep(1000);
+
         const data = await PageObjects.visualize.getDataTableData();
         const dataArray = data.replace(/,/g, '').split('\n');
         expect(dataArray.length).to.eql(20);
@@ -45,7 +46,7 @@ export default function ({ getService, getPageObjects }) {
         log.debug(`Interval = ${providedInterval}`);
         await PageObjects.visualize.setNumericInterval(providedInterval);
         await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.common.sleep(1000);
 
         const data = await PageObjects.visualize.getDataTableData();
         const dataArray = data.replace(/,/g, '').split('\n');
