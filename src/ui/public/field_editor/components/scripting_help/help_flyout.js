@@ -40,10 +40,12 @@ export const ScriptingHelpFlyout = ({
   const tabs = [{
     id: 'syntax',
     name: 'Syntax',
+    ['data-test-subj']: 'syntaxTab',
     content: <ScriptingSyntax />,
   }, {
     id: 'test',
     name: 'Preview results',
+    ['data-test-subj']: 'testTab',
     content: (
       <TestScript
         indexPattern={indexPattern}
@@ -55,7 +57,7 @@ export const ScriptingHelpFlyout = ({
   }];
 
   return isVisible ? (
-    <EuiFlyout onClose={onClose}>
+    <EuiFlyout onClose={onClose} data-test-subj="scriptedFieldsHelpFlyout">
       <EuiFlyoutBody>
         <EuiTabbedContent
           tabs={tabs}

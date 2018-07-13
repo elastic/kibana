@@ -356,7 +356,7 @@ export class FieldEditor extends PureComponent {
             </EuiFlexItem>
 
             <EuiFlexItem>
-              <EuiLink onClick={this.showScriptingHelp}>
+              <EuiLink onClick={this.showScriptingHelp} data-test-subj="scriptedFieldsHelpLink">
                 Get help with the syntax and preview the results of your script
               </EuiLink>
             </EuiFlexItem>

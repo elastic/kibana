@@ -127,7 +127,11 @@ export class TestScript extends Component {
           color="danger"
           iconType="cross"
         >
-          <EuiCodeBlock language="json" className="scriptPreviewCodeBlock">
+          <EuiCodeBlock
+            language="json"
+            className="scriptPreviewCodeBlock"
+            data-test-subj="scriptedFieldPreview"
+          >
             {JSON.stringify(previewData.error, null, ' ')}
           </EuiCodeBlock>
         </EuiCallOut>
@@ -138,7 +142,11 @@ export class TestScript extends Component {
       <Fragment>
         <EuiTitle size="xs"><p>First 10 results</p></EuiTitle>
         <EuiSpacer size="s" />
-        <EuiCodeBlock language="json" className="scriptPreviewCodeBlock">
+        <EuiCodeBlock
+          language="json"
+          className="scriptPreviewCodeBlock"
+          data-test-subj="scriptedFieldPreview"
+        >
           {JSON.stringify(previewData, null, ' ')}
         </EuiCodeBlock>
       </Fragment>
@@ -188,6 +196,7 @@ export class TestScript extends Component {
             options={fields}
             selectedOptions={this.state.sourceFields}
             onChange={this.onSourceFieldsChange}
+            data-test-subj="additionalFieldsSelect"
           />
         </EuiFormRow>
 
@@ -195,6 +204,7 @@ export class TestScript extends Component {
           onClick={this.executeScript}
           disabled={this.props.script ? false : true}
           isLoading={this.state.isLoading}
+          data-test-subj="runScriptButton"
         >
           Run script
         </EuiButton>
