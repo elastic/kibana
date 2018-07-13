@@ -396,12 +396,8 @@ describe('I18n engine', () => {
                    }`,
       });
 
-      expect(i18n.translate('a.b.c', { values: { numPhotos: 0 } })).toBe(
-        'You have no photos.'
-      );
-      expect(i18n.translate('a.b.c', { values: { numPhotos: 1 } })).toBe(
-        'You have one photo.'
-      );
+      expect(i18n.translate('a.b.c', { values: { numPhotos: 0 } })).toBe('You have no photos.');
+      expect(i18n.translate('a.b.c', { values: { numPhotos: 1 } })).toBe('You have one photo.');
       expect(i18n.translate('a.b.c', { values: { numPhotos: 1000 } })).toBe(
         'You have 1,000 photos.'
       );
@@ -476,9 +472,7 @@ describe('I18n engine', () => {
       });
       i18n.setDefaultLocale('en');
 
-      expect(i18n.translate('a.b.c', { values: { result: 0.15 } })).toBe(
-        'Result: 15%'
-      );
+      expect(i18n.translate('a.b.c', { values: { result: 0.15 } })).toBe('Result: 15%');
 
       expect(
         i18n.translate('d.e.f', {
@@ -604,9 +598,7 @@ describe('I18n engine', () => {
         ['d.e.f']: 'Your total is {total, number, eur}',
       });
 
-      expect(i18n.translate('a.b.c', { values: { total: 1000 } })).toBe(
-        'Your total is $1,000.00'
-      );
+      expect(i18n.translate('a.b.c', { values: { total: 1000 } })).toBe('Your total is $1,000.00');
 
       i18n.setFormats({
         number: {
@@ -614,13 +606,9 @@ describe('I18n engine', () => {
         },
       });
 
-      expect(i18n.translate('a.b.c', { values: { total: 1000 } })).toBe(
-        'Your total is $1,000.00'
-      );
+      expect(i18n.translate('a.b.c', { values: { total: 1000 } })).toBe('Your total is $1,000.00');
 
-      expect(i18n.translate('d.e.f', { values: { total: 1000 } })).toBe(
-        'Your total is €1,000.00'
-      );
+      expect(i18n.translate('d.e.f', { values: { total: 1000 } })).toBe('Your total is €1,000.00');
     });
 
     test('should format default message with a custom format', () => {
@@ -669,9 +657,7 @@ describe('I18n engine', () => {
       });
       i18n.setDefaultLocale('en');
 
-      expect(i18n.translate('a.b.c', { values: { total: 1000 } })).toBe(
-        'Your total is 1,000'
-      );
+      expect(i18n.translate('a.b.c', { values: { total: 1000 } })).toBe('Your total is 1,000');
 
       expect(
         i18n.translate('d.e.f', {
