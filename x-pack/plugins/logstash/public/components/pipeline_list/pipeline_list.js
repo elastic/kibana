@@ -140,7 +140,7 @@ export class PipelineList extends React.Component {
       message: (
         <div>
           <EuiLoadingSpinner size="m" />
-          &nbsp; Loading....
+          &nbsp; Loading pipelines....
         </div>
       ),
     });
