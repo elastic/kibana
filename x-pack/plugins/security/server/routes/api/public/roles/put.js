@@ -29,7 +29,6 @@ const transformRolesToEs = (
 
   return pick({
     metadata: payload.metadata,
-    transient_metadata: payload.transient_metadata,
     cluster: elasticsearch.cluster || [],
     indices: elasticsearch.indices || [],
     run_as: elasticsearch.run_as || [],
