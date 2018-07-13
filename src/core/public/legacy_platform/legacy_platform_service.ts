@@ -59,12 +59,15 @@ export class LegacyPlatformService {
 
   public stop() {
     const angular = require('angular');
-
     const angularRoot = angular.element(this.params.rootDomElement);
     const injector$ = angularRoot.injector();
 
-    // destroy the root angular scope
-    injector$.get('$rootScope').$destroy();
+    // if we haven't gotten to the point of bootstraping
+    // angular injector$ won't be defined
+    if (injector$) {
+      // destroy the root angular scope
+      injector$.get('$rootScope').$destroy();
+    }
 
     // clear the inner html of the root angular element
     angularRoot.html('');
