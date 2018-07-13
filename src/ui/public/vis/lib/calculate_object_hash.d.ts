@@ -17,17 +17,4 @@
  * under the License.
  */
 
-import { IndexedArray } from '../indexed_array';
-import { Field } from './_field';
-
-export class FieldList extends IndexedArray {
-  constructor(indexPattern, specs) {
-    super({
-      index: ['name'],
-      group: ['type'],
-      initialSet: specs.map(function (field) {
-        return new Field(indexPattern, field);
-      })
-    });
-  }
-}
+export function calculateObjectHash(obj: object): string;

@@ -17,17 +17,24 @@
  * under the License.
  */
 
-import { IndexedArray } from '../indexed_array';
-import { Field } from './_field';
+import { kfetch } from './kfetch';
 
-export class FieldList extends IndexedArray {
-  constructor(indexPattern, specs) {
-    super({
-      index: ['name'],
-      group: ['type'],
-      initialSet: specs.map(function (field) {
-        return new Field(indexPattern, field);
-      })
-    });
-  }
+function createAbortable() {
+  const abortController = new AbortController();
+  const { signal, abort } = abortController;
+
+  return {
+    signal,
+    abort: abort.bind(abortController),
+  };
+}
+
+export function kfetchAbortable(fetchOptions, kibanaOptions) {
+  const { signal, abort } = createAbortable();
+  const fetching = kfetch({ ...fetchOptions, signal }, kibanaOptions);
+
+  return {
+    fetching,
+    abort,
+  };
 }
