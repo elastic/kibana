@@ -17,22 +17,27 @@
  * under the License.
  */
 
-import 'ngreact';
-import './no_results.less';
-import { uiModules } from 'ui/modules';
+import React, { Fragment } from 'react';
 
 import {
-  DiscoverNoResults,
-} from './no_results';
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
 
-import {
-  DiscoverUnsupportedRollup,
-} from './unsupported_rollup';
+export const DiscoverUnsupportedRollup = () => (
+  <Fragment>
+    <EuiSpacer size="xl" />
 
-import './timechart';
-
-const app = uiModules.get('apps/discover', ['react']);
-
-app.directive('discoverNoResults', reactDirective => reactDirective(DiscoverNoResults));
-
-app.directive('discoverUnsupportedRollup', reactDirective => reactDirective(DiscoverUnsupportedRollup));
+    <EuiFlexGroup justifyContent="center">
+      <EuiFlexItem grow={false} className="discoverNoResults">
+        <EuiCallOut
+          title="OSS Kibana doesn't support rollup index patterns. Please use X-Pack to search this index pattern."
+          color="danger"
+          iconType="alert"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </Fragment>
+);
