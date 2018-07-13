@@ -17,8 +17,19 @@
  * under the License.
  */
 
-// @ts-ignore Types for EuiCallOut, EuiCodeBlock, and EuiEmptyPrompt missing https://github.com/elastic/eui/pull/1010
-import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiCodeBlock, EuiEmptyPrompt } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  // @ts-ignore Types for EuiCallOut missing https://github.com/elastic/eui/pull/1010
+  EuiCallOut,
+  // @ts-ignore Types for EuiCodeBlock missing https://github.com/elastic/eui/pull/1010
+  EuiCodeBlock,
+  // @ts-ignore Types for EuiEmptyPrompt missing https://github.com/elastic/eui/pull/1010
+  EuiEmptyPrompt,
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent,
+} from '@elastic/eui';
 import React from 'react';
 import * as Rx from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -85,34 +96,35 @@ export class FatalErrorsScreen extends React.Component<Props, State> {
 
   public render() {
     return (
-      <>
-        <EuiEmptyPrompt
-          iconType="alert"
-          iconColor="danger"
-          title={<h2>Oops!</h2>}
-          body={<p>Looks like something went wrong. Refreshing may do the trick.</p>}
-          actions={
-            <>
-              <EuiButton color="primary" fill onClick={this.onClickClearSession}>
-                Clear your session
-              </EuiButton>
-              <EuiButtonEmpty onClick={this.onClickGoBack}>Go Back</EuiButtonEmpty>
-            </>
-          }
-        />
-
-        {this.state.errors.map((error, i) => (
-          <EuiCallOut key={i} title={error.message} color="danger" iconType="cross">
-            <EuiCodeBlock>
-              {`Version: ${this.props.kibanaVersion}` +
-                '\n' +
-                `Build: ${this.props.buildNumber}` +
-                '\n' +
-                (error.stack ? error.stack : '')}
-            </EuiCodeBlock>
-          </EuiCallOut>
-        ))}
-      </>
+      <EuiPage style={{ minHeight: '100vh' }}>
+        <EuiPageBody>
+          <EuiPageContent verticalPosition="center" horizontalPosition="center">
+            <EuiEmptyPrompt
+              iconType="alert"
+              iconColor="danger"
+              title={<h2>Oops!</h2>}
+              body={<p>Looks like something went wrong. Refreshing may do the trick.</p>}
+              actions={[
+                <EuiButton color="primary" fill onClick={this.onClickClearSession}>
+                  Clear your session
+                </EuiButton>,
+                <EuiButtonEmpty onClick={this.onClickGoBack}>Go back</EuiButtonEmpty>,
+              ]}
+            />
+            {this.state.errors.map((error, i) => (
+              <EuiCallOut key={i} title={error.message} color="danger" iconType="alert">
+                <EuiCodeBlock language="bash" className="eui-textBreakAll">
+                  {`Version: ${this.props.kibanaVersion}` +
+                    '\n' +
+                    `Build: ${this.props.buildNumber}` +
+                    '\n' +
+                    (error.stack ? error.stack : '')}
+                </EuiCodeBlock>
+              </EuiCallOut>
+            ))}
+          </EuiPageContent>
+        </EuiPageBody>
+      </EuiPage>
     );
   }
 
