@@ -23,8 +23,13 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiOverlayMask,
-  EuiSpacer
+  EuiSpacer,
+  EuiText
 } from '@elastic/eui';
+
+import { metadata } from 'ui/metadata';
+// metadata.branch corresponds to the version used in documentation links.
+const jobTipsUrl = `https://www.elastic.co/guide/en/kibana/${metadata.branch}/job-tips.html`;
 
 // don't use something like plugins/ml/../common
 // because it won't work with the jest tests
@@ -212,7 +217,6 @@ class ValidateJob extends Component {
     const isCurrentJobConfig = (this.props.isCurrentJobConfig !== true) ? false : true;
     const isDisabled = (this.props.isDisabled !== true) ? false : true;
 
-
     return (
       <div>
         <EuiButton
@@ -235,6 +239,13 @@ class ValidateJob extends Component {
             {this.state.data.messages.map(
               (m, i) => <Callout key={`${m.id}_${i}`} message={m} />
             )}
+            <EuiText>
+              Job validation performs certain checks against job configurations and underlying source data
+              and tries to come up with specific advice on how to adjust settings that are more likely to produce insightful results.
+            </EuiText>
+            <EuiText>
+              For more information, see <EuiLink href={jobTipsUrl} target="_blank">Machine Learning Job Tips</EuiLink>.
+            </EuiText>
           </Modal>
         }
       </div>
