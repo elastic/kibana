@@ -144,10 +144,7 @@ export class BulkUploader {
       const [ usageHeader, usagePayload ] = findItem(KIBANA_USAGE_TYPE);
       const kibanaUsage = (usageHeader && usagePayload) ? usagePayload : null;
       const reportingUsage = (reportingHeader && reportingPayload) ? reportingPayload : null;
-      statsResult = [
-        statsHeader,
-        statsPayload
-      ];
+      statsResult = [ statsHeader, statsPayload ];
       if (kibanaUsage) {
         set(statsResult, '[1].usage', kibanaUsage);
       }
@@ -160,10 +157,7 @@ export class BulkUploader {
     let settingsResult;
     const [ settingsHeader, settingsPayload ] = findItem(KIBANA_SETTINGS_TYPE);
     if (settingsHeader && settingsPayload) {
-      settingsResult = [
-        settingsHeader,
-        settingsPayload,
-      ];
+      settingsResult = [ settingsHeader, settingsPayload ];
     }
 
     // return new payload with the combined data

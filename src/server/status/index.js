@@ -26,7 +26,6 @@ export function statusMixin(kbnServer, server, config) {
   kbnServer.status = new ServerStatus(kbnServer.server);
 
   const statsCollector = getOpsStatsCollector(server, kbnServer);
-
   const { collectorSet } = server.usage;
   collectorSet.register(statsCollector);
 

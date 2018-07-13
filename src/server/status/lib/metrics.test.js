@@ -155,7 +155,6 @@ describe('Metrics', function () {
           }
         }
       });
-
     });
 
     it('parses event with missing fields / NaN for responseTimes.avg', () => {
@@ -176,7 +175,6 @@ describe('Metrics', function () {
         response_times: { max_in_millis: 4 },
         requests: { total: 22, disconnects: 0, status_codes: { '200': 22 } },
       });
-
     });
   });
 
