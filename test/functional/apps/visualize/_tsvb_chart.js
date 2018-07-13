@@ -129,7 +129,7 @@ export default function ({ getService, getPageObjects }) {
         expect(text).to.be('1442901600000');
       });
 
-      it.skip('should allow printing raw value of data', async () => {
+      it('should allow printing raw value of data', async () => {
         await PageObjects.visualBuilder.enterMarkdown('{{ count.data.raw.[0].[1] }}');
         const text = await PageObjects.visualBuilder.getMarkdownText();
         expect(text).to.be('6');
