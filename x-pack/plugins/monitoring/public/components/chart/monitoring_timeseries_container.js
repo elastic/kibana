@@ -5,13 +5,14 @@
  */
 
 import React from 'react';
-import { Tooltip } from 'pivotal-ui/react/tooltip';
-import { OverlayTrigger } from 'pivotal-ui/react/overlay-trigger';
-import { KuiInfoButton } from '@kbn/ui-framework/components';
 import { getTitle } from './get_title';
 import { getUnits } from './get_units';
 import { MonitoringTimeseries } from './monitoring_timeseries';
 import { InfoTooltip } from './info_tooltip';
+
+import {
+  EuiIconTip, EuiFlexGroup, EuiFlexItem, EuiTitle
+} from '@elastic/eui';
 
 export function MonitoringTimeseriesContainer({ series, onBrush }) {
   if (series === undefined) {
@@ -21,24 +22,33 @@ export function MonitoringTimeseriesContainer({ series, onBrush }) {
   const units = getUnits(series);
 
   return (
-    <div className="monitoring-chart__container">
-      <h2 className="euiTitle">
-        { getTitle(series) }{ units ? ` (${units})` : '' }
-        <OverlayTrigger
-          placement="left"
-          trigger="click"
-          overlay={<Tooltip><InfoTooltip series={series}/></Tooltip>}
-        >
-          <span className="monitoring-chart-tooltip__trigger overlay-trigger">
-            <KuiInfoButton />
-          </span>
-        </OverlayTrigger>
-      </h2>
-      <MonitoringTimeseries
-        series={series}
-        onBrush={onBrush}
-      />
-    </div>
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" style={{ flexGrow: 0 }}>
+          <EuiFlexItem>
+            <EuiTitle>
+              <h2>
+                { getTitle(series) }{ units ? ` (${units})` : '' }
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIconTip
+              anchorClassName="eui-textRight eui-alignMiddle monitoring-chart-tooltip__trigger"
+              type="iInCircle"
+              position="right"
+              content={<InfoTooltip series={series}/>}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem style={{ minHeight: '200px' }}>
+        <MonitoringTimeseries
+          series={series}
+          onBrush={onBrush}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
 
