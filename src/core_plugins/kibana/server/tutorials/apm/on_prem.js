@@ -137,7 +137,7 @@ export function onPremInstructions(apmIndexPattern) {
         statusCheck: {
           title: 'Agent status',
           text:
-            'Make sure you application is running, and the agents are sending data',
+            'Make sure your application is running and the agents are sending data.',
           btnLabel: 'Check agent status',
           success: 'Data successfully received from one or more agents',
           error: `No data has been received from agents yet`,

@@ -59,11 +59,16 @@ export function CallClientProvider(Private, Promise, es) {
           case DUPLICATE:
             return request._uniq.resp;
           default:
+            if (request.aborted) {
+              return ABORTED;
+            }
+
             const index = _.findIndex(requestsToFetch, request);
             if (index < 0) {
               // This means the request failed.
               return ABORTED;
             }
+
             return responses[index];
         }
       })
