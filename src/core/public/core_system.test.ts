@@ -20,7 +20,7 @@
 import { InjectedMetadataService } from './injected_metadata';
 import { LegacyPlatformService } from './legacy_platform';
 
-const MockLegacyPlatformService = jest.fn<InjectedMetadataService>(
+const MockLegacyPlatformService = jest.fn<LegacyPlatformService>(
   function _MockLegacyPlatformService(this: any) {
     this.start = jest.fn();
   }
@@ -30,7 +30,7 @@ jest.mock('./legacy_platform', () => ({
 }));
 
 const mockInjectedMetadataStartContract = {};
-const MockInjectedMetadataService = jest.fn<LegacyPlatformService>(
+const MockInjectedMetadataService = jest.fn<InjectedMetadataService>(
   function _MockInjectedMetadataService(this: any) {
     this.start = jest.fn().mockReturnValue(mockInjectedMetadataStartContract);
   }
