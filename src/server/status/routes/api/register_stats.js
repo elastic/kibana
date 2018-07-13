@@ -73,8 +73,7 @@ export function registerStatsApi(kbnServer, server, config) {
 
         /* kibana_stats gets singled out from the collector set as it is used
          * for health-checking Kibana and fetch does not rely on fetching data
-         * from ES
-         */
+         * from ES */
         const kibanaStatsCollector = collectorSet.getCollectorByType(KIBANA_STATS_TYPE);
         let kibanaStats = await kibanaStatsCollector.fetch();
         kibanaStats = collectorSet.toApiFieldNames(kibanaStats);

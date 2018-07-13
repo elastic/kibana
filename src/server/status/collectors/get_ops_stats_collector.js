@@ -23,6 +23,17 @@ import { sourceKibana } from '../lib';
 
 /*
  * Initialize a collector for Kibana Ops Stats
+ *
+ * NOTE this collector's fetch method returns the latest stats from the
+ * Hapi/Good/Even-Better ops event listener. Therefore, the stats reset
+ * every 5 seconds (the default value of the ops.interval configuration
+ * setting). That makes it geared for providing the latest "real-time"
+ * stats. In the long-term, fetch should return stats that constantly
+ * accumulate over the server's uptime for better machine readability.
+ * Since the data is captured, timestamped and stored, the historical
+ * data can provide "real-time" stats by calculating a derivative of
+ * the metrics.
+ * See PR comment in https://github.com/elastic/kibana/pull/20577/files#r202416647
  */
 export function getOpsStatsCollector(server, kbnServer) {
   const { collectorSet } = server.usage;
@@ -31,7 +42,7 @@ export function getOpsStatsCollector(server, kbnServer) {
     fetch: () => {
       return {
         kibana: sourceKibana(server, kbnServer),
-        ...kbnServer.metrics
+        ...kbnServer.metrics // latest metrics captured from the ops event listener in src/server/status/index
       };
     }
   });
