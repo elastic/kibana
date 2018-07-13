@@ -54,10 +54,10 @@ export interface FrameworkRouteOptions<
   config?: {};
 }
 
-export type FrameworkRouteHandler<
-  RouteRequest extends FrameworkWrappableRequest,
-  RouteResponse
-> = (request: FrameworkRequest<RouteRequest>, reply: any) => void;
+export type FrameworkRouteHandler<RouteRequest extends FrameworkWrappableRequest, RouteResponse> = (
+  request: FrameworkRequest<RouteRequest>,
+  reply: any
+) => void;
 
 export interface FrameworkWrappableRequest<
   Payload = any,

@@ -12,7 +12,7 @@ export default function ({ getService, loadTestFile }) {
   describe('beats', () => {
     const cleanup = () => es.indices.delete({
       index: ES_INDEX_NAME,
-      ignore: [ 404 ]
+      ignore: [404]
     });
 
     beforeEach(cleanup);
@@ -20,10 +20,10 @@ export default function ({ getService, loadTestFile }) {
     loadTestFile(require.resolve('./create_enrollment_tokens'));
     loadTestFile(require.resolve('./enroll_beat'));
     loadTestFile(require.resolve('./list_beats'));
-    loadTestFile(require.resolve('./verify_beats'));
     loadTestFile(require.resolve('./update_beat'));
     loadTestFile(require.resolve('./set_tag'));
     loadTestFile(require.resolve('./assign_tags_to_beats'));
     loadTestFile(require.resolve('./remove_tags_from_beats'));
+    loadTestFile(require.resolve('./get_beat'));
   });
 }

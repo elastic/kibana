@@ -27,10 +27,7 @@ export const createTokensRoute = (libs: CMServerLibs) => ({
     const numTokens = get(request, 'payload.num_tokens', DEFAULT_NUM_TOKENS);
 
     try {
-      const tokens = await libs.tokens.createEnrollmentTokens(
-        request.user,
-        numTokens
-      );
+      const tokens = await libs.tokens.createEnrollmentTokens(request.user, numTokens);
       reply({ tokens });
     } catch (err) {
       // TODO move this to kibana route thing in adapter

@@ -6,7 +6,4 @@
 
 export { PLUGIN } from './plugin';
 export { INDEX_NAMES } from './index_names';
-export {
-  UNIQUENESS_ENFORCING_TYPES,
-  ConfigurationBlockTypes,
-} from './configuration_blocks';
+export { UNIQUENESS_ENFORCING_TYPES, ConfigurationBlockTypes } from './configuration_blocks';

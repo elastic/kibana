@@ -32,11 +32,7 @@ export const createSetTagRoute = (libs: CMServerLibs) => ({
     },
   },
   handler: async (request: FrameworkRequest, reply: any) => {
-    const configurationBlocks = get(
-      request,
-      'payload.configuration_blocks',
-      []
-    );
+    const configurationBlocks = get(request, 'payload.configuration_blocks', []);
     try {
       const { isValid, result } = await libs.tags.saveTag(
         request.user,
