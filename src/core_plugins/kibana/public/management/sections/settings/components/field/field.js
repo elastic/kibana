@@ -480,7 +480,7 @@ export class Field extends PureComponent {
             <Fragment>
               Default:
               <EuiCodeBlock
-                language="js"
+                language="json"
                 paddingSize="s"
                 overflowHeight={defVal.length >= 500 ? 300 : null}
               >

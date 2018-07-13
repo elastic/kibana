@@ -945,7 +945,7 @@ exports[`Field for json setting should render default value if there is no user 
               <UNDEFINED>
                 Default:
                 <EuiCodeBlock
-                  language="js"
+                  language="json"
                   overflowHeight={null}
                   paddingSize="s"
                 >
@@ -1073,7 +1073,7 @@ exports[`Field for json setting should render user value if there is user value 
               <UNDEFINED>
                 Default:
                 <EuiCodeBlock
-                  language="js"
+                  language="json"
                   overflowHeight={null}
                   paddingSize="s"
                 >
