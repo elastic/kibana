@@ -46,7 +46,17 @@ export class FatalErrorsService {
   }
 
   public add = (error: Error | string, source?: string) => {
-    this.errorInfo$.next(getErrorInfo(error, source));
+    const errorInfo = getErrorInfo(error, source);
+
+    this.errorInfo$.next(errorInfo);
+
+    if (error instanceof Error) {
+      // make stack traces clickable by putting whole error in the console
+      // tslint:disable-next-line no-console
+      console.error(error);
+    }
+
+    throw err;
   };
 
   public start() {
