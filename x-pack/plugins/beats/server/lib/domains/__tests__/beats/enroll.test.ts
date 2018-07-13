@@ -98,6 +98,7 @@ describe('Beats Domain Lib', () => {
 
       expect(beatsDB.length).toEqual(1);
       expect(beatsDB[0]).toHaveProperty('host_ip');
+      expect(beatsDB[0]).toHaveProperty('verified_on');
 
       expect(accessToken).toEqual(beatsDB[0].access_token);
 
