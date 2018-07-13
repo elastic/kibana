@@ -126,7 +126,8 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
           kbnUrl.getRouteHref(indexPattern, 'edit') +
           ') for more information.'
         );
-        notify.warning(warning, { lifetime: Infinity });
+
+        toastNotifications.addWarning(warning);
       }
     }
 
