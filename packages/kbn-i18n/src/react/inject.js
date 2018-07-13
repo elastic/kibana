@@ -17,34 +17,10 @@
  * under the License.
  */
 
-import { PureComponent } from 'react';
-import PropTypes from 'prop-types';
-import { intlShape } from 'react-intl';
-
 /**
- * Provides intl context to a child component using React render callback pattern
- * @example
- * <I18nContext>
- *   {intl => (
- *     <input
- *       placeholder={intl.formatMessage({
-           id: 'my-id',
-           defaultMessage: 'my default message',
-         })}
- *     />
- *   )}
- * </I18nContext>
+ * Higher-Order Component is used for injecting intl prop into wrapped
+ * component and encapsulate direct work with React context.
+ * More docs and examples can be found here https://github.com/yahoo/react-intl/wiki/API#injection-api
  */
-export class I18nContext extends PureComponent {
-  static propTypes = {
-    children: PropTypes.func.isRequired,
-  };
 
-  static contextTypes = {
-    intl: intlShape,
-  };
-
-  render() {
-    return this.props.children(this.context.intl);
-  }
-}
+export { injectIntl as injectI18n } from 'react-intl';
