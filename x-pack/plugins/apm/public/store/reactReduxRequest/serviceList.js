@@ -5,27 +5,17 @@
  */
 
 import React from 'react';
-import orderBy from 'lodash.orderby';
-import { createSelector } from 'reselect';
-import { loadServiceList } from '../../services/rest';
+import { loadServiceList } from '../../services/rest/apm';
 import { Request } from 'react-redux-request';
-import { withInitialData } from './helpers';
+import { createInitialDataSelector } from './helpers';
 
 const ID = 'serviceList';
 const INITIAL_DATA = [];
+const withInitialData = createInitialDataSelector(INITIAL_DATA);
 
-export const getServiceList = createSelector(
-  state => withInitialData(state.reactReduxRequest[ID], INITIAL_DATA),
-  state => state.sorting.service,
-  (serviceList, serviceSorting) => {
-    const { key: sortKey, descending } = serviceSorting;
-
-    return {
-      ...serviceList,
-      data: orderBy(serviceList.data, sortKey, descending ? 'desc' : 'asc')
-    };
-  }
-);
+export function getServiceList(state) {
+  return withInitialData(state.reactReduxRequest[ID]);
+}
 
 export function ServiceListRequest({ urlParams, render }) {
   const { start, end, kuery } = urlParams;

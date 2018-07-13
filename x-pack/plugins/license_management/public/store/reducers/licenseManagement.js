@@ -71,11 +71,6 @@ export const shouldShowRevertToBasicLicense = state => {
   return type === 'trial' || isImminentExpiration(state) || isExpired(state);
 };
 
-export const shouldShowRequestTrialExtension = state => {
-  const { type } = getLicense(state);
-  return type === 'trial' && (isImminentExpiration(state) || isExpired(state));
-};
-
 export const uploadNeedsAcknowledgement = state => {
   return !!state.uploadStatus.acknowledge;
 };
@@ -105,6 +100,15 @@ export const shouldShowStartTrial = state => {
     (licenseType !== 'platinum' || isExpired(state))
   );
 };
+
+export const shouldShowRequestTrialExtension = state => {
+  if (state.trialStatus.canStartTrial) {
+    return false;
+  }
+  const { type } = getLicense(state);
+  return type !== 'platinum' || isExpired(state);
+};
+
 export const startTrialError = state => {
   return state.trialStatus.startTrialError;
 };

@@ -81,9 +81,9 @@ describe('seriesAgg', () => {
 
   });
 
-  describe('cumlative sum', () => {
-    it('returns the series cumlative sum', () => {
-      expect(seriesAgg.cumlative_sum(series)).to.eql([
+  describe('cumulative sum', () => {
+    it('returns the series cumulative sum', () => {
+      expect(seriesAgg.cumulative_sum(series)).to.eql([
         [[0, 8], [1, 12], [2, 21]]
       ]);
     });

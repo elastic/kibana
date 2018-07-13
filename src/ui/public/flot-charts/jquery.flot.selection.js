@@ -48,7 +48,7 @@ A "plotunselected" event with no arguments is emitted when the user clicks the
 mouse to remove the selection. As stated above, setting "minSize" to 0 will
 destroy this behavior.
 
-The plugin allso adds the following methods to the plot object:
+The plugin also adds the following methods to the plot object:
 
 - setSelection( ranges, preventEvent )
 

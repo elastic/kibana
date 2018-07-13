@@ -25,7 +25,7 @@ export function getElasticsearchStats(server, callCluster, clusterUuids) {
  * @param {Object} server The server instance
  * @param {function} callCluster The callWithRequest or callWithInternalUser handler
  * @param {Array} clusterUuids Cluster UUIDs to limit the request against
- * @return {Promise} Response for the aggregations to fetch detaild for the product.
+ * @return {Promise} Response for the aggregations to fetch details for the product.
  */
 export function fetchElasticsearchStats(server, callCluster, clusterUuids) {
   const config = server.config();

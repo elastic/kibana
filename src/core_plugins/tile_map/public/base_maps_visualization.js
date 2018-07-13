@@ -45,6 +45,10 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
       this._mapIsLoaded = this._makeKibanaMap();
     }
 
+    isLoaded() {
+      return this._mapIsLoaded;
+    }
+
     destroy() {
       if (this._kibanaMap) {
         this._kibanaMap.destroy();

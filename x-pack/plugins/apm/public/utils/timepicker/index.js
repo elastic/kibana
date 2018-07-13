@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
 import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
 import 'ui/autoload/all';
 import { updateTimePicker } from '../../store/urlParams';
+import { timefilter, registerTimefilterWithGlobalState } from 'ui/timefilter';
 
-let globalTimefilter;
 let currentInterval;
 
 // hack to wait for angular template to be ready
@@ -24,80 +23,72 @@ const waitForAngularReady = new Promise(resolve => {
   }, 10);
 });
 
-export function initTimepicker(history, dispatch, callback) {
-  // default the timepicker to the last 24 hours
-  chrome.getUiSettingsClient().overrideLocalDefault(
-    'timepicker:timeDefaults',
-    JSON.stringify({
-      from: 'now-24h',
-      to: 'now',
-      mode: 'quick'
-    })
-  );
+export function initTimepicker(history, dispatch) {
+  return new Promise(resolve => {
+    // default the timepicker to the last 24 hours
+    chrome.getUiSettingsClient().overrideLocalDefault(
+      'timepicker:timeDefaults',
+      JSON.stringify({
+        from: 'now-24h',
+        to: 'now',
+        mode: 'quick'
+      })
+    );
 
-  uiModules
-    .get('app/apm', [])
-    .controller('TimePickerController', ($scope, timefilter, globalState) => {
-      // Add APM feedback menu
-      // TODO: move this somewhere else
-      $scope.topNavMenu = [];
-      $scope.topNavMenu.push({
-        key: 'APM feedback',
-        description: 'APM feedback',
-        tooltip: 'Provide feedback on APM',
-        template: require('../../templates/feedback_menu.html')
+    uiModules
+      .get('app/apm', [])
+      .controller('TimePickerController', ($scope, globalState) => {
+        // Add APM feedback menu
+        // TODO: move this somewhere else
+        $scope.topNavMenu = [];
+        $scope.topNavMenu.push({
+          key: 'APM feedback',
+          description: 'APM feedback',
+          tooltip: 'Provide feedback on APM',
+          template: require('../../templates/feedback_menu.html')
+        });
+
+        history.listen(() => {
+          updateRefreshRate(dispatch);
+          globalState.fetch(); // ensure global state is updated when url changes
+        });
+
+        // ensure that redux is notified after timefilter has updated
+        $scope.$listen(timefilter, 'timeUpdate', () =>
+          dispatch(updateTimePickerAction())
+        );
+
+        // ensure that timepicker updates when global state changes
+        registerTimefilterWithGlobalState(globalState);
+
+        timefilter.enableTimeRangeSelector();
+        timefilter.enableAutoRefreshSelector();
+
+        dispatch(updateTimePickerAction());
+        updateRefreshRate(dispatch);
+
+        Promise.all([waitForAngularReady]).then(resolve);
       });
-
-      history.listen(() => {
-        updateRefreshRate(dispatch, timefilter);
-        globalState.fetch();
-      });
-      timefilter.setTime = (from, to) => {
-        timefilter.time.from = moment(from).toISOString();
-        timefilter.time.to = moment(to).toISOString();
-        $scope.$apply();
-      };
-      timefilter.enableTimeRangeSelector();
-      timefilter.enableAutoRefreshSelector();
-      timefilter.init();
-
-      updateRefreshRate(dispatch, timefilter);
-
-      timefilter.on('update', () => dispatch(getAction(timefilter)));
-
-      // hack to access timefilter outside Angular
-      globalTimefilter = timefilter;
-
-      Promise.all([waitForAngularReady]).then(callback);
-    });
+  });
 }
 
-function getAction(timefilter) {
+function updateTimePickerAction() {
   return updateTimePicker({
     min: timefilter.getBounds().min.toISOString(),
     max: timefilter.getBounds().max.toISOString()
   });
 }
 
-function updateRefreshRate(dispatch, timefilter) {
-  const refreshInterval = timefilter.refreshInterval.value;
+function updateRefreshRate(dispatch) {
+  const refreshInterval = timefilter.getRefreshInterval().value;
   if (currentInterval) {
     clearInterval(currentInterval);
   }
 
-  if (refreshInterval > 0 && !timefilter.refreshInterval.pause) {
+  if (refreshInterval > 0 && !timefilter.getRefreshInterval().pause) {
     currentInterval = setInterval(
-      () => dispatch(getAction(timefilter)),
+      () => dispatch(updateTimePickerAction()),
       refreshInterval
     );
   }
-}
-
-export function getTimefilter() {
-  if (!globalTimefilter) {
-    throw new Error(
-      'Timepicker must be initialized before calling getTimefilter'
-    );
-  }
-  return globalTimefilter;
 }

@@ -19,6 +19,7 @@
 
 const fetch = require('node-fetch');
 const fs = require('fs');
+const os = require('os');
 const mkdirp = require('mkdirp');
 const chalk = require('chalk');
 const path = require('path');
@@ -69,7 +70,7 @@ exports.installSnapshot = async function installSnapshot({
  * @param {String} url
  * @param {String} dest
  * @param {ToolingLog} log
- * @returns {Promose}
+ * @returns {Promise}
  */
 function downloadFile(url, dest, log) {
   const downloadPath = `${dest}.tmp`;
@@ -83,10 +84,7 @@ function downloadFile(url, dest, log) {
     res =>
       new Promise((resolve, reject) => {
         if (res.status === 304) {
-          log.info(
-            'etags match, using cache from %s',
-            chalk.bold(cacheMeta.ts)
-          );
+          log.info('etags match, using cache from %s', chalk.bold(cacheMeta.ts));
           return resolve();
         }
 
@@ -116,9 +114,8 @@ function downloadFile(url, dest, log) {
 }
 
 function getFilename(license, version) {
-  const basename = `elasticsearch${
-    license === 'oss' ? '-oss-' : '-'
-  }${version}`;
+  const extension = os.platform().startsWith('win') ? 'zip' : 'tar.gz';
+  const basename = `elasticsearch${license === 'oss' ? '-oss-' : '-'}${version}`;
 
-  return `${basename}-SNAPSHOT.tar.gz`;
+  return `${basename}-SNAPSHOT.${extension}`;
 }

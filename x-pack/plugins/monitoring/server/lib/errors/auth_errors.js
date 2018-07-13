@@ -20,7 +20,7 @@ export function handleAuthError(err) {
 
   let message;
   /* 401 is changed to 403 because in user perception, they HAVE provided
-   * crendentials for the API.
+   * credentials for the API.
    * They should see the same message whether they're logged in but
    * insufficient permissions, or they're login is valid for the production
    * connection but not the monitoring connection

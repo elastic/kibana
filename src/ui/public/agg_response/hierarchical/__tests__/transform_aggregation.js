@@ -38,7 +38,7 @@ describe('buildHierarchicalData()', function () {
         return {
           id: id,
           name: name,
-          schema: { group: 'buckets' },
+          type: { type: 'buckets' },
           getKey: (bucket) => bucket.key,
           fieldFormatter: _.constant(String)
         };

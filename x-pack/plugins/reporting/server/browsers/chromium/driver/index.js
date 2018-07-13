@@ -9,7 +9,7 @@ import path from 'path';
 import moment from 'moment';
 import { promisify, delay } from 'bluebird';
 import { transformFn } from './transform_fn';
-import { IgnoreSSLErrorsBehavior } from './behaviors';
+import { ignoreSSLErrorsBehavior } from './ignore_ssl_errors';
 import { screenshotStitcher } from './screenshot_stitcher';
 
 export class HeadlessChromiumDriver {
@@ -19,14 +19,6 @@ export class HeadlessChromiumDriver {
     this._waitForDelayMs = 100;
     this._zoom = 1;
     this._logger = logger;
-    this._behaviors = [
-      new IgnoreSSLErrorsBehavior(client),
-    ];
-  }
-
-  async destroy() {
-    this.killed = true;
-    await this._client.close();
   }
 
   async evaluate({ fn, args = [], awaitPromise = false, returnByValue = false }) {
@@ -46,7 +38,7 @@ export class HeadlessChromiumDriver {
       Page.enable(),
     ]);
 
-    await Promise.all(this._behaviors.map(behavior => behavior.initialize()));
+    await ignoreSSLErrorsBehavior(this._client.Security);
     await Network.setExtraHTTPHeaders({ headers });
     await Page.navigate({ url });
     await Page.loadEventFired();
@@ -66,9 +58,7 @@ export class HeadlessChromiumDriver {
 
     Page.screencastFrame(async ({ data, sessionId }) => {
       await this._writeData(path.join(recordPath, `${moment().utc().format('HH_mm_ss_SSS')}.png`), data);
-      if (!this.killed) {
-        await Page.screencastFrameAck({ sessionId });
-      }
+      await Page.screencastFrameAck({ sessionId });
     });
   }
 
@@ -101,7 +91,7 @@ export class HeadlessChromiumDriver {
           scale: 1
         }
       });
-      this._logger.debug(`captured screenshot clip ${JSON.stringify(screenshotClip)}`);
+      this._logger.debug(`Captured screenshot clip ${JSON.stringify(screenshotClip)}`);
       return data;
     }, this._logger);
   }
@@ -112,6 +102,7 @@ export class HeadlessChromiumDriver {
   }
 
   async setViewport({ width, height, zoom }) {
+    this._logger.debug(`Setting viewport to width: ${width}, height: ${height}, zoom: ${zoom}`);
     const { Emulation } = this._client;
 
     await Emulation.setDeviceMetricsOverride({
@@ -125,13 +116,13 @@ export class HeadlessChromiumDriver {
   }
 
   async waitFor({ fn, args, toEqual }) {
-    while (!this.killed && (await this.evaluate({ fn, args })) !== toEqual) {
+    while ((await this.evaluate({ fn, args })) !== toEqual) {
       await delay(this._waitForDelayMs);
     }
   }
 
   async waitForSelector(selector) {
-    while (!this.killed) {
+    while (true) {
       const { nodeId } = await this._client.DOM.querySelector({ nodeId: this.documentNode.root.nodeId, selector });
       if (nodeId) {
         break;

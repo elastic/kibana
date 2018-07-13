@@ -6,13 +6,11 @@
 
 import { combineReducers } from 'redux';
 import location from './location';
-import sorting from './sorting';
 import urlParams from './urlParams';
 import { reducer } from 'react-redux-request';
 
 const rootReducer = combineReducers({
   location,
-  sorting,
   urlParams,
   reactReduxRequest: reducer
 });

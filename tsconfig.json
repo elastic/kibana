@@ -20,7 +20,8 @@
     // Node 8 should support everything output by esnext, we override this
     // in webpack with loader-level compiler options
     "target": "esnext",
-    // Use commonjs for node, overriden in webpack to keep import statements
+
+    // Use commonjs for node, overridden in webpack to keep import statements
     // to maintain support for things like `await import()`
     "module": "commonjs",
     // Allows default imports from modules with no default export. This does not affect code emit, just type checking.

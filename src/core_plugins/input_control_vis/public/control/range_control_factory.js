@@ -60,7 +60,13 @@ class RangeControl extends Control {
     const aggs = minMaxAgg(indexPattern.fields.byName[fieldName]);
     const searchSource = createSearchSource(this.kbnApi, null, indexPattern, aggs, this.useTimeFilter);
 
-    const resp = await searchSource.fetch();
+    let resp;
+    try {
+      resp = await searchSource.fetch();
+    } catch(error) {
+      this.disable(`Unable to fetch range min and max, error: ${error.message}`);
+      return;
+    }
 
     let minMaxReturnedFromAggregation = true;
     let min = _.get(resp, 'aggregations.minAgg.value');
@@ -74,7 +80,6 @@ class RangeControl extends Control {
     if (!minMaxReturnedFromAggregation) {
       this.disable(noValuesDisableMsg(fieldName, indexPattern.title));
     } else {
-      this.unsetValue = { min: min, max: min };
       this.min = min;
       this.max = max;
       this.enable = true;
@@ -91,10 +96,9 @@ export async function rangeControlFactory(controlParams, kbnApi, useTimeFilter) 
   } catch (err) {
     // ignore not found error and return control so it can be displayed in disabled state.
   }
-  const unsetValue = { min: 0, max: 1 };
   return new RangeControl(
     controlParams,
-    new RangeFilterManager(controlParams.id, controlParams.fieldName, indexPattern, kbnApi.queryFilter, unsetValue),
+    new RangeFilterManager(controlParams.id, controlParams.fieldName, indexPattern, kbnApi.queryFilter),
     kbnApi,
     useTimeFilter
   );

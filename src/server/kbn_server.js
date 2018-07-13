@@ -21,13 +21,13 @@ import { constant, once, compact, flatten } from 'lodash';
 import { fromNode } from 'bluebird';
 import { isWorker } from 'cluster';
 import { fromRoot, pkg } from '../utils';
-import { Config } from './config';
 import loggingConfiguration from './logging/configuration';
 import configSetupMixin from './config/setup';
 import httpMixin from './http';
 import { loggingMixin } from './logging';
 import warningsMixin from './warnings';
 import { statusMixin } from './status';
+import { usageMixin } from './usage';
 import pidMixin from './pid';
 import { configDeprecationWarningsMixin } from './config/deprecation_warnings';
 import configCompleteMixin from './config/complete';
@@ -39,6 +39,8 @@ import { sampleDataMixin } from './sample_data';
 import { kibanaIndexMappingsMixin } from './mappings';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
+import { sassMixin } from './sass';
+import { injectIntoKbnServer as newPlatformMixin } from '../core';
 
 const rootDir = fromRoot('.');
 
@@ -55,14 +57,19 @@ export default class KbnServer {
 
       // sets this.config, reads this.settings
       configSetupMixin,
+
+      newPlatformMixin,
+
       // sets this.server
       httpMixin,
+
       // adds methods for extending this.server
       serverExtensionsMixin,
       loggingMixin,
       configDeprecationWarningsMixin,
       warningsMixin,
       statusMixin,
+      usageMixin,
 
       // writes pid file
       pidMixin,
@@ -90,10 +97,13 @@ export default class KbnServer {
       // watch bundle server is running
       optimizeMixin,
 
+      // transpiles SCSS into CSS
+      sassMixin,
+
       // initialize the plugins
       Plugins.initializeMixin,
 
-      // notify any deffered setup logic that plugins have intialized
+      // notify any deferred setup logic that plugins have initialized
       Plugins.waitForInitResolveMixin,
 
       () => {
@@ -163,8 +173,7 @@ export default class KbnServer {
     return await this.server.inject(opts);
   }
 
-  async applyLoggingConfiguration(settings) {
-    const config = await Config.withDefaultSchema(settings);
+  async applyLoggingConfiguration(config) {
     const loggingOptions = loggingConfiguration(config);
     const subset = {
       ops: config.get('ops'),

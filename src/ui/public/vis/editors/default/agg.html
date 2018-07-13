@@ -14,17 +14,17 @@
   </button>
 
   <!-- title -->
-  <span class="vis-editor-agg-header-title">
+  <span class="vis-editor-agg-header-title" ng-class="{'vis-editor-agg-header-title--grow': editorOpen}">
     {{ agg.schema.title }}
   </span>
 
   <!-- description -->
-  <span ng-if="!editorOpen && aggForm.$valid" class="vis-editor-agg-header-description">
+  <span ng-if="!editorOpen && aggForm.$valid" class="vis-editor-agg-header-description" title="{{describe()}}">
     {{ describe() }}
   </span>
 
   <!-- error -->
-  <span ng-if="!editorOpen && aggForm.$invalid" class="vis-editor-agg-header-description danger">
+  <span ng-if="!editorOpen && aggForm.$invalid" class="vis-editor-agg-header-description danger" title="{{aggForm.describeErrors()}}">
     {{ aggForm.describeErrors() }}
   </span>
 
@@ -50,6 +50,7 @@
       aria-label="Enable aggregation"
       tooltip="Enable aggregation"
       tooltip-append-to-body="true"
+      data-test-subj="disableAggregationBtn"
       type="button"
       class="kuiButton kuiButton--basic kuiButton--small">
       <i aria-hidden="true" class="fa fa-toggle-off"></i>
@@ -93,6 +94,7 @@
   agg="agg"
   group-name="groupName"
   ng-show="editorOpen"
+  index-pattern="vis.indexPattern"
   class="vis-editor-agg-editor">
 </vis-editor-agg-params>
 

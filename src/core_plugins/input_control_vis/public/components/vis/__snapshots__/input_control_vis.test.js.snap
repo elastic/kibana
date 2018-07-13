@@ -27,6 +27,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
       <ListControl
         controlIndex={0}
         disableMsg={null}
+        fetchOptions={[Function]}
         id="mock-list-control"
         label="list control"
         multiselect={true}
@@ -153,6 +154,7 @@ exports[`Clear btns enabled when there are values 1`] = `
       <ListControl
         controlIndex={0}
         disableMsg={null}
+        fetchOptions={[Function]}
         id="mock-list-control"
         label="list control"
         multiselect={true}
@@ -279,6 +281,7 @@ exports[`Renders list control 1`] = `
       <ListControl
         controlIndex={0}
         disableMsg={null}
+        fetchOptions={[Function]}
         id="mock-list-control"
         label="list control"
         multiselect={true}
@@ -407,7 +410,7 @@ exports[`Renders range control 1`] = `
           Object {
             "id": "mock-range-control",
             "isEnabled": [Function],
-            "label": "ragne control",
+            "label": "range control",
             "max": 100,
             "min": 0,
             "options": Object {

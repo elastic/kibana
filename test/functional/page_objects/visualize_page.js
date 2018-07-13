@@ -40,22 +40,27 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clickAreaChart() {
       await find.clickByPartialLinkText('Area');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickDataTable() {
       await find.clickByPartialLinkText('Data Table');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickLineChart() {
       await find.clickByPartialLinkText('Line');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickRegionMap() {
       await find.clickByPartialLinkText('Region Map');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickMarkdownWidget() {
       await find.clickByPartialLinkText('Markdown');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickAddMetric() {
@@ -68,30 +73,37 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clickMetric() {
       await find.clickByPartialLinkText('Metric');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickGauge() {
       await find.clickByPartialLinkText('Gauge');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickPieChart() {
       await find.clickByPartialLinkText('Pie');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickTileMap() {
       await find.clickByPartialLinkText('Coordinate Map');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickTagCloud() {
       await find.clickByPartialLinkText('Tag Cloud');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickVega() {
       await find.clickByPartialLinkText('Vega');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickVisualBuilder() {
       await find.clickByPartialLinkText('Visual Builder');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickEditorSidebarCollapse() {
@@ -118,14 +130,17 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clickVerticalBarChart() {
       await find.clickByPartialLinkText('Vertical Bar');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickHeatmapChart() {
       await find.clickByPartialLinkText('Heat Map');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickInputControlVis() {
       await find.clickByPartialLinkText('Controls');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async getChartTypeCount() {
@@ -231,6 +246,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await this.closeComboBoxOptionsList(element);
     }
 
+    async filterComboBoxOptions(comboBoxSelector, value) {
+      const comboBox = await testSubjects.find(comboBoxSelector);
+      const input = await comboBox.findByTagName('input');
+      await input.clearValue();
+      await input.type(value);
+      await this.closeComboBoxOptionsList(comboBox);
+    }
+
     async getComboBoxOptions(comboBoxSelector) {
       await testSubjects.click(comboBoxSelector);
       const menu = await retry.try(
@@ -311,10 +334,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await options[optionIndex].click();
     }
 
-    async clickGoButton() {
-      await testSubjects.click('timepickerGoButton');
-    }
-
     async isInspectorButtonEnabled() {
       const button = await testSubjects.find('openInspectorButton');
       const ariaDisabled = await button.getAttribute('aria-disabled');
@@ -352,8 +371,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async setInspectorTablePageSize(size) {
       const panel = await testSubjects.find('inspectorPanel');
-      await find.clickByButtonText('Rows per page: 10', panel);
-      await find.clickByButtonText(`${size} rows`, panel);
+      await find.clickByButtonText('Rows per page: 20', panel);
+      // The buttons for setting table page size are in a popover element. This popover
+      // element appears as if it's part of the inspectorPanel but it's really attached
+      // to the body element by a portal.
+      const tableSizesPopover = await find.byCssSelector('.euiPanel');
+      await find.clickByButtonText(`${size} rows`, tableSizesPopover);
     }
 
     async getMetric() {
@@ -362,7 +385,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getGaugeValue() {
-      const elements = await find.allByCssSelector('visualize .chart svg');
+      const elements = await find.allByCssSelector('[data-test-subj="visualizationLoader"] .chart svg');
       return await Promise.all(elements.map(async element => await element.getVisibleText()));
     }
 
@@ -575,6 +598,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clickOptions() {
       await find.clickByPartialLinkText('Options');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickMetricsAndAxes() {
@@ -634,6 +658,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       // or extended character sets
       // https://github.com/elastic/kibana/issues/6300
       await input.type(vizName.replace('-', ' '));
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickVisualizationByName(vizName) {
@@ -656,6 +681,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async openSavedVisualization(vizName) {
       await this.clickVisualizationByName(vizName);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async getXAxisLabels() {
@@ -746,7 +772,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     // Returns value per pixel
     async getChartYAxisRatio(axis = 'ValueAxis-1') {
-      // 1). get the maximim chart Y-Axis marker value and Y position
+      // 1). get the maximum chart Y-Axis marker value and Y position
       const maxYAxisChartMarker = await retry.try(
         async () => await find.byCssSelector(`div.y-axis-div-wrapper > div > svg > g.${axis} > g:last-of-type.tick`)
       );
@@ -843,7 +869,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async waitForVisualization() {
-      return await find.byCssSelector('visualization');
+      return await find.byCssSelector('.visualization');
     }
 
     async getZoomSelectors(zoomSelector) {

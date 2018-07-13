@@ -61,9 +61,7 @@ describe('kbn-pm production', () => {
 
       for (const file of files) {
         if (file.endsWith('package.json')) {
-          expect(await readPackageJson(join(buildRoot, file))).toMatchSnapshot(
-            file
-          );
+          expect(await readPackageJson(join(buildRoot, file))).toMatchSnapshot(file);
         }
       }
     },

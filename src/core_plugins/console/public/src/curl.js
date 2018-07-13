@@ -127,7 +127,7 @@ export function parseCURL(text) {
       verb = matches[1];
     }
 
-    // JS regexen don't support possesive quantifiers, so
+    // JS regexen don't support possessive quantifiers, so
     // we need two distinct patterns
     const pattern = HasProtocol.test(line)
       ? CurlRequestWithProto
