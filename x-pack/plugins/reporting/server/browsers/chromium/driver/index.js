@@ -6,6 +6,8 @@
 
 import fs from 'fs';
 import path from 'path';
+import { PNG } from 'pngjs';
+
 import moment from 'moment';
 import { promisify, delay } from 'bluebird';
 import { transformFn } from './transform_fn';
@@ -33,10 +35,7 @@ export class HeadlessChromiumDriver {
   async open(url, { headers, waitForSelector }) {
     this._logger.debug(`HeadlessChromiumDriver:opening url ${url}`);
     const { Network, Page } = this._client;
-    await Promise.all([
-      Network.enable(),
-      Page.enable(),
-    ]);
+    await Promise.all([Network.enable(), Page.enable()]);
 
     await ignoreSSLErrorsBehavior(this._client.Security);
     await Network.setExtraHTTPHeaders({ headers });
@@ -57,7 +56,15 @@ export class HeadlessChromiumDriver {
     await Page.startScreencast();
 
     Page.screencastFrame(async ({ data, sessionId }) => {
-      await this._writeData(path.join(recordPath, `${moment().utc().format('HH_mm_ss_SSS')}.png`), data);
+      await this._writeData(
+        path.join(
+          recordPath,
+          `${moment()
+            .utc()
+            .format('HH_mm_ss_SSS')}.png`
+        ),
+        data
+      );
       await Page.screencastFrameAck({ sessionId });
     });
   }
@@ -74,6 +81,7 @@ export class HeadlessChromiumDriver {
         width: layoutViewport.clientWidth,
         height: layoutViewport.clientHeight,
       };
+      this._logger.debug(`elementPosition is null, output clip is ${JSON.stringify(outputClip)}`);
     } else {
       const { boundingClientRect, scroll = { x: 0, y: 0 } } = elementPosition;
       outputClip = {
@@ -82,18 +90,49 @@ export class HeadlessChromiumDriver {
         height: boundingClientRect.height,
         width: boundingClientRect.width,
       };
+      this._logger.debug(
+        `elementPosition is not null, boundingClientRect is ${JSON.stringify(boundingClientRect)}`
+      );
     }
 
-    return await screenshotStitcher(outputClip, this._zoom, this._maxScreenshotDimension, async screenshotClip => {
-      const { data } = await Page.captureScreenshot({
-        clip: {
-          ...screenshotClip,
-          scale: 1
-        }
-      });
-      this._logger.debug(`Captured screenshot clip ${JSON.stringify(screenshotClip)}`);
-      return data;
-    }, this._logger);
+    return await screenshotStitcher(
+      outputClip,
+      this._zoom,
+      this._maxScreenshotDimension,
+      async screenshotClip => {
+        const { data } = await Page.captureScreenshot({
+          clip: {
+            ...screenshotClip,
+            scale: 1,
+          },
+        });
+
+        const expectedDataWidth = screenshotClip.width * this._zoom;
+        const expectedDataHeight = screenshotClip.height * this._zoom;
+
+        const png = new PNG();
+        const buffer = Buffer.from(data, 'base64');
+
+        return await new Promise((resolve, reject) => {
+          png.parse(buffer, (error, png) => {
+            if (error) {
+              reject(error);
+            }
+
+            if (png.width !== expectedDataWidth || png.height !== expectedDataHeight) {
+              const errorMessage = `Screenshot captured with width:${png.width} and height: ${
+                png.height
+              }) is not of expected width: ${expectedDataWidth} and height: ${expectedDataHeight}`;
+
+              reject(errorMessage);
+            }
+
+            resolve(png);
+          });
+        });
+      },
+      this._logger
+    );
   }
 
   async _writeData(writePath, base64EncodedData) {
@@ -123,7 +162,10 @@ export class HeadlessChromiumDriver {
 
   async waitForSelector(selector) {
     while (true) {
-      const { nodeId } = await this._client.DOM.querySelector({ nodeId: this.documentNode.root.nodeId, selector });
+      const { nodeId } = await this._client.DOM.querySelector({
+        nodeId: this.documentNode.root.nodeId,
+        selector,
+      });
       if (nodeId) {
         break;
       }
