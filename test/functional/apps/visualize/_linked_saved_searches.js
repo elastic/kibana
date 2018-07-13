@@ -19,8 +19,7 @@
 
 import expect from 'expect.js';
 
-export default function ({ getPageObjects, getService }) {
-  const retry = getService('retry');
+export default function ({ getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'discover', 'visualize', 'header']);
 
   describe('visualize app', function () {
