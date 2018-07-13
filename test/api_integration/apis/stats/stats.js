@@ -28,17 +28,21 @@ const assertStatsAndMetrics = body => {
   expect(body.kibana.snapshot).to.be.a('boolean');
   expect(body.kibana.status).to.be('green');
 
-  expect(body.process.mem.heap_max_bytes).to.be.a('number');
-  expect(body.process.mem.heap_used_bytes).to.be.a('number');
-  expect(body.process.mem.resident_set_size_bytes).to.be.a('number');
+  expect(body.process.memory.heap.total_bytes).to.be.a('number');
+  expect(body.process.memory.heap.used_bytes).to.be.a('number');
+  expect(body.process.memory.heap.size_limit).to.be.a('number');
+  expect(body.process.memory.resident_set_size_bytes).to.be.a('number');
   expect(body.process.pid).to.be.a('number');
   expect(body.process.uptime_ms).to.be.a('number');
+  expect(body.process.event_loop_delay).to.be.a('number');
 
-  expect(body.os.mem.free_bytes).to.be.a('number');
-  expect(body.os.mem.total_bytes).to.be.a('number');
+  expect(body.os.memory.free_bytes).to.be.a('number');
+  expect(body.os.memory.total_bytes).to.be.a('number');
   expect(body.os.uptime_ms).to.be.a('number');
 
-  expect(body.os.cpu.load_average['1m']).to.be.a('number');
+  expect(body.os.load['1m']).to.be.a('number');
+  expect(body.os.load['5m']).to.be.a('number');
+  expect(body.os.load['15m']).to.be.a('number');
 
   expect(body.response_times.avg_ms).not.to.be(null); // ok if is undefined
   expect(body.response_times.max_ms).not.to.be(null); // ok if is undefined
@@ -51,7 +55,6 @@ const assertStatsAndMetrics = body => {
   expect(body.sockets.https.total).to.be.a('number');
 
   expect(body.concurrent_connections).to.be.a('number');
-  expect(body.event_loop_delay).to.be.a('number');
 };
 
 export default function ({ getService }) {
